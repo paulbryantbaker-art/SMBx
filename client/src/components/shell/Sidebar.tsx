@@ -36,7 +36,7 @@ interface SidebarProps {
 
 // Warm-family palette — teal for buy, ochre for raise, plum for pmi (brand pink for sell).
 const JOURNEY_COLORS: Record<string, string> = {
-  sell: '#D44A78',
+  sell: '#D4714E',
   buy: '#3E8E8E',
   raise: '#C99A3E',
   pmi: '#8F4A7A',
@@ -200,7 +200,7 @@ export default function Sidebar({
 
   return (
     <div
-      className="flex flex-col h-full bg-[#FAFAFA] border-r border-[rgba(0,0,0,0.06)] select-none"
+      className="flex flex-col h-full bg-[#f5f4ed] border-r border-[rgba(0,0,0,0.06)] select-none"
       style={{ width: isMobile ? 280 : 240 }}
     >
       {/* 1. BRAND HEADER */}
@@ -218,11 +218,11 @@ export default function Sidebar({
       <div className="px-4 mb-6 mt-2">
         <button
           onClick={handleNewChat}
-          className="flex items-center justify-center gap-2 w-full bg-white border border-[rgba(0,0,0,0.06)] shadow-sm text-[#0D0D0D] font-bold text-sm px-3 py-2.5 rounded-lg hover:bg-[#FDFCFB] transition-colors cursor-pointer"
+          className="flex items-center justify-center gap-2 w-full bg-white border border-[rgba(0,0,0,0.06)] shadow-sm text-[#1a1918] font-bold text-sm px-3 py-2.5 rounded-lg hover:bg-[#FDFCFB] transition-colors cursor-pointer"
           style={{ fontFamily: 'inherit' }}
           type="button"
         >
-          <svg className="w-4 h-4 text-[#D44A78]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+          <svg className="w-4 h-4 text-[#D4714E]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <path d="M12 5v14M5 12h14" />
           </svg>
           New Workspace
@@ -243,13 +243,13 @@ export default function Sidebar({
                   onClick={() => handleTabClick(item.id)}
                   className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-white text-[#0D0D0D] shadow-sm border border-[rgba(0,0,0,0.06)] font-bold'
-                      : 'text-[rgba(0,0,0,0.4)] hover:bg-white hover:text-[#0D0D0D] font-medium border border-transparent'
+                      ? 'bg-white text-[#1a1918] shadow-sm border border-[rgba(0,0,0,0.06)] font-bold'
+                      : 'text-[rgba(0,0,0,0.4)] hover:bg-white hover:text-[#1a1918] font-medium border border-transparent'
                   }`}
                   style={{ fontFamily: 'inherit' }}
                   type="button"
                 >
-                  <span className={isActive ? 'text-[#D44A78]' : 'text-[rgba(0,0,0,0.25)]'}>{item.icon}</span>
+                  <span className={isActive ? 'text-[#D4714E]' : 'text-[rgba(0,0,0,0.25)]'}>{item.icon}</span>
                   {item.label}
                 </button>
               );
@@ -264,7 +264,7 @@ export default function Sidebar({
               <div>
                 <div className="text-[11px] font-bold text-[rgba(0,0,0,0.25)] uppercase tracking-wider mb-2 px-3">Deals</div>
                 {dealGroups.map(group => {
-                  const color = JOURNEY_COLORS[group.journey || ''] || '#6E6A63';
+                  const color = JOURNEY_COLORS[group.journey || ''] || '#5e5d59';
                   const isExpanded = expandedDeals.has(group.dealId);
                   return (
                     <div key={group.dealId} className="mb-1">
@@ -276,17 +276,17 @@ export default function Sidebar({
                         >
                           {(group.journey || '?')[0].toUpperCase()}
                         </span>
-                        <span className="text-[12px] font-semibold text-[#0D0D0D] truncate flex-1 min-w-0" style={{ fontFamily: 'inherit' }}>
+                        <span className="text-[12px] font-semibold text-[#1a1918] truncate flex-1 min-w-0" style={{ fontFamily: 'inherit' }}>
                           {group.businessName}
                         </span>
                         {group.currentGate && (
-                          <span className="text-[9px] font-bold text-[#D44A78] bg-[#FFF0EB] px-[5px] py-[1px] rounded-[3px] shrink-0">
+                          <span className="text-[9px] font-bold text-[#D4714E] bg-[#FFF0EB] px-[5px] py-[1px] rounded-[3px] shrink-0">
                             {group.currentGate}
                           </span>
                         )}
                         <button
                           onClick={(e) => { e.stopPropagation(); handleNewDealChat(group.dealId); }}
-                          className="w-[20px] h-[20px] rounded-full border-none cursor-pointer flex items-center justify-center text-[rgba(0,0,0,0.25)] hover:text-[#D44A78] hover:bg-[#FFF0EB] transition-colors shrink-0 bg-transparent p-0"
+                          className="w-[20px] h-[20px] rounded-full border-none cursor-pointer flex items-center justify-center text-[rgba(0,0,0,0.25)] hover:text-[#D4714E] hover:bg-[#FFF0EB] transition-colors shrink-0 bg-transparent p-0"
                           type="button"
                           aria-label="New chat in deal"
                         >
@@ -300,8 +300,8 @@ export default function Sidebar({
                           onClick={() => handleConversationClick(c.id)}
                           className={`flex items-center gap-2 w-full px-3 py-2 ml-1 rounded-lg text-sm transition-all cursor-pointer border ${
                             c.id === activeConversationId && viewState === 'chat'
-                              ? 'bg-white text-[#0D0D0D] shadow-sm border-[rgba(0,0,0,0.06)] font-bold'
-                              : 'text-[rgba(0,0,0,0.4)] hover:bg-white hover:text-[#0D0D0D] font-medium border-transparent'
+                              ? 'bg-white text-[#1a1918] shadow-sm border-[rgba(0,0,0,0.06)] font-bold'
+                              : 'text-[rgba(0,0,0,0.4)] hover:bg-white hover:text-[#1a1918] font-medium border-transparent'
                           }`}
                           style={{ fontFamily: 'inherit', width: 'calc(100% - 4px)' }}
                           type="button"
@@ -333,8 +333,8 @@ export default function Sidebar({
                               onClick={() => handleConversationClick(c.id)}
                               className={`flex items-center gap-2 w-full px-3 py-1.5 ml-1 rounded-lg text-sm transition-all cursor-pointer border ${
                                 c.id === activeConversationId && viewState === 'chat'
-                                  ? 'bg-white text-[#0D0D0D] shadow-sm border-[rgba(0,0,0,0.06)]'
-                                  : 'text-[rgba(0,0,0,0.35)] hover:bg-white hover:text-[#0D0D0D] border-transparent'
+                                  ? 'bg-white text-[#1a1918] shadow-sm border-[rgba(0,0,0,0.06)]'
+                                  : 'text-[rgba(0,0,0,0.35)] hover:bg-white hover:text-[#1a1918] border-transparent'
                               }`}
                               style={{ fontFamily: 'inherit', width: 'calc(100% - 4px)' }}
                               type="button"
@@ -360,15 +360,15 @@ export default function Sidebar({
                     onClick={() => handleConversationClick(c.id)}
                     className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-all cursor-pointer ${
                       c.id === activeConversationId && viewState === 'chat'
-                        ? 'bg-white text-[#0D0D0D] shadow-sm border border-[rgba(0,0,0,0.06)] font-medium'
-                        : 'text-[rgba(0,0,0,0.4)] hover:bg-white hover:text-[#0D0D0D] font-medium border border-transparent'
+                        ? 'bg-white text-[#1a1918] shadow-sm border border-[rgba(0,0,0,0.06)] font-medium'
+                        : 'text-[rgba(0,0,0,0.4)] hover:bg-white hover:text-[#1a1918] font-medium border border-transparent'
                     }`}
                     style={{ fontFamily: 'inherit' }}
                     type="button"
                   >
                     <span
                       className="w-2 h-2 rounded-full shrink-0"
-                      style={{ backgroundColor: c.journey ? (JOURNEY_COLORS[c.journey] || '#6E6A63') : '#9CA3AF' }}
+                      style={{ backgroundColor: c.journey ? (JOURNEY_COLORS[c.journey] || '#5e5d59') : '#9CA3AF' }}
                     />
                     <span className="truncate flex-1 min-w-0 text-left">{c.title}</span>
                   </button>
@@ -389,7 +389,7 @@ export default function Sidebar({
               navigate('/login');
             }
           }}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer text-[rgba(0,0,0,0.4)] hover:bg-white hover:text-[#0D0D0D] font-medium border border-transparent"
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer text-[rgba(0,0,0,0.4)] hover:bg-white hover:text-[#1a1918] font-medium border border-transparent"
           style={{ fontFamily: 'inherit' }}
           type="button"
         >

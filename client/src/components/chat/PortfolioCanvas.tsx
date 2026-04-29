@@ -68,15 +68,15 @@ interface Props {
 
 const TIER_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   A: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-  B: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
+  B: { bg: 'bg-sky/15', text: 'text-[#2f5a85]', border: 'border-sky/40' },
   C: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
   D: { bg: 'bg-zinc-100', text: 'text-zinc-500', border: 'border-zinc-200' },
 };
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  new: { label: 'New', color: 'bg-blue-100 text-blue-700' },
+  new: { label: 'New', color: 'bg-sky/25 text-[#2f5a85]' },
   reviewing: { label: 'Reviewing', color: 'bg-amber-100 text-amber-700' },
-  contacted: { label: 'Contacted', color: 'bg-purple-100 text-purple-700' },
+  contacted: { label: 'Contacted', color: 'bg-plum/25 text-[#4a4773]' },
   responded: { label: 'Responded', color: 'bg-indigo-100 text-indigo-700' },
   meeting: { label: 'Meeting', color: 'bg-cyan-100 text-cyan-700' },
   pursuing: { label: 'Pursuing', color: 'bg-emerald-100 text-emerald-700' },
@@ -232,8 +232,8 @@ export default function PortfolioCanvas({ portfolioId, isFullscreen, onClose }: 
         <div className={maxW}>
           <div className="space-y-3">
             {[1, 2, 3].map(i => (
-              <div key={i} className="animate-pulse bg-[#FAFAFA] rounded-xl p-4">
-                <div className="h-4 bg-[#EBE7DF] rounded w-1/3 mb-2" />
+              <div key={i} className="animate-pulse bg-[#f5f4ed] rounded-xl p-4">
+                <div className="h-4 bg-[#e8e6dc] rounded w-1/3 mb-2" />
                 <div className="h-3 bg-[#F5F5F5] rounded w-2/3" />
               </div>
             ))}
@@ -247,7 +247,7 @@ export default function PortfolioCanvas({ portfolioId, isFullscreen, onClose }: 
     return (
       <div className={pad}>
         <div className={`${maxW} text-center py-12`}>
-          <p className="text-sm text-[#6E6A63]">Portfolio not found.</p>
+          <p className="text-sm text-[#5e5d59]">Portfolio not found.</p>
         </div>
       </div>
     );
@@ -262,14 +262,14 @@ export default function PortfolioCanvas({ portfolioId, isFullscreen, onClose }: 
         {/* Header */}
         <div className="mb-5">
           <div className="flex items-center justify-between mb-1">
-            <h2 className="text-lg font-semibold text-[#0D0D0D] m-0 tracking-tight" style={{ fontFamily: 'var(--headline, Sora, system-ui)' }}>
+            <h2 className="text-lg font-semibold text-[#1a1918] m-0 tracking-tight" style={{ fontFamily: "var(--headline, Georgia, serif)" }}>
               {portfolio.name}
             </h2>
             <PipelineStatusBadge status={portfolio.pipeline_status} />
           </div>
 
           {/* Stats bar */}
-          <div className="flex items-center gap-3 text-xs text-[#6E6A63] mt-2">
+          <div className="flex items-center gap-3 text-xs text-[#5e5d59] mt-2">
             <StatChip label="Total" value={portfolio.total_candidates} />
             <StatChip label="A-tier" value={portfolio.a_tier_count} color="emerald" />
             <StatChip label="B-tier" value={portfolio.b_tier_count} color="blue" />
@@ -279,17 +279,17 @@ export default function PortfolioCanvas({ portfolioId, isFullscreen, onClose }: 
 
         {/* Pipeline progress (active only) */}
         {isActive && (
-          <div className="mb-4 bg-[#FAFAFA] rounded-xl p-3 border border-[#D44A78]/10">
+          <div className="mb-4 bg-[#f5f4ed] rounded-xl p-3 border border-[#D4714E]/10">
             <div className="flex items-center gap-2 mb-1.5">
-              <div className="w-3 h-3 border-2 border-[#D44A78] border-t-transparent rounded-full animate-spin" />
-              <span className="text-xs font-medium text-[#0D0D0D]">
+              <div className="w-3 h-3 border-2 border-[#D4714E] border-t-transparent rounded-full animate-spin" />
+              <span className="text-xs font-medium text-[#1a1918]">
                 {portfolio.stage_progress?.message || 'Processing...'}
               </span>
             </div>
             {portfolio.stage_progress?.pct != null && (
-              <div className="w-full h-1.5 bg-[#EBE7DF] rounded-full overflow-hidden">
+              <div className="w-full h-1.5 bg-[#e8e6dc] rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#D44A78] rounded-full transition-all duration-700"
+                  className="h-full bg-[#D4714E] rounded-full transition-all duration-700"
                   style={{ width: `${portfolio.stage_progress.pct}%` }}
                 />
               </div>
@@ -355,8 +355,8 @@ export default function PortfolioCanvas({ portfolioId, isFullscreen, onClose }: 
               />
             ))}
             {candidates.length === 0 && (
-              <div className="text-center py-8 bg-[#FAFAFA] rounded-xl">
-                <p className="text-sm text-[#6E6A63] m-0">No candidates with status "{statusFilter}"</p>
+              <div className="text-center py-8 bg-[#f5f4ed] rounded-xl">
+                <p className="text-sm text-[#5e5d59] m-0">No candidates with status "{statusFilter}"</p>
               </div>
             )}
           </div>
@@ -364,9 +364,9 @@ export default function PortfolioCanvas({ portfolioId, isFullscreen, onClose }: 
 
         {/* Empty state */}
         {!loading && candidates.length === 0 && portfolio.pipeline_status === 'ready' && !statusFilter && (
-          <div className="text-center py-10 bg-[#FAFAFA] rounded-xl">
-            <p className="text-sm font-medium text-[#0D0D0D] m-0 mb-1">No candidates found</p>
-            <p className="text-xs text-[#6E6A63] m-0">Try broadening your thesis geography or industry.</p>
+          <div className="text-center py-10 bg-[#f5f4ed] rounded-xl">
+            <p className="text-sm font-medium text-[#1a1918] m-0 mb-1">No candidates found</p>
+            <p className="text-xs text-[#5e5d59] m-0">Try broadening your thesis geography or industry.</p>
           </div>
         )}
 
@@ -394,11 +394,11 @@ function PipelineStatusBadge({ status }: { status: string }) {
   const configs: Record<string, { label: string; cls: string }> = {
     initializing: { label: 'Initializing', cls: 'bg-zinc-100 text-zinc-600' },
     brief_generating: { label: 'Analyzing', cls: 'bg-amber-100 text-amber-700' },
-    expanding: { label: 'Searching', cls: 'bg-blue-100 text-blue-700' },
-    enriching: { label: 'Enriching', cls: 'bg-purple-100 text-purple-700' },
+    expanding: { label: 'Searching', cls: 'bg-sky/25 text-[#2f5a85]' },
+    enriching: { label: 'Enriching', cls: 'bg-plum/25 text-[#4a4773]' },
     scoring: { label: 'Scoring', cls: 'bg-indigo-100 text-indigo-700' },
     ready: { label: 'Ready', cls: 'bg-emerald-100 text-emerald-700' },
-    failed: { label: 'Failed', cls: 'bg-red-100 text-red-700' },
+    failed: { label: 'Failed', cls: 'bg-fig/25 text-[#7a3048]' },
     stale: { label: 'Needs Refresh', cls: 'bg-amber-100 text-amber-700' },
   };
   const cfg = configs[status] || { label: status, cls: 'bg-zinc-100 text-zinc-600' };
@@ -411,7 +411,7 @@ function PipelineStatusBadge({ status }: { status: string }) {
 
 function StatChip({ label, value, color }: { label: string; value: number; color?: string }) {
   if (value === 0) return null;
-  const colorCls = color ? `text-${color}-700` : 'text-[#0D0D0D]';
+  const colorCls = color ? `text-${color}-700` : 'text-[#1a1918]';
   return (
     <span className="flex items-center gap-1">
       <span className={`font-semibold tabular-nums ${colorCls}`}>{value}</span>
@@ -426,8 +426,8 @@ function FilterPill({ label, active, onClick }: { label: string; active: boolean
       onClick={onClick}
       className={`px-3 py-1 rounded-full text-[11px] font-medium border transition-colors cursor-pointer shrink-0 ${
         active
-          ? 'bg-[#D44A78] text-white border-[#D44A78]'
-          : 'bg-white text-[#6E6A63] border-[rgba(0,0,0,0.08)] hover:border-[#D44A78]'
+          ? 'bg-[#D4714E] text-white border-[#D4714E]'
+          : 'bg-white text-[#5e5d59] border-[rgba(0,0,0,0.08)] hover:border-[#D4714E]'
       }`}
     >
       {label}
@@ -489,13 +489,13 @@ function CandidateCard({ candidate: c, onSelect, onStatusChange }: {
   return (
     <div
       onClick={onSelect}
-      className="bg-white rounded-xl p-3 border border-[rgba(0,0,0,0.06)] hover:border-[#D44A78]/30 cursor-pointer transition-all"
+      className="bg-white rounded-xl p-3 border border-[rgba(0,0,0,0.06)] hover:border-[#D4714E]/30 cursor-pointer transition-all"
     >
       <div className="flex items-start gap-2.5">
         {/* Score badge */}
         <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${
           c.total_score >= 75 ? 'bg-emerald-50 text-emerald-700' :
-          c.total_score >= 55 ? 'bg-blue-50 text-blue-700' :
+          c.total_score >= 55 ? 'bg-sky/15 text-[#2f5a85]' :
           c.total_score >= 35 ? 'bg-amber-50 text-amber-700' :
           'bg-zinc-100 text-zinc-500'
         }`}>
@@ -505,7 +505,7 @@ function CandidateCard({ candidate: c, onSelect, onStatusChange }: {
         <div className="flex-1 min-w-0">
           {/* Name + status */}
           <div className="flex items-center gap-1.5 mb-0.5">
-            <h4 className="text-sm font-semibold text-[#0D0D0D] m-0 truncate">
+            <h4 className="text-sm font-semibold text-[#1a1918] m-0 truncate">
               {c.name || 'Unknown Business'}
             </h4>
             <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full shrink-0 ${statusCfg.color}`}>
@@ -514,7 +514,7 @@ function CandidateCard({ candidate: c, onSelect, onStatusChange }: {
           </div>
 
           {/* Meta row */}
-          <div className="flex items-center gap-2 text-[10px] text-[#6E6A63] mb-1 flex-wrap">
+          <div className="flex items-center gap-2 text-[10px] text-[#5e5d59] mb-1 flex-wrap">
             {c.city && c.state && <span>{c.city}, {c.state}</span>}
             {c.rating != null && (
               <span className="flex items-center gap-0.5">
@@ -525,7 +525,7 @@ function CandidateCard({ candidate: c, onSelect, onStatusChange }: {
             )}
             {c.year_founded && <span>Est. {c.year_founded}</span>}
             {c.estimated_revenue_low_cents && (
-              <span className="font-medium text-[#0D0D0D]">
+              <span className="font-medium text-[#1a1918]">
                 {formatRevenue(c.estimated_revenue_low_cents, c.estimated_revenue_high_cents)}
               </span>
             )}
@@ -537,7 +537,7 @@ function CandidateCard({ candidate: c, onSelect, onStatusChange }: {
               <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-orange-50 text-orange-700">SBA History</span>
             )}
             {c.succession_signals && c.succession_signals.length > 0 && (
-              <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-purple-50 text-purple-700">Exit Signals</span>
+              <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-plum/15 text-[#4a4773]">Exit Signals</span>
             )}
             {c.recurring_revenue_signals && c.recurring_revenue_signals.length > 0 && (
               <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Recurring Rev</span>
@@ -549,7 +549,7 @@ function CandidateCard({ candidate: c, onSelect, onStatusChange }: {
 
           {/* AI summary */}
           {c.ai_score_summary && (
-            <p className="text-[10px] text-[#6E6A63] m-0 mt-1 line-clamp-2 leading-relaxed">
+            <p className="text-[10px] text-[#5e5d59] m-0 mt-1 line-clamp-2 leading-relaxed">
               {c.ai_score_summary}
             </p>
           )}
@@ -601,12 +601,12 @@ function CandidateDetail({ candidate: c, onClose, onStatusChange, onEnrich, enri
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-[rgba(0,0,0,0.06)] px-5 py-4 z-10">
           <div className="flex items-center justify-between mb-1">
-            <h3 className="text-base font-semibold text-[#0D0D0D] m-0">{c.name || 'Unknown'}</h3>
+            <h3 className="text-base font-semibold text-[#1a1918] m-0">{c.name || 'Unknown'}</h3>
             <button onClick={onClose} className="w-7 h-7 rounded-full hover:bg-[#F5F5F5] flex items-center justify-center cursor-pointer border-0 bg-transparent">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6E6A63" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5e5d59" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
           </div>
-          <div className="text-xs text-[#6E6A63]">
+          <div className="text-xs text-[#5e5d59]">
             {[c.city, c.state].filter(Boolean).join(', ')}
             {c.phone && <span className="ml-2">{c.phone}</span>}
           </div>
@@ -615,18 +615,18 @@ function CandidateDetail({ candidate: c, onClose, onStatusChange, onEnrich, enri
         <div className="px-5 py-4 space-y-5">
           {/* Score breakdown */}
           <div>
-            <h4 className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#6E6A63] m-0 mb-2">Score Breakdown</h4>
+            <h4 className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#5e5d59] m-0 mb-2">Score Breakdown</h4>
             <div className="flex items-center gap-3 mb-3">
               <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-xl font-bold ${
                 c.total_score >= 75 ? 'bg-emerald-50 text-emerald-700' :
-                c.total_score >= 55 ? 'bg-blue-50 text-blue-700' :
+                c.total_score >= 55 ? 'bg-sky/15 text-[#2f5a85]' :
                 c.total_score >= 35 ? 'bg-amber-50 text-amber-700' :
                 'bg-zinc-100 text-zinc-500'
               }`}>
                 {c.total_score}
               </div>
-              <div className="flex-1 text-xs text-[#6E6A63]">
-                <span className="font-semibold text-[#0D0D0D]">{c.tier}-Tier</span> candidate
+              <div className="flex-1 text-xs text-[#5e5d59]">
+                <span className="font-semibold text-[#1a1918]">{c.tier}-Tier</span> candidate
                 {c.ai_summary && <p className="m-0 mt-1 leading-relaxed">{c.ai_summary}</p>}
               </div>
             </div>
@@ -642,11 +642,11 @@ function CandidateDetail({ candidate: c, onClose, onStatusChange, onEnrich, enri
 
           {/* Business details */}
           <div>
-            <h4 className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#6E6A63] m-0 mb-2">Business Details</h4>
+            <h4 className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#5e5d59] m-0 mb-2">Business Details</h4>
             <div className="space-y-1.5 text-xs">
               {c.website_url && (
                 <DetailRow label="Website">
-                  <a href={c.website_url} target="_blank" rel="noopener noreferrer" className="text-[#D44A78] hover:underline truncate">
+                  <a href={c.website_url} target="_blank" rel="noopener noreferrer" className="text-[#D4714E] hover:underline truncate">
                     {c.website_url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}
                   </a>
                 </DetailRow>
@@ -666,27 +666,27 @@ function CandidateDetail({ candidate: c, onClose, onStatusChange, onEnrich, enri
           {/* Signals */}
           {(c.growth_indicators?.length || c.risk_factors?.length || c.succession_signals?.length) && (
             <div>
-              <h4 className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#6E6A63] m-0 mb-2">Signals</h4>
+              <h4 className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#5e5d59] m-0 mb-2">Signals</h4>
               {c.growth_indicators && c.growth_indicators.length > 0 && (
                 <div className="mb-2">
                   <span className="text-[10px] font-medium text-emerald-700">Growth:</span>
-                  <ul className="m-0 mt-0.5 pl-4 text-[10px] text-[#6E6A63]">
+                  <ul className="m-0 mt-0.5 pl-4 text-[10px] text-[#5e5d59]">
                     {c.growth_indicators.map((g, i) => <li key={i}>{g}</li>)}
                   </ul>
                 </div>
               )}
               {c.risk_factors && c.risk_factors.length > 0 && (
                 <div className="mb-2">
-                  <span className="text-[10px] font-medium text-red-700">Risks:</span>
-                  <ul className="m-0 mt-0.5 pl-4 text-[10px] text-[#6E6A63]">
+                  <span className="text-[10px] font-medium text-[#7a3048]">Risks:</span>
+                  <ul className="m-0 mt-0.5 pl-4 text-[10px] text-[#5e5d59]">
                     {c.risk_factors.map((r, i) => <li key={i}>{r}</li>)}
                   </ul>
                 </div>
               )}
               {c.succession_signals && c.succession_signals.length > 0 && (
                 <div>
-                  <span className="text-[10px] font-medium text-purple-700">Exit signals:</span>
-                  <ul className="m-0 mt-0.5 pl-4 text-[10px] text-[#6E6A63]">
+                  <span className="text-[10px] font-medium text-[#4a4773]">Exit signals:</span>
+                  <ul className="m-0 mt-0.5 pl-4 text-[10px] text-[#5e5d59]">
                     {c.succession_signals.map((s, i) => <li key={i}>{s}</li>)}
                   </ul>
                 </div>
@@ -699,7 +699,7 @@ function CandidateDetail({ candidate: c, onClose, onStatusChange, onEnrich, enri
             <button
               onClick={() => onEnrich(c.id)}
               disabled={enriching}
-              className="w-full py-2.5 rounded-xl text-xs font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-2.5 rounded-xl text-xs font-semibold bg-[#D4714E] text-white border-0 cursor-pointer hover:bg-[#B85A3A] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {enriching ? (
                 <>
@@ -715,7 +715,7 @@ function CandidateDetail({ candidate: c, onClose, onStatusChange, onEnrich, enri
             <button
               onClick={() => onEnrich(c.id)}
               disabled={enriching}
-              className="w-full py-2.5 rounded-xl text-xs font-semibold bg-[#0D0D0D] text-white border-0 cursor-pointer hover:bg-[#333] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-2.5 rounded-xl text-xs font-semibold bg-[#1a1918] text-white border-0 cursor-pointer hover:bg-[#333] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {enriching ? (
                 <>
@@ -730,7 +730,7 @@ function CandidateDetail({ candidate: c, onClose, onStatusChange, onEnrich, enri
 
           {/* Status actions */}
           <div>
-            <h4 className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#6E6A63] m-0 mb-2">Status</h4>
+            <h4 className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#5e5d59] m-0 mb-2">Status</h4>
             <div className="flex flex-wrap gap-1.5">
               {(['new', 'reviewing', 'contacted', 'responded', 'meeting', 'pursuing', 'passed'] as const).map(s => {
                 const cfg = STATUS_LABELS[s];
@@ -742,7 +742,7 @@ function CandidateDetail({ candidate: c, onClose, onStatusChange, onEnrich, enri
                     className={`text-[10px] font-medium px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${
                       isActive
                         ? `${cfg.color} border-current`
-                        : 'bg-white text-[#6E6A63] border-[rgba(0,0,0,0.08)] hover:border-[#D44A78]'
+                        : 'bg-white text-[#5e5d59] border-[rgba(0,0,0,0.08)] hover:border-[#D4714E]'
                     }`}
                   >
                     {cfg.label}
@@ -754,18 +754,18 @@ function CandidateDetail({ candidate: c, onClose, onStatusChange, onEnrich, enri
 
           {/* Notes */}
           <div>
-            <h4 className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#6E6A63] m-0 mb-2">Notes</h4>
+            <h4 className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#5e5d59] m-0 mb-2">Notes</h4>
             <textarea
               value={noteDraft}
               onChange={e => onNoteChange(e.target.value)}
               placeholder="Add notes about this candidate..."
               rows={3}
-              className="w-full px-3 py-2 rounded-lg border border-[rgba(0,0,0,0.08)] text-xs bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78] resize-none"
+              className="w-full px-3 py-2 rounded-lg border border-[rgba(0,0,0,0.08)] text-xs bg-white text-[#1a1918] outline-none focus:border-[#D4714E] resize-none"
             />
             {noteDraft !== (c.user_notes || '') && (
               <button
                 onClick={onNoteSave}
-                className="mt-1.5 px-3 py-1 rounded-lg text-[10px] font-medium bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] transition-colors"
+                className="mt-1.5 px-3 py-1 rounded-lg text-[10px] font-medium bg-[#D4714E] text-white border-0 cursor-pointer hover:bg-[#B85A3A] transition-colors"
               >
                 Save Notes
               </button>
@@ -781,16 +781,16 @@ function ScoreBar({ label, value, max }: { label: string; value: number; max: nu
   const pct = max > 0 ? (value / max) * 100 : 0;
   return (
     <div className="flex items-center gap-2">
-      <span className="text-[10px] text-[#6E6A63] w-20 shrink-0">{label}</span>
-      <div className="flex-1 h-1.5 bg-[#EBE7DF] rounded-full overflow-hidden">
+      <span className="text-[10px] text-[#5e5d59] w-20 shrink-0">{label}</span>
+      <div className="flex-1 h-1.5 bg-[#e8e6dc] rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all ${
-            pct >= 80 ? 'bg-emerald-500' : pct >= 50 ? 'bg-blue-500' : pct >= 30 ? 'bg-amber-500' : 'bg-zinc-400'
+            pct >= 80 ? 'bg-emerald-500' : pct >= 50 ? 'bg-[#6a9bcc]' : pct >= 30 ? 'bg-amber-500' : 'bg-zinc-400'
           }`}
           style={{ width: `${pct}%` }}
         />
       </div>
-      <span className="text-[10px] text-[#0D0D0D] font-medium w-8 text-right tabular-nums">{value}/{max}</span>
+      <span className="text-[10px] text-[#1a1918] font-medium w-8 text-right tabular-nums">{value}/{max}</span>
     </div>
   );
 }
@@ -798,8 +798,8 @@ function ScoreBar({ label, value, max }: { label: string; value: number; max: nu
 function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex gap-2">
-      <span className="text-[#6E6A63] shrink-0 w-20">{label}</span>
-      <span className="text-[#0D0D0D] min-w-0">{children}</span>
+      <span className="text-[#5e5d59] shrink-0 w-20">{label}</span>
+      <span className="text-[#1a1918] min-w-0">{children}</span>
     </div>
   );
 }

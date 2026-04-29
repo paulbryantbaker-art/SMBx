@@ -9,11 +9,11 @@
 
 :root {
   /* ── Surfaces ─────────────────────────────────────────────────── */
-  --gg-bg-app:     #F2F2F4;
+  --gg-bg-app:     #faf9f5;
   --gg-bg-card:    #FFFFFF;
-  --gg-bg-subtle:  #F5F5F7;
-  --gg-bg-muted:   #E8E8EB;
-  --gg-bg-dark:    #0A0A0B;
+  --gg-bg-subtle:  #f5f4ed;
+  --gg-bg-muted:   #e8e6dc;
+  --gg-bg-dark:    #1a1918;
 
   /* ── Glass intensities ────────────────────────────────────────── */
   --gg-glass-light:   rgba(255, 255, 255, 0.72);
@@ -21,26 +21,26 @@
   --gg-glass-strong:  rgba(255, 255, 255, 0.88);
 
   /* ── Text ─────────────────────────────────────────────────────── */
-  --gg-text-primary:   #0A0A0B;
+  --gg-text-primary:   #1a1918;
   --gg-text-secondary: #3A3A3E;
-  --gg-text-muted:     #6B6B70;
-  --gg-text-faint:     #9A9A9F;
+  --gg-text-muted:     #87867f;
+  --gg-text-faint:     #b0aea5;
   --gg-text-inv:       #FFFFFF;
 
   /* ── Borders ──────────────────────────────────────────────────── */
   --gg-border:         rgba(0, 0, 0, 0.08);
   --gg-border-solid:   #E5E5E7;
-  --gg-border-strong:  #D1D1D4;
+  --gg-border-strong:  #d1cfc5;
 
   /* ── Accent (black, not a brand hue) ──────────────────────────── */
-  --gg-accent:       #0A0A0B;
+  --gg-accent:       #1a1918;
   --gg-accent-fill:  rgba(10, 10, 11, 0.06);
 
   /* ── Content-level status (never in chrome) ───────────────────── */
   --gg-dot-ready:    #22A755;
   --gg-dot-progress: #E8A033;
   --gg-dot-flag:     #DC2626;
-  --gg-dot-draft:    #9A9A9F;
+  --gg-dot-draft:    #b0aea5;
 
   /* ── Score band pairs (desaturated tint + darker text) ────────── */
   --gg-band-hi-bg:  #DCFCE7;  --gg-band-hi-fg:  #166534;
@@ -49,8 +49,8 @@
   --gg-band-flag-bg:#FEE2E2;  --gg-band-flag-fg:#991B1B;
 
   /* ── Type ─────────────────────────────────────────────────────── */
-  --gg-display: 'Sora', system-ui, sans-serif;
-  --gg-body:    'Inter', system-ui, sans-serif;
+  --gg-display: 'Figtree', system-ui, sans-serif;
+  --gg-body:    'Figtree', system-ui, sans-serif;
 
   /* ── Spacing (4px base) ───────────────────────────────────────── */
   --gg-s1:  4px;
@@ -296,7 +296,7 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 .gg-yulia {
-  background: linear-gradient(135deg, #3A3A3E 0%, #0A0A0B 100%);
+  background: linear-gradient(135deg, #3A3A3E 0%, #1a1918 100%);
   color: var(--gg-text-inv);
   display: flex; align-items: center; justify-content: center;
   font-family: var(--gg-display);

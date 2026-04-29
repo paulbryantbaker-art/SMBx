@@ -45,7 +45,7 @@ export default function ForgotPassword({ onNavigateLogin }: ForgotPasswordProps)
 
         {submitted ? (
           <div>
-            <p className="text-sm text-[#3D3B37] text-center leading-relaxed mb-6">
+            <p className="text-sm text-[#3d3d3a] text-center leading-relaxed mb-6">
               If an account exists for <strong>{email}</strong>, we sent a password reset link.
               Check your inbox and spam folder.
             </p>
@@ -56,20 +56,20 @@ export default function ForgotPassword({ onNavigateLogin }: ForgotPasswordProps)
               <div className="bg-[#FEF2F2] text-[#B91C1C] px-3.5 py-2.5 rounded-xl text-sm mb-4">{error}</div>
             )}
 
-            <label className="block text-sm font-medium text-[#0D0D0D] mb-1.5">Email</label>
+            <label className="block text-sm font-medium text-[#1a1918] mb-1.5">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#D44A78]"
+              className="w-full px-3.5 py-2.5 text-[15px] border border-[#f5f4ed] rounded-xl outline-none mb-4 bg-white text-[#1a1918] focus:border-[#D4714E]"
               required
             />
 
             <button
               type="submit"
               disabled={submitting}
-              className="w-full py-3 bg-[#D44A78] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer mt-1 hover:bg-[#B03860] transition-colors disabled:opacity-50"
+              className="w-full py-3 bg-[#D4714E] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer mt-1 hover:bg-[#B85A3A] transition-colors disabled:opacity-50"
             >
               {submitting ? 'Sending...' : 'Send reset link'}
             </button>
@@ -80,7 +80,7 @@ export default function ForgotPassword({ onNavigateLogin }: ForgotPasswordProps)
           <button
             type="button"
             onClick={onNavigateLogin}
-            className="bg-transparent border-none text-[#D44A78] font-semibold cursor-pointer text-sm p-0"
+            className="bg-transparent border-none text-[#D4714E] font-semibold cursor-pointer text-sm p-0"
           >
             Back to sign in
           </button>

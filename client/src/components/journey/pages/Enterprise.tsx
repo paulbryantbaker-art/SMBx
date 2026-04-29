@@ -301,7 +301,7 @@ function TeamWorkspaceMock() {
           <div key={u.name} style={{ flex: 1, padding: 10, background: 'var(--gg-bg-subtle)', borderRadius: 10, border: '0.5px solid var(--gg-border)', textAlign: 'center', opacity: u.active ? 1 : 0.65 }}>
             <div style={{
               width: 28, height: 28, borderRadius: 9, margin: '0 auto 6px',
-              background: 'linear-gradient(135deg, #3A3A3E, #0A0A0B)',
+              background: 'linear-gradient(135deg, #3A3A3E, #1a1918)',
               color: '#fff',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 10,

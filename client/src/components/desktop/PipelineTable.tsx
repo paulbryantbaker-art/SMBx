@@ -53,7 +53,7 @@ type ViewKey = 'all' | 'active' | 'stuck' | 'closing';
 type JourneyFilter = 'all' | 'sell' | 'buy' | 'raise' | 'pmi';
 
 const JOURNEY_COLORS: Record<string, string> = {
-  sell: '#D44A78',
+  sell: '#D4714E',
   buy: '#3E8E8E',
   raise: '#C99A3E',
   pmi: '#8F4A7A',
@@ -200,13 +200,13 @@ export default function PipelineTable({ dark, onOpenDeal, onNewDeal }: Props) {
   }, [deals, search, view, journey, sortKey]);
 
   /* ───── Palette ───── */
-  const heading = dark ? '#F0F0F3' : '#1A1C1E';
-  const body = dark ? 'rgba(240,240,243,0.78)' : '#3C3D40';
-  const muted = dark ? 'rgba(240,240,243,0.55)' : '#6B6C6F';
-  const borderC = dark ? 'rgba(255,255,255,0.06)' : '#E5E1D9';
+  const heading = dark ? '#f5f4ed' : '#1a1918';
+  const body = dark ? 'rgba(245,244,237,0.78)' : '#3C3D40';
+  const muted = dark ? 'rgba(245,244,237,0.55)' : '#6B6C6F';
+  const borderC = dark ? 'rgba(255,255,255,0.06)' : '#e8e6dc';
   const rowHover = dark ? 'rgba(255,255,255,0.03)' : 'rgba(15,16,18,0.02)';
   const subtleBg = dark ? 'rgba(255,255,255,0.02)' : 'rgba(15,16,18,0.015)';
-  const pink = dark ? '#E8709A' : '#D44A78';
+  const pink = dark ? '#ec9d78' : '#D4714E';
 
   const rowPadY = density === 'compact' ? 8 : 14;
   const rowFont = density === 'compact' ? 12.5 : 13.5;
@@ -256,7 +256,7 @@ export default function PipelineTable({ dark, onOpenDeal, onNewDeal }: Props) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
           <h1 style={{
             margin: 0,
-            fontFamily: "'Sora', system-ui, sans-serif",
+            fontFamily: "'Figtree', system-ui, sans-serif",
             fontSize: 20,
             fontWeight: 800,
             letterSpacing: '-0.02em',
@@ -290,9 +290,9 @@ export default function PipelineTable({ dark, onOpenDeal, onNewDeal }: Props) {
                 padding: '7px 12px 7px 30px',
                 borderRadius: 999,
                 border: `1px solid ${borderC}`,
-                background: dark ? '#1A1C1E' : '#FFFFFF',
+                background: dark ? '#1a1918' : '#FFFFFF',
                 color: heading,
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 13,
                 outline: 'none',
                 width: 220,
@@ -309,11 +309,11 @@ export default function PipelineTable({ dark, onOpenDeal, onNewDeal }: Props) {
               border: 'none',
               background: pink,
               color: '#FFFFFF',
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 13,
               fontWeight: 700,
               cursor: 'pointer',
-              boxShadow: '0 4px 14px rgba(212,74,120,0.22)',
+              boxShadow: '0 4px 14px rgba(212,113,78,0.22)',
             }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: 16 }}>add</span>
@@ -364,7 +364,7 @@ export default function PipelineTable({ dark, onOpenDeal, onNewDeal }: Props) {
         <div style={{
           padding: '8px 20px',
           borderBottom: `1px solid ${borderC}`,
-          fontFamily: "'Inter', system-ui, sans-serif",
+          fontFamily: "'Figtree', system-ui, sans-serif",
           fontSize: 12,
           color: muted,
           display: 'flex',
@@ -393,7 +393,7 @@ export default function PipelineTable({ dark, onOpenDeal, onNewDeal }: Props) {
       {/* Table body */}
       <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
         {error && (
-          <div style={{ padding: 40, textAlign: 'center', color: muted, fontFamily: "'Inter', system-ui, sans-serif", fontSize: 13 }}>
+          <div style={{ padding: 40, textAlign: 'center', color: muted, fontFamily: "'Figtree', system-ui, sans-serif", fontSize: 13 }}>
             {error} &mdash;{' '}
             <button onClick={fetchDeals} type="button" style={{ background: 'none', border: 'none', color: pink, cursor: 'pointer', fontWeight: 700 }}>
               retry
@@ -417,7 +417,7 @@ export default function PipelineTable({ dark, onOpenDeal, onNewDeal }: Props) {
             style={{
               width: '100%',
               borderCollapse: 'collapse',
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: rowFont,
               color: body,
             }}
@@ -426,7 +426,7 @@ export default function PipelineTable({ dark, onOpenDeal, onNewDeal }: Props) {
               <tr style={{
                 position: 'sticky',
                 top: 0,
-                background: dark ? '#151617' : '#FFFFFF',
+                background: dark ? '#141413' : '#FFFFFF',
                 zIndex: 1,
                 borderBottom: `1px solid ${borderC}`,
               }}>
@@ -465,7 +465,7 @@ export default function PipelineTable({ dark, onOpenDeal, onNewDeal }: Props) {
         display: 'flex',
         alignItems: 'center',
         gap: 16,
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Figtree', system-ui, sans-serif",
         fontSize: 12,
         color: muted,
         flexShrink: 0,
@@ -532,7 +532,7 @@ export default function PipelineTable({ dark, onOpenDeal, onNewDeal }: Props) {
 function FilterChip({
   label, active, onClick, dark, colorDot,
 }: { label: string; active: boolean; onClick: () => void; dark: boolean; colorDot?: string }) {
-  const pink = dark ? '#E8709A' : '#D44A78';
+  const pink = dark ? '#ec9d78' : '#D4714E';
   return (
     <button
       onClick={onClick}
@@ -547,10 +547,10 @@ function FilterChip({
         borderRadius: 999,
         border: 'none',
         background: active
-          ? (dark ? 'rgba(232,112,154,0.16)' : 'rgba(212,74,120,0.08)')
+          ? (dark ? 'rgba(236,157,120,0.16)' : 'rgba(212,113,78,0.08)')
           : 'transparent',
-        color: active ? pink : (dark ? 'rgba(240,240,243,0.78)' : '#3C3D40'),
-        fontFamily: "'Inter', system-ui, sans-serif",
+        color: active ? pink : (dark ? 'rgba(245,244,237,0.78)' : '#3C3D40'),
+        fontFamily: "'Figtree', system-ui, sans-serif",
         fontSize: 12.5,
         fontWeight: active ? 700 : 500,
         cursor: 'pointer',
@@ -575,8 +575,8 @@ function HeaderCell({
   className?: string;
   dark: boolean;
 }) {
-  const muted = dark ? 'rgba(240,240,243,0.55)' : '#6B6C6F';
-  const heading = dark ? '#F0F0F3' : '#1A1C1E';
+  const muted = dark ? 'rgba(245,244,237,0.55)' : '#6B6C6F';
+  const heading = dark ? '#f5f4ed' : '#1a1918';
   return (
     <th
       scope="col"
@@ -584,7 +584,7 @@ function HeaderCell({
       style={{
         textAlign: align,
         padding: '12px 16px',
-        fontFamily: "'Sora', system-ui, sans-serif",
+        fontFamily: "'Figtree', system-ui, sans-serif",
         fontSize: 11,
         fontWeight: 800,
         letterSpacing: '0.06em',
@@ -613,8 +613,8 @@ function PipelineRow({
   onOpenDeal: () => void;
   onArchive: () => void;
 }) {
-  const heading = dark ? '#F0F0F3' : '#1A1C1E';
-  const muted = dark ? 'rgba(240,240,243,0.55)' : '#6B6C6F';
+  const heading = dark ? '#f5f4ed' : '#1a1918';
+  const muted = dark ? 'rgba(245,244,237,0.55)' : '#6B6C6F';
   const journey = (deal.journey_type || 'sell').toLowerCase();
   const color = JOURNEY_COLORS[journey] || JOURNEY_COLORS.sell;
   const label = JOURNEY_LABELS[journey] || 'Deal';
@@ -655,7 +655,7 @@ function PipelineRow({
           borderRadius: 999,
           background: dark ? `${color}2A` : `${color}14`,
           color,
-          fontFamily: "'Inter', system-ui, sans-serif",
+          fontFamily: "'Figtree', system-ui, sans-serif",
           fontSize: 11,
           fontWeight: 700,
           letterSpacing: '0.02em',
@@ -689,9 +689,9 @@ function PipelineRow({
 
 function RowMenu({ onArchive, dark }: { onArchive: () => void; dark: boolean }) {
   const [open, setOpen] = useState(false);
-  const heading = dark ? '#F0F0F3' : '#1A1C1E';
-  const muted = dark ? 'rgba(240,240,243,0.55)' : '#6B6C6F';
-  const borderC = dark ? 'rgba(255,255,255,0.08)' : '#E5E1D9';
+  const heading = dark ? '#f5f4ed' : '#1a1918';
+  const muted = dark ? 'rgba(245,244,237,0.55)' : '#6B6C6F';
+  const borderC = dark ? 'rgba(255,255,255,0.08)' : '#e8e6dc';
 
   useEffect(() => {
     if (!open) return;
@@ -729,12 +729,12 @@ function RowMenu({ onArchive, dark }: { onArchive: () => void; dark: boolean }) 
             right: 0,
             top: 'calc(100% + 4px)',
             minWidth: 160,
-            background: dark ? '#151617' : '#FFFFFF',
+            background: dark ? '#141413' : '#FFFFFF',
             border: `1px solid ${borderC}`,
             borderRadius: 10,
             boxShadow: dark
               ? '0 12px 28px rgba(0,0,0,0.35)'
-              : '0 12px 28px rgba(60,55,45,0.12)',
+              : '0 12px 28px rgba(26,25,24,0.12)',
             padding: 4,
             zIndex: 20,
           }}
@@ -751,7 +751,7 @@ function RowMenu({ onArchive, dark }: { onArchive: () => void; dark: boolean }) 
               border: 'none',
               background: 'transparent',
               color: '#D44A4A',
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 12.5,
               fontWeight: 600,
               textAlign: 'left',
@@ -785,7 +785,7 @@ function DensityToggle({
   dark: boolean;
 }) {
   const active = value === current;
-  const pink = dark ? '#E8709A' : '#D44A78';
+  const pink = dark ? '#ec9d78' : '#D4714E';
   return (
     <button
       onClick={() => onSelect(value)}
@@ -795,9 +795,9 @@ function DensityToggle({
         padding: '3px 10px',
         borderRadius: 999,
         border: 'none',
-        background: active ? (dark ? 'rgba(232,112,154,0.16)' : 'rgba(212,74,120,0.08)') : 'transparent',
+        background: active ? (dark ? 'rgba(236,157,120,0.16)' : 'rgba(212,113,78,0.08)') : 'transparent',
         color: active ? pink : 'inherit',
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Figtree', system-ui, sans-serif",
         fontSize: 11.5,
         fontWeight: active ? 700 : 500,
         cursor: 'pointer',
@@ -809,7 +809,7 @@ function DensityToggle({
 }
 
 function SkeletonRows({ rows, dark }: { rows: number; dark: boolean }) {
-  const borderC = dark ? 'rgba(255,255,255,0.06)' : '#E5E1D9';
+  const borderC = dark ? 'rgba(255,255,255,0.06)' : '#e8e6dc';
   const sk = dark ? 'rgba(255,255,255,0.05)' : 'rgba(15,16,18,0.04)';
   return (
     <div style={{ padding: '12px 20px' }}>
@@ -838,10 +838,10 @@ function SkeletonRows({ rows, dark }: { rows: number; dark: boolean }) {
 function EmptyState({
   dark, filtered, onClearFilters, onNewDeal,
 }: { dark: boolean; filtered: boolean | null; onClearFilters: () => void; onNewDeal: () => void }) {
-  const heading = dark ? '#F0F0F3' : '#1A1C1E';
-  const body = dark ? 'rgba(240,240,243,0.78)' : '#3C3D40';
-  const muted = dark ? 'rgba(240,240,243,0.55)' : '#6B6C6F';
-  const pink = dark ? '#E8709A' : '#D44A78';
+  const heading = dark ? '#f5f4ed' : '#1a1918';
+  const body = dark ? 'rgba(245,244,237,0.78)' : '#3C3D40';
+  const muted = dark ? 'rgba(245,244,237,0.55)' : '#6B6C6F';
+  const pink = dark ? '#ec9d78' : '#D4714E';
 
   if (filtered) {
     return (
@@ -849,7 +849,7 @@ function EmptyState({
         padding: 48,
         textAlign: 'center',
         color: body,
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Figtree', system-ui, sans-serif",
       }}>
         <div style={{ fontSize: 15, fontWeight: 700, color: heading, marginBottom: 4 }}>No deals match this view</div>
         <div style={{ fontSize: 13, color: muted, marginBottom: 16 }}>Try a different filter or clear the current ones.</div>
@@ -862,7 +862,7 @@ function EmptyState({
             border: `1px solid ${pink}`,
             background: 'transparent',
             color: pink,
-            fontFamily: "'Inter', system-ui, sans-serif",
+            fontFamily: "'Figtree', system-ui, sans-serif",
             fontSize: 12.5,
             fontWeight: 700,
             cursor: 'pointer',
@@ -879,9 +879,9 @@ function EmptyState({
       padding: 56,
       textAlign: 'center',
       color: body,
-      fontFamily: "'Inter', system-ui, sans-serif",
+      fontFamily: "'Figtree', system-ui, sans-serif",
     }}>
-      <div style={{ fontSize: 18, fontWeight: 800, fontFamily: "'Sora', system-ui, sans-serif", color: heading, marginBottom: 8, letterSpacing: '-0.01em' }}>
+      <div style={{ fontSize: 18, fontWeight: 800, fontFamily: "'Figtree', system-ui, sans-serif", color: heading, marginBottom: 8, letterSpacing: '-0.01em' }}>
         Your pipeline starts here
       </div>
       <div style={{ fontSize: 13.5, color: body, marginBottom: 20, maxWidth: 420, margin: '0 auto 20px', lineHeight: 1.55 }}>
@@ -896,11 +896,11 @@ function EmptyState({
           border: 'none',
           background: pink,
           color: '#FFFFFF',
-          fontFamily: "'Inter', system-ui, sans-serif",
+          fontFamily: "'Figtree', system-ui, sans-serif",
           fontSize: 13,
           fontWeight: 700,
           cursor: 'pointer',
-          boxShadow: '0 4px 14px rgba(212,74,120,0.22)',
+          boxShadow: '0 4px 14px rgba(212,113,78,0.22)',
         }}
       >
         Start a new deal

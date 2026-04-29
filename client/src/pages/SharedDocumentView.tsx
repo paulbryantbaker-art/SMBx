@@ -44,10 +44,10 @@ export default function SharedDocumentView({ token }: { token: string }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F9F9FC] flex items-center justify-center">
+      <div className="min-h-screen bg-[#faf9f5] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-2 border-[#D44A78] border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-[#6E6A63]">Loading document...</p>
+          <div className="w-8 h-8 border-2 border-[#D4714E] border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-[#5e5d59]">Loading document...</p>
         </div>
       </div>
     );
@@ -55,7 +55,7 @@ export default function SharedDocumentView({ token }: { token: string }) {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#F9F9FC] flex items-center justify-center">
+      <div className="min-h-screen bg-[#faf9f5] flex items-center justify-center">
         <div className="max-w-md text-center px-6">
           <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2">
@@ -63,14 +63,14 @@ export default function SharedDocumentView({ token }: { token: string }) {
               <path d="M12 8v4M12 16h.01" />
             </svg>
           </div>
-          <h2 className="text-lg font-semibold text-[#0D0D0D] mb-2" style={{ fontFamily: "'Sora', system-ui, sans-serif" }}>
+          <h2 className="text-lg font-semibold text-[#1a1918] mb-2" style={{ fontFamily: "'Figtree', system-ui, sans-serif" }}>
             {error.includes('expired') ? 'Link Expired' : error.includes('Maximum') ? 'View Limit Reached' : 'Document Unavailable'}
           </h2>
-          <p className="text-sm text-[#6E6A63] leading-relaxed">{error}</p>
+          <p className="text-sm text-[#5e5d59] leading-relaxed">{error}</p>
           <a
             href="/"
             className="inline-block mt-6 px-6 py-2.5 rounded-full text-sm font-semibold text-white no-underline"
-            style={{ background: '#D44A78' }}
+            style={{ background: '#D4714E' }}
           >
             Go to smbx.ai
           </a>
@@ -81,14 +81,14 @@ export default function SharedDocumentView({ token }: { token: string }) {
 
   if (!doc || !doc.content) {
     return (
-      <div className="min-h-screen bg-[#F9F9FC] flex items-center justify-center">
-        <p className="text-sm text-[#6E6A63]">Document not found</p>
+      <div className="min-h-screen bg-[#faf9f5] flex items-center justify-center">
+        <p className="text-sm text-[#5e5d59]">Document not found</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F9F9FC]">
+    <div className="min-h-screen bg-[#faf9f5]">
       {/* Header bar */}
       <header
         className="sticky top-0 z-10 flex items-center justify-between px-6 py-3"
@@ -100,12 +100,12 @@ export default function SharedDocumentView({ token }: { token: string }) {
       >
         <div className="flex items-center gap-3">
           <a href="/" className="no-underline">
-            <span style={{ fontFamily: "'Sora', system-ui, sans-serif", fontWeight: 700, fontSize: 16, color: '#0D0D0D' }}>
+            <span style={{ fontFamily: "'Figtree', system-ui, sans-serif", fontWeight: 700, fontSize: 16, color: '#1a1918' }}>
               smbx.ai
             </span>
           </a>
-          <span className="text-[#EBE7DF]">|</span>
-          <span className="text-sm text-[#6E6A63]">{doc.docName}</span>
+          <span className="text-[#e8e6dc]">|</span>
+          <span className="text-sm text-[#5e5d59]">{doc.docName}</span>
           {doc.docClass && (
             <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
               doc.docClass === 'legal' ? 'bg-purple-50 text-purple-600'
@@ -135,10 +135,10 @@ export default function SharedDocumentView({ token }: { token: string }) {
         >
           <span
             style={{
-              fontFamily: "'Sora', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 72,
               fontWeight: 700,
-              color: '#0D0D0D',
+              color: '#1a1918',
               transform: 'rotate(-30deg)',
               whiteSpace: 'nowrap',
               userSelect: 'none',
@@ -161,9 +161,9 @@ export default function SharedDocumentView({ token }: { token: string }) {
       </main>
 
       {/* Footer */}
-      <footer className="text-center py-8 border-t border-[#EBE7DF]">
+      <footer className="text-center py-8 border-t border-[#e8e6dc]">
         <p className="text-[11px] text-[#A9A49C]">
-          Shared via <a href="/" className="text-[#D44A78] no-underline font-semibold">smbx.ai</a> — AI-powered deal intelligence
+          Shared via <a href="/" className="text-[#D4714E] no-underline font-semibold">smbx.ai</a> — AI-powered deal intelligence
         </p>
         <p className="text-[10px] text-[#C8C4BC] mt-1">
           This document is confidential. Unauthorized distribution is prohibited.

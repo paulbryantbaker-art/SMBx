@@ -19,7 +19,7 @@
   max-width: 880px;
   margin: 0 auto;
   padding: 48px 48px 140px;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Figtree', system-ui, -apple-system, sans-serif;
   color: var(--v4-ink);
 }
 .jc-scroll *, .jc-scroll *::before, .jc-scroll *::after { box-sizing: border-box; }
@@ -53,7 +53,7 @@
 
 /* Section heading scale */
 .jc-h1 {   /* page hero — used ONCE at top */
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 700;
   font-size: 40px;
   letter-spacing: -0.03em;
@@ -63,7 +63,7 @@
   color: var(--v4-ink);
 }
 .jc-h2 {   /* major section title */
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 700;
   font-size: 28px;
   letter-spacing: -0.025em;
@@ -97,7 +97,7 @@
   border-bottom: 1px solid var(--v4-line);
 }
 .jc-card__title {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 600;
   font-size: 13px;
   letter-spacing: -0.005em;
@@ -155,7 +155,7 @@
   max-width: 440px;
 }
 .jc-row__amt {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 600;
   font-size: 14px;
   color: var(--v4-ink);
@@ -184,7 +184,7 @@
 }
 .jc-kpi__cell:first-child { border-left: 0; padding-left: 0; }
 .jc-kpi__v {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 700;
   font-size: 22px;
   letter-spacing: -0.02em;
@@ -222,7 +222,7 @@
   gap: 2px;
 }
 .jc-donut__v {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 700;
   font-size: 42px;
   letter-spacing: -0.03em;
@@ -257,7 +257,7 @@
 .jc-dim__dot--flag { background: var(--v4-flag); }
 .jc-dim__l { color: var(--v4-ink-2); font-weight: 500; }
 .jc-dim__v {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 600;
   color: var(--v4-ink);
   font-variant-numeric: tabular-nums;
@@ -302,7 +302,7 @@
   text-transform: uppercase;
 }
 .jc-cim__t {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 600;
   font-size: 13px;
   line-height: 1.3;
@@ -320,7 +320,7 @@
   border-top: 1px solid var(--v4-line);
 }
 .jc-cim__kv {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 700;
   font-size: 13px;
   color: var(--v4-ink);
@@ -366,7 +366,7 @@
 }
 .jc-ioi__card--winner .jc-ioi__k { color: rgba(255,255,255,0.55); }
 .jc-ioi__tag {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 600;
   font-size: 9px;
   padding: 2px 6px;
@@ -375,7 +375,7 @@
   letter-spacing: 0.06em;
 }
 .jc-ioi__price {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 700;
   font-size: 28px;
   letter-spacing: -0.02em;
@@ -418,7 +418,7 @@
   font-weight: 500;
 }
 .jc-path__t {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 600;
   font-size: 14.5px;
   letter-spacing: -0.01em;
@@ -453,7 +453,7 @@
   display: flex; align-items: center; gap: 10px;
 }
 .jc-est__title {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 600;
   font-size: 13px;
   color: var(--v4-ink);
@@ -490,7 +490,7 @@
   color: var(--v4-ink);
   border: 0;
   border-radius: 8px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 500;
   font-size: 12.5px;
   cursor: pointer;
@@ -523,7 +523,7 @@
   font-weight: 500;
 }
 .jc-est__resv {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 700;
   font-size: 32px;
   letter-spacing: -0.025em;
@@ -559,7 +559,7 @@
   width: 22px; height: 22px; border-radius: 50%;
   background: var(--v4-ok); color: #fff;
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Sora', sans-serif; font-weight: 700; font-size: 11px;
+  font-family: 'Figtree', system-ui, sans-serif; font-weight: 700; font-size: 11px;
   flex-shrink: 0;
 }
 .jc-note__body { flex: 1; min-width: 0; }
@@ -599,7 +599,7 @@
   font-weight: 500;
 }
 .jc-cta__h {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 700;
   font-size: 24px;
   letter-spacing: -0.025em;
@@ -631,7 +631,7 @@
   border: 0;
   outline: 0;
   background: transparent;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-size: 13.5px;
   color: var(--v4-ink);
 }
@@ -650,7 +650,7 @@
   display: flex; gap: 6px; flex-wrap: wrap;
 }
 .jc-cta__chip {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-size: 11.5px;
   font-weight: 500;
   color: var(--v4-ink-2);
@@ -689,7 +689,7 @@
   border-radius: 3px;
 }
 .jc-mix__p {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--v4-ink);

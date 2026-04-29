@@ -27,12 +27,12 @@ export default function WorkingCapitalModel({ tabId }: Props) {
 
   return (
     <div className="p-5 space-y-6 max-w-3xl mx-auto">
-      <h2 className="text-base font-bold m-0" style={{ fontFamily: 'Sora, sans-serif' }}>Working Capital Analysis</h2>
+      <h2 className="text-base font-bold m-0" style={{ fontFamily: 'Figtree, system-ui, sans-serif' }}>Working Capital Analysis</h2>
 
       {wc && (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <KPICard label="Working Capital Peg" value={centsToDisplay(wc.peg)} color="#D44A78" sublabel="12-month average" />
+            <KPICard label="Working Capital Peg" value={centsToDisplay(wc.peg)} color="#D4714E" sublabel="12-month average" />
             <KPICard label="Variance" value={centsToDisplay(wc.variance)} sublabel="Seasonal swing" />
             <KPICard label="Months Analyzed" value={String(wc.monthlyWC.filter((m: any) => m.wc !== 0).length)} />
           </div>
@@ -47,17 +47,17 @@ export default function WorkingCapitalModel({ tabId }: Props) {
                     {
                       label: 'Working Capital',
                       data: wc.monthlyWC.map((m: any) => m.wc / 100),
-                      borderColor: '#D44A78',
+                      borderColor: '#D4714E',
                       backgroundColor: 'rgba(186,60,96,0.1)',
                       fill: true,
                       tension: 0.3,
                       pointRadius: 4,
-                      pointBackgroundColor: '#D44A78',
+                      pointBackgroundColor: '#D4714E',
                     },
                     {
                       label: 'Peg (Average)',
                       data: wc.monthlyWC.map(() => wc.peg / 100),
-                      borderColor: '#6E6A63',
+                      borderColor: '#5e5d59',
                       borderDash: [6, 3],
                       borderWidth: 1,
                       pointRadius: 0,
@@ -68,12 +68,12 @@ export default function WorkingCapitalModel({ tabId }: Props) {
                 options={{
                   responsive: true, maintainAspectRatio: false,
                   plugins: {
-                    legend: { display: true, position: 'bottom', labels: { color: '#6E6A63', font: { size: 10 }, boxWidth: 10 } },
+                    legend: { display: true, position: 'bottom', labels: { color: '#5e5d59', font: { size: 10 }, boxWidth: 10 } },
                     tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${centsToDisplay(Number(ctx.raw) * 100)}` } },
                   },
                   scales: {
-                    y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => centsToDisplay(Number(v) * 100), color: '#6E6A63', font: { size: 10 } } },
-                    x: { grid: { display: false }, ticks: { color: '#1A1A18', font: { size: 10 } } },
+                    y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => centsToDisplay(Number(v) * 100), color: '#5e5d59', font: { size: 10 } } },
+                    x: { grid: { display: false }, ticks: { color: '#1a1918', font: { size: 10 } } },
                   },
                 }}
               />
@@ -84,20 +84,20 @@ export default function WorkingCapitalModel({ tabId }: Props) {
 
       {/* Monthly data input */}
       <div>
-        <h3 className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#6E6A63' }}>Monthly Data</h3>
+        <h3 className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#5e5d59' }}>Monthly Data</h3>
         <div className="overflow-x-auto">
           <table className="text-xs w-full" style={{ borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ borderBottom: '2px solid #D44A78' }}>
-                <th style={{ padding: '4px 6px', textAlign: 'left', fontSize: 10, color: '#6E6A63' }}>Month</th>
-                <th style={{ padding: '4px 6px', textAlign: 'right', fontSize: 10, color: '#6E6A63' }}>Current Assets ($)</th>
-                <th style={{ padding: '4px 6px', textAlign: 'right', fontSize: 10, color: '#6E6A63' }}>Current Liabilities ($)</th>
-                <th style={{ padding: '4px 6px', textAlign: 'right', fontSize: 10, color: '#6E6A63' }}>Net WC</th>
+              <tr style={{ borderBottom: '2px solid #D4714E' }}>
+                <th style={{ padding: '4px 6px', textAlign: 'left', fontSize: 10, color: '#5e5d59' }}>Month</th>
+                <th style={{ padding: '4px 6px', textAlign: 'right', fontSize: 10, color: '#5e5d59' }}>Current Assets ($)</th>
+                <th style={{ padding: '4px 6px', textAlign: 'right', fontSize: 10, color: '#5e5d59' }}>Current Liabilities ($)</th>
+                <th style={{ padding: '4px 6px', textAlign: 'right', fontSize: 10, color: '#5e5d59' }}>Net WC</th>
               </tr>
             </thead>
             <tbody>
               {monthlyData.map((m: any, i: number) => (
-                <tr key={i} style={{ borderBottom: '1px solid #EBEBEB' }}>
+                <tr key={i} style={{ borderBottom: '1px solid #e8e6dc' }}>
                   <td style={{ padding: '4px 6px', fontWeight: 600 }}>{m.month}</td>
                   <td style={{ padding: '4px 6px' }}>
                     <input type="number" value={m.currentAssets / 100} onChange={e => updateMonth(i, 'currentAssets', Number(e.target.value) * 100)}

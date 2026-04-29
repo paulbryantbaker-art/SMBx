@@ -19,7 +19,7 @@ import DealMessagesPanel from '../documents/DealMessagesPanel';
 
 /* ───────── Journey palette (matches DealCard) ───────── */
 const JOURNEY_COLORS: Record<string, string> = {
-  sell: '#D44A78',
+  sell: '#D4714E',
   buy: '#3E8E8E',
   raise: '#C99A3E',
   pmi: '#8F4A7A',
@@ -77,12 +77,12 @@ type CenterTab = 'overview' | 'documents' | 'team';
 
 /* ───────── CARD CHROME — the floating-card language ───────── */
 const cardChrome = (dark: boolean): React.CSSProperties => ({
-  background: dark ? '#151617' : '#FFFFFF',
-  border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #E5E1D9',
+  background: dark ? '#141413' : '#FFFFFF',
+  border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #e8e6dc',
   borderRadius: 14,
   boxShadow: dark
     ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
-    : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)',
+    : '0 1px 2px rgba(26,25,24,0.06), 0 4px 8px rgba(26,25,24,0.04)',
   display: 'flex',
   flexDirection: 'column',
   overflow: 'hidden',
@@ -130,10 +130,10 @@ export default function DealWorkspace({
     return (
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 32 }}>
         <div style={{ ...cardChrome(dark), padding: 32, maxWidth: 420, textAlign: 'center', gap: 12 }}>
-          <div style={{ fontFamily: "'Sora', system-ui, sans-serif", fontWeight: 800, fontSize: 18, color: dark ? '#F0F0F3' : '#1A1C1E', marginBottom: 8 }}>
+          <div style={{ fontFamily: "'Figtree', system-ui, sans-serif", fontWeight: 800, fontSize: 18, color: dark ? '#f5f4ed' : '#1a1918', marginBottom: 8 }}>
             Deal not found
           </div>
-          <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 13, color: dark ? 'rgba(240,240,243,0.55)' : '#6B6C6F', margin: '0 0 16px' }}>
+          <p style={{ fontFamily: "'Figtree', system-ui, sans-serif", fontSize: 13, color: dark ? 'rgba(245,244,237,0.55)' : '#6B6C6F', margin: '0 0 16px' }}>
             The deal you linked to isn&rsquo;t in your portfolio, or it may have been archived.
           </p>
           <button
@@ -143,9 +143,9 @@ export default function DealWorkspace({
               padding: '10px 18px',
               borderRadius: 999,
               border: 'none',
-              background: dark ? '#E8709A' : '#D44A78',
+              background: dark ? '#ec9d78' : '#D4714E',
               color: '#fff',
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 13,
               fontWeight: 700,
               cursor: 'pointer',
@@ -169,10 +169,10 @@ export default function DealWorkspace({
   const business = deal.business_name || 'Untitled deal';
 
   /* ───────── Colors ───────── */
-  const heading = dark ? '#F0F0F3' : '#1A1C1E';
-  const body = dark ? 'rgba(240,240,243,0.78)' : '#3C3D40';
-  const muted = dark ? 'rgba(240,240,243,0.55)' : '#6B6C6F';
-  const border = dark ? 'rgba(255,255,255,0.06)' : '#E5E1D9';
+  const heading = dark ? '#f5f4ed' : '#1a1918';
+  const body = dark ? 'rgba(245,244,237,0.78)' : '#3C3D40';
+  const muted = dark ? 'rgba(245,244,237,0.55)' : '#6B6C6F';
+  const border = dark ? 'rgba(255,255,255,0.06)' : '#e8e6dc';
   const subtleBg = dark ? 'rgba(255,255,255,0.03)' : 'rgba(15,16,18,0.02)';
 
   const urgencyColor = urgency === 'stuck' ? '#D44A4A' : urgency === 'needs-you' ? '#C99A3E' : '#2F7A4E';
@@ -198,15 +198,15 @@ export default function DealWorkspace({
         <header style={{ padding: '14px 16px', borderBottom: `1px solid ${border}`, display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
             width: 30, height: 30, borderRadius: '50%',
-            background: 'linear-gradient(135deg, #D44A78 0%, #E8709A 100%)',
+            background: 'linear-gradient(135deg, #D4714E 0%, #ec9d78 100%)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#fff', fontFamily: "'Sora', system-ui, sans-serif", fontWeight: 800, fontSize: 13,
+            color: '#fff', fontFamily: "'Figtree', system-ui, sans-serif", fontWeight: 800, fontSize: 13,
           }}>Y</div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontFamily: "'Sora', system-ui, sans-serif", fontSize: 13, fontWeight: 700, color: heading, letterSpacing: '-0.01em' }}>
+            <div style={{ fontFamily: "'Figtree', system-ui, sans-serif", fontSize: 13, fontWeight: 700, color: heading, letterSpacing: '-0.01em' }}>
               Yulia
             </div>
-            <div style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 11, color: muted }}>
+            <div style={{ fontFamily: "'Figtree', system-ui, sans-serif", fontSize: 11, color: muted }}>
               on {business}
             </div>
           </div>
@@ -222,7 +222,7 @@ export default function DealWorkspace({
             marginBottom: 16,
           }}>
             <div style={{
-              fontFamily: "'Sora', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 10,
               fontWeight: 800,
               letterSpacing: '0.08em',
@@ -231,7 +231,7 @@ export default function DealWorkspace({
               marginBottom: 6,
             }}>Working brief</div>
             <p style={{
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 13.5,
               lineHeight: 1.55,
               color: body,
@@ -245,7 +245,7 @@ export default function DealWorkspace({
           {deal.conversations && deal.conversations.length > 0 && (
             <div style={{ marginBottom: 14 }}>
               <div style={{
-                fontFamily: "'Sora', system-ui, sans-serif",
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 10,
                 fontWeight: 800,
                 letterSpacing: '0.08em',
@@ -267,9 +267,9 @@ export default function DealWorkspace({
                       padding: '10px 12px',
                       borderRadius: 10,
                       border: `1px solid ${border}`,
-                      background: dark ? '#1A1C1E' : '#FFFFFF',
+                      background: dark ? '#1a1918' : '#FFFFFF',
                       color: body,
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'Figtree', system-ui, sans-serif",
                       fontSize: 13,
                       fontWeight: 500,
                       cursor: 'pointer',
@@ -305,9 +305,9 @@ export default function DealWorkspace({
               padding: '12px 16px',
               borderRadius: 12,
               border: 'none',
-              background: primaryConvId ? (dark ? '#E8709A' : '#D44A78') : (dark ? 'rgba(255,255,255,0.08)' : '#EEEAE2'),
+              background: primaryConvId ? (dark ? '#ec9d78' : '#D4714E') : (dark ? 'rgba(255,255,255,0.08)' : '#EEEAE2'),
               color: primaryConvId ? '#FFFFFF' : muted,
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 14,
               fontWeight: 700,
               letterSpacing: '-0.005em',
@@ -317,7 +317,7 @@ export default function DealWorkspace({
               justifyContent: 'center',
               gap: 8,
               boxShadow: primaryConvId
-                ? '0 4px 14px rgba(212,74,120,0.22)'
+                ? '0 4px 14px rgba(212,113,78,0.22)'
                 : 'none',
               transition: 'transform 120ms ease, box-shadow 120ms ease',
             }}
@@ -357,7 +357,7 @@ export default function DealWorkspace({
             <div style={{ flex: 1, minWidth: 0 }}>
               <h1 style={{
                 margin: 0,
-                fontFamily: "'Sora', system-ui, sans-serif",
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 24,
                 fontWeight: 800,
                 letterSpacing: '-0.02em',
@@ -373,8 +373,8 @@ export default function DealWorkspace({
                 <Chip label={journeyLabel} color={journeyColor} dark={dark} />
                 <Chip label={gateLabel} color={muted} outline dark={dark} />
                 <DotChip color={urgencyColor} label={urgencyLabel} dark={dark} />
-                {deal.industry && <span style={{ fontSize: 12, color: muted, fontFamily: "'Inter', system-ui, sans-serif" }}>{deal.industry}</span>}
-                {deal.league && <span style={{ fontSize: 12, color: muted, fontFamily: "'Inter', system-ui, sans-serif" }}>&bull; {deal.league}</span>}
+                {deal.industry && <span style={{ fontSize: 12, color: muted, fontFamily: "'Figtree', system-ui, sans-serif" }}>{deal.industry}</span>}
+                {deal.league && <span style={{ fontSize: 12, color: muted, fontFamily: "'Figtree', system-ui, sans-serif" }}>&bull; {deal.league}</span>}
               </div>
             </div>
           </div>
@@ -413,7 +413,7 @@ export default function DealWorkspace({
       <section style={cardChrome(dark)} aria-label="Actions and activity">
         <header style={{ padding: '14px 16px', borderBottom: `1px solid ${border}` }}>
           <div style={{
-            fontFamily: "'Sora', system-ui, sans-serif",
+            fontFamily: "'Figtree', system-ui, sans-serif",
             fontSize: 10,
             fontWeight: 800,
             letterSpacing: '0.08em',
@@ -427,21 +427,21 @@ export default function DealWorkspace({
           <div style={{
             padding: 16,
             borderRadius: 12,
-            background: dark ? 'rgba(232,112,154,0.08)' : 'rgba(212,74,120,0.05)',
-            border: `1px solid ${dark ? 'rgba(232,112,154,0.22)' : 'rgba(212,74,120,0.18)'}`,
+            background: dark ? 'rgba(236,157,120,0.08)' : 'rgba(212,113,78,0.05)',
+            border: `1px solid ${dark ? 'rgba(236,157,120,0.22)' : 'rgba(212,113,78,0.18)'}`,
           }}>
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
               fontSize: 10, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase',
-              color: dark ? '#E8709A' : '#D44A78',
+              color: dark ? '#ec9d78' : '#D4714E',
               marginBottom: 6,
             }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: dark ? '#E8709A' : '#D44A78' }} />
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: dark ? '#ec9d78' : '#D4714E' }} />
               Yulia suggests
             </div>
             <p style={{
               margin: 0,
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 14,
               fontWeight: 600,
               lineHeight: 1.4,
@@ -458,9 +458,9 @@ export default function DealWorkspace({
                   padding: '8px 14px',
                   borderRadius: 999,
                   border: 'none',
-                  background: dark ? '#E8709A' : '#D44A78',
+                  background: dark ? '#ec9d78' : '#D4714E',
                   color: '#fff',
-                  fontFamily: "'Inter', system-ui, sans-serif",
+                  fontFamily: "'Figtree', system-ui, sans-serif",
                   fontSize: 12.5,
                   fontWeight: 700,
                   cursor: 'pointer',
@@ -474,7 +474,7 @@ export default function DealWorkspace({
           {/* Recent artifacts */}
           <div>
             <div style={{
-              fontFamily: "'Sora', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 10,
               fontWeight: 800,
               letterSpacing: '0.08em',
@@ -499,7 +499,7 @@ export default function DealWorkspace({
               </div>
             )}
             {deliverablesError && (
-              <div style={{ fontSize: 12, color: muted, fontFamily: "'Inter', system-ui, sans-serif", padding: '8px 0' }}>
+              <div style={{ fontSize: 12, color: muted, fontFamily: "'Figtree', system-ui, sans-serif", padding: '8px 0' }}>
                 Couldn&rsquo;t load artifacts.{' '}
                 <button
                   onClick={() => setDeliverablesRefresh(n => n + 1)}
@@ -520,7 +520,7 @@ export default function DealWorkspace({
               </div>
             )}
             {deliverables && deliverables.length === 0 && (
-              <div style={{ fontSize: 12, color: muted, fontFamily: "'Inter', system-ui, sans-serif", padding: '8px 0', lineHeight: 1.5 }}>
+              <div style={{ fontSize: 12, color: muted, fontFamily: "'Figtree', system-ui, sans-serif", padding: '8px 0', lineHeight: 1.5 }}>
                 No artifacts yet. Ask Yulia for a ValueLens, CIM, or thesis to generate one.
               </div>
             )}
@@ -541,7 +541,7 @@ export default function DealWorkspace({
           {/* Quick actions */}
           <div>
             <div style={{
-              fontFamily: "'Sora', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 10,
               fontWeight: 800,
               letterSpacing: '0.08em',
@@ -597,7 +597,7 @@ function Chip({ label, color, outline, dark }: { label: string; color: string; o
       fontSize: 11,
       fontWeight: 700,
       letterSpacing: '0.02em',
-      fontFamily: "'Inter', system-ui, sans-serif",
+      fontFamily: "'Figtree', system-ui, sans-serif",
       background: outline ? 'transparent' : (dark ? `${color}24` : `${color}14`),
       color: outline ? color : color,
       border: outline ? `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(15,16,18,0.08)'}` : 'none',
@@ -616,9 +616,9 @@ function DotChip({ color, label, dark }: { color: string; label: string; dark: b
       fontSize: 11,
       fontWeight: 700,
       letterSpacing: '0.01em',
-      fontFamily: "'Inter', system-ui, sans-serif",
+      fontFamily: "'Figtree', system-ui, sans-serif",
       background: dark ? 'rgba(255,255,255,0.04)' : 'rgba(15,16,18,0.03)',
-      color: dark ? '#F0F0F3' : '#1A1C1E',
+      color: dark ? '#f5f4ed' : '#1a1918',
     }}>
       <span style={{ width: 6, height: 6, borderRadius: '50%', background: color }} />
       {label}
@@ -644,8 +644,8 @@ function TabButton({
         padding: '8px 12px 10px',
         border: 'none',
         background: 'transparent',
-        color: active ? (dark ? '#F0F0F3' : '#1A1C1E') : (dark ? 'rgba(240,240,243,0.55)' : '#6B6C6F'),
-        fontFamily: "'Inter', system-ui, sans-serif",
+        color: active ? (dark ? '#f5f4ed' : '#1a1918') : (dark ? 'rgba(245,244,237,0.55)' : '#6B6C6F'),
+        fontFamily: "'Figtree', system-ui, sans-serif",
         fontSize: 13,
         fontWeight: active ? 700 : 500,
         cursor: 'pointer',
@@ -672,10 +672,10 @@ function TabButton({
 function OverviewTab({
   deal, dark, stale, nextAction,
 }: { deal: DealWorkspaceDeal; dark: boolean; stale: number; nextAction: string }) {
-  const heading = dark ? '#F0F0F3' : '#1A1C1E';
-  const body = dark ? 'rgba(240,240,243,0.78)' : '#3C3D40';
-  const muted = dark ? 'rgba(240,240,243,0.55)' : '#6B6C6F';
-  const border = dark ? 'rgba(255,255,255,0.06)' : '#E5E1D9';
+  const heading = dark ? '#f5f4ed' : '#1a1918';
+  const body = dark ? 'rgba(245,244,237,0.78)' : '#3C3D40';
+  const muted = dark ? 'rgba(245,244,237,0.55)' : '#6B6C6F';
+  const border = dark ? 'rgba(255,255,255,0.06)' : '#e8e6dc';
 
   const facts = useMemo(() => {
     const rows: Array<{ label: string; value: string }> = [];
@@ -693,7 +693,7 @@ function OverviewTab({
       <section style={{ marginBottom: 22 }}>
         <h2 style={{
           margin: 0,
-          fontFamily: "'Sora', system-ui, sans-serif",
+          fontFamily: "'Figtree', system-ui, sans-serif",
           fontSize: 11,
           fontWeight: 800,
           letterSpacing: '0.08em',
@@ -703,7 +703,7 @@ function OverviewTab({
         }}>Where this deal stands</h2>
         <p style={{
           margin: 0,
-          fontFamily: "'Inter', system-ui, sans-serif",
+          fontFamily: "'Figtree', system-ui, sans-serif",
           fontSize: 14,
           lineHeight: 1.6,
           color: body,
@@ -715,7 +715,7 @@ function OverviewTab({
       <section>
         <h2 style={{
           margin: 0,
-          fontFamily: "'Sora', system-ui, sans-serif",
+          fontFamily: "'Figtree', system-ui, sans-serif",
           fontSize: 11,
           fontWeight: 800,
           letterSpacing: '0.08em',
@@ -735,7 +735,7 @@ function OverviewTab({
                 display: 'flex',
                 padding: '10px 14px',
                 borderBottom: i === facts.length - 1 ? 'none' : `1px solid ${border}`,
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 13,
               }}
             >
@@ -758,17 +758,17 @@ function DocumentsTab({
   onOpen: (d: Deliverable) => void;
   onOpenDataRoom: () => void;
 }) {
-  const muted = dark ? 'rgba(240,240,243,0.55)' : '#6B6C6F';
-  const heading = dark ? '#F0F0F3' : '#1A1C1E';
-  const border = dark ? 'rgba(255,255,255,0.06)' : '#E5E1D9';
-  const body = dark ? 'rgba(240,240,243,0.78)' : '#3C3D40';
+  const muted = dark ? 'rgba(245,244,237,0.55)' : '#6B6C6F';
+  const heading = dark ? '#f5f4ed' : '#1a1918';
+  const border = dark ? 'rgba(255,255,255,0.06)' : '#e8e6dc';
+  const body = dark ? 'rgba(245,244,237,0.78)' : '#3C3D40';
 
   return (
     <div style={{ padding: '18px 20px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <h2 style={{
           margin: 0,
-          fontFamily: "'Sora', system-ui, sans-serif",
+          fontFamily: "'Figtree', system-ui, sans-serif",
           fontSize: 11,
           fontWeight: 800,
           letterSpacing: '0.08em',
@@ -785,7 +785,7 @@ function DocumentsTab({
             border: `1px solid ${border}`,
             background: 'transparent',
             color: body,
-            fontFamily: "'Inter', system-ui, sans-serif",
+            fontFamily: "'Figtree', system-ui, sans-serif",
             fontSize: 12,
             fontWeight: 600,
             cursor: 'pointer',
@@ -797,10 +797,10 @@ function DocumentsTab({
       </div>
 
       {!deliverables && !error && (
-        <div style={{ fontSize: 13, color: muted, fontFamily: "'Inter', system-ui, sans-serif" }}>Loading documents…</div>
+        <div style={{ fontSize: 13, color: muted, fontFamily: "'Figtree', system-ui, sans-serif" }}>Loading documents…</div>
       )}
       {error && (
-        <div style={{ fontSize: 13, color: muted, fontFamily: "'Inter', system-ui, sans-serif" }}>Couldn&rsquo;t load documents.</div>
+        <div style={{ fontSize: 13, color: muted, fontFamily: "'Figtree', system-ui, sans-serif" }}>Couldn&rsquo;t load documents.</div>
       )}
       {deliverables && deliverables.length === 0 && (
         <div style={{
@@ -809,7 +809,7 @@ function DocumentsTab({
           padding: 22,
           textAlign: 'center',
           color: body,
-          fontFamily: "'Inter', system-ui, sans-serif",
+          fontFamily: "'Figtree', system-ui, sans-serif",
           fontSize: 13,
           lineHeight: 1.5,
         }}>
@@ -835,9 +835,9 @@ function DocumentsTab({
 function ArtifactRow({
   deliverable, dark, onOpen, expanded = false,
 }: { deliverable: Deliverable; dark: boolean; onOpen: () => void; expanded?: boolean }) {
-  const heading = dark ? '#F0F0F3' : '#1A1C1E';
-  const muted = dark ? 'rgba(240,240,243,0.55)' : '#6B6C6F';
-  const border = dark ? 'rgba(255,255,255,0.06)' : '#E5E1D9';
+  const heading = dark ? '#f5f4ed' : '#1a1918';
+  const muted = dark ? 'rgba(245,244,237,0.55)' : '#6B6C6F';
+  const border = dark ? 'rgba(255,255,255,0.06)' : '#e8e6dc';
 
   const done = deliverable.status === 'complete';
   const running = deliverable.status === 'generating' || deliverable.status === 'queued';
@@ -860,7 +860,7 @@ function ArtifactRow({
         border: `1px solid ${border}`,
         background: 'transparent',
         color: heading,
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Figtree', system-ui, sans-serif",
         cursor: done ? 'pointer' : 'default',
         opacity: done ? 1 : 0.7,
         display: 'flex',
@@ -908,8 +908,8 @@ function ArtifactRow({
 function QuickAction({
   icon, label, onClick, dark,
 }: { icon: string; label: string; onClick: () => void; dark: boolean }) {
-  const heading = dark ? '#F0F0F3' : '#1A1C1E';
-  const border = dark ? 'rgba(255,255,255,0.06)' : '#E5E1D9';
+  const heading = dark ? '#f5f4ed' : '#1a1918';
+  const border = dark ? 'rgba(255,255,255,0.06)' : '#e8e6dc';
 
   return (
     <button
@@ -925,7 +925,7 @@ function QuickAction({
         border: `1px solid ${border}`,
         background: 'transparent',
         color: heading,
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Figtree', system-ui, sans-serif",
         fontSize: 13,
         fontWeight: 600,
         cursor: 'pointer',

@@ -31,7 +31,7 @@
   padding: 0 40px 160px;
   margin: 0 auto;
   color: var(--v4-ink);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
 }
 .sell-v2[data-acc="on"] {
   --acc: #C9A76B;
@@ -111,7 +111,7 @@
   display: flex; align-items: center; gap: 14px;
 }
 .sv-hero__btn {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-size: 13.5px;
   font-weight: 600;
   letter-spacing: -0.005em;
@@ -143,7 +143,7 @@
 }
 .sv-hero__metac { display: flex; flex-direction: column; gap: 6px; }
 .sv-hero__metav {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 600;
   font-size: 17px;
   letter-spacing: -0.02em;
@@ -186,7 +186,7 @@
   width: 26px; height: 26px; border-radius: 50%;
   background: var(--v4-ink); color: var(--v4-on-ink);
   display: grid; place-items: center;
-  font-family: 'Sora', sans-serif; font-weight: 800; font-size: 11px;
+  font-family: 'Figtree', system-ui, sans-serif; font-weight: 800; font-size: 11px;
   margin-bottom: 6px;
 }
 .sv-shell__ico {
@@ -216,10 +216,10 @@
   width: 22px; height: 22px; border-radius: 50%;
   background: var(--v4-ok); color: #fff;
   display: grid; place-items: center;
-  font-family: 'Sora', sans-serif; font-weight: 700; font-size: 10px;
+  font-family: 'Figtree', system-ui, sans-serif; font-weight: 700; font-size: 10px;
 }
 .sv-shell__psw-n {
-  font-family: 'Sora', sans-serif; font-weight: 600; font-size: 11px;
+  font-family: 'Figtree', system-ui, sans-serif; font-weight: 600; font-size: 11px;
   color: var(--v4-ink); letter-spacing: -0.01em;
 }
 .sv-shell__psw-k {
@@ -237,7 +237,7 @@
   width: 12px; height: 12px; border-radius: 50%;
   background: var(--v4-ok); color: #fff;
   display: grid; place-items: center;
-  font-family: 'Sora', sans-serif; font-weight: 700; font-size: 7px;
+  font-family: 'Figtree', system-ui, sans-serif; font-weight: 700; font-size: 7px;
 }
 .sv-shell__msg-av--me { background: var(--v4-ink); }
 .sv-shell__msg-t {
@@ -289,7 +289,7 @@
   font-size: 8.5px;
 }
 .sv-shell__crumb-t {
-  font-family: 'Sora', sans-serif; font-weight: 600;
+  font-family: 'Figtree', system-ui, sans-serif; font-weight: 600;
   font-size: 11px; color: var(--v4-ink); letter-spacing: -0.005em;
 }
 .sv-shell__crumb-badge {
@@ -339,7 +339,7 @@
   margin: 0 8px 3px 10px;
 }
 .sv-row__h {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 500;
   font-size: clamp(26px, 3.2cqw, 40px);
   letter-spacing: -0.03em;
@@ -368,7 +368,7 @@
 }
 .sv-row__stat-c { display: flex; flex-direction: column; gap: 4px; }
 .sv-row__stat-v {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 600;
   font-size: 22px;
   letter-spacing: -0.025em;
@@ -421,7 +421,7 @@
   align-items: center;
 }
 .sv-bignum__v {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 500;
   font-size: clamp(80px, 12cqw, 160px);
   letter-spacing: -0.055em;
@@ -446,7 +446,7 @@
   font-weight: 500;
 }
 .sv-bignum__t {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 500;
   font-size: 26px;
   letter-spacing: -0.02em;
@@ -496,7 +496,7 @@
   letter-spacing: 0.1em;
 }
 .sv-paths__t {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 500;
   font-size: 22px;
   letter-spacing: -0.02em;
@@ -542,7 +542,7 @@
   font-weight: 500;
 }
 .sv-cta__h {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 500;
   font-size: clamp(26px, 3.6cqw, 44px);
   letter-spacing: -0.03em;
@@ -580,7 +580,7 @@
   border: 0;
   outline: 0;
   background: transparent;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-size: 14.5px;
   color: var(--v4-ink);
 }
@@ -598,7 +598,7 @@
   display: flex; gap: 8px; flex-wrap: wrap;
 }
 .sv-cta__chip {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-size: 12px;
   font-weight: 500;
   color: var(--v4-ink-2);
@@ -640,7 +640,7 @@
   background: var(--v4-card);
   border: 1px solid var(--v4-card-line);
   border-radius: 999px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-size: 11.5px;
   color: var(--v4-ink-2);
   box-shadow: var(--v4-shadow-sm);
@@ -666,7 +666,7 @@
 .sv-mini-table__t { color: var(--v4-ink); font-weight: 500; letter-spacing: -0.005em; }
 .sv-mini-table__s { color: var(--v4-faint); font-size: 8.5px; margin-top: 1px; }
 .sv-mini-table__a {
-  font-family: 'Inter', sans-serif; font-weight: 600;
+  font-family: 'Figtree', system-ui, sans-serif; font-weight: 600;
   color: var(--v4-ink); font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -695,7 +695,7 @@
 }
 .sv-mini-ioi__c--w .sv-mini-ioi__k { color: rgba(255,255,255,0.55); }
 .sv-mini-ioi__v {
-  font-family: 'Sora', sans-serif; font-weight: 700;
+  font-family: 'Figtree', system-ui, sans-serif; font-weight: 700;
   font-size: 14px; letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
@@ -709,7 +709,7 @@
 .sv-mini-rd__donut-v {
   position: absolute; inset: 0;
   display: grid; place-items: center;
-  font-family: 'Sora', sans-serif; font-weight: 700;
+  font-family: 'Figtree', system-ui, sans-serif; font-weight: 700;
   font-size: 22px; letter-spacing: -0.025em;
   color: var(--v4-ink);
 }
@@ -724,7 +724,7 @@
 .sv-mini-rd__dot--warn { background: var(--v4-warn); }
 .sv-mini-rd__l { color: var(--v4-ink-2); font-weight: 500; }
 .sv-mini-rd__v {
-  font-family: 'Inter', sans-serif; font-weight: 600;
+  font-family: 'Figtree', system-ui, sans-serif; font-weight: 600;
   color: var(--v4-ink); font-variant-numeric: tabular-nums;
 }
 
@@ -922,7 +922,7 @@
   font-weight: 500;
 }
 .sv-strip__t {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-size: 12.5px;
   color: var(--v4-mute);
   letter-spacing: -0.005em;
@@ -982,7 +982,7 @@
   box-shadow: 0 0 0 3px rgba(10,10,11,0.08);
 }
 .sv-strip__name {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-size: 12.5px;
   font-weight: 500;
   color: var(--v4-ink-2);
@@ -1034,7 +1034,7 @@
   font-weight: 500;
 }
 .sv-arc__t {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-size: 13.5px;
   font-weight: 500;
   color: var(--v4-ink);
@@ -1086,7 +1086,7 @@
 }
 .sv-arc__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .sv-arc__name {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-size: 13.5px;
   font-weight: 500;
   color: var(--v4-ink);
@@ -1113,7 +1113,7 @@
   border-radius: 10px;
   font-size: 11.5px;
   color: var(--v4-mute);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
 }
 .sv-arc__pulse {
   width: 7px; height: 7px; border-radius: 50%;
@@ -1142,7 +1142,7 @@
   font-weight: 500;
 }
 .sv-cta__h {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 500;
   font-size: clamp(32px, 4.2cqw, 52px);
   line-height: 1.02;
@@ -1175,7 +1175,7 @@
   border-radius: 999px;
   border: 0;
   cursor: pointer;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 600;
   font-size: 14px;
   letter-spacing: -0.01em;

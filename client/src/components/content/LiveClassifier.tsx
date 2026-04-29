@@ -17,8 +17,8 @@ import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { bridgeToYulia } from './chatBridge';
 
-const PINK = '#D44A78';
-const PINK_DARK = '#E8709A';
+const PINK = '#D4714E';
+const PINK_DARK = '#ec9d78';
 
 type Stage = 0 | 1 | 2 | 3 | 4;
 
@@ -51,7 +51,7 @@ const PRESETS: PresetReveal[] = [
       sector: 'HVAC services',
       league: 'SBA league · Lower-market',
       journey: 'Sell',
-      journeyColor: '#D44A78',
+      journeyColor: '#D4714E',
     },
     gates: [
       { label: 'S0 · Profile',   state: 'done' },
@@ -200,7 +200,7 @@ export function LiveClassifier({ dark = true, accent: accentOverride }: LiveClas
   return (
     <div
       className="rounded-3xl p-6 md:p-10 relative overflow-hidden"
-      style={{ background: panelBg, border: `1px solid ${panelBorder}`, color: '#f9f9fc' }}
+      style={{ background: panelBg, border: `1px solid ${panelBorder}`, color: '#faf9f5' }}
     >
       {/* accent glow */}
       <div
@@ -373,7 +373,7 @@ export function LiveClassifier({ dark = true, accent: accentOverride }: LiveClas
                     <p className="text-[9px] font-bold uppercase tracking-wider mb-1" style={{ color: mutedText }}>
                       {c.label}
                     </p>
-                    <p className="text-[1.5rem] font-black tabular-nums tracking-tight" style={{ color: '#f9f9fc', lineHeight: 1 }}>
+                    <p className="text-[1.5rem] font-black tabular-nums tracking-tight" style={{ color: '#faf9f5', lineHeight: 1 }}>
                       {c.value}
                     </p>
                     {c.sub && (

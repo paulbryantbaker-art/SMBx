@@ -44,15 +44,15 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
           alignItems: 'center',
           justifyContent: 'center',
           padding: 32,
-          fontFamily: 'Inter, system-ui, sans-serif',
-          background: '#F9F9FC',
-          color: '#1A1A18',
+          fontFamily: "'Figtree', system-ui, sans-serif",
+          background: '#faf9f5',
+          color: '#1a1918',
         }}>
           <div style={{ maxWidth: 420, textAlign: 'center' }}>
-            <h1 style={{ fontFamily: 'Sora, system-ui', fontSize: 24, fontWeight: 800, marginBottom: 12 }}>
+            <h1 style={{ fontFamily: "'Figtree', system-ui, sans-serif", fontSize: 24, fontWeight: 800, marginBottom: 12 }}>
               Something went wrong
             </h1>
-            <p style={{ fontSize: 15, color: '#6E6A63', marginBottom: 24, lineHeight: 1.6 }}>
+            <p style={{ fontSize: 15, color: '#5e5d59', marginBottom: 24, lineHeight: 1.6 }}>
               Yulia has been notified. Your work is saved — try refreshing the page.
             </p>
             <button
@@ -60,7 +60,7 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
               style={{
                 padding: '12px 28px',
                 borderRadius: 999,
-                background: '#D44A78',
+                background: '#D4714E',
                 color: '#fff',
                 border: 'none',
                 fontSize: 15,

@@ -44,12 +44,12 @@ export function ConfirmSheet({
   // The desktop modal variant at line ~73 keeps the opaque bg since modals
   // over the full viewport read better without translucency.
   const bg = dark ? 'rgba(21,22,23,0.82)' : 'rgba(254,254,254,0.88)';
-  const bgSolid = dark ? '#151617' : '#fefefe';
-  const headingC = dark ? '#f9f9fc' : '#0f1012';
+  const bgSolid = dark ? '#141413' : '#fefefe';
+  const headingC = dark ? '#faf9f5' : '#0f1012';
   const bodyC = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
   const borderC = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
   const rowBg = dark ? '#1f2123' : '#ffffff';
-  const pinkC = dark ? '#E8709A' : '#D44A78';
+  const pinkC = dark ? '#ec9d78' : '#D4714E';
   const dangerC = '#D44A4A';
   const confirmBg = destructive ? dangerC : pinkC;
 
@@ -79,7 +79,7 @@ export function ConfirmSheet({
               borderRadius: 16,
               boxShadow: dark
                 ? '0 1px 2px rgba(0,0,0,0.4), 0 24px 48px rgba(0,0,0,0.5)'
-                : '0 1px 2px rgba(60,55,45,0.08), 0 24px 48px rgba(60,55,45,0.18)',
+                : '0 1px 2px rgba(26,25,24,0.08), 0 24px 48px rgba(26,25,24,0.18)',
               zIndex: 230,
               outline: 'none',
               animation: 'confirmContentIn 160ms ease',
@@ -91,7 +91,7 @@ export function ConfirmSheet({
               <Dialog.Title asChild>
                 <h2 style={{
                   margin: 0,
-                  fontFamily: 'Sora, system-ui',
+                  fontFamily: "'Figtree', system-ui, sans-serif",
                   fontSize: 18, fontWeight: 800,
                   letterSpacing: '-0.02em',
                   color: headingC, lineHeight: 1.25,
@@ -103,7 +103,7 @@ export function ConfirmSheet({
                 <Dialog.Description asChild>
                   <p style={{
                     margin: '8px 0 0',
-                    fontFamily: 'Inter, system-ui',
+                    fontFamily: "'Figtree', system-ui, sans-serif",
                     fontSize: 13.5, lineHeight: 1.5,
                     color: bodyC,
                   }}>
@@ -128,7 +128,7 @@ export function ConfirmSheet({
                   border: `1px solid ${borderC}`,
                   background: rowBg,
                   color: headingC,
-                  fontFamily: 'Inter, system-ui',
+                  fontFamily: "'Figtree', system-ui, sans-serif",
                   fontSize: 13.5, fontWeight: 600,
                   cursor: 'pointer',
                 }}
@@ -145,12 +145,12 @@ export function ConfirmSheet({
                   border: 'none',
                   background: confirmBg,
                   color: '#fff',
-                  fontFamily: 'Inter, system-ui',
+                  fontFamily: "'Figtree', system-ui, sans-serif",
                   fontSize: 13.5, fontWeight: 700,
                   cursor: 'pointer',
                   boxShadow: destructive
                     ? '0 6px 18px rgba(212,74,74,0.28)'
-                    : '0 6px 18px rgba(212,74,120,0.28)',
+                    : '0 6px 18px rgba(212,113,78,0.28)',
                 }}
               >
                 {confirmLabel}
@@ -196,7 +196,7 @@ export function ConfirmSheet({
             <Drawer.Title asChild>
               <h2 style={{
                 margin: 0,
-                fontFamily: 'Sora, system-ui',
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 19,
                 fontWeight: 800,
                 letterSpacing: '-0.02em',
@@ -209,7 +209,7 @@ export function ConfirmSheet({
             {body && (
               <p style={{
                 margin: '8px 0 0',
-                fontFamily: 'Inter, system-ui',
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 14,
                 lineHeight: 1.5,
                 color: bodyC,
@@ -236,7 +236,7 @@ export function ConfirmSheet({
                 border: `1px solid ${borderC}`,
                 background: rowBg,
                 color: headingC,
-                fontFamily: 'Inter, system-ui',
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 15,
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -256,14 +256,14 @@ export function ConfirmSheet({
                 border: 'none',
                 background: confirmBg,
                 color: '#fff',
-                fontFamily: 'Inter, system-ui',
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 15,
                 fontWeight: 700,
                 cursor: 'pointer',
                 WebkitTapHighlightColor: 'transparent',
                 boxShadow: destructive
                   ? '0 6px 18px rgba(212,74,74,0.28)'
-                  : '0 6px 18px rgba(212,74,120,0.28)',
+                  : '0 6px 18px rgba(212,113,78,0.28)',
               }}
             >
               {confirmLabel}

@@ -27,11 +27,12 @@ interface PipelinePanelProps {
   isFullscreen?: boolean;
 }
 
+/* Cowork journey palette — clay / sky / mineral / plum. */
 const JOURNEY_LABELS: Record<string, { label: string; color: string }> = {
-  sell: { label: 'Sell', color: 'bg-[#D44A78] text-white' },
-  buy: { label: 'Buy', color: 'bg-blue-600 text-white' },
-  raise: { label: 'Raise', color: 'bg-green-600 text-white' },
-  pmi: { label: 'PMI', color: 'bg-purple-600 text-white' },
+  sell:  { label: 'Sell',  color: 'bg-[#D4714E] text-white' },  /* clay */
+  buy:   { label: 'Buy',   color: 'bg-[#6a9bcc] text-white' },  /* sky */
+  raise: { label: 'Raise', color: 'bg-[#629987] text-white' },  /* mineral */
+  pmi:   { label: 'PMI',   color: 'bg-[#827dbd] text-white' },  /* plum */
 };
 
 const GATE_LABELS: Record<string, string> = {
@@ -95,13 +96,13 @@ export default function PipelinePanel({ onOpenConversation, onNewDeal, isFullscr
     <div style={{ padding: isFullscreen ? '24px 40px' : 20 }}>
       <div style={{ maxWidth: isFullscreen ? 900 : undefined, margin: isFullscreen ? '0 auto' : undefined }}>
       <div className="flex items-center justify-between mb-5">
-        <p className="text-sm text-[#6E6A63] m-0">
+        <p className="text-sm text-[#5e5d59] m-0">
           {deals.length} {deals.length === 1 ? 'deal' : 'deals'}
         </p>
         {onNewDeal && (
           <button
             onClick={onNewDeal}
-            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] transition-colors"
+            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#D4714E] text-white border-0 cursor-pointer hover:bg-[#B85A3A] transition-colors"
           >
             + New Deal
           </button>
@@ -111,10 +112,10 @@ export default function PipelinePanel({ onOpenConversation, onNewDeal, isFullscr
       {loading && (
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="animate-pulse bg-[#FAFAFA] rounded-2xl p-4">
+            <div key={i} className="animate-pulse bg-[#f5f4ed] rounded-2xl p-4">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-14 h-4 bg-[#EBE7DF] rounded-full" />
-                <div className="h-4 bg-[#EBE7DF] rounded" style={{ width: '40%' }} />
+                <div className="w-14 h-4 bg-[#e8e6dc] rounded-full" />
+                <div className="h-4 bg-[#e8e6dc] rounded" style={{ width: '40%' }} />
               </div>
               <div className="h-1.5 bg-[#F5F5F5] rounded-full mb-2" />
               <div className="flex gap-3">
@@ -133,12 +134,12 @@ export default function PipelinePanel({ onOpenConversation, onNewDeal, isFullscr
               <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
             </svg>
           </div>
-          <p className="text-base font-semibold text-[#0D0D0D] m-0 mb-1">No deals yet</p>
-          <p className="text-sm text-[#6E6A63] m-0 mb-3">Start a conversation with Yulia to begin your first deal.</p>
+          <p className="text-base font-semibold text-[#1a1918] m-0 mb-1">No deals yet</p>
+          <p className="text-sm text-[#5e5d59] m-0 mb-3">Start a conversation with Yulia to begin your first deal.</p>
           {onNewDeal && (
             <button
               onClick={onNewDeal}
-              className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] transition-colors"
+              className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#D4714E] text-white border-0 cursor-pointer hover:bg-[#B85A3A] transition-colors"
             >
               Start a deal
             </button>
@@ -157,13 +158,13 @@ export default function PipelinePanel({ onOpenConversation, onNewDeal, isFullscr
             <button
               key={deal.id}
               onClick={() => deal.conversation_id && onOpenConversation?.(deal.conversation_id)}
-              className="w-full text-left bg-[#FAFAFA] rounded-2xl p-4 border border-transparent hover:border-[#D44A78] transition-all cursor-pointer"
+              className="w-full text-left bg-[#f5f4ed] rounded-2xl p-4 border border-transparent hover:border-[#D4714E] transition-all cursor-pointer"
             >
               <div className="flex items-center gap-2.5 mb-2.5">
                 <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${journey.color}`}>
                   {journey.label}
                 </span>
-                <span className="text-sm font-semibold text-[#0D0D0D] truncate">
+                <span className="text-sm font-semibold text-[#1a1918] truncate">
                   {deal.business_name || `${journey.label} Deal`}
                 </span>
                 {deal.league && (
@@ -179,23 +180,23 @@ export default function PipelinePanel({ onOpenConversation, onNewDeal, isFullscr
                     <div key={gate} className="flex-1">
                       <div
                         className={`h-1.5 w-full rounded-full ${
-                          i < currentIdx ? 'bg-[#D44A78]'
-                          : i === currentIdx ? 'bg-[#D44A78] opacity-60'
-                          : 'bg-[#EBE7DF]'
+                          i < currentIdx ? 'bg-[#D4714E]'
+                          : i === currentIdx ? 'bg-[#D4714E] opacity-60'
+                          : 'bg-[#e8e6dc]'
                         }`}
                       />
                     </div>
                   ))}
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-medium text-[#D44A78]">
+                  <span className="text-[11px] font-medium text-[#D4714E]">
                     {deal.current_gate}: {GATE_LABELS[deal.current_gate] || deal.current_gate}
                   </span>
                   <span className="text-[11px] text-[#A9A49C]">{progress}%</span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 text-[11px] text-[#6E6A63] flex-wrap">
+              <div className="flex items-center gap-3 text-[11px] text-[#5e5d59] flex-wrap">
                 {deal.industry && <span>{deal.industry}</span>}
                 {deal.revenue && <span>Rev: {formatRevenue(deal.revenue)}</span>}
                 {(deal.sde || deal.ebitda) && (

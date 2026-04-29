@@ -17,10 +17,10 @@ ChartJS.register(
 );
 
 // Brand colors
-const TERRA = '#D44A78';
+const TERRA = '#D4714E';
 const TERRA_LIGHT = 'rgba(186, 60, 96, 0.15)';
-const TEXT = '#1A1A18';
-const MUTED = '#6E6A63';
+const TEXT = '#1a1918';
+const MUTED = '#5e5d59';
 const CREAM = '#FAF8F4';
 const BORDER = '#DDD9D1';
 const GREEN = '#34A853';
@@ -81,7 +81,7 @@ export function DSCRGauge({ dscr, threshold = 1.25 }: { dscr: number; threshold?
           data={{
             datasets: [{
               data: [pct * 100, (1 - pct) * 100],
-              backgroundColor: [color, '#EBEBEB'],
+              backgroundColor: [color, '#e8e6dc'],
               borderWidth: 0,
               circumference: 270,
               rotation: 225,
@@ -96,7 +96,7 @@ export function DSCRGauge({ dscr, threshold = 1.25 }: { dscr: number; threshold?
         />
       </div>
       <div>
-        <p className="text-2xl font-bold m-0" style={{ color, fontFamily: 'Sora, sans-serif' }}>
+        <p className="text-2xl font-bold m-0" style={{ color, fontFamily: 'Figtree, system-ui, sans-serif' }}>
           {dscr.toFixed(2)}x
         </p>
         <p className="text-xs m-0" style={{ color: MUTED }}>
@@ -264,7 +264,7 @@ export function ProFormaTable({ years }: { years: { year: number; revenue: numbe
         </thead>
         <tbody>
           {years.map((y, i) => (
-            <tr key={y.year} style={{ background: i % 2 === 0 ? 'transparent' : '#FAFAF8', borderBottom: '1px solid #EBEBEB' }}>
+            <tr key={y.year} style={{ background: i % 2 === 0 ? 'transparent' : '#faf9f5', borderBottom: '1px solid #e8e6dc' }}>
               <td style={{ padding: '6px 8px', fontWeight: 600 }}>Year {y.year}</td>
               <td style={{ padding: '6px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{centsToDisplay(y.revenue)}</td>
               <td style={{ padding: '6px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{centsToDisplay(y.ebitda)}</td>
@@ -337,7 +337,7 @@ export function SourcesUsesTable({ sources, uses }: { sources: { label: string; 
       <div>
         <h4 className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: MUTED }}>Sources</h4>
         {sources.map(s => (
-          <div key={s.label} className="flex justify-between text-xs py-1" style={{ borderBottom: '1px solid #EBEBEB' }}>
+          <div key={s.label} className="flex justify-between text-xs py-1" style={{ borderBottom: '1px solid #e8e6dc' }}>
             <span>{s.label}</span>
             <span className="font-medium tabular-nums">{centsToDisplay(s.amount)}</span>
           </div>
@@ -350,7 +350,7 @@ export function SourcesUsesTable({ sources, uses }: { sources: { label: string; 
       <div>
         <h4 className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: MUTED }}>Uses</h4>
         {uses.map(u => (
-          <div key={u.label} className="flex justify-between text-xs py-1" style={{ borderBottom: '1px solid #EBEBEB' }}>
+          <div key={u.label} className="flex justify-between text-xs py-1" style={{ borderBottom: '1px solid #e8e6dc' }}>
             <span>{u.label}</span>
             <span className="font-medium tabular-nums">{centsToDisplay(u.amount)}</span>
           </div>
@@ -370,7 +370,7 @@ export function KPICard({ label, value, sublabel, color }: { label: string; valu
   return (
     <div className="rounded-lg p-3 sm:p-3" style={{ background: CREAM, border: `1px solid ${BORDER}` }}>
       <p className="text-[10px] sm:text-[9px] font-bold uppercase tracking-wider m-0 mb-1" style={{ color: MUTED }}>{label}</p>
-      <p className="text-lg sm:text-xl font-bold m-0 truncate" style={{ color: color || TEXT, fontFamily: 'Sora, sans-serif' }}>{value}</p>
+      <p className="text-lg sm:text-xl font-bold m-0 truncate" style={{ color: color || TEXT, fontFamily: 'Figtree, system-ui, sans-serif' }}>{value}</p>
       {sublabel && <p className="text-[10px] m-0 mt-0.5 truncate" style={{ color: MUTED }}>{sublabel}</p>}
     </div>
   );
@@ -413,7 +413,7 @@ export function ModelSlider({ label, value, onChange, min, max, step, format = '
           onChange={e => onChange(Number(e.target.value))}
           className="w-full cursor-pointer"
           style={{
-            background: `linear-gradient(to right, ${TERRA} 0%, ${TERRA} ${pct}%, #EBEBEB ${pct}%, #EBEBEB 100%)`,
+            background: `linear-gradient(to right, ${TERRA} 0%, ${TERRA} ${pct}%, #e8e6dc ${pct}%, #e8e6dc 100%)`,
           }}
         />
       </div>

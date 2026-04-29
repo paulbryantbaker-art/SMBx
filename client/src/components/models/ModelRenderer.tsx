@@ -23,7 +23,7 @@ export default function ModelRenderer({ tabId }: Props) {
   if (!tab) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p className="text-sm text-[#6E6A63]">Model not found.</p>
+        <p className="text-sm text-[#5e5d59]">Model not found.</p>
       </div>
     );
   }
@@ -54,8 +54,8 @@ export default function ModelRenderer({ tabId }: Props) {
       return (
         <div className="p-5">
           <div className="rounded-xl p-6 text-center" style={{ background: '#FAF8F4', border: '1px solid #DDD9D1' }}>
-            <p className="text-sm font-medium m-0 mb-1" style={{ color: '#1A1A18' }}>{tab.title}</p>
-            <p className="text-xs m-0" style={{ color: '#6E6A63' }}>Model type "{tab.type}" — coming soon.</p>
+            <p className="text-sm font-medium m-0 mb-1" style={{ color: '#1a1918' }}>{tab.title}</p>
+            <p className="text-xs m-0" style={{ color: '#5e5d59' }}>Model type "{tab.type}" — coming soon.</p>
           </div>
         </div>
       );

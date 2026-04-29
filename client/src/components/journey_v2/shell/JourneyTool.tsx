@@ -63,7 +63,7 @@ export default function JourneyTool({
       >
         {expanded ? (
           <span style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', paddingLeft: 4 }}>
-            <span style={{ fontFamily: "'Sora', sans-serif", fontWeight: 800, fontSize: 16, letterSpacing: '-0.04em' }}>smbx</span>
+            <span style={{ fontFamily: "'Figtree', system-ui, sans-serif", fontWeight: 800, fontSize: 16, letterSpacing: '-0.04em' }}>smbx</span>
             <span style={{ marginLeft: 'auto', opacity: 0.6, display: 'flex' }}>{Ic.chevronRight}</span>
           </span>
         ) : 'sm'}

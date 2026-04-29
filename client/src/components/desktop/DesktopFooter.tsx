@@ -41,12 +41,12 @@ const LINK_COLUMNS: Array<{ heading: string; links: Array<{ label: string; href:
 ];
 
 export default function DesktopFooter({ dark, onTalkToYulia, onNavigate }: Props) {
-  const heading = dark ? '#F0F0F3' : '#1A1C1E';
-  const body = dark ? 'rgba(240,240,243,0.78)' : '#3C3D40';
-  const muted = dark ? 'rgba(240,240,243,0.55)' : '#6B6C6F';
-  const border = dark ? 'rgba(255,255,255,0.06)' : '#E5E1D9';
-  const pink = dark ? '#E8709A' : '#D44A78';
-  const cardBg = dark ? '#151617' : '#FFFFFF';
+  const heading = dark ? '#f5f4ed' : '#1a1918';
+  const body = dark ? 'rgba(245,244,237,0.78)' : '#3C3D40';
+  const muted = dark ? 'rgba(245,244,237,0.55)' : '#6B6C6F';
+  const border = dark ? 'rgba(255,255,255,0.06)' : '#e8e6dc';
+  const pink = dark ? '#ec9d78' : '#D4714E';
+  const cardBg = dark ? '#141413' : '#FFFFFF';
 
   const year = new Date().getFullYear();
 
@@ -58,7 +58,7 @@ export default function DesktopFooter({ dark, onTalkToYulia, onNavigate }: Props
         borderTop: `1px solid ${border}`,
         background: 'transparent',
         padding: '36px 36px 24px',
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Figtree', system-ui, sans-serif",
       }}
     >
       <div style={{
@@ -73,7 +73,7 @@ export default function DesktopFooter({ dark, onTalkToYulia, onNavigate }: Props
         {/* Brand + CTA */}
         <div>
           <div style={{
-            fontFamily: "'Sora', system-ui, sans-serif",
+            fontFamily: "'Figtree', system-ui, sans-serif",
             fontSize: 20, fontWeight: 800,
             letterSpacing: '-0.02em',
             color: heading,
@@ -99,7 +99,7 @@ export default function DesktopFooter({ dark, onTalkToYulia, onNavigate }: Props
               color: '#FFFFFF',
               fontSize: 13, fontWeight: 700,
               cursor: 'pointer',
-              boxShadow: '0 4px 14px rgba(212,74,120,0.22)',
+              boxShadow: '0 4px 14px rgba(212,113,78,0.22)',
             }}
           >
             Talk to Yulia →
@@ -110,7 +110,7 @@ export default function DesktopFooter({ dark, onTalkToYulia, onNavigate }: Props
         {LINK_COLUMNS.map(col => (
           <div key={col.heading}>
             <div style={{
-              fontFamily: "'Sora', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 10, fontWeight: 800,
               letterSpacing: '0.08em', textTransform: 'uppercase',
               color: muted, marginBottom: 12,

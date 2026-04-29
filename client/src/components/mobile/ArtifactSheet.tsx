@@ -33,8 +33,8 @@ interface Props {
   onExport?: () => void;
 }
 
-const PINK = '#D44A78';
-const PINK_DARK = '#E8709A';
+const PINK = '#D4714E';
+const PINK_DARK = '#ec9d78';
 
 export function ArtifactSheet({
   open,
@@ -63,13 +63,13 @@ export function ArtifactSheet({
   };
 
   // Tokens
-  const bg = dark ? '#151617' : '#fefefe';
-  const headingC = dark ? '#f9f9fc' : '#0f1012';
+  const bg = dark ? '#141413' : '#fefefe';
+  const headingC = dark ? '#faf9f5' : '#0f1012';
   const bodyC = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
   const mutedC = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
   const borderC = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
   const pinkC = dark ? PINK_DARK : PINK;
-  const chipBg = dark ? '#1f2123' : '#f5f5f7';
+  const chipBg = dark ? '#1f2123' : '#f5f4ed';
 
   const handleAsk = () => {
     onAskYulia?.(`About this ${title.toLowerCase()} — `);
@@ -148,7 +148,7 @@ export function ArtifactSheet({
                 <h2
                   style={{
                     margin: 0,
-                    fontFamily: 'Sora, system-ui',
+                    fontFamily: "'Figtree', system-ui, sans-serif",
                     fontSize: 17,
                     fontWeight: 800,
                     letterSpacing: '-0.01em',
@@ -165,7 +165,7 @@ export function ArtifactSheet({
                 <p
                   style={{
                     margin: '2px 0 0',
-                    fontFamily: 'Inter, system-ui',
+                    fontFamily: "'Figtree', system-ui, sans-serif",
                     fontSize: 12,
                     fontWeight: 500,
                     color: mutedC,
@@ -211,7 +211,7 @@ export function ArtifactSheet({
               WebkitOverflowScrolling: 'touch',
               padding: '18px 18px 32px',
               color: bodyC,
-              fontFamily: 'Inter, system-ui',
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 15,
               lineHeight: 1.6,
             }}
@@ -262,7 +262,7 @@ export function ArtifactSheet({
                     border: 'none',
                     background: pinkC,
                     color: '#fff',
-                    fontFamily: 'Inter, system-ui',
+                    fontFamily: "'Figtree', system-ui, sans-serif",
                     fontSize: 14,
                     fontWeight: 700,
                     cursor: 'pointer',

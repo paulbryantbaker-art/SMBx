@@ -126,22 +126,22 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
         if (!fredLoading && validFred.length === 0) return null;
         return (
           <div className="mb-6">
-            <h2 className="text-[11px] font-bold text-[#6E6A63] uppercase tracking-wide m-0 mb-2">Economic Indicators</h2>
+            <h2 className="text-[11px] font-bold text-[#5e5d59] uppercase tracking-wide m-0 mb-2">Economic Indicators</h2>
             {fredLoading ? (
               <div className="grid grid-cols-2 gap-2">
                 {[1,2,3,4].map(i => (
-                  <div key={i} className="animate-pulse bg-[#FAFAFA] rounded-xl p-3">
-                    <div className="h-2.5 bg-[#EBE7DF] rounded w-2/3 mb-1.5" />
-                    <div className="h-5 bg-[#EBE7DF] rounded w-1/2" />
+                  <div key={i} className="animate-pulse bg-[#f5f4ed] rounded-xl p-3">
+                    <div className="h-2.5 bg-[#e8e6dc] rounded w-2/3 mb-1.5" />
+                    <div className="h-5 bg-[#e8e6dc] rounded w-1/2" />
                   </div>
                 ))}
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-2">
                 {validFred.slice(0, 6).map(ind => (
-                  <div key={ind.series_id} className="bg-[#FAFAFA] rounded-xl p-3">
+                  <div key={ind.series_id} className="bg-[#f5f4ed] rounded-xl p-3">
                     <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5 truncate">{ind.name}</p>
-                    <p className="text-base font-bold text-[#0D0D0D] m-0">
+                    <p className="text-base font-bold text-[#1a1918] m-0">
                       {`${ind.value}${ind.units === 'percent' ? '%' : ''}`}
                     </p>
                     {ind.date && <p className="text-[9px] text-[#A9A49C] m-0 mt-0.5">{ind.date}</p>}
@@ -154,13 +154,13 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
       })()}
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-5 bg-[#EBE7DF] rounded-xl p-1">
+      <div className="flex gap-1 mb-5 bg-[#e8e6dc] rounded-xl p-1">
         {TABS.map(t => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
             className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-medium border-0 cursor-pointer transition-colors ${
-              tab === t.id ? 'bg-white text-[#0D0D0D] shadow-sm' : 'bg-transparent text-[#6E6A63] hover:text-[#0D0D0D]'
+              tab === t.id ? 'bg-white text-[#1a1918] shadow-sm' : 'bg-transparent text-[#5e5d59] hover:text-[#1a1918]'
             }`}
           >
             {t.label}
@@ -169,42 +169,42 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
       </div>
 
       {error && (
-        <div className="mb-3 p-2.5 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700">
+        <div className="mb-3 p-2.5 rounded-xl bg-fig/15 border border-fig/40 text-xs text-[#7a3048]">
           {error}
-          <button onClick={() => setError(null)} className="ml-2 text-red-500 bg-transparent border-0 cursor-pointer underline text-xs">Dismiss</button>
+          <button onClick={() => setError(null)} className="ml-2 text-[#c46686] bg-transparent border-0 cursor-pointer underline text-xs">Dismiss</button>
         </div>
       )}
 
       {/* Market Overview Tab */}
       {tab === 'overview' && (
         <div>
-          <div className="bg-[#FAFAFA] rounded-2xl p-4 mb-4">
-            <h3 className="text-sm font-semibold text-[#0D0D0D] m-0 mb-3">Look Up a Market</h3>
+          <div className="bg-[#f5f4ed] rounded-2xl p-4 mb-4">
+            <h3 className="text-sm font-semibold text-[#1a1918] m-0 mb-3">Look Up a Market</h3>
             <div className="space-y-2.5">
               <div>
-                <label className="block text-[10px] font-medium text-[#6E6A63] mb-0.5">NAICS Code</label>
+                <label className="block text-[10px] font-medium text-[#5e5d59] mb-0.5">NAICS Code</label>
                 <input
                   type="text"
                   value={naicsCode}
                   onChange={e => setNaicsCode(e.target.value)}
                   placeholder="e.g. 561710"
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#1a1918] outline-none focus:border-[#D4714E]"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-medium text-[#6E6A63] mb-0.5">Geography (optional)</label>
+                <label className="block text-[10px] font-medium text-[#5e5d59] mb-0.5">Geography (optional)</label>
                 <input
                   type="text"
                   value={geography}
                   onChange={e => setGeography(e.target.value)}
                   placeholder="e.g. Texas"
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#1a1918] outline-none focus:border-[#D4714E]"
                 />
               </div>
               <button
                 onClick={fetchOverview}
                 disabled={loading || !naicsCode.trim()}
-                className="w-full py-1.5 rounded-xl text-sm font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-1.5 rounded-xl text-sm font-semibold bg-[#D4714E] text-white border-0 cursor-pointer hover:bg-[#B85A3A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Loading...' : 'Analyze'}
               </button>
@@ -214,25 +214,25 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
           {overview && (
             <div className="space-y-3">
               {overview.cbpData && (
-                <div className="bg-[#FAFAFA] rounded-2xl p-4">
-                  <h3 className="text-xs font-semibold text-[#0D0D0D] m-0 mb-2">Census Business Patterns</h3>
+                <div className="bg-[#f5f4ed] rounded-2xl p-4">
+                  <h3 className="text-xs font-semibold text-[#1a1918] m-0 mb-2">Census Business Patterns</h3>
                   <div className="grid grid-cols-2 gap-3">
                     {overview.cbpData.totalEstablishments !== undefined && (
                       <div>
                         <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Establishments</p>
-                        <p className="text-base font-bold text-[#0D0D0D] m-0">{Number(overview.cbpData.totalEstablishments).toLocaleString()}</p>
+                        <p className="text-base font-bold text-[#1a1918] m-0">{Number(overview.cbpData.totalEstablishments).toLocaleString()}</p>
                       </div>
                     )}
                     {overview.cbpData.totalEmployment !== undefined && (
                       <div>
                         <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Employment</p>
-                        <p className="text-base font-bold text-[#0D0D0D] m-0">{Number(overview.cbpData.totalEmployment).toLocaleString()}</p>
+                        <p className="text-base font-bold text-[#1a1918] m-0">{Number(overview.cbpData.totalEmployment).toLocaleString()}</p>
                       </div>
                     )}
                     {overview.cbpData.totalPayroll !== undefined && (
                       <div className="col-span-2">
                         <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Annual Payroll</p>
-                        <p className="text-base font-bold text-[#0D0D0D] m-0">${Number(overview.cbpData.totalPayroll).toLocaleString()}</p>
+                        <p className="text-base font-bold text-[#1a1918] m-0">${Number(overview.cbpData.totalPayroll).toLocaleString()}</p>
                       </div>
                     )}
                   </div>
@@ -242,11 +242,11 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
                       <div className="space-y-1">
                         {overview.cbpData.sizeBreakdown.map((sz: any, i: number) => (
                           <div key={i} className="flex items-center gap-2">
-                            <span className="text-[10px] text-[#6E6A63] w-28 shrink-0 truncate">{sz.label}</span>
+                            <span className="text-[10px] text-[#5e5d59] w-28 shrink-0 truncate">{sz.label}</span>
                             <div className="flex-1 h-1.5 bg-white rounded-full overflow-hidden">
-                              <div className="h-full bg-[#D44A78] rounded-full" style={{ width: `${sz.pct || 0}%` }} />
+                              <div className="h-full bg-[#D4714E] rounded-full" style={{ width: `${sz.pct || 0}%` }} />
                             </div>
-                            <span className="text-[10px] text-[#6E6A63] w-12 text-right">{sz.count?.toLocaleString()}</span>
+                            <span className="text-[10px] text-[#5e5d59] w-12 text-right">{sz.count?.toLocaleString()}</span>
                           </div>
                         ))}
                       </div>
@@ -256,18 +256,18 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
               )}
 
               {overview.sbaAnalysis && (
-                <div className="bg-[#FAFAFA] rounded-2xl p-4">
-                  <h3 className="text-xs font-semibold text-[#0D0D0D] m-0 mb-2">SBA Bankability</h3>
+                <div className="bg-[#f5f4ed] rounded-2xl p-4">
+                  <h3 className="text-xs font-semibold text-[#1a1918] m-0 mb-2">SBA Bankability</h3>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">DSCR</p>
-                      <p className={`text-base font-bold m-0 ${(overview.sbaAnalysis.dscr || 0) >= 1.25 ? 'text-green-600' : 'text-red-600'}`}>
+                      <p className={`text-base font-bold m-0 ${(overview.sbaAnalysis.dscr || 0) >= 1.25 ? 'text-[#3f6b5d]' : 'text-[#7a3048]'}`}>
                         {overview.sbaAnalysis.dscr?.toFixed(2) || '—'}
                       </p>
                     </div>
                     <div>
                       <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">SBA Eligible</p>
-                      <p className={`text-base font-bold m-0 ${overview.sbaAnalysis.eligible ? 'text-green-600' : 'text-red-600'}`}>
+                      <p className={`text-base font-bold m-0 ${overview.sbaAnalysis.eligible ? 'text-[#3f6b5d]' : 'text-[#7a3048]'}`}>
                         {overview.sbaAnalysis.eligible ? 'Yes' : 'No'}
                       </p>
                     </div>
@@ -284,8 +284,8 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
                   <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
                 </svg>
               </div>
-              <p className="text-sm font-semibold text-[#0D0D0D] m-0 mb-1">Enter a NAICS code</p>
-              <p className="text-xs text-[#6E6A63] m-0">Census data, SBA bankability, and economic indicators.</p>
+              <p className="text-sm font-semibold text-[#1a1918] m-0 mb-1">Enter a NAICS code</p>
+              <p className="text-xs text-[#5e5d59] m-0">Census data, SBA bankability, and economic indicators.</p>
             </div>
           )}
         </div>
@@ -297,33 +297,33 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
           {reportsLoading ? (
             <div className="space-y-2">
               {[1,2,3].map(i => (
-                <div key={i} className="animate-pulse bg-[#FAFAFA] rounded-2xl p-4">
-                  <div className="h-3 bg-[#EBE7DF] rounded w-1/3 mb-1.5" />
+                <div key={i} className="animate-pulse bg-[#f5f4ed] rounded-2xl p-4">
+                  <div className="h-3 bg-[#e8e6dc] rounded w-1/3 mb-1.5" />
                   <div className="h-2.5 bg-[#F5F5F5] rounded w-2/3" />
                 </div>
               ))}
             </div>
           ) : reports.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-sm font-semibold text-[#0D0D0D] m-0 mb-1">No reports yet</p>
-              <p className="text-xs text-[#6E6A63] m-0">Generate a market overview to create your first report.</p>
+              <p className="text-sm font-semibold text-[#1a1918] m-0 mb-1">No reports yet</p>
+              <p className="text-xs text-[#5e5d59] m-0">Generate a market overview to create your first report.</p>
             </div>
           ) : (
             <div className="space-y-2">
               {reports.map(r => (
-                <div key={r.id} className="bg-[#FAFAFA] rounded-2xl p-4 hover:bg-[#F5F5F5] transition-colors">
+                <div key={r.id} className="bg-[#f5f4ed] rounded-2xl p-4 hover:bg-[#F5F5F5] transition-colors">
                   <div className="flex items-center gap-1.5 mb-1">
-                    <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                    <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full bg-sky/25 text-[#2f5a85]">
                       {r.report_type}
                     </span>
                     <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full ${
-                      r.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                      r.status === 'completed' ? 'bg-cactus/60 text-[#1f4a3a]' : 'bg-peach/70 text-[#8a3d23]'
                     }`}>
                       {r.status}
                     </span>
                   </div>
-                  <h3 className="text-sm font-semibold text-[#0D0D0D] m-0">{r.title}</h3>
-                  <div className="flex items-center gap-2 mt-1 text-[10px] text-[#6E6A63]">
+                  <h3 className="text-sm font-semibold text-[#1a1918] m-0">{r.title}</h3>
+                  <div className="flex items-center gap-2 mt-1 text-[10px] text-[#5e5d59]">
                     {r.naics_code && <span>NAICS: {r.naics_code}</span>}
                     {r.geography && <span>{r.geography}</span>}
                     <span className="ml-auto text-[#A9A49C]">{new Date(r.created_at).toLocaleDateString()}</span>
@@ -338,44 +338,44 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
       {/* SBA Calculator Tab */}
       {tab === 'sba' && (
         <div>
-          <div className="bg-[#FAFAFA] rounded-2xl p-4 mb-4">
-            <h3 className="text-sm font-semibold text-[#0D0D0D] m-0 mb-2">SBA Loan Calculator</h3>
-            <p className="text-xs text-[#6E6A63] m-0 mb-3">Check SBA 7(a) eligibility with live FRED prime rate.</p>
+          <div className="bg-[#f5f4ed] rounded-2xl p-4 mb-4">
+            <h3 className="text-sm font-semibold text-[#1a1918] m-0 mb-2">SBA Loan Calculator</h3>
+            <p className="text-xs text-[#5e5d59] m-0 mb-3">Check SBA 7(a) eligibility with live FRED prime rate.</p>
             <div className="space-y-2.5">
               <div>
-                <label className="block text-[10px] font-medium text-[#6E6A63] mb-0.5">Purchase Price ($)</label>
+                <label className="block text-[10px] font-medium text-[#5e5d59] mb-0.5">Purchase Price ($)</label>
                 <input
                   type="number"
                   value={sbaInputs.purchasePrice}
                   onChange={e => setSbaInputs(p => ({ ...p, purchasePrice: e.target.value }))}
                   placeholder="1,000,000"
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#1a1918] outline-none focus:border-[#D4714E]"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-medium text-[#6E6A63] mb-0.5">Annual Debt Service ($)</label>
+                <label className="block text-[10px] font-medium text-[#5e5d59] mb-0.5">Annual Debt Service ($)</label>
                 <input
                   type="number"
                   value={sbaInputs.annualDebtService}
                   onChange={e => setSbaInputs(p => ({ ...p, annualDebtService: e.target.value }))}
                   placeholder="120,000"
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#1a1918] outline-none focus:border-[#D4714E]"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-medium text-[#6E6A63] mb-0.5">EBITDA ($)</label>
+                <label className="block text-[10px] font-medium text-[#5e5d59] mb-0.5">EBITDA ($)</label>
                 <input
                   type="number"
                   value={sbaInputs.ebitda}
                   onChange={e => setSbaInputs(p => ({ ...p, ebitda: e.target.value }))}
                   placeholder="250,000"
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#1a1918] outline-none focus:border-[#D4714E]"
                 />
               </div>
               <button
                 onClick={runSbaAnalysis}
                 disabled={loading || !sbaInputs.purchasePrice || !sbaInputs.annualDebtService || !sbaInputs.ebitda}
-                className="w-full py-1.5 rounded-xl text-sm font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-1.5 rounded-xl text-sm font-semibold bg-[#D4714E] text-white border-0 cursor-pointer hover:bg-[#B85A3A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Calculating...' : 'Check Eligibility'}
               </button>
@@ -383,44 +383,44 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
           </div>
 
           {sbaResult && (
-            <div className="bg-[#FAFAFA] rounded-2xl p-4">
-              <h3 className="text-xs font-semibold text-[#0D0D0D] m-0 mb-3">Results</h3>
+            <div className="bg-[#f5f4ed] rounded-2xl p-4">
+              <h3 className="text-xs font-semibold text-[#1a1918] m-0 mb-3">Results</h3>
               <div className="grid grid-cols-2 gap-3 mb-3">
                 <div>
                   <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">DSCR</p>
-                  <p className={`text-lg font-bold m-0 ${(sbaResult.dscr || 0) >= 1.25 ? 'text-green-600' : 'text-red-600'}`}>
+                  <p className={`text-lg font-bold m-0 ${(sbaResult.dscr || 0) >= 1.25 ? 'text-[#3f6b5d]' : 'text-[#7a3048]'}`}>
                     {sbaResult.dscr?.toFixed(2) || '—'}
                   </p>
                   <p className="text-[9px] text-[#A9A49C] m-0">Min: 1.25</p>
                 </div>
                 <div>
                   <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">SBA Eligible</p>
-                  <p className={`text-lg font-bold m-0 ${sbaResult.eligible ? 'text-green-600' : 'text-red-600'}`}>
+                  <p className={`text-lg font-bold m-0 ${sbaResult.eligible ? 'text-[#3f6b5d]' : 'text-[#7a3048]'}`}>
                     {sbaResult.eligible ? 'Yes' : 'No'}
                   </p>
                 </div>
                 {sbaResult.primeRate !== undefined && (
                   <div>
                     <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Prime Rate</p>
-                    <p className="text-lg font-bold text-[#0D0D0D] m-0">{sbaResult.primeRate}%</p>
+                    <p className="text-lg font-bold text-[#1a1918] m-0">{sbaResult.primeRate}%</p>
                   </div>
                 )}
                 {sbaResult.estimatedRate !== undefined && (
                   <div>
                     <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Est. Rate</p>
-                    <p className="text-lg font-bold text-[#0D0D0D] m-0">{sbaResult.estimatedRate}%</p>
+                    <p className="text-lg font-bold text-[#1a1918] m-0">{sbaResult.estimatedRate}%</p>
                   </div>
                 )}
               </div>
               {sbaResult.notes && (
-                <p className="text-xs text-[#6E6A63] m-0 p-2.5 bg-white rounded-lg">{sbaResult.notes}</p>
+                <p className="text-xs text-[#5e5d59] m-0 p-2.5 bg-white rounded-lg">{sbaResult.notes}</p>
               )}
             </div>
           )}
 
           {!sbaResult && !loading && (
             <div className="text-center py-6">
-              <p className="text-xs text-[#6E6A63] m-0">Enter deal parameters to check SBA eligibility.</p>
+              <p className="text-xs text-[#5e5d59] m-0">Enter deal parameters to check SBA eligibility.</p>
             </div>
           )}
         </div>

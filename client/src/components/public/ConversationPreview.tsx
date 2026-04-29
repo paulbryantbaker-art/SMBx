@@ -2,9 +2,9 @@ import YuliaAvatar from './YuliaAvatar';
 
 export default function ConversationPreview() {
   return (
-    <div className="bg-white border border-[#FAFAFA] rounded-[20px] overflow-hidden shadow-[0_16px_64px_rgba(0,0,0,0.04)]">
+    <div className="bg-white border border-[#f5f4ed] rounded-[20px] overflow-hidden shadow-[0_16px_64px_rgba(0,0,0,0.04)]">
       {/* Header */}
-      <div className="flex items-center gap-3 px-7 py-5 border-b border-[#FAFAFA] bg-[#FAFAFA]">
+      <div className="flex items-center gap-3 px-7 py-5 border-b border-[#f5f4ed] bg-[#f5f4ed]">
         <YuliaAvatar size={32} />
         <span className="font-semibold text-sm">Yulia &middot; AI Deal Advisor</span>
       </div>
@@ -13,7 +13,7 @@ export default function ConversationPreview() {
       <div className="px-7 py-7 flex flex-col gap-5">
         {/* User message */}
         <div className="flex justify-end">
-          <div className="max-w-[75%] bg-[#0D0D0D] text-white rounded-2xl rounded-br-[4px] px-[18px] py-[14px]">
+          <div className="max-w-[75%] bg-[#1a1918] text-white rounded-2xl rounded-br-[4px] px-[18px] py-[14px]">
             <p className="text-sm leading-[1.55] m-0">
               I want to sell my HVAC business in Dallas. Revenue is about $3.2M, I take home around $640K.
             </p>
@@ -23,12 +23,12 @@ export default function ConversationPreview() {
         {/* Yulia message with insight */}
         <div className="flex items-start gap-3">
           <YuliaAvatar size={32} className="mt-0.5" />
-          <div className="max-w-[75%] bg-[#FAFAFA] border border-[#FAFAFA] rounded-2xl rounded-bl-[4px] px-[18px] py-[14px]">
+          <div className="max-w-[75%] bg-[#f5f4ed] border border-[#f5f4ed] rounded-2xl rounded-bl-[4px] px-[18px] py-[14px]">
             <p className="text-sm leading-[1.55] m-0">
-              Great &mdash; let me work with those numbers. Based on your revenue and owner compensation, I&apos;m calculating an adjusted EBITDA of approximately <span className="text-[#D44A78] font-semibold">$780K</span> after typical add-backs for owner-operated HVAC businesses.
+              Great &mdash; let me work with those numbers. Based on your revenue and owner compensation, I&apos;m calculating an adjusted EBITDA of approximately <span className="text-[#D4714E] font-semibold">$780K</span> after typical add-backs for owner-operated HVAC businesses.
             </p>
             <div className="mt-2.5 px-3.5 py-2.5 bg-[#FFF0EB] rounded-[10px]">
-              <p className="text-[13px] text-[#B03860] leading-[1.5] m-0">
+              <p className="text-[13px] text-[#B85A3A] leading-[1.5] m-0">
                 &#x1F4CA; HVAC companies in the Dallas-Fort Worth market are currently trading at 4.5&ndash;6&times; EBITDA. Three PE firms are actively consolidating in your region. Your preliminary range: <strong>$3.5M &ndash; $4.7M</strong>.
               </p>
             </div>
@@ -42,7 +42,7 @@ export default function ConversationPreview() {
 
         {/* User reply */}
         <div className="flex justify-end">
-          <div className="max-w-[75%] bg-[#0D0D0D] text-white rounded-2xl rounded-br-[4px] px-[18px] py-[14px]">
+          <div className="max-w-[75%] bg-[#1a1918] text-white rounded-2xl rounded-br-[4px] px-[18px] py-[14px]">
             <p className="text-sm leading-[1.55] m-0">
               That&apos;s way more than I expected. What do we do next?
             </p>
@@ -52,7 +52,7 @@ export default function ConversationPreview() {
         {/* Yulia follow-up */}
         <div className="flex items-start gap-3">
           <YuliaAvatar size={32} className="mt-0.5" />
-          <div className="max-w-[75%] bg-[#FAFAFA] border border-[#FAFAFA] rounded-2xl rounded-bl-[4px] px-[18px] py-[14px]">
+          <div className="max-w-[75%] bg-[#f5f4ed] border border-[#f5f4ed] rounded-2xl rounded-bl-[4px] px-[18px] py-[14px]">
             <p className="text-sm leading-[1.55] m-0">
               Let&apos;s build your financial package and identify your best buyers. I&apos;ll walk you through every step &mdash; or if you&apos;re working with a broker, invite them in and I&apos;ll produce the work product they need to get you to market faster.
             </p>

@@ -28,11 +28,11 @@ export default function PublicNav({ chatMode }: Props) {
     return (
       <nav
         className="shrink-0 flex items-center w-full z-50 px-4"
-        style={{ background: '#FAFAFA', height: 56, borderBottom: '1px solid rgba(0,0,0,0.06)' }}
+        style={{ background: '#f5f4ed', height: 56, borderBottom: '1px solid rgba(0,0,0,0.06)' }}
       >
         <button
           onClick={() => resetToPublic()}
-          className="flex items-center justify-center w-9 h-9 rounded-full bg-transparent border-none cursor-pointer text-[#6E6A63] hover:text-[#0D0D0D] hover:bg-[rgba(0,0,0,0.04)] transition-colors shrink-0"
+          className="flex items-center justify-center w-9 h-9 rounded-full bg-transparent border-none cursor-pointer text-[#5e5d59] hover:text-[#1a1918] hover:bg-[rgba(0,0,0,0.04)] transition-colors shrink-0"
           type="button"
           aria-label="Back to page"
         >
@@ -42,7 +42,7 @@ export default function PublicNav({ chatMode }: Props) {
         </button>
         <div className="flex-1 flex items-center justify-center gap-2">
           <Logo />
-          <span className="text-[13px] font-medium text-[#6E6A63]">&middot; Yulia</span>
+          <span className="text-[13px] font-medium text-[#5e5d59]">&middot; Yulia</span>
         </div>
         <div className="w-9" /> {/* Spacer to balance back arrow */}
       </nav>
@@ -62,8 +62,8 @@ export default function PublicNav({ chatMode }: Props) {
               href={l.href}
               className={`text-[13px] font-medium no-underline transition-colors ${
                 location === l.href
-                  ? 'text-[#0D0D0D]'
-                  : 'text-[#7A766E] hover:text-[#0D0D0D]'
+                  ? 'text-[#1a1918]'
+                  : 'text-[#7A766E] hover:text-[#1a1918]'
               }`}
             >
               {l.label}
@@ -75,7 +75,7 @@ export default function PublicNav({ chatMode }: Props) {
         <div className="hidden md:flex items-center gap-3">
           <Link
             href="/login"
-            className="text-[13px] font-medium text-[#7A766E] hover:text-[#0D0D0D] no-underline transition-colors"
+            className="text-[13px] font-medium text-[#7A766E] hover:text-[#1a1918] no-underline transition-colors"
           >
             Sign in
           </Link>
@@ -85,7 +85,7 @@ export default function PublicNav({ chatMode }: Props) {
         {/* Mobile hamburger */}
         <button
           onClick={() => setOpen(!open)}
-          className="md:hidden p-2 text-[#0D0D0D] bg-transparent border-none cursor-pointer"
+          className="md:hidden p-2 text-[#1a1918] bg-transparent border-none cursor-pointer"
           aria-label="Toggle menu"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">

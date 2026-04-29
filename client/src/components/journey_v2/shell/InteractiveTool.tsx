@@ -36,7 +36,7 @@ export default function InteractiveTool({ kicker, sub, children, tag }: Props) {
         marginTop: 26,
         background: '#fff',
         border: '0.5px solid rgba(0,0,0,0.1)',
-        borderLeft: '3px solid #D44A78',
+        borderLeft: '3px solid #D4714E',
         borderRadius: 14,
         overflow: 'hidden',
         boxShadow: '0 4px 12px rgba(10,10,11,0.05), 0 1px 2px rgba(10,10,11,0.04)',
@@ -44,7 +44,7 @@ export default function InteractiveTool({ kicker, sub, children, tag }: Props) {
     >
       {/* Dark header bar — unmissable */}
       <div style={{
-        background: '#0A0A0B',
+        background: '#1a1918',
         color: '#fff',
         padding: '12px 20px',
         display: 'flex',
@@ -57,7 +57,7 @@ export default function InteractiveTool({ kicker, sub, children, tag }: Props) {
             display: 'inline-flex',
             alignItems: 'center',
             gap: 7,
-            background: '#D44A78',
+            background: '#D4714E',
             color: '#fff',
             padding: '5px 11px',
             borderRadius: 999,
@@ -77,7 +77,7 @@ export default function InteractiveTool({ kicker, sub, children, tag }: Props) {
             Try it
           </span>
           <span style={{
-            fontFamily: 'Sora, sans-serif',
+            fontFamily: 'Figtree, system-ui, sans-serif',
             fontWeight: 700,
             fontSize: 14.5,
             letterSpacing: '-0.01em',

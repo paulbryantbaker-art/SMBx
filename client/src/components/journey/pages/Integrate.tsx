@@ -300,7 +300,7 @@ function KeyEmployeesMock() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
               <div style={{
                 width: 32, height: 32, borderRadius: 10,
-                background: 'linear-gradient(135deg, #3A3A3E, #0A0A0B)',
+                background: 'linear-gradient(135deg, #3A3A3E, #1a1918)',
                 color: '#fff',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 12,

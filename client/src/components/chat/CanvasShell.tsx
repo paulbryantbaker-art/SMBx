@@ -11,18 +11,18 @@ interface CanvasShellProps {
 
 export default function CanvasShell({ title, subtitle, onClose, onFullscreen, isFullscreen, children }: CanvasShellProps) {
   return (
-    <div className="flex flex-col h-full" style={{ background: '#FAFAFA' }}>
+    <div className="flex flex-col h-full" style={{ background: '#f5f4ed' }}>
       {/* Header */}
       <div
         className="shrink-0 flex items-center justify-between"
         style={{ padding: '12px 20px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}
       >
         <div className="min-w-0">
-          <h2 className="font-sans m-0 truncate" style={{ fontSize: 16, fontWeight: 800, color: '#0D0D0D' }}>
+          <h2 className="font-sans m-0 truncate" style={{ fontSize: 16, fontWeight: 800, color: '#1a1918' }}>
             {title}
           </h2>
           {subtitle && (
-            <p className="font-sans m-0" style={{ fontSize: 12, color: '#6E6A63', marginTop: 1 }}>
+            <p className="font-sans m-0" style={{ fontSize: 12, color: '#5e5d59', marginTop: 1 }}>
               {subtitle}
             </p>
           )}
@@ -33,7 +33,7 @@ export default function CanvasShell({ title, subtitle, onClose, onFullscreen, is
               onClick={onFullscreen}
               title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
               className="flex items-center justify-center cursor-pointer border-0"
-              style={{ width: 32, height: 32, borderRadius: 8, background: 'transparent', color: '#6E6A63' }}
+              style={{ width: 32, height: 32, borderRadius: 8, background: 'transparent', color: '#5e5d59' }}
             >
               {isFullscreen ? (
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -49,7 +49,7 @@ export default function CanvasShell({ title, subtitle, onClose, onFullscreen, is
           <button
             onClick={onClose}
             className="flex items-center justify-center cursor-pointer border-0"
-            style={{ width: 32, height: 32, borderRadius: 8, background: 'transparent', color: '#6E6A63' }}
+            style={{ width: 32, height: 32, borderRadius: 8, background: 'transparent', color: '#5e5d59' }}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <path d="M18 6L6 18M6 6l12 12" />

@@ -48,13 +48,13 @@ export function HelpSheet({ open, onOpenChange, dark }: Props) {
     }
   }, [open]);
 
-  const bg = dark ? '#151617' : '#fefefe';
-  const headingC = dark ? '#f9f9fc' : '#0f1012';
+  const bg = dark ? '#141413' : '#fefefe';
+  const headingC = dark ? '#faf9f5' : '#0f1012';
   const bodyC = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
   const mutedC = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
   const borderC = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
   const rowBg = dark ? '#1f2123' : '#ffffff';
-  const pinkC = dark ? '#E8709A' : '#D44A78';
+  const pinkC = dark ? '#ec9d78' : '#D4714E';
 
   const filtered = GLOSSARY.filter(g =>
     !filter ||
@@ -96,7 +96,7 @@ export function HelpSheet({ open, onOpenChange, dark }: Props) {
             <Drawer.Title asChild>
               <h2 style={{
                 margin: 0,
-                fontFamily: 'Sora, system-ui',
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 22,
                 fontWeight: 800,
                 letterSpacing: '-0.02em',
@@ -122,7 +122,7 @@ export function HelpSheet({ open, onOpenChange, dark }: Props) {
             <section style={{ marginBottom: 24 }}>
               <h3 style={{
                 margin: '0 0 8px',
-                fontFamily: 'Sora, system-ui',
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 15,
                 fontWeight: 700,
                 color: headingC,
@@ -133,7 +133,7 @@ export function HelpSheet({ open, onOpenChange, dark }: Props) {
               </h3>
               <p style={{
                 margin: 0,
-                fontFamily: 'Inter, system-ui',
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 14,
                 lineHeight: 1.55,
                 color: bodyC,
@@ -146,7 +146,7 @@ export function HelpSheet({ open, onOpenChange, dark }: Props) {
             <section>
               <h3 style={{
                 margin: '0 0 10px',
-                fontFamily: 'Sora, system-ui',
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 15,
                 fontWeight: 700,
                 color: headingC,
@@ -167,7 +167,7 @@ export function HelpSheet({ open, onOpenChange, dark }: Props) {
                   border: `1px solid ${borderC}`,
                   background: rowBg,
                   color: headingC,
-                  fontFamily: 'Inter, system-ui',
+                  fontFamily: "'Figtree', system-ui, sans-serif",
                   fontSize: 14,
                   outline: 'none',
                   marginBottom: 10,
@@ -186,7 +186,7 @@ export function HelpSheet({ open, onOpenChange, dark }: Props) {
                   >
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
                       <span style={{
-                        fontFamily: 'Sora, system-ui',
+                        fontFamily: "'Figtree', system-ui, sans-serif",
                         fontSize: 13,
                         fontWeight: 800,
                         color: pinkC,
@@ -196,7 +196,7 @@ export function HelpSheet({ open, onOpenChange, dark }: Props) {
                       </span>
                       {g.full && (
                         <span style={{
-                          fontFamily: 'Inter, system-ui',
+                          fontFamily: "'Figtree', system-ui, sans-serif",
                           fontSize: 11,
                           fontWeight: 500,
                           color: mutedC,
@@ -207,7 +207,7 @@ export function HelpSheet({ open, onOpenChange, dark }: Props) {
                     </div>
                     <p style={{
                       margin: 0,
-                      fontFamily: 'Inter, system-ui',
+                      fontFamily: "'Figtree', system-ui, sans-serif",
                       fontSize: 13,
                       lineHeight: 1.5,
                       color: bodyC,

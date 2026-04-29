@@ -14,8 +14,8 @@
 import { useState, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
 
-const PINK = '#D44A78';
-const PINK_DARK = '#E8709A';
+const PINK = '#D4714E';
+const PINK_DARK = '#ec9d78';
 
 type Industry = {
   id: string;
@@ -117,7 +117,7 @@ export function MultipleMap({
   // Colors
   const bg = dark ? '#0f1012' : '#f9f7f1';
   const border = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
-  const headingColor = dark ? '#f9f9fc' : '#0f1012';
+  const headingColor = dark ? '#faf9f5' : '#0f1012';
   const mutedColor = dark ? 'rgba(218,218,220,0.65)' : '#7c7d80';
   const gridColor = dark ? 'rgba(255,255,255,0.04)' : 'rgba(15,16,18,0.05)';
   const accent = dark ? PINK_DARK : PINK;
@@ -172,8 +172,8 @@ export function MultipleMap({
               className="absolute inset-0 rounded-xl cursor-crosshair select-none"
               style={{
                 background: dark
-                  ? 'linear-gradient(135deg, rgba(232,112,154,0.04), rgba(255,255,255,0.02))'
-                  : 'linear-gradient(135deg, rgba(212,74,120,0.04), rgba(15,16,18,0.02))',
+                  ? 'linear-gradient(135deg, rgba(236,157,120,0.04), rgba(255,255,255,0.02))'
+                  : 'linear-gradient(135deg, rgba(212,113,78,0.04), rgba(15,16,18,0.02))',
                 border: `1px solid ${border}`,
               }}
               onClick={(e) => handleChartInteract(e.clientX, e.clientY)}

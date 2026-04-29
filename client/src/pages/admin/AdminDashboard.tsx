@@ -32,7 +32,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-dvh bg-[#F8F6F2] flex">
       {/* Desktop sidebar — matches app's 80px icon rail style */}
-      <aside className="w-20 bg-white border-r border-[#eeeef0] shadow-sm flex-col items-center py-6 shrink-0 hidden md:flex fixed top-0 left-0 h-screen z-50">
+      <aside className="w-20 bg-white border-r border-[#e8e6dc] shadow-sm flex-col items-center py-6 shrink-0 hidden md:flex fixed top-0 left-0 h-screen z-50">
         {/* Logo → back to chat */}
         <button
           onClick={() => navigate('/chat')}
@@ -52,8 +52,8 @@ export default function AdminDashboard() {
               onClick={() => setActiveTab(tab.id)}
               className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
                 activeTab === tab.id
-                  ? 'text-[#D44A78] bg-[#D44A78]/5'
-                  : 'text-[#636467] hover:text-[#D44A78] hover:bg-[#D44A78]/5'
+                  ? 'text-[#D4714E] bg-[#D4714E]/5'
+                  : 'text-[#5e5d59] hover:text-[#D4714E] hover:bg-[#D4714E]/5'
               }`}
               title={tab.label}
               type="button"
@@ -68,7 +68,7 @@ export default function AdminDashboard() {
         <div className="mt-auto">
           <button
             onClick={() => navigate('/chat')}
-            className="w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer text-[#636467] hover:text-[#D44A78] hover:bg-[#D44A78]/5"
+            className="w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer text-[#5e5d59] hover:text-[#D4714E] hover:bg-[#D4714E]/5"
             title="Back to Chat"
             type="button"
           >
@@ -79,7 +79,7 @@ export default function AdminDashboard() {
       </aside>
 
       {/* Mobile header — pill tabs matching app style */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-[#eeeef0] px-4 py-2.5 flex items-center gap-2 overflow-x-auto">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-[#e8e6dc] px-4 py-2.5 flex items-center gap-2 overflow-x-auto">
         <button
           onClick={() => navigate('/chat')}
           className="shrink-0 mr-1 border-0 bg-transparent cursor-pointer p-0"
@@ -93,8 +93,8 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab(tab.id)}
             className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
               activeTab === tab.id
-                ? 'bg-[#D44A78] text-white border-[#D44A78]'
-                : 'bg-white text-[#6E6A63] border-[rgba(0,0,0,0.08)]'
+                ? 'bg-[#D4714E] text-white border-[#D4714E]'
+                : 'bg-white text-[#5e5d59] border-[rgba(0,0,0,0.08)]'
             }`}
           >
             {tab.label}

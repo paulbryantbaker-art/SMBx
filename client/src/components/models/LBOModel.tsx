@@ -23,7 +23,7 @@ export default function LBOModel({ tabId }: Props) {
 
   const a = tab.assumptions;
   const lbo = tab.outputs.lbo;
-  if (!lbo) return <div className="p-5 text-sm text-[#6E6A63]">Set purchase price and EBITDA to begin.</div>;
+  if (!lbo) return <div className="p-5 text-sm text-[#5e5d59]">Set purchase price and EBITDA to begin.</div>;
 
   // Build sensitivity matrix on the fly
   const lboAssumptions: LBOAssumptions = tab.outputs.lboAssumptions;
@@ -84,7 +84,7 @@ export default function LBOModel({ tabId }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         {/* Left: Deal Inputs */}
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#6E6A63' }}>Deal Assumptions</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#5e5d59' }}>Deal Assumptions</h3>
 
           <ModelInput
             label="Purchase Price (EV)"
@@ -122,7 +122,7 @@ export default function LBOModel({ tabId }: Props) {
 
         {/* Middle: Exit & Structure */}
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#6E6A63' }}>Exit & Structure</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#5e5d59' }}>Exit & Structure</h3>
 
           <ModelSlider
             label="Exit Multiple"
@@ -139,7 +139,7 @@ export default function LBOModel({ tabId }: Props) {
             suffix=" years"
           />
 
-          <h4 className="text-[10px] font-bold uppercase tracking-wider mt-4 mb-2" style={{ color: '#6E6A63' }}>Debt Structure</h4>
+          <h4 className="text-[10px] font-bold uppercase tracking-wider mt-4 mb-2" style={{ color: '#5e5d59' }}>Debt Structure</h4>
 
           <ModelSlider
             label="Senior Debt (% of EV)"
@@ -166,20 +166,20 @@ export default function LBOModel({ tabId }: Props) {
 
         {/* Right: Sources & Uses */}
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#6E6A63' }}>Sources & Uses</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#5e5d59' }}>Sources & Uses</h3>
           <SourcesUsesTable sources={lbo.sourcesUses.sources} uses={lbo.sourcesUses.uses} />
 
           <div className="mt-4 rounded-lg p-3" style={{ background: '#FAF8F4', border: '1px solid #DDD9D1' }}>
             <div className="flex justify-between text-xs mb-1">
-              <span style={{ color: '#6E6A63' }}>Exit Value ({a.holdPeriod || 5}yr)</span>
+              <span style={{ color: '#5e5d59' }}>Exit Value ({a.holdPeriod || 5}yr)</span>
               <span className="font-bold">{centsToDisplay(lbo.exitValue)}</span>
             </div>
             <div className="flex justify-between text-xs mb-1">
-              <span style={{ color: '#6E6A63' }}>Exit Equity</span>
+              <span style={{ color: '#5e5d59' }}>Exit Equity</span>
               <span className="font-bold" style={{ color: '#34A853' }}>{centsToDisplay(lbo.exitEquity)}</span>
             </div>
             <div className="flex justify-between text-xs">
-              <span style={{ color: '#6E6A63' }}>Cash-on-Cash</span>
+              <span style={{ color: '#5e5d59' }}>Cash-on-Cash</span>
               <span className="font-bold">{pctDisplay(lbo.cashOnCash)}</span>
             </div>
           </div>
@@ -188,20 +188,20 @@ export default function LBOModel({ tabId }: Props) {
 
       {/* DSCR Timeline */}
       <div>
-        <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#6E6A63' }}>DSCR by Year</h3>
+        <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#5e5d59' }}>DSCR by Year</h3>
         <DSCRTimeline dscrByYear={lbo.dscrByYear} />
       </div>
 
       {/* Pro Forma */}
       <div>
-        <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#6E6A63' }}>Pro Forma Projections</h3>
+        <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#5e5d59' }}>Pro Forma Projections</h3>
         <ProFormaTable years={lbo.proForma} />
       </div>
 
       {/* Sensitivity */}
       {sensitivityData && sensitivityData.var1Values.length > 0 && (
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#6E6A63' }}>IRR Sensitivity: EBITDA vs Exit Multiple</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#5e5d59' }}>IRR Sensitivity: EBITDA vs Exit Multiple</h3>
           <SensitivityHeatmap {...sensitivityData} metric="irr" />
         </div>
       )}

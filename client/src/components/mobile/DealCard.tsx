@@ -14,7 +14,7 @@ import { forwardRef, type CSSProperties } from 'react';
 /* ═══ COLOR + LABEL MAPS ═══ */
 
 const JOURNEY_COLORS: Record<string, string> = {
-  sell: '#D44A78', // brand pink — unchanged
+  sell: '#D4714E', // brand pink — unchanged
   buy: '#3E8E8E',  // muted teal — warmer counterpoint than tech-blue
   raise: '#C99A3E', // warm ochre — reads as capital / gold
   pmi: '#8F4A7A',  // plum — warmer purple, rhymes with brand pink
@@ -171,11 +171,11 @@ export const DealCard = forwardRef<HTMLButtonElement, DealCardProps>(function De
         zIndex: 10 - stackIndex,
       };
 
-  const bg = dark ? '#1A1C1E' : '#FFFFFF';
+  const bg = dark ? '#1a1918' : '#FFFFFF';
   const surfaceBorder = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
-  const headingColor = dark ? '#F0F0F3' : '#1A1C1E';
-  const mutedColor = dark ? 'rgba(240,240,243,0.55)' : 'rgba(26,28,30,0.55)';
-  const fadeColor = dark ? 'rgba(240,240,243,0.35)' : 'rgba(26,28,30,0.35)';
+  const headingColor = dark ? '#f5f4ed' : '#1a1918';
+  const mutedColor = dark ? 'rgba(245,244,237,0.55)' : 'rgba(26,28,30,0.55)';
+  const fadeColor = dark ? 'rgba(245,244,237,0.35)' : 'rgba(26,28,30,0.35)';
 
   // Long-press detection (no external dep)
   let pressTimer: ReturnType<typeof setTimeout> | null = null;
@@ -227,7 +227,7 @@ export const DealCard = forwardRef<HTMLButtonElement, DealCardProps>(function De
           }} />
           <span style={{
             color: 'rgba(255,255,255,0.95)',
-            fontFamily: 'Sora, system-ui',
+            fontFamily: "'Figtree', system-ui, sans-serif",
             fontSize: 14,
             fontWeight: 700,
             letterSpacing: '-0.01em',
@@ -240,7 +240,7 @@ export const DealCard = forwardRef<HTMLButtonElement, DealCardProps>(function De
           </span>
           <span style={{
             color: 'rgba(255,255,255,0.88)',
-            fontFamily: 'Inter, system-ui',
+            fontFamily: "'Figtree', system-ui, sans-serif",
             fontSize: 11,
             fontWeight: 700,
             letterSpacing: '0.02em',
@@ -310,7 +310,7 @@ export const DealCard = forwardRef<HTMLButtonElement, DealCardProps>(function De
           <div style={{ position: 'absolute', inset: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{
               color: 'rgba(255,255,255,0.95)',
-              fontFamily: 'Sora, system-ui',
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 11,
               fontWeight: 800,
               letterSpacing: '0.08em',
@@ -321,7 +321,7 @@ export const DealCard = forwardRef<HTMLButtonElement, DealCardProps>(function De
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
               <span style={{
                 color: 'rgba(255,255,255,0.95)',
-                fontFamily: 'Inter, system-ui',
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 11,
                 fontWeight: 600,
               }}>
@@ -363,7 +363,7 @@ export const DealCard = forwardRef<HTMLButtonElement, DealCardProps>(function De
             <h3 style={{
               margin: 0,
               flex: 1,
-              fontFamily: 'Sora, system-ui',
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 20,
               fontWeight: 800,
               letterSpacing: '-0.02em',
@@ -377,7 +377,7 @@ export const DealCard = forwardRef<HTMLButtonElement, DealCardProps>(function De
             </h3>
             <span style={{
               flexShrink: 0,
-              fontFamily: 'Inter, system-ui',
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 11,
               fontWeight: 700,
               letterSpacing: '0.02em',
@@ -424,7 +424,7 @@ export const DealCard = forwardRef<HTMLButtonElement, DealCardProps>(function De
             alignItems: 'center',
             gap: 10,
             marginBottom: 10,
-            fontFamily: 'Inter, system-ui',
+            fontFamily: "'Figtree', system-ui, sans-serif",
             fontSize: 13,
             color: mutedColor,
             fontWeight: 500,
@@ -446,7 +446,7 @@ export const DealCard = forwardRef<HTMLButtonElement, DealCardProps>(function De
 
           {/* Next-action nudge */}
           <div style={{
-            fontFamily: 'Inter, system-ui',
+            fontFamily: "'Figtree', system-ui, sans-serif",
             fontSize: 14,
             lineHeight: 1.4,
             color: headingColor,

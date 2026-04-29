@@ -186,16 +186,16 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
     w.document.write(`
       <html><head><title>${displayTitle}</title>
       <style>
-        body { font-family: 'Inter', system-ui, sans-serif; color: #0D0D0D; padding: 40px; max-width: 800px; margin: 0 auto; line-height: 1.6; }
+        body { font-family: 'Figtree', system-ui, sans-serif; color: #1a1918; padding: 40px; max-width: 800px; margin: 0 auto; line-height: 1.6; }
         h1, h2, h3 { font-weight: 700; margin-top: 1.5em; }
-        h1 { font-size: 24px; border-bottom: 2px solid #D44A78; padding-bottom: 8px; }
-        h2 { font-size: 18px; color: #3D3B37; }
-        h3 { font-size: 15px; color: #6E6A63; }
+        h1 { font-size: 24px; border-bottom: 2px solid #D4714E; padding-bottom: 8px; }
+        h2 { font-size: 18px; color: #3d3d3a; }
+        h3 { font-size: 15px; color: #5e5d59; }
         table { border-collapse: collapse; width: 100%; margin: 16px 0; }
         th, td { border: 1px solid rgba(0,0,0,0.08); padding: 8px 12px; text-align: left; font-size: 13px; }
         th { background: #F5F5F5; font-weight: 600; }
         ul, ol { padding-left: 24px; }
-        .meta { color: #6E6A63; font-size: 12px; margin-bottom: 24px; }
+        .meta { color: #5e5d59; font-size: 12px; margin-bottom: 24px; }
         hr { border: none; border-top: 1px solid rgba(0,0,0,0.08); margin: 24px 0; }
         strong { font-weight: 700; }
       </style></head><body>
@@ -216,15 +216,15 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
       {/* Toolbar */}
       <div className="shrink-0 flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <div className="flex items-center gap-2 min-w-0">
-          <div className="w-6 h-6 rounded bg-[#D44A78] text-white flex items-center justify-center shrink-0">
+          <div className="w-6 h-6 rounded bg-[#D4714E] text-white flex items-center justify-center shrink-0">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><path d="M14 2v6h6" />
             </svg>
           </div>
-          <span className="text-sm font-semibold text-[#0D0D0D] truncate">{displayTitle}</span>
+          <span className="text-sm font-semibold text-[#1a1918] truncate">{displayTitle}</span>
           {!isMarkdownMode && data?.status && data.status !== 'complete' && (
             <span className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full shrink-0 ${
-              data.status === 'generating' ? 'text-blue-600 bg-blue-50' : data.status === 'queued' ? 'text-yellow-600 bg-yellow-50' : 'text-red-600 bg-red-50'
+              data.status === 'generating' ? 'text-[#2f5a85] bg-sky/15' : data.status === 'queued' ? 'text-[#8a3d23] bg-peach/50' : 'text-[#7a3048] bg-fig/15'
             }`}>{data.status}</span>
           )}
           {!isMarkdownMode && data?.is_stale && (
@@ -257,8 +257,8 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
               disabled={filing || filed}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border-0 cursor-pointer transition-colors ${
                 filed
-                  ? 'bg-green-50 text-green-700'
-                  : 'bg-[#D44A78] text-white hover:bg-[#B03860]'
+                  ? 'bg-cactus/40 text-[#1f4a3a]'
+                  : 'bg-[#D4714E] text-white hover:bg-[#B85A3A]'
               } disabled:opacity-60`}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -271,7 +271,7 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
             <button
               onClick={() => setEditMode(!editMode)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border-0 cursor-pointer transition-colors ${
-                editMode ? 'bg-[#D44A78] text-white' : 'bg-[#F5F5F5] text-[#3D3B37] hover:bg-[#EBE7DF]'
+                editMode ? 'bg-[#D4714E] text-white' : 'bg-[#F5F5F5] text-[#3d3d3a] hover:bg-[#e8e6dc]'
               }`}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -285,7 +285,7 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
             <button
               onClick={() => setCommentsOpen(!commentsOpen)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border-0 cursor-pointer transition-colors ${
-                commentsOpen ? 'bg-[#D44A78] text-white' : 'bg-[#F5F5F5] text-[#3D3B37] hover:bg-[#EBE7DF]'
+                commentsOpen ? 'bg-[#D4714E] text-white' : 'bg-[#F5F5F5] text-[#3d3d3a] hover:bg-[#e8e6dc]'
               }`}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -299,7 +299,7 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
               <button
                 onClick={() => deliverableId && !isMarkdownMode ? setExportOpen(!exportOpen) : handleExport('pdf')}
                 disabled={!!exporting}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#F5F5F5] text-[#3D3B37] border-0 cursor-pointer hover:bg-[#EBE7DF] transition-colors disabled:opacity-60"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#F5F5F5] text-[#3d3d3a] border-0 cursor-pointer hover:bg-[#e8e6dc] transition-colors disabled:opacity-60"
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
@@ -315,7 +315,7 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
                     <button
                       key={fmt}
                       onClick={() => handleExport(fmt)}
-                      className="w-full text-left px-3 py-2 text-xs font-medium text-[#3D3B37] bg-transparent border-0 cursor-pointer hover:bg-[#F5F5F5] transition-colors"
+                      className="w-full text-left px-3 py-2 text-xs font-medium text-[#3d3d3a] bg-transparent border-0 cursor-pointer hover:bg-[#F5F5F5] transition-colors"
                     >
                       {fmt.toUpperCase()}
                     </button>
@@ -347,8 +347,8 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
         {!isMarkdownMode && loading && (
           <div className="flex items-center justify-center p-12">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-2 border-[#D44A78] border-t-transparent rounded-full animate-spin" />
-              <p className="text-sm text-[#6E6A63]">Loading deliverable...</p>
+              <div className="w-8 h-8 border-2 border-[#D4714E] border-t-transparent rounded-full animate-spin" />
+              <p className="text-sm text-[#5e5d59]">Loading deliverable...</p>
             </div>
           </div>
         )}
@@ -356,9 +356,9 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
         {!isMarkdownMode && !loading && data?.status === 'generating' && (
           <div className="flex items-center justify-center p-12">
             <div className="flex flex-col items-center gap-3 text-center">
-              <div className="w-12 h-12 border-2 border-[#D44A78] border-t-transparent rounded-full animate-spin" />
-              <p className="text-base font-semibold text-[#0D0D0D]">Generating your {data.name}...</p>
-              <p className="text-sm text-[#6E6A63] max-w-xs">{genMessage || 'This typically takes 30-60 seconds. The document will appear here when ready.'}</p>
+              <div className="w-12 h-12 border-2 border-[#D4714E] border-t-transparent rounded-full animate-spin" />
+              <p className="text-base font-semibold text-[#1a1918]">Generating your {data.name}...</p>
+              <p className="text-sm text-[#5e5d59] max-w-xs">{genMessage || 'This typically takes 30-60 seconds. The document will appear here when ready.'}</p>
             </div>
           </div>
         )}
@@ -366,11 +366,11 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
         {!isMarkdownMode && !loading && data?.status === 'queued' && (
           <div className="flex items-center justify-center p-12">
             <div className="flex flex-col items-center gap-3 text-center">
-              <div className="w-10 h-10 rounded-full bg-yellow-50 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-peach/50 flex items-center justify-center">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
               </div>
-              <p className="text-base font-semibold text-[#0D0D0D]">In queue</p>
-              <p className="text-sm text-[#6E6A63]">Your {data.name} will begin generating shortly.</p>
+              <p className="text-base font-semibold text-[#1a1918]">In queue</p>
+              <p className="text-sm text-[#5e5d59]">Your {data.name} will begin generating shortly.</p>
             </div>
           </div>
         )}
@@ -403,11 +403,11 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
         {!isMarkdownMode && !loading && data?.status === 'failed' && (
           <div className="flex items-center justify-center p-12">
             <div className="flex flex-col items-center gap-3 text-center">
-              <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-fig/15 flex items-center justify-center">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>
               </div>
-              <p className="text-base font-semibold text-[#0D0D0D]">Generation failed</p>
-              <p className="text-sm text-[#6E6A63]">Something went wrong. Please try again or contact support.</p>
+              <p className="text-base font-semibold text-[#1a1918]">Generation failed</p>
+              <p className="text-sm text-[#5e5d59]">Something went wrong. Please try again or contact support.</p>
             </div>
           </div>
         )}
@@ -415,11 +415,11 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
         {!isMarkdownMode && !loading && (error || !data) && (
           <div className="flex items-center justify-center p-12">
             <div className="flex flex-col items-center gap-3 text-center">
-              <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-fig/15 flex items-center justify-center">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
               </div>
-              <p className="text-sm text-[#6E6A63]">{error || 'Deliverable not found.'}</p>
-              <button onClick={fetchData} className="text-sm font-semibold text-[#D44A78] bg-transparent border-0 cursor-pointer hover:underline">
+              <p className="text-sm text-[#5e5d59]">{error || 'Deliverable not found.'}</p>
+              <button onClick={fetchData} className="text-sm font-semibold text-[#D4714E] bg-transparent border-0 cursor-pointer hover:underline">
                 Try again
               </button>
             </div>
@@ -457,35 +457,35 @@ function CanvasContent({ content, name }: { content: Record<string, any>; name: 
   if (content.sections && Array.isArray(content.sections)) {
     return (
       <div className="space-y-6">
-        <h1 className="text-xl font-bold text-[#0D0D0D] m-0 pb-2" style={{ borderBottom: '2px solid #D44A78' }}>
+        <h1 className="text-xl font-bold text-[#1a1918] m-0 pb-2" style={{ borderBottom: '2px solid #D4714E' }}>
           {name}
         </h1>
         {content.summary && (
           <div className="bg-[#FFF8F5] rounded-xl px-5 py-4" style={{ border: '1px solid rgba(186,60,96,.15)' }}>
-            <p className="text-sm font-semibold text-[#D44A78] m-0 mb-1">Summary</p>
-            <p className="text-sm text-[#3D3B37] leading-relaxed m-0">{content.summary}</p>
+            <p className="text-sm font-semibold text-[#D4714E] m-0 mb-1">Summary</p>
+            <p className="text-sm text-[#3d3d3a] leading-relaxed m-0">{content.summary}</p>
           </div>
         )}
         {content.sections.map((section: any, i: number) => (
           <div key={i}>
-            <h2 className="text-base font-bold text-[#0D0D0D] m-0 mb-2">{section.title}</h2>
+            <h2 className="text-base font-bold text-[#1a1918] m-0 mb-2">{section.title}</h2>
             {typeof section.content === 'string' ? (
-              <div className="text-sm text-[#3D3B37] leading-[1.7] whitespace-pre-wrap">{section.content}</div>
+              <div className="text-sm text-[#3d3d3a] leading-[1.7] whitespace-pre-wrap">{section.content}</div>
             ) : section.table ? (
               <CanvasTable data={section.table} />
             ) : section.items ? (
-              <ul className="text-sm text-[#3D3B37] leading-[1.7] pl-5 m-0 space-y-1">
+              <ul className="text-sm text-[#3d3d3a] leading-[1.7] pl-5 m-0 space-y-1">
                 {section.items.map((item: string, j: number) => <li key={j}>{item}</li>)}
               </ul>
             ) : (
-              <div className="text-sm text-[#3D3B37] leading-[1.7]">
+              <div className="text-sm text-[#3d3d3a] leading-[1.7]">
                 <Markdown>{String(section.content || '')}</Markdown>
               </div>
             )}
           </div>
         ))}
         {content.disclaimer && (
-          <div className="text-xs text-[#A9A49C] pt-4 mt-4" style={{ borderTop: '1px solid #EBE7DF' }}>
+          <div className="text-xs text-[#A9A49C] pt-4 mt-4" style={{ borderTop: '1px solid #e8e6dc' }}>
             {content.disclaimer}
           </div>
         )}
@@ -496,17 +496,17 @@ function CanvasContent({ content, name }: { content: Record<string, any>; name: 
   // Key-value format
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold text-[#0D0D0D] m-0 pb-2" style={{ borderBottom: '2px solid #D44A78' }}>
+      <h1 className="text-xl font-bold text-[#1a1918] m-0 pb-2" style={{ borderBottom: '2px solid #D4714E' }}>
         {name}
       </h1>
       {Object.entries(content).map(([key, value]) => {
         if (key === 'type' || key === 'generated_at') return null;
         return (
-          <div key={key} className="pb-3" style={{ borderBottom: '1px solid #EBE7DF' }}>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#6E6A63] m-0 mb-1">
+          <div key={key} className="pb-3" style={{ borderBottom: '1px solid #e8e6dc' }}>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#5e5d59] m-0 mb-1">
               {key.replace(/_/g, ' ')}
             </p>
-            <div className="text-sm text-[#0D0D0D]">
+            <div className="text-sm text-[#1a1918]">
               {typeof value === 'string' ? (
                 <span className="whitespace-pre-wrap">{value}</span>
               ) : typeof value === 'number' ? (
@@ -565,15 +565,15 @@ function MarkdownCanvas({ content }: { content: string }) {
     <div className="flex">
       {/* Table of Contents sidebar */}
       {showToc && (
-        <div className="hidden md:block w-48 shrink-0 p-4 pt-6 sticky top-0 self-start" style={{ borderRight: '1px solid #EBE7DF' }}>
+        <div className="hidden md:block w-48 shrink-0 p-4 pt-6 sticky top-0 self-start" style={{ borderRight: '1px solid #e8e6dc' }}>
           <p className="text-[10px] font-bold uppercase tracking-widest text-[#A9A49C] m-0 mb-3">Contents</p>
           <nav className="space-y-1">
             {sections.map((s, i) => (
               <button
                 key={i}
                 onClick={() => scrollToSection(s.id)}
-                className={`block w-full text-left text-[12px] leading-tight bg-transparent border-0 cursor-pointer hover:text-[#D44A78] transition-colors p-0 ${
-                  s.level === 3 ? 'pl-3 text-[#A9A49C]' : 'text-[#6E6A63] font-medium'
+                className={`block w-full text-left text-[12px] leading-tight bg-transparent border-0 cursor-pointer hover:text-[#D4714E] transition-colors p-0 ${
+                  s.level === 3 ? 'pl-3 text-[#A9A49C]' : 'text-[#5e5d59] font-medium'
                 }`}
                 style={{ marginBottom: '6px' }}
                 type="button"
@@ -588,18 +588,18 @@ function MarkdownCanvas({ content }: { content: string }) {
       {/* Main content */}
       <div id="canvas-print-area" className="flex-1 px-6 py-5 max-w-[700px] mx-auto canvas-content">
         <div className="canvas-md prose prose-sm max-w-none
-          [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-[#0D0D0D] [&_h2]:mt-6 [&_h2]:mb-3
-          [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-[#3D3B37] [&_h3]:mt-4 [&_h3]:mb-2
-          [&_p]:text-sm [&_p]:text-[#3D3B37] [&_p]:leading-[1.7] [&_p]:mb-3
+          [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-[#1a1918] [&_h2]:mt-6 [&_h2]:mb-3
+          [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-[#3d3d3a] [&_h3]:mt-4 [&_h3]:mb-2
+          [&_p]:text-sm [&_p]:text-[#3d3d3a] [&_p]:leading-[1.7] [&_p]:mb-3
           [&_table]:w-full [&_table]:text-sm [&_table]:border-collapse [&_table]:my-3
-          [&_th]:text-left [&_th]:px-3 [&_th]:py-2 [&_th]:text-xs [&_th]:font-semibold [&_th]:text-[#3D3B37] [&_th]:bg-[#F5F5F5] [&_th]:border [&_th]:border-[rgba(0,0,0,0.08)]
-          [&_td]:px-3 [&_td]:py-2 [&_td]:text-[#0D0D0D] [&_td]:border [&_td]:border-[#EBE7DF]
-          [&_hr]:border-0 [&_hr]:border-t [&_hr]:border-[#EBE7DF] [&_hr]:my-5
-          [&_strong]:font-bold [&_strong]:text-[#0D0D0D]
-          [&_ul]:pl-5 [&_ul]:text-sm [&_ul]:text-[#3D3B37]
-          [&_ol]:pl-5 [&_ol]:text-sm [&_ol]:text-[#3D3B37]
+          [&_th]:text-left [&_th]:px-3 [&_th]:py-2 [&_th]:text-xs [&_th]:font-semibold [&_th]:text-[#3d3d3a] [&_th]:bg-[#F5F5F5] [&_th]:border [&_th]:border-[rgba(0,0,0,0.08)]
+          [&_td]:px-3 [&_td]:py-2 [&_td]:text-[#1a1918] [&_td]:border [&_td]:border-[#e8e6dc]
+          [&_hr]:border-0 [&_hr]:border-t [&_hr]:border-[#e8e6dc] [&_hr]:my-5
+          [&_strong]:font-bold [&_strong]:text-[#1a1918]
+          [&_ul]:pl-5 [&_ul]:text-sm [&_ul]:text-[#3d3d3a]
+          [&_ol]:pl-5 [&_ol]:text-sm [&_ol]:text-[#3d3d3a]
           [&_li]:mb-1
-          [&_em]:text-[#6E6A63]
+          [&_em]:text-[#5e5d59]
         ">
           <Markdown>{processedContent}</Markdown>
         </div>
@@ -617,7 +617,7 @@ function CanvasTable({ data }: { data: any }) {
           <thead>
             <tr className="bg-[#F5F5F5]">
               {headers.map(h => (
-                <th key={h} className="text-left px-3 py-2 text-xs font-semibold text-[#3D3B37] uppercase tracking-wide" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+                <th key={h} className="text-left px-3 py-2 text-xs font-semibold text-[#3d3d3a] uppercase tracking-wide" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
                   {h.replace(/_/g, ' ')}
                 </th>
               ))}
@@ -625,9 +625,9 @@ function CanvasTable({ data }: { data: any }) {
           </thead>
           <tbody>
             {data.map((row: any, i: number) => (
-              <tr key={i} className={i % 2 ? 'bg-[#FAFAF8]' : ''}>
+              <tr key={i} className={i % 2 ? 'bg-[#faf9f5]' : ''}>
                 {headers.map(h => (
-                  <td key={h} className="px-3 py-2 text-[#0D0D0D]" style={{ borderBottom: '1px solid #EBE7DF' }}>
+                  <td key={h} className="px-3 py-2 text-[#1a1918]" style={{ borderBottom: '1px solid #e8e6dc' }}>
                     {typeof row[h] === 'number' ? row[h].toLocaleString() : String(row[h] ?? '')}
                   </td>
                 ))}
@@ -646,11 +646,11 @@ function CanvasTable({ data }: { data: any }) {
         <table className="w-full text-sm" style={{ borderCollapse: 'collapse' }}>
           <tbody>
             {Object.entries(data).map(([k, v], i) => (
-              <tr key={k} className={i % 2 ? 'bg-[#FAFAF8]' : ''}>
-                <td className="px-3 py-2 text-xs font-semibold text-[#6E6A63] w-1/3" style={{ borderBottom: '1px solid #EBE7DF' }}>
+              <tr key={k} className={i % 2 ? 'bg-[#faf9f5]' : ''}>
+                <td className="px-3 py-2 text-xs font-semibold text-[#5e5d59] w-1/3" style={{ borderBottom: '1px solid #e8e6dc' }}>
                   {k.replace(/_/g, ' ')}
                 </td>
-                <td className="px-3 py-2 text-[#0D0D0D]" style={{ borderBottom: '1px solid #EBE7DF' }}>
+                <td className="px-3 py-2 text-[#1a1918]" style={{ borderBottom: '1px solid #e8e6dc' }}>
                   {typeof v === 'number' ? v.toLocaleString() : String(v ?? '')}
                 </td>
               </tr>

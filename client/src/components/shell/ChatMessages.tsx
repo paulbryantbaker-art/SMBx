@@ -20,6 +20,9 @@ interface ChatMessagesProps {
       a duplicate page (the surrounding shell — Notion home, drawer pill —
       already provides the start affordance). */
   hideEmptyState?: boolean;
+  /** Clicking a welcome-state prompt chip fires this with the chip text.
+      When omitted, chips are hidden. */
+  onChipClick?: (text: string) => void;
 }
 
 function formatTimestamp(iso: string): string {
@@ -45,20 +48,20 @@ function YuliaAvatar({ dark, pulsing = false }: { dark: boolean; pulsing?: boole
       className={pulsing ? 'yulia-avatar-pulse' : undefined}
       style={{
         width: 24, height: 24, borderRadius: '50%',
-        background: 'linear-gradient(135deg, #D44A78 0%, #E8709A 100%)',
+        background: 'linear-gradient(135deg, #D4714E 0%, #ec9d78 100%)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         flexShrink: 0,
         boxShadow: dark
           ? '0 1px 2px rgba(0,0,0,0.4)'
-          : '0 1px 2px rgba(212,74,120,0.18)',
+          : '0 1px 2px rgba(212,113,78,0.18)',
       }}
     >
-      <span style={{ color: '#fff', fontSize: 11, fontWeight: 800, letterSpacing: '-0.02em', fontFamily: "'Sora', system-ui, sans-serif" }}>Y</span>
+      <span style={{ color: '#fff', fontSize: 11, fontWeight: 800, letterSpacing: '-0.02em', fontFamily: "'Figtree', system-ui, sans-serif" }}>Y</span>
       <style>{`
         @keyframes yuliaAvatarPulse {
-          0%   { transform: scale(1);     box-shadow: 0 0 0 0 rgba(212,74,120,0.45); }
-          70%  { transform: scale(1.06);  box-shadow: 0 0 0 8px rgba(212,74,120,0); }
-          100% { transform: scale(1);     box-shadow: 0 0 0 0 rgba(212,74,120,0); }
+          0%   { transform: scale(1);     box-shadow: 0 0 0 0 rgba(212,113,78,0.45); }
+          70%  { transform: scale(1.06);  box-shadow: 0 0 0 8px rgba(212,113,78,0); }
+          100% { transform: scale(1);     box-shadow: 0 0 0 0 rgba(212,113,78,0); }
         }
         .yulia-avatar-pulse { animation: yuliaAvatarPulse 1.6s ease-out infinite; }
         @media (prefers-reduced-motion: reduce) {
@@ -95,14 +98,14 @@ function proseClasses(dark: boolean) {
   ].join(' ');
 }
 
-export default function ChatMessages({ messages, streamingText, sending, activeTool, error, onRetry, onOpenDeliverable, desktop, dark = false, userName, hideEmptyState = false }: ChatMessagesProps) {
+export default function ChatMessages({ messages, streamingText, sending, activeTool, error, onRetry, onOpenDeliverable, desktop, dark = false, userName, hideEmptyState = false, onChipClick }: ChatMessagesProps) {
   /* ─── Dark-aware colors ─── */
   const textColor = dark
     ? (desktop ? '#e2e8f0' : '#f0f0f2')
     : (desktop ? '#1e293b' : '#1A1A1A');
   const mutedColor = dark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)';
   const userMsgBg = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)';
-  const cardBg = dark ? '#2a2c2e' : '#fff';
+  const cardBg = dark ? '#141413' : '#fff';
   const cardBorder = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
   const cardIconBg = dark ? 'rgba(255,255,255,0.08)' : '#F5F5F5';
   const cardTitleColor = dark ? '#f0f0f2' : '#000';
@@ -116,7 +119,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
   /* Desktop label: tiny uppercase, muted */
   const Label = ({ text }: { text: string }) => (
     <p style={{
-      fontSize: 11, fontWeight: 700, color: text === 'Yulia' ? '#D44A78' : '#94a3b8',
+      fontSize: 11, fontWeight: 700, color: text === 'Yulia' ? '#D4714E' : '#94a3b8',
       textTransform: 'uppercase', letterSpacing: '0.1em',
       margin: '0 0 4px 0',
     }}>{text}</p>
@@ -134,8 +137,8 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
   } as React.CSSProperties;
 
   /* Mobile-specific user bubble bg — soft warm tint to differentiate from Yulia */
-  const userBubbleBgMobile = dark ? 'rgba(232,112,154,0.12)' : '#F4EBE3';
-  const userBubbleBorderMobile = dark ? 'rgba(232,112,154,0.18)' : '#E8DFD1';
+  const userBubbleBgMobile = dark ? 'rgba(236,157,120,0.12)' : '#F4EBE3';
+  const userBubbleBorderMobile = dark ? 'rgba(236,157,120,0.18)' : '#E8DFD1';
 
   const PROSE = proseClasses(dark);
   const isEmpty = messages.length === 0 && !streamingText && !sending;
@@ -144,7 +147,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
     <div style={{
       width: '100%',
       padding: desktop ? '24px 24px 24px 24px' : '12px 16px 16px 16px',
-      fontFamily: "'Inter', system-ui, sans-serif",
+      fontFamily: "'Figtree', system-ui, sans-serif",
       userSelect: 'text',
       WebkitUserSelect: 'text',
     } as React.CSSProperties}>
@@ -178,15 +181,16 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
           />
 
           <p style={{
-            fontFamily: 'Sora, system-ui',
-            fontSize: desktop ? 18 : 17,
-            fontWeight: 700,
+            fontFamily: "'Instrument Serif', Georgia, serif",
+            fontSize: desktop ? 28 : 24,
+            fontWeight: 400,
             letterSpacing: '-0.01em',
-            color: dark ? '#F0F0F3' : '#1A1C1E',
+            color: dark ? '#f5f4ed' : '#1a1918',
             textAlign: 'center',
             margin: 0,
-            lineHeight: 1.3,
+            lineHeight: 1.15,
             maxWidth: 340,
+            textWrap: 'balance',
           }}>
             {userName
               ? `What are you working on, ${userName.split(' ')[0]}?`
@@ -203,11 +207,69 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
             fontWeight: 500,
           }}>
             {userName
-              ? <>Tell me what you're working on — or tap the <span style={{ color: '#D44A78', fontWeight: 700 }}>+</span> in the pill below for a starter prompt.</>
+              ? <>Tell me what you're working on — or tap one of these to start.</>
               : <>I'm your AI deal intelligence. Tell me about a business you're selling, buying, raising for, or integrating — I'll take it from there.</>}
           </p>
-          {/* Ways-to-start accordion retired — the + button in the ChatDock pill
-              is the canonical starter surface. Avoids duplicate affordances. */}
+
+          {/* V17 prompt chips — three vertical pills with subtle terra left
+              border. Anonymous welcome state only (users with history see
+              their last deal instead). */}
+          {onChipClick && !userName && (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
+                width: '100%',
+                maxWidth: 320,
+                marginTop: desktop ? 8 : 4,
+              }}
+            >
+              {[
+                'Read this document and tell me what to do.',
+                'Help me figure out what my business is worth.',
+                'Draft the first section of my sell-side book.',
+              ].map((text) => (
+                <button
+                  key={text}
+                  type="button"
+                  onClick={() => onChipClick(text)}
+                  className="v17-prompt-chip"
+                  style={{
+                    textAlign: 'left',
+                    padding: '12px 14px 12px 16px',
+                    background: dark ? 'rgba(244,238,227,0.04)' : 'rgba(250,246,238,0.72)',
+                    border: dark ? '1px solid rgba(244,238,227,0.08)' : '1px solid rgba(26,24,20,0.08)',
+                    borderLeft: '2px solid #D4714E',
+                    borderRadius: 10,
+                    color: dark ? '#F4EEE3' : '#1A1814',
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontSize: 14,
+                    fontWeight: 500,
+                    letterSpacing: '-0.005em',
+                    cursor: 'pointer',
+                    WebkitTapHighlightColor: 'transparent',
+                    transition: 'background 160ms ease, border-color 160ms ease, transform 120ms cubic-bezier(0.22,1,0.36,1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 10,
+                  }}
+                >
+                  <span>{text}</span>
+                  <span aria-hidden style={{ color: '#D4714E', fontSize: 13, fontWeight: 500 }}>→</span>
+                </button>
+              ))}
+              <style>{`
+                .v17-prompt-chip:hover {
+                  background: ${dark ? 'rgba(244,238,227,0.07)' : 'rgba(250,246,238,1)'} !important;
+                  border-color: rgba(212,113,78,0.35) !important;
+                  transform: translateX(2px);
+                }
+                .v17-prompt-chip:active { transform: translateX(2px) scale(0.985); }
+              `}</style>
+            </div>
+          )}
         </div>
       )}
 
@@ -250,7 +312,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
                           display: 'inline-flex', alignItems: 'center', gap: 5,
                           padding: '4px 10px', borderRadius: 999,
                           background: dark ? '#f0f0f2' : '#000',
-                          color: dark ? '#1a1c1e' : '#fff',
+                          color: dark ? '#1a1918' : '#fff',
                           fontSize: 11, fontWeight: 600,
                         }}>
                           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -270,7 +332,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
                 {!desktop && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
                     <YuliaAvatar dark={dark} />
-                    <span style={{ fontSize: 11, fontWeight: 700, color: '#D44A78', textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>Yulia</span>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#D4714E', textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>Yulia</span>
                   </div>
                 )}
                 {cardInner}
@@ -334,7 +396,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
             <div key={m.id || i}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
                 <YuliaAvatar dark={dark} />
-                <span style={{ fontSize: 11, fontWeight: 700, color: '#D44A78', textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>Yulia</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#D4714E', textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>Yulia</span>
               </div>
               <div className={PROSE} style={textStyle}>
                 <Markdown>{m.content}</Markdown>
@@ -361,7 +423,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
                 <YuliaAvatar dark={dark} pulsing />
-                <span style={{ fontSize: 11, fontWeight: 700, color: '#D44A78', textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>Yulia</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#D4714E', textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>Yulia</span>
               </div>
               <div style={{ minWidth: 0 }}>
                 <div className={PROSE} style={textStyle}>
@@ -406,12 +468,12 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
                   <span style={{
                     fontSize: 12,
                     fontWeight: 600,
-                    color: '#D44A78',
-                    background: dark ? 'rgba(232,112,154,0.10)' : 'rgba(212,74,120,0.08)',
-                    border: `1px solid ${dark ? 'rgba(232,112,154,0.20)' : 'rgba(212,74,120,0.16)'}`,
+                    color: '#D4714E',
+                    background: dark ? 'rgba(236,157,120,0.10)' : 'rgba(212,113,78,0.08)',
+                    border: `1px solid ${dark ? 'rgba(236,157,120,0.20)' : 'rgba(212,113,78,0.16)'}`,
                     padding: '3px 8px',
                     borderRadius: 999,
-                    fontFamily: 'Inter, system-ui',
+                    fontFamily: "'Figtree', system-ui, sans-serif",
                   }}>
                     {activeTool}…
                   </span>

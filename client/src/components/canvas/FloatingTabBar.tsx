@@ -66,12 +66,12 @@ export default function FloatingTabBar({ tabs, activeTabId, onSelect, onClose, c
       <div
         className="pointer-events-auto"
         style={{
-          background: dark ? '#1A1C1E' : '#FFFFFF',
-          border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
+          background: dark ? '#1a1918' : '#FFFFFF',
+          border: dark ? '1px solid #141413' : '1px solid #e8e6dc',
           borderRadius: 100,
           boxShadow: dark
             ? '0 1px 2px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.35)'
-            : '0 1px 2px rgba(60,55,45,0.08), 0 8px 24px rgba(60,55,45,0.1)',
+            : '0 1px 2px rgba(26,25,24,0.08), 0 8px 24px rgba(26,25,24,0.1)',
           padding: '6px 8px',
           display: 'flex',
           alignItems: 'center',
@@ -99,12 +99,12 @@ export default function FloatingTabBar({ tabs, activeTabId, onSelect, onClose, c
                   ? (dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)')
                   : 'transparent',
                 color: isActive
-                  ? (dark ? '#F0F0F3' : '#1A1C1E')
+                  ? (dark ? '#f5f4ed' : '#1a1918')
                   : (dark ? '#A0A0A0' : '#5D5E61'),
                 fontSize: 13,
                 fontWeight: isActive ? 600 : 500,
                 cursor: 'pointer',
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 letterSpacing: '-0.01em',
                 whiteSpace: 'nowrap',
                 transition: 'background 0.15s ease, color 0.15s ease',

@@ -40,10 +40,11 @@ interface DashboardData {
   };
 }
 
+/* Cowork earth-tone difficulty palette. */
 const DIFFICULTY_COLORS: Record<string, string> = {
-  easy: 'text-green-700 bg-green-50',
-  medium: 'text-yellow-700 bg-yellow-50',
-  hard: 'text-red-700 bg-red-50',
+  easy:   'text-[#1f4a3a] bg-cactus/40',   /* sage → mineral text */
+  medium: 'text-[#8a3d23] bg-peach/50',    /* peach → clay text */
+  hard:   'text-[#7a3048] bg-fig/20',      /* fig */
 };
 
 const STATUS_ICONS: Record<string, string> = {
@@ -88,7 +89,7 @@ export default function SellerDashboard() {
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#D44A78] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#D4714E] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -99,8 +100,8 @@ export default function SellerDashboard() {
         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#FFF0EB] flex items-center justify-center text-2xl">
           {'\u{1F4CA}'}
         </div>
-        <h2 className="text-lg font-bold text-[#0D0D0D] mb-2">No Seller Profile Yet</h2>
-        <p className="text-sm text-[#6E6A63]">Start a conversation with Yulia about selling your business to see your value tracker here.</p>
+        <h2 className="text-lg font-bold text-[#1a1918] mb-2">No Seller Profile Yet</h2>
+        <p className="text-sm text-[#5e5d59]">Start a conversation with Yulia about selling your business to see your value tracker here.</p>
       </div>
     );
   }
@@ -124,8 +125,8 @@ export default function SellerDashboard() {
     <div className="max-w-3xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[#0D0D0D] mb-1">Your Business Value Tracker</h1>
-        <p className="text-sm text-[#6E6A63]">
+        <h1 className="text-2xl font-bold text-[#1a1918] mb-1">Your Business Value Tracker</h1>
+        <p className="text-sm text-[#5e5d59]">
           {deal.business_name || 'Your Business'} &middot; {deal.current_gate || 'Getting Started'}
           {stats?.valuationUpdatedAt && (
             <> &middot; Updated {new Date(stats.valuationUpdatedAt).toLocaleDateString()}</>
@@ -135,8 +136,8 @@ export default function SellerDashboard() {
 
       {/* Journey Phase Indicator */}
       {timeline && (
-        <div className="bg-white rounded-2xl p-6 mb-6" style={{ border: '1px solid #EBE7DF' }}>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#6E6A63] mb-4">Your Exit Journey</p>
+        <div className="bg-white rounded-2xl p-6 mb-6" style={{ border: '1px solid #e8e6dc' }}>
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#5e5d59] mb-4">Your Exit Journey</p>
           <div className="flex items-center gap-0">
             {PHASES.map((phase, i) => {
               const isActive = i === currentPhaseIndex;
@@ -146,24 +147,24 @@ export default function SellerDashboard() {
                   {/* Connector line */}
                   {i > 0 && (
                     <div
-                      className={`absolute top-2.5 right-1/2 w-full h-0.5 ${isPast ? 'bg-[#D44A78]' : 'bg-[#EBE7DF]'}`}
+                      className={`absolute top-2.5 right-1/2 w-full h-0.5 ${isPast ? 'bg-[#D4714E]' : 'bg-[#e8e6dc]'}`}
                       style={{ zIndex: 0 }}
                     />
                   )}
                   {/* Dot */}
                   <div
                     className={`w-5 h-5 rounded-full border-2 flex items-center justify-center relative z-10 ${
-                      isActive ? 'border-[#D44A78] bg-[#D44A78]'
-                      : isPast ? 'border-[#D44A78] bg-white'
+                      isActive ? 'border-[#D4714E] bg-[#D4714E]'
+                      : isPast ? 'border-[#D4714E] bg-white'
                       : 'border-[rgba(0,0,0,0.08)] bg-white'
                     }`}
                   >
-                    {isPast && <span className="text-[9px] text-[#D44A78] font-bold">{'\u2713'}</span>}
+                    {isPast && <span className="text-[9px] text-[#D4714E] font-bold">{'\u2713'}</span>}
                     {isActive && <span className="w-2 h-2 bg-white rounded-full" />}
                   </div>
                   {/* Label */}
                   <span className={`text-[9px] mt-1.5 text-center leading-tight ${
-                    isActive ? 'font-bold text-[#D44A78]' : isPast ? 'text-[#6E6A63]' : 'text-[#A9A49C]'
+                    isActive ? 'font-bold text-[#D4714E]' : isPast ? 'text-[#5e5d59]' : 'text-[#A9A49C]'
                   }`}>
                     {phase.label}
                   </span>
@@ -173,11 +174,11 @@ export default function SellerDashboard() {
           </div>
           {/* Timeline estimate */}
           <div className="mt-4 pt-3 border-t border-[#F5F5F5]">
-            <p className="text-sm text-[#3D3B37]">
+            <p className="text-sm text-[#3d3d3a]">
               Estimated time to market-ready: <span className="font-semibold">~{timeline.estimatedMonths} months</span>
             </p>
             {pendingHardActions > 0 && (
-              <p className="text-xs text-[#6E6A63] mt-1">
+              <p className="text-xs text-[#5e5d59] mt-1">
                 Complete your {pendingHardActions} remaining high-impact action{pendingHardActions > 1 ? 's' : ''} to accelerate your timeline.
               </p>
             )}
@@ -187,12 +188,12 @@ export default function SellerDashboard() {
 
       {/* Valuation Range */}
       {stats?.valuationLow && stats?.valuationHigh && (
-        <div className="bg-white rounded-2xl p-6 mb-6" style={{ border: '1px solid #EBE7DF' }}>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#6E6A63] mb-3">Estimated Value Range</p>
+        <div className="bg-white rounded-2xl p-6 mb-6" style={{ border: '1px solid #e8e6dc' }}>
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#5e5d59] mb-3">Estimated Value Range</p>
           <div className="flex items-end gap-2 mb-4">
-            <span className="text-3xl font-bold text-[#0D0D0D]">{formatDollars(stats.valuationLow)}</span>
-            <span className="text-lg text-[#6E6A63] mb-1">—</span>
-            <span className="text-3xl font-bold text-[#D44A78]">{formatDollars(stats.valuationHigh)}</span>
+            <span className="text-3xl font-bold text-[#1a1918]">{formatDollars(stats.valuationLow)}</span>
+            <span className="text-lg text-[#5e5d59] mb-1">—</span>
+            <span className="text-3xl font-bold text-[#D4714E]">{formatDollars(stats.valuationHigh)}</span>
           </div>
           {/* Range bar */}
           <div className="h-3 bg-[#F5F5F5] rounded-full overflow-hidden">
@@ -200,12 +201,12 @@ export default function SellerDashboard() {
               className="h-full rounded-full"
               style={{
                 width: '65%',
-                background: 'linear-gradient(90deg, #D44A78 0%, #E8956F 100%)',
+                background: 'linear-gradient(90deg, #D4714E 0%, #E8956F 100%)',
               }}
             />
           </div>
           {stats.totalValuationImpact > 0 && (
-            <p className="text-xs text-green-600 font-semibold mt-2">
+            <p className="text-xs text-[#3f6b5d] font-semibold mt-2">
               +{formatDollars(stats.totalValuationImpact)} from completed improvements
             </p>
           )}
@@ -214,25 +215,25 @@ export default function SellerDashboard() {
 
       {/* Action Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-xl p-4 text-center" style={{ border: '1px solid #EBE7DF' }}>
-          <p className="text-2xl font-bold text-[#0D0D0D]">{stats?.totalActions || 0}</p>
-          <p className="text-xs text-[#6E6A63]">Total Actions</p>
+        <div className="bg-white rounded-xl p-4 text-center" style={{ border: '1px solid #e8e6dc' }}>
+          <p className="text-2xl font-bold text-[#1a1918]">{stats?.totalActions || 0}</p>
+          <p className="text-xs text-[#5e5d59]">Total Actions</p>
         </div>
-        <div className="bg-white rounded-xl p-4 text-center" style={{ border: '1px solid #EBE7DF' }}>
-          <p className="text-2xl font-bold text-[#D44A78]">{stats?.inProgressCount || 0}</p>
-          <p className="text-xs text-[#6E6A63]">In Progress</p>
+        <div className="bg-white rounded-xl p-4 text-center" style={{ border: '1px solid #e8e6dc' }}>
+          <p className="text-2xl font-bold text-[#D4714E]">{stats?.inProgressCount || 0}</p>
+          <p className="text-xs text-[#5e5d59]">In Progress</p>
         </div>
-        <div className="bg-white rounded-xl p-4 text-center" style={{ border: '1px solid #EBE7DF' }}>
-          <p className="text-2xl font-bold text-green-600">{stats?.completedCount || 0}</p>
-          <p className="text-xs text-[#6E6A63]">Completed</p>
+        <div className="bg-white rounded-xl p-4 text-center" style={{ border: '1px solid #e8e6dc' }}>
+          <p className="text-2xl font-bold text-[#3f6b5d]">{stats?.completedCount || 0}</p>
+          <p className="text-xs text-[#5e5d59]">Completed</p>
         </div>
       </div>
 
       {/* Improvement Actions */}
-      <h2 className="text-lg font-bold text-[#0D0D0D] mb-3">Improvement Roadmap</h2>
+      <h2 className="text-lg font-bold text-[#1a1918] mb-3">Improvement Roadmap</h2>
       {actions.length === 0 ? (
-        <div className="bg-white rounded-xl p-6 text-center" style={{ border: '1px solid #EBE7DF' }}>
-          <p className="text-sm text-[#6E6A63]">Improvement actions will appear here after your Value Readiness Report is generated.</p>
+        <div className="bg-white rounded-xl p-6 text-center" style={{ border: '1px solid #e8e6dc' }}>
+          <p className="text-sm text-[#5e5d59]">Improvement actions will appear here after your Value Readiness Report is generated.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -240,7 +241,7 @@ export default function SellerDashboard() {
             <div
               key={action.id}
               className={`bg-white rounded-xl p-4 transition-all ${action.status === 'complete' ? 'opacity-70' : ''}`}
-              style={{ border: '1px solid #EBE7DF' }}
+              style={{ border: '1px solid #e8e6dc' }}
             >
               <div className="flex items-start gap-3">
                 {/* Status toggle */}
@@ -252,9 +253,9 @@ export default function SellerDashboard() {
                   }}
                   disabled={updatingId === action.id}
                   className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 cursor-pointer bg-transparent transition-colors ${
-                    action.status === 'complete' ? 'border-green-500 text-green-500 bg-green-50'
-                    : action.status === 'in_progress' ? 'border-[#D44A78] text-[#D44A78]'
-                    : 'border-[rgba(0,0,0,0.08)] text-transparent hover:border-[#D44A78]'
+                    action.status === 'complete' ? 'border-green-500 text-[#629987] bg-cactus/40'
+                    : action.status === 'in_progress' ? 'border-[#D4714E] text-[#D4714E]'
+                    : 'border-[rgba(0,0,0,0.08)] text-transparent hover:border-[#D4714E]'
                   }`}
                   type="button"
                 >
@@ -262,11 +263,11 @@ export default function SellerDashboard() {
                 </button>
 
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-semibold m-0 ${action.status === 'complete' ? 'line-through text-[#A9A49C]' : 'text-[#0D0D0D]'}`}>
+                  <p className={`text-sm font-semibold m-0 ${action.status === 'complete' ? 'line-through text-[#A9A49C]' : 'text-[#1a1918]'}`}>
                     {action.title}
                   </p>
                   {action.description && (
-                    <p className="text-xs text-[#6E6A63] m-0 mt-1">{action.description}</p>
+                    <p className="text-xs text-[#5e5d59] m-0 mt-1">{action.description}</p>
                   )}
                   <div className="flex items-center gap-2 mt-2">
                     {action.difficulty && (
@@ -275,7 +276,7 @@ export default function SellerDashboard() {
                       </span>
                     )}
                     {action.valuation_impact_cents && (
-                      <span className="text-[10px] font-semibold text-green-600">
+                      <span className="text-[10px] font-semibold text-[#3f6b5d]">
                         +{formatDollars(action.valuation_impact_cents)} value
                       </span>
                     )}

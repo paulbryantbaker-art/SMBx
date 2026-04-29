@@ -35,8 +35,8 @@ export default function DocumentToolbar({ editor }: DocumentToolbarProps) {
         border-0 cursor-pointer transition-colors
         ${disabled ? 'opacity-30 cursor-not-allowed' : ''}
         ${active
-          ? 'bg-[rgba(212,74,120,0.12)] text-[#D44A78]'
-          : 'bg-transparent text-[#3D3B37] hover:bg-[#F5F5F5] dark:text-[#C8C4BC] dark:hover:bg-[#2A2C2E]'
+          ? 'bg-[rgba(212,113,78,0.12)] text-[#D4714E]'
+          : 'bg-transparent text-[#3d3d3a] hover:bg-[#F5F5F5] dark:text-[#C8C4BC] dark:hover:bg-[#141413]'
         }
       `}
     >
@@ -44,11 +44,11 @@ export default function DocumentToolbar({ editor }: DocumentToolbarProps) {
     </button>
   );
 
-  const divider = <div className="w-px h-4 bg-[#EBE7DF] dark:bg-[#3A3C3E] mx-1" />;
+  const divider = <div className="w-px h-4 bg-[#e8e6dc] dark:bg-[#3A3C3E] mx-1" />;
   const iconSize = 15;
 
   return (
-    <div className="flex items-center gap-0.5 px-3 py-1.5 border-b border-[#EBE7DF] dark:border-[#3A3C3E] bg-white dark:bg-[#1A1C1E]">
+    <div className="flex items-center gap-0.5 px-3 py-1.5 border-b border-[#e8e6dc] dark:border-[#3A3C3E] bg-white dark:bg-[#1a1918]">
       {/* Text formatting */}
       {btn(
         editor.isActive('bold'),

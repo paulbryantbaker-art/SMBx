@@ -102,7 +102,7 @@ export default function DataRoom({ dealId }: { dealId: number }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-12">
-        <div className="w-8 h-8 border-2 border-[#D44A78] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#D4714E] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -110,7 +110,7 @@ export default function DataRoom({ dealId }: { dealId: number }) {
   if (error || !data) {
     return (
       <div className="flex items-center justify-center p-12">
-        <p className="text-sm text-[#6E6A63]">{error || 'No data room found'}</p>
+        <p className="text-sm text-[#5e5d59]">{error || 'No data room found'}</p>
       </div>
     );
   }
@@ -124,9 +124,9 @@ export default function DataRoom({ dealId }: { dealId: number }) {
   return (
     <div className="flex h-full bg-[#FAF9F6]">
       {/* Folder sidebar */}
-      <div className="w-56 shrink-0 bg-white border-r border-[#EBE7DF] p-4">
-        <h2 className="text-sm font-bold text-[#0D0D0D] mb-4 flex items-center gap-2">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D44A78" strokeWidth="2">
+      <div className="w-56 shrink-0 bg-white border-r border-[#e8e6dc] p-4">
+        <h2 className="text-sm font-bold text-[#1a1918] mb-4 flex items-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4714E" strokeWidth="2">
             <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
           </svg>
           Data Room
@@ -140,14 +140,14 @@ export default function DataRoom({ dealId }: { dealId: number }) {
                 onClick={() => setSelectedFolder(folder.id)}
                 className={`w-full text-left px-3 py-2 rounded-lg text-[13px] font-medium border-0 cursor-pointer transition-colors flex items-center justify-between ${
                   selectedFolder === folder.id
-                    ? 'bg-[#FFF0EB] text-[#D44A78]'
-                    : 'bg-transparent text-[#3D3B37] hover:bg-[#F5F5F5]'
+                    ? 'bg-[#FFF0EB] text-[#D4714E]'
+                    : 'bg-transparent text-[#3d3d3a] hover:bg-[#F5F5F5]'
                 }`}
                 type="button"
               >
                 <span className="truncate">{folder.name}</span>
                 {docCount > 0 && (
-                  <span className="text-[10px] font-semibold bg-[#EBE7DF] rounded-full px-1.5 py-0.5 shrink-0">
+                  <span className="text-[10px] font-semibold bg-[#e8e6dc] rounded-full px-1.5 py-0.5 shrink-0">
                     {docCount}
                   </span>
                 )}
@@ -160,9 +160,9 @@ export default function DataRoom({ dealId }: { dealId: number }) {
       {/* Document grid */}
       <div className="flex-1 p-6 overflow-y-auto">
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-base font-bold text-[#0D0D0D] m-0">{selectedFolderName}</h3>
+          <h3 className="text-base font-bold text-[#1a1918] m-0">{selectedFolderName}</h3>
           {selectedFolder && (
-            <label className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#D44A78] text-white cursor-pointer hover:bg-[#B03860] transition-colors">
+            <label className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#D4714E] text-white cursor-pointer hover:bg-[#B85A3A] transition-colors">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
               </svg>
@@ -199,13 +199,13 @@ export default function DataRoom({ dealId }: { dealId: number }) {
                 {folderDocs.map(doc => (
                   <div
                     key={doc.id}
-                    className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 border border-[#EBE7DF] hover:border-[#D44A78]/30 hover:shadow-sm transition-all cursor-pointer"
+                    className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 border border-[#e8e6dc] hover:border-[#D4714E]/30 hover:shadow-sm transition-all cursor-pointer"
                   >
                     <div className="w-9 h-9 rounded-lg bg-[#F5F5F5] flex items-center justify-center text-base shrink-0">
                       {FILE_ICONS[doc.type] || FILE_ICONS.default}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-[#0D0D0D] m-0 truncate">{doc.name}</p>
+                      <p className="text-sm font-semibold text-[#1a1918] m-0 truncate">{doc.name}</p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className="text-[11px] text-[#A9A49C]">
                           {new Date(doc.created_at).toLocaleDateString()}

@@ -25,11 +25,11 @@ interface LoginProps {
 
 export default function Login({ onGoogleLogin, onNavigateSignup, googleError }: LoginProps) {
   return (
-    <div className="flex justify-center items-center min-h-dvh px-5 bg-[#F9F9FC]">
+    <div className="flex justify-center items-center min-h-dvh px-5 bg-[#faf9f5]">
       <div className="w-full max-w-[400px] bg-white rounded-2xl p-8 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.06)]">
         <div className="flex flex-col items-center mb-7">
           <Logo linked={false} height={32} />
-          <p className="text-sm text-[#6e6a63] mt-2 m-0">Sign in to your account</p>
+          <p className="text-sm text-[#5e5d59] mt-2 m-0">Sign in to your account</p>
         </div>
 
         <button
@@ -50,16 +50,16 @@ export default function Login({ onGoogleLogin, onNavigateSignup, googleError }: 
           <div className="bg-[#FEF2F2] text-[#B91C1C] px-3.5 py-2.5 rounded-xl text-sm mt-3">{googleError}</div>
         )}
 
-        <p className="text-center text-[13px] text-[#6e6a63] mt-6 mb-0 leading-relaxed">
+        <p className="text-center text-[13px] text-[#5e5d59] mt-6 mb-0 leading-relaxed">
           Your Google account is all you need. No password to remember, no separate sign-up — we create your smbx.ai account on first sign-in.
         </p>
 
-        <p className="text-center text-sm text-[#6e6a63] mt-6 m-0">
+        <p className="text-center text-sm text-[#5e5d59] mt-6 m-0">
           New to smbx.ai?{' '}
           <button
             type="button"
             onClick={onNavigateSignup}
-            className="bg-transparent border-none text-[#D44A78] font-semibold cursor-pointer text-sm p-0"
+            className="bg-transparent border-none text-[#D4714E] font-semibold cursor-pointer text-sm p-0"
           >
             Get started
           </button>

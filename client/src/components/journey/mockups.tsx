@@ -222,7 +222,7 @@ export function PeekStack() {
           SDE $695K · 3.5&times;–4.2&times;
         </div>
         <div style={{ position: 'relative', height: 5, background: 'var(--gg-bg-muted)', borderRadius: 3, marginBottom: 6 }}>
-          <div style={{ position: 'absolute', left: '32%', right: '22%', top: 0, bottom: 0, background: 'linear-gradient(90deg, #6B6B70, #0A0A0B)', borderRadius: 3 }} />
+          <div style={{ position: 'absolute', left: '32%', right: '22%', top: 0, bottom: 0, background: 'linear-gradient(90deg, #87867f, #1a1918)', borderRadius: 3 }} />
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--gg-text-muted)' }}>
           <span>$1.5M</span><span>$3.6M</span>
@@ -694,7 +694,7 @@ export function VizBigStat({ value = '$1.1M', label = 'avg hidden value' }: { va
       style={{
         height: 140,
         borderRadius: 14,
-        background: 'linear-gradient(135deg, #F5F5F7 0%, #E8E8EB 100%)',
+        background: 'linear-gradient(135deg, #f5f4ed 0%, #e8e6dc 100%)',
         border: '0.5px solid var(--gg-border)',
         position: 'relative',
         overflow: 'hidden',
@@ -718,7 +718,7 @@ export function VizScoreCard({ score = 87, verdict = 'Pursue' }: { score?: numbe
       style={{
         height: 140,
         borderRadius: 14,
-        background: 'linear-gradient(135deg, #F5F5F7 0%, #E8E8EB 100%)',
+        background: 'linear-gradient(135deg, #f5f4ed 0%, #e8e6dc 100%)',
         border: '0.5px solid var(--gg-border)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         flexDirection: 'column', gap: 8,
@@ -763,7 +763,7 @@ export function VizCapitalStack() {
       style={{
         height: 140,
         borderRadius: 14,
-        background: 'linear-gradient(135deg, #F5F5F7 0%, #E8E8EB 100%)',
+        background: 'linear-gradient(135deg, #f5f4ed 0%, #e8e6dc 100%)',
         border: '0.5px solid var(--gg-border)',
         display: 'flex', flexDirection: 'column', gap: 3,
         padding: 16,

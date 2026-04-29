@@ -24,7 +24,7 @@ async function migrateSessionConversations() {
 function PageLoader() {
   return (
     <div className="flex justify-center items-center min-h-dvh bg-white">
-      <p className="text-[#9CA3AF] font-sans text-base m-0">Loading...</p>
+      <p className="text-[#b0aea5] font-sans text-base m-0">Loading...</p>
     </div>
   );
 }
@@ -53,14 +53,14 @@ function VerifyEmail({ onDone }: { onDone: () => void }) {
     }).catch(() => { setStatus('error'); setMsg('Network error.'); });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   return (
-    <div className="flex justify-center items-center min-h-dvh bg-[#F8F6F2] px-5">
+    <div className="flex justify-center items-center min-h-dvh bg-[#faf9f5] px-5">
       <div className="w-full max-w-[400px] bg-white rounded-2xl p-10 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.06)] text-center">
         {status === 'verifying' && (
           <>
-            <div className="w-12 h-12 rounded-full bg-[#F3F3F6] flex items-center justify-center mx-auto mb-4">
-              <span className="material-symbols-outlined text-[#5D5E61] text-2xl" style={{ animation: 'spin 1s linear infinite' }}>progress_activity</span>
+            <div className="w-12 h-12 rounded-full bg-[#f0eee6] flex items-center justify-center mx-auto mb-4">
+              <span className="material-symbols-outlined text-[#5e5d59] text-2xl" style={{ animation: 'spin 1s linear infinite' }}>progress_activity</span>
             </div>
-            <p className="text-sm text-[#5D5E61] m-0">Verifying your email...</p>
+            <p className="text-sm text-[#5e5d59] m-0">Verifying your email...</p>
           </>
         )}
         {status === 'success' && (
@@ -68,9 +68,9 @@ function VerifyEmail({ onDone }: { onDone: () => void }) {
             <div className="w-14 h-14 rounded-full bg-green-50 border-2 border-green-200 flex items-center justify-center mx-auto mb-5">
               <span className="material-symbols-outlined text-green-600 text-3xl">check</span>
             </div>
-            <p className="text-xl font-bold text-[#0D0D0D] m-0 mb-2" style={{ letterSpacing: '-0.02em' }}>You're verified.</p>
-            <p className="text-sm text-[#5D5E61] m-0 mb-1">Your email has been confirmed. You can close this tab.</p>
-            <p className="text-xs text-[#A9A49C] m-0 mt-4">This tab will close automatically...</p>
+            <p className="text-xl font-bold text-[#1a1918] m-0 mb-2" style={{ letterSpacing: '-0.02em' }}>You're verified.</p>
+            <p className="text-sm text-[#5e5d59] m-0 mb-1">Your email has been confirmed. You can close this tab.</p>
+            <p className="text-xs text-[#b0aea5] m-0 mt-4">This tab will close automatically...</p>
           </>
         )}
         {status === 'error' && (
@@ -78,8 +78,8 @@ function VerifyEmail({ onDone }: { onDone: () => void }) {
             <div className="w-14 h-14 rounded-full bg-red-50 border-2 border-red-200 flex items-center justify-center mx-auto mb-5">
               <span className="material-symbols-outlined text-red-500 text-3xl">close</span>
             </div>
-            <p className="text-xl font-bold text-[#0D0D0D] m-0 mb-2" style={{ letterSpacing: '-0.02em' }}>Verification failed</p>
-            <p className="text-sm text-[#5D5E61] m-0">{msg}</p>
+            <p className="text-xl font-bold text-[#1a1918] m-0 mb-2" style={{ letterSpacing: '-0.02em' }}>Verification failed</p>
+            <p className="text-sm text-[#5e5d59] m-0">{msg}</p>
           </>
         )}
       </div>
@@ -108,8 +108,14 @@ const V4App = lazy(() => import('./components/app_v4'));
 
 /** Check if a path should be handled by the unified AppShell */
 function isShellPath(path: string): boolean {
-  const shellExact = ['/', '/sell', '/buy', '/raise', '/integrate', '/how-it-works', '/advisors', '/enterprise', '/pricing', '/pipeline', '/dataroom', '/settings', '/chat'];
+  /* `/journey` was missing here — clicking the Journey tab navigated
+     to /journey, AppShell unmounted, the Switch fell through to the
+     catch-all `<Redirect to="/" />` and the user got bounced home.
+     Now /journey (and any future ?p=… variant via startsWith) routes
+     into AppShell where the actual MarketingJourney component lives. */
+  const shellExact = ['/', '/journey', '/sell', '/buy', '/raise', '/integrate', '/how-it-works', '/advisors', '/enterprise', '/pricing', '/pipeline', '/dataroom', '/settings', '/chat'];
   if (shellExact.includes(path)) return true;
+  if (path.startsWith('/journey')) return true;
   if (path.startsWith('/chat/')) return true;
   if (path.startsWith('/deal/')) return true;
   return false;
@@ -221,7 +227,7 @@ export default function App() {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-dvh bg-white">
-        <p className="text-[#9CA3AF] font-sans text-base m-0">Loading...</p>
+        <p className="text-[#b0aea5] font-sans text-base m-0">Loading...</p>
       </div>
     );
   }

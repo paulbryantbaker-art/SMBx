@@ -140,7 +140,7 @@ function AssumptionSlider({
 }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="text-xs font-medium text-[#6E6A63] w-28 shrink-0">{label}</span>
+      <span className="text-xs font-medium text-[#5e5d59] w-28 shrink-0">{label}</span>
       <input
         type="range"
         min={min}
@@ -150,10 +150,10 @@ function AssumptionSlider({
         onChange={e => onChange(parseFloat(e.target.value))}
         className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
         style={{
-          background: `linear-gradient(to right, #D44A78 0%, #D44A78 ${((value - min) / (max - min)) * 100}%, rgba(0,0,0,0.08) ${((value - min) / (max - min)) * 100}%, rgba(0,0,0,0.08) 100%)`,
+          background: `linear-gradient(to right, #D4714E 0%, #D4714E ${((value - min) / (max - min)) * 100}%, rgba(0,0,0,0.08) ${((value - min) / (max - min)) * 100}%, rgba(0,0,0,0.08) 100%)`,
         }}
       />
-      <span className="text-xs font-semibold text-[#0D0D0D] w-14 text-right tabular-nums">
+      <span className="text-xs font-semibold text-[#1a1918] w-14 text-right tabular-nums">
         {value.toFixed(step < 1 ? 1 : 0)}{unit}
       </span>
     </div>
@@ -205,18 +205,18 @@ function SensitivityMatrix({
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-bold text-[#0D0D0D] m-0">Sensitivity Analysis</h3>
+        <h3 className="text-sm font-bold text-[#1a1918] m-0">Sensitivity Analysis</h3>
         <span className="text-[10px] text-[#A9A49C]">Year 5 EBITDA by Growth Rate x Gross Margin</span>
       </div>
       <div className="overflow-x-auto rounded-lg" style={{ border: '1px solid rgba(0,0,0,0.08)' }}>
         <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
           <thead>
             <tr className="bg-[#F5F5F5]">
-              <th className="px-2 py-1.5 text-[10px] font-semibold text-[#6E6A63] text-left" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderRight: '1px solid rgba(0,0,0,0.08)' }}>
+              <th className="px-2 py-1.5 text-[10px] font-semibold text-[#5e5d59] text-left" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', borderRight: '1px solid rgba(0,0,0,0.08)' }}>
                 Growth \ Margin
               </th>
               {margins.map(m => (
-                <th key={m} className="px-2 py-1.5 text-[10px] font-semibold text-[#3D3B37] text-right" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+                <th key={m} className="px-2 py-1.5 text-[10px] font-semibold text-[#3d3d3a] text-right" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
                   {m}%
                 </th>
               ))}
@@ -225,7 +225,7 @@ function SensitivityMatrix({
           <tbody>
             {growthRates.map((gr, ri) => (
               <tr key={gr}>
-                <td className="px-2 py-1.5 text-[10px] font-semibold text-[#6E6A63]" style={{ borderRight: '1px solid rgba(0,0,0,0.08)', borderBottom: '1px solid #EBE7DF' }}>
+                <td className="px-2 py-1.5 text-[10px] font-semibold text-[#5e5d59]" style={{ borderRight: '1px solid rgba(0,0,0,0.08)', borderBottom: '1px solid #e8e6dc' }}>
                   {gr > 0 ? `+${gr}` : gr}%
                 </td>
                 {matrix[ri].map((val, ci) => (
@@ -233,9 +233,9 @@ function SensitivityMatrix({
                     key={ci}
                     className="px-2 py-1.5 text-right tabular-nums"
                     style={{
-                      borderBottom: '1px solid #EBE7DF',
+                      borderBottom: '1px solid #e8e6dc',
                       backgroundColor: getCellColor(val),
-                      color: val < 0 ? '#dc2626' : '#0D0D0D',
+                      color: val < 0 ? '#dc2626' : '#1a1918',
                       fontWeight: val < 0 ? 600 : 400,
                     }}
                   >
@@ -350,9 +350,9 @@ export default function InteractiveModel({ content }: InteractiveModelProps) {
 
   const SCENARIOS: { key: ScenarioKey; label: string; color: string }[] = [
     { key: 'conservative', label: 'Conservative', color: '#9B9891' },
-    { key: 'base', label: 'Base', color: '#0D0D0D' },
+    { key: 'base', label: 'Base', color: '#1a1918' },
     { key: 'optimistic', label: 'Optimistic', color: '#22863a' },
-    { key: 'custom', label: 'Custom', color: '#D44A78' },
+    { key: 'custom', label: 'Custom', color: '#D4714E' },
   ];
 
   return (
@@ -360,14 +360,14 @@ export default function InteractiveModel({ content }: InteractiveModelProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-[#0D0D0D] m-0">{content.business_name} — Financial Model</h2>
+          <h2 className="text-lg font-bold text-[#1a1918] m-0">{content.business_name} — Financial Model</h2>
           <p className="text-xs text-[#9B9891] m-0 mt-1">Adjust assumptions below to see projections update in real time</p>
         </div>
         <div className="flex gap-1 bg-[#F5F5F5] rounded-lg p-0.5">
           <button
             onClick={() => setViewMode('projections')}
             className={`px-3 py-1.5 text-xs font-semibold rounded-md border-0 cursor-pointer transition-colors ${
-              viewMode === 'projections' ? 'bg-white text-[#0D0D0D] shadow-sm' : 'bg-transparent text-[#6E6A63]'
+              viewMode === 'projections' ? 'bg-white text-[#1a1918] shadow-sm' : 'bg-transparent text-[#5e5d59]'
             }`}
           >
             Projections
@@ -375,7 +375,7 @@ export default function InteractiveModel({ content }: InteractiveModelProps) {
           <button
             onClick={() => setViewMode('sensitivity')}
             className={`px-3 py-1.5 text-xs font-semibold rounded-md border-0 cursor-pointer transition-colors ${
-              viewMode === 'sensitivity' ? 'bg-white text-[#0D0D0D] shadow-sm' : 'bg-transparent text-[#6E6A63]'
+              viewMode === 'sensitivity' ? 'bg-white text-[#1a1918] shadow-sm' : 'bg-transparent text-[#5e5d59]'
             }`}
           >
             Sensitivity
@@ -392,7 +392,7 @@ export default function InteractiveModel({ content }: InteractiveModelProps) {
             className={`px-3 py-1.5 text-xs font-semibold rounded-full border cursor-pointer transition-colors ${
               scenario === s.key
                 ? 'text-white'
-                : 'bg-transparent text-[#6E6A63] hover:bg-[#F5F5F5]'
+                : 'bg-transparent text-[#5e5d59] hover:bg-[#F5F5F5]'
             }`}
             style={{
               borderColor: scenario === s.key ? s.color : 'rgba(0,0,0,0.08)',
@@ -410,13 +410,13 @@ export default function InteractiveModel({ content }: InteractiveModelProps) {
           <div key={i} className="flex items-center gap-1 bg-[#F5F5F5] rounded-full pl-3 pr-1 py-1">
             <button
               onClick={() => loadSavedScenario(s)}
-              className="text-[10px] font-semibold text-[#3D3B37] bg-transparent border-0 cursor-pointer hover:text-[#D44A78] p-0"
+              className="text-[10px] font-semibold text-[#3d3d3a] bg-transparent border-0 cursor-pointer hover:text-[#D4714E] p-0"
             >
               {s.name}
             </button>
             <button
               onClick={() => deleteSavedScenario(i)}
-              className="w-4 h-4 rounded-full hover:bg-[rgba(0,0,0,0.08)] flex items-center justify-center bg-transparent border-0 cursor-pointer text-[#A9A49C] hover:text-[#6E6A63]"
+              className="w-4 h-4 rounded-full hover:bg-[rgba(0,0,0,0.08)] flex items-center justify-center bg-transparent border-0 cursor-pointer text-[#A9A49C] hover:text-[#5e5d59]"
             >
               <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
@@ -433,13 +433,13 @@ export default function InteractiveModel({ content }: InteractiveModelProps) {
               className="text-[11px] px-2 py-1 rounded border border-[rgba(0,0,0,0.08)] outline-none w-28"
               style={{ fontFamily: 'inherit' }}
             />
-            <button onClick={saveCurrentScenario} className="text-[10px] font-semibold text-[#D44A78] bg-transparent border-0 cursor-pointer">Save</button>
+            <button onClick={saveCurrentScenario} className="text-[10px] font-semibold text-[#D4714E] bg-transparent border-0 cursor-pointer">Save</button>
             <button onClick={() => { setShowSaveInput(false); setSaveName(''); }} className="text-[10px] text-[#A9A49C] bg-transparent border-0 cursor-pointer">Cancel</button>
           </div>
         ) : (
           <button
             onClick={() => setShowSaveInput(true)}
-            className="text-[10px] font-medium text-[#6E6A63] bg-transparent border-0 cursor-pointer hover:text-[#D44A78] flex items-center gap-1"
+            className="text-[10px] font-medium text-[#5e5d59] bg-transparent border-0 cursor-pointer hover:text-[#D4714E] flex items-center gap-1"
           >
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
             Save scenario
@@ -448,7 +448,7 @@ export default function InteractiveModel({ content }: InteractiveModelProps) {
       </div>
 
       {/* Assumption sliders */}
-      <div className="bg-[#FAFAF8] rounded-xl p-4 space-y-3" style={{ border: '1px solid #EBE7DF' }}>
+      <div className="bg-[#faf9f5] rounded-xl p-4 space-y-3" style={{ border: '1px solid #e8e6dc' }}>
         <p className="text-[10px] font-bold uppercase tracking-widest text-[#A9A49C] m-0">Assumptions</p>
         <AssumptionSlider
           label="Revenue Growth"
@@ -499,21 +499,21 @@ export default function InteractiveModel({ content }: InteractiveModelProps) {
 
       {/* Key metrics */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-white rounded-lg p-3 text-center" style={{ border: '1px solid #EBE7DF' }}>
+        <div className="bg-white rounded-lg p-3 text-center" style={{ border: '1px solid #e8e6dc' }}>
           <p className="text-[10px] font-semibold uppercase text-[#A9A49C] m-0 mb-1">5-Year Cash Flow</p>
-          <p className={`text-base font-bold m-0 ${metrics.total5yr < 0 ? 'text-red-600' : 'text-[#0D0D0D]'}`}>
+          <p className={`text-base font-bold m-0 ${metrics.total5yr < 0 ? 'text-[#7a3048]' : 'text-[#1a1918]'}`}>
             {fmtCents(metrics.total5yr)}
           </p>
         </div>
-        <div className="bg-white rounded-lg p-3 text-center" style={{ border: '1px solid #EBE7DF' }}>
+        <div className="bg-white rounded-lg p-3 text-center" style={{ border: '1px solid #e8e6dc' }}>
           <p className="text-[10px] font-semibold uppercase text-[#A9A49C] m-0 mb-1">Avg Annual</p>
-          <p className={`text-base font-bold m-0 ${metrics.avg < 0 ? 'text-red-600' : 'text-[#0D0D0D]'}`}>
+          <p className={`text-base font-bold m-0 ${metrics.avg < 0 ? 'text-[#7a3048]' : 'text-[#1a1918]'}`}>
             {fmtCents(metrics.avg)}
           </p>
         </div>
-        <div className="bg-white rounded-lg p-3 text-center" style={{ border: '1px solid #EBE7DF' }}>
+        <div className="bg-white rounded-lg p-3 text-center" style={{ border: '1px solid #e8e6dc' }}>
           <p className="text-[10px] font-semibold uppercase text-[#A9A49C] m-0 mb-1">Revenue CAGR</p>
-          <p className="text-base font-bold text-[#0D0D0D] m-0">{fmtPct(metrics.cagr)}</p>
+          <p className="text-base font-bold text-[#1a1918] m-0">{fmtPct(metrics.cagr)}</p>
         </div>
       </div>
 
@@ -523,11 +523,11 @@ export default function InteractiveModel({ content }: InteractiveModelProps) {
           <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
             <thead>
               <tr className="bg-[#F5F5F5]">
-                <th className="px-3 py-2 text-left text-[10px] font-semibold text-[#6E6A63] uppercase tracking-wide" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+                <th className="px-3 py-2 text-left text-[10px] font-semibold text-[#5e5d59] uppercase tracking-wide" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
                   Metric
                 </th>
                 {[1, 2, 3, 4, 5].map(y => (
-                  <th key={y} className="px-3 py-2 text-right text-[10px] font-semibold text-[#3D3B37] uppercase tracking-wide" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+                  <th key={y} className="px-3 py-2 text-right text-[10px] font-semibold text-[#3d3d3a] uppercase tracking-wide" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
                     Year {y}
                   </th>
                 ))}
@@ -548,10 +548,10 @@ export default function InteractiveModel({ content }: InteractiveModelProps) {
                 { label: 'Net Cash Flow', key: 'net_cash_flow', fmt: fmtCents, bold: true },
                 { label: 'Cumulative CF', key: 'cumulative_cash_flow', fmt: fmtCents },
               ].map(row => (
-                <tr key={row.key} className={row.bold ? 'bg-[#FAFAF8]' : ''}>
+                <tr key={row.key} className={row.bold ? 'bg-[#faf9f5]' : ''}>
                   <td
-                    className={`px-3 py-1.5 text-[#3D3B37] ${row.bold ? 'font-semibold' : ''}`}
-                    style={{ borderBottom: '1px solid #EBE7DF' }}
+                    className={`px-3 py-1.5 text-[#3d3d3a] ${row.bold ? 'font-semibold' : ''}`}
+                    style={{ borderBottom: '1px solid #e8e6dc' }}
                   >
                     {row.label}
                   </td>
@@ -562,8 +562,8 @@ export default function InteractiveModel({ content }: InteractiveModelProps) {
                         key={i}
                         className={`px-3 py-1.5 text-right tabular-nums ${
                           row.bold ? 'font-semibold' : ''
-                        } ${typeof val === 'number' && val < 0 ? 'text-red-600' : 'text-[#0D0D0D]'}`}
-                        style={{ borderBottom: '1px solid #EBE7DF' }}
+                        } ${typeof val === 'number' && val < 0 ? 'text-[#7a3048]' : 'text-[#1a1918]'}`}
+                        style={{ borderBottom: '1px solid #e8e6dc' }}
                       >
                         {row.fmt(val)}
                       </td>
@@ -585,7 +585,7 @@ export default function InteractiveModel({ content }: InteractiveModelProps) {
       )}
 
       {/* Breakeven info */}
-      <div className="text-xs text-[#9B9891] pt-2" style={{ borderTop: '1px solid #EBE7DF' }}>
+      <div className="text-xs text-[#9B9891] pt-2" style={{ borderTop: '1px solid #e8e6dc' }}>
         Monthly breakeven: {fmtCents(content.breakeven_analysis.monthly_breakeven_revenue)} ·
         Currently {content.breakeven_analysis.current_above_breakeven_pct}% above breakeven
       </div>

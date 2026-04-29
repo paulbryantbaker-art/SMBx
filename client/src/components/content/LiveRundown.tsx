@@ -10,8 +10,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const PINK = '#D44A78';
-const PINK_DARK = '#E8709A';
+const PINK = '#D4714E';
+const PINK_DARK = '#ec9d78';
 
 type Dimension = {
   key: string;
@@ -169,7 +169,7 @@ export function LiveRundown({ dark }: { dark: boolean }) {
   const bg = dark ? '#0f1012' : '#f9f7f1';
   const innerBg = dark ? 'rgba(255,255,255,0.04)' : 'white';
   const border = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
-  const headingColor = dark ? '#f9f9fc' : '#0f1012';
+  const headingColor = dark ? '#faf9f5' : '#0f1012';
   const bodyColor = dark ? 'rgba(218,218,220,0.78)' : '#3c3d40';
   const mutedColor = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
   const accent = dark ? PINK_DARK : PINK;

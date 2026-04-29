@@ -70,7 +70,7 @@ export default function V4Tool({ active, onPick, expanded, onToggle, nextAction,
       <button className="v4-tool__logo" onClick={onToggle} title={expanded ? 'Collapse' : 'Expand'} type="button">
         {expanded ? (
           <span style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', paddingLeft: 4 }}>
-            <span style={{ fontFamily: "'Sora', sans-serif", fontWeight: 800, fontSize: 16, letterSpacing: '-0.04em' }}>smbx</span>
+            <span style={{ fontFamily: "'Figtree', system-ui, sans-serif", fontWeight: 800, fontSize: 16, letterSpacing: '-0.04em' }}>smbx</span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginLeft: 'auto', opacity: 0.6 }}>
               <path d="M15 18l-6-6 6-6" />
             </svg>

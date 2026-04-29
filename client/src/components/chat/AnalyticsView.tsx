@@ -22,11 +22,12 @@ function authHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+/* Cowork journey palette — clay / sky / mineral / plum. */
 const JOURNEY_COLORS: Record<string, string> = {
-  sell: '#D44A78',
-  buy: '#4E8FD4',
-  raise: '#6B8F4E',
-  pmi: '#8F6BD4',
+  sell:  '#D4714E',  /* clay */
+  buy:   '#6a9bcc',  /* sky */
+  raise: '#629987',  /* mineral */
+  pmi:   '#827dbd',  /* plum */
 };
 
 const JOURNEY_LABELS: Record<string, string> = {
@@ -79,7 +80,7 @@ export default function AnalyticsView({
             className="w-3 h-3 rounded-full shrink-0"
             style={{ backgroundColor: JOURNEY_COLORS[selectedDeal.journey_type] || '#999' }}
           />
-          <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#0D0D0D', margin: 0, letterSpacing: '-0.02em' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#1a1918', margin: 0, letterSpacing: '-0.02em' }}>
             {selectedDeal.business_name || `${JOURNEY_LABELS[selectedDeal.journey_type] || ''} Deal #${selectedDeal.id}`}
           </h2>
           <span
@@ -104,7 +105,7 @@ export default function AnalyticsView({
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
       <div className="mb-6">
-        <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#0D0D0D', margin: 0, letterSpacing: '-0.02em' }}>Analytics</h1>
+        <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#1a1918', margin: 0, letterSpacing: '-0.02em' }}>Analytics</h1>
         <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.4)', margin: '4px 0 0' }}>
           Deal pipeline and progress overview
         </p>
@@ -114,7 +115,7 @@ export default function AnalyticsView({
       {!loading && deals.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           <StatCard label="Active Deals" value={String(deals.filter(d => d.status === 'active').length)} />
-          <StatCard label="Sell" value={String(deals.filter(d => d.journey_type === 'sell').length)} color="#D44A78" />
+          <StatCard label="Sell" value={String(deals.filter(d => d.journey_type === 'sell').length)} color="#D4714E" />
           <StatCard label="Buy" value={String(deals.filter(d => d.journey_type === 'buy').length)} color="#4E8FD4" />
           <StatCard label="Raise / PMI" value={String(deals.filter(d => d.journey_type === 'raise' || d.journey_type === 'pmi').length)} color="#6B8F4E" />
         </div>
@@ -138,7 +139,7 @@ export default function AnalyticsView({
                   style={{ backgroundColor: JOURNEY_COLORS[deal.journey_type] || '#999' }}
                 />
                 <div className="flex-1 min-w-0">
-                  <p style={{ fontSize: '14px', fontWeight: 600, color: '#0D0D0D', margin: 0 }} className="truncate">
+                  <p style={{ fontSize: '14px', fontWeight: 600, color: '#1a1918', margin: 0 }} className="truncate">
                     {deal.business_name || `Deal #${deal.id}`}
                   </p>
                   <p style={{ fontSize: '12px', color: 'rgba(0,0,0,0.4)', margin: '2px 0 0' }}>
@@ -168,7 +169,7 @@ function StatCard({ label, value, color }: { label: string; value: string; color
   return (
     <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.06)' }}>
       <p style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(0,0,0,0.35)', margin: 0 }}>{label}</p>
-      <p style={{ fontSize: '28px', fontWeight: 700, color: color || '#0D0D0D', margin: '4px 0 0', letterSpacing: '-0.03em' }}>{value}</p>
+      <p style={{ fontSize: '28px', fontWeight: 700, color: color || '#1a1918', margin: '4px 0 0', letterSpacing: '-0.03em' }}>{value}</p>
     </div>
   );
 }
@@ -188,7 +189,7 @@ function GateProgressView({ deal }: { deal: Deal }) {
 
   return (
     <div>
-      <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#0D0D0D', margin: '0 0 16px' }}>Gate Progress</h3>
+      <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#1a1918', margin: '0 0 16px' }}>Gate Progress</h3>
       <div className="flex flex-col gap-2">
         {gates.map((gate, i) => {
           const isDone = i < currentIdx;
@@ -205,8 +206,8 @@ function GateProgressView({ deal }: { deal: Deal }) {
               <span
                 className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
                 style={{
-                  background: isDone ? '#D44A78' : isCurrent ? 'rgba(186,60,96,0.15)' : 'rgba(0,0,0,0.06)',
-                  color: isDone ? '#fff' : isCurrent ? '#D44A78' : 'rgba(0,0,0,0.3)',
+                  background: isDone ? '#D4714E' : isCurrent ? 'rgba(186,60,96,0.15)' : 'rgba(0,0,0,0.06)',
+                  color: isDone ? '#fff' : isCurrent ? '#D4714E' : 'rgba(0,0,0,0.3)',
                 }}
               >
                 {isDone ? (
@@ -218,7 +219,7 @@ function GateProgressView({ deal }: { deal: Deal }) {
                 )}
               </span>
               <div>
-                <p style={{ fontSize: '13px', fontWeight: isCurrent ? 600 : 500, color: isDone || isCurrent ? '#0D0D0D' : 'rgba(0,0,0,0.35)', margin: 0 }}>
+                <p style={{ fontSize: '13px', fontWeight: isCurrent ? 600 : 500, color: isDone || isCurrent ? '#1a1918' : 'rgba(0,0,0,0.35)', margin: 0 }}>
                   {gate} — {GATE_LABELS[gate] || gate}
                 </p>
               </div>

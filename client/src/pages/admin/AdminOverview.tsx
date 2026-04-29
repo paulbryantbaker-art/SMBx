@@ -27,7 +27,7 @@ ChartJS.register(
 );
 
 /* ── color constants ── */
-const TERRA = '#D44A78';
+const TERRA = '#D4714E';
 const GREEN = '#34A853';
 const BLUE = '#4E8FD4';
 const YELLOW = '#FBBC04';
@@ -41,16 +41,16 @@ const JOURNEY_COLORS: Record<string, string> = {
 };
 
 const PLAN_COLORS: Record<string, string> = {
-  free: '#5d5e61',
+  free: '#5e5d59',
   starter: YELLOW,
   professional: TERRA,
-  enterprise: '#1a1c1e',
+  enterprise: '#1a1918',
 };
 
 /* ── shared chart options ── */
 const FONT_FAMILY = 'Inter, sans-serif';
 const GRID_COLOR = 'rgba(0,0,0,0.04)';
-const TICK_COLOR = '#5d5e61';
+const TICK_COLOR = '#5e5d59';
 
 /* ── types ── */
 interface Overview {
@@ -153,10 +153,10 @@ export default function AdminOverview() {
           {Array(6)
             .fill(0)
             .map((_, i) => (
-              <div key={i} className="h-20 bg-[#EEEEF0] rounded-xl" />
+              <div key={i} className="h-20 bg-[#e8e6dc] rounded-xl" />
             ))}
         </div>
-        <div className="h-64 bg-[#EEEEF0] rounded-2xl" />
+        <div className="h-64 bg-[#e8e6dc] rounded-2xl" />
       </div>
     );
   }
@@ -357,11 +357,11 @@ export default function AdminOverview() {
         <button
           onClick={sendTestEmails}
           disabled={testStatus === 'Sending...'}
-          className="px-4 py-2 rounded-full text-xs font-semibold bg-[#1A1C1E] text-white border-none cursor-pointer hover:bg-[#333] transition-colors disabled:opacity-50"
+          className="px-4 py-2 rounded-full text-xs font-semibold bg-[#1a1918] text-white border-none cursor-pointer hover:bg-[#333] transition-colors disabled:opacity-50"
         >
           Send Test Emails
         </button>
-        {testStatus && <span className="text-xs text-[#5d5e61]">{testStatus}</span>}
+        {testStatus && <span className="text-xs text-[#5e5d59]">{testStatus}</span>}
       </div>
 
       {/* KPI Cards */}
@@ -369,16 +369,16 @@ export default function AdminOverview() {
         {kpis.map((kpi) => (
           <div
             key={kpi.label}
-            className="rounded-xl p-4 bg-white border border-[#EEEEF0]"
+            className="rounded-xl p-4 bg-white border border-[#e8e6dc]"
           >
-            <p className="text-[10px] uppercase tracking-widest font-bold text-[#5d5e61] mb-1">
+            <p className="text-[10px] uppercase tracking-widest font-bold text-[#5e5d59] mb-1">
               {kpi.label}
             </p>
             <p
               className={`text-2xl font-black ${
                 'red' in kpi && kpi.red
                   ? 'text-red-600'
-                  : 'text-[#1a1c1e]'
+                  : 'text-[#1a1918]'
               }`}
             >
               {typeof kpi.value === 'number'
@@ -392,7 +392,7 @@ export default function AdminOverview() {
       {/* Funnel + Revenue */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         {/* Conversion Funnel */}
-        <div className="rounded-2xl bg-white border border-[#EEEEF0] p-6">
+        <div className="rounded-2xl bg-white border border-[#e8e6dc] p-6">
           <h3 className="text-lg font-bold mb-4">Conversion Funnel</h3>
           <div className="h-64">
             <Bar data={funnelData} options={funnelOptions} />
@@ -400,7 +400,7 @@ export default function AdminOverview() {
         </div>
 
         {/* Revenue Breakdown */}
-        <div className="rounded-2xl bg-white border border-[#EEEEF0] p-6">
+        <div className="rounded-2xl bg-white border border-[#e8e6dc] p-6">
           <h3 className="text-lg font-bold mb-4">Revenue Breakdown</h3>
           <div className="h-64">
             <Doughnut data={doughnutData} options={doughnutOptions} />
@@ -409,7 +409,7 @@ export default function AdminOverview() {
       </div>
 
       {/* Daily Trend */}
-      <div className="rounded-2xl bg-white border border-[#EEEEF0] p-6 mt-6">
+      <div className="rounded-2xl bg-white border border-[#e8e6dc] p-6 mt-6">
         <h3 className="text-lg font-bold mb-4">Daily Trend (30d)</h3>
         <div className="h-72">
           <Line data={lineData} options={lineOptions} />
@@ -417,7 +417,7 @@ export default function AdminOverview() {
       </div>
 
       {/* Journey Distribution */}
-      <div className="rounded-2xl bg-white border border-[#EEEEF0] p-6 mt-6">
+      <div className="rounded-2xl bg-white border border-[#e8e6dc] p-6 mt-6">
         <h3 className="text-lg font-bold mb-4">Journey Distribution</h3>
         <div className="h-64">
           <Bar data={journeyData} options={journeyOptions} />

@@ -163,7 +163,7 @@ export default function AuthV4Shell({
               justifyContent: 'center',
               color: 'var(--v4-mute)',
               fontSize: 14,
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
             }}>
               Artifacts Yulia generates will appear here.
             </div>

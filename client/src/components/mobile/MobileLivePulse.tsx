@@ -11,8 +11,8 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const PINK = '#D44A78';
-const PINK_DARK = '#E8709A';
+const PINK = '#D4714E';
+const PINK_DARK = '#ec9d78';
 
 const SNIPPETS = [
   'scoring a $48M EBITDA MSP in Texas',
@@ -46,8 +46,8 @@ export function MobileLivePulse({ dark }: { dark: boolean }) {
       <div
         className="inline-flex items-center gap-2 px-4 py-2 rounded-full"
         style={{
-          background: dark ? 'rgba(232,112,154,0.06)' : 'rgba(212,74,120,0.05)',
-          border: `1px solid ${dark ? 'rgba(232,112,154,0.16)' : 'rgba(212,74,120,0.14)'}`,
+          background: dark ? 'rgba(236,157,120,0.06)' : 'rgba(212,113,78,0.05)',
+          border: `1px solid ${dark ? 'rgba(236,157,120,0.16)' : 'rgba(212,113,78,0.14)'}`,
           maxWidth: '100%',
         }}
       >

@@ -24,13 +24,13 @@ interface ParticipantPanelProps {
 }
 
 const ROLE_LABELS: Record<string, { label: string; color: string }> = {
-  owner: { label: 'Owner', color: 'text-[#D44A78] bg-[#FFF8F5]' },
-  attorney: { label: 'Attorney', color: 'text-purple-700 bg-purple-50' },
-  cpa: { label: 'CPA', color: 'text-blue-700 bg-blue-50' },
-  broker: { label: 'Broker', color: 'text-green-700 bg-green-50' },
-  lender: { label: 'Lender', color: 'text-yellow-700 bg-yellow-50' },
+  owner: { label: 'Owner', color: 'text-[#D4714E] bg-[#FFF8F5]' },
+  attorney: { label: 'Attorney', color: 'text-[#4a4773] bg-plum/15' },
+  cpa: { label: 'CPA', color: 'text-[#2f5a85] bg-sky/15' },
+  broker: { label: 'Broker', color: 'text-[#1f4a3a] bg-cactus/40' },
+  lender: { label: 'Lender', color: 'text-[#8a3d23] bg-peach/50' },
   consultant: { label: 'Consultant', color: 'text-gray-600 bg-gray-100' },
-  counterparty: { label: 'Counterparty', color: 'text-red-600 bg-red-50' },
+  counterparty: { label: 'Counterparty', color: 'text-[#7a3048] bg-fig/15' },
 };
 
 const ROLES = ['attorney', 'cpa', 'broker', 'lender', 'consultant', 'counterparty'];
@@ -108,7 +108,7 @@ export default function ParticipantPanel({ dealId }: ParticipantPanelProps) {
         <p className="text-[11px] font-semibold uppercase tracking-wider text-[#A9A49C] m-0">Team</p>
         <button
           onClick={() => setShowInvite(!showInvite)}
-          className="text-[11px] font-semibold text-[#D44A78] bg-transparent border-0 cursor-pointer hover:underline"
+          className="text-[11px] font-semibold text-[#D4714E] bg-transparent border-0 cursor-pointer hover:underline"
         >
           + Invite
         </button>
@@ -117,13 +117,13 @@ export default function ParticipantPanel({ dealId }: ParticipantPanelProps) {
       {/* Invite form */}
       {showInvite && (
         <div className="px-3 pb-3">
-          <div className="p-3 rounded-xl bg-[#FAFAFA] space-y-2">
+          <div className="p-3 rounded-xl bg-[#f5f4ed] space-y-2">
             <input
               type="email"
               placeholder="Email address"
               value={inviteEmail}
               onChange={e => setInviteEmail(e.target.value)}
-              className="w-full px-3 py-1.5 rounded-lg text-sm border border-border bg-white outline-none focus:border-[#D44A78]"
+              className="w-full px-3 py-1.5 rounded-lg text-sm border border-border bg-white outline-none focus:border-[#D4714E]"
             />
             <select
               value={inviteRole}
@@ -138,18 +138,18 @@ export default function ParticipantPanel({ dealId }: ParticipantPanelProps) {
               <button
                 onClick={handleInvite}
                 disabled={inviting || !inviteEmail.trim()}
-                className="flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] disabled:opacity-50"
+                className="flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#D4714E] text-white border-0 cursor-pointer hover:bg-[#B85A3A] disabled:opacity-50"
               >
                 {inviting ? 'Sending...' : 'Send Invite'}
               </button>
               <button
                 onClick={() => { setShowInvite(false); setInviteError(null); }}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#F5F5F5] text-[#3D3B37] border-0 cursor-pointer hover:bg-[#EBE7DF]"
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#F5F5F5] text-[#3d3d3a] border-0 cursor-pointer hover:bg-[#e8e6dc]"
               >
                 Cancel
               </button>
             </div>
-            {inviteError && <p className="text-xs text-red-600 m-0">{inviteError}</p>}
+            {inviteError && <p className="text-xs text-[#7a3048] m-0">{inviteError}</p>}
           </div>
         </div>
       )}
@@ -157,11 +157,11 @@ export default function ParticipantPanel({ dealId }: ParticipantPanelProps) {
       {/* Owner */}
       {owner && (
         <div className="flex items-center gap-2 px-3 py-1.5">
-          <div className="w-6 h-6 rounded-full bg-[#D44A78] text-white flex items-center justify-center text-[10px] font-bold shrink-0">
+          <div className="w-6 h-6 rounded-full bg-[#D4714E] text-white flex items-center justify-center text-[10px] font-bold shrink-0">
             {(owner.display_name || owner.email)?.[0]?.toUpperCase() || '?'}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[12px] font-medium text-[#0D0D0D] m-0 truncate">{owner.display_name || owner.email}</p>
+            <p className="text-[12px] font-medium text-[#1a1918] m-0 truncate">{owner.display_name || owner.email}</p>
           </div>
           <span className={`text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded-full ${ROLE_LABELS.owner.color}`}>
             Owner
@@ -174,18 +174,18 @@ export default function ParticipantPanel({ dealId }: ParticipantPanelProps) {
         const roleInfo = ROLE_LABELS[p.role] || ROLE_LABELS.consultant;
         return (
           <div key={p.id} className="flex items-center gap-2 px-3 py-1.5 group">
-            <div className="w-6 h-6 rounded-full bg-[#EBE7DF] text-[#6E6A63] flex items-center justify-center text-[10px] font-bold shrink-0">
+            <div className="w-6 h-6 rounded-full bg-[#e8e6dc] text-[#5e5d59] flex items-center justify-center text-[10px] font-bold shrink-0">
               {(p.display_name || p.email)?.[0]?.toUpperCase() || '?'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[12px] font-medium text-[#0D0D0D] m-0 truncate">{p.display_name || p.email}</p>
+              <p className="text-[12px] font-medium text-[#1a1918] m-0 truncate">{p.display_name || p.email}</p>
             </div>
             <span className={`text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded-full ${roleInfo.color}`}>
               {roleInfo.label}
             </span>
             <button
               onClick={() => handleRemove(p.id)}
-              className="hidden group-hover:flex w-5 h-5 items-center justify-center rounded-full hover:bg-red-50 cursor-pointer border-0 bg-transparent text-red-400 hover:text-red-600 transition-colors shrink-0"
+              className="hidden group-hover:flex w-5 h-5 items-center justify-center rounded-full hover:bg-fig/15 cursor-pointer border-0 bg-transparent text-red-400 hover:text-[#7a3048] transition-colors shrink-0"
             >
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
@@ -203,7 +203,7 @@ export default function ParticipantPanel({ dealId }: ParticipantPanelProps) {
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[12px] text-[#6E6A63] m-0 truncate">{inv.email}</p>
+                <p className="text-[12px] text-[#5e5d59] m-0 truncate">{inv.email}</p>
               </div>
               <span className={`text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded-full ${(ROLE_LABELS[inv.role] || ROLE_LABELS.consultant).color}`}>
                 {(ROLE_LABELS[inv.role] || ROLE_LABELS.consultant).label}

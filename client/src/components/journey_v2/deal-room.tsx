@@ -426,7 +426,7 @@ export function DealStep({
           </div>
           <aside style={{
             paddingLeft: 'var(--dr-s-4)',
-            borderLeft: '2px solid rgba(212,74,120,0.45)',
+            borderLeft: '2px solid rgba(212,113,78,0.45)',
           }}>{callout}</aside>
         </div>
       ) : (
@@ -583,7 +583,7 @@ export function Row({ title, sub, amt, highlight }: {
     <div
       className="row"
       style={highlight ? {
-        background: '#F5F5F7',
+        background: '#f5f4ed',
         margin: '0 -22px -22px',
         padding: '16px 22px',
         borderTop: '0.5px solid rgba(0,0,0,0.08)',
@@ -613,7 +613,7 @@ export function ScoreDonut({ score, max = 100, size = 180 }: { score: number; ma
         <circle cx="100" cy="100" r="90" fill="none" stroke="#F0F0F2" strokeWidth="16" />
         <circle
           cx="100" cy="100" r="90"
-          fill="none" stroke="#0A0A0B" strokeWidth="16"
+          fill="none" stroke="#1a1918" strokeWidth="16"
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={dashOffset}
@@ -621,8 +621,8 @@ export function ScoreDonut({ score, max = 100, size = 180 }: { score: number; ma
         />
       </svg>
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ fontFamily: 'Sora, sans-serif', fontWeight: 800, fontSize: 54, letterSpacing: '-0.035em' }}>
-          {score}<span style={{ fontSize: 18, color: '#9A9A9F' }}>/{max}</span>
+        <div style={{ fontFamily: 'Figtree, system-ui, sans-serif', fontWeight: 800, fontSize: 54, letterSpacing: '-0.035em' }}>
+          {score}<span style={{ fontSize: 18, color: '#b0aea5' }}>/{max}</span>
         </div>
       </div>
     </div>
@@ -643,7 +643,7 @@ export function DimList({ dims }: { dims: readonly Dim[] }) {
         <div key={d.label} style={{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 13 }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: DIM_TONE[d.tone] }} />
           <span style={{ flex: 1, color: '#3A3A3E', fontWeight: 500 }}>{d.label}</span>
-          <span style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{d.value.toFixed(1)}</span>
+          <span style={{ fontFamily: 'Figtree, system-ui, sans-serif', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{d.value.toFixed(1)}</span>
         </div>
       ))}
     </div>

@@ -65,10 +65,11 @@ function formatCurrency(val: number | null): string {
   return `$${val.toLocaleString()}`;
 }
 
+/* Cowork earth-tone score tiers — mineral / clay / fig. */
 function scoreColor(score: number): string {
-  if (score >= 80) return 'text-green-600 bg-green-50';
-  if (score >= 60) return 'text-yellow-600 bg-yellow-50';
-  return 'text-red-600 bg-red-50';
+  if (score >= 80) return 'text-[#1f4a3a] bg-cactus/40';
+  if (score >= 60) return 'text-[#8a3d23] bg-peach/50';
+  return 'text-[#7a3048] bg-fig/20';
 }
 
 interface SourcingPanelProps {
@@ -263,12 +264,12 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
 
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
-        <p className="text-sm text-[#6E6A63] m-0">
+        <p className="text-sm text-[#5e5d59] m-0">
           {theses.length} {theses.length === 1 ? 'thesis' : 'theses'}
         </p>
         <button
           onClick={() => setShowNewThesis(true)}
-          className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] transition-colors"
+          className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#D4714E] text-white border-0 cursor-pointer hover:bg-[#B85A3A] transition-colors"
         >
           + New Thesis
         </button>
@@ -276,89 +277,89 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
 
       {/* New Thesis Form */}
       {showNewThesis && (
-        <div className="bg-[#FAFAFA] rounded-2xl border border-[#D44A78] p-4 mb-5">
+        <div className="bg-[#f5f4ed] rounded-2xl border border-[#D4714E] p-4 mb-5">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-[#0D0D0D] m-0">Create Buy Thesis</h3>
+            <h3 className="text-sm font-semibold text-[#1a1918] m-0">Create Buy Thesis</h3>
             <button onClick={() => setShowNewThesis(false)} className="w-6 h-6 rounded-full hover:bg-[#F5F5F5] flex items-center justify-center cursor-pointer border-0 bg-transparent">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
           </div>
           <div className="space-y-2.5 mb-3">
             <div>
-              <label className="block text-[10px] font-medium text-[#6E6A63] mb-0.5">Name *</label>
+              <label className="block text-[10px] font-medium text-[#5e5d59] mb-0.5">Name *</label>
               <input
                 type="text"
                 value={newThesis.name}
                 onChange={e => setNewThesis(p => ({ ...p, name: e.target.value }))}
                 placeholder="e.g. DFW HVAC Roll-up"
-                className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
+                className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#1a1918] outline-none focus:border-[#D4714E]"
               />
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[10px] font-medium text-[#6E6A63] mb-0.5">Industry</label>
+                <label className="block text-[10px] font-medium text-[#5e5d59] mb-0.5">Industry</label>
                 <input
                   type="text"
                   value={newThesis.industry}
                   onChange={e => setNewThesis(p => ({ ...p, industry: e.target.value }))}
                   placeholder="HVAC"
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#1a1918] outline-none focus:border-[#D4714E]"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-medium text-[#6E6A63] mb-0.5">Geography</label>
+                <label className="block text-[10px] font-medium text-[#5e5d59] mb-0.5">Geography</label>
                 <input
                   type="text"
                   value={newThesis.geography}
                   onChange={e => setNewThesis(p => ({ ...p, geography: e.target.value }))}
                   placeholder="Southeast US"
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#1a1918] outline-none focus:border-[#D4714E]"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-medium text-[#6E6A63] mb-0.5">NAICS Code</label>
+                <label className="block text-[10px] font-medium text-[#5e5d59] mb-0.5">NAICS Code</label>
                 <input
                   type="text"
                   value={newThesis.naicsCode}
                   onChange={e => setNewThesis(p => ({ ...p, naicsCode: e.target.value }))}
                   placeholder="238220"
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#1a1918] outline-none focus:border-[#D4714E]"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-medium text-[#6E6A63] mb-0.5">Min Rev ($)</label>
+                <label className="block text-[10px] font-medium text-[#5e5d59] mb-0.5">Min Rev ($)</label>
                 <input
                   type="number"
                   value={newThesis.minRevenue}
                   onChange={e => setNewThesis(p => ({ ...p, minRevenue: e.target.value }))}
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#1a1918] outline-none focus:border-[#D4714E]"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-medium text-[#6E6A63] mb-0.5">Max Rev ($)</label>
+                <label className="block text-[10px] font-medium text-[#5e5d59] mb-0.5">Max Rev ($)</label>
                 <input
                   type="number"
                   value={newThesis.maxRevenue}
                   onChange={e => setNewThesis(p => ({ ...p, maxRevenue: e.target.value }))}
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#1a1918] outline-none focus:border-[#D4714E]"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-medium text-[#6E6A63] mb-0.5">Min Price ($)</label>
+                <label className="block text-[10px] font-medium text-[#5e5d59] mb-0.5">Min Price ($)</label>
                 <input
                   type="number"
                   value={newThesis.minPrice}
                   onChange={e => setNewThesis(p => ({ ...p, minPrice: e.target.value }))}
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#1a1918] outline-none focus:border-[#D4714E]"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-medium text-[#6E6A63] mb-0.5">Max Price ($)</label>
+                <label className="block text-[10px] font-medium text-[#5e5d59] mb-0.5">Max Price ($)</label>
                 <input
                   type="number"
                   value={newThesis.maxPrice}
                   onChange={e => setNewThesis(p => ({ ...p, maxPrice: e.target.value }))}
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#1a1918] outline-none focus:border-[#D4714E]"
                 />
               </div>
             </div>
@@ -366,14 +367,14 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
           <div className="flex justify-end gap-2">
             <button
               onClick={() => setShowNewThesis(false)}
-              className="px-3 py-1.5 rounded-xl text-xs font-medium bg-transparent text-[#6E6A63] border border-[rgba(0,0,0,0.08)] cursor-pointer hover:bg-[#F5F5F5] transition-colors"
+              className="px-3 py-1.5 rounded-xl text-xs font-medium bg-transparent text-[#5e5d59] border border-[rgba(0,0,0,0.08)] cursor-pointer hover:bg-[#F5F5F5] transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={createThesis}
               disabled={saving || !newThesis.name.trim()}
-              className="px-4 py-1.5 rounded-xl text-xs font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-1.5 rounded-xl text-xs font-semibold bg-[#D4714E] text-white border-0 cursor-pointer hover:bg-[#B85A3A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? 'Creating...' : 'Create'}
             </button>
@@ -385,8 +386,8 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
       {loading && (
         <div className="space-y-3">
           {[1, 2].map(i => (
-            <div key={i} className="animate-pulse bg-[#FAFAFA] rounded-2xl p-4">
-              <div className="h-4 bg-[#EBE7DF] rounded w-1/3 mb-2" />
+            <div key={i} className="animate-pulse bg-[#f5f4ed] rounded-2xl p-4">
+              <div className="h-4 bg-[#e8e6dc] rounded w-1/3 mb-2" />
               <div className="flex gap-3">
                 <div className="h-3 bg-[#F5F5F5] rounded w-1/4" />
                 <div className="h-3 bg-[#F5F5F5] rounded w-1/4" />
@@ -404,11 +405,11 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
               <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
             </svg>
           </div>
-          <p className="text-base font-semibold text-[#0D0D0D] m-0 mb-1">No buy theses yet</p>
-          <p className="text-xs text-[#6E6A63] m-0 mb-3">Define what you're looking for and we'll find matches.</p>
+          <p className="text-base font-semibold text-[#1a1918] m-0 mb-1">No buy theses yet</p>
+          <p className="text-xs text-[#5e5d59] m-0 mb-3">Define what you're looking for and we'll find matches.</p>
           <button
             onClick={() => setShowNewThesis(true)}
-            className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] transition-colors"
+            className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#D4714E] text-white border-0 cursor-pointer hover:bg-[#B85A3A] transition-colors"
           >
             Create your first thesis
           </button>
@@ -426,24 +427,24 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                 onClick={() => setSelectedThesis(selectedThesis === t.id ? null : t.id)}
                 className={`w-full text-left rounded-xl p-3 border transition-all cursor-pointer ${
                   selectedThesis === t.id
-                    ? 'bg-[#FAFAFA] border-[#D44A78]'
-                    : 'bg-[#FAFAFA] border-transparent hover:border-[#D44A78]'
+                    ? 'bg-[#f5f4ed] border-[#D4714E]'
+                    : 'bg-[#f5f4ed] border-transparent hover:border-[#D4714E]'
                 }`}
               >
                 <div className="flex items-center gap-1.5 mb-0.5">
                   <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full ${
-                    t.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-[#F5F5F5] text-[#A9A49C]'
+                    t.status === 'active' ? 'bg-cactus/60 text-[#1f4a3a]' : 'bg-[#F5F5F5] text-[#A9A49C]'
                   }`}>
                     {t.status}
                   </span>
                   {(t.total_matches || 0) > 0 && (
-                    <span className="text-[9px] font-bold text-[#D44A78] bg-[#D44A78]/10 px-1.5 py-0.5 rounded-full">
+                    <span className="text-[9px] font-bold text-[#D4714E] bg-[#D4714E]/10 px-1.5 py-0.5 rounded-full">
                       {t.total_matches} match{t.total_matches !== 1 ? 'es' : ''}
                     </span>
                   )}
                 </div>
-                <h3 className="text-sm font-semibold text-[#0D0D0D] m-0 truncate">{t.name}</h3>
-                <div className="text-[10px] text-[#6E6A63] mt-0.5">
+                <h3 className="text-sm font-semibold text-[#1a1918] m-0 truncate">{t.name}</h3>
+                <div className="text-[10px] text-[#5e5d59] mt-0.5">
                   {[t.industry, t.geography, (t.min_revenue || t.max_revenue) ? `${formatCurrency(t.min_revenue)}–${formatCurrency(t.max_revenue)}` : null]
                     .filter(Boolean).join(' · ')}
                 </div>
@@ -459,7 +460,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                 {!portfolio && !pipelineRunning && (
                   <button
                     onClick={() => startPipeline(selectedThesis)}
-                    className="w-full py-3 rounded-xl text-sm font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] transition-colors flex items-center justify-center gap-2"
+                    className="w-full py-3 rounded-xl text-sm font-semibold bg-[#D4714E] text-white border-0 cursor-pointer hover:bg-[#B85A3A] transition-colors flex items-center justify-center gap-2"
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -469,23 +470,23 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                 )}
 
                 {pipelineRunning && (
-                  <div className="bg-[#FAFAFA] rounded-xl p-4 border border-[#D44A78]/20">
+                  <div className="bg-[#f5f4ed] rounded-xl p-4 border border-[#D4714E]/20">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-4 h-4 border-2 border-[#D44A78] border-t-transparent rounded-full animate-spin" />
-                      <span className="text-sm font-medium text-[#0D0D0D]">Analyzing market data...</span>
+                      <div className="w-4 h-4 border-2 border-[#D4714E] border-t-transparent rounded-full animate-spin" />
+                      <span className="text-sm font-medium text-[#1a1918]">Analyzing market data...</span>
                     </div>
-                    <p className="text-xs text-[#6E6A63] m-0">
+                    <p className="text-xs text-[#5e5d59] m-0">
                       Fetching Census, SBA, and economic data. This takes 30-60 seconds.
                     </p>
                   </div>
                 )}
 
                 {pipelineError && (
-                  <div className="bg-red-50 rounded-xl p-3 mb-3 border border-red-200">
-                    <p className="text-xs text-red-700 m-0 font-medium">{pipelineError}</p>
+                  <div className="bg-fig/15 rounded-xl p-3 mb-3 border border-fig/40">
+                    <p className="text-xs text-[#7a3048] m-0 font-medium">{pipelineError}</p>
                     <button
                       onClick={() => { setPipelineError(null); startPipeline(selectedThesis); }}
-                      className="text-xs text-red-600 underline mt-1 cursor-pointer bg-transparent border-0 p-0"
+                      className="text-xs text-[#7a3048] underline mt-1 cursor-pointer bg-transparent border-0 p-0"
                     >
                       Retry
                     </button>
@@ -497,7 +498,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
               {portfolio && portfolio.brief_status === 'complete' && (
                 <div className="mb-5">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#6E6A63] m-0">
+                    <h3 className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#5e5d59] m-0">
                       Acquisition Intelligence Brief
                     </h3>
                     {portfolio.brief_generation_time_ms && (
@@ -509,7 +510,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
 
                   {/* Narrative summary */}
                   {portfolio.narrative_markdown && (
-                    <div className="bg-[#FAFAFA] rounded-xl p-3 mb-2 text-xs text-[#0D0D0D] leading-relaxed whitespace-pre-line">
+                    <div className="bg-[#f5f4ed] rounded-xl p-3 mb-2 text-xs text-[#1a1918] leading-relaxed whitespace-pre-line">
                       {portfolio.narrative_markdown}
                     </div>
                   )}
@@ -557,23 +558,23 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
 
                   {/* Pipeline progress for Stages 2-4 */}
                   {portfolio.pipeline_status !== 'ready' && portfolio.pipeline_status !== 'failed' && portfolio.pipeline_status !== 'initializing' && (
-                    <div className="mt-3 bg-[#FAFAFA] rounded-xl p-3 border border-[#D44A78]/10">
+                    <div className="mt-3 bg-[#f5f4ed] rounded-xl p-3 border border-[#D4714E]/10">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <div className="w-3 h-3 border-2 border-[#D44A78] border-t-transparent rounded-full animate-spin" />
-                        <span className="text-xs font-medium text-[#0D0D0D]">
+                        <div className="w-3 h-3 border-2 border-[#D4714E] border-t-transparent rounded-full animate-spin" />
+                        <span className="text-xs font-medium text-[#1a1918]">
                           {portfolio.stage_progress?.message || 'Processing...'}
                         </span>
                       </div>
                       {portfolio.stage_progress?.pct != null && (
-                        <div className="w-full h-1.5 bg-[#EBE7DF] rounded-full overflow-hidden">
+                        <div className="w-full h-1.5 bg-[#e8e6dc] rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-[#D44A78] rounded-full transition-all duration-500"
+                            className="h-full bg-[#D4714E] rounded-full transition-all duration-500"
                             style={{ width: `${portfolio.stage_progress.pct}%` }}
                           />
                         </div>
                       )}
                       {portfolio.total_candidates > 0 && (
-                        <p className="text-[10px] text-[#6E6A63] m-0 mt-1">
+                        <p className="text-[10px] text-[#5e5d59] m-0 mt-1">
                           {portfolio.total_candidates} candidates found
                           {portfolio.a_tier_count > 0 && ` · ${portfolio.a_tier_count} A-tier`}
                           {portfolio.b_tier_count > 0 && ` · ${portfolio.b_tier_count} B-tier`}
@@ -596,16 +597,16 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
               )}
 
               {/* Existing matches section */}
-              <h3 className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#6E6A63] m-0 mb-2">Matches</h3>
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#5e5d59] m-0 mb-2">Matches</h3>
 
               {matchesLoading && (
                 <div className="space-y-2">
                   {[1,2].map(i => (
-                    <div key={i} className="animate-pulse bg-[#FAFAFA] rounded-xl p-3">
+                    <div key={i} className="animate-pulse bg-[#f5f4ed] rounded-xl p-3">
                       <div className="flex gap-2 mb-1.5">
-                        <div className="w-10 h-10 bg-[#EBE7DF] rounded-lg" />
+                        <div className="w-10 h-10 bg-[#e8e6dc] rounded-lg" />
                         <div className="flex-1">
-                          <div className="h-3 bg-[#EBE7DF] rounded w-1/2 mb-1.5" />
+                          <div className="h-3 bg-[#e8e6dc] rounded w-1/2 mb-1.5" />
                           <div className="h-2.5 bg-[#F5F5F5] rounded w-1/3" />
                         </div>
                       </div>
@@ -615,35 +616,35 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
               )}
 
               {!matchesLoading && matches.length === 0 && (
-                <div className="text-center py-6 bg-[#FAFAFA] rounded-xl">
-                  <p className="text-sm font-semibold text-[#0D0D0D] m-0 mb-0.5">No matches yet</p>
-                  <p className="text-xs text-[#6E6A63] m-0">Matches appear as opportunities are scored.</p>
+                <div className="text-center py-6 bg-[#f5f4ed] rounded-xl">
+                  <p className="text-sm font-semibold text-[#1a1918] m-0 mb-0.5">No matches yet</p>
+                  <p className="text-xs text-[#5e5d59] m-0">Matches appear as opportunities are scored.</p>
                 </div>
               )}
 
               {!matchesLoading && matches.length > 0 && (
                 <div className="space-y-2">
                   {matches.map(m => (
-                    <div key={m.id} className="bg-[#FAFAFA] rounded-xl p-3">
+                    <div key={m.id} className="bg-[#f5f4ed] rounded-xl p-3">
                       <div className="flex items-start gap-2.5">
                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${scoreColor(m.score)}`}>
                           {m.score}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 mb-0.5">
-                            <h4 className="text-sm font-semibold text-[#0D0D0D] m-0 truncate">
+                            <h4 className="text-sm font-semibold text-[#1a1918] m-0 truncate">
                               {m.business_name || 'Unnamed'}
                             </h4>
                             <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full shrink-0 ${
-                              m.status === 'new' ? 'bg-blue-100 text-blue-700' :
-                              m.status === 'reviewing' ? 'bg-yellow-100 text-yellow-700' :
-                              m.status === 'pursuing' ? 'bg-green-100 text-green-700' :
+                              m.status === 'new' ? 'bg-sky/25 text-[#2f5a85]' :
+                              m.status === 'reviewing' ? 'bg-peach/70 text-[#8a3d23]' :
+                              m.status === 'pursuing' ? 'bg-cactus/60 text-[#1f4a3a]' :
                               'bg-[#F5F5F5] text-[#A9A49C]'
                             }`}>
                               {m.status}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2 text-[10px] text-[#6E6A63] mb-1.5 flex-wrap">
+                          <div className="flex items-center gap-2 text-[10px] text-[#5e5d59] mb-1.5 flex-wrap">
                             {m.industry && <span>{m.industry}</span>}
                             {m.revenue && <span>Rev: {formatCurrency(m.revenue)}</span>}
                             {m.asking_price && <span>Price: {formatCurrency(m.asking_price)}</span>}
@@ -653,7 +654,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                             {m.status !== 'pursuing' && (
                               <button
                                 onClick={() => updateMatchStatus(m.id, 'pursuing')}
-                                className="text-[10px] font-medium px-2.5 py-1 rounded-full bg-green-50 text-green-700 border-0 cursor-pointer hover:bg-green-100 transition-colors"
+                                className="text-[10px] font-medium px-2.5 py-1 rounded-full bg-cactus/40 text-[#1f4a3a] border-0 cursor-pointer hover:bg-cactus/60 transition-colors"
                               >
                                 Pursue
                               </button>
@@ -661,7 +662,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                             {m.status !== 'passed' && (
                               <button
                                 onClick={() => updateMatchStatus(m.id, 'passed')}
-                                className="text-[10px] font-medium px-2.5 py-1 rounded-full bg-[#F5F5F5] text-[#6E6A63] border-0 cursor-pointer hover:bg-[#EBE7DF] transition-colors"
+                                className="text-[10px] font-medium px-2.5 py-1 rounded-full bg-[#F5F5F5] text-[#5e5d59] border-0 cursor-pointer hover:bg-[#e8e6dc] transition-colors"
                               >
                                 Pass
                               </button>
@@ -671,7 +672,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                                 href={m.source_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[10px] font-medium text-[#D44A78] hover:underline ml-auto"
+                                className="text-[10px] font-medium text-[#D4714E] hover:underline ml-auto"
                               >
                                 View listing
                               </a>
@@ -707,11 +708,11 @@ function BriefSection({ title, data, expanded, onToggle, isArray }: {
     <div className="rounded-lg border border-[rgba(0,0,0,0.06)] overflow-hidden">
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between px-3 py-2 bg-[#FAFAFA] hover:bg-[#F5F5F5] cursor-pointer border-0 transition-colors"
+        className="w-full flex items-center justify-between px-3 py-2 bg-[#f5f4ed] hover:bg-[#F5F5F5] cursor-pointer border-0 transition-colors"
       >
-        <span className="text-xs font-semibold text-[#0D0D0D]">{title}</span>
+        <span className="text-xs font-semibold text-[#1a1918]">{title}</span>
         <svg
-          width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6E6A63" strokeWidth="2"
+          width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5e5d59" strokeWidth="2"
           className={`transition-transform ${expanded ? 'rotate-180' : ''}`}
         >
           <path d="M6 9l6 6 6-6" />
@@ -725,15 +726,15 @@ function BriefSection({ title, data, expanded, onToggle, isArray }: {
                 <div key={i} className="text-xs">
                   <div className="flex items-center gap-1.5 mb-0.5">
                     <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full ${
-                      item.severity === 'high' ? 'bg-red-100 text-red-700' :
-                      item.severity === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-green-100 text-green-700'
+                      item.severity === 'high' ? 'bg-fig/25 text-[#7a3048]' :
+                      item.severity === 'medium' ? 'bg-peach/70 text-[#8a3d23]' :
+                      'bg-cactus/60 text-[#1f4a3a]'
                     }`}>{item.severity}</span>
-                    <span className="font-semibold text-[#0D0D0D]">{item.risk}</span>
+                    <span className="font-semibold text-[#1a1918]">{item.risk}</span>
                   </div>
-                  <p className="text-[#6E6A63] m-0 mb-0.5">{item.description}</p>
+                  <p className="text-[#5e5d59] m-0 mb-0.5">{item.description}</p>
                   {item.mitigation && (
-                    <p className="text-[#6E6A63] m-0 italic">Mitigation: {item.mitigation}</p>
+                    <p className="text-[#5e5d59] m-0 italic">Mitigation: {item.mitigation}</p>
                   )}
                 </div>
               ))}
@@ -761,8 +762,8 @@ function renderBriefData(data: any, depth = 0): React.ReactNode[] {
       if (typeof value[0] === 'string') {
         return (
           <div key={key} className="text-xs mb-1.5">
-            <span className="font-medium text-[#0D0D0D]">{label}:</span>
-            <ul className="m-0 mt-0.5 pl-4 text-[#6E6A63]">
+            <span className="font-medium text-[#1a1918]">{label}:</span>
+            <ul className="m-0 mt-0.5 pl-4 text-[#5e5d59]">
               {value.map((v: string, i: number) => <li key={i} className="mb-0.5">{v}</li>)}
             </ul>
           </div>
@@ -771,14 +772,14 @@ function renderBriefData(data: any, depth = 0): React.ReactNode[] {
       // Array of objects
       return (
         <div key={key} className="text-xs mb-1.5">
-          <span className="font-medium text-[#0D0D0D]">{label}:</span>
-          <div className="mt-0.5 pl-2 border-l-2 border-[#EBE7DF]">
+          <span className="font-medium text-[#1a1918]">{label}:</span>
+          <div className="mt-0.5 pl-2 border-l-2 border-[#e8e6dc]">
             {value.map((item: any, i: number) => (
-              <div key={i} className="text-[#6E6A63] mb-1">
+              <div key={i} className="text-[#5e5d59] mb-1">
                 {typeof item === 'object'
                   ? Object.entries(item).map(([k, v]) => (
                       <span key={k} className="mr-2">
-                        <span className="font-medium text-[#0D0D0D]">{k.replace(/_/g, ' ')}:</span> {String(v)}
+                        <span className="font-medium text-[#1a1918]">{k.replace(/_/g, ' ')}:</span> {String(v)}
                       </span>
                     ))
                   : String(item)
@@ -793,8 +794,8 @@ function renderBriefData(data: any, depth = 0): React.ReactNode[] {
     if (typeof value === 'object' && value !== null) {
       return (
         <div key={key} className="text-xs mb-1.5">
-          <span className="font-medium text-[#0D0D0D]">{label}:</span>
-          <div className="mt-0.5 pl-2 border-l-2 border-[#EBE7DF]">
+          <span className="font-medium text-[#1a1918]">{label}:</span>
+          <div className="mt-0.5 pl-2 border-l-2 border-[#e8e6dc]">
             {renderBriefData(value, depth + 1)}
           </div>
         </div>
@@ -805,8 +806,8 @@ function renderBriefData(data: any, depth = 0): React.ReactNode[] {
 
     return (
       <div key={key} className="text-xs flex gap-1">
-        <span className="font-medium text-[#0D0D0D] shrink-0">{label}:</span>
-        <span className="text-[#6E6A63]">{String(value)}</span>
+        <span className="font-medium text-[#1a1918] shrink-0">{label}:</span>
+        <span className="text-[#5e5d59]">{String(value)}</span>
       </div>
     );
   }).filter(Boolean) as React.ReactNode[];

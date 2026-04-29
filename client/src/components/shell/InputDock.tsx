@@ -77,20 +77,20 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
     return (
       <div className="fixed bottom-6 md:bottom-10 left-0 right-0 px-4 z-50 pointer-events-none" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="max-w-[700px] mx-auto pointer-events-auto">
-          <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-2xl flex flex-col overflow-hidden shadow-[0_4px_12px_rgba(186,60,96,0.04)] transition-all duration-300 focus-within:shadow-[0_8px_30px_rgba(186,60,96,0.12)] focus-within:border-[#D44A78]/50 focus-within:ring-4 focus-within:ring-[#FFF0EB]">
+          <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-2xl flex flex-col overflow-hidden shadow-[0_4px_12px_rgba(186,60,96,0.04)] transition-all duration-300 focus-within:shadow-[0_8px_30px_rgba(186,60,96,0.12)] focus-within:border-[#D4714E]/50 focus-within:ring-4 focus-within:ring-[#FFF0EB]">
             <textarea
               ref={textareaRef}
               value={value}
               onChange={handleChange}
               onKeyDown={handleKey}
               placeholder={placeholder}
-              className="w-full bg-transparent border-none focus:outline-none text-[16px] md:text-[18px] text-[#0D0D0D] placeholder:text-[#A9A49C] p-5 resize-none min-h-[80px]"
-              style={{ fontFamily: "'Inter', sans-serif", maxHeight: '200px' }}
+              className="w-full bg-transparent border-none focus:outline-none text-[16px] md:text-[18px] text-[#1a1918] placeholder:text-[#A9A49C] p-5 resize-none min-h-[80px]"
+              style={{ fontFamily: "'Figtree', system-ui, sans-serif", maxHeight: '200px' }}
               rows={2}
             />
             <div className="flex items-center justify-between px-5 pb-4 pt-1">
               <div className="text-xs text-[#A9A49C] font-bold tracking-wide flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-green-500" />
+                <span className="w-2 h-2 rounded-full bg-[#629987]" />
                 Federal Data Sync Active
               </div>
               <button
@@ -98,8 +98,8 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
                 disabled={!hasContent || disabled}
                 className={`px-5 py-2.5 rounded-xl font-bold text-sm tracking-widest uppercase transition-all shadow-sm ${
                   hasContent && !disabled
-                    ? 'bg-[#D44A78] text-white hover:bg-[#b8613d] cursor-pointer'
-                    : 'bg-[#D44A78] text-white opacity-50 shadow-none cursor-default'
+                    ? 'bg-[#D4714E] text-white hover:bg-[#b8613d] cursor-pointer'
+                    : 'bg-[#D4714E] text-white opacity-50 shadow-none cursor-default'
                 }`}
                 type="button"
               >
@@ -118,20 +118,20 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
       <div className="pointer-events-none absolute -top-16 left-0 right-0 h-16" style={{ background: 'linear-gradient(to bottom, transparent, white)' }} />
 
       <div className="max-w-3xl mx-auto px-4">
-        <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-2xl flex flex-col overflow-hidden shadow-[0_0.25rem_1.25rem_rgba(0,0,0,0.035)] transition-all duration-300 focus-within:shadow-[0_8px_30px_rgba(186,60,96,0.12)] focus-within:border-[#D44A78]/50">
+        <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-2xl flex flex-col overflow-hidden shadow-[0_0.25rem_1.25rem_rgba(0,0,0,0.035)] transition-all duration-300 focus-within:shadow-[0_8px_30px_rgba(186,60,96,0.12)] focus-within:border-[#D4714E]/50">
           <textarea
             ref={textareaRef}
             value={value}
             onChange={handleChange}
             onKeyDown={handleKey}
             placeholder={placeholder}
-            className="w-full bg-transparent border-none focus:outline-none text-[16px] md:text-[18px] text-[#0D0D0D] placeholder:text-[#A9A49C] p-5 resize-none min-h-[80px]"
-            style={{ fontFamily: "'Inter', sans-serif", maxHeight: '200px' }}
+            className="w-full bg-transparent border-none focus:outline-none text-[16px] md:text-[18px] text-[#1a1918] placeholder:text-[#A9A49C] p-5 resize-none min-h-[80px]"
+            style={{ fontFamily: "'Figtree', system-ui, sans-serif", maxHeight: '200px' }}
             rows={2}
           />
           <div className="flex items-center justify-between px-5 pb-4 pt-1">
             <div className="text-xs text-[#A9A49C] font-bold tracking-wide flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-green-500" />
+              <span className="w-2 h-2 rounded-full bg-[#629987]" />
               Federal Data Sync Active
             </div>
             <button
@@ -139,8 +139,8 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
               disabled={!hasContent || disabled}
               className={`px-5 py-2.5 rounded-xl font-bold text-sm tracking-widest uppercase transition-all shadow-sm ${
                 hasContent && !disabled
-                  ? 'bg-[#D44A78] text-white hover:bg-[#b8613d] cursor-pointer'
-                  : 'bg-[#D44A78] text-white opacity-50 shadow-none cursor-default'
+                  ? 'bg-[#D4714E] text-white hover:bg-[#b8613d] cursor-pointer'
+                  : 'bg-[#D4714E] text-white opacity-50 shadow-none cursor-default'
               }`}
               type="button"
             >
@@ -149,7 +149,7 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
           </div>
         </div>
 
-        <p className="text-center text-[12px] text-[#9CA3AF] mt-2.5 hidden sm:block" style={{ fontFamily: "'Inter', sans-serif" }}>
+        <p className="text-center text-[12px] text-[#9CA3AF] mt-2.5 hidden sm:block" style={{ fontFamily: "'Figtree', system-ui, sans-serif" }}>
           Yulia is an AI advisor. Built on Census, BLS, FRED, and SEC EDGAR data.
         </p>
       </div>

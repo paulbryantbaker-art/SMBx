@@ -81,16 +81,16 @@ export default function CanvasToolbar({ actions, dark = false }: CanvasToolbarPr
               borderRadius: 100,
               border: 'none',
               background: action.primary
-                ? '#1A1C1E'
+                ? '#1a1918'
                 : 'transparent',
               color: action.primary
                 ? '#FFFFFF'
-                : (dark ? '#E0DDD7' : '#1A1C1E'),
+                : (dark ? '#E0DDD7' : '#1a1918'),
               fontSize: 13,
               fontWeight: 600,
               cursor: action.disabled ? 'not-allowed' : 'pointer',
               opacity: action.disabled ? 0.4 : 1,
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               letterSpacing: '-0.01em',
             }}
           >

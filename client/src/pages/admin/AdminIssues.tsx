@@ -48,9 +48,9 @@ function timeAgo(iso: string): string {
 
 const SEVERITY_STYLES: Record<string, string> = {
   critical: 'bg-[#EA4335] text-white',
-  major: 'bg-[#FBBC04] text-[#1a1c1e]',
+  major: 'bg-[#FBBC04] text-[#1a1918]',
   minor: 'bg-[#34A853] text-white',
-  enhancement: 'bg-[#f3f3f6] text-[#5d5e61]',
+  enhancement: 'bg-[#f0eee6] text-[#5e5d59]',
 };
 
 const TYPE_STYLES: Record<string, string> = {
@@ -161,15 +161,15 @@ export default function AdminIssues() {
           {Array(4)
             .fill(0)
             .map((_, i) => (
-              <div key={i} className="h-20 bg-[#EEEEF0] rounded-xl" />
+              <div key={i} className="h-20 bg-[#e8e6dc] rounded-xl" />
             ))}
         </div>
-        <div className="h-12 bg-[#EEEEF0] rounded-xl mt-6" />
+        <div className="h-12 bg-[#e8e6dc] rounded-xl mt-6" />
         <div className="space-y-3 mt-4">
           {Array(3)
             .fill(0)
             .map((_, i) => (
-              <div key={i} className="h-16 bg-[#EEEEF0] rounded-2xl" />
+              <div key={i} className="h-16 bg-[#e8e6dc] rounded-2xl" />
             ))}
         </div>
       </div>
@@ -181,11 +181,11 @@ export default function AdminIssues() {
     <div>
       {/* Stats bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="rounded-xl p-4 bg-white border border-[#EEEEF0] text-center">
-          <p className="text-[10px] uppercase tracking-widest font-bold text-[#5d5e61] mb-1">
+        <div className="rounded-xl p-4 bg-white border border-[#e8e6dc] text-center">
+          <p className="text-[10px] uppercase tracking-widest font-bold text-[#5e5d59] mb-1">
             Open
           </p>
-          <p className="text-2xl font-black text-[#1a1c1e]">
+          <p className="text-2xl font-black text-[#1a1918]">
             {stats?.open_total ?? 0}
           </p>
         </div>
@@ -220,7 +220,7 @@ export default function AdminIssues() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="rounded-lg bg-white border border-[#EEEEF0] px-3 py-2 text-sm"
+          className="rounded-lg bg-white border border-[#e8e6dc] px-3 py-2 text-sm"
         >
           <option value="">All Statuses</option>
           <option value="open">Open</option>
@@ -231,7 +231,7 @@ export default function AdminIssues() {
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
-          className="rounded-lg bg-white border border-[#EEEEF0] px-3 py-2 text-sm"
+          className="rounded-lg bg-white border border-[#e8e6dc] px-3 py-2 text-sm"
         >
           <option value="">All Types</option>
           <option value="bug">Bug</option>
@@ -244,7 +244,7 @@ export default function AdminIssues() {
       {/* Issue list */}
       <div className="mt-4 space-y-3">
         {issues.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-[#5d5e61]">
+          <div className="flex flex-col items-center justify-center py-16 text-[#5e5d59]">
             <svg
               className="w-10 h-10 mb-3 text-[#34A853]"
               fill="none"
@@ -264,13 +264,13 @@ export default function AdminIssues() {
           issues.map((issue) => (
             <div
               key={issue.id}
-              className="rounded-2xl bg-white border border-[#EEEEF0] overflow-hidden"
+              className="rounded-2xl bg-white border border-[#e8e6dc] overflow-hidden"
             >
               {/* Card header */}
               <button
                 type="button"
                 onClick={() => handleToggleExpand(issue.id)}
-                className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-[#fafafa] transition-colors"
+                className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-[#f5f4ed] transition-colors"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <span
@@ -280,19 +280,19 @@ export default function AdminIssues() {
                   >
                     {issue.severity}
                   </span>
-                  <span className="text-sm font-semibold text-[#1a1c1e] truncate">
+                  <span className="text-sm font-semibold text-[#1a1918] truncate">
                     {issue.title}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0 ml-3">
                   <span
                     className={`text-[10px] px-2 py-0.5 rounded font-medium lowercase ${
-                      TYPE_STYLES[issue.type] ?? 'bg-[#f3f3f6] text-[#5d5e61]'
+                      TYPE_STYLES[issue.type] ?? 'bg-[#f0eee6] text-[#5e5d59]'
                     }`}
                   >
                     {formatType(issue.type)}
                   </span>
-                  <span className="text-xs text-[#5d5e61] whitespace-nowrap">
+                  <span className="text-xs text-[#5e5d59] whitespace-nowrap">
                     {timeAgo(issue.created_at)}
                   </span>
                 </div>
@@ -300,39 +300,39 @@ export default function AdminIssues() {
 
               {/* Expanded view */}
               {expandedId === issue.id && (
-                <div className="bg-[#fafafa] px-5 py-4 border-t border-[#EEEEF0]">
+                <div className="bg-[#f5f4ed] px-5 py-4 border-t border-[#e8e6dc]">
                   {/* Meta info */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs mb-4">
                     {issue.user_email && (
                       <div>
-                        <span className="font-bold text-[#5d5e61] uppercase tracking-wider text-[10px]">
+                        <span className="font-bold text-[#5e5d59] uppercase tracking-wider text-[10px]">
                           User
                         </span>
-                        <p className="text-[#1a1c1e] mt-0.5">{issue.user_email}</p>
+                        <p className="text-[#1a1918] mt-0.5">{issue.user_email}</p>
                       </div>
                     )}
                     {issue.business_name && (
                       <div>
-                        <span className="font-bold text-[#5d5e61] uppercase tracking-wider text-[10px]">
+                        <span className="font-bold text-[#5e5d59] uppercase tracking-wider text-[10px]">
                           Business
                         </span>
-                        <p className="text-[#1a1c1e] mt-0.5">{issue.business_name}</p>
+                        <p className="text-[#1a1918] mt-0.5">{issue.business_name}</p>
                       </div>
                     )}
                     {issue.journey_type && (
                       <div>
-                        <span className="font-bold text-[#5d5e61] uppercase tracking-wider text-[10px]">
+                        <span className="font-bold text-[#5e5d59] uppercase tracking-wider text-[10px]">
                           Journey
                         </span>
-                        <p className="text-[#1a1c1e] mt-0.5 capitalize">{issue.journey_type}</p>
+                        <p className="text-[#1a1918] mt-0.5 capitalize">{issue.journey_type}</p>
                       </div>
                     )}
                     {issue.current_gate && (
                       <div>
-                        <span className="font-bold text-[#5d5e61] uppercase tracking-wider text-[10px]">
+                        <span className="font-bold text-[#5e5d59] uppercase tracking-wider text-[10px]">
                           Gate
                         </span>
-                        <p className="text-[#1a1c1e] mt-0.5">{issue.current_gate}</p>
+                        <p className="text-[#1a1918] mt-0.5">{issue.current_gate}</p>
                       </div>
                     )}
                   </div>
@@ -340,30 +340,30 @@ export default function AdminIssues() {
                   {/* Description */}
                   {issue.description && (
                     <div className="mb-3">
-                      <p className="font-bold text-[#5d5e61] uppercase tracking-wider text-[10px] mb-1">
+                      <p className="font-bold text-[#5e5d59] uppercase tracking-wider text-[10px] mb-1">
                         Description
                       </p>
-                      <p className="text-sm text-[#1a1c1e]">{issue.description}</p>
+                      <p className="text-sm text-[#1a1918]">{issue.description}</p>
                     </div>
                   )}
 
                   {/* User message */}
                   {issue.user_message && (
                     <div className="mb-3">
-                      <p className="font-bold text-[#5d5e61] uppercase tracking-wider text-[10px] mb-1">
+                      <p className="font-bold text-[#5e5d59] uppercase tracking-wider text-[10px] mb-1">
                         User Message
                       </p>
-                      <p className="text-sm text-[#1a1c1e]">{issue.user_message}</p>
+                      <p className="text-sm text-[#1a1918]">{issue.user_message}</p>
                     </div>
                   )}
 
                   {/* Context JSON */}
                   {issue.context && Object.keys(issue.context).length > 0 && (
                     <div className="mb-3">
-                      <p className="font-bold text-[#5d5e61] uppercase tracking-wider text-[10px] mb-1">
+                      <p className="font-bold text-[#5e5d59] uppercase tracking-wider text-[10px] mb-1">
                         Context
                       </p>
-                      <pre className="bg-[#f3f3f6] rounded-lg p-3 text-xs overflow-x-auto">
+                      <pre className="bg-[#f0eee6] rounded-lg p-3 text-xs overflow-x-auto">
                         {JSON.stringify(issue.context, null, 2)}
                       </pre>
                     </div>
@@ -375,17 +375,17 @@ export default function AdminIssues() {
                       <p className="font-bold text-[#34A853] uppercase tracking-wider text-[10px] mb-1">
                         Resolution
                       </p>
-                      <p className="text-sm text-[#1a1c1e]">{issue.resolution}</p>
+                      <p className="text-sm text-[#1a1918]">{issue.resolution}</p>
                     </div>
                   )}
 
                   {/* Internal notes */}
                   {issue.internal_notes && (
                     <div className="mb-3">
-                      <p className="font-bold text-[#5d5e61] uppercase tracking-wider text-[10px] mb-1">
+                      <p className="font-bold text-[#5e5d59] uppercase tracking-wider text-[10px] mb-1">
                         Internal Notes
                       </p>
-                      <p className="text-sm text-[#1a1c1e]">{issue.internal_notes}</p>
+                      <p className="text-sm text-[#1a1918]">{issue.internal_notes}</p>
                     </div>
                   )}
 
@@ -409,7 +409,7 @@ export default function AdminIssues() {
                         setShowNoteInput(!showNoteInput);
                         setShowResolveInput(false);
                       }}
-                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#f3f3f6] text-[#5d5e61]"
+                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#f0eee6] text-[#5e5d59]"
                     >
                       Add Note
                     </button>
@@ -422,7 +422,7 @@ export default function AdminIssues() {
                         value={resolveText}
                         onChange={(e) => setResolveText(e.target.value)}
                         placeholder="Describe the resolution..."
-                        className="w-full rounded-lg border border-[#EEEEF0] px-3 py-2 text-sm resize-none h-20 focus:outline-none focus:ring-2 focus:ring-[#34A853]"
+                        className="w-full rounded-lg border border-[#e8e6dc] px-3 py-2 text-sm resize-none h-20 focus:outline-none focus:ring-2 focus:ring-[#34A853]"
                       />
                       <button
                         type="button"
@@ -441,12 +441,12 @@ export default function AdminIssues() {
                         value={noteText}
                         onChange={(e) => setNoteText(e.target.value)}
                         placeholder="Add an internal note..."
-                        className="w-full rounded-lg border border-[#EEEEF0] px-3 py-2 text-sm resize-none h-20 focus:outline-none focus:ring-2 focus:ring-[#EEEEF0]"
+                        className="w-full rounded-lg border border-[#e8e6dc] px-3 py-2 text-sm resize-none h-20 focus:outline-none focus:ring-2 focus:ring-[#e8e6dc]"
                       />
                       <button
                         type="button"
                         onClick={() => handleAddNote(issue.id)}
-                        className="mt-2 px-3 py-1.5 rounded-lg text-xs font-bold bg-[#f3f3f6] text-[#5d5e61]"
+                        className="mt-2 px-3 py-1.5 rounded-lg text-xs font-bold bg-[#f0eee6] text-[#5e5d59]"
                       >
                         Save Note
                       </button>

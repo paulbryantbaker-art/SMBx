@@ -203,9 +203,9 @@ export default function DocumentEditor({
       {editable && (
         <>
           {/* Action bar */}
-          <div className="shrink-0 flex items-center justify-between px-4 py-2 border-b border-[#EBE7DF] dark:border-[#3A3C3E]">
+          <div className="shrink-0 flex items-center justify-between px-4 py-2 border-b border-[#e8e6dc] dark:border-[#3A3C3E]">
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#D44A78] text-white">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#D4714E] text-white">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
                   <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
@@ -223,7 +223,7 @@ export default function DocumentEditor({
                   </button>
                   <button
                     onClick={handleCancel}
-                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-transparent text-[#6E6A63] border-0 cursor-pointer hover:bg-[#F5F5F5] dark:hover:bg-[#2A2C2E] transition-colors"
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-transparent text-[#5e5d59] border-0 cursor-pointer hover:bg-[#F5F5F5] dark:hover:bg-[#141413] transition-colors"
                   >
                     Cancel
                   </button>
@@ -233,7 +233,7 @@ export default function DocumentEditor({
             {docClass && (
               <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded ${
                 docClass === 'legal' ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
-                : docClass === 'marketing' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
+                : docClass === 'marketing' ? 'bg-sky/15 text-[#2f5a85] dark:bg-blue-900/20 dark:text-blue-400'
                 : 'bg-gray-50 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
               }`}>
                 {docClass}
@@ -245,8 +245,8 @@ export default function DocumentEditor({
           <DocumentToolbar editor={editor} />
 
           {/* Yulia revision bar */}
-          <div className="shrink-0 flex items-center gap-2 px-4 py-2 border-b border-[#EBE7DF] dark:border-[#3A3C3E] bg-[#FAFAF8] dark:bg-[#222426]">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D44A78" strokeWidth="2">
+          <div className="shrink-0 flex items-center gap-2 px-4 py-2 border-b border-[#e8e6dc] dark:border-[#3A3C3E] bg-[#faf9f5] dark:bg-[#222426]">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4714E" strokeWidth="2">
               <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
             </svg>
             <input
@@ -255,12 +255,12 @@ export default function DocumentEditor({
               onChange={e => setRevisionPrompt(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleRevision()}
               placeholder="Ask Yulia to revise... (e.g. 'make the financial projections more aggressive')"
-              className="flex-1 text-xs text-[#0D0D0D] dark:text-[#E8E6E3] bg-transparent border-0 outline-none placeholder:text-[#A9A49C]"
+              className="flex-1 text-xs text-[#1a1918] dark:text-[#E8E6E3] bg-transparent border-0 outline-none placeholder:text-[#A9A49C]"
             />
             <button
               onClick={handleRevision}
               disabled={!revisionPrompt.trim() || revising}
-              className="px-3 py-1 rounded-md text-[10px] font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] disabled:opacity-40 transition-colors"
+              className="px-3 py-1 rounded-md text-[10px] font-semibold bg-[#D4714E] text-white border-0 cursor-pointer hover:bg-[#B85A3A] disabled:opacity-40 transition-colors"
             >
               {revising ? 'Revising...' : 'Revise'}
             </button>

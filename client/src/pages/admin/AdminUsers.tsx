@@ -51,10 +51,10 @@ function PlanBadge({ plan }: { plan: string | null }) {
   const label = plan || 'Free';
   const normalized = (plan || '').toLowerCase();
 
-  let classes = 'bg-[#f3f3f6] text-[#5d5e61]';
+  let classes = 'bg-[#f0eee6] text-[#5e5d59]';
   if (normalized === 'starter') classes = 'bg-[#FBBC04]/10 text-[#FBBC04]';
-  else if (normalized === 'professional') classes = 'bg-[#D44A78]/10 text-[#D44A78]';
-  else if (normalized === 'enterprise') classes = 'bg-[#1a1c1e] text-white';
+  else if (normalized === 'professional') classes = 'bg-[#D4714E]/10 text-[#D4714E]';
+  else if (normalized === 'enterprise') classes = 'bg-[#1a1918] text-white';
 
   return (
     <span className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold capitalize ${classes}`}>
@@ -70,7 +70,7 @@ function SkeletonRows() {
         <tr key={i}>
           {Array.from({ length: 7 }).map((_, j) => (
             <td key={j} className="px-4 py-3">
-              <div className="h-4 rounded bg-[#eeeef0] animate-pulse" style={{ width: j === 0 ? '60%' : j === 1 ? '45%' : '30%' }} />
+              <div className="h-4 rounded bg-[#e8e6dc] animate-pulse" style={{ width: j === 0 ? '60%' : j === 1 ? '45%' : '30%' }} />
             </td>
           ))}
         </tr>
@@ -172,22 +172,22 @@ export default function AdminUsers() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by email or name..."
-          className="w-full rounded-xl bg-white border border-[#EEEEF0] pl-10 pr-4 py-3 text-sm outline-none focus:border-[#D44A78] transition-colors"
+          className="w-full rounded-xl bg-white border border-[#e8e6dc] pl-10 pr-4 py-3 text-sm outline-none focus:border-[#D4714E] transition-colors"
         />
       </div>
 
       {/* User table */}
-      <div className="rounded-2xl bg-white border border-[#EEEEF0] overflow-hidden mt-4">
+      <div className="rounded-2xl bg-white border border-[#e8e6dc] overflow-hidden mt-4">
         <table className="w-full">
           <thead>
-            <tr className="bg-[#f3f3f6]">
-              <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-widest font-bold text-[#5d5e61]">Email</th>
-              <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-widest font-bold text-[#5d5e61]">Name</th>
-              <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-widest font-bold text-[#5d5e61]">Plan</th>
-              <th className="text-right px-4 py-2.5 text-[10px] uppercase tracking-widest font-bold text-[#5d5e61]">Messages</th>
-              <th className="text-right px-4 py-2.5 text-[10px] uppercase tracking-widest font-bold text-[#5d5e61]">Deals</th>
-              <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-widest font-bold text-[#5d5e61]">Created</th>
-              <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-widest font-bold text-[#5d5e61]">Last Active</th>
+            <tr className="bg-[#f0eee6]">
+              <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-widest font-bold text-[#5e5d59]">Email</th>
+              <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-widest font-bold text-[#5e5d59]">Name</th>
+              <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-widest font-bold text-[#5e5d59]">Plan</th>
+              <th className="text-right px-4 py-2.5 text-[10px] uppercase tracking-widest font-bold text-[#5e5d59]">Messages</th>
+              <th className="text-right px-4 py-2.5 text-[10px] uppercase tracking-widest font-bold text-[#5e5d59]">Deals</th>
+              <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-widest font-bold text-[#5e5d59]">Created</th>
+              <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-widest font-bold text-[#5e5d59]">Last Active</th>
             </tr>
           </thead>
           <tbody>
@@ -205,32 +205,32 @@ export default function AdminUsers() {
                   <tr
                     key={user.id}
                     onClick={() => setExpandedId(expandedId === user.id ? null : user.id)}
-                    className="hover:bg-[#fafafa] cursor-pointer transition-all text-sm border-t border-[#EEEEF0] first:border-t-0"
+                    className="hover:bg-[#f5f4ed] cursor-pointer transition-all text-sm border-t border-[#e8e6dc] first:border-t-0"
                   >
-                    <td className="px-4 py-3 text-[#1a1a18] font-medium truncate max-w-[200px]">{user.email}</td>
-                    <td className="px-4 py-3 text-[#5d5e61] truncate max-w-[150px]">{user.display_name || '—'}</td>
+                    <td className="px-4 py-3 text-[#1a1918] font-medium truncate max-w-[200px]">{user.email}</td>
+                    <td className="px-4 py-3 text-[#5e5d59] truncate max-w-[150px]">{user.display_name || '—'}</td>
                     <td className="px-4 py-3">
                       <PlanBadge plan={user.subscription_plan} />
                     </td>
-                    <td className="px-4 py-3 text-right text-[#5d5e61] tabular-nums">{user.message_count.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-right text-[#5d5e61] tabular-nums">{user.deal_count}</td>
-                    <td className="px-4 py-3 text-[#5d5e61]">{new Date(user.created_at).toLocaleDateString()}</td>
-                    <td className="px-4 py-3 text-[#5d5e61]">{user.last_activity ? timeAgo(user.last_activity) : '—'}</td>
+                    <td className="px-4 py-3 text-right text-[#5e5d59] tabular-nums">{user.message_count.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-right text-[#5e5d59] tabular-nums">{user.deal_count}</td>
+                    <td className="px-4 py-3 text-[#5e5d59]">{new Date(user.created_at).toLocaleDateString()}</td>
+                    <td className="px-4 py-3 text-[#5e5d59]">{user.last_activity ? timeAgo(user.last_activity) : '—'}</td>
                   </tr>
 
                   {expandedId === user.id && (
                     <tr key={`${user.id}-expanded`}>
-                      <td colSpan={7} className="bg-[#fafafa] border-t border-[#EEEEF0] px-6 py-4">
+                      <td colSpan={7} className="bg-[#f5f4ed] border-t border-[#e8e6dc] px-6 py-4">
                         {!expandedData ? (
                           <div className="flex items-center gap-2 text-sm text-[#9e9ea0]">
-                            <div className="h-4 w-4 border-2 border-[#D44A78] border-t-transparent rounded-full animate-spin" />
+                            <div className="h-4 w-4 border-2 border-[#D4714E] border-t-transparent rounded-full animate-spin" />
                             Loading...
                           </div>
                         ) : (
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Recent Conversations */}
                             <div>
-                              <h4 className="text-[11px] uppercase tracking-widest font-bold text-[#5d5e61] mb-2">
+                              <h4 className="text-[11px] uppercase tracking-widest font-bold text-[#5e5d59] mb-2">
                                 Recent Conversations
                               </h4>
                               {expandedData.conversations.length === 0 ? (
@@ -240,7 +240,7 @@ export default function AdminUsers() {
                                   {expandedData.conversations.slice(0, 5).map((conv) => (
                                     <li key={conv.id} className="flex items-center justify-between text-sm">
                                       <div className="flex items-center gap-2 min-w-0">
-                                        <span className="truncate text-[#1a1a18]">{conv.title || 'Untitled'}</span>
+                                        <span className="truncate text-[#1a1918]">{conv.title || 'Untitled'}</span>
                                         {conv.journey && (
                                           <span className="shrink-0 text-[10px] uppercase tracking-wide font-semibold text-[#9e9ea0]">
                                             {conv.journey}
@@ -258,7 +258,7 @@ export default function AdminUsers() {
 
                             {/* Recent Deliverables */}
                             <div>
-                              <h4 className="text-[11px] uppercase tracking-widest font-bold text-[#5d5e61] mb-2">
+                              <h4 className="text-[11px] uppercase tracking-widest font-bold text-[#5e5d59] mb-2">
                                 Recent Deliverables
                               </h4>
                               {expandedData.deliverables.length === 0 ? (
@@ -267,7 +267,7 @@ export default function AdminUsers() {
                                 <ul className="space-y-1.5">
                                   {expandedData.deliverables.slice(0, 5).map((del) => (
                                     <li key={del.id} className="flex items-center justify-between text-sm">
-                                      <span className="text-[#1a1a18] capitalize">{del.type.replace(/_/g, ' ')}</span>
+                                      <span className="text-[#1a1918] capitalize">{del.type.replace(/_/g, ' ')}</span>
                                       <span className="text-[#9e9ea0] text-xs">
                                         {del.status} &middot; {new Date(del.created_at).toLocaleDateString()}
                                       </span>
@@ -289,22 +289,22 @@ export default function AdminUsers() {
 
         {/* Pagination */}
         {!loading && total > 0 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-[#EEEEF0] bg-[#fafafa]">
-            <span className="text-sm text-[#5d5e61]">
+          <div className="flex items-center justify-between px-4 py-3 border-t border-[#e8e6dc] bg-[#f5f4ed]">
+            <span className="text-sm text-[#5e5d59]">
               Showing {startIndex}–{endIndex} of {total.toLocaleString()} users
             </span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
-                className="px-3 py-1.5 rounded-lg text-sm font-medium bg-white border border-[#EEEEF0] text-[#1a1a18] hover:bg-[#f3f3f6] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1.5 rounded-lg text-sm font-medium bg-white border border-[#e8e6dc] text-[#1a1918] hover:bg-[#f0eee6] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 Prev
               </button>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages}
-                className="px-3 py-1.5 rounded-lg text-sm font-medium bg-white border border-[#EEEEF0] text-[#1a1a18] hover:bg-[#f3f3f6] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1.5 rounded-lg text-sm font-medium bg-white border border-[#e8e6dc] text-[#1a1918] hover:bg-[#f0eee6] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 Next
               </button>

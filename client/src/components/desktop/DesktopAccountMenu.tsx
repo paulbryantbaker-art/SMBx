@@ -118,20 +118,20 @@ export default function DesktopAccountMenu({
             gap: 6,
             padding: '8px 14px 8px 12px',
             borderRadius: 999,
-            border: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid #E5E1D9',
-            background: dark ? '#1A1C1E' : '#FFFFFF',
-            color: dark ? '#F0F0F3' : '#1A1C1E',
-            fontFamily: "'Inter', system-ui, sans-serif",
+            border: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid #e8e6dc',
+            background: dark ? '#1a1918' : '#FFFFFF',
+            color: dark ? '#f5f4ed' : '#1a1918',
+            fontFamily: "'Figtree', system-ui, sans-serif",
             fontSize: 13,
             fontWeight: 600,
             cursor: 'pointer',
             boxShadow: dark
               ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.25)'
-              : '0 1px 2px rgba(60,55,45,0.06), 0 4px 12px rgba(60,55,45,0.06)',
+              : '0 1px 2px rgba(26,25,24,0.06), 0 4px 12px rgba(26,25,24,0.06)',
             transition: 'transform 120ms ease, box-shadow 120ms ease',
           }}
         >
-          <span className="material-symbols-outlined" style={{ fontSize: 17, color: dark ? '#E8709A' : '#D44A78' }}>login</span>
+          <span className="material-symbols-outlined" style={{ fontSize: 17, color: dark ? '#ec9d78' : '#D4714E' }}>login</span>
           Sign in
         </button>
         <style>{`
@@ -143,9 +143,9 @@ export default function DesktopAccountMenu({
   }
 
   // ─── Signed in: avatar + popover ───
-  const headingC = dark ? '#F0F0F3' : '#1A1C1E';
-  const mutedC = dark ? 'rgba(240,240,243,0.55)' : '#6B6C6F';
-  const borderC = dark ? 'rgba(255,255,255,0.08)' : '#E5E1D9';
+  const headingC = dark ? '#f5f4ed' : '#1a1918';
+  const mutedC = dark ? 'rgba(245,244,237,0.55)' : '#6B6C6F';
+  const borderC = dark ? 'rgba(255,255,255,0.08)' : '#e8e6dc';
   const rowHover = dark ? 'rgba(255,255,255,0.04)' : 'rgba(15,16,18,0.04)';
   const dangerC = '#D44A4A';
   const dangerArmedBg = dark ? 'rgba(212,74,74,0.14)' : 'rgba(212,74,74,0.08)';
@@ -163,10 +163,10 @@ export default function DesktopAccountMenu({
           width: 36,
           height: 36,
           borderRadius: '50%',
-          border: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid #E5E1D9',
-          background: 'linear-gradient(135deg, #D44A78 0%, #C99A3E 100%)',
+          border: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid #e8e6dc',
+          background: 'linear-gradient(135deg, #D4714E 0%, #C99A3E 100%)',
           color: '#FFFFFF',
-          fontFamily: "'Sora', system-ui, sans-serif",
+          fontFamily: "'Figtree', system-ui, sans-serif",
           fontWeight: 800,
           fontSize: 14,
           letterSpacing: '0.02em',
@@ -177,7 +177,7 @@ export default function DesktopAccountMenu({
           padding: 0,
           boxShadow: dark
             ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.25)'
-            : '0 1px 2px rgba(60,55,45,0.06), 0 4px 12px rgba(60,55,45,0.06)',
+            : '0 1px 2px rgba(26,25,24,0.06), 0 4px 12px rgba(26,25,24,0.06)',
           transition: 'transform 120ms ease, box-shadow 120ms ease',
         }}
       >
@@ -192,12 +192,12 @@ export default function DesktopAccountMenu({
             top: 'calc(100% + 8px)',
             right: 0,
             width: 280,
-            background: dark ? '#151617' : '#FFFFFF',
+            background: dark ? '#141413' : '#FFFFFF',
             border: `1px solid ${borderC}`,
             borderRadius: 14,
             boxShadow: dark
               ? '0 1px 2px rgba(0,0,0,0.4), 0 12px 32px rgba(0,0,0,0.35)'
-              : '0 1px 2px rgba(60,55,45,0.06), 0 12px 32px rgba(60,55,45,0.10)',
+              : '0 1px 2px rgba(26,25,24,0.06), 0 12px 32px rgba(26,25,24,0.10)',
             overflow: 'hidden',
             animation: 'desktopAccountIn 140ms ease',
           }}
@@ -205,7 +205,7 @@ export default function DesktopAccountMenu({
           {/* Profile header */}
           <div style={{ padding: '14px 14px 12px', borderBottom: `1px solid ${borderC}` }}>
             <div style={{
-              fontFamily: "'Sora', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 14,
               fontWeight: 700,
               color: headingC,
@@ -219,7 +219,7 @@ export default function DesktopAccountMenu({
             {user.email && user.display_name && (
               <div style={{
                 marginTop: 2,
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 12,
                 color: mutedC,
                 overflow: 'hidden',
@@ -235,9 +235,9 @@ export default function DesktopAccountMenu({
               alignItems: 'center',
               padding: '3px 8px',
               borderRadius: 999,
-              background: dark ? 'rgba(232,112,154,0.10)' : 'rgba(212,74,120,0.06)',
-              color: dark ? '#E8709A' : '#D44A78',
-              fontFamily: "'Inter', system-ui, sans-serif",
+              background: dark ? 'rgba(236,157,120,0.10)' : 'rgba(212,113,78,0.06)',
+              color: dark ? '#ec9d78' : '#D4714E',
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 11,
               fontWeight: 700,
               letterSpacing: '0.02em',
@@ -289,7 +289,7 @@ export default function DesktopAccountMenu({
                 border: 'none',
                 background: signOutArmed ? dangerArmedBg : 'transparent',
                 color: dangerC,
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 13,
                 fontWeight: signOutArmed ? 700 : 600,
                 textAlign: 'left',
@@ -342,7 +342,7 @@ function MenuRow({
         border: 'none',
         background: 'transparent',
         color: text,
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Figtree', system-ui, sans-serif",
         fontSize: 13,
         fontWeight: 600,
         textAlign: 'left',

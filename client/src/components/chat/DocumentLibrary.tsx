@@ -25,15 +25,18 @@ function authHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+/* Cowork earth-tone status palette. Each state uses a named earth-tone
+   instead of the generic red/green/yellow SaaS set. Tint at ~40-60%,
+   text at full saturation for 4.5:1 contrast. */
 const STATUS_COLORS: Record<string, { bg: string; text: string; darkBg: string; darkText: string }> = {
-  queued:     { bg: 'rgba(0,0,0,0.05)', text: 'rgba(0,0,0,0.4)', darkBg: 'rgba(255,255,255,0.06)', darkText: 'rgba(255,255,255,0.5)' },
-  generating: { bg: '#FEF3C7', text: '#92400E', darkBg: 'rgba(251,191,4,0.15)', darkText: '#FCD34D' },
-  completed:  { bg: '#ECFDF5', text: '#065F46', darkBg: 'rgba(52,168,83,0.15)', darkText: '#6EE7B7' },
-  failed:     { bg: '#FEF2F2', text: '#991B1B', darkBg: 'rgba(234,67,53,0.15)', darkText: '#FCA5A5' },
-  draft:      { bg: '#EFF6FF', text: '#1E40AF', darkBg: 'rgba(78,143,212,0.15)', darkText: '#93C5FD' },
-  review:     { bg: '#FEF3C7', text: '#92400E', darkBg: 'rgba(251,191,4,0.15)', darkText: '#FCD34D' },
-  approved:   { bg: '#ECFDF5', text: '#065F46', darkBg: 'rgba(52,168,83,0.15)', darkText: '#6EE7B7' },
-  locked:     { bg: '#F3F4F6', text: '#374151', darkBg: 'rgba(255,255,255,0.06)', darkText: 'rgba(255,255,255,0.55)' },
+  queued:     { bg: 'rgba(227,218,204,0.60)', text: '#5e5d59',                   darkBg: 'rgba(227,218,204,0.10)', darkText: '#d1cfc5' },  /* oat */
+  generating: { bg: 'rgba(235,201,183,0.55)', text: '#8a3d23',                   darkBg: 'rgba(212,113,78,0.18)',  darkText: '#f4c0a4' },  /* peach→clay */
+  completed:  { bg: 'rgba(188,209,202,0.55)', text: '#1f4a3a',                   darkBg: 'rgba(98,153,135,0.20)',  darkText: '#bcd1ca' },  /* sage→mineral */
+  failed:     { bg: 'rgba(240,212,212,0.70)', text: '#7a1e1e',                   darkBg: 'rgba(181,51,51,0.18)',   darkText: '#e8a8a8' },
+  draft:      { bg: 'rgba(106,155,204,0.14)', text: '#2f5a85',                   darkBg: 'rgba(106,155,204,0.18)', darkText: '#a6c3e0' },  /* sky */
+  review:     { bg: 'rgba(235,201,183,0.55)', text: '#8a3d23',                   darkBg: 'rgba(212,113,78,0.18)',  darkText: '#f4c0a4' },  /* peach→clay */
+  approved:   { bg: 'rgba(98,153,135,0.18)',  text: '#1f4a3a',                   darkBg: 'rgba(98,153,135,0.22)',  darkText: '#bcd1ca' },  /* mineral */
+  locked:     { bg: 'rgba(240,238,230,0.80)', text: '#5e5d59',                   darkBg: 'rgba(245,244,237,0.06)', darkText: 'rgba(245,244,237,0.55)' },
 };
 
 const JOURNEY_LABELS: Record<string, string> = {
@@ -74,10 +77,10 @@ export default function DocumentLibrary({ onViewDeliverable }: { onViewDeliverab
 
   // Theme-aware colors
   const c = {
-    text: dark ? '#F0F0F3' : '#0D0D0D',
+    text: dark ? '#f5f4ed' : '#1a1918',
     textMuted: dark ? 'rgba(218,218,220,0.6)' : 'rgba(0,0,0,0.4)',
     textFaint: dark ? 'rgba(218,218,220,0.4)' : 'rgba(0,0,0,0.3)',
-    inputBg: dark ? '#2F3133' : '#FFFFFF',
+    inputBg: dark ? '#1f1e1d' : '#FFFFFF',
     inputBorder: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.1)',
     rowBorder: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
     rowHeaderBg: dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
@@ -88,7 +91,7 @@ export default function DocumentLibrary({ onViewDeliverable }: { onViewDeliverab
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-5 h-5 border-2 border-[#D44A78] border-t-transparent rounded-full animate-spin" />
+        <div className="w-5 h-5 border-2 border-[#D4714E] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }

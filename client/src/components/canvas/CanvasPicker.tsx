@@ -61,14 +61,14 @@ const TAB_ICONS: Record<string, string> = {
 };
 
 const JOURNEY_COLORS: Record<string, { light: string; dark: string }> = {
-  sell: { light: '#D44A78', dark: '#E8709A' },
+  sell: { light: '#D4714E', dark: '#ec9d78' },
   buy: { light: '#3E8E8E', dark: '#52A8A8' },
   raise: { light: '#C99A3E', dark: '#DDB25E' },
   pmi: { light: '#8F4A7A', dark: '#AE6D9A' },
   integrate: { light: '#8F4A7A', dark: '#AE6D9A' },
-  advisors: { light: '#D44A78', dark: '#E8709A' },
+  advisors: { light: '#D4714E', dark: '#ec9d78' },
 };
-const DEFAULT_ACCENT = { light: '#6e6a63', dark: 'rgba(218,218,220,0.55)' };
+const DEFAULT_ACCENT = { light: '#5e5d59', dark: 'rgba(218,218,220,0.55)' };
 
 const DOC_TYPES = new Set(['deliverable', 'markdown', 'model', 'deal-messages', 'comparison']);
 
@@ -146,15 +146,15 @@ export default function CanvasPicker({
   }
 
   // Palette
-  const pageBg = dark ? '#151617' : '#FFFFFF';
-  const border = dark ? 'rgba(255,255,255,0.06)' : '#E5E1D9';
+  const pageBg = dark ? '#141413' : '#FFFFFF';
+  const border = dark ? 'rgba(255,255,255,0.06)' : '#e8e6dc';
   const sectionBg = dark ? 'rgba(255,255,255,0.02)' : 'rgba(15,16,18,0.015)';
-  const headingC = dark ? '#F0F0F3' : '#1A1C1E';
-  const bodyC = dark ? 'rgba(240,240,243,0.72)' : '#3c3d40';
-  const mutedC = dark ? 'rgba(240,240,243,0.45)' : '#7c7d80';
-  const chipActive = dark ? 'rgba(232,112,154,0.12)' : 'rgba(212,74,120,0.06)';
+  const headingC = dark ? '#f5f4ed' : '#1a1918';
+  const bodyC = dark ? 'rgba(245,244,237,0.72)' : '#3c3d40';
+  const mutedC = dark ? 'rgba(245,244,237,0.45)' : '#7c7d80';
+  const chipActive = dark ? 'rgba(236,157,120,0.12)' : 'rgba(212,113,78,0.06)';
   const chipHover = dark ? 'rgba(255,255,255,0.04)' : 'rgba(15,16,18,0.03)';
-  const accent = dark ? '#E8709A' : '#D44A78';
+  const accent = dark ? '#ec9d78' : '#D4714E';
 
   if (!embedded && collapsed) {
     // Entire rail is clickable to expand — easier discovery than a small
@@ -199,7 +199,7 @@ export default function CanvasPicker({
           <span
             aria-hidden
             style={{
-              fontFamily: "'Sora', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 10,
               fontWeight: 800,
               letterSpacing: '0.08em',
@@ -239,7 +239,7 @@ export default function CanvasPicker({
         display: 'flex',
         flexDirection: 'column',
         minHeight: 0,
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Figtree', system-ui, sans-serif",
       }}
     >
       {/* Resize handle — desktop only. Hidden in embedded mode. 6px wide

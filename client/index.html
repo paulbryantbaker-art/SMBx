@@ -18,7 +18,7 @@
     <meta property="og:description" content="AI deal advisory from valuation to close. Sell, buy, raise capital, or integrate. Start free." />
     <meta property="og:type" content="website" />
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#2A2C2E" />
+    <meta name="theme-color" content="#F4EEE3" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <!-- Status bar: "default" pairs with a light theme-color. iOS paints
          the status-bar region with theme-color since we dropped
@@ -29,27 +29,19 @@
       // and to make the iOS Safari toolbar (and PWA chin / home-indicator
       // area, which iOS fills with theme-color) match the visible page.
       //
-      // Mobile (<=767px): body matches Glass Grok's app canvas edge-to-edge.
-      //   - Light mode: #F2F2F4 (--bg-app — matches internal app + marketing)
-      //   - Dark mode:  #151617 (near-black)
-      // Desktop: body is medium charcoal (#2A2C2E) so floating cards float.
-      //
-      // Prior value #FFFFFF produced a visible white chin below the tab bar
-      // in the iOS PWA — the theme-color + inline body bg overrode the
-      // @media(display-mode: standalone) rule that otherwise paints #F2F2F4.
+      // Cowork DL (2026-04-23): body sits on the darker cream --bg-body
+      // (#e8e6dc) so canvas cards lift visibly off it. Dark mode inverts —
+      // body is the darkest layer (gray-950).
       (function() {
         var stored = localStorage.getItem('smbx-theme'); // 'light' | 'dark' | null
         var isDark = stored === 'dark';
-        var isMobile = window.matchMedia('(max-width: 767px)').matches;
 
         if (isDark) {
           document.documentElement.classList.add('dark');
           document.documentElement.style.colorScheme = 'dark';
         }
 
-        var color = isMobile
-          ? (isDark ? '#151617' : '#F2F2F4')
-          : '#2A2C2E';
+        var color = isDark ? '#1A1814' : '#F4EEE3';
 
         var metas = document.querySelectorAll('meta[name="theme-color"]');
         metas.forEach(function(m) { m.setAttribute('content', color); });
@@ -119,7 +111,10 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/pwa-icon-180-dark.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Caveat:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <!-- Cowork DL fonts (2026-04-23): Instrument Serif = editorial display (Anthropic Serif analog);
+         Figtree = warm humanist sans (Anthropic Sans analog); JetBrains Mono = data.
+         Sora/Inter/Poppins/Caveat kept for back-compat — legacy components still reference them. -->
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Figtree:ital,wght@0,300..900;1,300..900&family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
     <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>

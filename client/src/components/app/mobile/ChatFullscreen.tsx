@@ -248,7 +248,7 @@ export default function ChatFullscreen({
         <div style={{ flex: 1, minWidth: 0, textAlign: 'center', padding: '0 8px' }}>
           <div
             style={{
-              fontFamily: "'Sora', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 15,
               fontWeight: 700,
               color: 'var(--text-primary)',
@@ -262,7 +262,7 @@ export default function ChatFullscreen({
           </div>
           <div
             style={{
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 11,
               color: 'var(--text-muted)',
               whiteSpace: 'nowrap',
@@ -298,7 +298,7 @@ export default function ChatFullscreen({
         {messages.length === 0 && !streamingText ? (
           <div
             style={{
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 14,
               color: 'var(--text-muted)',
               textAlign: 'center',
@@ -323,7 +323,7 @@ export default function ChatFullscreen({
                   border: m.role === 'user' ? 'none' : '0.5px solid var(--border)',
                   borderRadius:
                     m.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                  fontFamily: "'Inter', system-ui, sans-serif",
+                  fontFamily: "'Figtree', system-ui, sans-serif",
                   fontSize: 14.5,
                   lineHeight: 1.5,
                   color: m.role === 'user' ? '#fff' : 'var(--text-primary)',
@@ -357,7 +357,7 @@ export default function ChatFullscreen({
               background: 'var(--bg-card)',
               border: '0.5px solid var(--border)',
               borderRadius: '18px 18px 18px 4px',
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 14.5,
               lineHeight: 1.5,
               color: 'var(--text-primary)',
@@ -401,7 +401,7 @@ export default function ChatFullscreen({
             <p
               style={{
                 margin: 0,
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 13,
                 fontWeight: 500,
                 color: 'var(--band-flag-fg)',
@@ -421,7 +421,7 @@ export default function ChatFullscreen({
                   color: '#fff',
                   border: 'none',
                   borderRadius: 999,
-                  fontFamily: "'Inter', system-ui, sans-serif",
+                  fontFamily: "'Figtree', system-ui, sans-serif",
                   fontSize: 12.5,
                   fontWeight: 700,
                   cursor: 'pointer',
@@ -504,7 +504,7 @@ export default function ChatFullscreen({
               border: 'none',
               outline: 'none',
               background: 'transparent',
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 16 /* 16px+ prevents iOS auto-zoom on focus */,
               color: 'var(--text-primary)',
               minWidth: 0,

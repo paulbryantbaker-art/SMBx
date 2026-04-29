@@ -4,19 +4,19 @@
    ═══════════════════════════════════════════════════════════ */
 
 :root {
-  --gg-ink: #0A0A0B;
+  --gg-ink: #1a1918;
   --gg-ink-2: #3A3A3E;
-  --gg-mute: #6B6B70;
-  --gg-faint: #9A9A9F;
+  --gg-mute: #87867f;
+  --gg-faint: #b0aea5;
   --gg-border: rgba(0,0,0,0.08);
   --gg-border-soft: rgba(0,0,0,0.06);
-  --gg-bg: #F2F2F4;
+  --gg-bg: #faf9f5;
   --gg-panel: #FAFAFB;
   --gg-card: #FFFFFF;
   --gg-ok: #22A755;
   --gg-warn: #E8A033;
   --gg-flag: #D4533A;
-  --gg-accent: #0A0A0B;
+  --gg-accent: #1a1918;
 }
 
 * { box-sizing: border-box; }
@@ -41,23 +41,23 @@ input, textarea { font: inherit; }
   -webkit-backdrop-filter: blur(24px) saturate(1.8);
   border-bottom: 0.5px solid var(--gg-border);
 }
-.dr-top__logo { font-family: 'Sora', sans-serif; font-weight: 800; letter-spacing: -0.025em; font-size: 17px; }
+.dr-top__logo { font-family: 'Figtree', system-ui, sans-serif; font-weight: 800; letter-spacing: -0.025em; font-size: 17px; }
 .dr-top__nav { display: flex; gap: 2px; }
 .dr-top__nav a {
-  font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600;
+  font-family: 'Figtree', system-ui, sans-serif; font-size: 12.5px; font-weight: 600;
   color: var(--gg-mute); padding: 7px 12px; border: 0; background: transparent;
   border-radius: 8px; cursor: pointer; transition: all 150ms;
   text-decoration: none;
 }
-.dr-top__nav a:hover { background: #F5F5F7; color: var(--gg-ink); }
-.dr-top__nav a.active { background: #E8E8EB; color: var(--gg-ink); }
+.dr-top__nav a:hover { background: #f5f4ed; color: var(--gg-ink); }
+.dr-top__nav a.active { background: #e8e6dc; color: var(--gg-ink); }
 .dr-top__cta { display: flex; gap: 8px; align-items: center; }
 .dr-top__signin {
-  font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600;
+  font-family: 'Figtree', system-ui, sans-serif; font-size: 12.5px; font-weight: 600;
   color: var(--gg-mute); padding: 7px 12px; border: 0; background: transparent; cursor: pointer;
 }
 .dr-top__btn {
-  font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700;
+  font-family: 'Figtree', system-ui, sans-serif; font-size: 12.5px; font-weight: 700;
   color: #fff; background: var(--gg-ink); border: 0; padding: 8px 14px;
   border-radius: 8px; cursor: pointer;
 }
@@ -73,12 +73,12 @@ input, textarea { font: inherit; }
   border-radius: 999px;
 }
 .dr-nav button {
-  font-family: 'Sora', sans-serif; font-size: 11.5px; font-weight: 700;
+  font-family: 'Figtree', system-ui, sans-serif; font-size: 11.5px; font-weight: 700;
   letter-spacing: 0.02em; color: var(--gg-mute);
   padding: 6px 12px; border: 0; background: transparent;
   border-radius: 999px; cursor: pointer; transition: all 180ms;
 }
-.dr-nav button:hover { background: #F5F5F7; color: var(--gg-ink); }
+.dr-nav button:hover { background: #f5f4ed; color: var(--gg-ink); }
 .dr-nav button.active { background: var(--gg-ink); color: #fff; }
 
 /* ── Two-column: sticky chat rail + stage ─ */
@@ -108,14 +108,14 @@ input, textarea { font: inherit; }
 }
 .dr-rail__avatar {
   width: 36px; height: 36px; border-radius: 50%;
-  background: linear-gradient(135deg, #3A3A3E 0%, #0A0A0B 100%);
+  background: linear-gradient(135deg, #3A3A3E 0%, #1a1918 100%);
   color: #fff; display: flex; align-items: center; justify-content: center;
-  font-family: 'Sora', sans-serif; font-weight: 800; font-size: 14px;
+  font-family: 'Figtree', system-ui, sans-serif; font-weight: 800; font-size: 14px;
 }
 .dr-rail__who { display: flex; flex-direction: column; }
-.dr-rail__name { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 14px; color: var(--gg-ink); }
+.dr-rail__name { font-family: 'Figtree', system-ui, sans-serif; font-weight: 700; font-size: 14px; color: var(--gg-ink); }
 .dr-rail__status {
-  font-family: 'Inter', sans-serif; font-size: 11px; color: var(--gg-ok); font-weight: 600;
+  font-family: 'Figtree', system-ui, sans-serif; font-size: 11px; color: var(--gg-ok); font-weight: 600;
   display: flex; align-items: center; gap: 6px;
 }
 .dr-rail__status::before {
@@ -126,7 +126,7 @@ input, textarea { font: inherit; }
   margin-left: auto;
   font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 9.5px;
   color: var(--gg-mute); letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 4px 8px; background: #F5F5F7; border-radius: 999px;
+  padding: 4px 8px; background: #f5f4ed; border-radius: 999px;
 }
 
 .dr-rail__scroll { flex: 1; overflow-y: auto; padding: 20px 22px 16px; }
@@ -144,12 +144,12 @@ input, textarea { font: inherit; }
 }
 .dr-msg__bubble strong { color: var(--gg-ink); font-weight: 700; }
 .dr-msg--me .dr-msg__bubble {
-  background: #F5F5F7; padding: 10px 14px; border-radius: 14px 14px 4px 14px;
+  background: #f5f4ed; padding: 10px 14px; border-radius: 14px 14px 4px 14px;
   display: inline-block; max-width: 92%;
 }
 @keyframes dr-msg-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .dr-typing {
-  display: inline-flex; gap: 4px; padding: 10px 14px; background: #F5F5F7;
+  display: inline-flex; gap: 4px; padding: 10px 14px; background: #f5f4ed;
   border-radius: 14px; margin-bottom: 14px;
 }
 .dr-typing span {
@@ -166,7 +166,7 @@ input, textarea { font: inherit; }
 }
 .dr-rail__chat {
   display: flex; align-items: center; gap: 6px; padding: 6px 6px 6px 16px;
-  min-height: 44px; background: #F5F5F7; border-radius: 999px;
+  min-height: 44px; background: #f5f4ed; border-radius: 999px;
   transition: background 150ms;
 }
 .dr-rail__chat:focus-within { background: #EDEDF0; }
@@ -183,7 +183,7 @@ input, textarea { font: inherit; }
   display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px;
 }
 .dr-rail__chips button {
-  font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 600;
+  font-family: 'Figtree', system-ui, sans-serif; font-size: 11.5px; font-weight: 600;
   color: var(--gg-ink-2); background: #fff; border: 0.5px solid var(--gg-border);
   padding: 6px 11px; border-radius: 999px; cursor: pointer;
   transition: all 150ms;
@@ -201,7 +201,7 @@ input, textarea { font: inherit; }
   border-radius: 999px;
 }
 .dr-step__title {
-  font-family: 'Sora', sans-serif; font-weight: 800;
+  font-family: 'Figtree', system-ui, sans-serif; font-weight: 800;
   font-size: clamp(28px, 3.4vw, 44px); letter-spacing: -0.03em; line-height: 1.05;
   margin: 0 0 18px; text-wrap: balance;
 }
@@ -224,7 +224,7 @@ input, textarea { font: inherit; }
   background: linear-gradient(180deg, #FAFAFB, #fff);
 }
 .dr-bench__title {
-  font-family: 'Sora', sans-serif; font-weight: 700; font-size: 13.5px;
+  font-family: 'Figtree', system-ui, sans-serif; font-weight: 700; font-size: 13.5px;
   letter-spacing: -0.005em;
 }
 .dr-bench__meta {
@@ -246,11 +246,11 @@ input, textarea { font: inherit; }
 /* Shared bench helpers — rows, pills, donuts */
 .row { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 0; border-top: 0.5px solid var(--gg-border-soft); }
 .row:first-child { border-top: 0; }
-.row__title { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 13px; color: var(--gg-ink); }
+.row__title { font-family: 'Figtree', system-ui, sans-serif; font-weight: 700; font-size: 13px; color: var(--gg-ink); }
 .row__sub { font-size: 11.5px; color: var(--gg-mute); margin-top: 2px; }
-.row__amt { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 16px; font-variant-numeric: tabular-nums; color: var(--gg-ink); }
+.row__amt { font-family: 'Figtree', system-ui, sans-serif; font-weight: 800; font-size: 16px; font-variant-numeric: tabular-nums; color: var(--gg-ink); }
 
-.pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-family: 'Sora', sans-serif; font-weight: 700; font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-family: 'Figtree', system-ui, sans-serif; font-weight: 700; font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; }
 .pill--ok  { background: rgba(34,167,85,0.12); color: #1A7E40; }
 .pill--warn{ background: rgba(232,160,51,0.14); color: #8A5A14; }
 .pill--flag{ background: rgba(212,83,58,0.12); color: #9C3020; }
@@ -261,7 +261,7 @@ input, textarea { font: inherit; }
   background: var(--gg-ink); color: #fff; border-radius: 20px;
 }
 .dr-bottom h2 {
-  font-family: 'Sora', sans-serif; font-weight: 800;
+  font-family: 'Figtree', system-ui, sans-serif; font-weight: 800;
   font-size: clamp(28px, 3.6vw, 46px); letter-spacing: -0.03em; line-height: 1.05;
   margin: 0 0 14px; text-wrap: balance;
 }

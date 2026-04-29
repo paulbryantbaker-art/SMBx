@@ -12,8 +12,8 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 
-const PINK = '#D44A78';
-const PINK_DARK = '#E8709A';
+const PINK = '#D4714E';
+const PINK_DARK = '#ec9d78';
 
 type Row = {
   feature: string;
@@ -93,7 +93,7 @@ export function ChatGPTvsYulia({ dark }: { dark: boolean }) {
   const bg = dark ? '#0f1012' : '#f9f7f1';
   const border = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
   const ruleColor = dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.07)';
-  const headingColor = dark ? '#f9f9fc' : '#0f1012';
+  const headingColor = dark ? '#faf9f5' : '#0f1012';
   const bodyColor = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
   const mutedColor = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
   const accent = dark ? PINK_DARK : PINK;

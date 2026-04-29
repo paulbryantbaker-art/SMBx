@@ -13,8 +13,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 
-const PINK = '#D44A78';
-const PINK_DARK = '#E8709A';
+const PINK = '#D4714E';
+const PINK_DARK = '#ec9d78';
 
 interface NextAction {
   id: string;
@@ -56,7 +56,7 @@ export function NextActionsCards({ dark, onAction, authHeaders }: Props) {
   }, [fetchActions]);
 
   // Colors
-  const headingC = dark ? '#f9f9fc' : '#0f1012';
+  const headingC = dark ? '#faf9f5' : '#0f1012';
   const bodyC    = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
   const mutedC   = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
   const ruleC    = dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.08)';
@@ -106,8 +106,8 @@ export function NextActionsCards({ dark, onAction, authHeaders }: Props) {
           <div
             className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
             style={{
-              background: dark ? 'rgba(232,112,154,0.10)' : 'rgba(212,74,120,0.08)',
-              border: `1px solid ${dark ? 'rgba(232,112,154,0.20)' : 'rgba(212,74,120,0.16)'}`,
+              background: dark ? 'rgba(236,157,120,0.10)' : 'rgba(212,113,78,0.08)',
+              border: `1px solid ${dark ? 'rgba(236,157,120,0.20)' : 'rgba(212,113,78,0.16)'}`,
             }}
           >
             <span className="material-symbols-outlined text-[20px]" style={{ color: pinkC }}>

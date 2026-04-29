@@ -7,11 +7,11 @@
 /* ─── Base Typography ───────────────────────────────────────────────── */
 
 .document-editor-content {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Figtree', system-ui, -apple-system, sans-serif;
   font-size: 14px;
   font-weight: 400;
   line-height: 1.65;
-  color: #0D0D0D;
+  color: #1a1918;
   max-width: 700px;
   margin: 0 auto;
   padding: 28px 24px;
@@ -25,32 +25,32 @@
 /* ─── Headings ──────────────────────────────────────────────────────── */
 
 .document-editor-content h1 {
-  font-family: 'Sora', system-ui, sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-size: 24px;
   font-weight: 700;
-  color: #0D0D0D;
+  color: #1a1918;
   margin: 0 0 16px 0;
   padding-bottom: 10px;
-  border-bottom: 2px solid #D44A78;
+  border-bottom: 2px solid #D4714E;
   line-height: 1.3;
 }
 
 .document-editor-content h2 {
-  font-family: 'Sora', system-ui, sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-size: 18px;
   font-weight: 600;
-  color: #0D0D0D;
+  color: #1a1918;
   margin: 28px 0 12px 0;
   padding-left: 12px;
-  border-left: 3px solid #D44A78;
+  border-left: 3px solid #D4714E;
   line-height: 1.35;
 }
 
 .document-editor-content h3 {
-  font-family: 'Sora', system-ui, sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-size: 15px;
   font-weight: 600;
-  color: #3D3B37;
+  color: #3d3d3a;
   margin: 20px 0 8px 0;
   line-height: 1.4;
 }
@@ -59,7 +59,7 @@
 
 .document-editor-content p {
   margin: 0 0 12px 0;
-  color: #3D3B37;
+  color: #3d3d3a;
 }
 
 .document-editor-content p:last-child {
@@ -70,24 +70,24 @@
 
 .document-editor-content strong {
   font-weight: 600;
-  color: #0D0D0D;
+  color: #1a1918;
 }
 
 .document-editor-content em {
-  color: #6E6A63;
+  color: #5e5d59;
 }
 
 /* ─── Links ─────────────────────────────────────────────────────────── */
 
 .document-editor-content a {
-  color: #D44A78;
+  color: #D4714E;
   text-decoration: none;
   border-bottom: 1px solid transparent;
   transition: border-color 0.15s ease;
 }
 
 .document-editor-content a:hover {
-  border-bottom-color: #D44A78;
+  border-bottom-color: #D4714E;
 }
 
 /* ─── Lists ─────────────────────────────────────────────────────────── */
@@ -96,7 +96,7 @@
 .document-editor-content ol {
   padding-left: 20px;
   margin: 0 0 12px 0;
-  color: #3D3B37;
+  color: #3d3d3a;
 }
 
 .document-editor-content li {
@@ -117,30 +117,30 @@
 }
 
 .document-editor-content thead {
-  border-top: 2px solid #D44A78;
+  border-top: 2px solid #D4714E;
 }
 
 .document-editor-content th {
   text-align: left;
   padding: 8px 12px;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #3D3B37;
+  color: #3d3d3a;
   background: #F5F5F5;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .document-editor-content td {
   padding: 8px 12px;
-  color: #0D0D0D;
-  border-bottom: 1px solid #EBE7DF;
+  color: #1a1918;
+  border-bottom: 1px solid #e8e6dc;
 }
 
 .document-editor-content tbody tr:nth-child(even) {
-  background: #FAFAF8;
+  background: #faf9f5;
 }
 
 .document-editor-content tbody tr:hover {
@@ -150,7 +150,7 @@
 /* ─── Table editing — selected cells ────────────────────────────────── */
 
 .document-editor-content .selectedCell {
-  background: rgba(212, 74, 120, 0.08);
+  background: rgba(212,113,78, 0.08);
 }
 
 .document-editor-content .column-resize-handle {
@@ -159,7 +159,7 @@
   top: 0;
   bottom: 0;
   width: 4px;
-  background: #D44A78;
+  background: #D4714E;
   cursor: col-resize;
 }
 
@@ -168,13 +168,13 @@
 .document-editor-content blockquote {
   margin: 16px 0;
   padding: 12px 16px;
-  border-left: 3px solid #D44A78;
+  border-left: 3px solid #D4714E;
   background: #FFF8F5;
   border-radius: 0 6px 6px 0;
 }
 
 .document-editor-content blockquote p {
-  color: #3D3B37;
+  color: #3d3d3a;
   margin: 0;
 }
 
@@ -182,7 +182,7 @@
 
 .document-editor-content hr {
   border: none;
-  border-top: 1px solid #EBE7DF;
+  border-top: 1px solid #e8e6dc;
   margin: 24px 0;
 }
 
@@ -194,11 +194,11 @@
   background: #F5F5F5;
   padding: 2px 5px;
   border-radius: 3px;
-  color: #D44A78;
+  color: #D4714E;
 }
 
 .document-editor-content pre {
-  background: #1A1C1E;
+  background: #1a1918;
   color: #E8E6E3;
   padding: 16px;
   border-radius: 8px;
@@ -240,7 +240,7 @@
 }
 
 .document-editor-content ::selection {
-  background: rgba(212, 74, 120, 0.15);
+  background: rgba(212,113,78, 0.15);
 }
 
 /* ─── Dark Mode ─────────────────────────────────────────────────────── */
@@ -251,12 +251,12 @@ html.dark .document-editor-content {
 
 html.dark .document-editor-content h1 {
   color: #F5F3EF;
-  border-bottom-color: #E8709A;
+  border-bottom-color: #ec9d78;
 }
 
 html.dark .document-editor-content h2 {
   color: #F5F3EF;
-  border-left-color: #E8709A;
+  border-left-color: #ec9d78;
 }
 
 html.dark .document-editor-content h3 {
@@ -276,16 +276,16 @@ html.dark .document-editor-content em {
 }
 
 html.dark .document-editor-content a {
-  color: #E8709A;
+  color: #ec9d78;
 }
 
 html.dark .document-editor-content thead {
-  border-top-color: #E8709A;
+  border-top-color: #ec9d78;
 }
 
 html.dark .document-editor-content th {
   color: #C8C4BC;
-  background: #2A2C2E;
+  background: #141413;
   border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
@@ -299,16 +299,16 @@ html.dark .document-editor-content tbody tr:nth-child(even) {
 }
 
 html.dark .document-editor-content tbody tr:hover {
-  background: #2A2C2E;
+  background: #141413;
 }
 
 html.dark .document-editor-content .selectedCell {
-  background: rgba(232, 112, 154, 0.12);
+  background: rgba(236,157,120, 0.12);
 }
 
 html.dark .document-editor-content blockquote {
-  border-left-color: #E8709A;
-  background: rgba(232, 112, 154, 0.06);
+  border-left-color: #ec9d78;
+  background: rgba(236,157,120, 0.06);
 }
 
 html.dark .document-editor-content blockquote p {
@@ -320,12 +320,12 @@ html.dark .document-editor-content hr {
 }
 
 html.dark .document-editor-content code {
-  background: #2A2C2E;
-  color: #E8709A;
+  background: #141413;
+  color: #ec9d78;
 }
 
 html.dark .document-editor-content ::selection {
-  background: rgba(232, 112, 154, 0.2);
+  background: rgba(236,157,120, 0.2);
 }
 
 /* ─── Print ─────────────────────────────────────────────────────────── */

@@ -126,12 +126,12 @@ export default function SourcingCommandCenter({ dark }: Props) {
   const total = stageDist.reduce((a, b) => a + b, 0);
 
   /* ───── Palette ───── */
-  const heading = dark ? '#F0F0F3' : '#1A1C1E';
-  const body = dark ? 'rgba(240,240,243,0.78)' : '#3C3D40';
-  const muted = dark ? 'rgba(240,240,243,0.55)' : '#6B6C6F';
-  const borderC = dark ? 'rgba(255,255,255,0.06)' : '#E5E1D9';
+  const heading = dark ? '#f5f4ed' : '#1a1918';
+  const body = dark ? 'rgba(245,244,237,0.78)' : '#3C3D40';
+  const muted = dark ? 'rgba(245,244,237,0.55)' : '#6B6C6F';
+  const borderC = dark ? 'rgba(255,255,255,0.06)' : '#e8e6dc';
   const subtleBg = dark ? 'rgba(255,255,255,0.02)' : 'rgba(15,16,18,0.015)';
-  const pink = dark ? '#E8709A' : '#D44A78';
+  const pink = dark ? '#ec9d78' : '#D4714E';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, background: 'transparent' }}>
@@ -145,7 +145,7 @@ export default function SourcingCommandCenter({ dark }: Props) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
           <h1 style={{
             margin: 0,
-            fontFamily: "'Sora', system-ui, sans-serif",
+            fontFamily: "'Figtree', system-ui, sans-serif",
             fontSize: 20,
             fontWeight: 800,
             letterSpacing: '-0.02em',
@@ -159,7 +159,7 @@ export default function SourcingCommandCenter({ dark }: Props) {
             borderRadius: 999,
             padding: 3,
             border: `1px solid ${borderC}`,
-            background: dark ? '#1A1C1E' : '#FFFFFF',
+            background: dark ? '#1a1918' : '#FFFFFF',
           }}>
             <ViewChip icon="list" label="List" active={view === 'list'} onClick={() => setView('list')} dark={dark} />
             <ViewChip icon="view_kanban" label="Board" active={view === 'board'} onClick={() => setView('board')} dark={dark} />
@@ -181,10 +181,10 @@ export default function SourcingCommandCenter({ dark }: Props) {
                     padding: '8px 10px',
                     borderRadius: 10,
                     background: count > 0
-                      ? (dark ? 'rgba(232,112,154,0.10)' : 'rgba(212,74,120,0.06)')
+                      ? (dark ? 'rgba(236,157,120,0.10)' : 'rgba(212,113,78,0.06)')
                       : (dark ? 'rgba(255,255,255,0.02)' : 'rgba(15,16,18,0.02)'),
-                    border: `1px solid ${count > 0 ? (dark ? 'rgba(232,112,154,0.22)' : 'rgba(212,74,120,0.14)') : borderC}`,
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    border: `1px solid ${count > 0 ? (dark ? 'rgba(236,157,120,0.22)' : 'rgba(212,113,78,0.14)') : borderC}`,
+                    fontFamily: "'Figtree', system-ui, sans-serif",
                   }}
                 >
                   <div style={{
@@ -197,7 +197,7 @@ export default function SourcingCommandCenter({ dark }: Props) {
                   }}>
                     {s.short}
                   </div>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: heading, fontFamily: "'Sora', system-ui, sans-serif", letterSpacing: '-0.01em' }}>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: heading, fontFamily: "'Figtree', system-ui, sans-serif", letterSpacing: '-0.01em' }}>
                     {count}
                   </div>
                   <div style={{
@@ -228,7 +228,7 @@ export default function SourcingCommandCenter({ dark }: Props) {
             padding: 48,
             textAlign: 'center',
             color: muted,
-            fontFamily: "'Inter', system-ui, sans-serif",
+            fontFamily: "'Figtree', system-ui, sans-serif",
             fontSize: 13,
           }}>
             {error}{' '}
@@ -274,7 +274,7 @@ export default function SourcingCommandCenter({ dark }: Props) {
 function ViewChip({
   icon, label, active, onClick, dark,
 }: { icon: string; label: string; active: boolean; onClick: () => void; dark: boolean }) {
-  const pink = dark ? '#E8709A' : '#D44A78';
+  const pink = dark ? '#ec9d78' : '#D4714E';
   return (
     <button
       onClick={onClick}
@@ -288,10 +288,10 @@ function ViewChip({
         borderRadius: 999,
         border: 'none',
         background: active
-          ? (dark ? 'rgba(232,112,154,0.16)' : 'rgba(212,74,120,0.08)')
+          ? (dark ? 'rgba(236,157,120,0.16)' : 'rgba(212,113,78,0.08)')
           : 'transparent',
-        color: active ? pink : (dark ? 'rgba(240,240,243,0.78)' : '#3C3D40'),
-        fontFamily: "'Inter', system-ui, sans-serif",
+        color: active ? pink : (dark ? 'rgba(245,244,237,0.78)' : '#3C3D40'),
+        fontFamily: "'Figtree', system-ui, sans-serif",
         fontSize: 12.5,
         fontWeight: active ? 700 : 500,
         cursor: 'pointer',
@@ -321,10 +321,10 @@ function BoardView({
   }
   if (theses.length === 0) {
     return (
-      <div style={{ padding: 48, textAlign: 'center', color: muted, fontFamily: "'Inter', system-ui, sans-serif", fontSize: 13 }}>
+      <div style={{ padding: 48, textAlign: 'center', color: muted, fontFamily: "'Figtree', system-ui, sans-serif", fontSize: 13 }}>
         <div style={{
           fontSize: 16, fontWeight: 800, color: heading,
-          fontFamily: "'Sora', system-ui, sans-serif", marginBottom: 8, letterSpacing: '-0.01em',
+          fontFamily: "'Figtree', system-ui, sans-serif", marginBottom: 8, letterSpacing: '-0.01em',
         }}>
           No theses yet
         </div>
@@ -340,7 +340,7 @@ function BoardView({
             border: `1px solid ${pink}`,
             background: 'transparent',
             color: pink,
-            fontFamily: "'Inter', system-ui, sans-serif",
+            fontFamily: "'Figtree', system-ui, sans-serif",
             fontSize: 12.5,
             fontWeight: 700,
             cursor: 'pointer',
@@ -389,7 +389,7 @@ function BoardView({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            fontFamily: "'Sora', system-ui, sans-serif",
+            fontFamily: "'Figtree', system-ui, sans-serif",
           }}>
             <div>
               <div style={{
@@ -436,7 +436,7 @@ function BoardView({
               <div style={{
                 padding: 16,
                 textAlign: 'center',
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 11,
                 color: muted,
                 lineHeight: 1.5,
@@ -471,8 +471,8 @@ function ThesisCard({
       padding: 12,
       borderRadius: 10,
       border: `1px solid ${borderC}`,
-      background: dark ? '#1A1C1E' : '#FFFFFF',
-      fontFamily: "'Inter', system-ui, sans-serif",
+      background: dark ? '#1a1918' : '#FFFFFF',
+      fontFamily: "'Figtree', system-ui, sans-serif",
     }}>
       <div style={{
         fontSize: 13,
@@ -509,7 +509,7 @@ function ThesisCard({
           <span style={{
             padding: '1px 6px',
             borderRadius: 999,
-            background: dark ? 'rgba(212,74,120,0.18)' : 'rgba(212,74,120,0.10)',
+            background: dark ? 'rgba(212,113,78,0.18)' : 'rgba(212,113,78,0.10)',
             color: pink,
             fontSize: 10,
           }}>
@@ -566,7 +566,7 @@ function BoardSkeleton({ dark, borderC }: { dark: boolean; borderC: string }) {
                   padding: 12,
                   borderRadius: 10,
                   border: `1px solid ${borderC}`,
-                  background: dark ? '#1A1C1E' : '#FFFFFF',
+                  background: dark ? '#1a1918' : '#FFFFFF',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 8,

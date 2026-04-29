@@ -185,7 +185,7 @@ function DevPill({
     border: 'none',
     background: active ? 'var(--v4-ink)' : 'transparent',
     color: active ? 'var(--v4-on-ink)' : 'var(--v4-mute)',
-    fontFamily: "'Inter', system-ui, sans-serif",
+    fontFamily: "'Figtree', system-ui, sans-serif",
     fontSize: 12,
     fontWeight: 600,
     cursor: 'pointer',

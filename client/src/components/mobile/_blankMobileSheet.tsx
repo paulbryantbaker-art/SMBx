@@ -22,9 +22,9 @@ export function BlankMobileSheet({
   title,
 }: BlankMobileSheetProps & { title: string }) {
   if (!open) return null;
-  const bg = dark ? '#151617' : '#FEFEFE';
-  const ink = dark ? '#F9F9FC' : '#0F1012';
-  const mute = dark ? 'rgba(218,218,220,0.65)' : '#6B6B70';
+  const bg = dark ? '#141413' : '#FEFEFE';
+  const ink = dark ? '#faf9f5' : '#1a1918';
+  const mute = dark ? 'rgba(218,218,220,0.65)' : '#87867f';
   const accent = '#C7616F';
 
   return (
@@ -53,7 +53,7 @@ export function BlankMobileSheet({
           </Drawer.Title>
           <h2
             style={{
-              fontFamily: 'Sora, sans-serif', fontWeight: 800,
+              fontFamily: 'Figtree, system-ui, sans-serif', fontWeight: 800,
               fontSize: 28, letterSpacing: '-0.02em', lineHeight: 1.1,
               color: ink, margin: '0 0 12px',
             }}
@@ -62,7 +62,7 @@ export function BlankMobileSheet({
           </h2>
           <p
             style={{
-              fontFamily: 'Inter, system-ui, sans-serif',
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 14, lineHeight: 1.55, color: mute, margin: '0 0 20px',
             }}
           >
@@ -75,7 +75,7 @@ export function BlankMobileSheet({
               padding: '12px 18px',
               background: ink, color: bg,
               border: 'none', borderRadius: 999,
-              fontFamily: 'Sora, sans-serif', fontWeight: 700,
+              fontFamily: 'Figtree, system-ui, sans-serif', fontWeight: 700,
               fontSize: 13, cursor: 'pointer',
             }}
           >

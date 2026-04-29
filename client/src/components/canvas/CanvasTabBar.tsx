@@ -87,9 +87,9 @@ export default function CanvasTabBar({ tabs, activeTabId, onSelect, onClose, dar
                 maxWidth: 180,
                 minWidth: 0,
                 background: isActive
-                  ? (dark ? '#1A1C1E' : '#FFFFFF')
+                  ? (dark ? '#1a1918' : '#FFFFFF')
                   : 'transparent',
-                borderTop: isActive ? `2px solid ${dark ? '#F0F0F3' : '#1A1C1E'}` : '2px solid transparent',
+                borderTop: isActive ? `2px solid ${dark ? '#f5f4ed' : '#1a1918'}` : '2px solid transparent',
                 borderRight: `1px solid ${dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)'}`,
                 borderRadius: isActive ? '6px 6px 0 0' : 0,
                 marginBottom: isActive ? -1 : 0,
@@ -107,7 +107,7 @@ export default function CanvasTabBar({ tabs, activeTabId, onSelect, onClose, dar
               }}
             >
               {/* Icon */}
-              <span className={`shrink-0 ${isActive ? (dark ? 'text-[#F0F0F3]' : 'text-[#1A1C1E]') : dark ? 'text-[#6E6A63]' : 'text-[#A9A49C]'}`}>
+              <span className={`shrink-0 ${isActive ? (dark ? 'text-[#f5f4ed]' : 'text-[#1a1918]') : dark ? 'text-[#5e5d59]' : 'text-[#A9A49C]'}`}>
                 <TabIcon type={tab.type} />
               </span>
 
@@ -118,9 +118,9 @@ export default function CanvasTabBar({ tabs, activeTabId, onSelect, onClose, dar
                   fontSize: 12,
                   fontWeight: isActive ? 600 : 400,
                   color: isActive
-                    ? (dark ? '#F5F3EF' : '#0D0D0D')
-                    : (dark ? '#8A8680' : '#6E6A63'),
-                  fontFamily: "'Inter', system-ui, sans-serif",
+                    ? (dark ? '#F5F3EF' : '#1a1918')
+                    : (dark ? '#8A8680' : '#5e5d59'),
+                  fontFamily: "'Figtree', system-ui, sans-serif",
                   letterSpacing: '-0.01em',
                 }}
               >

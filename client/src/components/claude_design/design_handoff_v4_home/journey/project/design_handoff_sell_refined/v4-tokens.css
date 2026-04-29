@@ -14,7 +14,7 @@
   /* ───── v4 palette (canvas / rail / shell) ───────────────────── */
   --v4-bg:         #F6F6F4;   /* backdrop — cool off-white */
   --v4-bg-2:       #EEEEEB;   /* subtle variant */
-  --v4-ink:        #0A0A0B;   /* primary text */
+  --v4-ink:        #1a1918;   /* primary text */
   --v4-ink-2:      #2E2E32;   /* secondary */
   --v4-mute:       #6A6A70;
   --v4-faint:      #9C9CA2;
@@ -39,21 +39,21 @@
   --v4-ok:         #22A755;
   --v4-warn:       #D18B1F;
   --v4-flag:       #C24A2D;
-  --v4-accent:     #0A0A0B;
+  --v4-accent:     #1a1918;
   --v4-on-ink:     #FFFFFF;
 
   /* ───── Glass-Grok palette (mobile primitives share this set) ── */
-  --gg-ink:         #0A0A0B;
+  --gg-ink:         #1a1918;
   --gg-ink-2:       #3A3A3E;
-  --gg-mute:        #6B6B70;
-  --gg-faint:       #9A9A9F;
-  --gg-line:        #E8E8EB;
+  --gg-mute:        #87867f;
+  --gg-faint:       #b0aea5;
+  --gg-line:        #e8e6dc;
   --gg-border:      rgba(0, 0, 0, 0.08);
   --gg-border-soft: rgba(0, 0, 0, 0.06);
-  --gg-bg:          #F2F2F4;
+  --gg-bg:          #faf9f5;
   --gg-panel:       #FAFAFB;
   --gg-card:        #FFFFFF;
-  --gg-hover:       #F5F5F7;
+  --gg-hover:       #f5f4ed;
   --gg-ok:          #22A755;
   --gg-warn:        #E8A033;
   --gg-flag:        #D4533A;
@@ -75,7 +75,7 @@
   inset: 0;
   background: var(--v4-bg);
   color: var(--v4-ink);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Figtree', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

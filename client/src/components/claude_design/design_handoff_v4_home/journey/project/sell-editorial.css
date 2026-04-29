@@ -115,7 +115,7 @@
   font-size: 9.5px;
 }
 #home[data-journey="sell"] .h-today__h {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 800;
   font-size: clamp(44px, 5.2vw, 76px);
   letter-spacing: -0.035em;
@@ -149,7 +149,7 @@
   border: 0;
   padding: 14px 22px;
   border-radius: 999px;
-  font: 600 13px/1 'Inter', sans-serif;
+  font: 600 13px/1 'Figtree', system-ui, sans-serif;
   letter-spacing: -0.005em;
   display: inline-flex; align-items: center; gap: 10px;
   cursor: pointer;
@@ -223,7 +223,7 @@
 #home[data-journey="sell"] .h-today__demo-bubble--me {
   color: var(--s-bronze);
   font-style: italic;
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-size: 13.5px;
   font-weight: 500;
   padding-bottom: 14px;
@@ -232,7 +232,7 @@
 }
 #home[data-journey="sell"] .h-today__demo-bubble--me::before {
   content: '"';
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-size: 32px; line-height: 0;
   color: var(--s-honey);
   vertical-align: -12px;
@@ -251,7 +251,7 @@
   border: 0;
 }
 #home[data-journey="sell"] .h-today__demo-out-v {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 800;
   font-size: 40px;
   letter-spacing: -0.035em;
@@ -350,7 +350,7 @@
   max-width: 420px;
 }
 .s-editorial__attr-v {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 700; font-size: 26px;
   color: var(--s-ink);
   letter-spacing: -0.02em;
@@ -375,7 +375,7 @@
 }
 .s-editorial__num { display: flex; flex-direction: column; gap: 6px; }
 .s-editorial__num-v {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 800;
   font-size: 38px;
   letter-spacing: -0.03em;
@@ -442,7 +442,7 @@
 }
 #home[data-journey="sell"] .h-app__art-h {
   color: var(--s-ink);
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
@@ -470,7 +470,7 @@
   border-radius: 999px;
   padding: 8px 18px;
   border: 0;
-  font: 600 11.5px/1 'Inter', sans-serif;
+  font: 600 11.5px/1 'Figtree', system-ui, sans-serif;
 }
 /* Donut color — the readiness app */
 #home[data-journey="sell"] .h-app__donut svg circle:last-child { stroke: var(--s-ink); }
@@ -642,7 +642,7 @@
 .sell-demo__step.done .sell-demo__step-n { color: var(--s-bronze) !important; }
 .sell-demo__step.done .sell-demo__step-chk { background: var(--s-bronze) !important; color: var(--s-cream-1) !important; }
 .sell-demo__step-s { color: var(--s-bronze) !important; }
-.sell-demo__step-t { color: var(--s-umber) !important; font-family: 'Sora', sans-serif !important; font-weight: 500 !important; }
+.sell-demo__step-t { color: var(--s-umber) !important; font-family: 'Figtree', system-ui, sans-serif !important; font-weight: 500 !important; }
 
 .sell-demo__stage {
   padding: 36px 40px !important;

@@ -12,10 +12,11 @@
 import type { ReactNode, CSSProperties } from 'react';
 import type { Deal, DealDim, DimTone } from '../data';
 
+/* Cowork earth-tone tones — mineral (forest) / clay / fig-rose. */
 export const TONE_HEX: Record<DimTone, string> = {
-  green: '#22A755',
-  amber: '#E8A033',
-  red:   '#D4533A',
+  green: '#629987',  /* mineral */
+  amber: '#D4714E',  /* clay */
+  red:   '#c46686',  /* fig */
 };
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -89,14 +90,14 @@ export function ScoreDonut({ score, max = 100, size = 140 }: { score: number; ma
       <svg viewBox="0 0 200 200" style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
         <circle cx="100" cy="100" r="90" fill="none" stroke="#F0F0F2" strokeWidth="14" />
         <circle
-          cx="100" cy="100" r="90" fill="none" stroke="#0A0A0B" strokeWidth="14"
+          cx="100" cy="100" r="90" fill="none" stroke="#1a1918" strokeWidth="14"
           strokeLinecap="round" strokeDasharray={C} strokeDashoffset={off}
           style={{ transition: 'stroke-dashoffset 1.4s cubic-bezier(0.19,1,0.22,1)' }}
         />
       </svg>
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ fontFamily: 'Sora, sans-serif', fontWeight: 800, fontSize: size * 0.3, letterSpacing: '-0.035em', lineHeight: 1 }}>
-          {score}<span style={{ fontSize: size * 0.11, color: '#9A9A9F' }}>/{max}</span>
+        <div style={{ fontFamily: 'Figtree, system-ui, sans-serif', fontWeight: 800, fontSize: size * 0.3, letterSpacing: '-0.035em', lineHeight: 1 }}>
+          {score}<span style={{ fontSize: size * 0.11, color: '#b0aea5' }}>/{max}</span>
         </div>
       </div>
     </div>
@@ -122,7 +123,7 @@ export function RundownCard({ deal, compact = false }: { deal: Deal; compact?: b
             <Pill tone={statusTone}>{statusLabel}</Pill>
             <Pill tone="ink">Fit {deal.fit}</Pill>
           </div>
-          <div style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 14, letterSpacing: '-0.005em', marginBottom: 4 }}>
+          <div style={{ fontFamily: 'Figtree, system-ui, sans-serif', fontWeight: 700, fontSize: 14, letterSpacing: '-0.005em', marginBottom: 4 }}>
             {deal.name}
           </div>
           <div style={{ fontSize: 11.5, color: 'var(--gg-mute)', lineHeight: 1.5 }}>
@@ -154,7 +155,7 @@ export function SourcingCard({ deals }: { deals: Deal[] }) {
             <div className="src__fit">{d.fit}<small>FIT</small></div>
           </div>
         ))}
-        <div className="src__row" style={{ background: '#F5F5F7', margin: '0 -18px -16px', padding: '12px 18px' }}>
+        <div className="src__row" style={{ background: '#f5f4ed', margin: '0 -18px -16px', padding: '12px 18px' }}>
           <div>
             <div className="src__t">+ 44 more matching thesis</div>
             <div className="src__s">Named, contactable, fit ≥ 70</div>
@@ -304,7 +305,7 @@ export function ChartCard({ deal }: { deal: Deal }) {
           >
             <div style={{
               position: 'absolute', bottom: '100%', left: 0, right: 0,
-              textAlign: 'center', fontFamily: 'Sora, sans-serif',
+              textAlign: 'center', fontFamily: 'Figtree, system-ui, sans-serif',
               fontWeight: 700, fontSize: 11, marginBottom: 4,
             }}>
               {d.v}

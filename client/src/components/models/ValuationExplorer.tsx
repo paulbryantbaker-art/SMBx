@@ -43,7 +43,7 @@ export default function ValuationExplorer({ tabId }: Props) {
         <KPICard
           label="Valuation (Mid)"
           value={centsToDisplay(val?.mid || 0)}
-          color="#D44A78"
+          color="#D4714E"
         />
         <KPICard
           label="SBA Eligible"
@@ -56,20 +56,20 @@ export default function ValuationExplorer({ tabId }: Props) {
       {/* Valuation Range Chart */}
       {val && (
         <div className="rounded-xl p-4" style={{ background: '#FAF8F4', border: '1px solid #DDD9D1' }}>
-          <h3 className="text-sm font-bold m-0 mb-3" style={{ fontFamily: 'Sora, sans-serif' }}>Estimated Value Range</h3>
+          <h3 className="text-sm font-bold m-0 mb-3" style={{ fontFamily: 'Figtree, system-ui, sans-serif' }}>Estimated Value Range</h3>
 
           <div className="flex justify-between items-end mb-4 px-8">
             <div className="text-center">
-              <p className="text-[9px] font-bold uppercase tracking-wider m-0 mb-1" style={{ color: '#6E6A63' }}>Low</p>
-              <p className="text-lg font-bold m-0" style={{ color: '#6E6A63' }}>{centsToDisplay(val.low)}</p>
+              <p className="text-[9px] font-bold uppercase tracking-wider m-0 mb-1" style={{ color: '#5e5d59' }}>Low</p>
+              <p className="text-lg font-bold m-0" style={{ color: '#5e5d59' }}>{centsToDisplay(val.low)}</p>
             </div>
             <div className="text-center">
-              <p className="text-[9px] font-bold uppercase tracking-wider m-0 mb-1" style={{ color: '#D44A78' }}>Most Likely</p>
-              <p className="text-2xl font-bold m-0" style={{ color: '#D44A78', fontFamily: 'Sora, sans-serif' }}>{centsToDisplay(val.mid)}</p>
+              <p className="text-[9px] font-bold uppercase tracking-wider m-0 mb-1" style={{ color: '#D4714E' }}>Most Likely</p>
+              <p className="text-2xl font-bold m-0" style={{ color: '#D4714E', fontFamily: 'Figtree, system-ui, sans-serif' }}>{centsToDisplay(val.mid)}</p>
             </div>
             <div className="text-center">
-              <p className="text-[9px] font-bold uppercase tracking-wider m-0 mb-1" style={{ color: '#6E6A63' }}>High</p>
-              <p className="text-lg font-bold m-0" style={{ color: '#6E6A63' }}>{centsToDisplay(val.high)}</p>
+              <p className="text-[9px] font-bold uppercase tracking-wider m-0 mb-1" style={{ color: '#5e5d59' }}>High</p>
+              <p className="text-lg font-bold m-0" style={{ color: '#5e5d59' }}>{centsToDisplay(val.high)}</p>
             </div>
           </div>
 
@@ -85,7 +85,7 @@ export default function ValuationExplorer({ tabId }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {/* Left: Financial Inputs */}
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#6E6A63' }}>Financial Inputs</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#5e5d59' }}>Financial Inputs</h3>
 
           <ModelInput
             label="Revenue"
@@ -109,12 +109,12 @@ export default function ValuationExplorer({ tabId }: Props) {
           />
 
           <div className="mt-2">
-            <label className="block text-[10px] font-medium mb-1" style={{ color: '#6E6A63' }}>League</label>
+            <label className="block text-[10px] font-medium mb-1" style={{ color: '#5e5d59' }}>League</label>
             <select
               value={league}
               onChange={e => update(tabId, 'league', e.target.value)}
               className="w-full rounded-lg border px-3 py-1.5 text-sm outline-none"
-              style={{ borderColor: '#DDD9D1', color: '#1A1A18' }}
+              style={{ borderColor: '#DDD9D1', color: '#1a1918' }}
             >
               <option value="L1">L1 — Main Street (&lt;$500K SDE)</option>
               <option value="L2">L2 — Lower Middle ($500K–$2M SDE)</option>
@@ -128,7 +128,7 @@ export default function ValuationExplorer({ tabId }: Props) {
 
         {/* Right: Multiple Adjustments */}
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#6E6A63' }}>Multiple Adjustments</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#5e5d59' }}>Multiple Adjustments</h3>
 
           <ModelSlider
             label="Low Multiple"
@@ -148,7 +148,7 @@ export default function ValuationExplorer({ tabId }: Props) {
 
           {/* Blended methodology weights */}
           <div className="mt-4">
-            <h4 className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: '#6E6A63' }}>Methodology Weights</h4>
+            <h4 className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: '#5e5d59' }}>Methodology Weights</h4>
 
             <ModelSlider
               label="Multiple-Based"
@@ -178,7 +178,7 @@ export default function ValuationExplorer({ tabId }: Props) {
       {/* SDE/EBITDA Breakdown Waterfall */}
       {o.sde_breakdown || o.valuation ? (
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#6E6A63' }}>Earnings Composition</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#5e5d59' }}>Earnings Composition</h3>
           <WaterfallChart items={[
             { label: 'Revenue', amount: a.revenue || 0 },
             { label: 'Less: Expenses', amount: -(a.revenue || 0) + (a.sde || a.ebitda || 0) - (a.ownerComp || 0) },
@@ -191,12 +191,12 @@ export default function ValuationExplorer({ tabId }: Props) {
       {/* Blended valuation result */}
       {o.blended && (
         <div className="rounded-lg p-4" style={{ border: '1px solid #DDD9D1' }}>
-          <h3 className="text-sm font-bold m-0 mb-2" style={{ fontFamily: 'Sora, sans-serif' }}>Blended Valuation</h3>
-          <p className="text-xl font-bold m-0" style={{ color: '#D44A78' }}>{centsToDisplay(o.blended.blended)}</p>
+          <h3 className="text-sm font-bold m-0 mb-2" style={{ fontFamily: 'Figtree, system-ui, sans-serif' }}>Blended Valuation</h3>
+          <p className="text-xl font-bold m-0" style={{ color: '#D4714E' }}>{centsToDisplay(o.blended.blended)}</p>
           <div className="mt-2 space-y-1">
             {o.blended.methods.map((m: any) => (
               <div key={m.label} className="flex justify-between text-xs">
-                <span style={{ color: '#6E6A63' }}>{m.label} ({m.weight}%)</span>
+                <span style={{ color: '#5e5d59' }}>{m.label} ({m.weight}%)</span>
                 <span className="font-medium tabular-nums">{centsToDisplay(m.value)}</span>
               </div>
             ))}

@@ -49,15 +49,15 @@ export default function GateProgress({ dealId, currentGate }: GateProgressProps)
         return (
           <div key={g.gate} className="flex items-center gap-1 shrink-0">
             {i > 0 && (
-              <div className={`w-4 h-px ${isCompleted || isActive ? 'bg-[#D44A78]' : 'bg-[rgba(0,0,0,0.08)]'}`} />
+              <div className={`w-4 h-px ${isCompleted || isActive ? 'bg-[#D4714E]' : 'bg-[rgba(0,0,0,0.08)]'}`} />
             )}
             <div className="flex items-center gap-1">
               <div
                 className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
                   isCompleted
-                    ? 'bg-[#D44A78] text-white'
+                    ? 'bg-[#D4714E] text-white'
                     : isActive
-                    ? 'bg-white text-[#D44A78] border-2 border-[#D44A78]'
+                    ? 'bg-white text-[#D4714E] border-2 border-[#D4714E]'
                     : 'bg-[#F5F5F5] text-[#A9A49C]'
                 }`}
                 style={isActive ? { animation: 'gatePulse 2s ease-in-out infinite' } : undefined}
@@ -69,7 +69,7 @@ export default function GateProgress({ dealId, currentGate }: GateProgressProps)
                 )}
               </div>
               <span className={`text-[11px] font-medium whitespace-nowrap ${
-                isActive ? 'text-[#D44A78]' : isCompleted ? 'text-[#3D3B37]' : 'text-[#A9A49C]'
+                isActive ? 'text-[#D4714E]' : isCompleted ? 'text-[#3d3d3a]' : 'text-[#A9A49C]'
               }`}>
                 {label}
               </span>

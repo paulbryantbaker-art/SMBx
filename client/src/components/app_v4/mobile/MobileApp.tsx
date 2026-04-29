@@ -76,7 +76,7 @@ function InlineArtifact({ kind, deal }: { kind: string; deal: Deal | null }) {
   if (kind === 'loi') {
     return (
       <div>
-        <div style={{ fontFamily: 'Sora,sans-serif', fontWeight: 800, fontSize: 20, letterSpacing: '-0.02em' }}>
+        <div style={{ fontFamily: 'Figtree, system-ui, sans-serif', fontWeight: 800, fontSize: 20, letterSpacing: '-0.02em' }}>
           $16.8M<span style={{ fontSize: 11, color: 'var(--gg-mute)', marginLeft: 8, fontWeight: 600, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.04em' }}>70/20/10 · REC</span>
         </div>
         <div style={{ fontSize: 12, color: 'var(--gg-ink-2)', marginTop: 6, lineHeight: 1.5 }}>
@@ -159,7 +159,7 @@ function MobileToday({ onOpenChat }: { onOpenChat: () => void }) {
             {PINNED.map((p) => (
               <div key={p.id} className="m-hcard" onClick={onOpenChat}>
                 <div className="m-hcard__art">
-                  <div style={{ fontFamily: 'Sora,sans-serif', fontWeight: 800, fontSize: 44, letterSpacing: '-0.03em', color: '#0A0A0B' }}>
+                  <div style={{ fontFamily: 'Figtree, system-ui, sans-serif', fontWeight: 800, fontSize: 44, letterSpacing: '-0.03em', color: '#1a1918' }}>
                     {p.kind === 'rundown' ? '83' : p.kind === 'loi' ? '$16.8M' : p.kind === 'dd' ? '38/42' : p.kind === 'compare' ? '3' : '1.24M'}
                   </div>
                 </div>

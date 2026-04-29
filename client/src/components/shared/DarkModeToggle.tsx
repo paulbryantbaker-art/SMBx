@@ -2,26 +2,29 @@ import { useState, useEffect, useLayoutEffect, useCallback } from 'react';
 
 type ThemePref = 'light' | 'dark' | 'system';
 const STORAGE_KEY = 'smbx-theme';
-// Desktop: body is always medium charcoal (#2A2C2E) — the "table" floating
-// cards (sidebar, canvas, journey) sit on. Provides the visual hierarchy
-// where the cards float on the body.
+// 2026-04-28: body bg is now read from CSS tokens at runtime instead
+// of hardcoded constants. This module forces body bg inline (Safari
+// toolbar tinting) — previously a constant duplicated --canvas-warm
+// from CSS, requiring lockstep updates in 3 places. Now: change the
+// token in CSS, the inline body bg follows automatically.
 //
-// Mobile: body matches Glass Grok's app canvas edge-to-edge — light grey in
-// light mode, near-black in dark mode. iOS Safari reads this for the
-// toolbar AND the PWA chin (home-indicator area), so matching --bg-app is
-// what eliminates the visible seam below the tab bar in the installed PWA.
-const DESKTOP_BG = '#2A2C2E';
-const MOBILE_LIGHT = '#F2F2F4';   // matches --bg-app
-const MOBILE_DARK  = '#151617';
-
-function isMobileViewport(): boolean {
-  if (typeof window === 'undefined') return false;
-  return window.matchMedia('(max-width: 767px)').matches;
-}
+// Fallback hexes are kept only for the rare case where CSS hasn't
+// resolved yet (very early useLayoutEffect on first paint).
+const LIGHT_FALLBACK = '#EFE6D5';
+const DARK_FALLBACK  = '#1A1814';
 
 function bodyColorFor(isDark: boolean): string {
-  if (!isMobileViewport()) return DESKTOP_BG;
-  return isDark ? MOBILE_DARK : MOBILE_LIGHT;
+  if (typeof window === 'undefined') {
+    return isDark ? DARK_FALLBACK : LIGHT_FALLBACK;
+  }
+  // Read the canonical color from CSS at apply time. For dark mode we
+  // use --canvas-deep (defined in :root or html.dark scope), for light
+  // we use --canvas-warm. trim() handles the leading space CSS adds.
+  const cs = getComputedStyle(document.documentElement);
+  const tokenName = isDark ? '--canvas-deep' : '--canvas-warm';
+  const fallback = isDark ? DARK_FALLBACK : LIGHT_FALLBACK;
+  const value = cs.getPropertyValue(tokenName).trim();
+  return value || fallback;
 }
 
 function getSystemDark() {
@@ -117,7 +120,7 @@ export function DarkModeToggle({ dark, setDark }: { dark: boolean; setDark: (v: 
   return (
     <button
       onClick={() => setDark(!dark)}
-      className={`hidden md:flex fixed z-50 w-10 h-10 rounded-full items-center justify-center border-none cursor-pointer shadow-lg hover:scale-110 active:scale-95 transition-all duration-200 ${dark ? 'bg-[#1a1c1e] text-[#E8709A] border border-[#2A2C2E]' : 'bg-[#1a1c1e] text-[#E8709A]'}`}
+      className={`hidden md:flex fixed z-50 w-10 h-10 rounded-full items-center justify-center border-none cursor-pointer shadow-lg hover:scale-110 active:scale-95 transition-all duration-200 ${dark ? 'bg-[#1a1918] text-[#ec9d78] border border-[#141413]' : 'bg-[#1a1918] text-[#ec9d78]'}`}
       style={{ top: 16, right: 16 }}
       aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
     >

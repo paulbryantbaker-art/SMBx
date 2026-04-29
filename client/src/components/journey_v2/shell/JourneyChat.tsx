@@ -280,7 +280,7 @@ export default function JourneyChat({
                   border: '0.5px solid var(--v4-card-line)',
                   background: 'var(--v4-card)',
                   color: 'var(--v4-ink-2)',
-                  fontFamily: "'Inter', sans-serif",
+                  fontFamily: "'Figtree', system-ui, sans-serif",
                   fontSize: 11.5,
                   fontWeight: 600,
                   cursor: 'pointer',

@@ -34,7 +34,7 @@ export default function ValueLensPage({ token }: ValueLensPageProps) {
   if (loading) {
     return (
       <div className="min-h-dvh bg-[#FFFFFF] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#D44A78] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
+        <div className="w-6 h-6 border-2 border-[#D4714E] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
       </div>
     );
   }
@@ -43,8 +43,8 @@ export default function ValueLensPage({ token }: ValueLensPageProps) {
     return (
       <div className="min-h-dvh bg-[#FFFFFF] flex items-center justify-center">
         <div className="bg-white rounded-2xl shadow-md p-8 max-w-md text-center">
-          <p className="text-lg font-semibold text-[#0D0D0D] mb-2">ValueLens Not Found</p>
-          <p className="text-sm text-[#6E6A63]">{error}</p>
+          <p className="text-lg font-semibold text-[#1a1918] mb-2">ValueLens Not Found</p>
+          <p className="text-sm text-[#5e5d59]">{error}</p>
         </div>
       </div>
     );
@@ -53,15 +53,15 @@ export default function ValueLensPage({ token }: ValueLensPageProps) {
   return (
     <div className="min-h-dvh bg-[#FFFFFF]">
       {/* Header */}
-      <header className="bg-white border-b border-[#EBEBEB] px-4 py-3">
+      <header className="bg-white border-b border-[#e8e6dc] px-4 py-3">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-lg text-[#0D0D0D]">smbx<span className="text-[#D44A78]">.</span>ai</span>
-            <span className="text-xs text-[#6E6A63]">ValueLens</span>
+            <span className="font-bold text-lg text-[#1a1918]">smbx<span className="text-[#D4714E]">.</span>ai</span>
+            <span className="text-xs text-[#5e5d59]">ValueLens</span>
           </div>
           <a
             href="/"
-            className="text-sm font-medium text-[#D44A78] hover:underline no-underline"
+            className="text-sm font-medium text-[#D4714E] hover:underline no-underline"
           >
             Get yours free
           </a>
@@ -70,7 +70,7 @@ export default function ValueLensPage({ token }: ValueLensPageProps) {
 
       {/* Content */}
       <main className="max-w-3xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-2xl shadow-sm border border-[#EBEBEB] p-6 md:p-10">
+        <div className="bg-white rounded-2xl shadow-sm border border-[#e8e6dc] p-6 md:p-10">
           <div className="canvas-md">
             <Markdown>{markdown}</Markdown>
           </div>

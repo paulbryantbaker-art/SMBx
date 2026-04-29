@@ -93,7 +93,7 @@ export function DCFView({ deal }: { deal: Deal | null }) {
           </div>
         ))}
         <div className="dcf__bar dcf__bar--tv">
-          <div className="dcf__bar-fill" style={{ height: '92%', background: '#A76BEF' }} />
+          <div className="dcf__bar-fill" style={{ height: '92%', background: '#D4714E' }} />
           <div className="dcf__bar-v">${tv.toFixed(0)}M</div>
           <div className="dcf__bar-y">TV</div>
         </div>
@@ -202,7 +202,7 @@ export function CompareView({ dealIds, onOpenDeal }: {
                           className="cmp__ov-fill"
                           style={{
                             width: `${(vals[i] / max) * 100}%`,
-                            background: d.tone === 'ok' ? '#0A0A0B' : d.tone === 'warn' ? '#E8A033' : '#D4533A',
+                            background: d.tone === 'ok' ? '#1a1918' : d.tone === 'warn' ? '#E8A033' : '#D4533A',
                           }}
                         />
                       </div>

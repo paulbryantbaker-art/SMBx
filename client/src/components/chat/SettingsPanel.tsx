@@ -98,19 +98,19 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
         <SectionHeading>Profile</SectionHeading>
         <Card className="mb-6">
           <div className="flex items-start gap-4 mb-4">
-            <div className="w-12 h-12 rounded-full bg-[#D44A78]/10 flex items-center justify-center shrink-0">
-              <span className="text-[#D44A78] font-headline font-bold text-lg">
+            <div className="w-12 h-12 rounded-full bg-[#D4714E]/10 flex items-center justify-center shrink-0">
+              <span className="text-[#D4714E] font-headline font-bold text-lg">
                 {(user.display_name || user.email)[0].toUpperCase()}
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-base font-semibold text-[#0D0D0D] m-0 truncate">{user.display_name || '—'}</p>
+              <p className="text-base font-semibold text-[#1a1918] m-0 truncate">{user.display_name || '—'}</p>
               <div className="flex items-center gap-2 mt-0.5">
                 <p className="text-sm text-[#5D5E61] m-0 truncate">{user.email}</p>
                 {(user as any).email_verified ? (
-                  <span className="text-[10px] font-semibold text-green-700 bg-green-50 px-1.5 py-0.5 rounded-full border border-green-200 shrink-0">Verified</span>
+                  <span className="text-[10px] font-semibold text-[#1f4a3a] bg-cactus/40 px-1.5 py-0.5 rounded-full border border-cactus shrink-0">Verified</span>
                 ) : verificationSent ? (
-                  <span className="text-[10px] font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-full border border-blue-200 shrink-0">Sent</span>
+                  <span className="text-[10px] font-semibold text-[#2f5a85] bg-sky/15 px-1.5 py-0.5 rounded-full border border-sky/40 shrink-0">Sent</span>
                 ) : (
                   <button
                     onClick={async () => {
@@ -122,7 +122,7 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
                       finally { setSendingVerification(false); }
                     }}
                     disabled={sendingVerification}
-                    className="text-[10px] font-semibold text-[#D44A78] bg-[#D44A78]/5 px-1.5 py-0.5 rounded-full border border-[#D44A78]/20 cursor-pointer hover:bg-[#D44A78]/10 transition-colors shrink-0 disabled:opacity-50"
+                    className="text-[10px] font-semibold text-[#D4714E] bg-[#D4714E]/5 px-1.5 py-0.5 rounded-full border border-[#D4714E]/20 cursor-pointer hover:bg-[#D4714E]/10 transition-colors shrink-0 disabled:opacity-50"
                   >
                     {sendingVerification ? '...' : 'Verify'}
                   </button>
@@ -132,8 +132,8 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
           </div>
           <div className="flex items-center gap-3 text-xs text-[#5D5E61]">
             <span>Joined {new Date(user.created_at || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
-            {user.role === 'admin' && <span className="text-[10px] font-semibold text-[#D44A78] bg-[#D44A78]/5 px-1.5 py-0.5 rounded-full">Admin</span>}
-            {user.google_id && <span className="text-[10px] text-[#5D5E61] bg-[#f3f3f6] px-1.5 py-0.5 rounded-full">Google linked</span>}
+            {user.role === 'admin' && <span className="text-[10px] font-semibold text-[#D4714E] bg-[#D4714E]/5 px-1.5 py-0.5 rounded-full">Admin</span>}
+            {user.google_id && <span className="text-[10px] text-[#5D5E61] bg-[#f0eee6] px-1.5 py-0.5 rounded-full">Google linked</span>}
           </div>
         </Card>
 
@@ -142,18 +142,18 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
         <Card className="mb-6">
           {subLoading ? (
             <div className="animate-pulse flex items-center gap-3">
-              <div className="h-5 bg-[#f3f3f6] rounded w-32" />
-              <div className="h-4 bg-[#f3f3f6] rounded w-20" />
+              <div className="h-5 bg-[#f0eee6] rounded w-32" />
+              <div className="h-4 bg-[#f0eee6] rounded w-20" />
             </div>
           ) : (
             <>
               <div className="flex items-center gap-3 mb-3">
-                <span className="text-base font-bold text-[#0D0D0D]">{planLabel}</span>
+                <span className="text-base font-bold text-[#1a1918]">{planLabel}</span>
                 {subscription?.status === 'active' && (
-                  <span className="text-[10px] font-semibold text-green-700 bg-green-50 px-1.5 py-0.5 rounded-full border border-green-200">Active</span>
+                  <span className="text-[10px] font-semibold text-[#1f4a3a] bg-cactus/40 px-1.5 py-0.5 rounded-full border border-cactus">Active</span>
                 )}
                 {trialActive && !subscription?.plan && (
-                  <span className="text-[10px] font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-full border border-blue-200">{daysLeft} days left</span>
+                  <span className="text-[10px] font-semibold text-[#2f5a85] bg-sky/15 px-1.5 py-0.5 rounded-full border border-sky/40">{daysLeft} days left</span>
                 )}
               </div>
               {subscription?.current_period_end && (
@@ -168,12 +168,12 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
               )}
               <div className="flex gap-2 mt-3">
                 {(!subscription?.plan || subscription.plan === 'free') && (
-                  <button className="px-3.5 py-2 rounded-full text-xs font-semibold bg-[#D44A78] text-white border-none cursor-pointer hover:bg-[#B03860] transition-colors">
+                  <button className="px-3.5 py-2 rounded-full text-xs font-semibold bg-[#D4714E] text-white border-none cursor-pointer hover:bg-[#B85A3A] transition-colors">
                     Upgrade Plan
                   </button>
                 )}
                 {subscription?.plan && subscription.plan !== 'free' && (
-                  <button className="px-3.5 py-2 rounded-full text-xs font-medium bg-transparent text-[#5D5E61] border border-[rgba(0,0,0,0.08)] cursor-pointer hover:bg-[#f3f3f6] transition-colors">
+                  <button className="px-3.5 py-2 rounded-full text-xs font-medium bg-transparent text-[#5D5E61] border border-[rgba(0,0,0,0.08)] cursor-pointer hover:bg-[#f0eee6] transition-colors">
                     Manage Billing
                   </button>
                 )}
@@ -189,8 +189,8 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[1,2,3,4].map(i => (
                 <div key={i} className="animate-pulse">
-                  <div className="h-2.5 bg-[#f3f3f6] rounded w-2/3 mb-1.5" />
-                  <div className="h-5 bg-[#f3f3f6] rounded w-1/2" />
+                  <div className="h-2.5 bg-[#f0eee6] rounded w-2/3 mb-1.5" />
+                  <div className="h-5 bg-[#f0eee6] rounded w-1/2" />
                 </div>
               ))}
             </div>
@@ -199,21 +199,21 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
                 <div>
                   <p className="text-[11px] text-[#5D5E61] m-0 mb-0.5">Tokens Used</p>
-                  <p className="text-lg font-bold text-[#0D0D0D] m-0 tabular-nums">
+                  <p className="text-lg font-bold text-[#1a1918] m-0 tabular-nums">
                     {formatNumber((usageTotals?.total_input_tokens || 0) + (usageTotals?.total_output_tokens || 0))}
                   </p>
                 </div>
                 <div>
                   <p className="text-[11px] text-[#5D5E61] m-0 mb-0.5">Tool Calls</p>
-                  <p className="text-lg font-bold text-[#0D0D0D] m-0 tabular-nums">{formatNumber(usageTotals?.total_tool_calls || 0)}</p>
+                  <p className="text-lg font-bold text-[#1a1918] m-0 tabular-nums">{formatNumber(usageTotals?.total_tool_calls || 0)}</p>
                 </div>
                 <div>
                   <p className="text-[11px] text-[#5D5E61] m-0 mb-0.5">Deliverables</p>
-                  <p className="text-lg font-bold text-[#D44A78] m-0 tabular-nums">{usageTotals?.total_deliverables || 0}</p>
+                  <p className="text-lg font-bold text-[#D4714E] m-0 tabular-nums">{usageTotals?.total_deliverables || 0}</p>
                 </div>
                 <div>
                   <p className="text-[11px] text-[#5D5E61] m-0 mb-0.5">Queries</p>
-                  <p className="text-lg font-bold text-[#0D0D0D] m-0 tabular-nums">{usageTotals?.total_queries || 0}</p>
+                  <p className="text-lg font-bold text-[#1a1918] m-0 tabular-nums">{usageTotals?.total_queries || 0}</p>
                 </div>
               </div>
 
@@ -228,8 +228,8 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
                       return (
                         <div key={d.date} className="flex items-center gap-2">
                           <span className="text-[10px] text-[#5D5E61] w-14 shrink-0 tabular-nums">{new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                          <div className="flex-1 h-1.5 bg-[#f3f3f6] rounded-full overflow-hidden">
-                            <div className="h-full bg-[#D44A78] rounded-full transition-all" style={{ width: `${pct}%` }} />
+                          <div className="flex-1 h-1.5 bg-[#f0eee6] rounded-full overflow-hidden">
+                            <div className="h-full bg-[#D4714E] rounded-full transition-all" style={{ width: `${pct}%` }} />
                           </div>
                           <span className="text-[10px] text-[#5D5E61] w-12 text-right tabular-nums">{formatNumber(totalTokens)}</span>
                         </div>
@@ -246,7 +246,7 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
         <div className="pt-2">
           <button
             onClick={onLogout}
-            className="px-4 py-2 rounded-full text-sm font-medium bg-transparent text-red-500 border border-red-200 cursor-pointer hover:bg-red-50 transition-colors"
+            className="px-4 py-2 rounded-full text-sm font-medium bg-transparent text-[#c46686] border border-fig/40 cursor-pointer hover:bg-fig/15 transition-colors"
           >
             Sign out
           </button>

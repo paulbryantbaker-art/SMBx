@@ -241,7 +241,7 @@ export default function MobileChatDrawer({
   const drawerBg = dark ? 'rgba(20,22,24,0.94)' : 'rgba(255,255,255,0.97)';
   const handleC = dark ? 'rgba(255,255,255,0.22)' : 'rgba(15,16,18,0.18)';
   const border = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
-  const headingC = dark ? '#F0F0F3' : '#0f1012';
+  const headingC = dark ? '#f5f4ed' : '#0f1012';
   const mutedC = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
 
   // CSS height: max(140px, fraction × 100lvh).
@@ -321,7 +321,7 @@ export default function MobileChatDrawer({
               flexShrink: 0,
               padding: '4px 16px 8px',
               borderBottom: `1px solid ${border}`,
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               color: headingC,
               touchAction: 'none',
             }}
@@ -350,7 +350,7 @@ export default function MobileChatDrawer({
               <div
                 style={{
                   padding: '14px 18px 8px',
-                  fontFamily: "'Inter', system-ui, sans-serif",
+                  fontFamily: "'Figtree', system-ui, sans-serif",
                   fontSize: 14,
                   color: mutedC,
                   textAlign: 'center',

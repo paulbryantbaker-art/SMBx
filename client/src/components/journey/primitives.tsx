@@ -14,12 +14,13 @@ import {
   useState, useRef, useEffect,
 } from 'react';
 import './glass.css';
+import { useRevealOnScroll } from '../../hooks/useRevealOnScroll';
 
 /* ═════════════════════════════════════════════════════════════════════
    PAGE FRAME
    Desktop (≥1024px): app shell — Sidebar (68px) + TopBar (64px) + main
    Mobile (<1024px):  floating glass nav pill over main
-   Canvas is always #F2F2F4. Footer renders at the bottom.
+   Canvas is always #faf9f5. Footer renders at the bottom.
    ═════════════════════════════════════════════════════════════════════ */
 
 export type JourneyTab = 'home' | 'sell' | 'buy' | 'raise' | 'integrate' | 'pricing' | 'how-it-works' | 'enterprise';
@@ -79,8 +80,8 @@ export function Page({ children, active, onNavigate, onSignIn, onStartFree, ctaL
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        background: 'var(--gg-bg-app, #F2F2F4)',
-        color: 'var(--gg-text-primary, #0A0A0B)',
+        background: 'var(--gg-bg-app, #faf9f5)',
+        color: 'var(--gg-text-primary, #1a1918)',
         minHeight: '100%',
         width: '100%',
         alignSelf: 'stretch',
@@ -462,7 +463,7 @@ export function Footer() {
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-        <span className="gg-logo" style={{ fontSize: 13, fontFamily: 'var(--gg-display)' }}>smbx.ai</span>
+        <span className="gg-logo" style={{ fontSize: 13, fontFamily: 'var(--gg-sans)', fontWeight: 700 }}>smbx.ai</span>
         {links.map(l => (
           <a
             key={l.href}
@@ -655,8 +656,23 @@ export interface JourneyHeroProps {
 }
 
 export function JourneyHero(p: JourneyHeroProps) {
+  /* Cowork-style hero entrance: each editorial unit (eyebrow, headline,
+     tagline, chat input, chip row) lifts in sequence with a 90ms stagger.
+     Runs once on mount (hero is visible at page open), not scroll-gated.
+     Respects prefers-reduced-motion via the hook. */
+  const heroRef = useRef<HTMLElement>(null);
+  useRevealOnScroll(heroRef, {
+    selector: '[data-hero-reveal]',
+    stagger: 0.09,
+    y: 18,
+    duration: 0.7,
+    ease: 'power3.out',
+    start: 'top 100%',   // fire immediately on load
+  });
+
   return (
     <section
+      ref={heroRef}
       className="gg-enter"
       style={{
         position: 'relative',
@@ -669,19 +685,19 @@ export function JourneyHero(p: JourneyHeroProps) {
       <div className="gg-grid-bg" />
       <div className="gg-two-col" style={{ alignItems: 'center', position: 'relative', zIndex: 1 }}>
         <div>
-          <div className="gg-eyebrow" style={{ marginBottom: 20 }}>{p.eyebrow}</div>
-          <h1 className="gg-h1 gg-h1--journey" style={{ marginBottom: 28 }}>{p.headline}</h1>
-          <p className="gg-body gg-body--lead" style={{ maxWidth: 560, marginBottom: 32 }}>{p.tagline}</p>
-          <div style={{ maxWidth: 560, marginBottom: 20 }}>
+          <div data-hero-reveal className="gg-eyebrow" style={{ marginBottom: 20 }}>{p.eyebrow}</div>
+          <h1 data-hero-reveal className="gg-h1 gg-h1--journey" style={{ marginBottom: 28 }}>{p.headline}</h1>
+          <p data-hero-reveal className="gg-body gg-body--lead" style={{ maxWidth: 560, marginBottom: 32 }}>{p.tagline}</p>
+          <div data-hero-reveal style={{ maxWidth: 560, marginBottom: 20 }}>
             <ChatInput placeholder={p.chatPlaceholder} onSend={p.onSend} />
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, maxWidth: 720 }}>
+          <div data-hero-reveal style={{ display: 'flex', flexWrap: 'wrap', gap: 10, maxWidth: 720 }}>
             {p.chips.map(c => (
               <button key={c} type="button" className="gg-chip" onClick={() => p.onChip(c)}>{c}</button>
             ))}
           </div>
         </div>
-        {p.rightPanel && <div className="gg-desktop-only">{p.rightPanel}</div>}
+        {p.rightPanel && <div className="gg-desktop-only" data-hero-reveal>{p.rightPanel}</div>}
       </div>
     </section>
   );
@@ -701,21 +717,37 @@ export interface SectionProps {
 }
 
 export function Section({ variant = 'app', label, children, tight, anchor }: SectionProps) {
+  /* Cowork DL: GSAP-driven section reveal — uniform across all
+     browsers (Firefox included). Children with [data-section-reveal]
+     fade up with an 80ms stagger as the section enters the viewport.
+     We no longer apply the CSS `.gg-reveal` class here; GSAP owns
+     reveal end-to-end. */
   const cls = [
     'gg-section',
-    'gg-reveal',
     variant === 'tint' ? 'gg-section--tint' : '',
     variant === 'dark' ? 'gg-section--dark' : '',
   ].filter(Boolean).join(' ');
   const navId = anchor ?? (label ? label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : undefined);
+
+  const sectionRef = useRef<HTMLElement>(null);
+  useRevealOnScroll(sectionRef, {
+    selector: '[data-section-reveal]',
+    stagger: 0.08,
+    y: 20,
+    duration: 0.6,
+    ease: 'power2.out',
+    start: 'top 78%',
+  });
+
   return (
     <section
+      ref={sectionRef}
       className={cls}
       data-secnav-id={navId}
       style={tight ? { paddingTop: 'clamp(32px, 4vw, 56px)', paddingBottom: 'clamp(32px, 4vw, 56px)' } : undefined}
     >
       <div className="gg-section__inner">
-        {label && <div className="gg-label" style={{ marginBottom: 20 }}>{label}</div>}
+        {label && <div data-section-reveal className="gg-label" style={{ marginBottom: 20 }}>{label}</div>}
         {children}
       </div>
     </section>
@@ -724,12 +756,12 @@ export function Section({ variant = 'app', label, children, tight, anchor }: Sec
 
 export function H2({ children, style, variant }: { children: ReactNode; style?: React.CSSProperties; variant?: 'block' }) {
   const cls = variant === 'block' ? 'gg-h2 gg-h2--block' : 'gg-h2';
-  return <h2 className={cls} style={{ marginBottom: 20, ...style }}>{children}</h2>;
+  return <h2 data-section-reveal className={cls} style={{ marginBottom: 20, ...style }}>{children}</h2>;
 }
 
 export function Body({ children, lead, style }: { children: ReactNode; lead?: boolean; style?: React.CSSProperties }) {
   const cls = lead ? 'gg-body gg-body--lead' : 'gg-body';
-  return <p className={cls} style={{ marginBottom: 14, ...style }}>{children}</p>;
+  return <p data-section-reveal className={cls} style={{ marginBottom: 14, ...style }}>{children}</p>;
 }
 
 /* ═════════════════════════════════════════════════════════════════════
@@ -1041,7 +1073,7 @@ export function HorizontalTimeline({ phases }: { phases: readonly HPhase[] }) {
                 background: '#fff',
                 border: '1.5px solid var(--gg-text-primary)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 13,
+                fontFamily: 'var(--gg-sans)', fontWeight: 700, fontSize: 13,
                 color: 'var(--gg-text-primary)',
                 marginBottom: 24,
                 position: 'relative', zIndex: 1,
@@ -1055,18 +1087,18 @@ export function HorizontalTimeline({ phases }: { phases: readonly HPhase[] }) {
               {i + 1}
             </div>
             <div style={{
-              fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 10,
+              fontFamily: 'var(--gg-sans)', fontWeight: 600, fontSize: 10,
               letterSpacing: '0.14em', textTransform: 'uppercase',
               color: 'var(--gg-text-muted)', marginBottom: 6,
             }}>{p.idx}</div>
             <div style={{
-              fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 22,
+              fontFamily: 'var(--gg-sans)', fontWeight: 700, fontSize: 22,
               letterSpacing: '-0.015em', color: 'var(--gg-text-primary)',
               marginBottom: 8,
             }}>{p.name}</div>
             {p.meta && (
               <div style={{
-                fontFamily: 'var(--gg-display)', fontSize: 11.5, fontWeight: 600,
+                fontFamily: 'var(--gg-sans)', fontSize: 11.5, fontWeight: 500,
                 letterSpacing: '0.04em', color: 'var(--gg-text-muted)',
                 marginBottom: 14,
               }}>{p.meta}</div>
@@ -1217,7 +1249,7 @@ export function AlertBanner(p: AlertBannerProps) {
       <H2>{p.heading}</H2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 32, marginTop: 24, marginBottom: 32 }}>
         <div>
-          <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 12, color: '#C5C5CA', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>
+          <div style={{ fontFamily: 'var(--gg-sans)', fontWeight: 600, fontSize: 12, color: '#C5C5CA', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>
             {p.leftHeading}
           </div>
           <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
@@ -1230,7 +1262,7 @@ export function AlertBanner(p: AlertBannerProps) {
           </ul>
         </div>
         <div>
-          <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 12, color: '#C5C5CA', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>
+          <div style={{ fontFamily: 'var(--gg-sans)', fontWeight: 600, fontSize: 12, color: '#C5C5CA', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>
             {p.rightHeading}
           </div>
           <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>

@@ -19,8 +19,8 @@
 
 import { Drawer } from 'vaul';
 
-const PINK = '#D44A78';
-const PINK_DARK = '#E8709A';
+const PINK = '#D4714E';
+const PINK_DARK = '#ec9d78';
 
 interface Props {
   open: boolean;
@@ -38,8 +38,8 @@ interface Props {
 export function WorkspaceSheet({
   open, onOpenChange, dark, user, onOpenAccount,
 }: Props) {
-  const bg = dark ? '#151617' : '#fefefe';
-  const headingC = dark ? '#f9f9fc' : '#0f1012';
+  const bg = dark ? '#141413' : '#fefefe';
+  const headingC = dark ? '#faf9f5' : '#0f1012';
   const mutedC = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
   const borderC = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
   const rowBg = dark ? '#1f2123' : '#ffffff';
@@ -93,7 +93,7 @@ export function WorkspaceSheet({
           {/* Header label */}
           <div style={{ padding: '8px 20px 4px' }}>
             <span style={{
-              fontFamily: 'Inter, system-ui',
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 11, fontWeight: 700,
               textTransform: 'uppercase',
               letterSpacing: '0.08em',
@@ -119,17 +119,17 @@ export function WorkspaceSheet({
                 aria-hidden
                 style={{
                   width: 36, height: 36, borderRadius: '50%',
-                  background: `linear-gradient(135deg, ${accent}, ${dark ? '#AE6D9A' : '#E8709A'})`,
+                  background: `linear-gradient(135deg, ${accent}, ${dark ? '#AE6D9A' : '#ec9d78'})`,
                   color: '#fff',
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  fontFamily: "'Sora', system-ui, sans-serif",
+                  fontFamily: "'Figtree', system-ui, sans-serif",
                   fontSize: 14, fontWeight: 800,
                   flexShrink: 0,
                 }}
               >{initial}</span>
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{
-                  fontFamily: 'Inter, system-ui',
+                  fontFamily: "'Figtree', system-ui, sans-serif",
                   fontSize: 15, fontWeight: 700,
                   color: headingC,
                   letterSpacing: '-0.005em',
@@ -137,7 +137,7 @@ export function WorkspaceSheet({
                 }}>{workspaceLabel}</div>
                 {email && (
                   <div style={{
-                    fontFamily: 'Inter, system-ui',
+                    fontFamily: "'Figtree', system-ui, sans-serif",
                     fontSize: 12, fontWeight: 400,
                     color: mutedC,
                     lineHeight: 1.4,
@@ -191,13 +191,13 @@ export function WorkspaceSheet({
               </span>
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{
-                  fontFamily: 'Inter, system-ui',
+                  fontFamily: "'Figtree', system-ui, sans-serif",
                   fontSize: 14, fontWeight: 600,
                   color: headingC,
                   lineHeight: 1.3,
                 }}>Add workspace</div>
                 <div style={{
-                  fontFamily: 'Inter, system-ui',
+                  fontFamily: "'Figtree', system-ui, sans-serif",
                   fontSize: 12, color: mutedC, marginTop: 2,
                 }}>Multi-workspace coming soon</div>
               </div>
@@ -244,14 +244,14 @@ export function WorkspaceSheet({
               </span>
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{
-                  fontFamily: 'Inter, system-ui',
+                  fontFamily: "'Figtree', system-ui, sans-serif",
                   fontSize: 15, fontWeight: 700,
                   color: headingC,
                   letterSpacing: '-0.005em',
                   lineHeight: 1.3,
                 }}>Account & settings</div>
                 <div style={{
-                  fontFamily: 'Inter, system-ui',
+                  fontFamily: "'Figtree', system-ui, sans-serif",
                   fontSize: 12, color: mutedC, marginTop: 2,
                 }}>Profile, theme, subscription, sign out</div>
               </div>

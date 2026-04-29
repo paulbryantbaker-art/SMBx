@@ -28,7 +28,7 @@ interface PipelineProps {
 }
 
 const JOURNEY_LABELS: Record<string, { label: string; color: string }> = {
-  sell: { label: 'Sell', color: 'bg-[#D44A78] text-white' },
+  sell: { label: 'Sell', color: 'bg-[#D4714E] text-white' },
   buy: { label: 'Buy', color: 'bg-blue-600 text-white' },
   raise: { label: 'Raise', color: 'bg-green-600 text-white' },
   pmi: { label: 'PMI', color: 'bg-purple-600 text-white' },
@@ -98,26 +98,26 @@ export default function Pipeline({ user, onLogout }: PipelineProps) {
   };
 
   return (
-    <div className="min-h-dvh bg-[#FAFAFA]">
+    <div className="min-h-dvh bg-[#f5f4ed]">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-4 bg-[#FAFAFA]" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+      <div className="flex items-center justify-between px-6 py-4 bg-[#f5f4ed]" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/chat')}
-            className="flex items-center gap-1.5 text-sm text-[#6E6A63] bg-transparent border-0 cursor-pointer hover:text-[#D44A78] transition-colors"
+            className="flex items-center gap-1.5 text-sm text-[#5e5d59] bg-transparent border-0 cursor-pointer hover:text-[#D4714E] transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
             Chat
           </button>
-          <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#0D0D0D]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-            smb<span className="text-[#D44A78]">x</span>.ai
+          <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#1a1918]" style={{ fontFamily: "'Figtree', system-ui, sans-serif" }}>
+            smb<span className="text-[#D4714E]">x</span>.ai
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-sm text-[#6E6A63]">{user.display_name || user.email}</span>
+          <span className="text-sm text-[#5e5d59]">{user.display_name || user.email}</span>
           <button
             onClick={onLogout}
-            className="text-sm text-[#A9A49C] bg-transparent border-0 cursor-pointer hover:text-[#D44A78] transition-colors"
+            className="text-sm text-[#A9A49C] bg-transparent border-0 cursor-pointer hover:text-[#D4714E] transition-colors"
           >
             Sign out
           </button>
@@ -127,16 +127,16 @@ export default function Pipeline({ user, onLogout }: PipelineProps) {
       <div className="max-w-5xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-extrabold text-[#0D0D0D] m-0" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <h1 className="text-2xl font-extrabold text-[#1a1918] m-0" style={{ fontFamily: "'Figtree', system-ui, sans-serif" }}>
               Pipeline
             </h1>
-            <p className="text-sm text-[#6E6A63] m-0 mt-1">
+            <p className="text-sm text-[#5e5d59] m-0 mt-1">
               {deals.length} {deals.length === 1 ? 'deal' : 'deals'}
             </p>
           </div>
           <button
             onClick={() => navigate('/chat')}
-            className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] transition-colors"
+            className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#D4714E] text-white border-0 cursor-pointer hover:bg-[#B85A3A] transition-colors"
           >
             + New Deal
           </button>
@@ -147,8 +147,8 @@ export default function Pipeline({ user, onLogout }: PipelineProps) {
             {[1, 2, 3].map(i => (
               <div key={i} className="animate-pulse bg-white rounded-2xl p-5 border border-border">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-16 h-5 bg-[#EBE7DF] rounded-full" />
-                  <div className="h-5 bg-[#EBE7DF] rounded" style={{ width: '40%' }} />
+                  <div className="w-16 h-5 bg-[#e8e6dc] rounded-full" />
+                  <div className="h-5 bg-[#e8e6dc] rounded" style={{ width: '40%' }} />
                 </div>
                 <div className="h-2 bg-[#F5F5F5] rounded-full mb-3" />
                 <div className="flex gap-4">
@@ -167,11 +167,11 @@ export default function Pipeline({ user, onLogout }: PipelineProps) {
                 <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
               </svg>
             </div>
-            <p className="text-lg font-semibold text-[#0D0D0D] m-0 mb-1">No deals yet</p>
-            <p className="text-sm text-[#6E6A63] m-0 mb-4">Start a conversation with Yulia to begin your first deal.</p>
+            <p className="text-lg font-semibold text-[#1a1918] m-0 mb-1">No deals yet</p>
+            <p className="text-sm text-[#5e5d59] m-0 mb-4">Start a conversation with Yulia to begin your first deal.</p>
             <button
               onClick={() => navigate('/chat')}
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] transition-colors"
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#D4714E] text-white border-0 cursor-pointer hover:bg-[#B85A3A] transition-colors"
             >
               Start a deal
             </button>
@@ -190,14 +190,14 @@ export default function Pipeline({ user, onLogout }: PipelineProps) {
               <button
                 key={deal.id}
                 onClick={() => navigate(deal.conversation_id ? `/chat/${deal.conversation_id}` : '/chat')}
-                className="w-full text-left bg-white rounded-2xl p-5 border border-border hover:border-[#D44A78] hover:shadow-sm transition-all cursor-pointer"
+                className="w-full text-left bg-white rounded-2xl p-5 border border-border hover:border-[#D4714E] hover:shadow-sm transition-all cursor-pointer"
               >
                 {/* Header */}
                 <div className="flex items-center gap-3 mb-3">
                   <span className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-full ${journey.color}`}>
                     {journey.label}
                   </span>
-                  <span className="text-base font-semibold text-[#0D0D0D] truncate">
+                  <span className="text-base font-semibold text-[#1a1918] truncate">
                     {deal.business_name || `${journey.label} Deal`}
                   </span>
                   {deal.league && (
@@ -214,16 +214,16 @@ export default function Pipeline({ user, onLogout }: PipelineProps) {
                       <div key={gate} className="flex-1 flex flex-col items-center">
                         <div
                           className={`h-1.5 w-full rounded-full ${
-                            i < currentIdx ? 'bg-[#D44A78]'
-                            : i === currentIdx ? 'bg-[#D44A78] opacity-60'
-                            : 'bg-[#EBE7DF]'
+                            i < currentIdx ? 'bg-[#D4714E]'
+                            : i === currentIdx ? 'bg-[#D4714E] opacity-60'
+                            : 'bg-[#e8e6dc]'
                           }`}
                         />
                       </div>
                     ))}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-medium text-[#D44A78]">
+                    <span className="text-[11px] font-medium text-[#D4714E]">
                       {deal.current_gate}: {GATE_LABELS[deal.current_gate] || deal.current_gate}
                     </span>
                     <span className="text-[11px] text-[#A9A49C]">{progress}%</span>
@@ -231,7 +231,7 @@ export default function Pipeline({ user, onLogout }: PipelineProps) {
                 </div>
 
                 {/* Deal stats */}
-                <div className="flex items-center gap-4 text-[12px] text-[#6E6A63]">
+                <div className="flex items-center gap-4 text-[12px] text-[#5e5d59]">
                   {deal.industry && <span>{deal.industry}</span>}
                   {deal.revenue && <span>Rev: {formatRevenue(deal.revenue)}</span>}
                   {(deal.sde || deal.ebitda) && (

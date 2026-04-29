@@ -40,11 +40,11 @@ export function ChapterStrip({ chapters, activeChapterId, onChapterTap, dark }: 
 
   if (chapters.length < 2) return null;
 
-  const pink = dark ? '#E8709A' : '#D44A78';
-  const heading = dark ? '#f0f0f3' : '#1a1c1e';
+  const pink = dark ? '#ec9d78' : '#D4714E';
+  const heading = dark ? '#f5f4ed' : '#1a1918';
   const muted = dark ? 'rgba(218,218,220,0.45)' : '#7c7d80';
   const line = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.06)';
-  const activeBg = dark ? 'rgba(232,112,154,0.10)' : 'rgba(212,74,120,0.06)';
+  const activeBg = dark ? 'rgba(236,157,120,0.10)' : 'rgba(212,113,78,0.06)';
 
   return (
     <div
@@ -89,7 +89,7 @@ export function ChapterStrip({ chapters, activeChapterId, onChapterTap, dark }: 
                 <span
                   className="text-[11px] font-semibold whitespace-nowrap"
                   style={{
-                    fontFamily: "'Sora', system-ui, sans-serif",
+                    fontFamily: "'Figtree', system-ui, sans-serif",
                     color: isActive ? heading : muted,
                     letterSpacing: '-0.01em',
                   }}

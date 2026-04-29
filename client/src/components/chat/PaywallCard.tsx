@@ -83,12 +83,12 @@ export default function PaywallCard({ paywall, dealId, onUnlocked }: PaywallCard
       <div className="self-start max-w-[90%] min-w-0">
         <div className="bg-white rounded-[20px] px-6 py-5 overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(186,60,96,.12)', border: '1px solid rgba(186,60,96,.2)' }}>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-full bg-cactus/60 flex items-center justify-center shrink-0">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
             </div>
             <div>
-              <p className="text-base font-semibold text-[#0D0D0D] m-0">{plan.name} Activated</p>
-              <p className="text-sm text-[#6E6A63] m-0">All {plan.name} features are now unlocked.</p>
+              <p className="text-base font-semibold text-[#1a1918] m-0">{plan.name} Activated</p>
+              <p className="text-sm text-[#5e5d59] m-0">All {plan.name} features are now unlocked.</p>
             </div>
           </div>
         </div>
@@ -101,14 +101,14 @@ export default function PaywallCard({ paywall, dealId, onUnlocked }: PaywallCard
       <div className="bg-white rounded-[20px] px-6 py-5 overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(186,60,96,.12)', border: '1px solid rgba(186,60,96,.2)' }}>
         {/* Header */}
         <div className="flex items-start gap-3 mb-4">
-          <div className="w-10 h-10 rounded-full bg-[#D44A78] text-white flex items-center justify-center shrink-0" style={{ boxShadow: '0 2px 6px rgba(186,60,96,.2)' }}>
+          <div className="w-10 h-10 rounded-full bg-[#D4714E] text-white flex items-center justify-center shrink-0" style={{ boxShadow: '0 2px 6px rgba(186,60,96,.2)' }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
             </svg>
           </div>
           <div>
-            <p className="text-lg font-bold text-[#0D0D0D] m-0">Upgrade to {plan.name}</p>
-            <p className="text-sm text-[#6E6A63] m-0 mt-1">{plan.note}</p>
+            <p className="text-lg font-bold text-[#1a1918] m-0">Upgrade to {plan.name}</p>
+            <p className="text-sm text-[#5e5d59] m-0 mt-1">{plan.note}</p>
           </div>
         </div>
 
@@ -116,8 +116,8 @@ export default function PaywallCard({ paywall, dealId, onUnlocked }: PaywallCard
         <div className="space-y-2 mb-4">
           {paywall.valueProps.map((prop, i) => (
             <div key={i} className="flex items-start gap-2">
-              <svg className="w-4 h-4 text-[#D44A78] mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
-              <span className="text-[14px] text-[#3D3B37] leading-[1.4]">{prop}</span>
+              <svg className="w-4 h-4 text-[#D4714E] mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
+              <span className="text-[14px] text-[#3d3d3a] leading-[1.4]">{prop}</span>
             </div>
           ))}
         </div>
@@ -127,7 +127,7 @@ export default function PaywallCard({ paywall, dealId, onUnlocked }: PaywallCard
           <div className="mb-4">
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="text-[13px] text-[#D44A78] font-semibold bg-transparent border-0 cursor-pointer p-0 hover:opacity-80"
+              className="text-[13px] text-[#D4714E] font-semibold bg-transparent border-0 cursor-pointer p-0 hover:opacity-80"
             >
               {showDetails ? 'Hide' : 'See'} everything included →
             </button>
@@ -135,8 +135,8 @@ export default function PaywallCard({ paywall, dealId, onUnlocked }: PaywallCard
               <div className="mt-2 pl-1 space-y-1.5">
                 {paywall.whatYouGet.map((item, i) => (
                   <div key={i} className="flex items-start gap-2">
-                    <span className="text-[#D44A78] text-xs mt-1 shrink-0">●</span>
-                    <span className="text-[13px] text-[#6E6A63] leading-[1.4]">{item}</span>
+                    <span className="text-[#D4714E] text-xs mt-1 shrink-0">●</span>
+                    <span className="text-[13px] text-[#5e5d59] leading-[1.4]">{item}</span>
                   </div>
                 ))}
               </div>
@@ -145,15 +145,15 @@ export default function PaywallCard({ paywall, dealId, onUnlocked }: PaywallCard
         )}
 
         {/* Price + action */}
-        <div className="flex items-center justify-between pt-3" style={{ borderTop: '1px solid #EBE7DF' }}>
+        <div className="flex items-center justify-between pt-3" style={{ borderTop: '1px solid #e8e6dc' }}>
           <div>
-            <p className="text-2xl font-extrabold text-[#D44A78] m-0">{plan.price}</p>
+            <p className="text-2xl font-extrabold text-[#D4714E] m-0">{plan.price}</p>
             <p className="text-xs text-[#A9A49C] m-0 mt-0.5">Cancel anytime · No commitments</p>
           </div>
           <button
             onClick={handlePurchase}
             disabled={purchasing}
-            className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] transition-colors disabled:opacity-60"
+            className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#D4714E] text-white border-0 cursor-pointer hover:bg-[#B85A3A] transition-colors disabled:opacity-60"
           >
             {purchasing ? 'Processing...' : paywall.callToAction || `Start ${plan.name}`}
           </button>
@@ -161,7 +161,7 @@ export default function PaywallCard({ paywall, dealId, onUnlocked }: PaywallCard
 
         {/* Error */}
         {error && (
-          <div className="mt-3 p-3 rounded-lg bg-red-50 text-sm text-red-700">
+          <div className="mt-3 p-3 rounded-lg bg-fig/15 text-sm text-[#7a3048]">
             {error}
           </div>
         )}

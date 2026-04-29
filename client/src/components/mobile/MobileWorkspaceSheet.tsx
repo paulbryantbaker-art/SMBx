@@ -13,8 +13,8 @@
 import { Drawer } from 'vaul';
 import { type ReactNode, useState, useEffect, useRef } from 'react';
 
-const PINK = '#D44A78';
-const PINK_DARK = '#E8709A';
+const PINK = '#D4714E';
+const PINK_DARK = '#ec9d78';
 
 interface Props {
   open: boolean;
@@ -54,8 +54,8 @@ export function MobileWorkspaceSheet({
   };
 
   // Color tokens
-  const bg          = dark ? '#151617' : '#fefefe';
-  const headingC    = dark ? '#f9f9fc' : '#0f1012';
+  const bg          = dark ? '#141413' : '#fefefe';
+  const headingC    = dark ? '#faf9f5' : '#0f1012';
   const bodyC       = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
   const mutedC      = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
   const ruleC       = dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.08)';

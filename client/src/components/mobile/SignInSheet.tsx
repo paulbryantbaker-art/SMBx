@@ -6,8 +6,8 @@
 
 import { Drawer } from 'vaul';
 
-const PINK = '#D44A78';
-const PINK_DARK = '#E8709A';
+const PINK = '#D4714E';
+const PINK_DARK = '#ec9d78';
 
 interface Props {
   open: boolean;
@@ -20,8 +20,8 @@ interface Props {
 }
 
 export function SignInSheet({ open, onOpenChange, dark, onSignIn, onSignUp }: Props) {
-  const bg = dark ? '#151617' : '#fefefe';
-  const headingC = dark ? '#f9f9fc' : '#0f1012';
+  const bg = dark ? '#141413' : '#fefefe';
+  const headingC = dark ? '#faf9f5' : '#0f1012';
   const bodyC = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
   const mutedC = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
   const borderC = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
@@ -66,9 +66,9 @@ export function SignInSheet({ open, onOpenChange, dark, onSignIn, onSignUp }: Pr
               width: 56, height: 56, borderRadius: '50%',
               background: `linear-gradient(135deg, ${pinkC}, ${PINK_DARK})`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#fff', fontFamily: 'Sora, system-ui', fontSize: 26, fontWeight: 800,
+              color: '#fff', fontFamily: "'Figtree', system-ui, sans-serif", fontSize: 26, fontWeight: 800,
               flexShrink: 0,
-              boxShadow: '0 4px 12px rgba(212,74,120,0.28)',
+              boxShadow: '0 4px 12px rgba(212,113,78,0.28)',
             }}>
               X
             </div>
@@ -76,7 +76,7 @@ export function SignInSheet({ open, onOpenChange, dark, onSignIn, onSignUp }: Pr
               <Drawer.Title asChild>
                 <h2 style={{
                   margin: 0,
-                  fontFamily: 'Sora, system-ui',
+                  fontFamily: "'Figtree', system-ui, sans-serif",
                   fontSize: 18, fontWeight: 800,
                   letterSpacing: '-0.01em',
                   color: headingC,
@@ -86,7 +86,7 @@ export function SignInSheet({ open, onOpenChange, dark, onSignIn, onSignUp }: Pr
               </Drawer.Title>
               <p style={{
                 margin: '2px 0 0',
-                fontFamily: 'Inter, system-ui',
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 13, fontWeight: 500,
                 color: mutedC,
               }}>
@@ -111,11 +111,11 @@ export function SignInSheet({ open, onOpenChange, dark, onSignIn, onSignUp }: Pr
                 border: 'none',
                 background: pinkC,
                 color: '#fff',
-                fontFamily: 'Inter, system-ui',
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 15, fontWeight: 700,
                 cursor: 'pointer',
                 WebkitTapHighlightColor: 'transparent',
-                boxShadow: '0 6px 18px rgba(212,74,120,0.28)',
+                boxShadow: '0 6px 18px rgba(212,113,78,0.28)',
               }}
             >
               Sign in
@@ -129,7 +129,7 @@ export function SignInSheet({ open, onOpenChange, dark, onSignIn, onSignUp }: Pr
                 border: `1px solid ${rowBd}`,
                 background: rowBg,
                 color: headingC,
-                fontFamily: 'Inter, system-ui',
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 14, fontWeight: 600,
                 cursor: 'pointer',
                 WebkitTapHighlightColor: 'transparent',
@@ -140,7 +140,7 @@ export function SignInSheet({ open, onOpenChange, dark, onSignIn, onSignUp }: Pr
             <p style={{
               marginTop: 4,
               textAlign: 'center',
-              fontFamily: 'Inter, system-ui',
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 12,
               color: mutedC,
               fontWeight: 500,

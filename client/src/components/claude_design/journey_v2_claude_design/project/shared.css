@@ -6,9 +6,9 @@
 html, body {
   margin: 0;
   padding: 0;
-  font-family: 'Inter', system-ui, sans-serif;
-  background: var(--gg-bg-app, #F2F2F4);
-  color: var(--gg-text-primary, #0A0A0B);
+  font-family: 'Figtree', system-ui, sans-serif;
+  background: var(--gg-bg-app, #faf9f5);
+  color: var(--gg-text-primary, #1a1918);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -17,7 +17,7 @@ button { font-family: inherit; }
 
 /* Utility — shared monochrome logo mark */
 .smbx-mark {
-  font-family: 'Sora', system-ui, sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 800;
   letter-spacing: -0.025em;
   color: inherit;

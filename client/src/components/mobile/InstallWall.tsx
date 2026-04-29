@@ -62,13 +62,13 @@ export default function InstallWall({ dark, userName }: Props) {
     } catch { return false; }
   });
 
-  const pageBg = dark ? '#0f1012' : '#F9F9FC';
+  const pageBg = dark ? '#0f1012' : '#faf9f5';
   const cardBg = dark ? 'rgba(26,28,30,0.82)' : 'rgba(255,255,255,0.88)';
   const border = dark ? 'rgba(255,255,255,0.10)' : 'rgba(15,16,18,0.08)';
-  const heading = dark ? '#F9F9FC' : '#0f1012';
+  const heading = dark ? '#faf9f5' : '#0f1012';
   const body = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
-  const muted = dark ? 'rgba(218,218,220,0.55)' : '#6e6a63';
-  const accent = dark ? '#E8709A' : '#D44A78';
+  const muted = dark ? 'rgba(218,218,220,0.55)' : '#5e5d59';
+  const accent = dark ? '#ec9d78' : '#D4714E';
 
   return (
     <div
@@ -86,7 +86,7 @@ export default function InstallWall({ dark, userName }: Props) {
         justifyContent: 'center',
         padding: 'max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom))',
         overflow: 'hidden',
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Figtree', system-ui, sans-serif",
       }}
     >
       {/* Logo */}
@@ -122,7 +122,7 @@ export default function InstallWall({ dark, userName }: Props) {
       <h1
         style={{
           margin: 0,
-          fontFamily: "'Sora', system-ui, sans-serif",
+          fontFamily: "'Figtree', system-ui, sans-serif",
           fontSize: 'clamp(28px, 7vw, 34px)',
           fontWeight: 900,
           letterSpacing: '-0.03em',
@@ -251,7 +251,7 @@ function Step({ num, body, color, muted, last }: {
           alignItems: 'center',
           justifyContent: 'center',
           flexShrink: 0,
-          fontFamily: "'Sora', system-ui, sans-serif",
+          fontFamily: "'Figtree', system-ui, sans-serif",
           fontSize: 12,
           fontWeight: 800,
           marginTop: 1,

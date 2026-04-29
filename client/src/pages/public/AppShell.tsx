@@ -2340,13 +2340,22 @@ export default function AppShell() {
 
               {activeTab === 'home' ? (
               <div className="relative z-10 flex-1 flex flex-col w-full">
-                {/* ═══ HOME PAGE ═══ Glass Grok — canvas is #faf9f5, no framing card.
-                    overflow:hidden only when logged-in (dashboard) — logged-out
-                    Glass Grok home is a tall marketing page that must scroll. */}
+                {/* ═══ HOME PAGE ═══ Glass Grok canvas (#faf9f5) for the
+                    logged-in dashboard. On marketing paths we go
+                    transparent so the body's --canvas-warm shows
+                    through (V23C darker-bg treatment).
+
+                    Path-based, NOT auth-based: the marketing surface
+                    looks the same whether a user is logged in or out.
+                    `isEditionRoute` would gate this on `!user` which
+                    blocked the fix in dev when a user was signed in. */}
                 <div
                   className="flex-1 flex flex-col w-full"
                   style={{
-                    background: 'var(--gg-bg-app, #faf9f5)',
+                    background:
+                      location === '/' || location === '/journey' || location === '/how-it-works' || location === '/pricing'
+                        ? 'transparent'
+                        : 'var(--gg-bg-app, #faf9f5)',
                     overflow: user ? 'hidden' : 'visible',
                   }}
                 >
@@ -2928,19 +2937,25 @@ export default function AppShell() {
             )}
 
             <div className="flex min-w-0" style={{ flex: 1, minHeight: 0 }}>
-            {/* Canvas card — lifts off the darker body via warm-tinted
-                shadow + hairline border that's slightly darker than body.
-                The active CanvasTab merges into this card's top edge. */}
+            {/* Canvas card — for the LOGGED-IN dashboard, this is the
+                paper sheet that holds the workspace content. On edition
+                routes the marketing canvas (V23C MarketingHome) brings
+                its OWN canvas-card inside its component, so this
+                AppShell-level wrapper goes transparent — otherwise its
+                #faf9f5 bg covers body in the chat rail area, blocking
+                the V23C darker --canvas-warm from showing through. */}
             <div
               ref={canvasCardRef}
               className="flex-1 flex flex-col min-w-0 overflow-hidden relative"
               style={{
-                background: dark ? '#1a1918' : '#faf9f5',
-                border: dark ? '1px solid rgba(245,244,237,0.08)' : '1px solid #dedcd1',
-                borderRadius: 14,
-                boxShadow: dark
-                  ? '0 1px 2px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.35)'
-                  : '0 1px 3px rgba(26,25,24,0.06), 0 8px 24px rgba(26,25,24,0.05)',
+                background: isEditionRoute ? 'transparent' : (dark ? '#1a1918' : '#faf9f5'),
+                border: isEditionRoute ? 'none' : (dark ? '1px solid rgba(245,244,237,0.08)' : '1px solid #dedcd1'),
+                borderRadius: isEditionRoute ? 0 : 14,
+                boxShadow: isEditionRoute
+                  ? 'none'
+                  : (dark
+                    ? '0 1px 2px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.35)'
+                    : '0 1px 3px rgba(26,25,24,0.06), 0 8px 24px rgba(26,25,24,0.05)'),
                 zIndex: 1,
               }}
             >

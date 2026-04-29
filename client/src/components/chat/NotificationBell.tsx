@@ -18,7 +18,7 @@ interface Notification {
 }
 
 const TYPE_META: Record<string, { color: string; icon: string }> = {
-  gate_advance:     { color: '#D44A78', icon: 'arrow_circle_right' },
+  gate_advance:     { color: '#D4714E', icon: 'arrow_circle_right' },
   deliverable_ready:{ color: '#16a34a', icon: 'description' },
   review_request:   { color: '#f59e0b', icon: 'rate_review' },
   review_approved:  { color: '#16a34a', icon: 'check_circle' },
@@ -26,11 +26,11 @@ const TYPE_META: Record<string, { color: string; icon: string }> = {
   new_document:     { color: '#2563eb', icon: 'upload_file' },
   deal_comment:     { color: '#7c3aed', icon: 'chat' },
   share_viewed:     { color: '#6366f1', icon: 'visibility' },
-  thesis_match:     { color: '#D44A78', icon: 'travel_explore' },
-  new_listing_match:{ color: '#D44A78', icon: 'storefront' },
+  thesis_match:     { color: '#D4714E', icon: 'travel_explore' },
+  new_listing_match:{ color: '#D4714E', icon: 'storefront' },
   invitation:       { color: '#2563eb', icon: 'person_add' },
-  nudge:            { color: '#D44A78', icon: 'notifications_active' },
-  system:           { color: '#6E6A63', icon: 'info' },
+  nudge:            { color: '#D4714E', icon: 'notifications_active' },
+  system:           { color: '#5e5d59', icon: 'info' },
 };
 
 function timeAgo(date: string): string {
@@ -122,13 +122,13 @@ export default function NotificationBell({ dark = false, onNavigate }: Props) {
 
   // Colors
   const bg = dark ? '#1f2123' : '#fff';
-  const headerBg = dark ? '#1a1c1e' : '#fafafa';
+  const headerBg = dark ? '#1a1918' : '#f5f4ed';
   const borderC = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
-  const textC = dark ? '#f0f0f3' : '#0f1012';
+  const textC = dark ? '#f5f4ed' : '#0f1012';
   const mutedC = dark ? 'rgba(218,218,220,0.5)' : '#9ea0a5';
-  const unreadBg = dark ? 'rgba(232,112,154,0.08)' : '#FFF8F5';
-  const unreadHover = dark ? 'rgba(232,112,154,0.12)' : '#FFF3ED';
-  const readHover = dark ? 'rgba(255,255,255,0.04)' : '#fafaf8';
+  const unreadBg = dark ? 'rgba(236,157,120,0.08)' : '#FFF8F5';
+  const unreadHover = dark ? 'rgba(236,157,120,0.12)' : '#FFF3ED';
+  const readHover = dark ? 'rgba(255,255,255,0.04)' : '#faf9f5';
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -142,13 +142,13 @@ export default function NotificationBell({ dark = false, onNavigate }: Props) {
         }}
         aria-label="Notifications"
       >
-        <span className="material-symbols-outlined text-[20px]" style={{ color: dark ? 'rgba(218,218,220,0.7)' : '#636467' }}>
+        <span className="material-symbols-outlined text-[20px]" style={{ color: dark ? 'rgba(218,218,220,0.7)' : '#5e5d59' }}>
           notifications
         </span>
         {unreadCount > 0 && (
           <span
             className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white px-1"
-            style={{ background: '#D44A78' }}
+            style={{ background: '#D4714E' }}
           >
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
@@ -178,7 +178,7 @@ export default function NotificationBell({ dark = false, onNavigate }: Props) {
               <button
                 onClick={markAllRead}
                 className="text-[11px] font-semibold border-0 cursor-pointer bg-transparent"
-                style={{ color: '#D44A78', WebkitTapHighlightColor: 'transparent' }}
+                style={{ color: '#D4714E', WebkitTapHighlightColor: 'transparent' }}
               >
                 Mark all read
               </button>

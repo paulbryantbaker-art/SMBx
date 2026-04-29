@@ -22,7 +22,7 @@ interface Props {
 export function DealActionsSheet({ open, onOpenChange, dark, dealName, onPin, onMute, onShare, onArchive }: Props) {
   // Apple Glass — translucent bottom sheet; backdrop-blur on the content.
   const bg = dark ? 'rgba(21,22,23,0.82)' : 'rgba(254,254,254,0.88)';
-  const headingC = dark ? '#f9f9fc' : '#0f1012';
+  const headingC = dark ? '#faf9f5' : '#0f1012';
   const mutedC = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
   const borderC = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
   const rowBg = dark ? '#1f2123' : '#ffffff';
@@ -68,7 +68,7 @@ export function DealActionsSheet({ open, onOpenChange, dark, dealName, onPin, on
               <h3 style={{
                 margin: '8px 0 4px',
                 padding: '0 18px',
-                fontFamily: 'Sora, system-ui',
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 16,
                 fontWeight: 800,
                 letterSpacing: '-0.01em',
@@ -102,13 +102,13 @@ export function DealActionsSheet({ open, onOpenChange, dark, dealName, onPin, on
                   cursor: 'pointer',
                   WebkitTapHighlightColor: 'transparent',
                   color: headingC,
-                  fontFamily: 'Inter, system-ui',
+                  fontFamily: "'Figtree', system-ui, sans-serif",
                   fontSize: 15,
                   fontWeight: 600,
                   textAlign: 'left',
                 }}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: 20, color: '#D44A78' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 20, color: '#D4714E' }}>
                   {a.icon}
                 </span>
                 {a.label}
@@ -143,7 +143,7 @@ export function DealActionsSheet({ open, onOpenChange, dark, dealName, onPin, on
                   cursor: 'pointer',
                   WebkitTapHighlightColor: 'transparent',
                   color: dangerC,
-                  fontFamily: 'Inter, system-ui',
+                  fontFamily: "'Figtree', system-ui, sans-serif",
                   fontSize: 15,
                   fontWeight: 700,
                   textAlign: 'left',
@@ -161,7 +161,7 @@ export function DealActionsSheet({ open, onOpenChange, dark, dealName, onPin, on
               <div style={{
                 textAlign: 'center',
                 padding: '20px 12px',
-                fontFamily: 'Inter, system-ui',
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 13,
                 color: mutedC,
               }}>

@@ -115,7 +115,7 @@ export function DealCalculator({ dark, accent: accentOverride }: Props) {
   const innerBorder = 'rgba(15,16,18,0.06)';
   const headingColor = '#0f1012';
   const bodyColor = '#3c3d40';
-  const mutedColor = '#6e6a63';
+  const mutedColor = '#5e5d59';
   const accent = accentOverride ?? '#3E8E8E';        // /buy teal (single variant — card is always light)
   const sbaEligible = math.dscr >= 1.25;
 

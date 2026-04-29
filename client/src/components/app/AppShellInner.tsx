@@ -85,7 +85,7 @@ export default function AppShellInner({
         overflow: 'hidden',
         background: 'var(--bg-app)',
         color: 'var(--text-primary)',
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Figtree', system-ui, sans-serif",
         display: 'flex',
         flexDirection: 'column',
       }}
@@ -107,25 +107,27 @@ export default function AppShellInner({
         >
           <div
             style={{
-              fontFamily: "'Sora', system-ui, sans-serif",
-              fontWeight: 800,
-              fontSize: 28,
-              letterSpacing: '-0.025em',
+              fontFamily: "'Instrument Serif', Georgia, serif",
+              fontWeight: 400,
+              fontSize: 44,
+              letterSpacing: '-0.01em',
               color: 'var(--text-primary)',
               textAlign: 'center',
-              lineHeight: 1.15,
+              lineHeight: 1.1,
+              textWrap: 'balance',
             }}
           >
             Hi {firstName}.
           </div>
           <div
             style={{
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 15,
               color: 'var(--text-muted)',
               textAlign: 'center',
-              lineHeight: 1.45,
-              maxWidth: 280,
+              lineHeight: 1.55,
+              maxWidth: 320,
+              textWrap: 'pretty',
             }}
           >
             New mobile coming soon. Yulia is still here whenever you want to talk.
@@ -135,19 +137,19 @@ export default function AppShellInner({
             onClick={() => setChatOpen(true)}
             style={{
               marginTop: 8,
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 15,
-              fontWeight: 700,
+              fontWeight: 600,
               letterSpacing: '-0.005em',
               color: '#fff',
-              background: 'linear-gradient(180deg, #1A1A1E 0%, #000 100%)',
+              background: 'var(--clay)',
               border: 0,
               padding: '14px 28px',
               borderRadius: 999,
               cursor: 'pointer',
               WebkitTapHighlightColor: 'transparent',
               boxShadow:
-                'inset 0 0.5px 0 rgba(255,255,255,0.15), 0 4px 14px rgba(0,0,0,0.22)',
+                'inset 0 0.5px 0 rgba(255,255,255,0.2), 0 4px 14px rgba(212,113,78,0.32)',
               transition: 'transform 160ms cubic-bezier(0.23, 1, 0.32, 1)',
             }}
             onPointerDown={(e) => { e.currentTarget.style.transform = 'scale(0.97)'; }}

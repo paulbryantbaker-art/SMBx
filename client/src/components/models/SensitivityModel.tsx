@@ -17,7 +17,7 @@ export default function SensitivityModel({ tabId }: Props) {
   if (!matrix || !matrix.var1Values?.length) {
     return (
       <div className="p-5 text-center">
-        <p className="text-sm" style={{ color: '#6E6A63' }}>
+        <p className="text-sm" style={{ color: '#5e5d59' }}>
           Link this sensitivity tab to a parent model to generate the matrix.
         </p>
       </div>
@@ -26,12 +26,12 @@ export default function SensitivityModel({ tabId }: Props) {
 
   return (
     <div className="p-5 space-y-6 max-w-3xl mx-auto">
-      <h2 className="text-base font-bold m-0" style={{ fontFamily: 'Sora, sans-serif' }}>
+      <h2 className="text-base font-bold m-0" style={{ fontFamily: 'Figtree, system-ui, sans-serif' }}>
         Sensitivity Analysis
       </h2>
 
       <div className="mb-2">
-        <label className="block text-[10px] font-medium mb-1" style={{ color: '#6E6A63' }}>Output Metric</label>
+        <label className="block text-[10px] font-medium mb-1" style={{ color: '#5e5d59' }}>Output Metric</label>
         <select
           value={tab.assumptions.outputMetric || 'irr'}
           onChange={e => update(tabId, 'outputMetric', e.target.value)}

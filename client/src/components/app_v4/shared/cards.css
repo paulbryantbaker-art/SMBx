@@ -26,7 +26,7 @@
   background: linear-gradient(180deg, #FAFAFB, #fff);
 }
 .bench__title {
-  font-family: 'Sora', sans-serif; font-weight: 700; font-size: 12.5px;
+  font-family: 'Figtree', system-ui, sans-serif; font-weight: 700; font-size: 12.5px;
   letter-spacing: -0.005em;
 }
 .bench__meta {
@@ -50,20 +50,28 @@
   padding: var(--row-pad-y) 0; border-top: 0.5px solid var(--gg-border-soft);
 }
 .row:first-child { border-top: 0; }
-.row__title { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 12.5px; color: var(--gg-ink); letter-spacing: -0.005em; }
+.row__title { font-family: 'Figtree', system-ui, sans-serif; font-weight: 700; font-size: 12.5px; color: var(--gg-ink); letter-spacing: -0.005em; }
 .row__sub { font-size: 11px; color: var(--gg-mute); margin-top: 2px; }
-.row__amt { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 14px; font-variant-numeric: tabular-nums; color: var(--gg-ink); }
+.row__amt { font-family: 'Figtree', system-ui, sans-serif; font-weight: 800; font-size: 14px; font-variant-numeric: tabular-nums; color: var(--gg-ink); }
 
 .pill {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 3px 9px; border-radius: 999px;
-  font-family: 'Sora', sans-serif; font-weight: 700; font-size: 9.5px;
+  font-family: 'Figtree', system-ui, sans-serif; font-weight: 700; font-size: 9.5px;
   letter-spacing: 0.04em; text-transform: uppercase;
 }
-.pill--ok   { background: rgba(34,167,85,0.12);  color: #1A7E40; }
-.pill--warn { background: rgba(232,160,51,0.14); color: #8A5A14; }
-.pill--flag { background: rgba(212,83,58,0.12);  color: #9C3020; }
-.pill--ink  { background: rgba(10,10,11,0.08);   color: var(--gg-ink); }
+/* Cowork earth-tone pill palette. Tints sit at ~60% of the swatch,
+   text uses the full-saturation version for 4.5:1 contrast. */
+.pill--ok   { background: rgba(98,153,135,0.16);  color: #3f6b5d; }  /* mineral */
+.pill--warn { background: rgba(212,113,78,0.14);  color: #8a3d23; }  /* clay */
+.pill--flag { background: rgba(196,102,134,0.16); color: #7a3048; }  /* fig */
+.pill--ink  { background: rgba(26,25,24,0.08);    color: var(--gg-ink); }
+/* New tones — opt-in. */
+.pill--sage { background: rgba(188,209,202,0.40); color: #3f6b5d; }
+.pill--oat  { background: rgba(227,218,204,0.60); color: #5e5d59; }
+.pill--peach{ background: rgba(235,201,183,0.50); color: #8a3d23; }
+.pill--sky  { background: rgba(106,155,204,0.16); color: #2f5a85; }
+.pill--plum { background: rgba(130,125,189,0.16); color: #4a4773; }
 
 .dim {
   display: flex; gap: 10px; align-items: center; font-size: 12.5px;
@@ -74,7 +82,7 @@
 .dim__lbl { flex: 1; color: var(--gg-ink-2); font-weight: 500; }
 .dim__bar { width: 100px; height: 4px; background: var(--gg-line); border-radius: 2px; overflow: hidden; }
 .dim__bar-fill { height: 100%; background: var(--gg-ink); border-radius: 2px; }
-.dim__val { font-family: 'Sora', sans-serif; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 28px; text-align: right; }
+.dim__val { font-family: 'Figtree', system-ui, sans-serif; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 28px; text-align: right; }
 
 /* Compare strip */
 .compare {
@@ -85,10 +93,10 @@
   background: #fff; border: 0.5px solid var(--gg-border); border-radius: 12px;
   padding: 14px;
 }
-.compare__col-t { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 12.5px; letter-spacing: -0.005em; }
+.compare__col-t { font-family: 'Figtree', system-ui, sans-serif; font-weight: 700; font-size: 12.5px; letter-spacing: -0.005em; }
 .compare__col-s { font-size: 10.5px; color: var(--gg-mute); margin-top: 2px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.04em; text-transform: uppercase; }
 .compare__score {
-  font-family: 'Sora', sans-serif; font-weight: 800; font-size: 30px;
+  font-family: 'Figtree', system-ui, sans-serif; font-weight: 800; font-size: 30px;
   letter-spacing: -0.03em; line-height: 1; margin-top: 12px;
 }
 .compare__score small { font-size: 13px; color: var(--gg-faint); font-weight: 500; }
@@ -121,7 +129,7 @@
   text-transform: uppercase; color: #fff; background: var(--gg-ink);
   padding: 3px 7px; border-radius: 4px; display: inline-block; margin-bottom: 8px;
 }
-.loi__price { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+.loi__price { font-family: 'Figtree', system-ui, sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
 .loi__struc { font-size: 11.5px; color: var(--gg-mute); margin-top: 3px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.04em; }
 .loi__note { font-size: 12px; color: var(--gg-ink-2); margin-top: 8px; line-height: 1.5; }
 
@@ -132,10 +140,10 @@
   padding: var(--row-pad-y) 0; border-top: 0.5px solid var(--gg-border-soft);
 }
 .src__row:first-child { border-top: 0; }
-.src__t { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: -0.005em; }
+.src__t { font-family: 'Figtree', system-ui, sans-serif; font-weight: 700; font-size: 13px; letter-spacing: -0.005em; }
 .src__s { font-size: 11px; color: var(--gg-mute); margin-top: 2px; }
 .src__fit {
-  font-family: 'Sora', sans-serif; font-weight: 800; font-size: 18px;
+  font-family: 'Figtree', system-ui, sans-serif; font-weight: 800; font-size: 18px;
   letter-spacing: -0.02em; font-variant-numeric: tabular-nums; text-align: right;
 }
 .src__fit small { display: block; font-size: 9px; color: var(--gg-faint); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
@@ -143,10 +151,10 @@
 /* Financial model */
 .fm {
   font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
-  background: #0A0A0B; color: #fff; padding: 14px 16px; border-radius: 10px;
+  background: #1a1918; color: #fff; padding: 14px 16px; border-radius: 10px;
   overflow-x: auto; line-height: 1.7;
 }
-.fm .l { color: #9A9A9F; }
+.fm .l { color: #b0aea5; }
 .fm .k { color: var(--gg-warn); }
 .fm .v { color: #fff; font-weight: 600; }
 .fm .g { color: var(--gg-ok); }

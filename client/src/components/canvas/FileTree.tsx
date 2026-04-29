@@ -35,7 +35,7 @@ interface FileTreeProps {
 
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   draft: { bg: 'rgba(107,114,128,0.1)', text: '#6B7280' },
-  review: { bg: 'rgba(212,74,120,0.1)', text: '#D44A78' },
+  review: { bg: 'rgba(212,113,78,0.1)', text: '#D4714E' },
   approved: { bg: 'rgba(5,150,105,0.1)', text: '#059669' },
   agreed: { bg: 'rgba(37,99,235,0.1)', text: '#2563EB' },
   executed: { bg: 'rgba(124,58,237,0.1)', text: '#7C3AED' },
@@ -56,7 +56,7 @@ function FileIcon({ fileType, docClass }: { fileType?: string; docClass?: string
   const color = docClass === 'legal' ? '#7C3AED'
     : docClass === 'marketing' ? '#2563EB'
     : docClass === 'evidence' ? '#059669'
-    : '#6E6A63';
+    : '#5e5d59';
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d={path || DOC_CLASS_ICONS.working} />
@@ -159,7 +159,7 @@ export default function FileTree({ dealId, onOpenDocument, onUpload, dark }: Fil
   if (!dealId) {
     return (
       <div className="p-6 text-center">
-        <p className={`text-sm ${dark ? 'text-[#6E6A63]' : 'text-[#A9A49C]'}`}>
+        <p className={`text-sm ${dark ? 'text-[#5e5d59]' : 'text-[#A9A49C]'}`}>
           Select a deal to view documents
         </p>
       </div>
@@ -174,14 +174,14 @@ export default function FileTree({ dealId, onOpenDocument, onUpload, dark }: Fil
       {/* Header */}
       <div className="shrink-0 px-3 py-2.5 flex items-center justify-between"
         style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }}>
-        <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: dark ? '#6E6A63' : '#A9A49C' }}>
+        <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: dark ? '#5e5d59' : '#A9A49C' }}>
           Files
         </span>
         {onUpload && (
           <button
             onClick={onUpload}
             className="w-6 h-6 rounded flex items-center justify-center border-0 cursor-pointer transition-colors"
-            style={{ background: 'transparent', color: dark ? '#6E6A63' : '#A9A49C' }}
+            style={{ background: 'transparent', color: dark ? '#5e5d59' : '#A9A49C' }}
             title="Upload file"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -200,8 +200,8 @@ export default function FileTree({ dealId, onOpenDocument, onUpload, dark }: Fil
           placeholder="Search files..."
           className="w-full text-xs px-2.5 py-1.5 rounded-md border-0 outline-none"
           style={{
-            background: dark ? '#2A2C2E' : '#F5F5F3',
-            color: dark ? '#E8E6E3' : '#0D0D0D',
+            background: dark ? '#141413' : '#F5F5F3',
+            color: dark ? '#E8E6E3' : '#1a1918',
           }}
         />
       </div>
@@ -210,7 +210,7 @@ export default function FileTree({ dealId, onOpenDocument, onUpload, dark }: Fil
       <div className="flex-1 overflow-y-auto px-1 py-1">
         {loading ? (
           <div className="p-4 text-center">
-            <div className="w-5 h-5 border-2 border-[#D44A78] border-t-transparent rounded-full animate-spin mx-auto" />
+            <div className="w-5 h-5 border-2 border-[#D4714E] border-t-transparent rounded-full animate-spin mx-auto" />
           </div>
         ) : (
           <>
@@ -229,7 +229,7 @@ export default function FileTree({ dealId, onOpenDocument, onUpload, dark }: Fil
                     className="w-full flex items-center gap-1.5 px-2 py-1.5 rounded-md border-0 cursor-pointer transition-colors text-left"
                     style={{
                       background: 'transparent',
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'Figtree', system-ui, sans-serif",
                     }}
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'; }}
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
@@ -237,7 +237,7 @@ export default function FileTree({ dealId, onOpenDocument, onUpload, dark }: Fil
                     {/* Chevron */}
                     <svg
                       width="10" height="10" viewBox="0 0 24 24" fill="none"
-                      stroke={dark ? '#6E6A63' : '#A9A49C'} strokeWidth="2"
+                      stroke={dark ? '#5e5d59' : '#A9A49C'} strokeWidth="2"
                       style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0)', transition: 'transform 0.15s ease', flexShrink: 0 }}
                     >
                       <path d="M9 18l6-6-6-6" />
@@ -245,8 +245,8 @@ export default function FileTree({ dealId, onOpenDocument, onUpload, dark }: Fil
 
                     {/* Folder icon */}
                     <svg width="14" height="14" viewBox="0 0 24 24"
-                      fill={isExpanded ? (dark ? '#E8709A' : '#D44A78') : 'none'}
-                      stroke={isExpanded ? (dark ? '#E8709A' : '#D44A78') : (dark ? '#6E6A63' : '#A9A49C')}
+                      fill={isExpanded ? (dark ? '#ec9d78' : '#D4714E') : 'none'}
+                      stroke={isExpanded ? (dark ? '#ec9d78' : '#D4714E') : (dark ? '#5e5d59' : '#A9A49C')}
                       strokeWidth="1.5"
                     >
                       <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
@@ -254,13 +254,13 @@ export default function FileTree({ dealId, onOpenDocument, onUpload, dark }: Fil
 
                     {/* Name */}
                     <span className="flex-1 truncate text-[12px] font-medium"
-                      style={{ color: dark ? '#C8C4BC' : '#3D3B37' }}>
+                      style={{ color: dark ? '#C8C4BC' : '#3d3d3a' }}>
                       {folder.name}
                     </span>
 
                     {/* Count */}
                     {folderDocs.length > 0 && (
-                      <span className="text-[10px] tabular-nums" style={{ color: dark ? '#6E6A63' : '#A9A49C' }}>
+                      <span className="text-[10px] tabular-nums" style={{ color: dark ? '#5e5d59' : '#A9A49C' }}>
                         {folderDocs.length}
                       </span>
                     )}
@@ -268,7 +268,7 @@ export default function FileTree({ dealId, onOpenDocument, onUpload, dark }: Fil
 
                   {/* Documents */}
                   {(isExpanded || hasMatchingDocs) && folderDocs.length > 0 && (
-                    <div className="ml-3 pl-2.5" style={{ borderLeft: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : '#EBE7DF'}` }}>
+                    <div className="ml-3 pl-2.5" style={{ borderLeft: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : '#e8e6dc'}` }}>
                       {folderDocs
                         .filter(d => !search || d.name.toLowerCase().includes(search.toLowerCase()))
                         .map(doc => (
@@ -277,12 +277,12 @@ export default function FileTree({ dealId, onOpenDocument, onUpload, dark }: Fil
                             onClick={() => onOpenDocument(doc)}
                             onContextMenu={e => handleContextMenu(e, doc)}
                             className="w-full flex items-center gap-1.5 px-2 py-1.5 rounded-md border-0 cursor-pointer transition-colors text-left"
-                            style={{ background: 'transparent', fontFamily: "'Inter', system-ui, sans-serif" }}
+                            style={{ background: 'transparent', fontFamily: "'Figtree', system-ui, sans-serif" }}
                             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'; }}
                             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
                           >
                             <FileIcon fileType={doc.file_type} docClass={doc.doc_class} />
-                            <span className="flex-1 truncate text-[12px]" style={{ color: dark ? '#E8E6E3' : '#0D0D0D' }}>
+                            <span className="flex-1 truncate text-[12px]" style={{ color: dark ? '#E8E6E3' : '#1a1918' }}>
                               {doc.name}
                             </span>
                             {doc.status && doc.status !== 'complete' && (
@@ -293,7 +293,7 @@ export default function FileTree({ dealId, onOpenDocument, onUpload, dark }: Fil
                                 {doc.status}
                               </span>
                             )}
-                            <span className="text-[10px] tabular-nums shrink-0" style={{ color: dark ? '#6E6A63' : '#A9A49C' }}>
+                            <span className="text-[10px] tabular-nums shrink-0" style={{ color: dark ? '#5e5d59' : '#A9A49C' }}>
                               {timeAgo(doc.created_at)}
                             </span>
                           </button>
@@ -306,8 +306,8 @@ export default function FileTree({ dealId, onOpenDocument, onUpload, dark }: Fil
 
             {/* Unfiled documents */}
             {unfiledDocs.length > 0 && (
-              <div className="mt-2 pt-2" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : '#EBE7DF'}` }}>
-                <span className="px-2 text-[10px] font-bold uppercase tracking-wider" style={{ color: dark ? '#6E6A63' : '#A9A49C' }}>
+              <div className="mt-2 pt-2" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : '#e8e6dc'}` }}>
+                <span className="px-2 text-[10px] font-bold uppercase tracking-wider" style={{ color: dark ? '#5e5d59' : '#A9A49C' }}>
                   Unfiled
                 </span>
                 <div className="mt-1">
@@ -317,15 +317,15 @@ export default function FileTree({ dealId, onOpenDocument, onUpload, dark }: Fil
                       onClick={() => onOpenDocument(doc)}
                       onContextMenu={e => handleContextMenu(e, doc)}
                       className="w-full flex items-center gap-1.5 px-2 py-1.5 rounded-md border-0 cursor-pointer transition-colors text-left"
-                      style={{ background: 'transparent', fontFamily: "'Inter', system-ui, sans-serif" }}
+                      style={{ background: 'transparent', fontFamily: "'Figtree', system-ui, sans-serif" }}
                       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'; }}
                       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
                     >
                       <FileIcon fileType={doc.file_type} docClass={doc.doc_class} />
-                      <span className="flex-1 truncate text-[12px]" style={{ color: dark ? '#E8E6E3' : '#0D0D0D' }}>
+                      <span className="flex-1 truncate text-[12px]" style={{ color: dark ? '#E8E6E3' : '#1a1918' }}>
                         {doc.name}
                       </span>
-                      <span className="text-[10px] tabular-nums" style={{ color: dark ? '#6E6A63' : '#A9A49C' }}>
+                      <span className="text-[10px] tabular-nums" style={{ color: dark ? '#5e5d59' : '#A9A49C' }}>
                         {formatSize(doc.file_size)}
                       </span>
                     </button>
@@ -337,10 +337,10 @@ export default function FileTree({ dealId, onOpenDocument, onUpload, dark }: Fil
             {/* Empty state */}
             {folders.length === 0 && documents.length === 0 && (
               <div className="p-6 text-center">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={dark ? '#3A3C3E' : '#EBE7DF'} strokeWidth="1.5" className="mx-auto mb-3">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={dark ? '#3A3C3E' : '#e8e6dc'} strokeWidth="1.5" className="mx-auto mb-3">
                   <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                 </svg>
-                <p className="text-xs" style={{ color: dark ? '#6E6A63' : '#A9A49C' }}>
+                <p className="text-xs" style={{ color: dark ? '#5e5d59' : '#A9A49C' }}>
                   No documents yet
                 </p>
                 <p className="text-[10px] mt-1" style={{ color: dark ? '#4A4A4A' : '#C8C4BC' }}>
@@ -359,7 +359,7 @@ export default function FileTree({ dealId, onOpenDocument, onUpload, dark }: Fil
           style={{
             left: contextMenu.x,
             top: contextMenu.y,
-            background: dark ? '#2A2C2E' : '#FFFFFF',
+            background: dark ? '#141413' : '#FFFFFF',
             border: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
           }}
         >
@@ -368,7 +368,7 @@ export default function FileTree({ dealId, onOpenDocument, onUpload, dark }: Fil
               <button
                 onClick={() => { onOpenDocument(contextMenu.doc!); setContextMenu(null); }}
                 className="w-full text-left px-3 py-1.5 text-[12px] border-0 cursor-pointer transition-colors"
-                style={{ background: 'transparent', color: dark ? '#E8E6E3' : '#0D0D0D', fontFamily: "'Inter', system-ui, sans-serif" }}
+                style={{ background: 'transparent', color: dark ? '#E8E6E3' : '#1a1918', fontFamily: "'Figtree', system-ui, sans-serif" }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
               >
@@ -377,7 +377,7 @@ export default function FileTree({ dealId, onOpenDocument, onUpload, dark }: Fil
               <button
                 onClick={() => handleRename(contextMenu.doc!.id)}
                 className="w-full text-left px-3 py-1.5 text-[12px] border-0 cursor-pointer transition-colors"
-                style={{ background: 'transparent', color: dark ? '#E8E6E3' : '#0D0D0D', fontFamily: "'Inter', system-ui, sans-serif" }}
+                style={{ background: 'transparent', color: dark ? '#E8E6E3' : '#1a1918', fontFamily: "'Figtree', system-ui, sans-serif" }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
               >
@@ -387,7 +387,7 @@ export default function FileTree({ dealId, onOpenDocument, onUpload, dark }: Fil
               <button
                 onClick={() => handleDelete(contextMenu.doc!.id)}
                 className="w-full text-left px-3 py-1.5 text-[12px] border-0 cursor-pointer transition-colors"
-                style={{ background: 'transparent', color: '#DC2626', fontFamily: "'Inter', system-ui, sans-serif" }}
+                style={{ background: 'transparent', color: '#DC2626', fontFamily: "'Figtree', system-ui, sans-serif" }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
               >

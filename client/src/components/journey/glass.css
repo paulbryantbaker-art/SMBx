@@ -9,11 +9,11 @@
 
 :root {
   /* ── Surfaces ─────────────────────────────────────────────────── */
-  --gg-bg-app:     #F2F2F4;
+  --gg-bg-app:     #faf9f5;
   --gg-bg-card:    #FFFFFF;
-  --gg-bg-subtle:  #F5F5F7;
-  --gg-bg-muted:   #E8E8EB;
-  --gg-bg-dark:    #0A0A0B;
+  --gg-bg-subtle:  #f5f4ed;
+  --gg-bg-muted:   #e8e6dc;
+  --gg-bg-dark:    #1a1918;
 
   /* ── Glass intensities ────────────────────────────────────────── */
   --gg-glass-light:   rgba(255, 255, 255, 0.72);
@@ -21,35 +21,37 @@
   --gg-glass-strong:  rgba(255, 255, 255, 0.88);
 
   /* ── Text ─────────────────────────────────────────────────────── */
-  --gg-text-primary:   #0A0A0B;
+  --gg-text-primary:   #1a1918;
   --gg-text-secondary: #3A3A3E;
-  --gg-text-muted:     #6B6B70;
-  --gg-text-faint:     #9A9A9F;
+  --gg-text-muted:     #87867f;
+  --gg-text-faint:     #b0aea5;
   --gg-text-inv:       #FFFFFF;
 
   /* ── Borders ──────────────────────────────────────────────────── */
   --gg-border:         rgba(0, 0, 0, 0.08);
   --gg-border-solid:   #E5E5E7;
-  --gg-border-strong:  #D1D1D4;
+  --gg-border-strong:  #d1cfc5;
 
   /* ── Accent (black, not a brand hue) ──────────────────────────── */
-  --gg-accent:       #0A0A0B;
+  --gg-accent:       #1a1918;
   --gg-accent-fill:  rgba(10, 10, 11, 0.06);
 
   /* ── Content-level status (never in chrome) ───────────────────── */
-  --gg-dot-ready:    #22A755;
-  --gg-dot-progress: #E8A033;
-  --gg-dot-flag:     #DC2626;
-  --gg-dot-draft:    #9A9A9F;
+  /* Cowork earth-tone status dots */
+  --gg-dot-ready:    #629987;   /* mineral */
+  --gg-dot-progress: #D4714E;   /* clay */
+  --gg-dot-flag:     #b53333;
+  --gg-dot-draft:    #b0aea5;
 
-  /* ── Score band pairs (desaturated tint + darker text) ────────── */
-  --gg-band-hi-bg:  #DCFCE7;  --gg-band-hi-fg:  #166534;
-  --gg-band-med-bg: #FEF3C7;  --gg-band-med-fg: #92400E;
-  --gg-band-low-bg: #F1F1F2;  --gg-band-low-fg: #52525B;
-  --gg-band-flag-bg:#FEE2E2;  --gg-band-flag-fg:#991B1B;
+  /* ── Score band pairs (Cowork earth-tones) ────────────────────── */
+  --gg-band-hi-bg:  #dfeae4;    --gg-band-hi-fg:  #1f4a3a;
+  --gg-band-med-bg: #f4e4d5;    --gg-band-med-fg: #7a4a1e;
+  --gg-band-low-bg: #f0eee6;    --gg-band-low-fg: #5e5d59;
+  --gg-band-flag-bg:#f0d4d4;    --gg-band-flag-fg:#7a1e1e;
 
-  /* ── Type ─────────────────────────────────────────────────────── */
+  /* ── V17 Type: Sora ExtraBold display + Inter body ─────────────── */
   --gg-display: 'Sora', system-ui, sans-serif;
+  --gg-sans:    'Inter', system-ui, sans-serif;
   --gg-body:    'Inter', system-ui, sans-serif;
 
   /* ── Spacing (4px base) ───────────────────────────────────────── */
@@ -296,11 +298,12 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 .gg-yulia {
-  background: linear-gradient(135deg, #3A3A3E 0%, #0A0A0B 100%);
+  background: linear-gradient(135deg, #3d3d3a 0%, #1a1918 100%);
   color: var(--gg-text-inv);
   display: flex; align-items: center; justify-content: center;
-  font-family: var(--gg-display);
-  font-weight: 800;
+  /* Single-letter avatar reads better in Figtree 800 than serif. */
+  font-family: var(--gg-sans);
+  font-weight: 700;
   flex-shrink: 0;
   box-shadow:
     inset 0 0.5px 0 rgba(255, 255, 255, 0.15),
@@ -328,63 +331,71 @@
    journey, H2 52px section / 44px hero-block, stat 72px.
    ═══════════════════════════════════════════════════════════════════════ */
 
+/* V17: display type is Sora ExtraBold 800. Tight -0.025em tracking,
+   line-height 1.02. Stylistic-alternates on for editorial feel. */
 .gg-h1 {
   font-family: var(--gg-display);
   font-weight: 800;
-  /* Hero is the biggest element on any page — full stop. Prior sizes
-     (max 88px for home, 72px for journey heroes) left the GiantAnchor
-     sections reading as bigger than the hero, which inverted the
-     visual hierarchy. Home hero now tops out at 120px; journey heroes
-     at 108px. text-wrap: balance handles natural line breaks. */
-  font-size: clamp(52px, 8.5vw, 120px);
-  line-height: 0.95;
-  letter-spacing: -0.045em;
+  font-size: clamp(48px, 8vw, 96px);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
   color: var(--gg-text-primary);
   text-wrap: balance;
+  font-feature-settings: 'ss01', 'cv01', 'cv11', 'kern' 1;
 }
 .gg-h1--journey {
-  font-size: clamp(46px, 7.2vw, 108px);
-  line-height: 1;
-  letter-spacing: -0.035em;
+  font-size: clamp(44px, 7vw, 88px);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
 }
 .gg-h2 {
   font-family: var(--gg-display);
   font-weight: 800;
-  font-size: clamp(28px, 4.2vw, 52px);
+  font-size: clamp(36px, 4.5vw, 64px);
   line-height: 1.05;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.025em;
   color: var(--gg-text-primary);
   text-wrap: balance;
+  font-feature-settings: 'ss01', 'cv01', 'cv11', 'kern' 1;
 }
 .gg-h2--block {
-  /* H2 used inside a two-column zigzag (paired with a product mockup);
-     a notch smaller than section-intro H2. */
-  font-size: clamp(28px, 3.2vw, 44px);
-  line-height: 1.08;
+  font-size: clamp(28px, 3.4vw, 44px);
+  line-height: 1.1;
   letter-spacing: -0.02em;
 }
 .gg-h3 {
-  font-family: var(--gg-display);
-  font-weight: 700;
+  font-family: var(--gg-sans);
+  font-weight: 600;
   font-size: 18px;
   letter-spacing: -0.01em;
-  line-height: 1.2;
+  line-height: 1.25;
   color: var(--gg-text-primary);
 }
+.gg-h3--serif {
+  font-family: var(--gg-serif, 'Instrument Serif', Georgia, serif);
+  font-weight: 400;
+  font-style: italic;
+  font-size: 22px;
+  letter-spacing: 0;
+  line-height: 1.3;
+}
 .gg-stat {
-  font-family: var(--gg-display);
-  font-weight: 800;
+  /* Large metrics stay SANS — tabular figures are a Figtree strength
+     and numbers read as data, not display copy. */
+  font-family: var(--gg-sans);
+  font-weight: 600;
   font-size: clamp(52px, 6.5vw, 72px);
-  line-height: 0.9;
-  letter-spacing: -0.04em;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
   color: var(--gg-text-primary);
   font-variant-numeric: tabular-nums;
 }
 .gg-eyebrow {
-  font-family: var(--gg-display);
-  font-weight: 700;
+  /* Eyebrow/kicker stays sans — small caps-style. */
+  font-family: var(--gg-sans);
+  font-weight: 600;
   font-size: 11px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--gg-text-muted);
   display: inline-flex;

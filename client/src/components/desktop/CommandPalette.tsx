@@ -122,13 +122,13 @@ export default function CommandPalette({ open, onOpenChange, items, dark, placeh
     }
   };
 
-  const bg = dark ? '#151617' : '#FFFFFF';
-  const heading = dark ? '#F0F0F3' : '#1A1C1E';
-  const body = dark ? 'rgba(240,240,243,0.78)' : '#3C3D40';
-  const muted = dark ? 'rgba(240,240,243,0.55)' : '#6B6C6F';
-  const border = dark ? 'rgba(255,255,255,0.08)' : '#E5E1D9';
-  const activeBg = dark ? 'rgba(232,112,154,0.12)' : 'rgba(212,74,120,0.06)';
-  const accent = dark ? '#E8709A' : '#D44A78';
+  const bg = dark ? '#141413' : '#FFFFFF';
+  const heading = dark ? '#f5f4ed' : '#1a1918';
+  const body = dark ? 'rgba(245,244,237,0.78)' : '#3C3D40';
+  const muted = dark ? 'rgba(245,244,237,0.55)' : '#6B6C6F';
+  const border = dark ? 'rgba(255,255,255,0.08)' : '#e8e6dc';
+  const activeBg = dark ? 'rgba(236,157,120,0.12)' : 'rgba(212,113,78,0.06)';
+  const accent = dark ? '#ec9d78' : '#D4714E';
 
   let flatIndexCounter = 0;
 
@@ -156,7 +156,7 @@ export default function CommandPalette({ open, onOpenChange, items, dark, placeh
             borderRadius: 16,
             boxShadow: dark
               ? '0 1px 2px rgba(0,0,0,0.4), 0 24px 48px rgba(0,0,0,0.5)'
-              : '0 1px 2px rgba(60,55,45,0.08), 0 24px 48px rgba(60,55,45,0.18)',
+              : '0 1px 2px rgba(26,25,24,0.08), 0 24px 48px rgba(26,25,24,0.18)',
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
@@ -189,7 +189,7 @@ export default function CommandPalette({ open, onOpenChange, items, dark, placeh
                 border: 'none',
                 outline: 'none',
                 color: heading,
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 15,
               }}
             />
@@ -199,7 +199,7 @@ export default function CommandPalette({ open, onOpenChange, items, dark, placeh
               border: `1px solid ${border}`,
               fontSize: 10, fontWeight: 700,
               color: muted,
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               letterSpacing: '0.04em',
             }}>
               ESC
@@ -216,7 +216,7 @@ export default function CommandPalette({ open, onOpenChange, items, dark, placeh
               <div style={{
                 padding: 32, textAlign: 'center',
                 color: muted,
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 13.5,
               }}>
                 No matches for <strong style={{ color: heading }}>{query}</strong>
@@ -226,7 +226,7 @@ export default function CommandPalette({ open, onOpenChange, items, dark, placeh
                 <Fragment key={g.group + gi}>
                   <div style={{
                     padding: '10px 12px 4px',
-                    fontFamily: "'Sora', system-ui, sans-serif",
+                    fontFamily: "'Figtree', system-ui, sans-serif",
                     fontSize: 10, fontWeight: 800,
                     letterSpacing: '0.08em', textTransform: 'uppercase',
                     color: muted,
@@ -253,7 +253,7 @@ export default function CommandPalette({ open, onOpenChange, items, dark, placeh
                           border: 'none',
                           background: isActive ? activeBg : 'transparent',
                           color: heading,
-                          fontFamily: "'Inter', system-ui, sans-serif",
+                          fontFamily: "'Figtree', system-ui, sans-serif",
                           fontSize: 14,
                           fontWeight: 600,
                           textAlign: 'left',
@@ -291,7 +291,7 @@ export default function CommandPalette({ open, onOpenChange, items, dark, placeh
                             fontSize: 10, fontWeight: 700,
                             color: isActive ? accent : muted,
                             border: `1px solid ${isActive ? accent : border}`,
-                            fontFamily: "'Inter', system-ui, sans-serif",
+                            fontFamily: "'Figtree', system-ui, sans-serif",
                             letterSpacing: '0.04em',
                             flexShrink: 0,
                           }}>

@@ -32,7 +32,7 @@ interface Deal {
 }
 
 const JOURNEY_COLORS: Record<string, string> = {
-  sell: '#D44A78',
+  sell: '#D4714E',
   buy: '#3E8E8E',
   raise: '#C99A3E',
   pmi: '#8F4A7A',
@@ -152,15 +152,15 @@ export default function PortfolioAnalytics({ dark, onOpenDeal }: Props) {
   }
 
   /* ─── Palette ─── */
-  const heading = dark ? '#F0F0F3' : '#1A1C1E';
-  const body = dark ? 'rgba(240,240,243,0.78)' : '#3C3D40';
-  const muted = dark ? 'rgba(240,240,243,0.55)' : '#6B6C6F';
-  const borderC = dark ? 'rgba(255,255,255,0.06)' : '#E5E1D9';
-  const pink = dark ? '#E8709A' : '#D44A78';
+  const heading = dark ? '#f5f4ed' : '#1a1918';
+  const body = dark ? 'rgba(245,244,237,0.78)' : '#3C3D40';
+  const muted = dark ? 'rgba(245,244,237,0.55)' : '#6B6C6F';
+  const borderC = dark ? 'rgba(255,255,255,0.06)' : '#e8e6dc';
+  const pink = dark ? '#ec9d78' : '#D4714E';
 
   if (error) {
     return (
-      <div style={{ padding: 48, textAlign: 'center', color: muted, fontFamily: "'Inter', system-ui, sans-serif", fontSize: 13 }}>
+      <div style={{ padding: 48, textAlign: 'center', color: muted, fontFamily: "'Figtree', system-ui, sans-serif", fontSize: 13 }}>
         {error}{' '}
         <button onClick={fetchDeals} type="button" style={{ background: 'none', border: 'none', color: pink, cursor: 'pointer', fontWeight: 700 }}>
           retry
@@ -179,9 +179,9 @@ export default function PortfolioAnalytics({ dark, onOpenDeal }: Props) {
 
   if (stats.total === 0) {
     return (
-      <div style={{ padding: 56, textAlign: 'center', color: body, fontFamily: "'Inter', system-ui, sans-serif" }}>
+      <div style={{ padding: 56, textAlign: 'center', color: body, fontFamily: "'Figtree', system-ui, sans-serif" }}>
         <div style={{
-          fontFamily: "'Sora', system-ui, sans-serif", fontSize: 20, fontWeight: 800, color: heading,
+          fontFamily: "'Figtree', system-ui, sans-serif", fontSize: 20, fontWeight: 800, color: heading,
           letterSpacing: '-0.02em', marginBottom: 10,
         }}>
           No portfolio yet
@@ -194,13 +194,13 @@ export default function PortfolioAnalytics({ dark, onOpenDeal }: Props) {
   }
 
   const cardStyle: React.CSSProperties = {
-    background: dark ? '#151617' : '#FFFFFF',
+    background: dark ? '#141413' : '#FFFFFF',
     border: `1px solid ${borderC}`,
     borderRadius: 14,
     padding: 20,
     boxShadow: dark
       ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
-      : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)',
+      : '0 1px 2px rgba(26,25,24,0.06), 0 4px 8px rgba(26,25,24,0.04)',
   };
 
   return (
@@ -248,7 +248,7 @@ export default function PortfolioAnalytics({ dark, onOpenDeal }: Props) {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <h3 style={sectionHeadStyle(muted)}>Recently moved</h3>
             <span style={{
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 11, fontWeight: 600, color: muted,
             }}>
               Most recent activity across your book
@@ -272,7 +272,7 @@ export default function PortfolioAnalytics({ dark, onOpenDeal }: Props) {
                     border: 'none',
                     background: 'transparent',
                     color: heading,
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontFamily: "'Figtree', system-ui, sans-serif",
                     fontSize: 13,
                     fontWeight: 600,
                     textAlign: 'left',
@@ -321,13 +321,13 @@ export default function PortfolioAnalytics({ dark, onOpenDeal }: Props) {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
                       <span style={{
                         display: 'inline-flex', alignItems: 'center', gap: 6,
-                        fontFamily: "'Inter', system-ui, sans-serif",
+                        fontFamily: "'Figtree', system-ui, sans-serif",
                         fontSize: 13, fontWeight: 700, color: heading,
                       }}>
                         <span style={{ width: 8, height: 8, borderRadius: '50%', background: JOURNEY_COLORS[j] || '#7A766E' }} />
                         {JOURNEY_LABELS[j] || j}
                       </span>
-                      <span style={{ fontSize: 12, color: muted, fontFamily: "'Inter', system-ui, sans-serif" }}>
+                      <span style={{ fontSize: 12, color: muted, fontFamily: "'Figtree', system-ui, sans-serif" }}>
                         {list.length} · {formatMoney(value)}
                       </span>
                     </div>
@@ -360,7 +360,7 @@ export default function PortfolioAnalytics({ dark, onOpenDeal }: Props) {
                 return (
                   <div key={stage} style={{
                     display: 'flex', alignItems: 'center', gap: 10,
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontFamily: "'Figtree', system-ui, sans-serif",
                     fontSize: 13,
                   }}>
                     <span style={{ width: 56, fontWeight: 700, color: heading, flexShrink: 0 }}>{stage}</span>
@@ -387,7 +387,7 @@ export default function PortfolioAnalytics({ dark, onOpenDeal }: Props) {
             <h3 style={sectionHeadStyle(muted)}>Stuck deals</h3>
             <span style={{
               fontSize: 11, fontWeight: 700, color: '#D44A4A',
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
             }}>
               {formatMoney(stats.stuckValue)} at risk
             </span>
@@ -409,7 +409,7 @@ export default function PortfolioAnalytics({ dark, onOpenDeal }: Props) {
                     border: `1px solid ${borderC}`,
                     background: 'transparent',
                     color: heading,
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontFamily: "'Figtree', system-ui, sans-serif",
                     fontSize: 13, fontWeight: 600,
                     textAlign: 'left',
                     cursor: 'pointer',
@@ -447,7 +447,7 @@ export default function PortfolioAnalytics({ dark, onOpenDeal }: Props) {
 function sectionHeadStyle(muted: string): React.CSSProperties {
   return {
     margin: 0,
-    fontFamily: "'Sora', system-ui, sans-serif",
+    fontFamily: "'Figtree', system-ui, sans-serif",
     fontSize: 11,
     fontWeight: 800,
     letterSpacing: '0.08em',
@@ -459,12 +459,12 @@ function sectionHeadStyle(muted: string): React.CSSProperties {
 function KpiCard({
   label, value, hint, accent, dark,
 }: { label: string; value: string; hint: string; accent: string; dark: boolean }) {
-  const heading = dark ? '#F0F0F3' : '#1A1C1E';
-  const muted = dark ? 'rgba(240,240,243,0.55)' : '#6B6C6F';
-  const borderC = dark ? 'rgba(255,255,255,0.06)' : '#E5E1D9';
+  const heading = dark ? '#f5f4ed' : '#1a1918';
+  const muted = dark ? 'rgba(245,244,237,0.55)' : '#6B6C6F';
+  const borderC = dark ? 'rgba(255,255,255,0.06)' : '#e8e6dc';
   return (
     <div style={{
-      background: dark ? '#151617' : '#FFFFFF',
+      background: dark ? '#141413' : '#FFFFFF',
       border: `1px solid ${borderC}`,
       borderRadius: 14,
       padding: 20,
@@ -472,18 +472,18 @@ function KpiCard({
       overflow: 'hidden',
       boxShadow: dark
         ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
-        : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)',
+        : '0 1px 2px rgba(26,25,24,0.06), 0 4px 8px rgba(26,25,24,0.04)',
     }}>
       <div aria-hidden style={{ position: 'absolute', top: 0, left: 0, height: 3, width: '100%', background: accent, opacity: 0.75 }} />
       <div style={{
-        fontFamily: "'Sora', system-ui, sans-serif",
+        fontFamily: "'Figtree', system-ui, sans-serif",
         fontSize: 10, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase',
         color: muted, marginBottom: 6,
       }}>
         {label}
       </div>
       <div style={{
-        fontFamily: "'Sora', system-ui, sans-serif",
+        fontFamily: "'Figtree', system-ui, sans-serif",
         fontSize: 28, fontWeight: 800, letterSpacing: '-0.02em',
         color: heading, lineHeight: 1.1,
       }}>
@@ -491,7 +491,7 @@ function KpiCard({
       </div>
       <div style={{
         marginTop: 6,
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: "'Figtree', system-ui, sans-serif",
         fontSize: 12, color: muted, lineHeight: 1.4,
       }}>
         {hint}
@@ -502,7 +502,7 @@ function KpiCard({
 
 function SkeletonGrid({ dark }: { dark: boolean }) {
   const sk = dark ? 'rgba(255,255,255,0.04)' : 'rgba(15,16,18,0.04)';
-  const border = dark ? 'rgba(255,255,255,0.06)' : '#E5E1D9';
+  const border = dark ? 'rgba(255,255,255,0.06)' : '#e8e6dc';
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
       {Array.from({ length: 4 }).map((_, i) => (

@@ -105,7 +105,7 @@ export default function HelpSheet({ open, onOpenChange, onAskYulia }: Props) {
           <div style={{ padding: '14px 20px 8px', flexShrink: 0 }}>
             <h2
               style={{
-                fontFamily: "'Sora', system-ui, sans-serif",
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontWeight: 800,
                 fontSize: 22,
                 letterSpacing: '-0.02em',
@@ -117,7 +117,7 @@ export default function HelpSheet({ open, onOpenChange, onAskYulia }: Props) {
             </h2>
             <p
               style={{
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 13,
                 color: 'var(--text-muted)',
                 lineHeight: 1.5,
@@ -157,7 +157,7 @@ export default function HelpSheet({ open, onOpenChange, onAskYulia }: Props) {
                   border: 'none',
                   outline: 'none',
                   background: 'transparent',
-                  fontFamily: "'Inter', system-ui, sans-serif",
+                  fontFamily: "'Figtree', system-ui, sans-serif",
                   fontSize: 14,
                   color: 'var(--text-primary)',
                 }}
@@ -178,7 +178,7 @@ export default function HelpSheet({ open, onOpenChange, onAskYulia }: Props) {
             {filtered.length === 0 ? (
               <p
                 style={{
-                  fontFamily: "'Inter', system-ui, sans-serif",
+                  fontFamily: "'Figtree', system-ui, sans-serif",
                   fontSize: 13,
                   color: 'var(--text-muted)',
                   textAlign: 'center',
@@ -208,7 +208,7 @@ export default function HelpSheet({ open, onOpenChange, onAskYulia }: Props) {
                   >
                     <h3
                       style={{
-                        fontFamily: "'Sora', system-ui, sans-serif",
+                        fontFamily: "'Figtree', system-ui, sans-serif",
                         fontWeight: 700,
                         fontSize: 14,
                         letterSpacing: '-0.005em',
@@ -221,7 +221,7 @@ export default function HelpSheet({ open, onOpenChange, onAskYulia }: Props) {
                     {g.full && (
                       <span
                         style={{
-                          fontFamily: "'Inter', system-ui, sans-serif",
+                          fontFamily: "'Figtree', system-ui, sans-serif",
                           fontSize: 11,
                           color: 'var(--text-muted)',
                           fontWeight: 500,
@@ -233,7 +233,7 @@ export default function HelpSheet({ open, onOpenChange, onAskYulia }: Props) {
                   </div>
                   <p
                     style={{
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'Figtree', system-ui, sans-serif",
                       fontSize: 13,
                       lineHeight: 1.55,
                       color: 'var(--text-secondary)',
@@ -269,7 +269,7 @@ export default function HelpSheet({ open, onOpenChange, onAskYulia }: Props) {
                 color: '#fff',
                 border: 'none',
                 borderRadius: 12,
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 14,
                 fontWeight: 700,
                 cursor: 'pointer',

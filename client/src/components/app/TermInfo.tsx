@@ -103,13 +103,13 @@ export default function TermInfo({ term, definition, fullName }: Props) {
               boxShadow: 'var(--shadow-inset-highlight), 0 12px 40px rgba(0,0,0,0.18)',
               zIndex: 999,
               color: 'var(--text-primary)',
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "'Figtree', system-ui, sans-serif",
             }}
           >
             <h4
               id="term-info-title"
               style={{
-                fontFamily: "'Sora', system-ui, sans-serif",
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontWeight: 700,
                 fontSize: 15,
                 color: 'var(--text-primary)',
@@ -121,7 +121,7 @@ export default function TermInfo({ term, definition, fullName }: Props) {
             </h4>
             <div
               style={{
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 13,
                 color: 'var(--text-secondary)',
                 lineHeight: 1.6,
@@ -141,7 +141,7 @@ export default function TermInfo({ term, definition, fullName }: Props) {
                 color: 'var(--text-primary)',
                 border: '0.5px solid var(--border)',
                 borderRadius: 10,
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 13,
                 fontWeight: 600,
                 cursor: 'pointer',

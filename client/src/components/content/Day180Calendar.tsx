@@ -11,8 +11,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const PINK = '#D44A78';
-const PINK_DARK = '#E8709A';
+const PINK = '#D4714E';
+const PINK_DARK = '#ec9d78';
 
 type Milestone = {
   day: number;
@@ -119,7 +119,7 @@ export function Day180Calendar({ dark, accent: accentOverride }: { dark: boolean
   const bg = dark ? '#0f1012' : '#f9f7f1';
   const innerBg = dark ? 'rgba(255,255,255,0.04)' : 'white';
   const border = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
-  const headingColor = dark ? '#f9f9fc' : '#0f1012';
+  const headingColor = dark ? '#faf9f5' : '#0f1012';
   const bodyColor = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
   const mutedColor = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
   const accent = accentOverride ?? (dark ? PINK_DARK : PINK);
@@ -182,7 +182,7 @@ export function Day180Calendar({ dark, accent: accentOverride }: { dark: boolean
                 transform: 'translate(-50%, -50%)',
                 width: isActive ? 18 : 12,
                 height: isActive ? 18 : 12,
-                background: isActive ? accent : (dark ? '#2A2C2E' : 'white'),
+                background: isActive ? accent : (dark ? '#141413' : 'white'),
                 border: `2px solid ${m.day <= day ? accent : (dark ? 'rgba(255,255,255,0.25)' : 'rgba(15,16,18,0.2)')}`,
                 cursor: 'pointer',
                 padding: 0,

@@ -52,6 +52,10 @@ interface ChatDockProps {
   onFileUpload?: (file: File) => Promise<{ name: string; size: string } | null>;
   disabled?: boolean;
   placeholder?: string;
+  /** V17: rotating placeholder list. Cycles every 4s with a 200ms cross-fade.
+      Pauses while the input is focused or has content. If the typewriter
+      hints are set, the typewriter wins — this is a quieter alternative. */
+  rotatingPlaceholders?: string[];
   /** 'hero' = large textarea for landing page, 'dock' = compact for chat */
   variant?: 'hero' | 'dock';
   /** Override initial textarea rows (default: hero=3, dock=1) */
@@ -75,7 +79,7 @@ interface ChatDockProps {
 /* ═══ COMPONENT ═══ */
 
 const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
-  { onSend, onFileUpload, disabled, placeholder = "Tell Yulia about your deal...", variant = 'dock', rows, typewriterHints, typewriterPrefix = '', onInputFocus, onInputBlur, isMobile = false },
+  { onSend, onFileUpload, disabled, placeholder = "Tell Yulia about your deal...", rotatingPlaceholders, variant = 'dock', rows, typewriterHints, typewriterPrefix = '', onInputFocus, onInputBlur, isMobile = false },
   ref,
 ) {
   const isHero = variant === 'hero';
@@ -97,6 +101,32 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const hasContent = value.trim().length > 0;
+
+  /* ═══ V17 ROTATING PLACEHOLDER ═══
+     Rotates every 4s with a 200ms cross-fade via the existing .placeholder-exit
+     / .placeholder-enter CSS classes in index.css (originally built for the
+     home hero rotation). Pauses when the typewriter is active, when the user
+     focuses the input, or when the input has content. Skips entirely if only
+     one placeholder (or none) is given. Respects prefers-reduced-motion.
+  */
+  const [rotateFocused, setRotateFocused] = useState(false);
+  const [rotateIdx, setRotateIdx] = useState(0);
+  const rotateEnabled = !!rotatingPlaceholders && rotatingPlaceholders.length > 1 && !hasContent && !rotateFocused;
+  const resolvedPlaceholder = rotatingPlaceholders && rotatingPlaceholders.length > 0
+    ? rotatingPlaceholders[rotateIdx % rotatingPlaceholders.length]
+    : placeholder;
+
+  useEffect(() => {
+    if (!rotateEnabled) return;
+    if (typeof window !== 'undefined' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+    const id = setInterval(() => {
+      setRotateIdx((i) => i + 1);
+    }, 4000);
+    return () => clearInterval(id);
+  }, [rotateEnabled]);
 
   /* ═══ TYPEWRITER STATE ═══ */
   const [twText, setTwText] = useState('');
@@ -199,15 +229,17 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
     }
   }, [showTypewriter, hasContent]);
 
-  /* Focus/blur handlers for typewriter pause/resume */
+  /* Focus/blur handlers for typewriter AND rotating-placeholder pause/resume */
   const handleFocus = useCallback(() => {
     setTwActive(false);
     setTwText('');
     if (twTimerRef.current) clearTimeout(twTimerRef.current);
+    setRotateFocused(true);
     onInputFocus?.();
   }, [onInputFocus]);
 
   const handleBlur = useCallback(() => {
+    setRotateFocused(false);
     if (!value.trim()) {
       // Resume typewriter — start fresh from current hint
       twCharRef.current = 0;
@@ -403,7 +435,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             }}
           >
             {uploading ? (
-              <div className="w-4 h-4 border-2 border-[#D44A78] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
+              <div className="w-4 h-4 border-2 border-[#D4714E] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
             ) : (
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ transform: (isMobile ? mobileStarterOpen : (!onFileUpload && toolsOpen)) ? 'rotate(45deg)' : 'none', transition: 'transform .2s' }}>
                 <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -418,11 +450,11 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               className="flex items-center gap-1.5 px-2.5 py-1 bg-[#F5F5F5] rounded-full"
               style={{ flexShrink: 0, maxWidth: 200 }}
             >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D44A78" strokeWidth="2" strokeLinecap="round">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D4714E" strokeWidth="2" strokeLinecap="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                 <polyline points="14 2 14 8 20 8" />
               </svg>
-              <span className="text-[12px] font-medium text-[#1a1c1e] truncate">{attachment.name}</span>
+              <span className="text-[12px] font-medium text-[#1a1918] truncate">{attachment.name}</span>
               <button
                 onClick={() => setAttachment(null)}
                 className="bg-transparent border-none cursor-pointer p-0 ml-0.5 flex-shrink-0"
@@ -457,14 +489,14 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               onKeyDown={handleKey}
               onFocus={handleFocus}
               onBlur={handleBlur}
-              placeholder={showTypewriter ? '' : placeholder}
+              placeholder={showTypewriter ? '' : resolvedPlaceholder}
               autoComplete="off"
               data-1p-ignore="true"
               data-lpignore="true"
               data-form-type="other"
               name="yulia-chat-hero"
               enterKeyHint="send"
-              className="w-full bg-transparent border-none outline-none resize-none text-[16px] text-[#1a1c1e] leading-[1.4] font-normal"
+              className="w-full bg-transparent border-none outline-none resize-none text-[16px] text-[#1a1918] leading-[1.4] font-normal"
               style={{ fontFamily: 'inherit', minHeight: '38px', maxHeight: '140px', padding: '8px 0', color: 'rgba(0,0,0,1)' }}
               rows={1}
             />
@@ -476,7 +508,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             className="flex items-center justify-center border-none cursor-pointer active:scale-95"
             style={{
               width: 38, height: 38, borderRadius: '50%',
-              background: hasContent && !disabled ? '#D44A78' : '#D8D8DA',
+              background: hasContent && !disabled ? '#D4714E' : '#D8D8DA',
               color: hasContent && !disabled ? '#fff' : 'rgba(0,0,0,0.3)',
               transition: 'all .25s ease',
               flexShrink: 0,
@@ -511,12 +543,12 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
                   onClick={() => { setToolsOpen(false); fileInputRef.current?.click(); }}
                   type="button"
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#D44A78' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#D4714E' }}>
                     <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" style={{ display: 'none' }} />
                     <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
                   </svg>
                   <div>
-                    <div className="text-[15px] font-semibold leading-[1.3] text-[#1a1c1e]">Attach a file</div>
+                    <div className="text-[15px] font-semibold leading-[1.3] text-[#1a1918]">Attach a file</div>
                     <div className="text-[13px] leading-[1.4] mt-0.5" style={{ color: 'rgba(0,0,0,0.45)' }}>PDF, Word, Excel, images — Yulia reads it</div>
                   </div>
                 </button>
@@ -530,7 +562,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               <button key={t.label} className="home-tp-item" onClick={() => handleToolClick(t)} type="button">
                 {t.icon}
                 <div>
-                  <div className="text-[15px] font-semibold text-[#1a1c1e] leading-[1.3]">{t.label}</div>
+                  <div className="text-[15px] font-semibold text-[#1a1918] leading-[1.3]">{t.label}</div>
                   <div className="text-[13px] leading-[1.4] mt-0.5" style={{ color: 'rgba(0,0,0,0.45)' }}>{t.desc}</div>
                 </div>
               </button>
@@ -543,7 +575,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               <button key={t.label} className="home-tp-item" onClick={() => handleToolClick(t)} type="button">
                 {t.icon}
                 <div>
-                  <div className="text-[15px] font-semibold text-[#1a1c1e] leading-[1.3]">{t.label}</div>
+                  <div className="text-[15px] font-semibold text-[#1a1918] leading-[1.3]">{t.label}</div>
                   <div className="text-[13px] leading-[1.4] mt-0.5" style={{ color: 'rgba(0,0,0,0.45)' }}>{t.desc}</div>
                 </div>
               </button>
@@ -563,7 +595,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               <button key={t.label} className="home-tp-item" onClick={() => handleToolClick(t)} type="button">
                 {t.icon}
                 <div>
-                  <div className="text-[15px] font-semibold text-[#1a1c1e] leading-[1.3]">{t.label}</div>
+                  <div className="text-[15px] font-semibold text-[#1a1918] leading-[1.3]">{t.label}</div>
                   <div className="text-[13px] leading-[1.4] mt-0.5" style={{ color: 'rgba(0,0,0,0.45)' }}>{t.desc}</div>
                 </div>
               </button>
@@ -576,7 +608,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               <button key={t.label} className="home-tp-item" onClick={() => handleToolClick(t)} type="button">
                 {t.icon}
                 <div>
-                  <div className="text-[15px] font-semibold text-[#1a1c1e] leading-[1.3]">{t.label}</div>
+                  <div className="text-[15px] font-semibold text-[#1a1918] leading-[1.3]">{t.label}</div>
                   <div className="text-[13px] leading-[1.4] mt-0.5" style={{ color: 'rgba(0,0,0,0.45)' }}>{t.desc}</div>
                 </div>
               </button>
@@ -587,9 +619,9 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
           {attachment && (
             <div className="flex flex-wrap gap-2 px-4 pt-3 pb-0">
               <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#F5F5F5] rounded-lg max-w-[260px]">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D44A78" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
-                <span className="text-[13px] font-medium text-[#1a1c1e] truncate">{attachment.name}</span>
-                <button onClick={() => setAttachment(null)} className="hover:text-[#1a1c1e] bg-transparent border-none cursor-pointer p-0 ml-0.5 flex-shrink-0" style={{ color: 'rgba(0,0,0,0.35)' }} type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4714E" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+                <span className="text-[13px] font-medium text-[#1a1918] truncate">{attachment.name}</span>
+                <button onClick={() => setAttachment(null)} className="hover:text-[#1a1918] bg-transparent border-none cursor-pointer p-0 ml-0.5 flex-shrink-0" style={{ color: 'rgba(0,0,0,0.35)' }} type="button">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
               </div>
@@ -648,14 +680,14 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               onKeyDown={handleKey}
               onFocus={handleFocus}
               onBlur={handleBlur}
-              placeholder={showTypewriter ? '' : placeholder}
+              placeholder={showTypewriter ? '' : resolvedPlaceholder}
               autoComplete="off"
               data-1p-ignore="true"
               data-lpignore="true"
               data-form-type="other"
               name="yulia-chat-dock"
               enterKeyHint="send"
-              className="w-full bg-transparent border-none outline-none resize-none text-[17px] text-[#1a1c1e] leading-[1.5] font-normal"
+              className="w-full bg-transparent border-none outline-none resize-none text-[17px] text-[#1a1918] leading-[1.5] font-normal"
               style={{ fontFamily: 'inherit', minHeight: (rows ?? (isHero ? 3 : 1)) > 1 ? '100px' : '56px', maxHeight: '200px', padding: '16px 18px 10px 18px', color: 'rgba(0,0,0,1)' }}
               rows={rows ?? (isHero ? 3 : 1)}
             />
@@ -676,7 +708,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               type="button"
             >
               {uploading ? (
-                <div className="w-4 h-4 border-2 border-[#D44A78] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
+                <div className="w-4 h-4 border-2 border-[#D4714E] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
               ) : (
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ transform: toolsOpen ? 'rotate(45deg)' : 'none', transition: 'transform .2s' }}>
                   <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -689,7 +721,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               aria-label="Send message"
               style={{
                 width: 44, height: 44, borderRadius: '50%',
-                background: hasContent && !disabled ? '#D44A78' : '#D8D8DA',
+                background: hasContent && !disabled ? '#D4714E' : '#D8D8DA',
                 color: hasContent && !disabled ? '#fff' : 'rgba(0,0,0,0.3)',
                 transition: 'all .2s',
                 pointerEvents: hasContent && !disabled ? 'auto' : 'none',

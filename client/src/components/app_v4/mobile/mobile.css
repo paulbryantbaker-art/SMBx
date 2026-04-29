@@ -29,8 +29,8 @@
   position: absolute; top: 14px; left: 0; right: 0; height: 54px;
   display: flex; justify-content: space-between; align-items: center;
   padding: 14px 36px 0; z-index: 50;
-  font-family: 'SF Pro Display', -apple-system, 'Inter', sans-serif;
-  font-size: 15px; font-weight: 600; color: #0A0A0B;
+  font-family: 'SF Pro Display', -apple-system, 'Figtree', system-ui, sans-serif;
+  font-size: 15px; font-weight: 600; color: #1a1918;
 }
 .phone__status-r { display: flex; gap: 5px; align-items: center; }
 
@@ -64,7 +64,7 @@
   display: flex; flex-direction: column; align-items: center; gap: 2px;
   background: transparent; border: 0;
   color: #8E8E93;
-  font-family: 'SF Pro Display', -apple-system, 'Inter', sans-serif;
+  font-family: 'SF Pro Display', -apple-system, 'Figtree', system-ui, sans-serif;
   font-size: 10px; font-weight: 500;
   padding: 4px 6px;
   position: relative;
@@ -96,21 +96,21 @@
   padding: 12px 20px 8px;
 }
 .m-today__date {
-  font-family: 'SF Pro Display', -apple-system, 'Inter', sans-serif;
+  font-family: 'SF Pro Display', -apple-system, 'Figtree', system-ui, sans-serif;
   font-size: 13px; font-weight: 700; color: var(--gg-flag);
   letter-spacing: 0.02em; text-transform: uppercase;
 }
 .m-today__title {
-  font-family: 'SF Pro Display', -apple-system, 'Inter', sans-serif;
+  font-family: 'SF Pro Display', -apple-system, 'Figtree', system-ui, sans-serif;
   font-size: 28px; font-weight: 800; letter-spacing: -0.02em;
   color: var(--gg-ink); margin-top: 2px;
   display: flex; justify-content: space-between; align-items: center;
 }
 .m-today__avatar {
   width: 32px; height: 32px; border-radius: 50%;
-  background: linear-gradient(135deg, #3A3A3E, #0A0A0B);
+  background: linear-gradient(135deg, #3A3A3E, #1a1918);
   color: #fff; display: flex; align-items: center; justify-content: center;
-  font-family: 'Sora', sans-serif; font-weight: 800; font-size: 13px;
+  font-family: 'Figtree', system-ui, sans-serif; font-weight: 800; font-size: 13px;
 }
 
 .m-today__feed { padding: 8px 16px 20px; display: flex; flex-direction: column; gap: 14px; }
@@ -129,7 +129,7 @@
     radial-gradient(ellipse 80% 70% at 95% 25%, #FFE8A8 0%, transparent 55%),
     radial-gradient(ellipse 90% 80% at 85% 95%, #C9DCFF 0%, transparent 55%),
     radial-gradient(ellipse 100% 90% at 10% 110%, #F5C9EA 0%, transparent 55%),
-    radial-gradient(ellipse 60% 50% at 50% 50%, #FFD9DE 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 50% 50%, #fae0d2 0%, transparent 55%),
     #FFF6EC;
 }
 .m-card--hero .m-card__art::before {
@@ -145,23 +145,23 @@
 }
 .m-card--hero .m-card__body { position: relative; padding: 20px; margin-top: auto; z-index: 1; }
 .m-card--hero .m-card__kicker { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #C24A2D; opacity: 1; }
-.m-card--hero .m-card__t { font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-top: 6px; text-wrap: balance; color: #0A0A0B; }
+.m-card--hero .m-card__t { font-family: 'Figtree', system-ui, sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-top: 6px; text-wrap: balance; color: #1a1918; }
 .m-card--hero .m-card__s { font-size: 14px; color: #4A4A50; margin-top: 6px; line-height: 1.4; }
 
 .m-card--feat .m-card__art {
   height: 180px;
-  background: linear-gradient(135deg, #FAFAFB 0%, #E8E8EB 100%);
+  background: linear-gradient(135deg, #FAFAFB 0%, #e8e6dc 100%);
   display: flex; align-items: center; justify-content: center;
   position: relative; overflow: hidden;
 }
 .m-card--feat .m-card__body { padding: 16px 18px 18px; }
 .m-card__kicker {
-  font-family: 'SF Pro Display', -apple-system, 'Inter', sans-serif;
+  font-family: 'SF Pro Display', -apple-system, 'Figtree', system-ui, sans-serif;
   font-size: 11.5px; font-weight: 700; letter-spacing: 0.04em;
   text-transform: uppercase; color: var(--gg-flag);
 }
 .m-card__t {
-  font-family: 'SF Pro Display', -apple-system, 'Inter', sans-serif;
+  font-family: 'SF Pro Display', -apple-system, 'Figtree', system-ui, sans-serif;
   font-size: 20px; font-weight: 800; letter-spacing: -0.02em; color: var(--gg-ink);
   margin-top: 4px; text-wrap: balance;
 }
@@ -188,19 +188,19 @@
 .m-listrow:first-of-type { border-top: 0; }
 .m-listrow__icon {
   width: 52px; height: 52px; border-radius: 12px;
-  background: linear-gradient(135deg, #FAFAFB, #E8E8EB);
+  background: linear-gradient(135deg, #FAFAFB, #e8e6dc);
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Sora', sans-serif; font-weight: 800; font-size: 16px;
+  font-family: 'Figtree', system-ui, sans-serif; font-weight: 800; font-size: 16px;
   color: var(--gg-ink); letter-spacing: -0.02em;
   flex-shrink: 0;
   border: 0.5px solid var(--gg-border-soft);
 }
 .m-listrow__icon--ok { background: linear-gradient(135deg, rgba(34,167,85,0.15), rgba(34,167,85,0.3)); color: #1A7E40; }
 .m-listrow__icon--warn { background: linear-gradient(135deg, rgba(232,160,51,0.15), rgba(232,160,51,0.3)); color: #8A5A14; }
-.m-listrow__icon--ink { background: linear-gradient(135deg, #3A3A3E, #0A0A0B); color: #fff; }
+.m-listrow__icon--ink { background: linear-gradient(135deg, #3A3A3E, #1a1918); color: #fff; }
 .m-listrow__body { min-width: 0; }
 .m-listrow__t {
-  font-family: 'SF Pro Display', -apple-system, 'Inter', sans-serif;
+  font-family: 'SF Pro Display', -apple-system, 'Figtree', system-ui, sans-serif;
   font-size: 15px; font-weight: 600; color: var(--gg-ink);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
@@ -209,7 +209,7 @@
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .m-listrow__btn {
-  font-family: 'SF Pro Display', -apple-system, 'Inter', sans-serif;
+  font-family: 'SF Pro Display', -apple-system, 'Figtree', system-ui, sans-serif;
   font-size: 13px; font-weight: 700;
   /* Liquid-glass pill */
   background:
@@ -247,7 +247,7 @@
   display: flex; align-items: center; justify-content: space-between;
 }
 .m-sec__t {
-  font-family: 'SF Pro Display', -apple-system, 'Inter', sans-serif;
+  font-family: 'SF Pro Display', -apple-system, 'Figtree', system-ui, sans-serif;
   font-size: 22px; font-weight: 800; letter-spacing: -0.02em; color: var(--gg-ink);
 }
 .m-sec__k {
@@ -255,7 +255,7 @@
   color: var(--gg-mute); letter-spacing: 0.1em; text-transform: uppercase;
 }
 .m-sec__more {
-  font-family: 'SF Pro Display', -apple-system, 'Inter', sans-serif;
+  font-family: 'SF Pro Display', -apple-system, 'Figtree', system-ui, sans-serif;
   font-size: 15px; color: #007AFF; background: transparent; border: 0; font-weight: 500;
 }
 
@@ -275,7 +275,7 @@
 }
 .m-hcard__art {
   height: 160px;
-  background: linear-gradient(135deg, #FAFAFB 0%, #E8E8EB 100%);
+  background: linear-gradient(135deg, #FAFAFB 0%, #e8e6dc 100%);
   display: flex; align-items: center; justify-content: center;
   position: relative; overflow: hidden;
 }
@@ -287,7 +287,7 @@
   display: flex; justify-content: space-between; align-items: center;
 }
 .m-deals__head h1 {
-  font-family: 'SF Pro Display', -apple-system, 'Inter', sans-serif;
+  font-family: 'SF Pro Display', -apple-system, 'Figtree', system-ui, sans-serif;
   font-size: 34px; font-weight: 800; letter-spacing: -0.03em;
   margin: 0; color: var(--gg-ink);
 }
@@ -298,7 +298,7 @@
 .m-stages::-webkit-scrollbar { display: none; }
 .m-stage {
   flex-shrink: 0;
-  font-family: 'SF Pro Display', -apple-system, 'Inter', sans-serif;
+  font-family: 'SF Pro Display', -apple-system, 'Figtree', system-ui, sans-serif;
   font-size: 13px; font-weight: 600;
   /* Liquid-glass pill */
   background:
@@ -336,19 +336,19 @@
 }
 .m-gcard__art {
   aspect-ratio: 1; position: relative;
-  background: linear-gradient(135deg, #FAFAFB, #E8E8EB);
+  background: linear-gradient(135deg, #FAFAFB, #e8e6dc);
   display: flex; align-items: center; justify-content: center;
 }
 .m-gcard__score {
   position: absolute; top: 10px; right: 10px;
-  font-family: 'Sora', sans-serif; font-weight: 800; font-size: 13px;
+  font-family: 'Figtree', system-ui, sans-serif; font-weight: 800; font-size: 13px;
   background: rgba(255,255,255,0.92); padding: 3px 8px;
   border-radius: 999px; backdrop-filter: blur(4px);
   letter-spacing: -0.02em;
 }
 .m-gcard__body { padding: 10px 12px 12px; }
 .m-gcard__t {
-  font-family: 'SF Pro Display', -apple-system, 'Inter', sans-serif;
+  font-family: 'SF Pro Display', -apple-system, 'Figtree', system-ui, sans-serif;
   font-weight: 700; font-size: 14px; color: var(--gg-ink);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
@@ -365,12 +365,12 @@
 }
 .m-chat__avatar {
   width: 34px; height: 34px; border-radius: 50%;
-  background: linear-gradient(135deg, #3A3A3E, #0A0A0B);
+  background: linear-gradient(135deg, #3A3A3E, #1a1918);
   color: #fff; display: flex; align-items: center; justify-content: center;
-  font-family: 'Sora', sans-serif; font-weight: 800; font-size: 13px;
+  font-family: 'Figtree', system-ui, sans-serif; font-weight: 800; font-size: 13px;
 }
 .m-chat__who {
-  font-family: 'SF Pro Display', -apple-system, 'Inter', sans-serif;
+  font-family: 'SF Pro Display', -apple-system, 'Figtree', system-ui, sans-serif;
   font-size: 16px; font-weight: 700; color: var(--gg-ink);
 }
 .m-chat__status {
@@ -441,7 +441,7 @@
 .m-compose__box input {
   flex: 1; border: 0; outline: 0; background: transparent;
   font-size: 15px; color: var(--gg-ink);
-  font-family: 'SF Pro Display', -apple-system, 'Inter', sans-serif;
+  font-family: 'SF Pro Display', -apple-system, 'Figtree', system-ui, sans-serif;
 }
 .m-compose__send {
   width: 30px; height: 30px; border-radius: 50%;
@@ -467,7 +467,7 @@
   padding: 12px 20px 8px;
 }
 .m-inbox__head h1 {
-  font-family: 'SF Pro Display', -apple-system, 'Inter', sans-serif;
+  font-family: 'SF Pro Display', -apple-system, 'Figtree', system-ui, sans-serif;
   font-size: 34px; font-weight: 800; letter-spacing: -0.03em;
   margin: 0; color: var(--gg-ink);
 }
@@ -483,7 +483,7 @@
 .m-inbox__dot.warn { background: var(--gg-warn); }
 .m-inbox__dot.muted { background: var(--gg-line); }
 .m-inbox__t {
-  font-family: 'SF Pro Display', -apple-system, 'Inter', sans-serif;
+  font-family: 'SF Pro Display', -apple-system, 'Figtree', system-ui, sans-serif;
   font-size: 14px; font-weight: 700; color: var(--gg-ink);
   letter-spacing: -0.01em;
 }
