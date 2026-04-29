@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>smbx.ai — M&A workspace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="v3-styles.css" />
+<template id="__bundler_thumbnail">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<rect width="100" height="100" fill="#0B0E13"/>
+<path d="M30 70L50 30L70 70" stroke="#2EBF7C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+<circle cx="50" cy="30" r="3" fill="#2EBF7C"/>
+</svg>
+</template>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="v3-shell.jsx"></script>
+<script type="text/babel" src="v3-learn.jsx"></script>
+<script type="text/babel" src="v3-canvas.jsx"></script>
+<script type="text/babel" src="v3-chat.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+function App() {
+  const [activeDeal, setActiveDeal] = React.useState("sample");
+  const [tabs, setTabs] = React.useState([
+    { id: "screen", tag: "DOC", label: "Teaser screen", modified: true },
+    { id: "recast", tag: "DOC", label: "Recast" },
+    { id: "buyers", tag: "DOC", label: "Buyer list" },
+  ]);
+  const [activeTab, setActiveTab] = React.useState("screen");
+
+  const onSlash = (cmd) => {
+    if (cmd === "/pricing" || cmd === "/how" || cmd === "/about") {
+      const id = cmd.slice(1);
+      if (!tabs.find(t => t.id === id)) {
+        setTabs([...tabs, { id, tag: "CMD", label: cmd, closable: true }]);
+      }
+      setActiveTab(id);
+    }
+  };
+
+  const onClose = (id) => {
+    setTabs((p) => p.filter(t => t.id !== id));
+    if (activeTab === id) setActiveTab("screen");
+  };
+
+  return (
+    <div style={{ display: "flex", height: "100vh" }} data-screen-label="01 Workspace">
+      <V3Sidebar activeDeal={activeDeal} onPick={setActiveDeal} onSlash={onSlash} onCommand={() => {}} />
+      <main style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+        <V3DocTabs tabs={tabs} active={activeTab} onPick={setActiveTab} onClose={onClose} />
+        <V3Workspace onSlash={onSlash} />
+      </main>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
