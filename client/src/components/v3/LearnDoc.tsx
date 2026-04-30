@@ -12,14 +12,15 @@ export function LearnDoc() {
       {/* ── Title block ─────────────────────────────────────────── */}
       <div style={vL.titleBlock}>
         <div className="eyebrow" style={{ fontSize: 9.5 }}>
-          DOCUMENT · HOW IT WORKS &amp; PRICING · v0.5
+          DOCUMENT · HOW IT WORKS &amp; PRICING
         </div>
         <h1 style={vL.title}>
-          The engine.<br/>
-          <span style={vL.titleEm}>The price.</span>
+          Let's get started! Bring Yulia in on any deal now for free.
+          <br/>
+          <span style={vL.titleEm}>Your first deliverable is on us. Chat is always free.</span>
         </h1>
         <p style={vL.lede}>
-          Yulia is the deal team you hire. She does the analysis, draws the options, lays out the implications, and drafts the message. <span style={{ color: "var(--ink-3)" }}>You make every call that matters.</span> This document explains the engine — and what it costs.
+          Yulia is the analyst pod, the associate desk, and the document engine — on subscription. She runs the recast, builds the buyer tree, models the structures, and drafts every piece of work product on the deal. <span style={{ color: "var(--ink-3)" }}>You bring the judgment. You sign the email.</span>
         </p>
         <div style={vL.titleMeta}>
           <span className="mono" style={vL.metaTag}>6 sections</span>
@@ -28,86 +29,103 @@ export function LearnDoc() {
         </div>
       </div>
 
-      {/* ── §01 The four-step engine ─────────────────────────────── */}
-      <LSec n="01" title="The four-step engine" eyebrow="THE ENGINE">
+      {/* ── §01 How Yulia works ──────────────────────────────────── */}
+      <LSec n="01" title="How Yulia works · four steps, every deal" eyebrow="THE DESK">
         <p style={{ ...vL.intro, marginBottom: 18 }}>
-          Every deal Yulia touches runs through the same four steps. The first three are her job. <strong style={{ color: "var(--ink)" }}>The fourth is yours</strong> — and that's where the deal is actually decided.
+          Yulia runs every deal according to time-tested investment-bank and private-equity management practices established over the last 30 years, encompassing billions of dollars in capital management and transactional knowledge. She brings that to your deals — making them smarter and faster.
         </p>
         <div style={vL.fourGrid}>
           <PatternCell
             n="01"
-            head="She analyzes."
-            body="Reads the documents, runs the numbers, pulls the comps, sources the data. Work that used to take a junior banker a week, done before lunch."
+            head="She pulls the work into one place."
+            body="Drop in the financials, the tax returns, the CIM, the LOI thread, the diligence requests, the contracts. Yulia recasts the P&L, normalizes owner comp, defends the add-backs against the tax filings, pegs working capital, and builds a clean read of the business inside an hour. The pile becomes a working deal file."
           />
           <PatternCell
             n="02"
-            head="She draws the options."
-            body={'Three or four real paths, each structured, costed, and defended. No strawmen, no "here’s our recommendation" — real options laid out on the same axes so you can compare them directly.'}
+            head="She runs the analysis."
+            body="The Baseline valuation. Buyer universe with pursuit-rate scoring. SBA SOP 50 10 8 structure check. Quality-of-earnings pre-read. Diligence tracker with the data room mapped to the request list. CIM, teaser, IOI, LOI, engagement letter, board memo, lender package, 100-day plan. Twenty-eight document generators sharing one financial backbone, so every doc on the deal references the same numbers."
           />
           <PatternCell
             n="03"
-            head="She makes the implications clear."
-            body="Six axes — price, structure, timing, tax, close certainty, post-close role — in a single matrix, so you see the whole tradeoff in one frame instead of three meetings."
+            head="She lays out the options."
+            body="Three live paths, each one costed. Price. Structure. Timing. Tax. Close certainty. Buyer fit. Your role at close and the year after. Side by side, with the math defended. No softball options. No buried recommendation. The same way a senior advisor would frame it across a conference table — except faster and without the hourly rate."
           />
           <PatternCell
             n="04"
-            head="You decide."
-            body="Every time. You pick the path, Yulia drafts the message, you send it. The judgment that wins deals stays with you."
+            head="You pick the path."
+            body="Yulia drafts the next move — the counter, the engagement letter, the CIM section, the buyer outreach, the diligence response, the funds-flow update — to your house style. You read it, mark it up, send it. The leverage stays with you. The labor doesn't."
             accent
           />
         </div>
         <div style={vL.engineCloser}>
-          <span style={vL.engineRule} />
-          <em style={{ fontSize: 12.5, color: "var(--ink-2)" }}>
-            The fourth step is the product. The first three are how she earns it.
+          <em style={{ fontSize: 12.5, color: "var(--ink-2)", textWrap: "pretty" }}>
+            Yulia leads, guides, and educates the deal team so they can make the best decisions and be better prepared from day one to close.
           </em>
-          <span style={vL.engineRule} />
         </div>
       </LSec>
 
-      {/* ── §02 A real interaction (promoted up) ─────────────────── */}
-      <LSec n="02" title="A real interaction" eyebrow="A REAL INTERACTION">
+      {/* ── §02 A real interaction ───────────────────────────────── */}
+      <LSec n="02" title="A real interaction · names changed, numbers preserved" eyebrow="A REAL INTERACTION">
         <p style={{ ...vL.intro, marginBottom: 14 }}>
-          The four steps in motion: a founder asks a question, Yulia draws three options, the founder picks one — <span style={{ color: "var(--ink-3)" }}>done in the time a typical advisor would still be scheduling the kickoff call. Names changed; numbers preserved.</span>
+          Industrial services founder, 61, considering a sale. Multi-state ops, $28M revenue, $5.4M EBITDA after the recast. He hasn't picked an advisor yet. He wants to walk into the engagement-letter conversation with a view, not a question.
         </p>
 
         <ExampleAct
           n="01"
           tag="THE QUESTION"
-          ctx="Industrial services platform · $28M revenue · $5.4M EBITDA · multi-state · founder age 61"
+          ctx="$28M revenue · $5.4M EBITDA (recast) · multi-state · founder age 61 · no advisor yet"
         >
           <div style={vL.quote}>
-            “What’s it worth, and what’s the right way to take it to market?”
+            “What's it worth, and what's the right way to take it to market?”
           </div>
         </ExampleAct>
 
-        <ExampleAct n="02" tag="YULIA’S ANALYSIS">
+        <ExampleAct n="02" tag="YULIA'S READ">
           <div style={vL.exampleLead}>
-            EBITDA of $5.4M after normalizing $340K of owner-related compensation and defending $620K of run-rate add-backs against three years of tax returns and customer contracts.
+            Recast EBITDA at $5.4M after normalizing $340K of owner comp and supporting $620K of run-rate add-backs against three years of tax returns and the top-10 customer file. Working capital pegged to a 13-month average, net of seasonality. Customer concentration at 18% on the largest account — within range, flagged for diligence.
           </div>
 
           <div style={vL.optionsGrid}>
-            <OptionCard n="01" mult="5.5×" timeline="4–6 mo" title="Limited financial-buyer process" detail="~85% cash at close. Two-year transition. Founder-friendly buyer profile." />
-            <OptionCard n="02" mult="6.8×" timeline="6–9 mo" title="Broader process to PE platform buyers" detail="75% cash + 25% rollover equity. Earnout on revenue retention. Founder steps to chair." chosen />
-            <OptionCard n="03" mult="7.5×" timeline="8–14 mo" title="Strategic-buyer process · adjacent geos" detail="Mixed stock and cash. Longest timeline. Highest terminal value. Two-year operating commitment." />
+            <OptionCard
+              n="01"
+              mult="5.5×"
+              timeline="4–6 mo"
+              title="Limited financial-buyer process"
+              detail="Three to five qualified buyers. ~85% cash at close. Two-year transition. Founder walks away cleanly. Fastest path to liquidity that doesn't sacrifice fundamentals."
+            />
+            <OptionCard
+              n="02"
+              mult="6.8×"
+              timeline="6–9 mo"
+              title="Broader PE platform process"
+              detail="Twenty-plus buyers contacted. 75% cash, 25% rollover into the new platform. Earnout on revenue retention through year one. Founder steps to chair, then exits at the recap."
+              chosen
+            />
+            <OptionCard
+              n="03"
+              mult="7.5×"
+              timeline="8–14 mo"
+              title="Strategic consolidator process"
+              detail="Six to ten strategics in adjacent geographies. Mixed stock and cash. Two-year operating commit. Highest headline number, longest timeline, most diligence intensity."
+            />
           </div>
 
           <div style={vL.implTable}>
             <div style={vL.implHead}>
-              <span className="eyebrow" style={{ fontSize: 9 }}>IMPLICATIONS</span>
+              <span className="eyebrow" style={{ fontSize: 9 }}>WHAT EACH PATH COSTS YOU</span>
               <span className="mono" style={{ fontSize: 9.5, color: "var(--ink-4)" }}>4 cols × 3 rows</span>
             </div>
             <div style={{ ...vL.implRow, ...vL.implRowHead }}>
               <span></span>
-              <span>Tax</span>
+              <span>Tax treatment</span>
               <span>Close certainty</span>
-              <span>Your role</span>
+              <span>Founder's role</span>
               <span>Timeline</span>
             </div>
             {([
-              ["01", "Mostly capital", "High", "Two-year transition", "4–6 mo", false],
-              ["02", "Capital + rollover deferred", "High", "Chair, then exit", "6–9 mo", true],
-              ["03", "Stock + capital", "Medium", "Two-year operating commit", "8–14 mo", false],
+              ["01", "Mostly long-term capital gains", "High", "Two-year transition, then out", "4–6 mo", false],
+              ["02", "Capital gains + deferred on rollover", "High", "Chair, then exit at next recap", "6–9 mo", true],
+              ["03", "Stock at close + cap gains on cash", "Medium", "Two-year operating commit", "8–14 mo", false],
             ] as const).map(([n, tax, cert, role, tl, chosen], i) => (
               <div key={i} style={{
                 ...vL.implRow,
@@ -127,129 +145,159 @@ export function LearnDoc() {
 
         <ExampleAct n="03" tag="THE DECISION">
           <div style={vL.decisionLine}>
-            <span style={vL.decisionLabel}>Founder chose</span>
+            <span style={vL.decisionLabel}>The founder picked</span>
             <span style={vL.decisionPick}>Option 2<span style={{ color: "var(--go)" }}>.</span></span>
           </div>
           <div style={{ fontSize: 12.5, color: "var(--ink-2)", lineHeight: 1.6, marginTop: 8 }}>
-            Yulia drafted the engagement letter to the founder's chosen advisor and the kickoff CIM outline. The founder reviewed, adjusted the rollover percentage, and authorized the advisor to begin marketing.
+            Yulia drafted the engagement letter to the advisor he'd already been talking to, a kickoff CIM outline tuned to the PE platform audience, and a one-page process plan. He moved the rollover from 25% to 30%, signed the engagement letter, and the advisor went to market the following week with a deal file that was already organized.
           </div>
-          <div style={{ fontSize: 12, color: "var(--ink-3)", fontStyle: "italic", marginTop: 10 }}>
-            The decision was the founder’s. The matrix was the deliverable.
+          <div style={{ fontSize: 12, color: "var(--ink-3)", fontStyle: "italic", marginTop: 10, textWrap: "pretty" }}>
+            The decision was the founder's. Yulia's job was finished when the three paths were costed.
           </div>
         </ExampleAct>
       </LSec>
 
-      {/* ── §03 Why this gets faster (was: ChatGPT wrapper / moat) ── */}
-      <LSec n="03" title="Why this gets faster the longer you use it" eyebrow="THE COMPOUNDING">
+      {/* ── §03 Why this gets sharper deal over deal ─────────────── */}
+      <LSec n="03" title="Why this gets sharper deal over deal" eyebrow="THE COMPOUNDING">
         <p style={vL.body}>
-          <strong style={{ color: "var(--ink)" }}>Twelve capabilities live in one workspace, built on two years of integration engineering that compounds every time you run another deal.</strong>
+          <strong style={{ color: "var(--ink)" }}>Twelve capabilities. One workspace. Two years of integration that compounds with every deal you run.</strong>
         </p>
         <p style={vL.body}>
-          Any single capability on this list — the CIM, the buyer list, the QoE Lite, the structure model — you could probably stitch together with ChatGPT and a weekend. <span style={{ color: "var(--ink-3)" }}>Once, for one deal.</span>
+          Any one capability on this list — the recast, the buyer tree, the QofE pre-read, the structure model — you could probably stitch together with a general-purpose AI, a model template, and a free weekend. <span style={{ color: "var(--ink-3)" }}>Once. For one deal.</span> By Monday morning the file would be inconsistent and the buyer tree would be stale.
         </p>
         <p style={vL.body}>
-          What you can’t stitch together in a weekend is the integration. A <strong style={{ color: "var(--ink)" }}>22-gate methodology</strong> decides which capability runs when. <strong style={{ color: "var(--ink)" }}>Twenty-eight document generators</strong> share a single sourced-financials backbone, so the CIM, the model, and the LOI all reference the same numbers. The <strong style={{ color: "var(--ink)" }}>deal room</strong> classifies what you upload and surfaces the right capability for the right gate. A <strong style={{ color: "var(--ink)" }}>sourcing pipeline</strong> feeds the screening engine that feeds the CIM workflow that feeds the buyer-list engine. And the <strong style={{ color: "var(--ink)" }}>post-close PMI plan</strong> already knows what was promised in diligence.
+          What you can't stitch together in a weekend is the connective tissue. The <strong style={{ color: "var(--ink)" }}>22 gates</strong> that decide what runs when — recast before Baseline, Baseline before buyer tree, buyer tree before teaser, teaser before CIM, CIM before LOI review. The <strong style={{ color: "var(--ink)" }}>28 generators</strong> sharing one financial backbone, so the CIM number, the model number, the LOI number, and the lender-package number are the same number. The <strong style={{ color: "var(--ink)" }}>deal room</strong> that classifies what you upload and routes it to the right gate. The <strong style={{ color: "var(--ink)" }}>PMI plan</strong> that pulls the diligence findings forward into the 100-day plan, so what was promised before signing actually gets executed after.
         </p>
         <p style={vL.body}>
-          That’s the part that compounds. <span style={{ color: "var(--ink-3)" }}>Every deal you run teaches Yulia your firm’s house style, your buyer preferences, your structural defaults.</span> Your tenth CIM is sharper than your first. Your hundredth is faster. Two years of integration engineering goes to work, every time.
+          That's the part that compounds. <span style={{ color: "var(--ink-3)" }}>By the third deal Yulia knows your firm's house style — how you frame value, which buyer profiles you trust, which structures you don't waste time on, what your CIMs read like.</span> By the tenth deal, the first draft on a new mandate looks like your firm produced it because, in every way that matters, your firm did.
         </p>
         <div style={vL.moatStrip}>
           <MoatChip n="22" label="gate methodology" />
           <MoatChip n="28" label="document generators" />
-          <MoatChip n="12" label="capabilities" />
+          <MoatChip n="12" label="connected capabilities" />
           <MoatChip n="01" label="workspace" />
           <MoatChip n="~2yr" label="of integration engineering" accent />
         </div>
+        <div style={vL.engineCloser}>
+          <em style={{ fontSize: 12.5, color: "var(--ink-2)", textWrap: "pretty" }}>
+            The capabilities are the surface. The integration is the moat.
+          </em>
+        </div>
       </LSec>
 
-      {/* ── §04 Glossary ────────────────────────────────────────── */}
-      <LSec n="04" title="The language" eyebrow="THE LANGUAGE">
+      {/* ── §04 The language ──────────────────────────────────── */}
+      <LSec n="04" title="The language · three terms in every Yulia deliverable" eyebrow="THE LANGUAGE">
         <p style={{ ...vL.intro, marginBottom: 14 }}>
-          Three terms you'll see in every Yulia deliverable. <span style={{ color: "var(--ink-3)" }}>Each one is a specific kind of work, named so you know exactly what you're getting.</span>
+          Three terms you'll see in every Yulia deliverable. <span style={{ color: "var(--ink-3)" }}>Each one names a specific kind of work, so you know what you're getting before you open the doc.</span>
         </p>
         <div style={vL.glossGrid}>
-          <GlossCard term="The Baseline™" body="A multi-scenario valuation with implications. Three or four paths — each with price, structure, timing, tax, and close certainty defended against the seller's financials and the current market. The starting point for the conversation that decides the deal." />
-          <GlossCard term="Blind Equity™" body="The value hiding in financials that an unprepared seller leaves behind. Owner-comp normalization. Defended add-backs. Working-capital pegging. Customer-concentration scoring. The QoE-style work that sets the floor on the seller's price — and surfaces the upside no one was scoring." />
-          <GlossCard term="The Rundown™" body="The complete deal intelligence package — CIM, teaser, buyer list, structure model, methodology — branded to your firm. Generated in hours, edited in red pen, sent to the buyer’s data room without rework." />
+          <GlossCard term="The Baseline™" body="The first serious read on the deal. Three or four credible paths, each one costed — price, structure, timing, tax, close certainty, your role at close. Defended against the seller's financials and the current market. Not a recommendation. The map you walk into the engagement-letter conversation with." />
+          <GlossCard term="Blind Equity™" body="The value the seller is leaving on the table because nobody's done the recast properly. Owner comp not normalized. Add-backs not defended. Working capital pegged wrong. Customer concentration framed as a risk instead of a story. The first PE diligence team finds it in week two and uses it to retrade the LOI. Yulia finds it in week zero so it goes into the price." />
+          <GlossCard term="The Rundown™" body="The deal package. CIM, teaser, buyer tree, structure model, process plan, methodology memo, support files. Branded to your firm, ready for your redlines, defensible against any sophisticated buyer's diligence team. The work product an analyst pod would build over four weeks, drafted in two days." />
         </div>
       </LSec>
 
       {/* ── Pricing — divider ────────────────────────────────────── */}
       <div style={vL.partBreak}>
         <span style={vL.partRule} />
-        <span className="eyebrow" style={{ fontSize: 9.5, color: "var(--go)" }}>PART II · PRICING</span>
+        <span className="eyebrow" style={{ fontSize: 9.5, color: "var(--ink-3)" }}>PART II · PRICING</span>
         <span style={vL.partRule} />
       </div>
 
-      <LSec n="05" title="Four tiers + enterprise" eyebrow="PRICING">
+      <LSec n="05" title="Four tiers + enterprise · priced so you don't have to think about it" eyebrow="PRICING">
         <p style={{ ...vL.intro, marginBottom: 18 }}>
-          Every paid tier delivers every capability Yulia offers. <strong style={{ color: "var(--ink)" }}>You pay for volume, seats, and enterprise infrastructure</strong> — never for Yulia's work itself.
+          Same Yulia in every paid tier. Same models, same generators, same buyer engine, same deal room, same QofE pre-read. <strong style={{ color: "var(--ink)" }}>You pay more for seats, deal volume, and enterprise infrastructure</strong> — never for the work itself.
         </p>
 
         {/* Pricing strip — 5 cards */}
         <div style={vL.priceGrid}>
-          <PriceCard tier="Free"     price="$0"          built="Anyone"           seats="1" deals="1" deliv="1 (ever)" />
-          <PriceCard tier="Starter"  price="$49"  cad="/mo" built="Solo operators"   seats="1" deals="1" deliv="Unlimited" />
-          <PriceCard tier="Pro"      price="$149" cad="/mo" built="Practitioners"    seats="1" deals="Unlimited" deliv="Unlimited" featured />
-          <PriceCard tier="Team"     price="$999" cad="/mo" built="Small firms"      seats="up to 5" deals="Unlimited" deliv="Unlimited" />
-          <PriceCard tier="Enterprise" price="Contact" cad="sales" built="Custom"     seats="Custom" deals="Unlimited" deliv="Unlimited" muted />
+          <PriceCard tier="Free"     price="$0"          built="Try Yulia on a real deal"            seats="1" deals="1" deliv="1 (ever)" />
+          <PriceCard tier="Starter"  price="$49"  cad="/mo" built="Solo, one live deal at a time"      seats="1" deals="1" deliv="Unlimited" />
+          <PriceCard tier="Pro"      price="$149" cad="/mo" built="Active dealmakers"                  seats="1" deals="Unlimited" deliv="Unlimited" featured />
+          <PriceCard tier="Team"     price="$999" cad="/mo" built="Boutiques and partner-led firms"   seats="up to 5" deals="Unlimited" deliv="Unlimited" />
+          <PriceCard tier="Enterprise" price="Contact" cad="sales" built="Larger teams, regulated environments" seats="Custom" deals="Unlimited" deliv="Unlimited" muted />
         </div>
 
-        {/* Feature matrix */}
+        {/* Feature matrix — sectioned by tier-progression */}
         <div style={vL.matrix}>
           <div style={{ ...vL.matrixRow, ...vL.matrixHead }}>
             <span></span>
             <span>Free</span>
             <span>Starter</span>
-            <span style={{ color: "var(--go)" }}>Pro</span>
+            <span style={{ color: "var(--ink)", fontWeight: 600 }}>Pro</span>
             <span>Team</span>
             <span>Enterprise</span>
           </div>
+
+          {/* The basics — every paid tier */}
+          <div style={vL.matrixSection}>The basics — every paid tier</div>
           {([
-            ["Document generators (28)",       1, 1, 1, 1, 1],
-            ["Financial analysis + QoE Lite",  1, 1, 1, 1, 1],
-            ["Buyer-list engine",              1, 1, 1, 1, 1],
-            ["SBA + structure modeling",       1, 1, 1, 1, 1],
-            ["Deal room + diligence tracking", 1, 1, 1, 1, 1],
-            ["Market data + comps",            1, 1, 1, 1, 1],
-            ["Post-close / PMI",               0, 1, 1, 1, 1],
-            ["Team workspace + shared vault",  0, 0, 0, 1, 1],
-            ["SSO · single-tenant · SOC 2",    0, 0, 0, 0, 1],
-            ["Named account manager + SLA",    0, 0, 0, 0, 1],
-            ["API access",                     0, 0, 0, 0, 1],
-          ] as const).map((row, i) => {
-            const [label, ...cols] = row;
-            return (
-              <div key={i} style={vL.matrixRow}>
-                <span style={{ color: "var(--ink-2)", fontSize: 12 }}>{label}</span>
-                {cols.map((v, j) => (
-                  <span key={j} style={{
-                    display: "inline-flex", alignItems: "center", justifyContent: "center",
-                    color: v ? (j === 2 ? "var(--go)" : "var(--ink-2)") : "var(--ink-4)",
-                  }}>
-                    {v ? "✓" : "—"}
-                  </span>
-                ))}
-              </div>
-            );
-          })}
+            ["Yulia chat — unlimited",                "✓",    "✓",     "✓",   "✓",    "✓"],
+            ["Recast + Baseline™ valuation",          "✓",    "✓",     "✓",   "✓",    "✓"],
+            ["28 document generators",                "✓",    "✓",     "✓",   "✓",    "✓"],
+            ["Buyer-list engine",                     "preview","✓",   "✓",   "✓",    "✓"],
+            ["SBA + structure modeling",              "preview","✓",   "✓",   "✓",    "✓"],
+            ["Deal room + diligence tracker",         "—",    "1 deal","✓",   "✓",    "✓"],
+            ["Brand kit on every deliverable",        "—",    "✓",     "✓",   "✓",    "✓"],
+            ["180 days post-close PMI",               "—",    "✓",     "✓",   "✓",    "✓"],
+            ["Active deals",                          "1",    "1",     "unlimited", "unlimited", "unlimited"],
+            ["Finished deliverables",                 "1 (ever)", "unlimited", "unlimited", "unlimited", "unlimited"],
+          ] as const).map((row, i) => (
+            <MatrixRow key={`basic-${i}`} row={row} />
+          ))}
+
+          {/* Pro adds — the associate desk */}
+          <div style={vL.matrixSection}>Pro adds — the associate desk</div>
+          {([
+            ["QofE Lite pre-read (wedge)",            "—", "—", "✓", "✓", "✓"],
+            ["Parallel-deal pipeline view",           "—", "—", "✓", "✓", "✓"],
+            ["22-gate deal scoring",                  "—", "—", "✓", "✓", "✓"],
+            ["Sector-tuned buyer universes",          "—", "—", "✓", "✓", "✓"],
+            ["Audience-variant memos (LP, IC, board)","—", "—", "✓", "✓", "✓"],
+            ["Negotiation tactics + counter drafting","—", "—", "✓", "✓", "✓"],
+            ["Cap table + waterfall modeling",        "—", "—", "✓", "✓", "✓"],
+            ["Owner-readiness scoring (CEPA)",        "—", "—", "✓", "✓", "✓"],
+            ["API access (standard rate limits)",     "—", "—", "✓", "✓", "✓"],
+          ] as const).map((row, i) => (
+            <MatrixRow key={`pro-${i}`} row={row} />
+          ))}
+
+          {/* Team adds — for firms */}
+          <div style={vL.matrixSection}>Team adds — for firms</div>
+          {([
+            ["Up to 5 seats",                         "—", "—", "—", "✓", "✓"],
+            ["Shared deal vault + firm templates",    "—", "—", "—", "✓", "✓"],
+            ["Specialist handoff coordination",       "—", "—", "—", "✓", "✓"],
+          ] as const).map((row, i) => (
+            <MatrixRow key={`team-${i}`} row={row} />
+          ))}
+
+          {/* Enterprise adds */}
+          <div style={vL.matrixSection}>Enterprise adds — for regulated environments</div>
+          {([
+            ["Custom seat count",                     "—", "—", "—", "—", "✓"],
+            ["SSO · single-tenant · SOC 2",           "—", "—", "—", "—", "✓"],
+            ["Higher API rate limits + uptime SLA",   "—", "—", "—", "—", "✓"],
+            ["Named account manager",                 "—", "—", "—", "—", "✓"],
+          ] as const).map((row, i) => (
+            <MatrixRow key={`ent-${i}`} row={row} />
+          ))}
         </div>
 
-        {/* The promises (positively framed; was "The rules") */}
+        {/* The pricing promises — 5 bullets */}
         <div style={vL.rulesBox}>
           <div className="eyebrow" style={{ fontSize: 9.5, marginBottom: 10 }}>THE PROMISES</div>
           {([
-            ["Every paid tier delivers every core capability.", "The same toolkit at $49 as at $999 — pay for volume, seats, and infrastructure, not for capabilities.", false],
-            ["Subscription is the entire cost.", "Closed deal or broken.", false],
-            ["Post-close support is included in every paid tier.", "180 days of PMI included; subscription continues as long as you do.", false],
-            ["30-day free trial of Pro.", "14-day opt-out trial on every paid tier. Cancel anytime.", true],
-            ["One-time $99 credit pack", "for a second deliverable when you’re not yet ready for Starter.", false],
-            ["Month-to-month flexibility at launch.", "Annual discount lands once retention data earns it.", false],
+            ["No success fees. No per-deal tolls. No retainer hours billed against the work.", "Subscription is the entire cost. Closed deal or broken.", false],
+            ["180 days of PMI built into every paid tier.", "Diligence findings, integration milestones, and the value-creation plan all live in the same workspace.", false],
+            ["30 days FREE on Pro before you commit.", "14-day opt-out window on every other paid tier. Cancel anytime.", true],
+            ["Professional service providers are free, forever.", "Attorneys, real-estate agents, stockbrokers, and deal-team consultants can be brought into any deal at no cost until that deal closes.", false],
+            ["No surge pricing on hot mandates. No metered tokens. No \"AI usage\" line item.", "The $149 in March is the $149 in October.", false],
           ] as const).map(([head, tail, accent], i) => (
             <div key={i} style={vL.ruleRow}>
-              <span style={{ ...vL.ruleDot, ...(accent ? { background: "var(--go)", boxShadow: "0 0 0 3px var(--go-soft)" } : null) }} />
+              <span style={{ ...vL.ruleDot, ...(accent ? { background: "var(--ink)", boxShadow: "0 0 0 3px rgba(15,22,35,0.08)" } : null) }} />
               <span style={{ fontSize: 12.5, color: "var(--ink-2)", lineHeight: 1.55 }}>
-                <strong style={{ color: accent ? "var(--go)" : "var(--ink)" }}>{head}</strong>{" "}{tail}
+                <strong style={{ color: "var(--ink)" }}>{head}</strong>{" "}{tail}
               </span>
             </div>
           ))}
@@ -259,22 +307,22 @@ export function LearnDoc() {
       {/* ── §06 FAQ ─────────────────────────────────────────────── */}
       <LSec n="06" title="Frequently asked" eyebrow="FAQ">
         {[
-          ["What does Free include?",
-            "Unlimited chat with Yulia plus one deliverable — ever — with email registration. No credit card. The deliverable cap is total, not monthly."],
+          ["What does Free actually include?",
+            "Unlimited chat with Yulia and one finished deliverable, ever. No credit card. The cap is on completed work product, not access — you can run as many conversations as you want against a real deal before you trigger the deliverable."],
           ["What counts as a \"deliverable\"?",
-            "Any finished document Yulia produces — valuation, CIM draft, screening memo, LOI, LP update, 100-day plan."],
-          ["Why is Pro $149 but Team $999?",
-            "Pro is one person working alone. Team is a 2–5 person firm where Yulia becomes a shared resource — shared workspace, shared deal vault, shared templates. Same product, more seats, more shared infrastructure."],
-          ["What if I need six seats or more?",
-            "Enterprise. Quoted against your team — seat count, deployment model, compliance needs, SOC 2 / SSO requirements. Talk to sales."],
-          ["Do you have a separate tier for advisors or brokers?",
-            "No. A solo broker uses Starter or Pro. A 3-person boutique uses Team. A 15-person firm uses Enterprise. Same product, different configuration."],
-          ["What happens after I close a deal?",
-            "Your subscription continues at your current tier. 180 days of post-close PMI included. Many users stay on permanently — Yulia is where the next deal starts."],
-          ["Annual discount?",
-            "Not at launch. Introduced later at 16% off once retention data supports it."],
+            "Any finished work product — a recast, a Baseline, a CIM draft, a buyer tree, an LOI review, a counter, an engagement letter, a 100-day plan, a lender package. If it's something you'd send to a counterparty or sign, it counts."],
+          ["Why is Pro $149 and Team $999?",
+            "Pro is one practitioner running unlimited deals. Team is a 2–5 person firm using Yulia as a shared execution layer — shared vault, shared templates, shared house style across seats. Same product, different operating environment."],
+          ["Six seats or more?",
+            "Enterprise. Quoted against your firm — seat count, deployment model, SOC 2, SSO, support expectations. Talk to Yulia."],
+          ["Different plan for advisors vs. brokers vs. searchers?",
+            "No. A solo broker uses Starter or Pro. A 3-person M&A boutique uses Team. A 15-person firm uses Enterprise. Same product, configured for the way you work."],
+          ["What happens after close?",
+            "The subscription continues. 180 days of PMI is included on every paid tier — the diligence findings, the integration milestones, the value-creation plan all live in the same workspace. Most users keep the subscription past 180 days because the next deal starts in the same place the last one closed."],
+          ["Annual?",
+            "Not at launch. We'll add it once we have three months of cohort retention data, at 16% off. Selling annual before knowing the churn rate is how SaaS companies accidentally refund their first six months."],
           ["What does Yulia handle, and what does my attorney still do?",
-            "Yulia drafts every document on the deal — the LOI, the counter, the engagement letter, the closing checklist. Your attorney reviews, signs, and runs escrow. Yulia is the analyst pod and the document engine. Your attorney is the closer. The handoff is clean and the labor split is the same as it has always been — it's just that the analyst pod is on subscription."],
+            "Yulia handles the analyst-and-associate work — recast, Baseline, buyer tree, CIM, LOI drafts, diligence tracker, structure modeling, lender package, PMI plan. Your attorney handles legal language, escrow, and signing. The labor split is the same as any traditional process. The difference is the analyst pod is on subscription."],
         ].map(([q, a], i) => (
           <FaqRow key={i} q={q} a={a} idx={i} />
         ))}
@@ -284,14 +332,35 @@ export function LearnDoc() {
       <div style={vL.endCta}>
         <div>
           <div className="eyebrow eyebrow-go" style={{ fontSize: 9.5 }}>READY?</div>
-          <div style={vL.endCtaTitle}>Start free. No credit card.</div>
+          <div style={vL.endCtaTitle}>Bring her into one live deal.</div>
           <div style={{ fontSize: 12.5, color: "rgba(255,255,255,0.7)", marginTop: 6 }}>
-            Yulia is in the chat on your left. Same Yulia that runs in every paid workspace.
+            Upload the materials. Ask the question. See what she produces. Same Yulia that runs in every paid workspace.
           </div>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
-          <button className="btn btn-ghost" style={{ padding: "8px 14px", fontSize: 12.5 }}>Talk to sales</button>
-          <button className="btn btn-cta" style={{ padding: "8px 14px", fontSize: 12.5 }}>
+          <button
+            className="btn"
+            style={{
+              padding: "8px 14px",
+              fontSize: 12.5,
+              background: "transparent",
+              color: "rgba(255,255,255,0.92)",
+              border: "1px solid rgba(255,255,255,0.28)",
+              fontWeight: 500,
+            }}
+          >
+            Talk to Yulia
+          </button>
+          <button
+            className="btn"
+            style={{
+              padding: "8px 14px",
+              fontSize: 12.5,
+              background: "#FFFFFF",
+              color: "var(--ink)",
+              fontWeight: 600,
+            }}
+          >
             Start free
             <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </button>
@@ -302,7 +371,7 @@ export function LearnDoc() {
       <div style={vL.footnote}>
         <span className="mono" style={vL.footnoteTag}>FN</span>
         <p style={vL.footnoteText}>
-          smbX is software, not a fiduciary or registered broker-dealer. Yulia drafts documents, models structures, and prepares analyses for your review and decision. Funds and escrow run through your attorney. Outcomes are presented as ranges with methodology — never guarantees. smbX sits on the software side of SEC Rule 15(b)(13). A principal can use Yulia directly without triggering broker-dealer regulation; an advisor can use her inside their firm without competing with her.
+          smbX is software, not a fiduciary or registered broker-dealer. Yulia drafts documents, models structures, and prepares analyses for your review and decision. Funds and escrow run through your attorney. Outputs are presented as ranges with methodology, never guarantees. We sit on the software side of SEC Rule 15(b)(13) — what allows a principal to use Yulia directly, and what allows an advisor to use her inside their firm without competing with her.
         </p>
       </div>
     </div>
@@ -451,41 +520,68 @@ function PriceCard({ tier, price, cad, built, seats, deals, deliv, featured, mut
     }}>
       {featured && (
         <div style={vL.priceFeaturedTag}>
-          <span className="eyebrow" style={{ fontSize: 8.5, color: "#FFFFFF" }}>PRACTITIONERS' CHOICE</span>
+          <span className="eyebrow" style={{ fontSize: 8.5, color: "#FFFFFF", letterSpacing: "0.14em" }}>PRACTITIONERS' CHOICE</span>
         </div>
       )}
       <div className="eyebrow" style={{
         fontSize: 9.5,
-        color: featured ? "var(--go)" : "var(--ink-3)",
+        color: featured ? "var(--ink)" : "var(--ink-3)",
+        fontWeight: featured ? 600 : 500,
       }}>{tier}</div>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginTop: 8 }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginTop: 10 }}>
         <span style={{
           fontFamily: "var(--font-display)",
-          fontSize: muted ? 18 : 26,
+          fontSize: muted ? 20 : 28,
           fontWeight: 600,
-          letterSpacing: "-0.025em",
-          color: featured ? "var(--go)" : "var(--ink)",
+          letterSpacing: "-0.03em",
+          color: "var(--ink)",
           fontVariantNumeric: "tabular-nums",
+          lineHeight: 1,
         }}>{price}</span>
         {cad && (
           <span className="mono" style={{ fontSize: 11, color: "var(--ink-3)" }}>{cad}</span>
         )}
       </div>
-      <div style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 6 }}>{built}</div>
+      <div style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 8, minHeight: 17 }}>{built}</div>
       <div style={vL.priceMeta}>
-        <span className="mono" style={vL.priceMetaItem}>
-          <span style={{ color: "var(--ink-4)" }}>seats</span>
-          <span>{seats}</span>
+        <span style={vL.priceMetaItem}>
+          <span className="mono" style={{ color: "var(--ink-4)", fontSize: 10, letterSpacing: "0.04em" }}>seats</span>
+          <span className="mono" style={{ fontWeight: 500 }}>{seats}</span>
         </span>
-        <span className="mono" style={vL.priceMetaItem}>
-          <span style={{ color: "var(--ink-4)" }}>deals</span>
-          <span>{deals}</span>
+        <span style={vL.priceMetaItem}>
+          <span className="mono" style={{ color: "var(--ink-4)", fontSize: 10, letterSpacing: "0.04em" }}>deals</span>
+          <span className="mono" style={{ fontWeight: 500 }}>{deals}</span>
         </span>
-        <span className="mono" style={vL.priceMetaItem}>
-          <span style={{ color: "var(--ink-4)" }}>deliverables</span>
-          <span>{deliv}</span>
+        <span style={vL.priceMetaItem}>
+          <span className="mono" style={{ color: "var(--ink-4)", fontSize: 10, letterSpacing: "0.04em" }}>deliverables</span>
+          <span className="mono" style={{ fontWeight: 500 }}>{deliv}</span>
         </span>
       </div>
+    </div>
+  );
+}
+
+function MatrixRow({ row }: { row: readonly [string, string, string, string, string, string] }) {
+  const [label, ...cols] = row;
+  return (
+    <div style={vL.matrixRow}>
+      <span style={{ color: "var(--ink-2)", fontSize: 12 }}>{label}</span>
+      {cols.map((v, j) => {
+        const isCheck = v === "✓";
+        const isDash = v === "—";
+        const isProCol = j === 2;
+        return (
+          <span key={j} style={{
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            color: isDash ? "var(--ink-4)" : isProCol ? "var(--ink)" : "var(--ink-2)",
+            fontWeight: isCheck && isProCol ? 600 : 400,
+            fontSize: isCheck || isDash ? 13 : 11,
+            fontFamily: !isCheck && !isDash ? "var(--font-mono)" : undefined,
+          }}>
+            {v}
+          </span>
+        );
+      })}
     </div>
   );
 }
@@ -537,13 +633,22 @@ const vL: Record<string, CSSProperties> = {
   titleBlock: { paddingBottom: 22, borderBottom: "1px solid var(--line)" },
   title: {
     fontFamily: "var(--font-display)",
-    fontSize: 34, fontWeight: 600,
-    letterSpacing: "-0.03em",
+    fontSize: 22, fontWeight: 600,
+    letterSpacing: "-0.025em",
     margin: "8px 0 14px",
     color: "var(--ink)",
-    lineHeight: 1.05,
+    lineHeight: 1.25,
+    textWrap: "pretty",
   },
-  titleEm: { color: "var(--go)" },
+  titleEm: {
+    color: "var(--go)",
+  },
+  engineCloser: {
+    display: "flex", justifyContent: "center",
+    marginTop: 18, paddingTop: 14,
+    borderTop: "1px dashed var(--line)",
+    textAlign: "center",
+  },
   lede: {
     fontSize: 14.5, lineHeight: 1.6,
     color: "var(--ink)",
@@ -601,14 +706,6 @@ const vL: Record<string, CSSProperties> = {
   patternCellAccent: {
     background: "linear-gradient(135deg, var(--go-soft), transparent 80%), var(--surface)",
   },
-  engineCloser: {
-    display: "flex", alignItems: "center", gap: 14,
-    margin: "16px 0 0",
-  },
-  engineRule: {
-    flex: 1, height: 1, background: "var(--line)",
-  },
-
   // §02 example
   act: {
     background: "var(--surface)",
@@ -755,42 +852,53 @@ const vL: Record<string, CSSProperties> = {
   // §05 pricing
   priceGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(5, minmax(120px, 1fr))",
-    gap: 8,
+    gridTemplateColumns: "repeat(5, minmax(130px, 1fr))",
+    gap: 10,
+    marginTop: 24,
     marginBottom: 18,
+    paddingTop: 14,
     overflowX: "auto",
   },
   priceCard: {
     position: "relative",
     background: "var(--surface)",
     border: "1px solid var(--line)",
-    borderRadius: 6,
-    padding: "14px 14px 14px",
+    borderRadius: 8,
+    padding: "16px 16px 14px",
+    boxShadow: "0 1px 2px rgba(15,22,35,0.04)",
+    transition: "transform 160ms cubic-bezier(0.2,0.7,0.2,1), box-shadow 160ms",
   },
   priceCardFeatured: {
-    background: "linear-gradient(180deg, var(--go-soft), transparent 70%), var(--surface)",
-    borderColor: "var(--go-ring)",
-    boxShadow: "0 0 0 1px var(--go-ring), 0 1px 6px rgba(19,138,90,0.08)",
+    background: "var(--surface)",
+    borderColor: "var(--ink)",
+    boxShadow: "0 0 0 1px var(--ink), 0 8px 24px -12px rgba(15,22,35,0.18), 0 2px 4px rgba(15,22,35,0.06)",
+    transform: "translateY(-4px)",
+    padding: "18px 16px 16px",
   },
   priceCardMuted: {
     background: "var(--surface-2)",
     borderStyle: "dashed",
+    boxShadow: "none",
   },
   priceFeaturedTag: {
-    position: "absolute", top: -10, left: 14,
-    background: "var(--go)",
-    padding: "3px 8px",
+    position: "absolute",
+    bottom: "calc(100% + 6px)",
+    left: 12,
+    background: "var(--ink)",
+    padding: "4px 10px",
     borderRadius: 3,
+    whiteSpace: "nowrap",
   },
   priceMeta: {
-    marginTop: 12, paddingTop: 10,
+    marginTop: 14, paddingTop: 12,
     borderTop: "1px dashed var(--line-2)",
-    display: "flex", flexDirection: "column", gap: 4,
-    fontSize: 10.5,
+    display: "flex", flexDirection: "column", gap: 6,
+    fontSize: 11,
   },
   priceMetaItem: {
-    display: "flex", justifyContent: "space-between",
-    color: "var(--ink-2)",
+    display: "flex", justifyContent: "space-between", alignItems: "baseline",
+    gap: 8,
+    color: "var(--ink)",
   },
 
   matrix: {
@@ -818,6 +926,17 @@ const vL: Record<string, CSSProperties> = {
     textTransform: "uppercase",
     letterSpacing: "0.08em",
     fontWeight: 500,
+  },
+  matrixSection: {
+    padding: "12px 14px 8px",
+    borderBottom: "1px solid var(--line)",
+    fontFamily: "var(--font-mono)",
+    fontSize: 10.5,
+    letterSpacing: "0.06em",
+    color: "var(--ink-2)",
+    background: "var(--bg)",
+    minWidth: 600,
+    fontWeight: 600,
   },
 
   rulesBox: {

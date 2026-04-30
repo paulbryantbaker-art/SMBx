@@ -9,9 +9,10 @@ import { LearnDoc } from "./LearnDoc";
 interface CanvasPaneProps {
   mode: Mode;
   demoStep: number;
+  sendPair: (q: string, a: string) => void;
 }
 
-export function CanvasPane({ mode, demoStep }: CanvasPaneProps) {
+export function CanvasPane({ mode, demoStep, sendPair }: CanvasPaneProps) {
   const isLearn = mode === "learn";
   return (
     <div style={vp.wrap}>
@@ -21,7 +22,7 @@ export function CanvasPane({ mode, demoStep }: CanvasPaneProps) {
           <span className="mono" style={{ fontSize: 11, color: "var(--ink-2)" }}>
             {isLearn
               ? "learn/how-it-works.md"
-              : mode === "welcome" ? "preview/sample-deal.tx" : "deals/industrial-svc-tx/screen.md"}
+              : mode === "welcome" ? "preview/big-fake-deal.md" : "deals/big-fake-deal/screen.md"}
           </span>
           {!isLearn && (
             <span className="mono" style={{ fontSize: 9.5, color: "var(--go)", marginLeft: 6 }}>
@@ -35,10 +36,29 @@ export function CanvasPane({ mode, demoStep }: CanvasPaneProps) {
           )}
         </div>
         <div style={{ display: "flex", gap: 6 }}>
-          <button style={vp.headBtn} title="Export">
+          <button
+            style={vp.headBtn}
+            title="Export"
+            onClick={() => sendPair(
+              isLearn ? "Export this doc as PDF." : "Export this deal screen as PDF.",
+              isLearn
+                ? "Generated. In a paid workspace this gives you a branded PDF — your firm's logo, your color, your fonts — ready to send. (Demo: file wouldn't actually download.)"
+                : "Generated. In a paid workspace this is the full screen (recast, comps, structure, verdict) as a clean two-pager you can hand to a partner or attach to an IC memo. (Demo: file wouldn't actually download.)"
+            )}
+          >
             <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M7 2v8M3 7l4 4 4-4M2 12h10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </button>
-          <button style={vp.headBtn}>{isLearn ? "Print" : "Open in app"}</button>
+          <button
+            style={vp.headBtn}
+            onClick={() => sendPair(
+              isLearn ? "Print this doc." : "Open this in the app.",
+              isLearn
+                ? "Sent to your default printer. (Demo: print dialog would normally appear.)"
+                : "In a paid workspace this opens the full deal — recast, buyer tree, structure model, diligence tracker, the works — as a tabbed canvas. (Demo: only this read-only screen is loaded.)"
+            )}
+          >
+            {isLearn ? "Print" : "Open in app"}
+          </button>
         </div>
       </div>
 
@@ -123,7 +143,7 @@ function DealCanvas({ mode, demoStep }: { mode: Mode; demoStep: number }) {
             letterSpacing: "-0.02em",
             margin: "6px 0 0", color: "var(--ink)",
           }}>
-            Industrial Services Co · East Texas
+            Big Fake Deal · sample industrial services co
           </h1>
           <div style={{ display: "flex", gap: 14, marginTop: 8, fontSize: 12, color: "var(--ink-3)" }}>
             <span><span className="mono" style={{ color: "var(--ink-4)" }}>SIC</span> 1731</span>

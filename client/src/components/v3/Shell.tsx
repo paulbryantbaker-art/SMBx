@@ -21,7 +21,7 @@ interface V3SidebarProps {
 export function V3Sidebar({ activeDeal, onPick, onSlash, onCommand }: V3SidebarProps) {
   const [q, setQ] = useState("");
   const deals: Deal[] = [
-    { id: "sample", label: "Industrial Svc · TX", meta: "live", live: true, tag: "S" },
+    { id: "sample", label: "Big Fake Deal · sample", meta: "demo", live: true, tag: "S" },
     { id: "d1", label: "HVAC platform · CO", meta: "§3.2", muted: true, tag: "1" },
     { id: "d2", label: "Distribution · OH", meta: "ttm", muted: true, tag: "2" },
     { id: "d3", label: "Auto repair · 4-loc", meta: "BL·12", muted: true, tag: "3" },
@@ -31,13 +31,7 @@ export function V3Sidebar({ activeDeal, onPick, onSlash, onCommand }: V3SidebarP
     <aside style={vsb.rail}>
       <div style={vsb.brand}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={vsb.logoMark}>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M2 11L7 3L12 11" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="7" cy="3" r="1.4" fill="currentColor"/>
-            </svg>
-          </div>
-          <span style={vsb.brandText}>smbx<span style={{ color: "var(--cta)" }}>.</span>ai</span>
+          <span style={vsb.brandText}>smbx<span style={{ color: "var(--ink-3)" }}>.</span>ai</span>
         </div>
         <button style={vsb.iconBtn} title="New deal" onClick={() => onCommand("new")}>
           <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>
@@ -143,13 +137,6 @@ const vsb: Record<string, CSSProperties> = {
     padding: "13px 14px",
     borderBottom: "1px solid var(--line)",
     display: "flex", alignItems: "center", justifyContent: "space-between",
-  },
-  logoMark: {
-    width: 24, height: 24, borderRadius: 6,
-    background: "var(--surface-2)",
-    border: "1px solid var(--line-2)",
-    color: "var(--go)",
-    display: "grid", placeItems: "center",
   },
   brandText: {
     fontFamily: "var(--font-display)",
