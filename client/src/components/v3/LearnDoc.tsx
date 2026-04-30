@@ -29,7 +29,7 @@ export function LearnDoc() {
       </div>
 
       {/* ── §01 The four-step engine ─────────────────────────────── */}
-      <LSec n="01" title="The four-step engine · how Yulia works through every deal" eyebrow="THE ENGINE">
+      <LSec n="01" title="The four-step engine" eyebrow="THE ENGINE">
         <p style={{ ...vL.intro, marginBottom: 18 }}>
           Every deal Yulia touches runs through the same four steps. The first three are her job. <strong style={{ color: "var(--ink)" }}>The fourth is yours</strong> — and that's where the deal is actually decided.
         </p>
@@ -66,9 +66,9 @@ export function LearnDoc() {
       </LSec>
 
       {/* ── §02 A real interaction (promoted up) ─────────────────── */}
-      <LSec n="02" title="A real interaction · names changed, numbers preserved" eyebrow="A REAL INTERACTION">
+      <LSec n="02" title="A real interaction" eyebrow="A REAL INTERACTION">
         <p style={{ ...vL.intro, marginBottom: 14 }}>
-          The four steps in motion: a founder asks a question, Yulia draws three options, the founder picks one — <span style={{ color: "var(--ink-3)" }}>done in the time a typical advisor would still be scheduling the kickoff call.</span>
+          The four steps in motion: a founder asks a question, Yulia draws three options, the founder picks one — <span style={{ color: "var(--ink-3)" }}>done in the time a typical advisor would still be scheduling the kickoff call. Names changed; numbers preserved.</span>
         </p>
 
         <ExampleAct
@@ -81,7 +81,7 @@ export function LearnDoc() {
           </div>
         </ExampleAct>
 
-        <ExampleAct n="02" tag="YULIA'S ANALYSIS">
+        <ExampleAct n="02" tag="YULIA’S ANALYSIS">
           <div style={vL.exampleLead}>
             EBITDA of $5.4M after normalizing $340K of owner-related compensation and defending $620K of run-rate add-backs against three years of tax returns and customer contracts.
           </div>
@@ -163,7 +163,7 @@ export function LearnDoc() {
       </LSec>
 
       {/* ── §04 Glossary ────────────────────────────────────────── */}
-      <LSec n="04" title="The language · three terms in every Yulia deliverable" eyebrow="THE LANGUAGE">
+      <LSec n="04" title="The language" eyebrow="THE LANGUAGE">
         <p style={{ ...vL.intro, marginBottom: 14 }}>
           Three terms you'll see in every Yulia deliverable. <span style={{ color: "var(--ink-3)" }}>Each one is a specific kind of work, named so you know exactly what you're getting.</span>
         </p>
@@ -181,7 +181,7 @@ export function LearnDoc() {
         <span style={vL.partRule} />
       </div>
 
-      <LSec n="05" title="Four tiers + enterprise · priced so you don't have to think about it" eyebrow="PRICING">
+      <LSec n="05" title="Four tiers + enterprise" eyebrow="PRICING">
         <p style={{ ...vL.intro, marginBottom: 18 }}>
           Every paid tier delivers every capability Yulia offers. <strong style={{ color: "var(--ink)" }}>You pay for volume, seats, and enterprise infrastructure</strong> — never for Yulia's work itself.
         </p>
@@ -314,14 +314,18 @@ function LSec({ n, title, eyebrow, children }: { n: string; title: string; eyebr
   return (
     <section style={vL.sec}>
       <div style={vL.secHead}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
-          <span className="mono" style={{ fontSize: 10.5, color: "var(--ink-4)", letterSpacing: "0.1em" }}>§{n}</span>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 12, minWidth: 0, flex: 1 }}>
+          <span className="mono" style={{ fontSize: 10.5, color: "var(--ink-4)", letterSpacing: "0.1em", flexShrink: 0 }}>§{n}</span>
           <h3 className="eyebrow" style={{ fontSize: 11, color: "var(--ink)", margin: 0, letterSpacing: "0.08em" }}>
             {title}
           </h3>
         </div>
         {eyebrow && (
-          <span className="mono" style={{ fontSize: 9.5, color: "var(--ink-4)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+          <span className="mono" style={{
+            fontSize: 9.5, color: "var(--ink-4)",
+            letterSpacing: "0.1em", textTransform: "uppercase",
+            whiteSpace: "nowrap", flexShrink: 0, marginLeft: 12,
+          }}>
             {eyebrow}
           </span>
         )}
@@ -488,22 +492,41 @@ function PriceCard({ tier, price, cad, built, seats, deals, deliv, featured, mut
 
 function FaqRow({ q, a, idx }: { q: string; a: string; idx: number }) {
   const [open, setOpen] = useState(idx < 2);
+  const [hover, setHover] = useState(false);
+  const id = `faq-${idx}`;
   return (
     <div style={vL.faqRow}>
-      <button onClick={() => setOpen(!open)} style={vL.faqBtn}>
-        <span className="mono" style={{ fontSize: 10, color: "var(--ink-4)", marginRight: 12 }}>
+      <button
+        onClick={() => setOpen(!open)}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+        aria-expanded={open}
+        aria-controls={`${id}-answer`}
+        style={{
+          ...vL.faqBtn,
+          color: hover ? "var(--ink)" : undefined,
+        }}
+        className="faq-btn"
+      >
+        <span className="mono" style={{ fontSize: 10, color: hover ? "var(--go)" : "var(--ink-4)", marginRight: 12, transition: "color 120ms ease" }}>
           {String(idx + 1).padStart(2, "0")}
         </span>
         <span style={{ flex: 1, fontSize: 13, color: "var(--ink)", fontWeight: 500 }}>{q}</span>
         <span style={{
-          color: "var(--ink-3)", fontSize: 11,
+          color: hover ? "var(--ink)" : "var(--ink-3)", fontSize: 11,
           transform: open ? "rotate(180deg)" : "rotate(0deg)",
-          transition: "transform 180ms",
+          transition: "transform 180ms cubic-bezier(0.2,0.7,0.2,1), color 120ms ease",
         }}>▾</span>
       </button>
-      {open && (
-        <div style={vL.faqAnswer}>{a}</div>
-      )}
+      <div
+        id={`${id}-answer`}
+        role="region"
+        aria-hidden={!open}
+        hidden={!open}
+        style={vL.faqAnswer}
+      >
+        {a}
+      </div>
     </div>
   );
 }
