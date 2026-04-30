@@ -31,28 +31,28 @@ export function LearnDoc() {
       {/* ── §01 The four-step engine ─────────────────────────────── */}
       <LSec n="01" title="The four-step engine · how Yulia works through every deal" eyebrow="THE ENGINE">
         <p style={{ ...vL.intro, marginBottom: 18 }}>
-          Every deal Yulia touches runs through the same four steps. The first three are her job. <strong style={{ color: "var(--ink)" }}>The fourth is yours</strong> — and that's where the leverage lives.
+          Every deal Yulia touches runs through the same four steps. The first three are her job. <strong style={{ color: "var(--ink)" }}>The fourth is yours</strong> — and that's where the deal is actually decided.
         </p>
         <div style={vL.fourGrid}>
           <PatternCell
             n="01"
             head="She analyzes."
-            body="Reads the documents. Runs the numbers. Pulls the comps. Sources the data. The work that used to take a junior banker a week — done before lunch."
+            body="Reads the documents, runs the numbers, pulls the comps, sources the data. Work that used to take a junior banker a week, done before lunch."
           />
           <PatternCell
             n="02"
             head="She draws the options."
-            body={'Three or four real paths. Each one structured, costed, and defended. No strawmen. No "here’s our recommendation." Real options, the way an MD would lay them out.'}
+            body={'Three or four real paths, each structured, costed, and defended. No strawmen, no "here’s our recommendation" — real options laid out on the same axes so you can compare them directly.'}
           />
           <PatternCell
             n="03"
             head="She makes the implications clear."
-            body="Price. Structure. Timing. Tax. Close certainty. Post-close role. The matrix that lets you see the whole tradeoff in one frame instead of three meetings."
+            body="Six axes — price, structure, timing, tax, close certainty, post-close role — in a single matrix, so you see the whole tradeoff in one frame instead of three meetings."
           />
           <PatternCell
             n="04"
             head="You decide."
-            body="Every time. You pick the path. Yulia drafts the message. You send it. The judgment that wins deals stays where it belongs — with you."
+            body="Every time. You pick the path, Yulia drafts the message, you send it. The judgment that wins deals stays with you."
             accent
           />
         </div>
@@ -68,7 +68,7 @@ export function LearnDoc() {
       {/* ── §02 A real interaction (promoted up) ─────────────────── */}
       <LSec n="02" title="A real interaction · names changed, numbers preserved" eyebrow="A REAL INTERACTION">
         <p style={{ ...vL.intro, marginBottom: 14 }}>
-          The four steps in motion. One founder, one question, three options, one decision — <span style={{ color: "var(--ink-3)" }}>in the time a typical advisor would still be scheduling the kickoff call.</span>
+          The four steps in motion: a founder asks a question, Yulia draws three options, the founder picks one — <span style={{ color: "var(--ink-3)" }}>done in the time a typical advisor would still be scheduling the kickoff call.</span>
         </p>
 
         <ExampleAct
@@ -77,7 +77,7 @@ export function LearnDoc() {
           ctx="Industrial services platform · $28M revenue · $5.4M EBITDA · multi-state · founder age 61"
         >
           <div style={vL.quote}>
-            "What's it worth, and what's the right way to take it to market?"
+            “What’s it worth, and what’s the right way to take it to market?”
           </div>
         </ExampleAct>
 
@@ -134,7 +134,7 @@ export function LearnDoc() {
             Yulia drafted the engagement letter to the founder's chosen advisor and the kickoff CIM outline. The founder reviewed, adjusted the rollover percentage, and authorized the advisor to begin marketing.
           </div>
           <div style={{ fontSize: 12, color: "var(--ink-3)", fontStyle: "italic", marginTop: 10 }}>
-            The decision was the founder's. Yulia's job was finished when the options were clear.
+            The decision was the founder’s. The matrix was the deliverable.
           </div>
         </ExampleAct>
       </LSec>
@@ -142,16 +142,16 @@ export function LearnDoc() {
       {/* ── §03 Why this gets faster (was: ChatGPT wrapper / moat) ── */}
       <LSec n="03" title="Why this gets faster the longer you use it" eyebrow="THE COMPOUNDING">
         <p style={vL.body}>
-          <strong style={{ color: "var(--ink)" }}>Twelve capabilities. One workspace. Two years of integration that compounds with every deal.</strong>
+          <strong style={{ color: "var(--ink)" }}>Twelve capabilities live in one workspace, built on two years of integration engineering that compounds every time you run another deal.</strong>
         </p>
         <p style={vL.body}>
-          Any single capability on this list — the CIM, the buyer list, the QoE Lite, the structure model — you could probably stitch together with ChatGPT and a weekend. <span style={{ color: "var(--ink-3)" }}>One time. For one deal.</span>
+          Any single capability on this list — the CIM, the buyer list, the QoE Lite, the structure model — you could probably stitch together with ChatGPT and a weekend. <span style={{ color: "var(--ink-3)" }}>Once, for one deal.</span>
         </p>
         <p style={vL.body}>
-          What you can't stitch together in a weekend is the integration. The <strong style={{ color: "var(--ink)" }}>22-gate methodology</strong> that decides which capability runs when. The <strong style={{ color: "var(--ink)" }}>28 document generators</strong> that share a single sourced-financials backbone — so the CIM, the model, and the LOI all reference the same numbers. The <strong style={{ color: "var(--ink)" }}>deal room</strong> that classifies what you upload and surfaces the right capability for the right gate. The <strong style={{ color: "var(--ink)" }}>sourcing pipeline</strong> that feeds the screening engine that feeds the CIM workflow that feeds the buyer-list engine. The <strong style={{ color: "var(--ink)" }}>post-close PMI plan</strong> that already knows what was promised in diligence.
+          What you can’t stitch together in a weekend is the integration. A <strong style={{ color: "var(--ink)" }}>22-gate methodology</strong> decides which capability runs when. <strong style={{ color: "var(--ink)" }}>Twenty-eight document generators</strong> share a single sourced-financials backbone, so the CIM, the model, and the LOI all reference the same numbers. The <strong style={{ color: "var(--ink)" }}>deal room</strong> classifies what you upload and surfaces the right capability for the right gate. A <strong style={{ color: "var(--ink)" }}>sourcing pipeline</strong> feeds the screening engine that feeds the CIM workflow that feeds the buyer-list engine. And the <strong style={{ color: "var(--ink)" }}>post-close PMI plan</strong> already knows what was promised in diligence.
         </p>
         <p style={vL.body}>
-          That's the part that compounds. <span style={{ color: "var(--ink-3)" }}>Every deal you run teaches Yulia your firm's house style, your buyer preferences, your structural defaults.</span> Your tenth CIM is sharper than your first. Your hundredth is faster. Two years of integration engineering goes to work, every time.
+          That’s the part that compounds. <span style={{ color: "var(--ink-3)" }}>Every deal you run teaches Yulia your firm’s house style, your buyer preferences, your structural defaults.</span> Your tenth CIM is sharper than your first. Your hundredth is faster. Two years of integration engineering goes to work, every time.
         </p>
         <div style={vL.moatStrip}>
           <MoatChip n="22" label="gate methodology" />
@@ -160,9 +160,6 @@ export function LearnDoc() {
           <MoatChip n="01" label="workspace" />
           <MoatChip n="~2yr" label="of integration engineering" accent />
         </div>
-        <p style={{ ...vL.body, fontStyle: "italic", color: "var(--ink-2)", marginBottom: 0 }}>
-          The capabilities are the surface. The integration is the moat.
-        </p>
       </LSec>
 
       {/* ── §04 Glossary ────────────────────────────────────────── */}
@@ -173,7 +170,7 @@ export function LearnDoc() {
         <div style={vL.glossGrid}>
           <GlossCard term="The Baseline™" body="A multi-scenario valuation with implications. Three or four paths — each with price, structure, timing, tax, and close certainty defended against the seller's financials and the current market. The starting point for the conversation that decides the deal." />
           <GlossCard term="Blind Equity™" body="The value hiding in financials that an unprepared seller leaves behind. Owner-comp normalization. Defended add-backs. Working-capital pegging. Customer-concentration scoring. The QoE-style work that sets the floor on the seller's price — and surfaces the upside no one was scoring." />
-          <GlossCard term="The Rundown™" body="The complete deal intelligence package — CIM, teaser, buyer list, structure model, methodology — branded to your firm. Generated in hours, ready for your red pen, defensible against any sophisticated buyer's diligence." />
+          <GlossCard term="The Rundown™" body="The complete deal intelligence package — CIM, teaser, buyer list, structure model, methodology — branded to your firm. Generated in hours, edited in red pen, sent to the buyer’s data room without rework." />
         </div>
       </LSec>
 
@@ -242,11 +239,11 @@ export function LearnDoc() {
         <div style={vL.rulesBox}>
           <div className="eyebrow" style={{ fontSize: 9.5, marginBottom: 10 }}>THE PROMISES</div>
           {([
-            ["Every paid tier delivers every core capability.", "Every hero feature is in every plan.", false],
-            ["Subscription is the entire cost.", "Closed deal or broken. Predictable from day one.", false],
+            ["Every paid tier delivers every core capability.", "The same toolkit at $49 as at $999 — pay for volume, seats, and infrastructure, not for capabilities.", false],
+            ["Subscription is the entire cost.", "Closed deal or broken.", false],
             ["Post-close support is included in every paid tier.", "180 days of PMI included; subscription continues as long as you do.", false],
             ["30-day free trial of Pro.", "14-day opt-out trial on every paid tier. Cancel anytime.", true],
-            ["One-time $99 credit pack", "for a second deliverable when you're not yet ready for Starter.", false],
+            ["One-time $99 credit pack", "for a second deliverable when you’re not yet ready for Starter.", false],
             ["Month-to-month flexibility at launch.", "Annual discount lands once retention data earns it.", false],
           ] as const).map(([head, tail, accent], i) => (
             <div key={i} style={vL.ruleRow}>
@@ -305,7 +302,7 @@ export function LearnDoc() {
       <div style={vL.footnote}>
         <span className="mono" style={vL.footnoteTag}>FN</span>
         <p style={vL.footnoteText}>
-          smbX is software, not a fiduciary or registered broker-dealer. Yulia drafts documents, models structures, and prepares analyses for your review and decision. Funds and escrow run through your attorney. Outcomes are presented as ranges with methodology — never guarantees. We sit on the software side of SEC Rule 15(b)(13), which is what allows a principal to use Yulia directly without triggering broker-dealer regulation, and what allows an advisor to use her inside their firm without competing with her.
+          smbX is software, not a fiduciary or registered broker-dealer. Yulia drafts documents, models structures, and prepares analyses for your review and decision. Funds and escrow run through your attorney. Outcomes are presented as ranges with methodology — never guarantees. smbX sits on the software side of SEC Rule 15(b)(13). A principal can use Yulia directly without triggering broker-dealer regulation; an advisor can use her inside their firm without competing with her.
         </p>
       </div>
     </div>
