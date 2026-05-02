@@ -133,22 +133,37 @@ export function LargeTitle({ children }: LargeTitleProps) {
   const ref = useRef<HTMLHeadingElement | null>(null);
   const { setCollapsed } = useContext(TitleCollapseContext);
 
+  // Scroll-position driven (was IntersectionObserver). The observer races
+  // with iOS PWA layout settling + the mb-fade-up entrance transform on
+  // first paint, sometimes reporting "not intersecting" at scrollTop=0
+  // and starting the page in the collapsed state. A direct scroll listener
+  // on the mobile-root container is both faster and deterministic: we know
+  // the title's offsetTop + offsetHeight, we read scrollTop, we collapse
+  // once the title has scrolled past.
   useEffect(() => {
     const el = ref.current;
-    if (!el || typeof IntersectionObserver === "undefined") return;
-    // Observe whether the LargeTitle is still visible in the viewport.
-    // rootMargin's negative top accounts for the glass bar zone above —
-    // once the title has scrolled fully under the bar, collapsed = true.
-    const obs = new IntersectionObserver(
-      ([entry]) => setCollapsed(!entry.isIntersecting),
-      { threshold: 0, rootMargin: "-56px 0px 0px 0px" },
-    );
-    obs.observe(el);
-    // Reset to expanded when this LargeTitle mounts (new screen / tab).
-    setCollapsed(false);
+    if (!el) return;
+    // Walk up to find the .mobile-root scroll container.
+    const root = el.closest(".mobile-root") as HTMLElement | null;
+    if (!root) {
+      setCollapsed(false);
+      return;
+    }
+    const COLLAPSE_OFFSET = 12; // px past the title's bottom before collapse
+    const update = () => {
+      const titleBottom = el.offsetTop + el.offsetHeight;
+      setCollapsed(root.scrollTop > titleBottom - COLLAPSE_OFFSET);
+    };
+    update(); // run once on mount so initial state is correct
+    root.addEventListener("scroll", update, { passive: true });
+    // Recompute after layout settles (safe-area inset, fade-up animation,
+    // visualViewport height tracking) — covers the first ~600ms.
+    const t1 = setTimeout(update, 60);
+    const t2 = setTimeout(update, 240);
+    const t3 = setTimeout(update, 540);
     return () => {
-      obs.disconnect();
-      // Leave collapsed false on unmount so the next screen starts clean.
+      root.removeEventListener("scroll", update);
+      clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
       setCollapsed(false);
     };
   }, [setCollapsed]);
