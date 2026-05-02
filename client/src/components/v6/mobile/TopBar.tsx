@@ -78,26 +78,30 @@ export function GlassTopBar({
       <div
         style={{
           ...T.barWrap,
-          // Always interactive so the bar can intercept the safe-area zone,
-          // but visually transparent at scroll-top.
-          pointerEvents: "auto",
+          // Only intercept taps when the bar is materialized — at
+          // scroll-top the bar is fully transparent and shouldn't capture
+          // events meant for the LargeTitle row beneath it.
+          pointerEvents: scrolled ? "auto" : "none",
         }}
         aria-hidden={!collapsed}
       >
         <div
           style={{
             ...T.bar,
-            // Backdrop blur is ALWAYS active. Fades in by itself doesn't
-            // change appearance at scroll-top because nothing is behind
-            // the safe-area zone — the blur shows nothing.
-            backdropFilter: "blur(28px) saturate(180%) brightness(1.04)",
-            WebkitBackdropFilter: "blur(28px) saturate(180%) brightness(1.04)",
-            // Tint fades in once scrolled. Light at scroll-start, fuller
-            // once content is meaningfully under the bar.
+            // Backdrop blur is conditional — at scroll-top it would blur
+            // the LargeTitle behind it (the bar zone overlaps with the
+            // title's vertical position), creating a "ghost rectangle"
+            // look. Snap on the moment the user scrolls; the LargeTitle
+            // is moving by then so the snap reads as glass sliding over.
+            backdropFilter: scrolled
+              ? "blur(28px) saturate(180%) brightness(1.04)"
+              : "none",
+            WebkitBackdropFilter: scrolled
+              ? "blur(28px) saturate(180%) brightness(1.04)"
+              : "none",
             background: scrolled
               ? "rgba(255,255,255,0.55)"
               : "rgba(255,255,255,0)",
-            // Soft inner edge appears with the tint.
             boxShadow: scrolled
               ? "inset 0 -0.5px 0 rgba(0,0,0,0.06)"
               : "none",
