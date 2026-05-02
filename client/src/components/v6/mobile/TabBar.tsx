@@ -91,6 +91,11 @@ const B: Record<string, CSSProperties> = {
     zIndex: 40,
     pointerEvents: "auto",
     touchAction: "manipulation",
+    // Override the .mobile-root class's bg (var(--mb-bg) = #FFFFFF). The
+    // class is applied here so children can read --mb-* CSS tokens, but
+    // the side-effect white bg painted a full-width strip behind the
+    // floating pill + FAB, defeating the Liquid Glass effect.
+    background: "transparent",
   },
   capsule: {
     flex: 1,
