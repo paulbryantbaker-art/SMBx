@@ -35,7 +35,17 @@ export function TabBar({ active, onChange, onChat }: TabBarProps) {
       className="mobile-root"
       style={B.wrap}
     >
-      <GlassSurface tint="chrome" radius={999} style={B.capsule}>
+      <GlassSurface
+        tint="chrome"
+        radius={999}
+        style={{
+          ...B.capsule,
+          // Override the chrome bg to a much lower opacity so the page
+          // content actually shows through the pill — without this the
+          // ~62% white tint reads as a flat strip instead of glass.
+          background: "rgba(255,255,255,0.38)",
+        }}
+      >
         {TABS.map(t => {
           const isActive = active === t.id;
           const c = isActive ? "var(--mb-accent-ink)" : "var(--mb-ink-3)";

@@ -31,7 +31,7 @@ const PICKS: Pick[] = [
 
 export function BriefScreen({ isAnon, initials, onOpenDeal, onAvatarClick }: BriefProps) {
   return (
-    <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 140 }}>
+    <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
       <GlassTopBar title="Brief" initials={initials} onAvatarClick={onAvatarClick} />
       <LargeTitle>Brief</LargeTitle>
 

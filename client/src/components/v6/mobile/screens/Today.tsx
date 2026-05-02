@@ -35,7 +35,7 @@ const PIPELINE = [
 
 export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onLearn, onAvatarClick }: TodayProps) {
   return (
-    <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 140 }}>
+    <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
       <GlassTopBar title="Today" initials={initials} onAvatarClick={onAvatarClick} />
       <LargeTitle>Today</LargeTitle>
 
@@ -171,6 +171,14 @@ type HeroKind = Verdict | "welcome";
 // Texture path + a verdict-tinted overlay. Overlay is light at top so the
 // SVG sparkline + giant SDE number remain visible on the texture, and dimmer
 // at the bottom where white text sits in the inner cell.
+//
+// Sharpening recipe (2026-05-02): the previous overlay sat over the texture
+// as plain alpha and washed it out into a flat color field. Three changes
+// bring the watercolor variation back without harming text contrast:
+//   - drop the overlay alpha by ~8 points (less wash)
+//   - blend the gradient into the texture with `multiply` (keeps the
+//     texture's lights light + darks dark, just tinted)
+//   - add a soft inset top highlight + bottom shadow for tactile depth
 const HERO_TEXTURE: Record<HeroKind, string> = {
   pursue:  "/textures/texture-pursue.png",
   watch:   "/textures/texture-watch.png",
@@ -178,10 +186,10 @@ const HERO_TEXTURE: Record<HeroKind, string> = {
   welcome: "/textures/texture-sunrise.png",
 };
 const HERO_OVERLAY: Record<HeroKind, string> = {
-  pursue:  "linear-gradient(165deg, rgba(48,108,80,0.42) 0%, rgba(18,68,46,0.74) 100%)",
-  watch:   "linear-gradient(165deg, rgba(150,108,40,0.42) 0%, rgba(95,65,18,0.74) 100%)",
-  pass:    "linear-gradient(165deg, rgba(170,72,60,0.42) 0%, rgba(120,40,32,0.74) 100%)",
-  welcome: "linear-gradient(165deg, rgba(140,98,42,0.40) 0%, rgba(85,55,18,0.72) 100%)",
+  pursue:  "linear-gradient(165deg, rgba(48,108,80,0.34) 0%, rgba(18,68,46,0.66) 100%)",
+  watch:   "linear-gradient(165deg, rgba(150,108,40,0.34) 0%, rgba(95,65,18,0.66) 100%)",
+  pass:    "linear-gradient(165deg, rgba(170,72,60,0.34) 0%, rgba(120,40,32,0.66) 100%)",
+  welcome: "linear-gradient(165deg, rgba(140,98,42,0.32) 0%, rgba(85,55,18,0.64) 100%)",
 };
 
 function HeroFrame({
@@ -205,9 +213,15 @@ function HeroFrame({
         backgroundSize: "cover, cover",
         backgroundPosition: "center, center",
         backgroundRepeat: "no-repeat, no-repeat",
+        backgroundBlendMode: "multiply, normal",
         color: "#fff",
         overflow: "hidden",
-        boxShadow: "0 12px 28px -10px rgba(0,0,0,0.25)",
+        boxShadow:
+          "0 12px 28px -10px rgba(0,0,0,0.28)," +
+          // Inner top highlight — sells "lit from above"
+          " inset 0 1px 0 rgba(255,255,255,0.22)," +
+          // Inner bottom shadow — adds depth at the cell boundary
+          " inset 0 -1px 0 rgba(0,0,0,0.18)",
         position: "relative",
         cursor: onTap ? "pointer" : "default",
       }}
@@ -438,13 +452,17 @@ const E: Record<string, CSSProperties> = {
   card: {
     borderRadius: 22,
     backgroundImage:
-      "linear-gradient(165deg, rgba(95,115,200,0.46) 0%, rgba(50,72,160,0.78) 100%), url('/textures/texture-buyers.png')",
+      "linear-gradient(165deg, rgba(95,115,200,0.38) 0%, rgba(50,72,160,0.70) 100%), url('/textures/texture-buyers.png')",
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     backgroundRepeat: "no-repeat, no-repeat",
+    backgroundBlendMode: "multiply, normal",
     color: "#fff",
     overflow: "hidden",
-    boxShadow: "0 12px 28px -10px rgba(0,0,0,0.25)",
+    boxShadow:
+      "0 12px 28px -10px rgba(0,0,0,0.28)," +
+      " inset 0 1px 0 rgba(255,255,255,0.22)," +
+      " inset 0 -1px 0 rgba(0,0,0,0.18)",
     padding: "20px 16px 16px",
     position: "relative",
   },

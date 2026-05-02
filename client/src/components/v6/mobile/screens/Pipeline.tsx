@@ -37,7 +37,7 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onAvatarClick }: 
   const [activeChip, setActiveChip] = useState<string>("in-review");
 
   return (
-    <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 140 }}>
+    <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
       <GlassTopBar title="Pipeline" initials={initials} onAvatarClick={onAvatarClick} />
       <LargeTitle>Pipeline</LargeTitle>
 
