@@ -245,10 +245,12 @@ const H: Record<string, CSSProperties> = {
 
 /* ─── PRICING ────────────────────────────────────────────── */
 
+type PriceValue = number | "Free" | "Custom";
+
 interface Plan {
   id: string;
   name: string;
-  price: { monthly: number | "Free"; annual: number | "Free" };
+  price: { monthly: PriceValue; annual: PriceValue };
   sub: string;
   cta: string;
   prompt: string;
@@ -261,89 +263,138 @@ const PLANS: Plan[] = [
     id: "free",
     name: "Free",
     price: { monthly: "Free", annual: "Free" },
-    sub: "Use Yulia for as long as you want. One free deliverable on the house.",
+    sub: "Use Yulia for as long as you want. One finished deliverable on the house.",
     cta: "Start free",
     prompt: "I'm ready to start with the free tier. What do I need to do?",
     features: [
-      "Unlimited chat with Yulia",
-      "1 ValueLens or deal score",
-      "Email required · no card",
-      "Workspace stays yours",
+      "Yulia chat — unlimited",
+      "1 finished deliverable, ever",
+      "Recast + Baseline™ valuation",
+      "Buyer-list engine · preview",
+      "SBA + structure modeling · preview",
     ],
   },
   {
     id: "starter",
     name: "Starter",
     price: { monthly: 49, annual: 39 },
-    sub: "For first-time searchers, kicking the tires.",
+    sub: "For first-time searchers running their first deal end-to-end.",
     cta: "Choose Starter",
     prompt: "I'm interested in the $49 Starter plan. Walk me through what I get and how to upgrade.",
     features: [
-      "Unlimited ValueLens reports",
-      "Deal scoring + VRR",
-      "SDE / EBITDA analysis",
-      "Document exports",
-      "Email support",
+      "Everything in Free, unlimited",
+      "28 document generators",
+      "Deal room + diligence tracker · one deal",
+      "Brand kit on every deliverable",
+      "180 days post-close PMI",
     ],
   },
   {
-    id: "professional",
-    name: "Professional",
+    id: "pro",
+    name: "Pro",
     price: { monthly: 149, annual: 119 },
-    sub: "For active searchers running multiple deals at a time.",
-    cta: "Choose Professional",
-    prompt: "I'm interested in Professional at $149. What does sourcing + buyer matching unlock for me?",
+    sub: "An in-browser associate desk. Multiple deals, side-by-side.",
+    cta: "Choose Pro",
+    prompt: "I'm interested in Pro at $149. Walk me through QofE Lite, the parallel-deal pipeline, and the audience-variant memos.",
     featured: true,
     features: [
-      "Everything in Starter",
-      "CIM generation",
-      "Deal room + sharing",
-      "Buyer + seller matching",
-      "Sourcing engine",
-      "Due diligence + LOI drafting",
+      "QofE Lite pre-read — the wedge",
+      "Parallel-deal pipeline view",
+      "22-gate deal scoring",
+      "Sector-tuned buyer universes",
+      "Audience-variant memos · LP, IC, board",
+      "Negotiation tactics + counter drafting",
+      "Cap table + waterfall modeling",
+      "API access · standard rate limits",
+    ],
+  },
+  {
+    id: "team",
+    name: "Team",
+    price: { monthly: 999, annual: 799 },
+    sub: "For firms — partners, associates, and shared deal flow under one vault.",
+    cta: "Choose Team",
+    prompt: "I'm interested in Team at $999. How do the 5 seats, shared deal vault, and specialist handoff work?",
+    features: [
+      "Everything in Pro",
+      "Up to 5 seats",
+      "Shared deal vault + firm templates",
+      "Specialist handoff coordination",
     ],
   },
   {
     id: "enterprise",
     name: "Enterprise",
-    price: { monthly: 999, annual: 799 },
-    sub: "For micro-PE firms and small search funds.",
+    price: { monthly: "Custom", annual: "Custom" },
+    sub: "For regulated environments — fund admins, family offices, banks.",
     cta: "Talk to Yulia",
-    prompt: "I want to learn more about Enterprise — team seats, white-label, API access. Can you walk me through it?",
+    prompt: "I want to learn more about Enterprise — SSO, single-tenant, SOC 2, custom seat count, and the named account manager.",
     features: [
-      "Everything in Professional",
-      "Unlimited team seats",
-      "White-label workspace",
-      "API + webhooks",
-      "Portfolio dashboards",
-      "Dedicated success manager",
+      "Everything in Team",
+      "Custom seat count",
+      "SSO · single-tenant · SOC 2",
+      "Higher API rate limits + uptime SLA",
+      "Named account manager",
     ],
   },
 ];
 
 type Cell = string;
 
-interface CompareRow {
-  feature: string;
-  cells: [Cell, Cell, Cell, Cell];
+type CompareCells = [Cell, Cell, Cell, Cell, Cell]; // Free, Starter, Pro, Team, Enterprise
+
+interface CompareGroup {
+  title: string;
+  rows: { feature: string; cells: CompareCells }[];
 }
 
-const COMPARE: CompareRow[] = [
-  { feature: "Yulia chat",                   cells: ["Unlimited", "Unlimited", "Unlimited", "Unlimited"] },
-  { feature: "Deliverables (ValueLens, scores)", cells: ["1 total", "Unlimited", "Unlimited", "Unlimited"] },
-  { feature: "Active deals",                 cells: ["1",         "1",          "5",         "Unlimited"] },
-  { feature: "Recast P&L · Comps",           cells: ["—",         "Basic",      "Full",      "Full + custom"] },
-  { feature: "Valuation + DSCR sliders",     cells: ["—",         "—",          "✓",         "✓"] },
-  { feature: "Quality of earnings",          cells: ["—",         "—",          "✓",         "✓"] },
-  { feature: "CIM generation",               cells: ["—",         "—",          "✓",         "✓"] },
-  { feature: "Buyer + seller matching",      cells: ["—",         "—",          "✓",         "✓"] },
-  { feature: "Sourcing engine",              cells: ["—",         "—",          "✓",         "✓"] },
-  { feature: "Doc drafting (LOI, NDA, memos)", cells: ["—",       "Limited",    "Unlimited", "Unlimited + custom"] },
-  { feature: "Deal room + sharing",          cells: ["—",         "—",          "✓",         "✓"] },
-  { feature: "Team seats",                   cells: ["1",         "1",          "1",         "Unlimited"] },
-  { feature: "API + webhooks",               cells: ["—",         "—",          "—",         "✓"] },
-  { feature: "White-label",                  cells: ["—",         "—",          "—",         "✓"] },
-  { feature: "Support",                      cells: ["Community", "Email",      "Priority",  "Dedicated CSM"] },
+const COMPARE: CompareGroup[] = [
+  {
+    title: "The basics — every paid tier",
+    rows: [
+      { feature: "Yulia chat — unlimited",            cells: ["✓",          "✓",         "✓",         "✓",         "✓"] },
+      { feature: "Recast + Baseline™ valuation", cells: ["✓",          "✓",         "✓",         "✓",         "✓"] },
+      { feature: "28 document generators",            cells: ["✓",          "✓",         "✓",         "✓",         "✓"] },
+      { feature: "Buyer-list engine",                 cells: ["preview",    "✓",         "✓",         "✓",         "✓"] },
+      { feature: "SBA + structure modeling",          cells: ["preview",    "✓",         "✓",         "✓",         "✓"] },
+      { feature: "Deal room + diligence tracker",     cells: ["—",          "one deal",  "✓",         "✓",         "✓"] },
+      { feature: "Brand kit on every deliverable",    cells: ["—",          "✓",         "✓",         "✓",         "✓"] },
+      { feature: "180 days post-close PMI",           cells: ["—",          "✓",         "✓",         "✓",         "✓"] },
+      { feature: "Active deals",                      cells: ["1",          "1",         "unlimited", "unlimited", "unlimited"] },
+      { feature: "Finished deliverables",             cells: ["1 (ever)",   "unlimited", "unlimited", "unlimited", "unlimited"] },
+    ],
+  },
+  {
+    title: "Pro adds — the associate desk",
+    rows: [
+      { feature: "QofE Lite pre-read · the wedge",        cells: ["—", "—", "✓", "✓", "✓"] },
+      { feature: "Parallel-deal pipeline view",           cells: ["—", "—", "✓", "✓", "✓"] },
+      { feature: "22-gate deal scoring",                  cells: ["—", "—", "✓", "✓", "✓"] },
+      { feature: "Sector-tuned buyer universes",          cells: ["—", "—", "✓", "✓", "✓"] },
+      { feature: "Audience-variant memos · LP, IC, board",cells: ["—", "—", "✓", "✓", "✓"] },
+      { feature: "Negotiation tactics + counter drafting",cells: ["—", "—", "✓", "✓", "✓"] },
+      { feature: "Cap table + waterfall modeling",        cells: ["—", "—", "✓", "✓", "✓"] },
+      { feature: "Owner-readiness scoring · CEPA",        cells: ["—", "—", "✓", "✓", "✓"] },
+      { feature: "API access · standard rate limits",     cells: ["—", "—", "✓", "✓", "✓"] },
+    ],
+  },
+  {
+    title: "Team adds — for firms",
+    rows: [
+      { feature: "Up to 5 seats",                       cells: ["—", "—", "—", "✓", "✓"] },
+      { feature: "Shared deal vault + firm templates",  cells: ["—", "—", "—", "✓", "✓"] },
+      { feature: "Specialist handoff coordination",     cells: ["—", "—", "—", "✓", "✓"] },
+    ],
+  },
+  {
+    title: "Enterprise adds — for regulated environments",
+    rows: [
+      { feature: "Custom seat count",                       cells: ["—", "—", "—", "—", "✓"] },
+      { feature: "SSO · single-tenant · SOC 2",             cells: ["—", "—", "—", "—", "✓"] },
+      { feature: "Higher API rate limits + uptime SLA",     cells: ["—", "—", "—", "—", "✓"] },
+      { feature: "Named account manager",                   cells: ["—", "—", "—", "—", "✓"] },
+    ],
+  },
 ];
 
 function PricingSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) => void }) {
@@ -354,7 +405,7 @@ function PricingSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) =>
   };
 
   const fmtPrice = (p: Plan["price"][Billing]) =>
-    p === "Free" ? "Free" : `$${p}`;
+    p === "Free" ? "Free" : p === "Custom" ? "Custom" : `$${p}`;
 
   return (
     <div>
@@ -381,11 +432,12 @@ function PricingSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) =>
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14, marginBottom: 36 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 36 }}>
         {PLANS.map(p => {
           const featured = p.featured;
           const priceDisplay = fmtPrice(p.price[billing]);
-          const showPerMo = p.price[billing] !== "Free";
+          const priceValue = p.price[billing];
+          const showPerMo = priceValue !== "Free" && priceValue !== "Custom";
           return (
             <div
               key={p.id}
@@ -414,14 +466,17 @@ function PricingSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) =>
                 onClick={() => handleCta(p)}
               >{p.cta}</button>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {p.features.map(f => (
-                  <div key={f} style={P.featureRow}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" style={{ flexShrink: 0, marginTop: 2 }}>
-                      <path d="M3 7.5l2.5 2.5L11 4.5" stroke="var(--m-primary)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <span>{f}</span>
-                  </div>
-                ))}
+                {p.features.map((f, i) => {
+                  const isWedge = featured && i === 0;
+                  return (
+                    <div key={f} style={P.featureRow}>
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" style={{ flexShrink: 0, marginTop: 2 }}>
+                        <path d="M3 7.5l2.5 2.5L11 4.5" stroke="var(--m-primary)" strokeWidth={isWedge ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      <span style={isWedge ? { fontWeight: 600, color: "var(--m-primary)" } : undefined}>{f}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           );
@@ -434,30 +489,39 @@ function PricingSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) =>
             <div>Feature</div>
             <div style={{ textAlign: "center" }}>Free</div>
             <div style={{ textAlign: "center" }}>Starter</div>
-            <div style={{ textAlign: "center", color: "var(--m-primary)" }}>Professional</div>
+            <div style={{ textAlign: "center", color: "var(--m-primary)" }}>Pro</div>
+            <div style={{ textAlign: "center" }}>Team</div>
             <div style={{ textAlign: "center" }}>Enterprise</div>
           </div>
-          {COMPARE.map((row, i) => (
-            <div
-              key={row.feature}
-              style={{
-                ...P.compareRow,
-                borderBottom: i === COMPARE.length - 1 ? "none" : "1px solid var(--m-outline-var)",
-              }}
-            >
-              <div style={{ fontWeight: 500 }}>{row.feature}</div>
-              {row.cells.map((c, j) => (
-                <div
-                  key={j}
-                  style={{
-                    textAlign: "center",
-                    color: c === "—" ? "var(--m-on-surface-mid)"
-                      : j === 2 ? "var(--m-primary)"
-                      : "var(--m-on-surface-var)",
-                    fontWeight: j === 2 && c !== "—" ? 600 : 500,
-                  }}
-                >{c}</div>
-              ))}
+          {COMPARE.map((group, gi) => (
+            <div key={group.title}>
+              <div style={P.compareGroupHeader}>{group.title}</div>
+              {group.rows.map((row, ri) => {
+                const isLast = gi === COMPARE.length - 1 && ri === group.rows.length - 1;
+                return (
+                  <div
+                    key={row.feature}
+                    style={{
+                      ...P.compareRow,
+                      borderBottom: isLast ? "none" : "1px solid var(--m-outline-var)",
+                    }}
+                  >
+                    <div style={{ fontWeight: 500 }}>{row.feature}</div>
+                    {row.cells.map((c, j) => (
+                      <div
+                        key={j}
+                        style={{
+                          textAlign: "center",
+                          color: c === "—" ? "var(--m-on-surface-mid)"
+                            : j === 2 ? "var(--m-primary)"
+                            : "var(--m-on-surface-var)",
+                          fontWeight: j === 2 && c !== "—" ? 600 : 500,
+                        }}
+                      >{c}</div>
+                    ))}
+                  </div>
+                );
+              })}
             </div>
           ))}
         </div>
@@ -585,17 +649,26 @@ const P: Record<string, CSSProperties> = {
     lineHeight: 1.4,
   },
   compareHeader: {
-    display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr",
+    display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 1fr",
     background: "var(--m-surface-2)",
-    padding: "14px 22px",
+    padding: "14px 18px",
     fontSize: 11, fontFamily: "var(--font-mono)",
     letterSpacing: "0.1em", textTransform: "uppercase",
     fontWeight: 600, color: "var(--m-on-surface-mid)",
   },
+  compareGroupHeader: {
+    padding: "16px 18px 8px",
+    fontSize: 10.5, fontFamily: "var(--font-mono)",
+    letterSpacing: "0.14em", textTransform: "uppercase",
+    fontWeight: 700, color: "var(--m-primary)",
+    background: "var(--m-surface-2)",
+    borderTop: "1px solid var(--m-outline-var)",
+    borderBottom: "1px solid var(--m-outline-var)",
+  },
   compareRow: {
-    display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr",
-    padding: "12px 22px",
-    fontSize: 13, color: "var(--m-on-surface)",
+    display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 1fr",
+    padding: "12px 18px",
+    fontSize: 12.5, color: "var(--m-on-surface)",
     alignItems: "center",
   },
   guaranteeCard: {
