@@ -3,6 +3,8 @@ import { useLocation } from "wouter";
 import { useAnonymousChat } from "../../../hooks/useAnonymousChat";
 import { useAuthChat } from "../../../hooks/useAuthChat";
 import type { User } from "../../../hooks/useAuth";
+import { TabBar } from "./TabBar";
+import { GlassTopBar, LargeTitle } from "./TopBar";
 import type { MobileChatBridge, MobileTab, MobileView } from "./types";
 
 const VALID_TABS: MobileTab[] = ["today", "pipeline", "brief"];
@@ -57,7 +59,7 @@ interface ShellProps {
 }
 
 function V6MobileShell({ user, chat: _chat, onSignOut: _onSignOut }: ShellProps) {
-  const [, _navigate] = useLocation();
+  const [, navigate] = useLocation();
 
   const initial = readMobileHashState();
   const [view, setView] = useState<MobileView>(
@@ -65,6 +67,7 @@ function V6MobileShell({ user, chat: _chat, onSignOut: _onSignOut }: ShellProps)
       ? { kind: "detail", dealId: initial.detail }
       : { kind: "tab", tab: initial.tab }
   );
+  const [chatOpen, setChatOpen] = useState(false);
 
   // Track --vvh from visualViewport (per architecture_ios_pwa_pill.md)
   useEffect(() => {
@@ -104,22 +107,73 @@ function V6MobileShell({ user, chat: _chat, onSignOut: _onSignOut }: ShellProps)
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
 
+  const activeTab: MobileTab = view.kind === "tab" ? (view.tab ?? "today") : "today";
+  const onTabChange = (next: MobileTab) => setView({ kind: "tab", tab: next });
+  const onChat = () => setChatOpen(true);
+  const _ = chatOpen; // chat sheet lands in M7
+  const __ = setChatOpen;
+  const ___ = navigate;
+
+  const initials = computeInitials(user);
+
   return (
     <div className="mobile-root" style={S.root}>
-      <div style={S.placeholder}>
-        <div style={S.placeholderHead}>V6 Mobile</div>
-        <div style={S.placeholderBody}>
-          {view.kind === "tab"
-            ? `Tab: ${view.tab}`
-            : `Detail: ${view.dealId}`}
+      {view.kind === "tab" && (
+        <TabScreen tab={activeTab} initials={initials} />
+      )}
+      {view.kind === "detail" && (
+        <DetailPlaceholder
+          dealId={view.dealId ?? "unknown"}
+          onBack={() => setView({ kind: "tab", tab: "today" })}
+        />
+      )}
+      <TabBar active={activeTab} onChange={onTabChange} onChat={onChat} />
+    </div>
+  );
+}
+
+/* ─── Per-tab screen placeholder ─────────────────────────── */
+
+const TAB_TITLES: Record<MobileTab, string> = {
+  today: "Today",
+  pipeline: "Pipeline",
+  brief: "Brief",
+};
+
+function TabScreen({ tab, initials }: { tab: MobileTab; initials: string }) {
+  return (
+    <div style={{ minHeight: "100vh", paddingBottom: 140 }}>
+      <GlassTopBar title={TAB_TITLES[tab]} initials={initials} />
+      <LargeTitle>{TAB_TITLES[tab]}</LargeTitle>
+      <div style={S.placeholderBody}>
+        <div className="mb-mono" style={S.placeholderTag}>STUB · PHASE M2</div>
+        <div style={S.placeholderHint}>
+          {tab} screen lands in phase M{tab === "today" ? "3" : tab === "pipeline" ? "4" : "5"}.
         </div>
-        <div style={S.placeholderMeta}>
-          {user ? `Authed as ${user.email}` : "Anonymous"}
-        </div>
-        <div style={S.placeholderHint}>Phase M1 — primitives + chrome land next.</div>
       </div>
     </div>
   );
+}
+
+function DetailPlaceholder({ dealId, onBack }: { dealId: string; onBack: () => void }) {
+  return (
+    <div style={{ minHeight: "100vh", paddingBottom: 140 }}>
+      <GlassTopBar title="Deal" showBack onBack={onBack} initials="" />
+      <LargeTitle>{dealId}</LargeTitle>
+      <div style={S.placeholderBody}>
+        <div className="mb-mono" style={S.placeholderTag}>STUB · PHASE M2</div>
+        <div style={S.placeholderHint}>Deal detail screen lands in phase M6.</div>
+      </div>
+    </div>
+  );
+}
+
+function computeInitials(user: User | null): string {
+  if (!user) return "JM"; // sample-state placeholder per CD
+  const src = user.display_name?.trim() || user.email;
+  const parts = src.split(/[\s@.]+/).filter(Boolean);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return src.slice(0, 2).toUpperCase();
 }
 
 /* ─── URL hash state ─────────────────────────────────────── */
@@ -157,28 +211,19 @@ const S: Record<string, CSSProperties> = {
   root: {
     minHeight: "100vh",
     width: "100%",
-    background: "var(--mb-bg-2)",
-    paddingTop: "env(safe-area-inset-top, 0px)",
+    background: "var(--mb-bg)",
     paddingBottom: "env(safe-area-inset-bottom, 0px)",
-  },
-  placeholder: {
-    padding: "60px 22px",
-    display: "flex", flexDirection: "column", gap: 8,
-  },
-  placeholderHead: {
-    fontFamily: "var(--mb-font-display)",
-    fontSize: 34, fontWeight: 800, letterSpacing: -1,
-    color: "var(--mb-ink)",
+    position: "relative",
   },
   placeholderBody: {
-    fontFamily: "var(--mb-font-mono)",
-    fontSize: 14, color: "var(--mb-ink-2)",
+    padding: "32px 22px",
+    display: "flex", flexDirection: "column", gap: 8,
   },
-  placeholderMeta: {
-    fontSize: 13, color: "var(--mb-ink-3)",
+  placeholderTag: {
+    fontSize: 9.5, color: "var(--mb-ink-4)",
+    letterSpacing: "0.14em", fontWeight: 700,
   },
   placeholderHint: {
-    fontSize: 12, color: "var(--mb-ink-4)",
-    marginTop: 24,
+    fontSize: 13, color: "var(--mb-ink-3)",
   },
 };
