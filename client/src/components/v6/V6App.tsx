@@ -174,6 +174,19 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
     return () => window.removeEventListener("smbx:canvas_action", onAction);
   }, []);
 
+  // URL → tab bridge: /how-it-works and /pricing land you in the Learn tab
+  // (footer + bookmarked + shared links). After opening, the URL is rewritten
+  // to "/" so the tab state lives in the hash like the rest of the app.
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path === "/how-it-works" || path === "/pricing") {
+      const section: "how" | "pricing" = path === "/pricing" ? "pricing" : "how";
+      openTab({ id: "tab-learn", kind: "learn", title: "How it works · Pricing", section });
+      window.history.replaceState(null, "", "/" + window.location.hash);
+    }
+  }, []); // mount-only — initial URL routing
+
+
   // ─── Composer state ───
   const [draft, setDraft] = useState("");
   const inputRef = useRef<HTMLTextAreaElement | null>(null);

@@ -116,6 +116,18 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
 
+  // URL → LearnSheet bridge: /how-it-works and /pricing open the sheet on
+  // mount (footer + bookmarked links). URL is rewritten to "/" so subsequent
+  // tab state lives in the hash like the rest of the mobile shell.
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path === "/how-it-works" || path === "/pricing") {
+      const section: "how" | "pricing" = path === "/pricing" ? "pricing" : "how";
+      setLearn({ open: true, section });
+      window.history.replaceState(null, "", "/" + window.location.hash);
+    }
+  }, []); // mount-only
+
   const activeTab: MobileTab = view.kind === "tab" ? (view.tab ?? "today") : "today";
   const onTabChange = (next: MobileTab) => setView({ kind: "tab", tab: next });
   const onChat = () => setChatOpen(true);
