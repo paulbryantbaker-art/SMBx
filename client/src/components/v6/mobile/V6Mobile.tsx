@@ -8,6 +8,7 @@ import { GlassTopBar, LargeTitle } from "./TopBar";
 import { TodayScreen } from "./screens/Today";
 import { PipelineScreen } from "./screens/Pipeline";
 import { BriefScreen } from "./screens/Brief";
+import { DetailScreen } from "./screens/Detail";
 import type { MobileChatBridge, MobileTab, MobileView } from "./types";
 
 const VALID_TABS: MobileTab[] = ["today", "pipeline", "brief"];
@@ -161,7 +162,7 @@ function V6MobileShell({ user, chat: _chat, onSignOut: _onSignOut }: ShellProps)
         />
       )}
       {view.kind === "detail" && (
-        <DetailPlaceholder
+        <DetailScreen
           dealId={view.dealId ?? "unknown"}
           dealTitle={view.dealTitle ?? view.dealId ?? "Deal"}
           onBack={() => setView({ kind: "tab", tab: "today" })}
@@ -190,19 +191,6 @@ function TabPlaceholder({ tab, initials }: { tab: MobileTab; initials: string })
         <div style={S.placeholderHint}>
           {tab} screen lands in phase M{tab === "pipeline" ? "4" : "5"}.
         </div>
-      </div>
-    </div>
-  );
-}
-
-function DetailPlaceholder({ dealId: _dealId, dealTitle, onBack }: { dealId: string; dealTitle: string; onBack: () => void }) {
-  return (
-    <div style={{ minHeight: "100vh", paddingBottom: 140 }}>
-      <GlassTopBar title="Deal" showBack onBack={onBack} initials="" />
-      <LargeTitle>{dealTitle}</LargeTitle>
-      <div style={S.placeholderBody}>
-        <div className="mb-mono" style={S.placeholderTag}>STUB</div>
-        <div style={S.placeholderHint}>Deal detail screen lands in phase M6.</div>
       </div>
     </div>
   );
