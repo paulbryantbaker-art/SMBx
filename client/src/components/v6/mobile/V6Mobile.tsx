@@ -239,11 +239,19 @@ function writeMobileHashState(view: MobileView) {
 
 const S: Record<string, CSSProperties> = {
   root: {
-    minHeight: "100vh",
-    width: "100%",
+    // html/body are locked (height:100%, overflow:hidden) for the V6 desktop
+    // layout, so mobile must be its own scroll container.
+    // touch-action: pan-y opts back into vertical pans (PWA mode sets
+    // touch-action:none on body for the fullscreen-chat architecture).
+    position: "absolute",
+    inset: 0,
+    overflowY: "auto",
+    overflowX: "hidden",
+    WebkitOverflowScrolling: "touch",
+    overscrollBehaviorY: "contain",
+    touchAction: "pan-y",
     background: "var(--mb-bg)",
     paddingBottom: "env(safe-area-inset-bottom, 0px)",
-    position: "relative",
   },
   placeholderBody: {
     padding: "32px 22px",
