@@ -10,6 +10,7 @@ import { PipelineScreen } from "./screens/Pipeline";
 import { BriefScreen } from "./screens/Brief";
 import { DetailScreen } from "./screens/Detail";
 import { ChatSheet } from "./ChatSheet";
+import { LearnSheet } from "./LearnSheet";
 import type { MobileChatBridge, MobileTab, MobileView } from "./types";
 
 const VALID_TABS: MobileTab[] = ["today", "pipeline", "brief"];
@@ -73,6 +74,9 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
       : { kind: "tab", tab: initial.tab }
   );
   const [chatOpen, setChatOpen] = useState(false);
+  const [learn, setLearn] = useState<{ open: boolean; section: "how" | "pricing"; anchor?: string }>({
+    open: false, section: "how",
+  });
 
   // Track --vvh from visualViewport (per architecture_ios_pwa_pill.md)
   useEffect(() => {
@@ -116,6 +120,13 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
   const onTabChange = (next: MobileTab) => setView({ kind: "tab", tab: next });
   const onChat = () => setChatOpen(true);
   const onChatClose = () => setChatOpen(false);
+  const onLearn = (section: "how" | "pricing", anchor?: string) =>
+    setLearn({ open: true, section, anchor });
+  const onLearnClose = () => setLearn(s => ({ ...s, open: false }));
+  const onLearnTalkToYulia = (prompt: string) => {
+    chat.send(prompt);
+    setChatOpen(true);
+  };
 
   const initials = computeInitials(user);
   const isAnon = !user;
@@ -143,6 +154,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
           initials={initials}
           onOpenDeal={onOpenDeal}
           onChat={onChat}
+          onLearn={onLearn}
           onAvatarClick={onAvatarClick}
         />
       )}
@@ -171,6 +183,13 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
       )}
       <TabBar active={activeTab} onChange={onTabChange} onChat={onChat} />
       <ChatSheet open={chatOpen} onClose={onChatClose} chat={chat} />
+      <LearnSheet
+        open={learn.open}
+        onClose={onLearnClose}
+        section={learn.section}
+        anchor={learn.anchor}
+        onTalkToYulia={onLearnTalkToYulia}
+      />
     </div>
   );
 }

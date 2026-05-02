@@ -21,6 +21,7 @@ interface TodayProps {
   initials: string;
   onOpenDeal: (id: string, title: string) => void;
   onChat: () => void;
+  onLearn: (section: "how" | "pricing", anchor?: string) => void;
   onAvatarClick: () => void;
 }
 
@@ -32,7 +33,7 @@ const PIPELINE = [
   { id: "deal-dist",       icon: "default" as YIconKind, name: "Distribution · OH",          sub: "Asking high · margins thin",           action: "get"  as const, price: "Pass" },
 ];
 
-export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onAvatarClick }: TodayProps) {
+export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onLearn, onAvatarClick }: TodayProps) {
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 140 }}>
       <GlassTopBar title="Today" initials={initials} onAvatarClick={onAvatarClick} />
@@ -47,12 +48,15 @@ export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onAvatarClic
         )}
       </div>
 
-      {/* Try this guide — anon only */}
-      {isAnon && (
-        <div style={{ padding: "14px 16px 0" }}>
-          <TryThisCard onChat={onChat} onOpenDeal={() => onOpenDeal("deal-bigfake", "Big Fake Deal · sample")} />
-        </div>
-      )}
+      {/* Explore SMBX — about/learn surface for both anon and authed */}
+      <div style={{ padding: "14px 16px 0" }}>
+        <ExploreCard
+          isAnon={isAnon}
+          onChat={onChat}
+          onOpenDeal={() => onOpenDeal("deal-bigfake", "Big Fake Deal · sample")}
+          onLearn={onLearn}
+        />
+      </div>
 
       {/* Pipeline section — 5 sample deals */}
       <div style={{ marginTop: 24, padding: "0 16px" }}>
@@ -225,25 +229,52 @@ function HeroVisualPursue() {
   );
 }
 
-/* ─── TryThisCard ───────────────────────────────────────── */
+/* ─── ExploreCard ───────────────────────────────────────────
+   About / Learn surface for the mobile Today tab. Mirrors the desktop
+   ABOUT SMBX buttons (How it works · Pricing · Compare plans) but as
+   one textured card with four routes — including the in-app exploration
+   options (sample deal, chat) so a first-time user has a single board
+   that says "here are all the ways in." */
 
-function TryThisCard({ onChat, onOpenDeal }: { onChat: () => void; onOpenDeal: () => void }) {
+function ExploreCard({
+  isAnon, onChat, onOpenDeal, onLearn,
+}: {
+  isAnon: boolean;
+  onChat: () => void;
+  onOpenDeal: () => void;
+  onLearn: (section: "how" | "pricing", anchor?: string) => void;
+}) {
   return (
-    <div className="mb-as-card" style={{ padding: "18px 0 6px", overflow: "hidden" }}>
-      <div style={{ padding: "0 22px 12px" }}>
-        <div className="mb-section-eyebrow">TRY THIS</div>
-        <div className="mb-section-title">Three ways to explore</div>
-        <div style={S.subText}>You&rsquo;re inside a working sample of the app. Pick any path &mdash; no signup.</div>
+    <div style={E.card}>
+      <div style={E.eyebrowSlot}>
+        <div className="mb-eyebrow" style={E.eyebrow}>{isAnon ? "EXPLORE SMBX" : "ABOUT SMBX"}</div>
       </div>
-      <TryRow n={1} title="Open a sample deal"   sub="See Yulia's verdict, recast P&L, drafts" cta="View" onTap={onOpenDeal} />
-      <TryRow n={2} title="Chat with Yulia"      sub={"“What’s worth my time today?” · ask anything"} cta="Chat" onTap={onChat} />
-      <TryRow n={3} title="Read the brief"       sub="Today's 3 picks · 10 min read"           cta="Read" onTap={onOpenDeal} last />
+      <div style={E.titleBlock}>
+        <h3 style={E.h3}>{isAnon ? "Pick a way in." : "Get to know the app."}</h3>
+        <p style={E.tag}>
+          {isAnon
+            ? "Try a sample deal, learn how the methodology works, see what each plan includes, or just ask Yulia."
+            : "How the methodology works, what each plan includes, and a sample deal to play with."}
+        </p>
+      </div>
+      <div style={E.rows}>
+        <ExploreRow icon="pipeline" label="Try a sample deal"  sub="See verdict, recast, drafts"        onTap={onOpenDeal}             />
+        <ExploreRow icon="brief"    label="How it works"       sub="4 journeys × 6 gates · 22 formulas" onTap={() => onLearn("how")}   />
+        <ExploreRow icon="brief"    label="Pricing"            sub="Free + 4 paid tiers"                onTap={() => onLearn("pricing")} />
+        <ExploreRow icon="chat"     label="Chat with Yulia"    sub="Ask anything — no signup needed"    onTap={onChat} last            />
+      </div>
     </div>
   );
 }
 
-function TryRow({ n, title, sub, cta, onTap, last }: {
-  n: number; title: string; sub: string; cta: string; onTap: () => void; last?: boolean;
+function ExploreRow({
+  icon, label, sub, onTap, last,
+}: {
+  icon: "pipeline" | "brief" | "chat";
+  label: string;
+  sub: string;
+  onTap: () => void;
+  last?: boolean;
 }) {
   return (
     <div
@@ -253,24 +284,25 @@ function TryRow({ n, title, sub, cta, onTap, last }: {
       onClick={onTap}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onTap(); } }}
       style={{
-        display: "flex", alignItems: "center", gap: 14,
-        padding: "12px 22px",
-        borderBottom: last ? "none" : "0.5px solid var(--mb-line-2)",
-        marginLeft: 22, paddingLeft: 0,
+        display: "flex", alignItems: "center", gap: 12,
+        padding: "12px 14px",
+        borderRadius: 14,
+        background: "rgba(255,255,255,0.10)",
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
+        border: "0.5px solid rgba(255,255,255,0.14)",
+        marginBottom: last ? 0 : 8,
         cursor: "pointer",
       }}
     >
-      <div style={S.tryNum}>{n}</div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={S.tryTitle}>{title}</div>
-        <div style={S.trySub}>{sub}</div>
+      <div style={E.rowGlyph}>
+        <MobileIcon name={icon} c="#fff" size={18} />
       </div>
-      <button
-        type="button"
-        className="mb-get-pill"
-        style={{ padding: "5px 16px", fontSize: 13, marginRight: 22, flexShrink: 0 }}
-        onClick={(e) => { e.stopPropagation(); onTap(); }}
-      >{cta}</button>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={E.rowLabel}>{label}</div>
+        <div style={E.rowSub}>{sub}</div>
+      </div>
+      <span style={E.rowChevron} aria-hidden="true">↗</span>
     </div>
   );
 }
@@ -395,5 +427,61 @@ const H: Record<string, CSSProperties> = {
   metaText: {
     fontSize: 10.5, color: "rgba(255,255,255,0.75)",
     letterSpacing: "0.1em", fontWeight: 600,
+  },
+};
+
+/* ─── ExploreCard styles ─────────────────────────────────
+   Different texture from WelcomeHero — sunrise stays warm and editorial,
+   Explore uses texture-buyers.png with a cooler periwinkle wash that ties
+   to the V6 mobile accent (#8A9AE8 per architecture_v6_mobile.md). */
+const E: Record<string, CSSProperties> = {
+  card: {
+    borderRadius: 22,
+    backgroundImage:
+      "linear-gradient(165deg, rgba(95,115,200,0.46) 0%, rgba(50,72,160,0.78) 100%), url('/textures/texture-buyers.png')",
+    backgroundSize: "cover, cover",
+    backgroundPosition: "center, center",
+    backgroundRepeat: "no-repeat, no-repeat",
+    color: "#fff",
+    overflow: "hidden",
+    boxShadow: "0 12px 28px -10px rgba(0,0,0,0.25)",
+    padding: "20px 16px 16px",
+    position: "relative",
+  },
+  eyebrowSlot: { padding: "0 6px 4px" },
+  eyebrow: {
+    color: "rgba(255,255,255,0.85)",
+    fontWeight: 700,
+  },
+  titleBlock: { padding: "0 6px 14px" },
+  h3: {
+    fontFamily: "var(--mb-font-display)", fontWeight: 800,
+    fontSize: 22, letterSpacing: "-0.5px",
+    lineHeight: 1.12, margin: "4px 0 0", color: "#fff",
+    textWrap: "balance",
+  },
+  tag: {
+    fontSize: 13.5, color: "rgba(255,255,255,0.85)",
+    margin: "8px 0 0", lineHeight: 1.4,
+    textWrap: "pretty",
+  },
+  rows: { display: "flex", flexDirection: "column" },
+  rowGlyph: {
+    width: 34, height: 34, borderRadius: 10,
+    background: "rgba(255,255,255,0.16)",
+    display: "grid", placeItems: "center",
+    flexShrink: 0,
+  },
+  rowLabel: {
+    fontSize: 14.5, fontWeight: 600, color: "#fff",
+    letterSpacing: "-0.2px", lineHeight: 1.2,
+  },
+  rowSub: {
+    fontSize: 12, color: "rgba(255,255,255,0.78)",
+    marginTop: 2, lineHeight: 1.35,
+  },
+  rowChevron: {
+    fontSize: 14, color: "rgba(255,255,255,0.78)",
+    marginLeft: 4, marginRight: 2, flexShrink: 0,
   },
 };
