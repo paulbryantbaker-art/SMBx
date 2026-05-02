@@ -72,12 +72,7 @@ export function BriefScreen({ isAnon, initials, onOpenDeal, onAvatarClick }: Bri
               Recurring revenue, honest add-backs, and one I&rsquo;d pass on.
             </p>
           </div>
-          <div style={{ height: 80, position: "relative" }} aria-hidden="true">
-            <svg viewBox="0 0 360 80" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
-              <path d="M0 60 L40 50 L80 55 L120 40 L160 35 L200 25 L240 30 L280 18 L320 22 L360 10 L360 80 L0 80 Z" fill="rgba(255,255,255,0.12)"/>
-              <path d="M0 60 L40 50 L80 55 L120 40 L160 35 L200 25 L240 30 L280 18 L320 22 L360 10" stroke="#fff" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.95"/>
-            </svg>
-          </div>
+          <div style={{ height: 32 }} aria-hidden="true" />
         </div>
       </div>
 
@@ -157,7 +152,7 @@ const Br: Record<string, CSSProperties> = {
   editorial: {
     borderRadius: 22, overflow: "hidden",
     backgroundImage:
-      "linear-gradient(165deg, rgba(170,140,90,0.06) 0%, rgba(120,90,40,0.34) 100%), url('/textures/texture-sunrise.png')",
+      "linear-gradient(165deg, rgba(140,98,42,0.40) 0%, rgba(85,55,18,0.72) 100%), url('/textures/texture-sunrise.png')",
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     backgroundRepeat: "no-repeat, no-repeat",

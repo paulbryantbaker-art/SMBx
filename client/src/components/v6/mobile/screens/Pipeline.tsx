@@ -227,7 +227,7 @@ const P: Record<string, CSSProperties> = {
   featured: {
     borderRadius: 18, overflow: "hidden",
     backgroundImage:
-      "linear-gradient(160deg, rgba(127,168,217,0.10) 0%, rgba(74,122,176,0.42) 100%), url('/textures/texture-baseline.png')",
+      "linear-gradient(160deg, rgba(60,108,168,0.42) 0%, rgba(25,68,118,0.72) 100%), url('/textures/texture-baseline.png')",
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     backgroundRepeat: "no-repeat, no-repeat",

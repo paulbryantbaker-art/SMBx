@@ -190,11 +190,11 @@ type ArtifactKind = "recast" | "baseline" | "buyers" | "ioi";
 // textures would weaken the IOI/LOI doc gravitas.
 const ARTIFACT_BG: Record<ArtifactKind, string> = {
   recast:
-    "linear-gradient(160deg, rgba(95,168,138,0.10) 0%, rgba(63,138,106,0.40) 100%), url('/textures/texture-pursue.png')",
+    "linear-gradient(160deg, rgba(48,108,80,0.44) 0%, rgba(18,68,46,0.74) 100%), url('/textures/texture-pursue.png')",
   baseline:
-    "linear-gradient(160deg, rgba(127,168,217,0.10) 0%, rgba(74,122,176,0.40) 100%), url('/textures/texture-baseline.png')",
+    "linear-gradient(160deg, rgba(60,108,168,0.44) 0%, rgba(25,68,118,0.74) 100%), url('/textures/texture-baseline.png')",
   buyers:
-    "linear-gradient(160deg, rgba(155,124,210,0.10) 0%, rgba(112,80,170,0.42) 100%), url('/textures/texture-buyers.png')",
+    "linear-gradient(160deg, rgba(95,68,150,0.44) 0%, rgba(60,38,108,0.74) 100%), url('/textures/texture-buyers.png')",
   ioi:
     "linear-gradient(160deg, #3A4150, #1A2233)",
 };

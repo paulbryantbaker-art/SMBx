@@ -174,10 +174,10 @@ const HERO_TEXTURE: Record<HeroKind, string> = {
   welcome: "/textures/texture-sunrise.png",
 };
 const HERO_OVERLAY: Record<HeroKind, string> = {
-  pursue:  "linear-gradient(165deg, rgba(95,168,138,0.10) 0%, rgba(63,138,106,0.42) 100%)",
-  watch:   "linear-gradient(165deg, rgba(214,163,92,0.08) 0%, rgba(156,113,40,0.40) 100%)",
-  pass:    "linear-gradient(165deg, rgba(216,139,132,0.10) 0%, rgba(168,82,72,0.40) 100%)",
-  welcome: "linear-gradient(165deg, rgba(170,140,90,0.06) 0%, rgba(120,90,40,0.34) 100%)",
+  pursue:  "linear-gradient(165deg, rgba(48,108,80,0.42) 0%, rgba(18,68,46,0.74) 100%)",
+  watch:   "linear-gradient(165deg, rgba(150,108,40,0.42) 0%, rgba(95,65,18,0.74) 100%)",
+  pass:    "linear-gradient(165deg, rgba(170,72,60,0.42) 0%, rgba(120,40,32,0.74) 100%)",
+  welcome: "linear-gradient(165deg, rgba(140,98,42,0.40) 0%, rgba(85,55,18,0.72) 100%)",
 };
 
 function HeroFrame({
@@ -214,22 +214,12 @@ function HeroFrame({
 function HeroVisualPursue() {
   return (
     <div style={{ position: "relative", height: 280, overflow: "hidden" }} aria-hidden="true">
-      <div style={{ position: "absolute", top: -60, right: -40, width: 240, height: 240, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.22), transparent 60%)" }}/>
-      <div style={{ position: "absolute", bottom: -80, left: -30, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.12), transparent 60%)" }}/>
-      <svg viewBox="0 0 360 280" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
-        <defs>
-          <linearGradient id="mb-spark-fill" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="rgba(255,255,255,0.18)"/>
-            <stop offset="100%" stopColor="rgba(255,255,255,0)"/>
-          </linearGradient>
-        </defs>
-        <path d="M0 220 L40 210 L80 200 L120 180 L160 168 L200 140 L240 110 L280 90 L320 70 L360 50 L360 280 L0 280 Z" fill="url(#mb-spark-fill)"/>
-        <path d="M0 220 L40 210 L80 200 L120 180 L160 168 L200 140 L240 110 L280 90 L320 70 L360 50" stroke="#fff" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.95"/>
-      </svg>
+      <div style={{ position: "absolute", top: -60, right: -40, width: 240, height: 240, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.18), transparent 60%)" }}/>
+      <div style={{ position: "absolute", bottom: -80, left: -30, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.10), transparent 60%)" }}/>
       <div style={{ position: "absolute", bottom: 18, right: 22, textAlign: "right" }}>
-        <div className="mb-mono" style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", letterSpacing: 0.1 }}>SDE</div>
+        <div className="mb-mono" style={{ fontSize: 11, color: "rgba(255,255,255,0.78)", letterSpacing: 0.1 }}>SDE</div>
         <div style={{ fontFamily: "var(--mb-font-display)", fontWeight: 800, fontSize: 56, letterSpacing: -2, lineHeight: 1, color: "#fff" }}>$1.80M</div>
-        <div className="mb-mono" style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", marginTop: 2 }}>+$760K NORMALIZED</div>
+        <div className="mb-mono" style={{ fontSize: 11, color: "rgba(255,255,255,0.78)", marginTop: 2 }}>+$760K NORMALIZED</div>
       </div>
     </div>
   );
