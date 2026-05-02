@@ -6,6 +6,8 @@ import type { User } from "../../../hooks/useAuth";
 import { TabBar } from "./TabBar";
 import { GlassTopBar, LargeTitle } from "./TopBar";
 import { TodayScreen } from "./screens/Today";
+import { PipelineScreen } from "./screens/Pipeline";
+import { BriefScreen } from "./screens/Brief";
 import type { MobileChatBridge, MobileTab, MobileView } from "./types";
 
 const VALID_TABS: MobileTab[] = ["today", "pipeline", "brief"];
@@ -142,8 +144,21 @@ function V6MobileShell({ user, chat: _chat, onSignOut: _onSignOut }: ShellProps)
           onAvatarClick={onAvatarClick}
         />
       )}
-      {view.kind === "tab" && activeTab !== "today" && (
-        <TabPlaceholder tab={activeTab} initials={initials} />
+      {view.kind === "tab" && activeTab === "pipeline" && (
+        <PipelineScreen
+          isAnon={isAnon}
+          initials={initials}
+          onOpenDeal={onOpenDeal}
+          onAvatarClick={onAvatarClick}
+        />
+      )}
+      {view.kind === "tab" && activeTab === "brief" && (
+        <BriefScreen
+          isAnon={isAnon}
+          initials={initials}
+          onOpenDeal={onOpenDeal}
+          onAvatarClick={onAvatarClick}
+        />
       )}
       {view.kind === "detail" && (
         <DetailPlaceholder
