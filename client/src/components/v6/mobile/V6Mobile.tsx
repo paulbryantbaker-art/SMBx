@@ -5,6 +5,7 @@ import { useAuthChat } from "../../../hooks/useAuthChat";
 import type { User } from "../../../hooks/useAuth";
 import { TabBar } from "./TabBar";
 import { GlassTopBar, LargeTitle } from "./TopBar";
+import { TodayScreen } from "./screens/Today";
 import type { MobileChatBridge, MobileTab, MobileView } from "./types";
 
 const VALID_TABS: MobileTab[] = ["today", "pipeline", "brief"];
@@ -110,20 +111,44 @@ function V6MobileShell({ user, chat: _chat, onSignOut: _onSignOut }: ShellProps)
   const activeTab: MobileTab = view.kind === "tab" ? (view.tab ?? "today") : "today";
   const onTabChange = (next: MobileTab) => setView({ kind: "tab", tab: next });
   const onChat = () => setChatOpen(true);
-  const _ = chatOpen; // chat sheet lands in M7
-  const __ = setChatOpen;
-  const ___ = navigate;
+  const _chatPlaceholder = chatOpen; // chat sheet lands in M7
+  const _setChat = setChatOpen;
+  const _nav = navigate;
+  void _chatPlaceholder; void _setChat; void _nav;
 
   const initials = computeInitials(user);
+  const isAnon = !user;
+
+  const onOpenDeal = (id: string, title: string) => {
+    setView({ kind: "detail", dealId: id, dealTitle: title });
+  };
+  const onAvatarClick = () => {
+    if (user) {
+      // simple sign-out for now; M8 will add a proper account sheet
+      void _onSignOut();
+    } else {
+      navigate("/login");
+    }
+  };
 
   return (
     <div className="mobile-root" style={S.root}>
-      {view.kind === "tab" && (
-        <TabScreen tab={activeTab} initials={initials} />
+      {view.kind === "tab" && activeTab === "today" && (
+        <TodayScreen
+          isAnon={isAnon}
+          initials={initials}
+          onOpenDeal={onOpenDeal}
+          onChat={onChat}
+          onAvatarClick={onAvatarClick}
+        />
+      )}
+      {view.kind === "tab" && activeTab !== "today" && (
+        <TabPlaceholder tab={activeTab} initials={initials} />
       )}
       {view.kind === "detail" && (
         <DetailPlaceholder
           dealId={view.dealId ?? "unknown"}
+          dealTitle={view.dealTitle ?? view.dealId ?? "Deal"}
           onBack={() => setView({ kind: "tab", tab: "today" })}
         />
       )}
@@ -132,7 +157,7 @@ function V6MobileShell({ user, chat: _chat, onSignOut: _onSignOut }: ShellProps)
   );
 }
 
-/* ─── Per-tab screen placeholder ─────────────────────────── */
+/* ─── Per-tab screen placeholder (M4/M5) ─────────────────── */
 
 const TAB_TITLES: Record<MobileTab, string> = {
   today: "Today",
@@ -140,28 +165,28 @@ const TAB_TITLES: Record<MobileTab, string> = {
   brief: "Brief",
 };
 
-function TabScreen({ tab, initials }: { tab: MobileTab; initials: string }) {
+function TabPlaceholder({ tab, initials }: { tab: MobileTab; initials: string }) {
   return (
     <div style={{ minHeight: "100vh", paddingBottom: 140 }}>
       <GlassTopBar title={TAB_TITLES[tab]} initials={initials} />
       <LargeTitle>{TAB_TITLES[tab]}</LargeTitle>
       <div style={S.placeholderBody}>
-        <div className="mb-mono" style={S.placeholderTag}>STUB · PHASE M2</div>
+        <div className="mb-mono" style={S.placeholderTag}>STUB</div>
         <div style={S.placeholderHint}>
-          {tab} screen lands in phase M{tab === "today" ? "3" : tab === "pipeline" ? "4" : "5"}.
+          {tab} screen lands in phase M{tab === "pipeline" ? "4" : "5"}.
         </div>
       </div>
     </div>
   );
 }
 
-function DetailPlaceholder({ dealId, onBack }: { dealId: string; onBack: () => void }) {
+function DetailPlaceholder({ dealId: _dealId, dealTitle, onBack }: { dealId: string; dealTitle: string; onBack: () => void }) {
   return (
     <div style={{ minHeight: "100vh", paddingBottom: 140 }}>
       <GlassTopBar title="Deal" showBack onBack={onBack} initials="" />
-      <LargeTitle>{dealId}</LargeTitle>
+      <LargeTitle>{dealTitle}</LargeTitle>
       <div style={S.placeholderBody}>
-        <div className="mb-mono" style={S.placeholderTag}>STUB · PHASE M2</div>
+        <div className="mb-mono" style={S.placeholderTag}>STUB</div>
         <div style={S.placeholderHint}>Deal detail screen lands in phase M6.</div>
       </div>
     </div>
