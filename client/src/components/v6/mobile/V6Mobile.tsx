@@ -79,11 +79,29 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
   });
 
   // Track --vvh from visualViewport (per architecture_ios_pwa_pill.md)
+  // and reconcile html/body bg + theme-color with the mobile palette so
+  // viewport-fit=cover doesn't expose a colored chin (was #F6F7F9 from
+  // the desktop fight-of-paint inline script in index.html).
   useEffect(() => {
     document.documentElement.classList.add("mobile-pwa-active");
+
+    // Save and override html bg + theme-color for the mobile session.
+    const prevHtmlBg = document.documentElement.style.backgroundColor;
+    const prevBodyBg = document.body.style.backgroundColor;
+    document.documentElement.style.backgroundColor = "#FFFFFF";
+    document.body.style.backgroundColor = "#FFFFFF";
+    const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    const prevThemeColor = themeMeta?.getAttribute("content") ?? null;
+    if (themeMeta) themeMeta.setAttribute("content", "#FFFFFF");
+
     const vv = window.visualViewport;
     if (!vv) {
-      return () => document.documentElement.classList.remove("mobile-pwa-active");
+      return () => {
+        document.documentElement.classList.remove("mobile-pwa-active");
+        document.documentElement.style.backgroundColor = prevHtmlBg;
+        document.body.style.backgroundColor = prevBodyBg;
+        if (themeMeta && prevThemeColor !== null) themeMeta.setAttribute("content", prevThemeColor);
+      };
     }
     const setVVH = () => {
       const vvh = `${vv.height}px`;
@@ -98,6 +116,9 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
       document.documentElement.classList.remove("mobile-pwa-active");
       document.body.style.removeProperty("--vvh");
       document.body.style.removeProperty("--vvs");
+      document.documentElement.style.backgroundColor = prevHtmlBg;
+      document.body.style.backgroundColor = prevBodyBg;
+      if (themeMeta && prevThemeColor !== null) themeMeta.setAttribute("content", prevThemeColor);
     };
   }, []);
 

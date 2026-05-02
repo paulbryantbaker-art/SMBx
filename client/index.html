@@ -2,15 +2,17 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- NOTE on viewport-fit: Grok/ChatGPT PWAs deliberately OMIT
-         `viewport-fit=cover`. Without it, iOS sizes the webview to the
-         visible area and paints the status-bar + home-indicator safe
-         regions with `theme-color` automatically — no visible "chin."
-         With cover, the webview extends edge-to-edge and html bg fills
-         safe areas; any mismatch shows as a seam. We match the Grok
-         approach. If ever re-enabling cover, compensate with explicit
-         safe-area padding everywhere content ends. -->
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, interactive-widget=resizes-content" />
+    <!-- viewport-fit=cover: restored 2026-05-02 so the app bleeds edge-
+         to-edge behind iOS Safari's translucent URL bar / toolbar (App
+         Store look). Was previously omitted because it produced a
+         visible "chin" in installed PWA — that chin happened when the
+         webview extended past body and html bg didn't match. Compensated
+         here by matching html bg to mobile's --mb-bg (#FFFFFF) at runtime
+         in V6Mobile, and by safe-area-inset padding on every chrome
+         element (TopBar spacer, TabBar bottom, mobile-root paddingBottom).
+         If you ever see a colored seam at the bottom in PWA again, check
+         html bg + theme-color first. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, interactive-widget=resizes-content, viewport-fit=cover" />
     <link rel="manifest" href="/manifest.json" />
     <title>smbx.ai — M&amp;A workspace</title>
     <meta name="description" content="Yulia is the deal team you hire. M&amp;A deal work end-to-end — recasts, baselines, buyer lists, IOIs. $149/mo flat. No success fees, ever." />
