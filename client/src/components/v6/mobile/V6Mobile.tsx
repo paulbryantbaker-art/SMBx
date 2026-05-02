@@ -63,7 +63,7 @@ interface ShellProps {
   onSignOut: () => void;
 }
 
-function V6MobileShell({ user, chat, onSignOut: _onSignOut }: ShellProps) {
+function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
   const [, navigate] = useLocation();
 
   const initial = readMobileHashState();
@@ -124,11 +124,14 @@ function V6MobileShell({ user, chat, onSignOut: _onSignOut }: ShellProps) {
     setView({ kind: "detail", dealId: id, dealTitle: title });
   };
   const onAvatarClick = () => {
-    if (user) {
-      // simple sign-out for now; M8 will add a proper account sheet
-      void _onSignOut();
-    } else {
+    if (!user) {
       navigate("/login");
+      return;
+    }
+    // Authed: minimal confirm flow until a proper account sheet lands.
+    // Avoids accidental sign-out on a mistap.
+    if (typeof window !== "undefined" && window.confirm("Sign out of smbx.ai?")) {
+      onSignOut();
     }
   };
 
