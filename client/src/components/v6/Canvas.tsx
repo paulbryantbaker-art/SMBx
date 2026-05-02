@@ -112,7 +112,7 @@ function V6TabContent({ tab, openTab, onTalkToYulia }: TabContentProps) {
   if (tab.kind === "doc")      return <V6DocView title={tab.title} />;
   if (tab.kind === "analysis") return <V6AnalysisView title={tab.title} />;
   if (tab.kind === "feed-item") return <Placeholder label={`Feed · ${tab.title}`} note="Feed item reading view is a thin wrapper — coming after polish." />;
-  if (tab.kind === "learn")    return <V6LearnView section={tab.section} onTalkToYulia={onTalkToYulia} />;
+  if (tab.kind === "learn")    return <V6LearnView section={tab.section} anchor={tab.anchor} onTalkToYulia={onTalkToYulia} />;
   return <Placeholder label="Unknown tab" />;
 }
 

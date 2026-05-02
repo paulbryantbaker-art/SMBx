@@ -5,21 +5,33 @@ type Billing = "monthly" | "annual";
 
 interface LearnProps {
   section?: Section;
+  anchor?: string;
   onTalkToYulia?: (prompt: string) => void;
 }
 
-export function V6LearnView({ section, onTalkToYulia }: LearnProps) {
+export function V6LearnView({ section, anchor, onTalkToYulia }: LearnProps) {
   const [active, setActive] = useState<Section>(section ?? "how");
   useEffect(() => { if (section) setActive(section); }, [section]);
+
+  // Scroll to anchor whenever an anchor arrives — wait one frame so the
+  // newly-active section has mounted its DOM before we try to find it.
+  useEffect(() => {
+    if (!anchor) return;
+    const raf = requestAnimationFrame(() => {
+      const el = document.getElementById(anchor);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [anchor, active]);
 
   return (
     <div className="m-fade-up" style={{ width: "100%" }}>
       <header style={L.hero}>
         <div style={L.heroGlow} aria-hidden="true" />
         <div className="mono" style={L.heroEyebrow}>ABOUT SMBX · YULIA</div>
-        <h1 style={L.heroH1}>The chat-first M&amp;A workspace built for solo searchers.</h1>
+        <h1 style={L.heroH1}>A deal team that runs the playbook. So you can run the deal.</h1>
         <p style={L.heroTag}>
-          Yulia surfaces the right deals, drafts the docs, and runs the math &mdash; so you can focus on judgment, not busy-work.
+          Built for the people who run M&amp;A processes &mdash; bankers, brokers, advisors, searchers, principals. Yulia handles the production work the methodology demands. You bring the judgment, the relationships, and the call.
         </p>
       </header>
 
@@ -55,53 +67,55 @@ export function V6LearnView({ section, onTalkToYulia }: LearnProps) {
 interface LoopStep { n: string; title: string; body: string; chip: string }
 
 const LOOP: LoopStep[] = [
-  { n: "01", title: "Yulia surfaces deals",   body: "She watches the listings you'd watch — BizBuySell, DealStream, broker emails — and ranks what's worth your 10 minutes.", chip: "Business Search" },
-  { n: "02", title: "You read, ask, recast",  body: "Open a CIM. Yulia drafts a recast P&L, runs comps, and answers questions. Numbers update live as you push assumptions.", chip: "Analysis" },
-  { n: "03", title: "Drafts that close",      body: "LOIs, NDAs, diligence checklists, deal memos — generated from your context, ready to send.", chip: "Docs" },
+  { n: "01", title: "Source",     body: "Census + Places + your own pipeline feed the 5-stage sourcing engine. Every prospect ranked by 6-dimension fit against your thesis or mandate.",                                  chip: "Business Search" },
+  { n: "02", title: "Diligence",  body: "Open a CIM. Yulia produces ValueLens, recast P&L, Seven-Factor Analysis, working capital peg, and QoE Lite — all from the documents on the page, with every number traceable.", chip: "Analysis"        },
+  { n: "03", title: "Decide",     body: "LOI, counter-proposal, term sheet analysis, IC memo, board pack, LP update — drafted in your voice, ready to review and send.",                                                  chip: "Docs"            },
 ];
 
 interface Capability { tag: string; title: string; body: string }
 
 const CAPABILITIES: Capability[] = [
-  { tag: "RECAST",    title: "P&L recast in seconds",   body: "Strip owner perks, normalize comp, expose true SDE. With sources." },
-  { tag: "COMPS",     title: "Comparables, on demand",  body: "Pull recent multiples for the sector — geo, size, recency filters." },
-  { tag: "VALUATION", title: "DCF + LBO + IRR",         body: "Slider-driven sensitivity. SBA structures pre-checked. Newton-Raphson IRR." },
-  { tag: "QoE",       title: "Quality of earnings",     body: "Flag concentration, working-capital traps, owner dependence." },
-  { tag: "BUYER FIT", title: "Pursue / Watch / Pass",   body: "She knows your thesis. Every deal scored on fit, not just multiples." },
-  { tag: "DRAFTING",  title: "LOIs, NDAs, memos",       body: "Templates filled with context — your terms, the deal's specifics." },
+  { tag: "VALUELENS",   title: "ValueLens · the first read",       body: "Recast P&L, normalized SDE/EBITDA, blended valuation range — minutes from upload to PDF you can hand a client."         },
+  { tag: "SEVEN-FACTOR", title: "Seven-Factor Analysis",            body: "Diversification, dependency, financial integrity, owner role, market position, growth profile, risk concentration."     },
+  { tag: "VALUATION",   title: "Valuation engine · 22 formulas",   body: "DCF, LBO, IRR (Newton-Raphson), MOIC, DSCR with SBA structures pre-checked, sensitivity matrix on any 2 vars."          },
+  { tag: "QoE LITE",    title: "Quality-of-earnings pre-read",     body: "Add-back defensibility, working-capital traps, customer concentration, key-person risk — the conversation you need first." },
+  { tag: "CIM + TEASER", title: "CIM, blind teaser, pitch deck",   body: "10–60 page CIM, league-adapted; 22x-compliant for advisors. Blind teaser for outreach. Deck for the IC meeting."        },
+  { tag: "DRAFTING",    title: "LOI, counter, IC memo, LP update", body: "Every legal and communication artifact with the deal's context baked in — never a blank-page restart."                  },
 ];
 
 interface Stat { stat: string; label: string }
 
 const WHY_STATS: Stat[] = [
-  { stat: "10×",   label: "more deals reviewed per week" },
-  { stat: "2 hrs", label: "saved per CIM, on average"    },
-  { stat: "$0",    label: "spent on a junior analyst"    },
+  { stat: "4 × 6",  label: "journeys × gates · SELL, BUY, RAISE, PMI"      },
+  { stat: "22",     label: "deterministic formulas · sub-16ms · auditable" },
+  { stat: "28",     label: "tier-routed deliverable generators"            },
 ];
 
 interface Faq { q: string; a: string }
 
 const FAQS: Faq[] = [
-  { q: "Where does the data come from?",
-    a: "Public listings (BizBuySell, DealStream, broker sites), the documents you upload, and your own notes. Yulia never trains on your deals." },
-  { q: "Is my deal flow private?",
-    a: "Yes. Your workspace is fully isolated. We don't share, sell, or train on your conversations or files. SOC 2 Type II in progress." },
-  { q: "Can Yulia replace a CPA or attorney?",
-    a: "No. She'll draft and flag, but you should still have a real attorney for the close and a CPA for taxes. We'll surface where you need one." },
-  { q: "What about LBO models or fancy IRR?",
-    a: "All shipping. SDE recast, comps, LBO, DCF + IRR (Newton-Raphson), DSCR with SBA structures, sensitivity matrices, cap-table dilution + exit waterfall — 22 formula types in the calc engine." },
-  { q: "What happens when I hit the free deliverable limit?",
-    a: "Chat stays free forever. When you want a second deliverable — another ValueLens, deal score, recast, or draft — you pick a plan. No surprises, no auto-charge." },
-  { q: "Does it work on mobile?",
-    a: "Yes. Mobile is a separate experience optimized for one-handed reading on the go." },
-  { q: "Can I cancel anytime?",
-    a: "Yes. Cancel from the workspace. No penalty, no proration confusion." },
+  { q: "I'm a broker / banker / advisor. Where does Yulia fit in my workflow?",
+    a: "Yulia runs the production work — ValueLens, CIM, recast, working capital peg, LOI counter, LP update — so your hours go to the seller meeting, the buyer call, the negotiation, and the relationship. The 22x-compliant Broker Listing Generator and Day Pass tokens for your CPAs, lenders, and counsel are built specifically for advisor workflows. Brokers and bankers are customers, not competitors." },
+  { q: "How does Yulia know which playbook to run?",
+    a: "Three signals: journey (SELL, BUY, RAISE, or PMI), gate (which of the six steps you're in), and league (deal size, L1 sub-$500K SDE through L6 $50M+ EBITDA). The persona shifts with the league — Coach voice for L1 owner-operator add-back questions, Partner voice for L5 strategic premium, Macro for L6 antitrust. Same engine, different register." },
+  { q: "Is the math actually deterministic, or is an LLM doing arithmetic?",
+    a: "Deterministic. All 22 formulas live as pure JavaScript — sub-16ms, same inputs → same outputs every time, fully auditable. The LLM owns the narrative (why this multiple, what changes the answer, how to position the counter). The code owns every number." },
+  { q: "What deliverables does Yulia actually produce?",
+    a: "28 generators across five categories — narrative reports (ValueLens, Seven-Factor, market intel) as PDF; marketing docs (CIM, blind teaser, pitch deck); financial models (pro forma, LBO, SBA, cap table, working capital) as XLSX with live formulas; legal templates (LOI, term sheet, DD checklist) as DOCX; and operational plans (PMI integration, employee comms, day-zero checklist)." },
+  { q: "What won't Yulia do?",
+    a: "Yulia never represents either side, never contacts your counterparty, never holds funds, and never charges success fees. Every tax analysis ends with \"your CPA should confirm.\" Every legal output ends with \"your M&A attorney will draft the actual documents.\" Every drafted email ends with \"review and send when ready — adjust to match your style.\" Drafts and models, never decisions." },
+  { q: "What happens after I hit the free deliverable limit?",
+    a: "Chat stays free, unlimited, forever. When you want a second deliverable — another ValueLens, Seven-Factor, recast, draft — you pick a plan. The cap is total, not monthly, and there's no auto-charge. The intent is for you to get one real artifact in your hands before deciding." },
+  { q: "Where does my data live and who sees it?",
+    a: "PostgreSQL on Railway, isolated per workspace. Anthropic and Google process model calls under their enterprise API terms (no training on your data). On Enterprise, single-tenant deployment and SOC 2 audit trails are available. Day Pass tokens for external advisors are scoped to a single deal and expire in 48 hours." },
+  { q: "How is this different from ChatGPT with a custom prompt?",
+    a: "ChatGPT is the engine. The methodology — gates, league logic, deterministic formulas, deal memory across sessions, 28 tier-routed generators, sourcing pipeline against Census + Places, audit trail, regulatory guardrails — is the harness. A practitioner can replicate any one capability with a weekend and ChatGPT Plus. They can't replicate twelve, integrated, on the same deal context." },
 ];
 
 function HowSection() {
   return (
     <div>
-      <LearnSection eyebrow="THE LOOP" title="How a deal moves through Yulia" sub="Source → diligence → decision. Yulia keeps context across all three.">
+      <LearnSection eyebrow="THE LOOP" title="How a deal moves through Yulia" sub="Source → diligence → decision. Yulia carries the context across all three.">
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14 }}>
           {LOOP.map(s => (
             <div key={s.n} className="m-card" style={{ padding: "20px 22px" }}>
@@ -114,7 +128,7 @@ function HowSection() {
         </div>
       </LearnSection>
 
-      <LearnSection eyebrow="CAPABILITIES" title="What Yulia can do" sub="Six things she does better than scrambling in spreadsheets.">
+      <LearnSection id="capabilities" eyebrow="CAPABILITIES" title="What Yulia does" sub="The production work the methodology demands — for the people running the deal.">
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
           {CAPABILITIES.map(c => (
             <div key={c.title} className="m-card filled-tonal" style={{ padding: "16px 18px" }}>
@@ -126,13 +140,11 @@ function HowSection() {
         </div>
       </LearnSection>
 
-      <LearnSection eyebrow="WHY" title="Built for searchers, not bankers" sub="Most M&A tools assume you have a 12-person team. You don't.">
+      <LearnSection eyebrow="WHY" title="Built for the people running the deal" sub="Bankers, brokers, advisors, searchers, principals — same engine, different seat.">
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 18 }}>
           <div className="m-card" style={{ padding: "24px 28px" }}>
             <p style={H.whyBody}>
-              <strong>The solo searcher problem:</strong> you&rsquo;re sourcing 200 deals a year, qualifying 30, going deep on 5, and closing 1.
-              Every step costs hours. Every CIM is a different format. Every recast is rebuilt from scratch. Yulia is the analyst, banker, and lawyer
-              you can&rsquo;t yet afford &mdash; already up to speed on every deal you&rsquo;ve touched.
+              <strong>The deal team problem:</strong> every engagement runs on a sequence — what gets diagnosed at S1, what gets produced at S3, what closes at S5. Across SELL, BUY, RAISE, and PMI, that&rsquo;s 24 gates of analysis, modeling, drafting, and coordination. Yulia runs the playbook with you so the production work doesn&rsquo;t pull you off the seller meeting, the buyer call, or the negotiation that only you can do.
             </p>
           </div>
           <div className="m-card filled-tonal" style={{ padding: "24px 28px" }}>
@@ -148,7 +160,7 @@ function HowSection() {
         </div>
       </LearnSection>
 
-      <LearnSection eyebrow="FAQ" title="The honest answers">
+      <LearnSection eyebrow="FAQ" title="The questions practitioners ask">
         <div className="m-card" style={{ padding: 0, overflow: "hidden" }}>
           {FAQS.map((f, i) => (
             <FaqRow key={f.q} q={f.q} a={f.a} last={i === FAQS.length - 1} />
@@ -269,7 +281,7 @@ const PLANS: Plan[] = [
     features: [
       "Yulia chat — unlimited",
       "1 finished deliverable, ever",
-      "Recast + Baseline™ valuation",
+      "Recast + ValueLens valuation",
       "Buyer-list engine · preview",
       "SBA + structure modeling · preview",
     ],
@@ -300,7 +312,7 @@ const PLANS: Plan[] = [
     features: [
       "QofE Lite pre-read — the wedge",
       "Parallel-deal pipeline view",
-      "22-gate deal scoring",
+      "Seven-Factor deal scoring",
       "Sector-tuned buyer universes",
       "Audience-variant memos · LP, IC, board",
       "Negotiation tactics + counter drafting",
@@ -353,7 +365,7 @@ const COMPARE: CompareGroup[] = [
     title: "The basics — every paid tier",
     rows: [
       { feature: "Yulia chat — unlimited",            cells: ["✓",          "✓",         "✓",         "✓",         "✓"] },
-      { feature: "Recast + Baseline™ valuation", cells: ["✓",          "✓",         "✓",         "✓",         "✓"] },
+      { feature: "Recast + ValueLens valuation", cells: ["✓",          "✓",         "✓",         "✓",         "✓"] },
       { feature: "28 document generators",            cells: ["✓",          "✓",         "✓",         "✓",         "✓"] },
       { feature: "Buyer-list engine",                 cells: ["preview",    "✓",         "✓",         "✓",         "✓"] },
       { feature: "SBA + structure modeling",          cells: ["preview",    "✓",         "✓",         "✓",         "✓"] },
@@ -369,7 +381,7 @@ const COMPARE: CompareGroup[] = [
     rows: [
       { feature: "QofE Lite pre-read · the wedge",        cells: ["—", "—", "✓", "✓", "✓"] },
       { feature: "Parallel-deal pipeline view",           cells: ["—", "—", "✓", "✓", "✓"] },
-      { feature: "22-gate deal scoring",                  cells: ["—", "—", "✓", "✓", "✓"] },
+      { feature: "Seven-Factor deal scoring",                  cells: ["—", "—", "✓", "✓", "✓"] },
       { feature: "Sector-tuned buyer universes",          cells: ["—", "—", "✓", "✓", "✓"] },
       { feature: "Audience-variant memos · LP, IC, board",cells: ["—", "—", "✓", "✓", "✓"] },
       { feature: "Negotiation tactics + counter drafting",cells: ["—", "—", "✓", "✓", "✓"] },
@@ -483,7 +495,7 @@ function PricingSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) =>
         })}
       </div>
 
-      <LearnSection eyebrow="DETAILS" title="Compare plans" sub="Everything in one place.">
+      <LearnSection id="compare" eyebrow="DETAILS" title="Compare plans" sub="Everything in one place.">
         <div className="m-card" style={{ padding: 0, overflow: "hidden" }}>
           <div style={{ ...P.compareHeader }}>
             <div>Feature</div>
@@ -553,11 +565,11 @@ function PricingSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) =>
 
 /* ─── SECTION HELPER ─────────────────────────────────────── */
 
-function LearnSection({ eyebrow, title, sub, children }: {
-  eyebrow?: string; title: string; sub?: string; children: ReactNode;
+function LearnSection({ id, eyebrow, title, sub, children }: {
+  id?: string; eyebrow?: string; title: string; sub?: string; children: ReactNode;
 }) {
   return (
-    <section style={{ marginBottom: 32 }}>
+    <section id={id} style={{ marginBottom: 32, scrollMarginTop: 12 }}>
       <div style={{ marginBottom: 14 }}>
         {eyebrow && <div className="mono" style={{ fontSize: 9.5, color: "var(--m-on-surface-mid)", letterSpacing: "0.14em", fontWeight: 600 }}>{eyebrow}</div>}
         <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 22, letterSpacing: "-0.025em", margin: "4px 0 0", color: "var(--m-on-surface)" }}>{title}</h2>

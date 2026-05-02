@@ -198,11 +198,11 @@ const SUGGESTIONS_BY_MODE: Record<string, string[]> = {
   ],
 };
 
-const LEARN_CHIPS: { label: string; section: "how" | "pricing" }[] = [
-  { label: "How it works",       section: "how" },
-  { label: "Pricing",            section: "pricing" },
-  { label: "What can Yulia do?", section: "how" },
-  { label: "Compare plans",      section: "pricing" },
+const LEARN_CHIPS: { label: string; section: "how" | "pricing"; anchor?: string }[] = [
+  { label: "How it works",       section: "how"                               },
+  { label: "Pricing",            section: "pricing"                           },
+  { label: "What can Yulia do?", section: "how",     anchor: "capabilities"   },
+  { label: "Compare plans",      section: "pricing", anchor: "compare"        },
 ];
 
 function V6ChatEmpty({ modeLabel, onPick, onOpenTab }: ChatEmptyProps) {
@@ -212,8 +212,8 @@ function V6ChatEmpty({ modeLabel, onPick, onOpenTab }: ChatEmptyProps) {
     "Show me what's possible",
   ];
 
-  const openLearn = (section: "how" | "pricing") => {
-    onOpenTab({ id: "tab-learn", kind: "learn", title: "How it works · Pricing", section });
+  const openLearn = (section: "how" | "pricing", anchor?: string) => {
+    onOpenTab({ id: "tab-learn", kind: "learn", title: "How it works · Pricing", section, anchor });
   };
 
   return (
@@ -249,7 +249,7 @@ function V6ChatEmpty({ modeLabel, onPick, onOpenTab }: ChatEmptyProps) {
         {LEARN_CHIPS.map(c => (
           <button
             key={c.label}
-            onClick={() => openLearn(c.section)}
+            onClick={() => openLearn(c.section, c.anchor)}
             style={C.learnPill}
             onMouseEnter={(e) => { e.currentTarget.style.background = "#234975"; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = "var(--m-primary)"; }}

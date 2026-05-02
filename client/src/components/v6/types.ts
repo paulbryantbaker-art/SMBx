@@ -13,6 +13,8 @@ export interface Tab {
   title: string;
   pinned?: boolean;
   section?: "how" | "pricing";
+  /** Optional element id inside the rendered tab to scroll into view. */
+  anchor?: string;
   template?: string;
   tool?: string;
 }
