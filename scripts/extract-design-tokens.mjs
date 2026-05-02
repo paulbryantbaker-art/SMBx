@@ -1,0 +1,201 @@
+#!/usr/bin/env node
+// Extract V6 design tokens from client/src/index.css → DESIGN_TOKENS.md
+// Source of truth: code. Doc: mechanically derived. Run after editing tokens.
+//   npm run design:extract
+// or: node scripts/extract-design-tokens.mjs
+
+import { readFileSync, writeFileSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const SRC = resolve(ROOT, "client/src/index.css");
+const OUT = resolve(ROOT, "DESIGN_TOKENS.md");
+
+const css = readFileSync(SRC, "utf8");
+
+// Find banner-bounded V6 sections. Each banner is a /* === ... === */ comment
+// followed by the next selector block we care about.
+function extractBlock(selector, afterLine) {
+  const lines = css.split("\n");
+  for (let i = afterLine; i < lines.length; i++) {
+    if (lines[i].trim().startsWith(selector + " {") || lines[i].trim() === selector + "{") {
+      let depth = 1;
+      const body = [];
+      for (let j = i + 1; j < lines.length; j++) {
+        const line = lines[j];
+        if (line.includes("{")) depth++;
+        if (line.includes("}")) {
+          depth--;
+          if (depth === 0) return { startLine: i + 1, endLine: j + 1, body };
+        }
+        body.push(line);
+      }
+    }
+  }
+  return null;
+}
+
+function findBannerLine(needle) {
+  const lines = css.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].includes(needle)) return i;
+  }
+  return -1;
+}
+
+// Parse a CSS body into clusters. A cluster = (optional /* comment */) + N --token: value; lines.
+function parseClusters(body) {
+  const clusters = [];
+  let currentLabel = null;
+  let currentNote = "";
+  let inNote = false;
+  let noteBuf = [];
+  let pending = [];
+
+  const flush = () => {
+    if (pending.length > 0) {
+      clusters.push({ label: currentLabel, note: currentNote, tokens: pending });
+      pending = [];
+    }
+  };
+
+  for (const raw of body) {
+    const line = raw.trim();
+    if (!line) continue;
+
+    // Multi-line comment open
+    if (line.startsWith("/*") && !line.includes("*/")) {
+      flush();
+      inNote = true;
+      noteBuf = [line.replace(/^\/\*+\s*/, "")];
+      continue;
+    }
+    // Multi-line comment close
+    if (inNote) {
+      if (line.includes("*/")) {
+        noteBuf.push(line.replace(/\s*\*+\/.*$/, ""));
+        const fullText = noteBuf.join(" ").replace(/\s+/g, " ").trim();
+        const [first, ...rest] = fullText.split(/\.\s+/);
+        currentLabel = first;
+        currentNote = rest.join(". ").trim();
+        inNote = false;
+      } else {
+        noteBuf.push(line);
+      }
+      continue;
+    }
+    // Single-line comment → label
+    if (line.startsWith("/*") && line.includes("*/")) {
+      flush();
+      const inner = line.replace(/^\/\*+\s*/, "").replace(/\s*\*+\/$/, "").trim();
+      const [first, ...rest] = inner.split(/\.\s+/);
+      currentLabel = first;
+      currentNote = rest.join(". ").trim();
+      continue;
+    }
+    // Token line: --name: value;  (optional trailing /* comment */)
+    const tokenMatch = line.match(/^(--[\w-]+):\s*(.+?);\s*(?:\/\*\s*(.*?)\s*\*\/)?\s*$/);
+    if (tokenMatch) {
+      pending.push({
+        name: tokenMatch[1],
+        value: tokenMatch[2].trim(),
+        comment: tokenMatch[3] || "",
+      });
+      continue;
+    }
+    // Anything else (font-family, -webkit-font-smoothing, etc.) → skip; these
+    // are property assignments inside the rule, not custom properties.
+  }
+  flush();
+  return clusters;
+}
+
+function renderCluster(cluster) {
+  const out = [];
+  if (cluster.label) out.push(`### ${cluster.label}\n`);
+  if (cluster.note) out.push(`${cluster.note}\n`);
+  out.push(`| Token | Value | Notes |`);
+  out.push(`| --- | --- | --- |`);
+  for (const t of cluster.tokens) {
+    const val = t.value.startsWith("url(") || t.value.startsWith('"') || t.value.startsWith("'")
+      ? `\`${t.value}\``
+      : `\`${t.value}\``;
+    out.push(`| \`${t.name}\` | ${val} | ${t.comment} |`);
+  }
+  out.push("");
+  return out.join("\n");
+}
+
+// --- Extract V6 desktop ---
+const desktopBanner = findBannerLine("V6 — Files Workspace");
+if (desktopBanner < 0) throw new Error("V6 desktop banner not found in index.css");
+const desktopBlock = extractBlock(":root", desktopBanner);
+if (!desktopBlock) throw new Error("V6 desktop :root block not found after banner");
+
+// --- Extract V6 mobile ---
+const mobileBanner = findBannerLine("V6 MOBILE");
+if (mobileBanner < 0) throw new Error("V6 mobile banner not found in index.css");
+const mobileBlock = extractBlock(".mobile-root", mobileBanner);
+if (!mobileBlock) throw new Error("V6 mobile .mobile-root block not found after banner");
+
+const desktopClusters = parseClusters(desktopBlock.body);
+const mobileClusters = parseClusters(mobileBlock.body);
+
+const now = new Date().toISOString().split("T")[0];
+
+const md = `# Design Tokens — V6 (auto-generated)
+
+> **DO NOT EDIT.** This file is generated by \`scripts/extract-design-tokens.mjs\`
+> from \`client/src/index.css\`. The CSS is the source of truth; this doc is a
+> projection. Edit tokens in CSS, then run \`node scripts/extract-design-tokens.mjs\`
+> (or \`npm run design:extract\` if wired) to regenerate.
+>
+> **Last extracted:** ${now}
+> **Source:** \`client/src/index.css\`
+
+## How to use these tokens
+
+- **Desktop V6** components live in \`client/src/components/v6/\` and consume
+  \`--m-*\` tokens via the \`:root\` (the entire V6 desktop surface inherits them).
+- **Mobile V6** components live in \`client/src/components/v6/mobile/\` and consume
+  \`--mb-*\` tokens via the \`.mobile-root\` selector wrapper.
+- Hex values shown below are the production values. If you need a hex in a
+  Figma layer or marketing artwork, copy from this doc — but **leave a comment**
+  next to the hex naming the token (e.g. \`#8A9AE8 // --mb-accent\`) so the
+  artwork stays traceable when tokens change.
+- Anything not in this doc is not a design token. Don't invent one.
+
+---
+
+## Desktop V6 — Files Workspace
+
+**Source:** \`client/src/index.css\` lines ${desktopBlock.startLine}–${desktopBlock.endLine}
+**Selector:** \`:root\` (V6 desktop block)
+**Identity:** Material 3 base, slate-blue accent, cool lavender chrome.
+
+${desktopClusters.map(renderCluster).join("\n")}
+
+---
+
+## Mobile V6 — Apple App Store + Liquid Glass
+
+**Source:** \`client/src/index.css\` lines ${mobileBlock.startLine}–${mobileBlock.endLine}
+**Selector:** \`.mobile-root\` (scoped — does not collide with desktop)
+**Identity:** Periwinkle accent, watercolor texture heroes, App Store visual language.
+
+> **Note on textures:** the \`--mb-tex-*\` tokens point at PNGs in
+> \`client/public/textures/\`. These replaced CD's original pastel two-tone
+> gradients (commits \`2a3ecda\`, \`9c821a1\`). Marketing artwork should use the
+> PNGs as full-bleed backgrounds with verdict tints layered on top.
+
+${mobileClusters.map(renderCluster).join("\n")}
+`;
+
+writeFileSync(OUT, md, "utf8");
+
+const totalDesktop = desktopClusters.reduce((n, c) => n + c.tokens.length, 0);
+const totalMobile = mobileClusters.reduce((n, c) => n + c.tokens.length, 0);
+console.log(`✓ Wrote ${OUT}`);
+console.log(`  Desktop V6: ${totalDesktop} tokens in ${desktopClusters.length} clusters`);
+console.log(`  Mobile V6:  ${totalMobile} tokens in ${mobileClusters.length} clusters`);

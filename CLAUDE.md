@@ -34,43 +34,11 @@ AI-powered deal intelligence platform for business acquisitions from $300K to me
 11. **Mobile browser first.** Design for mobile, then adapt to desktop.
 
 ## Design System
-### Logo
-- **Primary:** `final logo.png` — purple-to-gold gradient X + "smbx.ai" text (side-by-side, transparent)
-- **Icon:** `x.png` — matching gradient X only (for sidebar, 42px, spins 180° on hover)
-- **Dark mode hero:** `DG Trans.png` (transparent dark-optimized variant)
-- Logo only shows in sidebar on non-home pages (hidden on home — hero logo is there)
+**The design system is the production code, not this section.** Read `DESIGN_SOURCE.md` at the repo root — it points at the V6 token blocks in `client/src/index.css` (`:root` for desktop, `.mobile-root` for mobile) and at the component code under `client/src/components/v6/`. For a quick token reference, read `DESIGN_TOKENS.md` (auto-generated from the CSS by `npm run design:extract`).
 
-### Colors
-```
---accent-primary: #D44A78    /* Hot pink from logo gradient — buttons, active states */
---accent-dark-mode: #E8709A  /* Lighter pink for dark backgrounds */
---accent-hover: #B03860      /* Deeper for hover/pressed */
---bg-primary: #F9F9FC        /* Light page background */
---bg-dark: #1A1C1E           /* Dark page background */
---bg-card: #FFFFFF            /* Cards, inputs */
---text-primary: #1A1A18       /* Near-black body text */
---text-muted: #6E6A63         /* Captions, meta */
---font-headline: 'Sora', system-ui, sans-serif
---font-body: 'Inter', system-ui, sans-serif
-```
+**V6 in one line:** desktop uses slate-blue `#2E5C8A` + lavender chrome `#ECEAF2`; mobile uses periwinkle `#8A9AE8` + watercolor textures from `client/public/textures/`. The hot-pink `#D44A78` era and the "Sora + dot grid" era are both retired — if your output anchors on either, you read a stale doc.
 
-### Backgrounds
-- **Dot grid** on body (CSS radial-gradient): 12% light / 10% dark, 26px spacing
-- **Circuit board** on landing pages only: `rose gold bg.jpeg` (light, 10% opacity) / `GD.jpeg` (dark, 35% opacity)
-- Background layers use position:absolute (NOT fixed) to avoid breaking Safari toolbar
-- Center blur ellipse on home page for clean text reading area
-- Journey pages get the same background with content at z-10
-
-### Send Button
-- Round circle, arrow points UP (not forward)
-- Grey `#D8D8DA` when empty (non-clickable)
-- Accent `#D44A78` when text present
-- Consistent across home hero, mobile, and in-chat
-
-### Dark Mode
-- Safari toolbar: DarkModeToggle sets body/html bg with !important + meta theme-color
-- NEVER use position:fixed viewport-covering divs with bg-color (Safari reads them for toolbar)
-- Toggle adds theme-transition class for smooth 300ms color shift
+**Safari toolbar rule still applies:** never use `position:fixed` full-viewport divs with a background color (Safari reads them for toolbar tinting and it breaks dark-mode switching). Use `position:absolute` inside a relative parent instead.
 
 ## Pricing Model — Monthly Subscriptions
 **Free:** Unlimited Yulia Q&A, ONE ValueLens or deal score (email required)

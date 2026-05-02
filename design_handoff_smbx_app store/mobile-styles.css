@@ -1,0 +1,167 @@
+/* Mobile iOS — App Store visual language, pastel palette (matches desktop) */
+:root {
+  --bg: #FFFFFF;
+  --bg-2: #F5F5F7;
+  --card: #FFFFFF;
+  --card-2: #F2F2F7;
+
+  --ink: #1A2233;
+  --ink-1: #1A2233;
+  --ink-2: #555E6F;
+  --ink-3: #7A8395;
+  --ink-4: #A6AEBC;
+  --ink-5: #C5CBD6;
+
+  --line: rgba(60,60,67,0.16);
+  --line-2: rgba(60,60,67,0.08);
+
+  /* iOS blue softened to powder */
+  --blue: #7FA8D9;
+  --blue-ink: #4A7AB0;
+  --blue-soft: #EAF0FA;
+
+  /* Primary — soft periwinkle (matches desktop --accent system) */
+  --accent: #8A9AE8;
+  --accent-2: #6F82DC;
+  --accent-ink: #4F60BD;
+  --accent-soft: #EEF1FB;
+
+  /* Hero gradients — pastel, two-tone (was: deep saturated) */
+  --hero-pursue-1: #A8D4BD;
+  --hero-pursue-2: #5FA88A;
+  --hero-watch-1:  #EBC891;
+  --hero-watch-2:  #C99959;
+  --hero-pass-1:   #EBB1AA;
+  --hero-pass-2:   #C6857D;
+
+  /* Verdict — mint sage */
+  --verdict-pursue: #6FB89A;
+  --verdict-pursue-ink: #3F8A6A;
+  --verdict-pursue-soft: #E6F3EC;
+
+  --warn: #D6A35C;
+  --warn-ink: #9C7128;
+  --warn-soft: #FAF1E1;
+
+  --danger: #D88B84;
+  --danger-ink: #A85248;
+  --danger-soft: #FBEAE7;
+
+  --font-display: "SF Pro Display", "Inter Tight", -apple-system, system-ui, sans-serif;
+  --font-body: "SF Pro Text", "Inter", -apple-system, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  background: #EDEEF1;
+  color: var(--ink);
+}
+
+button { font-family: inherit; cursor: pointer; }
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.85);
+  font-weight: 600;
+}
+.eyebrow-dark { color: var(--blue-ink); }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* App Store "Get"-style pill button */
+.get-pill {
+  background: var(--blue-soft);
+  color: var(--blue-ink);
+  font-weight: 700;
+  font-size: 15px;
+  padding: 6px 22px;
+  border-radius: 999px;
+  border: none;
+  letter-spacing: -0.1px;
+  min-width: 76px;
+}
+.get-pill.dark {
+  background: rgba(255,255,255,0.22);
+  color: #fff;
+}
+.get-pill.solid {
+  background: var(--accent-2);
+  color: #fff;
+}
+
+/* Card on app-store gray */
+.as-card {
+  background: var(--card);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+/* Pulse */
+.pulse-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  animation: pulse 2s ease-out infinite;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 currentColor; opacity: 1; }
+  70% { box-shadow: 0 0 0 6px transparent; opacity: 0.4; }
+  100% { box-shadow: 0 0 0 0 transparent; opacity: 1; }
+}
+
+@keyframes fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.fade-up { animation: fade-up 480ms cubic-bezier(0.2,0.7,0.2,1) both; }
+
+@keyframes slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.slide-up { animation: slide-up 380ms cubic-bezier(0.2,0.7,0.2,1) both; }
+
+.tap { transition: opacity 120ms; }
+.tap:active { opacity: 0.6; }
+
+/* Verdict pill (small, used on cards over color) */
+.verdict-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.20);
+  color: #fff;
+  backdrop-filter: blur(8px);
+}
+.verdict-pill.on-light {
+  background: var(--verdict-pursue-soft);
+  color: var(--verdict-pursue-ink);
+}
+.verdict-pill.warn { background: var(--warn-soft); color: var(--warn-ink); }
+.verdict-pill.danger { background: var(--danger-soft); color: var(--danger-ink); }
+
+/* Section header — eyebrow + huge title, App Store style */
+.section-eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-ink);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+  line-height: 1.1;
+  margin: 2px 0 0;
+}
+
+/* No scrollbar */
+.hide-scroll::-webkit-scrollbar { display: none; }
+.hide-scroll { scrollbar-width: none; }

@@ -11,7 +11,8 @@
     "start": "node dist/server/index.js",
     "start:worker": "node dist/worker/worker.js",
     "test": "playwright test",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "design:extract": "node scripts/extract-design-tokens.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",

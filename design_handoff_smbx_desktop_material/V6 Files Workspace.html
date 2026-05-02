@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>V6 — Files Workspace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="v6-styles.css?v=1" />
+<style>
+  html, body { overflow: visible; height: auto; }
+  body { background: #F1F1F4; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="v6-shell.jsx?v=1"></script>
+<script type="text/babel" src="v6-canvas.jsx?v=1"></script>
+<script type="text/babel" src="v6-modes.jsx?v=1"></script>
+<script type="text/babel" src="v6-views.jsx?v=1"></script>
+<script type="text/babel" src="v6-learn.jsx?v=1"></script>
+
+<script type="text/babel" data-presets="env,react">
+function V6App() {
+  const [activeMode, setActiveMode] = React.useState("search");
+  const [searchOpen, setSearchOpen] = React.useState(false);
+
+  // Tabs: each mode owns one root tab; opening an item appends a new tab to the active mode
+  // Structure: { id, kind: "mode-root" | "deal" | "doc" | "analysis", modeId?, title }
+  const [tabs, setTabs] = React.useState([
+    { id: "search-root", kind: "mode-root", modeId: "search", title: "Sample Business Search", pinned: true },
+  ]);
+  const [activeTabId, setActiveTabId] = React.useState("search-root");
+
+  // Switching modes: ensure that mode's root tab exists, switch to it
+  const pickMode = (modeId) => {
+    setActiveMode(modeId);
+    setSearchOpen(false);
+    const rootId = modeId + "-root";
+    setTabs(prev => {
+      if (prev.find(t => t.id === rootId)) return prev;
+      const modeMeta = MODES.find(m => m.id === modeId);
+      return [...prev, { id: rootId, kind: "mode-root", modeId, title: "Sample " + (modeMeta?.label || modeId), pinned: true }];
+    });
+    setActiveTabId(rootId);
+  };
+
+  // Open a new item tab — assigns unique id, sets active
+  const openTab = (descriptor) => {
+    const id = descriptor.id || `${descriptor.kind}-${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+    setTabs(prev => {
+      // If a tab with the same id already exists, just activate it
+      if (prev.find(t => t.id === id)) {
+        setActiveTabId(id);
+        return prev;
+      }
+      return [...prev, { ...descriptor, id }];
+    });
+    setActiveTabId(id);
+  };
+
+  // Close a tab — if it was active, fall back to nearest neighbor
+  const closeTab = (id) => {
+    setTabs(prev => {
+      const next = prev.filter(t => t.id !== id);
+      if (id === activeTabId) {
+        const idx = prev.findIndex(t => t.id === id);
+        const fallback = next[idx - 1] || next[idx] || next[0];
+        if (fallback) setActiveTabId(fallback.id);
+      }
+      return next;
+    });
+  };
+
+  // Chat
+  const [thread, setThread] = React.useState([]);
+  const [draft, setDraft] = React.useState("");
+  const inputRef = React.useRef(null);
+  const send = (t) => {
+    const msg = (t || draft).trim();
+    if (!msg) return;
+    setThread(p => [...p, { who: "u", text: msg }]);
+    setDraft("");
+    setTimeout(() => {
+      setThread(p => [...p, { who: "y", text: "On it. Watch the canvas — I'll fill it in as I go." }]);
+    }, 600);
+  };
+
+  // Resizable chat well
+  const [chatWidth, setChatWidth] = React.useState(400);
+  const onDragStart = (e) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startW = chatWidth;
+    const onMove = (ev) => {
+      const dx = ev.clientX - startX;
+      setChatWidth(Math.min(640, Math.max(320, startW + dx)));
+    };
+    const onUp = () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  };
+
+  const modeLabel = MODES.find(m => m.id === activeMode)?.label || "Workspace";
+
+  return (
+    <div style={{ display: "flex", height: "100%" }}>
+      <V6Sidebar
+        activeMode={activeMode}
+        onPickMode={pickMode}
+        searchOpen={searchOpen}
+        setSearchOpen={setSearchOpen}
+        onOpenTab={openTab}
+      />
+      <main style={{ flex: 1, minWidth: 0, display: "flex" }}>
+        <div style={{ width: chatWidth, flexShrink: 0, minWidth: 0, display: "flex", flexDirection: "column" }}>
+          <V6Chat
+            thread={thread}
+            draft={draft}
+            setDraft={setDraft}
+            send={send}
+            inputRef={inputRef}
+            modeLabel={modeLabel}
+            onOpenTab={openTab}
+          />
+        </div>
+        <div onMouseDown={onDragStart} title="Drag to resize"
+          style={{ width: 6, flexShrink: 0, cursor: "col-resize", background: "var(--m-outline-var)", position: "relative" }}>
+          <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 2, height: 28, borderRadius: 2, background: "var(--m-on-surface-mid)", opacity: 0.4 }}/>
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <V6Canvas
+            tabs={tabs}
+            activeTabId={activeTabId}
+            setActiveTabId={setActiveTabId}
+            openTab={openTab}
+            closeTab={closeTab}
+            mode={activeMode}
+            onPickMode={pickMode}
+          />
+        </div>
+      </main>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <DesignCanvas
+      title="V6 — Files Workspace"
+      subtitle="Sidebar = utility (account, search, modes). Canvas = tabbed App-Store-style workspace where deals, docs, and analyses live as native tabs."
+    >
+      <DCSection id="v6-app" title="V6 Files Workspace" subtitle="iOS-Files / App-Store metaphor on desktop · tabs · doc editor · live analysis">
+        <DCArtboard id="v6-home" label="Workspace" width={1680} height={1050}>
+          <V6App/>
+        </DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
