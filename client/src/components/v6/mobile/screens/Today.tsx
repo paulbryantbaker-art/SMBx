@@ -94,7 +94,7 @@ export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onAvatarClic
 
 function WelcomeHero({ onChat }: { onChat: () => void }) {
   return (
-    <HeroFrame kind="pursue" onTap={onChat}>
+    <HeroFrame kind="welcome" onTap={onChat}>
       <HeroVisualPursue />
 
       <div style={H.eyebrowSlot}>
@@ -162,16 +162,27 @@ function DailyHero({ onOpenDeal }: { onOpenDeal: () => void }) {
 
 /* ─── Hero scaffolding ──────────────────────────────────── */
 
-const HERO_GRADIENTS: Record<Verdict, [string, string]> = {
-  pursue: ["#A8D4BD", "#5FA88A"],
-  watch:  ["#EBC891", "#C99959"],
-  pass:   ["#EBB1AA", "#C6857D"],
+type HeroKind = Verdict | "welcome";
+
+// Texture path + a verdict-tinted overlay. Overlay is light at top so the
+// SVG sparkline + giant SDE number remain visible on the texture, and dimmer
+// at the bottom where white text sits in the inner cell.
+const HERO_TEXTURE: Record<HeroKind, string> = {
+  pursue:  "/textures/texture-pursue.png",
+  watch:   "/textures/texture-watch.png",
+  pass:    "/textures/texture-pass.png",
+  welcome: "/textures/texture-sunrise.png",
+};
+const HERO_OVERLAY: Record<HeroKind, string> = {
+  pursue:  "linear-gradient(165deg, rgba(95,168,138,0.10) 0%, rgba(63,138,106,0.42) 100%)",
+  watch:   "linear-gradient(165deg, rgba(214,163,92,0.08) 0%, rgba(156,113,40,0.40) 100%)",
+  pass:    "linear-gradient(165deg, rgba(216,139,132,0.10) 0%, rgba(168,82,72,0.40) 100%)",
+  welcome: "linear-gradient(165deg, rgba(170,140,90,0.06) 0%, rgba(120,90,40,0.34) 100%)",
 };
 
 function HeroFrame({
   kind, onTap, children,
-}: { kind: Verdict; onTap?: () => void; children: ReactNode }) {
-  const [c1, c2] = HERO_GRADIENTS[kind];
+}: { kind: HeroKind; onTap?: () => void; children: ReactNode }) {
   return (
     <div
       className="mb-tap"
@@ -186,7 +197,10 @@ function HeroFrame({
       }}
       style={{
         borderRadius: 22,
-        background: `linear-gradient(165deg, ${c1} 0%, ${c2} 100%)`,
+        backgroundImage: `${HERO_OVERLAY[kind]}, url('${HERO_TEXTURE[kind]}')`,
+        backgroundSize: "cover, cover",
+        backgroundPosition: "center, center",
+        backgroundRepeat: "no-repeat, no-repeat",
         color: "#fff",
         overflow: "hidden",
         boxShadow: "0 12px 28px -10px rgba(0,0,0,0.25)",

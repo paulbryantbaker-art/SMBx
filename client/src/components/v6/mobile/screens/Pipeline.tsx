@@ -226,7 +226,11 @@ const P: Record<string, CSSProperties> = {
   },
   featured: {
     borderRadius: 18, overflow: "hidden",
-    background: "linear-gradient(160deg, #A9C4E5 0%, #7FA8D9 100%)",
+    backgroundImage:
+      "linear-gradient(160deg, rgba(127,168,217,0.10) 0%, rgba(74,122,176,0.42) 100%), url('/textures/texture-baseline.png')",
+    backgroundSize: "cover, cover",
+    backgroundPosition: "center, center",
+    backgroundRepeat: "no-repeat, no-repeat",
     color: "#fff", position: "relative",
     boxShadow: "0 8px 22px -10px rgba(0,0,0,0.25)",
     cursor: "pointer",

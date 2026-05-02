@@ -156,7 +156,11 @@ const Br: Record<string, CSSProperties> = {
   },
   editorial: {
     borderRadius: 22, overflow: "hidden",
-    background: "linear-gradient(165deg, #A8D4BD 0%, #5FA88A 100%)",
+    backgroundImage:
+      "linear-gradient(165deg, rgba(170,140,90,0.06) 0%, rgba(120,90,40,0.34) 100%), url('/textures/texture-sunrise.png')",
+    backgroundSize: "cover, cover",
+    backgroundPosition: "center, center",
+    backgroundRepeat: "no-repeat, no-repeat",
     color: "#fff", position: "relative",
     cursor: "pointer",
     boxShadow: "0 12px 28px -12px rgba(0,0,0,0.22)",

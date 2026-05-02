@@ -185,15 +185,21 @@ function Section({ title, chevron, pad = true, children }: {
 
 type ArtifactKind = "recast" | "baseline" | "buyers" | "ioi";
 
-const ARTIFACT_GRADIENTS: Record<ArtifactKind, [string, string]> = {
-  recast:   ["#A8D4BD", "#5FA88A"],
-  baseline: ["#A9C4E5", "#7FA8D9"],
-  buyers:   ["#C5B0E5", "#9077C5"],
-  ioi:      ["#3A4150", "#1A2233"],
+// Each artifact card is a texture + tinted overlay (kept for white text
+// legibility), except "ioi" which stays as the formal dark slate card —
+// textures would weaken the IOI/LOI doc gravitas.
+const ARTIFACT_BG: Record<ArtifactKind, string> = {
+  recast:
+    "linear-gradient(160deg, rgba(95,168,138,0.10) 0%, rgba(63,138,106,0.40) 100%), url('/textures/texture-pursue.png')",
+  baseline:
+    "linear-gradient(160deg, rgba(127,168,217,0.10) 0%, rgba(74,122,176,0.40) 100%), url('/textures/texture-baseline.png')",
+  buyers:
+    "linear-gradient(160deg, rgba(155,124,210,0.10) 0%, rgba(112,80,170,0.42) 100%), url('/textures/texture-buyers.png')",
+  ioi:
+    "linear-gradient(160deg, #3A4150, #1A2233)",
 };
 
 function ArtifactPreview({ kind, title, big, sub }: { kind: ArtifactKind; title: string; big: string; sub: string }) {
-  const [c1, c2] = ARTIFACT_GRADIENTS[kind];
   return (
     <div
       className="mb-tap"
@@ -202,7 +208,10 @@ function ArtifactPreview({ kind, title, big, sub }: { kind: ArtifactKind; title:
       style={{
         flexShrink: 0, width: 220,
         borderRadius: 18,
-        background: `linear-gradient(160deg, ${c1}, ${c2})`,
+        backgroundImage: ARTIFACT_BG[kind],
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
         color: "#fff", overflow: "hidden", position: "relative",
         boxShadow: "0 6px 18px -8px rgba(0,0,0,0.2)",
         cursor: "pointer",

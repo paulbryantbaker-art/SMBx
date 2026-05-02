@@ -477,13 +477,17 @@ input[type="range"].m-slider::-moz-range-thumb {
   --mb-accent-ink:  #4F60BD;
   --mb-accent-soft: #EEF1FB;
 
-  /* Hero gradients — pastel two-tone, the primary brand signal */
-  --mb-hero-pursue-1: #A8D4BD;
-  --mb-hero-pursue-2: #5FA88A;
-  --mb-hero-watch-1:  #EBC891;
-  --mb-hero-watch-2:  #C99959;
-  --mb-hero-pass-1:   #EBB1AA;
-  --mb-hero-pass-2:   #C6857D;
+  /* Hero textures — watercolor washes (replaced CD pastel two-tone gradients).
+     Files live under client/public/textures/. Apply with:
+       background-image: linear-gradient(<verdict-tint>), url(var(--mb-tex-*));
+     Verdict tints are inline in the consuming component since they vary per
+     surface (hero vs artifact vs editorial). */
+  --mb-tex-pursue:   url("/textures/texture-pursue.png");
+  --mb-tex-watch:    url("/textures/texture-watch.png");
+  --mb-tex-pass:     url("/textures/texture-pass.png");
+  --mb-tex-baseline: url("/textures/texture-baseline.png");
+  --mb-tex-buyers:   url("/textures/texture-buyers.png");
+  --mb-tex-sunrise:  url("/textures/texture-sunrise.png");
 
   /* Verdict semantics */
   --mb-verdict-pursue:      #6FB89A;
