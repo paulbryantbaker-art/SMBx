@@ -441,3 +441,222 @@ input[type="range"].m-slider::-moz-range-thumb {
   .m-fade-up, .m-fade-in { animation: none; }
   .m-card.tap:hover { transform: none; }
 }
+
+/* ===========================================================================
+   V6 MOBILE — Apple App Store + Liquid Glass v2 (canonical 2026-05-01)
+   Periwinkle accent, pastel hero gradients, App Store visual language.
+   Tokens scoped to .mobile-root so they don't collide with V3 :root tokens.
+   Source: design_handoff_smbx_app store/mobile-styles.css + glass-primitives.jsx
+   =========================================================================== */
+.mobile-root {
+  /* Surfaces */
+  --mb-bg:     #FFFFFF;
+  --mb-bg-2:   #F5F5F7;
+  --mb-card:   #FFFFFF;
+  --mb-card-2: #F2F2F7;
+
+  /* Ink — App Store cool slate */
+  --mb-ink:   #1A2233;
+  --mb-ink-1: #1A2233;
+  --mb-ink-2: #555E6F;
+  --mb-ink-3: #7A8395;
+  --mb-ink-4: #A6AEBC;
+  --mb-ink-5: #C5CBD6;
+
+  --mb-line:   rgba(60,60,67,0.16);
+  --mb-line-2: rgba(60,60,67,0.08);
+
+  /* Powder iOS blue (Get pills) */
+  --mb-blue:      #7FA8D9;
+  --mb-blue-ink:  #4A7AB0;
+  --mb-blue-soft: #EAF0FA;
+
+  /* Periwinkle primary — different from desktop's slate; mobile-specific */
+  --mb-accent:      #8A9AE8;
+  --mb-accent-2:    #6F82DC;
+  --mb-accent-ink:  #4F60BD;
+  --mb-accent-soft: #EEF1FB;
+
+  /* Hero gradients — pastel two-tone, the primary brand signal */
+  --mb-hero-pursue-1: #A8D4BD;
+  --mb-hero-pursue-2: #5FA88A;
+  --mb-hero-watch-1:  #EBC891;
+  --mb-hero-watch-2:  #C99959;
+  --mb-hero-pass-1:   #EBB1AA;
+  --mb-hero-pass-2:   #C6857D;
+
+  /* Verdict semantics */
+  --mb-verdict-pursue:      #6FB89A;
+  --mb-verdict-pursue-ink:  #3F8A6A;
+  --mb-verdict-pursue-soft: #E6F3EC;
+  --mb-warn:      #D6A35C;
+  --mb-warn-ink:  #9C7128;
+  --mb-warn-soft: #FAF1E1;
+  --mb-danger:      #D88B84;
+  --mb-danger-ink:  #A85248;
+  --mb-danger-soft: #FBEAE7;
+
+  /* Typography — SF Pro stack with web fallbacks */
+  --mb-font-display: "SF Pro Display", "Inter Tight", -apple-system, system-ui, sans-serif;
+  --mb-font-body:    "SF Pro Text", "Inter", -apple-system, system-ui, sans-serif;
+  --mb-font-mono:    "JetBrains Mono", ui-monospace, monospace;
+
+  font-family: var(--mb-font-body);
+  color: var(--mb-ink);
+  background: var(--mb-bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Mobile utility classes (scoped to mobile root) */
+.mobile-root .mb-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.85);
+  font-weight: 600;
+}
+.mobile-root .mb-eyebrow-dark { color: var(--mb-blue-ink); }
+.mobile-root .mb-mono {
+  font-family: var(--mb-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* App Store "Get"-style pill */
+.mobile-root .mb-get-pill {
+  background: var(--mb-blue-soft);
+  color: var(--mb-blue-ink);
+  font-weight: 700;
+  font-size: 15px;
+  padding: 6px 22px;
+  border-radius: 999px;
+  border: none;
+  letter-spacing: -0.1px;
+  min-width: 76px;
+  font-family: var(--mb-font-body);
+  cursor: pointer;
+}
+.mobile-root .mb-get-pill.dark { background: rgba(255,255,255,0.22); color: #fff; }
+.mobile-root .mb-get-pill.solid { background: var(--mb-accent-2); color: #fff; }
+
+/* As-card */
+.mobile-root .mb-as-card {
+  background: var(--mb-card);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+/* Verdict pill */
+.mobile-root .mb-verdict-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--mb-font-mono);
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.20);
+  color: #fff;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.mobile-root .mb-verdict-pill.on-light {
+  background: var(--mb-verdict-pursue-soft);
+  color: var(--mb-verdict-pursue-ink);
+}
+.mobile-root .mb-verdict-pill.warn {
+  background: var(--mb-warn-soft);
+  color: var(--mb-warn-ink);
+}
+.mobile-root .mb-verdict-pill.danger {
+  background: var(--mb-danger-soft);
+  color: var(--mb-danger-ink);
+}
+
+/* Section headers — App Store style */
+.mobile-root .mb-section-eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mb-accent-ink);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.mobile-root .mb-section-title {
+  font-family: var(--mb-font-display);
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: -0.5px;
+  color: var(--mb-ink);
+  line-height: 1.1;
+  margin: 2px 0 0;
+}
+
+/* Tap state — opacity press feedback */
+.mobile-root .mb-tap { transition: opacity 120ms; }
+.mobile-root .mb-tap:active { opacity: 0.6; }
+
+/* Hide scrollbar (horizontal carousels) */
+.mobile-root .mb-hide-scroll::-webkit-scrollbar { display: none; }
+.mobile-root .mb-hide-scroll { scrollbar-width: none; }
+
+/* Pulse-dot already defined under V3 styles above — reuse */
+
+/* Mobile motion */
+@keyframes mb-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.mobile-root .mb-fade-up {
+  animation: mb-fade-up 480ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes mb-slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.mb-slide-up {
+  animation: mb-slide-up 380ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-root .mb-fade-up,
+  .mb-slide-up { animation: none; }
+}
+
+/* ─── PWA viewport handling — required for mobile chat pill ────────────────
+   Locks html/body and sizes body to --vvh from JS visualViewport tracking,
+   gated to mobile + installed PWA. Per architecture_ios_pwa_pill.md.
+   The --vvh tracker effect lives in V6Mobile root mount.
+*/
+@media (max-width: 767px) and (display-mode: standalone) {
+  html.mobile-pwa-active {
+    height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  html.mobile-pwa-active body {
+    position: relative;
+    height: var(--vvh, 100dvh);
+    overflow: hidden;
+    overscroll-behavior: none;
+    touch-action: none;
+  }
+}
+
+/* ─── Fullscreen chat sheet — three-layer iMessage architecture ───────────
+   Per feedback_pwa_chat_flex_layout.md. When chat sheet is open, hide #root
+   and let the portaled dialog be the only visible UI.
+*/
+html.yulia-chat-open {
+  height: 100% !important;
+  overflow: hidden !important;
+}
+html.yulia-chat-open body {
+  position: static !important;
+  inset: auto !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+  touch-action: auto !important;
+}
+html.yulia-chat-open #root {
+  display: none !important;
+}

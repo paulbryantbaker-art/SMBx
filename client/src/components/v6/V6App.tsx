@@ -3,6 +3,8 @@ import { useLocation } from "wouter";
 import { useAuth, type User } from "../../hooks/useAuth";
 import { useAnonymousChat } from "../../hooks/useAnonymousChat";
 import { useAuthChat } from "../../hooks/useAuthChat";
+import { useIsMobile } from "../../hooks/useIsMobile";
+import V6Mobile from "./mobile/V6Mobile";
 import { V6Sidebar } from "./Sidebar";
 import { V6Chat } from "./Chat";
 import { V6Canvas } from "./Canvas";
@@ -23,6 +25,8 @@ interface ChatBridge {
 
 export default function V6App() {
   const auth = useAuth();
+  const isMobile = useIsMobile();
+
   if (auth.loading) {
     return (
       <div style={{ display: "grid", placeItems: "center", height: "100vh", color: "var(--m-on-surface-mid)" }}>
@@ -30,6 +34,11 @@ export default function V6App() {
       </div>
     );
   }
+
+  if (isMobile) {
+    return <V6Mobile user={auth.user} onSignOut={async () => { await auth.logout(); }} />;
+  }
+
   return auth.user
     ? <V6AppAuthed user={auth.user} onSignOut={auth.logout} />
     : <V6AppAnon />;
