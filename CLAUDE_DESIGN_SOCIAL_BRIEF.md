@@ -8,14 +8,23 @@
 
 ## 0. STOP — read this before anything else
 
-**The design system is the production code. Read `DESIGN_SOURCE.md` at the repo root first.** It is the single canonical entry point for every visual decision. It tells you exactly which files to read and in what order.
+**You already designed V6. The two handoff bundles you delivered are the canonical V6 design language:**
+- `design_handoff_smbx_desktop_material/` — desktop V6 you shipped (Files Workspace, slate-blue, Material 3)
+- `design_handoff_smbx_app store/` — mobile V6 you shipped (App Store + Liquid Glass, periwinkle)
+
+Production faithfully implements both. Marketing material must match these bundles, not anything older.
+
+**Read `DESIGN_SOURCE.md` at the repo root first.** It maps every handoff file to its production path so you can verify your artwork against either layer.
 
 **Self-check, before you make any artwork:**
-- Is your palette pink (`#D44A78`)? **You read a stale doc — go back to `DESIGN_SOURCE.md`.** V6 uses slate-blue `#2E5C8A` (desktop) or periwinkle `#8A9AE8` (mobile). Pink is retired.
-- Are your fonts Sora or Instrument Serif? **Same problem.** V6 desktop is system body fonts via `--font-body`; mobile is SF Pro Display / Inter Tight via `--mb-font-display`.
-- Are your backgrounds dot grids or warm cream? **Same problem.** V6 desktop is `#F1F1F4` cool grey + `#ECEAF2` lavender chrome; mobile is `#FFFFFF` + watercolor texture PNGs from `client/public/textures/`.
+- Is your palette pink (`#D44A78`)? **Stale.** V6 desktop is slate-blue `#2E5C8A`; V6 mobile is periwinkle `#8A9AE8`. Pink was retired around V4.
+- Is your palette warm cream (`#F4EEE3`) + terra/clay (`#D4714E`)? **Also stale — and this one might fool you because of the version number.** That's your "Edition" v22 / v22b delivery from late April (Cowork-DL era). It was retired 2026-04-29 and replaced by V6 about a week later. v22 is *older* than V6, despite the bigger number.
+- Are your fonts Sora or Instrument Serif? **Same problem (Edition era).** V6 mobile is SF Pro Display / Inter Tight via `--mb-font-display`; V6 desktop uses system sans via `--font-body`.
+- Are your backgrounds dot grids or warm cream? **Stale.** V6 desktop is `#F1F1F4` cool grey + `#ECEAF2` lavender chrome; V6 mobile is `#FFFFFF` + watercolor texture PNGs from `client/public/textures/`.
 
-**Stale docs to ignore** (the ones that would push you to pink/Sora/cream): `docs/_archive/DESIGN_LANGUAGE.md`, `STYLE_GUIDE.md` visual sections, `docs/_archive/CLAUDE_DESIGN_BRIEF.md`, `docs/_archive/CLAUDE_DESIGN_BRIEF 2.md`, `docs/_archive/STITCH_BRIEF.md`, `client/src/components/claude_design/design_handoff_v3/`, `client/src/components/claude_design/design_handoff_v4_home/`. Each describes an earlier era of the project. The first four were moved out of the repo root to make stumbling onto them harder.
+**One mobile deviation to know about:** your original mobile drop had `--hero-pursue-1: #A8D4BD` etc. (pastel two-tone gradients on hero cards). Production replaced those with watercolor PNGs in `client/public/textures/` (commits `2a3ecda` + `9c821a1`). For marketing, **use the watercolor PNGs as full-bleed backgrounds with verdict tints layered on top — that's what ships.**
+
+**Stale docs to ignore:** `docs/_archive/DESIGN_LANGUAGE.md`, `STYLE_GUIDE.md` visual sections, `docs/_archive/CLAUDE_DESIGN_BRIEF.md`, `docs/_archive/CLAUDE_DESIGN_BRIEF 2.md`, `docs/_archive/STITCH_BRIEF.md`, `new claude design/design_handoff_v22b/` (Edition v22 era), `client/src/components/claude_design/design_handoff_v3/`, `client/src/components/claude_design/design_handoff_v4_home/`.
 
 The remainder of this file is the social-marketing brief itself. Read it after `DESIGN_SOURCE.md`.
 

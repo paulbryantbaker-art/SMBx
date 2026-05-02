@@ -34,9 +34,9 @@ AI-powered deal intelligence platform for business acquisitions from $300K to me
 11. **Mobile browser first.** Design for mobile, then adapt to desktop.
 
 ## Design System
-**The design system is the production code, not this section.** Read `DESIGN_SOURCE.md` at the repo root — it points at the V6 token blocks in `client/src/index.css` (`:root` for desktop, `.mobile-root` for mobile) and at the component code under `client/src/components/v6/`. For a quick token reference, read `DESIGN_TOKENS.md` (auto-generated from the CSS by `npm run design:extract`).
+**The V6 design language is the two CD handoff bundles** at the repo root: `design_handoff_smbx_desktop_material/` (desktop) and `design_handoff_smbx_app store/` (mobile). Production implements them faithfully — see `DESIGN_SOURCE.md` for the file-by-file implementation map. For a quick token reference, read `DESIGN_TOKENS.md` (auto-generated from `client/src/index.css` by `npm run design:extract`).
 
-**V6 in one line:** desktop uses slate-blue `#2E5C8A` + lavender chrome `#ECEAF2`; mobile uses periwinkle `#8A9AE8` + watercolor textures from `client/public/textures/`. The hot-pink `#D44A78` era and the "Sora + dot grid" era are both retired — if your output anchors on either, you read a stale doc.
+**V6 in one line:** desktop uses slate-blue `#2E5C8A` + lavender chrome `#ECEAF2`; mobile uses periwinkle `#8A9AE8` + watercolor textures from `client/public/textures/`. Hot pink (`#D44A78`, V3/V4 era) and warm cream + terra (`#F4EEE3` + `#D4714E`, Cowork-DL "Edition" v22 era) are both retired — if your output anchors on either, you read a stale doc.
 
 **Safari toolbar rule still applies:** never use `position:fixed` full-viewport divs with a background color (Safari reads them for toolbar tinting and it breaks dark-mode switching). Use `position:absolute` inside a relative parent instead.
 
