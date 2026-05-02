@@ -71,7 +71,7 @@ function VerifyEmail({ onDone }: { onDone: () => void }) {
   );
 }
 
-import V3App from './pages/V3App';
+import V6App from './components/v6/V6App';
 import Login from './pages/public/Login';
 import Signup from './pages/public/Signup';
 import Privacy from './pages/public/Privacy';
@@ -254,12 +254,9 @@ export default function App() {
           )}
         </Route>
 
-        {/* Catch-all → V3 workspace.
-            All retired marketing routes (/sell, /buy, /raise, /integrate,
-            /how-it-works, /pricing, /advisors, /enterprise, /journey) and
-            old logged-in surfaces (/chat, /pipeline, /dataroom, /settings,
-            /deal/*, /v4) fall through to here. */}
-        <Route><V3App /></Route>
+        {/* Catch-all → V6 Files Workspace (canonical 2026-05-01).
+            Replaced V3App. All retired routes fall through here. */}
+        <Route><V6App /></Route>
       </Switch>
     </ChatProvider>
   );

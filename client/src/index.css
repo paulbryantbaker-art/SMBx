@@ -172,3 +172,272 @@ input::placeholder, textarea::placeholder { color: var(--ink-4); }
 .fade-in { animation: fade-in 320ms ease-out both; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===========================================================================
+   V6 — Files Workspace (canonical 2026-05-01)
+   Material 3 base, slate-blue accent, cool lavender chrome.
+   All V6 tokens prefixed --m-* and primitives prefixed .m-* to coexist with
+   V3 tokens (which will be retired once V6 ships). V6 components scope their
+   own body-level styles (background, font-size) at the app root.
+   Source: design_handoff_smbx_desktop_material/v6-styles.css.
+   =========================================================================== */
+:root {
+  /* 10% accent — slate blue, single hue. No green/purple decoration. */
+  --m-primary:              #2E5C8A;
+  --m-on-primary:           #FFFFFF;
+  --m-primary-container:    #DCE7F3;
+  --m-on-primary-container: #0F2C4A;
+
+  /* Secondary <5% — warm terracotta for highlight chips */
+  --m-secondary:            #B85C3A;
+  --m-secondary-container:  #F4DDD0;
+  --m-on-secondary-container: #4A1F0F;
+  --m-tertiary:             #B85C3A;
+  --m-tertiary-container:   #F4DDD0;
+  --m-on-tertiary-container:#4A1F0F;
+
+  /* Verdict semantics — only inside verdict pills, never decoration */
+  --m-pursue:               #4A8C6F;
+  --m-pursue-container:     #DCE9E1;
+  --m-pursue-on-cont:       #143628;
+  --m-watch:                #B98A1A;
+  --m-watch-container:      #F5E5B8;
+  --m-pass:                 #A23A2F;
+  --m-pass-container:       #F2D6D2;
+
+  /* 60% canvas — cool grey */
+  --m-bg:                   #F1F1F4;
+  --m-surface:              #F8F8FA;
+  --m-surface-on-light:     #FFFFFF;
+  --m-surface-tinted:       #ECECF1;
+  --m-surface-2:            #E6E6EC;
+  --m-surface-3:            #D6D6DE;
+
+  /* 30% chrome — cool lavender, sidebar + tab strip ONLY */
+  --m-surface-1:            #ECEAF2;
+  --m-surface-container:    #ECEAF2;
+
+  /* Text + outlines */
+  --m-on-surface:           #1A1B25;
+  --m-on-surface-var:       #44475A;
+  --m-on-surface-mid:       #6B6F84;
+  --m-outline:              #C5C5CC;
+  --m-outline-var:          #DEDEE5;
+
+  /* Elevation */
+  --m-elev-0: none;
+  --m-elev-1: 0 1px 2px rgba(15, 18, 35, 0.05), 0 1px 3px 1px rgba(15, 18, 35, 0.04);
+  --m-elev-2: 0 2px 6px rgba(15, 18, 35, 0.08), 0 1px 2px rgba(15, 18, 35, 0.05);
+  --m-elev-3: 0 4px 12px rgba(15, 18, 35, 0.10), 0 2px 4px rgba(15, 18, 35, 0.05);
+}
+
+/* V6 root container — applied at V6App level so V3 surfaces stay unaffected */
+.v6-root {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: var(--m-on-surface);
+  background: var(--m-bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* M3 state-layer helper */
+.m-state {
+  transition: background 120ms ease, box-shadow 160ms ease, transform 120ms ease;
+  position: relative;
+}
+.m-state:hover { background-color: rgba(26, 27, 37, 0.04); }
+.m-state:active { background-color: rgba(26, 27, 37, 0.08); }
+
+/* Cards on canvas */
+.m-card {
+  background: var(--m-surface-on-light);
+  border: 1px solid var(--m-outline-var);
+  border-radius: 14px;
+}
+.m-card.elevated { border: none; box-shadow: var(--m-elev-2); }
+.m-card.tap { cursor: pointer; }
+.m-card.tap:hover { box-shadow: var(--m-elev-3); transform: translateY(-1px); }
+.m-card.filled-tonal { background: var(--m-surface-tinted); border: 1px solid transparent; }
+
+/* Buttons */
+.m-btn {
+  all: unset;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--font-body); font-size: 13px; font-weight: 500;
+  border-radius: 999px; padding: 0 14px; height: 36px; cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+.m-btn.filled { background: var(--m-primary); color: var(--m-on-primary); }
+.m-btn.filled:hover { background: #234975; }
+.m-btn.tonal { background: var(--m-primary-container); color: var(--m-on-primary-container); }
+.m-btn.tonal:hover { background: #C9D7E8; }
+.m-btn.outlined { border: 1px solid var(--m-outline); color: var(--m-on-surface); }
+.m-btn.outlined:hover { background: rgba(26,27,37,0.04); }
+.m-btn.text { color: var(--m-on-surface-var); }
+.m-btn.text:hover { background: rgba(26,27,37,0.05); }
+.m-btn:focus-visible {
+  outline: 2px solid var(--m-primary);
+  outline-offset: 2px;
+}
+
+/* FAB — chat send */
+.m-fab {
+  all: unset; display: inline-grid; place-items: center;
+  width: 36px; height: 36px; border-radius: 12px;
+  background: var(--m-primary); color: var(--m-on-primary);
+  cursor: pointer;
+  transition: background 120ms ease, transform 120ms ease;
+}
+.m-fab:hover { background: #234975; }
+.m-fab:active { transform: scale(0.96); }
+.m-fab:disabled { background: var(--m-surface-3); color: var(--m-on-surface-mid); cursor: not-allowed; }
+.m-fab:focus-visible { outline: 2px solid var(--m-primary); outline-offset: 2px; }
+
+/* Form controls */
+input.m-input, textarea.m-input {
+  width: 100%; box-sizing: border-box;
+  background: var(--m-surface-on-light);
+  border: 1px solid var(--m-outline-var);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: var(--font-body); font-size: 13.5px;
+  color: var(--m-on-surface);
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+input.m-input:focus, textarea.m-input:focus {
+  border-color: var(--m-primary);
+  box-shadow: 0 0 0 3px rgba(46, 92, 138, 0.15);
+}
+
+input[type="range"].m-slider {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 4px; border-radius: 999px;
+  background: var(--m-surface-3); outline: none;
+}
+input[type="range"].m-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--m-primary); cursor: grab;
+  box-shadow: 0 2px 6px rgba(46, 92, 138, 0.4);
+  border: 3px solid #fff;
+}
+input[type="range"].m-slider::-moz-range-thumb {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--m-primary); cursor: grab; border: 3px solid #fff;
+  box-shadow: 0 2px 6px rgba(46, 92, 138, 0.4);
+}
+
+/* Browser-style tabs */
+.tab-strip {
+  display: flex; align-items: stretch;
+  gap: 2px;
+  height: 38px;
+  background: var(--m-surface-1);
+  padding: 0 6px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--m-outline-var);
+}
+.tab-strip::-webkit-scrollbar { height: 0; }
+
+.tab {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 0 10px 0 14px;
+  height: 100%;
+  border-radius: 8px 8px 0 0;
+  background: transparent;
+  color: var(--m-on-surface-var);
+  cursor: pointer; min-width: 0;
+  font-size: 12.5px; font-weight: 500;
+  transition: background 120ms ease, color 120ms ease;
+  position: relative;
+  align-self: flex-end;
+}
+.tab:hover { background: rgba(26,27,37,0.04); color: var(--m-on-surface); }
+.tab.active {
+  background: var(--m-bg);
+  color: var(--m-on-surface);
+  font-weight: 600;
+  height: calc(100% + 1px);
+  margin-bottom: -1px;
+}
+.tab .tab-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+.tab .tab-close {
+  all: unset; display: grid; place-items: center;
+  width: 18px; height: 18px; border-radius: 4px;
+  color: var(--m-on-surface-mid); cursor: pointer; opacity: 0.6;
+  flex-shrink: 0;
+}
+.tab .tab-close:hover { background: rgba(26,27,37,0.1); opacity: 1; }
+.tab .tab-icon {
+  width: 14px; height: 14px; flex-shrink: 0;
+  display: grid; place-items: center;
+  color: var(--m-on-surface-mid);
+}
+.tab.active .tab-icon { color: var(--m-on-surface); }
+.tab.pinned { padding-right: 14px; }
+
+.tab-new-btn {
+  all: unset; align-self: center;
+  display: grid; place-items: center;
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  color: var(--m-on-surface-mid); cursor: pointer;
+  margin-left: 4px;
+  transition: background 120ms ease;
+}
+.tab-new-btn:hover { background: rgba(26,27,37,0.06); color: var(--m-on-surface); }
+
+/* Sidebar mode rail items */
+.mode-item {
+  all: unset;
+  display: flex; align-items: center; gap: 12px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  color: var(--m-on-surface-var);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+.mode-item:hover { background: rgba(26,27,37,0.04); color: var(--m-on-surface); }
+.mode-item.active {
+  background: var(--m-primary-container);
+  color: var(--m-on-primary-container);
+  font-weight: 600;
+}
+.mode-item .mode-icon {
+  width: 22px; height: 22px;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  color: inherit;
+}
+.mode-item .mode-count {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--m-on-surface-mid);
+  font-family: var(--font-mono);
+}
+.mode-item.active .mode-count { color: var(--m-on-primary-container); opacity: 0.7; }
+.mode-item:focus-visible {
+  outline: 2px solid var(--m-primary);
+  outline-offset: 2px;
+}
+
+/* V6 motion */
+@keyframes m-fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.m-fade-up { animation: m-fadeUp 280ms cubic-bezier(0.2, 0, 0, 1) both; }
+@keyframes m-fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.m-fade-in { animation: m-fadeIn 200ms ease both; }
+
+/* prefers-reduced-motion — disable V6 fade animations */
+@media (prefers-reduced-motion: reduce) {
+  .m-fade-up, .m-fade-in { animation: none; }
+  .m-card.tap:hover { transform: none; }
+}
