@@ -4,7 +4,7 @@ import { useAnonymousChat } from "../../../hooks/useAnonymousChat";
 import { useAuthChat } from "../../../hooks/useAuthChat";
 import type { User } from "../../../hooks/useAuth";
 import { TabBar } from "./TabBar";
-import { GlassTopBar, LargeTitle } from "./TopBar";
+import { GlassTopBar, LargeTitle, TitleCollapseProvider } from "./TopBar";
 import { TodayScreen } from "./screens/Today";
 import { PipelineScreen } from "./screens/Pipeline";
 import { BriefScreen } from "./screens/Brief";
@@ -147,6 +147,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
   };
 
   return (
+    <TitleCollapseProvider>
     <div className="mobile-root" style={S.root}>
       {view.kind === "tab" && activeTab === "today" && (
         <TodayScreen
@@ -191,6 +192,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
         onTalkToYulia={onLearnTalkToYulia}
       />
     </div>
+    </TitleCollapseProvider>
   );
 }
 

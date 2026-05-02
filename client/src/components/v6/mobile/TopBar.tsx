@@ -1,15 +1,40 @@
 /* V6 Mobile — TopBar variants.
    GlassTopBar = translucent sticky bar (mask-image bottom fade) for App Store
-                 large-title pattern.
+                 large-title pattern. The title in the bar is HIDDEN while the
+                 LargeTitle is on-screen, then fades in once the user scrolls
+                 past it — matching iOS App Store's collapse behavior.
    LargeTitle  = 34px display title that sits under the glass bar (visible on
-                 scroll-top, collapses into bar title on scroll).
-   StaticTopBar = standard non-translucent fallback for surfaces that don't
-                 want the glass treatment (e.g., the deal detail uses its own
-                 floating nav). */
+                 scroll-top, collapses into bar title on scroll). Reports its
+                 visibility via TitleCollapseContext so the bar can sync.
+   TitleCollapseProvider = wraps the mobile shell once, holds the shared
+                 collapsed flag. */
 
-import { type CSSProperties, type ReactNode } from "react";
+import {
+  createContext, useContext, useEffect, useRef, useState,
+  type CSSProperties, type ReactNode,
+} from "react";
 import { GlassSurface } from "./glass";
 import { MobileIcon } from "./icons";
+
+/* ─── Title-collapse context ──────────────────────────────── */
+
+interface TitleCollapseValue {
+  collapsed: boolean;
+  setCollapsed: (b: boolean) => void;
+}
+const TitleCollapseContext = createContext<TitleCollapseValue>({
+  collapsed: false,
+  setCollapsed: () => {},
+});
+
+export function TitleCollapseProvider({ children }: { children: ReactNode }) {
+  const [collapsed, setCollapsed] = useState(false);
+  return (
+    <TitleCollapseContext.Provider value={{ collapsed, setCollapsed }}>
+      {children}
+    </TitleCollapseContext.Provider>
+  );
+}
 
 interface GlassTopBarProps {
   title: string;
@@ -28,6 +53,7 @@ export function GlassTopBar({
   initials = "JM",
   onAvatarClick,
 }: GlassTopBarProps) {
+  const { collapsed } = useContext(TitleCollapseContext);
   return (
     <>
       {/* Spacer reserves layout space so content starts below the bar */}
@@ -45,7 +71,16 @@ export function GlassTopBar({
             </button>
           ) : <div style={{ width: 32 }} aria-hidden="true" />}
 
-          <h1 style={T.title}>{title}</h1>
+          <h1
+            aria-hidden={!collapsed}
+            style={{
+              ...T.title,
+              opacity: collapsed ? 1 : 0,
+              transform: collapsed ? "translateY(0)" : "translateY(4px)",
+              transition: "opacity 180ms cubic-bezier(0.25, 1, 0.5, 1), transform 180ms cubic-bezier(0.25, 1, 0.5, 1)",
+              pointerEvents: collapsed ? "auto" : "none",
+            }}
+          >{title}</h1>
 
           <div style={T.right}>
             {rightSlot ?? (
@@ -77,7 +112,30 @@ interface LargeTitleProps {
 }
 
 export function LargeTitle({ children }: LargeTitleProps) {
-  return <h1 style={T.largeTitle}>{children}</h1>;
+  const ref = useRef<HTMLHeadingElement | null>(null);
+  const { setCollapsed } = useContext(TitleCollapseContext);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    // Observe whether the LargeTitle is still visible in the viewport.
+    // rootMargin's negative top accounts for the glass bar zone above —
+    // once the title has scrolled fully under the bar, collapsed = true.
+    const obs = new IntersectionObserver(
+      ([entry]) => setCollapsed(!entry.isIntersecting),
+      { threshold: 0, rootMargin: "-56px 0px 0px 0px" },
+    );
+    obs.observe(el);
+    // Reset to expanded when this LargeTitle mounts (new screen / tab).
+    setCollapsed(false);
+    return () => {
+      obs.disconnect();
+      // Leave collapsed false on unmount so the next screen starts clean.
+      setCollapsed(false);
+    };
+  }, [setCollapsed]);
+
+  return <h1 ref={ref} style={T.largeTitle}>{children}</h1>;
 }
 
 const T: Record<string, CSSProperties> = {
