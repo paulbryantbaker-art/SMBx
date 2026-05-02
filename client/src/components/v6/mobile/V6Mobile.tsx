@@ -9,6 +9,7 @@ import { TodayScreen } from "./screens/Today";
 import { PipelineScreen } from "./screens/Pipeline";
 import { BriefScreen } from "./screens/Brief";
 import { DetailScreen } from "./screens/Detail";
+import { ChatSheet } from "./ChatSheet";
 import type { MobileChatBridge, MobileTab, MobileView } from "./types";
 
 const VALID_TABS: MobileTab[] = ["today", "pipeline", "brief"];
@@ -62,7 +63,7 @@ interface ShellProps {
   onSignOut: () => void;
 }
 
-function V6MobileShell({ user, chat: _chat, onSignOut: _onSignOut }: ShellProps) {
+function V6MobileShell({ user, chat, onSignOut: _onSignOut }: ShellProps) {
   const [, navigate] = useLocation();
 
   const initial = readMobileHashState();
@@ -114,10 +115,7 @@ function V6MobileShell({ user, chat: _chat, onSignOut: _onSignOut }: ShellProps)
   const activeTab: MobileTab = view.kind === "tab" ? (view.tab ?? "today") : "today";
   const onTabChange = (next: MobileTab) => setView({ kind: "tab", tab: next });
   const onChat = () => setChatOpen(true);
-  const _chatPlaceholder = chatOpen; // chat sheet lands in M7
-  const _setChat = setChatOpen;
-  const _nav = navigate;
-  void _chatPlaceholder; void _setChat; void _nav;
+  const onChatClose = () => setChatOpen(false);
 
   const initials = computeInitials(user);
   const isAnon = !user;
@@ -169,6 +167,7 @@ function V6MobileShell({ user, chat: _chat, onSignOut: _onSignOut }: ShellProps)
         />
       )}
       <TabBar active={activeTab} onChange={onTabChange} onChat={onChat} />
+      <ChatSheet open={chatOpen} onClose={onChatClose} chat={chat} />
     </div>
   );
 }
