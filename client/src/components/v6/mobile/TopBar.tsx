@@ -13,24 +13,34 @@ import {
   createContext, useContext, useEffect, useRef, useState,
   type CSSProperties, type ReactNode,
 } from "react";
-import { GlassSurface } from "./glass";
 import { MobileIcon } from "./icons";
 
 /* ─── Title-collapse context ──────────────────────────────── */
 
 interface TitleCollapseValue {
+  /** True once the LargeTitle has scrolled past the bar zone. Drives the
+      small title fade-in inside the bar. */
   collapsed: boolean;
   setCollapsed: (b: boolean) => void;
+  /** True as soon as the user has scrolled at all. Drives the bar's
+      backdrop tint — the blur itself is always on so content scrolling
+      under the bar is always covered, but the visible chrome only
+      materializes once the user starts scrolling. */
+  scrolled: boolean;
+  setScrolled: (b: boolean) => void;
 }
 const TitleCollapseContext = createContext<TitleCollapseValue>({
   collapsed: false,
   setCollapsed: () => {},
+  scrolled: false,
+  setScrolled: () => {},
 });
 
 export function TitleCollapseProvider({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   return (
-    <TitleCollapseContext.Provider value={{ collapsed, setCollapsed }}>
+    <TitleCollapseContext.Provider value={{ collapsed, setCollapsed, scrolled, setScrolled }}>
       {children}
     </TitleCollapseContext.Provider>
   );
@@ -53,7 +63,7 @@ export function GlassTopBar({
   initials = "JM",
   onAvatarClick,
 }: GlassTopBarProps) {
-  const { collapsed } = useContext(TitleCollapseContext);
+  const { collapsed, scrolled } = useContext(TitleCollapseContext);
   return (
     <>
       {/* Spacer reserves only safe-area + a small gap. The LargeTitle starts
@@ -61,19 +71,41 @@ export function GlassTopBar({
           LargeTitle row on the right side, App-Store style. */}
       <div style={T.spacer} aria-hidden="true" />
 
-      {/* Glass bar with title — fades in only when LargeTitle has scrolled
-          out of view. At rest (scroll-top) this layer is fully transparent
-          so it doesn't add visual mass at the top of the screen. */}
+      {/* Glass bar — the BLUR is always on so any content scrolling under
+          the bar zone is cleanly covered (no half-cut LargeTitle). The
+          visible tint fades in as soon as the user starts scrolling, and
+          the small title fades in once the LargeTitle has scrolled past. */}
       <div
         style={{
           ...T.barWrap,
-          opacity: collapsed ? 1 : 0,
-          pointerEvents: collapsed ? "auto" : "none",
-          transition: "opacity 180ms cubic-bezier(0.25, 1, 0.5, 1)",
+          // Always interactive so the bar can intercept the safe-area zone,
+          // but visually transparent at scroll-top.
+          pointerEvents: "auto",
         }}
         aria-hidden={!collapsed}
       >
-        <GlassSurface tint="chrome" radius={0} style={T.bar}>
+        <div
+          style={{
+            ...T.bar,
+            // Backdrop blur is ALWAYS active. Fades in by itself doesn't
+            // change appearance at scroll-top because nothing is behind
+            // the safe-area zone — the blur shows nothing.
+            backdropFilter: "blur(28px) saturate(180%) brightness(1.04)",
+            WebkitBackdropFilter: "blur(28px) saturate(180%) brightness(1.04)",
+            // Tint fades in once scrolled. Light at scroll-start, fuller
+            // once content is meaningfully under the bar.
+            background: scrolled
+              ? "rgba(255,255,255,0.55)"
+              : "rgba(255,255,255,0)",
+            // Soft inner edge appears with the tint.
+            boxShadow: scrolled
+              ? "inset 0 -0.5px 0 rgba(0,0,0,0.06)"
+              : "none",
+            transition:
+              "background 220ms cubic-bezier(0.25, 1, 0.5, 1), " +
+              "box-shadow 220ms cubic-bezier(0.25, 1, 0.5, 1)",
+          }}
+        >
           {showBack ? (
             <button
               type="button"
@@ -88,15 +120,18 @@ export function GlassTopBar({
           <h1
             style={{
               ...T.title,
+              opacity: collapsed ? 1 : 0,
               transform: collapsed ? "translateY(0)" : "translateY(4px)",
-              transition: "transform 180ms cubic-bezier(0.25, 1, 0.5, 1)",
+              transition:
+                "opacity 180ms cubic-bezier(0.25, 1, 0.5, 1), " +
+                "transform 180ms cubic-bezier(0.25, 1, 0.5, 1)",
             }}
           >{title}</h1>
 
           {/* Reserve the right gutter so the centered title stays centered
               against the always-visible floating chrome above. */}
           <div style={{ width: 80 }} aria-hidden="true" />
-        </GlassSurface>
+        </div>
       </div>
 
       {/* Floating chrome — always visible, always at top-right. Sits above
@@ -131,33 +166,39 @@ interface LargeTitleProps {
 
 export function LargeTitle({ children }: LargeTitleProps) {
   const ref = useRef<HTMLHeadingElement | null>(null);
-  const { setCollapsed } = useContext(TitleCollapseContext);
+  const { setCollapsed, setScrolled } = useContext(TitleCollapseContext);
 
   // Scroll-position driven (was IntersectionObserver). The observer races
   // with iOS PWA layout settling + the mb-fade-up entrance transform on
   // first paint, sometimes reporting "not intersecting" at scrollTop=0
   // and starting the page in the collapsed state. A direct scroll listener
-  // on the mobile-root container is both faster and deterministic: we know
-  // the title's offsetTop + offsetHeight, we read scrollTop, we collapse
-  // once the title has scrolled past.
+  // on the mobile-root container is both faster and deterministic.
+  //
+  // Two thresholds:
+  //   • scrolled  — true as soon as scrollTop > a small threshold. Drives
+  //                 the bar's tint so glass appears the moment content
+  //                 starts moving under it (no half-cut LargeTitle).
+  //   • collapsed — true once scrollTop has passed the LargeTitle's
+  //                 bottom. Drives the small title fade-in inside the bar.
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    // Walk up to find the .mobile-root scroll container.
     const root = el.closest(".mobile-root") as HTMLElement | null;
     if (!root) {
       setCollapsed(false);
+      setScrolled(false);
       return;
     }
-    const COLLAPSE_OFFSET = 12; // px past the title's bottom before collapse
+    const SCROLL_THRESHOLD = 4;   // px before showing glass tint
+    const COLLAPSE_OFFSET   = 12; // px past title's bottom before collapse
     const update = () => {
       const titleBottom = el.offsetTop + el.offsetHeight;
+      setScrolled(root.scrollTop > SCROLL_THRESHOLD);
       setCollapsed(root.scrollTop > titleBottom - COLLAPSE_OFFSET);
     };
-    update(); // run once on mount so initial state is correct
+    update();
     root.addEventListener("scroll", update, { passive: true });
-    // Recompute after layout settles (safe-area inset, fade-up animation,
-    // visualViewport height tracking) — covers the first ~600ms.
+    // Recompute after layout settles — covers the first ~600ms.
     const t1 = setTimeout(update, 60);
     const t2 = setTimeout(update, 240);
     const t3 = setTimeout(update, 540);
@@ -165,8 +206,9 @@ export function LargeTitle({ children }: LargeTitleProps) {
       root.removeEventListener("scroll", update);
       clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
       setCollapsed(false);
+      setScrolled(false);
     };
-  }, [setCollapsed]);
+  }, [setCollapsed, setScrolled]);
 
   return <h1 ref={ref} style={T.largeTitle}>{children}</h1>;
 }
@@ -190,8 +232,10 @@ const T: Record<string, CSSProperties> = {
     alignItems: "center",
     justifyContent: "space-between",
     borderRadius: 0,
-    maskImage: "linear-gradient(to bottom, black 80%, transparent 100%)",
-    WebkitMaskImage: "linear-gradient(to bottom, black 80%, transparent 100%)",
+    // Mask gradient previously faded the bar's bottom edge, but with the
+    // always-on blur that fade let half-cut LargeTitle text peek through
+    // as it scrolled past. Hard cutoff is what we want — anything below
+    // the bar's bottom edge is fully out of the bar zone.
   },
   iconBtn: {
     width: 32, height: 32,
