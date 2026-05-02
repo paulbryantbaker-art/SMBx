@@ -102,11 +102,12 @@ Desktop V6 ships exactly as you delivered it. No deviations.
 
 ## 5. Live screenshots (ground truth)
 
-For mobile, do not rely on the JSX mocks — the texture revision changed the look meaningfully. Use these:
+No shipped V6 screenshots are committed to the repo yet — for either surface. Two ways to see the live UI:
 
-- `client/src/components/claude_design/mobile_pics/IMG_3497.jpeg` … `IMG_3513.jpeg` (17 shipped screens)
+- **Open the handoff bundles' HTML files in a browser** — `design_handoff_smbx_desktop_material/V6 Files Workspace.html` and `design_handoff_smbx_app store/Mobile iOS.html`. These are pixel-true references CD authored, and production matches them (with the watercolor mobile deviation noted in §4).
+- **Run the live app** — `npm run dev` + `npx tsx server/index.ts`, then open in browser at desktop and mobile viewports. Components live at `client/src/components/v6/` (desktop) and `client/src/components/v6/mobile/` (mobile).
 
-For desktop, no shipped screenshots are committed yet. Pull `main`, run the dev server (`npm run dev` + `npx tsx server/index.ts`), and screenshot the V6 routes yourself. Components live at `client/src/components/v6/` (desktop) and `client/src/components/v6/mobile/` (mobile).
+> **Note:** there is a folder `client/src/components/claude_design/mobile_pics/` containing 17 iPhone screenshots (`IMG_3497.jpeg` … `IMG_3513.jpeg`). **These are NOT shipped V6 screens** — they are iOS reference screenshots the maintainer captured (Apple App Store Today tab, Roblox listing, Apple TV remote, etc.) and gave to CD on April 21 as inspiration for V6 mobile's "Apple App Store + Liquid Glass" visual language. Use them to confirm the visual idiom V6 mobile is *aiming at*, not as ground truth for what shipped.
 
 ---
 

@@ -71,7 +71,7 @@ The generator script lives at `scripts/extract-design-tokens.mjs`. Edit tokens i
 | `design_handoff_smbx_desktop_material/V6 Files Workspace.html` | CD's pixel-true desktop reference, openable in a browser |
 | `design_handoff_smbx_app store/Mobile iOS.html` | CD's pixel-true mobile reference, openable in a browser |
 | `client/public/textures/` | The six watercolor PNGs used by mobile heroes (pursue/watch/pass/baseline/buyers/sunrise) |
-| `client/src/components/claude_design/mobile_pics/` | 17 live shipped mobile screenshots from the production app (note: not yet committed to git as of this writing — local only) |
+| `client/src/components/claude_design/mobile_pics/` | 17 iOS reference screenshots (App Store, Apple TV remote, etc.) the maintainer captured from a real iPhone on April 21 and gave to CD as inspiration for V6 mobile's "App Store + Liquid Glass" visual language. **Inspiration material, not shipped smbx screens.** Local only, not committed to git. |
 
 For desktop screenshots of shipped state, run `npm run dev` + `npx tsx server/index.ts` and screenshot the V6 routes yourself.
 
