@@ -82,43 +82,33 @@ export function GlassTopBar({
           LargeTitle row on the right side, App-Store style. */}
       <div style={T.spacer} aria-hidden="true" />
 
-      {/* Glass bar — the BLUR is always on so any content scrolling under
-          the bar zone is cleanly covered (no half-cut LargeTitle). The
-          visible tint fades in as soon as the user starts scrolling, and
-          the small title fades in once the LargeTitle has scrolled past. */}
+      {/* DIAGNOSTIC PROBE (2026-05-03): bar is PERMANENTLY transparent —
+          NO React-driven inline-style mutations on this fixed-tree element
+          during scroll. Hypothesis: iOS 26 was locking chrome translucency
+          when scroll flipped `scrolled` → React updated bg/backdropFilter
+          inline → Safari treated it as a near-chrome paint mutation and
+          opaque-locked the status bar. If bleed survives scroll with this
+          static version, the hypothesis is confirmed and the App Store
+          collapse pattern needs to be rebuilt via CSS-only
+          (animation-timeline: scroll, sticky positioning) instead of
+          React state.
+
+          The small title (h1 inside) still fades on `collapsed` because
+          it's a content child, not a fixed element bg — should be safe. */}
       <div
         style={{
           ...T.barWrap,
-          // Only intercept taps when the bar is materialized — at
-          // scroll-top the bar is fully transparent and shouldn't capture
-          // events meant for the LargeTitle row beneath it.
-          pointerEvents: scrolled ? "auto" : "none",
+          pointerEvents: "none", // permanently non-interactive while bar is transparent
         }}
         aria-hidden={!collapsed}
       >
         <div
           style={{
             ...T.bar,
-            // Backdrop blur is conditional — at scroll-top it would blur
-            // the LargeTitle behind it (the bar zone overlaps with the
-            // title's vertical position), creating a "ghost rectangle"
-            // look. Snap on the moment the user scrolls; the LargeTitle
-            // is moving by then so the snap reads as glass sliding over.
-            backdropFilter: scrolled
-              ? "blur(28px) saturate(180%) brightness(1.04)"
-              : "none",
-            WebkitBackdropFilter: scrolled
-              ? "blur(28px) saturate(180%) brightness(1.04)"
-              : "none",
-            background: scrolled
-              ? "rgba(255,255,255,0.55)"
-              : "rgba(255,255,255,0)",
-            boxShadow: scrolled
-              ? "inset 0 -0.5px 0 rgba(0,0,0,0.06)"
-              : "none",
-            transition:
-              "background 220ms cubic-bezier(0.25, 1, 0.5, 1), " +
-              "box-shadow 220ms cubic-bezier(0.25, 1, 0.5, 1)",
+            background: "rgba(255,255,255,0)",
+            backdropFilter: "none",
+            WebkitBackdropFilter: "none",
+            boxShadow: "none",
           }}
         >
           {showBack ? (
