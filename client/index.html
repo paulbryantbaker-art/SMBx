@@ -24,12 +24,23 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <script>
-      // V3: light-only. Set body bg before first paint to avoid any flash.
-      document.documentElement.style.backgroundColor = '#F6F7F9';
-      if (document.body) document.body.style.backgroundColor = '#F6F7F9';
-      else document.addEventListener('DOMContentLoaded', function() {
-        document.body.style.backgroundColor = '#F6F7F9';
-      });
+      // Set body bg synchronously before first paint:
+      //  - Desktop V6: #F6F7F9 (slate, avoids white flash)
+      //  - Mobile: #D4A258 (warm gold sunrise) so iOS Safari samples it
+      //    AT INITIAL PAINT and the chrome stays translucent + warm-tinted.
+      //    Critical: do NOT change body bg via JS later — once iOS sees
+      //    a JS-driven post-paint bg change, the chrome locks out of
+      //    translucent mode into opaque-tinted, killing the page-bleed
+      //    behind the status bar. V6Mobile.tsx must NOT touch body bg.
+      (function() {
+        var isMobile = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
+        var bg = isMobile ? '#D4A258' : '#F6F7F9';
+        document.documentElement.style.backgroundColor = bg;
+        if (document.body) document.body.style.backgroundColor = bg;
+        else document.addEventListener('DOMContentLoaded', function() {
+          document.body.style.backgroundColor = bg;
+        });
+      })();
     </script>
     <!-- Site-wide Organization + SoftwareApplication schema. Per-page
          FAQPage / BreadcrumbList are injected by usePageMeta. -->

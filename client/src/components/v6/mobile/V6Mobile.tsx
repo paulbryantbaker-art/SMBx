@@ -91,47 +91,25 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
     return window.matchMedia("(display-mode: standalone)").matches;
   }, []);
 
-  // Track --vvh from visualViewport (per architecture_ios_pwa_pill.md)
-  // and reconcile html/body bg with the mobile palette so the iOS Safari
-  // chrome (URL bar, status bar) tints to a color cohesive with the page.
+  // Track --vvh from visualViewport (per architecture_ios_pwa_pill.md).
   //
-  // iOS 26 status-bar tint (2026-05-03 v4): the top iOS status bar in
-  // Safari tab mode is iOS chrome (not Safari chrome) and tints by
-  // sampling <body>'s backgroundColor directly — different mechanism
-  // from the bottom Safari URL bar which is translucent and shows actual
-  // page content through it (true bleed, works after the document-scroll
-  // architecture fix in d7aec64).
-  //
-  // To make the top status bar visibly bleed warm — same as how MacRumors
-  // gets a visible red status bar via their saturated red body — match
-  // the body bg to the .mobile-root gradient's top stop (#D4A258). iOS
-  // samples that, status bar paints warm gold. Doesn't affect the
-  // bottom bleed because the bottom isn't sampling — it's translucent
-  // over scrolling document content.
-  //
-  // Single solid color (per Ben Frain — gradients on body confuse the
-  // sampler). theme-color is left to index.html (dead in iOS 26).
+  // CRITICAL: do NOT touch document.body or document.documentElement
+  // backgroundColor here. iOS 26 Safari's chrome bleeds (translucent,
+  // shows page content blurred behind status bar) until a JS-driven
+  // post-initial-paint body bg change locks it into opaque-tinted mode.
+  // The body bg is set synchronously in index.html's inline script
+  // (#D4A258 warm gold for mobile) BEFORE iOS samples — that's how
+  // we keep the chrome translucent AND tinted warm. If you change
+  // body bg here, the chrome will appear correct for ~500ms then lock
+  // to opaque the moment React hydration completes. User-visible
+  // symptom: "it bleeds at first then stops after half a second."
   useEffect(() => {
     document.documentElement.classList.add("mobile-pwa-active");
-
-    const CHROME_TINT = "#D4A258";
-    const html = document.documentElement;
-    const body = document.body;
-    const prevHtmlBg = html.style.backgroundColor;
-    const prevBodyBg = body.style.backgroundColor;
-    html.style.backgroundColor = CHROME_TINT;
-    body.style.backgroundColor = CHROME_TINT;
-
-    const restoreChrome = () => {
-      html.style.backgroundColor = prevHtmlBg;
-      body.style.backgroundColor = prevBodyBg;
-    };
 
     const vv = window.visualViewport;
     if (!vv) {
       return () => {
         document.documentElement.classList.remove("mobile-pwa-active");
-        restoreChrome();
       };
     }
     const setVVH = () => {
@@ -147,7 +125,6 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
       document.documentElement.classList.remove("mobile-pwa-active");
       document.body.style.removeProperty("--vvh");
       document.body.style.removeProperty("--vvs");
-      restoreChrome();
     };
   }, []);
 
