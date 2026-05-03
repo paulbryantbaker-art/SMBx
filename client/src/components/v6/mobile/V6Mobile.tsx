@@ -297,27 +297,34 @@ function writeMobileHashState(view: MobileView) {
   } catch { /* noop */ }
 }
 
-// .mobile-root gradient: soft warm sunrise wash at top fading to white,
-// then periwinkle at the bottom for the Safari URL-bar bleed.
+// .mobile-root gradient: warm sunrise wash that fades naturally down
+// the page (visible fade in the page area, NOT under the chrome) +
+// periwinkle bleed at the bottom for Safari URL bar.
 //
-// The warm zone is anchored to env(safe-area-inset-top) so it ends in a
-// fixed pixel distance regardless of total page height. Earlier % stops
-// (#D4A258 0% → #FFFFFF 12%) extended ~300px on a 2500px scroll, which
-// read as a "yellow band." Absolute-pixel anchoring keeps the warm-to-
-// white fade ~60px below the chrome zone — soft, ambient, ends before
-// the hero card so the page stays clean below.
+// Critical: keep warm SOLID through the entire chrome zone plus a
+// small buffer below it. If the warm-to-white transition happens under
+// the iOS chrome, the chrome's translucent blur shows a blurred-
+// gradient mess. By extending solid warm past the chrome boundary and
+// only fading below, the chrome shows uniform color (clean, not
+// blurry) and the user sees a real, deliberate sunrise fade in the
+// visible page area — exactly the "natural fade down the page" feel.
+//
+// As the user scrolls, .mobile-root (in natural flow in Safari tab
+// mode) scrolls with body — the warm zone scrolls up and out of view,
+// leaving white at top of viewport. Chrome stays warm-tinted via body
+// bg sampling (set in index.html inline script).
 //
 // Layout the gradient produces:
-//   y=0           → #D4A258 warm gold (matches iOS chrome tint)
-//   y=safe-area   → #D4A258 (no harsh edge at chrome boundary)
-//   y=safe+60px   → #FFFFFF (soft fade complete by Today title's bottom)
-//   y=72% body    → #FFFFFF (white through middle)
-//   y=100% body   → #A8B3E5 periwinkle (Safari URL bar bleed bottom)
+//   y=0                → #D4A258 warm gold (matches chrome tint)
+//   y=safe-area+30px   → #D4A258 (still solid past chrome — clean tint)
+//   y=safe-area+200px  → #FFFFFF (soft 170px fade in visible page area)
+//   y=72% body         → #FFFFFF (white through middle)
+//   y=100% body        → #A8B3E5 (periwinkle URL bar bleed)
 const ROOT_GRADIENT =
   "linear-gradient(to bottom," +
   " #D4A258 0," +
-  " #D4A258 env(safe-area-inset-top, 44px)," +
-  " #FFFFFF calc(env(safe-area-inset-top, 44px) + 60px)," +
+  " #D4A258 calc(env(safe-area-inset-top, 44px) + 30px)," +
+  " #FFFFFF calc(env(safe-area-inset-top, 44px) + 200px)," +
   " #FFFFFF 72%," +
   " #A8B3E5 100%)";
 
