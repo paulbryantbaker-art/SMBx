@@ -66,6 +66,17 @@ export function GlassTopBar({
   const { collapsed, scrolled } = useContext(TitleCollapseContext);
   return (
     <>
+      {/* iOS 26 chrome sampler — Safari 26 live-samples the topmost
+          position:fixed element (≥80% wide, near edge) to compute the
+          status-bar tint, including its backdrop-filter. By placing a
+          fixed strip in ONLY the safe-area zone, we get true Liquid
+          Glass chrome without overlapping the LargeTitle below. The
+          subtle white wash + blur lets page content live-blur through
+          the chrome as the user scrolls — apple.com / macrumors quality.
+          Older iOS treats this as an invisible 0.2-alpha strip behind
+          the chrome (no visible regression). */}
+      <div style={T.chromeSentinel} aria-hidden="true" />
+
       {/* Spacer reserves only safe-area + a small gap. The LargeTitle starts
           right beneath it; the floating chrome (avatar + search) overlays the
           LargeTitle row on the right side, App-Store style. */}
@@ -232,6 +243,27 @@ export function LargeTitle({ children }: LargeTitleProps) {
 }
 
 const T: Record<string, CSSProperties> = {
+  chromeSentinel: {
+    // Sized to ONLY the safe-area-inset-top zone. Subtle white wash
+    // (0.20 alpha) + 20px blur. Safari 26 picks the topmost qualifying
+    // fixed element to drive chrome tint — this beats the body-bg
+    // fallback because it carries a backdrop-filter, which Safari
+    // propagates into the chrome surface itself. Result: chrome
+    // becomes truly translucent and live-blurs whatever is scrolling
+    // beneath it.
+    //
+    // pointer-events:none so it doesn't intercept taps near the top.
+    // z-index 29 = below barWrap (30) so the bar still draws above it
+    // when the bar materializes on scroll.
+    position: "fixed",
+    top: 0, left: 0, right: 0,
+    height: "env(safe-area-inset-top, 44px)",
+    background: "rgba(255,255,255,0.20)",
+    backdropFilter: "blur(20px) saturate(180%)",
+    WebkitBackdropFilter: "blur(20px) saturate(180%)",
+    zIndex: 29,
+    pointerEvents: "none",
+  },
   spacer: {
     // Just safe-area inset reservation — NO background color. A bg here
     // forces iOS chrome translucency to show this color instead of the
