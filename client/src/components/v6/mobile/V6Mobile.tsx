@@ -95,21 +95,26 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
   // and reconcile html/body bg with the mobile palette so the iOS Safari
   // chrome (URL bar, status bar) tints to a color cohesive with the page.
   //
-  // iOS 26 chrome-tint behavior (2026-05-03): Safari 26 dropped support
-  // for <meta name="theme-color"> and now derives chrome tinting by
-  // sampling <body>'s backgroundColor directly. Per Ben Frain, gradients
-  // on body make the sampler worse (safe-area inset interactions break
-  // it), so we use a single solid color: a faint warm-neutral midway
-  // between the .mobile-root gradient's sunrise cream (#FAF1E5) and
-  // periwinkle (#EEF1FB) ends. That gives the URL bar / status bar a
-  // deliberate soft tint instead of a stark white seam, while the
-  // .mobile-root gradient inside provides the actual page atmosphere.
-  // theme-color is left to whatever index.html declares — it has no
-  // effect in iOS 26+ but older iOS / Android may still honor it.
+  // iOS 26 status-bar tint (2026-05-03 v4): the top iOS status bar in
+  // Safari tab mode is iOS chrome (not Safari chrome) and tints by
+  // sampling <body>'s backgroundColor directly — different mechanism
+  // from the bottom Safari URL bar which is translucent and shows actual
+  // page content through it (true bleed, works after the document-scroll
+  // architecture fix in d7aec64).
+  //
+  // To make the top status bar visibly bleed warm — same as how MacRumors
+  // gets a visible red status bar via their saturated red body — match
+  // the body bg to the .mobile-root gradient's top stop (#D4A258). iOS
+  // samples that, status bar paints warm gold. Doesn't affect the
+  // bottom bleed because the bottom isn't sampling — it's translucent
+  // over scrolling document content.
+  //
+  // Single solid color (per Ben Frain — gradients on body confuse the
+  // sampler). theme-color is left to index.html (dead in iOS 26).
   useEffect(() => {
     document.documentElement.classList.add("mobile-pwa-active");
 
-    const CHROME_TINT = "#F4F1EC";
+    const CHROME_TINT = "#D4A258";
     const html = document.documentElement;
     const body = document.body;
     const prevHtmlBg = html.style.backgroundColor;
