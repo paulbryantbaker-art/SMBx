@@ -78,6 +78,19 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
     open: false, section: "how",
   });
 
+  // PWA standalone vs Safari tab determines scroll architecture:
+  //   - PWA standalone: .mobile-root is the scroll container (position:absolute
+  //     inset:0 overflow:auto). Required for visualViewport keyboard tracking
+  //     and the three-layer chat sheet pattern.
+  //   - Safari tab: .mobile-root flows naturally, body scrolls. Required for
+  //     iOS Safari's native chrome auto-hide / page-bleed behavior (Safari
+  //     only triggers it on document scroll, not custom scroll containers).
+  // Detected once at mount — display-mode doesn't change after launch.
+  const isStandalone = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(display-mode: standalone)").matches;
+  }, []);
+
   // Track --vvh from visualViewport (per architecture_ios_pwa_pill.md)
   // and reconcile html/body bg with the mobile palette so the iOS Safari
   // chrome (URL bar, status bar) tints to a color cohesive with the page.
@@ -192,7 +205,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
 
   return (
     <TitleCollapseProvider>
-    <div className="mobile-root" style={S.root}>
+    <div className="mobile-root" style={isStandalone ? S.rootPwa : S.rootSafari}>
       {view.kind === "tab" && activeTab === "today" && (
         <TodayScreen
           isAnon={isAnon}
@@ -302,12 +315,25 @@ function writeMobileHashState(view: MobileView) {
   } catch { /* noop */ }
 }
 
+// Shared gradient for both modes. In rootPwa it paints in the scrollport
+// (fixed to viewport) since .mobile-root is the scroll container. In
+// rootSafari it paints in the natural-flow box (scrolls with content) so
+// at scroll-top the warm gold reads through iOS chrome and at scroll-end
+// the periwinkle reads through. iOS Safari's native chrome bleed only
+// triggers on document scroll (rootSafari path).
+const ROOT_GRADIENT =
+  "linear-gradient(to bottom," +
+  " #D4A258 0%," +
+  " #FFFFFF 12%," +
+  " #FFFFFF 72%," +
+  " #A8B3E5 100%)";
+
 const S: Record<string, CSSProperties> = {
-  root: {
-    // html/body are locked (height:100%, overflow:hidden) for the V6 desktop
-    // layout, so mobile must be its own scroll container.
-    // touch-action: pan-y opts back into vertical pans (PWA mode sets
-    // touch-action:none on body for the fullscreen-chat architecture).
+  // PWA standalone: existing architecture. Body is locked to --vvh by the
+  // .mobile-pwa-active CSS rules; .mobile-root is the scroll container.
+  // visualViewport keyboard tracking + three-layer chat sheet depend on
+  // this exact shape.
+  rootPwa: {
     position: "absolute",
     inset: 0,
     overflowY: "auto",
@@ -315,23 +341,18 @@ const S: Record<string, CSSProperties> = {
     WebkitOverflowScrolling: "touch",
     overscrollBehaviorY: "contain",
     touchAction: "pan-y",
-    // Step 2 bleed (2026-05-03 v3): symmetric saturation top + bottom.
-    // The diagnostic at v2 (warm #D4A258 at 0%) confirmed iOS Safari
-    // sample/transmits the adjacent page color through both top status
-    // bar and bottom URL bar — chrome is translucent / positional, not
-    // single-body-bg-tinted. Top warm bleed worked; bottom periwinkle
-    // (#EEF1FB) was too close to white to register through the Safari
-    // toolbar bleed. Bump bottom to #A8B3E5 (real periwinkle, matching
-    // #D4A258's intensity) and pull cool stop earlier (78% → 72%) so the
-    // band has enough vertical coverage to bleed through both the
-    // floating tab pill area and the Safari URL bar at screen bottom.
-    background:
-      "linear-gradient(to bottom," +
-      " #D4A258 0%," +
-      " #FFFFFF 12%," +
-      " #FFFFFF 72%," +
-      " #A8B3E5 100%)",
+    background: ROOT_GRADIENT,
     paddingBottom: "env(safe-area-inset-bottom, 0px)",
+  },
+  // Safari tab: natural flow, body scrolls. min-height: 100dvh keeps the
+  // gradient visible even when content is short. paddingBottom clears the
+  // floating tab pill (~80px tall plus its 18px bottom gap plus safe area)
+  // so the last content card isn't permanently hidden behind it.
+  rootSafari: {
+    position: "relative",
+    minHeight: "100dvh",
+    background: ROOT_GRADIENT,
+    paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 110px)",
   },
   placeholderBody: {
     padding: "32px 22px",

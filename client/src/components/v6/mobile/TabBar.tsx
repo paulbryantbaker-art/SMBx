@@ -81,8 +81,15 @@ export function TabBar({ active, onChange, onChat }: TabBarProps) {
 
 const B: Record<string, CSSProperties> = {
   wrap: {
-    position: "absolute",
-    bottom: 18,
+    // position:fixed (was absolute) so the pill stays anchored to the
+    // viewport bottom regardless of whether body scrolls (Safari tab) or
+    // is locked to --vvh (PWA standalone). With viewport-fit=cover +
+    // interactive-widget=resizes-content in index.html, fixed bottom is
+    // measured from the visible viewport edge — above the URL bar in
+    // Safari, above the keyboard when open. safe-area-inset-bottom adds
+    // home-indicator clearance in PWA (≈30px) and 0 in Safari tab.
+    position: "fixed",
+    bottom: "calc(18px + env(safe-area-inset-bottom, 0px))",
     left: 12,
     right: 12,
     display: "flex",

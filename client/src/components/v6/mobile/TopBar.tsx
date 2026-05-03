@@ -176,7 +176,13 @@ export function LargeTitle({ children }: LargeTitleProps) {
   // with iOS PWA layout settling + the mb-fade-up entrance transform on
   // first paint, sometimes reporting "not intersecting" at scrollTop=0
   // and starting the page in the collapsed state. A direct scroll listener
-  // on the mobile-root container is both faster and deterministic.
+  // is both faster and deterministic.
+  //
+  // Scroll source depends on architecture (see V6Mobile.tsx isStandalone):
+  //   • PWA standalone: .mobile-root is the scroll container, listen there.
+  //   • Safari tab: body scrolls (per the desktop-only html/body lock gate
+  //     in index.css), listen on window. el.offsetTop is relative to the
+  //     offsetParent in either case so the math works for both.
   //
   // Two thresholds:
   //   • scrolled  — true as soon as scrollTop > a small threshold. Drives
@@ -187,27 +193,35 @@ export function LargeTitle({ children }: LargeTitleProps) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    const isStandalone =
+      typeof window !== "undefined" &&
+      window.matchMedia("(display-mode: standalone)").matches;
     const root = el.closest(".mobile-root") as HTMLElement | null;
-    if (!root) {
+    if (isStandalone && !root) {
       setCollapsed(false);
       setScrolled(false);
       return;
     }
     const SCROLL_THRESHOLD = 4;   // px before showing glass tint
     const COLLAPSE_OFFSET   = 12; // px past title's bottom before collapse
+    const getScrollTop = () =>
+      isStandalone && root ? root.scrollTop : window.scrollY;
     const update = () => {
       const titleBottom = el.offsetTop + el.offsetHeight;
-      setScrolled(root.scrollTop > SCROLL_THRESHOLD);
-      setCollapsed(root.scrollTop > titleBottom - COLLAPSE_OFFSET);
+      const scrollTop = getScrollTop();
+      setScrolled(scrollTop > SCROLL_THRESHOLD);
+      setCollapsed(scrollTop > titleBottom - COLLAPSE_OFFSET);
     };
     update();
-    root.addEventListener("scroll", update, { passive: true });
+    const target: HTMLElement | Window =
+      isStandalone && root ? root : window;
+    target.addEventListener("scroll", update, { passive: true });
     // Recompute after layout settles — covers the first ~600ms.
     const t1 = setTimeout(update, 60);
     const t2 = setTimeout(update, 240);
     const t3 = setTimeout(update, 540);
     return () => {
-      root.removeEventListener("scroll", update);
+      target.removeEventListener("scroll", update);
       clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
       setCollapsed(false);
       setScrolled(false);

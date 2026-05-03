@@ -45,7 +45,17 @@
 }
 
 * { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+html, body { margin: 0; padding: 0; }
+
+/* Desktop only: lock html/body so V6 desktop's internal scroll regions
+   (sidebar, chat, tabbed canvas) don't double-scroll the document.
+   On mobile the body MUST scroll naturally — that's what triggers iOS
+   Safari's native chrome auto-hide + page-bleed behavior. PWA standalone
+   re-locks body via the html.mobile-pwa-active rules below. See
+   memory/architecture_mobile_scroll_container.md. */
+@media (min-width: 768px) {
+  html, body { height: 100%; overflow: hidden; }
+}
 body {
   background: var(--bg);
   color: var(--ink);
