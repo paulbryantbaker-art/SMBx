@@ -217,19 +217,14 @@ function HeroFrame({
       }}
       style={{
         // fullBleed: square top corners (extends to viewport top), rounded
-        // bottom. The hero IS the page top — iOS status bar overlays its
-        // upper portion. Crucially, NO paddingTop here: the eyebrow is
-        // absolute-positioned (H.eyebrowSlot top:18) and HeroVisualPursue
-        // starts at y=0 of the padded box, so adding paddingTop would
-        // shift only the in-flow content (visual + title block) down,
-        // leaving the eyebrow stranded at top:18 in the safe-area zone
-        // and a 60px empty band in the middle. With paddingTop=0 the
-        // decorative circles + eyebrow text extend into the iOS chrome
-        // zone, which is exactly the bleed we want — page content blurs
-        // through translucent iOS chrome, MacRumors-style.
-        // boxShadow drops the top inset (no top edge to highlight when
-        // the hero extends past viewport top).
+        // bottom — the hero IS the page top, iOS status bar overlays its
+        // upper portion. Internal paddingTop clears the safe-area zone so
+        // visible hero content sits below the chrome. boxShadow drops the
+        // top inset (no top edge to highlight).
         borderRadius: fullBleed ? "0 0 22px 22px" : 22,
+        paddingTop: fullBleed
+          ? "calc(env(safe-area-inset-top, 44px) + 16px)"
+          : 0,
         backgroundImage: `${HERO_OVERLAY[kind]}, url('${HERO_TEXTURE[kind]}')`,
         backgroundSize: "cover, cover",
         backgroundPosition: "center, center",
