@@ -492,17 +492,17 @@ input[type="range"].m-slider::-moz-range-thumb {
        background-image: linear-gradient(<verdict-tint>), url(var(--mb-tex-*));
      Verdict tints are inline in the consuming component since they vary per
      surface (hero vs artifact vs editorial). */
-  --mb-tex-pursue:   url("/textures/texture-pursue.png");
-  --mb-tex-watch:    url("/textures/texture-watch.png");
-  --mb-tex-pass:     url("/textures/texture-pass.png");
-  --mb-tex-baseline: url("/textures/texture-baseline.png");
-  --mb-tex-buyers:   url("/textures/texture-buyers.png");
-  --mb-tex-sunrise:  url("/textures/texture-sunrise.png");
+  --mb-tex-pursue:   url("/textures/texture-pursue.png?v=20260503");
+  --mb-tex-watch:    url("/textures/texture-watch.png?v=20260503");
+  --mb-tex-pass:     url("/textures/texture-pass.png?v=20260503");
+  --mb-tex-baseline: url("/textures/texture-baseline.png?v=20260503");
+  --mb-tex-buyers:   url("/textures/texture-buyers.png?v=20260503");
+  --mb-tex-sunrise:  url("/textures/texture-sunrise.png?v=20260503");
   /* Spare textures (2026-05-03 drop) — available for new heroes / variants. */
-  --mb-tex-gold-marble:    url("/textures/texture-gold-marble.png");
-  --mb-tex-mint-waves:     url("/textures/texture-mint-waves.png");
-  --mb-tex-aqua-cloud:     url("/textures/texture-aqua-cloud.png");
-  --mb-tex-sage-botanical: url("/textures/texture-sage-botanical.png");
+  --mb-tex-gold-marble:    url("/textures/texture-gold-marble.png?v=20260503");
+  --mb-tex-mint-waves:     url("/textures/texture-mint-waves.png?v=20260503");
+  --mb-tex-aqua-cloud:     url("/textures/texture-aqua-cloud.png?v=20260503");
+  --mb-tex-sage-botanical: url("/textures/texture-sage-botanical.png?v=20260503");
 
   /* Verdict semantics */
   --mb-verdict-pursue:      #6FB89A;

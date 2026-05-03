@@ -180,10 +180,10 @@ type HeroKind = Verdict | "welcome";
 //     texture's lights light + darks dark, just tinted)
 //   - add a soft inset top highlight + bottom shadow for tactile depth
 const HERO_TEXTURE: Record<HeroKind, string> = {
-  pursue:  "/textures/texture-pursue.png",
-  watch:   "/textures/texture-watch.png",
-  pass:    "/textures/texture-pass.png",
-  welcome: "/textures/texture-sunrise.png",
+  pursue:  "/textures/texture-pursue.png?v=20260503",
+  watch:   "/textures/texture-watch.png?v=20260503",
+  pass:    "/textures/texture-pass.png?v=20260503",
+  welcome: "/textures/texture-sunrise.png?v=20260503",
 };
 const HERO_OVERLAY: Record<HeroKind, string> = {
   pursue:  "linear-gradient(165deg, rgba(48,108,80,0.34) 0%, rgba(18,68,46,0.66) 100%)",
@@ -452,7 +452,7 @@ const E: Record<string, CSSProperties> = {
   card: {
     borderRadius: 22,
     backgroundImage:
-      "linear-gradient(165deg, rgba(95,115,200,0.38) 0%, rgba(50,72,160,0.70) 100%), url('/textures/texture-buyers.png')",
+      "linear-gradient(165deg, rgba(95,115,200,0.38) 0%, rgba(50,72,160,0.70) 100%), url('/textures/texture-buyers.png?v=20260503')",
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     backgroundRepeat: "no-repeat, no-repeat",
