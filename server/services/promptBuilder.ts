@@ -4,6 +4,7 @@ import { PERSONAS } from '../prompts/personas.js';
 import { JOURNEY_DETECTION_PROMPT } from '../prompts/journeyDetection.js';
 import { GATE_PROMPTS } from '../prompts/gatePrompts.js';
 import { TAX_ENGINE_FOUNDATION, TAX_ENGINE_BY_LEAGUE } from '../prompts/taxEngine.js';
+import { LEGAL_ENGINE_FOUNDATION, LEGAL_ENGINE_BY_LEAGUE } from '../prompts/legalEngine.js';
 import { BRANCHING_LOGIC } from '../prompts/branchingLogic.js';
 import { getUserPlan, hasActiveSubscription, PLANS } from './subscriptionService.js';
 import { getKnowledgeForContext, formatKnowledgeForPrompt } from './knowledgeService.js';
@@ -322,6 +323,15 @@ export async function buildDynamicAnonymousPrompt(
     layers.push(TAX_ENGINE_BY_LEAGUE[convState.league]);
   }
 
+  // Layer: Legal Frameworks Engine — V18 §10 (per amendment 18b, May 3 2026)
+  // Same composition pattern as the tax engine. Together they implement V18's
+  // tax + legal substrate. The two engines coordinate at the §1060 / F-reorg /
+  // §280G interlock points; legalEngine references the tax module explicitly.
+  layers.push(LEGAL_ENGINE_FOUNDATION);
+  if (convState.league && LEGAL_ENGINE_BY_LEAGUE[convState.league]) {
+    layers.push(LEGAL_ENGINE_BY_LEAGUE[convState.league]);
+  }
+
   // Layer: Buyer demand signals — for sell-journey conversations
   if (opts.demandSignalText) {
     layers.push(`\n## ${opts.demandSignalText}\nMention buyer demand naturally when relevant — e.g., "There are active buyers looking for businesses like yours in this market." Do NOT make it sound like a sales pitch. Weave it into your analysis as market context.`);
@@ -481,6 +491,15 @@ export async function buildSystemPrompt(
     const dealLeague = deal.league || user.league;
     if (dealLeague && TAX_ENGINE_BY_LEAGUE[dealLeague]) {
       layers.push(TAX_ENGINE_BY_LEAGUE[dealLeague]);
+    }
+
+    // Layer 3c++: Legal Frameworks Engine — V18 §10 (per amendment 18b, May 3 2026)
+    // Sibling to the tax engine — same composition pattern. Together they
+    // implement V18's tax + legal substrate. Coordinates with §9 at the
+    // §1060 / F-reorg / §280G / rollover §83(b) interlock points.
+    layers.push(LEGAL_ENGINE_FOUNDATION);
+    if (dealLeague && LEGAL_ENGINE_BY_LEAGUE[dealLeague]) {
+      layers.push(LEGAL_ENGINE_BY_LEAGUE[dealLeague]);
     }
 
     // Layer 3d: Subscription context
