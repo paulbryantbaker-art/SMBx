@@ -95,26 +95,29 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
   // and reconcile html/body bg with the mobile palette so the iOS Safari
   // chrome (URL bar, status bar) tints to a color cohesive with the page.
   //
-  // iOS 26 status-bar tint (2026-05-03 v4): the top iOS status bar in
-  // Safari tab mode is iOS chrome (not Safari chrome) and tints by
-  // sampling <body>'s backgroundColor directly — different mechanism
-  // from the bottom Safari URL bar which is translucent and shows actual
-  // page content through it (true bleed, works after the document-scroll
-  // architecture fix in d7aec64).
+  // iOS 26 chrome continuity (2026-05-03 v5): iOS 26 Safari's Liquid Glass
+  // design samples <body>'s backgroundColor for the toolbar tint, AND
+  // expects the body bg to MATCH the page content beneath the chrome —
+  // that's how App Store / Apple Music / Settings get a seamless chrome-
+  // to-content transition. Mismatch (saturated body bg + white page)
+  // creates the visible "color band" where chrome ends and page begins,
+  // because chrome paints opaque-tinted in the body color while the page
+  // is rendering white.
   //
-  // To make the top status bar visibly bleed warm — same as how MacRumors
-  // gets a visible red status bar via their saturated red body — match
-  // the body bg to the .mobile-root gradient's top stop (#D4A258). iOS
-  // samples that, status bar paints warm gold. Doesn't affect the
-  // bottom bleed because the bottom isn't sampling — it's translucent
-  // over scrolling document content.
-  //
-  // Single solid color (per Ben Frain — gradients on body confuse the
-  // sampler). theme-color is left to index.html (dead in iOS 26).
+  // We tried saturated warm gold here (v4 / 8943833) for a MacRumors-
+  // style warm chrome — it worked but produced the yellow band the user
+  // flagged as ugly. MacRumors looks clean because their content top is
+  // ALSO saturated red — the entire top zone is one color. Our content
+  // top is white (.mobile-root), so the only way to match without a
+  // structural rewrite (Step 2 — hero to y=0, failed in 3478cfe) is to
+  // set body bg to white. iOS chrome will then appear as natural
+  // translucent over white at scroll-top, and as actual content blurred
+  // when content scrolls into the chrome zone (true Liquid Glass bleed,
+  // same as Detail page's chip behavior).
   useEffect(() => {
     document.documentElement.classList.add("mobile-pwa-active");
 
-    const CHROME_TINT = "#D4A258";
+    const CHROME_TINT = "#FFFFFF";
     const html = document.documentElement;
     const body = document.body;
     const prevHtmlBg = html.style.backgroundColor;
