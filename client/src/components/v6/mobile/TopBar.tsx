@@ -233,10 +233,16 @@ export function LargeTitle({ children }: LargeTitleProps) {
 
 const T: Record<string, CSSProperties> = {
   spacer: {
-    // Just safe-area inset — no chrome row. The LargeTitle below sits
-    // directly under the safe area; the floating chrome overlays it
-    // on the right (App Store pattern).
+    // Safe-area inset for the iOS chrome zone. Background color paints
+    // ONLY in this zone (the area iOS overlays with status bar) — page
+    // content below starts fresh on white. iOS Safari samples this for
+    // toolbar tinting via translucent chrome (and body bg sampling as
+    // fallback), so the status bar tints warm gold matching the welcome
+    // hero's sunrise palette without bleeding the warm color into the
+    // page itself. App Store pattern: chrome zone is a defined colored
+    // region, page below starts on clean bg.
     height: "env(safe-area-inset-top, 44px)",
+    background: "#D4A258",
   },
   barWrap: {
     position: "fixed",
