@@ -609,9 +609,17 @@ input[type="range"].m-slider::-moz-range-thumb {
   margin: 2px 0 0;
 }
 
-/* Tap state — opacity press feedback */
-.mobile-root .mb-tap { transition: opacity 120ms; }
-.mobile-root .mb-tap:active { opacity: 0.6; }
+/* Tap state — subtle scale press feedback (Emil Kowalski pattern).
+   Previous opacity 0.6 was firing on touchstart-then-scroll and washing
+   out hero textures into a flat gray for the duration of the gesture.
+   transform:scale(0.985) reads as a press without dimming the surface,
+   and -webkit-tap-highlight-color:transparent kills iOS Safari's
+   default gray tap overlay. */
+.mobile-root .mb-tap {
+  transition: transform 160ms cubic-bezier(0.25, 1, 0.5, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+.mobile-root .mb-tap:active { transform: scale(0.985); }
 
 /* Hide scrollbar (horizontal carousels) */
 .mobile-root .mb-hide-scroll::-webkit-scrollbar { display: none; }

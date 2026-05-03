@@ -6,6 +6,7 @@ import { type CSSProperties } from "react";
 import { GlassTopBar, LargeTitle } from "../TopBar";
 import { YIcon } from "../YIcon";
 import type { Verdict, YIconKind } from "../types";
+import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
 
 interface BriefProps {
   isAnon: boolean;
@@ -152,7 +153,7 @@ const Br: Record<string, CSSProperties> = {
   editorial: {
     borderRadius: 22, overflow: "hidden",
     backgroundImage:
-      "linear-gradient(165deg, rgba(140,98,42,0.40) 0%, rgba(85,55,18,0.72) 100%), url('/textures/texture-sunrise.png?v=20260503')",
+      `linear-gradient(165deg, rgba(140,98,42,0.40) 0%, rgba(85,55,18,0.72) 100%), url('${RANDOM_TEXTURES.welcome}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     backgroundRepeat: "no-repeat, no-repeat",

@@ -6,6 +6,7 @@
 import { type CSSProperties, type ReactNode } from "react";
 import { YIcon } from "../YIcon";
 import { MobileIcon } from "../icons";
+import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
 
 interface DetailProps {
   dealId: string;
@@ -190,11 +191,11 @@ type ArtifactKind = "recast" | "baseline" | "buyers" | "ioi";
 // textures would weaken the IOI/LOI doc gravitas.
 const ARTIFACT_BG: Record<ArtifactKind, string> = {
   recast:
-    "linear-gradient(160deg, rgba(48,108,80,0.44) 0%, rgba(18,68,46,0.74) 100%), url('/textures/texture-pursue.png?v=20260503')",
+    `linear-gradient(160deg, rgba(48,108,80,0.44) 0%, rgba(18,68,46,0.74) 100%), url('${RANDOM_TEXTURES.pursue}')`,
   baseline:
-    "linear-gradient(160deg, rgba(60,108,168,0.44) 0%, rgba(25,68,118,0.74) 100%), url('/textures/texture-baseline.png?v=20260503')",
+    `linear-gradient(160deg, rgba(60,108,168,0.44) 0%, rgba(25,68,118,0.74) 100%), url('${RANDOM_TEXTURES.baseline}')`,
   buyers:
-    "linear-gradient(160deg, rgba(95,68,150,0.44) 0%, rgba(60,38,108,0.74) 100%), url('/textures/texture-buyers.png?v=20260503')",
+    `linear-gradient(160deg, rgba(95,68,150,0.44) 0%, rgba(60,38,108,0.74) 100%), url('${RANDOM_TEXTURES.buyers}')`,
   ioi:
     "linear-gradient(160deg, #3A4150, #1A2233)",
 };

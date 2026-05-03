@@ -13,6 +13,7 @@ import { GlassTopBar, LargeTitle } from "../TopBar";
 import { GlassSurface } from "../glass";
 import { YIcon } from "../YIcon";
 import { VerdictPill } from "../VerdictPill";
+import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
 import { MobileIcon } from "../icons";
 import type { Verdict, YIconKind } from "../types";
 
@@ -179,11 +180,14 @@ type HeroKind = Verdict | "welcome";
 //   - blend the gradient into the texture with `multiply` (keeps the
 //     texture's lights light + darks dark, just tinted)
 //   - add a soft inset top highlight + bottom shadow for tactile depth
+// HERO_TEXTURE pulls from RANDOM_TEXTURES so each page-load gets a fresh
+// pick from the per-pool watercolor set. welcome stays in the gold pool
+// (preserves the warm home identity); watch/pass stay fixed (semantic).
 const HERO_TEXTURE: Record<HeroKind, string> = {
-  pursue:  "/textures/texture-pursue.png?v=20260503",
-  watch:   "/textures/texture-watch.png?v=20260503",
-  pass:    "/textures/texture-pass.png?v=20260503",
-  welcome: "/textures/texture-sunrise.png?v=20260503",
+  pursue:  RANDOM_TEXTURES.pursue,
+  watch:   RANDOM_TEXTURES.watch,
+  pass:    RANDOM_TEXTURES.pass,
+  welcome: RANDOM_TEXTURES.welcome,
 };
 const HERO_OVERLAY: Record<HeroKind, string> = {
   pursue:  "linear-gradient(165deg, rgba(48,108,80,0.34) 0%, rgba(18,68,46,0.66) 100%)",
@@ -452,7 +456,7 @@ const E: Record<string, CSSProperties> = {
   card: {
     borderRadius: 22,
     backgroundImage:
-      "linear-gradient(165deg, rgba(95,115,200,0.38) 0%, rgba(50,72,160,0.70) 100%), url('/textures/texture-buyers.png?v=20260503')",
+      `linear-gradient(165deg, rgba(95,115,200,0.38) 0%, rgba(50,72,160,0.70) 100%), url('${RANDOM_TEXTURES.buyers}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     backgroundRepeat: "no-repeat, no-repeat",
