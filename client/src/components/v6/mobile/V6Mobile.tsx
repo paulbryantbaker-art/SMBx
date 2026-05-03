@@ -315,21 +315,22 @@ const S: Record<string, CSSProperties> = {
     WebkitOverflowScrolling: "touch",
     overscrollBehaviorY: "contain",
     touchAction: "pan-y",
-    // Step 2 bleed (2026-05-03): gradient lives on the scroll container so
-    // it paints in the scrollport (fixed to the layout viewport) — content
-    // scrolls over the wash. Top stop is a rich sunrise gold (#D4A258),
-    // saturated enough to register clearly through iOS Safari status-bar
-    // translucency at the top — MacRumors-style content-behind-chrome
-    // bleed. Sharp transition to white at 12% keeps the warm band inside
-    // the status-bar zone; LargeTitle and content sit on white. Bottom
-    // periwinkle band starts at 78% so it surrounds the floating tab pill
-    // instead of just sitting under it.
+    // Step 2 bleed (2026-05-03 v3): symmetric saturation top + bottom.
+    // The diagnostic at v2 (warm #D4A258 at 0%) confirmed iOS Safari
+    // sample/transmits the adjacent page color through both top status
+    // bar and bottom URL bar — chrome is translucent / positional, not
+    // single-body-bg-tinted. Top warm bleed worked; bottom periwinkle
+    // (#EEF1FB) was too close to white to register through the Safari
+    // toolbar bleed. Bump bottom to #A8B3E5 (real periwinkle, matching
+    // #D4A258's intensity) and pull cool stop earlier (78% → 72%) so the
+    // band has enough vertical coverage to bleed through both the
+    // floating tab pill area and the Safari URL bar at screen bottom.
     background:
       "linear-gradient(to bottom," +
       " #D4A258 0%," +
       " #FFFFFF 12%," +
-      " #FFFFFF 78%," +
-      " #EEF1FB 100%)",
+      " #FFFFFF 72%," +
+      " #A8B3E5 100%)",
     paddingBottom: "env(safe-area-inset-bottom, 0px)",
   },
   placeholderBody: {
