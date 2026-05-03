@@ -82,25 +82,59 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
   // and reconcile html/body bg + theme-color with the mobile palette so
   // viewport-fit=cover doesn't expose a colored chin (was #F6F7F9 from
   // the desktop fight-of-paint inline script in index.html).
+  //
+  // Step 1 bleed (2026-05-03): swap solid #FFFFFF for a vertical gradient —
+  // warm sunrise-adjacent cream at the very top, white through the middle,
+  // periwinkle-adjacent --mb-accent-soft at the bottom. With viewport-fit=cover
+  // this paints into the safe areas behind URL bar / home indicator, so the
+  // page reads as warm-tinted glass rather than a hard white seam against the
+  // browser chrome. theme-color matches the warm top so the URL bar adopts
+  // the same warmth instead of cutting in as opaque white.
   useEffect(() => {
     document.documentElement.classList.add("mobile-pwa-active");
 
-    // Save and override html bg + theme-color for the mobile session.
-    const prevHtmlBg = document.documentElement.style.backgroundColor;
-    const prevBodyBg = document.body.style.backgroundColor;
-    document.documentElement.style.backgroundColor = "#FFFFFF";
-    document.body.style.backgroundColor = "#FFFFFF";
+    // Sunrise-adjacent warm cream → white → periwinkle-adjacent cool.
+    // Tints concentrated in the top/bottom 18% so the body of the page
+    // stays effectively white where content lives.
+    const BG_GRADIENT =
+      "linear-gradient(to bottom," +
+      " #FAF1E5 0%," +
+      " #FFFFFF 18%," +
+      " #FFFFFF 82%," +
+      " #EEF1FB 100%)";
+    const TOP_TINT = "#FAF1E5";
+
+    // Save inline style snapshots so we can restore on unmount. Note we
+    // capture both backgroundColor (was set previously) and backgroundImage
+    // (which we now set), since CSS gradients live on backgroundImage.
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtmlBg = html.style.backgroundColor;
+    const prevHtmlBgImage = html.style.backgroundImage;
+    const prevBodyBg = body.style.backgroundColor;
+    const prevBodyBgImage = body.style.backgroundImage;
+    html.style.backgroundColor = TOP_TINT;
+    html.style.backgroundImage = BG_GRADIENT;
+    body.style.backgroundColor = TOP_TINT;
+    body.style.backgroundImage = BG_GRADIENT;
+
     const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
     const prevThemeColor = themeMeta?.getAttribute("content") ?? null;
-    if (themeMeta) themeMeta.setAttribute("content", "#FFFFFF");
+    if (themeMeta) themeMeta.setAttribute("content", TOP_TINT);
+
+    const restoreChrome = () => {
+      html.style.backgroundColor = prevHtmlBg;
+      html.style.backgroundImage = prevHtmlBgImage;
+      body.style.backgroundColor = prevBodyBg;
+      body.style.backgroundImage = prevBodyBgImage;
+      if (themeMeta && prevThemeColor !== null) themeMeta.setAttribute("content", prevThemeColor);
+    };
 
     const vv = window.visualViewport;
     if (!vv) {
       return () => {
         document.documentElement.classList.remove("mobile-pwa-active");
-        document.documentElement.style.backgroundColor = prevHtmlBg;
-        document.body.style.backgroundColor = prevBodyBg;
-        if (themeMeta && prevThemeColor !== null) themeMeta.setAttribute("content", prevThemeColor);
+        restoreChrome();
       };
     }
     const setVVH = () => {
@@ -116,9 +150,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
       document.documentElement.classList.remove("mobile-pwa-active");
       document.body.style.removeProperty("--vvh");
       document.body.style.removeProperty("--vvs");
-      document.documentElement.style.backgroundColor = prevHtmlBg;
-      document.body.style.backgroundColor = prevBodyBg;
-      if (themeMeta && prevThemeColor !== null) themeMeta.setAttribute("content", prevThemeColor);
+      restoreChrome();
     };
   }, []);
 
@@ -304,7 +336,17 @@ const S: Record<string, CSSProperties> = {
     WebkitOverflowScrolling: "touch",
     overscrollBehaviorY: "contain",
     touchAction: "pan-y",
-    background: "var(--mb-bg)",
+    // Step 1 bleed (revised): gradient lives on the scroll container itself,
+    // not on body. Because .mobile-root is a positioned overflow:auto box,
+    // its background paints in the scrollport (fixed to the layout viewport)
+    // — content scrolls over the wash. Warm sunrise-cream at top, white
+    // through the middle 64%, periwinkle-adjacent --mb-accent-soft at bottom.
+    background:
+      "linear-gradient(to bottom," +
+      " #FAF1E5 0%," +
+      " #FFFFFF 18%," +
+      " #FFFFFF 82%," +
+      " #EEF1FB 100%)",
     paddingBottom: "env(safe-area-inset-bottom, 0px)",
   },
   placeholderBody: {
