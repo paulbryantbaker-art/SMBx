@@ -498,6 +498,11 @@ input[type="range"].m-slider::-moz-range-thumb {
   --mb-tex-baseline: url("/textures/texture-baseline.png");
   --mb-tex-buyers:   url("/textures/texture-buyers.png");
   --mb-tex-sunrise:  url("/textures/texture-sunrise.png");
+  /* Spare textures (2026-05-03 drop) — available for new heroes / variants. */
+  --mb-tex-gold-marble:    url("/textures/texture-gold-marble.png");
+  --mb-tex-mint-waves:     url("/textures/texture-mint-waves.png");
+  --mb-tex-aqua-cloud:     url("/textures/texture-aqua-cloud.png");
+  --mb-tex-sage-botanical: url("/textures/texture-sage-botanical.png");
 
   /* Verdict semantics */
   --mb-verdict-pursue:      #6FB89A;
