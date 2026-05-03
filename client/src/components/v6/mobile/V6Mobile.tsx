@@ -320,19 +320,16 @@ function writeMobileHashState(view: MobileView) {
   } catch { /* noop */ }
 }
 
-// Shared gradient for both modes. White from top to ~72%, then periwinkle
-// at bottom for the Safari URL-bar content bleed (true translucency over
-// scrolling document — only effective in rootSafari path with body scroll).
-//
-// Top warmth is NOT in this gradient — iOS Safari samples <body>'s
-// backgroundColor property directly to tint the top status bar (set to
-// #D4A258 in V6MobileShell mount). Putting warm at the gradient top stop
-// just paints a visible "yellow band" between status bar and hero card
-// because on a tall scrolling page (~2500px), 12% = 300px of warm —
-// way past where it reads as a chrome bleed.
+// Shared gradient for both modes. In rootPwa it paints in the scrollport
+// (fixed to viewport) since .mobile-root is the scroll container. In
+// rootSafari it paints in the natural-flow box (scrolls with content) so
+// at scroll-top the warm gold reads through iOS chrome and at scroll-end
+// the periwinkle reads through. iOS Safari's native chrome bleed only
+// triggers on document scroll (rootSafari path).
 const ROOT_GRADIENT =
   "linear-gradient(to bottom," +
-  " #FFFFFF 0%," +
+  " #D4A258 0%," +
+  " #FFFFFF 12%," +
   " #FFFFFF 72%," +
   " #A8B3E5 100%)";
 
