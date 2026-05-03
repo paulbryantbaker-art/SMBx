@@ -364,7 +364,7 @@
   color: var(--v4-faint);
   display: flex; justify-content: space-between; align-items: center;
 }
-.jc-ioi__card--winner .jc-ioi__k { color: rgba(255,255,255,0.55); }
+.jc-ioi__card--winner .jc-ioi__k { color: #fff; }
 .jc-ioi__tag {
   font-family: 'Figtree', system-ui, sans-serif;
   font-weight: 600;
@@ -391,7 +391,7 @@
   color: var(--v4-mute);
   margin-top: 4px;
 }
-.jc-ioi__card--winner .jc-ioi__terms { color: rgba(255,255,255,0.75); }
+.jc-ioi__card--winner .jc-ioi__terms { color: #fff; }
 
 /* ── Exit paths (6-card grid) ──────────────────────────────────── */
 .jc-paths {

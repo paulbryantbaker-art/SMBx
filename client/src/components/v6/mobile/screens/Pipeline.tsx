@@ -248,7 +248,7 @@ const P: Record<string, CSSProperties> = {
   featuredRev: {
     position: "absolute", top: 18, right: 22,
     fontFamily: "var(--mb-font-mono)", fontSize: 11,
-    color: "rgba(255,255,255,0.85)",
+    color: "#fff",
     letterSpacing: 0.1, fontWeight: 600,
   },
   featuredFooter: {
@@ -260,7 +260,7 @@ const P: Record<string, CSSProperties> = {
     fontSize: 14, fontWeight: 600, color: "#fff",
   },
   featuredSub: {
-    fontSize: 12, color: "rgba(255,255,255,0.7)",
+    fontSize: 12, color: "#fff",
   },
   watchTitle: {
     fontFamily: "var(--mb-font-display)", fontWeight: 700,

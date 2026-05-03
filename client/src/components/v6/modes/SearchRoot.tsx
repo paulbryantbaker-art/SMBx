@@ -116,7 +116,7 @@ export function V6SearchRoot({ openTab, onTalkToYulia, user }: SearchRootProps) 
 
           <div style={H.headerRow}>
             <span className="mono" style={H.eyebrow}>WELCOME TO SMBX · WORKING SAMPLE</span>
-            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.7)" }}>{HERO_DATE}</span>
+            <span style={{ fontSize: 11, color: "#fff" }}>{HERO_DATE}</span>
           </div>
 
           <div style={H.headBlock}>
@@ -126,7 +126,7 @@ export function V6SearchRoot({ openTab, onTalkToYulia, user }: SearchRootProps) 
 
           <div style={H.picksHead}>
             <span className="mono" style={H.picksEyebrow}>YULIA&rsquo;S PICKS · TODAY · {picks.length} DEALS · 14 MIN READ</span>
-            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.6)" }}>↓ tap any to open</span>
+            <span style={{ fontSize: 11, color: "#fff" }}>↓ tap any to open</span>
           </div>
 
           <div style={H.picksList}>
@@ -242,7 +242,7 @@ const H: Record<string, CSSProperties> = {
     display: "flex", justifyContent: "space-between", alignItems: "center",
   },
   eyebrow: {
-    fontSize: 10, color: "rgba(255,255,255,0.85)",
+    fontSize: 10, color: "#fff",
     letterSpacing: "0.14em", fontWeight: 600,
   },
   headBlock: { position: "relative", padding: "20px 28px 0" },
@@ -252,7 +252,7 @@ const H: Record<string, CSSProperties> = {
     maxWidth: 760, textWrap: "balance",
   },
   tag: {
-    fontSize: 14.5, lineHeight: 1.55, color: "rgba(255,255,255,0.88)",
+    fontSize: 14.5, lineHeight: 1.55, color: "#fff",
     margin: "12px 0 0", maxWidth: 620, textWrap: "pretty",
   },
   picksHead: {
@@ -260,7 +260,7 @@ const H: Record<string, CSSProperties> = {
     display: "flex", alignItems: "center", justifyContent: "space-between",
   },
   picksEyebrow: {
-    fontSize: 10, color: "rgba(255,255,255,0.7)",
+    fontSize: 10, color: "#fff",
     letterSpacing: "0.14em", fontWeight: 600,
   },
   picksList: {
@@ -274,19 +274,19 @@ const H: Record<string, CSSProperties> = {
   },
   pickRank: {
     fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 18,
-    color: "rgba(255,255,255,0.6)", textAlign: "center",
+    color: "#fff", textAlign: "center",
   },
   pickName: {
     fontSize: 13.5, fontWeight: 600, color: "#fff", letterSpacing: "-0.01em",
   },
-  pickNote: { fontSize: 12.5, color: "rgba(255,255,255,0.75)" },
+  pickNote: { fontSize: 12.5, color: "#fff" },
   pickFit: {
     fontFamily: "var(--font-mono)", fontSize: 17, fontWeight: 700,
     color: "#fff", textAlign: "right", fontVariantNumeric: "tabular-nums",
     display: "flex", flexDirection: "column", alignItems: "flex-end",
   },
   pickFitLabel: {
-    fontSize: 8, color: "rgba(255,255,255,0.6)",
+    fontSize: 8, color: "#fff",
     letterSpacing: "0.12em", fontWeight: 600, marginTop: -2,
   },
 };

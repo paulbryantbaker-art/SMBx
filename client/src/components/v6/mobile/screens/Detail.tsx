@@ -223,7 +223,7 @@ function ArtifactPreview({ kind, title, big, sub }: { kind: ArtifactKind; title:
         <div style={D.artifactBig}>{big}</div>
       </div>
       <div style={D.artifactFooter}>
-        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.85)", lineHeight: 1.3 }}>{sub}</div>
+        <div style={{ fontSize: 12, color: "#fff", lineHeight: 1.3 }}>{sub}</div>
         <button
           type="button"
           className="mb-get-pill dark"
@@ -307,7 +307,7 @@ const D: Record<string, CSSProperties> = {
   artifactCaption: {
     position: "absolute", bottom: 12, left: 16,
     fontSize: 10, letterSpacing: 0.1,
-    color: "rgba(255,255,255,0.7)",
+    color: "#fff",
   },
   artifactBig: {
     position: "absolute", bottom: 24, left: 16,

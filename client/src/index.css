@@ -527,7 +527,7 @@ input[type="range"].m-slider::-moz-range-thumb {
   font-size: 11px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.85);
+  color: #fff;
   font-weight: 600;
 }
 .mobile-root .mb-eyebrow-dark { color: var(--mb-blue-ink); }

@@ -235,9 +235,9 @@ function HeroVisualPursue() {
       <div style={{ position: "absolute", top: -60, right: -40, width: 240, height: 240, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.18), transparent 60%)" }}/>
       <div style={{ position: "absolute", bottom: -80, left: -30, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.10), transparent 60%)" }}/>
       <div style={{ position: "absolute", bottom: 18, right: 22, textAlign: "right" }}>
-        <div className="mb-mono" style={{ fontSize: 11, color: "rgba(255,255,255,0.78)", letterSpacing: 0.1 }}>SDE</div>
+        <div className="mb-mono" style={{ fontSize: 11, color: "#fff", letterSpacing: 0.1 }}>SDE</div>
         <div style={{ fontFamily: "var(--mb-font-display)", fontWeight: 800, fontSize: 56, letterSpacing: -2, lineHeight: 1, color: "#fff" }}>$1.80M</div>
-        <div className="mb-mono" style={{ fontSize: 11, color: "rgba(255,255,255,0.78)", marginTop: 2 }}>+$760K NORMALIZED</div>
+        <div className="mb-mono" style={{ fontSize: 11, color: "#fff", marginTop: 2 }}>+$760K NORMALIZED</div>
       </div>
     </div>
   );
@@ -419,7 +419,7 @@ const H: Record<string, CSSProperties> = {
     textWrap: "balance",
   },
   tag: {
-    fontSize: 14, color: "rgba(255,255,255,0.85)",
+    fontSize: 14, color: "#fff",
     margin: "8px 0 0", lineHeight: 1.35,
     textWrap: "pretty",
   },
@@ -432,14 +432,14 @@ const H: Record<string, CSSProperties> = {
     fontSize: 14, fontWeight: 600, color: "#fff", letterSpacing: "-0.2px",
   },
   innerSub: {
-    fontSize: 12, color: "rgba(255,255,255,0.78)", marginTop: 1,
+    fontSize: 12, color: "#fff", marginTop: 1,
   },
   metaRow: {
     padding: "0 22px 18px",
     display: "flex", alignItems: "center", justifyContent: "flex-end",
   },
   metaText: {
-    fontSize: 10.5, color: "rgba(255,255,255,0.75)",
+    fontSize: 10.5, color: "#fff",
     letterSpacing: "0.1em", fontWeight: 600,
   },
 };
@@ -468,7 +468,7 @@ const E: Record<string, CSSProperties> = {
   },
   eyebrowSlot: { padding: "0 6px 4px" },
   eyebrow: {
-    color: "rgba(255,255,255,0.85)",
+    color: "#fff",
     fontWeight: 700,
   },
   titleBlock: { padding: "0 6px 14px" },
@@ -479,7 +479,7 @@ const E: Record<string, CSSProperties> = {
     textWrap: "balance",
   },
   tag: {
-    fontSize: 13.5, color: "rgba(255,255,255,0.85)",
+    fontSize: 13.5, color: "#fff",
     margin: "8px 0 0", lineHeight: 1.4,
     textWrap: "pretty",
   },
@@ -495,11 +495,11 @@ const E: Record<string, CSSProperties> = {
     letterSpacing: "-0.2px", lineHeight: 1.2,
   },
   rowSub: {
-    fontSize: 12, color: "rgba(255,255,255,0.78)",
+    fontSize: 12, color: "#fff",
     marginTop: 2, lineHeight: 1.35,
   },
   rowChevron: {
-    fontSize: 14, color: "rgba(255,255,255,0.78)",
+    fontSize: 14, color: "#fff",
     marginLeft: 4, marginRight: 2, flexShrink: 0,
   },
 };

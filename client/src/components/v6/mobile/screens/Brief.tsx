@@ -167,7 +167,7 @@ const Br: Record<string, CSSProperties> = {
     textWrap: "balance",
   },
   editorialDek: {
-    fontSize: 14, color: "rgba(255,255,255,0.85)",
+    fontSize: 14, color: "#fff",
     margin: 0, lineHeight: 1.4,
     textWrap: "pretty",
   },

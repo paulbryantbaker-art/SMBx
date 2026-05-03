@@ -226,7 +226,7 @@ export const DealCard = forwardRef<HTMLButtonElement, DealCardProps>(function De
             flexShrink: 0,
           }} />
           <span style={{
-            color: 'rgba(255,255,255,0.95)',
+            color: '#fff',
             fontFamily: "'Figtree', system-ui, sans-serif",
             fontSize: 14,
             fontWeight: 700,
@@ -239,7 +239,7 @@ export const DealCard = forwardRef<HTMLButtonElement, DealCardProps>(function De
             {business}
           </span>
           <span style={{
-            color: 'rgba(255,255,255,0.88)',
+            color: '#fff',
             fontFamily: "'Figtree', system-ui, sans-serif",
             fontSize: 11,
             fontWeight: 700,
@@ -309,7 +309,7 @@ export const DealCard = forwardRef<HTMLButtonElement, DealCardProps>(function De
           {/* Top row: journey label + urgency dot */}
           <div style={{ position: 'absolute', inset: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{
-              color: 'rgba(255,255,255,0.95)',
+              color: '#fff',
               fontFamily: "'Figtree', system-ui, sans-serif",
               fontSize: 11,
               fontWeight: 800,
@@ -320,7 +320,7 @@ export const DealCard = forwardRef<HTMLButtonElement, DealCardProps>(function De
             </span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
               <span style={{
-                color: 'rgba(255,255,255,0.95)',
+                color: '#fff',
                 fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 11,
                 fontWeight: 600,

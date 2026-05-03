@@ -1135,11 +1135,11 @@ export function DealPreview({
         {metrics.map(m => (
           <div key={m.label} style={{ flex: '1 1 120px' }}>
             <div style={{ fontSize: '24px', fontWeight: 700, color: '#fff', lineHeight: 1.1 }}>{m.value}</div>
-            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', marginTop: 4 }}>{m.label}</div>
+            <div style={{ fontSize: '12px', color: '#fff', marginTop: 4 }}>{m.label}</div>
           </div>
         ))}
       </div>
-      {cta && <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', marginTop: 16, marginBottom: 0, fontStyle: 'italic' }}>{cta}</p>}
+      {cta && <p style={{ fontSize: '13px', color: '#fff', marginTop: 16, marginBottom: 0, fontStyle: 'italic' }}>{cta}</p>}
     </div>
   );
 }
@@ -1174,10 +1174,10 @@ export function SideBySideCard({
         </div>
       </div>
       <div style={{ flex: 1, padding: '24px', background: '#D4714E' }}>
-        <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 16 }}>{rightLabel}</span>
+        <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#fff', display: 'block', marginBottom: 16 }}>{rightLabel}</span>
         <div style={{ fontSize: '14px', fontVariantNumeric: 'tabular-nums' }}>
           {rightItems.map(r => (
-            <div key={r.label} className="flex justify-between" style={{ padding: '6px 0', color: 'rgba(255,255,255,0.7)' }}>
+            <div key={r.label} className="flex justify-between" style={{ padding: '6px 0', color: '#fff' }}>
               <span>{r.label}</span>
               <span style={{ fontWeight: 600, color: '#fff' }}>{r.value}</span>
             </div>
