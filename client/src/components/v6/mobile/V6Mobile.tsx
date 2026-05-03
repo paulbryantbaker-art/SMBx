@@ -297,14 +297,27 @@ function writeMobileHashState(view: MobileView) {
   } catch { /* noop */ }
 }
 
-// .mobile-root gradient: white at top, periwinkle at bottom for the
-// Safari URL-bar bleed. The warm gold for the iOS chrome zone is NOT
-// here — it's painted by TopBar's spacer (in flow, exactly the safe-
-// area-inset-top height), so warm stays inside the chrome zone with a
-// sharp boundary at safe-area edge. Page area is clean white.
+// .mobile-root gradient: soft warm sunrise wash at top fading to white,
+// then periwinkle at the bottom for the Safari URL-bar bleed.
+//
+// The warm zone is anchored to env(safe-area-inset-top) so it ends in a
+// fixed pixel distance regardless of total page height. Earlier % stops
+// (#D4A258 0% → #FFFFFF 12%) extended ~300px on a 2500px scroll, which
+// read as a "yellow band." Absolute-pixel anchoring keeps the warm-to-
+// white fade ~60px below the chrome zone — soft, ambient, ends before
+// the hero card so the page stays clean below.
+//
+// Layout the gradient produces:
+//   y=0           → #D4A258 warm gold (matches iOS chrome tint)
+//   y=safe-area   → #D4A258 (no harsh edge at chrome boundary)
+//   y=safe+60px   → #FFFFFF (soft fade complete by Today title's bottom)
+//   y=72% body    → #FFFFFF (white through middle)
+//   y=100% body   → #A8B3E5 periwinkle (Safari URL bar bleed bottom)
 const ROOT_GRADIENT =
   "linear-gradient(to bottom," +
-  " #FFFFFF 0%," +
+  " #D4A258 0," +
+  " #D4A258 env(safe-area-inset-top, 44px)," +
+  " #FFFFFF calc(env(safe-area-inset-top, 44px) + 60px)," +
   " #FFFFFF 72%," +
   " #A8B3E5 100%)";
 
