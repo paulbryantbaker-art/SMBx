@@ -91,19 +91,27 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
     return window.matchMedia("(display-mode: standalone)").matches;
   }, []);
 
-  // Track --vvh from visualViewport (per architecture_ios_pwa_pill.md).
+  // Track --vvh from visualViewport — PWA STANDALONE ONLY.
   //
   // CRITICAL: do NOT touch document.body or document.documentElement
-  // backgroundColor here. iOS 26 Safari's chrome bleeds (translucent,
-  // shows page content blurred behind status bar) until a JS-driven
-  // post-initial-paint body bg change locks it into opaque-tinted mode.
-  // The body bg is set synchronously in index.html's inline script
-  // (#D4A258 warm gold for mobile) BEFORE iOS samples — that's how
-  // we keep the chrome translucent AND tinted warm. If you change
-  // body bg here, the chrome will appear correct for ~500ms then lock
-  // to opaque the moment React hydration completes. User-visible
-  // symptom: "it bleeds at first then stops after half a second."
+  // styles in Safari tab mode. iOS 26 Safari's chrome stays translucent
+  // (live-blurs page content through status bar) until ANY post-initial-
+  // paint inline-style mutation on body locks it into opaque-tinted
+  // mode. Not just backgroundColor — setProperty('--vvh', ...) counts.
+  //
+  // visualViewport fires `resize` during the user's first scroll because
+  // iOS chrome auto-hides (viewport height changes). If we run setVVH on
+  // that event in Safari tab mode, body mutates → chrome locks → bleed
+  // dies after the first scroll gesture. Symptom: "worked on load and
+  // first scroll, then stopped." (exactly what we observed)
+  //
+  // Safe gating: the body-lock CSS at index.css:643 is itself gated by
+  // (display-mode: standalone), so --vvh is a no-op in Safari tab —
+  // skipping the JS write loses nothing. PWA standalone still needs
+  // --vvh for keyboard tracking + chat sheet sizing.
   useEffect(() => {
+    if (!isStandalone) return; // Safari tab: body must stay pristine for chrome bleed.
+
     document.documentElement.classList.add("mobile-pwa-active");
 
     const vv = window.visualViewport;
@@ -126,7 +134,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
       document.body.style.removeProperty("--vvh");
       document.body.style.removeProperty("--vvs");
     };
-  }, []);
+  }, [isStandalone]);
 
   // URL hash sync
   useEffect(() => {
