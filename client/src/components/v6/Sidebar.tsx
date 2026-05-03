@@ -155,10 +155,26 @@ export function V6Sidebar({
                   <div style={S.menuEmail}>{user.email}</div>
                 </div>
                 <div style={S.menuDivider} />
-                <button role="menuitem" className="m-state" style={S.menuItem} onClick={() => setMenuOpen(false)}>
+                <button
+                  role="menuitem"
+                  className="m-state"
+                  style={S.menuItem}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onOpenTab({ id: "tab-settings", kind: "settings", title: "Settings" });
+                  }}
+                >
                   Profile
                 </button>
-                <button role="menuitem" className="m-state" style={S.menuItem} onClick={() => setMenuOpen(false)}>
+                <button
+                  role="menuitem"
+                  className="m-state"
+                  style={S.menuItem}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onOpenTab({ id: "tab-settings", kind: "settings", title: "Settings" });
+                  }}
+                >
                   Settings
                 </button>
                 <div style={S.menuDivider} />
@@ -297,6 +313,7 @@ export function V6Sidebar({
             style={{ width: "100%", ...(expanded ? null : { justifyContent: "center", padding: "10px 0" }) }}
             title={!expanded ? "Recent activity" : undefined}
             aria-label="Recent activity"
+            onClick={() => onOpenTab({ id: "tab-history", kind: "history", title: "Conversation history" })}
           >
             <span className="mode-icon"><V6Icon name="history" size={14} /></span>
             {expanded && <span>Recent activity</span>}
@@ -306,6 +323,7 @@ export function V6Sidebar({
             style={{ width: "100%", ...(expanded ? null : { justifyContent: "center", padding: "10px 0" }) }}
             title={!expanded ? "Settings" : undefined}
             aria-label="Settings"
+            onClick={() => onOpenTab({ id: "tab-settings", kind: "settings", title: "Settings" })}
           >
             <span className="mode-icon"><V6Icon name="settings" size={14} /></span>
             {expanded && <span>Settings</span>}

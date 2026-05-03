@@ -1,5 +1,6 @@
 import { type CSSProperties, type ReactNode } from "react";
 import type { Tab, IconName, OpenTab, ModeId } from "./types";
+import type { User } from "../../hooks/useAuth";
 import { V6Icon } from "./icons";
 import { V6SearchRoot } from "./modes/SearchRoot";
 import { V6DocsRoot } from "./modes/DocsRoot";
@@ -9,6 +10,9 @@ import { V6LibraryRoot } from "./modes/LibraryRoot";
 import { V6DealView } from "./views/DealView";
 import { V6DocView } from "./views/DocView";
 import { V6AnalysisView } from "./views/AnalysisView";
+import { V6SettingsView } from "./views/SettingsView";
+import { V6HistoryView } from "./views/HistoryView";
+import { V6StarterView } from "./views/StarterView";
 import { V6LearnView } from "./Learn";
 
 interface CanvasProps {
@@ -19,10 +23,22 @@ interface CanvasProps {
   closeTab: (id: string) => void;
   onPickMode: (id: ModeId) => void;
   onTalkToYulia?: (prompt: string) => void;
+  user: User | null;
+  onSignOut: () => void;
 }
 
-export function V6Canvas({ tabs, activeTabId, setActiveTabId, openTab, closeTab, onPickMode, onTalkToYulia }: CanvasProps) {
+export function V6Canvas({ tabs, activeTabId, setActiveTabId, openTab, closeTab, onPickMode, onTalkToYulia, user, onSignOut }: CanvasProps) {
   const activeTab = tabs.find(t => t.id === activeTabId) ?? tabs[0];
+
+  const openStarterTab = () => {
+    const id = `starter-${Date.now()}`;
+    openTab({ id, kind: "starter", title: "New" });
+    // Notify Yulia so she greets the user in the chat panel.
+    if (onTalkToYulia) {
+      onTalkToYulia("I just opened a new tab — what can you help me with?");
+    }
+  };
+
   return (
     <div style={K.canvas}>
       <V6TabStrip
@@ -30,9 +46,19 @@ export function V6Canvas({ tabs, activeTabId, setActiveTabId, openTab, closeTab,
         activeTabId={activeTabId}
         setActiveTabId={setActiveTabId}
         closeTab={closeTab}
+        onNewTab={openStarterTab}
       />
       <div className="thin-scroll" style={K.canvasBody}>
-        {activeTab && <V6TabContent tab={activeTab} openTab={openTab} onPickMode={onPickMode} onTalkToYulia={onTalkToYulia} />}
+        {activeTab && (
+          <V6TabContent
+            tab={activeTab}
+            openTab={openTab}
+            onPickMode={onPickMode}
+            onTalkToYulia={onTalkToYulia}
+            user={user}
+            onSignOut={onSignOut}
+          />
+        )}
       </div>
     </div>
   );
@@ -43,9 +69,10 @@ interface TabStripProps {
   activeTabId: string;
   setActiveTabId: (id: string) => void;
   closeTab: (id: string) => void;
+  onNewTab: () => void;
 }
 
-function V6TabStrip({ tabs, activeTabId, setActiveTabId, closeTab }: TabStripProps) {
+function V6TabStrip({ tabs, activeTabId, setActiveTabId, closeTab, onNewTab }: TabStripProps) {
   return (
     <div className="tab-strip" role="tablist" aria-label="Open workspace items">
       {tabs.map(t => (
@@ -70,7 +97,7 @@ function V6TabStrip({ tabs, activeTabId, setActiveTabId, closeTab }: TabStripPro
           )}
         </div>
       ))}
-      <button className="tab-new-btn" title="New tab" aria-label="New tab">
+      <button className="tab-new-btn" title="New tab" aria-label="New tab" onClick={onNewTab}>
         <V6Icon name="plus" size={12} />
       </button>
     </div>
@@ -89,6 +116,9 @@ function tabIcon(tab: Tab): IconName {
   if (tab.kind === "analysis") return "chart";
   if (tab.kind === "feed-item") return "feed";
   if (tab.kind === "learn") return "library";
+  if (tab.kind === "settings") return "settings";
+  if (tab.kind === "history") return "history";
+  if (tab.kind === "starter") return "plus";
   return "doc";
 }
 
@@ -97,22 +127,27 @@ interface TabContentProps {
   openTab: OpenTab;
   onPickMode: (id: ModeId) => void;
   onTalkToYulia?: (prompt: string) => void;
+  user: User | null;
+  onSignOut: () => void;
 }
 
-function V6TabContent({ tab, openTab, onTalkToYulia }: TabContentProps) {
+function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut }: TabContentProps) {
   if (tab.kind === "mode-root") {
-    if (tab.modeId === "search")   return <V6SearchRoot openTab={openTab} />;
+    if (tab.modeId === "search")   return <V6SearchRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
     if (tab.modeId === "docs")     return <V6DocsRoot openTab={openTab} />;
     if (tab.modeId === "analysis") return <V6AnalysisRoot openTab={openTab} />;
     if (tab.modeId === "intel")    return <V6IntelRoot openTab={openTab} />;
     if (tab.modeId === "library")  return <V6LibraryRoot openTab={openTab} />;
     return <Placeholder label={`${tab.title} — root view`} note="Unknown mode root." />;
   }
-  if (tab.kind === "deal")     return <V6DealView title={tab.title} openTab={openTab} />;
-  if (tab.kind === "doc")      return <V6DocView title={tab.title} />;
+  if (tab.kind === "deal")     return <V6DealView id={tab.id} title={tab.title} openTab={openTab} />;
+  if (tab.kind === "doc")      return <V6DocView id={tab.id} title={tab.title} />;
   if (tab.kind === "analysis") return <V6AnalysisView title={tab.title} />;
   if (tab.kind === "feed-item") return <Placeholder label={`Feed · ${tab.title}`} note="Feed item reading view is a thin wrapper — coming after polish." />;
   if (tab.kind === "learn")    return <V6LearnView section={tab.section} anchor={tab.anchor} onTalkToYulia={onTalkToYulia} />;
+  if (tab.kind === "settings") return <V6SettingsView user={user} onSignOut={onSignOut} />;
+  if (tab.kind === "history")  return <V6HistoryView />;
+  if (tab.kind === "starter")  return <V6StarterView onTalkToYulia={onTalkToYulia} />;
   return <Placeholder label="Unknown tab" />;
 }
 

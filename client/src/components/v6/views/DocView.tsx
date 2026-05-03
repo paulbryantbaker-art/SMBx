@@ -1,5 +1,18 @@
-import { Fragment, type CSSProperties } from "react";
-import { V6DocStatus } from "../modes/cards";
+import { Fragment, useEffect, useState, type CSSProperties } from "react";
+import Markdown from "react-markdown";
+import { V6DocStatus, type DocStatusKind } from "../modes/cards";
+import { authHeaders } from "../../../hooks/useAuth";
+
+interface DeliverableRow {
+  id: number;
+  type: string;
+  status: string;
+  content: string | null;
+  created_at: string;
+  updated_at: string;
+  name?: string;
+  slug?: string;
+}
 
 const TOOLBAR_BUTTONS = [
   { key: "h", label: "Heading", v: "H2 ▾", weight: 500 },
@@ -27,8 +40,33 @@ const VERSIONS: Version[] = [
   { v: "v1", date: "Mar 22 · 10:04 AM" },
 ];
 
-export function V6DocView({ title }: { title: string }) {
-  const docTitle = title.replace(" · LOI v3", "").replace(" · LOI v1", "");
+export function V6DocView({ id, title }: { id: string; title: string }) {
+  const numericId = /^\d+$/.test(id) ? parseInt(id, 10) : null;
+  const [doc, setDoc] = useState<DeliverableRow | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (numericId === null) return;
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    fetch(`/api/deliverables/${numericId}`, { headers: authHeaders() })
+      .then(r => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
+      .then((d: DeliverableRow) => { if (!cancelled) setDoc(d); })
+      .catch((e: Error) => { if (!cancelled) setError(e.message); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [numericId]);
+
+  const docTitle = doc?.name || title.replace(/ · (LOI|Memo|CIM)[\s\w]*$/, "");
+  const eyebrowLabel = doc?.type
+    ? `${doc.type.replace(/_/g, " ").toUpperCase()} · ${doc.status.toUpperCase()}`
+    : "LETTER OF INTENT · DRAFT v3";
+  const statusKind: DocStatusKind = doc?.status === "complete" ? "live" : doc?.status === "draft" ? "draft" : "saved";
+  const savedAt = doc ? `SAVED · ${fmtRelative(doc.updated_at)}` : "SAVED · 12 MIN AGO";
+  const showSample = !numericId;
+  const showFetched = !!doc?.content;
 
   return (
     <div className="m-fade-up" style={V.shell}>
@@ -51,48 +89,71 @@ export function V6DocView({ title }: { title: string }) {
             </Fragment>
           ))}
           <div style={{ flex: 1 }} />
-          <span className="mono" style={V.savedAt}>SAVED · 12 MIN AGO</span>
-          <V6DocStatus status="draft" />
+          <span className="mono" style={V.savedAt}>{savedAt}</span>
+          <V6DocStatus status={statusKind} />
         </div>
 
         {/* Body */}
         <div style={{ fontFamily: "Iowan Old Style, Charter, Georgia, serif", color: "var(--m-on-surface)" }}>
-          <div className="mono" style={V.docEyebrow}>LETTER OF INTENT · DRAFT v3</div>
+          <div className="mono" style={V.docEyebrow}>{eyebrowLabel}</div>
           <h1 style={V.docH1}>{docTitle}</h1>
-          <p style={V.docMeta}>
-            From: Apex SMB Holdings &nbsp;·&nbsp; To: J. Marston, Owner &nbsp;·&nbsp; Re: Acquisition of {docTitle} &nbsp;·&nbsp; Date: March 27, 2026
-          </p>
 
-          <p style={V.docPara}>
-            We are pleased to submit this non-binding letter of intent (&ldquo;<strong>LOI</strong>&rdquo;) to acquire substantially all of the assets and operating business of {docTitle} Co., LLC (the &ldquo;<strong>Company</strong>&rdquo;), subject to the terms summarized below.
-          </p>
+          {loading && (
+            <p className="mono" style={{ fontSize: 11, color: "var(--m-on-surface-mid)", letterSpacing: "0.1em" }}>LOADING DELIVERABLE…</p>
+          )}
+          {error && (
+            <div style={{
+              padding: "10px 12px", borderRadius: 8, marginBottom: 16,
+              background: "var(--m-pass-container)", color: "#4A1410", fontSize: 12.5,
+            }}>
+              Couldn&rsquo;t load deliverable ({error}). Showing reference layout.
+            </div>
+          )}
 
-          <h2 style={V.docH2}>1. Purchase Price &amp; Structure</h2>
-          <p style={V.docPara}>Total enterprise value of <strong>$11.4M</strong> on a debt-free, cash-free basis, comprised of:</p>
-          <ul style={V.docList}>
-            <li><strong>$8.6M</strong> cash at closing, financed via SBA 7(a) loan and equity contribution</li>
-            <li><strong>$1.8M</strong> seller note, 5-year amortization at 7.5% interest</li>
-            <li><strong>$1.0M</strong> earn-out tied to 2026 EBITDA targets, paid quarterly in 2027</li>
-          </ul>
+          {showFetched && (
+            <div style={V.docMarkdown}>
+              <Markdown>{doc!.content!}</Markdown>
+            </div>
+          )}
 
-          <h2 style={V.docH2}>2. Diligence &amp; Conditions</h2>
-          <p style={V.docPara}>
-            <span style={V.highlight}>
-              45-day exclusivity period commencing on signature of this LOI
-              <span style={V.highlightDot} aria-label="Yulia comment marker" />
-            </span>
-            , during which the Buyer will conduct customary due diligence including financial review, legal/contractual review, and customer interviews (with prior approval).
-          </p>
+          {(showSample || (!showFetched && !loading && !error && numericId)) && (
+            <>
+              <p style={V.docMeta}>
+                From: Apex SMB Holdings &nbsp;·&nbsp; To: J. Marston, Owner &nbsp;·&nbsp; Re: Acquisition of {docTitle} &nbsp;·&nbsp; Date: March 27, 2026
+              </p>
 
-          <h2 style={V.docH2}>3. Working Capital</h2>
-          <p style={V.docPara}>
-            The Company shall be delivered with a normalized level of working capital, defined as the trailing 12-month average less ordinary cash distributions to the Seller. A target of <strong>$420,000</strong> in net working capital shall be agreed upon prior to closing.
-          </p>
+              <p style={V.docPara}>
+                We are pleased to submit this non-binding letter of intent (&ldquo;<strong>LOI</strong>&rdquo;) to acquire substantially all of the assets and operating business of {docTitle} Co., LLC (the &ldquo;<strong>Company</strong>&rdquo;), subject to the terms summarized below.
+              </p>
 
-          <h2 style={V.docH2}>4. Transition &amp; Non-Compete</h2>
-          <p style={V.docPara}>
-            The Seller agrees to a 90-day transition period at full salary, with consulting availability for an additional 9 months at a reduced rate. A 4-year non-compete covering the East Texas service region will be executed at closing.
-          </p>
+              <h2 style={V.docH2}>1. Purchase Price &amp; Structure</h2>
+              <p style={V.docPara}>Total enterprise value of <strong>$11.4M</strong> on a debt-free, cash-free basis, comprised of:</p>
+              <ul style={V.docList}>
+                <li><strong>$8.6M</strong> cash at closing, financed via SBA 7(a) loan and equity contribution</li>
+                <li><strong>$1.8M</strong> seller note, 5-year amortization at 7.5% interest</li>
+                <li><strong>$1.0M</strong> earn-out tied to 2026 EBITDA targets, paid quarterly in 2027</li>
+              </ul>
+
+              <h2 style={V.docH2}>2. Diligence &amp; Conditions</h2>
+              <p style={V.docPara}>
+                <span style={V.highlight}>
+                  45-day exclusivity period commencing on signature of this LOI
+                  <span style={V.highlightDot} aria-label="Yulia comment marker" />
+                </span>
+                , during which the Buyer will conduct customary due diligence including financial review, legal/contractual review, and customer interviews (with prior approval).
+              </p>
+
+              <h2 style={V.docH2}>3. Working Capital</h2>
+              <p style={V.docPara}>
+                The Company shall be delivered with a normalized level of working capital, defined as the trailing 12-month average less ordinary cash distributions to the Seller. A target of <strong>$420,000</strong> in net working capital shall be agreed upon prior to closing.
+              </p>
+
+              <h2 style={V.docH2}>4. Transition &amp; Non-Compete</h2>
+              <p style={V.docPara}>
+                The Seller agrees to a 90-day transition period at full salary, with consulting availability for an additional 9 months at a reduced rate. A 4-year non-compete covering the East Texas service region will be executed at closing.
+              </p>
+            </>
+          )}
         </div>
       </article>
 
@@ -253,4 +314,20 @@ const V: Record<string, CSSProperties> = {
     fontSize: 9.5, color: "var(--m-on-surface-mid)",
     letterSpacing: "0.14em", fontWeight: 600, marginBottom: 8,
   },
+  docMarkdown: {
+    fontSize: 16, lineHeight: 1.7,
+    fontFamily: "Iowan Old Style, Charter, Georgia, serif",
+  },
 };
+
+function fmtRelative(iso: string): string {
+  try {
+    const ms = Date.now() - new Date(iso).getTime();
+    const min = Math.round(ms / 60_000);
+    if (min < 60) return `${min} MIN AGO`;
+    const hr = Math.round(min / 60);
+    if (hr < 24) return `${hr}H AGO`;
+    const d = Math.round(hr / 24);
+    return `${d}D AGO`;
+  } catch { return ""; }
+}

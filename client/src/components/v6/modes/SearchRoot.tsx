@@ -2,8 +2,10 @@ import { type CSSProperties } from "react";
 import { V6Section } from "../Canvas";
 import { V6DealCard, V6WatchRow, type Verdict } from "./cards";
 import type { OpenTab } from "../types";
+import type { User } from "../../../hooks/useAuth";
+import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
 
-const HERO_DATE = "Friday, March 27";
+const HERO_DATE = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
 interface Pick {
   rank: number;
@@ -66,10 +68,30 @@ const CLOSED: ClosedDeal[] = [
   { name: "Pest control · GA",    sub: "Closed at $5.3M · 7.2×", date: "FEB 02" },
 ];
 
-export function V6SearchRoot({ openTab }: { openTab: OpenTab }) {
+interface SearchRootProps {
+  openTab: OpenTab;
+  onTalkToYulia?: (prompt: string) => void;
+  user: User | null;
+}
+
+export function V6SearchRoot({ openTab, onTalkToYulia, user }: SearchRootProps) {
+  const home = useHomeDeals(user);
+
+  // When the user is authenticated AND we have real deals, render their data.
+  // Otherwise fall back to the polished sample arrays — anon visitors and the
+  // brief loading window both stay on samples so the page never flashes empty.
+  const useReal = home.isAuthed && home.hasData;
+  const picks: Pick[]          = useReal ? home.picks.map(dealToPick)         : PICKS;
+  const inReview: InReviewDeal[] = useReal && home.inReview.length > 0 ? home.inReview.map(dealToInReview) : IN_REVIEW;
+  const closed: ClosedDeal[]   = useReal && home.closed.length > 0 ? home.closed.map(dealToClosed)     : CLOSED;
+
   const openTopPick = () => {
-    const top = PICKS[0];
-    openTab({ kind: "deal", title: top.name, id: top.id });
+    const top = picks[0];
+    if (top) openTab({ kind: "deal", title: top.name, id: top.id });
+  };
+
+  const askYulia = (prompt: string) => {
+    if (onTalkToYulia) onTalkToYulia(prompt);
   };
 
   return (
@@ -103,18 +125,18 @@ export function V6SearchRoot({ openTab }: { openTab: OpenTab }) {
           </div>
 
           <div style={H.picksHead}>
-            <span className="mono" style={H.picksEyebrow}>YULIA&rsquo;S PICKS · TODAY · {PICKS.length} DEALS · 14 MIN READ</span>
+            <span className="mono" style={H.picksEyebrow}>YULIA&rsquo;S PICKS · TODAY · {picks.length} DEALS · 14 MIN READ</span>
             <span style={{ fontSize: 11, color: "rgba(255,255,255,0.6)" }}>↓ tap any to open</span>
           </div>
 
           <div style={H.picksList}>
-            {PICKS.map((p, i) => (
+            {picks.map((p, i) => (
               <div
                 key={p.rank}
                 onClick={(e) => { e.stopPropagation(); openTab({ kind: "deal", title: p.name, id: p.id }); }}
                 style={{
                   ...H.pickRow,
-                  borderBottom: i === PICKS.length - 1 ? "none" : "1px solid rgba(255,255,255,0.1)",
+                  borderBottom: i === picks.length - 1 ? "none" : "1px solid rgba(255,255,255,0.1)",
                 }}
               >
                 <span style={H.pickRank}>{p.rank}</span>
@@ -132,13 +154,22 @@ export function V6SearchRoot({ openTab }: { openTab: OpenTab }) {
 
       {/* In Review */}
       <V6Section
-        eyebrow="PIPELINE · 6 IN REVIEW"
+        eyebrow={`PIPELINE · ${inReview.length} IN REVIEW`}
         title="In review"
         sub="Live deals you and Yulia are working"
-        action={<button className="m-btn text" style={{ height: 28, fontSize: 12 }}>See all &rarr;</button>}
+        action={
+          <button
+            className="m-btn text"
+            style={{ height: 28, fontSize: 12 }}
+            onClick={() => askYulia("Show me every deal currently in review across my pipeline.")}
+            type="button"
+          >
+            See all &rarr;
+          </button>
+        }
       >
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 14 }}>
-          {IN_REVIEW.map(d => (
+          {inReview.map(d => (
             <V6DealCard
               key={d.id}
               verdict={d.verdict}
@@ -174,7 +205,7 @@ export function V6SearchRoot({ openTab }: { openTab: OpenTab }) {
       {/* Recently closed */}
       <V6Section eyebrow="RECENT" title="Recently closed" sub="Reference deals — ask Yulia about any of them.">
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 12 }}>
-          {CLOSED.map(d => (
+          {closed.map(d => (
             <div
               key={d.name}
               className="m-card filled-tonal m-state tap"
@@ -259,3 +290,82 @@ const H: Record<string, CSSProperties> = {
     letterSpacing: "0.12em", fontWeight: 600, marginTop: -2,
   },
 };
+
+/* ─── Real-deal → display adapters ───────────────────────────────────
+   Convert HomeDeal records (revenue/sde/ebitda in cents) into the shape
+   the existing SearchRoot UI consumes. The synthetic fit score is a
+   quintile of EBITDA across the user's pipeline so the home page has
+   a visible signal until a real fit_score column lands on the deal row.
+*/
+
+function fmtCents(cents: number | null | undefined): string {
+  if (!cents) return "—";
+  const dollars = cents / 100;
+  if (dollars >= 1_000_000) return `$${(dollars / 1_000_000).toFixed(2).replace(/\.?0+$/, "")}M`;
+  if (dollars >= 1_000) return `$${Math.round(dollars / 1_000)}K`;
+  return `$${Math.round(dollars).toLocaleString()}`;
+}
+
+function fmtMonth(d: string): string {
+  try {
+    const date = new Date(d);
+    return date.toLocaleDateString("en-US", { month: "short", day: "2-digit" }).toUpperCase();
+  } catch { return ""; }
+}
+
+function fitFromEbitda(ebitda: number | null | undefined): number {
+  // Crude proxy until a real fit score column exists. Maps EBITDA in cents
+  // onto a 60-92 range so the picks list isn't all 0.
+  if (!ebitda) return 60;
+  const m = ebitda / 100_000_000; // millions
+  if (m >= 5) return 92;
+  if (m >= 3) return 86;
+  if (m >= 2) return 80;
+  if (m >= 1) return 74;
+  return 65;
+}
+
+function verdictFromGate(gate: string): Verdict {
+  // Late-stage gates → pursue; early/exploratory → watch; stalled handled separately.
+  if (/[345]$/.test(gate)) return "pursue";
+  if (/[12]$/.test(gate)) return "watch";
+  return "watch";
+}
+
+function dealToPick(d: HomeDeal, i: number): Pick {
+  const sde = fmtCents(d.sde);
+  const note = (d.financials?.notes || `${sde} SDE · ${d.industry || "—"}`).slice(0, 80);
+  return {
+    rank: i + 1,
+    name: d.business_name || d.industry || `Deal #${d.id}`,
+    note,
+    fit: fitFromEbitda(d.ebitda),
+    id: String(d.id),
+  };
+}
+
+function dealToInReview(d: HomeDeal): InReviewDeal {
+  const rev = fmtCents(d.revenue);
+  const loc = d.location || d.industry || "—";
+  const mult = d.financials?.multiple ? `${d.financials.multiple.toFixed(1)}×` : "—";
+  return {
+    verdict: verdictFromGate(d.current_gate),
+    id: String(d.id),
+    name: d.business_name || `Deal #${d.id}`,
+    sub: `${rev} rev · ${loc}`,
+    fit: fitFromEbitda(d.ebitda),
+    sde: fmtCents(d.sde),
+    multiple: mult,
+    note: d.financials?.notes || `${d.industry || "Business"} at ${d.current_gate}`,
+  };
+}
+
+function dealToClosed(d: HomeDeal): ClosedDeal {
+  const price = fmtCents(d.asking_price);
+  const mult = d.financials?.multiple ? ` · ${d.financials.multiple.toFixed(1)}×` : "";
+  return {
+    name: d.business_name || `Deal #${d.id}`,
+    sub: `Closed at ${price}${mult}`,
+    date: fmtMonth(d.updated_at),
+  };
+}

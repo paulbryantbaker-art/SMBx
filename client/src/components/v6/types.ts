@@ -1,6 +1,15 @@
 export type ModeId = "search" | "docs" | "analysis" | "intel" | "library";
 
-export type TabKind = "mode-root" | "deal" | "doc" | "analysis" | "learn" | "feed-item";
+export type TabKind =
+  | "mode-root"
+  | "deal"
+  | "doc"
+  | "analysis"
+  | "learn"
+  | "feed-item"
+  | "settings"
+  | "history"
+  | "starter";
 
 export type IconName =
   | "search" | "doc" | "chart" | "feed" | "library"

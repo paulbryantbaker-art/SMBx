@@ -138,9 +138,12 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
   const openTab: (descriptor: Omit<Tab, "id"> & { id?: string }) => void = (descriptor) => {
     const id = descriptor.id ?? `${descriptor.kind}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     setTabs(prev => {
-      if (prev.find(t => t.id === id)) {
-        setActiveTabId(id);
-        return prev;
+      const existing = prev.find(t => t.id === id);
+      if (existing) {
+        // Merge new descriptor into the existing tab so callers can re-open
+        // a tab with new section/anchor/template/tool props (e.g., pricing
+        // pill activates an open How-it-works tab and switches its section).
+        return prev.map(t => t.id === id ? { ...t, ...descriptor, id } : t);
       }
       return [...prev, { ...descriptor, id }];
     });
@@ -174,14 +177,20 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
     return () => window.removeEventListener("smbx:canvas_action", onAction);
   }, []);
 
-  // URL → tab bridge: /how-it-works and /pricing land you in the Learn tab
-  // (footer + bookmarked + shared links). After opening, the URL is rewritten
-  // to "/" so the tab state lives in the hash like the rest of the app.
+  // URL → tab bridge. Bookmarkable links / footer links open the matching
+  // tab. After opening, the URL is rewritten to "/" so the tab state lives
+  // in the hash like the rest of the app.
   useEffect(() => {
     const path = window.location.pathname;
     if (path === "/how-it-works" || path === "/pricing") {
       const section: "how" | "pricing" = path === "/pricing" ? "pricing" : "how";
       openTab({ id: "tab-learn", kind: "learn", title: "How it works · Pricing", section });
+      window.history.replaceState(null, "", "/" + window.location.hash);
+    } else if (path === "/settings" || path === "/profile") {
+      openTab({ id: "tab-settings", kind: "settings", title: "Settings" });
+      window.history.replaceState(null, "", "/" + window.location.hash);
+    } else if (path === "/history") {
+      openTab({ id: "tab-history", kind: "history", title: "Conversation history" });
       window.history.replaceState(null, "", "/" + window.location.hash);
     }
   }, []); // mount-only — initial URL routing
@@ -236,7 +245,9 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
     try { localStorage.setItem(SAMPLE_DISMISS_KEY, "1"); } catch { /* noop */ }
   };
   const startWorkspace = () => {
-    openTab({ id: "tab-learn", kind: "learn", title: "How it works · Pricing", section: "pricing" });
+    // Anon CTA — push to signup. Authed users never see this banner.
+    if (!user) navigate("/signup");
+    else openTab({ id: "tab-learn", kind: "learn", title: "How it works · Pricing", section: "pricing" });
   };
 
   // ⌘K opens sidebar search from anywhere
@@ -300,6 +311,8 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
               closeTab={closeTab}
               onPickMode={pickMode}
               onTalkToYulia={(prompt) => send(prompt)}
+              user={user}
+              onSignOut={onSignOut}
             />
           </div>
         </main>

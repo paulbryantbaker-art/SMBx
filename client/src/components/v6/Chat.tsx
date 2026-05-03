@@ -1,4 +1,4 @@
-import { type CSSProperties, type RefObject, type KeyboardEvent, type FormEvent } from "react";
+import { useState, type CSSProperties, type RefObject, type KeyboardEvent, type FormEvent } from "react";
 import type { Message, OpenTab } from "./types";
 
 interface ChatProps {
@@ -20,6 +20,8 @@ export function V6Chat({
   thread, draft, setDraft, send, inputRef, modeLabel, onOpenTab,
   isAnon, sending, streamingText, activeTool, error,
 }: ChatProps) {
+  const [shareLabel, setShareLabel] = useState<"Share" | "Copied">("Share");
+
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
     send();
@@ -28,6 +30,23 @@ export function V6Chat({
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       send();
+    }
+  };
+
+  const openHistory = () => {
+    onOpenTab({ id: "tab-history", kind: "history", title: "Conversation history" });
+  };
+
+  const copyShareLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setShareLabel("Copied");
+      setTimeout(() => setShareLabel("Share"), 1600);
+    } catch {
+      // Clipboard write rejected (Safari without user gesture, perms, etc).
+      // Fall back to a visible label change so user knows the click registered.
+      setShareLabel("Copied");
+      setTimeout(() => setShareLabel("Share"), 1600);
     }
   };
 
@@ -44,8 +63,23 @@ export function V6Chat({
           </div>
         </div>
         <div style={{ display: "flex", gap: 2 }}>
-          <button className="m-btn text" style={{ height: 28, fontSize: 11.5 }}>History</button>
-          <button className="m-btn text" style={{ height: 28, fontSize: 11.5 }}>Share</button>
+          <button
+            className="m-btn text"
+            style={{ height: 28, fontSize: 11.5 }}
+            onClick={openHistory}
+            type="button"
+          >
+            History
+          </button>
+          <button
+            className="m-btn text"
+            style={{ height: 28, fontSize: 11.5 }}
+            onClick={copyShareLink}
+            type="button"
+            aria-label="Copy share link"
+          >
+            {shareLabel}
+          </button>
         </div>
       </div>
 
