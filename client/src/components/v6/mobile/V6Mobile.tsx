@@ -315,16 +315,20 @@ const S: Record<string, CSSProperties> = {
     WebkitOverflowScrolling: "touch",
     overscrollBehaviorY: "contain",
     touchAction: "pan-y",
-    // Step 1 bleed (revised): gradient lives on the scroll container itself,
-    // not on body. Because .mobile-root is a positioned overflow:auto box,
-    // its background paints in the scrollport (fixed to the layout viewport)
-    // — content scrolls over the wash. Warm sunrise-cream at top, white
-    // through the middle 64%, periwinkle-adjacent --mb-accent-soft at bottom.
+    // Step 2 bleed (2026-05-03): gradient lives on the scroll container so
+    // it paints in the scrollport (fixed to the layout viewport) — content
+    // scrolls over the wash. Top stop is a saturated warm sand (#EBC080),
+    // not pale cream, so it survives iOS Safari's status-bar blur+desaturate
+    // wash and reads visibly as a warm "sunrise" band behind the chrome —
+    // same MacRumors-style bleed pattern. Sharp transition to white at 12%
+    // keeps the warm band inside the status-bar zone; LargeTitle and content
+    // sit on white. Bottom periwinkle band starts at 78% so it surrounds the
+    // floating tab pill instead of just sitting under it.
     background:
       "linear-gradient(to bottom," +
-      " #FAF1E5 0%," +
-      " #FFFFFF 18%," +
-      " #FFFFFF 82%," +
+      " #EBC080 0%," +
+      " #FFFFFF 12%," +
+      " #FFFFFF 78%," +
       " #EEF1FB 100%)",
     paddingBottom: "env(safe-area-inset-bottom, 0px)",
   },
