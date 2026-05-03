@@ -79,55 +79,34 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
   });
 
   // Track --vvh from visualViewport (per architecture_ios_pwa_pill.md)
-  // and reconcile html/body bg + theme-color with the mobile palette so
-  // viewport-fit=cover doesn't expose a colored chin (was #F6F7F9 from
-  // the desktop fight-of-paint inline script in index.html).
+  // and reconcile html/body bg with the mobile palette so the iOS Safari
+  // chrome (URL bar, status bar) tints to a color cohesive with the page.
   //
-  // Step 1 bleed (2026-05-03): swap solid #FFFFFF for a vertical gradient —
-  // warm sunrise-adjacent cream at the very top, white through the middle,
-  // periwinkle-adjacent --mb-accent-soft at the bottom. With viewport-fit=cover
-  // this paints into the safe areas behind URL bar / home indicator, so the
-  // page reads as warm-tinted glass rather than a hard white seam against the
-  // browser chrome. theme-color matches the warm top so the URL bar adopts
-  // the same warmth instead of cutting in as opaque white.
+  // iOS 26 chrome-tint behavior (2026-05-03): Safari 26 dropped support
+  // for <meta name="theme-color"> and now derives chrome tinting by
+  // sampling <body>'s backgroundColor directly. Per Ben Frain, gradients
+  // on body make the sampler worse (safe-area inset interactions break
+  // it), so we use a single solid color: a faint warm-neutral midway
+  // between the .mobile-root gradient's sunrise cream (#FAF1E5) and
+  // periwinkle (#EEF1FB) ends. That gives the URL bar / status bar a
+  // deliberate soft tint instead of a stark white seam, while the
+  // .mobile-root gradient inside provides the actual page atmosphere.
+  // theme-color is left to whatever index.html declares — it has no
+  // effect in iOS 26+ but older iOS / Android may still honor it.
   useEffect(() => {
     document.documentElement.classList.add("mobile-pwa-active");
 
-    // Sunrise-adjacent warm cream → white → periwinkle-adjacent cool.
-    // Tints concentrated in the top/bottom 18% so the body of the page
-    // stays effectively white where content lives.
-    const BG_GRADIENT =
-      "linear-gradient(to bottom," +
-      " #FAF1E5 0%," +
-      " #FFFFFF 18%," +
-      " #FFFFFF 82%," +
-      " #EEF1FB 100%)";
-    const TOP_TINT = "#FAF1E5";
-
-    // Save inline style snapshots so we can restore on unmount. Note we
-    // capture both backgroundColor (was set previously) and backgroundImage
-    // (which we now set), since CSS gradients live on backgroundImage.
+    const CHROME_TINT = "#F4F1EC";
     const html = document.documentElement;
     const body = document.body;
     const prevHtmlBg = html.style.backgroundColor;
-    const prevHtmlBgImage = html.style.backgroundImage;
     const prevBodyBg = body.style.backgroundColor;
-    const prevBodyBgImage = body.style.backgroundImage;
-    html.style.backgroundColor = TOP_TINT;
-    html.style.backgroundImage = BG_GRADIENT;
-    body.style.backgroundColor = TOP_TINT;
-    body.style.backgroundImage = BG_GRADIENT;
-
-    const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-    const prevThemeColor = themeMeta?.getAttribute("content") ?? null;
-    if (themeMeta) themeMeta.setAttribute("content", TOP_TINT);
+    html.style.backgroundColor = CHROME_TINT;
+    body.style.backgroundColor = CHROME_TINT;
 
     const restoreChrome = () => {
       html.style.backgroundColor = prevHtmlBg;
-      html.style.backgroundImage = prevHtmlBgImage;
       body.style.backgroundColor = prevBodyBg;
-      body.style.backgroundImage = prevBodyBgImage;
-      if (themeMeta && prevThemeColor !== null) themeMeta.setAttribute("content", prevThemeColor);
     };
 
     const vv = window.visualViewport;
