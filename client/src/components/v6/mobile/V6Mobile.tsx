@@ -317,16 +317,16 @@ const S: Record<string, CSSProperties> = {
     touchAction: "pan-y",
     // Step 2 bleed (2026-05-03): gradient lives on the scroll container so
     // it paints in the scrollport (fixed to the layout viewport) — content
-    // scrolls over the wash. Top stop is a saturated warm sand (#EBC080),
-    // not pale cream, so it survives iOS Safari's status-bar blur+desaturate
-    // wash and reads visibly as a warm "sunrise" band behind the chrome —
-    // same MacRumors-style bleed pattern. Sharp transition to white at 12%
-    // keeps the warm band inside the status-bar zone; LargeTitle and content
-    // sit on white. Bottom periwinkle band starts at 78% so it surrounds the
-    // floating tab pill instead of just sitting under it.
+    // scrolls over the wash. Top stop is a rich sunrise gold (#D4A258),
+    // saturated enough to register clearly through iOS Safari status-bar
+    // translucency at the top — MacRumors-style content-behind-chrome
+    // bleed. Sharp transition to white at 12% keeps the warm band inside
+    // the status-bar zone; LargeTitle and content sit on white. Bottom
+    // periwinkle band starts at 78% so it surrounds the floating tab pill
+    // instead of just sitting under it.
     background:
       "linear-gradient(to bottom," +
-      " #EBC080 0%," +
+      " #D4A258 0%," +
       " #FFFFFF 12%," +
       " #FFFFFF 78%," +
       " #EEF1FB 100%)",
