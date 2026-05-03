@@ -53,6 +53,13 @@ interface GlassTopBarProps {
   rightSlot?: ReactNode;
   initials?: string;
   onAvatarClick?: () => void;
+  /** When true, skip the safe-area spacer in flow AND always show the small
+      title in the bar. Use when the page renders a full-bleed hero at y=0
+      (Today welcome screen) — the hero handles its own safe-area padding,
+      so the spacer would just push it away from the iOS chrome zone where
+      the bleed effect lives. Without LargeTitle in flow, the collapsed
+      flag never flips, so we override it to keep the small title visible. */
+  noSpacer?: boolean;
 }
 
 export function GlassTopBar({
@@ -62,14 +69,18 @@ export function GlassTopBar({
   rightSlot,
   initials = "JM",
   onAvatarClick,
+  noSpacer,
 }: GlassTopBarProps) {
   const { collapsed, scrolled } = useContext(TitleCollapseContext);
+  // In noSpacer mode (full-bleed hero), there's no LargeTitle to drive
+  // collapse — just show the small title always. Otherwise honor the flag.
+  const titleVisible = noSpacer || collapsed;
   return (
     <>
       {/* Spacer reserves only safe-area + a small gap. The LargeTitle starts
           right beneath it; the floating chrome (avatar + search) overlays the
           LargeTitle row on the right side, App-Store style. */}
-      <div style={T.spacer} aria-hidden="true" />
+      {!noSpacer && <div style={T.spacer} aria-hidden="true" />}
 
       {/* Glass bar — the BLUR is always on so any content scrolling under
           the bar zone is cleanly covered (no half-cut LargeTitle). The
@@ -124,8 +135,8 @@ export function GlassTopBar({
           <h1
             style={{
               ...T.title,
-              opacity: collapsed ? 1 : 0,
-              transform: collapsed ? "translateY(0)" : "translateY(4px)",
+              opacity: titleVisible ? 1 : 0,
+              transform: titleVisible ? "translateY(0)" : "translateY(4px)",
               transition:
                 "opacity 180ms cubic-bezier(0.25, 1, 0.5, 1), " +
                 "transform 180ms cubic-bezier(0.25, 1, 0.5, 1)",

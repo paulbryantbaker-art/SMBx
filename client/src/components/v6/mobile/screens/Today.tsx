@@ -9,7 +9,7 @@
    Deal seed data. */
 
 import { type CSSProperties, type ReactNode } from "react";
-import { GlassTopBar, LargeTitle } from "../TopBar";
+import { GlassTopBar } from "../TopBar";
 import { GlassSurface } from "../glass";
 import { YIcon } from "../YIcon";
 import { VerdictPill } from "../VerdictPill";
@@ -36,17 +36,25 @@ const PIPELINE = [
 export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onLearn, onAvatarClick }: TodayProps) {
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
-      <GlassTopBar title="Today" initials={initials} onAvatarClick={onAvatarClick} />
-      <LargeTitle>Today</LargeTitle>
+      {/* Hero — full-bleed at y=0 so the brown sunrise texture extends behind
+          the iOS status bar. iOS Safari status bar is translucent in tab mode
+          (confirmed via Detail-page chip-bleed evidence) — having saturated
+          textured content at viewport top is what makes the bleed visible.
+          Hero handles its own safe-area-inset-top padding internally. No
+          surrounding container padding so the hero spans full width. */}
+      {isAnon ? (
+        <WelcomeHero onChat={onChat} />
+      ) : (
+        <DailyHero onOpenDeal={() => onOpenDeal("deal-bigfake", "Big Fake Deal · sample")} />
+      )}
 
-      {/* Hero — anon = welcome, authed = today's brief teaser */}
-      <div style={{ padding: "4px 16px 0" }}>
-        {isAnon ? (
-          <WelcomeHero onChat={onChat} />
-        ) : (
-          <DailyHero onOpenDeal={() => onOpenDeal("deal-bigfake", "Big Fake Deal · sample")} />
-        )}
-      </div>
+      {/* TopBar — fixed glass overlay; noSpacer skips the safe-area spacer
+          (hero already covers that zone) and pins the small "Today" title
+          visible since there's no LargeTitle to drive collapse logic. */}
+      <GlassTopBar title="Today" initials={initials} onAvatarClick={onAvatarClick} noSpacer />
+
+      {/* No LargeTitle on Today — the hero is the visual title. The small
+          title in the bar handles tab orientation. */}
 
       {/* Explore SMBX — about/learn surface for both anon and authed */}
       <div style={{ padding: "14px 16px 0" }}>
@@ -98,7 +106,7 @@ export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onLearn, onA
 
 function WelcomeHero({ onChat }: { onChat: () => void }) {
   return (
-    <HeroFrame kind="welcome" onTap={onChat}>
+    <HeroFrame kind="welcome" onTap={onChat} fullBleed>
       <HeroVisualPursue />
 
       <div style={H.eyebrowSlot}>
@@ -135,7 +143,7 @@ function WelcomeHero({ onChat }: { onChat: () => void }) {
 
 function DailyHero({ onOpenDeal }: { onOpenDeal: () => void }) {
   return (
-    <HeroFrame kind="pursue" onTap={onOpenDeal}>
+    <HeroFrame kind="pursue" onTap={onOpenDeal} fullBleed>
       <HeroVisualPursue />
 
       <div style={H.eyebrowSlot}>
@@ -193,8 +201,8 @@ const HERO_OVERLAY: Record<HeroKind, string> = {
 };
 
 function HeroFrame({
-  kind, onTap, children,
-}: { kind: HeroKind; onTap?: () => void; children: ReactNode }) {
+  kind, onTap, fullBleed, children,
+}: { kind: HeroKind; onTap?: () => void; fullBleed?: boolean; children: ReactNode }) {
   return (
     <div
       className="mb-tap"
@@ -208,7 +216,15 @@ function HeroFrame({
         }
       }}
       style={{
-        borderRadius: 22,
+        // fullBleed: square top corners (extends to viewport top), rounded
+        // bottom — the hero IS the page top, iOS status bar overlays its
+        // upper portion. Internal paddingTop clears the safe-area zone so
+        // visible hero content sits below the chrome. boxShadow drops the
+        // top inset (no top edge to highlight).
+        borderRadius: fullBleed ? "0 0 22px 22px" : 22,
+        paddingTop: fullBleed
+          ? "calc(env(safe-area-inset-top, 44px) + 16px)"
+          : 0,
         backgroundImage: `${HERO_OVERLAY[kind]}, url('${HERO_TEXTURE[kind]}')`,
         backgroundSize: "cover, cover",
         backgroundPosition: "center, center",
@@ -216,12 +232,12 @@ function HeroFrame({
         backgroundBlendMode: "multiply, normal",
         color: "#fff",
         overflow: "hidden",
-        boxShadow:
-          "0 12px 28px -10px rgba(0,0,0,0.28)," +
-          // Inner top highlight — sells "lit from above"
-          " inset 0 1px 0 rgba(255,255,255,0.22)," +
-          // Inner bottom shadow — adds depth at the cell boundary
-          " inset 0 -1px 0 rgba(0,0,0,0.18)",
+        boxShadow: fullBleed
+          ? "0 12px 28px -10px rgba(0,0,0,0.28)," +
+            " inset 0 -1px 0 rgba(0,0,0,0.18)"
+          : "0 12px 28px -10px rgba(0,0,0,0.28)," +
+            " inset 0 1px 0 rgba(255,255,255,0.22)," +
+            " inset 0 -1px 0 rgba(0,0,0,0.18)",
         position: "relative",
         cursor: onTap ? "pointer" : "default",
       }}
