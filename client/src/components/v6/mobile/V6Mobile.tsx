@@ -320,16 +320,27 @@ function writeMobileHashState(view: MobileView) {
   } catch { /* noop */ }
 }
 
-// Shared gradient for both modes. In rootPwa it paints in the scrollport
-// (fixed to viewport) since .mobile-root is the scroll container. In
-// rootSafari it paints in the natural-flow box (scrolls with content) so
-// at scroll-top the warm gold reads through iOS chrome and at scroll-end
-// the periwinkle reads through. iOS Safari's native chrome bleed only
-// triggers on document scroll (rootSafari path).
+// Shared gradient for both modes. Uses absolute-pixel stops anchored to
+// env(safe-area-inset-top) for the warm zone so it stays bounded to the
+// iOS chrome region, NOT 12% of element height (which on a tall scrolling
+// page = 300px and reads as a "yellow band" on the page below the chrome).
+//
+// Layout:
+//   y=0           → #D4A258 (warm gold, behind iOS status bar)
+//   y=safe-area   → #D4A258 (still warm at chrome boundary — no harsh edge)
+//   y=safe+24px   → #FFFFFF (transitioned to white just past chrome)
+//   y=72% body    → #FFFFFF (white through middle)
+//   y=100% body   → #A8B3E5 (periwinkle, behind bottom Safari URL bar
+//                            in rootSafari mode for true content bleed)
+//
+// In rootPwa it paints in the scrollport (fixed to viewport). In
+// rootSafari it paints in the natural-flow box (scrolls with content)
+// so at scroll-end the periwinkle reads through the bottom URL bar.
 const ROOT_GRADIENT =
   "linear-gradient(to bottom," +
-  " #D4A258 0%," +
-  " #FFFFFF 12%," +
+  " #D4A258 0," +
+  " #D4A258 env(safe-area-inset-top, 44px)," +
+  " #FFFFFF calc(env(safe-area-inset-top, 44px) + 24px)," +
   " #FFFFFF 72%," +
   " #A8B3E5 100%)";
 
