@@ -317,14 +317,14 @@ function writeMobileHashState(view: MobileView) {
 // Layout the gradient produces:
 //   y=0                → #D4A258 warm gold (matches chrome tint)
 //   y=safe-area+30px   → #D4A258 (still solid past chrome — clean tint)
-//   y=safe-area+200px  → #FFFFFF (soft 170px fade in visible page area)
+//   y=safe-area+280px  → #FFFFFF (soft 250px fade in visible page area)
 //   y=72% body         → #FFFFFF (white through middle)
 //   y=100% body        → #A8B3E5 (periwinkle URL bar bleed)
 const ROOT_GRADIENT =
   "linear-gradient(to bottom," +
   " #D4A258 0," +
   " #D4A258 calc(env(safe-area-inset-top, 44px) + 30px)," +
-  " #FFFFFF calc(env(safe-area-inset-top, 44px) + 200px)," +
+  " #FFFFFF calc(env(safe-area-inset-top, 44px) + 280px)," +
   " #FFFFFF 72%," +
   " #A8B3E5 100%)";
 
