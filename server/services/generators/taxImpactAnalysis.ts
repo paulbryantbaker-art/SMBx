@@ -10,6 +10,7 @@
  * - State tax considerations
  */
 import Anthropic from '@anthropic-ai/sdk';
+import { TAX_ENGINE_FOUNDATION, TAX_ENGINE_BY_LEAGUE } from '../../prompts/taxEngine.js';
 
 let client: Anthropic | null = null;
 function getClient(): Anthropic {
@@ -40,10 +41,17 @@ export async function generateTaxImpactAnalysis(input: TaxImpactInput): Promise<
   const isSeller = input.journey_type === 'sell';
   const purchasePrice = (input.purchase_price || 0) / 100;
 
+  const leagueWorkflow = TAX_ENGINE_BY_LEAGUE[input.league] || '';
+  const systemPrompt = [
+    `You are Yulia, generating a preliminary Tax Impact Analysis (NOT a CPA — always defer execution to the user's CPA / tax attorney). All figures are estimates for planning purposes only. Output clean markdown.`,
+    TAX_ENGINE_FOUNDATION,
+    leagueWorkflow,
+  ].filter(Boolean).join('\n\n');
+
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 4000,
-    system: `You are an M&A tax advisor (NOT a CPA — always recommend consulting their CPA/tax advisor). Generate a preliminary tax impact analysis. Use current 2024-2025 federal tax rates. Output clean markdown. Include disclaimers about consulting a tax professional. All figures are estimates for planning purposes only.`,
+    system: systemPrompt,
     messages: [{
       role: 'user',
       content: `Generate a Tax Impact Analysis for this deal:
@@ -102,8 +110,10 @@ ${input.seller_note_percent ? `### Installment Sale Analysis (Section 453)
 - Interest income tax treatment
 - Risks and considerations` : ''}
 
-### QSBS Eligibility (Section 1202)
-${input.entity_type === 'c_corp' ? 'C-Corp detected — analyze potential QSBS exclusion' : 'QSBS requires C-Corp status. Current entity type may not qualify.'}
+### QSBS Eligibility (Section 1202 — POST-OBBBA tiered exclusion)
+${input.entity_type === 'c_corp'
+  ? `C-Corp detected — analyze QSBS exclusion under post-OBBBA tiered rules. CRITICAL: ask for the issuance date. Stock issued AFTER July 4, 2025 follows tiered exclusion (50% at 3 yrs / 75% at 4 yrs / 100% at 5 yrs, $15M cap, $75M asset threshold). Stock issued ON OR BEFORE July 4, 2025 follows legacy rules (100% at 5 yrs only, $10M cap, $50M asset threshold). Also flag state QSBS conformity — California, NJ, PA, MA, WI, MN, MS DECOUPLE and tax the federally excluded gain.`
+  : 'QSBS requires domestic C-Corp original issuance. Current entity type may not qualify; consider §351 incorporation pre-issuance if pre-formation, but engage tax counsel — original-issuance requirements are unforgiving.'}
 
 ### Key Tax Planning Opportunities
 3-5 specific strategies for this deal (e.g., opportunity zone reinvestment, charitable remainder trust, installment sale structuring).

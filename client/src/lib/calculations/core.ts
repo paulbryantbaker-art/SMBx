@@ -476,15 +476,128 @@ export function calculateCovenantCompliance(
 }
 
 // ─── Tax Impact ─────────────────────────────────────────────────────
+// Methodology V18 §9 (per amendment 18a, effective May 2, 2026).
+// Operates on IRC as amended through OBBBA (P.L. 119-21, July 4, 2025).
+// International provisions effective for tax years beginning after 12/31/2025.
 
 export const FEDERAL_RATES = {
   longTermCapGains: 0.20,
-  niit: 0.038,       // Net Investment Income Tax
-  effectiveCapGains: 0.238, // 20% + 3.8%
+  niit: 0.038,                  // Net Investment Income Tax
+  effectiveCapGains: 0.238,     // 20% + 3.8%
   ordinaryMax: 0.37,
   corporate: 0.21,
-  deprecRecapture: 0.25, // §1245 max
-  section197: 15,     // years for goodwill amortization
+  deprecRecapture: 0.25,        // §1250 unrecaptured gain max (§1245 recapture is ordinary)
+  section1245Recapture: 0.37,   // §1245 recapture taxed at ordinary max
+  section1250Unrecaptured: 0.25,
+  section197: 15,               // years for goodwill / intangible amortization
+  qbiDeduction: 0.20,           // §199A — permanent post-OBBBA
+} as const;
+
+// §1202 QSBS — POST-OBBBA TIERED EXCLUSION
+// For stock issued AFTER July 4, 2025: 50% exclusion at 3 yrs, 75% at 4 yrs, 100% at 5 yrs.
+// Stock issued ON OR BEFORE July 4, 2025: legacy rule — 100% exclusion at 5 yrs only.
+// Always confirm issuance date when QSBS is in play.
+export const QSBS_OBBBA_BREAKPOINT = '2025-07-04';
+export const QSBS_TIERED_EXCLUSION = {
+  postObbba: {
+    threeYear: 0.50,
+    fourYear: 0.75,
+    fiveYear: 1.00,
+    perIssuerCapCents: 1_500_000_000,        // $15M (10× basis cap unchanged)
+    aggregateAssetThresholdCents: 7_500_000_000, // $75M
+    inflationIndexedFrom: 2027,
+  },
+  preObbba: {
+    fiveYear: 1.00,
+    perIssuerCapCents: 1_000_000_000,        // $10M
+    aggregateAssetThresholdCents: 5_000_000_000, // $50M
+  },
+} as const;
+
+// States that DECOUPLE from §1202 QSBS — tax the federally excluded gain.
+// Always confirm seller's state of residence; California is the headline trap.
+export const STATE_QSBS_DECOUPLED = ['CA', 'NJ', 'PA', 'MA', 'WI', 'MN', 'MS'] as const;
+
+// §168(k) bonus depreciation — PERMANENT 100% post-OBBBA.
+// Property acquired AND placed in service after January 19, 2025.
+// Pre-1/20/2025 binding contracts stay under TCJA phase-down (40%/20%/0%).
+export const SECTION_168K = {
+  permanentRateAfter: '2025-01-20',
+  permanentRate: 1.00,
+  phaseDownLegacyRates: { '2025': 0.40, '2026': 0.20, '2027': 0.00 },
+} as const;
+
+// §168(n) Qualified Production Property — NEW post-OBBBA.
+// 100% expensing of certain non-residential real property used in U.S.
+// manufacturing/production. Construction begins after 1/19/2025 and before
+// 1/1/2029; placed in service before 1/1/2031.
+export const SECTION_168N = {
+  enabled: true,
+  constructionWindow: { start: '2025-01-20', end: '2028-12-31' },
+  placedInServiceDeadline: '2030-12-31',
+  rate: 1.00,
+} as const;
+
+// §163(j) interest deduction limitation — POST-OBBBA.
+// EBITDA-based ATI permanent for tax years beginning after 12/31/2024.
+// Beginning TY 2026: ATI excludes Subpart F, NCTI, §78 gross-up, §245A.
+// Small-biz exception: avg gross receipts ≤ $31M (2025) over prior 3 yrs.
+export const SECTION_163J = {
+  basis: 'EBITDA',
+  basisEffective: '2025-01-01',
+  atiExclusionsEffective: '2026-01-01',
+  smallBusinessThresholdCents2025: 3_100_000_000, // $31M
+  atiPercent: 0.30,
+} as const;
+
+// §174A domestic R&E expensing — RESTORED post-OBBBA.
+// Domestic R&E deductible in year incurred for TY after 12/31/2024.
+// Foreign R&E remains 15-year capitalization.
+export const SECTION_174A = {
+  domesticExpensingRestored: true,
+  effectiveAfter: '2024-12-31',
+  foreignCapitalizationYears: 15,
+} as const;
+
+// SALT cap — POST-OBBBA.
+// $40K for TY 2025-2029, phase-down beginning $500K AGI.
+// Reverts to $10K permanent in 2030 unless extended.
+// PTE-election workaround PRESERVED (SSTB carve-out was dropped).
+export const SALT_CAP = {
+  cents2025_2029: 4_000_000,                // $40K
+  cents2030Plus: 1_000_000,                 // $10K (revert)
+  phaseDownAgiThresholdCents: 50_000_000,   // $500K AGI
+  pteWorkaroundPreserved: true,
+} as const;
+
+// International — POST-OBBBA, effective tax years beginning after 12/31/2025.
+// GILTI → NCTI, FDII → FDDEI.
+export const INTERNATIONAL_RATES = {
+  effectiveAfter: '2025-12-31',
+  ncti: {
+    section250Deduction: 0.40,              // was 50% under TCJA
+    effectiveRate: 0.126,                   // ~12.6%
+    qbaiNdtirEliminated: true,              // no more 10% return shield
+    ftcHaircut: 0.10,                       // was 20% under TCJA
+  },
+  fddei: {
+    section250Deduction: 0.3334,            // was 37.5% under TCJA
+    effectiveRate: 0.14,                    // ~14%
+    qbaiEliminated: true,
+  },
+  beat: {
+    rate: 0.125,
+    grossReceiptsThresholdCents: 50_000_000_000, // $500M
+    baseErosionPctMin: 0.03,
+  },
+} as const;
+
+// §453A interest charge threshold.
+// Applies if installment obligation > $150K AND outstanding installment
+// obligations at year-end > $5M. Annual interest charge on deferred tax.
+export const SECTION_453A = {
+  obligationThresholdCents: 15_000_000,     // $150K
+  outstandingThresholdCents: 500_000_000,   // $5M
 } as const;
 
 export interface TaxAssetClass {

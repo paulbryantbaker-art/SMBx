@@ -1,5 +1,5 @@
 CLAUDE.md — smbx.ai
-Last updated: 2026-04-01
+Last updated: 2026-05-03
 
 ## What This Is
 AI-powered deal intelligence platform for business acquisitions from $300K to mega-cap. Users talk to Yulia (AI deal intelligence) who guides them through buying, selling, or raising capital for businesses. Chat-first experience — users talk to Yulia, not dashboards. Yulia IS the front door — there is no sales team, no contact forms, no dead-end CTAs. Every action routes to chat.
@@ -74,7 +74,9 @@ Valuation Explorer, LBO, SBA Financing, Tax Impact, Cap Table, Sensitivity Matri
 - SSE canvas_action handler forwards tool results to zustand store
 
 ## Reference Documents
-- METHODOLOGY_V17.md (v17.1) — Master methodology: all formulas, gate logic, analysis types
+- **METHODOLOGY V18 (virtual master)** = METHODOLOGY_V17.md (§1-§8, §10-§15) + METHODOLOGY_V18a_TAX_AMENDMENT.md (replaces §9.0 entirely). 18b legal amendment pending.
+  - METHODOLOGY_V17.md (v17.1) — formulas, gate logic, analysis types
+  - METHODOLOGY_V18a_TAX_AMENDMENT.md (effective May 2, 2026) — post-OBBBA tax engine. Operates on IRC as amended through P.L. 119-21 (July 4, 2025); international provisions effective for tax years beginning after 12/31/2025. Distilled into runtime via `server/prompts/taxEngine.ts`.
 - SMBX_PLATFORM_REFERENCE.md — Platform identity, pricing, design system, sourcing, canvas architecture
 - STYLE_GUIDE.md — Complete UI & brand style guide for marketing materials
 - TESTING.md — Testing tracker with issue template system
@@ -91,6 +93,7 @@ Valuation Explorer, LBO, SBA Financing, Tax Impact, Cap Table, Sensitivity Matri
 | client/src/components/chat/PortfolioCanvas.tsx | Sourcing portfolio management UI |
 | server/index.ts | Express entry + auto-migrations |
 | server/services/aiService.ts | AI orchestration + agentic loop |
+| server/prompts/taxEngine.ts | V18 §9 tax foundation + per-league workflow (18a distillation) |
 | server/services/sourcingPipelineService.ts | 5-stage sourcing engine |
 | server/services/tools.ts | 16 agentic tools |
 | server/services/premiumPdfRenderer.ts | Puppeteer HTML→PDF with Chart.js |

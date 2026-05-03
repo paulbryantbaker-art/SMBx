@@ -3,6 +3,7 @@ import { MASTER_PROMPT } from '../prompts/masterPrompt.js';
 import { PERSONAS } from '../prompts/personas.js';
 import { JOURNEY_DETECTION_PROMPT } from '../prompts/journeyDetection.js';
 import { GATE_PROMPTS } from '../prompts/gatePrompts.js';
+import { TAX_ENGINE_FOUNDATION, TAX_ENGINE_BY_LEAGUE } from '../prompts/taxEngine.js';
 import { BRANCHING_LOGIC } from '../prompts/branchingLogic.js';
 import { getUserPlan, hasActiveSubscription, PLANS } from './subscriptionService.js';
 import { getKnowledgeForContext, formatKnowledgeForPrompt } from './knowledgeService.js';
@@ -313,6 +314,14 @@ export async function buildDynamicAnonymousPrompt(
     layers.push(`\n## GATE CONTEXT\n${GATE_PROMPTS[convState.current_gate]}`);
   }
 
+  // Layer: Tax Implications Engine — V18 §9 (per amendment 18a, May 2 2026)
+  // Foundation always loads once we have any conversation state; league checklist
+  // rides along when league is known.
+  layers.push(TAX_ENGINE_FOUNDATION);
+  if (convState.league && TAX_ENGINE_BY_LEAGUE[convState.league]) {
+    layers.push(TAX_ENGINE_BY_LEAGUE[convState.league]);
+  }
+
   // Layer: Buyer demand signals — for sell-journey conversations
   if (opts.demandSignalText) {
     layers.push(`\n## ${opts.demandSignalText}\nMention buyer demand naturally when relevant — e.g., "There are active buyers looking for businesses like yours in this market." Do NOT make it sound like a sales pitch. Weave it into your analysis as market context.`);
@@ -462,6 +471,16 @@ export async function buildSystemPrompt(
     // Layer 3c: Gate-specific prompt
     if (GATE_PROMPTS[deal.current_gate]) {
       layers.push(GATE_PROMPTS[deal.current_gate]);
+    }
+
+    // Layer 3c+: Tax Implications Engine — V18 §9 (per amendment 18a, May 2 2026)
+    // Foundation always loads in deal context; league workflow checklist rides
+    // along when league is known. Slotted before subscription/support/knowledge
+    // so tax posture frames downstream behavior.
+    layers.push(TAX_ENGINE_FOUNDATION);
+    const dealLeague = deal.league || user.league;
+    if (dealLeague && TAX_ENGINE_BY_LEAGUE[dealLeague]) {
+      layers.push(TAX_ENGINE_BY_LEAGUE[dealLeague]);
     }
 
     // Layer 3d: Subscription context
