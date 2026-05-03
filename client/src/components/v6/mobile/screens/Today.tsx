@@ -48,25 +48,6 @@ export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onLearn, onA
         )}
       </div>
 
-      {/* iOS 26 dynamic chrome tint: 1px sticky periwinkle marker. When the
-          user scrolls past the hero, this marker becomes the topmost
-          fixed/sticky element near the viewport edge — Safari re-samples
-          on scroll (per nasedk.in iOS 26 article: "Colors shift as you
-          scroll") and the status-bar tint shifts from warm gold (TopBar
-          spacer + body bg) to periwinkle (this marker) matching the
-          ExploreCard directly below. When scroll continues past Explore,
-          marker un-sticks and chrome falls back to body bg warm gold. */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: "sticky",
-          top: 0,
-          height: 1,
-          background: "#5F73C8",
-          zIndex: 1,
-        }}
-      />
-
       {/* Explore SMBX — about/learn surface for both anon and authed */}
       <div style={{ padding: "14px 16px 0" }}>
         <ExploreCard
