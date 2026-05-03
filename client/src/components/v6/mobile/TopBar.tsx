@@ -233,16 +233,15 @@ export function LargeTitle({ children }: LargeTitleProps) {
 
 const T: Record<string, CSSProperties> = {
   spacer: {
-    // Safe-area inset for the iOS chrome zone. Background color paints
-    // ONLY in this zone (the area iOS overlays with status bar) — page
-    // content below starts fresh on white. iOS Safari samples this for
-    // toolbar tinting via translucent chrome (and body bg sampling as
-    // fallback), so the status bar tints warm gold matching the welcome
-    // hero's sunrise palette without bleeding the warm color into the
-    // page itself. App Store pattern: chrome zone is a defined colored
-    // region, page below starts on clean bg.
+    // Just safe-area inset reservation — NO background color. A bg here
+    // forces iOS chrome translucency to show this color instead of the
+    // actual page content, which means scrolling never produces a real
+    // content-bleed-through-chrome effect (you observed Detail page
+    // bleeds on scroll because it has no spacer with bg; Today did NOT
+    // bleed because the spacer was forcing warm gold). Body bg #D4A258
+    // (set in index.html inline script) still provides the subtle warm
+    // chrome tint via Safari's body-bg sampling fallback.
     height: "env(safe-area-inset-top, 44px)",
-    background: "#D4A258",
   },
   barWrap: {
     position: "fixed",
