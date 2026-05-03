@@ -34,29 +34,48 @@ const PIPELINE = [
 ];
 
 export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onLearn, onAvatarClick }: TodayProps) {
+  // iOS 26 dynamic chrome tinting: Safari samples the bg-color of the
+  // topmost fixed-or-sticky element near the viewport edge to tint the
+  // toolbar. As the user scrolls, different sticky color markers come
+  // to the viewport top and Safari updates the toolbar accordingly —
+  // pure CSS, no JS (per nasedk.in iOS 26 article: "JS background
+  // changes don't update the toolbar"). Each colored card gets a 1px
+  // sticky marker matching its surface tone — toolbar follows scroll.
+  // Body bg = white is the fallback for sections without a marker.
+  const heroTint = isAnon
+    ? "#A87A40"  // warm brown — sunrise/welcome texture
+    : "#4D8E6E"; // green — pursue verdict
+  const exploreTint = "#5F73C8"; // periwinkle — explore-card gradient mid
+
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
       <GlassTopBar title="Today" initials={initials} onAvatarClick={onAvatarClick} />
       <LargeTitle>Today</LargeTitle>
 
-      {/* Hero — anon = welcome, authed = today's brief teaser */}
-      <div style={{ padding: "4px 16px 0" }}>
-        {isAnon ? (
-          <WelcomeHero onChat={onChat} />
-        ) : (
-          <DailyHero onOpenDeal={() => onOpenDeal("deal-bigfake", "Big Fake Deal · sample")} />
-        )}
-      </div>
+      {/* Hero zone — sticky color marker drives chrome tint while hero is at top */}
+      <section style={{ position: "relative" }}>
+        <ChromeTintMarker color={heroTint} />
+        <div style={{ padding: "4px 16px 0" }}>
+          {isAnon ? (
+            <WelcomeHero onChat={onChat} />
+          ) : (
+            <DailyHero onOpenDeal={() => onOpenDeal("deal-bigfake", "Big Fake Deal · sample")} />
+          )}
+        </div>
+      </section>
 
-      {/* Explore SMBX — about/learn surface for both anon and authed */}
-      <div style={{ padding: "14px 16px 0" }}>
-        <ExploreCard
-          isAnon={isAnon}
-          onChat={onChat}
-          onOpenDeal={() => onOpenDeal("deal-bigfake", "Big Fake Deal · sample")}
-          onLearn={onLearn}
-        />
-      </div>
+      {/* Explore zone — periwinkle marker takes over once user scrolls past hero */}
+      <section style={{ position: "relative" }}>
+        <ChromeTintMarker color={exploreTint} />
+        <div style={{ padding: "14px 16px 0" }}>
+          <ExploreCard
+            isAnon={isAnon}
+            onChat={onChat}
+            onOpenDeal={() => onOpenDeal("deal-bigfake", "Big Fake Deal · sample")}
+            onLearn={onLearn}
+          />
+        </div>
+      </section>
 
       {/* Pipeline section — 5 sample deals */}
       <div style={{ marginTop: 24, padding: "0 16px" }}>
@@ -91,6 +110,36 @@ export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onLearn, onA
         </div>
       </div>
     </div>
+  );
+}
+
+/* ─── Chrome tint marker ─────────────────────────────────────
+   1px sticky element at top of a card section. iOS 26 Safari samples
+   fixed/sticky elements' bg-color near the viewport edge to tint the
+   toolbar. Pure-CSS dynamic chrome bleed: as the user scrolls, the
+   topmost stuck marker changes and Safari updates the toolbar tint.
+   Visually invisible (1px tall, full width) — its only job is to feed
+   the iOS sampler. Source the same color as the card it precedes so
+   the toolbar reads as continuous with the card directly below. */
+
+function ChromeTintMarker({ color }: { color: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        position: "sticky",
+        top: 0,
+        height: 1,
+        background: color,
+        zIndex: 1,
+        // Pull width to viewport edges in case the section has padding.
+        // The 1px stripe is at the top of the section's containing block,
+        // which doesn't have horizontal padding here, so this is just
+        // defensive.
+        marginLeft: 0,
+        marginRight: 0,
+      }}
+    />
   );
 }
 
