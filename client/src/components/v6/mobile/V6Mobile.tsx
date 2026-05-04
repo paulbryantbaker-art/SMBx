@@ -234,6 +234,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
           onLearn={onLearn}
           onAvatarClick={onAvatarClick}
           userPipeline={userDeals.hasData ? userDeals.today : null}
+          userPicks={userDeals.hasData ? userDeals.picks : null}
         />
       )}
       {view.kind === "tab" && activeTab === "pipeline" && (

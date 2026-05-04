@@ -13,10 +13,11 @@ import { GlassTopBar, LargeTitle } from "../TopBar";
 import { GlassSurface } from "../glass";
 import { YIcon } from "../YIcon";
 import { VerdictPill } from "../VerdictPill";
+import { PickRow } from "../PickRow";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
 import { MobileIcon } from "../icons";
 import type { Verdict, YIconKind } from "../types";
-import type { MobilePipelineRow } from "../../../../hooks/useMobileDeals";
+import type { MobilePipelineRow, MobilePick } from "../../../../hooks/useMobileDeals";
 
 interface TodayProps {
   isAnon: boolean;
@@ -28,7 +29,25 @@ interface TodayProps {
   /** Authed user's deals (from useMobileDeals). Null = anon or empty,
       in which case the hardcoded SAMPLE_PIPELINE renders instead. */
   userPipeline: MobilePipelineRow[] | null;
+  /** Authed user's top 3 picks (from useMobileDeals). Null = anon or empty
+      → SAMPLE_PICKS renders instead. Same shape as Brief screen's picks. */
+  userPicks: MobilePick[] | null;
 }
+
+interface TodayPick {
+  rank: number;
+  id: string;
+  name: string;
+  sub: string;
+  fit: number;
+  kind: Verdict;
+}
+
+const SAMPLE_PICKS: TodayPick[] = [
+  { rank: 1, id: "deal-bigfake",    name: "Big Fake Deal · sample",       sub: "Recurring rev · honest capex story",         fit: 92, kind: "pursue" },
+  { rank: 2, id: "deal-pest",       name: "Pest Control · FL",            sub: "92% on monthly contracts · add-back rich",   fit: 84, kind: "pursue" },
+  { rank: 3, id: "deal-electrical", name: "Electrical Contractor · TX",   sub: "Margins good but 60% one customer",          fit: 78, kind: "watch"  },
+];
 
 interface TodayPipelineRow {
   id: string;
@@ -48,8 +67,9 @@ const SAMPLE_PIPELINE: TodayPipelineRow[] = [
   { id: "deal-dist",       icon: "default", name: "Distribution · OH",          sub: "Asking high · margins thin",           action: "get",  price: "Pass" },
 ];
 
-export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onLearn, onAvatarClick, userPipeline }: TodayProps) {
+export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onLearn, onAvatarClick, userPipeline, userPicks }: TodayProps) {
   const PIPELINE: TodayPipelineRow[] = userPipeline ?? SAMPLE_PIPELINE;
+  const PICKS: TodayPick[] = userPicks ?? SAMPLE_PICKS;
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
       <GlassTopBar title="Today" initials={initials} onAvatarClick={onAvatarClick} />
@@ -98,12 +118,31 @@ export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onLearn, onA
         </div>
       </div>
 
-      {/* Brief teaser */}
-      <div style={{ padding: "16px 22px 4px" }}>
-        <div className="mb-section-eyebrow">{isAnon ? "VIEW SAMPLE · YULIA'S BRIEF" : "YULIA'S BRIEF"}</div>
-        <div className="mb-section-title">3 picks worth your 10 minutes</div>
-        <div style={S.subText}>
-          See how Yulia screens 142 sources down to what matters &mdash; every morning.
+      {/* Brief teaser — uses the same mb-as-card + PickRow pattern as the
+          Brief screen's main ranked list, so the two surfaces stay locked
+          to one design language. Shows the 3 highest-fit picks (from
+          useMobileDeals) or SAMPLE_PICKS for anon visitors. */}
+      <div style={{ marginTop: 24, padding: "0 16px" }}>
+        <div className="mb-as-card" style={{ padding: "20px 0 6px" }}>
+          <div style={{ padding: "0 22px 4px" }}>
+            <div className="mb-section-eyebrow">{isAnon ? "VIEW SAMPLE · YULIA'S BRIEF" : "YULIA'S BRIEF"}</div>
+            <div className="mb-section-title">Review 3 picks in 5 minutes</div>
+            <div style={S.subText}>
+              See how Yulia screens 142 sources down to what matters &mdash; every morning.
+            </div>
+          </div>
+          {PICKS.map((p, i) => (
+            <PickRow
+              key={p.id}
+              rank={p.rank}
+              name={p.name}
+              sub={p.sub}
+              fit={p.fit}
+              kind={p.kind}
+              last={i === PICKS.length - 1}
+              onTap={() => onOpenDeal(p.id, p.name)}
+            />
+          ))}
         </div>
       </div>
     </div>

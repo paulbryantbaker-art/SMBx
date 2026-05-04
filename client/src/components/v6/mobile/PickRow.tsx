@@ -1,0 +1,84 @@
+/* V6 Mobile — Shared "Yulia's pick" row.
+   Single source of truth for the ranked-pick visual (rank number + YIcon
+   + name/sub stack + fit score). Used by both the Brief screen's main
+   ranked list and the Today screen's "Review 3 picks" teaser, so the two
+   surfaces stay locked to the same design language. */
+
+import { type CSSProperties } from "react";
+import { YIcon } from "./YIcon";
+import type { Verdict, YIconKind } from "./types";
+
+export interface PickRowProps {
+  rank: number;
+  name: string;
+  sub: string;
+  fit: number;
+  kind: Verdict;
+  last?: boolean;
+  onTap: () => void;
+}
+
+export function PickRow({ rank, name, sub, fit, kind, last, onTap }: PickRowProps) {
+  const fitColor =
+    kind === "pursue" ? "var(--mb-accent)" :
+    kind === "pass"   ? "var(--mb-danger)" :
+                        "var(--mb-warn)";
+  const iconKind: YIconKind = kind === "pursue" ? "cool" : "default";
+  return (
+    <div
+      className="mb-tap"
+      role="button"
+      tabIndex={0}
+      onClick={onTap}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onTap();
+        }
+      }}
+      style={{
+        display: "flex", alignItems: "center", gap: 12,
+        padding: "12px 22px",
+        borderBottom: last ? "none" : "0.5px solid var(--mb-line-2)",
+        marginLeft: 22, paddingLeft: 0,
+        cursor: "pointer",
+      }}
+    >
+      <div style={S.rank}>{rank}</div>
+      <YIcon size={48} kind={iconKind} radius={11} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={S.pickName}>{name}</div>
+        <div style={S.pickSub}>{sub}</div>
+      </div>
+      <div style={S.fitWrap}>
+        <div className="mb-mono" style={{ fontSize: 18, fontWeight: 700, color: fitColor, letterSpacing: "-0.5px" }}>{fit}</div>
+        <div style={S.fitLabel}>FIT</div>
+      </div>
+    </div>
+  );
+}
+
+const S: Record<string, CSSProperties> = {
+  rank: {
+    fontFamily: "var(--mb-font-display)", fontWeight: 700, fontSize: 22,
+    color: "var(--mb-ink-4)", width: 22,
+    flexShrink: 0,
+  },
+  pickName: {
+    fontSize: 15, fontWeight: 600, color: "var(--mb-ink)",
+    letterSpacing: "-0.2px",
+    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+  },
+  pickSub: {
+    fontSize: 13, color: "var(--mb-ink-3)", marginTop: 1,
+    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+  },
+  fitWrap: {
+    display: "flex", alignItems: "center", gap: 4,
+    paddingRight: 22, flexShrink: 0,
+  },
+  fitLabel: {
+    fontSize: 9, color: "var(--mb-ink-4)",
+    letterSpacing: 0.1, fontWeight: 600,
+  },
+};

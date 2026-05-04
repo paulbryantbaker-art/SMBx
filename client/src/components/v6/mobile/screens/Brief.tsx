@@ -4,8 +4,8 @@
 
 import { type CSSProperties } from "react";
 import { GlassTopBar, LargeTitle } from "../TopBar";
-import { YIcon } from "../YIcon";
-import type { Verdict, YIconKind } from "../types";
+import { PickRow } from "../PickRow";
+import type { Verdict } from "../types";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
 import type { MobilePick } from "../../../../hooks/useMobileDeals";
 
@@ -89,7 +89,7 @@ export function BriefScreen({ isAnon, initials, onOpenDeal, onAvatarClick, userP
             <div className="mb-section-title">Today&rsquo;s three picks</div>
           </div>
           {PICKS.map((p, i) => (
-            <BriefPick
+            <PickRow
               key={p.id}
               rank={p.rank}
               name={p.name}
@@ -101,48 +101,6 @@ export function BriefScreen({ isAnon, initials, onOpenDeal, onAvatarClick, userP
             />
           ))}
         </div>
-      </div>
-    </div>
-  );
-}
-
-function BriefPick({
-  rank, name, sub, fit, kind, last, onTap,
-}: { rank: number; name: string; sub: string; fit: number; kind: Verdict; last?: boolean; onTap: () => void }) {
-  const fitColor =
-    kind === "pursue" ? "var(--mb-accent)" :
-    kind === "pass"   ? "var(--mb-danger)" :
-                        "var(--mb-warn)";
-  const iconKind: YIconKind = kind === "pursue" ? "cool" : "default";
-  return (
-    <div
-      className="mb-tap"
-      role="button"
-      tabIndex={0}
-      onClick={onTap}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onTap();
-        }
-      }}
-      style={{
-        display: "flex", alignItems: "center", gap: 12,
-        padding: "12px 22px",
-        borderBottom: last ? "none" : "0.5px solid var(--mb-line-2)",
-        marginLeft: 22, paddingLeft: 0,
-        cursor: "pointer",
-      }}
-    >
-      <div style={Br.rank}>{rank}</div>
-      <YIcon size={48} kind={iconKind} radius={11} />
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={Br.pickName}>{name}</div>
-        <div style={Br.pickSub}>{sub}</div>
-      </div>
-      <div style={Br.fitWrap}>
-        <div className="mb-mono" style={{ fontSize: 18, fontWeight: 700, color: fitColor, letterSpacing: "-0.5px" }}>{fit}</div>
-        <div style={Br.fitLabel}>FIT</div>
       </div>
     </div>
   );
@@ -175,27 +133,5 @@ const Br: Record<string, CSSProperties> = {
     fontSize: 14, color: "#fff",
     margin: 0, lineHeight: 1.4,
     textWrap: "pretty",
-  },
-  rank: {
-    fontFamily: "var(--mb-font-display)", fontWeight: 700, fontSize: 22,
-    color: "var(--mb-ink-4)", width: 22,
-    flexShrink: 0,
-  },
-  pickName: {
-    fontSize: 15, fontWeight: 600, color: "var(--mb-ink)",
-    letterSpacing: "-0.2px",
-    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-  },
-  pickSub: {
-    fontSize: 13, color: "var(--mb-ink-3)", marginTop: 1,
-    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-  },
-  fitWrap: {
-    display: "flex", alignItems: "center", gap: 4,
-    paddingRight: 22, flexShrink: 0,
-  },
-  fitLabel: {
-    fontSize: 9, color: "var(--mb-ink-4)",
-    letterSpacing: 0.1, fontWeight: 600,
   },
 };
