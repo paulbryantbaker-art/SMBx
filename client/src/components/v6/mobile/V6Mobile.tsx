@@ -193,9 +193,14 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
     }
   };
 
+  const rootStyle: CSSProperties = {
+    ...(isStandalone ? S.rootPwa : S.rootSafari),
+    background: rootGradient(isAnon),
+  };
+
   return (
     <TitleCollapseProvider>
-    <div className="mobile-root" style={isStandalone ? S.rootPwa : S.rootSafari}>
+    <div className="mobile-root" style={rootStyle}>
       {view.kind === "tab" && activeTab === "today" && (
         <TodayScreen
           isAnon={isAnon}
@@ -305,42 +310,49 @@ function writeMobileHashState(view: MobileView) {
   } catch { /* noop */ }
 }
 
-// .mobile-root gradient: warm sunrise wash that fades naturally down
-// the page (visible fade in the page area, NOT under the chrome) +
-// periwinkle bleed at the bottom for Safari URL bar.
+// .mobile-root gradient: top wash that fades naturally down the page
+// (visible fade in the page area, NOT under the chrome) + periwinkle
+// bleed at the bottom for Safari URL bar.
 //
-// Critical: keep warm SOLID through the entire chrome zone plus a
-// small buffer below it. If the warm-to-white transition happens under
-// the iOS chrome, the chrome's translucent blur shows a blurred-
-// gradient mess. By extending solid warm past the chrome boundary and
-// only fading below, the chrome shows uniform color (clean, not
-// blurry) and the user sees a real, deliberate sunrise fade in the
-// visible page area — exactly the "natural fade down the page" feel.
+// Top color varies by auth state:
+//   • Anon  → #D4A258 (warm gold sunrise) — matches body bg in
+//             index.html, which iOS samples for the chrome tint.
+//   • Authed → #95C2A8 (sage green) — mirrors the pursue-verdict
+//             palette so the page feels "in the work" instead of
+//             "discovering". Body bg stays gold (locked post-paint
+//             per the chrome-bleed hazard) but the chromeSentinel
+//             in TopBar live-blurs .mobile-root through the status
+//             bar zone, so the chrome reads green-ish in this state.
 //
-// As the user scrolls, .mobile-root (in natural flow in Safari tab
-// mode) scrolls with body — the warm zone scrolls up and out of view,
-// leaving white at top of viewport. Chrome stays warm-tinted via body
-// bg sampling (set in index.html inline script).
+// Solid extends past the chrome zone AND down through the LargeTitle
+// area into the top of the hero card, then fades through the hero's
+// vertical middle so the wash dies cleanly into the page body — not
+// behind the chrome (which would make the blur look like a blurred-
+// gradient mess) and not above the hero (which would look abrupt).
 //
 // Layout the gradient produces:
-//   y=0                → #D4A258 warm gold (matches chrome tint)
-//   y=safe-area+30px   → #D4A258 (still solid past chrome — clean tint)
-//   y=safe-area+280px  → #FFFFFF (soft 250px fade in visible page area)
+//   y=0                → top color (matches chrome tint)
+//   y=safe-area+96px   → top color (solid past chrome + LargeTitle)
+//   y=safe-area+380px  → #FFFFFF (fade ends near hero card middle)
 //   y=72% body         → #FFFFFF (white through middle)
 //   y=100% body        → #A8B3E5 (periwinkle URL bar bleed)
-const ROOT_GRADIENT =
-  "linear-gradient(to bottom," +
-  " #D4A258 0," +
-  " #D4A258 calc(env(safe-area-inset-top, 44px) + 30px)," +
-  " #FFFFFF calc(env(safe-area-inset-top, 44px) + 280px)," +
-  " #FFFFFF 72%," +
-  " #A8B3E5 100%)";
+function rootGradient(isAnon: boolean) {
+  const top = isAnon ? "#D4A258" : "#95C2A8";
+  return (
+    "linear-gradient(to bottom," +
+    ` ${top} 0,` +
+    ` ${top} calc(env(safe-area-inset-top, 44px) + 96px),` +
+    " #FFFFFF calc(env(safe-area-inset-top, 44px) + 380px)," +
+    " #FFFFFF 72%," +
+    " #A8B3E5 100%)"
+  );
+}
 
 const S: Record<string, CSSProperties> = {
   // PWA standalone: existing architecture. Body is locked to --vvh by the
   // .mobile-pwa-active CSS rules; .mobile-root is the scroll container.
   // visualViewport keyboard tracking + three-layer chat sheet depend on
-  // this exact shape.
+  // this exact shape. Background is set inline per render (auth-aware).
   rootPwa: {
     position: "absolute",
     inset: 0,
@@ -349,7 +361,6 @@ const S: Record<string, CSSProperties> = {
     WebkitOverflowScrolling: "touch",
     overscrollBehaviorY: "contain",
     touchAction: "pan-y",
-    background: ROOT_GRADIENT,
     paddingBottom: "env(safe-area-inset-bottom, 0px)",
   },
   // Safari tab: natural flow, body scrolls. min-height: 100dvh keeps the
@@ -359,7 +370,6 @@ const S: Record<string, CSSProperties> = {
   rootSafari: {
     position: "relative",
     minHeight: "100dvh",
-    background: ROOT_GRADIENT,
     paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 110px)",
   },
   placeholderBody: {

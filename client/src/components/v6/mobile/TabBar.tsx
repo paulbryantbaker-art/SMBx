@@ -48,7 +48,10 @@ export function TabBar({ active, onChange, onChat }: TabBarProps) {
       >
         {TABS.map(t => {
           const isActive = active === t.id;
-          const c = isActive ? "var(--mb-accent-ink)" : "var(--mb-ink-3)";
+          // Unselected: bright white for a11y contrast against the
+          // periwinkle URL-bar bleed under the glass pill (gray fails
+          // 4.5:1 on the periwinkle wash). Selected: periwinkle ink.
+          const c = isActive ? "var(--mb-accent-ink)" : "#fff";
           return (
             <button
               key={t.id}
