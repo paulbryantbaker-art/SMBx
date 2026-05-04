@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useAnonymousChat } from "../../../hooks/useAnonymousChat";
 import { useAuthChat } from "../../../hooks/useAuthChat";
 import type { User } from "../../../hooks/useAuth";
+import { useMobileDeals } from "../../../hooks/useMobileDeals";
 import { TabBar } from "./TabBar";
 import { GlassTopBar, LargeTitle, TitleCollapseProvider } from "./TopBar";
 import { TodayScreen } from "./screens/Today";
@@ -66,6 +67,12 @@ interface ShellProps {
 
 function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
   const [, navigate] = useLocation();
+
+  // Live deal data for authed users; anon falls back to hardcoded
+  // sample arrays inside each screen. Empty arrays for authed users
+  // with no deals yet are also passed through — screens render their
+  // empty state in that case.
+  const userDeals = useMobileDeals(user);
 
   const initial = readMobileHashState();
   const [view, setView] = useState<MobileView>(
@@ -226,6 +233,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
           onChat={onChat}
           onLearn={onLearn}
           onAvatarClick={onAvatarClick}
+          userPipeline={userDeals.hasData ? userDeals.today : null}
         />
       )}
       {view.kind === "tab" && activeTab === "pipeline" && (
@@ -234,6 +242,8 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
           initials={initials}
           onOpenDeal={onOpenDeal}
           onAvatarClick={onAvatarClick}
+          userWatching={userDeals.hasData ? userDeals.watching : null}
+          userFeatured={userDeals.hasData ? userDeals.featured : null}
         />
       )}
       {view.kind === "tab" && activeTab === "brief" && (
@@ -242,6 +252,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
           initials={initials}
           onOpenDeal={onOpenDeal}
           onAvatarClick={onAvatarClick}
+          userPicks={userDeals.hasData ? userDeals.picks : null}
         />
       )}
       {view.kind === "detail" && (

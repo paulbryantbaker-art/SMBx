@@ -9,12 +9,17 @@ import { YIcon } from "../YIcon";
 import { MobileIcon } from "../icons";
 import type { YIconKind } from "../types";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
+import type { MobileWatchRow, MobileFeatured } from "../../../../hooks/useMobileDeals";
 
 interface PipelineProps {
   isAnon: boolean;
   initials: string;
   onOpenDeal: (id: string, title: string) => void;
   onAvatarClick: () => void;
+  /** Authed user's watching list (null = anon or empty → samples render). */
+  userWatching: MobileWatchRow[] | null;
+  /** Authed user's "NEW TODAY" featured hero (null = anon or empty → sample). */
+  userFeatured: MobileFeatured | null;
 }
 
 interface ChipDef { id: string; label: string; n: number }
@@ -27,14 +32,24 @@ const CHIPS: ChipDef[] = [
 ];
 
 interface WatchDeal { id: string; icon: YIconKind; name: string; sub: string; pill: string }
-const WATCHING: WatchDeal[] = [
+const SAMPLE_WATCHING: WatchDeal[] = [
   { id: "wpest",     icon: "cool",    name: "Pest Control Roll-up · FL",   sub: "$4.1M rev · Orlando",     pill: "$1.4M SDE" },
   { id: "welec",     icon: "default", name: "Electrical Contractor · TX",  sub: "$8.7M rev · Austin",      pill: "Watch" },
   { id: "wmarina",   icon: "cool",    name: "Marina Holdings · FL",        sub: "$8.2M rev · Tampa Bay",   pill: "Pursue" },
   { id: "wlogistic", icon: "default", name: "Boutique Logistics · GA",     sub: "$6.7M rev · Atlanta",     pill: "Pursue" },
 ];
 
-export function PipelineScreen({ isAnon, initials, onOpenDeal, onAvatarClick }: PipelineProps) {
+interface FeaturedDef { id: string; name: string; sub: string; revLabel: string }
+const SAMPLE_FEATURED: FeaturedDef = {
+  id: "deal-bigfake",
+  name: "Big Fake Deal · sample",
+  sub: "East Texas · sample seed",
+  revLabel: "$5.4M REV",
+};
+
+export function PipelineScreen({ isAnon, initials, onOpenDeal, onAvatarClick, userWatching, userFeatured }: PipelineProps) {
+  const WATCHING: WatchDeal[] = userWatching ?? SAMPLE_WATCHING;
+  const FEATURED: FeaturedDef = userFeatured ?? SAMPLE_FEATURED;
   const [activeChip, setActiveChip] = useState<string>("in-review");
 
   return (
@@ -87,7 +102,7 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onAvatarClick }: 
           to white over the gold/sage gradient band. */}
       <div className="on-color" style={{ padding: "0 22px 8px" }}>
         <div className="mb-section-eyebrow">{isAnon ? "VIEW SAMPLE · NEW TODAY" : "NEW TODAY"}</div>
-        <div className="mb-section-title">Big Fake Deal &middot; sample</div>
+        <div className="mb-section-title">{FEATURED.name}</div>
         <div style={P.subText}>The strongest source this week &mdash; tap to see why.</div>
       </div>
 
@@ -96,12 +111,12 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onAvatarClick }: 
           className="mb-tap"
           role="button"
           tabIndex={0}
-          aria-label="Open Big Fake Deal sample"
-          onClick={() => onOpenDeal("deal-bigfake", "Big Fake Deal · sample")}
+          aria-label={`Open ${FEATURED.name}`}
+          onClick={() => onOpenDeal(FEATURED.id, FEATURED.name)}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              onOpenDeal("deal-bigfake", "Big Fake Deal · sample");
+              onOpenDeal(FEATURED.id, FEATURED.name);
             }
           }}
           style={P.featured}
@@ -109,18 +124,18 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onAvatarClick }: 
           <div style={{ height: 200, position: "relative" }}>
             <div style={P.featuredGlow} aria-hidden="true" />
             <div style={P.featuredCorner}>
-              <div className="mb-eyebrow">FIT 92 &middot; PURSUE</div>
+              <div className="mb-eyebrow">FIT {userFeatured?.fit ?? 92} &middot; PURSUE</div>
               <div style={P.featuredHeadline}>
                 Recurring revenue.<br/>Honest capex story.
               </div>
             </div>
-            <div style={P.featuredRev}>$5.4M REV</div>
+            <div style={P.featuredRev}>{FEATURED.revLabel}</div>
           </div>
           <div style={P.featuredFooter}>
             <YIcon size={42} kind="cool" />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={P.featuredName}>Big Fake Deal &middot; sample</div>
-              <div style={P.featuredSub}>East Texas &middot; sample seed</div>
+              <div style={P.featuredName}>{FEATURED.name}</div>
+              <div style={P.featuredSub}>{FEATURED.sub}</div>
             </div>
             <button
               type="button"
@@ -128,7 +143,7 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onAvatarClick }: 
               style={{ padding: "6px 16px", fontSize: 13 }}
               onClick={(e) => {
                 e.stopPropagation();
-                onOpenDeal("deal-bigfake", "Big Fake Deal · sample");
+                onOpenDeal(FEATURED.id, FEATURED.name);
               }}
             >Dig in</button>
           </div>

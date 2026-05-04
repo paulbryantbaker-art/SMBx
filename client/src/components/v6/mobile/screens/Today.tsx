@@ -16,6 +16,7 @@ import { VerdictPill } from "../VerdictPill";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
 import { MobileIcon } from "../icons";
 import type { Verdict, YIconKind } from "../types";
+import type { MobilePipelineRow } from "../../../../hooks/useMobileDeals";
 
 interface TodayProps {
   isAnon: boolean;
@@ -24,17 +25,31 @@ interface TodayProps {
   onChat: () => void;
   onLearn: (section: "how" | "pricing", anchor?: string) => void;
   onAvatarClick: () => void;
+  /** Authed user's deals (from useMobileDeals). Null = anon or empty,
+      in which case the hardcoded SAMPLE_PIPELINE renders instead. */
+  userPipeline: MobilePipelineRow[] | null;
 }
 
-const PIPELINE = [
-  { id: "deal-bigfake",    icon: "cool"    as YIconKind, name: "Big Fake Deal · sample",     sub: "$1.80M SDE · honest capex story",      action: "open" as const, verdict: "pursue" as Verdict },
-  { id: "deal-pest",       icon: "cool"    as YIconKind, name: "Pest Control · FL",          sub: "92% on monthly contracts",             action: "open" as const, verdict: "pursue" as Verdict },
-  { id: "deal-electrical", icon: "default" as YIconKind, name: "Electrical · TX",            sub: "Margins good · concentration risk",    action: "get"  as const, price: "Watch" },
-  { id: "deal-hvac",       icon: "default" as YIconKind, name: "HVAC platform · CO",         sub: "Family business · clean financials",   action: "get"  as const, price: "Watch" },
-  { id: "deal-dist",       icon: "default" as YIconKind, name: "Distribution · OH",          sub: "Asking high · margins thin",           action: "get"  as const, price: "Pass" },
+interface TodayPipelineRow {
+  id: string;
+  icon: YIconKind;
+  name: string;
+  sub: string;
+  action: "open" | "get";
+  verdict?: Verdict;
+  price?: string;
+}
+
+const SAMPLE_PIPELINE: TodayPipelineRow[] = [
+  { id: "deal-bigfake",    icon: "cool",    name: "Big Fake Deal · sample",     sub: "$1.80M SDE · honest capex story",      action: "open", verdict: "pursue" },
+  { id: "deal-pest",       icon: "cool",    name: "Pest Control · FL",          sub: "92% on monthly contracts",             action: "open", verdict: "pursue" },
+  { id: "deal-electrical", icon: "default", name: "Electrical · TX",            sub: "Margins good · concentration risk",    action: "get",  price: "Watch" },
+  { id: "deal-hvac",       icon: "default", name: "HVAC platform · CO",         sub: "Family business · clean financials",   action: "get",  price: "Watch" },
+  { id: "deal-dist",       icon: "default", name: "Distribution · OH",          sub: "Asking high · margins thin",           action: "get",  price: "Pass" },
 ];
 
-export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onLearn, onAvatarClick }: TodayProps) {
+export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onLearn, onAvatarClick, userPipeline }: TodayProps) {
+  const PIPELINE: TodayPipelineRow[] = userPipeline ?? SAMPLE_PIPELINE;
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
       <GlassTopBar title="Today" initials={initials} onAvatarClick={onAvatarClick} />

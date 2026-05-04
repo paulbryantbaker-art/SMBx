@@ -7,12 +7,15 @@ import { GlassTopBar, LargeTitle } from "../TopBar";
 import { YIcon } from "../YIcon";
 import type { Verdict, YIconKind } from "../types";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
+import type { MobilePick } from "../../../../hooks/useMobileDeals";
 
 interface BriefProps {
   isAnon: boolean;
   initials: string;
   onOpenDeal: (id: string, title: string) => void;
   onAvatarClick: () => void;
+  /** Authed user's top 3 picks (null = anon or empty → samples render). */
+  userPicks: MobilePick[] | null;
 }
 
 interface Pick {
@@ -24,13 +27,14 @@ interface Pick {
   kind: Verdict;
 }
 
-const PICKS: Pick[] = [
+const SAMPLE_PICKS: Pick[] = [
   { rank: 1, id: "deal-bigfake",    name: "Big Fake Deal · sample",       sub: "Recurring rev · honest capex story",         fit: 92, kind: "pursue" },
   { rank: 2, id: "deal-pest",       name: "Pest Control · FL",            sub: "92% on monthly contracts · add-back rich",   fit: 84, kind: "pursue" },
   { rank: 3, id: "deal-electrical", name: "Electrical Contractor · TX",   sub: "Margins good but 60% one customer",          fit: 78, kind: "watch"  },
 ];
 
-export function BriefScreen({ isAnon, initials, onOpenDeal, onAvatarClick }: BriefProps) {
+export function BriefScreen({ isAnon, initials, onOpenDeal, onAvatarClick, userPicks }: BriefProps) {
+  const PICKS: Pick[] = userPicks ?? SAMPLE_PICKS;
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
       <GlassTopBar title="Brief" initials={initials} onAvatarClick={onAvatarClick} />
