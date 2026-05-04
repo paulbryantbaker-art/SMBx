@@ -34,7 +34,7 @@ export function BriefScreen({ isAnon, initials, onOpenDeal, onAvatarClick }: Bri
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
       <GlassTopBar title="Brief" initials={initials} onAvatarClick={onAvatarClick} />
-      <LargeTitle>Brief</LargeTitle>
+      <LargeTitle onColor>Brief</LargeTitle>
 
       {/* Date + sample callout */}
       <div style={{ padding: "0 22px 12px" }}>
@@ -43,7 +43,7 @@ export function BriefScreen({ isAnon, initials, onOpenDeal, onAvatarClick }: Bri
         </div>
         {isAnon && (
           <div style={Br.sampleLine}>
-            This is what Yulia sends every morning. <span style={{ color: "var(--mb-accent-ink)", fontWeight: 600 }}>Start free</span> to get yours.
+            This is what Yulia sends every morning. <span style={{ color: "#fff", fontWeight: 700 }}>Start free</span> to get yours.
           </div>
         )}
       </div>
@@ -145,9 +145,9 @@ function BriefPick({
 }
 
 const Br: Record<string, CSSProperties> = {
-  dateLine: { fontSize: 14, color: "var(--mb-ink-3)" },
+  dateLine: { fontSize: 14, color: "#fff" },
   sampleLine: {
-    fontSize: 13, color: "var(--mb-ink-3)",
+    fontSize: 13, color: "#fff",
     marginTop: 6, lineHeight: 1.45, textWrap: "pretty",
   },
   editorial: {

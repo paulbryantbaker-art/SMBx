@@ -167,9 +167,13 @@ export function GlassTopBar({
 
 interface LargeTitleProps {
   children: ReactNode;
+  /** Flip title to bright white for pages whose top sits over the
+      gold/sage gradient band (Pipeline, Brief). Default is dark ink
+      for hero-led pages where the title sits over the page body. */
+  onColor?: boolean;
 }
 
-export function LargeTitle({ children }: LargeTitleProps) {
+export function LargeTitle({ children, onColor }: LargeTitleProps) {
   const ref = useRef<HTMLHeadingElement | null>(null);
   const { setCollapsed, setScrolled } = useContext(TitleCollapseContext);
 
@@ -229,7 +233,12 @@ export function LargeTitle({ children }: LargeTitleProps) {
     };
   }, [setCollapsed, setScrolled]);
 
-  return <h1 ref={ref} style={T.largeTitle}>{children}</h1>;
+  return (
+    <h1
+      ref={ref}
+      style={onColor ? { ...T.largeTitle, color: "#fff" } : T.largeTitle}
+    >{children}</h1>
+  );
 }
 
 const T: Record<string, CSSProperties> = {

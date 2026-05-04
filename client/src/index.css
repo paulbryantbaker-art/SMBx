@@ -609,6 +609,14 @@ input[type="range"].m-slider::-moz-range-thumb {
   margin: 2px 0 0;
 }
 
+/* On-color override — wrap any block whose vertical position sits over
+   the gold/sage gradient band (top of Pipeline/Brief) in
+   `<div className="on-color">` and shared section text flips to white. */
+.mobile-root .on-color .mb-section-eyebrow,
+.mobile-root .on-color .mb-section-title {
+  color: #fff;
+}
+
 /* Tap state — subtle scale press feedback (Emil Kowalski pattern).
    Previous opacity 0.6 was firing on touchstart-then-scroll and washing
    out hero textures into a flat gray for the duration of the gesture.
