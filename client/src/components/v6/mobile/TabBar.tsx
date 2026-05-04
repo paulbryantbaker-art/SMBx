@@ -36,22 +36,18 @@ export function TabBar({ active, onChange, onChat }: TabBarProps) {
       style={B.wrap}
     >
       <GlassSurface
-        tint="chrome"
+        tint="dark"
         radius={999}
-        style={{
-          ...B.capsule,
-          // Override the chrome bg to a much lower opacity so the page
-          // content actually shows through the pill — without this the
-          // ~62% white tint reads as a flat strip instead of glass.
-          background: "rgba(255,255,255,0.38)",
-        }}
+        style={B.capsule}
       >
         {TABS.map(t => {
           const isActive = active === t.id;
-          // Unselected: bright white for a11y contrast against the
-          // periwinkle URL-bar bleed under the glass pill (gray fails
-          // 4.5:1 on the periwinkle wash). Selected: periwinkle ink.
-          const c = isActive ? "var(--mb-accent-ink)" : "#fff";
+          // Dark glass pill (iOS Music/Camera/Photos pattern) carries
+          // its own contrast: white unselected, brightened periwinkle
+          // selected. Both pass WCAG against the dark tint regardless
+          // of what's scrolled behind — no more white-on-white when
+          // the pill sits over the page's white middle band.
+          const c = isActive ? "var(--mb-accent)" : "#fff";
           return (
             <button
               key={t.id}
