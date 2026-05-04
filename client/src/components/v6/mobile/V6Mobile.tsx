@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useLocation } from "wouter";
 import { useAnonymousChat } from "../../../hooks/useAnonymousChat";
 import { useAuthChat } from "../../../hooks/useAuthChat";
@@ -141,6 +141,23 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
     writeMobileHashState(view);
   }, [view]);
 
+  // Scroll-to-top on every navigation. Tab taps and deal opens both flow
+  // through `view`, so a single effect on that key handles both. Scroll
+  // target depends on launch mode (mirrors the LargeTitle scroll-source
+  // detection): PWA standalone scrolls .mobile-root (body is locked to
+  // viewport so it can't scroll); Safari tab scrolls window (.mobile-root
+  // flows naturally so the document scrolls). Pure scroll calls don't
+  // mutate body styles, so the iOS 26 chrome-lock hazard at line 96
+  // doesn't apply here.
+  const rootRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (isStandalone) {
+      rootRef.current?.scrollTo({ top: 0 });
+    } else {
+      window.scrollTo({ top: 0 });
+    }
+  }, [view, isStandalone]);
+
   useEffect(() => {
     const onHash = () => {
       const next = readMobileHashState();
@@ -200,7 +217,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
 
   return (
     <TitleCollapseProvider>
-    <div className="mobile-root" style={rootStyle}>
+    <div ref={rootRef} className="mobile-root" style={rootStyle}>
       {view.kind === "tab" && activeTab === "today" && (
         <TodayScreen
           isAnon={isAnon}
