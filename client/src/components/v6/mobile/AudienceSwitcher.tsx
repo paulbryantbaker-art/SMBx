@@ -8,7 +8,7 @@
    feel like an iOS-style "perspective" switcher rather than a settings
    menu — the user is testing which version of the app fits them. */
 
-import { useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { type Audience, AUDIENCES, AUDIENCE_LABELS, AUDIENCE_LONG } from "../../../lib/audience";
 
@@ -19,6 +19,28 @@ interface AudienceSwitcherProps {
 
 export function AudienceSwitcher({ audience, onChange }: AudienceSwitcherProps) {
   const [open, setOpen] = useState(false);
+
+  // Lock scroll while the sheet is open. We lock both <html> and <body>
+  // because iOS Safari tab mode uses body as the native scroll
+  // container — overflow:hidden on html alone leaves body free.
+  // The scrim itself has touch-action:none in S.scrim so finger drags
+  // can't pass through to the page beneath.
+  // We accept the chrome-lock side-effect documented at V6Mobile.tsx:96
+  // (post-paint body inline-style mutation locks the chrome
+  // translucency mode) — same trade-off LearnSheet already takes.
+  useEffect(() => {
+    if (!open || typeof document === "undefined") return;
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtml = html.style.overflow;
+    const prevBody = body.style.overflow;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = prevHtml;
+      body.style.overflow = prevBody;
+    };
+  }, [open]);
 
   // Portal the sheet to document.body so any ancestor with
   // `overflow: hidden` (the Explore card has it; the welcome hero does
@@ -142,6 +164,10 @@ const S: Record<string, CSSProperties> = {
     WebkitBackdropFilter: "blur(2px)",
     border: "none",
     cursor: "pointer",
+    /* touch-action: none stops finger drags on the scrim from
+       scrolling the page beneath. Combined with the body+html overflow
+       lock above, this kills both touch- and scroll-event paths. */
+    touchAction: "none",
     animation: "mb-fade-up 200ms cubic-bezier(0.25, 1, 0.5, 1)",
   },
   sheet: {

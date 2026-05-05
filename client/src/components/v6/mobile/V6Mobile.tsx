@@ -191,6 +191,25 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
     }
   }, []); // mount-only
 
+  // Swipe-back trap: iOS Safari's edge-swipe gesture (and the trackpad
+  // two-finger swipe on macOS) drives browser history. Users who arrive
+  // via Google OAuth land with the OAuth page in their back stack, so a
+  // single swipe back kicks them out of the app — confusing.
+  // Solution: push a sentinel state on mount and re-push it on every
+  // popstate, so any back/forward gesture bounces back into the app.
+  // In-app navigation (tabs, detail) goes through wouter / hash and is
+  // unaffected — only browser-level history beyond our entry point is
+  // trapped.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.history.pushState({ smbx: "trap" }, "", window.location.href);
+    const onPopState = () => {
+      window.history.pushState({ smbx: "trap" }, "", window.location.href);
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
   // Watching is a sub-page of Pipeline, so reflect that in the tab bar.
   // Detail comes from anywhere, so default to Today there.
   const activeTab: MobileTab =
