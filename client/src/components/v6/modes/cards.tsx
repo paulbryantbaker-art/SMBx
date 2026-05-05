@@ -81,9 +81,11 @@ interface WatchRowProps {
   sub: string;
   count: number;
   last: boolean;
+  /** Called when the row is tapped or activated via keyboard. */
+  onClick?: () => void;
 }
 
-export function V6WatchRow({ tag, name, sub, count, last }: WatchRowProps) {
+export function V6WatchRow({ tag, name, sub, count, last, onClick }: WatchRowProps) {
   return (
     <div
       className="m-state"
@@ -91,10 +93,18 @@ export function V6WatchRow({ tag, name, sub, count, last }: WatchRowProps) {
         display: "flex", alignItems: "center", gap: 12,
         padding: "12px 16px",
         borderBottom: last ? "none" : "1px solid var(--m-outline-var)",
-        cursor: "pointer", color: "var(--m-on-surface-var)",
+        cursor: onClick ? "pointer" : "default",
+        color: "var(--m-on-surface-var)",
       }}
-      role="button"
-      tabIndex={0}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={onClick ? (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      } : undefined}
     >
       <div style={W.tag}>{tag}</div>
       <div style={{ flex: 1, minWidth: 0 }}>

@@ -195,7 +195,12 @@ export function V6SearchRoot({ openTab, onTalkToYulia, user }: SearchRootProps) 
           {[WATCHING_LEFT, WATCHING_RIGHT].map((col, idx) => (
             <div key={idx} className="m-card" style={{ overflow: "hidden", padding: 0 }}>
               {col.map((w, i) => (
-                <V6WatchRow key={w.tag} {...w} last={i === col.length - 1} />
+                <V6WatchRow
+                  key={w.tag}
+                  {...w}
+                  last={i === col.length - 1}
+                  onClick={() => askYulia(`Walk me through the latest from ${w.name} — what's worth a closer look?`)}
+                />
               ))}
             </div>
           ))}
