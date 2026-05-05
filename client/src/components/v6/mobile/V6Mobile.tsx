@@ -187,62 +187,10 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
     }
   }, []); // mount-only
 
-  // bfcache reload: iOS Safari aggressively serves back-nav from its
-  // back-forward cache, which restores the previous page instantly but
-  // with stale chrome state and stale body bg. Force a reload on
-  // bfcache restore so the URL-driven body-bg detection in index.html
-  // re-runs and chrome paints fresh. Without this, swipe-back from a
-  // white page (detail/chat) lands on home with stale white chrome.
-  useEffect(() => {
-    const onPageShow = (e: PageTransitionEvent) => {
-      if (e.persisted) window.location.reload();
-    };
-    window.addEventListener("pageshow", onPageShow);
-    return () => window.removeEventListener("pageshow", onPageShow);
-  }, []);
-
   const activeTab: MobileTab = view.kind === "tab" ? (view.tab ?? "today") : "today";
-
-  // pushPageNav: forward navigation with full reload. pushState (vs
-  // hash assignment) is silent — no hashchange event, no React
-  // re-render with stale body bg before reload completes, no iOS
-  // chrome lock. Reload then picks up the new URL and lets index.html's
-  // body-bg script paint from initial paint with the right color.
-  const pushPageNav = (hashParams: Record<string, string | undefined>) => {
-    const params = new URLSearchParams();
-    Object.entries(hashParams).forEach(([k, v]) => {
-      if (v) params.set(k, v);
-    });
-    const hash = params.toString() ? `#${params.toString()}` : "";
-    const url = window.location.pathname + window.location.search + hash;
-    window.history.pushState(null, "", url);
-    window.location.reload();
-  };
-
-  // Tab→tab is normal SPA nav (same body bg on both sides). Detail→tab
-  // is forward nav to a different page → pushPageNav. (Back-to-where-
-  // you-came-from is window.history.back, used by onChatClose / onBack.)
-  const onTabChange = (next: MobileTab) => {
-    if (view.kind === "detail") {
-      pushPageNav({ tab: next !== "today" ? next : undefined });
-      return;
-    }
-    setView({ kind: "tab", tab: next });
-  };
-  // Chat opens via full reload. Tab is preserved in URL so a back-nav
-  // (history.back) returns to the right tab.
-  const onChat = () => {
-    pushPageNav({
-      tab: activeTab !== "today" ? activeTab : undefined,
-      chat: "open",
-    });
-  };
-  // Close = browser back. Pageshow listener will reload when bfcache
-  // restores the previous page. This makes in-app close, browser back,
-  // and iOS swipe-back all behave identically.
-  const onChatClose = () => {
-    window.history.back();
-  };
+  const onTabChange = (next: MobileTab) => setView({ kind: "tab", tab: next });
+  const onChat = () => setChatOpen(true);
+  const onChatClose = () => setChatOpen(false);
   const onLearn = (section: "how" | "pricing", anchor?: string) =>
     setLearn({ open: true, section, anchor });
   const onLearnClose = () => setLearn(s => ({ ...s, open: false }));
@@ -254,12 +202,8 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
   const initials = computeInitials(user);
   const isAnon = !user;
 
-  // Tap-into-deal pushes a new history entry then reloads, so iOS swipe-
-  // back from detail returns to the user's previous page (typically
-  // home). pushState is silent (no hashchange, no SPA re-render, no
-  // chrome lock from the brief stale-bg state).
   const onOpenDeal = (id: string, title: string) => {
-    pushPageNav({ deal: id, t: title });
+    setView({ kind: "detail", dealId: id, dealTitle: title });
   };
   const onAvatarClick = () => {
     if (!user) {
@@ -316,12 +260,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
         <DetailScreen
           dealId={view.dealId ?? "unknown"}
           dealTitle={view.dealTitle ?? view.dealId ?? "Deal"}
-          onBack={() => {
-            // Browser back — same as iOS swipe-back. The pageshow
-            // listener forces a reload on bfcache restore, so the
-            // previous page repaints with correct body bg.
-            window.history.back();
-          }}
+          onBack={() => setView({ kind: "tab", tab: "today" })}
         />
       )}
       <TabBar active={activeTab} onChange={onTabChange} onChat={onChat} />
@@ -408,37 +347,36 @@ function writeMobileHashState(view: MobileView, chatOpen: boolean) {
   } catch { /* noop */ }
 }
 
-// .mobile-root gradient: top wash that fades naturally down the page
-// (visible fade in the page area, NOT under the chrome) + periwinkle
-// bleed at the bottom for Safari URL bar.
+// .mobile-root gradient: top wash that fades naturally down the page +
+// periwinkle bleed at the bottom for Safari URL bar.
 //
 // Top color varies by auth state:
-//   • Anon  → #D4A258 (warm gold sunrise) — matches body bg in
-//             index.html, which iOS samples for the chrome tint.
-//   • Authed → #95C2A8 (sage green) — mirrors the pursue-verdict
-//             palette so the page feels "in the work" instead of
-//             "discovering". Body bg stays gold (locked post-paint
-//             per the chrome-bleed hazard) but the chromeSentinel
-//             in TopBar live-blurs .mobile-root through the status
-//             bar zone, so the chrome reads green-ish in this state.
+//   • Anon  → #D4A258 (warm gold sunrise)
+//   • Authed → #95C2A8 (sage green) — mirrors the pursue-verdict palette
+//             so the page feels "in the work" instead of "discovering"
 //
-// Solid extends past the chrome zone AND down through the LargeTitle
-// area into the top of the hero card, then fades through the hero's
-// vertical middle so the wash dies cleanly into the page body — not
-// behind the chrome (which would make the blur look like a blurred-
-// gradient mess) and not above the hero (which would look abrupt).
+// The gradient now starts WHITE through the safe-area-inset-top zone
+// (the iOS chrome zone) so the chrome tint stays neutral white — body
+// bg is white everywhere on mobile and never has to flip. The top color
+// fades in just below the chrome and extends through the LargeTitle and
+// hero, then back to white through the page body, ending in periwinkle
+// at the URL bar bleed.
 //
-// Layout the gradient produces:
-//   y=0                → top color (matches chrome tint)
-//   y=safe-area+96px   → top color (solid past chrome + LargeTitle)
-//   y=safe-area+380px  → #FFFFFF (fade ends near hero card middle)
-//   y=72% body         → #FFFFFF (white through middle)
-//   y=100% body        → #A8B3E5 (periwinkle URL bar bleed)
+// Layout:
+//   y=0                              → #FFFFFF (matches body, blends with chrome)
+//   y=safe-area-inset-top            → #FFFFFF (still white through chrome zone)
+//   y=safe-area-inset-top+24px       → top color (gold/sage faded in)
+//   y=safe-area-inset-top+96px       → top color (solid through hero)
+//   y=safe-area-inset-top+380px      → #FFFFFF (fade ends near hero middle)
+//   y=72% body                       → #FFFFFF (white through middle)
+//   y=100% body                      → #A8B3E5 (periwinkle URL bar bleed)
 function rootGradient(isAnon: boolean) {
   const top = isAnon ? "#D4A258" : "#95C2A8";
   return (
     "linear-gradient(to bottom," +
-    ` ${top} 0,` +
+    " #FFFFFF 0," +
+    " #FFFFFF env(safe-area-inset-top, 44px)," +
+    ` ${top} calc(env(safe-area-inset-top, 44px) + 24px),` +
     ` ${top} calc(env(safe-area-inset-top, 44px) + 96px),` +
     " #FFFFFF calc(env(safe-area-inset-top, 44px) + 380px)," +
     " #FFFFFF 72%," +
