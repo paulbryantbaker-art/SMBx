@@ -34,14 +34,17 @@
       //    behind the status bar. V6Mobile.tsx must NOT touch body bg.
       (function() {
         var isMobile = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
-        // Mobile body bg is gold (#D4A258) at initial paint so iOS Safari's
-        // opaque-tinted chrome blends with the home gradient's gold sunrise
-        // at scroll=0. As the user scrolls past the gradient's gold band,
-        // V6Mobile.tsx adds html.mobile-past-gold which flips body to white
-        // via a CSS !important rule — chrome follows. Detail pages get
-        // html.mobile-detail (white). Class-based bg changes (vs body
-        // inline-style writes) don't trigger iOS's chrome-translucency lock.
-        var bg = isMobile ? '#D4A258' : '#F6F7F9';
+        // Mobile body bg is route-driven AT INITIAL PAINT so iOS Safari can
+        // commit chrome translucency mode against the right color and never
+        // re-evaluate. Home/pipeline/brief: gold (#D4A258) blends with the
+        // gradient's sunrise. Detail (#deal=...): white so the white page
+        // doesn't sit under a mismatched gold chrome. Body bg cannot be
+        // mutated post-paint (kills the chrome bleed — see V6Mobile.tsx:103),
+        // so V6Mobile forces a full page reload on every home ↔ detail
+        // transition. That gives each side its own fresh first paint with
+        // the correct body bg, and the chrome bleed stays alive on both.
+        var isDetail = /(?:^|[#&?])deal=/.test(window.location.hash);
+        var bg = !isMobile ? '#F6F7F9' : isDetail ? '#FFFFFF' : '#D4A258';
         document.documentElement.style.backgroundColor = bg;
         if (document.body) document.body.style.backgroundColor = bg;
         else document.addEventListener('DOMContentLoaded', function() {

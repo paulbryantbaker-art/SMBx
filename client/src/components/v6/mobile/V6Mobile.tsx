@@ -77,7 +77,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
   const initial = readMobileHashState();
   const [view, setView] = useState<MobileView>(
     initial.detail
-      ? { kind: "detail", dealId: initial.detail }
+      ? { kind: "detail", dealId: initial.detail, dealTitle: initial.dealTitle ?? undefined }
       : { kind: "tab", tab: initial.tab }
   );
   const [chatOpen, setChatOpen] = useState(false);
@@ -188,7 +188,19 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
   }, []); // mount-only
 
   const activeTab: MobileTab = view.kind === "tab" ? (view.tab ?? "today") : "today";
-  const onTabChange = (next: MobileTab) => setView({ kind: "tab", tab: next });
+  // Tab→tab is normal SPA nav. Detail→tab requires a full reload because
+  // the body bg must paint correctly for the chrome bleed (gold for tabs,
+  // white for detail). See V6Mobile.tsx body-bg comment + index.html.
+  const onTabChange = (next: MobileTab) => {
+    if (view.kind === "detail") {
+      const params = new URLSearchParams();
+      if (next !== "today") params.set("tab", next);
+      window.location.hash = params.toString() ? `#${params.toString()}` : "";
+      window.location.reload();
+      return;
+    }
+    setView({ kind: "tab", tab: next });
+  };
   const onChat = () => setChatOpen(true);
   const onChatClose = () => setChatOpen(false);
   const onLearn = (section: "how" | "pricing", anchor?: string) =>
@@ -202,8 +214,17 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
   const initials = computeInitials(user);
   const isAnon = !user;
 
+  // Tap-into-deal does a full page reload so iOS Safari can paint body
+  // white at initial paint and commit chrome translucency against white.
+  // SPA navigation would leave body gold and either lock the chrome
+  // (killing bleed) or leave a gold strip over the white detail page.
+  // See index.html body-bg comment for the full architecture.
   const onOpenDeal = (id: string, title: string) => {
-    setView({ kind: "detail", dealId: id, dealTitle: title });
+    const params = new URLSearchParams();
+    params.set("deal", id);
+    if (title) params.set("t", title);
+    window.location.hash = `#${params.toString()}`;
+    window.location.reload();
   };
   const onAvatarClick = () => {
     if (!user) {
@@ -260,7 +281,12 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
         <DetailScreen
           dealId={view.dealId ?? "unknown"}
           dealTitle={view.dealTitle ?? view.dealId ?? "Deal"}
-          onBack={() => setView({ kind: "tab", tab: "today" })}
+          onBack={() => {
+            // Detail → today via full reload. Body must repaint gold at
+            // initial paint so chrome bleed is correct over the gradient.
+            window.location.hash = "";
+            window.location.reload();
+          }}
         />
       )}
       <TabBar active={activeTab} onChange={onTabChange} onChat={onChat} />
@@ -310,17 +336,18 @@ function computeInitials(user: User | null): string {
 
 /* ─── URL hash state ─────────────────────────────────────── */
 
-function readMobileHashState(): { tab: MobileTab; detail: string | null } {
+function readMobileHashState(): { tab: MobileTab; detail: string | null; dealTitle: string | null } {
   try {
     const hash = window.location.hash.replace(/^#/, "");
-    if (!hash) return { tab: "today", detail: null };
+    if (!hash) return { tab: "today", detail: null, dealTitle: null };
     const params = new URLSearchParams(hash);
     const rawTab = params.get("tab") as MobileTab | null;
     const tab: MobileTab = rawTab && VALID_TABS.includes(rawTab) ? rawTab : "today";
     const detail = params.get("deal");
-    return { tab, detail };
+    const dealTitle = params.get("t");
+    return { tab, detail, dealTitle };
   } catch {
-    return { tab: "today", detail: null };
+    return { tab: "today", detail: null, dealTitle: null };
   }
 }
 
@@ -329,6 +356,9 @@ function writeMobileHashState(view: MobileView) {
     const params = new URLSearchParams();
     if (view.kind === "detail" && view.dealId) {
       params.set("deal", view.dealId);
+      // Persist title in the URL so it survives the home ↔ detail full
+      // reload (state is wiped by reload; URL is the only durable carrier).
+      if (view.dealTitle) params.set("t", view.dealTitle);
     } else if (view.tab) {
       params.set("tab", view.tab);
     }
