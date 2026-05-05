@@ -219,7 +219,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
 
   const rootStyle: CSSProperties = {
     ...(isStandalone ? S.rootPwa : S.rootSafari),
-    background: rootGradient(isAnon),
+    background: view.kind === "detail" ? "#FFFFFF" : rootGradient(isAnon),
   };
 
   return (
