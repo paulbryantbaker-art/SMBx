@@ -47,19 +47,6 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 
-/* Mobile: kill horizontal overscroll/edge-swipe so the iOS swipe-back
-   gesture doesn't animate the page sliding off (and risk landing the
-   user at the OAuth page if that's their previous history entry). The
-   popstate trap in V6Mobile.tsx catches anything that slips through.
-   Keeps vertical scroll natural so iOS Safari's native chrome
-   auto-hide + page bleed still work. */
-@media (max-width: 767px) {
-  html, body {
-    overscroll-behavior-x: none;
-    overscroll-behavior-y: auto;
-  }
-}
-
 /* Desktop only: lock html/body so V6 desktop's internal scroll regions
    (sidebar, chat, tabbed canvas) don't double-scroll the document.
    On mobile the body MUST scroll naturally — that's what triggers iOS
