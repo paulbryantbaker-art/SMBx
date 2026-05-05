@@ -37,15 +37,15 @@ export function PickRow({ rank, name, sub, fit, kind, last, onTap }: PickRowProp
         }
       }}
       style={{
-        display: "flex", alignItems: "center", gap: 12,
-        padding: "12px 22px",
+        display: "flex", alignItems: "center", gap: 14,
+        padding: "14px 22px",
         borderBottom: last ? "none" : "0.5px solid var(--mb-line-2)",
         marginLeft: 22, paddingLeft: 0,
         cursor: "pointer",
       }}
     >
       <div style={S.rank}>{rank}</div>
-      <YIcon size={48} kind={iconKind} radius={11} />
+      <YIcon size={52} kind={iconKind} radius={12} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={S.pickName}>{name}</div>
         <div style={S.pickSub}>{sub}</div>
@@ -65,12 +65,12 @@ const S: Record<string, CSSProperties> = {
     flexShrink: 0,
   },
   pickName: {
-    fontSize: 15, fontWeight: 600, color: "var(--mb-ink)",
-    letterSpacing: "-0.2px",
+    fontSize: 16, fontWeight: 600, color: "var(--mb-ink)",
+    letterSpacing: "-0.25px",
     whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
   },
   pickSub: {
-    fontSize: 13, color: "var(--mb-ink-3)", marginTop: 1,
+    fontSize: 13.5, color: "var(--mb-ink-3)", marginTop: 2,
     whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
   },
   fitWrap: {

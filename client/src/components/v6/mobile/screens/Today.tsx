@@ -488,14 +488,14 @@ function PipelineRow({
       onClick={onTap}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onTap(); } }}
       style={{
-        display: "flex", alignItems: "center", gap: 12,
-        padding: "10px 22px",
+        display: "flex", alignItems: "center", gap: 14,
+        padding: "14px 22px",
         borderBottom: last ? "none" : "0.5px solid var(--mb-line-2)",
         marginLeft: 22, paddingLeft: 0,
         cursor: "pointer",
       }}
     >
-      <YIcon size={48} kind={icon} radius={11} />
+      <YIcon size={52} kind={icon} radius={12} />
       <div style={{ flex: 1, minWidth: 0, paddingRight: 8 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <span style={S.rowName}>{name}</span>
@@ -549,11 +549,17 @@ const S: Record<string, CSSProperties> = {
     fontSize: 13, color: "var(--mb-ink-3)", marginTop: 1,
   },
   rowName: {
-    fontSize: 15, fontWeight: 600, color: "var(--mb-ink)",
-    letterSpacing: "-0.2px",
+    fontSize: 16, fontWeight: 600, color: "var(--mb-ink)",
+    letterSpacing: "-0.25px",
+    whiteSpace: "nowrap" as const,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   },
   rowSub: {
-    fontSize: 13, color: "var(--mb-ink-3)", marginTop: 1,
+    fontSize: 13.5, color: "var(--mb-ink-3)", marginTop: 2,
+    whiteSpace: "nowrap" as const,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   },
   rowAction: {
     display: "flex", flexDirection: "column",

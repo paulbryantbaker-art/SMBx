@@ -254,14 +254,14 @@ function PipeRow({
         }
       }}
       style={{
-        display: "flex", alignItems: "center", gap: 12,
-        padding: "10px 18px",
+        display: "flex", alignItems: "center", gap: 14,
+        padding: "14px 18px",
         borderBottom: last ? "none" : "0.5px solid var(--mb-line-2)",
         marginLeft: 18, paddingLeft: 0,
         cursor: "pointer",
       }}
     >
-      <YIcon size={48} kind={icon} radius={11} />
+      <YIcon size={52} kind={icon} radius={12} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={P.rowName}>{name}</div>
         <div style={P.rowSub}>{sub}</div>
@@ -358,10 +358,16 @@ const P: Record<string, CSSProperties> = {
     cursor: "pointer", textAlign: "left",
   },
   rowName: {
-    fontSize: 15, fontWeight: 600, color: "var(--mb-ink)",
-    letterSpacing: "-0.2px",
+    fontSize: 16, fontWeight: 600, color: "var(--mb-ink)",
+    letterSpacing: "-0.25px",
+    whiteSpace: "nowrap" as const,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   },
   rowSub: {
-    fontSize: 13, color: "var(--mb-ink-3)", marginTop: 1,
+    fontSize: 13.5, color: "var(--mb-ink-3)", marginTop: 2,
+    whiteSpace: "nowrap" as const,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   },
 };

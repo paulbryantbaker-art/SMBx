@@ -563,15 +563,18 @@ input[type="range"].m-slider::-moz-range-thumb {
   background: var(--mb-card);
   border-radius: 18px;
   overflow: hidden;
-  /* App Store-style elevation for white cards on a white page. Three
-     layers: hairline edge (0.5px ring) for crisp definition + tight
-     near shadow for grounding + soft ambient for the lifted feel.
-     Keeping opacities low (0.04–0.06) so the card stays quiet — heavier
-     and it reads as a widget, lighter and the depth disappears. */
+  /* App Store-style elevation. Earlier 0.5px / 4% hairline was too
+     faint to read on white-on-white surfaces — the card edge ended up
+     being defined by a soft 16px halo, which felt fuzzy. Bumped:
+       - 1px hairline at 6% (visible "printed-on-paper" edge)
+       - tighter near shadow (2px blur, 5%)
+       - smaller ambient (10px blur, -2 offset, 4%) so the depth is
+         felt without a halo. Net effect: the card reads as crisp +
+         lifted, like an Apple card on a Page. */
   box-shadow:
-    0 0 0 0.5px rgba(0, 0, 0, 0.04),
-    0 1px 2px rgba(0, 0, 0, 0.04),
-    0 6px 16px -4px rgba(0, 0, 0, 0.06);
+    0 0 0 1px rgba(0, 0, 0, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.05),
+    0 3px 10px -2px rgba(0, 0, 0, 0.04);
 }
 
 /* Verdict pill */
@@ -600,22 +603,26 @@ input[type="range"].m-slider::-moz-range-thumb {
   color: var(--mb-danger-ink);
 }
 
-/* Section headers — App Store style */
+/* Section headers — App Store style.
+   Tightened to match Apple's editorial cards: smaller eyebrow with more
+   tracking, heavier display title with tighter tracking. The contrast
+   between small/wide eyebrow and big/tight title is what reads as
+   "magazine layout" rather than "form label + h2". */
 .mobile-root .mb-section-eyebrow {
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 600;
   color: var(--mb-accent-ink);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 .mobile-root .mb-section-title {
   font-family: var(--mb-font-display);
-  font-weight: 700;
+  font-weight: 800;
   font-size: 26px;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.7px;
   color: var(--mb-ink);
-  line-height: 1.1;
-  margin: 2px 0 0;
+  line-height: 1.08;
+  margin: 4px 0 0;
 }
 
 /* On-color override — wrap any block whose vertical position sits over
