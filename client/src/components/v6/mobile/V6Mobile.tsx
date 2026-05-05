@@ -347,38 +347,21 @@ function writeMobileHashState(view: MobileView, chatOpen: boolean) {
   } catch { /* noop */ }
 }
 
-// .mobile-root gradient: top wash that fades naturally down the page +
-// periwinkle bleed at the bottom for Safari URL bar.
+// .mobile-root gradient: white throughout the page, fading to periwinkle
+// at the bottom for the Safari URL bar bleed.
 //
-// Top color varies by auth state:
-//   • Anon  → #D4A258 (warm gold sunrise)
-//   • Authed → #95C2A8 (sage green) — mirrors the pursue-verdict palette
-//             so the page feels "in the work" instead of "discovering"
+// The page-level gradient used to carry a gold/sage band at the top to
+// blend with the gold chrome, but body bg is white everywhere now — the
+// band had nothing to connect to and read as a stranded strip painting
+// the margins around the welcome card. The sunrise warmth lives in the
+// welcome card's own watercolor texture, which lets the card stand out
+// cleanly against a white page.
 //
-// The gradient now starts WHITE through the safe-area-inset-top zone
-// (the iOS chrome zone) so the chrome tint stays neutral white — body
-// bg is white everywhere on mobile and never has to flip. The top color
-// fades in just below the chrome and extends through the LargeTitle and
-// hero, then back to white through the page body, ending in periwinkle
-// at the URL bar bleed.
-//
-// Layout:
-//   y=0                              → #FFFFFF (matches body, blends with chrome)
-//   y=safe-area-inset-top            → #FFFFFF (still white through chrome zone)
-//   y=safe-area-inset-top+24px       → top color (gold/sage faded in)
-//   y=safe-area-inset-top+96px       → top color (solid through hero)
-//   y=safe-area-inset-top+380px      → #FFFFFF (fade ends near hero middle)
-//   y=72% body                       → #FFFFFF (white through middle)
-//   y=100% body                      → #A8B3E5 (periwinkle URL bar bleed)
-function rootGradient(isAnon: boolean) {
-  const top = isAnon ? "#D4A258" : "#95C2A8";
+// isAnon kept in the signature for symmetry but no longer drives color.
+function rootGradient(_isAnon: boolean) {
   return (
     "linear-gradient(to bottom," +
     " #FFFFFF 0," +
-    " #FFFFFF env(safe-area-inset-top, 44px)," +
-    ` ${top} calc(env(safe-area-inset-top, 44px) + 24px),` +
-    ` ${top} calc(env(safe-area-inset-top, 44px) + 96px),` +
-    " #FFFFFF calc(env(safe-area-inset-top, 44px) + 380px)," +
     " #FFFFFF 72%," +
     " #A8B3E5 100%)"
   );
