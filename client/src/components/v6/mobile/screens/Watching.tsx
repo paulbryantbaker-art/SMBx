@@ -205,10 +205,15 @@ const W: Record<string, CSSProperties> = {
   editorial: {
     borderRadius: 22, overflow: "hidden",
     backgroundImage:
-      `linear-gradient(165deg, rgba(140,98,42,0.42) 0%, rgba(85,55,18,0.74) 100%), url('${RANDOM_TEXTURES.welcome}')`,
+      `linear-gradient(165deg, rgba(140,98,42,0.52) 0%, rgba(85,55,18,0.86) 100%), url('${RANDOM_TEXTURES.welcome}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
-    boxShadow: "0 6px 20px -8px rgba(0,0,0,0.18)",
+    backgroundBlendMode: "multiply, normal",
+    boxShadow:
+      "0 14px 36px -10px rgba(140,98,42,0.32)," +
+      "0 8px 20px -8px rgba(0,0,0,0.26)," +
+      "inset 0 1px 0 rgba(255,255,255,0.24)," +
+      "inset 0 -1px 0 rgba(0,0,0,0.20)",
     minHeight: 180,
     display: "flex", alignItems: "flex-end",
     color: "#fff",

@@ -217,15 +217,25 @@ type ArtifactKind = "recast" | "baseline" | "buyers" | "ioi";
 // Each artifact card is a texture + tinted overlay (kept for white text
 // legibility), except "ioi" which stays as the formal dark slate card —
 // textures would weaken the IOI/LOI doc gravitas.
+/* Artifact previews use the same overlay-recipe as the home heroes:
+   deeper stops + multiply blend so the watercolor textures pop on the
+   white detail page background. */
 const ARTIFACT_BG: Record<ArtifactKind, string> = {
   recast:
-    `linear-gradient(160deg, rgba(48,108,80,0.44) 0%, rgba(18,68,46,0.74) 100%), url('${RANDOM_TEXTURES.pursue}')`,
+    `linear-gradient(160deg, rgba(48,108,80,0.54) 0%, rgba(18,68,46,0.86) 100%), url('${RANDOM_TEXTURES.pursue}')`,
   baseline:
-    `linear-gradient(160deg, rgba(60,108,168,0.44) 0%, rgba(25,68,118,0.74) 100%), url('${RANDOM_TEXTURES.baseline}')`,
+    `linear-gradient(160deg, rgba(60,108,168,0.54) 0%, rgba(25,68,118,0.86) 100%), url('${RANDOM_TEXTURES.baseline}')`,
   buyers:
-    `linear-gradient(160deg, rgba(95,68,150,0.44) 0%, rgba(60,38,108,0.74) 100%), url('${RANDOM_TEXTURES.buyers}')`,
+    `linear-gradient(160deg, rgba(95,68,150,0.54) 0%, rgba(60,38,108,0.86) 100%), url('${RANDOM_TEXTURES.buyers}')`,
   ioi:
     "linear-gradient(160deg, #3A4150, #1A2233)",
+};
+
+const ARTIFACT_GLOW: Record<ArtifactKind, string> = {
+  recast:   "0 12px 30px -10px rgba(48,108,80,0.32)",
+  baseline: "0 12px 30px -10px rgba(60,108,168,0.32)",
+  buyers:   "0 12px 30px -10px rgba(95,68,150,0.32)",
+  ioi:      "0 12px 30px -10px rgba(58,65,80,0.32)",
 };
 
 function ArtifactPreview({
@@ -250,8 +260,13 @@ function ArtifactPreview({
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
+        backgroundBlendMode: "multiply, normal",
         color: "#fff", overflow: "hidden", position: "relative",
-        boxShadow: "0 6px 18px -8px rgba(0,0,0,0.2)",
+        boxShadow:
+          ARTIFACT_GLOW[kind] + "," +
+          "0 6px 18px -8px rgba(0,0,0,0.22)," +
+          "inset 0 1px 0 rgba(255,255,255,0.22)," +
+          "inset 0 -1px 0 rgba(0,0,0,0.18)",
         cursor: "pointer",
       }}
     >

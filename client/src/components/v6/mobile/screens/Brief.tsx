@@ -115,14 +115,26 @@ const Br: Record<string, CSSProperties> = {
   },
   editorial: {
     borderRadius: 22, overflow: "hidden",
+    /* Overlay deepened 2025-05-05 — top stop +10%, bottom stop +12%
+       so the editorial card pops on a white page like the home hero
+       does. Also added blend-mode multiply so the watercolor texture
+       reads through more vividly instead of being flatly washed. */
     backgroundImage:
-      `linear-gradient(165deg, rgba(140,98,42,0.40) 0%, rgba(85,55,18,0.72) 100%), url('${RANDOM_TEXTURES.welcome}')`,
+      `linear-gradient(165deg, rgba(140,98,42,0.50) 0%, rgba(85,55,18,0.84) 100%), url('${RANDOM_TEXTURES.welcome}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     backgroundRepeat: "no-repeat, no-repeat",
+    backgroundBlendMode: "multiply, normal",
     color: "#fff", position: "relative",
     cursor: "pointer",
-    boxShadow: "0 12px 28px -12px rgba(0,0,0,0.22)",
+    /* Verdict-tinted ambient glow (gold here, matching the texture)
+       integrates the card with the white page — same recipe as the
+       home hero now uses. */
+    boxShadow:
+      "0 14px 36px -10px rgba(140,98,42,0.32)," +
+      "0 8px 20px -8px rgba(0,0,0,0.26)," +
+      "inset 0 1px 0 rgba(255,255,255,0.24)," +
+      "inset 0 -1px 0 rgba(0,0,0,0.20)",
   },
   editorialH2: {
     fontFamily: "var(--mb-font-display)", fontWeight: 800, fontSize: 30,
