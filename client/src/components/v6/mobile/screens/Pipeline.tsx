@@ -55,13 +55,13 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onAvatarClick, us
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
       <GlassTopBar title="Pipeline" initials={initials} onAvatarClick={onAvatarClick} />
-      <LargeTitle onColor>Pipeline</LargeTitle>
+      <LargeTitle>Pipeline</LargeTitle>
 
       {/* Logged-out callout */}
       {isAnon && (
         <div style={{ padding: "0 22px 14px" }}>
           <div style={P.calloutText}>
-            A live sample pipeline. <span style={{ color: "#fff", fontWeight: 700 }}>Tap any deal</span> to see how Yulia thinks &mdash; your real pipeline lives here once you start.
+            A live sample pipeline. <span style={{ color: "var(--mb-accent-ink)", fontWeight: 700 }}>Tap any deal</span> to see how Yulia thinks &mdash; your real pipeline lives here once you start.
           </div>
         </div>
       )}
@@ -98,9 +98,9 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onAvatarClick, us
         })}
       </div>
 
-      {/* New today — wrapped in .on-color so shared section styles flip
-          to white over the gold/sage gradient band. */}
-      <div className="on-color" style={{ padding: "0 22px 8px" }}>
+      {/* New today section — was wrapped in .on-color when the gradient
+          carried a gold/sage band; page is white now, default dark text. */}
+      <div style={{ padding: "0 22px 8px" }}>
         <div className="mb-section-eyebrow">{isAnon ? "VIEW SAMPLE · NEW TODAY" : "NEW TODAY"}</div>
         <div className="mb-section-title">{FEATURED.name}</div>
         <div style={P.subText}>The strongest source this week &mdash; tap to see why.</div>
@@ -216,7 +216,7 @@ function PipeRow({
 
 const P: Record<string, CSSProperties> = {
   calloutText: {
-    fontSize: 13.5, color: "#fff", lineHeight: 1.45,
+    fontSize: 13.5, color: "var(--mb-ink-3)", lineHeight: 1.45,
     textWrap: "pretty",
   },
   chipsRow: {
@@ -238,7 +238,7 @@ const P: Record<string, CSSProperties> = {
     fontFamily: "var(--mb-font-mono)",
   },
   subText: {
-    fontSize: 16, color: "#fff", marginTop: 2,
+    fontSize: 16, color: "var(--mb-ink-2)", marginTop: 2,
     textWrap: "pretty",
   },
   featured: {
