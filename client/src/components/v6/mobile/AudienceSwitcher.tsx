@@ -9,7 +9,8 @@
    menu — the user is testing which version of the app fits them. */
 
 import { useState, type CSSProperties } from "react";
-import { type Audience, AUDIENCES, AUDIENCE_LONG } from "../../../lib/audience";
+import { createPortal } from "react-dom";
+import { type Audience, AUDIENCES, AUDIENCE_LABELS, AUDIENCE_LONG } from "../../../lib/audience";
 
 interface AudienceSwitcherProps {
   audience: Audience;
@@ -18,21 +19,14 @@ interface AudienceSwitcherProps {
 
 export function AudienceSwitcher({ audience, onChange }: AudienceSwitcherProps) {
   const [open, setOpen] = useState(false);
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label="Switch audience for test drive"
-        aria-expanded={open}
-        style={S.pill}
-      >
-        <span style={S.pillEyebrow}>VIEWING AS</span>
-        <span style={S.pillLabel}>{AUDIENCE_LONG[audience]}</span>
-        <span style={S.pillChevron} aria-hidden="true">⌄</span>
-      </button>
 
-      {open && (
+  // Portal the sheet to document.body so any ancestor with
+  // `overflow: hidden` (the Explore card has it; the welcome hero does
+  // too — that's an iOS-style cropped texture card) doesn't clip the
+  // overlay. Without the portal the scrim and sheet rendered "inside"
+  // the card and got cut off, which made the popup look broken.
+  const overlay = open && typeof document !== "undefined"
+    ? createPortal(
         <>
           <button
             type="button"
@@ -78,8 +72,25 @@ export function AudienceSwitcher({ audience, onChange }: AudienceSwitcherProps) 
               you sign up.
             </div>
           </div>
-        </>
-      )}
+        </>,
+        document.body,
+      )
+    : null;
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+        aria-label={`Switch audience for test drive, currently ${AUDIENCE_LONG[audience]}`}
+        aria-expanded={open}
+        style={S.pill}
+      >
+        <span style={S.pillEyebrow}>VIEWING AS</span>
+        <span style={S.pillLabel}>{AUDIENCE_LABELS[audience]}</span>
+        <span style={S.pillChevron} aria-hidden="true">⌄</span>
+      </button>
+      {overlay}
     </>
   );
 }

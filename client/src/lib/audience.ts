@@ -1,80 +1,59 @@
-/* Audience model — primary axis for persona-aware UI.
-   Per PRODUCT_AUDIT.md §1, the matrix's seven audiences are higher-resolution
-   than the four journey personas in CLAUDE.md. We use audience as the
-   primary axis (drives copy, capability shortcuts, sample data) and the
-   journey is a secondary attribute derived from it (sell / buy / raise / pmi).
+/* Persona model for in-app routing.
+   The full audience matrix in PRODUCT_AUDIT.md §1 lists seven marketing
+   segments (search funders vs. independent sponsors vs. principal buyers
+   etc.). The PROCESSES those segments run aren't actually different in
+   the app — only the analysis depth and document complexity (which is
+   the L1–L6 sophistication axis from METHODOLOGY V17, layered later).
+   What genuinely diverges is the JOURNEY: are you buying, selling,
+   raising, or integrating? Those are four different flows with
+   different gates, artifacts, and counterparties.
+
+   So we collapse here to the four journey personas from CLAUDE.md and
+   METHODOLOGY V17. The marketing-segment matrix still applies on the
+   marketing side (homepage, pricing, sales copy) — just not in the app
+   shell.
+
+   Type name stays `Audience` so we don't churn the wiring. Values are
+   the four journey codes.
 */
 
-export type Audience =
-  | "principal_buyer"
-  | "principal_seller"
-  | "search_funder"
-  | "independent_sponsor"
-  | "lmm_advisor"
-  | "corp_dev"
-  | "family_office";
+export type Audience = "buy" | "sell" | "raise" | "pmi";
 
-export const AUDIENCES: Audience[] = [
-  "principal_buyer",
-  "principal_seller",
-  "search_funder",
-  "independent_sponsor",
-  "lmm_advisor",
-  "corp_dev",
-  "family_office",
-];
+export const AUDIENCES: Audience[] = ["buy", "sell", "raise", "pmi"];
 
-/** Default for an anonymous test drive — lowest-friction entry per matrix
-    audience #7 (principal buyer is the most universal "first acquirer"
-    flow and matches our existing buyer-shaped sample data). */
-export const DEFAULT_AUDIENCE: Audience = "principal_buyer";
+/** Default for an anonymous test drive — buy is the most universal flow
+    and the one most existing sample data is shaped around. */
+export const DEFAULT_AUDIENCE: Audience = "buy";
 
-/** Short labels for the audience switcher pill. Kept tight so the pill
-    fits on a 375px viewport without truncation. */
+/** Short labels for the audience switcher pill. */
 export const AUDIENCE_LABELS: Record<Audience, string> = {
-  principal_buyer:     "Buyer",
-  principal_seller:    "Seller",
-  search_funder:       "Searcher",
-  independent_sponsor: "Sponsor",
-  lmm_advisor:         "Advisor",
-  corp_dev:            "Corp dev",
-  family_office:       "Family office",
+  buy:   "Buyer",
+  sell:  "Seller",
+  raise: "Raiser",
+  pmi:   "Integrator",
 };
 
-/** Long labels for tooltips, settings sheets, and copy that introduces the
-    audience by name. */
+/** Long labels — used in the picker sheet and aria-labels. */
 export const AUDIENCE_LONG: Record<Audience, string> = {
-  principal_buyer:     "First-time buyer",
-  principal_seller:    "Owner-operator selling",
-  search_funder:       "Search fund / ETA operator",
-  independent_sponsor: "Independent sponsor",
-  lmm_advisor:         "LMM advisor / boutique broker",
-  corp_dev:            "Corp dev at a serial acquirer",
-  family_office:       "Family office, direct-investing",
+  buy:   "Buying a business",
+  sell:  "Selling a business",
+  raise: "Raising capital",
+  pmi:   "Integrating an acquisition",
 };
 
-/** Maps audience → primary journey from CLAUDE.md / METHODOLOGY V17.
-    Audiences that span multiple journeys (search funder is buy + pmi)
-    list the most-active journey here. */
+/** Maps audience → primary journey code from CLAUDE.md / METHODOLOGY V17.
+    Identity mapping now that the two axes have been unified. */
 export const AUDIENCE_JOURNEY: Record<Audience, "buy" | "sell" | "raise" | "pmi"> = {
-  principal_buyer:     "buy",
-  principal_seller:    "sell",
-  search_funder:       "buy",
-  independent_sponsor: "buy",
-  lmm_advisor:         "sell",  // advisors are sell-side first
-  corp_dev:            "buy",
-  family_office:       "buy",
+  buy:   "buy",
+  sell:  "sell",
+  raise: "raise",
+  pmi:   "pmi",
 };
 
-/** Buy-side audiences (drives Pipeline tab visibility and stage labels). */
 export function isBuySide(a: Audience): boolean {
-  const j = AUDIENCE_JOURNEY[a];
-  return j === "buy";
+  return a === "buy";
 }
 
-/** Sell-side audiences. Per matrix Decision 2, principal sellers should NOT
-    see a stage pipeline; they get a "Your buyers" view instead. */
 export function isSellSide(a: Audience): boolean {
-  const j = AUDIENCE_JOURNEY[a];
-  return j === "sell";
+  return a === "sell";
 }

@@ -94,25 +94,27 @@ export function TodayScreen({
       <GlassTopBar title="Today" initials={initials} onAvatarClick={onAvatarClick} onSearch={onChat} />
       <LargeTitle>Today</LargeTitle>
 
-      {/* Hero — anon = welcome, authed = today's brief teaser */}
+      {/* Hero — anon = welcome, authed = today's brief teaser. The
+          audience switcher pill (anon only) lives in the welcome hero's
+          eyebrow row so the test-drive control is anchored to the
+          biggest, most-visible card on the screen. */}
       <div style={{ padding: "4px 16px 0" }}>
         {isAnon ? (
-          <WelcomeHero onChat={onChat} heroTag={C.todayHeroTag} />
+          <WelcomeHero
+            onChat={onChat}
+            heroTag={C.todayHeroTag}
+            audience={audience}
+            onAudienceChange={onAudienceChange}
+            showAudienceSwitcher={showAudienceSwitcher}
+          />
         ) : (
           <DailyHero onOpenDeal={() => onOpenDeal("deal-bigfake", "Big Fake Deal · sample")} />
         )}
       </div>
 
-      {/* Explore SMBX — about/learn surface. Now persona-aware:
-          1 fixed "try a sample deal" entry + 3 audience-keyed tip chips
-          from copy.ts that open chat with a starter prompt. The marketing
-          chips (How it works · Pricing · Compare plans) are gone — the
-          authed audit-§3.1 finding said landing in a sales funnel
-          post-login was wrong.
-
-          For anon visitors, the audience switcher pill is rendered inline
-          at the top of this card so the test-drive control sits next to
-          the content it actually changes (the tip chips). */}
+      {/* Explore SMBX — about/learn surface. Persona-aware: 1 fixed
+          "try a sample deal" entry + 3 audience-keyed tip chips from
+          copy.ts that open chat with a starter prompt. */}
       <div style={{ padding: "14px 16px 0" }}>
         <ExploreCard
           isAnon={isAnon}
@@ -120,9 +122,6 @@ export function TodayScreen({
           onAskYulia={onAskYulia}
           onOpenDeal={() => onOpenDeal("deal-bigfake", "Big Fake Deal · sample")}
           tips={C.todayTips}
-          audience={audience}
-          onAudienceChange={onAudienceChange}
-          showAudienceSwitcher={showAudienceSwitcher}
         />
       </div>
 
@@ -183,14 +182,36 @@ export function TodayScreen({
 
 /* ─── Welcome hero (anon) ────────────────────────────────── */
 
-function WelcomeHero({ onChat, heroTag }: { onChat: () => void; heroTag: string }) {
+function WelcomeHero({
+  onChat, heroTag, audience, onAudienceChange, showAudienceSwitcher,
+}: {
+  onChat: () => void;
+  heroTag: string;
+  audience: Audience;
+  onAudienceChange: (a: Audience) => void;
+  showAudienceSwitcher: boolean;
+}) {
   return (
     <HeroFrame kind="welcome" onTap={onChat}>
       <HeroVisualPursue />
 
+      {/* Brand eyebrow on the left. Shortened from "WELCOME TO SMBX ·
+          WORKING SAMPLE" to just "WORKING SAMPLE" so it doesn't collide
+          with the audience switcher pill on the right. The "Welcome"
+          framing is already carried by the headline below. */}
       <div style={H.eyebrowSlot}>
-        <div className="mb-eyebrow">WELCOME TO SMBX · WORKING SAMPLE</div>
+        <div className="mb-eyebrow">WORKING SAMPLE</div>
       </div>
+      {/* Audience switcher pill — absolute top-right of the hero, anon
+          only. Sits in its own anchor so it doesn't push the eyebrow
+          into a multi-line wrap. Opens a portaled bottom sheet (see
+          AudienceSwitcher) — the hero's overflow:hidden doesn't clip
+          the popup because the portal renders to document.body. */}
+      {showAudienceSwitcher && (
+        <div style={H.pillSlot} onClick={(e) => e.stopPropagation()}>
+          <AudienceSwitcher audience={audience} onChange={onAudienceChange} />
+        </div>
+      )}
 
       <div style={H.titleBlock}>
         <h2 style={H.h2}>Agentic AI specifically built for buying and selling businesses of all shapes and sizes.</h2>
@@ -342,27 +363,17 @@ function HeroVisualPursue() {
 
 function ExploreCard({
   isAnon, onChat, onAskYulia, onOpenDeal, tips,
-  audience, onAudienceChange, showAudienceSwitcher,
 }: {
   isAnon: boolean;
   onChat: () => void;
   onAskYulia: (prompt: string) => void;
   onOpenDeal: () => void;
   tips: { label: string; prompt: string }[];
-  audience: Audience;
-  onAudienceChange: (a: Audience) => void;
-  showAudienceSwitcher: boolean;
 }) {
   return (
     <div style={E.card}>
-      {/* Top row: brand eyebrow on the left, optional audience pill on
-          the right. Pill replaces the previous floating chrome — the
-          control now sits next to the content it actually changes. */}
-      <div style={E.topRow}>
+      <div style={E.eyebrowSlot}>
         <div className="mb-eyebrow" style={E.eyebrow}>{isAnon ? "EXPLORE SMBX" : "GET THE MOST FROM YULIA"}</div>
-        {showAudienceSwitcher && (
-          <AudienceSwitcher audience={audience} onChange={onAudienceChange} />
-        )}
       </div>
       <div style={E.titleBlock}>
         <h3 style={E.h3}>{isAnon ? "Pick a way in." : "Today's quick wins."}</h3>
@@ -556,6 +567,16 @@ const S: Record<string, CSSProperties> = {
 
 const H: Record<string, CSSProperties> = {
   eyebrowSlot: { position: "absolute", top: 18, left: 22 },
+  /* Audience switcher anchor — top-right of the welcome hero card.
+     Independent of the eyebrow's absolute slot on the left so the
+     two never push each other into wrapping. zIndex sits above the
+     absolutely-positioned hero stats; the popup itself portals to
+     body and renders at z-index 100. */
+  pillSlot: {
+    position: "absolute",
+    top: 14, right: 14,
+    zIndex: 2,
+  },
   titleBlock: { padding: "4px 22px 0" },
   h2: {
     fontFamily: "var(--mb-font-display)", fontWeight: 800,
@@ -612,13 +633,6 @@ const E: Record<string, CSSProperties> = {
     position: "relative",
   },
   eyebrowSlot: { padding: "0 6px 4px" },
-  /* Top row inside the Explore card — eyebrow on the left, audience
-     switcher pill on the right (when shown). Replaces the previous
-     fixed-position pill. */
-  topRow: {
-    display: "flex", alignItems: "center", justifyContent: "space-between",
-    gap: 12, padding: "0 6px 4px",
-  },
   eyebrow: {
     color: "#fff",
     fontWeight: 700,
