@@ -296,11 +296,26 @@ const HERO_TEXTURE: Record<HeroKind, string> = {
   pass:    RANDOM_TEXTURES.pass,
   welcome: RANDOM_TEXTURES.welcome,
 };
+/* Overlay opacities bumped 2025-05-05 — when the page background went
+   from gold-band to pure white, these overlays needed to do more
+   work to read as "rich textured cards" instead of "muted washes".
+   Top stops +6%, bottom stops +12%. Saturation up, identity intact. */
 const HERO_OVERLAY: Record<HeroKind, string> = {
-  pursue:  "linear-gradient(165deg, rgba(48,108,80,0.34) 0%, rgba(18,68,46,0.66) 100%)",
-  watch:   "linear-gradient(165deg, rgba(150,108,40,0.34) 0%, rgba(95,65,18,0.66) 100%)",
-  pass:    "linear-gradient(165deg, rgba(170,72,60,0.34) 0%, rgba(120,40,32,0.66) 100%)",
-  welcome: "linear-gradient(165deg, rgba(140,98,42,0.32) 0%, rgba(85,55,18,0.64) 100%)",
+  pursue:  "linear-gradient(165deg, rgba(48,108,80,0.40) 0%, rgba(18,68,46,0.78) 100%)",
+  watch:   "linear-gradient(165deg, rgba(150,108,40,0.40) 0%, rgba(95,65,18,0.78) 100%)",
+  pass:    "linear-gradient(165deg, rgba(170,72,60,0.40) 0%, rgba(120,40,32,0.78) 100%)",
+  welcome: "linear-gradient(165deg, rgba(140,98,42,0.40) 0%, rgba(85,55,18,0.76) 100%)",
+};
+
+/* Verdict-tinted ambient shadows so each card "glows" its own color
+   on a white page. Without these, the cards sit isolated; with them
+   they feel alive and integrated. Layered with a regular dark shadow
+   for the lift. */
+const HERO_GLOW: Record<HeroKind, string> = {
+  pursue:  "0 14px 36px -10px rgba(48,108,80,0.35)",
+  watch:   "0 14px 36px -10px rgba(150,108,40,0.32)",
+  pass:    "0 14px 36px -10px rgba(170,72,60,0.28)",
+  welcome: "0 14px 36px -10px rgba(140,98,42,0.32)",
 };
 
 function HeroFrame({
@@ -328,11 +343,15 @@ function HeroFrame({
         color: "#fff",
         overflow: "hidden",
         boxShadow:
-          "0 12px 28px -10px rgba(0,0,0,0.28)," +
+          // Verdict-tinted glow — makes the card feel alive on a
+          // white page (its own color radiates outward subtly).
+          HERO_GLOW[kind] + "," +
+          // Dark base shadow for the actual lift.
+          "0 8px 20px -8px rgba(0,0,0,0.30)," +
           // Inner top highlight — sells "lit from above"
-          " inset 0 1px 0 rgba(255,255,255,0.22)," +
+          " inset 0 1px 0 rgba(255,255,255,0.24)," +
           // Inner bottom shadow — adds depth at the cell boundary
-          " inset 0 -1px 0 rgba(0,0,0,0.18)",
+          " inset 0 -1px 0 rgba(0,0,0,0.20)",
         position: "relative",
         cursor: onTap ? "pointer" : "default",
       }}
@@ -433,10 +452,13 @@ function ExploreRow({
         display: "flex", alignItems: "center", gap: 12,
         padding: "12px 14px",
         borderRadius: 14,
-        background: "rgba(255,255,255,0.10)",
+        // Sub-row tint bumped 0.10 → 0.18 so the rows are clearly
+        // visible against the deeper outer card backdrop. Border
+        // alpha bumped to match.
+        background: "rgba(255,255,255,0.18)",
         backdropFilter: "blur(8px)",
         WebkitBackdropFilter: "blur(8px)",
-        border: "0.5px solid rgba(255,255,255,0.14)",
+        border: "0.5px solid rgba(255,255,255,0.22)",
         marginBottom: last ? 0 : 8,
         cursor: "pointer",
       }}
@@ -622,8 +644,13 @@ const H: Record<string, CSSProperties> = {
 const E: Record<string, CSSProperties> = {
   card: {
     borderRadius: 22,
+    /* Overlay opacities bumped 2025-05-05 — when the page background
+       went pure white, the outer card felt washed out at 38%/70%.
+       Deepened to 52%/86% so the periwinkle reads vivid; the inner
+       row tints below were also bumped so they're actually visible
+       against the deeper backdrop. */
     backgroundImage:
-      `linear-gradient(165deg, rgba(95,115,200,0.38) 0%, rgba(50,72,160,0.70) 100%), url('${RANDOM_TEXTURES.buyers}')`,
+      `linear-gradient(165deg, rgba(95,115,200,0.52) 0%, rgba(50,72,160,0.86) 100%), url('${RANDOM_TEXTURES.buyers}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     backgroundRepeat: "no-repeat, no-repeat",
@@ -631,9 +658,13 @@ const E: Record<string, CSSProperties> = {
     color: "#fff",
     overflow: "hidden",
     boxShadow:
-      "0 12px 28px -10px rgba(0,0,0,0.28)," +
-      " inset 0 1px 0 rgba(255,255,255,0.22)," +
-      " inset 0 -1px 0 rgba(0,0,0,0.18)",
+      // Periwinkle-tinted ambient glow — the card "radiates" its
+      // accent color outward, integrating with the page like the
+      // hero cards now do.
+      "0 14px 36px -10px rgba(95,115,200,0.32)," +
+      "0 8px 20px -8px rgba(0,0,0,0.26)," +
+      " inset 0 1px 0 rgba(255,255,255,0.24)," +
+      " inset 0 -1px 0 rgba(0,0,0,0.20)",
     padding: "20px 16px 16px",
     position: "relative",
   },
