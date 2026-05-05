@@ -256,6 +256,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
           onOpenDeal={onOpenDeal}
           onOpenWatching={onOpenWatching}
           onAvatarClick={onAvatarClick}
+          onSearch={onChat}
           userWatching={userDeals.hasData ? userDeals.watching : null}
           userFeatured={userDeals.hasData ? userDeals.featured : null}
         />
@@ -266,6 +267,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
           initials={initials}
           onOpenDeal={onOpenDeal}
           onAvatarClick={onAvatarClick}
+          onSearch={onChat}
           userPicks={userDeals.hasData ? userDeals.picks : null}
         />
       )}

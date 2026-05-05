@@ -20,6 +20,7 @@ interface PipelineProps {
   onOpenDeal: (id: string, title: string) => void;
   onOpenWatching: () => void;
   onAvatarClick: () => void;
+  onSearch: () => void;
   /** Authed user's watching list (null = anon or empty → samples render). */
   userWatching: MobileWatchRow[] | null;
   /** Authed user's "NEW TODAY" featured hero (null = anon or empty → sample). */
@@ -59,7 +60,7 @@ const SAMPLE_FEATURED: FeaturedDef = {
   revLabel: "$5.4M REV",
 };
 
-export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, onAvatarClick, userWatching: _userWatching, userFeatured }: PipelineProps) {
+export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, onAvatarClick, onSearch, userWatching: _userWatching, userFeatured }: PipelineProps) {
   const FEATURED: FeaturedDef = userFeatured ?? SAMPLE_FEATURED;
   const [activeChip, setActiveChip] = useState<DealStage>("watching");
   const { isWatched, toggle } = useWatchlist();
@@ -67,7 +68,7 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
 
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
-      <GlassTopBar title="Pipeline" initials={initials} onAvatarClick={onAvatarClick} />
+      <GlassTopBar title="Pipeline" initials={initials} onAvatarClick={onAvatarClick} onSearch={onSearch} />
       <LargeTitle>Pipeline</LargeTitle>
 
       {/* Logged-out callout */}

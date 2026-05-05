@@ -74,7 +74,7 @@ export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onLearn, onA
   const { isWatched, toggle } = useWatchlist();
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
-      <GlassTopBar title="Today" initials={initials} onAvatarClick={onAvatarClick} />
+      <GlassTopBar title="Today" initials={initials} onAvatarClick={onAvatarClick} onSearch={onChat} />
       <LargeTitle>Today</LargeTitle>
 
       {/* Hero — anon = welcome, authed = today's brief teaser */}

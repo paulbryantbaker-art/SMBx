@@ -53,6 +53,7 @@ interface GlassTopBarProps {
   rightSlot?: ReactNode;
   initials?: string;
   onAvatarClick?: () => void;
+  onSearch?: () => void;
 }
 
 export function GlassTopBar({
@@ -62,6 +63,7 @@ export function GlassTopBar({
   rightSlot,
   initials = "JM",
   onAvatarClick,
+  onSearch,
 }: GlassTopBarProps) {
   const { collapsed, scrolled } = useContext(TitleCollapseContext);
   return (
@@ -148,7 +150,13 @@ export function GlassTopBar({
             <button
               type="button"
               aria-label="Search"
-              style={T.searchBtn}
+              onClick={onSearch}
+              disabled={!onSearch}
+              style={{
+                ...T.searchBtn,
+                cursor: onSearch ? "pointer" : "default",
+                opacity: onSearch ? 1 : 0.5,
+              }}
             >
               <MobileIcon name="search" size={15} c="var(--mb-ink-1)" />
             </button>

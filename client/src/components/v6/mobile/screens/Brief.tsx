@@ -14,6 +14,7 @@ interface BriefProps {
   initials: string;
   onOpenDeal: (id: string, title: string) => void;
   onAvatarClick: () => void;
+  onSearch: () => void;
   /** Authed user's top 3 picks (null = anon or empty → samples render). */
   userPicks: MobilePick[] | null;
 }
@@ -33,11 +34,11 @@ const SAMPLE_PICKS: Pick[] = [
   { rank: 3, id: "deal-electrical", name: "Electrical Contractor · TX",   sub: "Margins good but 60% one customer",          fit: 78, kind: "watch"  },
 ];
 
-export function BriefScreen({ isAnon, initials, onOpenDeal, onAvatarClick, userPicks }: BriefProps) {
+export function BriefScreen({ isAnon, initials, onOpenDeal, onAvatarClick, onSearch, userPicks }: BriefProps) {
   const PICKS: Pick[] = userPicks ?? SAMPLE_PICKS;
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
-      <GlassTopBar title="Brief" initials={initials} onAvatarClick={onAvatarClick} />
+      <GlassTopBar title="Brief" initials={initials} onAvatarClick={onAvatarClick} onSearch={onSearch} />
       <LargeTitle>Brief</LargeTitle>
 
       {/* Date + sample callout */}
