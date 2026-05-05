@@ -18,6 +18,7 @@ import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
 import { MobileIcon } from "../icons";
 import type { Verdict, YIconKind } from "../types";
 import type { MobilePipelineRow, MobilePick } from "../../../../hooks/useMobileDeals";
+import { useWatchlist } from "../../../../hooks/useWatchlist";
 
 interface TodayProps {
   isAnon: boolean;
@@ -70,6 +71,7 @@ const SAMPLE_PIPELINE: TodayPipelineRow[] = [
 export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onLearn, onAvatarClick, userPipeline, userPicks }: TodayProps) {
   const PIPELINE: TodayPipelineRow[] = userPipeline ?? SAMPLE_PIPELINE;
   const PICKS: TodayPick[] = userPicks ?? SAMPLE_PICKS;
+  const { isWatched, toggle } = useWatchlist();
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
       <GlassTopBar title="Today" initials={initials} onAvatarClick={onAvatarClick} />
@@ -113,6 +115,8 @@ export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onLearn, onA
               verdict={"verdict" in d ? d.verdict : undefined}
               last={i === PIPELINE.length - 1}
               onTap={() => onOpenDeal(d.id, d.name)}
+              watched={isWatched(d.id)}
+              onToggleWatch={() => toggle(d.id, d.name)}
             />
           ))}
         </div>
@@ -382,12 +386,30 @@ function ExploreRow({
 /* ─── PipelineRow ───────────────────────────────────────── */
 
 function PipelineRow({
-  icon, name, sub, action, price, verdict, last, onTap,
+  icon, name, sub, action, price, verdict, last, onTap, watched, onToggleWatch,
 }: {
   icon: YIconKind; name: string; sub: string;
   action: "open" | "get"; price?: string; verdict?: Verdict; last?: boolean;
   onTap: () => void;
+  watched: boolean;
+  onToggleWatch: () => void;
 }) {
+  // For "get" rows, the pill behaves like Pipeline's: "Watch" toggles the
+  // user's local watchlist, "Pass" is informational (still opens detail
+  // so user can read why Yulia passed).
+  const isWatchPill = price === "Watch";
+  const pillLabel = isWatchPill ? (watched ? "Watching" : "Watch") : price;
+  const pillBg = isWatchPill
+    ? (watched ? "var(--mb-accent-ink)" : "var(--mb-blue-soft)")
+    : "var(--mb-card-2)";
+  const pillColor = isWatchPill
+    ? (watched ? "#fff" : "var(--mb-blue-ink)")
+    : "var(--mb-ink-3)";
+  const onPillClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isWatchPill) onToggleWatch();
+    else onTap();
+  };
   return (
     <div
       className="mb-tap"
@@ -416,10 +438,16 @@ function PipelineRow({
           <>
             <button
               type="button"
-              className="mb-get-pill"
-              style={{ padding: "5px 18px", fontSize: 14 }}
-              onClick={(e) => { e.stopPropagation(); onTap(); }}
-            >{price}</button>
+              aria-pressed={isWatchPill ? watched : undefined}
+              style={{
+                padding: "5px 18px", fontSize: 14,
+                fontWeight: 700, borderRadius: 999, border: "none",
+                background: pillBg, color: pillColor,
+                cursor: "pointer", minWidth: 78,
+                transition: "background-color 200ms ease, color 200ms ease",
+              }}
+              onClick={onPillClick}
+            >{pillLabel}</button>
             <span style={S.rowActionMeta}>Yulia&rsquo;s call</span>
           </>
         ) : (

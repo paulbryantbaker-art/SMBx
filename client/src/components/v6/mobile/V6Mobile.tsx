@@ -10,6 +10,7 @@ import { TodayScreen } from "./screens/Today";
 import { PipelineScreen } from "./screens/Pipeline";
 import { BriefScreen } from "./screens/Brief";
 import { DetailScreen } from "./screens/Detail";
+import { WatchingScreen } from "./screens/Watching";
 import { ChatSheet } from "./ChatSheet";
 import { LearnSheet } from "./LearnSheet";
 import type { MobileChatBridge, MobileTab, MobileView } from "./types";
@@ -78,7 +79,9 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
   const [view, setView] = useState<MobileView>(
     initial.detail
       ? { kind: "detail", dealId: initial.detail, dealTitle: initial.dealTitle ?? undefined }
-      : { kind: "tab", tab: initial.tab }
+      : initial.watching
+        ? { kind: "watching" }
+        : { kind: "tab", tab: initial.tab }
   );
   const [chatOpen, setChatOpen] = useState(initial.chat);
   const [learn, setLearn] = useState<{ open: boolean; section: "how" | "pricing"; anchor?: string }>({
@@ -187,7 +190,12 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
     }
   }, []); // mount-only
 
-  const activeTab: MobileTab = view.kind === "tab" ? (view.tab ?? "today") : "today";
+  // Watching is a sub-page of Pipeline, so reflect that in the tab bar.
+  // Detail comes from anywhere, so default to Today there.
+  const activeTab: MobileTab =
+    view.kind === "tab" ? (view.tab ?? "today") :
+    view.kind === "watching" ? "pipeline" :
+    "today";
   const onTabChange = (next: MobileTab) => setView({ kind: "tab", tab: next });
   const onChat = () => setChatOpen(true);
   const onChatClose = () => setChatOpen(false);
@@ -205,6 +213,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
   const onOpenDeal = (id: string, title: string) => {
     setView({ kind: "detail", dealId: id, dealTitle: title });
   };
+  const onOpenWatching = () => setView({ kind: "watching" });
   const onAvatarClick = () => {
     if (!user) {
       navigate("/login");
@@ -217,9 +226,12 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
     }
   };
 
+  // Detail and Watching are full-page surfaces with their own white
+  // backgrounds. Tabs share the home gradient.
+  const isWhitePage = view.kind === "detail" || view.kind === "watching";
   const rootStyle: CSSProperties = {
     ...(isStandalone ? S.rootPwa : S.rootSafari),
-    background: view.kind === "detail" ? "#FFFFFF" : rootGradient(isAnon),
+    background: isWhitePage ? "#FFFFFF" : rootGradient(isAnon),
   };
 
   return (
@@ -242,6 +254,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
           isAnon={isAnon}
           initials={initials}
           onOpenDeal={onOpenDeal}
+          onOpenWatching={onOpenWatching}
           onAvatarClick={onAvatarClick}
           userWatching={userDeals.hasData ? userDeals.watching : null}
           userFeatured={userDeals.hasData ? userDeals.featured : null}
@@ -261,6 +274,12 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
           dealId={view.dealId ?? "unknown"}
           dealTitle={view.dealTitle ?? view.dealId ?? "Deal"}
           onBack={() => setView({ kind: "tab", tab: "today" })}
+        />
+      )}
+      {view.kind === "watching" && (
+        <WatchingScreen
+          onBack={() => setView({ kind: "tab", tab: "pipeline" })}
+          onOpenDeal={onOpenDeal}
         />
       )}
       <TabBar active={activeTab} onChange={onTabChange} onChat={onChat} />
@@ -310,19 +329,20 @@ function computeInitials(user: User | null): string {
 
 /* ─── URL hash state ─────────────────────────────────────── */
 
-function readMobileHashState(): { tab: MobileTab; detail: string | null; dealTitle: string | null; chat: boolean } {
+function readMobileHashState(): { tab: MobileTab; detail: string | null; dealTitle: string | null; chat: boolean; watching: boolean } {
   try {
     const hash = window.location.hash.replace(/^#/, "");
-    if (!hash) return { tab: "today", detail: null, dealTitle: null, chat: false };
+    if (!hash) return { tab: "today", detail: null, dealTitle: null, chat: false, watching: false };
     const params = new URLSearchParams(hash);
     const rawTab = params.get("tab") as MobileTab | null;
     const tab: MobileTab = rawTab && VALID_TABS.includes(rawTab) ? rawTab : "today";
     const detail = params.get("deal");
     const dealTitle = params.get("t");
     const chat = params.get("chat") === "open";
-    return { tab, detail, dealTitle, chat };
+    const watching = params.get("view") === "watching";
+    return { tab, detail, dealTitle, chat, watching };
   } catch {
-    return { tab: "today", detail: null, dealTitle: null, chat: false };
+    return { tab: "today", detail: null, dealTitle: null, chat: false, watching: false };
   }
 }
 
@@ -334,6 +354,8 @@ function writeMobileHashState(view: MobileView, chatOpen: boolean) {
       // Persist title in the URL so it survives the home ↔ detail full
       // reload (state is wiped by reload; URL is the only durable carrier).
       if (view.dealTitle) params.set("t", view.dealTitle);
+    } else if (view.kind === "watching") {
+      params.set("view", "watching");
     } else if (view.tab) {
       params.set("tab", view.tab);
     }

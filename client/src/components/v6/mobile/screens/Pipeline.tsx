@@ -1,20 +1,24 @@
 /* V6 Mobile — Pipeline screen.
-   Category chips → NEW TODAY featured hero → Yulia is watching list.
-   NEW TODAY featured uses Big Fake Deal · sample for sample-data consistency
-   with the desktop seed (per copy-resolution rule). */
+   Category chips filter the deal list below. NEW TODAY featured hero
+   stays pinned above as the curated weekly highlight. The "Yulia is
+   watching" section heading has a chevron that opens the full Watching
+   list page. Sample data comes from sampleDeals.ts. */
 
 import { useState, type CSSProperties } from "react";
 import { GlassTopBar, LargeTitle } from "../TopBar";
 import { YIcon } from "../YIcon";
 import { MobileIcon } from "../icons";
-import type { YIconKind } from "../types";
+import type { YIconKind, Verdict } from "../types";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
 import type { MobileWatchRow, MobileFeatured } from "../../../../hooks/useMobileDeals";
+import { dealsByStage, type DealStage, type SampleDeal } from "../../../../lib/sampleDeals";
+import { useWatchlist } from "../../../../hooks/useWatchlist";
 
 interface PipelineProps {
   isAnon: boolean;
   initials: string;
   onOpenDeal: (id: string, title: string) => void;
+  onOpenWatching: () => void;
   onAvatarClick: () => void;
   /** Authed user's watching list (null = anon or empty → samples render). */
   userWatching: MobileWatchRow[] | null;
@@ -22,7 +26,7 @@ interface PipelineProps {
   userFeatured: MobileFeatured | null;
 }
 
-interface ChipDef { id: string; label: string; n: number }
+interface ChipDef { id: DealStage; label: string; n: number }
 const CHIPS: ChipDef[] = [
   { id: "sourced",   label: "Sourced",   n: 142 },
   { id: "screened",  label: "Screened",  n: 28  },
@@ -31,13 +35,21 @@ const CHIPS: ChipDef[] = [
   { id: "watching",  label: "Watching",  n: 87  },
 ];
 
-interface WatchDeal { id: string; icon: YIconKind; name: string; sub: string; pill: string }
-const SAMPLE_WATCHING: WatchDeal[] = [
-  { id: "wpest",     icon: "cool",    name: "Pest Control Roll-up · FL",   sub: "$4.1M rev · Orlando",     pill: "$1.4M SDE" },
-  { id: "welec",     icon: "default", name: "Electrical Contractor · TX",  sub: "$8.7M rev · Austin",      pill: "Watch" },
-  { id: "wmarina",   icon: "cool",    name: "Marina Holdings · FL",        sub: "$8.2M rev · Tampa Bay",   pill: "Pursue" },
-  { id: "wlogistic", icon: "default", name: "Boutique Logistics · GA",     sub: "$6.7M rev · Atlanta",     pill: "Pursue" },
-];
+const STAGE_TITLES: Record<DealStage, string> = {
+  "sourced":   "Sourced this week",
+  "screened":  "Made it through screening",
+  "in-review": "Currently in review",
+  "pursuing":  "Yulia is pursuing",
+  "watching":  "Yulia is watching",
+};
+
+const STAGE_SUBS: Record<DealStage, string> = {
+  "sourced":   "Raw top-of-funnel — Yulia hasn't read these yet.",
+  "screened":  "Passed initial screen — promising on paper.",
+  "in-review": "Yulia's actively working these right now.",
+  "pursuing":  "Active pursuit — IOIs and conversations underway.",
+  "watching":  "Sample sources Yulia revisits weekly — yours go here.",
+};
 
 interface FeaturedDef { id: string; name: string; sub: string; revLabel: string }
 const SAMPLE_FEATURED: FeaturedDef = {
@@ -47,10 +59,11 @@ const SAMPLE_FEATURED: FeaturedDef = {
   revLabel: "$5.4M REV",
 };
 
-export function PipelineScreen({ isAnon, initials, onOpenDeal, onAvatarClick, userWatching, userFeatured }: PipelineProps) {
-  const WATCHING: WatchDeal[] = userWatching ?? SAMPLE_WATCHING;
+export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, onAvatarClick, userWatching: _userWatching, userFeatured }: PipelineProps) {
   const FEATURED: FeaturedDef = userFeatured ?? SAMPLE_FEATURED;
-  const [activeChip, setActiveChip] = useState<string>("in-review");
+  const [activeChip, setActiveChip] = useState<DealStage>("watching");
+  const { isWatched, toggle } = useWatchlist();
+  const filtered: SampleDeal[] = dealsByStage(activeChip);
 
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
@@ -150,35 +163,83 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onAvatarClick, us
         </div>
       </div>
 
-      {/* Yulia is watching */}
+      {/* Stage section — heading and rows update with active chip. Chevron
+          on "Watching" stage opens the full Watching list page; other
+          stages don't have a dedicated full-list page yet. */}
       <div style={{ padding: "24px 22px 4px" }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-          <h2 style={P.watchTitle}>Yulia is watching</h2>
-          <MobileIcon name="chevron" c="var(--mb-ink-3)" size={11} />
-        </div>
-        <div style={P.subText}>Sample sources Yulia revisits weekly &mdash; yours go here.</div>
+        {activeChip === "watching" ? (
+          <button
+            type="button"
+            onClick={onOpenWatching}
+            aria-label="Open full watching list"
+            style={P.headingBtn}
+          >
+            <h2 style={P.watchTitle}>{STAGE_TITLES[activeChip]}</h2>
+            <MobileIcon name="chevron" c="var(--mb-ink-3)" size={11} />
+          </button>
+        ) : (
+          <h2 style={P.watchTitle}>{STAGE_TITLES[activeChip]}</h2>
+        )}
+        <div style={P.subText}>{STAGE_SUBS[activeChip]}</div>
       </div>
 
-      <div className="mb-as-card" style={{ margin: "12px 16px 0", padding: "4px 0" }}>
-        {WATCHING.map((w, i) => (
-          <PipeRow
-            key={w.id}
-            icon={w.icon}
-            name={w.name}
-            sub={w.sub}
-            pill={w.pill}
-            last={i === WATCHING.length - 1}
-            onTap={() => onOpenDeal(w.id, w.name)}
-          />
-        ))}
-      </div>
+      {filtered.length === 0 ? (
+        <div style={{ padding: "32px 22px", textAlign: "center" }}>
+          <div style={P.subText}>No deals at this stage right now.</div>
+        </div>
+      ) : (
+        <div className="mb-as-card" style={{ margin: "12px 16px 0", padding: "4px 0" }}>
+          {filtered.map((d, i) => (
+            <PipeRow
+              key={d.id}
+              icon={d.icon}
+              name={d.name}
+              sub={d.sub}
+              verdict={d.verdict}
+              watched={isWatched(d.id)}
+              last={i === filtered.length - 1}
+              onTap={() => onOpenDeal(d.id, d.name)}
+              onToggleWatch={() => toggle(d.id, d.name)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 function PipeRow({
-  icon, name, sub, pill, last, onTap,
-}: { icon: YIconKind; name: string; sub: string; pill: string; last?: boolean; onTap: () => void }) {
+  icon, name, sub, verdict, watched, last, onTap, onToggleWatch,
+}: {
+  icon: YIconKind;
+  name: string;
+  sub: string;
+  verdict: Verdict;
+  watched: boolean;
+  last?: boolean;
+  onTap: () => void;
+  onToggleWatch: () => void;
+}) {
+  // Pill behavior is verdict-driven:
+  //   Pursue → "Pursue" pill opens detail (most decisive action)
+  //   Watch  → toggles watchlist (Watch ↔ Watching)
+  //   Pass   → informational, opens detail to read why Yulia passed
+  const isPursue = verdict === "pursue";
+  const isPass = verdict === "pass";
+  const pillLabel = isPursue ? "Pursue" : isPass ? "Pass" : (watched ? "Watching" : "Watch");
+  const pillBg =
+    isPursue ? "var(--mb-accent-soft)" :
+    isPass   ? "var(--mb-card-2)" :
+    watched  ? "var(--mb-accent-ink)" : "var(--mb-blue-soft)";
+  const pillColor =
+    isPursue ? "var(--mb-accent-ink)" :
+    isPass   ? "var(--mb-ink-3)" :
+    watched  ? "#fff" : "var(--mb-blue-ink)";
+  const onPillClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (verdict === "watch") onToggleWatch();
+    else onTap();
+  };
   return (
     <div
       className="mb-tap"
@@ -206,10 +267,16 @@ function PipeRow({
       </div>
       <button
         type="button"
-        className="mb-get-pill"
-        style={{ padding: "5px 14px", fontSize: 13, marginRight: 18 }}
-        onClick={(e) => { e.stopPropagation(); onTap(); }}
-      >{pill}</button>
+        aria-pressed={verdict === "watch" ? watched : undefined}
+        style={{
+          padding: "5px 14px", fontSize: 13, marginRight: 18,
+          fontWeight: 700, borderRadius: 999, border: "none",
+          background: pillBg, color: pillColor,
+          minWidth: 78, cursor: "pointer",
+          transition: "background-color 200ms ease, color 200ms ease",
+        }}
+        onClick={onPillClick}
+      >{pillLabel}</button>
     </div>
   );
 }
@@ -283,6 +350,11 @@ const P: Record<string, CSSProperties> = {
     fontFamily: "var(--mb-font-display)", fontWeight: 700,
     fontSize: 22, letterSpacing: "-0.5px", margin: 0,
     color: "var(--mb-ink)",
+  },
+  headingBtn: {
+    display: "flex", alignItems: "baseline", gap: 6,
+    padding: 0, background: "transparent", border: "none",
+    cursor: "pointer", textAlign: "left",
   },
   rowName: {
     fontSize: 15, fontWeight: 600, color: "var(--mb-ink)",

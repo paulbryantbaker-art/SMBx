@@ -1,6 +1,6 @@
 export type MobileTab = "today" | "pipeline" | "brief";
 
-export type MobileViewKind = "tab" | "detail";
+export type MobileViewKind = "tab" | "detail" | "watching";
 
 export interface MobileView {
   kind: MobileViewKind;
