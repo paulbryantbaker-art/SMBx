@@ -85,40 +85,42 @@ export function AudienceSwitcher({ audience, onChange }: AudienceSwitcherProps) 
 }
 
 const S: Record<string, CSSProperties> = {
+  /* Pill is inline-flow now (no position:fixed) — caller decides where
+     to render it. Designed to read against either the white app surface
+     OR a colored card backdrop (Explore card uses a purple watercolor
+     gradient), which is why the rgba(255,255,255,0.92) reads as a
+     "frosted chip" rather than a flat white pill. */
   pill: {
-    position: "fixed",
-    bottom: "calc(env(safe-area-inset-bottom, 0px) + 92px)",
-    right: 16,
-    zIndex: 25,
-    display: "inline-flex", alignItems: "center", gap: 8,
-    padding: "7px 14px 7px 12px",
+    display: "inline-flex", alignItems: "center", gap: 6,
+    padding: "5px 11px 5px 9px",
     borderRadius: 999,
     background: "rgba(255,255,255,0.92)",
     border: "none",
     boxShadow:
-      "0 0 0 0.5px rgba(0,0,0,0.05)," +
-      "0 1px 2px rgba(0,0,0,0.06)," +
-      "0 6px 18px -6px rgba(0,0,0,0.1)",
+      "0 0 0 0.5px rgba(0,0,0,0.06)," +
+      "0 1px 2px rgba(0,0,0,0.05)",
     backdropFilter: "blur(20px)",
     WebkitBackdropFilter: "blur(20px)",
     cursor: "pointer",
     fontFamily: "var(--mb-font-body)",
+    flexShrink: 0,
+    whiteSpace: "nowrap" as const,
     transition: "transform 160ms cubic-bezier(0.25, 1, 0.5, 1)",
   },
   pillEyebrow: {
     fontFamily: "var(--mb-font-mono)",
-    fontSize: 9.5, fontWeight: 600,
+    fontSize: 8.5, fontWeight: 600,
     letterSpacing: "0.08em",
     color: "var(--mb-ink-3)",
     textTransform: "uppercase",
   },
   pillLabel: {
-    fontSize: 13, fontWeight: 600,
+    fontSize: 12, fontWeight: 600,
     color: "var(--mb-ink-1)",
     letterSpacing: "-0.1px",
   },
   pillChevron: {
-    fontSize: 11, color: "var(--mb-ink-3)",
+    fontSize: 10, color: "var(--mb-ink-3)",
     marginLeft: 1, lineHeight: 1,
   },
 

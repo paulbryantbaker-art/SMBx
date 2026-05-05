@@ -19,8 +19,9 @@ import { MobileIcon } from "../icons";
 import type { Verdict, YIconKind } from "../types";
 import type { MobilePipelineRow, MobilePick } from "../../../../hooks/useMobileDeals";
 import { useWatchlist } from "../../../../hooks/useWatchlist";
-import { useAudience } from "../../../../hooks/useAudience";
 import { copyFor } from "../../../../lib/copy";
+import { type Audience } from "../../../../lib/audience";
+import { AudienceSwitcher } from "../AudienceSwitcher";
 
 interface TodayProps {
   isAnon: boolean;
@@ -36,6 +37,14 @@ interface TodayProps {
   /** Authed user's top 3 picks (from useMobileDeals). Null = anon or empty
       → SAMPLE_PICKS renders instead. Same shape as Brief screen's picks. */
   userPicks: MobilePick[] | null;
+  /** Current audience (drives copy + tip chips). */
+  audience: Audience;
+  /** Update audience (used by the inline switcher pill). */
+  onAudienceChange: (a: Audience) => void;
+  /** Whether to show the audience switcher pill at the top of the
+      Explore card. False for authed users (their audience is captured
+      server-side, not toggled). */
+  showAudienceSwitcher: boolean;
 }
 
 interface TodayPick {
@@ -71,11 +80,14 @@ const SAMPLE_PIPELINE: TodayPipelineRow[] = [
   { id: "deal-dist",       icon: "default", name: "Distribution · OH",          sub: "Asking high · margins thin",           action: "get",  price: "Pass" },
 ];
 
-export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onAskYulia, onLearn: _onLearn, onAvatarClick, userPipeline, userPicks }: TodayProps) {
+export function TodayScreen({
+  isAnon, initials, onOpenDeal, onChat, onAskYulia, onLearn: _onLearn,
+  onAvatarClick, userPipeline, userPicks,
+  audience, onAudienceChange, showAudienceSwitcher,
+}: TodayProps) {
   const PIPELINE: TodayPipelineRow[] = userPipeline ?? SAMPLE_PIPELINE;
   const PICKS: TodayPick[] = userPicks ?? SAMPLE_PICKS;
   const { isWatched, toggle } = useWatchlist();
-  const { audience } = useAudience(null);
   const C = copyFor(audience);
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
@@ -96,7 +108,11 @@ export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onAskYulia, 
           from copy.ts that open chat with a starter prompt. The marketing
           chips (How it works · Pricing · Compare plans) are gone — the
           authed audit-§3.1 finding said landing in a sales funnel
-          post-login was wrong. */}
+          post-login was wrong.
+
+          For anon visitors, the audience switcher pill is rendered inline
+          at the top of this card so the test-drive control sits next to
+          the content it actually changes (the tip chips). */}
       <div style={{ padding: "14px 16px 0" }}>
         <ExploreCard
           isAnon={isAnon}
@@ -104,6 +120,9 @@ export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onAskYulia, 
           onAskYulia={onAskYulia}
           onOpenDeal={() => onOpenDeal("deal-bigfake", "Big Fake Deal · sample")}
           tips={C.todayTips}
+          audience={audience}
+          onAudienceChange={onAudienceChange}
+          showAudienceSwitcher={showAudienceSwitcher}
         />
       </div>
 
@@ -323,17 +342,27 @@ function HeroVisualPursue() {
 
 function ExploreCard({
   isAnon, onChat, onAskYulia, onOpenDeal, tips,
+  audience, onAudienceChange, showAudienceSwitcher,
 }: {
   isAnon: boolean;
   onChat: () => void;
   onAskYulia: (prompt: string) => void;
   onOpenDeal: () => void;
   tips: { label: string; prompt: string }[];
+  audience: Audience;
+  onAudienceChange: (a: Audience) => void;
+  showAudienceSwitcher: boolean;
 }) {
   return (
     <div style={E.card}>
-      <div style={E.eyebrowSlot}>
+      {/* Top row: brand eyebrow on the left, optional audience pill on
+          the right. Pill replaces the previous floating chrome — the
+          control now sits next to the content it actually changes. */}
+      <div style={E.topRow}>
         <div className="mb-eyebrow" style={E.eyebrow}>{isAnon ? "EXPLORE SMBX" : "GET THE MOST FROM YULIA"}</div>
+        {showAudienceSwitcher && (
+          <AudienceSwitcher audience={audience} onChange={onAudienceChange} />
+        )}
       </div>
       <div style={E.titleBlock}>
         <h3 style={E.h3}>{isAnon ? "Pick a way in." : "Today's quick wins."}</h3>
@@ -583,6 +612,13 @@ const E: Record<string, CSSProperties> = {
     position: "relative",
   },
   eyebrowSlot: { padding: "0 6px 4px" },
+  /* Top row inside the Explore card — eyebrow on the left, audience
+     switcher pill on the right (when shown). Replaces the previous
+     fixed-position pill. */
+  topRow: {
+    display: "flex", alignItems: "center", justifyContent: "space-between",
+    gap: 12, padding: "0 6px 4px",
+  },
   eyebrow: {
     color: "#fff",
     fontWeight: 700,

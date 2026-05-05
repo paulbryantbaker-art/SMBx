@@ -13,7 +13,6 @@ import { DetailScreen } from "./screens/Detail";
 import { WatchingScreen } from "./screens/Watching";
 import { ChatSheet } from "./ChatSheet";
 import { LearnSheet } from "./LearnSheet";
-import { AudienceSwitcher } from "./AudienceSwitcher";
 import { useAudience } from "../../../hooks/useAudience";
 import type { MobileChatBridge, MobileTab, MobileView } from "./types";
 
@@ -215,11 +214,12 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
     setChatOpen(true);
   };
 
-  // Audience signal — drives copy, capability shortcuts, and the anon
-  // switcher pill below.
+  // Audience signal — drives copy + capability shortcuts. The anon
+  // switcher pill is rendered inline at the top of the Explore card on
+  // Today (passed down via prop). Authed users have their audience
+  // captured server-side, so no switcher needed.
   const { audience, setAudience } = useAudience(user);
-  const showAudienceSwitcher =
-    !user && view.kind === "tab" && activeTab === "today";
+  const isAnonAudience = !user;
 
   const initials = computeInitials(user);
   const isAnon = !user;
@@ -262,6 +262,9 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
           onAvatarClick={onAvatarClick}
           userPipeline={userDeals.hasData ? userDeals.today : null}
           userPicks={userDeals.hasData ? userDeals.picks : null}
+          audience={audience}
+          onAudienceChange={setAudience}
+          showAudienceSwitcher={isAnonAudience}
         />
       )}
       {view.kind === "tab" && activeTab === "pipeline" && (
@@ -301,9 +304,6 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
         />
       )}
       <TabBar active={activeTab} onChange={onTabChange} onChat={onChat} />
-      {showAudienceSwitcher && (
-        <AudienceSwitcher audience={audience} onChange={setAudience} />
-      )}
       <ChatSheet open={chatOpen} onClose={onChatClose} chat={chat} />
       <LearnSheet
         open={learn.open}
