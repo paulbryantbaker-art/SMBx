@@ -695,21 +695,3 @@ html.yulia-chat-open body {
 html.yulia-chat-open #root {
   display: none !important;
 }
-
-/* ─── Mobile detail view body bg override ─────────────────────────────────
-   The index.html inline script sets body bg to #D4A258 (warm gold) at
-   initial paint so iOS Safari samples it for chrome tinting on the home
-   gradient. On detail, we want white chrome instead. We can't mutate
-   body's inline style post-paint (locks iOS chrome translucency — see
-   V6Mobile.tsx:103), but a class on <html> with !important overrides
-   the inline value via CSS specificity. Empirically untested whether
-   iOS reacts to computed-style changes the same way it reacts to inline
-   mutations; if chrome locks, we fall back to the index.html initial-
-   paint detection for direct-load detail URLs.
-*/
-html.mobile-detail body {
-  background-color: #FFFFFF !important;
-}
-html.mobile-detail {
-  background-color: #FFFFFF !important;
-}

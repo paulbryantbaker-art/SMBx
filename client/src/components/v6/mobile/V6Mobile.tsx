@@ -165,28 +165,6 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
     }
   }, [view, isStandalone]);
 
-  // Detail view paints .mobile-root white instead of rootGradient. Mirror
-  // that in <meta name="theme-color"> so iOS Safari's URL-bar tint matches
-  // (Safari samples the meta in tab mode for the bottom chrome surface).
-  // <meta> mutation is safe — the chrome-lock hazard at line 96 is about
-  // body inline-style mutation, not meta tags.
-  //
-  // We also toggle html.mobile-detail to drive a CSS rule that overrides
-  // body's inline gold bg with white via !important. Per iOS architecture
-  // notes, iOS samples body bg directly for chrome tint — chromeSentinel's
-  // backdrop-filter doesn't actually win in practice. Class toggle on
-  // <html> is NOT inline-style mutation on body, so theoretically slips
-  // past the chrome-translucency lock at line 96 (which is specifically
-  // about body inline-style writes). Empirical: untested. If chrome
-  // locks white, that's the desired state on detail anyway. If chrome
-  // unlocks back to gold on home after detail, even better.
-  useEffect(() => {
-    const isDetail = view.kind === "detail";
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", isDetail ? "#FFFFFF" : "#F6F7F9");
-    document.documentElement.classList.toggle("mobile-detail", isDetail);
-  }, [view.kind]);
-
   useEffect(() => {
     const onHash = () => {
       const next = readMobileHashState();

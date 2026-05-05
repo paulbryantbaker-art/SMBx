@@ -34,16 +34,14 @@
       //    behind the status bar. V6Mobile.tsx must NOT touch body bg.
       (function() {
         var isMobile = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
-        // Mobile: white body bg so iOS Safari's opaque-tinted chrome reads
-        // white. Detail page is white throughout; home/pipeline/brief have
-        // a top-of-page gradient (gold sunrise / sage / etc.) that starts
-        // BELOW the iOS chrome zone, so chrome stays neutral white as the
-        // user scrolls. Previously the body was warm gold to "blend" with
-        // the home gradient at scroll=0, but that left a stranded gold
-        // strip in chrome whenever the user scrolled past the gradient's
-        // gold band. Body bg can't be safely mutated post-paint (locks
-        // chrome translucency), so white-everywhere is the answer.
-        var bg = isMobile ? '#FFFFFF' : '#F6F7F9';
+        // Mobile body bg is gold (#D4A258) at initial paint so iOS Safari's
+        // opaque-tinted chrome blends with the home gradient's gold sunrise
+        // at scroll=0. As the user scrolls past the gradient's gold band,
+        // V6Mobile.tsx adds html.mobile-past-gold which flips body to white
+        // via a CSS !important rule — chrome follows. Detail pages get
+        // html.mobile-detail (white). Class-based bg changes (vs body
+        // inline-style writes) don't trigger iOS's chrome-translucency lock.
+        var bg = isMobile ? '#D4A258' : '#F6F7F9';
         document.documentElement.style.backgroundColor = bg;
         if (document.body) document.body.style.backgroundColor = bg;
         else document.addEventListener('DOMContentLoaded', function() {
