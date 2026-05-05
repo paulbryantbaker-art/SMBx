@@ -204,11 +204,13 @@ const W: Record<string, CSSProperties> = {
   },
   editorial: {
     borderRadius: 22, overflow: "hidden",
+    /* Overlay retuned 2026-05-05 (eve) — sienna-brown stops became
+       muddy on the gold texture. Switched to amber/gold tones so the
+       overlay clarifies hue rather than darkening it into brown. */
     backgroundImage:
-      `linear-gradient(165deg, rgba(140,98,42,0.52) 0%, rgba(85,55,18,0.86) 100%), url('${RANDOM_TEXTURES.welcome}')`,
+      `linear-gradient(165deg, rgba(214,163,92,0.30) 0%, rgba(132,90,36,0.64) 100%), url('${RANDOM_TEXTURES.welcome}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
-    backgroundBlendMode: "multiply, normal",
     boxShadow:
       "0 14px 36px -10px rgba(140,98,42,0.32)," +
       "0 8px 20px -8px rgba(0,0,0,0.26)," +

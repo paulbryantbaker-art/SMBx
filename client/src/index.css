@@ -487,6 +487,13 @@ input[type="range"].m-slider::-moz-range-thumb {
   --mb-accent-ink:  #4F60BD;
   --mb-accent-soft: #EEF1FB;
 
+  /* Action accent — soft pastel mint used for "go" chrome (active tab,
+     FAB, send buttons). Cool-family pastel that pairs with periwinkle
+     the way iOS pairs Notes-yellow with Mail-blue: same temperature
+     family, distinct hue, calming brightness. */
+  --mb-action:      #9DD4B8;
+  --mb-action-soft: #DEF1E8;
+
   /* Hero textures — watercolor washes (replaced CD pastel two-tone gradients).
      Files live under client/public/textures/. Apply with:
        background-image: linear-gradient(<verdict-tint>), url(var(--mb-tex-*));

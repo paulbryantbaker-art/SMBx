@@ -295,6 +295,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
           dealTitle={view.dealTitle ?? view.dealId ?? "Deal"}
           onBack={() => setView({ kind: "tab", tab: "today" })}
           onChat={onChat}
+          onAskYulia={onAskYulia}
         />
       )}
       {view.kind === "watching" && (

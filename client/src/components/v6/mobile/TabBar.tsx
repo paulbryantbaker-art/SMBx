@@ -43,11 +43,11 @@ export function TabBar({ active, onChange, onChat }: TabBarProps) {
         {TABS.map(t => {
           const isActive = active === t.id;
           // Dark glass pill (iOS Music/Camera/Photos pattern) carries
-          // its own contrast: white unselected, brightened periwinkle
-          // selected. Both pass WCAG against the dark tint regardless
-          // of what's scrolled behind — no more white-on-white when
-          // the pill sits over the page's white middle band.
-          const c = isActive ? "var(--mb-accent)" : "#fff";
+          // its own contrast: white unselected, soft lavender action
+          // color selected. Lavender is lighter + more violet-shifted
+          // than the periwinkle brand accent — distinct enough to read
+          // as "active" without clashing with the cool palette.
+          const c = isActive ? "var(--mb-action)" : "#fff";
           return (
             <button
               key={t.id}
@@ -129,9 +129,9 @@ const B: Record<string, CSSProperties> = {
     width: 56,
     height: 56,
     borderRadius: "50%",
-    background: "var(--mb-accent-ink)",
+    background: "var(--mb-action)",
     border: "none",
-    boxShadow: "0 10px 28px -6px rgba(46,92,138,0.45), inset 0 0 0 0.5px rgba(255,255,255,0.2), inset 0 1px 0 rgba(255,255,255,0.18)",
+    boxShadow: "0 10px 28px -6px rgba(80,170,138,0.42), inset 0 0 0 0.5px rgba(255,255,255,0.28), inset 0 1px 0 rgba(255,255,255,0.24)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",

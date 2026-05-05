@@ -296,15 +296,17 @@ const HERO_TEXTURE: Record<HeroKind, string> = {
   pass:    RANDOM_TEXTURES.pass,
   welcome: RANDOM_TEXTURES.welcome,
 };
-/* Overlay opacities bumped 2025-05-05 — when the page background went
-   from gold-band to pure white, these overlays needed to do more
-   work to read as "rich textured cards" instead of "muted washes".
-   Top stops +6%, bottom stops +12%. Saturation up, identity intact. */
+/* Overlay hues retuned 2026-05-05 (eve) — the previous sienna-brown
+   stops were muddying the warm watercolor textures into "brown card."
+   Now using the brand verdict tokens directly: pursue = sage green,
+   watch + welcome = warm gold (--mb-warn family), pass = coral. The
+   colors stay in the texture's hue family so the overlay clarifies
+   identity instead of muddying it. */
 const HERO_OVERLAY: Record<HeroKind, string> = {
-  pursue:  "linear-gradient(165deg, rgba(48,108,80,0.40) 0%, rgba(18,68,46,0.78) 100%)",
-  watch:   "linear-gradient(165deg, rgba(150,108,40,0.40) 0%, rgba(95,65,18,0.78) 100%)",
-  pass:    "linear-gradient(165deg, rgba(170,72,60,0.40) 0%, rgba(120,40,32,0.78) 100%)",
-  welcome: "linear-gradient(165deg, rgba(140,98,42,0.40) 0%, rgba(85,55,18,0.76) 100%)",
+  pursue:  "linear-gradient(165deg, rgba(63,138,106,0.30) 0%, rgba(40,92,70,0.62) 100%)",
+  watch:   "linear-gradient(165deg, rgba(214,163,92,0.30) 0%, rgba(132,90,36,0.62) 100%)",
+  pass:    "linear-gradient(165deg, rgba(216,139,132,0.30) 0%, rgba(140,68,60,0.62) 100%)",
+  welcome: "linear-gradient(165deg, rgba(214,163,92,0.28) 0%, rgba(132,90,36,0.60) 100%)",
 };
 
 /* Verdict-tinted ambient shadows so each card "glows" its own color
@@ -312,10 +314,10 @@ const HERO_OVERLAY: Record<HeroKind, string> = {
    they feel alive and integrated. Layered with a regular dark shadow
    for the lift. */
 const HERO_GLOW: Record<HeroKind, string> = {
-  pursue:  "0 14px 36px -10px rgba(48,108,80,0.35)",
-  watch:   "0 14px 36px -10px rgba(150,108,40,0.32)",
-  pass:    "0 14px 36px -10px rgba(170,72,60,0.28)",
-  welcome: "0 14px 36px -10px rgba(140,98,42,0.32)",
+  pursue:  "0 14px 36px -10px rgba(63,138,106,0.32)",
+  watch:   "0 14px 36px -10px rgba(180,130,50,0.30)",
+  pass:    "0 14px 36px -10px rgba(180,90,80,0.28)",
+  welcome: "0 14px 36px -10px rgba(180,130,50,0.32)",
 };
 
 function HeroFrame({
@@ -339,7 +341,9 @@ function HeroFrame({
         backgroundSize: "cover, cover",
         backgroundPosition: "center, center",
         backgroundRepeat: "no-repeat, no-repeat",
-        backgroundBlendMode: "multiply, normal",
+        // Multiply was darkening the watercolor's warm cream tones into a
+        // muddy brown. Default normal compositing keeps the texture's true
+        // hue and lets the gradient overlay tint without muddying.
         color: "#fff",
         overflow: "hidden",
         boxShadow:
@@ -644,17 +648,15 @@ const H: Record<string, CSSProperties> = {
 const E: Record<string, CSSProperties> = {
   card: {
     borderRadius: 22,
-    /* Overlay opacities bumped 2025-05-05 — when the page background
-       went pure white, the outer card felt washed out at 38%/70%.
-       Deepened to 52%/86% so the periwinkle reads vivid; the inner
-       row tints below were also bumped so they're actually visible
-       against the deeper backdrop. */
+    /* Overlay reverted 2026-05-05 (eve) — multiply + heavy stops were
+       muddying the periwinkle into brown-ish purple. Back to lighter
+       stops with normal compositing; the verdict-tinted glow below
+       carries the depth without darkening the texture's true color. */
     backgroundImage:
-      `linear-gradient(165deg, rgba(95,115,200,0.52) 0%, rgba(50,72,160,0.86) 100%), url('${RANDOM_TEXTURES.buyers}')`,
+      `linear-gradient(165deg, rgba(95,115,200,0.38) 0%, rgba(50,72,160,0.70) 100%), url('${RANDOM_TEXTURES.buyers}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     backgroundRepeat: "no-repeat, no-repeat",
-    backgroundBlendMode: "multiply, normal",
     color: "#fff",
     overflow: "hidden",
     boxShadow:

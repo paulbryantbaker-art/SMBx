@@ -325,15 +325,14 @@ const P: Record<string, CSSProperties> = {
   },
   featured: {
     borderRadius: 18, overflow: "hidden",
-    /* Overlay deepened + multiply blend so the blue baseline texture
-       reads vivid on a white page. Verdict-tinted (blue) ambient
-       glow integrates the card with the surrounding page. */
+    /* Overlay reverted 2026-05-05 (eve) — multiply blend was muddying
+       the blue. Back to lighter normal-blend stops; verdict-tinted
+       glow below carries the integration with the white page. */
     backgroundImage:
-      `linear-gradient(160deg, rgba(60,108,168,0.54) 0%, rgba(25,68,118,0.86) 100%), url('${RANDOM_TEXTURES.baseline}')`,
+      `linear-gradient(160deg, rgba(60,108,168,0.42) 0%, rgba(25,68,118,0.72) 100%), url('${RANDOM_TEXTURES.baseline}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     backgroundRepeat: "no-repeat, no-repeat",
-    backgroundBlendMode: "multiply, normal",
     color: "#fff", position: "relative",
     boxShadow:
       "0 14px 36px -10px rgba(60,108,168,0.32)," +

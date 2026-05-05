@@ -3,8 +3,8 @@
    tag chips + What's Yulia saying + A closer look (horizontal artifact rail)
    + Confidence & notes. */
 
-import { type CSSProperties, type ReactNode } from "react";
-import { YIcon } from "../YIcon";
+import { type CSSProperties, type ReactNode, useState } from "react";
+import { FitGauge } from "../FitGauge";
 import { MobileIcon } from "../icons";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
 import { useWatchlist } from "../../../../hooks/useWatchlist";
@@ -14,9 +14,12 @@ interface DetailProps {
   dealTitle: string;
   onBack: () => void;
   onChat: () => void;
+  /** Send a starter prompt to chat then open the chat sheet. Used by
+      the next-actions list and the deal-context input at the bottom. */
+  onAskYulia: (prompt: string) => void;
 }
 
-export function DetailScreen({ dealId, dealTitle, onBack, onChat }: DetailProps) {
+export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia }: DetailProps) {
   const { isWatched, toggle } = useWatchlist();
   const watched = isWatched(dealId);
 
@@ -36,9 +39,12 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat }: DetailProps)
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 140, position: "relative", background: "var(--mb-bg)" }}>
       <FloatingNav onBack={onBack} onShare={onShare} />
 
-      {/* Hero block — icon + name + verdict */}
+      {/* Hero block — fit-score gauge + name + verdict.
+          The gauge replaces the previous YIcon block. Same footprint,
+          but communicates "how strong does this deal fit your thesis"
+          at a glance — way more useful than a generic mark. */}
       <div style={D.hero}>
-        <YIcon size={108} kind="pursue" radius={24} />
+        <FitGauge score={92} verdict="pursue" size={108} strokeRatio={0.09} />
         <div style={{ flex: 1, minWidth: 0, paddingTop: 4 }}>
           <h1 style={D.h1}>{dealTitle}</h1>
           <div style={D.dealMeta}>East Texas &middot; Deal #SMBX-0119</div>
@@ -59,11 +65,13 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat }: DetailProps)
         </div>
       </div>
 
-      {/* Stats strip */}
+      {/* Stats strip — FIT SCORE removed since the hero gauge already
+          carries it; replaced with EBITDA so the user sees both
+          earnings views at once. */}
       <div style={D.statsStrip}>
         <Stat top="$1.80M" label="NORM. SDE" sub={<span style={{ color: "var(--mb-accent)" }}>+$760K</span>} divider />
+        <Stat top="$2.10M" label="EBITDA"    sub="adj." divider />
         <Stat top="7.0×"   label="MULTIPLE"  sub="SBA-clear" divider />
-        <Stat top="92"     label="FIT SCORE" sub={<Stars n={4.6} />} divider />
         <Stat top="#3"     label="THIS WEEK" sub="of 142" />
       </div>
 
@@ -94,8 +102,10 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat }: DetailProps)
         </div>
       </Section>
 
-      {/* Confidence & notes */}
-      <Section title="Confidence & notes" chevron>
+      {/* Yulia Review — renamed from "Confidence & notes". The stars
+          and inline note are now framed as Yulia's live commentary
+          on the deal, not a user review. */}
+      <Section title="Yulia Review" chevron>
         <div style={{ display: "flex", alignItems: "center", gap: 18, paddingTop: 4 }}>
           <div>
             <div style={D.bigNumber}>4.6</div>
@@ -113,14 +123,123 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat }: DetailProps)
         <div style={D.userNote}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
             <Stars n={5} size={11} />
-            <span style={{ fontSize: 12, color: "var(--mb-ink-3)" }}>&middot;&nbsp;you, 1d ago</span>
+            <span style={{ fontSize: 12, color: "var(--mb-ink-3)" }}>&middot;&nbsp;Yulia, 2 hr ago</span>
           </div>
-          <div style={D.userNoteTitle}>Worth the call. Lining up the SBA pre-qual today.</div>
+          <div style={D.userNoteTitle}>Worth the call. Pre-qualify SBA today.</div>
           <div style={D.userNoteBody}>
-            The recast story tracks with what the broker mentioned off-record. I want to see the customer contracts before IOI goes out.
+            The recast holds. NWC peg is below median — flag for QoE. Concentration looks heavy on paper but those accounts are 6+ years old with zero churn. That&rsquo;s a moat, not a risk.
           </div>
         </div>
       </Section>
+
+      {/* Recommended next actions — 3 things Yulia thinks the user
+          should do next. Each tap fires onAskYulia(prompt) with a
+          starter that opens chat with the relevant action context. */}
+      <Section title="Recommended next" chevron={false}>
+        <NextAction
+          eyebrow="ANALYSIS"
+          title="Run a deeper QoE on the NWC peg"
+          sub="2 minutes · Yulia walks the working capital math"
+          onTap={() => onAskYulia(`On ${dealTitle}: walk me through a deeper QoE focused on the NWC peg. Numbers + recommendation.`)}
+        />
+        <NextAction
+          eyebrow="DOC"
+          title="Draft the IOI"
+          sub="Yulia has the v3 ready — review and send"
+          onTap={() => onAskYulia(`On ${dealTitle}: draft the IOI for me. League-appropriate template, agreed terms.`)}
+        />
+        <NextAction
+          eyebrow="OUTREACH"
+          title="Pull the buyer list"
+          sub="69 candidates · 47 strategics, 22 sponsors"
+          last
+          onTap={() => onAskYulia(`On ${dealTitle}: pull a ranked buyer list. Strategic and sponsor split, fit reasoning.`)}
+        />
+      </Section>
+
+      {/* Deal-context chat input — tappable field at the bottom that
+          opens chat with the deal already in context. Whatever the
+          user types becomes a starter prompt scoped to this deal. */}
+      <DealChatInput dealTitle={dealTitle} onAskYulia={onAskYulia} />
+    </div>
+  );
+}
+
+/* ─── Recommended-action row ─────────────────────────────── */
+
+function NextAction({
+  eyebrow, title, sub, last, onTap,
+}: { eyebrow: string; title: string; sub: string; last?: boolean; onTap: () => void }) {
+  return (
+    <div
+      className="mb-tap"
+      role="button"
+      tabIndex={0}
+      onClick={onTap}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onTap();
+        }
+      }}
+      style={{
+        display: "flex", alignItems: "center", gap: 12,
+        padding: "14px 0",
+        borderBottom: last ? "none" : "0.5px solid var(--mb-line-2)",
+        cursor: "pointer",
+      }}
+    >
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="mb-mono" style={D.nextEyebrow}>{eyebrow}</div>
+        <div style={D.nextTitle}>{title}</div>
+        <div style={D.nextSub}>{sub}</div>
+      </div>
+      <MobileIcon name="chevron" size={12} c="var(--mb-ink-3)" />
+    </div>
+  );
+}
+
+/* ─── Deal-context chat input ────────────────────────────── */
+
+function DealChatInput({
+  dealTitle, onAskYulia,
+}: { dealTitle: string; onAskYulia: (prompt: string) => void }) {
+  const [draft, setDraft] = useState("");
+  const submit = () => {
+    const t = draft.trim();
+    if (!t) {
+      // Empty submit — open chat with deal context as a starter.
+      onAskYulia(`Tell me more about ${dealTitle}.`);
+      return;
+    }
+    onAskYulia(`About ${dealTitle}: ${t}`);
+    setDraft("");
+  };
+  return (
+    <div style={D.chatInputWrap}>
+      <div className="mb-mono" style={D.chatInputEyebrow}>
+        ASK YULIA · ABOUT THIS DEAL
+      </div>
+      <form
+        onSubmit={(e) => { e.preventDefault(); submit(); }}
+        style={D.chatInputForm}
+      >
+        <input
+          type="text"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          placeholder="Chat with Yulia about this deal…"
+          aria-label={`Chat with Yulia about ${dealTitle}`}
+          style={D.chatInputField}
+        />
+        <button
+          type="submit"
+          aria-label="Send"
+          style={D.chatInputSend}
+        >
+          <MobileIcon name="arrowUp" size={16} c="#fff" />
+        </button>
+      </form>
     </div>
   );
 }
@@ -217,16 +336,16 @@ type ArtifactKind = "recast" | "baseline" | "buyers" | "ioi";
 // Each artifact card is a texture + tinted overlay (kept for white text
 // legibility), except "ioi" which stays as the formal dark slate card —
 // textures would weaken the IOI/LOI doc gravitas.
-/* Artifact previews use the same overlay-recipe as the home heroes:
-   deeper stops + multiply blend so the watercolor textures pop on the
-   white detail page background. */
+/* Artifact previews use the lighter overlay recipe — multiply blend was
+   muddying the watercolor into brown. Normal compositing + lighter stops
+   keeps the verdict colors vivid. */
 const ARTIFACT_BG: Record<ArtifactKind, string> = {
   recast:
-    `linear-gradient(160deg, rgba(48,108,80,0.54) 0%, rgba(18,68,46,0.86) 100%), url('${RANDOM_TEXTURES.pursue}')`,
+    `linear-gradient(160deg, rgba(48,108,80,0.44) 0%, rgba(18,68,46,0.74) 100%), url('${RANDOM_TEXTURES.pursue}')`,
   baseline:
-    `linear-gradient(160deg, rgba(60,108,168,0.54) 0%, rgba(25,68,118,0.86) 100%), url('${RANDOM_TEXTURES.baseline}')`,
+    `linear-gradient(160deg, rgba(60,108,168,0.44) 0%, rgba(25,68,118,0.74) 100%), url('${RANDOM_TEXTURES.baseline}')`,
   buyers:
-    `linear-gradient(160deg, rgba(95,68,150,0.54) 0%, rgba(60,38,108,0.86) 100%), url('${RANDOM_TEXTURES.buyers}')`,
+    `linear-gradient(160deg, rgba(95,68,150,0.44) 0%, rgba(60,38,108,0.74) 100%), url('${RANDOM_TEXTURES.buyers}')`,
   ioi:
     "linear-gradient(160deg, #3A4150, #1A2233)",
 };
@@ -260,7 +379,8 @@ function ArtifactPreview({
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
-        backgroundBlendMode: "multiply, normal",
+        // Multiply removed — was muddying the watercolor texture into
+        // brown. Normal compositing keeps colors vivid.
         color: "#fff", overflow: "hidden", position: "relative",
         boxShadow:
           ARTIFACT_GLOW[kind] + "," +
@@ -426,5 +546,65 @@ const D: Record<string, CSSProperties> = {
     display: "flex", alignItems: "center", justifyContent: "center",
     boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
     cursor: "pointer",
+  },
+
+  /* Recommended next-action rows */
+  nextEyebrow: {
+    fontSize: 10, letterSpacing: "0.08em", fontWeight: 700,
+    color: "var(--mb-ink-3)", textTransform: "uppercase",
+    marginBottom: 2,
+  },
+  nextTitle: {
+    fontSize: 15, fontWeight: 600, color: "var(--mb-ink)",
+    letterSpacing: "-0.2px", lineHeight: 1.25,
+  },
+  nextSub: {
+    fontSize: 13, color: "var(--mb-ink-3)", marginTop: 2,
+    lineHeight: 1.35,
+  },
+
+  /* Deal-context chat input — the light-grey wrapper holds the eyebrow
+     plus an inner pill that matches the ChatSheet composerPill exactly,
+     so the user feels they're already inside the chat from the deal
+     page. Clicking → opens ChatSheet with this deal pre-loaded. */
+  chatInputWrap: {
+    margin: "8px 16px 0",
+    padding: "16px 14px 16px",
+    background: "var(--mb-card-2)",
+    borderRadius: 18,
+    border: "0.5px solid var(--mb-line-2)",
+  },
+  chatInputEyebrow: {
+    fontSize: 10.5, letterSpacing: "0.08em", fontWeight: 700,
+    color: "var(--mb-ink-3)", marginBottom: 10, paddingLeft: 4,
+  },
+  chatInputForm: {
+    background: "rgba(255,255,255,0.92)",
+    border: "1px solid var(--mb-line-2)",
+    borderRadius: 20,
+    padding: 6,
+    paddingLeft: 14,
+    display: "flex", alignItems: "flex-end", gap: 8,
+    boxShadow: "0 6px 20px -6px rgba(0,0,0,0.12)",
+    backdropFilter: "blur(20px) saturate(180%)",
+    WebkitBackdropFilter: "blur(20px) saturate(180%)",
+  },
+  chatInputField: {
+    flex: 1, minWidth: 0,
+    border: "none", outline: "none", background: "transparent",
+    fontFamily: "var(--mb-font-body)",
+    fontSize: 16, lineHeight: 1.4,
+    color: "var(--mb-ink)",
+    padding: "8px 4px",
+  },
+  chatInputSend: {
+    flexShrink: 0,
+    width: 32, height: 32, borderRadius: "50%",
+    border: "none",
+    background: "var(--mb-action)",
+    color: "#fff",
+    cursor: "pointer",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    transition: "transform 160ms ease-out, background-color 200ms ease",
   },
 };

@@ -383,7 +383,7 @@ const S: Record<string, CSSProperties> = {
   sendBtn: {
     width: 32, height: 32,
     borderRadius: "50%",
-    background: "var(--mb-accent-ink)",
+    background: "var(--mb-action)",
     border: "none",
     display: "flex", alignItems: "center", justifyContent: "center",
     cursor: "pointer",

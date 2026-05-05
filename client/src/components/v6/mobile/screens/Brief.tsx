@@ -115,16 +115,14 @@ const Br: Record<string, CSSProperties> = {
   },
   editorial: {
     borderRadius: 22, overflow: "hidden",
-    /* Overlay deepened 2025-05-05 — top stop +10%, bottom stop +12%
-       so the editorial card pops on a white page like the home hero
-       does. Also added blend-mode multiply so the watercolor texture
-       reads through more vividly instead of being flatly washed. */
+    /* Overlay retuned 2026-05-05 (eve) — sienna-brown stops were muddying
+       the gold watercolor texture. Switched to amber/gold (--mb-warn family)
+       so the overlay clarifies the texture's hue rather than browning it. */
     backgroundImage:
-      `linear-gradient(165deg, rgba(140,98,42,0.50) 0%, rgba(85,55,18,0.84) 100%), url('${RANDOM_TEXTURES.welcome}')`,
+      `linear-gradient(165deg, rgba(214,163,92,0.28) 0%, rgba(132,90,36,0.62) 100%), url('${RANDOM_TEXTURES.welcome}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     backgroundRepeat: "no-repeat, no-repeat",
-    backgroundBlendMode: "multiply, normal",
     color: "#fff", position: "relative",
     cursor: "pointer",
     /* Verdict-tinted ambient glow (gold here, matching the texture)

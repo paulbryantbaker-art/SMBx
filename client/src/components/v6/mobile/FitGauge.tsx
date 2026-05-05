@@ -19,10 +19,14 @@ interface FitGaugeProps {
   strokeRatio?: number;
 }
 
+/* Use the medium verdict tones (not -ink) so the gauge reads pastel and
+   pairs with the cool/soft palette. The deep -ink versions felt like
+   hunter forest green / deep brass / terracotta — too saturated against
+   the periwinkle + pastel-mint scheme. */
 const VERDICT_COLOR: Record<Verdict, string> = {
-  pursue: "var(--mb-verdict-pursue-ink)",   // #3F8A6A
-  watch:  "var(--mb-warn-ink)",              // #9C7128
-  pass:   "var(--mb-danger-ink)",            // #A85248
+  pursue: "var(--mb-verdict-pursue)",   // #6FB89A — soft sage
+  watch:  "var(--mb-warn)",              // #D6A35C — warm gold
+  pass:   "var(--mb-danger)",            // #D88B84 — coral
 };
 
 const VERDICT_TRACK: Record<Verdict, string> = {
