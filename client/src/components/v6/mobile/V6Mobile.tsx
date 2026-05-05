@@ -13,6 +13,8 @@ import { DetailScreen } from "./screens/Detail";
 import { WatchingScreen } from "./screens/Watching";
 import { ChatSheet } from "./ChatSheet";
 import { LearnSheet } from "./LearnSheet";
+import { AudienceSwitcher } from "./AudienceSwitcher";
+import { useAudience } from "../../../hooks/useAudience";
 import type { MobileChatBridge, MobileTab, MobileView } from "./types";
 
 const VALID_TABS: MobileTab[] = ["today", "pipeline", "brief"];
@@ -206,6 +208,18 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
     chat.send(prompt);
     setChatOpen(true);
   };
+  // Used by Today's persona-tip chips. Same shape as onLearnTalkToYulia
+  // but the source is the Today Explore card rather than the Learn sheet.
+  const onAskYulia = (prompt: string) => {
+    chat.send(prompt);
+    setChatOpen(true);
+  };
+
+  // Audience signal — drives copy, capability shortcuts, and the anon
+  // switcher pill below.
+  const { audience, setAudience } = useAudience(user);
+  const showAudienceSwitcher =
+    !user && view.kind === "tab" && activeTab === "today";
 
   const initials = computeInitials(user);
   const isAnon = !user;
@@ -243,6 +257,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
           initials={initials}
           onOpenDeal={onOpenDeal}
           onChat={onChat}
+          onAskYulia={onAskYulia}
           onLearn={onLearn}
           onAvatarClick={onAvatarClick}
           userPipeline={userDeals.hasData ? userDeals.today : null}
@@ -286,6 +301,9 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
         />
       )}
       <TabBar active={activeTab} onChange={onTabChange} onChat={onChat} />
+      {showAudienceSwitcher && (
+        <AudienceSwitcher audience={audience} onChange={setAudience} />
+      )}
       <ChatSheet open={chatOpen} onClose={onChatClose} chat={chat} />
       <LearnSheet
         open={learn.open}

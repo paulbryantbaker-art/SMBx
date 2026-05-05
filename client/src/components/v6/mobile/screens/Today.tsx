@@ -19,12 +19,15 @@ import { MobileIcon } from "../icons";
 import type { Verdict, YIconKind } from "../types";
 import type { MobilePipelineRow, MobilePick } from "../../../../hooks/useMobileDeals";
 import { useWatchlist } from "../../../../hooks/useWatchlist";
+import { useAudience } from "../../../../hooks/useAudience";
+import { copyFor } from "../../../../lib/copy";
 
 interface TodayProps {
   isAnon: boolean;
   initials: string;
   onOpenDeal: (id: string, title: string) => void;
   onChat: () => void;
+  onAskYulia: (prompt: string) => void;
   onLearn: (section: "how" | "pricing", anchor?: string) => void;
   onAvatarClick: () => void;
   /** Authed user's deals (from useMobileDeals). Null = anon or empty,
@@ -68,10 +71,12 @@ const SAMPLE_PIPELINE: TodayPipelineRow[] = [
   { id: "deal-dist",       icon: "default", name: "Distribution · OH",          sub: "Asking high · margins thin",           action: "get",  price: "Pass" },
 ];
 
-export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onLearn, onAvatarClick, userPipeline, userPicks }: TodayProps) {
+export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onAskYulia, onLearn: _onLearn, onAvatarClick, userPipeline, userPicks }: TodayProps) {
   const PIPELINE: TodayPipelineRow[] = userPipeline ?? SAMPLE_PIPELINE;
   const PICKS: TodayPick[] = userPicks ?? SAMPLE_PICKS;
   const { isWatched, toggle } = useWatchlist();
+  const { audience } = useAudience(null);
+  const C = copyFor(audience);
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
       <GlassTopBar title="Today" initials={initials} onAvatarClick={onAvatarClick} onSearch={onChat} />
@@ -80,29 +85,35 @@ export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onLearn, onA
       {/* Hero — anon = welcome, authed = today's brief teaser */}
       <div style={{ padding: "4px 16px 0" }}>
         {isAnon ? (
-          <WelcomeHero onChat={onChat} />
+          <WelcomeHero onChat={onChat} heroTag={C.todayHeroTag} />
         ) : (
           <DailyHero onOpenDeal={() => onOpenDeal("deal-bigfake", "Big Fake Deal · sample")} />
         )}
       </div>
 
-      {/* Explore SMBX — about/learn surface for both anon and authed */}
+      {/* Explore SMBX — about/learn surface. Now persona-aware:
+          1 fixed "try a sample deal" entry + 3 audience-keyed tip chips
+          from copy.ts that open chat with a starter prompt. The marketing
+          chips (How it works · Pricing · Compare plans) are gone — the
+          authed audit-§3.1 finding said landing in a sales funnel
+          post-login was wrong. */}
       <div style={{ padding: "14px 16px 0" }}>
         <ExploreCard
           isAnon={isAnon}
           onChat={onChat}
+          onAskYulia={onAskYulia}
           onOpenDeal={() => onOpenDeal("deal-bigfake", "Big Fake Deal · sample")}
-          onLearn={onLearn}
+          tips={C.todayTips}
         />
       </div>
 
-      {/* Pipeline section — 5 sample deals */}
+      {/* Pipeline section — content per audience via copy.ts */}
       <div style={{ marginTop: 24, padding: "0 16px" }}>
         <div className="mb-as-card" style={{ padding: "20px 0 6px" }}>
           <div style={{ padding: "0 22px 4px" }}>
-            <div className="mb-section-eyebrow">{isAnon ? "VIEW SAMPLE · IN PIPELINE" : "PIPELINE · IN REVIEW"}</div>
-            <div className="mb-section-title">5 deals Yulia is working</div>
-            <div style={S.subText}>Tap any to see what Yulia delivered &mdash; verdict, recast, drafts.</div>
+            <div className="mb-section-eyebrow">{C.todayIntelEyebrow}</div>
+            <div className="mb-section-title">{C.todayIntelTitle}</div>
+            <div style={S.subText}>{C.todayIntelSub}</div>
           </div>
           {PIPELINE.map((d, i) => (
             <PipelineRow
@@ -129,11 +140,9 @@ export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onLearn, onA
       <div style={{ marginTop: 24, padding: "0 16px" }}>
         <div className="mb-as-card" style={{ padding: "20px 0 6px" }}>
           <div style={{ padding: "0 22px 4px" }}>
-            <div className="mb-section-eyebrow">{isAnon ? "VIEW SAMPLE · YULIA'S BRIEF" : "YULIA'S BRIEF"}</div>
-            <div className="mb-section-title">Review 3 picks in 5 minutes</div>
-            <div style={S.subText}>
-              See how Yulia screens 142 sources down to what matters &mdash; every morning.
-            </div>
+            <div className="mb-section-eyebrow">{C.todayBriefEyebrow}</div>
+            <div className="mb-section-title">{C.todayBriefTitle}</div>
+            <div style={S.subText}>{C.todayBriefSub}</div>
           </div>
           {PICKS.map((p, i) => (
             <PickRow
@@ -155,7 +164,7 @@ export function TodayScreen({ isAnon, initials, onOpenDeal, onChat, onLearn, onA
 
 /* ─── Welcome hero (anon) ────────────────────────────────── */
 
-function WelcomeHero({ onChat }: { onChat: () => void }) {
+function WelcomeHero({ onChat, heroTag }: { onChat: () => void; heroTag: string }) {
   return (
     <HeroFrame kind="welcome" onTap={onChat}>
       <HeroVisualPursue />
@@ -166,7 +175,7 @@ function WelcomeHero({ onChat }: { onChat: () => void }) {
 
       <div style={H.titleBlock}>
         <h2 style={H.h2}>Agentic AI specifically built for buying and selling businesses of all shapes and sizes.</h2>
-        <p style={H.tag}>Yulia does all of the hard work &mdash; so your deal team can focus on building relationships and making deals better and faster.</p>
+        <p style={H.tag}>{heroTag}</p>
       </div>
 
       <GlassSurface tint="onColor" radius={16} style={H.innerCell}>
@@ -313,32 +322,53 @@ function HeroVisualPursue() {
    that says "here are all the ways in." */
 
 function ExploreCard({
-  isAnon, onChat, onOpenDeal, onLearn,
+  isAnon, onChat, onAskYulia, onOpenDeal, tips,
 }: {
   isAnon: boolean;
   onChat: () => void;
+  onAskYulia: (prompt: string) => void;
   onOpenDeal: () => void;
-  onLearn: (section: "how" | "pricing", anchor?: string) => void;
+  tips: { label: string; prompt: string }[];
 }) {
   return (
     <div style={E.card}>
       <div style={E.eyebrowSlot}>
-        <div className="mb-eyebrow" style={E.eyebrow}>{isAnon ? "EXPLORE SMBX" : "ABOUT SMBX"}</div>
+        <div className="mb-eyebrow" style={E.eyebrow}>{isAnon ? "EXPLORE SMBX" : "GET THE MOST FROM YULIA"}</div>
       </div>
       <div style={E.titleBlock}>
-        <h3 style={E.h3}>{isAnon ? "Pick a way in." : "Get to know the app."}</h3>
+        <h3 style={E.h3}>{isAnon ? "Pick a way in." : "Today's quick wins."}</h3>
         <p style={E.tag}>
           {isAnon
-            ? "Try a sample deal, learn how the methodology works, see what each plan includes, or just ask Yulia."
-            : "How the methodology works, what each plan includes, and a sample deal to play with."}
+            ? "Try a sample deal — or ask Yulia one of the questions below."
+            : "Three things Yulia can do for you right now. Tap to start the conversation."}
         </p>
       </div>
       <div style={E.rows}>
-        <ExploreRow icon="pipeline" label="Try a sample deal"  sub="See verdict, recast, drafts"        onTap={onOpenDeal}             />
-        <ExploreRow icon="brief"    label="How it works"       sub="4 journeys × 6 gates · 22 formulas" onTap={() => onLearn("how")}   />
-        <ExploreRow icon="brief"    label="Pricing"            sub="Free + 4 paid tiers"                onTap={() => onLearn("pricing")} />
-        <ExploreRow icon="chat"     label="Chat with Yulia"    sub="Ask anything — no signup needed"    onTap={onChat} last            />
+        <ExploreRow
+          icon="pipeline"
+          label="Try a sample deal"
+          sub="See verdict, recast, drafts"
+          onTap={onOpenDeal}
+        />
+        {tips.map((t, i) => (
+          <ExploreRow
+            key={t.label}
+            icon="chat"
+            label={t.label}
+            sub={t.prompt}
+            onTap={() => onAskYulia(t.prompt)}
+            last={i === tips.length - 1}
+          />
+        ))}
       </div>
+      <button
+        type="button"
+        onClick={onChat}
+        style={E.freeFormBtn}
+        aria-label="Open chat for any other question"
+      >
+        Or just chat with Yulia →
+      </button>
     </div>
   );
 }
@@ -587,5 +617,21 @@ const E: Record<string, CSSProperties> = {
   rowChevron: {
     fontSize: 14, color: "#fff",
     marginLeft: 4, marginRight: 2, flexShrink: 0,
+  },
+  /* Inline link below the rows: "Or just chat with Yulia →".
+     Underplayed compared to the row buttons since the rows are the
+     primary call-to-action; this is the safety-net escape hatch. */
+  freeFormBtn: {
+    display: "block",
+    margin: "12px auto 4px",
+    padding: "8px 0",
+    background: "transparent",
+    border: "none",
+    color: "#fff",
+    fontSize: 12.5, fontWeight: 600,
+    letterSpacing: "-0.05px",
+    cursor: "pointer",
+    fontFamily: "var(--mb-font-body)",
+    opacity: 0.85,
   },
 };
