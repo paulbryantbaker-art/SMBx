@@ -12,6 +12,7 @@ import { type CSSProperties, type ReactNode } from "react";
 import { GlassTopBar, LargeTitle } from "../TopBar";
 import { GlassSurface } from "../glass";
 import { YIcon } from "../YIcon";
+import { IndustryIcon } from "../IndustryIcon";
 import { VerdictPill } from "../VerdictPill";
 import { PickRow } from "../PickRow";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
@@ -487,12 +488,13 @@ function PipelineRow({
       onClick={onTap}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onTap(); } }}
       style={{
-        display: "flex", alignItems: "center", gap: 14,
+        display: "flex", alignItems: "center", gap: 12,
         padding: "14px 22px",
         borderBottom: last ? "none" : "0.5px solid var(--mb-line-2)",
         cursor: "pointer",
       }}
     >
+      <IndustryIcon name={name} verdict={verdict ?? "watch"} size={40} />
       <div style={{ flex: 1, minWidth: 0, paddingRight: 8 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <span style={S.rowName}>{name}</span>

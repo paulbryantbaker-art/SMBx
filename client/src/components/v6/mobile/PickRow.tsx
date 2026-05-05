@@ -5,6 +5,7 @@
    surfaces stay locked to the same design language. */
 
 import { type CSSProperties } from "react";
+import { IndustryIcon } from "./IndustryIcon";
 import type { Verdict } from "./types";
 
 export interface PickRowProps {
@@ -35,7 +36,7 @@ export function PickRow({ rank, name, sub, fit, kind, last, onTap }: PickRowProp
         }
       }}
       style={{
-        display: "flex", alignItems: "center", gap: 14,
+        display: "flex", alignItems: "center", gap: 12,
         padding: "14px 22px",
         borderBottom: last ? "none" : "0.5px solid var(--mb-line-2)",
         marginLeft: 22, paddingLeft: 0,
@@ -43,6 +44,7 @@ export function PickRow({ rank, name, sub, fit, kind, last, onTap }: PickRowProp
       }}
     >
       <div style={S.rank}>{rank}</div>
+      <IndustryIcon name={name} verdict={kind} size={36} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={S.pickName}>{name}</div>
         <div style={S.pickSub}>{sub}</div>

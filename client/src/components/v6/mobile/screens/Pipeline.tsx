@@ -7,6 +7,7 @@
 import { useState, type CSSProperties } from "react";
 import { GlassTopBar, LargeTitle } from "../TopBar";
 import { YIcon } from "../YIcon";
+import { IndustryIcon } from "../IndustryIcon";
 import { MobileIcon } from "../icons";
 import type { Verdict } from "../types";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
@@ -268,12 +269,13 @@ function PipeRow({
         }
       }}
       style={{
-        display: "flex", alignItems: "center", gap: 14,
+        display: "flex", alignItems: "center", gap: 12,
         padding: "14px 18px",
         borderBottom: last ? "none" : "0.5px solid var(--mb-line-2)",
         cursor: "pointer",
       }}
     >
+      <IndustryIcon name={name} verdict={verdict} size={40} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={P.rowName}>{name}</div>
         <div style={P.rowSub}>{sub}</div>

@@ -6,6 +6,7 @@
 
 import { type CSSProperties, type ReactNode, useMemo } from "react";
 import { MobileIcon } from "../icons";
+import { IndustryIcon } from "../IndustryIcon";
 import type { Verdict } from "../types";
 import { watchableDeals, type SampleDeal } from "../../../../lib/sampleDeals";
 import { useWatchlist } from "../../../../hooks/useWatchlist";
@@ -142,6 +143,7 @@ function WatchRow({
       }}
     >
       <div style={W.rank}>{rank}</div>
+      <IndustryIcon name={deal.name} verdict={deal.verdict} size={36} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={W.rowName}>{deal.name}</div>
         <div style={W.rowSub}>{deal.sub}</div>
