@@ -34,15 +34,16 @@
       //    behind the status bar. V6Mobile.tsx must NOT touch body bg.
       (function() {
         var isMobile = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
-        // Detail URLs (hash like #deal=...) paint body white at initial
-        // paint so iOS Safari samples white for chrome tinting. Body bg
-        // can't be safely mutated post-paint — it locks chrome
-        // translucency. So URL-driven initial-paint is the only way to
-        // get white chrome on a hard-refresh of a detail link. In-app
-        // navigation home → detail still shows warm chrome until
-        // refresh; that's accepted as a trade-off.
-        var isDetail = /(?:^|[#&?])deal=/.test(window.location.hash);
-        var bg = !isMobile ? '#F6F7F9' : isDetail ? '#FFFFFF' : '#D4A258';
+        // Mobile: white body bg so iOS Safari's opaque-tinted chrome reads
+        // white. Detail page is white throughout; home/pipeline/brief have
+        // a top-of-page gradient (gold sunrise / sage / etc.) that starts
+        // BELOW the iOS chrome zone, so chrome stays neutral white as the
+        // user scrolls. Previously the body was warm gold to "blend" with
+        // the home gradient at scroll=0, but that left a stranded gold
+        // strip in chrome whenever the user scrolled past the gradient's
+        // gold band. Body bg can't be safely mutated post-paint (locks
+        // chrome translucency), so white-everywhere is the answer.
+        var bg = isMobile ? '#FFFFFF' : '#F6F7F9';
         document.documentElement.style.backgroundColor = bg;
         if (document.body) document.body.style.backgroundColor = bg;
         else document.addEventListener('DOMContentLoaded', function() {
