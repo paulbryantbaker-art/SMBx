@@ -7,6 +7,7 @@ import { type CSSProperties, type ReactNode } from "react";
 import { YIcon } from "../YIcon";
 import { MobileIcon } from "../icons";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
+import { useWatchlist } from "../../../../hooks/useWatchlist";
 
 interface DetailProps {
   dealId: string;
@@ -14,10 +15,25 @@ interface DetailProps {
   onBack: () => void;
 }
 
-export function DetailScreen({ dealId: _dealId, dealTitle, onBack }: DetailProps) {
+export function DetailScreen({ dealId, dealTitle, onBack }: DetailProps) {
+  const { isWatched, toggle } = useWatchlist();
+  const watched = isWatched(dealId);
+
+  const onShare = async () => {
+    const url = window.location.href;
+    if (typeof navigator !== "undefined" && "share" in navigator) {
+      try {
+        await navigator.share({ title: dealTitle, url });
+        return;
+      } catch { /* user cancelled */ }
+    }
+    // Desktop / unsupported: copy URL to clipboard.
+    try { await navigator.clipboard.writeText(url); } catch { /* noop */ }
+  };
+
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 140, position: "relative", background: "var(--mb-bg)" }}>
-      <FloatingNav onBack={onBack} />
+      <FloatingNav onBack={onBack} onShare={onShare} />
 
       {/* Hero block — icon + name + verdict */}
       <div style={D.hero}>
@@ -25,8 +41,18 @@ export function DetailScreen({ dealId: _dealId, dealTitle, onBack }: DetailProps
         <div style={{ flex: 1, minWidth: 0, paddingTop: 4 }}>
           <h1 style={D.h1}>{dealTitle}</h1>
           <div style={D.dealMeta}>East Texas &middot; Deal #SMBX-0119</div>
-          <div style={{ marginTop: 10 }}>
-            <button type="button" className="mb-get-pill solid" style={D.verdictBtn}>Pursue</button>
+          <div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center" }}>
+            <span style={D.verdictBadge}>Pursue</span>
+            <button
+              type="button"
+              aria-pressed={watched}
+              onClick={() => toggle(dealId, dealTitle)}
+              style={{
+                ...D.watchBtn,
+                background: watched ? "var(--mb-accent-ink)" : "var(--mb-blue-soft)",
+                color: watched ? "#fff" : "var(--mb-blue-ink)",
+              }}
+            >{watched ? "Watching" : "Watch"}</button>
           </div>
           <div style={D.verdictCaption}>Yulia&rsquo;s verdict</div>
         </div>
@@ -100,7 +126,7 @@ export function DetailScreen({ dealId: _dealId, dealTitle, onBack }: DetailProps
 
 /* ─── Floating glass back/share nav ──────────────────────── */
 
-function FloatingNav({ onBack }: { onBack: () => void }) {
+function FloatingNav({ onBack, onShare }: { onBack: () => void; onShare: () => void }) {
   return (
     <>
       <div style={D.navTopGuard} aria-hidden="true" />
@@ -114,6 +140,7 @@ function FloatingNav({ onBack }: { onBack: () => void }) {
       </button>
       <button
         type="button"
+        onClick={onShare}
         aria-label="Share"
         style={{ ...D.navBtn, top: 18, right: 16 }}
       >
@@ -247,7 +274,22 @@ const D: Record<string, CSSProperties> = {
     textWrap: "balance",
   },
   dealMeta: { fontSize: 14, color: "var(--mb-ink-3)", marginTop: 4 },
-  verdictBtn: { padding: "7px 26px", fontSize: 15 },
+  // Verdict is no longer a button — it's an informational badge that
+  // displays Yulia's call. The user-action button next to it is the
+  // separate Watch toggle.
+  verdictBadge: {
+    display: "inline-flex", alignItems: "center",
+    padding: "6px 18px", fontSize: 14, fontWeight: 700,
+    background: "var(--mb-verdict-pursue-soft)",
+    color: "var(--mb-verdict-pursue-ink)",
+    borderRadius: 999, letterSpacing: "-0.1px",
+  },
+  watchBtn: {
+    padding: "6px 18px", fontSize: 14, fontWeight: 700,
+    border: "none", borderRadius: 999, cursor: "pointer",
+    minWidth: 92,
+    transition: "background-color 200ms ease, color 200ms ease",
+  },
   verdictCaption: {
     fontSize: 11, color: "var(--mb-ink-4)", marginTop: 4,
     textAlign: "center", maxWidth: 110,
