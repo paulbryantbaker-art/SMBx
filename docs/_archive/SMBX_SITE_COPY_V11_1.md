@@ -1,3 +1,5 @@
+> **Status — Archived 2026-05-05.** Pre-V6 site copy. The current marketing surface (V6 Files Workspace, slate-blue desktop / periwinkle mobile) does not use this copy. **Do not lift verbatim.** For current voice and positioning, see `STYLE_GUIDE.md` and the live `journey_v2/` + `canvas_marketing/` source.
+
 # smbX.ai — Site Copy V11.1
 ## Written from the deal room, not the copywriter's desk
 ### March 15, 2026

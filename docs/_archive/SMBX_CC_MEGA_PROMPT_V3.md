@@ -1,3 +1,5 @@
+> **Status — Archived 2026-05-05.** Pre-V6 build prompt. The launch requirements here have either shipped, evolved, or been replaced by the V6/V18 architecture documented in `CLAUDE.md`. **Do not use as a build instruction set.** Treat as historical context only.
+
 # CC MEGA-SESSION V3 ADDENDUM: Deal Management + Living Documents
 ## These are LAUNCH REQUIREMENTS, not post-launch features.
 ## Append to SMBX_CC_MEGA_PROMPT_V3.md after Phase 3.

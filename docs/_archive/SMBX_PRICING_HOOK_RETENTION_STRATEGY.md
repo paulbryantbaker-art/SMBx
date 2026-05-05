@@ -1,6 +1,8 @@
+> **Status — Archived 2026-05-05.** Superseded by `SMBX_PRICING_STRATEGY_AND_RECOMMENDATION.md` (May 3, 2026). The current monthly-subscription pricing (Free / $49 / $149 / $999) is defined in `CLAUDE.md` and the May 3 strategy doc — read those, not this.
+
 # smbX.ai — Pricing, Hook & Retention Strategy
 **Version:** 1.0 | **Date:** March 21, 2026
-**Status:** Authoritative — supersedes Pricing Catalog v2 wallet model, Market Strategy subscription model, and all prior pricing discussions
+**Status (historical, March 2026):** Authoritative — supersedes Pricing Catalog v2 wallet model, Market Strategy subscription model, and all prior pricing discussions
 **Purpose:** Defines what smbx.ai IS, what each user segment gets free, what they pay for, and why they stay. This document governs pricing implementation, marketing copy, Yulia's paywall conversations, and the CC build prompt.
 
 ---

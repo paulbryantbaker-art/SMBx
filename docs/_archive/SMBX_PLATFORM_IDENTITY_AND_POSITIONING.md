@@ -1,3 +1,5 @@
+> **Status — Archived 2026-05-05.** This document predates the V6 design system, the monthly subscription pricing model, and the Yulia-as-front-door positioning. **Do not build against it.** Current positioning lives in `CLAUDE.md` and `SMBX_PRICING_STRATEGY_AND_RECOMMENDATION.md`.
+
 # smbX.ai — Platform Identity & Positioning
 **Version:** 1.0 | **Date:** March 21, 2026
 **Purpose:** Defines what smbx.ai IS in precise enough terms for marketing copy, sales funnels, promotional materials, and investor communications. This is the "what we are" source of truth.

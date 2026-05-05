@@ -1,3 +1,5 @@
+> **Status — Archived 2026-05-05.** This document predates the V6 design system (May 2026) and the V18a/V18b methodology amendments. **Do not build against it.** For current architecture and decisions, read `CLAUDE.md`, `DESIGN_SOURCE.md`, `METHODOLOGY_V17.md`, and the V18a/V18b amendments at the repo root.
+
 # smbX.ai — PLATFORM REFERENCE
 ## Single source of truth for decisions, architecture, and standards
 ## Place in repo root. CC reads this alongside CLAUDE.md.
