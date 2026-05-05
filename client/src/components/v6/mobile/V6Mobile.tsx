@@ -80,7 +80,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
       ? { kind: "detail", dealId: initial.detail, dealTitle: initial.dealTitle ?? undefined }
       : { kind: "tab", tab: initial.tab }
   );
-  const [chatOpen, setChatOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(initial.chat);
   const [learn, setLearn] = useState<{ open: boolean; section: "how" | "pricing"; anchor?: string }>({
     open: false, section: "how",
   });
@@ -145,8 +145,8 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
 
   // URL hash sync
   useEffect(() => {
-    writeMobileHashState(view);
-  }, [view]);
+    writeMobileHashState(view, chatOpen);
+  }, [view, chatOpen]);
 
   // Scroll-to-top on every navigation. Tab taps and deal opens both flow
   // through `view`, so a single effect on that key handles both. Scroll
@@ -201,8 +201,22 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
     }
     setView({ kind: "tab", tab: next });
   };
-  const onChat = () => setChatOpen(true);
-  const onChatClose = () => setChatOpen(false);
+  // Chat opens via full reload so iOS Safari paints body white at initial
+  // paint and chrome bleed lands correctly. Tab is preserved in the URL
+  // so closing chat returns the user to the tab they came from.
+  const onChat = () => {
+    const params = new URLSearchParams();
+    params.set("tab", activeTab);
+    params.set("chat", "open");
+    window.location.hash = `#${params.toString()}`;
+    window.location.reload();
+  };
+  const onChatClose = () => {
+    const params = new URLSearchParams();
+    if (activeTab !== "today") params.set("tab", activeTab);
+    window.location.hash = params.toString() ? `#${params.toString()}` : "";
+    window.location.reload();
+  };
   const onLearn = (section: "how" | "pricing", anchor?: string) =>
     setLearn({ open: true, section, anchor });
   const onLearnClose = () => setLearn(s => ({ ...s, open: false }));
@@ -336,22 +350,23 @@ function computeInitials(user: User | null): string {
 
 /* ─── URL hash state ─────────────────────────────────────── */
 
-function readMobileHashState(): { tab: MobileTab; detail: string | null; dealTitle: string | null } {
+function readMobileHashState(): { tab: MobileTab; detail: string | null; dealTitle: string | null; chat: boolean } {
   try {
     const hash = window.location.hash.replace(/^#/, "");
-    if (!hash) return { tab: "today", detail: null, dealTitle: null };
+    if (!hash) return { tab: "today", detail: null, dealTitle: null, chat: false };
     const params = new URLSearchParams(hash);
     const rawTab = params.get("tab") as MobileTab | null;
     const tab: MobileTab = rawTab && VALID_TABS.includes(rawTab) ? rawTab : "today";
     const detail = params.get("deal");
     const dealTitle = params.get("t");
-    return { tab, detail, dealTitle };
+    const chat = params.get("chat") === "open";
+    return { tab, detail, dealTitle, chat };
   } catch {
-    return { tab: "today", detail: null, dealTitle: null };
+    return { tab: "today", detail: null, dealTitle: null, chat: false };
   }
 }
 
-function writeMobileHashState(view: MobileView) {
+function writeMobileHashState(view: MobileView, chatOpen: boolean) {
   try {
     const params = new URLSearchParams();
     if (view.kind === "detail" && view.dealId) {
@@ -362,6 +377,9 @@ function writeMobileHashState(view: MobileView) {
     } else if (view.tab) {
       params.set("tab", view.tab);
     }
+    // Chat-open is URL-driven so the post-reload mount can rehydrate it
+    // (and so index.html's body-bg script can paint white when present).
+    if (chatOpen) params.set("chat", "open");
     const next = params.toString() ? `#${params.toString()}` : "";
     if (window.location.hash !== next) {
       window.history.replaceState(null, "", window.location.pathname + window.location.search + next);

@@ -43,8 +43,9 @@
         // so V6Mobile forces a full page reload on every home ↔ detail
         // transition. That gives each side its own fresh first paint with
         // the correct body bg, and the chrome bleed stays alive on both.
-        var isDetail = /(?:^|[#&?])deal=/.test(window.location.hash);
-        var bg = !isMobile ? '#F6F7F9' : isDetail ? '#FFFFFF' : '#D4A258';
+        var hash = window.location.hash;
+        var isWhitePage = /(?:^|[#&?])deal=/.test(hash) || /(?:^|[#&?])chat=open/.test(hash);
+        var bg = !isMobile ? '#F6F7F9' : isWhitePage ? '#FFFFFF' : '#D4A258';
         document.documentElement.style.backgroundColor = bg;
         if (document.body) document.body.style.backgroundColor = bg;
         else document.addEventListener('DOMContentLoaded', function() {
