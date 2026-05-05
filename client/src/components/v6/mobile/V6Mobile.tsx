@@ -187,35 +187,61 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
     }
   }, []); // mount-only
 
+  // bfcache reload: iOS Safari aggressively serves back-nav from its
+  // back-forward cache, which restores the previous page instantly but
+  // with stale chrome state and stale body bg. Force a reload on
+  // bfcache restore so the URL-driven body-bg detection in index.html
+  // re-runs and chrome paints fresh. Without this, swipe-back from a
+  // white page (detail/chat) lands on home with stale white chrome.
+  useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) window.location.reload();
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
+
   const activeTab: MobileTab = view.kind === "tab" ? (view.tab ?? "today") : "today";
-  // Tab→tab is normal SPA nav. Detail→tab requires a full reload because
-  // the body bg must paint correctly for the chrome bleed (gold for tabs,
-  // white for detail). See V6Mobile.tsx body-bg comment + index.html.
+
+  // pushPageNav: forward navigation with full reload. pushState (vs
+  // hash assignment) is silent — no hashchange event, no React
+  // re-render with stale body bg before reload completes, no iOS
+  // chrome lock. Reload then picks up the new URL and lets index.html's
+  // body-bg script paint from initial paint with the right color.
+  const pushPageNav = (hashParams: Record<string, string | undefined>) => {
+    const params = new URLSearchParams();
+    Object.entries(hashParams).forEach(([k, v]) => {
+      if (v) params.set(k, v);
+    });
+    const hash = params.toString() ? `#${params.toString()}` : "";
+    const url = window.location.pathname + window.location.search + hash;
+    window.history.pushState(null, "", url);
+    window.location.reload();
+  };
+
+  // Tab→tab is normal SPA nav (same body bg on both sides). Detail→tab
+  // is forward nav to a different page → pushPageNav. (Back-to-where-
+  // you-came-from is window.history.back, used by onChatClose / onBack.)
   const onTabChange = (next: MobileTab) => {
     if (view.kind === "detail") {
-      const params = new URLSearchParams();
-      if (next !== "today") params.set("tab", next);
-      window.location.hash = params.toString() ? `#${params.toString()}` : "";
-      window.location.reload();
+      pushPageNav({ tab: next !== "today" ? next : undefined });
       return;
     }
     setView({ kind: "tab", tab: next });
   };
-  // Chat opens via full reload so iOS Safari paints body white at initial
-  // paint and chrome bleed lands correctly. Tab is preserved in the URL
-  // so closing chat returns the user to the tab they came from.
+  // Chat opens via full reload. Tab is preserved in URL so a back-nav
+  // (history.back) returns to the right tab.
   const onChat = () => {
-    const params = new URLSearchParams();
-    params.set("tab", activeTab);
-    params.set("chat", "open");
-    window.location.hash = `#${params.toString()}`;
-    window.location.reload();
+    pushPageNav({
+      tab: activeTab !== "today" ? activeTab : undefined,
+      chat: "open",
+    });
   };
+  // Close = browser back. Pageshow listener will reload when bfcache
+  // restores the previous page. This makes in-app close, browser back,
+  // and iOS swipe-back all behave identically.
   const onChatClose = () => {
-    const params = new URLSearchParams();
-    if (activeTab !== "today") params.set("tab", activeTab);
-    window.location.hash = params.toString() ? `#${params.toString()}` : "";
-    window.location.reload();
+    window.history.back();
   };
   const onLearn = (section: "how" | "pricing", anchor?: string) =>
     setLearn({ open: true, section, anchor });
@@ -228,17 +254,12 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
   const initials = computeInitials(user);
   const isAnon = !user;
 
-  // Tap-into-deal does a full page reload so iOS Safari can paint body
-  // white at initial paint and commit chrome translucency against white.
-  // SPA navigation would leave body gold and either lock the chrome
-  // (killing bleed) or leave a gold strip over the white detail page.
-  // See index.html body-bg comment for the full architecture.
+  // Tap-into-deal pushes a new history entry then reloads, so iOS swipe-
+  // back from detail returns to the user's previous page (typically
+  // home). pushState is silent (no hashchange, no SPA re-render, no
+  // chrome lock from the brief stale-bg state).
   const onOpenDeal = (id: string, title: string) => {
-    const params = new URLSearchParams();
-    params.set("deal", id);
-    if (title) params.set("t", title);
-    window.location.hash = `#${params.toString()}`;
-    window.location.reload();
+    pushPageNav({ deal: id, t: title });
   };
   const onAvatarClick = () => {
     if (!user) {
@@ -296,10 +317,10 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
           dealId={view.dealId ?? "unknown"}
           dealTitle={view.dealTitle ?? view.dealId ?? "Deal"}
           onBack={() => {
-            // Detail → today via full reload. Body must repaint gold at
-            // initial paint so chrome bleed is correct over the gradient.
-            window.location.hash = "";
-            window.location.reload();
+            // Browser back — same as iOS swipe-back. The pageshow
+            // listener forces a reload on bfcache restore, so the
+            // previous page repaints with correct body bg.
+            window.history.back();
           }}
         />
       )}
