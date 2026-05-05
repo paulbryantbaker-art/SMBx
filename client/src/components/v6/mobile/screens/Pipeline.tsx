@@ -164,32 +164,48 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
         </div>
       </div>
 
-      {/* Stage section — heading and rows update with active chip. Chevron
-          on "Watching" stage opens the full Watching list page; other
-          stages don't have a dedicated full-list page yet. */}
-      <div style={{ padding: "24px 22px 4px" }}>
-        {activeChip === "watching" ? (
-          <button
-            type="button"
-            onClick={onOpenWatching}
-            aria-label="Open full watching list"
-            style={P.headingBtn}
-          >
-            <h2 style={P.watchTitle}>{STAGE_TITLES[activeChip]}</h2>
-            <MobileIcon name="chevron" c="var(--mb-ink-3)" size={11} />
-          </button>
-        ) : (
-          <h2 style={P.watchTitle}>{STAGE_TITLES[activeChip]}</h2>
-        )}
-        <div style={P.subText}>{STAGE_SUBS[activeChip]}</div>
-      </div>
-
+      {/* Stage section — heading + rows now live inside one card,
+          App Store-style ("NOW TRENDING / Play These Popular Games"
+          on the same surface as the list below it). Header sits at
+          the card's top with internal padding; rows follow. */}
       {filtered.length === 0 ? (
-        <div style={{ padding: "32px 22px", textAlign: "center" }}>
-          <div style={P.subText}>No deals at this stage right now.</div>
+        <div className="mb-as-card" style={{ margin: "24px 16px 0", padding: "20px 22px 22px" }}>
+          {activeChip === "watching" ? (
+            <button
+              type="button"
+              onClick={onOpenWatching}
+              aria-label="Open full watching list"
+              style={P.headingBtn}
+            >
+              <h2 style={P.watchTitle}>{STAGE_TITLES[activeChip]}</h2>
+              <MobileIcon name="chevron" c="var(--mb-ink-3)" size={11} />
+            </button>
+          ) : (
+            <h2 style={P.watchTitle}>{STAGE_TITLES[activeChip]}</h2>
+          )}
+          <div style={P.subText}>{STAGE_SUBS[activeChip]}</div>
+          <div style={{ marginTop: 16, fontSize: 13, color: "var(--mb-ink-4)", textAlign: "center" }}>
+            No deals at this stage right now.
+          </div>
         </div>
       ) : (
-        <div className="mb-as-card" style={{ margin: "12px 16px 0", padding: "4px 0" }}>
+        <div className="mb-as-card" style={{ margin: "24px 16px 0", padding: "20px 0 6px" }}>
+          <div style={{ padding: "0 22px 12px" }}>
+            {activeChip === "watching" ? (
+              <button
+                type="button"
+                onClick={onOpenWatching}
+                aria-label="Open full watching list"
+                style={P.headingBtn}
+              >
+                <h2 style={P.watchTitle}>{STAGE_TITLES[activeChip]}</h2>
+                <MobileIcon name="chevron" c="var(--mb-ink-3)" size={11} />
+              </button>
+            ) : (
+              <h2 style={P.watchTitle}>{STAGE_TITLES[activeChip]}</h2>
+            )}
+            <div style={P.subText}>{STAGE_SUBS[activeChip]}</div>
+          </div>
           {filtered.map((d, i) => (
             <PipeRow
               key={d.id}
