@@ -136,7 +136,6 @@ export function TodayScreen({
           {PIPELINE.map((d, i) => (
             <PipelineRow
               key={d.id}
-              icon={d.icon}
               name={d.name}
               sub={d.sub}
               action={d.action}
@@ -456,9 +455,9 @@ function ExploreRow({
 /* ─── PipelineRow ───────────────────────────────────────── */
 
 function PipelineRow({
-  icon, name, sub, action, price, verdict, last, onTap, watched, onToggleWatch,
+  name, sub, action, price, verdict, last, onTap, watched, onToggleWatch,
 }: {
-  icon: YIconKind; name: string; sub: string;
+  name: string; sub: string;
   action: "open" | "get"; price?: string; verdict?: Verdict; last?: boolean;
   onTap: () => void;
   watched: boolean;
@@ -491,11 +490,9 @@ function PipelineRow({
         display: "flex", alignItems: "center", gap: 14,
         padding: "14px 22px",
         borderBottom: last ? "none" : "0.5px solid var(--mb-line-2)",
-        marginLeft: 22, paddingLeft: 0,
         cursor: "pointer",
       }}
     >
-      <YIcon size={52} kind={icon} radius={12} />
       <div style={{ flex: 1, minWidth: 0, paddingRight: 8 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <span style={S.rowName}>{name}</span>

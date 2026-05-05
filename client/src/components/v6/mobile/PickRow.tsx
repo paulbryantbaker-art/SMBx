@@ -5,8 +5,7 @@
    surfaces stay locked to the same design language. */
 
 import { type CSSProperties } from "react";
-import { YIcon } from "./YIcon";
-import type { Verdict, YIconKind } from "./types";
+import type { Verdict } from "./types";
 
 export interface PickRowProps {
   rank: number;
@@ -23,7 +22,6 @@ export function PickRow({ rank, name, sub, fit, kind, last, onTap }: PickRowProp
     kind === "pursue" ? "var(--mb-accent)" :
     kind === "pass"   ? "var(--mb-danger)" :
                         "var(--mb-warn)";
-  const iconKind: YIconKind = kind === "pursue" ? "cool" : "default";
   return (
     <div
       className="mb-tap"
@@ -45,7 +43,6 @@ export function PickRow({ rank, name, sub, fit, kind, last, onTap }: PickRowProp
       }}
     >
       <div style={S.rank}>{rank}</div>
-      <YIcon size={52} kind={iconKind} radius={12} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={S.pickName}>{name}</div>
         <div style={S.pickSub}>{sub}</div>

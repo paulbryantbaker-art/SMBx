@@ -8,7 +8,7 @@ import { useState, type CSSProperties } from "react";
 import { GlassTopBar, LargeTitle } from "../TopBar";
 import { YIcon } from "../YIcon";
 import { MobileIcon } from "../icons";
-import type { YIconKind, Verdict } from "../types";
+import type { Verdict } from "../types";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
 import type { MobileWatchRow, MobileFeatured } from "../../../../hooks/useMobileDeals";
 import { dealsByStage, type DealStage, type SampleDeal } from "../../../../lib/sampleDeals";
@@ -193,7 +193,6 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
           {filtered.map((d, i) => (
             <PipeRow
               key={d.id}
-              icon={d.icon}
               name={d.name}
               sub={d.sub}
               verdict={d.verdict}
@@ -210,9 +209,8 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
 }
 
 function PipeRow({
-  icon, name, sub, verdict, watched, last, onTap, onToggleWatch,
+  name, sub, verdict, watched, last, onTap, onToggleWatch,
 }: {
-  icon: YIconKind;
   name: string;
   sub: string;
   verdict: Verdict;
@@ -257,11 +255,9 @@ function PipeRow({
         display: "flex", alignItems: "center", gap: 14,
         padding: "14px 18px",
         borderBottom: last ? "none" : "0.5px solid var(--mb-line-2)",
-        marginLeft: 18, paddingLeft: 0,
         cursor: "pointer",
       }}
     >
-      <YIcon size={52} kind={icon} radius={12} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={P.rowName}>{name}</div>
         <div style={P.rowSub}>{sub}</div>

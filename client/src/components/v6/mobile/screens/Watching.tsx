@@ -5,9 +5,8 @@
    via the chevron on Pipeline's "Yulia is watching" section. */
 
 import { type CSSProperties, type ReactNode, useMemo } from "react";
-import { YIcon } from "../YIcon";
 import { MobileIcon } from "../icons";
-import type { Verdict, YIconKind } from "../types";
+import type { Verdict } from "../types";
 import { watchableDeals, type SampleDeal } from "../../../../lib/sampleDeals";
 import { useWatchlist } from "../../../../hooks/useWatchlist";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
@@ -143,7 +142,6 @@ function WatchRow({
       }}
     >
       <div style={W.rank}>{rank}</div>
-      <YIcon size={48} kind={deal.icon as YIconKind} radius={11} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={W.rowName}>{deal.name}</div>
         <div style={W.rowSub}>{deal.sub}</div>
