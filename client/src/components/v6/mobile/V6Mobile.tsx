@@ -165,6 +165,17 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
     }
   }, [view, isStandalone]);
 
+  // Detail view paints .mobile-root white instead of rootGradient. Mirror
+  // that in <meta name="theme-color"> so iOS Safari's URL-bar tint matches
+  // (Safari samples the meta in tab mode for the bottom chrome surface).
+  // <meta> mutation is safe — the chrome-lock hazard at line 96 is about
+  // body inline-style mutation, not meta tags.
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta) return;
+    meta.setAttribute("content", view.kind === "detail" ? "#FFFFFF" : "#F6F7F9");
+  }, [view.kind]);
+
   useEffect(() => {
     const onHash = () => {
       const next = readMobileHashState();
@@ -392,13 +403,17 @@ const S: Record<string, CSSProperties> = {
     touchAction: "pan-y",
     paddingBottom: "env(safe-area-inset-bottom, 0px)",
   },
-  // Safari tab: natural flow, body scrolls. min-height: 100dvh keeps the
-  // gradient visible even when content is short. paddingBottom clears the
-  // floating tab pill (~80px tall plus its 18px bottom gap plus safe area)
-  // so the last content card isn't permanently hidden behind it.
+  // Safari tab: natural flow, body scrolls. min-height: 100lvh covers the
+  // FULL webview (largest viewport, including the area behind iOS chrome)
+  // so body bg never leaks past .mobile-root into the URL-bar zone. dvh
+  // (visible viewport, shrinks when chrome shows) was leaving a gold
+  // strip below the page. lvh always = full webview height. Content above
+  // is unaffected — min-height just adds white padding below the last
+  // card. paddingBottom clears the floating tab pill (~80px + 18px gap +
+  // safe area) so the last card isn't hidden behind it.
   rootSafari: {
     position: "relative",
-    minHeight: "100dvh",
+    minHeight: "100lvh",
     paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 110px)",
   },
   placeholderBody: {
