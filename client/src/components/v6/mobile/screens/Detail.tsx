@@ -13,9 +13,10 @@ interface DetailProps {
   dealId: string;
   dealTitle: string;
   onBack: () => void;
+  onChat: () => void;
 }
 
-export function DetailScreen({ dealId, dealTitle, onBack }: DetailProps) {
+export function DetailScreen({ dealId, dealTitle, onBack, onChat }: DetailProps) {
   const { isWatched, toggle } = useWatchlist();
   const watched = isWatched(dealId);
 
@@ -86,10 +87,10 @@ export function DetailScreen({ dealId, dealTitle, onBack }: DetailProps) {
       {/* A closer look — horizontal artifact rail */}
       <Section title="A closer look" pad={false}>
         <div className="mb-hide-scroll" style={D.artifactsRow}>
-          <ArtifactPreview kind="recast"   title="Recast walk"    big="$1.80M"    sub="P&L normalization · 5 lines" />
-          <ArtifactPreview kind="baseline" title="Baseline range" big="$7.2–9.4M" sub="4 scenarios · SBA at $7.8M" />
-          <ArtifactPreview kind="buyers"   title="Buyer list"     big="69"        sub="47 strategics · 22 sponsors" />
-          <ArtifactPreview kind="ioi"      title="IOI draft"      big="v2"        sub="Aggressive but earnest" />
+          <ArtifactPreview kind="recast"   title="Recast walk"    big="$1.80M"    sub="P&L normalization · 5 lines" onTap={onChat} />
+          <ArtifactPreview kind="baseline" title="Baseline range" big="$7.2–9.4M" sub="4 scenarios · SBA at $7.8M"  onTap={onChat} />
+          <ArtifactPreview kind="buyers"   title="Buyer list"     big="69"        sub="47 strategics · 22 sponsors" onTap={onChat} />
+          <ArtifactPreview kind="ioi"      title="IOI draft"      big="v2"        sub="Aggressive but earnest"      onTap={onChat} />
         </div>
       </Section>
 
@@ -227,12 +228,21 @@ const ARTIFACT_BG: Record<ArtifactKind, string> = {
     "linear-gradient(160deg, #3A4150, #1A2233)",
 };
 
-function ArtifactPreview({ kind, title, big, sub }: { kind: ArtifactKind; title: string; big: string; sub: string }) {
+function ArtifactPreview({
+  kind, title, big, sub, onTap,
+}: { kind: ArtifactKind; title: string; big: string; sub: string; onTap: () => void }) {
   return (
     <div
       className="mb-tap"
       role="button"
       tabIndex={0}
+      onClick={onTap}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onTap();
+        }
+      }}
       style={{
         flexShrink: 0, width: 220,
         borderRadius: 18,
@@ -256,6 +266,7 @@ function ArtifactPreview({ kind, title, big, sub }: { kind: ArtifactKind; title:
           type="button"
           className="mb-get-pill dark"
           style={{ padding: "4px 14px", fontSize: 12 }}
+          onClick={(e) => { e.stopPropagation(); onTap(); }}
         >Open</button>
       </div>
     </div>
