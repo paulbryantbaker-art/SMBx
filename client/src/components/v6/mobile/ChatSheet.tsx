@@ -279,7 +279,12 @@ function Streaming({ text, tool }: { text: string; tool: string | null }) {
 
 const S: Record<string, CSSProperties> = {
   dialog: {
-    position: "absolute",
+    /* Position retuned 2026-05-05 (eve) — was `absolute` which resolves to
+       the initial containing block in static-bodied Safari Tab mode and can
+       break when body has scrolled. Fixed always anchors to the visual
+       viewport in both PWA standalone and Safari Tab — no more "header
+       offscreen above, composer mid-page, tab bar visible behind." */
+    position: "fixed",
     inset: 0,
     background: "var(--mb-bg)",
     overflow: "hidden",
