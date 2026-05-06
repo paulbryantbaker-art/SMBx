@@ -4,6 +4,9 @@ import type { Tab, IconName, OpenTab, ModeId } from "./types";
 // Lazy-loaded model renderer keeps the calculations engine + chart bundle
 // out of the V6 chunk until a model tab actually opens (B2.1).
 const ModelRenderer = lazy(() => import("../models/ModelRenderer"));
+// Lazy-loaded sourcing panel — 814 lines, retired-palette styled,
+// kept out of the V6 chunk until needed (B2.2).
+const SourcingPanel = lazy(() => import("../chat/SourcingPanel"));
 import type { User } from "../../hooks/useAuth";
 import { V6Icon } from "./icons";
 import { V6SearchRoot } from "./modes/SearchRoot";
@@ -161,13 +164,21 @@ function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut }: TabConte
     return <V6ModelTabContent tabId={tab.id} title={tab.title} />;
   }
   if (tab.kind === "sourcing") {
+    // B2.2: mount the existing SourcingPanel. NOTE: it carries the retired
+    // Cowork DL styling and isn't yet on V6 tokens — restyle is a separate
+    // follow-up batch. Function over form for now: the live panel beats a
+    // placeholder for unblocking the B1 sourcing flow.
     return (
-      <PendingSurface
-        eyebrow="OPENED BY YULIA"
-        title={tab.title}
-        chip={tab.runId ? `run · ${tab.runId}` : undefined}
-        body="The live sourcing panel ships in the next build. Ask Yulia in chat for the latest candidates and stage progress."
-      />
+      <Suspense fallback={
+        <PendingSurface
+          eyebrow="OPENED BY YULIA"
+          title={tab.title}
+          chip={tab.runId ? `run · ${tab.runId}` : undefined}
+          body="Loading the sourcing panel — should land in a moment."
+        />
+      }>
+        <SourcingPanel isFullscreen={true} />
+      </Suspense>
     );
   }
   if (tab.kind === "deliverable") {

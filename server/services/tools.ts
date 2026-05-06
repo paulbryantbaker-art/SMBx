@@ -242,6 +242,18 @@ export const TOOL_DEFINITIONS: Tool[] = [
     },
   },
   {
+    name: 'start_sourcing_run',
+    description: 'Kick off the 5-stage sourcing pipeline for the user\'s active acquisition thesis. Stage 1 (intelligence brief) runs synchronously ~30-60s; stages 2-4 (target expansion + scoring) run as background jobs. Use when the user says "find me targets", "start sourcing", "go look", or otherwise asks to source a deal at B1. If thesisId is omitted, uses the user\'s most recent thesis. Returns canvas_action that opens the live sourcing panel.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        thesisId: { type: 'number', description: 'Buyer thesis to source against. Omit to use the most recent one.' },
+        title: { type: 'string', description: 'Optional tab title; defaults to the thesis name.' },
+      },
+      required: [],
+    },
+  },
+  {
     name: 'commit_valuation',
     description: 'Lock the user-confirmed valuation onto the deal record so gate readiness sees it (B2 → B3 / S2 → S3). Call this when the user says "lock this valuation", "save this", "go with these numbers", or otherwise approves a valuation we just walked through. The deal\'s financials.valuation_locked is set with the range + multiples + methodology blend, valuation_model_generated flag flips true so the gate-readiness check passes.',
     input_schema: {
@@ -398,6 +410,8 @@ export async function executeTool(
         return readTabState(input);
       case 'commit_valuation':
         return await commitValuation(input, userId);
+      case 'start_sourcing_run':
+        return await startSourcingRun(input, userId);
       case 'create_support_issue':
         return await createSupportIssue(input, userId, conversationId);
       case 'query_admin_data':
@@ -739,6 +753,58 @@ async function commitValuation(input: Record<string, any>, userId: number): Prom
       title: deal.business_name || `Deal #${dealId}`,
     },
   });
+}
+
+/**
+ * start_sourcing_run — kicks off the 5-stage sourcing pipeline. Looks up the
+ * user's most recent thesis when thesisId is omitted (or uses the supplied one
+ * if it belongs to the user). Returns canvas_action: 'open_sourcing' with the
+ * portfolioId so V6 opens the live panel.
+ *
+ * Chat-first: no UI button calls this. Yulia calls it when the user says
+ * "find me targets" / "start sourcing" / "go look".
+ */
+async function startSourcingRun(input: Record<string, any>, userId: number): Promise<string> {
+  const { initializePipeline } = await import('./sourcingPipelineService.js');
+
+  let thesisId: number | undefined = input.thesisId;
+  if (!thesisId) {
+    // Fall back to the user's most recent thesis
+    const [latest] = await sql`
+      SELECT id, name FROM buyer_theses
+      WHERE user_id = ${userId}
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+    if (!latest) {
+      return JSON.stringify({
+        error: 'No buyer thesis found. Walk the user through B0 first so we have a thesis to source against.',
+      });
+    }
+    thesisId = latest.id;
+  } else {
+    // Validate ownership
+    const [t] = await sql`SELECT id FROM buyer_theses WHERE id = ${thesisId} AND user_id = ${userId} LIMIT 1`;
+    if (!t) return JSON.stringify({ error: 'Thesis not found' });
+  }
+
+  const finalThesisId = thesisId as number;
+  try {
+    const result = await initializePipeline(finalThesisId, userId);
+    const [thesis] = await sql`SELECT name FROM buyer_theses WHERE id = ${finalThesisId} LIMIT 1`;
+    const title = input.title || thesis?.name || 'Sourcing run';
+    return JSON.stringify({
+      success: true,
+      portfolioId: result.portfolioId,
+      briefId: result.briefId,
+      status: result.status,
+      canvas_action: 'open_sourcing',
+      runId: result.portfolioId,
+      tabTitle: title,
+    });
+  } catch (e: any) {
+    return JSON.stringify({ error: `Sourcing run failed to start: ${e.message}` });
+  }
 }
 
 async function generateFreeDeliverable(input: Record<string, any>, userId: number): Promise<string> {
