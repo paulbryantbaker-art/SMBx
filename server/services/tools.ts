@@ -242,6 +242,19 @@ export const TOOL_DEFINITIONS: Tool[] = [
     },
   },
   {
+    name: 'generate_deliverable',
+    description: 'Generate any deliverable for a deal — DD package, CIM, LOI, pitch deck, valuation report, etc. Inserts a deliverables row with status=generating and enqueues the background job. Returns canvas_action that opens the deliverable tab immediately so the user sees a "generating…" placeholder while content lands. Use when the user asks for any document Yulia produces (CIM, LOI, DD, etc.) other than the three free completion-deliverables which already auto-generate at gate advance.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId:           { type: 'number', description: 'The deal ID' },
+        deliverableType:  { type: 'string', description: 'Slug of the deliverable to generate (e.g., "dd_package", "sell_cim_draft", "loi_draft", "raise_pitch_deck", "valuation_report"). Match the type column in the deliverables table.' },
+        menuItemSlug:     { type: 'string', description: 'Optional menu_items.slug for paid deliverables, used by subscriptionService for entitlement checks.' },
+      },
+      required: ['dealId', 'deliverableType'],
+    },
+  },
+  {
     name: 'promote_sourcing_target_to_deal',
     description: 'Convert a sourcing candidate into a real deal record. Copies the enriched fields (name, location, revenue/EBITDA estimates) onto the existing deal and flips financials.target_criteria_set so B1 readiness passes. Use when the user picks a sourced target and wants to start working it as the active deal.',
     input_schema: {
@@ -480,6 +493,8 @@ export async function executeTool(
         return await startSourcingRun(input, userId);
       case 'promote_sourcing_target_to_deal':
         return await promoteSourcingTargetToDeal(input, userId);
+      case 'generate_deliverable':
+        return await generateDeliverableTool(input, userId);
       case 'record_dd_complete':
         return await recordDdComplete(input, userId);
       case 'record_loi_executed':
@@ -881,6 +896,69 @@ async function startSourcingRun(input: Record<string, any>, userId: number): Pro
   } catch (e: any) {
     return JSON.stringify({ error: `Sourcing run failed to start: ${e.message}` });
   }
+}
+
+/**
+ * generate_deliverable — generic paid-deliverable trigger (B2.7, UX-11).
+ *
+ * Inserts a deliverables row with status='generating' and enqueues the
+ * background job. Returns canvas_action: 'open_deliverable' immediately so
+ * V6 opens the placeholder tab right away (B1.1 listener). The worker
+ * updates status='complete' + content when generation lands, and the
+ * client polls /api/deliverables/:id (B2.7's polling hook) to swap in
+ * real content.
+ *
+ * Chat-first: no UI button. Yulia calls this when the user asks for any
+ * paid deliverable (CIM, DD package, LOI, pitch deck, etc.). The free
+ * completion deliverables (VRR, thesis, SDE analysis) auto-generate at
+ * gate advance via gateCompletionDeliverables.ts (B1.3) and don't
+ * route through here.
+ */
+async function generateDeliverableTool(input: Record<string, any>, userId: number): Promise<string> {
+  const { dealId, deliverableType, menuItemSlug } = input;
+
+  // Verify deal ownership
+  const [deal] = await sql`SELECT id, business_name FROM deals WHERE id = ${dealId} AND user_id = ${userId} LIMIT 1`;
+  if (!deal) return JSON.stringify({ error: 'Deal not found' });
+
+  // Insert pending deliverable row
+  const [row] = await sql`
+    INSERT INTO deliverables (deal_id, user_id, type, status, content, price_charged_cents)
+    VALUES (${dealId}, ${userId}, ${deliverableType}, 'generating', NULL, 0)
+    RETURNING id
+  `;
+
+  // Enqueue background generation. The job worker handles the actual generator
+  // routing per deliverableType. menu_item_slug helps subscriptionService trace
+  // the entitlement at run time.
+  try {
+    const { enqueueDeliverableGeneration } = await import('./jobQueue.js');
+    await enqueueDeliverableGeneration({
+      deliverableId: row.id,
+      dealId,
+      userId,
+      menuItemSlug: menuItemSlug || deliverableType,
+      deliverableType,
+    });
+  } catch (e: any) {
+    // If the queue can't accept the job, mark the row failed and surface a
+    // helpful error so Yulia can tell the user.
+    await sql`UPDATE deliverables SET status = 'failed', content = ${JSON.stringify({ error: e.message })}::jsonb WHERE id = ${row.id}`.catch(() => {});
+    return JSON.stringify({ error: `Couldn't queue generation: ${e.message}` });
+  }
+
+  const prettyTitle = deliverableType
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (c: string) => c.toUpperCase());
+
+  return JSON.stringify({
+    success: true,
+    deliverableId: row.id,
+    dealId,
+    status: 'generating',
+    canvas_action: 'open_deliverable',
+    tabTitle: deal.business_name ? `${prettyTitle} · ${deal.business_name}` : prettyTitle,
+  });
 }
 
 /**

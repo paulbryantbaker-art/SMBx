@@ -1,5 +1,6 @@
 import { Suspense, lazy, type CSSProperties, type ReactNode } from "react";
 import type { Tab, IconName, OpenTab, ModeId } from "./types";
+import { useDeliverableStatus } from "../../hooks/useDeliverableStatus";
 
 // Lazy-loaded model renderer keeps the calculations engine + chart bundle
 // out of the V6 chunk until a model tab actually opens (B2.1).
@@ -182,14 +183,11 @@ function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut }: TabConte
     );
   }
   if (tab.kind === "deliverable") {
-    return (
-      <PendingSurface
-        eyebrow="OPENED BY YULIA"
-        title={tab.title}
-        chip={tab.deliverableId ? `deliverable · ${tab.deliverableId}` : undefined}
-        body="The in-canvas viewer ships in the next build. Ask Yulia in chat to summarize this deliverable or surface specific sections."
-      />
-    );
+    // B2.7: poll /api/deliverables/:id and surface status. When complete,
+    // render the markdown content (best-effort — full structured viewer
+    // lands in Phase 3). When still generating, the PendingSurface above
+    // updates its body line every 2s as the polling hook re-runs.
+    return <V6DeliverableTabContent tab={tab} />;
   }
   return <Placeholder label="Unknown tab" />;
 }
@@ -206,6 +204,92 @@ function Placeholder({ label, note }: { label: string; note?: string }) {
     </div>
   );
 }
+
+/**
+ * Live deliverable tab — polls status, renders the right state.
+ * Phase 3 will swap the markdown rendering for the full structured viewer
+ * (TipTap editor for editable types, chart-aware renderer for analytical types).
+ */
+function V6DeliverableTabContent({ tab }: { tab: Tab }) {
+  const { data, error } = useDeliverableStatus(tab.deliverableId ?? null);
+
+  if (error) {
+    return (
+      <PendingSurface
+        eyebrow="DELIVERABLE"
+        title={tab.title}
+        chip={tab.deliverableId ? `deliverable · ${tab.deliverableId}` : undefined}
+        body={`Couldn't load this deliverable (${error}). Ask Yulia to retry or describe what should have been here.`}
+      />
+    );
+  }
+
+  if (!data) {
+    return (
+      <PendingSurface
+        eyebrow="OPENED BY YULIA"
+        title={tab.title}
+        chip={tab.deliverableId ? `deliverable · ${tab.deliverableId}` : undefined}
+        body="Loading the deliverable…"
+      />
+    );
+  }
+
+  if (data.status === "generating" || data.status === "pending") {
+    return (
+      <PendingSurface
+        eyebrow="GENERATING"
+        title={tab.title}
+        chip={tab.deliverableId ? `deliverable · ${tab.deliverableId}` : undefined}
+        body="Yulia is preparing this — usually 30 to 90 seconds depending on the document. The page will update automatically when it's ready."
+      />
+    );
+  }
+
+  if (data.status === "failed") {
+    return (
+      <PendingSurface
+        eyebrow="FAILED"
+        title={tab.title}
+        chip={tab.deliverableId ? `deliverable · ${tab.deliverableId}` : undefined}
+        body={`Yulia couldn't generate this one${data.content?.error ? ` (${data.content.error})` : ""}. Ask her to retry in chat.`}
+      />
+    );
+  }
+
+  // status === 'complete' — render content. For now, best-effort markdown.
+  const markdown: string | null = typeof data.content === "string"
+    ? data.content
+    : (data.content?.markdown ?? data.content?.content ?? null);
+  return (
+    <div className="m-fade-up" style={{ maxWidth: 720 }}>
+      <div className="mono" style={{ fontSize: 9.5, color: "var(--m-primary)", letterSpacing: "0.14em", fontWeight: 600 }}>
+        DELIVERABLE · READY
+      </div>
+      <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 24, letterSpacing: "-0.025em", margin: "6px 0 16px", color: "var(--m-on-surface)" }}>
+        {tab.title}
+      </h1>
+      {markdown ? (
+        <pre style={{
+          fontFamily: "var(--font-body)",
+          fontSize: 13.5, lineHeight: 1.6,
+          color: "var(--m-on-surface)",
+          background: "var(--m-surface-on-light)",
+          border: "1px solid var(--m-outline-var)",
+          borderRadius: 12, padding: "20px 22px",
+          whiteSpace: "pre-wrap", textWrap: "pretty",
+          margin: 0,
+        }}>{markdown}</pre>
+      ) : (
+        <div style={{ fontSize: 13, color: "var(--m-on-surface-mid)" }}>
+          Generated, but the renderer for this deliverable type lands in a follow-up batch.
+          Ask Yulia in chat to walk through it for now.
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 /**
  * Wrapper that suspends while the lazy-loaded ModelRenderer fetches.
