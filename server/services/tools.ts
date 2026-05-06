@@ -460,7 +460,31 @@ async function createDeal(input: Record<string, any>, userId: number, conversati
   // Link conversation to deal and clear general flag (this is now a deal conversation)
   await sql`UPDATE conversations SET deal_id = ${deal.id}, is_general = false WHERE id = ${conversationId}`;
 
-  return JSON.stringify({ success: true, dealId: deal.id, journeyType, gate: initialGate });
+  // Fix UX-02: surface the new deal as a tab the moment Yulia creates it.
+  // Without this, the chat continues but the user has no signal a deal record
+  // exists. The V6App listener handles canvas_action="open_tab".
+  return JSON.stringify({
+    success: true,
+    dealId: deal.id,
+    journeyType,
+    gate: initialGate,
+    canvas_action: 'open_tab',
+    tab: {
+      id: String(deal.id),
+      kind: 'deal',
+      title: defaultDealTitle(journeyType),
+    },
+  });
+}
+
+function defaultDealTitle(journeyType: string): string {
+  switch (journeyType) {
+    case 'buy':   return 'New BUY thesis';
+    case 'sell':  return 'New SELL mandate';
+    case 'raise': return 'New RAISE';
+    case 'pmi':   return 'New PMI plan';
+    default:      return 'New deal';
+  }
 }
 
 const FINANCIAL_FIELDS = new Set(['revenue', 'sde', 'ebitda', 'asking_price']);
