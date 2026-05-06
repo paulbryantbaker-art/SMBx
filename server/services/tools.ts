@@ -242,6 +242,24 @@ export const TOOL_DEFINITIONS: Tool[] = [
     },
   },
   {
+    name: 'commit_valuation',
+    description: 'Lock the user-confirmed valuation onto the deal record so gate readiness sees it (B2 → B3 / S2 → S3). Call this when the user says "lock this valuation", "save this", "go with these numbers", or otherwise approves a valuation we just walked through. The deal\'s financials.valuation_locked is set with the range + multiples + methodology blend, valuation_model_generated flag flips true so the gate-readiness check passes.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId: { type: 'number', description: 'The deal ID' },
+        valuationLow: { type: 'number', description: 'Low end of the valuation range, in cents' },
+        valuationMid: { type: 'number', description: 'Midpoint / blended valuation, in cents' },
+        valuationHigh: { type: 'number', description: 'High end of the valuation range, in cents' },
+        impliedMultiple: { type: 'number', description: 'Implied multiple at the midpoint (e.g., 6.5 for 6.5x)' },
+        metric: { type: 'string', enum: ['SDE', 'EBITDA'], description: 'Which metric the multiple is on' },
+        methodology: { type: 'string', description: 'How we got here, e.g., "60% multiples / 40% DCF blended"' },
+        notes: { type: 'string', description: 'Optional one-line rationale the user agreed to' },
+      },
+      required: ['dealId', 'valuationLow', 'valuationMid', 'valuationHigh', 'impliedMultiple', 'metric', 'methodology'],
+    },
+  },
+  {
     name: 'query_admin_data',
     description: 'Admin-only tool for querying platform metrics, user activity, issues, and system health. Only available when the user is an admin. Use to answer questions like "how many users signed up this week?", "what are the top bugs?", "show me conversion metrics", "are there any critical issues?".',
     input_schema: {
@@ -378,6 +396,8 @@ export async function executeTool(
         return updateModel(input);
       case 'read_tab_state':
         return readTabState(input);
+      case 'commit_valuation':
+        return await commitValuation(input, userId);
       case 'create_support_issue':
         return await createSupportIssue(input, userId, conversationId);
       case 'query_admin_data':
@@ -656,6 +676,68 @@ async function advanceGate(input: Record<string, any>, userId: number): Promise<
     title: `${deal.journey_type === 'sell' ? 'Sell' : deal.journey_type === 'buy' ? 'Buy' : deal.journey_type === 'raise' ? 'Raise' : 'PMI'} Journey`,
     newGate: toGate,
     newConversationId: transition?.newConversationId ?? null,
+  });
+}
+
+/**
+ * commit_valuation — saves a user-confirmed valuation onto the deal record so
+ * gate-readiness sees `valuation_model_generated=true` and B2/S2 can advance.
+ *
+ * Chat-first: no UI button calls this. Yulia calls it when the user says "lock
+ * this", "save this", "go with these", etc. The result returns
+ * canvas_action: 'open_tab' for the deal so the user sees the locked numbers
+ * appear on the deal record immediately.
+ */
+async function commitValuation(input: Record<string, any>, userId: number): Promise<string> {
+  const {
+    dealId, valuationLow, valuationMid, valuationHigh,
+    impliedMultiple, metric, methodology, notes,
+  } = input;
+
+  const [deal] = await sql`
+    SELECT id, financials, business_name FROM deals WHERE id = ${dealId} AND user_id = ${userId} LIMIT 1
+  `;
+  if (!deal) return JSON.stringify({ error: 'Deal not found' });
+
+  const existing: Record<string, any> = typeof deal.financials === 'string'
+    ? JSON.parse(deal.financials)
+    : (deal.financials || {});
+
+  const valuationLocked = {
+    low_cents: valuationLow,
+    mid_cents: valuationMid,
+    high_cents: valuationHigh,
+    implied_multiple: impliedMultiple,
+    metric, // 'SDE' | 'EBITDA'
+    methodology,
+    notes: notes ?? null,
+    locked_at: new Date().toISOString(),
+  };
+
+  const merged = {
+    ...existing,
+    valuation_locked: valuationLocked,
+    // Gate-readiness flag — `gateReadinessService` looks for either of these
+    // depending on the journey.
+    valuation_model_generated: true,
+  };
+
+  await sql`
+    UPDATE deals
+    SET financials = ${JSON.stringify(merged)}::jsonb, updated_at = NOW()
+    WHERE id = ${dealId}
+  `;
+
+  return JSON.stringify({
+    success: true,
+    dealId,
+    valuationLocked,
+    canvas_action: 'open_tab',
+    tab: {
+      id: String(dealId),
+      kind: 'deal',
+      title: deal.business_name || `Deal #${dealId}`,
+    },
   });
 }
 

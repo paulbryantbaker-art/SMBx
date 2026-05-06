@@ -195,9 +195,26 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
 
       // create_model_tab → Yulia opens an interactive model in the canvas
       if (action === "create_model_tab" && detail.modelType) {
+        // Generate a stable id, populate the modelStore at that id so
+        // ModelRenderer can find it, then open the V6 tab with the same id.
+        // The store's restoreTab signature accepts a fixed id (see modelStore.ts:224).
+        const tabId = `model-${detail.modelType}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+        const title = detail.tabTitle ?? prettyModelTitle(detail.modelType);
+        // Lazy-import so V6 doesn't pay the modelStore + calculations bundle cost
+        // when no model tab has ever been opened.
+        import("../../lib/modelStore").then(({ useModelStore }) => {
+          useModelStore.getState().restoreTab(
+            tabId,
+            detail.modelType as any,
+            title,
+            detail.initialAssumptions ?? {},
+            detail.dealId,
+          );
+        }).catch((e: Error) => console.error("modelStore lazy-load failed", e.message));
         openTab({
+          id: tabId,
           kind: "model",
-          title: detail.tabTitle ?? prettyModelTitle(detail.modelType),
+          title,
           modelType: detail.modelType,
           initialAssumptions: detail.initialAssumptions,
         });

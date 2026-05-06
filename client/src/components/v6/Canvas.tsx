@@ -1,5 +1,9 @@
-import { type CSSProperties, type ReactNode } from "react";
+import { Suspense, lazy, type CSSProperties, type ReactNode } from "react";
 import type { Tab, IconName, OpenTab, ModeId } from "./types";
+
+// Lazy-loaded model renderer keeps the calculations engine + chart bundle
+// out of the V6 chunk until a model tab actually opens (B2.1).
+const ModelRenderer = lazy(() => import("../models/ModelRenderer"));
 import type { User } from "../../hooks/useAuth";
 import { V6Icon } from "./icons";
 import { V6SearchRoot } from "./modes/SearchRoot";
@@ -152,14 +156,9 @@ function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut }: TabConte
   if (tab.kind === "history")  return <V6HistoryView />;
   if (tab.kind === "starter")  return <V6StarterView onTalkToYulia={onTalkToYulia} />;
   if (tab.kind === "model") {
-    return (
-      <PendingSurface
-        eyebrow="OPENED BY YULIA"
-        title={tab.title}
-        chip={tab.modelType ? `model · ${tab.modelType}` : undefined}
-        body="The interactive model viewer ships in the next build. In the meantime, ask Yulia in chat to walk you through the assumptions or run a what-if."
-      />
-    );
+    // B2.1: mount the existing interactive model viewer. The store was
+    // populated at the same tab id by the V6App canvas_action listener.
+    return <V6ModelTabContent tabId={tab.id} title={tab.title} />;
   }
   if (tab.kind === "sourcing") {
     return (
@@ -194,6 +193,25 @@ function Placeholder({ label, note }: { label: string; note?: string }) {
       }}>{label}</h1>
       {note && <p style={{ fontSize: 13, color: "var(--m-on-surface-mid)", margin: 0 }}>{note}</p>}
     </div>
+  );
+}
+
+/**
+ * Wrapper that suspends while the lazy-loaded ModelRenderer fetches.
+ * The model store was already populated by the V6App listener (createTab via
+ * restoreTab) so by the time the chunk lands the tab is ready to render.
+ */
+function V6ModelTabContent({ tabId, title }: { tabId: string; title: string }) {
+  return (
+    <Suspense fallback={
+      <PendingSurface
+        eyebrow="OPENED BY YULIA"
+        title={title}
+        body="Loading the interactive model — should land in a moment."
+      />
+    }>
+      <ModelRenderer tabId={tabId} />
+    </Suspense>
   );
 }
 
