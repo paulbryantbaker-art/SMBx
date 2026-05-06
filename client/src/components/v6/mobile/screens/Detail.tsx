@@ -8,6 +8,32 @@ import { FitGauge } from "../FitGauge";
 import { MobileIcon } from "../icons";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
 import { useWatchlist } from "../../../../hooks/useWatchlist";
+import { findDeal } from "../../../../lib/sampleDeals";
+import type { Verdict } from "../types";
+
+const VERDICT_LABEL: Record<Verdict, string> = {
+  pursue: "PURSUE",
+  watch:  "WATCH",
+  pass:   "PASS",
+};
+
+const VERDICT_INK: Record<Verdict, string> = {
+  pursue: "var(--mb-verdict-pursue-ink)",
+  watch:  "var(--mb-warn-ink)",
+  pass:   "var(--mb-danger-ink)",
+};
+
+const VERDICT_DOT: Record<Verdict, string> = {
+  pursue: "var(--mb-verdict-pursue)",
+  watch:  "var(--mb-warn)",
+  pass:   "var(--mb-danger)",
+};
+
+const VERDICT_BLURB: Record<Verdict, string> = {
+  pursue: "Yulia recommends pursuing this deal.",
+  watch:  "Yulia is watching this — not ready to pursue yet.",
+  pass:   "Yulia recommends passing on this deal.",
+};
 
 interface DetailProps {
   dealId: string;
@@ -22,6 +48,15 @@ interface DetailProps {
 export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia }: DetailProps) {
   const { isWatched, toggle } = useWatchlist();
   const watched = isWatched(dealId);
+
+  /* Pull the real verdict + fit from the sample deal bank so the page reflects
+     this specific deal — not a hardcoded "Pursue / 92" that contradicts what
+     Yulia says in chat. Falls back to "watch / 70" for unknown ids so the
+     page still renders cleanly. */
+  const deal = findDeal(dealId);
+  const verdict: Verdict = deal?.verdict ?? "watch";
+  const fit = deal?.fit ?? 70;
+  const dealSub = deal?.sub ?? "";
 
   const onShare = async () => {
     const url = window.location.href;
@@ -39,29 +74,40 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia }: 
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 140, position: "relative", background: "var(--mb-bg)" }}>
       <FloatingNav onBack={onBack} onShare={onShare} />
 
-      {/* Hero block — fit-score gauge + name + verdict.
-          The gauge replaces the previous YIcon block. Same footprint,
-          but communicates "how strong does this deal fit your thesis"
-          at a glance — way more useful than a generic mark. */}
+      {/* Hero block — gauge + Watch button stacked on the left, title +
+          verdict label + blurb on the right. Watch under the gauge so the
+          gauge column carries the user's actions; verdict on the right is
+          read-only (Yulia's call). No more centered floating button. */}
       <div style={D.hero}>
-        <FitGauge score={92} verdict="pursue" size={108} strokeRatio={0.09} />
+        <div style={D.heroLeft}>
+          <FitGauge score={fit} verdict={verdict} size={108} strokeRatio={0.09} />
+          <button
+            type="button"
+            aria-pressed={watched}
+            onClick={() => toggle(dealId, dealTitle)}
+            style={{
+              ...D.watchBtn,
+              background: watched ? "var(--mb-accent-ink)" : "var(--mb-accent-soft)",
+              color: watched ? "#fff" : "var(--mb-accent-ink)",
+            }}
+          >{watched ? "✓ Watching" : "+ Watch"}</button>
+        </div>
         <div style={{ flex: 1, minWidth: 0, paddingTop: 4 }}>
           <h1 style={D.h1}>{dealTitle}</h1>
-          <div style={D.dealMeta}>East Texas &middot; Deal #SMBX-0119</div>
-          <div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center" }}>
-            <span style={D.verdictBadge}>Pursue</span>
-            <button
-              type="button"
-              aria-pressed={watched}
-              onClick={() => toggle(dealId, dealTitle)}
-              style={{
-                ...D.watchBtn,
-                background: watched ? "var(--mb-accent-ink)" : "var(--mb-blue-soft)",
-                color: watched ? "#fff" : "var(--mb-blue-ink)",
-              }}
-            >{watched ? "Watching" : "Watch"}</button>
+          <div style={D.dealMeta}>{dealSub || "Sample deal"}</div>
+
+          {/* Verdict status — flat label, NOT a button */}
+          <div style={D.verdictLabelRow}>
+            <span className="mb-mono" style={D.verdictEyebrow}>YULIA&rsquo;S CALL</span>
+            <span style={{ ...D.verdictStatus, color: VERDICT_INK[verdict] }}>
+              <span
+                aria-hidden="true"
+                style={{ ...D.verdictDot, background: VERDICT_DOT[verdict] }}
+              />
+              {VERDICT_LABEL[verdict]}
+            </span>
           </div>
-          <div style={D.verdictCaption}>Yulia&rsquo;s verdict</div>
+          <div style={D.verdictBlurb}>{VERDICT_BLURB[verdict]}</div>
         </div>
       </div>
 
@@ -419,26 +465,54 @@ const D: Record<string, CSSProperties> = {
     margin: 0, color: "var(--mb-ink)",
     textWrap: "balance",
   },
-  dealMeta: { fontSize: 14, color: "var(--mb-ink-3)", marginTop: 4 },
-  // Verdict is no longer a button — it's an informational badge that
-  // displays Yulia's call. The user-action button next to it is the
-  // separate Watch toggle.
-  verdictBadge: {
-    display: "inline-flex", alignItems: "center",
-    padding: "6px 18px", fontSize: 14, fontWeight: 700,
-    background: "var(--mb-verdict-pursue-soft)",
-    color: "var(--mb-verdict-pursue-ink)",
-    borderRadius: 999, letterSpacing: "-0.1px",
+  dealMeta: {
+    fontSize: 13, color: "var(--mb-ink-3)", marginTop: 4,
+    lineHeight: 1.35, textWrap: "pretty",
   },
+
+  /* Verdict label — flat status indicator. NOT a button. The mono eyebrow
+     plus the colored dot + word reads as "Yulia tagged this as PURSUE,"
+     not "tap me to pursue." */
+  verdictLabelRow: {
+    marginTop: 10,
+    display: "flex", flexDirection: "column", gap: 2,
+  },
+  verdictEyebrow: {
+    fontSize: 10, letterSpacing: "0.1em", fontWeight: 700,
+    color: "var(--mb-ink-4)",
+  },
+  verdictStatus: {
+    display: "inline-flex", alignItems: "center", gap: 6,
+    fontSize: 15, fontWeight: 800, letterSpacing: "-0.1px",
+  },
+  verdictDot: {
+    width: 8, height: 8, borderRadius: "50%",
+    flexShrink: 0,
+  },
+  verdictBlurb: {
+    marginTop: 4,
+    fontSize: 12, color: "var(--mb-ink-3)",
+    lineHeight: 1.35, textWrap: "pretty",
+  },
+
+  /* Hero left column — gauge stacked with Watch button. Center-aligned
+     so the button reads as anchored to the gauge, not floating. */
+  heroLeft: {
+    display: "flex", flexDirection: "column",
+    alignItems: "center", gap: 10,
+    flexShrink: 0,
+  },
+
+  /* Watch — the only tappable thing in the hero. Visually heavier than
+     the verdict label (full pill, longer label, plus an iconographic
+     prefix) so the affordance is unambiguous. */
   watchBtn: {
-    padding: "6px 18px", fontSize: 14, fontWeight: 700,
+    padding: "8px 16px",
+    fontSize: 13, fontWeight: 700, letterSpacing: "-0.1px",
     border: "none", borderRadius: 999, cursor: "pointer",
-    minWidth: 92,
     transition: "background-color 200ms ease, color 200ms ease",
-  },
-  verdictCaption: {
-    fontSize: 11, color: "var(--mb-ink-4)", marginTop: 4,
-    textAlign: "center", maxWidth: 110,
+    boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
+    minWidth: 108,
   },
   statsStrip: {
     display: "grid", gridTemplateColumns: "repeat(4, 1fr)",
