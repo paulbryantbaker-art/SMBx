@@ -297,15 +297,29 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
           onAskYulia={onAskYulia}
         />
       )}
-      {view.kind === "detail" && (
-        <DetailScreen
-          dealId={view.dealId ?? "unknown"}
-          dealTitle={view.dealTitle ?? view.dealId ?? "Deal"}
-          onBack={() => setView({ kind: "tab", tab: "today" })}
-          onChat={onChat}
-          onAskYulia={onAskYulia}
-        />
-      )}
+      {view.kind === "detail" && (() => {
+        const dealIdStr = view.dealId ?? "unknown";
+        // dealId is "deal-<id>" — pull the matching raw record so the
+        // Recommended Next surface can render gate-aware items (B2.0).
+        const numericId = parseInt(dealIdStr.replace(/^deal-/, ""), 10);
+        const matching = !isNaN(numericId)
+          ? userDeals.raw.find(d => d.id === numericId)
+          : undefined;
+        return (
+          <DetailScreen
+            dealId={dealIdStr}
+            dealTitle={view.dealTitle ?? view.dealId ?? "Deal"}
+            onBack={() => setView({ kind: "tab", tab: "today" })}
+            onChat={onChat}
+            onAskYulia={onAskYulia}
+            userDeal={matching ? {
+              business_name: matching.business_name,
+              journey_type: matching.journey_type,
+              current_gate: matching.current_gate,
+            } : null}
+          />
+        );
+      })()}
       {view.kind === "watching" && (
         <WatchingScreen
           onBack={() => setView({ kind: "tab", tab: "pipeline" })}

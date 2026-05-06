@@ -4,6 +4,7 @@ import { V6Icon } from "../icons";
 import { V6DocStatus, type DocStatusKind } from "../modes/cards";
 import type { OpenTab, TabKind } from "../types";
 import { authHeaders } from "../../../hooks/useAuth";
+import { getRecommendations } from "../../../lib/recommendedNext";
 
 interface Stat { k: string; v: string; sub: string }
 interface LinkedFile {
@@ -70,7 +71,7 @@ interface DeliverableRow {
   menu_item_name?: string;
 }
 
-export function V6DealView({ id, title, openTab }: { id: string; title: string; openTab: OpenTab }) {
+export function V6DealView({ id, title, openTab, onTalkToYulia }: { id: string; title: string; openTab: OpenTab; onTalkToYulia?: (prompt: string) => void }) {
   const numericId = /^\d+$/.test(id) ? parseInt(id, 10) : null;
   const [data, setData] = useState<DealDetailResp | null>(null);
   const [linked, setLinked] = useState<DeliverableRow[] | null>(null);
@@ -148,6 +149,39 @@ export function V6DealView({ id, title, openTab }: { id: string; title: string; 
         }}>
           Couldn&rsquo;t load this deal ({error}). Showing reference layout.
         </div>
+      )}
+
+      {/* B2.0: Recommended Next — gate-aware contextual shortcuts. Tap →
+          Yulia executes. Pills, not buttons. Renders only when we have a
+          real deal record (not the sample fallback) and there's a callback
+          to send prompts through. */}
+      {real && onTalkToYulia && (
+        <section style={{ marginBottom: 28 }}>
+          <div className="mono" style={D.recommendedEyebrow}>RECOMMENDED NEXT · YULIA SUGGESTS</div>
+          <div style={D.recommendedRow}>
+            {getRecommendations({
+              business_name: real.business_name,
+              journey_type: real.journey_type,
+              current_gate: real.current_gate,
+            }).map(rec => (
+              <button
+                key={rec.id}
+                type="button"
+                className="m-state"
+                onClick={() => onTalkToYulia(rec.prompt)}
+                style={D.recommendedPill}
+                onMouseDown={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(0.97)"; }}
+                onMouseUp={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+                title={rec.sub ?? rec.title}
+                aria-label={rec.title}
+              >
+                <span className="mono" style={D.recommendedPillEyebrow}>{rec.eyebrow}</span>
+                <span style={D.recommendedPillLabel}>{rec.title}</span>
+              </button>
+            ))}
+          </div>
+        </section>
       )}
 
       {/* Verdict banner */}
@@ -331,6 +365,31 @@ const D: Record<string, CSSProperties> = {
   eyebrow: {
     fontSize: 10, color: "var(--m-on-surface-mid)",
     letterSpacing: "0.14em", fontWeight: 600, marginBottom: 6,
+  },
+  recommendedEyebrow: {
+    fontSize: 9.5, letterSpacing: "0.14em", fontWeight: 600,
+    color: "var(--m-primary)",
+    marginBottom: 10,
+  },
+  recommendedRow: {
+    display: "flex", flexWrap: "wrap", gap: 8,
+  },
+  recommendedPill: {
+    display: "inline-flex", flexDirection: "column", gap: 2,
+    padding: "8px 14px",
+    background: "var(--m-primary-container)",
+    color: "var(--m-on-primary-container)",
+    border: "none",
+    borderRadius: 999,
+    cursor: "pointer",
+    transition: "transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background 160ms ease",
+  },
+  recommendedPillEyebrow: {
+    fontSize: 8.5, letterSpacing: "0.16em", fontWeight: 700, opacity: 0.7,
+  },
+  recommendedPillLabel: {
+    fontFamily: "var(--font-display)",
+    fontSize: 13, fontWeight: 600, letterSpacing: "-0.01em",
   },
   headerRow: {
     display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 20,

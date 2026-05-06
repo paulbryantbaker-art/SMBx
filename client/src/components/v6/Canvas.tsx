@@ -143,7 +143,7 @@ function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut }: TabConte
     if (tab.modeId === "library")  return <V6LibraryRoot openTab={openTab} user={user} />;
     return <Placeholder label={`${tab.title} — root view`} note="Unknown mode root." />;
   }
-  if (tab.kind === "deal")     return <V6DealView id={tab.id} title={tab.title} openTab={openTab} />;
+  if (tab.kind === "deal")     return <V6DealView id={tab.id} title={tab.title} openTab={openTab} onTalkToYulia={onTalkToYulia} />;
   if (tab.kind === "doc")      return <V6DocView id={tab.id} title={tab.title} />;
   if (tab.kind === "analysis") return <V6AnalysisView title={tab.title} />;
   if (tab.kind === "feed-item") return <Placeholder label={`Feed · ${tab.title}`} note="Feed item reading view is a thin wrapper — coming after polish." />;

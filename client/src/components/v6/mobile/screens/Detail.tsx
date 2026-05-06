@@ -9,6 +9,7 @@ import { MobileIcon } from "../icons";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
 import { useWatchlist } from "../../../../hooks/useWatchlist";
 import { findDeal } from "../../../../lib/sampleDeals";
+import { getRecommendations } from "../../../../lib/recommendedNext";
 import type { Verdict } from "../types";
 
 const VERDICT_LABEL: Record<Verdict, string> = {
@@ -53,9 +54,13 @@ interface DetailProps {
   /** Send a starter prompt to chat then open the chat sheet. Used by
       the next-actions list and the deal-context input at the bottom. */
   onAskYulia: (prompt: string) => void;
+  /** Real deal record when the dealId resolves to one of the user's deals.
+      Drives the gate-aware Recommended Next list (B2.0). Null/undefined
+      falls back to the sample-flavored static items below. */
+  userDeal?: { business_name?: string | null; journey_type?: string | null; current_gate?: string | null } | null;
 }
 
-export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia }: DetailProps) {
+export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, userDeal }: DetailProps) {
   const { isWatched, toggle } = useWatchlist();
   const watched = isWatched(dealId);
 
@@ -195,30 +200,51 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia }: 
         </div>
       </Section>
 
-      {/* Recommended next actions — 3 things Yulia thinks the user
-          should do next. Each tap fires onAskYulia(prompt) with a
-          starter that opens chat with the relevant action context. */}
-      <Section title="Recommended next" chevron={false}>
-        <NextAction
-          eyebrow="ANALYSIS"
-          title="Run a deeper QoE on the NWC peg"
-          sub="2 minutes · Yulia walks the working capital math"
-          onTap={() => onAskYulia(`On ${dealTitle}: walk me through a deeper QoE focused on the NWC peg. Numbers + recommendation.`)}
-        />
-        <NextAction
-          eyebrow="DOC"
-          title="Draft the IOI"
-          sub="Yulia has the v3 ready — review and send"
-          onTap={() => onAskYulia(`On ${dealTitle}: draft the IOI for me. League-appropriate template, agreed terms.`)}
-        />
-        <NextAction
-          eyebrow="OUTREACH"
-          title="Pull the buyer list"
-          sub="69 candidates · 47 strategics, 22 sponsors"
-          last
-          onTap={() => onAskYulia(`On ${dealTitle}: pull a ranked buyer list. Strategic and sponsor split, fit reasoning.`)}
-        />
-      </Section>
+      {/* Recommended next actions — 2-4 contextual shortcuts driven by the
+          deal's gate + journey when we have a real deal record (B2.0 from
+          getRecommendations). Falls back to static SELL-flavored samples
+          when no real deal is in scope (anon visitors hitting sample
+          deals). Each tap fires onAskYulia(prompt) — Yulia executes. */}
+      {userDeal ? (
+        <Section title="Recommended next" chevron={false}>
+          {getRecommendations({
+            business_name: userDeal.business_name ?? dealTitle,
+            journey_type: userDeal.journey_type,
+            current_gate: userDeal.current_gate,
+          }).map((rec, i, arr) => (
+            <NextAction
+              key={rec.id}
+              eyebrow={rec.eyebrow}
+              title={rec.title}
+              sub={rec.sub ?? ""}
+              last={i === arr.length - 1}
+              onTap={() => onAskYulia(rec.prompt)}
+            />
+          ))}
+        </Section>
+      ) : (
+        <Section title="Recommended next" chevron={false}>
+          <NextAction
+            eyebrow="ANALYSIS"
+            title="Run a deeper QoE on the NWC peg"
+            sub="2 minutes · Yulia walks the working capital math"
+            onTap={() => onAskYulia(`On ${dealTitle}: walk me through a deeper QoE focused on the NWC peg. Numbers + recommendation.`)}
+          />
+          <NextAction
+            eyebrow="DOC"
+            title="Draft the IOI"
+            sub="Yulia has the v3 ready — review and send"
+            onTap={() => onAskYulia(`On ${dealTitle}: draft the IOI for me. League-appropriate template, agreed terms.`)}
+          />
+          <NextAction
+            eyebrow="OUTREACH"
+            title="Pull the buyer list"
+            sub="69 candidates · 47 strategics, 22 sponsors"
+            last
+            onTap={() => onAskYulia(`On ${dealTitle}: pull a ranked buyer list. Strategic and sponsor split, fit reasoning.`)}
+          />
+        </Section>
+      )}
 
       {/* Deal-context chat input — tappable field at the bottom that
           opens chat with the deal already in context. Whatever the
