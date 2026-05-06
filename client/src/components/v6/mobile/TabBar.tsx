@@ -19,9 +19,10 @@ interface TabBarProps {
   onChat: () => void;
 }
 
-const TABS: { id: MobileTab; label: string; icon: "today" | "pipeline" | "brief" }[] = [
+const TABS: { id: MobileTab; label: string; icon: "today" | "pipeline" | "brief" | "library" }[] = [
   { id: "today",    label: "Today",    icon: "today"    },
   { id: "pipeline", label: "Pipeline", icon: "pipeline" },
+  { id: "library",  label: "Library",  icon: "library"  },
   { id: "brief",    label: "Brief",    icon: "brief"    },
 ];
 

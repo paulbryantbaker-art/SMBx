@@ -9,6 +9,7 @@ import { GlassTopBar, LargeTitle, TitleCollapseProvider } from "./TopBar";
 import { TodayScreen } from "./screens/Today";
 import { PipelineScreen } from "./screens/Pipeline";
 import { BriefScreen } from "./screens/Brief";
+import { LibraryScreen } from "./screens/Library";
 import { DetailScreen } from "./screens/Detail";
 import { WatchingScreen } from "./screens/Watching";
 import { ChatSheet } from "./ChatSheet";
@@ -16,7 +17,7 @@ import { LearnSheet } from "./LearnSheet";
 import { useAudience } from "../../../hooks/useAudience";
 import type { MobileChatBridge, MobileTab, MobileView } from "./types";
 
-const VALID_TABS: MobileTab[] = ["today", "pipeline", "brief"];
+const VALID_TABS: MobileTab[] = ["today", "pipeline", "library", "brief"];
 
 interface V6MobileProps {
   user: User | null;
@@ -279,6 +280,14 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
           userFeatured={userDeals.hasData ? userDeals.featured : null}
         />
       )}
+      {view.kind === "tab" && activeTab === "library" && (
+        <LibraryScreen
+          isAnon={isAnon}
+          initials={initials}
+          onAvatarClick={onAvatarClick}
+          onSearch={onChat}
+        />
+      )}
       {view.kind === "tab" && activeTab === "brief" && (
         <BriefScreen
           isAnon={isAnon}
@@ -323,6 +332,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
 const TAB_TITLES: Record<MobileTab, string> = {
   today: "Today",
   pipeline: "Pipeline",
+  library: "Library",
   brief: "Brief",
 };
 

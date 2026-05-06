@@ -1,4 +1,4 @@
-export type MobileTab = "today" | "pipeline" | "brief";
+export type MobileTab = "today" | "pipeline" | "library" | "brief";
 
 export type MobileViewKind = "tab" | "detail" | "watching";
 
@@ -29,6 +29,6 @@ export type YIconKind = Verdict | "default" | "cool";
 export type IconName =
   | "chat" | "search" | "back" | "share" | "close" | "download"
   | "chevron" | "star" | "arrowUp"
-  | "today" | "pipeline" | "brief";
+  | "today" | "pipeline" | "brief" | "library";
 
 export type GlassTint = "light" | "chrome" | "dark" | "onColor";

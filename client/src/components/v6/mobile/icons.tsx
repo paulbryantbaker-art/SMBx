@@ -81,4 +81,13 @@ const ICONS: Record<IconName, (p: IconProps) => ReactElement> = {
       <path d="M8 7H14M8 11H14M8 15H12" strokeLinecap="round" strokeWidth="1.2"/>
     </svg>
   ),
+  library: ({ c = "currentColor", active = false }) => (
+    <svg width={22} height={22} viewBox="0 0 22 22" fill={active ? c : "none"} stroke={c} strokeWidth="1.5" aria-hidden="true">
+      {/* Three vertical "books" — bound, growing slightly in height. Reads as
+          a library/shelf. */}
+      <path d="M4 4H7V18H4V4Z"/>
+      <path d="M9 5H12V18H9V5Z"/>
+      <path d="M14 7L17 6.5V18L14 18.5V7Z" strokeLinejoin="round"/>
+    </svg>
+  ),
 };
