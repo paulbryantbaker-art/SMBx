@@ -403,10 +403,15 @@ function writeMobileHashState(view: MobileView, chatOpen: boolean) {
 //
 // isAnon kept in the signature for symmetry but no longer drives color.
 function rootGradient(_isAnon: boolean) {
+  /* Page-wide gradient retuned 2026-05-05 (eve, take 5) — three stops with
+     a near-white intermediate at 40%. The top 40% interpolates white→
+     near-white (visually pure white), and the bottom 60% smoothly fades
+     to periwinkle. No knee, no plateau — just a gentle curve that pushes
+     the visible tint into the lower half of long pages. */
   return (
     "linear-gradient(to bottom," +
-    " #FFFFFF 0," +
-    " #FFFFFF 72%," +
+    " #FFFFFF 0%," +
+    " #FBFCFE 40%," +
     " #A8B3E5 100%)"
   );
 }
