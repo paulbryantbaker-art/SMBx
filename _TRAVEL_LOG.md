@@ -106,4 +106,40 @@ Cold-start BUY user can now perceive every step of progress that the platform ta
 
 ### Phase 1.5 — Mobile information architecture
 
+- **B1.8** ✓ Mobile Library tab — 4-tab IA + 3-tier doc model — committed `293bc06`. Verified on mobile viewport.
+- **B1.9** ✓ Brief → Search reframe — committed `2136944`. Verified on mobile viewport.
+- **B1.10** ✓ Today action queue (authed) — committed `065e973`. TypeScript clean; live render gated on having an authed account with deals.
+
+### Phase 2 — BUY end-to-end + Recommended Next + portfolio + compare
+
+- **B2.0** ✓ Recommended Next surface (mobile + desktop) — committed `39a9ecd`. Lib + per-journey/per-gate registry + DealView pills + DetailScreen swap-in.
+- **B2.1** ✓ Model tabs + commit_valuation — committed `dec3ab5`. Lazy-loaded ModelRenderer; modelStore.restoreTab populates at the V6 tab id.
+- **B2.2** ✓ Sourcing tool + panel mount — committed `be86de9`. Note: SourcingPanel still on retired Cowork DL palette — restyle is a follow-up.
+- **B2.3-2.6** ✓ Lifecycle record tools (promote, DD, LOI, financing, close) — committed `703700f`. Five flag-flipping tools that move deals through gate-readiness.
+- **B2.7** ✓ generate_deliverable + status-polling deliverable tab — committed `d3df985`. Deliverable tab transitions generating → complete via 2s polling.
+- **B2.8** ✓ Portfolio rollup card (desktop + mobile) — committed `c17fdce`. New /api/portfolio/summary endpoint; lavender→slate→green gate bar.
+- **B2.9** ✓ compare_deals tool + side-by-side surface — committed `7b3b7fd`. Reuses existing ComparisonModel; multi-step orchestration in V6App listener.
+
+### Phase 4.5 — Merger Lite
+
+- **B4.5** ✓ DB migration + tools + LOI structures + CIM carve-out — committed `1df569d`. Migration 059_merger_lite.sql adds parent_deal_id + merger_pairings + closed_deals tables. Tools: pair_merger_deals + create_deal accepts 'merger'. LOI deal_structure enum extended with 4 merger structures (forward/reverse triangular, share exchange, MOE). CIM appends 3 carve-out sections when financials.is_carve_out=true. Phase 5 (Merger Pro) adds §368 reorg analysis + HSR + interactive MergerExchangeModel.
+
+### Final summary (2026-05-06 close-out)
+
+- **Commits since restore point:** 21 (excluding doc/log commits).
+- **Memory entries written/updated:** 5 (chat-first, recommended-next, mobile tabs revised, search tab spec, portfolio overview).
+- **BLOCKERS logged:** 4 (B-01 mobile DetailScreen Vite cache, B-02 schema drift incl. is_general, B-03 Claude-key-gated generators, B-04 ANTHROPIC_API_KEY missing).
+
+**Single most important pre-flight before re-enabling chat (B-04 lift):** apply BLOCKERS B-02 — `ALTER TABLE conversations ADD COLUMN IF NOT EXISTS is_general BOOLEAN DEFAULT false;` — otherwise every cold-start `create_deal` throws "column does not exist" because `tools.ts:461` references it.
+
+**What walks now once chat is restored:**
+- Cold-start any journey (BUY/SELL/RAISE/PMI/MERGER) → empty home doesn't lie, deal tab auto-opens, gate strip animates as B0/S0/R0/PMI0 fields populate, gate advance writes a chat-thread receipt card with completion-deliverable button, model tabs open with live ModelRenderer, sourcing kicks off via `start_sourcing_run`, valuations lock via `commit_valuation`, lifecycle events all have a tool (`record_dd_complete`, `record_loi_executed`, `record_financing_secured`, `close_deal`), paid deliverables fire via `generate_deliverable` and surface in the deliverable tab with live status polling, portfolio overview card aggregates the user's whole pipeline, side-by-side `compare_deals` works for 2-3 deal evaluations, mergers can be paired via `pair_merger_deals`, carve-out CIMs detect and add TSA + separation cost sections.
+
+**Out of scope (deferred):**
+- Phase 5 — Merger Pro (MergerExchangeModel + §368 tax analysis + HSR checklist + spawn_carve_out + DealLineage view)
+- Phase 6 — Merger Governance (board resolutions, proxy materials, vote tracking)
+- Live verification of any chat path (gated on B-04)
+- SourcingPanel restyle to V6 tokens
+- Real backend signals for Today action queue (NDA expiry, share view counts, etc.)
+- Per-mode-root real-data wiring (B1.7 shipped empty-state only — Docs/Analysis/Intel/Library still need /api/* endpoints to surface real data)
 
