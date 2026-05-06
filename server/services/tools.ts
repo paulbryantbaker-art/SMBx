@@ -20,12 +20,12 @@ const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false
 export const TOOL_DEFINITIONS: Tool[] = [
   {
     name: 'create_deal',
-    description: 'Create a new deal for the current user. Call this PROACTIVELY within the first 2-3 messages when the user mentions a real business or transaction. Don\'t wait for explicit "I want to sell" — if they share financials, mention their company, or describe a deal situation, create the deal immediately. Infer the journey type from context.',
+    description: 'Create a new deal for the current user. Call this PROACTIVELY within the first 2-3 messages when the user mentions a real business or transaction. Don\'t wait for explicit "I want to sell" — if they share financials, mention their company, or describe a deal situation, create the deal immediately. Infer the journey type from context. Use "merger" when two parties combine.',
     input_schema: {
       type: 'object' as const,
       properties: {
-        journeyType: { type: 'string', enum: ['sell', 'buy', 'raise', 'pmi'], description: 'The type of M&A journey' },
-        initialGate: { type: 'string', description: 'Starting gate (S0, B0, R0, or PMI0)' },
+        journeyType: { type: 'string', enum: ['sell', 'buy', 'raise', 'pmi', 'merger'], description: 'The type of M&A journey' },
+        initialGate: { type: 'string', description: 'Starting gate (S0, B0, R0, PMI0, or M0 for mergers)' },
       },
       required: ['journeyType', 'initialGate'],
     },
@@ -239,6 +239,22 @@ export const TOOL_DEFINITIONS: Tool[] = [
         tabId: { type: 'string', description: 'Tab to read. Use "active" for currently visible tab, "all" for all open model tabs.' },
       },
       required: ['tabId'],
+    },
+  },
+  {
+    name: 'pair_merger_deals',
+    description: 'Pair two existing deals as the two sides of a merger transaction. Inserts a merger_pairings row linking deal A and deal B with structure (forward triangular, reverse triangular, share exchange, merger of equals), exchange ratio, and surviving entity. Use when the user has two deals and wants to merge them.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealAId:         { type: 'number', description: 'Deal ID for side A (typically the surviving entity)' },
+        dealBId:         { type: 'number', description: 'Deal ID for side B' },
+        structure:       { type: 'string', enum: ['forward_triangular_merger', 'reverse_triangular_merger', 'share_exchange', 'merger_of_equals'], description: 'Legal structure of the merger' },
+        exchangeRatio:   { type: 'number', description: 'Shares of A per share of B (or share-equivalent for cash). Optional.' },
+        survivingEntity: { type: 'string', enum: ['A', 'B', 'NEW'], description: 'Which entity survives. NEW = a newly formed parent (typical for MOE). Default: A.' },
+        notes:           { type: 'string', description: 'Free-text notes about the pairing.' },
+      },
+      required: ['dealAId', 'dealBId', 'structure'],
     },
   },
   {
@@ -513,6 +529,8 @@ export async function executeTool(
         return await generateDeliverableTool(input, userId);
       case 'compare_deals':
         return await compareDealsTool(input, userId);
+      case 'pair_merger_deals':
+        return await pairMergerDeals(input, userId);
       case 'record_dd_complete':
         return await recordDdComplete(input, userId);
       case 'record_loi_executed':
@@ -913,6 +931,79 @@ async function startSourcingRun(input: Record<string, any>, userId: number): Pro
     });
   } catch (e: any) {
     return JSON.stringify({ error: `Sourcing run failed to start: ${e.message}` });
+  }
+}
+
+/**
+ * pair_merger_deals — links two existing deals as the two sides of a
+ * merger transaction (B4.5). Inserts into merger_pairings + sets
+ * parent_deal_id on the surviving side so the relationship is
+ * navigable from either deal.
+ *
+ * Chat-first: Yulia calls this when the user says "merge these two",
+ * "pair PortCo A and PortCo B as a merger", etc.
+ */
+async function pairMergerDeals(input: Record<string, any>, userId: number): Promise<string> {
+  const { dealAId, dealBId, structure, exchangeRatio, survivingEntity, notes } = input;
+
+  if (dealAId === dealBId) {
+    return JSON.stringify({ error: "Can't pair a deal with itself." });
+  }
+
+  // Verify ownership of both deals
+  const owned = await sql`
+    SELECT id, business_name, journey_type FROM deals
+    WHERE id IN (${dealAId}, ${dealBId}) AND user_id = ${userId}
+  `;
+  if (owned.length !== 2) {
+    return JSON.stringify({ error: 'Both deals must belong to the user. One or both not found.' });
+  }
+  const dealA = owned.find((d: any) => d.id === dealAId);
+  const dealB = owned.find((d: any) => d.id === dealBId);
+
+  const surviving = (survivingEntity || 'A') as 'A' | 'B' | 'NEW';
+
+  try {
+    const [row] = await sql`
+      INSERT INTO merger_pairings (deal_a_id, deal_b_id, user_id, structure, exchange_ratio, surviving_entity, notes)
+      VALUES (${dealAId}, ${dealBId}, ${userId}, ${structure}, ${exchangeRatio ?? null}, ${surviving}, ${notes ?? null})
+      ON CONFLICT (deal_a_id, deal_b_id) DO UPDATE
+        SET structure = EXCLUDED.structure,
+            exchange_ratio = EXCLUDED.exchange_ratio,
+            surviving_entity = EXCLUDED.surviving_entity,
+            notes = EXCLUDED.notes,
+            updated_at = NOW()
+      RETURNING id
+    `;
+
+    // Set parent_deal_id on the non-surviving side (or both for NEW)
+    if (surviving === 'A') {
+      await sql`UPDATE deals SET parent_deal_id = ${dealAId}, updated_at = NOW() WHERE id = ${dealBId}`;
+    } else if (surviving === 'B') {
+      await sql`UPDATE deals SET parent_deal_id = ${dealBId}, updated_at = NOW() WHERE id = ${dealAId}`;
+    }
+    // For NEW, neither A nor B is the parent — a fresh entity will be the
+    // surviving record, which the user can create separately.
+
+    return JSON.stringify({
+      success: true,
+      pairingId: row.id,
+      structure,
+      survivingEntity: surviving,
+      exchangeRatio: exchangeRatio ?? null,
+      // Open the surviving deal's tab so the user sees the pairing landed.
+      canvas_action: 'open_tab',
+      tab: surviving === 'B'
+        ? { id: String(dealBId), kind: 'deal', title: dealB?.business_name || `Deal #${dealBId}` }
+        : { id: String(dealAId), kind: 'deal', title: dealA?.business_name || `Deal #${dealAId}` },
+    });
+  } catch (e: any) {
+    if (/relation .*merger_pairings.* does not exist/.test(e.message)) {
+      return JSON.stringify({
+        error: 'merger_pairings table not found. Run migration 059_merger_lite.sql first.',
+      });
+    }
+    return JSON.stringify({ error: `Failed to pair deals: ${e.message}` });
   }
 }
 
