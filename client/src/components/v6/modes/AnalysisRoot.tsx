@@ -3,6 +3,9 @@ import { V6Section } from "../Canvas";
 import { V6Icon } from "../icons";
 import { V6DocStatus, type DocStatusKind } from "./cards";
 import type { IconName, OpenTab } from "../types";
+import { V6ModeRootEmpty } from "./ModeRootEmpty";
+import { useHomeDeals } from "../../../hooks/useHomeDeals";
+import type { User } from "../../../hooks/useAuth";
 
 type ToneKey = "primary" | "secondary" | "tertiary" | "pursue" | "watch";
 
@@ -41,7 +44,16 @@ const TONE_FG: Record<ToneKey, string> = {
   watch:     "#3F2E00",
 };
 
-export function V6AnalysisRoot({ openTab }: { openTab: OpenTab }) {
+export function V6AnalysisRoot({ openTab, user }: { openTab: OpenTab; user?: User | null }) {
+  const home = useHomeDeals(user ?? null);
+  // UX-57: empty state for authed users with no deals (so no analyses yet).
+  if (home.isAuthed && !home.loading && !home.hasData) {
+    return <V6ModeRootEmpty noun="analyses" />;
+  }
+  return _AnalysisBody({ openTab });
+}
+
+function _AnalysisBody({ openTab }: { openTab: OpenTab }) {
   return (
     <div className="m-fade-up">
       <V6Section

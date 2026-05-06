@@ -2,6 +2,9 @@ import { type CSSProperties } from "react";
 import { V6Section } from "../Canvas";
 import { V6Icon } from "../icons";
 import type { OpenTab } from "../types";
+import { V6ModeRootEmpty } from "./ModeRootEmpty";
+import { useHomeDeals } from "../../../hooks/useHomeDeals";
+import type { User } from "../../../hooks/useAuth";
 
 interface FeedItem {
   id: string;
@@ -30,7 +33,19 @@ const SECTORS: Sector[] = [
   { id: "sec-dist", name: "Distribution",        count: 22, trend: "+1%"  },
 ];
 
-export function V6IntelRoot({ openTab }: { openTab: OpenTab }) {
+export function V6IntelRoot({ openTab, user }: { openTab: OpenTab; user?: User | null }) {
+  const home = useHomeDeals(user ?? null);
+  // UX-57: empty state for authed users with no deals — no intel feed yet.
+  if (home.isAuthed && !home.loading && !home.hasData) {
+    return <V6ModeRootEmpty
+      noun="intelligence briefs"
+      body="Yulia synthesizes market intel from your deals — sector movements, comp transactions, buyer signals — once you have a deal in flight. Head to chat to start one."
+    />;
+  }
+  return _IntelBody({ openTab });
+}
+
+function _IntelBody({ openTab }: { openTab: OpenTab }) {
   const featured = FEED.filter(f => f.featured);
   const rest = FEED.filter(f => !f.featured);
 

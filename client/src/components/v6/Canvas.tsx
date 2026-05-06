@@ -137,10 +137,10 @@ interface TabContentProps {
 function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut }: TabContentProps) {
   if (tab.kind === "mode-root") {
     if (tab.modeId === "search")   return <V6SearchRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
-    if (tab.modeId === "docs")     return <V6DocsRoot openTab={openTab} />;
-    if (tab.modeId === "analysis") return <V6AnalysisRoot openTab={openTab} />;
-    if (tab.modeId === "intel")    return <V6IntelRoot openTab={openTab} />;
-    if (tab.modeId === "library")  return <V6LibraryRoot openTab={openTab} />;
+    if (tab.modeId === "docs")     return <V6DocsRoot openTab={openTab} user={user} />;
+    if (tab.modeId === "analysis") return <V6AnalysisRoot openTab={openTab} user={user} />;
+    if (tab.modeId === "intel")    return <V6IntelRoot openTab={openTab} user={user} />;
+    if (tab.modeId === "library")  return <V6LibraryRoot openTab={openTab} user={user} />;
     return <Placeholder label={`${tab.title} — root view`} note="Unknown mode root." />;
   }
   if (tab.kind === "deal")     return <V6DealView id={tab.id} title={tab.title} openTab={openTab} />;

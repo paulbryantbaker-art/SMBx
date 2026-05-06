@@ -2,6 +2,9 @@ import { useState, type CSSProperties } from "react";
 import { V6Section } from "../Canvas";
 import { V6Icon } from "../icons";
 import type { IconName, OpenTab, TabKind } from "../types";
+import { V6ModeRootEmpty } from "./ModeRootEmpty";
+import { useHomeDeals } from "../../../hooks/useHomeDeals";
+import type { User } from "../../../hooks/useAuth";
 
 const FILTERS = ["All · 143", "Starred · 12", "Deals · 87", "Docs · 24", "Analyses · 11", "Memos · 9"];
 
@@ -24,7 +27,20 @@ const ITEMS: LibItem[] = [
   { kind: "doc",      title: "Acme NDA · executed",        sub: "Final",           updated: "Mar 18",    starred: false },
 ];
 
-export function V6LibraryRoot({ openTab }: { openTab: OpenTab }) {
+export function V6LibraryRoot({ openTab, user }: { openTab: OpenTab; user?: User | null }) {
+  const home = useHomeDeals(user ?? null);
+  // UX-57: empty state for authed users with no deals — library is empty until
+  // they have content to organize.
+  if (home.isAuthed && !home.loading && !home.hasData) {
+    return <V6ModeRootEmpty
+      noun="library entries"
+      body="The library is your starred and saved view across all deals, docs, and analyses — populates as you work with Yulia."
+    />;
+  }
+  return _LibraryBody({ openTab });
+}
+
+function _LibraryBody({ openTab }: { openTab: OpenTab }) {
   const [active, setActive] = useState(0);
 
   return (

@@ -3,6 +3,9 @@ import { V6Section } from "../Canvas";
 import { V6Icon } from "../icons";
 import { V6DocStatus, type DocStatusKind } from "./cards";
 import type { OpenTab } from "../types";
+import { V6ModeRootEmpty } from "./ModeRootEmpty";
+import { useHomeDeals } from "../../../hooks/useHomeDeals";
+import type { User } from "../../../hooks/useAuth";
 
 interface RecentDoc { id: string; title: string; deal: string; updated: string; status: DocStatusKind }
 
@@ -53,7 +56,15 @@ const FOLDERS: Folder[] = [
   { id: "f-archive", name: "Closed deals · 2025",     count: 47 },
 ];
 
-export function V6DocsRoot({ openTab }: { openTab: OpenTab }) {
+export function V6DocsRoot({ openTab, user }: { openTab: OpenTab; user?: User | null }) {
+  const home = useHomeDeals(user ?? null);
+  // UX-57: an authed user with no deals has nothing in Docs either — show
+  // the empty state rather than the marketing samples that read like fake
+  // pre-populated docs. Recents/Folders wiring to the real /api/deliverables
+  // endpoint lands as a Phase 2 follow-up.
+  if (home.isAuthed && !home.loading && !home.hasData) {
+    return <V6ModeRootEmpty noun="documents" />;
+  }
   return (
     <div className="m-fade-up">
       <V6Section
