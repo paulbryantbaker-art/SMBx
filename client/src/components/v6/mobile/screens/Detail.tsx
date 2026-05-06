@@ -224,6 +224,49 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia }: 
           opens chat with the deal already in context. Whatever the
           user types becomes a starter prompt scoped to this deal. */}
       <DealChatInput dealTitle={dealTitle} onAskYulia={onAskYulia} />
+
+      {/* Market intelligence — below the chat pill in its own section.
+          Per-deal data lives on SampleDeal.marketIntel; in production
+          this will be wired to the marketIntelligence subsystem so each
+          deal pulls fresh comps, multiples, buyer activity. Hidden
+          gracefully when no data on the deal. */}
+      {deal?.marketIntel && (
+        <Section title="Market intelligence" chevron>
+          <div style={D.marketIntroLine}>
+            <span className="mb-mono" style={D.marketIndustry}>
+              {deal.marketIntel.industry.toUpperCase()}
+              {deal.marketIntel.naics && ` · NAICS ${deal.marketIntel.naics}`}
+            </span>
+          </div>
+          <div style={D.marketGrid}>
+            <MarketTile label="AVG MULTIPLE"  value={deal.marketIntel.avgMultiple} />
+            <MarketTile label="AVG DEAL SIZE" value={deal.marketIntel.avgDealSize} />
+            <MarketTile label="ACTIVE BUYERS" value={deal.marketIntel.activeBuyers} />
+            <MarketTile label="MARKET TREND"  value={deal.marketIntel.yoyActivity} />
+          </div>
+          <p style={D.marketBlurb}>{deal.marketIntel.blurb}</p>
+          <button
+            type="button"
+            className="mb-tap"
+            onClick={() => onAskYulia(`On ${dealTitle}: deeper market intelligence — recent comparable transactions, who else is bidding, where multiples are trending. Pull the data.`)}
+            style={D.marketAskBtn}
+          >
+            <span>Ask Yulia for the deeper market read</span>
+            <MobileIcon name="chevron" size={11} c="var(--mb-accent-ink)" />
+          </button>
+        </Section>
+      )}
+    </div>
+  );
+}
+
+/* ─── Market-intelligence tile ───────────────────────────── */
+
+function MarketTile({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={D.marketTile}>
+      <div className="mb-mono" style={D.marketTileLabel}>{label}</div>
+      <div style={D.marketTileValue}>{value}</div>
     </div>
   );
 }
@@ -625,6 +668,55 @@ const D: Record<string, CSSProperties> = {
     display: "flex", alignItems: "center", justifyContent: "center",
     boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
     cursor: "pointer",
+  },
+
+  /* Market intelligence section */
+  marketIntroLine: {
+    marginBottom: 12,
+  },
+  marketIndustry: {
+    fontSize: 10.5, letterSpacing: "0.08em", fontWeight: 700,
+    color: "var(--mb-ink-3)",
+  },
+  marketGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 10,
+    marginBottom: 14,
+  },
+  marketTile: {
+    background: "var(--mb-card-2)",
+    borderRadius: 12,
+    padding: "12px 14px",
+    border: "0.5px solid var(--mb-line-2)",
+  },
+  marketTileLabel: {
+    fontSize: 9.5, letterSpacing: "0.08em", fontWeight: 700,
+    color: "var(--mb-ink-4)",
+    marginBottom: 4,
+  },
+  marketTileValue: {
+    fontFamily: "var(--mb-font-display)", fontWeight: 700,
+    fontSize: 16, letterSpacing: "-0.3px", lineHeight: 1.2,
+    color: "var(--mb-ink)",
+  },
+  marketBlurb: {
+    fontSize: 14, color: "var(--mb-ink-1)", lineHeight: 1.5,
+    margin: 0, letterSpacing: "-0.05px",
+    textWrap: "pretty",
+  },
+  marketAskBtn: {
+    marginTop: 14,
+    width: "100%",
+    padding: "12px 14px",
+    background: "var(--mb-accent-soft)",
+    border: "none",
+    borderRadius: 12,
+    display: "flex", alignItems: "center", justifyContent: "space-between",
+    fontSize: 13.5, fontWeight: 600,
+    color: "var(--mb-accent-ink)",
+    cursor: "pointer",
+    fontFamily: "inherit",
   },
 
   /* Recommended next-action rows */

@@ -9,6 +9,23 @@ import type { Verdict, YIconKind } from "../components/v6/mobile/types";
 export type DealStage = "sourced" | "screened" | "in-review" | "pursuing" | "watching";
 export type DealAction = "open" | "watch" | "pass" | "pursue";
 
+export interface MarketIntel {
+  /** Industry display name shown in the eyebrow / heading. */
+  industry: string;
+  /** NAICS code if known — small mono caption. */
+  naics?: string;
+  /** Typical multiple range for this industry at this size. */
+  avgMultiple: string;
+  /** Typical deal-size band. */
+  avgDealSize: string;
+  /** Buyer-side activity signal. */
+  activeBuyers: string;
+  /** YoY transaction activity / trend. */
+  yoyActivity: string;
+  /** 2-3 sentence market commentary. */
+  blurb: string;
+}
+
 export interface SampleDeal {
   id: string;
   name: string;
@@ -26,6 +43,11 @@ export interface SampleDeal {
       For WATCH deals this should also include what would flip it to PURSUE
       so the user understands the criteria, not just the label. */
   verdictWhy?: string;
+  /** Industry / market intelligence — populated for in-review and pursuing
+      deals. In production this will be wired to the marketIntelligence
+      subsystem; for samples we hand-author per industry so the data feels
+      researched, not generic. */
+  marketIntel?: MarketIntel;
 }
 
 /* 24 sample deals across all five stages so chips filter into real lists.
@@ -35,13 +57,53 @@ export interface SampleDeal {
 export const SAMPLE_DEAL_BANK: SampleDeal[] = [
   // In review (the four currently shown — same data, just centralized)
   { id: "deal-bigfake",    name: "Big Fake Deal · sample",    sub: "$1.80M SDE · honest capex story",     stage: "in-review", verdict: "pursue", icon: "cool",    fit: 92, metric: "$1.80M SDE",
-    verdictWhy: "Recast holds. $760K of clean add-backs, top-5 concentration looks scary but accounts are 6+ years old with zero churn — that's a moat. NWC peg flagged for QoE, otherwise SBA-clear at 7.0×." },
+    verdictWhy: "Recast holds. $760K of clean add-backs, top-5 concentration looks scary but accounts are 6+ years old with zero churn — that's a moat. NWC peg flagged for QoE, otherwise SBA-clear at 7.0×.",
+    marketIntel: {
+      industry: "Industrial Services",
+      naics: "5611X",
+      avgMultiple: "5–7× EBITDA",
+      avgDealSize: "$5M–$25M",
+      activeBuyers: "47 strategics · 22 sponsors",
+      yoyActivity: "+22% YoY",
+      blurb: "PE platforms are paying premiums for recurring service revenue in industrial services. Sun Belt geography commands a 0.5–1× multiple premium over national avg. Strategic acquirers actively bidding for businesses with multi-year service contracts and clean capex stories.",
+    },
+  },
   { id: "deal-pest",       name: "Pest Control · FL",         sub: "92% on monthly contracts",            stage: "in-review", verdict: "pursue", icon: "cool",    fit: 84, metric: "$1.4M SDE",
-    verdictWhy: "92% recurring revenue on monthly service contracts. Strong PE roll-up vertical (Anticimex/Rentokil/Rollins active). Add-back rich, multiples typically 4-6× SDE." },
+    verdictWhy: "92% recurring revenue on monthly service contracts. Strong PE roll-up vertical (Anticimex/Rentokil/Rollins active). Add-back rich, multiples typically 4-6× SDE.",
+    marketIntel: {
+      industry: "Pest Control",
+      naics: "561710",
+      avgMultiple: "4–6× SDE",
+      avgDealSize: "$1M–$5M",
+      activeBuyers: "Anticimex · Rentokil · Rollins",
+      yoyActivity: "+15% YoY",
+      blurb: "One of the most predictable PE roll-up verticals — recurring residential service revenue at 80–90% with low churn. Strategic consolidators are paying premium multiples for routes with route density and a service-contract book over 80%.",
+    },
+  },
   { id: "deal-electrical", name: "Electrical Contractor · TX", sub: "Margins good · concentration risk",  stage: "in-review", verdict: "watch",  icon: "default", fit: 78, metric: "Watch",
-    verdictWhy: "60% revenue from one customer is the deal-killer. Flips to PURSUE if (a) that anchor is on a multi-year locked contract, (b) 5+ years zero-churn history, and (c) the relationship transfers cleanly post-close." },
+    verdictWhy: "60% revenue from one customer is the deal-killer. Flips to PURSUE if (a) that anchor is on a multi-year locked contract, (b) 5+ years zero-churn history, and (c) the relationship transfers cleanly post-close.",
+    marketIntel: {
+      industry: "Electrical Trades",
+      naics: "238210",
+      avgMultiple: "4–6× SDE",
+      avgDealSize: "$1M–$8M",
+      activeBuyers: "23 PE platforms active",
+      yoyActivity: "+15% YoY",
+      blurb: "Electrical contractor multiples have firmed since 2023 as PE platforms consolidate the trades. Customer concentration above 30% is the #1 reason deals fall apart — most buyers discount 0.5–1× multiple for it. Sun Belt premium remains intact.",
+    },
+  },
   { id: "deal-hvac",       name: "HVAC platform · CO",        sub: "Family business · clean financials",  stage: "in-review", verdict: "watch",  icon: "default", fit: 74, metric: "Watch",
-    verdictWhy: "Clean books, but it's a family business and dad runs everything. Flips to PURSUE if a non-family GM is already in place or there's a credible 12-month transition plan." },
+    verdictWhy: "Clean books, but it's a family business and dad runs everything. Flips to PURSUE if a non-family GM is already in place or there's a credible 12-month transition plan.",
+    marketIntel: {
+      industry: "HVAC Services",
+      naics: "238220",
+      avgMultiple: "5–8× EBITDA",
+      avgDealSize: "$3M–$30M",
+      activeBuyers: "138 transactions in 2024",
+      yoyActivity: "+18% YoY",
+      blurb: "HVAC is the hottest PE roll-up in the trades — 138 transactions in 2024 alone. Recurring service revenue is the #1 valuation driver; multi-state platforms command 7–11× EBITDA. Family-owned operators with no GM see structural multiple discount.",
+    },
+  },
 
   // Pursuing (advanced — actively in motion)
   { id: "deal-marina",     name: "Marina Holdings · FL",      sub: "$8.2M rev · Tampa Bay",                stage: "pursuing",  verdict: "pursue", icon: "cool",    fit: 89, metric: "Pursue",
