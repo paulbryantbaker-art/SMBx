@@ -119,6 +119,9 @@ function tabIcon(tab: Tab): IconName {
   if (tab.kind === "settings") return "settings";
   if (tab.kind === "history") return "history";
   if (tab.kind === "starter") return "plus";
+  if (tab.kind === "model") return "chart";
+  if (tab.kind === "sourcing") return "search";
+  if (tab.kind === "deliverable") return "doc";
   return "doc";
 }
 
@@ -148,6 +151,36 @@ function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut }: TabConte
   if (tab.kind === "settings") return <V6SettingsView user={user} onSignOut={onSignOut} />;
   if (tab.kind === "history")  return <V6HistoryView />;
   if (tab.kind === "starter")  return <V6StarterView onTalkToYulia={onTalkToYulia} />;
+  if (tab.kind === "model") {
+    return (
+      <PendingSurface
+        eyebrow="OPENED BY YULIA"
+        title={tab.title}
+        chip={tab.modelType ? `model · ${tab.modelType}` : undefined}
+        body="The interactive model viewer ships in the next build. In the meantime, ask Yulia in chat to walk you through the assumptions or run a what-if."
+      />
+    );
+  }
+  if (tab.kind === "sourcing") {
+    return (
+      <PendingSurface
+        eyebrow="OPENED BY YULIA"
+        title={tab.title}
+        chip={tab.runId ? `run · ${tab.runId}` : undefined}
+        body="The live sourcing panel ships in the next build. Ask Yulia in chat for the latest candidates and stage progress."
+      />
+    );
+  }
+  if (tab.kind === "deliverable") {
+    return (
+      <PendingSurface
+        eyebrow="OPENED BY YULIA"
+        title={tab.title}
+        chip={tab.deliverableId ? `deliverable · ${tab.deliverableId}` : undefined}
+        body="The in-canvas viewer ships in the next build. Ask Yulia in chat to summarize this deliverable or surface specific sections."
+      />
+    );
+  }
   return <Placeholder label="Unknown tab" />;
 }
 
@@ -163,6 +196,70 @@ function Placeholder({ label, note }: { label: string; note?: string }) {
     </div>
   );
 }
+
+/**
+ * Tab opened by an agentic tool whose interactive viewer hasn't shipped yet.
+ * Honest framing: chat-first means even an empty canvas surface is OK because the
+ * conversation continues with Yulia. This card surfaces what was opened and points
+ * the user back to chat.
+ */
+function PendingSurface({ eyebrow, title, chip, body }: {
+  eyebrow: string;
+  title: string;
+  chip?: string;
+  body: string;
+}) {
+  return (
+    <div className="m-fade-up" style={P.wrap}>
+      <div className="mono" style={P.eyebrow}>{eyebrow}</div>
+      <h1 style={P.title}>{title}</h1>
+      {chip && <div style={P.chip}>{chip}</div>}
+      <p style={P.body}>{body}</p>
+    </div>
+  );
+}
+
+const P: Record<string, CSSProperties> = {
+  wrap: {
+    maxWidth: 560,
+    background: "var(--m-surface-on-light)",
+    border: "1px solid var(--m-outline-var)",
+    borderRadius: 14,
+    padding: "26px 28px",
+    boxShadow: "var(--m-elev-1)",
+  },
+  eyebrow: {
+    fontSize: 9.5,
+    color: "var(--m-primary)",
+    letterSpacing: "0.14em",
+    fontWeight: 600,
+  },
+  title: {
+    fontFamily: "var(--font-display)",
+    fontWeight: 700,
+    fontSize: 22,
+    letterSpacing: "-0.025em",
+    margin: "6px 0 10px",
+    color: "var(--m-on-surface)",
+  },
+  chip: {
+    display: "inline-block",
+    fontFamily: "var(--font-display)",
+    fontSize: 11,
+    color: "var(--m-on-primary-container)",
+    background: "var(--m-primary-container)",
+    padding: "3px 10px",
+    borderRadius: 999,
+    marginBottom: 14,
+  },
+  body: {
+    fontSize: 13.5,
+    lineHeight: 1.55,
+    color: "var(--m-on-surface-mid)",
+    margin: 0,
+    maxWidth: "60ch",
+  },
+};
 
 export function V6Section({ eyebrow, title, sub, action, children }: {
   eyebrow?: string;

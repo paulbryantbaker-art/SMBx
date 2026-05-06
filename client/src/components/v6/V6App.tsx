@@ -162,15 +162,60 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
     });
   };
 
-  // Listen for canvas_action events emitted by useAuthChat tools
+  // Listen for canvas_action events emitted by useAuthChat tools.
+  // Yulia is the conduit: every workflow action she runs returns a canvas_action
+  // here so the matching display surface opens. No buttons replace this path.
   useEffect(() => {
     const onAction = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (!detail) return;
-      // Possible canvas actions: open_tab, switch_mode
-      if (detail.canvas_action === "open_tab" && detail.tab) openTab(detail.tab);
-      if (detail.canvas_action === "switch_mode" && detail.mode && VALID_MODES.includes(detail.mode)) {
+      const action = detail.canvas_action;
+
+      if (action === "open_tab" && detail.tab) {
+        openTab(detail.tab);
+        return;
+      }
+
+      if (action === "switch_mode" && detail.mode && VALID_MODES.includes(detail.mode)) {
         pickMode(detail.mode);
+        return;
+      }
+
+      // open_pipeline → search mode root (where Today's Picks / In Review / Recently Closed live)
+      if (action === "open_pipeline") {
+        pickMode("search");
+        return;
+      }
+
+      // create_model_tab → Yulia opens an interactive model in the canvas
+      if (action === "create_model_tab" && detail.modelType) {
+        openTab({
+          kind: "model",
+          title: detail.tabTitle ?? prettyModelTitle(detail.modelType),
+          modelType: detail.modelType,
+          initialAssumptions: detail.initialAssumptions,
+        });
+        return;
+      }
+
+      // open_sourcing → Yulia kicked off a sourcing pipeline run
+      if (action === "open_sourcing" && detail.runId !== undefined && detail.runId !== null) {
+        openTab({
+          kind: "sourcing",
+          title: detail.tabTitle ?? `Sourcing run · ${detail.runId}`,
+          runId: String(detail.runId),
+        });
+        return;
+      }
+
+      // open_deliverable → Yulia generated a deliverable; open its viewer
+      if (action === "open_deliverable" && detail.deliverableId !== undefined && detail.deliverableId !== null) {
+        openTab({
+          kind: "deliverable",
+          title: detail.tabTitle ?? `Deliverable · ${detail.deliverableId}`,
+          deliverableId: String(detail.deliverableId),
+        });
+        return;
       }
     };
     window.addEventListener("smbx:canvas_action", onAction);
@@ -319,6 +364,22 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
       </div>
     </div>
   );
+}
+
+function prettyModelTitle(modelType: string): string {
+  const map: Record<string, string> = {
+    valuation: "Valuation model",
+    lbo: "LBO model",
+    sba_financing: "SBA financing model",
+    tax_impact: "Tax impact model",
+    cap_table: "Cap table",
+    sensitivity: "Sensitivity matrix",
+    comparison: "Deal comparison",
+    earnout: "Earnout model",
+    working_capital: "Working capital model",
+    covenant: "Covenant compliance",
+  };
+  return map[modelType] ?? `${modelType.replace(/_/g, " ")} model`;
 }
 
 /* ─── Hash-based URL state ───────────────────────────────── */

@@ -9,7 +9,10 @@ export type TabKind =
   | "feed-item"
   | "settings"
   | "history"
-  | "starter";
+  | "starter"
+  | "model"
+  | "sourcing"
+  | "deliverable";
 
 export type IconName =
   | "search" | "doc" | "chart" | "feed" | "library"
@@ -26,6 +29,14 @@ export interface Tab {
   anchor?: string;
   template?: string;
   tool?: string;
+  /** kind: "model" — which interactive model to render (valuation, lbo, sba, etc.) */
+  modelType?: string;
+  /** kind: "model" — initial assumptions piped from the agentic tool call */
+  initialAssumptions?: Record<string, unknown>;
+  /** kind: "sourcing" — sourcing pipeline run id */
+  runId?: string;
+  /** kind: "deliverable" — deliverable record id */
+  deliverableId?: string;
 }
 
 export interface Message {
