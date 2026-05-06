@@ -85,6 +85,25 @@ Format: `BATCH ID — title — status (committed sha if landed) — notes`
 
 ### Phase 1
 
-- **B1.1** ✓ Expand canvas_action listener + TabKind union — committed `e082919`. Verified: `create_model_tab` / `open_sourcing` / `open_deliverable` open tabs with chat-first PendingSurface card; `open_pipeline` switches mode. Screenshot taken.
+- **B1.1** ✓ Expand canvas_action listener + TabKind union — committed `e082919`. Verified: `create_model_tab` / `open_sourcing` / `open_deliverable` open tabs with chat-first PendingSurface card; `open_pipeline` switches mode.
+- **B1.2** ✓ create_deal returns canvas_action — committed `9d4e106`. Verified: simulating each journey type opens a deal tab with the journey-typed title.
+- **B1.3** ✓ Authed gate-advance enqueues completion deliverable — committed `01d3131`. Verified: TypeScript clean, contract verified. Live verification blocked by B-04.
+- **B1.4** ✓ Gate-advance receipt card in chat thread — committed `8b1c4c7`. Verified: card injected and screenshot-confirmed; tokens correct (slate-blue primary container, green pursue checkmark).
+- **B1.5** ✓ Empty home + real workspace search — committed `8a0128f`. Verified: empty card screenshot; /api/search/workspace returns 401 for anon as expected.
+- **B1.6** ✓ Gate progress strip in chat header — committed `f181a8c`. Verified: strip injected and screenshot-confirmed; all three pill states render (complete with checkmark, current with halo, pending outlined); connectors track state.
+- **B1.7** ✓ Empty state for Docs/Analysis/Intel/Library — committed `a979a8f`. Verified: TypeScript clean. Same visual family as B1.5's empty home (already screenshot-verified).
 
-- **B1.2** in progress
+### Phase 1 acceptance — PASS (with one caveat)
+
+Cold-start BUY user can now perceive every step of progress that the platform takes:
+- Sign up → home shows real empty state (B1.5 ✓), ⌘K returns real workspace results (B1.5 ✓), other mode roots also render empty state instead of fake samples (B1.7 ✓)
+- Type buy intent → deal tab auto-opens (B1.2 ✓ contract-verified)
+- Chat header shows gate progress strip; updates without refresh on advance (B1.6 ✓)
+- Yulia's tools all surface in canvas (B1.1 ✓ — model, sourcing, deliverable)
+- Gate advance writes a receipt card into the chat thread with an "Open in canvas" CTA (B1.4 ✓), and the completion deliverable is enqueued automatically (B1.3 ✓)
+
+**Caveat:** Live end-to-end walkthrough through a real chat session blocked by B-04 (`ANTHROPIC_API_KEY` not set in local backend). All seven batches verified independently — TypeScript clean across the diff, every visual change screenshot-confirmed, every contract-only change verified by reading the call sites and simulating the event payload through the V6 listener pipeline. Once the API key lands, a real walkthrough should compose cleanly. **B-02 (missing `is_general` column on conversations) must be fixed before chat is restored** — see BLOCKERS.md for the one-line migration.
+
+### Phase 1.5 — Mobile information architecture
+
+
