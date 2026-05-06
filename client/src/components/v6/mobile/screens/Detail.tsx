@@ -29,10 +29,20 @@ const VERDICT_DOT: Record<Verdict, string> = {
   pass:   "var(--mb-danger)",
 };
 
+const VERDICT_BG: Record<Verdict, string> = {
+  pursue: "var(--mb-verdict-pursue-soft)",
+  watch:  "var(--mb-warn-soft)",
+  pass:   "var(--mb-danger-soft)",
+};
+
+/* Generic fallback blurbs when the deal doesn't carry its own verdictWhy.
+   Phrased decisively (this IS a WATCH / this IS a PURSUE) so users don't
+   read it as "kinda both." Per-deal verdictWhy from sampleDeals.ts always
+   wins over these. */
 const VERDICT_BLURB: Record<Verdict, string> = {
-  pursue: "Yulia recommends pursuing this deal.",
-  watch:  "Yulia is watching this — not ready to pursue yet.",
-  pass:   "Yulia recommends passing on this deal.",
+  pursue: "PURSUE — strong fit. Move on the IOI.",
+  watch:  "WATCH — not a pursue yet. Specific things have to verify before it moves to PURSUE.",
+  pass:   "PASS — math doesn't work. Don't spend cycles here.",
 };
 
 interface DetailProps {
@@ -57,6 +67,10 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia }: 
   const verdict: Verdict = deal?.verdict ?? "watch";
   const fit = deal?.fit ?? 70;
   const dealSub = deal?.sub ?? "";
+  /* Per-deal verdict reasoning beats the generic blurb when present.
+     This is what answers the user's "is this a watch or pursue?" question
+     by spelling out the specific math + the criteria that would flip it. */
+  const verdictBlurb = deal?.verdictWhy ?? VERDICT_BLURB[verdict];
 
   const onShare = async () => {
     const url = window.location.href;
@@ -74,40 +88,43 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia }: 
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 140, position: "relative", background: "var(--mb-bg)" }}>
       <FloatingNav onBack={onBack} onShare={onShare} />
 
-      {/* Hero block — gauge + Watch button stacked on the left, title +
-          verdict label + blurb on the right. Watch under the gauge so the
-          gauge column carries the user's actions; verdict on the right is
-          read-only (Yulia's call). No more centered floating button. */}
+      {/* Hero block — original side-by-side layout. The verdict pill on
+          the left is Yulia's CALL (read-only label). The Watch pill on
+          the right is the user's ACTION (toggle). Visually distinct
+          treatments + the "Yulia's verdict" caption underneath make the
+          intent clear without extra UI clutter. */}
       <div style={D.hero}>
-        <div style={D.heroLeft}>
-          <FitGauge score={fit} verdict={verdict} size={108} strokeRatio={0.09} />
-          <button
-            type="button"
-            aria-pressed={watched}
-            onClick={() => toggle(dealId, dealTitle)}
-            style={{
-              ...D.watchBtn,
-              background: watched ? "var(--mb-accent-ink)" : "var(--mb-accent-soft)",
-              color: watched ? "#fff" : "var(--mb-accent-ink)",
-            }}
-          >{watched ? "✓ Watching" : "+ Watch"}</button>
-        </div>
+        <FitGauge score={fit} verdict={verdict} size={108} strokeRatio={0.09} />
         <div style={{ flex: 1, minWidth: 0, paddingTop: 4 }}>
           <h1 style={D.h1}>{dealTitle}</h1>
           <div style={D.dealMeta}>{dealSub || "Sample deal"}</div>
-
-          {/* Verdict status — flat label, NOT a button */}
-          <div style={D.verdictLabelRow}>
-            <span className="mb-mono" style={D.verdictEyebrow}>YULIA&rsquo;S CALL</span>
-            <span style={{ ...D.verdictStatus, color: VERDICT_INK[verdict] }}>
+          <div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center" }}>
+            <span style={{
+              ...D.verdictBadge,
+              background: VERDICT_BG[verdict],
+              color: VERDICT_INK[verdict],
+            }}>
               <span
                 aria-hidden="true"
                 style={{ ...D.verdictDot, background: VERDICT_DOT[verdict] }}
               />
               {VERDICT_LABEL[verdict]}
             </span>
+            <button
+              type="button"
+              aria-pressed={watched}
+              onClick={() => toggle(dealId, dealTitle)}
+              style={{
+                ...D.watchBtn,
+                background: watched ? "var(--mb-accent-ink)" : "var(--mb-accent-soft)",
+                color: watched ? "#fff" : "var(--mb-accent-ink)",
+              }}
+            >{watched ? "✓ Watching" : "+ Watch"}</button>
           </div>
-          <div style={D.verdictBlurb}>{VERDICT_BLURB[verdict]}</div>
+          <div style={D.verdictCaption}>
+            <span style={{ color: "var(--mb-ink-3)" }}>{VERDICT_LABEL[verdict]}</span>
+            {" is Yulia's verdict — Watch saves it to your list."}
+          </div>
         </div>
       </div>
 
@@ -470,49 +487,37 @@ const D: Record<string, CSSProperties> = {
     lineHeight: 1.35, textWrap: "pretty",
   },
 
-  /* Verdict label — flat status indicator. NOT a button. The mono eyebrow
-     plus the colored dot + word reads as "Yulia tagged this as PURSUE,"
-     not "tap me to pursue." */
-  verdictLabelRow: {
-    marginTop: 10,
-    display: "flex", flexDirection: "column", gap: 2,
-  },
-  verdictEyebrow: {
-    fontSize: 10, letterSpacing: "0.1em", fontWeight: 700,
-    color: "var(--mb-ink-4)",
-  },
-  verdictStatus: {
+  /* Verdict badge — flat label with dot prefix. NO shadow, NO button
+     affordance. The dot + dark colored text on soft tint reads as a
+     status tag, not a tappable element. Different shape/treatment from
+     the Watch button next to it. */
+  verdictBadge: {
     display: "inline-flex", alignItems: "center", gap: 6,
-    fontSize: 15, fontWeight: 800, letterSpacing: "-0.1px",
+    padding: "6px 12px",
+    fontSize: 13, fontWeight: 700, letterSpacing: "0.02em",
+    borderRadius: 999,
   },
   verdictDot: {
-    width: 8, height: 8, borderRadius: "50%",
-    flexShrink: 0,
-  },
-  verdictBlurb: {
-    marginTop: 4,
-    fontSize: 12, color: "var(--mb-ink-3)",
-    lineHeight: 1.35, textWrap: "pretty",
-  },
-
-  /* Hero left column — gauge stacked with Watch button. Center-aligned
-     so the button reads as anchored to the gauge, not floating. */
-  heroLeft: {
-    display: "flex", flexDirection: "column",
-    alignItems: "center", gap: 10,
+    width: 7, height: 7, borderRadius: "50%",
     flexShrink: 0,
   },
 
-  /* Watch — the only tappable thing in the hero. Visually heavier than
-     the verdict label (full pill, longer label, plus an iconographic
-     prefix) so the affordance is unambiguous. */
+  /* Watch button — clearly tappable. Solid pill with shadow + iconographic
+     prefix so the affordance is unambiguous next to the verdict badge. */
   watchBtn: {
-    padding: "8px 16px",
+    padding: "6px 16px",
     fontSize: 13, fontWeight: 700, letterSpacing: "-0.1px",
     border: "none", borderRadius: 999, cursor: "pointer",
     transition: "background-color 200ms ease, color 200ms ease",
     boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
-    minWidth: 108,
+    minWidth: 100,
+  },
+
+  /* Caption clarifies what each pill means — the verdict is informational,
+     Watch is the user's action. */
+  verdictCaption: {
+    fontSize: 11, color: "var(--mb-ink-4)", marginTop: 6,
+    lineHeight: 1.35,
   },
   statsStrip: {
     display: "grid", gridTemplateColumns: "repeat(4, 1fr)",
