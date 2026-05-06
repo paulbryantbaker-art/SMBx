@@ -21,6 +21,8 @@ interface ChatBridge {
   activeTool: string | null;
   error: string | null;
   send: (text: string) => void;
+  /** When a deal is in scope, the GateStrip in the chat header reads from this. */
+  activeDealId: number | null;
 }
 
 export default function V6App() {
@@ -58,6 +60,7 @@ function V6AppAnon() {
     activeTool: null,
     error: chat.error,
     send: chat.sendMessage,
+    activeDealId: null, // anon never has a real deal in scope
   }), [chat.messages, chat.sending, chat.streamingText, chat.error, chat.sendMessage]);
   return <V6AppShell user={null} chat={bridge} onSignOut={() => {}} />;
 }
@@ -76,7 +79,8 @@ function V6AppAuthed({ user, onSignOut }: { user: User; onSignOut: () => Promise
     activeTool: chat.activeTool,
     error: null, // useAuthChat surfaces errors via toasts already
     send: chat.sendMessage,
-  }), [chat.messages, chat.sending, chat.streamingText, chat.activeTool, chat.sendMessage]);
+    activeDealId: chat.activeDealId ?? null,
+  }), [chat.messages, chat.sending, chat.streamingText, chat.activeTool, chat.sendMessage, chat.activeDealId]);
 
   return <V6AppShell user={user} chat={bridge} onSignOut={async () => { await onSignOut(); }} />;
 }
@@ -344,6 +348,7 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
               streamingText={chat.streamingText}
               activeTool={chat.activeTool}
               error={chat.error}
+              activeDealId={chat.activeDealId}
             />
           </div>
           <div onMouseDown={onDragStart} title="Drag to resize chat" role="separator" aria-orientation="vertical" style={A.dragHandle}>

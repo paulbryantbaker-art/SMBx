@@ -1,5 +1,6 @@
 import { useState, type CSSProperties, type RefObject, type KeyboardEvent, type FormEvent } from "react";
 import type { Message, OpenTab } from "./types";
+import { V6GateStrip } from "./GateStrip";
 
 interface ChatProps {
   thread: Message[];
@@ -14,11 +15,13 @@ interface ChatProps {
   streamingText?: string;
   activeTool?: string | null;
   error?: string | null;
+  /** When a deal is in scope, the GateStrip in the chat header renders. */
+  activeDealId?: number | null;
 }
 
 export function V6Chat({
   thread, draft, setDraft, send, inputRef, modeLabel, onOpenTab,
-  isAnon, sending, streamingText, activeTool, error,
+  isAnon, sending, streamingText, activeTool, error, activeDealId,
 }: ChatProps) {
   const [shareLabel, setShareLabel] = useState<"Share" | "Copied">("Share");
 
@@ -82,6 +85,11 @@ export function V6Chat({
           </button>
         </div>
       </div>
+
+      {/* UX-03: gate progress strip. Renders only when a deal is in scope.
+          Pulls from /api/chat/deals/:dealId/gates and re-fetches on
+          smbx:gate_advance_refresh window events. */}
+      {activeDealId && <V6GateStrip dealId={activeDealId} />}
 
       <div className="thin-scroll" style={C.chatBody}>
         {thread.length === 0 && !sending ? (
