@@ -4,6 +4,7 @@ import { V6DealCard, V6WatchRow, type Verdict } from "./cards";
 import type { OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
 import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
+import { V6PortfolioOverviewCard } from "../PortfolioOverviewCard";
 
 const HERO_DATE = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
@@ -160,6 +161,12 @@ export function V6SearchRoot({ openTab, onTalkToYulia, user }: SearchRootProps) 
           </div>
         </div>
       </section>
+
+      {/* B2.8: Portfolio rollup card. Shows aggregations (weighted EV,
+          deals by gate, expected close window) — NOT individual deals.
+          Hides for anon and for authed users with zero deals. Lives
+          between the Yulia brief hero and the per-deal lists below. */}
+      <V6PortfolioOverviewCard user={user} />
 
       {/* In Review */}
       <V6Section

@@ -279,6 +279,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
           onSearch={onChat}
           userWatching={userDeals.hasData ? userDeals.watching : null}
           userFeatured={userDeals.hasData ? userDeals.featured : null}
+          user={user}
         />
       )}
       {view.kind === "tab" && activeTab === "library" && (

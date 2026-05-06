@@ -15,6 +15,9 @@ import type { MobileWatchRow, MobileFeatured } from "../../../../hooks/useMobile
 import { dealsByStage, type DealStage, type SampleDeal } from "../../../../lib/sampleDeals";
 import { useWatchlist } from "../../../../hooks/useWatchlist";
 
+import { PortfolioOverviewMobile } from "../PortfolioOverviewMobile";
+import type { User } from "../../../../hooks/useAuth";
+
 interface PipelineProps {
   isAnon: boolean;
   initials: string;
@@ -26,6 +29,8 @@ interface PipelineProps {
   userWatching: MobileWatchRow[] | null;
   /** Authed user's "NEW TODAY" featured hero (null = anon or empty → sample). */
   userFeatured: MobileFeatured | null;
+  /** Authed user — drives the portfolio overview header (B2.8). */
+  user?: User | null;
 }
 
 interface ChipDef { id: DealStage; label: string; n: number }
@@ -61,7 +66,7 @@ const SAMPLE_FEATURED: FeaturedDef = {
   revLabel: "$5.4M REV",
 };
 
-export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, onAvatarClick, onSearch, userWatching: _userWatching, userFeatured }: PipelineProps) {
+export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, onAvatarClick, onSearch, userWatching: _userWatching, userFeatured, user }: PipelineProps) {
   const FEATURED: FeaturedDef = userFeatured ?? SAMPLE_FEATURED;
   const [activeChip, setActiveChip] = useState<DealStage>("watching");
   const { isWatched, toggle } = useWatchlist();
@@ -71,6 +76,9 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
       <GlassTopBar title="Pipeline" initials={initials} onAvatarClick={onAvatarClick} onSearch={onSearch} />
       <LargeTitle>Pipeline</LargeTitle>
+
+      {/* B2.8 portfolio overview — hides for anon and zero-deal users */}
+      <PortfolioOverviewMobile user={user ?? null} />
 
       {/* Logged-out callout */}
       {isAnon && (
