@@ -240,6 +240,66 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
         });
         return;
       }
+
+      // compare_deals (B2.9) → builds per-deal valuation models, links them,
+      // then opens the comparison view. Multi-step orchestration so the
+      // listener handles it instead of a direct openTab.
+      if (action === "compare_deals" && Array.isArray(detail.deals) && detail.deals.length >= 2) {
+        import("../../lib/modelStore").then(({ useModelStore }) => {
+          const store = useModelStore.getState();
+          // Step 1: ensure a valuation tab exists for each deal. We seed each
+          // with the deal's revenue/sde/ebitda so the comparison numbers come
+          // straight from the database.
+          const valuationIds: string[] = detail.deals.map((d: any) => {
+            const tabId = `model-valuation-${d.dealId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+            store.restoreTab(
+              tabId,
+              "valuation" as any,
+              d.title,
+              {
+                revenue: d.revenueCents,
+                sde: d.sdeCents,
+                ebitda: d.ebitdaCents,
+                league: d.league,
+                multiple: d.multiple ?? undefined,
+              },
+              d.dealId,
+            );
+            return tabId;
+          });
+
+          // Step 2: build the comparison tab and link the valuations to it.
+          const comparisonId = `model-comparison-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+          store.restoreTab(
+            comparisonId,
+            "comparison" as any,
+            detail.tabTitle ?? `Comparison · ${detail.deals.length} deals`,
+            { linkedDealIds: detail.deals.map((d: any) => d.dealId) },
+            undefined,
+          );
+          // Stamp linkedTabs onto the comparison tab so ComparisonModel
+          // renders them. The store's tab structure includes linkedTabs[].
+          const fresh = useModelStore.getState();
+          const comparisonTab = fresh.tabs[comparisonId];
+          if (comparisonTab) {
+            useModelStore.setState(s => ({
+              tabs: {
+                ...s.tabs,
+                [comparisonId]: { ...comparisonTab, linkedTabs: valuationIds },
+              },
+            }));
+          }
+
+          // Step 3: open the comparison tab in V6.
+          openTab({
+            id: comparisonId,
+            kind: "model",
+            title: detail.tabTitle ?? `Comparison · ${detail.deals.length} deals`,
+            modelType: "comparison",
+          });
+        }).catch((e: Error) => console.error("compare_deals lazy-load failed", e.message));
+        return;
+      }
     };
     window.addEventListener("smbx:canvas_action", onAction);
     return () => window.removeEventListener("smbx:canvas_action", onAction);

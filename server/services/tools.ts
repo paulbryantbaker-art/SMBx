@@ -242,6 +242,22 @@ export const TOOL_DEFINITIONS: Tool[] = [
     },
   },
   {
+    name: 'compare_deals',
+    description: 'Open a side-by-side comparison of two or three deals (BUY-side, picking which target to pursue). Returns canvas_action that opens the comparison model in the canvas. The client builds valuation models for each deal first if they don\'t already exist, then links them into the comparison view. Use when the user says "compare these three", "which is the best of A B C", "side-by-side", etc.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealIds: {
+          type: 'array',
+          items: { type: 'number' },
+          description: 'Two or three deal IDs to compare. More than three crowds the side-by-side and gets capped on the client.',
+        },
+        title: { type: 'string', description: 'Optional tab title; defaults to "Deal comparison · 3 deals".' },
+      },
+      required: ['dealIds'],
+    },
+  },
+  {
     name: 'generate_deliverable',
     description: 'Generate any deliverable for a deal — DD package, CIM, LOI, pitch deck, valuation report, etc. Inserts a deliverables row with status=generating and enqueues the background job. Returns canvas_action that opens the deliverable tab immediately so the user sees a "generating…" placeholder while content lands. Use when the user asks for any document Yulia produces (CIM, LOI, DD, etc.) other than the three free completion-deliverables which already auto-generate at gate advance.',
     input_schema: {
@@ -495,6 +511,8 @@ export async function executeTool(
         return await promoteSourcingTargetToDeal(input, userId);
       case 'generate_deliverable':
         return await generateDeliverableTool(input, userId);
+      case 'compare_deals':
+        return await compareDealsTool(input, userId);
       case 'record_dd_complete':
         return await recordDdComplete(input, userId);
       case 'record_loi_executed':
@@ -896,6 +914,61 @@ async function startSourcingRun(input: Record<string, any>, userId: number): Pro
   } catch (e: any) {
     return JSON.stringify({ error: `Sourcing run failed to start: ${e.message}` });
   }
+}
+
+/**
+ * compare_deals — opens a side-by-side comparison of 2-3 deals (B2.9).
+ *
+ * Loads each deal's headline financials so the client can construct
+ * matching valuation model tabs (one per deal), link them, and open the
+ * comparison view that aggregates them.
+ *
+ * Chat-first: Yulia calls this when the user says "compare these three"
+ * or "which is best of A, B, C". The result returns canvas_action:
+ * 'compare_deals' with the per-deal seed data — the V6App listener
+ * handles the multi-tab orchestration.
+ */
+async function compareDealsTool(input: Record<string, any>, userId: number): Promise<string> {
+  const dealIds: number[] = Array.isArray(input.dealIds) ? input.dealIds.slice(0, 3) : [];
+  if (dealIds.length < 2) {
+    return JSON.stringify({ error: 'Need at least two dealIds to compare.' });
+  }
+
+  // Load each deal — verify ownership and gather headline numbers.
+  const deals = await Promise.all(dealIds.map(async id => {
+    const [d] = await sql`
+      SELECT id, business_name, journey_type, current_gate, league,
+             revenue, sde, ebitda, asking_price, financials
+      FROM deals
+      WHERE id = ${id} AND user_id = ${userId}
+      LIMIT 1
+    `;
+    if (!d) return null;
+    const fin = typeof d.financials === 'string' ? JSON.parse(d.financials) : (d.financials || {});
+    return {
+      dealId: d.id,
+      title: d.business_name || `Deal #${d.id}`,
+      league: d.league || 'L1',
+      revenueCents: d.revenue,
+      sdeCents: d.sde,
+      ebitdaCents: d.ebitda,
+      askingPriceCents: d.asking_price,
+      multiple: fin?.multiple ?? null,
+      currentGate: d.current_gate,
+    };
+  }));
+
+  const valid = deals.filter((d): d is NonNullable<typeof d> => d !== null);
+  if (valid.length < 2) {
+    return JSON.stringify({ error: 'Could not find at least two of the requested deals (ownership check or missing rows).' });
+  }
+
+  return JSON.stringify({
+    success: true,
+    canvas_action: 'compare_deals',
+    deals: valid,
+    tabTitle: input.title || `Comparison · ${valid.length} deals`,
+  });
 }
 
 /**
