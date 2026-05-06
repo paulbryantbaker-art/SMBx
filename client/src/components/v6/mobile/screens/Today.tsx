@@ -304,9 +304,12 @@ const HERO_TEXTURE: Record<HeroKind, string> = {
    identity instead of muddying it. */
 const HERO_OVERLAY: Record<HeroKind, string> = {
   pursue:  "linear-gradient(165deg, rgba(63,138,106,0.30) 0%, rgba(40,92,70,0.62) 100%)",
-  watch:   "linear-gradient(165deg, rgba(214,163,92,0.30) 0%, rgba(132,90,36,0.62) 100%)",
+  watch:   "linear-gradient(165deg, rgba(202,150,82,0.30) 0%, rgba(128,86,36,0.62) 100%)",
   pass:    "linear-gradient(165deg, rgba(216,139,132,0.30) 0%, rgba(140,68,60,0.62) 100%)",
-  welcome: "linear-gradient(165deg, rgba(214,163,92,0.28) 0%, rgba(132,90,36,0.60) 100%)",
+  /* welcome retuned 2026-05-05 (eve, take 2) — was reading slightly yellow.
+     Slight green-channel reduction shifts it toward warm gold/amber without
+     pushing into orange (the inner pill amplifies orange under saturate). */
+  welcome: "linear-gradient(165deg, rgba(202,150,82,0.28) 0%, rgba(128,86,36,0.60) 100%)",
 };
 
 /* Verdict-tinted ambient shadows so each card "glows" its own color
@@ -456,13 +459,14 @@ function ExploreRow({
         display: "flex", alignItems: "center", gap: 12,
         padding: "12px 14px",
         borderRadius: 14,
-        // Sub-row tint bumped 0.10 → 0.18 so the rows are clearly
-        // visible against the deeper outer card backdrop. Border
-        // alpha bumped to match.
-        background: "rgba(255,255,255,0.18)",
+        /* Inner row tint flipped from translucent-white → translucent-dark
+           so the white label/sub text pops with real contrast. White-on-
+           white-tint was washing out; dark inset makes each row read as a
+           crisp tappable cell on the periwinkle backdrop. */
+        background: "rgba(0,0,0,0.20)",
         backdropFilter: "blur(8px)",
         WebkitBackdropFilter: "blur(8px)",
-        border: "0.5px solid rgba(255,255,255,0.22)",
+        border: "0.5px solid rgba(255,255,255,0.12)",
         marginBottom: last ? 0 : 8,
         cursor: "pointer",
       }}
@@ -624,6 +628,13 @@ const H: Record<string, CSSProperties> = {
     margin: "16px 14px 14px",
     padding: "10px 12px",
     display: "flex", alignItems: "center", gap: 12,
+    /* Override GlassSurface's onColor tint — the default saturate(180%)
+       + brightness(1.10) was amplifying the gold underneath into orange.
+       Higher white opacity + neutral saturation keeps it a calm frosted
+       cell that reads as "card on warm bg" not "orange button." */
+    background: "rgba(255,255,255,0.28)",
+    backdropFilter: "blur(20px) saturate(120%)",
+    WebkitBackdropFilter: "blur(20px) saturate(120%)",
   },
   innerName: {
     fontSize: 14, fontWeight: 600, color: "#fff", letterSpacing: "-0.2px",
