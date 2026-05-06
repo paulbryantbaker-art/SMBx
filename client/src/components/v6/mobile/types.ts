@@ -1,4 +1,4 @@
-export type MobileTab = "today" | "pipeline" | "library" | "brief";
+export type MobileTab = "today" | "pipeline" | "library" | "search";
 
 export type MobileViewKind = "tab" | "detail" | "watching";
 

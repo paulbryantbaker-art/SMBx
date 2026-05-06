@@ -8,8 +8,8 @@ import { TabBar } from "./TabBar";
 import { GlassTopBar, LargeTitle, TitleCollapseProvider } from "./TopBar";
 import { TodayScreen } from "./screens/Today";
 import { PipelineScreen } from "./screens/Pipeline";
-import { BriefScreen } from "./screens/Brief";
 import { LibraryScreen } from "./screens/Library";
+import { SearchScreen } from "./screens/Search";
 import { DetailScreen } from "./screens/Detail";
 import { WatchingScreen } from "./screens/Watching";
 import { ChatSheet } from "./ChatSheet";
@@ -17,7 +17,7 @@ import { LearnSheet } from "./LearnSheet";
 import { useAudience } from "../../../hooks/useAudience";
 import type { MobileChatBridge, MobileTab, MobileView } from "./types";
 
-const VALID_TABS: MobileTab[] = ["today", "pipeline", "library", "brief"];
+const VALID_TABS: MobileTab[] = ["today", "pipeline", "library", "search"];
 
 interface V6MobileProps {
   user: User | null;
@@ -288,14 +288,12 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
           onSearch={onChat}
         />
       )}
-      {view.kind === "tab" && activeTab === "brief" && (
-        <BriefScreen
+      {view.kind === "tab" && activeTab === "search" && (
+        <SearchScreen
           isAnon={isAnon}
           initials={initials}
-          onOpenDeal={onOpenDeal}
           onAvatarClick={onAvatarClick}
-          onSearch={onChat}
-          userPicks={userDeals.hasData ? userDeals.picks : null}
+          onAskYulia={onAskYulia}
         />
       )}
       {view.kind === "detail" && (
@@ -333,7 +331,7 @@ const TAB_TITLES: Record<MobileTab, string> = {
   today: "Today",
   pipeline: "Pipeline",
   library: "Library",
-  brief: "Brief",
+  search: "Search",
 };
 
 function TabPlaceholder({ tab, initials }: { tab: MobileTab; initials: string }) {
