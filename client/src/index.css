@@ -487,12 +487,13 @@ input[type="range"].m-slider::-moz-range-thumb {
   --mb-accent-ink:  #4F60BD;
   --mb-accent-soft: #EEF1FB;
 
-  /* Action accent — soft pastel mint used for "go" chrome (active tab,
-     FAB, send buttons). Cool-family pastel that pairs with periwinkle
-     the way iOS pairs Notes-yellow with Mail-blue: same temperature
-     family, distinct hue, calming brightness. */
-  --mb-action:      #9DD4B8;
-  --mb-action-soft: #DEF1E8;
+  /* Action accent — brand gold matching the Today welcome hero. Same
+     amber/gold family as the watercolor textures so the action chrome
+     reads as "of the brand" rather than introducing a new color. Shares
+     the hex with --mb-warn intentionally — context disambiguates
+     (chrome vs verdict pill). */
+  --mb-action:      #D6A35C;
+  --mb-action-soft: #FAF1E1;
 
   /* Hero textures — watercolor washes (replaced CD pastel two-tone gradients).
      Files live under client/public/textures/. Apply with:

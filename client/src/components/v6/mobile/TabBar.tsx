@@ -89,8 +89,12 @@ const B: Record<string, CSSProperties> = {
     // home-indicator clearance in PWA (≈30px) and 0 in Safari tab.
     position: "fixed",
     bottom: "calc(18px + env(safe-area-inset-bottom, 0px))",
-    left: 12,
-    right: 12,
+    /* Side insets bumped 12 → 20 so the floating pill sits inside the
+       card-edge line on both sides. Was overhanging the cards by ~4px
+       which read as the pill being "too big" rather than floating
+       cleanly inside the content. */
+    left: 20,
+    right: 20,
     display: "flex",
     alignItems: "center",
     gap: 10,
@@ -131,7 +135,7 @@ const B: Record<string, CSSProperties> = {
     borderRadius: "50%",
     background: "var(--mb-action)",
     border: "none",
-    boxShadow: "0 10px 28px -6px rgba(80,170,138,0.42), inset 0 0 0 0.5px rgba(255,255,255,0.28), inset 0 1px 0 rgba(255,255,255,0.24)",
+    boxShadow: "0 10px 28px -6px rgba(180,128,52,0.42), inset 0 0 0 0.5px rgba(255,255,255,0.28), inset 0 1px 0 rgba(255,255,255,0.24)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
