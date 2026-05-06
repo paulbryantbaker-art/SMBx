@@ -48,6 +48,7 @@ export default function V6App() {
 function V6AppAnon() {
   const chat = useAnonymousChat();
   const bridge = useMemo<ChatBridge>(() => ({
+    // Anon chat never emits system messages (no gate-advance receipts pre-signup)
     thread: chat.messages.map(m => ({
       who: m.role === "user" ? "u" : "y",
       text: m.content,
@@ -66,8 +67,9 @@ function V6AppAuthed({ user, onSignOut }: { user: User; onSignOut: () => Promise
   const chat = useAuthChat(user);
   const bridge = useMemo<ChatBridge>(() => ({
     thread: chat.messages.map(m => ({
-      who: m.role === "user" ? "u" : "y",
+      who: m.role === "user" ? "u" : m.role === "system" ? "system" : "y",
       text: m.content,
+      meta: m.metadata as Message["meta"],
     })),
     sending: chat.sending,
     streamingText: chat.streamingText,

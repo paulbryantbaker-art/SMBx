@@ -78,11 +78,40 @@ const _hmr = (import.meta.hot?.data ?? {}) as {
   grouped?: GroupedConversations | null;
 };
 
+// Dev-only escape hatch: lets manual testing push a synthetic system message
+// (e.g., gate-advance card) into the chat without needing a live SSE event.
+// Set window.__smbxDevPushSystemMessage(metadata) from the console.
+declare global {
+  interface Window {
+    __smbxDevPushSystemMessage?: (metadata: Record<string, any>) => void;
+  }
+}
+
 export function useAuthChat(user: User | null) {
   const [conversations, setConversations] = useState<Conversation[]>(_hmr.conversations ?? []);
   const [grouped, setGrouped] = useState<GroupedConversations | null>(_hmr.grouped ?? null);
   const [activeConversationId, setActiveConversationId] = useState<number | null>(_hmr.activeConversationId ?? null);
   const [messages, setMessages] = useState<AuthMessage[]>(_hmr.messages ?? []);
+
+  // Dev-only: expose a hook to push synthetic system messages for visual testing.
+  useEffect(() => {
+    if (import.meta.env?.DEV) {
+      window.__smbxDevPushSystemMessage = (metadata: Record<string, any>) => {
+        setMessages(prev => [...prev, {
+          id: -Date.now(),
+          role: 'system',
+          content: metadata.completionDeliverableTitle
+            ? `Advanced to ${metadata.toGate} · ${metadata.completionDeliverableTitle} ready`
+            : `Advanced to ${metadata.toGate ?? 'next stage'}`,
+          created_at: new Date().toISOString(),
+          metadata,
+        }]);
+      };
+    }
+    return () => {
+      if (typeof window !== 'undefined') delete window.__smbxDevPushSystemMessage;
+    };
+  }, []);
   const [sending, setSending] = useState(false);
   const [streamingText, setStreamingText] = useState('');
   const [activeTool, setActiveTool] = useState<string | null>(null);
@@ -328,6 +357,31 @@ export function useAuthChat(user: User | null) {
                     setActiveConversationId(parsed.newConversationId);
                     window.history.replaceState(null, '', `/chat/${parsed.newConversationId}`);
                   }
+                  // UX-04 / UX-05 chat-side surface: append a synthetic system
+                  // message so the gate advance is visible in the thread with
+                  // an "Open" CTA for the completion deliverable. Ephemeral —
+                  // not persisted to DB; on reload the next loadConversations
+                  // re-syncs the canonical thread.
+                  const summary = parsed.completionDeliverableTitle
+                    ? `Advanced to ${parsed.toGate} · ${parsed.completionDeliverableTitle} ready`
+                    : `Advanced to ${parsed.toGate}`;
+                  const cardMessage: AuthMessage = {
+                    id: -Date.now(), // negative id signals ephemeral
+                    role: 'system',
+                    content: summary,
+                    created_at: new Date().toISOString(),
+                    metadata: {
+                      kind: 'gate_advance',
+                      fromGate: parsed.fromGate,
+                      toGate: parsed.toGate,
+                      gateName: parsed.gateName,
+                      completionDeliverableId: parsed.completionDeliverableId,
+                      completionDeliverableType: parsed.completionDeliverableType,
+                      completionDeliverableTitle: parsed.completionDeliverableTitle,
+                      completionDeliverableStatus: parsed.completionDeliverableStatus,
+                    },
+                  };
+                  setMessages(prev => [...prev, cardMessage]);
                 } else if (parsed.type === 'paywall') {
                   setPaywallData(parsed);
                 } else if (parsed.type === 'error') {

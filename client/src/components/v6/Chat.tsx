@@ -88,7 +88,7 @@ export function V6Chat({
           <V6ChatEmpty modeLabel={modeLabel} onPick={(t) => send(t)} onOpenTab={onOpenTab} />
         ) : (
           <>
-            {thread.map((m, i) => <V6Msg key={i} who={m.who} text={m.text} />)}
+            {thread.map((m, i) => <V6Msg key={i} {...m} />)}
             {sending && (streamingText || activeTool) && (
               <V6Streaming text={streamingText ?? ""} tool={activeTool ?? null} />
             )}
@@ -123,7 +123,13 @@ export function V6Chat({
   );
 }
 
-function V6Msg({ who, text }: Message) {
+function V6Msg({ who, text, meta }: Message) {
+  // System messages with structured payload render as styled cards.
+  // Today only one kind: gate_advance.
+  if (who === "system" && meta?.kind === "gate_advance") {
+    return <V6GateAdvanceCard meta={meta} fallbackText={text} />;
+  }
+
   const isY = who === "y";
   return (
     <div className="m-fade-up" style={{ display: "flex", gap: 10, marginBottom: 14 }}>
@@ -142,6 +148,142 @@ function V6Msg({ who, text }: Message) {
     </div>
   );
 }
+
+/**
+ * Gate-advance receipt card. Renders inline in the chat thread when the
+ * server emits an SSE `gate_advance` event. Surfaces the new gate + the
+ * completion deliverable Yulia just kicked off, with an "Open in canvas"
+ * action that fires the same canvas_action the model tools use.
+ *
+ * Design: V6 desktop tokens only. Primary-container background ties it to
+ * Yulia's voice (her avatars use the same swatch). Subtle entrance via
+ * .m-fade-up (cubic-bezier deceleration). No bounce, no celebration emoji
+ * — the artifact itself is the celebration.
+ */
+function V6GateAdvanceCard({ meta, fallbackText }: { meta: NonNullable<Message["meta"]>; fallbackText: string }) {
+  const hasDeliverable = !!meta.completionDeliverableId;
+  const deliverableReady = meta.completionDeliverableStatus === "complete";
+  const deliverableFailed = meta.completionDeliverableStatus === "failed";
+
+  const openDeliverable = () => {
+    if (!meta.completionDeliverableId) return;
+    window.dispatchEvent(new CustomEvent("smbx:canvas_action", {
+      detail: {
+        canvas_action: "open_deliverable",
+        deliverableId: meta.completionDeliverableId,
+        tabTitle: meta.completionDeliverableTitle ?? `Deliverable · ${meta.completionDeliverableId}`,
+      },
+    }));
+  };
+
+  // Fallback when meta arrived malformed — degrade gracefully to plain text.
+  if (!meta.toGate) {
+    return (
+      <div className="m-fade-up" style={GA.fallback}>
+        {fallbackText}
+      </div>
+    );
+  }
+
+  return (
+    <div className="m-fade-up" style={GA.row}>
+      <div style={GA.icon} aria-hidden="true">
+        {/* Checkmark for the gate completion. Single SVG, no fill animation —
+            the row's fade-up is the only motion. */}
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2.5 6.2 L5 8.5 L9.5 3.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+      <div style={GA.card}>
+        <div className="mono" style={GA.eyebrow}>
+          ADVANCED TO {meta.toGate.toUpperCase()}
+          {meta.gateName && (
+            <span style={{ color: "var(--m-on-primary-container)", opacity: 0.6, marginLeft: 6 }}>
+              · {meta.gateName}
+            </span>
+          )}
+        </div>
+        {meta.completionDeliverableTitle && (
+          <div style={GA.title}>{meta.completionDeliverableTitle}</div>
+        )}
+        {hasDeliverable && (
+          <div style={GA.body}>
+            {deliverableReady && "Ready in your canvas. Yulia can walk you through it."}
+            {!deliverableReady && !deliverableFailed && "Yulia's preparing it now — opens in your canvas in a moment."}
+            {deliverableFailed && "Couldn't generate this one. Ask Yulia to retry in chat."}
+          </div>
+        )}
+        {hasDeliverable && !deliverableFailed && (
+          <button
+            type="button"
+            className="m-fade-up"
+            onClick={openDeliverable}
+            style={GA.cta}
+            onMouseDown={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(0.97)"; }}
+            onMouseUp={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+          >
+            Open in canvas
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true" style={{ marginLeft: 6 }}>
+              <path d="M3.5 8.5 L8.5 3.5 M8.5 3.5 H4 M8.5 3.5 V8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const GA: Record<string, CSSProperties> = {
+  row: {
+    display: "flex", gap: 10, marginBottom: 14,
+  },
+  icon: {
+    width: 24, height: 24, flexShrink: 0, borderRadius: 7,
+    background: "var(--m-pursue-container)",
+    color: "var(--m-pursue-on-cont)",
+    display: "grid", placeItems: "center",
+  },
+  card: {
+    flex: 1, minWidth: 0,
+    background: "var(--m-primary-container)",
+    color: "var(--m-on-primary-container)",
+    borderRadius: 10,
+    padding: "10px 14px 12px",
+    boxShadow: "var(--m-elev-1)",
+  },
+  eyebrow: {
+    fontSize: 9.5, letterSpacing: "0.14em", fontWeight: 600,
+    color: "var(--m-on-primary-container)",
+  },
+  title: {
+    fontFamily: "var(--font-display)",
+    fontSize: 14.5, fontWeight: 600,
+    letterSpacing: "-0.01em",
+    margin: "4px 0 4px",
+  },
+  body: {
+    fontSize: 12, lineHeight: 1.5, opacity: 0.78, margin: 0,
+  },
+  cta: {
+    marginTop: 8,
+    display: "inline-flex", alignItems: "center",
+    background: "var(--m-primary)",
+    color: "var(--m-on-primary)",
+    border: "none",
+    fontFamily: "var(--font-display)",
+    fontSize: 12, fontWeight: 600,
+    padding: "5px 11px",
+    borderRadius: 999,
+    cursor: "pointer",
+    transition: "transform 160ms cubic-bezier(0.23, 1, 0.32, 1)",
+  },
+  fallback: {
+    fontSize: 12, color: "var(--m-on-surface-mid)",
+    padding: "6px 10px", marginBottom: 14,
+    background: "var(--m-surface-1)", borderRadius: 6,
+  },
+};
 
 function V6Streaming({ text, tool }: { text: string; tool: string | null }) {
   return (

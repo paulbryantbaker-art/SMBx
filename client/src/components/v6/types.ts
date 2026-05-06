@@ -39,9 +39,23 @@ export interface Tab {
   deliverableId?: string;
 }
 
+export interface GateAdvanceMeta {
+  kind: "gate_advance";
+  fromGate: string;
+  toGate: string;
+  gateName?: string;
+  /** Optional completion-deliverable info from the SSE payload */
+  completionDeliverableId?: number;
+  completionDeliverableType?: string;
+  completionDeliverableTitle?: string;
+  completionDeliverableStatus?: "generating" | "complete" | "failed";
+}
+
 export interface Message {
-  who: "u" | "y";
+  who: "u" | "y" | "system";
   text: string;
+  /** Structured payload for system cards (e.g., gate-advance receipts). */
+  meta?: GateAdvanceMeta;
 }
 
 export interface Mode {
