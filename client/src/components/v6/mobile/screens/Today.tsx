@@ -18,7 +18,8 @@ import { PickRow } from "../PickRow";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
 import { MobileIcon } from "../icons";
 import type { Verdict, YIconKind } from "../types";
-import type { MobilePipelineRow, MobilePick } from "../../../../hooks/useMobileDeals";
+import type { MobilePipelineRow, MobilePick, RawDeal } from "../../../../hooks/useMobileDeals";
+import { TodayActionQueue } from "./TodayActionQueue";
 import { useWatchlist } from "../../../../hooks/useWatchlist";
 import { copyFor } from "../../../../lib/copy";
 import { type Audience } from "../../../../lib/audience";
@@ -38,6 +39,8 @@ interface TodayProps {
   /** Authed user's top 3 picks (from useMobileDeals). Null = anon or empty
       → SAMPLE_PICKS renders instead. Same shape as Brief screen's picks. */
   userPicks: MobilePick[] | null;
+  /** Raw deal records for the action queue (B1.10). Null for anon/empty. */
+  userRawDeals: RawDeal[] | null;
   /** Current audience (drives copy + tip chips). */
   audience: Audience;
   /** Update audience (used by the inline switcher pill). */
@@ -83,7 +86,7 @@ const SAMPLE_PIPELINE: TodayPipelineRow[] = [
 
 export function TodayScreen({
   isAnon, initials, onOpenDeal, onChat, onAskYulia, onLearn: _onLearn,
-  onAvatarClick, userPipeline, userPicks,
+  onAvatarClick, userPipeline, userPicks, userRawDeals,
   audience, onAudienceChange, showAudienceSwitcher,
 }: TodayProps) {
   const PIPELINE: TodayPipelineRow[] = userPipeline ?? SAMPLE_PIPELINE;
@@ -113,18 +116,27 @@ export function TodayScreen({
         )}
       </div>
 
-      {/* Explore SMBX — about/learn surface. Persona-aware: 1 fixed
-          "try a sample deal" entry + 3 audience-keyed tip chips from
-          copy.ts that open chat with a starter prompt. */}
-      <div style={{ padding: "14px 16px 0" }}>
-        <ExploreCard
-          isAnon={isAnon}
-          onChat={onChat}
+      {/* B1.10: authed users with deals get the personal action queue
+          ("things you need to look at right now"). Anon visitors and
+          authed-no-data users keep the existing Explore card with the
+          starter chips. */}
+      {!isAnon && userRawDeals && userRawDeals.length > 0 ? (
+        <TodayActionQueue
+          raw={userRawDeals}
+          onOpenDeal={onOpenDeal}
           onAskYulia={onAskYulia}
-          onOpenDeal={() => onOpenDeal("deal-bigfake", "Big Fake Deal · sample")}
-          tips={C.todayTips}
         />
-      </div>
+      ) : (
+        <div style={{ padding: "14px 16px 0" }}>
+          <ExploreCard
+            isAnon={isAnon}
+            onChat={onChat}
+            onAskYulia={onAskYulia}
+            onOpenDeal={() => onOpenDeal("deal-bigfake", "Big Fake Deal · sample")}
+            tips={C.todayTips}
+          />
+        </div>
+      )}
 
       {/* Pipeline section — content per audience via copy.ts */}
       <div style={{ marginTop: 24, padding: "0 16px" }}>

@@ -88,6 +88,9 @@ export interface UseMobileDealsResult {
   watching: MobileWatchRow[];
   picks: MobilePick[];
   featured: MobileFeatured | null;
+  /** Raw deals (unshapeed) so consumers can derive surfaces beyond the four
+      curated slices — e.g., the Today action queue (B1.10). */
+  raw: RawDeal[];
 }
 
 const EMPTY: Omit<UseMobileDealsResult, "loading" | "loaded" | "isAuthed" | "hasData"> = {
@@ -95,6 +98,7 @@ const EMPTY: Omit<UseMobileDealsResult, "loading" | "loaded" | "isAuthed" | "has
   watching: [],
   picks: [],
   featured: null,
+  raw: [],
 };
 
 /* ─── derivation helpers ──────────────────────────────────── */
@@ -223,7 +227,7 @@ function shape(deals: RawDeal[]): Omit<UseMobileDealsResult, "loading" | "loaded
       }
     : null;
 
-  return { today, watching, picks, featured };
+  return { today, watching, picks, featured, raw: deals };
 }
 
 /* ─── hook ────────────────────────────────────────────────── */
