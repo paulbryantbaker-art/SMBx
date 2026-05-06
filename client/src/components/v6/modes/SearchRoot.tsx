@@ -77,9 +77,18 @@ interface SearchRootProps {
 export function V6SearchRoot({ openTab, onTalkToYulia, user }: SearchRootProps) {
   const home = useHomeDeals(user);
 
+  // UX-01 fix: an authed user with zero deals previously saw the marketing
+  // sample arrays — fake "Big Fake Deal · sample" rows that read like the
+  // platform pre-populated their account. Now they get a real chat-first
+  // empty state with starter chips that pre-fill the composer with a journey
+  // intent. Anon visitors keep the sample-data fallback (it's marketing).
+  if (home.isAuthed && !home.loading && !home.hasData) {
+    return <V6EmptyHome onTalkToYulia={onTalkToYulia} />;
+  }
+
   // When the user is authenticated AND we have real deals, render their data.
-  // Otherwise fall back to the polished sample arrays — anon visitors and the
-  // brief loading window both stay on samples so the page never flashes empty.
+  // Otherwise fall back to the polished sample arrays for anon visitors and
+  // the brief loading window so the page never flashes empty.
   const useReal = home.isAuthed && home.hasData;
   const picks: Pick[]          = useReal ? home.picks.map(dealToPick)         : PICKS;
   const inReview: InReviewDeal[] = useReal && home.inReview.length > 0 ? home.inReview.map(dealToInReview) : IN_REVIEW;
@@ -374,3 +383,123 @@ function dealToClosed(d: HomeDeal): ClosedDeal {
     date: fmtMonth(d.updated_at),
   };
 }
+
+/* ─── Empty home — authed user with zero deals ─────────────────────
+ * Chat-first onboarding. Four chips that pre-fill the chat composer
+ * with a journey-starter prompt. Tapping a chip "talks to Yulia" — no
+ * Buy/Sell/Raise/Integrate page-jumping, just the conversation that
+ * actually advances the deal.
+ *
+ * Phase 1 baseline. Phase 1.10 (Today authed action queue) replaces the
+ * static chips with a dynamic "what needs your attention" surface once
+ * the user has deals in flight.
+ */
+
+interface EmptyHomeProps {
+  onTalkToYulia?: (prompt: string) => void;
+}
+
+const EMPTY_CHIPS: { label: string; prompt: string; eyebrow: string }[] = [
+  { label: "Buy",       prompt: "I want to buy a business. Help me sketch the thesis.",                          eyebrow: "Acquire" },
+  { label: "Sell",      prompt: "I'm thinking about selling my business. Help me figure out where to start.",    eyebrow: "Exit" },
+  { label: "Raise",     prompt: "I'm raising capital. Help me build the materials.",                             eyebrow: "Capital" },
+  { label: "Integrate", prompt: "I just closed a deal and need to plan post-merger integration.",                eyebrow: "PMI" },
+];
+
+function V6EmptyHome({ onTalkToYulia }: EmptyHomeProps) {
+  return (
+    <div className="m-fade-up" style={E.wrap}>
+      <div style={E.cardWrap}>
+        <div className="mono" style={E.eyebrow}>WELCOME</div>
+        <h1 style={E.headline}>Tell Yulia what you want to do.</h1>
+        <p style={E.body}>
+          She'll handle the deal — sourcing, modeling, due diligence, paperwork.
+          Pick a starting point or just type in chat.
+        </p>
+        <div style={E.chips}>
+          {EMPTY_CHIPS.map(c => (
+            <button
+              key={c.label}
+              type="button"
+              className="m-state"
+              style={E.chip}
+              onClick={() => onTalkToYulia?.(c.prompt)}
+              onMouseDown={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(0.97)"; }}
+              onMouseUp={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+            >
+              <span className="mono" style={E.chipEyebrow}>{c.eyebrow}</span>
+              <span style={E.chipLabel}>{c.label}</span>
+            </button>
+          ))}
+        </div>
+        <div style={E.subline}>
+          Or upload financials in chat to get started faster.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const E: Record<string, CSSProperties> = {
+  wrap: {
+    minHeight: "60vh",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    padding: "40px 20px",
+  },
+  cardWrap: {
+    maxWidth: 560, width: "100%",
+    background: "var(--m-surface-on-light)",
+    border: "1px solid var(--m-outline-var)",
+    borderRadius: 16,
+    padding: "32px 36px 28px",
+    boxShadow: "var(--m-elev-1)",
+  },
+  eyebrow: {
+    fontSize: 9.5, letterSpacing: "0.14em", fontWeight: 600,
+    color: "var(--m-primary)",
+  },
+  headline: {
+    fontFamily: "var(--font-display)",
+    fontSize: 28, fontWeight: 700,
+    letterSpacing: "-0.025em",
+    margin: "8px 0 10px",
+    color: "var(--m-on-surface)",
+  },
+  body: {
+    fontSize: 14, lineHeight: 1.55,
+    color: "var(--m-on-surface-mid)",
+    margin: "0 0 22px",
+    maxWidth: "55ch",
+  },
+  chips: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))",
+    gap: 10,
+  },
+  chip: {
+    all: "unset",
+    display: "flex", flexDirection: "column", gap: 4,
+    padding: "12px 14px",
+    background: "var(--m-primary-container)",
+    color: "var(--m-on-primary-container)",
+    borderRadius: 10,
+    cursor: "pointer",
+    transition: "transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background 160ms ease",
+  },
+  chipEyebrow: {
+    fontSize: 9, letterSpacing: "0.14em", fontWeight: 600,
+    opacity: 0.65,
+  },
+  chipLabel: {
+    fontFamily: "var(--font-display)",
+    fontSize: 16, fontWeight: 600, letterSpacing: "-0.015em",
+  },
+  subline: {
+    marginTop: 18,
+    paddingTop: 14,
+    borderTop: "1px solid var(--m-outline-var)",
+    fontSize: 12.5,
+    color: "var(--m-on-surface-mid)",
+  },
+};

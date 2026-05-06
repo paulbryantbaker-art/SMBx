@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { MODES, V6Icon } from "./icons";
-import type { ModeId, OpenTab } from "./types";
+import type { ModeId, OpenTab, TabKind } from "./types";
+import { authHeaders } from "../../hooks/useAuth";
 
 interface SidebarProps {
   activeMode: ModeId;
@@ -14,24 +15,28 @@ interface SidebarProps {
   onSignOut: () => void;
 }
 
-const DEMO_RESULTS = {
+interface WorkspaceHit { id: string; group: ResultGroup; label: string; sub: string }
+type ResultGroup = "deals" | "docs" | "analyses";
+type WorkspaceMatches = Record<ResultGroup, WorkspaceHit[]>;
+
+// Anonymous fallback — marketing-flavored sample so the search UX still
+// demos for unsigned visitors. Authed users hit the real /api/search/workspace.
+const ANON_SAMPLES: WorkspaceMatches = {
   deals: [
-    { id: "d-bigfake",    label: "Big Fake Deal · sample", sub: "Pursue · 92 fit" },
-    { id: "d-pest",       label: "Pest Control · FL",      sub: "Pursue · 84 fit" },
-    { id: "d-electrical", label: "Electrical · TX",        sub: "Watch · 78 fit"  },
+    { id: "d-bigfake",    group: "deals", label: "Big Fake Deal · sample", sub: "Pursue · 92 fit" },
+    { id: "d-pest",       group: "deals", label: "Pest Control · FL",      sub: "Pursue · 84 fit" },
+    { id: "d-electrical", group: "deals", label: "Electrical · TX",        sub: "Watch · 78 fit"  },
   ],
   docs: [
-    { id: "doc-nda",  label: "Acme NDA · executed",     sub: "Mar 18 · final" },
-    { id: "doc-loi",  label: "Big Fake Deal · LOI v3",  sub: "Mar 22 · draft" },
-    { id: "doc-memo", label: "Q1 thesis memo",          sub: "Feb 28 · final" },
+    { id: "doc-nda",  group: "docs", label: "Acme NDA · executed",     sub: "Mar 18 · final" },
+    { id: "doc-loi",  group: "docs", label: "Big Fake Deal · LOI v3",  sub: "Mar 22 · draft" },
+    { id: "doc-memo", group: "docs", label: "Q1 thesis memo",          sub: "Feb 28 · final" },
   ],
-  analysis: [
-    { id: "an-recast", label: "Big Fake Deal · Recast",  sub: "Mar 25 · live"  },
-    { id: "an-comps",  label: "Pest Control · Comps",    sub: "Mar 20 · saved" },
+  analyses: [
+    { id: "an-recast", group: "analyses", label: "Big Fake Deal · Recast",  sub: "Mar 25 · live"  },
+    { id: "an-comps",  group: "analyses", label: "Pest Control · Comps",    sub: "Mar 20 · saved" },
   ],
-} as const;
-
-type ResultGroup = keyof typeof DEMO_RESULTS;
+};
 
 export function V6Sidebar({
   activeMode, onPickMode, searchOpen, setSearchOpen, onOpenTab,
@@ -71,10 +76,43 @@ export function V6Sidebar({
   })();
 
   const norm = q.trim().toLowerCase();
-  const matches = !norm ? null : (Object.fromEntries(
-    (Object.entries(DEMO_RESULTS) as [ResultGroup, typeof DEMO_RESULTS[ResultGroup]][])
-      .map(([k, arr]) => [k, arr.filter(r => (r.label + r.sub).toLowerCase().includes(norm))])
-  ) as Record<ResultGroup, { id: string; label: string; sub: string }[]>);
+  const isAnonForSearch = !user;
+
+  // UX-56: real workspace search for authed users via /api/search/workspace,
+  // debounced to 250ms. Anon falls back to the marketing samples so the search
+  // UX still demos.
+  const [matches, setMatches] = useState<WorkspaceMatches | null>(null);
+  const [searching, setSearching] = useState(false);
+
+  useEffect(() => {
+    if (!norm) { setMatches(null); return; }
+    if (isAnonForSearch) {
+      setMatches({
+        deals:    ANON_SAMPLES.deals.filter(r => (r.label + r.sub).toLowerCase().includes(norm)),
+        docs:     ANON_SAMPLES.docs.filter(r => (r.label + r.sub).toLowerCase().includes(norm)),
+        analyses: ANON_SAMPLES.analyses.filter(r => (r.label + r.sub).toLowerCase().includes(norm)),
+      });
+      return;
+    }
+    let cancelled = false;
+    setSearching(true);
+    const handle = window.setTimeout(() => {
+      fetch(`/api/search/workspace?q=${encodeURIComponent(norm)}`, { headers: authHeaders() })
+        .then(r => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
+        .then((data: WorkspaceMatches) => {
+          if (cancelled) return;
+          setMatches(data);
+        })
+        .catch(() => {
+          if (cancelled) return;
+          setMatches({ deals: [], docs: [], analyses: [] });
+        })
+        .finally(() => {
+          if (!cancelled) setSearching(false);
+        });
+    }, 250);
+    return () => { cancelled = true; window.clearTimeout(handle); };
+  }, [norm, isAnonForSearch]);
 
   const openSearch = () => {
     setSearchOpen(true);
@@ -90,7 +128,7 @@ export function V6Sidebar({
     if (e.key === "Escape") closeSearch();
   };
 
-  const tabKindFor = (group: ResultGroup) =>
+  const tabKindFor = (group: ResultGroup): TabKind =>
     group === "deals" ? "deal" : group === "docs" ? "doc" : "analysis";
 
   const iconFor = (group: ResultGroup) =>
@@ -252,7 +290,13 @@ export function V6Sidebar({
               </div>
             )}
 
-            {norm && matches && (Object.entries(matches) as [ResultGroup, typeof matches[ResultGroup]][]).map(([group, arr]) => arr.length > 0 && (
+            {norm && searching && !matches && (
+              <div style={{ padding: "16px 12px", fontSize: 12.5, color: "var(--m-on-surface-mid)", textAlign: "center" }}>
+                Searching…
+              </div>
+            )}
+
+            {norm && matches && (Object.entries(matches) as [ResultGroup, WorkspaceHit[]][]).map(([group, arr]) => arr.length > 0 && (
               <div key={group} style={{ marginBottom: 10 }}>
                 <div style={S.groupHead}>{group} · {arr.length}</div>
                 {arr.map(r => (
@@ -272,9 +316,11 @@ export function V6Sidebar({
               </div>
             ))}
 
-            {norm && matches && (Object.values(matches) as { id: string }[][]).every(a => a.length === 0) && (
+            {norm && matches && Object.values(matches).every(a => a.length === 0) && !searching && (
               <div style={{ padding: "16px 12px", fontSize: 12.5, color: "var(--m-on-surface-mid)", textAlign: "center" }}>
-                No matches for &ldquo;{q}&rdquo;
+                {isAnonForSearch
+                  ? <>No sample matches for &ldquo;{q}&rdquo;. Sign in to search your workspace.</>
+                  : <>No matches. Try a deal name, doc title, or industry.</>}
               </div>
             )}
           </div>
