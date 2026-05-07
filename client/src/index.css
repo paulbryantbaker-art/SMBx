@@ -284,13 +284,13 @@ input::placeholder, textarea::placeholder { color: var(--ink-4); }
    their original tinted-surface look. */
 .v6-root[data-auth="anon"] .m-card:not(.filled-tonal):not([style*="linear-gradient"]) {
   background-color: var(--m-surface-on-light);
-  background-image: linear-gradient(rgba(255,255,255,0.90), rgba(255,255,255,0.94)), var(--m-tex-gold-marble);
+  background-image: linear-gradient(rgba(255,255,255,0.72), rgba(255,255,255,0.82)), var(--m-tex-gold-marble);
   background-size: cover;
   background-position: center;
 }
 .v6-root[data-auth="authed"] .m-card:not(.filled-tonal):not([style*="linear-gradient"]) {
   background-color: var(--m-surface-on-light);
-  background-image: linear-gradient(rgba(255,255,255,0.90), rgba(255,255,255,0.94)), var(--m-tex-sage-botanical);
+  background-image: linear-gradient(rgba(255,255,255,0.74), rgba(255,255,255,0.84)), var(--m-tex-sage-botanical);
   background-size: cover;
   background-position: center;
 }
@@ -623,13 +623,13 @@ input[type="range"].m-slider::-moz-range-thumb {
    adds tonal depth so cards lift off the canvas. */
 .mobile-root[data-auth="anon"] .mb-as-card {
   background-color: var(--mb-card);
-  background-image: linear-gradient(rgba(255,255,255,0.88), rgba(255,255,255,0.93)), var(--mb-tex-gold-marble);
+  background-image: linear-gradient(rgba(255,255,255,0.70), rgba(255,255,255,0.80)), var(--mb-tex-gold-marble);
   background-size: cover;
   background-position: center;
 }
 .mobile-root[data-auth="authed"] .mb-as-card {
   background-color: var(--mb-card);
-  background-image: linear-gradient(rgba(255,255,255,0.88), rgba(255,255,255,0.93)), var(--mb-tex-sage-botanical);
+  background-image: linear-gradient(rgba(255,255,255,0.72), rgba(255,255,255,0.82)), var(--mb-tex-sage-botanical);
   background-size: cover;
   background-position: center;
 }
