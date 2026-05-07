@@ -239,6 +239,13 @@ input::placeholder, textarea::placeholder { color: var(--ink-4); }
   --m-elev-1: 0 1px 2px rgba(15, 18, 35, 0.05), 0 1px 3px 1px rgba(15, 18, 35, 0.04);
   --m-elev-2: 0 2px 6px rgba(15, 18, 35, 0.08), 0 1px 2px rgba(15, 18, 35, 0.05);
   --m-elev-3: 0 4px 12px rgba(15, 18, 35, 0.10), 0 2px 4px rgba(15, 18, 35, 0.05);
+
+  /* Auth-state textures (2026-05-07): exposed at :root so both desktop
+     (.v6-root) and mobile (.mobile-root) selectors can resolve them.
+     The mobile-scoped --mb-tex-* equivalents stay in .mobile-root for
+     the existing watercolor-hero patterns. */
+  --m-tex-gold-marble:    url("/textures/texture-gold-marble.png?v=20260503");
+  --m-tex-sage-botanical: url("/textures/texture-sage-botanical.png?v=20260503");
 }
 
 /* V6 root container — applied at V6App level so V3 surfaces stay unaffected */
@@ -269,6 +276,24 @@ input::placeholder, textarea::placeholder { color: var(--ink-4); }
 .m-card.tap { cursor: pointer; }
 .m-card.tap:hover { box-shadow: var(--m-elev-3); transform: translateY(-1px); }
 .m-card.filled-tonal { background: var(--m-surface-tinted); border: 1px solid transparent; }
+
+/* Auth-state texture (2026-05-07): subtle watercolor on every .m-card so
+   logged-out reads warm/gold and logged-in reads cool/sage. Heavy white
+   overlay keeps cards readable — the texture just adds tonal depth so
+   cards pop off the canvas. Filled-tonal variants opt out so they keep
+   their original tinted-surface look. */
+.v6-root[data-auth="anon"] .m-card:not(.filled-tonal):not([style*="linear-gradient"]) {
+  background-color: var(--m-surface-on-light);
+  background-image: linear-gradient(rgba(255,255,255,0.90), rgba(255,255,255,0.94)), var(--m-tex-gold-marble);
+  background-size: cover;
+  background-position: center;
+}
+.v6-root[data-auth="authed"] .m-card:not(.filled-tonal):not([style*="linear-gradient"]) {
+  background-color: var(--m-surface-on-light);
+  background-image: linear-gradient(rgba(255,255,255,0.90), rgba(255,255,255,0.94)), var(--m-tex-sage-botanical);
+  background-size: cover;
+  background-position: center;
+}
 
 /* Buttons */
 .m-btn {
@@ -590,6 +615,23 @@ input[type="range"].m-slider::-moz-range-thumb {
     0 2px 4px rgba(0, 0, 0, 0.07),
     0 8px 16px -2px rgba(0, 0, 0, 0.10),
     0 16px 32px -8px rgba(0, 0, 0, 0.06);
+}
+
+/* Auth-state texture (2026-05-07): subtle watercolor wash on every
+   .mb-as-card so logged-out cards read warm/gold and logged-in cards
+   read cool/sage. Heavy white overlay keeps text readable; texture
+   adds tonal depth so cards lift off the canvas. */
+.mobile-root[data-auth="anon"] .mb-as-card {
+  background-color: var(--mb-card);
+  background-image: linear-gradient(rgba(255,255,255,0.88), rgba(255,255,255,0.93)), var(--mb-tex-gold-marble);
+  background-size: cover;
+  background-position: center;
+}
+.mobile-root[data-auth="authed"] .mb-as-card {
+  background-color: var(--mb-card);
+  background-image: linear-gradient(rgba(255,255,255,0.88), rgba(255,255,255,0.93)), var(--mb-tex-sage-botanical);
+  background-size: cover;
+  background-position: center;
 }
 
 /* Verdict pill */
