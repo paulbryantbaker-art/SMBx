@@ -6,7 +6,7 @@ import { type CSSProperties } from "react";
 import { GlassTopBar, LargeTitle } from "../TopBar";
 import { PickRow } from "../PickRow";
 import type { Verdict } from "../types";
-import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
+import { WAVE_TEXTURES } from "../../../../lib/randomTextures";
 import type { MobilePick } from "../../../../hooks/useMobileDeals";
 
 interface BriefProps {
@@ -119,7 +119,7 @@ const Br: Record<string, CSSProperties> = {
        the gold watercolor texture. Switched to amber/gold (--mb-warn family)
        so the overlay clarifies the texture's hue rather than browning it. */
     backgroundImage:
-      `linear-gradient(165deg, rgba(214,163,92,0.28) 0%, rgba(132,90,36,0.62) 100%), url('${RANDOM_TEXTURES.welcome}')`,
+      `linear-gradient(165deg, rgba(214,163,92,0.28) 0%, rgba(132,90,36,0.62) 100%), url('${WAVE_TEXTURES.brief}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     backgroundRepeat: "no-repeat, no-repeat",

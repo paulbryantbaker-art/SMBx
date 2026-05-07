@@ -30,10 +30,41 @@ const pick = <T,>(arr: readonly T[]): T =>
 // textures, not the prior watercolor washes. watch + pass stay fixed
 // (semantic colors with no visual substitutes).
 //
-// 2026-05-07 update: full randomization across the new "textures 4" wave
-// set the user dropped (8 textures). Each colored hero card picks one at
-// page load. White list cards are unaffected (they don't reference
-// RANDOM_TEXTURES). watch + pass stay fixed (semantic).
+// Two distinct texture systems (2026-05-07):
+//
+//   RANDOM_TEXTURES — the previous watercolor-wash set. Used ONLY by the
+//   Detail page artifact cards (RECAST / BASELINE / BUYERS / IOI etc.)
+//   that carry semantic-verdict color identity. These should NOT pick up
+//   the new wave textures.
+//
+//   WAVE_TEXTURES — the new 'textures 4' wave set the user dropped. 8
+//   PNGs (gold/green/teal/blue/purple/coral/pink/greengold). Each colored
+//   hero card on Today / Pipeline / Brief picks one at module load and
+//   re-rolls on page reload.
+//
+// White list cards (.mb-as-card / .m-card) reference neither and stay
+// plain white. watch + pass stay fixed in RANDOM_TEXTURES (semantic).
+
+// ─── PREVIOUS set — watercolor washes, for Detail artifact cards ────
+const GOLD_POOL  = ["sunrise", "gold-marble", "orig-sunrise"] as const;
+const GREEN_POOL = ["pursue", "sage-botanical", "orig-pursue"] as const;
+const COOL_BLUE_POOL = [
+  "baseline", "mint-waves", "aqua-cloud", "orig-baseline",
+] as const;
+const COOL_PURPLE_POOL = [
+  "buyers", "sage-botanical", "mint-waves", "orig-buyers",
+] as const;
+
+export const RANDOM_TEXTURES = {
+  welcome:  tex(pick(GOLD_POOL)),
+  pursue:   tex(pick(GREEN_POOL)),
+  baseline: tex(pick(COOL_BLUE_POOL)),
+  buyers:   tex(pick(COOL_PURPLE_POOL)),
+  watch:    tex("watch"),
+  pass:     tex("pass"),
+} as const;
+
+// ─── NEW set — wave textures, for non-Detail colored cards ──────────
 const WAVE_POOL = [
   "wave-gold",
   "wave-green",
@@ -45,11 +76,10 @@ const WAVE_POOL = [
   "wave-greengold",
 ] as const;
 
-export const RANDOM_TEXTURES = {
-  welcome:  tex(pick(WAVE_POOL)), // anon Today hero, sample Brief
-  pursue:   tex(pick(WAVE_POOL)), // authed DailyHero, Detail recast
-  baseline: tex(pick(WAVE_POOL)), // Pipeline featured, Detail baseline
-  buyers:   tex(pick(WAVE_POOL)), // Today Explore, Detail buyers
-  watch:    tex("watch"),         // semantic, fixed
-  pass:     tex("pass"),          // semantic, fixed
+export const WAVE_TEXTURES = {
+  welcome:  tex(pick(WAVE_POOL)), // Today anon hero
+  pursue:   tex(pick(WAVE_POOL)), // Today authed DailyHero
+  baseline: tex(pick(WAVE_POOL)), // Pipeline featured hero
+  buyers:   tex(pick(WAVE_POOL)), // Today Explore card
+  brief:    tex(pick(WAVE_POOL)), // Brief screen editorial header
 } as const;

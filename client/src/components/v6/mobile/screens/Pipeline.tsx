@@ -10,7 +10,7 @@ import { YIcon } from "../YIcon";
 import { IndustryIcon } from "../IndustryIcon";
 import { MobileIcon } from "../icons";
 import type { Verdict } from "../types";
-import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
+import { WAVE_TEXTURES } from "../../../../lib/randomTextures";
 import type { MobileWatchRow, MobileFeatured } from "../../../../hooks/useMobileDeals";
 import { dealsByStage, type DealStage, type SampleDeal } from "../../../../lib/sampleDeals";
 import { useWatchlist } from "../../../../hooks/useWatchlist";
@@ -337,7 +337,7 @@ const P: Record<string, CSSProperties> = {
        the blue. Back to lighter normal-blend stops; verdict-tinted
        glow below carries the integration with the white page. */
     backgroundImage:
-      `linear-gradient(160deg, rgba(60,108,168,0.22) 0%, rgba(25,68,118,0.45) 100%), url('${RANDOM_TEXTURES.baseline}')`,
+      `linear-gradient(160deg, rgba(60,108,168,0.22) 0%, rgba(25,68,118,0.45) 100%), url('${WAVE_TEXTURES.baseline}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     backgroundRepeat: "no-repeat, no-repeat",

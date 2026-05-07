@@ -15,7 +15,7 @@ import { YIcon } from "../YIcon";
 import { IndustryIcon } from "../IndustryIcon";
 import { VerdictPill } from "../VerdictPill";
 import { PickRow } from "../PickRow";
-import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
+import { RANDOM_TEXTURES, WAVE_TEXTURES } from "../../../../lib/randomTextures";
 import { MobileIcon } from "../icons";
 import type { Verdict, YIconKind } from "../types";
 import type { MobilePipelineRow, MobilePick, RawDeal } from "../../../../hooks/useMobileDeals";
@@ -303,10 +303,12 @@ type HeroKind = Verdict | "welcome";
 // pick from the per-pool watercolor set. welcome stays in the gold pool
 // (preserves the warm home identity); watch/pass stay fixed (semantic).
 const HERO_TEXTURE: Record<HeroKind, string> = {
-  pursue:  RANDOM_TEXTURES.pursue,
+  // Today's heroes use the NEW wave set per user direction (2026-05-07).
+  // watch + pass stay on the verdict-fixed textures from RANDOM_TEXTURES.
+  pursue:  WAVE_TEXTURES.pursue,
   watch:   RANDOM_TEXTURES.watch,
   pass:    RANDOM_TEXTURES.pass,
-  welcome: RANDOM_TEXTURES.welcome,
+  welcome: WAVE_TEXTURES.welcome,
 };
 /* Overlay hues retuned 2026-05-05 (eve) — the previous sienna-brown
    stops were muddying the warm watercolor textures into "brown card."
@@ -676,7 +678,7 @@ const E: Record<string, CSSProperties> = {
        stops with normal compositing; the verdict-tinted glow below
        carries the depth without darkening the texture's true color. */
     backgroundImage:
-      `linear-gradient(165deg, rgba(95,115,200,0.20) 0%, rgba(50,72,160,0.42) 100%), url('${RANDOM_TEXTURES.buyers}')`,
+      `linear-gradient(165deg, rgba(95,115,200,0.20) 0%, rgba(50,72,160,0.42) 100%), url('${WAVE_TEXTURES.buyers}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     backgroundRepeat: "no-repeat, no-repeat",
