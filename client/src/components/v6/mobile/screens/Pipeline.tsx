@@ -337,7 +337,7 @@ const P: Record<string, CSSProperties> = {
        the blue. Back to lighter normal-blend stops; verdict-tinted
        glow below carries the integration with the white page. */
     backgroundImage:
-      `linear-gradient(160deg, rgba(60,108,168,0.42) 0%, rgba(25,68,118,0.72) 100%), url('${RANDOM_TEXTURES.baseline}')`,
+      `linear-gradient(160deg, rgba(60,108,168,0.22) 0%, rgba(25,68,118,0.45) 100%), url('${RANDOM_TEXTURES.baseline}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     backgroundRepeat: "no-repeat, no-repeat",

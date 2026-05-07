@@ -251,7 +251,7 @@ function V6MobileShell({ user, chat, onSignOut }: ShellProps) {
 
   return (
     <TitleCollapseProvider>
-    <div ref={rootRef} className="mobile-root" data-auth={isAnon ? "anon" : "authed"} style={rootStyle}>
+    <div ref={rootRef} className="mobile-root" style={rootStyle}>
       {view.kind === "tab" && activeTab === "today" && (
         <TodayScreen
           isAnon={isAnon}

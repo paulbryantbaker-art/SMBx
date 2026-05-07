@@ -394,7 +394,7 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
   }, [searchOpen]);
 
   return (
-    <div className="v6-root" data-auth={isAnon ? "anon" : "authed"} style={A.shell}>
+    <div className="v6-root" style={A.shell}>
       {isAnon && !bannerDismissed && (
         <SampleBanner onDismiss={dismissBanner} onStartWorkspace={startWorkspace} />
       )}

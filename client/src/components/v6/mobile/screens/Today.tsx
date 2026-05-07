@@ -676,7 +676,7 @@ const E: Record<string, CSSProperties> = {
        stops with normal compositing; the verdict-tinted glow below
        carries the depth without darkening the texture's true color. */
     backgroundImage:
-      `linear-gradient(165deg, rgba(95,115,200,0.38) 0%, rgba(50,72,160,0.70) 100%), url('${RANDOM_TEXTURES.buyers}')`,
+      `linear-gradient(165deg, rgba(95,115,200,0.20) 0%, rgba(50,72,160,0.42) 100%), url('${RANDOM_TEXTURES.buyers}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     backgroundRepeat: "no-repeat, no-repeat",

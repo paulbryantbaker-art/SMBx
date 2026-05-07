@@ -22,27 +22,24 @@ const tex = (name: string) => `/textures/texture-${name}.png?${VERSION}`;
 const pick = <T,>(arr: readonly T[]): T =>
   arr[Math.floor(Math.random() * arr.length)];
 
-// Warm + gold — for Today welcome hero + Brief screen header
-const GOLD_POOL = ["sunrise", "gold-marble", "orig-sunrise"] as const;
-
-// Sage / forest — for pursue action card + Detail pursue
-const GREEN_POOL = ["pursue", "sage-botanical", "orig-pursue"] as const;
-
-// Powder blue / mint / aqua — for Pipeline + Detail baseline
-const COOL_BLUE_POOL = [
-  "baseline", "mint-waves", "aqua-cloud", "orig-baseline",
-] as const;
-
-// Lavender / mist / cool — for Today Explore + Detail buyers
-const COOL_PURPLE_POOL = [
-  "buyers", "sage-botanical", "mint-waves", "orig-buyers",
-] as const;
+// Pinned 2026-05-07 per user direction: replace the prior randomized
+// pools with the new texture set. Anon (welcome) → gold-marble across
+// the home and any welcome hero. Authed (pursue / DailyHero) →
+// sage-botanical green. baseline + buyers also point at the new set
+// (mint-waves / aqua-cloud) so the whole hero system is on the new
+// textures, not the prior watercolor washes. watch + pass stay fixed
+// (semantic colors with no visual substitutes).
+//
+// `pick()` is intentionally kept exported in case CD wants to introduce
+// additional rotation later, but no surface uses it right now.
+const _UNUSED_PICK = pick;
+void _UNUSED_PICK;
 
 export const RANDOM_TEXTURES = {
-  welcome:  tex(pick(GOLD_POOL)),
-  pursue:   tex(pick(GREEN_POOL)),
-  baseline: tex(pick(COOL_BLUE_POOL)),
-  buyers:   tex(pick(COOL_PURPLE_POOL)),
-  watch:    tex("watch"), // semantic, fixed
-  pass:     tex("pass"),  // semantic, fixed
+  welcome:  tex("gold-marble"),    // home / anon hero — gold
+  pursue:   tex("sage-botanical"), // authed DailyHero / pursue cards — green
+  baseline: tex("mint-waves"),     // Pipeline / baseline hero
+  buyers:   tex("aqua-cloud"),     // Today Explore / buyers hero
+  watch:    tex("watch"),          // semantic, fixed
+  pass:     tex("pass"),           // semantic, fixed
 } as const;

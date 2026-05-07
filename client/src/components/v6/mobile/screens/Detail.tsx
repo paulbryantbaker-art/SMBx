@@ -473,11 +473,11 @@ type ArtifactKind = "recast" | "baseline" | "buyers" | "ioi";
    keeps the verdict colors vivid. */
 const ARTIFACT_BG: Record<ArtifactKind, string> = {
   recast:
-    `linear-gradient(160deg, rgba(48,108,80,0.44) 0%, rgba(18,68,46,0.74) 100%), url('${RANDOM_TEXTURES.pursue}')`,
+    `linear-gradient(160deg, rgba(48,108,80,0.22) 0%, rgba(18,68,46,0.46) 100%), url('${RANDOM_TEXTURES.pursue}')`,
   baseline:
-    `linear-gradient(160deg, rgba(60,108,168,0.44) 0%, rgba(25,68,118,0.74) 100%), url('${RANDOM_TEXTURES.baseline}')`,
+    `linear-gradient(160deg, rgba(60,108,168,0.22) 0%, rgba(25,68,118,0.46) 100%), url('${RANDOM_TEXTURES.baseline}')`,
   buyers:
-    `linear-gradient(160deg, rgba(95,68,150,0.44) 0%, rgba(60,38,108,0.74) 100%), url('${RANDOM_TEXTURES.buyers}')`,
+    `linear-gradient(160deg, rgba(95,68,150,0.22) 0%, rgba(60,38,108,0.46) 100%), url('${RANDOM_TEXTURES.buyers}')`,
   ioi:
     "linear-gradient(160deg, #3A4150, #1A2233)",
 };
