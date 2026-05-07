@@ -30,16 +30,26 @@ const pick = <T,>(arr: readonly T[]): T =>
 // textures, not the prior watercolor washes. watch + pass stay fixed
 // (semantic colors with no visual substitutes).
 //
-// `pick()` is intentionally kept exported in case CD wants to introduce
-// additional rotation later, but no surface uses it right now.
-const _UNUSED_PICK = pick;
-void _UNUSED_PICK;
+// 2026-05-07 update: full randomization across the new "textures 4" wave
+// set the user dropped (8 textures). Each colored hero card picks one at
+// page load. White list cards are unaffected (they don't reference
+// RANDOM_TEXTURES). watch + pass stay fixed (semantic).
+const WAVE_POOL = [
+  "wave-gold",
+  "wave-green",
+  "wave-teal",
+  "wave-blue",
+  "wave-purple",
+  "wave-coral",
+  "wave-pink",
+  "wave-greengold",
+] as const;
 
 export const RANDOM_TEXTURES = {
-  welcome:  tex("gold-marble"),    // home / anon hero — gold
-  pursue:   tex("sage-botanical"), // authed DailyHero / pursue cards — green
-  baseline: tex("mint-waves"),     // Pipeline / baseline hero
-  buyers:   tex("aqua-cloud"),     // Today Explore / buyers hero
-  watch:    tex("watch"),          // semantic, fixed
-  pass:     tex("pass"),           // semantic, fixed
+  welcome:  tex(pick(WAVE_POOL)), // anon Today hero, sample Brief
+  pursue:   tex(pick(WAVE_POOL)), // authed DailyHero, Detail recast
+  baseline: tex(pick(WAVE_POOL)), // Pipeline featured, Detail baseline
+  buyers:   tex(pick(WAVE_POOL)), // Today Explore, Detail buyers
+  watch:    tex("watch"),         // semantic, fixed
+  pass:     tex("pass"),          // semantic, fixed
 } as const;
