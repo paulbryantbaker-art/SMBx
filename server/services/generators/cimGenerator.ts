@@ -40,6 +40,11 @@ export interface CIMInput {
   asking_price?: number;     // cents
   financials?: Record<string, any>;
   seven_factor_scores?: Record<string, number>;
+  // Merger Lite (Phase B.1) — when this CIM describes a carve-out (a unit
+  // being sold out of a larger parent), the generator adds TSA + separation-
+  // cost sections and frames financials as allocated rather than standalone.
+  // Detected from financials.is_carve_out so callers don't have to wire a
+  // new prop everywhere.
 }
 
 export interface CIMSection {
@@ -58,7 +63,11 @@ export interface CIMDocument {
 }
 
 export async function generateCIM(input: CIMInput): Promise<CIMDocument> {
-  const sectionDefs = getCIMSections(input.league);
+  // Phase B.1 carve-out branch — extra sections when financials.is_carve_out=true.
+  const isCarveOut = input.financials?.is_carve_out === true;
+  const sectionDefs = isCarveOut
+    ? appendCarveOutSections(getCIMSections(input.league))
+    : getCIMSections(input.league);
   const sections: CIMSection[] = [];
 
   // Build context for Claude
@@ -91,6 +100,39 @@ interface SectionDef {
   pages: number;
   prompt: string;
   leagueMin: string; // minimum league for this section
+}
+
+/**
+ * Carve-out sections (Phase B.1). Appended when financials.is_carve_out=true
+ * so the CIM frames the unit being sold realistically: shared resources have
+ * to be unwound, allocated overhead is what the financials reflect, and the
+ * buyer carries separation costs (some absorbed via a Transition Services
+ * Agreement). Phase 5 carve-out work fleshes the templates further (§368
+ * narrative, HSR sizing, governance workflow); this batch keeps the CIM
+ * honest about what the buyer is really getting.
+ */
+function appendCarveOutSections(base: SectionDef[]): SectionDef[] {
+  return [
+    ...base,
+    {
+      title: 'Transition Services Agreement (TSA)',
+      pages: 2,
+      prompt: 'Outline the proposed TSA — what services the parent will provide post-close (IT, finance, HR, sales support), the term (typically 6-18 months), and the cost structure. Reference financials.shared_resources if specified, otherwise call out the typical scope for a carve-out of this size and industry.',
+      leagueMin: 'L1',
+    },
+    {
+      title: 'Separation Costs & Standalone Readiness',
+      pages: 2,
+      prompt: 'Quantify (range) the one-time separation costs the buyer should expect — IT systems standup, replicated overhead, contract assignment, possible workforce reorganization. Be specific: range, not a single number. Note what\'s already standalone vs what travels with the parent.',
+      leagueMin: 'L1',
+    },
+    {
+      title: 'Allocated Overhead vs Standalone Costs',
+      pages: 2,
+      prompt: 'Walk through the allocated overhead embedded in the carve-out\'s financials and contrast with what a standalone version would actually cost the buyer to run. Don\'t hide that allocated numbers usually understate the real run-rate; surface the gap honestly so the buyer trusts the analysis.',
+      leagueMin: 'L1',
+    },
+  ];
 }
 
 function getCIMSections(league: string): SectionDef[] {
