@@ -324,6 +324,76 @@ export const TOOL_DEFINITIONS: Tool[] = [
       required: ['reason'],
     },
   },
+
+  // ─── Lifecycle record tools (Phase A.1 — restored from autonomous run) ─
+  // Chat-first flag-flippers that move deals through the gate-readiness
+  // machine. None has a UI button; the user just tells Yulia.
+  {
+    name: 'promote_sourcing_target_to_deal',
+    description: 'Convert a sourcing candidate into a real deal record. Copies the enriched fields (name, location, revenue/EBITDA estimates) onto the existing deal and flips financials.target_criteria_set so B1 readiness passes. Use when the user picks a sourced target and wants to start working it as the active deal.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        targetId: { type: 'number', description: 'Sourcing candidate ID' },
+        dealId:   { type: 'number', description: 'Existing deal record to update' },
+      },
+      required: ['targetId', 'dealId'],
+    },
+  },
+  {
+    name: 'record_dd_complete',
+    description: 'Mark due diligence as complete on a deal. Flips financials.dd_findings_documented so B3 → B4 readiness passes. Use when the user says "DD is done", "we\'re past diligence", or otherwise signals DD is finished. Optionally records a one-line summary of findings.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId:          { type: 'number', description: 'The deal ID' },
+        findingsSummary: { type: 'string', description: 'One-line summary of what DD turned up. Optional.' },
+      },
+      required: ['dealId'],
+    },
+  },
+  {
+    name: 'record_loi_executed',
+    description: 'Record that the LOI is countersigned by both sides. Flips financials.deal_structure_agreed for B4 → B5 readiness. Use when the user says "LOI is signed", "Bob countersigned", etc.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId:            { type: 'number', description: 'The deal ID' },
+        loiDeliverableId:  { type: 'number', description: 'The deliverable record for the LOI, if known' },
+        executionDate:     { type: 'string', description: 'ISO date the LOI was executed' },
+        signers:           { type: 'array', items: { type: 'string' }, description: 'Names/emails of signers' },
+      },
+      required: ['dealId', 'executionDate'],
+    },
+  },
+  {
+    name: 'record_financing_secured',
+    description: 'Record that financing is approved by the lender. Flips financials.financing_secured for B4 → B5 readiness. Use when the user says "financing is approved", "lender confirmed", "we got the term sheet".',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId:               { type: 'number', description: 'The deal ID' },
+        lender:               { type: 'string', description: 'Lender name' },
+        amountCents:          { type: 'number', description: 'Approved financing amount in cents' },
+        commitmentLetterDate: { type: 'string', description: 'ISO date the commitment letter was issued' },
+      },
+      required: ['dealId', 'lender', 'amountCents', 'commitmentLetterDate'],
+    },
+  },
+  {
+    name: 'close_deal',
+    description: 'Mark a deal closed at the final price on a given date. Sets status="closed", inserts into closed_deals (if the table exists), optionally spawns a PMI deal for BUY journeys. Returns canvas_action that opens a celebratory close-out tab. Use when the user says "we closed", "the deal closed yesterday", or signals the transaction is complete.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId:          { type: 'number', description: 'The deal ID to close' },
+        closingDate:     { type: 'string', description: 'ISO date the deal closed' },
+        finalPriceCents: { type: 'number', description: 'Final transaction price, in cents' },
+        spawnPmi:        { type: 'boolean', description: 'For BUY journeys, also create a PMI deal so the user can plan integration' },
+      },
+      required: ['dealId', 'closingDate', 'finalPriceCents'],
+    },
+  },
 ];
 
 // ─── Tool Execution ────────────────────────────────────────
@@ -388,6 +458,17 @@ export async function executeTool(
         return await shareDocumentTool(input, userId);
       case 'start_new_chapter':
         return await startNewChapter(input, userId, conversationId);
+      // Lifecycle record tools (Phase A.1 — see definitions above)
+      case 'promote_sourcing_target_to_deal':
+        return await promoteSourcingTargetToDeal(input, userId);
+      case 'record_dd_complete':
+        return await recordDdComplete(input, userId);
+      case 'record_loi_executed':
+        return await recordLoiExecuted(input, userId);
+      case 'record_financing_secured':
+        return await recordFinancingSecured(input, userId);
+      case 'close_deal':
+        return await closeDeal(input, userId);
       default:
         return JSON.stringify({ error: `Unknown tool: ${toolName}` });
     }
@@ -1682,5 +1763,202 @@ async function shareDocumentTool(input: Record<string, any>, userId: number): Pr
     recipientName: name,
     docTitle,
     message: `Shared "${docTitle}" with ${name} at ${recipientEmail}. They'll receive an email with a link to view it on smbx.ai.`,
+  });
+}
+
+/**
+ * Lifecycle record tools (Phase A.1, restored from autonomous-run B2.3-2.6)
+ * — chat-first flag-flippers that move deals through the gate-readiness
+ * machine. Each is a small server-side tool Yulia calls when the user
+ * signals an event happened in the real world. None has a UI button;
+ * the user just tells Yulia. All handlers follow the same shape:
+ *   1. Verify deal ownership
+ *   2. Merge into financials JSONB (the canonical gate-readiness store)
+ *   3. UPDATE deals
+ *   4. Return canvas_action: 'open_tab' so the deal tab refreshes
+ */
+
+async function promoteSourcingTargetToDeal(input: Record<string, any>, userId: number): Promise<string> {
+  const { targetId, dealId } = input;
+
+  const [deal] = await sql`SELECT id, financials, business_name FROM deals WHERE id = ${dealId} AND user_id = ${userId} LIMIT 1`;
+  if (!deal) return JSON.stringify({ error: 'Deal not found' });
+
+  let candidate: any = null;
+  try {
+    const rows = await sql`SELECT * FROM sourcing_candidates WHERE id = ${targetId} LIMIT 1`;
+    candidate = rows[0];
+  } catch {
+    return JSON.stringify({ error: 'Sourcing candidate table not found in this deployment. Run sourcing migrations first.' });
+  }
+  if (!candidate) return JSON.stringify({ error: 'Sourcing candidate not found' });
+
+  const existingFin = typeof deal.financials === 'string' ? JSON.parse(deal.financials) : (deal.financials || {});
+  const merged = {
+    ...existingFin,
+    target_criteria_set: true,
+    promoted_target_id: targetId,
+    promoted_at: new Date().toISOString(),
+  };
+
+  const businessName = candidate.business_name || candidate.name || candidate.title || deal.business_name;
+  const industry     = candidate.industry || candidate.naics_label || null;
+  const location     = candidate.location || candidate.city || null;
+
+  await sql`
+    UPDATE deals
+    SET business_name = COALESCE(${businessName}, business_name),
+        industry      = COALESCE(${industry}, industry),
+        location      = COALESCE(${location}, location),
+        financials    = ${JSON.stringify(merged)}::jsonb,
+        updated_at    = NOW()
+    WHERE id = ${dealId}
+  `;
+
+  return JSON.stringify({
+    success: true,
+    dealId,
+    businessName,
+    canvas_action: 'open_tab',
+    tab: { id: String(dealId), kind: 'deal', title: businessName || `Deal #${dealId}` },
+  });
+}
+
+async function recordDdComplete(input: Record<string, any>, userId: number): Promise<string> {
+  const { dealId, findingsSummary } = input;
+
+  const [deal] = await sql`SELECT id, financials, business_name FROM deals WHERE id = ${dealId} AND user_id = ${userId} LIMIT 1`;
+  if (!deal) return JSON.stringify({ error: 'Deal not found' });
+
+  const existing = typeof deal.financials === 'string' ? JSON.parse(deal.financials) : (deal.financials || {});
+  const merged = {
+    ...existing,
+    dd_findings_documented: true,
+    dd_completed_at: new Date().toISOString(),
+    ...(findingsSummary ? { dd_findings_summary: findingsSummary } : {}),
+  };
+
+  await sql`UPDATE deals SET financials = ${JSON.stringify(merged)}::jsonb, updated_at = NOW() WHERE id = ${dealId}`;
+
+  return JSON.stringify({
+    success: true,
+    dealId,
+    canvas_action: 'open_tab',
+    tab: { id: String(dealId), kind: 'deal', title: deal.business_name || `Deal #${dealId}` },
+  });
+}
+
+async function recordLoiExecuted(input: Record<string, any>, userId: number): Promise<string> {
+  const { dealId, loiDeliverableId, executionDate, signers } = input;
+
+  const [deal] = await sql`SELECT id, financials, business_name FROM deals WHERE id = ${dealId} AND user_id = ${userId} LIMIT 1`;
+  if (!deal) return JSON.stringify({ error: 'Deal not found' });
+
+  const existing = typeof deal.financials === 'string' ? JSON.parse(deal.financials) : (deal.financials || {});
+  const merged = {
+    ...existing,
+    deal_structure_agreed: true,
+    loi_executed_at: executionDate,
+    loi_signers: signers ?? [],
+    ...(loiDeliverableId ? { loi_deliverable_id: loiDeliverableId } : {}),
+  };
+
+  await sql`UPDATE deals SET financials = ${JSON.stringify(merged)}::jsonb, updated_at = NOW() WHERE id = ${dealId}`;
+
+  return JSON.stringify({
+    success: true,
+    dealId,
+    canvas_action: 'open_tab',
+    tab: { id: String(dealId), kind: 'deal', title: deal.business_name || `Deal #${dealId}` },
+  });
+}
+
+async function recordFinancingSecured(input: Record<string, any>, userId: number): Promise<string> {
+  const { dealId, lender, amountCents, commitmentLetterDate } = input;
+
+  const [deal] = await sql`SELECT id, financials, business_name FROM deals WHERE id = ${dealId} AND user_id = ${userId} LIMIT 1`;
+  if (!deal) return JSON.stringify({ error: 'Deal not found' });
+
+  const existing = typeof deal.financials === 'string' ? JSON.parse(deal.financials) : (deal.financials || {});
+  const merged = {
+    ...existing,
+    financing_secured: true,
+    financing: {
+      lender,
+      amount_cents: amountCents,
+      commitment_letter_date: commitmentLetterDate,
+    },
+  };
+
+  await sql`UPDATE deals SET financials = ${JSON.stringify(merged)}::jsonb, updated_at = NOW() WHERE id = ${dealId}`;
+
+  return JSON.stringify({
+    success: true,
+    dealId,
+    canvas_action: 'open_tab',
+    tab: { id: String(dealId), kind: 'deal', title: deal.business_name || `Deal #${dealId}` },
+  });
+}
+
+async function closeDeal(input: Record<string, any>, userId: number): Promise<string> {
+  const { dealId, closingDate, finalPriceCents, spawnPmi } = input;
+
+  const [deal] = await sql`SELECT id, financials, business_name, journey_type FROM deals WHERE id = ${dealId} AND user_id = ${userId} LIMIT 1`;
+  if (!deal) return JSON.stringify({ error: 'Deal not found' });
+
+  const existing = typeof deal.financials === 'string' ? JSON.parse(deal.financials) : (deal.financials || {});
+  const merged = {
+    ...existing,
+    closing_date: closingDate,
+    final_price_cents: finalPriceCents,
+    closed_at: new Date().toISOString(),
+  };
+
+  await sql`
+    UPDATE deals
+    SET status = 'closed',
+        asking_price = COALESCE(asking_price, ${finalPriceCents}),
+        financials   = ${JSON.stringify(merged)}::jsonb,
+        updated_at   = NOW()
+    WHERE id = ${dealId}
+  `;
+
+  // Best-effort: insert into closed_deals archive if the table exists
+  // (added by 059_merger_lite.sql which already ran in production 2026-05-07).
+  try {
+    await sql`
+      INSERT INTO closed_deals (deal_id, user_id, closing_date, final_price_cents, journey_type, business_name)
+      VALUES (${dealId}, ${userId}, ${closingDate}, ${finalPriceCents}, ${deal.journey_type}, ${deal.business_name || null})
+      ON CONFLICT DO NOTHING
+    `;
+  } catch { /* table missing in this deployment; non-fatal */ }
+
+  let pmiDealId: number | null = null;
+  if (spawnPmi && deal.journey_type === 'buy') {
+    try {
+      const [pmi] = await sql`
+        INSERT INTO deals (user_id, journey_type, current_gate, status, business_name, industry, location)
+        VALUES (${userId}, 'pmi', 'PMI0', 'active',
+                ${deal.business_name ? `${deal.business_name} — PMI` : null},
+                ${existing.industry || null},
+                ${existing.location || null})
+        RETURNING id
+      `;
+      pmiDealId = pmi.id;
+    } catch { /* unable to spawn PMI; non-fatal */ }
+  }
+
+  return JSON.stringify({
+    success: true,
+    dealId,
+    closingDate,
+    finalPriceCents,
+    pmiDealId,
+    canvas_action: 'open_tab',
+    tab: {
+      id: String(dealId),
+      kind: 'deal',
+      title: deal.business_name ? `${deal.business_name} · CLOSED` : `Deal #${dealId} · CLOSED`,
+    },
   });
 }
