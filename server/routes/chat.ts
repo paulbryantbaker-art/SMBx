@@ -39,6 +39,7 @@ import { buildAnonymousPrompt } from '../services/promptBuilder.js';
 import { getFirstGate } from '../../shared/gateRegistry.js';
 import { upsertCompanyProfile, upsertBuyerThesis, getBuyerDemandSignals } from '../services/knowledgeGraphService.js';
 import { checkAnonymousGateAdvancement, advanceAnonymousGate } from '../services/gateService.js';
+import { enqueueGateCompletionDeliverable } from '../services/gateCompletionDeliverables.js';
 import { generateConversationTitle } from '../services/conversationNamer.js';
 import { generateValueReadinessReport } from '../services/generators/valueReadinessReport.js';
 import { generateThesisDocument } from '../services/generators/thesisDocument.js';
@@ -1198,8 +1199,31 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
         try {
           const gateResult = await checkAndAutoAdvance(deal.id);
           if (gateResult) {
+            // Phase C.2 (UX-05): enqueue the completion deliverable for the
+            // just-completed gate so the user gets an artifact for their
+            // progress. The helper inserts a pending row immediately and
+            // generates off-thread, so we have a deliverableId to send in
+            // the SSE without blocking. Re-fetch the deal so the generator
+            // sees the latest field updates applied above.
+            const freshDeal = await getDeal(deal.id).catch(() => deal);
+            const completion = await enqueueGateCompletionDeliverable(freshDeal || deal, gateResult.fromGate)
+              .catch((e: any) => {
+                console.error('Gate completion deliverable enqueue error:', e.message);
+                return null;
+              });
+
             if (!clientDisconnected && !res.writableEnded) {
-              res.write(`data: ${JSON.stringify({ type: 'gate_advance', ...gateResult })}\n\n`);
+              const payload = {
+                type: 'gate_advance',
+                ...gateResult,
+                ...(completion ? {
+                  completionDeliverableId: completion.deliverableId,
+                  completionDeliverableType: completion.deliverableType,
+                  completionDeliverableTitle: completion.title,
+                  completionDeliverableStatus: completion.status,
+                } : {}),
+              };
+              res.write(`data: ${JSON.stringify(payload)}\n\n`);
             }
             createNotification({ userId, dealId: deal.id, type: 'gate_advance', title: `Gate complete: ${gateResult.gateName || gateResult.toGate}`, body: `Your deal has advanced to ${gateResult.toGate}`, actionUrl: '/chat' }).catch(() => {});
           }
