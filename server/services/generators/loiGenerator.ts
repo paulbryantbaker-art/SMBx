@@ -11,7 +11,15 @@ export interface LOIInput {
   seller_name: string;
   business_name: string;
   purchase_price: number;        // cents
-  deal_structure: 'asset' | 'stock' | 'hybrid';
+  deal_structure:
+    | 'asset' | 'stock' | 'hybrid'
+    // Merger Lite (Phase B.2) — extended structures. Full §368 reorg
+    // analysis lands in Phase 5; this enum lets the LOI pick the right
+    // section template + label without that depth.
+    | 'forward_triangular_merger'
+    | 'reverse_triangular_merger'
+    | 'share_exchange'
+    | 'merger_of_equals';
   earnout_pct?: number;          // percentage of purchase price
   earnout_period_months?: number;
   earnout_conditions?: string;
@@ -53,6 +61,22 @@ export interface LOIDocument {
   generated_at: string;
 }
 
+/**
+ * Pretty label for the deal_structure enum (Phase B.2 added merger
+ * structures). Centralized so future extensions can't drop labels.
+ */
+function structureLabel(s: LOIInput['deal_structure']): string {
+  switch (s) {
+    case 'asset':                     return 'Asset Purchase';
+    case 'stock':                     return 'Stock/Equity Purchase';
+    case 'hybrid':                    return 'Hybrid Structure';
+    case 'forward_triangular_merger': return 'Forward Triangular Merger (§368(a)(2)(D))';
+    case 'reverse_triangular_merger': return 'Reverse Triangular Merger (§368(a)(2)(E))';
+    case 'share_exchange':            return 'Share Exchange / Stock-for-Stock';
+    case 'merger_of_equals':          return 'Merger of Equals';
+  }
+}
+
 export async function generateLOI(input: LOIInput): Promise<LOIDocument> {
   const priceDollars = input.purchase_price / 100;
   const ddDays = input.due_diligence_days || 45;
@@ -73,7 +97,7 @@ export async function generateLOI(input: LOIInput): Promise<LOIDocument> {
 
   const keyTerms: LOIDocument['key_terms'] = {
     purchase_price: input.purchase_price,
-    deal_structure: input.deal_structure === 'asset' ? 'Asset Purchase' : input.deal_structure === 'stock' ? 'Stock/Equity Purchase' : 'Hybrid Structure',
+    deal_structure: structureLabel(input.deal_structure),
     earnout: earnoutStr,
     seller_note: sellerNoteStr,
     transition: `${transitionMonths} months`,
