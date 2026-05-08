@@ -394,6 +394,25 @@ export const TOOL_DEFINITIONS: Tool[] = [
       required: ['dealId', 'closingDate', 'finalPriceCents'],
     },
   },
+
+  // ─── Sourcing pipeline (Phase A.2 — restored from autonomous run) ─────
+  // Server-side tool that kicks the 5-stage sourcing engine for a thesis.
+  // Stage 1 (intelligence brief) runs synchronously ~30-60s; stages 2-4
+  // run as background jobs. Returns canvas_action: 'open_sourcing' for
+  // when the SourcingPanel UI lands; the action is a harmless no-op on
+  // the current client (no listener for that action at fd1c6b4 + Phase A).
+  {
+    name: 'start_sourcing_run',
+    description: 'Kick off the 5-stage sourcing pipeline for the user\'s active acquisition thesis. Stage 1 (intelligence brief) runs synchronously ~30-60s; stages 2-4 (target expansion + scoring) run as background jobs. Use when the user says "find me targets", "start sourcing", "go look", or otherwise asks to source a deal at B1. If thesisId is omitted, uses the user\'s most recent thesis. Returns canvas_action that opens the live sourcing panel.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        thesisId: { type: 'number', description: 'Buyer thesis to source against. Omit to use the most recent one.' },
+        title: { type: 'string', description: 'Optional tab title; defaults to the thesis name.' },
+      },
+      required: [],
+    },
+  },
 ];
 
 // ─── Tool Execution ────────────────────────────────────────
@@ -469,6 +488,9 @@ export async function executeTool(
         return await recordFinancingSecured(input, userId);
       case 'close_deal':
         return await closeDeal(input, userId);
+      // Sourcing pipeline (Phase A.2)
+      case 'start_sourcing_run':
+        return await startSourcingRun(input, userId);
       default:
         return JSON.stringify({ error: `Unknown tool: ${toolName}` });
     }
@@ -1961,4 +1983,55 @@ async function closeDeal(input: Record<string, any>, userId: number): Promise<st
       title: deal.business_name ? `${deal.business_name} · CLOSED` : `Deal #${dealId} · CLOSED`,
     },
   });
+}
+
+/**
+ * Sourcing pipeline tool (Phase A.2, restored from autonomous-run B2.2).
+ * Wraps the existing 5-stage sourcingPipelineService — Stage 1 (intelligence
+ * brief) runs synchronously ~30-60s, stages 2-4 fire as background jobs.
+ * Returns canvas_action: 'open_sourcing' so a future SourcingPanel can mount;
+ * harmless no-op on the current client (no listener for that action at
+ * fd1c6b4 + Phase A — the panel is deferred until CD specs the design).
+ */
+async function startSourcingRun(input: Record<string, any>, userId: number): Promise<string> {
+  const { initializePipeline } = await import('./sourcingPipelineService.js');
+
+  let thesisId: number | undefined = input.thesisId;
+  if (!thesisId) {
+    // Fall back to the user's most recent thesis
+    const [latest] = await sql`
+      SELECT id, name FROM buyer_theses
+      WHERE user_id = ${userId}
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+    if (!latest) {
+      return JSON.stringify({
+        error: 'No buyer thesis found. Walk the user through B0 first so we have a thesis to source against.',
+      });
+    }
+    thesisId = latest.id;
+  } else {
+    // Validate ownership
+    const [t] = await sql`SELECT id FROM buyer_theses WHERE id = ${thesisId} AND user_id = ${userId} LIMIT 1`;
+    if (!t) return JSON.stringify({ error: 'Thesis not found' });
+  }
+
+  const finalThesisId = thesisId as number;
+  try {
+    const result = await initializePipeline(finalThesisId, userId);
+    const [thesis] = await sql`SELECT name FROM buyer_theses WHERE id = ${finalThesisId} LIMIT 1`;
+    const title = input.title || thesis?.name || 'Sourcing run';
+    return JSON.stringify({
+      success: true,
+      portfolioId: result.portfolioId,
+      briefId: result.briefId,
+      status: result.status,
+      canvas_action: 'open_sourcing',
+      runId: result.portfolioId,
+      tabTitle: title,
+    });
+  } catch (e: any) {
+    return JSON.stringify({ error: `Sourcing run failed to start: ${e.message}` });
+  }
 }
