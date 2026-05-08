@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { Route, Switch, Redirect, useLocation } from 'wouter';
-import { useAuth, authHeaders } from './hooks/useAuth';
+import { DEV_AUTH_BYPASS, useAuth, authHeaders } from './hooks/useAuth';
 import { ChatProvider } from './context/ChatContext';
 import { trackEvent } from './lib/analytics';
 
@@ -208,7 +208,7 @@ export default function App() {
 
         {/* Auth */}
         <Route path="/login">
-          {user ? <Redirect to="/" /> : (
+          {DEV_AUTH_BYPASS || user ? <Redirect to="/" /> : (
             <Login
               onLogin={handleLoginSuccess}
               onGoogleLogin={handleGoogleLogin}
@@ -219,7 +219,7 @@ export default function App() {
           )}
         </Route>
         <Route path="/signup">
-          {user ? <Redirect to="/" /> : (
+          {DEV_AUTH_BYPASS || user ? <Redirect to="/" /> : (
             <Signup
               onRegister={handleRegisterSuccess}
               onGoogleLogin={handleGoogleLogin}
@@ -231,7 +231,7 @@ export default function App() {
           <VerifyEmail onDone={() => navigate(user ? '/' : '/login')} />
         </Route>
         <Route path="/forgot-password">
-          {user ? <Redirect to="/" /> : (
+          {DEV_AUTH_BYPASS || user ? <Redirect to="/" /> : (
             <Suspense fallback={<PageLoader />}>
               <ForgotPassword onNavigateLogin={() => navigate('/login')} />
             </Suspense>
@@ -239,9 +239,13 @@ export default function App() {
         </Route>
         <Route path="/reset-password/:token">
           {(params) => (
-            <Suspense fallback={<PageLoader />}>
-              <ResetPassword token={params.token} onNavigateLogin={() => navigate('/login')} />
-            </Suspense>
+            DEV_AUTH_BYPASS
+              ? <Redirect to="/" />
+              : (
+                <Suspense fallback={<PageLoader />}>
+                  <ResetPassword token={params.token} onNavigateLogin={() => navigate('/login')} />
+                </Suspense>
+              )
           )}
         </Route>
 

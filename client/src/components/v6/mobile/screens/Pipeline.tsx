@@ -11,9 +11,10 @@ import { IndustryIcon } from "../IndustryIcon";
 import { MobileIcon } from "../icons";
 import type { Verdict } from "../types";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
-import type { MobileWatchRow, MobileFeatured } from "../../../../hooks/useMobileDeals";
+import type { MobileWatchRow, MobileFeatured, MobilePick } from "../../../../hooks/useMobileDeals";
 import { dealsByStage, type DealStage, type SampleDeal } from "../../../../lib/sampleDeals";
 import { useWatchlist } from "../../../../hooks/useWatchlist";
+import { BriefDigestSection } from "./Brief";
 
 interface PipelineProps {
   isAnon: boolean;
@@ -26,6 +27,8 @@ interface PipelineProps {
   userWatching: MobileWatchRow[] | null;
   /** Authed user's "NEW TODAY" featured hero (null = anon or empty → sample). */
   userFeatured: MobileFeatured | null;
+  /** Picks formerly shown on the Brief tab; now appended to Pipeline. */
+  userPicks: MobilePick[] | null;
 }
 
 interface ChipDef { id: DealStage; label: string; n: number }
@@ -61,7 +64,7 @@ const SAMPLE_FEATURED: FeaturedDef = {
   revLabel: "$5.4M REV",
 };
 
-export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, onAvatarClick, onSearch, userWatching: _userWatching, userFeatured }: PipelineProps) {
+export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, onAvatarClick, onSearch, userWatching: _userWatching, userFeatured, userPicks }: PipelineProps) {
   const FEATURED: FeaturedDef = userFeatured ?? SAMPLE_FEATURED;
   const [activeChip, setActiveChip] = useState<DealStage>("watching");
   const { isWatched, toggle } = useWatchlist();
@@ -221,6 +224,15 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
           ))}
         </div>
       )}
+
+      <div style={P.briefDock}>
+        <div style={{ padding: "0 22px 12px" }}>
+          <div className="mb-section-eyebrow">BRIEF</div>
+          <div className="mb-section-title">Yulia&rsquo;s ranked read</div>
+          <div style={P.subText}>The daily brief now lives with Pipeline, where the deal flow is.</div>
+        </div>
+        <BriefDigestSection isAnon={isAnon} onOpenDeal={onOpenDeal} userPicks={userPicks} />
+      </div>
     </div>
   );
 }
@@ -390,5 +402,8 @@ const P: Record<string, CSSProperties> = {
     whiteSpace: "nowrap" as const,
     overflow: "hidden",
     textOverflow: "ellipsis",
+  },
+  briefDock: {
+    marginTop: 32,
   },
 };

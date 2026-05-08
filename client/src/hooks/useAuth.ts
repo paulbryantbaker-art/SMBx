@@ -1,6 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const TOKEN_KEY = 'smbx_token';
+const DEV_USER_KEY = 'smbx_dev_mock_user';
+const DEV_AUTH_CHANGE_EVENT = 'smbx-dev-auth-change';
+const viteEnv = (import.meta as unknown as {
+  env?: { DEV?: boolean; VITE_DEV_AUTH_BYPASS?: string };
+}).env;
+
+export const DEV_AUTH_BYPASS =
+  viteEnv?.DEV === true && viteEnv.VITE_DEV_AUTH_BYPASS !== 'false';
 
 export interface User {
   id: number;
@@ -13,7 +21,37 @@ export interface User {
   updated_at: string;
 }
 
+const DEV_MOCK_USER: User = {
+  id: -1,
+  email: 'paul.preview@smbx.ai',
+  display_name: 'Paul Baker',
+  google_id: null,
+  league: null,
+  role: 'user',
+  created_at: '2026-05-08T00:00:00.000Z',
+  updated_at: '2026-05-08T00:00:00.000Z',
+};
+
+function readDevUser(): User | null {
+  if (!DEV_AUTH_BYPASS || typeof window === 'undefined') return null;
+  try {
+    return localStorage.getItem(DEV_USER_KEY) === '1' ? DEV_MOCK_USER : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeDevUser(enabled: boolean) {
+  if (!DEV_AUTH_BYPASS || typeof window === 'undefined') return;
+  try {
+    if (enabled) localStorage.setItem(DEV_USER_KEY, '1');
+    else localStorage.removeItem(DEV_USER_KEY);
+    window.dispatchEvent(new CustomEvent(DEV_AUTH_CHANGE_EVENT));
+  } catch { /* noop */ }
+}
+
 function getToken(): string | null {
+  if (DEV_AUTH_BYPASS) return null;
   return localStorage.getItem(TOKEN_KEY);
 }
 
@@ -31,10 +69,15 @@ export function authHeaders(): Record<string, string> {
 }
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(() => readDevUser());
+  const [loading, setLoading] = useState(!DEV_AUTH_BYPASS);
 
   const fetchCurrentUser = useCallback(async () => {
+    if (DEV_AUTH_BYPASS) {
+      setUser(readDevUser());
+      setLoading(false);
+      return;
+    }
     const token = getToken();
     if (!token) {
       setLoading(false);
@@ -61,7 +104,28 @@ export function useAuth() {
     fetchCurrentUser();
   }, [fetchCurrentUser]);
 
+  useEffect(() => {
+    if (!DEV_AUTH_BYPASS) return;
+    const syncDevUser = () => setUser(readDevUser());
+    window.addEventListener(DEV_AUTH_CHANGE_EVENT, syncDevUser);
+    window.addEventListener('storage', syncDevUser);
+    return () => {
+      window.removeEventListener(DEV_AUTH_CHANGE_EVENT, syncDevUser);
+      window.removeEventListener('storage', syncDevUser);
+    };
+  }, []);
+
+  const devSignIn = useCallback(() => {
+    writeDevUser(true);
+    setUser(DEV_MOCK_USER);
+    setLoading(false);
+    return DEV_MOCK_USER;
+  }, []);
+
   const login = async (email: string, password: string) => {
+    if (DEV_AUTH_BYPASS) {
+      return devSignIn();
+    }
     const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -78,6 +142,9 @@ export function useAuth() {
   };
 
   const register = async (displayName: string, email: string, password: string) => {
+    if (DEV_AUTH_BYPASS) {
+      return devSignIn();
+    }
     const res = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -94,6 +161,9 @@ export function useAuth() {
   };
 
   const loginWithGoogle = async (credential: string) => {
+    if (DEV_AUTH_BYPASS) {
+      return devSignIn();
+    }
     const res = await fetch('/api/auth/google', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -129,9 +199,14 @@ export function useAuth() {
   };
 
   const logout = async () => {
+    if (DEV_AUTH_BYPASS) {
+      writeDevUser(false);
+      setUser(null);
+      return;
+    }
     clearToken();
     setUser(null);
   };
 
-  return { user, loading, login, register, loginWithGoogle, migrateSession, logout };
+  return { user, loading, login, register, loginWithGoogle, migrateSession, logout, devSignIn };
 }

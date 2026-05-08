@@ -14,11 +14,11 @@ import { GlassSurface } from "../glass";
 import { YIcon } from "../YIcon";
 import { IndustryIcon } from "../IndustryIcon";
 import { VerdictPill } from "../VerdictPill";
-import { PickRow } from "../PickRow";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
 import { MobileIcon } from "../icons";
+import { LibraryActivityList, LibraryPreviewCard } from "./LibrarySearch";
 import type { Verdict, YIconKind } from "../types";
-import type { MobilePipelineRow, MobilePick } from "../../../../hooks/useMobileDeals";
+import type { MobilePipelineRow } from "../../../../hooks/useMobileDeals";
 import { useWatchlist } from "../../../../hooks/useWatchlist";
 import { copyFor } from "../../../../lib/copy";
 import { type Audience } from "../../../../lib/audience";
@@ -28,16 +28,16 @@ interface TodayProps {
   isAnon: boolean;
   initials: string;
   onOpenDeal: (id: string, title: string) => void;
+  onOpenLibrary: (filter?: "all" | "actionable" | "docs" | "analysis" | "data-room" | "shared" | "secure") => void;
+  onOpenLibraryDetail: (title?: string, meta?: string, kind?: string) => void;
   onChat: () => void;
+  onSearch?: () => void;
   onAskYulia: (prompt: string) => void;
   onLearn: (section: "how" | "pricing", anchor?: string) => void;
   onAvatarClick: () => void;
   /** Authed user's deals (from useMobileDeals). Null = anon or empty,
       in which case the hardcoded SAMPLE_PIPELINE renders instead. */
   userPipeline: MobilePipelineRow[] | null;
-  /** Authed user's top 3 picks (from useMobileDeals). Null = anon or empty
-      → SAMPLE_PICKS renders instead. Same shape as Brief screen's picks. */
-  userPicks: MobilePick[] | null;
   /** Current audience (drives copy + tip chips). */
   audience: Audience;
   /** Update audience (used by the inline switcher pill). */
@@ -47,21 +47,6 @@ interface TodayProps {
       server-side, not toggled). */
   showAudienceSwitcher: boolean;
 }
-
-interface TodayPick {
-  rank: number;
-  id: string;
-  name: string;
-  sub: string;
-  fit: number;
-  kind: Verdict;
-}
-
-const SAMPLE_PICKS: TodayPick[] = [
-  { rank: 1, id: "deal-bigfake",    name: "Big Fake Deal · sample",       sub: "Recurring rev · honest capex story",         fit: 92, kind: "pursue" },
-  { rank: 2, id: "deal-pest",       name: "Pest Control · FL",            sub: "92% on monthly contracts · add-back rich",   fit: 84, kind: "pursue" },
-  { rank: 3, id: "deal-electrical", name: "Electrical Contractor · TX",   sub: "Margins good but 60% one customer",          fit: 78, kind: "watch"  },
-];
 
 interface TodayPipelineRow {
   id: string;
@@ -82,17 +67,16 @@ const SAMPLE_PIPELINE: TodayPipelineRow[] = [
 ];
 
 export function TodayScreen({
-  isAnon, initials, onOpenDeal, onChat, onAskYulia, onLearn: _onLearn,
-  onAvatarClick, userPipeline, userPicks,
+  isAnon, initials, onOpenDeal, onOpenLibrary, onOpenLibraryDetail, onChat, onSearch, onAskYulia, onLearn: _onLearn,
+  onAvatarClick, userPipeline,
   audience, onAudienceChange, showAudienceSwitcher,
 }: TodayProps) {
   const PIPELINE: TodayPipelineRow[] = userPipeline ?? SAMPLE_PIPELINE;
-  const PICKS: TodayPick[] = userPicks ?? SAMPLE_PICKS;
   const { isWatched, toggle } = useWatchlist();
   const C = copyFor(audience);
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
-      <GlassTopBar title="Today" initials={initials} onAvatarClick={onAvatarClick} onSearch={onChat} />
+      <GlassTopBar title="Today" initials={initials} onAvatarClick={onAvatarClick} onSearch={onSearch ?? onChat} />
       <LargeTitle>Today</LargeTitle>
 
       {/* Hero — anon = welcome, authed = today's brief teaser. The
@@ -126,6 +110,15 @@ export function TodayScreen({
         />
       </div>
 
+      {/* Library — quick routes + docs that need attention. Brief moved
+          to Pipeline so Today can point straight at the workbench. */}
+      <div style={{ marginTop: 24, padding: "0 16px" }}>
+        <LibraryPreviewCard onOpenFinder={onOpenLibrary} />
+      </div>
+      <div style={{ marginTop: 14, padding: "0 16px" }}>
+        <LibraryActivityList onOpenDetail={onOpenLibraryDetail} limit={3} />
+      </div>
+
       {/* Pipeline section — content per audience via copy.ts */}
       <div style={{ marginTop: 24, padding: "0 16px" }}>
         <div className="mb-as-card" style={{ padding: "20px 0 6px" }}>
@@ -151,31 +144,6 @@ export function TodayScreen({
         </div>
       </div>
 
-      {/* Brief teaser — uses the same mb-as-card + PickRow pattern as the
-          Brief screen's main ranked list, so the two surfaces stay locked
-          to one design language. Shows the 3 highest-fit picks (from
-          useMobileDeals) or SAMPLE_PICKS for anon visitors. */}
-      <div style={{ marginTop: 24, padding: "0 16px" }}>
-        <div className="mb-as-card" style={{ padding: "20px 0 6px" }}>
-          <div style={{ padding: "0 22px 4px" }}>
-            <div className="mb-section-eyebrow">{C.todayBriefEyebrow}</div>
-            <div className="mb-section-title">{C.todayBriefTitle}</div>
-            <div style={S.subText}>{C.todayBriefSub}</div>
-          </div>
-          {PICKS.map((p, i) => (
-            <PickRow
-              key={p.id}
-              rank={p.rank}
-              name={p.name}
-              sub={p.sub}
-              fit={p.fit}
-              kind={p.kind}
-              last={i === PICKS.length - 1}
-              onTap={() => onOpenDeal(p.id, p.name)}
-            />
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

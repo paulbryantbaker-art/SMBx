@@ -3,9 +3,10 @@
    tag chips + What's Yulia saying + A closer look (horizontal artifact rail)
    + Confidence & notes. */
 
-import { type CSSProperties, type ReactNode, useState } from "react";
+import { type CSSProperties, type ReactNode } from "react";
 import { FitGauge } from "../FitGauge";
 import { MobileIcon } from "../icons";
+import { ChatStarterPill } from "../ChatStarterPill";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
 import { useWatchlist } from "../../../../hooks/useWatchlist";
 import { findDeal } from "../../../../lib/sampleDeals";
@@ -310,42 +311,16 @@ function NextAction({
 function DealChatInput({
   dealTitle, onAskYulia,
 }: { dealTitle: string; onAskYulia: (prompt: string) => void }) {
-  const [draft, setDraft] = useState("");
-  const submit = () => {
-    const t = draft.trim();
-    if (!t) {
-      // Empty submit — open chat with deal context as a starter.
-      onAskYulia(`Tell me more about ${dealTitle}.`);
-      return;
-    }
-    onAskYulia(`About ${dealTitle}: ${t}`);
-    setDraft("");
-  };
   return (
     <div style={D.chatInputWrap}>
       <div className="mb-mono" style={D.chatInputEyebrow}>
         ASK YULIA · ABOUT THIS DEAL
       </div>
-      <form
-        onSubmit={(e) => { e.preventDefault(); submit(); }}
-        style={D.chatInputForm}
-      >
-        <input
-          type="text"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          placeholder="Chat with Yulia about this deal…"
-          aria-label={`Chat with Yulia about ${dealTitle}`}
-          style={D.chatInputField}
-        />
-        <button
-          type="submit"
-          aria-label="Send"
-          style={D.chatInputSend}
-        >
-          <MobileIcon name="arrowUp" size={16} c="#fff" />
-        </button>
-      </form>
+      <ChatStarterPill
+        placeholder="Message Yulia"
+        ariaLabel={`Message Yulia about ${dealTitle}`}
+        onSend={(message) => onAskYulia(`About ${dealTitle}: ${message}`)}
+      />
     </div>
   );
 }

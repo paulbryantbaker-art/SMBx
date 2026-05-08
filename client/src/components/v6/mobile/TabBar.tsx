@@ -19,10 +19,11 @@ interface TabBarProps {
   onChat: () => void;
 }
 
-const TABS: { id: MobileTab; label: string; icon: "today" | "pipeline" | "brief" }[] = [
+const TABS: { id: MobileTab; label: string; icon: "today" | "pipeline" | "search" | "brief" }[] = [
   { id: "today",    label: "Today",    icon: "today"    },
   { id: "pipeline", label: "Pipeline", icon: "pipeline" },
-  { id: "brief",    label: "Brief",    icon: "brief"    },
+  { id: "search",   label: "Search",   icon: "search"   },
+  { id: "brief",    label: "Files",    icon: "brief"    },
 ];
 
 export function TabBar({ active, onChange, onChat }: TabBarProps) {
@@ -48,6 +49,7 @@ export function TabBar({ active, onChange, onChat }: TabBarProps) {
           // than the periwinkle brand accent — distinct enough to read
           // as "active" without clashing with the cool palette.
           const c = isActive ? "var(--mb-action)" : "#fff";
+          const iconSize = t.id === "search" ? 22 : undefined;
           return (
             <button
               key={t.id}
@@ -58,7 +60,9 @@ export function TabBar({ active, onChange, onChat }: TabBarProps) {
               onClick={() => onChange(t.id)}
               style={{ ...B.tab, color: c }}
             >
-              <MobileIcon name={t.icon} c={c} active={isActive} />
+              <span style={B.iconSlot}>
+                <MobileIcon name={t.icon} c={c} active={isActive} size={iconSize} />
+              </span>
               <span style={B.tabLabel}>{t.label}</span>
             </button>
           );
@@ -120,12 +124,25 @@ const B: Record<string, CSSProperties> = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: 2,
-    padding: "2px 0",
+    justifyContent: "center",
+    gap: 3,
+    padding: 0,
+    minHeight: 48,
     cursor: "pointer",
+    outline: "none",
+    WebkitTapHighlightColor: "transparent",
+  },
+  iconSlot: {
+    height: 24,
+    width: 28,
+    display: "grid",
+    placeItems: "center",
+    lineHeight: 0,
+    flexShrink: 0,
   },
   tabLabel: {
     fontSize: 10,
+    lineHeight: "12px",
     fontWeight: 600,
     fontFamily: "var(--mb-font-body)",
   },

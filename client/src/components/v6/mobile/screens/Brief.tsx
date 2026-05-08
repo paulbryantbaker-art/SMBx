@@ -35,12 +35,27 @@ const SAMPLE_PICKS: Pick[] = [
 ];
 
 export function BriefScreen({ isAnon, initials, onOpenDeal, onAvatarClick, onSearch, userPicks }: BriefProps) {
-  const PICKS: Pick[] = userPicks ?? SAMPLE_PICKS;
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
       <GlassTopBar title="Brief" initials={initials} onAvatarClick={onAvatarClick} onSearch={onSearch} />
       <LargeTitle>Brief</LargeTitle>
+      <BriefDigestSection isAnon={isAnon} onOpenDeal={onOpenDeal} userPicks={userPicks} />
+    </div>
+  );
+}
 
+export function BriefDigestSection({
+  isAnon,
+  onOpenDeal,
+  userPicks,
+}: {
+  isAnon: boolean;
+  onOpenDeal: (id: string, title: string) => void;
+  userPicks: MobilePick[] | null;
+}) {
+  const PICKS: Pick[] = userPicks ?? SAMPLE_PICKS;
+  return (
+    <>
       {/* Date + sample callout */}
       <div style={{ padding: "0 22px 12px" }}>
         <div style={Br.dateLine}>
@@ -103,7 +118,7 @@ export function BriefScreen({ isAnon, initials, onOpenDeal, onAvatarClick, onSea
           ))}
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

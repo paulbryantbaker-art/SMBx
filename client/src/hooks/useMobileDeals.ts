@@ -13,7 +13,7 @@
  * revenue/sde/ebitda in cents, financials JSON, seven_factor_composite.
  */
 import { useEffect, useState } from "react";
-import { authHeaders, type User } from "./useAuth";
+import { DEV_AUTH_BYPASS, authHeaders, type User } from "./useAuth";
 import type { Verdict, YIconKind } from "../components/v6/mobile/types";
 
 export interface RawDeal {
@@ -235,7 +235,7 @@ export function useMobileDeals(user: User | null): UseMobileDealsResult {
   const [hasData, setHasData] = useState(false);
 
   useEffect(() => {
-    if (!user) {
+    if (!user || DEV_AUTH_BYPASS) {
       setShaped(EMPTY);
       setLoaded(true);
       setHasData(false);

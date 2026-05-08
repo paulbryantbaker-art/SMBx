@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent } from "react";
 import { useLocation } from "wouter";
-import { useAuth, type User } from "../../hooks/useAuth";
+import { DEV_AUTH_BYPASS, useAuth, type User } from "../../hooks/useAuth";
 import { useAnonymousChat } from "../../hooks/useAnonymousChat";
 import { useAuthChat } from "../../hooks/useAuthChat";
 import { useIsMobile } from "../../hooks/useIsMobile";
@@ -26,6 +26,7 @@ interface ChatBridge {
 export default function V6App() {
   const auth = useAuth();
   const isMobile = useIsMobile();
+  const user = auth.user;
 
   if (auth.loading) {
     return (
@@ -36,16 +37,28 @@ export default function V6App() {
   }
 
   if (isMobile) {
-    return <V6Mobile user={auth.user} onSignOut={async () => { await auth.logout(); }} />;
+    return <V6Mobile user={user} onSignOut={async () => { await auth.logout(); }} onDevSignIn={auth.devSignIn} />;
   }
 
-  return auth.user
-    ? <V6AppAuthed user={auth.user} onSignOut={auth.logout} />
+  if (DEV_AUTH_BYPASS) {
+    return <V6AppAnon user={user} onSignOut={auth.logout} onDevSignIn={auth.devSignIn} />;
+  }
+
+  return user
+    ? <V6AppAuthed user={user} onSignOut={auth.logout} />
     : <V6AppAnon />;
 }
 
 /* ─── Anonymous variant — uses anon chat hook ────────────────── */
-function V6AppAnon() {
+function V6AppAnon({
+  user = null,
+  onSignOut = () => {},
+  onDevSignIn,
+}: {
+  user?: User | null;
+  onSignOut?: () => void | Promise<void>;
+  onDevSignIn?: () => void;
+} = {}) {
   const chat = useAnonymousChat();
   const bridge = useMemo<ChatBridge>(() => ({
     thread: chat.messages.map(m => ({
@@ -58,7 +71,7 @@ function V6AppAnon() {
     error: chat.error,
     send: chat.sendMessage,
   }), [chat.messages, chat.sending, chat.streamingText, chat.error, chat.sendMessage]);
-  return <V6AppShell user={null} chat={bridge} onSignOut={() => {}} />;
+  return <V6AppShell user={user} chat={bridge} onSignOut={() => { void onSignOut(); }} onDevSignIn={onDevSignIn} />;
 }
 
 /* ─── Authenticated variant — uses authed chat hook ──────────── */
@@ -85,9 +98,10 @@ interface ShellProps {
   user: User | null;
   chat: ChatBridge;
   onSignOut: () => void;
+  onDevSignIn?: () => void;
 }
 
-function V6AppShell({ user, chat, onSignOut }: ShellProps) {
+function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
   const [, navigate] = useLocation();
 
   // ─── Tab + mode state, hydrated from URL hash ───
@@ -246,8 +260,15 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
   };
   const startWorkspace = () => {
     // Anon CTA — push to signup. Authed users never see this banner.
-    if (!user) navigate("/signup");
-    else openTab({ id: "tab-learn", kind: "learn", title: "How it works · Pricing", section: "pricing" });
+    if (!user) {
+      if (DEV_AUTH_BYPASS) {
+        onDevSignIn?.();
+      } else {
+        navigate("/signup");
+      }
+    } else {
+      openTab({ id: "tab-learn", kind: "learn", title: "How it works · Pricing", section: "pricing" });
+    }
   };
 
   // ⌘K opens sidebar search from anywhere
@@ -278,8 +299,20 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
           setSearchOpen={setSearchOpen}
           onOpenTab={openTab}
           user={user}
-          onSignIn={() => navigate("/login")}
-          onSignUp={() => navigate("/signup")}
+          onSignIn={() => {
+            if (DEV_AUTH_BYPASS) {
+              onDevSignIn?.();
+              return;
+            }
+            navigate("/login");
+          }}
+          onSignUp={() => {
+            if (DEV_AUTH_BYPASS) {
+              onDevSignIn?.();
+              return;
+            }
+            navigate("/signup");
+          }}
           onSignOut={onSignOut}
         />
         <main style={A.main}>

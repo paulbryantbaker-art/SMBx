@@ -13,6 +13,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type FormEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import { MobileIcon } from "./icons";
+import { CHAT_COMPOSER_STYLES } from "./ChatStarterPill";
 import type { MobileChatBridge } from "./types";
 
 interface ChatSheetProps {
@@ -156,7 +157,7 @@ export function ChatSheet({ open, onClose, chat }: ChatSheetProps) {
           paddingBottom: kbHeight > 0 ? 8 : "max(env(safe-area-inset-bottom, 0px), 14px)",
         }}
       >
-        <div style={S.composerPill}>
+        <div style={CHAT_COMPOSER_STYLES.pill}>
           <textarea
             ref={inputRef}
             rows={1}
@@ -165,14 +166,14 @@ export function ChatSheet({ open, onClose, chat }: ChatSheetProps) {
             onKeyDown={onKeyDown}
             placeholder="Message Yulia"
             aria-label="Message Yulia"
-            style={S.composerInput}
+            style={CHAT_COMPOSER_STYLES.input}
           />
           <button
             type="submit"
             aria-label="Send"
             disabled={!draft.trim()}
             style={{
-              ...S.sendBtn,
+              ...CHAT_COMPOSER_STYLES.send,
               opacity: draft.trim() ? 1 : 0.4,
             }}
           >

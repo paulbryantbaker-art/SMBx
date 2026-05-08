@@ -7,7 +7,7 @@
  * revenue/sde/ebitda in cents, league, current_gate, status, financials JSON.
  */
 import { useEffect, useState } from "react";
-import { authHeaders, type User } from "./useAuth";
+import { DEV_AUTH_BYPASS, authHeaders, type User } from "./useAuth";
 
 export interface HomeDeal {
   id: number;
@@ -88,7 +88,7 @@ export function useHomeDeals(user: User | null): UseHomeDealsResult {
   const [hasData, setHasData] = useState(false);
 
   useEffect(() => {
-    if (!user) {
+    if (!user || DEV_AUTH_BYPASS) {
       setData(EMPTY);
       setHasData(false);
       return;

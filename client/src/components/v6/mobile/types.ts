@@ -1,12 +1,27 @@
-export type MobileTab = "today" | "pipeline" | "brief";
+export type MobileTab = "today" | "pipeline" | "search" | "brief";
 
-export type MobileViewKind = "tab" | "detail" | "watching";
+export type MobileViewKind =
+  | "tab"
+  | "detail"
+  | "watching"
+  | "search"
+  | "library"
+  | "library-finder"
+  | "library-detail"
+  | "library-doc";
 
 export interface MobileView {
   kind: MobileViewKind;
   tab?: MobileTab;
   dealId?: string;
   dealTitle?: string;
+  dealMeta?: string;
+  portfolioName?: string;
+  dealStage?: string;
+  docTitle?: string;
+  docMeta?: string;
+  docKind?: string;
+  filesFilter?: string;
 }
 
 export interface MobileMessage {
