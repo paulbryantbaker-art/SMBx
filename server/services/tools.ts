@@ -413,6 +413,29 @@ export const TOOL_DEFINITIONS: Tool[] = [
       required: [],
     },
   },
+
+  // ─── Compare deals (Phase A.3 — text-only restoration) ────────────────
+  // Phase A.3 ships a markdown comparison table that Yulia surfaces inline
+  // in chat. The autonomous-run version opened a side-by-side comparison
+  // surface in canvas; that UI is deferred until CD specs the design.
+  // Tool API stays compatible — when the surface lands, swap the response
+  // from text-table to canvas_action: 'compare_deals'.
+  {
+    name: 'compare_deals',
+    description: 'Compare two or three deals side-by-side (BUY-side, picking which target to pursue). Returns a markdown comparison table that Yulia presents inline in chat — covers headline financials (revenue, SDE, EBITDA, multiple, asking price), current gate, and league for each deal. Use when the user says "compare these three", "which is the best of A B C", "side-by-side", etc.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealIds: {
+          type: 'array',
+          items: { type: 'number' },
+          description: 'Two or three deal IDs to compare. More than three are silently truncated to the first three.',
+        },
+        title: { type: 'string', description: 'Optional comparison title (used in the table header).' },
+      },
+      required: ['dealIds'],
+    },
+  },
 ];
 
 // ─── Tool Execution ────────────────────────────────────────
@@ -491,6 +514,9 @@ export async function executeTool(
       // Sourcing pipeline (Phase A.2)
       case 'start_sourcing_run':
         return await startSourcingRun(input, userId);
+      // Comparison (Phase A.3 — text-only)
+      case 'compare_deals':
+        return await compareDealsTool(input, userId);
       default:
         return JSON.stringify({ error: `Unknown tool: ${toolName}` });
     }
@@ -2034,4 +2060,86 @@ async function startSourcingRun(input: Record<string, any>, userId: number): Pro
   } catch (e: any) {
     return JSON.stringify({ error: `Sourcing run failed to start: ${e.message}` });
   }
+}
+
+/**
+ * compare_deals (Phase A.3 — text-only) — restored from autonomous-run B2.9.
+ *
+ * Loads 2-3 owned deals and emits a markdown comparison table that Yulia
+ * presents inline in chat. The autonomous-run version returned
+ * canvas_action: 'compare_deals' to open a side-by-side surface in canvas;
+ * that surface is deferred until CD specs the design. This text-only
+ * fallback covers the semantic core ("how do these deals compare") with
+ * zero UI dependency.
+ *
+ * When the comparison surface lands later, swap the markdown response
+ * back to a canvas_action — the tool's input schema stays compatible.
+ */
+async function compareDealsTool(input: Record<string, any>, userId: number): Promise<string> {
+  const dealIds: number[] = Array.isArray(input.dealIds) ? input.dealIds.slice(0, 3) : [];
+  if (dealIds.length < 2) {
+    return JSON.stringify({ error: 'Need at least two dealIds to compare.' });
+  }
+
+  // Load each deal — verify ownership and gather headline numbers.
+  const deals = await Promise.all(dealIds.map(async id => {
+    const [d] = await sql`
+      SELECT id, business_name, journey_type, current_gate, league,
+             revenue, sde, ebitda, asking_price, financials
+      FROM deals
+      WHERE id = ${id} AND user_id = ${userId}
+      LIMIT 1
+    `;
+    if (!d) return null;
+    const fin = typeof d.financials === 'string' ? JSON.parse(d.financials) : (d.financials || {});
+    return {
+      dealId: d.id,
+      title: d.business_name || `Deal #${d.id}`,
+      league: d.league || 'L1',
+      revenueCents: d.revenue,
+      sdeCents: d.sde,
+      ebitdaCents: d.ebitda,
+      askingPriceCents: d.asking_price,
+      multiple: fin?.multiple ?? null,
+      currentGate: d.current_gate,
+    };
+  }));
+
+  const valid = deals.filter((d): d is NonNullable<typeof d> => d !== null);
+  if (valid.length < 2) {
+    return JSON.stringify({ error: 'Could not find at least two of the requested deals (ownership check or missing rows).' });
+  }
+
+  // Render markdown table for Yulia to surface inline.
+  const fmt = (cents: number | null | undefined): string => {
+    if (cents == null) return '—';
+    const dollars = cents / 100;
+    if (dollars >= 1_000_000) return `$${(dollars / 1_000_000).toFixed(2)}M`;
+    if (dollars >= 1_000)     return `$${Math.round(dollars / 1_000)}K`;
+    return `$${Math.round(dollars).toLocaleString()}`;
+  };
+  const fmtMul = (m: number | null): string => m == null ? '—' : `${m.toFixed(1)}x`;
+
+  const header  = `| Field | ${valid.map(d => d.title).join(' | ')} |`;
+  const sep     = `|---${valid.map(() => '|---').join('')}|`;
+  const rows = [
+    `| **League**         | ${valid.map(d => d.league).join(' | ')} |`,
+    `| **Current gate**   | ${valid.map(d => d.currentGate).join(' | ')} |`,
+    `| **Revenue**        | ${valid.map(d => fmt(d.revenueCents)).join(' | ')} |`,
+    `| **SDE**            | ${valid.map(d => fmt(d.sdeCents)).join(' | ')} |`,
+    `| **EBITDA**         | ${valid.map(d => fmt(d.ebitdaCents)).join(' | ')} |`,
+    `| **Asking price**   | ${valid.map(d => fmt(d.askingPriceCents)).join(' | ')} |`,
+    `| **Implied multiple** | ${valid.map(d => fmtMul(d.multiple)).join(' | ')} |`,
+  ];
+  const titleLine = input.title ? `**${input.title}**\n\n` : '';
+  const markdown = `${titleLine}${header}\n${sep}\n${rows.join('\n')}`;
+
+  return JSON.stringify({
+    success: true,
+    deals: valid,
+    markdown,
+    // NOTE: when the comparison canvas surface ships, restore
+    // canvas_action: 'compare_deals' here and have Yulia route the user
+    // to the tab. Until then, the markdown above is the deliverable.
+  });
 }
