@@ -76,6 +76,8 @@ Valuation Explorer, LBO, SBA Financing, Tax Impact, Cap Table, Sensitivity Matri
 - SSE canvas_action handler forwards tool results to zustand store
 
 ## Reference Documents
+- **YULIA_AGENCY_SPEC.md** — Product/architecture doctrine for Yulia as the agentic operating layer: advisor posture without licensed-advisor boundary crossing, permission levels, surface contracts, data-room/file architecture, and implementation priorities.
+- **YULIA_AGENCY_IMPLEMENTATION_PLAN.md** — Practical wiring plan for context packs, prompt governance, governed tool execution, staged approvals, surface actions, Today, Files, and Data Room.
 - **METHODOLOGY V18 (virtual master)** = METHODOLOGY_V17.md (§1-§8, §11-§15) + METHODOLOGY_V18a_TAX_AMENDMENT.md (replaces §9 entirely) + METHODOLOGY_V18b_LEGAL_AMENDMENT.md (replaces §10 entirely).
   - METHODOLOGY_V17.md (v17.1) — formulas, gate logic, analysis types
   - METHODOLOGY_V18a_TAX_AMENDMENT.md (effective May 2, 2026) — post-OBBBA tax engine. IRC as amended through P.L. 119-21 (July 4, 2025); international provisions effective for tax years beginning after 12/31/2025. Distilled into runtime via `server/prompts/taxEngine.ts`.

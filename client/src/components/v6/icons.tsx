@@ -1,16 +1,23 @@
 import type { IconName, Mode } from "./types";
 
 export const MODES: Mode[] = [
-  { id: "search",   label: "Business Search",     count: "6",   icon: "search"  },
-  { id: "docs",     label: "Docs",                count: "24",  icon: "doc"     },
-  { id: "analysis", label: "Analysis",            count: "11",  icon: "chart"   },
-  { id: "intel",    label: "Market Intelligence", count: "87",  icon: "feed"    },
-  { id: "library",  label: "Library",             count: "143", icon: "library" },
+  { id: "today",    label: "Today",    count: "5",  icon: "today"   },
+  { id: "pipeline", label: "Pipeline", count: "6",  icon: "feed"    },
+  { id: "search",   label: "Search",   count: "6",  icon: "search"  },
+  { id: "files",    label: "Files",    count: "24", icon: "library" },
 ];
 
 export function V6Icon({ name, size = 14 }: { name: IconName; size?: number }) {
   const s = size;
   switch (name) {
+    case "today":
+      return (
+        <svg width={s} height={s} viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <rect x="2.2" y="2.4" width="9.6" height="9.4" rx="1.5" stroke="currentColor" strokeWidth="1.35"/>
+          <path d="M4.2 1.7v2.1M9.8 1.7v2.1M2.8 5.2h8.4" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round"/>
+          <path d="M4.7 7.4h2.1M4.7 9.5h4.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
+        </svg>
+      );
     case "search":
       return (
         <svg width={s} height={s} viewBox="0 0 14 14" fill="none" aria-hidden="true">

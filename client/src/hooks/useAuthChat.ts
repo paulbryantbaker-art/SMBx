@@ -1,6 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { authHeaders, type User } from './useAuth';
 import { showToast } from '../lib/toast';
+import type { SurfaceContext } from '../lib/yuliaSurfaceContext';
+import type { ModelPreference } from '../lib/modelPreference';
 
 export interface AuthMessage {
   id: number;
@@ -123,7 +125,7 @@ export function useAuthChat(user: User | null) {
 
   // Stable ref to sendMessage so error-toast retry handlers can call the
   // current implementation without closing over a stale function.
-  const sendMessageRef = useRef<((content: string) => Promise<void>) | null>(null);
+  const sendMessageRef = useRef<((content: string, surfaceContext?: SurfaceContext, modelPreference?: ModelPreference) => Promise<void>) | null>(null);
 
   // Load conversation list (flat for backward compat + grouped for new sidebar)
   const loadConversations = useCallback(async () => {
@@ -224,7 +226,7 @@ export function useAuthChat(user: User | null) {
   }, [user]);
 
   // Send message with SSE streaming
-  const sendMessage = useCallback(async (content: string) => {
+  const sendMessage = useCallback(async (content: string, surfaceContext?: SurfaceContext, modelPreference?: ModelPreference) => {
     if (!user) return;
 
     const tempMsg: AuthMessage = {
@@ -253,7 +255,7 @@ export function useAuthChat(user: User | null) {
       const res = await fetch(`/api/chat/conversations/${convId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...authHeaders() },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ content, surfaceContext, modelPreference }),
         signal: controller.signal,
       });
 
@@ -382,7 +384,7 @@ export function useAuthChat(user: User | null) {
             const retryRes = await fetch(`/api/chat/conversations/${activeConversationId}/messages`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', ...authHeaders() },
-              body: JSON.stringify({ content }),
+              body: JSON.stringify({ content, surfaceContext, modelPreference }),
               signal: retryCtrl.signal,
             });
             if (retryRes.ok) {
@@ -445,7 +447,7 @@ export function useAuthChat(user: User | null) {
         // Bottom toast with one-tap retry
         showToast("Couldn't send your message", {
           tone: 'error',
-          action: { label: 'Retry', handler: () => sendMessageRef.current?.(content) },
+          action: { label: 'Retry', handler: () => sendMessageRef.current?.(content, surfaceContext, modelPreference) },
         });
         setMessages(prev => [...prev, {
           id: Date.now() + 1,

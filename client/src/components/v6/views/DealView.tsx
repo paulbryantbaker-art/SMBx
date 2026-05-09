@@ -2,8 +2,15 @@ import { useEffect, useState, type CSSProperties } from "react";
 import { V6Section } from "../Canvas";
 import { V6Icon } from "../icons";
 import { V6DocStatus, type DocStatusKind } from "../modes/cards";
-import type { OpenTab, TabKind } from "../types";
+import type { FileScope, OpenTab, TabKind } from "../types";
 import { authHeaders } from "../../../hooks/useAuth";
+import {
+  fileDeliverableToDataRoom,
+  generateDealDeliverable,
+  loadDealDataRoom,
+  type DealDataRoom,
+  type DataRoomDocument,
+} from "../../../hooks/useV6WorkspaceData";
 
 interface Stat { k: string; v: string; sub: string }
 interface LinkedFile {
@@ -12,6 +19,40 @@ interface LinkedFile {
   status: DocStatusKind;
   sub: string;
   id?: string;
+}
+
+type FileTone = "private" | "room" | "sent" | "received" | "deferred" | "executed";
+type FileSectionKey =
+  | "private"
+  | "analysis"
+  | "drafts"
+  | "artifacts"
+  | "room-docs"
+  | "sent"
+  | "received"
+  | "deferred"
+  | "executed";
+
+interface DealFolder {
+  label: string;
+  sub: string;
+  count: number;
+  scope: FileScope;
+  tone: FileTone;
+}
+
+interface DealFileItem {
+  id: string;
+  title: string;
+  meta: string;
+  location: string;
+  status: string;
+  kind: "doc" | "analysis";
+  tone: FileTone;
+  scopes: FileScope[];
+  section: FileSectionKey;
+  deliverableId?: number;
+  documentId?: number;
 }
 
 /* ─── Sample fallbacks (used when no numeric deal id is in scope) ─── */
@@ -31,6 +72,141 @@ const SAMPLE_LINKED: LinkedFile[] = [
   { kind: "analysis", title: "Comps · 7 deals", status: "saved", sub: "Range: 5.8× — 7.2×" },
   { kind: "analysis", title: "Buyer fit",       status: "live",  sub: "92 against your thesis" },
   { kind: "doc",      title: "Memo v2",         status: "draft", sub: "Awaiting your read" },
+];
+
+const DEAL_FILES: DealFileItem[] = [
+  {
+    id: "analysis-recast-walkthrough",
+    title: "Yulia · Recast walk-through",
+    meta: "Analysis · v3 · 2 min ago",
+    location: "All Files / Private workspace / Analysis",
+    status: "Private",
+    kind: "analysis",
+    tone: "private",
+    scopes: ["all"],
+    section: "analysis",
+  },
+  {
+    id: "doc-buyer-fit-memo",
+    title: "Buyer fit memo",
+    meta: "Memo · you · 1 hr ago · 4 pages",
+    location: "All Files / Private workspace / Memos",
+    status: "Open",
+    kind: "doc",
+    tone: "private",
+    scopes: ["all"],
+    section: "private",
+  },
+  {
+    id: "doc-ioi-v3",
+    title: "IOI draft · v3",
+    meta: "Yulia drafting · 2 min ago",
+    location: "All Files / Private workspace / Drafts",
+    status: "Draft",
+    kind: "doc",
+    tone: "private",
+    scopes: ["all"],
+    section: "drafts",
+  },
+  {
+    id: "analysis-concentration-risk",
+    title: "Concentration risk note",
+    meta: "Analysis · Yulia · 18 hr ago",
+    location: "All Files / Private workspace / Analysis",
+    status: "Private",
+    kind: "analysis",
+    tone: "private",
+    scopes: ["all"],
+    section: "analysis",
+  },
+  {
+    id: "room-2024-pl",
+    title: "2024 P&L · audited",
+    meta: "Excel · 1.2 MB · source artifact",
+    location: "All Files / Data Room / Artifacts / Financials",
+    status: "View",
+    kind: "analysis",
+    tone: "room",
+    scopes: ["all", "data-room"],
+    section: "artifacts",
+  },
+  {
+    id: "room-tax-returns",
+    title: "2022-2024 tax returns",
+    meta: "PDF packet · uploaded by seller",
+    location: "All Files / Data Room / Artifacts / Financials",
+    status: "View",
+    kind: "doc",
+    tone: "room",
+    scopes: ["all", "data-room"],
+    section: "artifacts",
+  },
+  {
+    id: "room-customer-list",
+    title: "Customer list · top 25",
+    meta: "CSV · received from seller",
+    location: "All Files / Data Room / Artifacts / Commercial",
+    status: "Action needed",
+    kind: "analysis",
+    tone: "received",
+    scopes: ["all", "data-room", "shared"],
+    section: "received",
+  },
+  {
+    id: "room-mutual-nda",
+    title: "Mutual NDA · seller counsel",
+    meta: "Sent Apr 04 · 2 markups",
+    location: "All Files / Data Room / Legal docs / In review",
+    status: "In review",
+    kind: "doc",
+    tone: "sent",
+    scopes: ["all", "data-room", "shared"],
+    section: "sent",
+  },
+  {
+    id: "room-security-findings",
+    title: "Security findings recap",
+    meta: "Received · routed to counsel",
+    location: "All Files / Data Room / Artifacts / IT",
+    status: "Deferred",
+    kind: "doc",
+    tone: "deferred",
+    scopes: ["all", "data-room", "shared"],
+    section: "deferred",
+  },
+  {
+    id: "room-disclosure-schedule",
+    title: "Disclosure schedule · v1",
+    meta: "Drafted legal doc · preparing for room",
+    location: "All Files / Data Room / Drafted legal docs",
+    status: "Draft",
+    kind: "doc",
+    tone: "room",
+    scopes: ["all", "data-room"],
+    section: "room-docs",
+  },
+  {
+    id: "room-ioi-sent",
+    title: "IOI · v2 sent",
+    meta: "Sent Apr 22 · awaiting reply",
+    location: "All Files / Shared / Sent",
+    status: "Awaiting",
+    kind: "doc",
+    tone: "sent",
+    scopes: ["all", "shared"],
+    section: "sent",
+  },
+  {
+    id: "room-nda-executed",
+    title: "NDA · countersigned",
+    meta: "Executed Mar 03 · seller + buyer",
+    location: "All Files / Data Room / Executed",
+    status: "Immutable",
+    kind: "doc",
+    tone: "executed",
+    scopes: ["all", "data-room", "shared"],
+    section: "executed",
+  },
 ];
 
 /* ─── Server response shapes ─── */
@@ -63,19 +239,48 @@ interface DealDetailResp {
 
 interface DeliverableRow {
   id: number;
-  type: string;
+  deal_id?: number;
+  menu_item_id?: number;
   status: string;
   created_at: string;
-  updated_at: string;
-  menu_item_name?: string;
+  completed_at?: string | null;
+  generation_time_ms?: number | null;
+  generation_model?: string | null;
+  slug?: string;
+  name?: string;
+  description?: string | null;
+  tier?: string | null;
+  journey?: string | null;
+  gate?: string | null;
 }
 
-export function V6DealView({ id, title, openTab }: { id: string; title: string; openTab: OpenTab }) {
+export function V6DealView({
+  id,
+  title,
+  openTab,
+  fileScope,
+  onTalkToYulia,
+}: {
+  id: string;
+  title: string;
+  openTab: OpenTab;
+  fileScope?: FileScope;
+  onTalkToYulia?: (prompt: string) => void;
+}) {
   const numericId = /^\d+$/.test(id) ? parseInt(id, 10) : null;
   const [data, setData] = useState<DealDetailResp | null>(null);
   const [linked, setLinked] = useState<DeliverableRow[] | null>(null);
+  const [dataRoom, setDataRoom] = useState<DealDataRoom | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionNote, setActionNote] = useState<string | null>(null);
+  const [busyAction, setBusyAction] = useState<string | null>(null);
+  const [activeFileScope, setActiveFileScope] = useState<FileScope | null>(fileScope ?? null);
+
+  useEffect(() => {
+    setActiveFileScope(fileScope ?? null);
+  }, [fileScope]);
 
   useEffect(() => {
     if (numericId === null) return;
@@ -85,11 +290,13 @@ export function V6DealView({ id, title, openTab }: { id: string; title: string; 
     Promise.all([
       fetch(`/api/deals/${numericId}`,            { headers: authHeaders() }).then(r => r.ok ? r.json() : Promise.reject(new Error(`deal ${r.status}`))),
       fetch(`/api/deals/${numericId}/deliverables`, { headers: authHeaders() }).then(r => r.ok ? r.json() : []),
+      loadDealDataRoom(numericId).catch(() => null),
     ])
-      .then(([detail, dels]) => {
+      .then(([detail, dels, room]) => {
         if (cancelled) return;
         setData(detail as DealDetailResp);
         setLinked(Array.isArray(dels) ? dels : []);
+        setDataRoom(room as DealDataRoom | null);
       })
       .catch((e: Error) => { if (!cancelled) setError(e.message); })
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -117,11 +324,69 @@ export function V6DealView({ id, title, openTab }: { id: string; title: string; 
 
   const verdict = real ? deriveVerdict(real) : { kind: "pursue" as const, eyebrow: "VERDICT · PURSUE", text: "Recurring revenue, honest add-backs. The concentration reads as a moat, not a risk.", fit: 92 };
   const yulia = real ? deriveYuliaRead(real) : null;
+  const dealName = real?.business_name || title;
+  const portfolioName = samplePortfolioForDeal(id, title);
+  const fileItems = numericId !== null && (linked || dataRoom)
+    ? buildDealFilesFromReal(linked ?? [], dataRoom, dealName)
+    : DEAL_FILES;
+  const primaryDeliverable = primaryDeliverableForJourney(real?.journey_type);
+  const setDealFileScope = (scope: FileScope | null) => {
+    setActiveFileScope(scope);
+    openTab({ id, kind: "deal", title: dealName, fileScope: scope ?? undefined });
+  };
+  const refreshDealArtifacts = async () => {
+    if (numericId === null) return;
+    const [dels, room] = await Promise.all([
+      fetch(`/api/deals/${numericId}/deliverables`, { headers: authHeaders() }).then(r => r.ok ? r.json() : []),
+      loadDealDataRoom(numericId).catch(() => null),
+    ]);
+    setLinked(Array.isArray(dels) ? dels : []);
+    setDataRoom(room);
+  };
+  const runGenerateDeliverable = async () => {
+    if (numericId === null) {
+      openTab({ kind: "doc", title: `${dealName} · ${primaryDeliverable.label}`, id: `doc-${id}-${primaryDeliverable.slug}` });
+      return;
+    }
+    setBusyAction("generate");
+    setActionError(null);
+    setActionNote(null);
+    try {
+      const result = await generateDealDeliverable({ dealId: numericId, menuItemSlug: primaryDeliverable.slug });
+      setActionNote(`${result.title || primaryDeliverable.label} is queued. Opening the live deliverable tab.`);
+      openTab({ kind: "doc", title: `${dealName} · ${result.title || primaryDeliverable.label}`, id: String(result.deliverableId) });
+      void refreshDealArtifacts();
+    } catch (e: any) {
+      setActionError(e?.message || "Could not generate deliverable");
+    } finally {
+      setBusyAction(null);
+    }
+  };
+  const fileLatestPrivateToRoom = async () => {
+    if (numericId === null) return;
+    const candidate = fileItems.find(file => file.deliverableId && !file.scopes.includes("data-room"));
+    if (!candidate?.deliverableId) {
+      setActionNote("No private generated deliverable is ready to file into the data room.");
+      return;
+    }
+    setBusyAction("file");
+    setActionError(null);
+    setActionNote(null);
+    try {
+      await fileDeliverableToDataRoom(numericId, candidate.deliverableId, dataRoom?.folders?.[0]?.id ?? null);
+      setActionNote(`${candidate.title} was filed into the deal data room.`);
+      await refreshDealArtifacts();
+    } catch (e: any) {
+      setActionError(e?.message || "Could not file deliverable");
+    } finally {
+      setBusyAction(null);
+    }
+  };
 
   return (
     <div className="m-fade-up" style={{ maxWidth: 1180 }}>
       {/* Hero strip */}
-      <section style={{ marginBottom: 28 }}>
+      <section id="deal-dashboard" style={{ marginBottom: 28 }}>
         <div className="mono" style={D.eyebrow}>{heroEyebrow}</div>
         <div style={D.headerRow}>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -129,9 +394,11 @@ export function V6DealView({ id, title, openTab }: { id: string; title: string; 
             <div style={D.sub}>{heroSub}</div>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button className="m-btn outlined" type="button">Export</button>
-            <button className="m-btn outlined" type="button">Share</button>
-            <button className="m-btn filled" type="button">Draft IOI</button>
+            <button className="m-btn outlined" type="button" onClick={() => setDealFileScope("all")}>Open files</button>
+            <button className="m-btn outlined" type="button" onClick={() => setDealFileScope("data-room")}>Data room</button>
+            <button className="m-btn filled" type="button" onClick={runGenerateDeliverable} disabled={busyAction === "generate"}>
+              {busyAction === "generate" ? "Generating..." : `Generate ${primaryDeliverable.label}`}
+            </button>
           </div>
         </div>
       </section>
@@ -148,6 +415,12 @@ export function V6DealView({ id, title, openTab }: { id: string; title: string; 
         }}>
           Couldn&rsquo;t load this deal ({error}). Showing reference layout.
         </div>
+      )}
+      {actionError && (
+        <div style={D.actionError}>{actionError}</div>
+      )}
+      {actionNote && (
+        <div style={D.actionNote}>{actionNote}</div>
       )}
 
       {/* Verdict banner */}
@@ -181,6 +454,21 @@ export function V6DealView({ id, title, openTab }: { id: string; title: string; 
           ))}
         </div>
       </section>
+
+      {activeFileScope && (
+        <DealFileExplorer
+          dealTitle={dealName}
+          portfolioName={portfolioName}
+          activeScope={activeFileScope}
+          setActiveScope={(scope) => setDealFileScope(scope)}
+          openDealDetail={() => setDealFileScope(null)}
+          openTab={openTab}
+          onTalkToYulia={onTalkToYulia}
+          files={fileItems}
+          onFileLatestToRoom={numericId !== null ? fileLatestPrivateToRoom : undefined}
+          fileBusy={busyAction === "file"}
+        />
+      )}
 
       <V6Section eyebrow="LINKED WORK" title="Files Yulia produced" sub="Click any to open in a new tab.">
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 12 }}>
@@ -239,7 +527,371 @@ export function V6DealView({ id, title, openTab }: { id: string; title: string; 
   );
 }
 
+function DealFileExplorer({
+  dealTitle,
+  portfolioName,
+  activeScope,
+  setActiveScope,
+  openDealDetail,
+  openTab,
+  onTalkToYulia,
+  files,
+  onFileLatestToRoom,
+  fileBusy,
+}: {
+  dealTitle: string;
+  portfolioName: string;
+  activeScope: FileScope;
+  setActiveScope: (scope: FileScope) => void;
+  openDealDetail: () => void;
+  openTab: OpenTab;
+  onTalkToYulia?: (prompt: string) => void;
+  files: DealFileItem[];
+  onFileLatestToRoom?: () => void;
+  fileBusy?: boolean;
+}) {
+  const visible = files.filter(file => file.scopes.includes(activeScope));
+  const folders = foldersForScope(activeScope, visible);
+  const sections = sectionsForScope(activeScope, visible);
+  const counts = {
+    all: files.filter(file => file.scopes.includes("all")).length,
+    "data-room": files.filter(file => file.scopes.includes("data-room")).length,
+    shared: files.filter(file => file.scopes.includes("shared")).length,
+  };
+  const copy = scopeCopy(activeScope);
+
+  const openFile = (file: DealFileItem) => {
+    openTab({ kind: file.kind === "analysis" && !file.deliverableId ? "analysis" : "doc", title: `${dealTitle} · ${file.title}`, id: file.deliverableId ? String(file.deliverableId) : file.id });
+  };
+
+  return (
+    <section style={D.fileSystem}>
+      <div style={D.fileTop}>
+        <div>
+          <h2 style={D.fileTitle}>{copy.title}</h2>
+          <p style={D.fileSub}>{copy.sub}</p>
+        </div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+          <button
+            type="button"
+            className="m-btn tonal"
+            onClick={() => onTalkToYulia?.(`Find the right ${dealTitle} file for me. I am looking at ${copy.label}.`)}
+          >
+            Ask Yulia for a file
+          </button>
+          {onFileLatestToRoom && (
+            <button
+              type="button"
+              className="m-btn outlined"
+              onClick={onFileLatestToRoom}
+              disabled={fileBusy}
+            >
+              {fileBusy ? "Filing..." : "File latest to room"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div style={D.scopeRail} role="tablist" aria-label="Deal file scope">
+        <button
+          type="button"
+          style={D.scopeChip}
+          onClick={openDealDetail}
+        >
+          View deal
+        </button>
+        {([
+          ["all", "All Files"],
+          ["data-room", "Data Room"],
+          ["shared", "Shared"],
+        ] as const).map(([scope, label]) => (
+          <button
+            key={scope}
+            type="button"
+            role="tab"
+            aria-selected={activeScope === scope}
+            style={{ ...D.scopeChip, ...(activeScope === scope ? D.scopeChipActive : {}) }}
+            onClick={() => setActiveScope(scope)}
+          >
+            {label}
+            <span className="mono" style={{ ...D.scopeCount, ...(activeScope === scope ? D.scopeCountActive : {}) }}>{counts[scope]}</span>
+          </button>
+        ))}
+      </div>
+
+      <div style={D.fileGrid}>
+        <aside style={D.folderCard}>
+          <div className="mono" style={D.folderEyebrow}>HIERARCHY</div>
+          <strong style={D.folderRoot}>{portfolioName} / {dealTitle}</strong>
+          <div style={D.folderRows}>
+            {folders.map(folder => (
+              <button
+                key={`${folder.scope}-${folder.label}`}
+                type="button"
+                style={D.folderRow}
+                onClick={() => setActiveScope(folder.scope)}
+              >
+                <span style={{ ...D.folderIcon, background: fileTone(folder.tone).soft, color: fileTone(folder.tone).ink }}>
+                  <V6Icon name={folder.scope === "data-room" ? "library" : folder.scope === "shared" ? "feed" : "doc"} size={14} />
+                </span>
+                <span style={D.folderText}>
+                  <strong>{folder.label}</strong>
+                  <span>{folder.sub}</span>
+                </span>
+                <span className="mono" style={D.folderCount}>{folder.count}</span>
+              </button>
+            ))}
+          </div>
+        </aside>
+
+        <div style={D.fileListCard}>
+          <div style={D.searchBar}>
+            <V6Icon name="search" size={14} />
+            <span>Search {dealTitle} {activeScope === "all" ? "files" : activeScope === "data-room" ? "data room" : "shared docs"}</span>
+            <kbd style={D.kbd}>⌘K</kbd>
+          </div>
+          {sections.map(section => (
+            <div key={section.title} style={D.fileSection}>
+              <div style={D.fileSectionHead}>
+                <div>
+                  <div className="mono" style={D.fileSectionEyebrow}>{section.eyebrow}</div>
+                  <h3 style={D.fileSectionTitle}>{section.title}</h3>
+                </div>
+                <span className="mono" style={D.fileSectionCount}>{section.rows.length}</span>
+              </div>
+              <div>
+                {section.rows.map((file, index) => (
+                  <DealFileRow
+                    key={file.id}
+                    file={file}
+                    last={index === section.rows.length - 1}
+                    onClick={() => openFile(file)}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function DealFileRow({ file, last, onClick }: { file: DealFileItem; last: boolean; onClick: () => void }) {
+  const t = fileTone(file.tone);
+  return (
+    <button
+      type="button"
+      style={{ ...D.fileRow, borderBottom: last ? "none" : "1px solid var(--m-outline-var)" }}
+      onClick={onClick}
+    >
+      <span style={{ ...D.fileIcon, background: t.soft, color: t.ink }}>
+        <V6Icon name={file.kind === "analysis" ? "chart" : "doc"} size={14} />
+      </span>
+      <span style={D.fileRowText}>
+        <strong>{file.title}</strong>
+        <span>{file.meta}</span>
+        <span style={D.filePath}>Location: {file.location}</span>
+      </span>
+      <span style={{ ...D.fileStatus, background: t.soft, color: t.ink }}>{file.status}</span>
+      <span style={D.fileChevron} aria-hidden="true">›</span>
+    </button>
+  );
+}
+
 /* ─── Helpers ────────────────────────────────────────────────────── */
+
+function primaryDeliverableForJourney(journey?: string | null): { label: string; slug: string } {
+  switch (journey) {
+    case "sell":
+      return { label: "CIM", slug: "sell-cim" };
+    case "raise":
+      return { label: "Pitch deck", slug: "raise-pitch-deck" };
+    case "pmi":
+      return { label: "100-day plan", slug: "pmi-100-day-plan" };
+    case "buy":
+    default:
+      return { label: "LOI", slug: "buy-loi-draft" };
+  }
+}
+
+function buildDealFilesFromReal(
+  deliverables: DeliverableRow[],
+  room: DealDataRoom | null,
+  dealTitle: string,
+): DealFileItem[] {
+  const filedDeliverableIds = new Set(
+    (room?.documents ?? [])
+      .map(doc => doc.deliverable_id)
+      .filter((value): value is number => typeof value === "number"),
+  );
+
+  const privateFiles = deliverables
+    .filter(d => !filedDeliverableIds.has(d.id))
+    .map(d => deliverableToFileItem(d, dealTitle));
+
+  const roomFiles = (room?.documents ?? []).map(doc => dataRoomDocToFileItem(doc, dealTitle));
+  const unfiledFiles = (room?.unfiledDeliverables ?? [])
+    .filter(d => !deliverables.some(existing => existing.id === d.id))
+    .map(d => deliverableToFileItem(d as DeliverableRow, dealTitle));
+
+  const merged = [...privateFiles, ...unfiledFiles, ...roomFiles];
+  return merged.length > 0 ? merged : DEAL_FILES;
+}
+
+function deliverableToFileItem(d: DeliverableRow, dealTitle: string): DealFileItem {
+  const name = d.name || formatType(d.slug || "deliverable");
+  const analysis = isAnalysisLike(`${d.slug || ""} ${name}`);
+  const draft = /loi|ioi|cim|memo|draft|letter|nda|term/i.test(`${d.slug || ""} ${name}`);
+  const section: FileSectionKey = draft && d.status !== "complete" ? "drafts" : analysis ? "analysis" : "private";
+  const folder = section === "analysis" ? "Analysis" : section === "drafts" ? "Drafts" : "Workspace";
+  return {
+    id: String(d.id),
+    title: name,
+    meta: `${formatStatus(d.status)} · ${fmtRelative(d.completed_at || d.created_at)}`,
+    location: `All Files / Private workspace / ${folder}`,
+    status: d.status === "complete" ? "Open" : formatStatus(d.status),
+    kind: analysis ? "analysis" : "doc",
+    tone: "private",
+    scopes: ["all"],
+    section,
+    deliverableId: d.id,
+  };
+}
+
+function dataRoomDocToFileItem(doc: DataRoomDocument, dealTitle: string): DealFileItem {
+  const legal = /loi|ioi|nda|agreement|disclosure|schedule|term|contract/i.test(doc.name);
+  const analysis = isAnalysisLike(`${doc.file_type} ${doc.name}`);
+  const executed = ["executed", "locked", "agreed"].includes(doc.status);
+  const review = ["review", "approved"].includes(doc.status);
+  const section: FileSectionKey = executed ? "executed" : review ? "sent" : legal || doc.file_type === "deliverable" ? "room-docs" : "artifacts";
+  const tone: FileTone = executed ? "executed" : review ? "sent" : "room";
+  return {
+    id: `room-${doc.id}`,
+    title: doc.name,
+    meta: `${formatFileType(doc.file_type)} · ${formatStatus(doc.status)} · ${fmtRelative(doc.updated_at || doc.created_at)}`,
+    location: `All Files / Data Room / ${section === "artifacts" ? "Artifacts" : section === "executed" ? "Executed" : "Deal documents"}`,
+    status: executed ? "Immutable" : review ? "In review" : doc.status === "draft" ? "Draft" : "View",
+    kind: analysis ? "analysis" : "doc",
+    tone,
+    scopes: ["all", "data-room", ...(review || executed ? ["shared" as const] : [])],
+    section,
+    deliverableId: doc.deliverable_id ?? undefined,
+    documentId: doc.id,
+  };
+}
+
+function isAnalysisLike(input: string): boolean {
+  return /model|valuation|analysis|recast|sba|comp|score|risk|tax|financial|xls|xlsx|csv|p&l|pl/i.test(input);
+}
+
+function formatFileType(input: string): string {
+  if (!input) return "File";
+  if (input.length <= 5) return input.toUpperCase();
+  return formatStatus(input);
+}
+
+function samplePortfolioForDeal(id: string, title: string): string {
+  if (/hvac/i.test(title) || id.includes("hvac")) return "Watchlist";
+  return "Buy";
+}
+
+function scopeCopy(scope: FileScope): { label: string; title: string; sub: string } {
+  if (scope === "data-room") {
+    return {
+      label: "Data Room",
+      title: "Shared diligence drive",
+      sub: "Permissioned materials for the deal team: source artifacts, legal docs, review items, and executed records.",
+    };
+  }
+  if (scope === "shared") {
+    return {
+      label: "Shared",
+      title: "Sent, received, and deferred",
+      sub: "Workflow view for documents outside your private workspace: sent out, received back, routed to counsel, or executed.",
+    };
+  }
+  return {
+    label: "All Files",
+    title: "Everything in this deal library",
+    sub: "Private working files, analysis, drafts, data-room materials, shared docs, and locked executed records.",
+  };
+}
+
+function foldersForScope(scope: FileScope, files: DealFileItem[]): DealFolder[] {
+  if (scope === "data-room") {
+    return [
+      folder("Artifacts", "Source files for diligence review", files, "artifacts", "data-room", "room"),
+      folder("Drafted legal docs", "Prepared for room sharing", files, "room-docs", "data-room", "room"),
+      folder("In review", "Markup or approval in progress", files, "sent", "shared", "sent"),
+      folder("Executed", "Immutable data-room records", files, "executed", "shared", "executed"),
+    ];
+  }
+  if (scope === "shared") {
+    return [
+      folder("Sent", "Awaiting action from another party", files, "sent", "shared", "sent"),
+      folder("Received", "Waiting on you or your team", files, "received", "shared", "received"),
+      folder("Deferred", "Routed to counsel or another reviewer", files, "deferred", "shared", "deferred"),
+      folder("Executed", "Countersigned and locked", files, "executed", "shared", "executed"),
+    ];
+  }
+  return [
+    { label: "All Files", sub: "Full deal library", count: files.length, scope: "all", tone: "private" },
+    { label: "Private workspace", sub: "Yulia drafts, memos, analysis", count: files.filter(f => ["private", "analysis", "drafts"].includes(f.section)).length, scope: "all", tone: "private" },
+    { label: "Data Room", sub: "Shared drive inside this deal", count: files.filter(f => f.scopes.includes("data-room")).length, scope: "data-room", tone: "room" },
+    { label: "Shared", sub: "Sent, received, deferred, executed", count: files.filter(f => f.scopes.includes("shared")).length, scope: "shared", tone: "sent" },
+  ];
+}
+
+function folder(
+  label: string,
+  sub: string,
+  files: DealFileItem[],
+  section: FileSectionKey,
+  scope: FileScope,
+  tone: FileTone,
+): DealFolder {
+  return { label, sub, count: files.filter(file => file.section === section).length, scope, tone };
+}
+
+function sectionsForScope(scope: FileScope, files: DealFileItem[]): Array<{ eyebrow: string; title: string; rows: DealFileItem[] }> {
+  if (scope === "data-room") {
+    return [
+      fileSection("ARTIFACTS", "Source artifacts", files, ["artifacts", "received", "deferred"]),
+      fileSection("LEGAL DOCS", "Drafted and in review", files, ["room-docs", "sent"]),
+      fileSection("EXECUTED", "Immutable records", files, ["executed"]),
+    ].filter(section => section.rows.length > 0);
+  }
+  if (scope === "shared") {
+    return [
+      fileSection("SENT", "Sent and awaiting action", files, ["sent"]),
+      fileSection("RECEIVED", "Received and awaiting action", files, ["received"]),
+      fileSection("DEFERRED", "Routed to another reviewer", files, ["deferred"]),
+      fileSection("EXECUTED", "Locked and auditable", files, ["executed"]),
+    ].filter(section => section.rows.length > 0);
+  }
+  return [
+    fileSection("PRIVATE", "Private workspace", files, ["private", "analysis", "drafts"]),
+    fileSection("DATA ROOM", "Shared diligence drive", files, ["artifacts", "room-docs", "received", "deferred"]),
+    fileSection("SHARED", "Sent, received, deferred, executed", files, ["sent", "executed"]),
+  ].filter(section => section.rows.length > 0);
+}
+
+function fileSection(eyebrow: string, title: string, files: DealFileItem[], keys: FileSectionKey[]) {
+  return { eyebrow, title, rows: files.filter(file => keys.includes(file.section)) };
+}
+
+function fileTone(tone: FileTone): { ink: string; soft: string } {
+  const tones: Record<FileTone, { ink: string; soft: string }> = {
+    private: { ink: "#4F60BD", soft: "#EEF1FB" },
+    room: { ink: "#3F7D64", soft: "rgba(98,153,135,0.16)" },
+    sent: { ink: "#655FA7", soft: "rgba(130,125,189,0.14)" },
+    received: { ink: "#9C7128", soft: "#FAF1E1" },
+    deferred: { ink: "#A85248", soft: "rgba(235,206,206,0.58)" },
+    executed: { ink: "#1A2233", soft: "rgba(26,34,51,0.08)" },
+  };
+  return tones[tone];
+}
 
 function fmtCents(cents: number | null): string {
   if (!cents) return "—";
@@ -293,13 +945,13 @@ function deriveYuliaRead(d: DealRow): { title: string; paragraphs: string[] } | 
 }
 
 function deliverableToLinkedFile(d: DeliverableRow): LinkedFile {
-  const isAnalysis = /model|valuation|recast|sensitivity|lbo|sba|comp|cap|sde|earnout|covenant|tax/i.test(d.type);
+  const label = d.name || formatType(d.slug || "deliverable");
   const status: DocStatusKind = d.status === "complete" ? "live" : d.status === "draft" ? "draft" : "saved";
   return {
-    kind: isAnalysis ? "analysis" : "doc",
-    title: d.menu_item_name || formatType(d.type),
+    kind: "doc",
+    title: label,
     status,
-    sub: `${formatStatus(d.status)} · ${fmtRelative(d.updated_at)}`,
+    sub: `${formatStatus(d.status)} · ${fmtRelative(d.completed_at || d.created_at)}`,
     id: String(d.id),
   };
 }
@@ -341,6 +993,22 @@ const D: Record<string, CSSProperties> = {
     textWrap: "balance",
   },
   sub: { fontSize: 14, color: "var(--m-on-surface-var)", marginTop: 6 },
+  actionError: {
+    padding: "10px 12px",
+    borderRadius: 10,
+    marginBottom: 18,
+    background: "var(--m-pass-container)",
+    color: "#4A1410",
+    fontSize: 12.5,
+  },
+  actionNote: {
+    padding: "10px 12px",
+    borderRadius: 10,
+    marginBottom: 18,
+    background: "rgba(98,153,135,0.14)",
+    color: "#2F604C",
+    fontSize: 12.5,
+  },
   verdict: {
     padding: "20px 24px",
     background: "var(--m-pursue-container)",
@@ -375,6 +1043,244 @@ const D: Record<string, CSSProperties> = {
   linkedTitle: {
     fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 13.5,
     letterSpacing: "-0.01em", color: "var(--m-on-surface)", marginTop: 12,
+  },
+  fileSystem: {
+    marginBottom: 32,
+    padding: 22,
+    borderRadius: 24,
+    background: "#FFFFFF",
+    border: "1px solid var(--m-outline-var)",
+    boxShadow: "var(--m-elev-2)",
+  },
+  fileTop: {
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 18,
+    marginBottom: 16,
+  },
+  fileTitle: {
+    margin: 0,
+    fontSize: 30,
+    lineHeight: 1,
+    letterSpacing: "-0.045em",
+    color: "var(--m-on-surface)",
+  },
+  fileSub: {
+    margin: "8px 0 0",
+    maxWidth: 780,
+    color: "var(--m-on-surface-mid)",
+    fontSize: 13.5,
+    lineHeight: 1.45,
+  },
+  scopeRail: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    paddingBottom: 16,
+    overflowX: "auto",
+  },
+  scopeChip: {
+    all: "unset",
+    minHeight: 38,
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 8,
+    padding: "0 14px",
+    borderRadius: 999,
+    background: "var(--m-surface-1)",
+    border: "1px solid var(--m-outline-var)",
+    color: "var(--m-on-surface)",
+    fontWeight: 850,
+    cursor: "pointer",
+  },
+  scopeChipActive: {
+    background: "var(--m-on-surface)",
+    color: "#FFFFFF",
+    borderColor: "var(--m-on-surface)",
+  },
+  scopeCount: {
+    minWidth: 20,
+    height: 20,
+    padding: "0 6px",
+    display: "inline-grid",
+    placeItems: "center",
+    borderRadius: 999,
+    background: "var(--m-surface-2)",
+    color: "var(--m-on-surface-mid)",
+    fontSize: 10,
+    fontWeight: 800,
+  },
+  scopeCountActive: {
+    background: "rgba(255,255,255,0.18)",
+    color: "#FFFFFF",
+  },
+  fileGrid: {
+    display: "grid",
+    gridTemplateColumns: "minmax(240px, 0.34fr) minmax(0, 1fr)",
+    gap: 16,
+    alignItems: "start",
+  },
+  folderCard: {
+    borderRadius: 20,
+    padding: 16,
+    background: "linear-gradient(180deg, #F8F9FF 0%, #FFFFFF 100%)",
+    border: "1px solid var(--m-outline-var)",
+  },
+  folderEyebrow: {
+    fontSize: 9.5,
+    letterSpacing: "0.16em",
+    color: "var(--m-on-primary-container)",
+    fontWeight: 800,
+  },
+  folderRoot: {
+    display: "block",
+    marginTop: 6,
+    color: "var(--m-on-surface)",
+    fontSize: 14,
+    letterSpacing: "-0.02em",
+  },
+  folderRows: {
+    marginTop: 12,
+    display: "grid",
+    gap: 8,
+  },
+  folderRow: {
+    all: "unset",
+    minHeight: 54,
+    display: "grid",
+    gridTemplateColumns: "34px minmax(0, 1fr) auto",
+    alignItems: "center",
+    gap: 10,
+    padding: "8px 9px",
+    borderRadius: 14,
+    cursor: "pointer",
+    color: "var(--m-on-surface-mid)",
+  },
+  folderIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 11,
+    display: "grid",
+    placeItems: "center",
+  },
+  folderText: {
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: 2,
+    fontSize: 11.5,
+    lineHeight: 1.25,
+  },
+  folderCount: {
+    fontSize: 10,
+    color: "var(--m-on-surface-mid)",
+    fontWeight: 800,
+  },
+  fileListCard: {
+    borderRadius: 20,
+    border: "1px solid var(--m-outline-var)",
+    overflow: "hidden",
+    background: "#FFFFFF",
+  },
+  searchBar: {
+    height: 52,
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    padding: "0 16px",
+    background: "var(--m-surface-1)",
+    color: "var(--m-on-surface-mid)",
+    borderBottom: "1px solid var(--m-outline-var)",
+    fontSize: 13,
+  },
+  kbd: {
+    marginLeft: "auto",
+    minWidth: 30,
+    height: 26,
+    display: "inline-grid",
+    placeItems: "center",
+    borderRadius: 8,
+    border: "1px solid var(--m-outline-var)",
+    background: "#FFFFFF",
+    color: "var(--m-on-surface-mid)",
+    fontSize: 11,
+    fontFamily: "var(--font-mono)",
+  },
+  fileSection: {
+    padding: "18px 18px 6px",
+    borderBottom: "1px solid var(--m-outline-var)",
+  },
+  fileSectionHead: {
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 12,
+    marginBottom: 8,
+  },
+  fileSectionEyebrow: {
+    fontSize: 9.5,
+    letterSpacing: "0.16em",
+    color: "var(--m-on-primary-container)",
+    fontWeight: 800,
+  },
+  fileSectionTitle: {
+    margin: "3px 0 0",
+    fontSize: 20,
+    lineHeight: 1,
+    letterSpacing: "-0.04em",
+    color: "var(--m-on-surface)",
+  },
+  fileSectionCount: {
+    color: "var(--m-on-surface-mid)",
+    fontSize: 10,
+    fontWeight: 800,
+  },
+  fileRow: {
+    all: "unset",
+    width: "100%",
+    boxSizing: "border-box",
+    minHeight: 70,
+    display: "grid",
+    gridTemplateColumns: "42px minmax(0, 1fr) auto 18px",
+    alignItems: "center",
+    gap: 12,
+    padding: "10px 0",
+    cursor: "pointer",
+  },
+  fileIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    display: "grid",
+    placeItems: "center",
+  },
+  fileRowText: {
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: 2,
+    color: "var(--m-on-surface-mid)",
+    fontSize: 12,
+  },
+  filePath: {
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    color: "var(--m-on-surface-mid)",
+    opacity: 0.78,
+  },
+  fileStatus: {
+    borderRadius: 999,
+    padding: "7px 10px",
+    fontSize: 12,
+    fontWeight: 850,
+    whiteSpace: "nowrap",
+  },
+  fileChevron: {
+    color: "var(--m-on-surface-mid)",
+    fontSize: 24,
+    lineHeight: 1,
   },
   readBody: {
     fontSize: 14.5, lineHeight: 1.65,

@@ -1,4 +1,4 @@
-export type ModeId = "search" | "docs" | "analysis" | "intel" | "library";
+export type ModeId = "today" | "pipeline" | "search" | "files" | "docs" | "analysis" | "intel" | "library";
 
 export type TabKind =
   | "mode-root"
@@ -12,8 +12,10 @@ export type TabKind =
   | "starter";
 
 export type IconName =
-  | "search" | "doc" | "chart" | "feed" | "library"
+  | "today" | "search" | "doc" | "chart" | "feed" | "library"
   | "settings" | "history" | "plus" | "close" | "pin" | "back" | "deal";
+
+export type FileScope = "all" | "data-room" | "shared";
 
 export interface Tab {
   id: string;
@@ -26,6 +28,7 @@ export interface Tab {
   anchor?: string;
   template?: string;
   tool?: string;
+  fileScope?: FileScope;
 }
 
 export interface Message {

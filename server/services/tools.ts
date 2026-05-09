@@ -12,6 +12,10 @@ import { fetchCBPData, fetchBDSData, calculateSBABankability } from './marketDat
 import { getSBALendingStats } from './sbaLendingService.js';
 import { getMarketHeat } from './marketHeatService.js';
 import { enrichCompanyWebsite } from './websiteEnrichmentService.js';
+import { enqueueDeliverableGeneration } from './jobQueue.js';
+import { processDeliverable } from './deliverableProcessor.js';
+import { canGenerateDeliverable, markFreeDeliverableUsed } from './subscriptionService.js';
+import { hasDealAccess } from './dealAccessService.js';
 
 const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
 
@@ -92,6 +96,32 @@ export const TOOL_DEFINITIONS: Tool[] = [
         },
       },
       required: ['dealId', 'deliverableType'],
+    },
+  },
+  {
+    name: 'generate_deal_deliverable',
+    description: 'Generate a real paid or included deal deliverable from the menu catalog. Use when the user asks Yulia to draft or run a deliverable such as an LOI, CIM, valuation, SBA analysis, buyer list, pitch deck, DD summary, or data-room structure. This queues generation and opens the live document tab.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId: { type: 'number', description: 'Deal ID' },
+        menuItemSlug: { type: 'string', description: 'Menu item slug, for example buy-loi-draft, sell-cim, sell-valuation-report, buy-sba-bankability, raise-pitch-deck, pmi-100-day-plan' },
+        modelPreference: { type: 'string', enum: ['auto', 'fast', 'deep', 'drafting', 'research'], description: 'Optional model preference. Auto is default.' },
+      },
+      required: ['dealId', 'menuItemSlug'],
+    },
+  },
+  {
+    name: 'file_deliverable_to_data_room',
+    description: 'File an existing generated deliverable into the deal data room. Use only after user confirmation because it moves a private workspace item into the shared diligence drive.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId: { type: 'number', description: 'Deal ID' },
+        deliverableId: { type: 'number', description: 'Deliverable ID to file' },
+        folderName: { type: 'string', description: 'Optional target data-room folder name. If omitted, Yulia will use the first available room folder.' },
+      },
+      required: ['dealId', 'deliverableId'],
     },
   },
   {
@@ -487,6 +517,10 @@ export async function executeTool(
         return await advanceGate(input, userId);
       case 'generate_free_deliverable':
         return await generateFreeDeliverable(input, userId);
+      case 'generate_deal_deliverable':
+        return await generateDealDeliverable(input, userId);
+      case 'file_deliverable_to_data_room':
+        return await fileDeliverableToDataRoom(input, userId);
       case 'recommend_providers':
         return await recommendProviders(input, userId);
       case 'analyze_buyer_demand':
@@ -844,6 +878,138 @@ async function generateFreeDeliverable(input: Record<string, any>, userId: numbe
     deliverableId: deliverable.id,
     title: deliverableType.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
     content,
+  });
+}
+
+async function generateDealDeliverable(input: Record<string, any>, userId: number): Promise<string> {
+  const { dealId, menuItemSlug, modelPreference } = input;
+  if (!dealId || !menuItemSlug) return JSON.stringify({ error: 'dealId and menuItemSlug are required' });
+
+  const [deal] = await sql`
+    SELECT id, business_name, user_id
+    FROM deals
+    WHERE id = ${dealId} AND user_id = ${userId}
+    LIMIT 1
+  `;
+  if (!deal) return JSON.stringify({ error: 'Deal not found' });
+
+  const [menuItem] = await sql`
+    SELECT id, slug, name
+    FROM menu_items
+    WHERE slug = ${menuItemSlug} AND active = true
+    LIMIT 1
+  `;
+  if (!menuItem) return JSON.stringify({ error: `Menu item not found: ${menuItemSlug}` });
+
+  const deliverableType = menuItem.slug.replace(/-/g, '_');
+  const access = await canGenerateDeliverable(userId, deliverableType);
+  if (!access.allowed) {
+    return JSON.stringify({
+      error: 'Subscription required',
+      requiredPlan: access.requiredPlan,
+      currentPlan: access.currentPlan,
+      message: `This deliverable requires a ${access.requiredPlan} subscription.`,
+    });
+  }
+
+  const [deliverable] = await sql`
+    INSERT INTO deliverables (deal_id, user_id, menu_item_id, status, price_charged_cents)
+    VALUES (${dealId}, ${userId}, ${menuItem.id}, 'queued', 0)
+    RETURNING id
+  `;
+
+  const jobData = {
+    deliverableId: deliverable.id,
+    dealId,
+    userId,
+    menuItemSlug,
+    deliverableType,
+    modelPreference,
+  };
+  const jobId = await enqueueDeliverableGeneration(jobData).catch(() => null);
+
+  if (access.isFreeDeliverable) {
+    await markFreeDeliverableUsed(userId, deliverableType).catch(() => {});
+  }
+
+  setImmediate(() => {
+    processDeliverable(jobData).catch(err =>
+      console.error('Tool deliverable generation error:', err.message),
+    );
+  });
+
+  return JSON.stringify({
+    success: true,
+    deliverableId: deliverable.id,
+    jobId,
+    status: 'queued',
+    title: menuItem.name,
+    canvas_action: 'open_tab',
+    tab: {
+      id: String(deliverable.id),
+      kind: 'doc',
+      title: `${deal.business_name || 'Deal'} · ${menuItem.name}`,
+    },
+  });
+}
+
+async function fileDeliverableToDataRoom(input: Record<string, any>, userId: number): Promise<string> {
+  const { dealId, deliverableId, folderName } = input;
+  if (!dealId || !deliverableId) return JSON.stringify({ error: 'dealId and deliverableId are required' });
+
+  const access = await hasDealAccess(dealId, userId);
+  if (!access) return JSON.stringify({ error: 'Deal not found' });
+  if (access.access_level === 'read') return JSON.stringify({ error: 'Read-only access cannot file documents' });
+
+  const [deliverable] = await sql`
+    SELECT d.id, d.status, d.menu_item_id, m.name
+    FROM deliverables d
+    JOIN menu_items m ON m.id = d.menu_item_id
+    WHERE d.id = ${deliverableId} AND d.deal_id = ${dealId}
+    LIMIT 1
+  `;
+  if (!deliverable) return JSON.stringify({ error: 'Deliverable not found' });
+
+  let folderId: number | null = null;
+  if (folderName) {
+    const [folder] = await sql`
+      SELECT id
+      FROM data_room_folders
+      WHERE deal_id = ${dealId} AND lower(name) = lower(${folderName})
+      LIMIT 1
+    `.catch(() => [null]);
+    folderId = folder?.id ?? null;
+  }
+  if (!folderId) {
+    const [folder] = await sql`
+      SELECT id FROM data_room_folders
+      WHERE deal_id = ${dealId}
+      ORDER BY sort_order ASC, id ASC
+      LIMIT 1
+    `.catch(() => [null]);
+    folderId = folder?.id ?? null;
+  }
+
+  const [doc] = await sql`
+    INSERT INTO data_room_documents (deal_id, folder_id, user_id, deliverable_id, name, file_type, status)
+    VALUES (${dealId}, ${folderId}, ${userId}, ${deliverableId}, ${deliverable.name || 'Deliverable'}, 'deliverable', 'draft')
+    ON CONFLICT DO NOTHING
+    RETURNING id, name, status
+  `;
+
+  return JSON.stringify({
+    success: true,
+    documentId: doc?.id ?? null,
+    deliverableId,
+    status: doc?.status || 'draft',
+    message: `"${deliverable.name || 'Deliverable'}" is now filed in the data room.`,
+    canvas_action: 'open_tab',
+    tab: {
+      id: String(dealId),
+      kind: 'deal',
+      title: `Deal #${dealId}`,
+      fileScope: 'data-room',
+    },
   });
 }
 

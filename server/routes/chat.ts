@@ -12,6 +12,7 @@ import { extractFromDocument } from '../services/documentExtractor.js';
 import { buildSystemPrompt, buildDynamicAnonymousPrompt } from '../services/promptBuilder.js';
 import type { ConversationState } from '../services/promptBuilder.js';
 import { streamAgenticResponse } from '../services/aiService.js';
+import { normalizeModelPreference, resolveChatModel } from '../services/modelPreference.js';
 
 /** Safe SSE write — checks destroyed + writableEnded, catches errors */
 function safeWrite(res: Response, data: string): boolean {
@@ -190,7 +191,8 @@ function detectAdvisor(message: string): boolean {
 chatRouter.post('/message', async (req, res) => {
   const userId = (req as any).userId || null;
   const sessionId = req.headers['x-session-id'] as string | undefined;
-  const { message, conversationId, journeyContext } = req.body;
+  const { message, conversationId, journeyContext, surfaceContext, modelPreference } = req.body ?? {};
+  const normalizedModelPreference = normalizeModelPreference(modelPreference);
 
   if (!message?.trim()) {
     return res.status(400).json({ error: 'Message is required' });
@@ -318,6 +320,8 @@ chatRouter.post('/message', async (req, res) => {
       messageCount: userMsgCount,
       demandSignalText,
       isAdvisor,
+      surfaceContext,
+      modelPreference: normalizedModelPreference,
     });
 
     // Stream from Anthropic
@@ -326,7 +330,7 @@ chatRouter.post('/message', async (req, res) => {
 
     try {
       const stream = await anthropic.messages.create({
-        model: STREAMING_MODEL,
+        model: resolveChatModel(normalizedModelPreference) || STREAMING_MODEL,
         max_tokens: 4096,
         system: systemPrompt,
         messages: apiMessages,
@@ -983,7 +987,8 @@ chatRouter.post('/deals/:dealId/unlock-gate', requireAuth, async (req, res) => {
 chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => {
   const userId = (req as any).userId;
   const convId = parseInt(req.params.id, 10);
-  const { content } = req.body;
+  const { content, surfaceContext, modelPreference } = req.body ?? {};
+  const normalizedModelPreference = normalizeModelPreference(modelPreference);
 
   if (!content || !content.trim()) {
     return res.status(400).json({ error: 'Message content is required' });
@@ -1049,7 +1054,7 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
     }
 
     // Build system prompt
-    const systemPrompt = await buildSystemPrompt(user as any, deal as any, convId);
+    const systemPrompt = await buildSystemPrompt(user as any, deal as any, convId, surfaceContext, normalizedModelPreference);
 
     // Load conversation history (last 50 messages max)
     const history = await sql`
@@ -1089,7 +1094,7 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
     try {
       // Run agentic loop and stream response
       assistantText = await streamAgenticResponse(
-        { userId, conversationId: convId, systemPrompt, messages },
+        { userId, conversationId: convId, systemPrompt, messages, modelPreference: normalizedModelPreference },
         res,
       );
     } catch (agentErr: any) {

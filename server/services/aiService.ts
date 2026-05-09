@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import type { MessageParam, ContentBlockParam } from '@anthropic-ai/sdk/resources/messages';
 import { TOOL_DEFINITIONS, executeTool } from './tools.js';
 import { persistCanvasTabFromAction } from './canvasTabPersist.js';
+import { resolveChatModel, type ModelPreference } from './modelPreference.js';
 import type { Response } from 'express';
 
 const MODEL = 'claude-sonnet-4-6';
@@ -40,6 +41,7 @@ interface StreamContext {
   conversationId: number;
   systemPrompt: string;
   messages: MessageParam[];
+  modelPreference?: ModelPreference;
 }
 
 /**
@@ -70,7 +72,7 @@ export async function streamAgenticResponse(
 
       // Call Claude (non-streaming for tool use rounds, streaming for final response)
       const response = await anthropic.messages.create({
-        model: MODEL,
+        model: resolveChatModel(ctx.modelPreference) || MODEL,
         max_tokens: 4096,
         system: ctx.systemPrompt,
         messages,
@@ -209,11 +211,12 @@ export async function streamAnonymousResponse(
   systemPrompt: string,
   messages: MessageParam[],
   res: Response,
+  modelPreference?: ModelPreference,
 ): Promise<string> {
   const anthropic = getClient();
 
   const response = await anthropic.messages.create({
-    model: MODEL,
+    model: resolveChatModel(modelPreference) || MODEL,
     max_tokens: 1500,
     system: systemPrompt,
     messages,

@@ -8,7 +8,9 @@ AI-powered deal intelligence platform for business acquisitions from $300K to me
 
 1. **[`REPO_STATUS.md`](./REPO_STATUS.md)** — what's current, what's stale, how to tell the difference. Start here if you're reviewing the repo from a clone or on GitHub.
 2. **[`CLAUDE.md`](./CLAUDE.md)** — project operating instructions. Architecture, critical rules, key file map.
-3. **[`DESIGN_SOURCE.md`](./DESIGN_SOURCE.md)** — V6 design handoff → production code map.
+3. **[`YULIA_AGENCY_SPEC.md`](./YULIA_AGENCY_SPEC.md)** — Yulia's agentic operating doctrine: methodology, permissions, app surfaces, data-room boundaries, and legal/tax guardrails.
+4. **[`YULIA_AGENCY_IMPLEMENTATION_PLAN.md`](./YULIA_AGENCY_IMPLEMENTATION_PLAN.md)** — how to wire the surfaces, prompt stack, tools, approval gates, and file/data-room model together.
+5. **[`DESIGN_SOURCE.md`](./DESIGN_SOURCE.md)** — V6 design handoff → production code map.
 
 ## Don't read these
 

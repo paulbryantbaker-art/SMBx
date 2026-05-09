@@ -2,6 +2,9 @@ import { type CSSProperties, type ReactNode } from "react";
 import type { Tab, IconName, OpenTab, ModeId } from "./types";
 import type { User } from "../../hooks/useAuth";
 import { V6Icon } from "./icons";
+import { V6TodayRoot } from "./modes/TodayRoot";
+import { V6PipelineRoot } from "./modes/PipelineRoot";
+import { V6FilesRoot } from "./modes/FilesRoot";
 import { V6SearchRoot } from "./modes/SearchRoot";
 import { V6DocsRoot } from "./modes/DocsRoot";
 import { V6AnalysisRoot } from "./modes/AnalysisRoot";
@@ -107,7 +110,8 @@ function V6TabStrip({ tabs, activeTabId, setActiveTabId, closeTab, onNewTab }: T
 function tabIcon(tab: Tab): IconName {
   if (tab.kind === "mode-root") {
     const map: Record<ModeId, IconName> = {
-      search: "search", docs: "doc", analysis: "chart", intel: "feed", library: "library",
+      today: "today", pipeline: "feed", search: "search", files: "library",
+      docs: "doc", analysis: "chart", intel: "feed", library: "library",
     };
     return tab.modeId ? map[tab.modeId] : "doc";
   }
@@ -133,14 +137,17 @@ interface TabContentProps {
 
 function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut }: TabContentProps) {
   if (tab.kind === "mode-root") {
+    if (tab.modeId === "today")    return <V6TodayRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
+    if (tab.modeId === "pipeline") return <V6PipelineRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
     if (tab.modeId === "search")   return <V6SearchRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
+    if (tab.modeId === "files")    return <V6FilesRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
     if (tab.modeId === "docs")     return <V6DocsRoot openTab={openTab} />;
     if (tab.modeId === "analysis") return <V6AnalysisRoot openTab={openTab} />;
     if (tab.modeId === "intel")    return <V6IntelRoot openTab={openTab} />;
     if (tab.modeId === "library")  return <V6LibraryRoot openTab={openTab} />;
     return <Placeholder label={`${tab.title} — root view`} note="Unknown mode root." />;
   }
-  if (tab.kind === "deal")     return <V6DealView id={tab.id} title={tab.title} openTab={openTab} />;
+  if (tab.kind === "deal")     return <V6DealView id={tab.id} title={tab.title} openTab={openTab} fileScope={tab.fileScope} onTalkToYulia={onTalkToYulia} />;
   if (tab.kind === "doc")      return <V6DocView id={tab.id} title={tab.title} />;
   if (tab.kind === "analysis") return <V6AnalysisView title={tab.title} />;
   if (tab.kind === "feed-item") return <Placeholder label={`Feed · ${tab.title}`} note="Feed item reading view is a thin wrapper — coming after polish." />;

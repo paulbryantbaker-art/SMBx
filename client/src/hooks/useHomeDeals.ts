@@ -23,6 +23,10 @@ export interface HomeDeal {
   asking_price: number | null;
   financials: { multiple?: number; status_label?: string; notes?: string } | null;
   updated_at: string;
+  deliverable_count?: number;
+  document_count?: number;
+  conversation_id?: number | null;
+  seven_factor_composite?: number | null;
 }
 
 export interface CategorizedHome {

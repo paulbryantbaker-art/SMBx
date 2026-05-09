@@ -15,6 +15,7 @@ import { LibraryDetailScreen, LibraryDocumentScreen, LibraryFinderScreen, Librar
 import { ChatSheet } from "./ChatSheet";
 import { LearnSheet } from "./LearnSheet";
 import { useAudience } from "../../../hooks/useAudience";
+import { buildMobileSurfaceContext } from "../../../lib/yuliaSurfaceContext";
 import type { MobileChatBridge, MobileTab, MobileView } from "./types";
 
 const VALID_TABS: MobileTab[] = ["today", "pipeline", "search", "brief"];
@@ -53,7 +54,7 @@ function V6MobileAnon({
     streamingText: chat.streamingText,
     activeTool: null,
     error: chat.error,
-    send: chat.sendMessage,
+    send: (text, surfaceContext) => chat.sendMessage(text, undefined, surfaceContext),
   }), [chat.messages, chat.sending, chat.streamingText, chat.error, chat.sendMessage]);
   return <V6MobileShell user={user} chat={bridge} onSignOut={onSignOut} onDevSignIn={onDevSignIn} />;
 }
@@ -242,6 +243,13 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
     view.kind === "watching" ? "pipeline" :
     view.tab ? view.tab :
     "today";
+  const sendWithSurface = (prompt: string) => {
+    chat.send(prompt, buildMobileSurfaceContext(view, activeTab));
+  };
+  const chatWithSurface: MobileChatBridge = {
+    ...chat,
+    send: sendWithSurface,
+  };
   const onTabChange = (next: MobileTab) => {
     if (next === "search") setView({ kind: "search", tab: "search" });
     else setView({ kind: "tab", tab: next });
@@ -265,13 +273,13 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
     setLearn({ open: true, section, anchor });
   const onLearnClose = () => setLearn(s => ({ ...s, open: false }));
   const onLearnTalkToYulia = (prompt: string) => {
-    chat.send(prompt);
+    sendWithSurface(prompt);
     setChatOpen(true);
   };
   // Used by Today's persona-tip chips. Same shape as onLearnTalkToYulia
   // but the source is the Today Explore card rather than the Learn sheet.
   const onAskYulia = (prompt: string) => {
-    chat.send(prompt);
+    sendWithSurface(prompt);
     setChatOpen(true);
   };
 
@@ -443,7 +451,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
         />
       )}
       <TabBar active={activeTab} onChange={onTabChange} onChat={onChat} />
-      <ChatSheet open={chatOpen} onClose={onChatClose} chat={chat} />
+      <ChatSheet open={chatOpen} onClose={onChatClose} chat={chatWithSurface} />
       <LearnSheet
         open={learn.open}
         onClose={onLearnClose}

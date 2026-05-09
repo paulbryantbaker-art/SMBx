@@ -7,7 +7,7 @@ interface DeliverableRow {
   id: number;
   type: string;
   status: string;
-  content: string | null;
+  content: unknown;
   created_at: string;
   updated_at: string;
   name?: string;
@@ -49,24 +49,45 @@ export function V6DocView({ id, title }: { id: string; title: string }) {
   useEffect(() => {
     if (numericId === null) return;
     let cancelled = false;
-    setLoading(true);
-    setError(null);
-    fetch(`/api/deliverables/${numericId}`, { headers: authHeaders() })
-      .then(r => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
-      .then((d: DeliverableRow) => { if (!cancelled) setDoc(d); })
-      .catch((e: Error) => { if (!cancelled) setError(e.message); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+    let poll: ReturnType<typeof setInterval> | null = null;
+    const load = async (withSpinner: boolean) => {
+      if (withSpinner) setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(`/api/deliverables/${numericId}`, { headers: authHeaders() });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const payload = await res.json();
+        if (cancelled) return;
+        setDoc(payload);
+        if (!["queued", "generating"].includes(payload?.status) && poll) {
+          clearInterval(poll);
+          poll = null;
+        }
+      } catch (e: any) {
+        if (!cancelled) setError(e?.message || "Failed to load deliverable");
+      } finally {
+        if (!cancelled && withSpinner) setLoading(false);
+      }
+    };
+    void load(true);
+    poll = setInterval(() => void load(false), 4000);
+    return () => {
+      cancelled = true;
+      if (poll) clearInterval(poll);
+    };
   }, [numericId]);
 
+  const markdown = extractMarkdown(doc?.content);
+  const docType = doc?.type || doc?.slug || "document";
   const docTitle = doc?.name || title.replace(/ · (LOI|Memo|CIM)[\s\w]*$/, "");
-  const eyebrowLabel = doc?.type
-    ? `${doc.type.replace(/_/g, " ").toUpperCase()} · ${doc.status.toUpperCase()}`
+  const eyebrowLabel = doc
+    ? `${docType.replace(/[-_]/g, " ").toUpperCase()} · ${doc.status.toUpperCase()}`
     : "LETTER OF INTENT · DRAFT v3";
   const statusKind: DocStatusKind = doc?.status === "complete" ? "live" : doc?.status === "draft" ? "draft" : "saved";
   const savedAt = doc ? `SAVED · ${fmtRelative(doc.updated_at)}` : "SAVED · 12 MIN AGO";
   const showSample = !numericId;
-  const showFetched = !!doc?.content;
+  const showFetched = !!markdown;
+  const isGenerating = !!numericId && !!doc && ["queued", "generating"].includes(doc.status) && !markdown;
 
   return (
     <div className="m-fade-up" style={V.shell}>
@@ -112,11 +133,19 @@ export function V6DocView({ id, title }: { id: string; title: string }) {
 
           {showFetched && (
             <div style={V.docMarkdown}>
-              <Markdown>{doc!.content!}</Markdown>
+              <Markdown>{markdown!}</Markdown>
             </div>
           )}
 
-          {(showSample || (!showFetched && !loading && !error && numericId)) && (
+          {isGenerating && (
+            <div style={V.generatingCard}>
+              <div className="mono" style={V.generatingEyebrow}>YULIA IS GENERATING</div>
+              <h2 style={V.generatingTitle}>This deliverable is being built.</h2>
+              <p style={V.generatingBody}>You can leave this tab open. It will refresh automatically when the draft is ready.</p>
+            </div>
+          )}
+
+          {(showSample || (!showFetched && !loading && !error && numericId && !isGenerating && !doc)) && (
             <>
               <p style={V.docMeta}>
                 From: Apex SMB Holdings &nbsp;·&nbsp; To: J. Marston, Owner &nbsp;·&nbsp; Re: Acquisition of {docTitle} &nbsp;·&nbsp; Date: March 27, 2026
@@ -211,6 +240,36 @@ export function V6DocView({ id, title }: { id: string; title: string }) {
       </aside>
     </div>
   );
+}
+
+function extractMarkdown(content: unknown): string | null {
+  if (!content) return null;
+  if (typeof content === "string") {
+    try {
+      const parsed = JSON.parse(content);
+      return extractMarkdown(parsed) || content;
+    } catch {
+      return content;
+    }
+  }
+  if (typeof content !== "object") return null;
+  const obj = content as Record<string, any>;
+  if (typeof obj.markdown === "string") return obj.markdown;
+  if (typeof obj.content === "string") return obj.content;
+  if (typeof obj.text === "string") return obj.text;
+  if (Array.isArray(obj.sections)) {
+    const parts = obj.sections
+      .map((section: any) => {
+        if (typeof section === "string") return section;
+        if (!section || typeof section !== "object") return "";
+        const title = section.title || section.heading || section.name;
+        const body = section.content || section.body || section.text;
+        return [title ? `## ${title}` : "", typeof body === "string" ? body : ""].filter(Boolean).join("\n\n");
+      })
+      .filter(Boolean);
+    if (parts.length) return parts.join("\n\n");
+  }
+  return "```json\n" + JSON.stringify(content, null, 2) + "\n```";
 }
 
 const V: Record<string, CSSProperties> = {
@@ -317,6 +376,34 @@ const V: Record<string, CSSProperties> = {
   docMarkdown: {
     fontSize: 16, lineHeight: 1.7,
     fontFamily: "Iowan Old Style, Charter, Georgia, serif",
+  },
+  generatingCard: {
+    marginTop: 20,
+    padding: 22,
+    borderRadius: 18,
+    background: "linear-gradient(135deg, rgba(238,241,251,0.92), rgba(255,255,255,0.94))",
+    border: "1px solid var(--m-outline-var)",
+    boxShadow: "var(--m-elev-1)",
+    fontFamily: "var(--font-body)",
+  },
+  generatingEyebrow: {
+    fontSize: 10,
+    letterSpacing: "0.16em",
+    color: "var(--m-on-primary-container)",
+    fontWeight: 800,
+  },
+  generatingTitle: {
+    margin: "7px 0 0",
+    fontFamily: "var(--font-display)",
+    fontSize: 24,
+    lineHeight: 1,
+    color: "var(--m-on-surface)",
+  },
+  generatingBody: {
+    margin: "8px 0 0",
+    color: "var(--m-on-surface-mid)",
+    fontSize: 13.5,
+    lineHeight: 1.5,
   },
 };
 

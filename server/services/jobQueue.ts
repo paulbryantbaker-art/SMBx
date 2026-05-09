@@ -29,6 +29,7 @@ export interface DeliverableJobData {
   userId: number;
   menuItemSlug: string;
   deliverableType: string;
+  modelPreference?: string;
 }
 
 /** Enqueue a deliverable generation job */

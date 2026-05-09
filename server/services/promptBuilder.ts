@@ -6,9 +6,16 @@ import { GATE_PROMPTS } from '../prompts/gatePrompts.js';
 import { TAX_ENGINE_FOUNDATION, TAX_ENGINE_BY_LEAGUE } from '../prompts/taxEngine.js';
 import { LEGAL_ENGINE_FOUNDATION, LEGAL_ENGINE_BY_LEAGUE } from '../prompts/legalEngine.js';
 import { BRANCHING_LOGIC } from '../prompts/branchingLogic.js';
+import { AGENCY_DOCTRINE } from '../prompts/agencyDoctrine.js';
 import { getUserPlan, hasActiveSubscription, PLANS } from './subscriptionService.js';
 import { getKnowledgeForContext, formatKnowledgeForPrompt } from './knowledgeService.js';
 import { getMarketHeat, formatMarketHeatForPrompt } from './marketHeatService.js';
+import {
+  buildYuliaContextPack,
+  formatYuliaContextForPrompt,
+  type SurfaceContext,
+} from './yuliaContextPack.js';
+import { describeModelPreference, type ModelPreference } from './modelPreference.js';
 
 const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
 
@@ -360,11 +367,20 @@ export async function buildDynamicAnonymousPrompt(
     messageCount?: number;
     demandSignalText?: string;
     isAdvisor?: boolean;
+    surfaceContext?: SurfaceContext;
+    modelPreference?: ModelPreference;
   },
 ): Promise<string> {
   // Start with the full base anonymous prompt
   const base = buildAnonymousPrompt(opts);
   const layers: string[] = [base];
+
+  layers.push(AGENCY_DOCTRINE);
+  const contextText = formatYuliaContextForPrompt(buildYuliaContextPack({
+    surfaceContext: opts.surfaceContext,
+  }));
+  if (contextText) layers.push(contextText);
+  layers.push(`\n## MODEL ROUTING\n${describeModelPreference(opts.modelPreference)}`);
 
   // Layer: Conversation state header
   if (convState.journey || convState.current_gate || convState.league) {
@@ -459,11 +475,22 @@ export async function buildSystemPrompt(
   user: UserContext,
   deal: DealContext | null,
   conversationId: number,
+  surfaceContext?: SurfaceContext,
+  modelPreference?: ModelPreference,
 ): Promise<string> {
   const layers: string[] = [];
 
   // Layer 1: ALWAYS — master prompt with agentic behavior
   layers.push(MASTER_PROMPT);
+  layers.push(AGENCY_DOCTRINE);
+  const contextText = formatYuliaContextForPrompt(buildYuliaContextPack({
+    user,
+    deal,
+    conversationId,
+    surfaceContext,
+  }));
+  if (contextText) layers.push(contextText);
+  layers.push(`\n## MODEL ROUTING\n${describeModelPreference(modelPreference)}`);
 
   // Layer 2: User context
   const userName = user.display_name || user.email.split('@')[0];

@@ -1,72 +1,8 @@
-import { type CSSProperties } from "react";
-import { V6Section } from "../Canvas";
-import { V6DealCard, V6WatchRow, type Verdict } from "./cards";
+import { useState, type CSSProperties, type FormEvent } from "react";
+import { V6Icon } from "../icons";
 import type { OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
-import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
-
-const HERO_DATE = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
-
-interface Pick {
-  rank: number;
-  name: string;
-  note: string;
-  fit: number;
-  id: string;
-}
-
-const PICKS: Pick[] = [
-  { rank: 1, name: "Big Fake Deal · sample",   note: "$1.80M SDE · honest capex story",       fit: 92, id: "deal-bigfake" },
-  { rank: 2, name: "Pest Control · FL",        note: "92% on monthly contracts",              fit: 84, id: "deal-pest"    },
-  { rank: 3, name: "Electrical · TX",          note: "Margins good · concentration risk",     fit: 78, id: "deal-electrical" },
-  { rank: 4, name: "HVAC platform · CO",       note: "Family business · clean financials",    fit: 74, id: "deal-hvac"    },
-  { rank: 5, name: "Distribution · OH",        note: "Asking high · margins thin",            fit: 61, id: "deal-dist"    },
-];
-
-interface InReviewDeal {
-  verdict: Verdict;
-  id: string;
-  name: string;
-  sub: string;
-  fit: number;
-  sde: string;
-  multiple: string;
-  note: string;
-}
-
-const IN_REVIEW: InReviewDeal[] = [
-  { verdict: "pursue", id: "deal-bigfake",    name: "Big Fake Deal · sample",     sub: "$5.4M rev · East Texas",  fit: 92, sde: "$1.80M", multiple: "7.0×", note: "Recurring revenue. Honest add-backs. The concentration reads as moat." },
-  { verdict: "pursue", id: "deal-pest",       name: "Pest Control · FL",          sub: "$4.1M rev · Orlando",     fit: 84, sde: "$1.40M", multiple: "6.5×", note: "92% on monthly contracts. Add-back rich but legitimate." },
-  { verdict: "watch",  id: "deal-electrical", name: "Electrical Contractor · TX", sub: "$8.7M rev · Austin",      fit: 78, sde: "$2.10M", multiple: "6.0×", note: "Margins are good, but 60% of revenue is one customer." },
-  { verdict: "watch",  id: "deal-hvac",       name: "HVAC platform · CO",         sub: "$3.6M rev · Denver",      fit: 74, sde: "$0.95M", multiple: "6.8×", note: "Family business. Clean financials. Owner wants to retire — succession plan unclear." },
-  { verdict: "pass",   id: "deal-dist",       name: "Distribution · OH",          sub: "$11.2M rev · Cleveland",  fit: 61, sde: "$1.55M", multiple: "8.5×", note: "Asking is rich, margins are thin, and inventory turns are slowing." },
-  { verdict: "pass",   id: "deal-marina",     name: "Marina Holdings · FL",       sub: "$8.2M rev · Tampa Bay",   fit: 42, sde: "$1.20M", multiple: "9.0×", note: "Asking is 50% above SBA-clear and the add-backs don't survive scrutiny." },
-];
-
-interface WatchSource { tag: string; name: string; sub: string; count: number }
-
-const WATCHING_LEFT: WatchSource[] = [
-  { tag: "B", name: "BizBuySell · MN distribution",    sub: "Updated 2h ago",       count: 142 },
-  { tag: "L", name: "LoopNet · Marina sales",          sub: "Updated yesterday",    count: 28  },
-  { tag: "A", name: "Axial · Industrial services",     sub: "Updated 3d ago",       count: 64  },
-  { tag: "I", name: "IBBA · Brokered listings",        sub: "Updated this week",    count: 311 },
-];
-
-const WATCHING_RIGHT: WatchSource[] = [
-  { tag: "D", name: "DealStream · MEP services",       sub: "Updated 4h ago",       count: 87 },
-  { tag: "S", name: "Sunbelt Network · TX/FL",         sub: "Updated 2d ago",       count: 53 },
-  { tag: "M", name: "Murphy Business · Auto repair",   sub: "Updated this week",    count: 96 },
-  { tag: "T", name: "Transworld · HVAC roll-ups",      sub: "Updated this week",    count: 41 },
-];
-
-interface ClosedDeal { name: string; sub: string; date: string }
-
-const CLOSED: ClosedDeal[] = [
-  { name: "Auto repair · 4-loc",  sub: "Closed at $3.2M · 6.4×", date: "MAR 12" },
-  { name: "MEP services · NM",    sub: "Closed at $9.1M · 7.8×", date: "FEB 28" },
-  { name: "HVAC · CO",            sub: "Closed at $4.8M · 6.9×", date: "FEB 14" },
-  { name: "Pest control · GA",    sub: "Closed at $5.3M · 7.2×", date: "FEB 02" },
-];
+import { RANDOM_TEXTURES } from "../../../lib/randomTextures";
 
 interface SearchRootProps {
   openTab: OpenTab;
@@ -74,303 +10,534 @@ interface SearchRootProps {
   user: User | null;
 }
 
-export function V6SearchRoot({ openTab, onTalkToYulia, user }: SearchRootProps) {
-  const home = useHomeDeals(user);
+interface Category {
+  eyebrow: string;
+  title: string;
+  sub: string;
+  tone: "gold" | "purple" | "green" | "blue" | "ink" | "aqua";
+  prompt: string;
+}
 
-  // When the user is authenticated AND we have real deals, render their data.
-  // Otherwise fall back to the polished sample arrays — anon visitors and the
-  // brief loading window both stay on samples so the page never flashes empty.
-  const useReal = home.isAuthed && home.hasData;
-  const picks: Pick[]          = useReal ? home.picks.map(dealToPick)         : PICKS;
-  const inReview: InReviewDeal[] = useReal && home.inReview.length > 0 ? home.inReview.map(dealToInReview) : IN_REVIEW;
-  const closed: ClosedDeal[]   = useReal && home.closed.length > 0 ? home.closed.map(dealToClosed)     : CLOSED;
+interface DiscoveryRow {
+  icon: "search" | "deal" | "doc" | "chart";
+  title: string;
+  sub: string;
+  pill: string;
+  prompt: string;
+}
 
-  const openTopPick = () => {
-    const top = picks[0];
-    if (top) openTab({ kind: "deal", title: top.name, id: top.id });
+const CATEGORIES: Category[] = [
+  {
+    eyebrow: "OPPORTUNITIES",
+    title: "Targets to buy",
+    sub: "Define a thesis and let Yulia build the market map.",
+    tone: "gold",
+    prompt: "Find acquisition targets from this thesis: recurring revenue, lower-middle-market services, owner transition risk acceptable.",
+  },
+  {
+    eyebrow: "BUYERS",
+    title: "Buyers and buy-side",
+    sub: "Strategics, PE-backed platforms, family offices, and buyer pools.",
+    tone: "purple",
+    prompt: "Find likely buyers and buyer pools for Big Fake Deal. Rank strategic fit, ability to close, and relationship angle.",
+  },
+  {
+    eyebrow: "CAPITAL",
+    title: "PE and lenders",
+    sub: "Sponsors, SBA lenders, senior debt, and flexible capital partners.",
+    tone: "blue",
+    prompt: "Find PE firms, independent sponsors, and senior debt lenders relevant to this deal size and industry.",
+  },
+  {
+    eyebrow: "PROVIDERS",
+    title: "Deal professionals",
+    sub: "Attorneys, real estate, QoE, tax, insurance, and diligence help.",
+    tone: "green",
+    prompt: "Find deal professionals for this transaction: M&A counsel, QoE, tax, insurance, and real estate support.",
+  },
+];
+
+const DISCOVERY: DiscoveryRow[] = [
+  {
+    icon: "search",
+    title: "Buyer pool for industrial services",
+    sub: "Strategics, PE platforms, and independent sponsors that fit Big Fake Deal.",
+    pill: "18 buyers",
+    prompt: "Open the buyer pool search for industrial services and tell me who deserves outreach first.",
+  },
+  {
+    icon: "deal",
+    title: "Targets from a route-density thesis",
+    sub: "Pest, HVAC, and field-service companies clustered by geography.",
+    pill: "42 targets",
+    prompt: "Build a target list from a route-density thesis in pest, HVAC, and field services.",
+  },
+  {
+    icon: "chart",
+    title: "SBA and senior debt lenders",
+    sub: "Lenders comfortable with service business cash flow and light collateral.",
+    pill: "12 lenders",
+    prompt: "Find SBA and senior debt lenders for a lower-middle-market services acquisition.",
+  },
+  {
+    icon: "doc",
+    title: "M&A attorneys for seller-side docs",
+    sub: "Counsel with lower-middle-market transaction experience.",
+    pill: "9 firms",
+    prompt: "Find M&A attorneys who can review seller-side documents and data-room workflow.",
+  },
+];
+
+const EXAMPLES = [
+  "Find buyers for Big Fake Deal",
+  "Build a target list from my HVAC thesis",
+  "Map PE firms active in pest control",
+  "Find M&A attorneys near Austin",
+];
+
+export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
+  const [query, setQuery] = useState("");
+
+  const ask = (prompt: string) => {
+    onTalkToYulia?.(prompt);
   };
 
-  const askYulia = (prompt: string) => {
-    if (onTalkToYulia) onTalkToYulia(prompt);
+  const runSearch = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    ask(`Run a market discovery search: ${trimmed}`);
   };
 
   return (
-    <div className="m-fade-up">
-      {/* Hero — Today's Brief */}
-      <section style={{ marginBottom: 36 }}>
-        <div
-          className="m-card elevated tap"
-          onClick={openTopPick}
-          role="button"
-          tabIndex={0}
-          aria-label="Today's brief — open top pick"
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openTopPick(); } }}
-          style={{
-            position: "relative", overflow: "hidden",
-            background: "linear-gradient(135deg, #2E5C8A 0%, #1A3D63 100%)",
-            color: "#fff", padding: 0,
-            border: "none",
-          }}
-        >
-          <div style={H.glow} aria-hidden="true" />
+    <div className="m-fade-up" style={S.page}>
+      <section style={S.hero}>
+        <div style={S.heroCopy}>
+          <div className="mono" style={S.eyebrow}>SEARCH</div>
+          <h1 style={S.title}>Find the other side of the market.</h1>
+          <p style={S.sub}>
+            Search here is not document search. It is market discovery: buyers, targets, capital, and the professionals who help deals close.
+          </p>
+        </div>
 
-          <div style={H.headerRow}>
-            <span className="mono" style={H.eyebrow}>WELCOME TO SMBX · WORKING SAMPLE</span>
-            <span style={{ fontSize: 11, color: "#fff" }}>{HERO_DATE}</span>
-          </div>
+        <form onSubmit={runSearch} style={S.searchBox}>
+          <V6Icon name="search" size={18} />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Ask Yulia to find buyers, targets, PE, lenders, or deal pros"
+            style={S.input}
+            aria-label="Market discovery search"
+          />
+          <button type="submit" style={S.searchButton}>Search</button>
+        </form>
 
-          <div style={H.headBlock}>
-            <h1 style={H.h1}>Agentic AI specifically built for buying and selling businesses of all shapes and sizes.</h1>
-            <p style={H.tag}>Yulia does all of the hard work &mdash; so your deal team can focus on building relationships and making deals better and faster.</p>
-          </div>
-
-          <div style={H.picksHead}>
-            <span className="mono" style={H.picksEyebrow}>YULIA&rsquo;S PICKS · TODAY · {picks.length} DEALS · 14 MIN READ</span>
-            <span style={{ fontSize: 11, color: "#fff" }}>↓ tap any to open</span>
-          </div>
-
-          <div style={H.picksList}>
-            {picks.map((p, i) => (
-              <div
-                key={p.rank}
-                onClick={(e) => { e.stopPropagation(); openTab({ kind: "deal", title: p.name, id: p.id }); }}
-                style={{
-                  ...H.pickRow,
-                  borderBottom: i === picks.length - 1 ? "none" : "1px solid rgba(255,255,255,0.1)",
-                }}
-              >
-                <span style={H.pickRank}>{p.rank}</span>
-                <span style={H.pickName}>{p.name}</span>
-                <span style={H.pickNote}>{p.note}</span>
-                <span style={H.pickFit}>
-                  {p.fit}
-                  <span style={H.pickFitLabel}>FIT</span>
-                </span>
-              </div>
-            ))}
-          </div>
+        <div style={S.examples}>
+          {EXAMPLES.map(example => (
+            <button key={example} type="button" style={S.examplePill} onClick={() => { setQuery(example); ask(`Run a market discovery search: ${example}`); }}>
+              {example}
+            </button>
+          ))}
         </div>
       </section>
 
-      {/* In Review */}
-      <V6Section
-        eyebrow={`PIPELINE · ${inReview.length} IN REVIEW`}
-        title="In review"
-        sub="Live deals you and Yulia are working"
-        action={
+      <section style={S.section}>
+        <SectionTitle eyebrow="BROWSE" title="Categories" sub="Start broad, then let Yulia narrow by thesis, geography, check size, fit, and relationship angle." />
+        <div style={S.categoryGrid}>
+          {CATEGORIES.map(category => (
+            <CategoryCard key={category.title} category={category} onClick={() => ask(category.prompt)} />
+          ))}
+        </div>
+      </section>
+
+      <section style={S.discoveryGrid}>
+        <div style={S.storyCard}>
+          <div className="mono" style={S.storyEyebrow}>ASK YULIA</div>
+          <h2 style={S.storyTitle}>What is worth sourcing this week?</h2>
+          <p style={S.storySub}>Yulia can turn a thesis into ranked companies, likely buyers, capital providers, and outreach notes.</p>
           <button
-            className="m-btn text"
-            style={{ height: 28, fontSize: 12 }}
-            onClick={() => askYulia("Show me every deal currently in review across my pipeline.")}
             type="button"
+            style={S.storyButton}
+            onClick={() => ask("What is worth sourcing this week based on my current pipeline and deal thesis?")}
           >
-            See all &rarr;
+            Open the chat <span aria-hidden="true">↗</span>
           </button>
-        }
-      >
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 14 }}>
-          {inReview.map(d => (
-            <V6DealCard
-              key={d.id}
-              verdict={d.verdict}
-              name={d.name}
-              sub={d.sub}
-              fit={d.fit}
-              sde={d.sde}
-              multiple={d.multiple}
-              note={d.note}
-              onClick={() => openTab({ kind: "deal", title: d.name, id: d.id })}
-            />
-          ))}
         </div>
-      </V6Section>
 
-      {/* Yulia is watching */}
-      <V6Section
-        eyebrow="YULIA IS WATCHING · 87 SOURCES"
-        title="Yulia is watching"
-        sub="Sources Yulia revisits weekly. Click to add to pipeline."
-      >
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))", gap: 14 }}>
-          {[WATCHING_LEFT, WATCHING_RIGHT].map((col, idx) => (
-            <div key={idx} className="m-card" style={{ overflow: "hidden", padding: 0 }}>
-              {col.map((w, i) => (
-                <V6WatchRow
-                  key={w.tag}
-                  {...w}
-                  last={i === col.length - 1}
-                  onClick={() => askYulia(`Walk me through the latest from ${w.name} — what's worth a closer look?`)}
-                />
-              ))}
+        <div style={S.listCard}>
+          <div style={S.listTop}>
+            <div>
+              <div className="mono" style={S.listEyebrow}>RECENT DISCOVERY</div>
+              <h2 style={S.listTitle}>Searches to reopen</h2>
             </div>
-          ))}
-        </div>
-      </V6Section>
-
-      {/* Recently closed */}
-      <V6Section eyebrow="RECENT" title="Recently closed" sub="Reference deals — ask Yulia about any of them.">
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 12 }}>
-          {closed.map(d => (
-            <div
-              key={d.name}
-              className="m-card filled-tonal m-state tap"
-              onClick={() => openTab({ kind: "deal", title: `${d.name} (closed)` })}
-              role="button"
-              tabIndex={0}
-              aria-label={`${d.name} ${d.sub}`}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openTab({ kind: "deal", title: `${d.name} (closed)` }); } }}
-              style={{ padding: "14px 16px", cursor: "pointer" }}
+            <button
+              className="m-btn tonal"
+              type="button"
+              onClick={() => openTab({ kind: "analysis", title: "Discovery map" })}
             >
-              <div className="mono" style={{ fontSize: 9.5, color: "var(--m-on-surface-mid)", letterSpacing: "0.14em", fontWeight: 600 }}>{d.date}</div>
-              <div style={{
-                fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14,
-                letterSpacing: "-0.01em", color: "var(--m-on-surface)", marginTop: 6,
-              }}>{d.name}</div>
-              <div style={{ fontSize: 12, color: "var(--m-on-surface-mid)", marginTop: 2 }}>{d.sub}</div>
-            </div>
+              Open map
+            </button>
+          </div>
+
+          {DISCOVERY.map((row, index) => (
+            <button
+              key={row.title}
+              type="button"
+              style={{ ...S.discoveryRow, borderBottom: index === DISCOVERY.length - 1 ? "none" : "1px solid var(--m-outline-var)" }}
+              onClick={() => ask(row.prompt)}
+            >
+              <span style={S.rowIcon}><V6Icon name={row.icon} size={16} /></span>
+              <span style={S.rowText}>
+                <strong>{row.title}</strong>
+                <span>{row.sub}</span>
+              </span>
+              <span style={S.rowPill}>{row.pill}</span>
+              <span style={S.chevron} aria-hidden="true">›</span>
+            </button>
           ))}
         </div>
-      </V6Section>
+      </section>
     </div>
   );
 }
 
-const H: Record<string, CSSProperties> = {
-  glow: {
-    position: "absolute", top: -120, right: -100,
-    width: 380, height: 380, borderRadius: "50%",
-    background: "radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%)",
-    pointerEvents: "none",
+function SectionTitle({ eyebrow, title, sub }: { eyebrow: string; title: string; sub: string }) {
+  return (
+    <div style={S.sectionHead}>
+      <div className="mono" style={S.sectionEyebrow}>{eyebrow}</div>
+      <h2 style={S.sectionTitle}>{title}</h2>
+      <p style={S.sectionSub}>{sub}</p>
+    </div>
+  );
+}
+
+function CategoryCard({ category, onClick }: { category: Category; onClick: () => void }) {
+  const t = tone(category.tone);
+  return (
+    <button type="button" style={{ ...S.categoryCard, background: t.bg, color: t.fg, boxShadow: t.shadow }} onClick={onClick}>
+      <span className="mono" style={S.categoryEyebrow}>{category.eyebrow}</span>
+      <span style={S.categorySpacer} />
+      <strong style={S.categoryTitle}>{category.title}</strong>
+      <span style={S.categorySub}>{category.sub}</span>
+    </button>
+  );
+}
+
+function tone(name: Category["tone"]) {
+  const tones: Record<Category["tone"], { bg: string; fg: string; shadow: string }> = {
+    gold: {
+      bg: `linear-gradient(145deg, rgba(214,163,92,0.42) 0%, rgba(156,113,40,0.78) 100%), url('${RANDOM_TEXTURES.card}')`,
+      fg: "#fffaf3",
+      shadow: "0 24px 54px rgba(156,113,40,0.22)",
+    },
+    purple: {
+      bg: `linear-gradient(145deg, rgba(138,154,232,0.46) 0%, rgba(81,70,159,0.78) 100%), url('${RANDOM_TEXTURES.cardBuyers}')`,
+      fg: "#fff",
+      shadow: "0 24px 54px rgba(79,96,189,0.22)",
+    },
+    green: {
+      bg: `linear-gradient(145deg, rgba(98,153,135,0.48) 0%, rgba(46,111,89,0.78) 100%), url('${RANDOM_TEXTURES.cardPursue}')`,
+      fg: "#F8FFFB",
+      shadow: "0 24px 54px rgba(46,111,89,0.20)",
+    },
+    blue: {
+      bg: `linear-gradient(145deg, rgba(127,168,217,0.48) 0%, rgba(46,92,138,0.78) 100%), url('${RANDOM_TEXTURES.cardBaseline}')`,
+      fg: "#fff",
+      shadow: "0 24px 54px rgba(46,92,138,0.20)",
+    },
+    ink: {
+      bg: "linear-gradient(145deg, #252B3B 0%, #121722 100%)",
+      fg: "#fff",
+      shadow: "0 24px 54px rgba(18,23,34,0.22)",
+    },
+    aqua: {
+      bg: "linear-gradient(145deg, #88C7C7 0%, #397B85 100%)",
+      fg: "#fff",
+      shadow: "0 24px 54px rgba(57,123,133,0.20)",
+    },
+  };
+  return tones[name];
+}
+
+const S: Record<string, CSSProperties> = {
+  page: {
+    minHeight: "100%",
+    position: "relative",
   },
-  headerRow: {
-    position: "relative", padding: "24px 28px 0",
-    display: "flex", justifyContent: "space-between", alignItems: "center",
+  hero: {
+    position: "relative",
+    overflow: "hidden",
+    padding: 30,
+    borderRadius: 26,
+    backgroundImage: `linear-gradient(135deg, rgba(255,255,255,0.88) 0%, rgba(242,245,255,0.78) 62%, rgba(238,241,251,0.60) 100%), url('${RANDOM_TEXTURES.baseline}')`,
+    backgroundSize: "cover, cover",
+    backgroundPosition: "center, center",
+    border: "1px solid var(--m-outline-var)",
+    boxShadow: "var(--m-elev-2)",
+    marginBottom: 34,
+  },
+  heroCopy: {
+    maxWidth: 860,
   },
   eyebrow: {
-    fontSize: 10, color: "#fff",
-    letterSpacing: "0.14em", fontWeight: 600,
+    fontSize: 10,
+    letterSpacing: "0.16em",
+    fontWeight: 800,
+    color: "var(--m-on-primary-container)",
   },
-  headBlock: { position: "relative", padding: "20px 28px 0" },
-  h1: {
-    fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 38,
-    letterSpacing: "-0.03em", lineHeight: 1.05, margin: 0, color: "#fff",
-    maxWidth: 760, textWrap: "balance",
+  title: {
+    margin: "8px 0 0",
+    fontSize: "clamp(44px, 5vw, 72px)",
+    lineHeight: 0.92,
+    letterSpacing: "-0.06em",
+    textWrap: "balance",
+    color: "var(--m-on-surface)",
   },
-  tag: {
-    fontSize: 14.5, lineHeight: 1.55, color: "#fff",
-    margin: "12px 0 0", maxWidth: 620, textWrap: "pretty",
+  sub: {
+    margin: "16px 0 0",
+    maxWidth: 680,
+    fontSize: 16,
+    lineHeight: 1.55,
+    color: "var(--m-on-surface-var)",
   },
-  picksHead: {
-    position: "relative", padding: "16px 28px 0",
-    display: "flex", alignItems: "center", justifyContent: "space-between",
+  searchBox: {
+    marginTop: 26,
+    maxWidth: 900,
+    height: 58,
+    display: "grid",
+    gridTemplateColumns: "28px minmax(0, 1fr) auto",
+    alignItems: "center",
+    gap: 12,
+    padding: "0 10px 0 18px",
+    borderRadius: 18,
+    background: "#FFFFFF",
+    color: "var(--m-on-surface-mid)",
+    border: "1px solid var(--m-outline-var)",
+    boxShadow: "0 14px 34px rgba(26,34,51,0.08)",
   },
-  picksEyebrow: {
-    fontSize: 10, color: "#fff",
-    letterSpacing: "0.14em", fontWeight: 600,
+  input: {
+    minWidth: 0,
+    width: "100%",
+    border: "none",
+    outline: "none",
+    background: "transparent",
+    fontSize: 16,
+    color: "var(--m-on-surface)",
   },
-  picksList: {
-    position: "relative", margin: "12px 18px 18px",
-    background: "rgba(255,255,255,0.14)", borderRadius: 14,
-  },
-  pickRow: {
-    display: "grid", gridTemplateColumns: "32px 1.4fr 2.4fr 60px",
-    alignItems: "center", gap: 16, padding: "11px 22px",
+  searchButton: {
+    all: "unset",
+    height: 40,
+    padding: "0 16px",
+    borderRadius: 999,
+    background: "var(--m-primary)",
+    color: "var(--m-on-primary)",
+    fontWeight: 800,
     cursor: "pointer",
   },
-  pickRank: {
-    fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 18,
-    color: "#fff", textAlign: "center",
+  examples: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 14,
   },
-  pickName: {
-    fontSize: 13.5, fontWeight: 600, color: "#fff", letterSpacing: "-0.01em",
+  examplePill: {
+    all: "unset",
+    padding: "8px 12px",
+    borderRadius: 999,
+    background: "rgba(255,255,255,0.68)",
+    border: "1px solid var(--m-outline-var)",
+    color: "var(--m-on-surface-var)",
+    fontSize: 12.5,
+    fontWeight: 700,
+    cursor: "pointer",
   },
-  pickNote: { fontSize: 12.5, color: "#fff" },
-  pickFit: {
-    fontFamily: "var(--font-mono)", fontSize: 17, fontWeight: 700,
-    color: "#fff", textAlign: "right", fontVariantNumeric: "tabular-nums",
-    display: "flex", flexDirection: "column", alignItems: "flex-end",
+  section: {
+    marginBottom: 34,
   },
-  pickFitLabel: {
-    fontSize: 8, color: "#fff",
-    letterSpacing: "0.12em", fontWeight: 600, marginTop: -2,
+  sectionHead: {
+    marginBottom: 14,
+  },
+  sectionEyebrow: {
+    fontSize: 10,
+    letterSpacing: "0.16em",
+    fontWeight: 800,
+    color: "var(--m-on-primary-container)",
+  },
+  sectionTitle: {
+    margin: "4px 0 0",
+    fontSize: 32,
+    lineHeight: 1,
+    letterSpacing: "-0.045em",
+    color: "var(--m-on-surface)",
+  },
+  sectionSub: {
+    margin: "8px 0 0",
+    maxWidth: 760,
+    fontSize: 14,
+    color: "var(--m-on-surface-mid)",
+  },
+  categoryGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+    gap: 16,
+  },
+  categoryCard: {
+    all: "unset",
+    minHeight: 230,
+    borderRadius: 24,
+    padding: 24,
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden",
+    cursor: "pointer",
+    border: "1px solid rgba(255,255,255,0.36)",
+    backgroundSize: "cover, cover",
+    backgroundPosition: "center, center",
+  },
+  categoryEyebrow: {
+    fontSize: 10,
+    letterSpacing: "0.16em",
+    fontWeight: 800,
+    opacity: 0.88,
+  },
+  categorySpacer: {
+    flex: 1,
+  },
+  categoryTitle: {
+    display: "block",
+    fontSize: 28,
+    lineHeight: 0.98,
+    letterSpacing: "-0.045em",
+  },
+  categorySub: {
+    display: "block",
+    marginTop: 10,
+    maxWidth: 310,
+    fontSize: 13.5,
+    lineHeight: 1.45,
+    opacity: 0.82,
+  },
+  discoveryGrid: {
+    display: "grid",
+    gridTemplateColumns: "minmax(300px, 0.75fr) minmax(420px, 1.25fr)",
+    gap: 18,
+    alignItems: "stretch",
+  },
+  storyCard: {
+    minHeight: 332,
+    borderRadius: 26,
+    padding: 28,
+    backgroundImage: `linear-gradient(145deg, rgba(138,154,232,0.48) 0%, rgba(79,96,189,0.78) 100%), url('${RANDOM_TEXTURES.cardBuyers}')`,
+    backgroundSize: "cover, cover",
+    backgroundPosition: "center, center",
+    color: "#fff",
+    boxShadow: "0 24px 58px rgba(79,96,189,0.24)",
+  },
+  storyEyebrow: {
+    fontSize: 10,
+    letterSpacing: "0.16em",
+    fontWeight: 800,
+    opacity: 0.84,
+  },
+  storyTitle: {
+    margin: "34px 0 0",
+    maxWidth: 440,
+    fontSize: 42,
+    lineHeight: 0.98,
+    letterSpacing: "-0.055em",
+    textWrap: "balance",
+  },
+  storySub: {
+    margin: "16px 0 0",
+    maxWidth: 420,
+    fontSize: 15,
+    lineHeight: 1.55,
+    opacity: 0.86,
+  },
+  storyButton: {
+    all: "unset",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 10,
+    marginTop: 28,
+    height: 42,
+    padding: "0 16px",
+    borderRadius: 999,
+    border: "1px solid rgba(255,255,255,0.45)",
+    background: "rgba(255,255,255,0.16)",
+    fontWeight: 850,
+    cursor: "pointer",
+  },
+  listCard: {
+    borderRadius: 26,
+    backgroundImage: `linear-gradient(135deg, rgba(255,255,255,0.94), rgba(248,250,255,0.82)), url('${RANDOM_TEXTURES.card}')`,
+    backgroundSize: "cover, cover",
+    backgroundPosition: "center, center",
+    border: "1px solid var(--m-outline-var)",
+    boxShadow: "var(--m-elev-2)",
+    overflow: "hidden",
+  },
+  listTop: {
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 16,
+    padding: "24px 24px 8px",
+  },
+  listEyebrow: {
+    fontSize: 10,
+    letterSpacing: "0.16em",
+    fontWeight: 800,
+    color: "var(--m-on-primary-container)",
+  },
+  listTitle: {
+    margin: "4px 0 0",
+    fontSize: 28,
+    lineHeight: 1,
+    letterSpacing: "-0.045em",
+    color: "var(--m-on-surface)",
+  },
+  discoveryRow: {
+    all: "unset",
+    display: "grid",
+    gridTemplateColumns: "46px minmax(0, 1fr) auto 20px",
+    alignItems: "center",
+    gap: 14,
+    width: "100%",
+    minHeight: 84,
+    boxSizing: "border-box",
+    padding: "14px 24px",
+    cursor: "pointer",
+  },
+  rowIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    display: "grid",
+    placeItems: "center",
+    background: "var(--m-primary-container)",
+    color: "var(--m-on-primary-container)",
+  },
+  rowText: {
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: 3,
+    fontSize: 12.5,
+    color: "var(--m-on-surface-mid)",
+    lineHeight: 1.35,
+  },
+  rowPill: {
+    borderRadius: 999,
+    padding: "7px 11px",
+    background: "var(--m-primary-container)",
+    color: "var(--m-on-primary-container)",
+    fontWeight: 850,
+    whiteSpace: "nowrap",
+  },
+  chevron: {
+    color: "var(--m-on-surface-mid)",
+    fontSize: 28,
+    lineHeight: 1,
   },
 };
-
-/* ─── Real-deal → display adapters ───────────────────────────────────
-   Convert HomeDeal records (revenue/sde/ebitda in cents) into the shape
-   the existing SearchRoot UI consumes. The synthetic fit score is a
-   quintile of EBITDA across the user's pipeline so the home page has
-   a visible signal until a real fit_score column lands on the deal row.
-*/
-
-function fmtCents(cents: number | null | undefined): string {
-  if (!cents) return "—";
-  const dollars = cents / 100;
-  if (dollars >= 1_000_000) return `$${(dollars / 1_000_000).toFixed(2).replace(/\.?0+$/, "")}M`;
-  if (dollars >= 1_000) return `$${Math.round(dollars / 1_000)}K`;
-  return `$${Math.round(dollars).toLocaleString()}`;
-}
-
-function fmtMonth(d: string): string {
-  try {
-    const date = new Date(d);
-    return date.toLocaleDateString("en-US", { month: "short", day: "2-digit" }).toUpperCase();
-  } catch { return ""; }
-}
-
-function fitFromEbitda(ebitda: number | null | undefined): number {
-  // Crude proxy until a real fit score column exists. Maps EBITDA in cents
-  // onto a 60-92 range so the picks list isn't all 0.
-  if (!ebitda) return 60;
-  const m = ebitda / 100_000_000; // millions
-  if (m >= 5) return 92;
-  if (m >= 3) return 86;
-  if (m >= 2) return 80;
-  if (m >= 1) return 74;
-  return 65;
-}
-
-function verdictFromGate(gate: string): Verdict {
-  // Late-stage gates → pursue; early/exploratory → watch; stalled handled separately.
-  if (/[345]$/.test(gate)) return "pursue";
-  if (/[12]$/.test(gate)) return "watch";
-  return "watch";
-}
-
-function dealToPick(d: HomeDeal, i: number): Pick {
-  const sde = fmtCents(d.sde);
-  const note = (d.financials?.notes || `${sde} SDE · ${d.industry || "—"}`).slice(0, 80);
-  return {
-    rank: i + 1,
-    name: d.business_name || d.industry || `Deal #${d.id}`,
-    note,
-    fit: fitFromEbitda(d.ebitda),
-    id: String(d.id),
-  };
-}
-
-function dealToInReview(d: HomeDeal): InReviewDeal {
-  const rev = fmtCents(d.revenue);
-  const loc = d.location || d.industry || "—";
-  const mult = d.financials?.multiple ? `${d.financials.multiple.toFixed(1)}×` : "—";
-  return {
-    verdict: verdictFromGate(d.current_gate),
-    id: String(d.id),
-    name: d.business_name || `Deal #${d.id}`,
-    sub: `${rev} rev · ${loc}`,
-    fit: fitFromEbitda(d.ebitda),
-    sde: fmtCents(d.sde),
-    multiple: mult,
-    note: d.financials?.notes || `${d.industry || "Business"} at ${d.current_gate}`,
-  };
-}
-
-function dealToClosed(d: HomeDeal): ClosedDeal {
-  const price = fmtCents(d.asking_price);
-  const mult = d.financials?.multiple ? ` · ${d.financials.multiple.toFixed(1)}×` : "";
-  return {
-    name: d.business_name || `Deal #${d.id}`,
-    sub: `Closed at ${price}${mult}`,
-    date: fmtMonth(d.updated_at),
-  };
-}

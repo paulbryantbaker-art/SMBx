@@ -10,9 +10,11 @@ import { V6Chat } from "./Chat";
 import { V6Canvas } from "./Canvas";
 import { SampleBanner, SAMPLE_DISMISS_KEY } from "./SampleBanner";
 import { MODES } from "./icons";
-import type { Message, ModeId, Tab } from "./types";
+import { buildDesktopSurfaceContext, type SurfaceContext } from "../../lib/yuliaSurfaceContext";
+import { normalizeModelPreference, type ModelPreference } from "../../lib/modelPreference";
+import type { FileScope, Message, ModeId, Tab } from "./types";
 
-const VALID_MODES: ModeId[] = ["search", "docs", "analysis", "intel", "library"];
+const VALID_MODES: ModeId[] = ["today", "pipeline", "search", "files", "docs", "analysis", "intel", "library"];
 
 interface ChatBridge {
   thread: Message[];
@@ -20,7 +22,7 @@ interface ChatBridge {
   streamingText: string;
   activeTool: string | null;
   error: string | null;
-  send: (text: string) => void;
+  send: (text: string, surfaceContext?: SurfaceContext, modelPreference?: ModelPreference) => void;
 }
 
 export default function V6App() {
@@ -69,7 +71,7 @@ function V6AppAnon({
     streamingText: chat.streamingText,
     activeTool: null,
     error: chat.error,
-    send: chat.sendMessage,
+    send: (text, surfaceContext, modelPreference) => chat.sendMessage(text, undefined, surfaceContext, modelPreference),
   }), [chat.messages, chat.sending, chat.streamingText, chat.error, chat.sendMessage]);
   return <V6AppShell user={user} chat={bridge} onSignOut={() => { void onSignOut(); }} onDevSignIn={onDevSignIn} />;
 }
@@ -108,30 +110,52 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
   const initial = readHashState();
 
   const [activeMode, setActiveMode] = useState<ModeId>(initial.mode);
+  const [modelPreference, setModelPreference] = useState<ModelPreference>(() => {
+    try {
+      return normalizeModelPreference(localStorage.getItem("smbx_model_preference"));
+    } catch {
+      return "auto";
+    }
+  });
   const [searchOpen, setSearchOpen] = useState(false);
   const [tabs, setTabs] = useState<Tab[]>(() => {
     const rootMode = initial.mode;
-    return [{
+    const rootTab: Tab = {
       id: `${rootMode}-root`,
       kind: "mode-root",
       modeId: rootMode,
-      title: `Sample ${MODES.find(m => m.id === rootMode)?.label ?? rootMode}`,
+      title: MODES.find(m => m.id === rootMode)?.label ?? rootMode,
       pinned: true,
-    }];
+    };
+    const deepTab = tabFromHash(initial.tab, initial.scope, initial.title);
+    return deepTab && deepTab.id !== rootTab.id ? [rootTab, deepTab] : [rootTab];
   });
   const [activeTabId, setActiveTabId] = useState(initial.tab ?? `${initial.mode}-root`);
 
   // Sync tab + mode to URL hash on every change
   useEffect(() => {
-    writeHashState({ mode: activeMode, tab: activeTabId });
-  }, [activeMode, activeTabId]);
+    const activeTab = tabs.find(t => t.id === activeTabId);
+    writeHashState({ mode: activeMode, tab: activeTabId, scope: activeTab?.fileScope });
+  }, [activeMode, activeTabId, tabs]);
 
   // Listen for browser back/forward
   useEffect(() => {
     const onHash = () => {
       const next = readHashState();
+      const rootId = `${next.mode}-root`;
       setActiveMode(next.mode);
-      if (next.tab) setActiveTabId(next.tab);
+      setTabs(prev => {
+        const deepTab = tabFromHash(next.tab, next.scope, next.title);
+        const withRoot = prev.find(t => t.id === rootId)
+          ? prev
+          : [...prev, { id: rootId, kind: "mode-root" as const, modeId: next.mode, title: MODES.find(m => m.id === next.mode)?.label ?? next.mode, pinned: true }];
+        if (!deepTab) return withRoot;
+        if (withRoot.find(t => t.id === deepTab.id)) {
+          return withRoot.map(t => t.id === deepTab.id ? { ...t, ...deepTab } : t);
+        }
+        return [...withRoot, deepTab];
+      });
+      setActiveTabId(next.tab ?? rootId);
     };
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
@@ -144,7 +168,7 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
     setTabs(prev => {
       if (prev.find(t => t.id === rootId)) return prev;
       const meta = MODES.find(m => m.id === modeId);
-      return [...prev, { id: rootId, kind: "mode-root", modeId, title: `Sample ${meta?.label ?? modeId}`, pinned: true }];
+      return [...prev, { id: rootId, kind: "mode-root", modeId, title: meta?.label ?? modeId, pinned: true }];
     });
     setActiveTabId(rootId);
   };
@@ -214,13 +238,21 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
   const [draft, setDraft] = useState("");
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
+  const currentSurfaceContext = () => buildDesktopSurfaceContext(activeMode, activeTabId, tabs);
+
   const send = (override?: string) => {
     const msg = (override ?? draft).trim();
     if (!msg) return;
-    chat.send(msg);
+    chat.send(msg, currentSurfaceContext(), modelPreference);
     setDraft("");
     setTimeout(() => inputRef.current?.focus(), 50);
   };
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("smbx_model_preference", modelPreference);
+    } catch { /* ignore */ }
+  }, [modelPreference]);
 
   // ─── Resizable chat well ───
   const [chatWidth, setChatWidth] = useState(400);
@@ -330,6 +362,8 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
               streamingText={chat.streamingText}
               activeTool={chat.activeTool}
               error={chat.error}
+              modelPreference={modelPreference}
+              setModelPreference={setModelPreference}
             />
           </div>
           <div onMouseDown={onDragStart} title="Drag to resize chat" role="separator" aria-orientation="vertical" style={A.dragHandle}>
@@ -356,25 +390,54 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
 
 /* ─── Hash-based URL state ───────────────────────────────── */
 
-function readHashState(): { mode: ModeId; tab: string | null } {
+function readHashState(): { mode: ModeId; tab: string | null; scope?: FileScope; title?: string } {
   try {
     const hash = window.location.hash.replace(/^#/, "");
-    if (!hash) return { mode: "search", tab: null };
+    if (!hash) return { mode: "today", tab: null };
     const params = new URLSearchParams(hash);
+    const mobileDeal = params.get("deal");
+    if (mobileDeal) {
+      return { mode: "today", tab: mobileDeal, title: params.get("t") ?? undefined };
+    }
     const rawMode = params.get("mode") as ModeId | null;
-    const mode: ModeId = rawMode && VALID_MODES.includes(rawMode) ? rawMode : "search";
+    const mode: ModeId = rawMode && VALID_MODES.includes(rawMode) ? rawMode : "today";
+    const rawScope = params.get("scope") as FileScope | null;
+    const scope = rawScope && ["all", "data-room", "shared"].includes(rawScope) ? rawScope : undefined;
     const tab = params.get("tab");
-    return { mode, tab };
+    return { mode, tab, scope, title: params.get("t") ?? undefined };
   } catch {
-    return { mode: "search", tab: null };
+    return { mode: "today", tab: null };
   }
 }
 
-function writeHashState({ mode, tab }: { mode: ModeId; tab: string }) {
+function tabFromHash(tab: string | null, scope?: FileScope, title?: string): Tab | null {
+  if (!tab) return null;
+  if (tab.endsWith("-root")) return null;
+  if (tab.startsWith("deal-")) {
+    return {
+      id: tab,
+      kind: "deal",
+      title: title || titleForDealId(tab),
+      fileScope: scope,
+    };
+  }
+  return null;
+}
+
+function titleForDealId(id: string): string {
+  if (id.includes("pest")) return "Pest Control · FL";
+  if (id.includes("hvac")) return "HVAC platform · CO";
+  if (id.includes("electrical")) return "Electrical Contractor · TX";
+  if (id.includes("dist")) return "Distribution · OH";
+  return "Big Fake Deal";
+}
+
+function writeHashState({ mode, tab, scope }: { mode: ModeId; tab: string; scope?: FileScope }) {
   try {
     const params = new URLSearchParams();
     params.set("mode", mode);
     params.set("tab", tab);
+    if (scope) params.set("scope", scope);
     const next = `#${params.toString()}`;
     if (window.location.hash !== next) {
       window.history.replaceState(null, "", window.location.pathname + window.location.search + next);
@@ -392,13 +455,13 @@ const A: Record<string, CSSProperties> = {
   dragHandle: {
     width: 6, flexShrink: 0,
     cursor: "col-resize",
-    background: "var(--m-outline-var)",
+    background: "#DDE3F0",
     position: "relative",
   },
   dragGrip: {
     position: "absolute", top: "50%", left: "50%",
     transform: "translate(-50%, -50%)",
     width: 2, height: 28, borderRadius: 2,
-    background: "var(--m-on-surface-mid)", opacity: 0.4,
+    background: "#7A8395", opacity: 0.45,
   },
 };

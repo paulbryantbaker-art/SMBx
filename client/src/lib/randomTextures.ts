@@ -1,48 +1,65 @@
 /* Random texture rotation — module-level pick.
  *
- * Each surface (welcome hero, pursue, baseline, buyers) draws once at module
- * import from a curated pool of compatible watercolor washes. Module imports
- * happen once per page load, so the pick is stable for the session and
- * re-rolls on hard refresh — exactly the "different look every reload" feel
- * we want without React re-render churn.
+ * textures 4 = hero surfaces.
+ * textures 3 = secondary/action cards.
  *
- * Constraint: home page (Today welcome hero) stays in the GOLD pool so the
- * warm/gold brand identity is preserved across rolls. Other surfaces draw
- * from broader pools that match their existing color washes (green, blue,
- * purple-cool).
- *
- * watch + pass stay fixed because their colors (peach, pink/coral) carry
- * semantic action meaning and don't have visual substitutes that read the
- * same way.
+ * Each surface draws once at module import, so the pick is stable for the
+ * session and re-rolls on hard refresh without React re-render churn.
  */
 
-const VERSION = "v=20260503";
+const VERSION = "v=20260509";
 const tex = (name: string) => `/textures/texture-${name}.png?${VERSION}`;
+const heroTex = (n: number) => `/textures/texture-hero-${n}.png?${VERSION}`;
+const cardTex = (n: number) => `/textures/texture-card-${n}.png?${VERSION}`;
 
 const pick = <T,>(arr: readonly T[]): T =>
   arr[Math.floor(Math.random() * arr.length)];
 
-// Warm + gold — for Today welcome hero + Brief screen header
-const GOLD_POOL = ["sunrise", "gold-marble", "orig-sunrise"] as const;
-
-// Sage / forest — for pursue action card + Detail pursue
-const GREEN_POOL = ["pursue", "sage-botanical", "orig-pursue"] as const;
-
-// Powder blue / mint / aqua — for Pipeline + Detail baseline
-const COOL_BLUE_POOL = [
-  "baseline", "mint-waves", "aqua-cloud", "orig-baseline",
-] as const;
-
-// Lavender / mist / cool — for Today Explore + Detail buyers
-const COOL_PURPLE_POOL = [
-  "buyers", "sage-botanical", "mint-waves", "orig-buyers",
-] as const;
+const HERO_POOL = [1, 2, 3, 4, 5, 6, 7, 8] as const;
+const CARD_POOL = [1, 2, 3, 4, 5, 6, 7, 8] as const;
 
 export const RANDOM_TEXTURES = {
-  welcome:  tex(pick(GOLD_POOL)),
-  pursue:   tex(pick(GREEN_POOL)),
-  baseline: tex(pick(COOL_BLUE_POOL)),
-  buyers:   tex(pick(COOL_PURPLE_POOL)),
-  watch:    tex("watch"), // semantic, fixed
-  pass:     tex("pass"),  // semantic, fixed
+  // Hero-facing aliases. Existing mobile hero cards consume these keys.
+  welcome:  heroTex(pick(HERO_POOL)),
+  pursue:   heroTex(pick(HERO_POOL)),
+  baseline: heroTex(pick(HERO_POOL)),
+  watch:    heroTex(pick(HERO_POOL)),
+  pass:     heroTex(pick(HERO_POOL)),
+
+  // Secondary/card-facing aliases. Existing supporting cards mostly consume
+  // buyers; newer surfaces can choose the explicit card keys.
+  buyers:       cardTex(pick(CARD_POOL)),
+  card:         cardTex(pick(CARD_POOL)),
+  cardPursue:   cardTex(pick(CARD_POOL)),
+  cardBaseline: cardTex(pick(CARD_POOL)),
+  cardBuyers:   cardTex(pick(CARD_POOL)),
+
+  // Legacy named textures remain available for any older route that expects
+  // semantic art. These are not in the new hero/card rotation.
+  legacyPursue:   tex("pursue"),
+  legacyWatch:    tex("watch"),
+  legacyPass:     tex("pass"),
+  legacyBaseline: tex("baseline"),
+} as const;
+
+export const DESKTOP_TEXTURES = {
+  todayHero: heroTex(2),
+  todayCard: cardTex(4),
+  todaySecondary: cardTex(4),
+
+  pipelineHero: heroTex(1),
+  pipelineCard: cardTex(2),
+  pipelineSecondary: cardTex(8),
+
+  filesHero: heroTex(3),
+  filesAll: cardTex(4),
+  filesDeals: cardTex(2),
+  filesAction: cardTex(5),
+  filesRoom: cardTex(7),
+
+  searchHero: heroTex(2),
+  searchOpportunities: cardTex(5),
+  searchBuyers: cardTex(7),
+  searchProviders: cardTex(2),
+  searchFinancing: cardTex(4),
 } as const;

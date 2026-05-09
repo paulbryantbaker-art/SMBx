@@ -17,6 +17,7 @@ interface CanvasActionPayload {
   dealId?: number;
   props?: Record<string, any>;
   content?: string;
+  tab?: { id?: string; kind?: string; title?: string; [key: string]: any };
 }
 
 /**
@@ -35,6 +36,13 @@ export async function persistCanvasTabFromAction(
   let props: Record<string, any> = {};
 
   switch (action.canvas_action) {
+    case 'open_tab':
+      if (!action.tab?.kind || !action.tab?.title) return false;
+      type = action.tab.kind;
+      tabId = action.tab.id || `${action.tab.kind}-${Date.now()}`;
+      label = action.tab.title;
+      props = { ...action.tab };
+      break;
     case 'create_model_tab':
       // Model tabs reuse tab id 'model' (matches client panel pattern)
       type = 'model';

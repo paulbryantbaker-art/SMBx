@@ -12,6 +12,7 @@
     "start:worker": "node dist/worker/worker.js",
     "test": "playwright test",
     "test:e2e": "playwright test",
+    "seed:demo-user": "node scripts/seed-demo-user-data.mjs",
     "design:extract": "node scripts/extract-design-tokens.mjs"
   },
   "dependencies": {

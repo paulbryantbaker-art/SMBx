@@ -105,7 +105,7 @@ deliverablesRouter.post('/deals/:dealId/deliverables', async (req, res) => {
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
 
   const dealId = parseInt(req.params.dealId);
-  const { menuItemSlug } = req.body;
+  const { menuItemSlug, modelPreference } = req.body;
 
   if (!dealId || !menuItemSlug) {
     return res.status(400).json({ error: 'dealId and menuItemSlug required' });
@@ -146,6 +146,7 @@ deliverablesRouter.post('/deals/:dealId/deliverables', async (req, res) => {
       userId,
       menuItemSlug,
       deliverableType: menuItem.slug.replace(/-/g, '_'),
+      modelPreference,
     };
     const jobId = await enqueueDeliverableGeneration(jobData);
 
@@ -165,6 +166,7 @@ deliverablesRouter.post('/deals/:dealId/deliverables', async (req, res) => {
       deliverableId: deliverable.id,
       jobId,
       status: 'queued',
+      title: menuItem.name,
     });
   } catch (err: any) {
     console.error('Generate deliverable error:', err.message);
@@ -210,6 +212,7 @@ deliverablesRouter.post('/deliverables/:id/regenerate', async (req, res) => {
       userId,
       menuItemSlug: slug,
       deliverableType: slug.replace(/-/g, '_'),
+      modelPreference: req.body?.modelPreference,
     };
     const jobId = await enqueueDeliverableGeneration(jobData);
 

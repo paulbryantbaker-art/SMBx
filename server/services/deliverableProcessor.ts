@@ -10,6 +10,7 @@
 import { sql } from '../db.js';
 import { callClaude, callClaudeWithModel } from './aiService.js';
 import { getModelForDeliverable, getMaxTokens } from './modelRouter.js';
+import { resolveDeliverableModelPreference } from './modelPreference.js';
 import { sendDeliverableReadyEmail } from './emailService.js';
 import { generateValuationReport } from './generators/valuationReport.js';
 import { generateSBAReport } from './generators/sbaBankability.js';
@@ -41,6 +42,7 @@ export interface DeliverableJobData {
   userId: number;
   menuItemSlug: string;
   deliverableType: string;
+  modelPreference?: string;
 }
 
 /**
@@ -724,7 +726,10 @@ export async function processDeliverable(data: DeliverableJobData): Promise<void
       default: {
         // ─── Category generators: route by category before generic fallback ───
         const category = getCategoryForType(normalizedType);
-        const routedModel = getModelForDeliverable(normalizedType);
+        const routedModel = resolveDeliverableModelPreference(
+          getModelForDeliverable(normalizedType),
+          data.modelPreference,
+        );
         const modelId = routedModel === 'deterministic' ? 'claude-sonnet-4-6' : routedModel;
         const maxTokens = getMaxTokens(routedModel) || 4096;
 

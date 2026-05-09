@@ -1,3 +1,5 @@
+import type { SurfaceContext } from "../../../lib/yuliaSurfaceContext";
+
 export type MobileTab = "today" | "pipeline" | "search" | "brief";
 
 export type MobileViewKind =
@@ -35,7 +37,7 @@ export interface MobileChatBridge {
   streamingText: string;
   activeTool: string | null;
   error: string | null;
-  send: (text: string) => void;
+  send: (text: string, surfaceContext?: SurfaceContext) => void;
 }
 
 export type Verdict = "pursue" | "watch" | "pass";

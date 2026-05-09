@@ -1692,27 +1692,27 @@ function CategoryCard({
 
 const categoryTones = {
   gold: {
-    background: "linear-gradient(160deg, rgba(202,150,82,0.30) 0%, rgba(128,86,36,0.62) 100%), linear-gradient(155deg, #D6A35C 0%, #9C7128 100%)",
+    background: `linear-gradient(160deg, rgba(202,150,82,0.30) 0%, rgba(128,86,36,0.62) 100%), url('${RANDOM_TEXTURES.card}')`,
     glow: "rgba(180,128,52,0.32)",
   },
   purple: {
-    background: "linear-gradient(160deg, rgba(125,98,170,0.30) 0%, rgba(75,52,128,0.62) 100%), linear-gradient(155deg, #8A75C2 0%, #5A4490 100%)",
+    background: `linear-gradient(160deg, rgba(125,98,170,0.30) 0%, rgba(75,52,128,0.62) 100%), url('${RANDOM_TEXTURES.cardBuyers}')`,
     glow: "rgba(110,82,158,0.30)",
   },
   sage: {
-    background: "linear-gradient(160deg, rgba(63,138,106,0.30) 0%, rgba(40,92,70,0.62) 100%), linear-gradient(155deg, #5A8C7A 0%, #2E5A48 100%)",
+    background: `linear-gradient(160deg, rgba(63,138,106,0.30) 0%, rgba(40,92,70,0.62) 100%), url('${RANDOM_TEXTURES.cardPursue}')`,
     glow: "rgba(63,138,106,0.30)",
   },
   blue: {
-    background: "linear-gradient(160deg, rgba(60,108,168,0.30) 0%, rgba(25,68,118,0.62) 100%), linear-gradient(155deg, #5C7BA3 0%, #2F4F77 100%)",
+    background: `linear-gradient(160deg, rgba(60,108,168,0.30) 0%, rgba(25,68,118,0.62) 100%), url('${RANDOM_TEXTURES.cardBaseline}')`,
     glow: "rgba(60,108,168,0.30)",
   },
   plum: {
-    background: "linear-gradient(160deg, rgba(168,90,124,0.30) 0%, rgba(108,46,76,0.62) 100%), linear-gradient(155deg, #B07898 0%, #7A4860 100%)",
+    background: `linear-gradient(160deg, rgba(168,90,124,0.30) 0%, rgba(108,46,76,0.62) 100%), url('${RANDOM_TEXTURES.cardBuyers}')`,
     glow: "rgba(150,78,108,0.28)",
   },
   slate: {
-    background: "linear-gradient(160deg, rgba(70,90,110,0.30) 0%, rgba(34,48,68,0.66) 100%), linear-gradient(155deg, #5A6878 0%, #2A3444 100%)",
+    background: `linear-gradient(160deg, rgba(70,90,110,0.30) 0%, rgba(34,48,68,0.66) 100%), url('${RANDOM_TEXTURES.cardBaseline}')`,
     glow: "rgba(50,72,98,0.30)",
   },
 };
@@ -1753,7 +1753,9 @@ const S: Record<string, CSSProperties> = {
     position: "relative",
     color: "#fff",
     cursor: "pointer",
-    background: "linear-gradient(160deg, rgba(202,150,82,0.30) 0%, rgba(128,86,36,0.62) 100%), linear-gradient(155deg, #D6A35C 0%, #9C7128 100%)",
+    backgroundImage: `linear-gradient(160deg, rgba(202,150,82,0.30) 0%, rgba(128,86,36,0.62) 100%), url('${RANDOM_TEXTURES.welcome}')`,
+    backgroundSize: "cover, cover",
+    backgroundPosition: "center, center",
     boxShadow:
       "0 14px 36px -10px rgba(180,128,52,0.32), " +
       "0 8px 20px -8px rgba(0,0,0,0.26), " +
@@ -1770,7 +1772,9 @@ const S: Record<string, CSSProperties> = {
     position: "relative",
     color: "#fff",
     cursor: "pointer",
-    background: "linear-gradient(160deg, rgba(95,115,200,0.30) 0%, rgba(50,72,160,0.62) 100%), linear-gradient(155deg, #8A9AE8 0%, #5C70C6 100%)",
+    backgroundImage: `linear-gradient(160deg, rgba(95,115,200,0.30) 0%, rgba(50,72,160,0.62) 100%), url('${RANDOM_TEXTURES.baseline}')`,
+    backgroundSize: "cover, cover",
+    backgroundPosition: "center, center",
     boxShadow:
       "0 14px 36px -10px rgba(95,115,200,0.32), " +
       "0 8px 20px -8px rgba(0,0,0,0.26), " +
@@ -1848,7 +1852,7 @@ const S: Record<string, CSSProperties> = {
     position: "relative",
     color: "#fff",
     backgroundImage:
-      `linear-gradient(165deg, rgba(63,138,106,0.34) 0%, rgba(48,74,130,0.68) 100%), url('${RANDOM_TEXTURES.buyers}')`,
+      `linear-gradient(165deg, rgba(63,138,106,0.34) 0%, rgba(48,74,130,0.68) 100%), url('${RANDOM_TEXTURES.baseline}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     boxShadow:
@@ -2216,6 +2220,8 @@ const S: Record<string, CSSProperties> = {
     flexDirection: "column",
     justifyContent: "space-between",
     color: "#fff",
+    backgroundSize: "cover, cover",
+    backgroundPosition: "center, center",
   },
   catGlow: {
     position: "absolute",

@@ -1,4 +1,5 @@
 import { type CSSProperties } from "react";
+import { RANDOM_TEXTURES } from "../../../lib/randomTextures";
 
 export type Verdict = "pursue" | "watch" | "pass";
 
@@ -25,7 +26,13 @@ export function V6DealCard({ verdict, name, sub, fit, sde, multiple, note, onCli
     <div
       onClick={onClick}
       className="m-card m-state tap"
-      style={{ padding: "16px 18px", cursor: "pointer" }}
+      style={{
+        padding: "16px 18px",
+        cursor: "pointer",
+        backgroundImage: `linear-gradient(135deg, rgba(255,255,255,0.94), rgba(248,250,255,0.82)), url('${RANDOM_TEXTURES.card}')`,
+        backgroundSize: "cover, cover",
+        backgroundPosition: "center, center",
+      }}
       role="button"
       tabIndex={0}
       aria-label={`${name}, ${theme.label}, ${sub}`}

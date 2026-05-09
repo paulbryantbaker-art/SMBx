@@ -1,5 +1,6 @@
-import { useState, type CSSProperties, type RefObject, type KeyboardEvent, type FormEvent } from "react";
+import { useState, type CSSProperties, type RefObject, type KeyboardEvent, type FormEvent, type ReactNode } from "react";
 import type { Message, OpenTab } from "./types";
+import { MODEL_PREFERENCE_LABELS, type ModelPreference } from "../../lib/modelPreference";
 
 interface ChatProps {
   thread: Message[];
@@ -14,11 +15,13 @@ interface ChatProps {
   streamingText?: string;
   activeTool?: string | null;
   error?: string | null;
+  modelPreference?: ModelPreference;
+  setModelPreference?: (value: ModelPreference) => void;
 }
 
 export function V6Chat({
   thread, draft, setDraft, send, inputRef, modeLabel, onOpenTab,
-  isAnon, sending, streamingText, activeTool, error,
+  isAnon, sending, streamingText, activeTool, error, modelPreference = "auto", setModelPreference,
 }: ChatProps) {
   const [shareLabel, setShareLabel] = useState<"Share" | "Copied">("Share");
 
@@ -62,7 +65,20 @@ export function V6Chat({
             </div>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 2 }}>
+        <div style={{ display: "flex", gap: 2, alignItems: "center" }}>
+          {setModelPreference && (
+            <select
+              value={modelPreference}
+              onChange={(e) => setModelPreference(e.target.value as ModelPreference)}
+              aria-label="Yulia model preference"
+              title="Yulia model preference"
+              style={C.modelSelect}
+            >
+              {(Object.keys(MODEL_PREFERENCE_LABELS) as ModelPreference[]).map(key => (
+                <option key={key} value={key}>{MODEL_PREFERENCE_LABELS[key]}</option>
+              ))}
+            </select>
+          )}
           <button
             className="m-btn text"
             style={{ height: 28, fontSize: 11.5 }}
@@ -195,6 +211,34 @@ interface ChatEmptyProps {
 }
 
 const SUGGESTIONS_BY_MODE: Record<string, string[]> = {
+  "Today": [
+    "What is worth my next 10 minutes?",
+    "Review the IOI draft with me",
+    "Show files that need my eye",
+    "What changed in the pipeline today?",
+    "Draft my buyer follow-up",
+  ],
+  "Pipeline": [
+    "Rank my pipeline by what matters today",
+    "Which deals should I pursue, watch, or pass?",
+    "Open the files behind Big Fake Deal",
+    "What changed in Pest Control FL?",
+    "Prepare the next buyer touch",
+  ],
+  "Search": [
+    "Find buyers for Big Fake Deal",
+    "Build a target list from my HVAC thesis",
+    "Map PE firms active in pest control",
+    "Find SBA and senior debt lenders",
+    "Find M&A attorneys near Austin",
+  ],
+  "Files": [
+    "Show files that need my eye",
+    "Open Big Fake Deal's data room",
+    "What is private versus shared?",
+    "Find executed documents",
+    "List active data rooms",
+  ],
   "Business Search": [
     "What's worth my time today?",
     "Filter pipeline by recurring revenue",
@@ -245,6 +289,7 @@ function V6ChatEmpty({ modeLabel, onPick, onOpenTab }: ChatEmptyProps) {
     "Walk me through a deal",
     "Show me what's possible",
   ];
+  const copy = emptyCopy(modeLabel);
 
   const openLearn = (section: "how" | "pricing", anchor?: string) => {
     onOpenTab({ id: "tab-learn", kind: "learn", title: "How it works · Pricing", section, anchor });
@@ -257,13 +302,13 @@ function V6ChatEmpty({ modeLabel, onPick, onOpenTab }: ChatEmptyProps) {
         letterSpacing: "-0.02em", lineHeight: 1.2, margin: "0 0 8px", color: "var(--m-on-surface)",
         textWrap: "balance",
       }}>
-        Hi there. Yulia can walk you through one of your deals right now &mdash; for free.
+        {copy.title}
       </h1>
       <p style={{ fontSize: 12.5, lineHeight: 1.55, color: "var(--m-on-surface-var)", margin: "0 0 14px", textWrap: "pretty" }}>
-        Start using the app completely for free. Use the <strong style={{ color: "var(--m-on-surface)" }}>Search Ideas</strong> below to explore, or just start chatting. Feel free to learn more about the app too.
+        {copy.body}
       </p>
 
-      <div className="mono" style={C.eyebrow}>SEARCH IDEAS · {modeLabel.toUpperCase()}</div>
+      <div className="mono" style={C.eyebrow}>{copy.eyebrow} · {modeLabel.toUpperCase()}</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 5, marginBottom: 16 }}>
         {suggestions.map(s => (
           <button
@@ -285,7 +330,7 @@ function V6ChatEmpty({ modeLabel, onPick, onOpenTab }: ChatEmptyProps) {
             key={c.label}
             onClick={() => openLearn(c.section, c.anchor)}
             style={C.learnPill}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "#234975"; }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "#C6954E"; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = "var(--m-primary)"; }}
           >
             <span style={{ fontSize: 10, opacity: 0.85 }}>↗</span>
@@ -297,31 +342,70 @@ function V6ChatEmpty({ modeLabel, onPick, onOpenTab }: ChatEmptyProps) {
   );
 }
 
+function emptyCopy(modeLabel: string): { title: string; body: ReactNode; eyebrow: string } {
+  if (modeLabel === "Today") {
+    return {
+      title: "Yulia is reading the desk with you.",
+      body: "Ask for the next move, open a draft, or have her turn this page into a tighter action list.",
+      eyebrow: "TODAY PROMPTS",
+    };
+  }
+  if (modeLabel === "Pipeline") {
+    return {
+      title: "Yulia can rank the pipeline with you.",
+      body: "Ask what moved, what deserves attention, or which deal should be pursue, watch, or pass.",
+      eyebrow: "PIPELINE PROMPTS",
+    };
+  }
+  if (modeLabel === "Search") {
+    return {
+      title: "Yulia can search the market with you.",
+      body: "Find buyers, buyer pools, targets, PE firms, lenders, and deal professionals from a plain-language thesis.",
+      eyebrow: "SEARCH IDEAS",
+    };
+  }
+  if (modeLabel === "Files") {
+    return {
+      title: "Yulia can navigate your deal files with you.",
+      body: "Ask what is private, what is in a data room, what needs review, or which executed docs are locked.",
+      eyebrow: "FILE PROMPTS",
+    };
+  }
+  return {
+    title: "Hi there. Yulia can walk you through one of your deals right now - for free.",
+    body: <>Start using the app completely for free. Use the <strong style={{ color: "var(--m-on-surface)" }}>Search Ideas</strong> below to explore, or just start chatting. Feel free to learn more about the app too.</>,
+    eyebrow: "SEARCH IDEAS",
+  };
+}
+
 const C: Record<string, CSSProperties> = {
   chat: {
-    background: "var(--m-surface)",
-    borderRight: "1px solid var(--m-outline-var)",
+    background: "linear-gradient(180deg, #F7F8FF 0%, #F0F2F8 100%)",
+    borderRight: "1px solid #D7DEEC",
     display: "flex", flexDirection: "column", minHeight: 0, height: "100%",
   },
   chatHead: {
-    height: 56, flexShrink: 0, padding: "0 14px",
+    height: 58, flexShrink: 0, padding: "0 14px",
     display: "flex", alignItems: "center", justifyContent: "space-between",
-    borderBottom: "1px solid var(--m-outline-var)",
+    borderBottom: "1px solid #E7EBF5",
+    background: "rgba(255,255,255,0.72)",
   },
   yMark: {
     width: 28, height: 28, borderRadius: 8,
-    background: "var(--m-primary-container)",
-    color: "var(--m-on-primary-container)",
+    background: "#1A1918",
+    color: "#FFFFFF",
     display: "grid", placeItems: "center",
     fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13,
+    boxShadow: "0 8px 18px rgba(26,34,51,0.12)",
   },
-  chatBody: { flex: 1, overflowY: "auto", padding: "16px 14px" },
+  chatBody: { flex: 1, overflowY: "auto", padding: "18px 14px" },
   composer: {
     margin: 12,
     background: "var(--m-surface-on-light)",
-    borderRadius: 14,
+    borderRadius: 18,
     padding: 10,
-    border: "1px solid var(--m-outline-var)",
+    border: "1px solid #DDE3F0",
+    boxShadow: "0 16px 34px rgba(26,34,51,0.10)",
   },
   composerInput: {
     width: "100%", boxSizing: "border-box",
@@ -331,6 +415,18 @@ const C: Record<string, CSSProperties> = {
     fontFamily: "var(--font-body)",
   },
   composerFoot: { marginTop: 4, display: "flex", justifyContent: "space-between", alignItems: "center" },
+  modelSelect: {
+    height: 28,
+    maxWidth: 94,
+    border: "1px solid var(--m-outline-var)",
+    borderRadius: 999,
+    background: "var(--m-surface-1)",
+    color: "var(--m-on-surface)",
+    padding: "0 8px",
+    fontSize: 11.5,
+    fontWeight: 700,
+    outline: "none",
+  },
   eyebrow: {
     fontSize: 9.5, color: "var(--m-on-surface-mid)",
     letterSpacing: "0.14em", fontWeight: 600,
@@ -340,10 +436,11 @@ const C: Record<string, CSSProperties> = {
     all: "unset",
     display: "flex", alignItems: "center", gap: 8,
     padding: "8px 12px",
-    background: "var(--m-surface-2)",
-    borderRadius: 10,
+    background: "#FFFFFF",
+    borderRadius: 12,
     fontSize: 12.5, color: "var(--m-on-surface-var)",
     cursor: "pointer", boxSizing: "border-box", width: "100%",
+    border: "1px solid rgba(215,222,236,0.72)",
   },
   learnPill: {
     all: "unset",

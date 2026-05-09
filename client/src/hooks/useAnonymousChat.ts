@@ -1,4 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import type { SurfaceContext } from '../lib/yuliaSurfaceContext';
+import type { ModelPreference } from '../lib/modelPreference';
 
 export interface AnonMessage {
   id: number;
@@ -95,7 +97,12 @@ export function useAnonymousChat() {
   }, [loadConversations]);
 
   // Send message via POST /api/chat/message
-  const sendMessage = useCallback(async (content: string, journeyContext?: string) => {
+  const sendMessage = useCallback(async (
+    content: string,
+    journeyContext?: string,
+    surfaceContext?: SurfaceContext,
+    modelPreference?: ModelPreference,
+  ) => {
     setError(null);
 
     const userMsg: AnonMessage = {
@@ -122,6 +129,8 @@ export function useAnonymousChat() {
           message: content,
           conversationId: activeConversationId,
           journeyContext,
+          surfaceContext,
+          modelPreference,
         }),
         signal: controller.signal,
       });
