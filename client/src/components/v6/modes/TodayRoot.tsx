@@ -115,6 +115,15 @@ interface PortfolioBriefHero {
   notes: PortfolioBriefNote[];
 }
 
+interface PortfolioMarketIntelligence {
+  eyebrow: string;
+  headline: string;
+  subhead: string;
+  bullets: string[];
+  sourceCount: number;
+  confidence: string;
+}
+
 interface PortfolioPriority {
   kicker: string;
   title: string;
@@ -132,6 +141,9 @@ interface PortfolioPriority {
 interface PortfolioBrief {
   source: "live";
   generatedAt: string;
+  modelUsed?: string;
+  intelligenceMode?: string;
+  marketIntelligence?: PortfolioMarketIntelligence;
   hero: PortfolioBriefHero;
   liveDesk: LiveDeskItem[];
   priorities: PortfolioPriority[];
@@ -185,6 +197,14 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   );
   const lead = deals[0] ?? null;
   const leadTitle = lead?.title ?? "your first deal";
+  const marketIntel = liveBrief?.marketIntelligence ?? {
+    eyebrow: "MARKET INTELLIGENCE LIVE",
+    headline: lead ? `${lead.title} is being read against market, structure, files, and next action.` : "Yulia turns every deal into a live intelligence desk.",
+    subhead: lead ? "Industry, buyer universe, financing climate, tax/legal issues, and work product belong in one place." : "Start with a deal or thesis and Yulia builds the market context around it.",
+    bullets: [],
+    sourceCount: 0,
+    confidence: liveBrief ? "Live" : "Demo",
+  };
   const heroNotes = liveBrief?.hero.notes?.length
     ? liveBrief.hero.notes
     : [
@@ -316,6 +336,22 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
               Ask Yulia <span aria-hidden="true">↗</span>
             </button>
           </div>
+
+          <button
+            style={T.marketIntelBand}
+            onClick={() => ask("Show me the market intelligence behind today’s read. Include strategy, tax, legal, and source gaps.")}
+            type="button"
+          >
+            <span style={T.marketIntelMarker} />
+            <span style={T.marketIntelCopy}>
+              <span className="mono" style={T.marketIntelEyebrow}>{marketIntel.eyebrow}</span>
+              <strong style={T.marketIntelHeadline}>{marketIntel.headline}</strong>
+              <span style={T.marketIntelSub}>{marketIntel.subhead}</span>
+            </span>
+            <span style={T.marketIntelMeta}>
+              {marketIntel.sourceCount > 0 ? `${marketIntel.sourceCount} sources` : marketIntel.confidence}
+            </span>
+          </button>
 
           <h1 style={T.headline}>
             {liveBrief?.hero.title || (lead ? (
@@ -667,8 +703,66 @@ const T: Record<string, CSSProperties> = {
     fontSize: 12,
     cursor: "pointer",
   },
+  marketIntelBand: {
+    all: "unset",
+    display: "grid",
+    gridTemplateColumns: "9px minmax(0, 1fr) auto",
+    alignItems: "center",
+    gap: 14,
+    width: "100%",
+    boxSizing: "border-box",
+    marginTop: 24,
+    padding: "15px 17px",
+    borderRadius: 18,
+    background: "linear-gradient(135deg, rgba(26,34,51,0.92), rgba(50,76,90,0.88))",
+    color: "#F7FAFC",
+    boxShadow: "0 18px 42px rgba(26,34,51,0.20)",
+    cursor: "pointer",
+  },
+  marketIntelMarker: {
+    width: 9,
+    alignSelf: "stretch",
+    minHeight: 64,
+    borderRadius: 999,
+    background: "linear-gradient(180deg, #D6A35C 0%, #629987 100%)",
+    boxShadow: "0 0 0 5px rgba(214, 163, 92, 0.12)",
+  },
+  marketIntelCopy: {
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
+  },
+  marketIntelEyebrow: {
+    fontSize: 9,
+    letterSpacing: "0.16em",
+    fontWeight: 800,
+    color: "#D9E3F0",
+  },
+  marketIntelHeadline: {
+    fontSize: 18,
+    lineHeight: 1.08,
+    letterSpacing: "-0.035em",
+    color: "#FFFFFF",
+  },
+  marketIntelSub: {
+    fontSize: 12.5,
+    lineHeight: 1.35,
+    color: "#CAD4E4",
+  },
+  marketIntelMeta: {
+    justifySelf: "end",
+    borderRadius: 999,
+    padding: "8px 10px",
+    background: "rgba(255,255,255,0.10)",
+    border: "1px solid rgba(255,255,255,0.16)",
+    color: "#F7FAFC",
+    fontSize: 11,
+    fontWeight: 850,
+    whiteSpace: "nowrap",
+  },
   headline: {
-    margin: "28px 0 0",
+    margin: "24px 0 0",
     maxWidth: 900,
     fontFamily: "'Figtree', var(--font-body)",
     fontWeight: 850,

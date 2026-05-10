@@ -1,9 +1,24 @@
 import { Router } from 'express';
 import { sql } from '../db.js';
+import { getDealBriefForUser, getPortfolioBriefForUser } from '../services/yuliaBriefingService.js';
 
 export const portfolioBriefRouter = Router();
 
 type Tone = 'gold' | 'cactus' | 'oat' | 'plum' | 'charcoal';
+
+portfolioBriefRouter.get('/agency/deals/:dealId/brief', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const dealId = parseInt(req.params.dealId, 10);
+    if (!dealId) return res.status(400).json({ error: 'Invalid deal ID' });
+    const forceRefresh = req.query.refresh === '1' || req.query.refresh === 'true';
+    return res.json(await getDealBriefForUser(userId, dealId, forceRefresh));
+  } catch (err: any) {
+    console.error('Yulia deal brief error:', err.message);
+    return res.status(500).json({ error: 'Failed to build deal intelligence brief' });
+  }
+});
 
 interface DealRow {
   id: number;
@@ -64,7 +79,14 @@ portfolioBriefRouter.get('/agency/portfolio-brief', async (req, res) => {
   try {
     const userId = (req as any).userId;
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const forceRefresh = req.query.refresh === '1' || req.query.refresh === 'true';
+    return res.json(await getPortfolioBriefForUser(userId, forceRefresh));
+  } catch (err: any) {
+    console.error('Yulia portfolio brief error, falling back:', err.message);
+  }
 
+  try {
+    const userId = (req as any).userId;
     const ownedDeals = await sql<DealRow[]>`
       SELECT d.id, d.business_name, d.industry, d.location, d.journey_type,
              d.current_gate, d.league, d.status, d.revenue, d.sde, d.ebitda,

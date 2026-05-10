@@ -17,6 +17,7 @@ import {
 } from './yuliaContextPack.js';
 import { describeModelPreference, type ModelPreference } from './modelPreference.js';
 import { formatAgencyActionContractsForPrompt } from './agencyActionRegistry.js';
+import { formatLatestYuliaBriefsForPrompt } from './yuliaBriefingService.js';
 
 const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
 
@@ -494,6 +495,8 @@ export async function buildSystemPrompt(
   }));
   if (contextText) layers.push(contextText);
   layers.push(`\n## MODEL ROUTING\n${describeModelPreference(modelPreference)}`);
+  const latestBriefs = await formatLatestYuliaBriefsForPrompt(user.id, deal?.id ?? null);
+  if (latestBriefs) layers.push(latestBriefs);
 
   // Layer 2: User context
   const userName = user.display_name || user.email.split('@')[0];
