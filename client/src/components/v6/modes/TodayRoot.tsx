@@ -1,5 +1,5 @@
-import { useMemo, type CSSProperties } from "react";
-import type { User } from "../../../hooks/useAuth";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { authHeaders, type User } from "../../../hooks/useAuth";
 import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
 import { useV6WorkspaceData, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
 import { DESKTOP_TEXTURES } from "../../../lib/randomTextures";
@@ -62,7 +62,16 @@ const DEALS: TodayDeal[] = [
   },
 ];
 
-const WORK = [
+interface LiveDeskItem {
+  eyebrow: string;
+  title: string;
+  sub: string;
+  pct: number;
+  tone: Tone;
+  prompt?: string;
+}
+
+const WORK: LiveDeskItem[] = [
   { eyebrow: "DRAFTING", title: "IOI v3", sub: "Recurring revenue framing · ready for review", pct: 76, tone: "gold" as Tone },
   { eyebrow: "WATCHING", title: "87 sources", sub: "4 new HVAC matches since yesterday", pct: 42, tone: "plum" as Tone },
   { eyebrow: "RANKING", title: "Buyer pool", sub: "18 candidates sorted by strategic fit", pct: 58, tone: "cactus" as Tone },
@@ -91,6 +100,45 @@ const QUICK_STARTS = [
   "Show files that need my eye.",
 ];
 
+interface PortfolioBriefNote {
+  label: string;
+  text: string;
+}
+
+interface PortfolioBriefHero {
+  title: string;
+  lede: string;
+  primaryLabel: string;
+  primaryPrompt?: string;
+  secondaryLabel: string;
+  secondaryDealId?: string;
+  notes: PortfolioBriefNote[];
+}
+
+interface PortfolioPriority {
+  kicker: string;
+  title: string;
+  sub: string;
+  cta: string;
+  tone: Tone;
+  dealId?: string;
+  dealTitle?: string;
+  docId?: string;
+  docTitle?: string;
+  prompt?: string;
+  tabKind?: string;
+}
+
+interface PortfolioBrief {
+  source: "live";
+  generatedAt: string;
+  hero: PortfolioBriefHero;
+  liveDesk: LiveDeskItem[];
+  priorities: PortfolioPriority[];
+  files: TodayFile[];
+  deals: TodayDeal[];
+}
+
 interface TodayRootProps {
   openTab: OpenTab;
   onTalkToYulia?: (prompt: string) => void;
@@ -100,17 +148,59 @@ interface TodayRootProps {
 export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const home = useHomeDeals(user);
   const workspace = useV6WorkspaceData(user);
+  const [portfolioBrief, setPortfolioBrief] = useState<PortfolioBrief | null>(null);
+
+  useEffect(() => {
+    if (!workspace.canFetch) {
+      setPortfolioBrief(null);
+      return;
+    }
+
+    let cancelled = false;
+    fetch("/api/agency/portfolio-brief", { headers: authHeaders() })
+      .then(res => res.ok ? res.json() : Promise.reject(new Error(`brief ${res.status}`)))
+      .then((brief: PortfolioBrief) => {
+        if (!cancelled) setPortfolioBrief(brief);
+      })
+      .catch(() => {
+        if (!cancelled) setPortfolioBrief(null);
+      });
+
+    return () => { cancelled = true; };
+  }, [workspace.canFetch, user?.id]);
+
   const useSampleData = !home.isAuthed || !workspace.canFetch;
   const realDeals = home.inReview.length > 0 ? home.inReview : home.picks;
-  const deals = useSampleData ? DEALS : realDeals.slice(0, 5).map(dealToTodayDeal);
+  const liveBrief = useSampleData ? null : portfolioBrief;
+  const deals = useSampleData ? DEALS : (liveBrief?.deals.length ? liveBrief.deals : realDeals.slice(0, 5).map(dealToTodayDeal));
+  const liveDesk = liveBrief?.liveDesk?.length ? liveBrief.liveDesk : WORK;
   const files = useMemo<TodayFile[]>(
-    () => workspace.canFetch
-      ? workspace.deliverables.slice(0, 5).map(deliverableToTodayFile)
-      : FILES,
-    [workspace.canFetch, workspace.deliverables],
+    () => {
+      if (liveBrief?.files?.length) return liveBrief.files;
+      return workspace.canFetch
+        ? workspace.deliverables.slice(0, 5).map(deliverableToTodayFile)
+        : FILES;
+    },
+    [liveBrief?.files, workspace.canFetch, workspace.deliverables],
   );
   const lead = deals[0] ?? null;
   const leadTitle = lead?.title ?? "your first deal";
+  const heroNotes = liveBrief?.hero.notes?.length
+    ? liveBrief.hero.notes
+    : [
+        {
+          label: lead ? "Why now" : "First step",
+          text: lead ? "The buyer call is close enough that weak language will travel." : "Tell Yulia the situation in plain English. She handles the software setup.",
+        },
+        {
+          label: lead ? "Risk" : "Sources",
+          text: lead ? "Working-cap target and add-backs need one clean reconciliation." : "Drop in a CIM, teaser, financials, LOI, NDA, or even rough notes.",
+        },
+        {
+          label: lead ? "Move" : "Output",
+          text: lead ? "Approve the IOI draft, then let Yulia prepare the buyer note." : "Yulia can create the deal, organize files, and prepare the first analysis.",
+        },
+      ];
 
   const ask = (prompt: string) => {
     onTalkToYulia?.(prompt);
@@ -124,11 +214,41 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
     openTab({ kind: "deal", id: deal.id, title: deal.title });
   };
 
+  const openDealById = (id: string, title?: string) => {
+    const deal = deals.find(item => item.id === id);
+    if (deal) {
+      openDeal(deal);
+      return;
+    }
+    openTab({ kind: "deal", id, title: title || "Deal" });
+  };
+
   const openDoc = (title: string, id?: string) => {
     openTab({ kind: "doc", title, id: id ?? `doc-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}` });
   };
 
-  const priorities = lead
+  const livePriorities = liveBrief?.priorities?.length
+    ? liveBrief.priorities.map(item => ({
+        ...item,
+        action: () => {
+          if (item.dealId) {
+            openDealById(item.dealId, item.dealTitle);
+            return;
+          }
+          if (item.docId || item.docTitle) {
+            openDoc(item.docTitle || item.title, item.docId);
+            return;
+          }
+          if (item.tabKind === "search") {
+            openTab({ kind: "mode-root", modeId: "search", id: "search-root", title: "Search", pinned: true });
+            return;
+          }
+          ask(item.prompt || `${item.title}: ${item.sub}`);
+        },
+      }))
+    : null;
+
+  const priorities = livePriorities ?? (lead
     ? [
         {
           kicker: "READY NOW",
@@ -180,7 +300,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           tone: "gold" as Tone,
           action: () => openTab({ kind: "mode-root", modeId: "search", id: "search-root", title: "Search", pinned: true }),
         },
-      ];
+      ]);
 
   return (
     <div className="m-fade-up" style={T.page}>
@@ -198,31 +318,47 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           </div>
 
           <h1 style={T.headline}>
-            {lead ? (
+            {liveBrief?.hero.title || (lead ? (
               <>Yulia's read: <span style={T.headlineSerif}>{leadTitle}</span> needs your eye before the next buyer touch.</>
             ) : (
               <>Yulia is ready when <span style={T.headlineSerif}>your first deal</span> lands.</>
-            )}
+            ))}
           </h1>
 
           <p style={T.lede}>
-            {lead
+            {liveBrief?.hero.lede || (lead
               ? "The deal is still worth pursuing. Review the IOI, answer counsel on the NDA, and keep the buyer search narrow until working capital is buttoned up."
-              : "No private workspace data is attached to this account yet. Start with a chat, source file, target, buyer pool, or deal thesis and Yulia will build the right surfaces around it."}
+              : "No private workspace data is attached to this account yet. Start with a chat, source file, target, buyer pool, or deal thesis and Yulia will build the right surfaces around it.")}
           </p>
 
           <div style={T.briefNotes}>
-            <BriefNote label={lead ? "Why now" : "First step"} text={lead ? "The buyer call is close enough that weak language will travel." : "Tell Yulia the situation in plain English. She handles the software setup."} />
-            <BriefNote label={lead ? "Risk" : "Sources"} text={lead ? "Working-cap target and add-backs need one clean reconciliation." : "Drop in a CIM, teaser, financials, LOI, NDA, or even rough notes."} />
-            <BriefNote label={lead ? "Move" : "Output"} text={lead ? "Approve the IOI draft, then let Yulia prepare the buyer note." : "Yulia can create the deal, organize files, and prepare the first analysis."} />
+            {heroNotes.slice(0, 3).map(note => (
+              <BriefNote key={note.label} label={note.label} text={note.text} />
+            ))}
           </div>
 
           <div style={T.leadActions}>
-            <button style={T.primaryButton} onClick={() => lead ? openDoc(`${lead.title} · IOI v3`) : ask("Help me start my first SMBx deal workspace.")} type="button">
-              {lead ? "Review IOI" : "Start with Yulia"}
+            <button
+              style={T.primaryButton}
+              onClick={() => liveBrief?.hero.primaryPrompt
+                ? ask(liveBrief.hero.primaryPrompt)
+                : lead
+                  ? openDoc(`${lead.title} · IOI v3`)
+                  : ask("Help me start my first SMBx deal workspace.")}
+              type="button"
+            >
+              {liveBrief?.hero.primaryLabel || (lead ? "Review IOI" : "Start with Yulia")}
             </button>
-            <button style={T.secondaryButton} onClick={() => lead ? openDeal(lead) : openTab({ kind: "mode-root", modeId: "pipeline", id: "pipeline-root", title: "Pipeline", pinned: true })} type="button">
-              {lead ? "Open deal" : "Open pipeline"}
+            <button
+              style={T.secondaryButton}
+              onClick={() => liveBrief?.hero.secondaryDealId
+                ? openDealById(liveBrief.hero.secondaryDealId)
+                : lead
+                  ? openDeal(lead)
+                  : openTab({ kind: "mode-root", modeId: "pipeline", id: "pipeline-root", title: "Pipeline", pinned: true })}
+              type="button"
+            >
+              {liveBrief?.hero.secondaryLabel || (lead ? "Open deal" : "Open pipeline")}
             </button>
           </div>
         </article>
@@ -237,11 +373,11 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           </div>
 
           <div style={T.workStack}>
-            {WORK.map(item => (
+            {liveDesk.map(item => (
               <button
                 key={item.title}
                 style={T.workCard}
-                onClick={() => ask(`${item.eyebrow.toLowerCase()}: ${item.title}. What changed and what should I do next?`)}
+                onClick={() => ask(item.prompt || `${item.eyebrow.toLowerCase()}: ${item.title}. What changed and what should I do next?`)}
                 type="button"
               >
                 <div style={T.workTop}>
