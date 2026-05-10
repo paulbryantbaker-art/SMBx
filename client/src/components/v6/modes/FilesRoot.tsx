@@ -1,4 +1,4 @@
-import { useMemo, type CSSProperties } from "react";
+import { useMemo, useRef, useState, type CSSProperties } from "react";
 import { V6Icon } from "../icons";
 import type { FileScope, OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
@@ -12,6 +12,7 @@ interface FilesRootProps {
 }
 
 interface Shortcut {
+  view: FileListView;
   label: string;
   count: string;
   sub: string;
@@ -19,6 +20,8 @@ interface Shortcut {
   tone: "all" | "deals" | "action" | "room";
   prompt: string;
 }
+
+type FileListView = "all" | "deal-libraries" | "needs-action" | "data-rooms";
 
 interface FileRow {
   title: string;
@@ -41,6 +44,7 @@ interface RoomRow {
 
 const SHORTCUTS: Shortcut[] = [
   {
+    view: "all",
     label: "All files",
     count: "24",
     sub: "Private deal docs, analysis, and data-room items across portfolios.",
@@ -49,6 +53,7 @@ const SHORTCUTS: Shortcut[] = [
     prompt: "Show all files across every portfolio, deal, stage, and data room.",
   },
   {
+    view: "deal-libraries",
     label: "Deal libraries",
     count: "6",
     sub: "Portfolio > deal > stage. Private until you share.",
@@ -57,6 +62,7 @@ const SHORTCUTS: Shortcut[] = [
     prompt: "Open my deal libraries and group them by portfolio, deal, and stage.",
   },
   {
+    view: "needs-action",
     label: "Needs action",
     count: "4",
     sub: "Drafts, requests, markups, and submissions waiting on you.",
@@ -65,6 +71,7 @@ const SHORTCUTS: Shortcut[] = [
     prompt: "Show files that need action from me.",
   },
   {
+    view: "data-rooms",
     label: "Data rooms",
     count: "9",
     sub: "Shared diligence rooms with artifacts, drafted docs, and executed docs.",
@@ -95,6 +102,8 @@ const ACTIONS: FileRow[] = [
 
 export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
   const workspace = useV6WorkspaceData(user);
+  const listRef = useRef<HTMLElement | null>(null);
+  const [activeList, setActiveList] = useState<FileListView>("all");
   const useSampleData = !workspace.canFetch;
   const shortcuts = useMemo(
     () => useSampleData ? SHORTCUTS : buildRealShortcuts(workspace.deals, workspace.deliverables),
@@ -102,6 +111,10 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
   );
   const recents = useMemo(
     () => useSampleData ? RECENTS : workspace.deliverables.slice(0, 5).map(deliverableToFileRow),
+    [useSampleData, workspace.deliverables],
+  );
+  const allFiles = useMemo(
+    () => useSampleData ? [...RECENTS, ...ACTIONS] : workspace.deliverables.map(deliverableToFileRow),
     [useSampleData, workspace.deliverables],
   );
   const rooms = useMemo(
@@ -137,20 +150,10 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
   };
 
   const runShortcut = (shortcut: Shortcut) => {
-    if (shortcut.label === "Needs action") {
-      document.getElementById("files-work-queue")?.scrollIntoView({ behavior: "smooth", block: "start" });
-      ask(shortcut.prompt);
-      return;
-    }
-    if (shortcut.label === "Data rooms" && rooms[0]) {
-      openDeal(rooms[0], "data-room");
-      return;
-    }
-    if ((shortcut.label === "All files" || shortcut.label === "Deal libraries") && rooms[0]) {
-      openDeal(rooms[0], "all");
-      return;
-    }
-    ask(shortcut.prompt);
+    setActiveList(shortcut.view);
+    requestAnimationFrame(() => {
+      listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   };
 
   return (
@@ -187,7 +190,13 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
             <button
               key={shortcut.label}
               type="button"
-              style={{ ...F.shortcutCard, backgroundImage: s.bg, borderColor: s.border, boxShadow: s.shadow }}
+              style={{
+                ...F.shortcutCard,
+                ...(activeList === shortcut.view ? F.shortcutCardActive : {}),
+                backgroundImage: s.bg,
+                borderColor: activeList === shortcut.view ? s.iconColor : s.border,
+                boxShadow: activeList === shortcut.view ? `${s.shadow}, 0 0 0 2px ${s.iconBg}` : s.shadow,
+              }}
               onClick={() => runShortcut(shortcut)}
             >
               <span style={{ ...F.shortcutIcon, background: s.iconBg, color: s.iconColor }}><V6Icon name={shortcut.icon} size={17} /></span>
@@ -198,6 +207,20 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
             );
           })}
         </div>
+      </section>
+
+      <section ref={listRef} style={F.section}>
+        <ActiveFilesList
+          activeList={activeList}
+          allFiles={allFiles}
+          rooms={rooms}
+          actions={actions}
+          loading={workspace.loading}
+          error={workspace.error}
+          openDoc={openDoc}
+          openDeal={openDeal}
+          ask={ask}
+        />
       </section>
 
       <section style={F.grid}>
@@ -305,6 +328,127 @@ function EmptyRows({
       <button className="m-btn tonal" type="button" onClick={onClick}>{action}</button>
     </div>
   );
+}
+
+function ActiveFilesList({
+  activeList,
+  allFiles,
+  rooms,
+  actions,
+  loading,
+  error,
+  openDoc,
+  openDeal,
+  ask,
+}: {
+  activeList: FileListView;
+  allFiles: FileRow[];
+  rooms: RoomRow[];
+  actions: FileRow[];
+  loading: boolean;
+  error: string | null;
+  openDoc: (row: FileRow) => void;
+  openDeal: (room: RoomRow, scope?: FileScope) => void;
+  ask: (prompt: string) => void;
+}) {
+  const copy = activeListCopy(activeList);
+  const rows = activeList === "needs-action" ? actions : allFiles;
+  const showRooms = activeList === "deal-libraries" || activeList === "data-rooms";
+  const roomScope: FileScope = activeList === "data-rooms" ? "data-room" : "all";
+
+  return (
+    <div style={F.activeListCard}>
+      <div style={F.activeListHead}>
+        <div>
+          <div className="mono" style={F.cardEyebrow}>{copy.eyebrow}</div>
+          <h2 style={F.cardTitle}>{copy.title}</h2>
+          <p style={F.cardSub}>{copy.sub}</p>
+        </div>
+        <button className="m-btn tonal" type="button" onClick={() => ask(copy.prompt)}>
+          Ask Yulia
+        </button>
+      </div>
+
+      <div style={F.rows}>
+        {loading && <div className="mono" style={F.loading}>LOADING REAL FILES…</div>}
+        {error && <div style={F.inlineError}>Couldn&rsquo;t load workspace files ({error}).</div>}
+
+        {!loading && showRooms && rooms.length === 0 && (
+          <EmptyRows
+            title="No deal libraries yet"
+            text="When you add a deal, its private library and data-room boundary will show up here."
+            action="Create with Yulia"
+            onClick={() => ask("Help me create my first deal library.")}
+          />
+        )}
+
+        {!loading && !showRooms && rows.length === 0 && (
+          <EmptyRows
+            title={activeList === "needs-action" ? "Nothing needs action" : "No files yet"}
+            text={activeList === "needs-action"
+              ? "Requests, reviews, execution items, and failed generations will appear here when they exist."
+              : "Generated docs, analyses, uploads, and data-room artifacts will appear here once this account has workspace data."}
+            action="Ask Yulia"
+            onClick={() => ask(copy.prompt)}
+          />
+        )}
+
+        {showRooms && rooms.map((room, index) => (
+          <button
+            key={`${activeList}-${room.id}-${room.deal}`}
+            type="button"
+            style={{ ...F.roomRow, borderBottom: index === rooms.length - 1 ? "none" : "1px solid var(--m-outline-var)" }}
+            onClick={() => openDeal(room, roomScope)}
+          >
+            <span style={F.roomIcon}><V6Icon name={activeList === "data-rooms" ? "library" : "deal"} size={18} /></span>
+            <span style={F.roomText}>
+              <strong>{room.deal}</strong>
+              <span>{room.meta}</span>
+            </span>
+            <span style={F.roomMeta}>
+              <strong>{activeList === "data-rooms" ? room.stage : "Open library"}</strong>
+              <span>{room.count}</span>
+            </span>
+            <span style={F.chevron} aria-hidden="true">›</span>
+          </button>
+        ))}
+
+        {!showRooms && rows.map((row, index) => (
+          <FileListRow key={`${activeList}-${row.id ?? row.title}-${index}`} row={row} last={index === rows.length - 1} onClick={() => openDoc(row)} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function activeListCopy(view: FileListView) {
+  const copy: Record<FileListView, { eyebrow: string; title: string; sub: string; prompt: string }> = {
+    all: {
+      eyebrow: "ALL FILES",
+      title: "Every file across deal libraries",
+      sub: "Private docs, analyses, data-room artifacts, shared docs, and executed records across portfolios.",
+      prompt: "Show every file across my portfolio, grouped by portfolio, deal, stage, and data room status.",
+    },
+    "deal-libraries": {
+      eyebrow: "DEAL LIBRARIES",
+      title: "Deal libraries",
+      sub: "Each deal opens to its private workspace, analysis, drafts, shared docs, and data-room boundary.",
+      prompt: "Show my deal libraries and summarize which one needs attention first.",
+    },
+    "needs-action": {
+      eyebrow: "NEEDS ACTION",
+      title: "Files needing action",
+      sub: "Drafts, requests, reviews, failed generations, markups, and submissions waiting on you.",
+      prompt: "Show files that need action from me and rank them by urgency.",
+    },
+    "data-rooms": {
+      eyebrow: "DATA ROOMS",
+      title: "Active data rooms",
+      sub: "Shared diligence drives by deal, separate from private workspaces and analyses.",
+      prompt: "Show active data rooms and separate artifacts, drafted docs, review items, and executed docs.",
+    },
+  };
+  return copy[view];
 }
 
 function FileListRow({ row, last, onClick }: { row: FileRow; last: boolean; onClick: () => void }) {
@@ -591,6 +735,9 @@ const F: Record<string, CSSProperties> = {
     cursor: "pointer",
     color: "var(--m-on-surface-var)",
   },
+  shortcutCardActive: {
+    transform: "translateY(-2px)",
+  },
   shortcutIcon: {
     width: 42,
     height: 42,
@@ -665,6 +812,20 @@ const F: Record<string, CSSProperties> = {
   },
   rows: {
     padding: "0 18px 12px",
+  },
+  activeListCard: {
+    borderRadius: 26,
+    background: "#FFFFFF",
+    border: "1px solid var(--m-outline-var)",
+    boxShadow: "var(--m-elev-2)",
+    overflow: "hidden",
+  },
+  activeListHead: {
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 16,
+    padding: "24px 24px 10px",
   },
   loading: {
     padding: "6px 0 10px",
