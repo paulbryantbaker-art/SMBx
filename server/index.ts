@@ -30,6 +30,7 @@ import { buyerPipelineRouter } from './routes/buyerPipeline.js';
 import { discoveryRouter } from './routes/discovery.js';
 import { adminRouter } from './routes/admin.js';
 import { passkeyRouter } from './routes/passkeys.js';
+import { agencyActionsRouter } from './routes/agencyActions.js';
 
 import { exportRouter } from './routes/export.js';
 import { startWorker } from './workers/discoveryWorker.js';
@@ -270,6 +271,7 @@ app.use('/api', buyerPipelineRouter);
 app.use('/api', discoveryRouter);
 app.use('/api', adminRouter);
 app.use('/api', passkeyRouter);
+app.use('/api', agencyActionsRouter);
 app.use('/api', canvasTabsRouter);
 app.use('/api', docViewsRouter);
 

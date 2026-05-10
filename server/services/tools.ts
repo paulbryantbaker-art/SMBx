@@ -16,6 +16,7 @@ import { enqueueDeliverableGeneration } from './jobQueue.js';
 import { processDeliverable } from './deliverableProcessor.js';
 import { canGenerateDeliverable, markFreeDeliverableUsed } from './subscriptionService.js';
 import { hasDealAccess } from './dealAccessService.js';
+import { TOOL_NAMES_REQUIRING_CONFIRMATION } from './agencyActionRegistry.js';
 
 const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
 
@@ -488,6 +489,26 @@ export const TOOL_DEFINITIONS: Tool[] = [
     },
   },
 ];
+
+const CONFIRMATION_SCHEMA = {
+  type: 'boolean',
+  description: 'Set to true only after the user explicitly confirms this staged action. Do not set true on the first attempt.',
+};
+
+const CONFIRMATION_SUMMARY_SCHEMA = {
+  type: 'string',
+  description: 'Short summary of what the user explicitly confirmed, used for audit.',
+};
+
+for (const tool of TOOL_DEFINITIONS) {
+  if (!TOOL_NAMES_REQUIRING_CONFIRMATION.has(tool.name)) continue;
+  const schema = tool.input_schema as any;
+  schema.properties = {
+    ...(schema.properties || {}),
+    confirmed: CONFIRMATION_SCHEMA,
+    confirmationSummary: CONFIRMATION_SUMMARY_SCHEMA,
+  };
+}
 
 // ─── Tool Execution ────────────────────────────────────────
 

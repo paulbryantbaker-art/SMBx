@@ -1,5 +1,5 @@
 import { useState, type CSSProperties, type RefObject, type KeyboardEvent, type FormEvent, type ReactNode } from "react";
-import type { Message, OpenTab } from "./types";
+import type { Message, OpenTab, StagedAction } from "./types";
 import { MODEL_PREFERENCE_LABELS, type ModelPreference } from "../../lib/modelPreference";
 
 interface ChatProps {
@@ -16,11 +16,14 @@ interface ChatProps {
   error?: string | null;
   modelPreference?: ModelPreference;
   setModelPreference?: (value: ModelPreference) => void;
+  onConfirmStagedAction?: (id: number, summary?: string) => void | Promise<void>;
+  onCancelStagedAction?: (id: number) => void | Promise<void>;
 }
 
 export function V6Chat({
   thread, draft, setDraft, send, inputRef, modeLabel, onOpenTab,
   sending, streamingText, activeTool, error, modelPreference = "auto", setModelPreference,
+  onConfirmStagedAction, onCancelStagedAction,
 }: ChatProps) {
   const [shareLabel, setShareLabel] = useState<"Share" | "Copied">("Share");
 
@@ -94,7 +97,16 @@ export function V6Chat({
           <V6ChatEmpty modeLabel={modeLabel} onPick={(t) => send(t)} onOpenTab={onOpenTab} />
         ) : (
           <>
-            {thread.map((m, i) => <V6Msg key={i} who={m.who} text={m.text} />)}
+            {thread.map((m, i) => (
+              <V6Msg
+                key={i}
+                who={m.who}
+                text={m.text}
+                stagedAction={m.stagedAction}
+                onConfirmStagedAction={onConfirmStagedAction}
+                onCancelStagedAction={onCancelStagedAction}
+              />
+            ))}
             {sending && (streamingText || activeTool) && (
               <V6Streaming text={streamingText ?? ""} tool={activeTool ?? null} />
             )}
@@ -126,8 +138,18 @@ export function V6Chat({
   );
 }
 
-function V6Msg({ who, text }: Message) {
+function V6Msg({
+  who,
+  text,
+  stagedAction,
+  onConfirmStagedAction,
+  onCancelStagedAction,
+}: Message & {
+  onConfirmStagedAction?: (id: number, summary?: string) => void | Promise<void>;
+  onCancelStagedAction?: (id: number) => void | Promise<void>;
+}) {
   const isY = who === "y";
+  const canAct = !!stagedAction?.id;
   return (
     <div className="m-fade-up" style={{ display: "flex", gap: 10, marginBottom: 14 }}>
       <div style={{
@@ -137,11 +159,70 @@ function V6Msg({ who, text }: Message) {
         display: "grid", placeItems: "center",
         fontFamily: "var(--font-mono)", fontWeight: 600, fontSize: 10,
       }}>{isY ? "Y" : ">"}</div>
-      <div style={{
-        flex: 1, minWidth: 0, fontSize: 12.5, lineHeight: 1.55,
-        color: "var(--m-on-surface)", paddingTop: 3,
-        whiteSpace: "pre-wrap", textWrap: "pretty",
-      }}>{text}</div>
+      <div style={{ flex: 1, minWidth: 0, paddingTop: 3 }}>
+        <div style={{
+          fontSize: 12.5, lineHeight: 1.55,
+          color: "var(--m-on-surface)",
+          whiteSpace: "pre-wrap", textWrap: "pretty",
+        }}>{text}</div>
+        {stagedAction && (
+          <StagedActionCard
+            action={stagedAction}
+            canAct={canAct}
+            onConfirm={() => {
+              if (stagedAction.id) void onConfirmStagedAction?.(stagedAction.id, stagedAction.summary);
+            }}
+            onCancel={() => {
+              if (stagedAction.id) void onCancelStagedAction?.(stagedAction.id);
+            }}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function StagedActionCard({
+  action,
+  canAct,
+  onConfirm,
+  onCancel,
+}: {
+  action: StagedAction;
+  canAct: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <div style={C.stagedCard}>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "flex-start" }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={C.stagedEyebrow}>STAGED ACTION</div>
+          <div style={C.stagedTitle}>{action.label}</div>
+          <div style={C.stagedSummary}>{action.summary}</div>
+        </div>
+        <span style={C.stagedRisk}>{(action.riskLevel || "approval").replace(/_/g, " ")}</span>
+      </div>
+      <div style={C.stagedActions}>
+        <button
+          type="button"
+          className="m-btn"
+          style={C.stagedConfirm}
+          disabled={!canAct}
+          onClick={onConfirm}
+        >
+          Confirm
+        </button>
+        <button
+          type="button"
+          className="m-btn text"
+          style={C.stagedCancel}
+          disabled={!canAct}
+          onClick={onCancel}
+        >
+          Cancel
+        </button>
+      </div>
     </div>
   );
 }
@@ -430,5 +511,66 @@ const C: Record<string, CSSProperties> = {
     fontSize: 11.5, fontWeight: 600, color: "var(--m-on-primary)",
     cursor: "pointer",
     transition: "background 120ms ease, transform 120ms ease",
+  },
+  stagedCard: {
+    marginTop: 10,
+    padding: 12,
+    borderRadius: 14,
+    background: "linear-gradient(180deg, #FFFFFF 0%, #F8FBFF 100%)",
+    border: "1px solid #D9E4F1",
+    boxShadow: "0 12px 28px rgba(31, 44, 69, 0.10)",
+  },
+  stagedEyebrow: {
+    fontFamily: "var(--font-mono)",
+    fontSize: 9,
+    letterSpacing: "0.15em",
+    fontWeight: 700,
+    color: "var(--m-primary)",
+    marginBottom: 5,
+  },
+  stagedTitle: {
+    fontSize: 13.5,
+    fontWeight: 750,
+    color: "var(--m-on-surface)",
+    lineHeight: 1.2,
+  },
+  stagedSummary: {
+    marginTop: 4,
+    fontSize: 11.5,
+    lineHeight: 1.45,
+    color: "var(--m-on-surface-var)",
+  },
+  stagedRisk: {
+    flexShrink: 0,
+    padding: "4px 8px",
+    borderRadius: 999,
+    background: "#EEF3FA",
+    color: "#5D6A7D",
+    fontSize: 10.5,
+    fontWeight: 700,
+    textTransform: "capitalize",
+  },
+  stagedActions: {
+    display: "flex",
+    gap: 8,
+    justifyContent: "flex-end",
+    marginTop: 12,
+  },
+  stagedConfirm: {
+    height: 30,
+    padding: "0 13px",
+    borderRadius: 999,
+    background: "#D6A653",
+    color: "#fff",
+    border: "none",
+    fontSize: 11.5,
+    fontWeight: 800,
+  },
+  stagedCancel: {
+    height: 30,
+    padding: "0 10px",
+    borderRadius: 999,
+    fontSize: 11.5,
+    fontWeight: 700,
   },
 };

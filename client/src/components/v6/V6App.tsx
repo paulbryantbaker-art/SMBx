@@ -23,6 +23,8 @@ interface ChatBridge {
   activeTool: string | null;
   error: string | null;
   send: (text: string, surfaceContext?: SurfaceContext, modelPreference?: ModelPreference) => void;
+  confirmStagedAction?: (id: number, summary?: string) => void | Promise<void>;
+  cancelStagedAction?: (id: number) => void | Promise<void>;
 }
 
 export default function V6App() {
@@ -66,6 +68,7 @@ function V6AppAnon({
     thread: chat.messages.map(m => ({
       who: m.role === "user" ? "u" : "y",
       text: m.content,
+      stagedAction: null,
     })),
     sending: chat.sending,
     streamingText: chat.streamingText,
@@ -83,13 +86,16 @@ function V6AppAuthed({ user, onSignOut }: { user: User; onSignOut: () => Promise
     thread: chat.messages.map(m => ({
       who: m.role === "user" ? "u" : "y",
       text: m.content,
+      stagedAction: m.metadata?.stagedAction ?? null,
     })),
     sending: chat.sending,
     streamingText: chat.streamingText,
     activeTool: chat.activeTool,
     error: null, // useAuthChat surfaces errors via toasts already
     send: chat.sendMessage,
-  }), [chat.messages, chat.sending, chat.streamingText, chat.activeTool, chat.sendMessage]);
+    confirmStagedAction: chat.confirmStagedAction,
+    cancelStagedAction: chat.cancelStagedAction,
+  }), [chat.messages, chat.sending, chat.streamingText, chat.activeTool, chat.sendMessage, chat.confirmStagedAction, chat.cancelStagedAction]);
 
   return <V6AppShell user={user} chat={bridge} onSignOut={async () => { await onSignOut(); }} />;
 }
@@ -368,6 +374,8 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
               error={chat.error}
               modelPreference={modelPreference}
               setModelPreference={setModelPreference}
+              onConfirmStagedAction={chat.confirmStagedAction}
+              onCancelStagedAction={chat.cancelStagedAction}
             />
           </div>
           <div onMouseDown={onDragStart} title="Drag to resize chat" role="separator" aria-orientation="vertical" style={A.dragHandle}>

@@ -12,6 +12,18 @@ export interface AuthMessage {
   metadata?: Record<string, any>;
 }
 
+interface StagedAction {
+  id?: number | null;
+  toolName: string;
+  label: string;
+  summary: string;
+  permissionLevel?: string;
+  riskLevel?: string;
+  writeScope?: string;
+  confirmEndpoint?: string | null;
+  cancelEndpoint?: string | null;
+}
+
 export interface Conversation {
   id: number;
   title: string;
@@ -323,6 +335,16 @@ export function useAuthChat(user: User | null) {
                       }
                     } catch { /* not JSON, ignore */ }
                   }
+                } else if (parsed.type === 'staged_action') {
+                  setActiveTool(null);
+                  const action = parsed.action as StagedAction | undefined;
+                  setMessages(prev => [...prev, {
+                    id: Date.now() + Math.floor(Math.random() * 1000),
+                    role: 'assistant' as const,
+                    content: parsed.message || 'I staged this action for your approval.',
+                    metadata: { stagedAction: action },
+                    created_at: new Date().toISOString(),
+                  }]);
                 } else if (parsed.type === 'done') {
                   if (parsed.dealId) setActiveDealId(parsed.dealId);
                   if (parsed.conversationId) setActiveConversationId(parsed.conversationId);
@@ -468,6 +490,65 @@ export function useAuthChat(user: User | null) {
     }
   }, [user, activeConversationId, createConversation, loadConversations]);
 
+  const confirmStagedAction = useCallback(async (id: number, summary?: string) => {
+    try {
+      const res = await fetch(`/api/agency/actions/${id}/confirm`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ confirmationSummary: summary || `Confirmed staged action ${id}` }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not confirm action');
+
+      const result = data.result || {};
+      if (result.canvas_action) {
+        window.dispatchEvent(new CustomEvent('smbx:canvas_action', { detail: result }));
+      }
+      setMessages(prev => [...prev, {
+        id: Date.now() + 1,
+        role: 'assistant' as const,
+        content: data.status === 'executed'
+          ? 'Confirmed. I executed the staged action.'
+          : `Confirmed, but the action is ${data.status}. ${result.message || result.error || ''}`.trim(),
+        created_at: new Date().toISOString(),
+      }]);
+      loadConversations();
+    } catch (err: any) {
+      showToast("Couldn't confirm action", { tone: 'error' });
+      setMessages(prev => [...prev, {
+        id: Date.now() + 1,
+        role: 'assistant' as const,
+        content: err.message || 'I could not confirm that action.',
+        created_at: new Date().toISOString(),
+      }]);
+    }
+  }, [loadConversations]);
+
+  const cancelStagedAction = useCallback(async (id: number) => {
+    try {
+      const res = await fetch(`/api/agency/actions/${id}/cancel`, {
+        method: 'POST',
+        headers: authHeaders(),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not cancel action');
+      setMessages(prev => [...prev, {
+        id: Date.now() + 1,
+        role: 'assistant' as const,
+        content: 'Canceled. I did not execute that staged action.',
+        created_at: new Date().toISOString(),
+      }]);
+    } catch (err: any) {
+      showToast("Couldn't cancel action", { tone: 'error' });
+      setMessages(prev => [...prev, {
+        id: Date.now() + 1,
+        role: 'assistant' as const,
+        content: err.message || 'I could not cancel that action.',
+        created_at: new Date().toISOString(),
+      }]);
+    }
+  }, []);
+
   // Keep the ref pointing at the latest sendMessage so toast retry handlers
   // never call a stale implementation.
   useEffect(() => { sendMessageRef.current = sendMessage; }, [sendMessage]);
@@ -499,6 +580,8 @@ export function useAuthChat(user: User | null) {
     currentGate,
     paywallData,
     sendMessage,
+    confirmStagedAction,
+    cancelStagedAction,
     selectConversation,
     newConversation,
     createConversation,

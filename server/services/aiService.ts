@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { MessageParam, ContentBlockParam } from '@anthropic-ai/sdk/resources/messages';
-import { TOOL_DEFINITIONS, executeTool } from './tools.js';
+import { TOOL_DEFINITIONS } from './tools.js';
+import { executeGovernedTool } from './governedToolExecutor.js';
 import { persistCanvasTabFromAction } from './canvasTabPersist.js';
 import { resolveChatModel, type ModelPreference } from './modelPreference.js';
 import type { Response } from 'express';
@@ -109,7 +110,7 @@ export async function streamAgenticResponse(
           }
 
           try {
-            const result = await executeTool(
+            const result = await executeGovernedTool(
               block.name,
               block.input as Record<string, any>,
               ctx.userId,
@@ -127,6 +128,14 @@ export async function streamAgenticResponse(
               tool: block.name,
               result: parsedResult,
             })}\n\n`);
+
+            if (parsedResult?.staged_action) {
+              safeWrite(res, `data: ${JSON.stringify({
+                type: 'staged_action',
+                action: parsedResult.staged_action,
+                message: parsedResult.message,
+              })}\n\n`);
+            }
 
             // Persist any canvas_action server-side so the tab survives client disconnects
             if (parsedResult?.canvas_action && ctx.conversationId) {

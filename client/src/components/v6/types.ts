@@ -34,9 +34,22 @@ export interface Tab {
   fileListView?: FileListView;
 }
 
+export interface StagedAction {
+  id?: number | null;
+  toolName: string;
+  label: string;
+  permissionLevel?: string;
+  riskLevel?: string;
+  writeScope?: string;
+  summary: string;
+  confirmEndpoint?: string | null;
+  cancelEndpoint?: string | null;
+}
+
 export interface Message {
   who: "u" | "y";
   text: string;
+  stagedAction?: StagedAction | null;
 }
 
 export interface Mode {

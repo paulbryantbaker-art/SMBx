@@ -14,6 +14,10 @@ COPY package*.json ./
 RUN npm ci
 COPY . .
 ARG CACHEBUST=1
-RUN rm -rf dist && npx vite build && npx esbuild server/index.ts --bundle --platform=node --outdir=dist/server --format=esm --packages=external
+RUN rm -rf dist \
+  && npx vite build \
+  && npx esbuild server/index.ts --bundle --platform=node --outdir=dist/server --format=esm --packages=external \
+  && mkdir -p dist/server/migrations \
+  && cp server/migrations/*.sql dist/server/migrations/
 EXPOSE 3000
 CMD ["npm", "start"]

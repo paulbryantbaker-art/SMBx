@@ -16,6 +16,7 @@ import {
   type SurfaceContext,
 } from './yuliaContextPack.js';
 import { describeModelPreference, type ModelPreference } from './modelPreference.js';
+import { formatAgencyActionContractsForPrompt } from './agencyActionRegistry.js';
 
 const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
 
@@ -376,6 +377,7 @@ export async function buildDynamicAnonymousPrompt(
   const layers: string[] = [base];
 
   layers.push(AGENCY_DOCTRINE);
+  layers.push(formatAgencyActionContractsForPrompt());
   const contextText = formatYuliaContextForPrompt(buildYuliaContextPack({
     surfaceContext: opts.surfaceContext,
   }));
@@ -483,6 +485,7 @@ export async function buildSystemPrompt(
   // Layer 1: ALWAYS — master prompt with agentic behavior
   layers.push(MASTER_PROMPT);
   layers.push(AGENCY_DOCTRINE);
+  layers.push(formatAgencyActionContractsForPrompt());
   const contextText = formatYuliaContextForPrompt(buildYuliaContextPack({
     user,
     deal,
