@@ -2,6 +2,7 @@ export type ModeId = "today" | "pipeline" | "search" | "files" | "docs" | "analy
 
 export type TabKind =
   | "mode-root"
+  | "files-list"
   | "deal"
   | "doc"
   | "analysis"
@@ -16,6 +17,7 @@ export type IconName =
   | "settings" | "history" | "plus" | "close" | "pin" | "back" | "deal";
 
 export type FileScope = "all" | "data-room" | "shared";
+export type FileListView = "all" | "deal-libraries" | "needs-action" | "data-rooms";
 
 export interface Tab {
   id: string;
@@ -29,6 +31,7 @@ export interface Tab {
   template?: string;
   tool?: string;
   fileScope?: FileScope;
+  fileListView?: FileListView;
 }
 
 export interface Message {

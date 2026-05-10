@@ -12,7 +12,7 @@ import { SampleBanner, SAMPLE_DISMISS_KEY } from "./SampleBanner";
 import { MODES } from "./icons";
 import { buildDesktopSurfaceContext, type SurfaceContext } from "../../lib/yuliaSurfaceContext";
 import { normalizeModelPreference, type ModelPreference } from "../../lib/modelPreference";
-import type { FileScope, Message, ModeId, Tab } from "./types";
+import type { FileListView, FileScope, Message, ModeId, Tab } from "./types";
 
 const VALID_MODES: ModeId[] = ["today", "pipeline", "search", "files", "docs", "analysis", "intel", "library"];
 
@@ -418,6 +418,17 @@ function readHashState(): { mode: ModeId; tab: string | null; scope?: FileScope;
 function tabFromHash(tab: string | null, scope?: FileScope, title?: string): Tab | null {
   if (!tab) return null;
   if (tab.endsWith("-root")) return null;
+  if (tab.startsWith("files-")) {
+    const view = tab.replace(/^files-/, "") as FileListView;
+    if (isFileListView(view)) {
+      return {
+        id: tab,
+        kind: "files-list",
+        title: filesListTitle(view),
+        fileListView: view,
+      };
+    }
+  }
   if (tab.startsWith("deal-")) {
     return {
       id: tab,
@@ -427,6 +438,20 @@ function tabFromHash(tab: string | null, scope?: FileScope, title?: string): Tab
     };
   }
   return null;
+}
+
+function isFileListView(value: string): value is FileListView {
+  return value === "all" || value === "deal-libraries" || value === "needs-action" || value === "data-rooms";
+}
+
+function filesListTitle(view: FileListView): string {
+  const titles: Record<FileListView, string> = {
+    all: "All files",
+    "deal-libraries": "Deal libraries",
+    "needs-action": "Needs action",
+    "data-rooms": "Data rooms",
+  };
+  return titles[view];
 }
 
 function titleForDealId(id: string): string {

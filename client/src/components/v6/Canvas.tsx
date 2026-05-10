@@ -5,7 +5,7 @@ import type { ModelPreference } from "../../lib/modelPreference";
 import { V6Icon } from "./icons";
 import { V6TodayRoot } from "./modes/TodayRoot";
 import { V6PipelineRoot } from "./modes/PipelineRoot";
-import { V6FilesRoot } from "./modes/FilesRoot";
+import { V6FilesListView, V6FilesRoot } from "./modes/FilesRoot";
 import { V6SearchRoot } from "./modes/SearchRoot";
 import { V6DocsRoot } from "./modes/DocsRoot";
 import { V6AnalysisRoot } from "./modes/AnalysisRoot";
@@ -123,6 +123,7 @@ function tabIcon(tab: Tab): IconName {
     return tab.modeId ? map[tab.modeId] : "doc";
   }
   if (tab.kind === "deal") return "deal";
+  if (tab.kind === "files-list") return tab.fileListView === "data-rooms" ? "library" : "doc";
   if (tab.kind === "doc") return "doc";
   if (tab.kind === "analysis") return "chart";
   if (tab.kind === "feed-item") return "feed";
@@ -155,6 +156,7 @@ function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut, modelPrefe
     if (tab.modeId === "library")  return <V6LibraryRoot openTab={openTab} />;
     return <Placeholder label={`${tab.title} — root view`} note="Unknown mode root." />;
   }
+  if (tab.kind === "files-list") return <V6FilesListView view={tab.fileListView ?? "all"} openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
   if (tab.kind === "deal")     return <V6DealView id={tab.id} title={tab.title} openTab={openTab} fileScope={tab.fileScope} onTalkToYulia={onTalkToYulia} modelPreference={modelPreference} />;
   if (tab.kind === "doc")      return <V6DocView id={tab.id} title={tab.title} onTalkToYulia={onTalkToYulia} />;
   if (tab.kind === "analysis") return <V6AnalysisView title={tab.title} tool={tab.tool} openTab={openTab} onTalkToYulia={onTalkToYulia} />;

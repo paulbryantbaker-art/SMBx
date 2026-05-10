@@ -26,6 +26,7 @@ export function buildDesktopSurfaceContext(
 ): SurfaceContext {
   const activeTab = tabs.find(tab => tab.id === activeTabId);
   const fileScope = activeTab?.fileScope;
+  const filesFilter = activeTab?.kind === "files-list" ? activeTab.fileListView : undefined;
 
   return compactSurfaceContext({
     device: "desktop",
@@ -37,6 +38,7 @@ export function buildDesktopSurfaceContext(
     dealId: activeTab?.kind === "deal" ? activeTab.id : undefined,
     dealTitle: activeTab?.kind === "deal" ? activeTab.title : undefined,
     fileScope,
+    filesFilter,
   });
 }
 

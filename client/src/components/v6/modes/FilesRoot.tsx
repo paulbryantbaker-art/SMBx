@@ -1,6 +1,6 @@
-import { useMemo, useRef, useState, type CSSProperties } from "react";
+import { useMemo, type CSSProperties } from "react";
 import { V6Icon } from "../icons";
-import type { FileScope, OpenTab } from "../types";
+import type { FileListView, FileScope, OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
 import { useV6WorkspaceData, type WorkspaceDeal, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
 import { DESKTOP_TEXTURES } from "../../../lib/randomTextures";
@@ -20,8 +20,6 @@ interface Shortcut {
   tone: "all" | "deals" | "action" | "room";
   prompt: string;
 }
-
-type FileListView = "all" | "deal-libraries" | "needs-action" | "data-rooms";
 
 interface FileRow {
   title: string;
@@ -100,10 +98,8 @@ const ACTIONS: FileRow[] = [
   { title: "NDA countersigned", sub: "Big Fake Deal · executed and immutable", status: "Executed", kind: "doc", tone: "done" },
 ];
 
-export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
+function useFilesWorkspace(user: User | null) {
   const workspace = useV6WorkspaceData(user);
-  const listRef = useRef<HTMLElement | null>(null);
-  const [activeList, setActiveList] = useState<FileListView>("all");
   const useSampleData = !workspace.canFetch;
   const shortcuts = useMemo(
     () => useSampleData ? SHORTCUTS : buildRealShortcuts(workspace.deals, workspace.deliverables),
@@ -124,14 +120,19 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
   const actions = useMemo(
     () => {
       if (useSampleData) return ACTIONS;
-      const queue = workspace.deliverables
+      return workspace.deliverables
         .filter(d => ["queued", "generating", "failed", "draft"].includes(d.status))
-        .slice(0, 5)
+        .slice(0, 8)
         .map(deliverableToFileRow);
-      return queue;
     },
     [useSampleData, workspace.deliverables],
   );
+
+  return { workspace, shortcuts, recents, allFiles, rooms, actions };
+}
+
+export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
+  const { workspace, shortcuts, recents, rooms, actions } = useFilesWorkspace(user);
 
   const ask = (prompt: string) => {
     onTalkToYulia?.(prompt);
@@ -150,9 +151,11 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
   };
 
   const runShortcut = (shortcut: Shortcut) => {
-    setActiveList(shortcut.view);
-    requestAnimationFrame(() => {
-      listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    openTab({
+      id: `files-${shortcut.view}`,
+      kind: "files-list",
+      title: shortcut.label,
+      fileListView: shortcut.view,
     });
   };
 
@@ -192,10 +195,9 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
               type="button"
               style={{
                 ...F.shortcutCard,
-                ...(activeList === shortcut.view ? F.shortcutCardActive : {}),
                 backgroundImage: s.bg,
-                borderColor: activeList === shortcut.view ? s.iconColor : s.border,
-                boxShadow: activeList === shortcut.view ? `${s.shadow}, 0 0 0 2px ${s.iconBg}` : s.shadow,
+                borderColor: s.border,
+                boxShadow: s.shadow,
               }}
               onClick={() => runShortcut(shortcut)}
             >
@@ -209,20 +211,6 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
         </div>
       </section>
 
-      <section ref={listRef} style={F.section}>
-        <ActiveFilesList
-          activeList={activeList}
-          allFiles={allFiles}
-          rooms={rooms}
-          actions={actions}
-          loading={workspace.loading}
-          error={workspace.error}
-          openDoc={openDoc}
-          openDeal={openDeal}
-          ask={ask}
-        />
-      </section>
-
       <section style={F.grid}>
         <div style={F.card}>
           <div style={F.cardHead}>
@@ -231,7 +219,13 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
               <h2 style={F.cardTitle}>Recently touched</h2>
               <p style={F.cardSub}>Last files Yulia or you touched, plus anything waiting on you.</p>
             </div>
-            <button className="m-btn text" type="button" onClick={() => ask("Show every recent file across my deal libraries.")}>See all</button>
+            <button
+              className="m-btn text"
+              type="button"
+              onClick={() => openTab({ id: "files-all", kind: "files-list", title: "All files", fileListView: "all" })}
+            >
+              See all
+            </button>
           </div>
           <div style={F.rows}>
             {workspace.loading && <div className="mono" style={F.loading}>LOADING REAL FILES…</div>}
@@ -310,6 +304,65 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
   );
 }
 
+export function V6FilesListView({
+  view,
+  openTab,
+  onTalkToYulia,
+  user,
+}: {
+  view: FileListView;
+  openTab: OpenTab;
+  onTalkToYulia?: (prompt: string) => void;
+  user: User | null;
+}) {
+  const { workspace, allFiles, rooms, actions } = useFilesWorkspace(user);
+  const copy = activeListCopy(view);
+  const s = detailTone(view);
+
+  const ask = (prompt: string) => {
+    onTalkToYulia?.(prompt);
+  };
+
+  const openDoc = (row: FileRow) => {
+    if (row.kind === "deal" && row.dealId) {
+      openTab({ kind: "deal", title: row.dealTitle ?? row.title, id: row.dealId });
+      return;
+    }
+    openTab({ kind: "doc", title: row.title, id: row.id ?? `file-${slug(row.title)}` });
+  };
+
+  const openDeal = (room: RoomRow, fileScope: FileScope = "all") => {
+    openTab({ kind: "deal", title: room.deal, id: room.id, fileScope });
+  };
+
+  return (
+    <div className="m-fade-up" style={F.detailPage}>
+      <section style={{ ...F.detailHero, backgroundImage: s.bg }}>
+        <div>
+          <div className="mono" style={F.detailEyebrow}>{copy.eyebrow}</div>
+          <h1 style={F.detailTitle}>{copy.title}</h1>
+          <p style={F.detailSub}>{copy.sub}</p>
+        </div>
+        <button className="m-btn tonal" type="button" onClick={() => ask(copy.prompt)}>
+          Ask Yulia
+        </button>
+      </section>
+
+      <ActiveFilesList
+        activeList={view}
+        allFiles={allFiles}
+        rooms={rooms}
+        actions={actions}
+        loading={workspace.loading}
+        error={workspace.error}
+        openDoc={openDoc}
+        openDeal={openDeal}
+        ask={ask}
+      />
+    </div>
+  );
+}
+
 function EmptyRows({
   title,
   text,
@@ -353,6 +406,7 @@ function ActiveFilesList({
 }) {
   const copy = activeListCopy(activeList);
   const rows = activeList === "needs-action" ? actions : allFiles;
+  const groups = groupFileRows(rows);
   const showRooms = activeList === "deal-libraries" || activeList === "data-rooms";
   const roomScope: FileScope = activeList === "data-rooms" ? "data-room" : "all";
 
@@ -413,12 +467,40 @@ function ActiveFilesList({
           </button>
         ))}
 
-        {!showRooms && rows.map((row, index) => (
-          <FileListRow key={`${activeList}-${row.id ?? row.title}-${index}`} row={row} last={index === rows.length - 1} onClick={() => openDoc(row)} />
+        {!showRooms && groups.map((group, groupIndex) => (
+          <div key={`${activeList}-${group.deal}`} style={F.fileGroup}>
+            <div style={F.fileGroupHead}>
+              <strong>{group.deal}</strong>
+              <span>{group.rows.length} {group.rows.length === 1 ? "file" : "files"}</span>
+            </div>
+            {group.rows.map((row, index) => (
+              <FileListRow
+                key={`${activeList}-${group.deal}-${row.id ?? row.title}-${index}`}
+                row={row}
+                last={index === group.rows.length - 1 && groupIndex === groups.length - 1}
+                onClick={() => openDoc(row)}
+              />
+            ))}
+          </div>
         ))}
       </div>
     </div>
   );
+}
+
+function groupFileRows(rows: FileRow[]): Array<{ deal: string; rows: FileRow[] }> {
+  const byDeal = new Map<string, FileRow[]>();
+  rows.forEach(row => {
+    const deal = fileDealName(row);
+    byDeal.set(deal, [...(byDeal.get(deal) ?? []), row]);
+  });
+  return Array.from(byDeal, ([deal, groupedRows]) => ({ deal, rows: groupedRows }));
+}
+
+function fileDealName(row: FileRow): string {
+  if (row.dealTitle) return row.dealTitle;
+  const [deal] = row.sub.split("·");
+  return deal.trim() || "Workspace";
 }
 
 function activeListCopy(view: FileListView) {
@@ -542,6 +624,24 @@ function shortcutTone(name: Shortcut["tone"]) {
   return tones[name];
 }
 
+function detailTone(view: FileListView) {
+  const map: Record<FileListView, { bg: string }> = {
+    all: {
+      bg: `linear-gradient(135deg, rgba(20,39,72,0.72), rgba(71,116,169,0.48) 56%, rgba(187,212,229,0.28)), url('${DESKTOP_TEXTURES.filesAll}')`,
+    },
+    "deal-libraries": {
+      bg: `linear-gradient(135deg, rgba(23,74,58,0.70), rgba(73,137,108,0.48) 58%, rgba(199,224,211,0.30)), url('${DESKTOP_TEXTURES.filesDeals}')`,
+    },
+    "needs-action": {
+      bg: `linear-gradient(135deg, rgba(114,74,18,0.70), rgba(198,145,64,0.48) 58%, rgba(249,226,173,0.30)), url('${DESKTOP_TEXTURES.filesAction}')`,
+    },
+    "data-rooms": {
+      bg: `linear-gradient(135deg, rgba(58,52,123,0.72), rgba(111,103,177,0.50) 56%, rgba(218,214,241,0.30)), url('${DESKTOP_TEXTURES.filesRoom}')`,
+    },
+  };
+  return map[view];
+}
+
 function slug(input: string): string {
   return input.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
@@ -615,6 +715,46 @@ const filesCardWash = `linear-gradient(135deg, rgba(255,255,255,0.94), rgba(246,
 const F: Record<string, CSSProperties> = {
   page: {
     minHeight: "100%",
+  },
+  detailPage: {
+    minHeight: "100%",
+    maxWidth: 1320,
+  },
+  detailHero: {
+    minHeight: 240,
+    borderRadius: 26,
+    padding: 30,
+    marginBottom: 22,
+    backgroundSize: "cover, cover",
+    backgroundPosition: "center, center",
+    border: "1px solid rgba(255,255,255,0.20)",
+    boxShadow: "0 24px 60px rgba(23,38,63,0.18), var(--m-elev-2)",
+    display: "flex",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    gap: 24,
+  },
+  detailEyebrow: {
+    fontSize: 10,
+    letterSpacing: "0.16em",
+    fontWeight: 800,
+    color: "rgba(255,255,255,0.76)",
+  },
+  detailTitle: {
+    margin: "8px 0 0",
+    maxWidth: 780,
+    fontSize: "clamp(42px, 4.2vw, 64px)",
+    lineHeight: 0.94,
+    letterSpacing: "-0.06em",
+    color: "#FFFDF7",
+    textWrap: "balance",
+  },
+  detailSub: {
+    margin: "14px 0 0",
+    maxWidth: 760,
+    fontSize: 15,
+    lineHeight: 1.5,
+    color: "rgba(255,255,255,0.80)",
   },
   hero: {
     display: "grid",
@@ -929,6 +1069,18 @@ const F: Record<string, CSSProperties> = {
     color: "var(--m-on-surface-mid)",
     fontSize: 12,
     whiteSpace: "nowrap",
+  },
+  fileGroup: {
+    paddingTop: 10,
+  },
+  fileGroupHead: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    padding: "8px 0 4px",
+    color: "var(--m-on-surface-mid)",
+    fontSize: 12,
   },
   actionCard: {
     borderRadius: 26,
