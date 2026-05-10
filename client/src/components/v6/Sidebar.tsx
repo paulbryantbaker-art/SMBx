@@ -1,12 +1,10 @@
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { MODES, V6Icon } from "./icons";
 import type { ModeId, OpenTab } from "./types";
 
 interface SidebarProps {
   activeMode: ModeId;
   onPickMode: (id: ModeId) => void;
-  searchOpen: boolean;
-  setSearchOpen: (v: boolean) => void;
   onOpenTab: OpenTab;
   user: { display_name: string | null; email: string } | null;
   onSignIn: () => void;
@@ -14,35 +12,14 @@ interface SidebarProps {
   onSignOut: () => void;
 }
 
-const DEMO_RESULTS = {
-  deals: [
-    { id: "d-bigfake",    label: "Big Fake Deal · sample", sub: "Pursue · 92 fit" },
-    { id: "d-pest",       label: "Pest Control · FL",      sub: "Pursue · 84 fit" },
-    { id: "d-electrical", label: "Electrical · TX",        sub: "Watch · 78 fit"  },
-  ],
-  docs: [
-    { id: "doc-nda",  label: "Acme NDA · executed",     sub: "Mar 18 · final" },
-    { id: "doc-loi",  label: "Big Fake Deal · LOI v3",  sub: "Mar 22 · draft" },
-    { id: "doc-memo", label: "Q1 thesis memo",          sub: "Feb 28 · final" },
-  ],
-  analysis: [
-    { id: "an-recast", label: "Big Fake Deal · Recast",  sub: "Mar 25 · live"  },
-    { id: "an-comps",  label: "Pest Control · Comps",    sub: "Mar 20 · saved" },
-  ],
-} as const;
-
-type ResultGroup = keyof typeof DEMO_RESULTS;
-
 export function V6Sidebar({
-  activeMode, onPickMode, searchOpen, setSearchOpen, onOpenTab,
+  activeMode, onPickMode, onOpenTab,
   user, onSignIn, onSignUp, onSignOut,
 }: SidebarProps) {
-  const searchRef = useRef<HTMLInputElement>(null);
-  const [q, setQ] = useState("");
   const [hover, setHover] = useState(false);
   const [pinned, setPinned] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const expanded = pinned || hover || searchOpen || menuOpen;
+  const expanded = pinned || hover || menuOpen;
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Click outside to close account menu
@@ -69,32 +46,6 @@ export function V6Sidebar({
     if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
     return src.slice(0, 2).toUpperCase();
   })();
-
-  const norm = q.trim().toLowerCase();
-  const matches = !norm ? null : (Object.fromEntries(
-    (Object.entries(DEMO_RESULTS) as [ResultGroup, typeof DEMO_RESULTS[ResultGroup]][])
-      .map(([k, arr]) => [k, arr.filter(r => (r.label + r.sub).toLowerCase().includes(norm))])
-  ) as Record<ResultGroup, { id: string; label: string; sub: string }[]>);
-
-  const openSearch = () => {
-    setSearchOpen(true);
-    setTimeout(() => searchRef.current?.focus(), 50);
-  };
-
-  const closeSearch = () => {
-    setSearchOpen(false);
-    setQ("");
-  };
-
-  const onSearchKey = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Escape") closeSearch();
-  };
-
-  const tabKindFor = (group: ResultGroup) =>
-    group === "deals" ? "deal" : group === "docs" ? "doc" : "analysis";
-
-  const iconFor = (group: ResultGroup) =>
-    group === "deals" ? "deal" : group === "docs" ? "doc" : "chart";
 
   return (
     <aside
@@ -187,102 +138,7 @@ export function V6Sidebar({
         )}
       </div>
 
-      <div style={{ ...S.searchWrap, padding: expanded ? "12px 12px 0" : "12px 8px 0" }}>
-        <button
-          className="m-state"
-          style={{ ...S.searchTrigger, ...(searchOpen ? S.searchTriggerActive : null) }}
-          onClick={() => (searchOpen ? closeSearch() : openSearch())}
-          aria-label="Search workspace"
-          aria-expanded={searchOpen}
-        >
-          <V6Icon name="search" size={13} />
-          {expanded && (
-            <>
-              <span style={{ flex: 1, textAlign: "left", fontSize: 12.5 }}>
-                {searchOpen ? "Searching everything…" : "Search · ⌘K"}
-              </span>
-              {!searchOpen && <span style={S.kbd}>⌘K</span>}
-              {searchOpen && (
-                <span
-                  role="button"
-                  onClick={(e) => { e.stopPropagation(); closeSearch(); }}
-                  style={{ fontSize: 11, color: "var(--m-on-surface-mid)", padding: "2px 6px" }}
-                >esc</span>
-              )}
-            </>
-          )}
-        </button>
-      </div>
-
-      {searchOpen && (
-        <div className="m-fade-in" style={S.searchPane}>
-          <input
-            ref={searchRef}
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Type to search deals, docs, analyses…"
-            style={S.searchInput}
-            onKeyDown={onSearchKey}
-            aria-label="Search query"
-          />
-          <div className="thin-scroll" style={S.searchResults}>
-            {!norm && (
-              <div style={{ paddingTop: 4 }}>
-                <div style={S.suggestedHead}>SUGGESTED</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  {[
-                    { kind: "deal" as const, label: "Big Fake Deal · sample",   sub: "Last opened today" },
-                    { kind: "doc" as const,  label: "Big Fake Deal · LOI v3",   sub: "3 days ago" },
-                    { kind: "analysis" as const, label: "Big Fake Deal · Recast", sub: "Yesterday" },
-                  ].map(s => (
-                    <button
-                      key={s.label}
-                      className="m-state"
-                      style={S.resultRow}
-                      onClick={() => { onOpenTab({ kind: s.kind, title: s.label }); closeSearch(); }}
-                    >
-                      <V6Icon name={s.kind === "deal" ? "deal" : s.kind === "doc" ? "doc" : "chart"} size={12} />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 12.5, color: "var(--m-on-surface)", fontWeight: 500 }}>{s.label}</div>
-                        <div style={{ fontSize: 11, color: "var(--m-on-surface-mid)" }}>{s.sub}</div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {norm && matches && (Object.entries(matches) as [ResultGroup, typeof matches[ResultGroup]][]).map(([group, arr]) => arr.length > 0 && (
-              <div key={group} style={{ marginBottom: 10 }}>
-                <div style={S.groupHead}>{group} · {arr.length}</div>
-                {arr.map(r => (
-                  <button
-                    key={r.id}
-                    className="m-state"
-                    style={S.resultRow}
-                    onClick={() => { onOpenTab({ kind: tabKindFor(group), title: r.label }); closeSearch(); }}
-                  >
-                    <V6Icon name={iconFor(group)} size={12} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 12.5, color: "var(--m-on-surface)", fontWeight: 500 }}>{r.label}</div>
-                      <div style={{ fontSize: 11, color: "var(--m-on-surface-mid)" }}>{r.sub}</div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            ))}
-
-            {norm && matches && (Object.values(matches) as { id: string }[][]).every(a => a.length === 0) && (
-              <div style={{ padding: "16px 12px", fontSize: 12.5, color: "var(--m-on-surface-mid)", textAlign: "center" }}>
-                No matches for &ldquo;{q}&rdquo;
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {!searchOpen && (
-        <div style={{ ...S.modes, padding: expanded ? "16px 8px 8px" : "16px 6px 8px" }}>
+      <div style={{ ...S.modes, padding: expanded ? "18px 8px 8px" : "18px 6px 8px" }}>
           {expanded && <div style={S.sectionHead}>Workspace</div>}
           {MODES.map(m => (
             <button
@@ -294,20 +150,17 @@ export function V6Sidebar({
               aria-current={activeMode === m.id ? "page" : undefined}
               style={!expanded ? { justifyContent: "center", padding: "10px 0" } : undefined}
             >
-              <span className="mode-icon"><V6Icon name={m.icon} size={14} /></span>
+              <span className="mode-icon"><V6Icon name={m.icon} size={17} /></span>
               {expanded && (
                 <>
                   <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.label}</span>
-                  <span className="mode-count">{m.count}</span>
                 </>
               )}
             </button>
           ))}
-        </div>
-      )}
+      </div>
 
-      {!searchOpen && (
-        <div style={{ ...S.foot, padding: expanded ? "8px 8px 12px" : "8px 6px 12px" }}>
+      <div style={{ ...S.foot, padding: expanded ? "8px 8px 12px" : "8px 6px 12px" }}>
           <button
             className="mode-item"
             style={{ width: "100%", ...(expanded ? null : { justifyContent: "center", padding: "10px 0" }) }}
@@ -315,7 +168,7 @@ export function V6Sidebar({
             aria-label="Recent activity"
             onClick={() => onOpenTab({ id: "tab-history", kind: "history", title: "Conversation history" })}
           >
-            <span className="mode-icon"><V6Icon name="history" size={14} /></span>
+            <span className="mode-icon"><V6Icon name="history" size={17} /></span>
             {expanded && <span>Recent activity</span>}
           </button>
           <button
@@ -325,11 +178,10 @@ export function V6Sidebar({
             aria-label="Settings"
             onClick={() => onOpenTab({ id: "tab-settings", kind: "settings", title: "Settings" })}
           >
-            <span className="mode-icon"><V6Icon name="settings" size={14} /></span>
+            <span className="mode-icon"><V6Icon name="settings" size={17} /></span>
             {expanded && <span>Settings</span>}
           </button>
-        </div>
-      )}
+      </div>
     </aside>
   );
 }
@@ -337,8 +189,8 @@ export function V6Sidebar({
 const S: Record<string, CSSProperties> = {
   rail: {
     flexShrink: 0,
-    background: "linear-gradient(180deg, #F5F6FB 0%, #EEF1F8 100%)",
-    borderRight: "1px solid #D7DEEC",
+    background: "linear-gradient(180deg, #F5F8FC 0%, #EEF4FA 100%)",
+    borderRight: "1px solid #DCE6F1",
     display: "flex", flexDirection: "column", height: "100%",
     transition: "width 180ms ease",
     overflow: "hidden",
@@ -347,8 +199,8 @@ const S: Record<string, CSSProperties> = {
   account: {
     display: "flex", alignItems: "center", gap: 10,
     padding: "12px 14px",
-    borderBottom: "1px solid #E7EBF5",
-    background: "rgba(255,255,255,0.58)",
+    borderBottom: "1px solid #E1E8F2",
+    background: "rgba(248,251,255,0.88)",
   },
   avatar: {
     width: 32, height: 32, borderRadius: 10,
@@ -377,73 +229,6 @@ const S: Record<string, CSSProperties> = {
     color: "var(--m-on-surface-mid)", cursor: "pointer",
     flexShrink: 0,
   },
-  searchWrap: { padding: "12px 12px 0" },
-  searchTrigger: {
-    all: "unset",
-    width: "100%", boxSizing: "border-box",
-    display: "flex", alignItems: "center", gap: 10,
-    padding: "9px 12px",
-    background: "#E8ECF5",
-    borderRadius: 10,
-    color: "var(--m-on-surface-var)",
-    cursor: "pointer",
-    boxShadow: "inset 0 0 0 1px rgba(215,222,236,0.72)",
-  },
-  searchTriggerActive: {
-    background: "var(--m-surface-on-light)",
-    boxShadow: "0 0 0 2px var(--m-primary), 0 12px 24px rgba(26,34,51,0.08)",
-    color: "var(--m-on-surface)",
-  },
-  kbd: {
-    fontFamily: "var(--font-mono)", fontSize: 10,
-    padding: "2px 6px",
-    background: "#DDE3F0",
-    borderRadius: 4,
-    color: "var(--m-on-surface-mid)",
-    flexShrink: 0,
-  },
-  searchPane: {
-    flex: 1,
-    display: "flex", flexDirection: "column",
-    padding: "12px 12px 0",
-    minHeight: 0,
-  },
-  searchInput: {
-    width: "100%", boxSizing: "border-box",
-    background: "var(--m-surface-on-light)",
-    border: "1px solid var(--m-primary)",
-    borderRadius: 10,
-    padding: "9px 12px",
-    fontSize: 13, color: "var(--m-on-surface)",
-    outline: "none",
-    boxShadow: "0 0 0 3px rgba(111, 130, 220, 0.16)",
-    fontFamily: "var(--font-body)",
-  },
-  searchResults: {
-    flex: 1, overflowY: "auto",
-    paddingTop: 12,
-    minHeight: 0,
-  },
-  resultRow: {
-    all: "unset",
-    display: "flex", alignItems: "center", gap: 10,
-    padding: "8px 10px",
-    borderRadius: 8,
-    cursor: "pointer",
-    color: "var(--m-on-surface-var)",
-    width: "100%", boxSizing: "border-box",
-  },
-  suggestedHead: {
-    fontSize: 11, color: "var(--m-on-surface-mid)",
-    marginBottom: 8,
-    fontFamily: "var(--font-mono)", letterSpacing: "0.1em", fontWeight: 600,
-  },
-  groupHead: {
-    fontSize: 10, color: "var(--m-on-surface-mid)",
-    margin: "8px 4px 4px",
-    fontFamily: "var(--font-mono)", letterSpacing: "0.12em", fontWeight: 600,
-    textTransform: "uppercase",
-  },
   modes: { flex: 1, overflow: "auto", padding: "16px 8px 8px" },
   sectionHead: {
     padding: "0 10px 8px",
@@ -453,7 +238,7 @@ const S: Record<string, CSSProperties> = {
   },
   foot: {
     padding: "8px 8px 12px",
-    borderTop: "1px solid #E7EBF5",
+    borderTop: "1px solid #E1E8F2",
     display: "flex", flexDirection: "column", gap: 2,
   },
   menu: {
@@ -461,7 +246,7 @@ const S: Record<string, CSSProperties> = {
     top: "calc(100% + 4px)",
     left: 12, right: 12,
     background: "var(--m-surface-on-light)",
-    border: "1px solid #D7DEEC",
+    border: "1px solid #DCE6F1",
     borderRadius: 10,
     boxShadow: "var(--m-elev-3)",
     padding: 4,

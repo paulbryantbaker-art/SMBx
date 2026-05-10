@@ -4,6 +4,7 @@ import { V6Icon } from "../icons";
 import { V6DocStatus, type DocStatusKind } from "../modes/cards";
 import type { FileScope, OpenTab, TabKind } from "../types";
 import { authHeaders } from "../../../hooks/useAuth";
+import type { ModelPreference } from "../../../lib/modelPreference";
 import {
   fileDeliverableToDataRoom,
   generateDealDeliverable,
@@ -260,12 +261,14 @@ export function V6DealView({
   openTab,
   fileScope,
   onTalkToYulia,
+  modelPreference,
 }: {
   id: string;
   title: string;
   openTab: OpenTab;
   fileScope?: FileScope;
   onTalkToYulia?: (prompt: string) => void;
+  modelPreference?: ModelPreference;
 }) {
   const numericId = /^\d+$/.test(id) ? parseInt(id, 10) : null;
   const [data, setData] = useState<DealDetailResp | null>(null);
@@ -352,7 +355,7 @@ export function V6DealView({
     setActionError(null);
     setActionNote(null);
     try {
-      const result = await generateDealDeliverable({ dealId: numericId, menuItemSlug: primaryDeliverable.slug });
+      const result = await generateDealDeliverable({ dealId: numericId, menuItemSlug: primaryDeliverable.slug, modelPreference });
       setActionNote(`${result.title || primaryDeliverable.label} is queued. Opening the live deliverable tab.`);
       openTab({ kind: "doc", title: `${dealName} · ${result.title || primaryDeliverable.label}`, id: String(result.deliverableId) });
       void refreshDealArtifacts();
@@ -686,7 +689,7 @@ function DealFileRow({ file, last, onClick }: { file: DealFileItem; last: boolea
       onClick={onClick}
     >
       <span style={{ ...D.fileIcon, background: t.soft, color: t.ink }}>
-        <V6Icon name={file.kind === "analysis" ? "chart" : "doc"} size={14} />
+        <V6Icon name={file.kind === "analysis" ? "chart" : "doc"} size={17} />
       </span>
       <span style={D.fileRowText}>
         <strong>{file.title}</strong>
@@ -1249,11 +1252,12 @@ const D: Record<string, CSSProperties> = {
     cursor: "pointer",
   },
   fileIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
+    width: 42,
+    height: 42,
+    borderRadius: 15,
     display: "grid",
     placeItems: "center",
+    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.60), 0 10px 18px rgba(26,34,51,0.06)",
   },
   fileRowText: {
     minWidth: 0,

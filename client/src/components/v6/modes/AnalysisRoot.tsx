@@ -1,8 +1,18 @@
-import { type CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import { V6Section } from "../Canvas";
 import { V6Icon } from "../icons";
 import { V6DocStatus, type DocStatusKind } from "./cards";
 import type { IconName, OpenTab } from "../types";
+import type { User } from "../../../hooks/useAuth";
+import { useV6WorkspaceData } from "../../../hooks/useV6WorkspaceData";
+import type { ModelPreference } from "../../../lib/modelPreference";
+import {
+  analysisSlugForTool,
+  generateActionDeliverable,
+  pickActionDeal,
+  primaryAnalysisForJourney,
+  yuliaComparePrompt,
+} from "../../../lib/v6ActionContracts";
 
 type ToneKey = "primary" | "secondary" | "tertiary" | "pursue" | "watch";
 
@@ -24,6 +34,7 @@ const TOOLS: Tool[] = [
   { id: "tool-qoe",     name: "QoE Lite",        sub: "Quality of earnings sweep",   icon: "search",tone: "primary"   },
   { id: "tool-buyer",   name: "Buyer fit",       sub: "Score against your thesis",   icon: "deal",  tone: "secondary" },
   { id: "tool-sba",     name: "SBA structure",   sub: "Model leverage scenarios",    icon: "chart", tone: "watch"     },
+  { id: "tool-compare", name: "Compare deals",   sub: "Side-by-side next-action read",icon: "deal",  tone: "tertiary"  },
 ];
 
 const TONE_BG: Record<ToneKey, string> = {
@@ -41,7 +52,61 @@ const TONE_FG: Record<ToneKey, string> = {
   watch:     "#3F2E00",
 };
 
-export function V6AnalysisRoot({ openTab }: { openTab: OpenTab }) {
+export function V6AnalysisRoot({
+  openTab,
+  onTalkToYulia,
+  user,
+  modelPreference,
+}: {
+  openTab: OpenTab;
+  onTalkToYulia?: (prompt: string) => void;
+  user: User | null;
+  modelPreference?: ModelPreference;
+}) {
+  const workspace = useV6WorkspaceData(user);
+  const deal = pickActionDeal(workspace.deals);
+  const [busyAction, setBusyAction] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionNote, setActionNote] = useState<string | null>(null);
+
+  const runAnalysisAction = async (tool?: Tool) => {
+    setActionError(null);
+    setActionNote(null);
+
+    if (tool?.id === "tool-compare") {
+      openTab({ kind: "analysis", title: "Deal comparison", tool: tool.id });
+      onTalkToYulia?.(yuliaComparePrompt(workspace.deals));
+      return;
+    }
+
+    const target = deal;
+    const mapping = tool ? analysisSlugForTool(tool.id, target?.journey_type) : primaryAnalysisForJourney(target?.journey_type);
+    if (!target || !mapping) {
+      openTab({ kind: "analysis", title: tool ? `New ${tool.name}` : "New analysis", tool: tool?.id });
+      onTalkToYulia?.(tool
+        ? `Run ${tool.name} on the active deal. Use the deal data already in the workspace and tell me what needs action.`
+        : "Run the most useful analysis on the active deal and open the result.");
+      return;
+    }
+
+    setBusyAction(tool?.id ?? "new-analysis");
+    try {
+      await generateActionDeliverable({
+        deal: target,
+        slug: mapping.slug,
+        label: mapping.label,
+        openTab,
+        modelPreference,
+        onNote: setActionNote,
+      });
+      void workspace.refresh();
+    } catch (e: any) {
+      setActionError(e?.message || "Could not run analysis.");
+    } finally {
+      setBusyAction(null);
+    }
+  };
+
   return (
     <div className="m-fade-up">
       <V6Section
@@ -49,13 +114,23 @@ export function V6AnalysisRoot({ openTab }: { openTab: OpenTab }) {
         title="Run an analysis"
         sub="Yulia handles the math. You read the result."
         action={
-          <button className="m-btn filled" aria-label="New analysis">
+          <button
+            className="m-btn filled"
+            aria-label="New analysis"
+            type="button"
+            onClick={() => { void runAnalysisAction(); }}
+            disabled={busyAction === "new-analysis"}
+          >
             <V6Icon name="plus" size={12} />
-            <span style={{ marginLeft: 6 }}>New analysis</span>
+            <span style={{ marginLeft: 6 }}>{busyAction === "new-analysis" ? "Running..." : "New analysis"}</span>
           </button>
         }
       >
-        <div />
+        {(actionError || actionNote || workspace.error) && (
+          <div style={actionError || workspace.error ? A.actionError : A.actionNote}>
+            {actionError || workspace.error || actionNote}
+          </div>
+        )}
       </V6Section>
 
       <V6Section eyebrow="TOOLS" title="What can I run">
@@ -64,11 +139,11 @@ export function V6AnalysisRoot({ openTab }: { openTab: OpenTab }) {
             <div
               key={t.id}
               className="m-card m-state tap"
-              onClick={() => openTab({ kind: "analysis", title: `New ${t.name}`, tool: t.id })}
+              onClick={() => { void runAnalysisAction(t); }}
               role="button"
               tabIndex={0}
               aria-label={`Run ${t.name} — ${t.sub}`}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openTab({ kind: "analysis", title: `New ${t.name}`, tool: t.id }); } }}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); void runAnalysisAction(t); } }}
               style={{ padding: "18px 20px", cursor: "pointer" }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -76,7 +151,7 @@ export function V6AnalysisRoot({ openTab }: { openTab: OpenTab }) {
                   <V6Icon name={t.icon} size={16} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={A.toolName}>{t.name}</div>
+                  <div style={A.toolName}>{busyAction === t.id ? "Running..." : t.name}</div>
                   <div style={A.toolSub}>{t.sub}</div>
                 </div>
                 <span style={{ transform: "rotate(180deg)", display: "inline-flex", color: "var(--m-on-surface-mid)" }} aria-hidden="true">
@@ -142,5 +217,21 @@ const A: Record<string, CSSProperties> = {
   recentDate: {
     fontSize: 10.5, color: "var(--m-on-surface-mid)",
     letterSpacing: "0.1em", textAlign: "right",
+  },
+  actionNote: {
+    padding: "10px 12px",
+    borderRadius: 12,
+    background: "rgba(225, 242, 235, 0.9)",
+    color: "#246B50",
+    fontSize: 12.5,
+    boxShadow: "var(--m-elev-1)",
+  },
+  actionError: {
+    padding: "10px 12px",
+    borderRadius: 12,
+    background: "var(--m-pass-container)",
+    color: "#6F241E",
+    fontSize: 12.5,
+    boxShadow: "var(--m-elev-1)",
   },
 };

@@ -1,6 +1,7 @@
 import { type CSSProperties, type ReactNode } from "react";
 import type { Tab, IconName, OpenTab, ModeId } from "./types";
 import type { User } from "../../hooks/useAuth";
+import type { ModelPreference } from "../../lib/modelPreference";
 import { V6Icon } from "./icons";
 import { V6TodayRoot } from "./modes/TodayRoot";
 import { V6PipelineRoot } from "./modes/PipelineRoot";
@@ -28,9 +29,10 @@ interface CanvasProps {
   onTalkToYulia?: (prompt: string) => void;
   user: User | null;
   onSignOut: () => void;
+  modelPreference?: ModelPreference;
 }
 
-export function V6Canvas({ tabs, activeTabId, setActiveTabId, openTab, closeTab, onPickMode, onTalkToYulia, user, onSignOut }: CanvasProps) {
+export function V6Canvas({ tabs, activeTabId, setActiveTabId, openTab, closeTab, onPickMode, onTalkToYulia, user, onSignOut, modelPreference }: CanvasProps) {
   const activeTab = tabs.find(t => t.id === activeTabId) ?? tabs[0];
 
   const openStarterTab = () => {
@@ -60,6 +62,7 @@ export function V6Canvas({ tabs, activeTabId, setActiveTabId, openTab, closeTab,
             onTalkToYulia={onTalkToYulia}
             user={user}
             onSignOut={onSignOut}
+            modelPreference={modelPreference}
           />
         )}
       </div>
@@ -81,7 +84,7 @@ function V6TabStrip({ tabs, activeTabId, setActiveTabId, closeTab, onNewTab }: T
       {tabs.map(t => (
         <div
           key={t.id}
-          className={`tab ${activeTabId === t.id ? "active" : ""} ${t.pinned ? "pinned" : ""}`}
+          className={`tab ${activeTabId === t.id ? "active" : ""} ${isTodayTab(t) ? "pinned" : "closable"}`}
           onClick={() => setActiveTabId(t.id)}
           title={t.title}
           role="tab"
@@ -89,13 +92,13 @@ function V6TabStrip({ tabs, activeTabId, setActiveTabId, closeTab, onNewTab }: T
         >
           <span className="tab-icon"><V6Icon name={tabIcon(t)} size={12} /></span>
           <span className="tab-label">{t.title}</span>
-          {!t.pinned && (
+          {!isTodayTab(t) && (
             <button
               className="tab-close"
               onClick={(e) => { e.stopPropagation(); closeTab(t.id); }}
               aria-label={`Close ${t.title}`}
             >
-              <V6Icon name="close" size={10} />
+              <V6Icon name="close" size={12} />
             </button>
           )}
         </div>
@@ -105,6 +108,10 @@ function V6TabStrip({ tabs, activeTabId, setActiveTabId, closeTab, onNewTab }: T
       </button>
     </div>
   );
+}
+
+function isTodayTab(tab: Tab): boolean {
+  return tab.kind === "mode-root" && tab.modeId === "today";
 }
 
 function tabIcon(tab: Tab): IconName {
@@ -133,23 +140,24 @@ interface TabContentProps {
   onTalkToYulia?: (prompt: string) => void;
   user: User | null;
   onSignOut: () => void;
+  modelPreference?: ModelPreference;
 }
 
-function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut }: TabContentProps) {
+function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut, modelPreference }: TabContentProps) {
   if (tab.kind === "mode-root") {
     if (tab.modeId === "today")    return <V6TodayRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
-    if (tab.modeId === "pipeline") return <V6PipelineRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
+    if (tab.modeId === "pipeline") return <V6PipelineRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} modelPreference={modelPreference} />;
     if (tab.modeId === "search")   return <V6SearchRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
     if (tab.modeId === "files")    return <V6FilesRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
-    if (tab.modeId === "docs")     return <V6DocsRoot openTab={openTab} />;
-    if (tab.modeId === "analysis") return <V6AnalysisRoot openTab={openTab} />;
-    if (tab.modeId === "intel")    return <V6IntelRoot openTab={openTab} />;
+    if (tab.modeId === "docs")     return <V6DocsRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} modelPreference={modelPreference} />;
+    if (tab.modeId === "analysis") return <V6AnalysisRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} modelPreference={modelPreference} />;
+    if (tab.modeId === "intel")    return <V6IntelRoot openTab={openTab} onTalkToYulia={onTalkToYulia} />;
     if (tab.modeId === "library")  return <V6LibraryRoot openTab={openTab} />;
     return <Placeholder label={`${tab.title} — root view`} note="Unknown mode root." />;
   }
-  if (tab.kind === "deal")     return <V6DealView id={tab.id} title={tab.title} openTab={openTab} fileScope={tab.fileScope} onTalkToYulia={onTalkToYulia} />;
-  if (tab.kind === "doc")      return <V6DocView id={tab.id} title={tab.title} />;
-  if (tab.kind === "analysis") return <V6AnalysisView title={tab.title} />;
+  if (tab.kind === "deal")     return <V6DealView id={tab.id} title={tab.title} openTab={openTab} fileScope={tab.fileScope} onTalkToYulia={onTalkToYulia} modelPreference={modelPreference} />;
+  if (tab.kind === "doc")      return <V6DocView id={tab.id} title={tab.title} onTalkToYulia={onTalkToYulia} />;
+  if (tab.kind === "analysis") return <V6AnalysisView title={tab.title} tool={tab.tool} openTab={openTab} onTalkToYulia={onTalkToYulia} />;
   if (tab.kind === "feed-item") return <Placeholder label={`Feed · ${tab.title}`} note="Feed item reading view is a thin wrapper — coming after polish." />;
   if (tab.kind === "learn")    return <V6LearnView section={tab.section} anchor={tab.anchor} onTalkToYulia={onTalkToYulia} />;
   if (tab.kind === "settings") return <V6SettingsView user={user} onSignOut={onSignOut} />;

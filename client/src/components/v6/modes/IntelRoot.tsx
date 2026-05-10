@@ -30,9 +30,17 @@ const SECTORS: Sector[] = [
   { id: "sec-dist", name: "Distribution",        count: 22, trend: "+1%"  },
 ];
 
-export function V6IntelRoot({ openTab }: { openTab: OpenTab }) {
+export function V6IntelRoot({ openTab, onTalkToYulia }: { openTab: OpenTab; onTalkToYulia?: (prompt: string) => void }) {
   const featured = FEED.filter(f => f.featured);
   const rest = FEED.filter(f => !f.featured);
+  const watchSector = (sector?: string) => {
+    if (sector) {
+      openTab({ id: "search-root", kind: "mode-root", modeId: "search", title: "Search" });
+      onTalkToYulia?.(`Watch ${sector}. Surface buyer movement, comps, new targets, capital signals, and deal professionals weekly.`);
+      return;
+    }
+    onTalkToYulia?.("Help me choose which sectors to watch based on my current thesis and pipeline.");
+  };
 
   return (
     <div className="m-fade-up">
@@ -40,7 +48,7 @@ export function V6IntelRoot({ openTab }: { openTab: OpenTab }) {
         eyebrow="MARKET INTELLIGENCE"
         title="What's moving"
         sub="Sector reads, deal flow, comps — all synthesized from the sources you watch."
-        action={<button className="m-btn outlined" style={{ height: 32 }}>+ Watch a sector</button>}
+        action={<button className="m-btn outlined" style={{ height: 32 }} onClick={() => watchSector()} type="button">+ Watch a sector</button>}
       >
         <div />
       </V6Section>
@@ -79,6 +87,8 @@ export function V6IntelRoot({ openTab }: { openTab: OpenTab }) {
               role="button"
               tabIndex={0}
               aria-label={`${s.name} — ${s.count} new signals, ${s.trend} this week`}
+              onClick={() => watchSector(s.name)}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); watchSector(s.name); } }}
               style={{ padding: "14px 16px", cursor: "pointer" }}
             >
               <div style={I.sectorName}>{s.name}</div>

@@ -117,18 +117,25 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
       return "auto";
     }
   });
-  const [searchOpen, setSearchOpen] = useState(false);
   const [tabs, setTabs] = useState<Tab[]>(() => {
     const rootMode = initial.mode;
+    const todayRoot: Tab = {
+      id: "today-root",
+      kind: "mode-root",
+      modeId: "today",
+      title: "Today",
+      pinned: true,
+    };
     const rootTab: Tab = {
       id: `${rootMode}-root`,
       kind: "mode-root",
       modeId: rootMode,
       title: MODES.find(m => m.id === rootMode)?.label ?? rootMode,
-      pinned: true,
+      pinned: rootMode === "today",
     };
     const deepTab = tabFromHash(initial.tab, initial.scope, initial.title);
-    return deepTab && deepTab.id !== rootTab.id ? [rootTab, deepTab] : [rootTab];
+    const base = rootTab.id === todayRoot.id ? [todayRoot] : [todayRoot, rootTab];
+    return deepTab && !base.find(tab => tab.id === deepTab.id) ? [...base, deepTab] : base;
   });
   const [activeTabId, setActiveTabId] = useState(initial.tab ?? `${initial.mode}-root`);
 
@@ -146,9 +153,12 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
       setActiveMode(next.mode);
       setTabs(prev => {
         const deepTab = tabFromHash(next.tab, next.scope, next.title);
-        const withRoot = prev.find(t => t.id === rootId)
+        const withToday = prev.find(t => t.id === "today-root")
           ? prev
-          : [...prev, { id: rootId, kind: "mode-root" as const, modeId: next.mode, title: MODES.find(m => m.id === next.mode)?.label ?? next.mode, pinned: true }];
+          : [{ id: "today-root", kind: "mode-root" as const, modeId: "today" as const, title: "Today", pinned: true }, ...prev];
+        const withRoot = withToday.find(t => t.id === rootId)
+          ? withToday
+          : [...withToday, { id: rootId, kind: "mode-root" as const, modeId: next.mode, title: MODES.find(m => m.id === next.mode)?.label ?? next.mode, pinned: next.mode === "today" }];
         if (!deepTab) return withRoot;
         if (withRoot.find(t => t.id === deepTab.id)) {
           return withRoot.map(t => t.id === deepTab.id ? { ...t, ...deepTab } : t);
@@ -163,12 +173,11 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
 
   const pickMode = (modeId: ModeId) => {
     setActiveMode(modeId);
-    setSearchOpen(false);
     const rootId = `${modeId}-root`;
     setTabs(prev => {
       if (prev.find(t => t.id === rootId)) return prev;
       const meta = MODES.find(m => m.id === modeId);
-      return [...prev, { id: rootId, kind: "mode-root", modeId, title: meta?.label ?? modeId, pinned: true }];
+      return [...prev, { id: rootId, kind: "mode-root", modeId, title: meta?.label ?? modeId, pinned: modeId === "today" }];
     });
     setActiveTabId(rootId);
   };
@@ -189,11 +198,12 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
   };
 
   const closeTab = (id: string) => {
+    if (id === "today-root") return;
     setTabs(prev => {
       const next = prev.filter(t => t.id !== id);
       if (id === activeTabId) {
         const idx = prev.findIndex(t => t.id === id);
-        const fallback = next[idx - 1] ?? next[idx] ?? next[0];
+        const fallback = next[idx - 1] ?? next[idx] ?? next.find(t => t.id === "today-root") ?? next[0];
         if (fallback) setActiveTabId(fallback.id);
       }
       return next;
@@ -303,20 +313,17 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
     }
   };
 
-  // ⌘K opens sidebar search from anywhere
+  // ⌘K focuses Yulia from anywhere.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        setSearchOpen(true);
-      }
-      if (e.key === "Escape" && searchOpen) {
-        setSearchOpen(false);
+        inputRef.current?.focus();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [searchOpen]);
+  }, []);
 
   return (
     <div className="v6-root" style={A.shell}>
@@ -327,8 +334,6 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
         <V6Sidebar
           activeMode={activeMode}
           onPickMode={pickMode}
-          searchOpen={searchOpen}
-          setSearchOpen={setSearchOpen}
           onOpenTab={openTab}
           user={user}
           onSignIn={() => {
@@ -357,7 +362,6 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
               inputRef={inputRef}
               modeLabel={modeLabel}
               onOpenTab={openTab}
-              isAnon={isAnon}
               sending={chat.sending}
               streamingText={chat.streamingText}
               activeTool={chat.activeTool}
@@ -380,6 +384,7 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
               onTalkToYulia={(prompt) => send(prompt)}
               user={user}
               onSignOut={onSignOut}
+              modelPreference={modelPreference}
             />
           </div>
         </main>
@@ -455,7 +460,7 @@ const A: Record<string, CSSProperties> = {
   dragHandle: {
     width: 6, flexShrink: 0,
     cursor: "col-resize",
-    background: "#DDE3F0",
+    background: "#DCE6F1",
     position: "relative",
   },
   dragGrip: {

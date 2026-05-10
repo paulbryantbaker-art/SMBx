@@ -12,7 +12,7 @@ const TODAY_DATE = new Date().toLocaleDateString("en-US", {
   day: "numeric",
 });
 
-type Tone = "clay" | "cactus" | "oat" | "plum" | "charcoal";
+type Tone = "gold" | "cactus" | "oat" | "plum" | "charcoal";
 
 interface TodayDeal {
   id: string;
@@ -47,7 +47,7 @@ const DEALS: TodayDeal[] = [
     fit: 88,
     sde: "$1.40M",
     multiple: "6.5x",
-    tone: "clay",
+    tone: "gold",
   },
   {
     id: "deal-hvac",
@@ -63,7 +63,7 @@ const DEALS: TodayDeal[] = [
 ];
 
 const WORK = [
-  { eyebrow: "DRAFTING", title: "IOI v3", sub: "Recurring revenue framing · ready for review", pct: 76, tone: "clay" as Tone },
+  { eyebrow: "DRAFTING", title: "IOI v3", sub: "Recurring revenue framing · ready for review", pct: 76, tone: "gold" as Tone },
   { eyebrow: "WATCHING", title: "87 sources", sub: "4 new HVAC matches since yesterday", pct: 42, tone: "plum" as Tone },
   { eyebrow: "RANKING", title: "Buyer pool", sub: "18 candidates sorted by strategic fit", pct: 58, tone: "cactus" as Tone },
 ];
@@ -78,7 +78,7 @@ interface TodayFile {
 }
 
 const FILES: TodayFile[] = [
-  { kind: "doc", title: "IOI draft · v3", sub: "Yulia · updated 2 min ago", status: "Review", tone: "clay" as Tone },
+  { kind: "doc", title: "IOI draft · v3", sub: "Yulia · updated 2 min ago", status: "Review", tone: "gold" as Tone },
   { kind: "doc", title: "Buyer fit memo", sub: "You · 1 hr ago · 4 pages", status: "Open", tone: "plum" as Tone },
   { kind: "doc", title: "Mutual NDA · seller counsel", sub: "Data room · 2 markups", status: "In review", tone: "cactus" as Tone },
   { kind: "chart", title: "2024 P&L · audited", sub: "Data room · locked artifact", status: "View", tone: "oat" as Tone },
@@ -135,7 +135,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           title: "Review the IOI draft",
           sub: `${lead.title} · Yulia tightened price, timing, and seller-friendly certainty.`,
           cta: "Open draft",
-          tone: "clay" as Tone,
+          tone: "gold" as Tone,
           action: () => openDoc(`${lead.title} · IOI v3`),
         },
         {
@@ -177,7 +177,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           title: "Find buyers, targets, or advisors",
           sub: "Start with a thesis and let Yulia assemble the search surface.",
           cta: "Search",
-          tone: "clay" as Tone,
+          tone: "gold" as Tone,
           action: () => openTab({ kind: "mode-root", modeId: "search", id: "search-root", title: "Search", pinned: true }),
         },
       ];
@@ -185,8 +185,8 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   return (
     <div className="m-fade-up" style={T.page}>
       <section style={T.heroGrid}>
-        <article style={T.leadCard}>
-          <div style={T.coverRule} />
+        <article style={{ ...T.leadCard, backgroundImage: todayHeroWash(useSampleData) }}>
+          <div style={{ ...T.coverRule, background: useSampleData ? "#C98F84" : "#629987" }} />
           <div style={T.leadTop}>
             <div>
               <div className="mono" style={T.eyebrow}>TODAY'S BRIEF</div>
@@ -312,7 +312,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
                 type="button"
               >
                 <span style={{ ...T.fileIcon, background: tone(file.tone).soft, color: tone(file.tone).ink }}>
-                  <V6Icon name={file.kind === "chart" ? "chart" : "doc"} size={15} />
+                  <V6Icon name={file.kind === "chart" ? "chart" : "doc"} size={18} />
                 </span>
                 <span style={T.fileText}>
                   <span style={T.fileTitle}>{file.title}</span>
@@ -382,7 +382,9 @@ function PriorityCard({
   const t = tone(itemTone);
   return (
     <button style={T.priorityCard} onClick={action} type="button">
-      <span style={{ ...T.priorityNum, color: t.ink, background: t.soft }}>{index}</span>
+      <span style={{ ...T.priorityNum, color: t.ink, background: t.soft }}>
+        <span className="mono" style={T.priorityNumLabel}>{index}</span>
+      </span>
       <span style={T.priorityBody}>
         <span className="mono" style={T.priorityKicker}>{kicker}</span>
         <span style={T.priorityTitle}>{title}</span>
@@ -395,7 +397,7 @@ function PriorityCard({
 
 function tone(key: Tone) {
   const tones: Record<Tone, { ink: string; soft: string }> = {
-    clay: { ink: "#9C7128", soft: "#FAF1E1" },
+    gold: { ink: "#9C7128", soft: "#FAF1E1" },
     cactus: { ink: "#3f7d64", soft: "rgba(98, 153, 135, 0.16)" },
     oat: { ink: "#6F7B96", soft: "rgba(238, 241, 251, 0.78)" },
     plum: { ink: "#655fa7", soft: "rgba(130, 125, 189, 0.14)" },
@@ -423,7 +425,7 @@ function fitFromEbitda(ebitda: number | null | undefined): number {
 }
 
 function dealToTodayDeal(d: HomeDeal, index: number): TodayDeal {
-  const tones: Tone[] = ["cactus", "clay", "oat", "plum", "charcoal"];
+  const tones: Tone[] = ["cactus", "gold", "oat", "plum", "charcoal"];
   const status = /[345]$/.test(d.current_gate) ? "Pursue" : "Watch";
   const sde = fmtCents(d.sde);
   const multiple = d.financials?.multiple ? `${d.financials.multiple.toFixed(1)}x` : "--";
@@ -448,13 +450,16 @@ function deliverableToTodayFile(d: WorkspaceDeliverable): TodayFile {
     title,
     sub: `${d.deal_name || "Deal"} · ${d.status === "complete" ? "ready" : d.status}`,
     status: d.status === "complete" ? "Open" : d.status.replace(/_/g, " "),
-    tone: d.status === "complete" ? "plum" : d.status === "failed" ? "charcoal" : "clay",
+    tone: d.status === "complete" ? "plum" : d.status === "failed" ? "charcoal" : "gold",
     id: String(d.id),
   };
 }
 
 const paperShadow = "0 22px 58px rgba(26, 34, 51, 0.12), 0 2px 10px rgba(26, 34, 51, 0.06)";
-const heroWash = `linear-gradient(135deg, rgba(255,255,255,0.86) 0%, rgba(236,245,251,0.76) 58%, rgba(226,239,248,0.62) 100%), url('${DESKTOP_TEXTURES.todayHero}')`;
+const todayHeroWash = (sample: boolean) =>
+  sample
+    ? `linear-gradient(135deg, rgba(255,255,255,0.82) 0%, rgba(255,239,234,0.70) 54%, rgba(201,143,132,0.28) 100%), url('${DESKTOP_TEXTURES.todayHeroSample}')`
+    : `linear-gradient(135deg, rgba(255,255,255,0.84) 0%, rgba(229,244,237,0.68) 55%, rgba(98,153,135,0.28) 100%), url('${DESKTOP_TEXTURES.todayHeroWorkspace}')`;
 const cardWash = `linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(246,249,253,0.78) 100%), url('${DESKTOP_TEXTURES.todayCard}')`;
 
 const T: Record<string, CSSProperties> = {
@@ -462,7 +467,7 @@ const T: Record<string, CSSProperties> = {
     minHeight: "100%",
     margin: "-28px -40px -56px",
     padding: "34px max(44px, calc(50% - 690px)) 72px",
-    background: "linear-gradient(180deg, #F8F9FF 0%, #FFFFFF 42%, #EEF1FB 100%)",
+    background: "linear-gradient(180deg, #F6F8FC 0%, #FFFFFF 44%, #EEF2F8 100%)",
     color: "#1A2233",
   },
   heroGrid: {
@@ -475,7 +480,6 @@ const T: Record<string, CSSProperties> = {
     position: "relative",
     overflow: "hidden",
     borderRadius: 24,
-    backgroundImage: heroWash,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     border: "1px solid #E7EBF5",
@@ -726,7 +730,7 @@ const T: Record<string, CSSProperties> = {
   priorityCard: {
     all: "unset",
     display: "grid",
-    gridTemplateColumns: "44px minmax(0, 1fr) auto",
+    gridTemplateColumns: "50px minmax(0, 1fr) auto",
     alignItems: "center",
     gap: 14,
     minHeight: 116,
@@ -740,13 +744,19 @@ const T: Record<string, CSSProperties> = {
     cursor: "pointer",
   },
   priorityNum: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
+    width: 46,
+    height: 46,
+    borderRadius: 16,
     display: "grid",
     placeItems: "center",
+    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.58), 0 10px 20px rgba(26,34,51,0.07)",
+    position: "relative",
+    overflow: "hidden",
+  },
+  priorityNumLabel: {
+    fontSize: 13,
+    letterSpacing: "0.08em",
     fontWeight: 900,
-    fontSize: 16,
     fontVariantNumeric: "tabular-nums",
   },
   priorityBody: {
@@ -870,11 +880,12 @@ const T: Record<string, CSSProperties> = {
     cursor: "pointer",
   },
   fileIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
+    width: 42,
+    height: 42,
+    borderRadius: 15,
     display: "grid",
     placeItems: "center",
+    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.60), 0 10px 18px rgba(26,34,51,0.06)",
   },
   fileText: {
     minWidth: 0,

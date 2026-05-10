@@ -7,10 +7,11 @@
  * session and re-rolls on hard refresh without React re-render churn.
  */
 
-const VERSION = "v=20260509";
+const VERSION = "v=20260509-pipeline-ink";
 const tex = (name: string) => `/textures/texture-${name}.png?${VERSION}`;
 const heroTex = (n: number) => `/textures/texture-hero-${n}.png?${VERSION}`;
 const cardTex = (n: number) => `/textures/texture-card-${n}.png?${VERSION}`;
+const desktopHero = (name: string) => `/textures/desktop-hero-${name}.svg?${VERSION}`;
 
 const pick = <T,>(arr: readonly T[]): T =>
   arr[Math.floor(Math.random() * arr.length)];
@@ -43,21 +44,22 @@ export const RANDOM_TEXTURES = {
 } as const;
 
 export const DESKTOP_TEXTURES = {
-  todayHero: heroTex(2),
+  todayHeroSample: desktopHero("today-sample"),
+  todayHeroWorkspace: desktopHero("today-workspace"),
   todayCard: cardTex(4),
   todaySecondary: cardTex(4),
 
-  pipelineHero: heroTex(1),
+  pipelineHero: desktopHero("pipeline"),
   pipelineCard: cardTex(2),
   pipelineSecondary: cardTex(8),
 
-  filesHero: heroTex(3),
+  filesHero: desktopHero("files"),
   filesAll: cardTex(4),
   filesDeals: cardTex(2),
   filesAction: cardTex(5),
   filesRoom: cardTex(7),
 
-  searchHero: heroTex(2),
+  searchHero: desktopHero("search"),
   searchOpportunities: cardTex(5),
   searchBuyers: cardTex(7),
   searchProviders: cardTex(2),

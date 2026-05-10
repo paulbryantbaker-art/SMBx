@@ -40,7 +40,7 @@ const B: Record<string, CSSProperties> = {
   bar: {
     height: 36,
     flexShrink: 0,
-    background: "#EEF1FB",
+    background: "#EEF2F8",
     color: "#4F60BD",
     borderBottom: "1px solid rgba(111, 130, 220, 0.13)",
     display: "flex",

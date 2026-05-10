@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState, type CSSProperties } from "react";
+import { Fragment, useEffect, useRef, useState, type CSSProperties } from "react";
 import Markdown from "react-markdown";
 import { V6DocStatus, type DocStatusKind } from "../modes/cards";
 import { authHeaders } from "../../../hooks/useAuth";
@@ -40,11 +40,22 @@ const VERSIONS: Version[] = [
   { v: "v1", date: "Mar 22 · 10:04 AM" },
 ];
 
-export function V6DocView({ id, title }: { id: string; title: string }) {
+export function V6DocView({
+  id,
+  title,
+  onTalkToYulia,
+}: {
+  id: string;
+  title: string;
+  onTalkToYulia?: (prompt: string) => void;
+}) {
   const numericId = /^\d+$/.test(id) ? parseInt(id, 10) : null;
+  const editorRef = useRef<HTMLDivElement | null>(null);
   const [doc, setDoc] = useState<DeliverableRow | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [toolbarNote, setToolbarNote] = useState<string | null>(null);
+  const [saveBusy, setSaveBusy] = useState(false);
 
   useEffect(() => {
     if (numericId === null) return;
@@ -89,6 +100,59 @@ export function V6DocView({ id, title }: { id: string; title: string }) {
   const showFetched = !!markdown;
   const isGenerating = !!numericId && !!doc && ["queued", "generating"].includes(doc.status) && !markdown;
 
+  const applyToolbar = (key: (typeof TOOLBAR_BUTTONS)[number]["key"]) => {
+    editorRef.current?.focus();
+    setToolbarNote(null);
+    if (!editorRef.current) {
+      setToolbarNote("Open a draft section before applying formatting.");
+      return;
+    }
+    if (key === "h") document.execCommand("formatBlock", false, "h2");
+    if (key === "b") document.execCommand("bold");
+    if (key === "i") document.execCommand("italic");
+    if (key === "u") document.execCommand("underline");
+    if (key === "ul") document.execCommand("insertUnorderedList");
+    if (key === "q") document.execCommand("formatBlock", false, "blockquote");
+    if (key === "k") {
+      const url = window.prompt("Link URL");
+      if (url) document.execCommand("createLink", false, url);
+    }
+    setToolbarNote("Formatting applied to the selected draft text.");
+  };
+
+  const saveDraft = async () => {
+    if (!editorRef.current) {
+      setToolbarNote("Nothing editable is open yet.");
+      return;
+    }
+    if (numericId === null) {
+      setToolbarNote("This is a sample draft. Real generated deliverables save back to the workspace.");
+      onTalkToYulia?.(`Save this sample draft direction for ${title} and tell me what real deal facts are missing before generation.`);
+      return;
+    }
+    const markdownBody = editorRef.current.innerText.trim();
+    if (!markdownBody) {
+      setToolbarNote("The draft is empty, so there is nothing to save.");
+      return;
+    }
+    setSaveBusy(true);
+    setToolbarNote(null);
+    try {
+      const res = await fetch(`/api/deliverables/${numericId}/content`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+        body: JSON.stringify({ markdown: markdownBody }),
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(payload.error || `HTTP ${res.status}`);
+      setToolbarNote("Draft saved to the workspace.");
+    } catch (e: any) {
+      setToolbarNote(e?.message || "Could not save this draft.");
+    } finally {
+      setSaveBusy(false);
+    }
+  };
+
   return (
     <div className="m-fade-up" style={V.shell}>
       <article style={V.article}>
@@ -100,6 +164,8 @@ export function V6DocView({ id, title }: { id: string; title: string }) {
               <button
                 className="m-state"
                 aria-label={b.label}
+                type="button"
+                onClick={() => applyToolbar(b.key)}
                 style={{
                   ...V.toolbarBtn,
                   fontWeight: "weight" in b ? b.weight : 500,
@@ -110,9 +176,13 @@ export function V6DocView({ id, title }: { id: string; title: string }) {
             </Fragment>
           ))}
           <div style={{ flex: 1 }} />
+          <button className="m-btn tonal" type="button" onClick={saveDraft} disabled={saveBusy} style={V.saveButton}>
+            {saveBusy ? "Saving..." : "Save"}
+          </button>
           <span className="mono" style={V.savedAt}>{savedAt}</span>
           <V6DocStatus status={statusKind} />
         </div>
+        {toolbarNote && <div style={V.toolbarNote}>{toolbarNote}</div>}
 
         {/* Body */}
         <div style={{ fontFamily: "Iowan Old Style, Charter, Georgia, serif", color: "var(--m-on-surface)" }}>
@@ -132,7 +202,7 @@ export function V6DocView({ id, title }: { id: string; title: string }) {
           )}
 
           {showFetched && (
-            <div style={V.docMarkdown}>
+            <div ref={editorRef} contentEditable suppressContentEditableWarning style={V.docMarkdown}>
               <Markdown>{markdown!}</Markdown>
             </div>
           )}
@@ -146,7 +216,7 @@ export function V6DocView({ id, title }: { id: string; title: string }) {
           )}
 
           {(showSample || (!showFetched && !loading && !error && numericId && !isGenerating && !doc)) && (
-            <>
+            <div ref={editorRef} contentEditable suppressContentEditableWarning>
               <p style={V.docMeta}>
                 From: Apex SMB Holdings &nbsp;·&nbsp; To: J. Marston, Owner &nbsp;·&nbsp; Re: Acquisition of {docTitle} &nbsp;·&nbsp; Date: March 27, 2026
               </p>
@@ -181,7 +251,7 @@ export function V6DocView({ id, title }: { id: string; title: string }) {
               <p style={V.docPara}>
                 The Seller agrees to a 90-day transition period at full salary, with consulting availability for an additional 9 months at a reduced rate. A 4-year non-compete covering the East Texas service region will be executed at closing.
               </p>
-            </>
+            </div>
           )}
         </div>
       </article>
@@ -301,6 +371,20 @@ const V: Record<string, CSSProperties> = {
     all: "unset",
     padding: "5px 10px", borderRadius: 6,
     fontSize: 12, color: "var(--m-on-surface-var)", cursor: "pointer",
+  },
+  saveButton: {
+    height: 28,
+    padding: "0 12px",
+    marginRight: 8,
+  },
+  toolbarNote: {
+    margin: "-22px 0 24px",
+    padding: "9px 11px",
+    borderRadius: 10,
+    background: "rgba(225, 242, 235, 0.9)",
+    color: "#246B50",
+    fontSize: 12,
+    fontFamily: "var(--font-body)",
   },
   savedAt: {
     fontSize: 10.5, color: "var(--m-on-surface-mid)", letterSpacing: "0.1em",

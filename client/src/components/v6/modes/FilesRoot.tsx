@@ -136,6 +136,23 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
     openTab({ kind: "deal", title: room.deal, id: room.id, fileScope });
   };
 
+  const runShortcut = (shortcut: Shortcut) => {
+    if (shortcut.label === "Needs action") {
+      document.getElementById("files-work-queue")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      ask(shortcut.prompt);
+      return;
+    }
+    if (shortcut.label === "Data rooms" && rooms[0]) {
+      openDeal(rooms[0], "data-room");
+      return;
+    }
+    if ((shortcut.label === "All files" || shortcut.label === "Deal libraries") && rooms[0]) {
+      openDeal(rooms[0], "all");
+      return;
+    }
+    ask(shortcut.prompt);
+  };
+
   return (
     <div className="m-fade-up" style={F.page}>
       <section style={F.hero}>
@@ -171,7 +188,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
               key={shortcut.label}
               type="button"
               style={{ ...F.shortcutCard, backgroundImage: s.bg, borderColor: s.border, boxShadow: s.shadow }}
-              onClick={() => ask(shortcut.prompt)}
+              onClick={() => runShortcut(shortcut)}
             >
               <span style={{ ...F.shortcutIcon, background: s.iconBg, color: s.iconColor }}><V6Icon name={shortcut.icon} size={17} /></span>
               <span style={{ ...F.shortcutCount, background: s.countBg, color: s.countColor }}>{shortcut.count}</span>
@@ -234,7 +251,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
                 style={{ ...F.roomRow, borderBottom: index === rooms.length - 1 ? "none" : "1px solid var(--m-outline-var)" }}
                 onClick={() => openDeal(room, "data-room")}
               >
-                <span style={F.roomIcon}><V6Icon name="deal" size={16} /></span>
+                <span style={F.roomIcon}><V6Icon name="deal" size={18} /></span>
                 <span style={F.roomText}>
                   <strong>{room.deal}</strong>
                   <span>{room.meta}</span>
@@ -250,7 +267,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
         </div>
       </section>
 
-      <section style={F.section}>
+      <section id="files-work-queue" style={F.section}>
         <SectionHead eyebrow="NEEDS ACTION" title="Data-room work queue" sub="Things in the shared room can be submitted, reviewed, executed, or locked. Artifacts remain review-only." />
         <div style={F.actionCard}>
           {!workspace.loading && actions.length === 0 && (
@@ -299,7 +316,7 @@ function FileListRow({ row, last, onClick }: { row: FileRow; last: boolean; onCl
       onClick={onClick}
     >
       <span style={{ ...F.fileIcon, background: t.soft, color: t.ink }}>
-        <V6Icon name={row.kind === "chart" ? "chart" : row.kind === "deal" ? "deal" : "doc"} size={16} />
+        <V6Icon name={row.kind === "chart" ? "chart" : row.kind === "deal" ? "deal" : "doc"} size={18} />
       </span>
       <span style={F.fileText}>
         <strong>{row.title}</strong>
@@ -448,7 +465,7 @@ function fmtRelative(iso?: string | null): string {
   }
 }
 
-const filesHeroWash = `linear-gradient(135deg, rgba(250,251,255,0.90) 0%, rgba(237,238,249,0.76) 48%, rgba(231,240,248,0.66) 100%), url('${DESKTOP_TEXTURES.filesHero}')`;
+const filesHeroWash = `linear-gradient(135deg, rgba(14,27,50,0.54) 0%, rgba(45,86,143,0.36) 52%, rgba(137,184,205,0.20) 100%), url('${DESKTOP_TEXTURES.filesHero}')`;
 const filesCardWash = `linear-gradient(135deg, rgba(255,255,255,0.94), rgba(246,249,253,0.82)), url('${DESKTOP_TEXTURES.filesAll}')`;
 
 const F: Record<string, CSSProperties> = {
@@ -460,13 +477,14 @@ const F: Record<string, CSSProperties> = {
     gridTemplateColumns: "minmax(0, 1fr) minmax(360px, 0.48fr)",
     gap: 20,
     alignItems: "stretch",
+    minHeight: 320,
     padding: 30,
     borderRadius: 26,
     backgroundImage: filesHeroWash,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
-    border: "1px solid var(--m-outline-var)",
-    boxShadow: "var(--m-elev-2)",
+    border: "1px solid rgba(255,255,255,0.18)",
+    boxShadow: "0 28px 70px rgba(23,38,63,0.20), var(--m-elev-2)",
     marginBottom: 34,
   },
   heroCopy: {
@@ -477,23 +495,23 @@ const F: Record<string, CSSProperties> = {
     fontSize: 10,
     letterSpacing: "0.16em",
     fontWeight: 800,
-    color: "var(--m-on-primary-container)",
+    color: "rgba(255,255,255,0.78)",
   },
   title: {
     margin: "8px 0 0",
     maxWidth: 880,
-    fontSize: "clamp(42px, 5.1vw, 74px)",
-    lineHeight: 0.94,
+    fontSize: "clamp(44px, 5vw, 72px)",
+    lineHeight: 0.92,
     letterSpacing: "-0.06em",
     textWrap: "balance",
-    color: "var(--m-on-surface)",
+    color: "#FFFDF7",
   },
   sub: {
     margin: "16px 0 0",
     maxWidth: 760,
     fontSize: 16,
     lineHeight: 1.55,
-    color: "var(--m-on-surface-var)",
+    color: "rgba(255,255,255,0.78)",
   },
   boundaryCard: {
     display: "grid",
@@ -503,29 +521,27 @@ const F: Record<string, CSSProperties> = {
   boundaryItem: {
     padding: 18,
     borderRadius: 20,
-    backgroundImage: filesCardWash,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    border: "1px solid var(--m-outline-var)",
-    boxShadow: "0 12px 28px rgba(26,34,51,0.07)",
+    background: "rgba(255,255,255,0.13)",
+    border: "1px solid rgba(255,255,255,0.20)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), 0 12px 28px rgba(23,38,63,0.10)",
   },
   boundaryEyebrow: {
     fontSize: 9,
     letterSpacing: "0.14em",
-    color: "var(--m-on-primary-container)",
+    color: "rgba(255,255,255,0.72)",
     fontWeight: 800,
   },
   boundaryTitle: {
     display: "block",
     marginTop: 7,
-    color: "var(--m-on-surface)",
+    color: "#FFFFFF",
     fontSize: 16,
     letterSpacing: "-0.02em",
   },
   boundaryText: {
     display: "block",
     marginTop: 5,
-    color: "var(--m-on-surface-var)",
+    color: "rgba(255,255,255,0.76)",
     fontSize: 13,
     lineHeight: 1.45,
   },
@@ -583,6 +599,7 @@ const F: Record<string, CSSProperties> = {
     placeItems: "center",
     background: "var(--m-primary-container)",
     color: "var(--m-on-primary-container)",
+    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.60), 0 10px 18px rgba(26,34,51,0.07)",
   },
   shortcutCount: {
     justifySelf: "end",
@@ -688,9 +705,10 @@ const F: Record<string, CSSProperties> = {
   fileIcon: {
     width: 42,
     height: 42,
-    borderRadius: 14,
+    borderRadius: 15,
     display: "grid",
     placeItems: "center",
+    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.60), 0 10px 18px rgba(26,34,51,0.06)",
   },
   fileText: {
     minWidth: 0,
@@ -727,11 +745,12 @@ const F: Record<string, CSSProperties> = {
   roomIcon: {
     width: 42,
     height: 42,
-    borderRadius: 14,
+    borderRadius: 15,
     display: "grid",
     placeItems: "center",
     background: "var(--m-primary-container)",
     color: "var(--m-on-primary-container)",
+    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.60), 0 10px 18px rgba(26,34,51,0.06)",
   },
   roomText: {
     minWidth: 0,

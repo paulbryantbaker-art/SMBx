@@ -1,4 +1,5 @@
 import { useState, type CSSProperties, type ChangeEvent } from "react";
+import type { OpenTab } from "../types";
 
 type AccentKey = "primary" | "tertiary" | "pursue" | "watch" | "pass";
 
@@ -110,12 +111,23 @@ const SCENARIOS: Scenario[] = [
   { l: "Aggressive",   m: 7.5, s: 1.85, d: 15, i: 11.5 },
 ];
 
-export function V6AnalysisView({ title }: { title: string }) {
+export function V6AnalysisView({
+  title,
+  tool,
+  openTab,
+  onTalkToYulia,
+}: {
+  title: string;
+  tool?: string;
+  openTab?: OpenTab;
+  onTalkToYulia?: (prompt: string) => void;
+}) {
   const [multiple, setMultiple] = useState(7.0);
   const [sde, setSde] = useState(1.80);
   const [downPct, setDownPct] = useState(20);
   const [interest, setInterest] = useState(11.5);
   const [growth, setGrowth] = useState(4);
+  const [actionNote, setActionNote] = useState<string | null>(null);
 
   const purchase = +(sde * multiple).toFixed(2);
   const down = +(purchase * downPct / 100).toFixed(2);
@@ -145,23 +157,54 @@ export function V6AnalysisView({ title }: { title: string }) {
     setSde(sc.s);
     setDownPct(sc.d);
     setInterest(sc.i);
+    setActionNote(`${sc.l} assumptions applied.`);
+  };
+
+  const resetScenario = () => {
+    const base = SCENARIOS[1];
+    setMultiple(base.m);
+    setSde(base.s);
+    setDownPct(base.d);
+    setInterest(base.i);
+    setGrowth(4);
+    setActionNote("Scenario reset to base case.");
+  };
+
+  const scenarioPrompt = () =>
+    `${title}: save this scenario. Multiple ${multiple.toFixed(1)}x, SDE $${sde.toFixed(2)}M, ${downPct}% down, ${interest.toFixed(2)}% interest, ${growth >= 0 ? "+" : ""}${growth.toFixed(1)}% year-1 growth. DSCR ${dscr.toFixed(2)}, free cash flow $${(cashFlow - 0.35).toFixed(2)}M.`;
+
+  const saveScenario = () => {
+    const docTitle = `${title} · scenario note`;
+    openTab?.({
+      kind: "doc",
+      title: docTitle,
+      id: `doc-scenario-${Date.now()}`,
+    });
+    onTalkToYulia?.(`${scenarioPrompt()} Draft this as a concise scenario note with facts, assumptions, risks, and user decision points.`);
+    setActionNote("Scenario note opened and sent to Yulia for drafting.");
+  };
+
+  const addToDeal = () => {
+    onTalkToYulia?.(`${scenarioPrompt()} Attach this analysis to the relevant deal workspace and tell me which deal file or data-room location it belongs in.`);
+    setActionNote("Yulia has the scenario context and can attach it to the right deal.");
   };
 
   return (
     <div className="m-fade-up" style={{ maxWidth: 1180 }}>
       <section style={{ marginBottom: 24 }}>
-        <div className="mono" style={A.eyebrow}>ANALYSIS · LIVE · YULIA RECOMPUTES AS YOU MOVE</div>
+        <div className="mono" style={A.eyebrow}>{tool === "tool-compare" ? "ANALYSIS · COMPARISON · YULIA CAN REFINE" : "ANALYSIS · LIVE · YULIA RECOMPUTES AS YOU MOVE"}</div>
         <div style={A.headerRow}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <h1 style={A.h1}>{title}</h1>
             <div style={A.sub}>SBA 7(a) leverage scenario · 10-year amortization · 78% LTV</div>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button className="m-btn outlined">Reset</button>
-            <button className="m-btn outlined">Save scenario</button>
-            <button className="m-btn filled">Add to deal</button>
+            <button className="m-btn outlined" type="button" onClick={resetScenario}>Reset</button>
+            <button className="m-btn outlined" type="button" onClick={saveScenario}>Save scenario</button>
+            <button className="m-btn filled" type="button" onClick={addToDeal}>Add to deal</button>
           </div>
         </div>
+        {actionNote && <div style={A.actionNote}>{actionNote}</div>}
       </section>
 
       <div style={{ display: "grid", gridTemplateColumns: "380px 1fr", gap: 24, alignItems: "flex-start" }}>
@@ -291,4 +334,13 @@ const A: Record<string, CSSProperties> = {
     flexShrink: 0,
   },
   yuliaEyebrow: { fontSize: 9.5, letterSpacing: "0.14em", fontWeight: 600, opacity: 0.7 },
+  actionNote: {
+    marginTop: 12,
+    padding: "10px 12px",
+    borderRadius: 12,
+    background: "rgba(225, 242, 235, 0.9)",
+    color: "#246B50",
+    fontSize: 12.5,
+    boxShadow: "var(--m-elev-1)",
+  },
 };

@@ -10,7 +10,6 @@ interface ChatProps {
   inputRef: RefObject<HTMLTextAreaElement | null>;
   modeLabel: string;
   onOpenTab: OpenTab;
-  isAnon: boolean;
   sending?: boolean;
   streamingText?: string;
   activeTool?: string | null;
@@ -21,7 +20,7 @@ interface ChatProps {
 
 export function V6Chat({
   thread, draft, setDraft, send, inputRef, modeLabel, onOpenTab,
-  isAnon, sending, streamingText, activeTool, error, modelPreference = "auto", setModelPreference,
+  sending, streamingText, activeTool, error, modelPreference = "auto", setModelPreference,
 }: ChatProps) {
   const [shareLabel, setShareLabel] = useState<"Share" | "Copied">("Share");
 
@@ -56,15 +55,6 @@ export function V6Chat({
   return (
     <div style={C.chat}>
       <div style={C.chatHead}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={C.yMark}>Y</div>
-          <div>
-            <div style={{ fontSize: 12.5, fontWeight: 600, color: "var(--m-on-surface)", letterSpacing: "-0.01em" }}>Yulia</div>
-            <div className="mono" style={{ fontSize: 10, color: "var(--m-on-surface-mid)", letterSpacing: "0.06em" }}>
-              {isAnon ? "SAMPLE · " : ""}{modeLabel.toUpperCase()}
-            </div>
-          </div>
-        </div>
         <div style={{ display: "flex", gap: 2, alignItems: "center" }}>
           {setModelPreference && (
             <select
@@ -125,9 +115,6 @@ export function V6Chat({
           aria-label="Message Yulia"
         />
         <div style={C.composerFoot}>
-          <span className="mono" style={{ fontSize: 10, color: "var(--m-on-surface-mid)" }}>
-            ↵ send · ⇧↵ newline · / commands
-          </span>
           <button type="submit" className="m-fab" aria-label="Send" disabled={!draft.trim()}>
             <svg width="16" height="16" viewBox="0 0 14 14" fill="none" aria-hidden="true">
               <path d="M7 11.5V2.5M7 2.5L3 6.5M7 2.5L11 6.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -330,7 +317,7 @@ function V6ChatEmpty({ modeLabel, onPick, onOpenTab }: ChatEmptyProps) {
             key={c.label}
             onClick={() => openLearn(c.section, c.anchor)}
             style={C.learnPill}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "#C6954E"; }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "#5C8DBA"; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = "var(--m-primary)"; }}
           >
             <span style={{ fontSize: 10, opacity: 0.85 }}>↗</span>
@@ -345,28 +332,28 @@ function V6ChatEmpty({ modeLabel, onPick, onOpenTab }: ChatEmptyProps) {
 function emptyCopy(modeLabel: string): { title: string; body: ReactNode; eyebrow: string } {
   if (modeLabel === "Today") {
     return {
-      title: "Yulia is reading the desk with you.",
-      body: "Ask for the next move, open a draft, or have her turn this page into a tighter action list.",
+      title: "The desk is ready.",
+      body: "Ask for the next move, open a draft, or turn this page into a tighter action list.",
       eyebrow: "TODAY PROMPTS",
     };
   }
   if (modeLabel === "Pipeline") {
     return {
-      title: "Yulia can rank the pipeline with you.",
+      title: "Rank the pipeline.",
       body: "Ask what moved, what deserves attention, or which deal should be pursue, watch, or pass.",
       eyebrow: "PIPELINE PROMPTS",
     };
   }
   if (modeLabel === "Search") {
     return {
-      title: "Yulia can search the market with you.",
+      title: "Search the market.",
       body: "Find buyers, buyer pools, targets, PE firms, lenders, and deal professionals from a plain-language thesis.",
       eyebrow: "SEARCH IDEAS",
     };
   }
   if (modeLabel === "Files") {
     return {
-      title: "Yulia can navigate your deal files with you.",
+      title: "Find the right file.",
       body: "Ask what is private, what is in a data room, what needs review, or which executed docs are locked.",
       eyebrow: "FILE PROMPTS",
     };
@@ -380,23 +367,15 @@ function emptyCopy(modeLabel: string): { title: string; body: ReactNode; eyebrow
 
 const C: Record<string, CSSProperties> = {
   chat: {
-    background: "linear-gradient(180deg, #F7F8FF 0%, #F0F2F8 100%)",
-    borderRight: "1px solid #D7DEEC",
+    background: "linear-gradient(180deg, #F5F8FC 0%, #EEF4FA 100%)",
+    borderRight: "1px solid #DCE6F1",
     display: "flex", flexDirection: "column", minHeight: 0, height: "100%",
   },
   chatHead: {
     height: 58, flexShrink: 0, padding: "0 14px",
-    display: "flex", alignItems: "center", justifyContent: "space-between",
-    borderBottom: "1px solid #E7EBF5",
-    background: "rgba(255,255,255,0.72)",
-  },
-  yMark: {
-    width: 28, height: 28, borderRadius: 8,
-    background: "#1A1918",
-    color: "#FFFFFF",
-    display: "grid", placeItems: "center",
-    fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13,
-    boxShadow: "0 8px 18px rgba(26,34,51,0.12)",
+    display: "flex", alignItems: "center", justifyContent: "flex-end",
+    borderBottom: "1px solid #E1E8F2",
+    background: "rgba(248,251,255,0.88)",
   },
   chatBody: { flex: 1, overflowY: "auto", padding: "18px 14px" },
   composer: {
@@ -404,8 +383,8 @@ const C: Record<string, CSSProperties> = {
     background: "var(--m-surface-on-light)",
     borderRadius: 18,
     padding: 10,
-    border: "1px solid #DDE3F0",
-    boxShadow: "0 16px 34px rgba(26,34,51,0.10)",
+    border: "1px solid #D9E3EF",
+    boxShadow: "0 18px 38px rgba(26, 34, 51, 0.10)",
   },
   composerInput: {
     width: "100%", boxSizing: "border-box",
@@ -414,7 +393,7 @@ const C: Record<string, CSSProperties> = {
     resize: "none", outline: "none", padding: "4px 6px",
     fontFamily: "var(--font-body)",
   },
-  composerFoot: { marginTop: 4, display: "flex", justifyContent: "space-between", alignItems: "center" },
+  composerFoot: { marginTop: 4, display: "flex", justifyContent: "flex-end", alignItems: "center" },
   modelSelect: {
     height: 28,
     maxWidth: 94,

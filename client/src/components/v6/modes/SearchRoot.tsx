@@ -2,7 +2,7 @@ import { useState, type CSSProperties, type FormEvent } from "react";
 import { V6Icon } from "../icons";
 import type { OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
-import { RANDOM_TEXTURES } from "../../../lib/randomTextures";
+import { DESKTOP_TEXTURES, RANDOM_TEXTURES } from "../../../lib/randomTextures";
 
 interface SearchRootProps {
   openTab: OpenTab;
@@ -14,7 +14,7 @@ interface Category {
   eyebrow: string;
   title: string;
   sub: string;
-  tone: "gold" | "purple" | "green" | "blue" | "ink" | "aqua";
+  tone: "gold" | "green" | "blue" | "ink" | "aqua";
   prompt: string;
 }
 
@@ -38,7 +38,7 @@ const CATEGORIES: Category[] = [
     eyebrow: "BUYERS",
     title: "Buyers and buy-side",
     sub: "Strategics, PE-backed platforms, family offices, and buyer pools.",
-    tone: "purple",
+    tone: "ink",
     prompt: "Find likely buyers and buyer pools for Big Fake Deal. Rank strategic fit, ability to close, and relationship angle.",
   },
   {
@@ -173,7 +173,10 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
             <button
               className="m-btn tonal"
               type="button"
-              onClick={() => openTab({ kind: "analysis", title: "Discovery map" })}
+              onClick={() => {
+                openTab({ kind: "analysis", title: "Discovery map", tool: "tool-compare" });
+                ask("Open a discovery map for my current sourcing work: buyers, targets, capital providers, and deal professionals grouped by thesis and next action.");
+              }}
             >
               Open map
             </button>
@@ -186,7 +189,7 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
               style={{ ...S.discoveryRow, borderBottom: index === DISCOVERY.length - 1 ? "none" : "1px solid var(--m-outline-var)" }}
               onClick={() => ask(row.prompt)}
             >
-              <span style={S.rowIcon}><V6Icon name={row.icon} size={16} /></span>
+              <span style={S.rowIcon}><V6Icon name={row.icon} size={18} /></span>
               <span style={S.rowText}>
                 <strong>{row.title}</strong>
                 <span>{row.sub}</span>
@@ -230,11 +233,6 @@ function tone(name: Category["tone"]) {
       fg: "#fffaf3",
       shadow: "0 24px 54px rgba(156,113,40,0.22)",
     },
-    purple: {
-      bg: `linear-gradient(145deg, rgba(138,154,232,0.46) 0%, rgba(81,70,159,0.78) 100%), url('${RANDOM_TEXTURES.cardBuyers}')`,
-      fg: "#fff",
-      shadow: "0 24px 54px rgba(79,96,189,0.22)",
-    },
     green: {
       bg: `linear-gradient(145deg, rgba(98,153,135,0.48) 0%, rgba(46,111,89,0.78) 100%), url('${RANDOM_TEXTURES.cardPursue}')`,
       fg: "#F8FFFB",
@@ -246,7 +244,7 @@ function tone(name: Category["tone"]) {
       shadow: "0 24px 54px rgba(46,92,138,0.20)",
     },
     ink: {
-      bg: "linear-gradient(145deg, #252B3B 0%, #121722 100%)",
+      bg: `linear-gradient(145deg, rgba(37,43,59,0.88) 0%, rgba(18,23,34,0.92) 100%), url('${RANDOM_TEXTURES.cardBuyers}')`,
       fg: "#fff",
       shadow: "0 24px 54px rgba(18,23,34,0.22)",
     },
@@ -269,7 +267,7 @@ const S: Record<string, CSSProperties> = {
     overflow: "hidden",
     padding: 30,
     borderRadius: 26,
-    backgroundImage: `linear-gradient(135deg, rgba(255,255,255,0.88) 0%, rgba(242,245,255,0.78) 62%, rgba(238,241,251,0.60) 100%), url('${RANDOM_TEXTURES.baseline}')`,
+    backgroundImage: `linear-gradient(135deg, rgba(20, 83, 77, 0.84) 0%, rgba(49, 113, 95, 0.66) 52%, rgba(214, 163, 92, 0.36) 100%), url('${DESKTOP_TEXTURES.searchHero}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     border: "1px solid var(--m-outline-var)",
@@ -283,7 +281,7 @@ const S: Record<string, CSSProperties> = {
     fontSize: 10,
     letterSpacing: "0.16em",
     fontWeight: 800,
-    color: "var(--m-on-primary-container)",
+    color: "rgba(255,255,255,0.78)",
   },
   title: {
     margin: "8px 0 0",
@@ -291,14 +289,14 @@ const S: Record<string, CSSProperties> = {
     lineHeight: 0.92,
     letterSpacing: "-0.06em",
     textWrap: "balance",
-    color: "var(--m-on-surface)",
+    color: "#FFFDF7",
   },
   sub: {
     margin: "16px 0 0",
     maxWidth: 680,
     fontSize: 16,
     lineHeight: 1.55,
-    color: "var(--m-on-surface-var)",
+    color: "rgba(255,255,255,0.82)",
   },
   searchBox: {
     marginTop: 26,
@@ -310,10 +308,10 @@ const S: Record<string, CSSProperties> = {
     gap: 12,
     padding: "0 10px 0 18px",
     borderRadius: 18,
-    background: "#FFFFFF",
-    color: "var(--m-on-surface-mid)",
-    border: "1px solid var(--m-outline-var)",
-    boxShadow: "0 14px 34px rgba(26,34,51,0.08)",
+    background: "rgba(255,255,255,0.94)",
+    color: "rgba(26,34,51,0.62)",
+    border: "1px solid rgba(255,255,255,0.58)",
+    boxShadow: "0 20px 44px rgba(15, 57, 52, 0.20)",
   },
   input: {
     minWidth: 0,
@@ -344,9 +342,9 @@ const S: Record<string, CSSProperties> = {
     all: "unset",
     padding: "8px 12px",
     borderRadius: 999,
-    background: "rgba(255,255,255,0.68)",
-    border: "1px solid var(--m-outline-var)",
-    color: "var(--m-on-surface-var)",
+    background: "rgba(255,255,255,0.16)",
+    border: "1px solid rgba(255,255,255,0.30)",
+    color: "#FFFDF7",
     fontSize: 12.5,
     fontWeight: 700,
     cursor: "pointer",
@@ -427,11 +425,11 @@ const S: Record<string, CSSProperties> = {
     minHeight: 332,
     borderRadius: 26,
     padding: 28,
-    backgroundImage: `linear-gradient(145deg, rgba(138,154,232,0.48) 0%, rgba(79,96,189,0.78) 100%), url('${RANDOM_TEXTURES.cardBuyers}')`,
+    backgroundImage: `linear-gradient(145deg, rgba(50,111,92,0.58) 0%, rgba(26,34,51,0.82) 100%), url('${RANDOM_TEXTURES.cardBuyers}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     color: "#fff",
-    boxShadow: "0 24px 58px rgba(79,96,189,0.24)",
+    boxShadow: "0 24px 58px rgba(26, 84, 70, 0.22)",
   },
   storyEyebrow: {
     fontSize: 10,
@@ -512,11 +510,12 @@ const S: Record<string, CSSProperties> = {
   rowIcon: {
     width: 42,
     height: 42,
-    borderRadius: 14,
+    borderRadius: 15,
     display: "grid",
     placeItems: "center",
     background: "var(--m-primary-container)",
     color: "var(--m-on-primary-container)",
+    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.60), 0 10px 18px rgba(26,34,51,0.06)",
   },
   rowText: {
     minWidth: 0,
