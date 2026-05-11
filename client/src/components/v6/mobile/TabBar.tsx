@@ -116,6 +116,19 @@ const B: Record<string, CSSProperties> = {
     display: "flex",
     justifyContent: "space-around",
     padding: "8px 4px 10px",
+    overflow: "hidden",
+    border: "0.5px solid rgba(255,255,255,0.26)",
+    background:
+      "radial-gradient(circle at 16% 0%, rgba(255,255,255,0.16), rgba(255,255,255,0.00) 34%), " +
+      "radial-gradient(circle at 82% 120%, rgba(110,150,190,0.12), rgba(110,150,190,0.00) 46%), " +
+      "linear-gradient(180deg, rgba(42,43,60,0.40), rgba(16,18,28,0.28))",
+    backdropFilter: "blur(48px) saturate(220%) brightness(1.02)",
+    WebkitBackdropFilter: "blur(48px) saturate(220%) brightness(1.02)",
+    boxShadow:
+      "0 18px 34px -16px rgba(0,0,0,0.42), " +
+      "inset 0 0 0 0.5px rgba(255,255,255,0.28), " +
+      "inset 0 1px 0 rgba(255,255,255,0.24), " +
+      "inset 0 -10px 24px rgba(0,0,0,0.12)",
   },
   tab: {
     flex: 1,

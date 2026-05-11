@@ -769,27 +769,33 @@ function buildLiveDesk(snapshot: Awaited<ReturnType<typeof buildPortfolioSnapsho
   const latestWork = inProgress[0] ?? snapshot.deliverables[0] ?? null;
   const pursue = snapshot.deals.filter(deal => fitScore(deal) >= 80).length;
   const sourceCount = snapshot.reports.length + snapshot.sourcingBriefs.length + snapshot.marketHeat.length;
+  const lead = [...snapshot.deals].sort((a, b) => fitScore(b) - fitScore(a))[0] ?? null;
+  const leadName = lead ? dealName(lead) : 'the current portfolio';
   return [
     {
-      eyebrow: 'INTELLIGENCE',
-      title: sourceCount > 0 ? `${sourceCount} live sources` : 'Market read needed',
-      sub: sourceCount > 0 ? 'Market reports, sourcing briefs, and deal data are feeding Yulia.' : 'Generate the first market intelligence brief for this workspace.',
+      eyebrow: 'MARKET',
+      title: lead?.industry ? `${lead.industry} read` : sourceCount > 0 ? `${sourceCount} live sources` : 'Market read needed',
+      sub: sourceCount > 0
+        ? `Yulia is tying market reports, sourcing briefs, and deal data back to ${leadName}.`
+        : `Generate the first market intelligence read so ${leadName} is not being judged from generic context.`,
       pct: sourceCount > 0 ? Math.min(100, 30 + sourceCount * 10) : 12,
       tone: 'cactus' as Tone,
       prompt: 'Show me the market intelligence behind today’s read.',
     },
     {
-      eyebrow: latestWork && inProgress.length > 0 ? 'DRAFTING' : 'WORKSPACE',
-      title: latestWork ? displayDeliverableName(latestWork) : `${snapshot.deliverables.length} files`,
-      sub: latestWork ? `${latestWork.deal_name || 'Deal'} · ${statusLabel(latestWork.status)}` : 'No generated work products yet',
-      pct: latestWork ? progressForStatus(latestWork.status) : 0,
+      eyebrow: 'STRUCTURE',
+      title: snapshot.reviews.length > 0 ? `${snapshot.reviews.length} review item${snapshot.reviews.length === 1 ? '' : 's'}` : 'Tax/legal issue map',
+      sub: snapshot.reviews.length > 0
+        ? 'Counsel, CPA, and user sign-off moments are being pulled into the deal read.'
+        : 'Yulia should surface structure, tax, legal, and sign-off questions before documents move.',
+      pct: snapshot.reviews.length > 0 ? Math.min(96, 52 + snapshot.reviews.length * 12) : latestWork ? progressForStatus(latestWork.status) : 34,
       tone: 'gold' as Tone,
-      prompt: latestWork ? `What changed on ${displayDeliverableName(latestWork)}?` : 'What should I create first?',
+      prompt: `Show me the tax, legal, and structure implications across ${leadName}.`,
     },
     {
       eyebrow: 'PORTFOLIO',
-      title: `${snapshot.deals.length} active deals`,
-      sub: `${pursue} pursue · ${snapshot.reviews.length + snapshot.stagedActions.length} reviews/approvals waiting`,
+      title: snapshot.deals.length === 1 ? `${leadName} is the portfolio` : `${snapshot.deals.length} active deals`,
+      sub: `${pursue} pursue · ${snapshot.stagedActions.length} approvals · ${snapshot.deliverables.length} work products attached`,
       pct: snapshot.deals.length > 0 ? Math.min(100, Math.max(18, pursue * 18)) : 0,
       tone: 'plum' as Tone,
       prompt: 'What changed across my active deals?',

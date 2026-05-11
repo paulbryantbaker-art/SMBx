@@ -2,7 +2,7 @@
    Multi-layer: bg tint + thick backdrop-filter + 0.5px white inner edge + soft shadow.
    Source recipes: design_handoff_smbx_app store/glass-primitives.jsx */
 
-import { type CSSProperties, type ReactNode } from "react";
+import { type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
 import type { GlassTint } from "./types";
 
 interface TintRecipe {
@@ -39,7 +39,7 @@ const TINTS: Record<GlassTint, TintRecipe> = {
   },
 };
 
-interface GlassSurfaceProps {
+interface GlassSurfaceProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
   radius?: number | string;
   tint?: GlassTint;
@@ -53,10 +53,12 @@ export function GlassSurface({
   tint = "light",
   style = {},
   className,
+  ...rest
 }: GlassSurfaceProps) {
   const t = TINTS[tint];
   return (
     <div
+      {...rest}
       className={className}
       style={{
         borderRadius: radius,

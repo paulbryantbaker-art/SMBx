@@ -5,6 +5,7 @@ import { V6DocStatus, type DocStatusKind } from "../modes/cards";
 import type { FileScope, OpenTab, TabKind } from "../types";
 import { authHeaders } from "../../../hooks/useAuth";
 import type { ModelPreference } from "../../../lib/modelPreference";
+import { findDeal, type MarketIntel } from "../../../lib/sampleDeals";
 import {
   fileDeliverableToDataRoom,
   generateDealDeliverable,
@@ -238,6 +239,22 @@ interface DealDetailResp {
   deliverableStats: { total: number; completed: number; in_progress: number };
 }
 
+interface DealBrief {
+  verdict?: { label?: string; score?: number; text?: string };
+  marketRead?: {
+    headline?: string;
+    bullets?: string[];
+    sourceSignals?: string[];
+    researchNeeded?: string[];
+  };
+  taxLegal?: {
+    tax?: string;
+    legal?: string;
+    signoffFlags?: string[];
+  };
+  nextMoves?: Array<{ title?: string; why?: string; prompt?: string }>;
+}
+
 interface DeliverableRow {
   id: number;
   deal_id?: number;
@@ -274,6 +291,7 @@ export function V6DealView({
   const [data, setData] = useState<DealDetailResp | null>(null);
   const [linked, setLinked] = useState<DeliverableRow[] | null>(null);
   const [dataRoom, setDataRoom] = useState<DealDataRoom | null>(null);
+  const [dealBrief, setDealBrief] = useState<DealBrief | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -286,7 +304,10 @@ export function V6DealView({
   }, [fileScope]);
 
   useEffect(() => {
-    if (numericId === null) return;
+    if (numericId === null) {
+      setDealBrief(null);
+      return;
+    }
     let cancelled = false;
     setLoading(true);
     setError(null);
@@ -294,12 +315,14 @@ export function V6DealView({
       fetch(`/api/deals/${numericId}`,            { headers: authHeaders() }).then(r => r.ok ? r.json() : Promise.reject(new Error(`deal ${r.status}`))),
       fetch(`/api/deals/${numericId}/deliverables`, { headers: authHeaders() }).then(r => r.ok ? r.json() : []),
       loadDealDataRoom(numericId).catch(() => null),
+      fetch(`/api/agency/deals/${numericId}/brief`, { headers: authHeaders() }).then(r => r.ok ? r.json() : null).catch(() => null),
     ])
-      .then(([detail, dels, room]) => {
+      .then(([detail, dels, room, brief]) => {
         if (cancelled) return;
         setData(detail as DealDetailResp);
         setLinked(Array.isArray(dels) ? dels : []);
         setDataRoom(room as DealDataRoom | null);
+        setDealBrief(brief as DealBrief | null);
       })
       .catch((e: Error) => { if (!cancelled) setError(e.message); })
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -308,6 +331,7 @@ export function V6DealView({
 
   // ─── Derive display data ──────────────────────────────────────────
   const real = data?.deal;
+  const sampleDeal = findDeal(id);
   const stats: Stat[] = real ? buildStats(real) : SAMPLE_STATS;
   const linkedFiles: LinkedFile[] = linked && linked.length > 0
     ? linked.map(deliverableToLinkedFile)
@@ -328,6 +352,14 @@ export function V6DealView({
   const verdict = real ? deriveVerdict(real) : { kind: "pursue" as const, eyebrow: "VERDICT · PURSUE", text: "Recurring revenue, honest add-backs. The concentration reads as a moat, not a risk.", fit: 92 };
   const yulia = real ? deriveYuliaRead(real) : null;
   const dealName = real?.business_name || title;
+  const intelligence = buildDealIntelligence({
+    dealName,
+    real,
+    sampleMarket: sampleDeal?.marketIntel,
+    sampleVerdictWhy: sampleDeal?.verdictWhy,
+    dealBrief,
+    verdict,
+  });
   const portfolioName = samplePortfolioForDeal(id, title);
   const fileItems = numericId !== null && (linked || dataRoom)
     ? buildDealFilesFromReal(linked ?? [], dataRoom, dealName)
@@ -455,6 +487,84 @@ export function V6DealView({
               <div style={{ fontSize: 11.5, color: "var(--m-on-surface-mid)", marginTop: 2 }}>{s.sub}</div>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section style={D.intelligenceGrid}>
+        <div className="m-card" style={D.marketCard}>
+          <div className="mono" style={D.intelEyebrow}>{intelligence.marketEyebrow}</div>
+          <h2 style={D.intelTitle}>Market intelligence</h2>
+          <p style={D.intelLead}>{intelligence.marketHeadline}</p>
+          <div style={D.marketTileGrid}>
+            {intelligence.marketTiles.map(tile => (
+              <div key={tile.label} style={D.desktopMarketTile}>
+                <div className="mono" style={D.desktopMarketTileLabel}>{tile.label}</div>
+                <div style={D.desktopMarketTileValue}>{tile.value}</div>
+              </div>
+            ))}
+          </div>
+          <div style={D.marketBulletStack}>
+            {intelligence.marketBullets.map(bullet => (
+              <button
+                key={bullet}
+                type="button"
+                style={D.marketBullet}
+                onClick={() => onTalkToYulia?.(`On ${dealName}: unpack this market intelligence note: ${bullet}`)}
+              >
+                {bullet}
+              </button>
+            ))}
+          </div>
+          {intelligence.researchNeeded.length > 0 && (
+            <div style={D.researchBox}>
+              <div className="mono" style={D.researchEyebrow}>SOURCE GAPS</div>
+              {intelligence.researchNeeded.slice(0, 3).map(gap => <span key={gap}>{gap}</span>)}
+            </div>
+          )}
+        </div>
+
+        <div style={D.intelSideStack}>
+          <div className="m-card" style={D.reviewCard}>
+            <div className="mono" style={D.intelEyebrow}>YULIA REVIEW</div>
+            <div style={D.reviewTop}>
+              <div>
+                <h2 style={D.reviewTitle}>{intelligence.reviewLabel}</h2>
+                <p style={D.reviewText}>{intelligence.reviewText}</p>
+              </div>
+              <div style={D.reviewScore}>
+                <strong>{intelligence.reviewScore}</strong>
+                <span>fit</span>
+              </div>
+            </div>
+            <div style={D.structureGrid}>
+              <div>
+                <span className="mono" style={D.structureLabel}>TAX</span>
+                <p>{intelligence.tax}</p>
+              </div>
+              <div>
+                <span className="mono" style={D.structureLabel}>LEGAL</span>
+                <p>{intelligence.legal}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="m-card" style={D.nextCard}>
+            <div className="mono" style={D.intelEyebrow}>RECOMMENDED NEXT</div>
+            {intelligence.nextMoves.map((move, index) => (
+              <button
+                key={move.title}
+                type="button"
+                style={{ ...D.nextMove, borderBottom: index === intelligence.nextMoves.length - 1 ? "none" : "1px solid var(--m-outline-var)" }}
+                onClick={() => onTalkToYulia?.(move.prompt || `On ${dealName}: ${move.title}`)}
+              >
+                <span style={D.nextMoveText}>
+                  <strong style={D.nextMoveTitle}>{move.title}</strong>
+                  <small style={D.nextMoveSub}>{move.why}</small>
+                </span>
+                <span style={D.nextArrow}>›</span>
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -703,6 +813,95 @@ function DealFileRow({ file, last, onClick }: { file: DealFileItem; last: boolea
 }
 
 /* ─── Helpers ────────────────────────────────────────────────────── */
+
+function buildDealIntelligence({
+  dealName,
+  real,
+  sampleMarket,
+  sampleVerdictWhy,
+  dealBrief,
+  verdict,
+}: {
+  dealName: string;
+  real: DealRow | undefined;
+  sampleMarket?: MarketIntel;
+  sampleVerdictWhy?: string;
+  dealBrief: DealBrief | null;
+  verdict: { kind: "pursue" | "watch" | "pass"; eyebrow: string; text: string; fit: number };
+}) {
+  const marketHeadline =
+    dealBrief?.marketRead?.headline ||
+    sampleMarket?.blurb ||
+    `${dealName} needs a deal-specific market read tied to industry, geography, buyer universe, financing climate, and current diligence gaps.`;
+
+  const marketTiles = sampleMarket
+    ? [
+        { label: "AVG MULTIPLE", value: sampleMarket.avgMultiple },
+        { label: "AVG DEAL SIZE", value: sampleMarket.avgDealSize },
+        { label: "ACTIVE BUYERS", value: sampleMarket.activeBuyers },
+        { label: "MARKET TREND", value: sampleMarket.yoyActivity },
+      ]
+    : [
+        { label: "INDUSTRY", value: real?.industry || "Research needed" },
+        { label: "GEOGRAPHY", value: real?.location || "Research needed" },
+        { label: "REVENUE", value: fmtCents(real?.revenue ?? null) },
+        { label: "EARNINGS", value: fmtCents(real?.ebitda ?? real?.sde ?? null) },
+      ];
+
+  const marketBullets = dealBrief?.marketRead?.bullets?.length
+    ? dealBrief.marketRead.bullets.slice(0, 3)
+    : sampleMarket
+      ? [
+          sampleMarket.blurb,
+          `Buyer activity: ${sampleMarket.activeBuyers}.`,
+          `Transaction activity: ${sampleMarket.yoyActivity}; typical pricing ${sampleMarket.avgMultiple}.`,
+        ]
+      : [
+          "Generate the market intelligence read before relying on generic industry context.",
+          "Yulia should compare buyer universe, capital availability, diligence gaps, and competitive pressure.",
+          "Tax and legal implications should be framed as issue spotting before CPA/counsel sign-off.",
+        ];
+
+  const nextMoves = dealBrief?.nextMoves?.length
+    ? dealBrief.nextMoves.slice(0, 3).map(move => ({
+        title: move.title || "Open next move",
+        why: move.why || "Yulia has this queued as the next action.",
+        prompt: move.prompt,
+      }))
+    : [
+        {
+          title: "Run the deeper market read",
+          why: "Comps, buyer appetite, financing climate, and source gaps belong in the deal file.",
+          prompt: `On ${dealName}: run the deeper market intelligence read.`,
+        },
+        {
+          title: "Map tax and legal implications",
+          why: "Structure choices need issue spotting before documents move.",
+          prompt: `On ${dealName}: map tax, legal, and structure implications. Flag CPA and counsel sign-off points.`,
+        },
+        {
+          title: "Open files needing action",
+          why: "Documents are the execution layer behind the read.",
+          prompt: `On ${dealName}: show me the files and deliverables that need action.`,
+        },
+      ];
+
+  return {
+    marketEyebrow: sampleMarket?.naics
+      ? `${sampleMarket.industry.toUpperCase()} · NAICS ${sampleMarket.naics}`
+      : (real?.industry || "DEAL MARKET").toUpperCase(),
+    marketHeadline,
+    marketTiles,
+    marketBullets,
+    researchNeeded: dealBrief?.marketRead?.researchNeeded ?? (!dealBrief?.marketRead && !sampleMarket ? ["Generate a current market intelligence read for this deal."] : []),
+    reviewLabel: dealBrief?.verdict?.label || verdict.eyebrow.replace("VERDICT · ", ""),
+    reviewScore: dealBrief?.verdict?.score ?? verdict.fit,
+    reviewText: dealBrief?.verdict?.text || sampleVerdictWhy || verdict.text,
+    tax: dealBrief?.taxLegal?.tax || "Spot purchase-price allocation, rollover/earnout/seller-note timing, entity form, state tax, and working-cap effects before signing.",
+    legal: dealBrief?.taxLegal?.legal || "Spot diligence scope, data-room permissions, third-party approvals, draft/review/execute status, and counsel sign-off before external sharing.",
+    nextMoves,
+  };
+}
 
 function primaryDeliverableForJourney(journey?: string | null): { label: string; slug: string } {
   switch (journey) {
@@ -1042,6 +1241,196 @@ const D: Record<string, CSSProperties> = {
     fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 22,
     letterSpacing: "-0.02em", color: "var(--m-on-surface)",
     marginTop: 4, fontVariantNumeric: "tabular-nums",
+  },
+  intelligenceGrid: {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1.15fr) minmax(360px, 0.85fr)",
+    gap: 16,
+    marginBottom: 32,
+    alignItems: "stretch",
+  },
+  marketCard: {
+    padding: "24px 26px",
+    background: "linear-gradient(135deg, rgba(246,249,253,0.98), rgba(255,255,255,0.86))",
+    border: "1px solid var(--m-outline-var)",
+  },
+  intelEyebrow: {
+    fontSize: 10,
+    letterSpacing: "0.14em",
+    fontWeight: 750,
+    color: "#5F72C8",
+  },
+  intelTitle: {
+    margin: "6px 0 0",
+    color: "var(--m-on-surface)",
+    fontFamily: "var(--font-display)",
+    fontWeight: 750,
+    fontSize: 28,
+    lineHeight: 1,
+    letterSpacing: "-0.035em",
+  },
+  intelLead: {
+    margin: "12px 0 0",
+    color: "var(--m-on-surface-var)",
+    fontSize: 14,
+    lineHeight: 1.45,
+    maxWidth: 760,
+  },
+  marketTileGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+    gap: 10,
+    marginTop: 18,
+  },
+  desktopMarketTile: {
+    borderRadius: 16,
+    padding: "12px 13px",
+    background: "#FFFFFF",
+    border: "1px solid var(--m-outline-var)",
+  },
+  desktopMarketTileLabel: {
+    fontSize: 9,
+    letterSpacing: "0.12em",
+    color: "var(--m-on-surface-mid)",
+    fontWeight: 750,
+  },
+  desktopMarketTileValue: {
+    marginTop: 7,
+    color: "var(--m-on-surface)",
+    fontSize: 15,
+    fontWeight: 850,
+    lineHeight: 1.1,
+  },
+  marketBulletStack: {
+    display: "grid",
+    gap: 9,
+    marginTop: 16,
+  },
+  marketBullet: {
+    all: "unset",
+    display: "block",
+    borderRadius: 15,
+    padding: "11px 13px",
+    background: "rgba(234,243,251,0.74)",
+    border: "1px solid #DDE8F4",
+    color: "#344053",
+    fontSize: 13,
+    lineHeight: 1.35,
+    cursor: "pointer",
+  },
+  researchBox: {
+    marginTop: 14,
+    display: "grid",
+    gap: 5,
+    borderRadius: 16,
+    padding: "12px 13px",
+    background: "rgba(214,163,92,0.12)",
+    color: "#7A5A22",
+    fontSize: 12.5,
+    lineHeight: 1.35,
+  },
+  researchEyebrow: {
+    fontSize: 9,
+    letterSpacing: "0.14em",
+    fontWeight: 800,
+    color: "#9C7128",
+  },
+  intelSideStack: {
+    display: "grid",
+    gap: 16,
+  },
+  reviewCard: {
+    padding: "22px 24px",
+  },
+  reviewTop: {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) auto",
+    gap: 18,
+    alignItems: "start",
+    marginTop: 8,
+  },
+  reviewTitle: {
+    margin: 0,
+    fontFamily: "var(--font-display)",
+    fontWeight: 800,
+    fontSize: 24,
+    letterSpacing: "-0.035em",
+    color: "var(--m-on-surface)",
+  },
+  reviewText: {
+    margin: "8px 0 0",
+    color: "var(--m-on-surface-var)",
+    fontSize: 13,
+    lineHeight: 1.42,
+  },
+  reviewScore: {
+    width: 72,
+    height: 72,
+    borderRadius: 18,
+    background: "var(--m-pursue-container)",
+    color: "var(--m-pursue-on-cont)",
+    display: "grid",
+    placeItems: "center",
+    alignContent: "center",
+    gap: 0,
+    textTransform: "uppercase",
+    fontSize: 9,
+    letterSpacing: "0.12em",
+    fontWeight: 750,
+  },
+  structureGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 12,
+    marginTop: 18,
+    color: "var(--m-on-surface-var)",
+    fontSize: 12.5,
+    lineHeight: 1.36,
+  },
+  structureLabel: {
+    display: "block",
+    marginBottom: 5,
+    color: "#5F72C8",
+    fontSize: 9,
+    letterSpacing: "0.14em",
+    fontWeight: 800,
+  },
+  nextCard: {
+    padding: "20px 24px 8px",
+  },
+  nextMove: {
+    all: "unset",
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) auto",
+    alignItems: "center",
+    gap: 12,
+    width: "100%",
+    boxSizing: "border-box",
+    padding: "13px 0",
+    color: "var(--m-on-surface)",
+    cursor: "pointer",
+  },
+  nextMoveText: {
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: 3,
+  },
+  nextMoveTitle: {
+    color: "var(--m-on-surface)",
+    fontSize: 14,
+    fontWeight: 850,
+    letterSpacing: "-0.02em",
+  },
+  nextMoveSub: {
+    color: "var(--m-on-surface-var)",
+    fontSize: 12.2,
+    lineHeight: 1.35,
+  },
+  nextArrow: {
+    color: "var(--m-on-surface-mid)",
+    fontSize: 26,
+    lineHeight: 1,
   },
   linkedTitle: {
     fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 13.5,

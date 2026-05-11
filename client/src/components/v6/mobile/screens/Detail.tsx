@@ -603,7 +603,16 @@ const D: Record<string, CSSProperties> = {
   },
   artifactFooter: {
     padding: "10px 14px 12px",
-    background: "rgba(0,0,0,0.18)",
+    background:
+      "radial-gradient(circle at 20% 0%, rgba(255,255,255,0.14), transparent 40%), " +
+      "linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.018))",
+    backdropFilter: "blur(5px) saturate(138%) brightness(1.01)",
+    WebkitBackdropFilter: "blur(5px) saturate(138%) brightness(1.01)",
+    borderTop: "0.5px solid rgba(255,255,255,0.32)",
+    boxShadow:
+      "0 12px 28px -20px rgba(0,0,0,0.46), " +
+      "inset 0 1px 0 rgba(255,255,255,0.30), " +
+      "inset 0 -1px 0 rgba(255,255,255,0.04)",
     display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
   },
   bigNumber: {

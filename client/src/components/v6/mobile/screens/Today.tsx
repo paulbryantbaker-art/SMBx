@@ -8,13 +8,14 @@
    with CD's mobile bundle copy. Sample pipeline matches desktop's Big Fake
    Deal seed data. */
 
-import { type CSSProperties, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { GlassTopBar, LargeTitle } from "../TopBar";
 import { GlassSurface } from "../glass";
 import { YIcon } from "../YIcon";
 import { IndustryIcon } from "../IndustryIcon";
 import { VerdictPill } from "../VerdictPill";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
+import { authHeaders } from "../../../../hooks/useAuth";
 import { MobileIcon } from "../icons";
 import { LibraryActivityList, LibraryPreviewCard } from "./LibrarySearch";
 import type { Verdict, YIconKind } from "../types";
@@ -22,7 +23,6 @@ import type { MobilePipelineRow } from "../../../../hooks/useMobileDeals";
 import { useWatchlist } from "../../../../hooks/useWatchlist";
 import { copyFor } from "../../../../lib/copy";
 import { type Audience } from "../../../../lib/audience";
-import { AudienceSwitcher } from "../AudienceSwitcher";
 
 interface TodayProps {
   isAnon: boolean;
@@ -58,6 +58,19 @@ interface TodayPipelineRow {
   price?: string;
 }
 
+interface PortfolioMarketIntelligence {
+  eyebrow: string;
+  headline: string;
+  subhead: string;
+  bullets: string[];
+  sourceCount: number;
+  confidence: string;
+}
+
+interface PortfolioBrief {
+  marketIntelligence?: PortfolioMarketIntelligence;
+}
+
 const SAMPLE_PIPELINE: TodayPipelineRow[] = [
   { id: "deal-bigfake",    icon: "cool",    name: "Big Fake Deal · sample",     sub: "$1.80M SDE · honest capex story",      action: "open", verdict: "pursue" },
   { id: "deal-pest",       icon: "cool",    name: "Pest Control · FL",          sub: "92% on monthly contracts",             action: "open", verdict: "pursue" },
@@ -66,35 +79,72 @@ const SAMPLE_PIPELINE: TodayPipelineRow[] = [
   { id: "deal-dist",       icon: "default", name: "Distribution · OH",          sub: "Asking high · margins thin",           action: "get",  price: "Pass" },
 ];
 
+const SAMPLE_MARKET_INTEL: PortfolioMarketIntelligence = {
+  eyebrow: "MARKET INTELLIGENCE",
+  headline: "Big Fake Deal is being read against industrial services buyers, financing appetite, and diligence gaps.",
+  subhead: "Yulia is watching whether recurring revenue and customer concentration still support the pursue call.",
+  bullets: [
+    "Buyer universe: strategic roll-ups and founder-friendly sponsors fit better than broad auctions.",
+    "Structure watch: working-cap target, add-backs, and seller-note language need counsel/CPA review before signature.",
+    "Source gap: ask for customer cohort detail before the next buyer touch.",
+  ],
+  sourceCount: 6,
+  confidence: "Sample read",
+};
+
 export function TodayScreen({
   isAnon, initials, onOpenDeal, onOpenLibrary, onOpenLibraryDetail, onChat, onSearch, onAskYulia, onLearn: _onLearn,
   onAvatarClick, userPipeline,
-  audience, onAudienceChange, showAudienceSwitcher,
+  audience,
 }: TodayProps) {
   const PIPELINE: TodayPipelineRow[] = userPipeline ?? SAMPLE_PIPELINE;
   const { isWatched, toggle } = useWatchlist();
   const C = copyFor(audience);
+  const [brief, setBrief] = useState<PortfolioBrief | null>(null);
+
+  useEffect(() => {
+    if (isAnon) {
+      setBrief(null);
+      return;
+    }
+    let cancelled = false;
+    fetch("/api/agency/portfolio-brief", { headers: authHeaders() })
+      .then(res => res.ok ? res.json() : Promise.reject(new Error(`brief ${res.status}`)))
+      .then((nextBrief: PortfolioBrief) => {
+        if (!cancelled) setBrief(nextBrief);
+      })
+      .catch(() => {
+        if (!cancelled) setBrief(null);
+      });
+    return () => { cancelled = true; };
+  }, [isAnon]);
+
+  const marketIntel = brief?.marketIntelligence ?? SAMPLE_MARKET_INTEL;
+  const marketPrompt = "Show me the market intelligence behind the deal of the day. Include buyer universe, financing climate, tax/legal structure issues, and source gaps.";
+
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
       <GlassTopBar title="Today" initials={initials} onAvatarClick={onAvatarClick} onSearch={onSearch ?? onChat} />
       <LargeTitle>Today</LargeTitle>
 
-      {/* Hero — anon = welcome, authed = today's brief teaser. The
-          audience switcher pill (anon only) lives in the welcome hero's
-          eyebrow row so the test-drive control is anchored to the
-          biggest, most-visible card on the screen. */}
+      {/* Hero — anon = welcome, authed = today's brief teaser. */}
       <div style={{ padding: "4px 16px 0" }}>
         {isAnon ? (
           <WelcomeHero
             onChat={onChat}
             heroTag={C.todayHeroTag}
-            audience={audience}
-            onAudienceChange={onAudienceChange}
-            showAudienceSwitcher={showAudienceSwitcher}
           />
         ) : (
           <DailyHero onOpenDeal={() => onOpenDeal("deal-bigfake", "Big Fake Deal · sample")} />
         )}
+      </div>
+
+      <div style={{ padding: "14px 16px 0" }}>
+        <MarketIntelCard
+          intel={marketIntel}
+          onAskYulia={onAskYulia}
+          fullPrompt={marketPrompt}
+        />
       </div>
 
       {/* Explore SMBX — about/learn surface. Persona-aware: 1 fixed
@@ -148,16 +198,120 @@ export function TodayScreen({
   );
 }
 
+function MarketIntelCard({
+  intel,
+  onAskYulia,
+  fullPrompt,
+}: {
+  intel: PortfolioMarketIntelligence;
+  onAskYulia: (prompt: string) => void;
+  fullPrompt: string;
+}) {
+  const bullets = intel.bullets?.length ? intel.bullets.slice(0, 3) : SAMPLE_MARKET_INTEL.bullets;
+  return (
+    <section
+      style={MI.card}
+      aria-label="Market intelligence behind today's deal"
+    >
+      <div style={MI.glow} aria-hidden="true" />
+      <div style={MI.topRow}>
+        <div className="mb-eyebrow" style={MI.eyebrow}>{intel.eyebrow || "MARKET INTELLIGENCE"}</div>
+        <span style={MI.sourcePill}>{intel.sourceCount > 0 ? `${intel.sourceCount} sources` : intel.confidence}</span>
+      </div>
+      <h3 style={MI.title}>{intel.headline}</h3>
+      <p style={MI.sub}>{intel.subhead}</p>
+
+      <div style={MI.rows}>
+        {bullets.map((bullet, index) => (
+          <MarketIntelRow
+            key={bullet}
+            index={index + 1}
+            text={bullet}
+            onTap={() => onAskYulia(`Unpack this market intelligence signal from today's deal: ${bullet}`)}
+          />
+        ))}
+      </div>
+
+      <TexturedActionCta
+        title="Ask Yulia for the read"
+        sub="Buyer universe, structure, source gaps"
+        actionLabel="Ask"
+        icon={<YIcon size={42} kind="pursue" />}
+        onTap={() => onAskYulia(fullPrompt)}
+      />
+    </section>
+  );
+}
+
+function MarketIntelRow({
+  index,
+  text,
+  onTap,
+}: {
+  index: number;
+  text: string;
+  onTap: () => void;
+}) {
+  const [label, ...rest] = text.split(":");
+  const hasLabel = rest.length > 0;
+  return (
+    <button type="button" className="mb-tap" style={MI.row} onClick={onTap}>
+      <span style={MI.rowCount}>{index}</span>
+      <span style={MI.rowText}>
+        <span style={MI.rowLabel}>{hasLabel ? label : "Signal"}</span>
+        <span style={MI.rowSub}>{hasLabel ? rest.join(":").trim() : text}</span>
+      </span>
+      <MobileIcon name="chevron" c="#fff" size={11} />
+    </button>
+  );
+}
+
+function TexturedActionCta({
+  title,
+  sub,
+  actionLabel,
+  icon,
+  onTap,
+}: {
+  title: string;
+  sub: string;
+  actionLabel: string;
+  icon: ReactNode;
+  onTap: () => void;
+}) {
+  return (
+    <GlassSurface
+      tint="onColor"
+      radius={16}
+      role="button"
+      tabIndex={0}
+      className="mb-tap"
+      style={CTA.cell}
+      onClick={onTap}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onTap();
+        }
+      }}
+    >
+      {icon}
+      <span style={CTA.copy}>
+        <span style={CTA.title}>{title}</span>
+        <span style={CTA.sub}>{sub}</span>
+      </span>
+      <span style={CTA.pill}>{actionLabel}</span>
+    </GlassSurface>
+  );
+}
+
 /* ─── Welcome hero (anon) ────────────────────────────────── */
 
 function WelcomeHero({
-  onChat, heroTag, audience, onAudienceChange, showAudienceSwitcher,
+  onChat, heroTag,
 }: {
   onChat: () => void;
   heroTag: string;
-  audience: Audience;
-  onAudienceChange: (a: Audience) => void;
-  showAudienceSwitcher: boolean;
 }) {
   return (
     <HeroFrame kind="welcome" onTap={onChat}>
@@ -170,17 +324,6 @@ function WelcomeHero({
       <div style={H.eyebrowSlot}>
         <div className="mb-eyebrow">WORKING SAMPLE</div>
       </div>
-      {/* Audience switcher pill — absolute top-right of the hero, anon
-          only. Sits in its own anchor so it doesn't push the eyebrow
-          into a multi-line wrap. Opens a portaled bottom sheet (see
-          AudienceSwitcher) — the hero's overflow:hidden doesn't clip
-          the popup because the portal renders to document.body. */}
-      {showAudienceSwitcher && (
-        <div style={H.pillSlot} onClick={(e) => e.stopPropagation()}>
-          <AudienceSwitcher audience={audience} onChange={onAudienceChange} />
-        </div>
-      )}
-
       <div style={H.titleBlock}>
         <h2 style={H.h2}>Agentic AI specifically built for buying and selling businesses of all shapes and sizes.</h2>
         <p style={H.tag}>{heroTag}</p>
@@ -194,8 +337,7 @@ function WelcomeHero({
         </div>
         <button
           type="button"
-          className="mb-get-pill dark"
-          style={{ padding: "6px 16px", fontSize: 13 }}
+          style={H.innerButton}
           onClick={(e) => { e.stopPropagation(); onChat(); }}
         >Start</button>
       </GlassSurface>
@@ -231,8 +373,7 @@ function DailyHero({ onOpenDeal }: { onOpenDeal: () => void }) {
         </div>
         <button
           type="button"
-          className="mb-get-pill dark"
-          style={{ padding: "6px 16px", fontSize: 13 }}
+          style={H.innerButton}
           onClick={(e) => { e.stopPropagation(); onOpenDeal(); }}
         >Open</button>
       </GlassSurface>
@@ -256,28 +397,21 @@ type HeroKind = Verdict | "welcome";
 //     texture's lights light + darks dark, just tinted)
 //   - add a soft inset top highlight + bottom shadow for tactile depth
 // HERO_TEXTURE pulls from RANDOM_TEXTURES so each page-load gets a fresh
-// pick from the per-pool watercolor set. welcome stays in the gold pool
-// (preserves the warm home identity); watch/pass stay fixed (semantic).
+// pick from the per-pool watercolor set. The logged-out Today card stays
+// rose gold by overlay, but the underlying texture still rotates.
 const HERO_TEXTURE: Record<HeroKind, string> = {
   pursue:  RANDOM_TEXTURES.pursue,
   watch:   RANDOM_TEXTURES.watch,
   pass:    RANDOM_TEXTURES.pass,
   welcome: RANDOM_TEXTURES.welcome,
 };
-/* Overlay hues retuned 2026-05-05 (eve) — the previous sienna-brown
-   stops were muddying the warm watercolor textures into "brown card."
-   Now using the brand verdict tokens directly: pursue = sage green,
-   watch + welcome = warm gold (--mb-warn family), pass = coral. The
-   colors stay in the texture's hue family so the overlay clarifies
-   identity instead of muddying it. */
 const HERO_OVERLAY: Record<HeroKind, string> = {
   pursue:  "linear-gradient(165deg, rgba(63,138,106,0.30) 0%, rgba(40,92,70,0.62) 100%)",
   watch:   "linear-gradient(165deg, rgba(202,150,82,0.30) 0%, rgba(128,86,36,0.62) 100%)",
   pass:    "linear-gradient(165deg, rgba(216,139,132,0.30) 0%, rgba(140,68,60,0.62) 100%)",
-  /* welcome retuned 2026-05-05 (eve, take 2) — was reading slightly yellow.
-     Slight green-channel reduction shifts it toward warm gold/amber without
-     pushing into orange (the inner pill amplifies orange under saturate). */
-  welcome: "linear-gradient(165deg, rgba(202,150,82,0.28) 0%, rgba(128,86,36,0.60) 100%)",
+  welcome:
+    "linear-gradient(165deg, rgba(238,204,176,0.08) 0%, rgba(186,116,104,0.14) 52%, rgba(124,68,78,0.28) 100%), " +
+    "linear-gradient(28deg, rgba(210,154,92,0.08) 0%, rgba(118,70,96,0.14) 100%)",
 };
 
 /* Verdict-tinted ambient shadows so each card "glows" its own color
@@ -288,7 +422,7 @@ const HERO_GLOW: Record<HeroKind, string> = {
   pursue:  "0 14px 36px -10px rgba(63,138,106,0.32)",
   watch:   "0 14px 36px -10px rgba(180,130,50,0.30)",
   pass:    "0 14px 36px -10px rgba(180,90,80,0.28)",
-  welcome: "0 14px 36px -10px rgba(180,130,50,0.32)",
+  welcome: "0 14px 36px -10px rgba(190,124,82,0.34)",
 };
 
 function HeroFrame({
@@ -338,7 +472,7 @@ function HeroVisualPursue() {
   return (
     <div style={{ position: "relative", height: 280, overflow: "hidden" }} aria-hidden="true">
       <div style={{ position: "absolute", top: -60, right: -40, width: 240, height: 240, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.18), transparent 60%)" }}/>
-      <div style={{ position: "absolute", bottom: -80, left: -30, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.10), transparent 60%)" }}/>
+      <div style={{ position: "absolute", bottom: -80, left: -30, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.078), transparent 60%)" }}/>
       <div style={{ position: "absolute", bottom: 18, right: 22, textAlign: "right" }}>
         <div className="mb-mono" style={{ fontSize: 11, color: "#fff", letterSpacing: 0.1 }}>SDE</div>
         <div style={{ fontFamily: "var(--mb-font-display)", fontWeight: 800, fontSize: 56, letterSpacing: -2, lineHeight: 1, color: "#fff" }}>$1.80M</div>
@@ -395,14 +529,13 @@ function ExploreCard({
           />
         ))}
       </div>
-      <button
-        type="button"
-        onClick={onChat}
-        style={E.freeFormBtn}
-        aria-label="Open chat for any other question"
-      >
-        Or just chat with Yulia →
-      </button>
+      <TexturedActionCta
+        title="Chat with Yulia"
+        sub="Ask anything else"
+        actionLabel="Start"
+        icon={<YIcon size={42} kind="pursue" />}
+        onTap={onChat}
+      />
     </div>
   );
 }
@@ -426,16 +559,9 @@ function ExploreRow({
       style={{
         display: "flex", alignItems: "center", gap: 12,
         padding: "12px 14px",
-        borderRadius: 14,
-        /* Inner row tint flipped from translucent-white → translucent-dark
-           so the white label/sub text pops with real contrast. White-on-
-           white-tint was washing out; dark inset makes each row read as a
-           crisp tappable cell on the periwinkle backdrop. */
-        background: "rgba(0,0,0,0.20)",
-        backdropFilter: "blur(8px)",
-        WebkitBackdropFilter: "blur(8px)",
-        border: "0.5px solid rgba(255,255,255,0.12)",
-        marginBottom: last ? 0 : 8,
+        background: "transparent",
+        border: "none",
+        borderBottom: last ? "none" : "0.5px solid rgba(255,255,255,0.14)",
         cursor: "pointer",
       }}
     >
@@ -446,7 +572,7 @@ function ExploreRow({
         <div style={E.rowLabel}>{label}</div>
         <div style={E.rowSub}>{sub}</div>
       </div>
-      <span style={E.rowChevron} aria-hidden="true">↗</span>
+      <MobileIcon name="chevron" c="#fff" size={11} />
     </div>
   );
 }
@@ -596,19 +722,36 @@ const H: Record<string, CSSProperties> = {
     margin: "16px 14px 14px",
     padding: "10px 12px",
     display: "flex", alignItems: "center", gap: 12,
-    /* Override GlassSurface's onColor tint — the default saturate(180%)
-       + brightness(1.10) was amplifying the gold underneath into orange.
-       Higher white opacity + neutral saturation keeps it a calm frosted
-       cell that reads as "card on warm bg" not "orange button." */
-    background: "rgba(255,255,255,0.28)",
-    backdropFilter: "blur(20px) saturate(120%)",
-    WebkitBackdropFilter: "blur(20px) saturate(120%)",
+    background:
+      "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.14), transparent 42%), " +
+      "linear-gradient(180deg, rgba(255,255,255,0.038), rgba(255,255,255,0.003))",
+    backdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    WebkitBackdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    border: "0.5px solid rgba(255,255,255,0.34)",
+    boxShadow:
+      "0 10px 26px -18px rgba(0,0,0,0.44), " +
+      "inset 0 1px 0 rgba(255,255,255,0.34), " +
+      "inset 0 -1px 0 rgba(255,255,255,0.05)",
   },
   innerName: {
     fontSize: 14, fontWeight: 600, color: "#fff", letterSpacing: "-0.2px",
   },
   innerSub: {
     fontSize: 12, color: "#fff", marginTop: 1,
+  },
+  innerButton: {
+    flexShrink: 0,
+    minHeight: 34,
+    minWidth: 62,
+    border: "none",
+    borderRadius: 999,
+    padding: "6px 14px",
+    background: "linear-gradient(180deg, rgba(255,255,255,0.078), rgba(255,255,255,0.02))",
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: 800,
+    letterSpacing: "-0.08px",
+    cursor: "pointer",
   },
   metaRow: {
     padding: "0 22px 18px",
@@ -617,6 +760,198 @@ const H: Record<string, CSSProperties> = {
   metaText: {
     fontSize: 10.5, color: "#fff",
     letterSpacing: "0.1em", fontWeight: 600,
+  },
+};
+
+const CTA: Record<string, CSSProperties> = {
+  cell: {
+    margin: "13px 0 0",
+    padding: "10px 12px",
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    background:
+      "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.14), transparent 42%), " +
+      "linear-gradient(180deg, rgba(255,255,255,0.038), rgba(255,255,255,0.003))",
+    backdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    WebkitBackdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    border: "0.5px solid rgba(255,255,255,0.34)",
+    boxShadow:
+      "0 10px 26px -18px rgba(0,0,0,0.44), " +
+      "inset 0 1px 0 rgba(255,255,255,0.34), " +
+      "inset 0 -1px 0 rgba(255,255,255,0.05)",
+    cursor: "pointer",
+    color: "#fff",
+  },
+  copy: {
+    flex: 1,
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: 1,
+  },
+  title: {
+    fontSize: 14,
+    fontWeight: 750,
+    color: "#fff",
+    letterSpacing: "-0.22px",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
+  sub: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.92)",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
+  pill: {
+    flexShrink: 0,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 34,
+    minWidth: 62,
+    borderRadius: 999,
+    padding: "6px 14px",
+    background: "linear-gradient(180deg, rgba(255,255,255,0.078), rgba(255,255,255,0.02))",
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: 800,
+    letterSpacing: "-0.08px",
+  },
+};
+
+const MI: Record<string, CSSProperties> = {
+  card: {
+    display: "block",
+    width: "100%",
+    boxSizing: "border-box",
+    borderRadius: 22,
+    padding: "20px 16px 16px",
+    backgroundImage:
+      `linear-gradient(165deg, rgba(24,58,76,0.26) 0%, rgba(42,88,110,0.40) 52%, rgba(16,36,62,0.56) 100%), url('${RANDOM_TEXTURES.market}')`,
+    backgroundSize: "cover, cover",
+    backgroundPosition: "center, center",
+    backgroundRepeat: "no-repeat, no-repeat",
+    color: "#F8FBFF",
+    boxShadow:
+      "0 16px 38px -14px rgba(24,72,105,0.48)," +
+      "0 8px 22px -12px rgba(0,0,0,0.30)," +
+      " inset 0 1px 0 rgba(255,255,255,0.22)",
+    overflow: "hidden",
+    textAlign: "left",
+    position: "relative",
+  },
+  glow: {
+    position: "absolute",
+    top: -78,
+    right: -44,
+    width: 230,
+    height: 230,
+    borderRadius: "50%",
+    background: "radial-gradient(circle, rgba(255,255,255,0.24), transparent 64%)",
+  },
+  topRow: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    marginBottom: 10,
+  },
+  eyebrow: {
+    color: "#DCEFE9",
+    fontWeight: 800,
+  },
+  sourcePill: {
+    position: "relative",
+    flexShrink: 0,
+    borderRadius: 999,
+    padding: "6px 9px",
+    background: "rgba(255,255,255,0.15)",
+    border: "0.5px solid rgba(255,255,255,0.18)",
+    color: "#FFFFFF",
+    fontSize: 11,
+    fontWeight: 800,
+  },
+  title: {
+    position: "relative",
+    margin: 0,
+    fontFamily: "var(--mb-font-display)",
+    fontSize: 24,
+    lineHeight: 1.08,
+    letterSpacing: "-0.65px",
+    fontWeight: 800,
+    color: "#FFFFFF",
+    textWrap: "balance",
+  },
+  sub: {
+    position: "relative",
+    margin: "9px 0 0",
+    color: "#ECF3FF",
+    fontSize: 13.5,
+    lineHeight: 1.42,
+    textWrap: "pretty",
+  },
+  rows: {
+    position: "relative",
+    margin: "16px 0 0",
+    borderRadius: 16,
+    overflow: "hidden",
+    background:
+      "radial-gradient(circle at 20% 0%, rgba(255,255,255,0.095), transparent 40%), " +
+      "linear-gradient(180deg, rgba(255,255,255,0.032), rgba(255,255,255,0.003))",
+    backdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    WebkitBackdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    border: "0.5px solid rgba(255,255,255,0.32)",
+    boxShadow:
+      "0 12px 28px -20px rgba(0,0,0,0.46), " +
+      "inset 0 1px 0 rgba(255,255,255,0.30), " +
+      "inset 0 -1px 0 rgba(255,255,255,0.04)",
+  },
+  row: {
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    padding: "12px 14px",
+    background: "transparent",
+    border: "none",
+    color: "#FFFFFF",
+    textAlign: "left",
+    cursor: "pointer",
+  },
+  rowCount: {
+    width: 30,
+    height: 30,
+    borderRadius: 10,
+    background: "linear-gradient(180deg, rgba(255,255,255,0.066), rgba(255,255,255,0.018))",
+    display: "grid",
+    placeItems: "center",
+    fontFamily: "var(--mb-font-mono)",
+    fontSize: 11,
+    fontWeight: 700,
+    flexShrink: 0,
+  },
+  rowText: {
+    flex: 1,
+    minWidth: 0,
+  },
+  rowLabel: {
+    display: "block",
+    fontSize: 14.5,
+    fontWeight: 750,
+    letterSpacing: "-0.2px",
+    lineHeight: 1.2,
+  },
+  rowSub: {
+    display: "block",
+    fontSize: 12.5,
+    color: "rgba(255,255,255,0.86)",
+    marginTop: 2,
+    lineHeight: 1.3,
   },
 };
 
@@ -632,7 +967,7 @@ const E: Record<string, CSSProperties> = {
        stops with normal compositing; the verdict-tinted glow below
        carries the depth without darkening the texture's true color. */
     backgroundImage:
-      `linear-gradient(165deg, rgba(95,115,200,0.38) 0%, rgba(50,72,160,0.70) 100%), url('${RANDOM_TEXTURES.buyers}')`,
+      `linear-gradient(165deg, rgba(95,115,200,0.22) 0%, rgba(50,72,160,0.44) 100%), url('${RANDOM_TEXTURES.explore}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     backgroundRepeat: "no-repeat, no-repeat",
@@ -666,10 +1001,25 @@ const E: Record<string, CSSProperties> = {
     margin: "8px 0 0", lineHeight: 1.4,
     textWrap: "pretty",
   },
-  rows: { display: "flex", flexDirection: "column" },
+  rows: {
+    display: "flex",
+    flexDirection: "column",
+    borderRadius: 16,
+    overflow: "hidden",
+    background:
+      "radial-gradient(circle at 20% 0%, rgba(255,255,255,0.095), transparent 40%), " +
+      "linear-gradient(180deg, rgba(255,255,255,0.032), rgba(255,255,255,0.003))",
+    backdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    WebkitBackdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    border: "0.5px solid rgba(255,255,255,0.32)",
+    boxShadow:
+      "0 12px 28px -20px rgba(0,0,0,0.46), " +
+      "inset 0 1px 0 rgba(255,255,255,0.30), " +
+      "inset 0 -1px 0 rgba(255,255,255,0.04)",
+  },
   rowGlyph: {
     width: 34, height: 34, borderRadius: 10,
-    background: "rgba(255,255,255,0.16)",
+    background: "linear-gradient(180deg, rgba(255,255,255,0.066), rgba(255,255,255,0.018))",
     display: "grid", placeItems: "center",
     flexShrink: 0,
   },
@@ -680,25 +1030,5 @@ const E: Record<string, CSSProperties> = {
   rowSub: {
     fontSize: 12, color: "#fff",
     marginTop: 2, lineHeight: 1.35,
-  },
-  rowChevron: {
-    fontSize: 14, color: "#fff",
-    marginLeft: 4, marginRight: 2, flexShrink: 0,
-  },
-  /* Inline link below the rows: "Or just chat with Yulia →".
-     Underplayed compared to the row buttons since the rows are the
-     primary call-to-action; this is the safety-net escape hatch. */
-  freeFormBtn: {
-    display: "block",
-    margin: "12px auto 4px",
-    padding: "8px 0",
-    background: "transparent",
-    border: "none",
-    color: "#fff",
-    fontSize: 12.5, fontWeight: 600,
-    letterSpacing: "-0.05px",
-    cursor: "pointer",
-    fontFamily: "var(--mb-font-body)",
-    opacity: 0.85,
   },
 };

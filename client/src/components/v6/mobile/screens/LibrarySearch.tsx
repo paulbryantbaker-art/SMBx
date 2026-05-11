@@ -15,6 +15,7 @@ import {
 import { GlassTopBar, LargeTitle } from "../TopBar";
 import { MobileIcon } from "../icons";
 import { ChatStarterPill } from "../ChatStarterPill";
+import { YIcon } from "../YIcon";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
 
 interface SharedChromeProps {
@@ -554,10 +555,13 @@ export function SearchScreen({
             <p style={S.heroCopy}>
               Search buyers, targets, capital, and deal professionals. Yulia turns a rough thesis into a short list.
             </p>
-            <span style={S.chatPill}>
-              <span style={S.chatBadge}>Y</span>
-              Start discovery
-              <span aria-hidden="true">↗</span>
+            <span style={S.searchHeroAction}>
+              <YIcon size={42} kind="pursue" />
+              <span style={S.searchHeroActionCopy}>
+                <span style={S.searchHeroActionTitle}>Start discovery</span>
+                <span style={S.searchHeroActionMeta}>Buyers, targets, capital, advisors</span>
+              </span>
+              <span style={S.searchHeroActionPill}>Start</span>
             </span>
           </div>
         </button>
@@ -1819,11 +1823,17 @@ const S: Record<string, CSSProperties> = {
     position: "relative",
     margin: "4px 14px 14px",
     padding: "10px 12px",
-    background: "rgba(255,255,255,0.18)",
-    backdropFilter: "blur(20px)",
-    WebkitBackdropFilter: "blur(20px)",
-    border: "0.5px solid rgba(255,255,255,0.28)",
+    background:
+      "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.14), transparent 42%), " +
+      "linear-gradient(180deg, rgba(255,255,255,0.038), rgba(255,255,255,0.003))",
+    backdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    WebkitBackdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    border: "0.5px solid rgba(255,255,255,0.34)",
     borderRadius: 16,
+    boxShadow:
+      "0 10px 26px -18px rgba(0,0,0,0.44), " +
+      "inset 0 1px 0 rgba(255,255,255,0.34), " +
+      "inset 0 -1px 0 rgba(255,255,255,0.05)",
     display: "flex",
     alignItems: "center",
     gap: 12,
@@ -1843,8 +1853,61 @@ const S: Record<string, CSSProperties> = {
     fontSize: 14,
     fontWeight: 600,
     borderRadius: 999,
-    background: "rgba(255,255,255,0.22)",
+    background: "linear-gradient(180deg, rgba(255,255,255,0.078), rgba(255,255,255,0.02))",
     color: "#fff",
+  },
+  searchHeroAction: {
+    marginTop: 16,
+    padding: "10px 12px",
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    borderRadius: 16,
+    background:
+      "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.14), transparent 42%), " +
+      "linear-gradient(180deg, rgba(255,255,255,0.038), rgba(255,255,255,0.003))",
+    backdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    WebkitBackdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    border: "0.5px solid rgba(255,255,255,0.34)",
+    boxShadow:
+      "0 10px 26px -18px rgba(0,0,0,0.44), " +
+      "inset 0 1px 0 rgba(255,255,255,0.34), " +
+      "inset 0 -1px 0 rgba(255,255,255,0.05)",
+  },
+  searchHeroActionCopy: {
+    flex: 1,
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: 1,
+  },
+  searchHeroActionTitle: {
+    fontSize: 14,
+    fontWeight: 750,
+    color: "#fff",
+    letterSpacing: "-0.22px",
+  },
+  searchHeroActionMeta: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.92)",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
+  searchHeroActionPill: {
+    flexShrink: 0,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 34,
+    minWidth: 62,
+    borderRadius: 999,
+    padding: "6px 14px",
+    background: "linear-gradient(180deg, rgba(255,255,255,0.078), rgba(255,255,255,0.02))",
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: 800,
+    letterSpacing: "-0.08px",
   },
   libraryPortal: {
     borderRadius: 22,
@@ -1852,7 +1915,7 @@ const S: Record<string, CSSProperties> = {
     position: "relative",
     color: "#fff",
     backgroundImage:
-      `linear-gradient(165deg, rgba(63,138,106,0.34) 0%, rgba(48,74,130,0.68) 100%), url('${RANDOM_TEXTURES.baseline}')`,
+      `linear-gradient(165deg, rgba(63,138,106,0.34) 0%, rgba(48,74,130,0.68) 100%), url('${RANDOM_TEXTURES.files}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     boxShadow:
@@ -1897,10 +1960,16 @@ const S: Record<string, CSSProperties> = {
     margin: "0 14px 14px",
     borderRadius: 16,
     overflow: "hidden",
-    background: "rgba(0,0,0,0.18)",
-    backdropFilter: "blur(16px)",
-    WebkitBackdropFilter: "blur(16px)",
-    border: "0.5px solid rgba(255,255,255,0.18)",
+    background:
+      "radial-gradient(circle at 20% 0%, rgba(255,255,255,0.095), transparent 40%), " +
+      "linear-gradient(180deg, rgba(255,255,255,0.032), rgba(255,255,255,0.003))",
+    backdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    WebkitBackdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    border: "0.5px solid rgba(255,255,255,0.32)",
+    boxShadow:
+      "0 12px 28px -20px rgba(0,0,0,0.46), " +
+      "inset 0 1px 0 rgba(255,255,255,0.30), " +
+      "inset 0 -1px 0 rgba(255,255,255,0.04)",
   },
   portalLink: {
     width: "100%",
@@ -1918,7 +1987,7 @@ const S: Record<string, CSSProperties> = {
     width: 30,
     height: 30,
     borderRadius: 10,
-    background: "rgba(255,255,255,0.18)",
+    background: "linear-gradient(180deg, rgba(255,255,255,0.066), rgba(255,255,255,0.018))",
     display: "grid",
     placeItems: "center",
     fontFamily: "var(--mb-font-mono)",
@@ -2394,10 +2463,16 @@ const S: Record<string, CSSProperties> = {
     minWidth: 0,
     borderRadius: 14,
     padding: "10px 8px",
-    background: "rgba(0,0,0,0.18)",
-    border: "0.5px solid rgba(255,255,255,0.16)",
-    backdropFilter: "blur(14px)",
-    WebkitBackdropFilter: "blur(14px)",
+    background:
+      "radial-gradient(circle at 20% 0%, rgba(255,255,255,0.095), transparent 40%), " +
+      "linear-gradient(180deg, rgba(255,255,255,0.032), rgba(255,255,255,0.003))",
+    border: "0.5px solid rgba(255,255,255,0.30)",
+    boxShadow:
+      "0 10px 24px -20px rgba(0,0,0,0.44), " +
+      "inset 0 1px 0 rgba(255,255,255,0.30), " +
+      "inset 0 -1px 0 rgba(255,255,255,0.04)",
+    backdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    WebkitBackdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
   },
   finderStatValue: {
     fontSize: 15,

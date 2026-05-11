@@ -7,7 +7,7 @@
  * session and re-rolls on hard refresh without React re-render churn.
  */
 
-const VERSION = "v=20260509-pipeline-ink";
+const VERSION = "v=20260510-mobile-texture-recipes-glass";
 const tex = (name: string) => `/textures/texture-${name}.png?${VERSION}`;
 const heroTex = (n: number) => `/textures/texture-hero-${n}.png?${VERSION}`;
 const cardTex = (n: number) => `/textures/texture-card-${n}.png?${VERSION}`;
@@ -20,20 +20,28 @@ const HERO_POOL = [1, 2, 3, 4, 5, 6, 7, 8] as const;
 const CARD_POOL = [1, 2, 3, 4, 5, 6, 7, 8] as const;
 
 export const RANDOM_TEXTURES = {
-  // Hero-facing aliases. Existing mobile hero cards consume these keys.
-  welcome:  heroTex(pick(HERO_POOL)),
-  pursue:   heroTex(pick(HERO_POOL)),
-  baseline: heroTex(pick(HERO_POOL)),
-  watch:    heroTex(pick(HERO_POOL)),
-  pass:     heroTex(pick(HERO_POOL)),
+  // Curated mobile recipes. These are intentionally semantic, not fully
+  // random: adjacent Today cards should never accidentally land in the same
+  // color family.
+  welcome: heroTex(6),
+  market:  heroTex(2),
+  explore: heroTex(3),
+  files:   heroTex(1),
+  search:  heroTex(8),
+  pipeline: heroTex(7),
 
-  // Secondary/card-facing aliases. Existing supporting cards mostly consume
-  // buyers; newer surfaces can choose the explicit card keys.
-  buyers:       cardTex(pick(CARD_POOL)),
-  card:         cardTex(pick(CARD_POOL)),
-  cardPursue:   cardTex(pick(CARD_POOL)),
-  cardBaseline: cardTex(pick(CARD_POOL)),
-  cardBuyers:   cardTex(pick(CARD_POOL)),
+  // Existing semantic aliases.
+  pursue:   heroTex(8),
+  baseline: heroTex(2),
+  watch:    tex("watch"),
+  pass:     tex("pass"),
+
+  // Supporting/navigation card aliases.
+  buyers:       heroTex(3),
+  card:         heroTex(2),
+  cardPursue:   heroTex(8),
+  cardBaseline: heroTex(1),
+  cardBuyers:   heroTex(3),
 
   // Legacy named textures remain available for any older route that expects
   // semantic art. These are not in the new hero/card rotation.

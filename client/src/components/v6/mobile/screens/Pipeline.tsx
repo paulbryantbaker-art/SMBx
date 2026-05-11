@@ -341,7 +341,7 @@ const P: Record<string, CSSProperties> = {
        the blue. Back to lighter normal-blend stops; verdict-tinted
        glow below carries the integration with the white page. */
     backgroundImage:
-      `linear-gradient(160deg, rgba(60,108,168,0.42) 0%, rgba(25,68,118,0.72) 100%), url('${RANDOM_TEXTURES.baseline}')`,
+      `linear-gradient(160deg, rgba(80,96,62,0.30) 0%, rgba(54,68,45,0.62) 100%), url('${RANDOM_TEXTURES.pipeline}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     backgroundRepeat: "no-repeat, no-repeat",
@@ -371,7 +371,16 @@ const P: Record<string, CSSProperties> = {
   },
   featuredFooter: {
     padding: "12px 14px",
-    background: "rgba(0,0,0,0.18)",
+    background:
+      "radial-gradient(circle at 20% 0%, rgba(255,255,255,0.14), transparent 40%), " +
+      "linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.018))",
+    backdropFilter: "blur(5px) saturate(138%) brightness(1.01)",
+    WebkitBackdropFilter: "blur(5px) saturate(138%) brightness(1.01)",
+    borderTop: "0.5px solid rgba(255,255,255,0.32)",
+    boxShadow:
+      "0 12px 28px -20px rgba(0,0,0,0.46), " +
+      "inset 0 1px 0 rgba(255,255,255,0.30), " +
+      "inset 0 -1px 0 rgba(255,255,255,0.04)",
     display: "flex", alignItems: "center", gap: 12,
   },
   featuredName: {

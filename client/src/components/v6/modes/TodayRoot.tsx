@@ -72,9 +72,9 @@ interface LiveDeskItem {
 }
 
 const WORK: LiveDeskItem[] = [
-  { eyebrow: "DRAFTING", title: "IOI v3", sub: "Recurring revenue framing · ready for review", pct: 76, tone: "gold" as Tone },
-  { eyebrow: "WATCHING", title: "87 sources", sub: "4 new HVAC matches since yesterday", pct: 42, tone: "plum" as Tone },
-  { eyebrow: "RANKING", title: "Buyer pool", sub: "18 candidates sorted by strategic fit", pct: 58, tone: "cactus" as Tone },
+  { eyebrow: "MARKET", title: "Industrial services read", sub: "Buyer appetite, SBA climate, and local density are shaping the pursue call.", pct: 76, tone: "cactus" as Tone },
+  { eyebrow: "STRUCTURE", title: "Tax and legal watch", sub: "Working-cap target, add-backs, seller-note timing, and counsel sign-off need daylight.", pct: 64, tone: "gold" as Tone },
+  { eyebrow: "PORTFOLIO", title: "One deal driving the day", sub: "Big Fake Deal is the current focus until review and buyer touch are cleared.", pct: 58, tone: "plum" as Tone },
 ];
 
 interface TodayFile {
@@ -402,11 +402,36 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
         <aside style={T.livePanel}>
           <div style={T.liveHeader}>
             <div>
-              <div className="mono" style={T.eyebrowBlue}>YULIA IS WORKING</div>
-              <h2 style={T.panelTitle}>Live desk</h2>
+              <div className="mono" style={T.eyebrowBlue}>YULIA'S MARKET DESK</div>
+              <h2 style={T.panelTitle}>Portfolio intelligence</h2>
             </div>
-            <span style={T.liveDotWrap}><span style={T.liveDot} /> live</span>
+            <span style={T.liveDotWrap}><span style={T.liveDot} /> {marketIntel.sourceCount > 0 ? `${marketIntel.sourceCount} sources` : "live"}</span>
           </div>
+
+          <button
+            type="button"
+            style={T.intelLead}
+            onClick={() => ask("Show me the portfolio market intelligence read. Separate market, buyer/capital, tax, legal, and source gaps.")}
+          >
+            <div className="mono" style={T.intelLeadEyebrow}>{marketIntel.eyebrow}</div>
+            <strong style={T.intelLeadTitle}>{marketIntel.headline}</strong>
+            <span style={T.intelLeadSub}>{marketIntel.subhead}</span>
+          </button>
+
+          {marketIntel.bullets?.length > 0 && (
+            <div style={T.intelBullets}>
+              {marketIntel.bullets.slice(0, 3).map((bullet) => (
+                <button
+                  key={bullet}
+                  type="button"
+                  style={T.intelBullet}
+                  onClick={() => ask(`Unpack this market intelligence note: ${bullet}`)}
+                >
+                  {bullet}
+                </button>
+              ))}
+            </div>
+          )}
 
           <div style={T.workStack}>
             {liveDesk.map(item => (
@@ -418,7 +443,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
               >
                 <div style={T.workTop}>
                   <span className="mono" style={T.workEyebrow}>{item.eyebrow}</span>
-                  <span style={{ ...T.workPct, color: tone(item.tone).ink }}>{item.pct}%</span>
+                  <span style={{ ...T.workPct, color: tone(item.tone).ink }}>{item.pct}% signal</span>
                 </div>
                 <div style={T.workTitle}>{item.title}</div>
                 <div style={T.workSub}>{item.sub}</div>
@@ -882,6 +907,58 @@ const T: Record<string, CSSProperties> = {
     flexDirection: "column",
     gap: 10,
     flex: 1,
+    marginTop: 12,
+  },
+  intelLead: {
+    all: "unset",
+    display: "block",
+    boxSizing: "border-box",
+    width: "100%",
+    borderRadius: 20,
+    padding: "16px 17px",
+    background: "linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.055))",
+    border: "1px solid rgba(255,255,255,0.14)",
+    color: "#FFFFFF",
+    cursor: "pointer",
+  },
+  intelLeadEyebrow: {
+    fontSize: 9,
+    letterSpacing: "0.16em",
+    color: "#96BFE2",
+    fontWeight: 800,
+  },
+  intelLeadTitle: {
+    display: "block",
+    marginTop: 9,
+    color: "#FFFFFF",
+    fontSize: 22,
+    lineHeight: 1.05,
+    letterSpacing: "-0.04em",
+    fontWeight: 850,
+  },
+  intelLeadSub: {
+    display: "block",
+    marginTop: 8,
+    color: "#D4DCEA",
+    fontSize: 13,
+    lineHeight: 1.42,
+  },
+  intelBullets: {
+    display: "grid",
+    gap: 8,
+    marginTop: 10,
+  },
+  intelBullet: {
+    all: "unset",
+    display: "block",
+    borderRadius: 15,
+    padding: "10px 12px",
+    background: "rgba(255,255,255,0.07)",
+    border: "1px solid rgba(255,255,255,0.10)",
+    color: "#E7ECF6",
+    fontSize: 12.2,
+    lineHeight: 1.34,
+    cursor: "pointer",
   },
   workCard: {
     all: "unset",
