@@ -118,6 +118,17 @@ const CONTRACTS: Record<string, AgencyActionContract> = {
     writeScope: 'deliverable',
     description: 'Queue a real document or analysis deliverable from deal data.',
   },
+  run_analysis: {
+    toolName: 'run_analysis',
+    label: 'Run analysis',
+    methodologyRefs: ['v17 §5 Math Engine', 'v17 §11 Interactive Canvas', 'v17 §13 Premium Exports'],
+    mode: 'modeler',
+    permissionLevel: 'A3_GENERATE_WORK_PRODUCT',
+    riskLevel: 'internal_write',
+    confirmation: 'none',
+    writeScope: 'deliverable',
+    description: 'Resolve an analysis intent to a real deliverable, queue generation, and open the live canvas tab.',
+  },
   file_deliverable_to_data_room: {
     toolName: 'file_deliverable_to_data_room',
     label: 'File deliverable to data room',

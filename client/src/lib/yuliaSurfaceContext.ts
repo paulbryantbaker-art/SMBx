@@ -17,6 +17,9 @@ export interface SurfaceContext {
   documentTitle?: string;
   documentMeta?: string;
   documentKind?: string;
+  analysisRunId?: number;
+  canvasVersion?: number;
+  modelStateSummary?: string;
 }
 
 export function buildDesktopSurfaceContext(
@@ -39,6 +42,9 @@ export function buildDesktopSurfaceContext(
     dealTitle: activeTab?.kind === "deal" ? activeTab.title : undefined,
     fileScope,
     filesFilter,
+    analysisRunId: activeTab?.analysisRunId ?? undefined,
+    canvasVersion: activeTab?.versionNumber ?? undefined,
+    modelStateSummary: summarizeModelState(activeTab?.modelState, activeTab?.analysisData),
   });
 }
 
@@ -62,6 +68,9 @@ export function buildMobileSurfaceContext(
     documentTitle: view.docTitle,
     documentMeta: view.docMeta,
     documentKind: view.docKind,
+    analysisRunId: view.kind === "analysis" ? view.analysisRunId ?? undefined : undefined,
+    canvasVersion: view.kind === "analysis" ? view.versionNumber ?? undefined : undefined,
+    modelStateSummary: view.kind === "analysis" ? summarizeModelState(view.modelState, view.analysisData) : undefined,
   });
 }
 
@@ -70,6 +79,7 @@ function mobileTitleForView(view: MobileView, activeTab: MobileTab): string {
   if (view.kind === "detail") return view.dealTitle ?? "Deal";
   if (view.kind === "library-detail") return view.dealTitle ?? "Deal files";
   if (view.kind === "library-doc") return view.docTitle ?? "Document";
+  if (view.kind === "analysis") return view.analysisTitle ?? "Analysis";
   if (view.kind === "library-finder") return "Files";
   if (view.kind === "library") return "Files";
   if (view.kind === "search") return "Search";
@@ -90,4 +100,32 @@ function compactSurfaceContext(context: SurfaceContext): SurfaceContext {
   return Object.fromEntries(
     Object.entries(context).filter(([, value]) => value !== undefined && value !== ""),
   ) as SurfaceContext;
+}
+
+function summarizeModelState(modelState?: Record<string, unknown>, analysisData?: Record<string, unknown>): string | undefined {
+  const summary: Record<string, unknown> = {};
+  if (modelState && Object.keys(modelState).length > 0) {
+    summary.state = modelState;
+  }
+  if (analysisData?.schemaVersion === "analysis-runtime-v1") {
+    const structured = analysisData as Record<string, any>;
+    summary.analysisType = structured.analysisType;
+    summary.verdict = structured.verdict?.label;
+    summary.score = structured.verdict?.score;
+    summary.assumptions = Array.isArray(structured.assumptions)
+      ? structured.assumptions.slice(0, 8).map((item: Record<string, unknown>) => ({
+          key: item.key,
+          label: item.label,
+          value: item.displayValue,
+        }))
+      : undefined;
+    summary.keyMetrics = Array.isArray(structured.metrics)
+      ? structured.metrics.slice(0, 8).map((item: Record<string, unknown>) => ({
+          key: item.key,
+          label: item.label,
+          value: item.displayValue,
+        }))
+      : undefined;
+  }
+  return Object.keys(summary).length > 0 ? JSON.stringify(summary).slice(0, 1200) : undefined;
 }

@@ -27,6 +27,44 @@ interface ChatBridge {
   cancelStagedAction?: (id: number) => void | Promise<void>;
 }
 
+function mergeStructuredAssumptions(analysisData: Record<string, any> | undefined, updates: Record<string, any>): Record<string, any> | undefined {
+  if (!analysisData || analysisData.schemaVersion !== "analysis-runtime-v1") return analysisData;
+  const assumptions = Array.isArray(analysisData.assumptions) ? analysisData.assumptions : [];
+  if (assumptions.length === 0) return analysisData;
+
+  return {
+    ...analysisData,
+    assumptions: assumptions.map((assumption: Record<string, any>) => {
+      if (!assumption?.key || updates[assumption.key] === undefined) return assumption;
+      const nextValue = updates[assumption.key];
+      return {
+        ...assumption,
+        value: nextValue,
+        displayValue: String(nextValue),
+      };
+    }),
+  };
+}
+
+function applyCanvasModelUpdate(tab: Tab, detail: Record<string, any>): Tab {
+  const updates = detail.updates && typeof detail.updates === "object" ? detail.updates : {};
+  const modelState = detail.state && typeof detail.state === "object"
+    ? detail.state
+    : { ...(tab.modelState ?? {}), ...updates };
+  const analysisData = detail.analysisData && typeof detail.analysisData === "object"
+    ? detail.analysisData
+    : mergeStructuredAssumptions(tab.analysisData, updates);
+
+  return {
+    ...tab,
+    modelState,
+    analysisData,
+    analysisRunId: detail.analysisRunId ?? tab.analysisRunId,
+    versionNumber: detail.versionNumber ?? tab.versionNumber,
+    status: detail.versionNumber ? `saved v${detail.versionNumber}` : tab.status,
+  };
+}
+
 export default function V6App() {
   const auth = useAuth();
   const isMobile = useIsMobile();
@@ -221,15 +259,40 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
     const onAction = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (!detail) return;
-      // Possible canvas actions: open_tab, switch_mode
+      // Possible canvas actions: open_tab, switch_mode, update_model, create_model_tab, read_tab_state
       if (detail.canvas_action === "open_tab" && detail.tab) openTab(detail.tab);
+      if (detail.canvas_action === "create_model_tab" && detail.tabId) {
+        openTab({
+          id: detail.tabId,
+          kind: "analysis",
+          title: detail.title || "Interactive model",
+          tool: detail.modelType || "interactive_model",
+          analysisRunId: detail.analysisRunId ?? null,
+          modelState: detail.initialAssumptions || {},
+          status: "saved model",
+        });
+      }
+      if (detail.canvas_action === "update_model") {
+        const targetId = detail.tabId && detail.tabId !== "active" ? detail.tabId : activeTabId;
+        setTabs(prev => prev.map(tab => tab.id === targetId ? applyCanvasModelUpdate(tab, detail) : tab));
+      }
+      if (detail.canvas_action === "read_tab_state" && detail.state) {
+        const targetId = detail.tabId && detail.tabId !== "active" ? detail.tabId : activeTabId;
+        setTabs(prev => prev.map(tab => tab.id === targetId ? {
+          ...tab,
+          modelState: detail.state,
+          analysisRunId: detail.analysisRunId ?? tab.analysisRunId,
+          analysisData: detail.analysisData ?? tab.analysisData,
+          versionNumber: detail.versionNumber ?? tab.versionNumber,
+        } : tab));
+      }
       if (detail.canvas_action === "switch_mode" && detail.mode && VALID_MODES.includes(detail.mode)) {
         pickMode(detail.mode);
       }
     };
     window.addEventListener("smbx:canvas_action", onAction);
     return () => window.removeEventListener("smbx:canvas_action", onAction);
-  }, []);
+  }, [activeTabId]);
 
   // URL → tab bridge. Bookmarkable links / footer links open the matching
   // tab. After opening, the URL is rewritten to "/" so the tab state lives

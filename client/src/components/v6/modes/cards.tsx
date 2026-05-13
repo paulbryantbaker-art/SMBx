@@ -1,5 +1,4 @@
 import { type CSSProperties } from "react";
-import { RANDOM_TEXTURES } from "../../../lib/randomTextures";
 
 export type Verdict = "pursue" | "watch" | "pass";
 
@@ -7,6 +6,24 @@ const VERDICT_THEME: Record<Verdict, { bg: string; fg: string; chip: string; lab
   pursue: { bg: "var(--m-pursue-container)", fg: "var(--m-pursue-on-cont)", chip: "var(--m-pursue)", label: "PURSUE" },
   watch:  { bg: "var(--m-watch-container)",  fg: "#3F2E00",                 chip: "var(--m-watch)",  label: "WATCH"  },
   pass:   { bg: "var(--m-pass-container)",   fg: "#4A1410",                 chip: "var(--m-pass)",   label: "PASS"   },
+};
+
+const VERDICT_SURFACE: Record<Verdict, { background: string; shadow: string; border: string }> = {
+  pursue: {
+    background: "linear-gradient(145deg, rgba(255,255,255,0.98) 0%, rgba(237,248,243,0.94) 100%)",
+    shadow: "0 24px 58px rgba(63,125,100,0.13), 0 8px 18px rgba(26,34,51,0.07)",
+    border: "rgba(98,153,135,0.18)",
+  },
+  watch: {
+    background: "linear-gradient(145deg, rgba(255,255,255,0.98) 0%, rgba(253,247,232,0.94) 100%)",
+    shadow: "0 24px 58px rgba(156,113,40,0.13), 0 8px 18px rgba(26,34,51,0.07)",
+    border: "rgba(214,163,92,0.20)",
+  },
+  pass: {
+    background: "linear-gradient(145deg, rgba(255,255,255,0.98) 0%, rgba(253,237,235,0.94) 100%)",
+    shadow: "0 24px 58px rgba(148,62,54,0.12), 0 8px 18px rgba(26,34,51,0.07)",
+    border: "rgba(240,164,156,0.22)",
+  },
 };
 
 interface DealCardProps {
@@ -22,6 +39,7 @@ interface DealCardProps {
 
 export function V6DealCard({ verdict, name, sub, fit, sde, multiple, note, onClick }: DealCardProps) {
   const theme = VERDICT_THEME[verdict];
+  const surface = VERDICT_SURFACE[verdict];
   return (
     <div
       onClick={onClick}
@@ -29,9 +47,9 @@ export function V6DealCard({ verdict, name, sub, fit, sde, multiple, note, onCli
       style={{
         padding: "16px 18px",
         cursor: "pointer",
-        backgroundImage: `linear-gradient(135deg, rgba(255,255,255,0.94), rgba(248,250,255,0.82)), url('${RANDOM_TEXTURES.card}')`,
-        backgroundSize: "cover, cover",
-        backgroundPosition: "center, center",
+        background: surface.background,
+        borderColor: surface.border,
+        boxShadow: surface.shadow,
       }}
       role="button"
       tabIndex={0}

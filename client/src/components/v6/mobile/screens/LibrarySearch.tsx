@@ -1817,7 +1817,8 @@ const S: Record<string, CSSProperties> = {
     fontSize: 14,
     margin: "10px 0 0",
     lineHeight: 1.4,
-    opacity: 0.95,
+    color: "#fff",
+    opacity: 1,
   },
   heroAction: {
     position: "relative",
@@ -1846,7 +1847,8 @@ const S: Record<string, CSSProperties> = {
   heroActionMeta: {
     fontSize: 12.5,
     marginTop: 1,
-    opacity: 0.92,
+    color: "#fff",
+    opacity: 1,
   },
   heroButton: {
     padding: "7px 18px",
@@ -1889,7 +1891,7 @@ const S: Record<string, CSSProperties> = {
   },
   searchHeroActionMeta: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.92)",
+    color: "#fff",
     whiteSpace: "nowrap",
     overflow: "hidden",
     textOverflow: "ellipsis",
@@ -1952,7 +1954,7 @@ const S: Record<string, CSSProperties> = {
     margin: "10px 0 0",
     lineHeight: 1.4,
     color: "#fff",
-    opacity: 0.94,
+    opacity: 1,
     textWrap: "pretty",
   },
   portalRows: {
@@ -2005,7 +2007,7 @@ const S: Record<string, CSSProperties> = {
   portalSub: {
     display: "block",
     fontSize: 12.5,
-    color: "rgba(255,255,255,0.86)",
+    color: "#fff",
     marginTop: 2,
     lineHeight: 1.3,
   },
@@ -2306,7 +2308,7 @@ const S: Record<string, CSSProperties> = {
     fontSize: 9.5,
     letterSpacing: "0.16em",
     fontWeight: 700,
-    opacity: 0.9,
+    opacity: 1,
   },
   catTitle: {
     display: "block",
@@ -2327,7 +2329,7 @@ const S: Record<string, CSSProperties> = {
     marginTop: 6,
     fontSize: 11.5,
     lineHeight: 1.28,
-    color: "rgba(255,255,255,0.82)",
+    color: "#fff",
     textWrap: "pretty",
   },
   quickStartPad: {
@@ -2482,7 +2484,7 @@ const S: Record<string, CSSProperties> = {
   },
   finderStatLabel: {
     fontSize: 11.5,
-    color: "rgba(255,255,255,0.86)",
+    color: "#fff",
     marginTop: 3,
     lineHeight: 1.2,
   },

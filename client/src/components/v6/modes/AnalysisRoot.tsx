@@ -7,10 +7,10 @@ import type { User } from "../../../hooks/useAuth";
 import { useV6WorkspaceData } from "../../../hooks/useV6WorkspaceData";
 import type { ModelPreference } from "../../../lib/modelPreference";
 import {
-  analysisSlugForTool,
-  generateActionDeliverable,
+  analysisActionForTool,
   pickActionDeal,
-  primaryAnalysisForJourney,
+  primaryAnalysisActionForJourney,
+  runActionAnalysis,
   yuliaComparePrompt,
 } from "../../../lib/v6ActionContracts";
 
@@ -74,13 +74,19 @@ export function V6AnalysisRoot({
     setActionNote(null);
 
     if (tool?.id === "tool-compare") {
-      openTab({ kind: "analysis", title: "Deal comparison", tool: tool.id });
+      const compareDeals = workspace.deals.slice(0, 3);
+      openTab({
+        kind: "analysis",
+        title: "Deal comparison",
+        tool: tool.id,
+        comparisonData: compareDeals,
+      });
       onTalkToYulia?.(yuliaComparePrompt(workspace.deals));
       return;
     }
 
     const target = deal;
-    const mapping = tool ? analysisSlugForTool(tool.id, target?.journey_type) : primaryAnalysisForJourney(target?.journey_type);
+    const mapping = tool ? analysisActionForTool(tool.id, target?.journey_type) : primaryAnalysisActionForJourney(target?.journey_type);
     if (!target || !mapping) {
       openTab({ kind: "analysis", title: tool ? `New ${tool.name}` : "New analysis", tool: tool?.id });
       onTalkToYulia?.(tool
@@ -91,12 +97,14 @@ export function V6AnalysisRoot({
 
     setBusyAction(tool?.id ?? "new-analysis");
     try {
-      await generateActionDeliverable({
+      await runActionAnalysis({
         deal: target,
-        slug: mapping.slug,
+        analysisType: mapping.analysisType,
+        menuItemSlug: mapping.menuItemSlug,
         label: mapping.label,
         openTab,
         modelPreference,
+        requestedFrom: "analysis_root",
         onNote: setActionNote,
       });
       void workspace.refresh();

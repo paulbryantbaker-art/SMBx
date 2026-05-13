@@ -79,6 +79,15 @@ export interface GenerateDeliverableInput {
   modelPreference?: ModelPreference;
 }
 
+export interface RunAnalysisInput {
+  dealId: number;
+  analysisType: string;
+  menuItemSlug?: string;
+  modelPreference?: ModelPreference;
+  requestedFrom?: string;
+  assumptionOverrides?: Record<string, any>;
+}
+
 export function useV6WorkspaceData(user: User | null) {
   const [deals, setDeals] = useState<WorkspaceDeal[]>([]);
   const [deliverables, setDeliverables] = useState<WorkspaceDeliverable[]>([]);
@@ -153,6 +162,43 @@ export async function generateDealDeliverable(input: GenerateDeliverableInput) {
   const payload = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(payload.error || payload.message || `HTTP ${res.status}`);
   return payload as { deliverableId: number; jobId?: string | null; status: string; title?: string };
+}
+
+export async function runDealAnalysis(input: RunAnalysisInput) {
+  const res = await fetch(`/api/deals/${input.dealId}/analysis`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({
+      analysisType: input.analysisType,
+      menuItemSlug: input.menuItemSlug,
+      modelPreference: input.modelPreference ?? "auto",
+      requestedFrom: input.requestedFrom ?? "ui_action",
+      assumptionOverrides: input.assumptionOverrides ?? {},
+    }),
+  });
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(payload.error || payload.message || `HTTP ${res.status}`);
+  return payload as {
+    ok?: boolean;
+    canvas_action?: "open_tab";
+    tab?: {
+      id?: string;
+      kind: "analysis";
+      title: string;
+      tool?: string;
+      analysisRunId?: number | null;
+      resolvedMenuItemSlug?: string;
+      status?: string;
+      markdown?: string;
+      analysisData?: Record<string, any>;
+    };
+    analysisRunId?: number | null;
+    analysisStatus?: string;
+    analysisType?: string;
+    resolvedMenuItemSlug?: string;
+    analysisData?: Record<string, any>;
+    message?: string;
+  };
 }
 
 export async function loadDealDataRoom(dealId: number): Promise<DealDataRoom> {

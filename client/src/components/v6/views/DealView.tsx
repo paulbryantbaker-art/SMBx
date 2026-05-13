@@ -13,6 +13,7 @@ import {
   type DealDataRoom,
   type DataRoomDocument,
 } from "../../../hooks/useV6WorkspaceData";
+import { runActionAnalysis } from "../../../lib/v6ActionContracts";
 
 interface Stat { k: string; v: string; sub: string }
 interface LinkedFile {
@@ -255,6 +256,13 @@ interface DealBrief {
   nextMoves?: Array<{ title?: string; why?: string; prompt?: string }>;
 }
 
+type DealNextMove = NonNullable<DealBrief["nextMoves"]>[number];
+type DealMoveAction =
+  | { kind: "artifact"; slug: string; label: string; busyKey: string }
+  | { kind: "analysis"; analysisType: string; label: string; busyKey: string; menuItemSlug?: string }
+  | { kind: "scope"; scope: FileScope; note?: string }
+  | { kind: "chat" };
+
 interface DeliverableRow {
   id: number;
   deal_id?: number;
@@ -378,24 +386,97 @@ export function V6DealView({
     setLinked(Array.isArray(dels) ? dels : []);
     setDataRoom(room);
   };
-  const runGenerateDeliverable = async () => {
+  const runDealDeliverableAction = async (slug: string, label: string, busyKey: string, promptHint?: string) => {
     if (numericId === null) {
-      openTab({ kind: "doc", title: `${dealName} · ${primaryDeliverable.label}`, id: `doc-${id}-${primaryDeliverable.slug}` });
+      openTab({ kind: "doc", title: `${dealName} · ${label}`, id: `doc-${id}-${slug}` });
+      onTalkToYulia?.(promptHint || `On ${dealName}: create the ${label} from the current deal context and open it as work product.`);
       return;
     }
-    setBusyAction("generate");
+    setBusyAction(busyKey);
     setActionError(null);
     setActionNote(null);
     try {
-      const result = await generateDealDeliverable({ dealId: numericId, menuItemSlug: primaryDeliverable.slug, modelPreference });
-      setActionNote(`${result.title || primaryDeliverable.label} is queued. Opening the live deliverable tab.`);
-      openTab({ kind: "doc", title: `${dealName} · ${result.title || primaryDeliverable.label}`, id: String(result.deliverableId) });
+      const result = await generateDealDeliverable({ dealId: numericId, menuItemSlug: slug, modelPreference });
+      setActionNote(`${result.title || label} is queued. Opening the live deliverable tab.`);
+      openTab({ kind: "doc", title: `${dealName} · ${result.title || label}`, id: String(result.deliverableId) });
       void refreshDealArtifacts();
     } catch (e: any) {
-      setActionError(e?.message || "Could not generate deliverable");
+      setActionError(e?.message || `Could not generate ${label}`);
     } finally {
       setBusyAction(null);
     }
+  };
+  const runGenerateDeliverable = async () => {
+    await runDealDeliverableAction(primaryDeliverable.slug, primaryDeliverable.label, "generate");
+  };
+  const runMarketIntelligenceRead = async (promptHint?: string) => {
+    await runDealAnalysisAction("market_intelligence", "market intelligence read", "market-read", "universal-market-intelligence", promptHint);
+  };
+  const runDealAnalysisAction = async (
+    analysisType: string,
+    label: string,
+    busyKey: string,
+    menuItemSlug?: string,
+    promptHint?: string,
+  ) => {
+    if (numericId === null) {
+      openTab({
+        kind: "analysis",
+        title: `${dealName} · ${label}`,
+        id: `analysis-${id}-${analysisType}`,
+        tool: analysisType,
+        markdown: promptHint || `Open a structured ${label} for ${dealName}.`,
+      });
+      onTalkToYulia?.(promptHint || `On ${dealName}: run ${label} and open the interactive analysis canvas.`);
+      return;
+    }
+    setBusyAction(busyKey);
+    setActionError(null);
+    setActionNote(null);
+    try {
+      await runActionAnalysis({
+        deal: real ?? { id: numericId, business_name: dealName, journey_type: "buy" },
+        analysisType,
+        label,
+        menuItemSlug,
+        openTab,
+        modelPreference,
+        requestedFrom: "deal_recommended_action",
+        onNote: setActionNote,
+      });
+    } catch (e: any) {
+      setActionError(e?.message || `Could not run ${label}`);
+    } finally {
+      setBusyAction(null);
+    }
+  };
+  const runRecommendedMove = async (move: DealNextMove) => {
+    const action = resolveDealMoveAction(move, real?.journey_type, primaryDeliverable);
+    if (action.kind === "scope") {
+      setDealFileScope(action.scope);
+      setActionNote(action.note ?? null);
+      return;
+    }
+    if (action.kind === "analysis") {
+      await runDealAnalysisAction(
+        action.analysisType,
+        action.label,
+        action.busyKey,
+        action.menuItemSlug,
+        move.prompt || `On ${dealName}: ${move.title || action.label}`,
+      );
+      return;
+    }
+    if (action.kind === "artifact") {
+      await runDealDeliverableAction(
+        action.slug,
+        action.label,
+        action.busyKey,
+        move.prompt || `On ${dealName}: ${move.title || action.label}`,
+      );
+      return;
+    }
+    onTalkToYulia?.(move.prompt || `On ${dealName}: ${move.title}`);
   };
   const fileLatestPrivateToRoom = async () => {
     if (numericId === null) return;
@@ -509,7 +590,7 @@ export function V6DealView({
                 key={bullet}
                 type="button"
                 style={D.marketBullet}
-                onClick={() => onTalkToYulia?.(`On ${dealName}: unpack this market intelligence note: ${bullet}`)}
+                onClick={() => { void runMarketIntelligenceRead(`On ${dealName}: unpack this market intelligence note in the canvas: ${bullet}`); }}
               >
                 {bullet}
               </button>
@@ -550,20 +631,29 @@ export function V6DealView({
 
           <div className="m-card" style={D.nextCard}>
             <div className="mono" style={D.intelEyebrow}>RECOMMENDED NEXT</div>
-            {intelligence.nextMoves.map((move, index) => (
-              <button
-                key={move.title}
-                type="button"
-                style={{ ...D.nextMove, borderBottom: index === intelligence.nextMoves.length - 1 ? "none" : "1px solid var(--m-outline-var)" }}
-                onClick={() => onTalkToYulia?.(move.prompt || `On ${dealName}: ${move.title}`)}
-              >
-                <span style={D.nextMoveText}>
-                  <strong style={D.nextMoveTitle}>{move.title}</strong>
-                  <small style={D.nextMoveSub}>{move.why}</small>
-                </span>
-                <span style={D.nextArrow}>›</span>
-              </button>
-            ))}
+            {intelligence.nextMoves.map((move, index) => {
+              const action = resolveDealMoveAction(move, real?.journey_type, primaryDeliverable);
+              const isBusy = action.kind !== "chat" && "busyKey" in action && busyAction === action.busyKey;
+              return (
+                <button
+                  key={move.title}
+                  type="button"
+                  disabled={!!busyAction}
+                  style={{
+                    ...D.nextMove,
+                    borderBottom: index === intelligence.nextMoves.length - 1 ? "none" : "1px solid var(--m-outline-var)",
+                    opacity: busyAction && !isBusy ? 0.58 : 1,
+                  }}
+                  onClick={() => { void runRecommendedMove(move); }}
+                >
+                  <span style={D.nextMoveText}>
+                    <strong style={D.nextMoveTitle}>{move.title}</strong>
+                    <small style={D.nextMoveSub}>{isBusy ? "Opening live analysis..." : move.why}</small>
+                  </span>
+                  <span style={D.nextArrow}>{isBusy ? "…" : "›"}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -915,6 +1005,121 @@ function primaryDeliverableForJourney(journey?: string | null): { label: string;
     default:
       return { label: "LOI", slug: "buy-loi-draft" };
   }
+}
+
+function structureAnalysisForJourney(journey?: string | null): { label: string; slug: string } {
+  switch (journey) {
+    case "sell":
+      return { label: "Deal Structure Analysis", slug: "sell-deal-structure-analysis" };
+    case "raise":
+      return { label: "Term Sheet Analysis", slug: "raise-term-sheet-analysis" };
+    case "pmi":
+      return { label: "Value Creation Plan", slug: "pmi-value-creation" };
+    case "buy":
+    default:
+      return { label: "Capital Structure Analysis", slug: "buy-capital-structure" };
+  }
+}
+
+function riskAnalysisForJourney(journey?: string | null): { label: string; slug: string } {
+  switch (journey) {
+    case "pmi":
+      return { label: "Operations Assessment", slug: "pmi-ops-assessment" };
+    case "sell":
+      return { label: "Price Gap Analysis", slug: "sell-price-gap-analysis" };
+    case "raise":
+      return { label: "Term Sheet Analysis", slug: "raise-term-sheet-analysis" };
+    case "buy":
+    default:
+      return { label: "Red Flag Report", slug: "buy-red-flag-report" };
+  }
+}
+
+function resolveDealMoveAction(
+  move: DealNextMove,
+  journey: string | null | undefined,
+  primaryDeliverable: { label: string; slug: string },
+): DealMoveAction {
+  const text = `${move.title || ""} ${move.why || ""} ${move.prompt || ""}`.toLowerCase();
+
+  if (/\bmarket\b|\bbuyer universe\b|\bsource gap\b|\bresearch\b|\bindustry\b|\bbuyer appetite\b/.test(text)) {
+    return {
+      kind: "analysis",
+      analysisType: "market_intelligence",
+      menuItemSlug: "universal-market-intelligence",
+      label: "market intelligence read",
+      busyKey: "market-read",
+    };
+  }
+
+  if (/\bcomps?\b|\bcomparables?\b|\bmultiple\b|\bpricing\b/.test(text)) {
+    return {
+      kind: "analysis",
+      analysisType: "comps",
+      menuItemSlug: "universal-comp-analysis",
+      label: "comparable transactions analysis",
+      busyKey: "comps",
+    };
+  }
+
+  if (/\btax\b|\blegal\b|\bstructure\b|\bcounsel\b|\bcpa\b/.test(text)) {
+    return {
+      kind: "analysis",
+      analysisType: "tax_legal_structure",
+      menuItemSlug: structureAnalysisForJourney(journey).slug,
+      label: "tax and legal implications model",
+      busyKey: "tax-legal",
+    };
+  }
+
+  if (/\bcapital\b|\bsba\b|\bfinancing\b|\bterm sheet\b|\bdebt\b|\blender\b/.test(text)) {
+    return {
+      kind: "analysis",
+      analysisType: /\bsba\b/.test(text) ? "sba" : /\bterm sheet\b/.test(text) ? "term_sheet" : "capital_structure",
+      menuItemSlug: structureAnalysisForJourney(journey).slug,
+      label: "capital structure model",
+      busyKey: "structure",
+    };
+  }
+
+  if (/\brisk\b|\bred flag\b|\bdiligence gap\b|\bcleanup\b|\bissue\b/.test(text)) {
+    const next = riskAnalysisForJourney(journey);
+    return {
+      kind: "analysis",
+      analysisType: "red_flags",
+      menuItemSlug: next.slug,
+      label: next.label,
+      busyKey: "risk",
+    };
+  }
+
+  if (/\bdraft\b|\bloi\b|\bioi\b|\bcim\b|\bpitch\b|\bmemo\b|\b100-day\b|\bplan\b/.test(text)) {
+    return { kind: "artifact", slug: primaryDeliverable.slug, label: primaryDeliverable.label, busyKey: "generate" };
+  }
+
+  if (/\bdata[-\s]?room\b/.test(text)) {
+    return {
+      kind: "scope",
+      scope: "data-room",
+      note: "Opened the shared diligence data room for this deal.",
+    };
+  }
+  if (/\baction\b|\bshared\b|\bsent\b|\breceived\b|\bdeferred\b|\bexecuted\b|\breview\b|\bsignature\b/.test(text)) {
+    return {
+      kind: "scope",
+      scope: "shared",
+      note: "Opened the shared/action queue: sent, received, deferred, in-review, and executed items.",
+    };
+  }
+  if (/\bfile\b|\bfiles\b|\bdeliverable\b|\bdeliverables\b/.test(text)) {
+    return {
+      kind: "scope",
+      scope: "all",
+      note: "Opened all files for this deal.",
+    };
+  }
+
+  return { kind: "chat" };
 }
 
 function buildDealFilesFromReal(

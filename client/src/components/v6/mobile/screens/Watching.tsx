@@ -57,7 +57,7 @@ export function WatchingScreen({ onBack, onOpenDeal }: WatchingProps) {
       <div style={{ padding: "0 16px 8px" }}>
         <div style={W.editorial}>
           <div style={W.editorialBody}>
-            <div className="mb-eyebrow" style={{ color: "rgba(255,255,255,0.85)" }}>
+            <div className="mb-eyebrow" style={{ color: "#fff" }}>
               SAMPLE · {feed.length} DEALS
             </div>
             <h2 style={W.editorialTitle}>
@@ -230,7 +230,7 @@ const W: Record<string, CSSProperties> = {
     textWrap: "balance",
   },
   editorialSub: {
-    fontSize: 13, color: "rgba(255,255,255,0.85)",
+    fontSize: 13, color: "#fff",
     margin: 0, lineHeight: 1.45,
   },
   rank: {

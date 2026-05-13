@@ -78,6 +78,7 @@ const TOOL_LABELS: Record<string, string> = {
   advance_gate: 'Advancing to next stage',
   generate_free_deliverable: 'Generating report',
   generate_deal_deliverable: 'Generating deliverable',
+  run_analysis: 'Running analysis',
   file_deliverable_to_data_room: 'Filing to data room',
   compare_deals: 'Comparing deals',
   recommend_providers: 'Finding service providers',

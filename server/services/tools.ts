@@ -17,6 +17,8 @@ import { processDeliverable } from './deliverableProcessor.js';
 import { canGenerateDeliverable, markFreeDeliverableUsed } from './subscriptionService.js';
 import { hasDealAccess } from './dealAccessService.js';
 import { TOOL_NAMES_REQUIRING_CONFIRMATION } from './agencyActionRegistry.js';
+import { createAnalysisRun, createModelTabRecord, readModelTabState, updateAnalysisRunSnapshot, updateModelTabState } from './analysisRuntime.js';
+import { buildDealComparisonAnalysis, buildDeterministicAnalysis } from './deterministicAnalysisEngine.js';
 
 const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
 
@@ -110,6 +112,39 @@ export const TOOL_DEFINITIONS: Tool[] = [
         modelPreference: { type: 'string', enum: ['auto', 'fast', 'deep', 'drafting', 'research'], description: 'Optional model preference. Auto is default.' },
       },
       required: ['dealId', 'menuItemSlug'],
+    },
+  },
+  {
+    name: 'run_analysis',
+    description: 'Run a real analysis for a deal and open it in the canvas. Use this instead of answering inline whenever the user asks to run, create, prepare, build, or open an analysis such as buyer fit, comps, valuation, recast, market intelligence, SBA, capital structure, red flags, working capital, tax, or legal/deal structure. This resolves the analysis type to the right menu deliverable, queues generation, saves it, and opens the live analysis tab.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId: { type: 'number', description: 'Deal ID' },
+        analysisType: {
+          type: 'string',
+          enum: [
+            'auto',
+            'deal_scorecard',
+            'buyer_fit',
+            'comps',
+            'valuation',
+            'recast',
+            'market_intelligence',
+            'sba',
+            'capital_structure',
+            'red_flags',
+            'working_capital',
+            'tax_structure',
+            'legal_structure',
+            'term_sheet',
+            'pmi_value_creation',
+          ],
+          description: 'The analysis the user wants. Use auto when the user asks generally to run analysis and the current deal journey/gate should choose the best first analysis.',
+        },
+        modelPreference: { type: 'string', enum: ['auto', 'fast', 'deep', 'drafting', 'research'], description: 'Optional model preference. Auto is default.' },
+      },
+      required: ['dealId', 'analysisType'],
     },
   },
   {
@@ -540,6 +575,8 @@ export async function executeTool(
         return await generateFreeDeliverable(input, userId);
       case 'generate_deal_deliverable':
         return await generateDealDeliverable(input, userId);
+      case 'run_analysis':
+        return await runAnalysis(input, userId, conversationId);
       case 'file_deliverable_to_data_room':
         return await fileDeliverableToDataRoom(input, userId);
       case 'recommend_providers':
@@ -561,11 +598,11 @@ export async function executeTool(
       case 'get_sourcing_portfolio':
         return await getSourcingPortfolio(input, userId);
       case 'create_model_tab':
-        return createModelTab(input);
+        return await createModelTab(input, userId, conversationId);
       case 'update_model':
-        return updateModel(input);
+        return await updateModel(input, userId, conversationId);
       case 'read_tab_state':
-        return readTabState(input);
+        return await readTabState(input, userId, conversationId);
       case 'create_support_issue':
         return await createSupportIssue(input, userId, conversationId);
       case 'query_admin_data':
@@ -592,7 +629,7 @@ export async function executeTool(
         return await startSourcingRun(input, userId);
       // Comparison (Phase A.3 — text-only)
       case 'compare_deals':
-        return await compareDealsTool(input, userId);
+        return await compareDealsTool(input, userId, conversationId);
       // Merger pairing (Phase A.4)
       case 'pair_merger_deals':
         return await pairMergerDeals(input, userId);
@@ -972,6 +1009,214 @@ async function generateDealDeliverable(input: Record<string, any>, userId: numbe
       title: `${deal.business_name || 'Deal'} · ${menuItem.name}`,
     },
   });
+}
+
+const ANALYSIS_TYPES = new Set([
+  'auto',
+  'deal_scorecard',
+  'buyer_fit',
+  'comps',
+  'valuation',
+  'recast',
+  'market_intelligence',
+  'sba',
+  'capital_structure',
+  'red_flags',
+  'working_capital',
+  'tax_structure',
+  'legal_structure',
+  'tax_legal_structure',
+  'term_sheet',
+  'pmi_value_creation',
+]);
+
+async function runAnalysis(input: Record<string, any>, userId: number, conversationId?: number | null): Promise<string> {
+  const { dealId, modelPreference } = input;
+  const analysisType = normalizeAnalysisType(input.analysisType);
+  if (!dealId || !analysisType) {
+    return JSON.stringify({ error: 'dealId and a valid analysisType are required' });
+  }
+
+  const [deal] = await sql`
+    SELECT id, business_name, journey_type, current_gate, user_id, league,
+           industry, location, revenue, sde, ebitda, asking_price, financials, status
+    FROM deals
+    WHERE id = ${dealId} AND user_id = ${userId}
+    LIMIT 1
+  `;
+  if (!deal) return JSON.stringify({ error: 'Deal not found' });
+
+  const menuItemSlug = resolveAnalysisMenuItemSlug({
+    analysisType,
+    journeyType: deal.journey_type,
+    currentGate: deal.current_gate,
+  });
+  const analysisData = buildDeterministicAnalysis({
+    analysisType,
+    deal,
+    menuItemSlug,
+  });
+
+  const resultText = await generateDealDeliverable({ dealId, menuItemSlug, modelPreference }, userId);
+  let result: Record<string, any>;
+  try {
+    result = JSON.parse(resultText);
+  } catch {
+    return resultText;
+  }
+
+  if (result.error) {
+    return JSON.stringify({
+      ...result,
+      analysisType,
+      resolvedMenuItemSlug: menuItemSlug,
+    });
+  }
+
+  const tabTitle = `${deal.business_name || 'Deal'} · ${result.title || humanizeAnalysisType(analysisType)}`;
+  const canvasTabId = `analysis-${analysisType}-${result.deliverableId ?? Date.now()}`;
+  const analysisRun = await createAnalysisRun({
+    userId,
+    dealId: Number(dealId),
+    conversationId: conversationId ?? null,
+    definitionSlug: analysisType,
+    analysisType,
+    title: tabTitle,
+    status: 'complete',
+    scope: 'deal',
+    source: 'yulia_tool',
+    inputPayload: {
+      dealId,
+      analysisType,
+      resolvedMenuItemSlug: menuItemSlug,
+      analysisSchemaVersion: analysisData.schemaVersion,
+      requestedAt: new Date().toISOString(),
+    },
+    assumptions: { items: analysisData.assumptions },
+    outputs: {
+      deliverableId: result.deliverableId ?? null,
+      jobId: result.jobId ?? null,
+      deliverableStatus: result.status ?? 'queued',
+      structuredAnalysis: analysisData,
+    },
+    commentaryMarkdown: analysisData.yuliaRead,
+    marketContext: analysisData.analysisType === 'market_intelligence'
+      ? { summary: analysisData.summary, metrics: analysisData.metrics, charts: analysisData.charts }
+      : {},
+    riskFlags: analysisData.risks,
+    missingData: analysisData.missingData,
+    professionalTriggers: analysisData.professionalTriggers,
+    canvasTabId,
+    deliverableId: result.deliverableId ?? null,
+    modelPreference: modelPreference ?? null,
+  });
+
+  return JSON.stringify({
+    ...result,
+    canvas_action: 'open_tab',
+    tab: {
+      id: analysisRun?.canvas_tab_id || canvasTabId,
+      kind: 'analysis',
+      title: tabTitle,
+      tool: analysisType,
+      analysisRunId: analysisRun?.id ?? null,
+      deliverableId: result.deliverableId ?? null,
+      resolvedMenuItemSlug: menuItemSlug,
+      status: 'analysis complete',
+      markdown: analysisData.yuliaRead,
+      analysisData,
+    },
+    analysisRunId: analysisRun?.id ?? null,
+    analysisStatus: 'complete',
+    analysisType,
+    resolvedMenuItemSlug: menuItemSlug,
+    analysisData,
+    message: `${result.title || 'Analysis'} is open as a structured analysis canvas. The supporting deliverable is ${result.status || 'queued'} in the background. Keep chat commentary short and guide the user through the live analysis tab.`,
+  });
+}
+
+function normalizeAnalysisType(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const normalized = value.trim().toLowerCase().replace(/[\s-]+/g, '_');
+  return ANALYSIS_TYPES.has(normalized) ? normalized : null;
+}
+
+function resolveAnalysisMenuItemSlug({
+  analysisType,
+  journeyType,
+  currentGate,
+}: {
+  analysisType: string;
+  journeyType?: string | null;
+  currentGate?: string | null;
+}): string {
+  const journey = journeyType || 'buy';
+
+  switch (analysisType) {
+    case 'deal_scorecard':
+      return journey === 'sell' ? 'sell-seven-factor-analysis' : 'buy-deal-scorecard';
+    case 'buyer_fit':
+      return journey === 'sell' ? 'sell-buyer-list' : 'buy-deal-scorecard';
+    case 'comps':
+      return 'universal-comp-analysis';
+    case 'valuation':
+      return journey === 'sell' ? 'sell-valuation-report' : journey === 'raise' ? 'raise-pre-post-model' : 'buy-valuation-model';
+    case 'recast':
+      return journey === 'sell' ? 'sell-financial-spread' : journey === 'pmi' ? 'pmi-financial-deep-dive' : 'buy-deal-scorecard';
+    case 'market_intelligence':
+      return 'universal-market-intelligence';
+    case 'sba':
+      return 'universal-sba-analysis';
+    case 'capital_structure':
+      return journey === 'sell' ? 'sell-deal-structure-analysis' : journey === 'raise' ? 'raise-use-of-funds' : 'buy-capital-structure';
+    case 'red_flags':
+      return journey === 'buy' ? 'buy-red-flag-report' : journey === 'pmi' ? 'pmi-ops-assessment' : 'sell-price-gap-analysis';
+    case 'working_capital':
+      return journey === 'sell' ? 'sell-working-capital-analysis' : 'buy-working-capital-model';
+    case 'tax_structure':
+    case 'legal_structure':
+    case 'tax_legal_structure':
+      return journey === 'sell' ? 'sell-deal-structure-analysis' : 'buy-capital-structure';
+    case 'term_sheet':
+      return journey === 'raise' ? 'raise-term-sheet-analysis' : journey === 'sell' ? 'sell-loi-comparison' : 'buy-loi-draft';
+    case 'pmi_value_creation':
+      return 'pmi-value-creation';
+    case 'auto':
+    default:
+      return resolveDefaultAnalysisSlug(journey, currentGate);
+  }
+}
+
+function resolveDefaultAnalysisSlug(journey?: string | null, currentGate?: string | null): string {
+  if (journey === 'sell') {
+    if (currentGate === 'S5' || currentGate === 'S6') return 'sell-deal-structure-analysis';
+    if (currentGate === 'S4') return 'sell-loi-comparison';
+    if (currentGate === 'S2' || currentGate === 'S3') return 'sell-seven-factor-analysis';
+    return 'sell-financial-spread';
+  }
+
+  if (journey === 'raise') {
+    if (currentGate === 'R4') return 'raise-term-sheet-analysis';
+    if (currentGate === 'R2' || currentGate === 'R3') return 'raise-investor-list';
+    return 'raise-unit-economics';
+  }
+
+  if (journey === 'pmi') {
+    if (currentGate === 'PMI3') return 'pmi-value-creation';
+    if (currentGate === 'PMI2') return 'pmi-financial-deep-dive';
+    return 'pmi-swot';
+  }
+
+  if (currentGate === 'B4' || currentGate === 'B5') return 'buy-capital-structure';
+  if (currentGate === 'B3') return 'buy-red-flag-report';
+  if (currentGate === 'B2') return 'buy-valuation-model';
+  return 'buy-deal-scorecard';
+}
+
+function humanizeAnalysisType(value: string): string {
+  return value
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 async function fileDeliverableToDataRoom(input: Record<string, any>, userId: number): Promise<string> {
@@ -1617,42 +1862,152 @@ async function getSourcingPortfolio(input: Record<string, any>, userId: number):
  * calculations — they're deterministic pure functions on the client.
  */
 
-function createModelTab(input: Record<string, any>): string {
+async function createModelTab(input: Record<string, any>, userId: number, conversationId?: number | null): Promise<string> {
   const { modelType, title, initialAssumptions } = input;
+  const modelTitle = title || `${modelType || 'Interactive'} model`;
+  const tabId = `model-${modelType || 'analysis'}-${Date.now()}`;
+  const analysisRun = await createAnalysisRun({
+    userId,
+    conversationId: conversationId ?? null,
+    definitionSlug: modelType || 'interactive_model',
+    analysisType: modelType || 'interactive_model',
+    title: modelTitle,
+    status: 'complete',
+    scope: 'deal',
+    source: 'yulia_tool',
+    inputPayload: { modelType, requestedAt: new Date().toISOString() },
+    assumptions: initialAssumptions || {},
+    outputs: { modelType, state: initialAssumptions || {} },
+    canvasTabId: tabId,
+  });
+  await createModelTabRecord({
+    analysisRunId: analysisRun?.id ?? null,
+    conversationId: conversationId ?? null,
+    tabId,
+    modelType: modelType || 'interactive_model',
+    title: modelTitle,
+    state: initialAssumptions || {},
+    sourcePayload: { input },
+  });
 
   return JSON.stringify({
     success: true,
     canvas_action: 'create_model_tab',
     modelType,
-    title,
+    title: modelTitle,
+    tabId,
+    analysisRunId: analysisRun?.id ?? null,
     initialAssumptions: initialAssumptions || {},
-    message: `I've opened a ${title} model on your canvas. You can adjust the assumptions with the sliders, or tell me what to change.`,
+    message: `I've opened a ${modelTitle} model on your canvas. You can adjust the assumptions with the sliders, or tell me what to change.`,
   });
 }
 
-function updateModel(input: Record<string, any>): string {
+function assumptionOverridesFromSavedState(snapshot: Record<string, any> | undefined, updates: Record<string, any>) {
+  const assumptions = snapshot || {};
+  const overrides: Record<string, any> = {};
+  const items = Array.isArray(assumptions.items) ? assumptions.items : [];
+  for (const item of items) {
+    if (item?.key) overrides[item.key] = item.value ?? item.displayValue;
+  }
+  for (const [key, value] of Object.entries(assumptions)) {
+    if (key !== 'items') overrides[key] = value;
+  }
+  return { ...overrides, ...updates };
+}
+
+async function rebuildAnalysisForModelUpdate(input: {
+  snapshot: Awaited<ReturnType<typeof readModelTabState>> | null;
+  updates: Record<string, any>;
+  userId: number;
+}) {
+  const run = input.snapshot?.analysisRun;
+  if (!run?.id || !run.dealId || !run.analysisType) return null;
+
+  const [deal] = await sql`
+    SELECT id, business_name, journey_type, current_gate, user_id, league,
+           industry, location, revenue, sde, ebitda, asking_price, financials, status
+    FROM deals
+    WHERE id = ${run.dealId} AND user_id = ${input.userId}
+    LIMIT 1
+  `;
+  if (!deal) return null;
+
+  const analysisData = buildDeterministicAnalysis({
+    analysisType: run.analysisType,
+    deal,
+    menuItemSlug: run.inputPayload?.resolvedMenuItemSlug ?? null,
+    assumptionOverrides: assumptionOverridesFromSavedState(run.assumptions, input.updates),
+  });
+  const updated = await updateAnalysisRunSnapshot({
+    analysisRunId: run.id,
+    userId: input.userId,
+    assumptionUpdates: {
+      ...input.updates,
+      items: analysisData.assumptions,
+    },
+    outputUpdates: { structuredAnalysis: analysisData },
+    commentaryMarkdown: analysisData.yuliaRead,
+    changeReason: 'Yulia update_model recalculation',
+  });
+
+  return { analysisData, updated };
+}
+
+async function updateModel(input: Record<string, any>, userId: number, conversationId?: number | null): Promise<string> {
   const { tabId, updates } = input;
+  const cleanUpdates = updates && typeof updates === 'object' && !Array.isArray(updates) ? updates : {};
+  const before = await readModelTabState({
+    conversationId: conversationId ?? null,
+    userId,
+    tabId: tabId || 'active',
+  });
+  const recalculated = await rebuildAnalysisForModelUpdate({ snapshot: before, updates: cleanUpdates, userId });
+  const snapshot = await updateModelTabState({
+    conversationId: conversationId ?? null,
+    userId,
+    tabId: tabId || 'active',
+    updates: cleanUpdates,
+    changeReason: 'Yulia update_model tool',
+    skipAnalysisRunUpdate: Boolean(recalculated),
+  });
 
   return JSON.stringify({
     success: true,
     canvas_action: 'update_model',
     tabId: tabId || 'active',
-    updates: updates || {},
-    message: `I've updated the model. The canvas recalculated instantly — take a look at the new numbers.`,
+    updates: cleanUpdates,
+    state: snapshot?.state ?? cleanUpdates,
+    analysisRunId: recalculated?.updated?.id ?? snapshot?.analysisRunId ?? null,
+    analysisData: recalculated?.analysisData ?? snapshot?.analysisRun?.outputs?.structuredAnalysis ?? null,
+    versionNumber: recalculated?.updated?.versionNumber ?? snapshot?.versionNumber ?? snapshot?.analysisRun?.versionNumber ?? null,
+    message: snapshot
+      ? `I've updated the model and saved version ${recalculated?.updated?.versionNumber ?? snapshot.versionNumber ?? 'the latest'} on the canvas.`
+      : `I've updated the visible canvas state. Save may be unavailable until this tab is linked to an analysis run.`,
   });
 }
 
-function readTabState(input: Record<string, any>): string {
-  // This tool's response is handled by the frontend — it injects
-  // the current tab state into the next prompt so Yulia can reference it.
-  // The server returns a placeholder; the SSE handler on the frontend
-  // intercepts this and injects actual tab state.
+async function readTabState(input: Record<string, any>, userId: number, conversationId?: number | null): Promise<string> {
+  const tabId = input.tabId || 'active';
+  const snapshot = await readModelTabState({
+    conversationId: conversationId ?? null,
+    userId,
+    tabId,
+  });
+
   return JSON.stringify({
-    success: true,
+    success: Boolean(snapshot),
     canvas_action: 'read_tab_state',
-    tabId: input.tabId || 'active',
-    message: 'Reading canvas state...',
-    note: 'The frontend will inject actual model state into this response before Yulia sees it.',
+    tabId,
+    title: snapshot?.title ?? null,
+    modelType: snapshot?.modelType ?? null,
+    state: snapshot?.state ?? null,
+    sourcePayload: snapshot?.sourcePayload ?? null,
+    analysisRunId: snapshot?.analysisRunId ?? null,
+    analysisData: snapshot?.analysisRun?.outputs?.structuredAnalysis ?? null,
+    versionNumber: snapshot?.versionNumber ?? snapshot?.analysisRun?.versionNumber ?? null,
+    message: snapshot
+      ? `I can see ${snapshot.title} on the canvas, including the latest saved assumptions and outputs.`
+      : `I couldn't find saved state for that canvas tab yet. I can still work from what's visible in the app surface context.`,
   });
 }
 
@@ -2274,19 +2629,12 @@ async function startSourcingRun(input: Record<string, any>, userId: number): Pro
 }
 
 /**
- * compare_deals (Phase A.3 — text-only) — restored from autonomous-run B2.9.
+ * compare_deals (Phase A.3) — restored from autonomous-run B2.9.
  *
- * Loads 2-3 owned deals and emits a markdown comparison table that Yulia
- * presents inline in chat. The autonomous-run version returned
- * canvas_action: 'compare_deals' to open a side-by-side surface in canvas;
- * that surface is deferred until CD specs the design. This text-only
- * fallback covers the semantic core ("how do these deals compare") with
- * zero UI dependency.
- *
- * When the comparison surface lands later, swap the markdown response
- * back to a canvas_action — the tool's input schema stays compatible.
+ * Loads 2-3 owned deals and opens a side-by-side analysis surface in the
+ * canvas, while preserving markdown commentary for Yulia's read.
  */
-async function compareDealsTool(input: Record<string, any>, userId: number): Promise<string> {
+async function compareDealsTool(input: Record<string, any>, userId: number, conversationId?: number | null): Promise<string> {
   const dealIds: number[] = Array.isArray(input.dealIds) ? input.dealIds.slice(0, 3) : [];
   if (dealIds.length < 2) {
     return JSON.stringify({ error: 'Need at least two dealIds to compare.' });
@@ -2344,14 +2692,62 @@ async function compareDealsTool(input: Record<string, any>, userId: number): Pro
   ];
   const titleLine = input.title ? `**${input.title}**\n\n` : '';
   const markdown = `${titleLine}${header}\n${sep}\n${rows.join('\n')}`;
+  const comparisonTabId = `comparison-${valid.map(d => d.dealId).join('-')}`;
+  const comparisonAnalysis = buildDealComparisonAnalysis(valid.map(d => ({
+    id: d.dealId,
+    business_name: d.title,
+    journey_type: undefined,
+    current_gate: d.currentGate,
+    league: d.league,
+    revenue: d.revenueCents,
+    sde: d.sdeCents,
+    ebitda: d.ebitdaCents,
+    asking_price: d.askingPriceCents,
+    financials: { multiple: d.multiple },
+  })), input.title || 'Deal comparison');
+  const analysisRun = await createAnalysisRun({
+    userId,
+    conversationId: conversationId ?? null,
+    definitionSlug: 'deal_comparison',
+    analysisType: 'deal_comparison',
+    title: input.title || 'Deal comparison',
+    status: 'complete',
+    scope: 'comparison',
+    source: 'yulia_tool',
+    inputPayload: {
+      dealIds: valid.map(d => d.dealId),
+      requestedAt: new Date().toISOString(),
+    },
+    outputs: {
+      deals: valid,
+      markdown,
+      structuredAnalysis: comparisonAnalysis,
+    },
+    commentaryMarkdown: comparisonAnalysis.yuliaRead || markdown,
+    assumptions: { items: comparisonAnalysis.assumptions },
+    riskFlags: comparisonAnalysis.risks,
+    missingData: comparisonAnalysis.missingData,
+    professionalTriggers: comparisonAnalysis.professionalTriggers,
+    canvasTabId: comparisonTabId,
+  });
 
   return JSON.stringify({
     success: true,
+    analysisRunId: analysisRun?.id ?? null,
+    analysisStatus: 'complete',
     deals: valid,
     markdown,
-    // NOTE: when the comparison canvas surface ships, restore
-    // canvas_action: 'compare_deals' here and have Yulia route the user
-    // to the tab. Until then, the markdown above is the deliverable.
+    canvas_action: 'open_tab',
+    tab: {
+      id: analysisRun?.canvas_tab_id || comparisonTabId,
+      kind: 'analysis',
+      title: input.title || 'Deal comparison',
+      tool: 'tool-compare',
+      analysisRunId: analysisRun?.id ?? null,
+      markdown,
+      comparisonData: valid,
+      analysisData: comparisonAnalysis,
+    },
   });
 }
 

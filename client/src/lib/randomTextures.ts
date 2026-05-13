@@ -7,17 +7,50 @@
  * session and re-rolls on hard refresh without React re-render churn.
  */
 
-const VERSION = "v=20260510-mobile-texture-recipes-glass";
+const VERSION = "v=20260511-gemini-tiered-textures-20";
 const tex = (name: string) => `/textures/texture-${name}.png?${VERSION}`;
 const heroTex = (n: number) => `/textures/texture-hero-${n}.png?${VERSION}`;
 const cardTex = (n: number) => `/textures/texture-card-${n}.png?${VERSION}`;
-const desktopHero = (name: string) => `/textures/desktop-hero-${name}.svg?${VERSION}`;
+const desktopHeroTex = (n: number) => `/textures/desktop/texture-hero-${n}.png?${VERSION}`;
+const desktopRandomTex = (n: number) => `/textures/desktop/random/texture-random-${String(n).padStart(2, "0")}.png?${VERSION}`;
 
 const pick = <T,>(arr: readonly T[]): T =>
   arr[Math.floor(Math.random() * arr.length)];
 
+const shuffle = <T,>(arr: readonly T[]): T[] => {
+  const out = [...arr];
+  for (let i = out.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+};
+
 const HERO_POOL = [1, 2, 3, 4, 5, 6, 7, 8] as const;
 const CARD_POOL = [1, 2, 3, 4, 5, 6, 7, 8] as const;
+const DESKTOP_MID_TEXTURE_COUNT = 14;
+const DESKTOP_MID_POOL = Array.from(
+  { length: DESKTOP_MID_TEXTURE_COUNT },
+  (_, index) => desktopRandomTex(index + 1),
+);
+const DESKTOP_HERO_POOL = Array.from(
+  { length: 6 },
+  (_, index) => desktopRandomTex(index + 15),
+);
+
+const desktopTextureSet = (pool: readonly string[], count: number): string[] => {
+  const deck = shuffle(pool);
+  return Array.from({ length: count }, (_, index) => deck[index % deck.length] ?? desktopHeroTex(1));
+};
+
+const todayDesktopHeroTextures = desktopTextureSet(DESKTOP_HERO_POOL, 3);
+const todayDesktopMidTextures = desktopTextureSet(DESKTOP_MID_POOL, 2);
+const pipelineDesktopHeroTextures = desktopTextureSet(DESKTOP_HERO_POOL, 1);
+const pipelineDesktopMidTextures = desktopTextureSet(DESKTOP_MID_POOL, 2);
+const filesDesktopHeroTextures = desktopTextureSet(DESKTOP_HERO_POOL, 1);
+const filesDesktopMidTextures = desktopTextureSet(DESKTOP_MID_POOL, 4);
+const searchDesktopHeroTextures = desktopTextureSet(DESKTOP_HERO_POOL, 1);
+const searchDesktopMidTextures = desktopTextureSet(DESKTOP_MID_POOL, 4);
 
 export const RANDOM_TEXTURES = {
   // Curated mobile recipes. These are intentionally semantic, not fully
@@ -52,24 +85,27 @@ export const RANDOM_TEXTURES = {
 } as const;
 
 export const DESKTOP_TEXTURES = {
-  todayHeroSample: desktopHero("today-sample"),
-  todayHeroWorkspace: desktopHero("today-workspace"),
-  todayCard: cardTex(4),
-  todaySecondary: cardTex(4),
+  // Desktop art shuffles per page group at module import. Each hard refresh
+  // gets a new spread, and no textured surface repeats within the same page.
+  todayHeroSample: todayDesktopHeroTextures[0],
+  todayHeroWorkspace: todayDesktopHeroTextures[1],
+  todayMarket: todayDesktopHeroTextures[2],
+  todayCard: todayDesktopMidTextures[0],
+  todaySecondary: todayDesktopMidTextures[1],
 
-  pipelineHero: desktopHero("pipeline"),
-  pipelineCard: cardTex(2),
-  pipelineSecondary: cardTex(8),
+  pipelineHero: pipelineDesktopHeroTextures[0],
+  pipelineCard: pipelineDesktopMidTextures[0],
+  pipelineSecondary: pipelineDesktopMidTextures[1],
 
-  filesHero: desktopHero("files"),
-  filesAll: cardTex(4),
-  filesDeals: cardTex(2),
-  filesAction: cardTex(5),
-  filesRoom: cardTex(7),
+  filesHero: filesDesktopHeroTextures[0],
+  filesAll: filesDesktopMidTextures[0],
+  filesDeals: filesDesktopMidTextures[1],
+  filesAction: filesDesktopMidTextures[2],
+  filesRoom: filesDesktopMidTextures[3],
 
-  searchHero: desktopHero("search"),
-  searchOpportunities: cardTex(5),
-  searchBuyers: cardTex(7),
-  searchProviders: cardTex(2),
-  searchFinancing: cardTex(4),
+  searchHero: searchDesktopHeroTextures[0],
+  searchOpportunities: searchDesktopMidTextures[0],
+  searchBuyers: searchDesktopMidTextures[1],
+  searchProviders: searchDesktopMidTextures[2],
+  searchFinancing: searchDesktopMidTextures[3],
 } as const;

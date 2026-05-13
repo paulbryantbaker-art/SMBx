@@ -801,7 +801,7 @@ const CTA: Record<string, CSSProperties> = {
   },
   sub: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.92)",
+    color: "#fff",
     whiteSpace: "nowrap",
     overflow: "hidden",
     textOverflow: "ellipsis",
@@ -949,7 +949,7 @@ const MI: Record<string, CSSProperties> = {
   rowSub: {
     display: "block",
     fontSize: 12.5,
-    color: "rgba(255,255,255,0.86)",
+    color: "#fff",
     marginTop: 2,
     lineHeight: 1.3,
   },

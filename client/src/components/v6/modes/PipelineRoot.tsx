@@ -11,8 +11,9 @@ import {
   actionDealTitle,
   generateActionDeliverable,
   pickActionDeal,
-  primaryAnalysisForJourney,
+  primaryAnalysisActionForJourney,
   primaryDocForJourney,
+  runActionAnalysis,
 } from "../../../lib/v6ActionContracts";
 
 interface PipelineDeal {
@@ -100,15 +101,17 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
       onTalkToYulia?.("Run the most useful analysis on the active sample deal.");
       return;
     }
-    const analysis = primaryAnalysisForJourney(journeyFromHomeDeal(deal));
+    const analysis = primaryAnalysisActionForJourney(journeyFromHomeDeal(deal));
     setBusyAction(action);
     try {
-      await generateActionDeliverable({
+      await runActionAnalysis({
         deal,
-        slug: analysis.slug,
+        analysisType: analysis.analysisType,
+        menuItemSlug: analysis.menuItemSlug,
         label: analysis.label,
         openTab,
         modelPreference,
+        requestedFrom: "pipeline_quick_action",
         onNote: setActionNote,
       });
     } catch (e: any) {
@@ -171,13 +174,13 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
         )}
         <div style={P.actionGrid}>
           {[
-            ["drafts", "Review drafts", "Open docs Yulia is shaping before they go to the data room.", "doc"],
-            ["analysis", "Run analysis", "Recast, comps, buyer fit, SBA structure, and risk notes.", "chart"],
-            ["buyers", "Find buyers", "Start a discovery search from a selected deal thesis.", "search"],
-          ].map(([action, title, sub, icon]) => (
+            { action: "drafts", title: "Review drafts", sub: "Open docs Yulia is shaping before they go to the data room.", icon: "doc", tone: "gold" },
+            { action: "analysis", title: "Run analysis", sub: "Recast, comps, buyer fit, SBA structure, and risk notes.", icon: "chart", tone: "blue" },
+            { action: "buyers", title: "Find buyers", sub: "Start a discovery search from a selected deal thesis.", icon: "search", tone: "green" },
+          ].map(({ action, title, sub, icon, tone }) => (
             <button
               key={title}
-              style={P.actionCard}
+              style={{ ...P.actionCard, ...pipelineActionTone(tone as "gold" | "blue" | "green") }}
               onClick={() => { void runPipelineAction(action as "drafts" | "analysis" | "buyers"); }}
               type="button"
               disabled={busyAction === action}
@@ -249,8 +252,31 @@ function journeyFromHomeDeal(d: HomeDeal): string {
   return "buy";
 }
 
-const pipelineHeroWash = `linear-gradient(135deg, rgba(7,13,23,0.30) 0%, rgba(34,45,69,0.28) 50%, rgba(214,163,92,0.14) 100%), url('${DESKTOP_TEXTURES.pipelineHero}')`;
-const pipelineActionWash = `linear-gradient(135deg, rgba(255,255,255,0.92), rgba(239,246,244,0.78)), url('${DESKTOP_TEXTURES.pipelineSecondary}')`;
+const pipelineHeroWash = `linear-gradient(135deg, rgba(16,25,58,0.70) 0%, rgba(65,76,132,0.50) 48%, rgba(19,47,70,0.70) 100%), url('${DESKTOP_TEXTURES.pipelineHero}')`;
+
+function pipelineActionTone(tone: "gold" | "blue" | "green"): CSSProperties {
+  const tones: Record<"gold" | "blue" | "green", CSSProperties> = {
+    gold: {
+      background: "linear-gradient(145deg, rgba(255,252,244,0.98) 0%, rgba(246,221,177,0.92) 100%)",
+      color: "#74501B",
+      borderColor: "rgba(214,163,92,0.24)",
+      boxShadow: "0 24px 58px rgba(156,113,40,0.14), 0 7px 18px rgba(26,34,51,0.08)",
+    },
+    blue: {
+      background: "linear-gradient(145deg, rgba(250,253,255,0.98) 0%, rgba(221,236,248,0.92) 100%)",
+      color: "#285B89",
+      borderColor: "rgba(106,155,204,0.24)",
+      boxShadow: "0 24px 58px rgba(61,105,150,0.14), 0 7px 18px rgba(26,34,51,0.08)",
+    },
+    green: {
+      background: "linear-gradient(145deg, rgba(249,253,251,0.98) 0%, rgba(220,240,231,0.92) 100%)",
+      color: "#2F6C55",
+      borderColor: "rgba(98,153,135,0.24)",
+      boxShadow: "0 24px 58px rgba(63,125,100,0.14), 0 7px 18px rgba(26,34,51,0.08)",
+    },
+  };
+  return tones[tone];
+}
 
 const P: Record<string, CSSProperties> = {
   hero: {
@@ -265,8 +291,8 @@ const P: Record<string, CSSProperties> = {
     backgroundImage: pipelineHeroWash,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
-    border: "1px solid rgba(255,255,255,0.18)",
-    boxShadow: "0 30px 78px rgba(17,24,39,0.26), var(--m-elev-2)",
+    border: "1px solid rgba(255,255,255,0.30)",
+    boxShadow: "0 36px 96px rgba(37,46,82,0.28), 0 10px 26px rgba(17,24,39,0.14), inset 0 1px 0 rgba(255,255,255,0.18)",
   },
   heroCopy: {
     alignSelf: "end",
@@ -276,7 +302,7 @@ const P: Record<string, CSSProperties> = {
     fontSize: 10,
     letterSpacing: "0.16em",
     fontWeight: 800,
-    color: "rgba(255,255,255,0.76)",
+    color: "#FFFFFF",
   },
   title: {
     margin: "8px 0 0",
@@ -285,14 +311,14 @@ const P: Record<string, CSSProperties> = {
     lineHeight: 0.92,
     letterSpacing: "-0.06em",
     textWrap: "balance",
-    color: "#FFFDF7",
+    color: "#FFFFFF",
   },
   sub: {
     margin: "16px 0 0",
     maxWidth: 680,
     fontSize: 16,
     lineHeight: 1.55,
-    color: "rgba(255,255,255,0.82)",
+    color: "#FFFFFF",
   },
   stats: {
     display: "grid",
@@ -303,15 +329,17 @@ const P: Record<string, CSSProperties> = {
     minHeight: 76,
     padding: 18,
     borderRadius: 20,
-    background: "rgba(17,24,39,0.28)",
-    border: "1px solid rgba(255,255,255,0.24)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.14), 0 14px 32px rgba(17,24,39,0.18)",
+    background: "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.24), transparent 44%), linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05))",
+    border: "0.5px solid rgba(255,255,255,0.36)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.32), 0 14px 32px rgba(17,24,39,0.18)",
+    backdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
+    WebkitBackdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
   },
   statLabel: {
     display: "block",
     fontSize: 9,
     letterSpacing: "0.14em",
-    color: "rgba(255,255,255,0.72)",
+    color: "#FFFFFF",
     fontWeight: 800,
   },
   statValue: {
@@ -320,6 +348,7 @@ const P: Record<string, CSSProperties> = {
     fontSize: 34,
     lineHeight: 1,
     fontVariantNumeric: "tabular-nums",
+    color: "#FFFFFF",
   },
   dealGrid: {
     display: "grid",
@@ -350,19 +379,16 @@ const P: Record<string, CSSProperties> = {
     gap: 12,
     padding: 18,
     borderRadius: 18,
-    backgroundImage: pipelineActionWash,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    border: "1px solid var(--m-outline-var)",
-    boxShadow: "var(--m-elev-1)",
+    border: "1px solid rgba(106,155,204,0.20)",
     cursor: "pointer",
   },
   actionIcon: {
     width: 38,
     height: 38,
     borderRadius: 12,
-    background: "var(--m-primary-container)",
-    color: "var(--m-on-primary-container)",
+    background: "rgba(255,255,255,0.62)",
+    color: "currentColor",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.80), 0 10px 18px rgba(26,34,51,0.06)",
     display: "grid",
     placeItems: "center",
     flexShrink: 0,
@@ -371,7 +397,7 @@ const P: Record<string, CSSProperties> = {
     display: "flex",
     flexDirection: "column",
     gap: 3,
-    color: "var(--m-on-surface-var)",
+    color: "currentColor",
     fontSize: 13,
     lineHeight: 1.4,
   },

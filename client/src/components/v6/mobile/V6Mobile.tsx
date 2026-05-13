@@ -11,10 +11,12 @@ import { TodayScreen } from "./screens/Today";
 import { PipelineScreen } from "./screens/Pipeline";
 import { DetailScreen } from "./screens/Detail";
 import { WatchingScreen } from "./screens/Watching";
+import { MobileAnalysisScreen } from "./screens/Analysis";
 import { LibraryDetailScreen, LibraryDocumentScreen, LibraryFinderScreen, LibraryScreen, SearchScreen } from "./screens/LibrarySearch";
 import { ChatSheet } from "./ChatSheet";
 import { LearnSheet } from "./LearnSheet";
 import { useAudience } from "../../../hooks/useAudience";
+import { runDealAnalysis } from "../../../hooks/useV6WorkspaceData";
 import { buildMobileSurfaceContext } from "../../../lib/yuliaSurfaceContext";
 import type { MobileChatBridge, MobileTab, MobileView } from "./types";
 
@@ -92,26 +94,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
   const userDeals = useMobileDeals(user);
 
   const initial = readMobileHashState();
-  const [view, setView] = useState<MobileView>(
-    initial.view
-      ? {
-          kind: initial.view,
-          tab: initial.tab,
-          dealTitle: initial.dealTitle ?? undefined,
-          dealMeta: initial.dealMeta ?? undefined,
-          portfolioName: initial.portfolioName ?? undefined,
-          dealStage: initial.dealStage ?? undefined,
-          docTitle: initial.docTitle ?? undefined,
-          docMeta: initial.docMeta ?? undefined,
-          docKind: initial.docKind ?? undefined,
-          filesFilter: initial.filesFilter ?? undefined,
-        }
-      : initial.detail
-      ? { kind: "detail", dealId: initial.detail, dealTitle: initial.dealTitle ?? undefined }
-      : initial.watching
-        ? { kind: "watching" }
-        : { kind: "tab", tab: initial.tab }
-  );
+  const [view, setView] = useState<MobileView>(() => mobileViewFromHash(initial));
   const [libraryDocBack, setLibraryDocBack] = useState<MobileView | null>(null);
   const [chatOpen, setChatOpen] = useState(initial.chat);
   const [learn, setLearn] = useState<{ open: boolean; section: "how" | "pricing"; anchor?: string }>({
@@ -201,23 +184,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
   useEffect(() => {
     const onHash = () => {
       const next = readMobileHashState();
-      if (next.view) {
-        setView({
-          kind: next.view,
-          tab: next.tab,
-          dealTitle: next.dealTitle ?? undefined,
-          dealMeta: next.dealMeta ?? undefined,
-          portfolioName: next.portfolioName ?? undefined,
-          dealStage: next.dealStage ?? undefined,
-          docTitle: next.docTitle ?? undefined,
-          docMeta: next.docMeta ?? undefined,
-          docKind: next.docKind ?? undefined,
-          filesFilter: next.filesFilter ?? undefined,
-        });
-      }
-      else if (next.detail) setView({ kind: "detail", dealId: next.detail, dealTitle: next.dealTitle ?? undefined });
-      else if (next.watching) setView({ kind: "watching" });
-      else setView({ kind: "tab", tab: next.tab });
+      setView(mobileViewFromHash(next));
     };
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
@@ -243,6 +210,57 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
     view.kind === "watching" ? "pipeline" :
     view.tab ? view.tab :
     "today";
+  useEffect(() => {
+    const onAction = (event: Event) => {
+      const detail = (event as CustomEvent).detail;
+      if (!detail) return;
+
+      if (detail.canvas_action === "open_tab" && detail.tab?.kind === "analysis") {
+        const tab = detail.tab;
+        setView({
+          kind: "analysis",
+          tab: activeTab,
+          analysisTitle: tab.title || detail.title || "Analysis",
+          analysisTool: tab.tool || detail.analysisType,
+          analysisRunId: tab.analysisRunId ?? detail.analysisRunId ?? null,
+          analysisData: tab.analysisData ?? detail.analysisData,
+          analysisMarkdown: tab.markdown ?? detail.markdown,
+          comparisonData: tab.comparisonData,
+          versionNumber: tab.versionNumber ?? detail.versionNumber ?? null,
+          status: tab.status ?? detail.analysisStatus ?? "analysis open",
+          modelState: tab.modelState,
+        });
+        setChatOpen(false);
+      }
+
+      if (detail.canvas_action === "create_model_tab" && detail.tabId) {
+        setView({
+          kind: "analysis",
+          tab: activeTab,
+          analysisTitle: detail.title || "Interactive model",
+          analysisTool: detail.modelType || "interactive_model",
+          analysisRunId: detail.analysisRunId ?? null,
+          status: "saved model",
+          modelState: detail.initialAssumptions || {},
+        });
+        setChatOpen(false);
+      }
+
+      if ((detail.canvas_action === "update_model" || detail.canvas_action === "read_tab_state") && (detail.analysisData || detail.versionNumber || detail.state)) {
+        setView(prev => prev.kind === "analysis" ? {
+          ...prev,
+          analysisData: detail.analysisData ?? prev.analysisData,
+          analysisRunId: detail.analysisRunId ?? prev.analysisRunId,
+          versionNumber: detail.versionNumber ?? prev.versionNumber,
+          status: detail.versionNumber ? `saved v${detail.versionNumber}` : prev.status,
+          modelState: detail.state ?? detail.updates ?? prev.modelState,
+        } : prev);
+      }
+    };
+
+    window.addEventListener("smbx:canvas_action", onAction);
+    return () => window.removeEventListener("smbx:canvas_action", onAction);
+  }, [activeTab]);
   const sendWithSurface = (prompt: string) => {
     chat.send(prompt, buildMobileSurfaceContext(view, activeTab));
   };
@@ -281,6 +299,43 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
   const onAskYulia = (prompt: string) => {
     sendWithSurface(prompt);
     setChatOpen(true);
+  };
+  const onRunDealAnalysis = async (input: {
+    dealId: string;
+    dealTitle: string;
+    analysisType: string;
+    menuItemSlug?: string;
+    label: string;
+    prompt: string;
+  }) => {
+    const numericId = Number(input.dealId);
+    if (!Number.isFinite(numericId)) {
+      onAskYulia(input.prompt);
+      return;
+    }
+
+    try {
+      const result = await runDealAnalysis({
+        dealId: numericId,
+        analysisType: input.analysisType,
+        menuItemSlug: input.menuItemSlug,
+        requestedFrom: "mobile_deal_detail",
+      });
+      const tab = result.tab;
+      setView({
+        kind: "analysis",
+        tab: activeTab,
+        analysisTitle: tab?.title || `${input.dealTitle} · ${input.label}`,
+        analysisTool: tab?.tool || result.analysisType || input.analysisType,
+        analysisRunId: tab?.analysisRunId ?? result.analysisRunId ?? null,
+        analysisData: tab?.analysisData ?? result.analysisData,
+        analysisMarkdown: tab?.markdown ?? result.message,
+        status: tab?.status ?? result.analysisStatus ?? "analysis complete",
+      });
+      setChatOpen(false);
+    } catch {
+      onAskYulia(input.prompt);
+    }
   };
 
   // Audience signal — drives copy + capability shortcuts. The anon
@@ -321,7 +376,8 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
     view.kind === "watching" ||
     view.kind === "library-finder" ||
     view.kind === "library-detail" ||
-    view.kind === "library-doc";
+    view.kind === "library-doc" ||
+    view.kind === "analysis";
   const rootStyle: CSSProperties = {
     ...(isStandalone ? S.rootPwa : S.rootSafari),
     background: isWhitePage ? "#FFFFFF" : rootGradient(isAnon),
@@ -387,6 +443,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           onBack={() => setView({ kind: "tab", tab: "today" })}
           onChat={onChat}
           onAskYulia={onAskYulia}
+          onRunAnalysis={onRunDealAnalysis}
         />
       )}
       {view.kind === "watching" && (
@@ -450,6 +507,18 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           kind={view.docKind}
         />
       )}
+      {view.kind === "analysis" && (
+        <MobileAnalysisScreen
+          title={view.analysisTitle ?? "Analysis"}
+          analysisRunId={view.analysisRunId}
+          analysisData={view.analysisData}
+          status={view.status}
+          versionNumber={view.versionNumber}
+          onBack={() => setView({ kind: "tab", tab: activeTab })}
+          onAskYulia={onAskYulia}
+          onUpdate={(patch) => setView(prev => prev.kind === "analysis" ? { ...prev, ...patch } : prev)}
+        />
+      )}
       <TabBar active={activeTab} onChange={onTabChange} onChat={onChat} />
       <ChatSheet open={chatOpen} onClose={onChatClose} chat={chatWithSurface} />
       <LearnSheet
@@ -509,20 +578,25 @@ function readMobileHashState(): {
   portfolioName: string | null;
   dealStage: string | null;
   filesFilter: string | null;
+  analysisRunId: number | null;
+  analysisTitle: string | null;
+  analysisTool: string | null;
+  status: string | null;
+  versionNumber: number | null;
   chat: boolean;
   watching: boolean;
-  view: "search" | "library" | "library-finder" | "library-detail" | "library-doc" | null;
+  view: "search" | "library" | "library-finder" | "library-detail" | "library-doc" | "analysis" | null;
 } {
   try {
     const hash = window.location.hash.replace(/^#/, "");
-    if (!hash) return { tab: "today", detail: null, dealTitle: null, docTitle: null, docMeta: null, docKind: null, dealMeta: null, portfolioName: null, dealStage: null, filesFilter: null, chat: false, watching: false, view: null };
+    if (!hash) return emptyMobileHashState();
     const params = new URLSearchParams(hash);
     const rawTabParam = params.get("tab");
     const rawTab = (rawTabParam === "library" ? "brief" : rawTabParam) as MobileTab | null;
     const tab: MobileTab = rawTab && VALID_TABS.includes(rawTab) ? rawTab : "today";
     const rawView = params.get("view");
     const pushedView =
-      rawView === "search" || rawView === "library" || rawView === "library-finder" || rawView === "library-detail" || rawView === "library-doc"
+      rawView === "search" || rawView === "library" || rawView === "library-finder" || rawView === "library-detail" || rawView === "library-doc" || rawView === "analysis"
         ? rawView
         : null;
     const detail = params.get("deal");
@@ -534,12 +608,86 @@ function readMobileHashState(): {
     const portfolioName = params.get("p");
     const dealStage = params.get("s");
     const filesFilter = params.get("filter");
+    const runParam = params.get("run");
+    const versionParam = params.get("v");
+    const analysisRunId = runParam ? Number(runParam) : NaN;
+    const versionNumber = versionParam ? Number(versionParam) : NaN;
+    const analysisTitle = params.get("at") ?? dealTitle;
+    const analysisTool = params.get("tool");
+    const status = params.get("status");
     const chat = params.get("chat") === "open";
     const watching = params.get("view") === "watching";
-    return { tab, detail, dealTitle, docTitle, docMeta, docKind, dealMeta, portfolioName, dealStage, filesFilter, chat, watching, view: pushedView };
+    return {
+      tab,
+      detail,
+      dealTitle,
+      docTitle,
+      docMeta,
+      docKind,
+      dealMeta,
+      portfolioName,
+      dealStage,
+      filesFilter,
+      analysisRunId: Number.isFinite(analysisRunId) ? analysisRunId : null,
+      analysisTitle,
+      analysisTool,
+      status,
+      versionNumber: Number.isFinite(versionNumber) ? versionNumber : null,
+      chat,
+      watching,
+      view: pushedView,
+    };
   } catch {
-    return { tab: "today", detail: null, dealTitle: null, docTitle: null, docMeta: null, docKind: null, dealMeta: null, portfolioName: null, dealStage: null, filesFilter: null, chat: false, watching: false, view: null };
+    return emptyMobileHashState();
   }
+}
+
+function emptyMobileHashState(): ReturnType<typeof readMobileHashState> {
+  return {
+    tab: "today",
+    detail: null,
+    dealTitle: null,
+    docTitle: null,
+    docMeta: null,
+    docKind: null,
+    dealMeta: null,
+    portfolioName: null,
+    dealStage: null,
+    filesFilter: null,
+    analysisRunId: null,
+    analysisTitle: null,
+    analysisTool: null,
+    status: null,
+    versionNumber: null,
+    chat: false,
+    watching: false,
+    view: null,
+  };
+}
+
+function mobileViewFromHash(state: ReturnType<typeof readMobileHashState>): MobileView {
+  if (state.view) {
+    return {
+      kind: state.view,
+      tab: state.tab,
+      dealTitle: state.dealTitle ?? undefined,
+      dealMeta: state.dealMeta ?? undefined,
+      portfolioName: state.portfolioName ?? undefined,
+      dealStage: state.dealStage ?? undefined,
+      docTitle: state.docTitle ?? undefined,
+      docMeta: state.docMeta ?? undefined,
+      docKind: state.docKind ?? undefined,
+      filesFilter: state.filesFilter ?? undefined,
+      analysisTitle: state.analysisTitle ?? state.dealTitle ?? undefined,
+      analysisTool: state.analysisTool ?? undefined,
+      analysisRunId: state.analysisRunId,
+      versionNumber: state.versionNumber,
+      status: state.status ?? undefined,
+    };
+  }
+  if (state.detail) return { kind: "detail", dealId: state.detail, dealTitle: state.dealTitle ?? undefined };
+  if (state.watching) return { kind: "watching" };
+  return { kind: "tab", tab: state.tab };
 }
 
 function writeMobileHashState(view: MobileView, chatOpen: boolean) {
@@ -552,7 +700,7 @@ function writeMobileHashState(view: MobileView, chatOpen: boolean) {
       if (view.dealTitle) params.set("t", view.dealTitle);
     } else if (view.kind === "watching") {
       params.set("view", "watching");
-    } else if (view.kind === "search" || view.kind === "library" || view.kind === "library-finder" || view.kind === "library-detail" || view.kind === "library-doc") {
+    } else if (view.kind === "search" || view.kind === "library" || view.kind === "library-finder" || view.kind === "library-detail" || view.kind === "library-doc" || view.kind === "analysis") {
       params.set("view", view.kind);
       if (view.tab) params.set("tab", view.tab);
       if (view.kind === "library-finder" && view.filesFilter) params.set("filter", view.filesFilter);
@@ -566,6 +714,13 @@ function writeMobileHashState(view: MobileView, chatOpen: boolean) {
         if (view.docTitle) params.set("doc", view.docTitle);
         if (view.docMeta) params.set("m", view.docMeta);
         if (view.docKind) params.set("k", view.docKind);
+      }
+      if (view.kind === "analysis") {
+        if (view.analysisTitle) params.set("at", view.analysisTitle);
+        if (view.analysisTool) params.set("tool", view.analysisTool);
+        if (view.analysisRunId) params.set("run", String(view.analysisRunId));
+        if (view.versionNumber) params.set("v", String(view.versionNumber));
+        if (view.status) params.set("status", view.status);
       }
     } else if (view.tab) {
       params.set("tab", view.tab);

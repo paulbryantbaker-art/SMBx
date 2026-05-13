@@ -1,0 +1,818 @@
+import { useEffect, useState, type CSSProperties } from "react";
+import { authHeaders } from "../../../../hooks/useAuth";
+import {
+  defaultScenarioName,
+  formatAssumptionDisplay,
+  isStructuredAnalysis,
+  numericAssumptionValue,
+  patchStructuredDataAssumptions,
+  sliderConfigForAssumption,
+  syncLinkedAssumptions,
+  type ScenarioSliderConfig,
+  type StructuredAnalysisData,
+  type StructuredAssumption,
+} from "../../../../lib/analysisCanvasModel";
+import { ChatStarterPill } from "../ChatStarterPill";
+import { MobileIcon } from "../icons";
+import { YIcon } from "../YIcon";
+
+interface MobileAnalysisScreenProps {
+  title: string;
+  analysisRunId?: number | null;
+  analysisData?: Record<string, any>;
+  status?: string;
+  versionNumber?: number | null;
+  onBack: () => void;
+  onAskYulia: (prompt: string) => void;
+  onUpdate?: (patch: {
+    analysisData?: Record<string, any>;
+    versionNumber?: number | null;
+    status?: string;
+    modelState?: Record<string, any>;
+  }) => void;
+}
+
+export function MobileAnalysisScreen({
+  title,
+  analysisRunId,
+  analysisData,
+  status,
+  versionNumber,
+  onBack,
+  onAskYulia,
+  onUpdate,
+}: MobileAnalysisScreenProps) {
+  const [data, setData] = useState<Record<string, any> | undefined>(analysisData);
+  const [currentVersion, setCurrentVersion] = useState<number | null | undefined>(versionNumber);
+  const [note, setNote] = useState<string | null>(null);
+
+  useEffect(() => {
+    setData(analysisData);
+    setCurrentVersion(versionNumber);
+  }, [analysisData, versionNumber]);
+
+  useEffect(() => {
+    if (data || !analysisRunId) return;
+    let cancelled = false;
+    fetch(`/api/analysis-runs/${analysisRunId}`, { headers: authHeaders() })
+      .then(res => res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`)))
+      .then(payload => {
+        if (cancelled) return;
+        setData(payload.analysisData ?? undefined);
+        setCurrentVersion(payload.versionNumber ?? null);
+        onUpdate?.({
+          analysisData: payload.analysisData ?? undefined,
+          versionNumber: payload.versionNumber ?? null,
+          status: payload.versionNumber ? `saved v${payload.versionNumber}` : status,
+        });
+      })
+      .catch(() => {
+        if (!cancelled) setNote("Yulia can still discuss this analysis, but the saved run could not be loaded here.");
+      });
+    return () => { cancelled = true; };
+  }, [analysisRunId, data, onUpdate, status]);
+
+  if (!isStructuredAnalysis(data)) {
+    return (
+      <div style={S.page}>
+        <FloatingChrome onBack={onBack} />
+        <section style={S.emptyCard}>
+          <div className="mb-mono" style={S.eyebrow}>ANALYSIS</div>
+          <h1 style={S.title}>{title}</h1>
+          <p style={S.copy}>
+            Yulia opened this analysis, but the structured canvas payload is not loaded on mobile yet.
+          </p>
+          {note && <div style={S.note}>{note}</div>}
+          <button
+            type="button"
+            style={S.primaryButton}
+            onClick={() => onAskYulia(`Open ${title} as an interactive analysis canvas and explain what is available on mobile.`)}
+          >
+            Ask Yulia
+          </button>
+        </section>
+      </div>
+    );
+  }
+
+  const structured = data;
+  const primaryPrompt = structured.nextActions?.[0]?.prompt || `Explain ${structured.title || title} and what decision this supports.`;
+
+  const updateAssumptions = async (updates: Record<string, unknown>, scenarioName?: string) => {
+    const nextData = patchStructuredDataAssumptions(structured, updates);
+    const modelState = scenarioName ? { ...updates, _scenario_name: scenarioName } : updates;
+    setData(nextData);
+    setNote("Scenario updated on this phone. Saving version...");
+    onUpdate?.({ analysisData: nextData, modelState });
+
+    window.dispatchEvent(new CustomEvent("smbx:canvas_action", {
+      detail: {
+        canvas_action: "update_model",
+        tabId: "active",
+        updates: modelState,
+        analysisRunId: analysisRunId ?? null,
+        analysisData: nextData,
+      },
+    }));
+
+    if (!analysisRunId) {
+      setNote("Scenario changed here. Save needs an analysis run.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/analysis-runs/${analysisRunId}/assumptions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+        body: JSON.stringify({
+          updates,
+          scenarioName,
+          changeReason: scenarioName ? `Saved mobile scenario: ${scenarioName}` : "Mobile scenario edit",
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const payload = await res.json();
+      const savedData = payload.analysisData ?? nextData;
+      setData(savedData);
+      setCurrentVersion(payload.versionNumber ?? currentVersion ?? null);
+      setNote(payload.versionNumber ? `Saved scenario v${payload.versionNumber}. Yulia can reference it in chat.` : "Scenario saved. Yulia can reference it in chat.");
+      onUpdate?.({
+        analysisData: savedData,
+        versionNumber: payload.versionNumber ?? currentVersion ?? null,
+        status: payload.versionNumber ? `saved v${payload.versionNumber}` : "scenario saved",
+        modelState,
+      });
+      window.dispatchEvent(new CustomEvent("smbx:canvas_action", {
+        detail: {
+          canvas_action: "update_model",
+          tabId: "active",
+          updates: modelState,
+          analysisRunId,
+          analysisData: savedData,
+          versionNumber: payload.versionNumber ?? null,
+        },
+      }));
+    } catch {
+      setNote("Scenario changed locally. Reconnect or sign in to save the version.");
+    }
+  };
+
+  return (
+    <div style={S.page}>
+      <FloatingChrome onBack={onBack} />
+
+      <section style={S.hero}>
+        <div style={S.heroWash} />
+        <div className="mb-mono" style={S.eyebrow}>ANALYSIS · LIVE MODEL</div>
+        <h1 style={S.title}>{structured.title || title}</h1>
+        <p style={S.copy}>{structured.summary}</p>
+        <div style={S.metaLine}>
+          <span>{analysisRunId ? `Run ${analysisRunId}` : "Live canvas"}</span>
+          <span>{currentVersion ? `v${currentVersion}` : status || "ready"}</span>
+        </div>
+        {structured.verdict && (
+          <div style={S.verdictPanel}>
+            <div style={S.scoreOrb}>{structured.verdict.score ?? "Y"}</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="mb-mono" style={S.glassEyebrow}>{structured.verdict.label}</div>
+              <div style={S.verdictText}>{structured.verdict.rationale}</div>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {structured.metrics?.length ? (
+        <section style={S.metricsGrid}>
+          {structured.metrics.slice(0, 6).map(metric => (
+            <div key={metric.key} style={S.metricTile}>
+              <div className="mb-mono" style={S.metricLabel}>{metric.label}</div>
+              <div style={S.metricValue}>{metric.displayValue}</div>
+              {metric.sub && <div style={S.metricSub}>{metric.sub}</div>}
+            </div>
+          ))}
+        </section>
+      ) : null}
+
+      {structured.yuliaRead && (
+        <section style={S.readCard}>
+          <div style={S.readHeader}>
+            <YIcon size={44} kind="pursue" />
+            <div>
+              <div className="mb-mono" style={S.darkEyebrow}>YULIA READ</div>
+              <div style={S.readTitle}>What moved</div>
+            </div>
+          </div>
+          <p style={S.readCopy}>{structured.yuliaRead}</p>
+          <button type="button" style={S.readButton} onClick={() => onAskYulia(primaryPrompt)}>
+            Discuss this read
+          </button>
+        </section>
+      )}
+
+      {structured.charts?.length ? (
+        <section style={S.whiteCard}>
+          <div className="mb-mono" style={S.cardEyebrow}>MODEL OUTPUT</div>
+          {structured.charts.slice(0, 2).map(chart => (
+            <ChartBlock key={chart.title} title={chart.title} rows={chart.data} />
+          ))}
+        </section>
+      ) : null}
+
+      {structured.assumptions?.length ? (
+        <section style={S.whiteCard}>
+          <ScenarioPanel
+            assumptions={structured.assumptions}
+            analysisTitle={structured.title || title}
+            onSave={updateAssumptions}
+            onAskYulia={onAskYulia}
+          />
+        </section>
+      ) : null}
+
+      {(structured.risks?.length || structured.missingData?.length || structured.professionalTriggers?.length) ? (
+        <section style={S.whiteCard}>
+          <div className="mb-mono" style={S.cardEyebrow}>DILIGENCE CONTROL</div>
+          <MiniList title="Risks" rows={(structured.risks ?? []).map(item => [item.label, item.detail])} />
+          <MiniList title="Missing data" rows={(structured.missingData ?? []).map(item => [item.label, item.why])} />
+          <MiniList title="Professional triggers" rows={(structured.professionalTriggers ?? []).map(item => [item.role, item.why])} />
+        </section>
+      ) : null}
+
+      {note && <div style={S.floatingNote}>{note}</div>}
+
+      <div style={S.chatDock}>
+        <ChatStarterPill
+          placeholder="Ask Yulia about this analysis"
+          ariaLabel="Ask Yulia about this analysis"
+          onSend={onAskYulia}
+          style={S.chatPill}
+        />
+      </div>
+    </div>
+  );
+}
+
+function FloatingChrome({ onBack }: { onBack: () => void }) {
+  return (
+    <>
+      <button type="button" onClick={onBack} aria-label="Back" style={S.floatBack}>
+        <MobileIcon name="back" size={14} c="var(--mb-ink-1)" />
+      </button>
+      <button type="button" aria-label="Share" style={S.floatShare}>
+        <MobileIcon name="share" size={16} c="var(--mb-ink-1)" />
+      </button>
+    </>
+  );
+}
+
+function ChartBlock({ title, rows }: { title: string; rows: Array<Record<string, unknown>> }) {
+  const values = rows
+    .map(row => Number(row.value ?? row.score ?? row.amount ?? row.y ?? 0))
+    .filter(value => Number.isFinite(value));
+  const max = Math.max(1, ...values.map(value => Math.abs(value)));
+  return (
+    <div style={S.chartBlock}>
+      <div style={S.chartTitle}>{title}</div>
+      <div style={{ display: "grid", gap: 10 }}>
+        {rows.slice(0, 6).map((row, index) => {
+          const label = String(row.label ?? row.name ?? row.key ?? `Item ${index + 1}`);
+          const value = Number(row.value ?? row.score ?? row.amount ?? row.y ?? 0);
+          const width = `${Math.max(8, Math.min(100, Math.abs(value) / max * 100))}%`;
+          return (
+            <div key={`${title}-${label}-${index}`} style={S.chartRow}>
+              <div style={S.chartRowTop}>
+                <span>{label}</span>
+                <strong>{Number.isFinite(value) ? value.toLocaleString(undefined, { maximumFractionDigits: 2 }) : "n/a"}</strong>
+              </div>
+              <div style={S.barTrack}>
+                <div style={{ ...S.barFill, width }} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ScenarioPanel({
+  assumptions,
+  analysisTitle,
+  onSave,
+  onAskYulia,
+}: {
+  assumptions: StructuredAssumption[];
+  analysisTitle: string;
+  onSave: (updates: Record<string, unknown>, scenarioName?: string) => void | Promise<void>;
+  onAskYulia: (prompt: string) => void;
+}) {
+  const [drafts, setDrafts] = useState<Record<string, number>>({});
+  const [scenarioName, setScenarioName] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setDrafts(Object.fromEntries(
+      assumptions
+        .map(item => [item.key, numericAssumptionValue(item)] as const)
+        .filter((entry): entry is readonly [string, number] => entry[1] != null),
+    ));
+  }, [assumptions]);
+
+  const sliderRows = assumptions
+    .map(item => {
+      const config = sliderConfigForAssumption(item);
+      const original = numericAssumptionValue(item);
+      if (!config || original == null) return null;
+      return { item, config, original };
+    })
+    .filter((item): item is { item: StructuredAssumption; config: ScenarioSliderConfig; original: number } => item != null);
+  const changedRows = sliderRows.filter(({ item, original }) => Math.abs((drafts[item.key] ?? original) - original) > 0.000001);
+  const scenarioLabel = scenarioName.trim() || defaultScenarioName(analysisTitle);
+
+  const saveScenario = async () => {
+    if (!changedRows.length) return;
+    const updates = Object.fromEntries(changedRows.map(({ item, original }) => [item.key, drafts[item.key] ?? original]));
+    setSaving(true);
+    try {
+      await onSave(updates, scenarioLabel);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const discussScenario = () => {
+    const changedText = changedRows.length
+      ? changedRows.map(({ item, original }) => {
+        const nextValue = drafts[item.key] ?? original;
+        return `${item.label}: ${formatAssumptionDisplay(item.key, original)} to ${formatAssumptionDisplay(item.key, nextValue)}`;
+      }).join("; ")
+      : "no changed assumptions yet";
+    onAskYulia(`Use the open ${analysisTitle} mobile analysis and discuss scenario "${scenarioLabel}". Changed assumptions: ${changedText}. Tell me what moved, what risk changed, and what decision this supports.`);
+  };
+
+  return (
+    <div>
+      <div className="mb-mono" style={S.cardEyebrow}>SCENARIO MODEL</div>
+      <h2 style={S.sectionTitle}>Play with the inputs</h2>
+      <p style={S.sectionCopy}>Save a scenario, then Yulia can compare it against the base case in chat.</p>
+      <label style={S.scenarioName}>
+        <span className="mb-mono" style={S.smallLabel}>NAME</span>
+        <input
+          value={scenarioName}
+          placeholder={defaultScenarioName(analysisTitle)}
+          onChange={event => setScenarioName(event.currentTarget.value)}
+          style={S.scenarioInput}
+        />
+      </label>
+      <div style={S.sliderStack}>
+        {sliderRows.slice(0, 8).map(({ item, config, original }) => {
+          const value = drafts[item.key] ?? original;
+          return (
+            <label key={item.key} style={S.sliderRow}>
+              <span style={S.sliderTop}>
+                <span style={S.sliderLabel}>{item.label}</span>
+                <strong style={S.sliderValue}>{formatAssumptionDisplay(item.key, value)}</strong>
+              </span>
+              <input
+                type="range"
+                min={config.min}
+                max={config.max}
+                step={config.step}
+                value={value}
+                onChange={event => setDrafts(prev => syncLinkedAssumptions(prev, item.key, Number(event.currentTarget.value)))}
+                aria-label={item.label}
+                aria-valuetext={formatAssumptionDisplay(item.key, value)}
+                style={S.range}
+              />
+              <span style={S.sliderBounds}>
+                <span>{formatAssumptionDisplay(item.key, config.min)}</span>
+                <span>base {formatAssumptionDisplay(item.key, original)}</span>
+                <span>{formatAssumptionDisplay(item.key, config.max)}</span>
+              </span>
+            </label>
+          );
+        })}
+      </div>
+      <div style={S.scenarioActions}>
+        <button
+          type="button"
+          disabled={!changedRows.length || saving}
+          onClick={() => { void saveScenario(); }}
+          style={{ ...S.primaryButton, opacity: changedRows.length && !saving ? 1 : 0.48 }}
+        >
+          {saving ? "Saving" : "Save scenario"}
+        </button>
+        <button type="button" onClick={discussScenario} style={S.secondaryButton}>Ask Yulia</button>
+      </div>
+    </div>
+  );
+}
+
+function MiniList({ title, rows }: { title: string; rows: Array<[string, string]> }) {
+  if (!rows.length) return null;
+  return (
+    <div style={S.miniList}>
+      <div style={S.miniTitle}>{title}</div>
+      {rows.slice(0, 4).map(([label, value]) => (
+        <div key={`${title}-${label}`} style={S.miniRow}>
+          <strong>{label}</strong>
+          <span>{value}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const glassPanel: CSSProperties = {
+  background: "linear-gradient(135deg, rgba(255,255,255,0.34), rgba(255,255,255,0.14))",
+  border: "1px solid rgba(255,255,255,0.44)",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.42), 0 16px 40px -24px rgba(28,38,68,0.45)",
+  backdropFilter: "blur(26px) saturate(170%)",
+  WebkitBackdropFilter: "blur(26px) saturate(170%)",
+};
+
+const S: Record<string, CSSProperties> = {
+  page: {
+    minHeight: "100vh",
+    padding: "86px 16px 150px",
+    background: "linear-gradient(180deg, #FFFFFF 0%, #F7FAFD 54%, #CAD2F0 100%)",
+    color: "var(--mb-ink)",
+  },
+  floatBack: {
+    position: "fixed",
+    top: "calc(env(safe-area-inset-top, 0px) + 18px)",
+    left: 18,
+    width: 44,
+    height: 44,
+    borderRadius: "50%",
+    border: "1px solid rgba(255,255,255,0.78)",
+    background: "rgba(255,255,255,0.78)",
+    boxShadow: "0 10px 24px rgba(31,42,66,0.14)",
+    zIndex: 20,
+    display: "grid",
+    placeItems: "center",
+    backdropFilter: "blur(20px) saturate(160%)",
+    WebkitBackdropFilter: "blur(20px) saturate(160%)",
+  },
+  floatShare: {
+    position: "fixed",
+    top: "calc(env(safe-area-inset-top, 0px) + 18px)",
+    right: 18,
+    width: 44,
+    height: 44,
+    borderRadius: "50%",
+    border: "1px solid rgba(255,255,255,0.78)",
+    background: "rgba(255,255,255,0.78)",
+    boxShadow: "0 10px 24px rgba(31,42,66,0.14)",
+    zIndex: 20,
+    display: "grid",
+    placeItems: "center",
+    backdropFilter: "blur(20px) saturate(160%)",
+    WebkitBackdropFilter: "blur(20px) saturate(160%)",
+  },
+  hero: {
+    position: "relative",
+    overflow: "hidden",
+    borderRadius: 30,
+    padding: "26px 24px 22px",
+    background: "linear-gradient(145deg, #406E98 0%, #6EA4C0 45%, #25385F 100%)",
+    boxShadow: "0 24px 58px -32px rgba(17,35,70,0.7)",
+    color: "#fff",
+  },
+  heroWash: {
+    position: "absolute",
+    inset: 0,
+    background: "radial-gradient(circle at 22% 10%, rgba(255,255,255,0.26), transparent 34%), radial-gradient(circle at 88% 100%, rgba(9,22,54,0.42), transparent 36%)",
+    pointerEvents: "none",
+  },
+  eyebrow: {
+    position: "relative",
+    zIndex: 1,
+    fontSize: 12,
+    letterSpacing: "0.18em",
+    fontWeight: 900,
+    color: "rgba(255,255,255,0.82)",
+  },
+  title: {
+    position: "relative",
+    zIndex: 1,
+    margin: "12px 0 0",
+    fontFamily: "var(--mb-font-display)",
+    fontSize: 42,
+    lineHeight: 0.96,
+    letterSpacing: 0,
+    color: "#fff",
+  },
+  copy: {
+    position: "relative",
+    zIndex: 1,
+    margin: "16px 0 0",
+    fontSize: 18,
+    lineHeight: 1.35,
+    color: "rgba(255,255,255,0.86)",
+  },
+  metaLine: {
+    position: "relative",
+    zIndex: 1,
+    display: "flex",
+    gap: 8,
+    flexWrap: "wrap",
+    marginTop: 18,
+    fontSize: 13,
+    color: "rgba(255,255,255,0.76)",
+  },
+  verdictPanel: {
+    ...glassPanel,
+    position: "relative",
+    zIndex: 1,
+    marginTop: 22,
+    borderRadius: 24,
+    padding: 14,
+    display: "flex",
+    gap: 14,
+    alignItems: "center",
+  },
+  scoreOrb: {
+    width: 58,
+    height: 58,
+    borderRadius: 18,
+    display: "grid",
+    placeItems: "center",
+    background: "rgba(255,255,255,0.24)",
+    color: "#fff",
+    fontSize: 24,
+    fontWeight: 900,
+    flexShrink: 0,
+  },
+  glassEyebrow: {
+    fontSize: 10,
+    letterSpacing: "0.18em",
+    color: "rgba(255,255,255,0.72)",
+  },
+  verdictText: {
+    marginTop: 5,
+    fontSize: 15,
+    lineHeight: 1.36,
+    fontWeight: 800,
+    color: "#fff",
+  },
+  metricsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+    gap: 10,
+    marginTop: 14,
+  },
+  metricTile: {
+    borderRadius: 22,
+    padding: 16,
+    background: "rgba(255,255,255,0.86)",
+    border: "1px solid rgba(216,224,237,0.86)",
+    boxShadow: "0 14px 34px -28px rgba(30,45,80,0.5)",
+  },
+  metricLabel: {
+    fontSize: 10,
+    letterSpacing: "0.16em",
+    color: "var(--mb-accent-ink)",
+  },
+  metricValue: {
+    marginTop: 7,
+    fontSize: 25,
+    fontWeight: 900,
+    color: "var(--mb-ink)",
+  },
+  metricSub: {
+    marginTop: 3,
+    fontSize: 13,
+    color: "var(--mb-ink-3)",
+    lineHeight: 1.25,
+  },
+  readCard: {
+    marginTop: 14,
+    borderRadius: 28,
+    padding: 18,
+    background: "#172135",
+    color: "#fff",
+    boxShadow: "0 24px 54px -34px rgba(10,19,39,0.78)",
+  },
+  readHeader: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+  },
+  darkEyebrow: {
+    fontSize: 10,
+    letterSpacing: "0.18em",
+    color: "#8D9BF1",
+  },
+  readTitle: {
+    fontSize: 24,
+    fontWeight: 900,
+  },
+  readCopy: {
+    margin: "16px 0 0",
+    fontSize: 16,
+    lineHeight: 1.46,
+    color: "rgba(255,255,255,0.82)",
+  },
+  readButton: {
+    marginTop: 16,
+    minHeight: 48,
+    borderRadius: 24,
+    border: "1px solid rgba(255,255,255,0.2)",
+    background: "rgba(255,255,255,0.12)",
+    color: "#fff",
+    padding: "0 18px",
+    fontWeight: 900,
+  },
+  whiteCard: {
+    marginTop: 14,
+    borderRadius: 28,
+    padding: 18,
+    background: "rgba(255,255,255,0.92)",
+    border: "1px solid rgba(219,226,238,0.92)",
+    boxShadow: "0 18px 48px -34px rgba(35,49,78,0.5)",
+  },
+  cardEyebrow: {
+    fontSize: 11,
+    letterSpacing: "0.18em",
+    color: "var(--mb-accent-ink)",
+    fontWeight: 900,
+  },
+  sectionTitle: {
+    margin: "8px 0 0",
+    fontSize: 26,
+    lineHeight: 1.05,
+    fontWeight: 900,
+    color: "var(--mb-ink)",
+  },
+  sectionCopy: {
+    margin: "7px 0 0",
+    fontSize: 15,
+    lineHeight: 1.36,
+    color: "var(--mb-ink-3)",
+  },
+  chartBlock: {
+    marginTop: 16,
+  },
+  chartTitle: {
+    fontSize: 17,
+    fontWeight: 900,
+    marginBottom: 12,
+  },
+  chartRow: {
+    display: "grid",
+    gap: 6,
+  },
+  chartRowTop: {
+    display: "flex",
+    justifyContent: "space-between",
+    gap: 10,
+    fontSize: 13,
+    color: "var(--mb-ink-3)",
+  },
+  barTrack: {
+    height: 9,
+    borderRadius: 999,
+    background: "rgba(120,132,160,0.16)",
+    overflow: "hidden",
+  },
+  barFill: {
+    height: "100%",
+    borderRadius: 999,
+    background: "linear-gradient(90deg, #5C79D6, #D9AD5F)",
+  },
+  scenarioName: {
+    display: "grid",
+    gap: 7,
+    marginTop: 16,
+  },
+  smallLabel: {
+    fontSize: 10,
+    letterSpacing: "0.16em",
+    color: "var(--mb-ink-3)",
+  },
+  scenarioInput: {
+    width: "100%",
+    minHeight: 48,
+    borderRadius: 18,
+    border: "1px solid var(--mb-line-2)",
+    background: "rgba(245,247,252,0.78)",
+    padding: "0 14px",
+    fontFamily: "var(--mb-font-body)",
+    fontSize: 16,
+    color: "var(--mb-ink)",
+    outline: "none",
+  },
+  sliderStack: {
+    display: "grid",
+    gap: 16,
+    marginTop: 18,
+  },
+  sliderRow: {
+    display: "grid",
+    gap: 9,
+    paddingBottom: 14,
+    borderBottom: "1px solid var(--mb-line-2)",
+  },
+  sliderTop: {
+    display: "flex",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  sliderLabel: {
+    fontSize: 15,
+    fontWeight: 850,
+    color: "var(--mb-ink)",
+  },
+  sliderValue: {
+    color: "var(--mb-accent-ink)",
+    fontVariantNumeric: "tabular-nums",
+  },
+  range: {
+    width: "100%",
+    accentColor: "var(--mb-action)",
+  },
+  sliderBounds: {
+    display: "flex",
+    justifyContent: "space-between",
+    gap: 8,
+    fontSize: 11,
+    color: "var(--mb-ink-4)",
+  },
+  scenarioActions: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 10,
+    marginTop: 18,
+  },
+  primaryButton: {
+    minHeight: 48,
+    borderRadius: 24,
+    border: "none",
+    background: "var(--mb-action)",
+    color: "#fff",
+    fontWeight: 900,
+    padding: "0 18px",
+  },
+  secondaryButton: {
+    minHeight: 48,
+    borderRadius: 24,
+    border: "1px solid var(--mb-line-2)",
+    background: "rgba(238,242,250,0.78)",
+    color: "var(--mb-accent-ink)",
+    fontWeight: 900,
+    padding: "0 18px",
+  },
+  miniList: {
+    marginTop: 16,
+  },
+  miniTitle: {
+    fontSize: 18,
+    fontWeight: 900,
+    color: "var(--mb-ink)",
+  },
+  miniRow: {
+    display: "grid",
+    gap: 3,
+    padding: "12px 0",
+    borderBottom: "1px solid var(--mb-line-2)",
+    fontSize: 14,
+    lineHeight: 1.35,
+    color: "var(--mb-ink-3)",
+  },
+  floatingNote: {
+    marginTop: 14,
+    borderRadius: 18,
+    padding: "12px 14px",
+    background: "rgba(30,42,68,0.86)",
+    color: "#fff",
+    fontSize: 13,
+    lineHeight: 1.35,
+  },
+  chatDock: {
+    position: "fixed",
+    left: 14,
+    right: 14,
+    bottom: "calc(env(safe-area-inset-bottom, 0px) + 86px)",
+    zIndex: 15,
+  },
+  chatPill: {
+    boxShadow: "0 18px 42px -22px rgba(18,30,58,0.65)",
+  },
+  emptyCard: {
+    borderRadius: 28,
+    padding: 24,
+    background: "#172135",
+    color: "#fff",
+    minHeight: 360,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "flex-end",
+  },
+  note: {
+    marginTop: 12,
+    fontSize: 13,
+    lineHeight: 1.35,
+    color: "rgba(255,255,255,0.78)",
+  },
+};

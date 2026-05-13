@@ -30,6 +30,15 @@ export interface Tab {
   anchor?: string;
   template?: string;
   tool?: string;
+  markdown?: string;
+  comparisonData?: Record<string, any>[];
+  analysisData?: Record<string, any>;
+  analysisRunId?: number | null;
+  deliverableId?: number | null;
+  modelState?: Record<string, any>;
+  versionNumber?: number | null;
+  resolvedMenuItemSlug?: string;
+  status?: string;
   fileScope?: FileScope;
   fileListView?: FileListView;
 }

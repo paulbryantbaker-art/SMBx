@@ -54,9 +54,17 @@ interface DetailProps {
   /** Send a starter prompt to chat then open the chat sheet. Used by
       the next-actions list and the deal-context input at the bottom. */
   onAskYulia: (prompt: string) => void;
+  onRunAnalysis?: (input: {
+    dealId: string;
+    dealTitle: string;
+    analysisType: string;
+    menuItemSlug?: string;
+    label: string;
+    prompt: string;
+  }) => void;
 }
 
-export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia }: DetailProps) {
+export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, onRunAnalysis }: DetailProps) {
   const { isWatched, toggle } = useWatchlist();
   const watched = isWatched(dealId);
 
@@ -204,7 +212,14 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia }: 
           eyebrow="ANALYSIS"
           title="Run a deeper QoE on the NWC peg"
           sub="2 minutes · Yulia walks the working capital math"
-          onTap={() => onAskYulia(`On ${dealTitle}: walk me through a deeper QoE focused on the NWC peg. Numbers + recommendation.`)}
+          onTap={() => {
+            const prompt = `On ${dealTitle}: walk me through a deeper QoE focused on the NWC peg. Open the working-capital analysis canvas with sliders.`;
+            if (onRunAnalysis) {
+              onRunAnalysis({ dealId, dealTitle, analysisType: "working_capital", menuItemSlug: "buy-working-capital-model", label: "working capital model", prompt });
+            } else {
+              onAskYulia(prompt);
+            }
+          }}
         />
         <NextAction
           eyebrow="DOC"
@@ -217,7 +232,14 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia }: 
           title="Pull the buyer list"
           sub="69 candidates · 47 strategics, 22 sponsors"
           last
-          onTap={() => onAskYulia(`On ${dealTitle}: pull a ranked buyer list. Strategic and sponsor split, fit reasoning.`)}
+          onTap={() => {
+            const prompt = `On ${dealTitle}: pull a ranked buyer list. Open buyer-fit analysis with strategic and sponsor split, fit reasoning.`;
+            if (onRunAnalysis) {
+              onRunAnalysis({ dealId, dealTitle, analysisType: "buyer_fit", label: "buyer fit analysis", prompt });
+            } else {
+              onAskYulia(prompt);
+            }
+          }}
         />
       </Section>
 
@@ -249,7 +271,14 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia }: 
           <button
             type="button"
             className="mb-tap"
-            onClick={() => onAskYulia(`On ${dealTitle}: deeper market intelligence — recent comparable transactions, who else is bidding, where multiples are trending. Pull the data.`)}
+            onClick={() => {
+              const prompt = `On ${dealTitle}: deeper market intelligence — recent comparable transactions, who else is bidding, where multiples are trending. Open the market intelligence analysis canvas.`;
+              if (onRunAnalysis) {
+                onRunAnalysis({ dealId, dealTitle, analysisType: "market_intelligence", menuItemSlug: "universal-market-intelligence", label: "market intelligence read", prompt });
+              } else {
+                onAskYulia(prompt);
+              }
+            }}
             style={D.marketAskBtn}
           >
             <span>Ask Yulia for the deeper market read</span>

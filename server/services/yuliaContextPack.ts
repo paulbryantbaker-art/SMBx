@@ -14,6 +14,9 @@ export interface SurfaceContext {
   documentTitle?: string;
   documentMeta?: string;
   documentKind?: string;
+  analysisRunId?: string | number;
+  canvasVersion?: string | number;
+  modelStateSummary?: string;
 }
 
 interface UserLike {
@@ -66,6 +69,9 @@ const SURFACE_KEYS: Array<keyof SurfaceContext> = [
   'documentTitle',
   'documentMeta',
   'documentKind',
+  'analysisRunId',
+  'canvasVersion',
+  'modelStateSummary',
 ];
 
 export function normalizeSurfaceContext(input: unknown): SurfaceContext | undefined {
@@ -172,6 +178,9 @@ function formatSurfaceLines(surface: SurfaceContext): string[] {
     ['documentTitle', 'Visible document'],
     ['documentMeta', 'Document metadata'],
     ['documentKind', 'Document kind'],
+    ['analysisRunId', 'Analysis run ID'],
+    ['canvasVersion', 'Canvas version'],
+    ['modelStateSummary', 'Canvas model state'],
   ];
 
   return labels.flatMap(([key, label]) => {

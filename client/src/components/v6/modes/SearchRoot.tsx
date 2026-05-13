@@ -2,7 +2,7 @@ import { useState, type CSSProperties, type FormEvent } from "react";
 import { V6Icon } from "../icons";
 import type { OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
-import { DESKTOP_TEXTURES, RANDOM_TEXTURES } from "../../../lib/randomTextures";
+import { DESKTOP_TEXTURES } from "../../../lib/randomTextures";
 
 interface SearchRootProps {
   openTab: OpenTab;
@@ -102,11 +102,29 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
     onTalkToYulia?.(prompt);
   };
 
+  const openDiscoverySurface = (prompt: string, title = "Market discovery") => {
+    openTab({
+      kind: "analysis",
+      title,
+      tool: "market_discovery",
+      markdown: [
+        `# ${title}`,
+        "",
+        "Yulia is opening this as a working market-discovery surface, not a document search.",
+        "",
+        "The output should become ranked buyers, targets, capital providers, or deal professionals with evidence, fit rationale, outreach priority, and next action.",
+        "",
+        `**Search brief:** ${prompt}`,
+      ].join("\n"),
+    });
+    ask(prompt);
+  };
+
   const runSearch = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const trimmed = query.trim();
     if (!trimmed) return;
-    ask(`Run a market discovery search: ${trimmed}`);
+    openDiscoverySurface(`Run a market discovery search: ${trimmed}`);
   };
 
   return (
@@ -134,7 +152,7 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
 
         <div style={S.examples}>
           {EXAMPLES.map(example => (
-            <button key={example} type="button" style={S.examplePill} onClick={() => { setQuery(example); ask(`Run a market discovery search: ${example}`); }}>
+            <button key={example} type="button" style={S.examplePill} onClick={() => { setQuery(example); openDiscoverySurface(`Run a market discovery search: ${example}`); }}>
               {example}
             </button>
           ))}
@@ -145,7 +163,7 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
         <SectionTitle eyebrow="BROWSE" title="Categories" sub="Start broad, then let Yulia narrow by thesis, geography, check size, fit, and relationship angle." />
         <div style={S.categoryGrid}>
           {CATEGORIES.map(category => (
-            <CategoryCard key={category.title} category={category} onClick={() => ask(category.prompt)} />
+            <CategoryCard key={category.title} category={category} onClick={() => openDiscoverySurface(category.prompt, category.title)} />
           ))}
         </div>
       </section>
@@ -174,8 +192,7 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
               className="m-btn tonal"
               type="button"
               onClick={() => {
-                openTab({ kind: "analysis", title: "Discovery map", tool: "tool-compare" });
-                ask("Open a discovery map for my current sourcing work: buyers, targets, capital providers, and deal professionals grouped by thesis and next action.");
+                openDiscoverySurface("Open a discovery map for my current sourcing work: buyers, targets, capital providers, and deal professionals grouped by thesis and next action.", "Discovery map");
               }}
             >
               Open map
@@ -187,7 +204,7 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
               key={row.title}
               type="button"
               style={{ ...S.discoveryRow, borderBottom: index === DISCOVERY.length - 1 ? "none" : "1px solid var(--m-outline-var)" }}
-              onClick={() => ask(row.prompt)}
+              onClick={() => openDiscoverySurface(row.prompt, row.title)}
             >
               <span style={S.rowIcon}><V6Icon name={row.icon} size={18} /></span>
               <span style={S.rowText}>
@@ -229,29 +246,29 @@ function CategoryCard({ category, onClick }: { category: Category; onClick: () =
 function tone(name: Category["tone"]) {
   const tones: Record<Category["tone"], { bg: string; fg: string; shadow: string }> = {
     gold: {
-      bg: `linear-gradient(145deg, rgba(214,163,92,0.42) 0%, rgba(156,113,40,0.78) 100%), url('${RANDOM_TEXTURES.card}')`,
-      fg: "#fffaf3",
-      shadow: "0 24px 54px rgba(156,113,40,0.22)",
+      bg: "linear-gradient(145deg, #D8B06E 0%, #9D6F27 100%)",
+      fg: "#FFFFFF",
+      shadow: "0 30px 74px rgba(156,113,40,0.28), 0 8px 22px rgba(26,34,51,0.10)",
     },
     green: {
-      bg: `linear-gradient(145deg, rgba(98,153,135,0.48) 0%, rgba(46,111,89,0.78) 100%), url('${RANDOM_TEXTURES.cardPursue}')`,
-      fg: "#F8FFFB",
-      shadow: "0 24px 54px rgba(46,111,89,0.20)",
+      bg: "linear-gradient(145deg, #6EA994 0%, #2F6C55 100%)",
+      fg: "#FFFFFF",
+      shadow: "0 30px 74px rgba(46,111,89,0.26), 0 8px 22px rgba(26,34,51,0.10)",
     },
     blue: {
-      bg: `linear-gradient(145deg, rgba(127,168,217,0.48) 0%, rgba(46,92,138,0.78) 100%), url('${RANDOM_TEXTURES.cardBaseline}')`,
-      fg: "#fff",
-      shadow: "0 24px 54px rgba(46,92,138,0.20)",
+      bg: "linear-gradient(145deg, #84AEDC 0%, #2F6597 100%)",
+      fg: "#FFFFFF",
+      shadow: "0 30px 74px rgba(46,92,138,0.26), 0 8px 22px rgba(26,34,51,0.10)",
     },
     ink: {
-      bg: `linear-gradient(145deg, rgba(37,43,59,0.88) 0%, rgba(18,23,34,0.92) 100%), url('${RANDOM_TEXTURES.cardBuyers}')`,
-      fg: "#fff",
-      shadow: "0 24px 54px rgba(18,23,34,0.22)",
+      bg: "linear-gradient(145deg, #2E364A 0%, #121722 100%)",
+      fg: "#FFFFFF",
+      shadow: "0 30px 74px rgba(18,23,34,0.30), 0 8px 22px rgba(26,34,51,0.12)",
     },
     aqua: {
       bg: "linear-gradient(145deg, #88C7C7 0%, #397B85 100%)",
-      fg: "#fff",
-      shadow: "0 24px 54px rgba(57,123,133,0.20)",
+      fg: "#FFFFFF",
+      shadow: "0 30px 74px rgba(57,123,133,0.26), 0 8px 22px rgba(26,34,51,0.10)",
     },
   };
   return tones[name];
@@ -271,7 +288,7 @@ const S: Record<string, CSSProperties> = {
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     border: "1px solid var(--m-outline-var)",
-    boxShadow: "var(--m-elev-2)",
+    boxShadow: "0 34px 90px rgba(26, 84, 70, 0.26), 0 10px 26px rgba(26,34,51,0.12)",
     marginBottom: 34,
   },
   heroCopy: {
@@ -281,7 +298,7 @@ const S: Record<string, CSSProperties> = {
     fontSize: 10,
     letterSpacing: "0.16em",
     fontWeight: 800,
-    color: "rgba(255,255,255,0.78)",
+    color: "#FFFFFF",
   },
   title: {
     margin: "8px 0 0",
@@ -289,14 +306,14 @@ const S: Record<string, CSSProperties> = {
     lineHeight: 0.92,
     letterSpacing: "-0.06em",
     textWrap: "balance",
-    color: "#FFFDF7",
+    color: "#FFFFFF",
   },
   sub: {
     margin: "16px 0 0",
     maxWidth: 680,
     fontSize: 16,
     lineHeight: 1.55,
-    color: "rgba(255,255,255,0.82)",
+    color: "#FFFFFF",
   },
   searchBox: {
     marginTop: 26,
@@ -344,7 +361,7 @@ const S: Record<string, CSSProperties> = {
     borderRadius: 999,
     background: "rgba(255,255,255,0.16)",
     border: "1px solid rgba(255,255,255,0.30)",
-    color: "#FFFDF7",
+    color: "#FFFFFF",
     fontSize: 12.5,
     fontWeight: 700,
     cursor: "pointer",
@@ -391,12 +408,14 @@ const S: Record<string, CSSProperties> = {
     border: "1px solid rgba(255,255,255,0.36)",
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
+    boxShadow: "0 30px 74px rgba(26,34,51,0.14), inset 0 1px 0 rgba(255,255,255,0.20)",
   },
   categoryEyebrow: {
     fontSize: 10,
     letterSpacing: "0.16em",
     fontWeight: 800,
-    opacity: 0.88,
+    color: "#FFFFFF",
+    opacity: 1,
   },
   categorySpacer: {
     flex: 1,
@@ -413,7 +432,8 @@ const S: Record<string, CSSProperties> = {
     maxWidth: 310,
     fontSize: 13.5,
     lineHeight: 1.45,
-    opacity: 0.82,
+    color: "#FFFFFF",
+    opacity: 1,
   },
   discoveryGrid: {
     display: "grid",
@@ -425,17 +445,18 @@ const S: Record<string, CSSProperties> = {
     minHeight: 332,
     borderRadius: 26,
     padding: 28,
-    backgroundImage: `linear-gradient(145deg, rgba(50,111,92,0.58) 0%, rgba(26,34,51,0.82) 100%), url('${RANDOM_TEXTURES.cardBuyers}')`,
+    backgroundImage: `linear-gradient(145deg, rgba(50,111,92,0.58) 0%, rgba(26,34,51,0.82) 100%), url('${DESKTOP_TEXTURES.searchBuyers}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
-    color: "#fff",
-    boxShadow: "0 24px 58px rgba(26, 84, 70, 0.22)",
+    color: "#FFFFFF",
+    boxShadow: "0 34px 86px rgba(26, 84, 70, 0.28), 0 10px 26px rgba(26,34,51,0.12)",
   },
   storyEyebrow: {
     fontSize: 10,
     letterSpacing: "0.16em",
     fontWeight: 800,
-    opacity: 0.84,
+    color: "#FFFFFF",
+    opacity: 1,
   },
   storyTitle: {
     margin: "34px 0 0",
@@ -444,13 +465,15 @@ const S: Record<string, CSSProperties> = {
     lineHeight: 0.98,
     letterSpacing: "-0.055em",
     textWrap: "balance",
+    color: "#FFFFFF",
   },
   storySub: {
     margin: "16px 0 0",
     maxWidth: 420,
     fontSize: 15,
     lineHeight: 1.55,
-    opacity: 0.86,
+    color: "#FFFFFF",
+    opacity: 1,
   },
   storyButton: {
     all: "unset",
@@ -468,11 +491,9 @@ const S: Record<string, CSSProperties> = {
   },
   listCard: {
     borderRadius: 26,
-    backgroundImage: `linear-gradient(135deg, rgba(255,255,255,0.94), rgba(248,250,255,0.82)), url('${RANDOM_TEXTURES.card}')`,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
+    background: "rgba(255, 255, 255, 0.94)",
     border: "1px solid var(--m-outline-var)",
-    boxShadow: "var(--m-elev-2)",
+    boxShadow: "0 28px 78px rgba(26, 34, 51, 0.14), 0 6px 18px rgba(26,34,51,0.07)",
     overflow: "hidden",
   },
   listTop: {

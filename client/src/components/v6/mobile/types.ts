@@ -10,7 +10,8 @@ export type MobileViewKind =
   | "library"
   | "library-finder"
   | "library-detail"
-  | "library-doc";
+  | "library-doc"
+  | "analysis";
 
 export interface MobileView {
   kind: MobileViewKind;
@@ -24,6 +25,15 @@ export interface MobileView {
   docMeta?: string;
   docKind?: string;
   filesFilter?: string;
+  analysisTitle?: string;
+  analysisTool?: string;
+  analysisRunId?: number | null;
+  analysisData?: Record<string, any>;
+  analysisMarkdown?: string;
+  comparisonData?: Record<string, any>[];
+  versionNumber?: number | null;
+  status?: string;
+  modelState?: Record<string, any>;
 }
 
 export interface MobileMessage {

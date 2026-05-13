@@ -337,22 +337,6 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
             </button>
           </div>
 
-          <button
-            style={T.marketIntelBand}
-            onClick={() => ask("Show me the market intelligence behind today’s read. Include strategy, tax, legal, and source gaps.")}
-            type="button"
-          >
-            <span style={T.marketIntelMarker} />
-            <span style={T.marketIntelCopy}>
-              <span className="mono" style={T.marketIntelEyebrow}>{marketIntel.eyebrow}</span>
-              <strong style={T.marketIntelHeadline}>{marketIntel.headline}</strong>
-              <span style={T.marketIntelSub}>{marketIntel.subhead}</span>
-            </span>
-            <span style={T.marketIntelMeta}>
-              {marketIntel.sourceCount > 0 ? `${marketIntel.sourceCount} sources` : marketIntel.confidence}
-            </span>
-          </button>
-
           <h1 style={T.headline}>
             {liveBrief?.hero.title || (lead ? (
               <>Yulia's read: <span style={T.headlineSerif}>{leadTitle}</span> needs your eye before the next buyer touch.</>
@@ -373,9 +357,9 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
             ))}
           </div>
 
-          <div style={T.leadActions}>
+          <div style={T.heroActionGrid}>
             <button
-              style={T.primaryButton}
+              style={T.heroGlassAction}
               onClick={() => liveBrief?.hero.primaryPrompt
                 ? ask(liveBrief.hero.primaryPrompt)
                 : lead
@@ -383,10 +367,15 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
                   : ask("Help me start my first SMBx deal workspace.")}
               type="button"
             >
-              {liveBrief?.hero.primaryLabel || (lead ? "Review IOI" : "Start with Yulia")}
+              <span style={T.yTile}>Y</span>
+              <span style={T.heroActionCopy}>
+                <strong>{liveBrief?.hero.primaryLabel || (lead ? "Review IOI" : "Start with Yulia")}</strong>
+                <span>{lead ? "Open the work product Yulia wants reviewed first." : "Chat first; Yulia will build the surface around the deal."}</span>
+              </span>
+              <span style={T.heroActionPill}>{lead ? "Open" : "Start"}</span>
             </button>
             <button
-              style={T.secondaryButton}
+              style={T.heroGlassActionSecondary}
               onClick={() => liveBrief?.hero.secondaryDealId
                 ? openDealById(liveBrief.hero.secondaryDealId)
                 : lead
@@ -394,15 +383,16 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
                   : openTab({ kind: "mode-root", modeId: "pipeline", id: "pipeline-root", title: "Pipeline", pinned: true })}
               type="button"
             >
-              {liveBrief?.hero.secondaryLabel || (lead ? "Open deal" : "Open pipeline")}
+              <span>{liveBrief?.hero.secondaryLabel || (lead ? "Open deal" : "Open pipeline")}</span>
+              <span aria-hidden="true">›</span>
             </button>
           </div>
         </article>
 
-        <aside style={T.livePanel}>
+        <aside style={T.marketPanel}>
           <div style={T.liveHeader}>
             <div>
-              <div className="mono" style={T.eyebrowBlue}>YULIA'S MARKET DESK</div>
+              <div className="mono" style={T.marketEyebrow}>YULIA'S MARKET DESK</div>
               <h2 style={T.panelTitle}>Portfolio intelligence</h2>
             </div>
             <span style={T.liveDotWrap}><span style={T.liveDot} /> {marketIntel.sourceCount > 0 ? `${marketIntel.sourceCount} sources` : "live"}</span>
@@ -443,7 +433,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
               >
                 <div style={T.workTop}>
                   <span className="mono" style={T.workEyebrow}>{item.eyebrow}</span>
-                  <span style={{ ...T.workPct, color: tone(item.tone).ink }}>{item.pct}% signal</span>
+                  <span style={T.workPct}>{item.pct}% signal</span>
                 </div>
                 <div style={T.workTitle}>{item.title}</div>
                 <div style={T.workSub}>{item.sub}</div>
@@ -524,7 +514,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
 
       <section style={T.startSection}>
         <div>
-          <div className="mono" style={T.eyebrow}>START SOMETHING</div>
+          <div className="mono" style={T.startEyebrow}>START SOMETHING</div>
           <h2 style={T.startTitle}>Give Yulia a clean sentence.</h2>
         </div>
         <div style={T.quickGrid}>
@@ -579,7 +569,7 @@ function PriorityCard({
   const t = tone(itemTone);
   return (
     <button style={T.priorityCard} onClick={action} type="button">
-      <span style={{ ...T.priorityNum, color: t.ink, background: t.soft }}>
+      <span style={{ ...T.priorityNum, background: t.soft, color: t.ink }}>
         <span className="mono" style={T.priorityNumLabel}>{index}</span>
       </span>
       <span style={T.priorityBody}>
@@ -652,19 +642,26 @@ function deliverableToTodayFile(d: WorkspaceDeliverable): TodayFile {
   };
 }
 
-const paperShadow = "0 22px 58px rgba(26, 34, 51, 0.12), 0 2px 10px rgba(26, 34, 51, 0.06)";
+const paperShadow = "0 28px 78px rgba(26, 34, 51, 0.15), 0 6px 18px rgba(26, 34, 51, 0.08)";
+const whiteCard = "rgba(255, 255, 255, 0.94)";
+const liquidGlass =
+  "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.25), transparent 44%), " +
+  "linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.045))";
+const liquidDarkGlass =
+  "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.24), transparent 44%), " +
+  "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.052))";
 const todayHeroWash = (sample: boolean) =>
   sample
-    ? `linear-gradient(135deg, rgba(255,255,255,0.82) 0%, rgba(255,239,234,0.70) 54%, rgba(201,143,132,0.28) 100%), url('${DESKTOP_TEXTURES.todayHeroSample}')`
-    : `linear-gradient(135deg, rgba(255,255,255,0.84) 0%, rgba(229,244,237,0.68) 55%, rgba(98,153,135,0.28) 100%), url('${DESKTOP_TEXTURES.todayHeroWorkspace}')`;
-const cardWash = `linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(246,249,253,0.78) 100%), url('${DESKTOP_TEXTURES.todayCard}')`;
+    ? `linear-gradient(155deg, rgba(77,39,53,0.52) 0%, rgba(183,103,93,0.34) 48%, rgba(29,30,54,0.58) 100%), url('${DESKTOP_TEXTURES.todayHeroSample}')`
+    : `linear-gradient(155deg, rgba(18,51,61,0.58) 0%, rgba(78,128,111,0.35) 48%, rgba(13,26,46,0.62) 100%), url('${DESKTOP_TEXTURES.todayHeroWorkspace}')`;
+const marketWash = `linear-gradient(165deg, rgba(8,25,43,0.76) 0%, rgba(21,75,104,0.62) 54%, rgba(5,17,31,0.84) 100%), url('${DESKTOP_TEXTURES.todayMarket}')`;
 
 const T: Record<string, CSSProperties> = {
   page: {
     minHeight: "100%",
     margin: "-28px -40px -56px",
     padding: "34px max(44px, calc(50% - 690px)) 72px",
-    background: "linear-gradient(180deg, #F6F8FC 0%, #FFFFFF 44%, #EEF2F8 100%)",
+    background: "radial-gradient(circle at 50% -120px, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0) 44%), linear-gradient(180deg, #F6F8FC 0%, #EEF4FA 58%, #E8F0F8 100%)",
     color: "#1A2233",
   },
   heroGrid: {
@@ -679,9 +676,12 @@ const T: Record<string, CSSProperties> = {
     borderRadius: 24,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
-    border: "1px solid #E7EBF5",
-    boxShadow: paperShadow,
+    border: "1px solid rgba(255,255,255,0.46)",
+    boxShadow: "0 34px 92px rgba(52, 63, 90, 0.25), 0 10px 28px rgba(26, 34, 51, 0.12), inset 0 1px 0 rgba(255,255,255,0.24)",
     padding: 30,
+    minHeight: 560,
+    display: "flex",
+    flexDirection: "column",
   },
   coverRule: {
     position: "absolute",
@@ -701,7 +701,7 @@ const T: Record<string, CSSProperties> = {
     fontSize: 10,
     letterSpacing: "0.16em",
     fontWeight: 700,
-    color: "#4F60BD",
+    color: "#FFFFFF",
   },
   eyebrowBlue: {
     fontSize: 10,
@@ -712,7 +712,7 @@ const T: Record<string, CSSProperties> = {
   date: {
     marginTop: 5,
     fontSize: 13,
-    color: "#7A8395",
+    color: "#FFFFFF",
   },
   smallGhost: {
     all: "unset",
@@ -722,69 +722,13 @@ const T: Record<string, CSSProperties> = {
     height: 34,
     padding: "0 13px",
     borderRadius: 999,
-    background: "#EEF1FB",
-    color: "#4F60BD",
+    background: liquidGlass,
+    color: "#FFFFFF",
+    border: "0.5px solid rgba(255,255,255,0.36)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.32), 0 10px 24px rgba(26,34,51,0.12)",
     fontWeight: 700,
     fontSize: 12,
     cursor: "pointer",
-  },
-  marketIntelBand: {
-    all: "unset",
-    display: "grid",
-    gridTemplateColumns: "9px minmax(0, 1fr) auto",
-    alignItems: "center",
-    gap: 14,
-    width: "100%",
-    boxSizing: "border-box",
-    marginTop: 24,
-    padding: "15px 17px",
-    borderRadius: 18,
-    background: "linear-gradient(135deg, rgba(26,34,51,0.92), rgba(50,76,90,0.88))",
-    color: "#F7FAFC",
-    boxShadow: "0 18px 42px rgba(26,34,51,0.20)",
-    cursor: "pointer",
-  },
-  marketIntelMarker: {
-    width: 9,
-    alignSelf: "stretch",
-    minHeight: 64,
-    borderRadius: 999,
-    background: "linear-gradient(180deg, #D6A35C 0%, #629987 100%)",
-    boxShadow: "0 0 0 5px rgba(214, 163, 92, 0.12)",
-  },
-  marketIntelCopy: {
-    minWidth: 0,
-    display: "flex",
-    flexDirection: "column",
-    gap: 4,
-  },
-  marketIntelEyebrow: {
-    fontSize: 9,
-    letterSpacing: "0.16em",
-    fontWeight: 800,
-    color: "#D9E3F0",
-  },
-  marketIntelHeadline: {
-    fontSize: 18,
-    lineHeight: 1.08,
-    letterSpacing: "-0.035em",
-    color: "#FFFFFF",
-  },
-  marketIntelSub: {
-    fontSize: 12.5,
-    lineHeight: 1.35,
-    color: "#CAD4E4",
-  },
-  marketIntelMeta: {
-    justifySelf: "end",
-    borderRadius: 999,
-    padding: "8px 10px",
-    background: "rgba(255,255,255,0.10)",
-    border: "1px solid rgba(255,255,255,0.16)",
-    color: "#F7FAFC",
-    fontSize: 11,
-    fontWeight: 850,
-    whiteSpace: "nowrap",
   },
   headline: {
     margin: "24px 0 0",
@@ -795,7 +739,8 @@ const T: Record<string, CSSProperties> = {
     lineHeight: 0.94,
     letterSpacing: "-0.055em",
     textWrap: "balance",
-    color: "#1A2233",
+    color: "#FFFFFF",
+    textShadow: "0 2px 18px rgba(26,34,51,0.20)",
   },
   headlineSerif: {
     fontFamily: "'Instrument Serif', Georgia, serif",
@@ -807,7 +752,7 @@ const T: Record<string, CSSProperties> = {
     margin: "18px 0 0",
     fontSize: 17,
     lineHeight: 1.55,
-    color: "#555E6F",
+    color: "#FFFFFF",
     textWrap: "pretty",
   },
   briefNotes: {
@@ -820,50 +765,100 @@ const T: Record<string, CSSProperties> = {
     minHeight: 112,
     padding: 16,
     borderRadius: 16,
-    backgroundImage: cardWash,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    border: "1px solid #E7EBF5",
+    background: liquidGlass,
+    border: "0.5px solid rgba(255,255,255,0.38)",
+    boxShadow: "0 10px 26px -18px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.34), inset 0 -1px 0 rgba(255,255,255,0.05)",
+    backdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
+    WebkitBackdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
   },
   noteLabel: {
     fontSize: 9.5,
     letterSpacing: "0.14em",
-    color: "#4F60BD",
+    color: "#FFFFFF",
     fontWeight: 700,
   },
   noteText: {
     marginTop: 10,
     fontSize: 13,
     lineHeight: 1.45,
-    color: "#555E6F",
+    color: "#FFFFFF",
   },
-  leadActions: {
+  heroActionGrid: {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) auto",
+    gap: 12,
+    alignItems: "stretch",
+    marginTop: "auto",
+    paddingTop: 24,
+  },
+  heroGlassAction: {
+    all: "unset",
+    minHeight: 72,
+    boxSizing: "border-box",
+    display: "grid",
+    gridTemplateColumns: "52px minmax(0, 1fr) auto",
+    alignItems: "center",
+    gap: 14,
+    padding: "11px 14px",
+    borderRadius: 22,
+    background: liquidGlass,
+    border: "0.5px solid rgba(255,255,255,0.42)",
+    boxShadow: "0 12px 30px -20px rgba(0,0,0,0.44), inset 0 1px 0 rgba(255,255,255,0.34), inset 0 -1px 0 rgba(255,255,255,0.05)",
+    color: "#FFFFFF",
+    cursor: "pointer",
+    backdropFilter: "blur(14px) saturate(150%) brightness(1.04)",
+    WebkitBackdropFilter: "blur(14px) saturate(150%) brightness(1.04)",
+  },
+  heroGlassActionSecondary: {
+    all: "unset",
+    minWidth: 138,
+    minHeight: 72,
+    boxSizing: "border-box",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    padding: "0 18px",
+    borderRadius: 22,
+    background: "rgba(26,34,51,0.74)",
+    color: "#FFFFFF",
+    border: "1px solid rgba(255,255,255,0.20)",
+    boxShadow: "0 12px 30px -18px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.13)",
+    fontWeight: 800,
+    fontSize: 13,
+    cursor: "pointer",
+    backdropFilter: "blur(14px) saturate(150%) brightness(1.03)",
+    WebkitBackdropFilter: "blur(14px) saturate(150%) brightness(1.03)",
+  },
+  yTile: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    display: "grid",
+    placeItems: "center",
+    background: "linear-gradient(145deg, #B7D8C6 0%, #5EA77F 100%)",
+    color: "#FFFFFF",
+    fontSize: 24,
+    fontWeight: 900,
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.58), 0 8px 18px rgba(26,34,51,0.13)",
+  },
+  heroActionCopy: {
+    minWidth: 0,
     display: "flex",
-    gap: 10,
-    marginTop: 24,
-  },
-  primaryButton: {
-    all: "unset",
-    height: 42,
-    padding: "0 18px",
-    borderRadius: 999,
-    background: "#D6A35C",
-    color: "#FFFFFF",
-    fontWeight: 800,
+    flexDirection: "column",
+    gap: 3,
     fontSize: 13,
-    cursor: "pointer",
-    boxShadow: "0 10px 24px rgba(214, 163, 92, 0.26)",
-  },
-  secondaryButton: {
-    all: "unset",
-    height: 42,
-    padding: "0 18px",
-    borderRadius: 999,
-    background: "#1A2233",
+    lineHeight: 1.35,
     color: "#FFFFFF",
-    fontWeight: 800,
-    fontSize: 13,
-    cursor: "pointer",
+  },
+  heroActionPill: {
+    borderRadius: 999,
+    padding: "9px 13px",
+    background: "linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.025))",
+    color: "#FFFFFF",
+    fontWeight: 850,
+    fontSize: 12,
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.56)",
   },
   livePanel: {
     borderRadius: 24,
@@ -873,6 +868,19 @@ const T: Record<string, CSSProperties> = {
     boxShadow: "0 24px 60px rgba(26, 34, 51, 0.22)",
     display: "flex",
     flexDirection: "column",
+  },
+  marketPanel: {
+    borderRadius: 24,
+    backgroundImage: marketWash,
+    backgroundSize: "cover, cover",
+    backgroundPosition: "center, center",
+    color: "#FFFFFF",
+    padding: 22,
+    boxShadow: "0 30px 82px rgba(26, 34, 51, 0.22), 0 10px 26px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.18)",
+    border: "1px solid rgba(255,255,255,0.24)",
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden",
   },
   liveHeader: {
     display: "flex",
@@ -886,13 +894,20 @@ const T: Record<string, CSSProperties> = {
     fontSize: 28,
     lineHeight: 1,
     letterSpacing: "-0.04em",
+    color: "#FFFFFF",
+  },
+  marketEyebrow: {
+    fontSize: 10,
+    letterSpacing: "0.16em",
+    fontWeight: 800,
+    color: "#FFFFFF",
   },
   liveDotWrap: {
     display: "inline-flex",
     alignItems: "center",
     gap: 7,
     fontSize: 12,
-    color: "#E7EBF5",
+    color: "#FFFFFF",
     fontWeight: 700,
   },
   liveDot: {
@@ -916,15 +931,18 @@ const T: Record<string, CSSProperties> = {
     width: "100%",
     borderRadius: 20,
     padding: "16px 17px",
-    background: "linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.055))",
-    border: "1px solid rgba(255,255,255,0.14)",
+    background: liquidDarkGlass,
+    border: "0.5px solid rgba(255,255,255,0.32)",
+    boxShadow: "0 12px 28px -20px rgba(0,0,0,0.46), inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -1px 0 rgba(255,255,255,0.04)",
     color: "#FFFFFF",
     cursor: "pointer",
+    backdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
+    WebkitBackdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
   },
   intelLeadEyebrow: {
     fontSize: 9,
     letterSpacing: "0.16em",
-    color: "#96BFE2",
+    color: "#FFFFFF",
     fontWeight: 800,
   },
   intelLeadTitle: {
@@ -939,7 +957,7 @@ const T: Record<string, CSSProperties> = {
   intelLeadSub: {
     display: "block",
     marginTop: 8,
-    color: "#D4DCEA",
+    color: "#FFFFFF",
     fontSize: 13,
     lineHeight: 1.42,
   },
@@ -953,21 +971,26 @@ const T: Record<string, CSSProperties> = {
     display: "block",
     borderRadius: 15,
     padding: "10px 12px",
-    background: "rgba(255,255,255,0.07)",
-    border: "1px solid rgba(255,255,255,0.10)",
-    color: "#E7ECF6",
+    background: liquidDarkGlass,
+    border: "0.5px solid rgba(255,255,255,0.30)",
+    color: "#FFFFFF",
     fontSize: 12.2,
     lineHeight: 1.34,
     cursor: "pointer",
+    backdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
+    WebkitBackdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
   },
   workCard: {
     all: "unset",
     display: "block",
     borderRadius: 18,
     padding: 16,
-    background: "rgba(255, 255, 255, 0.08)",
-    border: "1px solid rgba(255, 255, 255, 0.12)",
+    background: liquidDarkGlass,
+    border: "0.5px solid rgba(255, 255, 255, 0.31)",
+    boxShadow: "0 12px 28px -20px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.28), inset 0 -1px 0 rgba(255,255,255,0.04)",
     cursor: "pointer",
+    backdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
+    WebkitBackdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
   },
   workTop: {
     display: "flex",
@@ -978,13 +1001,14 @@ const T: Record<string, CSSProperties> = {
   workEyebrow: {
     fontSize: 9,
     letterSpacing: "0.16em",
-    color: "#C8D0E3",
+    color: "#FFFFFF",
     fontWeight: 700,
   },
   workPct: {
     fontSize: 12,
     fontWeight: 800,
     fontVariantNumeric: "tabular-nums",
+    color: "#FFFFFF",
   },
   workTitle: {
     marginTop: 12,
@@ -995,7 +1019,7 @@ const T: Record<string, CSSProperties> = {
   },
   workSub: {
     marginTop: 3,
-    color: "#C8D0E3",
+    color: "#FFFFFF",
     fontSize: 13,
     lineHeight: 1.45,
   },
@@ -1040,15 +1064,14 @@ const T: Record<string, CSSProperties> = {
     gridTemplateColumns: "50px minmax(0, 1fr) auto",
     alignItems: "center",
     gap: 14,
-    minHeight: 116,
+    minHeight: 108,
     padding: 18,
     borderRadius: 20,
-    backgroundImage: cardWash,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
+    background: whiteCard,
     border: "1px solid #E7EBF5",
-    boxShadow: "0 14px 34px rgba(26, 34, 51, 0.09)",
+    boxShadow: "0 22px 58px rgba(26, 34, 51, 0.13), 0 6px 16px rgba(26, 34, 51, 0.08)",
     cursor: "pointer",
+    overflow: "hidden",
   },
   priorityNum: {
     width: 46,
@@ -1056,7 +1079,7 @@ const T: Record<string, CSSProperties> = {
     borderRadius: 16,
     display: "grid",
     placeItems: "center",
-    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.58), 0 10px 20px rgba(26,34,51,0.07)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.60), 0 10px 22px rgba(26,34,51,0.08)",
     position: "relative",
     overflow: "hidden",
   },
@@ -1074,7 +1097,7 @@ const T: Record<string, CSSProperties> = {
   priorityKicker: {
     fontSize: 9,
     letterSpacing: "0.15em",
-    color: "#7A8395",
+    color: "#8B93A3",
     fontWeight: 700,
   },
   priorityTitle: {
@@ -1097,6 +1120,7 @@ const T: Record<string, CSSProperties> = {
     fontSize: 12,
     fontWeight: 850,
     whiteSpace: "nowrap",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.60)",
   },
   midGrid: {
     display: "grid",
@@ -1107,9 +1131,7 @@ const T: Record<string, CSSProperties> = {
   dealBoard: {
     overflow: "hidden",
     borderRadius: 22,
-    backgroundImage: cardWash,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
+    background: whiteCard,
     border: "1px solid #E7EBF5",
     boxShadow: paperShadow,
   },
@@ -1168,9 +1190,7 @@ const T: Record<string, CSSProperties> = {
   fileCard: {
     overflow: "hidden",
     borderRadius: 22,
-    backgroundImage: cardWash,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
+    background: whiteCard,
     border: "1px solid #E7EBF5",
     boxShadow: paperShadow,
   },
@@ -1236,10 +1256,11 @@ const T: Record<string, CSSProperties> = {
     marginTop: 36,
     padding: 22,
     borderRadius: 24,
-    backgroundImage: `linear-gradient(135deg, rgba(238,241,251,0.90), rgba(255,255,255,0.70)), url('${DESKTOP_TEXTURES.todaySecondary}')`,
+    backgroundImage: `linear-gradient(165deg, rgba(50,62,104,0.36) 0%, rgba(26,34,51,0.50) 100%), url('${DESKTOP_TEXTURES.todaySecondary}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
-    border: "1px solid #DDE3F0",
+    border: "1px solid rgba(255,255,255,0.30)",
+    boxShadow: "0 26px 70px rgba(26, 34, 51, 0.18), 0 8px 22px rgba(26,34,51,0.10), inset 0 1px 0 rgba(255,255,255,0.22)",
     display: "grid",
     gridTemplateColumns: "minmax(220px, 0.45fr) minmax(0, 1fr)",
     gap: 20,
@@ -1250,6 +1271,13 @@ const T: Record<string, CSSProperties> = {
     fontSize: 28,
     lineHeight: 1,
     letterSpacing: "-0.045em",
+    color: "#FFFFFF",
+  },
+  startEyebrow: {
+    fontSize: 10,
+    letterSpacing: "0.16em",
+    fontWeight: 800,
+    color: "#FFFFFF",
   },
   quickGrid: {
     display: "flex",
@@ -1265,12 +1293,14 @@ const T: Record<string, CSSProperties> = {
     height: 38,
     padding: "0 14px",
     borderRadius: 999,
-    background: "#FFFFFF",
-    border: "1px solid #DDE3F0",
-    color: "#1A2233",
+    background: liquidDarkGlass,
+    border: "0.5px solid rgba(255,255,255,0.34)",
+    color: "#FFFFFF",
     fontSize: 13,
     fontWeight: 800,
     cursor: "pointer",
-    boxShadow: "0 8px 18px rgba(26, 34, 51, 0.08)",
+    boxShadow: "0 12px 28px -20px rgba(0,0,0,0.46), inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -1px 0 rgba(255,255,255,0.04)",
+    backdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
+    WebkitBackdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
   },
 };

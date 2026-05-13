@@ -201,8 +201,8 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
               }}
               onClick={() => runShortcut(shortcut)}
             >
-              <span style={{ ...F.shortcutIcon, background: s.iconBg, color: s.iconColor }}><V6Icon name={shortcut.icon} size={17} /></span>
-              <span style={{ ...F.shortcutCount, background: s.countBg, color: s.countColor }}>{shortcut.count}</span>
+              <span style={F.shortcutIcon}><V6Icon name={shortcut.icon} size={17} /></span>
+              <span style={F.shortcutCount}>{shortcut.count}</span>
               <strong style={F.shortcutTitle}>{shortcut.label}</strong>
               <span style={F.shortcutSub}>{shortcut.sub}</span>
             </button>
@@ -585,36 +585,36 @@ function shortcutTone(name: Shortcut["tone"]) {
     countColor: string;
   }> = {
     all: {
-      bg: `linear-gradient(145deg, rgba(255,255,255,0.88) 0%, rgba(234,241,250,0.72) 100%), url('${DESKTOP_TEXTURES.filesAll}')`,
+      bg: "linear-gradient(145deg, #8BB9E4 0%, #3E6F9E 100%)",
       border: "rgba(106, 155, 204, 0.24)",
-      shadow: "0 18px 42px rgba(78, 113, 152, 0.14), 0 2px 8px rgba(26,34,51,0.05)",
+      shadow: "0 24px 64px rgba(78, 113, 152, 0.22), 0 8px 20px rgba(26,34,51,0.10)",
       iconBg: "rgba(106, 155, 204, 0.15)",
       iconColor: "#3E6F9E",
       countBg: "rgba(106, 155, 204, 0.13)",
       countColor: "#3E6F9E",
     },
     deals: {
-      bg: `linear-gradient(145deg, rgba(255,255,255,0.88) 0%, rgba(231,244,237,0.72) 100%), url('${DESKTOP_TEXTURES.filesDeals}')`,
+      bg: "linear-gradient(145deg, #78B99E 0%, #2F6C55 100%)",
       border: "rgba(98, 153, 135, 0.24)",
-      shadow: "0 18px 42px rgba(63, 125, 100, 0.13), 0 2px 8px rgba(26,34,51,0.05)",
+      shadow: "0 24px 64px rgba(63, 125, 100, 0.22), 0 8px 20px rgba(26,34,51,0.10)",
       iconBg: "rgba(98, 153, 135, 0.16)",
       iconColor: "#3F7D64",
       countBg: "rgba(98, 153, 135, 0.14)",
       countColor: "#3F7D64",
     },
     action: {
-      bg: `linear-gradient(145deg, rgba(255,255,255,0.86) 0%, rgba(251,241,218,0.74) 100%), url('${DESKTOP_TEXTURES.filesAction}')`,
+      bg: "linear-gradient(145deg, #E8BD72 0%, #A7732B 100%)",
       border: "rgba(156, 113, 40, 0.22)",
-      shadow: "0 18px 42px rgba(156, 113, 40, 0.12), 0 2px 8px rgba(26,34,51,0.05)",
+      shadow: "0 24px 64px rgba(156, 113, 40, 0.21), 0 8px 20px rgba(26,34,51,0.10)",
       iconBg: "rgba(214, 163, 92, 0.18)",
       iconColor: "#9C7128",
       countBg: "rgba(214, 163, 92, 0.16)",
       countColor: "#9C7128",
     },
     room: {
-      bg: `linear-gradient(145deg, rgba(255,255,255,0.88) 0%, rgba(239,237,248,0.72) 100%), url('${DESKTOP_TEXTURES.filesRoom}')`,
+      bg: "linear-gradient(145deg, #9A93D6 0%, #56509E 100%)",
       border: "rgba(130, 125, 189, 0.25)",
-      shadow: "0 18px 42px rgba(101, 95, 167, 0.13), 0 2px 8px rgba(26,34,51,0.05)",
+      shadow: "0 24px 64px rgba(101, 95, 167, 0.22), 0 8px 20px rgba(26,34,51,0.10)",
       iconBg: "rgba(130, 125, 189, 0.16)",
       iconColor: "#655FA7",
       countBg: "rgba(130, 125, 189, 0.15)",
@@ -709,8 +709,7 @@ function fmtRelative(iso?: string | null): string {
   }
 }
 
-const filesHeroWash = `linear-gradient(135deg, rgba(14,27,50,0.54) 0%, rgba(45,86,143,0.36) 52%, rgba(137,184,205,0.20) 100%), url('${DESKTOP_TEXTURES.filesHero}')`;
-const filesCardWash = `linear-gradient(135deg, rgba(255,255,255,0.94), rgba(246,249,253,0.82)), url('${DESKTOP_TEXTURES.filesAll}')`;
+const filesHeroWash = `linear-gradient(135deg, rgba(13,36,62,0.68) 0%, rgba(42,96,128,0.48) 52%, rgba(18,74,79,0.62) 100%), url('${DESKTOP_TEXTURES.filesHero}')`;
 
 const F: Record<string, CSSProperties> = {
   page: {
@@ -727,8 +726,8 @@ const F: Record<string, CSSProperties> = {
     marginBottom: 22,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
-    border: "1px solid rgba(255,255,255,0.20)",
-    boxShadow: "0 24px 60px rgba(23,38,63,0.18), var(--m-elev-2)",
+    border: "1px solid rgba(255,255,255,0.30)",
+    boxShadow: "0 30px 78px rgba(23,38,63,0.22), 0 8px 22px rgba(26,34,51,0.10), inset 0 1px 0 rgba(255,255,255,0.18)",
     display: "flex",
     alignItems: "flex-end",
     justifyContent: "space-between",
@@ -738,7 +737,7 @@ const F: Record<string, CSSProperties> = {
     fontSize: 10,
     letterSpacing: "0.16em",
     fontWeight: 800,
-    color: "rgba(255,255,255,0.76)",
+    color: "#FFFFFF",
   },
   detailTitle: {
     margin: "8px 0 0",
@@ -746,7 +745,7 @@ const F: Record<string, CSSProperties> = {
     fontSize: "clamp(42px, 4.2vw, 64px)",
     lineHeight: 0.94,
     letterSpacing: "-0.06em",
-    color: "#FFFDF7",
+    color: "#FFFFFF",
     textWrap: "balance",
   },
   detailSub: {
@@ -754,7 +753,7 @@ const F: Record<string, CSSProperties> = {
     maxWidth: 760,
     fontSize: 15,
     lineHeight: 1.5,
-    color: "rgba(255,255,255,0.80)",
+    color: "#FFFFFF",
   },
   hero: {
     display: "grid",
@@ -767,8 +766,8 @@ const F: Record<string, CSSProperties> = {
     backgroundImage: filesHeroWash,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
-    border: "1px solid rgba(255,255,255,0.18)",
-    boxShadow: "0 28px 70px rgba(23,38,63,0.20), var(--m-elev-2)",
+    border: "1px solid rgba(255,255,255,0.30)",
+    boxShadow: "0 32px 86px rgba(23,38,63,0.23), 0 8px 22px rgba(26,34,51,0.10), inset 0 1px 0 rgba(255,255,255,0.18)",
     marginBottom: 34,
   },
   heroCopy: {
@@ -779,7 +778,7 @@ const F: Record<string, CSSProperties> = {
     fontSize: 10,
     letterSpacing: "0.16em",
     fontWeight: 800,
-    color: "rgba(255,255,255,0.78)",
+    color: "#FFFFFF",
   },
   title: {
     margin: "8px 0 0",
@@ -788,14 +787,14 @@ const F: Record<string, CSSProperties> = {
     lineHeight: 0.92,
     letterSpacing: "-0.06em",
     textWrap: "balance",
-    color: "#FFFDF7",
+    color: "#FFFFFF",
   },
   sub: {
     margin: "16px 0 0",
     maxWidth: 760,
     fontSize: 16,
     lineHeight: 1.55,
-    color: "rgba(255,255,255,0.78)",
+    color: "#FFFFFF",
   },
   boundaryCard: {
     display: "grid",
@@ -805,14 +804,16 @@ const F: Record<string, CSSProperties> = {
   boundaryItem: {
     padding: 18,
     borderRadius: 20,
-    background: "rgba(255,255,255,0.13)",
-    border: "1px solid rgba(255,255,255,0.20)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), 0 12px 28px rgba(23,38,63,0.10)",
+    background: "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.24), transparent 44%), linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05))",
+    border: "0.5px solid rgba(255,255,255,0.34)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.30), 0 12px 28px rgba(23,38,63,0.10)",
+    backdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
+    WebkitBackdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
   },
   boundaryEyebrow: {
     fontSize: 9,
     letterSpacing: "0.14em",
-    color: "rgba(255,255,255,0.72)",
+    color: "#FFFFFF",
     fontWeight: 800,
   },
   boundaryTitle: {
@@ -825,7 +826,7 @@ const F: Record<string, CSSProperties> = {
   boundaryText: {
     display: "block",
     marginTop: 5,
-    color: "rgba(255,255,255,0.76)",
+    color: "#FFFFFF",
     fontSize: 13,
     lineHeight: 1.45,
   },
@@ -864,16 +865,13 @@ const F: Record<string, CSSProperties> = {
     minHeight: 178,
     borderRadius: 22,
     padding: 20,
-    backgroundImage: filesCardWash,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    border: "1px solid var(--m-outline-var)",
-    boxShadow: "var(--m-elev-2)",
+    border: "1px solid rgba(255,255,255,0.38)",
+    boxShadow: "0 24px 64px rgba(26,34,51,0.13), 0 6px 16px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.22)",
     display: "grid",
     gridTemplateRows: "auto auto 1fr auto",
     gap: 7,
     cursor: "pointer",
-    color: "var(--m-on-surface-var)",
+    color: "#FFFFFF",
   },
   shortcutCardActive: {
     transform: "translateY(-2px)",
@@ -884,30 +882,33 @@ const F: Record<string, CSSProperties> = {
     borderRadius: 14,
     display: "grid",
     placeItems: "center",
-    background: "var(--m-primary-container)",
-    color: "var(--m-on-primary-container)",
-    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.60), 0 10px 18px rgba(26,34,51,0.07)",
+    background: "rgba(255,255,255,0.18)",
+    color: "#FFFFFF",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.34), 0 10px 18px rgba(26,34,51,0.11)",
   },
   shortcutCount: {
     justifySelf: "end",
     marginTop: -44,
     borderRadius: 999,
     padding: "5px 10px",
-    background: "var(--m-surface-2)",
-    color: "var(--m-on-surface-var)",
+    background: "rgba(255,255,255,0.18)",
+    color: "#FFFFFF",
     fontWeight: 850,
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.30)",
   },
   shortcutTitle: {
     alignSelf: "end",
-    color: "var(--m-on-surface)",
+    color: "#FFFFFF",
     fontSize: 20,
     lineHeight: 1,
     letterSpacing: "-0.035em",
+    textShadow: "0 2px 16px rgba(26,34,51,0.24)",
   },
   shortcutSub: {
-    color: "var(--m-on-surface-var)",
+    color: "#FFFFFF",
     fontSize: 13,
     lineHeight: 1.42,
+    textShadow: "0 1px 12px rgba(26,34,51,0.20)",
   },
   grid: {
     display: "grid",
