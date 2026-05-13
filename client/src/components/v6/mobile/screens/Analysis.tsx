@@ -424,11 +424,11 @@ function MiniList({ title, rows }: { title: string; rows: Array<[string, string]
 }
 
 const glassPanel: CSSProperties = {
-  background: "linear-gradient(135deg, rgba(255,255,255,0.34), rgba(255,255,255,0.14))",
-  border: "1px solid rgba(255,255,255,0.44)",
-  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.42), 0 16px 40px -24px rgba(28,38,68,0.45)",
-  backdropFilter: "blur(26px) saturate(170%)",
-  WebkitBackdropFilter: "blur(26px) saturate(170%)",
+  background: "radial-gradient(circle at 16% 0%, rgba(255,255,255,0.30), transparent 34%), linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.055))",
+  border: "1px solid rgba(255,255,255,0.46)",
+  boxShadow: "0 16px 34px -22px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10)",
+  backdropFilter: "blur(6px) saturate(155%) contrast(1.08)",
+  WebkitBackdropFilter: "blur(6px) saturate(155%) contrast(1.08)",
 };
 
 const S: Record<string, CSSProperties> = {
@@ -451,8 +451,8 @@ const S: Record<string, CSSProperties> = {
     zIndex: 20,
     display: "grid",
     placeItems: "center",
-    backdropFilter: "blur(20px) saturate(160%)",
-    WebkitBackdropFilter: "blur(20px) saturate(160%)",
+    backdropFilter: "blur(10px) saturate(170%) contrast(1.06)",
+    WebkitBackdropFilter: "blur(10px) saturate(170%) contrast(1.06)",
   },
   floatShare: {
     position: "fixed",
@@ -467,8 +467,8 @@ const S: Record<string, CSSProperties> = {
     zIndex: 20,
     display: "grid",
     placeItems: "center",
-    backdropFilter: "blur(20px) saturate(160%)",
-    WebkitBackdropFilter: "blur(20px) saturate(160%)",
+    backdropFilter: "blur(10px) saturate(170%) contrast(1.06)",
+    WebkitBackdropFilter: "blur(10px) saturate(170%) contrast(1.06)",
   },
   hero: {
     position: "relative",
@@ -477,7 +477,7 @@ const S: Record<string, CSSProperties> = {
     padding: "26px 24px 22px",
     background: "linear-gradient(145deg, #406E98 0%, #6EA4C0 45%, #25385F 100%)",
     boxShadow: "0 24px 58px -32px rgba(17,35,70,0.7)",
-    color: "#fff",
+    color: "#FFFFFF",
   },
   heroWash: {
     position: "absolute",
@@ -491,7 +491,7 @@ const S: Record<string, CSSProperties> = {
     fontSize: 12,
     letterSpacing: "0.18em",
     fontWeight: 900,
-    color: "rgba(255,255,255,0.82)",
+    color: "#FFFFFF",
   },
   title: {
     position: "relative",
@@ -501,7 +501,7 @@ const S: Record<string, CSSProperties> = {
     fontSize: 42,
     lineHeight: 0.96,
     letterSpacing: 0,
-    color: "#fff",
+    color: "#FFFFFF",
   },
   copy: {
     position: "relative",
@@ -509,7 +509,7 @@ const S: Record<string, CSSProperties> = {
     margin: "16px 0 0",
     fontSize: 18,
     lineHeight: 1.35,
-    color: "rgba(255,255,255,0.86)",
+    color: "#FFFFFF",
   },
   metaLine: {
     position: "relative",
@@ -519,7 +519,7 @@ const S: Record<string, CSSProperties> = {
     flexWrap: "wrap",
     marginTop: 18,
     fontSize: 13,
-    color: "rgba(255,255,255,0.76)",
+    color: "#FFFFFF",
   },
   verdictPanel: {
     ...glassPanel,
@@ -539,7 +539,7 @@ const S: Record<string, CSSProperties> = {
     display: "grid",
     placeItems: "center",
     background: "rgba(255,255,255,0.24)",
-    color: "#fff",
+    color: "#FFFFFF",
     fontSize: 24,
     fontWeight: 900,
     flexShrink: 0,
@@ -547,14 +547,14 @@ const S: Record<string, CSSProperties> = {
   glassEyebrow: {
     fontSize: 10,
     letterSpacing: "0.18em",
-    color: "rgba(255,255,255,0.72)",
+    color: "#FFFFFF",
   },
   verdictText: {
     marginTop: 5,
     fontSize: 15,
     lineHeight: 1.36,
     fontWeight: 800,
-    color: "#fff",
+    color: "#FFFFFF",
   },
   metricsGrid: {
     display: "grid",
@@ -591,7 +591,7 @@ const S: Record<string, CSSProperties> = {
     borderRadius: 28,
     padding: 18,
     background: "#172135",
-    color: "#fff",
+    color: "#FFFFFF",
     boxShadow: "0 24px 54px -34px rgba(10,19,39,0.78)",
   },
   readHeader: {
@@ -612,7 +612,7 @@ const S: Record<string, CSSProperties> = {
     margin: "16px 0 0",
     fontSize: 16,
     lineHeight: 1.46,
-    color: "rgba(255,255,255,0.82)",
+    color: "#FFFFFF",
   },
   readButton: {
     marginTop: 16,
@@ -620,7 +620,7 @@ const S: Record<string, CSSProperties> = {
     borderRadius: 24,
     border: "1px solid rgba(255,255,255,0.2)",
     background: "rgba(255,255,255,0.12)",
-    color: "#fff",
+    color: "#FFFFFF",
     padding: "0 18px",
     fontWeight: 900,
   },
@@ -750,7 +750,7 @@ const S: Record<string, CSSProperties> = {
     borderRadius: 24,
     border: "none",
     background: "var(--mb-action)",
-    color: "#fff",
+    color: "#FFFFFF",
     fontWeight: 900,
     padding: "0 18px",
   },
@@ -785,7 +785,7 @@ const S: Record<string, CSSProperties> = {
     borderRadius: 18,
     padding: "12px 14px",
     background: "rgba(30,42,68,0.86)",
-    color: "#fff",
+    color: "#FFFFFF",
     fontSize: 13,
     lineHeight: 1.35,
   },
@@ -803,7 +803,7 @@ const S: Record<string, CSSProperties> = {
     borderRadius: 28,
     padding: 24,
     background: "#172135",
-    color: "#fff",
+    color: "#FFFFFF",
     minHeight: 360,
     display: "flex",
     flexDirection: "column",
@@ -813,6 +813,6 @@ const S: Record<string, CSSProperties> = {
     marginTop: 12,
     fontSize: 13,
     lineHeight: 1.35,
-    color: "rgba(255,255,255,0.78)",
+    color: "#FFFFFF",
   },
 };

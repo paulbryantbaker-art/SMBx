@@ -398,8 +398,6 @@ function V6ChatEmpty({ modeLabel, onPick, onOpenTab }: ChatEmptyProps) {
             key={c.label}
             onClick={() => openLearn(c.section, c.anchor)}
             style={C.learnPill}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "#5C8DBA"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "var(--m-primary)"; }}
           >
             <span style={{ fontSize: 10, opacity: 0.85 }}>↗</span>
             <span>{c.label}</span>
@@ -506,11 +504,15 @@ const C: Record<string, CSSProperties> = {
     all: "unset",
     display: "inline-flex", alignItems: "center", gap: 6,
     padding: "7px 12px",
-    background: "var(--m-primary)",
+    background: "rgba(255,255,255,0.72)",
+    border: "1px solid rgba(214,225,240,0.86)",
     borderRadius: 999,
-    fontSize: 11.5, fontWeight: 600, color: "var(--m-on-primary)",
+    fontSize: 11.5, fontWeight: 700, color: "var(--m-on-surface)",
     cursor: "pointer",
-    transition: "background 120ms ease, transform 120ms ease",
+    boxShadow: "0 10px 22px -18px rgba(31,44,69,0.32), inset 0 1px 0 rgba(255,255,255,0.74)",
+    backdropFilter: "blur(8px) saturate(170%) contrast(1.04)",
+    WebkitBackdropFilter: "blur(8px) saturate(170%) contrast(1.04)",
+    transition: "background 120ms ease, transform 120ms ease, box-shadow 120ms ease",
   },
   stagedCard: {
     marginTop: 10,

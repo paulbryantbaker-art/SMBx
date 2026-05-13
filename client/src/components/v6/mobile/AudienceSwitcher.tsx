@@ -132,8 +132,8 @@ const S: Record<string, CSSProperties> = {
     boxShadow:
       "0 0 0 0.5px rgba(0,0,0,0.06)," +
       "0 1px 2px rgba(0,0,0,0.05)",
-    backdropFilter: "blur(20px)",
-    WebkitBackdropFilter: "blur(20px)",
+    backdropFilter: "blur(10px) saturate(170%) contrast(1.06)",
+    WebkitBackdropFilter: "blur(10px) saturate(170%) contrast(1.06)",
     cursor: "pointer",
     fontFamily: "var(--mb-font-body)",
     flexShrink: 0,

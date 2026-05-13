@@ -292,7 +292,7 @@ const P: Record<string, CSSProperties> = {
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     border: "1px solid rgba(255,255,255,0.30)",
-    boxShadow: "0 36px 96px rgba(37,46,82,0.28), 0 10px 26px rgba(17,24,39,0.14), inset 0 1px 0 rgba(255,255,255,0.18)",
+    boxShadow: "0 48px 118px rgba(37,46,82,0.32), 0 20px 46px rgba(17,24,39,0.17), 0 4px 12px rgba(17,24,39,0.08), inset 0 1px 0 rgba(255,255,255,0.22)",
   },
   heroCopy: {
     alignSelf: "end",
@@ -331,9 +331,9 @@ const P: Record<string, CSSProperties> = {
     borderRadius: 20,
     background: "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.24), transparent 44%), linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05))",
     border: "0.5px solid rgba(255,255,255,0.36)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.32), 0 14px 32px rgba(17,24,39,0.18)",
-    backdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
-    WebkitBackdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
+    boxShadow: "0 16px 34px -22px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.34)",
+    backdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
+    WebkitBackdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
   },
   statLabel: {
     display: "block",

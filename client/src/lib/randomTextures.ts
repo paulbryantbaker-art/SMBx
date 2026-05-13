@@ -7,12 +7,13 @@
  * session and re-rolls on hard refresh without React re-render churn.
  */
 
-const VERSION = "v=20260511-gemini-tiered-textures-20";
+const VERSION = "v=20260513-pricing-live-28";
 const tex = (name: string) => `/textures/texture-${name}.png?${VERSION}`;
 const heroTex = (n: number) => `/textures/texture-hero-${n}.png?${VERSION}`;
 const cardTex = (n: number) => `/textures/texture-card-${n}.png?${VERSION}`;
 const desktopHeroTex = (n: number) => `/textures/desktop/texture-hero-${n}.png?${VERSION}`;
 const desktopRandomTex = (n: number) => `/textures/desktop/random/texture-random-${String(n).padStart(2, "0")}.png?${VERSION}`;
+const desktopTodayRoseGold = () => `/textures/desktop/texture-today-rose-gold.png?${VERSION}`;
 
 const pick = <T,>(arr: readonly T[]): T =>
   arr[Math.floor(Math.random() * arr.length)];
@@ -34,7 +35,7 @@ const DESKTOP_MID_POOL = Array.from(
   (_, index) => desktopRandomTex(index + 1),
 );
 const DESKTOP_HERO_POOL = Array.from(
-  { length: 6 },
+  { length: 13 },
   (_, index) => desktopRandomTex(index + 15),
 );
 
@@ -87,7 +88,7 @@ export const RANDOM_TEXTURES = {
 export const DESKTOP_TEXTURES = {
   // Desktop art shuffles per page group at module import. Each hard refresh
   // gets a new spread, and no textured surface repeats within the same page.
-  todayHeroSample: todayDesktopHeroTextures[0],
+  todayHeroSample: desktopTodayRoseGold(),
   todayHeroWorkspace: todayDesktopHeroTextures[1],
   todayMarket: todayDesktopHeroTextures[2],
   todayCard: todayDesktopMidTextures[0],
@@ -108,4 +109,10 @@ export const DESKTOP_TEXTURES = {
   searchBuyers: searchDesktopMidTextures[1],
   searchProviders: searchDesktopMidTextures[2],
   searchFinancing: searchDesktopMidTextures[3],
+
+  // Learn/pricing needs a steadier, sharper read than the random hero deck.
+  // These are curated from the high-resolution desktop texture set.
+  learnHero: desktopRandomTex(4),
+  pricingFeatured: desktopRandomTex(21),
+  pricingGuarantee: desktopRandomTex(10),
 } as const;

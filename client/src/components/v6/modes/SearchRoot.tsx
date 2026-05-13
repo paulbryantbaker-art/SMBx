@@ -15,6 +15,7 @@ interface Category {
   title: string;
   sub: string;
   tone: "gold" | "green" | "blue" | "ink" | "aqua";
+  texture: string;
   prompt: string;
 }
 
@@ -32,6 +33,7 @@ const CATEGORIES: Category[] = [
     title: "Targets to buy",
     sub: "Define a thesis and let Yulia build the market map.",
     tone: "gold",
+    texture: DESKTOP_TEXTURES.searchOpportunities,
     prompt: "Find acquisition targets from this thesis: recurring revenue, lower-middle-market services, owner transition risk acceptable.",
   },
   {
@@ -39,6 +41,7 @@ const CATEGORIES: Category[] = [
     title: "Buyers and buy-side",
     sub: "Strategics, PE-backed platforms, family offices, and buyer pools.",
     tone: "ink",
+    texture: DESKTOP_TEXTURES.searchBuyers,
     prompt: "Find likely buyers and buyer pools for Big Fake Deal. Rank strategic fit, ability to close, and relationship angle.",
   },
   {
@@ -46,6 +49,7 @@ const CATEGORIES: Category[] = [
     title: "PE and lenders",
     sub: "Sponsors, SBA lenders, senior debt, and flexible capital partners.",
     tone: "blue",
+    texture: DESKTOP_TEXTURES.searchFinancing,
     prompt: "Find PE firms, independent sponsors, and senior debt lenders relevant to this deal size and industry.",
   },
   {
@@ -53,6 +57,7 @@ const CATEGORIES: Category[] = [
     title: "Deal professionals",
     sub: "Attorneys, real estate, QoE, tax, insurance, and diligence help.",
     tone: "green",
+    texture: DESKTOP_TEXTURES.searchProviders,
     prompt: "Find deal professionals for this transaction: M&A counsel, QoE, tax, insurance, and real estate support.",
   },
 ];
@@ -152,7 +157,7 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
 
         <div style={S.examples}>
           {EXAMPLES.map(example => (
-            <button key={example} type="button" style={S.examplePill} onClick={() => { setQuery(example); openDiscoverySurface(`Run a market discovery search: ${example}`); }}>
+            <button key={example} className="m-glint m-glass-control" type="button" style={S.examplePill} onClick={() => { setQuery(example); openDiscoverySurface(`Run a market discovery search: ${example}`); }}>
               {example}
             </button>
           ))}
@@ -175,6 +180,7 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
           <p style={S.storySub}>Yulia can turn a thesis into ranked companies, likely buyers, capital providers, and outreach notes.</p>
           <button
             type="button"
+            className="m-glint m-glass-control"
             style={S.storyButton}
             onClick={() => ask("What is worth sourcing this week based on my current pipeline and deal thesis?")}
           >
@@ -234,41 +240,44 @@ function SectionTitle({ eyebrow, title, sub }: { eyebrow: string; title: string;
 function CategoryCard({ category, onClick }: { category: Category; onClick: () => void }) {
   const t = tone(category.tone);
   return (
-    <button type="button" style={{ ...S.categoryCard, background: t.bg, color: t.fg, boxShadow: t.shadow }} onClick={onClick}>
+    <article style={{ ...S.categoryCard, backgroundImage: t.bg(category.texture), color: t.fg, boxShadow: t.shadow }}>
       <span className="mono" style={S.categoryEyebrow}>{category.eyebrow}</span>
       <span style={S.categorySpacer} />
       <strong style={S.categoryTitle}>{category.title}</strong>
       <span style={S.categorySub}>{category.sub}</span>
-    </button>
+      <button type="button" className="m-glint m-glass-control" style={S.categoryAction} onClick={onClick}>
+        Open <span aria-hidden="true">›</span>
+      </button>
+    </article>
   );
 }
 
 function tone(name: Category["tone"]) {
-  const tones: Record<Category["tone"], { bg: string; fg: string; shadow: string }> = {
+  const tones: Record<Category["tone"], { bg: (texture: string) => string; fg: string; shadow: string }> = {
     gold: {
-      bg: "linear-gradient(145deg, #D8B06E 0%, #9D6F27 100%)",
+      bg: texture => `linear-gradient(145deg, rgba(107,73,22,0.50) 0%, rgba(198,148,72,0.38) 48%, rgba(57,40,24,0.62) 100%), url('${texture}')`,
       fg: "#FFFFFF",
-      shadow: "0 30px 74px rgba(156,113,40,0.28), 0 8px 22px rgba(26,34,51,0.10)",
+      shadow: "0 30px 74px rgba(156,113,40,0.30), 0 8px 22px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.22)",
     },
     green: {
-      bg: "linear-gradient(145deg, #6EA994 0%, #2F6C55 100%)",
+      bg: texture => `linear-gradient(145deg, rgba(14,62,48,0.58) 0%, rgba(63,128,101,0.40) 52%, rgba(10,31,35,0.66) 100%), url('${texture}')`,
       fg: "#FFFFFF",
-      shadow: "0 30px 74px rgba(46,111,89,0.26), 0 8px 22px rgba(26,34,51,0.10)",
+      shadow: "0 30px 74px rgba(46,111,89,0.30), 0 8px 22px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.22)",
     },
     blue: {
-      bg: "linear-gradient(145deg, #84AEDC 0%, #2F6597 100%)",
+      bg: texture => `linear-gradient(145deg, rgba(22,65,111,0.58) 0%, rgba(87,137,187,0.40) 50%, rgba(16,35,71,0.66) 100%), url('${texture}')`,
       fg: "#FFFFFF",
-      shadow: "0 30px 74px rgba(46,92,138,0.26), 0 8px 22px rgba(26,34,51,0.10)",
+      shadow: "0 30px 74px rgba(46,92,138,0.30), 0 8px 22px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.22)",
     },
     ink: {
-      bg: "linear-gradient(145deg, #2E364A 0%, #121722 100%)",
+      bg: texture => `linear-gradient(145deg, rgba(23,29,46,0.72) 0%, rgba(18,23,34,0.72) 100%), url('${texture}')`,
       fg: "#FFFFFF",
-      shadow: "0 30px 74px rgba(18,23,34,0.30), 0 8px 22px rgba(26,34,51,0.12)",
+      shadow: "0 30px 74px rgba(18,23,34,0.34), 0 8px 22px rgba(26,34,51,0.14), inset 0 1px 0 rgba(255,255,255,0.20)",
     },
     aqua: {
-      bg: "linear-gradient(145deg, #88C7C7 0%, #397B85 100%)",
+      bg: texture => `linear-gradient(145deg, rgba(29,100,108,0.58) 0%, rgba(83,151,157,0.40) 52%, rgba(20,52,68,0.66) 100%), url('${texture}')`,
       fg: "#FFFFFF",
-      shadow: "0 30px 74px rgba(57,123,133,0.26), 0 8px 22px rgba(26,34,51,0.10)",
+      shadow: "0 30px 74px rgba(57,123,133,0.30), 0 8px 22px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.22)",
     },
   };
   return tones[name];
@@ -288,7 +297,7 @@ const S: Record<string, CSSProperties> = {
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     border: "1px solid var(--m-outline-var)",
-    boxShadow: "0 34px 90px rgba(26, 84, 70, 0.26), 0 10px 26px rgba(26,34,51,0.12)",
+    boxShadow: "0 46px 116px rgba(26, 84, 70, 0.30), 0 20px 46px rgba(26,34,51,0.16), 0 4px 12px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.22)",
     marginBottom: 34,
   },
   heroCopy: {
@@ -362,6 +371,9 @@ const S: Record<string, CSSProperties> = {
     background: "rgba(255,255,255,0.16)",
     border: "1px solid rgba(255,255,255,0.30)",
     color: "#FFFFFF",
+    boxShadow: "0 14px 28px -20px rgba(0,0,0,0.46), inset 0 1px 0 rgba(255,255,255,0.36), inset 0 -1px 0 rgba(255,255,255,0.08)",
+    backdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
+    WebkitBackdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
     fontSize: 12.5,
     fontWeight: 700,
     cursor: "pointer",
@@ -404,7 +416,7 @@ const S: Record<string, CSSProperties> = {
     display: "flex",
     flexDirection: "column",
     overflow: "hidden",
-    cursor: "pointer",
+    cursor: "default",
     border: "1px solid rgba(255,255,255,0.36)",
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
@@ -435,6 +447,28 @@ const S: Record<string, CSSProperties> = {
     color: "#FFFFFF",
     opacity: 1,
   },
+  categoryAction: {
+    all: "unset",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    alignSelf: "flex-start",
+    marginTop: 18,
+    minWidth: 84,
+    height: 40,
+    padding: "0 15px",
+    borderRadius: 999,
+    background: "rgba(255,255,255,0.17)",
+    border: "0.5px solid rgba(255,255,255,0.45)",
+    color: "#FFFFFF",
+    boxShadow: "0 16px 34px -22px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.30)",
+    backdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
+    WebkitBackdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
+    fontSize: 13,
+    fontWeight: 850,
+    cursor: "pointer",
+  },
   discoveryGrid: {
     display: "grid",
     gridTemplateColumns: "minmax(300px, 0.75fr) minmax(420px, 1.25fr)",
@@ -449,7 +483,7 @@ const S: Record<string, CSSProperties> = {
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     color: "#FFFFFF",
-    boxShadow: "0 34px 86px rgba(26, 84, 70, 0.28), 0 10px 26px rgba(26,34,51,0.12)",
+    boxShadow: "0 44px 110px rgba(26, 84, 70, 0.30), 0 18px 42px rgba(26,34,51,0.15), 0 4px 12px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.20)",
   },
   storyEyebrow: {
     fontSize: 10,
@@ -486,6 +520,10 @@ const S: Record<string, CSSProperties> = {
     borderRadius: 999,
     border: "1px solid rgba(255,255,255,0.45)",
     background: "rgba(255,255,255,0.16)",
+    color: "#FFFFFF",
+    boxShadow: "0 16px 34px -22px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10)",
+    backdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
+    WebkitBackdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
     fontWeight: 850,
     cursor: "pointer",
   },

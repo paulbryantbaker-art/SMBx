@@ -190,22 +190,23 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
           {shortcuts.map(shortcut => {
             const s = shortcutTone(shortcut.tone);
             return (
-            <button
+            <article
               key={shortcut.label}
-              type="button"
               style={{
                 ...F.shortcutCard,
                 backgroundImage: s.bg,
                 borderColor: s.border,
                 boxShadow: s.shadow,
               }}
-              onClick={() => runShortcut(shortcut)}
             >
               <span style={F.shortcutIcon}><V6Icon name={shortcut.icon} size={17} /></span>
               <span style={F.shortcutCount}>{shortcut.count}</span>
               <strong style={F.shortcutTitle}>{shortcut.label}</strong>
               <span style={F.shortcutSub}>{shortcut.sub}</span>
-            </button>
+              <button type="button" className="m-glint m-glass-control" style={F.shortcutAction} onClick={() => runShortcut(shortcut)}>
+                Open <span aria-hidden="true">›</span>
+              </button>
+            </article>
             );
           })}
         </div>
@@ -585,36 +586,36 @@ function shortcutTone(name: Shortcut["tone"]) {
     countColor: string;
   }> = {
     all: {
-      bg: "linear-gradient(145deg, #8BB9E4 0%, #3E6F9E 100%)",
+      bg: `linear-gradient(145deg, rgba(22,65,111,0.58) 0%, rgba(87,137,187,0.40) 50%, rgba(16,35,71,0.66) 100%), url('${DESKTOP_TEXTURES.filesAll}')`,
       border: "rgba(106, 155, 204, 0.24)",
-      shadow: "0 24px 64px rgba(78, 113, 152, 0.22), 0 8px 20px rgba(26,34,51,0.10)",
+      shadow: "0 28px 70px rgba(78, 113, 152, 0.28), 0 8px 20px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.22)",
       iconBg: "rgba(106, 155, 204, 0.15)",
       iconColor: "#3E6F9E",
       countBg: "rgba(106, 155, 204, 0.13)",
       countColor: "#3E6F9E",
     },
     deals: {
-      bg: "linear-gradient(145deg, #78B99E 0%, #2F6C55 100%)",
+      bg: `linear-gradient(145deg, rgba(14,62,48,0.58) 0%, rgba(63,128,101,0.40) 52%, rgba(10,31,35,0.66) 100%), url('${DESKTOP_TEXTURES.filesDeals}')`,
       border: "rgba(98, 153, 135, 0.24)",
-      shadow: "0 24px 64px rgba(63, 125, 100, 0.22), 0 8px 20px rgba(26,34,51,0.10)",
+      shadow: "0 28px 70px rgba(63, 125, 100, 0.28), 0 8px 20px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.22)",
       iconBg: "rgba(98, 153, 135, 0.16)",
       iconColor: "#3F7D64",
       countBg: "rgba(98, 153, 135, 0.14)",
       countColor: "#3F7D64",
     },
     action: {
-      bg: "linear-gradient(145deg, #E8BD72 0%, #A7732B 100%)",
+      bg: `linear-gradient(145deg, rgba(107,73,22,0.52) 0%, rgba(198,148,72,0.38) 48%, rgba(57,40,24,0.62) 100%), url('${DESKTOP_TEXTURES.filesAction}')`,
       border: "rgba(156, 113, 40, 0.22)",
-      shadow: "0 24px 64px rgba(156, 113, 40, 0.21), 0 8px 20px rgba(26,34,51,0.10)",
+      shadow: "0 28px 70px rgba(156, 113, 40, 0.28), 0 8px 20px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.22)",
       iconBg: "rgba(214, 163, 92, 0.18)",
       iconColor: "#9C7128",
       countBg: "rgba(214, 163, 92, 0.16)",
       countColor: "#9C7128",
     },
     room: {
-      bg: "linear-gradient(145deg, #9A93D6 0%, #56509E 100%)",
+      bg: `linear-gradient(145deg, rgba(52,46,108,0.60) 0%, rgba(119,111,184,0.40) 52%, rgba(25,30,68,0.66) 100%), url('${DESKTOP_TEXTURES.filesRoom}')`,
       border: "rgba(130, 125, 189, 0.25)",
-      shadow: "0 24px 64px rgba(101, 95, 167, 0.22), 0 8px 20px rgba(26,34,51,0.10)",
+      shadow: "0 28px 70px rgba(101, 95, 167, 0.28), 0 8px 20px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.22)",
       iconBg: "rgba(130, 125, 189, 0.16)",
       iconColor: "#655FA7",
       countBg: "rgba(130, 125, 189, 0.15)",
@@ -727,7 +728,7 @@ const F: Record<string, CSSProperties> = {
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     border: "1px solid rgba(255,255,255,0.30)",
-    boxShadow: "0 30px 78px rgba(23,38,63,0.22), 0 8px 22px rgba(26,34,51,0.10), inset 0 1px 0 rgba(255,255,255,0.18)",
+    boxShadow: "0 44px 110px rgba(23,38,63,0.29), 0 18px 42px rgba(26,34,51,0.15), 0 4px 12px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.22)",
     display: "flex",
     alignItems: "flex-end",
     justifyContent: "space-between",
@@ -767,7 +768,7 @@ const F: Record<string, CSSProperties> = {
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     border: "1px solid rgba(255,255,255,0.30)",
-    boxShadow: "0 32px 86px rgba(23,38,63,0.23), 0 8px 22px rgba(26,34,51,0.10), inset 0 1px 0 rgba(255,255,255,0.18)",
+    boxShadow: "0 46px 116px rgba(23,38,63,0.29), 0 20px 46px rgba(26,34,51,0.15), 0 4px 12px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.22)",
     marginBottom: 34,
   },
   heroCopy: {
@@ -806,9 +807,9 @@ const F: Record<string, CSSProperties> = {
     borderRadius: 20,
     background: "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.24), transparent 44%), linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05))",
     border: "0.5px solid rgba(255,255,255,0.34)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.30), 0 12px 28px rgba(23,38,63,0.10)",
-    backdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
-    WebkitBackdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
+    boxShadow: "0 16px 34px -22px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.34)",
+    backdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
+    WebkitBackdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
   },
   boundaryEyebrow: {
     fontSize: 9,
@@ -867,10 +868,12 @@ const F: Record<string, CSSProperties> = {
     padding: 20,
     border: "1px solid rgba(255,255,255,0.38)",
     boxShadow: "0 24px 64px rgba(26,34,51,0.13), 0 6px 16px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.22)",
+    backgroundSize: "cover, cover",
+    backgroundPosition: "center, center",
     display: "grid",
-    gridTemplateRows: "auto auto 1fr auto",
+    gridTemplateRows: "auto auto 1fr auto auto",
     gap: 7,
-    cursor: "pointer",
+    cursor: "default",
     color: "#FFFFFF",
   },
   shortcutCardActive: {
@@ -884,7 +887,9 @@ const F: Record<string, CSSProperties> = {
     placeItems: "center",
     background: "rgba(255,255,255,0.18)",
     color: "#FFFFFF",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.34), 0 10px 18px rgba(26,34,51,0.11)",
+    boxShadow: "0 12px 28px -22px rgba(0,0,0,0.46), inset 0 1px 0 rgba(255,255,255,0.42), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.34)",
+    backdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
+    WebkitBackdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
   },
   shortcutCount: {
     justifySelf: "end",
@@ -894,7 +899,9 @@ const F: Record<string, CSSProperties> = {
     background: "rgba(255,255,255,0.18)",
     color: "#FFFFFF",
     fontWeight: 850,
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.30)",
+    boxShadow: "0 12px 28px -22px rgba(0,0,0,0.46), inset 0 1px 0 rgba(255,255,255,0.42), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.34)",
+    backdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
+    WebkitBackdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
   },
   shortcutTitle: {
     alignSelf: "end",
@@ -909,6 +916,28 @@ const F: Record<string, CSSProperties> = {
     fontSize: 13,
     lineHeight: 1.42,
     textShadow: "0 1px 12px rgba(26,34,51,0.20)",
+  },
+  shortcutAction: {
+    all: "unset",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    justifySelf: "start",
+    marginTop: 10,
+    minWidth: 78,
+    height: 38,
+    padding: "0 14px",
+    borderRadius: 999,
+    background: "rgba(255,255,255,0.17)",
+    border: "0.5px solid rgba(255,255,255,0.45)",
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontWeight: 850,
+    cursor: "pointer",
+    boxShadow: "0 16px 34px -22px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.30)",
+    backdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
+    WebkitBackdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
   },
   grid: {
     display: "grid",

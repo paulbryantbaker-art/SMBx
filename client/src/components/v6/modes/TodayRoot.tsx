@@ -326,13 +326,12 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
     <div className="m-fade-up" style={T.page}>
       <section style={T.heroGrid}>
         <article style={{ ...T.leadCard, backgroundImage: todayHeroWash(useSampleData) }}>
-          <div style={{ ...T.coverRule, background: useSampleData ? "#C98F84" : "#629987" }} />
           <div style={T.leadTop}>
             <div>
               <div className="mono" style={T.eyebrow}>TODAY'S BRIEF</div>
               <div style={T.date}>{TODAY_DATE}</div>
             </div>
-            <button style={T.smallGhost} onClick={() => ask("Give me the short version of today's deal brief.")} type="button">
+            <button className="m-glint m-glass-control" style={T.smallGhost} onClick={() => ask("Give me the short version of today's deal brief.")} type="button">
               Ask Yulia <span aria-hidden="true">↗</span>
             </button>
           </div>
@@ -359,6 +358,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
 
           <div style={T.heroActionGrid}>
             <button
+              className="m-glint m-glass-control"
               style={T.heroGlassAction}
               onClick={() => liveBrief?.hero.primaryPrompt
                 ? ask(liveBrief.hero.primaryPrompt)
@@ -375,6 +375,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
               <span style={T.heroActionPill}>{lead ? "Open" : "Start"}</span>
             </button>
             <button
+              className="m-glint m-glass-control"
               style={T.heroGlassActionSecondary}
               onClick={() => liveBrief?.hero.secondaryDealId
                 ? openDealById(liveBrief.hero.secondaryDealId)
@@ -400,6 +401,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
 
           <button
             type="button"
+            className="m-glass-control"
             style={T.intelLead}
             onClick={() => ask("Show me the portfolio market intelligence read. Separate market, buyer/capital, tax, legal, and source gaps.")}
           >
@@ -414,6 +416,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
                 <button
                   key={bullet}
                   type="button"
+                  className="m-glass-control"
                   style={T.intelBullet}
                   onClick={() => ask(`Unpack this market intelligence note: ${bullet}`)}
                 >
@@ -427,6 +430,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
             {liveDesk.map(item => (
               <button
                 key={item.title}
+                className="m-glass-control"
                 style={T.workCard}
                 onClick={() => ask(item.prompt || `${item.eyebrow.toLowerCase()}: ${item.title}. What changed and what should I do next?`)}
                 type="button"
@@ -519,7 +523,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
         </div>
         <div style={T.quickGrid}>
           {QUICK_STARTS.map(prompt => (
-            <button key={prompt} style={T.quickChip} onClick={() => ask(prompt)} type="button">
+            <button key={prompt} className="m-glint m-glass-control" style={T.quickChip} onClick={() => ask(prompt)} type="button">
               {prompt}
               <span aria-hidden="true">↗</span>
             </button>
@@ -645,11 +649,16 @@ function deliverableToTodayFile(d: WorkspaceDeliverable): TodayFile {
 const paperShadow = "0 28px 78px rgba(26, 34, 51, 0.15), 0 6px 18px rgba(26, 34, 51, 0.08)";
 const whiteCard = "rgba(255, 255, 255, 0.94)";
 const liquidGlass =
-  "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.25), transparent 44%), " +
-  "linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.045))";
+  "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.34), transparent 34%), " +
+  "linear-gradient(135deg, rgba(255,255,255,0.19), rgba(255,255,255,0.06) 48%, rgba(255,255,255,0.025))";
 const liquidDarkGlass =
-  "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.24), transparent 44%), " +
-  "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.052))";
+  "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.24), transparent 34%), " +
+  "linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.052) 52%, rgba(255,255,255,0.018))";
+const liquidGlassFilter = "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)";
+const liquidGlassShadow =
+  "0 16px 34px -22px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.34)";
+const liquidDarkGlassShadow =
+  "0 16px 34px -22px rgba(0,0,0,0.52), inset 0 1px 0 rgba(255,255,255,0.34), inset 0 -1px 0 rgba(255,255,255,0.08), inset 0 0 0 0.5px rgba(255,255,255,0.26)";
 const todayHeroWash = (sample: boolean) =>
   sample
     ? `linear-gradient(155deg, rgba(77,39,53,0.52) 0%, rgba(183,103,93,0.34) 48%, rgba(29,30,54,0.58) 100%), url('${DESKTOP_TEXTURES.todayHeroSample}')`
@@ -677,19 +686,11 @@ const T: Record<string, CSSProperties> = {
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     border: "1px solid rgba(255,255,255,0.46)",
-    boxShadow: "0 34px 92px rgba(52, 63, 90, 0.25), 0 10px 28px rgba(26, 34, 51, 0.12), inset 0 1px 0 rgba(255,255,255,0.24)",
+    boxShadow: "0 48px 118px rgba(52, 63, 90, 0.31), 0 20px 46px rgba(26, 34, 51, 0.16), 0 4px 12px rgba(26, 34, 51, 0.08), inset 0 1px 0 rgba(255,255,255,0.28)",
     padding: 30,
     minHeight: 560,
     display: "flex",
     flexDirection: "column",
-  },
-  coverRule: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 5,
-    background: "#8A9AE8",
   },
   leadTop: {
     display: "flex",
@@ -725,7 +726,9 @@ const T: Record<string, CSSProperties> = {
     background: liquidGlass,
     color: "#FFFFFF",
     border: "0.5px solid rgba(255,255,255,0.36)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.32), 0 10px 24px rgba(26,34,51,0.12)",
+    boxShadow: liquidGlassShadow,
+    backdropFilter: liquidGlassFilter,
+    WebkitBackdropFilter: liquidGlassFilter,
     fontWeight: 700,
     fontSize: 12,
     cursor: "pointer",
@@ -767,9 +770,9 @@ const T: Record<string, CSSProperties> = {
     borderRadius: 16,
     background: liquidGlass,
     border: "0.5px solid rgba(255,255,255,0.38)",
-    boxShadow: "0 10px 26px -18px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.34), inset 0 -1px 0 rgba(255,255,255,0.05)",
-    backdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
-    WebkitBackdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
+    boxShadow: liquidGlassShadow,
+    backdropFilter: liquidGlassFilter,
+    WebkitBackdropFilter: liquidGlassFilter,
   },
   noteLabel: {
     fontSize: 9.5,
@@ -803,11 +806,11 @@ const T: Record<string, CSSProperties> = {
     borderRadius: 22,
     background: liquidGlass,
     border: "0.5px solid rgba(255,255,255,0.42)",
-    boxShadow: "0 12px 30px -20px rgba(0,0,0,0.44), inset 0 1px 0 rgba(255,255,255,0.34), inset 0 -1px 0 rgba(255,255,255,0.05)",
+    boxShadow: liquidGlassShadow,
     color: "#FFFFFF",
     cursor: "pointer",
-    backdropFilter: "blur(14px) saturate(150%) brightness(1.04)",
-    WebkitBackdropFilter: "blur(14px) saturate(150%) brightness(1.04)",
+    backdropFilter: liquidGlassFilter,
+    WebkitBackdropFilter: liquidGlassFilter,
   },
   heroGlassActionSecondary: {
     all: "unset",
@@ -823,12 +826,12 @@ const T: Record<string, CSSProperties> = {
     background: "rgba(26,34,51,0.74)",
     color: "#FFFFFF",
     border: "1px solid rgba(255,255,255,0.20)",
-    boxShadow: "0 12px 30px -18px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.13)",
+    boxShadow: liquidDarkGlassShadow,
     fontWeight: 800,
     fontSize: 13,
     cursor: "pointer",
-    backdropFilter: "blur(14px) saturate(150%) brightness(1.03)",
-    WebkitBackdropFilter: "blur(14px) saturate(150%) brightness(1.03)",
+    backdropFilter: liquidGlassFilter,
+    WebkitBackdropFilter: liquidGlassFilter,
   },
   yTile: {
     width: 52,
@@ -876,7 +879,7 @@ const T: Record<string, CSSProperties> = {
     backgroundPosition: "center, center",
     color: "#FFFFFF",
     padding: 22,
-    boxShadow: "0 30px 82px rgba(26, 34, 51, 0.22), 0 10px 26px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.18)",
+    boxShadow: "0 46px 116px rgba(26, 34, 51, 0.30), 0 20px 44px rgba(26,34,51,0.16), 0 4px 12px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.22)",
     border: "1px solid rgba(255,255,255,0.24)",
     display: "flex",
     flexDirection: "column",
@@ -933,11 +936,11 @@ const T: Record<string, CSSProperties> = {
     padding: "16px 17px",
     background: liquidDarkGlass,
     border: "0.5px solid rgba(255,255,255,0.32)",
-    boxShadow: "0 12px 28px -20px rgba(0,0,0,0.46), inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -1px 0 rgba(255,255,255,0.04)",
+    boxShadow: liquidDarkGlassShadow,
     color: "#FFFFFF",
     cursor: "pointer",
-    backdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
-    WebkitBackdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
+    backdropFilter: liquidGlassFilter,
+    WebkitBackdropFilter: liquidGlassFilter,
   },
   intelLeadEyebrow: {
     fontSize: 9,
@@ -977,8 +980,9 @@ const T: Record<string, CSSProperties> = {
     fontSize: 12.2,
     lineHeight: 1.34,
     cursor: "pointer",
-    backdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
-    WebkitBackdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
+    boxShadow: liquidDarkGlassShadow,
+    backdropFilter: liquidGlassFilter,
+    WebkitBackdropFilter: liquidGlassFilter,
   },
   workCard: {
     all: "unset",
@@ -987,10 +991,10 @@ const T: Record<string, CSSProperties> = {
     padding: 16,
     background: liquidDarkGlass,
     border: "0.5px solid rgba(255, 255, 255, 0.31)",
-    boxShadow: "0 12px 28px -20px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.28), inset 0 -1px 0 rgba(255,255,255,0.04)",
+    boxShadow: liquidDarkGlassShadow,
     cursor: "pointer",
-    backdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
-    WebkitBackdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
+    backdropFilter: liquidGlassFilter,
+    WebkitBackdropFilter: liquidGlassFilter,
   },
   workTop: {
     display: "flex",
@@ -1260,7 +1264,7 @@ const T: Record<string, CSSProperties> = {
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     border: "1px solid rgba(255,255,255,0.30)",
-    boxShadow: "0 26px 70px rgba(26, 34, 51, 0.18), 0 8px 22px rgba(26,34,51,0.10), inset 0 1px 0 rgba(255,255,255,0.22)",
+    boxShadow: "0 40px 104px rgba(26, 34, 51, 0.24), 0 16px 38px rgba(26,34,51,0.13), 0 3px 10px rgba(26,34,51,0.07), inset 0 1px 0 rgba(255,255,255,0.24)",
     display: "grid",
     gridTemplateColumns: "minmax(220px, 0.45fr) minmax(0, 1fr)",
     gap: 20,
@@ -1299,8 +1303,8 @@ const T: Record<string, CSSProperties> = {
     fontSize: 13,
     fontWeight: 800,
     cursor: "pointer",
-    boxShadow: "0 12px 28px -20px rgba(0,0,0,0.46), inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -1px 0 rgba(255,255,255,0.04)",
-    backdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
-    WebkitBackdropFilter: "blur(12px) saturate(150%) brightness(1.04)",
+    boxShadow: liquidDarkGlassShadow,
+    backdropFilter: liquidGlassFilter,
+    WebkitBackdropFilter: liquidGlassFilter,
   },
 };

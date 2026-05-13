@@ -254,11 +254,44 @@ input::placeholder, textarea::placeholder { color: var(--ink-4); }
 
 /* M3 state-layer helper */
 .m-state {
-  transition: background 120ms ease, box-shadow 160ms ease, transform 120ms ease;
+  transition: background 120ms ease, box-shadow 160ms ease, transform 160ms cubic-bezier(0.22, 1, 0.36, 1), filter 160ms ease;
   position: relative;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
 }
-.m-state:hover { background-color: rgba(106, 155, 204, 0.10); }
-.m-state:active { background-color: rgba(106, 155, 204, 0.15); }
+.m-state:hover { background-color: rgba(106, 155, 204, 0.10); transform: translate3d(0, -1px, 0); }
+.m-state:active { background-color: rgba(106, 155, 204, 0.15); transform: translate3d(0, 0, 0) scale(0.985); }
+
+/* V6 tactile layer.
+   Almost every V6 surface is either a literal button or a role=button card.
+   This keeps the "nudge" consistent without hand-tuning each page. Larger
+   bespoke cards can still override this with a more specific hover rule. */
+.v6-root :where(button, [role="button"], .m-btn, .m-card.tap, .mode-item, .tab-new-btn) {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  transition:
+    transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 180ms ease,
+    filter 180ms ease,
+    background 140ms ease,
+    color 140ms ease,
+    border-color 140ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .v6-root :where(button, [role="button"], .m-btn, .m-card.tap, .mode-item, .tab-new-btn):not(:disabled):hover {
+    transform: translate3d(0, -1.5px, 0);
+  }
+}
+
+.v6-root :where(button, [role="button"], .m-btn, .m-card.tap, .mode-item, .tab-new-btn):not(:disabled):active {
+  transform: translate3d(0, 0, 0) scale(0.985);
+  transition-duration: 90ms;
+}
+
+.v6-root :where(button, [role="button"], .m-btn, .m-card.tap, .mode-item, .tab-new-btn):disabled {
+  transform: none;
+}
 
 /* Cards on canvas */
 .m-card {
@@ -268,7 +301,7 @@ input::placeholder, textarea::placeholder { color: var(--ink-4); }
 }
 .m-card.elevated { border: none; box-shadow: var(--m-elev-2); }
 .m-card.tap { cursor: pointer; }
-.m-card.tap:hover { box-shadow: var(--m-elev-3); transform: translateY(-1px); }
+.m-card.tap:hover { box-shadow: var(--m-elev-3); transform: translate3d(0, -1.5px, 0); }
 .m-card.filled-tonal { background: var(--m-surface-tinted); border: 1px solid transparent; }
 
 /* Buttons */
@@ -277,7 +310,7 @@ input::placeholder, textarea::placeholder { color: var(--ink-4); }
   display: inline-flex; align-items: center; justify-content: center;
   font-family: var(--font-body); font-size: 13px; font-weight: 500;
   border-radius: 999px; padding: 0 14px; height: 36px; cursor: pointer;
-  transition: background 120ms ease, color 120ms ease;
+  transition: background 120ms ease, color 120ms ease, transform 160ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 180ms ease;
 }
 .m-btn.filled { background: var(--m-primary); color: var(--m-on-primary); }
 .m-btn.filled:hover { background: #5C8DBA; }
@@ -301,7 +334,7 @@ input::placeholder, textarea::placeholder { color: var(--ink-4); }
   box-shadow: 0 10px 22px rgba(214, 163, 92, 0.24);
   transition: background 120ms ease, transform 120ms ease, box-shadow 160ms ease;
 }
-.m-fab:hover { background: #C6954E; box-shadow: 0 12px 26px rgba(214, 163, 92, 0.30); }
+.m-fab:hover { background: #C6954E; box-shadow: 0 12px 26px rgba(214, 163, 92, 0.30); transform: translate3d(0, -1.5px, 0); }
 .m-fab:active { transform: scale(0.96); }
 .m-fab:disabled { background: var(--m-surface-3); color: var(--m-on-surface-mid); cursor: not-allowed; box-shadow: none; }
 .m-fab:focus-visible { outline: 2px solid var(--m-secondary); outline-offset: 2px; }
@@ -364,7 +397,7 @@ input[type="range"].m-slider::-moz-range-thumb {
   font-size: 12.5px; font-weight: 650;
   border: 1px solid transparent;
   border-bottom: 0;
-  transition: background 120ms ease, color 120ms ease, box-shadow 160ms ease, border-color 120ms ease;
+  transition: background 120ms ease, color 120ms ease, box-shadow 160ms ease, border-color 120ms ease, transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
   position: relative;
   align-self: flex-end;
 }
@@ -406,7 +439,7 @@ input[type="range"].m-slider::-moz-range-thumb {
   border-radius: 10px;
   color: var(--m-on-surface-mid); cursor: pointer;
   margin-left: 4px;
-  transition: background 120ms ease, color 120ms ease, box-shadow 160ms ease;
+  transition: background 120ms ease, color 120ms ease, box-shadow 160ms ease, transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .tab-new-btn:hover { background: #FFFFFF; color: var(--m-primary); box-shadow: var(--m-elev-1); }
 
@@ -419,7 +452,7 @@ input[type="range"].m-slider::-moz-range-thumb {
   color: var(--m-on-surface-var);
   font-size: 13px;
   cursor: pointer;
-  transition: background 120ms ease, color 120ms ease;
+  transition: background 120ms ease, color 120ms ease, transform 160ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 180ms ease;
 }
 .mode-item:hover { background: rgba(106,155,204,0.10); color: var(--m-on-surface); }
 .mode-item.active {
@@ -466,10 +499,97 @@ input[type="range"].m-slider::-moz-range-thumb {
 }
 .m-fade-in { animation: m-fadeIn 200ms ease both; }
 
+/* Shared desktop nudge.
+   This sits late in the V6 layer so local card/button rules don't swallow the
+   interaction. It is intentionally tiny: enough feedback to feel alive without
+   making deal work feel springy or toy-like. */
+.v6-root button:not(:disabled),
+.v6-root [role="button"]:not([aria-disabled="true"]),
+.v6-root .tab,
+.v6-root .mode-item,
+.v6-root .m-card.tap,
+.v6-root .tab-new-btn {
+  transform: translate3d(0, 0, 0) !important;
+  transform-origin: center;
+  backface-visibility: hidden;
+  transition:
+    transform 170ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 190ms ease,
+    filter 190ms ease,
+    background 140ms ease,
+    color 140ms ease,
+    border-color 140ms ease,
+    opacity 140ms ease !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .v6-root button:not(:disabled):hover,
+  .v6-root [role="button"]:not([aria-disabled="true"]):hover,
+  .v6-root .mode-item:hover,
+  .v6-root .m-card.tap:hover,
+  .v6-root .tab-new-btn:hover {
+    transform: translate3d(0, -2.5px, 0) !important;
+    filter: saturate(1.035) brightness(1.012) !important;
+  }
+
+  .v6-root .tab:hover {
+    transform: translate3d(0, -1px, 0) !important;
+  }
+
+  .v6-root .m-nudge-soft:hover {
+    transform: translate3d(0, -1.5px, 0) !important;
+  }
+}
+
+.v6-root button:not(:disabled):active,
+.v6-root [role="button"]:not([aria-disabled="true"]):active,
+.v6-root .tab:active,
+.v6-root .mode-item:active,
+.v6-root .m-card.tap:active,
+.v6-root .tab-new-btn:active {
+  transform: translate3d(0, 0, 0) scale(0.985) !important;
+  transition-duration: 90ms !important;
+}
+
+/* Glass controls stay quieter than paper cards: a tiny hold-lift plus a darker
+   liquid tint, no sweep/glare gimmick. */
+.v6-root .m-glass-control {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate;
+  contain: paint !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .v6-root .m-glass-control:not(:disabled):hover {
+    transform: translate3d(0, -1px, 0) !important;
+    background:
+      radial-gradient(circle at 18% 0%, rgba(255,255,255,0.22), transparent 38%),
+      linear-gradient(135deg, rgba(26,34,51,0.58), rgba(26,34,51,0.34) 52%, rgba(26,34,51,0.20)) !important;
+    border-color: rgba(255,255,255,0.34) !important;
+    box-shadow:
+      0 18px 34px -22px rgba(0,0,0,0.58),
+      inset 0 1px 0 rgba(255,255,255,0.36),
+      inset 0 -1px 0 rgba(255,255,255,0.08),
+      inset 0 0 0 0.5px rgba(255,255,255,0.22) !important;
+    filter: saturate(1.02) brightness(1.01) !important;
+  }
+}
+
+.v6-root .m-glass-control:not(:disabled):active {
+  transform: translate3d(0, 0, 0) scale(0.992) !important;
+}
+
 /* prefers-reduced-motion — disable V6 fade animations */
 @media (prefers-reduced-motion: reduce) {
   .m-fade-up, .m-fade-in { animation: none; }
-  .m-card.tap:hover { transform: none; }
+  .v6-root :where(button, [role="button"], .m-btn, .m-card.tap, .mode-item, .tab, .tab-new-btn),
+  .m-card.tap:hover,
+  .m-state:hover,
+  .m-state:active {
+    transform: none !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* ===========================================================================
@@ -680,6 +800,27 @@ input[type="range"].m-slider::-moz-range-thumb {
 }
 .mobile-root .mb-tap:active { transform: scale(0.985); }
 
+.mobile-root :where(button, [role="button"], .mb-as-card) {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 160ms cubic-bezier(0.25, 1, 0.5, 1),
+    box-shadow 180ms ease,
+    background 140ms ease;
+}
+
+.mobile-root :where(button, [role="button"], .mb-as-card):not(:disabled):active {
+  transform: scale(0.985);
+  transition-duration: 90ms;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mobile-root :where(button, [role="button"], .mb-as-card):not(:disabled):hover {
+    transform: translate3d(0, -1.5px, 0);
+  }
+}
+
 /* Hide scrollbar (horizontal carousels) */
 .mobile-root .mb-hide-scroll::-webkit-scrollbar { display: none; }
 .mobile-root .mb-hide-scroll { scrollbar-width: none; }
@@ -705,6 +846,11 @@ input[type="range"].m-slider::-moz-range-thumb {
 @media (prefers-reduced-motion: reduce) {
   .mobile-root .mb-fade-up,
   .mb-slide-up { animation: none; }
+  .mobile-root :where(button, [role="button"], .mb-as-card),
+  .mobile-root :where(button, [role="button"], .mb-as-card):not(:disabled):active {
+    transform: none !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* ─── PWA viewport handling — required for mobile chat pill ────────────────
