@@ -1,6 +1,171 @@
 # Yulia Agentic Platform Build Plan
 
-Saved: May 11, 2026
+Saved: May 11, 2026  
+Execution refresh: May 13, 2026
+
+## Restore Point Protocol
+
+The current active clone is `/Users/paul/Desktop/SMBx-active`.
+
+Starting restore point:
+
+- Commit: `9132cb9`
+- Tag: `restore/agentic-build-start-20260513-174322`
+- Purpose: preserve the current UI, texture, mobile/desktop, and early agency work before the next sequential build pass.
+
+Going forward, work should be saved in small restore-point commits at the end of every meaningful phase:
+
+1. **Phase checkpoint commit:** after a phase builds and passes local verification.
+2. **Tag:** `restore/agentic-phase-N-YYYYMMDD-HHMMSS`.
+3. **Optional push:** only when the phase is stable enough for Railway/prod testing.
+4. **Rollback rule:** if a phase drifts visually or functionally, return to the most recent restore tag instead of trying to untangle a large dirty working tree.
+
+Suggested cadence:
+
+- Commit before any high-risk schema/API refactor.
+- Commit after every action-surface batch.
+- Commit after every working end-to-end flow.
+- Commit before pushing to `main`.
+
+## Sequential Execution Plan
+
+This is the order to knock the remaining work out. Each phase should finish with a build, targeted test, restore-point commit, and short note in this document.
+
+### Phase A — Surface Action Audit and Contract Map
+
+Goal: every visible command has a real backend action or a deliberate disabled/future state.
+
+Tasks:
+
+- Inventory every desktop button/card/chevron/menu action across Today, Pipeline, Search, Files, Deal Detail, Analysis, Document Viewer, and Learn.
+- Inventory every mobile action across Today, Pipeline, Search, Files, Deal Detail, Analysis, Document Viewer, and chat sheet.
+- Map each action to an existing action contract or add the missing contract.
+- Remove or relabel controls that imply a backend action that does not exist yet.
+- Add a local action manifest so desktop, mobile, and chat can share action names.
+
+Done when:
+
+- No primary button silently navigates to the wrong surface.
+- Every user-facing action has one canonical action name.
+- The manifest identifies gaps clearly instead of hiding them.
+
+Checkpoint A.1, May 13:
+
+- Added a frontend surface action manifest so UI controls can point to canonical action IDs instead of relying on display text.
+- Updated deal brief next moves to carry hidden `actionId` metadata from Yulia's briefing layer.
+- Fixed Yulia's tool schema so `tax_legal_structure` can be selected by Claude and opened as a structured canvas.
+- Updated deal detail recommended moves to prefer explicit action metadata before falling back to text matching.
+- Updated `compare_deals` tool description to reflect that it now opens a canvas, not only a chat table.
+
+### Phase B — Unified Action Dispatcher
+
+Goal: UI clicks and Yulia chat commands execute through the same governed action spine.
+
+Tasks:
+
+- Add a typed frontend action dispatcher.
+- Route buttons through the dispatcher instead of ad hoc `openTab`, `ask`, or placeholder navigation when the action is material.
+- Make dispatcher responses handle: open tab, open mobile view, update canvas, stage confirmation, show error, or ask for missing input.
+- Ensure chat tool results use the same surface action payload shape.
+
+Done when:
+
+- Clicking “Run analysis” and asking Yulia to run the same analysis produce the same backend action and canvas result.
+
+### Phase C — Analysis Workbench Completion
+
+Goal: analysis is always a canvas artifact, not chat math.
+
+Tasks:
+
+- Finish reusable structured analysis canvas.
+- Add sliders for every adjustable numeric input.
+- Add scenario labels: Base, Downside, Upside, Custom.
+- Add saved scenario history and restore.
+- Add version comparison.
+- Add Yulia context bridge: chat knows active analysis, active scenario, current version, and changed assumptions.
+- Add export/share/request-review actions.
+
+Done when:
+
+- A valuation, SBA, working-capital, capital-structure, market-intelligence, and comparison analysis can be run, adjusted, saved, reopened, and discussed with Yulia.
+
+### Phase D — Full Analysis and Model Catalog
+
+Goal: cover SMB through institutional/big-deal work with deterministic math plus LLM explanation.
+
+Tasks:
+
+- Expand model definitions using `METHODOLOGY_V17.md`, `METHODOLOGY_V18a_TAX_AMENDMENT.md`, and `METHODOLOGY_V18b_LEGAL_AMENDMENT.md`.
+- Fill model families: normalization/QoE, valuation, financing, LBO, DCF, comps, buyer fit, tax, legal, LOI terms, red flags, PMI, portfolio comparison.
+- Add required-input checks and missing-data prompts.
+- Add professional-trigger outputs for tax/legal/counsel/lender/banker review.
+
+Done when:
+
+- Yulia can select the right model by deal archetype, league, gate, and user request without dumping unsupported numbers into chat.
+
+### Phase E — Evidence and Market Intelligence Runtime
+
+Goal: Yulia becomes the go-to market intelligence source, not a static dashboard.
+
+Tasks:
+
+- Add evidence/citation objects to analysis runs.
+- Connect market reads to cached/source-backed industry, buyer, lender, legal, tax, and macro signals.
+- Add freshness timestamps and source quality.
+- Generate scheduled portfolio and deal reads.
+- Replace static Today/Deal commentary with cached Yulia reads from live facts.
+
+Done when:
+
+- Today and Deal Detail market intelligence are generated from real deal/file/market data with sources and freshness.
+
+### Phase F — Document Lifecycle and Data Room
+
+Goal: every document/file state change is real and governed.
+
+Tasks:
+
+- Normalize private workspace, all files, data room, shared, review, deferred, action-needed, executed.
+- Wire document creation, opening, editing, review request, share, file-to-data-room, and executed-lock actions.
+- Enforce immutability for executed records.
+- Add audit events and permission checks.
+
+Done when:
+
+- A private draft can move through review, sharing/data-room placement, execution, and immutable storage without fake UI states.
+
+### Phase G — Governance, Guardrails, and Model Routing
+
+Goal: Yulia acts autonomously inside the right legal/tax/broker boundaries.
+
+Tasks:
+
+- Load methodology, legal, tax, and market posture into runtime context.
+- Enforce action permission levels.
+- Stage external/irreversible actions for confirmation.
+- Route tax/legal answers through issue-spotting and handoff language.
+- Feed user model preference into chat, analysis generation, market intelligence, and document generation.
+
+Done when:
+
+- Yulia can do the work, but signoff/communication/execution remains with the user or licensed professional where required.
+
+### Phase H — Test Harness and Production Readiness
+
+Goal: no fake buttons, no cross-user data leaks, no silent regressions.
+
+Tasks:
+
+- Add Playwright coverage for the main desktop and mobile flows.
+- Add API tests for action contracts, analysis runs, scenario saves, document lifecycle, data-room actions, and staged confirmations.
+- Add golden test deals and expected formula outputs.
+- Add production smoke checklist for Railway.
+
+Done when:
+
+- We can push with confidence and test live without guessing what is wired.
 
 ## North Star
 
@@ -33,6 +198,21 @@ The codebase already has several important pieces:
 The gap is that these pieces are not yet one coherent execution system. Yulia can sometimes generate a deliverable, but she cannot yet reliably create an interactive analysis, cite its evidence, update assumptions, compare scenarios, maintain versions, attach findings to a deal, route signoffs, and keep the UI in sync across Today, Pipeline, Files, Deal Detail, Search, and Chat.
 
 ## Non-Negotiable Architecture
+
+### 0. Chat-First Intent, Contract-Based Execution
+
+Yulia remains a chat-first agent. Users should not need to learn commands, keywords, routes, or software operations.
+
+The action system is not a hard-coded command language for chat. It is the governed execution layer underneath Yulia's natural-language understanding:
+
+1. The user speaks naturally.
+2. Yulia interprets the user's intent with full deal, methodology, file, model, and portfolio context.
+3. If the intent requires action, Yulia chooses the right governed action/tool.
+4. The action opens or updates the correct surface: analysis canvas, document, model, file view, deal page, search run, review queue, or staged confirmation.
+
+Buttons, cards, and chevrons are shortcuts into the same contracts. They are not the primary interface. The primary interface is still Yulia understanding what the user is trying to accomplish and doing the software work on their behalf.
+
+Hard-coded keyword matching should only be used as a temporary UI fallback for static demo rows, not as the chat architecture. Where possible, UI rows should carry explicit action metadata from the backend instead of guessing from display text.
 
 ### 1. Action Contracts
 

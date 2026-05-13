@@ -595,7 +595,7 @@ Return JSON only:
   "verdict": {"label":"PURSUE|WATCH|PASS|NEEDS DATA","score":number,"text":string},
   "marketRead": {"headline":string,"bullets":[string,string,string],"sourceSignals":[string],"researchNeeded":[string]},
   "taxLegal": {"tax":string,"legal":string,"signoffFlags":[string]},
-  "nextMoves": [{"title":string,"why":string,"prompt":string}],
+  "nextMoves": [{"title":string,"why":string,"prompt":string,"actionId":"run_market_intelligence|run_tax_legal_structure|run_working_capital_analysis|run_buyer_fit_analysis|run_valuation_analysis|run_comps_analysis|run_capital_structure_model|run_red_flags_analysis|generate_primary_deliverable|generate_loi|open_files_all|open_files_data_room|open_files_shared|open_files_needing_action|ask_yulia"}],
   "filesFocus": [{"title":string,"why":string,"id":string|null}]
 }
 
@@ -603,6 +603,8 @@ Rules:
 - This is the current deal read. Market intelligence, tax, and legal issue spotting must be obvious.
 - Do not give legal or tax advice. Surface options, facts, and sign-off requirements.
 - Use actual source data only; put gaps in researchNeeded.
+- Pick an actionId for every nextMove. This is execution metadata for the app; users do not see or type these command names.
+- Prefer canvas-producing actionIds for analysis asks. Do not use open_files_* when the intended work is analysis or modeling.
 
 Fallback shape you may improve:
 ${JSON.stringify(fallback)}
@@ -711,9 +713,24 @@ function buildDeterministicDealBrief(snapshot: Awaited<ReturnType<typeof buildDe
       signoffFlags: ['CPA/tax attorney signs off tax positions.', 'M&A counsel signs off legal instruments and executed documents.'],
     },
     nextMoves: [
-      { title: 'Generate market intelligence read', why: 'The deal should never rely on generic industry context.', prompt: `Generate the market intelligence read for ${dealName(deal)}.` },
-      { title: 'Run tax/legal issue spotting', why: 'Structure implications need to be visible before documents move.', prompt: `Spot the tax and legal issues for ${dealName(deal)}.` },
-      { title: 'Open files that need action', why: 'Work products and data-room items are the execution layer.', prompt: `Show files needing action for ${dealName(deal)}.` },
+      {
+        title: 'Generate market intelligence read',
+        why: 'The deal should never rely on generic industry context.',
+        prompt: `Generate the market intelligence read for ${dealName(deal)}.`,
+        actionId: 'run_market_intelligence',
+      },
+      {
+        title: 'Run tax/legal issue spotting',
+        why: 'Structure implications need to be visible before documents move.',
+        prompt: `Spot the tax and legal issues for ${dealName(deal)}.`,
+        actionId: 'run_tax_legal_structure',
+      },
+      {
+        title: 'Open files that need action',
+        why: 'Work products and data-room items are the execution layer.',
+        prompt: `Show files needing action for ${dealName(deal)}.`,
+        actionId: 'open_files_needing_action',
+      },
     ],
     filesFocus: snapshot.deliverables.slice(0, 5).map(doc => ({ title: displayDeliverableName(doc), why: statusLabel(doc.status), id: String(doc.id) })),
   };

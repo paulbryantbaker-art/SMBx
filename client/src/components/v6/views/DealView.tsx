@@ -14,6 +14,7 @@ import {
   type DataRoomDocument,
 } from "../../../hooks/useV6WorkspaceData";
 import { runActionAnalysis } from "../../../lib/v6ActionContracts";
+import { isSurfaceActionId, type SurfaceActionId } from "../../../lib/v6SurfaceActions";
 
 interface Stat { k: string; v: string; sub: string }
 interface LinkedFile {
@@ -253,7 +254,7 @@ interface DealBrief {
     legal?: string;
     signoffFlags?: string[];
   };
-  nextMoves?: Array<{ title?: string; why?: string; prompt?: string }>;
+  nextMoves?: Array<{ title?: string; why?: string; prompt?: string; actionId?: string | SurfaceActionId }>;
 }
 
 type DealNextMove = NonNullable<DealBrief["nextMoves"]>[number];
@@ -957,22 +958,26 @@ function buildDealIntelligence({
         title: move.title || "Open next move",
         why: move.why || "Yulia has this queued as the next action.",
         prompt: move.prompt,
+        actionId: isSurfaceActionId(move.actionId) ? move.actionId : undefined,
       }))
     : [
         {
           title: "Run the deeper market read",
           why: "Comps, buyer appetite, financing climate, and source gaps belong in the deal file.",
           prompt: `On ${dealName}: run the deeper market intelligence read.`,
+          actionId: "run_market_intelligence" as const,
         },
         {
           title: "Map tax and legal implications",
           why: "Structure choices need issue spotting before documents move.",
           prompt: `On ${dealName}: map tax, legal, and structure implications. Flag CPA and counsel sign-off points.`,
+          actionId: "run_tax_legal_structure" as const,
         },
         {
           title: "Open files needing action",
           why: "Documents are the execution layer behind the read.",
           prompt: `On ${dealName}: show me the files and deliverables that need action.`,
+          actionId: "open_files_needing_action" as const,
         },
       ];
 
@@ -1040,6 +1045,11 @@ function resolveDealMoveAction(
   journey: string | null | undefined,
   primaryDeliverable: { label: string; slug: string },
 ): DealMoveAction {
+  if (isSurfaceActionId(move.actionId)) {
+    const explicit = resolveSurfaceDealMoveAction(move.actionId, journey, primaryDeliverable);
+    if (explicit) return explicit;
+  }
+
   const text = `${move.title || ""} ${move.why || ""} ${move.prompt || ""}`.toLowerCase();
 
   if (/\bmarket\b|\bbuyer universe\b|\bsource gap\b|\bresearch\b|\bindustry\b|\bbuyer appetite\b/.test(text)) {
@@ -1120,6 +1130,98 @@ function resolveDealMoveAction(
   }
 
   return { kind: "chat" };
+}
+
+function resolveSurfaceDealMoveAction(
+  actionId: SurfaceActionId,
+  journey: string | null | undefined,
+  primaryDeliverable: { label: string; slug: string },
+): DealMoveAction | null {
+  switch (actionId) {
+    case "run_market_intelligence":
+      return {
+        kind: "analysis",
+        analysisType: "market_intelligence",
+        menuItemSlug: "universal-market-intelligence",
+        label: "market intelligence read",
+        busyKey: "market-read",
+      };
+    case "run_tax_legal_structure":
+      return {
+        kind: "analysis",
+        analysisType: "tax_legal_structure",
+        menuItemSlug: structureAnalysisForJourney(journey).slug,
+        label: "tax and legal implications model",
+        busyKey: "tax-legal",
+      };
+    case "run_working_capital_analysis":
+      return {
+        kind: "analysis",
+        analysisType: "working_capital",
+        menuItemSlug: journey === "sell" ? "sell-working-capital-analysis" : "buy-working-capital-model",
+        label: "working-capital analysis",
+        busyKey: "working-capital",
+      };
+    case "run_buyer_fit_analysis":
+      return {
+        kind: "analysis",
+        analysisType: "buyer_fit",
+        menuItemSlug: journey === "sell" ? "sell-buyer-list" : "buy-deal-scorecard",
+        label: "buyer fit analysis",
+        busyKey: "buyer-fit",
+      };
+    case "run_valuation_analysis":
+      return {
+        kind: "analysis",
+        analysisType: "valuation",
+        menuItemSlug: journey === "sell" ? "sell-valuation-report" : journey === "raise" ? "raise-pre-post-model" : "buy-valuation-model",
+        label: "valuation analysis",
+        busyKey: "valuation",
+      };
+    case "run_comps_analysis":
+      return {
+        kind: "analysis",
+        analysisType: "comps",
+        menuItemSlug: "universal-comp-analysis",
+        label: "comparable transactions analysis",
+        busyKey: "comps",
+      };
+    case "run_capital_structure_model":
+      return {
+        kind: "analysis",
+        analysisType: "capital_structure",
+        menuItemSlug: structureAnalysisForJourney(journey).slug,
+        label: "capital structure model",
+        busyKey: "structure",
+      };
+    case "run_red_flags_analysis": {
+      const risk = riskAnalysisForJourney(journey);
+      return {
+        kind: "analysis",
+        analysisType: "red_flags",
+        menuItemSlug: risk.slug,
+        label: risk.label,
+        busyKey: "risk",
+      };
+    }
+    case "generate_loi":
+      return { kind: "artifact", slug: "buy-loi-draft", label: "LOI draft", busyKey: "generate" };
+    case "generate_primary_deliverable":
+      return { kind: "artifact", slug: primaryDeliverable.slug, label: primaryDeliverable.label, busyKey: "generate" };
+    case "open_files_data_room":
+      return { kind: "scope", scope: "data-room", note: "Opened the shared diligence data room for this deal." };
+    case "open_files_shared":
+    case "open_files_needing_action":
+      return {
+        kind: "scope",
+        scope: "shared",
+        note: "Opened the shared/action queue: sent, received, deferred, in-review, and executed items.",
+      };
+    case "open_files_all":
+      return { kind: "scope", scope: "all", note: "Opened all files for this deal." };
+    default:
+      return null;
+  }
 }
 
 function buildDealFilesFromReal(

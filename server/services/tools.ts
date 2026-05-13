@@ -137,6 +137,7 @@ export const TOOL_DEFINITIONS: Tool[] = [
             'working_capital',
             'tax_structure',
             'legal_structure',
+            'tax_legal_structure',
             'term_sheet',
             'pmi_value_creation',
           ],
@@ -501,15 +502,12 @@ export const TOOL_DEFINITIONS: Tool[] = [
     },
   },
 
-  // ─── Compare deals (Phase A.3 — text-only restoration) ────────────────
-  // Phase A.3 ships a markdown comparison table that Yulia surfaces inline
-  // in chat. The autonomous-run version opened a side-by-side comparison
-  // surface in canvas; that UI is deferred until CD specs the design.
-  // Tool API stays compatible — when the surface lands, swap the response
-  // from text-table to canvas_action: 'compare_deals'.
+  // ─── Compare deals (Phase A.3) ────────────────────────────────────────
+  // Opens a structured side-by-side comparison surface in the canvas while
+  // preserving markdown commentary for Yulia's short read.
   {
     name: 'compare_deals',
-    description: 'Compare two or three deals side-by-side (BUY-side, picking which target to pursue). Returns a markdown comparison table that Yulia presents inline in chat — covers headline financials (revenue, SDE, EBITDA, multiple, asking price), current gate, and league for each deal. Use when the user says "compare these three", "which is the best of A B C", "side-by-side", etc.',
+    description: 'Compare two or three deals side-by-side and open a structured comparison analysis in the canvas. Covers headline financials, current gate, league, risks, and next action. Use when the user says "compare these three", "which is the best of A B C", "side-by-side", etc. Do not leave the comparison only in chat.',
     input_schema: {
       type: 'object' as const,
       properties: {
