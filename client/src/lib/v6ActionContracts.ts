@@ -1,6 +1,7 @@
-import { generateDealDeliverable, runDealAnalysis } from "../hooks/useV6WorkspaceData";
+import { compareDealsAnalysis, generateDealDeliverable, runDealAnalysis } from "../hooks/useV6WorkspaceData";
 import type { ModelPreference } from "./modelPreference";
 import type { OpenTab } from "../components/v6/types";
+import { getSurfaceActionContract, type SurfaceActionId } from "./v6SurfaceActions";
 
 export interface ActionDeal {
   id: number | string;
@@ -30,6 +31,18 @@ export interface AnalysisActionInput {
   modelPreference?: ModelPreference;
   requestedFrom?: string;
   onNote?: (message: string | null) => void;
+}
+
+export interface SurfaceActionExecutionInput {
+  actionId: SurfaceActionId;
+  openTab: OpenTab;
+  deal?: ActionDeal | null;
+  deals?: ActionDeal[];
+  title?: string;
+  modelPreference?: ModelPreference;
+  requestedFrom?: string;
+  onNote?: (message: string | null) => void;
+  onTalkToYulia?: (prompt: string) => void;
 }
 
 export function pickActionDeal<T extends ActionDeal>(deals: T[]): T | null {
@@ -130,6 +143,33 @@ export function analysisActionForTool(toolId: string, journey?: string | null): 
   }
 }
 
+export function analysisActionForSurfaceAction(actionId: SurfaceActionId, journey?: string | null): { analysisType: string; menuItemSlug?: string; label: string } | null {
+  switch (actionId) {
+    case "run_market_intelligence":
+      return { analysisType: "market_intelligence", menuItemSlug: "universal-market-intelligence", label: "market intelligence read" };
+    case "run_tax_legal_structure":
+      return { analysisType: "tax_legal_structure", menuItemSlug: journey === "sell" ? "sell-deal-structure-analysis" : "buy-capital-structure", label: "tax and legal implications model" };
+    case "run_working_capital_analysis":
+      return { analysisType: "working_capital", menuItemSlug: journey === "sell" ? "sell-working-capital-analysis" : "buy-working-capital-model", label: "working-capital analysis" };
+    case "run_recast_analysis":
+      return { analysisType: "recast", menuItemSlug: journey === "sell" ? "sell-financial-spread" : "buy-deal-scorecard", label: "recast analysis" };
+    case "run_buyer_fit_analysis":
+      return { analysisType: "buyer_fit", menuItemSlug: journey === "sell" ? "sell-buyer-list" : "buy-deal-scorecard", label: "buyer fit analysis" };
+    case "run_valuation_analysis":
+      return { analysisType: "valuation", menuItemSlug: journey === "sell" ? "sell-valuation-report" : journey === "raise" ? "raise-pre-post-model" : "buy-valuation-model", label: "valuation model" };
+    case "run_comps_analysis":
+      return { analysisType: "comps", menuItemSlug: "universal-comp-analysis", label: "comps analysis" };
+    case "run_capital_structure_model":
+      return { analysisType: "capital_structure", menuItemSlug: journey === "sell" ? "sell-deal-structure-analysis" : "buy-capital-structure", label: "capital structure model" };
+    case "run_sba_analysis":
+      return { analysisType: "sba", menuItemSlug: "universal-sba-analysis", label: "SBA structure analysis" };
+    case "run_red_flags_analysis":
+      return { analysisType: "red_flags", menuItemSlug: journey === "pmi" ? "pmi-ops-assessment" : journey === "sell" ? "sell-price-gap-analysis" : "buy-red-flag-report", label: "red-flag analysis" };
+    default:
+      return null;
+  }
+}
+
 export async function generateActionDeliverable({
   deal,
   slug,
@@ -197,6 +237,101 @@ export async function runActionAnalysis({
     });
   }
   return result;
+}
+
+export async function runActionComparison({
+  deals,
+  openTab,
+  title = "Deal comparison",
+  modelPreference,
+  requestedFrom,
+  onNote,
+}: {
+  deals: ActionDeal[];
+  openTab: OpenTab;
+  title?: string;
+  modelPreference?: ModelPreference;
+  requestedFrom?: string;
+  onNote?: (message: string | null) => void;
+}) {
+  const numericDealIds = deals
+    .map(deal => typeof deal.id === "number" ? deal.id : Number(deal.id))
+    .filter(Number.isFinite)
+    .slice(0, 4);
+  if (numericDealIds.length < 2) throw new Error("This comparison needs at least two real deals.");
+
+  const result = await compareDealsAnalysis({
+    dealIds: numericDealIds,
+    title,
+    modelPreference,
+    requestedFrom,
+  });
+  const tab = result.tab;
+  if (tab) {
+    onNote?.(`${tab.title || title} is open as a live comparison canvas.`);
+    openTab({
+      ...tab,
+      kind: "analysis",
+      title: tab.title || title,
+    });
+  } else {
+    onNote?.(`${title} is ready. Opening the comparison canvas.`);
+    openTab({
+      kind: "analysis",
+      title,
+      tool: "tool-compare",
+      markdown: result.message,
+      analysisData: result.analysisData,
+      analysisRunId: result.analysisRunId ?? null,
+    });
+  }
+  return result;
+}
+
+export async function executeSurfaceAction({
+  actionId,
+  openTab,
+  deal,
+  deals = [],
+  title,
+  modelPreference,
+  requestedFrom = "surface_action",
+  onNote,
+  onTalkToYulia,
+}: SurfaceActionExecutionInput) {
+  const contract = getSurfaceActionContract(actionId);
+
+  if (actionId === "compare_deals") {
+    const scopedDeals = deals.length >= 2 ? deals : deal ? [deal] : [];
+    return runActionComparison({
+      deals: scopedDeals,
+      openTab,
+      title: title || contract.label,
+      modelPreference,
+      requestedFrom,
+      onNote,
+    });
+  }
+
+  if (contract.kind === "analysis") {
+    const mapping = analysisActionForSurfaceAction(actionId, deal?.journey_type);
+    if (!deal || !mapping) {
+      onTalkToYulia?.(`${contract.label}. Use the active deal context and open the result as an interactive canvas.`);
+      throw new Error(`${contract.label} needs an active real deal.`);
+    }
+    return runActionAnalysis({
+      deal,
+      analysisType: mapping.analysisType,
+      menuItemSlug: mapping.menuItemSlug,
+      label: mapping.label,
+      openTab,
+      modelPreference,
+      requestedFrom,
+      onNote,
+    });
+  }
+
+  throw new Error(`${contract.label} is not wired through the dispatcher yet.`);
 }
 
 export function yuliaComparePrompt(deals: ActionDeal[]): string {

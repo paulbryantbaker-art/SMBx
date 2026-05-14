@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { createAnalysisRun, readAnalysisRunSnapshot, updateAnalysisRunSnapshot } from '../services/analysisRuntime.js';
-import { buildDeterministicAnalysis } from '../services/deterministicAnalysisEngine.js';
+import { buildDealComparisonAnalysis, buildDeterministicAnalysis } from '../services/deterministicAnalysisEngine.js';
 import { sql } from '../db.js';
 
 export const analysisRunsRouter = Router();
@@ -255,6 +255,93 @@ analysisRunsRouter.post('/deals/:dealId/analysis', async (req, res) => {
   } catch (err: any) {
     console.error('[analysis-runs] create analysis error:', err.message);
     return res.status(500).json({ error: 'Failed to run analysis' });
+  }
+});
+
+analysisRunsRouter.post('/deals/compare', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const rawDealIds = Array.isArray(req.body?.dealIds) ? req.body.dealIds : [];
+    const dealIds = rawDealIds
+      .map((id: unknown) => Number(id))
+      .filter((id: number) => Number.isFinite(id))
+      .slice(0, 4);
+
+    if (dealIds.length < 2) {
+      return res.status(400).json({ error: 'Need at least two deals to compare' });
+    }
+
+    const rows = await sql`
+      SELECT id, business_name, journey_type, current_gate, user_id, league,
+             industry, location, revenue, sde, ebitda, asking_price, financials, status
+      FROM deals
+      WHERE user_id = ${userId}
+        AND id = ANY(${dealIds})
+    `;
+
+    const rowById = new Map(rows.map((row: any) => [Number(row.id), row]));
+    const deals = dealIds.map(id => rowById.get(id)).filter(Boolean);
+    if (deals.length < 2) {
+      return res.status(404).json({ error: 'Could not find at least two owned deals to compare' });
+    }
+
+    const requestedTitle = typeof req.body?.title === 'string' && req.body.title.trim()
+      ? req.body.title.trim()
+      : null;
+    const tabTitle = requestedTitle || 'Deal comparison';
+    const analysisData = buildDealComparisonAnalysis(deals, tabTitle);
+    const canvasTabId = `analysis-comparison-${deals.map((deal: any) => deal.id).join('-')}-${Date.now()}`;
+
+    const analysisRun = await createAnalysisRun({
+      userId,
+      dealId: null,
+      conversationId: Number.isFinite(Number(req.body?.conversationId)) ? Number(req.body.conversationId) : null,
+      definitionSlug: 'deal_comparison',
+      analysisType: 'deal_comparison',
+      title: tabTitle,
+      status: 'complete',
+      scope: 'comparison',
+      source: 'ui_action',
+      inputPayload: {
+        dealIds: deals.map((deal: any) => Number(deal.id)),
+        analysisSchemaVersion: analysisData.schemaVersion,
+        requestedFrom: req.body?.requestedFrom || 'analysis_root',
+        requestedAt: new Date().toISOString(),
+      },
+      assumptions: { items: analysisData.assumptions },
+      outputs: { structuredAnalysis: analysisData },
+      commentaryMarkdown: analysisData.yuliaRead,
+      marketContext: { summary: analysisData.summary, metrics: analysisData.metrics, charts: analysisData.charts },
+      riskFlags: analysisData.risks,
+      missingData: analysisData.missingData,
+      professionalTriggers: analysisData.professionalTriggers,
+      canvasTabId,
+      modelPreference: req.body?.modelPreference ?? null,
+    });
+
+    return res.json({
+      ok: true,
+      canvas_action: 'open_tab',
+      tab: {
+        id: analysisRun?.canvas_tab_id || canvasTabId,
+        kind: 'analysis',
+        title: tabTitle,
+        tool: 'tool-compare',
+        analysisRunId: analysisRun?.id ?? null,
+        status: 'comparison complete',
+        markdown: analysisData.yuliaRead,
+        comparisonData: deals,
+        analysisData,
+      },
+      analysisRunId: analysisRun?.id ?? null,
+      analysisStatus: 'complete',
+      analysisType: 'deal_comparison',
+      analysisData,
+      message: `${tabTitle} is open as a structured comparison canvas.`,
+    });
+  } catch (err: any) {
+    console.error('[analysis-runs] compare deals error:', err.message);
+    return res.status(500).json({ error: 'Failed to compare deals' });
   }
 });
 

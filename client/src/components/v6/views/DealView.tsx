@@ -1162,6 +1162,14 @@ function resolveSurfaceDealMoveAction(
         label: "working-capital analysis",
         busyKey: "working-capital",
       };
+    case "run_recast_analysis":
+      return {
+        kind: "analysis",
+        analysisType: "recast",
+        menuItemSlug: journey === "sell" ? "sell-financial-spread" : "buy-deal-scorecard",
+        label: "recast analysis",
+        busyKey: "recast",
+      };
     case "run_buyer_fit_analysis":
       return {
         kind: "analysis",
@@ -1193,6 +1201,14 @@ function resolveSurfaceDealMoveAction(
         menuItemSlug: structureAnalysisForJourney(journey).slug,
         label: "capital structure model",
         busyKey: "structure",
+      };
+    case "run_sba_analysis":
+      return {
+        kind: "analysis",
+        analysisType: "sba",
+        menuItemSlug: "universal-sba-analysis",
+        label: "SBA structure analysis",
+        busyKey: "sba",
       };
     case "run_red_flags_analysis": {
       const risk = riskAnalysisForJourney(journey);

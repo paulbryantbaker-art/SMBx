@@ -80,6 +80,14 @@ Done when:
 
 - Clicking “Run analysis” and asking Yulia to run the same analysis produce the same backend action and canvas result.
 
+Checkpoint B.1, May 13:
+
+- Added a shared frontend `executeSurfaceAction` path for analysis actions, starting with Analysis Home tools and deal-comparison.
+- Added a persisted `/api/deals/compare` analysis endpoint so UI-triggered comparisons create the same structured analysis-run object shape as Yulia's `compare_deals` tool.
+- Added explicit `run_recast_analysis` and `run_sba_analysis` surface actions so Recast P&L and SBA tools do not masquerade as adjacent models.
+- Updated Today so logged-in recommendation surfaces do not fall back to static card-authored suggestions if the Yulia portfolio brief is unavailable; they show a Yulia-read refresh state instead.
+- Captured the rule that cards do not author recommendations. Yulia's portfolio/deal intelligence layer is the source of next moves, warnings, rankings, and suggested actions.
+
 ### Phase C — Analysis Workbench Completion
 
 Goal: analysis is always a canvas artifact, not chat math.
@@ -188,6 +196,24 @@ Yulia is an agentic deal-team member. She generates analysis, options, implicati
 The app is finished only when every surface is backed by real data, every meaningful button maps to a real action, and every Yulia response can open or update the correct canvas, document, model, file, deal, search result, or review queue.
 
 No more fake demo-only buttons. Demo data may exist for logged-out or sample mode, but logged-in users must see their own deals, files, analyses, and Yulia-generated work.
+
+### Yulia-Originated Recommendations
+
+Cards, rows, pills, and panels are presentation surfaces only. They do not author recommendations.
+
+Any suggestive or judgment-bearing statement must originate from Yulia's portfolio/deal intelligence layer:
+
+- next moves
+- "needs action" items
+- rankings and priority queues
+- "what changed" notes
+- market, tax, legal, financing, diligence, or file warnings
+- "Yulia is working/watching/recommends" language
+- recommended documents, analyses, scenarios, reviews, and outreach
+
+For logged-in users, those statements must come from live user/deal/file/analysis context through cached or fresh Yulia reads. Deterministic fallback is acceptable only as Yulia's briefing-layer fallback when the LLM or source refresh is unavailable, and it must be derived from actual user data.
+
+Static copy may describe the product, empty states, or logged-out samples, but it must not masquerade as Yulia's analysis of the user's portfolio. If the system does not have enough data to make a recommendation, the UI should say what Yulia needs next rather than inventing a card-level suggestion.
 
 ## Current Foundation
 

@@ -88,6 +88,13 @@ export interface RunAnalysisInput {
   assumptionOverrides?: Record<string, any>;
 }
 
+export interface CompareDealsInput {
+  dealIds: number[];
+  title?: string;
+  modelPreference?: ModelPreference;
+  requestedFrom?: string;
+}
+
 export function useV6WorkspaceData(user: User | null) {
   const [deals, setDeals] = useState<WorkspaceDeal[]>([]);
   const [deliverables, setDeliverables] = useState<WorkspaceDeliverable[]>([]);
@@ -196,6 +203,41 @@ export async function runDealAnalysis(input: RunAnalysisInput) {
     analysisStatus?: string;
     analysisType?: string;
     resolvedMenuItemSlug?: string;
+    analysisData?: Record<string, any>;
+    message?: string;
+  };
+}
+
+export async function compareDealsAnalysis(input: CompareDealsInput) {
+  const res = await fetch("/api/deals/compare", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({
+      dealIds: input.dealIds,
+      title: input.title,
+      modelPreference: input.modelPreference ?? "auto",
+      requestedFrom: input.requestedFrom ?? "ui_action",
+    }),
+  });
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(payload.error || payload.message || `HTTP ${res.status}`);
+  return payload as {
+    ok?: boolean;
+    canvas_action?: "open_tab";
+    tab?: {
+      id?: string;
+      kind: "analysis";
+      title: string;
+      tool?: string;
+      analysisRunId?: number | null;
+      status?: string;
+      markdown?: string;
+      comparisonData?: Record<string, any>[];
+      analysisData?: Record<string, any>;
+    };
+    analysisRunId?: number | null;
+    analysisStatus?: string;
+    analysisType?: string;
     analysisData?: Record<string, any>;
     message?: string;
   };

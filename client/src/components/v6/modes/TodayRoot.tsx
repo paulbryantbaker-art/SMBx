@@ -184,8 +184,9 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const useSampleData = !home.isAuthed || !workspace.canFetch;
   const realDeals = home.inReview.length > 0 ? home.inReview : home.picks;
   const liveBrief = useSampleData ? null : portfolioBrief;
+  const waitingForYuliaRead = !useSampleData && !liveBrief;
   const deals = useSampleData ? DEALS : (liveBrief?.deals.length ? liveBrief.deals : realDeals.slice(0, 5).map(dealToTodayDeal));
-  const liveDesk = liveBrief?.liveDesk?.length ? liveBrief.liveDesk : WORK;
+  const liveDesk = liveBrief?.liveDesk?.length ? liveBrief.liveDesk : useSampleData ? WORK : [];
   const files = useMemo<TodayFile[]>(
     () => {
       if (liveBrief?.files?.length) return liveBrief.files;
@@ -198,16 +199,39 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const lead = deals[0] ?? null;
   const leadTitle = lead?.title ?? "your first deal";
   const marketIntel = liveBrief?.marketIntelligence ?? {
-    eyebrow: "MARKET INTELLIGENCE LIVE",
-    headline: lead ? `${lead.title} is being read against market, structure, files, and next action.` : "Yulia turns every deal into a live intelligence desk.",
-    subhead: lead ? "Industry, buyer universe, financing climate, tax/legal issues, and work product belong in one place." : "Start with a deal or thesis and Yulia builds the market context around it.",
+    eyebrow: waitingForYuliaRead ? "YULIA READ REFRESHING" : "MARKET INTELLIGENCE LIVE",
+    headline: waitingForYuliaRead
+      ? "Yulia is rebuilding this portfolio read from your live workspace."
+      : lead
+        ? `${lead.title} is being read against market, structure, files, and next action.`
+        : "Yulia turns every deal into a live intelligence desk.",
+    subhead: waitingForYuliaRead
+      ? "Recommendations will appear after the briefing layer returns a sourced portfolio read."
+      : lead
+        ? "Industry, buyer universe, financing climate, tax/legal issues, and work product belong in one place."
+        : "Start with a deal or thesis and Yulia builds the market context around it.",
     bullets: [],
     sourceCount: 0,
     confidence: liveBrief ? "Live" : "Demo",
   };
   const heroNotes = liveBrief?.hero.notes?.length
     ? liveBrief.hero.notes
-    : [
+    : waitingForYuliaRead
+      ? [
+          {
+            label: "Read",
+            text: "Yulia is refreshing the portfolio read from live deals, files, reviews, and market sources.",
+          },
+          {
+            label: "Source",
+            text: "No card-level recommendation is shown until the briefing layer returns the sourced result.",
+          },
+          {
+            label: "Next",
+            text: "Ask Yulia for the current read, or open a deal while the portfolio summary refreshes.",
+          },
+        ]
+      : [
         {
           label: lead ? "Why now" : "First step",
           text: lead ? "The buyer call is close enough that weak language will travel." : "Tell Yulia the situation in plain English. She handles the software setup.",
@@ -268,7 +292,18 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
       }))
     : null;
 
-  const priorities = livePriorities ?? (lead
+  const priorities = livePriorities ?? (waitingForYuliaRead
+    ? [
+        {
+          kicker: "YULIA READ",
+          title: "Refresh the live priority queue",
+          sub: "Yulia is the source of portfolio priorities. Ask for the read while the briefing layer refreshes.",
+          cta: "Ask Yulia",
+          tone: "plum" as Tone,
+          action: () => ask("Refresh my live portfolio read and tell me what needs action, with the source behind each recommendation."),
+        },
+      ]
+    : lead
     ? [
         {
           kicker: "READY NOW",
@@ -337,7 +372,9 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           </div>
 
           <h1 style={T.headline}>
-            {liveBrief?.hero.title || (lead ? (
+            {liveBrief?.hero.title || (waitingForYuliaRead ? (
+              <>Yulia is refreshing <span style={T.headlineSerif}>your portfolio read</span>.</>
+            ) : lead ? (
               <>Yulia's read: <span style={T.headlineSerif}>{leadTitle}</span> needs your eye before the next buyer touch.</>
             ) : (
               <>Yulia is ready when <span style={T.headlineSerif}>your first deal</span> lands.</>
@@ -345,7 +382,9 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           </h1>
 
           <p style={T.lede}>
-            {liveBrief?.hero.lede || (lead
+            {liveBrief?.hero.lede || (waitingForYuliaRead
+              ? "The page is holding the surface, but the recommendation copy belongs to Yulia's briefing layer. When it returns, the cards below will reflect her sourced read."
+              : lead
               ? "The deal is still worth pursuing. Review the IOI, answer counsel on the NDA, and keep the buyer search narrow until working capital is buttoned up."
               : "No private workspace data is attached to this account yet. Start with a chat, source file, target, buyer pool, or deal thesis and Yulia will build the right surfaces around it.")}
           </p>

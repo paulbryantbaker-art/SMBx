@@ -595,7 +595,7 @@ Return JSON only:
   "verdict": {"label":"PURSUE|WATCH|PASS|NEEDS DATA","score":number,"text":string},
   "marketRead": {"headline":string,"bullets":[string,string,string],"sourceSignals":[string],"researchNeeded":[string]},
   "taxLegal": {"tax":string,"legal":string,"signoffFlags":[string]},
-  "nextMoves": [{"title":string,"why":string,"prompt":string,"actionId":"run_market_intelligence|run_tax_legal_structure|run_working_capital_analysis|run_buyer_fit_analysis|run_valuation_analysis|run_comps_analysis|run_capital_structure_model|run_red_flags_analysis|generate_primary_deliverable|generate_loi|open_files_all|open_files_data_room|open_files_shared|open_files_needing_action|ask_yulia"}],
+  "nextMoves": [{"title":string,"why":string,"prompt":string,"actionId":"run_market_intelligence|run_tax_legal_structure|run_working_capital_analysis|run_recast_analysis|run_buyer_fit_analysis|run_valuation_analysis|run_comps_analysis|run_capital_structure_model|run_sba_analysis|run_red_flags_analysis|generate_primary_deliverable|generate_loi|open_files_all|open_files_data_room|open_files_shared|open_files_needing_action|ask_yulia"}],
   "filesFocus": [{"title":string,"why":string,"id":string|null}]
 }
 

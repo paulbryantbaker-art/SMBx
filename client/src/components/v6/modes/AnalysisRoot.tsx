@@ -8,11 +8,13 @@ import { useV6WorkspaceData } from "../../../hooks/useV6WorkspaceData";
 import type { ModelPreference } from "../../../lib/modelPreference";
 import {
   analysisActionForTool,
+  executeSurfaceAction,
   pickActionDeal,
   primaryAnalysisActionForJourney,
   runActionAnalysis,
   yuliaComparePrompt,
 } from "../../../lib/v6ActionContracts";
+import type { SurfaceActionId } from "../../../lib/v6SurfaceActions";
 
 type ToneKey = "primary" | "secondary" | "tertiary" | "pursue" | "watch";
 
@@ -25,16 +27,16 @@ const RECENTS: RecentRun[] = [
   { id: "an-buyer",  title: "Big Fake Deal · Buyer fit",  deal: "Big Fake Deal · sample", updated: "Mar 24", status: "live"  },
 ];
 
-interface Tool { id: string; name: string; sub: string; icon: IconName; tone: ToneKey }
+interface Tool { id: string; name: string; sub: string; icon: IconName; tone: ToneKey; actionId?: SurfaceActionId }
 
 const TOOLS: Tool[] = [
-  { id: "tool-recast",  name: "Recast P&L",      sub: "Find honest add-backs",       icon: "chart", tone: "tertiary"  },
-  { id: "tool-comps",   name: "Comps",           sub: "Public + private benchmarks", icon: "chart", tone: "primary"   },
-  { id: "tool-val",     name: "Valuation model", sub: "DCF, multiples, structure",   icon: "chart", tone: "pursue"    },
-  { id: "tool-qoe",     name: "QoE Lite",        sub: "Quality of earnings sweep",   icon: "search",tone: "primary"   },
-  { id: "tool-buyer",   name: "Buyer fit",       sub: "Score against your thesis",   icon: "deal",  tone: "secondary" },
-  { id: "tool-sba",     name: "SBA structure",   sub: "Model leverage scenarios",    icon: "chart", tone: "watch"     },
-  { id: "tool-compare", name: "Compare deals",   sub: "Side-by-side next-action read",icon: "deal",  tone: "tertiary"  },
+  { id: "tool-recast",  name: "Recast P&L",      sub: "Find honest add-backs",       icon: "chart", tone: "tertiary", actionId: "run_recast_analysis" },
+  { id: "tool-comps",   name: "Comps",           sub: "Public + private benchmarks", icon: "chart", tone: "primary",  actionId: "run_comps_analysis" },
+  { id: "tool-val",     name: "Valuation model", sub: "DCF, multiples, structure",   icon: "chart", tone: "pursue",   actionId: "run_valuation_analysis" },
+  { id: "tool-qoe",     name: "QoE Lite",        sub: "Quality of earnings sweep",   icon: "search",tone: "primary",  actionId: "run_working_capital_analysis" },
+  { id: "tool-buyer",   name: "Buyer fit",       sub: "Score against your thesis",   icon: "deal",  tone: "secondary",actionId: "run_buyer_fit_analysis" },
+  { id: "tool-sba",     name: "SBA structure",   sub: "Model leverage scenarios",    icon: "chart", tone: "watch",    actionId: "run_sba_analysis" },
+  { id: "tool-compare", name: "Compare deals",   sub: "Side-by-side next-action read",icon: "deal",  tone: "tertiary", actionId: "compare_deals" },
 ];
 
 const TONE_BG: Record<ToneKey, string> = {
@@ -74,18 +76,58 @@ export function V6AnalysisRoot({
     setActionNote(null);
 
     if (tool?.id === "tool-compare") {
-      const compareDeals = workspace.deals.slice(0, 3);
-      openTab({
-        kind: "analysis",
-        title: "Deal comparison",
-        tool: tool.id,
-        comparisonData: compareDeals,
-      });
-      onTalkToYulia?.(yuliaComparePrompt(workspace.deals));
+      const compareDeals = workspace.deals.slice(0, 4);
+      if (compareDeals.length < 2) {
+        openTab({
+          kind: "analysis",
+          title: "Deal comparison",
+          tool: tool.id,
+          comparisonData: compareDeals,
+        });
+        onTalkToYulia?.(yuliaComparePrompt(workspace.deals));
+        return;
+      }
+      setBusyAction(tool.id);
+      try {
+        await executeSurfaceAction({
+          actionId: "compare_deals",
+          deals: compareDeals,
+          openTab,
+          title: "Deal comparison",
+          modelPreference,
+          requestedFrom: "analysis_root",
+          onNote: setActionNote,
+        });
+      } catch (e: any) {
+        setActionError(e?.message || "Could not compare deals.");
+      } finally {
+        setBusyAction(null);
+      }
       return;
     }
 
     const target = deal;
+    if (tool?.actionId && target) {
+      setBusyAction(tool.id);
+      try {
+        await executeSurfaceAction({
+          actionId: tool.actionId,
+          deal: target,
+          openTab,
+          modelPreference,
+          requestedFrom: "analysis_root",
+          onNote: setActionNote,
+          onTalkToYulia,
+        });
+        void workspace.refresh();
+      } catch (e: any) {
+        setActionError(e?.message || `Could not run ${tool.name}.`);
+      } finally {
+        setBusyAction(null);
+      }
+      return;
+    }
+
     const mapping = tool ? analysisActionForTool(tool.id, target?.journey_type) : primaryAnalysisActionForJourney(target?.journey_type);
     if (!target || !mapping) {
       openTab({ kind: "analysis", title: tool ? `New ${tool.name}` : "New analysis", tool: tool?.id });
