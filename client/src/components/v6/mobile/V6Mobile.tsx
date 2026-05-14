@@ -516,6 +516,8 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           versionNumber={view.versionNumber}
           onBack={() => setView({ kind: "tab", tab: activeTab })}
           onAskYulia={onAskYulia}
+          onOpenDeal={onOpenDeal}
+          onOpenDocument={onOpenLibraryDoc}
           onOpenDealFiles={(_dealId, dealTitle, scope) => {
             setView({
               kind: "library-detail",

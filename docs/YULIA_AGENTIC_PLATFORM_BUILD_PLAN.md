@@ -107,6 +107,13 @@ Checkpoint B.4, May 13:
 - Preserved local scenario-slider behavior for `update_model_assumption`, because those controls are the active analysis workspace rather than a separate navigation action.
 - Kept legacy analysis action rows as compatibility fallback until every generator emits surface action metadata.
 
+Checkpoint B.5, May 13:
+
+- Re-routed mobile analysis next actions through the same surface action contract registry instead of string-matching labels or `run_` prefixes.
+- Fixed mobile follow-on analysis routing so an action like `run_tax_legal_structure` opens the tax/legal canvas instead of degrading into a generic red-flags analysis when `analysisType` is omitted.
+- Added mobile handlers for contracted file, deal, document, chat, analysis, model, and governed-confirmation actions while keeping scenario sliders local to the open canvas.
+- Preserved legacy mobile action handling only as fallback for older analysis payloads without `surfaceActionId` metadata.
+
 ### Phase C — Analysis Workbench Completion
 
 Goal: analysis is always a canvas artifact, not chat math.

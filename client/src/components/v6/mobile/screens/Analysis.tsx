@@ -12,6 +12,7 @@ import {
   type StructuredAnalysisData,
   type StructuredAssumption,
 } from "../../../../lib/analysisCanvasModel";
+import { getSurfaceActionContract, isSurfaceActionId, type SurfaceActionId } from "../../../../lib/v6SurfaceActions";
 import { ChatStarterPill } from "../ChatStarterPill";
 import { MobileIcon } from "../icons";
 import { YIcon } from "../YIcon";
@@ -25,10 +26,13 @@ interface MobileAnalysisScreenProps {
   onBack: () => void;
   onAskYulia: (prompt: string) => void;
   onOpenDealFiles?: (dealId: string, dealTitle: string, scope: "all" | "data-room" | "shared") => void;
+  onOpenDeal?: (dealId: string, dealTitle: string) => void;
+  onOpenDocument?: (docTitle: string, docMeta?: string, docKind?: string) => void;
   onRunDealAnalysis?: (input: {
     dealId: string;
     dealTitle: string;
     analysisType: string;
+    menuItemSlug?: string;
     label: string;
     prompt: string;
   }) => void | Promise<void>;
@@ -49,6 +53,8 @@ export function MobileAnalysisScreen({
   onBack,
   onAskYulia,
   onOpenDealFiles,
+  onOpenDeal,
+  onOpenDocument,
   onRunDealAnalysis,
   onUpdate,
 }: MobileAnalysisScreenProps) {
@@ -116,20 +122,27 @@ export function MobileAnalysisScreen({
   const runNextAction = (action: NonNullable<StructuredAnalysisData["nextActions"]>[number]) => {
     const targetDealId = action.targetDealId ?? linkedDealId;
     const targetDealTitle = action.targetDealTitle || analysisDealTitle;
-    if (action.surfaceActionId === "open_files_all" || action.surfaceActionId === "open_files_data_room" || action.surfaceActionId === "open_files_shared" || action.surfaceActionId === "open_files_needing_action" || action.actionType === "open_files") {
-      const scope = action.fileScope
-        || (action.surfaceActionId === "open_files_data_room" ? "data-room" : action.surfaceActionId === "open_files_all" ? "all" : "shared");
+
+    if (isSurfaceActionId(action.surfaceActionId)) {
+      runContractedAction(action.surfaceActionId, action, targetDealId, targetDealTitle);
+      return;
+    }
+
+    if (action.actionType === "open_files") {
+      const scope = action.fileScope || "all";
       if (targetDealId != null && onOpenDealFiles) {
         onOpenDealFiles(String(targetDealId), targetDealTitle, scope);
         return;
       }
     }
-    if (action.surfaceActionId === "update_model_assumption" || action.actionType === "update_model") {
+
+    if (action.actionType === "update_model") {
       document.getElementById("mobile-analysis-scenario-controls")?.scrollIntoView({ behavior: "smooth", block: "start" });
       setNote("Use the sliders below to model the scenario. Saved versions stay attached to this analysis for Yulia.");
       return;
     }
-    if ((action.surfaceActionId?.startsWith("run_") || action.actionType === "run_analysis") && targetDealId != null && onRunDealAnalysis) {
+
+    if (action.actionType === "run_analysis" && targetDealId != null && onRunDealAnalysis) {
       onRunDealAnalysis({
         dealId: String(targetDealId),
         dealTitle: targetDealTitle,
@@ -140,6 +153,72 @@ export function MobileAnalysisScreen({
       return;
     }
     onAskYulia(action.prompt);
+  };
+
+  const runContractedAction = (
+    actionId: SurfaceActionId,
+    action: NonNullable<StructuredAnalysisData["nextActions"]>[number],
+    targetDealId: number | string | null,
+    targetDealTitle: string,
+  ) => {
+    const contract = getSurfaceActionContract(actionId);
+    const promptText = action.prompt || `${contract.label}. Use the open analysis context and keep the result tied to this canvas.`;
+
+    if (actionId === "update_model_assumption") {
+      document.getElementById("mobile-analysis-scenario-controls")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setNote("Use the sliders below to model the scenario. Saved versions stay attached to this analysis for Yulia.");
+      return;
+    }
+
+    if (actionId === "ask_yulia" || contract.result === "chat") {
+      onAskYulia(promptText);
+      return;
+    }
+
+    if (actionId === "open_deal") {
+      if (targetDealId != null && onOpenDeal) {
+        onOpenDeal(String(targetDealId), targetDealTitle);
+        return;
+      }
+      onAskYulia(promptText);
+      return;
+    }
+
+    if (isMobileFileAction(actionId)) {
+      if (targetDealId != null && onOpenDealFiles) {
+        onOpenDealFiles(String(targetDealId), targetDealTitle, action.fileScope || mobileFileScopeForAction(actionId));
+        return;
+      }
+      onAskYulia(promptText);
+      return;
+    }
+
+    if (actionId === "open_document") {
+      if (onOpenDocument) {
+        onOpenDocument(action.label || contract.label, structured.title || title, "analysis");
+        return;
+      }
+      onAskYulia(promptText);
+      return;
+    }
+
+    if (contract.kind === "analysis" && targetDealId != null && onRunDealAnalysis) {
+      onRunDealAnalysis({
+        dealId: String(targetDealId),
+        dealTitle: targetDealTitle,
+        analysisType: action.analysisType || contract.analysisType || structured.analysisType || "red_flags",
+        label: action.label || contract.label,
+        prompt: promptText,
+      });
+      return;
+    }
+
+    if (contract.requiresConfirmation || contract.result === "staged_confirmation") {
+      onAskYulia(`${promptText} Stage this governed action for confirmation before anything is shared, filed, sent, or requested.`);
+      return;
+    }
+
+    onAskYulia(promptText);
   };
 
   const updateAssumptions = async (updates: Record<string, unknown>, scenarioName?: string) => {
@@ -317,6 +396,26 @@ export function MobileAnalysisScreen({
       </div>
     </div>
   );
+}
+
+function isMobileFileAction(actionId: SurfaceActionId): boolean {
+  return actionId === "open_files_all"
+    || actionId === "open_files_data_room"
+    || actionId === "open_files_shared"
+    || actionId === "open_files_needing_action";
+}
+
+function mobileFileScopeForAction(actionId: SurfaceActionId): "all" | "data-room" | "shared" {
+  switch (actionId) {
+    case "open_files_data_room":
+      return "data-room";
+    case "open_files_shared":
+    case "open_files_needing_action":
+      return "shared";
+    case "open_files_all":
+    default:
+      return "all";
+  }
 }
 
 function FloatingChrome({ onBack }: { onBack: () => void }) {
