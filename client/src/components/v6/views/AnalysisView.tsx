@@ -17,8 +17,8 @@ import {
   type StructuredMetric,
   type StructuredTable,
 } from "../../../lib/analysisCanvasModel";
-import { runActionAnalysis } from "../../../lib/v6ActionContracts";
-import { getSurfaceActionContract, isSurfaceActionId } from "../../../lib/v6SurfaceActions";
+import { executeSurfaceAction, runActionAnalysis } from "../../../lib/v6ActionContracts";
+import { getSurfaceActionContract, isSurfaceActionId, type SurfaceActionId } from "../../../lib/v6SurfaceActions";
 import type { FileScope, OpenTab } from "../types";
 
 type AccentKey = "primary" | "tertiary" | "pursue" | "watch" | "pass";
@@ -480,9 +480,9 @@ function StructuredAnalysisCanvas({
 	    });
 	  };
 
-	  const runContractAnalysis = async (
-	    action: NonNullable<StructuredAnalysisData["nextActions"]>[number],
-	    analysisType: string,
+		  const runContractAnalysis = async (
+		    action: NonNullable<StructuredAnalysisData["nextActions"]>[number],
+		    analysisType: string,
 	    label: string,
 	  ) => {
 	    const targetDealId = action.targetDealId ?? linkedDealId;
@@ -504,39 +504,44 @@ function StructuredAnalysisCanvas({
 	    } catch (error: any) {
 	      onTalkToYulia?.(`${action.prompt} I tried to run this from the canvas, but it needs Yulia to coordinate it: ${error?.message || "analysis failed"}`);
 	      setSaveNote("Yulia has the request. The direct analysis action could not complete from this canvas.");
-	    }
-	  };
+		    }
+		  };
 
-	  const runNextAction = async (action: NonNullable<StructuredAnalysisData["nextActions"]>[number]) => {
-	    if (isSurfaceActionId(action.surfaceActionId)) {
-	      const contract = getSurfaceActionContract(action.surfaceActionId);
-	      if (contract.kind === "analysis" && contract.analysisType) {
-	        await runContractAnalysis(action, action.analysisType || contract.analysisType, contract.label);
-	        return;
-	      }
-	      if (action.surfaceActionId === "open_deal") {
-	        openTargetDeal(action);
-	        return;
-	      }
-	      if (action.surfaceActionId === "open_files_all" || action.surfaceActionId === "open_files_data_room" || action.surfaceActionId === "open_files_shared" || action.surfaceActionId === "open_files_needing_action") {
-	        const scope: FileScope = action.fileScope
-	          || (action.surfaceActionId === "open_files_data_room" ? "data-room" : action.surfaceActionId === "open_files_all" ? "all" : "shared");
-	        openTargetDeal(action, scope);
-	        return;
-	      }
-	      if (action.surfaceActionId === "update_model_assumption") {
-	        openScenarioControls();
-	        return;
-	      }
-	      if (action.surfaceActionId === "request_review") {
-	        openReviewPackage(action.prompt);
-	        return;
-	      }
-	      if (action.surfaceActionId === "ask_yulia") {
-	        onTalkToYulia?.(action.prompt);
-	        return;
-	      }
-	    }
+		  const runSurfaceAction = async (
+		    action: NonNullable<StructuredAnalysisData["nextActions"]>[number],
+		    surfaceActionId: SurfaceActionId,
+		  ) => {
+		    if (surfaceActionId === "update_model_assumption") {
+		      openScenarioControls();
+		      return;
+		    }
+		    const contract = getSurfaceActionContract(surfaceActionId);
+		    const targetDealId = action.targetDealId ?? linkedDealId;
+		    setSaveNote(`${contract.label} is opening from this analysis...`);
+		    try {
+		      await executeSurfaceAction({
+		        actionId: surfaceActionId,
+		        deal: targetDealId != null ? { id: targetDealId, name: action.targetDealTitle || analysisDealTitle } : null,
+		        document: { title: action.label },
+		        fileScope: action.fileScope,
+		        title: action.label,
+		        prompt: action.prompt,
+		        openTab: openTab ?? (() => undefined),
+		        requestedFrom: "analysis_next_action",
+		        onNote: setSaveNote,
+		        onTalkToYulia,
+		      });
+		    } catch (error: any) {
+		      onTalkToYulia?.(`${action.prompt} I tried to run this from the analysis canvas, but Yulia needs to coordinate it: ${error?.message || "action failed"}`);
+		      setSaveNote("Yulia has the request. The direct action could not complete from this canvas.");
+		    }
+		  };
+
+		  const runNextAction = async (action: NonNullable<StructuredAnalysisData["nextActions"]>[number]) => {
+		    if (isSurfaceActionId(action.surfaceActionId)) {
+		      await runSurfaceAction(action, action.surfaceActionId);
+		      return;
+		    }
 
 	    const labelText = `${action.label} ${action.prompt}`.toLowerCase();
 	    if (action.actionType === "run_analysis") {

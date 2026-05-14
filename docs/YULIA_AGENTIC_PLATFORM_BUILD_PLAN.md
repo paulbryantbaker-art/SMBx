@@ -101,6 +101,12 @@ Checkpoint B.3, May 13:
 - Kept the older local text resolver only as a compatibility fallback for sample or legacy next moves without action metadata.
 - Verified the build after the deal-detail dispatcher handoff.
 
+Checkpoint B.4, May 13:
+
+- Re-routed desktop analysis-canvas next actions through the shared dispatcher whenever structured analysis includes a `surfaceActionId`.
+- Preserved local scenario-slider behavior for `update_model_assumption`, because those controls are the active analysis workspace rather than a separate navigation action.
+- Kept legacy analysis action rows as compatibility fallback until every generator emits surface action metadata.
+
 ### Phase C — Analysis Workbench Completion
 
 Goal: analysis is always a canvas artifact, not chat math.
