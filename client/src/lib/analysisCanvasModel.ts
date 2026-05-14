@@ -36,7 +36,16 @@ export interface StructuredAnalysisData {
   risks?: Array<{ label: string; detail: string; severity: "low" | "medium" | "high"; trigger?: string }>;
   missingData?: Array<{ label: string; why: string; priority: "low" | "medium" | "high" }>;
   professionalTriggers?: Array<{ role: string; trigger: string; why: string }>;
-  nextActions?: Array<{ label: string; actionType: string; prompt: string }>;
+  nextActions?: Array<{
+    label: string;
+    actionType: string;
+    prompt: string;
+    surfaceActionId?: string;
+    analysisType?: string;
+    fileScope?: "all" | "data-room" | "shared";
+    targetDealId?: number;
+    targetDealTitle?: string;
+  }>;
   yuliaRead?: string;
   calculations?: Record<string, unknown>;
 }

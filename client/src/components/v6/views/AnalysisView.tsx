@@ -17,6 +17,8 @@ import {
   type StructuredMetric,
   type StructuredTable,
 } from "../../../lib/analysisCanvasModel";
+import { runActionAnalysis } from "../../../lib/v6ActionContracts";
+import { getSurfaceActionContract, isSurfaceActionId } from "../../../lib/v6SurfaceActions";
 import type { FileScope, OpenTab } from "../types";
 
 type AccentKey = "primary" | "tertiary" | "pursue" | "watch" | "pass";
@@ -426,6 +428,7 @@ function StructuredAnalysisCanvas({
 	  const nextActions = dataView.nextActions ?? [];
 	  const primaryPrompt = nextActions[0]?.prompt || `Explain ${dataView.title || fallbackTitle} and tell me what decision this supports.`;
 	  const analysisDealId = dataView.calculations?.dealId;
+	  const linkedDealId = typeof analysisDealId === "number" || typeof analysisDealId === "string" ? analysisDealId : null;
 	  const analysisDealTitle = typeof dataView.calculations?.dealName === "string"
 	    ? dataView.calculations.dealName
 	    : (dataView.title || fallbackTitle).split(" · ")[0];
@@ -437,14 +440,14 @@ function StructuredAnalysisCanvas({
 	  };
 
 	  const openDealFiles = (scope: FileScope) => {
-	    if (analysisDealId == null) {
+	    if (linkedDealId == null) {
 	      onTalkToYulia?.(`Open the ${scope === "all" ? "" : `${scope} `}files that support ${dataView.title || fallbackTitle}.`);
 	      setSaveNote("Yulia has the request, but this analysis is not linked to a saved deal id yet.");
 	      return;
 	    }
 	    openTab?.({
 	      kind: "deal",
-	      id: String(analysisDealId),
+	      id: String(linkedDealId),
 	      title: analysisDealTitle,
 	      fileScope: scope,
 	    });
@@ -462,15 +465,92 @@ function StructuredAnalysisCanvas({
 	    setSaveNote("Review package opened. Yulia has the analysis context and sign-off guardrails.");
 	  };
 
-	  const runNextAction = (action: NonNullable<StructuredAnalysisData["nextActions"]>[number]) => {
+	  const openTargetDeal = (action: NonNullable<StructuredAnalysisData["nextActions"]>[number], scope?: FileScope) => {
+	    const targetDealId = action.targetDealId ?? linkedDealId;
+	    if (targetDealId == null) {
+	      onTalkToYulia?.(action.prompt);
+	      setSaveNote("Yulia has the request, but this action needs a linked deal before it can open a deal surface.");
+	      return;
+	    }
+	    openTab?.({
+	      kind: "deal",
+	      id: String(targetDealId),
+	      title: action.targetDealTitle || analysisDealTitle,
+	      fileScope: scope,
+	    });
+	  };
+
+	  const runContractAnalysis = async (
+	    action: NonNullable<StructuredAnalysisData["nextActions"]>[number],
+	    analysisType: string,
+	    label: string,
+	  ) => {
+	    const targetDealId = action.targetDealId ?? linkedDealId;
+	    if (targetDealId == null) {
+	      onTalkToYulia?.(action.prompt);
+	      setSaveNote("Yulia has the request, but this analysis needs a linked deal id before it can run.");
+	      return;
+	    }
+	    setSaveNote(`${label} is running as a live analysis canvas...`);
+	    try {
+	      await runActionAnalysis({
+	        deal: { id: targetDealId, name: action.targetDealTitle || analysisDealTitle },
+	        analysisType,
+	        label,
+	        openTab: openTab ?? (() => undefined),
+	        requestedFrom: "analysis_next_action",
+	        onNote: setSaveNote,
+	      });
+	    } catch (error: any) {
+	      onTalkToYulia?.(`${action.prompt} I tried to run this from the canvas, but it needs Yulia to coordinate it: ${error?.message || "analysis failed"}`);
+	      setSaveNote("Yulia has the request. The direct analysis action could not complete from this canvas.");
+	    }
+	  };
+
+	  const runNextAction = async (action: NonNullable<StructuredAnalysisData["nextActions"]>[number]) => {
+	    if (isSurfaceActionId(action.surfaceActionId)) {
+	      const contract = getSurfaceActionContract(action.surfaceActionId);
+	      if (contract.kind === "analysis" && contract.analysisType) {
+	        await runContractAnalysis(action, action.analysisType || contract.analysisType, contract.label);
+	        return;
+	      }
+	      if (action.surfaceActionId === "open_deal") {
+	        openTargetDeal(action);
+	        return;
+	      }
+	      if (action.surfaceActionId === "open_files_all" || action.surfaceActionId === "open_files_data_room" || action.surfaceActionId === "open_files_shared" || action.surfaceActionId === "open_files_needing_action") {
+	        const scope: FileScope = action.fileScope
+	          || (action.surfaceActionId === "open_files_data_room" ? "data-room" : action.surfaceActionId === "open_files_all" ? "all" : "shared");
+	        openTargetDeal(action, scope);
+	        return;
+	      }
+	      if (action.surfaceActionId === "update_model_assumption") {
+	        openScenarioControls();
+	        return;
+	      }
+	      if (action.surfaceActionId === "request_review") {
+	        openReviewPackage(action.prompt);
+	        return;
+	      }
+	      if (action.surfaceActionId === "ask_yulia") {
+	        onTalkToYulia?.(action.prompt);
+	        return;
+	      }
+	    }
+
 	    const labelText = `${action.label} ${action.prompt}`.toLowerCase();
+	    if (action.actionType === "run_analysis") {
+	      await runContractAnalysis(action, action.analysisType || "red_flags", action.label);
+	      return;
+	    }
 	    if (action.actionType === "open_files") {
-	      const scope: FileScope = /data[-\s]?room/.test(labelText)
-	        ? "data-room"
-	        : /action|review|signature|sign-off|signoff|sent|received|deferred|executed|shared/.test(labelText)
-	          ? "shared"
-	          : "all";
-	      openDealFiles(scope);
+	      const scope: FileScope = action.fileScope
+	        || (/data[-\s]?room/.test(labelText)
+	          ? "data-room"
+	          : /action|review|signature|sign-off|signoff|sent|received|deferred|executed|shared/.test(labelText)
+	            ? "shared"
+	            : "all");
+	      openTargetDeal(action, scope);
 	      return;
 	    }
 	    if (action.actionType === "update_model") {
@@ -489,7 +569,7 @@ function StructuredAnalysisCanvas({
 	      return;
 	    }
 	    if (action.actionType === "open_deal") {
-	      openDealFiles("all");
+	      openTargetDeal(action);
 	      return;
 	    }
 	    onTalkToYulia?.(action.prompt);
@@ -601,7 +681,7 @@ function StructuredAnalysisCanvas({
 	                  className="m-state"
 	                  type="button"
 	                  style={A.actionRow}
-	                  onClick={() => runNextAction(action)}
+	                  onClick={() => { void runNextAction(action); }}
 	                >
                   <span>{action.label}</span>
                   <span style={{ color: "var(--m-primary)", fontWeight: 800 }}>→</span>

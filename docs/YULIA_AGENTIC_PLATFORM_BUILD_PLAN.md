@@ -57,6 +57,14 @@ Checkpoint A.1, May 13:
 - Updated deal detail recommended moves to prefer explicit action metadata before falling back to text matching.
 - Updated `compare_deals` tool description to reflect that it now opens a canvas, not only a chat table.
 
+Checkpoint A.2, May 13:
+
+- Extended structured analysis `nextActions` with hidden `surfaceActionId`, target deal, analysis type, and file-scope metadata.
+- Updated deterministic analysis outputs so comparison, tax/legal, evidence, and file actions carry executable intent instead of relying only on button text.
+- Wired desktop analysis next-action rows to the same live analysis/file/model/review contracts used by deal detail.
+- Added mobile analysis next-action rows so phone canvases can open deal files, rerun follow-on analyses, and jump to scenario sliders with the same intent metadata.
+- Verified the app builds after the action metadata and analysis canvas changes.
+
 ### Phase B — Unified Action Dispatcher
 
 Goal: UI clicks and Yulia chat commands execute through the same governed action spine.

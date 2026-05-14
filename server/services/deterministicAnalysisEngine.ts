@@ -47,7 +47,16 @@ export interface AnalysisOutput {
   risks: Array<{ label: string; detail: string; severity: Severity; trigger?: string }>;
   missingData: Array<{ label: string; why: string; priority: Priority }>;
   professionalTriggers: Array<{ role: string; trigger: string; why: string }>;
-  nextActions: Array<{ label: string; actionType: string; prompt: string }>;
+  nextActions: Array<{
+    label: string;
+    actionType: string;
+    prompt: string;
+    surfaceActionId?: string;
+    analysisType?: string;
+    fileScope?: 'all' | 'data-room' | 'shared';
+    targetDealId?: number;
+    targetDealTitle?: string;
+  }>;
   yuliaRead: string;
   calculations: Record<string, unknown>;
 }
@@ -204,8 +213,23 @@ export function buildDealComparisonAnalysis(deals: DeterministicDealRow[], title
     missingData: facts.flatMap(f => commonMissingData(f)).slice(0, 6),
     professionalTriggers: facts.flatMap(f => commonProfessionalTriggers(f, 'deal_comparison')).slice(0, 6),
     nextActions: [
-      { label: 'Open lead deal', actionType: 'open_deal', prompt: `Open ${top?.name || 'the highest-ranked deal'} and show the evidence behind the ranking.` },
-      { label: 'Run diligence comparison', actionType: 'run_analysis', prompt: 'Compare diligence gaps, legal issues, tax structure, buyer fit, and financing feasibility for these deals.' },
+      {
+        label: 'Open lead deal',
+        actionType: 'open_deal',
+        surfaceActionId: 'open_deal',
+        targetDealId: top?.deal.id,
+        targetDealTitle: top?.name,
+        prompt: `Open ${top?.name || 'the highest-ranked deal'} and show the evidence behind the ranking.`,
+      },
+      {
+        label: 'Run diligence comparison',
+        actionType: 'run_analysis',
+        surfaceActionId: 'run_red_flags_analysis',
+        analysisType: 'red_flags',
+        targetDealId: top?.deal.id,
+        targetDealTitle: top?.name,
+        prompt: 'Compare diligence gaps, legal issues, tax structure, buyer fit, and financing feasibility for these deals.',
+      },
     ],
     yuliaRead: top
       ? `${top.name} is the first deal I would inspect because it has the strongest current fit score. I am not making the decision for you; the canvas is showing where the evidence is strongest and where the remaining diligence gaps sit.`
@@ -496,9 +520,25 @@ function buildTaxLegalStructureAnalysis(facts: DealFacts, common: Partial<Analys
     ].slice(0, 6),
     professionalTriggers: [...taxTriggers, ...legalTriggers].slice(0, 6),
     nextActions: [
-      { label: 'Model structure scenarios', actionType: 'update_model', prompt: 'Open structure assumptions and model asset vs equity, seller note, earnout, and working-capital outcomes.' },
-      { label: 'Route to counsel/CPA', actionType: 'request_review', prompt: 'Prepare a counsel and CPA review package with the tax/legal issue map and files needing sign-off.' },
-      { label: 'Open files needing action', actionType: 'open_files', prompt: 'Show the deal files that need review, signature, execution, or professional sign-off.' },
+      {
+        label: 'Model structure scenarios',
+        actionType: 'update_model',
+        surfaceActionId: 'update_model_assumption',
+        prompt: 'Open structure assumptions and model asset vs equity, seller note, earnout, and working-capital outcomes.',
+      },
+      {
+        label: 'Route to counsel/CPA',
+        actionType: 'request_review',
+        surfaceActionId: 'request_review',
+        prompt: 'Prepare a counsel and CPA review package with the tax/legal issue map and files needing sign-off.',
+      },
+      {
+        label: 'Open files needing action',
+        actionType: 'open_files',
+        surfaceActionId: 'open_files_needing_action',
+        fileScope: 'shared',
+        prompt: 'Show the deal files that need review, signature, execution, or professional sign-off.',
+      },
     ],
   });
 }
@@ -823,9 +863,25 @@ function commonProfessionalTriggers(facts: DealFacts, analysisType: string): Ana
 
 function commonNextActions(facts: DealFacts, analysisType: string): AnalysisOutput['nextActions'] {
   return [
-    { label: 'Ask Yulia for the read', actionType: 'chat', prompt: `Explain the ${ANALYSIS_LABELS[analysisType] || analysisType} for ${facts.name}, including the facts, risks, missing data, and the next decision I need to make.` },
-    { label: 'Request missing evidence', actionType: 'request_evidence', prompt: `Create a short evidence request list for ${facts.name} based on this analysis.` },
-    { label: 'Open deal files', actionType: 'open_files', prompt: `Open the files for ${facts.name} and show where the supporting evidence should live.` },
+    {
+      label: 'Ask Yulia for the read',
+      actionType: 'chat',
+      surfaceActionId: 'ask_yulia',
+      prompt: `Explain the ${ANALYSIS_LABELS[analysisType] || analysisType} for ${facts.name}, including the facts, risks, missing data, and the next decision I need to make.`,
+    },
+    {
+      label: 'Request missing evidence',
+      actionType: 'request_evidence',
+      surfaceActionId: 'request_review',
+      prompt: `Create a short evidence request list for ${facts.name} based on this analysis.`,
+    },
+    {
+      label: 'Open deal files',
+      actionType: 'open_files',
+      surfaceActionId: 'open_files_all',
+      fileScope: 'all',
+      prompt: `Open the files for ${facts.name} and show where the supporting evidence should live.`,
+    },
   ];
 }
 

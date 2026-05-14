@@ -24,6 +24,14 @@ interface MobileAnalysisScreenProps {
   versionNumber?: number | null;
   onBack: () => void;
   onAskYulia: (prompt: string) => void;
+  onOpenDealFiles?: (dealId: string, dealTitle: string, scope: "all" | "data-room" | "shared") => void;
+  onRunDealAnalysis?: (input: {
+    dealId: string;
+    dealTitle: string;
+    analysisType: string;
+    label: string;
+    prompt: string;
+  }) => void | Promise<void>;
   onUpdate?: (patch: {
     analysisData?: Record<string, any>;
     versionNumber?: number | null;
@@ -40,6 +48,8 @@ export function MobileAnalysisScreen({
   versionNumber,
   onBack,
   onAskYulia,
+  onOpenDealFiles,
+  onRunDealAnalysis,
   onUpdate,
 }: MobileAnalysisScreenProps) {
   const [data, setData] = useState<Record<string, any> | undefined>(analysisData);
@@ -97,6 +107,40 @@ export function MobileAnalysisScreen({
 
   const structured = data;
   const primaryPrompt = structured.nextActions?.[0]?.prompt || `Explain ${structured.title || title} and what decision this supports.`;
+  const analysisDealId = structured.calculations?.dealId;
+  const linkedDealId = typeof analysisDealId === "number" || typeof analysisDealId === "string" ? analysisDealId : null;
+  const analysisDealTitle = typeof structured.calculations?.dealName === "string"
+    ? structured.calculations.dealName
+    : (structured.title || title).split(" · ")[0];
+
+  const runNextAction = (action: NonNullable<StructuredAnalysisData["nextActions"]>[number]) => {
+    const targetDealId = action.targetDealId ?? linkedDealId;
+    const targetDealTitle = action.targetDealTitle || analysisDealTitle;
+    if (action.surfaceActionId === "open_files_all" || action.surfaceActionId === "open_files_data_room" || action.surfaceActionId === "open_files_shared" || action.surfaceActionId === "open_files_needing_action" || action.actionType === "open_files") {
+      const scope = action.fileScope
+        || (action.surfaceActionId === "open_files_data_room" ? "data-room" : action.surfaceActionId === "open_files_all" ? "all" : "shared");
+      if (targetDealId != null && onOpenDealFiles) {
+        onOpenDealFiles(String(targetDealId), targetDealTitle, scope);
+        return;
+      }
+    }
+    if (action.surfaceActionId === "update_model_assumption" || action.actionType === "update_model") {
+      document.getElementById("mobile-analysis-scenario-controls")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setNote("Use the sliders below to model the scenario. Saved versions stay attached to this analysis for Yulia.");
+      return;
+    }
+    if ((action.surfaceActionId?.startsWith("run_") || action.actionType === "run_analysis") && targetDealId != null && onRunDealAnalysis) {
+      onRunDealAnalysis({
+        dealId: String(targetDealId),
+        dealTitle: targetDealTitle,
+        analysisType: action.analysisType || "red_flags",
+        label: action.label,
+        prompt: action.prompt,
+      });
+      return;
+    }
+    onAskYulia(action.prompt);
+  };
 
   const updateAssumptions = async (updates: Record<string, unknown>, scenarioName?: string) => {
     const nextData = patchStructuredDataAssumptions(structured, updates);
@@ -219,13 +263,36 @@ export function MobileAnalysisScreen({
       ) : null}
 
       {structured.assumptions?.length ? (
-        <section style={S.whiteCard}>
+        <section id="mobile-analysis-scenario-controls" style={S.whiteCard}>
           <ScenarioPanel
             assumptions={structured.assumptions}
             analysisTitle={structured.title || title}
             onSave={updateAssumptions}
             onAskYulia={onAskYulia}
           />
+        </section>
+      ) : null}
+
+      {structured.nextActions?.length ? (
+        <section style={S.whiteCard}>
+          <div className="mb-mono" style={S.cardEyebrow}>NEXT ACTIONS</div>
+          <h2 style={S.sectionTitle}>Act on the read</h2>
+          <div style={S.nextActionStack}>
+            {structured.nextActions.map(action => (
+              <button
+                key={`${action.actionType}-${action.label}`}
+                type="button"
+                style={S.nextActionRow}
+                onClick={() => runNextAction(action)}
+              >
+                <span style={{ display: "grid", gap: 4 }}>
+                  <span style={{ fontSize: 16, fontWeight: 900 }}>{action.label}</span>
+                  <span style={{ fontSize: 13, lineHeight: 1.3, color: "var(--mb-ink-3)" }}>{action.prompt}</span>
+                </span>
+                <MobileIcon name="chevron" size={16} c="rgba(31,42,66,0.55)" />
+              </button>
+            ))}
+          </div>
         </section>
       ) : null}
 
@@ -650,6 +717,28 @@ const S: Record<string, CSSProperties> = {
     fontSize: 15,
     lineHeight: 1.36,
     color: "var(--mb-ink-3)",
+  },
+  nextActionStack: {
+    display: "grid",
+    gap: 0,
+    marginTop: 14,
+    borderRadius: 22,
+    overflow: "hidden",
+    border: "1px solid var(--mb-line-2)",
+    background: "rgba(247,249,253,0.7)",
+  },
+  nextActionRow: {
+    display: "grid",
+    gridTemplateColumns: "1fr auto",
+    alignItems: "center",
+    gap: 12,
+    minHeight: 76,
+    padding: "14px 14px",
+    border: "none",
+    borderBottom: "1px solid var(--mb-line-2)",
+    background: "rgba(255,255,255,0.64)",
+    textAlign: "left",
+    color: "var(--mb-ink)",
   },
   chartBlock: {
     marginTop: 16,

@@ -516,6 +516,17 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           versionNumber={view.versionNumber}
           onBack={() => setView({ kind: "tab", tab: activeTab })}
           onAskYulia={onAskYulia}
+          onOpenDealFiles={(_dealId, dealTitle, scope) => {
+            setView({
+              kind: "library-detail",
+              tab: activeTab,
+              dealTitle,
+              dealMeta: view.dealMeta,
+              portfolioName: "Deal files",
+              dealStage: scope,
+            });
+          }}
+          onRunDealAnalysis={onRunDealAnalysis}
           onUpdate={(patch) => setView(prev => prev.kind === "analysis" ? { ...prev, ...patch } : prev)}
         />
       )}
