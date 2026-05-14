@@ -126,6 +126,16 @@ function summarizeModelState(modelState?: Record<string, unknown>, analysisData?
           value: item.displayValue,
         }))
       : undefined;
+    summary.evidence = Array.isArray(structured.evidenceRefs)
+      ? structured.evidenceRefs.slice(0, 6).map((item: Record<string, unknown>) => ({
+          label: item.label,
+          source: item.source,
+          confidence: item.confidence,
+        }))
+      : undefined;
+    summary.yuliaRead = typeof structured.yuliaRead === "string"
+      ? structured.yuliaRead.slice(0, 360)
+      : undefined;
   }
-  return Object.keys(summary).length > 0 ? JSON.stringify(summary).slice(0, 1200) : undefined;
+  return Object.keys(summary).length > 0 ? JSON.stringify(summary).slice(0, 1800) : undefined;
 }

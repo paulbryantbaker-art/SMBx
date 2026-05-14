@@ -172,6 +172,56 @@ export function V6AnalysisView({
   const [interest, setInterest] = useState(11.5);
   const [growth, setGrowth] = useState(4);
   const [actionNote, setActionNote] = useState<string | null>(null);
+  const [snapshotData, setSnapshotData] = useState<Record<string, any> | null>(null);
+  const [snapshotMarkdown, setSnapshotMarkdown] = useState<string | null>(null);
+  const [snapshotStatus, setSnapshotStatus] = useState<string | null>(null);
+  const [snapshotVersion, setSnapshotVersion] = useState<number | null>(null);
+  const [snapshotType, setSnapshotType] = useState<string | null>(null);
+  const [snapshotLoading, setSnapshotLoading] = useState(false);
+  const [snapshotError, setSnapshotError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!analysisRunId || analysisData) {
+      setSnapshotData(null);
+      setSnapshotMarkdown(null);
+      setSnapshotStatus(null);
+      setSnapshotVersion(null);
+      setSnapshotType(null);
+      setSnapshotError(null);
+      setSnapshotLoading(false);
+      return;
+    }
+
+    let alive = true;
+    setSnapshotLoading(true);
+    setSnapshotError(null);
+    fetch(`/api/analysis-runs/${analysisRunId}`, { headers: authHeaders() })
+      .then(async res => {
+        const payload = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(payload.error || `HTTP ${res.status}`);
+        return payload;
+      })
+      .then(payload => {
+        if (!alive) return;
+        setSnapshotData(payload.analysisData ?? null);
+        setSnapshotMarkdown(payload.commentaryMarkdown ?? null);
+        setSnapshotStatus(payload.analysisStatus ?? status ?? null);
+        setSnapshotVersion(payload.versionNumber ?? null);
+        setSnapshotType(payload.analysisType ?? null);
+      })
+      .catch((err: any) => {
+        if (!alive) return;
+        setSnapshotError(err?.message || "Could not load saved analysis.");
+        setSnapshotData(null);
+      })
+      .finally(() => {
+        if (alive) setSnapshotLoading(false);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, [analysisRunId, analysisData, status]);
 
   const purchase = +(sde * multiple).toFixed(2);
   const down = +(purchase * downPct / 100).toFixed(2);
@@ -217,7 +267,7 @@ export function V6AnalysisView({
   const scenarioPrompt = () =>
     `${title}: save this scenario. Multiple ${multiple.toFixed(1)}x, SDE $${sde.toFixed(2)}M, ${downPct}% down, ${interest.toFixed(2)}% interest, ${growth >= 0 ? "+" : ""}${growth.toFixed(1)}% year-1 growth. DSCR ${dscr.toFixed(2)}, free cash flow $${(cashFlow - 0.35).toFixed(2)}M.`;
 
-  const saveScenario = () => {
+  const draftScenarioNote = () => {
     const docTitle = `${title} · scenario note`;
     openTab?.({
       kind: "doc",
@@ -228,20 +278,59 @@ export function V6AnalysisView({
     setActionNote("Scenario note opened and sent to Yulia for drafting.");
   };
 
-  const addToDeal = () => {
+  const askYuliaToFile = () => {
     onTalkToYulia?.(`${scenarioPrompt()} Attach this analysis to the relevant deal workspace and tell me which deal file or data-room location it belongs in.`);
     setActionNote("Yulia has the scenario context and can attach it to the right deal.");
   };
 
-  if (isStructuredAnalysis(analysisData)) {
+  const optimizeFallbackScenario = () => {
+    onTalkToYulia?.(`${scenarioPrompt()} Use optimize_scenario if this canvas is linked to a live analysis run; otherwise optimize from these visible assumptions and tell me the best path, negotiation asks, fallback positions, reps and warranties, diligence requests, professional signoffs, and work products to create next.`);
+    setActionNote("Yulia has the scenario context and will optimize the path from the visible assumptions.");
+  };
+
+  const effectiveAnalysisData = analysisData ?? snapshotData ?? undefined;
+  const effectiveMarkdown = markdown ?? snapshotMarkdown ?? undefined;
+  const effectiveStatus = status ?? snapshotStatus ?? undefined;
+  const effectiveVersion = versionNumber ?? snapshotVersion ?? undefined;
+  const effectiveTool = tool ?? snapshotType ?? undefined;
+  const needsRealCanvas = shouldUseRealAnalysisCanvas({
+    title,
+    tool: effectiveTool,
+    analysisRunId,
+    analysisData: effectiveAnalysisData,
+  });
+
+  if (snapshotLoading && analysisRunId && !analysisData) {
+    return (
+      <AnalysisRunState
+        title={title}
+        eyebrow="ANALYSIS · LOADING RUN"
+        body="Yulia is reopening the saved analysis run and its evidence trail. This view will not show sample numbers while the real canvas loads."
+      />
+    );
+  }
+
+  if (snapshotError && analysisRunId && !analysisData) {
+    return (
+      <AnalysisRunState
+        title={title}
+        eyebrow="ANALYSIS · RUN UNAVAILABLE"
+        body={snapshotError}
+        actionLabel="Ask Yulia to rerun it"
+        onAction={() => onTalkToYulia?.(`Rerun ${title} as a real interactive analysis canvas from the current deal data, market intelligence, evidence, and methodology guardrails.`)}
+      />
+    );
+  }
+
+  if (isStructuredAnalysis(effectiveAnalysisData)) {
     return (
       <StructuredAnalysisCanvas
         fallbackTitle={title}
-        data={analysisData}
+        data={effectiveAnalysisData}
         analysisRunId={analysisRunId}
         deliverableId={deliverableId}
-        status={status}
-        versionNumber={versionNumber}
+        status={effectiveStatus}
+        versionNumber={effectiveVersion}
         resolvedMenuItemSlug={resolvedMenuItemSlug}
         openTab={openTab}
         onTalkToYulia={onTalkToYulia}
@@ -249,13 +338,25 @@ export function V6AnalysisView({
     );
   }
 
-  if (tool === "tool-compare") {
+  if (effectiveTool === "tool-compare") {
     return (
       <ComparisonCanvas
         title={title}
-        markdown={markdown}
+        markdown={effectiveMarkdown}
         comparisonData={comparisonData ?? []}
         onTalkToYulia={onTalkToYulia}
+      />
+    );
+  }
+
+  if (needsRealCanvas) {
+    return (
+      <AnalysisRunState
+        title={title}
+        eyebrow="ANALYSIS · NEEDS REAL MODEL"
+        body="This tab was opened with an analysis intent but no model payload. Yulia should run the specific analysis before the canvas shows numbers, sliders, scenarios, or conclusions."
+        actionLabel="Run this analysis"
+        onAction={() => onTalkToYulia?.(`Run ${title} as a real interactive analysis canvas. Use the active deal data, market intelligence, evidence trail, methodology, tax/legal guardrails, and model-specific assumptions. Do not answer only in chat; open the canvas with sliders and saved-scenario support.`)}
       />
     );
   }
@@ -263,21 +364,22 @@ export function V6AnalysisView({
   return (
     <div className="m-fade-up" style={{ maxWidth: 1180 }}>
       <section style={{ marginBottom: 24 }}>
-        <div className="mono" style={A.eyebrow}>{tool === "tool-compare" ? "ANALYSIS · COMPARISON · YULIA CAN REFINE" : "ANALYSIS · LIVE · YULIA RECOMPUTES AS YOU MOVE"}</div>
+        <div className="mono" style={A.eyebrow}>{effectiveTool === "tool-compare" ? "ANALYSIS · COMPARISON · YULIA CAN REFINE" : "ANALYSIS · LIVE · YULIA RECOMPUTES AS YOU MOVE"}</div>
         <div style={A.headerRow}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <h1 style={A.h1}>{title}</h1>
             <div style={A.sub}>
               {analysisRunId ? `Saved analysis #${analysisRunId}` : "Live analysis"}
-              {status ? ` · ${status}` : ""}
+              {effectiveStatus ? ` · ${effectiveStatus}` : ""}
               {deliverableId ? ` · deliverable #${deliverableId}` : ""}
               {resolvedMenuItemSlug ? ` · ${resolvedMenuItemSlug}` : ""}
             </div>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <button className="m-btn outlined" type="button" onClick={resetScenario}>Reset</button>
-            <button className="m-btn outlined" type="button" onClick={saveScenario}>Save scenario</button>
-            <button className="m-btn filled" type="button" onClick={addToDeal}>Add to deal</button>
+            <button className="m-btn outlined" type="button" onClick={draftScenarioNote}>Draft note</button>
+            <button className="m-btn outlined" type="button" onClick={optimizeFallbackScenario}>Optimize</button>
+            <button className="m-btn filled" type="button" onClick={askYuliaToFile}>Ask Yulia to file</button>
           </div>
         </div>
         {actionNote && <div style={A.actionNote}>{actionNote}</div>}
@@ -496,160 +598,161 @@ function StructuredAnalysisCanvas({
   const risks = dataView.risks ?? [];
   const missingData = dataView.missingData ?? [];
   const professionalTriggers = dataView.professionalTriggers ?? [];
-	  const nextActions = dataView.nextActions ?? [];
-	  const primaryPrompt = nextActions[0]?.prompt || `Explain ${dataView.title || fallbackTitle} and tell me what decision this supports.`;
-	  const analysisDealId = dataView.calculations?.dealId;
-	  const linkedDealId = typeof analysisDealId === "number" || typeof analysisDealId === "string" ? analysisDealId : null;
-	  const analysisDealTitle = typeof dataView.calculations?.dealName === "string"
-	    ? dataView.calculations.dealName
-	    : (dataView.title || fallbackTitle).split(" · ")[0];
+  const evidenceRefs = dataView.evidenceRefs ?? [];
+  const nextActions = dataView.nextActions ?? [];
+  const primaryPrompt = nextActions[0]?.prompt || `Explain ${dataView.title || fallbackTitle} and tell me what decision this supports.`;
+  const analysisDealId = dataView.calculations?.dealId;
+  const linkedDealId = typeof analysisDealId === "number" || typeof analysisDealId === "string" ? analysisDealId : null;
+  const analysisDealTitle = typeof dataView.calculations?.dealName === "string"
+    ? dataView.calculations.dealName
+    : (dataView.title || fallbackTitle).split(" · ")[0];
 
-	  const openScenarioNote = () => {
-	    const docTitle = `${dataView.title || fallbackTitle} · Yulia read`;
-	    openTab?.({ kind: "doc", title: docTitle, id: `doc-analysis-note-${Date.now()}` });
-	    onTalkToYulia?.(`Turn this analysis into a concise work product note: ${dataView.yuliaRead || dataView.summary}`);
-	  };
+  const openScenarioNote = () => {
+    const docTitle = `${dataView.title || fallbackTitle} · Yulia read`;
+    openTab?.({ kind: "doc", title: docTitle, id: `doc-analysis-note-${Date.now()}` });
+    onTalkToYulia?.(`Turn this analysis into a concise work product note: ${dataView.yuliaRead || dataView.summary}`);
+  };
 
-	  const openDealFiles = (scope: FileScope) => {
-	    if (linkedDealId == null) {
-	      onTalkToYulia?.(`Open the ${scope === "all" ? "" : `${scope} `}files that support ${dataView.title || fallbackTitle}.`);
-	      setSaveNote("Yulia has the request, but this analysis is not linked to a saved deal id yet.");
-	      return;
-	    }
-	    openTab?.({
-	      kind: "deal",
-	      id: String(linkedDealId),
-	      title: analysisDealTitle,
-	      fileScope: scope,
-	    });
-	  };
+  const openDealFiles = (scope: FileScope) => {
+    if (linkedDealId == null) {
+      onTalkToYulia?.(`Open the ${scope === "all" ? "" : `${scope} `}files that support ${dataView.title || fallbackTitle}.`);
+      setSaveNote("Yulia has the request, but this analysis is not linked to a saved deal id yet.");
+      return;
+    }
+    openTab?.({
+      kind: "deal",
+      id: String(linkedDealId),
+      title: analysisDealTitle,
+      fileScope: scope,
+    });
+  };
 
-	  const openScenarioControls = () => {
-	    document.getElementById("analysis-scenario-controls")?.scrollIntoView({ behavior: "smooth", block: "start" });
-	    setSaveNote("Use the scenario sliders below to model changes. Saved versions are attached to this analysis run for Yulia to reference.");
-	  };
+  const openScenarioControls = () => {
+    document.getElementById("analysis-scenario-controls")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setSaveNote("Use the scenario sliders below to model changes. Saved versions are attached to this analysis run for Yulia to reference.");
+  };
 
-	  const openReviewPackage = (prompt: string) => {
-	    const docTitle = `${dataView.title || fallbackTitle} · review package`;
-	    openTab?.({ kind: "doc", title: docTitle, id: `doc-review-package-${Date.now()}` });
-	    onTalkToYulia?.(`${prompt} Draft this as a review package with evidence, open questions, and user decision points. Do not present legal or tax sign-off as final.`);
-	    setSaveNote("Review package opened. Yulia has the analysis context and sign-off guardrails.");
-	  };
+  const openReviewPackage = (prompt: string) => {
+    const docTitle = `${dataView.title || fallbackTitle} · review package`;
+    openTab?.({ kind: "doc", title: docTitle, id: `doc-review-package-${Date.now()}` });
+    onTalkToYulia?.(`${prompt} Draft this as a review package with evidence, open questions, and user decision points. Do not present legal or tax sign-off as final.`);
+    setSaveNote("Review package opened. Yulia has the analysis context and sign-off guardrails.");
+  };
 
-	  const openTargetDeal = (action: NonNullable<StructuredAnalysisData["nextActions"]>[number], scope?: FileScope) => {
-	    const targetDealId = action.targetDealId ?? linkedDealId;
-	    if (targetDealId == null) {
-	      onTalkToYulia?.(action.prompt);
-	      setSaveNote("Yulia has the request, but this action needs a linked deal before it can open a deal surface.");
-	      return;
-	    }
-	    openTab?.({
-	      kind: "deal",
-	      id: String(targetDealId),
-	      title: action.targetDealTitle || analysisDealTitle,
-	      fileScope: scope,
-	    });
-	  };
+  const openTargetDeal = (action: NonNullable<StructuredAnalysisData["nextActions"]>[number], scope?: FileScope) => {
+    const targetDealId = action.targetDealId ?? linkedDealId;
+    if (targetDealId == null) {
+      onTalkToYulia?.(action.prompt);
+      setSaveNote("Yulia has the request, but this action needs a linked deal before it can open a deal surface.");
+      return;
+    }
+    openTab?.({
+      kind: "deal",
+      id: String(targetDealId),
+      title: action.targetDealTitle || analysisDealTitle,
+      fileScope: scope,
+    });
+  };
 
-		  const runContractAnalysis = async (
-		    action: NonNullable<StructuredAnalysisData["nextActions"]>[number],
-		    analysisType: string,
-	    label: string,
-	  ) => {
-	    const targetDealId = action.targetDealId ?? linkedDealId;
-	    if (targetDealId == null) {
-	      onTalkToYulia?.(action.prompt);
-	      setSaveNote("Yulia has the request, but this analysis needs a linked deal id before it can run.");
-	      return;
-	    }
-	    setSaveNote(`${label} is running as a live analysis canvas...`);
-	    try {
-	      await runActionAnalysis({
-	        deal: { id: targetDealId, name: action.targetDealTitle || analysisDealTitle },
-	        analysisType,
-	        label,
-	        openTab: openTab ?? (() => undefined),
-	        requestedFrom: "analysis_next_action",
-	        onNote: setSaveNote,
-	      });
-	    } catch (error: any) {
-	      onTalkToYulia?.(`${action.prompt} I tried to run this from the canvas, but it needs Yulia to coordinate it: ${error?.message || "analysis failed"}`);
-	      setSaveNote("Yulia has the request. The direct analysis action could not complete from this canvas.");
-		    }
-		  };
+  const runContractAnalysis = async (
+    action: NonNullable<StructuredAnalysisData["nextActions"]>[number],
+    analysisType: string,
+    label: string,
+  ) => {
+    const targetDealId = action.targetDealId ?? linkedDealId;
+    if (targetDealId == null) {
+      onTalkToYulia?.(action.prompt);
+      setSaveNote("Yulia has the request, but this analysis needs a linked deal id before it can run.");
+      return;
+    }
+    setSaveNote(`${label} is running as a live analysis canvas...`);
+    try {
+      await runActionAnalysis({
+        deal: { id: targetDealId, name: action.targetDealTitle || analysisDealTitle },
+        analysisType,
+        label,
+        openTab: openTab ?? (() => undefined),
+        requestedFrom: "analysis_next_action",
+        onNote: setSaveNote,
+      });
+    } catch (error: any) {
+      onTalkToYulia?.(`${action.prompt} I tried to run this from the canvas, but it needs Yulia to coordinate it: ${error?.message || "analysis failed"}`);
+      setSaveNote("Yulia has the request. The direct analysis action could not complete from this canvas.");
+    }
+  };
 
-		  const runSurfaceAction = async (
-		    action: NonNullable<StructuredAnalysisData["nextActions"]>[number],
-		    surfaceActionId: SurfaceActionId,
-		  ) => {
-		    if (surfaceActionId === "update_model_assumption") {
-		      openScenarioControls();
-		      return;
-		    }
-		    const contract = getSurfaceActionContract(surfaceActionId);
-		    const targetDealId = action.targetDealId ?? linkedDealId;
-		    setSaveNote(`${contract.label} is opening from this analysis...`);
-		    try {
-		      await executeSurfaceAction({
-		        actionId: surfaceActionId,
-		        deal: targetDealId != null ? { id: targetDealId, name: action.targetDealTitle || analysisDealTitle } : null,
-		        document: { title: action.label },
-		        fileScope: action.fileScope,
-		        title: action.label,
-		        prompt: action.prompt,
-		        openTab: openTab ?? (() => undefined),
-		        requestedFrom: "analysis_next_action",
-		        onNote: setSaveNote,
-		        onTalkToYulia,
-		      });
-		    } catch (error: any) {
-		      onTalkToYulia?.(`${action.prompt} I tried to run this from the analysis canvas, but Yulia needs to coordinate it: ${error?.message || "action failed"}`);
-		      setSaveNote("Yulia has the request. The direct action could not complete from this canvas.");
-		    }
-		  };
+  const runSurfaceAction = async (
+    action: NonNullable<StructuredAnalysisData["nextActions"]>[number],
+    surfaceActionId: SurfaceActionId,
+  ) => {
+    if (surfaceActionId === "update_model_assumption") {
+      openScenarioControls();
+      return;
+    }
+    const contract = getSurfaceActionContract(surfaceActionId);
+    const targetDealId = action.targetDealId ?? linkedDealId;
+    setSaveNote(`${contract.label} is opening from this analysis...`);
+    try {
+      await executeSurfaceAction({
+        actionId: surfaceActionId,
+        deal: targetDealId != null ? { id: targetDealId, name: action.targetDealTitle || analysisDealTitle } : null,
+        document: { title: action.label },
+        fileScope: action.fileScope,
+        title: action.label,
+        prompt: action.prompt,
+        openTab: openTab ?? (() => undefined),
+        requestedFrom: "analysis_next_action",
+        onNote: setSaveNote,
+        onTalkToYulia,
+      });
+    } catch (error: any) {
+      onTalkToYulia?.(`${action.prompt} I tried to run this from the analysis canvas, but Yulia needs to coordinate it: ${error?.message || "action failed"}`);
+      setSaveNote("Yulia has the request. The direct action could not complete from this canvas.");
+    }
+  };
 
-		  const runNextAction = async (action: NonNullable<StructuredAnalysisData["nextActions"]>[number]) => {
-		    if (isSurfaceActionId(action.surfaceActionId)) {
-		      await runSurfaceAction(action, action.surfaceActionId);
-		      return;
-		    }
+  const runNextAction = async (action: NonNullable<StructuredAnalysisData["nextActions"]>[number]) => {
+    if (isSurfaceActionId(action.surfaceActionId)) {
+      await runSurfaceAction(action, action.surfaceActionId);
+      return;
+    }
 
-	    const labelText = `${action.label} ${action.prompt}`.toLowerCase();
-	    if (action.actionType === "run_analysis") {
-	      await runContractAnalysis(action, action.analysisType || "red_flags", action.label);
-	      return;
-	    }
-	    if (action.actionType === "open_files") {
-	      const scope: FileScope = action.fileScope
-	        || (/data[-\s]?room/.test(labelText)
-	          ? "data-room"
-	          : /action|review|signature|sign-off|signoff|sent|received|deferred|executed|shared/.test(labelText)
-	            ? "shared"
-	            : "all");
-	      openTargetDeal(action, scope);
-	      return;
-	    }
-	    if (action.actionType === "update_model") {
-	      openScenarioControls();
-	      return;
-	    }
-	    if (action.actionType === "request_review") {
-	      openReviewPackage(action.prompt);
-	      return;
-	    }
-	    if (action.actionType === "request_evidence") {
-	      const docTitle = `${analysisDealTitle} · evidence request`;
-	      openTab?.({ kind: "doc", title: docTitle, id: `doc-evidence-request-${Date.now()}` });
-	      onTalkToYulia?.(`${action.prompt} Turn it into a concise request list with owner, purpose, and data-room destination.`);
-	      setSaveNote("Evidence request opened from the analysis.");
-	      return;
-	    }
-	    if (action.actionType === "open_deal") {
-	      openTargetDeal(action);
-	      return;
-	    }
-	    onTalkToYulia?.(action.prompt);
-	  };
+    const labelText = `${action.label} ${action.prompt}`.toLowerCase();
+    if (action.actionType === "run_analysis") {
+      await runContractAnalysis(action, action.analysisType || "red_flags", action.label);
+      return;
+    }
+    if (action.actionType === "open_files") {
+      const scope: FileScope = action.fileScope
+        || (/data[-\s]?room/.test(labelText)
+          ? "data-room"
+          : /action|review|signature|sign-off|signoff|sent|received|deferred|executed|shared/.test(labelText)
+            ? "shared"
+            : "all");
+      openTargetDeal(action, scope);
+      return;
+    }
+    if (action.actionType === "update_model") {
+      openScenarioControls();
+      return;
+    }
+    if (action.actionType === "request_review") {
+      openReviewPackage(action.prompt);
+      return;
+    }
+    if (action.actionType === "request_evidence") {
+      const docTitle = `${analysisDealTitle} · evidence request`;
+      openTab?.({ kind: "doc", title: docTitle, id: `doc-evidence-request-${Date.now()}` });
+      onTalkToYulia?.(`${action.prompt} Turn it into a concise request list with owner, purpose, and data-room destination.`);
+      setSaveNote("Evidence request opened from the analysis.");
+      return;
+    }
+    if (action.actionType === "open_deal") {
+      openTargetDeal(action);
+      return;
+    }
+    onTalkToYulia?.(action.prompt);
+  };
 
   return (
     <div className="m-fade-up" style={{ maxWidth: 1180 }}>
@@ -713,6 +816,22 @@ function StructuredAnalysisCanvas({
 
         <div style={{ display: "grid", gap: 18 }}>
           <StructuredListCard
+            eyebrow="YULIA EVIDENCE"
+            title="Evidence Yulia used"
+            empty="No evidence references were attached to this analysis yet."
+            items={evidenceRefs.map(item => ({
+              key: `${item.type}-${item.label}`,
+              label: item.label,
+              sub: [
+                item.value,
+                item.source,
+                item.detail,
+              ].filter(Boolean).join(" · "),
+              badge: item.confidence || item.type.replace("_", " "),
+              tone: confidenceTone(item.confidence),
+            }))}
+          />
+          <StructuredListCard
             eyebrow="SOURCE GAPS"
             title="Missing data"
             empty="No critical missing data surfaced from the current facts."
@@ -749,17 +868,17 @@ function StructuredAnalysisCanvas({
             }))}
           />
           <div className="m-card" style={{ padding: "20px 22px" }}>
-            <div className="mono" style={A.cardEyebrow}>NEXT ACTIONS</div>
-            <div style={A.sideTitle}>Make the model actionable</div>
+            <div className="mono" style={A.cardEyebrow}>YULIA NEXT</div>
+            <div style={A.sideTitle}>Actions from the read</div>
             <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
-	              {nextActions.map(action => (
-	                <button
-	                  key={`${action.actionType}-${action.label}`}
-	                  className="m-state"
-	                  type="button"
-	                  style={A.actionRow}
-	                  onClick={() => { void runNextAction(action); }}
-	                >
+                {nextActions.map(action => (
+                  <button
+                    key={`${action.actionType}-${action.label}`}
+                    className="m-state"
+                    type="button"
+                    style={A.actionRow}
+                    onClick={() => { void runNextAction(action); }}
+                  >
                   <span>{action.label}</span>
                   <span style={{ color: "var(--m-primary)", fontWeight: 800 }}>→</span>
                 </button>
@@ -772,7 +891,7 @@ function StructuredAnalysisCanvas({
       {saveNote && <div style={A.actionNote}>{saveNote}</div>}
 
       {(dataView.inputs?.length || dataView.assumptions?.length || dataView.methodologyRefs?.length) && (
-	        <div id="analysis-scenario-controls" className="m-card" style={A.methodologyCard}>
+          <div id="analysis-scenario-controls" className="m-card" style={A.methodologyCard}>
           <div className="mono" style={A.cardEyebrow}>METHOD · INPUTS · GOVERNANCE</div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18, marginTop: 10 }}>
             <MiniFactList title="Inputs" rows={(dataView.inputs ?? []).map(input => [input.label, input.displayValue])} />
@@ -950,6 +1069,16 @@ function ScenarioAssumptionPanel({
     onTalkToYulia?.(`Use the open ${analysisTitle} canvas and discuss scenario "${scenarioLabel}". Changed assumptions: ${changedText}. Tell me what moved, what risk changed, and what decision this supports.`);
   };
 
+  const optimizeScenario = () => {
+    const changedText = changedRows.length
+      ? changedRows.map(({ item, original }) => {
+        const nextValue = drafts[item.key] ?? original;
+        return `${item.label}: ${formatAssumptionDisplay(item.key, original)} to ${formatAssumptionDisplay(item.key, nextValue)}`;
+      }).join("; ")
+      : "use the current saved/base assumptions";
+    onTalkToYulia?.(`Use optimize_scenario with tabId "active" for the open ${analysisTitle} canvas and optimize scenario "${scenarioLabel}" for my role in this transaction. Infer whether I am buying, selling, raising, divesting, or advising from the deal context; if that is ambiguous, ask one clarifying question before recommending. Read the active model, saved scenarios, evidence, market context, tax/legal constraints, financing constraints, and risk appetite. Changed assumptions: ${changedText}. Pick the best risk-adjusted scenario, explain why, and show the path to get there through negotiation asks, fallback positions, reps and warranties, diligence requests, professional signoffs, and concrete work products Yulia should create or update.`);
+  };
+
   return (
     <div>
       <div style={A.scenarioHeader}>
@@ -1017,6 +1146,14 @@ function ScenarioAssumptionPanel({
             onClick={() => { void saveScenario(); }}
           >
             {saving ? "Saving" : "Save scenario"}
+          </button>
+          <button
+            className="m-btn outlined"
+            type="button"
+            style={A.scenarioSave}
+            onClick={optimizeScenario}
+          >
+            Optimize
           </button>
           <button
             className="m-btn outlined"
@@ -1127,6 +1264,65 @@ function MiniFactList({ title, rows }: { title: string; rows: Array<[string, str
   );
 }
 
+function shouldUseRealAnalysisCanvas({
+  title,
+  tool,
+  analysisRunId,
+  analysisData,
+}: {
+  title: string;
+  tool?: string | null;
+  analysisRunId?: number | null;
+  analysisData?: Record<string, any> | null;
+}): boolean {
+  if (isStructuredAnalysis(analysisData)) return false;
+  if (analysisRunId) return true;
+
+  const text = `${tool || ""} ${title || ""}`.toLowerCase();
+  if (!text.trim()) return false;
+
+  const legacyScenarioOnly = /\bsba\b|\bfinanc(?:e|ing)\b|\bcapital structure\b|\bscenario\b/.test(text)
+    && !/\bbuyer fit\b|\bmarket intelligence\b|\bcomps?\b|\bvaluation\b|\bdcf\b|\blbo\b|\bsensitivity\b|\btax\b|\blegal\b|\bqoe\b|\brecast\b|\bred flag\b|\bcovenant\b|\bearnout\b|\ballocation\b/.test(text);
+  if (legacyScenarioOnly) return false;
+
+  return /\banalysis\b|\bmodel\b|\bmarket intelligence\b|\bbuyer fit\b|\bcomps?\b|\bvaluation\b|\bdcf\b|\blbo\b|\bsensitivity\b|\btax\b|\blegal\b|\bqoe\b|\brecast\b|\bred flag\b|\bcovenant\b|\bearnout\b|\ballocation\b|^tool-/.test(text);
+}
+
+function AnalysisRunState({
+  title,
+  eyebrow,
+  body,
+  actionLabel,
+  onAction,
+}: {
+  title: string;
+  eyebrow: string;
+  body: string;
+  actionLabel?: string;
+  onAction?: () => void;
+}) {
+  return (
+    <div className="m-fade-up" style={{ maxWidth: 960 }}>
+      <section style={{ marginBottom: 20 }}>
+        <div className="mono" style={A.eyebrow}>{eyebrow}</div>
+        <h1 style={A.h1}>{title}</h1>
+      </section>
+      <div className="m-card" style={A.analysisRunState}>
+        <div style={A.analysisRunIcon}>Y</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="mono" style={A.cardEyebrow}>YULIA WORKSPACE</div>
+          <div style={A.analysisRunBody}>{body}</div>
+          {actionLabel && onAction && (
+            <button className="m-btn filled" type="button" style={{ marginTop: 16 }} onClick={onAction}>
+              {actionLabel}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function toneAccent(tone?: AnalysisTone): string {
   if (tone === "pursue") return "var(--m-pursue)";
   if (tone === "watch") return "var(--m-watch)";
@@ -1159,6 +1355,13 @@ function priorityTone(priority: string): AnalysisTone {
   if (priority === "high") return "pass";
   if (priority === "medium") return "watch";
   if (priority === "low") return "pursue";
+  return "neutral";
+}
+
+function confidenceTone(confidence?: string): AnalysisTone {
+  if (confidence === "high") return "pursue";
+  if (confidence === "medium") return "watch";
+  if (confidence === "low") return "pass";
   return "neutral";
 }
 
@@ -1326,6 +1529,35 @@ const A: Record<string, CSSProperties> = {
     flexShrink: 0,
   },
   yuliaEyebrow: { fontSize: 9.5, letterSpacing: "0.14em", fontWeight: 600, opacity: 0.7 },
+  analysisRunState: {
+    padding: "22px 24px",
+    display: "flex",
+    gap: 16,
+    alignItems: "flex-start",
+    background: "linear-gradient(145deg, rgba(255,255,255,0.94), rgba(232,242,253,0.78))",
+    borderColor: "rgba(111, 139, 177, 0.22)",
+    boxShadow: "var(--m-elev-2)",
+  },
+  analysisRunIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    background: "linear-gradient(145deg, var(--m-primary), #79A892)",
+    color: "#fff",
+    display: "grid",
+    placeItems: "center",
+    fontFamily: "var(--font-mono)",
+    fontSize: 16,
+    fontWeight: 900,
+    boxShadow: "0 10px 24px rgba(49, 91, 119, 0.18)",
+    flexShrink: 0,
+  },
+  analysisRunBody: {
+    fontSize: 14,
+    lineHeight: 1.6,
+    color: "var(--m-on-surface-var)",
+    maxWidth: 740,
+  },
   compareGrid: {
     display: "grid",
     alignItems: "stretch",
@@ -1589,7 +1821,7 @@ const A: Record<string, CSSProperties> = {
   },
   scenarioActions: {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr",
+    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
     gap: 8,
     marginTop: 2,
   },

@@ -30,13 +30,18 @@ const RECENTS: RecentRun[] = [
 interface Tool { id: string; name: string; sub: string; icon: IconName; tone: ToneKey; actionId?: SurfaceActionId }
 
 const TOOLS: Tool[] = [
-  { id: "tool-recast",  name: "Recast P&L",      sub: "Find honest add-backs",       icon: "chart", tone: "tertiary", actionId: "run_recast_analysis" },
-  { id: "tool-comps",   name: "Comps",           sub: "Public + private benchmarks", icon: "chart", tone: "primary",  actionId: "run_comps_analysis" },
-  { id: "tool-val",     name: "Valuation model", sub: "DCF, multiples, structure",   icon: "chart", tone: "pursue",   actionId: "run_valuation_analysis" },
-  { id: "tool-qoe",     name: "QoE Lite",        sub: "Quality of earnings sweep",   icon: "search",tone: "primary",  actionId: "run_working_capital_analysis" },
-  { id: "tool-buyer",   name: "Buyer fit",       sub: "Score against your thesis",   icon: "deal",  tone: "secondary",actionId: "run_buyer_fit_analysis" },
-  { id: "tool-sba",     name: "SBA structure",   sub: "Model leverage scenarios",    icon: "chart", tone: "watch",    actionId: "run_sba_analysis" },
-  { id: "tool-compare", name: "Compare deals",   sub: "Side-by-side next-action read",icon: "deal",  tone: "tertiary", actionId: "compare_deals" },
+  { id: "tool-recast",      name: "Recast P&L",       sub: "Find honest add-backs",          icon: "chart", tone: "tertiary", actionId: "run_recast_analysis" },
+  { id: "tool-qoe",         name: "QoE",              sub: "Earnings quality + proof",       icon: "search",tone: "primary",  actionId: "run_qoe_analysis" },
+  { id: "tool-comps",       name: "Comps",            sub: "Public + private benchmarks",    icon: "chart", tone: "primary",  actionId: "run_comps_analysis" },
+  { id: "tool-val",         name: "Valuation model",  sub: "Multiples + pricing bridge",     icon: "chart", tone: "pursue",   actionId: "run_valuation_analysis" },
+  { id: "tool-dcf",         name: "DCF",              sub: "Growth, WACC, terminal value",   icon: "chart", tone: "secondary",actionId: "run_dcf_analysis" },
+  { id: "tool-lbo",         name: "LBO",              sub: "Leverage, MOIC, IRR",            icon: "chart", tone: "watch",    actionId: "run_lbo_analysis" },
+  { id: "tool-sensitivity", name: "Sensitivity",      sub: "Scenario table with sliders",    icon: "chart", tone: "tertiary", actionId: "run_sensitivity_analysis" },
+  { id: "tool-tax",         name: "Tax impact",       sub: "Allocation + sign-off map",      icon: "deal",  tone: "primary",  actionId: "run_tax_impact_analysis" },
+  { id: "tool-earnout",     name: "Earnout",          sub: "Contingent value scenarios",     icon: "deal",  tone: "watch",    actionId: "run_earnout_analysis" },
+  { id: "tool-buyer",       name: "Buyer fit",        sub: "Score against your thesis",      icon: "deal",  tone: "secondary",actionId: "run_buyer_fit_analysis" },
+  { id: "tool-sba",         name: "SBA structure",    sub: "Model leverage scenarios",       icon: "chart", tone: "watch",    actionId: "run_sba_analysis" },
+  { id: "tool-compare",     name: "Compare deals",    sub: "Side-by-side next-action read",  icon: "deal",  tone: "tertiary", actionId: "compare_deals" },
 ];
 
 const TONE_BG: Record<ToneKey, string> = {

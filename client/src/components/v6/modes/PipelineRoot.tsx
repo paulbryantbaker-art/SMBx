@@ -167,7 +167,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
         </div>
       </V6Section>
 
-      <V6Section eyebrow="NEXT MOVES" title="Pipeline actions">
+      <V6Section eyebrow="YULIA NEXT" title="Pipeline actions">
         {(actionError || actionNote) && (
           <div style={actionError ? P.actionError : P.actionNote}>
             {actionError || actionNote}

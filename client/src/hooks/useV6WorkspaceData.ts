@@ -41,6 +41,10 @@ export interface WorkspaceDeliverable {
   journey_type?: string | null;
   league?: string | null;
   generation_model?: string | null;
+  analysis_run_id?: number | null;
+  analysis_type?: string | null;
+  analysis_status?: string | null;
+  canvas_tab_id?: string | null;
 }
 
 export interface DataRoomFolder {

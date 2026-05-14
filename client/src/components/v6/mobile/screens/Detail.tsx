@@ -3,10 +3,11 @@
    tag chips + What's Yulia saying + A closer look (horizontal artifact rail)
    + Confidence & notes. */
 
-import { type CSSProperties, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { FitGauge } from "../FitGauge";
 import { MobileIcon } from "../icons";
 import { ChatStarterPill } from "../ChatStarterPill";
+import { authHeaders } from "../../../../hooks/useAuth";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
 import { useWatchlist } from "../../../../hooks/useWatchlist";
 import { findDeal } from "../../../../lib/sampleDeals";
@@ -64,22 +65,249 @@ interface DetailProps {
   }) => void;
 }
 
+interface MobileDealBrief {
+  verdict?: { label?: string; score?: number; text?: string };
+  marketRead?: {
+    headline?: string;
+    bullets?: string[];
+    sourceSignals?: string[];
+    researchNeeded?: string[];
+  };
+  taxLegal?: {
+    tax?: string;
+    legal?: string;
+    signoffFlags?: string[];
+  };
+  nextMoves?: Array<{ title?: string; why?: string; prompt?: string; actionId?: string }>;
+}
+
+interface MobileDealDetail {
+  deal?: {
+    revenue?: number | null;
+    sde?: number | null;
+    ebitda?: number | null;
+    asking_price?: number | null;
+    industry?: string | null;
+    location?: string | null;
+    journey_type?: string | null;
+  };
+}
+
+type MobileDealMove = NonNullable<MobileDealBrief["nextMoves"]>[number];
+
+interface MobileDealActionContext {
+  dealId: string;
+  dealTitle: string;
+  onRunAnalysis?: DetailProps["onRunAnalysis"];
+  onAskYulia: DetailProps["onAskYulia"];
+}
+
+function fmtMoney(value?: number | null, label?: string): string | null {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return null;
+  const abs = Math.abs(amount);
+  const pretty = abs >= 1_000_000
+    ? `$${(amount / 1_000_000).toFixed(abs >= 10_000_000 ? 0 : 1)}M`
+    : `$${Math.round(amount / 1_000)}K`;
+  return label ? `${pretty} ${label}` : pretty;
+}
+
+function mobileActionEyebrow(actionId?: string) {
+  if (!actionId) return "YULIA ACTION";
+  return actionId
+    .replace(/^run_/, "")
+    .replace(/^generate_/, "")
+    .replace(/_/g, " ")
+    .toUpperCase();
+}
+
+function mobileAnalysisForAction(actionId?: string) {
+  switch (actionId) {
+    case "run_market_intelligence":
+      return { analysisType: "market_intelligence", menuItemSlug: "universal-market-intelligence", label: "market intelligence read" };
+    case "run_tax_legal_structure":
+      return { analysisType: "tax_legal_structure", menuItemSlug: "buy-capital-structure", label: "tax and legal implications model" };
+    case "run_working_capital_analysis":
+      return { analysisType: "working_capital", menuItemSlug: "buy-working-capital-model", label: "working-capital analysis" };
+    case "run_recast_analysis":
+      return { analysisType: "recast", menuItemSlug: "buy-deal-scorecard", label: "recast analysis" };
+    case "run_buyer_fit_analysis":
+      return { analysisType: "buyer_fit", menuItemSlug: "buy-deal-scorecard", label: "buyer-fit analysis" };
+    case "run_valuation_analysis":
+      return { analysisType: "valuation", menuItemSlug: "buy-valuation-model", label: "valuation model" };
+    case "run_comps_analysis":
+      return { analysisType: "comps", menuItemSlug: "universal-comp-analysis", label: "comps analysis" };
+    case "run_capital_structure_model":
+      return { analysisType: "capital_structure", menuItemSlug: "buy-capital-structure", label: "capital structure model" };
+    case "run_sba_analysis":
+      return { analysisType: "sba", menuItemSlug: "universal-sba-analysis", label: "SBA structure analysis" };
+    case "run_red_flags_analysis":
+      return { analysisType: "red_flags", menuItemSlug: "buy-red-flag-report", label: "red-flag analysis" };
+    case "run_qoe_analysis":
+      return { analysisType: "qoe", menuItemSlug: "buy-deal-scorecard", label: "QoE analysis" };
+    case "run_lbo_analysis":
+      return { analysisType: "lbo", menuItemSlug: "buy-valuation-model", label: "LBO model" };
+    case "run_dcf_analysis":
+      return { analysisType: "dcf", menuItemSlug: "buy-valuation-model", label: "DCF model" };
+    case "run_sensitivity_analysis":
+      return { analysisType: "sensitivity", menuItemSlug: "buy-valuation-model", label: "sensitivity model" };
+    case "run_earnout_analysis":
+      return { analysisType: "earnout", menuItemSlug: "buy-earnout-analysis", label: "earnout model" };
+    case "run_tax_impact_analysis":
+      return { analysisType: "tax_impact", menuItemSlug: "buy-capital-structure", label: "tax impact model" };
+    case "run_purchase_price_allocation":
+      return { analysisType: "purchase_price_allocation", menuItemSlug: "buy-capital-structure", label: "purchase-price allocation" };
+    case "run_cap_table_analysis":
+      return { analysisType: "cap_table", menuItemSlug: "raise-cap-table", label: "cap table model" };
+    case "run_covenant_analysis":
+      return { analysisType: "covenant", menuItemSlug: "buy-capital-structure", label: "covenant model" };
+    default:
+      return null;
+  }
+}
+
+function runMobileDealAction(move: MobileDealMove, context: MobileDealActionContext) {
+  const prompt = move.prompt || `On ${context.dealTitle}: ${move.title || "run Yulia's recommended next action"}.`;
+  const analysis = mobileAnalysisForAction(move.actionId);
+
+  if (analysis && context.onRunAnalysis) {
+    context.onRunAnalysis({
+      dealId: context.dealId,
+      dealTitle: context.dealTitle,
+      analysisType: analysis.analysisType,
+      menuItemSlug: analysis.menuItemSlug,
+      label: analysis.label,
+      prompt,
+    });
+    return;
+  }
+
+  if (move.actionId === "generate_primary_deliverable" || move.actionId === "generate_loi") {
+    context.onAskYulia(`${prompt} Use the document-generation tool and open the generated work product in the canvas.`);
+    return;
+  }
+
+  if (move.actionId === "optimize_scenario") {
+    context.onAskYulia(`${prompt} Use optimize_scenario on the active deal model and return the best path, negotiation asks, reps and warranties, diligence asks, and sign-off needs.`);
+    return;
+  }
+
+  context.onAskYulia(prompt);
+}
+
+function defaultMobileNextMoves(dealTitle: string, isSampleDeal: boolean): MobileDealMove[] {
+  if (!isSampleDeal) {
+    return [
+      {
+        actionId: "run_market_intelligence",
+        title: "Generate Yulia's deal read",
+        why: "Recommendations should come from Yulia's sourced deal brief, not local card copy.",
+        prompt: `On ${dealTitle}: generate the sourced deal read, then return recommended next actions with action IDs.`,
+      },
+      {
+        actionId: "run_qoe_analysis",
+        title: "Run QoE evidence check",
+        why: "Open a canvas that separates supported earnings quality from missing source material.",
+        prompt: `On ${dealTitle}: run a QoE evidence check and tell me which source materials are missing.`,
+      },
+      {
+        actionId: "ask_yulia",
+        title: "Ask Yulia what is missing",
+        why: "Yulia should explain the missing inputs before recommending a move.",
+        prompt: `On ${dealTitle}: what evidence do you need before you can recommend the next action?`,
+      },
+    ];
+  }
+
+  return [
+    {
+      actionId: "run_qoe_analysis",
+      title: "Run a deeper QoE on the NWC peg",
+      why: "Separate durable earnings from working-capital pressure before the next buyer touch.",
+      prompt: `On ${dealTitle}: open QoE analysis and focus on normalized SDE, customer concentration, and the working-capital peg.`,
+    },
+    {
+      actionId: "run_sensitivity_analysis",
+      title: "Model the decision scenarios",
+      why: "Use sliders to compare conservative, base, and aggressive structures before drafting terms.",
+      prompt: `On ${dealTitle}: open the scenario model with sliders for price, SDE, down payment, rate, and growth.`,
+    },
+    {
+      actionId: "run_buyer_fit_analysis",
+      title: "Pull the buyer list",
+      why: "Rank strategic roll-ups and founder-friendly sponsors before broad outreach.",
+      prompt: `On ${dealTitle}: open buyer-fit analysis and rank the best buyer pools for this deal.`,
+    },
+  ];
+}
+
 export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, onRunAnalysis }: DetailProps) {
   const { isWatched, toggle } = useWatchlist();
   const watched = isWatched(dealId);
+  const numericId = /^\d+$/.test(dealId) ? parseInt(dealId, 10) : null;
+  const [dealBrief, setDealBrief] = useState<MobileDealBrief | null>(null);
+  const [realDetail, setRealDetail] = useState<MobileDealDetail | null>(null);
+  const [briefLoading, setBriefLoading] = useState(false);
+
+  useEffect(() => {
+    if (numericId === null) {
+      setDealBrief(null);
+      setRealDetail(null);
+      setBriefLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setBriefLoading(true);
+    Promise.all([
+      fetch(`/api/agency/deals/${numericId}/brief`, { headers: authHeaders() }).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(`/api/deals/${numericId}`, { headers: authHeaders() }).then(r => r.ok ? r.json() : null).catch(() => null),
+    ])
+      .then(([brief, detail]) => {
+        if (cancelled) return;
+        setDealBrief(brief as MobileDealBrief | null);
+        setRealDetail(detail as MobileDealDetail | null);
+      })
+      .finally(() => {
+        if (!cancelled) setBriefLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [numericId]);
 
   /* Pull the real verdict + fit from the sample deal bank so the page reflects
      this specific deal — not a hardcoded "Pursue / 92" that contradicts what
      Yulia says in chat. Falls back to "watch / 70" for unknown ids so the
      page still renders cleanly. */
   const deal = findDeal(dealId);
+  const isSampleDeal = Boolean(deal);
   const verdict: Verdict = deal?.verdict ?? "watch";
-  const fit = deal?.fit ?? 70;
-  const dealSub = deal?.sub ?? "";
+  const fit = dealBrief?.verdict?.score ?? deal?.fit ?? 70;
+  const real = realDetail?.deal;
+  const dealSub = real
+    ? [
+        fmtMoney(real.revenue, "revenue"),
+        real.location || null,
+        real.industry || null,
+      ].filter(Boolean).join(" · ")
+    : deal?.sub ?? "";
   /* Per-deal verdict reasoning beats the generic blurb when present.
      This is what answers the user's "is this a watch or pursue?" question
      by spelling out the specific math + the criteria that would flip it. */
-  const verdictBlurb = deal?.verdictWhy ?? VERDICT_BLURB[verdict];
+  const verdictBlurb = dealBrief?.verdict?.text
+    ?? deal?.verdictWhy
+    ?? (numericId !== null
+      ? "Yulia needs a refreshed deal brief before this page should make a deal-specific recommendation."
+      : VERDICT_BLURB[verdict]);
+  const readBullets = dealBrief?.marketRead?.bullets?.filter(Boolean).slice(0, 3) ?? [];
+  const sourceGaps = dealBrief?.marketRead?.researchNeeded?.filter(Boolean).slice(0, 3) ?? [];
+  const liveNextMoves = dealBrief?.nextMoves?.filter(move => move.title || move.prompt).slice(0, 3) ?? [];
+  const hasLiveYuliaRead = Boolean(dealBrief);
+  const readSectionTitle = hasLiveYuliaRead
+    ? "Yulia's sourced read"
+    : isSampleDeal
+      ? "Sample Yulia read"
+      : "Yulia's read is needed";
+  const reviewTitle = hasLiveYuliaRead ? "Yulia review" : isSampleDeal ? "Sample review" : "Generate Yulia's review";
+  const recommendationTitle = hasLiveYuliaRead ? "Yulia recommends" : isSampleDeal ? "Sample next moves" : "Ask Yulia to recommend";
 
   const onShare = async () => {
     const url = window.location.href;
@@ -154,93 +382,140 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
         ))}
       </div>
 
-      {/* What's Yulia saying */}
-      <Section title="What's Yulia saying" chevron>
+      {/* Yulia's read. Live briefs come from the briefing layer; sample
+          copy is labeled as sample; real deals without a brief show a
+          refresh/request state instead of pretending a card authored it. */}
+      <Section title={readSectionTitle} chevron>
         <div className="mb-mono" style={D.versionLine}>
-          UPDATED 2 MIN AGO &nbsp;&middot;&nbsp; v3
+          {hasLiveYuliaRead
+            ? "FROM YULIA'S DEAL BRIEF"
+            : isSampleDeal
+              ? "SAMPLE MODE · DEMO READ"
+              : briefLoading
+                ? "YULIA IS REFRESHING THIS DEAL"
+                : "NO SOURCED DEAL BRIEF YET"}
         </div>
         <p style={D.body}>
-          Recast is real. $760K of add-backs are clean &mdash; owner comp, family payroll, one-time legal, M&amp;E. The 38% top-5 concentration looks scary on paper but they&rsquo;ve held those accounts 6+ years with zero churn. That&rsquo;s a moat, not a risk. NWC peg is below median; flag for QoE. Drafting the IOI now.
+          {dealBrief?.marketRead?.headline
+            || (isSampleDeal
+              ? "Recast is real. Clean add-backs and durable customer tenure support the pursue call, but working-capital and source-material gaps still need review before documents move."
+              : "Yulia has not generated a sourced read for this deal yet. Run market intelligence or ask Yulia for the deal read so the page can show live analysis-backed recommendations.")}
         </p>
+        {(readBullets.length > 0 || sourceGaps.length > 0) && (
+          <div style={D.readBulletStack}>
+            {[...readBullets, ...sourceGaps].slice(0, 3).map((bullet, index) => (
+              <button
+                key={`${bullet}-${index}`}
+                type="button"
+                className="mb-tap"
+                style={D.readBullet}
+                onClick={() => runMobileDealAction({
+                  actionId: "run_market_intelligence",
+                  title: "Unpack the market signal",
+                  prompt: `On ${dealTitle}: unpack this Yulia deal-read signal in the market intelligence canvas: ${bullet}`,
+                }, { dealId, dealTitle, onRunAnalysis, onAskYulia })}
+              >
+                <span>{bullet}</span>
+                <MobileIcon name="chevron" size={11} c="var(--mb-ink-3)" />
+              </button>
+            ))}
+          </div>
+        )}
+        {!hasLiveYuliaRead && !isSampleDeal && (
+          <button
+            type="button"
+            className="mb-tap"
+            onClick={() => runMobileDealAction({
+              actionId: "run_market_intelligence",
+              title: "Generate Yulia's sourced read",
+              prompt: `On ${dealTitle}: generate the sourced deal read, then return recommended next actions with action IDs.`,
+            }, { dealId, dealTitle, onRunAnalysis, onAskYulia })}
+            style={D.marketAskBtn}
+          >
+            <span>{briefLoading ? "Refreshing..." : "Generate the read"}</span>
+            <MobileIcon name="chevron" size={11} c="var(--mb-accent-ink)" />
+          </button>
+        )}
       </Section>
 
       {/* A closer look — horizontal artifact rail */}
       <Section title="A closer look" pad={false}>
         <div className="mb-hide-scroll" style={D.artifactsRow}>
-          <ArtifactPreview kind="recast"   title="Recast walk"    big="$1.80M"    sub="P&L normalization · 5 lines" onTap={onChat} />
-          <ArtifactPreview kind="baseline" title="Baseline range" big="$7.2–9.4M" sub="4 scenarios · SBA at $7.8M"  onTap={onChat} />
-          <ArtifactPreview kind="buyers"   title="Buyer list"     big="69"        sub="47 strategics · 22 sponsors" onTap={onChat} />
-          <ArtifactPreview kind="ioi"      title="IOI draft"      big="v2"        sub="Aggressive but earnest"      onTap={onChat} />
+          <ArtifactPreview kind="recast" title="Recast walk" big={fmtMoney(real?.sde, "SDE") || "$1.80M"} sub="Open the recast canvas" onTap={() => {
+            runMobileDealAction({
+              actionId: "run_recast_analysis",
+              title: "Open recast analysis",
+              prompt: `On ${dealTitle}: open the recast analysis canvas with source-backed add-backs and sliders where assumptions apply.`,
+            }, { dealId, dealTitle, onRunAnalysis, onAskYulia });
+          }} />
+          <ArtifactPreview kind="baseline" title="Scenario model" big="Sliders" sub="Structure, price, downside" onTap={() => {
+            runMobileDealAction({
+              actionId: "run_sensitivity_analysis",
+              title: "Open scenario model",
+              prompt: `On ${dealTitle}: open the interactive sensitivity/scenario model with sliders and saved cases.`,
+            }, { dealId, dealTitle, onRunAnalysis, onAskYulia });
+          }} />
+          <ArtifactPreview kind="buyers" title="Buyer pool" big={deal?.marketIntel?.activeBuyers?.split("·")[0]?.trim() || "Rank"} sub="Open buyer-fit canvas" onTap={() => {
+            runMobileDealAction({
+              actionId: "run_buyer_fit_analysis",
+              title: "Open buyer fit",
+              prompt: `On ${dealTitle}: open buyer-fit analysis with strategic and sponsor split, fit reasoning, and outreach priority.`,
+            }, { dealId, dealTitle, onRunAnalysis, onAskYulia });
+          }} />
+          <ArtifactPreview kind="ioi" title="Primary draft" big="Draft" sub="Ask Yulia to generate" onTap={() => {
+            runMobileDealAction({
+              actionId: "generate_primary_deliverable",
+              title: "Generate primary draft",
+              prompt: `On ${dealTitle}: generate the next primary deal document from current deal context, then open it as work product.`,
+            }, { dealId, dealTitle, onRunAnalysis, onAskYulia });
+          }} />
         </div>
       </Section>
 
-      {/* Yulia Review — renamed from "Confidence & notes". The stars
-          and inline note are now framed as Yulia's live commentary
-          on the deal, not a user review. */}
-      <Section title="Yulia Review" chevron>
+      <Section title={reviewTitle} chevron>
         <div style={{ display: "flex", alignItems: "center", gap: 18, paddingTop: 4 }}>
           <div>
-            <div style={D.bigNumber}>4.6</div>
-            <div style={D.bigNumberSub}>out of 5</div>
+            <div style={D.bigNumber}>{hasLiveYuliaRead ? `${Math.round(fit)}` : isSampleDeal ? "4.6" : "—"}</div>
+            <div style={D.bigNumberSub}>{hasLiveYuliaRead ? "fit score" : "out of 5"}</div>
           </div>
           <div style={{ flex: 1 }}>
-            <Stars n={4.6} size={14} />
-            <div style={{ fontSize: 13, color: "var(--mb-ink-3)", marginTop: 4 }}>Yulia&rsquo;s confidence</div>
+            <Stars n={hasLiveYuliaRead ? Math.max(1, Math.min(5, fit / 20)) : isSampleDeal ? 4.6 : 0} size={14} />
+            <div style={{ fontSize: 13, color: "var(--mb-ink-3)", marginTop: 4 }}>
+              {hasLiveYuliaRead ? "Yulia's confidence" : isSampleDeal ? "Sample confidence" : "Awaiting sourced brief"}
+            </div>
             <div style={D.confidenceBody}>
-              Verdict held across 3 reviews. Concentration risk and NWC peg are the only two reasons confidence isn&rsquo;t 5/5.
+              {verdictBlurb}
             </div>
           </div>
         </div>
 
         <div style={D.userNote}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-            <Stars n={5} size={11} />
-            <span style={{ fontSize: 12, color: "var(--mb-ink-3)" }}>&middot;&nbsp;Yulia, 2 hr ago</span>
+            <Stars n={hasLiveYuliaRead ? Math.max(1, Math.min(5, fit / 20)) : isSampleDeal ? 5 : 0} size={11} />
+            <span style={{ fontSize: 12, color: "var(--mb-ink-3)" }}>&middot;&nbsp;{hasLiveYuliaRead ? "Yulia's sourced read" : isSampleDeal ? "sample read" : "needs refresh"}</span>
           </div>
-          <div style={D.userNoteTitle}>Worth the call. Pre-qualify SBA today.</div>
+          <div style={D.userNoteTitle}>
+            {dealBrief?.verdict?.label || (isSampleDeal ? "Worth the call. Pre-qualify structure today." : "Generate the deal read before acting.")}
+          </div>
           <div style={D.userNoteBody}>
-            The recast holds. NWC peg is below median — flag for QoE. Concentration looks heavy on paper but those accounts are 6+ years old with zero churn. That&rsquo;s a moat, not a risk.
+            {dealBrief?.taxLegal?.legal || dealBrief?.taxLegal?.tax || (isSampleDeal
+              ? "The sample recast holds, but structure, working-capital, and counsel/CPA sign-off still decide how the next document moves."
+              : "Yulia needs current deal files, market intelligence, and analysis results before this surface should show judgment-bearing commentary.")}
           </div>
         </div>
       </Section>
 
-      {/* Recommended next actions — 3 things Yulia thinks the user
-          should do next. Each tap fires onAskYulia(prompt) with a
-          starter that opens chat with the relevant action context. */}
-      <Section title="Recommended next" chevron={false}>
-        <NextAction
-          eyebrow="ANALYSIS"
-          title="Run a deeper QoE on the NWC peg"
-          sub="2 minutes · Yulia walks the working capital math"
-          onTap={() => {
-            const prompt = `On ${dealTitle}: walk me through a deeper QoE focused on the NWC peg. Open the working-capital analysis canvas with sliders.`;
-            if (onRunAnalysis) {
-              onRunAnalysis({ dealId, dealTitle, analysisType: "working_capital", menuItemSlug: "buy-working-capital-model", label: "working capital model", prompt });
-            } else {
-              onAskYulia(prompt);
-            }
-          }}
-        />
-        <NextAction
-          eyebrow="DOC"
-          title="Draft the IOI"
-          sub="Yulia has the v3 ready — review and send"
-          onTap={() => onAskYulia(`On ${dealTitle}: draft the IOI for me. League-appropriate template, agreed terms.`)}
-        />
-        <NextAction
-          eyebrow="OUTREACH"
-          title="Pull the buyer list"
-          sub="69 candidates · 47 strategics, 22 sponsors"
-          last
-          onTap={() => {
-            const prompt = `On ${dealTitle}: pull a ranked buyer list. Open buyer-fit analysis with strategic and sponsor split, fit reasoning.`;
-            if (onRunAnalysis) {
-              onRunAnalysis({ dealId, dealTitle, analysisType: "buyer_fit", label: "buyer fit analysis", prompt });
-            } else {
-              onAskYulia(prompt);
-            }
-          }}
-        />
+      <Section title={recommendationTitle} chevron={false}>
+        {(liveNextMoves.length > 0 ? liveNextMoves : defaultMobileNextMoves(dealTitle, isSampleDeal)).map((move, index, rows) => (
+          <NextAction
+            key={`${move.title || move.actionId || "move"}-${index}`}
+            eyebrow={mobileActionEyebrow(move.actionId)}
+            title={move.title || "Ask Yulia for the next move"}
+            sub={move.why || "Open the right analysis, document, or chat context from Yulia's recommendation."}
+            last={index === rows.length - 1}
+            onTap={() => runMobileDealAction(move, { dealId, dealTitle, onRunAnalysis, onAskYulia })}
+          />
+        ))}
       </Section>
 
       {/* Deal-context chat input — tappable field at the bottom that
@@ -602,6 +877,29 @@ const D: Record<string, CSSProperties> = {
     margin: 0, letterSpacing: "-0.1px",
     textWrap: "pretty",
   },
+  readBulletStack: {
+    display: "grid",
+    gap: 8,
+    marginTop: 14,
+  },
+  readBullet: {
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+    padding: "11px 12px",
+    border: "0.5px solid var(--mb-line-2)",
+    borderRadius: 13,
+    background: "var(--mb-card-2)",
+    color: "var(--mb-ink-1)",
+    fontFamily: "inherit",
+    fontSize: 13,
+    fontWeight: 600,
+    lineHeight: 1.35,
+    textAlign: "left",
+    cursor: "pointer",
+  },
   sectionTitle: {
     fontFamily: "var(--mb-font-display)", fontWeight: 700,
     fontSize: 22, letterSpacing: "-0.5px",
@@ -732,7 +1030,7 @@ const D: Record<string, CSSProperties> = {
     fontFamily: "inherit",
   },
 
-  /* Recommended next-action rows */
+  /* Yulia next-action rows */
   nextEyebrow: {
     fontSize: 10, letterSpacing: "0.08em", fontWeight: 700,
     color: "var(--mb-ink-3)", textTransform: "uppercase",

@@ -14,24 +14,61 @@ export const analysisRunsRouter = Router();
 const ANALYSIS_TYPES = new Set([
   'auto',
   'deal_scorecard',
-  'buyer_fit',
-  'comps',
-  'valuation',
-  'recast',
-  'market_intelligence',
-  'sba',
-  'capital_structure',
-  'red_flags',
-  'working_capital',
-  'tax_structure',
-  'legal_structure',
-  'tax_legal_structure',
-  'term_sheet',
-  'pmi_value_creation',
-]);
+    'buyer_fit',
+    'comps',
+    'valuation',
+    'qoe',
+    'lbo',
+    'dcf',
+    'sensitivity',
+    'recast',
+    'market_intelligence',
+    'sba',
+    'capital_structure',
+    'covenant',
+    'red_flags',
+    'working_capital',
+    'tax_impact',
+    'purchase_price_allocation',
+    'tax_structure',
+    'legal_structure',
+    'tax_legal_structure',
+    'term_sheet',
+    'earnout',
+    'cap_table',
+    'pmi_value_creation',
+  ]);
 
 function safeRecord(value: unknown): Record<string, any> {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {};
+}
+
+function evidenceRefsFromRows(evidence: Array<Record<string, any>>) {
+  return evidence.map(item => ({
+    label: item.title || item.sourceType || 'Evidence',
+    type: item.sourceType || 'analysis_evidence',
+    source: item.citation || 'analysis_evidence',
+    value: item.excerpt || undefined,
+    detail: item.sourceId ? `source ${item.sourceId}` : undefined,
+    confidence: item.confidence == null
+      ? undefined
+      : item.confidence >= 0.8
+        ? 'high'
+        : item.confidence >= 0.5
+          ? 'medium'
+          : 'low',
+  }));
+}
+
+function hydrateAnalysisEvidence(analysisData: unknown, evidence: Array<Record<string, any>>) {
+  const structured = safeRecord(analysisData);
+  if (structured.schemaVersion !== 'analysis-runtime-v1') return analysisData ?? null;
+  if (Array.isArray(structured.evidenceRefs) && structured.evidenceRefs.length > 0) return structured;
+  if (!evidence.length) return structured;
+  return {
+    ...structured,
+    evidenceRefs: evidenceRefsFromRows(evidence),
+  };
 }
 
 function normalizeAnalysisType(value: unknown): string | null {
@@ -62,30 +99,45 @@ function resolveAnalysisMenuItemSlug({
       return journey === 'sell' ? 'sell-seven-factor-analysis' : 'buy-deal-scorecard';
     case 'buyer_fit':
       return journey === 'sell' ? 'sell-buyer-list' : 'buy-deal-scorecard';
-    case 'comps':
-      return 'universal-comp-analysis';
-    case 'valuation':
-      return journey === 'sell' ? 'sell-valuation-report' : journey === 'raise' ? 'raise-pre-post-model' : 'buy-valuation-model';
-    case 'recast':
-      return journey === 'sell' ? 'sell-financial-spread' : journey === 'pmi' ? 'pmi-financial-deep-dive' : 'buy-deal-scorecard';
+      case 'comps':
+        return 'universal-comp-analysis';
+      case 'valuation':
+        return journey === 'sell' ? 'sell-valuation-report' : journey === 'raise' ? 'raise-pre-post-model' : 'buy-valuation-model';
+      case 'qoe':
+        return journey === 'sell' ? 'sell-financial-spread' : journey === 'pmi' ? 'pmi-financial-deep-dive' : 'buy-deal-scorecard';
+      case 'lbo':
+      case 'dcf':
+      case 'sensitivity':
+        return journey === 'sell' ? 'sell-valuation-report' : journey === 'raise' ? 'raise-pre-post-model' : 'buy-valuation-model';
+      case 'recast':
+        return journey === 'sell' ? 'sell-financial-spread' : journey === 'pmi' ? 'pmi-financial-deep-dive' : 'buy-deal-scorecard';
     case 'market_intelligence':
       return 'universal-market-intelligence';
     case 'sba':
       return 'universal-sba-analysis';
-    case 'capital_structure':
-      return journey === 'sell' ? 'sell-deal-structure-analysis' : journey === 'raise' ? 'raise-use-of-funds' : 'buy-capital-structure';
+      case 'capital_structure':
+        return journey === 'sell' ? 'sell-deal-structure-analysis' : journey === 'raise' ? 'raise-use-of-funds' : 'buy-capital-structure';
+      case 'covenant':
+        return journey === 'raise' ? 'raise-use-of-funds' : 'buy-capital-structure';
     case 'red_flags':
       return journey === 'buy' ? 'buy-red-flag-report' : journey === 'pmi' ? 'pmi-ops-assessment' : 'sell-price-gap-analysis';
-    case 'working_capital':
-      return journey === 'sell' ? 'sell-working-capital-analysis' : 'buy-working-capital-model';
-    case 'tax_structure':
-    case 'legal_structure':
-    case 'tax_legal_structure':
-      return journey === 'sell' ? 'sell-deal-structure-analysis' : 'buy-capital-structure';
+      case 'working_capital':
+        return journey === 'sell' ? 'sell-working-capital-analysis' : 'buy-working-capital-model';
+      case 'tax_impact':
+      case 'purchase_price_allocation':
+        return journey === 'sell' ? 'sell-deal-structure-analysis' : 'buy-capital-structure';
+      case 'tax_structure':
+      case 'legal_structure':
+      case 'tax_legal_structure':
+        return journey === 'sell' ? 'sell-deal-structure-analysis' : 'buy-capital-structure';
     case 'term_sheet':
       return journey === 'raise' ? 'raise-term-sheet-analysis' : journey === 'sell' ? 'sell-loi-comparison' : 'buy-loi-draft';
-    case 'pmi_value_creation':
-      return 'pmi-value-creation';
+      case 'pmi_value_creation':
+        return 'pmi-value-creation';
+      case 'earnout':
+        return journey === 'sell' ? 'sell-deal-structure-analysis' : 'buy-earnout-analysis';
+      case 'cap_table':
+        return 'raise-cap-table';
     case 'auto':
     default:
       return resolveDefaultAnalysisSlug(journey, currentGate);
@@ -385,7 +437,8 @@ analysisRunsRouter.post('/analysis-runs/:analysisRunId/assumptions', async (req,
       analysisRunId,
       versionNumber: updated?.versionNumber ?? current.versionNumber,
       assumptions: updated?.assumptions ?? current.assumptions,
-      analysisData: structuredAnalysis ?? null,
+      analysisData: hydrateAnalysisEvidence(structuredAnalysis, updated?.evidence ?? current.evidence ?? []),
+      evidence: updated?.evidence ?? current.evidence ?? [],
       versions,
     });
   } catch (err: any) {
@@ -426,7 +479,8 @@ analysisRunsRouter.post('/analysis-runs/:analysisRunId/versions/:versionNumber/r
       analysisRunId,
       versionNumber: restored.versionNumber,
       assumptions: restored.assumptions,
-      analysisData: structuredAnalysis,
+      analysisData: hydrateAnalysisEvidence(structuredAnalysis, restored.evidence),
+      evidence: restored.evidence,
       commentaryMarkdown: restored.commentaryMarkdown,
       versions,
     });
@@ -454,7 +508,8 @@ analysisRunsRouter.get('/analysis-runs/:analysisRunId', async (req, res) => {
       canvasTabId: snapshot.canvasTabId,
       versionNumber: snapshot.versionNumber,
       assumptions: snapshot.assumptions,
-      analysisData: structuredAnalysis,
+      analysisData: hydrateAnalysisEvidence(structuredAnalysis, snapshot.evidence),
+      evidence: snapshot.evidence,
       commentaryMarkdown: snapshot.commentaryMarkdown,
     });
   } catch (err: any) {

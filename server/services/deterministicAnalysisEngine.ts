@@ -27,6 +27,15 @@ export interface AnalysisMetric {
   tone?: Tone;
 }
 
+export interface AnalysisEvidenceRef {
+  label: string;
+  type: 'deal_fact' | 'financial_fact' | 'market_signal' | 'methodology' | 'user_assumption';
+  source: string;
+  value?: string;
+  detail?: string;
+  confidence?: 'high' | 'medium' | 'low';
+}
+
 export interface AnalysisOutput {
   schemaVersion: 'analysis-runtime-v1';
   analysisType: string;
@@ -39,6 +48,7 @@ export interface AnalysisOutput {
     rationale: string;
   };
   methodologyRefs: string[];
+  evidenceRefs: AnalysisEvidenceRef[];
   inputs: Array<{ key: string; label: string; value: unknown; displayValue: string; source: string }>;
   assumptions: Array<{ key: string; label: string; value: unknown; displayValue: string }>;
   metrics: AnalysisMetric[];
@@ -98,16 +108,25 @@ const ANALYSIS_LABELS: Record<string, string> = {
   buyer_fit: 'Buyer fit',
   comps: 'Comparable deal read',
   valuation: 'Valuation model',
+  qoe: 'Quality of earnings',
+  lbo: 'LBO model',
+  dcf: 'DCF model',
+  sensitivity: 'Sensitivity model',
   recast: 'Recast analysis',
   market_intelligence: 'Market intelligence',
   sba: 'SBA bankability',
   capital_structure: 'Capital structure',
+  covenant: 'Covenant model',
   red_flags: 'Red flags',
   working_capital: 'Working capital',
+  tax_impact: 'Tax impact',
+  purchase_price_allocation: 'Purchase-price allocation',
   tax_structure: 'Tax structure',
   legal_structure: 'Legal structure',
   tax_legal_structure: 'Tax and legal structure',
   term_sheet: 'Term sheet structure',
+  earnout: 'Earnout model',
+  cap_table: 'Cap table',
   pmi_value_creation: 'PMI value creation',
   deal_comparison: 'Deal comparison',
   auto: 'Deal analysis',
@@ -123,21 +142,34 @@ export function buildDeterministicAnalysis(params: {
   const facts = buildDealFacts(params.deal, params.assumptionOverrides);
   const common = commonAnalysisParts(facts, analysisType, params.menuItemSlug);
 
-  switch (analysisType) {
-    case 'valuation':
-    case 'comps':
-      return buildValuationAnalysis(facts, analysisType, common);
-    case 'recast':
-      return buildRecastAnalysis(facts, common);
-    case 'capital_structure':
-    case 'sba':
-      return buildCapitalStructureAnalysis(facts, analysisType, common);
-    case 'working_capital':
-      return buildWorkingCapitalAnalysis(facts, common);
-    case 'market_intelligence':
-      return buildMarketIntelligenceAnalysis(facts, common);
-    case 'tax_structure':
-      return buildTaxStructureAnalysis(facts, common);
+    switch (analysisType) {
+      case 'valuation':
+      case 'comps':
+        return buildValuationAnalysis(facts, analysisType, common);
+      case 'qoe':
+        return buildQoeAnalysis(facts, common);
+      case 'lbo':
+        return buildLboAnalysis(facts, common);
+      case 'dcf':
+        return buildDcfAnalysis(facts, common);
+      case 'sensitivity':
+        return buildSensitivityAnalysis(facts, common);
+      case 'recast':
+        return buildRecastAnalysis(facts, common);
+      case 'capital_structure':
+      case 'sba':
+        return buildCapitalStructureAnalysis(facts, analysisType, common);
+      case 'covenant':
+        return buildCovenantAnalysis(facts, common);
+      case 'working_capital':
+        return buildWorkingCapitalAnalysis(facts, common);
+      case 'market_intelligence':
+        return buildMarketIntelligenceAnalysis(facts, common);
+      case 'tax_impact':
+      case 'purchase_price_allocation':
+        return buildTaxImpactAnalysis(facts, analysisType, common);
+      case 'tax_structure':
+        return buildTaxStructureAnalysis(facts, common);
     case 'tax_legal_structure':
       return buildTaxLegalStructureAnalysis(facts, common);
     case 'legal_structure':
@@ -145,9 +177,13 @@ export function buildDeterministicAnalysis(params: {
       return buildLegalStructureAnalysis(facts, analysisType, common);
     case 'red_flags':
       return buildRedFlagsAnalysis(facts, common);
-    case 'pmi_value_creation':
-      return buildPmiAnalysis(facts, common);
-    case 'buyer_fit':
+      case 'pmi_value_creation':
+        return buildPmiAnalysis(facts, common);
+      case 'earnout':
+        return buildEarnoutAnalysis(facts, common);
+      case 'cap_table':
+        return buildCapTableAnalysis(facts, common);
+      case 'buyer_fit':
     case 'deal_scorecard':
     default:
       return buildScorecardAnalysis(facts, analysisType, common);
@@ -179,6 +215,7 @@ export function buildDealComparisonAnalysis(deals: DeterministicDealRow[], title
       'METHODOLOGY_V17 §8 Evidence before recommendation',
       'METHODOLOGY_V17 §11 Interactive canvas',
     ],
+    evidenceRefs: facts.flatMap(f => commonEvidenceRefs(f, 'deal_comparison')).slice(0, 14),
     inputs: facts.flatMap(f => commonInputs(f)).slice(0, 18),
     assumptions: [
       { key: 'ranking_basis', label: 'Ranking basis', value: 'fit_score', displayValue: 'Fit score, value, margin, completeness, and concentration risk' },
@@ -308,6 +345,180 @@ function buildValuationAnalysis(facts: DealFacts, analysisType: string, common: 
       ],
     }],
     calculations: { low, midpoint, high, askingVariance },
+    });
+  }
+
+function buildQoeAnalysis(facts: DealFacts, common: Partial<AnalysisOutput>): AnalysisOutput {
+  const reported = facts.earningsCents;
+  const adjusted = facts.adjustedEarningsCents;
+  const addBackLift = reported && adjusted ? (adjusted - reported) / reported : null;
+  const concentration = facts.customerConcentrationPct;
+  const wcPeg = centsFrom(numberFromUnknown(facts.financials.working_capital_peg));
+  const evidence = evidenceScore(facts);
+
+  return finalizeAnalysis(facts, 'qoe', common, {
+    summary: `${facts.name} quality of earnings is being read across add-back support, customer concentration, working capital, and evidence depth.`,
+    metrics: [
+      metric('reported', `Reported ${facts.metric}`, reported, fmtMoney(reported), 'Starting financial base'),
+      metric('adjusted', `Normalized ${facts.metric}`, adjusted, fmtMoney(adjusted), 'After supported add-backs'),
+      metric('addback_lift', 'Add-back lift', addBackLift, fmtPct(addBackLift), 'Higher lift needs stronger backup', addBackLift != null && addBackLift > 0.25 ? 'watch' : 'neutral'),
+      metric('evidence_depth', 'Evidence depth', evidence, `${evidence}%`, 'Support visible in current workspace', signalTone(evidence)),
+      metric('customer_concentration', 'Top customer', concentration, fmtPct(concentration), 'Quality and durability pressure', concentration != null && concentration >= 0.3 ? 'pass' : 'neutral'),
+    ],
+    charts: [{
+      type: 'bar',
+      title: 'QoE pressure',
+      data: [
+        { label: 'Reported', value: centsToMillions(reported), displayValue: fmtMoney(reported) },
+        { label: 'Add-backs', value: centsToMillions(facts.addBacksCents), displayValue: fmtMoney(facts.addBacksCents), tone: 'watch' },
+        { label: 'Normalized', value: centsToMillions(adjusted), displayValue: fmtMoney(adjusted), tone: facts.fitTone },
+      ],
+    }],
+    tables: [{
+      title: 'QoE checklist',
+      columns: ['Area', 'Current read', 'Evidence Yulia wants'],
+      rows: [
+        ['Add-backs', addBackLift == null ? 'Not enough facts' : fmtPct(addBackLift), 'Invoices, payroll detail, owner comp support, and one-time-expense backup.'],
+        ['Working capital', fmtMoney(wcPeg), 'A/R aging, inventory detail, deferred revenue, and peg support.'],
+        ['Revenue quality', fmtPct(facts.recurringRevenuePct), 'Cohorts, retention, gross margin by customer, and concentration support.'],
+      ],
+    }],
+    calculations: { reported, adjusted, addBackLift, wcPeg, evidence },
+  });
+}
+
+function buildDcfAnalysis(facts: DealFacts, common: Partial<AnalysisOutput>): AnalysisOutput {
+  const revenue = facts.revenueCents;
+  const margin = pctFromUnknown(facts.financials.ebitda_margin_pct) ?? facts.margin ?? 0.18;
+  const growth = pctFromUnknown(facts.financials.revenue_growth_pct) ?? 0.04;
+  const taxRate = pctFromUnknown(facts.financials.tax_rate_pct) ?? 0.26;
+  const capexPct = pctFromUnknown(facts.financials.capex_pct) ?? 0.025;
+  const wcInvestmentPct = pctFromUnknown(facts.financials.working_capital_investment_pct) ?? 0.01;
+  const wacc = pctFromUnknown(facts.financials.wacc_pct) ?? 0.14;
+  const terminalGrowth = pctFromUnknown(facts.financials.terminal_growth_pct) ?? 0.025;
+  const rows = forecastRows(revenue, growth, margin, taxRate, capexPct, wcInvestmentPct);
+  const terminalValue = rows.length && wacc > terminalGrowth
+    ? rows[rows.length - 1].fcf * (1 + terminalGrowth) / (wacc - terminalGrowth)
+    : null;
+  const pvFcf = rows.reduce((sum, row) => sum + row.fcf / Math.pow(1 + wacc, row.year), 0);
+  const pvTerminal = terminalValue == null ? null : terminalValue / Math.pow(1 + wacc, 5);
+  const enterpriseValue = pvTerminal == null ? (pvFcf || null) : pvFcf + pvTerminal;
+
+  return finalizeAnalysis(facts, 'dcf', common, {
+    summary: `${facts.name} DCF is modeled from revenue growth, margin, reinvestment, discount rate, and terminal value assumptions.`,
+    metrics: [
+      metric('enterprise_value', 'DCF enterprise value', enterpriseValue, fmtMoney(enterpriseValue), `${fmtPct(wacc)} WACC · ${fmtPct(terminalGrowth)} terminal growth`, varianceTone(enterpriseValue && facts.askingCents ? (facts.askingCents - enterpriseValue) / enterpriseValue : null)),
+      metric('year_5_revenue', 'Year 5 revenue', rows[4]?.revenue ?? null, fmtMoney(rows[4]?.revenue), `${fmtPct(growth)} annual growth`),
+      metric('terminal_value', 'PV terminal value', pvTerminal, fmtMoney(pvTerminal), 'Discounted terminal value'),
+      metric('fcf_conversion', 'FCF conversion', 1 - taxRate - capexPct - wcInvestmentPct, fmtPct(1 - taxRate - capexPct - wcInvestmentPct), 'From EBITDA to unlevered FCF'),
+    ],
+    charts: [{
+      type: 'bar',
+      title: 'Forecast free cash flow',
+      data: rows.map(row => ({ label: `Y${row.year}`, value: centsToMillions(row.fcf), displayValue: fmtMoney(row.fcf) })),
+    }],
+    tables: [{
+      title: 'Five-year DCF',
+      columns: ['Year', 'Revenue', 'EBITDA', 'FCF', 'PV FCF'],
+      rows: rows.map(row => [
+        row.year,
+        fmtMoney(row.revenue),
+        fmtMoney(row.ebitda),
+        fmtMoney(row.fcf),
+        fmtMoney(row.fcf / Math.pow(1 + wacc, row.year)),
+      ]),
+    }],
+    calculations: { growth, margin, taxRate, capexPct, wcInvestmentPct, wacc, terminalGrowth, pvFcf, pvTerminal, terminalValue, enterpriseValue },
+  });
+}
+
+function buildLboAnalysis(facts: DealFacts, common: Partial<AnalysisOutput>): AnalysisOutput {
+  const dealSize = facts.dealSizeCents;
+  const seniorDebtPct = pctFromUnknown(facts.financials.senior_debt_pct) ?? 0.6;
+  const sellerNotePct = pctFromUnknown(facts.financials.seller_note_pct) ?? 0.1;
+  const equityPct = Math.max(0, 1 - seniorDebtPct - sellerNotePct);
+  const growth = pctFromUnknown(facts.financials.revenue_growth_pct) ?? 0.04;
+  const margin = pctFromUnknown(facts.financials.ebitda_margin_pct) ?? facts.margin ?? 0.18;
+  const exitMultiple = numberFromUnknown(facts.financials.exit_multiple) ?? facts.multipleRange.high ?? facts.multipleRange.low + 1.5;
+  const holdPeriod = numberFromUnknown(facts.financials.hold_period_years) ?? 5;
+  const initialEquity = dealSize == null ? null : dealSize * equityPct;
+  const seniorDebt = dealSize == null ? null : dealSize * seniorDebtPct;
+  const exitEbitda = facts.revenueCents == null ? null : facts.revenueCents * Math.pow(1 + growth, holdPeriod) * margin;
+  const exitValue = exitEbitda == null ? null : exitEbitda * exitMultiple;
+  const debtPaydown = seniorDebt == null ? null : seniorDebt * clamp(0.12 * holdPeriod, 0.25, 0.75);
+  const remainingDebt = seniorDebt == null || debtPaydown == null ? null : Math.max(0, seniorDebt - debtPaydown);
+  const exitEquity = exitValue == null ? null : exitValue - (remainingDebt || 0);
+  const moic = initialEquity && exitEquity ? exitEquity / initialEquity : null;
+  const irr = moic != null && holdPeriod > 0 ? Math.pow(moic, 1 / holdPeriod) - 1 : null;
+
+  return finalizeAnalysis(facts, 'lbo', common, {
+    summary: `${facts.name} LBO read sizes equity, debt paydown, exit value, MOIC, and IRR against current deal facts.`,
+    metrics: [
+      metric('initial_equity', 'Initial equity', initialEquity, fmtMoney(initialEquity), `${fmtPct(equityPct)} of deal size`),
+      metric('senior_debt', 'Opening senior debt', seniorDebt, fmtMoney(seniorDebt), `${fmtPct(seniorDebtPct)} leverage`),
+      metric('exit_equity', 'Exit equity value', exitEquity, fmtMoney(exitEquity), `${fmtMultiple(exitMultiple)} exit multiple`),
+      metric('moic', 'MOIC', moic, moic == null ? '—' : `${moic.toFixed(1)}x`, `${holdPeriod}-year hold`, moic != null && moic >= 2 ? 'pursue' : 'watch'),
+      metric('irr', 'IRR', irr, fmtPct(irr), 'Illustrative sponsor return', irr != null && irr >= 0.25 ? 'pursue' : irr != null && irr >= 0.15 ? 'watch' : 'pass'),
+    ],
+    charts: [{
+      type: 'bar',
+      title: 'Equity bridge',
+      data: [
+        { label: 'Initial equity', value: centsToMillions(initialEquity), displayValue: fmtMoney(initialEquity) },
+        { label: 'Debt paydown', value: centsToMillions(debtPaydown), displayValue: fmtMoney(debtPaydown), tone: 'pursue' },
+        { label: 'Exit equity', value: centsToMillions(exitEquity), displayValue: fmtMoney(exitEquity), tone: moic != null && moic >= 2 ? 'pursue' : 'watch' },
+      ],
+    }],
+    tables: [{
+      title: 'LBO assumptions',
+      columns: ['Driver', 'Assumption', 'Why it matters'],
+      rows: [
+        ['Hold period', `${holdPeriod} years`, 'Sets compounding and exit timing.'],
+        ['Revenue growth', fmtPct(growth), 'Drives exit EBITDA.'],
+        ['Exit multiple', fmtMultiple(exitMultiple), 'Controls terminal value.'],
+        ['Debt paydown', fmtMoney(debtPaydown), 'Turns cash flow into sponsor equity value.'],
+      ],
+    }],
+    calculations: { dealSize, seniorDebtPct, sellerNotePct, equityPct, growth, margin, exitMultiple, holdPeriod, initialEquity, seniorDebt, exitEbitda, exitValue, debtPaydown, remainingDebt, exitEquity, moic, irr },
+  });
+}
+
+function buildSensitivityAnalysis(facts: DealFacts, common: Partial<AnalysisOutput>): AnalysisOutput {
+  const baseEarnings = facts.adjustedEarningsCents;
+  const baseMultiple = facts.impliedMultiple ?? (facts.multipleRange.low + (facts.multipleRange.high ?? facts.multipleRange.low + 3)) / 2;
+  const marginCases = [-0.02, 0, 0.02].map(delta => Math.max(0.03, (facts.margin ?? 0.18) + delta));
+  const multipleCases = [Math.max(1, baseMultiple - 1), baseMultiple, baseMultiple + 1];
+  const rows = marginCases.map(marginCase => {
+    const earnings = facts.revenueCents ? facts.revenueCents * marginCase : baseEarnings;
+    return multipleCases.map(multipleCase => earnings == null ? null : earnings * multipleCase);
+  });
+
+  return finalizeAnalysis(facts, 'sensitivity', common, {
+    summary: `${facts.name} sensitivity model shows how value moves when margin and multiple assumptions change.`,
+    metrics: [
+      metric('low_case', 'Low case', rows[0][0], fmtMoney(rows[0][0]), `${fmtPct(marginCases[0])} margin · ${fmtMultiple(multipleCases[0])}`),
+      metric('base_case', 'Base case', rows[1][1], fmtMoney(rows[1][1]), `${fmtPct(marginCases[1])} margin · ${fmtMultiple(multipleCases[1])}`),
+      metric('high_case', 'High case', rows[2][2], fmtMoney(rows[2][2]), `${fmtPct(marginCases[2])} margin · ${fmtMultiple(multipleCases[2])}`),
+    ],
+    charts: [{
+      type: 'matrix',
+      title: 'Value sensitivity',
+      data: marginCases.flatMap((marginCase, rowIndex) => multipleCases.map((multipleCase, colIndex) => ({
+        row: fmtPct(marginCase),
+        column: fmtMultiple(multipleCase),
+        value: centsToMillions(rows[rowIndex][colIndex]),
+        displayValue: fmtMoney(rows[rowIndex][colIndex]),
+      }))),
+    }],
+    tables: [{
+      title: 'Margin / multiple table',
+      columns: ['Margin', ...multipleCases.map(fmtMultiple)],
+      rows: marginCases.map((marginCase, rowIndex) => [
+        fmtPct(marginCase),
+        ...rows[rowIndex].map(fmtMoney),
+      ]),
+    }],
+    calculations: { baseEarnings, marginCases, multipleCases, values: rows },
   });
 }
 
@@ -382,6 +593,49 @@ function buildCapitalStructureAnalysis(facts: DealFacts, analysisType: string, c
       ],
     }],
     calculations: { dealSize, seniorDebtPct, sellerNotePct, equityPct, seniorDebt, sellerNote, equity, rate, seniorService, dscr },
+    });
+  }
+
+function buildCovenantAnalysis(facts: DealFacts, common: Partial<AnalysisOutput>): AnalysisOutput {
+  const dealSize = facts.dealSizeCents;
+  const seniorDebtPct = pctFromUnknown(facts.financials.senior_debt_pct) ?? 0.65;
+  const interestRate = pctFromUnknown(facts.financials.interest_rate) ?? 0.105;
+  const seniorDebt = dealSize == null ? null : dealSize * seniorDebtPct;
+  const debtService = annualDebtService(seniorDebt, interestRate, 10);
+  const dscr = facts.adjustedEarningsCents && debtService ? facts.adjustedEarningsCents / debtService : null;
+  const debtToEbitda = facts.adjustedEarningsCents && seniorDebt ? seniorDebt / facts.adjustedEarningsCents : null;
+  const minDscr = numberFromUnknown(facts.financials.min_dscr) ?? 1.25;
+  const maxDebtToEbitda = numberFromUnknown(facts.financials.max_debt_to_ebitda) ?? 3.5;
+  const maxLtv = pctFromUnknown(facts.financials.max_ltv_pct) ?? 0.75;
+  const ltv = dealSize && seniorDebt ? seniorDebt / dealSize : null;
+
+  return finalizeAnalysis(facts, 'covenant', common, {
+    summary: `${facts.name} covenant model checks DSCR, debt-to-EBITDA, loan-to-value, and lender pressure before financing terms harden.`,
+    metrics: [
+      metric('dscr', 'DSCR', dscr, dscr == null ? '—' : dscr.toFixed(2), `Minimum ${minDscr.toFixed(2)}x`, dscr != null && dscr >= minDscr ? 'pursue' : 'pass'),
+      metric('debt_to_ebitda', 'Debt / EBITDA', debtToEbitda, fmtMultiple(debtToEbitda), `Maximum ${fmtMultiple(maxDebtToEbitda)}`, debtToEbitda != null && debtToEbitda <= maxDebtToEbitda ? 'pursue' : 'watch'),
+      metric('ltv', 'Loan-to-value', ltv, fmtPct(ltv), `Maximum ${fmtPct(maxLtv)}`, ltv != null && ltv <= maxLtv ? 'pursue' : 'watch'),
+      metric('annual_debt_service', 'Annual debt service', debtService, fmtMoney(debtService), `${fmtPct(interestRate)} senior rate`),
+    ],
+    charts: [{
+      type: 'bar',
+      title: 'Covenant headroom',
+      data: [
+        { label: 'DSCR', value: dscr ?? 0, displayValue: dscr == null ? '—' : `${dscr.toFixed(2)}x`, tone: dscr != null && dscr >= minDscr ? 'pursue' : 'pass' },
+        { label: 'Debt / EBITDA', value: debtToEbitda ?? 0, displayValue: fmtMultiple(debtToEbitda), tone: debtToEbitda != null && debtToEbitda <= maxDebtToEbitda ? 'pursue' : 'watch' },
+        { label: 'LTV', value: (ltv ?? 0) * 100, displayValue: fmtPct(ltv), tone: ltv != null && ltv <= maxLtv ? 'pursue' : 'watch' },
+      ],
+    }],
+    tables: [{
+      title: 'Covenant checks',
+      columns: ['Check', 'Modeled read', 'Lender implication'],
+      rows: [
+        ['DSCR', dscr == null ? 'Missing' : `${dscr.toFixed(2)}x`, 'Below threshold usually requires price, debt, or seller-paper adjustment.'],
+        ['Debt / EBITDA', fmtMultiple(debtToEbitda), 'Higher leverage raises underwriting pressure.'],
+        ['Loan-to-value', fmtPct(ltv), 'Controls collateral and equity injection pressure.'],
+      ],
+    }],
+    calculations: { dealSize, seniorDebtPct, interestRate, seniorDebt, debtService, dscr, debtToEbitda, minDscr, maxDebtToEbitda, maxLtv, ltv },
   });
 }
 
@@ -447,6 +701,57 @@ function buildMarketIntelligenceAnalysis(facts: DealFacts, common: Partial<Analy
         ['Source gap', sourceGapRead(facts), 'Request the first missing schedule before the next buyer touch.'],
       ],
     }],
+    });
+  }
+
+function buildTaxImpactAnalysis(facts: DealFacts, analysisType: string, common: Partial<AnalysisOutput>): AnalysisOutput {
+  const purchasePrice = facts.dealSizeCents;
+  const assetPurchasePct = pctFromUnknown(facts.financials.asset_purchase_pct) ?? 0.7;
+  const goodwillPct = pctFromUnknown(facts.financials.goodwill_allocation_pct) ?? 0.55;
+  const inventoryPct = pctFromUnknown(facts.financials.inventory_allocation_pct) ?? 0.08;
+  const equipmentPct = pctFromUnknown(facts.financials.equipment_allocation_pct) ?? 0.17;
+  const taxRate = pctFromUnknown(facts.financials.tax_rate_pct) ?? 0.26;
+  const stateTaxRate = pctFromUnknown(facts.financials.state_tax_rate_pct) ?? 0.04;
+  const ordinaryRate = pctFromUnknown(facts.financials.ordinary_income_tax_rate_pct) ?? 0.37;
+  const capitalGainsRate = pctFromUnknown(facts.financials.capital_gains_tax_rate_pct) ?? 0.2;
+  const goodwill = purchasePrice == null ? null : purchasePrice * goodwillPct;
+  const inventory = purchasePrice == null ? null : purchasePrice * inventoryPct;
+  const equipment = purchasePrice == null ? null : purchasePrice * equipmentPct;
+  const goodwillAnnualShield = goodwill == null ? null : (goodwill / 15) * taxRate;
+  const sellerTaxPressure = purchasePrice == null ? null : purchasePrice * ((ordinaryRate * inventoryPct) + (capitalGainsRate * Math.max(0, 1 - inventoryPct)) + stateTaxRate);
+
+  return finalizeAnalysis(facts, analysisType, common, {
+    summary: `${facts.name} tax impact model frames asset/equity weighting, allocation, amortization shield, and seller tax pressure for CPA and tax-counsel review.`,
+    metrics: [
+      metric('asset_purchase_pct', 'Asset-purchase weighting', assetPurchasePct, fmtPct(assetPurchasePct), 'Working assumption, not tax advice'),
+      metric('goodwill', 'Goodwill allocation', goodwill, fmtMoney(goodwill), `${fmtPct(goodwillPct)} of purchase price`),
+      metric('annual_tax_shield', 'Annual goodwill tax shield', goodwillAnnualShield, fmtMoney(goodwillAnnualShield), '15-year illustrative amortization shield'),
+      metric('seller_tax_pressure', 'Illustrative seller tax pressure', sellerTaxPressure, fmtMoney(sellerTaxPressure), 'Rough issue spot only; CPA/tax counsel signs off', 'watch'),
+    ],
+    charts: [{
+      type: 'bar',
+      title: 'Purchase-price allocation',
+      data: [
+        { label: 'Goodwill', value: centsToMillions(goodwill), displayValue: fmtMoney(goodwill), tone: 'pursue' },
+        { label: 'Equipment', value: centsToMillions(equipment), displayValue: fmtMoney(equipment), tone: 'neutral' },
+        { label: 'Inventory', value: centsToMillions(inventory), displayValue: fmtMoney(inventory), tone: 'watch' },
+      ],
+    }],
+    tables: [{
+      title: analysisType === 'purchase_price_allocation' ? 'Allocation issue map' : 'Tax impact issue map',
+      columns: ['Issue', 'Modeled read', 'Sign-off owner'],
+      rows: [
+        ['Asset vs equity', `${fmtPct(assetPurchasePct)} asset weighting`, 'Tax counsel / CPA'],
+        ['Goodwill amortization', fmtMoney(goodwillAnnualShield), 'CPA / tax counsel'],
+        ['Inventory and ordinary income', fmtMoney(inventory), 'CPA'],
+        ['State tax exposure', fmtPct(stateTaxRate), 'State/local tax specialist as needed'],
+      ],
+    }],
+    professionalTriggers: [
+      { role: 'CPA / tax counsel', trigger: 'Purchase-price allocation, asset/equity treatment, state tax, installment sale, or earnout character affects economics.', why: 'Yulia can model scenarios and issue spot; tax professionals sign off on tax treatment.' },
+      { role: 'M&A attorney', trigger: 'Tax structure must match deal docs, allocation schedules, seller note, and earnout terms.', why: 'Legal terms determine how the tax model is actually implemented.' },
+    ],
+    calculations: { purchasePrice, assetPurchasePct, goodwillPct, inventoryPct, equipmentPct, taxRate, stateTaxRate, ordinaryRate, capitalGainsRate, goodwill, inventory, equipment, goodwillAnnualShield, sellerTaxPressure },
   });
 }
 
@@ -619,6 +924,88 @@ function buildPmiAnalysis(facts: DealFacts, common: Partial<AnalysisOutput>): An
         ['People', 'Confirm key employee retention and incentives.', 'Org chart / employment docs'],
       ],
     }],
+    });
+  }
+
+function buildEarnoutAnalysis(facts: DealFacts, common: Partial<AnalysisOutput>): AnalysisOutput {
+  const dealSize = facts.dealSizeCents;
+  const earnoutPct = pctFromUnknown(facts.financials.earnout_pct) ?? 0.1;
+  const probability = pctFromUnknown(facts.financials.earnout_probability_pct) ?? 0.6;
+  const discountRate = pctFromUnknown(facts.financials.discount_rate_pct) ?? 0.14;
+  const earnoutPeriodMonths = numberFromUnknown(facts.financials.earnout_period_months) ?? 24;
+  const targetGrowth = pctFromUnknown(facts.financials.earnout_revenue_growth_pct) ?? pctFromUnknown(facts.financials.revenue_growth_pct) ?? 0.08;
+  const maxEarnout = dealSize == null ? null : dealSize * earnoutPct;
+  const expectedEarnout = maxEarnout == null ? null : maxEarnout * probability;
+  const presentValue = expectedEarnout == null ? null : expectedEarnout / Math.pow(1 + discountRate, earnoutPeriodMonths / 12);
+
+  return finalizeAnalysis(facts, 'earnout', common, {
+    summary: `${facts.name} earnout model separates headline consideration from probability-weighted value, timing, and legal/tax review points.`,
+    metrics: [
+      metric('max_earnout', 'Maximum earnout', maxEarnout, fmtMoney(maxEarnout), `${fmtPct(earnoutPct)} of deal size`),
+      metric('expected_earnout', 'Expected earnout', expectedEarnout, fmtMoney(expectedEarnout), `${fmtPct(probability)} modeled probability`),
+      metric('present_value', 'PV of earnout', presentValue, fmtMoney(presentValue), `${fmtPct(discountRate)} discount rate`),
+      metric('target_growth', 'Target growth', targetGrowth, fmtPct(targetGrowth), 'Illustrative performance hurdle'),
+    ],
+    charts: [{
+      type: 'bar',
+      title: 'Earnout economics',
+      data: [
+        { label: 'Maximum', value: centsToMillions(maxEarnout), displayValue: fmtMoney(maxEarnout), tone: 'watch' },
+        { label: 'Expected', value: centsToMillions(expectedEarnout), displayValue: fmtMoney(expectedEarnout), tone: 'neutral' },
+        { label: 'PV', value: centsToMillions(presentValue), displayValue: fmtMoney(presentValue), tone: 'pursue' },
+      ],
+    }],
+    tables: [{
+      title: 'Earnout structure checklist',
+      columns: ['Term', 'Modeled read', 'Why Yulia flags it'],
+      rows: [
+        ['Performance hurdle', fmtPct(targetGrowth), 'Needs objective measurement and audit rights.'],
+        ['Measurement period', `${earnoutPeriodMonths} months`, 'Longer periods increase operating-control disputes.'],
+        ['Tax/legal character', 'Needs sign-off', 'Contingent value can change tax timing and agreement language.'],
+      ],
+    }],
+    calculations: { dealSize, earnoutPct, probability, discountRate, earnoutPeriodMonths, targetGrowth, maxEarnout, expectedEarnout, presentValue },
+  });
+}
+
+function buildCapTableAnalysis(facts: DealFacts, common: Partial<AnalysisOutput>): AnalysisOutput {
+  const preMoney = centsFrom(numberFromUnknown(facts.financials.pre_money_cents)) ?? facts.dealSizeCents ?? facts.askingCents;
+  const raiseAmount = centsFrom(numberFromUnknown(facts.financials.raise_amount_cents)) ?? (preMoney == null ? null : preMoney * 0.2);
+  const optionPoolPct = pctFromUnknown(facts.financials.option_pool_pct) ?? 0.1;
+  const liquidationPreferenceMultiple = numberFromUnknown(facts.financials.liquidation_preference_multiple) ?? numberFromUnknown(facts.financials.liquidation_preference_pct) ?? 1;
+  const postMoney = preMoney == null || raiseAmount == null ? null : preMoney + raiseAmount;
+  const investorOwnership = postMoney == null || raiseAmount == null ? null : raiseAmount / postMoney;
+  const founderOwnership = investorOwnership == null ? null : Math.max(0, 1 - investorOwnership - optionPoolPct);
+  const preferenceStack = raiseAmount == null ? null : raiseAmount * liquidationPreferenceMultiple;
+
+  return finalizeAnalysis(facts, 'cap_table', common, {
+    summary: `${facts.name} cap table model shows dilution, option pool pressure, and liquidation preference economics before fundraising terms become executable.`,
+    metrics: [
+      metric('pre_money', 'Pre-money value', preMoney, fmtMoney(preMoney), 'Working valuation assumption'),
+      metric('raise_amount', 'Raise amount', raiseAmount, fmtMoney(raiseAmount), 'Primary capital'),
+      metric('investor_ownership', 'Investor ownership', investorOwnership, fmtPct(investorOwnership), 'Post-money share'),
+      metric('founder_ownership', 'Founder / existing ownership', founderOwnership, fmtPct(founderOwnership), `After ${fmtPct(optionPoolPct)} option pool`),
+      metric('preference_stack', 'Preference stack', preferenceStack, fmtMoney(preferenceStack), `${liquidationPreferenceMultiple.toFixed(1)}x liquidation preference`),
+    ],
+    charts: [{
+      type: 'bar',
+      title: 'Post-money ownership',
+      data: [
+        { label: 'Investor', value: (investorOwnership ?? 0) * 100, displayValue: fmtPct(investorOwnership), tone: 'watch' },
+        { label: 'Option pool', value: optionPoolPct * 100, displayValue: fmtPct(optionPoolPct), tone: 'neutral' },
+        { label: 'Existing', value: (founderOwnership ?? 0) * 100, displayValue: fmtPct(founderOwnership), tone: 'pursue' },
+      ],
+    }],
+    tables: [{
+      title: 'Cap table terms',
+      columns: ['Term', 'Modeled read', 'Decision issue'],
+      rows: [
+        ['Pre-money', fmtMoney(preMoney), 'Controls dilution and headline valuation.'],
+        ['Option pool', fmtPct(optionPoolPct), 'Can shift dilution before or after investment.'],
+        ['Liquidation preference', `${liquidationPreferenceMultiple.toFixed(1)}x`, 'Changes downside economics and exit proceeds.'],
+      ],
+    }],
+    calculations: { preMoney, raiseAmount, optionPoolPct, liquidationPreferenceMultiple, postMoney, investorOwnership, founderOwnership, preferenceStack },
   });
 }
 
@@ -634,6 +1021,7 @@ function finalizeAnalysis(
   const professionalTriggers = specific.professionalTriggers || common.professionalTriggers || commonProfessionalTriggers(facts, analysisType);
   const nextActions = specific.nextActions || common.nextActions || commonNextActions(facts, analysisType);
   const summary = specific.summary || `${facts.name} analysis is ready.`;
+  const evidenceRefs = specific.evidenceRefs || common.evidenceRefs || commonEvidenceRefs(facts, analysisType);
 
   return {
     schemaVersion: 'analysis-runtime-v1',
@@ -652,6 +1040,7 @@ function finalizeAnalysis(
       'METHODOLOGY_V18a Tax amendment',
       'METHODOLOGY_V18b Legal amendment',
     ],
+    evidenceRefs,
     inputs: specific.inputs || common.inputs || commonInputs(facts),
     assumptions: specific.assumptions || common.assumptions || commonAssumptions(facts, analysisType),
     metrics: specific.metrics || common.metrics || [],
@@ -662,14 +1051,14 @@ function finalizeAnalysis(
     professionalTriggers,
     nextActions,
     yuliaRead: specific.yuliaRead || common.yuliaRead || yuliaRead(facts, analysisType, summary),
-	    calculations: {
-	      ...(common.calculations || {}),
-	      ...(specific.calculations || {}),
-	      dealId: facts.deal.id,
-	      dealName: facts.name,
-	      fitScore: facts.fitScore,
-	      impliedMultiple: facts.impliedMultiple,
-	      margin: facts.margin,
+      calculations: {
+        ...(common.calculations || {}),
+        ...(specific.calculations || {}),
+        dealId: facts.deal.id,
+        dealName: facts.name,
+        fitScore: facts.fitScore,
+        impliedMultiple: facts.impliedMultiple,
+        margin: facts.margin,
       adjustedEarningsCents: facts.adjustedEarningsCents,
     },
   };
@@ -685,6 +1074,7 @@ function commonAnalysisParts(facts: DealFacts, analysisType: string, menuItemSlu
       'METHODOLOGY_V18b Legal amendment',
     ],
     inputs: commonInputs(facts),
+    evidenceRefs: commonEvidenceRefs(facts, analysisType),
     assumptions: commonAssumptions(facts, analysisType),
     risks: commonRisks(facts),
     missingData: commonMissingData(facts),
@@ -772,6 +1162,96 @@ function commonInputs(facts: DealFacts): AnalysisOutput['inputs'] {
   ];
 }
 
+function commonEvidenceRefs(facts: DealFacts, analysisType: string): AnalysisOutput['evidenceRefs'] {
+  const refs: AnalysisOutput['evidenceRefs'] = [
+    {
+      label: 'Deal profile',
+      type: 'deal_fact',
+      source: 'deal record',
+      value: `${facts.name} · ${facts.league}`,
+      detail: `${facts.deal.journey_type || 'buy'} journey${facts.deal.current_gate ? ` · ${facts.deal.current_gate}` : ''}`,
+      confidence: 'high',
+    },
+    {
+      label: 'Financial base',
+      type: 'financial_fact',
+      source: 'deal financials',
+      value: `${fmtMoney(facts.revenueCents)} revenue · ${fmtMoney(facts.earningsCents)} ${facts.metric}`,
+      detail: 'Primary sizing facts used before Yulia surfaces a recommendation.',
+      confidence: facts.revenueCents && facts.earningsCents ? 'high' : 'medium',
+    },
+    {
+      label: 'Value signal',
+      type: 'financial_fact',
+      source: 'deal financials',
+      value: `${fmtMoney(facts.askingCents)} asking · ${fmtMultiple(facts.impliedMultiple)} implied`,
+      detail: `${facts.league} reference range ${fmtRange(facts.multipleRange)}`,
+      confidence: facts.askingCents && facts.impliedMultiple ? 'high' : 'medium',
+    },
+    {
+      label: 'Methodology guardrails',
+      type: 'methodology',
+      source: 'METHODOLOGY_V17, V18a, V18b',
+      value: ANALYSIS_LABELS[analysisType] || analysisType,
+      detail: 'Yulia surfaces facts and issues; users and licensed professionals make final calls.',
+      confidence: 'high',
+    },
+  ];
+
+  if (facts.deal.industry || facts.deal.location) {
+    refs.push({
+      label: 'Market context',
+      type: 'market_signal',
+      source: 'deal profile and market-read snapshot',
+      value: [facts.deal.industry, facts.deal.location].filter(Boolean).join(' · '),
+      detail: 'Used to frame buyer appetite, financing climate, and sourcing/comps questions.',
+      confidence: 'medium',
+    });
+  }
+  if (facts.addBacksCents > 0) {
+    refs.push({
+      label: 'Recast evidence',
+      type: 'financial_fact',
+      source: 'financial add-back schedule',
+      value: `${fmtMoney(facts.addBacksCents)} add-backs`,
+      detail: `Normalized ${facts.metric} becomes ${fmtMoney(facts.adjustedEarningsCents)} before valuation or debt sizing.`,
+      confidence: 'medium',
+    });
+  }
+  if (facts.customerConcentrationPct != null) {
+    refs.push({
+      label: 'Customer concentration',
+      type: 'financial_fact',
+      source: 'deal financials',
+      value: fmtPct(facts.customerConcentrationPct),
+      detail: 'Used for buyer-fit, lender appetite, diligence risk, and next-action priority.',
+      confidence: 'medium',
+    });
+  }
+  if (facts.recurringRevenuePct != null) {
+    refs.push({
+      label: 'Recurring revenue',
+      type: 'financial_fact',
+      source: 'deal financials',
+      value: fmtPct(facts.recurringRevenuePct),
+      detail: 'Used in market appetite, quality-of-revenue, and fit scoring.',
+      confidence: 'medium',
+    });
+  }
+  if (facts.financials.working_capital_peg) {
+    refs.push({
+      label: 'Working-capital peg',
+      type: 'financial_fact',
+      source: 'deal financials / diligence schedule',
+      value: fmtMoney(centsFrom(numberFromUnknown(facts.financials.working_capital_peg))),
+      detail: 'Used for LOI, QoE, covenant, and purchase-agreement issue spotting.',
+      confidence: 'medium',
+    });
+  }
+
+  return refs.slice(0, 9);
+}
+
 function commonAssumptions(facts: DealFacts, analysisType: string): AnalysisOutput['assumptions'] {
   const highMultiple = facts.multipleRange.high ?? facts.multipleRange.low + 4;
   const assumptions: AnalysisOutput['assumptions'] = [
@@ -782,31 +1262,49 @@ function commonAssumptions(facts: DealFacts, analysisType: string): AnalysisOutp
     { key: 'customer_concentration_pct', label: 'Top-customer concentration', value: facts.customerConcentrationPct, displayValue: fmtPct(facts.customerConcentrationPct) },
   ];
 
-  if (analysisType === 'capital_structure' || analysisType === 'sba') {
+  if (analysisType === 'capital_structure' || analysisType === 'sba' || analysisType === 'lbo' || analysisType === 'covenant') {
+      assumptions.push(
+        { key: 'senior_debt_pct', label: 'Senior debt', value: pctFromUnknown(facts.financials.senior_debt_pct) ?? (analysisType === 'sba' ? 0.8 : 0.65), displayValue: fmtPct(pctFromUnknown(facts.financials.senior_debt_pct) ?? (analysisType === 'sba' ? 0.8 : 0.65)) },
+        { key: 'seller_note_pct', label: 'Seller note', value: pctFromUnknown(facts.financials.seller_note_pct) ?? (analysisType === 'sba' ? 0.1 : 0.15), displayValue: fmtPct(pctFromUnknown(facts.financials.seller_note_pct) ?? (analysisType === 'sba' ? 0.1 : 0.15)) },
+        { key: 'interest_rate', label: 'Interest rate', value: pctFromUnknown(facts.financials.interest_rate) ?? (analysisType === 'sba' ? 0.115 : 0.105), displayValue: fmtPct(pctFromUnknown(facts.financials.interest_rate) ?? (analysisType === 'sba' ? 0.115 : 0.105)) },
+      );
+    }
+
+  if (['valuation', 'dcf', 'lbo', 'sensitivity'].includes(analysisType)) {
     assumptions.push(
-      { key: 'senior_debt_pct', label: 'Senior debt', value: pctFromUnknown(facts.financials.senior_debt_pct) ?? (analysisType === 'sba' ? 0.8 : 0.65), displayValue: fmtPct(pctFromUnknown(facts.financials.senior_debt_pct) ?? (analysisType === 'sba' ? 0.8 : 0.65)) },
-      { key: 'seller_note_pct', label: 'Seller note', value: pctFromUnknown(facts.financials.seller_note_pct) ?? (analysisType === 'sba' ? 0.1 : 0.15), displayValue: fmtPct(pctFromUnknown(facts.financials.seller_note_pct) ?? (analysisType === 'sba' ? 0.1 : 0.15)) },
-      { key: 'interest_rate', label: 'Interest rate', value: pctFromUnknown(facts.financials.interest_rate) ?? (analysisType === 'sba' ? 0.115 : 0.105), displayValue: fmtPct(pctFromUnknown(facts.financials.interest_rate) ?? (analysisType === 'sba' ? 0.115 : 0.105)) },
+      { key: 'revenue_growth_pct', label: 'Revenue growth', value: pctFromUnknown(facts.financials.revenue_growth_pct) ?? 0.04, displayValue: fmtPct(pctFromUnknown(facts.financials.revenue_growth_pct) ?? 0.04) },
+      { key: 'ebitda_margin_pct', label: 'EBITDA margin', value: pctFromUnknown(facts.financials.ebitda_margin_pct) ?? facts.margin ?? 0.18, displayValue: fmtPct(pctFromUnknown(facts.financials.ebitda_margin_pct) ?? facts.margin ?? 0.18) },
+      { key: 'exit_multiple', label: 'Exit multiple', value: numberFromUnknown(facts.financials.exit_multiple) ?? highMultiple, displayValue: fmtMultiple(numberFromUnknown(facts.financials.exit_multiple) ?? highMultiple) },
+      { key: 'wacc_pct', label: 'Discount rate / WACC', value: pctFromUnknown(facts.financials.wacc_pct) ?? 0.14, displayValue: fmtPct(pctFromUnknown(facts.financials.wacc_pct) ?? 0.14) },
     );
   }
 
-  if (analysisType === 'working_capital') {
-    assumptions.push(
-      { key: 'working_capital_peg', label: 'Working-capital peg', value: centsFrom(numberFromUnknown(facts.financials.working_capital_peg)), displayValue: fmtMoney(centsFrom(numberFromUnknown(facts.financials.working_capital_peg))) },
-      { key: 'accounts_receivable', label: 'A/R', value: centsFrom(numberFromUnknown(facts.financials.accounts_receivable)), displayValue: fmtMoney(centsFrom(numberFromUnknown(facts.financials.accounts_receivable))) },
-      { key: 'inventory', label: 'Inventory', value: centsFrom(numberFromUnknown(facts.financials.inventory)), displayValue: fmtMoney(centsFrom(numberFromUnknown(facts.financials.inventory))) },
-    );
-  }
+  if (analysisType === 'working_capital' || analysisType === 'qoe') {
+      assumptions.push(
+        { key: 'working_capital_peg', label: 'Working-capital peg', value: centsFrom(numberFromUnknown(facts.financials.working_capital_peg)), displayValue: fmtMoney(centsFrom(numberFromUnknown(facts.financials.working_capital_peg))) },
+        { key: 'accounts_receivable', label: 'A/R', value: centsFrom(numberFromUnknown(facts.financials.accounts_receivable)), displayValue: fmtMoney(centsFrom(numberFromUnknown(facts.financials.accounts_receivable))) },
+        { key: 'inventory', label: 'Inventory', value: centsFrom(numberFromUnknown(facts.financials.inventory)), displayValue: fmtMoney(centsFrom(numberFromUnknown(facts.financials.inventory))) },
+      );
+    }
 
-  if (['tax_structure', 'legal_structure', 'tax_legal_structure', 'term_sheet'].includes(analysisType)) {
-    assumptions.push(
-      { key: 'asset_purchase_pct', label: 'Asset-purchase weighting', value: pctFromUnknown(facts.financials.asset_purchase_pct) ?? 0.7, displayValue: fmtPct(pctFromUnknown(facts.financials.asset_purchase_pct) ?? 0.7) },
-      { key: 'seller_note_pct', label: 'Seller note', value: pctFromUnknown(facts.financials.seller_note_pct) ?? 0.15, displayValue: fmtPct(pctFromUnknown(facts.financials.seller_note_pct) ?? 0.15) },
-      { key: 'earnout_pct', label: 'Earnout / contingent value', value: pctFromUnknown(facts.financials.earnout_pct) ?? 0.05, displayValue: fmtPct(pctFromUnknown(facts.financials.earnout_pct) ?? 0.05) },
-      { key: 'goodwill_allocation_pct', label: 'Goodwill allocation', value: pctFromUnknown(facts.financials.goodwill_allocation_pct) ?? 0.55, displayValue: fmtPct(pctFromUnknown(facts.financials.goodwill_allocation_pct) ?? 0.55) },
+  if (['tax_structure', 'legal_structure', 'tax_legal_structure', 'term_sheet', 'tax_impact', 'purchase_price_allocation', 'earnout'].includes(analysisType)) {
+      assumptions.push(
+        { key: 'asset_purchase_pct', label: 'Asset-purchase weighting', value: pctFromUnknown(facts.financials.asset_purchase_pct) ?? 0.7, displayValue: fmtPct(pctFromUnknown(facts.financials.asset_purchase_pct) ?? 0.7) },
+        { key: 'seller_note_pct', label: 'Seller note', value: pctFromUnknown(facts.financials.seller_note_pct) ?? 0.15, displayValue: fmtPct(pctFromUnknown(facts.financials.seller_note_pct) ?? 0.15) },
+        { key: 'earnout_pct', label: 'Earnout / contingent value', value: pctFromUnknown(facts.financials.earnout_pct) ?? 0.05, displayValue: fmtPct(pctFromUnknown(facts.financials.earnout_pct) ?? 0.05) },
+        { key: 'goodwill_allocation_pct', label: 'Goodwill allocation', value: pctFromUnknown(facts.financials.goodwill_allocation_pct) ?? 0.55, displayValue: fmtPct(pctFromUnknown(facts.financials.goodwill_allocation_pct) ?? 0.55) },
       { key: 'working_capital_peg', label: 'Working-capital peg', value: centsFrom(numberFromUnknown(facts.financials.working_capital_peg)), displayValue: fmtMoney(centsFrom(numberFromUnknown(facts.financials.working_capital_peg))) },
-    );
-  }
+      );
+    }
+
+  if (analysisType === 'cap_table') {
+    assumptions.push(
+      { key: 'pre_money_cents', label: 'Pre-money value', value: centsFrom(numberFromUnknown(facts.financials.pre_money_cents)) ?? facts.dealSizeCents, displayValue: fmtMoney(centsFrom(numberFromUnknown(facts.financials.pre_money_cents)) ?? facts.dealSizeCents) },
+      { key: 'raise_amount_cents', label: 'Raise amount', value: centsFrom(numberFromUnknown(facts.financials.raise_amount_cents)) ?? (facts.dealSizeCents ? facts.dealSizeCents * 0.2 : null), displayValue: fmtMoney(centsFrom(numberFromUnknown(facts.financials.raise_amount_cents)) ?? (facts.dealSizeCents ? facts.dealSizeCents * 0.2 : null)) },
+      { key: 'option_pool_pct', label: 'Option pool', value: pctFromUnknown(facts.financials.option_pool_pct) ?? 0.1, displayValue: fmtPct(pctFromUnknown(facts.financials.option_pool_pct) ?? 0.1) },
+      { key: 'liquidation_preference_multiple', label: 'Liquidation preference', value: numberFromUnknown(facts.financials.liquidation_preference_multiple) ?? numberFromUnknown(facts.financials.liquidation_preference_pct) ?? 1, displayValue: `${(numberFromUnknown(facts.financials.liquidation_preference_multiple) ?? numberFromUnknown(facts.financials.liquidation_preference_pct) ?? 1).toFixed(1)}x` },
+      );
+    }
 
   if (analysisType === 'market_intelligence' || analysisType === 'buyer_fit' || analysisType === 'deal_scorecard') {
     assumptions.push(
@@ -814,8 +1312,8 @@ function commonAssumptions(facts: DealFacts, analysisType: string): AnalysisOutp
     );
   }
 
-  return assumptions.filter(item => item.displayValue !== '—').slice(0, 8);
-}
+  return assumptions.filter(item => item.displayValue !== '—').slice(0, 12);
+  }
 
 function commonRisks(facts: DealFacts): AnalysisOutput['risks'] {
   const risks: AnalysisOutput['risks'] = [];
@@ -848,16 +1346,16 @@ function commonMissingData(facts: DealFacts): AnalysisOutput['missingData'] {
 }
 
 function commonProfessionalTriggers(facts: DealFacts, analysisType: string): AnalysisOutput['professionalTriggers'] {
-  const triggers: AnalysisOutput['professionalTriggers'] = [];
-  if (['tax_structure', 'legal_structure', 'tax_legal_structure', 'term_sheet', 'working_capital'].includes(analysisType) || (facts.dealSizeCents || 0) > 5_000_000_00) {
-    triggers.push({ role: 'M&A attorney', trigger: 'Deal terms, diligence allocation, liability, or executed documents are being shaped.', why: 'Yulia can draft and analyze, but counsel signs off on legal terms.' });
-  }
-  if (['tax_structure', 'tax_legal_structure', 'valuation', 'recast', 'working_capital'].includes(analysisType) || facts.addBacksCents > 0) {
-    triggers.push({ role: 'CPA / tax counsel', trigger: 'Recast, tax structure, allocation, or installment-sale consequences affect economics.', why: 'Yulia surfaces facts and issues; tax professionals sign off on tax treatment.' });
-  }
-  if (['sba', 'capital_structure'].includes(analysisType)) {
-    triggers.push({ role: 'Lender', trigger: 'Debt sizing, DSCR, collateral, seller standby, and SBA eligibility are in scope.', why: 'Financing feasibility ultimately depends on lender underwriting.' });
-  }
+    const triggers: AnalysisOutput['professionalTriggers'] = [];
+    if (['tax_structure', 'legal_structure', 'tax_legal_structure', 'term_sheet', 'working_capital', 'tax_impact', 'purchase_price_allocation', 'earnout'].includes(analysisType) || (facts.dealSizeCents || 0) > 5_000_000_00) {
+      triggers.push({ role: 'M&A attorney', trigger: 'Deal terms, diligence allocation, liability, or executed documents are being shaped.', why: 'Yulia can draft and analyze, but counsel signs off on legal terms.' });
+    }
+    if (['tax_structure', 'tax_legal_structure', 'tax_impact', 'purchase_price_allocation', 'valuation', 'dcf', 'lbo', 'sensitivity', 'recast', 'qoe', 'working_capital', 'earnout'].includes(analysisType) || facts.addBacksCents > 0) {
+      triggers.push({ role: 'CPA / tax counsel', trigger: 'Recast, tax structure, allocation, or installment-sale consequences affect economics.', why: 'Yulia surfaces facts and issues; tax professionals sign off on tax treatment.' });
+    }
+    if (['sba', 'capital_structure', 'covenant', 'lbo'].includes(analysisType)) {
+      triggers.push({ role: 'Lender', trigger: 'Debt sizing, DSCR, collateral, seller standby, and SBA eligibility are in scope.', why: 'Financing feasibility ultimately depends on lender underwriting.' });
+    }
   return triggers;
 }
 
@@ -980,7 +1478,26 @@ function legalExecutionScore(facts: DealFacts): number {
   if (numberFromUnknown(facts.financials.exclusivity_days)) score += 8;
   if (facts.customerConcentrationPct != null && facts.customerConcentrationPct >= 0.25) score += 8;
   if (/regulated|health|financial|industrial|franchise|software|security/i.test(`${facts.deal.industry || ''} ${facts.financials.industry_notes || ''}`)) score += 8;
-  return clamp(score, 0, 100);
+    return clamp(score, 0, 100);
+  }
+
+function forecastRows(
+  revenueCents: number | null,
+  growth: number,
+  margin: number,
+  taxRate: number,
+  capexPct: number,
+  workingCapitalInvestmentPct: number,
+): Array<{ year: number; revenue: number; ebitda: number; fcf: number }> {
+  if (!revenueCents) return [];
+  const rows: Array<{ year: number; revenue: number; ebitda: number; fcf: number }> = [];
+  for (let year = 1; year <= 5; year += 1) {
+    const revenue = revenueCents * Math.pow(1 + growth, year);
+    const ebitda = revenue * margin;
+    const fcf = ebitda * Math.max(0, 1 - taxRate - capexPct - workingCapitalInvestmentPct);
+    rows.push({ year, revenue, ebitda, fcf });
+  }
+  return rows;
 }
 
 function recastRows(facts: DealFacts): Array<Array<string | number | null>> {
@@ -1022,16 +1539,18 @@ function safeFinancials(value: unknown): Record<string, unknown> {
 
 function mapAssumptionOverridesToFinancials(overrides: Record<string, unknown>): Record<string, unknown> {
   const financials: Record<string, unknown> = {};
-  const moneyKeys = [
-    'working_capital_peg',
-    'accounts_receivable',
-    'inventory',
-    'owner_salary',
-    'non_recurring_expenses',
-    'personal_expenses',
-    'one_time_professional_fees',
-    'family_payroll_adjustment',
-  ];
+    const moneyKeys = [
+      'working_capital_peg',
+      'accounts_receivable',
+      'inventory',
+      'owner_salary',
+      'non_recurring_expenses',
+      'personal_expenses',
+      'one_time_professional_fees',
+      'family_payroll_adjustment',
+      'pre_money_cents',
+      'raise_amount_cents',
+    ];
   for (const key of moneyKeys) {
     const value = centsOverride(overrides, key);
     if (value != null) financials[key] = value;
@@ -1043,16 +1562,45 @@ function mapAssumptionOverridesToFinancials(overrides: Record<string, unknown>):
     'earnout_pct',
     'asset_purchase_pct',
     'goodwill_allocation_pct',
-    'interest_rate',
-    'recurring_revenue_pct',
-    'customer_concentration_pct',
-  ]) {
+      'interest_rate',
+      'revenue_growth_pct',
+      'ebitda_margin_pct',
+      'tax_rate_pct',
+      'capex_pct',
+      'working_capital_investment_pct',
+      'wacc_pct',
+      'terminal_growth_pct',
+      'discount_rate_pct',
+      'earnout_probability_pct',
+      'earnout_revenue_growth_pct',
+      'inventory_allocation_pct',
+      'equipment_allocation_pct',
+      'state_tax_rate_pct',
+      'ordinary_income_tax_rate_pct',
+      'capital_gains_tax_rate_pct',
+      'max_ltv_pct',
+      'option_pool_pct',
+      'recurring_revenue_pct',
+      'customer_concentration_pct',
+    ]) {
     const value = pctFromUnknown(overrides[key]);
+    if (value != null) financials[key] = value;
+    }
+
+  for (const key of [
+    'exit_multiple',
+    'hold_period_years',
+    'min_dscr',
+    'max_debt_to_ebitda',
+    'earnout_period_months',
+    'liquidation_preference_multiple',
+  ]) {
+    const value = numberFromUnknown(overrides[key]);
     if (value != null) financials[key] = value;
   }
 
-  return financials;
-}
+    return financials;
+  }
 
 function centsOverride(overrides: Record<string, unknown>, key: string): number | null {
   if (overrides[key] === undefined || overrides[key] === null || overrides[key] === '') return null;

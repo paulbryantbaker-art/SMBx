@@ -17,7 +17,7 @@ import { processDeliverable } from './deliverableProcessor.js';
 import { canGenerateDeliverable, markFreeDeliverableUsed } from './subscriptionService.js';
 import { hasDealAccess } from './dealAccessService.js';
 import { TOOL_NAMES_REQUIRING_CONFIRMATION } from './agencyActionRegistry.js';
-import { createAnalysisRun, createModelTabRecord, readModelTabState, updateAnalysisRunSnapshot, updateModelTabState } from './analysisRuntime.js';
+import { createAnalysisRun, createModelTabRecord, readAnalysisRunSnapshot, readModelTabState, updateAnalysisRunSnapshot, updateModelTabState } from './analysisRuntime.js';
 import { buildDealComparisonAnalysis, buildDeterministicAnalysis } from './deterministicAnalysisEngine.js';
 
 const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
@@ -116,7 +116,7 @@ export const TOOL_DEFINITIONS: Tool[] = [
   },
   {
     name: 'run_analysis',
-    description: 'Run a real analysis for a deal and open it in the canvas. Use this instead of answering inline whenever the user asks to run, create, prepare, build, or open an analysis such as buyer fit, comps, valuation, recast, market intelligence, SBA, capital structure, red flags, working capital, tax, or legal/deal structure. This resolves the analysis type to the right menu deliverable, queues generation, saves it, and opens the live analysis tab.',
+    description: 'Run a real analysis for a deal and open it in the canvas. Use this instead of answering inline whenever the user asks to run, create, prepare, build, or open an analysis such as buyer fit, comps, valuation, DCF, LBO, sensitivity, QoE, recast, market intelligence, SBA, capital structure, covenant, red flags, working capital, earnout, cap table, tax impact, purchase-price allocation, or legal/deal structure. This resolves the analysis type to the right menu deliverable, queues generation, saves it, and opens the live analysis tab.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -127,19 +127,28 @@ export const TOOL_DEFINITIONS: Tool[] = [
             'auto',
             'deal_scorecard',
             'buyer_fit',
-            'comps',
-            'valuation',
-            'recast',
-            'market_intelligence',
-            'sba',
-            'capital_structure',
-            'red_flags',
-            'working_capital',
-            'tax_structure',
-            'legal_structure',
-            'tax_legal_structure',
-            'term_sheet',
-            'pmi_value_creation',
+              'comps',
+              'valuation',
+              'qoe',
+              'lbo',
+              'dcf',
+              'sensitivity',
+              'recast',
+              'market_intelligence',
+              'sba',
+              'capital_structure',
+              'covenant',
+              'red_flags',
+              'working_capital',
+              'tax_impact',
+              'purchase_price_allocation',
+              'tax_structure',
+              'legal_structure',
+              'tax_legal_structure',
+              'term_sheet',
+              'earnout',
+              'cap_table',
+              'pmi_value_creation',
           ],
           description: 'The analysis the user wants. Use auto when the user asks generally to run analysis and the current deal journey/gate should choose the best first analysis.',
         },
@@ -306,6 +315,22 @@ export const TOOL_DEFINITIONS: Tool[] = [
         tabId: { type: 'string', description: 'Tab to read. Use "active" for currently visible tab, "all" for all open model tabs.' },
       },
       required: ['tabId'],
+    },
+  },
+  {
+    name: 'optimize_scenario',
+    description: 'Optimize the currently open analysis/model scenario. Use when the user asks for the best scenario, best path, optimal structure, negotiation path, or how to improve the modeled outcome. Reads the active canvas, saved assumptions, evidence trail, user role, risk tolerance, and objective; then Yulia should recommend a risk-adjusted path plus the negotiation, diligence, reps/warranties, tax/legal, and work-product steps to get there.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        tabId: { type: 'string', description: 'Canvas tab to optimize. Use "active" for the currently visible analysis/model tab.' },
+        analysisRunId: { type: 'number', description: 'Optional analysis run ID if the scenario is not currently the active tab.' },
+        role: { type: 'string', enum: ['auto', 'buyer', 'seller', 'raiser', 'divestor', 'advisor'], description: 'User posture for this optimization. Auto is default.' },
+        objective: { type: 'string', description: 'What the user wants optimized: price, DSCR, cash to close, certainty, speed, tax outcome, risk allocation, or another goal.' },
+        riskTolerance: { type: 'string', enum: ['auto', 'conservative', 'balanced', 'aggressive'], description: 'How much execution/financing/legal risk the user is willing to tolerate.' },
+        scenarioName: { type: 'string', description: 'Optional scenario/version label to optimize against.' },
+      },
+      required: [],
     },
   },
   {
@@ -601,6 +626,8 @@ export async function executeTool(
         return await updateModel(input, userId, conversationId);
       case 'read_tab_state':
         return await readTabState(input, userId, conversationId);
+      case 'optimize_scenario':
+        return await optimizeScenario(input, userId, conversationId);
       case 'create_support_issue':
         return await createSupportIssue(input, userId, conversationId);
       case 'query_admin_data':
@@ -1012,21 +1039,30 @@ async function generateDealDeliverable(input: Record<string, any>, userId: numbe
 const ANALYSIS_TYPES = new Set([
   'auto',
   'deal_scorecard',
-  'buyer_fit',
-  'comps',
-  'valuation',
-  'recast',
-  'market_intelligence',
-  'sba',
-  'capital_structure',
-  'red_flags',
-  'working_capital',
-  'tax_structure',
-  'legal_structure',
-  'tax_legal_structure',
-  'term_sheet',
-  'pmi_value_creation',
-]);
+    'buyer_fit',
+    'comps',
+    'valuation',
+    'qoe',
+    'lbo',
+    'dcf',
+    'sensitivity',
+    'recast',
+    'market_intelligence',
+    'sba',
+    'capital_structure',
+    'covenant',
+    'red_flags',
+    'working_capital',
+    'tax_impact',
+    'purchase_price_allocation',
+    'tax_structure',
+    'legal_structure',
+    'tax_legal_structure',
+    'term_sheet',
+    'earnout',
+    'cap_table',
+    'pmi_value_creation',
+  ]);
 
 async function runAnalysis(input: Record<string, any>, userId: number, conversationId?: number | null): Promise<string> {
   const { dealId, modelPreference } = input;
@@ -1155,30 +1191,45 @@ function resolveAnalysisMenuItemSlug({
       return journey === 'sell' ? 'sell-seven-factor-analysis' : 'buy-deal-scorecard';
     case 'buyer_fit':
       return journey === 'sell' ? 'sell-buyer-list' : 'buy-deal-scorecard';
-    case 'comps':
-      return 'universal-comp-analysis';
-    case 'valuation':
-      return journey === 'sell' ? 'sell-valuation-report' : journey === 'raise' ? 'raise-pre-post-model' : 'buy-valuation-model';
-    case 'recast':
-      return journey === 'sell' ? 'sell-financial-spread' : journey === 'pmi' ? 'pmi-financial-deep-dive' : 'buy-deal-scorecard';
+      case 'comps':
+        return 'universal-comp-analysis';
+      case 'valuation':
+        return journey === 'sell' ? 'sell-valuation-report' : journey === 'raise' ? 'raise-pre-post-model' : 'buy-valuation-model';
+      case 'qoe':
+        return journey === 'sell' ? 'sell-financial-spread' : journey === 'pmi' ? 'pmi-financial-deep-dive' : 'buy-deal-scorecard';
+      case 'lbo':
+      case 'dcf':
+      case 'sensitivity':
+        return journey === 'sell' ? 'sell-valuation-report' : journey === 'raise' ? 'raise-pre-post-model' : 'buy-valuation-model';
+      case 'recast':
+        return journey === 'sell' ? 'sell-financial-spread' : journey === 'pmi' ? 'pmi-financial-deep-dive' : 'buy-deal-scorecard';
     case 'market_intelligence':
       return 'universal-market-intelligence';
     case 'sba':
       return 'universal-sba-analysis';
-    case 'capital_structure':
-      return journey === 'sell' ? 'sell-deal-structure-analysis' : journey === 'raise' ? 'raise-use-of-funds' : 'buy-capital-structure';
+      case 'capital_structure':
+        return journey === 'sell' ? 'sell-deal-structure-analysis' : journey === 'raise' ? 'raise-use-of-funds' : 'buy-capital-structure';
+      case 'covenant':
+        return journey === 'raise' ? 'raise-use-of-funds' : 'buy-capital-structure';
     case 'red_flags':
       return journey === 'buy' ? 'buy-red-flag-report' : journey === 'pmi' ? 'pmi-ops-assessment' : 'sell-price-gap-analysis';
-    case 'working_capital':
-      return journey === 'sell' ? 'sell-working-capital-analysis' : 'buy-working-capital-model';
-    case 'tax_structure':
-    case 'legal_structure':
-    case 'tax_legal_structure':
-      return journey === 'sell' ? 'sell-deal-structure-analysis' : 'buy-capital-structure';
+      case 'working_capital':
+        return journey === 'sell' ? 'sell-working-capital-analysis' : 'buy-working-capital-model';
+      case 'tax_impact':
+      case 'purchase_price_allocation':
+        return journey === 'sell' ? 'sell-deal-structure-analysis' : 'buy-capital-structure';
+      case 'tax_structure':
+      case 'legal_structure':
+      case 'tax_legal_structure':
+        return journey === 'sell' ? 'sell-deal-structure-analysis' : 'buy-capital-structure';
     case 'term_sheet':
       return journey === 'raise' ? 'raise-term-sheet-analysis' : journey === 'sell' ? 'sell-loi-comparison' : 'buy-loi-draft';
-    case 'pmi_value_creation':
-      return 'pmi-value-creation';
+      case 'pmi_value_creation':
+        return 'pmi-value-creation';
+      case 'earnout':
+        return journey === 'sell' ? 'sell-deal-structure-analysis' : 'buy-earnout-analysis';
+      case 'cap_table':
+        return 'raise-cap-table';
     case 'auto':
     default:
       return resolveDefaultAnalysisSlug(journey, currentGate);
@@ -2002,10 +2053,86 @@ async function readTabState(input: Record<string, any>, userId: number, conversa
     sourcePayload: snapshot?.sourcePayload ?? null,
     analysisRunId: snapshot?.analysisRunId ?? null,
     analysisData: snapshot?.analysisRun?.outputs?.structuredAnalysis ?? null,
+    evidence: snapshot?.analysisRun?.evidence ?? [],
     versionNumber: snapshot?.versionNumber ?? snapshot?.analysisRun?.versionNumber ?? null,
     message: snapshot
-      ? `I can see ${snapshot.title} on the canvas, including the latest saved assumptions and outputs.`
+      ? `I can see ${snapshot.title} on the canvas, including the latest saved assumptions, outputs, and evidence trail.`
       : `I couldn't find saved state for that canvas tab yet. I can still work from what's visible in the app surface context.`,
+  });
+}
+
+function pickEnum(value: unknown, allowed: string[], fallback: string): string {
+  return typeof value === 'string' && allowed.includes(value) ? value : fallback;
+}
+
+async function optimizeScenario(input: Record<string, any>, userId: number, conversationId?: number | null): Promise<string> {
+  const tabId = typeof input.tabId === 'string' && input.tabId.trim() ? input.tabId.trim() : 'active';
+  const role = pickEnum(input.role, ['auto', 'buyer', 'seller', 'raiser', 'divestor', 'advisor'], 'auto');
+  const riskTolerance = pickEnum(input.riskTolerance, ['auto', 'conservative', 'balanced', 'aggressive'], 'auto');
+  const objective = typeof input.objective === 'string' && input.objective.trim()
+    ? input.objective.trim()
+    : 'best risk-adjusted transaction outcome';
+  const requestedScenario = typeof input.scenarioName === 'string' && input.scenarioName.trim()
+    ? input.scenarioName.trim()
+    : null;
+
+  const snapshot = await readModelTabState({
+    conversationId: conversationId ?? null,
+    userId,
+    tabId,
+  });
+
+  const fallbackRunId = Number(input.analysisRunId);
+  const analysisRun = snapshot?.analysisRun
+    ?? (Number.isFinite(fallbackRunId) && fallbackRunId > 0
+      ? await readAnalysisRunSnapshot(fallbackRunId, userId)
+      : null);
+  const analysisData = analysisRun?.outputs?.structuredAnalysis ?? null;
+  const assumptions = analysisRun?.assumptions ?? snapshot?.state ?? {};
+  const savedScenarioName =
+    requestedScenario
+    ?? (typeof assumptions?.scenarioName === 'string' ? assumptions.scenarioName : null)
+    ?? (typeof assumptions?.label === 'string' ? assumptions.label : null)
+    ?? null;
+
+  if (!snapshot && !analysisRun) {
+    return JSON.stringify({
+      success: false,
+      canvas_action: 'optimize_scenario',
+      tabId,
+      role,
+      objective,
+      riskTolerance,
+      message: `I could not find a saved analysis/model scenario to optimize. Ask the user which canvas or analysis run to use, or run the analysis first.`,
+    });
+  }
+
+  return JSON.stringify({
+    success: true,
+    canvas_action: 'optimize_scenario',
+    tabId,
+    title: snapshot?.title ?? analysisData?.title ?? null,
+    modelType: snapshot?.modelType ?? analysisRun?.analysisType ?? null,
+    analysisRunId: analysisRun?.id ?? snapshot?.analysisRunId ?? null,
+    versionNumber: analysisRun?.versionNumber ?? snapshot?.versionNumber ?? null,
+    role,
+    objective,
+    riskTolerance,
+    scenarioName: savedScenarioName,
+    state: snapshot?.state ?? null,
+    assumptions,
+    analysisData,
+    evidence: analysisRun?.evidence ?? [],
+    optimizationBrief: {
+      instruction: 'Use this saved canvas state as the source of truth. Do not invent a different model in chat.',
+      outputShape: [
+        'Name the scenario/path Yulia would choose and why.',
+        'State the key tradeoffs and constraints from the model and evidence.',
+        'Explain how to get there: negotiation asks, fallback positions, reps/warranties, diligence requests, tax/legal/professional signoffs, and concrete work products.',
+        'Call out what is a fact from the model versus what requires user/professional approval.',
+      ],
+    },
+    message: `I read the current scenario${savedScenarioName ? ` (${savedScenarioName})` : ''}. Optimize for ${objective} with ${riskTolerance} risk tolerance from the ${role} posture, and give the user the recommended path plus the execution steps to get there.`,
   });
 }
 

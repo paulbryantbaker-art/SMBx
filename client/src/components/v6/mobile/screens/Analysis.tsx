@@ -435,7 +435,7 @@ export function MobileAnalysisScreen({
 
       {structured.nextActions?.length ? (
         <section style={S.whiteCard}>
-          <div className="mb-mono" style={S.cardEyebrow}>NEXT ACTIONS</div>
+          <div className="mb-mono" style={S.cardEyebrow}>YULIA NEXT</div>
           <h2 style={S.sectionTitle}>Act on the read</h2>
           <div style={S.nextActionStack}>
             {structured.nextActions.map(action => (
@@ -453,6 +453,19 @@ export function MobileAnalysisScreen({
               </button>
             ))}
           </div>
+        </section>
+      ) : null}
+
+      {structured.evidenceRefs?.length ? (
+        <section style={S.whiteCard}>
+          <div className="mb-mono" style={S.cardEyebrow}>YULIA EVIDENCE</div>
+          <MiniList
+            title="Evidence Yulia used"
+            rows={structured.evidenceRefs.map(item => [
+              item.label,
+              [item.value, item.source, item.detail].filter(Boolean).join(" · "),
+            ])}
+          />
         </section>
       ) : null}
 
@@ -597,6 +610,16 @@ function ScenarioPanel({
     onAskYulia(`Use the open ${analysisTitle} mobile analysis and discuss scenario "${scenarioLabel}". Changed assumptions: ${changedText}. Tell me what moved, what risk changed, and what decision this supports.`);
   };
 
+  const optimizeScenario = () => {
+    const changedText = changedRows.length
+      ? changedRows.map(({ item, original }) => {
+        const nextValue = drafts[item.key] ?? original;
+        return `${item.label}: ${formatAssumptionDisplay(item.key, original)} to ${formatAssumptionDisplay(item.key, nextValue)}`;
+      }).join("; ")
+      : "use the current saved/base assumptions";
+    onAskYulia(`Use optimize_scenario with tabId "active" for the open ${analysisTitle} mobile analysis and optimize scenario "${scenarioLabel}" for my role in this transaction. Infer whether I am buying, selling, raising, divesting, or advising from the deal context; if that is ambiguous, ask one clarifying question before recommending. Read the active model, saved scenarios, evidence, market context, tax/legal constraints, financing constraints, and risk appetite. Changed assumptions: ${changedText}. Pick the best risk-adjusted scenario, explain why, and show the path to get there through negotiation asks, fallback positions, reps and warranties, diligence requests, professional signoffs, and concrete work products Yulia should create or update.`);
+  };
+
   return (
     <div>
       <div className="mb-mono" style={S.cardEyebrow}>SCENARIO MODEL</div>
@@ -649,6 +672,7 @@ function ScenarioPanel({
         >
           {saving ? "Saving" : "Save scenario"}
         </button>
+        <button type="button" onClick={optimizeScenario} style={S.secondaryButton}>Optimize</button>
         <button type="button" onClick={discussScenario} style={S.secondaryButton}>Ask Yulia</button>
       </div>
     </div>
@@ -1081,7 +1105,7 @@ const S: Record<string, CSSProperties> = {
   },
   scenarioActions: {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr",
+    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
     gap: 10,
     marginTop: 18,
   },
@@ -1092,7 +1116,7 @@ const S: Record<string, CSSProperties> = {
     background: "var(--mb-action)",
     color: "#FFFFFF",
     fontWeight: 900,
-    padding: "0 18px",
+    padding: "0 12px",
   },
   secondaryButton: {
     minHeight: 48,
@@ -1101,7 +1125,7 @@ const S: Record<string, CSSProperties> = {
     background: "rgba(238,242,250,0.78)",
     color: "var(--mb-accent-ink)",
     fontWeight: 900,
-    padding: "0 18px",
+    padding: "0 12px",
   },
   versionStack: {
     display: "grid",

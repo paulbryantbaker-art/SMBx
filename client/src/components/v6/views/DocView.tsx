@@ -2,14 +2,22 @@ import { Fragment, useEffect, useRef, useState, type CSSProperties } from "react
 import Markdown from "react-markdown";
 import { V6DocStatus, type DocStatusKind } from "../modes/cards";
 import { authHeaders } from "../../../hooks/useAuth";
+import type { ModelPreference } from "../../../lib/modelPreference";
+import { executeSurfaceAction } from "../../../lib/v6ActionContracts";
+import type { SurfaceActionId } from "../../../lib/v6SurfaceActions";
+import type { OpenTab } from "../types";
 
 interface DeliverableRow {
   id: number;
+  deal_id: number;
   type: string;
   status: string;
   content: unknown;
   created_at: string;
   updated_at: string;
+  completed_at?: string | null;
+  version_number?: number | null;
+  doc_class?: string | null;
   name?: string;
   slug?: string;
 }
@@ -24,7 +32,23 @@ const TOOLBAR_BUTTONS = [
   { key: "q", label: "Quote", v: "❝" },
 ] as const;
 
-interface Comment { who: string; color: string; txt: string; time: string }
+interface Comment { who: string; color: string; txt: string; time: string; resolved?: boolean }
+interface LiveComment {
+  id: number;
+  content: string;
+  section_ref?: string | null;
+  resolved?: boolean;
+  created_at: string;
+  display_name?: string | null;
+  email?: string | null;
+  participant_role?: string | null;
+}
+interface DeliverableVersion {
+  id: number;
+  version: number;
+  change_summary?: string | null;
+  created_at: string;
+}
 
 const COMMENTS: Comment[] = [
   { who: "JM", color: "var(--m-tertiary-container)", txt: "Earn-out should be tied to gross margin not EBITDA — too easy to game.", time: "1d" },
@@ -43,19 +67,26 @@ const VERSIONS: Version[] = [
 export function V6DocView({
   id,
   title,
+  openTab,
+  modelPreference,
   onTalkToYulia,
 }: {
   id: string;
   title: string;
+  openTab?: OpenTab;
+  modelPreference?: ModelPreference;
   onTalkToYulia?: (prompt: string) => void;
 }) {
   const numericId = /^\d+$/.test(id) ? parseInt(id, 10) : null;
   const editorRef = useRef<HTMLDivElement | null>(null);
   const [doc, setDoc] = useState<DeliverableRow | null>(null);
+  const [comments, setComments] = useState<LiveComment[]>([]);
+  const [versions, setVersions] = useState<DeliverableVersion[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [toolbarNote, setToolbarNote] = useState<string | null>(null);
   const [saveBusy, setSaveBusy] = useState(false);
+  const [actionBusy, setActionBusy] = useState<string | null>(null);
 
   useEffect(() => {
     if (numericId === null) return;
@@ -70,6 +101,7 @@ export function V6DocView({
         const payload = await res.json();
         if (cancelled) return;
         setDoc(payload);
+        void loadDocumentContext(numericId, setComments, setVersions);
         if (!["queued", "generating"].includes(payload?.status) && poll) {
           clearInterval(poll);
           poll = null;
@@ -99,6 +131,17 @@ export function V6DocView({
   const showSample = !numericId;
   const showFetched = !!markdown;
   const isGenerating = !!numericId && !!doc && ["queued", "generating"].includes(doc.status) && !markdown;
+  const normalizedComments = showSample ? COMMENTS : comments.map(commentToRailComment);
+  const currentVersion = doc?.version_number || 1;
+  const normalizedVersions = showSample
+    ? VERSIONS
+    : [
+        { v: `v${currentVersion}`, date: doc?.updated_at ? fmtRelative(doc.updated_at) : "CURRENT", current: true },
+        ...versions
+          .filter(v => v.version !== currentVersion)
+          .map(v => ({ v: `v${v.version}`, date: fmtRelative(v.created_at), current: false })),
+      ];
+  const yuliaWatch = buildYuliaWatch({ showSample, isGenerating, markdown, docTitle, docType, status: doc?.status });
 
   const applyToolbar = (key: (typeof TOOLBAR_BUTTONS)[number]["key"]) => {
     editorRef.current?.focus();
@@ -150,6 +193,58 @@ export function V6DocView({
       setToolbarNote(e?.message || "Could not save this draft.");
     } finally {
       setSaveBusy(false);
+    }
+  };
+
+  const runDocumentAction = async (actionId: SurfaceActionId, actionPrompt: string) => {
+    if (!numericId || !doc) {
+      onTalkToYulia?.(`${actionPrompt} This is a sample or unsaved document, so tell me what real deal context you need before acting.`);
+      return;
+    }
+    setActionBusy(actionId);
+    setToolbarNote(null);
+    try {
+      await executeSurfaceAction({
+        actionId,
+        deal: { id: doc.deal_id, name: docTitle },
+        document: { id: numericId, title: docTitle },
+        openTab: openTab ?? (() => undefined),
+        title: docTitle,
+        modelPreference,
+        requestedFrom: "document_view",
+        prompt: `${actionPrompt} Deliverable id ${numericId}. Deal id ${doc.deal_id}. Document title: ${docTitle}.`,
+        onNote: setToolbarNote,
+        onTalkToYulia,
+      });
+    } catch (e: any) {
+      onTalkToYulia?.(`${actionPrompt} I tried from the document viewer but need Yulia to coordinate it: ${e?.message || "document action failed"}`);
+      setToolbarNote("Yulia has the document request.");
+    } finally {
+      setActionBusy(null);
+    }
+  };
+
+  const regenerateDraft = async () => {
+    if (!numericId) {
+      onTalkToYulia?.(`Regenerate the sample document direction for ${title} once I provide a real deal.`);
+      return;
+    }
+    setActionBusy("regenerate");
+    setToolbarNote(null);
+    try {
+      const res = await fetch(`/api/deliverables/${numericId}/regenerate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+        body: JSON.stringify({ modelPreference: modelPreference ?? "auto" }),
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(payload.error || `HTTP ${res.status}`);
+      setToolbarNote("Yulia is regenerating the latest version. This tab will refresh.");
+      setDoc(prev => prev ? { ...prev, status: "queued", content: null } : prev);
+    } catch (e: any) {
+      setToolbarNote(e?.message || "Could not regenerate this deliverable.");
+    } finally {
+      setActionBusy(null);
     }
   };
 
@@ -260,28 +355,76 @@ export function V6DocView({
       <aside style={V.rail}>
         <div className="m-card" style={V.yuliaWatching}>
           <div className="mono" style={V.yuliaWatchEyebrow}>YULIA · LIVE</div>
-          <div style={V.yuliaWatchTitle}>I&rsquo;m watching this draft</div>
+          <div style={V.yuliaWatchTitle}>{yuliaWatch.title}</div>
           <div style={V.yuliaWatchBody}>
-            Section 2 &mdash; your 45-day exclusivity is on the long side. Comparable LOIs in this sector are 30 days. Want me to flag that?
+            {yuliaWatch.body}
           </div>
         </div>
 
         <div className="m-card" style={{ padding: "14px 16px" }}>
-          <div className="mono" style={V.commentsEyebrow}>COMMENTS · {COMMENTS.length}</div>
-          {COMMENTS.map((c, i) => (
+          <div className="mono" style={V.commentsEyebrow}>DOCUMENT ACTIONS</div>
+          <div style={V.actionStack}>
+            <button
+              className="m-btn filled"
+              type="button"
+              onClick={() => onTalkToYulia?.(`Read ${docTitle}${numericId ? ` (deliverable ${numericId})` : ""} and tell me what needs my attention, what is ready, and what should not move without counsel or CPA sign-off.`)}
+            >
+              Ask Yulia
+            </button>
+            <button
+              className="m-btn tonal"
+              type="button"
+              disabled={actionBusy === "request_review"}
+              onClick={() => { void runDocumentAction("request_review", "Stage a review request for this document. Decide the right reviewer role from the document context and ask me to confirm before notifying anyone."); }}
+            >
+              {actionBusy === "request_review" ? "Staging..." : "Request review"}
+            </button>
+            <button
+              className="m-btn tonal"
+              type="button"
+              disabled={actionBusy === "file_to_data_room"}
+              onClick={() => { void runDocumentAction("file_to_data_room", "Stage filing this deliverable into the correct data-room folder. Confirm the folder, permissions, and whether it is an artifact, drafted legal doc, review item, or executed record before moving it."); }}
+            >
+              {actionBusy === "file_to_data_room" ? "Staging..." : "File to data room"}
+            </button>
+            <button
+              className="m-btn tonal"
+              type="button"
+              disabled={actionBusy === "share_document"}
+              onClick={() => { void runDocumentAction("share_document", "Stage sharing this document. Ask me for the recipient, access level, expiry, and whether NDA or passkey protection is required before sending anything."); }}
+            >
+              {actionBusy === "share_document" ? "Staging..." : "Share safely"}
+            </button>
+            <button
+              className="m-btn outlined"
+              type="button"
+              disabled={actionBusy === "regenerate"}
+              onClick={() => { void regenerateDraft(); }}
+            >
+              {actionBusy === "regenerate" ? "Regenerating..." : "Regenerate"}
+            </button>
+          </div>
+        </div>
+
+        <div className="m-card" style={{ padding: "14px 16px" }}>
+          <div className="mono" style={V.commentsEyebrow}>COMMENTS · {normalizedComments.length}</div>
+          {!showSample && !loading && normalizedComments.length === 0 && (
+            <div style={V.emptyRailText}>No comments yet. Ask Yulia to review the document or route it to a reviewer.</div>
+          )}
+          {normalizedComments.map((c, i) => (
             <div
               key={i}
               style={{
                 display: "flex", gap: 10,
-                marginBottom: i === COMMENTS.length - 1 ? 0 : 10,
-                paddingBottom: i === COMMENTS.length - 1 ? 0 : 10,
-                borderBottom: i === COMMENTS.length - 1 ? "none" : "1px solid var(--m-outline-var)",
+                marginBottom: i === normalizedComments.length - 1 ? 0 : 10,
+                paddingBottom: i === normalizedComments.length - 1 ? 0 : 10,
+                borderBottom: i === normalizedComments.length - 1 ? "none" : "1px solid var(--m-outline-var)",
               }}
             >
               <div style={{ ...V.commentAvatar, background: c.color }}>{c.who}</div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={V.commentTxt}>{c.txt}</div>
-                <div className="mono" style={V.commentTime}>{c.time.toUpperCase()}</div>
+                <div className="mono" style={V.commentTime}>{c.resolved ? "RESOLVED · " : ""}{c.time.toUpperCase()}</div>
               </div>
             </div>
           ))}
@@ -290,7 +433,7 @@ export function V6DocView({
         <div className="m-card" style={{ padding: "14px 16px" }}>
           <div className="mono" style={V.versionsEyebrow}>VERSION HISTORY</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {VERSIONS.map(v => (
+            {normalizedVersions.map(v => (
               <div
                 key={v.v}
                 style={{
@@ -310,6 +453,81 @@ export function V6DocView({
       </aside>
     </div>
   );
+}
+
+async function loadDocumentContext(
+  deliverableId: number,
+  setComments: (comments: LiveComment[]) => void,
+  setVersions: (versions: DeliverableVersion[]) => void,
+) {
+  const [commentRes, versionRes] = await Promise.allSettled([
+    fetch(`/api/deliverables/${deliverableId}/comments`, { headers: authHeaders() }),
+    fetch(`/api/deliverables/${deliverableId}/versions`, { headers: authHeaders() }),
+  ]);
+  if (commentRes.status === "fulfilled" && commentRes.value.ok) {
+    const payload = await commentRes.value.json().catch(() => []);
+    setComments(Array.isArray(payload) ? payload : []);
+  }
+  if (versionRes.status === "fulfilled" && versionRes.value.ok) {
+    const payload = await versionRes.value.json().catch(() => ({}));
+    setVersions(Array.isArray(payload.versions) ? payload.versions : []);
+  }
+}
+
+function commentToRailComment(comment: LiveComment): Comment {
+  const name = comment.display_name || comment.email?.split("@")[0] || comment.participant_role || "Team";
+  const initials = name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(part => part[0]?.toUpperCase())
+    .join("") || "T";
+  return {
+    who: initials,
+    color: comment.resolved ? "var(--m-pursue-container)" : "var(--m-primary-container)",
+    txt: comment.section_ref ? `${comment.section_ref}: ${comment.content}` : comment.content,
+    time: fmtRelative(comment.created_at),
+    resolved: comment.resolved,
+  };
+}
+
+function buildYuliaWatch({
+  showSample,
+  isGenerating,
+  markdown,
+  docTitle,
+  docType,
+  status,
+}: {
+  showSample: boolean;
+  isGenerating: boolean;
+  markdown: string | null;
+  docTitle: string;
+  docType: string;
+  status?: string | null;
+}) {
+  if (showSample) {
+    return {
+      title: "Sample draft read",
+      body: "Section 2 has a long exclusivity window. In a real document, Yulia would compare it against deal context, evidence, and reviewer sign-offs.",
+    };
+  }
+  if (isGenerating) {
+    return {
+      title: "Yulia is generating this",
+      body: "The live deliverable is queued. When it finishes, this page becomes the editable work surface and Yulia can review, route, or file it.",
+    };
+  }
+  if (markdown) {
+    return {
+      title: "Yulia is reading this work product",
+      body: `${docTitle} is a ${docType.replace(/[-_]/g, " ")} in ${status || "draft"} state. Ask Yulia for issues, redlines, reviewer routing, data-room placement, or execution blockers.`,
+    };
+  }
+  return {
+    title: "Yulia needs the source document",
+    body: "The deliverable record is live, but no readable content is loaded yet. Regenerate it or ask Yulia what source data is missing.",
+  };
 }
 
 function extractMarkdown(content: unknown): string | null {
@@ -422,6 +640,16 @@ const V: Record<string, CSSProperties> = {
   rail: {
     position: "sticky", top: 0,
     display: "flex", flexDirection: "column", gap: 12,
+  },
+  actionStack: {
+    display: "grid",
+    gridTemplateColumns: "1fr",
+    gap: 8,
+  },
+  emptyRailText: {
+    fontSize: 12,
+    color: "var(--m-on-surface-mid)",
+    lineHeight: 1.45,
   },
   yuliaWatching: {
     padding: "14px 16px",

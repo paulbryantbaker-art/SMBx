@@ -42,6 +42,27 @@ interface AnalysisRunSnapshot {
   assumptions: Record<string, any>;
   outputs: Record<string, any>;
   commentaryMarkdown: string | null;
+  evidence: AnalysisEvidenceItem[];
+}
+
+interface EvidenceSyncRow {
+  sourceType: string;
+  sourceId: string | null;
+  title: string | null;
+  citation: string | null;
+  excerpt: string | null;
+  confidence: number | null;
+}
+
+export interface AnalysisEvidenceItem {
+  id: number;
+  sourceType: string;
+  sourceId: string | null;
+  title: string | null;
+  citation: string | null;
+  excerpt: string | null;
+  confidence: number | null;
+  createdAt: string;
 }
 
 export interface AnalysisVersionSummary {
@@ -71,6 +92,108 @@ function safeRecord(value: Record<string, any> | undefined): Record<string, any>
 
 function safeArray(value: unknown[] | undefined): unknown[] {
   return Array.isArray(value) ? value : [];
+}
+
+function evidenceConfidence(value: unknown): number | null {
+  if (value === 'high') return 0.9;
+  if (value === 'medium') return 0.65;
+  if (value === 'low') return 0.35;
+  return null;
+}
+
+function evidenceRefsFromOutputs(outputs: Record<string, any>): EvidenceSyncRow[] {
+  const structured = safeRecord(outputs.structuredAnalysis);
+  const refs = Array.isArray(structured.evidenceRefs) ? structured.evidenceRefs : [];
+  return refs
+    .map((raw: any) => {
+      const ref = safeRecord(raw);
+      const label = typeof ref.label === 'string' ? ref.label.trim() : '';
+      const source = typeof ref.source === 'string' ? ref.source.trim() : '';
+      const value = typeof ref.value === 'string' ? ref.value.trim() : '';
+      const detail = typeof ref.detail === 'string' ? ref.detail.trim() : '';
+      const sourceType = typeof ref.type === 'string' && ref.type.trim() ? ref.type.trim() : 'analysis_evidence';
+      if (!label && !source && !value && !detail) return null;
+      return {
+        sourceType,
+        sourceId: typeof ref.sourceId === 'string' ? ref.sourceId : null,
+        title: label || null,
+        citation: source || null,
+        excerpt: [value, detail].filter(Boolean).join(' — ') || null,
+        confidence: evidenceConfidence(ref.confidence),
+      };
+    })
+    .filter((item): item is EvidenceSyncRow => item != null)
+    .slice(0, 50);
+}
+
+async function syncAnalysisEvidence(analysisRunId: number, outputs: Record<string, any>): Promise<void> {
+  const refs = evidenceRefsFromOutputs(outputs);
+  await sql`DELETE FROM analysis_evidence WHERE analysis_run_id = ${analysisRunId}`;
+  for (const ref of refs) {
+    await sql`
+      INSERT INTO analysis_evidence (
+        analysis_run_id,
+        source_type,
+        source_id,
+        title,
+        citation,
+        excerpt,
+        permissions,
+        confidence
+      )
+      VALUES (
+        ${analysisRunId},
+        ${ref.sourceType},
+        ${ref.sourceId},
+        ${ref.title},
+        ${ref.citation},
+        ${ref.excerpt},
+        ${sql.json({ source: 'structuredAnalysis.evidenceRefs', visibility: 'analysis_run_owner' })}::jsonb,
+        ${ref.confidence}
+      )
+    `;
+  }
+}
+
+function formatAnalysisEvidence(row: any): AnalysisEvidenceItem {
+  return {
+    id: Number(row.id),
+    sourceType: row.source_type,
+    sourceId: row.source_id ?? null,
+    title: row.title ?? null,
+    citation: row.citation ?? null,
+    excerpt: row.excerpt ?? null,
+    confidence: row.confidence == null ? null : Number(row.confidence),
+    createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : String(row.created_at),
+  };
+}
+
+export async function listAnalysisEvidence(
+  analysisRunId: number,
+  userId: number,
+): Promise<AnalysisEvidenceItem[]> {
+  try {
+    const rows = await sql`
+      SELECT
+        e.id,
+        e.source_type,
+        e.source_id,
+        e.title,
+        e.citation,
+        e.excerpt,
+        e.confidence,
+        e.created_at
+      FROM analysis_evidence e
+      JOIN analysis_runs r ON r.id = e.analysis_run_id
+      WHERE e.analysis_run_id = ${analysisRunId}
+        AND r.user_id = ${userId}
+      ORDER BY e.id ASC
+    `;
+    return rows.map(formatAnalysisEvidence);
+  } catch (err) {
+    if (isMissingAnalysisSchemaError(err)) return [];
+    throw err;
+  }
 }
 
 function versionScenarioName(assumptions: Record<string, any>, changeReason?: string | null): string | null {
@@ -214,6 +337,8 @@ export async function createAnalysisRun(input: AnalysisRunInput): Promise<Analys
       ON CONFLICT (analysis_run_id, version_number) DO NOTHING
     `;
 
+    await syncAnalysisEvidence(Number(row.id), safeRecord(input.outputs));
+
     return {
       id: Number(row.id),
       canvas_tab_id: row.canvas_tab_id ?? canvasTabId,
@@ -246,6 +371,7 @@ export async function updateAnalysisRunStatus(
           updated_at = NOW()
       WHERE id = ${analysisRunId}
     `;
+    if (outputs) await syncAnalysisEvidence(analysisRunId, safeRecord(outputs));
   } catch (err) {
     if (!isMissingAnalysisSchemaError(err)) throw err;
   }
@@ -260,6 +386,7 @@ export async function readAnalysisRunSnapshot(analysisRunId: number, userId: num
       LIMIT 1
     `;
     if (!row?.id) return null;
+    const evidence = await listAnalysisEvidence(Number(row.id), userId);
     return {
       id: Number(row.id),
       dealId: row.deal_id ? Number(row.deal_id) : null,
@@ -270,6 +397,7 @@ export async function readAnalysisRunSnapshot(analysisRunId: number, userId: num
       assumptions: safeRecord(row.assumptions),
       outputs: safeRecord(row.outputs),
       commentaryMarkdown: row.commentary_markdown ?? null,
+      evidence,
     };
   } catch (err) {
     if (isMissingAnalysisSchemaError(err)) return null;
@@ -380,6 +508,9 @@ export async function restoreAnalysisRunVersion(input: {
       ON CONFLICT (analysis_run_id, version_number) DO NOTHING
     `;
 
+    await syncAnalysisEvidence(input.analysisRunId, nextOutputs);
+    const evidence = await listAnalysisEvidence(input.analysisRunId, input.userId);
+
     return {
       id: Number(updated.id),
       dealId: updated.deal_id ? Number(updated.deal_id) : null,
@@ -390,6 +521,7 @@ export async function restoreAnalysisRunVersion(input: {
       assumptions: safeRecord(updated.assumptions),
       outputs: safeRecord(updated.outputs),
       commentaryMarkdown: updated.commentary_markdown ?? null,
+      evidence,
     };
   } catch (err) {
     if (isMissingAnalysisSchemaError(err)) return null;
@@ -460,6 +592,9 @@ export async function updateAnalysisRunSnapshot(input: {
       ON CONFLICT (analysis_run_id, version_number) DO NOTHING
     `;
 
+    await syncAnalysisEvidence(input.analysisRunId, nextOutputs);
+    const evidence = await listAnalysisEvidence(input.analysisRunId, input.userId);
+
     return {
       id: Number(updated.id),
       dealId: current.deal_id ? Number(current.deal_id) : null,
@@ -470,6 +605,7 @@ export async function updateAnalysisRunSnapshot(input: {
       assumptions: safeRecord(updated.assumptions),
       outputs: safeRecord(updated.outputs),
       commentaryMarkdown: updated.commentary_markdown ?? null,
+      evidence,
     };
   } catch (err) {
     if (isMissingAnalysisSchemaError(err)) return null;
@@ -565,7 +701,11 @@ async function findAnalysisRunByTab(conversationId: number, tabId: string, userI
   return rows[0] ?? null;
 }
 
-function formatModelTabSnapshot(tab: any, analysisRun?: any | null): ModelTabSnapshot {
+function formatModelTabSnapshot(
+  tab: any,
+  analysisRun?: any | null,
+  evidence: AnalysisEvidenceItem[] = [],
+): ModelTabSnapshot {
   const run = analysisRun
     ? {
         id: Number(analysisRun.id),
@@ -577,6 +717,7 @@ function formatModelTabSnapshot(tab: any, analysisRun?: any | null): ModelTabSna
         assumptions: safeRecord(analysisRun.assumptions),
         outputs: safeRecord(analysisRun.outputs),
         commentaryMarkdown: analysisRun.commentary_markdown ?? null,
+        evidence,
       }
     : null;
 
@@ -607,10 +748,14 @@ export async function readModelTabState(input: {
             SELECT id, deal_id, analysis_type, input_payload, canvas_tab_id, version_number, assumptions, outputs, commentary_markdown
             FROM analysis_runs
             WHERE id = ${tab.analysis_run_id}
+              ${input.userId ? sql`AND user_id = ${input.userId}` : sql``}
             LIMIT 1
           `
         : [null];
-      return formatModelTabSnapshot(tab, analysisRun ?? null);
+      const evidence = analysisRun?.id && input.userId
+        ? await listAnalysisEvidence(Number(analysisRun.id), input.userId)
+        : [];
+      return formatModelTabSnapshot(tab, analysisRun ?? null, evidence);
     }
 
     const analysisRun = await findAnalysisRunByTab(input.conversationId, input.tabId, input.userId);
@@ -636,6 +781,7 @@ export async function readModelTabState(input: {
         assumptions: safeRecord(analysisRun.assumptions),
         outputs: safeRecord(analysisRun.outputs),
         commentaryMarkdown: analysisRun.commentary_markdown ?? null,
+        evidence: input.userId ? await listAnalysisEvidence(Number(analysisRun.id), input.userId) : [],
       },
       versionNumber: Number(analysisRun.version_number ?? 1),
     };

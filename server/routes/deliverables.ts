@@ -22,10 +22,21 @@ deliverablesRouter.get('/deliverables/all', async (req, res) => {
     const deliverables = await sql`
       SELECT d.id, d.deal_id, d.status, d.created_at, d.completed_at,
              m.slug, m.name, m.description, m.tier, m.journey, m.gate,
-             dl.business_name as deal_name, dl.journey_type, dl.league
+             dl.business_name as deal_name, dl.journey_type, dl.league,
+             ar.id as analysis_run_id,
+             ar.analysis_type,
+             ar.status as analysis_status,
+             ar.canvas_tab_id
       FROM deliverables d
       JOIN menu_items m ON m.id = d.menu_item_id
       JOIN deals dl ON d.deal_id = dl.id
+      LEFT JOIN LATERAL (
+        SELECT id, analysis_type, status, canvas_tab_id
+        FROM analysis_runs
+        WHERE deliverable_id = d.id
+        ORDER BY updated_at DESC NULLS LAST, created_at DESC
+        LIMIT 1
+      ) ar ON TRUE
       WHERE dl.user_id = ${userId}
       ORDER BY d.updated_at DESC NULLS LAST, d.created_at DESC
     `;
@@ -95,6 +106,43 @@ deliverablesRouter.get('/deliverables/:id', async (req, res) => {
   } catch (err: any) {
     console.error('Get deliverable error:', err.message);
     return res.status(500).json({ error: 'Failed to get deliverable' });
+  }
+});
+
+// ─── List deliverable versions ─────────────────────────────
+
+deliverablesRouter.get('/deliverables/:id/versions', async (req, res) => {
+  const userId = (req as any).userId;
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+
+  const deliverableId = parseInt(req.params.id);
+  if (!deliverableId) return res.status(400).json({ error: 'Invalid deliverable ID' });
+
+  try {
+    const [deliverable] = await sql`
+      SELECT id, deal_id, version_number
+      FROM deliverables
+      WHERE id = ${deliverableId}
+    `;
+    if (!deliverable) return res.status(404).json({ error: 'Deliverable not found' });
+
+    const access = await hasDealAccess(deliverable.deal_id, userId);
+    if (!access) return res.status(404).json({ error: 'Deliverable not found' });
+
+    const versions = await sql`
+      SELECT id, version, change_summary, created_at
+      FROM deliverable_versions
+      WHERE deliverable_id = ${deliverableId}
+      ORDER BY version DESC
+    `;
+
+    return res.json({
+      currentVersion: deliverable.version_number || 1,
+      versions,
+    });
+  } catch (err: any) {
+    console.error('List deliverable versions error:', err.message);
+    return res.status(500).json({ error: 'Failed to list deliverable versions' });
   }
 });
 

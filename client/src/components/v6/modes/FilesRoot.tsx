@@ -30,6 +30,9 @@ interface FileRow {
   id?: string;
   dealId?: string;
   dealTitle?: string;
+  analysisRunId?: number | null;
+  analysisType?: string | null;
+  analysisStatus?: string | null;
 }
 
 interface RoomRow {
@@ -141,6 +144,17 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
   const openDoc = (row: FileRow) => {
     if (row.kind === "deal" && row.dealId) {
       openTab({ kind: "deal", title: row.dealTitle ?? row.title, id: row.dealId });
+      return;
+    }
+    if (row.kind === "chart" && row.analysisRunId) {
+      openTab({
+        kind: "analysis",
+        title: row.title,
+        id: row.analysisRunId ? `analysis-${row.analysisRunId}` : row.id,
+        analysisRunId: row.analysisRunId,
+        tool: row.analysisType ?? undefined,
+        status: row.analysisStatus ?? undefined,
+      });
       return;
     }
     openTab({ kind: "doc", title: row.title, id: row.id ?? `file-${slug(row.title)}` });
@@ -327,6 +341,17 @@ export function V6FilesListView({
   const openDoc = (row: FileRow) => {
     if (row.kind === "deal" && row.dealId) {
       openTab({ kind: "deal", title: row.dealTitle ?? row.title, id: row.dealId });
+      return;
+    }
+    if (row.kind === "chart" && row.analysisRunId) {
+      openTab({
+        kind: "analysis",
+        title: row.title,
+        id: row.analysisRunId ? `analysis-${row.analysisRunId}` : row.id,
+        analysisRunId: row.analysisRunId,
+        tool: row.analysisType ?? undefined,
+        status: row.analysisStatus ?? undefined,
+      });
       return;
     }
     openTab({ kind: "doc", title: row.title, id: row.id ?? `file-${slug(row.title)}` });
@@ -660,7 +685,7 @@ function buildRealShortcuts(deals: WorkspaceDeal[], deliverables: WorkspaceDeliv
 }
 
 function deliverableToFileRow(d: WorkspaceDeliverable): FileRow {
-  const isAnalysis = /model|valuation|analysis|recast|sba|comp|score|risk|tax|financial/i.test(d.slug || d.name);
+  const isAnalysis = !!d.analysis_run_id || /model|valuation|analysis|recast|sba|comp|score|risk|tax|financial/i.test(d.slug || d.name);
   return {
     title: d.name || formatSlug(d.slug),
     sub: `${d.deal_name || "Deal"} · ${formatStatus(d.status)} · ${fmtRelative(d.completed_at || d.created_at)}`,
@@ -668,6 +693,9 @@ function deliverableToFileRow(d: WorkspaceDeliverable): FileRow {
     kind: isAnalysis ? "chart" : "doc",
     tone: d.status === "complete" ? "review" : d.status === "failed" ? "locked" : "draft",
     id: String(d.id),
+    analysisRunId: d.analysis_run_id ?? null,
+    analysisType: d.analysis_type ?? null,
+    analysisStatus: d.analysis_status ?? null,
   };
 }
 

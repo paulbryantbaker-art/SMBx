@@ -135,15 +135,25 @@ export function analysisActionForTool(toolId: string, journey?: string | null): 
       return { analysisType: "comps", menuItemSlug: "universal-comp-analysis", label: "comps analysis" };
     case "tool-val":
       return { analysisType: "valuation", menuItemSlug: journey === "sell" ? "sell-valuation-report" : journey === "raise" ? "raise-pre-post-model" : "buy-valuation-model", label: "valuation model" };
-    case "tool-qoe":
-      return { analysisType: "working_capital", menuItemSlug: journey === "sell" ? "sell-working-capital-analysis" : "buy-working-capital-model", label: "QoE / working-capital analysis" };
-    case "tool-buyer":
-      return { analysisType: "buyer_fit", menuItemSlug: journey === "sell" ? "sell-buyer-list" : "buy-deal-scorecard", label: "buyer fit analysis" };
-    case "tool-sba":
-      return { analysisType: "sba", menuItemSlug: "universal-sba-analysis", label: "SBA structure analysis" };
-    default:
-      return null;
-  }
+      case "tool-qoe":
+        return { analysisType: "qoe", menuItemSlug: journey === "sell" ? "sell-financial-spread" : "buy-deal-scorecard", label: "QoE analysis" };
+      case "tool-buyer":
+        return { analysisType: "buyer_fit", menuItemSlug: journey === "sell" ? "sell-buyer-list" : "buy-deal-scorecard", label: "buyer fit analysis" };
+      case "tool-sba":
+        return { analysisType: "sba", menuItemSlug: "universal-sba-analysis", label: "SBA structure analysis" };
+      case "tool-dcf":
+        return { analysisType: "dcf", menuItemSlug: journey === "sell" ? "sell-valuation-report" : journey === "raise" ? "raise-pre-post-model" : "buy-valuation-model", label: "DCF model" };
+      case "tool-lbo":
+        return { analysisType: "lbo", menuItemSlug: journey === "sell" ? "sell-valuation-report" : "buy-valuation-model", label: "LBO model" };
+      case "tool-tax":
+        return { analysisType: "tax_impact", menuItemSlug: journey === "sell" ? "sell-deal-structure-analysis" : "buy-capital-structure", label: "tax impact model" };
+      case "tool-earnout":
+        return { analysisType: "earnout", menuItemSlug: journey === "sell" ? "sell-deal-structure-analysis" : "buy-earnout-analysis", label: "earnout model" };
+      case "tool-sensitivity":
+        return { analysisType: "sensitivity", menuItemSlug: journey === "sell" ? "sell-valuation-report" : "buy-valuation-model", label: "sensitivity model" };
+      default:
+        return null;
+    }
 }
 
 export function analysisActionForSurfaceAction(actionId: SurfaceActionId, journey?: string | null): { analysisType: string; menuItemSlug?: string; label: string } | null {
@@ -166,11 +176,29 @@ export function analysisActionForSurfaceAction(actionId: SurfaceActionId, journe
       return { analysisType: "capital_structure", menuItemSlug: journey === "sell" ? "sell-deal-structure-analysis" : "buy-capital-structure", label: "capital structure model" };
     case "run_sba_analysis":
       return { analysisType: "sba", menuItemSlug: "universal-sba-analysis", label: "SBA structure analysis" };
-    case "run_red_flags_analysis":
-      return { analysisType: "red_flags", menuItemSlug: journey === "pmi" ? "pmi-ops-assessment" : journey === "sell" ? "sell-price-gap-analysis" : "buy-red-flag-report", label: "red-flag analysis" };
-    default:
-      return null;
-  }
+      case "run_red_flags_analysis":
+        return { analysisType: "red_flags", menuItemSlug: journey === "pmi" ? "pmi-ops-assessment" : journey === "sell" ? "sell-price-gap-analysis" : "buy-red-flag-report", label: "red-flag analysis" };
+      case "run_qoe_analysis":
+        return { analysisType: "qoe", menuItemSlug: journey === "sell" ? "sell-financial-spread" : "buy-deal-scorecard", label: "QoE analysis" };
+      case "run_lbo_analysis":
+        return { analysisType: "lbo", menuItemSlug: journey === "sell" ? "sell-valuation-report" : "buy-valuation-model", label: "LBO model" };
+      case "run_dcf_analysis":
+        return { analysisType: "dcf", menuItemSlug: journey === "sell" ? "sell-valuation-report" : journey === "raise" ? "raise-pre-post-model" : "buy-valuation-model", label: "DCF model" };
+      case "run_sensitivity_analysis":
+        return { analysisType: "sensitivity", menuItemSlug: journey === "sell" ? "sell-valuation-report" : "buy-valuation-model", label: "sensitivity model" };
+      case "run_earnout_analysis":
+        return { analysisType: "earnout", menuItemSlug: journey === "sell" ? "sell-deal-structure-analysis" : "buy-earnout-analysis", label: "earnout model" };
+      case "run_tax_impact_analysis":
+        return { analysisType: "tax_impact", menuItemSlug: journey === "sell" ? "sell-deal-structure-analysis" : "buy-capital-structure", label: "tax impact model" };
+      case "run_purchase_price_allocation":
+        return { analysisType: "purchase_price_allocation", menuItemSlug: journey === "sell" ? "sell-deal-structure-analysis" : "buy-capital-structure", label: "purchase-price allocation" };
+      case "run_cap_table_analysis":
+        return { analysisType: "cap_table", menuItemSlug: "raise-cap-table", label: "cap table model" };
+      case "run_covenant_analysis":
+        return { analysisType: "covenant", menuItemSlug: journey === "raise" ? "raise-use-of-funds" : "buy-capital-structure", label: "covenant model" };
+      default:
+        return null;
+    }
 }
 
 export async function generateActionDeliverable({
@@ -310,6 +338,11 @@ export async function executeSurfaceAction({
 
   if (actionId === "ask_yulia") {
     onTalkToYulia?.(promptText);
+    return { status: "sent_to_chat", actionId };
+  }
+
+  if (actionId === "optimize_scenario") {
+    onTalkToYulia?.(`${promptText} Use optimize_scenario with tabId "active" first, then recommend the risk-adjusted path and execution steps from the saved model and evidence trail.`);
     return { status: "sent_to_chat", actionId };
   }
 

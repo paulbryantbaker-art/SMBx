@@ -122,6 +122,25 @@ Checkpoint B.6, May 13:
 - Removed Pipeline's fake sample fallbacks for material draft/analysis actions; when no live deal is available, the intent is sent to Yulia instead of opening an unrelated placeholder surface.
 - Updated Deal Detail real-deal fallback behavior so missing Yulia briefs produce a neutral “generate Yulia's read / open source files / ask what is missing” state instead of component-authored recommendations.
 
+Checkpoint B.7, May 14:
+
+- Added the stronger recommendation-origin rule: every suggested action shown on a page is an execution object from Yulia's portfolio/deal intelligence layer, not advice authored by a card component.
+- Updated Yulia's briefing prompt schema so she can choose advanced modeling actions such as QoE, LBO, DCF, sensitivity, earnout, tax impact, purchase-price allocation, cap table, and covenant analysis.
+- Updated deterministic fallback logic so “files” is not used as a lazy substitute when the right next move is really to run analysis or model scenarios.
+
+Checkpoint B.8, May 14:
+
+- Locked the language rule into the product contract: any strategic, tactical, market, tax/legal, workflow, or file recommendation visible on any page must be presented as Yulia's sourced read or Yulia's suggested next action.
+- Cards, lists, hero modules, and file/detail surfaces are renderers only. They may expose tools, but they do not invent advisory copy, rankings, warnings, or next moves outside Yulia's portfolio/deal intelligence layer.
+- Tightened mobile/desktop parity so QoE recommendations open the QoE canvas, not a nearby working-capital substitute, and deal detail labels the section as Yulia's recommendation set.
+
+Checkpoint B.9, May 14:
+
+- Wired mobile Deal Detail to fetch the live deal brief and real deal facts when a numeric deal is open.
+- Replaced mobile detail's card-authored "Yulia" copy with sourced-brief states: live Yulia read, labeled sample read, or an explicit "Yulia's read is needed" state.
+- Routed mobile deal read bullets, artifact previews, and recommended next moves through canonical analysis/document/chat action IDs so they open real canvases or ask Yulia to run the governed tool.
+- Added mobile compatibility fallbacks for real deals without a brief: generate Yulia's deal read, run QoE evidence check, or ask Yulia what evidence is missing.
+
 ### Phase C — Analysis Workbench Completion
 
 Goal: analysis is always a canvas artifact, not chat math.
@@ -148,6 +167,40 @@ Checkpoint C.1, May 13:
 - Added the same saved-scenario history and restore loop to mobile analysis canvases for parity.
 - Updated scenario saves so the canvas adopts the recalculated persisted payload returned by the backend, keeping Yulia's chat context aligned with the visible model.
 
+Checkpoint C.2, May 14:
+
+- Preserved the rule that any adjustable analysis input should appear as a slider where possible.
+- Added slider eligibility for raise amounts, pre-money valuation, hold period, earnout period, minimum DSCR, and maximum debt-to-EBITDA alongside existing money, percentage, and multiple assumptions.
+- Kept scenario versions as durable work product so saved cases can be restored and discussed with Yulia in chat.
+
+Checkpoint C.3, May 14:
+
+- Added `optimize_scenario` as a first-class Yulia tool instead of leaving optimization as UI-only copy.
+- Wired desktop and mobile Optimize buttons to tell Yulia to call the tool against the active canvas before recommending a path.
+- Added the governance contract for scenario optimization as a safe modeler action: it reads saved canvas state, assumptions, outputs, evidence, user role, objective, and risk tolerance, then Yulia recommends the best risk-adjusted scenario.
+- Optimization output must include the path to get there: negotiation asks, fallback positions, reps/warranties, diligence requests, tax/legal or professional signoffs, and concrete work products.
+
+Checkpoint C.4, May 14:
+
+- Cleaned up the legacy/non-structured analysis canvas so it no longer promises durable scenario persistence when it can only draft a note or route context to Yulia.
+- Added an Optimize shortcut on that legacy canvas that sends the active assumptions to Yulia and requests the same risk-adjusted path, negotiation asks, fallback positions, reps/warranties, diligence requests, professional signoffs, and next work products.
+- Kept the structured analysis canvas as the source-of-truth path for real saved scenarios, restored versions, sliders, Optimize, and Yulia discussion.
+
+Checkpoint C.5, May 14:
+
+- Added the first document-viewer cleanup pass so real deliverables no longer show sample comments, sample version history, or fake "Yulia is watching" copy.
+- Added live deliverable comment and version-history loading for numeric deliverables, while keeping sample copy explicitly limited to sample/non-numeric documents.
+- Added document viewer actions that route through Yulia's governed action layer: ask about the document, request review, file to data room, share safely, and regenerate.
+- Kept document movement and external sharing chat-first and confirmation-staged, so Yulia collects missing recipient, permission, folder, NDA, expiry, and professional-review context before acting.
+
+Checkpoint C.6, May 14:
+
+- Fixed the analysis-tab failure mode where market-intelligence follow-up clicks and sensitivity/model links could open the same legacy scenario canvas with a different title.
+- Analysis tabs now reload persisted `analysis_run` payloads when opened from files, deliverables, or saved tabs before rendering a canvas.
+- Non-structured analysis tabs with no real model payload now show an explicit “needs real model” Yulia workspace state instead of presenting sample numbers as if they were the requested analysis.
+- Market-intelligence bullets now route to specific deeper analysis families: buyer universe, financing climate, tax/legal, diligence gap/QoE, working-capital, comps, or the full market read depending on the note clicked.
+- Build verified after the routing and fallback changes. This is the stopping point before the next methodology update reshapes the model catalog and execution rules.
+
 ### Phase D — Full Analysis and Model Catalog
 
 Goal: cover SMB through institutional/big-deal work with deterministic math plus LLM explanation.
@@ -162,6 +215,13 @@ Tasks:
 Done when:
 
 - Yulia can select the right model by deal archetype, league, gate, and user request without dumping unsupported numbers into chat.
+
+Checkpoint D.1, May 14:
+
+- Expanded the server analysis runtime from first-tier analysis types into the methodology-backed model catalog: QoE, LBO, DCF, sensitivity, earnout, tax impact, purchase-price allocation, cap table, and covenant modeling.
+- Added deterministic builders for those model families so chat and buttons open structured canvases with metrics, tables, charts, assumptions, risk flags, missing data, professional triggers, and Yulia-readable commentary.
+- Added migration `064_analysis_catalog_expansion.sql` so the analysis definitions are durable and discoverable in production.
+- Routed the new analysis types through Yulia tool schemas, API validation, menu-item resolution, desktop analysis tools, and deal-detail action handling.
 
 ### Phase E — Evidence and Market Intelligence Runtime
 
@@ -939,12 +999,13 @@ Done when: no major visible button is fake, no analysis is chat-only, no profess
 7. Build a real deal comparison canvas. **Advanced: comparisons now persist structured rankings, metrics, tables, risks, missing data, and Yulia read metadata.**
 8. Add Yulia tools for `read_model_state` and `update_model_assumption`. **Started: `read_tab_state` and `update_model` now read/write persisted model and analysis-run state.**
 9. Make all adjustable analysis assumptions scenario sliders, not freeform text fields. **Started: structured analysis canvases now expose slider-based scenario saves and an Ask Yulia prompt tied to the active scenario.**
-10. Wire “Run analysis” buttons across Today, Pipeline, Deal Detail, Search, Files, and Analysis Root.
-11. Add market intelligence refresh/read pipeline with evidence and recency.
-12. Replace static Yulia comments with cached, LLM-synthesized portfolio/deal reads.
-13. Build data-room/share/executed lifecycle actions.
-14. Add permissions and audit enforcement on every read/write action.
-15. Add tests that click through every button and verify real action results.
+10. Add scenario optimization as a first-class action. **Started: desktop, mobile, and legacy analysis canvases now expose Optimize as a Yulia action/tool. Optimize asks Yulia to re-analyze saved/current scenarios for the user's role — buyer, seller, raiser, divestor, or advisor — select the best risk-adjusted path, explain why, and turn it into negotiation strategy, fallback positions, reps-and-warranties asks, diligence requests, professional signoffs, and concrete work products.**
+11. Wire “Run analysis” buttons across Today, Pipeline, Deal Detail, Search, Files, and Analysis Root.
+12. Add market intelligence refresh/read pipeline with evidence and recency. **Started: structured analysis payloads now include first-class evidence references so Yulia's read can point to the deal facts, financial facts, methodology guardrails, and market context it used.**
+13. Replace static Yulia comments with cached, LLM-synthesized portfolio/deal reads.
+14. Build data-room/share/executed lifecycle actions.
+15. Add permissions and audit enforcement on every read/write action.
+16. Add tests that click through every button and verify real action results.
 
 ## Implementation Checkpoint — May 12, 2026
 
@@ -991,6 +1052,23 @@ Still needed for Phase 3:
 - Add evidence/citation side panel linked to `analysis_evidence`.
 - Add export/share/review actions from structured canvases.
 - Add Playwright coverage that opens a real analysis, changes an assumption, verifies the version bump, and asks Yulia about the updated state.
+
+## Implementation Checkpoint — May 14, 2026, Yulia-Owned Recommendations
+
+Recommendation authorship is now an explicit product invariant:
+
+- Any strategic, tactical, market, tax, legal, workflow, file, or model recommendation visible on any page must be Yulia's recommendation from the current portfolio, deal, file, model, market, and methodology context.
+- Cards, hero modules, lists, dashboards, and detail panels are renderers only. They do not invent advisory copy, rankings, warnings, or next moves.
+- Buttons may provide governed shortcuts, but chat remains the primary intent layer. Natural-language requests should route to the same action contracts that buttons use.
+- If the next move is analysis or modeling, the surface should open the analysis/model canvas. It should not dump numbers into chat or fall back to files unless the actual recommendation is to inspect files.
+- Adjustable model inputs should be sliders where possible, with saved scenario versions that Yulia can read, compare, discuss, and act on.
+- Scenario optimization is a Yulia decision layer, not just a math preset. The Optimize action should read the active model, saved scenarios, user role, risk appetite, market context, tax/legal constraints, financing constraints, and evidence trail, then recommend the best path and how to get there through negotiation, structure, reps and warranties, diligence, and work-product execution.
+
+The first evidence pass is now in code:
+
+- Structured analysis outputs include `evidenceRefs` for deal profile, financial base, value signal, methodology guardrails, market context, recast evidence, concentration, recurring revenue, and working-capital peg where available.
+- Desktop and mobile analysis canvases render "Evidence Yulia used" so a visible recommendation is grounded in the source trail.
+- This is the bridge toward the full market-intelligence runtime: today it exposes source hooks from the deterministic deal/database layer; next it should hydrate those hooks from live market intelligence, files, data-room artifacts, and external research feeds with recency.
 
 ## Definition of Done
 

@@ -21,6 +21,15 @@ export interface StructuredTable {
   rows: Array<Array<string | number | null>>;
 }
 
+export interface StructuredEvidenceRef {
+  label: string;
+  type: "deal_fact" | "financial_fact" | "market_signal" | "methodology" | "user_assumption";
+  source: string;
+  value?: string;
+  detail?: string;
+  confidence?: "high" | "medium" | "low";
+}
+
 export interface StructuredAnalysisData {
   schemaVersion: "analysis-runtime-v1";
   analysisType: string;
@@ -28,6 +37,7 @@ export interface StructuredAnalysisData {
   summary: string;
   verdict?: { label: string; tone: AnalysisTone; score?: number; rationale: string };
   methodologyRefs?: string[];
+  evidenceRefs?: StructuredEvidenceRef[];
   inputs?: Array<{ key: string; label: string; displayValue: string; source?: string }>;
   assumptions?: StructuredAssumption[];
   metrics?: StructuredMetric[];
@@ -72,6 +82,15 @@ const MONEY_ASSUMPTION_KEYS = new Set([
   "personal_expenses",
   "one_time_professional_fees",
   "family_payroll_adjustment",
+  "pre_money_cents",
+  "raise_amount_cents",
+]);
+
+const NUMBER_ASSUMPTION_KEYS = new Set([
+  "hold_period_years",
+  "earnout_period_months",
+  "min_dscr",
+  "max_debt_to_ebitda",
 ]);
 
 export function isStructuredAnalysis(value: unknown): value is StructuredAnalysisData {
@@ -134,14 +153,20 @@ export function sliderConfigForAssumption(item: StructuredAssumption): ScenarioS
   if (isMultipleAssumptionKey(item.key)) {
     return { min: Math.max(1, Number((base - 3).toFixed(1))), max: Math.min(20, Number((base + 3).toFixed(1))), step: 0.1 };
   }
-  if (isPctAssumptionKey(item.key)) {
-    if (item.key === "interest_rate") return { min: 0.02, max: 0.18, step: 0.0025 };
-    if (item.key.includes("debt") || item.key.includes("seller_note")) return { min: 0, max: 1, step: 0.025 };
-    if (item.key === "customer_concentration_pct") return { min: 0, max: 0.8, step: 0.01 };
-    return { min: 0, max: 1, step: 0.01 };
+    if (isPctAssumptionKey(item.key)) {
+      if (item.key === "interest_rate") return { min: 0.02, max: 0.18, step: 0.0025 };
+      if (item.key.includes("debt") || item.key.includes("seller_note")) return { min: 0, max: 1, step: 0.025 };
+      if (item.key === "customer_concentration_pct") return { min: 0, max: 0.8, step: 0.01 };
+      return { min: 0, max: 1, step: 0.01 };
+    }
+  if (NUMBER_ASSUMPTION_KEYS.has(item.key)) {
+    if (item.key === "hold_period_years") return { min: 1, max: 10, step: 1 };
+    if (item.key === "earnout_period_months") return { min: 6, max: 60, step: 6 };
+    if (item.key === "min_dscr") return { min: 1, max: 2, step: 0.05 };
+    if (item.key === "max_debt_to_ebitda") return { min: 1, max: 6, step: 0.1 };
   }
-  return null;
-}
+    return null;
+  }
 
 export function syncLinkedAssumptions(prev: Record<string, number>, key: string, value: number): Record<string, number> {
   const next = { ...prev, [key]: value };

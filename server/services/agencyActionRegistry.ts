@@ -272,6 +272,17 @@ const CONTRACTS: Record<string, AgencyActionContract> = {
     writeScope: 'none',
     description: 'Read current model surface state.',
   },
+  optimize_scenario: {
+    toolName: 'optimize_scenario',
+    label: 'Optimize scenario',
+    methodologyRefs: ['v17 §5 Math Engine', 'v17 §11 Interactive Canvas', 'v18 Tax Framework', 'v18 Legal Framework'],
+    mode: 'modeler',
+    permissionLevel: 'A0_READ',
+    riskLevel: 'safe',
+    confirmation: 'none',
+    writeScope: 'none',
+    description: 'Read a saved analysis/model scenario and have Yulia recommend the best risk-adjusted path plus negotiation, diligence, tax/legal, and work-product steps.',
+  },
   create_support_issue: {
     toolName: 'create_support_issue',
     label: 'Create support issue',

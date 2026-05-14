@@ -515,7 +515,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
       </section>
 
       <section style={T.section}>
-        <SectionHead eyebrow="PRIORITY QUEUE" title="What needs action" sub="Three moves. Then the day gets quieter." />
+        <SectionHead eyebrow="YULIA PRIORITY QUEUE" title="What needs action" sub="Three moves surfaced from the live portfolio read." />
         <div style={T.priorityGrid}>
           {priorities.map((item, index) => (
             <PriorityCard key={item.title} index={index + 1} {...item} />

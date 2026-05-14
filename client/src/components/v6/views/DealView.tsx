@@ -410,8 +410,15 @@ export function V6DealView({
   const runGenerateDeliverable = async () => {
     await runDealDeliverableAction(primaryDeliverable.slug, primaryDeliverable.label, "generate");
   };
-  const runMarketIntelligenceRead = async (promptHint?: string) => {
-    await runDealAnalysisAction("market_intelligence", "market intelligence read", "market-read", "universal-market-intelligence", promptHint);
+  const runMarketBulletAnalysis = async (bullet: string) => {
+    const intent = resolveMarketBulletAnalysis(bullet, real?.journey_type);
+    await runDealAnalysisAction(
+      intent.analysisType,
+      intent.label,
+      intent.busyKey,
+      intent.menuItemSlug,
+      `On ${dealName}: use this Yulia market-intelligence note as the trigger for a deeper ${intent.label}: "${bullet}". Combine live deal facts, collected files, seeded/user data, market intelligence, methodology, and tax/legal guardrails. Open an interactive analysis canvas with the right model, evidence, assumptions, sliders where applicable, Yulia's read, and concrete next actions.`,
+    );
   };
   const runDealAnalysisAction = async (
     analysisType: string,
@@ -623,7 +630,7 @@ export function V6DealView({
                 key={bullet}
                 type="button"
                 style={D.marketBullet}
-                onClick={() => { void runMarketIntelligenceRead(`On ${dealName}: unpack this market intelligence note in the canvas: ${bullet}`); }}
+                onClick={() => { void runMarketBulletAnalysis(bullet); }}
               >
                 {bullet}
               </button>
@@ -663,7 +670,7 @@ export function V6DealView({
           </div>
 
           <div className="m-card" style={D.nextCard}>
-            <div className="mono" style={D.intelEyebrow}>RECOMMENDED NEXT</div>
+            <div className="mono" style={D.intelEyebrow}>YULIA RECOMMENDS</div>
             {intelligence.nextMoves.map((move, index) => {
               const action = resolveDealMoveAction(move, real?.journey_type, primaryDeliverable);
               const isBusy = action.kind !== "chat" && "busyKey" in action && busyAction === action.busyKey;
@@ -681,7 +688,7 @@ export function V6DealView({
                 >
                   <span style={D.nextMoveText}>
                     <strong style={D.nextMoveTitle}>{move.title}</strong>
-                    <small style={D.nextMoveSub}>{isBusy ? "Opening live analysis..." : move.why}</small>
+                    <small style={D.nextMoveSub}>{isBusy ? "Opening Yulia's live analysis..." : move.why}</small>
                   </span>
                   <span style={D.nextArrow}>{isBusy ? "…" : "›"}</span>
                 </button>
@@ -1008,10 +1015,10 @@ function buildDealIntelligence({
           actionId: "run_tax_legal_structure" as const,
         },
         {
-          title: "Open files needing action",
-          why: "Documents are the execution layer behind the read.",
-          prompt: `On ${dealName}: show me the files and deliverables that need action.`,
-          actionId: "open_files_needing_action" as const,
+          title: "Model the decision scenarios",
+          why: "Price, structure, downside case, and sign-off points need to be visible before the next move.",
+          prompt: `On ${dealName}: open the interactive sensitivity model and show the scenarios I should review.`,
+          actionId: "run_sensitivity_analysis" as const,
         },
       ]
     : [
@@ -1022,10 +1029,10 @@ function buildDealIntelligence({
           actionId: "run_market_intelligence" as const,
         },
         {
-          title: "Open source files",
-          why: "Yulia needs the private workspace, data room, and shared files to ground the next read.",
-          prompt: `On ${dealName}: open the deal files and tell me which source materials are missing for a real read.`,
-          actionId: "open_files_all" as const,
+          title: "Run QoE evidence check",
+          why: "Yulia needs to separate supported earnings quality from missing source material.",
+          prompt: `On ${dealName}: run a QoE evidence check and tell me which source materials are missing.`,
+          actionId: "run_qoe_analysis" as const,
         },
         {
           title: "Ask Yulia what is missing",
@@ -1096,6 +1103,71 @@ function riskAnalysisForJourney(journey?: string | null): { label: string; slug:
     default:
       return { label: "Red Flag Report", slug: "buy-red-flag-report" };
   }
+}
+
+function resolveMarketBulletAnalysis(
+  bullet: string,
+  journey: string | null | undefined,
+): Extract<DealMoveAction, { kind: "analysis" }> {
+  const text = bullet.toLowerCase();
+
+  if (/\bbuyer\b|\bacquirer\b|\bstrategic\b|\bsponsor\b|\bpe\b|\bplatform\b|\broll[-\s]?up\b|\buniverse\b|\bpool\b/.test(text)) {
+    return {
+      kind: "analysis",
+      analysisType: "buyer_fit",
+      menuItemSlug: journey === "sell" ? "sell-buyer-list" : "buy-deal-scorecard",
+      label: "buyer universe analysis",
+      busyKey: "buyer-universe",
+    };
+  }
+
+  if (/\bfinanc|\bdebt\b|\blender\b|\bsba\b|\bbank\b|\bdscr\b|\bcapital\b|\bseller note\b|\bcash to close\b/.test(text)) {
+    return {
+      kind: "analysis",
+      analysisType: /\bsba\b/.test(text) ? "sba" : "capital_structure",
+      menuItemSlug: journey === "sell" ? "sell-deal-structure-analysis" : "buy-capital-structure",
+      label: /\bsba\b/.test(text) ? "SBA structure analysis" : "financing climate model",
+      busyKey: /\bsba\b/.test(text) ? "sba" : "capital-structure",
+    };
+  }
+
+  if (/\btax\b|\blegal\b|\bcounsel\b|\bcpa\b|\breps?\b|\bwarrant|\bstructure\b|\ballocation\b|\bsign[-\s]?off\b/.test(text)) {
+    return {
+      kind: "analysis",
+      analysisType: "tax_legal_structure",
+      menuItemSlug: structureAnalysisForJourney(journey).slug,
+      label: "tax and legal implications model",
+      busyKey: "tax-legal",
+    };
+  }
+
+  if (/\bworking[-\s]?cap|\badd[-\s]?back|\bpeg\b|\bar\b|\ba\/r\b|\binventory\b|\bquality of earnings\b|\bqoe\b|\bcohort\b|\bcustomer\b|\bsource gap\b|\bgap\b|\bdiligence\b|\bmissing\b|\brequest\b/.test(text)) {
+    return {
+      kind: "analysis",
+      analysisType: /\bworking[-\s]?cap|\bpeg\b|\bar\b|\ba\/r\b|\binventory\b/.test(text) ? "working_capital" : "qoe",
+      menuItemSlug: journey === "sell" ? "sell-financial-spread" : "buy-deal-scorecard",
+      label: /\bworking[-\s]?cap|\bpeg\b|\bar\b|\ba\/r\b|\binventory\b/.test(text) ? "working-capital analysis" : "diligence gap analysis",
+      busyKey: "diligence-gap",
+    };
+  }
+
+  if (/\bmultiple\b|\bpremium\b|\bpricing\b|\bvaluation\b|\btrend\b|\btransaction\b|\bmarket\b|\bcomp\b/.test(text)) {
+    return {
+      kind: "analysis",
+      analysisType: "comps",
+      menuItemSlug: "universal-comp-analysis",
+      label: "market comps analysis",
+      busyKey: "market-comps",
+    };
+  }
+
+  return {
+    kind: "analysis",
+    analysisType: "market_intelligence",
+    menuItemSlug: "universal-market-intelligence",
+    label: "market intelligence read",
+    busyKey: "market-read",
+  };
 }
 
 function resolveDealMoveAction(
@@ -1278,6 +1350,78 @@ function resolveSurfaceDealMoveAction(
         busyKey: "risk",
       };
     }
+    case "run_qoe_analysis":
+      return {
+        kind: "analysis",
+        analysisType: "qoe",
+        menuItemSlug: journey === "sell" ? "sell-financial-spread" : "buy-deal-scorecard",
+        label: "QoE analysis",
+        busyKey: "qoe",
+      };
+    case "run_lbo_analysis":
+      return {
+        kind: "analysis",
+        analysisType: "lbo",
+        menuItemSlug: journey === "sell" ? "sell-valuation-report" : "buy-valuation-model",
+        label: "LBO model",
+        busyKey: "lbo",
+      };
+    case "run_dcf_analysis":
+      return {
+        kind: "analysis",
+        analysisType: "dcf",
+        menuItemSlug: journey === "sell" ? "sell-valuation-report" : journey === "raise" ? "raise-pre-post-model" : "buy-valuation-model",
+        label: "DCF model",
+        busyKey: "dcf",
+      };
+    case "run_sensitivity_analysis":
+      return {
+        kind: "analysis",
+        analysisType: "sensitivity",
+        menuItemSlug: journey === "sell" ? "sell-valuation-report" : "buy-valuation-model",
+        label: "sensitivity model",
+        busyKey: "sensitivity",
+      };
+    case "run_earnout_analysis":
+      return {
+        kind: "analysis",
+        analysisType: "earnout",
+        menuItemSlug: journey === "sell" ? "sell-deal-structure-analysis" : "buy-earnout-analysis",
+        label: "earnout model",
+        busyKey: "earnout",
+      };
+    case "run_tax_impact_analysis":
+      return {
+        kind: "analysis",
+        analysisType: "tax_impact",
+        menuItemSlug: structureAnalysisForJourney(journey).slug,
+        label: "tax impact model",
+        busyKey: "tax-impact",
+      };
+    case "run_purchase_price_allocation":
+      return {
+        kind: "analysis",
+        analysisType: "purchase_price_allocation",
+        menuItemSlug: structureAnalysisForJourney(journey).slug,
+        label: "purchase-price allocation",
+        busyKey: "ppa",
+      };
+    case "run_cap_table_analysis":
+      return {
+        kind: "analysis",
+        analysisType: "cap_table",
+        menuItemSlug: "raise-cap-table",
+        label: "cap table model",
+        busyKey: "cap-table",
+      };
+    case "run_covenant_analysis":
+      return {
+        kind: "analysis",
+        analysisType: "covenant",
+        menuItemSlug: journey === "raise" ? "raise-use-of-funds" : "buy-capital-structure",
+        label: "covenant model",
+        busyKey: "covenant",
+      };
     case "generate_loi":
       return { kind: "artifact", slug: "buy-loi-draft", label: "LOI draft", busyKey: "generate" };
     case "generate_primary_deliverable":

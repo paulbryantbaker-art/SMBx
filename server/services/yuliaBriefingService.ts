@@ -15,6 +15,16 @@ type PortfolioPriorityActionId =
   | 'run_capital_structure_model'
   | 'run_sba_analysis'
   | 'run_red_flags_analysis'
+  | 'run_qoe_analysis'
+  | 'run_lbo_analysis'
+  | 'run_dcf_analysis'
+  | 'run_sensitivity_analysis'
+  | 'run_earnout_analysis'
+  | 'run_tax_impact_analysis'
+  | 'run_purchase_price_allocation'
+  | 'run_cap_table_analysis'
+  | 'run_covenant_analysis'
+  | 'optimize_scenario'
   | 'compare_deals'
   | 'generate_primary_deliverable'
   | 'generate_loi'
@@ -39,6 +49,16 @@ const PORTFOLIO_PRIORITY_ACTION_IDS = new Set<string>([
   'run_capital_structure_model',
   'run_sba_analysis',
   'run_red_flags_analysis',
+  'run_qoe_analysis',
+  'run_lbo_analysis',
+  'run_dcf_analysis',
+  'run_sensitivity_analysis',
+  'run_earnout_analysis',
+  'run_tax_impact_analysis',
+  'run_purchase_price_allocation',
+  'run_cap_table_analysis',
+  'run_covenant_analysis',
+  'optimize_scenario',
   'compare_deals',
   'generate_primary_deliverable',
   'generate_loi',
@@ -615,7 +635,7 @@ Return JSON only, matching this TypeScript-ish shape:
   "marketIntelligence": {"eyebrow":"MARKET INTELLIGENCE LIVE","headline":string,"subhead":string,"bullets":[string,string,string],"sourceCount":number,"confidence":string},
   "hero": {"title":string,"lede":string,"primaryLabel":string,"primaryPrompt":string,"secondaryLabel":string,"secondaryDealId":string|null,"notes":[{"label":string,"text":string},{"label":string,"text":string},{"label":string,"text":string}]},
   "liveDesk": [{"eyebrow":string,"title":string,"sub":string,"pct":number,"tone":"gold|cactus|oat|plum|charcoal","prompt":string}],
-  "priorities": [{"kicker":string,"title":string,"sub":string,"cta":string,"tone":"gold|cactus|oat|plum|charcoal","actionId":"run_market_intelligence|run_tax_legal_structure|run_working_capital_analysis|run_recast_analysis|run_buyer_fit_analysis|run_valuation_analysis|run_comps_analysis|run_capital_structure_model|run_sba_analysis|run_red_flags_analysis|compare_deals|generate_primary_deliverable|generate_loi|open_deal|open_document|open_pipeline|open_search|open_files_all|open_files_data_room|open_files_shared|open_files_needing_action|ask_yulia","dealId":string|null,"dealTitle":string|null,"docId":string|null,"docTitle":string|null,"prompt":string|null,"tabKind":string|null}],
+  "priorities": [{"kicker":string,"title":string,"sub":string,"cta":string,"tone":"gold|cactus|oat|plum|charcoal","actionId":"run_market_intelligence|run_tax_legal_structure|run_working_capital_analysis|run_recast_analysis|run_buyer_fit_analysis|run_valuation_analysis|run_comps_analysis|run_capital_structure_model|run_sba_analysis|run_red_flags_analysis|run_qoe_analysis|run_lbo_analysis|run_dcf_analysis|run_sensitivity_analysis|run_earnout_analysis|run_tax_impact_analysis|run_purchase_price_allocation|run_cap_table_analysis|run_covenant_analysis|optimize_scenario|compare_deals|generate_primary_deliverable|generate_loi|open_deal|open_document|open_pipeline|open_search|open_files_all|open_files_data_room|open_files_shared|open_files_needing_action|ask_yulia","dealId":string|null,"dealTitle":string|null,"docId":string|null,"docTitle":string|null,"prompt":string|null,"tabKind":string|null}],
   "files": [{"kind":"doc|chart","title":string,"sub":string,"status":string,"tone":"gold|cactus|oat|plum|charcoal","id":string|null}],
   "deals": [{"id":string,"title":string,"meta":string,"thesis":string,"status":string,"fit":number,"sde":string,"multiple":string,"tone":"gold|cactus|oat|plum|charcoal"}]
 }
@@ -628,7 +648,8 @@ Rules:
 - Preserve existing IDs exactly when provided.
 - Return exactly 3 hero notes, 3 liveDesk items, 3 priorities, up to 5 files, up to 5 deals.
 - Pick an actionId for every priority. Cards render Yulia's read; they do not invent the action.
-- Prefer canvas-producing actionIds for analysis or modeling recommendations. Do not use open_files_* when the recommendation is really to run analysis.
+- Every priority, warning, ranking, suggested next move, and file/workflow recommendation is from Yulia's analysis of the source snapshot. Never write generic card-authored advice.
+- Prefer canvas-producing actionIds for analysis or modeling recommendations. Use optimize_scenario when Yulia already has a saved model/scenario and the next move is to choose the best path. Do not use open_files_* when the recommendation is really to run analysis.
 - Use open_files_* only when Yulia's actual recommendation is to inspect files, data-room items, shared items, or action queues.
 
 Fallback shape you may improve:
@@ -649,7 +670,7 @@ Return JSON only:
   "verdict": {"label":"PURSUE|WATCH|PASS|NEEDS DATA","score":number,"text":string},
   "marketRead": {"headline":string,"bullets":[string,string,string],"sourceSignals":[string],"researchNeeded":[string]},
   "taxLegal": {"tax":string,"legal":string,"signoffFlags":[string]},
-  "nextMoves": [{"title":string,"why":string,"prompt":string,"actionId":"run_market_intelligence|run_tax_legal_structure|run_working_capital_analysis|run_recast_analysis|run_buyer_fit_analysis|run_valuation_analysis|run_comps_analysis|run_capital_structure_model|run_sba_analysis|run_red_flags_analysis|generate_primary_deliverable|generate_loi|open_files_all|open_files_data_room|open_files_shared|open_files_needing_action|ask_yulia"}],
+  "nextMoves": [{"title":string,"why":string,"prompt":string,"actionId":"run_market_intelligence|run_tax_legal_structure|run_working_capital_analysis|run_recast_analysis|run_buyer_fit_analysis|run_valuation_analysis|run_comps_analysis|run_capital_structure_model|run_sba_analysis|run_red_flags_analysis|run_qoe_analysis|run_lbo_analysis|run_dcf_analysis|run_sensitivity_analysis|run_earnout_analysis|run_tax_impact_analysis|run_purchase_price_allocation|run_cap_table_analysis|run_covenant_analysis|optimize_scenario|generate_primary_deliverable|generate_loi|open_files_all|open_files_data_room|open_files_shared|open_files_needing_action|ask_yulia"}],
   "filesFocus": [{"title":string,"why":string,"id":string|null}]
 }
 
@@ -658,7 +679,8 @@ Rules:
 - Do not give legal or tax advice. Surface options, facts, and sign-off requirements.
 - Use actual source data only; put gaps in researchNeeded.
 - Pick an actionId for every nextMove. This is execution metadata for the app; users do not see or type these command names.
-- Prefer canvas-producing actionIds for analysis asks. Do not use open_files_* when the intended work is analysis or modeling.
+- Every nextMove is Yulia's own deal read rendered into a surface action. Do not produce generic card copy or fallback navigation when the right answer is analysis, modeling, generation, review, or a missing-evidence prompt.
+- Prefer canvas-producing actionIds for analysis asks. Use optimize_scenario when Yulia already has model/scenario evidence and the intended work is choosing the best risk-adjusted path. Do not use open_files_* when the intended work is analysis or modeling.
 
 Fallback shape you may improve:
 ${JSON.stringify(fallback)}
@@ -683,6 +705,7 @@ Posture:
 - You are advisor-shaped, not a licensed advisor. Present facts, math, market context, options, and consequences. The user decides. Licensed professionals sign.
 - Be precise, sourced, current, and skeptical. Never invent market facts, comps, statutes, or financial figures.
 - For tax/legal, surface implications and handoff questions. Do not opine that a structure is legally/tax-valid for the user's facts.
+- Any recommendation visible on a product surface must be your recommendation from the current portfolio/deal/file/model context. The UI only renders it.
 `.trim();
 
 function buildDeterministicPortfolioBrief(snapshot: Awaited<ReturnType<typeof buildPortfolioSnapshot>>): PortfolioBriefResponse {
@@ -779,12 +802,12 @@ function buildDeterministicDealBrief(snapshot: Awaited<ReturnType<typeof buildDe
         prompt: `Spot the tax and legal issues for ${dealName(deal)}.`,
         actionId: 'run_tax_legal_structure',
       },
-      {
-        title: 'Open files that need action',
-        why: 'Work products and data-room items are the execution layer.',
-        prompt: `Show files needing action for ${dealName(deal)}.`,
-        actionId: 'open_files_needing_action',
-      },
+        {
+          title: 'Model the decision scenarios',
+          why: 'Price, structure, downside case, and professional sign-off should be visible before the next move.',
+          prompt: `Open an interactive sensitivity model for ${dealName(deal)} and show the cases I should review.`,
+          actionId: 'run_sensitivity_analysis',
+        },
     ],
     filesFocus: snapshot.deliverables.slice(0, 5).map(doc => ({ title: displayDeliverableName(doc), why: statusLabel(doc.status), id: String(doc.id) })),
   };
@@ -987,11 +1010,21 @@ function normalizePriorityActionId(priority: any): PortfolioPriorityActionId {
     return priority.actionId as PortfolioPriorityActionId;
   }
 
-  const text = `${priority?.kicker || ''} ${priority?.title || ''} ${priority?.sub || ''} ${priority?.cta || ''}`.toLowerCase();
-  if (/market|industry|buyer universe|source gap|sourcing/.test(text)) return 'run_market_intelligence';
-  if (/tax|legal|structure|counsel|attorney|cpa/.test(text)) return 'run_tax_legal_structure';
-  if (/working.?cap|qoe|quality of earnings/.test(text)) return 'run_working_capital_analysis';
-  if (/valuation|multiple|dcf|price/.test(text)) return 'run_valuation_analysis';
+    const text = `${priority?.kicker || ''} ${priority?.title || ''} ${priority?.sub || ''} ${priority?.cta || ''}`.toLowerCase();
+    if (/market|industry|buyer universe|source gap|sourcing/.test(text)) return 'run_market_intelligence';
+    if (/purchase.?price allocation|ppa|allocation/.test(text)) return 'run_purchase_price_allocation';
+    if (/tax impact|installment|qsbs|338|state tax/.test(text)) return 'run_tax_impact_analysis';
+    if (/tax|legal|structure|counsel|attorney|cpa/.test(text)) return 'run_tax_legal_structure';
+    if (/qoe|quality of earnings|add.?back|addback/.test(text)) return 'run_qoe_analysis';
+    if (/working.?cap|peg|a\/r|inventory/.test(text)) return 'run_working_capital_analysis';
+    if (/lbo|irr|moic|sponsor return/.test(text)) return 'run_lbo_analysis';
+    if (/dcf|discount|wacc|terminal value/.test(text)) return 'run_dcf_analysis';
+    if (/optimi[sz]e|best path|best case|risk-adjusted|risk adjusted|negotiation path/.test(text)) return 'optimize_scenario';
+    if (/sensitivity|scenario|downside|upside/.test(text)) return 'run_sensitivity_analysis';
+    if (/earnout|contingent/.test(text)) return 'run_earnout_analysis';
+    if (/cap table|dilution|pre.?money|post.?money/.test(text)) return 'run_cap_table_analysis';
+    if (/covenant|dscr|debt.?to.?ebitda|ltv/.test(text)) return 'run_covenant_analysis';
+    if (/valuation|multiple|price/.test(text)) return 'run_valuation_analysis';
   if (/comp|benchmark/.test(text)) return 'run_comps_analysis';
   if (/capital|sba|debt|lender|financing/.test(text)) return /sba/.test(text) ? 'run_sba_analysis' : 'run_capital_structure_model';
   if (/red.?flag|risk|diligence gap/.test(text)) return 'run_red_flags_analysis';

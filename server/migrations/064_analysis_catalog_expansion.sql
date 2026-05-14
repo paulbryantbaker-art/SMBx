@@ -1,0 +1,148 @@
+-- 064: Agentic analysis catalog expansion
+-- Extends Yulia's governed analysis/runtime catalog beyond first-tier SMB tools
+-- into institutional modeling surfaces. These definitions keep chat intent,
+-- surface buttons, and durable analysis canvases on the same execution layer.
+
+INSERT INTO analysis_definitions (
+  slug,
+  title,
+  category,
+  description,
+  model_family,
+  default_tool_name,
+  default_menu_item_slug,
+  methodology_refs,
+  evidence_requirements,
+  guardrail_tags,
+  sort_order
+) VALUES
+  (
+    'qoe',
+    'Quality of earnings',
+    'financial',
+    'Add-back support, normalized earnings, working-capital evidence, revenue quality, and concentration pressure.',
+    'quality_of_earnings',
+    'run_analysis',
+    'buy-deal-scorecard',
+    '["METHODOLOGY_V17 §5 Math Engine", "METHODOLOGY_V17 §11 Interactive Canvas"]'::jsonb,
+    '["financial_statements", "add_back_support", "customer_detail", "working_capital_schedules"]'::jsonb,
+    '["analysis_only", "cpa_signoff_required"]'::jsonb,
+    82
+  ),
+  (
+    'lbo',
+    'LBO model',
+    'financial',
+    'Sponsor-style leverage, equity check, debt paydown, exit value, MOIC, and IRR scenario modeling.',
+    'returns_model',
+    'run_analysis',
+    'buy-valuation-model',
+    '["METHODOLOGY_V17 §11 Interactive Canvas", "METHODOLOGY_V17 §12 Model Tabs"]'::jsonb,
+    '["purchase_price", "normalized_earnings", "capital_structure", "exit_assumptions"]'::jsonb,
+    '["analysis_only", "financing_signoff_required"]'::jsonb,
+    84
+  ),
+  (
+    'dcf',
+    'DCF model',
+    'financial',
+    'Discounted cash-flow model with growth, margin, reinvestment, WACC, and terminal value assumptions.',
+    'valuation',
+    'run_analysis',
+    'buy-valuation-model',
+    '["METHODOLOGY_V17 §5 Math Engine", "METHODOLOGY_V17 §11 Interactive Canvas"]'::jsonb,
+    '["financial_forecast", "revenue_history", "margin_support", "capital_expenditure_assumptions"]'::jsonb,
+    '["analysis_only"]'::jsonb,
+    86
+  ),
+  (
+    'sensitivity',
+    'Sensitivity model',
+    'financial',
+    'Scenario matrix for valuation, margin, multiple, downside, base, and upside decision cases.',
+    'scenario_model',
+    'run_analysis',
+    'buy-valuation-model',
+    '["METHODOLOGY_V17 §11 Interactive Canvas", "METHODOLOGY_V17 §12 Model Tabs"]'::jsonb,
+    '["base_case", "downside_case", "upside_case", "key_assumptions"]'::jsonb,
+    '["analysis_only"]'::jsonb,
+    88
+  ),
+  (
+    'earnout',
+    'Earnout model',
+    'structure',
+    'Probability-weighted contingent consideration, measurement period, discounting, and tax/legal issue spotting.',
+    'structure_model',
+    'run_analysis',
+    'buy-earnout-analysis',
+    '["METHODOLOGY_V17 §11 Interactive Canvas", "METHODOLOGY_V18a Tax Amendment", "METHODOLOGY_V18b Legal Amendment"]'::jsonb,
+    '["purchase_price", "earnout_terms", "performance_hurdles", "measurement_rights"]'::jsonb,
+    '["analysis_only", "legal_signoff_required", "tax_signoff_required"]'::jsonb,
+    90
+  ),
+  (
+    'tax_impact',
+    'Tax impact model',
+    'tax',
+    'Asset/equity weighting, installment, seller note, earnout, state exposure, and amortization issue map.',
+    'tax_model',
+    'run_analysis',
+    'buy-capital-structure',
+    '["METHODOLOGY_V18a Tax Amendment", "METHODOLOGY_V18b Legal Amendment"]'::jsonb,
+    '["entity_type", "purchase_price", "allocation_schedule", "seller_note", "earnout_terms", "state_exposure"]'::jsonb,
+    '["analysis_only", "tax_signoff_required", "no_tax_advice"]'::jsonb,
+    92
+  ),
+  (
+    'purchase_price_allocation',
+    'Purchase-price allocation',
+    'tax',
+    'Goodwill, inventory, equipment, working capital, state tax, and buyer/seller tax issue map.',
+    'tax_model',
+    'run_analysis',
+    'buy-capital-structure',
+    '["METHODOLOGY_V18a Tax Amendment", "METHODOLOGY_V18b Legal Amendment"]'::jsonb,
+    '["allocation_schedule", "fixed_asset_detail", "inventory_detail", "goodwill_support"]'::jsonb,
+    '["analysis_only", "tax_signoff_required", "no_tax_advice"]'::jsonb,
+    94
+  ),
+  (
+    'cap_table',
+    'Cap table model',
+    'capital',
+    'Pre-money, post-money, dilution, option pool, liquidation preference, and raise structure scenarios.',
+    'capital_model',
+    'run_analysis',
+    'raise-cap-table',
+    '["METHODOLOGY_V17 §12 Model Tabs", "METHODOLOGY_V18b Legal Amendment"]'::jsonb,
+    '["pre_money", "raise_amount", "option_pool", "term_sheet"]'::jsonb,
+    '["analysis_only", "legal_signoff_required"]'::jsonb,
+    96
+  ),
+  (
+    'covenant',
+    'Covenant model',
+    'capital',
+    'DSCR, debt-to-EBITDA, loan-to-value, interest rate, and lender covenant headroom.',
+    'credit_model',
+    'run_analysis',
+    'buy-capital-structure',
+    '["METHODOLOGY_V17 §5 Math Engine", "METHODOLOGY_V17 §11 Interactive Canvas"]'::jsonb,
+    '["debt_terms", "normalized_earnings", "purchase_price", "collateral_support"]'::jsonb,
+    '["analysis_only", "financing_signoff_required"]'::jsonb,
+    98
+  )
+ON CONFLICT (slug) DO UPDATE SET
+  title = EXCLUDED.title,
+  category = EXCLUDED.category,
+  description = EXCLUDED.description,
+  model_family = EXCLUDED.model_family,
+  default_tool_name = EXCLUDED.default_tool_name,
+  default_menu_item_slug = EXCLUDED.default_menu_item_slug,
+  methodology_refs = EXCLUDED.methodology_refs,
+  evidence_requirements = EXCLUDED.evidence_requirements,
+  guardrail_tags = EXCLUDED.guardrail_tags,
+  sort_order = EXCLUDED.sort_order,
+  is_active = true,
+  updated_at = NOW();
