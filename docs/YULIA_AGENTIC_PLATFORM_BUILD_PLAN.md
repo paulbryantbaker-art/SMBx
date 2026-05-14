@@ -88,6 +88,13 @@ Checkpoint B.1, May 13:
 - Updated Today so logged-in recommendation surfaces do not fall back to static card-authored suggestions if the Yulia portfolio brief is unavailable; they show a Yulia-read refresh state instead.
 - Captured the rule that cards do not author recommendations. Yulia's portfolio/deal intelligence layer is the source of next moves, warnings, rankings, and suggested actions.
 
+Checkpoint B.2, May 13:
+
+- Extended Yulia's portfolio briefing payload so priority items carry explicit `actionId` metadata from the intelligence layer.
+- Updated deterministic portfolio fallback to assign action contracts from live user data instead of letting the frontend infer intent from card text.
+- Expanded the shared frontend dispatcher beyond analysis so Yulia-originated priorities can open deals, files, documents, modes, generated deliverables, comparisons, or governed confirmation prompts through one path.
+- Re-routed Today priority cards through the dispatcher; the card is now a presentation surface for Yulia's read, not the author of the recommendation or action.
+
 ### Phase C — Analysis Workbench Completion
 
 Goal: analysis is always a canvas artifact, not chat math.

@@ -3,6 +3,8 @@ import { authHeaders, type User } from "../../../hooks/useAuth";
 import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
 import { useV6WorkspaceData, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
 import { DESKTOP_TEXTURES } from "../../../lib/randomTextures";
+import { executeSurfaceAction, type ActionDeal } from "../../../lib/v6ActionContracts";
+import { isSurfaceActionId, type SurfaceActionId } from "../../../lib/v6SurfaceActions";
 import type { OpenTab } from "../types";
 import { V6Icon } from "../icons";
 
@@ -130,6 +132,7 @@ interface PortfolioPriority {
   sub: string;
   cta: string;
   tone: Tone;
+  actionId?: SurfaceActionId;
   dealId?: string;
   dealTitle?: string;
   docId?: string;
@@ -258,37 +261,59 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
     openTab({ kind: "deal", id: deal.id, title: deal.title });
   };
 
-  const openDealById = (id: string, title?: string) => {
-    const deal = deals.find(item => item.id === id);
-    if (deal) {
-      openDeal(deal);
-      return;
-    }
-    openTab({ kind: "deal", id, title: title || "Deal" });
-  };
-
   const openDoc = (title: string, id?: string) => {
     openTab({ kind: "doc", title, id: id ?? `doc-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}` });
+  };
+
+  const todayDealToActionDeal = (deal: TodayDeal | null | undefined): ActionDeal | null => {
+    if (!deal) return null;
+    return {
+      id: deal.id,
+      business_name: deal.title,
+      name: deal.title,
+    };
+  };
+
+  const actionDealForPriority = (item: PortfolioPriority): ActionDeal | null => {
+    if (item.dealId) {
+      const matched = deals.find(deal => deal.id === item.dealId);
+      if (matched) return todayDealToActionDeal(matched);
+      return {
+        id: item.dealId,
+        business_name: item.dealTitle || item.title,
+        name: item.dealTitle || item.title,
+      };
+    }
+    return todayDealToActionDeal(lead);
+  };
+
+  const actionDeals = deals.map(todayDealToActionDeal).filter(Boolean) as ActionDeal[];
+
+  const executePriority = (item: PortfolioPriority) => {
+    const actionId = isSurfaceActionId(item.actionId) ? item.actionId : null;
+    const prompt = item.prompt || `${item.title}: ${item.sub}`;
+    if (!actionId) {
+      ask(prompt);
+      return;
+    }
+
+    void executeSurfaceAction({
+      actionId,
+      deal: actionDealForPriority(item),
+      deals: actionDeals,
+      document: { id: item.docId, title: item.docTitle || item.title },
+      title: item.title,
+      prompt,
+      openTab,
+      requestedFrom: "today_priority",
+      onTalkToYulia: ask,
+    }).catch(() => ask(prompt));
   };
 
   const livePriorities = liveBrief?.priorities?.length
     ? liveBrief.priorities.map(item => ({
         ...item,
-        action: () => {
-          if (item.dealId) {
-            openDealById(item.dealId, item.dealTitle);
-            return;
-          }
-          if (item.docId || item.docTitle) {
-            openDoc(item.docTitle || item.title, item.docId);
-            return;
-          }
-          if (item.tabKind === "search") {
-            openTab({ kind: "mode-root", modeId: "search", id: "search-root", title: "Search", pinned: true });
-            return;
-          }
-          ask(item.prompt || `${item.title}: ${item.sub}`);
-        },
+        action: () => executePriority(item),
       }))
     : null;
 

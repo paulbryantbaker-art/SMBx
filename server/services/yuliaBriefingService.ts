@@ -4,6 +4,56 @@ import { callClaudeWithModel } from './aiService.js';
 import { getMarketHeat } from './marketHeatService.js';
 
 type Tone = 'gold' | 'cactus' | 'oat' | 'plum' | 'charcoal';
+type PortfolioPriorityActionId =
+  | 'run_market_intelligence'
+  | 'run_tax_legal_structure'
+  | 'run_working_capital_analysis'
+  | 'run_recast_analysis'
+  | 'run_buyer_fit_analysis'
+  | 'run_valuation_analysis'
+  | 'run_comps_analysis'
+  | 'run_capital_structure_model'
+  | 'run_sba_analysis'
+  | 'run_red_flags_analysis'
+  | 'compare_deals'
+  | 'generate_primary_deliverable'
+  | 'generate_loi'
+  | 'open_deal'
+  | 'open_document'
+  | 'open_pipeline'
+  | 'open_search'
+  | 'open_files_all'
+  | 'open_files_data_room'
+  | 'open_files_shared'
+  | 'open_files_needing_action'
+  | 'ask_yulia';
+
+const PORTFOLIO_PRIORITY_ACTION_IDS = new Set<string>([
+  'run_market_intelligence',
+  'run_tax_legal_structure',
+  'run_working_capital_analysis',
+  'run_recast_analysis',
+  'run_buyer_fit_analysis',
+  'run_valuation_analysis',
+  'run_comps_analysis',
+  'run_capital_structure_model',
+  'run_sba_analysis',
+  'run_red_flags_analysis',
+  'compare_deals',
+  'generate_primary_deliverable',
+  'generate_loi',
+  'open_deal',
+  'open_document',
+  'open_pipeline',
+  'open_search',
+  'open_files_all',
+  'open_files_data_room',
+  'open_files_shared',
+  'open_files_needing_action',
+  'ask_yulia',
+]);
+
+const TONES = new Set<string>(['gold', 'cactus', 'oat', 'plum', 'charcoal']);
 
 interface DealRow {
   id: number;
@@ -125,6 +175,7 @@ export interface PortfolioBriefResponse {
     sub: string;
     cta: string;
     tone: Tone;
+    actionId?: PortfolioPriorityActionId;
     dealId?: string;
     dealTitle?: string;
     docId?: string;
@@ -564,7 +615,7 @@ Return JSON only, matching this TypeScript-ish shape:
   "marketIntelligence": {"eyebrow":"MARKET INTELLIGENCE LIVE","headline":string,"subhead":string,"bullets":[string,string,string],"sourceCount":number,"confidence":string},
   "hero": {"title":string,"lede":string,"primaryLabel":string,"primaryPrompt":string,"secondaryLabel":string,"secondaryDealId":string|null,"notes":[{"label":string,"text":string},{"label":string,"text":string},{"label":string,"text":string}]},
   "liveDesk": [{"eyebrow":string,"title":string,"sub":string,"pct":number,"tone":"gold|cactus|oat|plum|charcoal","prompt":string}],
-  "priorities": [{"kicker":string,"title":string,"sub":string,"cta":string,"tone":"gold|cactus|oat|plum|charcoal","dealId":string|null,"dealTitle":string|null,"docId":string|null,"docTitle":string|null,"prompt":string|null,"tabKind":string|null}],
+  "priorities": [{"kicker":string,"title":string,"sub":string,"cta":string,"tone":"gold|cactus|oat|plum|charcoal","actionId":"run_market_intelligence|run_tax_legal_structure|run_working_capital_analysis|run_recast_analysis|run_buyer_fit_analysis|run_valuation_analysis|run_comps_analysis|run_capital_structure_model|run_sba_analysis|run_red_flags_analysis|compare_deals|generate_primary_deliverable|generate_loi|open_deal|open_document|open_pipeline|open_search|open_files_all|open_files_data_room|open_files_shared|open_files_needing_action|ask_yulia","dealId":string|null,"dealTitle":string|null,"docId":string|null,"docTitle":string|null,"prompt":string|null,"tabKind":string|null}],
   "files": [{"kind":"doc|chart","title":string,"sub":string,"status":string,"tone":"gold|cactus|oat|plum|charcoal","id":string|null}],
   "deals": [{"id":string,"title":string,"meta":string,"thesis":string,"status":string,"fit":number,"sde":string,"multiple":string,"tone":"gold|cactus|oat|plum|charcoal"}]
 }
@@ -576,6 +627,9 @@ Rules:
 - Keep UI copy tight. No hype words. No generic SaaS copy.
 - Preserve existing IDs exactly when provided.
 - Return exactly 3 hero notes, 3 liveDesk items, 3 priorities, up to 5 files, up to 5 deals.
+- Pick an actionId for every priority. Cards render Yulia's read; they do not invent the action.
+- Prefer canvas-producing actionIds for analysis or modeling recommendations. Do not use open_files_* when the recommendation is really to run analysis.
+- Use open_files_* only when Yulia's actual recommendation is to inspect files, data-room items, shared items, or action queues.
 
 Fallback shape you may improve:
 ${JSON.stringify(fallback)}
@@ -834,6 +888,9 @@ function buildPriorities(
       sub: 'No user should have to google industry context outside the app.',
       cta: 'Run read',
       tone: 'cactus',
+      actionId: 'run_market_intelligence',
+      dealId: String(deals[0].id),
+      dealTitle: dealName(deals[0]),
       prompt: `Generate the full market intelligence read for ${dealName(deals[0])}.`,
     });
   }
@@ -844,6 +901,7 @@ function buildPriorities(
       sub: 'Yulia staged this action. Confirm or cancel before anything changes.',
       cta: 'Review',
       tone: action.risk_level === 'high' ? 'gold' : 'plum',
+      actionId: 'ask_yulia',
       prompt: `Review the staged action: ${action.action_label || action.tool_name}.`,
     });
   }
@@ -854,7 +912,11 @@ function buildPriorities(
       sub: `${review.deal_name || 'Deal'} · ${review.reviewer_role || 'review'} requested`,
       cta: 'Review',
       tone: 'plum',
+      actionId: review.doc_name ? 'open_document' : 'ask_yulia',
+      dealId: review.deal_id ? String(review.deal_id) : undefined,
+      dealTitle: review.deal_name || undefined,
       docTitle: review.doc_name || 'Review request',
+      prompt: `Review ${review.doc_name || 'the pending review request'} for ${review.deal_name || 'this deal'} and tell me what needs a decision.`,
     });
   }
   for (const doc of stale.slice(0, 2)) {
@@ -864,8 +926,12 @@ function buildPriorities(
       sub: `${doc.deal_name || 'Deal'} · ${doc.stale_reason || 'source data changed'}`,
       cta: 'Refresh',
       tone: 'gold',
+      actionId: 'open_document',
+      dealId: doc.deal_id ? String(doc.deal_id) : undefined,
+      dealTitle: doc.deal_name || undefined,
       docId: String(doc.id),
       docTitle: displayDeliverableName(doc),
+      prompt: `Refresh ${displayDeliverableName(doc)} using the changed source data, then reopen it as a canvas/document.`,
     });
   }
   if (inProgress[0]) {
@@ -875,6 +941,9 @@ function buildPriorities(
       sub: `${inProgress[0].deal_name || 'Deal'} · ${statusLabel(inProgress[0].status)}`,
       cta: 'Open',
       tone: 'gold',
+      actionId: 'open_document',
+      dealId: inProgress[0].deal_id ? String(inProgress[0].deal_id) : undefined,
+      dealTitle: inProgress[0].deal_name || undefined,
       docId: String(inProgress[0].id),
       docTitle: displayDeliverableName(inProgress[0]),
     });
@@ -886,6 +955,7 @@ function buildPriorities(
       sub: `${fmtCents(deals[0].revenue)} revenue · ${fitScore(deals[0])} fit · ${gateLabel(deals[0].current_gate)}`,
       cta: 'Open deal',
       tone: toneForDeal(deals[0]),
+      actionId: 'open_deal',
       dealId: String(deals[0].id),
       dealTitle: dealName(deals[0]),
     });
@@ -908,8 +978,52 @@ function buildFiles(deliverables: DeliverableRow[]) {
   });
 }
 
+function normalizeTone(value: unknown, fallback: Tone = 'plum'): Tone {
+  return typeof value === 'string' && TONES.has(value) ? value as Tone : fallback;
+}
+
+function normalizePriorityActionId(priority: any): PortfolioPriorityActionId {
+  if (PORTFOLIO_PRIORITY_ACTION_IDS.has(priority?.actionId)) {
+    return priority.actionId as PortfolioPriorityActionId;
+  }
+
+  const text = `${priority?.kicker || ''} ${priority?.title || ''} ${priority?.sub || ''} ${priority?.cta || ''}`.toLowerCase();
+  if (/market|industry|buyer universe|source gap|sourcing/.test(text)) return 'run_market_intelligence';
+  if (/tax|legal|structure|counsel|attorney|cpa/.test(text)) return 'run_tax_legal_structure';
+  if (/working.?cap|qoe|quality of earnings/.test(text)) return 'run_working_capital_analysis';
+  if (/valuation|multiple|dcf|price/.test(text)) return 'run_valuation_analysis';
+  if (/comp|benchmark/.test(text)) return 'run_comps_analysis';
+  if (/capital|sba|debt|lender|financing/.test(text)) return /sba/.test(text) ? 'run_sba_analysis' : 'run_capital_structure_model';
+  if (/red.?flag|risk|diligence gap/.test(text)) return 'run_red_flags_analysis';
+  if (priority?.docId || priority?.docTitle) return 'open_document';
+  if (priority?.dealId || priority?.dealTitle) return 'open_deal';
+  if (priority?.tabKind === 'search') return 'open_search';
+  return 'ask_yulia';
+}
+
+function normalizePortfolioPriority(priority: any): PortfolioBriefResponse['priorities'][number] {
+  const title = String(priority?.title || 'Ask Yulia for the current read');
+  return {
+    kicker: String(priority?.kicker || 'YULIA READ').toUpperCase().slice(0, 36),
+    title: clip(title, 96),
+    sub: clip(String(priority?.sub || 'Yulia needs more live context before recommending the next action.'), 180),
+    cta: clip(String(priority?.cta || 'Ask Yulia'), 32),
+    tone: normalizeTone(priority?.tone),
+    actionId: normalizePriorityActionId(priority),
+    dealId: priority?.dealId != null ? String(priority.dealId) : undefined,
+    dealTitle: priority?.dealTitle ? String(priority.dealTitle) : undefined,
+    docId: priority?.docId != null ? String(priority.docId) : undefined,
+    docTitle: priority?.docTitle ? String(priority.docTitle) : undefined,
+    prompt: priority?.prompt ? String(priority.prompt) : undefined,
+    tabKind: priority?.tabKind ? String(priority.tabKind) : undefined,
+  };
+}
+
 function normalizePortfolioBrief(raw: any, snapshot: Awaited<ReturnType<typeof buildPortfolioSnapshot>>, mode: PortfolioBriefResponse['intelligenceMode'], modelUsed: string): PortfolioBriefResponse {
   const fallback = buildDeterministicPortfolioBrief(snapshot);
+  const normalizedPriorities = Array.isArray(raw?.priorities) && raw.priorities.length
+    ? raw.priorities.slice(0, 3).map(normalizePortfolioPriority)
+    : fallback.priorities.map(normalizePortfolioPriority);
   const merged: PortfolioBriefResponse = {
     ...fallback,
     ...raw,
@@ -920,7 +1034,7 @@ function normalizePortfolioBrief(raw: any, snapshot: Awaited<ReturnType<typeof b
     marketIntelligence: { ...fallback.marketIntelligence, ...(raw?.marketIntelligence || {}) },
     hero: { ...fallback.hero, ...(raw?.hero || {}) },
     liveDesk: Array.isArray(raw?.liveDesk) && raw.liveDesk.length ? raw.liveDesk.slice(0, 3) : fallback.liveDesk,
-    priorities: Array.isArray(raw?.priorities) && raw.priorities.length ? raw.priorities.slice(0, 3) : fallback.priorities,
+    priorities: normalizedPriorities,
     files: Array.isArray(raw?.files) && raw.files.length ? raw.files.slice(0, 5) : fallback.files,
     deals: Array.isArray(raw?.deals) && raw.deals.length ? raw.deals.slice(0, 5) : fallback.deals,
   };

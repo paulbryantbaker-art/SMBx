@@ -1,6 +1,6 @@
 import { compareDealsAnalysis, generateDealDeliverable, runDealAnalysis } from "../hooks/useV6WorkspaceData";
 import type { ModelPreference } from "./modelPreference";
-import type { OpenTab } from "../components/v6/types";
+import type { FileScope, ModeId, OpenTab } from "../components/v6/types";
 import { getSurfaceActionContract, type SurfaceActionId } from "./v6SurfaceActions";
 
 export interface ActionDeal {
@@ -38,7 +38,10 @@ export interface SurfaceActionExecutionInput {
   openTab: OpenTab;
   deal?: ActionDeal | null;
   deals?: ActionDeal[];
+  document?: { id?: number | string | null; title?: string | null };
+  fileScope?: FileScope;
   title?: string;
+  prompt?: string;
   modelPreference?: ModelPreference;
   requestedFrom?: string;
   onNote?: (message: string | null) => void;
@@ -293,13 +296,61 @@ export async function executeSurfaceAction({
   openTab,
   deal,
   deals = [],
+  document,
+  fileScope,
   title,
+  prompt,
   modelPreference,
   requestedFrom = "surface_action",
   onNote,
   onTalkToYulia,
 }: SurfaceActionExecutionInput) {
   const contract = getSurfaceActionContract(actionId);
+  const promptText = prompt || `${contract.label}. Use the active context and open the right surface if one is available.`;
+
+  if (actionId === "ask_yulia") {
+    onTalkToYulia?.(promptText);
+    return { status: "sent_to_chat", actionId };
+  }
+
+  const modeId = modeForSurfaceAction(actionId);
+  if (modeId) {
+    openTab({ kind: "mode-root", modeId, id: `${modeId}-root`, title: contract.label.replace(/^Open /, ""), pinned: true });
+    return { status: "opened_mode", actionId, modeId };
+  }
+
+  if (actionId === "open_deal") {
+    if (!deal) {
+      onTalkToYulia?.(promptText);
+      throw new Error("Open Deal needs a real deal.");
+    }
+    openTab({ kind: "deal", id: String(deal.id), title: actionDealTitle(deal) });
+    return { status: "opened_deal", actionId, dealId: deal.id };
+  }
+
+  if (isFileSurfaceAction(actionId)) {
+    if (!deal) {
+      onTalkToYulia?.(promptText);
+      throw new Error(`${contract.label} needs a real deal.`);
+    }
+    const scope = fileScope || fileScopeForSurfaceAction(actionId);
+    openTab({ kind: "deal", id: String(deal.id), title: actionDealTitle(deal), fileScope: scope });
+    return { status: "opened_files", actionId, dealId: deal.id, fileScope: scope };
+  }
+
+  if (actionId === "open_document") {
+    const docTitle = document?.title || title;
+    if (!docTitle) {
+      onTalkToYulia?.(promptText);
+      throw new Error("Open Document needs a document title.");
+    }
+    openTab({
+      kind: "doc",
+      title: docTitle,
+      id: document?.id != null ? String(document.id) : `doc-${docTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+    });
+    return { status: "opened_document", actionId, documentId: document?.id ?? null };
+  }
 
   if (actionId === "compare_deals") {
     const scopedDeals = deals.length >= 2 ? deals : deal ? [deal] : [];
@@ -309,6 +360,24 @@ export async function executeSurfaceAction({
       title: title || contract.label,
       modelPreference,
       requestedFrom,
+      onNote,
+    });
+  }
+
+  if (actionId === "generate_primary_deliverable" || actionId === "generate_loi") {
+    if (!deal) {
+      onTalkToYulia?.(promptText);
+      throw new Error(`${contract.label} needs a real deal.`);
+    }
+    const doc = actionId === "generate_loi"
+      ? { slug: "buy-loi-draft", label: "LOI draft" }
+      : primaryDocForJourney(deal.journey_type);
+    return generateActionDeliverable({
+      deal,
+      slug: doc.slug,
+      label: doc.label,
+      openTab,
+      modelPreference,
       onNote,
     });
   }
@@ -331,7 +400,54 @@ export async function executeSurfaceAction({
     });
   }
 
+  if (contract.requiresConfirmation || contract.result === "staged_confirmation") {
+    onTalkToYulia?.(`${promptText} Stage the governed action for confirmation before anything is shared, filed, or sent.`);
+    return { status: "sent_to_chat_for_confirmation", actionId };
+  }
+
+  if (contract.result === "chat") {
+    onTalkToYulia?.(promptText);
+    return { status: "sent_to_chat", actionId };
+  }
+
   throw new Error(`${contract.label} is not wired through the dispatcher yet.`);
+}
+
+function modeForSurfaceAction(actionId: SurfaceActionId): ModeId | null {
+  switch (actionId) {
+    case "open_today":
+      return "today";
+    case "open_pipeline":
+      return "pipeline";
+    case "open_search":
+    case "search_buyers":
+    case "start_sourcing_run":
+      return "search";
+    case "open_files":
+      return "files";
+    default:
+      return null;
+  }
+}
+
+function isFileSurfaceAction(actionId: SurfaceActionId): boolean {
+  return actionId === "open_files_all"
+    || actionId === "open_files_data_room"
+    || actionId === "open_files_shared"
+    || actionId === "open_files_needing_action";
+}
+
+function fileScopeForSurfaceAction(actionId: SurfaceActionId): FileScope {
+  switch (actionId) {
+    case "open_files_data_room":
+      return "data-room";
+    case "open_files_shared":
+    case "open_files_needing_action":
+      return "shared";
+    case "open_files_all":
+    default:
+      return "all";
+  }
 }
 
 export function yuliaComparePrompt(deals: ActionDeal[]): string {
