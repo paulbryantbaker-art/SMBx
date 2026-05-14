@@ -95,6 +95,12 @@ Checkpoint B.2, May 13:
 - Expanded the shared frontend dispatcher beyond analysis so Yulia-originated priorities can open deals, files, documents, modes, generated deliverables, comparisons, or governed confirmation prompts through one path.
 - Re-routed Today priority cards through the dispatcher; the card is now a presentation surface for Yulia's read, not the author of the recommendation or action.
 
+Checkpoint B.3, May 13:
+
+- Re-routed explicit deal-detail `nextMoves` through the shared dispatcher when Yulia's deal brief includes an `actionId`.
+- Kept the older local text resolver only as a compatibility fallback for sample or legacy next moves without action metadata.
+- Verified the build after the deal-detail dispatcher handoff.
+
 ### Phase C — Analysis Workbench Completion
 
 Goal: analysis is always a canvas artifact, not chat math.

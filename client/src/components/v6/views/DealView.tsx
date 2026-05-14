@@ -13,7 +13,7 @@ import {
   type DealDataRoom,
   type DataRoomDocument,
 } from "../../../hooks/useV6WorkspaceData";
-import { runActionAnalysis } from "../../../lib/v6ActionContracts";
+import { executeSurfaceAction, runActionAnalysis, type ActionDeal } from "../../../lib/v6ActionContracts";
 import { isSurfaceActionId, type SurfaceActionId } from "../../../lib/v6SurfaceActions";
 
 interface Stat { k: string; v: string; sub: string }
@@ -453,6 +453,38 @@ export function V6DealView({
   };
   const runRecommendedMove = async (move: DealNextMove) => {
     const action = resolveDealMoveAction(move, real?.journey_type, primaryDeliverable);
+    const explicitActionId = isSurfaceActionId(move.actionId) ? move.actionId : null;
+    const realActionDeal: ActionDeal | null = numericId !== null
+      ? real ?? { id: numericId, business_name: dealName, name: dealName, journey_type: "buy" }
+      : null;
+
+    if (explicitActionId && realActionDeal) {
+      setBusyAction(action.kind !== "chat" && "busyKey" in action ? action.busyKey : explicitActionId);
+      setActionError(null);
+      setActionNote(null);
+      try {
+        await executeSurfaceAction({
+          actionId: explicitActionId,
+          deal: realActionDeal,
+          openTab,
+          title: move.title || dealName,
+          prompt: move.prompt || `On ${dealName}: ${move.title || "run the recommended next action"}.`,
+          requestedFrom: "deal_recommended_action",
+          modelPreference,
+          onNote: setActionNote,
+          onTalkToYulia,
+        });
+        if (explicitActionId === "generate_primary_deliverable" || explicitActionId === "generate_loi") {
+          void refreshDealArtifacts();
+        }
+      } catch (e: any) {
+        setActionError(e?.message || `Could not run ${move.title || "recommended action"}`);
+      } finally {
+        setBusyAction(null);
+      }
+      return;
+    }
+
     if (action.kind === "scope") {
       setDealFileScope(action.scope);
       setActionNote(action.note ?? null);
