@@ -17,6 +17,14 @@ import { ChatStarterPill } from "../ChatStarterPill";
 import { MobileIcon } from "../icons";
 import { YIcon } from "../YIcon";
 
+interface AnalysisVersionSummary {
+  versionNumber: number;
+  changeReason: string | null;
+  createdAt: string;
+  scenarioName: string | null;
+  summary: string | null;
+}
+
 interface MobileAnalysisScreenProps {
   title: string;
   analysisRunId?: number | null;
@@ -60,12 +68,36 @@ export function MobileAnalysisScreen({
 }: MobileAnalysisScreenProps) {
   const [data, setData] = useState<Record<string, any> | undefined>(analysisData);
   const [currentVersion, setCurrentVersion] = useState<number | null | undefined>(versionNumber);
+  const [versions, setVersions] = useState<AnalysisVersionSummary[]>([]);
+  const [versionsLoading, setVersionsLoading] = useState(false);
   const [note, setNote] = useState<string | null>(null);
 
   useEffect(() => {
     setData(analysisData);
     setCurrentVersion(versionNumber);
   }, [analysisData, versionNumber]);
+
+  const refreshVersions = async () => {
+    if (!analysisRunId) {
+      setVersions([]);
+      return;
+    }
+    setVersionsLoading(true);
+    try {
+      const res = await fetch(`/api/analysis-runs/${analysisRunId}/versions`, { headers: authHeaders() });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const payload = await res.json();
+      setVersions(Array.isArray(payload.versions) ? payload.versions : []);
+    } catch {
+      setVersions([]);
+    } finally {
+      setVersionsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void refreshVersions();
+  }, [analysisRunId]);
 
   useEffect(() => {
     if (data || !analysisRunId) return;
@@ -258,6 +290,7 @@ export function MobileAnalysisScreen({
       const savedData = payload.analysisData ?? nextData;
       setData(savedData);
       setCurrentVersion(payload.versionNumber ?? currentVersion ?? null);
+      if (Array.isArray(payload.versions)) setVersions(payload.versions);
       setNote(payload.versionNumber ? `Saved scenario v${payload.versionNumber}. Yulia can reference it in chat.` : "Scenario saved. Yulia can reference it in chat.");
       onUpdate?.({
         analysisData: savedData,
@@ -277,6 +310,40 @@ export function MobileAnalysisScreen({
       }));
     } catch {
       setNote("Scenario changed locally. Reconnect or sign in to save the version.");
+    }
+  };
+
+  const restoreVersion = async (targetVersion: number) => {
+    if (!analysisRunId) return;
+    setNote(`Restoring v${targetVersion}...`);
+    try {
+      const res = await fetch(`/api/analysis-runs/${analysisRunId}/versions/${targetVersion}/restore`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const payload = await res.json();
+      const restoredData = payload.analysisData ?? data;
+      setData(restoredData);
+      setCurrentVersion(payload.versionNumber ?? null);
+      if (Array.isArray(payload.versions)) setVersions(payload.versions);
+      setNote(`Restored v${targetVersion} as v${payload.versionNumber ?? "latest"}. Yulia can compare it in chat.`);
+      onUpdate?.({
+        analysisData: restoredData,
+        versionNumber: payload.versionNumber ?? null,
+        status: payload.versionNumber ? `restored v${payload.versionNumber}` : "version restored",
+      });
+      window.dispatchEvent(new CustomEvent("smbx:canvas_action", {
+        detail: {
+          canvas_action: "update_model",
+          tabId: "active",
+          analysisRunId,
+          analysisData: restoredData,
+          versionNumber: payload.versionNumber ?? null,
+        },
+      }));
+    } catch {
+      setNote("Could not restore that version. Ask Yulia to reopen the saved analysis.");
     }
   };
 
@@ -348,6 +415,20 @@ export function MobileAnalysisScreen({
             analysisTitle={structured.title || title}
             onSave={updateAssumptions}
             onAskYulia={onAskYulia}
+          />
+        </section>
+      ) : null}
+
+      {analysisRunId ? (
+        <section style={S.whiteCard}>
+          <MobileVersionHistory
+            versions={versions}
+            currentVersion={currentVersion ?? null}
+            loading={versionsLoading}
+            onRestore={restoreVersion}
+            onAskYulia={(version) => onAskYulia(
+              `Use the open ${structured.title || title} mobile analysis and explain saved scenario v${version.versionNumber}${version.scenarioName ? ` (${version.scenarioName})` : ""}. Compare it with the current version and tell me what decision it supports.`,
+            )}
           />
         </section>
       ) : null}
@@ -572,6 +653,77 @@ function ScenarioPanel({
       </div>
     </div>
   );
+}
+
+function MobileVersionHistory({
+  versions,
+  currentVersion,
+  loading,
+  onRestore,
+  onAskYulia,
+}: {
+  versions: AnalysisVersionSummary[];
+  currentVersion: number | null;
+  loading: boolean;
+  onRestore: (versionNumber: number) => void | Promise<void>;
+  onAskYulia: (version: AnalysisVersionSummary) => void;
+}) {
+  const rows = versions.slice(0, 5);
+  return (
+    <div>
+      <div className="mb-mono" style={S.cardEyebrow}>VERSIONS</div>
+      <h2 style={S.sectionTitle}>Saved scenarios</h2>
+      <p style={S.sectionCopy}>Restore one, or ask Yulia how it changes the decision.</p>
+      {loading ? (
+        <div style={S.versionEmpty}>Loading version history...</div>
+      ) : rows.length ? (
+        <div style={S.versionStack}>
+          {rows.map(version => {
+            const active = currentVersion === version.versionNumber;
+            return (
+              <div key={version.versionNumber} style={S.versionRow}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={S.versionTitle}>
+                    v{version.versionNumber}
+                    {version.scenarioName ? ` · ${version.scenarioName}` : ""}
+                    {active ? " · current" : ""}
+                  </div>
+                  <div style={S.versionMeta}>
+                    {version.changeReason || "Saved analysis version"} · {formatMobileVersionDate(version.createdAt)}
+                  </div>
+                  {version.summary && <div style={S.versionSummary}>{version.summary}</div>}
+                </div>
+                <div style={S.versionActions}>
+                  <button type="button" style={S.versionButton} onClick={() => onAskYulia(version)}>Ask</button>
+                  <button
+                    type="button"
+                    style={{ ...S.versionButton, opacity: active ? 0.42 : 1 }}
+                    disabled={active}
+                    onClick={() => { void onRestore(version.versionNumber); }}
+                  >
+                    Restore
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div style={S.versionEmpty}>Save a scenario to start the version trail.</div>
+      )}
+    </div>
+  );
+}
+
+function formatMobileVersionDate(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 function MiniList({ title, rows }: { title: string; rows: Array<[string, string]> }) {
@@ -950,6 +1102,60 @@ const S: Record<string, CSSProperties> = {
     color: "var(--mb-accent-ink)",
     fontWeight: 900,
     padding: "0 18px",
+  },
+  versionStack: {
+    display: "grid",
+    gap: 12,
+    marginTop: 16,
+  },
+  versionRow: {
+    display: "grid",
+    gap: 12,
+    padding: 14,
+    borderRadius: 20,
+    border: "1px solid var(--mb-line-2)",
+    background: "linear-gradient(145deg, rgba(255,255,255,0.88), rgba(241,245,252,0.78))",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.72)",
+  },
+  versionTitle: {
+    fontSize: 15,
+    fontWeight: 900,
+    color: "var(--mb-ink)",
+  },
+  versionMeta: {
+    marginTop: 3,
+    fontSize: 12,
+    color: "var(--mb-ink-4)",
+    lineHeight: 1.35,
+  },
+  versionSummary: {
+    marginTop: 6,
+    fontSize: 12,
+    color: "var(--mb-ink-3)",
+    lineHeight: 1.45,
+  },
+  versionActions: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 8,
+  },
+  versionButton: {
+    minHeight: 38,
+    borderRadius: 999,
+    border: "1px solid var(--mb-line-2)",
+    background: "rgba(238,242,250,0.78)",
+    color: "var(--mb-accent-ink)",
+    fontWeight: 900,
+    padding: "0 14px",
+  },
+  versionEmpty: {
+    marginTop: 14,
+    padding: "12px 14px",
+    borderRadius: 18,
+    border: "1px solid var(--mb-line-2)",
+    background: "rgba(241,245,252,0.78)",
+    color: "var(--mb-ink-3)",
+    fontSize: 13,
   },
   miniList: {
     marginTop: 16,

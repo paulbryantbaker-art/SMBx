@@ -23,6 +23,14 @@ import type { FileScope, OpenTab } from "../types";
 
 type AccentKey = "primary" | "tertiary" | "pursue" | "watch" | "pass";
 
+interface AnalysisVersionSummary {
+  versionNumber: number;
+  changeReason: string | null;
+  createdAt: string;
+  scenarioName: string | null;
+  summary: string | null;
+}
+
 interface SliderProps {
   label: string;
   val: number;
@@ -140,6 +148,7 @@ export function V6AnalysisView({
   analysisRunId,
   deliverableId,
   status,
+  versionNumber,
   resolvedMenuItemSlug,
   openTab,
   onTalkToYulia,
@@ -152,6 +161,7 @@ export function V6AnalysisView({
   analysisRunId?: number | null;
   deliverableId?: number | null;
   status?: string;
+  versionNumber?: number | null;
   resolvedMenuItemSlug?: string;
   openTab?: OpenTab;
   onTalkToYulia?: (prompt: string) => void;
@@ -231,6 +241,7 @@ export function V6AnalysisView({
         analysisRunId={analysisRunId}
         deliverableId={deliverableId}
         status={status}
+        versionNumber={versionNumber}
         resolvedMenuItemSlug={resolvedMenuItemSlug}
         openTab={openTab}
         onTalkToYulia={onTalkToYulia}
@@ -358,6 +369,7 @@ function StructuredAnalysisCanvas({
   analysisRunId,
   deliverableId,
   status,
+  versionNumber,
   resolvedMenuItemSlug,
   openTab,
   onTalkToYulia,
@@ -367,13 +379,40 @@ function StructuredAnalysisCanvas({
   analysisRunId?: number | null;
   deliverableId?: number | null;
   status?: string;
+  versionNumber?: number | null;
   resolvedMenuItemSlug?: string;
   openTab?: OpenTab;
   onTalkToYulia?: (prompt: string) => void;
 }) {
   const [canvasData, setCanvasData] = useState(data);
+  const [currentVersion, setCurrentVersion] = useState<number | null>(versionNumber ?? null);
+  const [versions, setVersions] = useState<AnalysisVersionSummary[]>([]);
+  const [versionsLoading, setVersionsLoading] = useState(false);
   const [saveNote, setSaveNote] = useState<string | null>(null);
   useEffect(() => setCanvasData(data), [data]);
+  useEffect(() => setCurrentVersion(versionNumber ?? null), [versionNumber]);
+
+  const refreshVersions = async () => {
+    if (!analysisRunId) {
+      setVersions([]);
+      return;
+    }
+    setVersionsLoading(true);
+    try {
+      const res = await fetch(`/api/analysis-runs/${analysisRunId}/versions`, { headers: authHeaders() });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const payload = await res.json();
+      setVersions(Array.isArray(payload.versions) ? payload.versions : []);
+    } catch {
+      setVersions([]);
+    } finally {
+      setVersionsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void refreshVersions();
+  }, [analysisRunId]);
 
   const updateAssumptions = async (updates: Record<string, unknown>, scenarioName?: string) => {
     const nextData = patchStructuredDataAssumptions(canvasData, updates);
@@ -402,6 +441,10 @@ function StructuredAnalysisCanvas({
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const payload = await res.json();
+      const savedData = payload.analysisData ?? nextData;
+      setCanvasData(savedData);
+      setCurrentVersion(payload.versionNumber ?? currentVersion ?? null);
+      if (Array.isArray(payload.versions)) setVersions(payload.versions);
       setSaveNote(payload.versionNumber ? `Saved scenario v${payload.versionNumber}. Yulia can reference this version in chat.` : "Scenario saved. Yulia can reference this version in chat.");
       window.dispatchEvent(new CustomEvent("smbx:canvas_action", {
         detail: {
@@ -409,12 +452,40 @@ function StructuredAnalysisCanvas({
           tabId: "active",
           updates: modelUpdates,
           analysisRunId,
-          analysisData: payload.analysisData ?? nextData,
+          analysisData: savedData,
           versionNumber: payload.versionNumber ?? null,
         },
       }));
     } catch {
       setSaveNote("Scenario updated locally. Sign in or reconnect to save this version.");
+    }
+  };
+
+  const restoreVersion = async (targetVersion: number) => {
+    if (!analysisRunId) return;
+    setSaveNote(`Restoring v${targetVersion}...`);
+    try {
+      const res = await fetch(`/api/analysis-runs/${analysisRunId}/versions/${targetVersion}/restore`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const payload = await res.json();
+      if (payload.analysisData) setCanvasData(payload.analysisData);
+      setCurrentVersion(payload.versionNumber ?? null);
+      if (Array.isArray(payload.versions)) setVersions(payload.versions);
+      setSaveNote(`Restored v${targetVersion} as v${payload.versionNumber ?? "latest"}. Yulia can compare it against the prior scenario.`);
+      window.dispatchEvent(new CustomEvent("smbx:canvas_action", {
+        detail: {
+          canvas_action: "update_model",
+          tabId: "active",
+          analysisRunId,
+          analysisData: payload.analysisData ?? canvasData,
+          versionNumber: payload.versionNumber ?? null,
+        },
+      }));
+    } catch {
+      setSaveNote("Could not restore that version. Ask Yulia to reopen the saved analysis run or reconnect.");
     }
   };
 
@@ -589,6 +660,7 @@ function StructuredAnalysisCanvas({
             <h1 style={A.h1}>{dataView.title || fallbackTitle}</h1>
             <div style={A.sub}>
               {analysisRunId ? `Saved analysis #${analysisRunId}` : "Live deterministic model"}
+              {currentVersion ? ` · v${currentVersion}` : ""}
               {status ? ` · ${status}` : ""}
               {deliverableId ? ` · deliverable #${deliverableId}` : ""}
               {resolvedMenuItemSlug ? ` · ${resolvedMenuItemSlug}` : ""}
@@ -712,6 +784,17 @@ function StructuredAnalysisCanvas({
             />
             <MiniFactList title="Methodology refs" rows={(dataView.methodologyRefs ?? []).map(ref => ["Ref", ref])} />
           </div>
+          {analysisRunId && (
+            <VersionHistoryPanel
+              versions={versions}
+              currentVersion={currentVersion}
+              loading={versionsLoading}
+              onRestore={restoreVersion}
+              onAskYulia={(version) => onTalkToYulia?.(
+                `Use the open ${dataView.title || fallbackTitle} canvas and explain saved scenario v${version.versionNumber}${version.scenarioName ? ` (${version.scenarioName})` : ""}. Compare it against the current version and tell me what decision it supports.`,
+              )}
+            />
+          )}
         </div>
       )}
     </div>
@@ -947,6 +1030,86 @@ function ScenarioAssumptionPanel({
       </div>
     </div>
   );
+}
+
+function VersionHistoryPanel({
+  versions,
+  currentVersion,
+  loading,
+  onRestore,
+  onAskYulia,
+}: {
+  versions: AnalysisVersionSummary[];
+  currentVersion: number | null;
+  loading: boolean;
+  onRestore: (versionNumber: number) => void | Promise<void>;
+  onAskYulia: (version: AnalysisVersionSummary) => void;
+}) {
+  const rows = versions.slice(0, 8);
+  return (
+    <div style={A.versionPanel}>
+      <div style={A.scenarioHeader}>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 900, color: "var(--m-on-surface)" }}>Saved scenarios</div>
+          <div style={{ fontSize: 11.5, color: "var(--m-on-surface-var)", marginTop: 2 }}>
+            Yulia can reference, compare, or restore any saved version.
+          </div>
+        </div>
+        <span className="mono" style={A.scenarioCount}>{currentVersion ? `v${currentVersion}` : "live"}</span>
+      </div>
+      {loading ? (
+        <div style={A.versionEmpty}>Loading version history...</div>
+      ) : rows.length ? (
+        <div style={A.versionRows}>
+          {rows.map(version => {
+            const active = currentVersion === version.versionNumber;
+            return (
+              <div key={version.versionNumber} style={A.versionRow}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={A.versionTitle}>
+                    v{version.versionNumber}
+                    {version.scenarioName ? ` · ${version.scenarioName}` : ""}
+                    {active ? " · current" : ""}
+                  </div>
+                  <div style={A.versionMeta}>
+                    {version.changeReason || "Saved analysis version"} · {formatVersionDate(version.createdAt)}
+                  </div>
+                  {version.summary && <div style={A.versionSummary}>{version.summary}</div>}
+                </div>
+                <div style={A.versionActions}>
+                  <button className="m-btn outlined" type="button" style={A.versionButton} onClick={() => onAskYulia(version)}>
+                    Ask
+                  </button>
+                  <button
+                    className="m-btn outlined"
+                    type="button"
+                    style={A.versionButton}
+                    disabled={active}
+                    onClick={() => { void onRestore(version.versionNumber); }}
+                  >
+                    Restore
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div style={A.versionEmpty}>Save a scenario to start the version trail.</div>
+      )}
+    </div>
+  );
+}
+
+function formatVersionDate(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 function MiniFactList({ title, rows }: { title: string; rows: Array<[string, string]> }) {
@@ -1434,6 +1597,61 @@ const A: Record<string, CSSProperties> = {
     minHeight: 36,
     padding: "0 10px",
     fontSize: 11.5,
+  },
+  versionPanel: {
+    marginTop: 18,
+    paddingTop: 16,
+    borderTop: "1px solid var(--m-outline-var)",
+  },
+  versionRows: {
+    display: "grid",
+    gap: 10,
+  },
+  versionRow: {
+    display: "flex",
+    gap: 14,
+    alignItems: "flex-start",
+    padding: "12px",
+    borderRadius: 16,
+    background: "linear-gradient(145deg, rgba(255,255,255,0.82), rgba(241,246,252,0.70))",
+    border: "1px solid rgba(121, 142, 170, 0.16)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.72)",
+  },
+  versionTitle: {
+    fontSize: 13,
+    fontWeight: 900,
+    color: "var(--m-on-surface)",
+  },
+  versionMeta: {
+    marginTop: 3,
+    fontSize: 11.5,
+    color: "var(--m-on-surface-var)",
+    lineHeight: 1.35,
+  },
+  versionSummary: {
+    marginTop: 6,
+    fontSize: 11.5,
+    color: "var(--m-on-surface-var)",
+    lineHeight: 1.45,
+    maxWidth: 760,
+  },
+  versionActions: {
+    display: "flex",
+    gap: 6,
+    flexShrink: 0,
+  },
+  versionButton: {
+    minHeight: 30,
+    padding: "0 10px",
+    fontSize: 11,
+  },
+  versionEmpty: {
+    padding: "12px",
+    borderRadius: 14,
+    background: "rgba(244, 247, 251, 0.8)",
+    border: "1px solid var(--m-outline-var)",
+    color: "var(--m-on-surface-var)",
+    fontSize: 12,
   },
   actionNote: {
     marginTop: 12,

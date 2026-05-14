@@ -132,6 +132,14 @@ Done when:
 
 - A valuation, SBA, working-capital, capital-structure, market-intelligence, and comparison analysis can be run, adjusted, saved, reopened, and discussed with Yulia.
 
+Checkpoint C.1, May 13:
+
+- Added analysis version history endpoints so saved scenarios can be listed for a run and restored as a new audited version instead of overwriting history.
+- Stored scenario names in analysis-run assumptions so saved versions have human-readable labels Yulia can reference.
+- Updated desktop structured analysis canvases with a saved-scenarios panel that shows current version, change reason, timestamp, restore actions, and Ask Yulia prompts for version comparison.
+- Added the same saved-scenario history and restore loop to mobile analysis canvases for parity.
+- Updated scenario saves so the canvas adopts the recalculated persisted payload returned by the backend, keeping Yulia's chat context aligned with the visible model.
+
 ### Phase D — Full Analysis and Model Catalog
 
 Goal: cover SMB through institutional/big-deal work with deterministic math plus LLM explanation.

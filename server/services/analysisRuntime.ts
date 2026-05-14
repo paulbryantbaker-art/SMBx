@@ -44,6 +44,14 @@ interface AnalysisRunSnapshot {
   commentaryMarkdown: string | null;
 }
 
+export interface AnalysisVersionSummary {
+  versionNumber: number;
+  changeReason: string | null;
+  createdAt: string;
+  scenarioName: string | null;
+  summary: string | null;
+}
+
 export interface ModelTabSnapshot {
   tabId: string;
   title: string;
@@ -63,6 +71,22 @@ function safeRecord(value: Record<string, any> | undefined): Record<string, any>
 
 function safeArray(value: unknown[] | undefined): unknown[] {
   return Array.isArray(value) ? value : [];
+}
+
+function versionScenarioName(assumptions: Record<string, any>, changeReason?: string | null): string | null {
+  if (typeof assumptions._scenario_name === 'string' && assumptions._scenario_name.trim()) {
+    return assumptions._scenario_name.trim();
+  }
+  const reason = changeReason || '';
+  const match = reason.match(/^Saved (?:mobile )?scenario:\s*(.+)$/i);
+  return match?.[1]?.trim() || null;
+}
+
+function versionSummary(outputs: Record<string, any>): string | null {
+  const structured = safeRecord(outputs.structuredAnalysis);
+  if (typeof structured.summary === 'string' && structured.summary.trim()) return structured.summary.trim();
+  if (typeof structured.yuliaRead === 'string' && structured.yuliaRead.trim()) return structured.yuliaRead.trim();
+  return null;
 }
 
 function isMissingAnalysisSchemaError(err: unknown): boolean {
@@ -246,6 +270,126 @@ export async function readAnalysisRunSnapshot(analysisRunId: number, userId: num
       assumptions: safeRecord(row.assumptions),
       outputs: safeRecord(row.outputs),
       commentaryMarkdown: row.commentary_markdown ?? null,
+    };
+  } catch (err) {
+    if (isMissingAnalysisSchemaError(err)) return null;
+    throw err;
+  }
+}
+
+export async function listAnalysisRunVersions(
+  analysisRunId: number,
+  userId: number,
+  limit = 12,
+): Promise<AnalysisVersionSummary[]> {
+  try {
+    const rows = await sql`
+      SELECT
+        v.version_number,
+        v.change_reason,
+        v.created_at,
+        v.assumptions,
+        v.outputs
+      FROM analysis_versions v
+      JOIN analysis_runs r ON r.id = v.analysis_run_id
+      WHERE v.analysis_run_id = ${analysisRunId}
+        AND r.user_id = ${userId}
+      ORDER BY v.version_number DESC
+      LIMIT ${Math.max(1, Math.min(50, limit))}
+    `;
+
+    return rows.map((row: any) => {
+      const assumptions = safeRecord(row.assumptions);
+      const outputs = safeRecord(row.outputs);
+      return {
+        versionNumber: Number(row.version_number),
+        changeReason: row.change_reason ?? null,
+        createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : String(row.created_at),
+        scenarioName: versionScenarioName(assumptions, row.change_reason),
+        summary: versionSummary(outputs),
+      };
+    });
+  } catch (err) {
+    if (isMissingAnalysisSchemaError(err)) return [];
+    throw err;
+  }
+}
+
+export async function restoreAnalysisRunVersion(input: {
+  analysisRunId: number;
+  userId: number;
+  versionNumber: number;
+}): Promise<AnalysisRunSnapshot | null> {
+  try {
+    const [current] = await sql`
+      SELECT id, user_id, deal_id, analysis_type, canvas_tab_id, version_number
+      FROM analysis_runs
+      WHERE id = ${input.analysisRunId} AND user_id = ${input.userId}
+      LIMIT 1
+    `;
+    if (!current?.id) return null;
+
+    const [version] = await sql`
+      SELECT input_payload, assumptions, outputs, commentary_markdown
+      FROM analysis_versions
+      WHERE analysis_run_id = ${input.analysisRunId}
+        AND version_number = ${input.versionNumber}
+      LIMIT 1
+    `;
+    if (!version) return null;
+
+    const nextVersion = Number(current.version_number ?? 1) + 1;
+    const nextInputPayload = safeRecord(version.input_payload);
+    const nextAssumptions = safeRecord(version.assumptions);
+    const nextOutputs = safeRecord(version.outputs);
+    const nextCommentary = version.commentary_markdown ?? null;
+
+    const [updated] = await sql`
+      UPDATE analysis_runs
+      SET input_payload = ${sql.json(nextInputPayload)}::jsonb,
+          assumptions = ${sql.json(nextAssumptions)}::jsonb,
+          outputs = ${sql.json(nextOutputs)}::jsonb,
+          commentary_markdown = ${nextCommentary},
+          version_number = ${nextVersion},
+          updated_at = NOW()
+      WHERE id = ${input.analysisRunId} AND user_id = ${input.userId}
+      RETURNING id, deal_id, analysis_type, input_payload, canvas_tab_id, version_number, assumptions, outputs, commentary_markdown
+    `;
+
+    await sql`
+      INSERT INTO analysis_versions (
+        analysis_run_id,
+        version_number,
+        input_payload,
+        assumptions,
+        outputs,
+        commentary_markdown,
+        changed_by_user_id,
+        change_reason
+      )
+      VALUES (
+        ${input.analysisRunId},
+        ${nextVersion},
+        ${sql.json(nextInputPayload)}::jsonb,
+        ${sql.json(nextAssumptions)}::jsonb,
+        ${sql.json(nextOutputs)}::jsonb,
+        ${nextCommentary},
+        ${input.userId},
+        ${`Restored version ${input.versionNumber}`}
+      )
+      ON CONFLICT (analysis_run_id, version_number) DO NOTHING
+    `;
+
+    return {
+      id: Number(updated.id),
+      dealId: updated.deal_id ? Number(updated.deal_id) : null,
+      analysisType: updated.analysis_type ?? null,
+      canvasTabId: updated.canvas_tab_id ?? null,
+      versionNumber: Number(updated.version_number ?? nextVersion),
+      inputPayload: safeRecord(updated.input_payload),
+      assumptions: safeRecord(updated.assumptions),
+      outputs: safeRecord(updated.outputs),
+      commentaryMarkdown: updated.commentary_markdown ?? null,
     };
   } catch (err) {
     if (isMissingAnalysisSchemaError(err)) return null;

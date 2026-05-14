@@ -1,5 +1,11 @@
 import { Router } from 'express';
-import { createAnalysisRun, readAnalysisRunSnapshot, updateAnalysisRunSnapshot } from '../services/analysisRuntime.js';
+import {
+  createAnalysisRun,
+  listAnalysisRunVersions,
+  readAnalysisRunSnapshot,
+  restoreAnalysisRunVersion,
+  updateAnalysisRunSnapshot,
+} from '../services/analysisRuntime.js';
 import { buildDealComparisonAnalysis, buildDeterministicAnalysis } from '../services/deterministicAnalysisEngine.js';
 import { sql } from '../db.js';
 
@@ -358,6 +364,7 @@ analysisRunsRouter.post('/analysis-runs/:analysisRunId/assumptions', async (req,
     if (!current) return res.status(404).json({ error: 'Analysis run not found' });
 
     const currentStructured = safeRecord(current.outputs).structuredAnalysis;
+    const scenarioName = typeof req.body?.scenarioName === 'string' ? req.body.scenarioName.trim() : '';
     const recalculated = await rebuildStructuredAnalysis({ current, updates, userId });
     const structuredAnalysis = recalculated ?? patchStructuredAnalysisAssumptions(currentStructured, updates);
     const updated = await updateAnalysisRunSnapshot({
@@ -365,11 +372,13 @@ analysisRunsRouter.post('/analysis-runs/:analysisRunId/assumptions', async (req,
       userId,
       assumptionUpdates: {
         ...updates,
+        ...(scenarioName ? { _scenario_name: scenarioName } : {}),
         ...(structuredAnalysis ? { items: structuredAnalysis.assumptions } : {}),
       },
       outputUpdates: structuredAnalysis ? { structuredAnalysis } : {},
-      changeReason: req.body?.changeReason || 'User updated analysis assumptions',
+      changeReason: req.body?.changeReason || (scenarioName ? `Saved scenario: ${scenarioName}` : 'User updated analysis assumptions'),
     });
+    const versions = await listAnalysisRunVersions(analysisRunId, userId);
 
     return res.json({
       ok: true,
@@ -377,10 +386,53 @@ analysisRunsRouter.post('/analysis-runs/:analysisRunId/assumptions', async (req,
       versionNumber: updated?.versionNumber ?? current.versionNumber,
       assumptions: updated?.assumptions ?? current.assumptions,
       analysisData: structuredAnalysis ?? null,
+      versions,
     });
   } catch (err: any) {
     console.error('[analysis-runs] update assumptions error:', err.message);
     return res.status(500).json({ error: 'Failed to update analysis assumptions' });
+  }
+});
+
+analysisRunsRouter.get('/analysis-runs/:analysisRunId/versions', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const analysisRunId = Number(req.params.analysisRunId);
+    if (!Number.isFinite(analysisRunId)) return res.status(400).json({ error: 'Invalid analysis run id' });
+
+    const versions = await listAnalysisRunVersions(analysisRunId, userId);
+    return res.json({ ok: true, analysisRunId, versions });
+  } catch (err: any) {
+    console.error('[analysis-runs] list versions error:', err.message);
+    return res.status(500).json({ error: 'Failed to list analysis versions' });
+  }
+});
+
+analysisRunsRouter.post('/analysis-runs/:analysisRunId/versions/:versionNumber/restore', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const analysisRunId = Number(req.params.analysisRunId);
+    const versionNumber = Number(req.params.versionNumber);
+    if (!Number.isFinite(analysisRunId)) return res.status(400).json({ error: 'Invalid analysis run id' });
+    if (!Number.isFinite(versionNumber)) return res.status(400).json({ error: 'Invalid version number' });
+
+    const restored = await restoreAnalysisRunVersion({ analysisRunId, userId, versionNumber });
+    if (!restored) return res.status(404).json({ error: 'Analysis version not found' });
+    const versions = await listAnalysisRunVersions(analysisRunId, userId);
+    const structuredAnalysis = safeRecord(restored.outputs).structuredAnalysis ?? null;
+
+    return res.json({
+      ok: true,
+      analysisRunId,
+      versionNumber: restored.versionNumber,
+      assumptions: restored.assumptions,
+      analysisData: structuredAnalysis,
+      commentaryMarkdown: restored.commentaryMarkdown,
+      versions,
+    });
+  } catch (err: any) {
+    console.error('[analysis-runs] restore version error:', err.message);
+    return res.status(500).json({ error: 'Failed to restore analysis version' });
   }
 });
 
