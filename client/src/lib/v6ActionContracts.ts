@@ -313,6 +313,12 @@ export async function executeSurfaceAction({
     return { status: "sent_to_chat", actionId };
   }
 
+  if (actionId === "search_buyers" || actionId === "start_sourcing_run") {
+    openTab({ kind: "mode-root", modeId: "search", id: "search-root", title: "Search", pinned: true });
+    onTalkToYulia?.(promptText);
+    return { status: "opened_search_and_sent_to_chat", actionId };
+  }
+
   const modeId = modeForSurfaceAction(actionId);
   if (modeId) {
     openTab({ kind: "mode-root", modeId, id: `${modeId}-root`, title: contract.label.replace(/^Open /, ""), pinned: true });

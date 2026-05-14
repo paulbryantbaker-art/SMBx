@@ -8,13 +8,12 @@ import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
 import { DESKTOP_TEXTURES } from "../../../lib/randomTextures";
 import type { ModelPreference } from "../../../lib/modelPreference";
 import {
+  executeSurfaceAction,
   actionDealTitle,
-  generateActionDeliverable,
   pickActionDeal,
-  primaryAnalysisActionForJourney,
-  primaryDocForJourney,
-  runActionAnalysis,
+  type ActionDeal,
 } from "../../../lib/v6ActionContracts";
+import type { SurfaceActionId } from "../../../lib/v6SurfaceActions";
 
 interface PipelineDeal {
   verdict: Verdict;
@@ -54,68 +53,70 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
   const pursue = deals.filter(d => d.verdict === "pursue");
   const watch = deals.filter(d => d.verdict === "watch");
   const pass = deals.filter(d => d.verdict === "pass");
-  const actionDeal = useSampleData ? null : pickActionDeal(realDeals);
+  const selectedHomeDeal = useSampleData ? null : pickActionDeal(realDeals);
+  const actionDeal = selectedHomeDeal ? homeDealToActionDeal(selectedHomeDeal) : null;
+  const actionDeals = realDeals.map(homeDealToActionDeal);
 
   const runPipelineAction = async (action: "drafts" | "analysis" | "buyers") => {
     setActionError(null);
     setActionNote(null);
 
-    if (action === "buyers") {
-      const deal = actionDeal;
-      openTab({ id: "search-root", kind: "mode-root", modeId: "search", title: "Search" });
-      onTalkToYulia?.(deal
-        ? `Find buyers, buyer pools, lenders, and deal professionals for ${actionDealTitle(deal)}. Use the deal context and return ranked next outreach.`
-        : "Find buyers, buyer pools, lenders, and deal professionals for the most promising deal in the pipeline.");
-      return;
-    }
+    const actionConfig: Record<"drafts" | "analysis" | "buyers", {
+      actionId: SurfaceActionId;
+      error: string;
+      prompt: (deal: ActionDeal | null) => string;
+      title?: string;
+    }> = {
+      drafts: {
+        actionId: "generate_primary_deliverable",
+        error: "Could not open or generate the draft.",
+        prompt: deal => deal
+          ? `Create or open the draft Yulia thinks needs review first for ${actionDealTitle(deal)}. Use the deal context and open the deliverable surface.`
+          : "Create or open the draft Yulia thinks needs review first for the highest-priority deal.",
+      },
+      analysis: {
+        actionId: "run_market_intelligence",
+        error: "Could not run the analysis.",
+        prompt: deal => deal
+          ? `Run the deeper market read for ${actionDealTitle(deal)}. Include comps, buyer appetite, financing climate, tax/legal issues, source gaps, and next actions in an interactive canvas.`
+          : "Run the most useful market, tax/legal, buyer, and risk analysis for the highest-priority deal and open it as an interactive canvas.",
+      },
+      buyers: {
+        actionId: "search_buyers",
+        error: "Could not start the buyer search.",
+        prompt: deal => deal
+          ? `Find buyers, buyer pools, lenders, and deal professionals for ${actionDealTitle(deal)}. Use the deal context and return ranked next outreach.`
+          : "Find buyers, buyer pools, lenders, and deal professionals for the most promising deal in the pipeline.",
+        title: "Buyer search",
+      },
+    };
 
-    if (action === "drafts") {
-      const deal = actionDeal;
-      if (!deal) {
-        openTab({ kind: "deal", id: "deal-bigfake", title: "Big Fake Deal", fileScope: "all" });
-        onTalkToYulia?.("Open the draft documents that need my review.");
-        return;
-      }
-      const doc = primaryDocForJourney(journeyFromHomeDeal(deal));
-      setBusyAction(action);
-      try {
-        await generateActionDeliverable({
-          deal,
-          slug: doc.slug,
-          label: doc.label,
-          openTab,
-          modelPreference,
-          onNote: setActionNote,
-        });
-      } catch (e: any) {
-        setActionError(e?.message || "Could not open or generate the draft.");
-      } finally {
-        setBusyAction(null);
-      }
-      return;
-    }
-
+    const config = actionConfig[action];
     const deal = actionDeal;
-    if (!deal) {
-      openTab({ kind: "analysis", title: "New SBA structure analysis", tool: "tool-sba" });
-      onTalkToYulia?.("Run the most useful analysis on the active sample deal.");
+    const prompt = config.prompt(deal);
+
+    if (!deal && action !== "buyers") {
+      setActionNote("Yulia needs a live deal before she can create the work product. I sent the intent to chat instead of opening a fake surface.");
+      onTalkToYulia?.(prompt);
       return;
     }
-    const analysis = primaryAnalysisActionForJourney(journeyFromHomeDeal(deal));
+
     setBusyAction(action);
     try {
-      await runActionAnalysis({
+      await executeSurfaceAction({
+        actionId: config.actionId,
         deal,
-        analysisType: analysis.analysisType,
-        menuItemSlug: analysis.menuItemSlug,
-        label: analysis.label,
+        deals: actionDeals,
         openTab,
         modelPreference,
-        requestedFrom: "pipeline_quick_action",
+        requestedFrom: "pipeline_root_action",
+        prompt,
+        title: config.title,
         onNote: setActionNote,
+        onTalkToYulia,
       });
     } catch (e: any) {
-      setActionError(e?.message || "Could not run analysis.");
+      setActionError(e?.message || config.error);
     } finally {
       setBusyAction(null);
     }
@@ -250,6 +251,18 @@ function journeyFromHomeDeal(d: HomeDeal): string {
   if (d.current_gate?.startsWith("R")) return "raise";
   if (d.current_gate?.startsWith("P")) return "pmi";
   return "buy";
+}
+
+function homeDealToActionDeal(d: HomeDeal): ActionDeal {
+  return {
+    id: d.id,
+    business_name: d.business_name,
+    name: d.business_name || d.industry || `Deal #${d.id}`,
+    industry: d.industry,
+    location: d.location,
+    current_gate: d.current_gate,
+    journey_type: journeyFromHomeDeal(d),
+  };
 }
 
 const pipelineHeroWash = `linear-gradient(135deg, rgba(16,25,58,0.70) 0%, rgba(65,76,132,0.50) 48%, rgba(19,47,70,0.70) 100%), url('${DESKTOP_TEXTURES.pipelineHero}')`;

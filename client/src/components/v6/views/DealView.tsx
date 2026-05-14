@@ -971,6 +971,7 @@ function buildDealIntelligence({
         { label: "EARNINGS", value: fmtCents(real?.ebitda ?? real?.sde ?? null) },
       ];
 
+  const hasYuliaDealRead = !!dealBrief;
   const marketBullets = dealBrief?.marketRead?.bullets?.length
     ? dealBrief.marketRead.bullets.slice(0, 3)
     : sampleMarket
@@ -980,9 +981,9 @@ function buildDealIntelligence({
           `Transaction activity: ${sampleMarket.yoyActivity}; typical pricing ${sampleMarket.avgMultiple}.`,
         ]
       : [
-          "Generate the market intelligence read before relying on generic industry context.",
-          "Yulia should compare buyer universe, capital availability, diligence gaps, and competitive pressure.",
-          "Tax and legal implications should be framed as issue spotting before CPA/counsel sign-off.",
+          "Yulia has not produced a sourced deal read yet.",
+          "Generate the market intelligence canvas before relying on this deal page for recommendations.",
+          "Attach source files so Yulia can ground the next read in evidence.",
         ];
 
   const nextMoves = dealBrief?.nextMoves?.length
@@ -992,7 +993,8 @@ function buildDealIntelligence({
         prompt: move.prompt,
         actionId: isSurfaceActionId(move.actionId) ? move.actionId : undefined,
       }))
-    : [
+    : !real || sampleMarket
+    ? [
         {
           title: "Run the deeper market read",
           why: "Comps, buyer appetite, financing climate, and source gaps belong in the deal file.",
@@ -1011,6 +1013,26 @@ function buildDealIntelligence({
           prompt: `On ${dealName}: show me the files and deliverables that need action.`,
           actionId: "open_files_needing_action" as const,
         },
+      ]
+    : [
+        {
+          title: "Generate Yulia's deal read",
+          why: "Recommendations should come from Yulia's sourced deal brief, not static page copy.",
+          prompt: `On ${dealName}: generate the sourced deal read, then return the recommended next actions with action IDs.`,
+          actionId: "run_market_intelligence" as const,
+        },
+        {
+          title: "Open source files",
+          why: "Yulia needs the private workspace, data room, and shared files to ground the next read.",
+          prompt: `On ${dealName}: open the deal files and tell me which source materials are missing for a real read.`,
+          actionId: "open_files_all" as const,
+        },
+        {
+          title: "Ask Yulia what is missing",
+          why: "If the deal brief is unavailable, Yulia should explain the missing inputs before recommending a move.",
+          prompt: `On ${dealName}: what evidence do you need before you can recommend the next action?`,
+          actionId: "ask_yulia" as const,
+        },
       ];
 
   return {
@@ -1023,9 +1045,13 @@ function buildDealIntelligence({
     researchNeeded: dealBrief?.marketRead?.researchNeeded ?? (!dealBrief?.marketRead && !sampleMarket ? ["Generate a current market intelligence read for this deal."] : []),
     reviewLabel: dealBrief?.verdict?.label || verdict.eyebrow.replace("VERDICT · ", ""),
     reviewScore: dealBrief?.verdict?.score ?? verdict.fit,
-    reviewText: dealBrief?.verdict?.text || sampleVerdictWhy || verdict.text,
-    tax: dealBrief?.taxLegal?.tax || "Spot purchase-price allocation, rollover/earnout/seller-note timing, entity form, state tax, and working-cap effects before signing.",
-    legal: dealBrief?.taxLegal?.legal || "Spot diligence scope, data-room permissions, third-party approvals, draft/review/execute status, and counsel sign-off before external sharing.",
+    reviewText: dealBrief?.verdict?.text || sampleVerdictWhy || (hasYuliaDealRead ? verdict.text : "Yulia needs a refreshed deal brief before the page should make a deal-specific recommendation."),
+    tax: dealBrief?.taxLegal?.tax || (hasYuliaDealRead || sampleMarket
+      ? "Spot purchase-price allocation, rollover/earnout/seller-note timing, entity form, state tax, and working-cap effects before signing."
+      : "Run Yulia's tax/legal structure read before treating this as deal-specific tax or legal issue spotting."),
+    legal: dealBrief?.taxLegal?.legal || (hasYuliaDealRead || sampleMarket
+      ? "Spot diligence scope, data-room permissions, third-party approvals, draft/review/execute status, and counsel sign-off before external sharing."
+      : "Run Yulia's legal issue matrix before treating this as deal-specific legal issue spotting."),
     nextMoves,
   };
 }

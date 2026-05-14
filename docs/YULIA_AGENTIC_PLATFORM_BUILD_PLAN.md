@@ -114,6 +114,14 @@ Checkpoint B.5, May 13:
 - Added mobile handlers for contracted file, deal, document, chat, analysis, model, and governed-confirmation actions while keeping scenario sliders local to the open canvas.
 - Preserved legacy mobile action handling only as fallback for older analysis payloads without `surfaceActionId` metadata.
 
+Checkpoint B.6, May 13:
+
+- Added the recommendation attribution contract: suggested actions are Yulia recommendation objects rendered by cards, not card-authored advice.
+- Updated the shared dispatcher so search/sourcing actions open the Search surface and send the natural-language intent to Yulia, preserving chat-first behavior while still using action contracts.
+- Re-routed Pipeline quick actions through shared contracts: review drafts, run the deeper market read, and find buyers now use `generate_primary_deliverable`, `run_market_intelligence`, and `search_buyers`.
+- Removed Pipeline's fake sample fallbacks for material draft/analysis actions; when no live deal is available, the intent is sent to Yulia instead of opening an unrelated placeholder surface.
+- Updated Deal Detail real-deal fallback behavior so missing Yulia briefs produce a neutral “generate Yulia's read / open source files / ask what is missing” state instead of component-authored recommendations.
+
 ### Phase C — Analysis Workbench Completion
 
 Goal: analysis is always a canvas artifact, not chat math.
@@ -248,6 +256,17 @@ Any suggestive or judgment-bearing statement must originate from Yulia's portfol
 For logged-in users, those statements must come from live user/deal/file/analysis context through cached or fresh Yulia reads. Deterministic fallback is acceptable only as Yulia's briefing-layer fallback when the LLM or source refresh is unavailable, and it must be derived from actual user data.
 
 Static copy may describe the product, empty states, or logged-out samples, but it must not masquerade as Yulia's analysis of the user's portfolio. If the system does not have enough data to make a recommendation, the UI should say what Yulia needs next rather than inventing a card-level suggestion.
+
+### Recommendation Attribution Contract
+
+At no point should a suggested action be "something on a card." The system of record is:
+
+1. Yulia analyzes the portfolio, deal, file, market, model, tax/legal, or workflow context.
+2. Yulia emits a recommendation object with source context, confidence/freshness when available, and an executable `actionId`.
+3. The surface renders that object as a card, row, pill, or panel.
+4. Clicking the surface executes the same governed action Yulia could have chosen from chat.
+
+This applies across Today, Pipeline, Files, Search, Deal Detail, Analysis, Document Viewer, mobile, and desktop. If a surface cannot prove the recommendation came from Yulia's read, it should either become neutral navigation/product copy or ask Yulia for the read.
 
 ## Current Foundation
 
