@@ -469,7 +469,13 @@ const C: Record<string, CSSProperties> = {
     borderRadius: 18,
     padding: 10,
     border: "1px solid #D9E3EF",
-    boxShadow: "0 20px 42px rgba(31, 55, 84, 0.11), inset 0 1px 0 rgba(255,255,255,0.72)",
+    /* Shadow softened (was 0 20px 42px / 11% dark blue) — the heavy lift
+       made sense when chat was its own card lifting off the page; now that
+       the composer floats on the page bg directly, that shadow was casting
+       a noticeable darker-blue patch behind the pill ("weird color behind
+       the chat box"). Subtle elevation only — keeps the composer feeling
+       pressable without bleeding onto the page bg. */
+    boxShadow: "0 4px 12px rgba(31, 55, 84, 0.05), inset 0 1px 0 rgba(255,255,255,0.72)",
   },
   composerInput: {
     width: "100%", boxSizing: "border-box",
