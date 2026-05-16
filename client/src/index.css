@@ -202,6 +202,9 @@ input::placeholder, textarea::placeholder { color: var(--ink-4); }
   --m-secondary:            #D6A35C;
   --m-secondary-container:  #FAF1E1;
   --m-on-secondary-container: #6D4A13;
+  --m-fab-rose-gold:        #C88B78;
+  --m-fab-rose-gold-hover:  #B97869;
+  --m-fab-rose-gold-soft:   #F7E4DD;
   --m-tertiary:             #629987;
   --m-tertiary-container:   #E3EFEA;
   --m-on-tertiary-container:#214C3B;
@@ -217,7 +220,7 @@ input::placeholder, textarea::placeholder { color: var(--ink-4); }
 
   /* 60% canvas — cool deal-desk paper. Slightly bluer than document
      canvases so docs/analysis can keep the cleaner off-white stage. */
-  --m-bg:                   #F1F6FB;
+  --m-bg:                   #F8FBFE;
   --m-surface:              #F6F8FC;
   --m-surface-on-light:     #FFFFFF;
   --m-surface-tinted:       #F0F5FB;
@@ -329,15 +332,20 @@ input::placeholder, textarea::placeholder { color: var(--ink-4); }
 .m-fab {
   all: unset; display: inline-grid; place-items: center;
   width: 36px; height: 36px; border-radius: 999px;
-  background: #D8A85B; color: var(--m-on-primary);
+  background: var(--m-fab-rose-gold);
+  color: var(--m-on-primary);
   cursor: pointer;
-  box-shadow: none;
+  box-shadow: 0 10px 22px rgba(168, 95, 85, 0.18);
   transition: background 120ms ease, transform 120ms ease, box-shadow 160ms ease;
 }
-.m-fab:hover { background: #C99A50; box-shadow: none; transform: translate3d(0, -1px, 0); }
+.m-fab:hover {
+  background: var(--m-fab-rose-gold-hover);
+  box-shadow: 0 12px 26px rgba(168, 95, 85, 0.24);
+  transform: translate3d(0, -1.5px, 0);
+}
 .m-fab:active { transform: scale(0.96); }
 .m-fab:disabled { background: var(--m-surface-3); color: var(--m-on-surface-mid); cursor: not-allowed; box-shadow: none; }
-.m-fab:focus-visible { outline: 2px solid var(--m-secondary); outline-offset: 2px; }
+.m-fab:focus-visible { outline: 2px solid var(--m-fab-rose-gold); outline-offset: 2px; }
 
 /* Form controls */
 input.m-input, textarea.m-input {

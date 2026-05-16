@@ -430,7 +430,7 @@ export function enrichAnalysisWithMarketIntelligenceProfile(
       ...profile.sourceGaps.slice(0, 4).map(gap => ({
         label: String(gap.label || 'Market source gap'),
         why: String(gap.detail || gap.why || 'Yulia needs deeper source coverage before relying on this signal.'),
-        priority: (gap.priority === 'high' || gap.priority === 'medium' || gap.priority === 'low') ? gap.priority : 'medium',
+        priority: ((gap.priority === 'high' || gap.priority === 'medium' || gap.priority === 'low') ? gap.priority : 'medium') as 'high' | 'medium' | 'low',
       })),
     ],
     yuliaRead: buildProfileYuliaRead(profile),
@@ -837,7 +837,7 @@ function mapProfileRow(row: any): MarketIntelligenceProfile {
     buyerUniverse: asRecord(row.buyer_universe),
     capitalStack: asRecord(row.capital_stack),
     citations: asArray(row.citations),
-    evidenceRefs: asArray(row.evidence_refs) as AnalysisEvidenceRef[],
+    evidenceRefs: asArray(row.evidence_refs) as unknown as AnalysisEvidenceRef[],
     lastResearchedAt: toIsoString(row.last_researched_at),
     nextRefreshAt: toIsoString(row.next_refresh_at),
   };

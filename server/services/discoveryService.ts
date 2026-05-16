@@ -138,7 +138,7 @@ async function searchGooglePlaces(thesisId: number, criteria: ThesisCriteria): P
             source: 'google_places',
             sourceId: place.id,
             industry: query,
-            state: extractState(place.formattedAddress || ''),
+            state: extractState(place.formattedAddress || '') || undefined,
           });
         }
       } catch (err: any) {

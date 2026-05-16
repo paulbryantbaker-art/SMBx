@@ -37,8 +37,7 @@ export function Reveal({
   const ref = useRef<HTMLElement>(null);
   useRevealOnScroll(ref, { selector, stagger, y, duration, ease, start, repeat });
   return (
-    // @ts-expect-error — React polymorphic-as typing is verbose; Tag is a valid JSX element.
-    <Tag ref={ref} {...rest}>
+    <Tag ref={ref as any} {...rest}>
       {children}
     </Tag>
   );

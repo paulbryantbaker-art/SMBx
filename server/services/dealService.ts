@@ -187,11 +187,8 @@ export async function checkAndAutoAdvance(dealId: number): Promise<{
   const deal = await getDeal(dealId);
   if (!deal) return null;
 
-  const readiness = checkGateReadiness(deal.current_gate, deal);
+  const readiness = await checkGateReadiness(deal.current_gate, deal);
   if (!readiness.ready || !readiness.nextGate) return null;
-
-  // Don't auto-advance through paywall gates
-  if (readiness.paywallRequired) return null;
 
   // Only auto-advance if next gate is free
   if (!isGateFree(readiness.nextGate)) return null;

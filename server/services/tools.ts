@@ -19,6 +19,7 @@ import { hasDealAccess } from './dealAccessService.js';
 import { TOOL_NAMES_REQUIRING_CONFIRMATION } from './agencyActionRegistry.js';
 import { createAnalysisRun, createModelTabRecord, readAnalysisRunSnapshot, readModelTabState, updateAnalysisRunSnapshot, updateModelTabState } from './analysisRuntime.js';
 import { buildDealComparisonAnalysis, buildDeterministicAnalysis } from './deterministicAnalysisEngine.js';
+import type { DeterministicDealRow } from './deterministicAnalysisEngine.js';
 import {
   ensureMarketIntelligenceProfileForDeal,
   enrichAnalysisWithMarketIntelligenceProfile,
@@ -1135,7 +1136,7 @@ async function runAnalysis(input: Record<string, any>, userId: number, conversat
 
   const baseAnalysisData = buildDeterministicAnalysis({
     analysisType,
-    deal,
+    deal: deal as DeterministicDealRow,
     menuItemSlug,
   });
   const analysisData = enrichAnalysisWithMarketIntelligenceProfile(baseAnalysisData, marketProfile);
@@ -1476,11 +1477,11 @@ async function analyzeBuyerDemandTool(input: Record<string, any>, userId: number
 
   // Build markdown summary for canvas
   const lines: string[] = ['# Buyer Demand Analysis\n'];
-  if (result.buyerDemand) {
-    lines.push(`**Market Heat:** ${result.buyerDemand.heat || 'Moderate'}\n`);
-    if (result.buyerDemand.activeTheses) lines.push(`**Active buyer theses matching your profile:** ${result.buyerDemand.activeTheses}`);
-    if (result.buyerDemand.summary) lines.push(`\n${result.buyerDemand.summary}`);
+  lines.push(`**Market Heat:** ${result.demandSignal || 'moderate'}\n`);
+  if (result.matchingThesesCount) {
+    lines.push(`**Active buyer theses matching your profile:** ${result.matchingThesesCount}`);
   }
+  if (result.summary) lines.push(`\n${result.summary}`);
 
   return JSON.stringify({
     success: true,
@@ -2037,7 +2038,7 @@ async function rebuildAnalysisForModelUpdate(input: {
 
   const analysisData = buildDeterministicAnalysis({
     analysisType: run.analysisType,
-    deal,
+    deal: deal as DeterministicDealRow,
     menuItemSlug: run.inputPayload?.resolvedMenuItemSlug ?? null,
     assumptionOverrides: assumptionOverridesFromSavedState(run.assumptions, input.updates),
   });
@@ -2282,7 +2283,8 @@ async function queryAdminData(input: Record<string, any>, userId: number): Promi
   }
 
   const { query, timeRange = '7d', limit = 20 } = input;
-  const interval = { '24h': '24 hours', '7d': '7 days', '30d': '30 days', '90d': '90 days' }[timeRange] || '7 days';
+  const intervalMap: Record<string, string> = { '24h': '24 hours', '7d': '7 days', '30d': '30 days', '90d': '90 days' };
+  const interval = intervalMap[timeRange] || '7 days';
   const hasSubs = await tableExists('subscriptions');
 
   switch (query) {

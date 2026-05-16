@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { authHeaders, type User } from "../../../hooks/useAuth";
 import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
 import { useV6WorkspaceData, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
+import { LOGGED_OUT_HERO_COPY } from "../../../lib/copy";
 import { ART_HOUSE_TEXTURES, DESKTOP_TEXTURES } from "../../../lib/randomTextures";
 import { executeSurfaceAction, type ActionDeal } from "../../../lib/v6ActionContracts";
 import { isSurfaceActionId, type SurfaceActionId } from "../../../lib/v6SurfaceActions";
@@ -201,6 +202,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
     [liveBrief?.files, workspace.canFetch, workspace.deliverables],
   );
   const lead = deals[0] ?? null;
+  const isLoggedOutHero = !home.isAuthed;
   const leadTitle = lead?.title ?? "your first deal";
   const marketIntel = liveBrief?.marketIntelligence ?? {
     eyebrow: waitingForYuliaRead ? "YULIA READ REFRESHING" : "MARKET INTELLIGENCE LIVE",
@@ -463,13 +465,19 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
             <button
               className="m-glint m-glass-control"
               style={T.heroGlassActionSecondary}
-              onClick={() => liveBrief?.hero.secondaryDealId
-                ? openDealById(liveBrief.hero.secondaryDealId)
-                : showLoggedOutMarketing && lead
-                  ? openDeal(lead)
-                : lead
-                  ? openDeal(lead)
-                  : openTab({ kind: "mode-root", modeId: "pipeline", id: "pipeline-root", title: "Pipeline", pinned: true })}
+              onClick={() => {
+                const secondaryId = liveBrief?.hero.secondaryDealId;
+                if (secondaryId) {
+                  const matched = deals.find(d => d.id === secondaryId);
+                  openTab({ kind: "deal", id: secondaryId, title: matched?.title || liveBrief?.hero.secondaryLabel || "Deal" });
+                  return;
+                }
+                if (lead) {
+                  openDeal(lead);
+                  return;
+                }
+                openTab({ kind: "mode-root", modeId: "pipeline", id: "pipeline-root", title: "Pipeline", pinned: true });
+              }}
               type="button"
             >
               <span>{liveBrief?.hero.secondaryLabel || (showLoggedOutMarketing ? "Try sample deal" : lead ? "Open deal" : "Open pipeline")}</span>

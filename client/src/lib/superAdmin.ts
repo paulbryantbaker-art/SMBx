@@ -5,7 +5,9 @@ const SUPERADMIN_EMAILS = new Set([
   "paul.preview@smbx.ai",
 ]);
 
-export function isSuperAdminUser(user: Pick<User, "email" | "role"> | null | undefined): boolean {
+export function isSuperAdminUser(
+  user: { email: string; role?: User["role"] } | null | undefined,
+): boolean {
   if (!user) return false;
   const role = user.role?.toLowerCase();
   const email = user.email?.toLowerCase();

@@ -191,7 +191,7 @@ export function buildDeterministicAnalysis(params: {
 }
 
 export function buildDealComparisonAnalysis(deals: DeterministicDealRow[], title = 'Deal comparison'): AnalysisOutput {
-  const facts = deals.map(buildDealFacts);
+  const facts = deals.map((deal) => buildDealFacts(deal));
   const ranked = [...facts].sort((a, b) => b.fitScore - a.fitScore);
   const top = ranked[0];
 
@@ -821,7 +821,7 @@ function buildTaxLegalStructureAnalysis(facts: DealFacts, common: Partial<Analys
     ],
     risks: [
       ...commonRisks(facts),
-      { label: 'Tax/legal signoff gap', detail: 'The model can spot issues and options; final positions, filings, opinions, and executed instruments belong with licensed professionals.', severity: 'medium' },
+      { label: 'Tax/legal signoff gap', detail: 'The model can spot issues and options; final positions, filings, opinions, and executed instruments belong with licensed professionals.', severity: 'medium' as Severity },
     ].slice(0, 6),
     professionalTriggers: [...taxTriggers, ...legalTriggers].slice(0, 6),
     nextActions: [
@@ -1466,7 +1466,7 @@ function taxSensitivityScore(facts: DealFacts): number {
   if ((pctFromUnknown(facts.financials.goodwill_allocation_pct) ?? 0) >= 0.5) score += 8;
   if ((pctFromUnknown(facts.financials.asset_purchase_pct) ?? 0) >= 0.65) score += 6;
   if (/c[-\s]?corp|corporation|stock/i.test(String(facts.financials.entity_type || facts.financials.deal_structure || ''))) score += 12;
-  if (facts.location && /ca|california|ny|new york|tx|texas|fl|florida/i.test(facts.location)) score += 4;
+  if (facts.deal.location && /ca|california|ny|new york|tx|texas|fl|florida/i.test(facts.deal.location)) score += 4;
   return clamp(score, 0, 100);
 }
 

@@ -1050,7 +1050,7 @@ function readSavedStudioDrafts(): SavedStudioDraft[] {
           format,
           campaign: typeof draft.campaign === "string" ? draft.campaign : "General",
           updatedAt: typeof draft.updatedAt === "string" ? draft.updatedAt : "",
-          status: draft.status === "completed" ? "completed" : "draft",
+          status: (draft.status === "completed" ? "completed" : "draft") as "draft" | "completed",
           story: typeof draft.story === "string" ? draft.story : undefined,
           layout: isStudioLayout(draft.layout) ? draft.layout : undefined,
           texture: isStudioTexture(draft.texture) ? draft.texture : undefined,

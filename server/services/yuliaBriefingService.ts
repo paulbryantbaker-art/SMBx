@@ -322,7 +322,7 @@ export async function getDealBriefForUser(userId: number, dealId: number, forceR
     } catch (err: any) {
       status = 'failed';
       errorMessage = err.message || 'Deal brief generation failed';
-      generated = { ...fallback, intelligenceMode: 'deterministic_fallback' };
+      generated = { ...fallback, intelligenceMode: 'deterministic_fallback' } as typeof fallback;
     }
   } else if (!process.env.ANTHROPIC_API_KEY) {
     status = 'failed';

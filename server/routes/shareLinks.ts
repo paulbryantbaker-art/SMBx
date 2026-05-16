@@ -15,7 +15,7 @@ export const shareLinksRouter = Router();
 shareLinksRouter.post('/deals/:dealId/share-links', requireAuth, async (req, res) => {
   try {
     const userId = (req as any).userId;
-    const dealId = parseInt(req.params.dealId, 10);
+    const dealId = parseInt(String(req.params.dealId), 10);
     const { livingCimId, accessLevel, requiresNda, maxViews, expiresInDays } = req.body;
 
     // Verify ownership
@@ -53,7 +53,7 @@ shareLinksRouter.post('/deals/:dealId/share-links', requireAuth, async (req, res
 shareLinksRouter.get('/deals/:dealId/share-links', requireAuth, async (req, res) => {
   try {
     const userId = (req as any).userId;
-    const dealId = parseInt(req.params.dealId, 10);
+    const dealId = parseInt(String(req.params.dealId), 10);
 
     const [deal] = await sql`SELECT id FROM deals WHERE id = ${dealId} AND user_id = ${userId}`;
     if (!deal) return res.status(404).json({ error: 'Deal not found' });
@@ -78,7 +78,7 @@ shareLinksRouter.get('/deals/:dealId/share-links', requireAuth, async (req, res)
 shareLinksRouter.delete('/share-links/:linkId', requireAuth, async (req, res) => {
   try {
     const userId = (req as any).userId;
-    const linkId = parseInt(req.params.linkId, 10);
+    const linkId = parseInt(String(req.params.linkId), 10);
 
     const [revoked] = await sql`
       UPDATE cim_share_links SET revoked_at = NOW()

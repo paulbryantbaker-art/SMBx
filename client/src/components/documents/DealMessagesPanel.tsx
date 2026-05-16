@@ -66,7 +66,7 @@ export default function DealMessagesPanel({ dealId, currentUserEmail, onClose }:
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const pollRef = useRef<ReturnType<typeof setInterval>>();
+  const pollRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
 
   const fetchMessages = useCallback(async () => {
     try {

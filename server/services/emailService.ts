@@ -306,6 +306,34 @@ export async function sendDeliverableReadyEmail(userId: number, deliverableName:
   });
 }
 
+// ─── 10. REVIEW REQUEST ───
+export async function sendReviewRequestEmail(
+  reviewerEmail: string,
+  requesterName: string,
+  docTitle: string,
+  focusAreas?: string,
+): Promise<boolean> {
+  if (!reviewerEmail) return false;
+  const focusBlock = focusAreas
+    ? `<p style="margin:14px 0;padding:16px 20px;background:rgba(0,0,0,0.03);border-radius:12px;font-size:14px;color:#1A1C1E;"><strong>Focus areas:</strong> ${focusAreas}</p>`
+    : '';
+  return sendEmail({
+    to: reviewerEmail,
+    subject: `Review requested: ${docTitle}`,
+    html: brandedEmail({
+      headline: 'A document needs your review.',
+      body: `
+        <p style="margin:0 0 14px;"><strong style="color:#1A1C1E;">${requesterName}</strong> requested your review on <strong style="color:#1A1C1E;">${docTitle}</strong>.</p>
+        ${focusBlock}
+        <p style="margin:0;">Open the workspace to read it, leave comments, and approve or request changes.</p>
+      `,
+      ctaLabel: 'Open the Review',
+      ctaUrl: `${BASE_URL}/chat`,
+      footnote: 'You received this because someone routed a document review to you on smbx.ai.',
+    }),
+  });
+}
+
 // ─── TEST: Send all 9 templates to a given email ───
 export async function sendTestEmails(toEmail: string): Promise<{ sent: number; failed: number }> {
   let sent = 0, failed = 0;

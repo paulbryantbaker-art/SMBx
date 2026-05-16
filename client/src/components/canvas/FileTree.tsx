@@ -96,7 +96,7 @@ export default function FileTree({ dealId, onOpenDocument, onUpload, dark }: Fil
         setFolders(data.folders || []);
         setDocuments(data.documents || []);
         // Auto-expand folders with documents
-        const withDocs = new Set((data.documents || []).map((d: any) => d.folder_id).filter(Boolean));
+        const withDocs = new Set<number>((data.documents || []).map((d: any) => d.folder_id).filter(Boolean));
         setExpanded(withDocs);
       }
     } catch { /* ignore */ }
@@ -285,14 +285,17 @@ export default function FileTree({ dealId, onOpenDocument, onUpload, dark }: Fil
                             <span className="flex-1 truncate text-[12px]" style={{ color: dark ? '#E8E6E3' : '#1a1918' }}>
                               {doc.name}
                             </span>
-                            {doc.status && doc.status !== 'complete' && (
-                              <span
-                                className="text-[9px] font-semibold uppercase px-1 py-0.5 rounded"
-                                style={STATUS_COLORS[doc.status] || STATUS_COLORS.draft}
-                              >
-                                {doc.status}
-                              </span>
-                            )}
+                            {doc.status && doc.status !== 'complete' && (() => {
+                              const sc = STATUS_COLORS[doc.status] || STATUS_COLORS.draft;
+                              return (
+                                <span
+                                  className="text-[9px] font-semibold uppercase px-1 py-0.5 rounded"
+                                  style={{ background: sc.bg, color: sc.text }}
+                                >
+                                  {doc.status}
+                                </span>
+                              );
+                            })()}
                             <span className="text-[10px] tabular-nums shrink-0" style={{ color: dark ? '#5e5d59' : '#A9A49C' }}>
                               {timeAgo(doc.created_at)}
                             </span>

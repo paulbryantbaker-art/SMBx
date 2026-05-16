@@ -25,6 +25,29 @@ function safeWrite(res: Response, data: string): boolean {
     return false;
   }
 }
+
+/**
+ * Normalize Anthropic MessageParam[] to plain {role, content: string}[].
+ * MessageParam.content is `string | ContentBlockParam[]`; the DB only stores
+ * the rendered text string, but TS can't prove that, and downstream helpers
+ * (title generation, field extraction) want plain strings.
+ */
+function toPlainMessages(
+  msgs: Array<{ role: string; content: unknown }>,
+): Array<{ role: string; content: string }> {
+  return msgs.map((m) => {
+    let text = '';
+    if (typeof m.content === 'string') {
+      text = m.content;
+    } else if (Array.isArray(m.content)) {
+      text = m.content
+        .map((block: any) => (block && block.type === 'text' ? block.text : ''))
+        .filter(Boolean)
+        .join('\n');
+    }
+    return { role: m.role, content: text };
+  });
+}
 import { checkAndAutoAdvance, getDeal, updateDealFields, updateDealFinancials, advanceGate } from '../services/dealService.js';
 import { extractFields } from '../services/fieldExtractor.js';
 import type { ExtractedFields } from '../services/fieldExtractor.js';
@@ -682,7 +705,7 @@ chatRouter.get('/conversations', async (req, res) => {
     const userId = (req as any).userId || null;
     const sessionId = req.headers['x-session-id'] as string | undefined;
 
-    let convos;
+    let convos: any[] = [];
     if (userId) {
       convos = await sql`
         SELECT c.id, c.title, c.deal_id, c.is_archived, c.gate_status, c.gate_label, c.summary, c.created_at, c.updated_at,
@@ -917,7 +940,7 @@ chatRouter.delete('/conversations/:id', async (req, res) => {
 chatRouter.get('/deals/:dealId/gates', requireAuth, async (req, res) => {
   try {
     const userId = (req as any).userId;
-    const dealId = parseInt(req.params.dealId, 10);
+    const dealId = parseInt(String(req.params.dealId), 10);
 
     // Verify ownership
     const [deal] = await sql`
@@ -950,7 +973,7 @@ chatRouter.get('/deals/:dealId/gates', requireAuth, async (req, res) => {
 chatRouter.post('/deals/:dealId/unlock-gate', requireAuth, async (req, res) => {
   try {
     const userId = (req as any).userId;
-    const dealId = parseInt(req.params.dealId, 10);
+    const dealId = parseInt(String(req.params.dealId), 10);
     const { gate } = req.body;
 
     if (!gate) return res.status(400).json({ error: 'Gate ID required' });
@@ -986,7 +1009,7 @@ chatRouter.post('/deals/:dealId/unlock-gate', requireAuth, async (req, res) => {
 
 chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => {
   const userId = (req as any).userId;
-  const convId = parseInt(req.params.id, 10);
+  const convId = parseInt(String(req.params.id), 10);
   const { content, surfaceContext, modelPreference } = req.body ?? {};
   const normalizedModelPreference = normalizeModelPreference(modelPreference);
 
@@ -1032,7 +1055,7 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
     const [user] = await sql`SELECT id, email, display_name, league FROM users WHERE id = ${userId} LIMIT 1`;
 
     // Load deal if linked
-    let deal = null;
+    let deal: any = null;
     if (conv.deal_id) {
       const [d] = await sql`SELECT * FROM deals WHERE id = ${conv.deal_id} AND user_id = ${userId} LIMIT 1`;
       deal = d || null;
@@ -1148,7 +1171,7 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
       // ─── AI conversation naming (fire-and-forget) ─────────
       if (needsAiTitle) {
         generateConversationTitle(
-          [...messages, { role: 'assistant', content: assistantText }],
+          toPlainMessages([...messages, { role: 'assistant', content: assistantText }]),
           deal ? { business_name: deal.business_name, journey_type: deal.journey_type, industry: deal.industry } : null,
         ).then(async (title) => {
           if (title) {
@@ -1163,7 +1186,7 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
       // Extract fields from conversation and update deal, then check gate advancement
       if (deal) {
         try {
-          const allMsgs = [...messages, { role: 'assistant' as const, content: assistantText }];
+          const allMsgs = toPlainMessages([...messages, { role: 'assistant' as const, content: assistantText }]);
           const fields = await extractFields(allMsgs);
           if (fields) {
             // Load current deal values to guard against overwriting tool-saved data
@@ -1302,7 +1325,7 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
 chatRouter.post('/conversations/:id/upload', requireAuth, upload.single('file'), async (req, res) => {
   try {
     const userId = (req as any).userId;
-    const conversationId = parseInt(req.params.id, 10);
+    const conversationId = parseInt(String(req.params.id), 10);
 
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });

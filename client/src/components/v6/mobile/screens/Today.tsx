@@ -21,14 +21,14 @@ import { LibraryActivityList, LibraryPreviewCard } from "./LibrarySearch";
 import type { Verdict, YIconKind } from "../types";
 import type { MobilePipelineRow } from "../../../../hooks/useMobileDeals";
 import { useWatchlist } from "../../../../hooks/useWatchlist";
-import { copyFor } from "../../../../lib/copy";
+import { copyFor, LOGGED_OUT_HERO_COPY } from "../../../../lib/copy";
 import { type Audience } from "../../../../lib/audience";
 
 interface TodayProps {
   isAnon: boolean;
   initials: string;
   onOpenDeal: (id: string, title: string) => void;
-  onOpenLibrary: (filter?: "all" | "actionable" | "docs" | "analysis" | "data-room" | "shared" | "secure") => void;
+  onOpenLibrary: (filter?: "all" | "deals" | "actionable" | "docs" | "analysis" | "data-room" | "shared" | "secure") => void;
   onOpenLibraryDetail: (title?: string, meta?: string, kind?: string) => void;
   onChat: () => void;
   onSearch?: () => void;
@@ -325,7 +325,7 @@ function WelcomeHero({
         <div className="mb-eyebrow">WORKING SAMPLE</div>
       </div>
       <div style={H.titleBlock}>
-        <h2 style={H.h2}>Agentic AI specifically built for buying and selling businesses of all shapes and sizes.</h2>
+        <h2 style={H.h2}>{LOGGED_OUT_HERO_COPY.headline}</h2>
         <p style={H.tag}>{heroTag}</p>
       </div>
 

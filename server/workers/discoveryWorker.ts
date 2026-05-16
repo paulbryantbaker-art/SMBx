@@ -18,9 +18,9 @@ export async function startWorker(): Promise<void> {
       ssl: { rejectUnauthorized: false },
     });
 
-    boss.on('error', () => {}); // Silence queue-not-found spam
+    boss!.on('error', () => {}); // Silence queue-not-found spam
 
-    await boss.start();
+    await boss!.start();
     console.log('[worker] pg-boss started');
 
     // Register handlers — each wrapped so missing queues don't crash

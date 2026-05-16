@@ -49,7 +49,7 @@ export function V6Sidebar({
     : "Guest";
   const acctSub = user ? user.email : "Sign in to use yours";
   const initials = (() => {
-    if (!user) return "·";
+    if (!user) return "s";
     const src = user.display_name?.trim() || user.email;
     const parts = src.split(/[\s@.]+/).filter(Boolean);
     if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
@@ -389,7 +389,7 @@ function tabBelongsToMode(tab: Tab, mode: ModeId, allTabs: Tab[]): boolean {
 function groupTabsByDeal(modeTabs: Tab[]): { deals: DealTabGroup[]; loose: Tab[] } {
   const dealTabs = modeTabs.filter(tab => tab.kind === "deal");
   const used = new Set<string>();
-  const deals = dealTabs.map(deal => {
+  const deals: DealTabGroup[] = dealTabs.map(deal => {
     used.add(deal.id);
     const children = modeTabs.filter(tab => tab.kind !== "deal" && tabMatchesDeal(tab, deal));
     children.forEach(tab => used.add(tab.id));
@@ -623,18 +623,20 @@ const S: Record<string, CSSProperties> = {
   account: {
     display: "flex", alignItems: "center", gap: 10,
     padding: "12px 14px",
-    borderBottom: "1px solid #E1E8F2",
-    background: "rgba(248,251,255,0.88)",
+    borderBottom: "1px solid rgba(216,226,238,0.82)",
+    background: "rgba(255,255,255,0.58)",
+    backdropFilter: "blur(14px) saturate(150%)",
+    WebkitBackdropFilter: "blur(14px) saturate(150%)",
   },
   avatar: {
     width: 32, height: 32, borderRadius: 10,
-    background: "#1A1918",
-    color: "#FFFFFF",
+    background: "linear-gradient(145deg, #1A2233 0%, #111827 100%)",
+    color: "#F8FBFF",
     display: "grid", placeItems: "center",
     fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 12,
     letterSpacing: "-0.02em",
     flexShrink: 0,
-    boxShadow: "0 8px 18px rgba(26,34,51,0.12)",
+    boxShadow: "0 10px 22px rgba(26,34,51,0.16), inset 0 1px 0 rgba(255,255,255,0.16)",
   },
   acctName: {
     fontSize: 13, fontWeight: 600, color: "var(--m-on-surface)",
@@ -662,7 +664,8 @@ const S: Record<string, CSSProperties> = {
   },
   foot: {
     padding: "8px 8px 12px",
-    borderTop: "1px solid #E1E8F2",
+    borderTop: "1px solid rgba(216,226,238,0.82)",
+    background: "linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.36) 100%)",
     display: "flex", flexDirection: "column", gap: 2,
   },
   menu: {

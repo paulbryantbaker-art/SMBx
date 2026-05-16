@@ -702,13 +702,13 @@ export function LibraryDetailScreen({
           <button
             type="button"
             key={filter.label}
-            onClick={
-              filter.stage
-                ? () => onStageChange?.(filter.stage)
-                : filter.anchorId
-                ? () => document.getElementById(filter.anchorId)?.scrollIntoView({ behavior: "smooth", block: "start" })
-                : undefined
-            }
+            onClick={(() => {
+              const stage = filter.stage;
+              const anchorId = filter.anchorId;
+              if (stage) return () => onStageChange?.(stage);
+              if (anchorId) return () => document.getElementById(anchorId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+              return undefined;
+            })()}
             style={{
               ...S.filterChip,
               background: filter.active ? "var(--mb-ink)" : "#fff",
