@@ -464,13 +464,19 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
             <button
               className="m-glint m-glass-control"
               style={T.heroGlassActionSecondary}
-              onClick={() => liveBrief?.hero.secondaryDealId
-                ? openDealById(liveBrief.hero.secondaryDealId)
-                : isLoggedOutHero && lead
-                  ? openDeal(lead)
-                : lead
-                  ? openDeal(lead)
-                  : openTab({ kind: "mode-root", modeId: "pipeline", id: "pipeline-root", title: "Pipeline", pinned: true })}
+              onClick={() => {
+                const secondaryId = liveBrief?.hero.secondaryDealId;
+                if (secondaryId) {
+                  const matched = deals.find(d => d.id === secondaryId);
+                  openTab({ kind: "deal", id: secondaryId, title: matched?.title || liveBrief?.hero.secondaryLabel || "Deal" });
+                  return;
+                }
+                if (lead) {
+                  openDeal(lead);
+                  return;
+                }
+                openTab({ kind: "mode-root", modeId: "pipeline", id: "pipeline-root", title: "Pipeline", pinned: true });
+              }}
               type="button"
             >
               <span>{liveBrief?.hero.secondaryLabel || (isLoggedOutHero ? "Try sample deal" : lead ? "Open deal" : "Open pipeline")}</span>

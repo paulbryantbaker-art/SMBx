@@ -90,7 +90,7 @@ function safeRecord(value: Record<string, any> | undefined): Record<string, any>
   return value && typeof value === 'object' ? value : {};
 }
 
-function safeArray(value: unknown[] | undefined): unknown[] {
+function safeArray(value: unknown[] | undefined): any[] {
   return Array.isArray(value) ? value : [];
 }
 
@@ -858,6 +858,7 @@ export async function updateModelTabState(input: {
           assumptions: safeRecord(analysisRun.assumptions),
           outputs: safeRecord(analysisRun.outputs),
           commentaryMarkdown: analysisRun.commentary_markdown ?? null,
+          evidence: [],
         },
         versionNumber: Number(analysisRun.version_number ?? 1),
       };

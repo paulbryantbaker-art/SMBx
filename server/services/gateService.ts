@@ -5,7 +5,7 @@
  * determines the completion deliverable, and advances the gate.
  */
 import postgres from 'postgres';
-import { checkGateReadiness } from './gateReadinessService.js';
+import { checkGateReadinessSync } from './gateReadinessService.js';
 
 const sql = postgres(process.env.DATABASE_URL!, {
   ssl: 'require',
@@ -47,7 +47,7 @@ export function checkAnonymousGateAdvancement(
 
   // Build a deal-like object that the existing gate checker understands
   const dealLike = buildDealLikeFromExtracted(extractedData, journey, league);
-  const readiness = checkGateReadiness(currentGate, dealLike);
+  const readiness = checkGateReadinessSync(currentGate, dealLike);
 
   if (!readiness.ready || !readiness.nextGate) {
     return { shouldAdvance: false, nextGate: null, completionDeliverable: null };

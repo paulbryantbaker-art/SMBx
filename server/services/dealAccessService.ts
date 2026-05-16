@@ -45,7 +45,7 @@ export async function hasDealAccess(dealId: number, userId: number): Promise<Dea
     SELECT role, access_level, folder_scope FROM deal_participants
     WHERE deal_id = ${dealId} AND user_id = ${userId} AND accepted_at IS NOT NULL
   `;
-  return participant || null;
+  return (participant as DealAccess | undefined) || null;
 }
 
 /** Get folder IDs visible to a given role/access.

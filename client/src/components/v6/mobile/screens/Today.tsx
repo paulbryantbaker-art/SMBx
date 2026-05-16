@@ -28,7 +28,7 @@ interface TodayProps {
   isAnon: boolean;
   initials: string;
   onOpenDeal: (id: string, title: string) => void;
-  onOpenLibrary: (filter?: "all" | "actionable" | "docs" | "analysis" | "data-room" | "shared" | "secure") => void;
+  onOpenLibrary: (filter?: "all" | "deals" | "actionable" | "docs" | "analysis" | "data-room" | "shared" | "secure") => void;
   onOpenLibraryDetail: (title?: string, meta?: string, kind?: string) => void;
   onChat: () => void;
   onSearch?: () => void;

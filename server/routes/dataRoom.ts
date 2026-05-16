@@ -346,7 +346,7 @@ dataRoomRouter.patch('/deliverable-comments/:commentId/resolve', async (req, res
 dataRoomRouter.post('/data-room/:dealId/upload', upload.single('file'), async (req, res) => {
   try {
     const userId = (req as any).userId;
-    const dealId = parseInt(req.params.dealId, 10);
+    const dealId = parseInt(String(req.params.dealId), 10);
     const file = req.file;
 
     if (!file) return res.status(400).json({ error: 'No file provided' });

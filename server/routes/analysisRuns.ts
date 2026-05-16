@@ -7,6 +7,7 @@ import {
   updateAnalysisRunSnapshot,
 } from '../services/analysisRuntime.js';
 import { buildDealComparisonAnalysis, buildDeterministicAnalysis } from '../services/deterministicAnalysisEngine.js';
+import type { DeterministicDealRow } from '../services/deterministicAnalysisEngine.js';
 import { sql } from '../db.js';
 
 export const analysisRunsRouter = Router();
@@ -218,7 +219,7 @@ async function rebuildStructuredAnalysis(input: {
 
   return deal ? buildDeterministicAnalysis({
     analysisType: current.analysisType,
-    deal,
+    deal: deal as DeterministicDealRow,
     menuItemSlug: current.inputPayload?.resolvedMenuItemSlug ?? null,
     assumptionOverrides: assumptionOverridesFromSnapshot(current.assumptions, updates),
   }) : null;
@@ -251,7 +252,7 @@ analysisRunsRouter.post('/deals/:dealId/analysis', async (req, res) => {
         });
     const analysisData = buildDeterministicAnalysis({
       analysisType,
-      deal,
+      deal: deal as DeterministicDealRow,
       menuItemSlug,
       assumptionOverrides: safeRecord(req.body?.assumptionOverrides),
     });
@@ -338,7 +339,7 @@ analysisRunsRouter.post('/deals/compare', async (req, res) => {
     `;
 
     const rowById = new Map(rows.map((row: any) => [Number(row.id), row]));
-    const deals = dealIds.map(id => rowById.get(id)).filter(Boolean);
+    const deals = dealIds.map((id: number) => rowById.get(id)).filter(Boolean);
     if (deals.length < 2) {
       return res.status(404).json({ error: 'Could not find at least two owned deals to compare' });
     }

@@ -1,3 +1,4 @@
+import type React from 'react';
 import { useState, useMemo } from 'react';
 import { useLocation } from 'wouter';
 import Logo from '../public/Logo';
@@ -54,7 +55,7 @@ function formatShortTime(iso: string): string {
   return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
-const NAV_ITEMS: { id: TabId; label: string; icon: JSX.Element }[] = [
+const NAV_ITEMS: { id: TabId; label: string; icon: React.ReactNode }[] = [
   {
     id: 'sell',
     label: 'Sell a Business',

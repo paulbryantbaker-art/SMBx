@@ -39,7 +39,7 @@ stripeRouter.get('/subscription', async (req, res) => {
     const plan = await getUserPlan(userId);
     const planInfo = PLANS[plan];
     const subscription = await getSubscription(userId);
-    return res.json({ plan, ...planInfo, subscription });
+    return res.json({ ...planInfo, plan, subscription });
   } catch (err: any) {
     console.error('Get subscription error:', err.message);
     return res.status(500).json({ error: 'Failed to get subscription' });
@@ -53,7 +53,7 @@ stripeRouter.get('/plan', async (req, res) => {
   try {
     const plan = await getUserPlan(userId);
     const planInfo = PLANS[plan];
-    return res.json({ plan, ...planInfo });
+    return res.json({ ...planInfo, plan });
   } catch (err: any) {
     return res.status(500).json({ error: 'Failed to get plan' });
   }
