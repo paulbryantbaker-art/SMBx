@@ -611,14 +611,16 @@ function docLaneForTab(tab: Tab): string {
 const S: Record<string, CSSProperties> = {
   rail: {
     flexShrink: 0,
-    background: "linear-gradient(180deg, rgba(225,236,247,0.98) 0%, rgba(214,229,242,0.98) 100%)",
-    border: "1px solid rgba(197, 214, 230, 0.82)",
-    borderRadius: 22,
+    /* Card chrome (bg, border, radius, shadow) moved up to V6App's
+       A.leftRail wrapper — Sidebar + chat share one surface (Canva
+       pattern). This column is transparent so the rail bg shows
+       through. Width transition + overflow + z-index stay; those are
+       layout concerns, not visual chrome. */
+    background: "transparent",
     display: "flex", flexDirection: "column", height: "100%",
     transition: "width 260ms cubic-bezier(0.16, 1, 0.3, 1)",
     overflow: "hidden",
     position: "relative", zIndex: 5,
-    boxShadow: "0 22px 54px rgba(38, 59, 84, 0.10)",
   },
   account: {
     display: "flex", alignItems: "center", gap: 10,

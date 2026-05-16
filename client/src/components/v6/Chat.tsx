@@ -446,12 +446,13 @@ function emptyCopy(modeLabel: string): { title: string; body: ReactNode; eyebrow
 
 const C: Record<string, CSSProperties> = {
   chat: {
-    background: "linear-gradient(180deg, #EEF5FB 0%, #E8F1F8 46%, #DFEBF5 100%)",
-    border: "1px solid rgba(205, 220, 235, 0.86)",
-    borderRadius: "inherit",
+    /* Card chrome (own gradient bg, border, radius, inset highlights)
+       moved up to V6App's A.leftRail — Sidebar + chat share one surface
+       now. This column is transparent so the rail bg shows through.
+       Only layout properties (flex/overflow/min-height) remain. */
+    background: "transparent",
     overflow: "hidden",
     display: "flex", flexDirection: "column", minHeight: 0, height: "100%",
-    boxShadow: "inset 1px 0 0 rgba(255,255,255,0.58), inset -1px 0 0 rgba(196,213,231,0.82)",
   },
   chatHead: {
     height: 58, flexShrink: 0, padding: "0 14px",

@@ -423,32 +423,36 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
   return (
     <div className="v6-root" style={A.shell}>
       <div style={A.row}>
-        <V6Sidebar
-          activeMode={activeMode}
-          tabs={tabs}
-          activeTabId={activeTabId}
-          onPickMode={pickMode}
-          onPickTab={activateTab}
-          onCloseTab={closeTab}
-          onOpenTab={openTab}
-          user={user}
-          onSignIn={() => {
-            if (DEV_AUTH_BYPASS) {
-              onDevSignIn?.();
-              return;
-            }
-            navigate("/login");
-          }}
-          onSignUp={() => {
-            if (DEV_AUTH_BYPASS) {
-              onDevSignIn?.();
-              return;
-            }
-            navigate("/signup");
-          }}
-          onSignOut={onSignOut}
-        />
-        <main style={A.main}>
+        {/* Unified left rail — Canva pattern. Sidebar (modes + tab tree) and
+            chat share one background surface. The hairline divider between
+            them sits on the chatPane left edge. Drag handle stays OUTSIDE
+            the rail so resize semantics target the chat width, not the rail. */}
+        <div style={A.leftRail}>
+          <V6Sidebar
+            activeMode={activeMode}
+            tabs={tabs}
+            activeTabId={activeTabId}
+            onPickMode={pickMode}
+            onPickTab={activateTab}
+            onCloseTab={closeTab}
+            onOpenTab={openTab}
+            user={user}
+            onSignIn={() => {
+              if (DEV_AUTH_BYPASS) {
+                onDevSignIn?.();
+                return;
+              }
+              navigate("/login");
+            }}
+            onSignUp={() => {
+              if (DEV_AUTH_BYPASS) {
+                onDevSignIn?.();
+                return;
+              }
+              navigate("/signup");
+            }}
+            onSignOut={onSignOut}
+          />
           <div style={{ ...A.chatPane, width: chatWidth }}>
             <V6Chat
               thread={chat.thread}
@@ -468,25 +472,25 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
               onCancelStagedAction={chat.cancelStagedAction}
             />
           </div>
-          <div onMouseDown={onDragStart} title="Drag to resize chat" role="separator" aria-orientation="vertical" style={A.dragHandle}>
-            <div style={A.dragGrip} />
-          </div>
-          <div style={A.canvasPane}>
-            <V6Canvas
-              tabs={tabs}
-              activeTabId={activeTabId}
-              setActiveTabId={setActiveTabId}
-              openTab={openTab}
-              closeTab={closeTab}
-              reorderTabs={reorderTabs}
-              onPickMode={pickMode}
-              onTalkToYulia={(prompt) => send(prompt)}
-              user={user}
-              onSignOut={onSignOut}
-              modelPreference={modelPreference}
-            />
-          </div>
-        </main>
+        </div>
+        <div onMouseDown={onDragStart} title="Drag to resize chat" role="separator" aria-orientation="vertical" style={A.dragHandle}>
+          <div style={A.dragGrip} />
+        </div>
+        <div style={A.canvasPane}>
+          <V6Canvas
+            tabs={tabs}
+            activeTabId={activeTabId}
+            setActiveTabId={setActiveTabId}
+            openTab={openTab}
+            closeTab={closeTab}
+            reorderTabs={reorderTabs}
+            onPickMode={pickMode}
+            onTalkToYulia={(prompt) => send(prompt)}
+            user={user}
+            onSignOut={onSignOut}
+            modelPreference={modelPreference}
+          />
+        </div>
       </div>
     </div>
   );
@@ -648,21 +652,33 @@ const A: Record<string, CSSProperties> = {
     padding: 8,
     boxSizing: "border-box",
   },
-  main: {
-    flex: 1,
-    minWidth: 0,
-    display: "flex",
-    gap: 8,
+  /* Unified left rail — Sidebar (modes + tab tree) and chat live on
+     ONE surface (Canva pattern). The rail owns the bg/radius/shadow;
+     inner children (V6Sidebar, chatPane) are transparent so the rail
+     bg shows through cleanly. Hairline divider lives on chatPane's
+     left edge so the eye gets an anchor at the icon/chat boundary. */
+  leftRail: {
+    flexShrink: 0,
     minHeight: 0,
+    display: "flex",
+    /* Sidebar gradient (more substantial blue) wins over chat's slightly
+       lighter gradient — this is the rail surface for the whole left
+       side of the workspace. */
+    background: "linear-gradient(180deg, rgba(225,236,247,0.98) 0%, rgba(214,229,242,0.98) 100%)",
+    border: "1px solid rgba(197, 214, 230, 0.82)",
+    borderRadius: 22,
+    overflow: "hidden",
+    boxShadow: "0 22px 56px rgba(38, 59, 84, 0.12)",
   },
   chatPane: {
     flexShrink: 0,
     minWidth: 0,
     display: "flex",
     flexDirection: "column",
-    borderRadius: 22,
-    overflow: "hidden",
-    boxShadow: "0 22px 56px rgba(38, 59, 84, 0.12)",
+    /* Card chrome (bg, radius, shadow) moved up to A.leftRail. This pane
+       just provides the layout slot. Hairline divider anchors the
+       icon/chat boundary inside the unified rail. */
+    borderLeft: "1px solid rgba(60, 60, 67, 0.06)",
   },
   canvasPane: {
     flex: 1,
