@@ -27,7 +27,7 @@ export interface TipChip {
 }
 
 export interface Copy {
-  /** Today screen — subtitle under the welcome hero, both anon and authed. */
+  /** Today screen — logged-out subtitle under the welcome hero. */
   todayHeroTag: string;
 
   /** Today screen — eyebrow over the daily intel section. */
@@ -50,6 +50,12 @@ export interface Copy {
   todayTips: TipChip[];
 }
 
+export const LOGGED_OUT_HERO_COPY = {
+  headline: "Connect sourcing, diligence, execution, and value creation in one workflow.",
+  tagline:
+    "smbX.ai connects institutional deal intelligence, workflow execution, and continuous transaction context across the deal lifecycle — from sourcing and diligence through post-close value realization.",
+};
+
 /* ─── COPY TABLE ────────────────────────────────────────────
    Four journeys, each with hero tag, intel section, brief teaser, and
    three tip chips. Designed to be uniform shape — buy/sell/raise/pmi all
@@ -58,8 +64,7 @@ export interface Copy {
 const COPY: Record<Audience, Copy> = {
   /* ─── Buying a business ─── */
   buy: {
-    todayHeroTag:
-      "Yulia scores every deal you look at, models the financing, and tells you which ones are worth your weekend.",
+    todayHeroTag: LOGGED_OUT_HERO_COPY.tagline,
     todayIntelEyebrow: "VIEW SAMPLE · IN PIPELINE",
     todayIntelTitle: "5 deals Yulia is working",
     todayIntelSub: "Tap any to see what Yulia delivered — verdict, recast, drafts.",
@@ -75,8 +80,7 @@ const COPY: Record<Audience, Copy> = {
 
   /* ─── Selling a business ─── */
   sell: {
-    todayHeroTag:
-      "Yulia is the smart friend who's done this before. She'll tell you what your business is worth, what to fix before listing, and how to read a buyer's first IOI without paying $25K to find out.",
+    todayHeroTag: LOGGED_OUT_HERO_COPY.tagline,
     todayIntelEyebrow: "VIEW SAMPLE · BUYER INTEREST",
     todayIntelTitle: "Where your sale stands",
     todayIntelSub: "Buyer activity, signals from Yulia, and what to push on this week.",
@@ -92,8 +96,7 @@ const COPY: Record<Audience, Copy> = {
 
   /* ─── Raising capital (minority stake / growth equity) ─── */
   raise: {
-    todayHeroTag:
-      "Yulia builds the pitch deck, screens the right investors, and runs the round end-to-end so you stay focused on operating the business.",
+    todayHeroTag: LOGGED_OUT_HERO_COPY.tagline,
     todayIntelEyebrow: "VIEW SAMPLE · INVESTOR INTEREST",
     todayIntelTitle: "Where your round stands",
     todayIntelSub: "Soft-circled commitments, term sheet variance, and what to push on this week.",
@@ -109,8 +112,7 @@ const COPY: Record<Audience, Copy> = {
 
   /* ─── PMI — post-close integration ─── */
   pmi: {
-    todayHeroTag:
-      "Yulia is the chief of staff for your first 100 days. Stabilization checklists, system migrations, customer comms — Yulia tracks the work and flags the risks.",
+    todayHeroTag: LOGGED_OUT_HERO_COPY.tagline,
     todayIntelEyebrow: "VIEW SAMPLE · INTEGRATION",
     todayIntelTitle: "Day N — integration health",
     todayIntelSub: "What's stabilized, what's at risk, and what's worth your attention today.",

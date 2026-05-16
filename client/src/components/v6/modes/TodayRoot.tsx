@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { authHeaders, type User } from "../../../hooks/useAuth";
 import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
 import { useV6WorkspaceData, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
+import { LOGGED_OUT_HERO_COPY } from "../../../lib/copy";
 import { DESKTOP_TEXTURES } from "../../../lib/randomTextures";
 import { executeSurfaceAction, type ActionDeal } from "../../../lib/v6ActionContracts";
 import { isSurfaceActionId, type SurfaceActionId } from "../../../lib/v6SurfaceActions";
@@ -200,6 +201,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
     [liveBrief?.files, workspace.canFetch, workspace.deliverables],
   );
   const lead = deals[0] ?? null;
+  const isLoggedOutHero = !home.isAuthed;
   const leadTitle = lead?.title ?? "your first deal";
   const marketIntel = liveBrief?.marketIntelligence ?? {
     eyebrow: waitingForYuliaRead ? "YULIA READ REFRESHING" : "MARKET INTELLIGENCE LIVE",
@@ -219,6 +221,21 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   };
   const heroNotes = liveBrief?.hero.notes?.length
     ? liveBrief.hero.notes
+    : isLoggedOutHero
+      ? [
+          {
+            label: "Sourcing",
+            text: "Find targets, buyers, lenders, and advisors from a plain-English thesis.",
+          },
+          {
+            label: "Diligence",
+            text: "Connect market intelligence, files, tax/legal issues, and work product in one context.",
+          },
+          {
+            label: "Execution",
+            text: "Carry every decision through close and into post-close value realization.",
+          },
+        ]
     : waitingForYuliaRead
       ? [
           {
@@ -397,7 +414,9 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           </div>
 
           <h1 style={T.headline}>
-            {liveBrief?.hero.title || (waitingForYuliaRead ? (
+            {liveBrief?.hero.title || (isLoggedOutHero ? (
+              LOGGED_OUT_HERO_COPY.headline
+            ) : waitingForYuliaRead ? (
               <>Yulia is refreshing <span style={T.headlineSerif}>your portfolio read</span>.</>
             ) : lead ? (
               <>Yulia's read: <span style={T.headlineSerif}>{leadTitle}</span> needs your eye before the next buyer touch.</>
@@ -407,7 +426,9 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           </h1>
 
           <p style={T.lede}>
-            {liveBrief?.hero.lede || (waitingForYuliaRead
+            {liveBrief?.hero.lede || (isLoggedOutHero
+              ? LOGGED_OUT_HERO_COPY.tagline
+              : waitingForYuliaRead
               ? "The page is holding the surface, but the recommendation copy belongs to Yulia's briefing layer. When it returns, the cards below will reflect her sourced read."
               : lead
               ? "The deal is still worth pursuing. Review the IOI, answer counsel on the NDA, and keep the buyer search narrow until working capital is buttoned up."
@@ -426,6 +447,8 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
               style={T.heroGlassAction}
               onClick={() => liveBrief?.hero.primaryPrompt
                 ? ask(liveBrief.hero.primaryPrompt)
+                : isLoggedOutHero
+                  ? ask("Show me how smbx.ai connects sourcing, diligence, execution, and value creation in one workflow.")
                 : lead
                   ? openDoc(`${lead.title} · IOI v3`)
                   : ask("Help me start my first SMBx deal workspace.")}
@@ -433,22 +456,24 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
             >
               <span style={T.yTile}>Y</span>
               <span style={T.heroActionCopy}>
-                <strong>{liveBrief?.hero.primaryLabel || (lead ? "Review IOI" : "Start with Yulia")}</strong>
-                <span>{lead ? "Open the work product Yulia wants reviewed first." : "Chat first; Yulia will build the surface around the deal."}</span>
+                <strong>{liveBrief?.hero.primaryLabel || (isLoggedOutHero ? "Ask Yulia" : lead ? "Review IOI" : "Start with Yulia")}</strong>
+                <span>{isLoggedOutHero ? "Tell her the deal goal; she builds the workflow around it." : lead ? "Open the work product Yulia wants reviewed first." : "Chat first; Yulia will build the surface around the deal."}</span>
               </span>
-              <span style={T.heroActionPill}>{lead ? "Open" : "Start"}</span>
+              <span style={T.heroActionPill}>{isLoggedOutHero ? "Ask" : lead ? "Open" : "Start"}</span>
             </button>
             <button
               className="m-glint m-glass-control"
               style={T.heroGlassActionSecondary}
               onClick={() => liveBrief?.hero.secondaryDealId
                 ? openDealById(liveBrief.hero.secondaryDealId)
+                : isLoggedOutHero && lead
+                  ? openDeal(lead)
                 : lead
                   ? openDeal(lead)
                   : openTab({ kind: "mode-root", modeId: "pipeline", id: "pipeline-root", title: "Pipeline", pinned: true })}
               type="button"
             >
-              <span>{liveBrief?.hero.secondaryLabel || (lead ? "Open deal" : "Open pipeline")}</span>
+              <span>{liveBrief?.hero.secondaryLabel || (isLoggedOutHero ? "Try sample deal" : lead ? "Open deal" : "Open pipeline")}</span>
               <span aria-hidden="true">›</span>
             </button>
           </div>

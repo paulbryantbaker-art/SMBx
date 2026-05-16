@@ -446,15 +446,18 @@ function emptyCopy(modeLabel: string): { title: string; body: ReactNode; eyebrow
 
 const C: Record<string, CSSProperties> = {
   chat: {
-    background: "linear-gradient(180deg, #F5F8FC 0%, #EEF4FA 100%)",
-    borderRight: "1px solid #DCE6F1",
+    background: "linear-gradient(180deg, #EEF5FB 0%, #E8F1F8 46%, #DFEBF5 100%)",
+    borderRight: "1px solid rgba(193,211,229,0.96)",
     display: "flex", flexDirection: "column", minHeight: 0, height: "100%",
+    boxShadow: "inset 1px 0 0 rgba(255,255,255,0.58), inset -1px 0 0 rgba(196,213,231,0.82)",
   },
   chatHead: {
     height: 58, flexShrink: 0, padding: "0 14px",
     display: "flex", alignItems: "center", justifyContent: "flex-end",
-    borderBottom: "1px solid #E1E8F2",
-    background: "rgba(248,251,255,0.88)",
+    borderBottom: "1px solid rgba(202,216,232,0.86)",
+    background: "rgba(246,250,253,0.58)",
+    backdropFilter: "blur(14px) saturate(150%)",
+    WebkitBackdropFilter: "blur(14px) saturate(150%)",
   },
   chatBody: { flex: 1, overflowY: "auto", padding: "18px 14px" },
   composer: {
@@ -463,7 +466,7 @@ const C: Record<string, CSSProperties> = {
     borderRadius: 18,
     padding: 10,
     border: "1px solid #D9E3EF",
-    boxShadow: "0 18px 38px rgba(26, 34, 51, 0.10)",
+    boxShadow: "0 20px 42px rgba(31, 55, 84, 0.11), inset 0 1px 0 rgba(255,255,255,0.72)",
   },
   composerInput: {
     width: "100%", boxSizing: "border-box",
