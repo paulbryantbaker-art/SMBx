@@ -457,10 +457,10 @@ const C: Record<string, CSSProperties> = {
   chatHead: {
     height: 58, flexShrink: 0, padding: "0 14px",
     display: "flex", alignItems: "center", justifyContent: "flex-end",
-    borderBottom: "1px solid rgba(202,216,232,0.86)",
-    background: "rgba(246,250,253,0.58)",
-    backdropFilter: "blur(14px) saturate(150%)",
-    WebkitBackdropFilter: "blur(14px) saturate(150%)",
+    /* Frosted backdrop + bottom border removed — sidebar + chat now sit
+       directly on the page bg (Canva pattern). The Auto/History/Share
+       buttons float on the page gradient like everything else. */
+    background: "transparent",
   },
   chatBody: { flex: 1, overflowY: "auto", padding: "18px 14px" },
   composer: {
