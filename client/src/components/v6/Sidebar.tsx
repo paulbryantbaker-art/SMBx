@@ -666,8 +666,10 @@ const S: Record<string, CSSProperties> = {
   },
   foot: {
     padding: "8px 8px 12px",
-    borderTop: "1px solid rgba(216,226,238,0.82)",
-    background: "linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.36) 100%)",
+    /* Top border + white-fade gradient removed — was creating an awkward
+       lighter patch at the bottom of the sidebar column that read as a
+       "weird color block" against the page bg. Footer icons (history,
+       settings) now float on the page gradient like the rest of the rail. */
     display: "flex", flexDirection: "column", gap: 2,
   },
   menu: {
