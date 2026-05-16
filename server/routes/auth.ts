@@ -1,16 +1,13 @@
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
-import postgres from 'postgres';
 import { requireAuth, signToken } from '../middleware/auth.js';
 import { sendEmail, sendWelcomeEmail, brandedEmail } from '../services/emailService.js';
+import { createSql } from '../dbConfig.js';
 
 const BCRYPT_ROUNDS = 12;
 
-const sql = postgres(process.env.DATABASE_URL!, {
-  ssl: 'require',
-  prepare: false,
-});
+const sql = createSql();
 
 export const authRouter = Router();
 
@@ -39,7 +36,7 @@ authRouter.post('/register', async (req, res) => {
     const [user] = await sql`
       INSERT INTO users (email, password, display_name, trial_ends_at)
       VALUES (${emailLower}, ${hashedPassword}, ${displayName || emailLower}, NOW() + INTERVAL '90 days')
-      RETURNING id, email, display_name, google_id, league, role, created_at, updated_at
+      RETURNING id, email, display_name, google_id, league, role, is_advisor, plan, trial_ends_at, free_deliverable_used, email_verified, created_at, updated_at
     `;
 
     // Fire-and-forget welcome email
@@ -97,7 +94,7 @@ authRouter.get('/me', requireAuth, async (req, res) => {
   try {
     const userId = (req as any).userId;
     const [user] = await sql`
-      SELECT id, email, display_name, google_id, league, role, email_verified, created_at, updated_at
+      SELECT id, email, display_name, google_id, league, role, is_advisor, plan, trial_ends_at, free_deliverable_used, email_verified, created_at, updated_at
       FROM users WHERE id = ${userId} LIMIT 1
     `;
     if (!user) {
@@ -153,7 +150,7 @@ authRouter.post('/google', async (req, res) => {
 
     // Check if user exists by google_id or email
     let [user] = await sql`
-      SELECT id, email, display_name, google_id, league, role, created_at, updated_at
+      SELECT id, email, display_name, google_id, league, role, is_advisor, plan, trial_ends_at, free_deliverable_used, email_verified, created_at, updated_at
       FROM users WHERE google_id = ${googleId} OR email = ${emailLower}
       LIMIT 1
     `;
@@ -169,7 +166,7 @@ authRouter.post('/google', async (req, res) => {
       [user] = await sql`
         INSERT INTO users (email, google_id, display_name, trial_ends_at)
         VALUES (${emailLower}, ${googleId}, ${name || emailLower}, NOW() + INTERVAL '90 days')
-        RETURNING id, email, display_name, google_id, league, role, created_at, updated_at
+        RETURNING id, email, display_name, google_id, league, role, is_advisor, plan, trial_ends_at, free_deliverable_used, email_verified, created_at, updated_at
       `;
 
     }
@@ -274,7 +271,7 @@ authRouter.post('/reset-password', async (req, res) => {
 
     const jwtToken = signToken(resetToken.user_id);
     const [user] = await sql`
-      SELECT id, email, display_name, google_id, league, role, created_at, updated_at
+      SELECT id, email, display_name, google_id, league, role, is_advisor, plan, trial_ends_at, free_deliverable_used, email_verified, created_at, updated_at
       FROM users WHERE id = ${resetToken.user_id}
     `;
 

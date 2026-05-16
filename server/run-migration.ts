@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import fs from 'fs';
 import postgres from 'postgres';
+import { getDatabaseUrl, getPostgresOptions } from './dbConfig.js';
 
 const file = process.argv[2];
 if (!file) {
@@ -8,7 +9,7 @@ if (!file) {
   process.exit(1);
 }
 
-const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require' });
+const sql = postgres(getDatabaseUrl(), getPostgresOptions());
 const migration = fs.readFileSync(file, 'utf8');
 
 // Strip single-line comments, then split on semicolons

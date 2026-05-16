@@ -21,10 +21,7 @@ export function V6Sidebar({
   activeMode, tabs, activeTabId, onPickMode, onPickTab, onCloseTab, onOpenTab,
   user, onSignIn, onSignUp, onSignOut,
 }: SidebarProps) {
-  const [hover, setHover] = useState(false);
-  const [pinned, setPinned] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const expanded = pinned || hover || menuOpen;
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Click outside to close account menu
@@ -56,299 +53,196 @@ export function V6Sidebar({
     return src.slice(0, 2).toUpperCase();
   })();
 
-  return (
-    <aside
-      className={`workspace-rail ${expanded ? "expanded" : "collapsed"}`}
-      style={{ ...S.rail, width: expanded ? 332 : 56 }}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => {
-        setHover(false);
-      }}
-    >
-      <div ref={menuRef} style={{ ...S.account, padding: expanded ? "12px 14px" : "12px 0", justifyContent: expanded ? "flex-start" : "center", position: "relative" }}>
+  const renderWorkRow = (tab: Tab, options: { child?: boolean; parentTitle?: string } = {}) => {
+    const active = tab.id === activeTabId;
+    const parentDeal = options.parentTitle ? null : owningDealForTab(tab, tabs);
+    const dealContext = options.parentTitle ?? parentDeal?.title ?? inferredDealNameForTab(tab);
+    const label = dealContext ? childTabTitle(tab, dealContext) : tab.title;
+    return (
+      <div
+        key={tab.id}
+        className={`module-work-row ${options.child ? "child" : "parent"} ${active ? "active" : ""}`}
+        role="listitem"
+      >
         <button
-          className="m-state"
-          style={{ ...S.avatar, cursor: "pointer", border: "none" }}
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label={user ? "Account menu" : "Sign in or sign up"}
-          aria-expanded={menuOpen}
-        >{initials}</button>
-        {expanded && (
-          <>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={S.acctName}>{acctName}</div>
-              <div style={S.acctSub}>{acctSub}</div>
-            </div>
-            <button
-              className="m-state"
-              style={S.chevBtn}
-              title={pinned ? "Unpin sidebar" : "Pin sidebar"}
-              aria-label={pinned ? "Unpin sidebar" : "Pin sidebar"}
-              aria-pressed={pinned}
-              onClick={() => setPinned(!pinned)}
-            >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                {pinned
-                  ? <path d="M9 4.5l-3-3-3 3M9 7.5l-3 3-3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  : <path d="M3 4.5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>}
-              </svg>
-            </button>
-          </>
-        )}
-
-        {menuOpen && expanded && (
-          <div role="menu" style={S.menu} className="m-fade-in">
-            {isAnon ? (
-              <>
-                <button role="menuitem" className="m-state" style={S.menuItem} onClick={() => { setMenuOpen(false); onSignIn(); }}>
-                  Sign in
-                </button>
-                <button role="menuitem" className="m-state" style={S.menuItem} onClick={() => { setMenuOpen(false); onSignUp(); }}>
-                  Create account
-                </button>
-                <div style={S.menuDivider} />
-                <div style={S.menuFooter}>
-                  Free tier · unlimited chat · 1 deliverable
-                </div>
-              </>
-            ) : (
-              <>
-                <div style={S.menuHeader}>
-                  <div style={S.menuName}>{acctName}</div>
-                  <div style={S.menuEmail}>{user.email}</div>
-                </div>
-                <div style={S.menuDivider} />
-                <button
-                  role="menuitem"
-                  className="m-state"
-                  style={S.menuItem}
-                  onClick={() => {
-                    setMenuOpen(false);
-                    onOpenTab({ id: "tab-settings", kind: "settings", title: "Settings" });
-                  }}
-                >
-                  Profile
-                </button>
-                <button
-                  role="menuitem"
-                  className="m-state"
-                  style={S.menuItem}
-                  onClick={() => {
-                    setMenuOpen(false);
-                    onOpenTab({ id: "tab-settings", kind: "settings", title: "Settings" });
-                  }}
-                >
-                  Settings
-                </button>
-                <div style={S.menuDivider} />
-                <button role="menuitem" className="m-state" style={{ ...S.menuItem, color: "var(--m-pass)" }} onClick={() => { setMenuOpen(false); onSignOut(); }}>
-                  Sign out
-                </button>
-              </>
-            )}
-          </div>
-        )}
+          className="module-work-item"
+          onClick={() => onPickTab(tab.id)}
+          title={tab.title}
+        >
+          <span className="module-work-icon"><V6Icon name={tabIcon(tab)} size={options.child ? 11 : 12} /></span>
+          <span className="module-work-copy">
+            <span className="module-work-title">{label}</span>
+            <span className="module-work-meta">{tabMeta(tab, tabs, Boolean(options.parentTitle || parentDeal))}</span>
+          </span>
+        </button>
+        <button
+          className="module-work-close"
+          onClick={(event) => {
+            event.stopPropagation();
+            onCloseTab(tab.id);
+          }}
+          aria-label={`Close ${tab.title}`}
+          title={`Close ${tab.title}`}
+        >
+          <V6Icon name="close" size={10} />
+        </button>
       </div>
+    );
+  };
 
-      <div style={{ ...S.modes, padding: expanded ? "20px 10px 10px" : "18px 6px 8px" }}>
-          {expanded && <div style={S.sectionHead}>Workspace</div>}
-          {MODES.map(m => {
-            const modeTabs = tabsForMode(m.id);
-            const tabTree = groupTabsByDeal(modeTabs);
-            const modeOpenCount = modeTabs.length;
-            const hasOpenWork = expanded && modeOpenCount > 0;
-            const renderWorkRow = (tab: Tab, options: { child?: boolean; parentTitle?: string } = {}) => {
-              const active = tab.id === activeTabId;
-              const parentDeal = options.parentTitle ? null : owningDealForTab(tab, tabs);
-              const dealContext = options.parentTitle ?? parentDeal?.title ?? inferredDealNameForTab(tab);
-              const label = dealContext ? childTabTitle(tab, dealContext) : tab.title;
-              return (
+  const renderVirtualDealRow = (deal: Tab, hasActiveChild: boolean) => (
+    <div
+      key={deal.id}
+      className={`module-work-row parent virtual ${hasActiveChild ? "active-parent" : ""}`}
+      role="listitem"
+    >
+      <button
+        className="module-work-item"
+        onClick={() => onOpenTab({ id: dealTabIdForTitle(deal.title), kind: "deal", title: deal.title, sourceMode: "pipeline" })}
+        title={`Open ${deal.title}`}
+      >
+        <span className="module-work-icon"><V6Icon name="deal" size={12} /></span>
+        <span className="module-work-copy">
+          <span className="module-work-title">{deal.title}</span>
+          <span className="module-work-meta">Deal workspace</span>
+        </span>
+      </button>
+    </div>
+  );
+
+  const renderModeWork = (m: (typeof MODES)[number]) => {
+    const modeTabs = tabsForMode(m.id);
+    const tabTree = groupTabsByDeal(modeTabs);
+    const modeOpenCount = modeTabs.length;
+    const hasActiveWork = modeTabs.some(tab => tab.id === activeTabId);
+    return (
+      <div
+        key={m.id}
+        className={`module-group has-work ${activeMode === m.id || hasActiveWork ? "active" : ""}`}
+      >
+        <button
+          className={`mode-item module-head ${activeMode === m.id ? "active" : ""}`}
+          onClick={() => onPickMode(m.id)}
+          aria-label={m.label}
+          aria-current={activeMode === m.id ? "page" : undefined}
+        >
+          <span className="mode-icon"><V6Icon name={m.icon} size={16} /></span>
+          <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.label}</span>
+          {modeOpenCount > 0 && <span className="mode-count">{modeOpenCount}</span>}
+        </button>
+        {modeOpenCount > 0 && (
+          <div className="module-work-reveal open">
+            <div className="module-work-stack" role="list" aria-label={`${m.label} open work`}>
+              {tabTree.deals.map(group => (
                 <div
-                  key={tab.id}
-                  className={`module-work-row ${options.child ? "child" : "parent"} ${active ? "active" : ""}`}
+                  key={group.deal.id}
+                  className={`module-work-branch ${group.children.some(tab => tab.id === activeTabId) ? "active-child" : ""}`}
                   role="listitem"
                 >
-                  <button
-                    className="module-work-item"
-                    onClick={() => onPickTab(tab.id)}
-                    title={tab.title}
-                  >
-                    <span className="module-work-icon"><V6Icon name={tabIcon(tab)} size={options.child ? 11 : 12} /></span>
-                    <span className="module-work-copy">
-                      <span className="module-work-title">{label}</span>
-                      <span className="module-work-meta">{tabMeta(tab, tabs, Boolean(options.parentTitle || parentDeal))}</span>
-                    </span>
-                  </button>
-                  <button
-                    className="module-work-close"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      onCloseTab(tab.id);
-                    }}
-                    aria-label={`Close ${tab.title}`}
-                    title={`Close ${tab.title}`}
-                  >
-                    <V6Icon name="close" size={10} />
-                  </button>
-                </div>
-              );
-            };
-            const renderVirtualDealRow = (deal: Tab, hasActiveChild: boolean) => (
-              <div
-                key={deal.id}
-                className={`module-work-row parent virtual ${hasActiveChild ? "active-parent" : ""}`}
-                role="listitem"
-              >
-                <button
-                  className="module-work-item"
-                  onClick={() => onOpenTab({ id: dealTabIdForTitle(deal.title), kind: "deal", title: deal.title, sourceMode: "pipeline" })}
-                  title={`Open ${deal.title}`}
-                >
-                  <span className="module-work-icon"><V6Icon name="deal" size={12} /></span>
-                  <span className="module-work-copy">
-                    <span className="module-work-title">{deal.title}</span>
-                    <span className="module-work-meta">Deal workspace</span>
-                  </span>
-                </button>
-              </div>
-            );
-            return (
-            <div
-              key={m.id}
-              className={`module-group ${hasOpenWork ? "has-work" : ""} ${activeMode === m.id ? "active" : ""}`}
-            >
-              <button
-                className={`mode-item module-head ${activeMode === m.id ? "active" : ""}`}
-                onClick={() => onPickMode(m.id)}
-                title={!expanded ? m.label : undefined}
-                aria-label={m.label}
-                aria-current={activeMode === m.id ? "page" : undefined}
-                style={!expanded ? { justifyContent: "center", padding: "10px 0" } : undefined}
-              >
-                <span className="mode-icon"><V6Icon name={m.icon} size={17} /></span>
-                {expanded && (
-                  <>
-                    <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.label}</span>
-                    {modeOpenCount > 0 && <span className="mode-count">{modeOpenCount}</span>}
-                  </>
-                )}
-              </button>
-              {hasOpenWork && (
-                <div className="module-work-reveal open">
-                  <div className="module-work-stack" role="list" aria-label={`${m.label} open work`}>
-                    {tabTree.deals.map(group => (
-                      <div
-                        key={group.deal.id}
-                        className={`module-work-branch ${group.children.some(tab => tab.id === activeTabId) ? "active-child" : ""}`}
-                        role="listitem"
-                      >
-                        {group.virtual
-                          ? renderVirtualDealRow(group.deal, group.children.some(tab => tab.id === activeTabId))
-                          : renderWorkRow(group.deal)}
-                        {group.children.length > 0 && (
-                          <div className="module-child-stack" role="list" aria-label={`${group.deal.title} open work`}>
-                            {group.children.map(tab => renderWorkRow(tab, { child: true, parentTitle: group.deal.title }))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                    {tabTree.loose.map(tab => renderWorkRow(tab))}
-                  </div>
-                </div>
-              )}
-              {showStudio && m.id === "files" && (
-                <button
-                  className="mode-item"
-                  onClick={() => onOpenTab({ id: "marketing-studio", kind: "marketing-studio", title: "Marketing Studio", studioView: "home" })}
-                  title={!expanded ? "Marketing Studio" : undefined}
-                  aria-label="Marketing Studio"
-                  style={{
-                    marginTop: 3,
-                    ...(expanded
-                      ? { color: "var(--m-on-surface)", background: "rgba(255,255,255,0.44)" }
-                      : { justifyContent: "center", padding: "10px 0" }),
-                  }}
-                >
-                  <span className="mode-icon"><V6Icon name="doc" size={17} /></span>
-                  {expanded && (
-                    <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Studio</span>
-                  )}
-                </button>
-              )}
-            </div>
-          );
-          })}
-          {expanded && aboutTabs.length > 0 && (
-            <div className={`module-group has-work about-group ${aboutActive ? "active" : ""}`}>
-              <button
-                className={`mode-item module-head ${aboutActive ? "active" : ""}`}
-                onClick={() => onPickTab(aboutTabs[0].id)}
-                aria-label="About SMBX"
-                aria-current={aboutActive ? "page" : undefined}
-              >
-                <span className="mode-icon"><V6Icon name="library" size={17} /></span>
-                <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>About SMBX</span>
-                <span className="mode-count">{aboutTabs.length}</span>
-              </button>
-              <div className="module-work-reveal open">
-                <div className="module-work-stack" role="list" aria-label="About SMBX open pages">
-                  {aboutTabs.map(tab => (
-                    <div
-                      key={tab.id}
-                      className={`module-work-row child ${tab.id === activeTabId ? "active" : ""}`}
-                      role="listitem"
-                    >
-                      <button
-                        className="module-work-item"
-                        onClick={() => onPickTab(tab.id)}
-                        title={tab.title}
-                      >
-                        <span className="module-work-icon"><V6Icon name={tabIcon(tab)} size={11} /></span>
-                        <span className="module-work-copy">
-                          <span className="module-work-title">{tab.title}</span>
-                          <span className="module-work-meta">{tabMeta(tab)}</span>
-                        </span>
-                      </button>
-                      <button
-                        className="module-work-close"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          onCloseTab(tab.id);
-                        }}
-                        aria-label={`Close ${tab.title}`}
-                        title={`Close ${tab.title}`}
-                      >
-                        <V6Icon name="close" size={10} />
-                      </button>
+                  {group.virtual
+                    ? renderVirtualDealRow(group.deal, group.children.some(tab => tab.id === activeTabId))
+                    : renderWorkRow(group.deal)}
+                  {group.children.length > 0 && (
+                    <div className="module-child-stack" role="list" aria-label={`${group.deal.title} open work`}>
+                      {group.children.map(tab => renderWorkRow(tab, { child: true, parentTitle: group.deal.title }))}
                     </div>
-                  ))}
+                  )}
                 </div>
-              </div>
+              ))}
+              {tabTree.loose.map(tab => renderWorkRow(tab))}
             </div>
-          )}
-      </div>
-
-      <div style={{ ...S.foot, padding: expanded ? "8px 8px 12px" : "8px 6px 12px" }}>
+          </div>
+        )}
+        {showStudio && m.id === "files" && (
           <button
             className="mode-item"
-            style={{ width: "100%", ...(expanded ? null : { justifyContent: "center", padding: "10px 0" }) }}
-            title={!expanded ? "Recent activity" : undefined}
+            onClick={() => onOpenTab({ id: "marketing-studio", kind: "marketing-studio", title: "Marketing Studio", studioView: "home" })}
+            aria-label="Marketing Studio"
+            style={{ marginTop: 3, color: "var(--m-on-surface)", background: "rgba(255,255,255,0.44)" }}
+          >
+            <span className="mode-icon"><V6Icon name="doc" size={16} /></span>
+            <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Studio</span>
+          </button>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <aside className="workspace-rail" style={S.rail}>
+      <div style={S.iconRail}>
+        <div ref={menuRef} style={S.iconAccount}>
+          <button
+            className="m-state"
+            style={{ ...S.avatar, cursor: "pointer", border: "none" }}
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label={user ? "Account menu" : "Sign in or sign up"}
+            aria-expanded={menuOpen}
+          >{initials}</button>
+
+          {menuOpen && (
+            <div role="menu" style={{ ...S.menu, ...S.iconMenu }} className="m-fade-in">
+              {isAnon ? (
+                <>
+                  <button role="menuitem" className="m-state" style={S.menuItem} onClick={() => { setMenuOpen(false); onSignIn(); }}>
+                    Sign in
+                  </button>
+                  <button role="menuitem" className="m-state" style={S.menuItem} onClick={() => { setMenuOpen(false); onSignUp(); }}>
+                    Create account
+                  </button>
+                  <div style={S.menuDivider} />
+                  <div style={S.menuFooter}>Free tier · unlimited chat · 1 deliverable</div>
+                </>
+              ) : (
+                <>
+                  <div style={S.menuHeader}>
+                    <div style={S.menuName}>{acctName}</div>
+                    <div style={S.menuEmail}>{user.email}</div>
+                  </div>
+                  <div style={S.menuDivider} />
+                  <button
+                    role="menuitem"
+                    className="m-state"
+                    style={S.menuItem}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onOpenTab({ id: "tab-settings", kind: "settings", title: "Settings" });
+                    }}
+                  >
+                    Settings
+                  </button>
+                  <div style={S.menuDivider} />
+                  <button role="menuitem" className="m-state" style={{ ...S.menuItem, color: "var(--m-pass)" }} onClick={() => { setMenuOpen(false); onSignOut(); }}>
+                    Sign out
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div style={S.primaryModes} />
+
+        <div style={S.iconFooter}>
+          <button
+            className="canva-mode-item"
+            style={S.canvaMode}
             aria-label="Recent activity"
             onClick={() => onOpenTab({ id: "tab-history", kind: "history", title: "Conversation history" })}
           >
-            <span className="mode-icon"><V6Icon name="history" size={17} /></span>
-            {expanded && <span>Recent activity</span>}
+            <span className="canva-mode-icon" style={S.canvaIcon}><V6Icon name="history" size={18} /></span>
+            <span className="canva-mode-label" style={S.canvaLabel}>Recent</span>
           </button>
           <button
-            className="mode-item"
-            style={{ width: "100%", ...(expanded ? null : { justifyContent: "center", padding: "10px 0" }) }}
-            title={!expanded ? "Settings" : undefined}
+            className="canva-mode-item"
+            style={S.canvaMode}
             aria-label="Settings"
             onClick={() => onOpenTab({ id: "tab-settings", kind: "settings", title: "Settings" })}
           >
-            <span className="mode-icon"><V6Icon name="settings" size={17} /></span>
-            {expanded && <span>Settings</span>}
+            <span className="canva-mode-icon" style={S.canvaIcon}><V6Icon name="settings" size={18} /></span>
+            <span className="canva-mode-label" style={S.canvaLabel}>Settings</span>
           </button>
+        </div>
       </div>
     </aside>
   );
@@ -611,16 +505,27 @@ function docLaneForTab(tab: Tab): string {
 const S: Record<string, CSSProperties> = {
   rail: {
     flexShrink: 0,
-    /* Card chrome (bg, border, radius, shadow) moved up to V6App's
-       A.leftRail wrapper — Sidebar + chat share one surface (Canva
-       pattern). This column is transparent so the rail bg shows
-       through. Width transition + overflow + z-index stay; those are
-       layout concerns, not visual chrome. */
+    width: 66,
     background: "transparent",
-    display: "flex", flexDirection: "column", height: "100%",
-    transition: "width 260ms cubic-bezier(0.16, 1, 0.3, 1)",
-    overflow: "hidden",
-    position: "relative", zIndex: 5,
+    display: "flex", flexDirection: "row", height: "100%",
+    overflow: "visible",
+    position: "relative", zIndex: 30,
+  },
+  iconRail: {
+    width: 66,
+    flexShrink: 0,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "stretch",
+    padding: "9px 6px",
+    gap: 8,
+    boxSizing: "border-box",
+  },
+  iconAccount: {
+    position: "relative",
+    display: "grid",
+    placeItems: "center",
+    paddingBottom: 2,
   },
   account: {
     display: "flex", alignItems: "center", gap: 10,
@@ -640,6 +545,136 @@ const S: Record<string, CSSProperties> = {
     flexShrink: 0,
     boxShadow: "0 10px 22px rgba(26,34,51,0.16), inset 0 1px 0 rgba(255,255,255,0.16)",
   },
+  primaryModes: {
+    flex: 1,
+    minHeight: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
+  },
+  tabCommandWrap: {
+    flex: 1,
+    minHeight: 0,
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "center",
+    paddingTop: 128,
+  },
+  canvaMode: {
+    all: "unset",
+    boxSizing: "border-box",
+    width: "100%",
+    minHeight: 45,
+    borderRadius: 10,
+    display: "grid",
+    gridTemplateRows: "24px 13px",
+    placeItems: "center",
+    gap: 1,
+    padding: "4px 2px",
+    color: "#6D5B90",
+    cursor: "pointer",
+    textAlign: "center",
+  },
+  canvaIcon: {
+    width: 30,
+    height: 27,
+    borderRadius: 9,
+    display: "grid",
+    placeItems: "center",
+    color: "inherit",
+  },
+  canvaLabel: {
+    maxWidth: 58,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    color: "inherit",
+    fontSize: 10,
+    lineHeight: 1,
+    fontWeight: 700,
+  },
+  iconFooter: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 3,
+    paddingTop: 5,
+  },
+  workspacePanel: {
+    position: "absolute",
+    left: 66,
+    top: 144,
+    width: 322,
+    height: "min(560px, calc(100% - 178px))",
+    display: "flex",
+    flexDirection: "column",
+    padding: "10px 10px 8px",
+    boxSizing: "border-box",
+    background: "rgba(242, 247, 253, 0.94)",
+    border: "1px solid rgba(195, 211, 228, 0.70)",
+    borderLeftColor: "rgba(255, 255, 255, 0.78)",
+    borderRadius: 16,
+    boxShadow: "18px 0 34px rgba(37, 52, 74, 0.13), 0 1px 0 rgba(255,255,255,0.72) inset",
+    backdropFilter: "blur(18px) saturate(160%)",
+    WebkitBackdropFilter: "blur(18px) saturate(160%)",
+    overflow: "hidden",
+  },
+  treePanel: {
+    width: "100%",
+    flexShrink: 0,
+    minWidth: 0,
+    minHeight: 0,
+    display: "flex",
+    flexDirection: "column",
+    flex: 1,
+    maxHeight: "none",
+    padding: 0,
+    boxSizing: "border-box",
+    overflow: "hidden",
+  },
+  treeAccount: {
+    flexShrink: 0,
+    padding: "6px 8px 7px",
+    boxSizing: "border-box",
+    display: "grid",
+    alignContent: "center",
+  },
+  flyoutTitle: {
+    fontSize: 14,
+    fontWeight: 800,
+    letterSpacing: "-0.02em",
+    color: "var(--m-on-surface)",
+    lineHeight: 1.1,
+  },
+  flyoutMeta: {
+    marginTop: 3,
+    fontSize: 10.5,
+    lineHeight: 1.25,
+    color: "var(--m-on-surface-mid)",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+  },
+  commandRow: {
+    display: "flex",
+    gap: 5,
+    padding: "0 8px 9px",
+    flexShrink: 0,
+  },
+  commandPill: {
+    height: 20,
+    padding: "0 8px",
+    borderRadius: 999,
+    display: "inline-flex",
+    alignItems: "center",
+    fontSize: 10.5,
+    fontWeight: 800,
+    color: "#537291",
+    background: "rgba(255,255,255,0.66)",
+    boxShadow: "inset 0 0 0 1px rgba(190, 212, 232, 0.62)",
+  },
+  treeHeader: {
+    flexShrink: 0,
+  },
   acctName: {
     fontSize: 13, fontWeight: 600, color: "var(--m-on-surface)",
     letterSpacing: "-0.01em",
@@ -657,9 +692,9 @@ const S: Record<string, CSSProperties> = {
     color: "var(--m-on-surface-mid)", cursor: "pointer",
     flexShrink: 0,
   },
-  modes: { flex: 1, overflow: "auto", padding: "16px 8px 8px" },
+  modes: { flex: 1, overflow: "auto", padding: "0 4px 8px 1px" },
   sectionHead: {
-    padding: "0 10px 8px",
+    padding: "0 8px 8px",
     fontFamily: "var(--font-mono)", fontSize: 9.5,
     color: "var(--m-on-surface-mid)",
     letterSpacing: "0.14em", textTransform: "uppercase", fontWeight: 600,
@@ -683,6 +718,12 @@ const S: Record<string, CSSProperties> = {
     padding: 4,
     zIndex: 50,
     display: "flex", flexDirection: "column", gap: 1,
+  },
+  iconMenu: {
+    top: 0,
+    left: 56,
+    right: "auto",
+    width: 220,
   },
   menuItem: {
     all: "unset",

@@ -132,7 +132,7 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
           </div>
           <div className="flex items-center gap-3 text-xs text-[#5D5E61]">
             <span>Joined {new Date(user.created_at || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
-            {user.role === 'admin' && <span className="text-[10px] font-semibold text-[#D4714E] bg-[#D4714E]/5 px-1.5 py-0.5 rounded-full">Admin</span>}
+            {(user.role === 'admin' || user.role === 'superadmin') && <span className="text-[10px] font-semibold text-[#D4714E] bg-[#D4714E]/5 px-1.5 py-0.5 rounded-full">{user.role === 'superadmin' ? 'Superadmin' : 'Admin'}</span>}
             {user.google_id && <span className="text-[10px] text-[#5D5E61] bg-[#f0eee6] px-1.5 py-0.5 rounded-full">Google linked</span>}
           </div>
         </Card>

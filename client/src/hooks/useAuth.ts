@@ -17,6 +17,10 @@ export interface User {
   google_id: string | null;
   league: string | null;
   role: string;
+  is_advisor?: boolean | null;
+  plan?: string | null;
+  trial_ends_at?: string | null;
+  free_deliverable_used?: boolean | null;
   created_at: string;
   updated_at: string;
 }
@@ -27,7 +31,11 @@ const DEV_MOCK_USER: User = {
   display_name: 'Paul Baker',
   google_id: null,
   league: null,
-  role: 'user',
+  role: 'superadmin',
+  is_advisor: true,
+  plan: 'enterprise',
+  trial_ends_at: null,
+  free_deliverable_used: false,
   created_at: '2026-05-08T00:00:00.000Z',
   updated_at: '2026-05-08T00:00:00.000Z',
 };

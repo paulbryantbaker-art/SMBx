@@ -1,6 +1,7 @@
-import { useState, type CSSProperties, type RefObject, type KeyboardEvent, type FormEvent, type ReactNode } from "react";
+import { useRef, useState, type CSSProperties, type RefObject, type KeyboardEvent, type FormEvent, type ReactNode, type ChangeEvent } from "react";
 import type { Message, OpenTab, StagedAction } from "./types";
 import { MODEL_PREFERENCE_LABELS, type ModelPreference } from "../../lib/modelPreference";
+import { V6Icon } from "./icons";
 
 interface ChatProps {
   thread: Message[];
@@ -16,6 +17,8 @@ interface ChatProps {
   error?: string | null;
   modelPreference?: ModelPreference;
   setModelPreference?: (value: ModelPreference) => void;
+  showLearnLinks?: boolean;
+  onFileUpload?: (file: File) => Promise<{ name: string; size: string } | null>;
   onConfirmStagedAction?: (id: number, summary?: string) => void | Promise<void>;
   onCancelStagedAction?: (id: number) => void | Promise<void>;
 }
@@ -23,9 +26,12 @@ interface ChatProps {
 export function V6Chat({
   thread, draft, setDraft, send, inputRef, modeLabel, onOpenTab,
   sending, streamingText, activeTool, error, modelPreference = "auto", setModelPreference,
-  onConfirmStagedAction, onCancelStagedAction,
+  showLearnLinks = true, onFileUpload, onConfirmStagedAction, onCancelStagedAction,
 }: ChatProps) {
   const [shareLabel, setShareLabel] = useState<"Share" | "Copied">("Share");
+  const [uploading, setUploading] = useState(false);
+  const [attachment, setAttachment] = useState<{ name: string; size: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -42,6 +48,10 @@ export function V6Chat({
     onOpenTab({ id: "tab-history", kind: "history", title: "Conversation history" });
   };
 
+  const openSettings = () => {
+    onOpenTab({ id: "tab-settings", kind: "settings", title: "Settings" });
+  };
+
   const copyShareLink = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
@@ -55,46 +65,27 @@ export function V6Chat({
     }
   };
 
+  const handleFilePick = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || !onFileUpload || uploading) return;
+    setUploading(true);
+    try {
+      const result = await onFileUpload(file);
+      if (result) {
+        setAttachment(result);
+        setDraft(draft.trim() ? draft : `Review ${result.name} and tell me what matters.`);
+      }
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div style={C.chat}>
-      <div style={C.chatHead}>
-        <div style={{ display: "flex", gap: 2, alignItems: "center" }}>
-          {setModelPreference && (
-            <select
-              value={modelPreference}
-              onChange={(e) => setModelPreference(e.target.value as ModelPreference)}
-              aria-label="Yulia model preference"
-              title="Yulia model preference"
-              style={C.modelSelect}
-            >
-              {(Object.keys(MODEL_PREFERENCE_LABELS) as ModelPreference[]).map(key => (
-                <option key={key} value={key}>{MODEL_PREFERENCE_LABELS[key]}</option>
-              ))}
-            </select>
-          )}
-          <button
-            className="m-btn text"
-            style={{ height: 28, fontSize: 11.5 }}
-            onClick={openHistory}
-            type="button"
-          >
-            History
-          </button>
-          <button
-            className="m-btn text"
-            style={{ height: 28, fontSize: 11.5 }}
-            onClick={copyShareLink}
-            type="button"
-            aria-label="Copy share link"
-          >
-            {shareLabel}
-          </button>
-        </div>
-      </div>
-
       <div className="thin-scroll" style={C.chatBody}>
         {thread.length === 0 && !sending ? (
-          <V6ChatEmpty modeLabel={modeLabel} onPick={(t) => send(t)} onOpenTab={onOpenTab} />
+          <V6ChatEmpty modeLabel={modeLabel} onPick={(t) => send(t)} onOpenTab={onOpenTab} showLearnLinks={showLearnLinks} />
         ) : (
           <>
             {thread.map((m, i) => (
@@ -116,6 +107,13 @@ export function V6Chat({
       </div>
 
       <form style={C.composer} onSubmit={onSubmit}>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,.doc,.docx,.txt,.rtf,.md,.xlsx,.xls,.csv,.pptx,.ppt,.png,.jpg,.jpeg,.webp,.gif,.heic,.json"
+          onChange={handleFilePick}
+          style={{ display: "none" }}
+        />
         <textarea
           ref={inputRef}
           rows={2}
@@ -126,7 +124,51 @@ export function V6Chat({
           onKeyDown={onKey}
           aria-label="Message Yulia"
         />
+        {attachment && (
+          <div style={C.attachmentChip}>
+            <span style={C.attachmentIcon}><V6Icon name="doc" size={12} /></span>
+            <span style={C.attachmentName}>{attachment.name}</span>
+            <span style={C.attachmentSize}>{attachment.size}</span>
+            <button type="button" style={C.attachmentRemove} onClick={() => setAttachment(null)} aria-label={`Remove ${attachment.name}`}>
+              <V6Icon name="close" size={10} />
+            </button>
+          </div>
+        )}
         <div style={C.composerFoot}>
+          <div style={C.composerTools}>
+            <button
+              type="button"
+              style={C.composerTool}
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading || !onFileUpload}
+              title={onFileUpload ? "Upload a file" : "Sign in to upload files"}
+            >
+              <V6Icon name="plus" size={13} />
+              <span>{uploading ? "Uploading" : "Upload"}</span>
+            </button>
+            {setModelPreference && (
+              <select
+                value={modelPreference}
+                onChange={(e) => setModelPreference(e.target.value as ModelPreference)}
+                aria-label="Yulia model preference"
+                title="Yulia model preference"
+                style={C.modelSelect}
+              >
+                {(Object.keys(MODEL_PREFERENCE_LABELS) as ModelPreference[]).map(key => (
+                  <option key={key} value={key}>{MODEL_PREFERENCE_LABELS[key]}</option>
+                ))}
+              </select>
+            )}
+            <button type="button" style={{ ...C.composerTool, ...C.composerIconTool }} onClick={openHistory} aria-label="History" title="History">
+              <V6Icon name="history" size={13} />
+            </button>
+            <button type="button" style={C.composerTool} onClick={copyShareLink} aria-label="Copy share link" title="Copy share link">
+              <span>{shareLabel}</span>
+            </button>
+            <button type="button" style={{ ...C.composerTool, ...C.composerIconTool }} onClick={openSettings} aria-label="Settings" title="Settings">
+              <V6Icon name="settings" size={13} />
+            </button>
+          </div>
           <button type="submit" className="m-fab" aria-label="Send" disabled={!draft.trim()}>
             <svg width="16" height="16" viewBox="0 0 14 14" fill="none" aria-hidden="true">
               <path d="M7 11.5V2.5M7 2.5L3 6.5M7 2.5L11 6.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -276,6 +318,7 @@ interface ChatEmptyProps {
   modeLabel: string;
   onPick: (text: string) => void;
   onOpenTab: OpenTab;
+  showLearnLinks: boolean;
 }
 
 const SUGGESTIONS_BY_MODE: Record<string, string[]> = {
@@ -351,7 +394,7 @@ const LEARN_CHIPS: { label: string; section: "how" | "pricing"; anchor?: string 
   { label: "Compare plans",      section: "pricing", anchor: "compare"        },
 ];
 
-function V6ChatEmpty({ modeLabel, onPick, onOpenTab }: ChatEmptyProps) {
+function V6ChatEmpty({ modeLabel, onPick, onOpenTab, showLearnLinks }: ChatEmptyProps) {
   const suggestions = SUGGESTIONS_BY_MODE[modeLabel] ?? [
     "What can you do?",
     "Walk me through a deal",
@@ -391,19 +434,23 @@ function V6ChatEmpty({ modeLabel, onPick, onOpenTab }: ChatEmptyProps) {
         ))}
       </div>
 
-      <div className="mono" style={C.eyebrow}>ABOUT SMBX</div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-        {LEARN_CHIPS.map(c => (
-          <button
-            key={c.label}
-            onClick={() => openLearn(c.section, c.anchor)}
-            style={C.learnPill}
-          >
-            <span style={{ fontSize: 10, opacity: 0.85 }}>↗</span>
-            <span>{c.label}</span>
-          </button>
-        ))}
-      </div>
+      {showLearnLinks && (
+        <>
+          <div className="mono" style={C.eyebrow}>ABOUT SMBX</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {LEARN_CHIPS.map(c => (
+              <button
+                key={c.label}
+                onClick={() => openLearn(c.section, c.anchor)}
+                style={C.learnPill}
+              >
+                <span style={{ fontSize: 10, opacity: 0.85 }}>↗</span>
+                <span>{c.label}</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -454,17 +501,9 @@ const C: Record<string, CSSProperties> = {
     overflow: "hidden",
     display: "flex", flexDirection: "column", minHeight: 0, height: "100%",
   },
-  chatHead: {
-    height: 58, flexShrink: 0, padding: "0 14px",
-    display: "flex", alignItems: "center", justifyContent: "flex-end",
-    /* Frosted backdrop + bottom border removed — sidebar + chat now sit
-       directly on the page bg (Canva pattern). The Auto/History/Share
-       buttons float on the page gradient like everything else. */
-    background: "transparent",
-  },
-  chatBody: { flex: 1, overflowY: "auto", padding: "18px 14px" },
+  chatBody: { flex: 1, overflowY: "auto", padding: "8px 8px 10px" },
   composer: {
-    margin: 12,
+    margin: 8,
     background: "var(--m-surface-on-light)",
     borderRadius: 18,
     padding: 10,
@@ -484,17 +523,98 @@ const C: Record<string, CSSProperties> = {
     resize: "none", outline: "none", padding: "4px 6px",
     fontFamily: "var(--font-body)",
   },
-  composerFoot: { marginTop: 4, display: "flex", justifyContent: "flex-end", alignItems: "center" },
-  modelSelect: {
-    height: 28,
-    maxWidth: 94,
-    border: "1px solid var(--m-outline-var)",
-    borderRadius: 999,
-    background: "var(--m-surface-1)",
-    color: "var(--m-on-surface)",
+  composerFoot: {
+    marginTop: 6,
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    gap: 8,
+  },
+  composerTools: {
+    minWidth: 0,
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "nowrap",
+    gap: 4,
+  },
+  composerTool: {
+    all: "unset",
+    height: 26,
+    boxSizing: "border-box",
     padding: "0 8px",
+    borderRadius: 999,
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 4,
+    color: "var(--m-on-surface-mid)",
+    background: "rgba(236, 242, 249, 0.72)",
+    border: "1px solid rgba(204, 217, 232, 0.72)",
+    fontSize: 11,
+    fontWeight: 750,
+    cursor: "pointer",
+  },
+  composerIconTool: {
+    width: 26,
+    justifyContent: "center",
+    padding: 0,
+  },
+  attachmentChip: {
+    marginTop: 6,
+    maxWidth: "100%",
+    minHeight: 30,
+    boxSizing: "border-box",
+    padding: "5px 6px 5px 7px",
+    borderRadius: 10,
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    background: "#F2F7FC",
+    border: "1px solid rgba(198, 214, 230, 0.82)",
+  },
+  attachmentIcon: {
+    width: 18,
+    height: 18,
+    borderRadius: 6,
+    display: "grid",
+    placeItems: "center",
+    color: "#4F7FAB",
+    background: "#FFFFFF",
+  },
+  attachmentName: {
+    minWidth: 0,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    color: "var(--m-on-surface)",
     fontSize: 11.5,
-    fontWeight: 700,
+    fontWeight: 800,
+  },
+  attachmentSize: {
+    flexShrink: 0,
+    color: "var(--m-on-surface-mid)",
+    fontSize: 10.5,
+    fontWeight: 650,
+  },
+  attachmentRemove: {
+    all: "unset",
+    width: 18,
+    height: 18,
+    borderRadius: 999,
+    display: "grid",
+    placeItems: "center",
+    color: "var(--m-on-surface-mid)",
+    cursor: "pointer",
+  },
+  modelSelect: {
+    height: 26,
+    maxWidth: 92,
+    border: "1px solid rgba(204, 217, 232, 0.72)",
+    borderRadius: 999,
+    background: "rgba(236, 242, 249, 0.72)",
+    color: "var(--m-on-surface)",
+    padding: "0 7px",
+    fontSize: 11,
+    fontWeight: 800,
     outline: "none",
   },
   eyebrow: {

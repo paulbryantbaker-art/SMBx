@@ -1,4 +1,3 @@
-import postgres from 'postgres';
 import { MASTER_PROMPT } from '../prompts/masterPrompt.js';
 import { PERSONAS } from '../prompts/personas.js';
 import { JOURNEY_DETECTION_PROMPT } from '../prompts/journeyDetection.js';
@@ -18,8 +17,9 @@ import {
 import { describeModelPreference, type ModelPreference } from './modelPreference.js';
 import { formatAgencyActionContractsForPrompt } from './agencyActionRegistry.js';
 import { formatLatestYuliaBriefsForPrompt } from './yuliaBriefingService.js';
+import { createSql } from '../dbConfig.js';
 
-const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
+const sql = createSql();
 
 export interface ConversationState {
   journey: string | null;

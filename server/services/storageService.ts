@@ -9,6 +9,7 @@ import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } fro
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { writeFile, readFile, mkdir } from 'fs/promises';
 import { join } from 'path';
+import { getUploadRoot } from './uploadRoot.js';
 
 // ─── Configuration ──────────────────────────────────────────────────
 
@@ -55,7 +56,7 @@ export async function uploadFile(
   }
 
   // Local fallback
-  const LOCAL_ROOT = process.env.UPLOAD_PATH || '/tmp/uploads';
+  const LOCAL_ROOT = getUploadRoot();
   const dir = join(LOCAL_ROOT, String(dealId));
   await mkdir(dir, { recursive: true });
   const localPath = join(dir, safeFilename);

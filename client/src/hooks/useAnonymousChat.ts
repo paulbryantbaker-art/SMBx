@@ -96,6 +96,18 @@ export function useAnonymousChat() {
     loadConversations();
   }, [loadConversations]);
 
+  const uploadFile = useCallback(async (file: File): Promise<{ name: string; size: string } | null> => {
+    const form = new FormData();
+    form.append('file', file);
+    const res = await fetch(`/api/anonymous/${sessionIdRef.current}/upload`, {
+      method: 'POST',
+      body: form,
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.file ? { name: data.file.name, size: data.file.sizeFormatted } : null;
+  }, []);
+
   // Send message via POST /api/chat/message
   const sendMessage = useCallback(async (
     content: string,
@@ -326,6 +338,7 @@ export function useAnonymousChat() {
     pendingDeliverable,
     setPendingDeliverable,
     sendMessage,
+    uploadFile,
     selectConversation,
     newConversation,
     getSessionId,

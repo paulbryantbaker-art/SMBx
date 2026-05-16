@@ -3,17 +3,17 @@
  * Used by the web server to dispatch deliverable generation.
  */
 import { PgBoss } from 'pg-boss';
+import { getDatabaseUrl, shouldUseDatabaseSsl } from '../dbConfig.js';
 
 let boss: any = null;
 
 async function getBoss(): Promise<any> {
   if (!boss) {
-    const dbUrl = process.env.DATABASE_URL;
-    if (!dbUrl) throw new Error('DATABASE_URL not set');
+    const dbUrl = getDatabaseUrl();
 
     boss = new (PgBoss as any)({
       connectionString: dbUrl,
-      ssl: { rejectUnauthorized: false },
+      ssl: shouldUseDatabaseSsl(dbUrl) ? { rejectUnauthorized: false } : false,
       noScheduling: true,
       noSupervisor: true,
     });

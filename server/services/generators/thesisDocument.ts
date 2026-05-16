@@ -4,12 +4,9 @@
  * Generates a buyer's acquisition thesis document with criteria table,
  * SBA financing snapshot, and platform match intelligence.
  */
-import postgres from 'postgres';
+import { createSql } from '../../dbConfig.js';
 
-const sql = postgres(process.env.DATABASE_URL!, {
-  ssl: 'require',
-  prepare: false,
-});
+const sql = createSql();
 
 export interface ThesisInput {
   buyer_type?: string;

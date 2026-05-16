@@ -1,18 +1,16 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent } from "react";
-import { useLocation } from "wouter";
 import { DEV_AUTH_BYPASS, useAuth, type User } from "../../hooks/useAuth";
 import { useAnonymousChat } from "../../hooks/useAnonymousChat";
 import { useAuthChat } from "../../hooks/useAuthChat";
 import { useIsMobile } from "../../hooks/useIsMobile";
 import V6Mobile from "./mobile/V6Mobile";
-import { V6Sidebar } from "./Sidebar";
 import { V6Chat } from "./Chat";
 import { V6Canvas } from "./Canvas";
-import { MODES } from "./icons";
+import { MODES, V6Icon } from "./icons";
 import { buildDesktopSurfaceContext, type SurfaceContext } from "../../lib/yuliaSurfaceContext";
 import { normalizeModelPreference, type ModelPreference } from "../../lib/modelPreference";
 import { isSuperAdminUser } from "../../lib/superAdmin";
-import type { FileListView, FileScope, Message, ModeId, Tab } from "./types";
+import type { FileListView, FileScope, IconName, Message, ModeId, Tab } from "./types";
 
 const VALID_MODES: ModeId[] = ["today", "pipeline", "search", "files", "docs", "analysis", "intel", "library"];
 
@@ -23,6 +21,7 @@ interface ChatBridge {
   activeTool: string | null;
   error: string | null;
   send: (text: string, surfaceContext?: SurfaceContext, modelPreference?: ModelPreference) => void;
+  uploadFile?: (file: File) => Promise<{ name: string; size: string } | null>;
   confirmStagedAction?: (id: number, summary?: string) => void | Promise<void>;
   cancelStagedAction?: (id: number) => void | Promise<void>;
 }
@@ -113,7 +112,8 @@ function V6AppAnon({
     activeTool: null,
     error: chat.error,
     send: (text, surfaceContext, modelPreference) => chat.sendMessage(text, undefined, surfaceContext, modelPreference),
-  }), [chat.messages, chat.sending, chat.streamingText, chat.error, chat.sendMessage]);
+    uploadFile: chat.uploadFile,
+  }), [chat.messages, chat.sending, chat.streamingText, chat.error, chat.sendMessage, chat.uploadFile]);
   return <V6AppShell user={user} chat={bridge} onSignOut={() => { void onSignOut(); }} onDevSignIn={onDevSignIn} />;
 }
 
@@ -131,9 +131,10 @@ function V6AppAuthed({ user, onSignOut }: { user: User; onSignOut: () => Promise
     activeTool: chat.activeTool,
     error: null, // useAuthChat surfaces errors via toasts already
     send: chat.sendMessage,
+    uploadFile: chat.uploadFile,
     confirmStagedAction: chat.confirmStagedAction,
     cancelStagedAction: chat.cancelStagedAction,
-  }), [chat.messages, chat.sending, chat.streamingText, chat.activeTool, chat.sendMessage, chat.confirmStagedAction, chat.cancelStagedAction]);
+  }), [chat.messages, chat.sending, chat.streamingText, chat.activeTool, chat.sendMessage, chat.uploadFile, chat.confirmStagedAction, chat.cancelStagedAction]);
 
   return <V6AppShell user={user} chat={bridge} onSignOut={async () => { await onSignOut(); }} />;
 }
@@ -147,9 +148,7 @@ interface ShellProps {
   onDevSignIn?: () => void;
 }
 
-function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
-  const [, navigate] = useLocation();
-
+function V6AppShell({ user, chat, onSignOut }: ShellProps) {
   // ─── Tab + mode state, hydrated from URL hash ───
   const initial = readHashState();
 
@@ -385,7 +384,7 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
     } catch { /* ignore */ }
   }, [modelPreference]);
 
-  // ─── Resizable chat well ───
+  // ─── Resizable Yulia rail ───
   const [chatWidth, setChatWidth] = useState(400);
   const onDragStart = (e: MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -393,7 +392,7 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
     const startW = chatWidth;
     const onMove = (ev: globalThis.MouseEvent) => {
       const dx = ev.clientX - startX;
-      setChatWidth(Math.min(640, Math.max(320, startW + dx)));
+      setChatWidth(Math.min(520, Math.max(360, startW + dx)));
     };
     const onUp = () => {
       window.removeEventListener("mousemove", onMove);
@@ -408,6 +407,162 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
   };
 
   const modeLabel = MODES.find(m => m.id === activeMode)?.label ?? "Workspace";
+  const launcherWork = (modeId: ModeId) => tabs.filter(tab => tabBelongsToLauncherMode(tab, modeId, tabs));
+  const [hoveredLauncher, setHoveredLauncher] = useState<ModeId | null>(null);
+  const [closingLauncher, setClosingLauncher] = useState<ModeId | null>(null);
+  const hoveredLauncherRef = useRef<ModeId | null>(null);
+  const launcherHoverCloseRef = useRef<number | null>(null);
+  const launcherFadeCloseRef = useRef<number | null>(null);
+  const launcherStripRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    hoveredLauncherRef.current = hoveredLauncher;
+  }, [hoveredLauncher]);
+
+  const clearLauncherHoverClose = () => {
+    if (launcherHoverCloseRef.current !== null) {
+      window.clearTimeout(launcherHoverCloseRef.current);
+      launcherHoverCloseRef.current = null;
+    }
+  };
+
+  const clearLauncherFadeClose = () => {
+    if (launcherFadeCloseRef.current !== null) {
+      window.clearTimeout(launcherFadeCloseRef.current);
+      launcherFadeCloseRef.current = null;
+    }
+  };
+
+  const openLauncherHover = (modeId: ModeId, openCount: number) => {
+    clearLauncherHoverClose();
+    clearLauncherFadeClose();
+    setClosingLauncher(null);
+    setHoveredLauncher(openCount > 0 ? modeId : null);
+  };
+
+  const closeLauncherHover = () => {
+    clearLauncherHoverClose();
+    const launcherToClose = hoveredLauncherRef.current;
+    setHoveredLauncher(null);
+    if (!launcherToClose) return;
+    setClosingLauncher(launcherToClose);
+    clearLauncherFadeClose();
+    launcherFadeCloseRef.current = window.setTimeout(() => {
+      setClosingLauncher(current => current === launcherToClose ? null : current);
+      launcherFadeCloseRef.current = null;
+    }, 560);
+  };
+
+  const scheduleLauncherHoverClose = () => {
+    clearLauncherHoverClose();
+    launcherHoverCloseRef.current = window.setTimeout(() => {
+      closeLauncherHover();
+    }, 160);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (launcherHoverCloseRef.current !== null) window.clearTimeout(launcherHoverCloseRef.current);
+      if (launcherFadeCloseRef.current !== null) window.clearTimeout(launcherFadeCloseRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hoveredLauncher) return;
+
+    const onPointerMove = (event: PointerEvent) => {
+      const openWrap = launcherStripRef.current?.querySelector<HTMLElement>(".top-launcher-wrap.open");
+      const openMenu = openWrap?.querySelector<HTMLElement>(".top-launcher-menu");
+      const boundaryTargets = [openWrap, openMenu, launcherStripRef.current].filter(Boolean) as HTMLElement[];
+      const margin = 46;
+      const insideOpenArea = boundaryTargets.some(target => {
+        const rect = target.getBoundingClientRect();
+        return (
+          event.clientX >= rect.left - margin &&
+          event.clientX <= rect.right + margin &&
+          event.clientY >= rect.top - margin &&
+          event.clientY <= rect.bottom + margin
+        );
+      });
+
+      if (!insideOpenArea) {
+        closeLauncherHover();
+      }
+    };
+
+    window.addEventListener("pointermove", onPointerMove);
+    return () => window.removeEventListener("pointermove", onPointerMove);
+  }, [hoveredLauncher]);
+
+  const renderLauncherTab = (tab: Tab, options: { child?: boolean; parentTitle?: string } = {}) => {
+    const parentDeal = options.parentTitle ? null : owningLauncherDealForTab(tab, tabs);
+    const dealContext = options.parentTitle ?? parentDeal?.title ?? inferredLauncherDealName(tab);
+    const label = dealContext ? stripLauncherDealPrefix(tab.title, dealContext) : tab.title;
+    return (
+      <div
+        key={tab.id}
+        className={`top-work-row ${options.child ? "child" : "parent"} ${tab.id === activeTabId ? "active" : ""}`}
+      >
+        <button
+          className="top-work-item"
+          onClick={() => activateTab(tab.id)}
+          title={tab.title}
+        >
+          <span className="top-work-copy">
+            <span className="top-work-title">{label}</span>
+            <span className="top-work-meta">{topTabMeta(tab, tabs, Boolean(options.parentTitle || parentDeal))}</span>
+          </span>
+        </button>
+        <button
+          className="top-work-close"
+          onClick={(event) => {
+            event.stopPropagation();
+            closeTab(tab.id);
+          }}
+          aria-label={`Close ${tab.title}`}
+          title={`Close ${tab.title}`}
+        >
+          <V6Icon name="close" size={10} />
+        </button>
+      </div>
+    );
+  };
+
+  const renderLauncherWorkTree = (modeId: ModeId) => {
+    const modeTabs = launcherWork(modeId);
+    const tabTree = groupLauncherTabsByDeal(modeTabs);
+    if (modeTabs.length === 0) {
+      return null;
+    }
+    return (
+      <div className="top-work-stack" role="list">
+        {tabTree.deals.map(group => (
+          <div key={group.deal.id} className="top-work-branch" role="listitem">
+            {group.virtual ? (
+              <div className={`top-work-row parent virtual ${group.children.some(tab => tab.id === activeTabId) ? "active-parent" : ""}`}>
+                <button
+                  className="top-work-item"
+                  onClick={() => openTab({ id: launcherDealTabIdForTitle(group.deal.title), kind: "deal", title: group.deal.title, sourceMode: "pipeline" })}
+                >
+                  <span className="top-work-copy">
+                    <span className="top-work-title">{group.deal.title}</span>
+                    <span className="top-work-meta">Deal page</span>
+                  </span>
+                </button>
+              </div>
+            ) : renderLauncherTab(group.deal)}
+            {group.children.length > 0 && (
+              <div className="top-work-child-stack">
+                {group.children.map(tab => renderLauncherTab(tab, { child: true, parentTitle: group.deal.title }))}
+              </div>
+            )}
+          </div>
+        ))}
+        {tabTree.loose.map(tab => renderLauncherTab(tab))}
+      </div>
+    );
+  };
+
   // ⌘K focuses Yulia from anywhere.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -423,37 +578,65 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
   return (
     <div className="v6-root" style={A.shell}>
       <div style={A.row}>
-        {/* Unified left rail — Canva pattern. Sidebar (modes + tab tree) and
-            chat share one background surface. The hairline divider between
-            them sits on the chatPane left edge. Drag handle stays OUTSIDE
-            the rail so resize semantics target the chat width, not the rail. */}
-        <div style={A.leftRail}>
-          <V6Sidebar
-            activeMode={activeMode}
-            tabs={tabs}
-            activeTabId={activeTabId}
-            onPickMode={pickMode}
-            onPickTab={activateTab}
-            onCloseTab={closeTab}
-            onOpenTab={openTab}
-            user={user}
-            onSignIn={() => {
-              if (DEV_AUTH_BYPASS) {
-                onDevSignIn?.();
-                return;
-              }
-              navigate("/login");
-            }}
-            onSignUp={() => {
-              if (DEV_AUTH_BYPASS) {
-                onDevSignIn?.();
-                return;
-              }
-              navigate("/signup");
-            }}
-            onSignOut={onSignOut}
-          />
-          <div style={{ ...A.chatPane, width: chatWidth }}>
+        <div style={{ ...A.leftRail, width: chatWidth }}>
+          <div style={A.leftLauncherBar}>
+            <nav ref={launcherStripRef} style={A.launcherStrip} aria-label="Workspace launchers">
+              {MODES.map(mode => {
+                const openCount = launcherWork(mode.id).length;
+                const isLauncherMenuOpen = hoveredLauncher === mode.id && openCount > 0;
+                const isLauncherMenuClosing = closingLauncher === mode.id && openCount > 0;
+                return (
+                  <div
+                    key={mode.id}
+                    className={`top-launcher-wrap ${isLauncherMenuOpen ? "open" : ""} ${isLauncherMenuClosing ? "closing" : ""}`}
+                    style={A.topLauncherWrap}
+                    onMouseEnter={() => openLauncherHover(mode.id, openCount)}
+                    onMouseLeave={scheduleLauncherHoverClose}
+                    onFocus={() => openLauncherHover(mode.id, openCount)}
+                    onBlur={(event) => {
+                      const nextTarget = event.relatedTarget;
+                      if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) {
+                        scheduleLauncherHoverClose();
+                      }
+                    }}
+                  >
+                    <button
+                      className={`top-launcher ${activeMode === mode.id ? "active" : ""}`}
+                      style={A.topLauncher}
+                      onClick={() => pickMode(mode.id)}
+                      aria-label={mode.label}
+                      aria-current={activeMode === mode.id ? "page" : undefined}
+                      aria-haspopup={openCount > 0 ? "menu" : undefined}
+                    >
+                      <span className="top-launcher-icon" style={A.topLauncherIcon}>
+                        <V6Icon name={mode.icon} size={14} />
+                      </span>
+                      <span style={A.topLauncherLabel}>{mode.label}</span>
+                      {openCount > 0 && <span style={A.topLauncherBadge}>{openCount}</span>}
+                    </button>
+                    {openCount > 0 && (
+                      <div
+                        className="top-launcher-menu"
+                        style={A.topLauncherMenu}
+                        role="menu"
+                        onMouseEnter={() => openLauncherHover(mode.id, openCount)}
+                        onMouseLeave={scheduleLauncherHoverClose}
+                      >
+                        <div style={A.topLauncherMenuHead}>
+                          <span>{mode.label}</span>
+                          <span style={A.topLauncherMenuMeta}>{openCount} open</span>
+                        </div>
+                        <div className="thin-scroll" style={A.topLauncherMenuBody}>
+                          {renderLauncherWorkTree(mode.id)}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </nav>
+          </div>
+          <div style={A.chatPane}>
             <V6Chat
               thread={chat.thread}
               draft={draft}
@@ -468,6 +651,8 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
               error={chat.error}
               modelPreference={modelPreference}
               setModelPreference={setModelPreference}
+              showLearnLinks={false}
+              onFileUpload={chat.uploadFile}
               onConfirmStagedAction={chat.confirmStagedAction}
               onCancelStagedAction={chat.cancelStagedAction}
             />
@@ -476,7 +661,7 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
         <div onMouseDown={onDragStart} title="Drag to resize chat" role="separator" aria-orientation="vertical" style={A.dragHandle}>
           <div style={A.dragGrip} />
         </div>
-        <div style={A.canvasPane}>
+        <div className="v6-canvas-frame" style={A.canvasPane}>
           <V6Canvas
             tabs={tabs}
             activeTabId={activeTabId}
@@ -618,11 +803,186 @@ function discardStudioDraft(tab: Tab) {
 
 function modeForTab(tab: Tab): ModeId | null {
   if (tab.kind === "mode-root") return tab.modeId ?? null;
-  if (tab.sourceMode) return tab.sourceMode;
   if (tab.kind === "deal" || tab.kind === "analysis") return "pipeline";
-  if (tab.kind === "files-list" || tab.kind === "doc" || tab.kind === "marketing-studio") return "files";
+  if (tab.kind === "doc") return inferredLauncherDealName(tab) ? "pipeline" : "files";
+  if (tab.kind === "files-list" || tab.kind === "marketing-studio") return "files";
   if (tab.kind === "learn" || tab.kind === "feed-item" || tab.kind === "starter" || tab.kind === "settings" || tab.kind === "history") return "today";
+  if (tab.sourceMode) return tab.sourceMode;
   return null;
+}
+
+interface LauncherDealGroup {
+  deal: Tab;
+  children: Tab[];
+  virtual?: boolean;
+}
+
+function tabBelongsToLauncherMode(tab: Tab, mode: ModeId, allTabs: Tab[]): boolean {
+  if (tab.kind === "mode-root") return false;
+  if (tab.kind === "learn") return mode === "today";
+  if (tab.kind === "settings" || tab.kind === "history" || tab.kind === "starter" || tab.kind === "feed-item") return mode === "today";
+  if (tab.kind === "files-list" || tab.kind === "marketing-studio") return mode === "files";
+  if (tab.kind === "deal") return mode === "pipeline";
+  const dealParent = owningLauncherDealForTab(tab, allTabs);
+  if (dealParent || inferredLauncherDealName(tab)) return mode === "pipeline";
+  if (tab.kind === "analysis") return mode === "pipeline";
+  if (tab.kind === "doc") return mode === "files";
+  if (tab.sourceMode) return tab.sourceMode === mode;
+  return false;
+}
+
+function groupLauncherTabsByDeal(modeTabs: Tab[]): { deals: LauncherDealGroup[]; loose: Tab[] } {
+  const dealTabs = modeTabs.filter(tab => tab.kind === "deal");
+  const used = new Set<string>();
+  const deals: LauncherDealGroup[] = dealTabs.map(deal => {
+    used.add(deal.id);
+    const children = modeTabs.filter(tab => tab.kind !== "deal" && launcherTabMatchesDeal(tab, deal));
+    children.forEach(tab => used.add(tab.id));
+    return { deal, children };
+  });
+
+  const virtualDealChildren = new Map<string, Tab[]>();
+  modeTabs.forEach(tab => {
+    if (used.has(tab.id) || tab.kind === "deal") return;
+    const dealTitle = inferredLauncherDealName(tab);
+    if (!dealTitle) return;
+    if (!virtualDealChildren.has(dealTitle)) virtualDealChildren.set(dealTitle, []);
+    virtualDealChildren.get(dealTitle)?.push(tab);
+    used.add(tab.id);
+  });
+
+  virtualDealChildren.forEach((children, dealTitle) => {
+    deals.push({
+      deal: {
+        id: `virtual-${launcherDealTabIdForTitle(dealTitle)}`,
+        kind: "deal",
+        title: dealTitle,
+        sourceMode: "pipeline",
+      },
+      children,
+      virtual: true,
+    });
+  });
+
+  return { deals, loose: modeTabs.filter(tab => !used.has(tab.id)) };
+}
+
+function owningLauncherDealForTab(tab: Tab, allTabs: Tab[]): Tab | null {
+  if (tab.kind === "deal") return null;
+  return allTabs.find(candidate => candidate.kind === "deal" && launcherTabMatchesDeal(tab, candidate)) ?? null;
+}
+
+function launcherTabMatchesDeal(tab: Tab, deal: Tab): boolean {
+  if (tab.id === deal.id) return false;
+  const dealTitle = normalizeLauncherDealTitle(deal.title);
+  return sameLauncherDealName(inferredLauncherDealName(tab), dealTitle) || stripLauncherDealPrefix(tab.title, dealTitle) !== normalizeLauncherTabTitle(tab.title);
+}
+
+function inferredLauncherDealName(tab: Tab): string | null {
+  const haystack = normalizeLauncherTabTitle([
+    tab.id,
+    tab.title,
+    tab.kind === "analysis" ? tab.tool : "",
+    tab.kind === "doc" ? tab.status : "",
+  ].filter(Boolean).join(" ")).toLowerCase();
+
+  if (haystack.includes("big fake") || haystack.includes("bigfake")) return "Big Fake Deal";
+  if (haystack.includes("pest")) return "Pest Control · FL";
+  if (haystack.includes("hvac")) return "HVAC platform · CO";
+  if (haystack.includes("electrical")) return "Electrical Contractor · TX";
+  if (haystack.includes("distribution")) return "Distribution · OH";
+  if (/\bioi\b/.test(haystack) || haystack.includes("qoe") || haystack.includes("buyer fit") || haystack.includes("mutual nda")) return "Big Fake Deal";
+  if (haystack.includes("p&l") || haystack.includes("p-l") || haystack.includes("audited") || haystack.includes("tax return")) return "Big Fake Deal";
+  if (/\bloi\b/.test(haystack)) return "Pest Control · FL";
+  if (
+    haystack.includes("customer list") ||
+    haystack.includes("security findings") ||
+    haystack.includes("corporate org") ||
+    haystack.includes("disclosure schedule") ||
+    haystack.includes("insurance") ||
+    haystack.includes("litigation")
+  ) {
+    return "HVAC platform · CO";
+  }
+  return null;
+}
+
+function topTabIcon(tab: Tab): IconName {
+  if (tab.kind === "deal") return "deal";
+  if (tab.kind === "analysis") return "chart";
+  if (tab.kind === "files-list" || tab.kind === "learn") return "library";
+  if (tab.kind === "doc" || tab.kind === "marketing-studio") return "doc";
+  if (tab.kind === "history") return "history";
+  if (tab.kind === "settings") return "settings";
+  if (tab.kind === "starter") return "plus";
+  return "feed";
+}
+
+function topTabMeta(tab: Tab, allTabs: Tab[] = [], insideDeal = false): string {
+  const dealContext = insideDeal ? null : (owningLauncherDealForTab(tab, allTabs)?.title ?? inferredLauncherDealName(tab));
+  const withDeal = (label: string) => dealContext ? `${dealContext} · ${label}` : label;
+  if (tab.kind === "deal") return "Deal page";
+  if (tab.kind === "analysis") return withDeal(tab.tool ? `Analysis · ${tab.tool}` : "Analysis");
+  if (tab.kind === "files-list") return "File workspace";
+  if (tab.kind === "doc") return withDeal(tab.status ? `Document · ${tab.status}` : "Document");
+  if (tab.kind === "marketing-studio") return "Studio";
+  if (tab.kind === "learn") return tab.section === "pricing" ? "Pricing" : "How it works";
+  if (tab.kind === "history") return "Recent activity";
+  if (tab.kind === "settings") return "Workspace settings";
+  if (tab.kind === "starter") return "New workspace";
+  return "Open work";
+}
+
+function launcherDealTabIdForTitle(title: string): string {
+  const key = normalizeLauncherDealTitle(title).toLowerCase();
+  if (key.includes("big fake")) return "deal-bigfake";
+  if (key.includes("pest")) return "deal-pest";
+  if (key.includes("hvac")) return "deal-hvac";
+  if (key.includes("electrical")) return "deal-electrical";
+  if (key.includes("distribution")) return "deal-distribution";
+  return `deal-${key.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "workspace"}`;
+}
+
+function stripLauncherDealPrefix(title: string, dealTitle: string): string {
+  const normalizedTitle = normalizeLauncherTabTitle(title);
+  const normalizedDeal = normalizeLauncherDealTitle(dealTitle);
+  if (!normalizedDeal) return normalizedTitle;
+  const patterns = [
+    new RegExp(`^${escapeLauncherRegExp(normalizedDeal)}\\s*(?:[·:/-])\\s*`, "i"),
+    new RegExp(`^${escapeLauncherRegExp(normalizedDeal)}\\s+`, "i"),
+  ];
+  for (const pattern of patterns) {
+    const stripped = normalizedTitle.replace(pattern, "").trim();
+    if (stripped !== normalizedTitle) return stripped || normalizedTitle;
+  }
+  return normalizedTitle;
+}
+
+function sameLauncherDealName(left?: string | null, right?: string | null): boolean {
+  const a = launcherDealTitleKey(left);
+  const b = launcherDealTitleKey(right);
+  return Boolean(a && b && a === b);
+}
+
+function launcherDealTitleKey(title?: string | null): string {
+  return normalizeLauncherDealTitle(title ?? "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function normalizeLauncherDealTitle(title: string): string {
+  return normalizeLauncherTabTitle(title)
+    .replace(/\s*[·:-]\s*sample\b/gi, "")
+    .trim();
+}
+
+function normalizeLauncherTabTitle(title: string): string {
+  return title.replace(/\s+/g, " ").trim();
+}
+
+function escapeLauncherRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function writeHashState({ mode, tab, scope }: { mode: ModeId; tab: string; scope?: FileScope }) {
@@ -642,49 +1002,172 @@ const A: Record<string, CSSProperties> = {
   shell: {
     display: "flex", flexDirection: "column",
     height: "100vh", width: "100%", overflow: "hidden",
-    background: "linear-gradient(180deg, #D8E4F0 0%, #CEDDEB 100%)",
+    background: "linear-gradient(180deg, #EEF4FA 0%, #ECEAF2 46%, #F7F5FB 100%)",
+  },
+  leftLauncherBar: {
+    height: 54,
+    flexShrink: 0,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "6px 10px 8px",
+    boxSizing: "border-box",
+    overflow: "visible",
+    position: "relative",
+    zIndex: 70,
+  },
+  launcherStrip: {
+    position: "relative",
+    height: 40,
+    width: "fit-content",
+    maxWidth: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 5,
+    padding: "4px",
+    boxSizing: "border-box",
+    borderRadius: 15,
+    background: "rgba(255, 255, 255, 0.50)",
+    border: "1px solid rgba(198, 214, 230, 0.58)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.78), 0 12px 28px -24px rgba(45, 65, 90, 0.35)",
+    backdropFilter: "blur(14px) saturate(160%)",
+    WebkitBackdropFilter: "blur(14px) saturate(160%)",
+    overflow: "visible",
+  },
+  topLauncherWrap: {
+    display: "inline-flex",
+    height: 32,
+    flex: "0 0 auto",
+  },
+  topLauncher: {
+    all: "unset",
+    boxSizing: "border-box",
+    height: 32,
+    minWidth: 74,
+    padding: "0 8px",
+    borderRadius: 11,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 5,
+    cursor: "pointer",
+    color: "#59697D",
+    fontSize: 12,
+    fontWeight: 800,
+  },
+  topLauncherIcon: {
+    width: 19,
+    height: 19,
+    borderRadius: 6,
+    display: "grid",
+    placeItems: "center",
+    color: "inherit",
+  },
+  topLauncherLabel: {
+    lineHeight: 1,
+    whiteSpace: "nowrap",
+  },
+  topLauncherBadge: {
+    minWidth: 16,
+    height: 16,
+    padding: "0 5px",
+    borderRadius: 999,
+    display: "grid",
+    placeItems: "center",
+    fontFamily: "var(--font-mono)",
+    fontSize: 9.5,
+    color: "#537291",
+    background: "rgba(234, 243, 251, 0.9)",
+    boxShadow: "inset 0 0 0 1px rgba(172, 198, 222, 0.5)",
+  },
+  topLauncherMenu: {
+    position: "absolute",
+    top: "calc(100% + 4px)",
+    left: "50%",
+    width: 326,
+    maxHeight: "min(500px, calc(100vh - 108px))",
+    display: "flex",
+    flexDirection: "column",
+    padding: 10,
+    boxSizing: "border-box",
+    borderRadius: 16,
+    background: "rgba(242, 247, 253, 0.96)",
+    border: "1px solid rgba(195, 211, 228, 0.72)",
+    boxShadow: "0 22px 54px rgba(37, 52, 74, 0.18), inset 0 1px 0 rgba(255,255,255,0.78)",
+    backdropFilter: "blur(18px) saturate(160%)",
+    WebkitBackdropFilter: "blur(18px) saturate(160%)",
+    zIndex: 80,
+  },
+  topLauncherMenuHead: {
+    flexShrink: 0,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+    padding: "4px 6px 9px",
+    fontSize: 13,
+    fontWeight: 850,
+    color: "var(--m-on-surface)",
+    letterSpacing: "-0.01em",
+  },
+  topLauncherMenuMeta: {
+    fontFamily: "var(--font-mono)",
+    fontSize: 9.5,
+    letterSpacing: "0.11em",
+    textTransform: "uppercase",
+    color: "var(--m-on-surface-mid)",
+    fontWeight: 700,
+  },
+  topLauncherMenuBody: {
+    flex: "0 1 auto",
+    minHeight: 0,
+    maxHeight: "min(410px, calc(100vh - 174px))",
+    overflowY: "auto",
+    padding: "0 2px 2px",
   },
   row: {
     flex: 1,
     display: "flex",
     minHeight: 0,
     gap: 8,
-    padding: 8,
+    padding: "8px",
     boxSizing: "border-box",
+    overflow: "visible",
   },
-  /* Unified left "rail" — Canva pattern (corrected). Sidebar (modes +
-     tab tree) and chat sit DIRECTLY on the page background. NO card
-     chrome here — no bg, no border, no radius, no shadow. The page
-     gradient (A.shell) is the unifying surface. Only the canvas is
-     an elevated focal card.
-
-     The wrapper stays as a layout grouping div (groups sidebar + chat
-     in the DOM, hosts the hairline divider via chatPane's borderLeft)
-     but is visually invisible. */
   leftRail: {
     flexShrink: 0,
     minHeight: 0,
     display: "flex",
+    flexDirection: "column",
+    overflow: "visible",
+    position: "relative",
+    zIndex: 60,
   },
   chatPane: {
-    flexShrink: 0,
+    flex: 1,
     minWidth: 0,
     display: "flex",
     flexDirection: "column",
-    /* Hairline divider removed — was re-creating the column seam we're
-       trying to dissolve. Sidebar icons + chat content now flow as one
-       continuous surface on the page bg (Canva pattern). */
+    marginTop: 0,
+    minHeight: 0,
   },
   canvasPane: {
     flex: 1,
     minWidth: 0,
     display: "flex",
     minHeight: 0,
-    borderRadius: 22,
+    position: "relative",
+    borderRadius: 14,
     overflow: "hidden",
-    background: "var(--m-bg)",
-    border: "1px solid rgba(199, 214, 229, 0.72)",
-    boxShadow: "0 26px 68px rgba(38, 59, 84, 0.14)",
+    background: "#FEFFFF",
+    border: "1px solid rgba(166, 181, 199, 0.74)",
+    boxShadow: [
+      "-1px 0 0 rgba(255, 255, 255, 0.94)",
+      "-8px 0 18px rgba(38, 54, 76, 0.08)",
+      "0 12px 30px rgba(26, 34, 51, 0.10)",
+      "0 1px 2px rgba(26, 34, 51, 0.10)",
+    ].join(", "),
   },
   dragHandle: {
     width: 8, flexShrink: 0,

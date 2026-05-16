@@ -1,12 +1,10 @@
 import { Router } from 'express';
 import type { Response } from 'express';
-import postgres from 'postgres';
 import Anthropic from '@anthropic-ai/sdk';
 import multer from 'multer';
 import crypto from 'crypto';
 import path from 'path';
 import fs from 'fs';
-import { fileURLToPath } from 'url';
 import { optionalAuth, requireAuth } from '../middleware/auth.js';
 import { extractFromDocument } from '../services/documentExtractor.js';
 import { buildSystemPrompt, buildDynamicAnonymousPrompt } from '../services/promptBuilder.js';
@@ -68,17 +66,14 @@ import { generateConversationTitle } from '../services/conversationNamer.js';
 import { generateValueReadinessReport } from '../services/generators/valueReadinessReport.js';
 import { generateThesisDocument } from '../services/generators/thesisDocument.js';
 import { generateSdeAnalysis } from '../services/generators/sdeAnalysis.js';
+import { getUploadRoot } from '../services/uploadRoot.js';
+import { createSql } from '../dbConfig.js';
 import type { MessageParam } from '@anthropic-ai/sdk/resources/messages';
 
-const sql = postgres(process.env.DATABASE_URL!, {
-  ssl: 'require',
-  prepare: false,
-});
+const sql = createSql();
 
 // ─── File upload config ─────────────────────────────────────
-const __filename_chat = fileURLToPath(import.meta.url);
-const __dirname_chat = path.dirname(__filename_chat);
-const UPLOAD_DIR = path.resolve(__dirname_chat, '../../uploads');
+const UPLOAD_DIR = getUploadRoot();
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 const upload = multer({

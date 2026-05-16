@@ -33,6 +33,7 @@ import { passkeyRouter } from './routes/passkeys.js';
 import { agencyActionsRouter } from './routes/agencyActions.js';
 import { analysisRunsRouter } from './routes/analysisRuns.js';
 import { portfolioBriefRouter } from './routes/portfolioBrief.js';
+import { createSql, getDatabaseUrl, getPostgresOptions } from './dbConfig.js';
 
 import { exportRouter } from './routes/export.js';
 import { startWorker } from './workers/discoveryWorker.js';
@@ -77,7 +78,7 @@ if (!process.env.ANTHROPIC_API_KEY) {
 
 (async () => {
   try {
-    const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
+    const sql = createSql();
     const result = await sql`SELECT 1 as ok`;
     console.log('DB connected:', result[0]?.ok === 1 ? 'OK' : 'unexpected');
     await sql.end();
@@ -116,7 +117,7 @@ app.get('/api/debug/check-ai', async (_req, res) => {
     : 'NOT SET';
 
   try {
-    const testSql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
+    const testSql = createSql();
     const result = await testSql`SELECT COUNT(*)::int as count FROM conversations`;
     checks.dbConnected = true;
     checks.conversationCount = result[0]?.count;
@@ -312,7 +313,7 @@ app.post('/api/analytics/event', express.json(), async (req, res) => {
     // Capture IP for geo resolution in admin traffic view
     const ip = req.ip || (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || null;
 
-    const eventSql = postgres(process.env.DATABASE_URL!, { ssl: process.env.NODE_ENV === 'production' ? 'require' : false as any, prepare: false });
+    const eventSql = createSql();
     await eventSql`
       INSERT INTO analytics_events (user_id, session_id, event_type, event_data, ip_address)
       VALUES (${userId}, ${session_id || null}, ${event_type}, ${JSON.stringify(event_data || {})}::jsonb, ${ip}::inet)
@@ -326,7 +327,7 @@ app.post('/api/analytics/event', express.json(), async (req, res) => {
 
 app.post('/api/support/client-error', express.json(), async (req, res) => {
   try {
-    const supportSql = postgres(process.env.DATABASE_URL!, { ssl: process.env.NODE_ENV === 'production' ? 'require' : false as any, prepare: false });
+    const supportSql = createSql();
     await supportSql`
       INSERT INTO support_issues (type, severity, title, description, context)
       VALUES (
@@ -359,7 +360,7 @@ app.get('*', (_req, res) => {
 app.use((err: any, req: any, res: any, _next: any) => {
   console.error('Unhandled error:', err.message || err);
   try {
-    const errorSql = postgres(process.env.DATABASE_URL!, { ssl: process.env.NODE_ENV === 'production' ? 'require' : false as any, prepare: false });
+    const errorSql = createSql();
     errorSql`
       INSERT INTO support_issues (user_id, type, severity, title, description, context)
       VALUES (
@@ -378,7 +379,7 @@ app.use((err: any, req: any, res: any, _next: any) => {
 
 // ─── Auto-run migrations on startup ─────────────────────────
 async function runMigrations() {
-  const sql = postgres(process.env.DATABASE_URL!, { ssl: process.env.NODE_ENV === 'production' ? 'require' : false as any, prepare: false });
+  const sql = postgres(getDatabaseUrl(), getPostgresOptions());
   try {
     // Create tracking table if needed
     await sql`CREATE TABLE IF NOT EXISTS _migrations (name TEXT PRIMARY KEY, applied_at TIMESTAMPTZ DEFAULT NOW())`;
@@ -417,15 +418,45 @@ async function runMigrations() {
 
 runMigrations().then(async () => {
   // Post-migration: ensure critical schema and admin account exist
-  const bootSql = postgres(process.env.DATABASE_URL!, { ssl: process.env.NODE_ENV === 'production' ? 'require' : false as any, prepare: false });
+  const bootSql = createSql();
   try {
     await bootSql`ALTER TABLE users ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMPTZ`;
     await bootSql`
-      INSERT INTO users (email, password, display_name, role, trial_ends_at)
-      VALUES ('pbaker@smbx.ai', '$2b$10$mNL0ykJmWlbqzVCzLM4w4.KuHpAkezdSQSzEN6F2x/tKrKL9fqYFW', 'Paul Baker', 'admin', NOW() + INTERVAL '90 days')
-      ON CONFLICT (email) DO UPDATE SET password = EXCLUDED.password, role = 'admin'
+      INSERT INTO users (email, password, display_name, role, is_advisor, league, plan, trial_ends_at, free_deliverable_used)
+      VALUES (
+        'pbaker@smbx.ai',
+        '$2b$10$mNL0ykJmWlbqzVCzLM4w4.KuHpAkezdSQSzEN6F2x/tKrKL9fqYFW',
+        'Paul Baker',
+        'superadmin',
+        true,
+        'L4',
+        'enterprise',
+        NOW() + INTERVAL '90 days',
+        false
+      )
+      ON CONFLICT (email) DO UPDATE SET
+        password = COALESCE(users.password, EXCLUDED.password),
+        display_name = EXCLUDED.display_name,
+        role = 'superadmin',
+        is_advisor = true,
+        league = COALESCE(users.league, EXCLUDED.league),
+        plan = 'enterprise',
+        trial_ends_at = GREATEST(COALESCE(users.trial_ends_at, NOW()), EXCLUDED.trial_ends_at),
+        free_deliverable_used = false,
+        updated_at = NOW()
     `;
-    console.log('[boot] Admin account verified');
+    await bootSql`
+      INSERT INTO subscriptions (user_id, plan, status, stripe_subscription_id, stripe_customer_id, current_period_start, current_period_end, trial_ends_at)
+      SELECT id, 'enterprise', 'active', 'dev_superadmin_enterprise', 'dev_superadmin', NOW(), NOW() + INTERVAL '30 days', NOW() + INTERVAL '90 days'
+      FROM users
+      WHERE email = 'pbaker@smbx.ai'
+      ON CONFLICT (user_id) DO UPDATE SET
+        plan = 'enterprise',
+        status = 'active',
+        trial_ends_at = EXCLUDED.trial_ends_at,
+        updated_at = NOW()
+    `;
+    console.log('[boot] Superadmin account verified');
     // Debug: log which email/API keys are configured
     const keyStatus = ['RESEND_API_KEY', 'ANTHROPIC_API_KEY', 'GOOGLE_CLIENT_ID', 'STRIPE_SECRET_KEY', 'EMAIL_FROM']
       .map(k => `${k}=${process.env[k] ? 'SET' : 'MISSING'}`)

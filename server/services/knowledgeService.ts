@@ -10,6 +10,7 @@ import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import postgres from 'postgres';
+import { createSql } from '../dbConfig.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
@@ -110,7 +111,7 @@ let _sql: ReturnType<typeof postgres> | null = null;
 
 function getSql(): ReturnType<typeof postgres> {
   if (!_sql) {
-    _sql = postgres(process.env.DATABASE_URL!, { ssl: 'require' });
+    _sql = createSql();
   }
   return _sql;
 }

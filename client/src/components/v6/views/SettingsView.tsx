@@ -1,5 +1,6 @@
 import Settings from "../../../pages/Settings";
 import type { User } from "../../../hooks/useAuth";
+import { useLocation } from "wouter";
 
 interface SettingsViewProps {
   user: User | null;
@@ -7,6 +8,8 @@ interface SettingsViewProps {
 }
 
 export function V6SettingsView({ user, onSignOut }: SettingsViewProps) {
+  const [, navigate] = useLocation();
+
   if (!user) {
     return (
       <div className="m-fade-up" style={{ maxWidth: 560 }}>
@@ -18,6 +21,14 @@ export function V6SettingsView({ user, onSignOut }: SettingsViewProps) {
         <p style={{ fontSize: 13, color: "var(--m-on-surface-mid)", margin: 0 }}>
           Profile, usage, billing, and preferences are tied to your account.
         </p>
+        <div style={{ display: "flex", gap: 8, marginTop: 18 }}>
+          <button className="m-btn" type="button" onClick={() => navigate("/login")}>
+            Sign in
+          </button>
+          <button className="m-btn text" type="button" onClick={() => navigate("/signup")}>
+            Create account
+          </button>
+        </div>
       </div>
     );
   }

@@ -4,12 +4,9 @@
  * to inject into seller conversations.
  */
 import crypto from 'crypto';
-import postgres from 'postgres';
+import { createSql } from '../dbConfig.js';
 
-const sql = postgres(process.env.DATABASE_URL!, {
-  ssl: 'require',
-  prepare: false,
-});
+const sql = createSql();
 
 // ─── Types ───────────────────────────────────────────────────
 

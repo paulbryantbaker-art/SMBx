@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useLocation } from 'wouter';
+import { isSuperAdminUser } from '../../lib/superAdmin';
 import AdminOverview from './AdminOverview';
 import AdminUsers from './AdminUsers';
 import AdminTraffic from './AdminTraffic';
@@ -24,7 +25,7 @@ export default function AdminDashboard() {
     return <div className="flex justify-center items-center min-h-dvh bg-[#F8F6F2]"><p className="text-[#9CA3AF]">Loading...</p></div>;
   }
 
-  if (!user || (user.role !== 'admin' && user.email !== 'pbaker@smbx.ai')) {
+  if (!isSuperAdminUser(user)) {
     navigate('/chat');
     return null;
   }

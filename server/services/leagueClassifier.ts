@@ -1,6 +1,7 @@
 /**
  * League Classifier — Deterministic league detection from financial data.
- * Source: METHODOLOGY_V17.md + YULIA_PROMPTS_V3.md
+ * Source: shipped V18/V6 classifier.
+ * V19 L1-L10 constants live in server/constants/v19Leagues.ts.
  *
  * League determines: financial metric (SDE vs EBITDA), multiple ranges,
  * deliverable pricing, Yulia persona, document complexity.

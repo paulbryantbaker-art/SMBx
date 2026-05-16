@@ -1,5 +1,5 @@
 CLAUDE.md — smbx.ai
-Last updated: 2026-05-05
+Last updated: 2026-05-16
 
 > **For a current-vs-stale map of the whole repo, read `REPO_STATUS.md` at the root.** Archived docs live in `docs/_archive/` — do not build against them.
 
@@ -7,7 +7,7 @@ Last updated: 2026-05-05
 AI-powered deal intelligence platform for business acquisitions from $300K to mega-cap. Users talk to Yulia (AI deal intelligence) who guides them through buying, selling, or raising capital for businesses. Chat-first experience — users talk to Yulia, not dashboards. Yulia IS the front door — there is no sales team, no contact forms, no dead-end CTAs. Every action routes to chat.
 
 ## Core Architecture
-- AppShell.tsx is the ONLY layout — all routes go through it. Chat.tsx is deleted.
+- `client/src/components/v6/V6App.tsx` is the current app shell — all catch-all routes go through it. Chat.tsx is deleted.
 - Node.js + Express (ESM) backend
 - React 19 + Vite 7 + Tailwind CSS v3 + Radix UI frontend
 - wouter for client routing
@@ -26,7 +26,7 @@ AI-powered deal intelligence platform for business acquisitions from $300K to me
 1. **MONTHLY SUBSCRIPTIONS.** Free (unlimited chat + 1 deliverable) / $49 Starter / $149 Professional / $999 Enterprise. No per-deal fees. No wallet.
 2. **WALLET IS DEAD.** walletService, paywallService, dealExecutionFee, platformFeeService deleted. Never recreate.
 3. **FREE TIER.** Unlimited conversation. ONE free deliverable per user. Paywall triggers after first free deliverable, NOT at a fixed gate.
-4. **AppShell.tsx is the ONLY layout.** Never create parallel layouts. All UI changes go here.
+4. **V6App.tsx is the ONLY current app shell.** Never create parallel layouts. All UI changes go through the V6 shell/components.
 5. **NEVER use position:fixed full-viewport divs with background-color.** Safari reads them for toolbar tinting and it breaks dark mode switching. Use position:absolute inside a relative parent instead.
 6. **ValueLens (NOT Bizestimate).** The old name is dead.
 7. **Talk to Yulia (NOT Contact Sales).** All CTAs route to chat.
@@ -78,10 +78,10 @@ Valuation Explorer, LBO, SBA Financing, Tax Impact, Cap Table, Sensitivity Matri
 ## Reference Documents
 - **YULIA_AGENCY_SPEC.md** — Product/architecture doctrine for Yulia as the agentic operating layer: advisor posture without licensed-advisor boundary crossing, permission levels, surface contracts, data-room/file architecture, and implementation priorities.
 - **YULIA_AGENCY_IMPLEMENTATION_PLAN.md** — Practical wiring plan for context packs, prompt governance, governed tool execution, staged approvals, surface actions, Today, Files, and Data Room.
-- **METHODOLOGY V18 (virtual master)** = METHODOLOGY_V17.md (§1-§8, §11-§15) + METHODOLOGY_V18a_TAX_AMENDMENT.md (replaces §9 entirely) + METHODOLOGY_V18b_LEGAL_AMENDMENT.md (replaces §10 entirely).
-  - METHODOLOGY_V17.md (v17.1) — formulas, gate logic, analysis types
-  - METHODOLOGY_V18a_TAX_AMENDMENT.md (effective May 2, 2026) — post-OBBBA tax engine. IRC as amended through P.L. 119-21 (July 4, 2025); international provisions effective for tax years beginning after 12/31/2025. Distilled into runtime via `server/prompts/taxEngine.ts`.
-  - METHODOLOGY_V18b_LEGAL_AMENDMENT.md (effective May 3, 2026) — Harvard Law–grade U.S. M&A legal awareness model. Three operating modes (Continuous Awareness / Defer to Counsel / Research Externally). Anchored to §15(a) software-side broker-dealer boundary. 50 always-defer triggers + 8 always-halt categories. Distilled into runtime via `server/prompts/legalEngine.ts`.
+- **METHODOLOGY V19** = `methodology/METHODOLOGY_V19.md` + `methodology/CC_V19_IMPLEMENTATION_BRIEF.md` + `methodology/V19_BUILD_PLAN.md`.
+  - V19 is the current build target as of May 16, 2026.
+  - V17/V18a/V18b are archived in `docs/_archive/methodology/` and should not be used as new-build source material.
+  - Runtime still contains V18 tax/legal distillations in `server/prompts/taxEngine.ts` and `server/prompts/legalEngine.ts`; V19 prompt/runtime migration is tracked in `methodology/V19_BUILD_PLAN.md`.
 - STYLE_GUIDE.md — Complete UI & brand style guide for marketing materials
 - TESTING.md — Testing tracker with issue template system
 - REPO_STATUS.md — Current-vs-stale map for the whole repo (read this when reviewing on GitHub)
@@ -89,7 +89,7 @@ Valuation Explorer, LBO, SBA Financing, Tax Impact, Cap Table, Sensitivity Matri
 ## Key File Map
 | File | Purpose |
 |------|---------|
-| client/src/pages/public/AppShell.tsx | THE layout — all routes, all views, tabbed canvas |
+| client/src/components/v6/V6App.tsx | Current app shell — catch-all routes, desktop/mobile V6 workspace, tabbed canvas |
 | client/src/components/models/ | 10 interactive financial model components |
 | client/src/lib/calculations/core.ts | Deterministic calculation engine (22 formulas) |
 | client/src/lib/modelStore.ts | Zustand store for model tab state |
@@ -100,8 +100,10 @@ Valuation Explorer, LBO, SBA Financing, Tax Impact, Cap Table, Sensitivity Matri
 | server/services/aiService.ts | AI orchestration + agentic loop |
 | server/prompts/taxEngine.ts | V18 §9 tax foundation + per-league workflow (18a distillation) |
 | server/prompts/legalEngine.ts | V18 §10 legal foundation + per-league workflow (18b distillation) |
+| server/constants/v19Regulatory.ts | V19 regulatory constants for HSR, SBA, OBBBA, §382, CFIUS, RWI |
+| server/constants/v19Leagues.ts | V19 L1-L10 league classification constants |
 | server/services/sourcingPipelineService.ts | 5-stage sourcing engine |
-| server/services/tools.ts | 16 agentic tools |
+| server/services/tools.ts | 35 agentic tools |
 | server/services/premiumPdfRenderer.ts | Puppeteer HTML→PDF with Chart.js |
 | server/services/chartService.ts | Chart configs for PDF export |
 | server/services/subscriptionService.ts | Subscription management + Stripe |
@@ -120,7 +122,7 @@ Valuation Explorer, LBO, SBA Financing, Tax Impact, Cap Table, Sensitivity Matri
 | Task | Engine |
 |------|--------|
 | Chat/Conversation | Claude Sonnet 4.6 |
-| Agentic Loop | Claude Sonnet 4.6 (16 tools, 10-round limit) |
+| Agentic Loop | Claude Sonnet 4.6 (35 tools, 10-round limit) |
 | Deliverable Generation | Tier-routed (28 generators) |
 | CIM Generation | Claude Opus 4.6 |
 | Intelligence Brief | Claude Sonnet 4.6 (sourcing Stage 1) |

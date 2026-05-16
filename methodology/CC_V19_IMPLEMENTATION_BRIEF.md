@@ -7,7 +7,7 @@
 
 **Purpose:** This brief specifies EVERY file change CC must make to bring the smbX.ai app in line with METHODOLOGY V19. No interpretation required. File paths, function signatures, constants, SQL, and prompt snippets are all explicit.
 
-**Sequence:** Execute Section 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 in order. Each section is independent enough to commit + deploy + verify before moving to the next.
+**Sequence:** Execute Section 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 in order. Each section is independent enough to commit + deploy + verify before moving to the next.
 
 ---
 
@@ -29,11 +29,11 @@
 
 ### 1.1 Archive Superseded Docs
 
-Move the following from `/methodology/` (or repo root, wherever they live) into `/methodology/_archive/`:
-* `METHODOLOGY_V17.md` → `_archive/METHODOLOGY_V17.md`
-* `METHODOLOGY_V18a_TAX_AMENDMENT.md` → `_archive/METHODOLOGY_V18a_TAX_AMENDMENT.md`
-* `METHODOLOGY_V18b_LEGAL_AMENDMENT.md` → `_archive/METHODOLOGY_V18b_LEGAL_AMENDMENT.md`
-* (also archive any duplicate variant: `U_S__M_and_A_Law__Legal_Awareness_Architecture_for_Yulia_AI_Deal_Team.md` → `_archive/`)
+Move the following from the repo root into `docs/_archive/methodology/`:
+* `METHODOLOGY_V17.md` -> `docs/_archive/methodology/METHODOLOGY_V17.md`
+* `METHODOLOGY_V18a_TAX_AMENDMENT.md` -> `docs/_archive/methodology/METHODOLOGY_V18a_TAX_AMENDMENT.md`
+* `METHODOLOGY_V18b_LEGAL_AMENDMENT.md` -> `docs/_archive/methodology/METHODOLOGY_V18b_LEGAL_AMENDMENT.md`
+* (also archive any duplicate variant: `U_S__M_and_A_Law__Legal_Awareness_Architecture_for_Yulia_AI_Deal_Team.md` -> `docs/_archive/methodology/`)
 
 ### 1.2 Add New Master
 
@@ -55,9 +55,9 @@ For each match, replace the reference with `METHODOLOGY_V19`. Specifically:
 methodology:
   current: methodology/METHODOLOGY_V19.md
   archive:
-    - methodology/_archive/METHODOLOGY_V17.md
-    - methodology/_archive/METHODOLOGY_V18a_TAX_AMENDMENT.md
-    - methodology/_archive/METHODOLOGY_V18b_LEGAL_AMENDMENT.md
+    - docs/_archive/methodology/METHODOLOGY_V17.md
+    - docs/_archive/methodology/METHODOLOGY_V18a_TAX_AMENDMENT.md
+    - docs/_archive/methodology/METHODOLOGY_V18b_LEGAL_AMENDMENT.md
   companions:
     - methodology/SMBX_DEAL_MODEL_CATALOG.md         # to be built
     - methodology/SMBX_LEGAL_TAX_ECONOMICS_CATALOG.md # to be built
@@ -76,7 +76,7 @@ prompts:
 
 ## SECTION 2: DATABASE MIGRATIONS
 
-Create new migration file `server/migrations/2026-05-14-v19-schema.sql`. Apply via the existing migration runner.
+Create new migration file `server/migrations/067_v19_foundation.sql`. Apply via the existing migration runner.
 
 ### 2.1 New Tables
 
@@ -1502,13 +1502,13 @@ Edit `/CLAUDE.md` (root) to include V19 doc map. Replace existing doc-map sectio
 
 ### Methodology (Authoritative)
 - `methodology/METHODOLOGY_V19.md` — Current master (May 14, 2026)
-- `methodology/_archive/METHODOLOGY_V17.md` — Superseded by V19 §§ 1–8, 11–15
-- `methodology/_archive/METHODOLOGY_V18a_TAX_AMENDMENT.md` — Superseded by V19 § 9
-- `methodology/_archive/METHODOLOGY_V18b_LEGAL_AMENDMENT.md` — Superseded by V19 § 10
+- `docs/_archive/methodology/METHODOLOGY_V17.md` — Superseded by V19 §§ 1–8, 11–15
+- `docs/_archive/methodology/METHODOLOGY_V18a_TAX_AMENDMENT.md` — Superseded by V19 § 9
+- `docs/_archive/methodology/METHODOLOGY_V18b_LEGAL_AMENDMENT.md` — Superseded by V19 § 10
 
 ### Companion Documents
 - `methodology/SMBX_DEAL_MODEL_CATALOG.md` — Full per-model schemas (TO BUILD)
-- `methodology/SMBX_LEGAL_TAX_ECONOMICS_CATALOG.md` — Every legal/tax concept → $ impact (TO BUILD)
+- `methodology/SMBX_LEGAL_TAX_ECONOMICS_CATALOG.md` — Every legal/tax concept -> $ impact (TO BUILD)
 - `methodology/SMBX_YULIA_MODEL_GATING_LOGIC.md` — Deterministic decision tree (TO BUILD)
 
 ### Operating References
@@ -1522,14 +1522,14 @@ Edit `/CLAUDE.md` (root) to include V19 doc map. Replace existing doc-map sectio
 - `server/prompts/_archive/YULIA_PROMPTS_V3.md` — Superseded
 
 ### Implementation
-- `server/migrations/2026-05-14-v19-schema.sql` — V19 DB schema
+- `server/migrations/067_v19_foundation.sql` — V19 DB schema
 - `server/constants/v19Regulatory.ts` — 2026 regulatory constants
 - `server/constants/v19Leagues.ts` — L1–L10 classification
 - `server/services/modelRegistry.ts` — Model versioning
 - `server/services/models/` — Per-model implementations
 - `server/services/marketDataService.ts` — L2 market data cache + FRED refresh
 - `server/services/citationValidator.ts` — L6 citation validation
-- `server/services/modelStackComposer.ts` — Deal → model stack composition
+- `server/services/modelStackComposer.ts` — Deal -> model stack composition
 
 ### Tier 0 Blockers (per Punch List V2)
 - Persistent file storage via Railway volume at `/data/uploads/`
@@ -1545,7 +1545,7 @@ Add to top of `CLAUDE.md`:
 ```markdown
 ## V19 BUILD ORDER
 
-1. Apply DB migration (`server/migrations/2026-05-14-v19-schema.sql`)
+1. Apply DB migration (`server/migrations/067_v19_foundation.sql`)
 2. Seed citation registry (`server/seeds/v19_citation_registry.sql`)
 3. Deploy `server/constants/v19Regulatory.ts` + `v19Leagues.ts`
 4. Deploy `modelRegistry.ts` + Phase 1 models (20 Tier-0 models)
@@ -1559,7 +1559,7 @@ Add to top of `CLAUDE.md`:
 12. Run hallucination test suite (Phase 1: top 20 risks)
 13. Smoke test: L4 LMM PE sell-side scenario end-to-end with audit trail
 
-After Phase 1 stable → Phase 2 models → Phase 3 mega-cap models.
+After Phase 1 stable -> Phase 2 models -> Phase 3 mega-cap models.
 ```
 
 ---
@@ -1579,7 +1579,7 @@ Before declaring V19 complete:
 - [ ] `YULIA_PROMPTS_V4.md` deployed; master prompt references V19 architecture
 - [ ] All 22 gates have `requiredModels` set per V19 § 4.9 table
 - [ ] 7 new agentic tools registered and callable by Yulia
-- [ ] Smoke test: ask Yulia "I have a $10M EBITDA HVAC business in TX, S-corp, 15 yrs, considering a sale to a PE buyer" → Yulia produces 4-Beat First Response with L4 classification, valuation estimate, model stack auto-composed, F-reorg flagged for S-corp, RWI surfaced, all numbers cite-tagged
+- [ ] Smoke test: ask Yulia "I have a $10M EBITDA HVAC business in TX, S-corp, 15 yrs, considering a sale to a PE buyer" -> Yulia produces 4-Beat First Response with L4 classification, valuation estimate, model stack auto-composed, F-reorg flagged for S-corp, RWI surfaced, all numbers cite-tagged
 - [ ] Audit trail JSON downloadable from a sample conversation
 - [ ] Hallucination test suite: 0 fails on Phase 1 (top 20 risks per V19 § 14.2)
 

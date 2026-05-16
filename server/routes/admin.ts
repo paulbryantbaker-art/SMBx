@@ -1,22 +1,21 @@
 /**
  * Admin Routes — metrics, issues, Claude query, health.
- * All require admin role (user.role = 'admin' or user.email in allowlist).
+ * All require superadmin/admin role or a configured owner email allowlist.
  */
 import { Router } from 'express';
 import { sql } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
+import { isSuperAdminUser } from '../adminAccess.js';
 
 export const adminRouter = Router();
 
-// Admin check — only Paul (or future admins)
-const ADMIN_EMAILS = ['pbaker@smbx.ai']; // Add more as needed
 function requireAdmin(req: any, res: any, next: any) {
   const userId = req.userId;
   if (!userId) return res.status(401).json({ error: 'Auth required' });
 
   sql`SELECT email, role FROM users WHERE id = ${userId}`.then(([user]: any) => {
     if (!user) return res.status(401).json({ error: 'User not found' });
-    if (user.role === 'admin' || ADMIN_EMAILS.includes(user.email)) {
+    if (isSuperAdminUser(user)) {
       next();
     } else {
       res.status(403).json({ error: 'Admin access required' });

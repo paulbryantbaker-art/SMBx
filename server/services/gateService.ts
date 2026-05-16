@@ -4,13 +4,10 @@
  * Checks whether extracted conversation data meets gate requirements,
  * determines the completion deliverable, and advances the gate.
  */
-import postgres from 'postgres';
 import { checkGateReadinessSync } from './gateReadinessService.js';
+import { createSql } from '../dbConfig.js';
 
-const sql = postgres(process.env.DATABASE_URL!, {
-  ssl: 'require',
-  prepare: false,
-});
+const sql = createSql();
 
 // ─── Types ───────────────────────────────────────────────────
 

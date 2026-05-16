@@ -2,7 +2,7 @@
 
 This folder holds documents that are kept for historical reference only. **Do not build against them.** For what's current, see `REPO_STATUS.md` at the repo root.
 
-The archive covers two categories: superseded **design** eras and superseded **strategy / positioning / build prompts**.
+The archive covers superseded **design** eras, **strategy / positioning / build prompts**, and **methodology** references.
 
 ## Design eras (most recent first)
 
@@ -25,6 +25,14 @@ The archive covers two categories: superseded **design** eras and superseded **s
 | `BACKUP.txt` | Mar 2, 2026 | Old raw backup. Kept only because it was tracked in git history. |
 | `SKILL.md` | Mar 16, 2026 | Generic skill template — not project-specific content. |
 | `Building M&A Sourcing on a Bootstrapped Budget.pdf` | Mar 25, 2026 | Background reading, not a project source-of-truth doc. |
+
+## Methodology (archived 2026-05-16)
+
+| Doc | Era | Superseded by |
+|---|---|---|
+| `docs/_archive/methodology/METHODOLOGY_V17.md` | V17/V18 virtual master base | `methodology/METHODOLOGY_V19.md` |
+| `docs/_archive/methodology/METHODOLOGY_V18a_TAX_AMENDMENT.md` | V18 tax amendment | `methodology/METHODOLOGY_V19.md` + V19 constants |
+| `docs/_archive/methodology/METHODOLOGY_V18b_LEGAL_AMENDMENT.md` | V18 legal amendment | `methodology/METHODOLOGY_V19.md` |
 
 ## Why these are archived, not deleted
 

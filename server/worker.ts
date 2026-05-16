@@ -17,9 +17,12 @@ import { runDailyAggregatorScan } from './services/aggregatorMonitorService.js';
 import { batchEnrichTargets } from './services/websiteEnrichmentService.js';
 import { runStage2, runStage3, runStage4, runWeeklyPortfolioRefresh, runMonthlyPortfolioExpansion } from './services/sourcingPipelineService.js';
 import { sql } from './db.js';
+import { getDatabaseUrl, shouldUseDatabaseSsl } from './dbConfig.js';
 
-const DATABASE_URL = process.env.DATABASE_URL;
-if (!DATABASE_URL) {
+let DATABASE_URL = '';
+try {
+  DATABASE_URL = getDatabaseUrl();
+} catch {
   console.error('DATABASE_URL not set');
   process.exit(1);
 }
@@ -28,7 +31,7 @@ if (!DATABASE_URL) {
 
 const boss = new (PgBoss as any)({
   connectionString: DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
+  ssl: shouldUseDatabaseSsl(DATABASE_URL) ? { rejectUnauthorized: false } : false,
   retryLimit: 2,
   retryDelay: 5,
   expireInHours: 1,

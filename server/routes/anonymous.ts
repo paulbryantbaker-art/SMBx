@@ -2,7 +2,6 @@ import { Router } from 'express';
 import crypto from 'crypto';
 import path from 'path';
 import fs from 'fs';
-import { fileURLToPath } from 'url';
 import multer from 'multer';
 import { sql } from '../db.js';
 import { buildAnonymousPrompt } from '../services/promptBuilder.js';
@@ -10,15 +9,13 @@ import { streamAnonymousResponse } from '../services/aiService.js';
 import { extractFields } from '../services/fieldExtractor.js';
 import { scoreSevenFactors, calculateCompositeScore, scoredFactorCount } from '../services/sevenFactorScoring.js';
 import { extractFromDocument } from '../services/documentExtractor.js';
+import { getUploadRoot } from '../services/uploadRoot.js';
 import type { MessageParam } from '@anthropic-ai/sdk/resources/messages';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export const anonymousRouter = Router();
 
 // Upload config
-const UPLOAD_DIR = path.resolve(__dirname, '../../uploads');
+const UPLOAD_DIR = getUploadRoot();
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 const upload = multer({

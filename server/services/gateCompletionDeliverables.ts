@@ -18,15 +18,12 @@
  * doesn't need a separate "generate VRR for me?" prompt — completing the gate
  * is the trigger.
  */
-import postgres from 'postgres';
 import { generateValueReadinessReport, type VRRInput } from './generators/valueReadinessReport.js';
 import { generateThesisDocument, type ThesisInput } from './generators/thesisDocument.js';
 import { generateSdeAnalysis, type SdeAnalysisInput } from './generators/sdeAnalysis.js';
+import { createSql } from '../dbConfig.js';
 
-const sql = postgres(process.env.DATABASE_URL!, {
-  ssl: 'require',
-  prepare: false,
-});
+const sql = createSql();
 
 export type GateCompletionDeliverableType =
   | 'value_readiness_report'  // S0 → S1

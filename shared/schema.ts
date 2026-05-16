@@ -8,6 +8,10 @@ export interface User {
   google_id: string | null;
   league: string | null;
   role: string;
+  is_advisor?: boolean | null;
+  plan?: string | null;
+  trial_ends_at?: Date | null;
+  free_deliverable_used?: boolean | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -19,6 +23,9 @@ export interface Conversation {
   user_id: number | null;
   deal_id: number | null;
   title: string;
+  current_gate: string | null;
+  journey: string | null;
+  league: string | null;
   is_archived: boolean;
   created_at: Date;
   updated_at: Date;
@@ -41,6 +48,16 @@ export interface Deal {
   journey_type: string;
   current_gate: string;
   league: string | null;
+  deal_type: string | null;
+  jurisdiction: string | null;
+  buyer_state: string | null;
+  naics_6digit: string | null;
+  sic_code: string | null;
+  entity_type: string | null;
+  s_election_years: number | null;
+  rollover_pct: number | null;
+  earnout_present: boolean | null;
+  rwi_eligible: boolean | null;
   industry: string | null;
   location: string | null;
   business_name: string | null;

@@ -127,7 +127,7 @@ export function V6Section({ eyebrow, title, sub, action, children }: {
 
 const K: Record<string, CSSProperties> = {
   canvas: {
-    background: "linear-gradient(180deg, #FAFCFE 0%, #F5F8FC 100%)",
+    background: "linear-gradient(180deg, #FEFFFF 0%, #FCFDFF 42%, #F8FAFD 100%)",
     display: "flex", flexDirection: "column", flex: 1, minWidth: 0,
     minHeight: 0, width: "100%", height: "100%",
     borderRadius: "inherit",

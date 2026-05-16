@@ -1,5 +1,7 @@
 # SMBx.ai — Build Status & Punch List
 
+> **Status note — 2026-05-16:** This is the May 3 pre-V19 audit. It remains useful as a historical baseline, but the active build list is now `methodology/V19_BUILD_PLAN.md`.
+
 **Audit date:** 2026-05-03
 **Method:** Two parallel codebase audits (backend + frontend), claims spot-verified against actual files.
 **Bottom line:** Backend ~85%, Frontend ~70%, end-to-end product ~75%. Core M&A flow works (chat → gate progression → deliverable → PDF). Sourcing engine runs. Subscriptions take money. Auth holds. The polish layer and a few strategic seams are what's missing.
@@ -10,7 +12,7 @@
 
 The biggest finding is meta. **CLAUDE.md and `~/.claude/projects/.../memory/MEMORY.md` reference files and directories that no longer exist:**
 
-- CLAUDE.md says `client/src/pages/public/AppShell.tsx` is THE layout — **it does not exist**. The real shell is `client/src/components/v6/V6App.tsx`, with `<Route><V6App /></Route>` as the catch-all in `client/src/App.tsx`.
+- As of the May 3 audit, CLAUDE.md pointed to missing `client/src/pages/public/AppShell.tsx`. Fixed in the May 16 V19 doc migration: the current shell is `client/src/components/v6/V6App.tsx`, with `<Route><V6App /></Route>` as the catch-all in `client/src/App.tsx`.
 - Memory references `client/src/components/journey_v2/pages/` — **that directory is gone**.
 - CLAUDE.md says "Claude (primary), Gemini (secondary), OpenAI (tertiary)" — **only Claude is wired**; zero Gemini or OpenAI imports exist anywhere in `/server`.
 
@@ -24,7 +26,7 @@ Anyone (human or AI) following the docs as ground truth will write code against 
 |---|---|
 | **Methodology** | All 22 gates (S0-S5 / B0-B5 / R0-R5 / PMI0-3) have full prompts in `server/prompts/gatePrompts.ts` (1192 lines, no stubs). Tax §9 just got V18a (post-OBBBA, May 2 2026 effective). |
 | **Calculation engine** | All 22 formulas in `client/src/lib/calculations/core.ts`. Tax constants now post-OBBBA-current (QSBS tiered exclusion, §168(k) permanent, §163(j) EBITDA, etc). |
-| **AI agentic loop** | 16 tools defined and dispatched in `server/services/aiService.ts`; 10-round limit; SSE heartbeat to dodge proxy timeouts. |
+| **AI agentic loop** | 35 tools defined and dispatched in `server/services/tools.ts`; 10-round limit; SSE heartbeat to dodge proxy timeouts. |
 | **Deliverables** | 28 generators in `server/services/generators/`, routed via `deliverableProcessor.ts`. PDF rendering via Puppeteer + Chart.js. |
 | **Subscriptions** | Free / $49 / $149 / $999 — Stripe checkout, webhooks (`subscription.updated`, `charge.succeeded`), portal redirect, plan-gating helper. Free-deliverable counter on user record. |
 | **Auth** | JWT (no sessions), signup / login / reset, Google OAuth, **passkeys** (`server/migrations/046_passkeys.sql`). |

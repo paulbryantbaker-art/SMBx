@@ -1,5 +1,6 @@
-import postgres from 'postgres';
 import type { Tool } from '@anthropic-ai/sdk/resources/messages';
+import { isSuperAdminUser } from '../adminAccess.js';
+import { createSql } from '../dbConfig.js';
 import { checkGateReadinessSync as checkReadiness } from './gateReadinessService.js';
 import { generateProviderRecommendation, findProviders, trackReferral } from './providerMatchingService.js';
 import { matchFranchises } from './franchiseMatchingService.js';
@@ -27,7 +28,7 @@ import {
   summarizeMarketIntelligenceProfile,
 } from './marketIntelligenceRuntime.js';
 
-const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
+const sql = createSql();
 
 // ─── Tool Definitions (for Claude API) ─────────────────────
 
@@ -2267,8 +2268,6 @@ async function createSupportIssue(
 
 // ─── Admin Query Tool ────────────────────────────────────────
 
-const ADMIN_EMAILS = ['pbaker@smbx.ai'];
-
 // Check if a table exists before querying
 async function tableExists(name: string): Promise<boolean> {
   const [r] = await sql`SELECT to_regclass('public.' || ${name}) IS NOT NULL as exists`;
@@ -2278,7 +2277,7 @@ async function tableExists(name: string): Promise<boolean> {
 async function queryAdminData(input: Record<string, any>, userId: number): Promise<string> {
   // Verify admin
   const [user] = await sql`SELECT email, role FROM users WHERE id = ${userId}`;
-  if (!user || (user.role !== 'admin' && !ADMIN_EMAILS.includes(user.email))) {
+  if (!isSuperAdminUser(user)) {
     return JSON.stringify({ error: 'Admin access required' });
   }
 

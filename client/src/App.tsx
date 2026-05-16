@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react'
 import { Route, Switch, Redirect, useLocation } from 'wouter';
 import { DEV_AUTH_BYPASS, useAuth, authHeaders } from './hooks/useAuth';
 import { ChatProvider } from './context/ChatContext';
+import { isSuperAdminUser } from './lib/superAdmin';
 import { trackEvent } from './lib/analytics';
 
 /** Transfer anonymous conversations to the newly-authenticated user */
@@ -251,7 +252,7 @@ export default function App() {
 
         {/* Admin */}
         <Route path="/admin">
-          {user?.role === 'admin' || user?.email === 'pbaker@smbx.ai' ? (
+          {isSuperAdminUser(user) ? (
             <Suspense fallback={<PageLoader />}><AdminDashboard /></Suspense>
           ) : (
             <Redirect to={user ? '/' : '/login'} />

@@ -1,29 +1,35 @@
-/**
- * Login — Google-only sign-in.
- *
- * The email/password form was removed because it had reliability issues
- * on mobile that took too long to chase. Google auth works in every
- * environment we support, so we're funnelling all sign-ins through it.
- *
- * Props `onLogin` and `onNavigateForgot` are kept optional so the caller
- * (App.tsx) does not need to change — they're unused in this rendering.
- * If we ever re-introduce email/password, wire the form back in; the
- * backend handlers are untouched.
- */
-
+import { useState } from 'react';
 import Logo from '../../components/public/Logo';
 
 interface LoginProps {
-  /** @deprecated email/password form removed — kept for API compatibility. */
   onLogin?: (email: string, password: string) => Promise<void>;
   onGoogleLogin: () => void;
   onNavigateSignup: () => void;
-  /** @deprecated no password form → no forgot flow. Kept for API compatibility. */
   onNavigateForgot?: () => void;
   googleError?: string;
 }
 
-export default function Login({ onGoogleLogin, onNavigateSignup, googleError }: LoginProps) {
+const isDev = import.meta.env.DEV;
+const DEV_EMAIL = 'pbaker@smbx.ai';
+const DEV_PASSWORD = 'test123';
+
+export default function Login({ onLogin, onGoogleLogin, onNavigateSignup, onNavigateForgot, googleError }: LoginProps) {
+  const [devLoading, setDevLoading] = useState(false);
+  const [devError, setDevError] = useState('');
+
+  const handleDevLogin = async () => {
+    if (!onLogin) return;
+    setDevLoading(true);
+    setDevError('');
+    try {
+      await onLogin(DEV_EMAIL, DEV_PASSWORD);
+    } catch (err: any) {
+      setDevError(err.message || 'Dev login failed');
+    } finally {
+      setDevLoading(false);
+    }
+  };
+
   return (
     <div className="flex justify-center items-center min-h-dvh px-5 bg-[#faf9f5]">
       <div className="w-full max-w-[400px] bg-white rounded-2xl p-8 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.06)]">
@@ -46,13 +52,51 @@ export default function Login({ onGoogleLogin, onNavigateSignup, googleError }: 
           Continue with Google
         </button>
 
+        {isDev && (
+          <>
+            <div className="flex items-center gap-3 my-5">
+              <div className="h-px bg-[rgba(15,16,18,0.08)] flex-1" />
+              <span className="text-[11px] uppercase tracking-[0.12em] text-[#8f8b84] font-semibold">Local dev</span>
+              <div className="h-px bg-[rgba(15,16,18,0.08)] flex-1" />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleDevLogin}
+              disabled={devLoading}
+              className="w-full flex items-center justify-center px-4 py-3 bg-[#0f1012] border border-[#0f1012] rounded-xl text-[15px] text-white font-semibold cursor-pointer transition-colors hover:bg-[#2E5C8A] disabled:opacity-60 disabled:cursor-wait"
+            >
+              {devLoading ? 'Signing in...' : 'Sign in as Paul'}
+            </button>
+
+            <p className="text-center text-[12px] text-[#5e5d59] mt-3 mb-0">
+              {DEV_EMAIL}
+            </p>
+          </>
+        )}
+
         {googleError && (
           <div className="bg-[#FEF2F2] text-[#B91C1C] px-3.5 py-2.5 rounded-xl text-sm mt-3">{googleError}</div>
+        )}
+        {devError && (
+          <div className="bg-[#FEF2F2] text-[#B91C1C] px-3.5 py-2.5 rounded-xl text-sm mt-3">{devError}</div>
         )}
 
         <p className="text-center text-[13px] text-[#5e5d59] mt-6 mb-0 leading-relaxed">
           Your Google account is all you need. No password to remember, no separate sign-up — we create your smbx.ai account on first sign-in.
         </p>
+
+        {onNavigateForgot && !isDev && (
+          <p className="text-center text-sm text-[#5e5d59] mt-4 m-0">
+            <button
+              type="button"
+              onClick={onNavigateForgot}
+              className="bg-transparent border-none text-[#5e5d59] font-medium cursor-pointer text-sm p-0"
+            >
+              Forgot password?
+            </button>
+          </p>
+        )}
 
         <p className="text-center text-sm text-[#5e5d59] mt-6 m-0">
           New to smbx.ai?{' '}

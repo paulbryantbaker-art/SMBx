@@ -1,10 +1,10 @@
 # REPO_STATUS.md — what's current, what's stale
 
-**Last updated: 2026-05-05.**
+**Last updated: 2026-05-16.**
 
 This file is a stable reading-order map for anyone (human or AI) reviewing this repo on GitHub or as a fresh clone. Read this **first** after `CLAUDE.md`.
 
-The short version: production runs on `main`. Production is current as long as **Yulia Prompts V3** + **Methodology V18a (tax)** + **Methodology V18b (legal)** + the **V6 design handoff bundles** are wired in, and they are.
+The short version: production runs on `main`. V6 is live. V19 is now the active build target, with Week 1 foundation work started in migration `067_v19_foundation.sql`, `server/constants/v19Regulatory.ts`, and `server/constants/v19Leagues.ts`. Runtime tax/legal prompt distillations are still V18-era until the V19 prompt migration lands.
 
 ---
 
@@ -12,16 +12,17 @@ The short version: production runs on `main`. Production is current as long as *
 
 ### Architecture & operating instructions
 - `CLAUDE.md` — project instructions (canonical entry point)
-- `BUILD_STATUS.md` — current build state
+- `methodology/V19_BUILD_PLAN.md` — current build state and sequencing
+- `BUILD_STATUS.md` — May 3 pre-V19 audit; historical baseline, not the active V19 build list
 - `V6_WIRING_LOG.md`, `V6_MOBILE_WIRING_LOG.md` — what V6 wiring landed and where
 
-### Methodology (virtual V18 master)
-- `METHODOLOGY_V17.md` — base (§1–§8, §11–§15 still live)
-- `METHODOLOGY_V18a_TAX_AMENDMENT.md` — replaces §9 (post-OBBBA tax engine)
-- `METHODOLOGY_V18b_LEGAL_AMENDMENT.md` — replaces §10 (Harvard Law–grade U.S. M&A)
+### Methodology (V19 current build target)
+- `methodology/METHODOLOGY_V19.md` — V19 methodology master
+- `methodology/CC_V19_IMPLEMENTATION_BRIEF.md` — V19 runtime implementation brief
+- `methodology/V19_BUILD_PLAN.md` — active V19 build list and sequencing
 
 ### Yulia (AI) reference set
-- `YULIA_PROMPTS_V3.md` — system prompts (V3 is the current rev)
+- `YULIA_PROMPTS_V3.md` — current shipped system prompts until V19 prompt migration lands
 - `YULIA_INDUSTRY_INTELLIGENCE.md`, `YULIA_INDUSTRY_PROFILES.md`, `YULIA_NEGOTIATION_PLAYBOOK.md`, `YULIA_VALUATION_MASTERY.md` — stable knowledge bases (domain content, not era-specific)
 
 ### Design system — V6 (May 2026)
@@ -40,7 +41,9 @@ The short version: production runs on `main`. Production is current as long as *
 - `TESTING.md` — testing tracker
 
 ### Code (always authoritative — read code over docs when they disagree)
-- `client/src/pages/public/AppShell.tsx` — THE layout
+- `client/src/components/v6/V6App.tsx` — current app shell / catch-all workspace
+- `server/migrations/067_v19_foundation.sql` — V19 schema and citation seed
+- `server/constants/v19Regulatory.ts`, `server/constants/v19Leagues.ts` — V19 constants foundation
 - `server/index.ts` — Express entry + auto-migrations
 - `server/prompts/taxEngine.ts` — V18a runtime distillation
 - `server/prompts/legalEngine.ts` — V18b runtime distillation
@@ -64,6 +67,9 @@ Archived files live in `docs/_archive/`. Each archived markdown also carries an 
 | `SKILL.md` | Mar 16, 2026 | Generic skill template — not project content |
 | `Building M&A Sourcing on a Bootstrapped Budget.pdf` | Mar 25, 2026 | Reading material, not project source |
 | (earlier design eras) | various | See `docs/_archive/README.md` |
+| `METHODOLOGY_V17.md` | V17/V18 virtual master base | `methodology/METHODOLOGY_V19.md` |
+| `METHODOLOGY_V18a_TAX_AMENDMENT.md` | V18 tax amendment | `methodology/METHODOLOGY_V19.md` + `server/constants/v19Regulatory.ts` |
+| `METHODOLOGY_V18b_LEGAL_AMENDMENT.md` | V18 legal amendment | `methodology/METHODOLOGY_V19.md` |
 
 ---
 
@@ -71,7 +77,7 @@ Archived files live in `docs/_archive/`. Each archived markdown also carries an 
 
 1. **Does it predate V6 (May 2026) and talk about the design system or marketing surface?** → Probably stale. V6 redesigned both desktop and mobile.
 2. **Does it talk about pricing without mentioning monthly subscriptions (Free / $49 / $149 / $999)?** → Stale. The wallet model is dead; do not recreate.
-3. **Does it reference Methodology V17 §9 (tax) or §10 (legal) without the V18a/V18b amendments?** → Stale on those sections.
+3. **Does it treat Methodology V17/V18 as the current build target?** -> Stale. V19 is current; V18 tax/legal runtime remains only as shipped implementation until migration.
 4. **Does it use Cowork DL (warm cream + clay), V4 hot pink `#D44A78`, or V3 indigo+emerald palettes?** → Stale design language.
 
 When in doubt, trust **code on `main`** over **docs**. The build is the source of truth.

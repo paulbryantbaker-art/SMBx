@@ -1,10 +1,7 @@
-import postgres from 'postgres';
 import type { AgencyActionContract, AgencySurface } from './agencyActionRegistry.js';
+import { createSql } from '../dbConfig.js';
 
-const sql = postgres(process.env.DATABASE_URL!, {
-  ssl: process.env.NODE_ENV === 'production' ? 'require' : false as any,
-  prepare: false,
-});
+const sql = createSql();
 
 interface AgencyActionEventInput {
   userId: number;

@@ -241,6 +241,26 @@ export function useAuthChat(user: User | null) {
     }
   }, [user]);
 
+  const uploadFile = useCallback(async (file: File): Promise<{ name: string; size: string } | null> => {
+    if (!user) return null;
+    let convId = activeConversationId;
+    if (!convId) {
+      convId = await createConversation();
+      if (!convId) return null;
+    }
+    const form = new FormData();
+    form.append('file', file);
+    const res = await fetch(`/api/chat/conversations/${convId}/upload`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: form,
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    loadConversations();
+    return data.file ? { name: data.file.name, size: data.file.sizeFormatted } : null;
+  }, [user, activeConversationId, createConversation, loadConversations]);
+
   // Send message with SSE streaming
   const sendMessage = useCallback(async (content: string, surfaceContext?: SurfaceContext, modelPreference?: ModelPreference) => {
     if (!user) return;
@@ -581,6 +601,7 @@ export function useAuthChat(user: User | null) {
     currentGate,
     paywallData,
     sendMessage,
+    uploadFile,
     confirmStagedAction,
     cancelStagedAction,
     selectConversation,

@@ -3,19 +3,23 @@
  * Wraps each handler in try/catch so missing queues don't crash the server.
  */
 import { PgBoss } from 'pg-boss';
+import { createSql, getDatabaseUrl, shouldUseDatabaseSsl } from '../dbConfig.js';
 
 let boss: InstanceType<typeof PgBoss> | null = null;
 
 export async function startWorker(): Promise<void> {
-  if (!process.env.DATABASE_URL) {
+  let dbUrl = '';
+  try {
+    dbUrl = getDatabaseUrl();
+  } catch {
     console.warn('[worker] DATABASE_URL not set — skipping worker init');
     return;
   }
 
   try {
     boss = new (PgBoss as any)({
-      connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false },
+      connectionString: dbUrl,
+      ssl: shouldUseDatabaseSsl(dbUrl) ? { rejectUnauthorized: false } : false,
     });
 
     boss!.on('error', () => {}); // Silence queue-not-found spam
@@ -51,8 +55,7 @@ export async function startWorker(): Promise<void> {
 
     await register('daily-metrics-aggregation', async () => {
       try {
-        const pgSql = (await import('postgres')).default;
-        const metricsSql = pgSql(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
+        const metricsSql = createSql();
 
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
