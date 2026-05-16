@@ -115,6 +115,13 @@ export async function streamAgenticResponse(
               block.input as Record<string, any>,
               ctx.userId,
               ctx.conversationId,
+              {
+                actorType: 'yulia',
+                actorId: 'yulia',
+                actingOnBehalfOfUserId: ctx.userId,
+                sourceSurface: 'chat',
+                sourceAgent: 'yulia-chat',
+              },
             );
             if (process.env.NODE_ENV !== 'production') {
               console.log(`Tool result: ${result.substring(0, 200)}`);

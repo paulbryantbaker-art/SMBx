@@ -5,7 +5,7 @@ import { V6DealCard, type Verdict } from "./cards";
 import type { OpenTab } from "../types";
 import { DEV_AUTH_BYPASS, type User } from "../../../hooks/useAuth";
 import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
-import { DESKTOP_TEXTURES } from "../../../lib/randomTextures";
+import { ART_HOUSE_TEXTURES, DESKTOP_TEXTURES } from "../../../lib/randomTextures";
 import type { ModelPreference } from "../../../lib/modelPreference";
 import {
   executeSurfaceAction,
@@ -276,10 +276,12 @@ function pipelineActionTone(tone: "gold" | "blue" | "green"): CSSProperties {
       boxShadow: "0 24px 58px rgba(156,113,40,0.14), 0 7px 18px rgba(26,34,51,0.08)",
     },
     blue: {
-      background: "linear-gradient(145deg, rgba(250,253,255,0.98) 0%, rgba(221,236,248,0.92) 100%)",
-      color: "#285B89",
-      borderColor: "rgba(106,155,204,0.24)",
-      boxShadow: "0 24px 58px rgba(61,105,150,0.14), 0 7px 18px rgba(26,34,51,0.08)",
+      background: `linear-gradient(145deg, rgba(18,36,58,0.72) 0%, rgba(52,92,116,0.44) 52%, rgba(12,24,42,0.78) 100%), url('${ART_HOUSE_TEXTURES.pipeline}')`,
+      backgroundSize: "cover, cover",
+      backgroundPosition: "center, center",
+      color: "#FFFFFF",
+      borderColor: "rgba(255,255,255,0.32)",
+      boxShadow: "0 30px 76px rgba(34,72,102,0.26), 0 8px 22px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.24)",
     },
     green: {
       background: "linear-gradient(145deg, rgba(249,253,251,0.98) 0%, rgba(220,240,231,0.92) 100%)",

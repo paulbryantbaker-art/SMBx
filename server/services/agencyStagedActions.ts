@@ -5,6 +5,7 @@ export interface AgencyStagedAction {
   id: number;
   user_id: number;
   conversation_id: number | null;
+  action_id?: string | null;
   tool_name: string;
   action_label: string;
   permission_level: string | null;
@@ -45,32 +46,77 @@ export async function createStagedAction({
   contract: AgencyActionContract;
   input: Record<string, any>;
 }): Promise<AgencyStagedAction | null> {
+  const canonical = contract as any;
+
   try {
     const [row] = await sql`
       INSERT INTO agency_staged_actions (
         user_id,
         conversation_id,
+        action_id,
         tool_name,
         action_label,
         permission_level,
         risk_level,
         write_scope,
+        required_scopes,
+        allowed_surfaces,
+        citation_requirement,
+        billing_event_type,
+        billing_credit_cost,
+        source_surface,
         input
       )
       VALUES (
         ${userId},
         ${conversationId},
+        ${canonical.actionId ?? contract.toolName},
         ${contract.toolName},
         ${contract.label},
         ${contract.permissionLevel},
         ${contract.riskLevel},
         ${contract.writeScope},
+        ${canonical.requiredScopes ?? []},
+        ${canonical.allowedSurfaces ?? []},
+        ${canonical.citationRequirement ?? null},
+        ${canonical.billing?.eventType ?? null},
+        ${canonical.billing?.creditCost ?? 0},
+        ${input.sourceSurface ?? 'chat'},
         ${safeJson(input)}::jsonb
       )
       RETURNING *
     `;
     return normalizeAction(row);
   } catch (err: any) {
+    try {
+      const [row] = await sql`
+        INSERT INTO agency_staged_actions (
+          user_id,
+          conversation_id,
+          tool_name,
+          action_label,
+          permission_level,
+          risk_level,
+          write_scope,
+          input
+        )
+        VALUES (
+          ${userId},
+          ${conversationId},
+          ${contract.toolName},
+          ${contract.label},
+          ${contract.permissionLevel},
+          ${contract.riskLevel},
+          ${contract.writeScope},
+          ${safeJson(input)}::jsonb
+        )
+        RETURNING *
+      `;
+      return normalizeAction(row);
+    } catch {
+      // Fall through to the dev warning below.
+    }
+
     if (process.env.NODE_ENV !== 'production') {
       console.warn('[agencyStagedActions] create skipped:', err.message);
     }

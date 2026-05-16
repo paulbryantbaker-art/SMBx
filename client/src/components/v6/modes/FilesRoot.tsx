@@ -3,7 +3,7 @@ import { V6Icon } from "../icons";
 import type { FileListView, FileScope, OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
 import { useV6WorkspaceData, type WorkspaceDeal, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
-import { DESKTOP_TEXTURES } from "../../../lib/randomTextures";
+import { ART_HOUSE_TEXTURES, DESKTOP_TEXTURES } from "../../../lib/randomTextures";
 
 interface FilesRootProps {
   openTab: OpenTab;
@@ -149,7 +149,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
     if (row.kind === "chart" && row.analysisRunId) {
       openTab({
         kind: "analysis",
-        title: row.title,
+        title: fileTabTitle(row),
         id: row.analysisRunId ? `analysis-${row.analysisRunId}` : row.id,
         analysisRunId: row.analysisRunId,
         tool: row.analysisType ?? undefined,
@@ -157,7 +157,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
       });
       return;
     }
-    openTab({ kind: "doc", title: row.title, id: row.id ?? `file-${slug(row.title)}` });
+    openTab({ kind: "doc", title: fileTabTitle(row), id: row.id ?? `file-${slug(row.title)}` });
   };
 
   const openDeal = (room: RoomRow, fileScope: FileScope = "all") => {
@@ -346,7 +346,7 @@ export function V6FilesListView({
     if (row.kind === "chart" && row.analysisRunId) {
       openTab({
         kind: "analysis",
-        title: row.title,
+        title: fileTabTitle(row),
         id: row.analysisRunId ? `analysis-${row.analysisRunId}` : row.id,
         analysisRunId: row.analysisRunId,
         tool: row.analysisType ?? undefined,
@@ -354,7 +354,7 @@ export function V6FilesListView({
       });
       return;
     }
-    openTab({ kind: "doc", title: row.title, id: row.id ?? `file-${slug(row.title)}` });
+    openTab({ kind: "doc", title: fileTabTitle(row), id: row.id ?? `file-${slug(row.title)}` });
   };
 
   const openDeal = (room: RoomRow, fileScope: FileScope = "all") => {
@@ -529,6 +529,12 @@ function fileDealName(row: FileRow): string {
   return deal.trim() || "Workspace";
 }
 
+function fileTabTitle(row: FileRow): string {
+  const deal = fileDealName(row);
+  if (!deal || deal === "Workspace" || row.title.startsWith(`${deal} · `)) return row.title;
+  return `${deal} · ${row.title}`;
+}
+
 function activeListCopy(view: FileListView) {
   const copy: Record<FileListView, { eyebrow: string; title: string; sub: string; prompt: string }> = {
     all: {
@@ -620,7 +626,7 @@ function shortcutTone(name: Shortcut["tone"]) {
       countColor: "#3E6F9E",
     },
     deals: {
-      bg: `linear-gradient(145deg, rgba(14,62,48,0.58) 0%, rgba(63,128,101,0.40) 52%, rgba(10,31,35,0.66) 100%), url('${DESKTOP_TEXTURES.filesDeals}')`,
+      bg: `linear-gradient(145deg, rgba(14,62,48,0.58) 0%, rgba(63,128,101,0.40) 52%, rgba(10,31,35,0.66) 100%), url('${ART_HOUSE_TEXTURES.files}')`,
       border: "rgba(98, 153, 135, 0.24)",
       shadow: "0 28px 70px rgba(63, 125, 100, 0.28), 0 8px 20px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.22)",
       iconBg: "rgba(98, 153, 135, 0.16)",
@@ -746,7 +752,7 @@ const F: Record<string, CSSProperties> = {
   },
   detailPage: {
     minHeight: "100%",
-    maxWidth: 1320,
+    maxWidth: 1380,
   },
   detailHero: {
     minHeight: 240,

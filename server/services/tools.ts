@@ -19,6 +19,12 @@ import { hasDealAccess } from './dealAccessService.js';
 import { TOOL_NAMES_REQUIRING_CONFIRMATION } from './agencyActionRegistry.js';
 import { createAnalysisRun, createModelTabRecord, readAnalysisRunSnapshot, readModelTabState, updateAnalysisRunSnapshot, updateModelTabState } from './analysisRuntime.js';
 import { buildDealComparisonAnalysis, buildDeterministicAnalysis } from './deterministicAnalysisEngine.js';
+import {
+  ensureMarketIntelligenceProfileForDeal,
+  enrichAnalysisWithMarketIntelligenceProfile,
+  queueIndustryDeepResearchJob,
+  summarizeMarketIntelligenceProfile,
+} from './marketIntelligenceRuntime.js';
 
 const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
 
@@ -730,10 +736,29 @@ async function createDeal(input: Record<string, any>, userId: number, conversati
   // Link conversation to deal and clear general flag (this is now a deal conversation)
   await sql`UPDATE conversations SET deal_id = ${deal.id}, is_general = false WHERE id = ${conversationId}`;
 
+  setImmediate(() => {
+    queueIndustryDeepResearchJob({
+      userId,
+      dealId: Number(deal.id),
+      triggerReason: 'deal_created',
+      sourceSurface: 'chat',
+      sourceAgent: 'yulia-create-deal',
+    }).catch(() => {});
+  });
+
   return JSON.stringify({ success: true, dealId: deal.id, journeyType, gate: initialGate });
 }
 
 const FINANCIAL_FIELDS = new Set(['revenue', 'sde', 'ebitda', 'asking_price']);
+const MARKET_INTELLIGENCE_TRIGGER_FIELDS = new Set([
+  'business_name',
+  'industry',
+  'location',
+  'league',
+  'journey_type',
+  'current_gate',
+  'status',
+]);
 
 async function updateDealField(input: Record<string, any>, userId: number): Promise<string> {
   const { dealId, field, value } = input;
@@ -766,6 +791,18 @@ async function updateDealField(input: Record<string, any>, userId: number): Prom
   // Check freshness after financial updates (non-blocking)
   if (isFinancialUpdate) {
     setImmediate(() => checkDealFreshness(dealId).catch(() => {}));
+  }
+
+  if (isFinancialUpdate || MARKET_INTELLIGENCE_TRIGGER_FIELDS.has(field)) {
+    setImmediate(() => {
+      ensureMarketIntelligenceProfileForDeal({
+        userId,
+        dealId: Number(dealId),
+        triggerReason: `deal_field_updated:${field}`,
+        sourceSurface: 'chat',
+        sourceAgent: 'yulia-update-deal-field',
+      }).catch(() => {});
+    });
   }
 
   return JSON.stringify({ success: true, field, value });
@@ -1085,11 +1122,23 @@ async function runAnalysis(input: Record<string, any>, userId: number, conversat
     journeyType: deal.journey_type,
     currentGate: deal.current_gate,
   });
-  const analysisData = buildDeterministicAnalysis({
+
+  const marketProfile = analysisType === 'market_intelligence'
+    ? await ensureMarketIntelligenceProfileForDeal({
+        userId,
+        dealId: Number(dealId),
+        triggerReason: 'run_market_intelligence_analysis',
+        sourceSurface: 'analysis_canvas',
+        sourceAgent: 'yulia-run-analysis',
+      })
+    : null;
+
+  const baseAnalysisData = buildDeterministicAnalysis({
     analysisType,
     deal,
     menuItemSlug,
   });
+  const analysisData = enrichAnalysisWithMarketIntelligenceProfile(baseAnalysisData, marketProfile);
 
   const resultText = await generateDealDeliverable({ dealId, menuItemSlug, modelPreference }, userId);
   let result: Record<string, any>;
@@ -1135,7 +1184,12 @@ async function runAnalysis(input: Record<string, any>, userId: number, conversat
     },
     commentaryMarkdown: analysisData.yuliaRead,
     marketContext: analysisData.analysisType === 'market_intelligence'
-      ? { summary: analysisData.summary, metrics: analysisData.metrics, charts: analysisData.charts }
+      ? {
+          summary: analysisData.summary,
+          metrics: analysisData.metrics,
+          charts: analysisData.charts,
+          runtimeProfile: summarizeMarketIntelligenceProfile(marketProfile),
+        }
       : {},
     riskFlags: analysisData.risks,
     missingData: analysisData.missingData,

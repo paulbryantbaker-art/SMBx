@@ -8,10 +8,10 @@ import V6Mobile from "./mobile/V6Mobile";
 import { V6Sidebar } from "./Sidebar";
 import { V6Chat } from "./Chat";
 import { V6Canvas } from "./Canvas";
-import { SampleBanner, SAMPLE_DISMISS_KEY } from "./SampleBanner";
 import { MODES } from "./icons";
 import { buildDesktopSurfaceContext, type SurfaceContext } from "../../lib/yuliaSurfaceContext";
 import { normalizeModelPreference, type ModelPreference } from "../../lib/modelPreference";
+import { isSuperAdminUser } from "../../lib/superAdmin";
 import type { FileListView, FileScope, Message, ModeId, Tab } from "./types";
 
 const VALID_MODES: ModeId[] = ["today", "pipeline", "search", "files", "docs", "analysis", "intel", "library"];
@@ -226,23 +226,48 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
     setActiveTabId(rootId);
   };
 
+  const activateTab = (id: string) => {
+    const tab = tabs.find(t => t.id === id);
+    const mode = tab ? modeForTab(tab) : null;
+    if (mode) setActiveMode(mode);
+    setActiveTabId(id);
+  };
+
   const openTab: (descriptor: Omit<Tab, "id"> & { id?: string }) => void = (descriptor) => {
     const id = descriptor.id ?? `${descriptor.kind}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const sourceMode = descriptor.kind === "mode-root" ? undefined : descriptor.sourceMode ?? activeMode;
+    const nextTab = { ...descriptor, ...(sourceMode ? { sourceMode } : null), id } as Tab;
     setTabs(prev => {
       const existing = prev.find(t => t.id === id);
       if (existing) {
         // Merge new descriptor into the existing tab so callers can re-open
         // a tab with new section/anchor/template/tool props (e.g., pricing
         // pill activates an open How-it-works tab and switches its section).
-        return prev.map(t => t.id === id ? { ...t, ...descriptor, id } : t);
+        return prev.map(t => t.id === id ? { ...t, ...descriptor, ...(sourceMode ? { sourceMode } : null), id } : t);
       }
-      return [...prev, { ...descriptor, id }];
+      if (descriptor.kind === "marketing-studio" && descriptor.studioView === "canvas") {
+        const lastStudioIndex = prev.reduce((last, tab, index) => tab.kind === "marketing-studio" ? index : last, -1);
+        const insertAt = lastStudioIndex >= 0 ? lastStudioIndex + 1 : prev.length;
+        return [...prev.slice(0, insertAt), nextTab, ...prev.slice(insertAt)];
+      }
+      return [...prev, nextTab];
     });
+    const nextMode = modeForTab(nextTab);
+    if (nextMode) setActiveMode(nextMode);
     setActiveTabId(id);
   };
 
   const closeTab = (id: string) => {
     if (id === "today-root") return;
+    const tabToClose = tabs.find(t => t.id === id);
+    if (tabToClose?.kind === "marketing-studio" && tabToClose.studioView === "canvas" && tabToClose.studioDirty !== false) {
+      const saveDraft = window.confirm(`Save "${tabToClose.title}" before closing?\n\nOK saves it to Marketing Studio. Cancel closes without saving.`);
+      if (saveDraft) {
+        saveStudioDraft(tabToClose);
+      } else {
+        discardStudioDraft(tabToClose);
+      }
+    }
     setTabs(prev => {
       const next = prev.filter(t => t.id !== id);
       if (id === activeTabId) {
@@ -250,6 +275,26 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
         const fallback = next[idx - 1] ?? next[idx] ?? next.find(t => t.id === "today-root") ?? next[0];
         if (fallback) setActiveTabId(fallback.id);
       }
+      return next;
+    });
+  };
+
+  const reorderTabs = (dragId: string, targetId: string) => {
+    if (dragId === targetId || dragId === "today-root" || targetId === "today-root") return;
+    setTabs(prev => {
+      const dragIndex = prev.findIndex(t => t.id === dragId);
+      const targetIndex = prev.findIndex(t => t.id === targetId);
+      if (dragIndex < 0 || targetIndex < 0) return prev;
+
+      const dragged = prev[dragIndex];
+      const target = prev[targetIndex];
+      const todayPinned = (tab: Tab) => tab.kind === "mode-root" && tab.modeId === "today";
+      if (todayPinned(dragged) || todayPinned(target)) return prev;
+
+      const next = [...prev];
+      next.splice(dragIndex, 1);
+      const adjustedTargetIndex = next.findIndex(t => t.id === targetId);
+      next.splice(adjustedTargetIndex < 0 ? next.length : adjustedTargetIndex, 0, dragged);
       return next;
     });
   };
@@ -302,6 +347,13 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
     if (path === "/how-it-works" || path === "/pricing") {
       const section: "how" | "pricing" = path === "/pricing" ? "pricing" : "how";
       openTab({ id: "tab-learn", kind: "learn", title: "How it works · Pricing", section });
+      window.history.replaceState(null, "", "/" + window.location.hash);
+    } else if (path === "/marketing-studio" || path === "/studio") {
+      if (isSuperAdminUser(user)) {
+        openTab({ id: "marketing-studio", kind: "marketing-studio", title: "Marketing Studio", studioView: "home" });
+      } else {
+        openTab({ id: "today-root", kind: "mode-root", modeId: "today", title: "Today", pinned: true });
+      }
       window.history.replaceState(null, "", "/" + window.location.hash);
     } else if (path === "/settings" || path === "/profile") {
       openTab({ id: "tab-settings", kind: "settings", title: "Settings" });
@@ -356,32 +408,6 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
   };
 
   const modeLabel = MODES.find(m => m.id === activeMode)?.label ?? "Workspace";
-  const isAnon = !user;
-
-  // ─── Banner state (anon only) ───
-  const [bannerDismissed, setBannerDismissed] = useState(false);
-  useEffect(() => {
-    try {
-      if (localStorage.getItem(SAMPLE_DISMISS_KEY) === "1") setBannerDismissed(true);
-    } catch { /* noop */ }
-  }, []);
-  const dismissBanner = () => {
-    setBannerDismissed(true);
-    try { localStorage.setItem(SAMPLE_DISMISS_KEY, "1"); } catch { /* noop */ }
-  };
-  const startWorkspace = () => {
-    // Anon CTA — push to signup. Authed users never see this banner.
-    if (!user) {
-      if (DEV_AUTH_BYPASS) {
-        onDevSignIn?.();
-      } else {
-        navigate("/signup");
-      }
-    } else {
-      openTab({ id: "tab-learn", kind: "learn", title: "How it works · Pricing", section: "pricing" });
-    }
-  };
-
   // ⌘K focuses Yulia from anywhere.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -396,13 +422,14 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
 
   return (
     <div className="v6-root" style={A.shell}>
-      {isAnon && !bannerDismissed && (
-        <SampleBanner onDismiss={dismissBanner} onStartWorkspace={startWorkspace} />
-      )}
       <div style={A.row}>
         <V6Sidebar
           activeMode={activeMode}
+          tabs={tabs}
+          activeTabId={activeTabId}
           onPickMode={pickMode}
+          onPickTab={activateTab}
+          onCloseTab={closeTab}
           onOpenTab={openTab}
           user={user}
           onSignIn={() => {
@@ -422,7 +449,7 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           onSignOut={onSignOut}
         />
         <main style={A.main}>
-          <div style={{ width: chatWidth, flexShrink: 0, minWidth: 0, display: "flex", flexDirection: "column" }}>
+          <div style={{ ...A.chatPane, width: chatWidth }}>
             <V6Chat
               thread={chat.thread}
               draft={draft}
@@ -444,13 +471,14 @@ function V6AppShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           <div onMouseDown={onDragStart} title="Drag to resize chat" role="separator" aria-orientation="vertical" style={A.dragHandle}>
             <div style={A.dragGrip} />
           </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={A.canvasPane}>
             <V6Canvas
               tabs={tabs}
               activeTabId={activeTabId}
               setActiveTabId={setActiveTabId}
               openTab={openTab}
               closeTab={closeTab}
+              reorderTabs={reorderTabs}
               onPickMode={pickMode}
               onTalkToYulia={(prompt) => send(prompt)}
               user={user}
@@ -508,6 +536,14 @@ function tabFromHash(tab: string | null, scope?: FileScope, title?: string): Tab
       fileScope: scope,
     };
   }
+  if (tab === "marketing-studio") {
+    return {
+      id: "marketing-studio",
+      kind: "marketing-studio",
+      title: "Marketing Studio",
+      studioView: "home",
+    };
+  }
   return null;
 }
 
@@ -533,6 +569,58 @@ function titleForDealId(id: string): string {
   return "Big Fake Deal";
 }
 
+function saveStudioDraft(tab: Tab) {
+  try {
+    const key = "smbx_marketing_studio_drafts";
+    const drafts = JSON.parse(localStorage.getItem(key) || "[]");
+    const draftId = tab.studioDraftId ?? tab.id;
+    const workingStore = (window as unknown as Record<string, Record<string, any> | undefined>).__smbxMarketingStudioWorkingDrafts ?? {};
+    const workingDraft = workingStore[draftId] ?? {};
+    const existing = Array.isArray(drafts)
+      ? drafts.find((item: any) => item?.id === draftId)
+      : null;
+    const draft = {
+      ...existing,
+      ...workingDraft,
+      id: draftId,
+      tabId: tab.id,
+      title: workingDraft.title ?? tab.title,
+      format: workingDraft.format ?? tab.studioFormat ?? "one-pager",
+      campaign: workingDraft.campaign ?? tab.studioCampaign ?? "General",
+      updatedAt: new Date().toISOString(),
+      status: workingDraft.status ?? existing?.status ?? "draft",
+    };
+    const next = Array.isArray(drafts)
+      ? [draft, ...drafts.filter((item: any) => item?.id !== draft.id)].slice(0, 24)
+      : [draft];
+    localStorage.setItem(key, JSON.stringify(next));
+    delete workingStore[draftId];
+    (window as unknown as Record<string, Record<string, any>>).__smbxMarketingStudioWorkingDrafts = workingStore;
+  } catch {
+    // Local draft saving is best-effort until the studio has a backend table.
+  }
+}
+
+function discardStudioDraft(tab: Tab) {
+  try {
+    const draftId = tab.studioDraftId ?? tab.id;
+    const workingStore = (window as unknown as Record<string, Record<string, any> | undefined>).__smbxMarketingStudioWorkingDrafts ?? {};
+    delete workingStore[draftId];
+    (window as unknown as Record<string, Record<string, any>>).__smbxMarketingStudioWorkingDrafts = workingStore;
+  } catch {
+    // Best-effort session cleanup.
+  }
+}
+
+function modeForTab(tab: Tab): ModeId | null {
+  if (tab.kind === "mode-root") return tab.modeId ?? null;
+  if (tab.sourceMode) return tab.sourceMode;
+  if (tab.kind === "deal" || tab.kind === "analysis") return "pipeline";
+  if (tab.kind === "files-list" || tab.kind === "doc" || tab.kind === "marketing-studio") return "files";
+  if (tab.kind === "learn" || tab.kind === "feed-item" || tab.kind === "starter" || tab.kind === "settings" || tab.kind === "history") return "today";
+  return null;
+}
+
 function writeHashState({ mode, tab, scope }: { mode: ModeId; tab: string; scope?: FileScope }) {
   try {
     const params = new URLSearchParams();
@@ -550,19 +638,55 @@ const A: Record<string, CSSProperties> = {
   shell: {
     display: "flex", flexDirection: "column",
     height: "100vh", width: "100%", overflow: "hidden",
+    background: "linear-gradient(180deg, #D8E4F0 0%, #CEDDEB 100%)",
   },
-  row: { flex: 1, display: "flex", minHeight: 0 },
-  main: { flex: 1, minWidth: 0, display: "flex" },
+  row: {
+    flex: 1,
+    display: "flex",
+    minHeight: 0,
+    gap: 8,
+    padding: 8,
+    boxSizing: "border-box",
+  },
+  main: {
+    flex: 1,
+    minWidth: 0,
+    display: "flex",
+    gap: 8,
+    minHeight: 0,
+  },
+  chatPane: {
+    flexShrink: 0,
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+    borderRadius: 22,
+    overflow: "hidden",
+    boxShadow: "0 22px 56px rgba(38, 59, 84, 0.12)",
+  },
+  canvasPane: {
+    flex: 1,
+    minWidth: 0,
+    display: "flex",
+    minHeight: 0,
+    borderRadius: 22,
+    overflow: "hidden",
+    background: "var(--m-bg)",
+    border: "1px solid rgba(199, 214, 229, 0.72)",
+    boxShadow: "0 26px 68px rgba(38, 59, 84, 0.14)",
+  },
   dragHandle: {
-    width: 6, flexShrink: 0,
+    width: 8, flexShrink: 0,
     cursor: "col-resize",
-    background: "#DCE6F1",
+    background: "transparent",
     position: "relative",
+    borderRadius: 999,
+    margin: "10px 0",
   },
   dragGrip: {
     position: "absolute", top: "50%", left: "50%",
     transform: "translate(-50%, -50%)",
-    width: 2, height: 28, borderRadius: 2,
-    background: "#7A8395", opacity: 0.45,
+    width: 3, height: 42, borderRadius: 999,
+    background: "#778A9E", opacity: 0.18,
   },
 };

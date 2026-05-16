@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { authHeaders, type User } from "../../../hooks/useAuth";
 import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
 import { useV6WorkspaceData, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
-import { DESKTOP_TEXTURES } from "../../../lib/randomTextures";
+import { ART_HOUSE_TEXTURES, DESKTOP_TEXTURES } from "../../../lib/randomTextures";
 import { executeSurfaceAction, type ActionDeal } from "../../../lib/v6ActionContracts";
 import { isSurfaceActionId, type SurfaceActionId } from "../../../lib/v6SurfaceActions";
 import type { OpenTab } from "../types";
@@ -185,6 +185,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   }, [workspace.canFetch, user?.id]);
 
   const useSampleData = !home.isAuthed || !workspace.canFetch;
+  const showLoggedOutMarketing = !user && useSampleData;
   const realDeals = home.inReview.length > 0 ? home.inReview : home.picks;
   const liveBrief = useSampleData ? null : portfolioBrief;
   const waitingForYuliaRead = !useSampleData && !liveBrief;
@@ -219,6 +220,21 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   };
   const heroNotes = liveBrief?.hero.notes?.length
     ? liveBrief.hero.notes
+    : showLoggedOutMarketing
+      ? [
+          {
+            label: "Source",
+            text: "Find targets, buyers, capital, advisors, and market context without leaving the deal desk.",
+          },
+          {
+            label: "Diligence",
+            text: "Turn source materials into issue trees, model inputs, evidence trails, and action queues.",
+          },
+          {
+            label: "Execute",
+            text: "Carry decisions into documents, data rooms, shared reviews, and post-close value work.",
+          },
+        ]
     : waitingForYuliaRead
       ? [
           {
@@ -397,7 +413,9 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           </div>
 
           <h1 style={T.headline}>
-            {liveBrief?.hero.title || (waitingForYuliaRead ? (
+            {liveBrief?.hero.title || (showLoggedOutMarketing ? (
+              <>Connect sourcing, diligence, execution, and value creation in one workflow.</>
+            ) : waitingForYuliaRead ? (
               <>Yulia is refreshing <span style={T.headlineSerif}>your portfolio read</span>.</>
             ) : lead ? (
               <>Yulia's read: <span style={T.headlineSerif}>{leadTitle}</span> needs your eye before the next buyer touch.</>
@@ -407,7 +425,9 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           </h1>
 
           <p style={T.lede}>
-            {liveBrief?.hero.lede || (waitingForYuliaRead
+            {liveBrief?.hero.lede || (showLoggedOutMarketing
+              ? "smbX.ai connects institutional deal intelligence, workflow execution, and continuous transaction context across the deal lifecycle — from sourcing and diligence through post-close value realization."
+              : waitingForYuliaRead
               ? "The page is holding the surface, but the recommendation copy belongs to Yulia's briefing layer. When it returns, the cards below will reflect her sourced read."
               : lead
               ? "The deal is still worth pursuing. Review the IOI, answer counsel on the NDA, and keep the buyer search narrow until working capital is buttoned up."
@@ -426,6 +446,8 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
               style={T.heroGlassAction}
               onClick={() => liveBrief?.hero.primaryPrompt
                 ? ask(liveBrief.hero.primaryPrompt)
+                : showLoggedOutMarketing
+                  ? ask("Help me connect sourcing, diligence, execution, and value creation in one workflow.")
                 : lead
                   ? openDoc(`${lead.title} · IOI v3`)
                   : ask("Help me start my first SMBx deal workspace.")}
@@ -433,22 +455,24 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
             >
               <span style={T.yTile}>Y</span>
               <span style={T.heroActionCopy}>
-                <strong>{liveBrief?.hero.primaryLabel || (lead ? "Review IOI" : "Start with Yulia")}</strong>
-                <span>{lead ? "Open the work product Yulia wants reviewed first." : "Chat first; Yulia will build the surface around the deal."}</span>
+                <strong>{liveBrief?.hero.primaryLabel || (showLoggedOutMarketing ? "Chat with Yulia" : lead ? "Review IOI" : "Start with Yulia")}</strong>
+                <span>{showLoggedOutMarketing ? "Start with a thesis, source file, target, buyer, or deal question." : lead ? "Open the work product Yulia wants reviewed first." : "Chat first; Yulia will build the surface around the deal."}</span>
               </span>
-              <span style={T.heroActionPill}>{lead ? "Open" : "Start"}</span>
+              <span style={T.heroActionPill}>{showLoggedOutMarketing ? "Start" : lead ? "Open" : "Start"}</span>
             </button>
             <button
               className="m-glint m-glass-control"
               style={T.heroGlassActionSecondary}
               onClick={() => liveBrief?.hero.secondaryDealId
                 ? openDealById(liveBrief.hero.secondaryDealId)
+                : showLoggedOutMarketing && lead
+                  ? openDeal(lead)
                 : lead
                   ? openDeal(lead)
                   : openTab({ kind: "mode-root", modeId: "pipeline", id: "pipeline-root", title: "Pipeline", pinned: true })}
               type="button"
             >
-              <span>{liveBrief?.hero.secondaryLabel || (lead ? "Open deal" : "Open pipeline")}</span>
+              <span>{liveBrief?.hero.secondaryLabel || (showLoggedOutMarketing ? "Try sample deal" : lead ? "Open deal" : "Open pipeline")}</span>
               <span aria-hidden="true">›</span>
             </button>
           </div>
@@ -727,13 +751,13 @@ const todayHeroWash = (sample: boolean) =>
   sample
     ? `linear-gradient(155deg, rgba(77,39,53,0.52) 0%, rgba(183,103,93,0.34) 48%, rgba(29,30,54,0.58) 100%), url('${DESKTOP_TEXTURES.todayHeroSample}')`
     : `linear-gradient(155deg, rgba(18,51,61,0.58) 0%, rgba(78,128,111,0.35) 48%, rgba(13,26,46,0.62) 100%), url('${DESKTOP_TEXTURES.todayHeroWorkspace}')`;
-const marketWash = `linear-gradient(165deg, rgba(8,25,43,0.76) 0%, rgba(21,75,104,0.62) 54%, rgba(5,17,31,0.84) 100%), url('${DESKTOP_TEXTURES.todayMarket}')`;
+const marketWash = `linear-gradient(165deg, rgba(8,25,43,0.76) 0%, rgba(21,75,104,0.62) 54%, rgba(5,17,31,0.84) 100%), url('${ART_HOUSE_TEXTURES.today}')`;
 
 const T: Record<string, CSSProperties> = {
   page: {
     minHeight: "100%",
     margin: "-28px -40px -56px",
-    padding: "34px max(44px, calc(50% - 690px)) 72px",
+    padding: "34px 40px 72px",
     background: "radial-gradient(circle at 50% -120px, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0) 44%), linear-gradient(180deg, #F6F8FC 0%, #EEF4FA 58%, #E8F0F8 100%)",
     color: "#1A2233",
   },

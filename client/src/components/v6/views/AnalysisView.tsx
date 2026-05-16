@@ -362,7 +362,7 @@ export function V6AnalysisView({
   }
 
   return (
-    <div className="m-fade-up" style={{ maxWidth: 1180 }}>
+    <div className="m-fade-up" style={{ maxWidth: 1380 }}>
       <section style={{ marginBottom: 24 }}>
         <div className="mono" style={A.eyebrow}>{effectiveTool === "tool-compare" ? "ANALYSIS · COMPARISON · YULIA CAN REFINE" : "ANALYSIS · LIVE · YULIA RECOMPUTES AS YOU MOVE"}</div>
         <div style={A.headerRow}>
@@ -755,7 +755,7 @@ function StructuredAnalysisCanvas({
   };
 
   return (
-    <div className="m-fade-up" style={{ maxWidth: 1180 }}>
+    <div className="m-fade-up" style={{ maxWidth: 1380 }}>
       <section style={{ marginBottom: 24 }}>
         <div className="mono" style={A.eyebrow}>ANALYSIS · STRUCTURED · EVIDENCE LED</div>
         <div style={A.headerRow}>
@@ -1380,7 +1380,7 @@ function ComparisonCanvas({
   const hasDeals = deals.length >= 2;
 
   return (
-    <div className="m-fade-up" style={{ maxWidth: 1180 }}>
+    <div className="m-fade-up" style={{ maxWidth: 1380 }}>
       <section style={{ marginBottom: 24 }}>
         <div className="mono" style={A.eyebrow}>ANALYSIS · COMPARISON</div>
         <div style={A.headerRow}>

@@ -2,6 +2,7 @@
 
 Saved: May 11, 2026  
 Execution refresh: May 13, 2026
+V19 refresh: May 15, 2026
 
 ## Restore Point Protocol
 
@@ -26,6 +27,131 @@ Suggested cadence:
 - Commit after every action-surface batch.
 - Commit after every working end-to-end flow.
 - Commit before pushing to `main`.
+
+## V19 Operating Addendum — Agentic Platform Scope
+
+Authoritative inputs for the next build pass:
+
+- `methodology/METHODOLOGY_V19.md` — current master methodology.
+- `methodology/CC_V19_IMPLEMENTATION_BRIEF.md` — implementation instructions for schema, prompts, tools, services, model registry, and gate injection.
+- `smbX Must-Haves, Attractor and Stickiness Architecture_ Prescriptive Build Priorities.pdf` — conversion, retention, lock-in, and daily habit priorities.
+- `Agent Economy MandA Playbook_ Pricing and Architecture Strategy for smbX.ai.pdf` — V1 go-live pricing, metering, agent-channel, and protocol strategy.
+
+V19 does not replace the current plan; it sharpens it. The current plan already points toward Yulia as an operating layer, but V19 makes the execution requirements explicit:
+
+- Yulia is a governed deal-team agent, not a chatbot with widgets.
+- Every serious number comes from a deterministic model or versioned content table.
+- Every market, tax, legal, regulatory, or factual claim needs a validated citation or source trace.
+- Every action, model run, scenario change, generated artifact, user approval, and professional handoff needs an audit trail.
+- Every recommendation visible in the product must originate from Yulia's portfolio/deal intelligence layer.
+- Every high-value output must be portable, but the workflow memory, audit trail, assumption history, and institutional context become the sticky layer.
+- V1 go-live includes the internal agent-forward runtime: Yulia, chat, UI, jobs, analyses, documents, market intelligence, and future external agents all use the same governed action substrate.
+- V1 must be a **public go-live product**, not an internal beta or demo shell. Public launch readiness means real users, real billing/plan limits, real audit trails, real permissions, real data isolation, real supportable workflows, and production smoke tests.
+- V1 must also be **public-agent-surface ready** for MCP, OpenAI Apps SDK, Salesforce AgentExchange, Microsoft Agent Store, A2A, and AP2 readiness. Marketplace/listing activation can be held behind product/legal/business launch gates, but the technical surface should not be deferred.
+
+### V1 Go-Live Agent Economy Addendum
+
+For this plan, **V1 means public go-live product**, not the methodology version number and not an internal beta. V19 is the methodology and governance spine; V1 is the first production release that must feel agentic, trustworthy, economically ready, and safe for real customers.
+
+The launch distinction is:
+
+- The smbX product itself should be ready for public launch in V1.
+- The external agent surfaces should be production-ready in V1, but can remain unlisted, invite-only, or feature-flagged until counsel, security, partner review, and business timing approve public activation.
+- No surface should be a demo-only shortcut. If it is visible to users or agents, it must route through governed contracts, permissions, citations, metering, and audit.
+
+V1 must include the internal agent-forward architecture:
+
+- Yulia must behave internally like an agent calling structured tools, not like a freeform chatbot that happens to render widgets.
+- Chat, UI buttons, background jobs, analysis canvases, documents, files, market intelligence, billing, audit, and future external agents must dispatch through the same action contracts.
+- Every meaningful operation needs a canonical `actionId`, label, description, input schema, output schema, required scopes, billing or credit cost, citation requirement, audit requirement, confirmation requirement, and allowed surfaces.
+- Irreversible or externally visible actions — send, share, execute, data-room movement, external participant invitation, and production filing — must stage for human confirmation.
+- Yulia-originated recommendations must resolve to governed action objects. A card, row, pill, or CTA only presents the recommendation; it does not author it.
+
+V1 must also include agent-economy pricing and metering foundations:
+
+- Existing public pricing tiers may remain, but internally they are subscriptions with bundled Yulia work capacity rather than pure seat fees.
+- Meter software-defined work: action runs, model runs, document generation, market research, data-room ingest, exports, file operations, and future external-agent API calls.
+- Do **not** meter or price by deal close, deal value, financing success, buyer-introduction success, transaction outcome, or any other transaction-based compensation.
+- Add usage events, plan caps, credit or work-capacity balances, real-time visibility, and audit-friendly billing records before any broad consumption rollout.
+- Treat the audit trail as a trust and billing artifact: every action run should be traceable to actor, acting-on-behalf-of user, organization, source surface, model/tool version, citation state, confirmation state, and usage event.
+
+Public agent surfaces are part of V1 readiness:
+
+- V1 must include production-ready protocol surfaces for MCP, OpenAI Apps SDK, Salesforce AgentExchange, Microsoft Agent Store, A2A, and AP2 readiness, or the closest launchable shell where third-party review timelines require submission/approval.
+- Public discovery, marketplace listing, and broad external-agent availability can be feature-flagged until counsel, security, and product approve release.
+- These protocol surfaces must be thin adapters over the internal action runtime, not separate systems.
+- The same governed contracts must expose read-only context, model runs, document drafting, search, file operations, and staged write actions safely.
+
+### V19 Build Priority Stack
+
+The new execution order is:
+
+1. **V19 foundation:** archive superseded methodology docs, install V19 as the canonical reference, add V19 constants, seed citation registry, and update repo guidance.
+2. **V1 Internal Agent Substrate:** action registry, structured tool contracts, usage metering, audit, permissions, citations, model routing, confirmation gates, and caller identity fields.
+3. **Governance spine:** context packs, citation validator, audit trail, professional defer logic, prompt V4, broker-test guardrails, and Yulia-originated recommendation contracts.
+4. **Model registry:** stable model IDs, version pinning, required inputs, output schemas, cite tags, and formula ownership.
+5. **Model stack composer:** Yulia chooses models by journey, gate, league, deal type, structure, jurisdiction, industry, and available evidence.
+6. **Real analysis surfaces:** every analysis opens the right canvas, not a title-swapped generic page. Each canvas has model-specific inputs, sliders, scenarios, outputs, evidence, Yulia read, version history, Optimize, and export/review actions.
+7. **Market intelligence runtime:** industry/deal/portfolio research, live data cache, source/citation validation, rule-change watch, and scheduled Yulia reads.
+8. **Conversion workflows:** CIM in 48 hours, Deal Pack in 4 hours, QoE Preview, Pricing Reality Check, Capital Partner / Buyer outreach kit, and Today Brief + Countdown + Pulse.
+9. **Stickiness architecture:** Firm Memory, 7-year SOX-grade AI audit trail, prior-deal carryforward, Excel round-trip, recurring LP/portfolio updates, multi-journey attach, gate countdowns, and cold-pipeline/deals-in-flight pulses.
+10. **Document/data-room lifecycle:** private work product, shared diligence drive, review, deferred/action-needed, executed immutable records, and permission-aware retrieval.
+11. **V1 Public-Ready Agent Surfaces:** MCP server, OpenAI Apps SDK, Salesforce AgentExchange, Microsoft Copilot / Agent Store, A2A card, AP2 readiness, and public agent API channels built as launch-ready adapters over the internal runtime, with marketplace activation controlled by launch gates.
+
+Checkpoint V1 substrate, May 15:
+
+- Extended the governed action registry so each Yulia tool can resolve to a canonical public-go-live action contract with `actionId`, input/output schema placeholders, required scopes, billing policy, citation requirement, audit requirement, allowed surfaces, and external-agent readiness.
+- Added caller identity plumbing for action runs: actor type/id, acting-on-behalf-of user, organization, source surface, source agent, and mandate scope.
+- Added usage-event foundations so billable Yulia work can be metered as software-defined work: model runs, document generation, market research, file operations, action runs, exports, and future external-agent API calls.
+- Added migration `065_v1_agent_substrate_metering.sql` to make action events, staged actions, and usage events ready for public go-live audit/billing requirements.
+- Updated the execution-layer prompt context so Yulia treats structured actions as the runtime spine, not as optional chat helpers.
+
+### Real Market Intelligence Requirement
+
+Market intelligence is not a card, page, or occasional report. It is a standing layer of Yulia's reasoning.
+
+Yulia must become the user's go-to source for M&A market intelligence so the user does not need to Google industry insights, financing climate, buyer behavior, transaction trends, or rule changes before deciding what to do next.
+
+The runtime must cover:
+
+- Industry trend synthesis.
+- Deal-impact analysis by industry, geography, size, league, role, and transaction type.
+- Forecasts and scenario implications.
+- Financing climate, spreads, rates, SBA/SBIC/lender appetite, and capital availability.
+- Active buyers, buyer pools, sponsors, strategic acquirers, lenders, and deal professionals.
+- Recent comparable transactions and sector valuation movement.
+- Rule changes that affect industries or deal structures: tax, legal, regulatory, labor, privacy/cyber, environmental, antitrust, SBA, HSR, CFIUS, state law, and industry-specific rules.
+- Source gaps: what Yulia still needs to know before she can support a pursue/watch/pass, valuation, financing, diligence, tax, legal, or negotiation view.
+
+When a user creates or imports a deal, the first background action should be an **Industry Deep Research job**:
+
+1. Classify the deal by NAICS/SIC, geography, league, role, transaction type, likely buyer universe, and current gate.
+2. Pull live/cached market sources and external research.
+3. Create a deal-specific market intelligence profile.
+4. Identify trend impacts, forecasts, rule changes, comps, buyer appetite, financing constraints, and diligence issues.
+5. Attach source/citation records and freshness timestamps.
+6. Generate a Yulia deal read overnight or by next-day refresh.
+7. Inject the read into Today, Deal Detail, Pipeline, Search, Files, analysis canvases, and chat context.
+
+This makes market intelligence operational: every recommendation, model stack, document, outreach list, buyer ranking, diligence request, tax/legal issue spot, and Optimize scenario can incorporate the current market read.
+
+### Stickiness Architecture Requirement
+
+The Must-Haves research is explicit: capability alone is not enough. Yulia becomes hard to leave when she compounds memory, auditability, and daily workflow.
+
+The sticky layer must include:
+
+- **Firm Memory:** persistent, sourced, queryable memory of prior deals, preferred language, buyer/seller relationships, passed-deal rationale, thesis history, modeled comps, lender preferences, QoE providers, attorney/CPA preferences, outreach response history, successful negotiation patterns, and reusable assumptions.
+- **Prior-deal carryforward:** new deals should be pre-populated from Firm Memory where appropriate, just like tax software carryforwards.
+- **7-year AI audit trail:** append-only record of prompts, outputs, citations, source docs, model versions, assumption changes, user edits, approvals, professional handoffs, exports, data-room activity, and executed artifacts.
+- **Daily habit:** Today must become Brief + Countdown + Pulse, opened by default and refreshed from live deal/market/workflow state.
+- **Gate Advance & Closing Countdown:** live deadlines for LOI exclusivity, financing commitments, diligence requests, HSR/state notices, third-party deliverables, IC/board steps, and close conditions.
+- **Deals-in-Flight Pulse / Cold Pipeline Decay:** Yulia should surface stale deals, new triggering events, thesis-matched targets, and overnight market changes.
+- **Excel round-trip:** models can leave as Excel and return with diffs, while Yulia preserves the canonical assumption/version history.
+- **Recurring deliverables:** LP updates, portfolio updates, banker/broker status reports, buyer pipeline updates, and diligence summaries should be generated from live activity.
+- **Multi-journey attach:** Sell, Buy, Raise, and PMI should reinforce each other; a closed Sell journey can become a Buy/PMI origin, and a Raise can become a portfolio-monitoring workflow.
+
+The product should remain portable and trustworthy: users own their documents, exports, and models. The durable moat is the memory, audit trail, workflow graph, model history, and source-linked context that make Yulia better every month.
 
 ## Sequential Execution Plan
 
@@ -234,10 +360,26 @@ Tasks:
 - Add freshness timestamps and source quality.
 - Generate scheduled portfolio and deal reads.
 - Replace static Today/Deal commentary with cached Yulia reads from live facts.
+- Run an Industry Deep Research job when a deal is created, imported, or materially changed.
+- Persist deal-level market intelligence profiles with industry, geography, league, role, buyer universe, capital availability, rule changes, forecasts, comps, and source gaps.
+- Monitor rule changes and market events that affect industries, financing, taxes, legal exposure, regulatory timing, diligence requests, and negotiation strategy.
+- Feed market intelligence into model stack composition, Optimize, valuation, buyer fit, tax/legal structure, deal ranking, document generation, and outreach.
+- Surface what changed since the last read and what Yulia did with that change.
 
 Done when:
 
 - Today and Deal Detail market intelligence are generated from real deal/file/market data with sources and freshness.
+- Every new deal receives an initial industry/deal market read automatically, with next-day/overnight refresh behavior.
+- Yulia can explain how a market trend, forecast, source gap, or rule change affects a specific deal, model, document, buyer list, or next action.
+
+Checkpoint E.1, May 15:
+
+- Added durable market-intelligence runtime tables for deal/portfolio profiles, source/citation records, and queued Industry Deep Research jobs.
+- Added a runtime service that builds a deal-specific market intelligence profile from current deal facts plus available market heat, Census CBP/BDS, SBA lending, and FRED data.
+- Wired `run_analysis` for `market_intelligence` so the canvas is hydrated with the deal's runtime profile, citations, source gaps, freshness, and queued deep-research job context instead of only generic deterministic copy.
+- Queued an Industry Deep Research job automatically when Yulia creates a deal and when material deal fields or financial fields change.
+- Preserved the professional-boundary rule: rule changes, tax/legal impacts, and market claims stay source-gapped/queued until source-backed evidence is attached.
+- Verified the production build after the runtime migration/service wiring.
 
 ### Phase F — Document Lifecycle and Data Room
 
@@ -284,6 +426,64 @@ Tasks:
 Done when:
 
 - We can push with confidence and test live without guessing what is wired.
+
+### Phase I — Conversion Workflows and Stickiness
+
+Goal: ship the moments that convert users and the architecture that makes Yulia harder to leave every month.
+
+Conversion workflows:
+
+- Engagement-Letter-to-CIM-in-48-hours.
+- Deal Pack in 4 hours after LOI.
+- Yulia QoE Preview before the user spends on full QoE.
+- Listing Pricing Reality Check.
+- Capital Partner / Buyer outreach kit.
+- Free-until-LOI / first-value onboarding paths where appropriate.
+
+Stickiness systems:
+
+- Firm Memory persistent object.
+- Prior-deal carryforward into new deals, theses, models, language, buyers, lenders, counsel, CPAs, and preferred assumptions.
+- 7-year SOX-grade AI audit trail.
+- Morning Yulia Brief.
+- Gate Advance & Closing Countdown.
+- Deals-in-Flight Pulse.
+- Cold Pipeline Decay.
+- Excel round-trip with assumption diffing.
+- Quarterly LP / investor / stakeholder updates.
+- Multi-journey attach instrumentation across Sell, Buy, Raise, and PMI.
+
+Done when:
+
+- A broker can upload an engagement package and receive a credible CIM/teaser/buyer-list workflow.
+- A searcher can get a pre-LOI QoE Preview that helps decide whether to spend on full QoE.
+- An independent sponsor can produce a capital-partner-grade Deal Pack from an LOI.
+- A repeat user gets materially better outputs because Yulia remembers prior deals, preferred language, assumptions, buyer/lender history, and source-backed judgments.
+
+### Phase J — V1 Public-Ready Agent Surfaces and External Agent Interop
+
+Goal: make Yulia and smbX capabilities ready to launch publicly on agent rails while preserving the same internal governance, citations, permissions, metering, and audit trail used by chat and UI.
+
+This phase is part of V1 readiness. Public discovery/listing can be feature-flagged, unlisted, or held for marketplace review, counsel, and business timing, but the technical architecture should be launchable.
+
+Tasks:
+
+- Define an smbX capability manifest: available actions, model types, document operations, file operations, search operations, and required scopes.
+- Build public-ready adapters for MCP, OpenAI Apps SDK, Salesforce AgentExchange, Microsoft Copilot / Agent Store, A2A Agent Card, AP2 readiness, and the public Yulia API channel.
+- Reuse the internal action runtime for every adapter; do not create separate action logic for marketplaces or public agents.
+- Add scoped external-agent auth, permission boundaries, caller identity, acting-on-behalf-of identity, organization, source surface, and mandate/scope fields.
+- Allow external agents to request actions; never silently execute irreversible actions.
+- Require citations, source references, and audit handoff for any external-agent market/tax/legal/model claim.
+- Record external-agent activity in the same audit trail as Yulia and users.
+- Expose read-only deal/file/model/context endpoints first, then staged write endpoints.
+- Stage all external share, send, execute, and data-room movement actions for user confirmation.
+- Add usage/metering events for public-agent calls, model runs, document generation, market research, file ingest, exports, and premium action runs.
+- Keep public listing/marketplace activation behind launch gates until counsel/security/product approve.
+
+Done when:
+
+- Another trusted agent can ask smbX for deal context, request a model run, draft a document, search market intelligence, or stage a file/workflow action through governed contracts, and every action is permissioned, cited, metered, and auditable.
+- smbX can safely choose to activate public MCP/OpenAI/Salesforce/Microsoft/A2A/AP2 surfaces without rebuilding the runtime.
 
 ## North Star
 
@@ -337,10 +537,9 @@ The codebase already has several important pieces:
 - A `run_analysis` action contract that can route analysis requests into the canvas instead of dumping numbers into chat.
 - A `compare_deals` path that can open a comparison tab.
 - A model store with early interactive model types: valuation, LBO, SBA financing, DCF, sensitivity, comparison, cap table, earnout, tax impact, working capital, covenant, and SDE analysis.
-- Methodology docs defining math, workflow, canvas, tax, and legal guardrails:
-  - `METHODOLOGY_V17.md`
-  - `METHODOLOGY_V18a_TAX_AMENDMENT.md`
-  - `METHODOLOGY_V18b_LEGAL_AMENDMENT.md`
+- Methodology docs defining math, workflow, canvas, tax, legal, market intelligence, anti-hallucination, and audit guardrails:
+  - `methodology/METHODOLOGY_V19.md`
+  - `methodology/CC_V19_IMPLEMENTATION_BRIEF.md`
 
 The gap is that these pieces are not yet one coherent execution system. Yulia can sometimes generate a deliverable, but she cannot yet reliably create an interactive analysis, cite its evidence, update assumptions, compare scenarios, maintain versions, attach findings to a deal, route signoffs, and keep the UI in sync across Today, Pipeline, Files, Deal Detail, Search, and Chat.
 
@@ -876,7 +1075,31 @@ Document Viewer must support:
 - Confirm production deploy branch.
 - Confirm seed/demo mode vs logged-in user data mode.
 
-### Phase 1 — Analysis Registry and Persistence
+### Phase 1 — V19 Schema, Citation, Model, and Governance Foundation
+
+- Apply V19 schema additions.
+- Seed citation registry.
+- Add V19 regulatory and league constants.
+- Add model registry and stable model IDs.
+- Add citation validator.
+- Add prompt V4 governance.
+- Add professional-boundary and broker-test guardrails.
+
+Done when: Yulia has the V19 foundation needed to produce cited, model-backed, legally bounded outputs.
+
+### Phase 2 — V1 Internal Agent Substrate and Usage Metering
+
+- Add canonical action definitions.
+- Add action runs.
+- Add usage/metering events.
+- Add credit or work-capacity balance tracking.
+- Add caller identity fields: actor, acting-on-behalf-of user, organization, mandate/scope, and source surface.
+- Add confirmation gates for irreversible or externally visible actions.
+- Route chat, UI buttons, background jobs, analysis canvases, documents, files, and market intelligence through the same action dispatcher.
+
+Done when: clicking **Run analysis** and asking Yulia to run the same analysis create the same governed action run, audit event, and usage event.
+
+### Phase 3 — Analysis Registry and Persistence
 
 - Add `analysis_definitions`.
 - Add `analysis_runs`.
@@ -888,7 +1111,7 @@ Document Viewer must support:
 
 Done when: asking Yulia for buyer fit, valuation, market intelligence, or comparison creates a saved analysis run and opens a canvas tab.
 
-### Phase 2 — First Real Model Family
+### Phase 4 — First Real Model Family
 
 Implement deterministic engines for:
 
@@ -903,7 +1126,7 @@ Implement deterministic engines for:
 
 Done when: outputs are structured JSON, chart-ready, assumption-driven, and discussable with Yulia.
 
-### Phase 3 — Interactive Canvas
+### Phase 5 — Interactive Canvas
 
 - Build reusable canvas shell.
 - Build chart components.
@@ -915,19 +1138,22 @@ Done when: outputs are structured JSON, chart-ready, assumption-driven, and disc
 
 Done when: the user can change assumptions and Yulia can respond using the updated model state.
 
-### Phase 4 — Market Intelligence Runtime
+### Phase 6 — Market Intelligence Runtime
 
 - Connect market intelligence sources and cache.
-- Build deal-specific market read.
-- Build portfolio-wide market read.
-- Build scheduled refresh.
-- Link market events to deals.
-- Add citations and recency stamps.
-- Show front-and-center on Today and Deal Detail.
+- Build initial Industry Deep Research jobs for deal creation/import.
+- Build deal-specific market reads.
+- Build portfolio-wide market reads.
+- Build scheduled overnight/next-day refresh.
+- Build rule-change watch by industry, jurisdiction, tax/legal/regulatory area, and financing market.
+- Link market events, forecasts, rule changes, buyer activity, and source gaps to affected deals.
+- Add citations, source quality, and recency stamps.
+- Feed market context into model stack composition, scenario Optimize, buyer fit, valuation, tax/legal issue spotting, diligence requests, and outreach.
+- Show front-and-center on Today, Deal Detail, Pipeline, Search, Files, and analysis canvases.
 
-Done when: Today and Deal Detail comments are LLM-synthesized from current market intelligence and deal facts, not static copy.
+Done when: Today and Deal Detail comments are LLM-synthesized from current market intelligence and deal facts, not static copy, and Yulia can explain what market/rule/trend changed, which deals it affects, and what action she recommends next.
 
-### Phase 5 — Document Lifecycle
+### Phase 7 — Document Lifecycle
 
 - Private draft.
 - Analysis/doc.
@@ -939,7 +1165,7 @@ Done when: Today and Deal Detail comments are LLM-synthesized from current marke
 
 Done when: every file action changes real state and appears in Files, Deal Detail, Today, and Chat.
 
-### Phase 6 — Tax and Legal Guardrails
+### Phase 8 — Tax and Legal Guardrails
 
 - Encode tax/legal trigger matrices.
 - Add professional handoff flags.
@@ -949,7 +1175,7 @@ Done when: every file action changes real state and appears in Files, Deal Detai
 
 Done when: Yulia can run sophisticated tax/legal structure analysis while staying on the analysis side of the line.
 
-### Phase 7 — Institutional / Big-Deal Expansion
+### Phase 9 — Institutional / Big-Deal Expansion
 
 - Full LBO.
 - Accretion/dilution.
@@ -963,7 +1189,7 @@ Done when: Yulia can run sophisticated tax/legal structure analysis while stayin
 
 Done when: a PE, corp dev, or banking user can run a serious institutional deal workflow without the product feeling SMB-only.
 
-### Phase 8 — Workflow Orchestration
+### Phase 10 — Workflow Orchestration
 
 - Background Yulia jobs.
 - Work queues.
@@ -976,7 +1202,20 @@ Done when: a PE, corp dev, or banking user can run a serious institutional deal 
 
 Done when: Yulia can move work from insight to next action without the user manually operating every surface.
 
-### Phase 9 — QA and Trust
+### Phase 11 — V1 Public-Ready Agent Surfaces
+
+- Build launch-ready MCP server.
+- Build launch-ready OpenAI Apps SDK surface.
+- Build launch-ready Salesforce AgentExchange package path.
+- Build launch-ready Microsoft Copilot / Agent Store connector path.
+- Publish-ready A2A Agent Card.
+- AP2 readiness for future agent-mediated payments and mandate proof.
+- Public Yulia API channel with scoped auth, metering, and audit.
+- Keep external availability behind launch flags until counsel/security/product approve activation.
+
+Done when: public agent surfaces can be activated without rebuilding action logic, and every external-agent request is permissioned, staged where needed, cited, metered, and auditable.
+
+### Phase 12 — QA, Trust, and Production Readiness
 
 - Golden test deals.
 - Formula test vectors.
@@ -984,6 +1223,8 @@ Done when: Yulia can move work from insight to next action without the user manu
 - Evidence/citation tests.
 - Tool-call contract tests.
 - Regression tests for every UI button.
+- Usage/metering tests.
+- Public-agent adapter tests.
 - Production smoke tests.
 
 Done when: no major visible button is fake, no analysis is chat-only, no professional-boundary output crosses the line, and no user sees another user's data.
@@ -1001,11 +1242,22 @@ Done when: no major visible button is fake, no analysis is chat-only, no profess
 9. Make all adjustable analysis assumptions scenario sliders, not freeform text fields. **Started: structured analysis canvases now expose slider-based scenario saves and an Ask Yulia prompt tied to the active scenario.**
 10. Add scenario optimization as a first-class action. **Started: desktop, mobile, and legacy analysis canvases now expose Optimize as a Yulia action/tool. Optimize asks Yulia to re-analyze saved/current scenarios for the user's role — buyer, seller, raiser, divestor, or advisor — select the best risk-adjusted path, explain why, and turn it into negotiation strategy, fallback positions, reps-and-warranties asks, diligence requests, professional signoffs, and concrete work products.**
 11. Wire “Run analysis” buttons across Today, Pipeline, Deal Detail, Search, Files, and Analysis Root.
-12. Add market intelligence refresh/read pipeline with evidence and recency. **Started: structured analysis payloads now include first-class evidence references so Yulia's read can point to the deal facts, financial facts, methodology guardrails, and market context it used.**
+12. Add market intelligence refresh/read pipeline with evidence and recency. **Advanced: market-intelligence analysis now hydrates from persisted deal-level profiles with source records, citations, freshness, source gaps, and queued Deep Research job context.**
 13. Replace static Yulia comments with cached, LLM-synthesized portfolio/deal reads.
 14. Build data-room/share/executed lifecycle actions.
 15. Add permissions and audit enforcement on every read/write action.
 16. Add tests that click through every button and verify real action results.
+17. Add V19 Industry Deep Research jobs on deal creation/import and material deal changes. **Started: deal creation and material deal-field/financial updates now queue a `market_intelligence_jobs` record tied to the deal profile.**
+18. Add Firm Memory as the durable cross-deal carryforward object.
+19. Add the 7-year append-only AI audit trail and signed deliverable manifests.
+20. Add Today Brief + Countdown + Pulse as the daily habit surface.
+21. Add conversion workflows in priority order: CIM in 48 hours, Deal Pack in 4 hours, QoE Preview, Pricing Reality Check, and Capital Partner / Buyer outreach kit.
+22. Add V1 action definitions and action-run persistence so chat, UI, jobs, models, files, and documents use one governed dispatcher.
+23. Add V1 usage/metering events, plan caps, work-capacity balances, and audit-friendly billing records.
+24. Add confirmation gates for irreversible or externally visible actions: send, share, execute, invite, and data-room movement.
+25. Add public-ready MCP, OpenAI Apps SDK, Salesforce AgentExchange, Microsoft Copilot / Agent Store, A2A, AP2 readiness, and public Yulia API surfaces as thin adapters over the internal runtime.
+26. Keep external/public activation behind launch gates, but do not defer the technical readiness work beyond V1.
+27. Add public-agent adapter tests proving external requests are permissioned, staged where needed, cited, metered, and auditable.
 
 ## Implementation Checkpoint — May 12, 2026
 

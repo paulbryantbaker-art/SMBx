@@ -7,10 +7,14 @@ export type TabKind =
   | "doc"
   | "analysis"
   | "learn"
+  | "marketing-studio"
   | "feed-item"
   | "settings"
   | "history"
   | "starter";
+
+export type StudioFormatId = "one-pager" | "carousel" | "article";
+export type StudioView = "home" | "canvas" | "collection";
 
 export type IconName =
   | "today" | "search" | "doc" | "chart" | "feed" | "library"
@@ -23,6 +27,7 @@ export interface Tab {
   id: string;
   kind: TabKind;
   modeId?: ModeId;
+  sourceMode?: ModeId;
   title: string;
   pinned?: boolean;
   section?: "how" | "pricing";
@@ -41,6 +46,12 @@ export interface Tab {
   status?: string;
   fileScope?: FileScope;
   fileListView?: FileListView;
+  studioView?: StudioView;
+  studioFormat?: StudioFormatId;
+  studioDraftId?: string;
+  studioCampaign?: string;
+  studioCollectionSub?: string;
+  studioDirty?: boolean;
 }
 
 export interface StagedAction {

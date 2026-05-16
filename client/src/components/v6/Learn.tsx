@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { DESKTOP_TEXTURES } from "../../lib/randomTextures";
+import { ART_HOUSE_TEXTURES, DESKTOP_TEXTURES } from "../../lib/randomTextures";
 
 type Section = "how" | "pricing";
 type Billing = "monthly" | "annual";
@@ -137,7 +137,7 @@ const FAQS: Faq[] = [
 function HowSection() {
   return (
     <div>
-      <LearnSection eyebrow="THE LOOP" title="How a deal moves through Yulia" sub="Source → diligence → decision. Yulia carries the context across all three.">
+      <LearnSection eyebrow="THE LOOP" title="How Yulia moves deals faster and smarter" sub="Source → diligence → decision. Yulia carries the context across all three.">
         <div style={H.loopSpread}>
           <Reveal direction="right">
             <div style={H.loopLead}>
@@ -160,12 +160,12 @@ function HowSection() {
           <div style={H.stepStack}>
             {LOOP.map((s, index) => (
               <Reveal key={s.n} delay={index * 90} direction="left">
-                <div style={H.stepCard}>
-                  <div className="mono" style={H.stepN}>{s.n}</div>
+                <div style={stepCardStyle(index)}>
+                  <div className="mono" style={stepNumberStyle(index)}>{s.n}</div>
                   <div>
                     <h3 style={H.stepTitle}>{s.title}</h3>
                     <p style={H.stepBody}>{s.body}</p>
-                    <span className="mono" style={H.chip}>{s.chip}</span>
+                    <span className="mono" style={index === 2 ? { ...H.chip, ...H.chipDark } : H.chip}>{s.chip}</span>
                   </div>
                 </div>
               </Reveal>
@@ -178,7 +178,7 @@ function HowSection() {
         <div style={H.capabilityMosaic}>
           {CAPABILITIES.map((c, index) => (
             <Reveal key={c.title} delay={(index % 3) * 80} direction={index % 2 === 0 ? "up" : "left"}>
-              <div style={{ ...H.capCard, ...(index === 0 || index === 2 ? H.capCardWide : {}) }}>
+              <div style={capabilityCardStyle(index)}>
                 <div className="mono" style={H.capTag}>{c.tag}</div>
                 <h4 style={H.capTitle}>{c.title}</h4>
                 <p style={H.capBody}>{c.body}</p>
@@ -299,6 +299,111 @@ function Reveal({
   );
 }
 
+function stepCardStyle(index: number): CSSProperties {
+  if (index === 1) {
+    return {
+      ...H.stepCard,
+      background: "linear-gradient(135deg, rgba(238,245,253,0.98) 0%, rgba(255,255,255,0.92) 54%, rgba(225,236,248,0.96) 100%)",
+      border: "1px solid rgba(203,220,239,0.95)",
+      boxShadow: "0 22px 52px rgba(52, 84, 124, 0.12), 0 6px 16px rgba(31,44,69,0.06), inset 0 1px 0 rgba(255,255,255,0.90)",
+    };
+  }
+  if (index === 2) {
+    return {
+      ...H.stepCard,
+      color: "#FFFFFF",
+      backgroundImage: `linear-gradient(145deg, rgba(20,28,47,0.82) 0%, rgba(57,68,108,0.58) 52%, rgba(18,24,40,0.88) 100%), url('${DESKTOP_TEXTURES.pipelineCard}')`,
+      backgroundSize: "cover, cover",
+      backgroundPosition: "center, center",
+      border: "1px solid rgba(255,255,255,0.30)",
+      boxShadow: "0 24px 60px rgba(19,28,46,0.22), 0 8px 20px rgba(19,28,46,0.10), inset 0 1px 0 rgba(255,255,255,0.20)",
+    };
+  }
+  return {
+    ...H.stepCard,
+    background: "linear-gradient(150deg, #FFFFFF 0%, rgba(249,251,255,0.96) 54%, rgba(235,242,250,0.90) 100%)",
+  };
+}
+
+function stepNumberStyle(index: number): CSSProperties {
+  if (index === 1) {
+    return {
+      ...H.stepN,
+      color: "#4E61A8",
+      background: "linear-gradient(180deg, rgba(235,238,255,0.98), rgba(218,225,252,0.92))",
+      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.88), 0 10px 24px rgba(78,97,168,0.12)",
+    };
+  }
+  if (index === 2) {
+    return {
+      ...H.stepN,
+      color: "#FFFFFF",
+      background: "rgba(255,255,255,0.16)",
+      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.34), 0 10px 24px rgba(0,0,0,0.18)",
+    };
+  }
+  return H.stepN;
+}
+
+function capabilityCardStyle(index: number): CSSProperties {
+  const base: CSSProperties = H.capCard;
+  const texturedBase: CSSProperties = {
+    color: "#FFFFFF",
+    border: "1px solid rgba(255,255,255,0.32)",
+    boxShadow: "0 24px 62px rgba(31,44,69,0.16), 0 8px 20px rgba(31,44,69,0.08), inset 0 1px 0 rgba(255,255,255,0.20)",
+    backgroundSize: "cover, cover",
+    backgroundPosition: "center, center",
+  };
+
+  if (index === 0) {
+    return {
+      ...base,
+      color: "#FFFFFF",
+      minHeight: 210,
+      background:
+        "radial-gradient(circle at 18% 12%, rgba(129,190,211,0.34), transparent 36%), linear-gradient(145deg, rgba(20,55,72,0.98) 0%, rgba(43,88,99,0.94) 52%, rgba(17,33,48,0.98) 100%)",
+      border: "1px solid rgba(255,255,255,0.22)",
+      boxShadow: "0 24px 62px rgba(31,44,69,0.16), 0 8px 20px rgba(31,44,69,0.08), inset 0 1px 0 rgba(255,255,255,0.18)",
+    };
+  }
+  if (index === 1) {
+    return {
+      ...base,
+      background: "linear-gradient(145deg, rgba(255,255,255,0.98), rgba(245,249,254,0.94))",
+      borderTop: "5px solid rgba(106,155,204,0.34)",
+    };
+  }
+  if (index === 2) {
+    return {
+      ...base,
+      ...texturedBase,
+      minHeight: 210,
+      backgroundImage: `linear-gradient(145deg, rgba(36,39,69,0.72) 0%, rgba(77,82,130,0.48) 50%, rgba(18,23,39,0.82) 100%), url('${DESKTOP_TEXTURES.pricingFeatured}')`,
+    };
+  }
+  if (index === 3) {
+    return {
+      ...base,
+      background: "radial-gradient(circle at 18% 14%, rgba(214,163,92,0.16), transparent 34%), linear-gradient(145deg, rgba(255,255,255,0.98), rgba(249,244,234,0.92))",
+      border: "1px solid rgba(224,210,188,0.88)",
+    };
+  }
+  if (index === 4) {
+    return {
+      ...base,
+      color: "#FFFFFF",
+      background: "linear-gradient(145deg, rgba(44,72,104,0.96), rgba(37,54,80,0.96))",
+      border: "1px solid rgba(255,255,255,0.20)",
+      boxShadow: "0 24px 60px rgba(24,37,58,0.20), inset 0 1px 0 rgba(255,255,255,0.14)",
+    };
+  }
+  return {
+    ...base,
+    background: "linear-gradient(145deg, rgba(240,247,250,0.98), rgba(255,255,255,0.94))",
+    borderLeft: "5px solid rgba(80,145,118,0.34)",
+  };
+}
+
 const H: Record<string, CSSProperties> = {
   loopSpread: {
     display: "grid",
@@ -314,7 +419,7 @@ const H: Record<string, CSSProperties> = {
     flexDirection: "column",
     justifyContent: "space-between",
     overflow: "hidden",
-    backgroundImage: `linear-gradient(145deg, rgba(22,55,83,0.70) 0%, rgba(92,134,165,0.42) 52%, rgba(19,29,53,0.76) 100%), url('${DESKTOP_TEXTURES.filesHero}')`,
+    backgroundImage: `linear-gradient(145deg, rgba(17,41,63,0.74) 0%, rgba(64,99,119,0.38) 52%, rgba(15,24,42,0.78) 100%), url('${ART_HOUSE_TEXTURES.learn}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     border: "1px solid rgba(255,255,255,0.34)",
@@ -376,6 +481,7 @@ const H: Record<string, CSSProperties> = {
     background: "linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,251,255,0.92))",
     border: "1px solid rgba(219,228,241,0.92)",
     boxShadow: "0 18px 46px rgba(31,44,69,0.10), 0 4px 12px rgba(31,44,69,0.06), inset 0 1px 0 rgba(255,255,255,0.88)",
+    color: "var(--m-on-surface)",
   },
   stepN: {
     width: 44,
@@ -392,16 +498,21 @@ const H: Record<string, CSSProperties> = {
   },
   stepTitle: {
     fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 700,
-    letterSpacing: "-0.02em", margin: "8px 0 6px", color: "var(--m-on-surface)",
+    letterSpacing: "-0.02em", margin: "8px 0 6px", color: "currentColor",
   },
   stepBody: {
-    fontSize: 13, lineHeight: 1.55, color: "var(--m-on-surface-var)",
+    fontSize: 13, lineHeight: 1.55, color: "currentColor", opacity: 0.72,
     margin: "0 0 12px", textWrap: "pretty",
   },
   chip: {
     fontSize: 10, padding: "3px 8px",
     background: "var(--m-surface-2)", borderRadius: 999,
     color: "var(--m-on-surface-var)", fontWeight: 600, letterSpacing: "0.1em",
+  },
+  chipDark: {
+    background: "rgba(255,255,255,0.16)",
+    color: "#FFFFFF",
+    opacity: 0.9,
   },
   capabilityMosaic: {
     display: "grid",
@@ -419,6 +530,7 @@ const H: Record<string, CSSProperties> = {
     flexDirection: "column",
     justifyContent: "space-between",
     gap: 14,
+    color: "var(--m-on-surface)",
   },
   capCardWide: {
     background: `linear-gradient(145deg, rgba(20,47,75,0.72) 0%, rgba(82,132,166,0.44) 52%, rgba(18,25,46,0.76) 100%), url('${DESKTOP_TEXTURES.searchFinancing}')`,
@@ -468,7 +580,7 @@ const H: Record<string, CSSProperties> = {
     minHeight: 230,
     borderRadius: 26,
     padding: "24px 26px",
-    backgroundImage: `linear-gradient(145deg, rgba(27,35,58,0.80) 0%, rgba(67,78,128,0.54) 52%, rgba(19,23,38,0.86) 100%), url('${DESKTOP_TEXTURES.pipelineCard}')`,
+    backgroundImage: `linear-gradient(145deg, rgba(22,28,45,0.80) 0%, rgba(58,68,96,0.52) 52%, rgba(16,20,34,0.86) 100%), url('${DESKTOP_TEXTURES.pipelineCard}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     border: "1px solid rgba(255,255,255,0.28)",
@@ -1268,7 +1380,7 @@ const P: Record<string, CSSProperties> = {
   },
   planFeatured: {
     border: "1px solid rgba(106,155,204,0.42)",
-    backgroundImage: `linear-gradient(145deg, rgba(18,41,68,0.76) 0%, rgba(58,100,138,0.42) 52%, rgba(15,23,42,0.82) 100%), url('${DESKTOP_TEXTURES.pricingFeatured}')`,
+    backgroundImage: `linear-gradient(145deg, rgba(18,32,52,0.76) 0%, rgba(64,76,100,0.42) 52%, rgba(14,21,36,0.84) 100%), url('${ART_HOUSE_TEXTURES.pricing}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     color: "#FFFFFF",

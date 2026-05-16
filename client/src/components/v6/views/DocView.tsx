@@ -566,7 +566,7 @@ const V: Record<string, CSSProperties> = {
     gridTemplateColumns: "1fr 280px",
     gap: 32,
     alignItems: "flex-start",
-    maxWidth: 1180,
+    maxWidth: 1380,
   },
   article: {
     background: "var(--m-surface-on-light)",

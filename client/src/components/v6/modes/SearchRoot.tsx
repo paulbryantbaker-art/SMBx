@@ -2,7 +2,7 @@ import { useState, type CSSProperties, type FormEvent } from "react";
 import { V6Icon } from "../icons";
 import type { OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
-import { DESKTOP_TEXTURES } from "../../../lib/randomTextures";
+import { ART_HOUSE_TEXTURES, DESKTOP_TEXTURES } from "../../../lib/randomTextures";
 
 interface SearchRootProps {
   openTab: OpenTab;
@@ -99,6 +99,14 @@ const EXAMPLES = [
   "Map PE firms active in pest control",
   "Find M&A attorneys near Austin",
 ];
+
+const LIQUID_GLASS_FILTER = "blur(5px) saturate(165%) contrast(1.08) brightness(1.04)";
+const LIQUID_GLASS_BACKGROUND =
+  "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.32), transparent 42%), linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.13) 50%, rgba(255,255,255,0.08))";
+const LIQUID_GLASS_SHADOW =
+  "0 18px 36px -24px rgba(0,0,0,0.54), inset 0 1px 0 rgba(255,255,255,0.56), inset 0 -1px 0 rgba(255,255,255,0.12), inset 0 0 0 0.5px rgba(255,255,255,0.34)";
+const SEARCH_ACTION_GLASS_BACKGROUND =
+  "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.18), transparent 40%), linear-gradient(135deg, rgba(14,18,27,0.98), rgba(25,31,46,0.96) 52%, rgba(9,12,18,0.98))";
 
 export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
   const [query, setQuery] = useState("");
@@ -270,9 +278,9 @@ function tone(name: Category["tone"]) {
       shadow: "0 30px 74px rgba(46,92,138,0.30), 0 8px 22px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.22)",
     },
     ink: {
-      bg: texture => `linear-gradient(145deg, rgba(23,29,46,0.72) 0%, rgba(18,23,34,0.72) 100%), url('${texture}')`,
+      bg: texture => `linear-gradient(145deg, rgba(22,31,48,0.44) 0%, rgba(36,55,70,0.30) 48%, rgba(10,18,31,0.48) 100%), url('${texture}')`,
       fg: "#FFFFFF",
-      shadow: "0 30px 74px rgba(18,23,34,0.34), 0 8px 22px rgba(26,34,51,0.14), inset 0 1px 0 rgba(255,255,255,0.20)",
+      shadow: "0 32px 78px rgba(18,23,34,0.30), 0 10px 24px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.22)",
     },
     aqua: {
       bg: texture => `linear-gradient(145deg, rgba(29,100,108,0.58) 0%, rgba(83,151,157,0.40) 52%, rgba(20,52,68,0.66) 100%), url('${texture}')`,
@@ -353,8 +361,12 @@ const S: Record<string, CSSProperties> = {
     height: 40,
     padding: "0 16px",
     borderRadius: 999,
-    background: "var(--m-primary)",
+    background: SEARCH_ACTION_GLASS_BACKGROUND,
+    border: "0.5px solid rgba(255,255,255,0.54)",
     color: "var(--m-on-primary)",
+    boxShadow: LIQUID_GLASS_SHADOW,
+    backdropFilter: LIQUID_GLASS_FILTER,
+    WebkitBackdropFilter: LIQUID_GLASS_FILTER,
     fontWeight: 800,
     cursor: "pointer",
   },
@@ -366,16 +378,16 @@ const S: Record<string, CSSProperties> = {
   },
   examplePill: {
     all: "unset",
-    padding: "8px 12px",
+    padding: "9px 14px",
     borderRadius: 999,
-    background: "rgba(255,255,255,0.16)",
-    border: "1px solid rgba(255,255,255,0.30)",
+    background: LIQUID_GLASS_BACKGROUND,
+    border: "0.5px solid rgba(255,255,255,0.52)",
     color: "#FFFFFF",
-    boxShadow: "0 14px 28px -20px rgba(0,0,0,0.46), inset 0 1px 0 rgba(255,255,255,0.36), inset 0 -1px 0 rgba(255,255,255,0.08)",
-    backdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
-    WebkitBackdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
+    boxShadow: LIQUID_GLASS_SHADOW,
+    backdropFilter: LIQUID_GLASS_FILTER,
+    WebkitBackdropFilter: LIQUID_GLASS_FILTER,
     fontSize: 12.5,
-    fontWeight: 700,
+    fontWeight: 800,
     cursor: "pointer",
   },
   section: {
@@ -459,12 +471,12 @@ const S: Record<string, CSSProperties> = {
     height: 40,
     padding: "0 15px",
     borderRadius: 999,
-    background: "rgba(255,255,255,0.17)",
-    border: "0.5px solid rgba(255,255,255,0.45)",
+    background: LIQUID_GLASS_BACKGROUND,
+    border: "0.5px solid rgba(255,255,255,0.52)",
     color: "#FFFFFF",
-    boxShadow: "0 16px 34px -22px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.30)",
-    backdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
-    WebkitBackdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
+    boxShadow: LIQUID_GLASS_SHADOW,
+    backdropFilter: LIQUID_GLASS_FILTER,
+    WebkitBackdropFilter: LIQUID_GLASS_FILTER,
     fontSize: 13,
     fontWeight: 850,
     cursor: "pointer",
@@ -479,9 +491,9 @@ const S: Record<string, CSSProperties> = {
     minHeight: 332,
     borderRadius: 26,
     padding: 28,
-    backgroundImage: `linear-gradient(145deg, rgba(50,111,92,0.58) 0%, rgba(26,34,51,0.82) 100%), url('${DESKTOP_TEXTURES.searchBuyers}')`,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
+    backgroundImage: `radial-gradient(circle at 8% 18%, rgba(255,255,255,0.16), transparent 42%), linear-gradient(145deg, rgba(42,103,88,0.32) 0%, rgba(42,78,86,0.36) 46%, rgba(22,32,50,0.54) 100%), url('${ART_HOUSE_TEXTURES.search}')`,
+    backgroundSize: "cover, cover, cover",
+    backgroundPosition: "center, center, center",
     color: "#FFFFFF",
     boxShadow: "0 44px 110px rgba(26, 84, 70, 0.30), 0 18px 42px rgba(26,34,51,0.15), 0 4px 12px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.20)",
   },
@@ -518,12 +530,12 @@ const S: Record<string, CSSProperties> = {
     height: 42,
     padding: "0 16px",
     borderRadius: 999,
-    border: "1px solid rgba(255,255,255,0.45)",
-    background: "rgba(255,255,255,0.16)",
+    border: "0.5px solid rgba(255,255,255,0.52)",
+    background: LIQUID_GLASS_BACKGROUND,
     color: "#FFFFFF",
-    boxShadow: "0 16px 34px -22px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10)",
-    backdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
-    WebkitBackdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
+    boxShadow: LIQUID_GLASS_SHADOW,
+    backdropFilter: LIQUID_GLASS_FILTER,
+    WebkitBackdropFilter: LIQUID_GLASS_FILTER,
     fontWeight: 850,
     cursor: "pointer",
   },

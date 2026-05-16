@@ -446,15 +446,17 @@ function emptyCopy(modeLabel: string): { title: string; body: ReactNode; eyebrow
 
 const C: Record<string, CSSProperties> = {
   chat: {
-    background: "linear-gradient(180deg, #F5F8FC 0%, #EEF4FA 100%)",
-    borderRight: "1px solid #DCE6F1",
+    background: "linear-gradient(180deg, #EEF5FA 0%, #E8F1F8 100%)",
+    border: "1px solid rgba(205, 220, 235, 0.86)",
+    borderRadius: "inherit",
+    overflow: "hidden",
     display: "flex", flexDirection: "column", minHeight: 0, height: "100%",
   },
   chatHead: {
     height: 58, flexShrink: 0, padding: "0 14px",
     display: "flex", alignItems: "center", justifyContent: "flex-end",
     borderBottom: "1px solid #E1E8F2",
-    background: "rgba(248,251,255,0.88)",
+    background: "rgba(242,247,252,0.86)",
   },
   chatBody: { flex: 1, overflowY: "auto", padding: "18px 14px" },
   composer: {

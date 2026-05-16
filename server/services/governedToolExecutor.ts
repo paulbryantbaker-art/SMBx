@@ -3,6 +3,7 @@ import {
   getAgencyActionContract,
   inputHasExplicitConfirmation,
   resolveGateActionClass,
+  type AgencySurface,
   type AgencyActionContract,
 } from './agencyActionRegistry.js';
 import { recordAgencyActionEvent } from './agencyAuditLog.js';
@@ -32,6 +33,8 @@ function stagedActionPayload(
   contract: AgencyActionContract,
   stagedActionId?: number | null,
 ) {
+  const canonical = contract as any;
+
   return {
     success: false,
     governed: true,
@@ -40,11 +43,16 @@ function stagedActionPayload(
     tool: toolName,
     staged_action: {
       id: stagedActionId ?? null,
+      actionId: canonical.actionId ?? toolName,
       toolName,
       label: contract.label,
       permissionLevel: contract.permissionLevel,
       riskLevel: contract.riskLevel,
       writeScope: contract.writeScope,
+      requiredScopes: canonical.requiredScopes ?? [],
+      citationRequirement: canonical.citationRequirement ?? 'optional',
+      billing: canonical.billing ?? null,
+      allowedSurfaces: canonical.allowedSurfaces ?? [],
       summary: summarizeStagedAction(contract, input),
       input,
       confirmWith: { ...input, confirmed: true },
@@ -55,11 +63,22 @@ function stagedActionPayload(
   };
 }
 
+export interface GovernedCallerContext {
+  actorType?: 'user' | 'yulia' | 'system' | 'external_agent';
+  actorId?: string | number | null;
+  actingOnBehalfOfUserId?: number | null;
+  organizationId?: number | null;
+  sourceSurface?: AgencySurface | 'confirmation_route' | string;
+  sourceAgent?: string | null;
+  mandateScope?: string | null;
+}
+
 export async function executeGovernedTool(
   toolName: string,
   input: Record<string, any>,
   userId: number,
   conversationId: number,
+  callerContext: GovernedCallerContext = {},
 ): Promise<string> {
   const contract = getAgencyActionContract(toolName);
 
@@ -79,6 +98,7 @@ export async function executeGovernedTool(
       input,
       result,
       reason: 'missing_action_contract',
+      ...callerContext,
     });
     return JSON.stringify(result);
   }
@@ -95,6 +115,7 @@ export async function executeGovernedTool(
       input,
       result,
       reason: 'confirmation_required',
+      ...callerContext,
     });
     return JSON.stringify(result);
   }
@@ -126,6 +147,7 @@ export async function executeGovernedTool(
         input,
         result,
         reason: gate.reason,
+        ...callerContext,
       });
       return JSON.stringify(result);
     }
@@ -143,6 +165,7 @@ export async function executeGovernedTool(
       input,
       result: parsedResult,
       reason: parsedResult?.error,
+      ...callerContext,
     });
     return result;
   } catch (err: any) {
@@ -160,6 +183,7 @@ export async function executeGovernedTool(
       input,
       result,
       reason: err.message,
+      ...callerContext,
     });
     return JSON.stringify(result);
   }

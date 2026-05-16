@@ -7,13 +7,14 @@
  * session and re-rolls on hard refresh without React re-render churn.
  */
 
-const VERSION = "v=20260513-pricing-live-28";
+const VERSION = "v=20260515-art-house-1";
 const tex = (name: string) => `/textures/texture-${name}.png?${VERSION}`;
 const heroTex = (n: number) => `/textures/texture-hero-${n}.png?${VERSION}`;
 const cardTex = (n: number) => `/textures/texture-card-${n}.png?${VERSION}`;
 const desktopHeroTex = (n: number) => `/textures/desktop/texture-hero-${n}.png?${VERSION}`;
 const desktopRandomTex = (n: number) => `/textures/desktop/random/texture-random-${String(n).padStart(2, "0")}.png?${VERSION}`;
 const desktopTodayRoseGold = () => `/textures/desktop/texture-today-rose-gold.png?${VERSION}`;
+const artHouseTex = (n: number) => `/textures/desktop/art-house/art-house-${String(n).padStart(2, "0")}.png?${VERSION}`;
 
 const pick = <T,>(arr: readonly T[]): T =>
   arr[Math.floor(Math.random() * arr.length)];
@@ -38,6 +39,10 @@ const DESKTOP_HERO_POOL = Array.from(
   { length: 13 },
   (_, index) => desktopRandomTex(index + 15),
 );
+const ART_HOUSE_POOL = Array.from(
+  { length: 7 },
+  (_, index) => artHouseTex(index + 1),
+);
 
 const desktopTextureSet = (pool: readonly string[], count: number): string[] => {
   const deck = shuffle(pool);
@@ -52,6 +57,8 @@ const filesDesktopHeroTextures = desktopTextureSet(DESKTOP_HERO_POOL, 1);
 const filesDesktopMidTextures = desktopTextureSet(DESKTOP_MID_POOL, 4);
 const searchDesktopHeroTextures = desktopTextureSet(DESKTOP_HERO_POOL, 1);
 const searchDesktopMidTextures = desktopTextureSet(DESKTOP_MID_POOL, 4);
+const pageArtHouseTextures = desktopTextureSet(ART_HOUSE_POOL, 7);
+const studioArtHouseTextures = desktopTextureSet(ART_HOUSE_POOL, 4);
 
 export const RANDOM_TEXTURES = {
   // Curated mobile recipes. These are intentionally semantic, not fully
@@ -115,4 +122,29 @@ export const DESKTOP_TEXTURES = {
   learnHero: desktopRandomTex(4),
   pricingFeatured: desktopRandomTex(21),
   pricingGuarantee: desktopRandomTex(10),
+} as const;
+
+export const STUDIO_TEXTURES = {
+  rose: desktopTodayRoseGold(),
+  blue: desktopRandomTex(24),
+  green: desktopRandomTex(26),
+  navy: desktopRandomTex(4),
+} as const;
+
+export const ART_HOUSE_TEXTURES = {
+  // Art-house imagery is for secondary/editorial contrast, not the main app
+  // hero language. Each major page gets one anchor image so the art feels
+  // intentional and never repeats inside the same page.
+  today: pageArtHouseTextures[0],
+  pipeline: pageArtHouseTextures[1],
+  files: pageArtHouseTextures[2],
+  search: pageArtHouseTextures[3],
+  learn: pageArtHouseTextures[4],
+  pricing: pageArtHouseTextures[5],
+  studio: pageArtHouseTextures[6],
+
+  studioPreview: studioArtHouseTextures[0],
+  studioCollection: studioArtHouseTextures[1],
+  studioCampaign: studioArtHouseTextures[2],
+  studioCollateral: studioArtHouseTextures[3],
 } as const;

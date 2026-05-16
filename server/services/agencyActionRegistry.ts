@@ -27,8 +27,41 @@ export type RiskLevel =
 
 export type ConfirmationPolicy = 'none' | 'required';
 
+export type AgencySurface =
+  | 'chat'
+  | 'desktop'
+  | 'mobile'
+  | 'background_job'
+  | 'analysis_canvas'
+  | 'document'
+  | 'files'
+  | 'external_agent';
+
+export type CitationRequirement = 'none' | 'optional' | 'required';
+export type AuditRequirement = 'required';
+
+export type AgencyUsageEventType =
+  | 'action_run'
+  | 'model_run'
+  | 'document_generation'
+  | 'market_research'
+  | 'data_room_ingest'
+  | 'file_operation'
+  | 'export'
+  | 'external_agent_api_call';
+
+export interface AgencyBillingPolicy {
+  eventType: AgencyUsageEventType;
+  creditCost: number;
+  billable: boolean;
+  unit: 'run' | 'document' | 'research_job' | 'file' | 'export' | 'api_call';
+}
+
+export type JsonSchemaLite = Record<string, unknown>;
+
 export interface AgencyActionContract {
   toolName: string;
+  actionId?: string;
   label: string;
   methodologyRefs: string[];
   mode: AgencyMode;
@@ -38,6 +71,26 @@ export interface AgencyActionContract {
   writeScope: 'none' | 'conversation' | 'deal' | 'deliverable' | 'data_room' | 'review' | 'share' | 'sourcing' | 'support' | 'model';
   actionClass?: ActionClass | 'dynamic_share';
   description: string;
+  inputSchema?: JsonSchemaLite;
+  outputSchema?: JsonSchemaLite;
+  requiredScopes?: string[];
+  billing?: AgencyBillingPolicy;
+  citationRequirement?: CitationRequirement;
+  auditRequirement?: AuditRequirement;
+  allowedSurfaces?: AgencySurface[];
+  externalAgentReady?: boolean;
+}
+
+export interface CanonicalAgencyActionContract extends AgencyActionContract {
+  actionId: string;
+  inputSchema: JsonSchemaLite;
+  outputSchema: JsonSchemaLite;
+  requiredScopes: string[];
+  billing: AgencyBillingPolicy;
+  citationRequirement: CitationRequirement;
+  auditRequirement: AuditRequirement;
+  allowedSurfaces: AgencySurface[];
+  externalAgentReady: boolean;
 }
 
 const CONTRACTS: Record<string, AgencyActionContract> = {
@@ -436,12 +489,95 @@ export const TOOL_NAMES_REQUIRING_CONFIRMATION = new Set(
     .map(contract => contract.toolName),
 );
 
-export function getAgencyActionContract(toolName: string): AgencyActionContract | undefined {
-  return CONTRACTS[toolName];
+const BASE_INPUT_SCHEMA: JsonSchemaLite = {
+  type: 'object',
+  additionalProperties: true,
+  description: 'Tool-specific payload. Future public agent surfaces must validate the concrete schema before execution.',
+};
+
+const BASE_OUTPUT_SCHEMA: JsonSchemaLite = {
+  type: 'object',
+  additionalProperties: true,
+  properties: {
+    success: { type: 'boolean' },
+    governed: { type: 'boolean' },
+    message: { type: 'string' },
+  },
+};
+
+function defaultScopes(contract: AgencyActionContract): string[] {
+  const scopes = new Set<string>(['workspace:read']);
+  if (contract.writeScope !== 'none') scopes.add(`${contract.writeScope}:write`);
+  if (contract.permissionLevel === 'A3_GENERATE_WORK_PRODUCT') scopes.add('work_product:generate');
+  if (contract.permissionLevel === 'A4_SHARED_WORKFLOW') scopes.add('workflow:share');
+  if (contract.permissionLevel === 'A5_EXTERNAL_DISCLOSURE') scopes.add('external:share');
+  if (contract.permissionLevel === 'A6_IMMUTABLE_OR_CLOSE') scopes.add('immutable:write');
+  return Array.from(scopes);
 }
 
-export function listAgencyActionContracts(): AgencyActionContract[] {
-  return Object.values(CONTRACTS);
+function defaultBilling(contract: AgencyActionContract): AgencyBillingPolicy {
+  if (contract.permissionLevel === 'A0_READ' || contract.permissionLevel === 'A1_NAVIGATE') {
+    return { eventType: 'action_run', creditCost: 0, billable: false, unit: 'run' };
+  }
+
+  if (contract.writeScope === 'share' || contract.writeScope === 'review' || contract.writeScope === 'data_room') {
+    return { eventType: 'file_operation', creditCost: 1, billable: true, unit: 'file' };
+  }
+
+  if (contract.writeScope === 'sourcing' || contract.toolName === 'scan_market' || contract.toolName === 'analyze_buyer_demand') {
+    return { eventType: 'market_research', creditCost: 2, billable: true, unit: 'research_job' };
+  }
+
+  if (contract.mode === 'author') {
+    return { eventType: 'document_generation', creditCost: 2, billable: true, unit: 'document' };
+  }
+
+  if (contract.mode === 'modeler' || contract.writeScope === 'model') {
+    return { eventType: 'model_run', creditCost: 1, billable: true, unit: 'run' };
+  }
+
+  return { eventType: 'action_run', creditCost: 1, billable: true, unit: 'run' };
+}
+
+function defaultCitationRequirement(contract: AgencyActionContract): CitationRequirement {
+  if (contract.mode === 'modeler' || contract.mode === 'auditor' || contract.mode === 'author') return 'required';
+  if (contract.permissionLevel === 'A5_EXTERNAL_DISCLOSURE' || contract.permissionLevel === 'A6_IMMUTABLE_OR_CLOSE') return 'required';
+  if (contract.mode === 'read' || contract.mode === 'navigator') return 'optional';
+  return 'optional';
+}
+
+function defaultAllowedSurfaces(contract: AgencyActionContract): AgencySurface[] {
+  const surfaces = new Set<AgencySurface>(['chat', 'desktop', 'mobile']);
+  if (contract.mode === 'modeler' || contract.writeScope === 'model') surfaces.add('analysis_canvas');
+  if (contract.writeScope === 'deliverable') surfaces.add('document');
+  if (contract.writeScope === 'data_room' || contract.writeScope === 'share' || contract.writeScope === 'review') surfaces.add('files');
+  if (contract.writeScope === 'sourcing' || contract.toolName === 'scan_market') surfaces.add('background_job');
+  surfaces.add('external_agent');
+  return Array.from(surfaces);
+}
+
+export function canonicalizeAgencyActionContract(contract: AgencyActionContract): CanonicalAgencyActionContract {
+  return {
+    ...contract,
+    actionId: contract.actionId ?? contract.toolName,
+    inputSchema: contract.inputSchema ?? BASE_INPUT_SCHEMA,
+    outputSchema: contract.outputSchema ?? BASE_OUTPUT_SCHEMA,
+    requiredScopes: contract.requiredScopes ?? defaultScopes(contract),
+    billing: contract.billing ?? defaultBilling(contract),
+    citationRequirement: contract.citationRequirement ?? defaultCitationRequirement(contract),
+    auditRequirement: contract.auditRequirement ?? 'required',
+    allowedSurfaces: contract.allowedSurfaces ?? defaultAllowedSurfaces(contract),
+    externalAgentReady: contract.externalAgentReady ?? true,
+  };
+}
+
+export function getAgencyActionContract(toolName: string): CanonicalAgencyActionContract | undefined {
+  const contract = CONTRACTS[toolName];
+  return contract ? canonicalizeAgencyActionContract(contract) : undefined;
+}
+
+export function listAgencyActionContracts(): CanonicalAgencyActionContract[] {
+  return Object.values(CONTRACTS).map(canonicalizeAgencyActionContract);
 }
 
 export function inputHasExplicitConfirmation(input: Record<string, any>): boolean {
@@ -458,12 +594,17 @@ export function resolveGateActionClass(contract: AgencyActionContract, input: Re
 export function formatAgencyActionContractsForPrompt(): string {
   const confirmFirst = listAgencyActionContracts()
     .filter(contract => contract.confirmation === 'required')
-    .map(contract => `- ${contract.toolName}: ${contract.label} (${contract.permissionLevel}). First call stages the action; after the user explicitly confirms, call the same tool with confirmed=true.`)
+    .map(contract => `- ${contract.actionId}: ${contract.label} (${contract.permissionLevel}). First call stages the action; after the user explicitly confirms, call the same tool with confirmed=true.`)
+    .join('\n');
+
+  const publicReady = listAgencyActionContracts()
+    .filter(contract => contract.externalAgentReady)
+    .map(contract => `- ${contract.actionId}: scopes=${contract.requiredScopes.join(', ')}; citations=${contract.citationRequirement}; meter=${contract.billing.eventType}:${contract.billing.creditCost}; surfaces=${contract.allowedSurfaces.join(', ')}`)
     .join('\n');
 
   return `
-## YULIA EXECUTION LAYER — METHOD v17 RUNTIME
-Every tool call is governed by an action contract derived from Methodology v17.
+## YULIA EXECUTION LAYER — V19 / V1 PUBLIC-GO-LIVE RUNTIME
+Every tool call is governed by a canonical action contract. The same contract shape serves chat, UI buttons, background jobs, analysis canvases, document/file actions, billing, audit, and future public agent surfaces.
 
 Runtime rule:
 - Safe read, navigation, modeling, and internal drafting actions may execute directly.
@@ -471,8 +612,13 @@ Runtime rule:
 - If a confirm-first tool returns a staged action, do not claim it happened. Explain exactly what is staged and ask the user to confirm.
 - After the user confirms, call the same tool again with confirmed=true and a short confirmationSummary.
 - If an action gate blocks execution, tell the user what signoff or status is missing and offer the next safe step.
+- Every material action must produce audit and usage records. Do not bypass the action contract by answering as freeform chat when a structured tool exists.
+- Use citation-backed outputs for model, market intelligence, document, tax, legal, and diligence work.
 
 Confirm-first tools:
 ${confirmFirst}
+
+Public-agent-ready contracts:
+${publicReady}
 `.trim();
 }

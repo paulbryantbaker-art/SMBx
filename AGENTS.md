@@ -1,0 +1,141 @@
+AGENTS.md — smbx.ai
+Last updated: 2026-05-05
+
+> **For a current-vs-stale map of the whole repo, read `REPO_STATUS.md` at the root.** Archived docs live in `docs/_archive/` — do not build against them.
+
+## What This Is
+AI-powered deal intelligence platform for business acquisitions from $300K to mega-cap. Users talk to Yulia (AI deal intelligence) who guides them through buying, selling, or raising capital for businesses. Chat-first experience — users talk to Yulia, not dashboards. Yulia IS the front door — there is no sales team, no contact forms, no dead-end CTAs. Every action routes to chat.
+
+## Core Architecture
+- AppShell.tsx is the ONLY layout — all routes go through it. Chat.tsx is deleted.
+- Node.js + Express (ESM) backend
+- React 19 + Vite 7 + Tailwind CSS v3 + Radix UI frontend
+- wouter for client routing
+- PostgreSQL via raw postgres-js (no ORM)
+- Codex API (primary), Google Gemini (secondary), OpenAI (tertiary)
+- Stripe monthly subscriptions: Free / $49 Starter / $149 Professional / $999 Enterprise
+- JWT authentication (no sessions, no passport — sessions broke on Railway)
+- Railway deployment (GitHub push → auto-deploy, Dockerfile with Chromium)
+- Auto-migrations on server startup (server/index.ts runs all SQL in server/migrations/)
+- Tabbed canvas system — tools open as persistent tabs in the right canvas panel
+- 10 interactive financial models with deterministic calculation engine (zustand state)
+- 5-stage sourcing engine with Google Places integration
+- Premium PDF export via Puppeteer (headless Chromium) + Chart.js
+
+## Critical Rules — Read These First
+1. **MONTHLY SUBSCRIPTIONS.** Free (unlimited chat + 1 deliverable) / $49 Starter / $149 Professional / $999 Enterprise. No per-deal fees. No wallet.
+2. **WALLET IS DEAD.** walletService, paywallService, dealExecutionFee, platformFeeService deleted. Never recreate.
+3. **FREE TIER.** Unlimited conversation. ONE free deliverable per user. Paywall triggers after first free deliverable, NOT at a fixed gate.
+4. **AppShell.tsx is the ONLY layout.** Never create parallel layouts. All UI changes go here.
+5. **NEVER use position:fixed full-viewport divs with background-color.** Safari reads them for toolbar tinting and it breaks dark mode switching. Use position:absolute inside a relative parent instead.
+6. **ValueLens (NOT Bizestimate).** The old name is dead.
+7. **Talk to Yulia (NOT Contact Sales).** All CTAs route to chat.
+8. **Yulia never says "As an AI."** Expert M&A deal intelligence. Adapts persona by league.
+9. **Financial data: zero hallucination.** Extract exactly from documents, never invent numbers.
+10. **All money stored in cents (integers).** Never use floating point for financial values.
+11. **Mobile browser first.** Design for mobile, then adapt to desktop.
+
+## Design System
+**The V6 design language is the two CD handoff bundles** at the repo root: `design_handoff_smbx_desktop_material/` (desktop) and `design_handoff_smbx_app store/` (mobile). Production implements them faithfully — see `DESIGN_SOURCE.md` for the file-by-file implementation map. For a quick token reference, read `DESIGN_TOKENS.md` (auto-generated from `client/src/index.css` by `npm run design:extract`).
+
+**V6 in one line:** desktop uses slate-blue `#2E5C8A` + lavender chrome `#ECEAF2`; mobile uses periwinkle `#8A9AE8` + watercolor textures from `client/public/textures/`. Hot pink (`#D44A78`, V3/V4 era) and warm cream + terra (`#F4EEE3` + `#D4714E`, Cowork-DL "Edition" v22 era) are both retired — if your output anchors on either, you read a stale doc.
+
+**Safari toolbar rule still applies:** never use `position:fixed` full-viewport divs with a background color (Safari reads them for toolbar tinting and it breaks dark-mode switching). Use `position:absolute` inside a relative parent instead.
+
+## Pricing Model — Monthly Subscriptions
+**Free:** Unlimited Yulia Q&A, ONE ValueLens or deal score (email required)
+**$49 Starter:** Unlimited ValueLens, deal scoring, VRR, SDE/EBITDA analysis, exports
+**$149 Professional:** Everything in Starter + CIM, deal room, matching, sourcing, DD, LOI
+**$999 Enterprise:** Everything in Professional + unlimited users, white-label, API, portfolio
+
+## Four Journeys × Six Gates
+- **SELL:** S0 Intake → S1 Financials → S2 Valuation → S3 Packaging → S4 Market Matching → S5 Closing
+- **BUY:** B0 Thesis → B1 Sourcing → B2 Valuation → B3 Due Diligence → B4 Structuring → B5 Closing
+- **RAISE:** R0 Intake → R1 Financial Package → R2 Investor Materials → R3 Outreach → R4 Terms → R5 Closing
+- **PMI:** PMI0 Day 0 → PMI1 Stabilization → PMI2 Assessment → PMI3 Optimization
+
+## Calculation Engine (client/src/lib/calculations/)
+22 formula types, all pure JS, <16ms, deterministic:
+- SDE, EBITDA, DSCR, IRR (Newton-Raphson), MOIC, FCF, DCF
+- Valuation (multiple-based, blended multi-methodology)
+- LBO full model (pro forma, sources/uses, exit analysis)
+- SBA financing (eligibility, amortization)
+- Tax impact (asset sale §1060, stock sale, goodwill §197, installment §453)
+- Cap table dilution + exit waterfall
+- Earnout expected value, covenant compliance, working capital
+- Sensitivity matrix builder
+
+## 10 Interactive Models (client/src/components/models/)
+Valuation Explorer, LBO, SBA Financing, Tax Impact, Cap Table, Sensitivity Matrix, Deal Comparison, Earnout, Working Capital, Covenant Compliance. All use zustand store, react-chartjs-2 charts, responsive grids.
+
+## Yulia's Canvas Tools
+- `create_model_tab` — opens interactive models from conversation
+- `update_model` — modifies assumptions ("what if EBITDA is $1.5M")
+- `read_tab_state` — reads canvas state for contextual responses
+- `get_sourcing_portfolio` — reads buyer's sourcing pipeline
+- SSE canvas_action handler forwards tool results to zustand store
+
+## Reference Documents
+- **YULIA_AGENCY_SPEC.md** — Product/architecture doctrine for Yulia as the agentic operating layer: advisor posture without licensed-advisor boundary crossing, permission levels, surface contracts, data-room/file architecture, and implementation priorities.
+- **YULIA_AGENCY_IMPLEMENTATION_PLAN.md** — Practical wiring plan for context packs, prompt governance, governed tool execution, staged approvals, surface actions, Today, Files, and Data Room.
+- **METHODOLOGY V18 (virtual master)** = METHODOLOGY_V17.md (§1-§8, §11-§15) + METHODOLOGY_V18a_TAX_AMENDMENT.md (replaces §9 entirely) + METHODOLOGY_V18b_LEGAL_AMENDMENT.md (replaces §10 entirely).
+  - METHODOLOGY_V17.md (v17.1) — formulas, gate logic, analysis types
+  - METHODOLOGY_V18a_TAX_AMENDMENT.md (effective May 2, 2026) — post-OBBBA tax engine. IRC as amended through P.L. 119-21 (July 4, 2025); international provisions effective for tax years beginning after 12/31/2025. Distilled into runtime via `server/prompts/taxEngine.ts`.
+  - METHODOLOGY_V18b_LEGAL_AMENDMENT.md (effective May 3, 2026) — Harvard Law–grade U.S. M&A legal awareness model. Three operating modes (Continuous Awareness / Defer to Counsel / Research Externally). Anchored to §15(a) software-side broker-dealer boundary. 50 always-defer triggers + 8 always-halt categories. Distilled into runtime via `server/prompts/legalEngine.ts`.
+- STYLE_GUIDE.md — Complete UI & brand style guide for marketing materials
+- TESTING.md — Testing tracker with issue template system
+- REPO_STATUS.md — Current-vs-stale map for the whole repo (read this when reviewing on GitHub)
+
+## Key File Map
+| File | Purpose |
+|------|---------|
+| client/src/pages/public/AppShell.tsx | THE layout — all routes, all views, tabbed canvas |
+| client/src/components/models/ | 10 interactive financial model components |
+| client/src/lib/calculations/core.ts | Deterministic calculation engine (22 formulas) |
+| client/src/lib/modelStore.ts | Zustand store for model tab state |
+| client/src/components/shared/ChatDock.tsx | THE chat input — used everywhere |
+| client/src/components/shared/DarkModeToggle.tsx | Dark mode + Safari toolbar color management |
+| client/src/components/chat/PortfolioCanvas.tsx | Sourcing portfolio management UI |
+| server/index.ts | Express entry + auto-migrations |
+| server/services/aiService.ts | AI orchestration + agentic loop |
+| server/prompts/taxEngine.ts | V18 §9 tax foundation + per-league workflow (18a distillation) |
+| server/prompts/legalEngine.ts | V18 §10 legal foundation + per-league workflow (18b distillation) |
+| server/services/sourcingPipelineService.ts | 5-stage sourcing engine |
+| server/services/tools.ts | 16 agentic tools |
+| server/services/premiumPdfRenderer.ts | Puppeteer HTML→PDF with Chart.js |
+| server/services/chartService.ts | Chart configs for PDF export |
+| server/services/subscriptionService.ts | Subscription management + Stripe |
+| server/templates/pdf/ | HTML templates for premium PDF export |
+| server/worker.ts | pg-boss scheduled jobs |
+| Dockerfile | Node 22 Alpine + Chromium + fonts |
+
+## Dead Code (deleted — do not recreate)
+- walletService.ts, paywallService.ts, dealExecutionFee.ts, platformFeeService.ts
+- Chat.tsx, Home.tsx, Advisors.tsx, Buy.tsx, Sell.tsx (standalone pages)
+- chat/Sidebar.tsx, HomeSidebar.tsx, PublicChatInput.tsx (orphaned)
+- chartjs-node-canvas (native canvas dep removed — charts render in Puppeteer page)
+- All old logo files (x-logo.png, X2 Transaparant.png, GX.png, redx.png, etc.)
+
+## AI Orchestration
+| Task | Engine |
+|------|--------|
+| Chat/Conversation | Codex Sonnet 4.6 |
+| Agentic Loop | Codex Sonnet 4.6 (16 tools, 10-round limit) |
+| Deliverable Generation | Tier-routed (28 generators) |
+| CIM Generation | Codex Opus 4.6 |
+| Intelligence Brief | Codex Sonnet 4.6 (sourcing Stage 1) |
+| Website Enrichment | Codex Haiku 4.5 |
+| Gate Summarization | Codex Haiku 4.5 |
+
+## Commands
+```bash
+npm run dev          # Start Vite dev server (frontend only, port 5173)
+npx tsx server/index.ts  # Start Express backend (port 3000)
+npm run build        # Build for production
+```
+
+## Environment Variables
+DATABASE_URL, ANTHROPIC_API_KEY, GOOGLE_AI_API_KEY, OPENAI_API_KEY,
+GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_PLACES_API_KEY,
+STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET,
+JWT_SECRET, NODE_ENV, PORT, APP_URL, CENSUS_API_KEY, TEST_MODE

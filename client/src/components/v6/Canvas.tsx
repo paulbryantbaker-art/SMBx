@@ -1,8 +1,7 @@
 import { type CSSProperties, type ReactNode } from "react";
-import type { Tab, IconName, OpenTab, ModeId } from "./types";
+import type { Tab, OpenTab, ModeId } from "./types";
 import type { User } from "../../hooks/useAuth";
 import type { ModelPreference } from "../../lib/modelPreference";
-import { V6Icon } from "./icons";
 import { V6TodayRoot } from "./modes/TodayRoot";
 import { V6PipelineRoot } from "./modes/PipelineRoot";
 import { V6FilesListView, V6FilesRoot } from "./modes/FilesRoot";
@@ -18,6 +17,7 @@ import { V6SettingsView } from "./views/SettingsView";
 import { V6HistoryView } from "./views/HistoryView";
 import { V6StarterView } from "./views/StarterView";
 import { V6LearnView } from "./Learn";
+import { V6MarketingStudioView } from "./views/MarketingStudioView";
 
 interface CanvasProps {
   tabs: Tab[];
@@ -25,6 +25,7 @@ interface CanvasProps {
   setActiveTabId: (id: string) => void;
   openTab: OpenTab;
   closeTab: (id: string) => void;
+  reorderTabs: (dragId: string, targetId: string) => void;
   onPickMode: (id: ModeId) => void;
   onTalkToYulia?: (prompt: string) => void;
   user: User | null;
@@ -32,27 +33,11 @@ interface CanvasProps {
   modelPreference?: ModelPreference;
 }
 
-export function V6Canvas({ tabs, activeTabId, setActiveTabId, openTab, closeTab, onPickMode, onTalkToYulia, user, onSignOut, modelPreference }: CanvasProps) {
+export function V6Canvas({ tabs, activeTabId, openTab, onPickMode, onTalkToYulia, user, onSignOut, modelPreference }: CanvasProps) {
   const activeTab = tabs.find(t => t.id === activeTabId) ?? tabs[0];
-
-  const openStarterTab = () => {
-    const id = `starter-${Date.now()}`;
-    openTab({ id, kind: "starter", title: "New" });
-    // Notify Yulia so she greets the user in the chat panel.
-    if (onTalkToYulia) {
-      onTalkToYulia("I just opened a new tab — what can you help me with?");
-    }
-  };
 
   return (
     <div style={K.canvas}>
-      <V6TabStrip
-        tabs={tabs}
-        activeTabId={activeTabId}
-        setActiveTabId={setActiveTabId}
-        closeTab={closeTab}
-        onNewTab={openStarterTab}
-      />
       <div className="thin-scroll" style={K.canvasBody}>
         {activeTab && (
           <V6TabContent
@@ -68,70 +53,6 @@ export function V6Canvas({ tabs, activeTabId, setActiveTabId, openTab, closeTab,
       </div>
     </div>
   );
-}
-
-interface TabStripProps {
-  tabs: Tab[];
-  activeTabId: string;
-  setActiveTabId: (id: string) => void;
-  closeTab: (id: string) => void;
-  onNewTab: () => void;
-}
-
-function V6TabStrip({ tabs, activeTabId, setActiveTabId, closeTab, onNewTab }: TabStripProps) {
-  return (
-    <div className="tab-strip" role="tablist" aria-label="Open workspace items">
-      {tabs.map(t => (
-        <div
-          key={t.id}
-          className={`tab ${activeTabId === t.id ? "active" : ""} ${isTodayTab(t) ? "pinned" : "closable"}`}
-          onClick={() => setActiveTabId(t.id)}
-          title={t.title}
-          role="tab"
-          aria-selected={activeTabId === t.id}
-        >
-          <span className="tab-icon"><V6Icon name={tabIcon(t)} size={12} /></span>
-          <span className="tab-label">{t.title}</span>
-          {!isTodayTab(t) && (
-            <button
-              className="tab-close"
-              onClick={(e) => { e.stopPropagation(); closeTab(t.id); }}
-              aria-label={`Close ${t.title}`}
-            >
-              <V6Icon name="close" size={12} />
-            </button>
-          )}
-        </div>
-      ))}
-      <button className="tab-new-btn" title="New tab" aria-label="New tab" onClick={onNewTab}>
-        <V6Icon name="plus" size={12} />
-      </button>
-    </div>
-  );
-}
-
-function isTodayTab(tab: Tab): boolean {
-  return tab.kind === "mode-root" && tab.modeId === "today";
-}
-
-function tabIcon(tab: Tab): IconName {
-  if (tab.kind === "mode-root") {
-    const map: Record<ModeId, IconName> = {
-      today: "today", pipeline: "feed", search: "search", files: "library",
-      docs: "doc", analysis: "chart", intel: "feed", library: "library",
-    };
-    return tab.modeId ? map[tab.modeId] : "doc";
-  }
-  if (tab.kind === "deal") return "deal";
-  if (tab.kind === "files-list") return tab.fileListView === "data-rooms" ? "library" : "doc";
-  if (tab.kind === "doc") return "doc";
-  if (tab.kind === "analysis") return "chart";
-  if (tab.kind === "feed-item") return "feed";
-  if (tab.kind === "learn") return "library";
-  if (tab.kind === "settings") return "settings";
-  if (tab.kind === "history") return "history";
-  if (tab.kind === "starter") return "plus";
-  return "doc";
 }
 
 interface TabContentProps {
@@ -162,6 +83,7 @@ function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut, modelPrefe
   if (tab.kind === "analysis") return <V6AnalysisView title={tab.title} tool={tab.tool} markdown={tab.markdown} comparisonData={tab.comparisonData} analysisData={tab.analysisData} analysisRunId={tab.analysisRunId} deliverableId={tab.deliverableId} status={tab.status} versionNumber={tab.versionNumber} resolvedMenuItemSlug={tab.resolvedMenuItemSlug} openTab={openTab} onTalkToYulia={onTalkToYulia} />;
   if (tab.kind === "feed-item") return <Placeholder label={`Feed · ${tab.title}`} note="Feed item reading view is a thin wrapper — coming after polish." />;
   if (tab.kind === "learn")    return <V6LearnView section={tab.section} anchor={tab.anchor} onTalkToYulia={onTalkToYulia} />;
+  if (tab.kind === "marketing-studio") return <V6MarketingStudioView tab={tab} openTab={openTab} user={user} onTalkToYulia={onTalkToYulia} />;
   if (tab.kind === "settings") return <V6SettingsView user={user} onSignOut={onSignOut} />;
   if (tab.kind === "history")  return <V6HistoryView />;
   if (tab.kind === "starter")  return <V6StarterView onTalkToYulia={onTalkToYulia} />;
@@ -205,8 +127,11 @@ export function V6Section({ eyebrow, title, sub, action, children }: {
 
 const K: Record<string, CSSProperties> = {
   canvas: {
-    background: "var(--m-bg)",
-    display: "flex", flexDirection: "column", minHeight: 0, height: "100%",
+    background: "linear-gradient(180deg, #FAFCFE 0%, #F5F8FC 100%)",
+    display: "flex", flexDirection: "column", flex: 1, minWidth: 0,
+    minHeight: 0, width: "100%", height: "100%",
+    borderRadius: "inherit",
+    overflow: "hidden",
   },
   canvasBody: {
     flex: 1, overflowY: "auto",

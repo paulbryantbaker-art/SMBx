@@ -54,6 +54,13 @@ agencyActionsRouter.post('/agency/actions/:id/confirm', async (req, res) => {
       },
       userId,
       action.conversation_id || 0,
+      {
+        actorType: 'user',
+        actorId: userId,
+        actingOnBehalfOfUserId: userId,
+        sourceSurface: 'confirmation_route',
+        sourceAgent: 'agency-actions-api',
+      },
     );
     const result = parseJsonResult(resultText);
     const status = result?.blocked ? 'blocked' : result?.error ? 'failed' : 'executed';
