@@ -671,10 +671,9 @@ const A: Record<string, CSSProperties> = {
     minWidth: 0,
     display: "flex",
     flexDirection: "column",
-    /* Hairline divider — the only visual mark on the left side. Anchors
-       the icon/chat boundary so the eye has a reference point without
-       re-establishing a floating-card seam. */
-    borderLeft: "1px solid rgba(60, 60, 67, 0.06)",
+    /* Hairline divider removed — was re-creating the column seam we're
+       trying to dissolve. Sidebar icons + chat content now flow as one
+       continuous surface on the page bg (Canva pattern). */
   },
   canvasPane: {
     flex: 1,

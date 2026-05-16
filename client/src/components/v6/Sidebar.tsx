@@ -625,10 +625,10 @@ const S: Record<string, CSSProperties> = {
   account: {
     display: "flex", alignItems: "center", gap: 10,
     padding: "12px 14px",
-    borderBottom: "1px solid rgba(216,226,238,0.82)",
-    background: "rgba(255,255,255,0.58)",
-    backdropFilter: "blur(14px) saturate(150%)",
-    WebkitBackdropFilter: "blur(14px) saturate(150%)",
+    /* Frosted backdrop + bottom border removed — sidebar now sits
+       directly on the page bg (Canva pattern). The avatar floats on
+       the page gradient like the chat content beside it. */
+    background: "transparent",
   },
   avatar: {
     width: 32, height: 32, borderRadius: 10,
