@@ -652,32 +652,28 @@ const A: Record<string, CSSProperties> = {
     padding: 8,
     boxSizing: "border-box",
   },
-  /* Unified left rail — Sidebar (modes + tab tree) and chat live on
-     ONE surface (Canva pattern). The rail owns the bg/radius/shadow;
-     inner children (V6Sidebar, chatPane) are transparent so the rail
-     bg shows through cleanly. Hairline divider lives on chatPane's
-     left edge so the eye gets an anchor at the icon/chat boundary. */
+  /* Unified left "rail" — Canva pattern (corrected). Sidebar (modes +
+     tab tree) and chat sit DIRECTLY on the page background. NO card
+     chrome here — no bg, no border, no radius, no shadow. The page
+     gradient (A.shell) is the unifying surface. Only the canvas is
+     an elevated focal card.
+
+     The wrapper stays as a layout grouping div (groups sidebar + chat
+     in the DOM, hosts the hairline divider via chatPane's borderLeft)
+     but is visually invisible. */
   leftRail: {
     flexShrink: 0,
     minHeight: 0,
     display: "flex",
-    /* Sidebar gradient (more substantial blue) wins over chat's slightly
-       lighter gradient — this is the rail surface for the whole left
-       side of the workspace. */
-    background: "linear-gradient(180deg, rgba(225,236,247,0.98) 0%, rgba(214,229,242,0.98) 100%)",
-    border: "1px solid rgba(197, 214, 230, 0.82)",
-    borderRadius: 22,
-    overflow: "hidden",
-    boxShadow: "0 22px 56px rgba(38, 59, 84, 0.12)",
   },
   chatPane: {
     flexShrink: 0,
     minWidth: 0,
     display: "flex",
     flexDirection: "column",
-    /* Card chrome (bg, radius, shadow) moved up to A.leftRail. This pane
-       just provides the layout slot. Hairline divider anchors the
-       icon/chat boundary inside the unified rail. */
+    /* Hairline divider — the only visual mark on the left side. Anchors
+       the icon/chat boundary so the eye has a reference point without
+       re-establishing a floating-card seam. */
     borderLeft: "1px solid rgba(60, 60, 67, 0.06)",
   },
   canvasPane: {
