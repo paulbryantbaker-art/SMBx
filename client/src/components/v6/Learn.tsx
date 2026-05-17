@@ -25,7 +25,7 @@ export function V6LearnView({ section, anchor, onTalkToYulia }: LearnProps) {
   }, [anchor, active]);
 
   return (
-    <div className="m-fade-up" style={{ width: "100%" }}>
+    <div className="m-fade-up" style={L.page}>
       <header style={L.hero}>
         <div style={L.heroGlow} aria-hidden="true" />
         <div style={L.heroMain}>
@@ -1850,16 +1850,21 @@ function ComparePlans() {
     <div style={P.compareStage}>
       <style>{`
         .plan-compare-row {
-          transition: background 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+          transition: background 180ms ease, box-shadow 180ms ease;
         }
         .plan-compare-row:hover {
           background: linear-gradient(90deg, rgba(239,246,255,0.76), rgba(255,255,255,0.92));
-          transform: translate3d(0, -1px, 0);
           box-shadow: inset 3px 0 0 rgba(106,155,204,0.55);
         }
         @media (max-width: 900px) {
           .plan-compare-row {
-            grid-template-columns: 1fr 1fr !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            min-width: 0 !important;
+            gap: 12px !important;
+          }
+          .plan-compare-row > :first-child,
+          .plan-compare-row > :nth-child(3) {
+            grid-column: 1 / -1;
           }
         }
       `}</style>
@@ -2009,6 +2014,12 @@ const learnHeroWash =
   `radial-gradient(circle at 14% 8%, rgba(255,255,255,0.20), transparent 34%), linear-gradient(110deg, rgba(13,36,62,0.76) 0%, rgba(58,111,148,0.48) 50%, rgba(17,34,61,0.72) 100%), url('${DESKTOP_TEXTURES.learnHero}')`;
 
 const L: Record<string, CSSProperties> = {
+  page: {
+    width: "min(100%, 1440px)",
+    maxWidth: 1440,
+    margin: "0 auto",
+    boxSizing: "border-box",
+  },
   hero: {
     backgroundImage: learnHeroWash,
     backgroundSize: "cover, cover, cover",
