@@ -23,15 +23,15 @@ The V19 implementation brief covers **runtime correctness** (calc engine, citati
 | 1 | Today Canvas (Morning Brief + Gate Countdown + Deals-in-Flight Pulse) | PDF #4 | ❌ greenfield |
 | 2 | Firm Memory persistent object (prior-deal carryforward) | PDF #5 | ❌ greenfield |
 | 3 | 7-yr SOX-grade AI audit trail (immutable append-only + signed manifests + SOC 2 Type 2) | PDF #6 | 🟡 V19 `audit_trail` schema added; immutable manifests + SOC 2 controls pending |
-| 4 | Citation registry + validator | V19 §2+§7 | 🟡 registry schema + seed added; validator pending |
-| 5 | Model registry + Tier-0 calc engine (20 models server-side) | V19 §4 | 🟡 registry schema added; server-side models pending |
-| 6 | Model stack composer | V19 §7 | ❌ greenfield |
+| 4 | Citation registry + validator | V19 §2+§7 | 🟡 registry schema + seed + validator service added; chat hook pending |
+| 5 | Model registry + Tier-0 calc engine (20 models server-side) | V19 §4 | 🟡 registry schema + catalog/hash service added; executable server-side models pending |
+| 6 | Model stack composer | V19 §7 | 🟡 composer service added; tool/runtime hook pending |
 | 7 | Excel round-trip (assumption versioning + diff engine) | PDF #9 | ❌ greenfield |
 | 8 | Engagement-Letter→CIM-in-48hrs hero workflow (broker Attractor) | PDF #1 | 🟡 partial (CIM gen exists, workflow chain doesn't) |
 | 9 | Deal Pack in 4 hours (IS Attractor) | PDF #2 | ❌ greenfield |
 | 10 | QoE Preview (search-funder Attractor) | PDF #3 | ❌ greenfield |
 | 11 | SBA-eligibility filter on buyer lists (post-March-2026 citizenship rule) | PDF #7 | ❌ greenfield (`sbaLendingService.ts` exists as foundation) |
-| 12 | Credit-budget pricing recast + real-time meter UI | PDF Agent Economy | ❌ greenfield |
+| 12 | Credit-budget pricing recast + real-time meter UI | PDF Agent Economy | 🟡 V19 plan ladder aligned; credit-budget meter still greenfield |
 | 13 | Persistent file storage on Railway volume `/data/uploads/` | V19 §7.5 | 🟡 production default set; Railway volume/env verification pending |
 | 14 | Doc migration (archive V17/V18a/V18b, update CLAUDE.md) | V19 §1+§9 | 🟡 working-tree complete; commit SHA pending |
 
@@ -42,7 +42,7 @@ The V19 implementation brief covers **runtime correctness** (calc engine, citati
 | 15 | DB migrations: citation_registry + model_registry + audit_trail + deal_model_stack + tax_position_registry + legal_defer_log | V19 §2 | 🟡 migration 067 added; deploy/apply pending |
 | 16 | Constants: `v19Regulatory.ts` + `v19Leagues.ts` | V19 §3 | 🟡 files added; runtime integration pending |
 | 17 | Yulia prompts V4 — V19 block + tax/legal V19 refs + gate prompts with model stack | V19 §5 | 🟡 partial (V18 distillations exist; need V19 updates) |
-| 18 | 7 new agentic tools: compose_model_stack, execute_model, lookup_citation, fetch_market_data, defer_to_counsel, update_tax_position, write_audit_trail | V19 §6 | ❌ greenfield |
+| 18 | 7 new agentic tools: compose_model_stack, execute_model, lookup_citation, fetch_market_data, defer_to_counsel, update_tax_position, write_audit_trail | V19 §6 | 🟡 model/citation/composer service foundation added; tool registration pending |
 | 19 | FRED daily refresh job | V19 §7.4 | ❌ greenfield |
 | 20 | Gate registry: `requiredModels` + `alwaysHaltTriggers` per gate | V19 §8 | ❌ greenfield |
 | 21 | Broken-auction signal layer | PDF #14 | ❌ greenfield (category-creating; no incumbent) |
@@ -54,7 +54,7 @@ The V19 implementation brief covers **runtime correctness** (calc engine, citati
 | # | Item | Source | State |
 |---|---|---|---|
 | 27 | MCP server (Cloudflare Workers + Anthropic SDK, 15-25 consolidated tools) | PDF Agent Economy | ❌ greenfield |
-| 28 | A2A Agent Card at `/.well-known/agent-card.json` | PDF Agent Economy | ❌ greenfield |
+| 28 | A2A Agent Card at `/.well-known/agent-card.json` | PDF Agent Economy | 🟡 public agent-card endpoint added; OAuth/scoped-token metadata pending |
 | 29 | OAuth 2.1 + PKCE-S256 + RFC 8707 audience-bound tokens | PDF Agent Economy | ❌ greenfield |
 | 30 | AP2 readiness (Verifiable Credentials, 3 mandate types, Stripe + x402 stablecoin rails) | PDF Agent Economy | ❌ greenfield |
 | 31 | Per-agent identity + scoped Restricted-API-Keys + 15-min ephemeral tokens | PDF Agent Economy | ❌ greenfield |

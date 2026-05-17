@@ -37,6 +37,8 @@ import { createSql, getDatabaseUrl, getPostgresOptions } from './dbConfig.js';
 
 import { exportRouter } from './routes/export.js';
 import { startWorker } from './workers/discoveryWorker.js';
+import { buildAgentCard } from './services/agentCard.js';
+import { ensureModelRegistrySeeded } from './services/modelRegistry.js';
 import rateLimit from 'express-rate-limit';
 import type { Request, Response, NextFunction } from 'express';
 
@@ -106,6 +108,14 @@ app.get('/api/config', (_req, res) => {
     googleClientId: process.env.GOOGLE_CLIENT_ID || null,
     stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY || null,
   });
+});
+
+app.get('/.well-known/agent-card.json', (_req, res) => {
+  res.json(buildAgentCard());
+});
+
+app.get('/api/agent-card', (_req, res) => {
+  res.json(buildAgentCard());
 });
 
 app.get('/api/debug/check-ai', async (_req, res) => {
@@ -457,6 +467,12 @@ runMigrations().then(async () => {
         updated_at = NOW()
     `;
     console.log('[boot] Superadmin account verified');
+    try {
+      const seeded = await ensureModelRegistrySeeded();
+      console.log(`[boot] V19 model registry catalog verified (${seeded.insertedOrUpdated} models)`);
+    } catch (err: any) {
+      console.warn('[boot] V19 model registry seed skipped:', err.message);
+    }
     // Debug: log which email/API keys are configured
     const keyStatus = ['RESEND_API_KEY', 'ANTHROPIC_API_KEY', 'GOOGLE_CLIENT_ID', 'STRIPE_SECRET_KEY', 'EMAIL_FROM']
       .map(k => `${k}=${process.env[k] ? 'SET' : 'MISSING'}`)

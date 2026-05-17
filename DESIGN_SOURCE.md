@@ -4,6 +4,8 @@
 - `design_handoff_smbx_desktop_material/` — desktop V6 (Files Workspace, Material 3, slate-blue)
 - `design_handoff_smbx_app store/` — mobile V6 (App Store + Liquid Glass, periwinkle)
 
+For a practical usage guide to current production surfaces — which cards are white, textured, art-house, accented, or Liquid Glass — read `docs/V6_DESIGN_LANGUAGE_REVIEW.md`.
+
 **Production faithfully implements them.** Tokens, component structure, and visual language all match the bundles 1:1, with one documented mobile deviation (watercolor texture heroes replaced CD's pastel gradients). When in doubt, the running app at `npm run dev` is the tiebreaker.
 
 This file is the implementation map: where each handoff lives in the codebase, what's identical, and what diverged.

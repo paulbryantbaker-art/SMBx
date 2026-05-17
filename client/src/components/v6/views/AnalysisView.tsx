@@ -2801,7 +2801,10 @@ function buildArtifactMetrics(data?: Record<string, any>): Array<{ label: string
   if (Number.isFinite(Number(data.matchingThesesCount))) rows.push({ label: "Matches", value: String(data.matchingThesesCount), sub: "Buyer theses" });
   if (Array.isArray(data.neededTypes)) rows.push({ label: "Needs", value: String(data.neededTypes.length), sub: "Professional types" });
   if (data.recommendations && typeof data.recommendations === "object") {
-    const total = Object.values(data.recommendations).reduce((sum, value) => sum + (Array.isArray(value) ? value.length : 0), 0);
+    const total = Object.values(data.recommendations).reduce<number>(
+      (sum, value) => sum + (Array.isArray(value) ? value.length : 0),
+      0,
+    );
     rows.push({ label: "Providers", value: String(total), sub: "Recommended matches" });
   }
   if (Array.isArray(data.providers)) rows.push({ label: "Providers", value: String(data.providers.length), sub: data.state ? `State: ${data.state}` : "Search results" });

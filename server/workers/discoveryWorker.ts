@@ -72,7 +72,11 @@ export async function startWorker(): Promise<void> {
         const [mrr] = mrrExists.exists
           ? await metricsSql`
               SELECT COALESCE(SUM(CASE
-                WHEN plan = 'starter' THEN 4900 WHEN plan = 'professional' THEN 14900 WHEN plan = 'enterprise' THEN 99900 ELSE 0
+                WHEN plan IN ('solo', 'starter') THEN 7900
+                WHEN plan IN ('pro', 'professional') THEN 19900
+                WHEN plan = 'team' THEN 49900
+                WHEN plan = 'enterprise' THEN 250000
+                ELSE 0
               END), 0)::bigint as mrr_cents FROM subscriptions WHERE status IN ('active', 'trialing')
             `
           : [{ mrr_cents: 0 }];

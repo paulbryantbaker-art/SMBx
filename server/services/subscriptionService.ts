@@ -5,13 +5,14 @@
  *
  * Pricing model:
  *   Free     — $0      — Unlimited Yulia conversation + ONE structured deliverable (email required)
- *   Starter  — $49/mo  — Unlimited ValueLens, deal scoring, VRR, SDE/EBITDA, exports
- *   Professional — $149/mo — Everything + CIM, deal room, matching, sourcing, DD/LOI, living docs
- *   Enterprise   — $999/mo — Everything + unlimited users, white-label, API, portfolio dashboard
+ *   Solo     — $79/mo  — Unlimited ValueLens, deal scoring, VRR, SDE/EBITDA, exports
+ *   Pro      — $199/mo — Everything + CIM, deal room, matching, sourcing, DD/LOI, living docs
+ *   Team     — $499/mo — Shared deal vault, firm templates, seats, and specialist handoff
+ *   Enterprise — $2,500+/mo — Single-tenant, SSO, API controls, portfolio infrastructure
  *
  * Rules:
  *   - Monthly billing only. No annual pricing until 90 days of churn data.
- *   - 30-day free trial of Professional available.
+ *   - 30-day free trial of Pro available.
  *   - No per-deal fees. No success fees. No hidden charges.
  *   - Free deliverable is per-USER, not per-session/deal. Tracked on users table.
  *   - Email capture required for the free deliverable (account creation moment).
@@ -22,14 +23,22 @@ import Stripe from 'stripe';
 import { sql } from '../db.js';
 
 // ─── Plan hierarchy ─────────────────────────────────────────
-export type Plan = 'free' | 'starter' | 'professional' | 'enterprise';
+export type Plan = 'free' | 'solo' | 'pro' | 'team' | 'enterprise';
 
 const PLAN_RANK: Record<Plan, number> = {
   free: 0,
-  starter: 1,
-  professional: 2,
-  enterprise: 3,
+  solo: 1,
+  pro: 2,
+  team: 3,
+  enterprise: 4,
 };
+
+export function normalizePlan(plan?: string | null): Plan {
+  if (plan === 'starter') return 'solo';
+  if (plan === 'professional') return 'pro';
+  if (plan === 'solo' || plan === 'pro' || plan === 'team' || plan === 'enterprise') return plan;
+  return 'free';
+}
 
 export interface PlanInfo {
   plan: Plan;
@@ -41,9 +50,10 @@ export interface PlanInfo {
 
 export const PLANS: Record<Plan, PlanInfo> = {
   free: { plan: 'free', name: 'Free', priceCents: 0, priceDisplay: 'Free', note: 'Unlimited Yulia conversation + one free deliverable' },
-  starter: { plan: 'starter', name: 'Starter', priceCents: 4900, priceDisplay: '$49/month', note: 'Unlimited analysis, valuations, and exports' },
-  professional: { plan: 'professional', name: 'Professional', priceCents: 14900, priceDisplay: '$149/month', note: 'CIM, deal room, matching, sourcing, living docs' },
-  enterprise: { plan: 'enterprise', name: 'Enterprise', priceCents: 99900, priceDisplay: '$999/month', note: 'Unlimited users, white-label, API, portfolio' },
+  solo: { plan: 'solo', name: 'Solo', priceCents: 7900, priceDisplay: '$79/month', note: 'Unlimited analysis, valuations, exports, and solo deal desk workflows' },
+  pro: { plan: 'pro', name: 'Pro', priceCents: 19900, priceDisplay: '$199/month', note: 'CIM, deal room, matching, sourcing, living docs, and parallel deal work' },
+  team: { plan: 'team', name: 'Team', priceCents: 49900, priceDisplay: '$499/month', note: 'Seats, shared vaults, firm templates, and specialist handoffs' },
+  enterprise: { plan: 'enterprise', name: 'Enterprise', priceCents: 250000, priceDisplay: '$2,500+/month', note: 'Single-tenant, SSO, API controls, and portfolio infrastructure' },
 };
 
 // ─── Deliverable tier classification ────────────────────────
@@ -94,6 +104,9 @@ const PROFESSIONAL_TYPES = new Set([
 // ─── Stripe helpers ─────────────────────────────────────────
 
 function getStripePriceId(plan: Plan): string | null {
+  if (plan === 'solo') return process.env.STRIPE_PRICE_SOLO || process.env.STRIPE_PRICE_STARTER || null;
+  if (plan === 'pro') return process.env.STRIPE_PRICE_PRO || process.env.STRIPE_PRICE_PROFESSIONAL || null;
+  if (plan === 'team') return process.env.STRIPE_PRICE_TEAM || null;
   const envKey = `STRIPE_PRICE_${plan.toUpperCase()}`;
   return process.env[envKey] || null;
 }
@@ -114,13 +127,13 @@ export async function getUserPlan(userId: number): Promise<Plan> {
     const [user] = await sql`SELECT plan, trial_ends_at FROM users WHERE id = ${userId}`;
     if (!user) return 'free';
 
-    // Early-access trial: grants Professional until trial_ends_at
+    // Early-access trial: grants Pro until trial_ends_at
     if (user.trial_ends_at && new Date(user.trial_ends_at) > new Date()) {
-      const basePlan = (user.plan as Plan) || 'free';
-      return PLAN_RANK[basePlan] >= PLAN_RANK.professional ? basePlan : 'professional';
+      const basePlan = normalizePlan(user.plan as string | null);
+      return PLAN_RANK[basePlan] >= PLAN_RANK.pro ? basePlan : 'pro';
     }
 
-    return (user.plan as Plan) || 'free';
+    return normalizePlan(user.plan as string | null);
   } catch (err: any) {
     // Defensive: if the 'plan' column doesn't exist yet (migration not applied),
     // fall back to checking the subscriptions table or default to 'free'
@@ -128,7 +141,7 @@ export async function getUserPlan(userId: number): Promise<Plan> {
       console.warn('getUserPlan: "plan" column missing from users table — falling back to free. Run migrations.');
       try {
         const [sub] = await sql`SELECT plan FROM subscriptions WHERE user_id = ${userId} AND status IN ('active', 'trialing') ORDER BY created_at DESC LIMIT 1`;
-        return (sub?.plan as Plan) || 'free';
+        return normalizePlan(sub?.plan as string | null);
       } catch { return 'free'; }
     }
     throw err;
@@ -140,18 +153,18 @@ export function planMeetsRequirement(userPlan: Plan, requiredPlan: Plan): boolea
   return PLAN_RANK[userPlan] >= PLAN_RANK[requiredPlan];
 }
 
-/** True if the user has a paid subscription (starter+) */
+/** True if the user has a paid subscription (Solo+) */
 export function hasActiveSubscription(userPlan: Plan): boolean {
-  return PLAN_RANK[userPlan] >= PLAN_RANK.starter;
+  return PLAN_RANK[normalizePlan(userPlan)] >= PLAN_RANK.solo;
 }
 
 /** Determine the minimum plan required for a deliverable type */
 export function getRequiredPlan(deliverableType: string): Plan {
   const dt = deliverableType.toLowerCase();
-  if (STARTER_TYPES.has(dt)) return 'starter';
-  if (PROFESSIONAL_TYPES.has(dt)) return 'professional';
-  // Default to starter — if it's a known type it should be in one of the sets
-  return 'starter';
+  if (STARTER_TYPES.has(dt)) return 'solo';
+  if (PROFESSIONAL_TYPES.has(dt)) return 'pro';
+  // Default to Solo — if it's a known type it should be in one of the sets
+  return 'solo';
 }
 
 /**
@@ -212,34 +225,35 @@ export async function createCheckout(
   cancelUrl?: string,
   trial?: boolean,
 ): Promise<{ url: string; test?: boolean }> {
-  if (plan === 'free') throw new Error('Cannot create checkout for free plan');
+  const checkoutPlan = normalizePlan(plan);
+  if (checkoutPlan === 'free') throw new Error('Cannot create checkout for free plan');
 
   const appUrl = process.env.APP_URL || 'https://smbx.ai';
 
   // TEST_MODE: mark as subscribed immediately
   if (process.env.TEST_MODE === 'true') {
-    await setUserPlan(userId, plan, 'test_sub_' + Date.now(), 'test_cust_' + Date.now());
-    return { url: `${appUrl}/chat?subscription=success&plan=${plan}`, test: true };
+    await setUserPlan(userId, checkoutPlan, 'test_sub_' + Date.now(), 'test_cust_' + Date.now());
+    return { url: `${appUrl}/chat?subscription=success&plan=${checkoutPlan}`, test: true };
   }
 
   const [user] = await sql`SELECT email, stripe_customer_id FROM users WHERE id = ${userId}`;
   if (!user) throw new Error('User not found');
 
   const stripe = getStripe();
-  const priceId = getStripePriceId(plan);
-  if (!priceId) throw new Error(`Stripe price not configured for plan: ${plan}`);
+  const priceId = getStripePriceId(checkoutPlan);
+  if (!priceId) throw new Error(`Stripe price not configured for plan: ${checkoutPlan}`);
 
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: 'subscription',
     payment_method_types: ['card'],
     line_items: [{ price: priceId, quantity: 1 }],
-    metadata: { type: 'subscription', userId: userId.toString(), plan },
-    success_url: successUrl || `${appUrl}/chat?subscription=success&plan=${plan}`,
+    metadata: { type: 'subscription', userId: userId.toString(), plan: checkoutPlan },
+    success_url: successUrl || `${appUrl}/chat?subscription=success&plan=${checkoutPlan}`,
     cancel_url: cancelUrl || `${appUrl}/chat?subscription=cancelled`,
   };
 
-  // 30-day free trial of Professional
-  if (trial && plan === 'professional') {
+  // 30-day free trial of Pro
+  if (trial && checkoutPlan === 'pro') {
     sessionParams.subscription_data = { trial_period_days: 30 };
   }
 
@@ -280,9 +294,10 @@ export async function setUserPlan(
   stripeSubscriptionId?: string,
   stripeCustomerId?: string,
 ): Promise<void> {
+  const normalizedPlan = normalizePlan(plan);
   await sql`
     UPDATE users SET
-      plan = ${plan},
+      plan = ${normalizedPlan},
       stripe_customer_id = COALESCE(${stripeCustomerId || null}, stripe_customer_id),
       updated_at = NOW()
     WHERE id = ${userId}
@@ -292,9 +307,9 @@ export async function setUserPlan(
   if (stripeSubscriptionId) {
     await sql`
       INSERT INTO subscriptions (user_id, plan, status, stripe_subscription_id, stripe_customer_id)
-      VALUES (${userId}, ${plan}, 'active', ${stripeSubscriptionId}, ${stripeCustomerId || null})
+      VALUES (${userId}, ${normalizedPlan}, 'active', ${stripeSubscriptionId}, ${stripeCustomerId || null})
       ON CONFLICT (user_id) DO UPDATE SET
-        plan = ${plan},
+        plan = ${normalizedPlan},
         status = 'active',
         stripe_subscription_id = ${stripeSubscriptionId},
         stripe_customer_id = COALESCE(${stripeCustomerId || null}, subscriptions.stripe_customer_id),
@@ -311,7 +326,7 @@ export async function handleSubscriptionWebhook(event: Stripe.Event): Promise<vo
       if (session.metadata?.type !== 'subscription') return;
 
       const userId = parseInt(session.metadata?.userId || '0');
-      const plan = (session.metadata?.plan || 'starter') as Plan;
+      const plan = normalizePlan(session.metadata?.plan || 'solo');
       const subscriptionId = session.subscription as string;
       const customerId = session.customer as string;
 
@@ -331,7 +346,7 @@ export async function handleSubscriptionWebhook(event: Stripe.Event): Promise<vo
 
       if (subscription.status === 'active' || subscription.status === 'trialing') {
         const priceId = subscription.items.data[0]?.price?.id;
-        const plan = getPlanFromPriceId(priceId) || 'starter';
+        const plan = getPlanFromPriceId(priceId) || 'solo';
         await setUserPlan(user.id, plan, subscription.id, customerId);
 
         // Update subscription record with period info
@@ -401,8 +416,9 @@ export async function getSubscription(userId: number) {
 /** Map Stripe price ID back to plan name */
 function getPlanFromPriceId(priceId?: string): Plan | null {
   if (!priceId) return null;
-  if (priceId === process.env.STRIPE_PRICE_STARTER) return 'starter';
-  if (priceId === process.env.STRIPE_PRICE_PROFESSIONAL) return 'professional';
+  if (priceId === process.env.STRIPE_PRICE_SOLO || priceId === process.env.STRIPE_PRICE_STARTER) return 'solo';
+  if (priceId === process.env.STRIPE_PRICE_PRO || priceId === process.env.STRIPE_PRICE_PROFESSIONAL) return 'pro';
+  if (priceId === process.env.STRIPE_PRICE_TEAM) return 'team';
   if (priceId === process.env.STRIPE_PRICE_ENTERPRISE) return 'enterprise';
   return null;
 }

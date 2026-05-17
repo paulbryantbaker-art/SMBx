@@ -2381,7 +2381,7 @@ async function queryAdminData(input: Record<string, any>, userId: number): Promi
       `;
       const [deals] = await sql`SELECT COUNT(*)::int as total FROM deals WHERE status = 'active'`;
       const [mrr] = hasSubs
-        ? await sql`SELECT COALESCE(SUM(CASE WHEN plan = 'starter' THEN 4900 WHEN plan = 'professional' THEN 14900 WHEN plan = 'enterprise' THEN 99900 ELSE 0 END), 0)::bigint as mrr_cents FROM subscriptions WHERE status IN ('active', 'trialing')`
+        ? await sql`SELECT COALESCE(SUM(CASE WHEN plan IN ('solo', 'starter') THEN 7900 WHEN plan IN ('pro', 'professional') THEN 19900 WHEN plan = 'team' THEN 49900 WHEN plan = 'enterprise' THEN 250000 ELSE 0 END), 0)::bigint as mrr_cents FROM subscriptions WHERE status IN ('active', 'trialing')`
         : [{ mrr_cents: 0 }];
       const [msgs] = await sql`SELECT COUNT(*)::int as c FROM messages WHERE created_at > NOW() - ${interval}::interval`;
       const [delivs] = await sql`SELECT COUNT(*)::int as c FROM deliverables WHERE created_at > NOW() - ${interval}::interval`;
@@ -2443,7 +2443,7 @@ async function queryAdminData(input: Record<string, any>, userId: number): Promi
         ? await sql`SELECT plan, status, COUNT(*)::int as count FROM subscriptions GROUP BY plan, status ORDER BY plan`
         : [];
       const [mrr] = hasSubs
-        ? await sql`SELECT COALESCE(SUM(CASE WHEN plan = 'starter' THEN 4900 WHEN plan = 'professional' THEN 14900 WHEN plan = 'enterprise' THEN 99900 ELSE 0 END), 0)::bigint as mrr_cents FROM subscriptions WHERE status IN ('active', 'trialing')`
+        ? await sql`SELECT COALESCE(SUM(CASE WHEN plan IN ('solo', 'starter') THEN 7900 WHEN plan IN ('pro', 'professional') THEN 19900 WHEN plan = 'team' THEN 49900 WHEN plan = 'enterprise' THEN 250000 ELSE 0 END), 0)::bigint as mrr_cents FROM subscriptions WHERE status IN ('active', 'trialing')`
         : [{ mrr_cents: 0 }];
       return JSON.stringify({ breakdown, mrrCents: Number(mrr.mrr_cents) });
     }

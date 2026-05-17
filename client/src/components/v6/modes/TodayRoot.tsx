@@ -759,9 +759,9 @@ const todayHeroWash = (sample: boolean) =>
   sample
     ? `linear-gradient(155deg, rgba(77,39,53,0.52) 0%, rgba(183,103,93,0.34) 48%, rgba(29,30,54,0.58) 100%), url('${DESKTOP_TEXTURES.todayHeroSample}')`
     : `linear-gradient(155deg, rgba(18,51,61,0.58) 0%, rgba(78,128,111,0.35) 48%, rgba(13,26,46,0.62) 100%), url('${DESKTOP_TEXTURES.todayHeroWorkspace}')`;
-const TODAY_MARKET_TEXTURE = "/textures/desktop/random/texture-random-10.png?v=20260516-market-calm-1";
+const TODAY_MARKET_TEXTURE = "/textures/desktop/art-house/art-house-03.png?v=20260516-market-room-1";
 const TODAY_START_TEXTURE = "/textures/desktop/random/texture-random-10.png?v=20260516-start-cool-1";
-const marketWash = `linear-gradient(165deg, rgba(8,25,43,0.78) 0%, rgba(21,75,104,0.58) 54%, rgba(5,17,31,0.82) 100%), url('${TODAY_MARKET_TEXTURE}')`;
+const marketWash = `linear-gradient(165deg, rgba(7,22,38,0.82) 0%, rgba(25,80,114,0.61) 54%, rgba(5,17,31,0.86) 100%), url('${TODAY_MARKET_TEXTURE}')`;
 
 const T: Record<string, CSSProperties> = {
   page: {

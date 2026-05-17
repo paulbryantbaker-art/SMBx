@@ -35,7 +35,7 @@ The short version: production runs on `main`. V6 is live. V19 is now the active 
 
 ### Strategy & positioning (current)
 - `SMBX_FEATURE_AUDIENCE_VALUE_MATRIX.md` (May 3, 2026)
-- `SMBX_PRICING_STRATEGY_AND_RECOMMENDATION.md` (May 3, 2026) — current Free / $49 / $149 / $999 monthly subscription model
+- `SMBX_PRICING_STRATEGY_AND_RECOMMENDATION.md` (May 3, 2026) — V19 monthly subscription model: Free / $79 Solo / $199 Pro / $499 Team / $2,500+ Enterprise
 
 ### Process
 - `TESTING.md` — testing tracker
@@ -76,7 +76,7 @@ Archived files live in `docs/_archive/`. Each archived markdown also carries an 
 ## How to tell if a doc has gone stale
 
 1. **Does it predate V6 (May 2026) and talk about the design system or marketing surface?** → Probably stale. V6 redesigned both desktop and mobile.
-2. **Does it talk about pricing without mentioning monthly subscriptions (Free / $49 / $149 / $999)?** → Stale. The wallet model is dead; do not recreate.
+2. **Does it talk about pricing without mentioning monthly subscriptions (Free / $79 Solo / $199 Pro / $499 Team / $2,500+ Enterprise)?** → Stale. The wallet model is dead; do not recreate.
 3. **Does it treat Methodology V17/V18 as the current build target?** -> Stale. V19 is current; V18 tax/legal runtime remains only as shipped implementation until migration.
 4. **Does it use Cowork DL (warm cream + clay), V4 hot pink `#D44A78`, or V3 indigo+emerald palettes?** → Stale design language.
 

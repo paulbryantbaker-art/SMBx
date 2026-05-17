@@ -613,8 +613,9 @@ export async function buildSystemPrompt(
 ## SUBSCRIPTION CONTEXT
 The user is on the Free plan. They get unlimited conversation and ONE free structured deliverable.
 If they've used their free deliverable, paid deliverables require a subscription.
-Starter is ${PLANS.starter.priceDisplay} — covers analysis, valuations, exports.
-Professional is ${PLANS.professional.priceDisplay} — adds CIM, deal room, matching, sourcing.
+Solo is ${PLANS.solo.priceDisplay} — covers analysis, valuations, exports, and solo deal desk workflows.
+Pro is ${PLANS.pro.priceDisplay} — adds CIM, deal room, matching, sourcing, and parallel deal work.
+Team is ${PLANS.team.priceDisplay} — adds seats, shared vaults, firm templates, and specialist handoff.
 NEVER be pushy. Mention subscription only when the user requests a paid deliverable.
 If they decline, continue helping with conversation and guidance.
 `);

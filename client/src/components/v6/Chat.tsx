@@ -388,10 +388,8 @@ const SUGGESTIONS_BY_MODE: Record<string, string[]> = {
 };
 
 const LEARN_CHIPS: { label: string; section: "how" | "pricing"; anchor?: string }[] = [
-  { label: "How it works",       section: "how"                               },
-  { label: "Pricing",            section: "pricing"                           },
-  { label: "What can Yulia do?", section: "how",     anchor: "capabilities"   },
-  { label: "Compare plans",      section: "pricing", anchor: "compare"        },
+  { label: "How it works", section: "how"     },
+  { label: "Pricing",      section: "pricing" },
 ];
 
 function V6ChatEmpty({ modeLabel, onPick, onOpenTab, showLearnLinks }: ChatEmptyProps) {

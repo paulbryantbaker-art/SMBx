@@ -233,7 +233,7 @@ SELF-CHECK before advancing:
 
   S2: `## CURRENT GATE: S2 — Valuation & Reality Check
 OBJECTIVE: Calculate defensible valuation, compare to seller expectations, go/no-go.
-COST: Requires Starter subscription ($49/month) or higher.
+COST: Requires Solo subscription ($79/month) or higher.
 
 SUBSCRIPTION CONTEXT:
 "This is where it gets exciting — we're about to put a real number on your business. The valuation analysis uses current market data, industry comparables, and your verified financials to give you a defensible price range.
@@ -300,13 +300,13 @@ ON COMPLETION:
 
   S3: `## CURRENT GATE: S3 — Packaging
 OBJECTIVE: Create CIM, blind teaser, and data room.
-COST: Requires Professional subscription ($149/month) for CIM. Starter covers teaser, data room, executive summary.
+COST: Requires Pro subscription ($199/month) for CIM. Solo covers teaser, data room, executive summary.
 
 DELIVERABLES AVAILABLE:
-1. Full CIM (Professional)
-2. Blind Teaser (Starter)
-3. Data Room Structure (Starter)
-4. Executive Summary (Starter)
+1. Full CIM (Pro)
+2. Blind Teaser (Solo)
+3. Data Room Structure (Solo)
+4. Executive Summary (Solo)
 
 CONVERSATION FLOW:
 "Now we're building your marketing package. The centerpiece is your CIM — the Confidential Information Memorandum. This is the document serious buyers review to decide if they want to pursue your business.
@@ -381,7 +381,7 @@ GATE S3 COMPLETION TRIGGERS:
 
   S4: `## CURRENT GATE: S4 — Market Matching
 OBJECTIVE: Identify, qualify, and engage potential buyers.
-COST: Requires Professional subscription. Buyer List, Outreach Strategy included.
+COST: Requires Pro subscription. Buyer List, Outreach Strategy included.
 
 CONVERSATION FLOW:
 "Your CIM is ready. Now let's find your buyer. Based on your business profile, here's the type of buyer I'd target:"
@@ -444,7 +444,7 @@ GATE S4 COMPLETION TRIGGERS:
 
   S5: `## CURRENT GATE: S5 — Closing
 OBJECTIVE: Complete due diligence, negotiate APA, close transaction.
-COST: Requires Professional subscription. All closing deliverables included.
+COST: Requires Pro subscription. All closing deliverables included.
 
 DELIVERABLES AVAILABLE:
 1. DD Coordination Checklist
@@ -638,7 +638,7 @@ SELF-CHECK before advancing:
 
   B2: `## CURRENT GATE: B2 — Valuation & Offer
 OBJECTIVE: Analyze target financials and calculate defensible value from buyer perspective.
-COST: Requires Starter subscription ($49/month) or higher.
+COST: Requires Solo subscription ($79/month) or higher.
 
 YOUR TASK:
 - Build financial model from CIM data or available information
@@ -682,7 +682,7 @@ GATE B2 COMPLETION TRIGGERS:
 
   B3: `## CURRENT GATE: B3 — Due Diligence
 OBJECTIVE: Coordinate financial, legal, and operational diligence. Flag risks.
-COST: Requires Professional subscription. DD package included.
+COST: Requires Pro subscription. DD package included.
 
 YOUR TASK:
 - Generate comprehensive DD checklist (league-appropriate)
@@ -734,7 +734,7 @@ GATE B3 COMPLETION TRIGGERS:
 
   B4: `## CURRENT GATE: B4 — Structuring & Financing
 OBJECTIVE: Optimize deal structure for buyer's benefit.
-COST: Requires Professional subscription. Structure analysis included.
+COST: Requires Pro subscription. Structure analysis included.
 
 YOUR TASK:
 - Final sources & uses model
@@ -760,7 +760,7 @@ GATE B4 COMPLETION TRIGGERS:
 
   B5: `## CURRENT GATE: B5 — Closing
 OBJECTIVE: Execute the deal. Manage from LOI through funds wired.
-COST: Requires Professional subscription. All closing deliverables included.
+COST: Requires Pro subscription. All closing deliverables included.
 
 YOUR TASK:
 - Pre-closing checklist generation
@@ -863,7 +863,7 @@ GATE R1 COMPLETION TRIGGERS:
 
   R2: `## CURRENT GATE: R2 — Investor Materials
 OBJECTIVE: Create compelling investor-facing documents.
-COST: Requires Professional subscription ($149/month). Pitch deck, exec summary, teaser all included.
+COST: Requires Pro subscription ($199/month). Pitch deck, exec summary, teaser all included.
 
 DELIVERABLES:
 1. AI Pitch Deck (10-15 slides):
@@ -892,7 +892,7 @@ GATE R2 COMPLETION TRIGGERS:
 
   R3: `## CURRENT GATE: R3 — Investor Outreach
 OBJECTIVE: Build investor pipeline and manage outreach.
-COST: Requires Professional subscription. Investor targeting included.
+COST: Requires Pro subscription. Investor targeting included.
 
 YOUR TASK:
 - Generate target investor profiles matched to the business
@@ -917,7 +917,7 @@ GATE R3 COMPLETION TRIGGERS:
 
   R4: `## CURRENT GATE: R4 — Term Sheet Negotiation
 OBJECTIVE: Navigate term sheet analysis and negotiation.
-COST: Requires Professional subscription. Term sheet analysis included.
+COST: Requires Pro subscription. Term sheet analysis included.
 
 YOUR TASK:
 - Explain term sheet components in plain language
@@ -944,7 +944,7 @@ GATE R4 COMPLETION TRIGGERS:
 
   R5: `## CURRENT GATE: R5 — Closing
 OBJECTIVE: Execute the raise.
-COST: Requires Professional subscription. Closing coordination included.
+COST: Requires Pro subscription. Closing coordination included.
 
 YOUR TASK:
 - Transaction document coordination

@@ -14,7 +14,7 @@ export interface GateDef {
 }
 
 /**
- * Subscription model: S2/B2/R2 require at least Starter plan ($49/mo).
+ * Subscription model: S2/B2/R2 require at least Solo plan ($79/mo).
  * Gates before the paywall are free. Gates after the paywall are included
  * in the subscription. PMI gates are always free.
  * The `free` field marks gates accessible without a subscription.
