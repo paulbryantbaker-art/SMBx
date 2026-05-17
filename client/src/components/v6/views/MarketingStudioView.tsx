@@ -1129,13 +1129,17 @@ function writeStudioCampaigns(campaigns: StudioCampaign[]) {
 
 const S: Record<string, CSSProperties> = {
   page: {
-    maxWidth: 1380,
+    width: "min(100%, 1440px)",
+    maxWidth: 1440,
     margin: "0 auto",
+    boxSizing: "border-box",
     paddingBottom: 72,
   },
   collectionPage: {
-    maxWidth: 1380,
+    width: "min(100%, 1440px)",
+    maxWidth: 1440,
     margin: "0 auto",
+    boxSizing: "border-box",
     paddingBottom: 72,
   },
   collectionHero: {

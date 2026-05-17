@@ -1175,11 +1175,11 @@ const A: Record<string, CSSProperties> = {
     padding: "4px",
     boxSizing: "border-box",
     borderRadius: 15,
-    background: "rgba(249, 252, 255, 0.72)",
-    border: "1px solid rgba(174, 194, 218, 0.72)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.88), 0 12px 28px -22px rgba(45, 65, 90, 0.42)",
-    backdropFilter: "blur(14px) saturate(160%)",
-    WebkitBackdropFilter: "blur(14px) saturate(160%)",
+    background: "rgba(251, 253, 255, 0.88)",
+    border: "1px solid rgba(150, 174, 205, 0.78)",
+    boxShadow: "0 1px 2px rgba(36,59,84,0.08), 0 10px 24px -22px rgba(45,65,90,0.38), inset 0 1px 0 rgba(255,255,255,0.94)",
+    backdropFilter: "blur(8px) saturate(150%)",
+    WebkitBackdropFilter: "blur(8px) saturate(150%)",
     overflow: "visible",
   },
   topLauncherWrap: {
@@ -1206,11 +1206,12 @@ const A: Record<string, CSSProperties> = {
   },
   topLauncherActive: {
     background: "#FFFFFF",
-    border: "1px solid rgba(166, 181, 210, 0.78)",
+    border: "1px solid rgba(132, 158, 196, 0.88)",
     color: "#2F5F8D",
     boxShadow: [
-      "0 1px 2px rgba(36, 59, 84, 0.10)",
-      "0 8px 18px -17px rgba(36, 59, 84, 0.46)",
+      "0 1px 1px rgba(36, 59, 84, 0.10)",
+      "0 8px 16px -15px rgba(36, 59, 84, 0.38)",
+      "inset 0 1px 0 rgba(255,255,255,0.96)",
     ].join(", "),
   },
   topLauncherIcon: {
@@ -1222,8 +1223,9 @@ const A: Record<string, CSSProperties> = {
     color: "inherit",
   },
   topLauncherIconActive: {
-    background: "rgba(232, 241, 252, 0.92)",
+    background: "rgba(225, 239, 253, 0.96)",
     color: "#2F5F8D",
+    boxShadow: "inset 0 0 0 0.5px rgba(147, 176, 209, 0.42)",
   },
   topLauncherLabel: {
     lineHeight: 1,

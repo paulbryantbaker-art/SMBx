@@ -295,6 +295,10 @@ const S: Record<string, CSSProperties> = {
   page: {
     minHeight: "100%",
     position: "relative",
+    width: "min(100%, 1440px)",
+    maxWidth: 1440,
+    margin: "0 auto",
+    boxSizing: "border-box",
   },
   hero: {
     position: "relative",

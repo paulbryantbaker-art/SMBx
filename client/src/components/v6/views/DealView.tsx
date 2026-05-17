@@ -542,7 +542,7 @@ export function V6DealView({
   };
 
   return (
-    <div className="m-fade-up" style={{ maxWidth: 1380 }}>
+    <div className="m-fade-up" style={{ width: "min(100%, 1440px)", maxWidth: 1440, margin: "0 auto", boxSizing: "border-box" }}>
       {/* Hero strip */}
       <section id="deal-dashboard" style={{ marginBottom: 28 }}>
         <div className="mono" style={D.eyebrow}>{heroEyebrow}</div>

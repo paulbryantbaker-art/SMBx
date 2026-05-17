@@ -43,7 +43,7 @@ export function V6IntelRoot({ openTab, onTalkToYulia }: { openTab: OpenTab; onTa
   };
 
   return (
-    <div className="m-fade-up">
+    <div className="m-fade-up" style={I.page}>
       <V6Section
         eyebrow="MARKET INTELLIGENCE"
         title="What's moving"
@@ -140,6 +140,12 @@ export function V6IntelRoot({ openTab, onTalkToYulia }: { openTab: OpenTab; onTa
 }
 
 const I: Record<string, CSSProperties> = {
+  page: {
+    width: "min(100%, 1440px)",
+    maxWidth: 1440,
+    margin: "0 auto",
+    boxSizing: "border-box",
+  },
   featuredEyebrow: {
     fontSize: 10, color: "var(--m-on-primary-container)",
     letterSpacing: "0.14em", fontWeight: 600, marginBottom: 14,

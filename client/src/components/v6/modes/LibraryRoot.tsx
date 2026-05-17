@@ -28,7 +28,7 @@ export function V6LibraryRoot({ openTab }: { openTab: OpenTab }) {
   const [active, setActive] = useState(0);
 
   return (
-    <div className="m-fade-up">
+    <div className="m-fade-up" style={L.page}>
       <V6Section
         eyebrow="LIBRARY"
         title="Everything you've touched"
@@ -95,6 +95,12 @@ function iconForKind(kind: TabKind): IconName {
 }
 
 const L: Record<string, CSSProperties> = {
+  page: {
+    width: "min(100%, 1440px)",
+    maxWidth: 1440,
+    margin: "0 auto",
+    boxSizing: "border-box",
+  },
   row: {
     display: "grid",
     gridTemplateColumns: "32px 2fr 1.4fr 100px 24px",

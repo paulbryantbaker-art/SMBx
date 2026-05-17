@@ -123,7 +123,7 @@ export function V6DocsRoot({
   };
 
   return (
-    <div className="m-fade-up">
+    <div className="m-fade-up" style={D.page}>
       <V6Section
         eyebrow="DOCS"
         title="Documents"
@@ -234,6 +234,12 @@ export function V6DocsRoot({
 }
 
 const D: Record<string, CSSProperties> = {
+  page: {
+    width: "min(100%, 1440px)",
+    maxWidth: 1440,
+    margin: "0 auto",
+    boxSizing: "border-box",
+  },
   templateTag: {
     width: 44, height: 32, borderRadius: 8,
     display: "grid", placeItems: "center",

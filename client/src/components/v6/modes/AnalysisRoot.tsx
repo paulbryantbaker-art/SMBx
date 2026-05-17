@@ -163,7 +163,7 @@ export function V6AnalysisRoot({
   };
 
   return (
-    <div className="m-fade-up">
+    <div className="m-fade-up" style={A.page}>
       <V6Section
         eyebrow="ANALYSIS"
         title="Run an analysis"
@@ -251,6 +251,12 @@ export function V6AnalysisRoot({
 }
 
 const A: Record<string, CSSProperties> = {
+  page: {
+    width: "min(100%, 1440px)",
+    maxWidth: 1440,
+    margin: "0 auto",
+    boxSizing: "border-box",
+  },
   toolIcon: {
     width: 36, height: 36, borderRadius: 10,
     display: "grid", placeItems: "center",

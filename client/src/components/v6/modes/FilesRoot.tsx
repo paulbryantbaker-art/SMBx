@@ -750,10 +750,17 @@ const filesHeroWash = `linear-gradient(135deg, rgba(13,36,62,0.68) 0%, rgba(42,9
 const F: Record<string, CSSProperties> = {
   page: {
     minHeight: "100%",
+    width: "min(100%, 1440px)",
+    maxWidth: 1440,
+    margin: "0 auto",
+    boxSizing: "border-box",
   },
   detailPage: {
     minHeight: "100%",
-    maxWidth: 1380,
+    width: "min(100%, 1440px)",
+    maxWidth: 1440,
+    margin: "0 auto",
+    boxSizing: "border-box",
   },
   detailHero: {
     minHeight: 240,

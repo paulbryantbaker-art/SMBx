@@ -1137,22 +1137,24 @@ input[type="range"].m-slider::-moz-range-thumb {
 }
 
 .top-launcher:hover {
-  background: rgba(255, 255, 255, 0.64);
+  background: rgba(255, 255, 255, 0.78);
   color: #315F8E;
 }
 
 .top-launcher.active {
   background: #FFFFFF;
-  border-color: rgba(166, 181, 210, 0.78);
+  border-color: rgba(132, 158, 196, 0.88);
   color: #2F5F8D;
   box-shadow:
-    0 1px 2px rgba(36, 59, 84, 0.10),
-    0 8px 18px -17px rgba(36, 59, 84, 0.46);
+    0 1px 1px rgba(36, 59, 84, 0.10),
+    0 8px 16px -15px rgba(36, 59, 84, 0.38),
+    inset 0 1px 0 rgba(255,255,255,0.96);
 }
 
 .top-launcher.active .top-launcher-icon {
-  background: rgba(232, 241, 252, 0.92);
+  background: rgba(225, 239, 253, 0.96);
   color: #2F5F8D;
+  box-shadow: inset 0 0 0 0.5px rgba(147, 176, 209, 0.42);
 }
 
 .top-work-stack {
@@ -1902,12 +1904,12 @@ input[type="range"].m-slider::-moz-range-thumb {
   }
 
   .v6-root .top-launcher:not(.active):not(:disabled):hover {
-    background: rgba(255, 255, 255, 0.58) !important;
-    border-color: rgba(170, 195, 221, 0.56) !important;
+    background: rgba(255, 255, 255, 0.78) !important;
+    border-color: rgba(150, 176, 207, 0.64) !important;
     color: #315F8E !important;
     box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.72),
-      0 7px 16px -15px rgba(36, 59, 84, 0.36) !important;
+      inset 0 1px 0 rgba(255,255,255,0.86),
+      0 7px 14px -15px rgba(36, 59, 84, 0.32) !important;
   }
 
   .v6-root .top-work-row:not(.active):hover {

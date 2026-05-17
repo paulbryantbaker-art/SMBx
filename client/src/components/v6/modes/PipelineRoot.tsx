@@ -130,7 +130,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
   };
 
   return (
-    <div className="m-fade-up">
+    <div className="m-fade-up" style={P.page}>
       <section style={P.hero}>
         <div style={P.heroCopy}>
           <div className="mono" style={P.eyebrow}>PIPELINE</div>
@@ -295,6 +295,12 @@ function pipelineActionTone(tone: "gold" | "blue" | "green"): CSSProperties {
 }
 
 const P: Record<string, CSSProperties> = {
+  page: {
+    width: "min(100%, 1440px)",
+    maxWidth: 1440,
+    margin: "0 auto",
+    boxSizing: "border-box",
+  },
   hero: {
     display: "grid",
     gridTemplateColumns: "minmax(0, 1fr) minmax(320px, 0.38fr)",
