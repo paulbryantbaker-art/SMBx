@@ -396,6 +396,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
 
   return (
     <div className="m-fade-up" style={showLoggedOutMarketing ? { ...T.page, ...T.loggedOutPage } : T.page}>
+      <div style={T.pageContent}>
       <section style={T.heroGrid}>
         <article style={{ ...T.leadCard, backgroundImage: todayHeroWash(useSampleData) }}>
           <div style={T.leadTop}>
@@ -611,6 +612,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           ))}
         </div>
       </section>
+      </div>
     </div>
   );
 }
@@ -755,6 +757,12 @@ const T: Record<string, CSSProperties> = {
     padding: "34px 40px 72px",
     background: "radial-gradient(circle at 50% -120px, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0) 44%), linear-gradient(180deg, #F6F8FC 0%, #EEF4FA 58%, #E8F0F8 100%)",
     color: "#1A2233",
+  },
+  pageContent: {
+    width: "min(100%, 1440px)",
+    maxWidth: 1440,
+    margin: "0 auto",
+    boxSizing: "border-box",
   },
   loggedOutPage: {
     background: "radial-gradient(circle at 48% -120px, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0) 42%), linear-gradient(180deg, #FFFFFF 0%, #FEFFFF 54%, #F8FBFF 100%)",
