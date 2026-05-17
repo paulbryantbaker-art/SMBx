@@ -14,6 +14,7 @@ import {
   type ActionDeal,
 } from "../../../lib/v6ActionContracts";
 import type { SurfaceActionId } from "../../../lib/v6SurfaceActions";
+import { buildBigFakeInvestmentBoardTab } from "../../../lib/sampleInvestmentBoard";
 
 interface PipelineDeal {
   verdict: Verdict;
@@ -94,6 +95,12 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
     const config = actionConfig[action];
     const deal = actionDeal;
     const prompt = config.prompt(deal);
+
+    if (!deal && useSampleData && action === "analysis") {
+      openTab(buildBigFakeInvestmentBoardTab());
+      setActionNote("Opened the dev investment board for Big Fake Deal. Live deals will use the backend analysis runner.");
+      return;
+    }
 
     if (!deal && action !== "buyers") {
       setActionNote("Yulia needs a live deal before she can create the work product. I sent the intent to chat instead of opening a fake surface.");
@@ -266,31 +273,25 @@ function homeDealToActionDeal(d: HomeDeal): ActionDeal {
 }
 
 const pipelineHeroWash = `linear-gradient(135deg, rgba(16,25,58,0.70) 0%, rgba(65,76,132,0.50) 48%, rgba(19,47,70,0.70) 100%), url('${DESKTOP_TEXTURES.pipelineHero}')`;
+const ART_CARD_WASH = "linear-gradient(145deg, rgba(18,31,48,0.68) 0%, rgba(56,70,83,0.42) 52%, rgba(13,22,37,0.72) 100%)";
+const ART_CARD_FRAME: CSSProperties = {
+  backgroundSize: "cover, cover",
+  backgroundPosition: "center, center",
+  color: "#FFFFFF",
+  borderColor: "rgba(255,255,255,0.30)",
+  boxShadow: "0 30px 76px rgba(31,44,69,0.24), 0 8px 22px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.24)",
+};
 
 function pipelineActionTone(tone: "gold" | "blue" | "green"): CSSProperties {
-  const tones: Record<"gold" | "blue" | "green", CSSProperties> = {
-    gold: {
-      background: "linear-gradient(145deg, rgba(255,252,244,0.98) 0%, rgba(246,221,177,0.92) 100%)",
-      color: "#74501B",
-      borderColor: "rgba(214,163,92,0.24)",
-      boxShadow: "0 24px 58px rgba(156,113,40,0.14), 0 7px 18px rgba(26,34,51,0.08)",
-    },
-    blue: {
-      background: `linear-gradient(145deg, rgba(18,36,58,0.72) 0%, rgba(52,92,116,0.44) 52%, rgba(12,24,42,0.78) 100%), url('${ART_HOUSE_TEXTURES.pipeline}')`,
-      backgroundSize: "cover, cover",
-      backgroundPosition: "center, center",
-      color: "#FFFFFF",
-      borderColor: "rgba(255,255,255,0.32)",
-      boxShadow: "0 30px 76px rgba(34,72,102,0.26), 0 8px 22px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.24)",
-    },
-    green: {
-      background: "linear-gradient(145deg, rgba(249,253,251,0.98) 0%, rgba(220,240,231,0.92) 100%)",
-      color: "#2F6C55",
-      borderColor: "rgba(98,153,135,0.24)",
-      boxShadow: "0 24px 58px rgba(63,125,100,0.14), 0 7px 18px rgba(26,34,51,0.08)",
-    },
+  const textures: Record<"gold" | "blue" | "green", string> = {
+    gold: ART_HOUSE_TEXTURES.pricing,
+    blue: ART_HOUSE_TEXTURES.pipeline,
+    green: ART_HOUSE_TEXTURES.search,
   };
-  return tones[tone];
+  return {
+    ...ART_CARD_FRAME,
+    backgroundImage: `${ART_CARD_WASH}, url('${textures[tone]}')`,
+  };
 }
 
 const P: Record<string, CSSProperties> = {

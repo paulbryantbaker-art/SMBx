@@ -3,7 +3,7 @@ import { authHeaders, type User } from "../../../hooks/useAuth";
 import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
 import { useV6WorkspaceData, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
 import { LOGGED_OUT_HERO_COPY } from "../../../lib/copy";
-import { ART_HOUSE_TEXTURES, DESKTOP_TEXTURES } from "../../../lib/randomTextures";
+import { DESKTOP_TEXTURES } from "../../../lib/randomTextures";
 import { executeSurfaceAction, type ActionDeal } from "../../../lib/v6ActionContracts";
 import { isSurfaceActionId, type SurfaceActionId } from "../../../lib/v6SurfaceActions";
 import type { OpenTab } from "../types";
@@ -401,7 +401,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
       ]);
 
   return (
-    <div className="m-fade-up" style={T.page}>
+    <div className="m-fade-up" style={showLoggedOutMarketing ? { ...T.page, ...T.loggedOutPage } : T.page}>
       <section style={T.heroGrid}>
         <article style={{ ...T.leadCard, backgroundImage: todayHeroWash(useSampleData) }}>
           <div style={T.leadTop}>
@@ -759,7 +759,9 @@ const todayHeroWash = (sample: boolean) =>
   sample
     ? `linear-gradient(155deg, rgba(77,39,53,0.52) 0%, rgba(183,103,93,0.34) 48%, rgba(29,30,54,0.58) 100%), url('${DESKTOP_TEXTURES.todayHeroSample}')`
     : `linear-gradient(155deg, rgba(18,51,61,0.58) 0%, rgba(78,128,111,0.35) 48%, rgba(13,26,46,0.62) 100%), url('${DESKTOP_TEXTURES.todayHeroWorkspace}')`;
-const marketWash = `linear-gradient(165deg, rgba(8,25,43,0.76) 0%, rgba(21,75,104,0.62) 54%, rgba(5,17,31,0.84) 100%), url('${ART_HOUSE_TEXTURES.today}')`;
+const TODAY_MARKET_TEXTURE = "/textures/desktop/random/texture-random-10.png?v=20260516-market-calm-1";
+const TODAY_START_TEXTURE = "/textures/desktop/random/texture-random-10.png?v=20260516-start-cool-1";
+const marketWash = `linear-gradient(165deg, rgba(8,25,43,0.78) 0%, rgba(21,75,104,0.58) 54%, rgba(5,17,31,0.82) 100%), url('${TODAY_MARKET_TEXTURE}')`;
 
 const T: Record<string, CSSProperties> = {
   page: {
@@ -768,6 +770,9 @@ const T: Record<string, CSSProperties> = {
     padding: "34px 40px 72px",
     background: "radial-gradient(circle at 50% -120px, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0) 44%), linear-gradient(180deg, #F6F8FC 0%, #EEF4FA 58%, #E8F0F8 100%)",
     color: "#1A2233",
+  },
+  loggedOutPage: {
+    background: "radial-gradient(circle at 48% -120px, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0) 42%), linear-gradient(180deg, #FFFFFF 0%, #FEFFFF 54%, #F8FBFF 100%)",
   },
   heroGrid: {
     display: "grid",
@@ -1356,7 +1361,7 @@ const T: Record<string, CSSProperties> = {
     marginTop: 36,
     padding: 22,
     borderRadius: 24,
-    backgroundImage: `linear-gradient(165deg, rgba(50,62,104,0.36) 0%, rgba(26,34,51,0.50) 100%), url('${DESKTOP_TEXTURES.todaySecondary}')`,
+    backgroundImage: `linear-gradient(165deg, rgba(35,72,104,0.58) 0%, rgba(16,33,55,0.64) 100%), url('${TODAY_START_TEXTURE}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
     border: "1px solid rgba(255,255,255,0.30)",

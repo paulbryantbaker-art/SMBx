@@ -56,6 +56,50 @@ export function actionDealTitle(deal: ActionDeal): string {
   return deal.business_name || deal.name || deal.industry || `Deal #${deal.id}`;
 }
 
+function scopedWorkTitle(dealName: string, rawTitle: string | null | undefined, fallback: string): string {
+  const parts = stripKnownWorkScopeParts(splitWorkTitleParts(String(rawTitle || fallback)), dealName);
+  return `${dealName} · ${(parts.join(" · ") || fallback).trim()}`;
+}
+
+function normalizeWorkTitlePart(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function splitWorkTitleParts(value: string): string[] {
+  return value
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(/\s*[·:]\s*/)
+    .map(part => part.trim())
+    .filter(Boolean);
+}
+
+function stripKnownWorkScopeParts(parts: string[], dealName: string): string[] {
+  const scopes = [
+    dealName,
+    "Big Fake Deal",
+    "Pest Control · FL",
+    "HVAC platform · CO",
+    "Electrical Contractor · TX",
+    "Distribution · OH",
+  ];
+  const next = [...parts];
+  let changed = true;
+  while (changed && next.length > 0) {
+    changed = false;
+    for (const scope of scopes) {
+      const scopeParts = splitWorkTitleParts(scope);
+      const candidate = next.slice(0, scopeParts.length).join(" ");
+      if (scopeParts.length > 0 && normalizeWorkTitlePart(candidate) === normalizeWorkTitlePart(scopeParts.join(" "))) {
+        next.splice(0, scopeParts.length);
+        changed = true;
+        break;
+      }
+    }
+  }
+  return next;
+}
+
 export function primaryDocForJourney(journey?: string | null): { slug: string; label: string } {
   switch (journey) {
     case "sell":
@@ -217,12 +261,14 @@ export async function generateActionDeliverable({
     modelPreference,
   });
   const dealName = actionDealTitle(deal);
-  const deliverableTitle = result.title || label;
+  const deliverableTitle = scopedWorkTitle(dealName, result.title, label);
   onNote?.(`${deliverableTitle} is queued for ${dealName}. Opening the live deliverable tab.`);
   openTab({
     kind: "doc",
-    title: `${dealName} · ${deliverableTitle}`,
+    title: deliverableTitle,
     id: String(result.deliverableId),
+    dealId: numericId,
+    dealTitle: dealName,
   });
   return result;
 }
@@ -248,23 +294,28 @@ export async function runActionAnalysis({
   });
   const tab = result.tab;
   const dealName = actionDealTitle(deal);
+  const tabTitle = scopedWorkTitle(dealName, tab?.title, label);
   if (tab) {
-    onNote?.(`${tab.title || label} is open as a live analysis canvas for ${dealName}.`);
+    onNote?.(`${tabTitle} is open as a live analysis canvas for ${dealName}.`);
     openTab({
       ...tab,
       kind: "analysis",
-      title: tab.title || `${dealName} · ${label}`,
+      title: tabTitle,
+      dealId: numericId,
+      dealTitle: dealName,
     });
   } else {
     onNote?.(`${label} is ready for ${dealName}. Opening the analysis canvas.`);
     openTab({
       kind: "analysis",
-      title: `${dealName} · ${label}`,
+      title: scopedWorkTitle(dealName, label, label),
       tool: analysisType,
       markdown: result.message,
       analysisData: result.analysisData,
       analysisRunId: result.analysisRunId ?? null,
       resolvedMenuItemSlug: result.resolvedMenuItemSlug,
+      dealId: numericId,
+      dealTitle: dealName,
     });
   }
   return result;

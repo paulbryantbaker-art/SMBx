@@ -458,7 +458,7 @@ function V6ChatEmpty({ modeLabel, onPick, onOpenTab, showLearnLinks }: ChatEmpty
 function emptyCopy(modeLabel: string): { title: string; body: ReactNode; eyebrow: string } {
   if (modeLabel === "Today") {
     return {
-      title: "The desk is ready.",
+      title: "Hi, I'm Yulia, your deal desk is ready.",
       body: "Ask for the next move, open a draft, or turn this page into a tighter action list.",
       eyebrow: "TODAY PROMPTS",
     };
@@ -504,17 +504,16 @@ const C: Record<string, CSSProperties> = {
   chatBody: { flex: 1, overflowY: "auto", padding: "8px 8px 10px" },
   composer: {
     margin: 8,
-    background: "var(--m-surface-on-light)",
+    background: "linear-gradient(180deg, #FFFFFF 0%, #FBFDFF 100%)",
     borderRadius: 18,
     padding: 10,
-    border: "1px solid #D9E3EF",
-    /* Shadow softened (was 0 20px 42px / 11% dark blue) — the heavy lift
-       made sense when chat was its own card lifting off the page; now that
-       the composer floats on the page bg directly, that shadow was casting
-       a noticeable darker-blue patch behind the pill ("weird color behind
-       the chat box"). Subtle elevation only — keeps the composer feeling
-       pressable without bleeding onto the page bg. */
-    boxShadow: "0 4px 12px rgba(31, 55, 84, 0.05), inset 0 1px 0 rgba(255,255,255,0.72)",
+    border: "1px solid rgba(166, 186, 212, 0.82)",
+    boxShadow: [
+      "0 0 0 1px rgba(255,255,255,0.58)",
+      "inset 0 1px 0 rgba(255,255,255,0.96)",
+      "0 12px 26px rgba(31, 55, 84, 0.075)",
+      "0 2px 7px rgba(31, 55, 84, 0.065)",
+    ].join(", "),
   },
   composerInput: {
     width: "100%", boxSizing: "border-box",

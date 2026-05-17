@@ -10,6 +10,7 @@ import { MODES, V6Icon } from "./icons";
 import { buildDesktopSurfaceContext, type SurfaceContext } from "../../lib/yuliaSurfaceContext";
 import { normalizeModelPreference, type ModelPreference } from "../../lib/modelPreference";
 import { isSuperAdminUser } from "../../lib/superAdmin";
+import { buildBigFakeInvestmentBoardTab, shouldOpenSampleInvestmentBoard } from "../../lib/sampleInvestmentBoard";
 import type { FileListView, FileScope, IconName, Message, ModeId, Tab } from "./types";
 
 const VALID_MODES: ModeId[] = ["today", "pipeline", "search", "files", "docs", "analysis", "intel", "library"];
@@ -176,7 +177,7 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
       title: MODES.find(m => m.id === rootMode)?.label ?? rootMode,
       pinned: rootMode === "today",
     };
-    const deepTab = tabFromHash(initial.tab, initial.scope, initial.title);
+    const deepTab = tabFromHash(initial.tab, initial.scope, initial.title, initial.run);
     const base = rootTab.id === todayRoot.id ? [todayRoot] : [todayRoot, rootTab];
     return deepTab && !base.find(tab => tab.id === deepTab.id) ? [...base, deepTab] : base;
   });
@@ -185,7 +186,13 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
   // Sync tab + mode to URL hash on every change
   useEffect(() => {
     const activeTab = tabs.find(t => t.id === activeTabId);
-    writeHashState({ mode: activeMode, tab: activeTabId, scope: activeTab?.fileScope });
+    writeHashState({
+      mode: activeMode,
+      tab: activeTabId,
+      scope: activeTab?.fileScope,
+      title: activeTab?.title,
+      run: activeTab?.analysisRunId ?? undefined,
+    });
   }, [activeMode, activeTabId, tabs]);
 
   // Listen for browser back/forward
@@ -195,7 +202,7 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
       const rootId = `${next.mode}-root`;
       setActiveMode(next.mode);
       setTabs(prev => {
-        const deepTab = tabFromHash(next.tab, next.scope, next.title);
+        const deepTab = tabFromHash(next.tab, next.scope, next.title, next.run);
         const withToday = prev.find(t => t.id === "today-root")
           ? prev
           : [{ id: "today-root", kind: "mode-root" as const, modeId: "today" as const, title: "Today", pinned: true }, ...prev];
@@ -305,11 +312,26 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
       if (!detail) return;
       // Possible canvas actions: open_tab, switch_mode, update_model, create_model_tab, read_tab_state
       if (detail.canvas_action === "open_tab" && detail.tab) openTab(detail.tab);
+      if (detail.canvas_action === "show_content") {
+        const artifactTab: Tab = {
+          id: detail.tabId || `artifact-${Date.now()}`,
+          kind: "analysis",
+          title: detail.title || "Yulia artifact",
+          tool: "artifact",
+          markdown: detail.content || detail.markdown || detail.message || "",
+          artifactData: detail,
+          status: "canvas artifact",
+        };
+        saveArtifactTab(artifactTab);
+        openTab(artifactTab);
+      }
       if (detail.canvas_action === "create_model_tab" && detail.tabId) {
         openTab({
           id: detail.tabId,
           kind: "analysis",
           title: detail.title || "Interactive model",
+          dealId: detail.dealId ?? null,
+          dealTitle: detail.dealTitle ?? null,
           tool: detail.modelType || "interactive_model",
           analysisRunId: detail.analysisRunId ?? null,
           modelState: detail.initialAssumptions || {},
@@ -373,6 +395,12 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
   const send = (override?: string) => {
     const msg = (override ?? draft).trim();
     if (!msg) return;
+    if ((DEV_AUTH_BYPASS || !user) && shouldOpenSampleInvestmentBoard(msg)) {
+      openTab(buildBigFakeInvestmentBoardTab());
+      setDraft("");
+      setTimeout(() => inputRef.current?.focus(), 50);
+      return;
+    }
     chat.send(msg, currentSurfaceContext(), modelPreference);
     setDraft("");
     setTimeout(() => inputRef.current?.focus(), 50);
@@ -497,7 +525,7 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
   const renderLauncherTab = (tab: Tab, options: { child?: boolean; parentTitle?: string } = {}) => {
     const parentDeal = options.parentTitle ? null : owningLauncherDealForTab(tab, tabs);
     const dealContext = options.parentTitle ?? parentDeal?.title ?? inferredLauncherDealName(tab);
-    const label = dealContext ? stripLauncherDealPrefix(tab.title, dealContext) : tab.title;
+    const label = cleanLauncherRepeatedScope(dealContext ? stripLauncherDealPrefix(tab.title, dealContext) : tab.title);
     return (
       <div
         key={tab.id}
@@ -583,6 +611,7 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
             <nav ref={launcherStripRef} style={A.launcherStrip} aria-label="Workspace launchers">
               {MODES.map(mode => {
                 const openCount = launcherWork(mode.id).length;
+                const launcherActive = activeMode === mode.id;
                 const isLauncherMenuOpen = hoveredLauncher === mode.id && openCount > 0;
                 const isLauncherMenuClosing = closingLauncher === mode.id && openCount > 0;
                 return (
@@ -601,18 +630,18 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
                     }}
                   >
                     <button
-                      className={`top-launcher ${activeMode === mode.id ? "active" : ""}`}
-                      style={A.topLauncher}
+                      className={`top-launcher ${launcherActive ? "active" : ""}`}
+                      style={{ ...A.topLauncher, ...(launcherActive ? A.topLauncherActive : undefined) }}
                       onClick={() => pickMode(mode.id)}
                       aria-label={mode.label}
-                      aria-current={activeMode === mode.id ? "page" : undefined}
+                      aria-current={launcherActive ? "page" : undefined}
                       aria-haspopup={openCount > 0 ? "menu" : undefined}
                     >
-                      <span className="top-launcher-icon" style={A.topLauncherIcon}>
+                      <span className="top-launcher-icon" style={{ ...A.topLauncherIcon, ...(launcherActive ? A.topLauncherIconActive : undefined) }}>
                         <V6Icon name={mode.icon} size={14} />
                       </span>
                       <span style={A.topLauncherLabel}>{mode.label}</span>
-                      {openCount > 0 && <span style={A.topLauncherBadge}>{openCount}</span>}
+                      {openCount > 0 && <span style={{ ...A.topLauncherBadge, ...(launcherActive ? A.topLauncherBadgeActive : undefined) }}>{openCount}</span>}
                     </button>
                     {openCount > 0 && (
                       <div
@@ -651,7 +680,7 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
               error={chat.error}
               modelPreference={modelPreference}
               setModelPreference={setModelPreference}
-              showLearnLinks={false}
+              showLearnLinks={!user}
               onFileUpload={chat.uploadFile}
               onConfirmStagedAction={chat.confirmStagedAction}
               onCancelStagedAction={chat.cancelStagedAction}
@@ -683,27 +712,29 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
 
 /* ─── Hash-based URL state ───────────────────────────────── */
 
-function readHashState(): { mode: ModeId; tab: string | null; scope?: FileScope; title?: string } {
+function readHashState(): { mode: ModeId; tab: string | null; scope?: FileScope; title?: string; run?: number } {
   try {
     const hash = window.location.hash.replace(/^#/, "");
     if (!hash) return { mode: "today", tab: null };
     const params = new URLSearchParams(hash);
+    const runParam = Number(params.get("run"));
+    const run = Number.isFinite(runParam) && runParam > 0 ? runParam : undefined;
     const mobileDeal = params.get("deal");
     if (mobileDeal) {
-      return { mode: "today", tab: mobileDeal, title: params.get("t") ?? undefined };
+      return { mode: "today", tab: mobileDeal, title: params.get("t") ?? undefined, run };
     }
     const rawMode = params.get("mode") as ModeId | null;
     const mode: ModeId = rawMode && VALID_MODES.includes(rawMode) ? rawMode : "today";
     const rawScope = params.get("scope") as FileScope | null;
     const scope = rawScope && ["all", "data-room", "shared"].includes(rawScope) ? rawScope : undefined;
     const tab = params.get("tab");
-    return { mode, tab, scope, title: params.get("t") ?? undefined };
+    return { mode, tab, scope, title: params.get("t") ?? undefined, run };
   } catch {
     return { mode: "today", tab: null };
   }
 }
 
-function tabFromHash(tab: string | null, scope?: FileScope, title?: string): Tab | null {
+function tabFromHash(tab: string | null, scope?: FileScope, title?: string, run?: number): Tab | null {
   if (!tab) return null;
   if (tab.endsWith("-root")) return null;
   if (tab.startsWith("files-")) {
@@ -723,6 +754,28 @@ function tabFromHash(tab: string | null, scope?: FileScope, title?: string): Tab
       kind: "deal",
       title: title || titleForDealId(tab),
       fileScope: scope,
+    };
+  }
+  if (tab.startsWith("analysis-") || tab.startsWith("an-")) {
+    if (tab.startsWith("analysis-bigfake-board")) {
+      return buildBigFakeInvestmentBoardTab(tab);
+    }
+    return {
+      id: tab,
+      kind: "analysis",
+      title: title || titleForAnalysisId(tab),
+      analysisRunId: run ?? analysisRunIdFromTabId(tab),
+    };
+  }
+  if (tab.startsWith("artifact-")) {
+    return readArtifactTab(tab) ?? {
+      id: tab,
+      kind: "analysis",
+      title: title || "Yulia artifact",
+      tool: "artifact",
+      markdown: "",
+      artifactData: { canvas_action: "show_content", title: title || "Yulia artifact" },
+      status: "canvas artifact",
     };
   }
   if (tab === "marketing-studio") {
@@ -756,6 +809,68 @@ function titleForDealId(id: string): string {
   if (id.includes("electrical")) return "Electrical Contractor · TX";
   if (id.includes("dist")) return "Distribution · OH";
   return "Big Fake Deal";
+}
+
+function titleForAnalysisId(id: string): string {
+  const normalized = id.toLowerCase();
+  if (normalized.includes("buyer")) return "Buyer fit";
+  if (normalized.includes("qoe")) return "Quality of earnings";
+  if (normalized.includes("comps") || normalized.includes("comparison")) return "Deal comparison";
+  if (normalized.includes("valuation")) return "Valuation model";
+  if (normalized.includes("recast")) return "Recast analysis";
+  if (normalized.includes("sba")) return "SBA bankability";
+  if (normalized.includes("lbo")) return "LBO model";
+  if (normalized.includes("dcf")) return "DCF model";
+  if (normalized.includes("tax")) return "Tax impact";
+  if (normalized.includes("market")) return "Market intelligence";
+  return "Analysis";
+}
+
+function analysisRunIdFromTabId(id: string): number | undefined {
+  const match = id.match(/^analysis-(\d+)$/);
+  if (!match) return undefined;
+  const run = Number(match[1]);
+  return Number.isFinite(run) && run > 0 ? run : undefined;
+}
+
+const ARTIFACT_TAB_CACHE_KEY = "smbx_v6_artifact_tabs";
+
+function saveArtifactTab(tab: Tab) {
+  try {
+    if (tab.kind !== "analysis" || tab.tool !== "artifact") return;
+    const raw = sessionStorage.getItem(ARTIFACT_TAB_CACHE_KEY);
+    const existing = raw ? JSON.parse(raw) : {};
+    const next = {
+      ...(existing && typeof existing === "object" ? existing : {}),
+      [tab.id]: {
+        id: tab.id,
+        kind: tab.kind,
+        title: tab.title,
+        tool: tab.tool,
+        markdown: tab.markdown,
+        artifactData: tab.artifactData,
+        status: tab.status,
+        sourceMode: tab.sourceMode,
+      },
+    };
+    const entries = Object.entries(next).slice(-12);
+    sessionStorage.setItem(ARTIFACT_TAB_CACHE_KEY, JSON.stringify(Object.fromEntries(entries)));
+  } catch {
+    // Best-effort; artifact tabs still work for the current render.
+  }
+}
+
+function readArtifactTab(id: string): Tab | null {
+  try {
+    const raw = sessionStorage.getItem(ARTIFACT_TAB_CACHE_KEY);
+    if (!raw) return null;
+    const cache = JSON.parse(raw);
+    const tab = cache?.[id];
+    if (!tab || tab.kind !== "analysis" || tab.tool !== "artifact") return null;
+    return tab as Tab;
+  } catch {
+    return null;
+  }
 }
 
 function saveStudioDraft(tab: Tab) {
@@ -874,11 +989,17 @@ function owningLauncherDealForTab(tab: Tab, allTabs: Tab[]): Tab | null {
 
 function launcherTabMatchesDeal(tab: Tab, deal: Tab): boolean {
   if (tab.id === deal.id) return false;
+  if (tab.dealId != null && String(tab.dealId) === String(deal.id)) return true;
+  if (tab.dealTitle && sameLauncherDealName(tab.dealTitle, deal.title)) return true;
+  if (tab.dealTitle) return false;
+  if (tab.kind === "analysis" && tab.id.startsWith("model-")) return false;
   const dealTitle = normalizeLauncherDealTitle(deal.title);
   return sameLauncherDealName(inferredLauncherDealName(tab), dealTitle) || stripLauncherDealPrefix(tab.title, dealTitle) !== normalizeLauncherTabTitle(tab.title);
 }
 
 function inferredLauncherDealName(tab: Tab): string | null {
+  if (tab.dealTitle) return tab.dealTitle;
+  if (tab.kind === "analysis" && tab.id.startsWith("model-")) return null;
   const haystack = normalizeLauncherTabTitle([
     tab.id,
     tab.title,
@@ -888,7 +1009,7 @@ function inferredLauncherDealName(tab: Tab): string | null {
 
   if (haystack.includes("big fake") || haystack.includes("bigfake")) return "Big Fake Deal";
   if (haystack.includes("pest")) return "Pest Control · FL";
-  if (haystack.includes("hvac")) return "HVAC platform · CO";
+  if (haystack.includes("hvac platform") || haystack.includes("deal-hvac")) return "HVAC platform · CO";
   if (haystack.includes("electrical")) return "Electrical Contractor · TX";
   if (haystack.includes("distribution")) return "Distribution · OH";
   if (/\bioi\b/.test(haystack) || haystack.includes("qoe") || haystack.includes("buyer fit") || haystack.includes("mutual nda")) return "Big Fake Deal";
@@ -958,6 +1079,18 @@ function stripLauncherDealPrefix(title: string, dealTitle: string): string {
   return normalizedTitle;
 }
 
+function cleanLauncherRepeatedScope(title: string): string {
+  const parts = normalizeLauncherTabTitle(title)
+    .split(/\s*[·:]\s*/)
+    .map(part => part.trim())
+    .filter(Boolean);
+  if (parts.length < 2) return normalizeLauncherTabTitle(title);
+  while (parts.length > 1 && launcherDealTitleKey(parts[0]) === launcherDealTitleKey(parts[1])) {
+    parts.splice(1, 1);
+  }
+  return parts.join(" · ");
+}
+
 function sameLauncherDealName(left?: string | null, right?: string | null): boolean {
   const a = launcherDealTitleKey(left);
   const b = launcherDealTitleKey(right);
@@ -985,12 +1118,26 @@ function escapeLauncherRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function writeHashState({ mode, tab, scope }: { mode: ModeId; tab: string; scope?: FileScope }) {
+function writeHashState({
+  mode,
+  tab,
+  scope,
+  title,
+  run,
+}: {
+  mode: ModeId;
+  tab: string;
+  scope?: FileScope;
+  title?: string;
+  run?: number;
+}) {
   try {
     const params = new URLSearchParams();
     params.set("mode", mode);
     params.set("tab", tab);
     if (scope) params.set("scope", scope);
+    if (title && !tab.endsWith("-root")) params.set("t", title);
+    if (run) params.set("run", String(run));
     const next = `#${params.toString()}`;
     if (window.location.hash !== next) {
       window.history.replaceState(null, "", window.location.pathname + window.location.search + next);
@@ -1002,7 +1149,7 @@ const A: Record<string, CSSProperties> = {
   shell: {
     display: "flex", flexDirection: "column",
     height: "100vh", width: "100%", overflow: "hidden",
-    background: "linear-gradient(180deg, #EEF4FA 0%, #ECEAF2 46%, #F7F5FB 100%)",
+    background: "linear-gradient(180deg, #DDE8F8 0%, #E2EBF9 48%, #EFF4FD 100%)",
   },
   leftLauncherBar: {
     height: 54,
@@ -1028,9 +1175,9 @@ const A: Record<string, CSSProperties> = {
     padding: "4px",
     boxSizing: "border-box",
     borderRadius: 15,
-    background: "rgba(255, 255, 255, 0.50)",
-    border: "1px solid rgba(198, 214, 230, 0.58)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.78), 0 12px 28px -24px rgba(45, 65, 90, 0.35)",
+    background: "rgba(249, 252, 255, 0.72)",
+    border: "1px solid rgba(174, 194, 218, 0.72)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.88), 0 12px 28px -22px rgba(45, 65, 90, 0.42)",
     backdropFilter: "blur(14px) saturate(160%)",
     WebkitBackdropFilter: "blur(14px) saturate(160%)",
     overflow: "visible",
@@ -1052,9 +1199,19 @@ const A: Record<string, CSSProperties> = {
     justifyContent: "center",
     gap: 5,
     cursor: "pointer",
+    border: "1px solid transparent",
     color: "#59697D",
     fontSize: 12,
     fontWeight: 800,
+  },
+  topLauncherActive: {
+    background: "#FFFFFF",
+    border: "1px solid rgba(166, 181, 210, 0.78)",
+    color: "#2F5F8D",
+    boxShadow: [
+      "0 1px 2px rgba(36, 59, 84, 0.10)",
+      "0 8px 18px -17px rgba(36, 59, 84, 0.46)",
+    ].join(", "),
   },
   topLauncherIcon: {
     width: 19,
@@ -1063,6 +1220,10 @@ const A: Record<string, CSSProperties> = {
     display: "grid",
     placeItems: "center",
     color: "inherit",
+  },
+  topLauncherIconActive: {
+    background: "rgba(232, 241, 252, 0.92)",
+    color: "#2F5F8D",
   },
   topLauncherLabel: {
     lineHeight: 1,
@@ -1077,9 +1238,14 @@ const A: Record<string, CSSProperties> = {
     placeItems: "center",
     fontFamily: "var(--font-mono)",
     fontSize: 9.5,
-    color: "#537291",
-    background: "rgba(234, 243, 251, 0.9)",
-    boxShadow: "inset 0 0 0 1px rgba(172, 198, 222, 0.5)",
+    color: "#3F6689",
+    background: "rgba(227, 240, 253, 0.96)",
+    boxShadow: "inset 0 0 0 1px rgba(151, 183, 214, 0.62)",
+  },
+  topLauncherBadgeActive: {
+    color: "#2F5F8D",
+    background: "rgba(235, 244, 253, 0.78)",
+    boxShadow: "0 0 0 1px rgba(150, 174, 205, 0.42)",
   },
   topLauncherMenu: {
     position: "absolute",
@@ -1160,13 +1326,15 @@ const A: Record<string, CSSProperties> = {
     position: "relative",
     borderRadius: 14,
     overflow: "hidden",
-    background: "#FEFFFF",
-    border: "1px solid rgba(166, 181, 199, 0.74)",
+    background: "linear-gradient(180deg, #FFFFFF 0%, #FEFFFF 58%, #F8FBFF 100%)",
+    border: "1px solid rgba(145, 165, 191, 0.84)",
     boxShadow: [
-      "-1px 0 0 rgba(255, 255, 255, 0.94)",
-      "-8px 0 18px rgba(38, 54, 76, 0.08)",
-      "0 12px 30px rgba(26, 34, 51, 0.10)",
-      "0 1px 2px rgba(26, 34, 51, 0.10)",
+      "0 0 0 1px rgba(255, 255, 255, 0.72)",
+      "inset 0 1px 0 rgba(255, 255, 255, 0.98)",
+      "-14px -10px 30px rgba(38, 54, 76, 0.13)",
+      "-3px -2px 8px rgba(38, 54, 76, 0.10)",
+      "0 18px 44px rgba(31, 45, 66, 0.14)",
+      "0 2px 8px rgba(31, 45, 66, 0.10)",
     ].join(", "),
   },
   dragHandle: {

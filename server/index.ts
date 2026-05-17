@@ -94,7 +94,7 @@ app.set('trust proxy', 1);
 app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook);
 
 // ─── 2. Body parsing ───────────────────────────────────────
-app.use(express.json());
+app.use(express.json({ limit: '2mb' }));
 
 // ─── 2. API routes (public) ────────────────────────────────
 app.get('/api/health', (_req, res) => {

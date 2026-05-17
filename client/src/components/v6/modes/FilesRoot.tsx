@@ -691,10 +691,11 @@ function buildRealShortcuts(deals: WorkspaceDeal[], deliverables: WorkspaceDeliv
 }
 
 function deliverableToFileRow(d: WorkspaceDeliverable): FileRow {
-  const isAnalysis = !!d.analysis_run_id || /model|valuation|analysis|recast|sba|comp|score|risk|tax|financial/i.test(d.slug || d.name);
+  const isModel = d.folder_category === "models" || /model/i.test(`${d.slug || ""} ${d.name || ""}`);
+  const isAnalysis = isModel || !!d.analysis_run_id || /valuation|analysis|recast|sba|comp|score|risk|tax|financial/i.test(d.slug || d.name);
   return {
     title: d.name || formatSlug(d.slug),
-    sub: `${d.deal_name || "Deal"} · ${formatStatus(d.status)} · ${fmtRelative(d.completed_at || d.created_at)}`,
+    sub: `${d.deal_name || "Deal"} · ${isModel ? "Models" : formatStatus(d.status)} · ${fmtRelative(d.completed_at || d.created_at)}`,
     status: d.status === "complete" ? "Open" : formatStatus(d.status),
     kind: isAnalysis ? "chart" : "doc",
     tone: d.status === "complete" ? "review" : d.status === "failed" ? "locked" : "draft",

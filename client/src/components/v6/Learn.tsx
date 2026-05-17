@@ -113,6 +113,10 @@ const WHY_STATS: Stat[] = [
   { stat: "28",     label: "tier-routed deliverable generators"            },
 ];
 
+const LIGHT_MOUNTAIN_ART = "/textures/desktop/art-house/art-house-01.png?v=20260516-light-loop-1";
+const ROOM_ART = "/textures/desktop/art-house/art-house-03.png?v=20260516-pricing-room-1";
+const LIGHT_COST_TEXTURE = "/textures/desktop/random/texture-random-22.png?v=20260516-cost-light-1";
+
 interface Faq { q: string; a: string }
 
 const FAQS: Faq[] = [
@@ -311,12 +315,10 @@ function stepCardStyle(index: number): CSSProperties {
   if (index === 2) {
     return {
       ...H.stepCard,
-      color: "#FFFFFF",
-      backgroundImage: `linear-gradient(145deg, rgba(20,28,47,0.82) 0%, rgba(57,68,108,0.58) 52%, rgba(18,24,40,0.88) 100%), url('${DESKTOP_TEXTURES.pipelineCard}')`,
-      backgroundSize: "cover, cover",
-      backgroundPosition: "center, center",
-      border: "1px solid rgba(255,255,255,0.30)",
-      boxShadow: "0 24px 60px rgba(19,28,46,0.22), 0 8px 20px rgba(19,28,46,0.10), inset 0 1px 0 rgba(255,255,255,0.20)",
+      color: "#5E4816",
+      background: "radial-gradient(circle at 16% 10%, rgba(255,255,255,0.56), transparent 32%), linear-gradient(145deg, rgba(255,248,229,0.98) 0%, rgba(245,222,174,0.90) 100%)",
+      border: "1px solid rgba(219,184,112,0.54)",
+      boxShadow: "0 22px 52px rgba(156,113,40,0.13), 0 6px 16px rgba(31,44,69,0.06), inset 0 1px 0 rgba(255,255,255,0.82)",
     };
   }
   return {
@@ -337,9 +339,9 @@ function stepNumberStyle(index: number): CSSProperties {
   if (index === 2) {
     return {
       ...H.stepN,
-      color: "#FFFFFF",
-      background: "rgba(255,255,255,0.16)",
-      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.34), 0 10px 24px rgba(0,0,0,0.18)",
+      color: "#7A5718",
+      background: "linear-gradient(180deg, rgba(255,245,219,0.98), rgba(239,211,147,0.90))",
+      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.86), 0 10px 24px rgba(156,113,40,0.13)",
     };
   }
   return H.stepN;
@@ -347,21 +349,15 @@ function stepNumberStyle(index: number): CSSProperties {
 
 function capabilityCardStyle(index: number): CSSProperties {
   const base: CSSProperties = H.capCard;
-  const texturedBase: CSSProperties = {
-    color: "#FFFFFF",
-    border: "1px solid rgba(255,255,255,0.32)",
-    boxShadow: "0 24px 62px rgba(31,44,69,0.16), 0 8px 20px rgba(31,44,69,0.08), inset 0 1px 0 rgba(255,255,255,0.20)",
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-  };
 
   if (index === 0) {
     return {
       ...base,
       color: "#FFFFFF",
-      minHeight: 210,
-      background:
-        "radial-gradient(circle at 18% 12%, rgba(129,190,211,0.34), transparent 36%), linear-gradient(145deg, rgba(20,55,72,0.98) 0%, rgba(43,88,99,0.94) 52%, rgba(17,33,48,0.98) 100%)",
+      backgroundImage:
+        `radial-gradient(circle at 18% 12%, rgba(129,190,211,0.34), transparent 36%), linear-gradient(145deg, rgba(20,55,72,0.84) 0%, rgba(43,88,99,0.62) 52%, rgba(17,33,48,0.88) 100%), url('${ART_HOUSE_TEXTURES.learn}')`,
+      backgroundSize: "cover, cover, cover",
+      backgroundPosition: "center, center, center",
       border: "1px solid rgba(255,255,255,0.22)",
       boxShadow: "0 24px 62px rgba(31,44,69,0.16), 0 8px 20px rgba(31,44,69,0.08), inset 0 1px 0 rgba(255,255,255,0.18)",
     };
@@ -369,38 +365,55 @@ function capabilityCardStyle(index: number): CSSProperties {
   if (index === 1) {
     return {
       ...base,
-      background: "linear-gradient(145deg, rgba(255,255,255,0.98), rgba(245,249,254,0.94))",
-      borderTop: "5px solid rgba(106,155,204,0.34)",
+      color: "#1D2A42",
+      backgroundImage: `linear-gradient(145deg, rgba(255,255,255,0.96), rgba(238,246,255,0.88)), url('${DESKTOP_TEXTURES.pipelineCard}')`,
+      backgroundSize: "cover, cover",
+      backgroundPosition: "center, center",
+      border: "1px solid rgba(188,206,226,0.76)",
+      boxShadow: "0 22px 56px rgba(53,78,116,0.11), 0 6px 16px rgba(31,44,69,0.06), inset 0 1px 0 rgba(255,255,255,0.86)",
     };
   }
   if (index === 2) {
     return {
       ...base,
-      ...texturedBase,
-      minHeight: 210,
-      backgroundImage: `linear-gradient(145deg, rgba(36,39,69,0.72) 0%, rgba(77,82,130,0.48) 50%, rgba(18,23,39,0.82) 100%), url('${DESKTOP_TEXTURES.pricingFeatured}')`,
+      color: "#FFFFFF",
+      backgroundImage: `linear-gradient(145deg, rgba(42,50,92,0.70) 0%, rgba(82,92,148,0.48) 50%, rgba(28,35,66,0.82) 100%), url('${DESKTOP_TEXTURES.pricingFeatured}')`,
+      backgroundSize: "cover, cover",
+      backgroundPosition: "center, center",
+      border: "1px solid rgba(255,255,255,0.30)",
+      boxShadow: "0 24px 62px rgba(31,44,69,0.16), 0 8px 20px rgba(31,44,69,0.08), inset 0 1px 0 rgba(255,255,255,0.20)",
     };
   }
   if (index === 3) {
     return {
       ...base,
-      background: "radial-gradient(circle at 18% 14%, rgba(214,163,92,0.16), transparent 34%), linear-gradient(145deg, rgba(255,255,255,0.98), rgba(249,244,234,0.92))",
-      border: "1px solid rgba(224,210,188,0.88)",
+      color: "#5E4816",
+      backgroundImage: `radial-gradient(circle at 18% 14%, rgba(255,255,255,0.48), transparent 34%), linear-gradient(145deg, rgba(255,250,239,0.96), rgba(247,230,196,0.88)), url('${ART_HOUSE_TEXTURES.pricing}')`,
+      backgroundSize: "cover, cover, cover",
+      backgroundPosition: "center, center, center",
+      border: "1px solid rgba(224,190,126,0.68)",
+      boxShadow: "0 22px 56px rgba(156,113,40,0.12), 0 6px 16px rgba(31,44,69,0.06), inset 0 1px 0 rgba(255,255,255,0.86)",
     };
   }
   if (index === 4) {
     return {
       ...base,
       color: "#FFFFFF",
-      background: "linear-gradient(145deg, rgba(44,72,104,0.96), rgba(37,54,80,0.96))",
-      border: "1px solid rgba(255,255,255,0.20)",
+      backgroundImage: `radial-gradient(circle at 82% 8%, rgba(106,155,204,0.24), transparent 34%), linear-gradient(145deg, rgba(55,83,119,0.82), rgba(42,62,92,0.86)), url('${DESKTOP_TEXTURES.searchFinancing}')`,
+      backgroundSize: "cover, cover, cover",
+      backgroundPosition: "center, center, center",
+      border: "1px solid rgba(255,255,255,0.22)",
       boxShadow: "0 24px 60px rgba(24,37,58,0.20), inset 0 1px 0 rgba(255,255,255,0.14)",
     };
   }
   return {
     ...base,
-    background: "linear-gradient(145deg, rgba(240,247,250,0.98), rgba(255,255,255,0.94))",
-    borderLeft: "5px solid rgba(80,145,118,0.34)",
+    color: "#214C3B",
+    backgroundImage: `linear-gradient(145deg, rgba(244,252,248,0.96), rgba(223,241,233,0.90)), url('${ART_HOUSE_TEXTURES.search}')`,
+    backgroundSize: "cover, cover",
+    backgroundPosition: "center, center",
+    border: "1px solid rgba(159,198,181,0.68)",
+    boxShadow: "0 22px 56px rgba(63,125,100,0.12), 0 6px 16px rgba(31,44,69,0.06), inset 0 1px 0 rgba(255,255,255,0.86)",
   };
 }
 
@@ -419,17 +432,18 @@ const H: Record<string, CSSProperties> = {
     flexDirection: "column",
     justifyContent: "space-between",
     overflow: "hidden",
-    backgroundImage: `linear-gradient(145deg, rgba(17,41,63,0.74) 0%, rgba(64,99,119,0.38) 52%, rgba(15,24,42,0.78) 100%), url('${ART_HOUSE_TEXTURES.learn}')`,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    border: "1px solid rgba(255,255,255,0.34)",
-    boxShadow: "0 28px 74px rgba(23,38,63,0.24), 0 8px 20px rgba(26,34,51,0.10), inset 0 1px 0 rgba(255,255,255,0.22)",
+    backgroundImage: `url('${LIGHT_MOUNTAIN_ART}')`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    border: "1px solid rgba(179,202,222,0.78)",
+    boxShadow: "0 24px 64px rgba(52,84,124,0.14), 0 8px 20px rgba(26,34,51,0.07), inset 0 1px 0 rgba(255,255,255,0.82)",
   },
   loopLeadEyebrow: {
     fontSize: 10,
     color: "#FFFFFF",
     letterSpacing: "0.16em",
     fontWeight: 800,
+    textShadow: "0 2px 12px rgba(13, 24, 42, 0.42)",
   },
   loopLeadTitle: {
     margin: "18px 0 0",
@@ -438,7 +452,7 @@ const H: Record<string, CSSProperties> = {
     lineHeight: 0.98,
     letterSpacing: "-0.055em",
     color: "#FFFFFF",
-    textShadow: "0 2px 18px rgba(18,31,54,0.24)",
+    textShadow: "0 2px 18px rgba(13, 24, 42, 0.46), 0 1px 2px rgba(13, 24, 42, 0.36)",
   },
   loopLeadBody: {
     margin: "14px 0 0",
@@ -446,6 +460,7 @@ const H: Record<string, CSSProperties> = {
     fontSize: 14.5,
     lineHeight: 1.55,
     color: "#FFFFFF",
+    textShadow: "0 2px 12px rgba(13, 24, 42, 0.42), 0 1px 2px rgba(13, 24, 42, 0.34)",
     textWrap: "pretty",
   },
   loopLeadRail: {
@@ -456,11 +471,11 @@ const H: Record<string, CSSProperties> = {
     width: "fit-content",
     padding: "10px 12px",
     borderRadius: 999,
-    background: "radial-gradient(circle at 12% 0%, rgba(255,255,255,0.24), transparent 40%), linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.07))",
-    border: "0.5px solid rgba(255,255,255,0.42)",
-    boxShadow: "0 16px 34px -22px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10)",
-    backdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
-    WebkitBackdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
+    background: "radial-gradient(circle at 12% 0%, rgba(255,255,255,0.34), transparent 42%), linear-gradient(180deg, rgba(255,255,255,0.22), rgba(30,45,66,0.22) 48%, rgba(16,28,45,0.28))",
+    border: "0.5px solid rgba(255,255,255,0.56)",
+    boxShadow: "0 16px 34px -22px rgba(0,0,0,0.50), inset 0 1px 0 rgba(255,255,255,0.50), inset 0 -1px 0 rgba(255,255,255,0.14)",
+    backdropFilter: "blur(10px) saturate(175%) contrast(1.08) brightness(1.05)",
+    WebkitBackdropFilter: "blur(10px) saturate(175%) contrast(1.08) brightness(1.05)",
     color: "#FFFFFF",
     fontSize: 12,
     fontWeight: 750,
@@ -510,13 +525,13 @@ const H: Record<string, CSSProperties> = {
     color: "var(--m-on-surface-var)", fontWeight: 600, letterSpacing: "0.1em",
   },
   chipDark: {
-    background: "rgba(255,255,255,0.16)",
-    color: "#FFFFFF",
+    background: "rgba(231,241,250,0.84)",
+    color: "#426A83",
     opacity: 0.9,
   },
   capabilityMosaic: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
     gap: 12,
   },
   capCard: {
@@ -580,11 +595,11 @@ const H: Record<string, CSSProperties> = {
     minHeight: 230,
     borderRadius: 26,
     padding: "24px 26px",
-    backgroundImage: `linear-gradient(145deg, rgba(22,28,45,0.80) 0%, rgba(58,68,96,0.52) 52%, rgba(16,20,34,0.86) 100%), url('${DESKTOP_TEXTURES.pipelineCard}')`,
+    backgroundImage: `linear-gradient(145deg, rgba(255,255,255,0.94) 0%, rgba(236,244,253,0.84) 52%, rgba(214,229,244,0.76) 100%), url('${DESKTOP_TEXTURES.pipelineCard}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
-    border: "1px solid rgba(255,255,255,0.28)",
-    boxShadow: "0 28px 72px rgba(31,44,69,0.20), inset 0 1px 0 rgba(255,255,255,0.18)",
+    border: "1px solid rgba(188,206,226,0.82)",
+    boxShadow: "0 24px 64px rgba(52,84,124,0.13), inset 0 1px 0 rgba(255,255,255,0.84)",
     display: "flex",
     alignItems: "center",
   },
@@ -594,16 +609,16 @@ const H: Record<string, CSSProperties> = {
     gap: 14,
     alignItems: "baseline",
     padding: "10px 0",
-    borderBottom: "1px solid rgba(255,255,255,0.12)",
+    borderBottom: "1px solid rgba(166,181,210,0.22)",
   },
   stat: {
     fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 28,
-    letterSpacing: "-0.03em", color: "#FFFFFF", minWidth: 72,
+    letterSpacing: "-0.03em", color: "#274D73", minWidth: 72,
   },
   statLabel: {
     fontSize: 13,
-    color: "#FFFFFF",
-    opacity: 0.78,
+    color: "#52657C",
+    opacity: 1,
   },
   faqCard: {
     padding: 0,
@@ -1207,7 +1222,7 @@ function LearnSection({ id, eyebrow, title, sub, children }: {
 }
 
 const learnHeroWash =
-  `linear-gradient(145deg, rgba(14,28,48,0.72) 0%, rgba(47,90,132,0.44) 52%, rgba(14,22,42,0.74) 100%), url('${DESKTOP_TEXTURES.learnHero}')`;
+  `linear-gradient(145deg, rgba(14,28,48,0.62) 0%, rgba(47,90,132,0.28) 52%, rgba(14,22,42,0.62) 100%), url('${ROOM_ART}')`;
 
 const L: Record<string, CSSProperties> = {
   hero: {
@@ -1455,19 +1470,20 @@ const P: Record<string, CSSProperties> = {
     minHeight: 142,
     borderRadius: 24,
     padding: "22px 24px",
-    backgroundImage: `linear-gradient(145deg, rgba(30,64,94,0.72), rgba(76,124,158,0.42)), url('${DESKTOP_TEXTURES.pricingGuarantee}')`,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
+    backgroundImage: `url('${LIGHT_COST_TEXTURE}')`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
     color: "#FFFFFF",
-    border: "1px solid rgba(255,255,255,0.30)",
-    boxShadow: "0 22px 58px rgba(31,44,69,0.13), inset 0 1px 0 rgba(255,255,255,0.22)",
+    border: "1px solid rgba(255,255,255,0.34)",
+    boxShadow: "0 22px 58px rgba(31,44,69,0.16), inset 0 1px 0 rgba(255,255,255,0.22)",
   },
   costEyebrow: {
     fontSize: 9.5,
     letterSpacing: "0.16em",
     fontWeight: 800,
     color: "#FFFFFF",
-    opacity: 0.82,
+    opacity: 0.86,
+    textShadow: "0 2px 12px rgba(13,24,42,0.42)",
   },
   costTitle: {
     fontFamily: "var(--font-display)",
@@ -1476,6 +1492,7 @@ const P: Record<string, CSSProperties> = {
     letterSpacing: "-0.04em",
     margin: "32px 0 0",
     color: "#FFFFFF",
+    textShadow: "0 2px 16px rgba(13,24,42,0.46), 0 1px 2px rgba(13,24,42,0.34)",
     textWrap: "balance",
   },
   costGrid: {

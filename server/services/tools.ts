@@ -1158,7 +1158,11 @@ async function runAnalysis(input: Record<string, any>, userId: number, conversat
     });
   }
 
-  const tabTitle = `${deal.business_name || 'Deal'} · ${result.title || humanizeAnalysisType(analysisType)}`;
+  const tabTitle = dealScopedTitle(
+    deal.business_name || 'Deal',
+    analysisData.title || result.title,
+    humanizeAnalysisType(analysisType),
+  );
   const canvasTabId = `analysis-${analysisType}-${result.deliverableId ?? Date.now()}`;
   const analysisRun = await createAnalysisRun({
     userId,
@@ -1208,6 +1212,8 @@ async function runAnalysis(input: Record<string, any>, userId: number, conversat
       id: analysisRun?.canvas_tab_id || canvasTabId,
       kind: 'analysis',
       title: tabTitle,
+      dealId: Number(deal.id),
+      dealTitle: deal.business_name || 'Deal',
       tool: analysisType,
       analysisRunId: analysisRun?.id ?? null,
       deliverableId: result.deliverableId ?? null,
@@ -1229,6 +1235,59 @@ function normalizeAnalysisType(value: unknown): string | null {
   if (typeof value !== 'string') return null;
   const normalized = value.trim().toLowerCase().replace(/[\s-]+/g, '_');
   return ANALYSIS_TYPES.has(normalized) ? normalized : null;
+}
+
+function dealScopedTitle(dealName: string, rawTitle: string | null | undefined, fallback: string): string {
+  const parts = stripKnownTitleScopeParts(splitTitleParts(String(rawTitle || fallback)), dealName);
+  return `${dealName} · ${(parts.join(' · ') || fallback).trim()}`;
+}
+
+function cleanRepeatedTitleScope(title: string): string {
+  const parts = splitTitleParts(title);
+  if (parts.length < 2) return title.replace(/\s+/g, ' ').trim();
+  while (parts.length > 1 && titleKey(parts[0]) === titleKey(parts[1])) {
+    parts.splice(1, 1);
+  }
+  return parts.join(' · ');
+}
+
+function titleKey(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+function splitTitleParts(value: string): string[] {
+  return value
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(/\s*[·:]\s*/)
+    .map(part => part.trim())
+    .filter(Boolean);
+}
+
+function stripKnownTitleScopeParts(parts: string[], dealName: string): string[] {
+  const scopes = [
+    dealName,
+    'Big Fake Deal',
+    'Pest Control · FL',
+    'HVAC platform · CO',
+    'Electrical Contractor · TX',
+    'Distribution · OH',
+  ];
+  const next = [...parts];
+  let changed = true;
+  while (changed && next.length > 0) {
+    changed = false;
+    for (const scope of scopes) {
+      const scopeParts = splitTitleParts(scope);
+      const candidate = next.slice(0, scopeParts.length).join(' ');
+      if (scopeParts.length > 0 && titleKey(candidate) === titleKey(scopeParts.join(' '))) {
+        next.splice(0, scopeParts.length);
+        changed = true;
+        break;
+      }
+    }
+  }
+  return next;
 }
 
 function resolveAnalysisMenuItemSlug({
@@ -1969,10 +2028,26 @@ async function getSourcingPortfolio(input: Record<string, any>, userId: number):
 
 async function createModelTab(input: Record<string, any>, userId: number, conversationId?: number | null): Promise<string> {
   const { modelType, title, initialAssumptions } = input;
-  const modelTitle = title || `${modelType || 'Interactive'} model`;
+  const [contextDeal] = conversationId
+    ? await sql`
+        SELECT d.id, d.business_name
+        FROM analysis_runs ar
+        JOIN deals d ON d.id = ar.deal_id
+        WHERE ar.user_id = ${userId}
+          AND ar.conversation_id = ${conversationId}
+          AND ar.deal_id IS NOT NULL
+        ORDER BY ar.created_at DESC
+        LIMIT 1
+      `
+    : [];
+  const rawModelTitle = cleanRepeatedTitleScope(String(title || `${modelType || 'Interactive'} model`));
+  const modelTitle = contextDeal?.business_name
+    ? dealScopedTitle(String(contextDeal.business_name), rawModelTitle, `${modelType || 'Interactive'} model`)
+    : rawModelTitle;
   const tabId = `model-${modelType || 'analysis'}-${Date.now()}`;
   const analysisRun = await createAnalysisRun({
     userId,
+    dealId: contextDeal?.id ? Number(contextDeal.id) : null,
     conversationId: conversationId ?? null,
     definitionSlug: modelType || 'interactive_model',
     analysisType: modelType || 'interactive_model',
@@ -1980,7 +2055,12 @@ async function createModelTab(input: Record<string, any>, userId: number, conver
     status: 'complete',
     scope: 'deal',
     source: 'yulia_tool',
-    inputPayload: { modelType, requestedAt: new Date().toISOString() },
+    inputPayload: {
+      modelType,
+      requestedAt: new Date().toISOString(),
+      dealId: contextDeal?.id ? Number(contextDeal.id) : null,
+      dealTitle: contextDeal?.business_name ?? null,
+    },
     assumptions: initialAssumptions || {},
     outputs: { modelType, state: initialAssumptions || {} },
     canvasTabId: tabId,
@@ -1992,7 +2072,11 @@ async function createModelTab(input: Record<string, any>, userId: number, conver
     modelType: modelType || 'interactive_model',
     title: modelTitle,
     state: initialAssumptions || {},
-    sourcePayload: { input },
+    sourcePayload: {
+      input,
+      dealId: contextDeal?.id ? Number(contextDeal.id) : null,
+      dealTitle: contextDeal?.business_name ?? null,
+    },
   });
 
   return JSON.stringify({
@@ -2000,6 +2084,8 @@ async function createModelTab(input: Record<string, any>, userId: number, conver
     canvas_action: 'create_model_tab',
     modelType,
     title: modelTitle,
+    dealId: contextDeal?.id ? Number(contextDeal.id) : null,
+    dealTitle: contextDeal?.business_name ?? null,
     tabId,
     analysisRunId: analysisRun?.id ?? null,
     initialAssumptions: initialAssumptions || {},

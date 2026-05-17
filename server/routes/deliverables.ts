@@ -20,8 +20,9 @@ deliverablesRouter.get('/deliverables/all', async (req, res) => {
 
   try {
     const deliverables = await sql`
-      SELECT d.id, d.deal_id, d.status, d.created_at, d.completed_at,
-             m.slug, m.name, m.description, m.tier, m.journey, m.gate,
+      SELECT d.id, d.deal_id, d.status, d.created_at, d.completed_at, d.folder_category,
+             d.content->>'artifactKind' as artifact_kind,
+             m.slug, COALESCE(d.content->>'artifactTitle', m.name) as name, m.description, m.tier, m.journey, m.gate,
              dl.business_name as deal_name, dl.journey_type, dl.league,
              ar.id as analysis_run_id,
              ar.analysis_type,
@@ -64,8 +65,9 @@ deliverablesRouter.get('/deals/:dealId/deliverables', async (req, res) => {
 
     const deliverables = await sql`
       SELECT d.id, d.deal_id, d.menu_item_id, d.status, d.created_at, d.completed_at,
-             d.generation_time_ms, d.generation_model,
-             m.slug, m.name, m.description, m.tier, m.journey, m.gate
+             d.generation_time_ms, d.generation_model, d.folder_category,
+             d.content->>'artifactKind' as artifact_kind,
+             m.slug, COALESCE(d.content->>'artifactTitle', m.name) as name, m.description, m.tier, m.journey, m.gate
       FROM deliverables d
       JOIN menu_items m ON m.id = d.menu_item_id
       WHERE d.deal_id = ${dealId}

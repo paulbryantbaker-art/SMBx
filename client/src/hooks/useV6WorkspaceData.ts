@@ -45,6 +45,8 @@ export interface WorkspaceDeliverable {
   analysis_type?: string | null;
   analysis_status?: string | null;
   canvas_tab_id?: string | null;
+  folder_category?: string | null;
+  artifact_kind?: string | null;
 }
 
 export interface DataRoomFolder {
@@ -97,6 +99,32 @@ export interface CompareDealsInput {
   title?: string;
   modelPreference?: ModelPreference;
   requestedFrom?: string;
+}
+
+export interface SavedModelArtifact {
+  id: number;
+  dealId: number;
+  title: string;
+  status: string;
+  savedAt: string;
+  exportUrls?: {
+    pdf?: string;
+    pptx?: string;
+  };
+}
+
+export interface SaveModelArtifactInput {
+  analysisRunId: number;
+  title?: string;
+  dealIds?: number[];
+  menuItemSlug?: string;
+  artifactPayload?: Record<string, any>;
+}
+
+export interface ExportModelArtifactPreviewInput {
+  title: string;
+  format: "pdf" | "pptx";
+  artifactPayload: Record<string, any>;
 }
 
 export function useV6WorkspaceData(user: User | null) {
@@ -244,6 +272,80 @@ export async function compareDealsAnalysis(input: CompareDealsInput) {
     analysisType?: string;
     analysisData?: Record<string, any>;
     message?: string;
+  };
+}
+
+export async function saveAnalysisModelArtifact(input: SaveModelArtifactInput) {
+  const res = await fetch(`/api/analysis-runs/${input.analysisRunId}/save-model-artifact`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({
+      title: input.title,
+      dealIds: input.dealIds ?? [],
+      menuItemSlug: input.menuItemSlug,
+      artifactPayload: input.artifactPayload ?? {},
+    }),
+  });
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(payload.error || payload.message || `HTTP ${res.status}`);
+  return payload as {
+    ok: boolean;
+    analysisRunId: number;
+    artifactTitle: string;
+    folder: string;
+    dataRoomFiled: boolean;
+    deliverables: SavedModelArtifact[];
+    message: string;
+  };
+}
+
+export async function exportDeliverableFile(deliverableId: number, format: "pdf" | "pptx" | "docx" | "xlsx") {
+  const res = await fetch(`/api/deliverables/${deliverableId}/export/${format}`, {
+    method: "POST",
+    headers: authHeaders(),
+  });
+  const blob = await res.blob();
+  if (!res.ok) {
+    const text = await blob.text().catch(() => "");
+    let message = text || `HTTP ${res.status}`;
+    try {
+      const parsed = JSON.parse(text);
+      message = parsed.error || parsed.message || message;
+    } catch {}
+    throw new Error(message);
+  }
+  const disposition = res.headers.get("content-disposition") || "";
+  const match = disposition.match(/filename="?([^"]+)"?/i);
+  return {
+    blob,
+    filename: match?.[1] || `smbx-model-artifact.${format}`,
+  };
+}
+
+export async function exportModelArtifactPreview(input: ExportModelArtifactPreviewInput) {
+  const res = await fetch(`/api/model-artifacts/export/${input.format}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({
+      title: input.title,
+      artifactPayload: input.artifactPayload,
+    }),
+  });
+  const blob = await res.blob();
+  if (!res.ok) {
+    const text = await blob.text().catch(() => "");
+    let message = text || `HTTP ${res.status}`;
+    try {
+      const parsed = JSON.parse(text);
+      message = parsed.error || parsed.message || message;
+    } catch {}
+    throw new Error(message);
+  }
+  const disposition = res.headers.get("content-disposition") || "";
+  const match = disposition.match(/filename="?([^"]+)"?/i);
+  return {
+    blob,
+    filename: match?.[1] || `smbx-model-export.${input.format}`,
   };
 }
 

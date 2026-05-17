@@ -44,6 +44,10 @@ function safeRecord(value: unknown): Record<string, any> {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {};
 }
 
+function safeArray(value: unknown): any[] {
+  return Array.isArray(value) ? value : [];
+}
+
 function evidenceRefsFromRows(evidence: Array<Record<string, any>>) {
   return evidence.map(item => ({
     label: item.title || item.sourceType || 'Evidence',
@@ -82,6 +86,157 @@ function humanizeAnalysisType(value: string): string {
   return value
     .replace(/_/g, ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function dealScopedTitle(dealName: string, rawTitle: string | null | undefined, fallback: string): string {
+  const dealKey = titleKey(dealName);
+  const parts = String(rawTitle || fallback)
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(/\s*[·:]\s*/)
+    .map(part => part.trim())
+    .filter(Boolean);
+  while (parts.length > 0 && titleKey(parts[0]) === dealKey) {
+    parts.shift();
+  }
+  return `${dealName} · ${(parts.join(' · ') || fallback).trim()}`;
+}
+
+function titleKey(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+function modelArtifactMenuSlug(analysisType: string | null): string {
+  if (analysisType === 'capital_structure' || analysisType === 'covenant') return 'buy-capital-structure';
+  if (analysisType === 'sba') return 'universal-sba-analysis';
+  if (analysisType === 'comps' || analysisType === 'deal_comparison') return 'universal-comp-analysis';
+  return 'buy-valuation-model';
+}
+
+function artifactDealRows(artifactPayload: Record<string, any>) {
+  const rawDeals = safeArray(artifactPayload.deals);
+  return rawDeals.map((item) => {
+    const data = safeRecord(item?.data);
+    const calculations = safeRecord(data.calculations);
+    const metrics = safeArray(data.metrics);
+    const metric = (key: string) => metrics.find((candidate: any) => candidate?.key === key)?.displayValue;
+    return {
+      title: String(item?.title || calculations.dealName || data.title || 'Deal'),
+      score: String(item?.modelScore ?? data.verdict?.score ?? metric('fit') ?? metric('score') ?? '—'),
+      verdict: String(data.verdict?.label || 'Model read'),
+      valuation: String(metric('valuation') || metric('ask') || '—'),
+      earnings: String(metric('ebitda') || metric('sde') || '—'),
+    };
+  });
+}
+
+function numericDealIdsFromPayload(value: unknown): number[] {
+  const ids = new Set<number>();
+  const payload = safeRecord(value);
+
+  for (const id of safeArray(payload.dealIds)) {
+    const numeric = Number(id);
+    if (Number.isFinite(numeric)) ids.add(numeric);
+  }
+
+  for (const item of safeArray(payload.deals)) {
+    const data = safeRecord(item?.data);
+    const rawId = safeRecord(data.calculations).dealId;
+    const numeric = Number(rawId);
+    if (Number.isFinite(numeric)) ids.add(numeric);
+  }
+
+  return Array.from(ids);
+}
+
+function buildModelArtifactContent(input: {
+  run: Record<string, any>;
+  artifactTitle: string;
+  artifactPayload: Record<string, any>;
+  dealIds: number[];
+  savedAt: string;
+}) {
+  const primaryData = safeRecord(input.artifactPayload.primaryData);
+  const structured = Object.keys(primaryData).length > 0
+    ? primaryData
+    : safeRecord(safeRecord(input.run.outputs).structuredAnalysis);
+  const yuliaRead = String(input.artifactPayload.yuliaRead || structured.yuliaRead || input.run.commentary_markdown || '');
+  const rows = artifactDealRows(input.artifactPayload);
+  const scope = input.artifactPayload.comparisonActive ? 'Saved comparison model' : 'Saved model snapshot';
+  const relatedDeals = input.dealIds.length
+    ? input.dealIds.map(id => `Deal #${id}`).join(', ')
+    : 'Related deal workspace';
+  const modelRows = rows.length
+    ? rows
+    : [{
+        title: String(structured.title || input.run.title || 'Model'),
+        score: String(structured.verdict?.score ?? '—'),
+        verdict: String(structured.verdict?.label || 'Model read'),
+        valuation: '—',
+        earnings: '—',
+      }];
+
+  const markdownRows = modelRows
+    .map(row => `| ${row.title} | ${row.score} | ${row.verdict} | ${row.valuation} | ${row.earnings} |`)
+    .join('\n');
+  const markdown = [
+    `# ${input.artifactTitle}`,
+    '',
+    `Saved: ${new Date(input.savedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}`,
+    `Source: Analysis run #${input.run.id}, v${input.run.version_number ?? 1}`,
+    `Scope: ${scope}`,
+    '',
+    '> Model output only. This is not legal, tax, investment, or transaction advice.',
+    '',
+    '## Yulia read',
+    yuliaRead || 'Saved from the interactive model canvas.',
+    '',
+    '## Model output',
+    '| Deal | Score | Read | Value range | Earnings |',
+    '|---|---:|---|---:|---:|',
+    markdownRows,
+    '',
+    '## File boundary',
+    `This artifact was saved privately to ${relatedDeals} under Models. It was not added to any data room.`,
+  ].join('\n');
+
+  return {
+    artifactKind: input.artifactPayload.comparisonActive ? 'saved_model_comparison' : 'saved_model_snapshot',
+    artifactTitle: input.artifactTitle,
+    savedAt: input.savedAt,
+    source: 'analysis_run',
+    analysisRunId: Number(input.run.id),
+    analysisVersion: Number(input.run.version_number ?? 1),
+    canvasTabId: input.run.canvas_tab_id ?? null,
+    relatedDealIds: input.dealIds,
+    markdown,
+    sections: [
+      {
+        title: 'Model snapshot',
+        body: yuliaRead || 'Saved from the interactive model canvas.',
+        bullets: [
+          `Saved ${new Date(input.savedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}`,
+          `Analysis run #${input.run.id}, version ${input.run.version_number ?? 1}`,
+          'Private model artifact. Not added to the data room.',
+        ],
+      },
+      {
+        title: 'Compared model output',
+        table: modelRows.map(row => ({
+          Deal: row.title,
+          Score: row.score,
+          Read: row.verdict,
+          Valuation: row.valuation,
+          Earnings: row.earnings,
+        })),
+      },
+      {
+        title: 'Sharing boundary',
+        body: 'This output is saved to the related deal file library under Models for internal sharing. Data-room publication requires a separate file-to-data-room action from the deal workspace.',
+      },
+    ],
+    artifactPayload: input.artifactPayload,
+  };
 }
 
 function resolveAnalysisMenuItemSlug({
@@ -257,7 +412,11 @@ analysisRunsRouter.post('/deals/:dealId/analysis', async (req, res) => {
       assumptionOverrides: safeRecord(req.body?.assumptionOverrides),
     });
 
-    const tabTitle = `${deal.business_name || 'Deal'} · ${analysisData.title || humanizeAnalysisType(analysisType)}`;
+    const tabTitle = dealScopedTitle(
+      deal.business_name || 'Deal',
+      analysisData.title,
+      humanizeAnalysisType(analysisType),
+    );
     const canvasTabId = `analysis-${dealId}-${analysisType}-${Date.now()}`;
     const analysisRun = await createAnalysisRun({
       userId,
@@ -297,6 +456,8 @@ analysisRunsRouter.post('/deals/:dealId/analysis', async (req, res) => {
         id: analysisRun?.canvas_tab_id || canvasTabId,
         kind: 'analysis',
         title: tabTitle,
+        dealId: Number(deal.id),
+        dealTitle: deal.business_name || 'Deal',
         tool: analysisType,
         analysisRunId: analysisRun?.id ?? null,
         resolvedMenuItemSlug: menuItemSlug,
@@ -488,6 +649,138 @@ analysisRunsRouter.post('/analysis-runs/:analysisRunId/versions/:versionNumber/r
   } catch (err: any) {
     console.error('[analysis-runs] restore version error:', err.message);
     return res.status(500).json({ error: 'Failed to restore analysis version' });
+  }
+});
+
+analysisRunsRouter.post('/analysis-runs/:analysisRunId/save-model-artifact', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const analysisRunId = Number(req.params.analysisRunId);
+    if (!Number.isFinite(analysisRunId)) return res.status(400).json({ error: 'Invalid analysis run id' });
+
+    const [run] = await sql`
+      SELECT id, user_id, deal_id, title, analysis_type, input_payload, assumptions, outputs,
+             commentary_markdown, canvas_tab_id, version_number
+      FROM analysis_runs
+      WHERE id = ${analysisRunId} AND user_id = ${userId}
+      LIMIT 1
+    `;
+    if (!run?.id) return res.status(404).json({ error: 'Analysis run not found' });
+
+    const artifactPayload = safeRecord(req.body?.artifactPayload);
+    const explicitDealIds = numericDealIdsFromPayload(req.body);
+    const payloadDealIds = numericDealIdsFromPayload(artifactPayload);
+    const runDealIds = [
+      ...(run.deal_id ? [Number(run.deal_id)] : []),
+      ...safeArray(safeRecord(run.input_payload).dealIds).map(Number).filter((id: number) => Number.isFinite(id)),
+    ];
+    const candidateIds = Array.from(new Set([...explicitDealIds, ...payloadDealIds, ...runDealIds]));
+    if (candidateIds.length === 0) {
+      return res.status(400).json({ error: 'No related deal found for this model artifact' });
+    }
+
+    const deals = await sql`
+      SELECT id, business_name
+      FROM deals
+      WHERE user_id = ${userId}
+        AND id = ANY(${candidateIds})
+    `;
+    if (deals.length === 0) return res.status(404).json({ error: 'No related deal found' });
+
+    const menuSlug = typeof req.body?.menuItemSlug === 'string' && req.body.menuItemSlug.trim()
+      ? req.body.menuItemSlug.trim()
+      : modelArtifactMenuSlug(run.analysis_type ?? null);
+    const [menuItem] = await sql`
+      SELECT id, slug, name
+      FROM menu_items
+      WHERE slug = ${menuSlug}
+      LIMIT 1
+    `;
+    if (!menuItem?.id) return res.status(404).json({ error: `Menu item not found: ${menuSlug}` });
+
+    const savedAt = new Date().toISOString();
+    const artifactTitle = typeof req.body?.title === 'string' && req.body.title.trim()
+      ? req.body.title.trim()
+      : `${run.title || menuItem.name} · saved model`;
+    const content = buildModelArtifactContent({
+      run,
+      artifactTitle,
+      artifactPayload,
+      dealIds: deals.map((deal: any) => Number(deal.id)),
+      savedAt,
+    });
+
+    const created = [];
+    for (const deal of deals as any[]) {
+      const [deliverable] = await sql`
+        INSERT INTO deliverables (
+          deal_id,
+          user_id,
+          menu_item_id,
+          type,
+          status,
+          content,
+          price_charged_cents,
+          folder_category,
+          doc_class,
+          generated_from_snapshot,
+          completed_at,
+          updated_at
+        )
+        VALUES (
+          ${Number(deal.id)},
+          ${userId},
+          ${Number(menuItem.id)},
+          'model_artifact',
+          'complete',
+          ${sql.json(content)}::jsonb,
+          0,
+          'models',
+          'working',
+          ${sql.json({
+            analysisRunId,
+            analysisVersion: Number(run.version_number ?? 1),
+            canvasTabId: run.canvas_tab_id ?? null,
+            artifactKind: content.artifactKind,
+            savedAt,
+          })}::jsonb,
+          NOW(),
+          NOW()
+        )
+        RETURNING id, deal_id, status, created_at, completed_at
+      `;
+      created.push({
+        id: Number(deliverable.id),
+        dealId: Number(deliverable.deal_id),
+        title: artifactTitle,
+        status: deliverable.status,
+        savedAt,
+        exportUrls: {
+          pdf: `/api/deliverables/${deliverable.id}/export/pdf`,
+          pptx: `/api/deliverables/${deliverable.id}/export/pptx`,
+        },
+      });
+    }
+
+    await sql`
+      UPDATE analysis_runs
+      SET deliverable_id = COALESCE(deliverable_id, ${created[0]?.id ?? null}),
+          updated_at = NOW()
+      WHERE id = ${analysisRunId} AND user_id = ${userId}
+    `;
+
+    return res.json({
+      ok: true,
+      analysisRunId,
+      artifactTitle,
+      folder: 'Private workspace / Models',
+      dataRoomFiled: false,
+      deliverables: created,
+      message: `Saved ${artifactTitle} to ${created.length} related deal ${created.length === 1 ? 'file library' : 'file libraries'} under Models. It was not added to the data room.`,
+    });
+  } catch (err: any) {
+    console.error('[analysis-runs] save model artifact error:', err.message);
+    return res.status(500).json({ error: 'Failed to save model artifact' });
   }
 });
 

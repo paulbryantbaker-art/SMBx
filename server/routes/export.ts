@@ -27,6 +27,197 @@ const FILE_EXTENSIONS: Record<string, string> = {
   pptx: '.pptx',
 };
 
+function safeRecord(value: unknown): Record<string, any> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {};
+}
+
+function safeArray(value: unknown): any[] {
+  return Array.isArray(value) ? value : [];
+}
+
+function compactText(value: unknown, fallback = '—'): string {
+  if (typeof value !== 'string') return fallback;
+  const trimmed = value.trim();
+  return trimmed || fallback;
+}
+
+function metricDisplay(data: Record<string, any>, key: string): string {
+  const item = safeArray(data.metrics).find((metric: any) => metric?.key === key);
+  return compactText(item?.displayValue, '—');
+}
+
+function assumptionValue(data: Record<string, any>, key: string): number | null {
+  const item = safeArray(data.assumptions).find((assumption: any) => assumption?.key === key);
+  const numeric = Number(item?.value);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+function formatCents(value: unknown): string {
+  const cents = Number(value);
+  if (!Number.isFinite(cents)) return '—';
+  const dollars = cents / 100;
+  if (Math.abs(dollars) >= 1_000_000) return `$${(dollars / 1_000_000).toFixed(2).replace(/\.00$/, '')}M`;
+  if (Math.abs(dollars) >= 1_000) return `$${Math.round(dollars / 1_000)}K`;
+  return `$${Math.round(dollars).toLocaleString('en-US')}`;
+}
+
+function dealNameFromPayloadItem(item: Record<string, any>): string {
+  const data = safeRecord(item.data);
+  const calculations = safeRecord(data.calculations);
+  return compactText(item.title, '')
+    || compactText(calculations.dealName, '')
+    || compactText(data.title, '')
+    || 'Deal';
+}
+
+function modelRowsFromArtifactPayload(artifactPayload: Record<string, any>) {
+  const rawDeals = safeArray(artifactPayload.deals);
+  const sourceDeals = rawDeals.length
+    ? rawDeals
+    : [{ title: artifactPayload.selectedDeal || artifactPayload.title || 'Model', data: artifactPayload.primaryData }];
+
+  return sourceDeals.map((item: any) => {
+    const data = safeRecord(item?.data);
+    const calculations = safeRecord(data.calculations);
+    const normalizedSde = calculations.normalizedSdeCents ?? assumptionValue(data, 'normalized_sde_cents');
+    const adjustedEbitda = calculations.adjustedEbitdaCents ?? assumptionValue(data, 'adjusted_ebitda_cents');
+    const earningsValue = Number(adjustedEbitda ?? normalizedSde);
+    const multiple = Number(assumptionValue(data, 'base_multiple') ?? safeRecord(data.verdict).multiple);
+    const riskCount = safeArray(data.risks).length + safeArray(data.missingData).length;
+    const score = Number(item?.modelScore ?? safeRecord(data.verdict).score ?? calculations.fitScore);
+    return {
+      deal: dealNameFromPayloadItem(safeRecord(item)),
+      score: Number.isFinite(score) ? score : null,
+      scoreDisplay: Number.isFinite(score) ? String(Math.round(score)) : metricDisplay(data, 'fit'),
+      read: compactText(safeRecord(data.verdict).label, 'Model read'),
+      sde: metricDisplay(data, 'sde') !== '—' ? metricDisplay(data, 'sde') : formatCents(normalizedSde),
+      ebitda: metricDisplay(data, 'ebitda') !== '—' ? metricDisplay(data, 'ebitda') : formatCents(adjustedEbitda),
+      valuation: metricDisplay(data, 'valuation') !== '—'
+        ? metricDisplay(data, 'valuation')
+        : `${formatCents(calculations.valuationLowCents)}-${formatCents(calculations.valuationHighCents)}`,
+      earningsValue: Number.isFinite(earningsValue) ? earningsValue : null,
+      multiple: Number.isFinite(multiple) ? multiple : null,
+      riskCount,
+      rationale: compactText(safeRecord(data.verdict).rationale || data.yuliaRead || data.summary, ''),
+    };
+  });
+}
+
+function winner<T>(rows: T[], score: (row: T) => number): T | null {
+  if (rows.length === 0) return null;
+  return rows.reduce((best, row) => score(row) > score(best) ? row : best, rows[0]);
+}
+
+function buildPublicModelArtifactContent(body: Record<string, any>) {
+  const artifactPayload = safeRecord(body.artifactPayload);
+  const title = compactText(body.title || artifactPayload.title || artifactPayload.canvasTitle, 'SMBx model export');
+  const savedAt = compactText(artifactPayload.savedAt, new Date().toISOString());
+  const rows = modelRowsFromArtifactPayload(artifactPayload);
+  const byScore = winner(rows, row => row.score ?? -Infinity);
+  const byEarnings = winner(rows, row => row.earningsValue ?? -Infinity);
+  const byRisk = winner(rows, row => -row.riskCount);
+  const byPrice = winner(rows, row => row.multiple == null ? -Infinity : -row.multiple);
+  const comparisonLabel = rows.length > 1 ? `${rows.length} visible deals` : rows[0]?.deal || 'visible model';
+  const yuliaRead = compactText(artifactPayload.yuliaRead, 'Exported from the live interactive canvas.');
+  const rowMarkdown = rows
+    .map(row => `| ${row.deal} | ${row.scoreDisplay} | ${row.read} | ${row.sde} | ${row.ebitda} | ${row.valuation} |`)
+    .join('\n');
+
+  const winRows = [
+    { Lens: 'Best live model', Winner: byScore?.deal || '—', Read: byScore ? `${byScore.scoreDisplay} model score` : '—' },
+    { Lens: 'Best price discipline', Winner: byPrice?.deal || '—', Read: byPrice?.multiple == null ? 'Needs multiple support' : `${byPrice.multiple.toFixed(1)}x EBITDA basis` },
+    { Lens: 'Most earnings scale', Winner: byEarnings?.deal || '—', Read: byEarnings?.ebitda || '—' },
+    { Lens: 'Lowest proof burden', Winner: byRisk?.deal || '—', Read: byRisk ? `${byRisk.riskCount} visible risks/gaps` : '—' },
+  ];
+
+  const markdown = [
+    `# ${title}`,
+    '',
+    `Exported: ${new Date(savedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}`,
+    `Scope: ${comparisonLabel}`,
+    '',
+    '> Model output only. This is not legal, tax, investment, or transaction advice.',
+    '',
+    '## Yulia read',
+    yuliaRead,
+    '',
+    '## Model output',
+    '| Deal | Score | Read | SDE | EBITDA | Value range |',
+    '|---|---:|---|---:|---:|---:|',
+    rowMarkdown,
+    '',
+    '## What wins out',
+    ...winRows.map(row => `- **${row.Lens}:** ${row.Winner} — ${row.Read}`),
+    '',
+    '## File boundary',
+    'This demo export was generated from the visible canvas state. Logged-in saved boards are filed privately under the related deal Models folder and are not added to a data room unless the user explicitly files them there.',
+  ].join('\n');
+
+  return {
+    company_name: title,
+    subtitle: 'Model comparison export',
+    markdown,
+    sections: [
+      {
+        title: 'Decision frame',
+        body: yuliaRead,
+        bullets: [
+          `Exported ${new Date(savedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}`,
+          `${comparisonLabel} on the current canvas`,
+          'Model output only. Not legal, tax, investment, or transaction advice.',
+        ],
+      },
+      {
+        title: 'Model output',
+        table: rows.map(row => ({
+          Deal: row.deal,
+          Score: row.scoreDisplay,
+          Read: row.read,
+          SDE: row.sde,
+          EBITDA: row.ebitda,
+          Value: row.valuation,
+        })),
+      },
+      {
+        title: 'What wins out',
+        table: winRows,
+      },
+      {
+        title: 'Sharing boundary',
+        body: 'Demo exports are generated from the live canvas. Logged-in saved boards are saved to the deal file library under Models. Data-room publication remains a separate explicit action.',
+      },
+    ],
+  };
+}
+
+exportRouter.post('/model-artifacts/export/:format', async (req, res) => {
+  const format = req.params.format.toLowerCase();
+  if (!['pdf', 'pptx'].includes(format)) {
+    return res.status(400).json({ error: 'Invalid format. Use pdf or pptx.' });
+  }
+
+  try {
+    const content = buildPublicModelArtifactContent(safeRecord(req.body));
+    const title = compactText(req.body?.title || content.company_name, 'SMBx model export');
+    const buffer = format === 'pdf'
+      ? await exportToPDF(content, title)
+      : await exportToPPTX(content, title);
+    const safeName = title.replace(/[^a-zA-Z0-9_\- ]/g, '').replace(/\s+/g, '_').substring(0, 60);
+
+    res.set({
+      'Content-Type': CONTENT_TYPES[format],
+      'Content-Disposition': `attachment; filename="${safeName || 'smbx-model-export'}${FILE_EXTENSIONS[format]}"`,
+      'Content-Length': buffer.length.toString(),
+      'Cache-Control': 'no-store',
+    });
+
+    return res.send(buffer);
+  } catch (err: any) {
+    console.error('Public model artifact export error:', err.message);
+    return res.status(500).json({ error: 'Failed to export model artifact' });
+  }
+});
+
 // ─── Export deliverable ──────────────────────────────────────
 
 exportRouter.post('/deliverables/:id/export/:format', async (req, res) => {
@@ -56,7 +247,7 @@ exportRouter.post('/deliverables/:id/export/:format', async (req, res) => {
     const access = await hasDealAccess(deliverable.deal_id, userId);
     if (!access) return res.status(404).json({ error: 'Deliverable not found' });
 
-    if (deliverable.status !== 'completed') {
+    if (!['complete', 'completed'].includes(deliverable.status)) {
       return res.status(400).json({ error: 'Deliverable is not yet completed' });
     }
 

@@ -1,6 +1,12 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { SurfaceContext } from '../lib/yuliaSurfaceContext';
 import type { ModelPreference } from '../lib/modelPreference';
+import {
+  chatArtifactStreamingMessage,
+  dispatchCanvasActionResult,
+  routeChatArtifactToCanvas,
+  shouldRouteChatArtifact,
+} from '../lib/chatArtifactRouting';
 
 export interface AnonMessage {
   id: number;
@@ -54,6 +60,7 @@ export function useAnonymousChat() {
   const sessionIdRef = useRef(getOrCreateSessionId());
   const abortRef = useRef<AbortController | null>(null);
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const artifactHistoryBatchRef = useRef('');
 
   // Sync critical state to HMR data so it survives hot reloads
   useEffect(() => {
@@ -63,6 +70,26 @@ export function useAnonymousChat() {
       import.meta.hot.data.activeConversationId = activeConversationId;
     }
   }, [messages, conversations, activeConversationId]);
+
+  useEffect(() => {
+    const batchKey = messages.map(message => message.id).join(':');
+    if (!batchKey || artifactHistoryBatchRef.current === batchKey) return;
+    const candidate = [...messages].reverse().find(message =>
+      message.role === 'assistant'
+      && !message.metadata?.canvasArtifact
+      && shouldRouteChatArtifact(message.content),
+    );
+    if (!candidate) return;
+
+    artifactHistoryBatchRef.current = batchKey;
+    const routed = routeChatArtifactToCanvas(candidate.content, 'anonymous_chat_history');
+    if (!routed.opened) return;
+    setMessages(prev => prev.map(message => message.id === candidate.id ? {
+      ...message,
+      content: routed.chatMessage,
+      metadata: { ...(message.metadata ?? {}), canvasArtifact: { title: routed.title, source: 'anonymous_chat_history' } },
+    } : message));
+  }, [messages]);
 
   // Clean up in-flight requests on unmount
   useEffect(() => {
@@ -162,6 +189,7 @@ export function useAnonymousChat() {
       const decoder = new TextDecoder();
       let accumulated = '';
       let sseBuffer = '';
+      let canvasActionDispatched = false;
 
       if (reader) {
         // Stale-connection timeout: abort if no data arrives for 45s
@@ -198,7 +226,9 @@ export function useAnonymousChat() {
 
                 if (parsed.type === 'text_delta') {
                   accumulated += parsed.text;
-                  setStreamingText(accumulated);
+                  setStreamingText(shouldRouteChatArtifact(accumulated) ? chatArtifactStreamingMessage(accumulated) : accumulated);
+                } else if (parsed.type === 'tool_done') {
+                  canvasActionDispatched = dispatchCanvasActionResult(parsed.result) || canvasActionDispatched;
                 } else if (parsed.type === 'message_stop') {
                   if (parsed.conversationId) {
                     setActiveConversationId(parsed.conversationId);
@@ -223,7 +253,9 @@ export function useAnonymousChat() {
               const parsed = JSON.parse(data);
               if (parsed.type === 'text_delta') {
                 accumulated += parsed.text;
-                setStreamingText(accumulated);
+                setStreamingText(shouldRouteChatArtifact(accumulated) ? chatArtifactStreamingMessage(accumulated) : accumulated);
+              } else if (parsed.type === 'tool_done') {
+                canvasActionDispatched = dispatchCanvasActionResult(parsed.result) || canvasActionDispatched;
               }
             } catch { /* ignore */ }
           }
@@ -232,11 +264,15 @@ export function useAnonymousChat() {
 
       setStreamingText('');
       if (accumulated) {
+        const routed = canvasActionDispatched
+          ? { opened: false, title: '', chatMessage: accumulated }
+          : routeChatArtifactToCanvas(accumulated, 'anonymous_chat');
         setMessages(prev => [...prev, {
           id: Date.now() + 1,
           role: 'assistant' as const,
-          content: accumulated,
+          content: routed.chatMessage,
           created_at: new Date().toISOString(),
+          metadata: routed.opened ? { canvasArtifact: { title: routed.title, source: 'anonymous_chat' } } : undefined,
         }]);
       }
 

@@ -222,7 +222,10 @@ export async function exportToPPTX(
   content: Record<string, any>,
   title: string,
 ): Promise<Buffer> {
-  const pptx = new PptxGenJS();
+  const PptxCtor = typeof PptxGenJS === 'function'
+    ? PptxGenJS
+    : (PptxGenJS as unknown as { default: typeof PptxGenJS }).default;
+  const pptx = new PptxCtor();
   pptx.author = 'smbx.ai';
   pptx.company = 'smbx.ai';
   pptx.title = title;

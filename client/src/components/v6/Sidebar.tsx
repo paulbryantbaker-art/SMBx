@@ -322,6 +322,10 @@ function owningDealForTab(tab: Tab, allTabs: Tab[]): Tab | null {
 }
 
 function tabMatchesDeal(tab: Tab, deal: Tab): boolean {
+  if (tab.dealId != null && String(tab.dealId) === String(deal.id)) return true;
+  if (tab.dealTitle && sameDealName(tab.dealTitle, deal.title)) return true;
+  if (tab.dealTitle) return false;
+  if (tab.kind === "analysis" && tab.id.startsWith("model-")) return false;
   return isChildOfDeal(tab, deal) || sameDealName(inferredDealNameForTab(tab), deal.title);
 }
 
@@ -334,7 +338,7 @@ function isChildOfDeal(tab: Tab, deal: Tab): boolean {
 }
 
 function childTabTitle(tab: Tab, parentTitle: string): string {
-  return stripDealPrefix(normalizeTabTitle(tab.title), parentTitle);
+  return cleanRepeatedScope(stripDealPrefix(normalizeTabTitle(tab.title), parentTitle));
 }
 
 function normalizeTabTitle(title: string): string {
@@ -380,6 +384,8 @@ function escapeRegExp(value: string): string {
 }
 
 function inferredDealNameForTab(tab: Tab): string | null {
+  if (tab.dealTitle) return tab.dealTitle;
+  if (tab.kind === "analysis" && tab.id.startsWith("model-")) return null;
   const haystack = normalizeTabTitle([
     tab.id,
     tab.title,
@@ -389,7 +395,7 @@ function inferredDealNameForTab(tab: Tab): string | null {
 
   if (haystack.includes("big fake") || haystack.includes("bigfake")) return "Big Fake Deal";
   if (haystack.includes("pest")) return "Pest Control · FL";
-  if (haystack.includes("hvac")) return "HVAC platform · CO";
+  if (haystack.includes("hvac platform") || haystack.includes("deal-hvac")) return "HVAC platform · CO";
   if (haystack.includes("electrical")) return "Electrical Contractor · TX";
   if (haystack.includes("distribution")) return "Distribution · OH";
 
@@ -421,6 +427,18 @@ function inferredDealNameForTab(tab: Tab): string | null {
     return "HVAC platform · CO";
   }
   return null;
+}
+
+function cleanRepeatedScope(title: string): string {
+  const parts = normalizeTabTitle(title)
+    .split(/\s*[·:]\s*/)
+    .map(part => part.trim())
+    .filter(Boolean);
+  if (parts.length < 2) return normalizeTabTitle(title);
+  while (parts.length > 1 && dealTitleKey(parts[0]) === dealTitleKey(parts[1])) {
+    parts.splice(1, 1);
+  }
+  return parts.join(" · ");
 }
 
 function dealTabIdForTitle(title: string): string {

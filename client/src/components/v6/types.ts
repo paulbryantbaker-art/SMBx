@@ -29,6 +29,8 @@ export interface Tab {
   modeId?: ModeId;
   sourceMode?: ModeId;
   title: string;
+  dealId?: number | string | null;
+  dealTitle?: string | null;
   pinned?: boolean;
   section?: "how" | "pricing";
   /** Optional element id inside the rendered tab to scroll into view. */
@@ -38,6 +40,7 @@ export interface Tab {
   markdown?: string;
   comparisonData?: Record<string, any>[];
   analysisData?: Record<string, any>;
+  artifactData?: Record<string, any>;
   analysisRunId?: number | null;
   deliverableId?: number | null;
   modelState?: Record<string, any>;

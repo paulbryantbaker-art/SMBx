@@ -279,6 +279,8 @@ interface DeliverableRow {
   tier?: string | null;
   journey?: string | null;
   gate?: string | null;
+  folder_category?: string | null;
+  artifact_kind?: string | null;
 }
 
 export function V6DealView({
@@ -1468,14 +1470,15 @@ function buildDealFilesFromReal(
 
 function deliverableToFileItem(d: DeliverableRow, dealTitle: string): DealFileItem {
   const name = d.name || formatType(d.slug || "deliverable");
-  const analysis = isAnalysisLike(`${d.slug || ""} ${name}`);
+  const model = d.folder_category === "models" || /model/i.test(`${d.slug || ""} ${name}`);
+  const analysis = model || isAnalysisLike(`${d.slug || ""} ${name}`);
   const draft = /loi|ioi|cim|memo|draft|letter|nda|term/i.test(`${d.slug || ""} ${name}`);
   const section: FileSectionKey = draft && d.status !== "complete" ? "drafts" : analysis ? "analysis" : "private";
-  const folder = section === "analysis" ? "Analysis" : section === "drafts" ? "Drafts" : "Workspace";
+  const folder = model ? "Models" : section === "analysis" ? "Analysis" : section === "drafts" ? "Drafts" : "Workspace";
   return {
     id: String(d.id),
     title: name,
-    meta: `${formatStatus(d.status)} · ${fmtRelative(d.completed_at || d.created_at)}`,
+    meta: `${model ? "Model artifact" : formatStatus(d.status)} · ${fmtRelative(d.completed_at || d.created_at)}`,
     location: `All Files / Private workspace / ${folder}`,
     status: d.status === "complete" ? "Open" : formatStatus(d.status),
     kind: analysis ? "analysis" : "doc",
@@ -1564,7 +1567,7 @@ function foldersForScope(scope: FileScope, files: DealFileItem[]): DealFolder[] 
   }
   return [
     { label: "All Files", sub: "Full deal library", count: files.length, scope: "all", tone: "private" },
-    { label: "Private workspace", sub: "Yulia drafts, memos, analysis", count: files.filter(f => ["private", "analysis", "drafts"].includes(f.section)).length, scope: "all", tone: "private" },
+    { label: "Private workspace", sub: "Yulia drafts, memos, models", count: files.filter(f => ["private", "analysis", "drafts"].includes(f.section)).length, scope: "all", tone: "private" },
     { label: "Data Room", sub: "Shared drive inside this deal", count: files.filter(f => f.scopes.includes("data-room")).length, scope: "data-room", tone: "room" },
     { label: "Shared", sub: "Sent, received, deferred, executed", count: files.filter(f => f.scopes.includes("shared")).length, scope: "shared", tone: "sent" },
   ];
@@ -1598,7 +1601,7 @@ function sectionsForScope(scope: FileScope, files: DealFileItem[]): Array<{ eyeb
     ].filter(section => section.rows.length > 0);
   }
   return [
-    fileSection("PRIVATE", "Private workspace", files, ["private", "analysis", "drafts"]),
+    fileSection("PRIVATE", "Private workspace: models, analysis, drafts", files, ["private", "analysis", "drafts"]),
     fileSection("DATA ROOM", "Shared diligence drive", files, ["artifacts", "room-docs", "received", "deferred"]),
     fileSection("SHARED", "Sent, received, deferred, executed", files, ["sent", "executed"]),
   ].filter(section => section.rows.length > 0);
