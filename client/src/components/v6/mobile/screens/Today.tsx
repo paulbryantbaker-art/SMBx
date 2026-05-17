@@ -214,10 +214,6 @@ function MarketIntelCard({
       aria-label="Market intelligence behind today's deal"
     >
       <div style={MI.glow} aria-hidden="true" />
-      <div style={MI.topRow}>
-        <div className="mb-eyebrow" style={MI.eyebrow}>{intel.eyebrow || "MARKET INTELLIGENCE"}</div>
-        <span style={MI.sourcePill}>{intel.sourceCount > 0 ? `${intel.sourceCount} sources` : intel.confidence}</span>
-      </div>
       <h3 style={MI.title}>{intel.headline}</h3>
       <p style={MI.sub}>{intel.subhead}</p>
 
@@ -641,7 +637,6 @@ function PipelineRow({
               }}
               onClick={onPillClick}
             >{pillLabel}</button>
-            <span style={S.rowActionMeta}>Yulia&rsquo;s call</span>
           </>
         ) : (
           <MobileIcon name="download" c="var(--mb-accent-ink)" size={26} />
@@ -688,9 +683,6 @@ const S: Record<string, CSSProperties> = {
     display: "flex", flexDirection: "column",
     alignItems: "center", gap: 2, flexShrink: 0,
     paddingRight: 22,
-  },
-  rowActionMeta: {
-    fontSize: 9.5, color: "var(--mb-ink-4)",
   },
 };
 
@@ -863,17 +855,6 @@ const MI: Record<string, CSSProperties> = {
   },
   eyebrow: {
     color: "#DCEFE9",
-    fontWeight: 800,
-  },
-  sourcePill: {
-    position: "relative",
-    flexShrink: 0,
-    borderRadius: 999,
-    padding: "6px 9px",
-    background: "rgba(255,255,255,0.15)",
-    border: "0.5px solid rgba(255,255,255,0.18)",
-    color: "#FFFFFF",
-    fontSize: 11,
     fontWeight: 800,
   },
   title: {

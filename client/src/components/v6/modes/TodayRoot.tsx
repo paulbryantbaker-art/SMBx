@@ -9,12 +9,6 @@ import { isSurfaceActionId, type SurfaceActionId } from "../../../lib/v6SurfaceA
 import type { OpenTab } from "../types";
 import { V6Icon } from "../icons";
 
-const TODAY_DATE = new Date().toLocaleDateString("en-US", {
-  weekday: "long",
-  month: "long",
-  day: "numeric",
-});
-
 type Tone = "gold" | "cactus" | "oat" | "plum" | "charcoal";
 
 interface TodayDeal {
@@ -405,10 +399,6 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
       <section style={T.heroGrid}>
         <article style={{ ...T.leadCard, backgroundImage: todayHeroWash(useSampleData) }}>
           <div style={T.leadTop}>
-            <div>
-              <div className="mono" style={T.eyebrow}>TODAY'S BRIEF</div>
-              <div style={T.date}>{TODAY_DATE}</div>
-            </div>
             <button className="m-glint m-glass-control" style={T.smallGhost} onClick={() => ask("Give me the short version of today's deal brief.")} type="button">
               Ask Yulia <span aria-hidden="true">↗</span>
             </button>
@@ -492,7 +482,6 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
               <div className="mono" style={T.marketEyebrow}>YULIA'S MARKET DESK</div>
               <h2 style={T.panelTitle}>Portfolio intelligence</h2>
             </div>
-            <span style={T.liveDotWrap}><span style={T.liveDot} /> {marketIntel.sourceCount > 0 ? `${marketIntel.sourceCount} sources` : "live"}</span>
           </div>
 
           <button
@@ -531,10 +520,6 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
                 onClick={() => ask(item.prompt || `${item.eyebrow.toLowerCase()}: ${item.title}. What changed and what should I do next?`)}
                 type="button"
               >
-                <div style={T.workTop}>
-                  <span className="mono" style={T.workEyebrow}>{item.eyebrow}</span>
-                  <span style={T.workPct}>{item.pct}% signal</span>
-                </div>
                 <div style={T.workTitle}>{item.title}</div>
                 <div style={T.workSub}>{item.sub}</div>
                 <div style={T.meterTrack}>
@@ -795,7 +780,7 @@ const T: Record<string, CSSProperties> = {
   },
   leadTop: {
     display: "flex",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     alignItems: "flex-start",
     gap: 20,
   },
@@ -810,11 +795,6 @@ const T: Record<string, CSSProperties> = {
     letterSpacing: "0.16em",
     fontWeight: 700,
     color: "#5967b5",
-  },
-  date: {
-    marginTop: 5,
-    fontSize: 13,
-    color: "#FFFFFF",
   },
   smallGhost: {
     all: "unset",
@@ -1006,21 +986,6 @@ const T: Record<string, CSSProperties> = {
     fontWeight: 800,
     color: "#FFFFFF",
   },
-  liveDotWrap: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 7,
-    fontSize: 12,
-    color: "#FFFFFF",
-    fontWeight: 700,
-  },
-  liveDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 999,
-    background: "#D6A35C",
-    boxShadow: "0 0 0 6px rgba(214, 163, 92, 0.18)",
-  },
   workStack: {
     display: "flex",
     flexDirection: "column",
@@ -1097,26 +1062,8 @@ const T: Record<string, CSSProperties> = {
     backdropFilter: liquidGlassFilter,
     WebkitBackdropFilter: liquidGlassFilter,
   },
-  workTop: {
-    display: "flex",
-    justifyContent: "space-between",
-    gap: 12,
-    alignItems: "center",
-  },
-  workEyebrow: {
-    fontSize: 9,
-    letterSpacing: "0.16em",
-    color: "#FFFFFF",
-    fontWeight: 700,
-  },
-  workPct: {
-    fontSize: 12,
-    fontWeight: 800,
-    fontVariantNumeric: "tabular-nums",
-    color: "#FFFFFF",
-  },
   workTitle: {
-    marginTop: 12,
+    marginTop: 0,
     color: "#FFFFFF",
     fontSize: 21,
     fontWeight: 850,

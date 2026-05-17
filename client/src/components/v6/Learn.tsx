@@ -145,8 +145,6 @@ const WORK_SURFACES: WorkSurface[] = [
   },
 ];
 
-interface Faq { q: string; a: string }
-
 const FOUR_STEPS: StepStory[] = [
   {
     n: "01",
@@ -208,104 +206,12 @@ const OPTION_ROWS = [
   ["Strategic", "Highest headline", "8-14 months", "More diligence"],
 ] as const;
 
-const ORCHESTRATION_ROWS: Capability[] = [
-  {
-    title: "The math path is deterministic.",
-    body: "The model engine runs the numbers. Same inputs, same outputs, auditable formulas, no AI arithmetic hidden inside the answer.",
-  },
-  {
-    title: "The auditor only extracts what exists.",
-    body: "NOT FOUND is a valid return. Yulia can flag missing proof, but she does not invent support for a seller-friendly number.",
-  },
-  {
-    title: "Market and regulatory inputs are versioned.",
-    body: "Rates, thresholds, insurance pricing, tax assumptions, and model versions belong in the record so the output can be re-opened later.",
-  },
-  {
-    title: "The author cannot mint the facts.",
-    body: "Yulia writes around the primitives supplied by the source files, models, and market layer. Claims need a trail before they ship.",
-  },
-  {
-    title: "The deal room routes the work.",
-    body: "Uploads are classified, attached to the right gate, and reused across the CIM, model, LOI, lender package, and diligence tracker.",
-  },
-  {
-    title: "The record gets smarter with you.",
-    body: "House style, buyer preferences, structural defaults, and prior decisions follow the deal without turning into uncontrolled advice.",
-  },
-];
-
-const FIRST_SESSION_ROWS: Capability[] = [
-  {
-    title: "The Recast",
-    body: "Three years of financials normalized into a defensible earnings number, with add-backs traced and weak support stripped or flagged.",
-  },
-  {
-    title: "The Baseline",
-    body: "Three or four credible paths with price, structure, timing, tax, close certainty, and role at close shown side by side.",
-  },
-  {
-    title: "The Rundown",
-    body: "The working deal package: CIM outline, teaser, buyer tree, structure model, methodology memo, and support file map.",
-  },
-];
-
-const TERM_ROWS: Capability[] = [
-  {
-    title: "The Baseline",
-    body: "The first serious read on the deal: credible paths, current-market support, and enough structure to walk into the next conversation.",
-  },
-  {
-    title: "Blind Equity",
-    body: "Value lost because the recast, working-capital peg, customer story, or add-back proof was not done before the buyer found the gap.",
-  },
-  {
-    title: "The Rundown",
-    body: "The branded deal package and audit trail Yulia builds so the work can move from chat to review to the next counterparty.",
-  },
-];
-
-const FAQS: Faq[] = [
-  {
-    q: "Is this just ChatGPT with a better prompt?",
-    a: "No. A prompt can answer a question. Yulia keeps a deal record, opens a canvas, runs deterministic models, tracks files, cites evidence, drafts outputs, and carries the state from one gate to the next.",
-  },
-  {
-    q: "Where does Yulia fit for brokers, bankers, advisors, and searchers?",
-    a: "Yulia does the analyst-and-associate work: recast, Baseline, buyer tree, CIM, LOI drafts, diligence tracker, structure model, lender package, and PMI plan. You keep the relationship and decision.",
-  },
-  {
-    q: "What does my attorney or CPA still do?",
-    a: "They review and own their professional work. Yulia prepares analysis, drafts, options, and source trails so the professionals are reacting to organized work instead of starting from a blank page.",
-  },
-  {
-    q: "Can Yulia make the decision for me?",
-    a: "No. She can model paths, explain implications, draft the next move, and show what wins under the assumptions. The decision, signature, and judgment stay with you.",
-  },
-];
-
 function HowSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) => void }) {
   return (
     <div>
       <style>{`
-        .about-proof-row {
-          transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
-        }
-        .about-proof-row:hover {
-          background: rgba(255,255,255,0.82);
-          border-color: rgba(192,211,232,0.92);
-          transform: translate3d(0, -1px, 0);
-        }
-        .about-surface-row {
-          transition: background 180ms ease, transform 180ms ease;
-        }
-        .about-surface-row:hover {
-          background: linear-gradient(90deg, rgba(241,247,254,0.88), rgba(255,255,255,0.96));
-          transform: translate3d(2px, 0, 0);
-        }
         @media (max-width: 1080px) {
           .about-open-grid,
-          .about-proof-grid,
           .about-story-row,
           .about-step-board,
           .about-system-grid {
@@ -423,88 +329,6 @@ function HowSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) => voi
         </Reveal>
       </section>
 
-      <section className="about-proof-grid" style={A.proofGrid}>
-        <Reveal direction="right">
-          <div className="about-white-panel" style={A.proofPanel}>
-            <h2 style={A.sectionTitle}>Why this is not a wrapper</h2>
-            <p style={A.sectionLead}>The capabilities are the surface. The orchestration is the moat: models, source extraction, facts, market context, authoring, and citation checks working in order.</p>
-            <div style={A.proofRows}>
-              {ORCHESTRATION_ROWS.map((item, index) => (
-                <ProofDisclosure key={item.title} item={item} defaultOpen={index === 0} />
-              ))}
-            </div>
-          </div>
-        </Reveal>
-
-        <Reveal direction="left" delay={100}>
-          <div className="about-white-panel" style={A.surfacePanel}>
-            <h2 style={A.sectionTitle}>What you see first</h2>
-            <p style={A.sectionLead}>Three real deliverables. None of them are previews.</p>
-            <div style={A.surfaceRows}>
-              {FIRST_SESSION_ROWS.map(({ title, body }, index) => (
-                <div
-                  key={title}
-                  className="about-surface-row"
-                  style={{ ...A.surfaceRow, borderBottom: index === FIRST_SESSION_ROWS.length - 1 ? "none" : "1px solid rgba(219,228,241,0.88)" }}
-                >
-                  <span style={A.surfaceIndex}>{String(index + 1).padStart(2, "0")}</span>
-                  <span style={A.surfaceText}>
-                    <strong>{title}</strong>
-                    <span>{body}</span>
-                  </span>
-                </div>
-              ))}
-            </div>
-            <div style={{ ...A.surfaceRows, marginTop: 14 }}>
-              {TERM_ROWS.map(({ title, body }, index) => (
-                <div
-                  key={title}
-                  className="about-surface-row"
-                  style={{ ...A.surfaceRow, borderBottom: index === TERM_ROWS.length - 1 ? "none" : "1px solid rgba(219,228,241,0.88)" }}
-                >
-                  <span style={A.surfaceIndex}>{String(index + 4).padStart(2, "0")}</span>
-                  <span style={A.surfaceText}>
-                    <strong>{title}</strong>
-                    <span>{body}</span>
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Reveal>
-      </section>
-
-      <LearnSection title="Questions we get">
-        <Reveal>
-          <div style={A.faqCard}>
-            {FAQS.map((f, i) => (
-              <FaqRow key={f.q} q={f.q} a={f.a} last={i === FAQS.length - 1} />
-            ))}
-          </div>
-        </Reveal>
-      </LearnSection>
-    </div>
-  );
-}
-
-function ProofDisclosure({ item, defaultOpen = false }: { item: { title: string; body: string }; defaultOpen?: boolean }) {
-  const [open, setOpen] = useState(defaultOpen);
-
-  return (
-    <div className="about-proof-row" style={A.proofRow}>
-      <button
-        type="button"
-        className="m-state"
-        aria-expanded={open}
-        onClick={() => setOpen(!open)}
-        style={A.proofButton}
-      >
-        <span style={A.proofButtonText}>
-          <strong>{item.title}</strong>
-          {open && <span>{item.body}</span>}
-        </span>
-        <span aria-hidden="true" style={{ ...A.proofToggle, transform: open ? "rotate(45deg)" : "rotate(0deg)" }}>+</span>
-      </button>
     </div>
   );
 }
@@ -537,27 +361,6 @@ function DifferenceDisclosure({ item, defaultOpen = false }: { item: Difference;
         </span>
       </button>
       {open && <p style={H.differenceBody}>{item.body}</p>}
-    </div>
-  );
-}
-
-function FaqRow({ q, a, last }: { q: string; a: string; last: boolean }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div style={{ borderBottom: last ? "none" : "1px solid var(--m-outline-var)" }}>
-      <button
-        onClick={() => setOpen(!open)}
-        className="m-state"
-        aria-expanded={open}
-        style={H.faqBtn}
-      >
-        <span style={H.faqQ}>{q}</span>
-        <span aria-hidden="true" style={{
-          ...H.faqIcon,
-          transform: open ? "rotate(45deg)" : "none",
-        }}>+</span>
-      </button>
-      {open && <div style={H.faqA}>{a}</div>}
     </div>
   );
 }
@@ -1093,84 +896,6 @@ const A: Record<string, CSSProperties> = {
     color: "rgba(255,255,255,0.84)",
     textWrap: "pretty",
   },
-  proofGrid: {
-    display: "grid",
-    gridTemplateColumns: "minmax(min(520px, 100%), 0.92fr) minmax(min(480px, 100%), 1.08fr)",
-    gap: 18,
-    alignItems: "start",
-    marginBottom: 46,
-  },
-  proofPanel: {
-    borderRadius: 28,
-    padding: "28px 30px",
-    background: "linear-gradient(155deg, rgba(255,255,255,0.98), rgba(247,251,255,0.90))",
-    border: "1px solid rgba(219,228,241,0.94)",
-    boxShadow: "0 28px 72px rgba(31,44,69,0.11), 0 7px 18px rgba(31,44,69,0.06), inset 0 1px 0 rgba(255,255,255,0.94)",
-  },
-  proofRows: {
-    marginTop: 20,
-    overflow: "hidden",
-    borderRadius: 22,
-    border: "1px solid rgba(219,228,241,0.86)",
-    background: "rgba(255,255,255,0.62)",
-  },
-  proofRow: {
-    borderBottom: "1px solid rgba(219,228,241,0.86)",
-    background: "rgba(255,255,255,0.42)",
-  },
-  proofButton: {
-    all: "unset",
-    boxSizing: "border-box",
-    cursor: "pointer",
-    width: "100%",
-    minHeight: 74,
-    display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) 28px",
-    alignItems: "center",
-    gap: 14,
-    padding: "15px 16px",
-  },
-  proofButtonText: {
-    minWidth: 0,
-    display: "grid",
-    gap: 5,
-    color: "var(--m-on-surface)",
-  },
-  proofToggle: {
-    width: 26,
-    height: 26,
-    borderRadius: 10,
-    display: "grid",
-    placeItems: "center",
-    background: "rgba(236,243,251,0.86)",
-    color: "#51759B",
-    fontSize: 15,
-    fontWeight: 850,
-    transition: "transform 180ms ease",
-  },
-  surfacePanel: {
-    borderRadius: 28,
-    padding: "28px 30px",
-    background:
-      "radial-gradient(circle at 100% 0%, rgba(98,153,135,0.12), transparent 34%), linear-gradient(155deg, rgba(255,255,255,0.98), rgba(248,252,255,0.90))",
-    border: "1px solid rgba(219,228,241,0.94)",
-    boxShadow: "0 28px 72px rgba(31,44,69,0.11), 0 7px 18px rgba(31,44,69,0.06), inset 0 1px 0 rgba(255,255,255,0.94)",
-  },
-  surfaceRows: {
-    marginTop: 20,
-    overflow: "hidden",
-    borderRadius: 22,
-    border: "1px solid rgba(219,228,241,0.86)",
-    background: "rgba(255,255,255,0.70)",
-  },
-  surfaceRow: {
-    display: "grid",
-    gridTemplateColumns: "54px minmax(0, 1fr)",
-    gap: 14,
-    alignItems: "center",
-    minHeight: 78,
-    padding: "15px 18px",
-  },
   surfaceIndex: {
     width: 36,
     height: 36,
@@ -1182,23 +907,6 @@ const A: Record<string, CSSProperties> = {
     fontSize: 11,
     fontWeight: 850,
     letterSpacing: "0.09em",
-  },
-  surfaceText: {
-    display: "grid",
-    gap: 4,
-    minWidth: 0,
-    fontSize: 13,
-    lineHeight: 1.45,
-    color: "var(--m-on-surface-var)",
-    textWrap: "pretty",
-  },
-  faqCard: {
-    padding: 0,
-    overflow: "hidden",
-    borderRadius: 24,
-    background: "#FFFFFF",
-    border: "1px solid var(--m-outline-var)",
-    boxShadow: "0 24px 64px rgba(31,44,69,0.12), 0 6px 16px rgba(31,44,69,0.07)",
   },
 };
 
@@ -1772,37 +1480,6 @@ const H: Record<string, CSSProperties> = {
     color: "#52657C",
     opacity: 1,
   },
-  faqCard: {
-    padding: 0,
-    overflow: "hidden",
-    borderRadius: 24,
-    background: "#FFFFFF",
-    border: "1px solid var(--m-outline-var)",
-    boxShadow: "0 24px 64px rgba(31,44,69,0.12), 0 6px 16px rgba(31,44,69,0.07)",
-  },
-  faqBtn: {
-    all: "unset", cursor: "pointer",
-    width: "100%", boxSizing: "border-box",
-    padding: "14px 22px",
-    display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16,
-  },
-  faqQ: {
-    fontFamily: "var(--font-display)", fontSize: 14, fontWeight: 600,
-    color: "var(--m-on-surface)", letterSpacing: "-0.01em", textWrap: "pretty",
-  },
-  faqIcon: {
-    width: 20, height: 20, borderRadius: 6,
-    display: "grid", placeItems: "center",
-    background: "var(--m-surface-2)", color: "var(--m-on-surface-var)",
-    fontSize: 12, fontWeight: 700,
-    transition: "transform 200ms ease",
-    flexShrink: 0,
-  },
-  faqA: {
-    padding: "0 22px 18px",
-    fontSize: 13, lineHeight: 1.6, color: "var(--m-on-surface-var)",
-    textWrap: "pretty",
-  },
 };
 
 /* ─── PRICING ────────────────────────────────────────────── */
@@ -1908,29 +1585,6 @@ const INCLUDED_GROUPS: Capability[] = [
   },
 ];
 
-const PRICING_FAQS: Faq[] = [
-  {
-    q: "What does Free actually include?",
-    a: "Unlimited chat with Yulia and one finished deliverable, ever. No credit card. The cap is on completed work product, not on asking questions.",
-  },
-  {
-    q: "What counts as a deliverable?",
-    a: "Any finished work product you would send, sign, or rely on: a recast, Baseline, CIM draft, buyer tree, LOI review, counter, engagement letter, lender package, or 100-day plan.",
-  },
-  {
-    q: "Why Solo at $79 and Pro at $199?",
-    a: "Solo is for one operator on one live deal. Pro is the full associate desk across unlimited deals: QofE Lite, deeper model stacks, scoring, buyer universes, tax and legal structuring, and API access.",
-  },
-  {
-    q: "Why Team at $499?",
-    a: "Team is for a two-to-five person firm using Yulia as shared execution infrastructure: shared vault, shared templates, house style, access control, and handoffs.",
-  },
-  {
-    q: "What happens after close?",
-    a: "Every paid tier includes 180 days of post-close PMI support. The diligence findings, integration milestones, and value-creation plan stay in the same workspace.",
-  },
-];
-
 type Cell = string;
 
 type CompareCells = [Cell, Cell, Cell, Cell, Cell]; // Free, Solo, Pro, Team, Enterprise
@@ -2000,14 +1654,6 @@ function PricingSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) =>
   return (
     <div>
       <style>{`
-        .pricing-story-grid {
-          grid-template-columns: minmax(min(520px, 100%), 1fr) minmax(min(360px, 100%), 0.78fr);
-        }
-        @media (max-width: 1100px) {
-          .pricing-story-grid {
-            grid-template-columns: 1fr !important;
-          }
-        }
         .plan-choice-card {
           cursor: pointer;
           transform: translate3d(0, 0, 0);
@@ -2051,8 +1697,6 @@ function PricingSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) =>
           }
         }
       `}</style>
-      <CostBreakdown />
-
       <div style={P.planGrid}>
         {PLANS.map((p, index) => {
           const featured = p.featured;
@@ -2128,16 +1772,6 @@ function PricingSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) =>
         </Reveal>
       </LearnSection>
 
-      <LearnSection title="Questions we get">
-        <Reveal>
-          <div style={A.faqCard}>
-            {PRICING_FAQS.map((f, i) => (
-              <FaqRow key={f.q} q={f.q} a={f.a} last={i === PRICING_FAQS.length - 1} />
-            ))}
-          </div>
-        </Reveal>
-      </LearnSection>
-
       <LearnSection title="Ready to bring her into one live deal?" sub="Upload the materials. Ask the question. See what she produces. Same Yulia that runs in every paid workspace.">
         <Reveal>
         <div style={P.guaranteeCard}>
@@ -2166,57 +1800,9 @@ function PricingSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) =>
   );
 }
 
-function CostBreakdown() {
-  const rows = [
-    {
-      title: "Same Yulia",
-      body: "Every paid tier gets the same core desk: models, generators, buyer engine, and orchestration.",
-    },
-    {
-      title: "Pay for scale",
-      body: "Price changes with seats, deal volume, and infrastructure. The work itself is not metered.",
-    },
-    {
-      title: "No deal toll",
-      body: "No success fee, no per-deal tariff, no retainer hours, and no token bill that rises when the work gets real.",
-    },
-  ];
-
-  return (
-    <Reveal direction="up" delay={80}>
-      <div className="pricing-story-grid" style={P.pricingStory}>
-        <div style={P.pricingTexture}>
-          <div style={P.pricingTextureVeil} aria-hidden="true" />
-          <div style={P.pricingTextureCopy}>
-            <h3 style={P.pricingStoryTitle}>Same Yulia in every paid tier.</h3>
-            <p style={P.pricingStoryBody}>
-              You pay more for seats, deal volume, and enterprise infrastructure. You never pay a success fee, per-deal toll, or metered charge that climbs when the mandate gets busy.
-            </p>
-            <div style={P.pricingPills}>
-              <span style={P.pricingPill}>Free</span>
-              <span style={P.pricingPill}>Solo $79</span>
-              <span style={P.pricingPill}>Pro $199</span>
-              <span style={P.pricingPill}>Team $499</span>
-            </div>
-          </div>
-        </div>
-        <div style={P.pricingRows}>
-          {rows.map((row, index) => (
-            <div key={row.title} style={{ ...P.pricingRow, borderBottom: index === rows.length - 1 ? "none" : "1px solid rgba(219,228,241,0.88)" }}>
-              <span style={P.pricingRowIndex}>{String(index + 1).padStart(2, "0")}</span>
-              <span style={P.pricingRowText}>
-                <strong>{row.title}</strong>
-                <span>{row.body}</span>
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </Reveal>
-  );
-}
-
 function ComparePlans() {
+  const [expanded, setExpanded] = useState(false);
+  const detailId = "plan-compare-details";
   const rows = [
     {
       plan: "Free",
@@ -2302,6 +1888,59 @@ function ComparePlans() {
             <p style={P.compareText}>{row.deliverables}</p>
           </div>
         ))}
+        <div style={P.compareExpandWrap}>
+          <button
+            type="button"
+            className="m-state"
+            aria-expanded={expanded}
+            aria-controls={detailId}
+            onClick={() => setExpanded(!expanded)}
+            style={P.compareExpandButton}
+          >
+            <span>{expanded ? "Hide full feature comparison" : "Expand full feature comparison"}</span>
+            <span aria-hidden="true" style={{ ...P.compareExpandIcon, transform: expanded ? "rotate(45deg)" : "rotate(0deg)" }}>+</span>
+          </button>
+        </div>
+        {expanded && (
+          <div id={detailId} style={P.compareDetails}>
+            <div style={P.compareHeader}>
+              <span>Feature</span>
+              <span>Free</span>
+              <span>Solo</span>
+              <span>Pro</span>
+              <span>Team</span>
+              <span>Enterprise</span>
+            </div>
+            {COMPARE.map(group => (
+              <div key={group.title}>
+                <div style={P.compareGroupHeader}>{group.title}</div>
+                {group.rows.map((row, rowIndex) => (
+                  <div
+                    key={`${group.title}-${row.feature}`}
+                    className="plan-compare-row"
+                    style={{
+                      ...P.compareFeatureRow,
+                      borderBottom: rowIndex === group.rows.length - 1 ? "none" : "1px solid rgba(219,228,241,0.78)",
+                    }}
+                  >
+                    <strong style={P.compareFeatureName}>{row.feature}</strong>
+                    {row.cells.map((cell, cellIndex) => (
+                      <span
+                        key={`${row.feature}-${cellIndex}`}
+                        style={{
+                          ...P.compareCell,
+                          ...(cellIndex === 2 ? P.compareProCell : undefined),
+                        }}
+                      >
+                        {cell}
+                      </span>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -2660,209 +2299,6 @@ const P: Record<string, CSSProperties> = {
     opacity: 0.76,
     lineHeight: 1.4,
   },
-  pricingStory: {
-    display: "grid",
-    gridTemplateColumns: "minmax(min(520px, 100%), 1fr) minmax(min(360px, 100%), 0.78fr)",
-    gap: 14,
-    alignItems: "stretch",
-    marginBottom: 18,
-  },
-  pricingTexture: {
-    position: "relative",
-    minHeight: 220,
-    borderRadius: 28,
-    overflow: "hidden",
-    background:
-      "radial-gradient(circle at 10% 0%, rgba(106,155,204,0.16), transparent 34%), radial-gradient(circle at 96% 12%, rgba(98,153,135,0.12), transparent 34%), linear-gradient(155deg, rgba(255,255,255,0.98), rgba(242,248,255,0.92))",
-    border: "1px solid rgba(214,225,240,0.94)",
-    boxShadow: "0 24px 62px rgba(31,44,69,0.10), 0 6px 16px rgba(31,44,69,0.05), inset 0 1px 0 rgba(255,255,255,0.94)",
-    color: "var(--m-on-surface)",
-  },
-  pricingTextureVeil: {
-    position: "absolute",
-    inset: 0,
-    background: "linear-gradient(115deg, rgba(255,255,255,0.42), transparent 42%, rgba(106,155,204,0.08) 100%)",
-    pointerEvents: "none",
-  },
-  pricingTextureCopy: {
-    position: "relative",
-    zIndex: 1,
-    minHeight: 220,
-    padding: "26px 28px",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "space-between",
-  },
-  pricingStoryTitle: {
-    fontFamily: "var(--font-display)",
-    fontSize: 32,
-    lineHeight: 1,
-    letterSpacing: "-0.05em",
-    margin: 0,
-    maxWidth: 660,
-    color: "var(--m-on-surface)",
-    textWrap: "balance",
-    textShadow: "none",
-  },
-  pricingStoryBody: {
-    margin: "12px 0 0",
-    maxWidth: 680,
-    fontSize: 14,
-    lineHeight: 1.55,
-    color: "var(--m-on-surface-var)",
-    textWrap: "pretty",
-  },
-  pricingPills: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: 8,
-    marginTop: 20,
-  },
-  pricingPill: {
-    minHeight: 34,
-    display: "inline-flex",
-    alignItems: "center",
-    padding: "0 12px",
-    borderRadius: 999,
-    background:
-      "linear-gradient(180deg, rgba(29,45,68,0.96), rgba(16,24,38,0.92))",
-    border: "0.5px solid rgba(255,255,255,0.34)",
-    color: "#FFFFFF",
-    fontSize: 11.5,
-    fontWeight: 850,
-    boxShadow: "0 18px 36px -24px rgba(0,0,0,0.58), inset 0 1px 0 rgba(255,255,255,0.42)",
-    backdropFilter: "blur(5px) saturate(165%) contrast(1.08) brightness(1.04)",
-    WebkitBackdropFilter: "blur(5px) saturate(165%) contrast(1.08) brightness(1.04)",
-  },
-  pricingRows: {
-    minHeight: 220,
-    overflow: "hidden",
-    borderRadius: 28,
-    background: "linear-gradient(155deg, rgba(255,255,255,0.98), rgba(247,251,255,0.92))",
-    border: "1px solid rgba(219,228,241,0.94)",
-    boxShadow: "0 24px 62px rgba(31,44,69,0.10), 0 6px 16px rgba(31,44,69,0.06), inset 0 1px 0 rgba(255,255,255,0.94)",
-  },
-  pricingRow: {
-    minHeight: 73,
-    display: "grid",
-    gridTemplateColumns: "50px minmax(0, 1fr)",
-    gap: 12,
-    alignItems: "center",
-    padding: "14px 18px",
-  },
-  pricingRowIndex: {
-    width: 34,
-    height: 34,
-    display: "grid",
-    placeItems: "center",
-    borderRadius: 12,
-    background: "linear-gradient(180deg, rgba(232,242,251,0.98), rgba(211,226,242,0.86))",
-    color: "#416F9C",
-    fontSize: 11,
-    fontWeight: 850,
-    letterSpacing: "0.09em",
-  },
-  pricingRowText: {
-    display: "grid",
-    gap: 4,
-    fontSize: 12.5,
-    lineHeight: 1.42,
-    color: "var(--m-on-surface-var)",
-    textWrap: "pretty",
-  },
-  costPanel: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(min(430px, 100%), 1fr))",
-    gap: 14,
-    alignItems: "stretch",
-    marginBottom: 18,
-  },
-  costIntro: {
-    minHeight: 132,
-    borderRadius: 24,
-    padding: "22px 24px",
-    background:
-      "radial-gradient(circle at 10% 0%, rgba(255,255,255,0.90), transparent 40%), " +
-      "linear-gradient(135deg, rgba(229,244,251,0.96) 0%, rgba(236,246,238,0.92) 52%, rgba(235,239,253,0.96) 100%)",
-    color: "var(--m-on-surface)",
-    border: "1px solid rgba(214,225,240,0.92)",
-    boxShadow: "0 20px 50px rgba(31,44,69,0.10), 0 5px 14px rgba(31,44,69,0.06), inset 0 1px 0 rgba(255,255,255,0.94)",
-  },
-  costEyebrow: {
-    fontSize: 9.5,
-    letterSpacing: "0.16em",
-    fontWeight: 800,
-    color: "var(--m-on-primary-container)",
-  },
-  costTitle: {
-    fontFamily: "var(--font-display)",
-    fontSize: 24,
-    lineHeight: 1.04,
-    letterSpacing: "-0.04em",
-    margin: "22px 0 0",
-    color: "var(--m-on-surface)",
-    textWrap: "balance",
-  },
-  costGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-    gap: 12,
-  },
-  costCard: {
-    minHeight: 132,
-    borderRadius: 24,
-    padding: "18px 18px",
-    background: "rgba(255,255,255,0.92)",
-    border: "1px solid rgba(214,225,240,0.90)",
-    boxShadow: "0 20px 50px rgba(31,44,69,0.10), 0 5px 14px rgba(31,44,69,0.06), inset 0 1px 0 rgba(255,255,255,0.94)",
-    display: "flex",
-    flexDirection: "column",
-  },
-  costCardFocus: {
-    background: "linear-gradient(180deg, rgba(255,255,255,0.96), rgba(235,244,254,0.88))",
-    border: "1px solid rgba(133,174,214,0.54)",
-  },
-  costCardTone0: {
-    background: "linear-gradient(145deg, rgba(246,251,255,0.98), rgba(226,240,253,0.90))",
-    border: "1px solid rgba(169,203,231,0.62)",
-  },
-  costCardTone1: {
-    background: "linear-gradient(145deg, rgba(250,253,249,0.98), rgba(227,243,234,0.92))",
-    border: "1px solid rgba(172,213,191,0.58)",
-  },
-  costCardTone2: {
-    background: "linear-gradient(145deg, rgba(250,249,255,0.98), rgba(232,232,251,0.90))",
-    border: "1px solid rgba(190,192,235,0.58)",
-  },
-  costCardEyebrow: {
-    fontSize: 9,
-    letterSpacing: "0.14em",
-    fontWeight: 800,
-    color: "var(--m-on-primary-container)",
-  },
-  costCardTitle: {
-    marginTop: 18,
-    fontFamily: "var(--font-display)",
-    fontWeight: 820,
-    fontSize: 20,
-    lineHeight: 1,
-    letterSpacing: "-0.04em",
-    color: "var(--m-on-surface)",
-  },
-  costCardBody: {
-    margin: "8px 0 0",
-    fontSize: 12.5,
-    lineHeight: 1.45,
-    color: "var(--m-on-surface-var)",
-    textWrap: "pretty",
-  },
-  costMeta: {
-    marginTop: "auto",
-    fontSize: 9,
-    letterSpacing: "0.12em",
-    color: "var(--m-on-surface-mid)",
-    fontWeight: 800,
-  },
   compareStage: {
     position: "relative",
     overflow: "hidden",
@@ -2934,16 +2370,20 @@ const P: Record<string, CSSProperties> = {
     display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 1fr",
     background: "linear-gradient(180deg, rgba(246,250,255,0.98), rgba(236,244,253,0.92))",
     padding: "15px 18px",
-    fontSize: 11, fontFamily: "var(--font-mono)",
-    letterSpacing: "0.1em", textTransform: "uppercase",
-    fontWeight: 600, color: "var(--m-on-surface-mid)",
+    minWidth: 900,
+    fontSize: 12.5,
+    letterSpacing: 0,
+    fontWeight: 850,
+    color: "var(--m-on-surface)",
     borderBottom: "1px solid rgba(214,225,240,0.88)",
   },
   compareGroupHeader: {
-    padding: "18px 18px 9px",
-    fontSize: 10.5, fontFamily: "var(--font-mono)",
-    letterSpacing: "0.14em", textTransform: "uppercase",
-    fontWeight: 700, color: "var(--m-primary)",
+    padding: "15px 18px 10px",
+    minWidth: 900,
+    fontSize: 13,
+    letterSpacing: 0,
+    fontWeight: 850,
+    color: "var(--m-primary)",
     background: "linear-gradient(90deg, rgba(244,249,255,0.92), rgba(255,255,255,0.96))",
     borderTop: "1px solid var(--m-outline-var)",
     borderBottom: "1px solid var(--m-outline-var)",
@@ -2961,7 +2401,7 @@ const P: Record<string, CSSProperties> = {
     minHeight: 52,
     background: "linear-gradient(180deg, rgba(246,250,255,0.98), rgba(236,244,253,0.92))",
     color: "var(--m-on-surface-mid)",
-    fontSize: 11,
+    fontSize: 12.5,
     fontWeight: 800,
     letterSpacing: 0,
     borderBottom: "1px solid rgba(214,225,240,0.88)",
@@ -2984,6 +2424,61 @@ const P: Record<string, CSSProperties> = {
     lineHeight: 1.45,
     color: "var(--m-on-surface-mid)",
     textWrap: "pretty",
+  },
+  compareExpandWrap: {
+    borderTop: "1px solid rgba(214,225,240,0.88)",
+    padding: 12,
+    background: "linear-gradient(180deg, rgba(250,252,255,0.94), rgba(244,249,255,0.88))",
+  },
+  compareExpandButton: {
+    all: "unset",
+    boxSizing: "border-box",
+    width: "100%",
+    minHeight: 48,
+    borderRadius: 16,
+    padding: "0 16px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 14,
+    cursor: "pointer",
+    fontSize: 14,
+    fontWeight: 850,
+    color: "var(--m-on-surface)",
+    background: "rgba(255,255,255,0.74)",
+    border: "1px solid rgba(214,225,240,0.86)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.88)",
+  },
+  compareExpandIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 999,
+    display: "grid",
+    placeItems: "center",
+    flexShrink: 0,
+    color: "var(--m-primary)",
+    background: "rgba(232,241,252,0.92)",
+    transition: "transform 180ms ease",
+  },
+  compareDetails: {
+    overflowX: "auto",
+    borderTop: "1px solid rgba(214,225,240,0.88)",
+    background: "rgba(255,255,255,0.72)",
+  },
+  compareFeatureRow: {
+    display: "grid",
+    gridTemplateColumns: "minmax(260px, 2fr) repeat(5, minmax(98px, 1fr))",
+    gap: 12,
+    padding: "11px 18px",
+    minWidth: 900,
+    alignItems: "center",
+    fontSize: 13,
+    color: "var(--m-on-surface)",
+  },
+  compareFeatureName: {
+    fontSize: 13,
+    lineHeight: 1.35,
+    color: "var(--m-on-surface)",
   },
   includedGrid: {
     display: "grid",
