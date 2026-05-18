@@ -32,47 +32,47 @@ export async function composeModelStack(input: ComposeModelStackInput): Promise<
   const spec = LEAGUES[input.league];
   const primaryModels = new Set<string>();
   const supporting = new Set<string>();
-  const taxLegal = new Set<string>(['v19.tax.structure', 'v19.legal.haltscan']);
-  const sensitivity = new Set<string>(['v19.sensitivity.matrix', 'v19.market.context']);
+  const taxLegal = new Set<string>(['MODEL.TAX.STRUCTURE.v1', 'MODEL.LEGAL.HALTSCAN.v1']);
+  const sensitivity = new Set<string>(['MODEL.SENSITIVITY.MATRIX.v1', 'MODEL.MARKET.CONTEXT.v1']);
 
   if (spec.primaryMetric === 'SDE') {
-    primaryModels.add('v19.sde.recast');
-    supporting.add('v19.sba.bankability');
-    supporting.add('v19.dscr');
+    primaryModels.add('MODEL.VAL.SDE.v1');
+    supporting.add('MODEL.LBO.SBA.v1');
+    supporting.add('MODEL.DSCR.STRESS.v1');
   } else {
-    primaryModels.add('v19.ebitda.adjusted');
-    supporting.add('v19.working_capital.peg');
-    supporting.add('v19.qoe.lite');
+    primaryModels.add('MODEL.VAL.EBITDA.v1');
+    supporting.add('MODEL.STRUCT.NWC.PEG.v1');
+    supporting.add('MODEL.QOE.LITE.v1');
   }
 
-  primaryModels.add('v19.valuation.multiple');
-  primaryModels.add('v19.deal.score');
+  primaryModels.add('MODEL.VAL.TRIANGULATION.v1');
+  primaryModels.add('MODEL.DEAL.SCORE.v1');
 
   if (input.journey === 'buy') {
-    primaryModels.add('v19.buyer.fit');
-    supporting.add('v19.deal.comparison');
-    if (leagueAtLeast(input.league, 'L3')) supporting.add('v19.lbo.lite');
+    primaryModels.add('MODEL.BUYER.FIT.v1');
+    supporting.add('MODEL.DEAL.COMPARISON.v1');
+    if (leagueAtLeast(input.league, 'L3')) supporting.add('MODEL.LBO.LMM.v1');
   }
 
   if (input.journey === 'sell') {
-    supporting.add('v19.buyer.fit');
-    supporting.add('v19.qoe.lite');
-    supporting.add('v19.working_capital.peg');
+    supporting.add('MODEL.BUYER.FIT.v1');
+    supporting.add('MODEL.QOE.LITE.v1');
+    supporting.add('MODEL.STRUCT.NWC.PEG.v1');
   }
 
   if (input.journey === 'raise') {
-    primaryModels.add('v19.cap_table.dilution');
-    supporting.add('v19.dcf.simple');
+    primaryModels.add('MODEL.CAPTABLE.DILUTION.v1');
+    supporting.add('MODEL.VAL.DCF.TWOSTAGE.v1');
   }
 
   if (input.journey === 'pmi') {
-    primaryModels.add('v19.pmi.value_creation');
-    supporting.add('v19.covenant.compliance');
+    primaryModels.add('MODEL.PMI.VALUE.CREATION.v1');
+    supporting.add('MODEL.COVENANT.COMPLIANCE.v1');
   }
 
   if (leagueAtLeast(input.league, 'L4')) {
-    supporting.add('v19.covenant.compliance');
-    sensitivity.add('v19.earnout.ev');
+    supporting.add('MODEL.COVENANT.COMPLIANCE.v1');
+    sensitivity.add('MODEL.STRUCT.EARNOUT.MC.v1');
   }
 
   const stack: V19ModelStack = {

@@ -20,10 +20,10 @@
 | 2 | Pitch Book Generation Engine | 🟡 Deterministic templates for seven formats exist in `server/services/pitchBookStudio.ts`; tools exist in `server/services/tools.ts`. | Replace placeholder narrative/model slots with canonical server model runs and source-extraction facts. |
 | 3 | Pitch Book Source Grounding | 🟡 Slide-level provenance, warning states, source cards, and audit appendices exist in draft form. | Validate every citation/model/file reference against registries before export and block/flag unsupported metrics. |
 | 4 | V19 Foundation Repair | 🟡 `market_data_cache` collision is addressed by 067/070 compatibility migrations; V19 tables exist. | Run fresh-db and migrated-db verification; confirm all V19 tables and seeds are usable. |
-| 5 | Canonical Server-Side V19 Runtime | 🟠 Model registry catalog exists, but model IDs are still `v19.*` and executable `MODEL.*.v1` runners do not exist. | Standardize IDs on `MODEL.*.v1`, add `V19Model` contract, model output hashes, and audit payloads. |
-| 6 | Tier-0 Server Models | ❌ Not executable yet. | Implement Tier-0 valuation, QoE, LBO/SBA, tax, legal halt scan, DSCR, NWC, PPA, sources/uses, rollover, earnout, and structure models. |
+| 5 | Canonical Server-Side V19 Runtime | 🟡 Started: model registry now canonicalizes IDs to `MODEL.*.v1`; `v19ModelRuntime.ts` adds deterministic execution, missing-input reporting, output hashes, and audit payloads. | Persist model executions to audit records and make Studio refresh call the runner directly. |
+| 6 | Tier-0 Server Models | 🟡 First executable subset added: SDE, EBITDA, valuation triangulation, DSCR stress, NWC peg, sources/uses, SBA, HSR, and QoE Lite. Framework runners exist for remaining Tier-0/Phase 2 models. | Fill out full Tier-0 calculations for tax, legal halt scan, PPA, rollover, earnout, structure analysis, LBO, and model fixtures. |
 | 7 | Model Stack, Gates, Prompts | 🟡 Composer service exists; gate/runtime wiring and `YULIA_PROMPTS_V4.md` are still pending. | Compose league × journey × deal type stacks, inject requirements into chat/Studio, and add halt triggers. |
-| 8 | V19 Tools + Chat Runtime | 🟡 Pitch-book tools exist; the seven canonical V19 tools are not registered. | Add `compose_model_stack`, `execute_model`, `lookup_citation`, `fetch_market_data`, `defer_to_counsel`, `update_tax_position`, and `write_audit_trail`. |
+| 8 | V19 Tools + Chat Runtime | 🟡 Started: `compose_model_stack`, `execute_model`, `lookup_citation`, `fetch_market_data`, `defer_to_counsel`, `update_tax_position`, and `write_audit_trail` are registered. | Wire citation validation into chat/Studio publish paths and make audit writes automatic for model-backed responses/exports. |
 | 9 | Market Data + Connectors | 🟡 Existing market-data service/cache exists. | Add daily FRED refresh, freshness checks, and read-only connector contracts/status surfaces. |
 | 10 | Today Canvas + Firm Memory | 🟡 Today UI exists, but V19 operating-surface data model is pending. | Add Morning Brief, Gate Countdown, Deals-in-Flight Pulse, Studio refresh needs, and reusable firm memory. |
 | 11 | QoE Preview Attractor | 🟡 QoE Preview Book template exists. | Make the full upload → extraction → QoE Lite → Studio book → export path work end to end. |
@@ -52,8 +52,8 @@ The V19 implementation brief covers **runtime correctness** (calc engine, citati
 | 2 | Firm Memory persistent object (prior-deal carryforward) | PDF #5 | ❌ greenfield |
 | 3 | 7-yr SOX-grade AI audit trail (immutable append-only + signed manifests + SOC 2 Type 2) | PDF #6 | 🟡 V19 `audit_trail` schema added; immutable manifests + SOC 2 controls pending |
 | 4 | Citation registry + validator | V19 §2+§7 | 🟡 registry schema + seed + validator service added; chat hook pending |
-| 5 | Model registry + Tier-0 calc engine (20 models server-side) | V19 §4 | 🟡 registry schema + catalog/hash service added; executable server-side models pending |
-| 6 | Model stack composer | V19 §7 | 🟡 composer service added; tool/runtime hook pending |
+| 5 | Model registry + Tier-0 calc engine (20 models server-side) | V19 §4 | 🟡 registry schema + canonical `MODEL.*.v1` catalog + first executable subset added |
+| 6 | Model stack composer | V19 §7 | 🟡 composer service added and canonical tool registered; gate/runtime hook pending |
 | 7 | Excel round-trip (assumption versioning + diff engine) | PDF #9 | ❌ greenfield |
 | 8 | Engagement-Letter→CIM-in-48hrs hero workflow (broker Attractor) | PDF #1 | 🟡 partial (CIM gen exists, workflow chain doesn't) |
 | 9 | Deal Pack in 4 hours (IS Attractor) | PDF #2 | ❌ greenfield |
@@ -70,7 +70,7 @@ The V19 implementation brief covers **runtime correctness** (calc engine, citati
 | 15 | DB migrations: citation_registry + model_registry + audit_trail + deal_model_stack + tax_position_registry + legal_defer_log | V19 §2 | 🟡 migration 067 added; deploy/apply pending |
 | 16 | Constants: `v19Regulatory.ts` + `v19Leagues.ts` | V19 §3 | 🟡 files added; runtime integration pending |
 | 17 | Yulia prompts V4 — V19 block + tax/legal V19 refs + gate prompts with model stack | V19 §5 | 🟡 partial (V18 distillations exist; need V19 updates) |
-| 18 | 7 new agentic tools: compose_model_stack, execute_model, lookup_citation, fetch_market_data, defer_to_counsel, update_tax_position, write_audit_trail | V19 §6 | 🟡 model/citation/composer service foundation added; tool registration pending |
+| 18 | 7 new agentic tools: compose_model_stack, execute_model, lookup_citation, fetch_market_data, defer_to_counsel, update_tax_position, write_audit_trail | V19 §6 | 🟡 tools registered; chat/Studio automatic invocation and fixture coverage pending |
 | 19 | FRED daily refresh job | V19 §7.4 | ❌ greenfield |
 | 20 | Gate registry: `requiredModels` + `alwaysHaltTriggers` per gate | V19 §8 | ❌ greenfield |
 | 21 | Broken-auction signal layer | PDF #14 | ❌ greenfield (category-creating; no incumbent) |

@@ -104,7 +104,7 @@ const FORMAT_MODELS: Record<PitchBookFormat, string[]> = {
   'buyer-pitch-book': ['MODEL.VAL.TRIANGULATION.v1', 'MODEL.DSCR.STRESS.v1', 'MODEL.SOURCES.USES.v1'],
   'seller-pitch-book': ['MODEL.VAL.TRIANGULATION.v1', 'MODEL.STRUCT.NWC.PEG.v1'],
   'ic-deck': ['MODEL.VAL.TRIANGULATION.v1', 'MODEL.LBO.LMM.v1', 'MODEL.SOURCES.USES.v1'],
-  'qoe-preview-book': ['MODEL.VAL.EBITDA.v1', 'MODEL.STRUCT.NWC.PEG.v1', 'MODEL.DSCR.STRESS.v1'],
+  'qoe-preview-book': ['MODEL.QOE.LITE.v1', 'MODEL.VAL.EBITDA.v1', 'MODEL.STRUCT.NWC.PEG.v1', 'MODEL.DSCR.STRESS.v1'],
   'cim-summary-deck': ['MODEL.VAL.TRIANGULATION.v1', 'MODEL.STRUCT.NWC.PEG.v1'],
   'board-update': ['MODEL.DEALKILL.PROB.v1', 'MODEL.TIMELINE.MC.v1'],
   'lender-book': ['MODEL.LBO.SBA.v1', 'MODEL.DSCR.STRESS.v1', 'MODEL.SOURCES.USES.v1'],

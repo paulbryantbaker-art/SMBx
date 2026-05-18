@@ -1,6 +1,8 @@
 import type { Tool } from '@anthropic-ai/sdk/resources/messages';
+import { createHash } from 'crypto';
 import { isSuperAdminUser } from '../adminAccess.js';
 import { createSql } from '../dbConfig.js';
+import { classifyV19LeagueFromCents, type League } from '../constants/v19Leagues.js';
 import { checkGateReadinessSync as checkReadiness } from './gateReadinessService.js';
 import { generateProviderRecommendation, findProviders, trackReferral } from './providerMatchingService.js';
 import { matchFranchises } from './franchiseMatchingService.js';
@@ -34,6 +36,9 @@ import {
   refreshPitchBookFromModels,
   revisePitchBook,
 } from './pitchBookStudio.js';
+import { composeModelStack, type V19Journey } from './modelStackComposer.js';
+import { executeV19Model } from './v19ModelRuntime.js';
+import { validateCitationTags } from './citationValidator.js';
 
 const sql = createSql();
 
@@ -194,6 +199,107 @@ export const TOOL_DEFINITIONS: Tool[] = [
         format: { type: 'string', enum: ['pptx', 'pdf'], description: 'Preferred export format.' },
       },
       required: ['bookId', 'format'],
+    },
+  },
+  {
+    name: 'compose_model_stack',
+    description: 'Compose and persist the canonical V19 model stack for a deal using journey, league, deal type, industry, and jurisdiction.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId: { type: 'number', description: 'Deal ID to compose the stack for.' },
+        journey: { type: 'string', enum: ['sell', 'buy', 'raise', 'pmi'], description: 'Optional override when the deal journey is missing.' },
+        league: { type: 'string', enum: ['L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10'], description: 'Optional override when the deal league is missing.' },
+        dealType: { type: 'string', description: 'Optional deal type or structure override.' },
+      },
+      required: ['dealId'],
+    },
+  },
+  {
+    name: 'execute_model',
+    description: 'Execute a deterministic server-side V19 model by MODEL.*.v1 id. Returns outputs, missing inputs, citation tags, output hash, and audit payload.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        modelId: { type: 'string', description: 'Canonical model ID, for example MODEL.VAL.EBITDA.v1 or MODEL.DSCR.STRESS.v1.' },
+        input: { type: 'object', description: 'Model inputs. Financial values must be cents.' },
+        dealId: { type: 'number', description: 'Optional deal ID for audit context.' },
+      },
+      required: ['modelId', 'input'],
+    },
+  },
+  {
+    name: 'lookup_citation',
+    description: 'Look up a V19 citation tag from the citation registry and report whether it is active.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        citeTag: { type: 'string', description: 'Citation tag such as [FRED:DPRIME] or [SBA SOP 50 10 8].' },
+      },
+      required: ['citeTag'],
+    },
+  },
+  {
+    name: 'fetch_market_data',
+    description: 'Fetch the latest cached V19 market data series from market_data_cache.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        seriesId: { type: 'string', description: 'Market data series ID, for example SOFR, DPRIME, or DGS10.' },
+      },
+      required: ['seriesId'],
+    },
+  },
+  {
+    name: 'defer_to_counsel',
+    description: 'Record a Mode 2 defer-to-counsel trigger with a briefing packet. Use when tax/legal/regulated issues need human counsel.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        triggerCode: { type: 'string', description: 'Counsel halt or referral trigger code.' },
+        contextText: { type: 'string', description: 'User-facing context that caused the deferral.' },
+        dealId: { type: 'number', description: 'Optional deal ID.' },
+      },
+      required: ['triggerCode', 'contextText'],
+    },
+  },
+  {
+    name: 'update_tax_position',
+    description: 'Record the current V19 tax position facts for a deal before tax-sensitive model execution.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId: { type: 'number', description: 'Deal ID.' },
+        dealType: { type: 'string', description: 'Deal type or structure.' },
+        structureNotes: { type: 'string', description: 'Known tax structure notes.' },
+        rolloverPct: { type: 'number', description: 'Rollover percentage, if known.' },
+        rolloverPath: { type: 'string', description: 'Rollover path, if known.' },
+        earnoutMethod: { type: 'string', description: 'Earnout method, if known.' },
+        qsbsEligible: { type: 'boolean', description: 'Whether QSBS may be relevant.' },
+        qsbsStateConformity: { type: 'string', description: 'State conformity note.' },
+      },
+      required: ['dealId', 'dealType'],
+    },
+  },
+  {
+    name: 'write_audit_trail',
+    description: 'Write a V19 audit_trail record for a model-backed response, Studio action, export, or counsel deferral.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        sessionId: { type: 'string', description: 'Audit session ID.' },
+        dealId: { type: 'number', description: 'Optional deal ID.' },
+        turnId: { type: 'string', description: 'Turn/action ID.' },
+        journey: { type: 'string', description: 'Journey context.' },
+        league: { type: 'string', description: 'League context.' },
+        dealType: { type: 'string', description: 'Deal type context.' },
+        modelStack: { type: 'object', description: 'Model stack used.' },
+        inputsUsed: { type: 'object', description: 'Inputs used.' },
+        citationsValidated: { type: 'object', description: 'Citation validation results.' },
+        mode2Triggers: { type: 'object', description: 'Mode 2 counsel triggers.' },
+        outputHash: { type: 'string', description: 'Output hash if already computed.' },
+      },
+      required: ['sessionId', 'turnId'],
     },
   },
   {
@@ -690,6 +796,20 @@ export async function executeTool(
         return await refreshPitchBookFromModelsTool(input, userId);
       case 'export_pitch_book':
         return await exportPitchBookTool(input, userId);
+      case 'compose_model_stack':
+        return await composeModelStackTool(input, userId);
+      case 'execute_model':
+        return await executeModelTool(input, userId, conversationId);
+      case 'lookup_citation':
+        return await lookupCitationTool(input);
+      case 'fetch_market_data':
+        return await fetchMarketDataTool(input);
+      case 'defer_to_counsel':
+        return await deferToCounselTool(input, userId, conversationId);
+      case 'update_tax_position':
+        return await updateTaxPositionTool(input, userId);
+      case 'write_audit_trail':
+        return await writeAuditTrailTool(input, userId, conversationId);
       case 'run_analysis':
         return await runAnalysis(input, userId, conversationId);
       case 'file_deliverable_to_data_room':
@@ -1244,6 +1364,220 @@ async function exportPitchBookTool(input: Record<string, any>, userId: number): 
     downloadUrl: `/api/studio/pitch-books/${book.id}/export/${format}`,
     alternateDownloadUrl: `/api/studio/pitch-books/${book.id}/export/${format === 'pptx' ? 'pdf' : 'pptx'}`,
   });
+}
+
+async function composeModelStackTool(input: Record<string, any>, userId: number): Promise<string> {
+  const dealId = Number(input.dealId);
+  if (!Number.isFinite(dealId) || dealId <= 0) return JSON.stringify({ error: 'dealId is required' });
+  if (!(await hasDealAccess(dealId, userId))) return JSON.stringify({ error: 'Deal not found' });
+
+  const [deal] = await sql`
+    SELECT id, journey_type, league, deal_type, industry, jurisdiction, revenue, sde, ebitda
+    FROM deals
+    WHERE id = ${dealId}
+    LIMIT 1
+  `;
+  if (!deal) return JSON.stringify({ error: 'Deal not found' });
+
+  const journey = normalizeV19Journey(input.journey || deal.journey_type);
+  const league = normalizeV19League(input.league || deal.league)
+    || classifyV19LeagueFromCents({
+      revenueCents: deal.revenue == null ? null : Number(deal.revenue),
+      sdeCents: deal.sde == null ? null : Number(deal.sde),
+      ebitdaCents: deal.ebitda == null ? null : Number(deal.ebitda),
+    });
+  const stack = await composeModelStack({
+    dealId,
+    journey,
+    league,
+    dealType: String(input.dealType || deal.deal_type || 'unknown'),
+    industry: deal.industry || null,
+    jurisdiction: deal.jurisdiction || null,
+  });
+
+  return JSON.stringify({ success: true, dealId, stack });
+}
+
+async function executeModelTool(input: Record<string, any>, userId: number, conversationId: number): Promise<string> {
+  const dealId = input.dealId == null ? null : Number(input.dealId);
+  if (dealId && !(await hasDealAccess(dealId, userId))) return JSON.stringify({ error: 'Deal not found' });
+  const execution = await executeV19Model({
+    modelId: String(input.modelId || ''),
+    input: asRecord(input.input),
+    dealId,
+    userId,
+    conversationId,
+  });
+  return JSON.stringify({ success: true, execution });
+}
+
+async function lookupCitationTool(input: Record<string, any>): Promise<string> {
+  const citeTag = String(input.citeTag || '').trim();
+  if (!citeTag) return JSON.stringify({ error: 'citeTag is required' });
+  const validation = await validateCitationTags([citeTag]);
+  const [row] = await sql`
+    SELECT cite_tag, category, description, current_value, source_url, as_of_date, validated_at, status
+    FROM citation_registry
+    WHERE cite_tag = ${citeTag}
+    LIMIT 1
+  `;
+  return JSON.stringify({
+    found: !!row,
+    active: validation.active.includes(citeTag),
+    citation: row || null,
+    validation,
+  });
+}
+
+async function fetchMarketDataTool(input: Record<string, any>): Promise<string> {
+  const seriesId = String(input.seriesId || '').trim();
+  if (!seriesId) return JSON.stringify({ error: 'seriesId is required' });
+  const [row] = await sql`
+    SELECT series_id, value, as_of_date, source, source_url, cite_tag, fetched_at, metadata
+    FROM market_data_cache
+    WHERE series_id = ${seriesId}
+    ORDER BY as_of_date DESC NULLS LAST, fetched_at DESC
+    LIMIT 1
+  `;
+  return JSON.stringify({ found: !!row, seriesId, data: row || null });
+}
+
+async function deferToCounselTool(input: Record<string, any>, userId: number, conversationId: number): Promise<string> {
+  const triggerCode = String(input.triggerCode || '').trim();
+  const contextText = String(input.contextText || '').trim();
+  const dealId = input.dealId == null ? null : Number(input.dealId);
+  if (!triggerCode || !contextText) return JSON.stringify({ error: 'triggerCode and contextText are required' });
+  if (dealId && !(await hasDealAccess(dealId, userId))) return JSON.stringify({ error: 'Deal not found' });
+
+  const briefingPacket = {
+    triggerCode,
+    contextText,
+    userInstruction: 'Defer legal/tax conclusion to qualified counsel. Yulia may summarize facts and prepare questions.',
+    createdAt: new Date().toISOString(),
+  };
+  const [row] = await sql`
+    INSERT INTO legal_defer_log (deal_id, session_id, trigger_code, context_text, briefing_packet, user_id)
+    VALUES (
+      ${dealId || null},
+      ${`conversation:${conversationId}`},
+      ${triggerCode},
+      ${contextText},
+      ${JSON.stringify(briefingPacket)}::jsonb,
+      ${userId}
+    )
+    RETURNING id, created_at
+  `;
+
+  return JSON.stringify({ success: true, deferLogId: row.id, briefingPacket });
+}
+
+async function updateTaxPositionTool(input: Record<string, any>, userId: number): Promise<string> {
+  const dealId = Number(input.dealId);
+  if (!Number.isFinite(dealId) || dealId <= 0) return JSON.stringify({ error: 'dealId is required' });
+  if (!(await hasDealAccess(dealId, userId))) return JSON.stringify({ error: 'Deal not found' });
+  const dealType = String(input.dealType || '').trim();
+  if (!dealType) return JSON.stringify({ error: 'dealType is required' });
+
+  const notes = {
+    entityType: input.entityType ?? null,
+    sElectionYears: input.sElectionYears ?? null,
+    recordedBy: 'yulia-tool',
+  };
+  const [row] = await sql`
+    INSERT INTO tax_position_registry (
+      deal_id, deal_type, structure_notes, rollover_pct, rollover_path, earnout_method,
+      qsbs_eligible, qsbs_state_conformity, s382_relevant, s163j_relevant, s168k_pct,
+      international, notes_jsonb
+    )
+    VALUES (
+      ${dealId},
+      ${dealType},
+      ${nullableString(input.structureNotes)},
+      ${nullableNumber(input.rolloverPct)},
+      ${nullableString(input.rolloverPath)},
+      ${nullableString(input.earnoutMethod)},
+      ${nullableBoolean(input.qsbsEligible)},
+      ${nullableString(input.qsbsStateConformity)},
+      ${nullableBoolean(input.s382Relevant)},
+      ${nullableBoolean(input.s163jRelevant)},
+      ${nullableNumber(input.s168kPct)},
+      ${nullableBoolean(input.international) ?? false},
+      ${JSON.stringify(notes)}::jsonb
+    )
+    RETURNING id, updated_at
+  `;
+  return JSON.stringify({ success: true, taxPositionId: row.id });
+}
+
+async function writeAuditTrailTool(input: Record<string, any>, userId: number, conversationId: number): Promise<string> {
+  const payload = {
+    modelStack: asRecord(input.modelStack),
+    inputsUsed: asRecord(input.inputsUsed),
+    liveDataSnapshots: asRecord(input.liveDataSnapshots),
+    citationsValidated: asRecord(input.citationsValidated),
+    mode2Triggers: asRecord(input.mode2Triggers),
+  };
+  const outputHash = String(input.outputHash || hashForAudit(payload));
+  const [row] = await sql`
+    INSERT INTO audit_trail (
+      session_id, deal_id, user_id, conversation_id, turn_id, journey, league, deal_type,
+      model_stack, inputs_used, live_data_snapshots, citations_validated, mode_2_triggers, output_hash
+    )
+    VALUES (
+      ${String(input.sessionId || `conversation:${conversationId}`)},
+      ${input.dealId == null ? null : Number(input.dealId)},
+      ${userId},
+      ${conversationId},
+      ${String(input.turnId || `tool:${Date.now()}`)},
+      ${nullableString(input.journey)},
+      ${nullableString(input.league)},
+      ${nullableString(input.dealType)},
+      ${JSON.stringify(payload.modelStack)}::jsonb,
+      ${JSON.stringify(payload.inputsUsed)}::jsonb,
+      ${JSON.stringify(payload.liveDataSnapshots)}::jsonb,
+      ${JSON.stringify(payload.citationsValidated)}::jsonb,
+      ${JSON.stringify(payload.mode2Triggers)}::jsonb,
+      ${outputHash}
+    )
+    RETURNING id, created_at
+  `;
+  return JSON.stringify({ success: true, auditTrailId: row.id, outputHash });
+}
+
+function normalizeV19Journey(value: unknown): V19Journey {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (normalized === 'sell' || normalized === 'buy' || normalized === 'raise' || normalized === 'pmi') {
+    return normalized;
+  }
+  return 'buy';
+}
+
+function normalizeV19League(value: unknown): League | null {
+  const normalized = String(value || '').trim().toUpperCase();
+  return /^L([1-9]|10)$/.test(normalized) ? normalized as League : null;
+}
+
+function asRecord(value: unknown): Record<string, any> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {};
+}
+
+function nullableString(value: unknown): string | null {
+  const text = String(value ?? '').trim();
+  return text ? text : null;
+}
+
+function nullableNumber(value: unknown): number | null {
+  if (value === null || value === undefined || value === '') return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function nullableBoolean(value: unknown): boolean | null {
+  return typeof value === 'boolean' ? value : null;
+}
+
+function hashForAudit(value: unknown): string {
+  return createHash('sha256').update(JSON.stringify(value)).digest('hex');
 }
 
 const ANALYSIS_TYPES = new Set([

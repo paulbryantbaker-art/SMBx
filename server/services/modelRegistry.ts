@@ -20,6 +20,29 @@ export interface RegisteredModelRecord extends RegisteredModel {
   hash: string;
 }
 
+const MODEL_ID_ALIASES: Record<string, string> = {
+  'v19.sde.recast': 'MODEL.VAL.SDE.v1',
+  'v19.ebitda.adjusted': 'MODEL.VAL.EBITDA.v1',
+  'v19.valuation.multiple': 'MODEL.VAL.TRIANGULATION.v1',
+  'v19.sba.bankability': 'MODEL.LBO.SBA.v1',
+  'v19.dscr': 'MODEL.DSCR.STRESS.v1',
+  'v19.qoe.lite': 'MODEL.QOE.LITE.v1',
+  'v19.working_capital.peg': 'MODEL.STRUCT.NWC.PEG.v1',
+  'v19.tax.structure': 'MODEL.TAX.STRUCTURE.v1',
+  'v19.legal.haltscan': 'MODEL.LEGAL.HALTSCAN.v1',
+  'v19.buyer.fit': 'MODEL.BUYER.FIT.v1',
+  'v19.deal.score': 'MODEL.DEAL.SCORE.v1',
+  'v19.market.context': 'MODEL.MARKET.CONTEXT.v1',
+  'v19.sensitivity.matrix': 'MODEL.SENSITIVITY.MATRIX.v1',
+  'v19.deal.comparison': 'MODEL.DEAL.COMPARISON.v1',
+  'v19.lbo.lite': 'MODEL.LBO.LMM.v1',
+  'v19.cap_table.dilution': 'MODEL.CAPTABLE.DILUTION.v1',
+  'v19.earnout.ev': 'MODEL.STRUCT.EARNOUT.MC.v1',
+  'v19.covenant.compliance': 'MODEL.COVENANT.COMPLIANCE.v1',
+  'v19.dcf.simple': 'MODEL.VAL.DCF.TWOSTAGE.v1',
+  'v19.pmi.value_creation': 'MODEL.PMI.VALUE.CREATION.v1',
+};
+
 const V19_MODEL_CATALOG: RegisteredModel[] = [
   {
     modelId: 'v19.sde.recast',
@@ -93,6 +116,24 @@ const V19_MODEL_CATALOG: RegisteredModel[] = [
     citationTags: ['[ABA 2025]', '[SRS 2025]'],
   },
   {
+    modelId: 'MODEL.SOURCES.USES.v1',
+    version: 'v1',
+    name: 'Sources and Uses',
+    phase: 'tier0',
+    description: 'Balances funding sources against purchase price, fees, rollover, and working-capital uses.',
+    requiredInputs: ['sources_cents', 'uses_cents'],
+    citationTags: [],
+  },
+  {
+    modelId: 'MODEL.HSR.TRIAGE.v1',
+    version: 'v1',
+    name: 'HSR Triage',
+    phase: 'tier0',
+    description: 'Checks transaction size against current HSR thresholds and flags filing-tier review.',
+    requiredInputs: ['enterprise_value_cents'],
+    citationTags: ['[FTC 2026 HSR - Size of Transaction]', '[FTC 2026 HSR - Auto-Reportable]'],
+  },
+  {
     modelId: 'v19.tax.structure',
     version: '1.0.0',
     name: 'Tax Structure Lens',
@@ -100,6 +141,33 @@ const V19_MODEL_CATALOG: RegisteredModel[] = [
     description: 'Issue-spots asset sale, stock sale, QSBS, rollover, bonus depreciation, SALT, and interest limitation paths.',
     requiredInputs: ['deal_type', 'entity_type', 'purchase_price_cents', 'rollover_pct', 'tax_facts'],
     citationTags: ['[OBBBA Sec. 70301]', '[OBBBA Sec. 70302]', '[OBBBA Sec. 70425]', '[OBBBA Sec. 70505]'],
+  },
+  {
+    modelId: 'MODEL.STRUCT.PPA.v1',
+    version: 'v1',
+    name: 'Purchase Price Allocation',
+    phase: 'tier0',
+    description: 'Frames §1060 purchase-price allocation across asset classes for tax review.',
+    requiredInputs: ['purchase_price_cents', 'asset_classes'],
+    citationTags: ['[OBBBA Sec. 70301]', '[OBBBA Sec. 70302]'],
+  },
+  {
+    modelId: 'MODEL.STRUCT.ROLLOVER.v1',
+    version: 'v1',
+    name: 'Rollover Structure',
+    phase: 'tier0',
+    description: 'Frames rollover percentage, tax pathway, and counsel-review flags.',
+    requiredInputs: ['rollover_pct', 'entity_type', 'deal_type'],
+    citationTags: ['[OBBBA Sec. 70505]'],
+  },
+  {
+    modelId: 'MODEL.STRUCT.ANALYSIS.v1',
+    version: 'v1',
+    name: 'Structure Analysis',
+    phase: 'tier0',
+    description: 'Combines tax, legal, financing, and execution-structure facts into a decision-ready issue map.',
+    requiredInputs: ['deal_type', 'structure_facts'],
+    citationTags: ['[SBA SOP 50 10 8]', '[FTC 2026 HSR - Size of Transaction]'],
   },
   {
     modelId: 'v19.legal.haltscan',
@@ -214,14 +282,23 @@ const V19_MODEL_CATALOG: RegisteredModel[] = [
 ];
 
 export function listRegisteredModels(): RegisteredModelRecord[] {
-  return V19_MODEL_CATALOG.map(withHash);
+  return V19_MODEL_CATALOG.map(toCanonicalModel).map(withHash);
 }
 
 export function getRegisteredModel(modelId: string, version?: string): RegisteredModelRecord | null {
-  const model = V19_MODEL_CATALOG.find(candidate =>
-    candidate.modelId === modelId && (!version || candidate.version === version)
+  const canonicalModelId = canonicalizeModelId(modelId);
+  const canonicalVersion = canonicalizeModelVersion(version);
+  const model = V19_MODEL_CATALOG
+    .map(toCanonicalModel)
+    .find(candidate =>
+      candidate.modelId === canonicalModelId && (!canonicalVersion || candidate.version === canonicalVersion)
   );
   return model ? withHash(model) : null;
+}
+
+export function canonicalizeModelId(modelId: string): string {
+  const trimmed = String(modelId || '').trim();
+  return MODEL_ID_ALIASES[trimmed] || trimmed;
 }
 
 export async function ensureModelRegistrySeeded(): Promise<{ insertedOrUpdated: number }> {
@@ -273,4 +350,19 @@ function withHash(model: RegisteredModel): RegisteredModelRecord {
     }))
     .digest('hex');
   return { ...model, hash };
+}
+
+function canonicalizeModelVersion(version?: string): string | undefined {
+  if (!version) return undefined;
+  const normalized = String(version).trim().toLowerCase();
+  if (normalized === '1.0.0' || normalized === '1') return 'v1';
+  return version;
+}
+
+function toCanonicalModel(model: RegisteredModel): RegisteredModel {
+  return {
+    ...model,
+    modelId: canonicalizeModelId(model.modelId),
+    version: canonicalizeModelVersion(model.version) || 'v1',
+  };
 }
