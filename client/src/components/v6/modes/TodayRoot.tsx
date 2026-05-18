@@ -149,6 +149,90 @@ interface PortfolioBrief {
   deals: TodayDeal[];
 }
 
+interface TodayOperatingBrief {
+  source: "live";
+  generatedAt: string;
+  morningBrief: {
+    title: string;
+    lede: string;
+    focusDealId?: string;
+    focusDealTitle?: string;
+    chips: string[];
+    prompt: string;
+    freshness: string;
+  };
+  gateCountdown: TodayGateCountdownItem[];
+  dealPulse: TodayDealPulseItem[];
+  filesNeedingReview: TodayFileReviewItem[];
+  studioRefreshNeeds: TodayStudioRefreshItem[];
+  firmMemory: TodayFirmMemorySnapshot;
+}
+
+interface TodayGateCountdownItem {
+  dealId: string;
+  title: string;
+  gateId: string;
+  gateName: string;
+  blockers: string[];
+  requiredModels: string[];
+  requiredCitations: string[];
+  nextAction: string;
+  tone: Tone;
+}
+
+interface TodayDealPulseItem {
+  dealId: string;
+  title: string;
+  status: string;
+  fit: number;
+  thesis: string;
+  metric: string;
+  urgency: string;
+  tone: Tone;
+  nextAction: string;
+}
+
+interface TodayFileReviewItem {
+  id: string;
+  title: string;
+  dealId?: string;
+  dealTitle?: string;
+  reason: string;
+  status: string;
+  tone: Tone;
+  updatedAt?: string;
+}
+
+interface TodayStudioRefreshItem {
+  bookId: string;
+  title: string;
+  format: string;
+  reason: string;
+  gaps: number;
+  action: string;
+  tone: Tone;
+}
+
+interface TodayFirmMemorySnapshot {
+  assumptions: FirmMemoryItem[];
+  houseStyle: FirmMemoryItem[];
+  providers: FirmMemoryItem[];
+  dealPatterns: FirmMemoryItem[];
+  workflows: FirmMemoryItem[];
+  stats: {
+    total: number;
+    updatedAt?: string;
+  };
+}
+
+interface FirmMemoryItem {
+  id: string;
+  label: string;
+  text: string;
+  confidence: number;
+  source: string;
+}
+
 interface TodayRootProps {
   openTab: OpenTab;
   onTalkToYulia?: (prompt: string) => void;
@@ -159,10 +243,12 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const home = useHomeDeals(user);
   const workspace = useV6WorkspaceData(user);
   const [portfolioBrief, setPortfolioBrief] = useState<PortfolioBrief | null>(null);
+  const [todayOperatingBrief, setTodayOperatingBrief] = useState<TodayOperatingBrief | null>(null);
 
   useEffect(() => {
     if (!workspace.canFetch) {
       setPortfolioBrief(null);
+      setTodayOperatingBrief(null);
       return;
     }
 
@@ -175,6 +261,14 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
       .catch(() => {
         if (!cancelled) setPortfolioBrief(null);
       });
+    fetch("/api/agency/today-operating-brief", { headers: authHeaders() })
+      .then(res => res.ok ? res.json() : Promise.reject(new Error(`today ${res.status}`)))
+      .then((brief: TodayOperatingBrief) => {
+        if (!cancelled) setTodayOperatingBrief(brief);
+      })
+      .catch(() => {
+        if (!cancelled) setTodayOperatingBrief(null);
+      });
 
     return () => { cancelled = true; };
   }, [workspace.canFetch, user?.id]);
@@ -183,6 +277,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const showLoggedOutMarketing = !user && useSampleData;
   const realDeals = home.inReview.length > 0 ? home.inReview : home.picks;
   const liveBrief = useSampleData ? null : portfolioBrief;
+  const operatingBrief = useSampleData ? null : todayOperatingBrief;
   const waitingForYuliaRead = !useSampleData && !liveBrief;
   const deals = useSampleData ? DEALS : (liveBrief?.deals.length ? liveBrief.deals : realDeals.slice(0, 5).map(dealToTodayDeal));
   const liveDesk = liveBrief?.liveDesk?.length ? liveBrief.liveDesk : useSampleData ? WORK : [];
@@ -275,6 +370,18 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
 
   const openDoc = (title: string, id?: string) => {
     openTab({ kind: "doc", title, id: id ?? `doc-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}` });
+  };
+
+  const openStudioBook = (item: TodayStudioRefreshItem) => {
+    const bookId = Number(item.bookId);
+    openTab({
+      kind: "marketing-studio",
+      modeId: "studio",
+      id: Number.isFinite(bookId) ? `studio-book-${bookId}` : `studio-book-${item.bookId}`,
+      title: item.title,
+      studioView: "canvas",
+      studioBookId: Number.isFinite(bookId) ? bookId : null,
+    });
   };
 
   const todayDealToActionDeal = (deal: TodayDeal | null | undefined): ActionDeal | null => {
@@ -541,6 +648,23 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
         </div>
       </section>
 
+      {operatingBrief && (
+        <section style={T.operatingGrid}>
+          <OperatingBriefCard brief={operatingBrief.morningBrief} onAsk={ask} />
+          <GateCountdownCard
+            items={operatingBrief.gateCountdown}
+            onOpenDeal={(dealId, title) => openTab({ kind: "deal", id: dealId, title })}
+            onAsk={ask}
+          />
+          <StudioRefreshCard
+            items={operatingBrief.studioRefreshNeeds}
+            onOpenBook={openStudioBook}
+            onAsk={ask}
+          />
+          <FirmMemoryCard memory={operatingBrief.firmMemory} onAsk={ask} />
+        </section>
+      )}
+
       <section style={T.midGrid}>
         <div style={T.section}>
           <SectionHead eyebrow="PIPELINE PULSE" title="Deals in motion" sub="Not every live deal deserves the same attention." />
@@ -667,6 +791,129 @@ function PriorityCard({
       <span style={{ ...T.priorityCta, color: t.ink, background: t.soft }}>{cta}</span>
     </button>
   );
+}
+
+function OperatingBriefCard({ brief, onAsk }: { brief: TodayOperatingBrief["morningBrief"]; onAsk: (prompt: string) => void }) {
+  return (
+    <article style={T.operatingPanel}>
+      <div style={T.operatingHeader}>
+        <h3 style={T.operatingTitle}>{brief.title}</h3>
+        <span style={T.operatingFreshness}>{brief.freshness}</span>
+      </div>
+      <p style={T.operatingCopy}>{brief.lede}</p>
+      <div style={T.operatingChips}>
+        {brief.chips.slice(0, 4).map(chip => (
+          <span key={chip} style={T.operatingChip}>{chip}</span>
+        ))}
+      </div>
+      <button className="m-glass-control" style={T.operatingAction} onClick={() => onAsk(brief.prompt)} type="button">
+        Ask for the brief <span aria-hidden="true">›</span>
+      </button>
+    </article>
+  );
+}
+
+function GateCountdownCard({
+  items,
+  onOpenDeal,
+  onAsk,
+}: {
+  items: TodayGateCountdownItem[];
+  onOpenDeal: (dealId: string, title: string) => void;
+  onAsk: (prompt: string) => void;
+}) {
+  return (
+    <article style={T.operatingPanel}>
+      <div style={T.operatingHeader}>
+        <h3 style={T.operatingTitle}>Gate countdown</h3>
+        <span style={T.operatingFreshness}>{items.length || 0}</span>
+      </div>
+      <div style={T.operatingList}>
+        {items.length === 0 && <EmptyOperatingLine text="No active gate blockers surfaced." />}
+        {items.slice(0, 3).map(item => (
+          <button key={`${item.dealId}-${item.gateId}`} style={T.operatingRow} onClick={() => onOpenDeal(item.dealId, item.title)} type="button">
+            <span style={{ ...T.operatingDot, background: tone(item.tone).ink }} />
+            <span style={T.operatingRowText}>
+              <strong>{item.title}</strong>
+              <span>{item.gateId} · {item.gateName} · {item.nextAction}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+      <button className="m-glass-control" style={T.operatingAction} onClick={() => onAsk("Show my gate countdown with required models, citations, and blockers.")} type="button">
+        Read gates <span aria-hidden="true">›</span>
+      </button>
+    </article>
+  );
+}
+
+function StudioRefreshCard({
+  items,
+  onOpenBook,
+  onAsk,
+}: {
+  items: TodayStudioRefreshItem[];
+  onOpenBook: (item: TodayStudioRefreshItem) => void;
+  onAsk: (prompt: string) => void;
+}) {
+  return (
+    <article style={T.operatingPanel}>
+      <div style={T.operatingHeader}>
+        <h3 style={T.operatingTitle}>Studio refresh</h3>
+        <span style={T.operatingFreshness}>{items.length || 0}</span>
+      </div>
+      <div style={T.operatingList}>
+        {items.length === 0 && <EmptyOperatingLine text="Studio books are clean enough for the next draft pass." />}
+        {items.slice(0, 3).map(item => (
+          <button key={item.bookId} style={T.operatingRow} onClick={() => onOpenBook(item)} type="button">
+            <span style={{ ...T.operatingDot, background: tone(item.tone).ink }} />
+            <span style={T.operatingRowText}>
+              <strong>{item.title}</strong>
+              <span>{item.gaps} {item.gaps === 1 ? "gap" : "gaps"} · {item.reason}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+      <button className="m-glass-control" style={T.operatingAction} onClick={() => onAsk("Show me Studio drafts that need model refresh, source grounding, or export readiness work.")} type="button">
+        Review Studio <span aria-hidden="true">›</span>
+      </button>
+    </article>
+  );
+}
+
+function FirmMemoryCard({ memory, onAsk }: { memory: TodayFirmMemorySnapshot; onAsk: (prompt: string) => void }) {
+  const items = [
+    ...memory.assumptions.slice(0, 1),
+    ...memory.houseStyle.slice(0, 1),
+    ...memory.workflows.slice(0, 1),
+    ...memory.providers.slice(0, 1),
+    ...memory.dealPatterns.slice(0, 1),
+  ].slice(0, 3);
+
+  return (
+    <article style={{ ...T.operatingPanel, ...T.memoryPanel }}>
+      <div style={T.operatingHeader}>
+        <h3 style={T.operatingTitle}>Firm memory</h3>
+        <span style={T.operatingFreshness}>{memory.stats.total}</span>
+      </div>
+      <div style={T.operatingList}>
+        {items.length === 0 && <EmptyOperatingLine text="Reusable assumptions and house style will accumulate here." />}
+        {items.map(item => (
+          <div key={item.id} style={T.memoryLine}>
+            <strong>{item.label}</strong>
+            <span>{item.text}</span>
+          </div>
+        ))}
+      </div>
+      <button className="m-glass-control" style={T.operatingAction} onClick={() => onAsk("Show the firm memory Yulia is using today, and what should be updated.")} type="button">
+        Open memory <span aria-hidden="true">›</span>
+      </button>
+    </article>
+  );
+}
+
+function EmptyOperatingLine({ text }: { text: string }) {
+  return <div style={T.emptyOperatingLine}>{text}</div>;
 }
 
 function tone(key: Tone) {
@@ -1181,6 +1428,144 @@ const T: Record<string, CSSProperties> = {
     fontWeight: 850,
     whiteSpace: "nowrap",
     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.60)",
+  },
+  operatingGrid: {
+    marginTop: 18,
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(270px, 1fr))",
+    gap: 12,
+    alignItems: "stretch",
+  },
+  operatingPanel: {
+    minHeight: 224,
+    boxSizing: "border-box",
+    display: "flex",
+    flexDirection: "column",
+    padding: 18,
+    borderRadius: 22,
+    background: "linear-gradient(145deg, rgba(255,255,255,0.95), rgba(245,249,255,0.76))",
+    border: "1px solid rgba(188, 204, 228, 0.72)",
+    boxShadow: "0 24px 70px rgba(26,34,51,0.11), 0 7px 18px rgba(26,34,51,0.06), inset 0 1px 0 rgba(255,255,255,0.70)",
+    backdropFilter: "blur(18px) saturate(150%)",
+    WebkitBackdropFilter: "blur(18px) saturate(150%)",
+    overflow: "hidden",
+  },
+  memoryPanel: {
+    backgroundImage: `linear-gradient(145deg, rgba(255,255,255,0.94), rgba(239,244,255,0.72)), url('${TODAY_START_TEXTURE}')`,
+    backgroundSize: "cover, cover",
+    backgroundPosition: "center, center",
+  },
+  operatingHeader: {
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 12,
+    marginBottom: 10,
+  },
+  operatingTitle: {
+    margin: 0,
+    color: "#1A2233",
+    fontSize: 20,
+    lineHeight: 1.05,
+    letterSpacing: "-0.04em",
+    fontWeight: 850,
+  },
+  operatingFreshness: {
+    flex: "0 0 auto",
+    borderRadius: 999,
+    padding: "6px 10px",
+    background: "rgba(225,235,250,0.78)",
+    color: "#2E5C8A",
+    fontSize: 12,
+    fontWeight: 850,
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.72)",
+  },
+  operatingCopy: {
+    margin: 0,
+    color: "#596477",
+    fontSize: 13.5,
+    lineHeight: 1.45,
+  },
+  operatingChips: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 7,
+    marginTop: 14,
+  },
+  operatingChip: {
+    borderRadius: 999,
+    padding: "7px 10px",
+    background: "rgba(238, 243, 252, 0.86)",
+    color: "#596477",
+    fontSize: 12,
+    fontWeight: 800,
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.76)",
+  },
+  operatingList: {
+    display: "grid",
+    gap: 8,
+    marginTop: 2,
+  },
+  operatingRow: {
+    all: "unset",
+    boxSizing: "border-box",
+    width: "100%",
+    display: "grid",
+    gridTemplateColumns: "10px minmax(0, 1fr)",
+    gap: 11,
+    alignItems: "start",
+    padding: "9px 0",
+    cursor: "pointer",
+  },
+  operatingDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 999,
+    marginTop: 7,
+    boxShadow: "0 0 0 4px rgba(226,235,249,0.72)",
+  },
+  operatingRowText: {
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: 3,
+    color: "#6B7486",
+    fontSize: 12.5,
+    lineHeight: 1.35,
+  },
+  memoryLine: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
+    padding: "8px 0",
+    color: "#6B7486",
+    fontSize: 12.5,
+    lineHeight: 1.35,
+  },
+  operatingAction: {
+    all: "unset",
+    minHeight: 38,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginTop: "auto",
+    borderRadius: 999,
+    background: "rgba(34, 47, 68, 0.86)",
+    color: "#FFFFFF",
+    fontSize: 12.5,
+    fontWeight: 850,
+    cursor: "pointer",
+    border: "0.5px solid rgba(255,255,255,0.28)",
+    boxShadow: liquidDarkGlassShadow,
+    backdropFilter: liquidGlassFilter,
+    WebkitBackdropFilter: liquidGlassFilter,
+  },
+  emptyOperatingLine: {
+    color: "#7A8395",
+    fontSize: 13,
+    lineHeight: 1.4,
+    padding: "9px 0",
   },
   midGrid: {
     display: "grid",

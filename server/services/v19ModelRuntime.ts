@@ -429,7 +429,7 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
     const deals = objectArray(input.deals);
     const missing = requireInputs({ deal_ids: dealIds.length ? dealIds : null, comparison_lens: comparisonLens, assumption_scope: assumptionScope });
     if (missing.length) return { missingInputs: missing, outputs: {} };
-    const rows = (deals.length ? deals : dealIds.map(id => ({ id }))).map((deal, index) => {
+    const rows = (deals.length ? deals : dealIds.map(id => ({ id } as Record<string, any>))).map((deal: Record<string, any>, index) => {
       const score = scoreInput(deal.score ?? deal.deal_score ?? deal.fit_score) ?? null;
       const price = cents(deal.purchase_price_cents ?? deal.asking_price_cents);
       const earnings = cents(deal.ebitda_cents ?? deal.sde_cents ?? deal.cash_flow_cents);

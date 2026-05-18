@@ -62,7 +62,7 @@ v19ResourcesRouter.get('/v19/resources', async (req, res) => {
       sourceSurface: 'api',
       resourceType: 'v19_resource',
       resourceId: uri,
-      metadata: { uri, kind: resource.kind },
+      metadata: { uri, kind: (resource.artifact as any)?.kind || 'unknown' },
     });
     return res.json(resource);
   } catch (err: any) {

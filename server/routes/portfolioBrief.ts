@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { sql } from '../db.js';
 import { getDealBriefForUser, getPortfolioBriefForUser } from '../services/yuliaBriefingService.js';
+import { getTodayOperatingBrief } from '../services/todayOperatingService.js';
 
 export const portfolioBriefRouter = Router();
 
@@ -193,6 +194,18 @@ portfolioBriefRouter.get('/agency/portfolio-brief', async (req, res) => {
   } catch (err: any) {
     console.error('Portfolio brief error:', err.message);
     return res.status(500).json({ error: 'Failed to build portfolio brief' });
+  }
+});
+
+portfolioBriefRouter.get('/agency/today-operating-brief', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const forceRefresh = req.query.refresh === '1' || req.query.refresh === 'true';
+    return res.json(await getTodayOperatingBrief(userId, forceRefresh));
+  } catch (err: any) {
+    console.error('Yulia Today operating brief error:', err.message);
+    return res.status(500).json({ error: 'Failed to build Today operating brief' });
   }
 });
 

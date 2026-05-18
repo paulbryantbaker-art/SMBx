@@ -185,7 +185,7 @@ function addSourceAppendix(pptx: PptxGenJS, book: PitchBookRecord) {
   slide.addTable([
     ['Source', 'Type', 'Citation', 'Status'],
     ...rows,
-  ], {
+  ] as any, {
     x: 0.6, y: 1.35, w: 12.1, h: 4.9,
     border: { type: 'solid', color: BRAND.line, pt: 0.5 },
     fontFace: 'Helvetica',
@@ -194,7 +194,7 @@ function addSourceAppendix(pptx: PptxGenJS, book: PitchBookRecord) {
     fill: { color: 'FFFFFF' },
     autoFit: false,
     colW: [5.1, 2.2, 3.2, 1.6],
-  });
+  } as any);
   addFooter(slide, book);
 }
 

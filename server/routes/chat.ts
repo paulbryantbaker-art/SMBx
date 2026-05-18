@@ -90,13 +90,13 @@ async function writeAutomaticV19ChatAudit(input: {
       ${String(input.deal.journey_type || readiness?.journey || '') || null},
       ${String(input.deal.league || '') || null},
       ${String(input.deal.deal_type || '') || null},
-      ${sql.json(modelStack)}::jsonb,
-      ${sql.json(inputsUsed)}::jsonb,
+      ${sql.json(modelStack as any)}::jsonb,
+      ${sql.json(inputsUsed as any)}::jsonb,
       ${sql.json({
         readinessCheckedAt: readiness?.checkedAt || null,
         resourceUris: readiness?.resourceUris || [],
       })}::jsonb,
-      ${sql.json(readiness?.citationValidation || {})}::jsonb,
+      ${sql.json((readiness?.citationValidation || {}) as any)}::jsonb,
       ${sql.json((readiness?.issues || []).map(issue => ({
         code: issue.code,
         severity: issue.severity,

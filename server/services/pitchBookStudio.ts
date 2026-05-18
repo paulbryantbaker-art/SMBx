@@ -208,7 +208,7 @@ export async function revisePitchBook(input: RevisePitchBookInput): Promise<Pitc
   const instruction = input.instruction.trim();
   if (!instruction) throw new Error('Revision instruction is required');
 
-  const slides = current.slides.map((slide, index) => index === 0
+  const slides: StudioSlide[] = current.slides.map((slide, index) => index === 0
     ? {
         ...slide,
         speakerNotes: `${slide.speakerNotes}\nRevision brief: ${instruction}`,
@@ -216,7 +216,7 @@ export async function revisePitchBook(input: RevisePitchBookInput): Promise<Pitc
           ...slide.provenance,
           uncheckedClaims: [...slide.provenance.uncheckedClaims, 'Revision narrative requires human/source review.'],
         },
-        warningState: slide.warningState === 'stale_models' ? 'stale_models' : 'needs_sources',
+        warningState: slide.warningState === 'stale_models' ? 'stale_models' as const : 'needs_sources' as const,
       }
     : slide
   );
@@ -290,7 +290,7 @@ export async function refreshPitchBookFromModels(userId: number, bookId: number)
   const deal = current.dealId ? await readAccessibleDeal(userId, current.dealId) : null;
   const modelIds = getPitchBookModelIds(current);
   const executions: V19ModelExecution[] = [];
-  const modelOutputs = [];
+  const modelOutputs: Array<Record<string, any>> = [];
   for (const modelId of modelIds) {
     const execution = await executeV19Model({
       modelId,
@@ -394,7 +394,7 @@ export async function recordPitchBookExport(
         exportedAt: new Date().toISOString(),
         citationValidation,
         warnings,
-      })}::jsonb
+      } as any)}::jsonb
     )
     RETURNING id
   `;
@@ -525,7 +525,7 @@ async function insertVersion(
       ${version},
       ${title},
       ${sql.json(outline)}::jsonb,
-      ${sql.json(slides)}::jsonb,
+      ${sql.json(slides as any)}::jsonb,
       ${sql.json(assumptions)}::jsonb,
       ${sql.json(modelOutputs)}::jsonb,
       ${sql.json(buildProvenance(slides))}::jsonb,

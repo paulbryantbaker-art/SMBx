@@ -28,6 +28,8 @@ const requiredTables = [
   'studio_sources',
   'studio_exports',
   'model_executions',
+  'firm_memory',
+  'today_operating_briefs',
   'market_data_cache',
 ] as const;
 
@@ -36,6 +38,8 @@ const requiredColumns: Record<string, string[]> = {
   audit_trail: ['session_id', 'deal_id', 'user_id', 'conversation_id', 'turn_id', 'model_stack', 'citations_validated', 'output_hash'],
   studio_book_versions: ['slides', 'assumptions', 'model_outputs', 'provenance', 'audit', 'speaker_notes'],
   model_executions: ['model_id', 'version', 'status', 'input_hash', 'output_hash', 'missing_inputs', 'citation_tags', 'audit_payload'],
+  firm_memory: ['memory_type', 'label', 'value', 'source', 'confidence', 'status'],
+  today_operating_briefs: ['source_fingerprint', 'morning_brief', 'gate_countdown', 'deal_pulse', 'studio_refresh_needs', 'firm_memory_snapshot'],
 };
 
 let passed = 0;
