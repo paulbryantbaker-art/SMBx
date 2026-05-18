@@ -420,32 +420,28 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
             </button>
           </div>
 
-          <h1 style={T.headline}>
-            {liveBrief?.hero.title || (showLoggedOutMarketing ? (
-              <>Connect sourcing, diligence, execution, and value creation in one workflow.</>
-            ) : waitingForYuliaRead ? (
-              <>Yulia is refreshing <span style={T.headlineSerif}>your portfolio read</span>.</>
-            ) : lead ? (
-              <>Yulia's read: <span style={T.headlineSerif}>{leadTitle}</span> needs your eye before the next buyer touch.</>
-            ) : (
-              <>Yulia is ready when <span style={T.headlineSerif}>your first deal</span> lands.</>
-            ))}
-          </h1>
+          <div style={T.heroInner}>
+            <h1 style={T.headline}>
+              {liveBrief?.hero.title || (showLoggedOutMarketing ? (
+                <>Connect sourcing, diligence, execution, and value creation in one workflow.</>
+              ) : waitingForYuliaRead ? (
+                <>Yulia is refreshing <span style={T.headlineSerif}>your portfolio read</span>.</>
+              ) : lead ? (
+                <>Yulia's read: <span style={T.headlineSerif}>{leadTitle}</span> needs your eye before the next buyer touch.</>
+              ) : (
+                <>Yulia is ready when <span style={T.headlineSerif}>your first deal</span> lands.</>
+              ))}
+            </h1>
 
-          <p style={T.lede}>
-            {liveBrief?.hero.lede || (showLoggedOutMarketing
-              ? "smbX.ai connects institutional deal intelligence, workflow execution, and continuous transaction context across the deal lifecycle — from sourcing and diligence through post-close value realization."
-              : waitingForYuliaRead
-              ? "The page is holding the surface, but the recommendation copy belongs to Yulia's briefing layer. When it returns, the cards below will reflect her sourced read."
-              : lead
-              ? "The deal is still worth pursuing. Review the IOI, answer counsel on the NDA, and keep the buyer search narrow until working capital is buttoned up."
-              : "No private workspace data is attached to this account yet. Start with a chat, source file, target, buyer pool, or deal thesis and Yulia will build the right surfaces around it.")}
-          </p>
-
-          <div style={T.briefNotes}>
-            {heroNotes.slice(0, 3).map(note => (
-              <BriefNote key={note.label} label={note.label} text={note.text} />
-            ))}
+            <p style={T.lede}>
+              {liveBrief?.hero.lede || (showLoggedOutMarketing
+                ? "smbX.ai connects institutional deal intelligence, workflow execution, and continuous transaction context across the deal lifecycle — from sourcing and diligence through post-close value realization."
+                : waitingForYuliaRead
+                ? "The page is holding the surface, but the recommendation copy belongs to Yulia's briefing layer. When it returns, the cards below will reflect her sourced read."
+                : lead
+                ? "The deal is still worth pursuing. Review the IOI, answer counsel on the NDA, and keep the buyer search narrow until working capital is buttoned up."
+                : "No private workspace data is attached to this account yet. Start with a chat, source file, target, buyer pool, or deal thesis and Yulia will build the right surfaces around it.")}
+            </p>
           </div>
 
           <div style={T.heroActionGrid}>
@@ -491,15 +487,20 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
             </button>
           </div>
         </article>
+      </section>
 
+      <section style={T.section}>
+        <SectionHead eyebrow="YULIA PRIORITY QUEUE" title="What needs action" sub="Three moves surfaced from the live portfolio read." />
+        <div style={T.priorityGrid}>
+          {priorities.map((item, index) => (
+            <PriorityCard key={item.title} index={index + 1} {...item} />
+          ))}
+        </div>
+      </section>
+
+      <section style={T.readSection}>
+        <SectionHead eyebrow="TODAY READ" title="Portfolio intelligence" sub="Market, structure, source gaps, and the work Yulia is watching." />
         <aside style={T.marketPanel}>
-          <div style={T.liveHeader}>
-            <div>
-              <div className="mono" style={T.marketEyebrow}>YULIA'S MARKET DESK</div>
-              <h2 style={T.panelTitle}>Portfolio intelligence</h2>
-            </div>
-          </div>
-
           <button
             type="button"
             className="m-glass-control"
@@ -544,16 +545,13 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
               </button>
             ))}
           </div>
-        </aside>
-      </section>
 
-      <section style={T.section}>
-        <SectionHead eyebrow="YULIA PRIORITY QUEUE" title="What needs action" sub="Three moves surfaced from the live portfolio read." />
-        <div style={T.priorityGrid}>
-          {priorities.map((item, index) => (
-            <PriorityCard key={item.title} index={index + 1} {...item} />
-          ))}
-        </div>
+          <div style={T.briefNotes}>
+            {heroNotes.slice(0, 3).map(note => (
+              <BriefNote key={note.label} label={note.label} text={note.text} />
+            ))}
+          </div>
+        </aside>
       </section>
 
       {operatingBrief && (
@@ -687,7 +685,7 @@ function PriorityCard({
 }) {
   const t = tone(itemTone);
   return (
-    <button style={T.priorityCard} onClick={action} type="button">
+    <button style={index === 3 ? { ...T.priorityCard, ...T.priorityCardWide } : T.priorityCard} onClick={action} type="button">
       <span style={{ ...T.priorityNum, background: t.soft, color: t.ink }}>
         <span className="mono" style={T.priorityNumLabel}>{index}</span>
       </span>
@@ -899,11 +897,11 @@ const liquidDarkGlassShadow =
   "0 16px 34px -22px rgba(0,0,0,0.52), inset 0 1px 0 rgba(255,255,255,0.34), inset 0 -1px 0 rgba(255,255,255,0.08), inset 0 0 0 0.5px rgba(255,255,255,0.26)";
 const todayHeroWash = (sample: boolean) =>
   sample
-    ? `linear-gradient(155deg, rgba(77,39,53,0.52) 0%, rgba(183,103,93,0.34) 48%, rgba(29,30,54,0.58) 100%), url('${DESKTOP_TEXTURES.todayHeroSample}')`
-    : `linear-gradient(155deg, rgba(18,51,61,0.58) 0%, rgba(78,128,111,0.35) 48%, rgba(13,26,46,0.62) 100%), url('${DESKTOP_TEXTURES.todayHeroWorkspace}')`;
+    ? `linear-gradient(155deg, rgba(69,35,49,0.48) 0%, rgba(179,101,92,0.30) 48%, rgba(25,28,52,0.52) 100%), url('${DESKTOP_TEXTURES.todayHeroSample}')`
+    : `linear-gradient(155deg, rgba(20,52,62,0.50) 0%, rgba(83,133,116,0.30) 48%, rgba(13,28,48,0.54) 100%), url('${DESKTOP_TEXTURES.todayHeroWorkspace}')`;
 const TODAY_MARKET_TEXTURE = "/textures/desktop/art-house/art-house-03.png?v=20260516-market-room-1";
 const TODAY_START_TEXTURE = "/textures/desktop/random/texture-random-10.png?v=20260516-start-cool-1";
-const marketWash = `linear-gradient(165deg, rgba(7,22,38,0.82) 0%, rgba(25,80,114,0.61) 54%, rgba(5,17,31,0.86) 100%), url('${TODAY_MARKET_TEXTURE}')`;
+const marketWash = `linear-gradient(145deg, rgba(255,255,255,0.90) 0%, rgba(241,247,255,0.76) 48%, rgba(231,238,250,0.70) 100%), url('${TODAY_MARKET_TEXTURE}')`;
 
 const T: Record<string, CSSProperties> = {
   page: {
@@ -923,10 +921,7 @@ const T: Record<string, CSSProperties> = {
     background: "radial-gradient(circle at 48% -120px, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0) 42%), linear-gradient(180deg, #FFFFFF 0%, #FEFFFF 54%, #F8FBFF 100%)",
   },
   heroGrid: {
-    display: "grid",
-    gridTemplateColumns: "minmax(min(520px, 100%), 1.25fr) minmax(min(360px, 100%), 0.75fr)",
-    gap: 20,
-    alignItems: "stretch",
+    display: "block",
   },
   leadCard: {
     position: "relative",
@@ -936,16 +931,20 @@ const T: Record<string, CSSProperties> = {
     backgroundPosition: "center, center",
     border: "1px solid rgba(255,255,255,0.46)",
     boxShadow: "0 48px 118px rgba(52, 63, 90, 0.31), 0 20px 46px rgba(26, 34, 51, 0.16), 0 4px 12px rgba(26, 34, 51, 0.08), inset 0 1px 0 rgba(255,255,255,0.28)",
-    padding: 30,
-    minHeight: 560,
+    padding: "clamp(28px, 3vw, 44px)",
+    minHeight: 390,
     display: "flex",
     flexDirection: "column",
+    justifyContent: "center",
   },
   leadTop: {
     display: "flex",
     justifyContent: "flex-end",
     alignItems: "flex-start",
     gap: 20,
+  },
+  heroInner: {
+    maxWidth: 980,
   },
   eyebrow: {
     fontSize: 10,
@@ -978,11 +977,11 @@ const T: Record<string, CSSProperties> = {
     cursor: "pointer",
   },
   headline: {
-    margin: "24px 0 0",
-    maxWidth: 900,
+    margin: "18px 0 0",
+    maxWidth: 970,
     fontFamily: "'Figtree', var(--font-body)",
     fontWeight: 850,
-    fontSize: "clamp(38px, 4.5vw, 76px)",
+    fontSize: "clamp(38px, 4.2vw, 68px)",
     lineHeight: 0.94,
     letterSpacing: "-0.055em",
     textWrap: "balance",
@@ -995,7 +994,7 @@ const T: Record<string, CSSProperties> = {
     letterSpacing: "-0.035em",
   },
   lede: {
-    maxWidth: 680,
+    maxWidth: 760,
     margin: "18px 0 0",
     fontSize: 17,
     lineHeight: 1.55,
@@ -1005,41 +1004,42 @@ const T: Record<string, CSSProperties> = {
   briefNotes: {
     display: "grid",
     gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-    gap: 10,
-    marginTop: 28,
+    gap: 12,
+    marginTop: 14,
+    gridColumn: "1 / -1",
   },
   note: {
-    minHeight: 112,
+    minHeight: 92,
     padding: 16,
     borderRadius: 16,
-    background: liquidGlass,
-    border: "0.5px solid rgba(255,255,255,0.38)",
-    boxShadow: liquidGlassShadow,
+    background: "rgba(255,255,255,0.58)",
+    border: "0.5px solid rgba(255,255,255,0.58)",
+    boxShadow: "0 16px 34px rgba(42,65,96,0.08), inset 0 1px 0 rgba(255,255,255,0.72)",
     backdropFilter: liquidGlassFilter,
     WebkitBackdropFilter: liquidGlassFilter,
   },
   noteLabel: {
     fontSize: 9.5,
     letterSpacing: "0.14em",
-    color: "#FFFFFF",
+    color: "#5D6D83",
     fontWeight: 700,
   },
   noteText: {
     marginTop: 10,
     fontSize: 13,
     lineHeight: 1.45,
-    color: "#FFFFFF",
+    color: "#243047",
   },
   heroActionGrid: {
-    display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) auto",
+    display: "flex",
+    flexWrap: "wrap",
     gap: 12,
     alignItems: "stretch",
-    marginTop: "auto",
-    paddingTop: 24,
+    marginTop: 28,
   },
   heroGlassAction: {
     all: "unset",
+    flex: "1 1 520px",
     minHeight: 72,
     boxSizing: "border-box",
     display: "grid",
@@ -1058,6 +1058,7 @@ const T: Record<string, CSSProperties> = {
   },
   heroGlassActionSecondary: {
     all: "unset",
+    flex: "0 1 180px",
     minWidth: 138,
     minHeight: 72,
     boxSizing: "border-box",
@@ -1121,13 +1122,16 @@ const T: Record<string, CSSProperties> = {
     backgroundImage: marketWash,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
-    color: "#FFFFFF",
-    padding: 22,
-    boxShadow: "0 46px 116px rgba(26, 34, 51, 0.30), 0 20px 44px rgba(26,34,51,0.16), 0 4px 12px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.22)",
-    border: "1px solid rgba(255,255,255,0.24)",
-    display: "flex",
-    flexDirection: "column",
+    color: "#1A2233",
+    padding: 18,
+    boxShadow: "0 28px 82px rgba(42,65,96,0.14), 0 10px 24px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.72)",
+    border: "1px solid rgba(255,255,255,0.58)",
+    display: "grid",
+    gridTemplateColumns: "minmax(min(420px, 100%), 1fr) minmax(min(420px, 100%), 1fr)",
+    gap: 12,
     overflow: "hidden",
+    backdropFilter: "blur(18px) saturate(150%)",
+    WebkitBackdropFilter: "blur(18px) saturate(150%)",
   },
   liveHeader: {
     display: "flex",
@@ -1150,11 +1154,10 @@ const T: Record<string, CSSProperties> = {
     color: "#FFFFFF",
   },
   workStack: {
-    display: "flex",
-    flexDirection: "column",
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
     gap: 10,
-    flex: 1,
-    marginTop: 12,
+    alignContent: "stretch",
   },
   intelLead: {
     all: "unset",
@@ -1163,10 +1166,10 @@ const T: Record<string, CSSProperties> = {
     width: "100%",
     borderRadius: 20,
     padding: "16px 17px",
-    background: liquidDarkGlass,
-    border: "0.5px solid rgba(255,255,255,0.32)",
-    boxShadow: liquidDarkGlassShadow,
-    color: "#FFFFFF",
+    background: "rgba(255,255,255,0.62)",
+    border: "0.5px solid rgba(255,255,255,0.64)",
+    boxShadow: "0 18px 44px rgba(42,65,96,0.10), inset 0 1px 0 rgba(255,255,255,0.76)",
+    color: "#1A2233",
     cursor: "pointer",
     backdropFilter: liquidGlassFilter,
     WebkitBackdropFilter: liquidGlassFilter,
@@ -1174,13 +1177,13 @@ const T: Record<string, CSSProperties> = {
   intelLeadEyebrow: {
     fontSize: 9,
     letterSpacing: "0.16em",
-    color: "#FFFFFF",
+    color: "#64748A",
     fontWeight: 800,
   },
   intelLeadTitle: {
     display: "block",
     marginTop: 9,
-    color: "#FFFFFF",
+    color: "#172033",
     fontSize: 22,
     lineHeight: 1.05,
     letterSpacing: "-0.04em",
@@ -1189,7 +1192,7 @@ const T: Record<string, CSSProperties> = {
   intelLeadSub: {
     display: "block",
     marginTop: 8,
-    color: "#FFFFFF",
+    color: "#556276",
     fontSize: 13,
     lineHeight: 1.42,
   },
@@ -1203,13 +1206,13 @@ const T: Record<string, CSSProperties> = {
     display: "block",
     borderRadius: 15,
     padding: "10px 12px",
-    background: liquidDarkGlass,
-    border: "0.5px solid rgba(255,255,255,0.30)",
-    color: "#FFFFFF",
+    background: "rgba(255,255,255,0.58)",
+    border: "0.5px solid rgba(255,255,255,0.62)",
+    color: "#334055",
     fontSize: 12.2,
     lineHeight: 1.34,
     cursor: "pointer",
-    boxShadow: liquidDarkGlassShadow,
+    boxShadow: "0 14px 30px rgba(42,65,96,0.08), inset 0 1px 0 rgba(255,255,255,0.72)",
     backdropFilter: liquidGlassFilter,
     WebkitBackdropFilter: liquidGlassFilter,
   },
@@ -1218,23 +1221,23 @@ const T: Record<string, CSSProperties> = {
     display: "block",
     borderRadius: 18,
     padding: 16,
-    background: liquidDarkGlass,
-    border: "0.5px solid rgba(255, 255, 255, 0.31)",
-    boxShadow: liquidDarkGlassShadow,
+    background: "rgba(255,255,255,0.54)",
+    border: "0.5px solid rgba(255, 255, 255, 0.62)",
+    boxShadow: "0 14px 30px rgba(42,65,96,0.08), inset 0 1px 0 rgba(255,255,255,0.72)",
     cursor: "pointer",
     backdropFilter: liquidGlassFilter,
     WebkitBackdropFilter: liquidGlassFilter,
   },
   workTitle: {
     marginTop: 0,
-    color: "#FFFFFF",
-    fontSize: 21,
+    color: "#172033",
+    fontSize: 18,
     fontWeight: 850,
     letterSpacing: "-0.04em",
   },
   workSub: {
     marginTop: 3,
-    color: "#FFFFFF",
+    color: "#566477",
     fontSize: 13,
     lineHeight: 1.45,
   },
@@ -1242,7 +1245,7 @@ const T: Record<string, CSSProperties> = {
     marginTop: 14,
     height: 6,
     borderRadius: 999,
-    background: "rgba(255, 255, 255, 0.12)",
+    background: "rgba(91, 112, 142, 0.13)",
     overflow: "hidden",
   },
   meterFill: {
@@ -1251,6 +1254,9 @@ const T: Record<string, CSSProperties> = {
     borderRadius: 999,
   },
   section: {
+    marginTop: 30,
+  },
+  readSection: {
     marginTop: 34,
   },
   sectionHead: {
@@ -1270,23 +1276,26 @@ const T: Record<string, CSSProperties> = {
   },
   priorityGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(340px, 100%), 1fr))",
     gap: 12,
   },
   priorityCard: {
     all: "unset",
     display: "grid",
-    gridTemplateColumns: "50px minmax(0, 1fr) auto",
-    alignItems: "center",
-    gap: 14,
-    minHeight: 108,
+    gridTemplateColumns: "46px minmax(0, 1fr)",
+    alignItems: "start",
+    gap: "12px 14px",
+    minHeight: 116,
     padding: 18,
     borderRadius: 20,
-    background: whiteCard,
-    border: "1px solid #E7EBF5",
-    boxShadow: "0 22px 58px rgba(26, 34, 51, 0.13), 0 6px 16px rgba(26, 34, 51, 0.08)",
+    background: "linear-gradient(145deg, rgba(255,255,255,0.96), rgba(247,250,255,0.78))",
+    border: "1px solid rgba(218,226,240,0.82)",
+    boxShadow: "0 18px 46px rgba(26, 34, 51, 0.09), 0 5px 14px rgba(26, 34, 51, 0.05), inset 0 1px 0 rgba(255,255,255,0.74)",
     cursor: "pointer",
     overflow: "hidden",
+  },
+  priorityCardWide: {
+    gridColumn: "1 / -1",
   },
   priorityNum: {
     width: 46,
@@ -1329,9 +1338,11 @@ const T: Record<string, CSSProperties> = {
     lineHeight: 1.4,
   },
   priorityCta: {
-    alignSelf: "center",
+    gridColumn: "2",
+    alignSelf: "start",
+    justifySelf: "start",
     borderRadius: 999,
-    padding: "8px 12px",
+    padding: "7px 11px",
     fontSize: 12,
     fontWeight: 850,
     whiteSpace: "nowrap",
