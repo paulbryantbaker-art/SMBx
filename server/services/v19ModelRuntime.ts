@@ -34,6 +34,17 @@ export interface V19ModelExecution {
   };
 }
 
+export interface V19ModelExecutionRecord {
+  id: number;
+  createdAt: string;
+}
+
+export interface V19ModelExecutionPersistenceInput {
+  studioBookId?: number | null;
+  studioVersionId?: number | null;
+  toolName?: string | null;
+}
+
 interface V19ModelDefinition {
   id: string;
   version: string;
@@ -215,6 +226,40 @@ export async function executeV19Model(args: V19ModelExecutionInput): Promise<V19
     outputHash,
     auditPayload,
   };
+}
+
+export async function persistV19ModelExecution(
+  execution: V19ModelExecution,
+  context: V19ModelExecutionPersistenceInput = {},
+): Promise<V19ModelExecutionRecord> {
+  const { sql } = await import('../db.js');
+  const [row] = await sql`
+    INSERT INTO model_executions (
+      model_id, version, status, deal_id, user_id, conversation_id, studio_book_id,
+      studio_version_id, tool_name, input_hash, output_hash, inputs, outputs,
+      missing_inputs, citation_tags, audit_payload
+    )
+    VALUES (
+      ${execution.modelId},
+      ${execution.version},
+      ${execution.status},
+      ${execution.auditPayload.dealId},
+      ${execution.auditPayload.userId},
+      ${execution.auditPayload.conversationId},
+      ${context.studioBookId ?? null},
+      ${context.studioVersionId ?? null},
+      ${context.toolName ?? null},
+      ${execution.auditPayload.inputHash},
+      ${execution.outputHash},
+      ${sql.json(execution.inputs)}::jsonb,
+      ${sql.json(execution.outputs)}::jsonb,
+      ${sql.json(execution.missingInputs)}::jsonb,
+      ${sql.json(execution.citationTags)}::jsonb,
+      ${sql.json(execution.auditPayload)}::jsonb
+    )
+    RETURNING id, created_at
+  `;
+  return { id: Number(row.id), createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : String(row.created_at) };
 }
 
 function defineModel(

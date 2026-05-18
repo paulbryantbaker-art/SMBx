@@ -37,7 +37,7 @@ import {
   revisePitchBook,
 } from './pitchBookStudio.js';
 import { composeModelStack, type V19Journey } from './modelStackComposer.js';
-import { executeV19Model } from './v19ModelRuntime.js';
+import { executeV19Model, persistV19ModelExecution } from './v19ModelRuntime.js';
 import { validateCitationTags } from './citationValidator.js';
 
 const sql = createSql();
@@ -1408,7 +1408,8 @@ async function executeModelTool(input: Record<string, any>, userId: number, conv
     userId,
     conversationId,
   });
-  return JSON.stringify({ success: true, execution });
+  const record = await persistV19ModelExecution(execution, { toolName: 'execute_model' });
+  return JSON.stringify({ success: true, modelExecutionId: record.id, execution });
 }
 
 async function lookupCitationTool(input: Record<string, any>): Promise<string> {

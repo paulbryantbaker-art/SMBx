@@ -72,7 +72,7 @@ Base plans remain monthly subscriptions. No wallet, no success fees, no per-deal
 | 2 | Pitch Book Generation Engine | 🟡 Deterministic templates for seven formats exist in `server/services/pitchBookStudio.ts`; tools exist in `server/services/tools.ts`; Studio refresh now calls canonical V19 model execution and stores missing-input state/output hashes on the book version. | Replace placeholder narrative slots with source-extraction facts and deepen the remaining format-specific model templates. |
 | 3 | Pitch Book Source Grounding | 🟡 Slide-level provenance, warning states, source cards, audit appendices, export citation validation, and Studio model-health UI exist in draft form. | Validate every file/model/citation reference against registries before chat publish/share, and block or clearly flag unsupported metrics. |
 | 4 | V19 Foundation Repair | 🟡 `market_data_cache` collision is addressed by 067/070 compatibility migrations; V19 tables exist. | Run fresh-db and migrated-db verification; confirm all V19 tables and seeds are usable. |
-| 5 | Canonical Server-Side V19 Runtime | 🟡 Started: model registry now canonicalizes IDs to `MODEL.*.v1`; `v19ModelRuntime.ts` adds deterministic execution, missing-input reporting, output hashes, and audit payloads; Studio refresh/export writes V19 audit records. | Add a dedicated persisted model-execution record path and make chat/tool-backed claims use the same runner automatically. |
+| 5 | Canonical Server-Side V19 Runtime | 🟡 Started: model registry now canonicalizes IDs to `MODEL.*.v1`; `v19ModelRuntime.ts` adds deterministic execution, missing-input reporting, output hashes, audit payloads; `model_executions` persists canonical runs from Studio refresh and the `execute_model` tool; Studio refresh/export writes V19 audit records. | Make chat-backed claims use the same runner automatically and attach model-execution ids to audit packets/share flows. |
 | 6 | Tier-0 Server Models | 🟡 First executable subset added: SDE, EBITDA, valuation triangulation, DSCR stress, NWC peg, sources/uses, SBA, HSR, and QoE Lite. Framework runners exist for remaining Tier-0/Phase 2 models. `npm run test:v19-models` covers the first deterministic fixtures. | Fill out full Tier-0 calculations for tax, legal halt scan, PPA, rollover, earnout, structure analysis, and LBO. |
 | 7 | Artifact Schemas + Thin MCP Contract | ❌ Greenfield. | Define strict schemas/resources for deals, sources, model runs, Studio books, audit records, and expose a local/first-party MCP contract for the already-built tools. |
 | 8 | Model Stack, Gates, Prompts | 🟡 Composer service exists; gate/runtime wiring and `YULIA_PROMPTS_V4.md` are still pending. | Compose league × journey × deal type stacks, inject requirements into chat/Studio, and add halt triggers. |
@@ -196,7 +196,8 @@ The V19 implementation brief covers **runtime correctness** (calc engine, citati
 - ✅ Persist Studio refresh/export hashes into V19 audit records.
 - ✅ Add source/citation validation before Studio export.
 - ✅ Add fixtures for first Tier-0 models.
-- Add dedicated persisted model-execution records for every canonical run.
+- ✅ Add dedicated persisted model-execution records for Studio refresh and the `execute_model` tool.
+- Extend persisted model-execution records across chat-backed claims and audit packets.
 
 ### Phase 2 — Thin Agent Substrate
 

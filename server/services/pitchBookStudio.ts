@@ -2,7 +2,7 @@ import { createHash } from 'crypto';
 import { sql } from '../db.js';
 import { hasDealAccess } from './dealAccessService.js';
 import { validateCitationTags } from './citationValidator.js';
-import { executeV19Model, type V19ModelExecution } from './v19ModelRuntime.js';
+import { executeV19Model, persistV19ModelExecution, type V19ModelExecution } from './v19ModelRuntime.js';
 
 export type PitchBookFormat =
   | 'buyer-pitch-book'
@@ -294,8 +294,13 @@ export async function refreshPitchBookFromModels(userId: number, bookId: number)
       userId,
       input: buildModelInput(modelId, current, deal),
     });
+    const executionRecord = await persistV19ModelExecution(execution, {
+      studioBookId: current.id,
+      toolName: 'refresh_pitch_book_from_models',
+    });
     executions.push(execution);
     modelOutputs.push({
+      executionId: executionRecord.id,
       modelId: execution.modelId,
       version: execution.version,
       status: execution.status,
