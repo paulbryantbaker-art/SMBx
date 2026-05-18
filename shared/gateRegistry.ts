@@ -11,6 +11,18 @@ export interface GateDef {
   free: boolean;
   /** Fields Yulia must extract before this gate can be considered complete */
   requiredFields: string[];
+  /** V19 server-side models required before model-backed claims or exports at this gate */
+  requiredModels?: string[];
+  /** V19 citation tags that should be validated before external-fact claims at this gate */
+  requiredCitations?: string[];
+  /** Legal/tax/regulated triggers that always halt to approval or counsel deferral */
+  alwaysHaltTriggers?: string[];
+}
+
+export interface GateV19Requirements {
+  requiredModels: string[];
+  requiredCitations: string[];
+  alwaysHaltTriggers: string[];
 }
 
 /**
@@ -125,4 +137,50 @@ export function contextToJourney(context?: string): 'sell' | 'buy' | 'raise' | '
     intelligence: 'sell', // default to sell for intelligence context
   };
   return map[context] || null;
+}
+
+const COMMON_HALT_TRIGGERS = [
+  'legal_opinion_required',
+  'tax_position_required',
+  'regulated_industry_transfer',
+  'consent_or_assignment_issue',
+  'closing_document_signoff',
+];
+
+const GATE_V19_REQUIREMENTS: Record<string, GateV19Requirements> = {
+  S0: { requiredModels: [], requiredCitations: [], alwaysHaltTriggers: [] },
+  S1: { requiredModels: ['MODEL.VAL.SDE.v1', 'MODEL.VAL.EBITDA.v1', 'MODEL.QOE.LITE.v1'], requiredCitations: ['[Pepperdine PCAP 2025]', '[ABA 2025]'], alwaysHaltTriggers: ['unsupported_add_back'] },
+  S2: { requiredModels: ['MODEL.VAL.TRIANGULATION.v1', 'MODEL.MARKET.CONTEXT.v1'], requiredCitations: ['[Damodaran 2026]', '[Kroll 2024]', '[Pepperdine PCAP 2025]'], alwaysHaltTriggers: ['unsourced_valuation_metric'] },
+  S3: { requiredModels: ['MODEL.QOE.LITE.v1', 'MODEL.STRUCT.NWC.PEG.v1', 'MODEL.BUYER.FIT.v1'], requiredCitations: ['[ABA 2025]', '[SRS 2025]'], alwaysHaltTriggers: ['customer_facing_unsourced_claim'] },
+  S4: { requiredModels: ['MODEL.BUYER.FIT.v1', 'MODEL.MARKET.CONTEXT.v1'], requiredCitations: ['[Pepperdine PCAP 2025]'], alwaysHaltTriggers: [] },
+  S5: { requiredModels: ['MODEL.LEGAL.HALTSCAN.v1', 'MODEL.TAX.STRUCTURE.v1'], requiredCitations: ['[SBA SOP 50 10 8]', '[FTC 2026 HSR - Size of Transaction]'], alwaysHaltTriggers: COMMON_HALT_TRIGGERS },
+
+  B0: { requiredModels: ['MODEL.BUYER.FIT.v1', 'MODEL.MARKET.CONTEXT.v1'], requiredCitations: ['[Pepperdine PCAP 2025]'], alwaysHaltTriggers: [] },
+  B1: { requiredModels: ['MODEL.BUYER.FIT.v1', 'MODEL.DEAL.SCORE.v1'], requiredCitations: ['[Pepperdine PCAP 2025]'], alwaysHaltTriggers: [] },
+  B2: { requiredModels: ['MODEL.VAL.TRIANGULATION.v1', 'MODEL.DSCR.STRESS.v1', 'MODEL.SOURCES.USES.v1'], requiredCitations: ['[Damodaran 2026]', '[Kroll 2024]', '[SBA SOP 50 10 8]'], alwaysHaltTriggers: ['unsourced_valuation_metric'] },
+  B3: { requiredModels: ['MODEL.QOE.LITE.v1', 'MODEL.STRUCT.NWC.PEG.v1', 'MODEL.LEGAL.HALTSCAN.v1'], requiredCitations: ['[ABA 2025]', '[SRS 2025]'], alwaysHaltTriggers: ['unsupported_add_back', 'missing_diligence_file'] },
+  B4: { requiredModels: ['MODEL.TAX.STRUCTURE.v1', 'MODEL.STRUCT.ANALYSIS.v1', 'MODEL.STRUCT.ROLLOVER.v1', 'MODEL.STRUCT.EARNOUT.MC.v1'], requiredCitations: ['[OBBBA Sec. 70301]', '[OBBBA Sec. 70302]', '[OBBBA Sec. 70505]'], alwaysHaltTriggers: COMMON_HALT_TRIGGERS },
+  B5: { requiredModels: ['MODEL.LEGAL.HALTSCAN.v1', 'MODEL.HSR.TRIAGE.v1'], requiredCitations: ['[FTC 2026 HSR - Size of Transaction]', '[FTC 2026 HSR - Auto-Reportable]'], alwaysHaltTriggers: COMMON_HALT_TRIGGERS },
+
+  R0: { requiredModels: ['MODEL.MARKET.CONTEXT.v1'], requiredCitations: ['[FRED:SOFR]', '[FRED:DGS10]'], alwaysHaltTriggers: [] },
+  R1: { requiredModels: ['MODEL.VAL.DCF.TWOSTAGE.v1', 'MODEL.CAPTABLE.DILUTION.v1'], requiredCitations: ['[Damodaran 2026]', '[Kroll 2024]'], alwaysHaltTriggers: ['unsourced_forecast'] },
+  R2: { requiredModels: ['MODEL.CAPTABLE.DILUTION.v1', 'MODEL.VAL.DCF.TWOSTAGE.v1'], requiredCitations: ['[Damodaran 2026]', '[Kroll 2024]'], alwaysHaltTriggers: ['customer_facing_unsourced_claim'] },
+  R3: { requiredModels: ['MODEL.MARKET.CONTEXT.v1'], requiredCitations: ['[FRED:SOFR]', '[FRED:DGS10]'], alwaysHaltTriggers: [] },
+  R4: { requiredModels: ['MODEL.TAX.STRUCTURE.v1', 'MODEL.LEGAL.HALTSCAN.v1'], requiredCitations: ['[OBBBA Sec. 70425]', '[OBBBA Sec. 70505]'], alwaysHaltTriggers: COMMON_HALT_TRIGGERS },
+  R5: { requiredModels: ['MODEL.LEGAL.HALTSCAN.v1'], requiredCitations: [], alwaysHaltTriggers: COMMON_HALT_TRIGGERS },
+
+  PMI0: { requiredModels: ['MODEL.PMI.VALUE.CREATION.v1'], requiredCitations: [], alwaysHaltTriggers: ['closing_document_signoff'] },
+  PMI1: { requiredModels: ['MODEL.PMI.VALUE.CREATION.v1', 'MODEL.COVENANT.COMPLIANCE.v1'], requiredCitations: [], alwaysHaltTriggers: [] },
+  PMI2: { requiredModels: ['MODEL.PMI.VALUE.CREATION.v1', 'MODEL.DEAL.SCORE.v1'], requiredCitations: [], alwaysHaltTriggers: [] },
+  PMI3: { requiredModels: ['MODEL.PMI.VALUE.CREATION.v1', 'MODEL.SENSITIVITY.MATRIX.v1'], requiredCitations: [], alwaysHaltTriggers: [] },
+};
+
+export function getGateV19Requirements(gateId: string): GateV19Requirements {
+  const gate = GATE_MAP[gateId];
+  const requirements = GATE_V19_REQUIREMENTS[gateId] || { requiredModels: [], requiredCitations: [], alwaysHaltTriggers: [] };
+  return {
+    requiredModels: gate?.requiredModels || requirements.requiredModels,
+    requiredCitations: gate?.requiredCitations || requirements.requiredCitations,
+    alwaysHaltTriggers: gate?.alwaysHaltTriggers || requirements.alwaysHaltTriggers,
+  };
 }
