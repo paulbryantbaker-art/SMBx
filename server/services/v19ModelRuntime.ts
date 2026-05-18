@@ -165,6 +165,160 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
       },
     };
   }),
+  'MODEL.TAX.STRUCTURE.v1': defineModel('MODEL.TAX.STRUCTURE.v1', ['deal_type', 'entity_type', 'purchase_price_cents'], ['[OBBBA Sec. 70301]', '[OBBBA Sec. 70302]', '[OBBBA Sec. 70425]', '[OBBBA Sec. 70505]'], input => {
+    const dealType = text(input.deal_type);
+    const entityType = text(input.entity_type);
+    const purchasePrice = cents(input.purchase_price_cents);
+    const rolloverPct = number(input.rollover_pct) ?? 0;
+    const taxFacts = safeObject(input.tax_facts);
+    const missing = requireInputs({ deal_type: dealType, entity_type: entityType, purchase_price_cents: purchasePrice });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const structure = /stock|equity/i.test(dealType!)
+      ? 'stock_or_equity_sale'
+      : /asset|338|1060/i.test(dealType!)
+        ? 'asset_sale_allocation'
+        : 'structure_to_confirm';
+    const counselFlags = [
+      /c[-\s]?corp/i.test(entityType!) && 'QSBS review if original issuance and holding-period facts exist.',
+      rolloverPct > 0 && 'Rollover tax path requires counsel review before external conclusion.',
+      taxFacts.international && 'International tax facts require specialist tax review.',
+      taxFacts.loss_carryforwards && 'Loss carryforwards may trigger Section 382 review.',
+    ].filter(Boolean);
+    return {
+      outputs: {
+        structure,
+        purchase_price_cents: purchasePrice,
+        rollover_pct: round(rolloverPct, 4),
+        bonus_depreciation_pct: 1,
+        interest_limitation_basis: 'EBITDA-based ATI per registered V19 tax citation',
+        counsel_flags: counselFlags,
+        counsel_required: counselFlags.length > 0,
+      },
+    };
+  }),
+  'MODEL.LEGAL.HALTSCAN.v1': defineModel('MODEL.LEGAL.HALTSCAN.v1', ['deal_type', 'industry', 'jurisdiction', 'enterprise_value_cents'], ['[FTC 2026 HSR - Size of Transaction]', '[FTC 2026 HSR - Auto-Reportable]'], input => {
+    const dealType = text(input.deal_type);
+    const industry = text(input.industry);
+    const jurisdiction = text(input.jurisdiction);
+    const enterpriseValue = cents(input.enterprise_value_cents);
+    const legalFacts = safeObject(input.legal_facts);
+    const missing = requireInputs({ deal_type: dealType, industry, jurisdiction, enterprise_value_cents: enterpriseValue });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const regulated = /(health|dental|veterinary|insurance|bank|lending|defense|government|utility|cannabis|alcohol|franchise)/i.test(`${industry} ${dealType}`);
+    const hsrTriggered = enterpriseValue! >= HSR_2026.SIZE_OF_TRANSACTION * 100;
+    const haltTriggers = [
+      regulated && 'regulated_industry_or_license_transfer',
+      hsrTriggered && 'hsr_size_of_transaction_review',
+      legalFacts.foreign_buyer && 'foreign_buyer_cfius_screen',
+      legalFacts.consent_required && 'material_contract_consent_required',
+      legalFacts.professional_license && 'professional_license_transfer_review',
+    ].filter(Boolean);
+    return {
+      outputs: {
+        jurisdiction,
+        hsr_size_triggered: hsrTriggered,
+        threshold_cents: HSR_2026.SIZE_OF_TRANSACTION * 100,
+        halt_triggers: haltTriggers,
+        counsel_required: haltTriggers.length > 0,
+      },
+    };
+  }),
+  'MODEL.LBO.LMM.v1': defineModel('MODEL.LBO.LMM.v1', ['purchase_price_cents', 'debt_cents', 'sponsor_equity_cents', 'entry_ebitda_cents', 'exit_multiple'], ['[FRED:SOFR]', '[FRED:BAMLH0A0HYM2]'], input => {
+    const purchasePrice = cents(input.purchase_price_cents);
+    const debt = cents(input.debt_cents);
+    const equity = cents(input.sponsor_equity_cents);
+    const entryEbitda = cents(input.entry_ebitda_cents);
+    const exitMultiple = number(input.exit_multiple);
+    const holdYears = number(input.hold_years) ?? 5;
+    const ebitdaGrowth = number(input.ebitda_growth_pct) ?? 0;
+    const debtPaydown = cents(input.debt_paydown_cents) ?? 0;
+    const missing = requireInputs({ purchase_price_cents: purchasePrice, debt_cents: debt, sponsor_equity_cents: equity, entry_ebitda_cents: entryEbitda, exit_multiple: exitMultiple });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const exitEbitda = Math.round(entryEbitda! * ((1 + ebitdaGrowth) ** holdYears));
+    const exitEnterpriseValue = Math.round(exitEbitda * exitMultiple!);
+    const exitDebt = Math.max(0, debt! - debtPaydown);
+    const exitEquity = exitEnterpriseValue - exitDebt;
+    const moic = equity! > 0 ? exitEquity / equity! : null;
+    return {
+      outputs: {
+        entry_leverage: round(debt! / entryEbitda!, 2),
+        sponsor_equity_pct: round(equity! / purchasePrice!, 4),
+        exit_ebitda_cents: exitEbitda,
+        exit_enterprise_value_cents: exitEnterpriseValue,
+        exit_equity_value_cents: exitEquity,
+        moic: moic == null ? null : round(moic, 2),
+        simple_irr: moic == null ? null : round((moic ** (1 / holdYears)) - 1, 4),
+      },
+    };
+  }),
+  'MODEL.STRUCT.PPA.v1': defineModel('MODEL.STRUCT.PPA.v1', ['purchase_price_cents', 'asset_classes'], ['[OBBBA Sec. 70301]', '[OBBBA Sec. 70302]'], input => {
+    const purchasePrice = cents(input.purchase_price_cents);
+    const classes = assetClassAllocations(input.asset_classes);
+    const missing = requireInputs({ purchase_price_cents: purchasePrice, asset_classes: classes.length ? classes : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const allocated = classes.reduce((sum, item) => sum + item.amount_cents, 0);
+    return {
+      outputs: {
+        purchase_price_cents: purchasePrice,
+        allocated_cents: allocated,
+        unallocated_cents: purchasePrice! - allocated,
+        allocation: classes,
+        requires_form_8594_consistency_review: true,
+      },
+    };
+  }),
+  'MODEL.STRUCT.ROLLOVER.v1': defineModel('MODEL.STRUCT.ROLLOVER.v1', ['rollover_pct', 'entity_type', 'deal_type'], ['[OBBBA Sec. 70505]'], input => {
+    const rolloverPct = number(input.rollover_pct);
+    const entityType = text(input.entity_type);
+    const dealType = text(input.deal_type);
+    const missing = requireInputs({ rollover_pct: rolloverPct, entity_type: entityType, deal_type: dealType });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const likelyTaxReview = rolloverPct! > 0 || /stock|equity|partnership|llc/i.test(`${dealType} ${entityType}`);
+    return {
+      outputs: {
+        rollover_pct: round(rolloverPct!, 4),
+        rollover_present: rolloverPct! > 0,
+        tax_review_required: likelyTaxReview,
+        counsel_flags: likelyTaxReview ? ['Confirm rollover security, basis, entity classification, and boot treatment.'] : [],
+      },
+    };
+  }),
+  'MODEL.STRUCT.EARNOUT.MC.v1': defineModel('MODEL.STRUCT.EARNOUT.MC.v1', ['earnout_targets', 'probabilities', 'discount_rate'], ['[ABA 2025]', '[SRS 2025]'], input => {
+    const targets = arrayOfCents(input.earnout_targets);
+    const probabilities = numberArray(input.probabilities);
+    const discountRate = number(input.discount_rate);
+    const missing = requireInputs({ earnout_targets: targets.length ? targets : null, probabilities: probabilities.length ? probabilities : null, discount_rate: discountRate });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const expectedGross = targets.reduce((sum, target, index) => sum + target * clamp(probabilities[index] ?? 0, 0, 1), 0);
+    const termYears = number(input.term_years) ?? 1;
+    return {
+      outputs: {
+        expected_gross_cents: Math.round(expectedGross),
+        expected_present_value_cents: Math.round(expectedGross / ((1 + discountRate!) ** termYears)),
+        scenarios: targets.map((target, index) => ({ target_cents: target, probability: round(clamp(probabilities[index] ?? 0, 0, 1), 4) })),
+      },
+    };
+  }),
+  'MODEL.STRUCT.ANALYSIS.v1': defineModel('MODEL.STRUCT.ANALYSIS.v1', ['deal_type', 'structure_facts'], ['[SBA SOP 50 10 8]', '[FTC 2026 HSR - Size of Transaction]'], input => {
+    const dealType = text(input.deal_type);
+    const facts = safeObject(input.structure_facts);
+    const missing = requireInputs({ deal_type: dealType, structure_facts: Object.keys(facts).length ? facts : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const issueMap = [
+      facts.sba_financing && { issue: 'SBA financing', action: 'Confirm equity injection, standby seller note, citizenship, and DSCR.' },
+      facts.rollover_pct && { issue: 'Seller rollover', action: 'Confirm rollover security, tax path, and governance rights.' },
+      facts.asset_sale && { issue: 'Asset sale', action: 'Prepare PPA and Form 8594 consistency review.' },
+      facts.enterprise_value_cents && cents(facts.enterprise_value_cents)! >= HSR_2026.SIZE_OF_TRANSACTION * 100 && { issue: 'HSR threshold', action: 'Run HSR triage and counsel review.' },
+    ].filter(Boolean);
+    return {
+      outputs: {
+        deal_type: dealType,
+        issue_map: issueMap,
+        action_count: issueMap.length,
+        counsel_required: issueMap.some((item: any) => /tax|HSR|counsel|governance/i.test(`${item.issue} ${item.action}`)),
+      },
+    };
+  }),
 };
 
 const GENERIC_MODELS = new Set([
@@ -320,6 +474,46 @@ function sumCents(value: unknown): number | null {
     return parsed.length ? parsed.reduce((acc, item) => acc + item, 0) : null;
   }
   return cents(value);
+}
+
+function text(value: unknown): string | null {
+  const normalized = String(value ?? '').trim();
+  return normalized ? normalized : null;
+}
+
+function safeObject(value: unknown): Record<string, any> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {};
+}
+
+function numberArray(value: unknown): number[] {
+  if (!Array.isArray(value)) return [];
+  return value.map(number).filter((item): item is number => item !== null);
+}
+
+function assetClassAllocations(value: unknown): Array<{ class_name: string; amount_cents: number }> {
+  if (Array.isArray(value)) {
+    return value
+      .map((item, index) => {
+        if (item && typeof item === 'object') {
+          const amount = cents((item as any).amount_cents ?? (item as any).value_cents ?? (item as any).amount);
+          return amount == null ? null : { class_name: String((item as any).class_name || (item as any).name || `Class ${index + 1}`), amount_cents: amount };
+        }
+        const amount = cents(item);
+        return amount == null ? null : { class_name: `Class ${index + 1}`, amount_cents: amount };
+      })
+      .filter((item): item is { class_name: string; amount_cents: number } => item !== null);
+  }
+  if (value && typeof value === 'object') {
+    return Object.entries(value).map(([className, amount]) => {
+      const parsed = cents(amount);
+      return parsed == null ? null : { class_name: className, amount_cents: parsed };
+    }).filter((item): item is { class_name: string; amount_cents: number } => item !== null);
+  }
+  return [];
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
 }
 
 function sanitizeInputs(input: Record<string, any>): Record<string, any> {

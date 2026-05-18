@@ -54,6 +54,17 @@ export async function readV19Resource(userId: number, uri: string): Promise<V19R
 }
 
 async function readMethodologyResource(path: string): Promise<Record<string, any>> {
+  if (path === 'yulia-prompts/v4') {
+    const promptPath = resolve(process.cwd(), 'server/prompts/YULIA_PROMPTS_V4.md');
+    const prompt = await readFile(promptPath, 'utf8').catch(() => '');
+    return {
+      kind: 'methodology',
+      uri: 'methodology://yulia-prompts/v4',
+      id: 'yulia-prompts-v4',
+      title: 'Yulia V4 prompt governance',
+      prompt,
+    };
+  }
   if (path !== 'v19') throw new Error('Unknown methodology resource');
   const planPath = resolve(process.cwd(), 'methodology/V19_BUILD_PLAN.md');
   const plan = await readFile(planPath, 'utf8').catch(() => '');

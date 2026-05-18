@@ -133,6 +133,85 @@ await test('Legacy V19 aliases canonicalize to MODEL.*.v1 ids', async () => {
   assertEqual(run.outputs.adjusted_ebitda_cents, 10_250, 'alias output');
 });
 
+await test('Tax structure issue-spots rollover and Section 382 review flags', async () => {
+  const run = await executeV19Model({
+    modelId: 'MODEL.TAX.STRUCTURE.v1',
+    input: {
+      deal_type: 'asset sale with rollover',
+      entity_type: 'C-Corp',
+      purchase_price_cents: 25_000_000,
+      rollover_pct: 0.15,
+      tax_facts: { loss_carryforwards: true },
+    },
+  });
+  assertEqual(run.status, 'complete', 'status');
+  assertEqual(run.outputs.structure, 'asset_sale_allocation', 'structure');
+  assertEqual(run.outputs.counsel_required, true, 'counsel required');
+});
+
+await test('Legal halt scan flags HSR and regulated-industry counsel review', async () => {
+  const run = await executeV19Model({
+    modelId: 'MODEL.LEGAL.HALTSCAN.v1',
+    input: {
+      deal_type: 'platform acquisition',
+      industry: 'healthcare services',
+      jurisdiction: 'TX',
+      enterprise_value_cents: 150_000_000_00,
+      legal_facts: { consent_required: true },
+    },
+  });
+  assertEqual(run.status, 'complete', 'status');
+  assertEqual(run.outputs.hsr_size_triggered, true, 'HSR threshold');
+  assertEqual(run.outputs.counsel_required, true, 'counsel required');
+});
+
+await test('LBO LMM returns leverage, MOIC, and simple IRR', async () => {
+  const run = await executeV19Model({
+    modelId: 'MODEL.LBO.LMM.v1',
+    input: {
+      purchase_price_cents: 100_000_000,
+      debt_cents: 55_000_000,
+      sponsor_equity_cents: 45_000_000,
+      entry_ebitda_cents: 20_000_000,
+      exit_multiple: 6,
+      ebitda_growth_pct: 0.05,
+      hold_years: 5,
+      debt_paydown_cents: 20_000_000,
+    },
+  });
+  assertEqual(run.status, 'complete', 'status');
+  assertEqual(run.outputs.entry_leverage, 2.75, 'entry leverage');
+  assert(run.outputs.moic > 2, 'MOIC should be above 2.0x');
+});
+
+await test('PPA tracks allocated and unallocated purchase price', async () => {
+  const run = await executeV19Model({
+    modelId: 'MODEL.STRUCT.PPA.v1',
+    input: {
+      purchase_price_cents: 100_000,
+      asset_classes: { working_capital: 20_000, equipment: 30_000, goodwill: 40_000 },
+    },
+  });
+  assertEqual(run.status, 'complete', 'status');
+  assertEqual(run.outputs.allocated_cents, 90_000, 'allocated');
+  assertEqual(run.outputs.unallocated_cents, 10_000, 'unallocated');
+});
+
+await test('Earnout model computes expected present value', async () => {
+  const run = await executeV19Model({
+    modelId: 'MODEL.STRUCT.EARNOUT.MC.v1',
+    input: {
+      earnout_targets: [100_000, 200_000],
+      probabilities: [0.5, 0.25],
+      discount_rate: 0.1,
+      term_years: 1,
+    },
+  });
+  assertEqual(run.status, 'complete', 'status');
+  assertEqual(run.outputs.expected_gross_cents, 100_000, 'expected gross');
+  assertEqual(run.outputs.expected_present_value_cents, 90_909, 'expected PV');
+});
+
 console.log(`\n${passed} passed, ${failed} failed`);
 
 if (failed > 0) process.exit(1);

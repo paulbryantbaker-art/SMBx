@@ -11,6 +11,7 @@ import { buildSystemPrompt, buildDynamicAnonymousPrompt } from '../services/prom
 import type { ConversationState } from '../services/promptBuilder.js';
 import { streamAgenticResponse } from '../services/aiService.js';
 import { normalizeModelPreference, resolveChatModel } from '../services/modelPreference.js';
+import { readDealV19Readiness } from '../services/v19ReadinessService.js';
 
 /** Safe SSE write — checks destroyed + writableEnded, catches errors */
 function safeWrite(res: Response, data: string): boolean {
@@ -45,6 +46,73 @@ function toPlainMessages(
     }
     return { role: m.role, content: text };
   });
+}
+
+async function writeAutomaticV19ChatAudit(input: {
+  userId: number;
+  conversationId: number;
+  assistantMessageId: number;
+  deal: any;
+  assistantText: string;
+}): Promise<void> {
+  if (!input.deal?.id || !shouldAuditV19Response(input.assistantText)) return;
+  const readiness = await readDealV19Readiness(input.userId, Number(input.deal.id)).catch(() => null);
+  if (!readiness && !containsModelBackedLanguage(input.assistantText)) return;
+
+  const modelStack = {
+    requiredModels: readiness?.requiredModels || [],
+    latestModels: readiness?.models || [],
+  };
+  const inputsUsed = {
+    responseMessageId: input.assistantMessageId,
+    dealId: Number(input.deal.id),
+    responseLength: input.assistantText.length,
+    responseHash: crypto.createHash('sha256').update(input.assistantText).digest('hex'),
+  };
+  const outputHash = crypto.createHash('sha256').update(JSON.stringify({
+    conversationId: input.conversationId,
+    assistantMessageId: input.assistantMessageId,
+    response: input.assistantText,
+    modelStack,
+  })).digest('hex');
+
+  await sql`
+    INSERT INTO audit_trail (
+      session_id, deal_id, user_id, conversation_id, turn_id, journey, league, deal_type,
+      model_stack, inputs_used, live_data_snapshots, citations_validated, mode_2_triggers, output_hash
+    )
+    VALUES (
+      ${`conversation:${input.conversationId}`},
+      ${Number(input.deal.id)},
+      ${input.userId},
+      ${input.conversationId},
+      ${`assistant:${input.assistantMessageId}`},
+      ${String(input.deal.journey_type || readiness?.journey || '') || null},
+      ${String(input.deal.league || '') || null},
+      ${String(input.deal.deal_type || '') || null},
+      ${sql.json(modelStack)}::jsonb,
+      ${sql.json(inputsUsed)}::jsonb,
+      ${sql.json({
+        readinessCheckedAt: readiness?.checkedAt || null,
+        resourceUris: readiness?.resourceUris || [],
+      })}::jsonb,
+      ${sql.json(readiness?.citationValidation || {})}::jsonb,
+      ${sql.json((readiness?.issues || []).map(issue => ({
+        code: issue.code,
+        severity: issue.severity,
+        detail: issue.detail,
+      })))}::jsonb,
+      ${outputHash}
+    )
+  `;
+}
+
+function shouldAuditV19Response(text: string): boolean {
+  return containsModelBackedLanguage(text) || /\b(model|source|citation|audit|valuation|qoe|quality of earnings|dscr|nwc|working capital|lbo|tax|legal|counsel|earnout|rollover|ppa|purchase price allocation)\b/i.test(text);
+}
+
+function containsModelBackedLanguage(text: string): boolean {
+  return /\$|%|\b\d+(\.\d+)?x\b|\b(ebitda|sde|revenue|earnings|multiple|valuation|enterprise value|moic|irr|debt service|cash flow|add-back|addback)\b/i.test(text);
 }
 import { checkAndAutoAdvance, getDeal, updateDealFields, updateDealFinancials, advanceGate } from '../services/dealService.js';
 import { extractFields } from '../services/fieldExtractor.js';
@@ -1157,6 +1225,16 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
           } catch { /* is_general column may not exist yet */ }
         }
       }
+
+      writeAutomaticV19ChatAudit({
+        userId,
+        conversationId: convId,
+        assistantMessageId: Number(assistantMsg.id),
+        deal,
+        assistantText,
+      }).catch((e: any) => {
+        console.error('Automatic V19 chat audit error:', e.message);
+      });
 
       // Send completion event
       if (!clientDisconnected && !res.writableEnded) {

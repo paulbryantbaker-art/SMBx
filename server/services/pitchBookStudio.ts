@@ -174,8 +174,8 @@ export async function createPitchBook(input: CreatePitchBookInput): Promise<Pitc
   const title = cleanTitle(input.title)
     || `${deal?.business_name || FORMAT_LABELS[format]} - ${FORMAT_LABELS[format]}`;
   const brief = input.brief?.trim() || defaultBrief(format, deal);
-  const slides = buildSlides(format, deal, brief);
   const sources = await buildSources(format, deal?.id ?? null);
+  const slides = buildSlides(format, deal, brief, sources);
   const assumptions = buildAssumptions(format, deal);
   const modelOutputs = FORMAT_MODELS[format].map(modelId => ({
     modelId,
@@ -622,11 +622,11 @@ async function buildSources(format: PitchBookFormat, dealId: number | null): Pro
   return sources;
 }
 
-function buildSlides(format: PitchBookFormat, deal: Record<string, any> | null, brief: string): StudioSlide[] {
-  const facts = dealFacts(deal);
+function buildSlides(format: PitchBookFormat, deal: Record<string, any> | null, brief: string, sources: StudioSource[] = []): StudioSlide[] {
+  const facts = [...dealFacts(deal), ...sourceFacts(sources)];
   return FORMAT_OUTLINES[format].map((title, index) => {
     const citations = index === 0 ? citationTagsForFormat(format).slice(0, 2) : [];
-    const factsUsed = facts.filter(Boolean).slice(0, index < 2 ? 5 : 3);
+    const factsUsed = factsForSlide(title, facts, index);
     return {
       id: `slide-${index + 1}`,
       title,
@@ -685,6 +685,33 @@ function dealFacts(deal: Record<string, any> | null): string[] {
     deal.ebitda && `EBITDA: ${formatCents(deal.ebitda)}`,
     deal.asking_price && `Asking price: ${formatCents(deal.asking_price)}`,
   ].filter(Boolean) as string[];
+}
+
+function sourceFacts(sources: StudioSource[]): string[] {
+  return sources
+    .filter(source => source.status === 'linked' && source.sourceType !== 'methodology')
+    .slice(0, 8)
+    .map(source => `Source: ${source.label}`);
+}
+
+function factsForSlide(title: string, facts: string[], index: number): string[] {
+  if (!facts.length) return [];
+  const lower = title.toLowerCase();
+  const weighted = facts.filter(fact => {
+    const factLower = fact.toLowerCase();
+    if (/financial|earnings|cash flow|qoe|valuation|returns|lender|sources|uses/i.test(lower)) {
+      return /revenue|sde|ebitda|asking price|source|p&l|financial|tax|bank|lender/i.test(factLower);
+    }
+    if (/market|buyer|positioning|company|target/i.test(lower)) {
+      return /company|industry|location|source|buyer|market|cim|profile/i.test(factLower);
+    }
+    if (/risk|red flag|diligence|approval|next/i.test(lower)) {
+      return /source|legal|tax|nda|qoe|data room|diligence|league/i.test(factLower);
+    }
+    return true;
+  });
+  const picked = weighted.length ? weighted : facts;
+  return [...new Set(picked)].slice(0, index < 2 ? 5 : 3);
 }
 
 function citationTagsForFormat(format: PitchBookFormat): string[] {

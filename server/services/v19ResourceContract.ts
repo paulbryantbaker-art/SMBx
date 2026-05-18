@@ -7,6 +7,11 @@ export const V19_RESOURCE_TEMPLATES = [
     description: 'Current methodology, model, citation, gate, and audit doctrine.',
   },
   {
+    uriTemplate: 'methodology://yulia-prompts/v4',
+    name: 'Yulia V4 prompt governance',
+    description: 'Runtime rules for model-backed claims, Studio provenance, tollgates, counsel deferrals, and audit records.',
+  },
+  {
     uriTemplate: 'deal://{dealId}/state',
     name: 'Deal state',
     description: 'Journey, league, gate, active model stack, and next-action state.',

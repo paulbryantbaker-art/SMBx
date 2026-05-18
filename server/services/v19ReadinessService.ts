@@ -163,6 +163,7 @@ export async function buildStudioReadiness(userId: number, book: PitchBookRecord
       detail: `${output.modelId || 'MODEL.UNKNOWN.v1'}${safeStringArray(output.missingInputs).length ? ` needs ${safeStringArray(output.missingInputs).join(', ')}` : ''}`,
       resourceUri: output.executionId ? `model://execution/${output.executionId}` : `studio://book/${book.id}`,
     }));
+  const referenceIssues = validateStudioSlideReferences(book);
   const citationIssues = citationValidation.missing.map(tag => ({
     code: 'citation_validation_required',
     severity: 'blocker' as const,
@@ -174,7 +175,7 @@ export async function buildStudioReadiness(userId: number, book: PitchBookRecord
     ...issue,
     detail: `Gate ${dealReadiness?.gateId}: ${issue.detail}`,
   }));
-  const issues = [...slideIssues, ...sourceIssues, ...modelIssues, ...citationIssues, ...dealIssues, ...uncheckedIssues];
+  const issues = [...slideIssues, ...sourceIssues, ...modelIssues, ...referenceIssues, ...citationIssues, ...dealIssues, ...uncheckedIssues];
   const blockerCount = issues.filter(issue => issue.severity === 'blocker').length;
 
   return {
@@ -265,6 +266,78 @@ function collectBookCitationTags(book: PitchBookRecord): string[] {
     ...book.slides.flatMap(slide => slide.provenance.citationsUsed),
     ...book.modelOutputs.flatMap(output => Array.isArray(output.citationTags) ? output.citationTags : []),
   ])] as string[];
+}
+
+function validateStudioSlideReferences(book: PitchBookRecord): V19ReadinessIssue[] {
+  const linkedSources = book.sources.filter(source => source.status === 'linked');
+  const hasDealRecord = linkedSources.some(source => source.sourceType === 'deal_record');
+  const hasDataRoomDocument = linkedSources.some(source => source.sourceType === 'data_room_document');
+  const linkedCitationTags = new Set(book.sources.map(source => source.citationTag).filter(Boolean).map(String));
+  const modelById = new Map(book.modelOutputs.map(output => [String(output.modelId || ''), output]));
+  const issues: V19ReadinessIssue[] = [];
+
+  for (const slide of book.slides) {
+    const provenance = slide.provenance || { factsUsed: [], modelOutputsUsed: [], citationsUsed: [], uncheckedClaims: [] };
+    const modelRefs = safeStringArray(provenance.modelOutputsUsed);
+    for (const modelId of modelRefs) {
+      const output = modelById.get(modelId);
+      if (!output) {
+        issues.push({
+          code: 'model_reference_missing',
+          severity: 'blocker',
+          label: 'Slide references a model output that is not attached',
+          detail: `${slide.title}: ${modelId}`,
+          resourceUri: `studio://book/${book.id}/slide/${slide.id}`,
+        });
+      }
+    }
+
+    const citationRefs = safeStringArray(provenance.citationsUsed);
+    for (const citeTag of citationRefs) {
+      if (!linkedCitationTags.has(citeTag)) {
+        issues.push({
+          code: 'citation_reference_missing',
+          severity: 'blocker',
+          label: 'Slide references a citation without a source card',
+          detail: `${slide.title}: ${citeTag}`,
+          resourceUri: `studio://book/${book.id}/slide/${slide.id}`,
+        });
+      }
+    }
+
+    const factRefs = safeStringArray(provenance.factsUsed);
+    if (factRefs.length && !hasDealRecord && !hasDataRoomDocument) {
+      issues.push({
+        code: 'fact_source_missing',
+        severity: 'blocker',
+        label: 'Slide facts need a deal record or source file',
+        detail: `${slide.title}: ${factRefs.slice(0, 2).join('; ')}`,
+        resourceUri: `studio://book/${book.id}/slide/${slide.id}`,
+      });
+    }
+
+    if (containsMetricLanguage(slide) && !factRefs.length && !modelRefs.length && !citationRefs.length) {
+      issues.push({
+        code: 'unsupported_metric_present',
+        severity: 'blocker',
+        label: 'Slide has a metric claim without facts, models, or citations',
+        detail: slide.title,
+        resourceUri: `studio://book/${book.id}/slide/${slide.id}`,
+      });
+    }
+  }
+
+  return issues;
+}
+
+function containsMetricLanguage(slide: Pick<PitchBookRecord['slides'][number], 'title' | 'body' | 'bullets' | 'speakerNotes'>): boolean {
+  const text = [
+    slide.title,
+    slide.body,
+    ...(Array.isArray(slide.bullets) ? slide.bullets : []),
+    slide.speakerNotes,
+  ].join(' ');
+  return /\$|%|\b(revenue|sde|ebitda|earnings|valuation|multiple|dscr|nwc|working capital|purchase price|enterprise value|moic|irr|debt service|add-back|addback)\b/i.test(text);
 }
 
 function safeStringArray(value: unknown): string[] {
