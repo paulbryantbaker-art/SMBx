@@ -1,7 +1,9 @@
 import { listRegisteredModels } from './modelRegistry.js';
+import { listV19ResourceContract } from './v19ResourceContract.js';
 
 export function buildAgentCard() {
   const models = listRegisteredModels();
+  const resourceContract = listV19ResourceContract();
   return {
     name: 'smbx.ai Yulia Deal Desk',
     version: 'v19-foundation',
@@ -44,7 +46,15 @@ export function buildAgentCard() {
         status: 'available',
         note: 'Chat and canvas are two control surfaces over the same deal state.',
       },
+      {
+        id: 'v19_resource_contract',
+        label: 'V19 artifact/resource contract',
+        status: 'internal',
+        resources: resourceContract.resourceTemplates.map(resource => resource.uriTemplate),
+        tools: resourceContract.toolContracts,
+      },
     ],
+    resourceContract,
     models: models.map(model => ({
       modelId: model.modelId,
       version: model.version,
