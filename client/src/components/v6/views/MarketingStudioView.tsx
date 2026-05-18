@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { authHeaders, type User } from "../../../hooks/useAuth";
-import { ART_HOUSE_TEXTURES, DESKTOP_TEXTURES, STUDIO_TEXTURES } from "../../../lib/randomTextures";
+import { ART_HOUSE_TEXTURES, STUDIO_TEXTURES } from "../../../lib/randomTextures";
 import type { OpenTab, StudioFormatId, Tab } from "../types";
 
 interface MarketingStudioProps {
@@ -143,6 +143,16 @@ const SAMPLE_BOOKS: PitchBookRecord[] = [
   localBook("buyer-pitch-book", "Pest Control FL - Buyer Pitch Book"),
 ];
 
+const FORMAT_TEXTURES: Record<StudioFormatId, string> = {
+  "buyer-pitch-book": STUDIO_TEXTURES.green,
+  "seller-pitch-book": STUDIO_TEXTURES.rose,
+  "ic-deck": STUDIO_TEXTURES.navy,
+  "qoe-preview-book": STUDIO_TEXTURES.blue,
+  "cim-summary-deck": ART_HOUSE_TEXTURES.studioPreview,
+  "board-update": ART_HOUSE_TEXTURES.studioCampaign,
+  "lender-book": ART_HOUSE_TEXTURES.studioCollateral,
+};
+
 const glassBackdrop: CSSProperties = {
   backdropFilter: "blur(22px) saturate(155%)",
   WebkitBackdropFilter: "blur(22px) saturate(155%)",
@@ -152,9 +162,13 @@ const liquidGlass =
   "radial-gradient(circle at 18% 0%, rgba(255,255,255,.54), transparent 36%), " +
   "linear-gradient(135deg, rgba(255,255,255,.58), rgba(245,250,255,.32) 50%, rgba(232,241,252,.20))";
 
-const liquidDarkGlass =
-  "radial-gradient(circle at 16% 0%, rgba(255,255,255,.20), transparent 34%), " +
-  "linear-gradient(155deg, rgba(18,35,54,.88), rgba(27,59,86,.72) 54%, rgba(9,25,43,.84))";
+const liquidGlassFilter = "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)";
+const liquidGlassShadow =
+  "0 16px 34px -22px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.34)";
+const liquidDarkGlassShadow =
+  "0 16px 34px -22px rgba(0,0,0,0.52), inset 0 1px 0 rgba(255,255,255,0.34), inset 0 -1px 0 rgba(255,255,255,0.08), inset 0 0 0 0.5px rgba(255,255,255,0.26)";
+const studioHeroWash =
+  `linear-gradient(155deg, rgba(77,39,53,0.52) 0%, rgba(183,103,93,0.34) 48%, rgba(29,30,54,0.58) 100%), url('${STUDIO_TEXTURES.rose}')`;
 
 export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: MarketingStudioProps) {
   const [books, setBooks] = useState<PitchBookRecord[]>([]);
@@ -288,34 +302,30 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
       <section style={S.hero}>
         <div style={S.heroTexture} />
         <div style={S.heroInner}>
-          <div style={S.brandRail}>
-            <span style={S.brandDot}>Y</span>
-            <span>Pitch Book Studio</span>
-          </div>
           <h1 style={S.heroTitle}>Create finance-grade pitch books from the same deal brain.</h1>
           <p style={S.heroCopy}>
             Build IC decks, QoE preview books, buyer books, lender books, and CIM summaries with slide-level sources, model links, and export-ready audit trails.
           </p>
+          <div style={S.heroNotes}>
+            {[
+              "Turn files, models, and citations into a clean banking story.",
+              "Keep every slide tied to facts, source documents, and model outputs.",
+              "Export decks with source footnotes and an audit appendix.",
+            ].map(note => <span key={note} style={S.heroNote}>{note}</span>)}
+          </div>
           <div style={S.heroActions}>
-            <button className="m-btn filled" style={S.primaryButton} onClick={() => void createBook("qoe-preview-book")}>
-              Start QoE Preview
+            <button className="m-glint m-glass-control" style={S.primaryButton} onClick={() => void createBook("qoe-preview-book")} type="button">
+              <span style={S.brandDot}>Y</span>
+              <span style={S.heroActionCopy}>
+                <strong>Start QoE Preview</strong>
+                <span>Create the first source-grounded book.</span>
+              </span>
+              <span style={S.heroActionPill}>Start</span>
             </button>
-            <button className="m-btn tonal" style={S.glassButton} onClick={() => askYulia("Help me choose the right pitch book format and ask for the source files you need first.")}>
-              Plan with Yulia
+            <button className="m-glint m-glass-control" style={S.glassButton} onClick={() => askYulia("Help me choose the right pitch book format and ask for the source files you need first.")} type="button">
+              Plan with Yulia <span aria-hidden="true">›</span>
             </button>
           </div>
-        </div>
-        <div style={S.heroPanel}>
-          <div style={S.panelTop}>
-            <strong>Studio readiness</strong>
-            <span>{loadingBooks ? "syncing" : `${books.length} books`}</span>
-          </div>
-          {["Sources linked", "Model outputs tracked", "Audit appendix ready"].map((item, index) => (
-            <div key={item} style={S.readinessRow}>
-              <span style={{ ...S.readinessMeter, width: `${84 - index * 16}%` }} />
-              <strong>{item}</strong>
-            </div>
-          ))}
         </div>
       </section>
 
@@ -349,7 +359,7 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
             key={format.id}
             type="button"
             className="m-state"
-            style={{ ...S.formatCard, ...(selectedFormat === format.id ? S.formatCardActive : null) }}
+            style={{ ...S.formatCard, backgroundImage: formatCardBackground(format.id), ...(selectedFormat === format.id ? S.formatCardActive : null) }}
             onClick={() => setSelectedFormat(format.id)}
             onDoubleClick={() => void createBook(format.id)}
           >
@@ -698,6 +708,10 @@ function formatInitial(value: StudioFormatId): string {
   return formatLabel(value).split(/\s+/).map(part => part[0]).slice(0, 2).join("");
 }
 
+function formatCardBackground(value: StudioFormatId): string {
+  return `linear-gradient(180deg, rgba(14, 31, 50, 0.16), rgba(12, 28, 48, 0.62)), linear-gradient(135deg, rgba(255,255,255,.18), rgba(255,255,255,0) 48%), url('${FORMAT_TEXTURES[value]}')`;
+}
+
 function hashCode(value: string): number {
   return value.split("").reduce((hash, char) => ((hash << 5) - hash + char.charCodeAt(0)) | 0, 0);
 }
@@ -751,46 +765,38 @@ const S: Record<string, CSSProperties> = {
   page: {
     width: "min(1440px, calc(100% - 32px))",
     margin: "0 auto",
-    padding: "28px 0 72px",
+    padding: "22px 0 72px",
     color: "#172033",
   },
   hero: {
-    minHeight: 430,
-    borderRadius: 28,
+    minHeight: 560,
+    borderRadius: 24,
     position: "relative",
     overflow: "hidden",
-    display: "grid",
-    gridTemplateColumns: "minmax(0, 1.1fr) 420px",
-    gap: 24,
-    padding: 28,
-    backgroundImage: `radial-gradient(circle at 12% 0%, rgba(255,255,255,.92), transparent 42%), linear-gradient(135deg, rgba(229,240,253,.86), rgba(249,252,255,.64) 46%, rgba(220,233,248,.50)), url('${ART_HOUSE_TEXTURES.studio}')`,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    border: "1px solid rgba(255,255,255,.72)",
-    boxShadow: "0 30px 82px rgba(42,65,96,.18), inset 0 1px 0 rgba(255,255,255,.86)",
-    ...glassBackdrop,
+    display: "flex",
+    flexDirection: "column",
+    padding: 30,
+    backgroundImage: studioHeroWash,
+    backgroundSize: "cover, cover",
+    backgroundPosition: "center, center",
+    border: "1px solid rgba(255,255,255,0.46)",
+    boxShadow: "0 48px 118px rgba(52, 63, 90, 0.31), 0 20px 46px rgba(26, 34, 51, 0.16), 0 4px 12px rgba(26, 34, 51, 0.08), inset 0 1px 0 rgba(255,255,255,0.28)",
   },
   heroTexture: {
     position: "absolute",
     inset: 0,
-    backgroundImage: `linear-gradient(90deg, rgba(255,255,255,.72), rgba(255,255,255,.10) 58%, rgba(21,36,58,.20)), url('${DESKTOP_TEXTURES.todayHeroSample}')`,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    opacity: 0.54,
+    pointerEvents: "none",
+    background: "radial-gradient(circle at 12% 6%, rgba(255,255,255,0.18), transparent 34%), linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0) 56%)",
+    opacity: 1,
   },
-  heroInner: { position: "relative", zIndex: 1, alignSelf: "end", maxWidth: 820 },
-  brandRail: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 10,
-    padding: "8px 12px",
-    borderRadius: 999,
-    background: liquidGlass,
-    border: "1px solid rgba(255,255,255,.56)",
-    fontWeight: 800,
-    color: "#2E5C8A",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,.78), 0 14px 26px rgba(42,65,96,.10)",
-    ...glassBackdrop,
+  heroInner: {
+    position: "relative",
+    zIndex: 1,
+    display: "flex",
+    flexDirection: "column",
+    flex: 1,
+    maxWidth: 900,
+    padding: 0,
   },
   brandDot: {
     width: 28,
@@ -799,65 +805,120 @@ const S: Record<string, CSSProperties> = {
     display: "inline-grid",
     placeItems: "center",
     color: "#fff",
-    background: "linear-gradient(135deg, #8A9AE8, #2E5C8A)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,.45)",
+    background: "linear-gradient(145deg, #B7D8C6 0%, #5EA77F 100%)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.58), 0 8px 18px rgba(26,34,51,0.13)",
   },
   heroTitle: {
-    margin: "28px 0 16px",
-    maxWidth: 700,
-    fontSize: "clamp(42px, 4.8vw, 70px)",
+    margin: "52px 0 0",
+    maxWidth: 900,
+    fontFamily: "'Figtree', var(--font-body)",
+    fontWeight: 850,
+    fontSize: "clamp(38px, 4.5vw, 76px)",
     lineHeight: 0.94,
-    letterSpacing: 0,
+    letterSpacing: "-0.055em",
+    color: "#FFFFFF",
+    textWrap: "balance",
+    textShadow: "0 2px 18px rgba(26,34,51,0.20)",
   },
   heroCopy: {
-    maxWidth: 690,
-    margin: 0,
-    color: "#526176",
-    fontSize: 19,
+    maxWidth: 680,
+    margin: "18px 0 0",
+    color: "#FFFFFF",
+    fontSize: 17,
+    lineHeight: 1.55,
+    textWrap: "pretty",
+  },
+  heroActions: {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) auto",
+    gap: 12,
+    alignItems: "stretch",
+    marginTop: "auto",
+    paddingTop: 24,
+  },
+  heroNotes: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+    gap: 10,
+    marginTop: 28,
+  },
+  heroNote: {
+    minHeight: 112,
+    padding: 16,
+    borderRadius: 16,
+    background: "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.22), transparent 38%), linear-gradient(135deg, rgba(26,34,51,0.48), rgba(26,34,51,0.30) 52%, rgba(26,34,51,0.18))",
+    border: "0.5px solid rgba(255,255,255,0.34)",
+    boxShadow: liquidDarkGlassShadow,
+    backdropFilter: liquidGlassFilter,
+    WebkitBackdropFilter: liquidGlassFilter,
+    color: "#FFFFFF",
+    fontSize: 13,
     lineHeight: 1.45,
+    boxSizing: "border-box",
   },
-  heroActions: { display: "flex", gap: 12, flexWrap: "wrap", marginTop: 26 },
-  primaryButton: { minHeight: 44, background: "#1D5C94", color: "#fff" },
-  glassButton: { minHeight: 44, background: "rgba(255,255,255,.72)" },
-  heroPanel: {
-    position: "relative",
-    zIndex: 1,
-    alignSelf: "center",
-    minHeight: 300,
-    borderRadius: 24,
-    padding: 22,
-    color: "#EAF4FF",
-    backgroundImage: `${liquidDarkGlass}, url('${STUDIO_TEXTURES.navy}')`,
-    backgroundSize: "cover",
-    boxShadow: "0 20px 60px rgba(23,42,65,.24), inset 0 1px 0 rgba(255,255,255,.22)",
-    border: "1px solid rgba(255,255,255,.22)",
-    ...glassBackdrop,
-  },
-  panelTop: { display: "flex", justifyContent: "space-between", marginBottom: 34, color: "#fff" },
-  readinessRow: {
-    position: "relative",
-    overflow: "hidden",
+  primaryButton: {
+    all: "unset",
     minHeight: 72,
-    borderRadius: 18,
-    padding: "16px 18px",
-    marginBottom: 12,
-    background: "rgba(255,255,255,.13)",
-    border: "1px solid rgba(255,255,255,.18)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,.16)",
-    ...glassBackdrop,
+    boxSizing: "border-box",
+    display: "grid",
+    gridTemplateColumns: "52px minmax(0, 1fr) auto",
+    alignItems: "center",
+    gap: 14,
+    padding: "11px 14px",
+    borderRadius: 22,
+    background: "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.22), transparent 38%), linear-gradient(135deg, rgba(26,34,51,0.54), rgba(26,34,51,0.34) 52%, rgba(26,34,51,0.20))",
+    color: "#fff",
+    border: "0.5px solid rgba(255,255,255,0.34)",
+    boxShadow: liquidDarkGlassShadow,
+    backdropFilter: liquidGlassFilter,
+    WebkitBackdropFilter: liquidGlassFilter,
+    cursor: "pointer",
+    width: "100%",
   },
-  readinessMeter: {
-    position: "absolute",
-    left: 0,
-    bottom: 0,
-    height: 4,
-    background: "linear-gradient(90deg, #8A9AE8, #6FAE95)",
+  heroActionCopy: {
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: 3,
+    fontSize: 13,
+    lineHeight: 1.35,
+    color: "#FFFFFF",
+  },
+  heroActionPill: {
+    borderRadius: 999,
+    padding: "9px 13px",
+    background: "linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.025))",
+    color: "#FFFFFF",
+    fontWeight: 850,
+    fontSize: 12,
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.56)",
+  },
+  glassButton: {
+    all: "unset",
+    minWidth: 138,
+    minHeight: 72,
+    boxSizing: "border-box",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    padding: "0 18px",
+    borderRadius: 22,
+    background: "rgba(26,34,51,0.74)",
+    color: "#FFFFFF",
+    border: "1px solid rgba(255,255,255,0.20)",
+    boxShadow: liquidDarkGlassShadow,
+    backdropFilter: liquidGlassFilter,
+    WebkitBackdropFilter: liquidGlassFilter,
+    fontWeight: 800,
+    fontSize: 13,
+    cursor: "pointer",
   },
   commandBand: {
     display: "grid",
-    gridTemplateColumns: "minmax(0, .82fr) minmax(360px, 1fr)",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 380px), 1fr))",
     gap: 24,
-    marginTop: 28,
+    marginTop: 24,
     alignItems: "stretch",
   },
   commandCopy: { padding: "22px 6px" },
@@ -865,11 +926,12 @@ const S: Record<string, CSSProperties> = {
   sectionCopy: { color: "#60708A", fontSize: 16, lineHeight: 1.5, maxWidth: 620 },
   commandBox: {
     padding: 18,
-    borderRadius: 22,
-    background: liquidGlass,
-    border: "1px solid rgba(255,255,255,.55)",
-    boxShadow: "0 18px 44px rgba(42,65,96,.12), inset 0 1px 0 rgba(255,255,255,.74)",
-    ...glassBackdrop,
+    borderRadius: 20,
+    background: "radial-gradient(circle at 12% 0%, rgba(255,255,255,.74), transparent 40%), linear-gradient(145deg, rgba(255,255,255,.56), rgba(235,244,253,.34) 56%, rgba(214,230,248,.24))",
+    border: "0.5px solid rgba(255,255,255,0.58)",
+    boxShadow: "0 18px 44px rgba(42,65,96,.12), inset 0 1px 0 rgba(255,255,255,.72), inset 0 -1px 0 rgba(113,142,181,.12)",
+    backdropFilter: liquidGlassFilter,
+    WebkitBackdropFilter: liquidGlassFilter,
   },
   select: {
     width: "100%",
@@ -878,8 +940,11 @@ const S: Record<string, CSSProperties> = {
     borderRadius: 14,
     padding: "0 12px",
     color: "#172033",
-    background: "rgba(255,255,255,.86)",
+    background: "rgba(255,255,255,.68)",
     fontWeight: 800,
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,.72)",
+    backdropFilter: liquidGlassFilter,
+    WebkitBackdropFilter: liquidGlassFilter,
   },
   briefInput: {
     width: "100%",
@@ -892,37 +957,57 @@ const S: Record<string, CSSProperties> = {
     font: "inherit",
     lineHeight: 1.45,
     color: "#172033",
-    background: "rgba(255,255,255,.78)",
+    background: "rgba(255,255,255,.62)",
     boxSizing: "border-box",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,.74)",
+    backdropFilter: liquidGlassFilter,
+    WebkitBackdropFilter: liquidGlassFilter,
   },
-  commandButton: { width: "100%", marginTop: 12, minHeight: 42 },
+  commandButton: {
+    width: "100%",
+    marginTop: 12,
+    minHeight: 44,
+    background: "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.22), transparent 38%), linear-gradient(135deg, rgba(26,34,51,0.62), rgba(26,34,51,0.42) 52%, rgba(26,34,51,0.26))",
+    color: "#FFFFFF",
+    border: "0.5px solid rgba(255,255,255,0.32)",
+    boxShadow: liquidDarkGlassShadow,
+    backdropFilter: liquidGlassFilter,
+    WebkitBackdropFilter: liquidGlassFilter,
+  },
   errorText: { display: "block", marginTop: 10, color: "#8B3F24", fontWeight: 800 },
   busyText: { color: "#2E5C8A", fontWeight: 800 },
   formatGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(172px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
     gap: 12,
     marginTop: 28,
   },
   formatCard: {
-    minHeight: 188,
+    minHeight: 220,
+    position: "relative",
     textAlign: "left",
-    borderRadius: 20,
-    padding: 16,
-    border: "1px solid rgba(153,176,209,.42)",
-    background: liquidGlass,
-    boxShadow: "0 14px 34px rgba(42,65,96,.08), inset 0 1px 0 rgba(255,255,255,.64)",
+    borderRadius: 18,
+    padding: 17,
+    border: "1px solid rgba(255,255,255,.28)",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    color: "#FFFFFF",
+    boxShadow: "0 18px 44px rgba(42,65,96,.14), inset 0 1px 0 rgba(255,255,255,.28)",
     ...glassBackdrop,
     display: "flex",
     flexDirection: "column",
     gap: 8,
+    overflow: "hidden",
   },
-  formatCardActive: { borderColor: "rgba(75,113,168,.75)", boxShadow: "0 18px 42px rgba(46,92,138,.18)" },
-  formatMeta: { color: "#6B7C95", fontWeight: 800, fontSize: 12 },
+  formatCardActive: {
+    borderColor: "rgba(255,255,255,.82)",
+    boxShadow: "0 22px 52px rgba(46,92,138,.24), inset 0 0 0 1px rgba(255,255,255,.42)",
+  },
+  formatMeta: { color: "rgba(255,255,255,.74)", fontWeight: 850, fontSize: 12 },
   formatTitle: { fontSize: 19, lineHeight: 1.05 },
-  formatAudience: { color: "#2E5C8A", fontWeight: 800, fontSize: 12 },
-  formatDetail: { color: "#60708A", fontSize: 13, lineHeight: 1.35 },
-  lowerGrid: { display: "grid", gridTemplateColumns: "1.05fr .95fr", gap: 24, marginTop: 28 },
+  formatAudience: { color: "rgba(255,255,255,.86)", fontWeight: 850, fontSize: 12 },
+  formatDetail: { color: "rgba(236,246,255,.90)", fontSize: 13, lineHeight: 1.35, marginTop: "auto" },
+  lowerGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 420px), 1fr))", gap: 24, marginTop: 28 },
   bookPanel: {
     borderRadius: 24,
     padding: 20,
@@ -989,7 +1074,7 @@ const S: Record<string, CSSProperties> = {
     boxShadow: "0 18px 44px rgba(42,65,96,.10), inset 0 1px 0 rgba(255,255,255,.72)",
     ...glassBackdrop,
   },
-  diffGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 20 },
+  diffGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 210px), 1fr))", gap: 12, marginTop: 20 },
   diffItem: {
     minHeight: 118,
     borderRadius: 18,
@@ -1002,26 +1087,35 @@ const S: Record<string, CSSProperties> = {
     color: "#60708A",
   },
   canvasPage: {
-    width: "calc(100% - clamp(20px, 4vw, 64px))",
+    width: "min(1440px, calc(100% - 32px))",
     margin: "0 auto",
-    padding: "24px 0 72px",
+    padding: "20px 0 72px",
     color: "#172033",
   },
   canvasHeader: {
-    width: "min(1760px, 100%)",
-    margin: "0 auto 20px",
+    width: "100%",
+    margin: "0 auto 18px",
+    padding: 20,
+    boxSizing: "border-box",
+    borderRadius: 24,
     display: "flex",
     justifyContent: "space-between",
     alignItems: "flex-end",
     gap: 20,
+    backgroundImage: `radial-gradient(circle at 12% 0%, rgba(255,255,255,.66), transparent 40%), linear-gradient(135deg, rgba(247,251,255,.84), rgba(224,237,251,.50)), url('${STUDIO_TEXTURES.green}')`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    border: "1px solid rgba(255,255,255,.62)",
+    boxShadow: "0 18px 44px rgba(42,65,96,.10), inset 0 1px 0 rgba(255,255,255,.82)",
+    ...glassBackdrop,
   },
-  canvasTitle: { margin: "14px 0 6px", fontSize: "clamp(34px, 4vw, 56px)", lineHeight: 0.95 },
-  canvasSub: { margin: 0, color: "#60708A", fontSize: 17, maxWidth: 620 },
+  canvasTitle: { margin: "14px 0 6px", fontSize: "clamp(34px, 4vw, 54px)", lineHeight: 0.96, letterSpacing: 0 },
+  canvasSub: { margin: 0, color: "#4F6077", fontSize: 16, lineHeight: 1.42, maxWidth: 620 },
   canvasActions: { display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" },
   smallButton: { minHeight: 38 },
   workbench: {
     width: "100%",
-    maxWidth: 1760,
+    maxWidth: 1440,
     margin: "0 auto",
     display: "flex",
     flexWrap: "wrap",
@@ -1039,14 +1133,14 @@ const S: Record<string, CSSProperties> = {
   },
   toolRail: {
     display: "grid",
-    gap: 14,
-    flex: "0 1 340px",
-    width: "min(100%, 340px)",
-    maxWidth: 340,
+    gap: 12,
+    flex: "0 1 330px",
+    width: "min(100%, 330px)",
+    maxWidth: 330,
     alignSelf: "flex-start",
   },
   railSection: {
-    borderRadius: 22,
+    borderRadius: 18,
     padding: 16,
     background: liquidGlass,
     border: "1px solid rgba(255,255,255,.55)",
@@ -1072,11 +1166,11 @@ const S: Record<string, CSSProperties> = {
   warnDot: { width: 9, height: 9, marginTop: 5, borderRadius: 99, background: "#C9A24E" },
   slideStage: {
     minHeight: 720,
-    maxWidth: 980,
+    maxWidth: 1000,
     minWidth: "min(100%, 600px)",
     flex: "1 1 760px",
-    borderRadius: 26,
-    padding: 18,
+    borderRadius: 24,
+    padding: 16,
     backgroundImage: `radial-gradient(circle at 20% 0%, rgba(255,255,255,.62), transparent 38%), linear-gradient(180deg, rgba(225,238,252,.82), rgba(255,255,255,.56)), url('${STUDIO_TEXTURES.blue}')`,
     backgroundSize: "cover",
     border: "1px solid rgba(255,255,255,.58)",
@@ -1085,8 +1179,8 @@ const S: Record<string, CSSProperties> = {
   },
   deckFrame: { display: "grid", gap: 16 },
   slideCard: {
-    minHeight: 360,
-    borderRadius: 24,
+    minHeight: 382,
+    borderRadius: 22,
     padding: 24,
     backgroundImage: `radial-gradient(circle at 8% 0%, rgba(255,255,255,.76), transparent 40%), linear-gradient(135deg, rgba(255,255,255,.82), rgba(245,249,255,.58)), url('${STUDIO_TEXTURES.rose}')`,
     backgroundSize: "cover",
@@ -1096,9 +1190,9 @@ const S: Record<string, CSSProperties> = {
   },
   slideTop: { display: "flex", justifyContent: "space-between", alignItems: "center" },
   slideNumber: { fontWeight: 900, color: "#8A9AE8" },
-  slideTitle: { margin: "42px 0 14px", fontSize: 36, lineHeight: 0.98, maxWidth: 720 },
+  slideTitle: { margin: "42px 0 14px", fontSize: 34, lineHeight: 0.98, maxWidth: 720, letterSpacing: 0 },
   slideBody: { color: "#526176", fontSize: 17, lineHeight: 1.45, maxWidth: 760 },
-  bulletGrid: { display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 10, marginTop: 24 },
+  bulletGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 180px), 1fr))", gap: 10, marginTop: 24 },
   provenanceStrip: {
     display: "flex",
     flexWrap: "wrap",

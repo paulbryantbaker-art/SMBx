@@ -10,7 +10,7 @@ import { MODES, V6Icon } from "./icons";
 import { buildDesktopSurfaceContext, type SurfaceContext } from "../../lib/yuliaSurfaceContext";
 import { normalizeModelPreference, type ModelPreference } from "../../lib/modelPreference";
 import { buildBigFakeInvestmentBoardTab, shouldOpenSampleInvestmentBoard } from "../../lib/sampleInvestmentBoard";
-import type { FileListView, FileScope, IconName, Message, ModeId, Tab } from "./types";
+import type { FileListView, FileScope, Message, ModeId, Tab } from "./types";
 
 const VALID_MODES: ModeId[] = ["today", "pipeline", "search", "studio", "files", "docs", "analysis", "intel", "library"];
 
@@ -431,91 +431,6 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
 
   const modeLabel = MODES.find(m => m.id === activeMode)?.label ?? "Workspace";
   const launcherWork = (modeId: ModeId) => tabs.filter(tab => tabBelongsToLauncherMode(tab, modeId, tabs));
-  const [hoveredLauncher, setHoveredLauncher] = useState<ModeId | null>(null);
-  const [closingLauncher, setClosingLauncher] = useState<ModeId | null>(null);
-  const hoveredLauncherRef = useRef<ModeId | null>(null);
-  const launcherHoverCloseRef = useRef<number | null>(null);
-  const launcherFadeCloseRef = useRef<number | null>(null);
-  const launcherStripRef = useRef<HTMLElement | null>(null);
-
-  useEffect(() => {
-    hoveredLauncherRef.current = hoveredLauncher;
-  }, [hoveredLauncher]);
-
-  const clearLauncherHoverClose = () => {
-    if (launcherHoverCloseRef.current !== null) {
-      window.clearTimeout(launcherHoverCloseRef.current);
-      launcherHoverCloseRef.current = null;
-    }
-  };
-
-  const clearLauncherFadeClose = () => {
-    if (launcherFadeCloseRef.current !== null) {
-      window.clearTimeout(launcherFadeCloseRef.current);
-      launcherFadeCloseRef.current = null;
-    }
-  };
-
-  const openLauncherHover = (modeId: ModeId, openCount: number) => {
-    clearLauncherHoverClose();
-    clearLauncherFadeClose();
-    setClosingLauncher(null);
-    setHoveredLauncher(openCount > 0 ? modeId : null);
-  };
-
-  const closeLauncherHover = () => {
-    clearLauncherHoverClose();
-    const launcherToClose = hoveredLauncherRef.current;
-    setHoveredLauncher(null);
-    if (!launcherToClose) return;
-    setClosingLauncher(launcherToClose);
-    clearLauncherFadeClose();
-    launcherFadeCloseRef.current = window.setTimeout(() => {
-      setClosingLauncher(current => current === launcherToClose ? null : current);
-      launcherFadeCloseRef.current = null;
-    }, 560);
-  };
-
-  const scheduleLauncherHoverClose = () => {
-    clearLauncherHoverClose();
-    launcherHoverCloseRef.current = window.setTimeout(() => {
-      closeLauncherHover();
-    }, 160);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (launcherHoverCloseRef.current !== null) window.clearTimeout(launcherHoverCloseRef.current);
-      if (launcherFadeCloseRef.current !== null) window.clearTimeout(launcherFadeCloseRef.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!hoveredLauncher) return;
-
-    const onPointerMove = (event: PointerEvent) => {
-      const openWrap = launcherStripRef.current?.querySelector<HTMLElement>(".top-launcher-wrap.open");
-      const openMenu = openWrap?.querySelector<HTMLElement>(".top-launcher-menu");
-      const boundaryTargets = [openWrap, openMenu, launcherStripRef.current].filter(Boolean) as HTMLElement[];
-      const margin = 46;
-      const insideOpenArea = boundaryTargets.some(target => {
-        const rect = target.getBoundingClientRect();
-        return (
-          event.clientX >= rect.left - margin &&
-          event.clientX <= rect.right + margin &&
-          event.clientY >= rect.top - margin &&
-          event.clientY <= rect.bottom + margin
-        );
-      });
-
-      if (!insideOpenArea) {
-        closeLauncherHover();
-      }
-    };
-
-    window.addEventListener("pointermove", onPointerMove);
-    return () => window.removeEventListener("pointermove", onPointerMove);
-  }, [hoveredLauncher]);
 
   const renderLauncherTab = (tab: Tab, options: { child?: boolean; parentTitle?: string } = {}) => {
     const parentDeal = options.parentTitle ? null : owningLauncherDealForTab(tab, tabs);
@@ -586,6 +501,19 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
     );
   };
 
+  const renderLauncherChildren = (modeId: ModeId) => {
+    const openTabs = launcherWork(modeId);
+    if (openTabs.length === 0) return null;
+
+    return (
+      <div className="top-launcher-children">
+        <section className="top-work-section">
+          {renderLauncherWorkTree(modeId)}
+        </section>
+      </div>
+    );
+  };
+
   // ⌘K focuses Yulia from anywhere.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -603,26 +531,15 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
       <div style={A.row}>
         <div style={{ ...A.leftRail, width: chatWidth }}>
           <div style={A.leftLauncherBar}>
-            <nav ref={launcherStripRef} style={A.launcherStrip} aria-label="Workspace launchers">
+            <nav style={A.launcherStrip} aria-label="Workspace launchers">
               {MODES.map(mode => {
                 const openCount = launcherWork(mode.id).length;
                 const launcherActive = activeMode === mode.id;
-                const isLauncherMenuOpen = hoveredLauncher === mode.id && openCount > 0;
-                const isLauncherMenuClosing = closingLauncher === mode.id && openCount > 0;
                 return (
                   <div
                     key={mode.id}
-                    className={`top-launcher-wrap ${isLauncherMenuOpen ? "open" : ""} ${isLauncherMenuClosing ? "closing" : ""}`}
+                    className="top-launcher-wrap"
                     style={A.topLauncherWrap}
-                    onMouseEnter={() => openLauncherHover(mode.id, openCount)}
-                    onMouseLeave={scheduleLauncherHoverClose}
-                    onFocus={() => openLauncherHover(mode.id, openCount)}
-                    onBlur={(event) => {
-                      const nextTarget = event.relatedTarget;
-                      if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) {
-                        scheduleLauncherHoverClose();
-                      }
-                    }}
                   >
                     <button
                       className={`top-launcher ${launcherActive ? "active" : ""}`}
@@ -630,7 +547,6 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
                       onClick={() => pickMode(mode.id)}
                       aria-label={mode.label}
                       aria-current={launcherActive ? "page" : undefined}
-                      aria-haspopup={openCount > 0 ? "menu" : undefined}
                     >
                       <span className="top-launcher-icon" style={{ ...A.topLauncherIcon, ...(launcherActive ? A.topLauncherIconActive : undefined) }}>
                         <V6Icon name={mode.icon} size={14} />
@@ -638,23 +554,7 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
                       <span style={A.topLauncherLabel}>{mode.label}</span>
                       {openCount > 0 && <span style={{ ...A.topLauncherBadge, ...(launcherActive ? A.topLauncherBadgeActive : undefined) }}>{openCount}</span>}
                     </button>
-                    {openCount > 0 && (
-                      <div
-                        className="top-launcher-menu"
-                        style={A.topLauncherMenu}
-                        role="menu"
-                        onMouseEnter={() => openLauncherHover(mode.id, openCount)}
-                        onMouseLeave={scheduleLauncherHoverClose}
-                      >
-                        <div style={A.topLauncherMenuHead}>
-                          <span>{mode.label}</span>
-                          <span style={A.topLauncherMenuMeta}>{openCount} open</span>
-                        </div>
-                        <div className="thin-scroll" style={A.topLauncherMenuBody}>
-                          {renderLauncherWorkTree(mode.id)}
-                        </div>
-                      </div>
-                    )}
+                    {launcherActive && renderLauncherChildren(mode.id)}
                   </div>
                 );
               })}
@@ -676,6 +576,7 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
               modelPreference={modelPreference}
               setModelPreference={setModelPreference}
               showLearnLinks={!user}
+              showEmptySuggestions
               onFileUpload={chat.uploadFile}
               onConfirmStagedAction={chat.confirmStagedAction}
               onCancelStagedAction={chat.cancelStagedAction}
@@ -1038,17 +939,6 @@ function inferredLauncherDealName(tab: Tab): string | null {
   return null;
 }
 
-function topTabIcon(tab: Tab): IconName {
-  if (tab.kind === "deal") return "deal";
-  if (tab.kind === "analysis") return "chart";
-  if (tab.kind === "files-list" || tab.kind === "learn") return "library";
-  if (tab.kind === "doc" || tab.kind === "marketing-studio") return "doc";
-  if (tab.kind === "history") return "history";
-  if (tab.kind === "settings") return "settings";
-  if (tab.kind === "starter") return "plus";
-  return "feed";
-}
-
 function topTabMeta(tab: Tab, allTabs: Tab[] = [], insideDeal = false): string {
   const dealContext = insideDeal ? null : (owningLauncherDealForTab(tab, allTabs)?.title ?? inferredLauncherDealName(tab));
   const withDeal = (label: string) => dealContext ? `${dealContext} · ${label}` : label;
@@ -1162,12 +1052,12 @@ const A: Record<string, CSSProperties> = {
     background: "linear-gradient(180deg, #DDE8F8 0%, #E2EBF9 48%, #EFF4FD 100%)",
   },
   leftLauncherBar: {
-    height: 54,
+    flex: "0 0 auto",
     flexShrink: 0,
     display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "6px 10px 8px",
+    alignItems: "stretch",
+    justifyContent: "flex-start",
+    padding: "10px 12px 8px",
     boxSizing: "border-box",
     overflow: "visible",
     position: "relative",
@@ -1175,71 +1065,59 @@ const A: Record<string, CSSProperties> = {
   },
   launcherStrip: {
     position: "relative",
-    height: 40,
-    width: "fit-content",
-    maxWidth: "100%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 5,
-    padding: "4px",
+    width: "100%",
+    display: "grid",
+    gap: 2,
+    padding: 0,
     boxSizing: "border-box",
-    borderRadius: 15,
-    background: "rgba(251, 253, 255, 0.88)",
-    border: "1px solid rgba(150, 174, 205, 0.78)",
-    boxShadow: "0 1px 2px rgba(36,59,84,0.08), 0 10px 24px -22px rgba(45,65,90,0.38), inset 0 1px 0 rgba(255,255,255,0.94)",
-    backdropFilter: "blur(8px) saturate(150%)",
-    WebkitBackdropFilter: "blur(8px) saturate(150%)",
+    background: "transparent",
+    border: 0,
+    boxShadow: "none",
     overflow: "visible",
   },
   topLauncherWrap: {
-    display: "inline-flex",
-    height: 32,
-    flex: "0 0 auto",
+    display: "block",
   },
   topLauncher: {
     all: "unset",
     boxSizing: "border-box",
-    height: 32,
-    minWidth: 74,
-    padding: "0 8px",
-    borderRadius: 11,
-    display: "inline-flex",
+    width: "100%",
+    minHeight: 32,
+    padding: "4px 7px",
+    borderRadius: 9,
+    display: "grid",
+    gridTemplateColumns: "24px minmax(0, 1fr) auto",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 5,
+    gap: 8,
     cursor: "pointer",
     border: "1px solid transparent",
-    color: "#59697D",
-    fontSize: 12,
-    fontWeight: 800,
+    color: "#4D5B6E",
+    fontSize: 14,
+    fontWeight: 720,
   },
   topLauncherActive: {
-    background: "#FFFFFF",
-    border: "1px solid rgba(132, 158, 196, 0.88)",
+    background: "rgba(255,255,255,.42)",
+    border: "1px solid rgba(166, 190, 216, 0.36)",
     color: "#2F5F8D",
-    boxShadow: [
-      "0 1px 1px rgba(36, 59, 84, 0.10)",
-      "0 8px 16px -15px rgba(36, 59, 84, 0.38)",
-      "inset 0 1px 0 rgba(255,255,255,0.96)",
-    ].join(", "),
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,.54)",
   },
   topLauncherIcon: {
-    width: 19,
-    height: 19,
+    width: 24,
+    height: 24,
     borderRadius: 6,
     display: "grid",
     placeItems: "center",
     color: "inherit",
   },
   topLauncherIconActive: {
-    background: "rgba(225, 239, 253, 0.96)",
+    background: "rgba(255, 255, 255, 0.54)",
     color: "#2F5F8D",
-    boxShadow: "inset 0 0 0 0.5px rgba(147, 176, 209, 0.42)",
   },
   topLauncherLabel: {
     lineHeight: 1,
     whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   },
   topLauncherBadge: {
     minWidth: 16,
@@ -1259,51 +1137,6 @@ const A: Record<string, CSSProperties> = {
     background: "rgba(235, 244, 253, 0.78)",
     boxShadow: "0 0 0 1px rgba(150, 174, 205, 0.42)",
   },
-  topLauncherMenu: {
-    position: "absolute",
-    top: "calc(100% + 4px)",
-    left: "50%",
-    width: 326,
-    maxHeight: "min(500px, calc(100vh - 108px))",
-    display: "flex",
-    flexDirection: "column",
-    padding: 10,
-    boxSizing: "border-box",
-    borderRadius: 16,
-    background: "rgba(242, 247, 253, 0.96)",
-    border: "1px solid rgba(195, 211, 228, 0.72)",
-    boxShadow: "0 22px 54px rgba(37, 52, 74, 0.18), inset 0 1px 0 rgba(255,255,255,0.78)",
-    backdropFilter: "blur(18px) saturate(160%)",
-    WebkitBackdropFilter: "blur(18px) saturate(160%)",
-    zIndex: 80,
-  },
-  topLauncherMenuHead: {
-    flexShrink: 0,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 10,
-    padding: "4px 6px 9px",
-    fontSize: 13,
-    fontWeight: 850,
-    color: "var(--m-on-surface)",
-    letterSpacing: "-0.01em",
-  },
-  topLauncherMenuMeta: {
-    fontFamily: "var(--font-mono)",
-    fontSize: 9.5,
-    letterSpacing: "0.11em",
-    textTransform: "uppercase",
-    color: "var(--m-on-surface-mid)",
-    fontWeight: 700,
-  },
-  topLauncherMenuBody: {
-    flex: "0 1 auto",
-    minHeight: 0,
-    maxHeight: "min(410px, calc(100vh - 174px))",
-    overflowY: "auto",
-    padding: "0 2px 2px",
-  },
   row: {
     flex: 1,
     display: "flex",
@@ -1318,12 +1151,98 @@ const A: Record<string, CSSProperties> = {
     minHeight: 0,
     display: "flex",
     flexDirection: "column",
-    overflow: "visible",
+    overflow: "hidden",
     position: "relative",
     zIndex: 60,
   },
+  railTabLayer: {
+    position: "relative",
+    zIndex: 72,
+    flex: "0 1 auto",
+    minHeight: 0,
+    maxHeight: "min(42vh, 440px)",
+    margin: "0 12px 8px",
+    padding: "2px 0 18px",
+    boxSizing: "border-box",
+    display: "grid",
+    gridTemplateRows: "auto minmax(0, 1fr)",
+    borderRadius: 0,
+    color: "#263245",
+    background: "transparent",
+    border: 0,
+    boxShadow: "none",
+  },
+  railTabHeader: {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) auto",
+    alignItems: "center",
+    gap: 10,
+    minHeight: 28,
+    padding: "9px 4px 6px",
+  },
+  railTabHeaderCopy: {
+    display: "grid",
+    gap: 1,
+    minWidth: 0,
+  },
+  railTabTitle: {
+    color: "#253244",
+    fontSize: 13,
+    lineHeight: 1.08,
+    fontWeight: 850,
+    letterSpacing: "-0.01em",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+  },
+  railTabMeta: {
+    color: "#6D7D91",
+    fontSize: 10.5,
+    lineHeight: 1.05,
+    fontWeight: 650,
+  },
+  railTabCount: {
+    minWidth: 21,
+    height: 21,
+    padding: "0 6px",
+    borderRadius: 999,
+    display: "grid",
+    placeItems: "center",
+    color: "#496B90",
+    background: "rgba(255,255,255,.46)",
+    boxShadow: "inset 0 0 0 1px rgba(170,196,222,.34)",
+    fontSize: 10.5,
+    fontWeight: 850,
+  },
+  railTabScroll: {
+    position: "relative",
+    minHeight: 0,
+    overflowY: "auto",
+    padding: "0 2px 14px 0",
+  },
+  railTabGroup: {
+    display: "grid",
+    gap: 5,
+    marginBottom: 12,
+  },
+  railTabGroupLabel: {
+    padding: "6px 0 2px 4px",
+    color: "rgba(77, 89, 106, 0.62)",
+    fontSize: 12,
+    lineHeight: 1,
+    fontWeight: 760,
+  },
+  railTabFade: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: -1,
+    height: 34,
+    pointerEvents: "none",
+    background: "linear-gradient(180deg, rgba(225,237,252,0), rgba(225,237,252,.78))",
+  },
   chatPane: {
-    flex: 1,
+    flex: "1 1 auto",
     minWidth: 0,
     display: "flex",
     flexDirection: "column",

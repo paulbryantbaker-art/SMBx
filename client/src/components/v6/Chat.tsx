@@ -18,6 +18,7 @@ interface ChatProps {
   modelPreference?: ModelPreference;
   setModelPreference?: (value: ModelPreference) => void;
   showLearnLinks?: boolean;
+  showEmptySuggestions?: boolean;
   onFileUpload?: (file: File) => Promise<{ name: string; size: string } | null>;
   onConfirmStagedAction?: (id: number, summary?: string) => void | Promise<void>;
   onCancelStagedAction?: (id: number) => void | Promise<void>;
@@ -26,12 +27,13 @@ interface ChatProps {
 export function V6Chat({
   thread, draft, setDraft, send, inputRef, modeLabel, onOpenTab,
   sending, streamingText, activeTool, error, modelPreference = "auto", setModelPreference,
-  showLearnLinks = true, onFileUpload, onConfirmStagedAction, onCancelStagedAction,
+  showLearnLinks = true, showEmptySuggestions = true, onFileUpload, onConfirmStagedAction, onCancelStagedAction,
 }: ChatProps) {
   const [shareLabel, setShareLabel] = useState<"Share" | "Copied">("Share");
   const [uploading, setUploading] = useState(false);
   const [attachment, setAttachment] = useState<{ name: string; size: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const isEmpty = thread.length === 0 && !sending;
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -83,9 +85,9 @@ export function V6Chat({
 
   return (
     <div style={C.chat}>
-      <div className="thin-scroll" style={C.chatBody}>
-        {thread.length === 0 && !sending ? (
-          <V6ChatEmpty modeLabel={modeLabel} onPick={(t) => send(t)} onOpenTab={onOpenTab} showLearnLinks={showLearnLinks} />
+      <div className="thin-scroll" style={{ ...C.chatBody, ...(isEmpty ? C.chatBodyEmpty : undefined) }}>
+        {isEmpty ? (
+          <V6ChatEmpty modeLabel={modeLabel} onPick={(t) => send(t)} onOpenTab={onOpenTab} showLearnLinks={showLearnLinks} showSuggestions={showEmptySuggestions} />
         ) : (
           <>
             {thread.map((m, i) => (
@@ -319,6 +321,7 @@ interface ChatEmptyProps {
   onPick: (text: string) => void;
   onOpenTab: OpenTab;
   showLearnLinks: boolean;
+  showSuggestions: boolean;
 }
 
 const SUGGESTIONS_BY_MODE: Record<string, string[]> = {
@@ -349,6 +352,12 @@ const SUGGESTIONS_BY_MODE: Record<string, string[]> = {
     "What is private versus shared?",
     "Find executed documents",
     "List active data rooms",
+  ],
+  "Studio": [
+    "Create a buyer pitch book",
+    "Turn open files into a QoE Preview Book",
+    "Draft an IC deck from Big Fake Deal",
+    "Refresh this book from models",
   ],
   "Business Search": [
     "What's worth my time today?",
@@ -392,7 +401,7 @@ const LEARN_CHIPS: { label: string; section: "how" | "pricing"; anchor?: string 
   { label: "Pricing",      section: "pricing" },
 ];
 
-function V6ChatEmpty({ modeLabel, onPick, onOpenTab, showLearnLinks }: ChatEmptyProps) {
+function V6ChatEmpty({ modeLabel, onPick, onOpenTab, showLearnLinks, showSuggestions }: ChatEmptyProps) {
   const suggestions = SUGGESTIONS_BY_MODE[modeLabel] ?? [
     "What can you do?",
     "Walk me through a deal",
@@ -405,49 +414,51 @@ function V6ChatEmpty({ modeLabel, onPick, onOpenTab, showLearnLinks }: ChatEmpty
   };
 
   return (
-    <div className="m-fade-up">
-      <h1 style={{
-        fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700,
-        letterSpacing: "-0.02em", lineHeight: 1.2, margin: "0 0 8px", color: "var(--m-on-surface)",
-        textWrap: "balance",
-      }}>
-        {copy.title}
-      </h1>
-      <p style={{ fontSize: 12.5, lineHeight: 1.55, color: "var(--m-on-surface-var)", margin: "0 0 14px", textWrap: "pretty" }}>
-        {copy.body}
-      </p>
-
-      <div className="mono" style={C.eyebrow}>{copy.eyebrow} · {modeLabel.toUpperCase()}</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 5, marginBottom: 16 }}>
-        {suggestions.map(s => (
-          <button
-            key={s}
-            onClick={() => onPick(s)}
-            className="m-state"
-            style={C.suggestionChip}
-          >
-            <span style={{ color: "var(--m-primary)", fontSize: 11 }}>→</span>
-            <span>{s}</span>
-          </button>
-        ))}
+    <div className="m-fade-up" style={C.emptyState}>
+      <div style={C.emptyIntro}>
+        <h1 style={{
+          fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700,
+          letterSpacing: "-0.02em", lineHeight: 1.2, margin: "0 0 8px", color: "var(--m-on-surface)",
+          textWrap: "balance",
+        }}>
+          {copy.title}
+        </h1>
+        <p style={{ fontSize: 12.5, lineHeight: 1.55, color: "var(--m-on-surface-var)", margin: 0, textWrap: "pretty" }}>
+          {copy.body}
+        </p>
       </div>
 
-      {showLearnLinks && (
-        <>
-          <div className="mono" style={C.eyebrow}>ABOUT SMBX</div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {LEARN_CHIPS.map(c => (
+      {showSuggestions && (
+        <div style={C.emptyActions}>
+          <div style={C.emptySuggestionStack}>
+            {suggestions.map(s => (
               <button
-                key={c.label}
-                onClick={() => openLearn(c.section, c.anchor)}
-                style={C.learnPill}
+                key={s}
+                onClick={() => onPick(s)}
+                className="m-state"
+                style={C.suggestionChip}
               >
-                <span style={{ fontSize: 10, opacity: 0.85 }}>↗</span>
-                <span>{c.label}</span>
+                <span style={{ color: "var(--m-primary)", fontSize: 11 }}>→</span>
+                <span>{s}</span>
               </button>
             ))}
           </div>
-        </>
+
+          {showLearnLinks && (
+            <div style={C.learnStack}>
+              {LEARN_CHIPS.map(c => (
+                <button
+                  key={c.label}
+                  onClick={() => openLearn(c.section, c.anchor)}
+                  style={C.learnPill}
+                >
+                  <span style={{ fontSize: 10, opacity: 0.85 }}>↗</span>
+                  <span>{c.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
@@ -457,7 +468,7 @@ function emptyCopy(modeLabel: string): { title: string; body: ReactNode; eyebrow
   if (modeLabel === "Today") {
     return {
       title: "Hi, I'm Yulia, your deal desk is ready.",
-      body: "Ask for the next move, open a draft, or turn this page into a tighter action list.",
+      body: <>Start using the app completely for free. Use the shortcuts below to explore, or just start chatting. Feel free to learn more about the app too.</>,
       eyebrow: "TODAY PROMPTS",
     };
   }
@@ -507,6 +518,10 @@ const C: Record<string, CSSProperties> = {
     display: "flex", flexDirection: "column", minHeight: 0, height: "100%",
   },
   chatBody: { flex: 1, overflowY: "auto", padding: "8px 8px 10px" },
+  chatBodyEmpty: {
+    display: "flex",
+    minHeight: 0,
+  },
   composer: {
     margin: 8,
     background: "linear-gradient(180deg, #FFFFFF 0%, #FBFDFF 100%)",
@@ -625,6 +640,32 @@ const C: Record<string, CSSProperties> = {
     fontSize: 9.5, color: "var(--m-on-surface-mid)",
     letterSpacing: "0.14em", fontWeight: 600,
     margin: "0 0 8px",
+  },
+  emptyState: {
+    width: "100%",
+    minHeight: "100%",
+    display: "flex",
+    flexDirection: "column",
+    gap: 14,
+  },
+  emptyIntro: {
+    flex: "0 0 auto",
+  },
+  emptyActions: {
+    marginTop: "auto",
+    display: "grid",
+    gap: 10,
+    paddingTop: 12,
+  },
+  emptySuggestionStack: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 5,
+  },
+  learnStack: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 6,
   },
   suggestionChip: {
     all: "unset",

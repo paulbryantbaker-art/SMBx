@@ -4,6 +4,34 @@
 **Sources:** `methodology/CC_V19_IMPLEMENTATION_BRIEF.md` + `methodology/METHODOLOGY_V19.md` + `Downloads/v19/smbX Must-Haves.pdf` + `Downloads/v19/Agent Economy MandA Playbook.pdf`.
 **Audit baseline:** `origin/main` at `c5270a9`.
 
+## Current V19 execution order — Pitch Book Studio first
+
+**Decision:** V19 now leads with **Pitch Book Studio**, not Today Canvas or a standalone QoE report. Studio is the creation surface for pitch books, IC decks, QoE preview books, CIM excerpts, lender books, board updates, and investment memos. Files remains storage/routing. Studio is where source-grounded collateral gets created, versioned, refreshed, audited, and exported.
+
+**First Attractor:** QoE Preview ships as a Studio-generated book: upload/source files → extract facts → run QoE Lite + NWC/add-back defensibility → generate QoE Preview Book → export/share.
+
+**Competitive bar:** Studio must compete with finance workbenches and Claude Finance-style workflows: unified inputs, source-linked verification, server-side financial models, Excel/model round trip, audit trail, and institutional-quality presentation output.
+
+### Consecutive runs from here
+
+| Run | Name | Current repo state | Next done condition |
+|---|---|---|---|
+| 1 | Pitch Book Studio V1 | 🟡 Implemented as first pass: `studio_books`, `studio_book_versions`, `studio_sources`, `studio_exports`, server routes, Studio UI, local fallback, PPTX/PDF export, and five pitch-book tools exist. | Verify migrations on fresh + existing DB, harden source/provenance states, and make Studio UI use the final Apple Glass + Neo design language. |
+| 2 | Pitch Book Generation Engine | 🟡 Deterministic templates for seven formats exist in `server/services/pitchBookStudio.ts`; tools exist in `server/services/tools.ts`. | Replace placeholder narrative/model slots with canonical server model runs and source-extraction facts. |
+| 3 | Pitch Book Source Grounding | 🟡 Slide-level provenance, warning states, source cards, and audit appendices exist in draft form. | Validate every citation/model/file reference against registries before export and block/flag unsupported metrics. |
+| 4 | V19 Foundation Repair | 🟡 `market_data_cache` collision is addressed by 067/070 compatibility migrations; V19 tables exist. | Run fresh-db and migrated-db verification; confirm all V19 tables and seeds are usable. |
+| 5 | Canonical Server-Side V19 Runtime | 🟠 Model registry catalog exists, but model IDs are still `v19.*` and executable `MODEL.*.v1` runners do not exist. | Standardize IDs on `MODEL.*.v1`, add `V19Model` contract, model output hashes, and audit payloads. |
+| 6 | Tier-0 Server Models | ❌ Not executable yet. | Implement Tier-0 valuation, QoE, LBO/SBA, tax, legal halt scan, DSCR, NWC, PPA, sources/uses, rollover, earnout, and structure models. |
+| 7 | Model Stack, Gates, Prompts | 🟡 Composer service exists; gate/runtime wiring and `YULIA_PROMPTS_V4.md` are still pending. | Compose league × journey × deal type stacks, inject requirements into chat/Studio, and add halt triggers. |
+| 8 | V19 Tools + Chat Runtime | 🟡 Pitch-book tools exist; the seven canonical V19 tools are not registered. | Add `compose_model_stack`, `execute_model`, `lookup_citation`, `fetch_market_data`, `defer_to_counsel`, `update_tax_position`, and `write_audit_trail`. |
+| 9 | Market Data + Connectors | 🟡 Existing market-data service/cache exists. | Add daily FRED refresh, freshness checks, and read-only connector contracts/status surfaces. |
+| 10 | Today Canvas + Firm Memory | 🟡 Today UI exists, but V19 operating-surface data model is pending. | Add Morning Brief, Gate Countdown, Deals-in-Flight Pulse, Studio refresh needs, and reusable firm memory. |
+| 11 | QoE Preview Attractor | 🟡 QoE Preview Book template exists. | Make the full upload → extraction → QoE Lite → Studio book → export path work end to end. |
+| 12 | Excel Round Trip | ❌ Greenfield. | Add assumptions, import/export, rerun, diff, and Studio slide refresh when linked assumptions change. |
+| 13 | Credit Budget + Pricing Meter | 🟡 Subscription ladder exists; V19 credit meter is pending. | Meter model runs, exports, API/tool calls, and enterprise usage without reintroducing wallet/success fees. |
+| 14 | Audit, Agent Economy, Full V19 | 🟡 Agent card exists; deeper audit/API/OAuth work pending. | Seven-year audit manifests, audit packets, scoped auth, MCP-compatible routes, and marketplace packaging. |
+| 15 | Final Hardening | ❌ Pending. | Build, migrations, model fixtures, Studio export checks, chat/tool checks, and Playwright coverage all green. |
+
 ## The three lenses
 
 The V19 implementation brief covers **runtime correctness** (calc engine, citation hygiene, model stack, audit trail). The two PDFs cover a parallel and equally large body of **conversion + stickiness** and **agent-economy SKU** work that the brief doesn't address. The real build list is the union.
