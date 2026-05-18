@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'wouter';
 import { authHeaders, type User } from '../hooks/useAuth';
+import { V19UsageMeter } from '../components/v6/V19UsageMeter';
 
 interface SettingsProps {
   user: User;
@@ -164,6 +165,10 @@ export default function Settings({ user, onLogout }: SettingsProps) {
         {/* Usage Tab */}
         {tab === 'usage' && (
           <div>
+            <div className="mb-5">
+              <V19UsageMeter user={user} />
+            </div>
+
             {/* Period selector */}
             <div className="flex gap-2 mb-4">
               {[7, 30, 90].map(d => (

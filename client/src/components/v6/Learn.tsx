@@ -1625,6 +1625,17 @@ const COMPARE: CompareGroup[] = [
     ],
   },
   {
+    title: "V19 usage — included monthly",
+    rows: [
+      { feature: "V19 allowance",                    cells: ["30",  "600",   "2,500",  "12,000", "custom"] },
+      { feature: "Server model runs",                cells: ["20",  "300",   "1,200",  "6,000",  "custom"] },
+      { feature: "Studio books",                     cells: ["1",   "12",    "60",     "300",    "custom"] },
+      { feature: "Studio exports",                   cells: ["1",   "30",    "150",    "600",    "custom"] },
+      { feature: "API/MCP calls",                    cells: ["—",   "—",     "2,500",  "15,000", "custom"] },
+      { feature: "Agent usage",                      cells: ["—",   "—",     "—",      "supervised", "autonomous"] },
+    ],
+  },
+  {
     title: "Team adds — for firms",
     rows: [
       { feature: "Up to 5 seats",                       cells: ["—", "—", "—", "✓", "✓"] },

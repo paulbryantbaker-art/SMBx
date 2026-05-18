@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { authHeaders, type User } from "../../../hooks/useAuth";
 import { ART_HOUSE_TEXTURES, STUDIO_TEXTURES } from "../../../lib/randomTextures";
 import type { OpenTab, StudioFormatId, Tab } from "../types";
+import { V19UsageMeter } from "../V19UsageMeter";
 
 interface MarketingStudioProps {
   tab: Tab;
@@ -328,8 +329,9 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
             Choose the collateral Yulia should build. Use the chat rail for audience, source, and mandate instructions.
           </p>
         </div>
-        {error && <span style={S.errorText}>{error}</span>}
       </section>
+      {error && <div style={S.errorNotice}>{error}</div>}
+      {user && <V19UsageMeter user={user} compact surface="studio" />}
 
       <section style={S.formatGrid}>
         {FORMATS.map(format => (
@@ -653,7 +655,7 @@ function StudioCanvas({
                 ))}
               </div>
             ) : null}
-            {error && <p style={S.errorText}>{error}</p>}
+            {error && <p style={S.errorNotice}>{error}</p>}
             {busy && <p style={S.busyText}>{busy}...</p>}
           </section>
         </aside>
@@ -897,6 +899,18 @@ const S: Record<string, CSSProperties> = {
   sectionTitle: { margin: 0, fontSize: 28, lineHeight: 1.05 },
   sectionCopy: { color: "#60708A", fontSize: 16, lineHeight: 1.5, maxWidth: 620 },
   errorText: { display: "block", marginTop: 10, color: "#8B3F24", fontWeight: 800 },
+  errorNotice: {
+    margin: "12px 0 0",
+    padding: "12px 14px",
+    borderRadius: 18,
+    color: "#243653",
+    fontWeight: 850,
+    background:
+      "radial-gradient(circle at 18% 0%, rgba(255,255,255,.72), transparent 35%), linear-gradient(135deg, rgba(255,255,255,.72), rgba(234,243,251,.62))",
+    border: "1px solid rgba(166,190,220,.42)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,.76), 0 16px 34px rgba(42,65,96,.10)",
+    ...glassBackdrop,
+  },
   busyText: { color: "#2E5C8A", fontWeight: 800 },
   formatGrid: {
     display: "grid",

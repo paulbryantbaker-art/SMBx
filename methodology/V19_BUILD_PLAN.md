@@ -89,7 +89,7 @@ Implemented in `server/services/v19EntitlementService.ts`; events are written to
 | 7 | Artifact Schemas + Thin MCP Contract | 🟡 Started: `shared/v19Artifacts.ts` defines Studio, source, model-run, audit, deal-state, and gate-state artifact contracts; `v19ResourceContract.ts` exposes first resource templates/tool contracts through the agent card; `/api/v19/resource-contract` and `/api/v19/resources?uri=...` now read authenticated internal resources. | Keep resource reads aligned with Studio/model/audit persistence and graduate the internal contract into MCP/API packaging only after it stabilizes. |
 | 8 | Model Stack, Gates, Prompts | 🟡 Composer service exists; gate definitions now expose V19 `requiredModels`, `requiredCitations`, and `alwaysHaltTriggers`; chat prompt injection now includes current V19 gate readiness; `YULIA_PROMPTS_V4.md` is still pending. | Compose league × journey × deal type stacks more deeply and formalize prompt governance in `YULIA_PROMPTS_V4.md`. |
 | 9 | V19 Tools + Chat Runtime | 🟡 Started: `compose_model_stack`, `execute_model`, `lookup_citation`, `fetch_market_data`, `read_v19_readiness`, `defer_to_counsel`, `update_tax_position`, and `write_audit_trail` are registered. Tool outputs now carry V19 readiness for deal context, Studio books, model runs, exports, and gate advance. | Make audit writes automatic for every model-backed response and extend readiness checks into share/publish paths beyond Studio export. |
-| 10 | Credit Budget + Pricing Tollgates | 🟡 Implemented as first pass: V19 plan entitlements now define model-run, Studio-book, export, API/MCP, tool-call, and enterprise-agent allowances; V19 actions write to `agency_usage_events`; tools and Studio return structured `credit_budget_required`, `human_approval_required`, and `enterprise_scope_required` states. | Add pricing-page/user-visible meter UI, org-level pooling, and enterprise policy controls. |
+| 10 | Credit Budget + Pricing Tollgates | 🟡 Implemented as first pass: V19 plan entitlements now define model-run, Studio-book, export, API/MCP, tool-call, and enterprise-agent allowances; V19 actions write to `agency_usage_events`; tools and Studio return structured `credit_budget_required`, `human_approval_required`, and `enterprise_scope_required` states; Settings/Studio/Pricing now expose the first user-visible meter and entitlement language. | Add org-level pooling, enterprise policy controls, and persistent billing-period reconciliation. |
 | 11 | Today Canvas + Firm Memory | 🟡 Today UI exists, but V19 operating-surface data model is pending. | Add Morning Brief, Gate Countdown, Deals-in-Flight Pulse, Studio refresh needs, and reusable firm memory. |
 | 12 | QoE Preview Attractor | 🟡 QoE Preview Book template exists. | Make the full upload → extraction → QoE Lite → Studio book → export path work end to end. |
 | 13 | Market Data + Connectors | 🟡 Existing market-data service/cache exists. | Add daily FRED refresh, freshness checks, and read-only connector contracts/status surfaces. |
@@ -125,7 +125,7 @@ The V19 implementation brief covers **runtime correctness** (calc engine, citati
 | 9 | Deal Pack in 4 hours (IS Attractor) | PDF #2 | ❌ greenfield |
 | 10 | QoE Preview (search-funder Attractor) | PDF #3 | ❌ greenfield |
 | 11 | SBA-eligibility filter on buyer lists (post-March-2026 citizenship rule) | PDF #7 | ❌ greenfield (`sbaLendingService.ts` exists as foundation) |
-| 12 | Credit-budget pricing recast + real-time meter UI | PDF Agent Economy | 🟡 Server meter/entitlements started; real-time UI and org pooling pending |
+| 12 | Credit-budget pricing recast + real-time meter UI | PDF Agent Economy | 🟡 Server meter/entitlements started; Settings/Studio meter UI and pricing comparison language added; org pooling pending |
 | 13 | Persistent file storage on Railway volume `/data/uploads/` | V19 §7.5 | 🟡 production default set; Railway volume/env verification pending |
 | 14 | Doc migration (archive V17/V18a/V18b, update CLAUDE.md) | V19 §1+§9 | 🟡 working-tree complete; commit SHA pending |
 
@@ -221,7 +221,8 @@ The V19 implementation brief covers **runtime correctness** (calc engine, citati
 - Keep the contract internal/local until stable, then package the same objects for MCP/API consumers.
 - ✅ Add plan entitlements for credits, model runs, exports, and agent/API scopes.
 - ✅ Add remaining tollgate states to tools and Studio: human approval required, credit budget required, enterprise scope required.
-- Add pricing-page/user-visible meter UI, org-level budgets, and enterprise policy controls.
+- ✅ Add pricing-page/user-visible meter UI.
+- Add org-level budgets and enterprise policy controls.
 
 ### Phase 3 — Today, Files, Pipeline as Operating Surfaces
 

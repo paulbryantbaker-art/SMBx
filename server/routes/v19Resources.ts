@@ -4,6 +4,7 @@ import { readV19Resource } from '../services/v19ResourceReader.js';
 import {
   checkV19Entitlement,
   formatV19TollgateForYulia,
+  readV19UsageMeter,
   recordV19UsageEvent,
 } from '../services/v19EntitlementService.js';
 
@@ -11,6 +12,22 @@ export const v19ResourcesRouter = Router();
 
 v19ResourcesRouter.get('/v19/resource-contract', (_req, res) => {
   res.json(listV19ResourceContract());
+});
+
+v19ResourcesRouter.get('/v19/entitlements', async (req, res) => {
+  const userId = Number((req as any).userId);
+  if (!Number.isFinite(userId) || userId <= 0) return res.status(401).json({ error: 'Not authenticated' });
+
+  try {
+    const usage = await readV19UsageMeter(userId);
+    return res.json({
+      usage,
+      tollgateStates: ['credit_budget_required', 'human_approval_required', 'enterprise_scope_required'],
+    });
+  } catch (err: any) {
+    console.error('[v19] read entitlements failed:', err.message);
+    return res.status(500).json({ error: 'Failed to read V19 entitlements' });
+  }
 });
 
 v19ResourcesRouter.get('/v19/resources', async (req, res) => {
