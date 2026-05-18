@@ -2,6 +2,7 @@ import { useMemo, type CSSProperties } from "react";
 import { V6Icon } from "../icons";
 import type { FileListView, FileScope, OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
+import { useTodayOperatingBrief, type TodayFileReviewItem } from "../../../hooks/useTodayOperatingBrief";
 import { useV6WorkspaceData, type WorkspaceDeal, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
 import { ART_HOUSE_TEXTURES, DESKTOP_TEXTURES } from "../../../lib/randomTextures";
 
@@ -103,10 +104,12 @@ const ACTIONS: FileRow[] = [
 
 function useFilesWorkspace(user: User | null) {
   const workspace = useV6WorkspaceData(user);
+  const operating = useTodayOperatingBrief(user, workspace.canFetch);
   const useSampleData = !workspace.canFetch;
+  const operatingFiles = operating.brief?.filesNeedingReview ?? [];
   const shortcuts = useMemo(
-    () => useSampleData ? SHORTCUTS : buildRealShortcuts(workspace.deals, workspace.deliverables),
-    [useSampleData, workspace.deals, workspace.deliverables],
+    () => useSampleData ? SHORTCUTS : buildRealShortcuts(workspace.deals, workspace.deliverables, operatingFiles),
+    [useSampleData, workspace.deals, workspace.deliverables, operatingFiles],
   );
   const recents = useMemo(
     () => useSampleData ? RECENTS : workspace.deliverables.slice(0, 5).map(deliverableToFileRow),
@@ -123,19 +126,20 @@ function useFilesWorkspace(user: User | null) {
   const actions = useMemo(
     () => {
       if (useSampleData) return ACTIONS;
+      if (operatingFiles.length) return operatingFiles.map(operatingFileToFileRow);
       return workspace.deliverables
         .filter(d => ["queued", "generating", "failed", "draft"].includes(d.status))
         .slice(0, 8)
         .map(deliverableToFileRow);
     },
-    [useSampleData, workspace.deliverables],
+    [operatingFiles, useSampleData, workspace.deliverables],
   );
 
-  return { workspace, shortcuts, recents, allFiles, rooms, actions };
+  return { workspace, operating, shortcuts, recents, allFiles, rooms, actions };
 }
 
 export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
-  const { workspace, shortcuts, recents, rooms, actions } = useFilesWorkspace(user);
+  const { workspace, operating, shortcuts, recents, rooms, actions } = useFilesWorkspace(user);
 
   const ask = (prompt: string) => {
     onTalkToYulia?.(prompt);
@@ -302,7 +306,9 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
       <section id="files-work-queue" style={F.section}>
         <SectionHead eyebrow="NEEDS ACTION" title="Data-room work queue" sub="Things in the shared room can be submitted, reviewed, executed, or locked. Artifacts remain review-only." />
         <div style={F.actionCard}>
-          {!workspace.loading && actions.length === 0 && (
+          {operating.loading && <div className="mono" style={F.loading}>READING TODAY QUEUE…</div>}
+          {operating.error && <div style={F.inlineError}>Couldn&rsquo;t load Today queue ({operating.error}).</div>}
+          {!workspace.loading && !operating.loading && actions.length === 0 && (
             <EmptyRows
               title="Nothing needs action"
               text="Requests, reviews, execution items, and failed generations will appear here when they exist."
@@ -330,9 +336,11 @@ export function V6FilesListView({
   onTalkToYulia?: (prompt: string) => void;
   user: User | null;
 }) {
-  const { workspace, allFiles, rooms, actions } = useFilesWorkspace(user);
+  const { workspace, operating, allFiles, rooms, actions } = useFilesWorkspace(user);
   const copy = activeListCopy(view);
   const s = detailTone(view);
+  const listLoading = workspace.loading || (view === "needs-action" && operating.loading);
+  const listError = workspace.error || (view === "needs-action" ? operating.error : null);
 
   const ask = (prompt: string) => {
     onTalkToYulia?.(prompt);
@@ -379,8 +387,8 @@ export function V6FilesListView({
         allFiles={allFiles}
         rooms={rooms}
         actions={actions}
-        loading={workspace.loading}
-        error={workspace.error}
+        loading={listLoading}
+        error={listError}
         openDoc={openDoc}
         openDeal={openDeal}
         ask={ask}
@@ -678,9 +686,9 @@ function slug(input: string): string {
   return input.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
-function buildRealShortcuts(deals: WorkspaceDeal[], deliverables: WorkspaceDeliverable[]): Shortcut[] {
+function buildRealShortcuts(deals: WorkspaceDeal[], deliverables: WorkspaceDeliverable[], operatingFiles: TodayFileReviewItem[] = []): Shortcut[] {
   const docCount = deals.reduce((sum, deal) => sum + Number(deal.document_count ?? 0), 0);
-  const actionCount = deliverables.filter(d => ["queued", "generating", "failed", "draft"].includes(d.status)).length;
+  const actionCount = operatingFiles.length || deliverables.filter(d => ["queued", "generating", "failed", "draft"].includes(d.status)).length;
   const dataRooms = deals.filter(deal => Number(deal.document_count ?? 0) > 0).length || deals.length;
   return [
     { ...SHORTCUTS[0], count: String(deliverables.length + docCount) },
@@ -688,6 +696,30 @@ function buildRealShortcuts(deals: WorkspaceDeal[], deliverables: WorkspaceDeliv
     { ...SHORTCUTS[2], count: String(actionCount) },
     { ...SHORTCUTS[3], count: String(dataRooms) },
   ];
+}
+
+function operatingFileToFileRow(item: TodayFileReviewItem): FileRow {
+  const basis = `${item.title} ${item.reason} ${item.status}`;
+  const isAnalysis = /model|analysis|financial|p&l|chart|score|valuation|qoe|recast|sba|tax|legal|metric/i.test(basis);
+  return {
+    title: item.title,
+    sub: `${item.dealTitle || "Workspace"} · ${item.reason}`,
+    status: formatStatus(item.status),
+    kind: isAnalysis ? "chart" : "doc",
+    tone: todayFileTone(item),
+    id: item.id,
+    dealId: item.dealId,
+    dealTitle: item.dealTitle,
+  };
+}
+
+function todayFileTone(item: TodayFileReviewItem): FileRow["tone"] {
+  if (/executed|done|complete/i.test(item.status)) return "done";
+  if (/locked|immutable/i.test(item.status)) return "locked";
+  if (item.tone === "gold" || /refresh|queued|generating|draft/i.test(item.status)) return "draft";
+  if (item.tone === "cactus") return "done";
+  if (item.tone === "charcoal") return "locked";
+  return "review";
 }
 
 function deliverableToFileRow(d: WorkspaceDeliverable): FileRow {

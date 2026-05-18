@@ -48,6 +48,7 @@ import {
   recordV19UsageEvent,
   type V19EntitlementCheck,
 } from './v19EntitlementService.js';
+import { upsertFirmMemory, type FirmMemoryType } from './todayOperatingService.js';
 
 const sql = createSql();
 
@@ -276,6 +277,26 @@ export const TOOL_DEFINITIONS: Tool[] = [
     input_schema: {
       type: 'object' as const,
       properties: {},
+    },
+  },
+  {
+    name: 'update_firm_memory',
+    description: 'Create or update a reusable Firm Memory item such as a preferred assumption, house style rule, provider preference, prior-deal pattern, or standard workflow. Use only for durable facts/preferences the user wants Yulia to remember.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        memoryType: {
+          type: 'string',
+          enum: ['assumption', 'house_style', 'provider', 'deal_pattern', 'workflow'],
+          description: 'Kind of firm memory to create or update.',
+        },
+        label: { type: 'string', description: 'Short stable label, for example Apple Glass + Neo or QoE preview default.' },
+        text: { type: 'string', description: 'Plain-English memory text. Use this for most memory writes.' },
+        value: { type: 'object', description: 'Optional structured memory payload.' },
+        confidence: { type: 'number', description: 'Confidence from 0 to 1. Defaults to 0.76.' },
+        status: { type: 'string', enum: ['active', 'archived'], description: 'Archive to retire a memory without deleting it.' },
+      },
+      required: ['memoryType', 'label'],
     },
   },
   {
@@ -836,6 +857,8 @@ export async function executeTool(
         return await readV19ReadinessTool(input, userId);
       case 'read_v19_entitlements':
         return await readV19EntitlementsTool(userId);
+      case 'update_firm_memory':
+        return await updateFirmMemoryTool(input, userId);
       case 'defer_to_counsel':
         return await deferToCounselTool(input, userId, conversationId);
       case 'update_tax_position':
@@ -1581,6 +1604,42 @@ async function readV19EntitlementsTool(userId: number): Promise<string> {
     success: true,
     usage: meter,
     tollgateStates: ['credit_budget_required', 'human_approval_required', 'enterprise_scope_required'],
+  });
+}
+
+async function updateFirmMemoryTool(input: Record<string, any>, userId: number): Promise<string> {
+  const memoryType = String(input.memoryType || '').trim() as FirmMemoryType;
+  const label = String(input.label || '').trim();
+  if (!memoryType || !label) return JSON.stringify({ error: 'memoryType and label are required' });
+
+  const memory = await upsertFirmMemory(userId, {
+    memoryType,
+    label,
+    text: input.text == null ? undefined : String(input.text),
+    value: input.value && typeof input.value === 'object' && !Array.isArray(input.value) ? input.value : undefined,
+    confidence: input.confidence == null ? undefined : Number(input.confidence),
+    status: input.status === 'archived' ? 'archived' : 'active',
+  });
+
+  await recordV19UsageEvent({
+    userId,
+    eventType: 'tool_call',
+    actionId: 'update_firm_memory',
+    toolName: 'update_firm_memory',
+    sourceSurface: 'chat',
+    resourceType: 'firm_memory',
+    resourceId: memory.id,
+    metadata: {
+      memoryType: memory.memoryType,
+      label: memory.label,
+      status: memory.status,
+    },
+  });
+
+  return JSON.stringify({
+    success: true,
+    memory,
+    v19Usage: await readV19UsageMeter(userId),
   });
 }
 

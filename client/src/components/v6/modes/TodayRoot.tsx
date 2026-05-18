@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { authHeaders, type User } from "../../../hooks/useAuth";
 import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
+import { useTodayOperatingBrief, type TodayFirmMemorySnapshot, type TodayGateCountdownItem, type TodayOperatingBrief, type TodayStudioRefreshItem } from "../../../hooks/useTodayOperatingBrief";
 import { useV6WorkspaceData, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
 import { LOGGED_OUT_HERO_COPY } from "../../../lib/copy";
 import { DESKTOP_TEXTURES } from "../../../lib/randomTextures";
@@ -149,90 +150,6 @@ interface PortfolioBrief {
   deals: TodayDeal[];
 }
 
-interface TodayOperatingBrief {
-  source: "live";
-  generatedAt: string;
-  morningBrief: {
-    title: string;
-    lede: string;
-    focusDealId?: string;
-    focusDealTitle?: string;
-    chips: string[];
-    prompt: string;
-    freshness: string;
-  };
-  gateCountdown: TodayGateCountdownItem[];
-  dealPulse: TodayDealPulseItem[];
-  filesNeedingReview: TodayFileReviewItem[];
-  studioRefreshNeeds: TodayStudioRefreshItem[];
-  firmMemory: TodayFirmMemorySnapshot;
-}
-
-interface TodayGateCountdownItem {
-  dealId: string;
-  title: string;
-  gateId: string;
-  gateName: string;
-  blockers: string[];
-  requiredModels: string[];
-  requiredCitations: string[];
-  nextAction: string;
-  tone: Tone;
-}
-
-interface TodayDealPulseItem {
-  dealId: string;
-  title: string;
-  status: string;
-  fit: number;
-  thesis: string;
-  metric: string;
-  urgency: string;
-  tone: Tone;
-  nextAction: string;
-}
-
-interface TodayFileReviewItem {
-  id: string;
-  title: string;
-  dealId?: string;
-  dealTitle?: string;
-  reason: string;
-  status: string;
-  tone: Tone;
-  updatedAt?: string;
-}
-
-interface TodayStudioRefreshItem {
-  bookId: string;
-  title: string;
-  format: string;
-  reason: string;
-  gaps: number;
-  action: string;
-  tone: Tone;
-}
-
-interface TodayFirmMemorySnapshot {
-  assumptions: FirmMemoryItem[];
-  houseStyle: FirmMemoryItem[];
-  providers: FirmMemoryItem[];
-  dealPatterns: FirmMemoryItem[];
-  workflows: FirmMemoryItem[];
-  stats: {
-    total: number;
-    updatedAt?: string;
-  };
-}
-
-interface FirmMemoryItem {
-  id: string;
-  label: string;
-  text: string;
-  confidence: number;
-  source: string;
-}
-
 interface TodayRootProps {
   openTab: OpenTab;
   onTalkToYulia?: (prompt: string) => void;
@@ -243,12 +160,11 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const home = useHomeDeals(user);
   const workspace = useV6WorkspaceData(user);
   const [portfolioBrief, setPortfolioBrief] = useState<PortfolioBrief | null>(null);
-  const [todayOperatingBrief, setTodayOperatingBrief] = useState<TodayOperatingBrief | null>(null);
+  const todayOperating = useTodayOperatingBrief(user, workspace.canFetch);
 
   useEffect(() => {
     if (!workspace.canFetch) {
       setPortfolioBrief(null);
-      setTodayOperatingBrief(null);
       return;
     }
 
@@ -261,14 +177,6 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
       .catch(() => {
         if (!cancelled) setPortfolioBrief(null);
       });
-    fetch("/api/agency/today-operating-brief", { headers: authHeaders() })
-      .then(res => res.ok ? res.json() : Promise.reject(new Error(`today ${res.status}`)))
-      .then((brief: TodayOperatingBrief) => {
-        if (!cancelled) setTodayOperatingBrief(brief);
-      })
-      .catch(() => {
-        if (!cancelled) setTodayOperatingBrief(null);
-      });
 
     return () => { cancelled = true; };
   }, [workspace.canFetch, user?.id]);
@@ -277,7 +185,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const showLoggedOutMarketing = !user && useSampleData;
   const realDeals = home.inReview.length > 0 ? home.inReview : home.picks;
   const liveBrief = useSampleData ? null : portfolioBrief;
-  const operatingBrief = useSampleData ? null : todayOperatingBrief;
+  const operatingBrief = useSampleData ? null : todayOperating.brief;
   const waitingForYuliaRead = !useSampleData && !liveBrief;
   const deals = useSampleData ? DEALS : (liveBrief?.deals.length ? liveBrief.deals : realDeals.slice(0, 5).map(dealToTodayDeal));
   const liveDesk = liveBrief?.liveDesk?.length ? liveBrief.liveDesk : useSampleData ? WORK : [];

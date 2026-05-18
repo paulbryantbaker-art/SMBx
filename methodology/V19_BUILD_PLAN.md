@@ -1,6 +1,6 @@
 # V19 Build Plan — Real Outstanding Work
 
-**Audit date:** May 18, 2026 (after V19 methodology docs landed in repo + 62 TS-error cleanup + Phase E/G substrate work + Pitch Book Studio/runtime spine work).
+**Audit date:** May 18, 2026 (after V19 methodology docs landed in repo + 62 TS-error cleanup + Phase E/G substrate work + Pitch Book Studio/runtime spine work + Today/Files/Pipeline operating wiring).
 **Sources:** `methodology/CC_V19_IMPLEMENTATION_BRIEF.md` + `methodology/METHODOLOGY_V19.md` + `Downloads/v19/smbX Must-Haves.pdf` + `Downloads/v19/Agent Economy MandA Playbook.pdf`.
 **Audit baseline:** `origin/main` at `c5270a9`.
 
@@ -90,7 +90,7 @@ Implemented in `server/services/v19EntitlementService.ts`; events are written to
 | 8 | Model Stack, Gates, Prompts | 🟡 Composer service exists; gate definitions expose V19 `requiredModels`, `requiredCitations`, and `alwaysHaltTriggers`; chat prompt injection includes current V19 gate readiness; `server/prompts/YULIA_PROMPTS_V4.md` now formalizes prompt governance. | Compose league × journey × deal type stacks more deeply and bind V4 prompt sections to specific gate/model states. |
 | 9 | V19 Tools + Chat Runtime | 🟡 `compose_model_stack`, `execute_model`, `lookup_citation`, `fetch_market_data`, `read_v19_readiness`, `defer_to_counsel`, `update_tax_position`, and `write_audit_trail` are registered. Tool outputs carry V19 readiness for deal context, Studio books, model runs, exports, and gate advance. Chat now writes automatic audit rows for model-backed deal responses. | Extend automatic audit/readiness checks into share/publish paths beyond Studio export. |
 | 10 | Credit Budget + Pricing Tollgates | 🟡 Implemented as first pass: V19 plan entitlements now define model-run, Studio-book, export, API/MCP, tool-call, and enterprise-agent allowances; V19 actions write to `agency_usage_events`; tools and Studio return structured `credit_budget_required`, `human_approval_required`, and `enterprise_scope_required` states; Settings/Studio/Pricing now expose the first user-visible meter and entitlement language. | Add org-level pooling, enterprise policy controls, and persistent billing-period reconciliation. |
-| 11 | Today Canvas + Firm Memory | 🟡 First pass implemented: `today_operating_briefs` cache, `firm_memory` persistent object, `/api/agency/today-operating-brief`, and Today UI cards for Morning Brief, Gate Countdown, Studio refresh needs, and Firm Memory. | Wire Files/Pipeline against the same operating objects, add write/update tools for Firm Memory, and deepen Today actions with model/readiness execution. |
+| 11 | Today Canvas + Firm Memory | 🟡 First pass implemented: `today_operating_briefs` cache, `firm_memory` persistent object, `/api/agency/today-operating-brief`, Today UI cards, Files work queue wiring, Pipeline deal-pulse/gate-countdown wiring, and `update_firm_memory` tool. | Deepen Today actions with model/readiness execution, add user-visible Firm Memory edit UI, and add enterprise memory governance. |
 | 12 | QoE Preview Attractor | 🟡 QoE Preview Book template exists. | Make the full upload → extraction → QoE Lite → Studio book → export path work end to end. |
 | 13 | Market Data + Connectors | 🟡 Existing market-data service/cache exists. | Add daily FRED refresh, freshness checks, and read-only connector contracts/status surfaces. |
 | 14 | Excel Round Trip | ❌ Greenfield. | Add assumptions, import/export, rerun, diff, and Studio slide refresh when linked assumptions change. |
@@ -114,8 +114,8 @@ The V19 implementation brief covers **runtime correctness** (calc engine, citati
 
 | # | Item | Source | State |
 |---|---|---|---|
-| 1 | Today Canvas (Morning Brief + Gate Countdown + Deals-in-Flight Pulse) | PDF #4 | 🟡 First pass: cached operating brief service, API route, and Today UI surface now exist; deeper action execution pending |
-| 2 | Firm Memory persistent object (prior-deal carryforward) | PDF #5 | 🟡 First pass: `firm_memory` table, default memory seeds, and Today memory snapshot exist; write/update tools pending |
+| 1 | Today Canvas (Morning Brief + Gate Countdown + Deals-in-Flight Pulse) | PDF #4 | 🟡 First pass: cached operating brief service, API route, Today UI surface, Files work queue, and Pipeline gate/deal pulse wiring now exist; deeper action execution pending |
+| 2 | Firm Memory persistent object (prior-deal carryforward) | PDF #5 | 🟡 First pass: `firm_memory` table, default memory seeds, Today memory snapshot, and `update_firm_memory` chat tool exist; visible edit UI/governance pending |
 | 3 | 7-yr SOX-grade AI audit trail (immutable append-only + signed manifests + SOC 2 Type 2) | PDF #6 | 🟡 V19 `audit_trail` schema added; immutable manifests + SOC 2 controls pending |
 | 4 | Citation registry + validator | V19 §2+§7 | 🟡 registry schema + seed + validator service added; chat hook pending |
 | 5 | Model registry + Tier-0 calc engine (20 models server-side) | V19 §4 | 🟡 registry schema + canonical `MODEL.*.v1` catalog + first executable subset added |
@@ -232,9 +232,12 @@ The V19 implementation brief covers **runtime correctness** (calc engine, citati
 ### Phase 3 — Today, Files, Pipeline as Operating Surfaces
 
 - ✅ Today first pass: morning brief, gate countdown, deals-in-flight pulse substrate, files needing review substrate, Studio drafts needing refresh, and cached operating brief.
-- Files: source cards, file status, data-room routing, source gaps, permission state, citation links.
-- Pipeline: gate state, deal stack, model requirements, grouped tabs, sub-tabs, next action.
+- ✅ Files first wiring: work queue and shortcuts can read `filesNeedingReview` from the shared Today operating brief.
+- Files next: source cards, file status, data-room routing, source gaps, permission state, citation links.
+- ✅ Pipeline first wiring: deal cards can read `dealPulse`, and the page shows `gateCountdown` from the shared Today operating brief.
+- Pipeline next: deeper deal stack, model requirements, grouped tabs, sub-tabs, next action execution.
 - ✅ Firm Memory first pass: persistent object, default house style/workflow/finance assumptions, and Today snapshot.
+- ✅ Firm Memory write path: `update_firm_memory` creates/updates durable assumptions, house style, providers, deal patterns, and workflows through the tool runtime.
 - Firm Memory next: user-visible edit/update actions, provider/deal-pattern capture, and enterprise governance.
 
 ### Phase 4 — QoE Preview Attractor
@@ -267,7 +270,7 @@ The V19 implementation brief covers **runtime correctness** (calc engine, citati
 V19 is no longer a single backend cleanup. It is a dual-track product build:
 
 - **Short term:** make Studio beautiful, useful, source-grounded, and model-backed.
-- **Medium term:** make Today/Files/Pipeline operate on the same substrate objects.
+- **Medium term:** deepen Today/Files/Pipeline now that they share the same operating substrate objects.
 - **12-18 month readiness:** expose those same objects and tools to agents through MCP/API, scoped auth, credits, and audit packets.
 
 Maintain this file in lockstep with `methodology/METHODOLOGY_V19.md`. When a tier-0 item ships, mark it ✅ done with a commit SHA. When scope changes, update here in the same commit as the code.

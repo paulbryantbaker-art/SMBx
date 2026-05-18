@@ -5,6 +5,7 @@ import { V6DealCard, type Verdict } from "./cards";
 import type { OpenTab } from "../types";
 import { DEV_AUTH_BYPASS, type User } from "../../../hooks/useAuth";
 import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
+import { useTodayOperatingBrief, type TodayDealPulseItem, type TodayGateCountdownItem } from "../../../hooks/useTodayOperatingBrief";
 import { ART_HOUSE_TEXTURES, DESKTOP_TEXTURES } from "../../../lib/randomTextures";
 import type { ModelPreference } from "../../../lib/modelPreference";
 import {
@@ -48,8 +49,15 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionNote, setActionNote] = useState<string | null>(null);
   const useSampleData = !home.isAuthed || DEV_AUTH_BYPASS;
+  const operating = useTodayOperatingBrief(user, home.isAuthed && !DEV_AUTH_BYPASS);
   const realDeals = home.inReview.length > 0 ? home.inReview : home.picks;
-  const deals = useSampleData ? SAMPLE_DEALS : realDeals.map(dealToPipelineDeal);
+  const operatingDeals = operating.brief?.dealPulse ?? [];
+  const gateCountdown = useSampleData ? [] : (operating.brief?.gateCountdown ?? []);
+  const deals = useSampleData
+    ? SAMPLE_DEALS
+    : operatingDeals.length
+      ? operatingDeals.map(dealPulseToPipelineDeal)
+      : realDeals.map(dealToPipelineDeal);
 
   const pursue = deals.filter(d => d.verdict === "pursue");
   const watch = deals.filter(d => d.verdict === "watch");
@@ -144,6 +152,14 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
         </div>
       </section>
 
+      {gateCountdown.length > 0 && (
+        <GateCountdownStrip
+          items={gateCountdown}
+          openTab={openTab}
+          onTalkToYulia={onTalkToYulia}
+        />
+      )}
+
       <V6Section
         eyebrow="IN REVIEW"
         title="Live deals"
@@ -206,6 +222,52 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
   );
 }
 
+function GateCountdownStrip({
+  items,
+  openTab,
+  onTalkToYulia,
+}: {
+  items: TodayGateCountdownItem[];
+  openTab: OpenTab;
+  onTalkToYulia?: (prompt: string) => void;
+}) {
+  return (
+    <section style={P.gateStrip}>
+      <div style={P.gateStripHead}>
+        <div>
+          <h2 style={P.gateTitle}>Gate countdown</h2>
+          <p style={P.gateSub}>Same operating read as Today: blockers, model needs, citations, and the next deal move.</p>
+        </div>
+        <button
+          className="m-btn tonal"
+          type="button"
+          onClick={() => onTalkToYulia?.("Show my pipeline gate countdown, including blockers, required models, required citations, and next action.")}
+        >
+          Ask Yulia
+        </button>
+      </div>
+      <div style={P.gateRows}>
+        {items.slice(0, 3).map(item => (
+          <button
+            key={`${item.dealId}-${item.gateId}`}
+            type="button"
+            style={P.gateRow}
+            onClick={() => openTab({ kind: "deal", id: item.dealId, title: item.title })}
+          >
+            <span style={P.gateBadge}>{item.gateId}</span>
+            <span style={P.gateText}>
+              <strong>{item.title}</strong>
+              <span>{item.gateName} · {item.nextAction}</span>
+            </span>
+            <span style={P.gateMeta}>{item.blockers[0] || "No blocker surfaced"}</span>
+            <span style={P.chevron} aria-hidden="true">›</span>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function PipelineStat({ label, value, tone }: { label: string; value: number; tone: string }) {
   return (
     <div style={P.stat}>
@@ -237,6 +299,25 @@ function verdictFromGate(gate: string): Verdict {
   if (/[345]$/.test(gate)) return "pursue";
   if (/[12]$/.test(gate)) return "watch";
   return "watch";
+}
+
+function dealPulseToPipelineDeal(item: TodayDealPulseItem): PipelineDeal {
+  const status = item.status.toLowerCase();
+  const verdict: Verdict = status.includes("pursue")
+    ? "pursue"
+    : status.includes("hold") || status.includes("pass")
+      ? "pass"
+      : "watch";
+  return {
+    verdict,
+    id: item.dealId,
+    name: item.title,
+    sub: `${item.metric} · ${item.urgency}`,
+    fit: item.fit,
+    sde: item.metric,
+    multiple: "--",
+    note: item.thesis || item.nextAction,
+  };
 }
 
 function dealToPipelineDeal(d: HomeDeal): PipelineDeal {
@@ -371,6 +452,92 @@ const P: Record<string, CSSProperties> = {
     lineHeight: 1,
     fontVariantNumeric: "tabular-nums",
     color: "#FFFFFF",
+  },
+  gateStrip: {
+    margin: "0 0 28px",
+    padding: 18,
+    borderRadius: 22,
+    background: "linear-gradient(180deg, rgba(255,255,255,0.86), rgba(255,255,255,0.66))",
+    border: "1px solid rgba(180, 197, 221, 0.74)",
+    boxShadow: "0 26px 76px rgba(41,61,92,0.12), 0 8px 18px rgba(26,34,51,0.07), inset 0 1px 0 rgba(255,255,255,0.76)",
+    backdropFilter: "blur(12px) saturate(150%)",
+    WebkitBackdropFilter: "blur(12px) saturate(150%)",
+  },
+  gateStripHead: {
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 18,
+    marginBottom: 12,
+  },
+  gateTitle: {
+    margin: 0,
+    fontSize: 24,
+    lineHeight: 1,
+    letterSpacing: "-0.045em",
+    color: "var(--m-on-surface)",
+  },
+  gateSub: {
+    margin: "6px 0 0",
+    maxWidth: 720,
+    fontSize: 13,
+    lineHeight: 1.45,
+    color: "var(--m-on-surface-mid)",
+  },
+  gateRows: {
+    display: "grid",
+    gap: 8,
+  },
+  gateRow: {
+    all: "unset",
+    minHeight: 58,
+    display: "grid",
+    gridTemplateColumns: "64px minmax(0, 1fr) minmax(160px, 0.32fr) 16px",
+    alignItems: "center",
+    gap: 12,
+    padding: "10px 12px",
+    borderRadius: 16,
+    background: "rgba(255,255,255,0.78)",
+    border: "1px solid rgba(180,197,221,0.62)",
+    boxShadow: "0 10px 22px rgba(26,34,51,0.06), inset 0 1px 0 rgba(255,255,255,0.72)",
+    cursor: "pointer",
+  },
+  gateBadge: {
+    height: 36,
+    minWidth: 52,
+    padding: "0 8px",
+    borderRadius: 999,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "rgba(46,92,138,0.10)",
+    color: "var(--m-on-primary-container)",
+    fontSize: 12,
+    fontWeight: 900,
+    fontVariantNumeric: "tabular-nums",
+  },
+  gateText: {
+    minWidth: 0,
+    display: "grid",
+    gap: 2,
+    color: "var(--m-on-surface)",
+    fontSize: 14,
+    lineHeight: 1.25,
+  },
+  gateMeta: {
+    justifySelf: "end",
+    maxWidth: 220,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    color: "var(--m-on-surface-mid)",
+    fontSize: 12,
+    fontWeight: 760,
+  },
+  chevron: {
+    color: "var(--m-on-surface-mid)",
+    fontSize: 24,
+    lineHeight: 1,
   },
   dealGrid: {
     display: "grid",

@@ -162,6 +162,24 @@ export interface TodayOperatingBrief {
   firmMemory: TodayFirmMemorySnapshot;
 }
 
+export type FirmMemoryType = 'assumption' | 'house_style' | 'provider' | 'deal_pattern' | 'workflow';
+
+export interface UpsertFirmMemoryInput {
+  memoryType: FirmMemoryType;
+  label: string;
+  value?: Record<string, any>;
+  text?: string;
+  source?: string;
+  confidence?: number;
+  status?: 'active' | 'archived';
+}
+
+export interface UpsertFirmMemoryResult extends FirmMemoryItem {
+  memoryType: FirmMemoryType;
+  status: string;
+  updatedAt: string;
+}
+
 interface TodaySnapshot {
   deals: DealRow[];
   deliverables: DeliverableRow[];
@@ -199,6 +217,57 @@ export async function getTodayOperatingBrief(userId: number, forceRefresh = fals
   return brief;
 }
 
+export async function upsertFirmMemory(userId: number, input: UpsertFirmMemoryInput): Promise<UpsertFirmMemoryResult> {
+  const memoryType = normalizeFirmMemoryType(input.memoryType);
+  const label = String(input.label || '').trim();
+  if (!label) throw new Error('Firm Memory label is required');
+
+  const value = {
+    ...(input.value && typeof input.value === 'object' && !Array.isArray(input.value) ? input.value : {}),
+  };
+  const text = String(input.text || '').trim();
+  if (text) value.text = text;
+  if (!Object.keys(value).length) throw new Error('Firm Memory value or text is required');
+
+  const confidence = clamp(Number(input.confidence ?? 0.76), 0, 1);
+  const source = String(input.source || 'yulia-tool').trim() || 'yulia-tool';
+  const status = input.status === 'archived' ? 'archived' : 'active';
+
+  const [row] = await sql<FirmMemoryRow[]>`
+    INSERT INTO firm_memory (user_id, memory_type, label, value, source, confidence, status, last_used_at)
+    VALUES (
+      ${userId},
+      ${memoryType},
+      ${label},
+      ${sql.json(value as any)}::jsonb,
+      ${source},
+      ${confidence},
+      ${status},
+      NOW()
+    )
+    ON CONFLICT (user_id, memory_type, label)
+    DO UPDATE SET
+      value = EXCLUDED.value,
+      source = EXCLUDED.source,
+      confidence = EXCLUDED.confidence,
+      status = EXCLUDED.status,
+      last_used_at = NOW(),
+      updated_at = NOW()
+    RETURNING id, memory_type, label, value, confidence, source, last_used_at, updated_at
+  `;
+
+  return {
+    id: String(row.id),
+    memoryType: row.memory_type as FirmMemoryType,
+    label: row.label,
+    text: firmMemoryText(row),
+    confidence: Number(row.confidence || confidence),
+    source: row.source,
+    status,
+    updatedAt: toIso(row.updated_at),
+  };
+}
+
 async function buildSnapshot(userId: number): Promise<TodaySnapshot> {
   const deals = await readDeals(userId).catch(err => {
     console.warn('[today operating brief] deals unavailable:', err.message);
@@ -224,6 +293,15 @@ async function buildSnapshot(userId: number): Promise<TodaySnapshot> {
     }),
   ]);
   return { deals, deliverables, reviews, studioBooks, firmMemory };
+}
+
+function normalizeFirmMemoryType(value: string): FirmMemoryType {
+  const normalized = String(value || '').trim() as FirmMemoryType;
+  const allowed: FirmMemoryType[] = ['assumption', 'house_style', 'provider', 'deal_pattern', 'workflow'];
+  if (!allowed.includes(normalized)) {
+    throw new Error(`Unsupported Firm Memory type: ${value}`);
+  }
+  return normalized;
 }
 
 async function readDeals(userId: number): Promise<DealRow[]> {

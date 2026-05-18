@@ -55,6 +55,7 @@ export const V19_TOOL_CONTRACTS = [
   'fetch_market_data',
   'read_v19_readiness',
   'read_v19_entitlements',
+  'update_firm_memory',
   'defer_to_counsel',
   'update_tax_position',
   'write_audit_trail',
