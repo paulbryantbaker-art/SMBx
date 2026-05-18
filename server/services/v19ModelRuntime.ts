@@ -319,6 +319,281 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
       },
     };
   }),
+  'MODEL.BUYER.FIT.v1': defineModel('MODEL.BUYER.FIT.v1', ['industry', 'location', 'deal_size_cents', 'buyer_thesis', 'operating_needs'], ['[Pepperdine PCAP 2025]'], input => {
+    const industry = text(input.industry);
+    const location = text(input.location);
+    const dealSize = cents(input.deal_size_cents);
+    const thesis = text(input.buyer_thesis);
+    const operatingNeeds = stringArray(input.operating_needs);
+    const buyerCriteria = safeObject(input.buyer_criteria);
+    const missing = requireInputs({
+      industry,
+      location,
+      deal_size_cents: dealSize,
+      buyer_thesis: thesis,
+      operating_needs: operatingNeeds.length ? operatingNeeds : null,
+    });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const thesisText = `${thesis} ${buyerCriteria.thesis || ''}`.toLowerCase();
+    const strategicFit = thesisText.includes(industry!.toLowerCase()) ? 90 : thesisText.length > 30 ? 72 : 58;
+    const geographyFit = thesisText.includes(location!.toLowerCase()) || text(buyerCriteria.location)?.toLowerCase().includes(location!.toLowerCase()) ? 88 : 66;
+    const operatingFit = Math.max(45, 86 - operatingNeeds.length * 6);
+    const financingFit = scoreFromRange(dealSize!, cents(buyerCriteria.min_deal_size_cents), cents(buyerCriteria.max_deal_size_cents));
+    const fitScore = weightedScore([
+      [strategicFit, 0.34],
+      [geographyFit, 0.18],
+      [operatingFit, 0.22],
+      [financingFit, 0.26],
+    ]);
+    return {
+      outputs: {
+        fit_score: fitScore,
+        fit_band: gradeFromScore(fitScore),
+        strategic_fit: strategicFit,
+        geography_fit: geographyFit,
+        operating_fit: operatingFit,
+        financing_fit: financingFit,
+        risk_flags: operatingNeeds.map(item => `Operating need: ${item}`),
+        recommended_next_action: fitScore >= 75 ? 'Prioritize outreach and diligence.' : 'Keep in watch list until fit gaps are resolved.',
+      },
+    };
+  }),
+  'MODEL.DEAL.SCORE.v1': defineModel('MODEL.DEAL.SCORE.v1', ['fit_score', 'earnings_quality_score', 'evidence_score', 'risk_score'], ['[Pepperdine PCAP 2025]', '[ABA 2025]'], input => {
+    const fit = scoreInput(input.fit_score);
+    const earnings = scoreInput(input.earnings_quality_score);
+    const evidence = scoreInput(input.evidence_score);
+    const risk = scoreInput(input.risk_score);
+    const missing = requireInputs({ fit_score: fit, earnings_quality_score: earnings, evidence_score: evidence, risk_score: risk });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const score = weightedScore([
+      [fit!, 0.30],
+      [earnings!, 0.25],
+      [evidence!, 0.25],
+      [100 - risk!, 0.20],
+    ]);
+    return {
+      outputs: {
+        deal_score: score,
+        score_band: gradeFromScore(score),
+        pursue_watch_pass: score >= 75 ? 'pursue' : score >= 55 ? 'watch' : 'pass',
+        component_scores: { fit, earnings_quality: earnings, evidence, risk },
+      },
+    };
+  }),
+  'MODEL.MARKET.CONTEXT.v1': defineModel('MODEL.MARKET.CONTEXT.v1', ['series_ids', 'as_of_date'], ['[FRED:SOFR]', '[FRED:DGS10]', '[FRED:BAMLH0A0HYM2]', '[FRED:BAMLC0A0CM]', '[FRED:VIXCLS]'], input => {
+    const seriesIds = stringArray(input.series_ids);
+    const asOfDate = text(input.as_of_date);
+    const values = safeObject(input.series_values);
+    const missing = requireInputs({ series_ids: seriesIds.length ? seriesIds : null, as_of_date: asOfDate });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const snapshots = seriesIds.map(seriesId => ({
+      series_id: seriesId,
+      value: number(values[seriesId] ?? values[seriesId.toLowerCase()]),
+      as_of_date: asOfDate,
+      citation_tag: `[FRED:${seriesId}]`,
+      status: number(values[seriesId] ?? values[seriesId.toLowerCase()]) == null ? 'missing_value' : 'current',
+    }));
+    return {
+      outputs: {
+        as_of_date: asOfDate,
+        series_count: seriesIds.length,
+        missing_value_series: snapshots.filter(item => item.status === 'missing_value').map(item => item.series_id),
+        snapshots,
+      },
+    };
+  }),
+  'MODEL.SENSITIVITY.MATRIX.v1': defineModel('MODEL.SENSITIVITY.MATRIX.v1', ['base_case', 'x_axis', 'y_axis', 'output_metric'], [], input => {
+    const base = safeObject(input.base_case);
+    const xAxis = axisValues(input.x_axis);
+    const yAxis = axisValues(input.y_axis);
+    const metric = text(input.output_metric);
+    const baseValue = number(base.value ?? base.base_value ?? input.base_value);
+    const missing = requireInputs({ base_case: baseValue, x_axis: xAxis.length ? xAxis : null, y_axis: yAxis.length ? yAxis : null, output_metric: metric });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const matrix = yAxis.map(y => xAxis.map(x => round(baseValue! * (1 + x) * (1 + y), 2)));
+    return {
+      outputs: {
+        output_metric: metric,
+        x_axis: xAxis,
+        y_axis: yAxis,
+        matrix,
+        low_case: Math.min(...matrix.flat()),
+        high_case: Math.max(...matrix.flat()),
+      },
+    };
+  }),
+  'MODEL.DEAL.COMPARISON.v1': defineModel('MODEL.DEAL.COMPARISON.v1', ['deal_ids', 'comparison_lens', 'assumption_scope'], [], input => {
+    const dealIds = stringArray(input.deal_ids);
+    const comparisonLens = text(input.comparison_lens);
+    const assumptionScope = text(input.assumption_scope) || (Object.keys(safeObject(input.assumption_scope)).length ? JSON.stringify(input.assumption_scope) : null);
+    const deals = objectArray(input.deals);
+    const missing = requireInputs({ deal_ids: dealIds.length ? dealIds : null, comparison_lens: comparisonLens, assumption_scope: assumptionScope });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const rows = (deals.length ? deals : dealIds.map(id => ({ id }))).map((deal, index) => {
+      const score = scoreInput(deal.score ?? deal.deal_score ?? deal.fit_score) ?? null;
+      const price = cents(deal.purchase_price_cents ?? deal.asking_price_cents);
+      const earnings = cents(deal.ebitda_cents ?? deal.sde_cents ?? deal.cash_flow_cents);
+      return {
+        id: String(deal.id ?? deal.deal_id ?? dealIds[index] ?? index + 1),
+        name: String(deal.name ?? deal.business_name ?? `Deal ${index + 1}`),
+        score,
+        purchase_price_cents: price,
+        earnings_cents: earnings,
+        multiple: price != null && earnings ? round(price / earnings, 2) : null,
+      };
+    });
+    const ranked = [...rows].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+    return {
+      outputs: {
+        comparison_lens: comparisonLens,
+        assumption_scope: assumptionScope,
+        deal_count: rows.length,
+        rows,
+        ranked_ids: ranked.map(row => row.id),
+        top_deal_id: ranked[0]?.id ?? null,
+      },
+    };
+  }),
+  'MODEL.CAPTABLE.DILUTION.v1': defineModel('MODEL.CAPTABLE.DILUTION.v1', ['pre_money_cents', 'round_size_cents', 'option_pool_pct', 'security_terms'], [], input => {
+    const preMoney = cents(input.pre_money_cents);
+    const roundSize = cents(input.round_size_cents);
+    const optionPoolPct = number(input.option_pool_pct);
+    const securityTerms = safeObject(input.security_terms);
+    const missing = requireInputs({ pre_money_cents: preMoney, round_size_cents: roundSize, option_pool_pct: optionPoolPct, security_terms: Object.keys(securityTerms).length ? securityTerms : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const postMoney = preMoney! + roundSize!;
+    const investorOwnership = roundSize! / postMoney;
+    const optionPoolOwnership = clamp(optionPoolPct!, 0, 1);
+    const founderOwnership = Math.max(0, 1 - investorOwnership - optionPoolOwnership);
+    return {
+      outputs: {
+        post_money_cents: postMoney,
+        investor_ownership_pct: round(investorOwnership, 4),
+        option_pool_pct: round(optionPoolOwnership, 4),
+        founder_ownership_pct: round(founderOwnership, 4),
+        liquidation_preference_cents: Math.round(roundSize! * (number(securityTerms.liquidation_pref_multiple) ?? 1)),
+      },
+    };
+  }),
+  'MODEL.COVENANT.COMPLIANCE.v1': defineModel('MODEL.COVENANT.COMPLIANCE.v1', ['forecast_periods', 'covenant_terms', 'debt_schedule'], ['[FRED:SOFR]', '[FRED:BAMLC0A0CM]'], input => {
+    const periods = objectArray(input.forecast_periods);
+    const terms = safeObject(input.covenant_terms);
+    const debtSchedule = objectArray(input.debt_schedule);
+    const missing = requireInputs({ forecast_periods: periods.length ? periods : null, covenant_terms: Object.keys(terms).length ? terms : null, debt_schedule: debtSchedule.length ? debtSchedule : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const maxLeverage = number(terms.max_leverage) ?? Infinity;
+    const minDscr = number(terms.min_dscr) ?? 0;
+    const minLiquidity = cents(terms.min_liquidity_cents) ?? 0;
+    const tested = periods.map((period, index) => {
+      const ebitda = cents(period.ebitda_cents);
+      const debt = cents(period.total_debt_cents ?? debtSchedule[index]?.total_debt_cents);
+      const cashFlow = cents(period.cash_flow_cents ?? period.ebitda_cents);
+      const debtService = cents(period.debt_service_cents ?? debtSchedule[index]?.debt_service_cents);
+      const liquidity = cents(period.liquidity_cents) ?? 0;
+      const leverage = ebitda && debt != null ? debt / ebitda : null;
+      const dscr = cashFlow && debtService ? cashFlow / debtService : null;
+      const breaches = [
+        leverage != null && leverage > maxLeverage && 'max_leverage',
+        dscr != null && dscr < minDscr && 'min_dscr',
+        liquidity < minLiquidity && 'min_liquidity',
+      ].filter(Boolean);
+      return {
+        period: String(period.period ?? index + 1),
+        leverage: leverage == null ? null : round(leverage, 2),
+        dscr: dscr == null ? null : round(dscr, 2),
+        liquidity_cents: liquidity,
+        breaches,
+      };
+    });
+    return {
+      outputs: {
+        status: tested.some(period => period.breaches.length) ? 'breach' : 'compliant',
+        breach_count: tested.reduce((sum, period) => sum + period.breaches.length, 0),
+        periods: tested,
+      },
+    };
+  }),
+  'MODEL.VAL.DCF.TWOSTAGE.v1': defineModel('MODEL.VAL.DCF.TWOSTAGE.v1', ['free_cash_flows_cents', 'discount_rate', 'terminal_growth_rate'], ['[Damodaran 2026]', '[Kroll 2024]'], input => {
+    const cashFlows = arrayOfCents(input.free_cash_flows_cents);
+    const discountRate = number(input.discount_rate);
+    const terminalGrowth = number(input.terminal_growth_rate);
+    const missing = requireInputs({ free_cash_flows_cents: cashFlows.length ? cashFlows : null, discount_rate: discountRate, terminal_growth_rate: terminalGrowth });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    if (discountRate! <= terminalGrowth!) return { missingInputs: ['discount_rate_above_terminal_growth_rate'], outputs: {} };
+    const pvCashFlows = cashFlows.map((cashFlow, index) => Math.round(cashFlow / ((1 + discountRate!) ** (index + 1))));
+    const terminalValue = Math.round(cashFlows[cashFlows.length - 1] * (1 + terminalGrowth!) / (discountRate! - terminalGrowth!));
+    const pvTerminalValue = Math.round(terminalValue / ((1 + discountRate!) ** cashFlows.length));
+    return {
+      outputs: {
+        pv_cash_flows_cents: pvCashFlows,
+        terminal_value_cents: terminalValue,
+        pv_terminal_value_cents: pvTerminalValue,
+        enterprise_value_cents: pvCashFlows.reduce((sum, value) => sum + value, 0) + pvTerminalValue,
+      },
+    };
+  }),
+  'MODEL.PMI.VALUE.CREATION.v1': defineModel('MODEL.PMI.VALUE.CREATION.v1', ['deal_findings', 'integration_risks', 'value_levers'], [], input => {
+    const findings = stringArray(input.deal_findings);
+    const risks = stringArray(input.integration_risks);
+    const levers = objectArray(input.value_levers);
+    const missing = requireInputs({ deal_findings: findings.length ? findings : null, integration_risks: risks.length ? risks : null, value_levers: levers.length ? levers : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const leverValue = levers.reduce((sum, lever) => sum + (cents(lever.value_cents) ?? 0), 0);
+    return {
+      outputs: {
+        finding_count: findings.length,
+        risk_count: risks.length,
+        lever_count: levers.length,
+        identified_value_cents: leverValue,
+        first_100_day_actions: [
+          ...risks.slice(0, 2).map(risk => `Stabilize risk: ${risk}`),
+          ...levers.slice(0, 2).map(lever => `Capture lever: ${lever.name || lever.label || 'value lever'}`),
+        ],
+      },
+    };
+  }),
+  'MODEL.DEALKILL.PROB.v1': defineModel('MODEL.DEALKILL.PROB.v1', ['risk_factors'], [], input => {
+    const riskFactors = objectArray(input.risk_factors);
+    const missing = requireInputs({ risk_factors: riskFactors.length ? riskFactors : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const weightedRisk = riskFactors.reduce((sum, factor) => {
+      const severity = scoreInput(factor.severity ?? factor.score) ?? 50;
+      const probability = clamp(number(factor.probability) ?? 0.5, 0, 1);
+      return sum + severity * probability;
+    }, 0) / riskFactors.length;
+    return {
+      outputs: {
+        deal_kill_probability: round(clamp(weightedRisk / 100, 0, 1), 4),
+        risk_band: weightedRisk >= 70 ? 'high' : weightedRisk >= 45 ? 'medium' : 'low',
+        top_risks: riskFactors
+          .map(factor => ({ label: String(factor.label || factor.name || 'Risk'), severity: scoreInput(factor.severity ?? factor.score) ?? 50 }))
+          .sort((a, b) => b.severity - a.severity)
+          .slice(0, 3),
+      },
+    };
+  }),
+  'MODEL.TIMELINE.MC.v1': defineModel('MODEL.TIMELINE.MC.v1', ['milestones'], [], input => {
+    const milestones = objectArray(input.milestones);
+    const missing = requireInputs({ milestones: milestones.length ? milestones : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const rows = milestones.map((milestone, index) => {
+      const optimistic = number(milestone.optimistic_days) ?? number(milestone.days) ?? 0;
+      const base = number(milestone.base_days) ?? number(milestone.days) ?? optimistic;
+      const downside = number(milestone.downside_days) ?? base;
+      const expected = (optimistic + (4 * base) + downside) / 6;
+      return {
+        name: String(milestone.name || milestone.label || `Milestone ${index + 1}`),
+        expected_days: round(expected, 1),
+      };
+    });
+    return {
+      outputs: {
+        expected_days: round(rows.reduce((sum, row) => sum + row.expected_days, 0), 1),
+        milestone_count: rows.length,
+        milestones: rows,
+      },
+    };
+  }),
 };
 
 const GENERIC_MODELS = new Set([
@@ -488,6 +763,50 @@ function safeObject(value: unknown): Record<string, any> {
 function numberArray(value: unknown): number[] {
   if (!Array.isArray(value)) return [];
   return value.map(number).filter((item): item is number => item !== null);
+}
+
+function stringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    const single = text(value);
+    return single ? [single] : [];
+  }
+  return value.map(text).filter((item): item is string => item !== null);
+}
+
+function objectArray(value: unknown): Array<Record<string, any>> {
+  return Array.isArray(value)
+    ? value.filter((item): item is Record<string, any> => item && typeof item === 'object' && !Array.isArray(item))
+    : [];
+}
+
+function axisValues(value: unknown): number[] {
+  if (Array.isArray(value)) return numberArray(value);
+  const axis = safeObject(value);
+  return numberArray(axis.values ?? axis.cases ?? axis.points);
+}
+
+function scoreInput(value: unknown): number | null {
+  const parsed = number(value);
+  if (parsed == null) return null;
+  return clamp(parsed, 0, 100);
+}
+
+function scoreFromRange(value: number, min: number | null, max: number | null): number {
+  if (min == null && max == null) return 70;
+  if (min != null && value < min) return Math.max(35, 70 - ((min - value) / Math.max(min, 1)) * 60);
+  if (max != null && value > max) return Math.max(35, 70 - ((value - max) / Math.max(max, 1)) * 60);
+  return 88;
+}
+
+function weightedScore(parts: Array<[number, number]>): number {
+  const totalWeight = parts.reduce((sum, [, weight]) => sum + weight, 0) || 1;
+  return Math.round(parts.reduce((sum, [score, weight]) => sum + clamp(score, 0, 100) * weight, 0) / totalWeight);
+}
+
+function gradeFromScore(score: number): 'strong' | 'workable' | 'weak' {
+  if (score >= 75) return 'strong';
+  if (score >= 55) return 'workable';
+  return 'weak';
 }
 
 function assetClassAllocations(value: unknown): Array<{ class_name: string; amount_cents: number }> {

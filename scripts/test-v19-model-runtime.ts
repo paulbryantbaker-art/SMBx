@@ -212,6 +212,161 @@ await test('Earnout model computes expected present value', async () => {
   assertEqual(run.outputs.expected_present_value_cents, 90_909, 'expected PV');
 });
 
+await test('Buyer fit scores thesis, geography, operations, and financing fit', async () => {
+  const run = await executeV19Model({
+    modelId: 'MODEL.BUYER.FIT.v1',
+    input: {
+      industry: 'HVAC',
+      location: 'Austin',
+      deal_size_cents: 200_000_000,
+      buyer_thesis: 'HVAC route density in Austin',
+      operating_needs: ['dispatch cleanup'],
+      buyer_criteria: { min_deal_size_cents: 100_000_000, max_deal_size_cents: 300_000_000 },
+    },
+  });
+  assertEqual(run.status, 'complete', 'status');
+  assertEqual(run.outputs.fit_score, 87, 'fit score');
+  assertEqual(run.outputs.fit_band, 'strong', 'fit band');
+});
+
+await test('Deal score converts component scores into pursue/watch/pass', async () => {
+  const run = await executeV19Model({
+    modelId: 'MODEL.DEAL.SCORE.v1',
+    input: { fit_score: 80, earnings_quality_score: 70, evidence_score: 90, risk_score: 20 },
+  });
+  assertEqual(run.status, 'complete', 'status');
+  assertEqual(run.outputs.deal_score, 80, 'deal score');
+  assertEqual(run.outputs.pursue_watch_pass, 'pursue', 'decision band');
+});
+
+await test('Market context preserves supplied FRED snapshots without inventing missing values', async () => {
+  const run = await executeV19Model({
+    modelId: 'MODEL.MARKET.CONTEXT.v1',
+    input: {
+      series_ids: ['SOFR', 'DGS10'],
+      as_of_date: '2026-05-18',
+      series_values: { SOFR: 4.2 },
+    },
+  });
+  assertEqual(run.status, 'complete', 'status');
+  assertEqual(run.outputs.series_count, 2, 'series count');
+  assert(run.outputs.missing_value_series.includes('DGS10'), 'missing value should be explicit');
+});
+
+await test('Sensitivity matrix builds deterministic two-axis cases', async () => {
+  const run = await executeV19Model({
+    modelId: 'MODEL.SENSITIVITY.MATRIX.v1',
+    input: {
+      base_case: { value: 100 },
+      x_axis: [-0.1, 0.1],
+      y_axis: [0, 0.2],
+      output_metric: 'enterprise_value',
+    },
+  });
+  assertEqual(run.status, 'complete', 'status');
+  assertEqual(run.outputs.low_case, 90, 'low case');
+  assertEqual(run.outputs.high_case, 132, 'high case');
+});
+
+await test('Deal comparison ranks deals by supplied score and keeps multiples auditable', async () => {
+  const run = await executeV19Model({
+    modelId: 'MODEL.DEAL.COMPARISON.v1',
+    input: {
+      deal_ids: ['a', 'b'],
+      comparison_lens: 'buyer priority',
+      assumption_scope: 'base case',
+      deals: [
+        { id: 'a', name: 'A', score: 60, purchase_price_cents: 1_000_000, ebitda_cents: 250_000 },
+        { id: 'b', name: 'B', score: 85, purchase_price_cents: 1_500_000, ebitda_cents: 300_000 },
+      ],
+    },
+  });
+  assertEqual(run.status, 'complete', 'status');
+  assertEqual(run.outputs.top_deal_id, 'b', 'top deal');
+  assertEqual(run.outputs.rows[0].multiple, 4, 'multiple');
+});
+
+await test('Cap table dilution returns post-money ownership', async () => {
+  const run = await executeV19Model({
+    modelId: 'MODEL.CAPTABLE.DILUTION.v1',
+    input: {
+      pre_money_cents: 100_000_000,
+      round_size_cents: 25_000_000,
+      option_pool_pct: 0.1,
+      security_terms: { liquidation_pref_multiple: 1 },
+    },
+  });
+  assertEqual(run.status, 'complete', 'status');
+  assertEqual(run.outputs.post_money_cents, 125_000_000, 'post money');
+  assertEqual(run.outputs.investor_ownership_pct, 0.2, 'investor ownership');
+});
+
+await test('Covenant compliance identifies compliant periods', async () => {
+  const run = await executeV19Model({
+    modelId: 'MODEL.COVENANT.COMPLIANCE.v1',
+    input: {
+      forecast_periods: [{ period: 'Y1', ebitda_cents: 100_000, total_debt_cents: 300_000, cash_flow_cents: 80_000, debt_service_cents: 60_000, liquidity_cents: 50_000 }],
+      covenant_terms: { max_leverage: 3.5, min_dscr: 1.2, min_liquidity_cents: 40_000 },
+      debt_schedule: [{ total_debt_cents: 300_000, debt_service_cents: 60_000 }],
+    },
+  });
+  assertEqual(run.status, 'complete', 'status');
+  assertEqual(run.outputs.status, 'compliant', 'covenant status');
+  assertEqual(run.outputs.periods[0].dscr, 1.33, 'DSCR');
+});
+
+await test('Two-stage DCF computes cash-flow PV and terminal value', async () => {
+  const run = await executeV19Model({
+    modelId: 'MODEL.VAL.DCF.TWOSTAGE.v1',
+    input: { free_cash_flows_cents: [100, 110], discount_rate: 0.1, terminal_growth_rate: 0.03 },
+  });
+  assertEqual(run.status, 'complete', 'status');
+  assertEqual(run.outputs.enterprise_value_cents, 1520, 'enterprise value');
+});
+
+await test('PMI value creation turns findings into first-100-day actions', async () => {
+  const run = await executeV19Model({
+    modelId: 'MODEL.PMI.VALUE.CREATION.v1',
+    input: {
+      deal_findings: ['Route density upside', 'Weak dispatch process'],
+      integration_risks: ['GM retention', 'billing migration'],
+      value_levers: [{ name: 'Pricing cleanup', value_cents: 1000 }, { name: 'Route optimization', value_cents: 500 }],
+    },
+  });
+  assertEqual(run.status, 'complete', 'status');
+  assertEqual(run.outputs.identified_value_cents, 1500, 'identified value');
+  assertEqual(run.outputs.first_100_day_actions.length, 4, 'action count');
+});
+
+await test('Deal-kill probability converts weighted risks into a band', async () => {
+  const run = await executeV19Model({
+    modelId: 'MODEL.DEALKILL.PROB.v1',
+    input: {
+      risk_factors: [
+        { label: 'customer concentration', severity: 90, probability: 1 },
+        { label: 'financing gap', severity: 50, probability: 0.8 },
+      ],
+    },
+  });
+  assertEqual(run.status, 'complete', 'status');
+  assertEqual(run.outputs.deal_kill_probability, 0.65, 'probability');
+  assertEqual(run.outputs.risk_band, 'medium', 'risk band');
+});
+
+await test('Timeline model uses PERT expected days', async () => {
+  const run = await executeV19Model({
+    modelId: 'MODEL.TIMELINE.MC.v1',
+    input: {
+      milestones: [
+        { name: 'QoE', optimistic_days: 5, base_days: 10, downside_days: 20 },
+        { name: 'Lender approval', days: 4 },
+      ],
+    },
+  });
+  assertEqual(run.status, 'complete', 'status');
+  assertEqual(run.outputs.expected_days, 14.8, 'expected days');
+});
+
 console.log(`\n${passed} passed, ${failed} failed`);
 
 if (failed > 0) process.exit(1);
