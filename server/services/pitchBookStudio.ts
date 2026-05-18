@@ -130,6 +130,13 @@ export function listPitchBookFormats() {
   }));
 }
 
+export function getPitchBookModelIds(book: Pick<PitchBookRecord, 'format' | 'modelOutputs'>): string[] {
+  return [...new Set([
+    ...FORMAT_MODELS[book.format],
+    ...book.modelOutputs.map(output => String(output.modelId || '')).filter(Boolean),
+  ])];
+}
+
 export async function listPitchBooks(userId: number): Promise<PitchBookRecord[]> {
   const rows = await sql`
     SELECT b.id, b.deal_id, b.title, b.format, b.status, b.brief,
@@ -281,10 +288,7 @@ export async function refreshPitchBookFromModels(userId: number, bookId: number)
   const current = await getPitchBook(userId, bookId);
   if (!current) throw new Error('Pitch book not found');
   const deal = current.dealId ? await readAccessibleDeal(userId, current.dealId) : null;
-  const modelIds = [...new Set([
-    ...FORMAT_MODELS[current.format],
-    ...current.modelOutputs.map(output => String(output.modelId || '')).filter(Boolean),
-  ])];
+  const modelIds = getPitchBookModelIds(current);
   const executions: V19ModelExecution[] = [];
   const modelOutputs = [];
   for (const modelId of modelIds) {

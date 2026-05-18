@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   addPitchBookSection,
   createPitchBook,
+  getPitchBookModelIds,
   getPitchBook,
   listPitchBookFormats,
   listPitchBooks,
@@ -13,6 +14,13 @@ import {
 import { exportPitchBookToPPTX } from '../services/pitchBookExportService.js';
 import { exportToPDF } from '../services/exportService.js';
 import { readStudioBookV19Readiness } from '../services/v19ReadinessService.js';
+import {
+  checkV19Entitlement,
+  formatV19TollgateForYulia,
+  readV19UsageMeter,
+  recordV19UsageEvent,
+  type V19EntitlementCheck,
+} from '../services/v19EntitlementService.js';
 
 export const studioRouter = Router();
 
@@ -24,6 +32,21 @@ function userIdFromReq(req: any): number | null {
 function parseId(value: string): number | null {
   const id = Number(value);
   return Number.isFinite(id) && id > 0 ? id : null;
+}
+
+function tollgateStatus(check: V19EntitlementCheck): number {
+  if (check.tollgate?.code === 'credit_budget_required') return 402;
+  if (check.tollgate?.code === 'enterprise_scope_required') return 403;
+  if (check.tollgate?.code === 'human_approval_required') return 428;
+  return 403;
+}
+
+function tollgatePayload(check: V19EntitlementCheck) {
+  return {
+    error: check.tollgate?.message || 'This action is not available on the current plan',
+    tollgate: formatV19TollgateForYulia(check.tollgate),
+    usage: check.meter,
+  };
 }
 
 studioRouter.get('/studio/formats', (_req, res) => {
@@ -46,6 +69,15 @@ studioRouter.post('/studio/pitch-books', async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
   try {
+    const gate = await checkV19Entitlement(userId, 'studio_book', {
+      actionId: 'create_pitch_book',
+      toolName: 'create_pitch_book',
+      sourceSurface: 'studio',
+      resourceType: 'studio_book',
+      metadata: { format: req.body?.format },
+    });
+    if (!gate.allowed) return res.status(tollgateStatus(gate)).json(tollgatePayload(gate));
+
     const book = await createPitchBook({
       userId,
       dealId: req.body?.dealId == null ? null : Number(req.body.dealId),
@@ -53,8 +85,19 @@ studioRouter.post('/studio/pitch-books', async (req, res) => {
       title: req.body?.title,
       brief: req.body?.brief,
     });
+    await recordV19UsageEvent({
+      userId,
+      eventType: 'studio_book',
+      actionId: 'create_pitch_book',
+      toolName: 'create_pitch_book',
+      sourceSurface: 'studio',
+      resourceType: 'studio_book',
+      resourceId: book.id,
+      metadata: { format: book.format, dealId: book.dealId },
+    });
     const readiness = await readStudioBookV19Readiness(userId, book.id);
-    return res.status(201).json({ book, readiness });
+    const usage = await readV19UsageMeter(userId);
+    return res.status(201).json({ book, readiness, usage });
   } catch (err: any) {
     console.error('[studio] create pitch book failed:', err.message);
     return res.status(400).json({ error: err.message || 'Failed to create pitch book' });
@@ -123,9 +166,35 @@ studioRouter.post('/studio/pitch-books/:bookId/refresh', async (req, res) => {
   const bookId = parseId(req.params.bookId);
   if (!bookId) return res.status(400).json({ error: 'Invalid pitch book id' });
   try {
+    const existing = await getPitchBook(userId, bookId);
+    if (!existing) return res.status(404).json({ error: 'Pitch book not found' });
+    const modelIds = getPitchBookModelIds(existing);
+    const gate = await checkV19Entitlement(userId, 'model_run', {
+      quantity: modelIds.length || 1,
+      actionId: 'refresh_pitch_book_from_models',
+      toolName: 'refresh_pitch_book_from_models',
+      sourceSurface: 'studio',
+      resourceType: 'studio_book',
+      resourceId: bookId,
+      metadata: { modelIds },
+    });
+    if (!gate.allowed) return res.status(tollgateStatus(gate)).json(tollgatePayload(gate));
+
     const book = await refreshPitchBookFromModels(userId, bookId);
+    await recordV19UsageEvent({
+      userId,
+      eventType: 'model_run',
+      quantity: modelIds.length || 1,
+      actionId: 'refresh_pitch_book_from_models',
+      toolName: 'refresh_pitch_book_from_models',
+      sourceSurface: 'studio',
+      resourceType: 'studio_book',
+      resourceId: book.id,
+      metadata: { modelIds },
+    });
     const readiness = await readStudioBookV19Readiness(userId, book.id);
-    return res.json({ book, readiness });
+    const usage = await readV19UsageMeter(userId);
+    return res.json({ book, readiness, usage });
   } catch (err: any) {
     console.error('[studio] refresh pitch book failed:', err.message);
     return res.status(400).json({ error: err.message || 'Failed to refresh pitch book' });
@@ -165,11 +234,37 @@ studioRouter.get('/studio/pitch-books/:bookId/export/:format', async (req, res) 
         readiness,
       });
     }
+    const gate = await checkV19Entitlement(userId, 'studio_export', {
+      actionId: 'export_pitch_book',
+      toolName: 'export_pitch_book',
+      sourceSurface: 'studio',
+      resourceType: 'studio_book',
+      resourceId: book.id,
+      metadata: { format, strict, readyForExternalDelivery: readiness.readyForExternalDelivery },
+    });
+    if (!gate.allowed) return res.status(tollgateStatus(gate)).json(tollgatePayload(gate));
+
     const content = pitchBookToExportContent(book);
     const buffer = format === 'pptx'
       ? await exportPitchBookToPPTX(book)
       : await exportToPDF(content, book.title);
     const exportRecord = await recordPitchBookExport(userId, book.id, format, buffer);
+    await recordV19UsageEvent({
+      userId,
+      eventType: 'studio_export',
+      actionId: 'export_pitch_book',
+      toolName: 'export_pitch_book',
+      sourceSurface: 'studio',
+      resourceType: 'studio_export',
+      resourceId: exportRecord.exportId,
+      metadata: {
+        bookId: book.id,
+        format,
+        strict,
+        outputHash: exportRecord.outputHash,
+        readyForExternalDelivery: readiness.readyForExternalDelivery,
+      },
+    });
     const safeName = book.title.replace(/[^a-zA-Z0-9_\- ]/g, '').replace(/\s+/g, '_').substring(0, 60);
 
     res.set({

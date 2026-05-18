@@ -32,6 +32,7 @@ import {
 import {
   addPitchBookSection,
   createPitchBook,
+  getPitchBookModelIds,
   getPitchBook,
   refreshPitchBookFromModels,
   revisePitchBook,
@@ -40,6 +41,13 @@ import { composeModelStack, type V19Journey } from './modelStackComposer.js';
 import { executeV19Model, persistV19ModelExecution } from './v19ModelRuntime.js';
 import { validateCitationTags } from './citationValidator.js';
 import { readDealV19Readiness, readStudioBookV19Readiness } from './v19ReadinessService.js';
+import {
+  checkV19Entitlement,
+  formatV19TollgateForYulia,
+  readV19UsageMeter,
+  recordV19UsageEvent,
+  type V19EntitlementCheck,
+} from './v19EntitlementService.js';
 
 const sql = createSql();
 
@@ -260,6 +268,14 @@ export const TOOL_DEFINITIONS: Tool[] = [
         dealId: { type: 'number', description: 'Optional deal ID for gate/model/citation readiness.' },
         bookId: { type: 'number', description: 'Optional Studio book ID for export/source/model readiness.' },
       },
+    },
+  },
+  {
+    name: 'read_v19_entitlements',
+    description: 'Read the user plan entitlements, current monthly V19 usage meter, and available tollgate states for model runs, Studio books, exports, API/MCP access, and agent usage.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {},
     },
   },
   {
@@ -813,11 +829,13 @@ export async function executeTool(
       case 'execute_model':
         return await executeModelTool(input, userId, conversationId);
       case 'lookup_citation':
-        return await lookupCitationTool(input);
+        return await lookupCitationTool(input, userId);
       case 'fetch_market_data':
-        return await fetchMarketDataTool(input);
+        return await fetchMarketDataTool(input, userId);
       case 'read_v19_readiness':
         return await readV19ReadinessTool(input, userId);
+      case 'read_v19_entitlements':
+        return await readV19EntitlementsTool(userId);
       case 'defer_to_counsel':
         return await deferToCounselTool(input, userId, conversationId);
       case 'update_tax_position':
@@ -1297,12 +1315,31 @@ async function generateDealDeliverable(input: Record<string, any>, userId: numbe
 }
 
 async function createPitchBookTool(input: Record<string, any>, userId: number): Promise<string> {
+  const gate = await checkV19Entitlement(userId, 'studio_book', {
+    actionId: 'create_pitch_book',
+    toolName: 'create_pitch_book',
+    sourceSurface: 'chat',
+    resourceType: 'studio_book',
+    metadata: { format: input.format },
+  });
+  if (!gate.allowed) return stringifyV19Tollgate(gate);
+
   const book = await createPitchBook({
     userId,
     dealId: input.dealId == null ? null : Number(input.dealId),
     format: input.format,
     title: input.title,
     brief: input.brief,
+  });
+  await recordV19UsageEvent({
+    userId,
+    eventType: 'studio_book',
+    actionId: 'create_pitch_book',
+    toolName: 'create_pitch_book',
+    sourceSurface: 'chat',
+    resourceType: 'studio_book',
+    resourceId: book.id,
+    metadata: { format: book.format, dealId: book.dealId },
   });
   return JSON.stringify({
     success: true,
@@ -1313,6 +1350,7 @@ async function createPitchBookTool(input: Record<string, any>, userId: number): 
     slides: book.slides.length,
     warnings: book.slides.filter(slide => slide.warningState !== 'clean').length,
     v19Readiness: await readStudioBookV19Readiness(userId, book.id),
+    v19Usage: await readV19UsageMeter(userId),
     canvas_action: 'open_tab',
     tab: {
       id: `studio-book-${book.id}`,
@@ -1322,6 +1360,15 @@ async function createPitchBookTool(input: Record<string, any>, userId: number): 
       studioFormat: book.format,
       studioBookId: book.id,
     },
+  });
+}
+
+function stringifyV19Tollgate(check: V19EntitlementCheck): string {
+  return JSON.stringify({
+    success: false,
+    error: check.tollgate?.message || 'This V19 action is not available on the current plan',
+    tollgate: formatV19TollgateForYulia(check.tollgate),
+    v19Usage: check.meter,
   });
 }
 
@@ -1360,7 +1407,33 @@ async function addPitchBookSectionTool(input: Record<string, any>, userId: numbe
 }
 
 async function refreshPitchBookFromModelsTool(input: Record<string, any>, userId: number): Promise<string> {
-  const book = await refreshPitchBookFromModels(userId, Number(input.bookId));
+  const bookId = Number(input.bookId);
+  const existing = await getPitchBook(userId, bookId);
+  if (!existing) return JSON.stringify({ error: 'Pitch book not found' });
+  const modelIds = getPitchBookModelIds(existing);
+  const gate = await checkV19Entitlement(userId, 'model_run', {
+    quantity: modelIds.length || 1,
+    actionId: 'refresh_pitch_book_from_models',
+    toolName: 'refresh_pitch_book_from_models',
+    sourceSurface: 'chat',
+    resourceType: 'studio_book',
+    resourceId: bookId,
+    metadata: { modelIds },
+  });
+  if (!gate.allowed) return stringifyV19Tollgate(gate);
+
+  const book = await refreshPitchBookFromModels(userId, bookId);
+  await recordV19UsageEvent({
+    userId,
+    eventType: 'model_run',
+    quantity: modelIds.length || 1,
+    actionId: 'refresh_pitch_book_from_models',
+    toolName: 'refresh_pitch_book_from_models',
+    sourceSurface: 'chat',
+    resourceType: 'studio_book',
+    resourceId: book.id,
+    metadata: { modelIds },
+  });
   return JSON.stringify({
     success: true,
     bookId: book.id,
@@ -1369,6 +1442,7 @@ async function refreshPitchBookFromModelsTool(input: Record<string, any>, userId
     message: 'Pitch book model slots were refreshed against the V19 runtime.',
     warnings: book.slides.filter(slide => slide.warningState !== 'clean').length,
     v19Readiness: await readStudioBookV19Readiness(userId, book.id),
+    v19Usage: await readV19UsageMeter(userId),
   });
 }
 
@@ -1378,6 +1452,16 @@ async function exportPitchBookTool(input: Record<string, any>, userId: number): 
   const book = await getPitchBook(userId, bookId);
   if (!book) return JSON.stringify({ error: 'Pitch book not found' });
   const readiness = await readStudioBookV19Readiness(userId, book.id);
+  const gate = await checkV19Entitlement(userId, 'studio_export', {
+    actionId: 'export_pitch_book',
+    toolName: 'export_pitch_book',
+    sourceSurface: 'chat',
+    resourceType: 'studio_book',
+    resourceId: book.id,
+    metadata: { format, readyForExternalDelivery: readiness.readyForExternalDelivery },
+  });
+  if (!gate.allowed) return stringifyV19Tollgate(gate);
+
   return JSON.stringify({
     success: true,
     bookId: book.id,
@@ -1388,6 +1472,7 @@ async function exportPitchBookTool(input: Record<string, any>, userId: number): 
     alternateDownloadUrl: `/api/studio/pitch-books/${book.id}/export/${format === 'pptx' ? 'pdf' : 'pptx'}`,
     readyForExternalDelivery: readiness.readyForExternalDelivery,
     v19Readiness: readiness,
+    v19Usage: gate.meter,
   });
 }
 
@@ -1426,6 +1511,16 @@ async function composeModelStackTool(input: Record<string, any>, userId: number)
 async function executeModelTool(input: Record<string, any>, userId: number, conversationId: number): Promise<string> {
   const dealId = input.dealId == null ? null : Number(input.dealId);
   if (dealId && !(await hasDealAccess(dealId, userId))) return JSON.stringify({ error: 'Deal not found' });
+  const gate = await checkV19Entitlement(userId, 'model_run', {
+    actionId: 'execute_model',
+    toolName: 'execute_model',
+    sourceSurface: 'chat',
+    resourceType: 'model',
+    resourceId: String(input.modelId || ''),
+    metadata: { dealId },
+  });
+  if (!gate.allowed) return stringifyV19Tollgate(gate);
+
   const execution = await executeV19Model({
     modelId: String(input.modelId || ''),
     input: asRecord(input.input),
@@ -1434,8 +1529,29 @@ async function executeModelTool(input: Record<string, any>, userId: number, conv
     conversationId,
   });
   const record = await persistV19ModelExecution(execution, { toolName: 'execute_model' });
+  await recordV19UsageEvent({
+    userId,
+    eventType: 'model_run',
+    actionId: 'execute_model',
+    toolName: 'execute_model',
+    sourceSurface: 'chat',
+    resourceType: 'model_execution',
+    resourceId: record.id,
+    metadata: {
+      dealId,
+      modelId: execution.modelId,
+      status: execution.status,
+      outputHash: execution.outputHash,
+    },
+  });
   const readiness = dealId ? await readDealV19Readiness(userId, dealId).catch(() => null) : null;
-  return JSON.stringify({ success: true, modelExecutionId: record.id, execution, v19Readiness: readiness });
+  return JSON.stringify({
+    success: true,
+    modelExecutionId: record.id,
+    execution,
+    v19Readiness: readiness,
+    v19Usage: await readV19UsageMeter(userId),
+  });
 }
 
 async function readV19ReadinessTool(input: Record<string, any>, userId: number): Promise<string> {
@@ -1451,9 +1567,35 @@ async function readV19ReadinessTool(input: Record<string, any>, userId: number):
   });
 }
 
-async function lookupCitationTool(input: Record<string, any>): Promise<string> {
+async function readV19EntitlementsTool(userId: number): Promise<string> {
+  const meter = await readV19UsageMeter(userId);
+  await recordV19UsageEvent({
+    userId,
+    eventType: 'tool_call',
+    actionId: 'read_v19_entitlements',
+    toolName: 'read_v19_entitlements',
+    sourceSurface: 'chat',
+    metadata: { plan: meter.plan },
+  });
+  return JSON.stringify({
+    success: true,
+    usage: meter,
+    tollgateStates: ['credit_budget_required', 'human_approval_required', 'enterprise_scope_required'],
+  });
+}
+
+async function lookupCitationTool(input: Record<string, any>, userId: number): Promise<string> {
   const citeTag = String(input.citeTag || '').trim();
   if (!citeTag) return JSON.stringify({ error: 'citeTag is required' });
+  await recordV19UsageEvent({
+    userId,
+    eventType: 'tool_call',
+    actionId: 'lookup_citation',
+    toolName: 'lookup_citation',
+    sourceSurface: 'chat',
+    resourceType: 'citation',
+    resourceId: citeTag,
+  });
   const validation = await validateCitationTags([citeTag]);
   const [row] = await sql`
     SELECT cite_tag, category, description, current_value, source_url, as_of_date, validated_at, status
@@ -1469,9 +1611,18 @@ async function lookupCitationTool(input: Record<string, any>): Promise<string> {
   });
 }
 
-async function fetchMarketDataTool(input: Record<string, any>): Promise<string> {
+async function fetchMarketDataTool(input: Record<string, any>, userId: number): Promise<string> {
   const seriesId = String(input.seriesId || '').trim();
   if (!seriesId) return JSON.stringify({ error: 'seriesId is required' });
+  const gate = await checkV19Entitlement(userId, 'api_call', {
+    actionId: 'fetch_market_data',
+    toolName: 'fetch_market_data',
+    sourceSurface: 'chat',
+    resourceType: 'market_data_series',
+    resourceId: seriesId,
+  });
+  if (!gate.allowed) return stringifyV19Tollgate(gate);
+
   const [row] = await sql`
     SELECT series_id, value, as_of_date, source, source_url, cite_tag, fetched_at, metadata
     FROM market_data_cache
@@ -1479,7 +1630,17 @@ async function fetchMarketDataTool(input: Record<string, any>): Promise<string> 
     ORDER BY as_of_date DESC NULLS LAST, fetched_at DESC
     LIMIT 1
   `;
-  return JSON.stringify({ found: !!row, seriesId, data: row || null });
+  await recordV19UsageEvent({
+    userId,
+    eventType: 'api_call',
+    actionId: 'fetch_market_data',
+    toolName: 'fetch_market_data',
+    sourceSurface: 'chat',
+    resourceType: 'market_data_series',
+    resourceId: seriesId,
+    metadata: { found: !!row },
+  });
+  return JSON.stringify({ found: !!row, seriesId, data: row || null, v19Usage: await readV19UsageMeter(userId) });
 }
 
 async function deferToCounselTool(input: Record<string, any>, userId: number, conversationId: number): Promise<string> {

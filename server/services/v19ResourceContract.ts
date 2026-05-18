@@ -49,6 +49,7 @@ export const V19_TOOL_CONTRACTS = [
   'lookup_citation',
   'fetch_market_data',
   'read_v19_readiness',
+  'read_v19_entitlements',
   'defer_to_counsel',
   'update_tax_position',
   'write_audit_trail',

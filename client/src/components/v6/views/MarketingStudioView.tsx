@@ -249,7 +249,11 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to create pitch book");
+      if (!res.ok) {
+        const error = new Error(data.tollgate?.message || data.error || "Failed to create pitch book") as Error & { tollgate?: unknown };
+        error.tollgate = data.tollgate;
+        throw error;
+      }
       const book = data.book as PitchBookRecord;
       refreshBook(book);
       openTab({
@@ -265,6 +269,7 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
       });
     } catch (err: any) {
       setError(err.message || "Failed to create pitch book");
+      if (err.tollgate) return;
       openTab({
         id: fallbackId,
         kind: "marketing-studio",
