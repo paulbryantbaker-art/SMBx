@@ -482,8 +482,15 @@ function emptyCopy(modeLabel: string): { title: string; body: ReactNode; eyebrow
       eyebrow: "FILE PROMPTS",
     };
   }
+  if (modeLabel === "Studio") {
+    return {
+      title: "Hi, I'm Yulia, your deal desk is ready.",
+      body: "Ask me to create a pitch book, memo, model pack, or source-grounded draft from the files and deals you already have open.",
+      eyebrow: "STUDIO PROMPTS",
+    };
+  }
   return {
-    title: "Hi there. Yulia can walk you through one of your deals right now - for free.",
+    title: "Hi, I'm Yulia, your deal desk is ready.",
     body: <>Start using the app completely for free. Use the <strong style={{ color: "var(--m-on-surface)" }}>Search Ideas</strong> below to explore, or just start chatting. Feel free to learn more about the app too.</>,
     eyebrow: "SEARCH IDEAS",
   };

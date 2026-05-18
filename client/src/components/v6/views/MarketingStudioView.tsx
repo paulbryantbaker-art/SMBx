@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { authHeaders, type User } from "../../../hooks/useAuth";
-import { DESKTOP_TEXTURES, STUDIO_TEXTURES } from "../../../lib/randomTextures";
+import { ART_HOUSE_TEXTURES, DESKTOP_TEXTURES, STUDIO_TEXTURES } from "../../../lib/randomTextures";
 import type { OpenTab, StudioFormatId, Tab } from "../types";
 
 interface MarketingStudioProps {
@@ -142,6 +142,19 @@ const SAMPLE_BOOKS: PitchBookRecord[] = [
   localBook("qoe-preview-book", "Big Fake Deal - QoE Preview Book"),
   localBook("buyer-pitch-book", "Pest Control FL - Buyer Pitch Book"),
 ];
+
+const glassBackdrop: CSSProperties = {
+  backdropFilter: "blur(22px) saturate(155%)",
+  WebkitBackdropFilter: "blur(22px) saturate(155%)",
+};
+
+const liquidGlass =
+  "radial-gradient(circle at 18% 0%, rgba(255,255,255,.54), transparent 36%), " +
+  "linear-gradient(135deg, rgba(255,255,255,.58), rgba(245,250,255,.32) 50%, rgba(232,241,252,.20))";
+
+const liquidDarkGlass =
+  "radial-gradient(circle at 16% 0%, rgba(255,255,255,.20), transparent 34%), " +
+  "linear-gradient(155deg, rgba(18,35,54,.88), rgba(27,59,86,.72) 54%, rgba(9,25,43,.84))";
 
 export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: MarketingStudioProps) {
   const [books, setBooks] = useState<PitchBookRecord[]>([]);
@@ -750,17 +763,20 @@ const S: Record<string, CSSProperties> = {
     gridTemplateColumns: "minmax(0, 1.1fr) 420px",
     gap: 24,
     padding: 28,
-    background: "linear-gradient(135deg, rgba(238,245,255,.94), rgba(250,252,255,.84))",
-    border: "1px solid rgba(153,176,209,.52)",
-    boxShadow: "0 24px 70px rgba(42,65,96,.16), inset 0 1px 0 rgba(255,255,255,.9)",
+    backgroundImage: `radial-gradient(circle at 12% 0%, rgba(255,255,255,.92), transparent 42%), linear-gradient(135deg, rgba(229,240,253,.86), rgba(249,252,255,.64) 46%, rgba(220,233,248,.50)), url('${ART_HOUSE_TEXTURES.studio}')`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    border: "1px solid rgba(255,255,255,.72)",
+    boxShadow: "0 30px 82px rgba(42,65,96,.18), inset 0 1px 0 rgba(255,255,255,.86)",
+    ...glassBackdrop,
   },
   heroTexture: {
     position: "absolute",
     inset: 0,
-    backgroundImage: `linear-gradient(90deg, rgba(255,255,255,.84), rgba(255,255,255,.18) 56%, rgba(21,36,58,.12)), url('${DESKTOP_TEXTURES.todayHeroSample}')`,
+    backgroundImage: `linear-gradient(90deg, rgba(255,255,255,.72), rgba(255,255,255,.10) 58%, rgba(21,36,58,.20)), url('${DESKTOP_TEXTURES.todayHeroSample}')`,
     backgroundSize: "cover",
     backgroundPosition: "center",
-    opacity: 0.9,
+    opacity: 0.54,
   },
   heroInner: { position: "relative", zIndex: 1, alignSelf: "end", maxWidth: 820 },
   brandRail: {
@@ -769,10 +785,12 @@ const S: Record<string, CSSProperties> = {
     gap: 10,
     padding: "8px 12px",
     borderRadius: 999,
-    background: "rgba(255,255,255,.68)",
-    border: "1px solid rgba(143,166,199,.42)",
+    background: liquidGlass,
+    border: "1px solid rgba(255,255,255,.56)",
     fontWeight: 800,
     color: "#2E5C8A",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,.78), 0 14px 26px rgba(42,65,96,.10)",
+    ...glassBackdrop,
   },
   brandDot: {
     width: 28,
@@ -809,10 +827,11 @@ const S: Record<string, CSSProperties> = {
     borderRadius: 24,
     padding: 22,
     color: "#EAF4FF",
-    backgroundImage: `linear-gradient(180deg, rgba(18,35,54,.86), rgba(19,43,66,.74)), url('${STUDIO_TEXTURES.navy}')`,
+    backgroundImage: `${liquidDarkGlass}, url('${STUDIO_TEXTURES.navy}')`,
     backgroundSize: "cover",
     boxShadow: "0 20px 60px rgba(23,42,65,.24), inset 0 1px 0 rgba(255,255,255,.22)",
     border: "1px solid rgba(255,255,255,.22)",
+    ...glassBackdrop,
   },
   panelTop: { display: "flex", justifyContent: "space-between", marginBottom: 34, color: "#fff" },
   readinessRow: {
@@ -822,8 +841,10 @@ const S: Record<string, CSSProperties> = {
     borderRadius: 18,
     padding: "16px 18px",
     marginBottom: 12,
-    background: "rgba(255,255,255,.11)",
+    background: "rgba(255,255,255,.13)",
     border: "1px solid rgba(255,255,255,.18)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,.16)",
+    ...glassBackdrop,
   },
   readinessMeter: {
     position: "absolute",
@@ -845,9 +866,10 @@ const S: Record<string, CSSProperties> = {
   commandBox: {
     padding: 18,
     borderRadius: 22,
-    background: "rgba(255,255,255,.72)",
-    border: "1px solid rgba(153,176,209,.45)",
-    boxShadow: "0 18px 44px rgba(42,65,96,.12)",
+    background: liquidGlass,
+    border: "1px solid rgba(255,255,255,.55)",
+    boxShadow: "0 18px 44px rgba(42,65,96,.12), inset 0 1px 0 rgba(255,255,255,.74)",
+    ...glassBackdrop,
   },
   select: {
     width: "100%",
@@ -888,8 +910,9 @@ const S: Record<string, CSSProperties> = {
     borderRadius: 20,
     padding: 16,
     border: "1px solid rgba(153,176,209,.42)",
-    background: "rgba(255,255,255,.68)",
-    boxShadow: "0 14px 34px rgba(42,65,96,.08)",
+    background: liquidGlass,
+    boxShadow: "0 14px 34px rgba(42,65,96,.08), inset 0 1px 0 rgba(255,255,255,.64)",
+    ...glassBackdrop,
     display: "flex",
     flexDirection: "column",
     gap: 8,
@@ -903,8 +926,10 @@ const S: Record<string, CSSProperties> = {
   bookPanel: {
     borderRadius: 24,
     padding: 20,
-    background: "rgba(255,255,255,.72)",
-    border: "1px solid rgba(153,176,209,.45)",
+    background: liquidGlass,
+    border: "1px solid rgba(255,255,255,.55)",
+    boxShadow: "0 18px 44px rgba(42,65,96,.10), inset 0 1px 0 rgba(255,255,255,.72)",
+    ...glassBackdrop,
   },
   panelHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 },
   smallPill: {
@@ -958,9 +983,11 @@ const S: Record<string, CSSProperties> = {
   diffPanel: {
     borderRadius: 24,
     padding: 22,
-    backgroundImage: `linear-gradient(135deg, rgba(255,255,255,.84), rgba(238,245,255,.58)), url('${STUDIO_TEXTURES.blue}')`,
+    backgroundImage: `radial-gradient(circle at 10% 0%, rgba(255,255,255,.58), transparent 38%), linear-gradient(135deg, rgba(255,255,255,.74), rgba(238,245,255,.44)), url('${STUDIO_TEXTURES.blue}')`,
     backgroundSize: "cover",
-    border: "1px solid rgba(153,176,209,.45)",
+    border: "1px solid rgba(255,255,255,.55)",
+    boxShadow: "0 18px 44px rgba(42,65,96,.10), inset 0 1px 0 rgba(255,255,255,.72)",
+    ...glassBackdrop,
   },
   diffGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 20 },
   diffItem: {
@@ -1021,9 +1048,10 @@ const S: Record<string, CSSProperties> = {
   railSection: {
     borderRadius: 22,
     padding: 16,
-    background: "rgba(255,255,255,.74)",
-    border: "1px solid rgba(153,176,209,.42)",
-    boxShadow: "0 14px 32px rgba(42,65,96,.08)",
+    background: liquidGlass,
+    border: "1px solid rgba(255,255,255,.55)",
+    boxShadow: "0 14px 32px rgba(42,65,96,.09), inset 0 1px 0 rgba(255,255,255,.70)",
+    ...glassBackdrop,
   },
   railTitle: { display: "block", marginBottom: 12, fontSize: 16 },
   storyInput: {
@@ -1049,19 +1077,22 @@ const S: Record<string, CSSProperties> = {
     flex: "1 1 760px",
     borderRadius: 26,
     padding: 18,
-    background: "linear-gradient(180deg, rgba(238,245,255,.88), rgba(255,255,255,.72))",
-    border: "1px solid rgba(153,176,209,.48)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,.88)",
+    backgroundImage: `radial-gradient(circle at 20% 0%, rgba(255,255,255,.62), transparent 38%), linear-gradient(180deg, rgba(225,238,252,.82), rgba(255,255,255,.56)), url('${STUDIO_TEXTURES.blue}')`,
+    backgroundSize: "cover",
+    border: "1px solid rgba(255,255,255,.58)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,.88), 0 20px 46px rgba(42,65,96,.10)",
+    ...glassBackdrop,
   },
   deckFrame: { display: "grid", gap: 16 },
   slideCard: {
     minHeight: 360,
     borderRadius: 24,
     padding: 24,
-    backgroundImage: `linear-gradient(135deg, rgba(255,255,255,.9), rgba(245,249,255,.72)), url('${STUDIO_TEXTURES.rose}')`,
+    backgroundImage: `radial-gradient(circle at 8% 0%, rgba(255,255,255,.76), transparent 40%), linear-gradient(135deg, rgba(255,255,255,.82), rgba(245,249,255,.58)), url('${STUDIO_TEXTURES.rose}')`,
     backgroundSize: "cover",
-    border: "1px solid rgba(153,176,209,.45)",
-    boxShadow: "0 18px 44px rgba(42,65,96,.12)",
+    border: "1px solid rgba(255,255,255,.58)",
+    boxShadow: "0 18px 44px rgba(42,65,96,.12), inset 0 1px 0 rgba(255,255,255,.80)",
+    ...glassBackdrop,
   },
   slideTop: { display: "flex", justifyContent: "space-between", alignItems: "center" },
   slideNumber: { fontWeight: 900, color: "#8A9AE8" },
