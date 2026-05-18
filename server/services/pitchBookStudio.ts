@@ -1,6 +1,8 @@
 import { createHash } from 'crypto';
 import { sql } from '../db.js';
 import { hasDealAccess } from './dealAccessService.js';
+import { validateCitationTags } from './citationValidator.js';
+import { executeV19Model, type V19ModelExecution } from './v19ModelRuntime.js';
 
 export type PitchBookFormat =
   | 'buyer-pitch-book'
@@ -278,19 +280,61 @@ export async function addPitchBookSection(input: AddSectionInput): Promise<Pitch
 export async function refreshPitchBookFromModels(userId: number, bookId: number): Promise<PitchBookRecord> {
   const current = await getPitchBook(userId, bookId);
   if (!current) throw new Error('Pitch book not found');
-  const modelOutputs = current.modelOutputs.map(output => ({
-    ...output,
-    status: 'stale_until_runtime',
-    refreshedAt: new Date().toISOString(),
-  }));
-  const slides = current.slides.map(slide => ({
-    ...slide,
-    warningState: 'stale_models' as const,
-    provenance: {
-      ...slide.provenance,
-      uncheckedClaims: [...new Set([...slide.provenance.uncheckedClaims, 'Linked model output needs V19 runtime execution.'])],
-    },
-  }));
+  const deal = current.dealId ? await readAccessibleDeal(userId, current.dealId) : null;
+  const modelIds = [...new Set([
+    ...FORMAT_MODELS[current.format],
+    ...current.modelOutputs.map(output => String(output.modelId || '')).filter(Boolean),
+  ])];
+  const executions: V19ModelExecution[] = [];
+  const modelOutputs = [];
+  for (const modelId of modelIds) {
+    const execution = await executeV19Model({
+      modelId,
+      dealId: current.dealId,
+      userId,
+      input: buildModelInput(modelId, current, deal),
+    });
+    executions.push(execution);
+    modelOutputs.push({
+      modelId: execution.modelId,
+      version: execution.version,
+      status: execution.status,
+      outputs: execution.outputs,
+      missingInputs: execution.missingInputs,
+      citationTags: execution.citationTags,
+      outputHash: execution.outputHash,
+      auditPayload: execution.auditPayload,
+      refreshedAt: execution.auditPayload.executedAt,
+    });
+  }
+  const executionByModel = new Map(modelOutputs.map(output => [output.modelId, output]));
+  const slides = current.slides.map(slide => {
+    const linked = slide.provenance.modelOutputsUsed
+      .map(modelId => executionByModel.get(modelId))
+      .filter(Boolean) as typeof modelOutputs;
+    const missingInputs = linked.flatMap(output => output.missingInputs || []);
+    const staleMessages = missingInputs.length
+      ? [`Missing model inputs: ${[...new Set(missingInputs)].join(', ')}.`]
+      : [];
+    const uncheckedClaims = [
+      ...slide.provenance.uncheckedClaims.filter(claim => !/Linked model output needs V19 runtime execution|Missing model inputs:/i.test(claim)),
+      ...staleMessages,
+    ];
+    return {
+      ...slide,
+      warningState: missingInputs.length
+        ? 'stale_models' as const
+        : (slide.provenance.factsUsed.length ? 'clean' as const : 'needs_sources' as const),
+      provenance: {
+        ...slide.provenance,
+        citationsUsed: [...new Set([
+          ...slide.provenance.citationsUsed,
+          ...linked.flatMap(output => output.citationTags || []),
+        ])],
+        uncheckedClaims,
+      },
+    };
+  });
   const audit = buildAudit({
     format: current.format,
     slides,
@@ -298,10 +342,19 @@ export async function refreshPitchBookFromModels(userId: number, bookId: number)
     modelOutputs,
     sources: current.sources,
     action: 'refresh_pitch_book_from_models',
+    modelExecutionHashes: executions.map(execution => execution.outputHash),
   });
   const version = await insertVersion(current.id, current.title, current.outline, slides, current.assumptions, modelOutputs, audit, 'yulia');
   await cloneSources(current.id, current.versionId, version.id);
   await sql`UPDATE studio_books SET current_version_id = ${version.id}, updated_at = NOW() WHERE id = ${current.id}`;
+  await writeStudioAuditTrail({
+    userId,
+    book: current,
+    versionId: version.id,
+    action: 'refresh_pitch_book_from_models',
+    modelOutputs,
+    outputHash: audit.inputHash,
+  });
   const refreshed = await getPitchBook(userId, current.id);
   if (!refreshed) throw new Error('Pitch book refresh could not be read back');
   return refreshed;
@@ -316,18 +369,36 @@ export async function recordPitchBookExport(
   const book = await getPitchBook(userId, bookId);
   if (!book) throw new Error('Pitch book not found');
   const outputHash = createHash('sha256').update(buffer).digest('hex');
+  const citationValidation = await validateCitationTags(collectBookCitationTags(book));
+  const warnings = buildExportWarnings(book, citationValidation);
   const [row] = await sql`
     INSERT INTO studio_exports (book_id, version_id, format, status, output_hash, metadata)
     VALUES (
       ${book.id},
       ${book.versionId},
       ${format},
-      'ready',
+      ${warnings.length ? 'ready_with_warnings' : 'ready'},
       ${outputHash},
-      ${sql.json({ title: book.title, slideCount: book.slides.length, exportedAt: new Date().toISOString() })}::jsonb
+      ${sql.json({
+        title: book.title,
+        slideCount: book.slides.length,
+        exportedAt: new Date().toISOString(),
+        citationValidation,
+        warnings,
+      })}::jsonb
     )
     RETURNING id
   `;
+  await writeStudioAuditTrail({
+    userId,
+    book,
+    versionId: book.versionId,
+    action: `export_pitch_book:${format}`,
+    modelOutputs: book.modelOutputs,
+    outputHash,
+    citationsValidated: citationValidation,
+    warnings,
+  });
   return { exportId: Number(row.id), outputHash };
 }
 
@@ -622,6 +693,7 @@ function buildAudit(input: {
   sources: StudioSource[];
   action: string;
   instruction?: string;
+  modelExecutionHashes?: string[];
 }): Record<string, any> {
   const payload = {
     schemaVersion: 'studio-audit-v1',
@@ -632,12 +704,127 @@ function buildAudit(input: {
     modelOutputCount: input.modelOutputs.length,
     sourceCount: input.sources.length,
     instruction: input.instruction || null,
+    modelExecutionHashes: input.modelExecutionHashes || [],
     generatedAt: new Date().toISOString(),
   };
   return {
     ...payload,
     inputHash: createHash('sha256').update(JSON.stringify(payload)).digest('hex'),
   };
+}
+
+async function writeStudioAuditTrail(input: {
+  userId: number;
+  book: PitchBookRecord;
+  versionId: number | null;
+  action: string;
+  modelOutputs: Array<Record<string, any>>;
+  outputHash: string;
+  citationsValidated?: Record<string, any>;
+  warnings?: string[];
+}): Promise<void> {
+  await sql`
+    INSERT INTO audit_trail (
+      session_id, deal_id, user_id, conversation_id, turn_id, journey, league, deal_type,
+      model_stack, inputs_used, live_data_snapshots, citations_validated, mode_2_triggers, output_hash
+    )
+    VALUES (
+      ${`studio:${input.book.id}`},
+      ${input.book.dealId},
+      ${input.userId},
+      ${null},
+      ${`${input.action}:v${input.versionId || input.book.version}`},
+      ${assumptionValue(input.book.assumptions, 'journey')},
+      ${assumptionValue(input.book.assumptions, 'league')},
+      ${input.book.format},
+      ${sql.json(input.modelOutputs.map(output => output.modelId))}::jsonb,
+      ${sql.json({ bookId: input.book.id, versionId: input.versionId, action: input.action })}::jsonb,
+      ${sql.json({ studioSources: input.book.sources.length, warnings: input.warnings || [] })}::jsonb,
+      ${sql.json(input.citationsValidated || {})}::jsonb,
+      ${sql.json([])}::jsonb,
+      ${input.outputHash}
+    )
+  `;
+}
+
+function buildModelInput(modelId: string, book: PitchBookRecord, deal: Record<string, any> | null): Record<string, any> {
+  const financials = safeRecord(deal?.financials);
+  const normalizedEarnings = centsValue(deal?.ebitda) ?? centsValue(deal?.sde);
+  const askingPrice = centsValue(deal?.asking_price);
+  const annualDebtService = centsValue(financials.annual_debt_service_cents) || centsValue(financials.debt_service_cents);
+  const common = {
+    deal_id: book.dealId,
+    format: book.format,
+    financial_facts: [
+      ...book.slides.flatMap(slide => slide.provenance.factsUsed),
+      ...dealFacts(deal),
+    ].filter(Boolean),
+    adjustments: safeArray(financials.adjustments || financials.add_backs).map(item => typeof item === 'object' ? item : { value: item }),
+    data_room_files: book.sources.filter(source => source.sourceType === 'data_room_document'),
+    revenue_cents: centsValue(deal?.revenue),
+    sde_cents: centsValue(deal?.sde),
+    seller_discretionary_earnings_cents: centsValue(deal?.sde),
+    ebitda_cents: centsValue(deal?.ebitda),
+    normalized_earnings_cents: normalizedEarnings,
+    adjusted_ebitda_cents: centsValue(deal?.ebitda),
+    normalized_sde_cents: centsValue(deal?.sde),
+    purchase_price_cents: askingPrice,
+    enterprise_value_cents: askingPrice,
+    cash_flow_cents: normalizedEarnings,
+    annual_debt_service_cents: annualDebtService,
+    buyer_equity_cents: centsValue(financials.buyer_equity_cents),
+    add_backs_cents: centsValue(financials.add_backs_cents),
+    owner_comp_cents: centsValue(financials.owner_comp_cents),
+    adjustments_cents: centsValue(financials.adjustments_cents),
+    monthly_nwc_cents: safeArray(financials.monthly_nwc_cents),
+    sources_cents: financials.sources_cents,
+    uses_cents: financials.uses_cents,
+    low_multiple: numberValue(financials.low_multiple) || 4,
+    high_multiple: numberValue(financials.high_multiple) || 6,
+  };
+
+  if (modelId === 'MODEL.SOURCES.USES.v1' && !common.sources_cents && askingPrice) {
+    common.sources_cents = [centsValue(financials.senior_debt_cents), centsValue(financials.seller_note_cents), centsValue(financials.buyer_equity_cents)].filter(value => value != null);
+    common.uses_cents = [askingPrice, centsValue(financials.fees_cents)].filter(value => value != null);
+  }
+
+  return common;
+}
+
+function collectBookCitationTags(book: PitchBookRecord): string[] {
+  return [...new Set([
+    ...book.sources.map(source => source.citationTag).filter(Boolean),
+    ...book.slides.flatMap(slide => slide.provenance.citationsUsed),
+    ...book.modelOutputs.flatMap(output => Array.isArray(output.citationTags) ? output.citationTags : []),
+  ])] as string[];
+}
+
+function buildExportWarnings(book: PitchBookRecord, citationValidation: { missing: string[] }): string[] {
+  return [
+    ...book.slides
+      .filter(slide => slide.warningState !== 'clean')
+      .map(slide => `${slide.title}: ${slide.warningState}`),
+    ...book.modelOutputs
+      .filter(output => output.status !== 'complete')
+      .map(output => `${output.modelId}: ${output.status}`),
+    ...citationValidation.missing.map(tag => `Missing citation: ${tag}`),
+  ];
+}
+
+function assumptionValue(assumptions: Array<Record<string, any>>, key: string): string | null {
+  const hit = assumptions.find(item => item.key === key);
+  return typeof hit?.value === 'string' ? hit.value : null;
+}
+
+function centsValue(value: unknown): number | null {
+  const parsed = numberValue(value);
+  return parsed == null ? null : Math.round(parsed);
+}
+
+function numberValue(value: unknown): number | null {
+  if (value === null || value === undefined || value === '') return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
 }
 
 function buildProvenance(slides: StudioSlide[]): Record<string, any> {

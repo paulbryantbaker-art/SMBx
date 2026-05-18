@@ -173,6 +173,8 @@ const GENERIC_MODELS = new Set([
   'MODEL.STRUCT.PPA.v1',
   'MODEL.STRUCT.ROLLOVER.v1',
   'MODEL.STRUCT.ANALYSIS.v1',
+  'MODEL.DEALKILL.PROB.v1',
+  'MODEL.TIMELINE.MC.v1',
 ]);
 
 export async function executeV19Model(args: V19ModelExecutionInput): Promise<V19ModelExecution> {
