@@ -12,6 +12,58 @@
 
 **Competitive bar:** Studio must compete with finance workbenches and Claude Finance-style workflows: unified inputs, source-linked verification, server-side financial models, Excel/model round trip, audit trail, and institutional-quality presentation output.
 
+## Dual-track doctrine — beautiful app, callable substrate
+
+V19 must ship as two synchronized lanes, not as a choice between frontend and infrastructure.
+
+**Lane A — Product Surface.** The app remains beautiful, fast, and useful for human users. Apple Glass + Neo is the product language. Today, Studio, Files, Pipeline, Search, Pricing, and Learn should feel like one coherent product, not admin dashboards over a database.
+
+**Lane B — Callable Substrate.** Every meaningful frontend action must resolve to a durable object, strict schema, tool, resource, model execution, citation check, and audit record. This prepares smbX for the next 12-18 months when more usage comes from agents, API clients, and MCP-enabled finance workbenches.
+
+### Surface-to-substrate map
+
+| Human surface | Human job | Substrate primitive | Agent/MCP future |
+|---|---|---|---|
+| Today | See what matters now | `morning_brief`, `gate_countdown`, `deal_pulse`, `studio_refresh_need` | `get_morning_brief`, `list_deal_actions` |
+| Studio | Create collateral | `studio_book`, `studio_slide`, `studio_source`, `studio_export`, `slide_provenance` | `create_pitch_book`, `revise_pitch_book`, `export_pitch_book` |
+| Files | Route and verify source material | `source_card`, `data_room_file`, `citation_link`, `access_scope` | `list_sources`, `attach_source`, `validate_source` |
+| Pipeline | Manage deal state | `deal_state`, `gate_state`, `model_stack`, `next_action` | `compose_model_stack`, `advance_gate`, `read_deal_state` |
+| Search | Find buyers, targets, lenders, advisors | `market_query`, `buyer_pool`, `target_list`, `provider_match` | `buyer_universe`, `target_search`, `provider_search` |
+| Chat/Yulia | Orchestrate work | `tool_call`, `approval_request`, `audit_record`, `counsel_deferral` | MCP tools + agent identity + scoped auth |
+| Pricing | Package access | `plan_entitlement`, `credit_budget`, `agent_scope`, `export_limit` | API/MCP credits, per-agent limits, enterprise governance |
+
+### Pricing and tollgate doctrine
+
+Base plans remain monthly subscriptions. No wallet, no success fees, no per-deal tolls. V19 adds credit budgets, agent scopes, and governance gates on top of subscriptions.
+
+| Gate | Meaning | Applies to |
+|---|---|---|
+| `agent_identity_required` | Autonomous/background agent use requires a named agent identity and scope. | MCP/API, enterprise automation |
+| `source_grounding_required` | Customer-facing output needs source/citation/model provenance. | Studio export, share links, investment memos |
+| `model_refresh_required` | Linked assumptions/files changed after a model-backed output was created. | Studio books, Today brief, QoE Preview |
+| `human_approval_required` | Legal/tax/regulated/closing-sensitive action needs user approval or counsel deferral. | Counsel triggers, tax structure, legal issue spotting |
+| `credit_budget_required` | High-volume model runs, exports, or API calls consume included plan credits. | Server models, exports, MCP calls |
+| `enterprise_scope_required` | Firm memory, connectors, scoped tokens, audit packets, and API/MCP access require enterprise governance. | Team/Enterprise |
+
+### What must be built
+
+**Human product work**
+- Studio as the flagship collateral surface: pitch books, IC decks, QoE books, CIM summaries, lender books, board updates, investment memos.
+- Today as the daily operating surface: morning brief, gate countdown, deals-in-flight pulse, Studio drafts needing refresh, files needing review.
+- Files as routing and proof: data-room items, source cards, citations, file status, permissions, source gaps.
+- Pipeline as deal state: grouped tabs, gates, active deals, sub-tabs, model stack, next action.
+- Pricing/Learn as credible product packaging: monthly plans, credits, agent limits, enterprise governance, no wallet language.
+
+**Substrate work**
+- Canonical `MODEL.*.v1` server-side model execution with output hashes and audit payloads.
+- Strict artifact schemas for `StudioBook`, `StudioSlide`, `SourceCard`, `ModelRun`, `AuditRecord`, `DealState`, `GateState`.
+- Source/citation validation before Studio export and high-stakes chat answers.
+- V19 tool runtime: `compose_model_stack`, `execute_model`, `lookup_citation`, `fetch_market_data`, `defer_to_counsel`, `update_tax_position`, `write_audit_trail`.
+- Thin MCP v1 exposing the same tools/resources used by the app, then full MCP/API packaging later.
+- Agent identity, scoped tokens, and audit manifests for enterprise/agent users.
+- Credit budget meter and plan entitlements for human and agent usage.
+- Anonymized benchmark/data-rights foundation for future sub-$1B deal-terms corpus.
+
 ### Consecutive runs from here
 
 | Run | Name | Current repo state | Next done condition |
@@ -22,15 +74,17 @@
 | 4 | V19 Foundation Repair | 🟡 `market_data_cache` collision is addressed by 067/070 compatibility migrations; V19 tables exist. | Run fresh-db and migrated-db verification; confirm all V19 tables and seeds are usable. |
 | 5 | Canonical Server-Side V19 Runtime | 🟡 Started: model registry now canonicalizes IDs to `MODEL.*.v1`; `v19ModelRuntime.ts` adds deterministic execution, missing-input reporting, output hashes, and audit payloads. | Persist model executions to audit records and make Studio refresh call the runner directly. |
 | 6 | Tier-0 Server Models | 🟡 First executable subset added: SDE, EBITDA, valuation triangulation, DSCR stress, NWC peg, sources/uses, SBA, HSR, and QoE Lite. Framework runners exist for remaining Tier-0/Phase 2 models. | Fill out full Tier-0 calculations for tax, legal halt scan, PPA, rollover, earnout, structure analysis, LBO, and model fixtures. |
-| 7 | Model Stack, Gates, Prompts | 🟡 Composer service exists; gate/runtime wiring and `YULIA_PROMPTS_V4.md` are still pending. | Compose league × journey × deal type stacks, inject requirements into chat/Studio, and add halt triggers. |
-| 8 | V19 Tools + Chat Runtime | 🟡 Started: `compose_model_stack`, `execute_model`, `lookup_citation`, `fetch_market_data`, `defer_to_counsel`, `update_tax_position`, and `write_audit_trail` are registered. | Wire citation validation into chat/Studio publish paths and make audit writes automatic for model-backed responses/exports. |
-| 9 | Market Data + Connectors | 🟡 Existing market-data service/cache exists. | Add daily FRED refresh, freshness checks, and read-only connector contracts/status surfaces. |
-| 10 | Today Canvas + Firm Memory | 🟡 Today UI exists, but V19 operating-surface data model is pending. | Add Morning Brief, Gate Countdown, Deals-in-Flight Pulse, Studio refresh needs, and reusable firm memory. |
-| 11 | QoE Preview Attractor | 🟡 QoE Preview Book template exists. | Make the full upload → extraction → QoE Lite → Studio book → export path work end to end. |
-| 12 | Excel Round Trip | ❌ Greenfield. | Add assumptions, import/export, rerun, diff, and Studio slide refresh when linked assumptions change. |
-| 13 | Credit Budget + Pricing Meter | 🟡 Subscription ladder exists; V19 credit meter is pending. | Meter model runs, exports, API/tool calls, and enterprise usage without reintroducing wallet/success fees. |
-| 14 | Audit, Agent Economy, Full V19 | 🟡 Agent card exists; deeper audit/API/OAuth work pending. | Seven-year audit manifests, audit packets, scoped auth, MCP-compatible routes, and marketplace packaging. |
-| 15 | Final Hardening | ❌ Pending. | Build, migrations, model fixtures, Studio export checks, chat/tool checks, and Playwright coverage all green. |
+| 7 | Artifact Schemas + Thin MCP Contract | ❌ Greenfield. | Define strict schemas/resources for deals, sources, model runs, Studio books, audit records, and expose a local/first-party MCP contract for the already-built tools. |
+| 8 | Model Stack, Gates, Prompts | 🟡 Composer service exists; gate/runtime wiring and `YULIA_PROMPTS_V4.md` are still pending. | Compose league × journey × deal type stacks, inject requirements into chat/Studio, and add halt triggers. |
+| 9 | V19 Tools + Chat Runtime | 🟡 Started: `compose_model_stack`, `execute_model`, `lookup_citation`, `fetch_market_data`, `defer_to_counsel`, `update_tax_position`, and `write_audit_trail` are registered. | Wire citation validation into chat/Studio publish paths and make audit writes automatic for model-backed responses/exports. |
+| 10 | Credit Budget + Pricing Tollgates | 🟡 Subscription ladder exists; V19 credit meter is pending. | Meter model runs, exports, API/tool calls, and enterprise agent usage without reintroducing wallet/success fees. |
+| 11 | Today Canvas + Firm Memory | 🟡 Today UI exists, but V19 operating-surface data model is pending. | Add Morning Brief, Gate Countdown, Deals-in-Flight Pulse, Studio refresh needs, and reusable firm memory. |
+| 12 | QoE Preview Attractor | 🟡 QoE Preview Book template exists. | Make the full upload → extraction → QoE Lite → Studio book → export path work end to end. |
+| 13 | Market Data + Connectors | 🟡 Existing market-data service/cache exists. | Add daily FRED refresh, freshness checks, and read-only connector contracts/status surfaces. |
+| 14 | Excel Round Trip | ❌ Greenfield. | Add assumptions, import/export, rerun, diff, and Studio slide refresh when linked assumptions change. |
+| 15 | Agent Identity, Audit Packets, Full MCP/API | 🟡 Agent card exists; deeper audit/API/OAuth work pending. | Seven-year audit manifests, audit packets, scoped auth, MCP-compatible routes, A2A/API packaging, and marketplace readiness. |
+| 16 | Benchmarks + Data Rights Foundation | ❌ Greenfield. | Add anonymized-data rights/metadata flow and internal benchmark schema for future sub-$1B deal-terms corpus. |
+| 17 | Final Hardening | ❌ Pending. | Build, migrations, model fixtures, Studio export checks, chat/tool checks, Playwright coverage, and deployment checks all green. |
 
 ## The three lenses
 
@@ -118,51 +172,77 @@ The V19 implementation brief covers **runtime correctness** (calc engine, citati
 - **`is_general` column** on conversations (mig 060).
 - **Merger lite**: mig 059 + `pair_merger_deals` tool + CIM carve-out + LOI merger structures.
 
-## Four strategic decisions blocking the build
+## Locked decisions
 
-1. **Conversion target** — which of the three Attractors leads? (IS = "Sign your next LOI before lunch", Search funder = "Don't pay $25K for a QoE on a fraud deal", Broker = "Sign engagement Tuesday, send outreach Thursday"). Picking one collapses Tier 0 by ~40%.
+1. **Lead Attractor:** QoE Preview leads, shipped as a Studio-generated book. Engagement-Letter→CIM and Deal Pack follow after Studio/source grounding works.
 
-2. **Phase E/G substrate vs V19 audit_trail** — same or different? If `agency_action_events` can absorb V19's `audit_trail` semantics with column additions, half of V19 §2 is partway done.
+2. **Audit substrate:** V19 `audit_trail` stays as the canonical model/export/citation audit record. Phase E/G `agency_action_events` can remain adjacent for staged actions and approvals, but it should not replace V19 audit semantics.
 
-3. **Server-side calc engine or keep client-side?** V19 wants `server/services/models/`; today they live in `client/src/lib/calculations/`. Moving enables audit trail + citation hygiene but requires API surface.
+3. **Server-side models:** Server-side `MODEL.*.v1` execution is canonical for audit, exports, chat-backed claims, and agent/API calls. Client models remain interactive what-if surfaces.
 
-4. **MCP server scope** — full v1 is 16-28 eng-weeks (4-7 months). Ship Tier 0 product first and add MCP as Tier 2, or pause Tier 0 to lay MCP foundation?
+4. **MCP timing:** Do not pause frontend to build a giant MCP server. Build a thin MCP/schema/resource contract in parallel now, using the same internals the app already calls. Full marketplace-grade MCP/API packaging comes later.
 
-## Pragmatic Tier 0 cut (3-4 weeks focused)
+5. **Pricing doctrine:** Monthly subscriptions remain the base. Add included credits, agent scopes, and governance gates. Do not reintroduce wallet, success fees, or per-deal tolls.
 
-**Week 1 — Schema + docs foundation**
-- §1 doc migration
-- §2 migrations (citation_registry + model_registry + audit_trail + deal_model_stack + tax_position_registry + legal_defer_log)
-- §2 columns on deals/conversations
-- §3 constants (`v19Regulatory.ts`, `v19Leagues.ts`)
-- §2 seed citation_registry (~30 rows)
+6. **Human experience:** The app must stay beautiful for every human user. Apple Glass + Neo remains the product design language while the substrate becomes more callable underneath.
 
-**Week 2 — Model registry + Tier 0 calc + composer**
-- `modelRegistry.ts`
-- 20 Phase 1 Tier 0 models
-- `modelStackComposer.ts`
-- `citationValidator.ts` + chat-route hook
-- 7 new agentic tools
+## Execution plan
 
-**Week 3 — Today Canvas (PDF #4) + Firm Memory (PDF #5)**
-Highest-leverage user-visible features in the entire backlog.
+### Phase 1 — Studio + Runtime Spine
 
-**Week 4 — Ship one Attractor end-to-end**
-Pick the persona. Build < 5-min onboarding → hero deliverable → conversion.
+- Finish Studio V1 visual alignment and interaction polish.
+- Verify migrations on fresh and existing DBs.
+- Make Studio refresh call canonical `execute_model`.
+- Persist model executions and export hashes into audit records.
+- Add source/citation validation before Studio export.
+- Add fixtures for first Tier-0 models.
 
-**Week 5+** — Credit-budget pricing, broken-auction signal, Excel round-trip, native integrations, then agent-economy SKU as separate workstream.
+### Phase 2 — Thin Agent Substrate
 
-## Why this ordering
+- Define strict artifact schemas for deals, Studio books, slides, sources, model runs, audit records, and gate states.
+- Add first `methodology://`, `deal://`, `studio://`, `source://`, and `model://` resource shapes.
+- Create a thin MCP contract over existing server tools; keep it internal/local until stable.
+- Add plan entitlements for credits, model runs, exports, and agent/API scopes.
+- Add tollgate states to UI and tools: source grounding required, model refresh required, human approval required, credit budget required.
 
-- **Weeks 1-2 are pure foundation** — gives every later phase a substrate to build on. Nothing user-visible ships, but everything after this gets faster.
-- **Week 3 (Today Canvas + Firm Memory) is the highest user-visible leverage.** The PDFs identify Today Canvas as the daily-habit hook ("DAU stabilizes >40% or dies <15%") and Firm Memory as the strongest unilateral lock-in. These two ship the experience users actually feel.
-- **Week 4 (Attractor)** is the conversion mechanic. Without one of these working end-to-end, the product still feels like a chat tool with extras.
-- **Tier 2 (agent-economy)** waits because it's a different business — the API SKU, MCP server, marketplace surfaces. Important but not Tier 0 ship-blocking.
+### Phase 3 — Today, Files, Pipeline as Operating Surfaces
+
+- Today: morning brief, gate countdown, deals-in-flight pulse, files needing review, Studio drafts needing refresh.
+- Files: source cards, file status, data-room routing, source gaps, permission state, citation links.
+- Pipeline: gate state, deal stack, model requirements, grouped tabs, sub-tabs, next action.
+- Firm Memory: reusable assumptions, house style, preferred providers, prior deal patterns, standard diligence workflows.
+
+### Phase 4 — QoE Preview Attractor
+
+- Upload/source files.
+- Extract financial facts.
+- Run QoE Lite, NWC peg, add-back defensibility, DSCR stress.
+- Generate QoE Preview Book in Studio.
+- Flag unsupported metrics and stale model outputs.
+- Export PPTX/PDF with source and audit appendix.
+
+### Phase 5 — Excel + Connector Work
+
+- Add assumption versioning and Excel import/export.
+- Add model rerun and diff review.
+- Refresh linked Studio slides when assumptions change.
+- Add read-only connector contracts/status for QuickBooks, VDRs, DocuSign/Ironclad, Carta, and later PitchBook/CapIQ-style providers.
+- Add market-data freshness checks and daily FRED refresh.
+
+### Phase 6 — Enterprise Agent Readiness
+
+- Add agent identity, scoped tokens, and enterprise audit packets.
+- Expand MCP/API routes from internal contract to public/enterprise packaging.
+- Add A2A/agent-card metadata for scopes, pricing, tools, auth, and audit guarantees.
+- Add seven-year append-only audit manifests.
+- Add anonymized-data rights/metadata foundation and internal benchmark schema.
 
 ## Bottom-line
 
-V19 brief alone = ~9-15 days of focused work.
-V19 + PDF Tier 1 + one Attractor = ~3-4 weeks focused (6 weeks sustainable).
-Full V19 + PDFs + agent-economy SKU = ~4-7 months.
+V19 is no longer a single backend cleanup. It is a dual-track product build:
+
+- **Short term:** make Studio beautiful, useful, source-grounded, and model-backed.
+- **Medium term:** make Today/Files/Pipeline operate on the same substrate objects.
+- **12-18 month readiness:** expose those same objects and tools to agents through MCP/API, scoped auth, credits, and audit packets.
 
 Maintain this file in lockstep with `methodology/METHODOLOGY_V19.md`. When a tier-0 item ships, mark it ✅ done with a commit SHA. When scope changes, update here in the same commit as the code.
