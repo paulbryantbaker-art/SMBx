@@ -65,6 +65,16 @@ interface PitchBookRecord {
   createdAt: string;
 }
 
+interface V19StudioReadiness {
+  readyForExternalDelivery: boolean;
+  issues: Array<{
+    code: string;
+    severity: "blocker" | "warning";
+    label: string;
+    detail: string;
+  }>;
+}
+
 interface SavedStudioDraft {
   id: string;
   title: string;
@@ -392,6 +402,7 @@ function StudioCanvas({
 }) {
   const localDraft = useMemo(() => readStudioDraft(tab.studioDraftId ?? tab.id), [tab.id, tab.studioDraftId]);
   const [book, setBook] = useState<PitchBookRecord | null>(null);
+  const [readiness, setReadiness] = useState<V19StudioReadiness | null>(null);
   const [story, setStory] = useState(localDraft?.story ?? "");
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -400,6 +411,7 @@ function StudioCanvas({
   useEffect(() => {
     if (!user || !bookId) {
       setBook(localBook(output.id, tab.title, story));
+      setReadiness(null);
       return;
     }
     let alive = true;
@@ -408,9 +420,13 @@ function StudioCanvas({
       .then(async res => {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Could not load pitch book");
-        return data.book as PitchBookRecord;
+        return data as { book: PitchBookRecord; readiness?: V19StudioReadiness };
       })
-      .then(next => { if (alive) setBook(next); })
+      .then(next => {
+        if (!alive) return;
+        setBook(next.book);
+        setReadiness(next.readiness ?? null);
+      })
       .catch(err => { if (alive) setError(err.message); })
       .finally(() => { if (alive) setBusy(null); });
     return () => { alive = false; };
@@ -431,6 +447,12 @@ function StudioCanvas({
   const current = book ?? localBook(output.id, tab.title, story);
   const warningCount = bookWarningCount(current);
   const modelHealth = modelHealthForBook(current);
+  const readinessBlockers = readiness?.issues.filter(issue => issue.severity === "blocker").length ?? 0;
+  const readinessLabel = readiness
+    ? readiness.readyForExternalDelivery
+      ? "export ready"
+      : `${readinessBlockers || readiness.issues.length} export ${readinessBlockers === 1 ? "gap" : "gaps"}`
+    : "readiness pending";
 
   const revise = async () => {
     if (!user || !bookId) {
@@ -448,6 +470,7 @@ function StudioCanvas({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Revision failed");
       setBook(data.book);
+      setReadiness(data.readiness ?? null);
       onBookUpdated(data.book);
     } catch (err: any) {
       setError(err.message || "Revision failed");
@@ -471,6 +494,7 @@ function StudioCanvas({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Refresh failed");
       setBook(data.book);
+      setReadiness(data.readiness ?? null);
       onBookUpdated(data.book);
     } catch (err: any) {
       setError(err.message || "Refresh failed");
@@ -519,6 +543,7 @@ function StudioCanvas({
         <div style={S.canvasActions}>
           <span style={warningCount ? S.warnPill : S.cleanPill}>{warningCount ? `${warningCount} slide gaps` : "slides grounded"}</span>
           <span style={modelHealth.gaps ? S.warnPill : S.cleanPill}>{modelHealth.label}</span>
+          <span style={!readiness || readiness.readyForExternalDelivery ? S.cleanPill : S.warnPill}>{readinessLabel}</span>
           <button className="m-btn tonal" style={S.smallButton} onClick={() => void refresh()} disabled={!!busy}>Refresh models</button>
           <button className="m-btn tonal" style={S.smallButton} onClick={() => void exportBook("pdf")} disabled={!!busy}>PDF</button>
           <button className="m-btn filled" style={S.smallButton} onClick={() => void exportBook("pptx")} disabled={!!busy}>PowerPoint</button>
@@ -613,6 +638,16 @@ function StudioCanvas({
             <p style={S.auditCopy}>
               Version {current.version}. Exports write an output hash and include source and audit appendices.
             </p>
+            {readiness?.issues.length ? (
+              <div style={S.readinessList}>
+                {readiness.issues.slice(0, 4).map((issue, index) => (
+                  <div key={`${issue.code}-${index}`} style={S.readinessItem}>
+                    <strong>{issue.label}</strong>
+                    <span>{issue.detail}</span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
             {error && <p style={S.errorText}>{error}</p>}
             {busy && <p style={S.busyText}>{busy}...</p>}
           </section>
@@ -1133,4 +1168,14 @@ const S: Record<string, CSSProperties> = {
     borderBottom: "1px solid rgba(153,176,209,.24)",
   },
   auditCopy: { color: "#60708A", lineHeight: 1.45, margin: 0 },
+  readinessList: { display: "grid", gap: 8, marginTop: 12 },
+  readinessItem: {
+    display: "grid",
+    gap: 3,
+    padding: "9px 0",
+    borderTop: "1px solid rgba(153,176,209,.24)",
+    color: "#60708A",
+    fontSize: 12,
+    lineHeight: 1.35,
+  },
 };

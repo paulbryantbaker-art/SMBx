@@ -12,6 +12,7 @@ import {
 } from '../services/pitchBookStudio.js';
 import { exportPitchBookToPPTX } from '../services/pitchBookExportService.js';
 import { exportToPDF } from '../services/exportService.js';
+import { readStudioBookV19Readiness } from '../services/v19ReadinessService.js';
 
 export const studioRouter = Router();
 
@@ -52,7 +53,8 @@ studioRouter.post('/studio/pitch-books', async (req, res) => {
       title: req.body?.title,
       brief: req.body?.brief,
     });
-    return res.status(201).json({ book });
+    const readiness = await readStudioBookV19Readiness(userId, book.id);
+    return res.status(201).json({ book, readiness });
   } catch (err: any) {
     console.error('[studio] create pitch book failed:', err.message);
     return res.status(400).json({ error: err.message || 'Failed to create pitch book' });
@@ -67,7 +69,8 @@ studioRouter.get('/studio/pitch-books/:bookId', async (req, res) => {
   try {
     const book = await getPitchBook(userId, bookId);
     if (!book) return res.status(404).json({ error: 'Pitch book not found' });
-    return res.json({ book });
+    const readiness = await readStudioBookV19Readiness(userId, book.id);
+    return res.json({ book, readiness });
   } catch (err: any) {
     console.error('[studio] read pitch book failed:', err.message);
     return res.status(500).json({ error: 'Failed to load pitch book' });
@@ -85,7 +88,8 @@ studioRouter.post('/studio/pitch-books/:bookId/revise', async (req, res) => {
       bookId,
       instruction: String(req.body?.instruction || ''),
     });
-    return res.json({ book });
+    const readiness = await readStudioBookV19Readiness(userId, book.id);
+    return res.json({ book, readiness });
   } catch (err: any) {
     console.error('[studio] revise pitch book failed:', err.message);
     return res.status(400).json({ error: err.message || 'Failed to revise pitch book' });
@@ -105,7 +109,8 @@ studioRouter.post('/studio/pitch-books/:bookId/sections', async (req, res) => {
       body: typeof req.body?.body === 'string' ? req.body.body : null,
       bullets: Array.isArray(req.body?.bullets) ? req.body.bullets.map(String) : [],
     });
-    return res.json({ book });
+    const readiness = await readStudioBookV19Readiness(userId, book.id);
+    return res.json({ book, readiness });
   } catch (err: any) {
     console.error('[studio] add pitch book section failed:', err.message);
     return res.status(400).json({ error: err.message || 'Failed to add section' });
@@ -119,10 +124,25 @@ studioRouter.post('/studio/pitch-books/:bookId/refresh', async (req, res) => {
   if (!bookId) return res.status(400).json({ error: 'Invalid pitch book id' });
   try {
     const book = await refreshPitchBookFromModels(userId, bookId);
-    return res.json({ book });
+    const readiness = await readStudioBookV19Readiness(userId, book.id);
+    return res.json({ book, readiness });
   } catch (err: any) {
     console.error('[studio] refresh pitch book failed:', err.message);
     return res.status(400).json({ error: err.message || 'Failed to refresh pitch book' });
+  }
+});
+
+studioRouter.get('/studio/pitch-books/:bookId/readiness', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const bookId = parseId(req.params.bookId);
+  if (!bookId) return res.status(400).json({ error: 'Invalid pitch book id' });
+  try {
+    const readiness = await readStudioBookV19Readiness(userId, bookId);
+    return res.json({ readiness });
+  } catch (err: any) {
+    console.error('[studio] read pitch book readiness failed:', err.message);
+    return res.status(400).json({ error: err.message || 'Failed to read pitch book readiness' });
   }
 });
 
@@ -137,6 +157,14 @@ studioRouter.get('/studio/pitch-books/:bookId/export/:format', async (req, res) 
   try {
     const book = await getPitchBook(userId, bookId);
     if (!book) return res.status(404).json({ error: 'Pitch book not found' });
+    const readiness = await readStudioBookV19Readiness(userId, book.id);
+    const strict = req.query.strict === '1' || req.query.strict === 'true';
+    if (strict && !readiness.readyForExternalDelivery) {
+      return res.status(409).json({
+        error: 'Pitch book is not ready for external delivery',
+        readiness,
+      });
+    }
     const content = pitchBookToExportContent(book);
     const buffer = format === 'pptx'
       ? await exportPitchBookToPPTX(book)
@@ -153,6 +181,8 @@ studioRouter.get('/studio/pitch-books/:bookId/export/:format', async (req, res) 
       'Cache-Control': 'no-store',
       'X-SMBX-Export-Id': String(exportRecord.exportId),
       'X-SMBX-Output-Hash': exportRecord.outputHash,
+      'X-SMBX-V19-Ready': readiness.readyForExternalDelivery ? 'true' : 'false',
+      'X-SMBX-V19-Warnings': String(readiness.issues.length),
     });
     return res.send(buffer);
   } catch (err: any) {

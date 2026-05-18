@@ -39,6 +39,7 @@ import {
 import { composeModelStack, type V19Journey } from './modelStackComposer.js';
 import { executeV19Model, persistV19ModelExecution } from './v19ModelRuntime.js';
 import { validateCitationTags } from './citationValidator.js';
+import { readDealV19Readiness, readStudioBookV19Readiness } from './v19ReadinessService.js';
 
 const sql = createSql();
 
@@ -248,6 +249,17 @@ export const TOOL_DEFINITIONS: Tool[] = [
         seriesId: { type: 'string', description: 'Market data series ID, for example SOFR, DPRIME, or DGS10.' },
       },
       required: ['seriesId'],
+    },
+  },
+  {
+    name: 'read_v19_readiness',
+    description: 'Read V19 readiness for a deal gate and/or Studio book before making model-backed claims, exporting collateral, or deciding whether sources/models/citations need refresh.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId: { type: 'number', description: 'Optional deal ID for gate/model/citation readiness.' },
+        bookId: { type: 'number', description: 'Optional Studio book ID for export/source/model readiness.' },
+      },
     },
   },
   {
@@ -804,6 +816,8 @@ export async function executeTool(
         return await lookupCitationTool(input);
       case 'fetch_market_data':
         return await fetchMarketDataTool(input);
+      case 'read_v19_readiness':
+        return await readV19ReadinessTool(input, userId);
       case 'defer_to_counsel':
         return await deferToCounselTool(input, userId, conversationId);
       case 'update_tax_position':
@@ -1093,6 +1107,7 @@ async function getDealContext(input: Record<string, any>, userId: number): Promi
   if (ctx.ebitda) ctx.ebitda_display = `$${(ctx.ebitda / 100).toLocaleString()}`;
   if (ctx.asking_price) ctx.asking_price_display = `$${(ctx.asking_price / 100).toLocaleString()}`;
   delete ctx.password; // safety
+  ctx.v19_readiness = await readDealV19Readiness(userId, Number(dealId)).catch(() => null);
 
   return JSON.stringify(ctx);
 }
@@ -1145,6 +1160,7 @@ async function advanceGate(input: Record<string, any>, userId: number): Promise<
     title: `${deal.journey_type === 'sell' ? 'Sell' : deal.journey_type === 'buy' ? 'Buy' : deal.journey_type === 'raise' ? 'Raise' : 'PMI'} Journey`,
     newGate: toGate,
     newConversationId: transition?.newConversationId ?? null,
+    v19Readiness: await readDealV19Readiness(userId, Number(dealId)).catch(() => null),
   });
 }
 
@@ -1276,6 +1292,7 @@ async function generateDealDeliverable(input: Record<string, any>, userId: numbe
       kind: 'doc',
       title: `${deal.business_name || 'Deal'} · ${menuItem.name}`,
     },
+    v19Readiness: await readDealV19Readiness(userId, Number(dealId)).catch(() => null),
   });
 }
 
@@ -1295,6 +1312,7 @@ async function createPitchBookTool(input: Record<string, any>, userId: number): 
     format: book.format,
     slides: book.slides.length,
     warnings: book.slides.filter(slide => slide.warningState !== 'clean').length,
+    v19Readiness: await readStudioBookV19Readiness(userId, book.id),
     canvas_action: 'open_tab',
     tab: {
       id: `studio-book-${book.id}`,
@@ -1319,6 +1337,7 @@ async function revisePitchBookTool(input: Record<string, any>, userId: number): 
     version: book.version,
     title: book.title,
     warnings: book.slides.filter(slide => slide.warningState !== 'clean').length,
+    v19Readiness: await readStudioBookV19Readiness(userId, book.id),
   });
 }
 
@@ -1336,6 +1355,7 @@ async function addPitchBookSectionTool(input: Record<string, any>, userId: numbe
     version: book.version,
     title: book.title,
     slides: book.slides.length,
+    v19Readiness: await readStudioBookV19Readiness(userId, book.id),
   });
 }
 
@@ -1346,8 +1366,9 @@ async function refreshPitchBookFromModelsTool(input: Record<string, any>, userId
     bookId: book.id,
     version: book.version,
     title: book.title,
-    message: 'Pitch book model slots were refreshed and flagged for V19 runtime execution.',
+    message: 'Pitch book model slots were refreshed against the V19 runtime.',
     warnings: book.slides.filter(slide => slide.warningState !== 'clean').length,
+    v19Readiness: await readStudioBookV19Readiness(userId, book.id),
   });
 }
 
@@ -1356,13 +1377,17 @@ async function exportPitchBookTool(input: Record<string, any>, userId: number): 
   const format = String(input.format || 'pptx').toLowerCase() === 'pdf' ? 'pdf' : 'pptx';
   const book = await getPitchBook(userId, bookId);
   if (!book) return JSON.stringify({ error: 'Pitch book not found' });
+  const readiness = await readStudioBookV19Readiness(userId, book.id);
   return JSON.stringify({
     success: true,
     bookId: book.id,
     title: book.title,
     format,
     downloadUrl: `/api/studio/pitch-books/${book.id}/export/${format}`,
+    strictDownloadUrl: `/api/studio/pitch-books/${book.id}/export/${format}?strict=1`,
     alternateDownloadUrl: `/api/studio/pitch-books/${book.id}/export/${format === 'pptx' ? 'pdf' : 'pptx'}`,
+    readyForExternalDelivery: readiness.readyForExternalDelivery,
+    v19Readiness: readiness,
   });
 }
 
@@ -1409,7 +1434,21 @@ async function executeModelTool(input: Record<string, any>, userId: number, conv
     conversationId,
   });
   const record = await persistV19ModelExecution(execution, { toolName: 'execute_model' });
-  return JSON.stringify({ success: true, modelExecutionId: record.id, execution });
+  const readiness = dealId ? await readDealV19Readiness(userId, dealId).catch(() => null) : null;
+  return JSON.stringify({ success: true, modelExecutionId: record.id, execution, v19Readiness: readiness });
+}
+
+async function readV19ReadinessTool(input: Record<string, any>, userId: number): Promise<string> {
+  const dealId = input.dealId == null ? null : Number(input.dealId);
+  const bookId = input.bookId == null ? null : Number(input.bookId);
+  if (!dealId && !bookId) return JSON.stringify({ error: 'dealId or bookId is required' });
+  const dealReadiness = dealId ? await readDealV19Readiness(userId, dealId) : null;
+  const studioReadiness = bookId ? await readStudioBookV19Readiness(userId, bookId) : null;
+  return JSON.stringify({
+    success: true,
+    dealReadiness,
+    studioReadiness,
+  });
 }
 
 async function lookupCitationTool(input: Record<string, any>): Promise<string> {

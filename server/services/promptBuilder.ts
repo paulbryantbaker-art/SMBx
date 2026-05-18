@@ -17,6 +17,7 @@ import {
 import { describeModelPreference, type ModelPreference } from './modelPreference.js';
 import { formatAgencyActionContractsForPrompt } from './agencyActionRegistry.js';
 import { formatLatestYuliaBriefsForPrompt } from './yuliaBriefingService.js';
+import { readDealV19Readiness, type V19DealReadiness } from './v19ReadinessService.js';
 import { createSql } from '../dbConfig.js';
 
 const sql = createSql();
@@ -53,6 +54,13 @@ interface DealContext {
   status: string;
 }
 
+const V19_RUNTIME_RULES = `
+## V19 SOURCE-GROUNDED RUNTIME
+- Customer-facing pitch books, exports, model-backed claims, valuation claims, tax/legal issue spotting, and diligence conclusions must be grounded in files, server-side MODEL.*.v1 executions, active citations, or explicit user-provided facts.
+- Before exporting or presenting a model-backed conclusion, use read_v19_readiness when a dealId or Studio bookId is available.
+- If readiness reports source_grounding_required, model_execution_required, model_refresh_required, model_inputs_required, citation_validation_required, or unchecked_claims_present, do not smooth it over. State the gap plainly and either refresh models, look up citations, ask for the missing source, or defer to counsel when the trigger is legal/tax/regulated.
+- Yulia may draft narrative, but numbers must come from uploaded files, server models, registered citations, market data, or user-confirmed inputs.`;
+
 function formatDealContext(deal: DealContext): string {
   const fields: string[] = [];
   if (deal.business_name) fields.push(`Business Name: ${deal.business_name}`);
@@ -77,6 +85,28 @@ function formatDealContext(deal: DealContext): string {
   }
 
   return fields.join('\n');
+}
+
+function formatV19ReadinessForPrompt(readiness: V19DealReadiness): string {
+  const modelLines = readiness.models.length
+    ? readiness.models.map(model => `- ${model.modelId}: ${model.status}${model.missingInputs.length ? ` (${model.missingInputs.join(', ')})` : ''}`).join('\n')
+    : '- No required models for this gate.';
+  const issues = readiness.issues.length
+    ? readiness.issues.slice(0, 8).map(issue => `- ${issue.code}: ${issue.detail}`).join('\n')
+    : '- No V19 blockers reported.';
+  return `
+## CURRENT V19 READINESS
+Gate: ${readiness.gateId} — ${readiness.gateName}
+Ready for model-backed claims: ${readiness.readyForModelBackedClaims ? 'yes' : 'no'}
+Required models: ${readiness.requiredModels.length ? readiness.requiredModels.join(', ') : 'none'}
+Required citations: ${readiness.requiredCitations.length ? readiness.requiredCitations.join(', ') : 'none'}
+Always-halt triggers to watch: ${readiness.alwaysHaltTriggers.length ? readiness.alwaysHaltTriggers.join(', ') : 'none'}
+
+Model status:
+${modelLines}
+
+Open readiness issues:
+${issues}`;
 }
 
 const JOURNEY_CONTEXT: Record<string, string> = {
@@ -379,6 +409,7 @@ export async function buildDynamicAnonymousPrompt(
 
   layers.push(AGENCY_DOCTRINE);
   layers.push(formatAgencyActionContractsForPrompt());
+  layers.push(V19_RUNTIME_RULES);
   const contextText = formatYuliaContextForPrompt(buildYuliaContextPack({
     surfaceContext: opts.surfaceContext,
   }));
@@ -487,6 +518,7 @@ export async function buildSystemPrompt(
   layers.push(MASTER_PROMPT);
   layers.push(AGENCY_DOCTRINE);
   layers.push(formatAgencyActionContractsForPrompt());
+  layers.push(V19_RUNTIME_RULES);
   const contextText = formatYuliaContextForPrompt(buildYuliaContextPack({
     user,
     deal,
@@ -549,6 +581,10 @@ export async function buildSystemPrompt(
   } else {
     // Layer 3a: Deal context summary
     layers.push(`\n## CURRENT DEAL (ID: ${deal.id})\n${formatDealContext(deal)}`);
+    try {
+      const readiness = await readDealV19Readiness(user.id, deal.id);
+      layers.push(formatV19ReadinessForPrompt(readiness));
+    } catch { /* V19 readiness is non-critical prompt context */ }
 
     // Layer 3a+: Previous gate summaries for context carry-forward
     try {
