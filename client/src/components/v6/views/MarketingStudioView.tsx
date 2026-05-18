@@ -173,8 +173,6 @@ const studioHeroWash =
 export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: MarketingStudioProps) {
   const [books, setBooks] = useState<PitchBookRecord[]>([]);
   const [loadingBooks, setLoadingBooks] = useState(false);
-  const [brief, setBrief] = useState("");
-  const [selectedFormat, setSelectedFormat] = useState<StudioFormatId>("qoe-preview-book");
   const [error, setError] = useState<string | null>(null);
 
   const askYulia = (prompt: string) => onTalkToYulia?.(prompt);
@@ -203,9 +201,8 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
     return () => { alive = false; };
   }, [user]);
 
-  const activeFormat = FORMATS.find(item => item.id === selectedFormat) ?? FORMATS[0];
   const activeOutput = tab.studioView === "canvas"
-    ? FORMATS.find(output => output.id === tab.studioFormat) ?? activeFormat
+    ? FORMATS.find(output => output.id === tab.studioFormat) ?? FORMATS[0]
     : null;
 
   const refreshBook = (next: PitchBookRecord) => {
@@ -213,7 +210,7 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
   };
 
   const createBook = async (format: StudioFormatId, title?: string) => {
-    const output = FORMATS.find(item => item.id === format) ?? activeFormat;
+    const output = FORMATS.find(item => item.id === format) ?? FORMATS[0];
     const fallbackId = `studio-${format}-${Date.now().toString(36)}`;
 
     if (!user) {
@@ -238,7 +235,7 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
         body: JSON.stringify({
           format,
           title: title || undefined,
-          brief: brief || output.prompt,
+          brief: output.prompt,
         }),
       });
       const data = await res.json();
@@ -306,51 +303,17 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
           <p style={S.heroCopy}>
             Build IC decks, QoE preview books, buyer books, lender books, and CIM summaries with slide-level sources, model links, and export-ready audit trails.
           </p>
-          <div style={S.heroNotes}>
-            {[
-              "Turn files, models, and citations into a clean banking story.",
-              "Keep every slide tied to facts, source documents, and model outputs.",
-              "Export decks with source footnotes and an audit appendix.",
-            ].map(note => <span key={note} style={S.heroNote}>{note}</span>)}
-          </div>
-          <div style={S.heroActions}>
-            <button className="m-glint m-glass-control" style={S.primaryButton} onClick={() => void createBook("qoe-preview-book")} type="button">
-              <span style={S.brandDot}>Y</span>
-              <span style={S.heroActionCopy}>
-                <strong>Start QoE Preview</strong>
-                <span>Create the first source-grounded book.</span>
-              </span>
-              <span style={S.heroActionPill}>Start</span>
-            </button>
-            <button className="m-glint m-glass-control" style={S.glassButton} onClick={() => askYulia("Help me choose the right pitch book format and ask for the source files you need first.")} type="button">
-              Plan with Yulia <span aria-hidden="true">›</span>
-            </button>
-          </div>
         </div>
       </section>
 
-      <section style={S.commandBand}>
-        <div style={S.commandCopy}>
-          <h2 style={S.sectionTitle}>Start from a mandate.</h2>
+      <section style={S.quickStartHeader}>
+        <div>
+          <h2 style={S.sectionTitle}>Start from a format.</h2>
           <p style={S.sectionCopy}>
-            Give Yulia the audience and the decision the book needs to support. The Studio keeps the story, sources, assumptions, model outputs, and export trail together.
+            Choose the collateral Yulia should build. Use the chat rail for audience, source, and mandate instructions.
           </p>
         </div>
-        <div style={S.commandBox}>
-          <select value={selectedFormat} onChange={(event) => setSelectedFormat(event.target.value as StudioFormatId)} style={S.select}>
-            {FORMATS.map(format => <option key={format.id} value={format.id}>{format.title}</option>)}
-          </select>
-          <textarea
-            value={brief}
-            onChange={(event) => setBrief(event.target.value)}
-            placeholder="Example: Build a QoE preview for a buyer deciding whether to spend outside diligence money. Focus on defended EBITDA, add-backs, NWC, and red flags."
-            style={S.briefInput}
-          />
-          <button className="m-btn filled" style={S.commandButton} onClick={() => void createBook(selectedFormat)}>
-            Create {activeFormat.title}
-          </button>
-          {error && <span style={S.errorText}>{error}</span>}
-        </div>
+        {error && <span style={S.errorText}>{error}</span>}
       </section>
 
       <section style={S.formatGrid}>
@@ -359,14 +322,14 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
             key={format.id}
             type="button"
             className="m-state"
-            style={{ ...S.formatCard, backgroundImage: formatCardBackground(format.id), ...(selectedFormat === format.id ? S.formatCardActive : null) }}
-            onClick={() => setSelectedFormat(format.id)}
-            onDoubleClick={() => void createBook(format.id)}
+            style={{ ...S.formatCard, backgroundImage: formatCardBackground(format.id) }}
+            onClick={() => void createBook(format.id)}
           >
             <span style={S.formatMeta}>{format.slideCount}</span>
             <strong style={S.formatTitle}>{format.title}</strong>
             <span style={S.formatAudience}>{format.audience}</span>
             <span style={S.formatDetail}>{format.detail}</span>
+            <span style={S.formatAction}>Create</span>
           </button>
         ))}
       </section>
@@ -822,13 +785,14 @@ const S: Record<string, CSSProperties> = {
     color: "#172033",
   },
   hero: {
-    minHeight: 560,
+    minHeight: 340,
     borderRadius: 24,
     position: "relative",
     overflow: "hidden",
     display: "flex",
     flexDirection: "column",
-    padding: 30,
+    justifyContent: "center",
+    padding: "clamp(24px, 3vw, 40px)",
     backgroundImage: studioHeroWash,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
@@ -847,8 +811,8 @@ const S: Record<string, CSSProperties> = {
     zIndex: 1,
     display: "flex",
     flexDirection: "column",
-    flex: 1,
-    maxWidth: 900,
+    justifyContent: "center",
+    maxWidth: 820,
     padding: 0,
   },
   brandDot: {
@@ -862,12 +826,12 @@ const S: Record<string, CSSProperties> = {
     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.58), 0 8px 18px rgba(26,34,51,0.13)",
   },
   heroTitle: {
-    margin: "52px 0 0",
-    maxWidth: 900,
+    margin: 0,
+    maxWidth: 820,
     fontFamily: "'Figtree', var(--font-body)",
     fontWeight: 850,
-    fontSize: "clamp(38px, 4.5vw, 76px)",
-    lineHeight: 0.94,
+    fontSize: "clamp(34px, 4vw, 62px)",
+    lineHeight: 0.96,
     letterSpacing: "-0.055em",
     color: "#FFFFFF",
     textWrap: "balance",
@@ -881,159 +845,24 @@ const S: Record<string, CSSProperties> = {
     lineHeight: 1.55,
     textWrap: "pretty",
   },
-  heroActions: {
-    display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) auto",
-    gap: 12,
-    alignItems: "stretch",
-    marginTop: "auto",
-    paddingTop: 24,
-  },
-  heroNotes: {
-    display: "grid",
-    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-    gap: 10,
-    marginTop: 28,
-  },
-  heroNote: {
-    minHeight: 112,
-    padding: 16,
-    borderRadius: 16,
-    background: "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.22), transparent 38%), linear-gradient(135deg, rgba(26,34,51,0.48), rgba(26,34,51,0.30) 52%, rgba(26,34,51,0.18))",
-    border: "0.5px solid rgba(255,255,255,0.34)",
-    boxShadow: liquidDarkGlassShadow,
-    backdropFilter: liquidGlassFilter,
-    WebkitBackdropFilter: liquidGlassFilter,
-    color: "#FFFFFF",
-    fontSize: 13,
-    lineHeight: 1.45,
-    boxSizing: "border-box",
-  },
-  primaryButton: {
-    all: "unset",
-    minHeight: 72,
-    boxSizing: "border-box",
-    display: "grid",
-    gridTemplateColumns: "52px minmax(0, 1fr) auto",
-    alignItems: "center",
-    gap: 14,
-    padding: "11px 14px",
-    borderRadius: 22,
-    background: "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.22), transparent 38%), linear-gradient(135deg, rgba(26,34,51,0.54), rgba(26,34,51,0.34) 52%, rgba(26,34,51,0.20))",
-    color: "#fff",
-    border: "0.5px solid rgba(255,255,255,0.34)",
-    boxShadow: liquidDarkGlassShadow,
-    backdropFilter: liquidGlassFilter,
-    WebkitBackdropFilter: liquidGlassFilter,
-    cursor: "pointer",
-    width: "100%",
-  },
-  heroActionCopy: {
-    minWidth: 0,
+  quickStartHeader: {
     display: "flex",
-    flexDirection: "column",
-    gap: 3,
-    fontSize: 13,
-    lineHeight: 1.35,
-    color: "#FFFFFF",
+    justifyContent: "space-between",
+    alignItems: "end",
+    gap: 18,
+    marginTop: 28,
+    padding: "0 6px",
+    flexWrap: "wrap",
   },
-  heroActionPill: {
-    borderRadius: 999,
-    padding: "9px 13px",
-    background: "linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.025))",
-    color: "#FFFFFF",
-    fontWeight: 850,
-    fontSize: 12,
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.56)",
-  },
-  glassButton: {
-    all: "unset",
-    minWidth: 138,
-    minHeight: 72,
-    boxSizing: "border-box",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    padding: "0 18px",
-    borderRadius: 22,
-    background: "rgba(26,34,51,0.74)",
-    color: "#FFFFFF",
-    border: "1px solid rgba(255,255,255,0.20)",
-    boxShadow: liquidDarkGlassShadow,
-    backdropFilter: liquidGlassFilter,
-    WebkitBackdropFilter: liquidGlassFilter,
-    fontWeight: 800,
-    fontSize: 13,
-    cursor: "pointer",
-  },
-  commandBand: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 380px), 1fr))",
-    gap: 24,
-    marginTop: 24,
-    alignItems: "stretch",
-  },
-  commandCopy: { padding: "22px 6px" },
   sectionTitle: { margin: 0, fontSize: 28, lineHeight: 1.05 },
   sectionCopy: { color: "#60708A", fontSize: 16, lineHeight: 1.5, maxWidth: 620 },
-  commandBox: {
-    padding: 18,
-    borderRadius: 20,
-    background: "radial-gradient(circle at 12% 0%, rgba(255,255,255,.74), transparent 40%), linear-gradient(145deg, rgba(255,255,255,.56), rgba(235,244,253,.34) 56%, rgba(214,230,248,.24))",
-    border: "0.5px solid rgba(255,255,255,0.58)",
-    boxShadow: "0 18px 44px rgba(42,65,96,.12), inset 0 1px 0 rgba(255,255,255,.72), inset 0 -1px 0 rgba(113,142,181,.12)",
-    backdropFilter: liquidGlassFilter,
-    WebkitBackdropFilter: liquidGlassFilter,
-  },
-  select: {
-    width: "100%",
-    height: 44,
-    border: "1px solid rgba(126,150,184,.5)",
-    borderRadius: 14,
-    padding: "0 12px",
-    color: "#172033",
-    background: "rgba(255,255,255,.68)",
-    fontWeight: 800,
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,.72)",
-    backdropFilter: liquidGlassFilter,
-    WebkitBackdropFilter: liquidGlassFilter,
-  },
-  briefInput: {
-    width: "100%",
-    minHeight: 108,
-    marginTop: 12,
-    border: "1px solid rgba(126,150,184,.42)",
-    borderRadius: 16,
-    padding: 14,
-    resize: "vertical",
-    font: "inherit",
-    lineHeight: 1.45,
-    color: "#172033",
-    background: "rgba(255,255,255,.62)",
-    boxSizing: "border-box",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,.74)",
-    backdropFilter: liquidGlassFilter,
-    WebkitBackdropFilter: liquidGlassFilter,
-  },
-  commandButton: {
-    width: "100%",
-    marginTop: 12,
-    minHeight: 44,
-    background: "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.22), transparent 38%), linear-gradient(135deg, rgba(26,34,51,0.62), rgba(26,34,51,0.42) 52%, rgba(26,34,51,0.26))",
-    color: "#FFFFFF",
-    border: "0.5px solid rgba(255,255,255,0.32)",
-    boxShadow: liquidDarkGlassShadow,
-    backdropFilter: liquidGlassFilter,
-    WebkitBackdropFilter: liquidGlassFilter,
-  },
   errorText: { display: "block", marginTop: 10, color: "#8B3F24", fontWeight: 800 },
   busyText: { color: "#2E5C8A", fontWeight: 800 },
   formatGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
     gap: 12,
-    marginTop: 28,
+    marginTop: 16,
   },
   formatCard: {
     minHeight: 220,
@@ -1060,6 +889,20 @@ const S: Record<string, CSSProperties> = {
   formatTitle: { fontSize: 19, lineHeight: 1.05 },
   formatAudience: { color: "rgba(255,255,255,.86)", fontWeight: 850, fontSize: 12 },
   formatDetail: { color: "rgba(236,246,255,.90)", fontSize: 13, lineHeight: 1.35, marginTop: "auto" },
+  formatAction: {
+    marginTop: 12,
+    alignSelf: "flex-start",
+    borderRadius: 999,
+    padding: "7px 12px",
+    background: "rgba(26,34,51,.46)",
+    border: "1px solid rgba(255,255,255,.24)",
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: 850,
+    boxShadow: liquidDarkGlassShadow,
+    backdropFilter: liquidGlassFilter,
+    WebkitBackdropFilter: liquidGlassFilter,
+  },
   lowerGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 420px), 1fr))", gap: 24, marginTop: 28 },
   bookPanel: {
     borderRadius: 24,
