@@ -779,8 +779,8 @@ function buildModelInput(modelId: string, book: PitchBookRecord, deal: Record<st
     monthly_nwc_cents: safeArray(financials.monthly_nwc_cents),
     sources_cents: financials.sources_cents,
     uses_cents: financials.uses_cents,
-    low_multiple: numberValue(financials.low_multiple) || 4,
-    high_multiple: numberValue(financials.high_multiple) || 6,
+    low_multiple: numberValue(financials.low_multiple),
+    high_multiple: numberValue(financials.high_multiple),
   };
 
   if (modelId === 'MODEL.SOURCES.USES.v1' && !common.sources_cents && askingPrice) {

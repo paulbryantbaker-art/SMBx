@@ -1,5 +1,4 @@
 import { createHash } from 'crypto';
-import { sql } from '../db.js';
 import type { League } from '../constants/v19Leagues.js';
 
 export type V19ModelPhase = 'tier0' | 'phase2' | 'phase3';
@@ -302,6 +301,7 @@ export function canonicalizeModelId(modelId: string): string {
 }
 
 export async function ensureModelRegistrySeeded(): Promise<{ insertedOrUpdated: number }> {
+  const { sql } = await import('../db.js');
   const models = listRegisteredModels();
   for (const model of models) {
     await sql`

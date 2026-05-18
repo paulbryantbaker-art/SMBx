@@ -385,8 +385,8 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
                   <strong>{book.title}</strong>
                   <small>{formatLabel(book.format)} / v{book.version} / {book.slides.length} slides</small>
                 </span>
-                <span style={bookWarningCount(book) ? S.warnPill : S.cleanPill}>
-                  {bookWarningCount(book) ? `${bookWarningCount(book)} gaps` : "clean"}
+                <span style={bookReadinessCount(book) ? S.warnPill : S.cleanPill}>
+                  {bookReadinessCount(book) ? `${bookReadinessCount(book)} gaps` : "clean"}
                 </span>
               </button>
             ))}
@@ -467,6 +467,7 @@ function StudioCanvas({
 
   const current = book ?? localBook(output.id, tab.title, story);
   const warningCount = bookWarningCount(current);
+  const modelHealth = modelHealthForBook(current);
 
   const revise = async () => {
     if (!user || !bookId) {
@@ -553,7 +554,8 @@ function StudioCanvas({
           <p style={S.canvasSub}>{output.detail}</p>
         </div>
         <div style={S.canvasActions}>
-          <span style={warningCount ? S.warnPill : S.cleanPill}>{warningCount ? `${warningCount} source gaps` : "source clean"}</span>
+          <span style={warningCount ? S.warnPill : S.cleanPill}>{warningCount ? `${warningCount} slide gaps` : "slides grounded"}</span>
+          <span style={modelHealth.gaps ? S.warnPill : S.cleanPill}>{modelHealth.label}</span>
           <button className="m-btn tonal" style={S.smallButton} onClick={() => void refresh()} disabled={!!busy}>Refresh models</button>
           <button className="m-btn tonal" style={S.smallButton} onClick={() => void exportBook("pdf")} disabled={!!busy}>PDF</button>
           <button className="m-btn filled" style={S.smallButton} onClick={() => void exportBook("pptx")} disabled={!!busy}>PowerPoint</button>
@@ -629,13 +631,19 @@ function StudioCanvas({
             ))}
           </section>
           <section style={S.railSection}>
-            <strong style={S.railTitle}>Model outputs</strong>
-            {current.modelOutputs.map(item => (
-              <div key={String(item.modelId)} style={S.modelRow}>
-                <strong>{String(item.modelId)}</strong>
-                <span>{String(item.status || "not_run")}</span>
-              </div>
-            ))}
+            <strong style={S.railTitle}>Model tray</strong>
+            <div style={S.modelStack}>
+              {current.modelOutputs.map(item => (
+                <div key={String(item.modelId)} style={S.modelCard}>
+                  <span style={modelDotStyle(item)} />
+                  <span style={S.modelText}>
+                    <strong>{formatModelName(String(item.modelId || "MODEL.UNKNOWN.v1"))}</strong>
+                    <small>{modelSummary(item)}</small>
+                  </span>
+                  {item.outputHash && <code style={S.modelHash}>{shortHash(String(item.outputHash))}</code>}
+                </div>
+              ))}
+            </div>
           </section>
           <section style={S.railSection}>
             <strong style={S.railTitle}>Audit</strong>
@@ -698,6 +706,51 @@ function localBook(format: StudioFormatId, title: string, brief = ""): PitchBook
 
 function bookWarningCount(book: PitchBookRecord): number {
   return book.slides.filter(slide => slide.warningState !== "clean").length;
+}
+
+function bookReadinessCount(book: PitchBookRecord): number {
+  return bookWarningCount(book) + modelHealthForBook(book).gaps;
+}
+
+function modelHealthForBook(book: PitchBookRecord): { total: number; complete: number; gaps: number; label: string } {
+  const outputs = book.modelOutputs || [];
+  const complete = outputs.filter(item => item.status === "complete").length;
+  const gaps = outputs.filter(item => item.status !== "complete" || safeModelMissingInputs(item).length > 0).length;
+  const label = outputs.length === 0
+    ? "no models"
+    : gaps
+      ? `${gaps} model ${gaps === 1 ? "gap" : "gaps"}`
+      : `${complete} models current`;
+  return { total: outputs.length, complete, gaps, label };
+}
+
+function safeModelMissingInputs(item: Record<string, any>): string[] {
+  return Array.isArray(item.missingInputs) ? item.missingInputs.map(value => String(value)).filter(Boolean) : [];
+}
+
+function formatModelName(modelId: string): string {
+  return modelId
+    .replace(/^MODEL\./, "")
+    .replace(/\.v\d+$/, "")
+    .split(".")
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ");
+}
+
+function modelSummary(item: Record<string, any>): string {
+  const missing = safeModelMissingInputs(item);
+  if (missing.length) return `Needs ${missing.slice(0, 3).join(", ")}${missing.length > 3 ? "..." : ""}`;
+  if (item.status === "complete") return item.version ? `Current ${item.version}` : "Current";
+  if (item.status === "not_saved") return "Save the book to run";
+  return String(item.status || "Not run").replace(/_/g, " ");
+}
+
+function modelDotStyle(item: Record<string, any>): CSSProperties {
+  return item.status === "complete" && safeModelMissingInputs(item).length === 0 ? S.cleanDot : S.warnDot;
+}
+
+function shortHash(value: string): string {
+  return value.slice(0, 7);
 }
 
 function formatLabel(value: StudioFormatId): string {
@@ -1162,6 +1215,26 @@ const S: Record<string, CSSProperties> = {
   sourceStack: { display: "grid", gap: 9 },
   sourceCard: { display: "grid", gridTemplateColumns: "12px minmax(0, 1fr)", gap: 9, alignItems: "start" },
   sourceText: { display: "grid", gap: 2, minWidth: 0 },
+  modelStack: { display: "grid", gap: 10 },
+  modelCard: {
+    display: "grid",
+    gridTemplateColumns: "12px minmax(0, 1fr) auto",
+    gap: 10,
+    alignItems: "start",
+    padding: "10px 0",
+    borderBottom: "1px solid rgba(153,176,209,.24)",
+  },
+  modelText: { display: "grid", gap: 3, minWidth: 0 },
+  modelHash: {
+    alignSelf: "start",
+    padding: "3px 6px",
+    borderRadius: 8,
+    background: "rgba(138,154,232,.12)",
+    color: "#2E5C8A",
+    fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+    fontSize: 11,
+    fontWeight: 800,
+  },
   cleanDot: { width: 9, height: 9, marginTop: 5, borderRadius: 99, background: "#6FAE95" },
   warnDot: { width: 9, height: 9, marginTop: 5, borderRadius: 99, background: "#C9A24E" },
   slideStage: {
