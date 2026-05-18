@@ -33,6 +33,7 @@ import { passkeyRouter } from './routes/passkeys.js';
 import { agencyActionsRouter } from './routes/agencyActions.js';
 import { analysisRunsRouter } from './routes/analysisRuns.js';
 import { portfolioBriefRouter } from './routes/portfolioBrief.js';
+import { studioRouter } from './routes/studio.js';
 import { createSql, getDatabaseUrl, getPostgresOptions } from './dbConfig.js';
 
 import { exportRouter } from './routes/export.js';
@@ -289,6 +290,7 @@ app.use('/api', analysisRunsRouter);
 app.use('/api', portfolioBriefRouter);
 app.use('/api', canvasTabsRouter);
 app.use('/api', docViewsRouter);
+app.use('/api', studioRouter);
 
 app.use('/api', exportRouter);
 

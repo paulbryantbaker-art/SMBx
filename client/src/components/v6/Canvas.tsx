@@ -70,6 +70,7 @@ function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut, modelPrefe
     if (tab.modeId === "today")    return <V6TodayRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
     if (tab.modeId === "pipeline") return <V6PipelineRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} modelPreference={modelPreference} />;
     if (tab.modeId === "search")   return <V6SearchRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
+    if (tab.modeId === "studio")   return <V6MarketingStudioView tab={{ id: "marketing-studio", kind: "marketing-studio", title: "Studio", studioView: "home" }} openTab={openTab} user={user} onTalkToYulia={onTalkToYulia} />;
     if (tab.modeId === "files")    return <V6FilesRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
     if (tab.modeId === "docs")     return <V6DocsRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} modelPreference={modelPreference} />;
     if (tab.modeId === "analysis") return <V6AnalysisRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} modelPreference={modelPreference} />;

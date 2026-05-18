@@ -27,6 +27,13 @@ import {
   queueIndustryDeepResearchJob,
   summarizeMarketIntelligenceProfile,
 } from './marketIntelligenceRuntime.js';
+import {
+  addPitchBookSection,
+  createPitchBook,
+  getPitchBook,
+  refreshPitchBookFromModels,
+  revisePitchBook,
+} from './pitchBookStudio.js';
 
 const sql = createSql();
 
@@ -120,6 +127,73 @@ export const TOOL_DEFINITIONS: Tool[] = [
         modelPreference: { type: 'string', enum: ['auto', 'fast', 'deep', 'drafting', 'research'], description: 'Optional model preference. Auto is default.' },
       },
       required: ['dealId', 'menuItemSlug'],
+    },
+  },
+  {
+    name: 'create_pitch_book',
+    description: 'Create a source-grounded Pitch Book Studio book for a deal or blank mandate. Use for buyer pitch books, seller pitch books, IC decks, QoE preview books, CIM summary decks, board updates, and lender books. Returns a persisted Studio book with slide-level provenance.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId: { type: 'number', description: 'Optional deal ID to ground the book in current deal facts and files.' },
+        format: {
+          type: 'string',
+          enum: ['buyer-pitch-book', 'seller-pitch-book', 'ic-deck', 'qoe-preview-book', 'cim-summary-deck', 'board-update', 'lender-book'],
+          description: 'Pitch book format.',
+        },
+        title: { type: 'string', description: 'Optional book title.' },
+        brief: { type: 'string', description: 'User mandate or story instructions.' },
+      },
+      required: ['format'],
+    },
+  },
+  {
+    name: 'revise_pitch_book',
+    description: 'Revise an existing Pitch Book Studio book by creating a new version with a revision instruction tracked in the audit trail.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        bookId: { type: 'number', description: 'Studio pitch book ID.' },
+        instruction: { type: 'string', description: 'Revision instruction from the user.' },
+      },
+      required: ['bookId', 'instruction'],
+    },
+  },
+  {
+    name: 'add_pitch_book_section',
+    description: 'Add a new section/slide to a Pitch Book Studio book. New sections are flagged as needing source review until grounded.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        bookId: { type: 'number', description: 'Studio pitch book ID.' },
+        title: { type: 'string', description: 'New slide or section title.' },
+        body: { type: 'string', description: 'Optional draft body.' },
+        bullets: { type: 'array', items: { type: 'string' }, description: 'Optional bullets.' },
+      },
+      required: ['bookId', 'title'],
+    },
+  },
+  {
+    name: 'refresh_pitch_book_from_models',
+    description: 'Refresh a Pitch Book Studio book against linked model outputs. Until the full V19 server runtime is complete, this flags linked model slots as stale and creates a new audited version.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        bookId: { type: 'number', description: 'Studio pitch book ID.' },
+      },
+      required: ['bookId'],
+    },
+  },
+  {
+    name: 'export_pitch_book',
+    description: 'Prepare a Pitch Book Studio export. Returns authenticated download URLs for PPTX and PDF. Use after the user asks to export or share a pitch book.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        bookId: { type: 'number', description: 'Studio pitch book ID.' },
+        format: { type: 'string', enum: ['pptx', 'pdf'], description: 'Preferred export format.' },
+      },
+      required: ['bookId', 'format'],
     },
   },
   {
@@ -606,6 +680,16 @@ export async function executeTool(
         return await generateFreeDeliverable(input, userId);
       case 'generate_deal_deliverable':
         return await generateDealDeliverable(input, userId);
+      case 'create_pitch_book':
+        return await createPitchBookTool(input, userId);
+      case 'revise_pitch_book':
+        return await revisePitchBookTool(input, userId);
+      case 'add_pitch_book_section':
+        return await addPitchBookSectionTool(input, userId);
+      case 'refresh_pitch_book_from_models':
+        return await refreshPitchBookFromModelsTool(input, userId);
+      case 'export_pitch_book':
+        return await exportPitchBookTool(input, userId);
       case 'run_analysis':
         return await runAnalysis(input, userId, conversationId);
       case 'file_deliverable_to_data_room':
@@ -1072,6 +1156,93 @@ async function generateDealDeliverable(input: Record<string, any>, userId: numbe
       kind: 'doc',
       title: `${deal.business_name || 'Deal'} · ${menuItem.name}`,
     },
+  });
+}
+
+async function createPitchBookTool(input: Record<string, any>, userId: number): Promise<string> {
+  const book = await createPitchBook({
+    userId,
+    dealId: input.dealId == null ? null : Number(input.dealId),
+    format: input.format,
+    title: input.title,
+    brief: input.brief,
+  });
+  return JSON.stringify({
+    success: true,
+    bookId: book.id,
+    version: book.version,
+    title: book.title,
+    format: book.format,
+    slides: book.slides.length,
+    warnings: book.slides.filter(slide => slide.warningState !== 'clean').length,
+    canvas_action: 'open_tab',
+    tab: {
+      id: `studio-book-${book.id}`,
+      kind: 'marketing-studio',
+      title: book.title,
+      studioView: 'canvas',
+      studioFormat: book.format,
+      studioBookId: book.id,
+    },
+  });
+}
+
+async function revisePitchBookTool(input: Record<string, any>, userId: number): Promise<string> {
+  const book = await revisePitchBook({
+    userId,
+    bookId: Number(input.bookId),
+    instruction: String(input.instruction || ''),
+  });
+  return JSON.stringify({
+    success: true,
+    bookId: book.id,
+    version: book.version,
+    title: book.title,
+    warnings: book.slides.filter(slide => slide.warningState !== 'clean').length,
+  });
+}
+
+async function addPitchBookSectionTool(input: Record<string, any>, userId: number): Promise<string> {
+  const book = await addPitchBookSection({
+    userId,
+    bookId: Number(input.bookId),
+    title: String(input.title || ''),
+    body: typeof input.body === 'string' ? input.body : null,
+    bullets: Array.isArray(input.bullets) ? input.bullets.map(String) : [],
+  });
+  return JSON.stringify({
+    success: true,
+    bookId: book.id,
+    version: book.version,
+    title: book.title,
+    slides: book.slides.length,
+  });
+}
+
+async function refreshPitchBookFromModelsTool(input: Record<string, any>, userId: number): Promise<string> {
+  const book = await refreshPitchBookFromModels(userId, Number(input.bookId));
+  return JSON.stringify({
+    success: true,
+    bookId: book.id,
+    version: book.version,
+    title: book.title,
+    message: 'Pitch book model slots were refreshed and flagged for V19 runtime execution.',
+    warnings: book.slides.filter(slide => slide.warningState !== 'clean').length,
+  });
+}
+
+async function exportPitchBookTool(input: Record<string, any>, userId: number): Promise<string> {
+  const bookId = Number(input.bookId);
+  const format = String(input.format || 'pptx').toLowerCase() === 'pdf' ? 'pdf' : 'pptx';
+  const book = await getPitchBook(userId, bookId);
+  if (!book) return JSON.stringify({ error: 'Pitch book not found' });
+  return JSON.stringify({
+    success: true,
+    bookId: book.id,
+    title: book.title,
+    format,
+    downloadUrl: `/api/studio/pitch-books/${book.id}/export/${format}`,
+    alternateDownloadUrl: `/api/studio/pitch-books/${book.id}/export/${format === 'pptx' ? 'pdf' : 'pptx'}`,
   });
 }
 

@@ -1,4 +1,4 @@
-export type ModeId = "today" | "pipeline" | "search" | "files" | "docs" | "analysis" | "intel" | "library";
+export type ModeId = "today" | "pipeline" | "search" | "studio" | "files" | "docs" | "analysis" | "intel" | "library";
 
 export type TabKind =
   | "mode-root"
@@ -13,12 +13,19 @@ export type TabKind =
   | "history"
   | "starter";
 
-export type StudioFormatId = "one-pager" | "carousel" | "article";
+export type StudioFormatId =
+  | "buyer-pitch-book"
+  | "seller-pitch-book"
+  | "ic-deck"
+  | "qoe-preview-book"
+  | "cim-summary-deck"
+  | "board-update"
+  | "lender-book";
 export type StudioView = "home" | "canvas" | "collection";
 
 export type IconName =
   | "today" | "search" | "doc" | "chart" | "feed" | "library"
-  | "settings" | "history" | "plus" | "close" | "pin" | "back" | "deal";
+  | "settings" | "history" | "plus" | "close" | "pin" | "back" | "deal" | "studio";
 
 export type FileScope = "all" | "data-room" | "shared";
 export type FileListView = "all" | "deal-libraries" | "needs-action" | "data-rooms";
@@ -52,6 +59,7 @@ export interface Tab {
   studioView?: StudioView;
   studioFormat?: StudioFormatId;
   studioDraftId?: string;
+  studioBookId?: number | null;
   studioCampaign?: string;
   studioCollectionSub?: string;
   studioDirty?: boolean;

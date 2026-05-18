@@ -9,11 +9,10 @@ import { V6Canvas } from "./Canvas";
 import { MODES, V6Icon } from "./icons";
 import { buildDesktopSurfaceContext, type SurfaceContext } from "../../lib/yuliaSurfaceContext";
 import { normalizeModelPreference, type ModelPreference } from "../../lib/modelPreference";
-import { isSuperAdminUser } from "../../lib/superAdmin";
 import { buildBigFakeInvestmentBoardTab, shouldOpenSampleInvestmentBoard } from "../../lib/sampleInvestmentBoard";
 import type { FileListView, FileScope, IconName, Message, ModeId, Tab } from "./types";
 
-const VALID_MODES: ModeId[] = ["today", "pipeline", "search", "files", "docs", "analysis", "intel", "library"];
+const VALID_MODES: ModeId[] = ["today", "pipeline", "search", "studio", "files", "docs", "analysis", "intel", "library"];
 
 interface ChatBridge {
   thread: Message[];
@@ -267,7 +266,7 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
     if (id === "today-root") return;
     const tabToClose = tabs.find(t => t.id === id);
     if (tabToClose?.kind === "marketing-studio" && tabToClose.studioView === "canvas" && tabToClose.studioDirty !== false) {
-      const saveDraft = window.confirm(`Save "${tabToClose.title}" before closing?\n\nOK saves it to Marketing Studio. Cancel closes without saving.`);
+      const saveDraft = window.confirm(`Save "${tabToClose.title}" before closing?\n\nOK saves it to Pitch Book Studio. Cancel closes without saving.`);
       if (saveDraft) {
         saveStudioDraft(tabToClose);
       } else {
@@ -370,11 +369,7 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
       openTab({ id: "tab-learn", kind: "learn", title: "How it works · Pricing", section });
       window.history.replaceState(null, "", "/" + window.location.hash);
     } else if (path === "/marketing-studio" || path === "/studio") {
-      if (isSuperAdminUser(user)) {
-        openTab({ id: "marketing-studio", kind: "marketing-studio", title: "Marketing Studio", studioView: "home" });
-      } else {
-        openTab({ id: "today-root", kind: "mode-root", modeId: "today", title: "Today", pinned: true });
-      }
+      openTab({ id: "marketing-studio", kind: "marketing-studio", title: "Studio", studioView: "home" });
       window.history.replaceState(null, "", "/" + window.location.hash);
     } else if (path === "/settings" || path === "/profile") {
       openTab({ id: "tab-settings", kind: "settings", title: "Settings" });
@@ -782,8 +777,20 @@ function tabFromHash(tab: string | null, scope?: FileScope, title?: string, run?
     return {
       id: "marketing-studio",
       kind: "marketing-studio",
-      title: "Marketing Studio",
+      title: "Studio",
       studioView: "home",
+    };
+  }
+  if (tab.startsWith("studio-book-")) {
+    const bookId = Number(tab.replace(/^studio-book-/, ""));
+    return {
+      id: tab,
+      kind: "marketing-studio",
+      title: title || "Pitch Book",
+      studioView: "canvas",
+      studioFormat: "buyer-pitch-book",
+      studioBookId: Number.isFinite(bookId) && bookId > 0 ? bookId : null,
+      studioDraftId: tab,
     };
   }
   return null;
@@ -889,7 +896,8 @@ function saveStudioDraft(tab: Tab) {
       id: draftId,
       tabId: tab.id,
       title: workingDraft.title ?? tab.title,
-      format: workingDraft.format ?? tab.studioFormat ?? "one-pager",
+      format: workingDraft.format ?? tab.studioFormat ?? "buyer-pitch-book",
+      studioBookId: tab.studioBookId ?? workingDraft.studioBookId ?? null,
       campaign: workingDraft.campaign ?? tab.studioCampaign ?? "General",
       updatedAt: new Date().toISOString(),
       status: workingDraft.status ?? existing?.status ?? "draft",
@@ -920,7 +928,8 @@ function modeForTab(tab: Tab): ModeId | null {
   if (tab.kind === "mode-root") return tab.modeId ?? null;
   if (tab.kind === "deal" || tab.kind === "analysis") return "pipeline";
   if (tab.kind === "doc") return inferredLauncherDealName(tab) ? "pipeline" : "files";
-  if (tab.kind === "files-list" || tab.kind === "marketing-studio") return "files";
+  if (tab.kind === "marketing-studio") return "studio";
+  if (tab.kind === "files-list") return "files";
   if (tab.kind === "learn" || tab.kind === "feed-item" || tab.kind === "starter" || tab.kind === "settings" || tab.kind === "history") return "today";
   if (tab.sourceMode) return tab.sourceMode;
   return null;
@@ -936,7 +945,8 @@ function tabBelongsToLauncherMode(tab: Tab, mode: ModeId, allTabs: Tab[]): boole
   if (tab.kind === "mode-root") return false;
   if (tab.kind === "learn") return mode === "today";
   if (tab.kind === "settings" || tab.kind === "history" || tab.kind === "starter" || tab.kind === "feed-item") return mode === "today";
-  if (tab.kind === "files-list" || tab.kind === "marketing-studio") return mode === "files";
+  if (tab.kind === "marketing-studio") return mode === "studio";
+  if (tab.kind === "files-list") return mode === "files";
   if (tab.kind === "deal") return mode === "pipeline";
   const dealParent = owningLauncherDealForTab(tab, allTabs);
   if (dealParent || inferredLauncherDealName(tab)) return mode === "pipeline";

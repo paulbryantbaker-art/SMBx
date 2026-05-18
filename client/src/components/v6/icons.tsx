@@ -9,6 +9,7 @@ import {
   FileCheck2,
   FileText,
   FolderClosed,
+  Images,
   Pin,
   Plus,
   Search,
@@ -21,6 +22,7 @@ export const MODES: Mode[] = [
   { id: "today",    label: "Today",    count: "5",  icon: "today"   },
   { id: "pipeline", label: "Pipeline", count: "6",  icon: "feed"    },
   { id: "search",   label: "Search",   count: "6",  icon: "search"  },
+  { id: "studio",   label: "Studio",   count: "7",  icon: "studio"  },
   { id: "files",    label: "Files",    count: "24", icon: "library" },
 ];
 
@@ -39,6 +41,7 @@ export function V6Icon({ name, size = 14 }: { name: IconName; size?: number }) {
     pin: Pin,
     back: ArrowLeft,
     deal: BriefcaseBusiness,
+    studio: Images,
   };
   const Icon = icons[name] ?? FileText;
   return <Icon size={size} strokeWidth={2.15} absoluteStrokeWidth aria-hidden="true" />;

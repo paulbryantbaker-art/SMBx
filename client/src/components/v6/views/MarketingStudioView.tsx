@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
-import type { User } from "../../../hooks/useAuth";
-import { ART_HOUSE_TEXTURES, DESKTOP_TEXTURES, STUDIO_TEXTURES } from "../../../lib/randomTextures";
-import { isSuperAdminUser } from "../../../lib/superAdmin";
+import { authHeaders, type User } from "../../../hooks/useAuth";
+import { DESKTOP_TEXTURES, STUDIO_TEXTURES } from "../../../lib/randomTextures";
 import type { OpenTab, StudioFormatId, Tab } from "../types";
 
 interface MarketingStudioProps {
@@ -11,23 +10,59 @@ interface MarketingStudioProps {
   onTalkToYulia?: (prompt: string) => void;
 }
 
-interface StudioOutput {
+interface StudioFormat {
   id: StudioFormatId;
   title: string;
-  size: string;
-  dimensions: string;
-  width: number;
-  height: number;
-  pages: number;
+  audience: string;
   detail: string;
+  slideCount: string;
   prompt: string;
 }
 
-interface StudioFormatCard {
+interface StudioSlide {
+  id: string;
   title: string;
-  sub: string;
-  count: number;
+  subtitle?: string;
+  body: string;
+  bullets: string[];
+  speakerNotes?: string;
+  provenance: {
+    factsUsed: string[];
+    modelOutputsUsed: string[];
+    citationsUsed: string[];
+    uncheckedClaims: string[];
+  };
+  warningState: "clean" | "needs_sources" | "stale_models";
+}
+
+interface StudioSource {
+  id?: number;
+  sourceType: string;
+  sourceId?: string | null;
+  label: string;
+  citationTag?: string | null;
+  sourceUrl?: string | null;
+  status: "linked" | "missing" | "stale";
+}
+
+interface PitchBookRecord {
+  id: number;
+  dealId: number | null;
+  title: string;
   format: StudioFormatId;
+  status: string;
+  brief: string | null;
+  versionId: number | null;
+  version: number;
+  outline: string[];
+  slides: StudioSlide[];
+  assumptions: Array<Record<string, any>>;
+  modelOutputs: Array<Record<string, any>>;
+  provenance: Record<string, any>;
+  audit: Record<string, any>;
+  sources: StudioSource[];
+  updatedAt: string;
+  createdAt: string;
 }
 
 interface SavedStudioDraft {
@@ -36,283 +71,201 @@ interface SavedStudioDraft {
   format: StudioFormatId;
   campaign: string;
   updatedAt: string;
-  status?: "draft" | "completed";
   story?: string;
-  layout?: StudioLayoutId;
-  texture?: StudioTextureId;
-  cta?: string;
+  status?: "draft" | "completed";
+  studioBookId?: number | null;
 }
 
-type StudioLayoutId = "liquid-list" | "proof-cards" | "white-brief";
-type StudioTextureId = "auto" | "rose" | "blue" | "green" | "navy";
-
-interface StudioStarter {
-  title: string;
-  detail: string;
-  format: StudioFormatId;
-  prompt: string;
-}
-
-interface StudioCampaign {
-  id: string;
-  title: string;
-  sub: string;
-  count: number;
-  createdAt: string;
-  deal?: string;
-}
-
-const DRAFT_STORAGE_KEY = "smbx_marketing_studio_drafts";
-const CAMPAIGN_STORAGE_KEY = "smbx_marketing_studio_campaigns";
 const WORKING_DRAFTS_KEY = "__smbxMarketingStudioWorkingDrafts";
+const DRAFT_STORAGE_KEY = "smbx_marketing_studio_drafts";
 
-const OUTPUTS: StudioOutput[] = [
+const FORMATS: StudioFormat[] = [
   {
-    id: "one-pager",
-    title: "LinkedIn one-pager",
-    size: "1080 x 1350",
-    dimensions: "1080 x 1350",
-    width: 1080,
-    height: 1350,
-    pages: 1,
-    detail: "One thesis, one visual argument, LinkedIn portrait-ready.",
-    prompt: "Draft a LinkedIn one-pager about smbx.ai as the execution layer for institutional M&A. Use the current product positioning and keep it crisp.",
+    id: "buyer-pitch-book",
+    title: "Buyer Pitch Book",
+    audience: "Searchers, independent sponsors, corp dev",
+    detail: "Target read, market map, valuation frame, risks, and next actions.",
+    slideCount: "6 slides",
+    prompt: "Create a buyer pitch book for this deal. Ground every metric in files, model outputs, or citations.",
   },
   {
-    id: "carousel",
-    title: "Carousel PDF",
-    size: "1080 x 1350",
-    dimensions: "1080 x 1350",
-    width: 1080,
-    height: 1350,
-    pages: 7,
-    detail: "Five to seven editorial cards with a tight narrative arc.",
-    prompt: "Create a seven-page LinkedIn carousel outline for smbx.ai. Use the current design language and make each page screenshot-ready.",
+    id: "seller-pitch-book",
+    title: "Seller Pitch Book",
+    audience: "Owners, advisors, buyer outreach",
+    detail: "Positioning, business profile, financial story, buyer universe, and process plan.",
+    slideCount: "6 slides",
+    prompt: "Create a seller pitch book that a buyer or advisor would actually read.",
   },
   {
-    id: "article",
-    title: "Blog post",
-    size: "Article",
-    dimensions: "1200 wide",
-    width: 1200,
-    height: 828,
-    pages: 3,
-    detail: "A publishable argument that can become a post, email, or carousel.",
-    prompt: "Draft a blog post about why M&A software has to become an execution layer, not a document generator.",
+    id: "ic-deck",
+    title: "IC Deck",
+    audience: "Investment committee",
+    detail: "Decision ask, thesis, returns frame, risks, and approval path.",
+    slideCount: "6 slides",
+    prompt: "Create an IC deck with a clean decision ask and source-grounded risk frame.",
+  },
+  {
+    id: "qoe-preview-book",
+    title: "QoE Preview Book",
+    audience: "Buyers deciding whether to spend diligence money",
+    detail: "Normalized earnings, add-back defense, NWC, red flags, and diligence asks.",
+    slideCount: "6 slides",
+    prompt: "Create a QoE preview book. Separate defended earnings from unverified add-backs.",
+  },
+  {
+    id: "cim-summary-deck",
+    title: "CIM Summary Deck",
+    audience: "Qualified buyers and internal deal teams",
+    detail: "Investment highlights, company profile, market position, and financial summary.",
+    slideCount: "6 slides",
+    prompt: "Create a CIM summary deck with an audit appendix and concise buyer-facing story.",
+  },
+  {
+    id: "board-update",
+    title: "Board Update",
+    audience: "Board, partners, LPs",
+    detail: "Portfolio read, deals in motion, key changes, decisions needed, and risks.",
+    slideCount: "6 slides",
+    prompt: "Create a board update book for current deal work and open decisions.",
+  },
+  {
+    id: "lender-book",
+    title: "Lender Book",
+    audience: "SBA and senior lenders",
+    detail: "Borrower profile, sources and uses, cash flow support, and credit ask.",
+    slideCount: "6 slides",
+    prompt: "Create a lender book with DSCR, sources and uses, and credit support clearly separated.",
   },
 ];
 
-const STARTERS: StudioStarter[] = [
-  {
-    title: "Positioning card",
-    detail: "One claim, one proof stack, one CTA. Best for a LinkedIn single image.",
-    format: "one-pager",
-    prompt: "Turn the campaign into a single positioning card with a sharp thesis, proof, and CTA.",
-  },
-  {
-    title: "Carousel builder",
-    detail: "A 5-7 page narrative arc for a PDF carousel.",
-    format: "carousel",
-    prompt: "Turn the campaign into a tight LinkedIn carousel with a clear page-by-page narrative.",
-  },
-  {
-    title: "Founder note",
-    detail: "A founder-led point of view that can become a post or letter.",
-    format: "article",
-    prompt: "Draft a founder note from the campaign positioning with a human, direct voice.",
-  },
-  {
-    title: "Pricing explainer",
-    detail: "A simple explanation of plan logic, use cases, and who each plan is for.",
-    format: "one-pager",
-    prompt: "Create a pricing explainer card for the selected campaign.",
-  },
-  {
-    title: "Product launch post",
-    detail: "A launch-ready post with the product moment, claim, and proof.",
-    format: "article",
-    prompt: "Draft a product launch post for the selected campaign.",
-  },
-  {
-    title: "Screenshot canvas",
-    detail: "A visual frame for turning an app screenshot into collateral.",
-    format: "one-pager",
-    prompt: "Create a screenshot-led collateral canvas from the selected campaign.",
-  },
-];
-
-const DEFAULT_CAMPAIGNS: StudioCampaign[] = [
-  { id: "campaign-launch", title: "Launch narrative", sub: "Core positioning, founder voice, investor-grade proof points.", count: 6, createdAt: "default" },
-  { id: "campaign-yulia-agency", title: "Yulia agency", sub: "Agentic workflow posts, analysis canvases, document lifecycle.", count: 4, createdAt: "default" },
-  { id: "campaign-market-intel", title: "Market intelligence", sub: "Why SMBx becomes the go-to M&A strategy source.", count: 3, createdAt: "default" },
-];
-
-const DEAL_OPTIONS = [
-  "No deal link",
-  "Big Fake Deal",
-  "Pest Control · FL",
-  "HVAC platform · CO",
-  "Electrical Contractor · TX",
-];
-
-const COLLATERAL_FOLDERS: StudioFormatCard[] = [
-  { title: "One-pagers", sub: "Single-image LinkedIn portrait posts and founder notes.", count: 5, format: "one-pager" },
-  { title: "Carousels", sub: "Multi-page LinkedIn PDF posts grouped by campaign.", count: 2, format: "carousel" },
-  { title: "Articles", sub: "Longer arguments that can become posts, email, or carousel source.", count: 3, format: "article" },
-];
-
-const LAYOUTS: { id: StudioLayoutId; label: string; detail: string }[] = [
-  { id: "liquid-list", label: "Liquid list", detail: "Textured card with glass action rows." },
-  { id: "proof-cards", label: "Proof cards", detail: "Three strong proof blocks and a CTA rail." },
-  { id: "white-brief", label: "White brief", detail: "A cleaner memo-style page over art." },
-];
-
-const TEXTURES: { id: StudioTextureId; label: string }[] = [
-  { id: "auto", label: "Auto mix" },
-  { id: "rose", label: "Rose leather" },
-  { id: "blue", label: "Blue glass" },
-  { id: "green", label: "Sage linen" },
-  { id: "navy", label: "Navy desk" },
+const SAMPLE_BOOKS: PitchBookRecord[] = [
+  localBook("qoe-preview-book", "Big Fake Deal - QoE Preview Book"),
+  localBook("buyer-pitch-book", "Pest Control FL - Buyer Pitch Book"),
 ];
 
 export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: MarketingStudioProps) {
-  const [campaigns, setCampaigns] = useState<StudioCampaign[]>(() => readStudioCampaigns());
-  const [savedDrafts, setSavedDrafts] = useState<SavedStudioDraft[]>(() => readSavedStudioDrafts());
-  const [activeCampaignId, setActiveCampaignId] = useState(campaigns[0]?.id ?? DEFAULT_CAMPAIGNS[0].id);
-  const [newCampaignTitle, setNewCampaignTitle] = useState("");
-  const [newCampaignSub, setNewCampaignSub] = useState("");
-  const [newCampaignDeal, setNewCampaignDeal] = useState(DEAL_OPTIONS[0]);
-
-  if (!isSuperAdminUser(user)) {
-    return (
-      <main style={S.lockedWrap}>
-        <div className="m-card" style={S.lockedCard}>
-          <div className="mono" style={S.eyebrow}>PRIVATE</div>
-          <h1 style={S.lockedTitle}>Marketing Studio is restricted.</h1>
-          <p style={S.lockedCopy}>
-            This workspace is visible only to the smbx.ai superadmin account while the publishing system is being designed.
-          </p>
-        </div>
-      </main>
-    );
-  }
+  const [books, setBooks] = useState<PitchBookRecord[]>([]);
+  const [loadingBooks, setLoadingBooks] = useState(false);
+  const [brief, setBrief] = useState("");
+  const [selectedFormat, setSelectedFormat] = useState<StudioFormatId>("qoe-preview-book");
+  const [error, setError] = useState<string | null>(null);
 
   const askYulia = (prompt: string) => onTalkToYulia?.(prompt);
-  const activeCampaign = campaigns.find(campaign => campaign.id === activeCampaignId) ?? campaigns[0] ?? DEFAULT_CAMPAIGNS[0];
+
+  useEffect(() => {
+    if (!user) {
+      setBooks(SAMPLE_BOOKS);
+      return;
+    }
+    let alive = true;
+    setLoadingBooks(true);
+    fetch("/api/studio/pitch-books", { headers: authHeaders() })
+      .then(async res => {
+        if (!res.ok) throw new Error("Could not load pitch books");
+        return res.json();
+      })
+      .then(data => {
+        if (alive) setBooks(Array.isArray(data.books) && data.books.length ? data.books : SAMPLE_BOOKS);
+      })
+      .catch(() => {
+        if (alive) setBooks(SAMPLE_BOOKS);
+      })
+      .finally(() => {
+        if (alive) setLoadingBooks(false);
+      });
+    return () => { alive = false; };
+  }, [user]);
+
+  const activeFormat = FORMATS.find(item => item.id === selectedFormat) ?? FORMATS[0];
   const activeOutput = tab.studioView === "canvas"
-    ? OUTPUTS.find(output => output.id === tab.studioFormat) ?? OUTPUTS[0]
+    ? FORMATS.find(output => output.id === tab.studioFormat) ?? activeFormat
     : null;
 
-  const refreshDrafts = () => setSavedDrafts(readSavedStudioDrafts());
-
-  const createCampaign = () => {
-    const title = newCampaignTitle.trim();
-    if (!title) return;
-    const nextCampaign: StudioCampaign = {
-      id: `campaign-${slugify(title)}-${Date.now().toString(36)}`,
-      title,
-      sub: newCampaignSub.trim() || "Custom campaign.",
-      count: 0,
-      createdAt: new Date().toISOString(),
-      deal: newCampaignDeal === DEAL_OPTIONS[0] ? undefined : newCampaignDeal,
-    };
-    const next = [nextCampaign, ...campaigns];
-    setCampaigns(next);
-    writeStudioCampaigns(next);
-    setActiveCampaignId(nextCampaign.id);
-    setNewCampaignTitle("");
-    setNewCampaignSub("");
-    setNewCampaignDeal(DEAL_OPTIONS[0]);
-    openStudioCollection(nextCampaign.title, nextCampaign.sub);
+  const refreshBook = (next: PitchBookRecord) => {
+    setBooks(prev => [next, ...prev.filter(item => item.id !== next.id)]);
   };
 
-  const deleteCampaign = (campaignId: string) => {
-    const campaign = campaigns.find(item => item.id === campaignId);
-    if (!campaign) return;
-    const confirmed = window.confirm(`Delete the "${campaign.title}" campaign folder?\n\nSaved collateral will stay in Local assets, but it will no longer have a campaign folder.`);
-    if (!confirmed) return;
-    const next = campaigns.filter(item => item.id !== campaignId);
-    setCampaigns(next);
-    writeStudioCampaigns(next);
-    if (activeCampaignId === campaignId) {
-      setActiveCampaignId(next[0]?.id ?? DEFAULT_CAMPAIGNS[0].id);
+  const createBook = async (format: StudioFormatId, title?: string) => {
+    const output = FORMATS.find(item => item.id === format) ?? activeFormat;
+    const fallbackId = `studio-${format}-${Date.now().toString(36)}`;
+
+    if (!user) {
+      openTab({
+        id: fallbackId,
+        kind: "marketing-studio",
+        title: title || `Studio - ${output.title}`,
+        studioView: "canvas",
+        studioFormat: format,
+        studioDraftId: fallbackId,
+        studioCampaign: "Local Studio draft",
+        studioDirty: true,
+      });
+      return;
+    }
+
+    setError(null);
+    try {
+      const res = await fetch("/api/studio/pitch-books", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+        body: JSON.stringify({
+          format,
+          title: title || undefined,
+          brief: brief || output.prompt,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to create pitch book");
+      const book = data.book as PitchBookRecord;
+      refreshBook(book);
+      openTab({
+        id: `studio-book-${book.id}`,
+        kind: "marketing-studio",
+        title: book.title,
+        studioView: "canvas",
+        studioFormat: book.format,
+        studioBookId: book.id,
+        studioDraftId: `studio-book-${book.id}`,
+        studioCampaign: "Pitch Book Studio",
+        studioDirty: false,
+      });
+    } catch (err: any) {
+      setError(err.message || "Failed to create pitch book");
+      openTab({
+        id: fallbackId,
+        kind: "marketing-studio",
+        title: title || `Studio - ${output.title}`,
+        studioView: "canvas",
+        studioFormat: format,
+        studioDraftId: fallbackId,
+        studioCampaign: "Local Studio draft",
+        studioDirty: true,
+      });
     }
   };
 
-  const deleteDraft = (draftId: string) => {
-    const draft = savedDrafts.find(item => item.id === draftId);
-    if (!draft) return;
-    const confirmed = window.confirm(`Delete "${draft.title}"?\n\nThis removes the local Studio asset from this browser.`);
-    if (!confirmed) return;
-    deleteStudioDraft(draftId);
-    refreshDrafts();
-  };
-
-  const openSavedDraft = (draft: SavedStudioDraft) => {
-    const output = OUTPUTS.find(item => item.id === draft.format) ?? OUTPUTS[0];
+  const openBook = (book: PitchBookRecord) => {
     openTab({
-      id: draft.id,
+      id: `studio-book-${book.id}`,
       kind: "marketing-studio",
-      title: draft.title,
+      title: book.title,
       studioView: "canvas",
-      studioFormat: output.id,
-      studioDraftId: draft.id,
-      studioCampaign: draft.campaign,
-      studioDirty: true,
+      studioFormat: book.format,
+      studioBookId: book.id,
+      studioDraftId: `studio-book-${book.id}`,
+      studioCampaign: "Pitch Book Studio",
+      studioDirty: false,
     });
-  };
-
-  const openStudioOutput = (output: StudioOutput, tool?: string, campaign = activeCampaign.title) => {
-    const draftId = `studio-${output.id}-${Date.now().toString(36)}`;
-    openTab({
-      id: draftId,
-      kind: "marketing-studio",
-      title: `Studio · ${output.title}`,
-      studioView: "canvas",
-      studioFormat: output.id,
-      studioDraftId: draftId,
-      studioCampaign: campaign,
-      studioDirty: true,
-    });
-    askYulia(tool
-      ? `Use the ${tool} starter in the Marketing Studio for the "${campaign}" campaign. I will give you the story; turn it into screenshot-ready sections in the open ${output.title} canvas.`
-      : `Open a ${output.title} draft in Marketing Studio for the "${campaign}" campaign. I will give you the story; turn it into screenshot-ready sections using the app design language.`);
-  };
-
-  const openStudioCollection = (title: string, sub: string) => {
-    openTab({
-      id: `studio-campaign-${slugify(title)}`,
-      kind: "marketing-studio",
-      title: `Campaign · ${title}`,
-      studioView: "collection",
-      studioCampaign: title,
-      studioCollectionSub: sub,
-    });
-    askYulia(`Open the "${title}" marketing campaign workspace. Context: ${sub}. Help me decide whether this should become a one-pager, carousel, or article, then ask for the story inputs.`);
   };
 
   if (activeOutput) {
     return (
       <StudioCanvas
         output={activeOutput}
-        campaign={tab.studioCampaign ?? "Launch narrative"}
-        draftId={tab.studioDraftId ?? tab.id}
-        draftTitle={tab.title}
+        tab={tab}
+        user={user}
         onAskYulia={askYulia}
-      />
-    );
-  }
-
-  if (tab.studioView === "collection") {
-    return (
-      <StudioCollection
-        title={tab.studioCampaign ?? "Campaign"}
-        sub={tab.studioCollectionSub ?? "Create collateral inside this campaign."}
-        drafts={savedDrafts.filter(draft => draft.campaign === tab.studioCampaign)}
-        onStart={(output) => openStudioOutput(output, undefined, tab.studioCampaign ?? "Campaign")}
-        onOpenDraft={openSavedDraft}
-        onDeleteDraft={deleteDraft}
-        onAskYulia={askYulia}
+        onBookUpdated={refreshBook}
       />
     );
   }
@@ -320,753 +273,447 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
   return (
     <main className="m-fade-up" style={S.page}>
       <section style={S.hero}>
-        <div style={S.heroWash} />
+        <div style={S.heroTexture} />
         <div style={S.heroInner}>
-          <div className="mono" style={S.heroEyebrow}>SUPERADMIN STUDIO</div>
-          <h1 style={S.heroTitle}>Make the marketing look like the product.</h1>
+          <div style={S.brandRail}>
+            <span style={S.brandDot}>Y</span>
+            <span>Pitch Book Studio</span>
+          </div>
+          <h1 style={S.heroTitle}>Create finance-grade pitch books from the same deal brain.</h1>
           <p style={S.heroCopy}>
-            Build LinkedIn one-pagers, carousel PDFs, blog posts, and screenshot-ready launch material from the same visual system as the app.
+            Build IC decks, QoE preview books, buyer books, lender books, and CIM summaries with slide-level sources, model links, and export-ready audit trails.
           </p>
           <div style={S.heroActions}>
-            <button
-              type="button"
-              className="m-btn"
-              style={S.heroPrimary}
-              onClick={() => askYulia(OUTPUTS[0].prompt)}
-            >
-              Draft with Yulia
+            <button className="m-btn filled" style={S.primaryButton} onClick={() => void createBook("qoe-preview-book")}>
+              Start QoE Preview
             </button>
-            <button
-              type="button"
-              className="m-btn"
-              style={S.heroGlass}
-              onClick={() => askYulia("Help me choose the strongest marketing format for today: one-pager, carousel, or blog post.")}
-            >
-              Pick the format
+            <button className="m-btn tonal" style={S.glassButton} onClick={() => askYulia("Help me choose the right pitch book format and ask for the source files you need first.")}>
+              Plan with Yulia
             </button>
           </div>
         </div>
-      </section>
-
-      <section style={S.contentGrid}>
-        <div className="m-card" style={S.panel}>
-          <div className="mono" style={S.eyebrow}>OUTPUTS</div>
-          <h2 style={S.sectionTitle}>Start with the channel.</h2>
-          <label style={S.activeCampaignField}>
-            <span className="mono" style={S.fieldLabel}>CAMPAIGN REQUIRED</span>
-            <select
-              value={activeCampaign.id}
-              onChange={(event) => setActiveCampaignId(event.target.value)}
-              style={S.selectInput}
-            >
-              {campaigns.map(campaign => (
-                <option key={campaign.id} value={campaign.id}>{campaign.title}</option>
-              ))}
-            </select>
-          </label>
-          <div style={S.outputStack}>
-            {OUTPUTS.map((output) => (
-              <button
-              key={output.title}
-              type="button"
-                className="m-state"
-                style={S.outputRow}
-                onClick={() => openStudioOutput(output, undefined, activeCampaign.title)}
-              >
-                <span style={{ minWidth: 0 }}>
-                  <strong style={S.rowTitle}>{output.title}</strong>
-                  <span style={S.rowDetail}>{output.detail}</span>
-                </span>
-                <span className="mono" style={S.sizePill}>{output.size}</span>
-              </button>
-            ))}
+        <div style={S.heroPanel}>
+          <div style={S.panelTop}>
+            <strong>Studio readiness</strong>
+            <span>{loadingBooks ? "syncing" : `${books.length} books`}</span>
           </div>
-        </div>
-
-        <div className="m-card" style={S.previewShell}>
-          <div style={S.previewCard}>
-            <div className="mono" style={S.previewEyebrow}>POSITIONING CARD</div>
-            <h2 style={S.previewTitle}>Better decisions. Less friction. Faster execution.</h2>
-            <p style={S.previewCopy}>
-              Connect sourcing, diligence, execution, and value creation in one workflow.
-            </p>
-          </div>
-          <div style={S.previewFoot}>
-            <span>Screenshot-ready composition</span>
-            <span>1080 x 1350</span>
-          </div>
-        </div>
-      </section>
-
-      <section style={S.managementGrid}>
-        <div className="m-card" style={S.managementPanel}>
-          <div className="mono" style={S.eyebrow}>CAMPAIGNS</div>
-          <h2 style={S.sectionTitle}>Campaign folders</h2>
-          <div style={S.campaignCreate}>
-            <input
-              value={newCampaignTitle}
-              onChange={(event) => setNewCampaignTitle(event.target.value)}
-              placeholder="Name a campaign"
-              style={S.inlineInput}
-            />
-            <input
-              value={newCampaignSub}
-              onChange={(event) => setNewCampaignSub(event.target.value)}
-              placeholder="What is this campaign for?"
-              style={S.inlineInput}
-            />
-            <div style={S.createFooter}>
-              <select
-                value={newCampaignDeal}
-                onChange={(event) => setNewCampaignDeal(event.target.value)}
-                style={{ ...S.selectInput, minHeight: 40 }}
-              >
-                {DEAL_OPTIONS.map(option => (
-                  <option key={option} value={option}>{option}</option>
-                ))}
-              </select>
-              <button
-                type="button"
-                className="m-btn filled"
-                style={S.createButton}
-                onClick={createCampaign}
-                disabled={!newCampaignTitle.trim()}
-              >
-                Create
-              </button>
+          {["Sources linked", "Model outputs tracked", "Audit appendix ready"].map((item, index) => (
+            <div key={item} style={S.readinessRow}>
+              <span style={{ ...S.readinessMeter, width: `${84 - index * 16}%` }} />
+              <strong>{item}</strong>
             </div>
-          </div>
-          <div style={S.folderStack}>
-            {campaigns.map((campaign) => (
-              <div
-                key={campaign.title}
-                style={S.folderRow}
-              >
-                <button
-                  type="button"
-                  className="m-state"
-                  style={S.rowOpenArea}
-                  onClick={() => openStudioCollection(campaign.title, campaign.sub)}
-                >
-                  <span>
-                    <strong style={S.rowTitle}>{campaign.title}</strong>
-                    <span style={S.rowDetail}>{campaign.deal ? `${campaign.deal} · ${campaign.sub}` : campaign.sub}</span>
-                  </span>
-                </button>
-                <span style={S.rowActions}>
-                  <span className="mono" style={S.sizePill}>{campaign.count}</span>
-                  <button
-                    type="button"
-                    className="m-state"
-                    style={S.deleteButton}
-                    onClick={() => deleteCampaign(campaign.id)}
-                  >
-                    Delete
-                  </button>
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="m-card" style={S.managementPanel}>
-          <div className="mono" style={S.eyebrow}>FORMATS</div>
-          <h2 style={S.sectionTitle}>Collateral types</h2>
-          <div style={S.folderStack}>
-            {COLLATERAL_FOLDERS.map((folder) => (
-              <button
-                key={folder.title}
-                type="button"
-                className="m-state"
-                style={S.folderRow}
-                onClick={() => openStudioOutput(OUTPUTS.find(output => output.id === folder.format) ?? OUTPUTS[0], undefined, activeCampaign.title)}
-              >
-                <span>
-                  <strong style={S.rowTitle}>{folder.title}</strong>
-                  <span style={S.rowDetail}>{folder.sub}</span>
-                </span>
-                <span className="mono" style={S.sizePill}>{folder.count}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="m-card" style={S.managementPanel}>
-          <div className="mono" style={S.eyebrow}>DRAFTS</div>
-          <h2 style={S.sectionTitle}>Local assets</h2>
-          <div style={S.folderStack}>
-            {(savedDrafts.length ? savedDrafts.slice(0, 3) : [
-              { id: "empty", title: "No saved local drafts yet", format: "one-pager" as const, campaign: "Close a Studio draft tab and choose save.", updatedAt: "" },
-            ]).map((draft) => (
-              <div
-                key={draft.id}
-                style={S.folderRow}
-              >
-                <button
-                  type="button"
-                  className="m-state"
-                  style={S.rowOpenArea}
-                  onClick={() => draft.id !== "empty" && openSavedDraft(draft)}
-                >
-                  <span>
-                    <strong style={S.rowTitle}>{draft.title}</strong>
-                    <span style={S.rowDetail}>{draft.campaign || "Marketing Studio"}</span>
-                  </span>
-                </button>
-                <span style={S.rowActions}>
-                  <span className="mono" style={S.sizePill}>{draft.format}</span>
-                  {draft.id !== "empty" && (
-                    <button
-                      type="button"
-                      className="m-state"
-                      style={S.deleteButton}
-                      onClick={() => deleteDraft(draft.id)}
-                    >
-                      Delete
-                    </button>
-                  )}
-                </span>
-              </div>
-            ))}
-          </div>
+          ))}
         </div>
       </section>
 
-      <section className="m-card" style={S.toolPanel}>
-        <div>
-          <div className="mono" style={S.eyebrow}>STARTERS</div>
-          <h2 style={S.sectionTitle}>Start from a brief.</h2>
+      <section style={S.commandBand}>
+        <div style={S.commandCopy}>
+          <h2 style={S.sectionTitle}>Start from a mandate.</h2>
           <p style={S.sectionCopy}>
-            These are not folders. They pre-load Yulia with a focused collateral shape inside the active campaign.
+            Give Yulia the audience and the decision the book needs to support. The Studio keeps the story, sources, assumptions, model outputs, and export trail together.
           </p>
         </div>
-        <div style={S.toolGrid}>
-          {STARTERS.map((starter) => {
-            const output = OUTPUTS.find(item => item.id === starter.format) ?? OUTPUTS[0];
-            return (
-            <button
-              key={starter.title}
-              type="button"
-              className="m-state"
-              style={S.toolCard}
-              onClick={() => {
-                openStudioOutput(output, starter.title, activeCampaign.title);
-              }}
-            >
-              <span style={S.toolTitle}>{starter.title}</span>
-              <span style={S.toolDetail}>{starter.detail}</span>
-              <span className="mono" style={S.toolMeta}>{output.size}</span>
-            </button>
-            );
-          })}
+        <div style={S.commandBox}>
+          <select value={selectedFormat} onChange={(event) => setSelectedFormat(event.target.value as StudioFormatId)} style={S.select}>
+            {FORMATS.map(format => <option key={format.id} value={format.id}>{format.title}</option>)}
+          </select>
+          <textarea
+            value={brief}
+            onChange={(event) => setBrief(event.target.value)}
+            placeholder="Example: Build a QoE preview for a buyer deciding whether to spend outside diligence money. Focus on defended EBITDA, add-backs, NWC, and red flags."
+            style={S.briefInput}
+          />
+          <button className="m-btn filled" style={S.commandButton} onClick={() => void createBook(selectedFormat)}>
+            Create {activeFormat.title}
+          </button>
+          {error && <span style={S.errorText}>{error}</span>}
+        </div>
+      </section>
+
+      <section style={S.formatGrid}>
+        {FORMATS.map(format => (
+          <button
+            key={format.id}
+            type="button"
+            className="m-state"
+            style={{ ...S.formatCard, ...(selectedFormat === format.id ? S.formatCardActive : null) }}
+            onClick={() => setSelectedFormat(format.id)}
+            onDoubleClick={() => void createBook(format.id)}
+          >
+            <span style={S.formatMeta}>{format.slideCount}</span>
+            <strong style={S.formatTitle}>{format.title}</strong>
+            <span style={S.formatAudience}>{format.audience}</span>
+            <span style={S.formatDetail}>{format.detail}</span>
+          </button>
+        ))}
+      </section>
+
+      <section style={S.lowerGrid}>
+        <div style={S.bookPanel}>
+          <div style={S.panelHeader}>
+            <h2 style={S.sectionTitle}>Books in Studio</h2>
+            <span style={S.smallPill}>{loadingBooks ? "Loading" : "Current"}</span>
+          </div>
+          <div style={S.bookStack}>
+            {books.map(book => (
+              <button key={`${book.id}-${book.version}`} className="m-state" style={S.bookRow} onClick={() => openBook(book)}>
+                <span style={S.bookIcon}>{formatInitial(book.format)}</span>
+                <span style={S.bookBody}>
+                  <strong>{book.title}</strong>
+                  <small>{formatLabel(book.format)} / v{book.version} / {book.slides.length} slides</small>
+                </span>
+                <span style={bookWarningCount(book) ? S.warnPill : S.cleanPill}>
+                  {bookWarningCount(book) ? `${bookWarningCount(book)} gaps` : "clean"}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={S.diffPanel}>
+          <h2 style={S.sectionTitle}>Built to compete with finance workbenches.</h2>
+          <div style={S.diffGrid}>
+            {[
+              ["Unified inputs", "Files, model runs, citations, and Yulia's narrative live in one book."],
+              ["Slide provenance", "Each slide tracks facts, models, citations, and unchecked claims."],
+              ["Export discipline", "PPTX/PDF exports include source and audit appendices."],
+              ["Deal-native", "The book opens in the same canvas as Today, Files, and Pipeline."],
+            ].map(([title, body]) => (
+              <div key={title} style={S.diffItem}>
+                <strong>{title}</strong>
+                <span>{body}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </main>
   );
 }
 
-function StudioCanvas({ output, campaign, draftId, draftTitle, onAskYulia }: {
-  output: StudioOutput;
-  campaign: string;
-  draftId: string;
-  draftTitle: string;
+function StudioCanvas({
+  output,
+  tab,
+  user,
+  onAskYulia,
+  onBookUpdated,
+}: {
+  output: StudioFormat;
+  tab: Tab;
+  user: User | null;
   onAskYulia: (prompt: string) => void;
+  onBookUpdated: (book: PitchBookRecord) => void;
 }) {
-  const savedDraft = useMemo(() => readStudioDraft(draftId), [draftId]);
-  const [story, setStory] = useState(savedDraft?.story ?? "");
-  const [layout, setLayout] = useState<StudioLayoutId>(savedDraft?.layout ?? "liquid-list");
-  const [texture, setTexture] = useState<StudioTextureId>(savedDraft?.texture ?? "auto");
-  const [cta, setCta] = useState(savedDraft?.cta ?? "Start with Yulia");
-  const pages = useMemo(() => studioPages(output), [output.id]);
-  const isArticle = output.id === "article";
-  const textureLabel = TEXTURES.find(item => item.id === texture)?.label ?? "Auto";
+  const localDraft = useMemo(() => readStudioDraft(tab.studioDraftId ?? tab.id), [tab.id, tab.studioDraftId]);
+  const [book, setBook] = useState<PitchBookRecord | null>(null);
+  const [story, setStory] = useState(localDraft?.story ?? "");
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const bookId = tab.studioBookId ?? null;
+
+  useEffect(() => {
+    if (!user || !bookId) {
+      setBook(localBook(output.id, tab.title, story));
+      return;
+    }
+    let alive = true;
+    setBusy("Loading book");
+    fetch(`/api/studio/pitch-books/${bookId}`, { headers: authHeaders() })
+      .then(async res => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Could not load pitch book");
+        return data.book as PitchBookRecord;
+      })
+      .then(next => { if (alive) setBook(next); })
+      .catch(err => { if (alive) setError(err.message); })
+      .finally(() => { if (alive) setBusy(null); });
+    return () => { alive = false; };
+  }, [bookId, output.id, story, tab.title, user]);
 
   useEffect(() => {
     writeStudioDraft({
-      id: draftId,
-      title: draftTitle,
+      id: tab.studioDraftId ?? tab.id,
+      title: tab.title,
       format: output.id,
-      campaign,
+      campaign: tab.studioCampaign ?? "Pitch Book Studio",
       updatedAt: new Date().toISOString(),
       story,
-      layout,
-      texture,
-      cta,
+      studioBookId: bookId,
     });
-  }, [campaign, cta, draftId, draftTitle, layout, output.id, story, texture]);
+  }, [bookId, output.id, story, tab.id, tab.studioCampaign, tab.studioDraftId, tab.title]);
+
+  const current = book ?? localBook(output.id, tab.title, story);
+  const warningCount = bookWarningCount(current);
+
+  const revise = async () => {
+    if (!user || !bookId) {
+      onAskYulia(`${output.prompt} Use this revision brief: ${story || "Ask me for the missing source-grounded story."}`);
+      return;
+    }
+    setBusy("Revising");
+    setError(null);
+    try {
+      const res = await fetch(`/api/studio/pitch-books/${bookId}/revise`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+        body: JSON.stringify({ instruction: story || "Improve narrative and flag source gaps." }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Revision failed");
+      setBook(data.book);
+      onBookUpdated(data.book);
+    } catch (err: any) {
+      setError(err.message || "Revision failed");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const refresh = async () => {
+    if (!user || !bookId) {
+      onAskYulia("Refresh this local Studio draft against the V19 model stack once the server book is saved.");
+      return;
+    }
+    setBusy("Refreshing models");
+    setError(null);
+    try {
+      const res = await fetch(`/api/studio/pitch-books/${bookId}/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Refresh failed");
+      setBook(data.book);
+      onBookUpdated(data.book);
+    } catch (err: any) {
+      setError(err.message || "Refresh failed");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const exportBook = async (format: "pptx" | "pdf") => {
+    if (!user || !bookId) {
+      onAskYulia(`Prepare this ${output.title} for ${format.toUpperCase()} export once it is saved to Studio.`);
+      return;
+    }
+    setBusy(`Exporting ${format.toUpperCase()}`);
+    setError(null);
+    try {
+      const res = await fetch(`/api/studio/pitch-books/${bookId}/export/${format}`, { headers: authHeaders() });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Export failed");
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `${current.title.replace(/[^a-zA-Z0-9_-]+/g, "_")}.${format}`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      setError(err.message || "Export failed");
+    } finally {
+      setBusy(null);
+    }
+  };
 
   return (
     <main style={S.canvasPage}>
       <header style={S.canvasHeader}>
         <div>
-          <div className="mono" style={S.canvasEyebrow}>SCREENSHOT STUDIO</div>
-          <h1 style={S.canvasTitle}>{output.title}</h1>
-          <p style={S.canvasSub}>
-            A screenshot-ready mini-site inside the canvas. Yulia can rewrite the story; you can steer the layout, texture, and CTA.
-          </p>
+          <div style={S.brandRail}><span style={S.brandDot}>Y</span><span>Pitch Book Studio</span></div>
+          <h1 style={S.canvasTitle}>{current.title}</h1>
+          <p style={S.canvasSub}>{output.detail}</p>
         </div>
         <div style={S.canvasActions}>
-          <span className="mono" style={S.canvasSize}>{campaign}</span>
-          <span className="mono" style={S.canvasSize}>{output.dimensions}</span>
-          <button
-            type="button"
-            className="m-btn filled"
-            style={S.askButton}
-            onClick={() => onAskYulia(`${output.prompt} Use this brief: "${story || "I will provide the story next."}" Layout direction: ${layout}. Texture direction: ${textureLabel}. CTA: "${cta}". Fill the open Marketing Studio canvas with section-by-section copy. Keep each section screenshot-ready and do not make the page scroll internally.`)}
-          >
-            Brief Yulia
-          </button>
+          <span style={warningCount ? S.warnPill : S.cleanPill}>{warningCount ? `${warningCount} source gaps` : "source clean"}</span>
+          <button className="m-btn tonal" style={S.smallButton} onClick={() => void refresh()} disabled={!!busy}>Refresh models</button>
+          <button className="m-btn tonal" style={S.smallButton} onClick={() => void exportBook("pdf")} disabled={!!busy}>PDF</button>
+          <button className="m-btn filled" style={S.smallButton} onClick={() => void exportBook("pptx")} disabled={!!busy}>PowerPoint</button>
         </div>
       </header>
 
-      <div className="studio-workspace" style={S.studioWorkspace}>
-        <aside className="studio-rail" style={S.studioRail}>
-          <section style={S.studioControls}>
-            <div>
-              <div className="mono" style={S.eyebrow}>CONTENT BRIEF</div>
-              <strong style={S.briefTitle}>Give Yulia the story; steer the artifact here.</strong>
-              <p style={S.briefCopy}>
-                Best inputs: audience, claim, proof points, CTA, and whether the tone should feel like a founder note, institutional memo, product launch, or market insight.
-              </p>
-            </div>
-            <label style={S.briefField}>
-              <span className="mono" style={S.fieldLabel}>STORY / CONTEXT</span>
-              <textarea
-                value={story}
-                onChange={(event) => setStory(event.target.value)}
-                placeholder="Paste the argument, post idea, rough notes, or customer story here..."
-                style={S.storyInput}
-              />
-            </label>
-            <div style={S.controlGrid}>
-              <div>
-                <div className="mono" style={S.fieldLabel}>LAYOUT</div>
-                <div style={S.optionGrid}>
-                  {LAYOUTS.map(item => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      className="m-state"
-                      style={{ ...S.optionButton, ...(layout === item.id ? S.optionButtonActive : null) }}
-                      onClick={() => setLayout(item.id)}
-                    >
-                      <strong>{item.label}</strong>
-                      <span>{item.detail}</span>
-                    </button>
-                  ))}
+      <div style={S.workbench}>
+        <section style={S.slideStage}>
+          <div style={S.deckFrame}>
+            {current.slides.map((slide, index) => (
+              <article key={slide.id} style={S.slideCard}>
+                <div style={S.slideTop}>
+                  <span style={S.slideNumber}>{String(index + 1).padStart(2, "0")}</span>
+                  <span style={slide.warningState === "clean" ? S.cleanPill : S.warnPill}>
+                    {slide.warningState === "clean" ? "grounded" : slide.warningState.replace("_", " ")}
+                  </span>
                 </div>
-              </div>
-              <div>
-                <div className="mono" style={S.fieldLabel}>TEXTURE</div>
-                <div style={S.textureRow}>
-                  {TEXTURES.map(item => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      className="m-state"
-                      style={{
-                        ...S.textureButton,
-                        ...textureChipStyle(item.id, texture === item.id),
-                      }}
-                      onClick={() => setTexture(item.id)}
-                    >
-                      <span aria-hidden="true" style={textureSwatchStyle(item.id)} />
-                      {item.label}
-                    </button>
-                  ))}
+                <h2 style={S.slideTitle}>{slide.title}</h2>
+                <p style={S.slideBody}>{slide.body}</p>
+                <div style={S.bulletGrid}>
+                  {slide.bullets.map(point => <span key={point}>{point}</span>)}
                 </div>
-                <label style={{ ...S.briefField, marginTop: 12 }}>
-                  <span className="mono" style={S.fieldLabel}>CTA</span>
-                  <input
-                    value={cta}
-                    onChange={(event) => setCta(event.target.value)}
-                    placeholder="Start with Yulia"
-                    style={S.ctaInput}
-                  />
-                </label>
-              </div>
-            </div>
-            <button
-              type="button"
-              className="m-btn tonal"
-              style={S.structureButton}
-              onClick={() => onAskYulia(`I want to make a ${output.title}. Ask me for the missing story inputs, then write the section copy for this canvas page by page. Layout: ${layout}. Texture: ${textureLabel}. CTA: ${cta}.`)}
-            >
-              Ask for structure
+                <div style={S.provenanceStrip}>
+                  <span>{slide.provenance.factsUsed.length} facts</span>
+                  <span>{slide.provenance.modelOutputsUsed.length} models</span>
+                  <span>{slide.provenance.citationsUsed.length} cites</span>
+                  <span>{slide.provenance.uncheckedClaims.length} unchecked</span>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <aside style={S.toolRail}>
+          <section style={S.railSection}>
+            <strong style={S.railTitle}>Yulia instruction</strong>
+            <textarea
+              value={story}
+              onChange={(event) => setStory(event.target.value)}
+              placeholder="Tell Yulia what to change: audience, tone, missing proof, or the decision the book needs to support."
+              style={S.storyInput}
+            />
+            <button className="m-btn filled" style={S.fullButton} onClick={() => void revise()} disabled={!!busy}>
+              {busy === "Revising" ? "Revising..." : "Revise book"}
+            </button>
+            <button className="m-btn tonal" style={S.fullButton} onClick={() => onAskYulia(`${output.prompt} Review this open Studio book and tell me the three highest-impact improvements before export.`)}>
+              Ask Yulia
             </button>
           </section>
-        </aside>
 
-        <div style={S.artboardStack}>
-          {pages.map((page, index) => (
-            <article
-              key={`${output.id}-${index}`}
-              style={{
-                ...S.artboard,
-                ...(isArticle ? S.articleBoard : null),
-                aspectRatio: `${output.width} / ${output.height}`,
-                backgroundImage: studioTextureBackground(texture, page.background),
-              }}
-            >
-              <div style={S.artboardShade} />
-              <div style={S.artboardContent}>
-                <div style={S.artboardTop}>
-                  <span className="mono" style={S.artboardEyebrow}>{page.eyebrow}</span>
-                  <span className="mono" style={S.pageCount}>{String(index + 1).padStart(2, "0")} / {String(pages.length).padStart(2, "0")}</span>
-                </div>
-                <div style={S.artboardMain}>
-                  <h2 style={S.artboardTitle}>{page.title}</h2>
-                  <p style={S.artboardText}>{page.text}</p>
-                </div>
-                {renderStudioPageBody(page.points, layout)}
-                {(index === pages.length - 1 || output.id === "one-pager") && (
-                  <div style={S.artboardCta}>
-                    <span style={S.ctaBadge}>Y</span>
-                    <span>
-                      <strong>{cta}</strong>
-                      <small>Yulia turns the story into the next asset.</small>
-                    </span>
-                    <span style={S.ctaButton}>Open</span>
-                  </div>
-                )}
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    </main>
-  );
-}
-
-function StudioCollection({
-  title,
-  sub,
-  drafts,
-  onStart,
-  onOpenDraft,
-  onDeleteDraft,
-  onAskYulia,
-}: {
-  title: string;
-  sub: string;
-  drafts: SavedStudioDraft[];
-  onStart: (output: StudioOutput) => void;
-  onOpenDraft: (draft: SavedStudioDraft) => void;
-  onDeleteDraft: (draftId: string) => void;
-  onAskYulia: (prompt: string) => void;
-}) {
-  return (
-    <main className="m-fade-up" style={S.collectionPage}>
-      <section style={S.collectionHero}>
-        <div style={S.collectionWash} />
-        <div style={S.collectionHeroInner}>
-          <div className="mono" style={S.heroEyebrow}>CAMPAIGN WORKSPACE</div>
-          <h1 style={S.collectionTitle}>{title}</h1>
-          <p style={S.collectionCopy}>{sub}</p>
-          <button
-            type="button"
-            className="m-btn"
-            style={S.heroPrimary}
-            onClick={() => onAskYulia(`For the "${title}" campaign, help me choose the strongest marketing asset format. Ask for the audience, claim, proof, and CTA before drafting.`)}
-          >
-            Plan with Yulia
-          </button>
-        </div>
-      </section>
-
-      <section style={S.collectionGrid}>
-        <div className="m-card" style={S.collectionPanel}>
-          <div className="mono" style={S.eyebrow}>CREATE</div>
-          <h2 style={S.sectionTitle}>Start an asset</h2>
-          <div style={S.outputStack}>
-            {OUTPUTS.map(output => (
-              <button
-                key={output.id}
-                type="button"
-                className="m-state"
-                style={S.outputRow}
-                onClick={() => onStart(output)}
-              >
-                <span style={{ minWidth: 0 }}>
-                  <strong style={S.rowTitle}>{output.title}</strong>
-                  <span style={S.rowDetail}>{output.detail}</span>
-                </span>
-                <span className="mono" style={S.sizePill}>{output.size}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="m-card" style={S.collectionPanel}>
-          <div className="mono" style={S.eyebrow}>DRAFTS</div>
-          <h2 style={S.sectionTitle}>In this campaign</h2>
-          <div style={S.folderStack}>
-            {(drafts.length ? drafts : [
-              { id: "empty", title: "No saved assets in this campaign yet", format: "one-pager" as const, campaign: "Start an asset, then save the tab.", updatedAt: "" },
-            ]).map(draft => (
-              <div key={draft.id} style={S.folderRow}>
-                <button
-                  type="button"
-                  className="m-state"
-                  style={S.rowOpenArea}
-                  onClick={() => draft.id !== "empty" && onOpenDraft(draft)}
-                >
-                  <span>
-                    <strong style={S.rowTitle}>{draft.title}</strong>
-                    <span style={S.rowDetail}>{draft.campaign}</span>
+          <section style={S.railSection}>
+            <strong style={S.railTitle}>Source tray</strong>
+            <div style={S.sourceStack}>
+              {current.sources.map(source => (
+                <div key={`${source.sourceType}-${source.id ?? source.label}`} style={S.sourceCard}>
+                  <span style={source.status === "linked" ? S.cleanDot : S.warnDot} />
+                  <span style={S.sourceText}>
+                    <strong>{source.label}</strong>
+                    <small>{source.sourceType}{source.citationTag ? ` / ${source.citationTag}` : ""}</small>
                   </span>
-                </button>
-                <span style={S.rowActions}>
-                  <span className="mono" style={S.sizePill}>{draft.format}</span>
-                  {draft.id !== "empty" && (
-                    <button
-                      type="button"
-                      className="m-state"
-                      style={S.deleteButton}
-                      onClick={() => onDeleteDraft(draft.id)}
-                    >
-                      Delete
-                    </button>
-                  )}
-                </span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section style={S.railSection}>
+            <strong style={S.railTitle}>Assumptions</strong>
+            {current.assumptions.map(item => (
+              <div key={String(item.key)} style={S.assumptionRow}>
+                <span>{String(item.label || item.key)}</span>
+                <strong>{String(item.value ?? "-")}</strong>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
+          </section>
+          <section style={S.railSection}>
+            <strong style={S.railTitle}>Model outputs</strong>
+            {current.modelOutputs.map(item => (
+              <div key={String(item.modelId)} style={S.modelRow}>
+                <strong>{String(item.modelId)}</strong>
+                <span>{String(item.status || "not_run")}</span>
+              </div>
+            ))}
+          </section>
+          <section style={S.railSection}>
+            <strong style={S.railTitle}>Audit</strong>
+            <p style={S.auditCopy}>
+              Version {current.version}. Exports write an output hash and include source and audit appendices.
+            </p>
+            {error && <p style={S.errorText}>{error}</p>}
+            {busy && <p style={S.busyText}>{busy}...</p>}
+          </section>
+        </aside>
+      </div>
     </main>
   );
 }
 
-function renderStudioPageBody(points: string[], layout: StudioLayoutId) {
-  if (layout === "proof-cards") {
-    return (
-      <div style={S.proofGrid}>
-        {points.map((point, pointIndex) => (
-          <div key={point} style={S.proofCard}>
-            <span className="mono" style={S.proofNumber}>{String(pointIndex + 1).padStart(2, "0")}</span>
-            <strong>{point}</strong>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (layout === "white-brief") {
-    return (
-      <div style={S.whiteBrief}>
-        {points.map((point, pointIndex) => (
-          <div key={point} style={S.whiteBriefLine}>
-            <span style={S.whiteBriefNumber}>{pointIndex + 1}</span>
-            <strong>{point}</strong>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  return (
-    <div style={S.artboardGlass}>
-      {points.map((point, pointIndex) => (
-        <div key={point} style={S.glassLine}>
-          <span style={S.glassNumber}>{pointIndex + 1}</span>
-          <strong>{point}</strong>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function studioTextureBackground(texture: StudioTextureId, fallback: string): string {
-  const wash = "linear-gradient(135deg, rgba(10,17,29,0.34), rgba(10,17,29,0.08) 46%, rgba(10,17,29,0.54))";
-  const map: Record<Exclude<StudioTextureId, "auto">, string> = {
-    rose: `${wash}, url('${STUDIO_TEXTURES.rose}')`,
-    blue: `${wash}, url('${STUDIO_TEXTURES.blue}')`,
-    green: `${wash}, url('${STUDIO_TEXTURES.green}')`,
-    navy: `${wash}, url('${STUDIO_TEXTURES.navy}')`,
-  };
-  return texture === "auto" ? fallback : map[texture];
-}
-
-function texturePreviewBackground(texture: StudioTextureId): string {
-  const wash = "linear-gradient(90deg, rgba(12,18,31,0.20), rgba(12,18,31,0.03) 48%, rgba(12,18,31,0.30))";
-  const map: Record<StudioTextureId, string> = {
-    auto: `linear-gradient(135deg, rgba(214,163,92,0.42), rgba(106,155,204,0.26) 46%, rgba(74,140,111,0.34)), url('${DESKTOP_TEXTURES.todaySecondary}')`,
-    rose: `${wash}, url('${STUDIO_TEXTURES.rose}')`,
-    blue: `${wash}, url('${STUDIO_TEXTURES.blue}')`,
-    green: `${wash}, url('${STUDIO_TEXTURES.green}')`,
-    navy: `${wash}, url('${STUDIO_TEXTURES.navy}')`,
-  };
-  return map[texture];
-}
-
-function textureChipStyle(texture: StudioTextureId, active: boolean): CSSProperties {
+function localBook(format: StudioFormatId, title: string, brief = ""): PitchBookRecord {
+  const fmt = FORMATS.find(item => item.id === format) ?? FORMATS[0];
+  const slides: StudioSlide[] = ["Decision frame", "Source read", "Model view", "Risks", "Open questions", "Next actions"].map((name, index) => ({
+    id: `local-${format}-${index}`,
+    title: index === 0 ? fmt.title : name,
+    body: index === 0 ? (brief || fmt.detail) : "Save this book to Studio to attach deal files, model outputs, and audit metadata.",
+    bullets: index === 0
+      ? ["Source-grounded story", "Model-linked outputs", "Exportable audit trail"]
+      : ["Add source", "Refresh model", "Review with Yulia"],
+    speakerNotes: "Local draft. Save to Studio for persistence and export tracking.",
+    provenance: {
+      factsUsed: [],
+      modelOutputsUsed: [],
+      citationsUsed: [],
+      uncheckedClaims: ["Local draft is not source-grounded."],
+    },
+    warningState: "needs_sources",
+  }));
   return {
-    backgroundImage: texturePreviewBackground(texture),
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    color: "#FFFFFF",
-    borderColor: active ? "rgba(255,255,255,0.80)" : "rgba(255,255,255,0.34)",
-    boxShadow: active
-      ? "0 16px 36px rgba(35,55,78,0.22), inset 0 1px 0 rgba(255,255,255,0.48)"
-      : "0 10px 22px rgba(35,55,78,0.10), inset 0 1px 0 rgba(255,255,255,0.24)",
-    opacity: active ? 1 : 0.94,
+    id: Math.abs(hashCode(`${format}-${title}`)),
+    dealId: null,
+    title,
+    format,
+    status: "draft",
+    brief,
+    versionId: null,
+    version: 1,
+    outline: slides.map(slide => slide.title),
+    slides,
+    assumptions: [
+      { key: "format", label: "Format", value: fmt.title },
+      { key: "state", label: "State", value: "Local draft" },
+    ],
+    modelOutputs: [{ modelId: "MODEL.V19.RUNTIME", status: "not_saved" }],
+    provenance: {},
+    audit: {},
+    sources: [
+      { sourceType: "studio_template", label: fmt.title, status: "linked" },
+      { sourceType: "deal_files", label: "Deal files not linked", status: "missing" },
+    ],
+    updatedAt: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
   };
 }
 
-function textureSwatchStyle(texture: StudioTextureId): CSSProperties {
-  return {
-    width: 18,
-    height: 18,
-    borderRadius: 7,
-    flexShrink: 0,
-    backgroundImage: texturePreviewBackground(texture),
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    border: "1px solid rgba(255,255,255,0.46)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.36)",
-  };
+function bookWarningCount(book: PitchBookRecord): number {
+  return book.slides.filter(slide => slide.warningState !== "clean").length;
 }
 
-function slugify(value: string): string {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "draft";
+function formatLabel(value: StudioFormatId): string {
+  return FORMATS.find(item => item.id === value)?.title ?? value.replace(/-/g, " ");
 }
 
-function isStudioLayout(value: unknown): value is StudioLayoutId {
-  return value === "liquid-list" || value === "proof-cards" || value === "white-brief";
+function formatInitial(value: StudioFormatId): string {
+  return formatLabel(value).split(/\s+/).map(part => part[0]).slice(0, 2).join("");
 }
 
-function isStudioTexture(value: unknown): value is StudioTextureId {
-  return value === "auto" || value === "rose" || value === "blue" || value === "green" || value === "navy";
+function hashCode(value: string): number {
+  return value.split("").reduce((hash, char) => ((hash << 5) - hash + char.charCodeAt(0)) | 0, 0);
 }
 
 function isStudioFormat(value: unknown): value is StudioFormatId {
-  return value === "one-pager" || value === "carousel" || value === "article";
-}
-
-function studioPages(output: StudioOutput) {
-  const onePager = [
-    {
-      eyebrow: "SMBX.AI POSITIONING",
-      title: "Better decisions. Less friction. Faster execution.",
-      text: "Connect sourcing, diligence, execution, and value creation in one workflow.",
-      points: ["Institutional deal intelligence", "Workflow execution", "Continuous transaction context"],
-      background: `linear-gradient(135deg, rgba(30,43,64,0.48), rgba(85,60,64,0.28)), url('${DESKTOP_TEXTURES.todayHeroSample}')`,
-    },
-  ];
-
-  const carousel = [
-    {
-      eyebrow: "THE PROBLEM",
-      title: "M&A work breaks when context lives in too many places.",
-      text: "The chat knows one thing, the file room another, and the memo is already stale.",
-      points: ["Sourcing notes drift", "Diligence findings disappear", "Execution loses the thread"],
-      background: `linear-gradient(135deg, rgba(16,38,54,0.46), rgba(8,20,34,0.28)), url('${DESKTOP_TEXTURES.searchHero}')`,
-    },
-    {
-      eyebrow: "THE SHIFT",
-      title: "The interface should follow the deal, not the software menu.",
-      text: "Yulia turns the conversation into surfaces only when the work requires it.",
-      points: ["Chat first", "Canvas when needed", "Files when evidence matters"],
-      background: `linear-gradient(135deg, rgba(21,40,54,0.58), rgba(10,20,34,0.38)), url('${ART_HOUSE_TEXTURES.studioCollection}')`,
-    },
-    {
-      eyebrow: "THE WORKFLOW",
-      title: "Sourcing, diligence, execution, and value creation stay connected.",
-      text: "The same transaction context moves from first thesis to post-close work.",
-      points: ["Market intelligence", "Deal analysis", "Action contracts"],
-      background: `linear-gradient(135deg, rgba(53,42,77,0.38), rgba(15,28,48,0.34)), url('${DESKTOP_TEXTURES.pipelineHero}')`,
-    },
-    {
-      eyebrow: "THE PROOF",
-      title: "Every recommendation should come from Yulia's read.",
-      text: "Not a static card. Not placeholder advice. A sourced deal or portfolio judgment.",
-      points: ["Evidence trail", "Methodology guardrails", "Human sign-off"],
-      background: `linear-gradient(135deg, rgba(42,65,58,0.44), rgba(88,70,35,0.24)), url('${DESKTOP_TEXTURES.todayMarket}')`,
-    },
-    {
-      eyebrow: "THE OUTPUT",
-      title: "Documents become living artifacts, not one-off downloads.",
-      text: "Drafts, analyses, files, and executed records remain tied to the deal.",
-      points: ["Draft", "Review", "Data room", "Executed"],
-      background: `linear-gradient(135deg, rgba(20,31,50,0.58), rgba(31,49,62,0.32)), url('${ART_HOUSE_TEXTURES.studioCampaign}')`,
-    },
-    {
-      eyebrow: "THE POSITION",
-      title: "smbX.ai is the execution layer for institutional M&A.",
-      text: "A deal desk where Yulia carries context, analysis, and action forward.",
-      points: ["Fewer handoffs", "Cleaner decisions", "Faster execution"],
-      background: `linear-gradient(135deg, rgba(27,52,78,0.38), rgba(52,74,67,0.30)), url('${DESKTOP_TEXTURES.filesDeals}')`,
-    },
-    {
-      eyebrow: "THE ASK",
-      title: "Bring the deal. Yulia will build the workflow around it.",
-      text: "From a sentence, a file, or a source list, the system creates the right next surface.",
-      points: ["Start with chat", "Open the canvas", "Move the deal"],
-      background: `linear-gradient(135deg, rgba(58,42,34,0.42), rgba(22,31,48,0.36)), url('${ART_HOUSE_TEXTURES.studioCollateral}')`,
-    },
-  ];
-
-  const article = [
-    {
-      eyebrow: "ARTICLE COVER",
-      title: "Why M&A software has to become an execution layer.",
-      text: "The next useful product is not a prettier dashboard. It is a system that remembers the deal and moves work forward.",
-      points: ["Context", "Evidence", "Execution"],
-      background: `linear-gradient(135deg, rgba(18,35,52,0.46), rgba(50,72,68,0.28)), url('${DESKTOP_TEXTURES.learnHero}')`,
-    },
-    {
-      eyebrow: "ARGUMENT",
-      title: "The memo, model, and data room should not be separate planets.",
-      text: "Yulia should know what changed in the model, what evidence supports it, and which document or action it affects.",
-      points: ["Live analysis", "Scenario versions", "Document lifecycle"],
-      background: `linear-gradient(135deg, rgba(32,45,64,0.54), rgba(22,31,48,0.34)), url('${ART_HOUSE_TEXTURES.studioCollection}')`,
-    },
-    {
-      eyebrow: "CLOSE",
-      title: "The best M&A tool feels less like software and more like process ownership.",
-      text: "The user understands the deal. Yulia handles the software, analysis, generation, and next-action coordination.",
-      points: ["Advisor-like process", "User-owned decisions", "Institutional quality"],
-      background: `linear-gradient(135deg, rgba(28,45,56,0.56), rgba(42,40,68,0.34)), url('${ART_HOUSE_TEXTURES.studioCollateral}')`,
-    },
-  ];
-
-  if (output.id === "carousel") return carousel;
-  if (output.id === "article") return article;
-  return onePager;
-}
-
-function readSavedStudioDrafts(): SavedStudioDraft[] {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(DRAFT_STORAGE_KEY) || "[]");
-    if (!Array.isArray(parsed)) return [];
-    return parsed
-      .filter((draft): draft is Record<string, unknown> => Boolean(draft && typeof draft === "object"))
-      .map((draft) => {
-        const format: StudioFormatId = isStudioFormat(draft.format) ? draft.format : "one-pager";
-        return {
-          id: typeof draft.id === "string" ? draft.id : `studio-draft-${Date.now().toString(36)}`,
-          title: typeof draft.title === "string" ? draft.title : "Untitled Studio draft",
-          format,
-          campaign: typeof draft.campaign === "string" ? draft.campaign : "General",
-          updatedAt: typeof draft.updatedAt === "string" ? draft.updatedAt : "",
-          status: (draft.status === "completed" ? "completed" : "draft") as "draft" | "completed",
-          story: typeof draft.story === "string" ? draft.story : undefined,
-          layout: isStudioLayout(draft.layout) ? draft.layout : undefined,
-          texture: isStudioTexture(draft.texture) ? draft.texture : undefined,
-          cta: typeof draft.cta === "string" ? draft.cta : undefined,
-        };
-      })
-      .slice(0, 24);
-  } catch {
-    return [];
-  }
+  return typeof value === "string" && FORMATS.some(format => format.id === value);
 }
 
 function readStudioDraft(id: string): SavedStudioDraft | undefined {
   const working = readWorkingStudioDrafts()[id];
   if (working) return working;
-  return readSavedStudioDrafts().find(draft => draft.id === id);
+  try {
+    const parsed = JSON.parse(localStorage.getItem(DRAFT_STORAGE_KEY) || "[]");
+    if (!Array.isArray(parsed)) return undefined;
+    const draft = parsed.find((item: any) => item?.id === id);
+    if (!draft) return undefined;
+    return {
+      id: typeof draft.id === "string" ? draft.id : id,
+      title: typeof draft.title === "string" ? draft.title : "Pitch Book Studio draft",
+      format: isStudioFormat(draft.format) ? draft.format : "buyer-pitch-book",
+      campaign: typeof draft.campaign === "string" ? draft.campaign : "Pitch Book Studio",
+      updatedAt: typeof draft.updatedAt === "string" ? draft.updatedAt : "",
+      story: typeof draft.story === "string" ? draft.story : "",
+      status: draft.status === "completed" ? "completed" : "draft",
+      studioBookId: typeof draft.studioBookId === "number" ? draft.studioBookId : null,
+    };
+  } catch {
+    return undefined;
+  }
 }
 
 function writeStudioDraft(draft: SavedStudioDraft) {
@@ -1075,19 +722,7 @@ function writeStudioDraft(draft: SavedStudioDraft) {
     store[draft.id] = draft;
     (window as unknown as Record<string, Record<string, SavedStudioDraft>>)[WORKING_DRAFTS_KEY] = store;
   } catch {
-    // Session draft caching is best effort; the canvas still remains editable.
-  }
-}
-
-function deleteStudioDraft(id: string) {
-  try {
-    const drafts = readSavedStudioDrafts();
-    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(drafts.filter(draft => draft.id !== id)));
-    const working = readWorkingStudioDrafts();
-    delete working[id];
-    (window as unknown as Record<string, Record<string, SavedStudioDraft>>)[WORKING_DRAFTS_KEY] = working;
-  } catch {
-    // Best-effort local cleanup.
+    // Local draft cache is best effort.
   }
 }
 
@@ -1099,828 +734,362 @@ function readWorkingStudioDrafts(): Record<string, SavedStudioDraft> {
   return win[WORKING_DRAFTS_KEY] ?? {};
 }
 
-function readStudioCampaigns(): StudioCampaign[] {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(CAMPAIGN_STORAGE_KEY) || "[]");
-    if (!Array.isArray(parsed) || parsed.length === 0) return DEFAULT_CAMPAIGNS;
-    const campaigns = parsed
-      .filter((campaign): campaign is Record<string, unknown> => Boolean(campaign && typeof campaign === "object"))
-      .map((campaign) => ({
-        id: typeof campaign.id === "string" ? campaign.id : `campaign-${Date.now().toString(36)}`,
-        title: typeof campaign.title === "string" ? campaign.title : "Untitled campaign",
-        sub: typeof campaign.sub === "string" ? campaign.sub : "Campaign workspace.",
-        count: typeof campaign.count === "number" ? campaign.count : 0,
-        createdAt: typeof campaign.createdAt === "string" ? campaign.createdAt : new Date().toISOString(),
-        deal: typeof campaign.deal === "string" ? campaign.deal : undefined,
-      }));
-    return campaigns.length ? campaigns : DEFAULT_CAMPAIGNS;
-  } catch {
-    return DEFAULT_CAMPAIGNS;
-  }
-}
-
-function writeStudioCampaigns(campaigns: StudioCampaign[]) {
-  try {
-    localStorage.setItem(CAMPAIGN_STORAGE_KEY, JSON.stringify(campaigns));
-  } catch {
-    // Local campaign storage is best effort until Studio has a backend table.
-  }
-}
-
 const S: Record<string, CSSProperties> = {
   page: {
-    width: "min(100%, 1440px)",
-    maxWidth: 1440,
+    width: "min(1440px, calc(100% - 32px))",
     margin: "0 auto",
-    boxSizing: "border-box",
-    paddingBottom: 72,
-  },
-  collectionPage: {
-    width: "min(100%, 1440px)",
-    maxWidth: 1440,
-    margin: "0 auto",
-    boxSizing: "border-box",
-    paddingBottom: 72,
-  },
-  collectionHero: {
-    position: "relative",
-    minHeight: 360,
-    overflow: "hidden",
-    borderRadius: 30,
-    border: "1px solid rgba(255,255,255,0.54)",
-    backgroundImage: `url('${DESKTOP_TEXTURES.searchHero}')`,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    boxShadow: "0 34px 88px rgba(35,55,78,0.22), 0 12px 26px rgba(35,55,78,0.12)",
-    color: "rgba(255,255,255,0.98)",
-  },
-  collectionWash: {
-    position: "absolute",
-    inset: 0,
-    background: "linear-gradient(115deg, rgba(12,22,38,0.60) 0%, rgba(37,76,88,0.24) 50%, rgba(11,18,31,0.56) 100%)",
-  },
-  collectionHeroInner: {
-    position: "relative",
-    zIndex: 1,
-    maxWidth: 780,
-    padding: "50px 56px",
-  },
-  collectionTitle: {
-    margin: "16px 0 14px",
-    fontFamily: "var(--font-display)",
-    fontSize: "clamp(54px, 5.8vw, 84px)",
-    lineHeight: 0.92,
-    letterSpacing: "-0.055em",
-    color: "rgba(255,255,255,0.98)",
-    textWrap: "balance",
-  },
-  collectionCopy: {
-    margin: "0 0 28px",
-    maxWidth: 680,
-    fontSize: 18,
-    lineHeight: 1.45,
-    color: "rgba(255,255,255,0.86)",
-  },
-  collectionGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-    gap: 22,
-    marginTop: 26,
-  },
-  collectionPanel: {
-    padding: 28,
-    minHeight: 330,
-  },
-  lockedWrap: {
-    minHeight: "58vh",
-    display: "grid",
-    placeItems: "center",
-  },
-  lockedCard: {
-    maxWidth: 520,
-    padding: 30,
-  },
-  lockedTitle: {
-    margin: "8px 0 10px",
-    fontFamily: "var(--font-display)",
-    fontSize: 34,
-    lineHeight: 1,
-    letterSpacing: "-0.035em",
-    color: "var(--m-on-surface)",
-  },
-  lockedCopy: {
-    margin: 0,
-    color: "var(--m-on-surface-mid)",
-    fontSize: 14,
-    lineHeight: 1.55,
+    padding: "28px 0 72px",
+    color: "#172033",
   },
   hero: {
-    position: "relative",
     minHeight: 430,
+    borderRadius: 28,
+    position: "relative",
     overflow: "hidden",
-    borderRadius: 30,
-    border: "1px solid rgba(255,255,255,0.54)",
-    backgroundImage: `url('${DESKTOP_TEXTURES.todayHeroSample}')`,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    boxShadow: "0 36px 96px rgba(35,55,78,0.24), 0 12px 28px rgba(35,55,78,0.14)",
-    color: "rgba(255,255,255,0.98)",
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1.1fr) 420px",
+    gap: 24,
+    padding: 28,
+    background: "linear-gradient(135deg, rgba(238,245,255,.94), rgba(250,252,255,.84))",
+    border: "1px solid rgba(153,176,209,.52)",
+    boxShadow: "0 24px 70px rgba(42,65,96,.16), inset 0 1px 0 rgba(255,255,255,.9)",
   },
-  heroWash: {
+  heroTexture: {
     position: "absolute",
     inset: 0,
-    background: "linear-gradient(115deg, rgba(26,34,51,0.46) 0%, rgba(114,67,70,0.18) 48%, rgba(13,21,36,0.46) 100%)",
+    backgroundImage: `linear-gradient(90deg, rgba(255,255,255,.84), rgba(255,255,255,.18) 56%, rgba(21,36,58,.12)), url('${DESKTOP_TEXTURES.todayHeroSample}')`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    opacity: 0.9,
   },
-  heroInner: {
-    position: "relative",
-    zIndex: 1,
-    maxWidth: 760,
-    padding: "54px 58px",
+  heroInner: { position: "relative", zIndex: 1, alignSelf: "end", maxWidth: 820 },
+  brandRail: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 10,
+    padding: "8px 12px",
+    borderRadius: 999,
+    background: "rgba(255,255,255,.68)",
+    border: "1px solid rgba(143,166,199,.42)",
+    fontWeight: 800,
+    color: "#2E5C8A",
   },
-  heroEyebrow: {
-    fontSize: 10,
-    letterSpacing: "0.22em",
-    fontWeight: 700,
-    color: "rgba(255,255,255,0.82)",
+  brandDot: {
+    width: 28,
+    height: 28,
+    borderRadius: 10,
+    display: "inline-grid",
+    placeItems: "center",
+    color: "#fff",
+    background: "linear-gradient(135deg, #8A9AE8, #2E5C8A)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,.45)",
   },
   heroTitle: {
-    margin: "18px 0 18px",
-    fontFamily: "var(--font-display)",
-    fontSize: "clamp(56px, 6vw, 88px)",
-    lineHeight: 0.9,
-    letterSpacing: "-0.05em",
-    color: "rgba(255,255,255,0.98)",
-    textWrap: "balance",
+    margin: "28px 0 16px",
+    maxWidth: 700,
+    fontSize: "clamp(42px, 4.8vw, 70px)",
+    lineHeight: 0.94,
+    letterSpacing: 0,
   },
   heroCopy: {
+    maxWidth: 690,
     margin: 0,
-    maxWidth: 650,
-    fontSize: 18,
-    lineHeight: 1.45,
-    color: "rgba(255,255,255,0.86)",
-  },
-  heroActions: {
-    display: "flex",
-    gap: 12,
-    flexWrap: "wrap",
-    marginTop: 34,
-  },
-  heroPrimary: {
-    minHeight: 42,
-    padding: "0 18px",
-    color: "#1A2233",
-    background: "rgba(255,255,255,0.86)",
-    borderColor: "rgba(255,255,255,0.56)",
-  },
-  heroGlass: {
-    minHeight: 42,
-    padding: "0 18px",
-    color: "rgba(255,255,255,0.96)",
-    background: "rgba(255,255,255,0.14)",
-    borderColor: "rgba(255,255,255,0.32)",
-    backdropFilter: "blur(18px) saturate(1.25)",
-  },
-  contentGrid: {
-    display: "grid",
-    gridTemplateColumns: "minmax(0, 0.95fr) minmax(420px, 1.05fr)",
-    gap: 22,
-    marginTop: 26,
-  },
-  panel: {
-    padding: 28,
-    minHeight: 330,
-  },
-  eyebrow: {
-    fontSize: 10,
-    letterSpacing: "0.18em",
-    fontWeight: 700,
-    color: "var(--m-primary)",
-  },
-  sectionTitle: {
-    margin: "8px 0 20px",
-    fontFamily: "var(--font-display)",
-    fontSize: 32,
-    lineHeight: 1,
-    letterSpacing: "-0.035em",
-    color: "var(--m-on-surface)",
-  },
-  sectionCopy: {
-    margin: "-10px 0 22px",
-    maxWidth: 720,
-    color: "var(--m-on-surface-mid)",
-    fontSize: 14,
-    lineHeight: 1.5,
-  },
-  activeCampaignField: {
-    display: "grid",
-    gap: 8,
-    marginBottom: 14,
-  },
-  selectInput: {
-    width: "100%",
-    minHeight: 44,
-    borderRadius: 16,
-    border: "1px solid rgba(207,221,236,0.92)",
-    background: "linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,251,255,0.92))",
-    color: "var(--m-on-surface)",
-    padding: "0 12px",
-    font: "inherit",
-    fontSize: 13,
-    fontWeight: 750,
-    outline: "none",
-  },
-  outputStack: {
-    display: "grid",
-    gap: 10,
-  },
-  outputRow: {
-    width: "100%",
-    border: "1px solid var(--m-outline-var)",
-    borderRadius: 18,
-    padding: "16px 18px",
-    background: "rgba(250,252,254,0.88)",
-    display: "flex",
-    gap: 16,
-    justifyContent: "space-between",
-    alignItems: "center",
-    textAlign: "left",
-    cursor: "pointer",
-  },
-  rowTitle: {
-    display: "block",
-    color: "var(--m-on-surface)",
-    fontSize: 15,
-  },
-  rowDetail: {
-    display: "block",
-    marginTop: 3,
-    color: "var(--m-on-surface-mid)",
-    fontSize: 12.5,
+    color: "#526176",
+    fontSize: 19,
     lineHeight: 1.45,
   },
-  sizePill: {
-    color: "var(--m-on-surface-var)",
-    background: "var(--m-surface-2)",
-    padding: "6px 10px",
-    borderRadius: 999,
-    fontSize: 10,
-    whiteSpace: "nowrap",
-  },
-  previewShell: {
-    padding: 0,
-    overflow: "hidden",
-  },
-  previewCard: {
-    minHeight: 318,
-    padding: 30,
-    backgroundImage: `linear-gradient(135deg, rgba(17,33,54,0.36), rgba(18,31,50,0.72)), url('${ART_HOUSE_TEXTURES.studio}')`,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    color: "white",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "flex-end",
-  },
-  previewEyebrow: {
-    fontSize: 10,
-    letterSpacing: "0.2em",
-    color: "rgba(255,255,255,0.72)",
-    fontWeight: 700,
-  },
-  previewTitle: {
-    margin: "12px 0",
-    maxWidth: 560,
-    fontFamily: "var(--font-display)",
-    fontSize: 46,
-    lineHeight: 0.95,
-    letterSpacing: "-0.045em",
-    color: "rgba(255,255,255,0.98)",
-  },
-  previewCopy: {
-    margin: 0,
-    maxWidth: 520,
-    fontSize: 16,
-    lineHeight: 1.45,
-    color: "rgba(255,255,255,0.82)",
-  },
-  previewFoot: {
-    display: "flex",
-    justifyContent: "space-between",
-    gap: 18,
-    padding: "14px 18px",
-    color: "var(--m-on-surface-mid)",
-    fontSize: 12,
-    borderTop: "1px solid var(--m-outline-var)",
-  },
-  toolPanel: {
-    marginTop: 22,
-    padding: 28,
-  },
-  managementGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-    gap: 22,
-    marginTop: 22,
-  },
-  managementPanel: {
-    padding: 24,
-    minHeight: 318,
-    background: "linear-gradient(145deg, rgba(255,255,255,0.96), rgba(245,249,253,0.88))",
-  },
-  campaignCreate: {
-    display: "grid",
-    gap: 10,
-    margin: "0 0 14px",
-    padding: 12,
-    borderRadius: 20,
-    border: "1px solid rgba(207,221,236,0.72)",
-    background: "linear-gradient(145deg, rgba(234,243,251,0.76), rgba(255,255,255,0.82))",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.76)",
-  },
-  inlineInput: {
-    width: "100%",
-    minHeight: 40,
-    borderRadius: 14,
-    border: "1px solid rgba(207,221,236,0.92)",
-    background: "rgba(255,255,255,0.88)",
-    color: "var(--m-on-surface)",
-    padding: "0 12px",
-    font: "inherit",
-    fontSize: 13,
-    outline: "none",
-    boxSizing: "border-box",
-  },
-  createFooter: {
-    display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) auto",
-    gap: 8,
-    alignItems: "center",
-  },
-  createButton: {
-    minHeight: 40,
-    padding: "0 14px",
-    opacity: 1,
-  },
-  folderStack: {
-    display: "grid",
-    gap: 10,
-  },
-  folderRow: {
-    width: "100%",
-    minHeight: 74,
-    border: "1px solid var(--m-outline-var)",
-    borderRadius: 18,
-    padding: "14px 16px",
-    background: "rgba(255,255,255,0.72)",
-    display: "flex",
-    gap: 14,
-    justifyContent: "space-between",
-    alignItems: "center",
-    textAlign: "left",
-    cursor: "pointer",
-    boxShadow: "0 10px 24px rgba(35,55,78,0.05)",
-  },
-  rowOpenArea: {
-    flex: 1,
-    minWidth: 0,
-    border: 0,
-    padding: 0,
-    background: "transparent",
-    color: "inherit",
-    textAlign: "left",
-    cursor: "pointer",
-  },
-  rowActions: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 8,
-    flexShrink: 0,
-  },
-  deleteButton: {
-    minHeight: 30,
-    borderRadius: 999,
-    border: "1px solid rgba(207,221,236,0.86)",
-    background: "rgba(255,255,255,0.68)",
-    color: "var(--m-on-surface-mid)",
-    padding: "0 10px",
-    fontSize: 11,
-    fontWeight: 800,
-    cursor: "pointer",
-  },
-  toolGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-    gap: 12,
-  },
-  toolCard: {
-    minHeight: 118,
-    border: "1px solid var(--m-outline-var)",
-    borderRadius: 20,
-    padding: 18,
-    background: "linear-gradient(145deg, rgba(255,255,255,0.98), rgba(244,248,252,0.92))",
-    color: "var(--m-on-surface)",
-    fontSize: 15,
-    lineHeight: 1.4,
-    fontWeight: 650,
-    textAlign: "left",
-    cursor: "pointer",
-    display: "grid",
-    alignContent: "start",
-    gap: 8,
-  },
-  toolTitle: {
-    display: "block",
-    color: "var(--m-on-surface)",
-    fontSize: 15.5,
-    lineHeight: 1.15,
-    fontWeight: 800,
-  },
-  toolDetail: {
-    display: "block",
-    color: "var(--m-on-surface-mid)",
-    fontSize: 12.5,
-    lineHeight: 1.4,
-    fontWeight: 550,
-  },
-  toolMeta: {
-    display: "inline-flex",
-    width: "fit-content",
-    marginTop: 4,
-    padding: "5px 8px",
-    borderRadius: 999,
-    color: "var(--m-on-surface-var)",
-    background: "var(--m-surface-2)",
-    fontSize: 9,
-    fontWeight: 850,
-  },
-  canvasPage: {
-    width: "min(1380px, 100%)",
-    margin: "0 auto",
-    paddingBottom: 72,
-  },
-  canvasHeader: {
-    display: "flex",
-    alignItems: "flex-end",
-    justifyContent: "space-between",
-    gap: 24,
-    marginBottom: 22,
-  },
-  canvasEyebrow: {
-    fontSize: 10,
-    letterSpacing: "0.18em",
-    fontWeight: 800,
-    color: "var(--m-primary)",
-  },
-  canvasTitle: {
-    margin: "8px 0 8px",
-    fontFamily: "var(--font-display)",
-    fontSize: "clamp(42px, 4.6vw, 68px)",
-    lineHeight: 0.92,
-    letterSpacing: "-0.055em",
-    color: "var(--m-on-surface)",
-  },
-  canvasSub: {
-    margin: 0,
-    maxWidth: 720,
-    color: "var(--m-on-surface-var)",
-    fontSize: 16,
-    lineHeight: 1.48,
-  },
-  canvasActions: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    flexWrap: "wrap",
-    justifyContent: "flex-end",
-  },
-  canvasSize: {
-    padding: "9px 12px",
-    borderRadius: 999,
-    background: "var(--m-surface-2)",
-    color: "var(--m-on-surface-var)",
-    fontSize: 10,
-    fontWeight: 800,
-  },
-  askButton: {
-    minHeight: 42,
-    padding: "0 18px",
-  },
-  studioWorkspace: {
-    display: "grid",
-    gap: 26,
-    alignItems: "start",
-  },
-  studioRail: {
-    position: "sticky",
-    top: 18,
-    alignSelf: "start",
-    zIndex: 2,
-  },
-  studioControls: {
-    display: "grid",
-    gap: 16,
-    padding: 18,
-    borderRadius: 24,
-    background: "linear-gradient(150deg, rgba(255,255,255,0.92), rgba(244,249,254,0.82))",
-    border: "1px solid var(--m-outline-var)",
-    boxShadow: "0 22px 58px rgba(35,55,78,0.13), inset 0 1px 0 rgba(255,255,255,0.86)",
-    backdropFilter: "blur(18px) saturate(1.14)",
-  },
-  briefField: {
-    display: "grid",
-    gap: 8,
-  },
-  fieldLabel: {
-    color: "var(--m-on-surface-mid)",
-    fontSize: 9.5,
-    letterSpacing: "0.16em",
-    fontWeight: 850,
-  },
-  storyInput: {
-    width: "100%",
-    minHeight: 154,
-    resize: "vertical",
-    borderRadius: 18,
-    padding: "15px 16px",
-    border: "1px solid rgba(207,221,236,0.92)",
-    background: "linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,251,255,0.92))",
-    color: "var(--m-on-surface)",
-    font: "inherit",
-    fontSize: 13.5,
-    lineHeight: 1.48,
-    outline: "none",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.92)",
-  },
-  controlGrid: {
-    display: "grid",
-    gap: 16,
-    alignItems: "start",
-  },
-  optionGrid: {
-    display: "grid",
-    gap: 10,
-    marginTop: 8,
-  },
-  optionButton: {
-    minHeight: 76,
-    borderRadius: 18,
-    border: "1px solid rgba(207,221,236,0.92)",
-    padding: "13px 14px",
-    background: "rgba(255,255,255,0.70)",
-    color: "var(--m-on-surface)",
-    display: "grid",
-    gap: 5,
-    textAlign: "left",
-    cursor: "pointer",
-    boxShadow: "0 10px 24px rgba(35,55,78,0.05)",
-  },
-  optionButtonActive: {
-    color: "#FFFFFF",
-    background: "linear-gradient(135deg, rgba(31,44,69,0.96), rgba(67,85,112,0.92))",
-    borderColor: "rgba(255,255,255,0.34)",
-    boxShadow: "0 18px 42px rgba(31,44,69,0.18), inset 0 1px 0 rgba(255,255,255,0.16)",
-  },
-  textureRow: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: 8,
-    marginTop: 8,
-  },
-  textureButton: {
-    borderRadius: 999,
-    minHeight: 38,
-    padding: "0 12px 0 9px",
-    border: "1px solid rgba(255,255,255,0.34)",
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 8,
-    fontWeight: 850,
-    textShadow: "0 1px 2px rgba(10,17,29,0.32)",
-    cursor: "pointer",
-  },
-  ctaInput: {
-    minHeight: 40,
-    borderRadius: 14,
-    border: "1px solid rgba(207,221,236,0.92)",
-    padding: "0 13px",
-    background: "rgba(255,255,255,0.86)",
-    color: "var(--m-on-surface)",
-    font: "inherit",
-    fontSize: 13.5,
-    outline: "none",
-  },
-  briefTitle: {
-    display: "block",
-    marginTop: 6,
-    color: "var(--m-on-surface)",
-    fontSize: 17,
-    letterSpacing: "-0.02em",
-  },
-  briefCopy: {
-    margin: "6px 0 0",
-    color: "var(--m-on-surface-mid)",
-    fontSize: 13.5,
-    lineHeight: 1.5,
-  },
-  structureButton: {
-    width: "100%",
-    minHeight: 42,
-  },
-  artboardStack: {
-    display: "grid",
-    gap: 26,
-    justifyItems: "center",
-    minWidth: 0,
-  },
-  artboard: {
-    position: "relative",
-    width: "min(860px, 100%)",
-    aspectRatio: "4 / 5",
-    margin: "0 auto",
-    overflow: "hidden",
-    borderRadius: 28,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    border: "1px solid rgba(255,255,255,0.50)",
-    boxShadow: "0 40px 108px rgba(35,55,78,0.26), 0 14px 32px rgba(35,55,78,0.13)",
-    color: "rgba(255,255,255,0.98)",
-  },
-  articleBoard: {
-    aspectRatio: "1.45 / 1",
-    width: "min(1020px, 100%)",
-  },
-  artboardShade: {
-    position: "absolute",
-    inset: 0,
-    background: "linear-gradient(135deg, rgba(9,15,27,0.34), rgba(9,15,27,0.04) 42%, rgba(9,15,27,0.48))",
-  },
-  artboardContent: {
+  heroActions: { display: "flex", gap: 12, flexWrap: "wrap", marginTop: 26 },
+  primaryButton: { minHeight: 44, background: "#1D5C94", color: "#fff" },
+  glassButton: { minHeight: 44, background: "rgba(255,255,255,.72)" },
+  heroPanel: {
     position: "relative",
     zIndex: 1,
-    height: "100%",
-    padding: "clamp(34px, 5.2vw, 58px)",
-    display: "flex",
-    flexDirection: "column",
-  },
-  artboardTop: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: 18,
-  },
-  artboardEyebrow: {
-    color: "rgba(255,255,255,0.78)",
-    fontSize: 10,
-    letterSpacing: "0.22em",
-    fontWeight: 800,
-  },
-  pageCount: {
-    color: "rgba(255,255,255,0.76)",
-    fontSize: 10,
-    letterSpacing: "0.16em",
-    fontWeight: 800,
-  },
-  artboardMain: {
-    marginTop: "auto",
-    maxWidth: 720,
-  },
-  artboardTitle: {
-    margin: 0,
-    fontFamily: "var(--font-display)",
-    fontSize: "clamp(48px, 7vw, 82px)",
-    lineHeight: 0.9,
-    letterSpacing: "-0.058em",
-    color: "rgba(255,255,255,0.99)",
-    textWrap: "balance",
-  },
-  artboardText: {
-    margin: "20px 0 0",
-    maxWidth: 690,
-    fontSize: "clamp(17px, 2vw, 24px)",
-    lineHeight: 1.35,
-    color: "rgba(255,255,255,0.86)",
-  },
-  artboardGlass: {
-    marginTop: 28,
+    alignSelf: "center",
+    minHeight: 300,
     borderRadius: 24,
+    padding: 22,
+    color: "#EAF4FF",
+    backgroundImage: `linear-gradient(180deg, rgba(18,35,54,.86), rgba(19,43,66,.74)), url('${STUDIO_TEXTURES.navy}')`,
+    backgroundSize: "cover",
+    boxShadow: "0 20px 60px rgba(23,42,65,.24), inset 0 1px 0 rgba(255,255,255,.22)",
+    border: "1px solid rgba(255,255,255,.22)",
+  },
+  panelTop: { display: "flex", justifyContent: "space-between", marginBottom: 34, color: "#fff" },
+  readinessRow: {
+    position: "relative",
     overflow: "hidden",
-    background: "linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0.08))",
-    border: "1px solid rgba(255,255,255,0.34)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.34), 0 16px 42px rgba(0,0,0,0.20)",
-    backdropFilter: "blur(8px) saturate(1.35)",
-  },
-  proofGrid: {
-    marginTop: 28,
-    display: "grid",
-    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-    gap: 12,
-  },
-  proofCard: {
-    minHeight: 132,
-    padding: "18px 18px",
-    borderRadius: 22,
-    color: "rgba(255,255,255,0.96)",
-    background: "linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0.08))",
-    border: "1px solid rgba(255,255,255,0.34)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.34), 0 16px 42px rgba(0,0,0,0.16)",
-    backdropFilter: "blur(8px) saturate(1.35)",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "space-between",
-    gap: 16,
-  },
-  proofNumber: {
-    color: "rgba(255,255,255,0.72)",
-    fontSize: 10,
-    letterSpacing: "0.16em",
-    fontWeight: 850,
-  },
-  whiteBrief: {
-    marginTop: 28,
-    borderRadius: 24,
-    overflow: "hidden",
-    background: "rgba(252,253,255,0.88)",
-    border: "1px solid rgba(255,255,255,0.76)",
-    boxShadow: "0 18px 44px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.78)",
-    backdropFilter: "blur(10px) saturate(1.22)",
-  },
-  whiteBriefLine: {
     minHeight: 72,
-    padding: "18px 22px",
-    display: "flex",
-    alignItems: "center",
-    gap: 16,
-    color: "#1A2233",
-    fontSize: 17,
-    borderBottom: "1px solid rgba(206,218,232,0.74)",
+    borderRadius: 18,
+    padding: "16px 18px",
+    marginBottom: 12,
+    background: "rgba(255,255,255,.11)",
+    border: "1px solid rgba(255,255,255,.18)",
   },
-  whiteBriefNumber: {
-    width: 34,
-    height: 34,
-    borderRadius: 12,
+  readinessMeter: {
+    position: "absolute",
+    left: 0,
+    bottom: 0,
+    height: 4,
+    background: "linear-gradient(90deg, #8A9AE8, #6FAE95)",
+  },
+  commandBand: {
     display: "grid",
-    placeItems: "center",
-    flexShrink: 0,
-    background: "rgba(106,155,204,0.14)",
-    color: "#355F89",
-    fontWeight: 850,
+    gridTemplateColumns: "minmax(0, .82fr) minmax(360px, 1fr)",
+    gap: 24,
+    marginTop: 28,
+    alignItems: "stretch",
   },
-  glassLine: {
-    minHeight: 70,
-    padding: "18px 22px",
-    display: "flex",
-    alignItems: "center",
-    gap: 16,
-    color: "rgba(255,255,255,0.94)",
-    fontSize: 17,
-    borderBottom: "1px solid rgba(255,255,255,0.16)",
-  },
-  glassNumber: {
-    width: 34,
-    height: 34,
-    borderRadius: 12,
-    display: "grid",
-    placeItems: "center",
-    flexShrink: 0,
-    background: "rgba(255,255,255,0.18)",
-    color: "rgba(255,255,255,0.94)",
-    fontWeight: 800,
-  },
-  artboardCta: {
-    marginTop: 18,
-    minHeight: 72,
-    padding: "10px 12px",
+  commandCopy: { padding: "22px 6px" },
+  sectionTitle: { margin: 0, fontSize: 28, lineHeight: 1.05 },
+  sectionCopy: { color: "#60708A", fontSize: 16, lineHeight: 1.5, maxWidth: 620 },
+  commandBox: {
+    padding: 18,
     borderRadius: 22,
-    display: "grid",
-    gridTemplateColumns: "54px minmax(0, 1fr) auto",
-    gap: 14,
-    alignItems: "center",
-    color: "rgba(255,255,255,0.96)",
-    background: "linear-gradient(135deg, rgba(255,255,255,0.24), rgba(255,255,255,0.10))",
-    border: "1px solid rgba(255,255,255,0.38)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.36), 0 18px 46px rgba(0,0,0,0.18)",
-    backdropFilter: "blur(9px) saturate(1.35)",
+    background: "rgba(255,255,255,.72)",
+    border: "1px solid rgba(153,176,209,.45)",
+    boxShadow: "0 18px 44px rgba(42,65,96,.12)",
   },
-  ctaBadge: {
-    width: 50,
-    height: 50,
+  select: {
+    width: "100%",
+    height: 44,
+    border: "1px solid rgba(126,150,184,.5)",
     borderRadius: 14,
-    display: "grid",
-    placeItems: "center",
-    background: "linear-gradient(145deg, #9BC7AB, #6EAD89)",
-    color: "#FFFFFF",
-    fontSize: 24,
-    fontWeight: 900,
-    boxShadow: "0 12px 26px rgba(15,38,27,0.18), inset 0 1px 0 rgba(255,255,255,0.42)",
+    padding: "0 12px",
+    color: "#172033",
+    background: "rgba(255,255,255,.86)",
+    fontWeight: 800,
   },
-  ctaButton: {
-    minHeight: 38,
-    padding: "0 18px",
+  briefInput: {
+    width: "100%",
+    minHeight: 108,
+    marginTop: 12,
+    border: "1px solid rgba(126,150,184,.42)",
+    borderRadius: 16,
+    padding: 14,
+    resize: "vertical",
+    font: "inherit",
+    lineHeight: 1.45,
+    color: "#172033",
+    background: "rgba(255,255,255,.78)",
+    boxSizing: "border-box",
+  },
+  commandButton: { width: "100%", marginTop: 12, minHeight: 42 },
+  errorText: { display: "block", marginTop: 10, color: "#8B3F24", fontWeight: 800 },
+  busyText: { color: "#2E5C8A", fontWeight: 800 },
+  formatGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(172px, 1fr))",
+    gap: 12,
+    marginTop: 28,
+  },
+  formatCard: {
+    minHeight: 188,
+    textAlign: "left",
+    borderRadius: 20,
+    padding: 16,
+    border: "1px solid rgba(153,176,209,.42)",
+    background: "rgba(255,255,255,.68)",
+    boxShadow: "0 14px 34px rgba(42,65,96,.08)",
+    display: "flex",
+    flexDirection: "column",
+    gap: 8,
+  },
+  formatCardActive: { borderColor: "rgba(75,113,168,.75)", boxShadow: "0 18px 42px rgba(46,92,138,.18)" },
+  formatMeta: { color: "#6B7C95", fontWeight: 800, fontSize: 12 },
+  formatTitle: { fontSize: 19, lineHeight: 1.05 },
+  formatAudience: { color: "#2E5C8A", fontWeight: 800, fontSize: 12 },
+  formatDetail: { color: "#60708A", fontSize: 13, lineHeight: 1.35 },
+  lowerGrid: { display: "grid", gridTemplateColumns: "1.05fr .95fr", gap: 24, marginTop: 28 },
+  bookPanel: {
+    borderRadius: 24,
+    padding: 20,
+    background: "rgba(255,255,255,.72)",
+    border: "1px solid rgba(153,176,209,.45)",
+  },
+  panelHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 },
+  smallPill: {
+    padding: "7px 10px",
     borderRadius: 999,
+    background: "rgba(138,154,232,.14)",
+    color: "#2E5C8A",
+    fontWeight: 800,
+    fontSize: 12,
+  },
+  bookStack: { display: "grid", gap: 10, marginTop: 18 },
+  bookRow: {
+    display: "grid",
+    gridTemplateColumns: "48px minmax(0, 1fr) auto",
+    alignItems: "center",
+    gap: 12,
+    width: "100%",
+    padding: 12,
+    borderRadius: 18,
+    background: "rgba(247,250,255,.82)",
+    border: "1px solid rgba(153,176,209,.32)",
+    textAlign: "left",
+  },
+  bookIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 15,
     display: "grid",
     placeItems: "center",
-    background: "rgba(255,255,255,0.18)",
-    color: "#FFFFFF",
-    fontWeight: 850,
+    color: "#fff",
+    fontWeight: 900,
+    background: "linear-gradient(135deg, #8A9AE8, #2E5C8A)",
   },
+  bookBody: { display: "grid", gap: 3, minWidth: 0 },
+  cleanPill: {
+    padding: "7px 10px",
+    borderRadius: 999,
+    background: "rgba(111,174,149,.16)",
+    color: "#2F735D",
+    fontWeight: 900,
+    fontSize: 12,
+  },
+  warnPill: {
+    padding: "7px 10px",
+    borderRadius: 999,
+    background: "rgba(201,162,78,.17)",
+    color: "#8B6422",
+    fontWeight: 900,
+    fontSize: 12,
+  },
+  diffPanel: {
+    borderRadius: 24,
+    padding: 22,
+    backgroundImage: `linear-gradient(135deg, rgba(255,255,255,.84), rgba(238,245,255,.58)), url('${STUDIO_TEXTURES.blue}')`,
+    backgroundSize: "cover",
+    border: "1px solid rgba(153,176,209,.45)",
+  },
+  diffGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 20 },
+  diffItem: {
+    minHeight: 118,
+    borderRadius: 18,
+    padding: 14,
+    background: "rgba(255,255,255,.68)",
+    border: "1px solid rgba(153,176,209,.36)",
+    display: "grid",
+    gap: 8,
+    alignContent: "start",
+    color: "#60708A",
+  },
+  canvasPage: {
+    width: "calc(100% - clamp(20px, 4vw, 64px))",
+    margin: "0 auto",
+    padding: "24px 0 72px",
+    color: "#172033",
+  },
+  canvasHeader: {
+    width: "min(1760px, 100%)",
+    margin: "0 auto 20px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    gap: 20,
+  },
+  canvasTitle: { margin: "14px 0 6px", fontSize: "clamp(34px, 4vw, 56px)", lineHeight: 0.95 },
+  canvasSub: { margin: 0, color: "#60708A", fontSize: 17, maxWidth: 620 },
+  canvasActions: { display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" },
+  smallButton: { minHeight: 38 },
+  workbench: {
+    width: "100%",
+    maxWidth: 1760,
+    margin: "0 auto",
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "clamp(14px, 1.4vw, 22px)",
+    justifyContent: "center",
+    alignItems: "start",
+  },
+  leftRail: { display: "grid", gap: 14, flex: "0 1 340px", width: "min(100%, 340px)", maxWidth: 340 },
+  rightRail: {
+    display: "grid",
+    gap: 14,
+    flex: "0 1 360px",
+    width: "min(100%, 360px)",
+    maxWidth: 360,
+  },
+  toolRail: {
+    display: "grid",
+    gap: 14,
+    flex: "0 1 340px",
+    width: "min(100%, 340px)",
+    maxWidth: 340,
+    alignSelf: "flex-start",
+  },
+  railSection: {
+    borderRadius: 22,
+    padding: 16,
+    background: "rgba(255,255,255,.74)",
+    border: "1px solid rgba(153,176,209,.42)",
+    boxShadow: "0 14px 32px rgba(42,65,96,.08)",
+  },
+  railTitle: { display: "block", marginBottom: 12, fontSize: 16 },
+  storyInput: {
+    minHeight: 154,
+    width: "100%",
+    resize: "vertical",
+    borderRadius: 16,
+    border: "1px solid rgba(126,150,184,.42)",
+    padding: 12,
+    font: "inherit",
+    boxSizing: "border-box",
+  },
+  fullButton: { width: "100%", marginTop: 10, minHeight: 40 },
+  sourceStack: { display: "grid", gap: 9 },
+  sourceCard: { display: "grid", gridTemplateColumns: "12px minmax(0, 1fr)", gap: 9, alignItems: "start" },
+  sourceText: { display: "grid", gap: 2, minWidth: 0 },
+  cleanDot: { width: 9, height: 9, marginTop: 5, borderRadius: 99, background: "#6FAE95" },
+  warnDot: { width: 9, height: 9, marginTop: 5, borderRadius: 99, background: "#C9A24E" },
+  slideStage: {
+    minHeight: 720,
+    maxWidth: 980,
+    minWidth: "min(100%, 600px)",
+    flex: "1 1 760px",
+    borderRadius: 26,
+    padding: 18,
+    background: "linear-gradient(180deg, rgba(238,245,255,.88), rgba(255,255,255,.72))",
+    border: "1px solid rgba(153,176,209,.48)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,.88)",
+  },
+  deckFrame: { display: "grid", gap: 16 },
+  slideCard: {
+    minHeight: 360,
+    borderRadius: 24,
+    padding: 24,
+    backgroundImage: `linear-gradient(135deg, rgba(255,255,255,.9), rgba(245,249,255,.72)), url('${STUDIO_TEXTURES.rose}')`,
+    backgroundSize: "cover",
+    border: "1px solid rgba(153,176,209,.45)",
+    boxShadow: "0 18px 44px rgba(42,65,96,.12)",
+  },
+  slideTop: { display: "flex", justifyContent: "space-between", alignItems: "center" },
+  slideNumber: { fontWeight: 900, color: "#8A9AE8" },
+  slideTitle: { margin: "42px 0 14px", fontSize: 36, lineHeight: 0.98, maxWidth: 720 },
+  slideBody: { color: "#526176", fontSize: 17, lineHeight: 1.45, maxWidth: 760 },
+  bulletGrid: { display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 10, marginTop: 24 },
+  provenanceStrip: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 24,
+    color: "#60708A",
+    fontSize: 12,
+    fontWeight: 800,
+  },
+  assumptionRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    gap: 10,
+    borderBottom: "1px solid rgba(153,176,209,.24)",
+    padding: "8px 0",
+    color: "#60708A",
+  },
+  modelRow: {
+    display: "grid",
+    gap: 3,
+    padding: "9px 0",
+    borderBottom: "1px solid rgba(153,176,209,.24)",
+  },
+  auditCopy: { color: "#60708A", lineHeight: 1.45, margin: 0 },
 };

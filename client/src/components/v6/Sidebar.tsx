@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { MODES, V6Icon } from "./icons";
 import type { FileListView, IconName, ModeId, OpenTab, Tab } from "./types";
-import { isSuperAdminUser } from "../../lib/superAdmin";
 
 interface SidebarProps {
   activeMode: ModeId;
@@ -37,7 +36,6 @@ export function V6Sidebar({
   }, [menuOpen]);
 
   const isAnon = !user;
-  const showStudio = isSuperAdminUser(user);
   const tabsForMode = (mode: ModeId) => tabs.filter(tab => tabBelongsToMode(tab, mode, tabs));
   const aboutTabs = tabs.filter(tab => tab.kind === "learn");
   const aboutActive = aboutTabs.some(tab => tab.id === activeTabId);
@@ -153,17 +151,6 @@ export function V6Sidebar({
             </div>
           </div>
         )}
-        {showStudio && m.id === "files" && (
-          <button
-            className="mode-item"
-            onClick={() => onOpenTab({ id: "marketing-studio", kind: "marketing-studio", title: "Marketing Studio", studioView: "home" })}
-            aria-label="Marketing Studio"
-            style={{ marginTop: 3, color: "var(--m-on-surface)", background: "rgba(255,255,255,0.44)" }}
-          >
-            <span className="mode-icon"><V6Icon name="doc" size={16} /></span>
-            <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Studio</span>
-          </button>
-        )}
       </div>
     );
   };
@@ -257,7 +244,8 @@ interface DealTabGroup {
 function tabBelongsToMode(tab: Tab, mode: ModeId, allTabs: Tab[]): boolean {
   if (tab.kind === "mode-root") return false;
   if (tab.kind === "learn") return false;
-  if (tab.kind === "files-list" || tab.kind === "marketing-studio") return mode === "files";
+  if (tab.kind === "marketing-studio") return mode === "studio";
+  if (tab.kind === "files-list") return mode === "files";
   if (tab.kind === "deal") return mode === "pipeline";
   const dealParent = owningDealForTab(tab, allTabs);
   if (dealParent) {
@@ -456,7 +444,7 @@ function tabIcon(tab: Tab): IconName {
   if (tab.kind === "analysis") return "chart";
   if (tab.kind === "files-list") return tab.fileListView === "data-rooms" ? "library" : "doc";
   if (tab.kind === "doc") return "doc";
-  if (tab.kind === "marketing-studio") return "doc";
+  if (tab.kind === "marketing-studio") return "studio";
   if (tab.kind === "learn") return "library";
   if (tab.kind === "history") return "history";
   if (tab.kind === "settings") return "settings";
@@ -481,7 +469,7 @@ function tabMeta(tab: Tab, allTabs: Tab[] = [], insideDeal = false): string {
   if (tab.kind === "doc") return withDeal(docLaneForTab(tab));
   if (tab.kind === "marketing-studio") {
     if (tab.studioView === "collection") return tab.studioCollectionSub ? `Studio · ${tab.studioCollectionSub}` : "Studio collection";
-    if (tab.studioView === "canvas") return tab.studioFormat ? `Studio draft · ${tab.studioFormat}` : "Studio draft";
+    if (tab.studioView === "canvas") return tab.studioFormat ? `Pitch book · ${tab.studioFormat}` : "Pitch book";
     return "Studio home";
   }
   if (tab.kind === "learn") return tab.section === "pricing" ? "Pricing" : "How it works";

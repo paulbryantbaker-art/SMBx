@@ -5,19 +5,37 @@
 
 CREATE TABLE IF NOT EXISTS market_data_cache (
   id BIGSERIAL PRIMARY KEY,
-  series_id TEXT NOT NULL,
-  value NUMERIC NOT NULL,
-  as_of_date DATE NOT NULL,
+  source VARCHAR(30) NOT NULL,
+  cache_key VARCHAR(255),
+  data JSONB,
   fetched_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  source TEXT NOT NULL,
+  expires_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '7 days'),
+  series_id TEXT,
+  value NUMERIC,
+  as_of_date DATE,
   source_url TEXT,
-  cite_tag TEXT NOT NULL,
-  metadata JSONB,
-  UNIQUE (series_id, as_of_date)
+  cite_tag TEXT,
+  metadata JSONB
 );
 
+ALTER TABLE market_data_cache
+  ADD COLUMN IF NOT EXISTS series_id TEXT,
+  ADD COLUMN IF NOT EXISTS value NUMERIC,
+  ADD COLUMN IF NOT EXISTS as_of_date DATE,
+  ADD COLUMN IF NOT EXISTS source_url TEXT,
+  ADD COLUMN IF NOT EXISTS cite_tag TEXT,
+  ADD COLUMN IF NOT EXISTS metadata JSONB;
+
+ALTER TABLE market_data_cache
+  ALTER COLUMN data DROP NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_market_data_cache_v19_unique
+  ON market_data_cache(series_id, as_of_date)
+  WHERE series_id IS NOT NULL AND as_of_date IS NOT NULL;
+
 CREATE INDEX IF NOT EXISTS idx_market_data_cache_series
-  ON market_data_cache(series_id, as_of_date DESC);
+  ON market_data_cache(series_id, as_of_date DESC)
+  WHERE series_id IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS citation_registry (
   id BIGSERIAL PRIMARY KEY,
