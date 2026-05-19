@@ -114,6 +114,8 @@ const TODAY_TEXTURE_CARDS: StudioFormatId[] = [
   "lender-book",
 ];
 
+const TODAY_TEXTURE_CARD_FLIPS = [false, false, true, false, false, true, false];
+
 interface PortfolioBriefNote {
   label: string;
   text: string;
@@ -702,8 +704,19 @@ function PriorityCard({
   tone: Tone;
   action: () => void;
 }) {
+  const cardIndex = index - 1;
+  const shouldFlipTexture = todayTextureCardShouldFlip(cardIndex);
+
   return (
-    <button style={{ ...T.priorityCard, backgroundImage: todayTextureCardBackground(index - 1) }} onClick={action} type="button">
+    <button style={T.priorityCard} onClick={action} type="button">
+      <span
+        aria-hidden="true"
+        style={{
+          ...T.priorityCardArt,
+          backgroundImage: todayTextureCardBackground(cardIndex),
+          transform: shouldFlipTexture ? "scaleX(-1)" : undefined,
+        }}
+      />
       <span className="mono" style={T.priorityKicker}>{kicker}</span>
       <strong style={T.priorityTitle}>{title}</strong>
       <span style={T.prioritySub}>{sub}</span>
@@ -848,6 +861,10 @@ function tone(key: Tone) {
 
 function todayTextureCardBackground(index: number): string {
   return studioFormatCardBackground(TODAY_TEXTURE_CARDS[index % TODAY_TEXTURE_CARDS.length]);
+}
+
+function todayTextureCardShouldFlip(index: number): boolean {
+  return TODAY_TEXTURE_CARD_FLIPS[index % TODAY_TEXTURE_CARD_FLIPS.length];
 }
 
 function dealInitials(value: string): string {
@@ -1264,18 +1281,37 @@ const T: Record<string, CSSProperties> = {
   priorityCard: {
     ...studioTextureCardStyles.card,
     cursor: "pointer",
+    backgroundImage: undefined,
+  },
+  priorityCardArt: {
+    position: "absolute",
+    inset: 0,
+    zIndex: 0,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+    pointerEvents: "none",
+    transformOrigin: "center",
   },
   priorityKicker: {
     ...studioTextureCardStyles.meta,
+    position: "relative",
+    zIndex: 1,
   },
   priorityTitle: {
     ...studioTextureCardStyles.title,
+    position: "relative",
+    zIndex: 1,
   },
   prioritySub: {
     ...studioTextureCardStyles.detail,
+    position: "relative",
+    zIndex: 1,
   },
   priorityCta: {
     ...studioTextureCardStyles.action,
+    position: "relative",
+    zIndex: 1,
   },
   operatingGrid: {
     marginTop: 18,
