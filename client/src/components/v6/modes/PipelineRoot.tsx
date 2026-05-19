@@ -246,6 +246,31 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
         />
       )}
 
+      <V6Section eyebrow="YULIA NEXT" title="Pipeline shortcuts">
+        {(actionError || actionNote) && (
+          <div style={actionError ? P.actionError : P.actionNote}>
+            {actionError || actionNote}
+          </div>
+        )}
+        <div style={P.actionGrid}>
+          {PIPELINE_SHORTCUTS.map(({ action, title, sub, icon, tone }) => (
+            <button
+              key={title}
+              style={{ ...P.actionCard, ...pipelineActionTone(tone) }}
+              onClick={() => { void runPipelineShortcut(action); }}
+              type="button"
+              disabled={busyAction === action}
+            >
+              <span style={P.actionIcon}><V6Icon name={icon} size={16} /></span>
+              <span style={P.actionText}>
+                <strong>{busyAction === action ? "Working..." : title}</strong>
+                <span>{sub}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </V6Section>
+
       <section style={P.boardShell}>
         <div style={P.boardHeader}>
           <div>
@@ -283,31 +308,6 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
           ))}
         </div>
       </section>
-
-      <V6Section eyebrow="YULIA NEXT" title="Pipeline shortcuts">
-        {(actionError || actionNote) && (
-          <div style={actionError ? P.actionError : P.actionNote}>
-            {actionError || actionNote}
-          </div>
-        )}
-        <div style={P.actionGrid}>
-          {PIPELINE_SHORTCUTS.map(({ action, title, sub, icon, tone }) => (
-            <button
-              key={title}
-              style={{ ...P.actionCard, ...pipelineActionTone(tone) }}
-              onClick={() => { void runPipelineShortcut(action); }}
-              type="button"
-              disabled={busyAction === action}
-            >
-              <span style={P.actionIcon}><V6Icon name={icon} size={16} /></span>
-              <span style={P.actionText}>
-                <strong>{busyAction === action ? "Working..." : title}</strong>
-                <span>{sub}</span>
-              </span>
-            </button>
-          ))}
-        </div>
-      </V6Section>
     </div>
   );
 }
