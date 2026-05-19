@@ -15,6 +15,7 @@ const desktopHeroTex = (n: number) => `/textures/desktop/texture-hero-${n}.png?$
 const desktopRandomTex = (n: number) => `/textures/desktop/random/texture-random-${String(n).padStart(2, "0")}.png?${VERSION}`;
 const desktopRandomNamedTex = (name: string) => `/textures/desktop/random/${name}.png?${VERSION}`;
 const desktopTodayRoseGold = () => `/textures/desktop/texture-today-rose-gold.png?${VERSION}`;
+const desktopTodayRoseGoldHero = () => `/textures/desktop/texture-today-rose-gold-hero-crop.png?${VERSION}`;
 const artHouseTex = (n: number) => `/textures/desktop/art-house/art-house-${String(n).padStart(2, "0")}.png?${VERSION}`;
 
 const pick = <T,>(arr: readonly T[]): T =>
@@ -96,9 +97,10 @@ export const RANDOM_TEXTURES = {
 export const DESKTOP_TEXTURES = {
   // Desktop art shuffles per page group at module import. Each hard refresh
   // gets a new spread, and no textured surface repeats within the same page.
-  todayHeroSample: desktopTodayRoseGold(),
+  todayHeroSample: desktopTodayRoseGoldHero(),
   todayHeroWorkspace: todayDesktopHeroTextures[1],
   todayMarket: todayDesktopHeroTextures[2],
+  todayPortfolio: desktopRandomNamedTex("texture-random-24-portfolio"),
   todayCard: todayDesktopMidTextures[0],
   todaySecondary: todayDesktopMidTextures[1],
 

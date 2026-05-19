@@ -508,7 +508,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           </div>
         </article>
 
-        <aside style={T.marketPanel}>
+        <aside style={{ ...T.marketPanel, backgroundImage: todayPortfolioWash }}>
           <div style={T.liveHeader}>
             <div>
               <div className="mono" style={T.marketEyebrow}>YULIA'S MARKET DESK</div>
@@ -917,6 +917,8 @@ const todayHeroWash = (sample: boolean) =>
   sample
     ? `linear-gradient(155deg, rgba(77,39,53,0.52) 0%, rgba(183,103,93,0.34) 48%, rgba(29,30,54,0.58) 100%), url('${DESKTOP_TEXTURES.todayHeroSample}')`
     : `linear-gradient(155deg, rgba(18,51,61,0.58) 0%, rgba(78,128,111,0.35) 48%, rgba(13,26,46,0.62) 100%), url('${DESKTOP_TEXTURES.todayHeroWorkspace}')`;
+const todayPortfolioWash =
+  `radial-gradient(circle at 10% 0%, rgba(255,255,255,.58), transparent 38%), linear-gradient(135deg, rgba(255,255,255,.74), rgba(238,245,255,.44)), url('${DESKTOP_TEXTURES.todayPortfolio}')`;
 const TODAY_START_TEXTURE = "/textures/desktop/random/texture-random-10.png?v=20260516-start-cool-1";
 
 const T: Record<string, CSSProperties> = {
@@ -948,6 +950,7 @@ const T: Record<string, CSSProperties> = {
     borderRadius: 24,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
+    backgroundRepeat: "no-repeat, no-repeat",
     border: "1px solid rgba(255,255,255,0.46)",
     boxShadow: "0 48px 118px rgba(52, 63, 90, 0.31), 0 20px 46px rgba(26, 34, 51, 0.16), 0 4px 12px rgba(26, 34, 51, 0.08), inset 0 1px 0 rgba(255,255,255,0.28)",
     padding: 30,

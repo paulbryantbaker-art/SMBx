@@ -141,6 +141,8 @@ export const studioCompeteCardStyles: Record<string, CSSProperties> = {
     padding: 22,
     backgroundImage: `radial-gradient(circle at 10% 0%, rgba(255,255,255,.58), transparent 38%), linear-gradient(135deg, rgba(255,255,255,.74), rgba(238,245,255,.44)), url('${STUDIO_TEXTURES.blue}')`,
     backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
     border: "1px solid rgba(255,255,255,.55)",
     boxShadow: "0 18px 44px rgba(42,65,96,.10), inset 0 1px 0 rgba(255,255,255,.72)",
     ...studioGlassBackdrop,
