@@ -60,6 +60,21 @@ const DEALS: TodayDeal[] = [
   },
 ];
 
+interface LiveDeskItem {
+  eyebrow: string;
+  title: string;
+  sub: string;
+  pct: number;
+  tone: Tone;
+  prompt?: string;
+}
+
+const WORK: LiveDeskItem[] = [
+  { eyebrow: "MARKET", title: "Industrial services read", sub: "Buyer appetite, SBA climate, and local density are shaping the pursue call.", pct: 76, tone: "cactus" as Tone },
+  { eyebrow: "STRUCTURE", title: "Tax and legal watch", sub: "Working-cap target, add-backs, seller-note timing, and counsel sign-off need daylight.", pct: 64, tone: "gold" as Tone },
+  { eyebrow: "PORTFOLIO", title: "One deal driving the day", sub: "Big Fake Deal is the current focus until review and buyer touch are cleared.", pct: 58, tone: "plum" as Tone },
+];
+
 interface TodayFile {
   kind: "doc" | "chart";
   title: string;
@@ -129,14 +144,7 @@ interface PortfolioBrief {
   intelligenceMode?: string;
   marketIntelligence?: PortfolioMarketIntelligence;
   hero: PortfolioBriefHero;
-  liveDesk: Array<{
-    eyebrow: string;
-    title: string;
-    sub: string;
-    pct: number;
-    tone: Tone;
-    prompt?: string;
-  }>;
+  liveDesk: LiveDeskItem[];
   priorities: PortfolioPriority[];
   files: TodayFile[];
   deals: TodayDeal[];
@@ -180,6 +188,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const operatingBrief = useSampleData ? null : todayOperating.brief;
   const waitingForYuliaRead = !useSampleData && !liveBrief;
   const deals = useSampleData ? DEALS : (liveBrief?.deals.length ? liveBrief.deals : realDeals.slice(0, 5).map(dealToTodayDeal));
+  const liveDesk = liveBrief?.liveDesk?.length ? liveBrief.liveDesk : useSampleData ? WORK : [];
   const files = useMemo<TodayFile[]>(
     () => {
       if (liveBrief?.files?.length) return liveBrief.files;
@@ -192,6 +201,68 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const lead = deals[0] ?? null;
   const isLoggedOutHero = !home.isAuthed;
   const leadTitle = lead?.title ?? "your first deal";
+  const marketIntel = liveBrief?.marketIntelligence ?? {
+    eyebrow: waitingForYuliaRead ? "YULIA READ REFRESHING" : "MARKET INTELLIGENCE LIVE",
+    headline: waitingForYuliaRead
+      ? "Yulia is rebuilding this portfolio read from your live workspace."
+      : lead
+        ? `${lead.title} is being read against market, structure, files, and next action.`
+        : "Yulia turns every deal into a live intelligence desk.",
+    subhead: waitingForYuliaRead
+      ? "Recommendations will appear after the briefing layer returns a sourced portfolio read."
+      : lead
+        ? "Industry, buyer universe, financing climate, tax/legal issues, and work product belong in one place."
+        : "Start with a deal or thesis and Yulia builds the market context around it.",
+    bullets: [],
+    sourceCount: 0,
+    confidence: liveBrief ? "Live" : "Demo",
+  };
+  const heroNotes = liveBrief?.hero.notes?.length
+    ? liveBrief.hero.notes
+    : showLoggedOutMarketing
+      ? [
+          {
+            label: "Source",
+            text: "Find targets, buyers, capital, advisors, and market context without leaving the deal desk.",
+          },
+          {
+            label: "Diligence",
+            text: "Turn source materials into issue trees, model inputs, evidence trails, and action queues.",
+          },
+          {
+            label: "Execute",
+            text: "Carry decisions into documents, data rooms, shared reviews, and post-close value work.",
+          },
+        ]
+    : waitingForYuliaRead
+      ? [
+          {
+            label: "Read",
+            text: "Yulia is refreshing the portfolio read from live deals, files, reviews, and market sources.",
+          },
+          {
+            label: "Source",
+            text: "No card-level recommendation is shown until the briefing layer returns the sourced result.",
+          },
+          {
+            label: "Next",
+            text: "Ask Yulia for the current read, or open a deal while the portfolio summary refreshes.",
+          },
+        ]
+      : [
+        {
+          label: lead ? "Why now" : "First step",
+          text: lead ? "The buyer call is close enough that weak language will travel." : "Tell Yulia the situation in plain English. She handles the software setup.",
+        },
+        {
+          label: lead ? "Risk" : "Sources",
+          text: lead ? "Working-cap target and add-backs need one clean reconciliation." : "Drop in a CIM, teaser, financials, LOI, NDA, or even rough notes.",
+        },
+        {
+          label: lead ? "Move" : "Output",
+          text: lead ? "Approve the IOI draft, then let Yulia prepare the buyer note." : "Yulia can create the deal, organize files, and prepare the first analysis.",
+        },
+      ];
 
   const ask = (prompt: string) => {
     onTalkToYulia?.(prompt);
@@ -371,6 +442,12 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
               : "No private workspace data is attached to this account yet. Start with a chat, source file, target, buyer pool, or deal thesis and Yulia will build the right surfaces around it.")}
           </p>
 
+          <div style={T.briefNotes}>
+            {heroNotes.slice(0, 3).map(note => (
+              <BriefNote key={note.label} label={note.label} text={note.text} />
+            ))}
+          </div>
+
           <div style={T.heroActionGrid}>
             <button
               className="m-glint m-glass-control"
@@ -415,6 +492,59 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           </div>
         </article>
 
+        <aside style={T.marketPanel}>
+          <div style={T.liveHeader}>
+            <div>
+              <div className="mono" style={T.marketEyebrow}>YULIA'S MARKET DESK</div>
+              <h2 style={T.panelTitle}>Portfolio intelligence</h2>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            className="m-glass-control"
+            style={T.intelLead}
+            onClick={() => ask("Show me the portfolio market intelligence read. Separate market, buyer/capital, tax, legal, and source gaps.")}
+          >
+            <div className="mono" style={T.intelLeadEyebrow}>{marketIntel.eyebrow}</div>
+            <strong style={T.intelLeadTitle}>{marketIntel.headline}</strong>
+            <span style={T.intelLeadSub}>{marketIntel.subhead}</span>
+          </button>
+
+          {marketIntel.bullets?.length > 0 && (
+            <div style={T.intelBullets}>
+              {marketIntel.bullets.slice(0, 3).map((bullet) => (
+                <button
+                  key={bullet}
+                  type="button"
+                  className="m-glass-control"
+                  style={T.intelBullet}
+                  onClick={() => ask(`Unpack this market intelligence note: ${bullet}`)}
+                >
+                  {bullet}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div style={T.workStack}>
+            {liveDesk.map(item => (
+              <button
+                key={item.title}
+                className="m-glass-control"
+                style={T.workCard}
+                onClick={() => ask(item.prompt || `${item.eyebrow.toLowerCase()}: ${item.title}. What changed and what should I do next?`)}
+                type="button"
+              >
+                <div style={T.workTitle}>{item.title}</div>
+                <div style={T.workSub}>{item.sub}</div>
+                <div style={T.meterTrack}>
+                  <span style={{ ...T.meterFill, width: `${item.pct}%`, background: tone(item.tone).ink }} />
+                </div>
+              </button>
+            ))}
+          </div>
+        </aside>
       </section>
 
       <section style={T.section}>
@@ -519,6 +649,15 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   );
 }
 
+function BriefNote({ label, text }: { label: string; text: string }) {
+  return (
+    <div style={T.note}>
+      <div className="mono" style={T.noteLabel}>{label}</div>
+      <div style={T.noteText}>{text}</div>
+    </div>
+  );
+}
+
 function SectionHead({ eyebrow, title, sub }: { eyebrow: string; title: string; sub: string }) {
   return (
     <div style={T.sectionHead}>
@@ -530,6 +669,8 @@ function SectionHead({ eyebrow, title, sub }: { eyebrow: string; title: string; 
 }
 
 function PriorityCard({
+  index,
+  kicker,
   title,
   sub,
   cta,
@@ -547,8 +688,11 @@ function PriorityCard({
   const t = tone(itemTone);
   return (
     <button style={T.priorityCard} onClick={action} type="button">
-      <span style={{ ...T.priorityNum, background: t.soft, color: t.ink }} aria-hidden="true" />
+      <span style={{ ...T.priorityNum, background: t.soft, color: t.ink }}>
+        <span className="mono" style={T.priorityNumLabel}>{index}</span>
+      </span>
       <span style={T.priorityBody}>
+        <span className="mono" style={T.priorityKicker}>{kicker}</span>
         <span style={T.priorityTitle}>{title}</span>
         <span style={T.prioritySub}>{sub}</span>
       </span>
@@ -779,7 +923,10 @@ const T: Record<string, CSSProperties> = {
     background: "radial-gradient(circle at 48% -120px, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0) 42%), linear-gradient(180deg, #FFFFFF 0%, #FEFFFF 54%, #F8FBFF 100%)",
   },
   heroGrid: {
-    display: "block",
+    display: "grid",
+    gridTemplateColumns: "minmax(min(520px, 100%), 1.25fr) minmax(min(360px, 100%), 0.75fr)",
+    gap: 20,
+    alignItems: "stretch",
   },
   leadCard: {
     position: "relative",
@@ -789,11 +936,10 @@ const T: Record<string, CSSProperties> = {
     backgroundPosition: "center, center",
     border: "1px solid rgba(255,255,255,0.46)",
     boxShadow: "0 48px 118px rgba(52, 63, 90, 0.31), 0 20px 46px rgba(26, 34, 51, 0.16), 0 4px 12px rgba(26, 34, 51, 0.08), inset 0 1px 0 rgba(255,255,255,0.28)",
-    padding: "clamp(24px, 3vw, 40px)",
-    minHeight: 360,
+    padding: 30,
+    minHeight: 560,
     display: "flex",
     flexDirection: "column",
-    justifyContent: "center",
   },
   leadTop: {
     display: "flex",
@@ -832,12 +978,12 @@ const T: Record<string, CSSProperties> = {
     cursor: "pointer",
   },
   headline: {
-    margin: "18px 0 0",
-    maxWidth: 840,
+    margin: "24px 0 0",
+    maxWidth: 900,
     fontFamily: "'Figtree', var(--font-body)",
     fontWeight: 850,
-    fontSize: "clamp(34px, 4vw, 62px)",
-    lineHeight: 0.96,
+    fontSize: "clamp(38px, 4.5vw, 76px)",
+    lineHeight: 0.94,
     letterSpacing: "-0.055em",
     textWrap: "balance",
     color: "#FFFFFF",
@@ -885,15 +1031,15 @@ const T: Record<string, CSSProperties> = {
     color: "#FFFFFF",
   },
   heroActionGrid: {
-    display: "flex",
-    flexWrap: "wrap",
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) auto",
     gap: 12,
     alignItems: "stretch",
-    marginTop: 28,
+    marginTop: "auto",
+    paddingTop: 24,
   },
   heroGlassAction: {
     all: "unset",
-    flex: "1 1 520px",
     minHeight: 72,
     boxSizing: "border-box",
     display: "grid",
@@ -912,7 +1058,6 @@ const T: Record<string, CSSProperties> = {
   },
   heroGlassActionSecondary: {
     all: "unset",
-    flex: "0 1 178px",
     minWidth: 138,
     minHeight: 72,
     boxSizing: "border-box",
@@ -1125,31 +1270,28 @@ const T: Record<string, CSSProperties> = {
   },
   priorityGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
-    gap: 14,
+    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+    gap: 12,
   },
   priorityCard: {
     all: "unset",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
+    display: "grid",
+    gridTemplateColumns: "50px minmax(0, 1fr) auto",
+    alignItems: "center",
     gap: 14,
-    minHeight: 156,
-    boxSizing: "border-box",
-    padding: 20,
-    borderRadius: 22,
-    background: liquidGlass,
-    border: "1px solid rgba(255,255,255,0.55)",
-    boxShadow: "0 18px 44px rgba(42,65,96,.10), inset 0 1px 0 rgba(255,255,255,.72)",
-    backdropFilter: "blur(22px) saturate(155%)",
-    WebkitBackdropFilter: "blur(22px) saturate(155%)",
+    minHeight: 108,
+    padding: 18,
+    borderRadius: 20,
+    background: whiteCard,
+    border: "1px solid #E7EBF5",
+    boxShadow: "0 22px 58px rgba(26, 34, 51, 0.13), 0 6px 16px rgba(26, 34, 51, 0.08)",
     cursor: "pointer",
     overflow: "hidden",
   },
   priorityNum: {
     width: 46,
     height: 46,
-    borderRadius: 15,
+    borderRadius: 16,
     display: "grid",
     placeItems: "center",
     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.60), 0 10px 22px rgba(26,34,51,0.08)",
@@ -1174,21 +1316,20 @@ const T: Record<string, CSSProperties> = {
     fontWeight: 700,
   },
   priorityTitle: {
-    marginTop: 0,
-    fontSize: 20,
+    marginTop: 5,
+    fontSize: 18,
     fontWeight: 850,
     letterSpacing: "-0.035em",
     color: "#1A2233",
   },
   prioritySub: {
-    marginTop: 7,
+    marginTop: 4,
     color: "#555E6F",
-    fontSize: 14,
-    lineHeight: 1.45,
+    fontSize: 13,
+    lineHeight: 1.4,
   },
   priorityCta: {
-    alignSelf: "flex-start",
-    marginTop: "auto",
+    alignSelf: "center",
     borderRadius: 999,
     padding: "8px 12px",
     fontSize: 12,
