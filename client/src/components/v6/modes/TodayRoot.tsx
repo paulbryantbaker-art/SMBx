@@ -7,8 +7,14 @@ import { LOGGED_OUT_HERO_COPY } from "../../../lib/copy";
 import { DESKTOP_TEXTURES } from "../../../lib/randomTextures";
 import { executeSurfaceAction, type ActionDeal } from "../../../lib/v6ActionContracts";
 import { isSurfaceActionId, type SurfaceActionId } from "../../../lib/v6SurfaceActions";
-import type { OpenTab } from "../types";
+import type { OpenTab, StudioFormatId } from "../types";
 import { V6Icon } from "../icons";
+import {
+  studioCompeteCardStyles,
+  studioFormatCardBackground,
+  studioListCardStyles,
+  studioTextureCardStyles,
+} from "../styles/studioSurfaces";
 
 type Tone = "gold" | "cactus" | "oat" | "plum" | "charcoal";
 
@@ -96,6 +102,16 @@ const QUICK_STARTS = [
   "Review the IOI draft with me.",
   "Find buyers for Big Fake Deal.",
   "Show files that need my eye.",
+];
+
+const TODAY_TEXTURE_CARDS: StudioFormatId[] = [
+  "buyer-pitch-book",
+  "seller-pitch-book",
+  "ic-deck",
+  "qoe-preview-book",
+  "cim-summary-deck",
+  "board-update",
+  "lender-book",
 ];
 
 interface PortfolioBriefNote {
@@ -500,38 +516,31 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
             </div>
           </div>
 
-          <button
-            type="button"
-            className="m-glass-control"
-            style={T.intelLead}
-            onClick={() => ask("Show me the portfolio market intelligence read. Separate market, buyer/capital, tax, legal, and source gaps.")}
-          >
-            <div className="mono" style={T.intelLeadEyebrow}>{marketIntel.eyebrow}</div>
-            <strong style={T.intelLeadTitle}>{marketIntel.headline}</strong>
-            <span style={T.intelLeadSub}>{marketIntel.subhead}</span>
-          </button>
+          <div style={T.workStack}>
+            <button
+              type="button"
+              style={T.intelLead}
+              onClick={() => ask("Show me the portfolio market intelligence read. Separate market, buyer/capital, tax, legal, and source gaps.")}
+            >
+              <div className="mono" style={T.intelLeadEyebrow}>{marketIntel.eyebrow}</div>
+              <strong style={T.intelLeadTitle}>{marketIntel.headline}</strong>
+              <span style={T.intelLeadSub}>{marketIntel.subhead}</span>
+            </button>
 
-          {marketIntel.bullets?.length > 0 && (
-            <div style={T.intelBullets}>
-              {marketIntel.bullets.slice(0, 3).map((bullet) => (
+            {marketIntel.bullets?.length > 0 && marketIntel.bullets.slice(0, 3).map((bullet) => (
                 <button
                   key={bullet}
                   type="button"
-                  className="m-glass-control"
                   style={T.intelBullet}
                   onClick={() => ask(`Unpack this market intelligence note: ${bullet}`)}
                 >
                   {bullet}
                 </button>
-              ))}
-            </div>
-          )}
+            ))}
 
-          <div style={T.workStack}>
             {liveDesk.map(item => (
               <button
                 key={item.title}
-                className="m-glass-control"
                 style={T.workCard}
                 onClick={() => ask(item.prompt || `${item.eyebrow.toLowerCase()}: ${item.title}. What changed and what should I do next?`)}
                 type="button"
@@ -583,20 +592,25 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
                 <span>When you add a deal, Yulia will rank it here by urgency, fit, and next action.</span>
               </div>
             )}
-            {deals.map(deal => (
-              <button key={deal.id} style={T.dealRow} onClick={() => openDeal(deal)} type="button">
-                <span style={{ ...T.dealTone, background: tone(deal.tone).soft, color: tone(deal.tone).ink }}>{deal.status}</span>
-                <span style={T.dealMain}>
-                  <span style={T.dealTitle}>{deal.title}</span>
-                  <span style={T.dealMeta}>{deal.meta}</span>
-                </span>
-                <span style={T.dealStats}>
-                  <span>{deal.sde}</span>
-                  <span>{deal.multiple}</span>
-                  <strong>{deal.fit}</strong>
-                </span>
-              </button>
-            ))}
+            {deals.length > 0 && (
+              <div style={T.listStack}>
+                {deals.map(deal => (
+                  <button key={deal.id} style={T.dealRow} onClick={() => openDeal(deal)} type="button">
+                    <span style={T.dealIcon}>{dealInitials(deal.title)}</span>
+                    <span style={T.dealMain}>
+                      <span style={T.dealTitle}>{deal.title}</span>
+                      <span style={T.dealMeta}>{deal.meta}</span>
+                    </span>
+                    <span style={T.dealStats}>
+                      <span style={{ ...T.dealTone, background: tone(deal.tone).soft, color: tone(deal.tone).ink }}>{deal.status}</span>
+                      <span>{deal.sde}</span>
+                      <span>{deal.multiple}</span>
+                      <strong>{deal.fit}</strong>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -609,23 +623,27 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
                 <span>Generated docs, analyses, uploaded artifacts, and data-room items will appear here.</span>
               </div>
             )}
-            {files.map((file, index) => (
-              <button
-                key={`${file.id ?? file.title}-${index}`}
-                style={{ ...T.fileRow, borderBottom: index === files.length - 1 ? "none" : "1px solid #E7EBF5" }}
-                onClick={() => openDoc(file.title, file.id)}
-                type="button"
-              >
-                <span style={{ ...T.fileIcon, background: tone(file.tone).soft, color: tone(file.tone).ink }}>
-                  <V6Icon name={file.kind === "chart" ? "chart" : "doc"} size={18} />
-                </span>
-                <span style={T.fileText}>
-                  <span style={T.fileTitle}>{file.title}</span>
-                  <span style={T.fileSub}>{file.sub}</span>
-                </span>
-                <span style={{ ...T.fileStatus, color: tone(file.tone).ink, background: tone(file.tone).soft }}>{file.status}</span>
-              </button>
-            ))}
+            {files.length > 0 && (
+              <div style={T.listStack}>
+                {files.map((file, index) => (
+                  <button
+                    key={`${file.id ?? file.title}-${index}`}
+                    style={T.fileRow}
+                    onClick={() => openDoc(file.title, file.id)}
+                    type="button"
+                  >
+                    <span style={T.fileIcon}>
+                      <V6Icon name={file.kind === "chart" ? "chart" : "doc"} size={18} />
+                    </span>
+                    <span style={T.fileText}>
+                      <span style={T.fileTitle}>{file.title}</span>
+                      <span style={T.fileSub}>{file.sub}</span>
+                    </span>
+                    <span style={{ ...T.fileStatus, color: tone(file.tone).ink, background: tone(file.tone).soft }}>{file.status}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -674,7 +692,6 @@ function PriorityCard({
   title,
   sub,
   cta,
-  tone: itemTone,
   action,
 }: {
   index: number;
@@ -685,18 +702,12 @@ function PriorityCard({
   tone: Tone;
   action: () => void;
 }) {
-  const t = tone(itemTone);
   return (
-    <button style={T.priorityCard} onClick={action} type="button">
-      <span style={{ ...T.priorityNum, background: t.soft, color: t.ink }}>
-        <span className="mono" style={T.priorityNumLabel}>{index}</span>
-      </span>
-      <span style={T.priorityBody}>
-        <span className="mono" style={T.priorityKicker}>{kicker}</span>
-        <span style={T.priorityTitle}>{title}</span>
-        <span style={T.prioritySub}>{sub}</span>
-      </span>
-      <span style={{ ...T.priorityCta, color: t.ink, background: t.soft }}>{cta}</span>
+    <button style={{ ...T.priorityCard, backgroundImage: todayTextureCardBackground(index - 1) }} onClick={action} type="button">
+      <span className="mono" style={T.priorityKicker}>{kicker}</span>
+      <strong style={T.priorityTitle}>{title}</strong>
+      <span style={T.prioritySub}>{sub}</span>
+      <span style={T.priorityCta}>{cta}</span>
     </button>
   );
 }
@@ -835,6 +846,14 @@ function tone(key: Tone) {
   return tones[key];
 }
 
+function todayTextureCardBackground(index: number): string {
+  return studioFormatCardBackground(TODAY_TEXTURE_CARDS[index % TODAY_TEXTURE_CARDS.length]);
+}
+
+function dealInitials(value: string): string {
+  return value.split(/\s+/).filter(Boolean).map(part => part[0]).slice(0, 2).join("").toUpperCase();
+}
+
 function fmtCents(cents: number | null | undefined): string {
   if (!cents) return "--";
   const dollars = cents / 100;
@@ -889,9 +908,6 @@ const whiteCard = "linear-gradient(145deg, rgba(255,255,255,0.94), rgba(247,250,
 const liquidGlass =
   "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.34), transparent 34%), " +
   "linear-gradient(135deg, rgba(255,255,255,0.19), rgba(255,255,255,0.06) 48%, rgba(255,255,255,0.025))";
-const liquidDarkGlass =
-  "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.24), transparent 34%), " +
-  "linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.052) 52%, rgba(255,255,255,0.018))";
 const liquidGlassFilter = "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)";
 const liquidGlassShadow =
   "0 16px 34px -22px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.34)";
@@ -901,9 +917,7 @@ const todayHeroWash = (sample: boolean) =>
   sample
     ? `linear-gradient(155deg, rgba(77,39,53,0.52) 0%, rgba(183,103,93,0.34) 48%, rgba(29,30,54,0.58) 100%), url('${DESKTOP_TEXTURES.todayHeroSample}')`
     : `linear-gradient(155deg, rgba(18,51,61,0.58) 0%, rgba(78,128,111,0.35) 48%, rgba(13,26,46,0.62) 100%), url('${DESKTOP_TEXTURES.todayHeroWorkspace}')`;
-const TODAY_MARKET_TEXTURE = "/textures/desktop/art-house/art-house-03.png?v=20260516-market-room-1";
 const TODAY_START_TEXTURE = "/textures/desktop/random/texture-random-10.png?v=20260516-start-cool-1";
-const marketWash = `linear-gradient(165deg, rgba(7,22,38,0.82) 0%, rgba(25,80,114,0.61) 54%, rgba(5,17,31,0.86) 100%), url('${TODAY_MARKET_TEXTURE}')`;
 
 const T: Record<string, CSSProperties> = {
   page: {
@@ -1117,14 +1131,11 @@ const T: Record<string, CSSProperties> = {
     flexDirection: "column",
   },
   marketPanel: {
-    borderRadius: 24,
-    backgroundImage: marketWash,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    color: "#FFFFFF",
-    padding: 22,
-    boxShadow: "0 30px 82px rgba(26, 34, 51, 0.22), 0 12px 30px rgba(26,34,51,0.10), inset 0 1px 0 rgba(255,255,255,0.24)",
-    border: "1px solid rgba(255,255,255,0.24)",
+    ...studioCompeteCardStyles.panel,
+    backgroundSize: "100% 100%, 100% 100%, 100% auto",
+    backgroundRepeat: "no-repeat, no-repeat, repeat-y",
+    backgroundPosition: "center, center, top center",
+    color: "#1A2233",
     display: "flex",
     flexDirection: "column",
     overflow: "hidden",
@@ -1141,46 +1152,38 @@ const T: Record<string, CSSProperties> = {
     fontSize: 28,
     lineHeight: 1,
     letterSpacing: "-0.04em",
-    color: "#FFFFFF",
+    color: "#1A2233",
   },
   marketEyebrow: {
     fontSize: 10,
     letterSpacing: "0.16em",
     fontWeight: 800,
-    color: "#FFFFFF",
+    color: "#60708A",
   },
   workStack: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 10,
+    ...studioCompeteCardStyles.grid,
     flex: 1,
-    marginTop: 12,
   },
   intelLead: {
     all: "unset",
+    ...studioCompeteCardStyles.item,
     display: "block",
     boxSizing: "border-box",
     width: "100%",
-    borderRadius: 20,
-    padding: "16px 17px",
-    background: liquidDarkGlass,
-    border: "0.5px solid rgba(255,255,255,0.32)",
-    boxShadow: liquidDarkGlassShadow,
-    color: "#FFFFFF",
+    background: "rgba(255,255,255,.72)",
+    color: "#60708A",
     cursor: "pointer",
-    backdropFilter: liquidGlassFilter,
-    WebkitBackdropFilter: liquidGlassFilter,
   },
   intelLeadEyebrow: {
     fontSize: 9,
     letterSpacing: "0.16em",
-    color: "#FFFFFF",
+    color: "#60708A",
     fontWeight: 800,
   },
   intelLeadTitle: {
     display: "block",
     marginTop: 9,
-    color: "#FFFFFF",
+    color: "#1A2233",
     fontSize: 22,
     lineHeight: 1.05,
     letterSpacing: "-0.04em",
@@ -1189,52 +1192,39 @@ const T: Record<string, CSSProperties> = {
   intelLeadSub: {
     display: "block",
     marginTop: 8,
-    color: "#FFFFFF",
+    color: "#60708A",
     fontSize: 13,
     lineHeight: 1.42,
   },
-  intelBullets: {
-    display: "grid",
-    gap: 8,
-    marginTop: 10,
-  },
   intelBullet: {
     all: "unset",
+    ...studioCompeteCardStyles.item,
     display: "block",
-    borderRadius: 15,
-    padding: "10px 12px",
-    background: liquidDarkGlass,
-    border: "0.5px solid rgba(255,255,255,0.30)",
-    color: "#FFFFFF",
+    boxSizing: "border-box",
+    background: "rgba(255,255,255,.72)",
+    color: "#60708A",
     fontSize: 12.2,
     lineHeight: 1.34,
     cursor: "pointer",
-    boxShadow: liquidDarkGlassShadow,
-    backdropFilter: liquidGlassFilter,
-    WebkitBackdropFilter: liquidGlassFilter,
   },
   workCard: {
     all: "unset",
+    ...studioCompeteCardStyles.item,
     display: "block",
-    borderRadius: 18,
-    padding: 16,
-    background: liquidDarkGlass,
-    border: "0.5px solid rgba(255, 255, 255, 0.31)",
-    boxShadow: liquidDarkGlassShadow,
+    boxSizing: "border-box",
+    background: "rgba(255,255,255,.72)",
     cursor: "pointer",
-    backdropFilter: liquidGlassFilter,
-    WebkitBackdropFilter: liquidGlassFilter,
   },
   workTitle: {
     marginTop: 0,
-    color: "#FFFFFF",
+    color: "#1A2233",
     fontSize: 21,
     fontWeight: 850,
     letterSpacing: "-0.04em",
   },
   workSub: {
     marginTop: 3,
-    color: "#FFFFFF",
+    color: "#60708A",
     fontSize: 13,
     lineHeight: 1.45,
   },
@@ -1269,75 +1259,23 @@ const T: Record<string, CSSProperties> = {
     color: "#7A8395",
   },
   priorityGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-    gap: 14,
+    ...studioTextureCardStyles.grid,
   },
   priorityCard: {
-    all: "unset",
-    display: "grid",
-    gridTemplateColumns: "50px minmax(0, 1fr) auto",
-    alignItems: "center",
-    gap: 14,
-    minHeight: 96,
-    padding: 16,
-    borderRadius: 20,
-    background: whiteCard,
-    border: "1px solid rgba(255,255,255,0.62)",
-    boxShadow: paperShadow,
-    backdropFilter: "blur(18px) saturate(145%)",
-    WebkitBackdropFilter: "blur(18px) saturate(145%)",
+    ...studioTextureCardStyles.card,
     cursor: "pointer",
-    overflow: "hidden",
-  },
-  priorityNum: {
-    width: 46,
-    height: 46,
-    borderRadius: 16,
-    display: "grid",
-    placeItems: "center",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.60), 0 10px 22px rgba(26,34,51,0.08)",
-    position: "relative",
-    overflow: "hidden",
-  },
-  priorityNumLabel: {
-    fontSize: 13,
-    letterSpacing: "0.08em",
-    fontWeight: 900,
-    fontVariantNumeric: "tabular-nums",
-  },
-  priorityBody: {
-    minWidth: 0,
-    display: "flex",
-    flexDirection: "column",
   },
   priorityKicker: {
-    fontSize: 9,
-    letterSpacing: "0.15em",
-    color: "#8B93A3",
-    fontWeight: 700,
+    ...studioTextureCardStyles.meta,
   },
   priorityTitle: {
-    marginTop: 5,
-    fontSize: 18,
-    fontWeight: 850,
-    letterSpacing: "-0.035em",
-    color: "#1A2233",
+    ...studioTextureCardStyles.title,
   },
   prioritySub: {
-    marginTop: 4,
-    color: "#555E6F",
-    fontSize: 13,
-    lineHeight: 1.4,
+    ...studioTextureCardStyles.detail,
   },
   priorityCta: {
-    alignSelf: "center",
-    borderRadius: 999,
-    padding: "8px 12px",
-    fontSize: 12,
-    fontWeight: 850,
-    whiteSpace: "nowrap",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.60)",
+    ...studioTextureCardStyles.action,
   },
   operatingGrid: {
     marginTop: 18,
@@ -1484,26 +1422,19 @@ const T: Record<string, CSSProperties> = {
     alignItems: "start",
   },
   dealBoard: {
-    overflow: "hidden",
-    borderRadius: 22,
-    background: whiteCard,
-    border: "1px solid rgba(255,255,255,0.62)",
-    boxShadow: paperShadow,
-    backdropFilter: "blur(18px) saturate(145%)",
-    WebkitBackdropFilter: "blur(18px) saturate(145%)",
+    ...studioListCardStyles.panel,
+  },
+  listStack: {
+    ...studioListCardStyles.stack,
   },
   dealRow: {
     all: "unset",
-    display: "grid",
-    gridTemplateColumns: "86px minmax(0, 1fr) 172px",
-    alignItems: "center",
-    gap: 16,
-    width: "100%",
+    ...studioListCardStyles.row,
     boxSizing: "border-box",
-    minHeight: 74,
-    padding: "13px 18px",
-    borderBottom: "1px solid #E7EBF5",
     cursor: "pointer",
+  },
+  dealIcon: {
+    ...studioListCardStyles.icon,
   },
   dealTone: {
     borderRadius: 999,
@@ -1535,48 +1466,28 @@ const T: Record<string, CSSProperties> = {
     whiteSpace: "nowrap",
   },
   dealStats: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr 44px",
-    gap: 10,
-    alignItems: "baseline",
+    display: "flex",
+    gap: 9,
+    alignItems: "center",
     color: "#555E6F",
     fontWeight: 800,
     fontVariantNumeric: "tabular-nums",
     textAlign: "right",
   },
   fileCard: {
-    overflow: "hidden",
-    borderRadius: 22,
-    background: whiteCard,
-    border: "1px solid rgba(255,255,255,0.62)",
-    boxShadow: paperShadow,
-    backdropFilter: "blur(18px) saturate(145%)",
-    WebkitBackdropFilter: "blur(18px) saturate(145%)",
+    ...studioListCardStyles.panel,
   },
   fileRow: {
     all: "unset",
-    width: "100%",
+    ...studioListCardStyles.row,
     boxSizing: "border-box",
-    display: "grid",
-    gridTemplateColumns: "42px minmax(0, 1fr) auto",
-    alignItems: "center",
-    gap: 12,
-    minHeight: 70,
-    padding: "12px 16px",
     cursor: "pointer",
   },
   fileIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 15,
-    display: "grid",
-    placeItems: "center",
-    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.60), 0 10px 18px rgba(26,34,51,0.06)",
+    ...studioListCardStyles.icon,
   },
   fileText: {
-    minWidth: 0,
-    display: "flex",
-    flexDirection: "column",
+    ...studioListCardStyles.body,
   },
   fileTitle: {
     color: "#1A2233",
@@ -1612,14 +1523,8 @@ const T: Record<string, CSSProperties> = {
     lineHeight: 1.45,
   },
   startSection: {
+    ...studioCompeteCardStyles.panel,
     marginTop: 36,
-    padding: 22,
-    borderRadius: 24,
-    backgroundImage: `linear-gradient(165deg, rgba(35,72,104,0.58) 0%, rgba(16,33,55,0.64) 100%), url('${TODAY_START_TEXTURE}')`,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    border: "1px solid rgba(255,255,255,0.30)",
-    boxShadow: "0 40px 104px rgba(26, 34, 51, 0.24), 0 16px 38px rgba(26,34,51,0.13), 0 3px 10px rgba(26,34,51,0.07), inset 0 1px 0 rgba(255,255,255,0.24)",
     display: "grid",
     gridTemplateColumns: "minmax(220px, 0.45fr) minmax(0, 1fr)",
     gap: 20,
@@ -1630,36 +1535,28 @@ const T: Record<string, CSSProperties> = {
     fontSize: 28,
     lineHeight: 1,
     letterSpacing: "-0.045em",
-    color: "#FFFFFF",
+    color: "#1A2233",
   },
   startEyebrow: {
     fontSize: 10,
     letterSpacing: "0.16em",
     fontWeight: 800,
-    color: "#FFFFFF",
+    color: "#60708A",
   },
   quickGrid: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: 10,
-    justifyContent: "flex-end",
+    ...studioCompeteCardStyles.grid,
+    marginTop: 0,
   },
   quickChip: {
     all: "unset",
-    display: "inline-flex",
+    ...studioCompeteCardStyles.item,
+    boxSizing: "border-box",
+    display: "flex",
     alignItems: "center",
-    gap: 8,
-    height: 38,
-    padding: "0 14px",
-    borderRadius: 999,
-    background: liquidDarkGlass,
-    border: "0.5px solid rgba(255,255,255,0.34)",
-    color: "#FFFFFF",
-    fontSize: 13,
-    fontWeight: 800,
+    justifyContent: "space-between",
+    color: "#60708A",
+    fontSize: 14,
+    fontWeight: 850,
     cursor: "pointer",
-    boxShadow: liquidDarkGlassShadow,
-    backdropFilter: liquidGlassFilter,
-    WebkitBackdropFilter: liquidGlassFilter,
   },
 };
