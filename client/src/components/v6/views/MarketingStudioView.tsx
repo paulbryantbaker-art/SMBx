@@ -1,8 +1,17 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { authHeaders, type User } from "../../../hooks/useAuth";
-import { ART_HOUSE_TEXTURES, STUDIO_TEXTURES } from "../../../lib/randomTextures";
+import { STUDIO_TEXTURES } from "../../../lib/randomTextures";
 import type { OpenTab, StudioFormatId, Tab } from "../types";
 import { V19UsageMeter } from "../V19UsageMeter";
+import {
+  studioCompeteCardStyles,
+  studioFormatCardBackground as formatCardBackground,
+  studioGlassBackdrop as glassBackdrop,
+  studioHeroWash,
+  studioLiquidGlass as liquidGlass,
+  studioListCardStyles,
+  studioTextureCardStyles,
+} from "../styles/studioSurfaces";
 
 interface MarketingStudioProps {
   tab: Tab;
@@ -153,33 +162,6 @@ const SAMPLE_BOOKS: PitchBookRecord[] = [
   localBook("qoe-preview-book", "Big Fake Deal - QoE Preview Book"),
   localBook("buyer-pitch-book", "Pest Control FL - Buyer Pitch Book"),
 ];
-
-const FORMAT_TEXTURES: Record<StudioFormatId, string> = {
-  "buyer-pitch-book": STUDIO_TEXTURES.green,
-  "seller-pitch-book": STUDIO_TEXTURES.rose,
-  "ic-deck": STUDIO_TEXTURES.navy,
-  "qoe-preview-book": STUDIO_TEXTURES.blue,
-  "cim-summary-deck": ART_HOUSE_TEXTURES.studioPreview,
-  "board-update": ART_HOUSE_TEXTURES.studioCampaign,
-  "lender-book": ART_HOUSE_TEXTURES.studioCollateral,
-};
-
-const glassBackdrop: CSSProperties = {
-  backdropFilter: "blur(22px) saturate(155%)",
-  WebkitBackdropFilter: "blur(22px) saturate(155%)",
-};
-
-const liquidGlass =
-  "radial-gradient(circle at 18% 0%, rgba(255,255,255,.54), transparent 36%), " +
-  "linear-gradient(135deg, rgba(255,255,255,.58), rgba(245,250,255,.32) 50%, rgba(232,241,252,.20))";
-
-const liquidGlassFilter = "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)";
-const liquidGlassShadow =
-  "0 16px 34px -22px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.34)";
-const liquidDarkGlassShadow =
-  "0 16px 34px -22px rgba(0,0,0,0.52), inset 0 1px 0 rgba(255,255,255,0.34), inset 0 -1px 0 rgba(255,255,255,0.08), inset 0 0 0 0.5px rgba(255,255,255,0.26)";
-const studioHeroWash =
-  `linear-gradient(155deg, rgba(77,39,53,0.52) 0%, rgba(183,103,93,0.34) 48%, rgba(29,30,54,0.58) 100%), url('${STUDIO_TEXTURES.rose}')`;
 
 export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: MarketingStudioProps) {
   const [books, setBooks] = useState<PitchBookRecord[]>([]);
@@ -766,10 +748,6 @@ function formatInitial(value: StudioFormatId): string {
   return formatLabel(value).split(/\s+/).map(part => part[0]).slice(0, 2).join("");
 }
 
-function formatCardBackground(value: StudioFormatId): string {
-  return `linear-gradient(180deg, rgba(14, 31, 50, 0.16), rgba(12, 28, 48, 0.62)), linear-gradient(135deg, rgba(255,255,255,.18), rgba(255,255,255,0) 48%), url('${FORMAT_TEXTURES[value]}')`;
-}
-
 function hashCode(value: string): number {
   return value.split("").reduce((hash, char) => ((hash << 5) - hash + char.charCodeAt(0)) | 0, 0);
 }
@@ -912,60 +890,16 @@ const S: Record<string, CSSProperties> = {
     ...glassBackdrop,
   },
   busyText: { color: "#2E5C8A", fontWeight: 800 },
-  formatGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
-    gap: 12,
-    marginTop: 16,
-  },
-  formatCard: {
-    minHeight: 220,
-    position: "relative",
-    textAlign: "left",
-    borderRadius: 18,
-    padding: 17,
-    border: "1px solid rgba(255,255,255,.28)",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    color: "#FFFFFF",
-    boxShadow: "0 18px 44px rgba(42,65,96,.14), inset 0 1px 0 rgba(255,255,255,.28)",
-    ...glassBackdrop,
-    display: "flex",
-    flexDirection: "column",
-    gap: 8,
-    overflow: "hidden",
-  },
-  formatCardActive: {
-    borderColor: "rgba(255,255,255,.82)",
-    boxShadow: "0 22px 52px rgba(46,92,138,.24), inset 0 0 0 1px rgba(255,255,255,.42)",
-  },
-  formatMeta: { color: "rgba(255,255,255,.74)", fontWeight: 850, fontSize: 12 },
-  formatTitle: { fontSize: 19, lineHeight: 1.05 },
-  formatAudience: { color: "rgba(255,255,255,.86)", fontWeight: 850, fontSize: 12 },
-  formatDetail: { color: "rgba(236,246,255,.90)", fontSize: 13, lineHeight: 1.35, marginTop: "auto" },
-  formatAction: {
-    marginTop: 12,
-    alignSelf: "flex-start",
-    borderRadius: 999,
-    padding: "7px 12px",
-    background: "rgba(26,34,51,.46)",
-    border: "1px solid rgba(255,255,255,.24)",
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: 850,
-    boxShadow: liquidDarkGlassShadow,
-    backdropFilter: liquidGlassFilter,
-    WebkitBackdropFilter: liquidGlassFilter,
-  },
+  formatGrid: studioTextureCardStyles.grid,
+  formatCard: studioTextureCardStyles.card,
+  formatCardActive: studioTextureCardStyles.active,
+  formatMeta: studioTextureCardStyles.meta,
+  formatTitle: studioTextureCardStyles.title,
+  formatAudience: studioTextureCardStyles.audience,
+  formatDetail: studioTextureCardStyles.detail,
+  formatAction: studioTextureCardStyles.action,
   lowerGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 420px), 1fr))", gap: 24, marginTop: 28 },
-  bookPanel: {
-    borderRadius: 24,
-    padding: 20,
-    background: liquidGlass,
-    border: "1px solid rgba(255,255,255,.55)",
-    boxShadow: "0 18px 44px rgba(42,65,96,.10), inset 0 1px 0 rgba(255,255,255,.72)",
-    ...glassBackdrop,
-  },
+  bookPanel: studioListCardStyles.panel,
   panelHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 },
   smallPill: {
     padding: "7px 10px",
@@ -975,67 +909,15 @@ const S: Record<string, CSSProperties> = {
     fontWeight: 800,
     fontSize: 12,
   },
-  bookStack: { display: "grid", gap: 10, marginTop: 18 },
-  bookRow: {
-    display: "grid",
-    gridTemplateColumns: "48px minmax(0, 1fr) auto",
-    alignItems: "center",
-    gap: 12,
-    width: "100%",
-    padding: 12,
-    borderRadius: 18,
-    background: "rgba(247,250,255,.82)",
-    border: "1px solid rgba(153,176,209,.32)",
-    textAlign: "left",
-  },
-  bookIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 15,
-    display: "grid",
-    placeItems: "center",
-    color: "#fff",
-    fontWeight: 900,
-    background: "linear-gradient(135deg, #8A9AE8, #2E5C8A)",
-  },
-  bookBody: { display: "grid", gap: 3, minWidth: 0 },
-  cleanPill: {
-    padding: "7px 10px",
-    borderRadius: 999,
-    background: "rgba(111,174,149,.16)",
-    color: "#2F735D",
-    fontWeight: 900,
-    fontSize: 12,
-  },
-  warnPill: {
-    padding: "7px 10px",
-    borderRadius: 999,
-    background: "rgba(201,162,78,.17)",
-    color: "#8B6422",
-    fontWeight: 900,
-    fontSize: 12,
-  },
-  diffPanel: {
-    borderRadius: 24,
-    padding: 22,
-    backgroundImage: `radial-gradient(circle at 10% 0%, rgba(255,255,255,.58), transparent 38%), linear-gradient(135deg, rgba(255,255,255,.74), rgba(238,245,255,.44)), url('${STUDIO_TEXTURES.blue}')`,
-    backgroundSize: "cover",
-    border: "1px solid rgba(255,255,255,.55)",
-    boxShadow: "0 18px 44px rgba(42,65,96,.10), inset 0 1px 0 rgba(255,255,255,.72)",
-    ...glassBackdrop,
-  },
-  diffGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 210px), 1fr))", gap: 12, marginTop: 20 },
-  diffItem: {
-    minHeight: 118,
-    borderRadius: 18,
-    padding: 14,
-    background: "rgba(255,255,255,.68)",
-    border: "1px solid rgba(153,176,209,.36)",
-    display: "grid",
-    gap: 8,
-    alignContent: "start",
-    color: "#60708A",
-  },
+  bookStack: studioListCardStyles.stack,
+  bookRow: studioListCardStyles.row,
+  bookIcon: studioListCardStyles.icon,
+  bookBody: studioListCardStyles.body,
+  cleanPill: studioListCardStyles.cleanPill,
+  warnPill: studioListCardStyles.warnPill,
+  diffPanel: studioCompeteCardStyles.panel,
+  diffGrid: studioCompeteCardStyles.grid,
+  diffItem: studioCompeteCardStyles.item,
   canvasPage: {
     width: "min(1440px, calc(100% - 32px))",
     margin: "0 auto",
