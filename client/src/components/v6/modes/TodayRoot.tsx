@@ -502,7 +502,6 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
 
           <button
             type="button"
-            className="m-glass-control"
             style={T.intelLead}
             onClick={() => ask("Show me the portfolio market intelligence read. Separate market, buyer/capital, tax, legal, and source gaps.")}
           >
@@ -517,7 +516,6 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
                 <button
                   key={bullet}
                   type="button"
-                  className="m-glass-control"
                   style={T.intelBullet}
                   onClick={() => ask(`Unpack this market intelligence note: ${bullet}`)}
                 >
@@ -531,7 +529,6 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
             {liveDesk.map(item => (
               <button
                 key={item.title}
-                className="m-glass-control"
                 style={T.workCard}
                 onClick={() => ask(item.prompt || `${item.eyebrow.toLowerCase()}: ${item.title}. What changed and what should I do next?`)}
                 type="button"
@@ -637,7 +634,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
         </div>
         <div style={T.quickGrid}>
           {QUICK_STARTS.map(prompt => (
-            <button key={prompt} className="m-glint m-glass-control" style={T.quickChip} onClick={() => ask(prompt)} type="button">
+            <button key={prompt} style={T.quickChip} onClick={() => ask(prompt)} type="button">
               {prompt}
               <span aria-hidden="true">↗</span>
             </button>
@@ -897,13 +894,15 @@ const liquidGlassShadow =
   "0 16px 34px -22px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.34)";
 const liquidDarkGlassShadow =
   "0 16px 34px -22px rgba(0,0,0,0.52), inset 0 1px 0 rgba(255,255,255,0.34), inset 0 -1px 0 rgba(255,255,255,0.08), inset 0 0 0 0.5px rgba(255,255,255,0.26)";
+const studioGlassBackdrop: CSSProperties = {
+  backdropFilter: "blur(22px) saturate(155%)",
+  WebkitBackdropFilter: "blur(22px) saturate(155%)",
+};
 const todayHeroWash = (sample: boolean) =>
   sample
     ? `linear-gradient(155deg, rgba(77,39,53,0.52) 0%, rgba(183,103,93,0.34) 48%, rgba(29,30,54,0.58) 100%), url('${DESKTOP_TEXTURES.todayHeroSample}')`
     : `linear-gradient(155deg, rgba(18,51,61,0.58) 0%, rgba(78,128,111,0.35) 48%, rgba(13,26,46,0.62) 100%), url('${DESKTOP_TEXTURES.todayHeroWorkspace}')`;
-const TODAY_MARKET_TEXTURE = "/textures/desktop/art-house/art-house-03.png?v=20260516-market-room-1";
 const TODAY_START_TEXTURE = "/textures/desktop/random/texture-random-10.png?v=20260516-start-cool-1";
-const marketWash = `linear-gradient(165deg, rgba(7,22,38,0.82) 0%, rgba(25,80,114,0.61) 54%, rgba(5,17,31,0.86) 100%), url('${TODAY_MARKET_TEXTURE}')`;
 
 const T: Record<string, CSSProperties> = {
   page: {
@@ -1118,16 +1117,16 @@ const T: Record<string, CSSProperties> = {
   },
   marketPanel: {
     borderRadius: 24,
-    backgroundImage: marketWash,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    color: "#FFFFFF",
+    backgroundImage: `radial-gradient(circle at 10% 0%, rgba(255,255,255,.58), transparent 38%), linear-gradient(135deg, rgba(255,255,255,.74), rgba(238,245,255,.44)), url('${STUDIO_TEXTURES.blue}')`,
+    backgroundSize: "cover",
+    color: "#172033",
     padding: 22,
-    boxShadow: "0 30px 82px rgba(26, 34, 51, 0.22), 0 12px 30px rgba(26,34,51,0.10), inset 0 1px 0 rgba(255,255,255,0.24)",
-    border: "1px solid rgba(255,255,255,0.24)",
+    boxShadow: "0 18px 44px rgba(42,65,96,.10), inset 0 1px 0 rgba(255,255,255,.72)",
+    border: "1px solid rgba(255,255,255,.55)",
     display: "flex",
     flexDirection: "column",
     overflow: "hidden",
+    ...studioGlassBackdrop,
   },
   liveHeader: {
     display: "flex",
@@ -1141,13 +1140,13 @@ const T: Record<string, CSSProperties> = {
     fontSize: 28,
     lineHeight: 1,
     letterSpacing: "-0.04em",
-    color: "#FFFFFF",
+    color: "#172033",
   },
   marketEyebrow: {
     fontSize: 10,
     letterSpacing: "0.16em",
     fontWeight: 800,
-    color: "#FFFFFF",
+    color: "#60708A",
   },
   workStack: {
     display: "flex",
@@ -1158,40 +1157,40 @@ const T: Record<string, CSSProperties> = {
   },
   intelLead: {
     all: "unset",
-    display: "block",
+    display: "grid",
     boxSizing: "border-box",
     width: "100%",
-    borderRadius: 20,
-    padding: "16px 17px",
-    background: liquidDarkGlass,
-    border: "0.5px solid rgba(255,255,255,0.32)",
-    boxShadow: liquidDarkGlassShadow,
-    color: "#FFFFFF",
+    minHeight: 118,
+    borderRadius: 18,
+    padding: 14,
+    background: "rgba(255,255,255,.68)",
+    border: "1px solid rgba(153,176,209,.36)",
+    gap: 8,
+    alignContent: "start",
+    color: "#60708A",
     cursor: "pointer",
-    backdropFilter: liquidGlassFilter,
-    WebkitBackdropFilter: liquidGlassFilter,
   },
   intelLeadEyebrow: {
     fontSize: 9,
     letterSpacing: "0.16em",
-    color: "#FFFFFF",
+    color: "#60708A",
     fontWeight: 800,
   },
   intelLeadTitle: {
     display: "block",
-    marginTop: 9,
-    color: "#FFFFFF",
-    fontSize: 22,
+    marginTop: 0,
+    color: "#60708A",
+    fontSize: 20,
     lineHeight: 1.05,
     letterSpacing: "-0.04em",
     fontWeight: 850,
   },
   intelLeadSub: {
     display: "block",
-    marginTop: 8,
-    color: "#FFFFFF",
-    fontSize: 13,
-    lineHeight: 1.42,
+    marginTop: 0,
+    color: "#60708A",
+    fontSize: 14,
+    lineHeight: 1.4,
   },
   intelBullets: {
     display: "grid",
@@ -1200,49 +1199,50 @@ const T: Record<string, CSSProperties> = {
   },
   intelBullet: {
     all: "unset",
-    display: "block",
-    borderRadius: 15,
-    padding: "10px 12px",
-    background: liquidDarkGlass,
-    border: "0.5px solid rgba(255,255,255,0.30)",
-    color: "#FFFFFF",
-    fontSize: 12.2,
-    lineHeight: 1.34,
+    minHeight: 118,
+    borderRadius: 18,
+    padding: 14,
+    background: "rgba(255,255,255,.68)",
+    border: "1px solid rgba(153,176,209,.36)",
+    display: "grid",
+    gap: 8,
+    alignContent: "start",
+    color: "#60708A",
+    fontSize: 14,
+    lineHeight: 1.4,
     cursor: "pointer",
-    boxShadow: liquidDarkGlassShadow,
-    backdropFilter: liquidGlassFilter,
-    WebkitBackdropFilter: liquidGlassFilter,
   },
   workCard: {
     all: "unset",
-    display: "block",
+    minHeight: 118,
     borderRadius: 18,
-    padding: 16,
-    background: liquidDarkGlass,
-    border: "0.5px solid rgba(255, 255, 255, 0.31)",
-    boxShadow: liquidDarkGlassShadow,
+    padding: 14,
+    background: "rgba(255,255,255,.68)",
+    border: "1px solid rgba(153,176,209,.36)",
+    display: "grid",
+    gap: 8,
+    alignContent: "start",
+    color: "#60708A",
     cursor: "pointer",
-    backdropFilter: liquidGlassFilter,
-    WebkitBackdropFilter: liquidGlassFilter,
   },
   workTitle: {
     marginTop: 0,
-    color: "#FFFFFF",
-    fontSize: 21,
+    color: "#60708A",
+    fontSize: 16,
     fontWeight: 850,
     letterSpacing: "-0.04em",
   },
   workSub: {
     marginTop: 3,
-    color: "#FFFFFF",
-    fontSize: 13,
+    color: "#60708A",
+    fontSize: 12.5,
     lineHeight: 1.45,
   },
   meterTrack: {
     marginTop: 14,
     height: 6,
     borderRadius: 999,
-    background: "rgba(255, 255, 255, 0.12)",
+    background: "rgba(96,112,138,0.14)",
     overflow: "hidden",
   },
   meterFill: {
@@ -1271,32 +1271,31 @@ const T: Record<string, CSSProperties> = {
   priorityGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-    gap: 14,
+    gap: 12,
   },
   priorityCard: {
     all: "unset",
     display: "grid",
-    gridTemplateColumns: "50px minmax(0, 1fr) auto",
+    gridTemplateColumns: "48px minmax(0, 1fr) auto",
     alignItems: "center",
-    gap: 14,
-    minHeight: 96,
-    padding: 16,
-    borderRadius: 20,
-    background: whiteCard,
-    border: "1px solid rgba(255,255,255,0.62)",
-    boxShadow: paperShadow,
-    backdropFilter: "blur(18px) saturate(145%)",
-    WebkitBackdropFilter: "blur(18px) saturate(145%)",
+    gap: 12,
+    width: "100%",
+    padding: 12,
+    borderRadius: 18,
+    background: "rgba(247,250,255,.82)",
+    border: "1px solid rgba(153,176,209,.32)",
+    textAlign: "left",
     cursor: "pointer",
     overflow: "hidden",
+    boxSizing: "border-box",
   },
   priorityNum: {
-    width: 46,
-    height: 46,
-    borderRadius: 16,
+    width: 44,
+    height: 44,
+    borderRadius: 15,
     display: "grid",
     placeItems: "center",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.60), 0 10px 22px rgba(26,34,51,0.08)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.60)",
     position: "relative",
     overflow: "hidden",
   },
@@ -1642,8 +1641,8 @@ const T: Record<string, CSSProperties> = {
   },
   quickGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
-    gap: 12,
+    gridTemplateColumns: "repeat(auto-fit, minmax(178px, 1fr))",
+    gap: 10,
   },
   quickChip: {
     all: "unset",
@@ -1651,13 +1650,13 @@ const T: Record<string, CSSProperties> = {
     alignItems: "center",
     justifyContent: "space-between",
     gap: 8,
-    minHeight: 54,
-    padding: "12px 14px",
-    borderRadius: 18,
+    minHeight: 42,
+    padding: "9px 12px",
+    borderRadius: 15,
     background: "rgba(255,255,255,.68)",
     border: "1px solid rgba(153,176,209,.36)",
     color: "#60708A",
-    fontSize: 13,
+    fontSize: 12.5,
     fontWeight: 800,
     lineHeight: 1.2,
     cursor: "pointer",
