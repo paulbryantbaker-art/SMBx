@@ -13,6 +13,7 @@ const heroTex = (n: number) => `/textures/texture-hero-${n}.png?${VERSION}`;
 const cardTex = (n: number) => `/textures/texture-card-${n}.png?${VERSION}`;
 const desktopHeroTex = (n: number) => `/textures/desktop/texture-hero-${n}.png?${VERSION}`;
 const desktopRandomTex = (n: number) => `/textures/desktop/random/texture-random-${String(n).padStart(2, "0")}.png?${VERSION}`;
+const desktopRandomNamedTex = (name: string) => `/textures/desktop/random/${name}.png?${VERSION}`;
 const desktopTodayRoseGold = () => `/textures/desktop/texture-today-rose-gold.png?${VERSION}`;
 const artHouseTex = (n: number) => `/textures/desktop/art-house/art-house-${String(n).padStart(2, "0")}.png?${VERSION}`;
 
@@ -126,7 +127,7 @@ export const DESKTOP_TEXTURES = {
 
 export const STUDIO_TEXTURES = {
   rose: desktopTodayRoseGold(),
-  blue: desktopRandomTex(24),
+  blue: desktopRandomNamedTex("texture-random-24-clean"),
   green: desktopRandomTex(26),
   navy: desktopRandomTex(4),
 } as const;

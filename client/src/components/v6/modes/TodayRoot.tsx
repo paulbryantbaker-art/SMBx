@@ -1132,9 +1132,6 @@ const T: Record<string, CSSProperties> = {
   },
   marketPanel: {
     ...studioCompeteCardStyles.panel,
-    backgroundSize: "100% 100%, 100% 100%, 100% auto",
-    backgroundRepeat: "no-repeat, no-repeat, no-repeat",
-    backgroundPosition: "center, center, center bottom",
     color: "#1A2233",
     display: "flex",
     flexDirection: "column",
