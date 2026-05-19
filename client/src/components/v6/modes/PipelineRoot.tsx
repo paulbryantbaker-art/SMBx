@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from "react";
 import { V6Section } from "../Canvas";
 import { V6Icon } from "../icons";
-import { V6DealCard, type Verdict } from "./cards";
+import type { Verdict } from "./cards";
 import type { OpenTab } from "../types";
 import { DEV_AUTH_BYPASS, type User } from "../../../hooks/useAuth";
 import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
@@ -16,6 +16,7 @@ import {
 } from "../../../lib/v6ActionContracts";
 import type { SurfaceActionId } from "../../../lib/v6SurfaceActions";
 import { buildBigFakeInvestmentBoardTab } from "../../../lib/sampleInvestmentBoard";
+import { GATE_MAP, getGateV19Requirements, getJourneyGates, getNextGate } from "@shared/gateRegistry";
 
 interface PipelineDeal {
   verdict: Verdict;
@@ -26,14 +27,41 @@ interface PipelineDeal {
   sde: string;
   multiple: string;
   note: string;
+  league: string;
+  journey: "buy" | "sell" | "raise" | "pmi";
+  gateId: string;
+  gateName: string;
+  nextGateName: string;
+  stageId: PipelineStageId;
+  methodologyProgress: number;
+  requiredModels: number;
+  requiredCitations: number;
+  blocker: string;
+  yuliaMove: string;
 }
 
+type PipelineStageId = "source" | "value" | "diligence" | "structure" | "close";
+
+interface PipelineStage {
+  id: PipelineStageId;
+  title: string;
+  sub: string;
+}
+
+const PIPELINE_STAGES: PipelineStage[] = [
+  { id: "source", title: "Source", sub: "Thesis, intake, first read" },
+  { id: "value", title: "Value", sub: "Valuation and finance fit" },
+  { id: "diligence", title: "Diligence", sub: "QoE, files, legal watch" },
+  { id: "structure", title: "Structure", sub: "Terms, tax, approvals" },
+  { id: "close", title: "Close / PMI", sub: "Closing and value creation" },
+];
+
 const SAMPLE_DEALS: PipelineDeal[] = [
-  { verdict: "pursue", id: "deal-bigfake", name: "Big Fake Deal", sub: "$5.4M · East Texas", fit: 92, sde: "$1.80M", multiple: "7.0x", note: "Recurring revenue. Honest add-backs. Working-cap language needs one more pass." },
-  { verdict: "pursue", id: "deal-pest", name: "Pest Control · FL", sub: "$2.1M · recurring route density", fit: 88, sde: "$1.40M", multiple: "6.5x", note: "Route density is stronger than first read. Ask for churn by route before moving up." },
-  { verdict: "watch", id: "deal-hvac", name: "HVAC platform · CO", sub: "$4.8M · service mix under review", fit: 71, sde: "$0.95M", multiple: "6.8x", note: "Clean financials, but succession risk is still the story." },
-  { verdict: "watch", id: "deal-electrical", name: "Electrical Contractor · TX", sub: "$8.7M · Austin", fit: 78, sde: "$2.10M", multiple: "6.0x", note: "Margins are good. Customer concentration keeps it from being a pursue yet." },
-  { verdict: "pass", id: "deal-dist", name: "Distribution · OH", sub: "$11.2M · Cleveland", fit: 61, sde: "$1.55M", multiple: "8.5x", note: "Asking is rich, margins are thin, and inventory turns are slowing." },
+  enrichPipelineDeal({ verdict: "pursue", id: "deal-bigfake", name: "Big Fake Deal", sub: "$5.4M · East Texas", fit: 92, sde: "$1.80M", multiple: "7.0x", note: "Recurring revenue. Honest add-backs. Working-cap language needs one more pass.", league: "L3", gateId: "B3", blocker: "NWC/add-back support" }),
+  enrichPipelineDeal({ verdict: "pursue", id: "deal-pest", name: "Pest Control · FL", sub: "$2.1M · recurring route density", fit: 88, sde: "$1.40M", multiple: "6.5x", note: "Route density is stronger than first read. Ask for churn by route before moving up.", league: "L2", gateId: "B2", blocker: "Churn by route" }),
+  enrichPipelineDeal({ verdict: "watch", id: "deal-hvac", name: "HVAC platform · CO", sub: "$4.8M · service mix under review", fit: 71, sde: "$0.95M", multiple: "6.8x", note: "Clean financials, but succession risk is still the story.", league: "L3", gateId: "B3", blocker: "Succession risk" }),
+  enrichPipelineDeal({ verdict: "watch", id: "deal-electrical", name: "Electrical Contractor · TX", sub: "$8.7M · Austin", fit: 78, sde: "$2.10M", multiple: "6.0x", note: "Margins are good. Customer concentration keeps it from being a pursue yet.", league: "L3", gateId: "B2", blocker: "Customer concentration" }),
+  enrichPipelineDeal({ verdict: "pass", id: "deal-dist", name: "Distribution · OH", sub: "$11.2M · Cleveland", fit: 61, sde: "$1.55M", multiple: "8.5x", note: "Asking is rich, margins are thin, and inventory turns are slowing.", league: "L3", gateId: "B1", blocker: "Inventory turns" }),
 ];
 
 interface PipelineRootProps {
@@ -53,15 +81,24 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
   const realDeals = home.inReview.length > 0 ? home.inReview : home.picks;
   const operatingDeals = operating.brief?.dealPulse ?? [];
   const gateCountdown = useSampleData ? [] : (operating.brief?.gateCountdown ?? []);
+  const gateCountdownByDeal = new Map(gateCountdown.map(item => [item.dealId, item]));
   const deals = useSampleData
     ? SAMPLE_DEALS
     : operatingDeals.length
-      ? operatingDeals.map(dealPulseToPipelineDeal)
+      ? operatingDeals.map(item => dealPulseToPipelineDeal(item, gateCountdownByDeal.get(item.dealId)))
       : realDeals.map(dealToPipelineDeal);
 
   const pursue = deals.filter(d => d.verdict === "pursue");
   const watch = deals.filter(d => d.verdict === "watch");
   const pass = deals.filter(d => d.verdict === "pass");
+  const boardStages = PIPELINE_STAGES.map(stage => ({
+    ...stage,
+    deals: deals.filter(deal => deal.stageId === stage.id),
+  }));
+  const activeLeagueCount = new Set(deals.map(deal => deal.league)).size;
+  const modelCount = deals.reduce((sum, deal) => sum + deal.requiredModels, 0);
+  const citationCount = deals.reduce((sum, deal) => sum + deal.requiredCitations, 0);
+  const autoMoveCount = deals.filter(deal => deal.requiredModels + deal.requiredCitations > 0).length;
   const selectedHomeDeal = useSampleData ? null : pickActionDeal(realDeals);
   const actionDeal = selectedHomeDeal ? homeDealToActionDeal(selectedHomeDeal) : null;
   const actionDeals = realDeals.map(homeDealToActionDeal);
@@ -142,8 +179,8 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
       <section style={P.hero}>
         <div style={P.heroCopy}>
           <div className="mono" style={P.eyebrow}>PIPELINE</div>
-          <h1 style={P.title}>Every deal, ranked by what deserves attention.</h1>
-          <p style={P.sub}>Same hierarchy as mobile: pursue, watch, pass, and the files or analyses behind each deal.</p>
+          <h1 style={P.title}>Run every opportunity against the method.</h1>
+          <p style={P.sub}>Pipeline is the deal Kanban: Yulia tracks each opportunity by league, gate, model stack, source gaps, and the next move before it advances.</p>
         </div>
         <div style={P.stats}>
           <PipelineStat label="Pursue" value={pursue.length} tone="#92E1BC" />
@@ -160,18 +197,26 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
         />
       )}
 
-      <V6Section
-        eyebrow="IN REVIEW"
-        title="Live deals"
-        sub="Open a deal to review Yulia's read, linked files, and current action."
-        action={
-          <button className="m-btn tonal" onClick={() => onTalkToYulia?.("Rank my pipeline by what deserves attention today.")} type="button">
-            Ask Yulia to rank
+      <section style={P.boardShell}>
+        <div style={P.boardHeader}>
+          <div>
+            <h2 style={P.boardTitle}>Opportunity board</h2>
+            <p style={P.boardSub}>Stages are methodology gates. League determines how deep Yulia goes before a deal can move forward.</p>
+          </div>
+          <button className="m-btn tonal" onClick={() => onTalkToYulia?.("Rank my pipeline by methodology readiness, blockers, and the next Yulia move for each deal.")} type="button">
+            Rank with Yulia
           </button>
-        }
-      >
-        <div style={P.dealGrid}>
-          {deals.length === 0 && (
+        </div>
+
+        <div style={P.methodologyStrip}>
+          <MethodologyChip label="Leagues" value={activeLeagueCount || 0} />
+          <MethodologyChip label="Models watched" value={modelCount} />
+          <MethodologyChip label="Citations needed" value={citationCount} />
+          <MethodologyChip label="Auto-move checks" value={autoMoveCount} />
+        </div>
+
+        <div style={P.kanbanGrid}>
+          {deals.length === 0 ? (
             <div style={P.emptyCard}>
               <strong>No deals yet</strong>
               <span>Start with a chat, source file, thesis, target, or buyer pool and Yulia will create the first deal workspace.</span>
@@ -179,16 +224,16 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
                 Start with Yulia
               </button>
             </div>
-          )}
-          {deals.map(deal => (
-            <V6DealCard
-              key={deal.id}
-              {...deal}
-              onClick={() => openTab({ kind: "deal", id: deal.id, title: deal.name })}
+          ) : boardStages.map(stage => (
+            <KanbanColumn
+              key={stage.id}
+              stage={stage}
+              openTab={openTab}
+              onTalkToYulia={onTalkToYulia}
             />
           ))}
         </div>
-      </V6Section>
+      </section>
 
       <V6Section eyebrow="YULIA NEXT" title="Pipeline actions">
         {(actionError || actionNote) && (
@@ -268,13 +313,158 @@ function GateCountdownStrip({
   );
 }
 
+function MethodologyChip({ label, value }: { label: string; value: number | string }) {
+  return (
+    <div style={P.methodologyChip}>
+      <strong style={P.methodologyValue}>{value}</strong>
+      <span style={P.methodologyLabel}>{label}</span>
+    </div>
+  );
+}
+
+function KanbanColumn({
+  stage,
+  openTab,
+  onTalkToYulia,
+}: {
+  stage: PipelineStage & { deals: PipelineDeal[] };
+  openTab: OpenTab;
+  onTalkToYulia?: (prompt: string) => void;
+}) {
+  return (
+    <section style={P.kanbanColumn}>
+      <div style={P.kanbanHead}>
+        <div>
+          <h3 style={P.kanbanTitle}>{stage.title}</h3>
+          <p style={P.kanbanSub}>{stage.sub}</p>
+        </div>
+        <span style={P.kanbanCount}>{stage.deals.length}</span>
+      </div>
+      <div style={P.kanbanStack}>
+        {stage.deals.length === 0 ? (
+          <div style={P.kanbanEmpty}>No opportunities at this gate.</div>
+        ) : stage.deals.map(deal => (
+          <OpportunityCard
+            key={deal.id}
+            deal={deal}
+            onOpen={() => openTab({ kind: "deal", id: deal.id, title: deal.name })}
+            onAsk={() => onTalkToYulia?.(`For ${deal.name}, show the current ${deal.league} ${deal.gateId} methodology state, blockers, required models, required citations, and the next Yulia move.`)}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function OpportunityCard({
+  deal,
+  onOpen,
+  onAsk,
+}: {
+  deal: PipelineDeal;
+  onOpen: () => void;
+  onAsk: () => void;
+}) {
+  const tone = verdictTone(deal.verdict);
+
+  return (
+    <article style={P.opportunityCard}>
+      <button type="button" style={P.opportunityMain} onClick={onOpen}>
+        <span style={{ ...P.opportunityAccent, background: tone.accent }} />
+        <span style={P.opportunityTop}>
+          <strong style={P.opportunityName}>{deal.name}</strong>
+          <span style={{ ...P.verdictPill, color: tone.ink, background: tone.soft }}>{tone.label}</span>
+        </span>
+        <span style={P.opportunitySub}>{deal.sub}</span>
+        <span style={P.gateLine}>
+          <strong>{deal.league}</strong>
+          <span>{deal.gateId} · {deal.gateName}</span>
+        </span>
+        <span style={P.progressTrack}>
+          <span style={{ ...P.progressFill, width: `${deal.methodologyProgress}%`, background: tone.accent }} />
+        </span>
+        <span style={P.opportunityMeta}>
+          <span>{deal.requiredModels} models</span>
+          <span>{deal.requiredCitations} citations</span>
+          <span>Next: {deal.nextGateName}</span>
+        </span>
+        <span style={P.opportunityNote}>{deal.note}</span>
+      </button>
+      <button type="button" style={P.yuliaMove} onClick={onAsk}>
+        <span>{deal.yuliaMove}</span>
+        <span aria-hidden="true">›</span>
+      </button>
+      <div style={P.blockerLine}>
+        <span>Blocking</span>
+        <strong>{deal.blocker}</strong>
+      </div>
+    </article>
+  );
+}
+
 function PipelineStat({ label, value, tone }: { label: string; value: number; tone: string }) {
   return (
     <div style={P.stat}>
-      <span className="mono" style={P.statLabel}>{label}</span>
       <strong style={{ ...P.statValue, color: tone }}>{value}</strong>
+      <span style={P.statLabel}>{label}</span>
     </div>
   );
+}
+
+type PipelineDealSeed = Pick<PipelineDeal, "verdict" | "id" | "name" | "sub" | "fit" | "sde" | "multiple" | "note" | "league" | "gateId" | "blocker">;
+
+function enrichPipelineDeal(seed: PipelineDealSeed): PipelineDeal {
+  const gate = GATE_MAP[seed.gateId] ?? GATE_MAP.B2;
+  const nextGateId = getNextGate(gate.id);
+  const nextGate = nextGateId ? GATE_MAP[nextGateId] : null;
+  const requirements = getGateV19Requirements(gate.id);
+  const stageId = stageForGate(gate.id);
+
+  return {
+    ...seed,
+    journey: gate.journey,
+    gateName: gate.name,
+    nextGateName: nextGate ? `${nextGate.id} ${nextGate.name}` : "Ready to close",
+    stageId,
+    methodologyProgress: methodologyProgressForGate(gate.id),
+    requiredModels: requirements.requiredModels.length,
+    requiredCitations: requirements.requiredCitations.length,
+    yuliaMove: yuliaMoveForGate(gate.id, seed.verdict),
+  };
+}
+
+function stageForGate(gateId: string): PipelineStageId {
+  if (/^(S|B|R)[01]$/.test(gateId)) return "source";
+  if (/^(S|B|R)2$/.test(gateId)) return "value";
+  if (/^(S|B)3$/.test(gateId) || gateId === "R3") return "diligence";
+  if (/^(S|B|R)4$/.test(gateId)) return "structure";
+  return "close";
+}
+
+function methodologyProgressForGate(gateId: string): number {
+  const gate = GATE_MAP[gateId];
+  if (!gate) return 35;
+  const gates = getJourneyGates(gate.journey);
+  const lastIndex = Math.max(...gates.map(item => item.index), 1);
+  return Math.max(12, Math.round((gate.index / lastIndex) * 100));
+}
+
+function yuliaMoveForGate(gateId: string, verdict: Verdict): string {
+  if (verdict === "pass") return "Hold until facts change";
+  if (/^(S|B|R)[01]$/.test(gateId)) return "Build the first read";
+  if (/^(S|B|R)2$/.test(gateId)) return "Run value and finance checks";
+  if (/^(S|B)3$/.test(gateId)) return "Pull diligence into the file";
+  if (/^(S|B|R)4$/.test(gateId)) return "Resolve structure and approvals";
+  return "Prep closing or PMI work";
+}
+
+function verdictTone(verdict: Verdict) {
+  const tones: Record<Verdict, { label: string; accent: string; ink: string; soft: string }> = {
+    pursue: { label: "Pursue", accent: "#5EA987", ink: "#2F735D", soft: "rgba(111,174,149,.16)" },
+    watch: { label: "Watch", accent: "#C39A40", ink: "#8B6422", soft: "rgba(201,162,78,.17)" },
+    pass: { label: "Pass", accent: "#B96B64", ink: "#873E37", soft: "rgba(185,107,100,.15)" },
+  };
+  return tones[verdict];
 }
 
 function fmtCents(cents: number | null | undefined): string {
@@ -301,14 +491,14 @@ function verdictFromGate(gate: string): Verdict {
   return "watch";
 }
 
-function dealPulseToPipelineDeal(item: TodayDealPulseItem): PipelineDeal {
+function dealPulseToPipelineDeal(item: TodayDealPulseItem, gateItem?: TodayGateCountdownItem): PipelineDeal {
   const status = item.status.toLowerCase();
   const verdict: Verdict = status.includes("pursue")
     ? "pursue"
     : status.includes("hold") || status.includes("pass")
       ? "pass"
       : "watch";
-  return {
+  return enrichPipelineDeal({
     verdict,
     id: item.dealId,
     name: item.title,
@@ -317,12 +507,15 @@ function dealPulseToPipelineDeal(item: TodayDealPulseItem): PipelineDeal {
     sde: item.metric,
     multiple: "--",
     note: item.thesis || item.nextAction,
-  };
+    league: "L3",
+    gateId: gateItem?.gateId || gateForVerdict(verdict),
+    blocker: gateItem?.blockers[0] || item.nextAction,
+  });
 }
 
 function dealToPipelineDeal(d: HomeDeal): PipelineDeal {
   const sde = fmtCents(d.sde);
-  return {
+  return enrichPipelineDeal({
     verdict: verdictFromGate(d.current_gate),
     id: String(d.id),
     name: d.business_name || d.industry || `Deal #${d.id}`,
@@ -331,7 +524,28 @@ function dealToPipelineDeal(d: HomeDeal): PipelineDeal {
     sde,
     multiple: d.financials?.multiple ? `${d.financials.multiple.toFixed(1)}x` : "--",
     note: d.financials?.notes || `${sde} SDE · ${d.current_gate}`,
-  };
+    league: d.league || inferLeague(d),
+    gateId: d.current_gate || "B2",
+    blocker: d.financials?.notes || "Next required model/source check",
+  });
+}
+
+function gateForVerdict(verdict: Verdict): string {
+  if (verdict === "pursue") return "B3";
+  if (verdict === "pass") return "B1";
+  return "B2";
+}
+
+function inferLeague(d: HomeDeal): string {
+  const ebitda = d.ebitda ?? 0;
+  const sde = d.sde ?? 0;
+  const revenue = d.revenue ?? 0;
+
+  if (ebitda >= 25_000_000_00) return "L5";
+  if (ebitda >= 5_000_000_00) return "L4";
+  if (ebitda >= 1_000_000_00) return "L3";
+  if (sde >= 300_000_00 || revenue >= 1_000_000_00) return "L2";
+  return "L1";
 }
 
 function journeyFromHomeDeal(d: HomeDeal): string {
@@ -432,6 +646,9 @@ const P: Record<string, CSSProperties> = {
     minHeight: 76,
     padding: 18,
     borderRadius: 20,
+    display: "flex",
+    alignItems: "center",
+    gap: 14,
     background: "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.24), transparent 44%), linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05))",
     border: "0.5px solid rgba(255,255,255,0.36)",
     boxShadow: "0 16px 34px -22px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.34)",
@@ -440,14 +657,14 @@ const P: Record<string, CSSProperties> = {
   },
   statLabel: {
     display: "block",
-    fontSize: 9,
-    letterSpacing: "0.14em",
-    color: "#FFFFFF",
-    fontWeight: 800,
+    marginTop: 2,
+    fontSize: 15,
+    letterSpacing: "-0.02em",
+    color: "rgba(255,255,255,.86)",
+    fontWeight: 850,
   },
   statValue: {
     display: "block",
-    marginTop: 7,
     fontSize: 34,
     lineHeight: 1,
     fontVariantNumeric: "tabular-nums",
@@ -538,6 +755,236 @@ const P: Record<string, CSSProperties> = {
     color: "var(--m-on-surface-mid)",
     fontSize: 24,
     lineHeight: 1,
+  },
+  boardShell: {
+    margin: "0 0 30px",
+    padding: 20,
+    borderRadius: 26,
+    background: "radial-gradient(circle at 12% 0%, rgba(255,255,255,.58), transparent 38%), linear-gradient(135deg, rgba(255,255,255,.78), rgba(239,246,255,.48))",
+    border: "1px solid rgba(255,255,255,.62)",
+    boxShadow: "0 22px 58px rgba(42,65,96,.11), inset 0 1px 0 rgba(255,255,255,.78)",
+    backdropFilter: "blur(22px) saturate(155%)",
+    WebkitBackdropFilter: "blur(22px) saturate(155%)",
+  },
+  boardHeader: {
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 18,
+    marginBottom: 14,
+  },
+  boardTitle: {
+    margin: 0,
+    color: "var(--m-on-surface)",
+    fontSize: 31,
+    lineHeight: 1,
+    letterSpacing: "-0.05em",
+  },
+  boardSub: {
+    margin: "7px 0 0",
+    maxWidth: 820,
+    color: "var(--m-on-surface-mid)",
+    fontSize: 14,
+    lineHeight: 1.45,
+  },
+  methodologyStrip: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+    gap: 10,
+    marginBottom: 14,
+  },
+  methodologyChip: {
+    minHeight: 58,
+    borderRadius: 18,
+    padding: "11px 13px",
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    background: "rgba(247,250,255,.72)",
+    border: "1px solid rgba(153,176,209,.32)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,.72)",
+  },
+  methodologyLabel: {
+    display: "block",
+    fontSize: 13,
+    letterSpacing: "-0.015em",
+    color: "#6B7891",
+    fontWeight: 780,
+  },
+  methodologyValue: {
+    display: "block",
+    color: "var(--m-on-surface)",
+    fontSize: 22,
+    lineHeight: 1,
+    fontVariantNumeric: "tabular-nums",
+  },
+  kanbanGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(214px, 1fr))",
+    gap: 12,
+    alignItems: "stretch",
+  },
+  kanbanColumn: {
+    minHeight: 360,
+    borderRadius: 22,
+    padding: 12,
+    background: "rgba(239,245,255,.56)",
+    border: "1px solid rgba(153,176,209,.34)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,.62)",
+  },
+  kanbanHead: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: 10,
+    padding: "4px 4px 10px",
+  },
+  kanbanTitle: {
+    margin: 0,
+    color: "var(--m-on-surface)",
+    fontSize: 18,
+    lineHeight: 1,
+    letterSpacing: "-0.035em",
+  },
+  kanbanSub: {
+    margin: "5px 0 0",
+    color: "var(--m-on-surface-mid)",
+    fontSize: 11.5,
+    lineHeight: 1.25,
+  },
+  kanbanCount: {
+    minWidth: 28,
+    height: 28,
+    borderRadius: 999,
+    display: "inline-grid",
+    placeItems: "center",
+    background: "rgba(255,255,255,.76)",
+    color: "var(--m-on-primary-container)",
+    fontWeight: 900,
+    fontSize: 12,
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,.82)",
+  },
+  kanbanStack: {
+    display: "grid",
+    gap: 10,
+  },
+  kanbanEmpty: {
+    minHeight: 132,
+    display: "grid",
+    placeItems: "center",
+    textAlign: "center",
+    borderRadius: 18,
+    border: "1px dashed rgba(153,176,209,.42)",
+    color: "var(--m-on-surface-mid)",
+    fontSize: 12,
+    lineHeight: 1.4,
+    padding: 14,
+  },
+  opportunityCard: {
+    position: "relative",
+    borderRadius: 18,
+    background: "rgba(255,255,255,.82)",
+    border: "1px solid rgba(153,176,209,.34)",
+    boxShadow: "0 14px 32px rgba(42,65,96,.09), inset 0 1px 0 rgba(255,255,255,.72)",
+    overflow: "hidden",
+  },
+  opportunityMain: {
+    all: "unset",
+    display: "grid",
+    gap: 8,
+    width: "100%",
+    boxSizing: "border-box",
+    padding: 13,
+    cursor: "pointer",
+  },
+  opportunityAccent: {
+    position: "absolute",
+    inset: "0 auto 0 0",
+    width: 4,
+    opacity: 0.84,
+  },
+  opportunityTop: {
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  opportunityName: {
+    minWidth: 0,
+    color: "var(--m-on-surface)",
+    fontSize: 15,
+    lineHeight: 1.1,
+    letterSpacing: "-0.025em",
+  },
+  verdictPill: {
+    flex: "0 0 auto",
+    borderRadius: 999,
+    padding: "4px 8px",
+    fontSize: 10,
+    fontWeight: 900,
+  },
+  opportunitySub: {
+    color: "var(--m-on-surface-mid)",
+    fontSize: 11.5,
+    lineHeight: 1.25,
+  },
+  gateLine: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    color: "var(--m-on-surface)",
+    fontSize: 12,
+    lineHeight: 1.2,
+  },
+  progressTrack: {
+    display: "block",
+    height: 5,
+    borderRadius: 999,
+    background: "rgba(198,211,232,.52)",
+    overflow: "hidden",
+  },
+  progressFill: {
+    display: "block",
+    height: "100%",
+    borderRadius: 999,
+  },
+  opportunityMeta: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 6,
+    color: "var(--m-on-surface-mid)",
+    fontSize: 10.5,
+    lineHeight: 1,
+  },
+  opportunityNote: {
+    color: "var(--m-on-surface-var)",
+    fontSize: 12,
+    lineHeight: 1.35,
+  },
+  yuliaMove: {
+    all: "unset",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+    width: "100%",
+    boxSizing: "border-box",
+    padding: "10px 13px",
+    color: "var(--m-on-primary-container)",
+    background: "rgba(236,243,255,.70)",
+    borderTop: "1px solid rgba(153,176,209,.30)",
+    fontSize: 12,
+    fontWeight: 850,
+    cursor: "pointer",
+  },
+  blockerLine: {
+    display: "grid",
+    gap: 2,
+    padding: "10px 13px 12px",
+    borderTop: "1px solid rgba(153,176,209,.24)",
+    color: "var(--m-on-surface-mid)",
+    fontSize: 10.5,
+    lineHeight: 1.25,
   },
   dealGrid: {
     display: "grid",
