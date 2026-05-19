@@ -2,11 +2,11 @@ import { useState, type CSSProperties } from "react";
 import { V6Section } from "../Canvas";
 import { V6Icon } from "../icons";
 import type { Verdict } from "./cards";
-import type { OpenTab } from "../types";
+import type { IconName, OpenTab } from "../types";
 import { DEV_AUTH_BYPASS, type User } from "../../../hooks/useAuth";
 import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
 import { useTodayOperatingBrief, type TodayDealPulseItem, type TodayGateCountdownItem } from "../../../hooks/useTodayOperatingBrief";
-import { ART_HOUSE_TEXTURES, DESKTOP_TEXTURES } from "../../../lib/randomTextures";
+import { ART_HOUSE_TEXTURES, STUDIO_TEXTURES } from "../../../lib/randomTextures";
 import type { ModelPreference } from "../../../lib/modelPreference";
 import {
   executeSurfaceAction,
@@ -48,12 +48,32 @@ interface PipelineStage {
   sub: string;
 }
 
+type PipelineSurfaceAction = "drafts" | "analysis" | "buyers";
+type PipelineShortcutAction = PipelineSurfaceAction | "rank" | "blockers" | "models" | "files" | "touch";
+
+interface PipelineShortcut {
+  action: PipelineShortcutAction;
+  title: string;
+  sub: string;
+  icon: IconName;
+  tone: "gold" | "blue" | "green" | "slate" | "rose" | "violet";
+}
+
 const PIPELINE_STAGES: PipelineStage[] = [
   { id: "source", title: "Source", sub: "Thesis, intake, first read" },
   { id: "value", title: "Value", sub: "Valuation and finance fit" },
   { id: "diligence", title: "Diligence", sub: "QoE, files, legal watch" },
   { id: "structure", title: "Structure", sub: "Terms, tax, approvals" },
   { id: "close", title: "Close / PMI", sub: "Closing and value creation" },
+];
+
+const PIPELINE_SHORTCUTS: PipelineShortcut[] = [
+  { action: "rank", title: "Rank pipeline", sub: "Sort pursue, watch, pass by what deserves today.", icon: "feed", tone: "blue" },
+  { action: "blockers", title: "Show blockers", sub: "List what stops each deal from moving gates.", icon: "pin", tone: "rose" },
+  { action: "models", title: "Refresh model stack", sub: "Check required models, citations, and stale outputs.", icon: "chart", tone: "violet" },
+  { action: "files", title: "Review files", sub: "Open diligence docs and data-room items needing attention.", icon: "library", tone: "gold" },
+  { action: "buyers", title: "Find buyers", sub: "Start discovery from the selected deal thesis.", icon: "search", tone: "green" },
+  { action: "touch", title: "Prep next touch", sub: "Draft the next buyer, seller, lender, or counsel note.", icon: "doc", tone: "slate" },
 ];
 
 const SAMPLE_DEALS: PipelineDeal[] = [
@@ -103,11 +123,11 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
   const actionDeal = selectedHomeDeal ? homeDealToActionDeal(selectedHomeDeal) : null;
   const actionDeals = realDeals.map(homeDealToActionDeal);
 
-  const runPipelineAction = async (action: "drafts" | "analysis" | "buyers") => {
+  const runPipelineAction = async (action: PipelineSurfaceAction) => {
     setActionError(null);
     setActionNote(null);
 
-    const actionConfig: Record<"drafts" | "analysis" | "buyers", {
+    const actionConfig: Record<PipelineSurfaceAction, {
       actionId: SurfaceActionId;
       error: string;
       prompt: (deal: ActionDeal | null) => string;
@@ -174,6 +194,35 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
     }
   };
 
+  const runPipelineShortcut = async (action: PipelineShortcutAction) => {
+    setActionError(null);
+    setActionNote(null);
+
+    if (action === "buyers") {
+      await runPipelineAction(action);
+      return;
+    }
+
+    if (action === "drafts" || action === "analysis") {
+      await runPipelineAction(action);
+      return;
+    }
+
+    if (action === "models") {
+      await runPipelineAction("analysis");
+      return;
+    }
+
+    const prompts: Record<"rank" | "blockers" | "files" | "touch", string> = {
+      rank: "Rank my pipeline by methodology readiness, blockers, fit, urgency, and the next Yulia move for each deal.",
+      blockers: "Show the blockers for each deal in my pipeline, grouped by gate, required models, citations, files, and approval needs.",
+      files: "Show the files, data-room items, diligence docs, and analyses that are blocking movement in my pipeline.",
+      touch: "Prepare the next buyer, seller, lender, or counsel touch for the highest-priority pipeline deal. Use the current gate and blockers.",
+    };
+
+    onTalkToYulia?.(prompts[action]);
+  };
+
   return (
     <div className="m-fade-up" style={P.page}>
       <section style={P.hero}>
@@ -235,26 +284,22 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
         </div>
       </section>
 
-      <V6Section eyebrow="YULIA NEXT" title="Pipeline actions">
+      <V6Section eyebrow="YULIA NEXT" title="Pipeline shortcuts">
         {(actionError || actionNote) && (
           <div style={actionError ? P.actionError : P.actionNote}>
             {actionError || actionNote}
           </div>
         )}
         <div style={P.actionGrid}>
-          {[
-            { action: "drafts", title: "Review drafts", sub: "Open docs Yulia is shaping before they go to the data room.", icon: "doc", tone: "gold" },
-            { action: "analysis", title: "Run analysis", sub: "Recast, comps, buyer fit, SBA structure, and risk notes.", icon: "chart", tone: "blue" },
-            { action: "buyers", title: "Find buyers", sub: "Start a discovery search from a selected deal thesis.", icon: "search", tone: "green" },
-          ].map(({ action, title, sub, icon, tone }) => (
+          {PIPELINE_SHORTCUTS.map(({ action, title, sub, icon, tone }) => (
             <button
               key={title}
-              style={{ ...P.actionCard, ...pipelineActionTone(tone as "gold" | "blue" | "green") }}
-              onClick={() => { void runPipelineAction(action as "drafts" | "analysis" | "buyers"); }}
+              style={{ ...P.actionCard, ...pipelineActionTone(tone) }}
+              onClick={() => { void runPipelineShortcut(action); }}
               type="button"
               disabled={busyAction === action}
             >
-              <span style={P.actionIcon}><V6Icon name={icon as "doc" | "chart" | "search"} size={16} /></span>
+              <span style={P.actionIcon}><V6Icon name={icon} size={16} /></span>
               <span style={P.actionText}>
                 <strong>{busyAction === action ? "Working..." : title}</strong>
                 <span>{sub}</span>
@@ -567,7 +612,7 @@ function homeDealToActionDeal(d: HomeDeal): ActionDeal {
   };
 }
 
-const pipelineHeroWash = `linear-gradient(135deg, rgba(16,25,58,0.70) 0%, rgba(65,76,132,0.50) 48%, rgba(19,47,70,0.70) 100%), url('${DESKTOP_TEXTURES.pipelineHero}')`;
+const pipelineHeroWash = `linear-gradient(135deg, rgba(8,18,38,0.46) 0%, rgba(46,92,138,0.20) 46%, rgba(10,24,46,0.54) 100%), url('${STUDIO_TEXTURES.navy}')`;
 const ART_CARD_WASH = "linear-gradient(145deg, rgba(18,31,48,0.68) 0%, rgba(56,70,83,0.42) 52%, rgba(13,22,37,0.72) 100%)";
 const ART_CARD_FRAME: CSSProperties = {
   backgroundSize: "cover, cover",
@@ -577,11 +622,14 @@ const ART_CARD_FRAME: CSSProperties = {
   boxShadow: "0 30px 76px rgba(31,44,69,0.24), 0 8px 22px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.24)",
 };
 
-function pipelineActionTone(tone: "gold" | "blue" | "green"): CSSProperties {
-  const textures: Record<"gold" | "blue" | "green", string> = {
+function pipelineActionTone(tone: PipelineShortcut["tone"]): CSSProperties {
+  const textures: Record<PipelineShortcut["tone"], string> = {
     gold: ART_HOUSE_TEXTURES.pricing,
     blue: ART_HOUSE_TEXTURES.pipeline,
     green: ART_HOUSE_TEXTURES.search,
+    slate: ART_HOUSE_TEXTURES.studioPreview,
+    rose: STUDIO_TEXTURES.rose,
+    violet: STUDIO_TEXTURES.blue,
   };
   return {
     ...ART_CARD_FRAME,
