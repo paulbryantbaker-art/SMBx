@@ -884,8 +884,8 @@ function deliverableToTodayFile(d: WorkspaceDeliverable): TodayFile {
   };
 }
 
-const paperShadow = "0 28px 78px rgba(26, 34, 51, 0.15), 0 6px 18px rgba(26, 34, 51, 0.08)";
-const whiteCard = "rgba(255, 255, 255, 0.94)";
+const paperShadow = "0 18px 44px rgba(42,65,96,0.10), 0 4px 12px rgba(26,34,51,0.05), inset 0 1px 0 rgba(255,255,255,0.72)";
+const whiteCard = "linear-gradient(145deg, rgba(255,255,255,0.94), rgba(247,250,255,0.74))";
 const liquidGlass =
   "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.34), transparent 34%), " +
   "linear-gradient(135deg, rgba(255,255,255,0.19), rgba(255,255,255,0.06) 48%, rgba(255,255,255,0.025))";
@@ -1123,7 +1123,7 @@ const T: Record<string, CSSProperties> = {
     backgroundPosition: "center, center",
     color: "#FFFFFF",
     padding: 22,
-    boxShadow: "0 46px 116px rgba(26, 34, 51, 0.30), 0 20px 44px rgba(26,34,51,0.16), 0 4px 12px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.22)",
+    boxShadow: "0 30px 82px rgba(26, 34, 51, 0.22), 0 12px 30px rgba(26,34,51,0.10), inset 0 1px 0 rgba(255,255,255,0.24)",
     border: "1px solid rgba(255,255,255,0.24)",
     display: "flex",
     flexDirection: "column",
@@ -1271,7 +1271,7 @@ const T: Record<string, CSSProperties> = {
   priorityGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-    gap: 12,
+    gap: 14,
   },
   priorityCard: {
     all: "unset",
@@ -1279,12 +1279,14 @@ const T: Record<string, CSSProperties> = {
     gridTemplateColumns: "50px minmax(0, 1fr) auto",
     alignItems: "center",
     gap: 14,
-    minHeight: 108,
-    padding: 18,
+    minHeight: 96,
+    padding: 16,
     borderRadius: 20,
     background: whiteCard,
-    border: "1px solid #E7EBF5",
-    boxShadow: "0 22px 58px rgba(26, 34, 51, 0.13), 0 6px 16px rgba(26, 34, 51, 0.08)",
+    border: "1px solid rgba(255,255,255,0.62)",
+    boxShadow: paperShadow,
+    backdropFilter: "blur(18px) saturate(145%)",
+    WebkitBackdropFilter: "blur(18px) saturate(145%)",
     cursor: "pointer",
     overflow: "hidden",
   },
@@ -1345,15 +1347,15 @@ const T: Record<string, CSSProperties> = {
     alignItems: "stretch",
   },
   operatingPanel: {
-    minHeight: 224,
+    minHeight: 206,
     boxSizing: "border-box",
     display: "flex",
     flexDirection: "column",
     padding: 18,
     borderRadius: 22,
-    background: "linear-gradient(145deg, rgba(255,255,255,0.95), rgba(245,249,255,0.76))",
-    border: "1px solid rgba(188, 204, 228, 0.72)",
-    boxShadow: "0 24px 70px rgba(26,34,51,0.11), 0 7px 18px rgba(26,34,51,0.06), inset 0 1px 0 rgba(255,255,255,0.70)",
+    background: whiteCard,
+    border: "1px solid rgba(255,255,255,0.62)",
+    boxShadow: paperShadow,
     backdropFilter: "blur(18px) saturate(150%)",
     WebkitBackdropFilter: "blur(18px) saturate(150%)",
     overflow: "hidden",
@@ -1485,8 +1487,10 @@ const T: Record<string, CSSProperties> = {
     overflow: "hidden",
     borderRadius: 22,
     background: whiteCard,
-    border: "1px solid #E7EBF5",
+    border: "1px solid rgba(255,255,255,0.62)",
     boxShadow: paperShadow,
+    backdropFilter: "blur(18px) saturate(145%)",
+    WebkitBackdropFilter: "blur(18px) saturate(145%)",
   },
   dealRow: {
     all: "unset",
@@ -1544,8 +1548,10 @@ const T: Record<string, CSSProperties> = {
     overflow: "hidden",
     borderRadius: 22,
     background: whiteCard,
-    border: "1px solid #E7EBF5",
+    border: "1px solid rgba(255,255,255,0.62)",
     boxShadow: paperShadow,
+    backdropFilter: "blur(18px) saturate(145%)",
+    WebkitBackdropFilter: "blur(18px) saturate(145%)",
   },
   fileRow: {
     all: "unset",

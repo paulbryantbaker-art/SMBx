@@ -107,6 +107,10 @@ const LIQUID_GLASS_SHADOW =
   "0 18px 36px -24px rgba(0,0,0,0.54), inset 0 1px 0 rgba(255,255,255,0.56), inset 0 -1px 0 rgba(255,255,255,0.12), inset 0 0 0 0.5px rgba(255,255,255,0.34)";
 const SEARCH_ACTION_GLASS_BACKGROUND =
   "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.18), transparent 40%), linear-gradient(135deg, rgba(14,18,27,0.98), rgba(25,31,46,0.96) 52%, rgba(9,12,18,0.98))";
+const STUDIO_SOFT_GLASS =
+  "radial-gradient(circle at 18% 0%, rgba(255,255,255,.54), transparent 36%), linear-gradient(135deg, rgba(255,255,255,.58), rgba(245,250,255,.32) 50%, rgba(232,241,252,.20))";
+const STUDIO_SOFT_SHADOW =
+  "0 18px 44px rgba(42,65,96,.10), inset 0 1px 0 rgba(255,255,255,.72)";
 
 export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
   const [query, setQuery] = useState("");
@@ -263,29 +267,29 @@ function CategoryCard({ category, onClick }: { category: Category; onClick: () =
 function tone(name: Category["tone"]) {
   const tones: Record<Category["tone"], { bg: (texture: string) => string; fg: string; shadow: string }> = {
     gold: {
-      bg: texture => `linear-gradient(145deg, rgba(107,73,22,0.50) 0%, rgba(198,148,72,0.38) 48%, rgba(57,40,24,0.62) 100%), url('${texture}')`,
+      bg: texture => `linear-gradient(145deg, rgba(107,73,22,0.42) 0%, rgba(198,148,72,0.30) 48%, rgba(57,40,24,0.52) 100%), url('${texture}')`,
       fg: "#FFFFFF",
-      shadow: "0 30px 74px rgba(156,113,40,0.30), 0 8px 22px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.22)",
+      shadow: "0 18px 44px rgba(156,113,40,0.18), 0 6px 16px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.24)",
     },
     green: {
-      bg: texture => `linear-gradient(145deg, rgba(14,62,48,0.58) 0%, rgba(63,128,101,0.40) 52%, rgba(10,31,35,0.66) 100%), url('${texture}')`,
+      bg: texture => `linear-gradient(145deg, rgba(14,62,48,0.48) 0%, rgba(63,128,101,0.32) 52%, rgba(10,31,35,0.56) 100%), url('${texture}')`,
       fg: "#FFFFFF",
-      shadow: "0 30px 74px rgba(46,111,89,0.30), 0 8px 22px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.22)",
+      shadow: "0 18px 44px rgba(46,111,89,0.18), 0 6px 16px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.24)",
     },
     blue: {
-      bg: texture => `linear-gradient(145deg, rgba(22,65,111,0.58) 0%, rgba(87,137,187,0.40) 50%, rgba(16,35,71,0.66) 100%), url('${texture}')`,
+      bg: texture => `linear-gradient(145deg, rgba(22,65,111,0.48) 0%, rgba(87,137,187,0.32) 50%, rgba(16,35,71,0.56) 100%), url('${texture}')`,
       fg: "#FFFFFF",
-      shadow: "0 30px 74px rgba(46,92,138,0.30), 0 8px 22px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.22)",
+      shadow: "0 18px 44px rgba(46,92,138,0.18), 0 6px 16px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.24)",
     },
     ink: {
-      bg: texture => `linear-gradient(145deg, rgba(22,31,48,0.44) 0%, rgba(36,55,70,0.30) 48%, rgba(10,18,31,0.48) 100%), url('${texture}')`,
+      bg: texture => `linear-gradient(145deg, rgba(22,31,48,0.38) 0%, rgba(36,55,70,0.26) 48%, rgba(10,18,31,0.42) 100%), url('${texture}')`,
       fg: "#FFFFFF",
-      shadow: "0 32px 78px rgba(18,23,34,0.30), 0 10px 24px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.22)",
+      shadow: "0 18px 44px rgba(18,23,34,0.18), 0 6px 16px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.24)",
     },
     aqua: {
-      bg: texture => `linear-gradient(145deg, rgba(29,100,108,0.58) 0%, rgba(83,151,157,0.40) 52%, rgba(20,52,68,0.66) 100%), url('${texture}')`,
+      bg: texture => `linear-gradient(145deg, rgba(29,100,108,0.48) 0%, rgba(83,151,157,0.32) 52%, rgba(20,52,68,0.56) 100%), url('${texture}')`,
       fg: "#FFFFFF",
-      shadow: "0 30px 74px rgba(57,123,133,0.30), 0 8px 22px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.22)",
+      shadow: "0 18px 44px rgba(57,123,133,0.18), 0 6px 16px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.24)",
     },
   };
   return tones[name];
@@ -422,13 +426,13 @@ const S: Record<string, CSSProperties> = {
   categoryGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-    gap: 16,
+    gap: 12,
   },
   categoryCard: {
     all: "unset",
-    minHeight: 230,
-    borderRadius: 24,
-    padding: 24,
+    minHeight: 206,
+    borderRadius: 18,
+    padding: 20,
     display: "flex",
     flexDirection: "column",
     overflow: "hidden",
@@ -436,7 +440,7 @@ const S: Record<string, CSSProperties> = {
     border: "1px solid rgba(255,255,255,0.36)",
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
-    boxShadow: "0 30px 74px rgba(26,34,51,0.14), inset 0 1px 0 rgba(255,255,255,0.20)",
+    boxShadow: "0 18px 44px rgba(42,65,96,.14), inset 0 1px 0 rgba(255,255,255,.28)",
   },
   categoryEyebrow: {
     fontSize: 10,
@@ -450,7 +454,7 @@ const S: Record<string, CSSProperties> = {
   },
   categoryTitle: {
     display: "block",
-    fontSize: 28,
+    fontSize: 24,
     lineHeight: 0.98,
     letterSpacing: "-0.045em",
   },
@@ -488,18 +492,18 @@ const S: Record<string, CSSProperties> = {
   discoveryGrid: {
     display: "grid",
     gridTemplateColumns: "minmax(300px, 0.75fr) minmax(420px, 1.25fr)",
-    gap: 18,
+    gap: 16,
     alignItems: "stretch",
   },
   storyCard: {
-    minHeight: 332,
-    borderRadius: 26,
-    padding: 28,
-    backgroundImage: `radial-gradient(circle at 8% 18%, rgba(255,255,255,0.16), transparent 42%), linear-gradient(145deg, rgba(42,103,88,0.32) 0%, rgba(42,78,86,0.36) 46%, rgba(22,32,50,0.54) 100%), url('${ART_HOUSE_TEXTURES.search}')`,
+    minHeight: 292,
+    borderRadius: 24,
+    padding: 24,
+    backgroundImage: `radial-gradient(circle at 8% 18%, rgba(255,255,255,0.18), transparent 42%), linear-gradient(145deg, rgba(42,103,88,0.26) 0%, rgba(42,78,86,0.30) 46%, rgba(22,32,50,0.46) 100%), url('${ART_HOUSE_TEXTURES.search}')`,
     backgroundSize: "cover, cover, cover",
     backgroundPosition: "center, center, center",
     color: "#FFFFFF",
-    boxShadow: "0 44px 110px rgba(26, 84, 70, 0.30), 0 18px 42px rgba(26,34,51,0.15), 0 4px 12px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.20)",
+    boxShadow: "0 28px 74px rgba(26, 84, 70, 0.20), 0 10px 24px rgba(26,34,51,0.10), inset 0 1px 0 rgba(255,255,255,0.24)",
   },
   storyEyebrow: {
     fontSize: 10,
@@ -509,9 +513,9 @@ const S: Record<string, CSSProperties> = {
     opacity: 1,
   },
   storyTitle: {
-    margin: "34px 0 0",
+    margin: "24px 0 0",
     maxWidth: 440,
-    fontSize: 42,
+    fontSize: 36,
     lineHeight: 0.98,
     letterSpacing: "-0.055em",
     textWrap: "balance",
@@ -544,10 +548,12 @@ const S: Record<string, CSSProperties> = {
     cursor: "pointer",
   },
   listCard: {
-    borderRadius: 26,
-    background: "rgba(255, 255, 255, 0.94)",
-    border: "1px solid var(--m-outline-var)",
-    boxShadow: "0 28px 78px rgba(26, 34, 51, 0.14), 0 6px 18px rgba(26,34,51,0.07)",
+    borderRadius: 24,
+    background: STUDIO_SOFT_GLASS,
+    border: "1px solid rgba(255,255,255,.55)",
+    boxShadow: STUDIO_SOFT_SHADOW,
+    backdropFilter: "blur(22px) saturate(155%)",
+    WebkitBackdropFilter: "blur(22px) saturate(155%)",
     overflow: "hidden",
   },
   listTop: {
@@ -577,9 +583,9 @@ const S: Record<string, CSSProperties> = {
     alignItems: "center",
     gap: 14,
     width: "100%",
-    minHeight: 84,
+    minHeight: 74,
     boxSizing: "border-box",
-    padding: "14px 24px",
+    padding: "12px 22px",
     cursor: "pointer",
   },
   rowIcon: {
