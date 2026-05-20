@@ -1,10 +1,10 @@
 # REPO_STATUS.md — what's current, what's stale
 
-**Last updated: 2026-05-16.**
+**Last updated: 2026-05-20.**
 
 This file is a stable reading-order map for anyone (human or AI) reviewing this repo on GitHub or as a fresh clone. Read this **first** after `CLAUDE.md`.
 
-The short version: production runs on `main`. V6 is live. V19 is now the active build target, with Week 1 foundation work started in migration `067_v19_foundation.sql`, `server/constants/v19Regulatory.ts`, and `server/constants/v19Leagues.ts`. Runtime tax/legal prompt distillations are still V18-era until the V19 prompt migration lands.
+The short version: production runs on `main`. V6 is live. V19 is the current methodology/runtime baseline, and **DEFINITIVE v1.0** is now the active agent-access/spec/substrate build target. Week 1 V19 foundation work started in migration `067_v19_foundation.sql`, `server/constants/v19Regulatory.ts`, and `server/constants/v19Leagues.ts`; DEFINITIVE rolls that work forward into Authority Register, MCP/API, beneficial-customer identity, mandate-chain audit, conformance, and THE LINE contracts. Runtime tax/legal prompt distillations are still V18-era until the V19/DEFINITIVE prompt migration lands.
 
 ---
 
@@ -16,10 +16,11 @@ The short version: production runs on `main`. V6 is live. V19 is now the active 
 - `BUILD_STATUS.md` — May 3 pre-V19 audit; historical baseline, not the active V19 build list
 - `V6_WIRING_LOG.md`, `V6_MOBILE_WIRING_LOG.md` — what V6 wiring landed and where
 
-### Methodology (V19 current build target)
+### Methodology and agent substrate (V19 baseline -> DEFINITIVE target)
+- `methodology/DEFINITIVE_BUILD_PLAN.md` — current agent-access/spec/substrate build plan; read this first for new MCP/API/agent work
 - `methodology/METHODOLOGY_V19.md` — V19 methodology master
 - `methodology/CC_V19_IMPLEMENTATION_BRIEF.md` — V19 runtime implementation brief
-- `methodology/V19_BUILD_PLAN.md` — active V19 build list and sequencing
+- `methodology/V19_BUILD_PLAN.md` — V19 baseline/status map and sequencing; new agent-access work maps to DEFINITIVE
 
 ### Yulia (AI) reference set
 - `YULIA_PROMPTS_V3.md` — current shipped system prompts until V19 prompt migration lands
@@ -77,7 +78,7 @@ Archived files live in `docs/_archive/`. Each archived markdown also carries an 
 
 1. **Does it predate V6 (May 2026) and talk about the design system or marketing surface?** → Probably stale. V6 redesigned both desktop and mobile.
 2. **Does it talk about pricing without mentioning monthly subscriptions (Free / $79 Solo / $199 Pro / $499 Team / $2,500+ Enterprise)?** → Stale. The wallet model is dead; do not recreate.
-3. **Does it treat Methodology V17/V18 as the current build target?** -> Stale. V19 is current; V18 tax/legal runtime remains only as shipped implementation until migration.
+3. **Does it treat Methodology V17/V18 as the current build target?** -> Stale. V19 is the methodology baseline; DEFINITIVE v1.0 is the active agent-access/spec target. V18 tax/legal runtime remains only as shipped implementation until migration.
 4. **Does it use Cowork DL (warm cream + clay), V4 hot pink `#D44A78`, or V3 indigo+emerald palettes?** → Stale design language.
 
 When in doubt, trust **code on `main`** over **docs**. The build is the source of truth.

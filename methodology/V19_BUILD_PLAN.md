@@ -1,5 +1,7 @@
 # V19 Build Plan — Real Outstanding Work
 
+> **DEFINITIVE update, May 20, 2026:** V19 remains the current methodology/runtime baseline, but the active agent-access build target is now **DEFINITIVE v1.0**. Read `methodology/DEFINITIVE_BUILD_PLAN.md` first for the current substrate plan. This file remains the V19 baseline/status map and should be updated when V19 work lands, but new agent/API/MCP/spec work should map to DEFINITIVE naming, versioning, Authority Register, beneficial-customer identity, mandate chain, conformance, and THE LINE contracts.
+
 **Audit date:** May 19, 2026 (after V19 methodology docs landed in repo + 62 TS-error cleanup + Phase E/G substrate work + Pitch Book Studio/runtime spine work + Today/Files/Pipeline operating wiring + public demo Yulia context + agent-substrate strategy update + Studio-surface design normalization for Search/Files + static V19 schema/model verification).
 **Sources:** `methodology/CC_V19_IMPLEMENTATION_BRIEF.md` + `methodology/METHODOLOGY_V19.md` + `Downloads/v19/smbX Must-Haves.pdf` + `Downloads/v19/Agent Economy MandA Playbook.pdf` + May 19 agent-attractor/tollgate strategy notes.
 **Audit baseline:** `origin/main` at `c5270a9`.

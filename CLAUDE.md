@@ -36,7 +36,7 @@ AI-powered deal intelligence platform for business acquisitions from $300K to me
 11. **Mobile browser first.** Design for mobile, then adapt to desktop.
 
 ## Design System
-**The V6 design language is the two CD handoff bundles** at the repo root: `design_handoff_smbx_desktop_material/` (desktop) and `design_handoff_smbx_app store/` (mobile). Production implements them faithfully — see `DESIGN_SOURCE.md` for the file-by-file implementation map. For a quick token reference, read `DESIGN_TOKENS.md` (auto-generated from `client/src/index.css` by `npm run design:extract`).
+**The V6 design language is the two CD handoff bundles** at the repo root: `design_handoff_smbx_desktop_material/` (desktop) and `design_handoff_smbx_app store/` (mobile). Production implements them faithfully — see `DESIGN_SOURCE.md` for the file-by-file implementation map. For a quick token reference, read `DESIGN_TOKENS.md` (auto-generated from `client/src/index.css` by `npm run design:extract`). Reuse saved Studio/List/Compete/texture-card primitives; do not invent adjacent card/button styles when an existing primitive fits.
 
 **V6 in one line:** desktop uses slate-blue `#2E5C8A` + lavender chrome `#ECEAF2`; mobile uses periwinkle `#8A9AE8` + watercolor textures from `client/public/textures/`. Hot pink (`#D44A78`, V3/V4 era) and warm cream + terra (`#F4EEE3` + `#D4714E`, Cowork-DL "Edition" v22 era) are both retired — if your output anchors on either, you read a stale doc.
 
@@ -79,10 +79,14 @@ Valuation Explorer, LBO, SBA Financing, Tax Impact, Cap Table, Sensitivity Matri
 ## Reference Documents
 - **YULIA_AGENCY_SPEC.md** — Product/architecture doctrine for Yulia as the agentic operating layer: advisor posture without licensed-advisor boundary crossing, permission levels, surface contracts, data-room/file architecture, and implementation priorities.
 - **YULIA_AGENCY_IMPLEMENTATION_PLAN.md** — Practical wiring plan for context packs, prompt governance, governed tool execution, staged approvals, surface actions, Today, Files, and Data Room.
-- **METHODOLOGY V19** = `methodology/METHODOLOGY_V19.md` + `methodology/CC_V19_IMPLEMENTATION_BRIEF.md` + `methodology/V19_BUILD_PLAN.md`.
-  - V19 is the current build target as of May 16, 2026.
+- **DEFINITIVE v1.0** = `methodology/DEFINITIVE_BUILD_PLAN.md` + V19 baseline docs below.
+  - DEFINITIVE is the current agent-access/spec/substrate build target as of May 20, 2026.
+  - Doctrine: smbX is the M&A diligence substrate; Yulia is the human reference surface.
+  - Agent/API/MCP work should use DEFINITIVE naming, spec versioning, Authority Register, beneficial-customer identity, mandate chain, conformance, audit packets, and THE LINE contracts.
+- **METHODOLOGY V19 baseline** = `methodology/METHODOLOGY_V19.md` + `methodology/CC_V19_IMPLEMENTATION_BRIEF.md` + `methodology/V19_BUILD_PLAN.md`.
+  - V19 remains the current methodology/runtime baseline and rolls forward into DEFINITIVE v1.0.
   - V17/V18a/V18b are archived in `docs/_archive/methodology/` and should not be used as new-build source material.
-  - Runtime still contains V18 tax/legal distillations in `server/prompts/taxEngine.ts` and `server/prompts/legalEngine.ts`; V19 prompt/runtime migration is tracked in `methodology/V19_BUILD_PLAN.md`.
+  - Runtime still contains V18 tax/legal distillations in `server/prompts/taxEngine.ts` and `server/prompts/legalEngine.ts`; V19/DEFINITIVE prompt/runtime migration is tracked in `methodology/V19_BUILD_PLAN.md` and `methodology/DEFINITIVE_BUILD_PLAN.md`.
 - STYLE_GUIDE.md — Complete UI & brand style guide for marketing materials
 - TESTING.md — Testing tracker with issue template system
 - REPO_STATUS.md — Current-vs-stale map for the whole repo (read this when reviewing on GitHub)
