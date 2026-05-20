@@ -10,6 +10,7 @@ import { isSurfaceActionId, type SurfaceActionId } from "../../../lib/v6SurfaceA
 import type { OpenTab, StudioFormatId } from "../types";
 import { V6Icon } from "../icons";
 import {
+  studioCompeteButtonItemStyles,
   studioCompeteCardStyles,
   studioFormatCardBackground,
   studioListCardStyles,
@@ -1182,14 +1183,11 @@ const T: Record<string, CSSProperties> = {
     flex: 1,
   },
   intelLead: {
-    all: "unset",
-    ...studioCompeteCardStyles.item,
+    ...studioCompeteButtonItemStyles,
     display: "block",
-    boxSizing: "border-box",
     width: "100%",
     background: "rgba(255,255,255,.72)",
     color: "#60708A",
-    cursor: "pointer",
   },
   intelLeadEyebrow: {
     fontSize: 9,
@@ -1214,23 +1212,17 @@ const T: Record<string, CSSProperties> = {
     lineHeight: 1.42,
   },
   intelBullet: {
-    all: "unset",
-    ...studioCompeteCardStyles.item,
+    ...studioCompeteButtonItemStyles,
     display: "block",
-    boxSizing: "border-box",
     background: "rgba(255,255,255,.72)",
     color: "#60708A",
     fontSize: 12.2,
     lineHeight: 1.34,
-    cursor: "pointer",
   },
   workCard: {
-    all: "unset",
-    ...studioCompeteCardStyles.item,
+    ...studioCompeteButtonItemStyles,
     display: "block",
-    boxSizing: "border-box",
     background: "rgba(255,255,255,.72)",
-    cursor: "pointer",
   },
   workTitle: {
     marginTop: 0,
@@ -1584,9 +1576,7 @@ const T: Record<string, CSSProperties> = {
     marginTop: 0,
   },
   quickChip: {
-    all: "unset",
-    ...studioCompeteCardStyles.item,
-    boxSizing: "border-box",
+    ...studioCompeteButtonItemStyles,
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",

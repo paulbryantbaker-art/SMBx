@@ -4,7 +4,17 @@ import type { FileListView, FileScope, OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
 import { useTodayOperatingBrief, type TodayFileReviewItem } from "../../../hooks/useTodayOperatingBrief";
 import { useV6WorkspaceData, type WorkspaceDeal, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
-import { ART_HOUSE_TEXTURES, DESKTOP_TEXTURES } from "../../../lib/randomTextures";
+import { DESKTOP_TEXTURES, STUDIO_TEXTURES } from "../../../lib/randomTextures";
+import {
+  studioCompeteButtonItemStyles,
+  studioCompeteCardStyles,
+  studioGlassBackdrop,
+  studioListCardStyles,
+  studioLiquidGlassFilter,
+  studioLiquidGlassShadow,
+  studioTextureCardBackground,
+  studioTextureCardStyles,
+} from "../styles/studioSurfaces";
 
 interface FilesRootProps {
   openTab: OpenTab;
@@ -16,6 +26,8 @@ interface Shortcut {
   view: FileListView;
   label: string;
   count: string;
+  unit: string;
+  audience: string;
   sub: string;
   icon: "library" | "deal" | "doc" | "chart";
   tone: "all" | "deals" | "action" | "room";
@@ -49,6 +61,8 @@ const SHORTCUTS: Shortcut[] = [
     view: "all",
     label: "All files",
     count: "24",
+    unit: "files",
+    audience: "Private and shared",
     sub: "Private deal docs, analysis, and data-room items across portfolios.",
     icon: "library",
     tone: "all",
@@ -58,6 +72,8 @@ const SHORTCUTS: Shortcut[] = [
     view: "deal-libraries",
     label: "Deal libraries",
     count: "6",
+    unit: "deals",
+    audience: "Portfolio > deal > stage",
     sub: "Portfolio > deal > stage. Private until you share.",
     icon: "deal",
     tone: "deals",
@@ -67,6 +83,8 @@ const SHORTCUTS: Shortcut[] = [
     view: "needs-action",
     label: "Needs action",
     count: "4",
+    unit: "asks",
+    audience: "Drafts and reviews",
     sub: "Drafts, requests, markups, and submissions waiting on you.",
     icon: "doc",
     tone: "action",
@@ -76,6 +94,8 @@ const SHORTCUTS: Shortcut[] = [
     view: "data-rooms",
     label: "Data rooms",
     count: "9",
+    unit: "rooms",
+    audience: "Shared diligence",
     sub: "Shared diligence rooms with artifacts, drafted docs, and executed docs.",
     icon: "chart",
     tone: "room",
@@ -100,6 +120,25 @@ const ACTIONS: FileRow[] = [
   { title: "Customer list top 25", sub: "HVAC platform · data room request", status: "Action needed", kind: "chart", tone: "draft" },
   { title: "Security findings recap", sub: "HVAC platform · attorney review", status: "Review", kind: "doc", tone: "review" },
   { title: "NDA countersigned", sub: "Big Fake Deal · executed and immutable", status: "Executed", kind: "doc", tone: "done" },
+];
+
+const FILE_CONTROL_STACK = [
+  {
+    title: "Private library",
+    sub: "Internal notes, models, memos, and draft work stay inside the deal until you share them.",
+  },
+  {
+    title: "Data-room boundary",
+    sub: "Shared artifacts and transaction documents stay separated from private work product.",
+  },
+  {
+    title: "Source trail",
+    sub: "Files should carry source status, citation links, access scope, and audit record when they support a claim.",
+  },
+  {
+    title: "Execution state",
+    sub: "Draft, review, signed, locked, and missing-source states should be visible without turning the page into storage.",
+  },
 ];
 
 function useFilesWorkspace(user: User | null) {
@@ -181,50 +220,31 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
     <div className="m-fade-up" style={F.page}>
       <section style={F.hero}>
         <div style={F.heroCopy}>
-          <div className="mono" style={F.eyebrow}>FILES</div>
           <h1 style={F.title}>Private deal libraries, plus shared data rooms.</h1>
           <p style={F.sub}>
             Every deal has its own file library. The data room is the shared diligence drive inside that library, with artifacts, drafted legal docs, review items, and executed docs.
           </p>
         </div>
-
-        <div style={F.boundaryCard}>
-          <div style={F.boundaryItem}>
-            <div className="mono" style={F.boundaryEyebrow}>BOUNDARY</div>
-            <strong style={F.boundaryTitle}>Private by default</strong>
-            <span style={F.boundaryText}>Your memos, analyses, drafts, and internal files stay in the deal library until you choose to share.</span>
-          </div>
-          <div style={F.boundaryItem}>
-            <div className="mono" style={F.boundaryEyebrow}>SHARED SPACE</div>
-            <strong style={F.boundaryTitle}>Data room</strong>
-            <span style={F.boundaryText}>Artifacts and transaction documents visible to approved participants on the deal team.</span>
-          </div>
-        </div>
       </section>
 
       <section style={F.section}>
-        <SectionHead eyebrow="OPEN FILES" title="Browse by hierarchy" sub="Portfolio > deal > stage for all files. Data rooms add artifact, action, review, and executed status." />
+        <SectionHead title="Source lanes" sub="Portfolio > deal > stage for all files. Data rooms add artifact, action, review, and executed status." />
         <div style={F.shortcutGrid}>
           {shortcuts.map(shortcut => {
-            const s = shortcutTone(shortcut.tone);
             return (
-            <article
+            <button
               key={shortcut.label}
-              style={{
-                ...F.shortcutCard,
-                backgroundImage: s.bg,
-                borderColor: s.border,
-                boxShadow: s.shadow,
-              }}
+              type="button"
+              className="m-state"
+              style={{ ...F.shortcutCard, backgroundImage: studioTextureCardBackground(shortcutTexture(shortcut.tone)) }}
+              onClick={() => runShortcut(shortcut)}
             >
-              <span style={F.shortcutIcon}><V6Icon name={shortcut.icon} size={17} /></span>
-              <span style={F.shortcutCount}>{shortcut.count}</span>
+              <span style={F.shortcutMeta}>{shortcut.count} {shortcut.unit}</span>
               <strong style={F.shortcutTitle}>{shortcut.label}</strong>
+              <span style={F.shortcutAudience}>{shortcut.audience}</span>
               <span style={F.shortcutSub}>{shortcut.sub}</span>
-              <button type="button" className="m-glint m-glass-control" style={F.shortcutAction} onClick={() => runShortcut(shortcut)}>
-                Open <span aria-hidden="true">›</span>
-              </button>
-            </article>
+              <span style={F.shortcutAction}>Open</span>
+            </button>
             );
           })}
         </div>
@@ -234,12 +254,11 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
         <div style={F.card}>
           <div style={F.cardHead}>
             <div>
-              <div className="mono" style={F.cardEyebrow}>RECENTS</div>
               <h2 style={F.cardTitle}>Recently touched</h2>
               <p style={F.cardSub}>Last files Yulia or you touched, plus anything waiting on you.</p>
             </div>
             <button
-              className="m-btn text"
+              style={F.cardAction}
               type="button"
               onClick={() => openTab({ id: "files-all", kind: "files-list", title: "All files", fileListView: "all" })}
             >
@@ -266,7 +285,6 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
         <div style={F.card}>
           <div style={F.cardHead}>
             <div>
-              <div className="mono" style={F.cardEyebrow}>DATA ROOMS</div>
               <h2 style={F.cardTitle}>Current rooms</h2>
               <p style={F.cardSub}>Shared diligence drives by deal. Open a deal to see what is private versus in the room.</p>
             </div>
@@ -296,29 +314,53 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
                   <strong>{room.stage}</strong>
                   <span>{room.count}</span>
                 </span>
-                <span style={F.chevron} aria-hidden="true">›</span>
               </button>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="files-work-queue" style={F.section}>
-        <SectionHead eyebrow="NEEDS ACTION" title="Data-room work queue" sub="Things in the shared room can be submitted, reviewed, executed, or locked. Artifacts remain review-only." />
-        <div style={F.actionCard}>
-          {operating.loading && <div className="mono" style={F.loading}>READING TODAY QUEUE…</div>}
-          {operating.error && <div style={F.inlineError}>Couldn&rsquo;t load Today queue ({operating.error}).</div>}
-          {!workspace.loading && !operating.loading && actions.length === 0 && (
-            <EmptyRows
-              title="Nothing needs action"
-              text="Requests, reviews, execution items, and failed generations will appear here when they exist."
-              action="Ask Yulia"
-              onClick={() => ask("What should I work on next in my files?")}
-            />
-          )}
-          {actions.map((row, index) => (
-            <FileListRow key={`${row.id ?? row.title}-${index}`} row={row} last={index === actions.length - 1} onClick={() => openDoc(row)} />
-          ))}
+      <section style={F.lowerGrid}>
+        <div style={F.controlCard}>
+          <h2 style={F.controlTitle}>Source control for deal work.</h2>
+          <div style={F.controlGrid}>
+            {FILE_CONTROL_STACK.map(item => (
+              <button
+                key={item.title}
+                type="button"
+                className="m-state"
+                style={F.controlItem}
+                onClick={() => ask(`Explain file source control: ${item.title}. ${item.sub}`)}
+              >
+                <strong>{item.title}</strong>
+                <span>{item.sub}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div id="files-work-queue" style={F.card}>
+          <div style={F.cardHead}>
+            <div>
+              <h2 style={F.cardTitle}>Data-room work queue</h2>
+              <p style={F.cardSub}>Requests, reviews, execution items, and failed generations waiting for a decision.</p>
+            </div>
+          </div>
+          <div style={F.rows}>
+            {operating.loading && <div className="mono" style={F.loading}>READING TODAY QUEUE…</div>}
+            {operating.error && <div style={F.inlineError}>Couldn&rsquo;t load Today queue ({operating.error}).</div>}
+            {!workspace.loading && !operating.loading && actions.length === 0 && (
+              <EmptyRows
+                title="Nothing needs action"
+                text="Requests, reviews, execution items, and failed generations will appear here when they exist."
+                action="Ask Yulia"
+                onClick={() => ask("What should I work on next in my files?")}
+              />
+            )}
+            {actions.map((row, index) => (
+              <FileListRow key={`${row.id ?? row.title}-${index}`} row={row} last={index === actions.length - 1} onClick={() => openDoc(row)} />
+            ))}
+          </div>
         </div>
       </section>
     </div>
@@ -373,7 +415,6 @@ export function V6FilesListView({
     <div className="m-fade-up" style={F.detailPage}>
       <section style={{ ...F.detailHero, backgroundImage: s.bg }}>
         <div>
-          <div className="mono" style={F.detailEyebrow}>{copy.eyebrow}</div>
           <h1 style={F.detailTitle}>{copy.title}</h1>
           <p style={F.detailSub}>{copy.sub}</p>
         </div>
@@ -448,7 +489,6 @@ function ActiveFilesList({
     <div style={F.activeListCard}>
       <div style={F.activeListHead}>
         <div>
-          <div className="mono" style={F.cardEyebrow}>{copy.eyebrow}</div>
           <h2 style={F.cardTitle}>{copy.title}</h2>
           <p style={F.cardSub}>{copy.sub}</p>
         </div>
@@ -497,7 +537,6 @@ function ActiveFilesList({
               <strong>{activeList === "data-rooms" ? room.stage : "Open library"}</strong>
               <span>{room.count}</span>
             </span>
-            <span style={F.chevron} aria-hidden="true">›</span>
           </button>
         ))}
 
@@ -589,15 +628,13 @@ function FileListRow({ row, last, onClick }: { row: FileRow; last: boolean; onCl
         <span>{row.sub}</span>
       </span>
       <span style={{ ...F.filePill, background: t.soft, color: t.ink }}>{row.status}</span>
-      <span style={F.chevron} aria-hidden="true">›</span>
     </button>
   );
 }
 
-function SectionHead({ eyebrow, title, sub }: { eyebrow: string; title: string; sub: string }) {
+function SectionHead({ title, sub }: { title: string; sub: string }) {
   return (
     <div style={F.sectionHead}>
-      <div className="mono" style={F.sectionEyebrow}>{eyebrow}</div>
       <h2 style={F.sectionTitle}>{title}</h2>
       <p style={F.sectionSub}>{sub}</p>
     </div>
@@ -614,54 +651,14 @@ function tone(name: FileRow["tone"]) {
   return tones[name];
 }
 
-function shortcutTone(name: Shortcut["tone"]) {
-  const tones: Record<Shortcut["tone"], {
-    bg: string;
-    border: string;
-    shadow: string;
-    iconBg: string;
-    iconColor: string;
-    countBg: string;
-    countColor: string;
-  }> = {
-    all: {
-      bg: `linear-gradient(145deg, rgba(22,65,111,0.58) 0%, rgba(87,137,187,0.40) 50%, rgba(16,35,71,0.66) 100%), url('${DESKTOP_TEXTURES.filesAll}')`,
-      border: "rgba(106, 155, 204, 0.24)",
-      shadow: "0 28px 70px rgba(78, 113, 152, 0.28), 0 8px 20px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.22)",
-      iconBg: "rgba(106, 155, 204, 0.15)",
-      iconColor: "#3E6F9E",
-      countBg: "rgba(106, 155, 204, 0.13)",
-      countColor: "#3E6F9E",
-    },
-    deals: {
-      bg: `linear-gradient(145deg, rgba(14,62,48,0.58) 0%, rgba(63,128,101,0.40) 52%, rgba(10,31,35,0.66) 100%), url('${ART_HOUSE_TEXTURES.files}')`,
-      border: "rgba(98, 153, 135, 0.24)",
-      shadow: "0 28px 70px rgba(63, 125, 100, 0.28), 0 8px 20px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.22)",
-      iconBg: "rgba(98, 153, 135, 0.16)",
-      iconColor: "#3F7D64",
-      countBg: "rgba(98, 153, 135, 0.14)",
-      countColor: "#3F7D64",
-    },
-    action: {
-      bg: `linear-gradient(145deg, rgba(107,73,22,0.52) 0%, rgba(198,148,72,0.38) 48%, rgba(57,40,24,0.62) 100%), url('${DESKTOP_TEXTURES.filesAction}')`,
-      border: "rgba(156, 113, 40, 0.22)",
-      shadow: "0 28px 70px rgba(156, 113, 40, 0.28), 0 8px 20px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.22)",
-      iconBg: "rgba(214, 163, 92, 0.18)",
-      iconColor: "#9C7128",
-      countBg: "rgba(214, 163, 92, 0.16)",
-      countColor: "#9C7128",
-    },
-    room: {
-      bg: `linear-gradient(145deg, rgba(52,46,108,0.60) 0%, rgba(119,111,184,0.40) 52%, rgba(25,30,68,0.66) 100%), url('${DESKTOP_TEXTURES.filesRoom}')`,
-      border: "rgba(130, 125, 189, 0.25)",
-      shadow: "0 28px 70px rgba(101, 95, 167, 0.28), 0 8px 20px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.22)",
-      iconBg: "rgba(130, 125, 189, 0.16)",
-      iconColor: "#655FA7",
-      countBg: "rgba(130, 125, 189, 0.15)",
-      countColor: "#655FA7",
-    },
+function shortcutTexture(name: Shortcut["tone"]) {
+  const textures: Record<Shortcut["tone"], string> = {
+    all: STUDIO_TEXTURES.navy,
+    deals: STUDIO_TEXTURES.green,
+    action: STUDIO_TEXTURES.rose,
+    room: STUDIO_TEXTURES.blue,
   };
-  return tones[name];
+  return textures[name];
 }
 
 function detailTone(view: FileListView) {
@@ -796,12 +793,12 @@ const F: Record<string, CSSProperties> = {
   },
   detailHero: {
     minHeight: 240,
-    borderRadius: 26,
+    borderRadius: 24,
     padding: 30,
     marginBottom: 22,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
-    border: "1px solid rgba(255,255,255,0.30)",
+    border: "1px solid rgba(255,255,255,0.46)",
     boxShadow: "0 44px 110px rgba(23,38,63,0.29), 0 18px 42px rgba(26,34,51,0.15), 0 4px 12px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.22)",
     display: "flex",
     alignItems: "flex-end",
@@ -831,23 +828,21 @@ const F: Record<string, CSSProperties> = {
     color: "#FFFFFF",
   },
   hero: {
-    display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) minmax(360px, 0.48fr)",
-    gap: 20,
-    alignItems: "stretch",
-    minHeight: 320,
-    padding: 30,
-    borderRadius: 26,
+    display: "flex",
+    alignItems: "flex-end",
+    minHeight: 350,
+    padding: 34,
+    borderRadius: 24,
     backgroundImage: filesHeroWash,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
-    border: "1px solid rgba(255,255,255,0.30)",
+    border: "1px solid rgba(255,255,255,0.46)",
     boxShadow: "0 46px 116px rgba(23,38,63,0.29), 0 20px 46px rgba(26,34,51,0.15), 0 4px 12px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.22)",
-    marginBottom: 34,
+    marginBottom: 30,
+    ...studioGlassBackdrop,
   },
   heroCopy: {
-    alignSelf: "end",
-    maxWidth: 850,
+    maxWidth: 900,
   },
   eyebrow: {
     fontSize: 10,
@@ -856,11 +851,11 @@ const F: Record<string, CSSProperties> = {
     color: "#FFFFFF",
   },
   title: {
-    margin: "8px 0 0",
+    margin: 0,
     maxWidth: 880,
-    fontSize: "clamp(44px, 5vw, 72px)",
-    lineHeight: 0.92,
-    letterSpacing: "-0.06em",
+    fontSize: "clamp(44px, 5vw, 70px)",
+    lineHeight: 0.94,
+    letterSpacing: "-0.055em",
     textWrap: "balance",
     color: "#FFFFFF",
   },
@@ -918,7 +913,7 @@ const F: Record<string, CSSProperties> = {
     color: "var(--m-on-primary-container)",
   },
   sectionTitle: {
-    margin: "4px 0 0",
+    margin: 0,
     fontSize: 32,
     lineHeight: 1,
     letterSpacing: "-0.045em",
@@ -931,87 +926,24 @@ const F: Record<string, CSSProperties> = {
     color: "var(--m-on-surface-mid)",
   },
   shortcutGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
-    gap: 14,
+    ...studioTextureCardStyles.grid,
   },
   shortcutCard: {
-    all: "unset",
-    minHeight: 178,
-    borderRadius: 22,
-    padding: 20,
-    border: "1px solid rgba(255,255,255,0.38)",
-    boxShadow: "0 24px 64px rgba(26,34,51,0.13), 0 6px 16px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.22)",
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    display: "grid",
-    gridTemplateRows: "auto auto 1fr auto auto",
-    gap: 7,
-    cursor: "default",
-    color: "#FFFFFF",
+    ...studioTextureCardStyles.card,
+    cursor: "pointer",
   },
-  shortcutCardActive: {
-    transform: "translateY(-2px)",
-  },
-  shortcutIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
-    display: "grid",
-    placeItems: "center",
-    background: "rgba(255,255,255,0.18)",
-    color: "#FFFFFF",
-    boxShadow: "0 12px 28px -22px rgba(0,0,0,0.46), inset 0 1px 0 rgba(255,255,255,0.42), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.34)",
-    backdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
-    WebkitBackdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
-  },
-  shortcutCount: {
-    justifySelf: "end",
-    marginTop: -44,
-    borderRadius: 999,
-    padding: "5px 10px",
-    background: "rgba(255,255,255,0.18)",
-    color: "#FFFFFF",
-    fontWeight: 850,
-    boxShadow: "0 12px 28px -22px rgba(0,0,0,0.46), inset 0 1px 0 rgba(255,255,255,0.42), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.34)",
-    backdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
-    WebkitBackdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
-  },
+  shortcutMeta: studioTextureCardStyles.meta,
   shortcutTitle: {
-    alignSelf: "end",
-    color: "#FFFFFF",
-    fontSize: 20,
-    lineHeight: 1,
-    letterSpacing: "-0.035em",
-    textShadow: "0 2px 16px rgba(26,34,51,0.24)",
+    ...studioTextureCardStyles.title,
+  },
+  shortcutAudience: {
+    ...studioTextureCardStyles.audience,
   },
   shortcutSub: {
-    color: "#FFFFFF",
-    fontSize: 13,
-    lineHeight: 1.42,
-    textShadow: "0 1px 12px rgba(26,34,51,0.20)",
+    ...studioTextureCardStyles.detail,
   },
   shortcutAction: {
-    all: "unset",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    justifySelf: "start",
-    marginTop: 10,
-    minWidth: 78,
-    height: 38,
-    padding: "0 14px",
-    borderRadius: 999,
-    background: "rgba(255,255,255,0.17)",
-    border: "0.5px solid rgba(255,255,255,0.45)",
-    color: "#FFFFFF",
-    fontSize: 13,
-    fontWeight: 850,
-    cursor: "pointer",
-    boxShadow: "0 16px 34px -22px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.30)",
-    backdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
-    WebkitBackdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
+    ...studioTextureCardStyles.action,
   },
   grid: {
     display: "grid",
@@ -1021,18 +953,29 @@ const F: Record<string, CSSProperties> = {
     marginBottom: 34,
   },
   card: {
-    borderRadius: 26,
-    background: "#FFFFFF",
-    border: "1px solid var(--m-outline-var)",
-    boxShadow: "var(--m-elev-2)",
-    overflow: "hidden",
+    ...studioListCardStyles.panel,
   },
   cardHead: {
     display: "flex",
     alignItems: "flex-start",
     justifyContent: "space-between",
     gap: 16,
-    padding: "24px 24px 10px",
+    padding: 0,
+    marginBottom: 16,
+  },
+  cardAction: {
+    all: "unset",
+    borderRadius: 999,
+    padding: "8px 12px",
+    background: "rgba(34, 47, 68, 0.86)",
+    border: "0.5px solid rgba(255,255,255,0.28)",
+    color: "#FFFFFF",
+    boxShadow: studioLiquidGlassShadow,
+    backdropFilter: studioLiquidGlassFilter,
+    WebkitBackdropFilter: studioLiquidGlassFilter,
+    fontSize: 12.5,
+    fontWeight: 850,
+    cursor: "pointer",
   },
   cardEyebrow: {
     fontSize: 10,
@@ -1041,8 +984,8 @@ const F: Record<string, CSSProperties> = {
     color: "var(--m-on-primary-container)",
   },
   cardTitle: {
-    margin: "4px 0 0",
-    fontSize: 29,
+    margin: 0,
+    fontSize: 30,
     lineHeight: 1,
     letterSpacing: "-0.045em",
     color: "var(--m-on-surface)",
@@ -1055,21 +998,20 @@ const F: Record<string, CSSProperties> = {
     color: "var(--m-on-surface-mid)",
   },
   rows: {
-    padding: "0 18px 12px",
+    ...studioListCardStyles.stack,
+    marginTop: 0,
+    padding: 0,
   },
   activeListCard: {
-    borderRadius: 26,
-    background: "#FFFFFF",
-    border: "1px solid var(--m-outline-var)",
-    boxShadow: "var(--m-elev-2)",
-    overflow: "hidden",
+    ...studioListCardStyles.panel,
   },
   activeListHead: {
     display: "flex",
     alignItems: "flex-start",
     justifyContent: "space-between",
     gap: 16,
-    padding: "24px 24px 10px",
+    padding: 0,
+    marginBottom: 16,
   },
   loading: {
     padding: "6px 0 10px",
@@ -1097,29 +1039,16 @@ const F: Record<string, CSSProperties> = {
   },
   fileRow: {
     all: "unset",
-    width: "100%",
-    minHeight: 74,
+    ...studioListCardStyles.row,
     boxSizing: "border-box",
-    display: "grid",
-    gridTemplateColumns: "46px minmax(0, 1fr) auto 18px",
-    alignItems: "center",
-    gap: 12,
-    padding: "12px 0",
     cursor: "pointer",
   },
   fileIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 15,
-    display: "grid",
-    placeItems: "center",
+    ...studioListCardStyles.icon,
     boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.60), 0 10px 18px rgba(26,34,51,0.06)",
   },
   fileText: {
-    minWidth: 0,
-    display: "flex",
-    flexDirection: "column",
-    gap: 3,
+    ...studioListCardStyles.body,
     fontSize: 12.5,
     color: "var(--m-on-surface-mid)",
   },
@@ -1137,31 +1066,16 @@ const F: Record<string, CSSProperties> = {
   },
   roomRow: {
     all: "unset",
-    width: "100%",
-    minHeight: 82,
+    ...studioListCardStyles.row,
     boxSizing: "border-box",
-    display: "grid",
-    gridTemplateColumns: "46px minmax(0, 1fr) auto 18px",
-    alignItems: "center",
-    gap: 12,
-    padding: "13px 0",
     cursor: "pointer",
   },
   roomIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 15,
-    display: "grid",
-    placeItems: "center",
-    background: "var(--m-primary-container)",
-    color: "var(--m-on-primary-container)",
+    ...studioListCardStyles.icon,
     boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.60), 0 10px 18px rgba(26,34,51,0.06)",
   },
   roomText: {
-    minWidth: 0,
-    display: "flex",
-    flexDirection: "column",
-    gap: 3,
+    ...studioListCardStyles.body,
     fontSize: 12.5,
     color: "var(--m-on-surface-mid)",
   },
@@ -1187,10 +1101,29 @@ const F: Record<string, CSSProperties> = {
     fontSize: 12,
   },
   actionCard: {
-    borderRadius: 26,
-    background: "#FFFFFF",
-    border: "1px solid var(--m-outline-var)",
-    boxShadow: "var(--m-elev-2)",
-    padding: "4px 18px",
+    ...studioListCardStyles.panel,
+  },
+  lowerGrid: {
+    display: "grid",
+    gridTemplateColumns: "minmax(min(520px, 100%), 1fr) minmax(min(420px, 100%), 1fr)",
+    gap: 18,
+    alignItems: "stretch",
+    marginBottom: 34,
+  },
+  controlCard: {
+    ...studioCompeteCardStyles.panel,
+  },
+  controlTitle: {
+    margin: 0,
+    color: "#1A2233",
+    fontSize: 30,
+    lineHeight: 1,
+    letterSpacing: "-0.045em",
+  },
+  controlGrid: {
+    ...studioCompeteCardStyles.grid,
+  },
+  controlItem: {
+    ...studioCompeteButtonItemStyles,
   },
 };

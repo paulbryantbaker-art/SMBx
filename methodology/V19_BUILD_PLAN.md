@@ -1,6 +1,6 @@
 # V19 Build Plan — Real Outstanding Work
 
-**Audit date:** May 19, 2026 (after V19 methodology docs landed in repo + 62 TS-error cleanup + Phase E/G substrate work + Pitch Book Studio/runtime spine work + Today/Files/Pipeline operating wiring + public demo Yulia context + agent-substrate strategy update).
+**Audit date:** May 19, 2026 (after V19 methodology docs landed in repo + 62 TS-error cleanup + Phase E/G substrate work + Pitch Book Studio/runtime spine work + Today/Files/Pipeline operating wiring + public demo Yulia context + agent-substrate strategy update + Studio-surface design normalization for Search/Files + static V19 schema/model verification).
 **Sources:** `methodology/CC_V19_IMPLEMENTATION_BRIEF.md` + `methodology/METHODOLOGY_V19.md` + `Downloads/v19/smbX Must-Haves.pdf` + `Downloads/v19/Agent Economy MandA Playbook.pdf` + May 19 agent-attractor/tollgate strategy notes.
 **Audit baseline:** `origin/main` at `c5270a9`.
 
@@ -135,8 +135,8 @@ Implemented in `server/services/v19EntitlementService.ts`; events are written to
 
 | Run | Name | Current repo state | Next done condition |
 |---|---|---|---|
-| 1 | Product Design System Lock | 🟡 Apple Glass + Neo is live across V6, Studio has the strongest softened desktop pattern, Today/Search/Pipeline are being aligned, reusable Studio surface styles exist. | Extract/normalize reusable hero, texture-card, list-card, dark-glass, rail, and detail-page styles; verify desktop/mobile screenshots so the human app feels coherent and premium. |
-| 2 | V19 Foundation Repair | 🟡 `market_data_cache` collision is addressed by 067/070 compatibility migrations; V19 tables exist; `npm run verify:v19-schema` verifies required migration/table/column coverage and can run live DB checks when `DATABASE_URL` is present. | Run verifier against fresh and existing Railway/local databases; mark schema state with commit SHA. |
+| 1 | Product Design System Lock | 🟡 Apple Glass + Neo is live across V6, Studio has the strongest softened desktop pattern, reusable Studio surface styles exist, and Search/Files now use saved Studio texture/list/compete primitives. `npm run build` passes; desktop screenshots were checked for Search and Files. | Finish Today/Pipeline/detail-page/mobile normalization against the same saved primitives; keep screenshot QA so the human app feels coherent and premium. |
+| 2 | V19 Foundation Repair | 🟡 `market_data_cache` collision is addressed by 067/070 compatibility migrations; V19 tables exist; `npm run verify:v19-schema` passes static migration coverage with 56 checks / 0 failures. Live DB verification is still skipped when `DATABASE_URL` is absent. | Run verifier against fresh and existing Railway/local databases; mark schema state with commit SHA. |
 | 3 | Canonical Server-Side Deal Modeling Runtime | 🟡 Model registry canonicalizes IDs to `MODEL.*.v1`; `v19ModelRuntime.ts` runs deterministic models, reports missing inputs, hashes outputs, persists model executions, and writes V19 audit records. | Make server models the default source for every model-backed chat answer, Studio refresh, Today brief, Pipeline gate move, and export; attach model execution ids to audit packets/share flows. |
 | 4 | Tier-0 Server Models | ✅ First-pass V19 server catalog covers SDE, EBITDA, valuation, DSCR, NWC, sources/uses, SBA, HSR, QoE Lite, tax, legal halt scan, LBO, PPA, rollover, earnout, structure analysis, buyer fit, deal score, market context, sensitivity, comparison, cap table, covenant, DCF, PMI, deal-kill probability, and timeline. `npm run test:v19-models` covers 25 deterministic fixtures. | Deepen formulas with live source extraction, market-data refreshes, Excel round-trip assumptions, and benchmark calibration. |
 | 5 | Model Stack, Gates, And Deal Work | 🟡 Composer service exists; gate definitions expose V19 `requiredModels`, `requiredCitations`, and `alwaysHaltTriggers`; Pipeline now shows methodology stages and sample deal blockers. | Compose league × journey × deal type stacks deeply, execute required models per gate, move deals through Kanban stages, surface blockers, and require approval/counsel deferral for sensitive actions. |
@@ -173,8 +173,8 @@ The V19 implementation brief covers **runtime correctness** (calc engine, citati
 
 | # | Item | Source | State |
 |---|---|---|---|
-| 1 | Product design system lock (Apple Glass + Neo) | Product doctrine | 🟡 V6 live; Studio has strongest softened desktop pattern; Today/Search/Pipeline alignment in progress |
-| 2 | V19 foundation + migration verification | V19 §1-2 | 🟡 067/070 compatibility migrations exist; verifier exists; fresh/existing DB verification still needed |
+| 1 | Product design system lock (Apple Glass + Neo) | Product doctrine | 🟡 V6 live; Studio has strongest softened desktop pattern; Search/Files now use saved Studio primitives; Today/Pipeline/detail/mobile alignment remains |
+| 2 | V19 foundation + migration verification | V19 §1-2 | 🟡 067/070 compatibility migrations exist; static verifier passes 56/56; fresh/existing DB verification still needed |
 | 3 | Canonical server-side deal-model runtime | V19 §4 | 🟡 `MODEL.*.v1` runtime, output hashes, persisted executions, and audit payloads exist |
 | 4 | Tier-0 model catalog | V19 §4 | ✅ 25 deterministic fixtures passing; deeper formulas/source extraction still needed |
 | 5 | Model stack + gate execution | V19 §7-8 | 🟡 Composer/gate requirements exist; deeper league × journey × deal-type execution pending |

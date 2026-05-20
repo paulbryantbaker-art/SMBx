@@ -4,6 +4,7 @@ import { STUDIO_TEXTURES } from "../../../lib/randomTextures";
 import type { OpenTab, StudioFormatId, Tab } from "../types";
 import { V19UsageMeter } from "../V19UsageMeter";
 import {
+  studioCompeteButtonItemStyles,
   studioCompeteCardStyles,
   studioFormatCardBackground as formatCardBackground,
   studioGlassBackdrop as glassBackdrop,
@@ -161,6 +162,29 @@ const FORMATS: StudioFormat[] = [
 const SAMPLE_BOOKS: PitchBookRecord[] = [
   localBook("qoe-preview-book", "Big Fake Deal - QoE Preview Book"),
   localBook("buyer-pitch-book", "Pest Control FL - Buyer Pitch Book"),
+];
+
+const WORKBENCH_STACK = [
+  {
+    title: "Unified inputs",
+    body: "Files, model runs, citations, and Yulia's narrative live in one book.",
+    prompt: "Explain how Pitch Book Studio keeps files, model runs, citations, and Yulia narrative unified in one book.",
+  },
+  {
+    title: "Slide provenance",
+    body: "Each slide tracks facts, models, citations, and unchecked claims.",
+    prompt: "Explain Studio slide provenance: facts used, model outputs used, citations used, and unchecked claims.",
+  },
+  {
+    title: "Export discipline",
+    body: "PPTX/PDF exports include source and audit appendices.",
+    prompt: "Explain how Studio export discipline works for PPTX/PDF, source footnotes, and audit appendices.",
+  },
+  {
+    title: "Deal-native",
+    body: "The book opens in the same canvas as Today, Files, and Pipeline.",
+    prompt: "Explain what deal-native Studio means and how books connect to Today, Files, Pipeline, and chat.",
+  },
 ];
 
 export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: MarketingStudioProps) {
@@ -358,16 +382,11 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
         <div style={S.diffPanel}>
           <h2 style={S.sectionTitle}>Built to compete with finance workbenches.</h2>
           <div style={S.diffGrid}>
-            {[
-              ["Unified inputs", "Files, model runs, citations, and Yulia's narrative live in one book."],
-              ["Slide provenance", "Each slide tracks facts, models, citations, and unchecked claims."],
-              ["Export discipline", "PPTX/PDF exports include source and audit appendices."],
-              ["Deal-native", "The book opens in the same canvas as Today, Files, and Pipeline."],
-            ].map(([title, body]) => (
-              <div key={title} style={S.diffItem}>
-                <strong>{title}</strong>
-                <span>{body}</span>
-              </div>
+            {WORKBENCH_STACK.map(item => (
+              <button key={item.title} type="button" className="m-state" style={S.diffItem} onClick={() => askYulia(item.prompt)}>
+                <strong>{item.title}</strong>
+                <span>{item.body}</span>
+              </button>
             ))}
           </div>
         </div>
@@ -917,7 +936,7 @@ const S: Record<string, CSSProperties> = {
   warnPill: studioListCardStyles.warnPill,
   diffPanel: studioCompeteCardStyles.panel,
   diffGrid: studioCompeteCardStyles.grid,
-  diffItem: studioCompeteCardStyles.item,
+  diffItem: studioCompeteButtonItemStyles,
   canvasPage: {
     width: "min(1440px, calc(100% - 32px))",
     margin: "0 auto",

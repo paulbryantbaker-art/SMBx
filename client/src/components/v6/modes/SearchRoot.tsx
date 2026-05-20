@@ -1,8 +1,17 @@
-import { useState, type CSSProperties, type FormEvent } from "react";
+import { type CSSProperties } from "react";
 import { V6Icon } from "../icons";
 import type { OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
-import { ART_HOUSE_TEXTURES, DESKTOP_TEXTURES } from "../../../lib/randomTextures";
+import { DESKTOP_TEXTURES, STUDIO_TEXTURES } from "../../../lib/randomTextures";
+import {
+  studioCompeteButtonItemStyles,
+  studioCompeteCardStyles,
+  studioListCardStyles,
+  studioLiquidGlassFilter,
+  studioLiquidGlassShadow,
+  studioTextureCardBackground,
+  studioTextureCardStyles,
+} from "../styles/studioSurfaces";
 
 interface SearchRootProps {
   openTab: OpenTab;
@@ -11,10 +20,10 @@ interface SearchRootProps {
 }
 
 interface Category {
-  eyebrow: string;
+  meta: string;
   title: string;
-  sub: string;
-  tone: "gold" | "green" | "blue" | "ink" | "aqua";
+  audience: string;
+  detail: string;
   texture: string;
   prompt: string;
 }
@@ -29,35 +38,35 @@ interface DiscoveryRow {
 
 const CATEGORIES: Category[] = [
   {
-    eyebrow: "OPPORTUNITIES",
+    meta: "Market lane",
     title: "Targets to buy",
-    sub: "Define a thesis and let Yulia build the market map.",
-    tone: "gold",
-    texture: DESKTOP_TEXTURES.searchOpportunities,
+    audience: "Thesis, geography, check size",
+    detail: "Target read, source confidence, fit rationale, and first outreach angle.",
+    texture: STUDIO_TEXTURES.green,
     prompt: "Find acquisition targets from this thesis: recurring revenue, lower-middle-market services, owner transition risk acceptable.",
   },
   {
-    eyebrow: "BUYERS",
+    meta: "Buyer lane",
     title: "Buyers and buy-side",
-    sub: "Strategics, PE-backed platforms, family offices, and buyer pools.",
-    tone: "ink",
-    texture: DESKTOP_TEXTURES.searchBuyers,
+    audience: "Strategics, sponsors, buyer pools",
+    detail: "Buyer universe ranked by strategic fit, ability to close, and relationship angle.",
+    texture: STUDIO_TEXTURES.rose,
     prompt: "Find likely buyers and buyer pools for Big Fake Deal. Rank strategic fit, ability to close, and relationship angle.",
   },
   {
-    eyebrow: "CAPITAL",
+    meta: "Capital lane",
     title: "PE and lenders",
-    sub: "Sponsors, SBA lenders, senior debt, and flexible capital partners.",
-    tone: "blue",
-    texture: DESKTOP_TEXTURES.searchFinancing,
+    audience: "Sponsors, SBA, senior debt",
+    detail: "Capital partners matched by mandate, check size, lender fit, and diligence ask.",
+    texture: STUDIO_TEXTURES.navy,
     prompt: "Find PE firms, independent sponsors, and senior debt lenders relevant to this deal size and industry.",
   },
   {
-    eyebrow: "PROVIDERS",
+    meta: "Provider lane",
     title: "Deal professionals",
-    sub: "Attorneys, real estate, QoE, tax, insurance, and diligence help.",
-    tone: "green",
-    texture: DESKTOP_TEXTURES.searchProviders,
+    audience: "M&A counsel, QoE, tax, insurance",
+    detail: "Provider shortlist with why-now context, fit rationale, and handoff instructions.",
+    texture: STUDIO_TEXTURES.blue,
     prompt: "Find deal professionals for this transaction: M&A counsel, QoE, tax, insurance, and real estate support.",
   },
 ];
@@ -100,21 +109,30 @@ const EXAMPLES = [
   "Find M&A attorneys near Austin",
 ];
 
+const MARKET_STACK = [
+  {
+    title: "Buyer universe",
+    sub: "Strategics, platforms, sponsors, and family offices grouped by fit and likely close path.",
+  },
+  {
+    title: "Target list",
+    sub: "Companies ranked by thesis match, geography, route density, size, and source confidence.",
+  },
+  {
+    title: "Provider match",
+    sub: "Attorneys, QoE, tax, insurance, and diligence partners matched to deal context.",
+  },
+  {
+    title: "Market citations",
+    sub: "Every useful answer should carry source trail, date, and reason it belongs in the deal record.",
+  },
+];
+
 const LIQUID_GLASS_FILTER = "blur(5px) saturate(165%) contrast(1.08) brightness(1.04)";
-const LIQUID_GLASS_BACKGROUND =
-  "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.32), transparent 42%), linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.13) 50%, rgba(255,255,255,0.08))";
-const LIQUID_GLASS_SHADOW =
-  "0 18px 36px -24px rgba(0,0,0,0.54), inset 0 1px 0 rgba(255,255,255,0.56), inset 0 -1px 0 rgba(255,255,255,0.12), inset 0 0 0 0.5px rgba(255,255,255,0.34)";
-const SEARCH_ACTION_GLASS_BACKGROUND =
-  "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.18), transparent 40%), linear-gradient(135deg, rgba(14,18,27,0.98), rgba(25,31,46,0.96) 52%, rgba(9,12,18,0.98))";
-const STUDIO_SOFT_GLASS =
-  "radial-gradient(circle at 18% 0%, rgba(255,255,255,.54), transparent 36%), linear-gradient(135deg, rgba(255,255,255,.58), rgba(245,250,255,.32) 50%, rgba(232,241,252,.20))";
-const STUDIO_SOFT_SHADOW =
-  "0 18px 44px rgba(42,65,96,.10), inset 0 1px 0 rgba(255,255,255,.72)";
+const SHORTCUT_DARK_GLASS_BACKGROUND =
+  "radial-gradient(circle at 20% -18%, rgba(255,255,255,0.24), transparent 42%), linear-gradient(145deg, rgba(21,28,42,0.88), rgba(39,49,70,0.70) 52%, rgba(10,14,22,0.84))";
 
 export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
-  const [query, setQuery] = useState("");
-
   const ask = (prompt: string) => {
     onTalkToYulia?.(prompt);
   };
@@ -137,39 +155,27 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
     ask(prompt);
   };
 
-  const runSearch = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const trimmed = query.trim();
-    if (!trimmed) return;
-    openDiscoverySurface(`Run a market discovery search: ${trimmed}`);
-  };
-
   return (
     <div className="m-fade-up" style={S.page}>
       <section style={S.hero}>
         <div style={S.heroCopy}>
-          <div className="mono" style={S.eyebrow}>SEARCH</div>
           <h1 style={S.title}>Find the other side of the market.</h1>
           <p style={S.sub}>
             Search here is not document search. It is market discovery: buyers, targets, capital, and the professionals who help deals close.
           </p>
         </div>
 
-        <form onSubmit={runSearch} style={S.searchBox}>
-          <V6Icon name="search" size={18} />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Ask Yulia to find buyers, targets, PE, lenders, or deal pros"
-            style={S.input}
-            aria-label="Market discovery search"
-          />
-          <button type="submit" style={S.searchButton}>Search</button>
-        </form>
-
         <div style={S.examples}>
           {EXAMPLES.map(example => (
-            <button key={example} className="m-glint m-glass-control" type="button" style={S.examplePill} onClick={() => { setQuery(example); openDiscoverySurface(`Run a market discovery search: ${example}`); }}>
+            <button
+              key={example}
+              className="m-glint m-glass-control"
+              type="button"
+              style={S.examplePill}
+              onClick={() => {
+                openDiscoverySurface(`Run a market discovery search: ${example}`);
+              }}
+            >
               {example}
             </button>
           ))}
@@ -177,7 +183,7 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
       </section>
 
       <section style={S.section}>
-        <SectionTitle eyebrow="BROWSE" title="Categories" sub="Start broad, then let Yulia narrow by thesis, geography, check size, fit, and relationship angle." />
+        <SectionTitle title="Market lanes" sub="Start broad, then let Yulia narrow by thesis, geography, check size, fit, and relationship angle." />
         <div style={S.categoryGrid}>
           {CATEGORIES.map(category => (
             <CategoryCard key={category.title} category={category} onClick={() => openDiscoverySurface(category.prompt, category.title)} />
@@ -186,28 +192,14 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
       </section>
 
       <section style={S.discoveryGrid}>
-        <div style={S.storyCard}>
-          <div className="mono" style={S.storyEyebrow}>ASK YULIA</div>
-          <h2 style={S.storyTitle}>What is worth sourcing this week?</h2>
-          <p style={S.storySub}>Yulia can turn a thesis into ranked companies, likely buyers, capital providers, and outreach notes.</p>
-          <button
-            type="button"
-            className="m-glint m-glass-control"
-            style={S.storyButton}
-            onClick={() => ask("What is worth sourcing this week based on my current pipeline and deal thesis?")}
-          >
-            Open the chat <span aria-hidden="true">↗</span>
-          </button>
-        </div>
-
         <div style={S.listCard}>
           <div style={S.listTop}>
             <div>
-              <div className="mono" style={S.listEyebrow}>RECENT DISCOVERY</div>
               <h2 style={S.listTitle}>Searches to reopen</h2>
+              <p style={S.listSub}>Recent market maps, buyer pools, lenders, and provider searches.</p>
             </div>
             <button
-              className="m-btn tonal"
+              style={S.listAction}
               type="button"
               onClick={() => {
                 openDiscoverySurface("Open a discovery map for my current sourcing work: buyers, targets, capital providers, and deal professionals grouped by thesis and next action.", "Discovery map");
@@ -217,32 +209,49 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
             </button>
           </div>
 
-          {DISCOVERY.map((row, index) => (
-            <button
-              key={row.title}
-              type="button"
-              style={{ ...S.discoveryRow, borderBottom: index === DISCOVERY.length - 1 ? "none" : "1px solid var(--m-outline-var)" }}
-              onClick={() => openDiscoverySurface(row.prompt, row.title)}
-            >
-              <span style={S.rowIcon}><V6Icon name={row.icon} size={18} /></span>
-              <span style={S.rowText}>
-                <strong>{row.title}</strong>
-                <span>{row.sub}</span>
-              </span>
-              <span style={S.rowPill}>{row.pill}</span>
-              <span style={S.chevron} aria-hidden="true">›</span>
-            </button>
-          ))}
+          <div style={S.listStack}>
+            {DISCOVERY.map(row => (
+              <button
+                key={row.title}
+                type="button"
+                style={S.discoveryRow}
+                onClick={() => openDiscoverySurface(row.prompt, row.title)}
+              >
+                <span style={S.rowIcon}><V6Icon name={row.icon} size={18} /></span>
+                <span style={S.rowText}>
+                  <strong>{row.title}</strong>
+                  <span>{row.sub}</span>
+                </span>
+                <span style={S.rowPill}>{row.pill}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={S.competesCard}>
+          <h2 style={S.competeTitle}>Built for market work that becomes deal work.</h2>
+          <div style={S.competeGrid}>
+            {MARKET_STACK.map(item => (
+              <button
+                key={item.title}
+                type="button"
+                style={S.competeItem}
+                onClick={() => ask(`Use Search to build this market work product: ${item.title}. ${item.sub}`)}
+              >
+                <strong>{item.title}</strong>
+                <span>{item.sub}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </section>
     </div>
   );
 }
 
-function SectionTitle({ eyebrow, title, sub }: { eyebrow: string; title: string; sub: string }) {
+function SectionTitle({ title, sub }: { title: string; sub: string }) {
   return (
     <div style={S.sectionHead}>
-      <div className="mono" style={S.sectionEyebrow}>{eyebrow}</div>
       <h2 style={S.sectionTitle}>{title}</h2>
       <p style={S.sectionSub}>{sub}</p>
     </div>
@@ -250,49 +259,20 @@ function SectionTitle({ eyebrow, title, sub }: { eyebrow: string; title: string;
 }
 
 function CategoryCard({ category, onClick }: { category: Category; onClick: () => void }) {
-  const t = tone(category.tone);
   return (
-    <article style={{ ...S.categoryCard, backgroundImage: t.bg(category.texture), color: t.fg, boxShadow: t.shadow }}>
-      <span className="mono" style={S.categoryEyebrow}>{category.eyebrow}</span>
-      <span style={S.categorySpacer} />
+    <button
+      type="button"
+      className="m-state"
+      style={{ ...S.categoryCard, backgroundImage: studioTextureCardBackground(category.texture) }}
+      onClick={onClick}
+    >
+      <span style={S.categoryMeta}>{category.meta}</span>
       <strong style={S.categoryTitle}>{category.title}</strong>
-      <span style={S.categorySub}>{category.sub}</span>
-      <button type="button" className="m-glint m-glass-control" style={S.categoryAction} onClick={onClick}>
-        Open <span aria-hidden="true">›</span>
-      </button>
-    </article>
+      <span style={S.categoryAudience}>{category.audience}</span>
+      <span style={S.categoryDetail}>{category.detail}</span>
+      <span style={S.categoryAction}>Open</span>
+    </button>
   );
-}
-
-function tone(name: Category["tone"]) {
-  const tones: Record<Category["tone"], { bg: (texture: string) => string; fg: string; shadow: string }> = {
-    gold: {
-      bg: texture => `linear-gradient(145deg, rgba(107,73,22,0.42) 0%, rgba(198,148,72,0.30) 48%, rgba(57,40,24,0.52) 100%), url('${texture}')`,
-      fg: "#FFFFFF",
-      shadow: "0 18px 44px rgba(156,113,40,0.18), 0 6px 16px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.24)",
-    },
-    green: {
-      bg: texture => `linear-gradient(145deg, rgba(14,62,48,0.48) 0%, rgba(63,128,101,0.32) 52%, rgba(10,31,35,0.56) 100%), url('${texture}')`,
-      fg: "#FFFFFF",
-      shadow: "0 18px 44px rgba(46,111,89,0.18), 0 6px 16px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.24)",
-    },
-    blue: {
-      bg: texture => `linear-gradient(145deg, rgba(22,65,111,0.48) 0%, rgba(87,137,187,0.32) 50%, rgba(16,35,71,0.56) 100%), url('${texture}')`,
-      fg: "#FFFFFF",
-      shadow: "0 18px 44px rgba(46,92,138,0.18), 0 6px 16px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.24)",
-    },
-    ink: {
-      bg: texture => `linear-gradient(145deg, rgba(22,31,48,0.38) 0%, rgba(36,55,70,0.26) 48%, rgba(10,18,31,0.42) 100%), url('${texture}')`,
-      fg: "#FFFFFF",
-      shadow: "0 18px 44px rgba(18,23,34,0.18), 0 6px 16px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.24)",
-    },
-    aqua: {
-      bg: texture => `linear-gradient(145deg, rgba(29,100,108,0.48) 0%, rgba(83,151,157,0.32) 52%, rgba(20,52,68,0.56) 100%), url('${texture}')`,
-      fg: "#FFFFFF",
-      shadow: "0 18px 44px rgba(57,123,133,0.18), 0 6px 16px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.24)",
-    },
-  };
-  return tones[name];
 }
 
 const S: Record<string, CSSProperties> = {
@@ -307,14 +287,14 @@ const S: Record<string, CSSProperties> = {
   hero: {
     position: "relative",
     overflow: "hidden",
-    padding: 30,
-    borderRadius: 26,
+    padding: 34,
+    borderRadius: 24,
     backgroundImage: `linear-gradient(135deg, rgba(20, 83, 77, 0.84) 0%, rgba(49, 113, 95, 0.66) 52%, rgba(214, 163, 92, 0.36) 100%), url('${DESKTOP_TEXTURES.searchHero}')`,
     backgroundSize: "cover, cover",
     backgroundPosition: "center, center",
-    border: "1px solid var(--m-outline-var)",
+    border: "1px solid rgba(255,255,255,0.46)",
     boxShadow: "0 46px 116px rgba(26, 84, 70, 0.30), 0 20px 46px rgba(26,34,51,0.16), 0 4px 12px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.22)",
-    marginBottom: 34,
+    marginBottom: 30,
   },
   heroCopy: {
     maxWidth: 860,
@@ -326,10 +306,10 @@ const S: Record<string, CSSProperties> = {
     color: "#FFFFFF",
   },
   title: {
-    margin: "8px 0 0",
-    fontSize: "clamp(44px, 5vw, 72px)",
-    lineHeight: 0.92,
-    letterSpacing: "-0.06em",
+    margin: 0,
+    fontSize: "clamp(44px, 5vw, 70px)",
+    lineHeight: 0.94,
+    letterSpacing: "-0.055em",
     textWrap: "balance",
     color: "#FFFFFF",
   },
@@ -340,62 +320,29 @@ const S: Record<string, CSSProperties> = {
     lineHeight: 1.55,
     color: "#FFFFFF",
   },
-  searchBox: {
-    marginTop: 26,
-    maxWidth: 900,
-    height: 58,
-    display: "grid",
-    gridTemplateColumns: "28px minmax(0, 1fr) auto",
-    alignItems: "center",
-    gap: 12,
-    padding: "0 10px 0 18px",
-    borderRadius: 18,
-    background: "rgba(255,255,255,0.94)",
-    color: "rgba(26,34,51,0.62)",
-    border: "1px solid rgba(255,255,255,0.58)",
-    boxShadow: "0 20px 44px rgba(15, 57, 52, 0.20)",
-  },
-  input: {
-    minWidth: 0,
-    width: "100%",
-    border: "none",
-    outline: "none",
-    background: "transparent",
-    fontSize: 16,
-    color: "var(--m-on-surface)",
-  },
-  searchButton: {
-    all: "unset",
-    height: 40,
-    padding: "0 16px",
-    borderRadius: 999,
-    background: SEARCH_ACTION_GLASS_BACKGROUND,
-    border: "0.5px solid rgba(255,255,255,0.54)",
-    color: "var(--m-on-primary)",
-    boxShadow: LIQUID_GLASS_SHADOW,
-    backdropFilter: LIQUID_GLASS_FILTER,
-    WebkitBackdropFilter: LIQUID_GLASS_FILTER,
-    fontWeight: 800,
-    cursor: "pointer",
-  },
   examples: {
     display: "flex",
     flexWrap: "wrap",
     gap: 8,
-    marginTop: 14,
+    marginTop: 26,
   },
   examplePill: {
     all: "unset",
-    padding: "9px 14px",
+    minHeight: 34,
+    padding: "0 14px",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
     borderRadius: 999,
-    background: LIQUID_GLASS_BACKGROUND,
-    border: "0.5px solid rgba(255,255,255,0.52)",
+    background: SHORTCUT_DARK_GLASS_BACKGROUND,
+    border: "0.5px solid rgba(255,255,255,0.44)",
     color: "#FFFFFF",
-    boxShadow: LIQUID_GLASS_SHADOW,
+    boxShadow: "0 16px 32px -20px rgba(0,0,0,0.64), inset 0 1px 0 rgba(255,255,255,0.36), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.22)",
     backdropFilter: LIQUID_GLASS_FILTER,
     WebkitBackdropFilter: LIQUID_GLASS_FILTER,
     fontSize: 12.5,
     fontWeight: 800,
+    textShadow: "0 1px 10px rgba(13,22,32,0.22)",
     cursor: "pointer",
   },
   section: {
@@ -411,7 +358,7 @@ const S: Record<string, CSSProperties> = {
     color: "var(--m-on-primary-container)",
   },
   sectionTitle: {
-    margin: "4px 0 0",
+    margin: 0,
     fontSize: 32,
     lineHeight: 1,
     letterSpacing: "-0.045em",
@@ -424,200 +371,105 @@ const S: Record<string, CSSProperties> = {
     color: "var(--m-on-surface-mid)",
   },
   categoryGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-    gap: 12,
+    ...studioTextureCardStyles.grid,
   },
   categoryCard: {
-    all: "unset",
-    minHeight: 206,
-    borderRadius: 18,
-    padding: 20,
-    display: "flex",
-    flexDirection: "column",
-    overflow: "hidden",
-    cursor: "default",
-    border: "1px solid rgba(255,255,255,0.36)",
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    boxShadow: "0 18px 44px rgba(42,65,96,.14), inset 0 1px 0 rgba(255,255,255,.28)",
+    ...studioTextureCardStyles.card,
+    cursor: "pointer",
   },
-  categoryEyebrow: {
-    fontSize: 10,
-    letterSpacing: "0.16em",
-    fontWeight: 800,
-    color: "#FFFFFF",
-    opacity: 1,
-  },
-  categorySpacer: {
-    flex: 1,
-  },
+  categoryMeta: studioTextureCardStyles.meta,
   categoryTitle: {
-    display: "block",
-    fontSize: 24,
-    lineHeight: 0.98,
-    letterSpacing: "-0.045em",
+    ...studioTextureCardStyles.title,
   },
-  categorySub: {
-    display: "block",
-    marginTop: 10,
-    maxWidth: 310,
-    fontSize: 13.5,
-    lineHeight: 1.45,
-    color: "#FFFFFF",
-    opacity: 1,
+  categoryAudience: {
+    ...studioTextureCardStyles.audience,
+  },
+  categoryDetail: {
+    ...studioTextureCardStyles.detail,
   },
   categoryAction: {
-    all: "unset",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    alignSelf: "flex-start",
-    marginTop: 18,
-    minWidth: 84,
-    height: 40,
-    padding: "0 15px",
-    borderRadius: 999,
-    background: LIQUID_GLASS_BACKGROUND,
-    border: "0.5px solid rgba(255,255,255,0.52)",
-    color: "#FFFFFF",
-    boxShadow: LIQUID_GLASS_SHADOW,
-    backdropFilter: LIQUID_GLASS_FILTER,
-    WebkitBackdropFilter: LIQUID_GLASS_FILTER,
-    fontSize: 13,
-    fontWeight: 850,
-    cursor: "pointer",
+    ...studioTextureCardStyles.action,
   },
   discoveryGrid: {
     display: "grid",
-    gridTemplateColumns: "minmax(300px, 0.75fr) minmax(420px, 1.25fr)",
+    gridTemplateColumns: "minmax(min(520px, 100%), 0.95fr) minmax(min(420px, 100%), 1.05fr)",
     gap: 16,
     alignItems: "stretch",
   },
-  storyCard: {
-    minHeight: 292,
-    borderRadius: 24,
-    padding: 24,
-    backgroundImage: `radial-gradient(circle at 8% 18%, rgba(255,255,255,0.18), transparent 42%), linear-gradient(145deg, rgba(42,103,88,0.26) 0%, rgba(42,78,86,0.30) 46%, rgba(22,32,50,0.46) 100%), url('${ART_HOUSE_TEXTURES.search}')`,
-    backgroundSize: "cover, cover, cover",
-    backgroundPosition: "center, center, center",
-    color: "#FFFFFF",
-    boxShadow: "0 28px 74px rgba(26, 84, 70, 0.20), 0 10px 24px rgba(26,34,51,0.10), inset 0 1px 0 rgba(255,255,255,0.24)",
-  },
-  storyEyebrow: {
-    fontSize: 10,
-    letterSpacing: "0.16em",
-    fontWeight: 800,
-    color: "#FFFFFF",
-    opacity: 1,
-  },
-  storyTitle: {
-    margin: "24px 0 0",
-    maxWidth: 440,
-    fontSize: 36,
-    lineHeight: 0.98,
-    letterSpacing: "-0.055em",
-    textWrap: "balance",
-    color: "#FFFFFF",
-  },
-  storySub: {
-    margin: "16px 0 0",
-    maxWidth: 420,
-    fontSize: 15,
-    lineHeight: 1.55,
-    color: "#FFFFFF",
-    opacity: 1,
-  },
-  storyButton: {
-    all: "unset",
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 10,
-    marginTop: 28,
-    height: 42,
-    padding: "0 16px",
-    borderRadius: 999,
-    border: "0.5px solid rgba(255,255,255,0.52)",
-    background: LIQUID_GLASS_BACKGROUND,
-    color: "#FFFFFF",
-    boxShadow: LIQUID_GLASS_SHADOW,
-    backdropFilter: LIQUID_GLASS_FILTER,
-    WebkitBackdropFilter: LIQUID_GLASS_FILTER,
-    fontWeight: 850,
-    cursor: "pointer",
-  },
   listCard: {
-    borderRadius: 24,
-    background: STUDIO_SOFT_GLASS,
-    border: "1px solid rgba(255,255,255,.55)",
-    boxShadow: STUDIO_SOFT_SHADOW,
-    backdropFilter: "blur(22px) saturate(155%)",
-    WebkitBackdropFilter: "blur(22px) saturate(155%)",
-    overflow: "hidden",
+    ...studioListCardStyles.panel,
   },
   listTop: {
     display: "flex",
     alignItems: "flex-start",
     justifyContent: "space-between",
     gap: 16,
-    padding: "24px 24px 8px",
-  },
-  listEyebrow: {
-    fontSize: 10,
-    letterSpacing: "0.16em",
-    fontWeight: 800,
-    color: "var(--m-on-primary-container)",
+    marginBottom: 16,
   },
   listTitle: {
-    margin: "4px 0 0",
-    fontSize: 28,
+    margin: 0,
+    fontSize: 30,
     lineHeight: 1,
     letterSpacing: "-0.045em",
     color: "var(--m-on-surface)",
   },
+  listSub: {
+    margin: "8px 0 0",
+    fontSize: 13.5,
+    lineHeight: 1.4,
+    color: "var(--m-on-surface-mid)",
+  },
+  listAction: {
+    all: "unset",
+    borderRadius: 999,
+    padding: "8px 12px",
+    background: "rgba(34, 47, 68, 0.86)",
+    border: "0.5px solid rgba(255,255,255,0.28)",
+    color: "#FFFFFF",
+    boxShadow: studioLiquidGlassShadow,
+    backdropFilter: studioLiquidGlassFilter,
+    WebkitBackdropFilter: studioLiquidGlassFilter,
+    fontSize: 12.5,
+    fontWeight: 850,
+    cursor: "pointer",
+  },
+  listStack: {
+    ...studioListCardStyles.stack,
+    marginTop: 0,
+  },
   discoveryRow: {
     all: "unset",
-    display: "grid",
-    gridTemplateColumns: "46px minmax(0, 1fr) auto 20px",
-    alignItems: "center",
-    gap: 14,
-    width: "100%",
-    minHeight: 74,
+    ...studioListCardStyles.row,
     boxSizing: "border-box",
-    padding: "12px 22px",
     cursor: "pointer",
   },
   rowIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 15,
-    display: "grid",
-    placeItems: "center",
-    background: "var(--m-primary-container)",
-    color: "var(--m-on-primary-container)",
-    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.60), 0 10px 18px rgba(26,34,51,0.06)",
+    ...studioListCardStyles.icon,
   },
   rowText: {
-    minWidth: 0,
-    display: "flex",
-    flexDirection: "column",
-    gap: 3,
-    fontSize: 12.5,
-    color: "var(--m-on-surface-mid)",
+    ...studioListCardStyles.body,
+    fontSize: 13,
     lineHeight: 1.35,
   },
   rowPill: {
-    borderRadius: 999,
-    padding: "7px 11px",
-    background: "var(--m-primary-container)",
-    color: "var(--m-on-primary-container)",
-    fontWeight: 850,
+    ...studioListCardStyles.cleanPill,
     whiteSpace: "nowrap",
   },
-  chevron: {
-    color: "var(--m-on-surface-mid)",
-    fontSize: 28,
+  competesCard: {
+    ...studioCompeteCardStyles.panel,
+  },
+  competeTitle: {
+    margin: 0,
+    color: "#1A2233",
+    fontSize: 30,
     lineHeight: 1,
+    letterSpacing: "-0.045em",
+  },
+  competeGrid: {
+    ...studioCompeteCardStyles.grid,
+  },
+  competeItem: {
+    ...studioCompeteButtonItemStyles,
+    color: "#60708A",
   },
 };

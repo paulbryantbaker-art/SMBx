@@ -29,11 +29,31 @@ export const studioLiquidGlassShadow =
 export const studioLiquidDarkGlassShadow =
   "0 16px 34px -22px rgba(0,0,0,0.52), inset 0 1px 0 rgba(255,255,255,0.34), inset 0 -1px 0 rgba(255,255,255,0.08), inset 0 0 0 0.5px rgba(255,255,255,0.26)";
 
+export const studioDarkLiquidGlassPill: CSSProperties = {
+  borderRadius: 999,
+  color: "#FFFFFF",
+  background:
+    "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.28), transparent 42%), " +
+    "linear-gradient(135deg, rgba(31,38,52,0.76), rgba(18,24,36,0.68) 48%, rgba(8,12,20,0.78))",
+  border: "0.5px solid rgba(255,255,255,0.64)",
+  boxShadow:
+    "0 18px 38px -24px rgba(0,0,0,0.58), " +
+    "inset 0 1px 0 rgba(255,255,255,0.58), " +
+    "inset 0 -1px 0 rgba(255,255,255,0.16), " +
+    "inset 0 0 0 0.5px rgba(255,255,255,0.22)",
+  backdropFilter: "blur(12px) saturate(175%) contrast(1.08) brightness(1.06)",
+  WebkitBackdropFilter: "blur(12px) saturate(175%) contrast(1.08) brightness(1.06)",
+};
+
 export const studioHeroWash =
   `linear-gradient(155deg, rgba(77,39,53,0.52) 0%, rgba(183,103,93,0.34) 48%, rgba(29,30,54,0.58) 100%), url('${STUDIO_TEXTURES.rose}')`;
 
+export function studioTextureCardBackground(texture: string): string {
+  return `linear-gradient(180deg, rgba(14, 31, 50, 0.16), rgba(12, 28, 48, 0.62)), linear-gradient(135deg, rgba(255,255,255,.18), rgba(255,255,255,0) 48%), url('${texture}')`;
+}
+
 export function studioFormatCardBackground(value: StudioFormatId): string {
-  return `linear-gradient(180deg, rgba(14, 31, 50, 0.16), rgba(12, 28, 48, 0.62)), linear-gradient(135deg, rgba(255,255,255,.18), rgba(255,255,255,0) 48%), url('${studioFormatTextures[value]}')`;
+  return studioTextureCardBackground(studioFormatTextures[value]);
 }
 
 export const studioTextureCardStyles: Record<string, CSSProperties> = {
@@ -71,16 +91,10 @@ export const studioTextureCardStyles: Record<string, CSSProperties> = {
   action: {
     marginTop: 12,
     alignSelf: "flex-start",
-    borderRadius: 999,
     padding: "7px 12px",
-    background: "rgba(26,34,51,.46)",
-    border: "1px solid rgba(255,255,255,.24)",
-    color: "#FFFFFF",
     fontSize: 12,
     fontWeight: 850,
-    boxShadow: studioLiquidDarkGlassShadow,
-    backdropFilter: studioLiquidGlassFilter,
-    WebkitBackdropFilter: studioLiquidGlassFilter,
+    ...studioDarkLiquidGlassPill,
   },
 };
 
@@ -164,4 +178,23 @@ export const studioCompeteCardStyles: Record<string, CSSProperties> = {
     alignContent: "start",
     color: "#60708A",
   },
+};
+
+export const studioCompeteButtonItemStyles: CSSProperties = {
+  all: "unset",
+  ...studioCompeteCardStyles.item,
+  boxSizing: "border-box",
+  width: "100%",
+  textAlign: "left",
+  cursor: "pointer",
+  font: "inherit",
+};
+
+export const studioListButtonRowStyles: CSSProperties = {
+  all: "unset",
+  ...studioListCardStyles.row,
+  boxSizing: "border-box",
+  width: "100%",
+  cursor: "pointer",
+  font: "inherit",
 };

@@ -1,7 +1,56 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { ART_HOUSE_TEXTURES, DESKTOP_TEXTURES } from "../../lib/randomTextures";
+import { ART_HOUSE_TEXTURES, DESKTOP_TEXTURES, STUDIO_TEXTURES } from "../../lib/randomTextures";
+import {
+  studioCompeteButtonItemStyles,
+  studioCompeteCardStyles,
+  studioDarkLiquidGlassPill,
+  studioGlassBackdrop,
+  studioHeroWash,
+  studioLiquidGlass,
+  studioListButtonRowStyles,
+  studioListCardStyles,
+  studioTextureCardBackground,
+  studioTextureCardStyles,
+} from "./styles/studioSurfaces";
 
 type Section = "how" | "pricing";
+
+type HeroConfig = {
+  title: string;
+  copy: string;
+  cta: string;
+  prompt: string;
+  background: string;
+  dock: [string, string][];
+};
+
+const LEARN_HERO: Record<Section, HeroConfig> = {
+  how: {
+    title: "See how the deal desk works.",
+    copy: "Yulia turns chat, files, models, and decisions into one live work surface. The canvas shows the work; the chat rail stays the front door.",
+    cta: "Ask Yulia to walk the desk",
+    prompt: "Walk me through how Yulia runs the deal desk from chat to models, files, Studio, and audit trail.",
+    background:
+      `linear-gradient(155deg, rgba(15,34,58,0.76) 0%, rgba(54,100,142,0.46) 48%, rgba(14,25,48,0.78) 100%), url('${STUDIO_TEXTURES.navy}')`,
+    dock: [
+      ["Chat opens the work", "A question becomes a route into Today, Pipeline, Search, Files, Studio, or a deal detail page."],
+      ["Models stay grounded", "Financial outputs come from deterministic V19 models, uploaded files, and cited sources."],
+      ["Outputs carry proof", "Memos, books, and exports keep their source trail, model links, and audit state."],
+    ],
+  },
+  pricing: {
+    title: "Start free. Scale with governed deal work.",
+    copy: "Monthly plans stay simple. Credits and tollgates control expensive model runs, Studio exports, API/MCP calls, and agent usage without wallets or success fees.",
+    cta: "Ask Yulia which plan fits",
+    prompt: "Help me choose the right smbX plan based on deal volume, Studio exports, model runs, API/MCP access, and agent usage.",
+    background: studioHeroWash,
+    dock: [
+      ["Monthly plans", "Free, Solo, Pro, Team, and Enterprise map to how much real deal work needs to move."],
+      ["Included credits", "Model runs, exports, Studio books, and API/tool calls are metered inside monthly allowances."],
+      ["Agent-ready gates", "Higher-scope actions can require credit budget, human approval, or enterprise permission."],
+    ],
+  },
+};
 
 interface LearnProps {
   section?: Section;
@@ -11,6 +60,7 @@ interface LearnProps {
 
 export function V6LearnView({ section, anchor, onTalkToYulia }: LearnProps) {
   const [active, setActive] = useState<Section>(section ?? "how");
+  const hero = LEARN_HERO[active];
   useEffect(() => { if (section) setActive(section); }, [section]);
 
   // Scroll to anchor whenever an anchor arrives — wait one frame so the
@@ -26,29 +76,23 @@ export function V6LearnView({ section, anchor, onTalkToYulia }: LearnProps) {
 
   return (
     <div className="m-fade-up" style={L.page}>
-      <header style={L.hero}>
+      <header style={{ ...L.hero, backgroundImage: hero.background }}>
         <div style={L.heroGlow} aria-hidden="true" />
         <div style={L.heroMain}>
           <div>
-            <h1 style={L.heroH1}>The deal desk runs behind the chat.</h1>
-            <p style={L.heroTag}>
-              Yulia analyzes the deal, lays out the paths, makes the implications clear, and drafts the next move. The leverage stays with you. The labor does not.
-            </p>
+            <h1 style={L.heroH1}>{hero.title}</h1>
+            <p style={L.heroTag}>{hero.copy}</p>
             <button
               className="m-state"
               style={L.heroCta}
-              onClick={() => onTalkToYulia?.("Show me how Yulia would run the deal desk for my situation.")}
+              onClick={() => onTalkToYulia?.(hero.prompt)}
             >
-              <span>Ask Yulia to run the desk</span>
+              <span>{hero.cta}</span>
               <span aria-hidden="true">↗</span>
             </button>
           </div>
           <div style={L.heroDock} aria-label="Yulia system summary">
-            {[
-              ["Analyze", "Financials, tax returns, CIMs, contracts, and diligence requests become one defended read."],
-              ["Model", "The recast, valuation, structure, tax, and risk view stay tied to auditable inputs."],
-              ["Draft", "Counters, memos, outreach, and deal-room outputs come from the same deal record."],
-            ].map(([title, body]) => (
+            {hero.dock.map(([title, body]) => (
               <div key={title} style={L.heroDockItem}>
                 <strong style={L.heroDockTitle}>{title}</strong>
                 <span style={L.heroDockText}>{body}</span>
@@ -206,128 +250,160 @@ const OPTION_ROWS = [
   ["Strategic", "Highest headline", "8-14 months", "More diligence"],
 ] as const;
 
+const HOW_TEXTURE_CARDS = [
+  {
+    meta: "01",
+    title: "Ask in chat",
+    audience: "Front door",
+    detail: "Start with a question, file, target, buyer, or open decision. Yulia routes it to the right surface.",
+    action: "Open work",
+    texture: STUDIO_TEXTURES.green,
+  },
+  {
+    meta: "02",
+    title: "Work the deal",
+    audience: "Canvas",
+    detail: "The answer becomes a model, buyer map, file read, pipeline move, or Studio draft instead of staying trapped in chat.",
+    action: "Build context",
+    texture: STUDIO_TEXTURES.rose,
+  },
+  {
+    meta: "03",
+    title: "Ground the math",
+    audience: "V19 models",
+    detail: "Numbers come from deterministic models, source files, citations, and versioned assumptions.",
+    action: "Verify",
+    texture: STUDIO_TEXTURES.navy,
+  },
+  {
+    meta: "04",
+    title: "Ship the output",
+    audience: "Studio + files",
+    detail: "Drafts, pitch books, memos, and exports keep their source trail and audit state.",
+    action: "Deliver",
+    texture: STUDIO_TEXTURES.blue,
+  },
+];
+
+const HOW_COMPETE_ITEMS = [
+  ["Unified record", "The same deal context feeds Today, Pipeline, Files, Search, Studio, and chat."],
+  ["Methodology gates", "Yulia tracks deal stage, league, required models, citations, and halt triggers."],
+  ["Deterministic models", "Valuation, QoE, LBO, tax, legal issue spotting, DSCR, NWC, and structure runs stay reproducible."],
+  ["Audit trail", "Every model-backed answer and export can carry sources, hashes, approvals, and deferrals."],
+];
+
+const HOW_LIST_ROWS = [
+  ["TH", "Thesis to target map", "Search lanes create buyer, lender, provider, and target maps from one mandate.", "Search"],
+  ["QO", "QoE Preview wedge", "Files become normalized earnings, add-back defense, NWC issues, and Studio books.", "Studio"],
+  ["IC", "IC and board work", "Models and citations become pitch books, board updates, memos, and decision asks.", "Export"],
+  ["AG", "Agent-ready substrate", "API/MCP callers get governed tools, tollgates, audit writes, and source-grounded outputs.", "V19"],
+];
+
 function HowSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) => void }) {
   return (
     <div>
       <style>{`
         @media (max-width: 1080px) {
-          .about-open-grid,
-          .about-story-row,
-          .about-step-board,
-          .about-system-grid {
+          .learn-two-column,
+          .learn-step-grid {
             grid-template-columns: 1fr !important;
-          }
-          .about-story-row.is-reverse > *:first-child {
-            order: 0 !important;
           }
         }
         @media (max-width: 760px) {
-          .about-hero-card,
-          .about-white-panel,
-          .about-system-panel {
-            border-radius: 24px !important;
-            padding: 22px !important;
-          }
-          .about-story-node {
-            min-height: 0 !important;
+          .learn-info-panel {
+            border-radius: 22px !important;
+            padding: 18px !important;
           }
         }
       `}</style>
 
-      <section className="about-open-grid" style={A.openGrid}>
+      <LearnSection
+        title="Work starts in chat. It does not stay there."
+        sub="The canvas is where Yulia turns intent into deal work: tabs, models, source reads, drafts, and audit-ready deliverables."
+      >
+        <div style={L.textureGrid}>
+          {HOW_TEXTURE_CARDS.map((card, index) => (
+            <Reveal key={card.title} delay={index * 60}>
+              <article style={{ ...L.textureCard, backgroundImage: studioTextureCardBackground(card.texture) }}>
+                <span style={L.textureMeta}>{card.meta}</span>
+                <strong style={L.textureTitle}>{card.title}</strong>
+                <span style={L.textureAudience}>{card.audience}</span>
+                <span style={L.textureDetail}>{card.detail}</span>
+                <span style={L.textureAction}>{card.action}</span>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+      </LearnSection>
+
+      <section className="learn-two-column" style={L.twoColumnGrid}>
         <Reveal direction="right">
-          <div className="about-white-panel" style={A.openPanel}>
-            <h2 style={A.massiveTitle}>Yulia is the analyst pod, associate desk, and document engine.</h2>
-            <p style={A.openLead}>
-              She runs the recast, builds the buyer tree, models the structure, drafts the documents, and tracks every gate from sourcing to post-close. You bring the judgment. You sign the email.
-            </p>
-            <div style={A.statRail}>
-              <span style={A.statPill}>Analysis in the canvas</span>
-              <span style={A.statPill}>Every number traceable</span>
-              <span style={A.statPill}>Your decision</span>
+          <div className="learn-info-panel" style={L.competePanel}>
+            <h2 style={L.infoTitle}>Built as a deal operating layer.</h2>
+            <div style={L.competeGrid}>
+              {HOW_COMPETE_ITEMS.map(([title, body]) => (
+                <button
+                  key={title}
+                  type="button"
+                  className="m-state"
+                  style={L.competeItem}
+                  onClick={() => onTalkToYulia?.(`Explain ${title} in the smbX deal operating layer. ${body}`)}
+                >
+                  <strong>{title}</strong>
+                  <span>{body}</span>
+                </button>
+              ))}
             </div>
           </div>
         </Reveal>
 
         <Reveal direction="left" delay={90}>
-          <div className="about-hero-card" style={A.artCard}>
-            <div style={A.artWash} aria-hidden="true" />
-            <div style={A.artContent}>
-              <h2 style={A.artTitle}>Chat is the front door. The work lands on the desk.</h2>
-              <p style={A.artBody}>
-                Questions become models, comparisons, memos, diligence reads, buyer lists, and review-ready drafts instead of disappearing into a transcript.
-              </p>
-              <button
-                type="button"
-                className="m-glint m-glass-control"
-                style={A.darkGlassPill}
-                onClick={() => onTalkToYulia?.("Show me how Yulia would run the deal desk for my situation.")}
-              >
-                Talk to Yulia <span aria-hidden="true">↗</span>
-              </button>
+          <div className="learn-info-panel" style={L.listPanel}>
+            <div style={L.panelHeader}>
+              <h2 style={L.infoTitle}>What Yulia keeps organized</h2>
+              <span style={L.softPill}>V19</span>
+            </div>
+            <div style={L.listStack}>
+              {HOW_LIST_ROWS.map(([icon, title, body, pill]) => (
+                <button
+                  key={title}
+                  type="button"
+                  className="m-state"
+                  style={L.listRow}
+                  onClick={() => onTalkToYulia?.(`Explain ${title}. ${body}`)}
+                >
+                  <span style={L.listIcon}>{icon}</span>
+                  <span style={L.listBody}>
+                    <strong>{title}</strong>
+                    <small>{body}</small>
+                  </span>
+                  <span style={L.cleanPill}>{pill}</span>
+                </button>
+              ))}
             </div>
           </div>
         </Reveal>
       </section>
 
-      <section style={A.storySection}>
-        <Reveal>
-          <div style={A.sectionHead}>
-            <h2 style={A.sectionTitle}>Four steps, every deal</h2>
-            <p style={A.sectionLead}>The first three are mechanical. The fourth is yours. That split is the regulatory firewall and the product.</p>
-          </div>
-        </Reveal>
-
-        <div className="about-step-board" style={A.stepBoard}>
+      <LearnSection
+        title="Four steps, every deal."
+        sub="Yulia can do the mechanical work, but the decision stays with the user."
+      >
+        <div className="learn-step-grid" style={L.stepGrid}>
           {FOUR_STEPS.map((step, index) => (
-            <Reveal key={step.title} direction="up" delay={index * 70}>
-              <article style={stepBoardCardStyle(index)}>
-                <div style={A.stepTopline}>
-                  <span style={stepBadgeStyle(index)}>{step.n}</span>
-                  <span style={A.stepOutcomePill}>{step.outcome}</span>
+            <Reveal key={step.title} delay={index * 60}>
+              <article style={L.stepCard}>
+                <div style={L.stepTopline}>
+                  <span style={L.stepNumber}>{step.n}</span>
+                  <span style={L.softPill}>{step.outcome}</span>
                 </div>
-                <h3 style={A.stepBoardTitle}>{step.title}</h3>
-                <p style={A.stepBoardBody}>{step.body}</p>
+                <h3 style={L.stepTitle}>{step.title}</h3>
+                <p style={L.stepBody}>{step.body}</p>
               </article>
             </Reveal>
           ))}
         </div>
-      </section>
-
-      <section className="about-system-panel" style={A.systemPanel}>
-        <div style={A.systemVeil} aria-hidden="true" />
-        <Reveal>
-          <div style={A.systemIntro}>
-            <h2 style={A.systemTitle}>A real interaction</h2>
-            <p style={A.systemLead}>
-              Industrial services platform. Multi-state operations. $28M revenue. The founder asks, "What's it worth, and what's the right way to take it to market?"
-            </p>
-          </div>
-        </Reveal>
-        <div className="about-system-grid" style={A.systemGrid}>
-          {SESSION_TIMELINE.map((step, index) => (
-            <Reveal key={step.title} delay={index * 80} direction="up">
-              <div style={A.systemStep}>
-                <span style={A.systemNumber}>{step.time}</span>
-                <h3 style={A.systemStepTitle}>{step.title}</h3>
-                <p style={A.systemStepBody}>{step.body}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-        <Reveal delay={160}>
-          <div style={A.optionBoard}>
-            {OPTION_ROWS.map(([option, certainty, timing, role]) => (
-              <div key={option} style={A.optionRow}>
-                <strong>{option}</strong>
-                <span>{certainty}</span>
-                <span>{timing}</span>
-                <span>{role}</span>
-              </div>
-            ))}
-          </div>
-        </Reveal>
-      </section>
+      </LearnSection>
 
     </div>
   );
@@ -605,16 +681,10 @@ const A: Record<string, CSSProperties> = {
     alignItems: "center",
     gap: 10,
     padding: "0 16px",
-    borderRadius: 999,
     color: "#FFFFFF",
     fontSize: 13,
     fontWeight: 850,
-    background:
-      "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.18), transparent 40%), linear-gradient(135deg, rgba(14,18,27,0.94), rgba(27,35,51,0.88) 52%, rgba(10,13,20,0.94))",
-    border: "0.5px solid rgba(255,255,255,0.52)",
-    boxShadow: "0 18px 36px -24px rgba(0,0,0,0.58), inset 0 1px 0 rgba(255,255,255,0.42), inset 0 -1px 0 rgba(255,255,255,0.12)",
-    backdropFilter: "blur(5px) saturate(165%) contrast(1.08) brightness(1.04)",
-    WebkitBackdropFilter: "blur(5px) saturate(165%) contrast(1.08) brightness(1.04)",
+    ...studioDarkLiquidGlassPill,
   },
   storySection: {
     marginBottom: 46,
@@ -1654,158 +1724,244 @@ const COMPARE: CompareGroup[] = [
   },
 ];
 
+const PRICING_CONTROL_ITEMS = [
+  {
+    title: "Monthly subscription",
+    body: "Free, Solo, Pro, Team, and Enterprise stay simple. No wallet, no success fee, no per-deal toll.",
+  },
+  {
+    title: "Included credits",
+    body: "Model runs, Studio books, exports, tool calls, and API/MCP calls are measured against monthly allowances.",
+  },
+  {
+    title: "Tollgate states",
+    body: "Expensive or sensitive actions can return credit budget, human approval, or enterprise-scope requirements.",
+  },
+  {
+    title: "Agent access",
+    body: "Pro starts API/MCP access. Team adds supervised agent use. Enterprise opens autonomous governed scope.",
+  },
+];
+
+const PRICING_PLAN_ORDER = ["free", "solo", "pro", "team", "enterprise"] as const;
+
+const PLAN_TEXTURES: Record<string, string> = {
+  free: STUDIO_TEXTURES.green,
+  solo: STUDIO_TEXTURES.green,
+  pro: STUDIO_TEXTURES.navy,
+  team: STUDIO_TEXTURES.rose,
+  enterprise: ART_HOUSE_TEXTURES.studioPreview,
+};
+
+const PLAN_AUDIENCES: Record<string, string> = {
+  free: "Test-drive Yulia",
+  solo: "One operator",
+  pro: "Active dealmaker",
+  team: "Boutique or firm",
+  enterprise: "Governed deployment",
+};
+
+const PRICING_FAQS = [
+  {
+    icon: "NO",
+    title: "No wallet, success fee, or per-deal toll",
+    body: "Plans are monthly. Credits only meter expensive model runs, exports, Studio books, and API/tool usage inside the plan.",
+    pill: "Simple",
+  },
+  {
+    icon: "FR",
+    title: "Free is a real trial",
+    body: "Free users can talk to Yulia and complete one deliverable so they can feel the product on a real deal.",
+    pill: "Low risk",
+  },
+  {
+    icon: "CR",
+    title: "Credits create guardrails",
+    body: "When an action needs more budget, approval, or enterprise scope, Yulia returns a clear tollgate instead of failing silently.",
+    pill: "Governed",
+  },
+  {
+    icon: "EN",
+    title: "Enterprise is custom by design",
+    body: "Single-tenant, SSO, higher limits, API/MCP controls, and audit needs vary by firm and agent scope.",
+    pill: "Custom",
+  },
+];
+
+function planPriceLabel(plan: Plan): string {
+  if (plan.price === "Free") return "$0/mo";
+  if (typeof plan.price === "number") return `$${plan.price}/mo`;
+  return `${plan.price}/mo`;
+}
+
+function planById(id: string): Plan {
+  const plan = PLANS.find((item) => item.id === id);
+  if (!plan) throw new Error(`Missing plan ${id}`);
+  return plan;
+}
+
 function PricingSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) => void }) {
   const handleCta = (plan: Plan) => {
     onTalkToYulia?.(plan.prompt);
   };
 
-  const fmtPrice = (p: PriceValue) =>
-    typeof p === "number" ? `$${p}` : p;
-
   return (
     <div>
       <style>{`
-        .plan-choice-card {
+        .pricing-tier-card {
           cursor: pointer;
           transform: translate3d(0, 0, 0);
           transition:
-            transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
             box-shadow 180ms ease,
             border-color 180ms ease,
             filter 180ms ease;
         }
-        .plan-choice-card:hover {
-          transform: translate3d(0, -5px, 0);
-          border-color: rgba(132, 167, 205, 0.66) !important;
-          box-shadow:
-            0 34px 82px rgba(31,44,69,0.16),
-            0 9px 22px rgba(31,44,69,0.08),
-            inset 0 1px 0 rgba(255,255,255,0.92) !important;
+        .pricing-tier-grid > div {
+          min-width: 0;
+          height: 100%;
         }
-        .plan-choice-card.is-featured:hover {
-          filter: saturate(1.08) contrast(1.03);
-          box-shadow:
-            0 38px 92px rgba(28,63,107,0.30),
-            0 10px 24px rgba(31,44,69,0.14),
-            inset 0 1px 0 rgba(255,255,255,0.24) !important;
+        .pricing-tier-card:hover {
+          filter: saturate(1.04) contrast(1.01);
+          border-color: rgba(255, 255, 255, 0.54) !important;
         }
-        .plan-choice-card:focus-visible {
+        .pricing-tier-card:focus-visible {
           outline: 3px solid rgba(214, 173, 91, 0.70);
           outline-offset: 4px;
         }
-        .plan-choice-card:hover .plan-action-pill {
-          transform: translate3d(4px, 0, 0);
-          background: rgba(255,255,255,0.90);
+        @media (max-width: 1280px) {
+          .pricing-tier-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+          }
         }
-        .plan-choice-card.is-featured:hover .plan-action-pill {
-          background: rgba(255,255,255,0.24);
+        @media (max-width: 1080px) {
+          .pricing-choice-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+        .pricing-choice-grid > div {
+          min-width: 0;
+          height: 100%;
+        }
+        .pricing-info-panel {
+          box-sizing: border-box;
+          height: 100%;
+        }
+        @media (max-width: 760px) {
+          .pricing-tier-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .pricing-info-panel {
+            border-radius: 22px !important;
+            padding: 18px !important;
+          }
         }
         @media (prefers-reduced-motion: reduce) {
-          .plan-choice-card,
-          .plan-action-pill {
+          .pricing-tier-card {
             transition: none !important;
             transform: none !important;
           }
         }
       `}</style>
-      <div style={P.planGrid}>
-        {PLANS.map((p, index) => {
-          const featured = p.featured;
-          const priceDisplay = fmtPrice(p.price);
-          const showPerMo = typeof p.price === "number";
-          return (
-            <Reveal key={p.id} delay={index * 65} direction="up">
-            <div
-              role="button"
-              tabIndex={0}
-              aria-label={`${p.cta}: ${p.name}`}
-              onClick={() => handleCta(p)}
-              onKeyDown={(event) => {
-                if (event.key !== "Enter" && event.key !== " ") return;
-                event.preventDefault();
-                handleCta(p);
-              }}
-              className={`plan-choice-card m-card ${featured ? "is-featured elevated" : ""}`}
-              style={{
-                ...P.planCard,
-                ...(featured ? P.planFeatured : {}),
-              }}
-            >
-              {featured && (
-                <div style={P.popular}>Most popular</div>
-              )}
-              <h3 style={P.planName}>{p.name}</h3>
-              <p style={P.planSub}>{p.sub}</p>
-              <div style={P.priceRow}>
-                <span style={P.priceNumber}>{priceDisplay}</span>
-                {showPerMo && (
-                  <span style={P.priceUnit}>/mo</span>
-                )}
-              </div>
-              <div
-                className="plan-action-pill"
-                style={{
-                  ...P.planAction,
-                  ...(featured ? P.planActionFeatured : {}),
-                }}
-              >
-                <span>{p.cta}</span>
-                <span aria-hidden="true">→</span>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {p.features.map((f, i) => {
-                  const isWedge = featured && i === 0;
-                  return (
-                    <div key={f} style={P.featureRow}>
-                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" style={{ flexShrink: 0, marginTop: 2 }}>
-                        <path d="M3 7.5l2.5 2.5L11 4.5" stroke={featured ? "#FFFFFF" : "var(--m-primary)"} strokeWidth={isWedge ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      <span style={isWedge ? { fontWeight: 700, color: featured ? "#FFFFFF" : "var(--m-primary)" } : undefined}>{f}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            </Reveal>
-          );
-        })}
-      </div>
 
-      <LearnSection id="compare" title="Compare plans">
+      <LearnSection
+        title="Choose a plan."
+        sub="Start free, move to Pro for active deal work, or add Team when the work becomes shared."
+      >
+        <div className="pricing-tier-grid" style={P.pricingTierGrid}>
+          {PRICING_PLAN_ORDER.map((id, index) => {
+            const plan = planById(id);
+            const featured = Boolean(plan.featured);
+            return (
+              <Reveal key={plan.id} delay={index * 70} direction="up">
+                <button
+                  type="button"
+                  className="pricing-tier-card"
+                  aria-label={`${plan.cta}: ${plan.name}`}
+                  onClick={() => handleCta(plan)}
+                  style={{
+                    ...P.pricingTierCard,
+                    backgroundImage: studioTextureCardBackground(PLAN_TEXTURES[plan.id]),
+                    ...(featured ? P.pricingTierFeatured : {}),
+                  }}
+                >
+                  <span style={P.pricingTierMeta}>{PLAN_AUDIENCES[plan.id]}</span>
+                  <span style={P.pricingTierName}>{plan.name}</span>
+                  <span style={P.pricingTierPrice}>{planPriceLabel(plan)}</span>
+                  <span style={P.pricingTierSub}>{plan.sub}</span>
+                  <span style={P.pricingTierFeatures}>
+                    {plan.features.slice(0, 2).map((feature) => (
+                      <span key={feature}>{feature}</span>
+                    ))}
+                  </span>
+                  <span style={P.pricingTierFooter}>
+                    {featured && <span style={P.recommendedPill}>Recommended</span>}
+                    <span style={P.pricingDarkPill}>{plan.cta}</span>
+                  </span>
+                </button>
+              </Reveal>
+            );
+          })}
+        </div>
+      </LearnSection>
+
+      <LearnSection id="compare" title="Compare plans" sub="Open the full matrix when you need exact allowance, agent access, and governance details.">
         <Reveal>
           <ComparePlans />
         </Reveal>
       </LearnSection>
 
-      <LearnSection title="What's included">
-        <Reveal>
-          <IncludedPlans />
-        </Reveal>
-      </LearnSection>
+      <LearnSection
+        title="Pricing has guardrails, not gotchas."
+        sub="The page should answer the objections before they become a reason to stall."
+      >
+        <div className="pricing-choice-grid" style={P.pricingChoiceGrid}>
+          <Reveal direction="right">
+            <div className="pricing-info-panel" style={P.pricingCompetePanel}>
+              <h2 style={L.infoTitle}>What pricing controls.</h2>
+              <div style={L.competeGrid}>
+                {PRICING_CONTROL_ITEMS.map((item) => (
+                  <button
+                    key={item.title}
+                    type="button"
+                    className="m-state"
+                    style={L.competeItem}
+                    onClick={() => onTalkToYulia?.(`Explain this pricing control: ${item.title}. ${item.body}`)}
+                  >
+                    <strong>{item.title}</strong>
+                    <span>{item.body}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </Reveal>
 
-      <LearnSection title="Ready to bring her into one live deal?" sub="Upload the materials. Ask the question. See what she produces. Same Yulia that runs in every paid workspace.">
-        <Reveal>
-        <div style={P.guaranteeCard}>
-          <div style={{ flex: 1, minWidth: 240 }}>
-            <h3 style={P.guaranteeH3}>Start free, then upgrade when the work becomes real.</h3>
-            <p style={P.guaranteeBody}>
-              smbX is software, not a fiduciary, broker-dealer, law firm, CPA firm, or escrow agent. Yulia models structures, drafts documents, and prepares analysis for your review and decision.
-            </p>
-          </div>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <button
-              className="m-glint m-glass-control"
-              style={P.ctaGlassButton}
-              onClick={() => onTalkToYulia?.("Help me figure out which plan fits me.")}
-            >Talk to Yulia</button>
-            <button
-              className="m-glint m-glass-control"
-              style={{ ...P.ctaGlassButton, ...P.ctaPrimaryButton }}
-              onClick={() => onTalkToYulia?.("I'm ready to start with the free tier. What do I need to do?")}
-            >Start free</button>
-          </div>
+          <Reveal direction="left" delay={90}>
+            <div className="pricing-info-panel" style={P.planListPanel}>
+              <div style={L.panelHeader}>
+                <h2 style={L.infoTitle}>Questions to clear</h2>
+                <span style={L.softPill}>FAQ</span>
+              </div>
+              <div style={L.listStack}>
+                {PRICING_FAQS.map((item) => (
+                  <button
+                    key={item.title}
+                    type="button"
+                    className="m-state"
+                    style={L.listRow}
+                    onClick={() => onTalkToYulia?.(`Explain this pricing question: ${item.title}. ${item.body}`)}
+                  >
+                    <span style={L.listIcon}>{item.icon}</span>
+                    <span style={L.listBody}>
+                      <strong>{item.title}</strong>
+                      <small>{item.body}</small>
+                    </span>
+                    <span style={L.cleanPill}>{item.pill}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </Reveal>
         </div>
-        </Reveal>
       </LearnSection>
     </div>
   );
@@ -2038,9 +2194,9 @@ const L: Record<string, CSSProperties> = {
     border: "1px solid rgba(255,255,255,0.34)",
     boxShadow: "0 46px 116px rgba(23,38,63,0.30), 0 20px 46px rgba(26,34,51,0.16), 0 4px 12px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.24)",
     borderRadius: 26,
-    padding: "42px 46px 32px",
+    padding: "38px 46px 32px",
     marginBottom: 20,
-    minHeight: 440,
+    minHeight: 390,
     position: "relative",
     overflow: "hidden",
   },
@@ -2051,7 +2207,7 @@ const L: Record<string, CSSProperties> = {
     alignItems: "flex-end",
     flexWrap: "wrap",
     gap: 22,
-    minHeight: 366,
+    minHeight: 320,
   },
   heroGlow: {
     position: "absolute", top: -110, right: -80,
@@ -2092,12 +2248,7 @@ const L: Record<string, CSSProperties> = {
     color: "#FFFFFF",
     fontSize: 13,
     fontWeight: 800,
-    background:
-      "radial-gradient(circle at 12% 0%, rgba(255,255,255,0.34), transparent 42%), linear-gradient(180deg, rgba(255,255,255,0.20), rgba(31,57,84,0.20))",
-    border: "0.5px solid rgba(255,255,255,0.58)",
-    boxShadow: "0 20px 46px rgba(10,22,38,0.26), inset 0 1px 0 rgba(255,255,255,0.46), inset 0 -1px 0 rgba(255,255,255,0.10)",
-    backdropFilter: "blur(12px) saturate(175%) contrast(1.08) brightness(1.04)",
-    WebkitBackdropFilter: "blur(12px) saturate(175%) contrast(1.08) brightness(1.04)",
+    ...studioDarkLiquidGlassPill,
   },
   heroDock: {
     width: 360,
@@ -2218,6 +2369,128 @@ const L: Record<string, CSSProperties> = {
     color: "var(--m-on-surface-mid)",
     lineHeight: 1.45,
   },
+  textureGrid: {
+    ...studioTextureCardStyles.grid,
+  },
+  textureCard: {
+    ...studioTextureCardStyles.card,
+  },
+  textureMeta: studioTextureCardStyles.meta,
+  textureTitle: {
+    ...studioTextureCardStyles.title,
+    fontSize: 22,
+  },
+  textureAudience: studioTextureCardStyles.audience,
+  textureDetail: studioTextureCardStyles.detail,
+  textureAction: studioTextureCardStyles.action,
+  twoColumnGrid: {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) minmax(360px, 0.88fr)",
+    gap: 18,
+    alignItems: "stretch",
+    marginBottom: 40,
+  },
+  competePanel: {
+    ...studioCompeteCardStyles.panel,
+    minHeight: 360,
+  },
+  listPanel: {
+    ...studioListCardStyles.panel,
+    minHeight: 360,
+  },
+  infoTitle: {
+    fontFamily: "var(--font-display)",
+    fontSize: 32,
+    lineHeight: 1,
+    letterSpacing: "-0.045em",
+    margin: 0,
+    color: "var(--m-on-surface)",
+    textWrap: "balance",
+  },
+  competeGrid: {
+    ...studioCompeteCardStyles.grid,
+  },
+  competeItem: {
+    ...studioCompeteButtonItemStyles,
+  },
+  panelHeader: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  softPill: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 34,
+    padding: "0 12px",
+    borderRadius: 999,
+    background: "rgba(232,238,252,.78)",
+    color: "#3B6595",
+    fontSize: 12,
+    fontWeight: 900,
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,.72)",
+  },
+  listStack: {
+    ...studioListCardStyles.stack,
+  },
+  listRow: {
+    ...studioListButtonRowStyles,
+  },
+  listIcon: {
+    ...studioListCardStyles.icon,
+  },
+  listBody: {
+    ...studioListCardStyles.body,
+  },
+  cleanPill: {
+    ...studioListCardStyles.cleanPill,
+  },
+  stepGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+    gap: 12,
+  },
+  stepCard: {
+    ...studioListCardStyles.panel,
+    minHeight: 260,
+    display: "flex",
+    flexDirection: "column",
+  },
+  stepTopline: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+    marginBottom: 18,
+  },
+  stepNumber: {
+    width: 42,
+    height: 42,
+    borderRadius: 15,
+    display: "grid",
+    placeItems: "center",
+    color: "#FFFFFF",
+    fontWeight: 900,
+    background: "linear-gradient(135deg, #8A9AE8, #2E5C8A)",
+  },
+  stepTitle: {
+    fontFamily: "var(--font-display)",
+    fontSize: 22,
+    lineHeight: 1,
+    letterSpacing: "-0.035em",
+    margin: 0,
+    color: "var(--m-on-surface)",
+    textWrap: "balance",
+  },
+  stepBody: {
+    margin: "10px 0 0",
+    fontSize: 13,
+    lineHeight: 1.48,
+    color: "var(--m-on-surface-var)",
+    textWrap: "pretty",
+  },
 };
 
 const P: Record<string, CSSProperties> = {
@@ -2237,6 +2510,169 @@ const P: Record<string, CSSProperties> = {
     fontSize: 12.5, fontWeight: 600,
     transition: "background 120ms ease, color 120ms ease, box-shadow 120ms ease",
   },
+  pricingTierGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))",
+    gap: 12,
+    alignItems: "stretch",
+  },
+  pricingTierCard: {
+    boxSizing: "border-box",
+    width: "100%",
+    height: "100%",
+    minHeight: 286,
+    position: "relative",
+    textAlign: "left",
+    borderRadius: studioTextureCardStyles.card.borderRadius,
+    padding: 17,
+    border: "1px solid rgba(255,255,255,.28)",
+    appearance: "none",
+    WebkitAppearance: "none",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    color: "#FFFFFF",
+    boxShadow: "0 22px 52px rgba(42,65,96,.16), inset 0 1px 0 rgba(255,255,255,.28)",
+    font: "inherit",
+    ...studioGlassBackdrop,
+    display: "flex",
+    flexDirection: "column",
+    gap: 8,
+    overflow: "hidden",
+    cursor: "pointer",
+  },
+  pricingTierFeatured: {
+    borderColor: "rgba(255,255,255,.82)",
+    boxShadow: "0 28px 68px rgba(31,55,93,.24), inset 0 0 0 1px rgba(255,255,255,.42)",
+  },
+  pricingTierMeta: {
+    color: "rgba(255,255,255,.76)",
+    fontWeight: 900,
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+  },
+  pricingTierName: {
+    fontFamily: "var(--font-display)",
+    fontSize: 25,
+    lineHeight: 1,
+    letterSpacing: "-0.045em",
+    fontWeight: 850,
+    color: "#FFFFFF",
+    textShadow: "0 2px 18px rgba(10,22,38,.28)",
+  },
+  pricingTierPrice: {
+    fontFamily: "var(--font-display)",
+    fontSize: 17,
+    lineHeight: 1,
+    fontWeight: 850,
+    color: "rgba(255,255,255,.94)",
+  },
+  pricingTierSub: {
+    color: "rgba(255,255,255,.88)",
+    fontSize: 12.5,
+    lineHeight: 1.35,
+    fontWeight: 700,
+  },
+  pricingTierFeatures: {
+    display: "grid",
+    gap: 6,
+    marginTop: "auto",
+    color: "rgba(236,246,255,.90)",
+    fontSize: 12.5,
+    lineHeight: 1.32,
+  },
+  pricingTierFooter: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+    marginTop: 12,
+    flexWrap: "wrap",
+  },
+  recommendedPill: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 34,
+    padding: "0 12px",
+    borderRadius: 999,
+    background: "rgba(255,255,255,.20)",
+    color: "#FFFFFF",
+    border: "1px solid rgba(255,255,255,.24)",
+    fontSize: 12,
+    fontWeight: 900,
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,.24)",
+  },
+  pricingDarkPill: {
+    ...studioTextureCardStyles.action,
+    marginTop: 0,
+    alignSelf: "auto",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 38,
+    padding: "0 15px",
+    fontSize: 13,
+    fontWeight: 900,
+  },
+  pricingChoiceGrid: {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) minmax(360px, 0.86fr)",
+    gap: 18,
+    alignItems: "stretch",
+    marginBottom: 6,
+  },
+  planListPanel: {
+    ...studioListCardStyles.panel,
+    minHeight: 0,
+  },
+  planListStack: {
+    ...studioListCardStyles.stack,
+  },
+  planListRow: {
+    boxSizing: "border-box",
+    display: "grid",
+    gridTemplateColumns: "48px minmax(0, 1fr) auto",
+    alignItems: "center",
+    gap: 12,
+    width: "100%",
+    padding: 12,
+    borderRadius: 18,
+    background: "rgba(247,250,255,.82)",
+    border: "1px solid rgba(153,176,209,.32)",
+    color: "var(--m-on-surface)",
+    font: "inherit",
+    appearance: "none",
+    WebkitAppearance: "none",
+    textAlign: "left",
+    cursor: "pointer",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,.76)",
+  },
+  planListIcon: {
+    ...studioListCardStyles.icon,
+  },
+  planListIconFeatured: {
+    ...studioListCardStyles.icon,
+    background: studioTextureCardBackground(STUDIO_TEXTURES.navy),
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    boxShadow: "0 14px 30px rgba(46,92,138,.20), inset 0 1px 0 rgba(255,255,255,.28)",
+  },
+  planListBody: {
+    ...studioListCardStyles.body,
+  },
+  planListPill: {
+    ...studioListCardStyles.cleanPill,
+    whiteSpace: "nowrap",
+  },
+  planFeaturedPill: {
+    ...studioListCardStyles.warnPill,
+    whiteSpace: "nowrap",
+  },
+  pricingCompetePanel: {
+    ...studioCompeteCardStyles.panel,
+    minHeight: 0,
+  },
   planGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
@@ -2244,24 +2680,25 @@ const P: Record<string, CSSProperties> = {
     marginBottom: 38,
   },
   planCard: {
-    minHeight: 350,
+    minHeight: 330,
     padding: "24px 24px 22px",
     position: "relative",
-    border: "1px solid rgba(219,228,241,0.92)",
+    border: "1px solid rgba(255,255,255,.55)",
     borderRadius: 24,
-    background: "linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,251,255,0.94))",
-    boxShadow: "0 20px 54px rgba(31,44,69,0.10), 0 5px 14px rgba(31,44,69,0.06), inset 0 1px 0 rgba(255,255,255,0.90)",
+    background: studioLiquidGlass,
+    boxShadow: "0 18px 44px rgba(42,65,96,.10), inset 0 1px 0 rgba(255,255,255,.72)",
     display: "flex",
     flexDirection: "column",
     color: "var(--m-on-surface)",
+    ...studioGlassBackdrop,
   },
   planFeatured: {
-    border: "1px solid rgba(92,145,182,0.48)",
-    background:
-      "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.24), transparent 34%), " +
-      "linear-gradient(145deg, rgba(38,93,119,0.94) 0%, rgba(68,119,142,0.86) 45%, rgba(33,48,82,0.96) 100%)",
+    border: "1px solid rgba(255,255,255,.34)",
+    background: studioTextureCardBackground(STUDIO_TEXTURES.navy),
+    backgroundSize: "cover",
+    backgroundPosition: "center",
     color: "#FFFFFF",
-    boxShadow: "0 30px 78px rgba(40,88,122,0.22), 0 8px 22px rgba(31,44,69,0.10), inset 0 1px 0 rgba(255,255,255,0.22)",
+    boxShadow: "0 22px 52px rgba(46,92,138,.24), inset 0 1px 0 rgba(255,255,255,.28)",
   },
   popular: {
     position: "absolute", top: -10, left: 24,
@@ -2301,19 +2738,11 @@ const P: Record<string, CSSProperties> = {
     padding: "0 14px 0 16px",
     fontSize: 12.5,
     fontWeight: 800,
-    color: "var(--m-on-surface)",
-    background: "linear-gradient(180deg, rgba(248,251,255,0.92), rgba(238,245,253,0.78))",
-    border: "1px solid rgba(214,225,240,0.86)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.90)",
-    transition: "transform 180ms ease, background 180ms ease",
+    ...studioDarkLiquidGlassPill,
+    transition: "border-color 180ms ease",
   },
   planActionFeatured: {
     color: "#FFFFFF",
-    background: "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.07))",
-    border: "1px solid rgba(255,255,255,0.28)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.32)",
-    backdropFilter: "blur(5px) saturate(155%)",
-    WebkitBackdropFilter: "blur(5px) saturate(155%)",
   },
   featureRow: {
     display: "flex", gap: 8,
@@ -2322,13 +2751,9 @@ const P: Record<string, CSSProperties> = {
     lineHeight: 1.4,
   },
   compareStage: {
-    position: "relative",
+    ...studioCompeteCardStyles.panel,
     overflow: "hidden",
-    borderRadius: 28,
     padding: 0,
-    background: "radial-gradient(circle at 16% 0%, rgba(255,255,255,0.90), transparent 32%), linear-gradient(145deg, rgba(232,242,253,0.72), rgba(247,250,254,0.92) 42%, rgba(222,233,247,0.72))",
-    border: "1px solid rgba(214,225,240,0.90)",
-    boxShadow: "0 28px 76px rgba(31,44,69,0.14), 0 8px 18px rgba(31,44,69,0.06), inset 0 1px 0 rgba(255,255,255,0.96)",
   },
   compareToolbar: {
     position: "relative",
@@ -2381,9 +2806,10 @@ const P: Record<string, CSSProperties> = {
     overflowX: "auto",
     overflowY: "hidden",
     borderRadius: 28,
-    background: "rgba(255,255,255,0.94)",
-    border: "1px solid rgba(214,225,240,0.92)",
-    boxShadow: "0 24px 64px rgba(31,44,69,0.10), 0 6px 16px rgba(31,44,69,0.06), inset 0 1px 0 rgba(255,255,255,0.90)",
+    background: "rgba(255,255,255,0.72)",
+    border: "1px solid rgba(153,176,209,0.36)",
+    boxShadow: "0 18px 44px rgba(42,65,96,.10), inset 0 1px 0 rgba(255,255,255,.72)",
+    ...studioGlassBackdrop,
   },
   compareScroll: {
     overflowX: "auto",
@@ -2511,9 +2937,10 @@ const P: Record<string, CSSProperties> = {
     minHeight: 190,
     borderRadius: 24,
     padding: "22px 24px",
-    background: "linear-gradient(155deg, rgba(255,255,255,0.98), rgba(248,251,255,0.92))",
-    border: "1px solid rgba(219,228,241,0.94)",
-    boxShadow: "0 22px 58px rgba(31,44,69,0.10), 0 6px 16px rgba(31,44,69,0.05), inset 0 1px 0 rgba(255,255,255,0.94)",
+    background: "rgba(255,255,255,.68)",
+    border: "1px solid rgba(153,176,209,.36)",
+    boxShadow: "0 18px 44px rgba(42,65,96,.10), inset 0 1px 0 rgba(255,255,255,.72)",
+    ...studioGlassBackdrop,
   },
   includedBlue: {
     background:
