@@ -40,6 +40,7 @@ import {
 import { composeModelStack, type V19Journey } from './modelStackComposer.js';
 import { executeV19Model, persistV19ModelExecution } from './v19ModelRuntime.js';
 import { validateCitationTags } from './citationValidator.js';
+import { lookupAuthority } from './authorityRegister.js';
 import { readDealV19Readiness, readStudioBookV19Readiness } from './v19ReadinessService.js';
 import {
   checkV19Entitlement,
@@ -240,13 +241,14 @@ export const TOOL_DEFINITIONS: Tool[] = [
   },
   {
     name: 'lookup_citation',
-    description: 'Look up a V19 citation tag from the citation registry and report whether it is active.',
+    description: 'Look up a DEFINITIVE authority id or V19 citation tag from the Authority Register / citation registry and report whether it is active.',
     input_schema: {
       type: 'object' as const,
       properties: {
-        citeTag: { type: 'string', description: 'Citation tag such as [FRED:DPRIME] or [SBA SOP 50 10 8].' },
+        citeTag: { type: 'string', description: 'Citation tag, such as [FRED:DPRIME] or [SBA SOP 50 10 8].' },
+        authorityId: { type: 'string', description: 'Optional DEFINITIVE authority id, such as AUTH.FRED.DPRIME.' },
       },
-      required: ['citeTag'],
+      required: [],
     },
   },
   {
@@ -1644,27 +1646,30 @@ async function updateFirmMemoryTool(input: Record<string, any>, userId: number):
 }
 
 async function lookupCitationTool(input: Record<string, any>, userId: number): Promise<string> {
-  const citeTag = String(input.citeTag || '').trim();
-  if (!citeTag) return JSON.stringify({ error: 'citeTag is required' });
+  const citeTag = String(input.authorityId || input.citeTag || '').trim();
+  if (!citeTag) return JSON.stringify({ error: 'citeTag or authorityId is required' });
   await recordV19UsageEvent({
     userId,
     eventType: 'tool_call',
     actionId: 'lookup_citation',
     toolName: 'lookup_citation',
     sourceSurface: 'chat',
-    resourceType: 'citation',
+    resourceType: citeTag.startsWith('AUTH.') ? 'authority' : 'citation',
     resourceId: citeTag,
   });
   const validation = await validateCitationTags([citeTag]);
+  const authority = await lookupAuthority(citeTag);
   const [row] = await sql`
-    SELECT cite_tag, category, description, current_value, source_url, as_of_date, validated_at, status
+    SELECT cite_tag, authority_id, category, description, current_value, source_url, as_of_date, validated_at, status
     FROM citation_registry
     WHERE cite_tag = ${citeTag}
+       OR authority_id = ${citeTag}
     LIMIT 1
   `;
   return JSON.stringify({
-    found: !!row,
-    active: validation.active.includes(citeTag),
+    found: !!authority || !!row,
+    active: validation.active.includes(citeTag) || authority?.status === 'active',
+    authority,
     citation: row || null,
     validation,
   });

@@ -1,4 +1,5 @@
 import { sql } from '../db.js';
+import { lookupAuthorities } from './authorityRegister.js';
 
 export interface CitationValidation {
   tags: string[];
@@ -26,7 +27,11 @@ export async function validateCitationTags(tags: string[]): Promise<CitationVali
     WHERE status = 'active'
       AND cite_tag IN ${sql(uniqueTags)}
   `;
-  const active = rows.map(row => row.cite_tag);
+  const authorities = await lookupAuthorities(uniqueTags);
+  const active = [
+    ...rows.map(row => row.cite_tag),
+    ...authorities.flatMap(row => [row.authority_id, row.cite_tag].filter(Boolean) as string[]),
+  ];
   const activeSet = new Set(active);
   const missing = uniqueTags.filter(tag => !activeSet.has(tag));
 

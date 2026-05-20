@@ -235,6 +235,7 @@ Keep proprietary:
 ### Run 2 - Authority Register Foundation
 
 **Goal:** create the L2 content spine.
+**Status:** Started in repo. Migration `073_definitive_authority_register.sql` creates the first Authority Register schema, seeds 50 active US authorities, and wires `lookup_citation` through the register while preserving V19 `citation_registry` compatibility.
 
 - Add `authority_register` schema.
 - Add `methodology_sections` authority links if not already present.

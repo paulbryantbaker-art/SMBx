@@ -16,6 +16,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
 
 const requiredTables = [
+  'authority_register',
   'citation_registry',
   'model_registry',
   'audit_trail',
@@ -34,6 +35,7 @@ const requiredTables = [
 ] as const;
 
 const requiredColumns: Record<string, string[]> = {
+  authority_register: ['authority_id', 'cite_tag', 'authority_type', 'jurisdiction', 'source_url', 'effective_date', 'supersedes_authority_id', 'status', 'validation_status', 'next_check_due', 'aliases'],
   market_data_cache: ['series_id', 'value', 'as_of_date', 'source_url', 'cite_tag', 'metadata'],
   audit_trail: ['session_id', 'deal_id', 'user_id', 'conversation_id', 'turn_id', 'model_stack', 'citations_validated', 'output_hash'],
   studio_book_versions: ['slides', 'assumptions', 'model_outputs', 'provenance', 'audit', 'speaker_notes'],
@@ -118,6 +120,8 @@ async function verifyDatabase() {
 
     const [citationCount] = await sql`SELECT COUNT(*)::int as count FROM citation_registry WHERE status = 'active'`;
     assert(Number(citationCount?.count || 0) >= 10, 'citation_registry has active V19 seeds');
+    const [authorityCount] = await sql`SELECT COUNT(*)::int as count FROM authority_register WHERE status = 'active'`;
+    assert(Number(authorityCount?.count || 0) >= 50, 'authority_register has 50+ active DEFINITIVE seeds');
   } finally {
     await sql.end({ timeout: 5 });
   }
