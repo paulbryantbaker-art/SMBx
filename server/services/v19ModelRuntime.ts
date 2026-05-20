@@ -7,6 +7,7 @@ import {
   definitiveVersionPayload,
 } from '../constants/definitive.js';
 import { HSR_2026, SBA_SOP_50_10_8 } from '../constants/v19Regulatory.js';
+import { resolveDefinitiveMandateContext } from './definitiveMandateService.js';
 import { canonicalizeModelId, getRegisteredModel } from './modelRegistry.js';
 
 export type V19ModelStatus = 'complete' | 'needs_inputs';
@@ -54,6 +55,14 @@ export interface V19ModelExecutionPersistenceInput {
   studioBookId?: number | null;
   studioVersionId?: number | null;
   toolName?: string | null;
+  organizationId?: number | null;
+  billingOrgId?: number | null;
+  beneficialCustomerId?: number | null;
+  mandateId?: string | null;
+  agentId?: string | number | null;
+  agentPlatformId?: string | null;
+  requestedScopes?: string[];
+  sourceSurface?: string | null;
 }
 
 interface V19ModelDefinition {
@@ -675,11 +684,24 @@ export async function persistV19ModelExecution(
   context: V19ModelExecutionPersistenceInput = {},
 ): Promise<V19ModelExecutionRecord> {
   const { sql } = await import('../db.js');
+  const mandateContext = execution.auditPayload.userId == null
+    ? null
+    : await resolveDefinitiveMandateContext({
+        userId: execution.auditPayload.userId,
+        organizationId: context.organizationId,
+        billingOrgId: context.billingOrgId,
+        agentId: context.agentId,
+        agentPlatformId: context.agentPlatformId,
+        mandateId: context.mandateId,
+        requestedScopes: context.requestedScopes,
+        sourceSurface: context.sourceSurface || context.toolName || 'model_runtime',
+      });
   const [row] = await sql`
     INSERT INTO model_executions (
       model_id, version, status, deal_id, user_id, conversation_id, studio_book_id,
       studio_version_id, tool_name, input_hash, output_hash, inputs, outputs,
-      missing_inputs, citation_tags, audit_payload, spec_version, spec_uri, methodology_version, methodology_uri
+      missing_inputs, citation_tags, audit_payload, spec_version, spec_uri, methodology_version, methodology_uri,
+      beneficial_customer_id, billing_org_id, mandate_id, agent_id, agent_platform_id, mandate_chain
     )
     VALUES (
       ${execution.modelId},
@@ -701,7 +723,13 @@ export async function persistV19ModelExecution(
       ${DEFINITIVE_SPEC_VERSION},
       ${DEFINITIVE_SPEC_URI},
       ${DEFINITIVE_METHODOLOGY_VERSION},
-      ${DEFINITIVE_METHODOLOGY_URI}
+      ${DEFINITIVE_METHODOLOGY_URI},
+      ${context.beneficialCustomerId ?? mandateContext?.beneficialCustomerId ?? null},
+      ${context.billingOrgId ?? mandateContext?.billingOrgId ?? null},
+      ${context.mandateId ?? mandateContext?.mandateId ?? null},
+      ${context.agentId == null ? mandateContext?.agentId ?? null : String(context.agentId)},
+      ${context.agentPlatformId ?? mandateContext?.agentPlatformId ?? null},
+      ${sql.json(mandateContext?.mandateChain || {})}::jsonb
     )
     RETURNING id, created_at
   `;

@@ -9,6 +9,7 @@ import {
 } from '../constants/definitive.js';
 import { hasDealAccess } from './dealAccessService.js';
 import { validateCitationTags } from './citationValidator.js';
+import { resolveDefinitiveMandateContext } from './definitiveMandateService.js';
 import { executeV19Model, persistV19ModelExecution, type V19ModelExecution } from './v19ModelRuntime.js';
 
 export type PitchBookFormat =
@@ -781,11 +782,16 @@ async function writeStudioAuditTrail(input: {
   citationsValidated?: Record<string, any>;
   warnings?: string[];
 }): Promise<void> {
+  const mandateContext = await resolveDefinitiveMandateContext({
+    userId: input.userId,
+    sourceSurface: 'studio',
+  });
   await sql`
     INSERT INTO audit_trail (
       session_id, deal_id, user_id, conversation_id, turn_id, journey, league, deal_type,
       model_stack, inputs_used, live_data_snapshots, citations_validated, mode_2_triggers, output_hash,
-      spec_version, spec_uri, methodology_version, methodology_uri
+      spec_version, spec_uri, methodology_version, methodology_uri,
+      beneficial_customer_id, billing_org_id, mandate_id, agent_id, agent_platform_id, mandate_chain
     )
     VALUES (
       ${`studio:${input.book.id}`},
@@ -805,7 +811,13 @@ async function writeStudioAuditTrail(input: {
       ${DEFINITIVE_SPEC_VERSION},
       ${DEFINITIVE_SPEC_URI},
       ${DEFINITIVE_METHODOLOGY_VERSION},
-      ${DEFINITIVE_METHODOLOGY_URI}
+      ${DEFINITIVE_METHODOLOGY_URI},
+      ${mandateContext.beneficialCustomerId},
+      ${mandateContext.billingOrgId},
+      ${mandateContext.mandateId},
+      ${mandateContext.agentId},
+      ${mandateContext.agentPlatformId},
+      ${sql.json(mandateContext.mandateChain)}::jsonb
     )
   `;
 }

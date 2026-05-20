@@ -2,6 +2,7 @@ import type { Tool } from '@anthropic-ai/sdk/resources/messages';
 import { createHash } from 'crypto';
 import { isSuperAdminUser } from '../adminAccess.js';
 import { createSql } from '../dbConfig.js';
+import { resolveDefinitiveMandateContext } from './definitiveMandateService.js';
 import {
   DEFINITIVE_METHODOLOGY_URI,
   DEFINITIVE_METHODOLOGY_VERSION,
@@ -1789,11 +1790,24 @@ async function writeAuditTrailTool(input: Record<string, any>, userId: number, c
     mode2Triggers: asRecord(input.mode2Triggers),
   };
   const outputHash = String(input.outputHash || hashForAudit(payload));
+  const mandateContext = await resolveDefinitiveMandateContext({
+    userId,
+    organizationId: input.organizationId == null ? null : Number(input.organizationId),
+    billingOrgId: input.billingOrgId == null ? null : Number(input.billingOrgId),
+    sourceAgent: nullableString(input.sourceAgent),
+    agentId: input.agentId == null ? null : String(input.agentId),
+    agentPlatformId: nullableString(input.agentPlatformId),
+    mandateId: nullableString(input.mandateId),
+    requestedScopes: Array.isArray(input.requiredScopes) ? input.requiredScopes.map(String) : [],
+    sourceSurface: nullableString(input.sourceSurface) || 'chat',
+    metadata: asRecord(input.metadata),
+  });
   const [row] = await sql`
     INSERT INTO audit_trail (
       session_id, deal_id, user_id, conversation_id, turn_id, journey, league, deal_type,
       model_stack, inputs_used, live_data_snapshots, citations_validated, mode_2_triggers, output_hash,
-      spec_version, spec_uri, methodology_version, methodology_uri
+      spec_version, spec_uri, methodology_version, methodology_uri,
+      beneficial_customer_id, billing_org_id, mandate_id, agent_id, agent_platform_id, mandate_chain
     )
     VALUES (
       ${String(input.sessionId || `conversation:${conversationId}`)},
@@ -1813,7 +1827,13 @@ async function writeAuditTrailTool(input: Record<string, any>, userId: number, c
       ${DEFINITIVE_SPEC_VERSION},
       ${DEFINITIVE_SPEC_URI},
       ${DEFINITIVE_METHODOLOGY_VERSION},
-      ${DEFINITIVE_METHODOLOGY_URI}
+      ${DEFINITIVE_METHODOLOGY_URI},
+      ${input.beneficialCustomerId == null ? mandateContext.beneficialCustomerId : Number(input.beneficialCustomerId)},
+      ${input.billingOrgId == null ? mandateContext.billingOrgId : Number(input.billingOrgId)},
+      ${nullableString(input.mandateId) || mandateContext.mandateId},
+      ${input.agentId == null ? mandateContext.agentId : String(input.agentId)},
+      ${nullableString(input.agentPlatformId) || mandateContext.agentPlatformId},
+      ${JSON.stringify(input.mandateChain || mandateContext.mandateChain)}::jsonb
     )
     RETURNING id, created_at
   `;

@@ -1,5 +1,6 @@
 import type { AgencyActionContract, AgencySurface } from './agencyActionRegistry.js';
 import { createSql } from '../dbConfig.js';
+import { resolveDefinitiveMandateContext } from './definitiveMandateService.js';
 
 const sql = createSql();
 
@@ -16,6 +17,11 @@ interface AgencyActionEventInput {
   actorId?: string | number | null;
   actingOnBehalfOfUserId?: number | null;
   organizationId?: number | null;
+  billingOrgId?: number | null;
+  beneficialCustomerId?: number | null;
+  mandateId?: string | null;
+  agentPlatformId?: string | null;
+  mandateChain?: Record<string, any> | null;
   sourceSurface?: AgencySurface | 'confirmation_route' | string;
   sourceAgent?: string | null;
   mandateScope?: string | null;
@@ -36,6 +42,17 @@ export async function recordAgencyActionEvent(event: AgencyActionEventInput): Pr
   const sourceSurface = event.sourceSurface ?? 'chat';
   const actorType = event.actorType ?? 'yulia';
   const actorId = event.actorId != null ? String(event.actorId) : null;
+  const mandateContext = await resolveDefinitiveMandateContext({
+    userId: event.userId,
+    organizationId: event.organizationId,
+    billingOrgId: event.billingOrgId,
+    sourceAgent: event.sourceAgent,
+    agentId: actorType === 'external_agent' ? actorId : null,
+    agentPlatformId: event.agentPlatformId,
+    mandateId: event.mandateId,
+    requestedScopes: contract?.requiredScopes ?? [],
+    sourceSurface,
+  });
 
   try {
     const [row] = await sql`
@@ -57,9 +74,14 @@ export async function recordAgencyActionEvent(event: AgencyActionEventInput): Pr
         actor_id,
         acting_on_behalf_of_user_id,
         organization_id,
+        beneficial_customer_id,
+        billing_org_id,
         source_surface,
         source_agent,
         mandate_scope,
+        mandate_id,
+        agent_platform_id,
+        mandate_chain,
         outcome,
         requires_confirmation,
         input,
@@ -84,9 +106,14 @@ export async function recordAgencyActionEvent(event: AgencyActionEventInput): Pr
         ${actorId},
         ${event.actingOnBehalfOfUserId ?? event.userId ?? null},
         ${event.organizationId ?? null},
+        ${event.beneficialCustomerId ?? mandateContext.beneficialCustomerId},
+        ${event.billingOrgId ?? mandateContext.billingOrgId},
         ${sourceSurface},
         ${event.sourceAgent ?? null},
         ${event.mandateScope ?? null},
+        ${event.mandateId ?? mandateContext.mandateId},
+        ${event.agentPlatformId ?? mandateContext.agentPlatformId},
+        ${safeJson(event.mandateChain ?? mandateContext.mandateChain)}::jsonb,
         ${event.outcome},
         ${contract?.confirmation === 'required'},
         ${safeJson(event.input)}::jsonb,
@@ -102,6 +129,7 @@ export async function recordAgencyActionEvent(event: AgencyActionEventInput): Pr
       actionId,
       sourceSurface,
       actorType,
+      mandateContext,
     });
   } catch (err: any) {
     try {
@@ -150,12 +178,14 @@ async function recordAgencyUsageEvent({
   actionId,
   sourceSurface,
   actorType,
+  mandateContext,
 }: {
   actionEventId: number | null;
   event: AgencyActionEventInput;
   actionId: string;
   sourceSurface: string;
   actorType: string;
+  mandateContext: Awaited<ReturnType<typeof resolveDefinitiveMandateContext>>;
 }): Promise<void> {
   const contract = event.contract as any;
   const billing = contract?.billing;
@@ -166,6 +196,8 @@ async function recordAgencyUsageEvent({
       INSERT INTO agency_usage_events (
         user_id,
         organization_id,
+        beneficial_customer_id,
+        billing_org_id,
         action_event_id,
         action_id,
         tool_name,
@@ -174,11 +206,17 @@ async function recordAgencyUsageEvent({
         quantity,
         source_surface,
         actor_type,
+        agent_id,
+        agent_platform_id,
+        mandate_id,
+        mandate_chain,
         metadata
       )
       VALUES (
         ${event.userId},
         ${event.organizationId ?? null},
+        ${event.beneficialCustomerId ?? mandateContext.beneficialCustomerId},
+        ${event.billingOrgId ?? mandateContext.billingOrgId},
         ${actionEventId},
         ${actionId},
         ${event.toolName},
@@ -187,11 +225,17 @@ async function recordAgencyUsageEvent({
         ${1},
         ${sourceSurface},
         ${actorType},
+        ${mandateContext.agentId},
+        ${event.agentPlatformId ?? mandateContext.agentPlatformId},
+        ${event.mandateId ?? mandateContext.mandateId},
+        ${safeJson(event.mandateChain ?? mandateContext.mandateChain)}::jsonb,
         ${safeJson({
           unit: billing.unit,
           outcome: event.outcome,
           sourceAgent: event.sourceAgent ?? null,
           mandateScope: event.mandateScope ?? null,
+          mandateId: event.mandateId ?? mandateContext.mandateId,
+          beneficialCustomerId: event.beneficialCustomerId ?? mandateContext.beneficialCustomerId,
           citationRequirement: contract?.citationRequirement ?? null,
         })}::jsonb
       )

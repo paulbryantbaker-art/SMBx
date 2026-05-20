@@ -5,6 +5,7 @@ import {
   planMeetsRequirement,
   type Plan,
 } from './subscriptionService.js';
+import { resolveDefinitiveMandateContext } from './definitiveMandateService.js';
 
 export type V19UsageEventType =
   | 'model_run'
@@ -83,6 +84,12 @@ interface V19EntitlementCheckInput {
   requiresHumanApproval?: boolean;
   requiresEnterpriseScope?: boolean;
   metadata?: Record<string, any>;
+  billingOrgId?: number | null;
+  beneficialCustomerId?: number | null;
+  mandateId?: string | null;
+  agentId?: string | number | null;
+  agentPlatformId?: string | null;
+  requestedScopes?: string[];
 }
 
 interface V19UsageRecordInput extends V19EntitlementCheckInput {
@@ -93,6 +100,12 @@ interface V19UsageRecordInput extends V19EntitlementCheckInput {
   creditCost?: number;
   actorType?: string;
   organizationId?: number | null;
+  billingOrgId?: number | null;
+  beneficialCustomerId?: number | null;
+  mandateId?: string | null;
+  agentId?: string | number | null;
+  agentPlatformId?: string | null;
+  requestedScopes?: string[];
 }
 
 const EVENT_TYPES: V19UsageEventType[] = [
@@ -321,18 +334,34 @@ export async function recordV19UsageEvent(input: V19UsageRecordInput): Promise<n
   const period = currentBillingPeriod();
   const eventTypeKey = EVENT_TYPE_KEY[input.eventType];
   const creditCost = input.creditCost ?? EVENT_CREDIT_COST[input.eventType];
+  const mandateContext = await resolveDefinitiveMandateContext({
+    userId: input.userId,
+    organizationId: input.organizationId,
+    billingOrgId: input.billingOrgId,
+    sourceAgent: typeof input.metadata?.sourceAgent === 'string' ? input.metadata.sourceAgent : null,
+    agentId: input.agentId,
+    agentPlatformId: input.agentPlatformId,
+    mandateId: input.mandateId,
+    requestedScopes: input.requestedScopes,
+    sourceSurface: input.sourceSurface || 'chat',
+    metadata: input.metadata,
+  });
   const metadata = {
     ...(input.metadata || {}),
     v19: true,
     resourceType: input.resourceType ?? null,
     resourceId: input.resourceId == null ? null : String(input.resourceId),
     actionId: input.actionId,
+    mandateId: input.mandateId ?? mandateContext.mandateId,
+    beneficialCustomerId: input.beneficialCustomerId ?? mandateContext.beneficialCustomerId,
   };
 
   const [row] = await sql`
     INSERT INTO agency_usage_events (
       user_id,
       organization_id,
+      beneficial_customer_id,
+      billing_org_id,
       action_id,
       tool_name,
       event_type,
@@ -342,11 +371,17 @@ export async function recordV19UsageEvent(input: V19UsageRecordInput): Promise<n
       billing_period_key,
       source_surface,
       actor_type,
+      agent_id,
+      agent_platform_id,
+      mandate_id,
+      mandate_chain,
       metadata
     )
     VALUES (
       ${input.userId},
       ${input.organizationId ?? null},
+      ${input.beneficialCustomerId ?? mandateContext.beneficialCustomerId},
+      ${input.billingOrgId ?? mandateContext.billingOrgId},
       ${input.actionId},
       ${input.toolName || input.actionId},
       ${eventTypeKey},
@@ -356,6 +391,10 @@ export async function recordV19UsageEvent(input: V19UsageRecordInput): Promise<n
       ${period.key},
       ${input.sourceSurface || 'chat'},
       ${input.actorType || 'yulia'},
+      ${mandateContext.agentId},
+      ${input.agentPlatformId ?? mandateContext.agentPlatformId},
+      ${input.mandateId ?? mandateContext.mandateId},
+      ${sql.json(mandateContext.mandateChain)}::jsonb,
       ${sql.json(metadata)}::jsonb
     )
     RETURNING id

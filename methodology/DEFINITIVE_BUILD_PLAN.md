@@ -263,6 +263,7 @@ Keep proprietary:
 ### Run 4 - Beneficial Customer And Mandate Chain
 
 **Goal:** make agent billing/audit attribution correct.
+**Status:** Started in repo. Migration `075_definitive_mandate_chain.sql` adds beneficial customer records, external agent identities, agent mandates, and mandate-chain fields on audit, usage, action, and model-execution records. Runtime usage/audit writers now resolve a default human-session mandate context and can carry external agent mandate IDs when present.
 
 - Add beneficial-customer identity fields to usage/audit/call records.
 - Add mandate records with scope, expiry, signature placeholder, and spend cap.

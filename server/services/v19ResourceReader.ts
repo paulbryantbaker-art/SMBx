@@ -147,7 +147,9 @@ async function readModelResource(userId: number, path: string): Promise<V19Model
   const [row] = await sql`
     SELECT id, model_id, version, status, deal_id, user_id, conversation_id, studio_book_id,
            input_hash, output_hash, missing_inputs, citation_tags,
-           spec_version, spec_uri, methodology_version, methodology_uri, created_at
+           spec_version, spec_uri, methodology_version, methodology_uri,
+           beneficial_customer_id, billing_org_id, mandate_id, agent_id, agent_platform_id,
+           mandate_chain, created_at
     FROM model_executions
     WHERE id = ${Number(match[1])}
     LIMIT 1
@@ -159,6 +161,7 @@ async function readModelResource(userId: number, path: string): Promise<V19Model
     uri: `model://execution/${row.id}`,
     id: String(row.id),
     ...versionPinsFromRow(row),
+    ...mandatePinsFromRow(row),
     modelId: row.model_id,
     version: row.version,
     status: row.status === 'complete' ? 'complete' : 'needs_inputs',
@@ -178,7 +181,8 @@ async function readAuditResource(userId: number, path: string): Promise<V19Audit
   const [row] = await sql`
     SELECT id, session_id, deal_id, user_id, conversation_id, turn_id, model_stack,
            citations_validated, output_hash, spec_version, spec_uri,
-           methodology_version, methodology_uri, created_at
+           methodology_version, methodology_uri, beneficial_customer_id, billing_org_id,
+           mandate_id, agent_id, agent_platform_id, mandate_chain, created_at
     FROM audit_trail
     WHERE id = ${Number(match[1])}
     LIMIT 1
@@ -190,6 +194,7 @@ async function readAuditResource(userId: number, path: string): Promise<V19Audit
     uri: `audit://record/${row.id}`,
     id: String(row.id),
     ...versionPinsFromRow(row),
+    ...mandatePinsFromRow(row),
     sessionId: row.session_id,
     turnId: row.turn_id,
     dealId: row.deal_id == null ? null : Number(row.deal_id),
@@ -331,4 +336,19 @@ function versionPinsFromRecord(record: Record<string, any> | null | undefined) {
     methodologyVersion: record?.methodologyVersion || record?.methodology_version || defaults.methodologyVersion,
     methodologyUri: record?.methodologyUri || record?.methodology_uri || defaults.methodologyUri,
   };
+}
+
+function mandatePinsFromRow(row: Record<string, any>) {
+  return {
+    beneficialCustomerId: row.beneficial_customer_id == null ? null : Number(row.beneficial_customer_id),
+    billingOrgId: row.billing_org_id == null ? null : Number(row.billing_org_id),
+    mandateId: row.mandate_id ?? null,
+    agentId: row.agent_id ?? null,
+    agentPlatformId: row.agent_platform_id ?? null,
+    mandateChain: asJsonRecord(row.mandate_chain),
+  };
+}
+
+function asJsonRecord(value: unknown): Record<string, any> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {};
 }

@@ -33,6 +33,12 @@ export interface V19ArtifactBase {
   specUri?: string;
   methodologyVersion?: string;
   methodologyUri?: string;
+  beneficialCustomerId?: number | null;
+  billingOrgId?: number | null;
+  mandateId?: string | null;
+  agentId?: string | null;
+  agentPlatformId?: string | null;
+  mandateChain?: Record<string, any>;
   createdAt?: string;
   updatedAt?: string;
 }

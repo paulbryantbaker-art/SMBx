@@ -32,16 +32,26 @@ const requiredTables = [
   'firm_memory',
   'today_operating_briefs',
   'market_data_cache',
+  'agency_action_events',
+  'agency_usage_events',
+  'definitive_beneficial_customers',
+  'definitive_agent_identities',
+  'definitive_agent_mandates',
 ] as const;
 
 const requiredColumns: Record<string, string[]> = {
   authority_register: ['authority_id', 'cite_tag', 'authority_type', 'jurisdiction', 'source_url', 'effective_date', 'supersedes_authority_id', 'status', 'validation_status', 'next_check_due', 'aliases'],
   market_data_cache: ['series_id', 'value', 'as_of_date', 'source_url', 'cite_tag', 'metadata'],
-  audit_trail: ['session_id', 'deal_id', 'user_id', 'conversation_id', 'turn_id', 'model_stack', 'citations_validated', 'output_hash', 'spec_version', 'methodology_version', 'spec_uri', 'methodology_uri'],
+  audit_trail: ['session_id', 'deal_id', 'user_id', 'conversation_id', 'turn_id', 'model_stack', 'citations_validated', 'output_hash', 'spec_version', 'methodology_version', 'spec_uri', 'methodology_uri', 'beneficial_customer_id', 'billing_org_id', 'mandate_id', 'mandate_chain'],
   studio_book_versions: ['slides', 'assumptions', 'model_outputs', 'provenance', 'audit', 'speaker_notes', 'spec_version', 'methodology_version'],
   studio_exports: ['output_hash', 'metadata', 'spec_version', 'methodology_version'],
-  model_executions: ['model_id', 'version', 'status', 'input_hash', 'output_hash', 'missing_inputs', 'citation_tags', 'audit_payload', 'spec_version', 'methodology_version', 'spec_uri', 'methodology_uri'],
+  model_executions: ['model_id', 'version', 'status', 'input_hash', 'output_hash', 'missing_inputs', 'citation_tags', 'audit_payload', 'spec_version', 'methodology_version', 'spec_uri', 'methodology_uri', 'beneficial_customer_id', 'billing_org_id', 'mandate_id', 'mandate_chain'],
   deal_model_stack: ['primary_models', 'supporting', 'tax_legal', 'sensitivity', 'spec_version', 'methodology_version'],
+  agency_action_events: ['beneficial_customer_id', 'billing_org_id', 'mandate_id', 'agent_platform_id', 'mandate_chain'],
+  agency_usage_events: ['beneficial_customer_id', 'billing_org_id', 'mandate_id', 'agent_id', 'agent_platform_id', 'mandate_chain'],
+  definitive_beneficial_customers: ['customer_key', 'user_id', 'organization_id', 'billing_org_id', 'customer_type', 'plan_key', 'metadata'],
+  definitive_agent_identities: ['agent_id', 'agent_platform_id', 'platform_name', 'auth_subject', 'status'],
+  definitive_agent_mandates: ['mandate_id', 'beneficial_customer_id', 'agent_identity_id', 'scope', 'spend_cap_credits', 'expires_at', 'status', 'signature_payload'],
   firm_memory: ['memory_type', 'label', 'value', 'source', 'confidence', 'status'],
   today_operating_briefs: ['source_fingerprint', 'morning_brief', 'gate_countdown', 'deal_pulse', 'studio_refresh_needs', 'firm_memory_snapshot'],
 };
