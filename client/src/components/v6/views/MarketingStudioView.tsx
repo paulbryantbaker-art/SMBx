@@ -344,7 +344,7 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
           <button
             key={format.id}
             type="button"
-            className="m-state"
+            className="m-nudge-soft"
             style={{ ...S.formatCard, backgroundImage: formatCardBackground(format.id) }}
             onClick={() => void createBook(format.id)}
           >
@@ -365,7 +365,7 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
           </div>
           <div style={S.bookStack}>
             {books.map(book => (
-              <button key={`${book.id}-${book.version}`} className="m-state" style={S.bookRow} onClick={() => openBook(book)}>
+              <button key={`${book.id}-${book.version}`} className="m-nudge-soft" style={S.bookRow} onClick={() => openBook(book)}>
                 <span style={S.bookIcon}>{formatInitial(book.format)}</span>
                 <span style={S.bookBody}>
                   <strong>{book.title}</strong>
@@ -383,7 +383,7 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
           <h2 style={S.sectionTitle}>Built to compete with finance workbenches.</h2>
           <div style={S.diffGrid}>
             {WORKBENCH_STACK.map(item => (
-              <button key={item.title} type="button" className="m-state" style={S.diffItem} onClick={() => askYulia(item.prompt)}>
+              <button key={item.title} type="button" className="m-nudge-soft" style={S.diffItem} onClick={() => askYulia(item.prompt)}>
                 <strong>{item.title}</strong>
                 <span>{item.body}</span>
               </button>

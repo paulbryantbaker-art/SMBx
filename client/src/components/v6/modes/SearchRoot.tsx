@@ -262,7 +262,7 @@ function CategoryCard({ category, onClick }: { category: Category; onClick: () =
   return (
     <button
       type="button"
-      className="m-state"
+      className="m-nudge-soft"
       style={{ ...S.categoryCard, backgroundImage: studioTextureCardBackground(category.texture) }}
       onClick={onClick}
     >

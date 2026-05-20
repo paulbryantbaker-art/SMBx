@@ -1839,6 +1839,12 @@ input[type="range"].m-slider::-moz-range-thumb {
   .v6-root .m-nudge-soft:hover {
     transform: translate3d(0, -1.5px, 0) !important;
   }
+
+  .v6-root button.m-nudge-soft:not(:disabled):hover,
+  .v6-root [role="button"].m-nudge-soft:not([aria-disabled="true"]):hover {
+    transform: translate3d(0, -1.5px, 0) !important;
+    filter: none !important;
+  }
 }
 
 .v6-root button:not(:disabled):active,

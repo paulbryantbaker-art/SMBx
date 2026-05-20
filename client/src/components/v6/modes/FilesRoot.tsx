@@ -235,7 +235,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
             <button
               key={shortcut.label}
               type="button"
-              className="m-state"
+              className="m-nudge-soft"
               style={{ ...F.shortcutCard, backgroundImage: studioTextureCardBackground(shortcutTexture(shortcut.tone)) }}
               onClick={() => runShortcut(shortcut)}
             >
@@ -328,7 +328,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
               <button
                 key={item.title}
                 type="button"
-                className="m-state"
+                className="m-nudge-soft"
                 style={F.controlItem}
                 onClick={() => ask(`Explain file source control: ${item.title}. ${item.sub}`)}
               >

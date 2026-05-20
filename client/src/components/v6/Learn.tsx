@@ -345,7 +345,7 @@ function HowSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) => voi
                 <button
                   key={title}
                   type="button"
-                  className="m-state"
+                  className="m-nudge-soft"
                   style={L.competeItem}
                   onClick={() => onTalkToYulia?.(`Explain ${title} in the smbX deal operating layer. ${body}`)}
                 >
@@ -368,7 +368,7 @@ function HowSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) => voi
                 <button
                   key={title}
                   type="button"
-                  className="m-state"
+                  className="m-nudge-soft"
                   style={L.listRow}
                   onClick={() => onTalkToYulia?.(`Explain ${title}. ${body}`)}
                 >
@@ -1923,7 +1923,7 @@ function PricingSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) =>
                   <button
                     key={item.title}
                     type="button"
-                    className="m-state"
+                    className="m-nudge-soft"
                     style={L.competeItem}
                     onClick={() => onTalkToYulia?.(`Explain this pricing control: ${item.title}. ${item.body}`)}
                   >
@@ -1946,7 +1946,7 @@ function PricingSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) =>
                   <button
                     key={item.title}
                     type="button"
-                    className="m-state"
+                    className="m-nudge-soft"
                     style={L.listRow}
                     onClick={() => onTalkToYulia?.(`Explain this pricing question: ${item.title}. ${item.body}`)}
                   >

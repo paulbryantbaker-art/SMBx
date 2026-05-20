@@ -522,6 +522,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           <div style={T.workStack}>
             <button
               type="button"
+              className="m-nudge-soft"
               style={T.intelLead}
               onClick={() => ask("Show me the portfolio market intelligence read. Separate market, buyer/capital, tax, legal, and source gaps.")}
             >
@@ -534,6 +535,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
                 <button
                   key={bullet}
                   type="button"
+                  className="m-nudge-soft"
                   style={T.intelBullet}
                   onClick={() => ask(`Unpack this market intelligence note: ${bullet}`)}
                 >
@@ -544,6 +546,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
             {liveDesk.map(item => (
               <button
                 key={item.title}
+                className="m-nudge-soft"
                 style={T.workCard}
                 onClick={() => ask(item.prompt || `${item.eyebrow.toLowerCase()}: ${item.title}. What changed and what should I do next?`)}
                 type="button"
@@ -658,7 +661,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
         </div>
         <div style={T.quickGrid}>
           {QUICK_STARTS.map(prompt => (
-            <button key={prompt} className="m-glint m-glass-control" style={T.quickChip} onClick={() => ask(prompt)} type="button">
+            <button key={prompt} className="m-nudge-soft" style={T.quickChip} onClick={() => ask(prompt)} type="button">
               {prompt}
               <span aria-hidden="true">↗</span>
             </button>
