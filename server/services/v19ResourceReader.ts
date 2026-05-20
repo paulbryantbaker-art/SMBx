@@ -1,6 +1,7 @@
 import { readFile } from 'fs/promises';
 import { resolve } from 'path';
 import { sql } from '../db.js';
+import { definitiveVersionPayload } from '../constants/definitive.js';
 import { hasDealAccess } from './dealAccessService.js';
 import { getPitchBook } from './pitchBookStudio.js';
 import { listV19ResourceContract } from './v19ResourceContract.js';
@@ -84,11 +85,13 @@ async function readStudioResource(userId: number, path: string): Promise<V19Stud
   const bookId = Number(match[1]);
   const book = await getPitchBook(userId, bookId);
   if (!book) throw new Error('Studio book not found');
+  const pins = versionPinsFromRecord(book.audit);
 
   const artifact: V19StudioBookArtifact = {
     kind: 'studio_book',
     uri: `studio://book/${book.id}`,
     id: String(book.id),
+    ...pins,
     title: book.title,
     format: book.format,
     dealId: book.dealId,
@@ -100,6 +103,7 @@ async function readStudioResource(userId: number, path: string): Promise<V19Stud
       kind: 'studio_slide',
       uri: `studio://book/${book.id}/slide/${slide.id}`,
       id: String(slide.id),
+      ...pins,
       title: slide.title,
       body: slide.body,
       bullets: slide.bullets,
@@ -110,6 +114,7 @@ async function readStudioResource(userId: number, path: string): Promise<V19Stud
       kind: 'source_card',
       uri: `source://studio_source/${source.id ?? source.sourceId ?? source.label}`,
       id: String(source.id ?? source.sourceId ?? source.label),
+      ...pins,
       sourceType: source.sourceType,
       label: source.label,
       status: source.status,
@@ -120,6 +125,7 @@ async function readStudioResource(userId: number, path: string): Promise<V19Stud
       kind: 'model_run',
       uri: output.executionId ? `model://execution/${output.executionId}` : v19ResourceUri('model', `book/${book.id}/${output.modelId}`),
       id: String(output.executionId ?? `${book.id}:${output.modelId}`),
+      ...versionPinsFromRecord(output.auditPayload || pins),
       modelId: String(output.modelId),
       version: String(output.version || 'v1'),
       status: output.status === 'complete' ? 'complete' : 'needs_inputs',
@@ -140,7 +146,8 @@ async function readModelResource(userId: number, path: string): Promise<V19Model
   if (!match) throw new Error('Model resource must be model://execution/{executionId}');
   const [row] = await sql`
     SELECT id, model_id, version, status, deal_id, user_id, conversation_id, studio_book_id,
-           input_hash, output_hash, missing_inputs, citation_tags, created_at
+           input_hash, output_hash, missing_inputs, citation_tags,
+           spec_version, spec_uri, methodology_version, methodology_uri, created_at
     FROM model_executions
     WHERE id = ${Number(match[1])}
     LIMIT 1
@@ -151,6 +158,7 @@ async function readModelResource(userId: number, path: string): Promise<V19Model
     kind: 'model_run',
     uri: `model://execution/${row.id}`,
     id: String(row.id),
+    ...versionPinsFromRow(row),
     modelId: row.model_id,
     version: row.version,
     status: row.status === 'complete' ? 'complete' : 'needs_inputs',
@@ -169,7 +177,8 @@ async function readAuditResource(userId: number, path: string): Promise<V19Audit
   if (!match) throw new Error('Audit resource must be audit://record/{auditId}');
   const [row] = await sql`
     SELECT id, session_id, deal_id, user_id, conversation_id, turn_id, model_stack,
-           citations_validated, output_hash, created_at
+           citations_validated, output_hash, spec_version, spec_uri,
+           methodology_version, methodology_uri, created_at
     FROM audit_trail
     WHERE id = ${Number(match[1])}
     LIMIT 1
@@ -180,6 +189,7 @@ async function readAuditResource(userId: number, path: string): Promise<V19Audit
     kind: 'audit_record',
     uri: `audit://record/${row.id}`,
     id: String(row.id),
+    ...versionPinsFromRow(row),
     sessionId: row.session_id,
     turnId: row.turn_id,
     dealId: row.deal_id == null ? null : Number(row.deal_id),
@@ -206,7 +216,8 @@ async function readDealResource(userId: number, path: string): Promise<V19DealSt
   `;
   if (!deal) throw new Error('Deal not found');
   const [stack] = await sql`
-    SELECT primary_models, supporting, tax_legal, sensitivity, composed_at
+    SELECT primary_models, supporting, tax_legal, sensitivity,
+           spec_version, spec_uri, methodology_version, methodology_uri, composed_at
     FROM deal_model_stack
     WHERE deal_id = ${dealId}
     ORDER BY version DESC, composed_at DESC
@@ -222,6 +233,7 @@ async function readDealResource(userId: number, path: string): Promise<V19DealSt
     kind: 'deal_state',
     uri: `deal://${dealId}/state`,
     id: String(dealId),
+    ...versionPinsFromRow(stack || {}),
     journey: normalizeJourney(deal.journey_type),
     league: deal.league || 'L1',
     dealType: deal.deal_type || 'unknown',
@@ -241,6 +253,7 @@ function readGateResource(path: string): V19GateStateArtifact {
     kind: 'gate_state',
     uri: `gate://${gate.journey}/${gate.id}`,
     id: gate.id,
+    ...definitiveVersionPayload(),
     gateId: gate.id,
     requiredModels: requirements.requiredModels,
     requiredCitations: requirements.requiredCitations,
@@ -265,6 +278,7 @@ async function readSourceResource(userId: number, path: string): Promise<V19Sour
     kind: 'source_card',
     uri: `source://studio_source/${row.id}`,
     id: String(row.id),
+    ...definitiveVersionPayload(),
     sourceType: row.source_type,
     label: row.label,
     status: row.status === 'linked' ? 'linked' : row.status === 'stale' ? 'stale' : 'missing',
@@ -297,4 +311,24 @@ function safeStringArray(value: unknown): string[] {
 function dateString(value: unknown): string | undefined {
   if (!value) return undefined;
   return value instanceof Date ? value.toISOString() : String(value);
+}
+
+function versionPinsFromRow(row: Record<string, any>) {
+  const defaults = definitiveVersionPayload();
+  return {
+    specVersion: row.spec_version || defaults.specVersion,
+    specUri: row.spec_uri || defaults.specUri,
+    methodologyVersion: row.methodology_version || defaults.methodologyVersion,
+    methodologyUri: row.methodology_uri || defaults.methodologyUri,
+  };
+}
+
+function versionPinsFromRecord(record: Record<string, any> | null | undefined) {
+  const defaults = definitiveVersionPayload();
+  return {
+    specVersion: record?.specVersion || record?.spec_version || defaults.specVersion,
+    specUri: record?.specUri || record?.spec_uri || defaults.specUri,
+    methodologyVersion: record?.methodologyVersion || record?.methodology_version || defaults.methodologyVersion,
+    methodologyUri: record?.methodologyUri || record?.methodology_uri || defaults.methodologyUri,
+  };
 }

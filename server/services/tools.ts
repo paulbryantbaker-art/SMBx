@@ -2,6 +2,12 @@ import type { Tool } from '@anthropic-ai/sdk/resources/messages';
 import { createHash } from 'crypto';
 import { isSuperAdminUser } from '../adminAccess.js';
 import { createSql } from '../dbConfig.js';
+import {
+  DEFINITIVE_METHODOLOGY_URI,
+  DEFINITIVE_METHODOLOGY_VERSION,
+  DEFINITIVE_SPEC_URI,
+  DEFINITIVE_SPEC_VERSION,
+} from '../constants/definitive.js';
 import { classifyV19LeagueFromCents, type League } from '../constants/v19Leagues.js';
 import { checkGateReadinessSync as checkReadiness } from './gateReadinessService.js';
 import { generateProviderRecommendation, findProviders, trackReferral } from './providerMatchingService.js';
@@ -1786,7 +1792,8 @@ async function writeAuditTrailTool(input: Record<string, any>, userId: number, c
   const [row] = await sql`
     INSERT INTO audit_trail (
       session_id, deal_id, user_id, conversation_id, turn_id, journey, league, deal_type,
-      model_stack, inputs_used, live_data_snapshots, citations_validated, mode_2_triggers, output_hash
+      model_stack, inputs_used, live_data_snapshots, citations_validated, mode_2_triggers, output_hash,
+      spec_version, spec_uri, methodology_version, methodology_uri
     )
     VALUES (
       ${String(input.sessionId || `conversation:${conversationId}`)},
@@ -1802,7 +1809,11 @@ async function writeAuditTrailTool(input: Record<string, any>, userId: number, c
       ${JSON.stringify(payload.liveDataSnapshots)}::jsonb,
       ${JSON.stringify(payload.citationsValidated)}::jsonb,
       ${JSON.stringify(payload.mode2Triggers)}::jsonb,
-      ${outputHash}
+      ${outputHash},
+      ${DEFINITIVE_SPEC_VERSION},
+      ${DEFINITIVE_SPEC_URI},
+      ${DEFINITIVE_METHODOLOGY_VERSION},
+      ${DEFINITIVE_METHODOLOGY_URI}
     )
     RETURNING id, created_at
   `;

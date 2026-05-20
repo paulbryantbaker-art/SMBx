@@ -37,9 +37,11 @@ const requiredTables = [
 const requiredColumns: Record<string, string[]> = {
   authority_register: ['authority_id', 'cite_tag', 'authority_type', 'jurisdiction', 'source_url', 'effective_date', 'supersedes_authority_id', 'status', 'validation_status', 'next_check_due', 'aliases'],
   market_data_cache: ['series_id', 'value', 'as_of_date', 'source_url', 'cite_tag', 'metadata'],
-  audit_trail: ['session_id', 'deal_id', 'user_id', 'conversation_id', 'turn_id', 'model_stack', 'citations_validated', 'output_hash'],
-  studio_book_versions: ['slides', 'assumptions', 'model_outputs', 'provenance', 'audit', 'speaker_notes'],
-  model_executions: ['model_id', 'version', 'status', 'input_hash', 'output_hash', 'missing_inputs', 'citation_tags', 'audit_payload'],
+  audit_trail: ['session_id', 'deal_id', 'user_id', 'conversation_id', 'turn_id', 'model_stack', 'citations_validated', 'output_hash', 'spec_version', 'methodology_version', 'spec_uri', 'methodology_uri'],
+  studio_book_versions: ['slides', 'assumptions', 'model_outputs', 'provenance', 'audit', 'speaker_notes', 'spec_version', 'methodology_version'],
+  studio_exports: ['output_hash', 'metadata', 'spec_version', 'methodology_version'],
+  model_executions: ['model_id', 'version', 'status', 'input_hash', 'output_hash', 'missing_inputs', 'citation_tags', 'audit_payload', 'spec_version', 'methodology_version', 'spec_uri', 'methodology_uri'],
+  deal_model_stack: ['primary_models', 'supporting', 'tax_legal', 'sensitivity', 'spec_version', 'methodology_version'],
   firm_memory: ['memory_type', 'label', 'value', 'source', 'confidence', 'status'],
   today_operating_briefs: ['source_fingerprint', 'morning_brief', 'gate_countdown', 'deal_pulse', 'studio_refresh_needs', 'firm_memory_snapshot'],
 };

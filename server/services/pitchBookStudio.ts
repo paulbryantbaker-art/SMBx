@@ -1,5 +1,12 @@
 import { createHash } from 'crypto';
 import { sql } from '../db.js';
+import {
+  DEFINITIVE_METHODOLOGY_URI,
+  DEFINITIVE_METHODOLOGY_VERSION,
+  DEFINITIVE_SPEC_URI,
+  DEFINITIVE_SPEC_VERSION,
+  definitiveVersionPayload,
+} from '../constants/definitive.js';
 import { hasDealAccess } from './dealAccessService.js';
 import { validateCitationTags } from './citationValidator.js';
 import { executeV19Model, persistV19ModelExecution, type V19ModelExecution } from './v19ModelRuntime.js';
@@ -381,7 +388,10 @@ export async function recordPitchBookExport(
   const citationValidation = await validateCitationTags(collectBookCitationTags(book));
   const warnings = buildExportWarnings(book, citationValidation);
   const [row] = await sql`
-    INSERT INTO studio_exports (book_id, version_id, format, status, output_hash, metadata)
+    INSERT INTO studio_exports (
+      book_id, version_id, format, status, output_hash, metadata,
+      spec_version, spec_uri, methodology_version, methodology_uri
+    )
     VALUES (
       ${book.id},
       ${book.versionId},
@@ -394,7 +404,13 @@ export async function recordPitchBookExport(
         exportedAt: new Date().toISOString(),
         citationValidation,
         warnings,
+        ...definitiveVersionPayload(),
       } as any)}::jsonb
+      ,
+      ${DEFINITIVE_SPEC_VERSION},
+      ${DEFINITIVE_SPEC_URI},
+      ${DEFINITIVE_METHODOLOGY_VERSION},
+      ${DEFINITIVE_METHODOLOGY_URI}
     )
     RETURNING id
   `;
@@ -518,7 +534,8 @@ async function insertVersion(
   const version = Number(next?.version || 1);
   const [row] = await sql`
     INSERT INTO studio_book_versions (
-      book_id, version, title, outline, slides, assumptions, model_outputs, provenance, audit, speaker_notes, created_by
+      book_id, version, title, outline, slides, assumptions, model_outputs, provenance,
+      audit, speaker_notes, created_by, spec_version, spec_uri, methodology_version, methodology_uri
     )
     VALUES (
       ${bookId},
@@ -529,9 +546,13 @@ async function insertVersion(
       ${sql.json(assumptions)}::jsonb,
       ${sql.json(modelOutputs)}::jsonb,
       ${sql.json(buildProvenance(slides))}::jsonb,
-      ${sql.json(audit)}::jsonb,
+      ${sql.json({ ...audit, ...definitiveVersionPayload() })}::jsonb,
       ${sql.json(slides.map(slide => ({ slideId: slide.id, notes: slide.speakerNotes })))}::jsonb,
-      ${createdBy}
+      ${createdBy},
+      ${DEFINITIVE_SPEC_VERSION},
+      ${DEFINITIVE_SPEC_URI},
+      ${DEFINITIVE_METHODOLOGY_VERSION},
+      ${DEFINITIVE_METHODOLOGY_URI}
     )
     RETURNING id, version
   `;
@@ -733,6 +754,7 @@ function buildAudit(input: {
 }): Record<string, any> {
   const payload = {
     schemaVersion: 'studio-audit-v1',
+    ...definitiveVersionPayload(),
     action: input.action,
     format: input.format,
     slideCount: input.slides.length,
@@ -762,7 +784,8 @@ async function writeStudioAuditTrail(input: {
   await sql`
     INSERT INTO audit_trail (
       session_id, deal_id, user_id, conversation_id, turn_id, journey, league, deal_type,
-      model_stack, inputs_used, live_data_snapshots, citations_validated, mode_2_triggers, output_hash
+      model_stack, inputs_used, live_data_snapshots, citations_validated, mode_2_triggers, output_hash,
+      spec_version, spec_uri, methodology_version, methodology_uri
     )
     VALUES (
       ${`studio:${input.book.id}`},
@@ -778,7 +801,11 @@ async function writeStudioAuditTrail(input: {
       ${sql.json({ studioSources: input.book.sources.length, warnings: input.warnings || [] })}::jsonb,
       ${sql.json(input.citationsValidated || {})}::jsonb,
       ${sql.json([])}::jsonb,
-      ${input.outputHash}
+      ${input.outputHash},
+      ${DEFINITIVE_SPEC_VERSION},
+      ${DEFINITIVE_SPEC_URI},
+      ${DEFINITIVE_METHODOLOGY_VERSION},
+      ${DEFINITIVE_METHODOLOGY_URI}
     )
   `;
 }

@@ -1,4 +1,10 @@
 import { sql } from '../db.js';
+import {
+  DEFINITIVE_METHODOLOGY_URI,
+  DEFINITIVE_METHODOLOGY_VERSION,
+  DEFINITIVE_SPEC_URI,
+  DEFINITIVE_SPEC_VERSION,
+} from '../constants/definitive.js';
 import { LEAGUES, type League } from '../constants/v19Leagues.js';
 
 export type V19Journey = 'sell' | 'buy' | 'raise' | 'pmi';
@@ -108,7 +114,8 @@ async function persistModelStack(dealId: number, stack: V19ModelStack): Promise<
 
   await sql`
     INSERT INTO deal_model_stack (
-      deal_id, journey, league, deal_type, primary_models, supporting, tax_legal, sensitivity, version
+      deal_id, journey, league, deal_type, primary_models, supporting, tax_legal, sensitivity,
+      version, spec_version, spec_uri, methodology_version, methodology_uri
     )
     VALUES (
       ${dealId},
@@ -119,7 +126,11 @@ async function persistModelStack(dealId: number, stack: V19ModelStack): Promise<
       ${sql.json(stack.supporting)}::jsonb,
       ${sql.json(stack.taxLegal)}::jsonb,
       ${sql.json(stack.sensitivity)}::jsonb,
-      ${version}
+      ${version},
+      ${DEFINITIVE_SPEC_VERSION},
+      ${DEFINITIVE_SPEC_URI},
+      ${DEFINITIVE_METHODOLOGY_VERSION},
+      ${DEFINITIVE_METHODOLOGY_URI}
     )
   `;
 }

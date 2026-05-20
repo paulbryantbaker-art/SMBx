@@ -29,6 +29,10 @@ export type V19ModelRunStatus = 'complete' | 'needs_inputs';
 export interface V19ArtifactBase {
   uri: V19ResourceUri;
   id: string;
+  specVersion?: string;
+  specUri?: string;
+  methodologyVersion?: string;
+  methodologyUri?: string;
   createdAt?: string;
   updatedAt?: string;
 }

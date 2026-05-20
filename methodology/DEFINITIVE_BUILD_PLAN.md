@@ -248,6 +248,7 @@ Keep proprietary:
 ### Run 3 - Spec Versioning And Methodology Pins
 
 **Goal:** make reproducibility explicit.
+**Status:** Started in repo. Migration `074_definitive_version_pins.sql` adds `DEFINITIVE.v1.0` / `methodology://v19` pins to audit trail, model executions, Studio versions/exports, and deal model stacks. Current model, audit, Studio, and resource-read paths now persist or expose those pins for agent reproducibility.
 
 - Add `spec_version` / `methodology_version` to model runs, Studio exports, audit trail, gate state, and tool calls.
 - Reject unknown versions.

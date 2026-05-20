@@ -1,4 +1,11 @@
 import { createHash } from 'crypto';
+import {
+  DEFINITIVE_METHODOLOGY_URI,
+  DEFINITIVE_METHODOLOGY_VERSION,
+  DEFINITIVE_SPEC_URI,
+  DEFINITIVE_SPEC_VERSION,
+  definitiveVersionPayload,
+} from '../constants/definitive.js';
 import { HSR_2026, SBA_SOP_50_10_8 } from '../constants/v19Regulatory.js';
 import { canonicalizeModelId, getRegisteredModel } from './modelRegistry.js';
 
@@ -24,6 +31,10 @@ export interface V19ModelExecution {
   auditPayload: {
     modelId: string;
     version: string;
+    specVersion: string;
+    specUri: string;
+    methodologyVersion: string;
+    methodologyUri: string;
     dealId: number | null;
     userId: number | null;
     conversationId: number | null;
@@ -630,11 +641,13 @@ export async function executeV19Model(args: V19ModelExecutionInput): Promise<V19
   const missingInputs = [...new Set(run.missingInputs || [])];
   const status: V19ModelStatus = missingInputs.length ? 'needs_inputs' : 'complete';
   const outputs = run.outputs || {};
-  const inputHash = hash({ modelId, inputs });
-  const outputHash = hash({ modelId, status, outputs, missingInputs });
+  const versionPins = definitiveVersionPayload();
+  const inputHash = hash({ modelId, specVersion: versionPins.specVersion, methodologyVersion: versionPins.methodologyVersion, inputs });
+  const outputHash = hash({ modelId, specVersion: versionPins.specVersion, methodologyVersion: versionPins.methodologyVersion, status, outputs, missingInputs });
   const auditPayload = {
     modelId,
     version: definition.version,
+    ...versionPins,
     dealId: args.dealId ?? null,
     userId: args.userId ?? null,
     conversationId: args.conversationId ?? null,
@@ -666,7 +679,7 @@ export async function persistV19ModelExecution(
     INSERT INTO model_executions (
       model_id, version, status, deal_id, user_id, conversation_id, studio_book_id,
       studio_version_id, tool_name, input_hash, output_hash, inputs, outputs,
-      missing_inputs, citation_tags, audit_payload
+      missing_inputs, citation_tags, audit_payload, spec_version, spec_uri, methodology_version, methodology_uri
     )
     VALUES (
       ${execution.modelId},
@@ -684,7 +697,11 @@ export async function persistV19ModelExecution(
       ${sql.json(execution.outputs)}::jsonb,
       ${sql.json(execution.missingInputs)}::jsonb,
       ${sql.json(execution.citationTags)}::jsonb,
-      ${sql.json(execution.auditPayload)}::jsonb
+      ${sql.json(execution.auditPayload)}::jsonb,
+      ${DEFINITIVE_SPEC_VERSION},
+      ${DEFINITIVE_SPEC_URI},
+      ${DEFINITIVE_METHODOLOGY_VERSION},
+      ${DEFINITIVE_METHODOLOGY_URI}
     )
     RETURNING id, created_at
   `;

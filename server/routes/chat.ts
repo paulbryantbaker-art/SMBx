@@ -12,6 +12,12 @@ import type { ConversationState } from '../services/promptBuilder.js';
 import { streamAgenticResponse } from '../services/aiService.js';
 import { normalizeModelPreference, resolveChatModel } from '../services/modelPreference.js';
 import { readDealV19Readiness } from '../services/v19ReadinessService.js';
+import {
+  DEFINITIVE_METHODOLOGY_URI,
+  DEFINITIVE_METHODOLOGY_VERSION,
+  DEFINITIVE_SPEC_URI,
+  DEFINITIVE_SPEC_VERSION,
+} from '../constants/definitive.js';
 
 /** Safe SSE write — checks destroyed + writableEnded, catches errors */
 function safeWrite(res: Response, data: string): boolean {
@@ -79,7 +85,8 @@ async function writeAutomaticV19ChatAudit(input: {
   await sql`
     INSERT INTO audit_trail (
       session_id, deal_id, user_id, conversation_id, turn_id, journey, league, deal_type,
-      model_stack, inputs_used, live_data_snapshots, citations_validated, mode_2_triggers, output_hash
+      model_stack, inputs_used, live_data_snapshots, citations_validated, mode_2_triggers, output_hash,
+      spec_version, spec_uri, methodology_version, methodology_uri
     )
     VALUES (
       ${`conversation:${input.conversationId}`},
@@ -102,7 +109,11 @@ async function writeAutomaticV19ChatAudit(input: {
         severity: issue.severity,
         detail: issue.detail,
       })))}::jsonb,
-      ${outputHash}
+      ${outputHash},
+      ${DEFINITIVE_SPEC_VERSION},
+      ${DEFINITIVE_SPEC_URI},
+      ${DEFINITIVE_METHODOLOGY_VERSION},
+      ${DEFINITIVE_METHODOLOGY_URI}
     )
   `;
 }
