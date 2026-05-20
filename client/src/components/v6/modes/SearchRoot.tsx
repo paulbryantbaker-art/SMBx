@@ -156,7 +156,7 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
   };
 
   return (
-    <div className="m-fade-up" style={S.page}>
+    <div className="m-fade-up m-page-flow" style={S.page}>
       <section style={S.hero}>
         <div style={S.heroCopy}>
           <h1 style={S.title}>Find the other side of the market.</h1>
@@ -165,7 +165,7 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
           </p>
         </div>
 
-        <div style={S.examples}>
+        <div className="m-flow-grid" style={S.examples}>
           {EXAMPLES.map(example => (
             <button
               key={example}
@@ -184,14 +184,14 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
 
       <section style={S.section}>
         <SectionTitle title="Market lanes" sub="Start broad, then let Yulia narrow by thesis, geography, check size, fit, and relationship angle." />
-        <div style={S.categoryGrid}>
+        <div className="m-flow-grid" style={S.categoryGrid}>
           {CATEGORIES.map(category => (
             <CategoryCard key={category.title} category={category} onClick={() => openDiscoverySurface(category.prompt, category.title)} />
           ))}
         </div>
       </section>
 
-      <section style={S.discoveryGrid}>
+      <section className="m-flow-grid" style={S.discoveryGrid}>
         <div style={S.listCard}>
           <div style={S.listTop}>
             <div>
@@ -209,7 +209,7 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
             </button>
           </div>
 
-          <div style={S.listStack}>
+          <div className="m-flow-grid" style={S.listStack}>
             {DISCOVERY.map(row => (
               <button
                 key={row.title}
@@ -230,7 +230,7 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
 
         <div style={S.competesCard}>
           <h2 style={S.competeTitle}>Built for market work that becomes deal work.</h2>
-          <div style={S.competeGrid}>
+          <div className="m-flow-grid" style={S.competeGrid}>
             {MARKET_STACK.map(item => (
               <button
                 key={item.title}

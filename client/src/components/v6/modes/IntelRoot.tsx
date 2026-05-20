@@ -43,7 +43,7 @@ export function V6IntelRoot({ openTab, onTalkToYulia }: { openTab: OpenTab; onTa
   };
 
   return (
-    <div className="m-fade-up" style={I.page}>
+    <div className="m-fade-up m-page-flow" style={I.page}>
       <V6Section
         eyebrow="MARKET INTELLIGENCE"
         title="What's moving"

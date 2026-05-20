@@ -224,7 +224,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
   };
 
   return (
-    <div className="m-fade-up" style={P.page}>
+    <div className="m-fade-up m-page-flow" style={P.page}>
       <section style={P.hero}>
         <div style={P.heroCopy}>
           <div className="mono" style={P.eyebrow}>PIPELINE</div>
@@ -252,7 +252,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
             {actionError || actionNote}
           </div>
         )}
-        <div style={P.actionGrid}>
+        <div className="m-flow-grid" style={P.actionGrid}>
           {PIPELINE_SHORTCUTS.map(({ action, title, sub, icon, tone }) => (
             <button
               key={title}
@@ -282,14 +282,14 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
           </button>
         </div>
 
-        <div style={P.methodologyStrip}>
+        <div className="m-flow-grid" style={P.methodologyStrip}>
           <MethodologyChip label="Leagues" value={activeLeagueCount || 0} />
           <MethodologyChip label="Models watched" value={modelCount} />
           <MethodologyChip label="Citations needed" value={citationCount} />
           <MethodologyChip label="Auto-move checks" value={autoMoveCount} />
         </div>
 
-        <div style={P.kanbanGrid}>
+        <div className="m-flow-grid" style={P.kanbanGrid}>
           {deals.length === 0 ? (
             <div style={P.emptyCard}>
               <strong>No deals yet</strong>

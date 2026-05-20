@@ -317,7 +317,7 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
   }
 
   return (
-    <main className="m-fade-up" style={S.page}>
+    <main className="m-fade-up m-page-flow" style={S.page}>
       <section style={S.hero}>
         <div style={S.heroTexture} />
         <div style={S.heroInner}>
@@ -339,7 +339,7 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
       {error && <div style={S.errorNotice}>{error}</div>}
       {user && <V19UsageMeter user={user} compact surface="studio" />}
 
-      <section style={S.formatGrid}>
+      <section className="m-flow-grid" style={S.formatGrid}>
         {FORMATS.map(format => (
           <button
             key={format.id}
@@ -357,7 +357,7 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
         ))}
       </section>
 
-      <section style={S.lowerGrid}>
+      <section className="m-flow-grid" style={S.lowerGrid}>
         <div style={S.bookPanel}>
           <div style={S.panelHeader}>
             <h2 style={S.sectionTitle}>Books in Studio</h2>

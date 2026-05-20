@@ -249,7 +249,7 @@ export function V6DocView({
   };
 
   return (
-    <div className="m-fade-up" style={V.shell}>
+    <div className="m-fade-up m-page-flow" style={V.shell}>
       <article style={V.article}>
         {/* Toolbar */}
         <div style={V.toolbar}>

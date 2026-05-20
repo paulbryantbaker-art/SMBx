@@ -12,7 +12,7 @@ export function V6SettingsView({ user, onSignOut }: SettingsViewProps) {
 
   if (!user) {
     return (
-      <div className="m-fade-up" style={{ maxWidth: 560 }}>
+      <div className="m-fade-up m-page-flow" style={{ maxWidth: 560 }}>
         <div className="mono" style={{ fontSize: 9.5, color: "var(--m-on-surface-mid)", letterSpacing: "0.14em", fontWeight: 600 }}>SETTINGS</div>
         <h1 style={{
           fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 24,

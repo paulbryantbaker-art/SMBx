@@ -163,7 +163,7 @@ export function V6AnalysisRoot({
   };
 
   return (
-    <div className="m-fade-up" style={A.page}>
+    <div className="m-fade-up m-page-flow" style={A.page}>
       <V6Section
         eyebrow="ANALYSIS"
         title="Run an analysis"
@@ -189,7 +189,7 @@ export function V6AnalysisRoot({
       </V6Section>
 
       <V6Section eyebrow="TOOLS" title="What can I run">
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
+        <div className="m-flow-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
           {TOOLS.map(t => (
             <div
               key={t.id}

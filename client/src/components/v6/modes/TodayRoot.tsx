@@ -430,8 +430,8 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
 
   return (
     <div className="m-fade-up" style={showLoggedOutMarketing ? { ...T.page, ...T.loggedOutPage } : T.page}>
-      <div style={T.pageContent}>
-      <section style={T.heroGrid}>
+      <div className="m-page-flow" style={T.pageContent}>
+      <section className="m-flow-grid" style={T.heroGrid}>
         <article style={{ ...T.leadCard, backgroundImage: todayHeroWash(useSampleData) }}>
           <div style={T.leadTop}>
             <button className="m-glint m-glass-control" style={T.smallGhost} onClick={() => ask("Give me the short version of today's deal brief.")} type="button">
@@ -461,13 +461,13 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
               : "No private workspace data is attached to this account yet. Start with a chat, source file, target, buyer pool, or deal thesis and Yulia will build the right surfaces around it.")}
           </p>
 
-          <div style={T.briefNotes}>
+          <div className="m-flow-grid" style={T.briefNotes}>
             {heroNotes.slice(0, 3).map(note => (
               <BriefNote key={note.label} label={note.label} text={note.text} />
             ))}
           </div>
 
-          <div style={T.heroActionGrid}>
+          <div className="m-flow-grid" style={T.heroActionGrid}>
             <button
               className="m-glint m-glass-control"
               style={T.heroGlassAction}
@@ -519,7 +519,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
             </div>
           </div>
 
-          <div style={T.workStack}>
+          <div className="m-flow-grid" style={T.workStack}>
             <button
               type="button"
               className="m-nudge-soft"
@@ -564,7 +564,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
 
       <section style={T.section}>
         <SectionHead eyebrow="YULIA PRIORITY QUEUE" title="What needs action" sub="Three moves surfaced from the live portfolio read." />
-        <div style={T.priorityGrid}>
+        <div className="m-flow-grid" style={T.priorityGrid}>
           {priorities.map((item, index) => (
             <PriorityCard key={item.title} index={index + 1} {...item} />
           ))}
@@ -572,7 +572,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
       </section>
 
       {operatingBrief && (
-        <section style={T.operatingGrid}>
+        <section className="m-flow-grid" style={T.operatingGrid}>
           <OperatingBriefCard brief={operatingBrief.morningBrief} onAsk={ask} />
           <GateCountdownCard
             items={operatingBrief.gateCountdown}
@@ -588,7 +588,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
         </section>
       )}
 
-      <section style={T.midGrid}>
+      <section className="m-flow-grid" style={T.midGrid}>
         <div style={T.section}>
           <SectionHead eyebrow="PIPELINE PULSE" title="Deals in motion" sub="Not every live deal deserves the same attention." />
           <div style={T.dealBoard}>
@@ -599,7 +599,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
               </div>
             )}
             {deals.length > 0 && (
-              <div style={T.listStack}>
+              <div className="m-flow-grid" style={T.listStack}>
                 {deals.map(deal => (
                   <button key={deal.id} style={T.dealRow} onClick={() => openDeal(deal)} type="button">
                     <span style={T.dealIcon}>{dealInitials(deal.title)}</span>
@@ -630,7 +630,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
               </div>
             )}
             {files.length > 0 && (
-              <div style={T.listStack}>
+              <div className="m-flow-grid" style={T.listStack}>
                 {files.map((file, index) => (
                   <button
                     key={`${file.id ?? file.title}-${index}`}
@@ -659,7 +659,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           <div className="mono" style={T.startEyebrow}>START SOMETHING</div>
           <h2 style={T.startTitle}>Give Yulia a clean sentence.</h2>
         </div>
-        <div style={T.quickGrid}>
+        <div className="m-flow-grid" style={T.quickGrid}>
           {QUICK_STARTS.map(prompt => (
             <button key={prompt} className="m-nudge-soft" style={T.quickChip} onClick={() => ask(prompt)} type="button">
               {prompt}

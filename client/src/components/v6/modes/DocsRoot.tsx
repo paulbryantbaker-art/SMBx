@@ -123,7 +123,7 @@ export function V6DocsRoot({
   };
 
   return (
-    <div className="m-fade-up" style={D.page}>
+    <div className="m-fade-up m-page-flow" style={D.page}>
       <V6Section
         eyebrow="DOCS"
         title="Documents"

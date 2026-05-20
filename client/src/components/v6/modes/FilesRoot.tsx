@@ -217,7 +217,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
   };
 
   return (
-    <div className="m-fade-up" style={F.page}>
+    <div className="m-fade-up m-page-flow" style={F.page}>
       <section style={F.hero}>
         <div style={F.heroCopy}>
           <h1 style={F.title}>Private deal libraries, plus shared data rooms.</h1>
@@ -229,7 +229,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
 
       <section style={F.section}>
         <SectionHead title="Source lanes" sub="Portfolio > deal > stage for all files. Data rooms add artifact, action, review, and executed status." />
-        <div style={F.shortcutGrid}>
+        <div className="m-flow-grid" style={F.shortcutGrid}>
           {shortcuts.map(shortcut => {
             return (
             <button
@@ -250,7 +250,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
         </div>
       </section>
 
-      <section style={F.grid}>
+      <section className="m-flow-grid" style={F.grid}>
         <div style={F.card}>
           <div style={F.cardHead}>
             <div>
@@ -265,7 +265,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
               See all
             </button>
           </div>
-          <div style={F.rows}>
+          <div className="m-flow-grid" style={F.rows}>
             {workspace.loading && <div className="mono" style={F.loading}>LOADING REAL FILES…</div>}
             {workspace.error && <div style={F.inlineError}>Couldn&rsquo;t load workspace files ({workspace.error}).</div>}
             {!workspace.loading && recents.length === 0 && (
@@ -289,7 +289,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
               <p style={F.cardSub}>Shared diligence drives by deal. Open a deal to see what is private versus in the room.</p>
             </div>
           </div>
-          <div style={F.rows}>
+          <div className="m-flow-grid" style={F.rows}>
             {!workspace.loading && rooms.length === 0 && (
               <EmptyRows
                 title="No deal libraries yet"
@@ -346,7 +346,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
               <p style={F.cardSub}>Requests, reviews, execution items, and failed generations waiting for a decision.</p>
             </div>
           </div>
-          <div style={F.rows}>
+          <div className="m-flow-grid" style={F.rows}>
             {operating.loading && <div className="mono" style={F.loading}>READING TODAY QUEUE…</div>}
             {operating.error && <div style={F.inlineError}>Couldn&rsquo;t load Today queue ({operating.error}).</div>}
             {!workspace.loading && !operating.loading && actions.length === 0 && (
@@ -412,7 +412,7 @@ export function V6FilesListView({
   };
 
   return (
-    <div className="m-fade-up" style={F.detailPage}>
+    <div className="m-fade-up m-page-flow" style={F.detailPage}>
       <section style={{ ...F.detailHero, backgroundImage: s.bg }}>
         <div>
           <h1 style={F.detailTitle}>{copy.title}</h1>
@@ -497,7 +497,7 @@ function ActiveFilesList({
         </button>
       </div>
 
-      <div style={F.rows}>
+      <div className="m-flow-grid" style={F.rows}>
         {loading && <div className="mono" style={F.loading}>LOADING REAL FILES…</div>}
         {error && <div style={F.inlineError}>Couldn&rsquo;t load workspace files ({error}).</div>}
 

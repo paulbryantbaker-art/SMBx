@@ -1,6 +1,6 @@
 export function V6HistoryView() {
   return (
-    <div className="m-fade-up" style={{ maxWidth: 640 }}>
+    <div className="m-fade-up m-page-flow" style={{ maxWidth: 640 }}>
       <div className="mono" style={{ fontSize: 9.5, color: "var(--m-on-surface-mid)", letterSpacing: "0.14em", fontWeight: 600 }}>COMING SOON</div>
       <h1 style={{
         fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 26,

@@ -15,14 +15,14 @@ const STARTER_PROMPTS: { label: string; prompt: string; eyebrow: string }[] = [
 
 export function V6StarterView({ onTalkToYulia }: StarterViewProps) {
   return (
-    <div className="m-fade-up" style={{ maxWidth: 720 }}>
+    <div className="m-fade-up m-page-flow" style={{ maxWidth: 720 }}>
       <div className="mono" style={S.eyebrow}>NEW TAB</div>
       <h1 style={S.h1}>What can Yulia help with?</h1>
       <p style={S.tag}>
         Pick a starting point, or just type into the chat. Yulia is aware of every tab you have open.
       </p>
 
-      <div style={S.grid}>
+      <div className="m-flow-grid" style={S.grid}>
         {STARTER_PROMPTS.map(p => (
           <button
             key={p.label}

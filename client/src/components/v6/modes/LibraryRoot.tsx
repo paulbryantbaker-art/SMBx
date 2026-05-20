@@ -28,7 +28,7 @@ export function V6LibraryRoot({ openTab }: { openTab: OpenTab }) {
   const [active, setActive] = useState(0);
 
   return (
-    <div className="m-fade-up" style={L.page}>
+    <div className="m-fade-up m-page-flow" style={L.page}>
       <V6Section
         eyebrow="LIBRARY"
         title="Everything you've touched"

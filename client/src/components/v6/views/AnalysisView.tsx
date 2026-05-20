@@ -394,7 +394,7 @@ export function V6AnalysisView({
   }
 
   return (
-    <div className="m-fade-up" style={{ width: "min(100%, 1440px)", maxWidth: 1440, margin: "0 auto", boxSizing: "border-box" }}>
+    <div className="m-fade-up m-page-flow" style={{ width: "min(100%, 1440px)", maxWidth: 1440, margin: "0 auto", boxSizing: "border-box" }}>
       <section style={{ marginBottom: 24 }}>
         <div className="mono" style={A.eyebrow}>{effectiveTool === "tool-compare" ? "ANALYSIS · COMPARISON · YULIA CAN REFINE" : "ANALYSIS · LIVE · YULIA RECOMPUTES AS YOU MOVE"}</div>
         <div style={A.headerRow}>
@@ -1008,7 +1008,7 @@ function StructuredAnalysisCanvas({
   };
 
   return (
-    <div className="m-fade-up" style={{ width: "min(100%, 1440px)", maxWidth: 1440, margin: "0 auto", boxSizing: "border-box" }}>
+    <div className="m-fade-up m-page-flow" style={{ width: "min(100%, 1440px)", maxWidth: 1440, margin: "0 auto", boxSizing: "border-box" }}>
       <section style={{ marginBottom: 24 }}>
         <div className="mono" style={A.eyebrow}>ANALYSIS · STRUCTURED · EVIDENCE LED</div>
         <div style={A.headerRow}>
@@ -2431,7 +2431,7 @@ function AnalysisRunState({
   onAction?: () => void;
 }) {
   return (
-    <div className="m-fade-up" style={{ maxWidth: 960 }}>
+    <div className="m-fade-up m-page-flow" style={{ maxWidth: 960 }}>
       <section style={{ marginBottom: 20 }}>
         <div className="mono" style={A.eyebrow}>{eyebrow}</div>
         <h1 style={A.h1}>{title}</h1>
@@ -2530,7 +2530,7 @@ function ArtifactCanvas({
   }
 
   return (
-    <div className="m-fade-up" style={IA.shell}>
+    <div className="m-fade-up m-page-flow" style={IA.shell}>
       <section style={IA.hero}>
         <div style={IA.heroCopy}>
           <div className="mono" style={IA.eyebrow}>INVESTMENT BOARD · YULIA ARTIFACT</div>
@@ -2631,7 +2631,7 @@ function ArtifactNeedsPayload({
 }) {
   const cleanTitle = /loading into the model/i.test(title) ? "Investment board" : title;
   return (
-    <div className="m-fade-up" style={IA.shell}>
+    <div className="m-fade-up m-page-flow" style={IA.shell}>
       <section className="m-card" style={IA.needsPayload}>
         <div className="mono" style={IA.eyebrow}>CANVAS ARTIFACT · NEEDS DATA</div>
         <h1 style={IA.title}>{cleanTitle}</h1>
@@ -3432,7 +3432,7 @@ function ComparisonCanvas({
   const hasDeals = deals.length >= 2;
 
   return (
-    <div className="m-fade-up" style={{ width: "min(100%, 1440px)", maxWidth: 1440, margin: "0 auto", boxSizing: "border-box" }}>
+    <div className="m-fade-up m-page-flow" style={{ width: "min(100%, 1440px)", maxWidth: 1440, margin: "0 auto", boxSizing: "border-box" }}>
       <section style={{ marginBottom: 24 }}>
         <div className="mono" style={A.eyebrow}>ANALYSIS · COMPARISON</div>
         <div style={A.headerRow}>
