@@ -118,7 +118,7 @@ This is the 95-model core that makes "substrate for all deal mechanics" credible
 
 ### v1.1 Staged Models
 
-M143, M159, M161-M164, M168, M177-M179, M181, M191, M194, M197, M205, M209, M213, and M218.
+M143, M161-M163, M191, M194, M197, M205, M209, M213, and M218.
 
 The LME set M161-M163 is explicitly research-only: uptier, drop-down, double-dip, and pari-plus outcomes depend on jurisdiction and exact loan-document language.
 
@@ -157,12 +157,12 @@ The V19 runtime remains the current execution baseline while expanded DEFINITIVE
 
 ## Next Build Runs
 
-1. Continue deterministic runtime functions and schemas for the v1.1 executable batch. Fifty-one models are executable with conformance coverage: M139, M148, M151-M158, M160, M169-M172, M180, M182-M190, M192-M193, M195-M196, M198-M204, M206-M208, M210-M212, M214-M217, and M219-M223. Next targets are M159, M164-M168, M177-M179, and M181.
+1. Continue deterministic runtime functions and schemas for the v1.1 executable batch. Sixty-one models are executable with conformance coverage: M139, M148, M151-M160, M164-M172, M177-M190, M192-M193, M195-M196, M198-M204, M206-M208, M210-M212, M214-M217, and M219-M223. Next targets are M143, M161-M163, M191, M194, M197, M205, M209, M213, and M218.
 2. Expand Authority Register from 500+ target to 800+ target, prioritizing bankruptcy, restructuring, IRC/Treasury, real estate, IP, agreement architecture, pass-through pricing, recovery data, digital assets, and regulated-industry sources.
 3. Publish the Pass-Through Substrate Catalog with per-call cost, fixed margin, source type, and THE LINE boundary.
 4. Add Yulia prompt/runtime language so research-only, professional-handoff, and pass-through models are useful without crossing THE LINE.
 5. Connect route-level applicable mechanics to Today, Pipeline, Files, and Studio surfaces after the chat/tool contract is stable.
 
 Completed first pass: `compose_model_stack` now uses the route map as Yulia's deal-profile classifier. It returns applicable mechanics, readiness, tool surfaces, and THE LINE boundary by deal profile, including G28/G29/G30 trigger overlays.
-Completed runtime slices: M139, M148, M151, M157-M158, M160, M169-M172, M180, M182-M190, M192-M193, M195-M196, M198-M204, M206-M208, M210-M212, M214-M217, and M219-M223 are mapped to `MODEL.*.v1` runtime ids with deterministic functions, registry entries, and complete/missing-input fixtures.
-Completed first conformance pass: `npm run test:definitive-conformance` now includes 164 cases: 152 model-runtime cases and 12 deal-mechanics route cases spanning real estate, connected tax, agreement architecture, IP, restructuring, LME, capital structure, secondaries, crypto, carve-out/JV, and venture/PIPE profiles.
+Completed runtime slices: M139, M148, M151-M160, M164-M172, M177-M190, M192-M193, M195-M196, M198-M204, M206-M208, M210-M212, M214-M217, and M219-M223 are mapped to `MODEL.*.v1` runtime ids with deterministic functions, registry entries, and complete/missing-input fixtures.
+Completed first conformance pass: `npm run test:definitive-conformance` now includes 184 cases: 172 model-runtime cases and 12 deal-mechanics route cases spanning real estate, connected tax, agreement architecture, IP, restructuring, LME, capital structure, secondaries, crypto, carve-out/JV, and venture/PIPE profiles.

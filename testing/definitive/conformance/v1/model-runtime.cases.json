@@ -2937,5 +2937,388 @@
       "status": "needs_inputs",
       "missingInputsIncludes": ["plan_payment_stream_cents"]
     }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.FULCRUM.001",
+    "title": "Fulcrum model identifies the partially impaired tranche",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.FULCRUM_SECURITY.v1",
+    "input": {
+      "enterprise_value_cents": 1200000,
+      "tranches": [
+        { "tranche_name": "First lien", "priority_rank": 1, "claim_cents": 800000 },
+        { "tranche_name": "Second lien", "priority_rank": 2, "claim_cents": 700000 }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "enterprise_value_cents": 1200000,
+        "total_claims_cents": 1500000,
+        "residual_value_cents": 0,
+        "fulcrum_tranche": "Second lien",
+        "financial_advisor_ev_handoff_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.FULCRUM.002",
+    "title": "Fulcrum model refuses missing tranches",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.FULCRUM_SECURITY.v1",
+    "input": {
+      "enterprise_value_cents": 1200000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["tranches"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.RSA.001",
+    "title": "RSA economics computes class support, milestones, and fiduciary-out status",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.RSA_ECONOMICS.v1",
+    "input": {
+      "classes": [
+        { "class_name": "Secured", "support_amount_pct": 0.7, "support_number_pct": 0.55 },
+        { "class_name": "GUC", "support_amount_pct": 0.6, "support_number_pct": 0.4 }
+      ],
+      "milestones": [
+        { "name": "petition", "completed": true },
+        { "name": "confirmation" }
+      ],
+      "termination_events": ["missed milestone", "fiduciary out"],
+      "fiduciary_out_present": true,
+      "toggle_type": "specified_plan"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "class_count": 2,
+        "support_threshold_class_count": 1,
+        "all_classes_meet_support_thresholds": false,
+        "milestone_count": 2,
+        "open_milestone_count": 1,
+        "termination_event_count": 2,
+        "fiduciary_out_present": true,
+        "toggle_type": "specified_plan",
+        "counsel_review_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.RSA.002",
+    "title": "RSA economics refuses missing classes",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.RSA_ECONOMICS.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["classes"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.ABC_ARTICLE9.001",
+    "title": "ABC and Article 9 model computes liquidation waterfall and notice floor",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.ABC_ARTICLE9.v1",
+    "input": {
+      "liquidation_value_cents": 1000000,
+      "assignee_fee_cents": 50000,
+      "sale_costs_cents": 50000,
+      "notice_days": 9,
+      "claims": [
+        { "class_name": "Secured", "priority_rank": 1, "claim_cents": 300000 },
+        { "class_name": "Unsecured", "priority_rank": 2, "claim_cents": 700000 }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "distributable_value_cents": 900000,
+        "notice_floor_satisfied": false,
+        "total_distributed_cents": 900000,
+        "residual_value_cents": 0,
+        "counsel_review_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.ABC_ARTICLE9.002",
+    "title": "ABC and Article 9 model refuses missing claims",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.ABC_ARTICLE9.v1",
+    "input": {
+      "liquidation_value_cents": 1000000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["claims"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.CLAIMS.001",
+    "title": "Claims trading model applies URD regression and computes IRR",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.CLAIMS_TRADING.v1",
+    "input": {
+      "face_amount_cents": 1000000,
+      "purchase_price_cents": 400000,
+      "post_default_trading_price": 0.4,
+      "time_to_recovery_years": 2
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "expected_recovery_rate": 0.42,
+        "expected_recovery_cents": 420000,
+        "gross_profit_cents": 20000,
+        "estimated_irr": 0.0247,
+        "frbp_transfer_review_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.CLAIMS.002",
+    "title": "Claims trading model refuses missing recovery input",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.CLAIMS_TRADING.v1",
+    "input": {
+      "face_amount_cents": 1000000,
+      "purchase_price_cents": 400000,
+      "time_to_recovery_years": 2
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["expected_recovery_rate"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.SUBV.001",
+    "title": "Subchapter V eligibility uses current reverted debt threshold",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.SUBCHAPTER_V_ELIGIBILITY.v1",
+    "input": {
+      "aggregate_noncontingent_liquidated_debt_cents": 250000000,
+      "engaged_in_commercial_activity": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "debt_limit_cents": 302472500,
+        "debt_limit_satisfied": true,
+        "engaged_in_commercial_activity": true,
+        "affiliate_of_public_issuer": false,
+        "subchapter_v_eligible_under_inputs": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.SUBV.002",
+    "title": "Subchapter V eligibility refuses missing commercial activity fact",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.SUBCHAPTER_V_ELIGIBILITY.v1",
+    "input": {
+      "aggregate_noncontingent_liquidated_debt_cents": 250000000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["engaged_in_commercial_activity"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.CH22.001",
+    "title": "Chapter 22 model scores recidivism from leverage, liquidity, growth, and history",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.CHAPTER22.RECIDIVISM.v1",
+    "input": {
+      "exit_leverage": 5,
+      "liquidity_months": 6,
+      "ebitda_growth_pct": -0.05,
+      "prior_bankruptcy_count": 1
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "chapter22_recidivism_score": 74,
+        "risk_band": "high",
+        "financial_advisor_handoff_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.CH22.002",
+    "title": "Chapter 22 model refuses missing liquidity months",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.CHAPTER22.RECIDIVISM.v1",
+    "input": {
+      "exit_leverage": 5,
+      "ebitda_growth_pct": -0.05
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["liquidity_months"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.SECONDARIES.LP_ECI.001",
+    "title": "LP secondary model computes 1446(f) withholding and transfer documents",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.SECONDARIES.LP_ECI.v1",
+    "input": {
+      "purchase_price_cents": 1000000,
+      "seller_foreign_person": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "section_1446f_default_withholding_cents": 100000,
+        "psa_required": true,
+        "tri_party_transfer_required": true,
+        "tax_specialist_handoff_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.SECONDARIES.LP_ECI.002",
+    "title": "LP secondary model refuses missing seller status",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.SECONDARIES.LP_ECI.v1",
+    "input": {
+      "purchase_price_cents": 1000000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["seller_foreign_person"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.SECONDARIES.STRIP.001",
+    "title": "Strip-sale model computes implied value and retained NAV",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.SECONDARIES.STRIP_SALE.v1",
+    "input": {
+      "fund_nav_cents": 1000000,
+      "strip_percentage": 0.25,
+      "sale_price_cents": 220000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "sold_nav_cents": 250000,
+        "retained_nav_cents": 750000,
+        "implied_total_value_cents": 880000,
+        "discount_to_nav_pct": 0.12
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.SECONDARIES.STRIP.002",
+    "title": "Strip-sale model refuses missing strip percentage",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.SECONDARIES.STRIP_SALE.v1",
+    "input": {
+      "fund_nav_cents": 1000000,
+      "sale_price_cents": 220000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["strip_percentage"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.FINANCE.NAV.001",
+    "title": "NAV facility model computes LTV and cushion",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.FINANCE.NAV_FACILITY.v1",
+    "input": {
+      "fund_nav_cents": 1000000,
+      "loan_amount_cents": 700000,
+      "required_cushion_pct": 0.25
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "nav_ltv": 0.7,
+        "cushion_pct": 0.3,
+        "required_cushion_pct": 0.25,
+        "cushion_requirement_satisfied": true,
+        "lender_handoff_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.FINANCE.NAV.002",
+    "title": "NAV facility model refuses missing loan amount",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.FINANCE.NAV_FACILITY.v1",
+    "input": {
+      "fund_nav_cents": 1000000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["loan_amount_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.FINANCE.VD_WARRANT.001",
+    "title": "Venture-debt warrant model computes coverage, value, and lender return",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.FINANCE.VENTURE_DEBT_WARRANT.v1",
+    "input": {
+      "loan_amount_cents": 1000000,
+      "warrant_coverage_pct": 0.1,
+      "exercise_price_cents": 200,
+      "fair_value_share_price_cents": 300,
+      "term_years": 3,
+      "cash_interest_rate": 0.1
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "warrant_coverage_amount_cents": 100000,
+        "warrant_shares": 500,
+        "intrinsic_warrant_value_cents": 50000,
+        "simple_interest_cents": 300000,
+        "lender_gross_return_cents": 1350000,
+        "estimated_lender_irr": 0.1052
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.FINANCE.VD_WARRANT.002",
+    "title": "Venture-debt warrant model refuses missing exercise price",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.FINANCE.VENTURE_DEBT_WARRANT.v1",
+    "input": {
+      "loan_amount_cents": 1000000,
+      "warrant_coverage_pct": 0.1,
+      "fair_value_share_price_cents": 300
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["exercise_price_cents"]
+    }
   }
 ]

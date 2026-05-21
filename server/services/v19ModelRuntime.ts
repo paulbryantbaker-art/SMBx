@@ -1414,6 +1414,278 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
       },
     };
   }),
+  'MODEL.RESTRUCTURING.FULCRUM_SECURITY.v1': defineModel('MODEL.RESTRUCTURING.FULCRUM_SECURITY.v1', ['enterprise_value_cents', 'tranches'], ['[Restructuring Market Practice]'], input => {
+    const enterpriseValue = cents(input.enterprise_value_cents);
+    const tranches = objectArray(input.tranches);
+    const missing = requireInputs({ enterprise_value_cents: enterpriseValue, tranches: tranches.length ? tranches : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    let remainingValue = enterpriseValue!;
+    let fulcrumTranche: string | null = null;
+    const rows = tranches
+      .map((tranche, index) => ({
+        tranche_name: String(tranche.tranche_name || tranche.name || `Tranche ${index + 1}`),
+        priority_rank: number(tranche.priority_rank) ?? index + 1,
+        claim_cents: cents(tranche.claim_cents ?? tranche.allowed_claim_cents) ?? 0,
+      }))
+      .sort((left, right) => left.priority_rank - right.priority_rank)
+      .map(tranche => {
+        const valueAllocated = Math.min(remainingValue, tranche.claim_cents);
+        remainingValue -= valueAllocated;
+        const recoveryPct = tranche.claim_cents > 0 ? valueAllocated / tranche.claim_cents : 0;
+        if (!fulcrumTranche && recoveryPct > 0 && recoveryPct < 1) fulcrumTranche = tranche.tranche_name;
+        return {
+          ...tranche,
+          value_allocated_cents: valueAllocated,
+          recovery_pct: round(recoveryPct, 4),
+        };
+      });
+    if (!fulcrumTranche) {
+      const firstUnpaid = rows.find(row => row.recovery_pct === 0);
+      const lastPaid = [...rows].reverse().find(row => row.recovery_pct >= 1);
+      fulcrumTranche = firstUnpaid?.tranche_name ?? lastPaid?.tranche_name ?? null;
+    }
+    return {
+      outputs: {
+        enterprise_value_cents: enterpriseValue,
+        total_claims_cents: rows.reduce((sum, row) => sum + row.claim_cents, 0),
+        residual_value_cents: Math.max(0, remainingValue),
+        fulcrum_tranche: fulcrumTranche,
+        financial_advisor_ev_handoff_required: true,
+        tranche_rows: rows,
+      },
+    };
+  }),
+  'MODEL.RESTRUCTURING.RSA_ECONOMICS.v1': defineModel('MODEL.RESTRUCTURING.RSA_ECONOMICS.v1', ['classes'], ['[11 U.S.C. 1125]', '[Indianapolis Downs]'], input => {
+    const classes = objectArray(input.classes);
+    const milestones = objectArray(input.milestones);
+    const terminationEvents = stringArray(input.termination_events);
+    const fiduciaryOutPresent = booleanInput(input.fiduciary_out_present) ?? false;
+    const toggleType = text(input.toggle_type) ?? 'unspecified';
+    const missing = requireInputs({ classes: classes.length ? classes : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const rows = classes.map((claimClass, index) => {
+      const supportAmountPct = number(claimClass.support_amount_pct) ?? 0;
+      const supportNumberPct = number(claimClass.support_number_pct) ?? 0;
+      return {
+        class_name: String(claimClass.class_name || claimClass.name || `Class ${index + 1}`),
+        support_amount_pct: round(supportAmountPct, 4),
+        support_number_pct: round(supportNumberPct, 4),
+        section_1126c_threshold_met: supportAmountPct >= (2 / 3) && supportNumberPct > 0.5,
+      };
+    });
+    return {
+      outputs: {
+        class_count: rows.length,
+        support_threshold_class_count: rows.filter(row => row.section_1126c_threshold_met).length,
+        all_classes_meet_support_thresholds: rows.every(row => row.section_1126c_threshold_met),
+        milestone_count: milestones.length,
+        open_milestone_count: milestones.filter(milestone => booleanInput(milestone.completed) !== true).length,
+        termination_event_count: terminationEvents.length,
+        fiduciary_out_present: fiduciaryOutPresent,
+        toggle_type: toggleType,
+        counsel_review_required: true,
+        class_rows: rows,
+      },
+    };
+  }),
+  'MODEL.RESTRUCTURING.ABC_ARTICLE9.v1': defineModel('MODEL.RESTRUCTURING.ABC_ARTICLE9.v1', ['liquidation_value_cents', 'claims'], ['[UCC 9-610]', '[UCC 9-611]', '[UCC 9-615]', '[State ABC Law]'], input => {
+    const liquidationValue = cents(input.liquidation_value_cents);
+    const claims = objectArray(input.claims);
+    const assigneeFee = cents(input.assignee_fee_cents) ?? 0;
+    const saleCosts = cents(input.sale_costs_cents) ?? 0;
+    const noticeDays = number(input.notice_days) ?? 10;
+    const commerciallyReasonableSale = booleanInput(input.commercially_reasonable_sale) ?? null;
+    const missing = requireInputs({ liquidation_value_cents: liquidationValue, claims: claims.length ? claims : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    let remaining = Math.max(0, liquidationValue! - assigneeFee - saleCosts);
+    const rows = claims
+      .map((claim, index) => ({
+        class_name: String(claim.class_name || claim.name || `Class ${index + 1}`),
+        priority_rank: number(claim.priority_rank) ?? index + 1,
+        claim_cents: cents(claim.claim_cents ?? claim.allowed_claim_cents) ?? 0,
+      }))
+      .sort((left, right) => left.priority_rank - right.priority_rank)
+      .map(claim => {
+        const distribution = Math.min(remaining, claim.claim_cents);
+        remaining -= distribution;
+        return {
+          ...claim,
+          distribution_cents: distribution,
+          recovery_pct: claim.claim_cents > 0 ? round(distribution / claim.claim_cents, 4) : 0,
+        };
+      });
+    return {
+      outputs: {
+        liquidation_value_cents: liquidationValue,
+        assignee_fee_cents: assigneeFee,
+        sale_costs_cents: saleCosts,
+        distributable_value_cents: Math.max(0, liquidationValue! - assigneeFee - saleCosts),
+        notice_days: noticeDays,
+        article9_notice_floor_days: 10,
+        notice_floor_satisfied: noticeDays >= 10,
+        commercially_reasonable_sale: commerciallyReasonableSale,
+        total_distributed_cents: rows.reduce((sum, row) => sum + row.distribution_cents, 0),
+        residual_value_cents: remaining,
+        counsel_review_required: true,
+        distribution_rows: rows,
+      },
+    };
+  }),
+  'MODEL.RESTRUCTURING.CLAIMS_TRADING.v1': defineModel('MODEL.RESTRUCTURING.CLAIMS_TRADING.v1', ['face_amount_cents', 'purchase_price_cents', 'time_to_recovery_years'], ['[Moody\'s Ultimate Recovery Database]', '[FRBP 3001]'], input => {
+    const faceAmount = cents(input.face_amount_cents);
+    const purchasePrice = cents(input.purchase_price_cents);
+    const years = number(input.time_to_recovery_years);
+    const postDefaultTradingPrice = number(input.post_default_trading_price);
+    const expectedRecoveryRate = number(input.expected_recovery_rate) ?? (postDefaultTradingPrice == null ? null : (0.90 * postDefaultTradingPrice) + 0.06);
+    const missing = requireInputs({ face_amount_cents: faceAmount, purchase_price_cents: purchasePrice, time_to_recovery_years: years, expected_recovery_rate: expectedRecoveryRate });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const expectedRecovery = Math.round(faceAmount! * expectedRecoveryRate!);
+    const irr = purchasePrice! > 0 && years! > 0 ? (expectedRecovery / purchasePrice!) ** (1 / years!) - 1 : null;
+    return {
+      outputs: {
+        face_amount_cents: faceAmount,
+        purchase_price_cents: purchasePrice,
+        post_default_trading_price: postDefaultTradingPrice == null ? null : round(postDefaultTradingPrice, 4),
+        expected_recovery_rate: round(expectedRecoveryRate!, 4),
+        expected_recovery_cents: expectedRecovery,
+        gross_profit_cents: expectedRecovery - purchasePrice!,
+        estimated_irr: irr == null ? null : round(irr, 4),
+        frbp_transfer_review_required: true,
+      },
+    };
+  }),
+  'MODEL.RESTRUCTURING.SUBCHAPTER_V_ELIGIBILITY.v1': defineModel('MODEL.RESTRUCTURING.SUBCHAPTER_V_ELIGIBILITY.v1', ['aggregate_noncontingent_liquidated_debt_cents', 'engaged_in_commercial_activity'], ['[11 U.S.C. 1181-1195]'], input => {
+    const debt = cents(input.aggregate_noncontingent_liquidated_debt_cents);
+    const engaged = booleanInput(input.engaged_in_commercial_activity);
+    const affiliateIssuer = booleanInput(input.affiliate_of_public_issuer) ?? false;
+    const threshold = cents(input.debt_limit_cents) ?? 302472500;
+    const missing = requireInputs({ aggregate_noncontingent_liquidated_debt_cents: debt, engaged_in_commercial_activity: engaged });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    return {
+      outputs: {
+        aggregate_noncontingent_liquidated_debt_cents: debt,
+        debt_limit_cents: threshold,
+        debt_limit_satisfied: debt! <= threshold,
+        engaged_in_commercial_activity: engaged,
+        affiliate_of_public_issuer: affiliateIssuer,
+        subchapter_v_eligible_under_inputs: debt! <= threshold && engaged === true && !affiliateIssuer,
+        current_threshold_handoff_note: 'Uses the reverted $3,024,725 threshold unless a user-supplied debt_limit_cents overrides it.',
+      },
+    };
+  }),
+  'MODEL.RESTRUCTURING.CHAPTER22.RECIDIVISM.v1': defineModel('MODEL.RESTRUCTURING.CHAPTER22.RECIDIVISM.v1', ['exit_leverage', 'liquidity_months', 'ebitda_growth_pct'], ['[LoPucki Bankruptcy Research Database]'], input => {
+    const exitLeverage = number(input.exit_leverage);
+    const liquidityMonths = number(input.liquidity_months);
+    const ebitdaGrowthPct = number(input.ebitda_growth_pct);
+    const priorBankruptcyCount = number(input.prior_bankruptcy_count) ?? 0;
+    const missing = requireInputs({ exit_leverage: exitLeverage, liquidity_months: liquidityMonths, ebitda_growth_pct: ebitdaGrowthPct });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const leverageRisk = clamp((exitLeverage! - 3) * 12, 0, 35);
+    const liquidityRisk = clamp((12 - liquidityMonths!) * 2.5, 0, 30);
+    const growthRisk = clamp((-ebitdaGrowthPct!) * 100, 0, 20);
+    const repeatRisk = clamp(priorBankruptcyCount * 10, 0, 15);
+    const recidivismScore = Math.round(clamp(20 + leverageRisk + liquidityRisk + growthRisk + repeatRisk, 0, 100));
+    return {
+      outputs: {
+        exit_leverage: round(exitLeverage!, 2),
+        liquidity_months: round(liquidityMonths!, 1),
+        ebitda_growth_pct: round(ebitdaGrowthPct!, 4),
+        prior_bankruptcy_count: priorBankruptcyCount,
+        chapter22_recidivism_score: recidivismScore,
+        risk_band: recidivismScore >= 70 ? 'high' : recidivismScore >= 45 ? 'watch' : 'lower',
+        financial_advisor_handoff_required: true,
+      },
+    };
+  }),
+  'MODEL.SECONDARIES.LP_ECI.v1': defineModel('MODEL.SECONDARIES.LP_ECI.v1', ['purchase_price_cents', 'seller_foreign_person'], ['[IRC 1446(f)]', '[ILPA Guidance]'], input => {
+    const purchasePrice = cents(input.purchase_price_cents);
+    const foreignSeller = booleanInput(input.seller_foreign_person);
+    const withholdingCertificateProvided = booleanInput(input.withholding_certificate_provided) ?? false;
+    const eciGain = cents(input.eci_gain_cents);
+    const missing = requireInputs({ purchase_price_cents: purchasePrice, seller_foreign_person: foreignSeller });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const defaultWithholding = foreignSeller && !withholdingCertificateProvided ? Math.round(purchasePrice! * 0.10) : 0;
+    return {
+      outputs: {
+        purchase_price_cents: purchasePrice,
+        seller_foreign_person: foreignSeller,
+        withholding_certificate_provided: withholdingCertificateProvided,
+        section_1446f_default_withholding_cents: defaultWithholding,
+        eci_gain_cents: eciGain,
+        psa_required: true,
+        tri_party_transfer_required: true,
+        tax_specialist_handoff_required: foreignSeller === true,
+      },
+    };
+  }),
+  'MODEL.SECONDARIES.STRIP_SALE.v1': defineModel('MODEL.SECONDARIES.STRIP_SALE.v1', ['fund_nav_cents', 'strip_percentage', 'sale_price_cents'], ['[Secondary Market Practice]'], input => {
+    const nav = cents(input.fund_nav_cents);
+    const stripPct = number(input.strip_percentage);
+    const salePrice = cents(input.sale_price_cents);
+    const missing = requireInputs({ fund_nav_cents: nav, strip_percentage: stripPct, sale_price_cents: salePrice });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const soldNav = Math.round(nav! * stripPct!);
+    const impliedTotalValue = stripPct! > 0 ? Math.round(salePrice! / stripPct!) : 0;
+    return {
+      outputs: {
+        fund_nav_cents: nav,
+        strip_percentage: round(stripPct!, 4),
+        sold_nav_cents: soldNav,
+        retained_nav_cents: nav! - soldNav,
+        sale_price_cents: salePrice,
+        implied_total_value_cents: impliedTotalValue,
+        discount_to_nav_pct: nav! > 0 ? round(1 - (impliedTotalValue / nav!), 4) : null,
+      },
+    };
+  }),
+  'MODEL.FINANCE.NAV_FACILITY.v1': defineModel('MODEL.FINANCE.NAV_FACILITY.v1', ['fund_nav_cents', 'loan_amount_cents'], ['[NAV Facility Market Practice]'], input => {
+    const nav = cents(input.fund_nav_cents);
+    const loan = cents(input.loan_amount_cents);
+    const requiredCushion = number(input.required_cushion_pct) ?? 0.25;
+    const missing = requireInputs({ fund_nav_cents: nav, loan_amount_cents: loan });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const ltv = nav! > 0 ? loan! / nav! : 0;
+    const cushion = 1 - ltv;
+    return {
+      outputs: {
+        fund_nav_cents: nav,
+        loan_amount_cents: loan,
+        nav_ltv: round(ltv, 4),
+        cushion_pct: round(cushion, 4),
+        required_cushion_pct: round(requiredCushion, 4),
+        cushion_requirement_satisfied: cushion >= requiredCushion,
+        lender_handoff_required: true,
+      },
+    };
+  }),
+  'MODEL.FINANCE.VENTURE_DEBT_WARRANT.v1': defineModel('MODEL.FINANCE.VENTURE_DEBT_WARRANT.v1', ['loan_amount_cents', 'warrant_coverage_pct', 'exercise_price_cents', 'fair_value_share_price_cents'], ['[Venture Debt Market Practice]'], input => {
+    const loan = cents(input.loan_amount_cents);
+    const coveragePct = number(input.warrant_coverage_pct);
+    const exercisePrice = cents(input.exercise_price_cents);
+    const fairValueSharePrice = cents(input.fair_value_share_price_cents);
+    const termYears = number(input.term_years) ?? 3;
+    const cashInterestRate = number(input.cash_interest_rate) ?? 0;
+    const missing = requireInputs({ loan_amount_cents: loan, warrant_coverage_pct: coveragePct, exercise_price_cents: exercisePrice, fair_value_share_price_cents: fairValueSharePrice });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const warrantCoverageAmount = Math.round(loan! * coveragePct!);
+    const warrantShares = exercisePrice! > 0 ? warrantCoverageAmount / exercisePrice! : 0;
+    const intrinsicValue = Math.max(0, Math.round(warrantShares * (fairValueSharePrice! - exercisePrice!)));
+    const simpleInterest = Math.round(loan! * cashInterestRate * termYears);
+    const grossReturn = loan! + simpleInterest + intrinsicValue;
+    const lenderIrr = termYears > 0 ? (grossReturn / loan!) ** (1 / termYears) - 1 : null;
+    return {
+      outputs: {
+        loan_amount_cents: loan,
+        warrant_coverage_pct: round(coveragePct!, 4),
+        warrant_coverage_amount_cents: warrantCoverageAmount,
+        warrant_shares: Math.round(warrantShares),
+        intrinsic_warrant_value_cents: intrinsicValue,
+        simple_interest_cents: simpleInterest,
+        lender_gross_return_cents: grossReturn,
+        estimated_lender_irr: lenderIrr == null ? null : round(lenderIrr, 4),
+      },
+    };
+  }),
   'MODEL.RE.ASSET_ENTITY.ELECTION.v1': defineModel('MODEL.RE.ASSET_ENTITY.ELECTION.v1', ['enterprise_value_cents', 'real_property_value_cents'], ['[IRC 1001]', '[IRC 1060]', '[IRC 197]'], input => {
     const enterpriseValue = cents(input.enterprise_value_cents);
     const realPropertyValue = cents(input.real_property_value_cents);

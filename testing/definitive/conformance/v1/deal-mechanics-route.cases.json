@@ -107,9 +107,9 @@
     "expect": {
       "slotIdsInclude": ["M151", "M152", "M153", "M154", "M155", "M156", "M158"],
       "readinessAtLeast": {
-        "executable": 8,
-        "professional_handoff": 5,
-        "planning_only": 1
+        "executable": 14,
+        "professional_handoff": 1,
+        "research_only": 1
       },
       "yuliaBriefIncludes": ["professional handoff"]
     }
@@ -129,8 +129,8 @@
     "expect": {
       "slotIdsInclude": ["M151", "M157", "M167"],
       "readinessAtLeast": {
-        "planning_only": 2,
-        "professional_handoff": 4
+        "executable": 15,
+        "planning_only": 1
       }
     }
   },
@@ -150,7 +150,8 @@
       "slotIdsInclude": ["M160", "M161", "M162", "M163", "M164"],
       "readinessAtLeast": {
         "research_only": 3,
-        "professional_handoff": 2
+        "professional_handoff": 1,
+        "executable": 5
       },
       "yuliaBriefIncludes": ["research-only"]
     }
@@ -190,7 +191,9 @@
     "expect": {
       "slotIdsInclude": ["M177", "M178"],
       "readinessAtLeast": {
-        "research_only": 2
+        "executable": 3,
+        "professional_handoff": 4,
+        "research_only": 4
       }
     }
   },
@@ -229,7 +232,8 @@
       "slotIdsInclude": ["M103", "M144", "M145", "M218"],
       "readinessAtLeast": {
         "planning_only": 8,
-        "professional_handoff": 2
+        "professional_handoff": 1,
+        "executable": 10
       }
     }
   },
@@ -248,7 +252,7 @@
     "expect": {
       "slotIdsInclude": ["M146", "M147", "M180", "M181"],
       "readinessAtLeast": {
-        "executable": 1,
+        "executable": 4,
         "planning_only": 4
       },
       "toolSurfacesInclude": {
