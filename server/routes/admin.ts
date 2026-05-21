@@ -23,8 +23,7 @@ function requireAdmin(req: any, res: any, next: any) {
   }).catch(() => res.status(500).json({ error: 'Auth check failed' }));
 }
 
-adminRouter.use(requireAuth);
-adminRouter.use(requireAdmin);
+adminRouter.use('/admin', requireAuth, requireAdmin);
 
 // ─── Test Emails ────────────────────────────────────────────
 adminRouter.post('/admin/test-emails', async (req, res) => {

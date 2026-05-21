@@ -72,6 +72,17 @@ export function buildDefinitiveConformanceStatus() {
       'refusal states',
     ],
     command: 'npm run test:definitive-conformance',
-    nextTarget: 150,
+    authenticatedRouteSmoke: {
+      status: 'started',
+      command: 'npm run test:definitive-auth-route',
+      fixture: 'DB fixture + JWT bearer token + live API server',
+      assertions: [
+        'protected endpoints reject missing JWT',
+        'tool inventory is available with JWT',
+        'unsupported spec versions refuse before execution',
+        'compose_model_stack returns mandate chain and G28/G29/G30 route map',
+      ],
+    },
+    nextTarget: 750,
   };
 }
