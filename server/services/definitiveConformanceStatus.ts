@@ -86,6 +86,8 @@ export function buildDefinitiveConformanceStatus() {
         'unsupported spec versions refuse before execution',
         'compose_model_stack returns mandate chain and G28/G29/G30 route map',
         'audit packet retrieval returns pinned reproducibility payloads',
+        'Studio export audit packet routes return pinned export payloads',
+        'staged agency action routes expose and cancel confirmation holds',
       ],
     },
     nextTarget: 750,

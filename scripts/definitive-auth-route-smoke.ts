@@ -19,6 +19,7 @@ import {
   DEFINITIVE_METHODOLOGY_URI,
   DEFINITIVE_SPEC_VERSION,
 } from '../server/constants/definitive.js';
+import { executeGovernedTool } from '../server/services/governedToolExecutor.js';
 
 const BASE_URL = process.env.DEFINITIVE_TEST_BASE_URL || 'http://localhost:3000';
 const FIXTURE_EMAIL = 'definitive-auth-route@smbx.test';
@@ -192,15 +193,73 @@ try {
     assertEqual(body.methodologyVersion, DEFINITIVE_METHODOLOGY_VERSION, 'audit packet methodology version');
     assertEqual(body.methodologyUri, DEFINITIVE_METHODOLOGY_URI, 'audit packet methodology uri');
     assertEqual(body.mandateChain.principal.userId, fixture.userId, 'audit packet mandate user');
+    assertEqual(body.auditPacket.schemaVersion, 'model-backed-chat-audit-v1', 'model-backed packet schema');
     assertEqual(body.auditPacket.line, 'compute_only', 'audit packet THE LINE marker');
     assert(body.modelStack.triggeredOverlayGates.includes('G28'), 'audit packet carries route map');
+  });
+
+  await test('Studio export audit packet routes return pinned export payloads', async () => {
+    const { bookId, exportId } = await ensureStudioExportFixture(fixture.userId, fixture.dealId);
+    const latest = await authedJson(`/api/studio/pitch-books/${bookId}/exports/latest/audit-packet`, token);
+    const direct = await authedJson(`/api/studio/pitch-books/${bookId}/exports/${exportId}/audit-packet`, token);
+
+    for (const body of [latest, direct]) {
+      assertEqual(body.exportId, exportId, 'studio export id');
+      assertEqual(body.bookId, bookId, 'studio book id');
+      assertEqual(body.specVersion, DEFINITIVE_SPEC_VERSION, 'studio export spec');
+      assertEqual(body.methodologyUri, DEFINITIVE_METHODOLOGY_URI, 'studio export methodology uri');
+      assertEqual(body.auditPacket.schemaVersion, 'studio-export-audit-v1', 'studio audit packet schema');
+      assertEqual(body.auditPacket.export.outputHash, 'fixture-studio-output-hash', 'studio audit output hash');
+      assertEqual(body.auditPacket.book.dealId, fixture.dealId, 'studio audit deal id');
+    }
+  });
+
+  await test('Staged agency action routes expose and cancel confirmation holds', async () => {
+    await cancelFixtureStagedActions(fixture.userId);
+    const conversationId = await ensureConversationFixture(fixture.userId, fixture.dealId);
+    const stagedText = await executeGovernedTool(
+      'advance_gate',
+      {
+        dealId: fixture.dealId,
+        currentGate: 'B3',
+        nextGate: 'B4',
+        sourceSurface: FIXTURE_KEY,
+      },
+      fixture.userId,
+      conversationId,
+      {
+        actorType: 'external_agent',
+        actorId: 'agent:definitive-auth-route-smoke',
+        actingOnBehalfOfUserId: fixture.userId,
+        sourceSurface: 'external_agent',
+        sourceAgent: 'definitive-auth-route-smoke',
+      },
+    );
+    const staged = JSON.parse(stagedText);
+    const stagedId = Number(staged.staged_action?.id);
+
+    assertEqual(staged.staged, true, 'action staged');
+    assertEqual(staged.requires_confirmation, true, 'action requires confirmation');
+    assert(Number.isFinite(stagedId) && stagedId > 0, 'staged action id exists');
+
+    const list = await authedJson('/api/agency/actions', token);
+    assert(list.actions.some((action: any) => Number(action.id) === stagedId), 'staged action is listed');
+
+    const canceled = await postJson(`/api/agency/actions/${stagedId}/cancel`, token, {
+      reason: 'route smoke cleanup',
+    });
+    assertEqual(canceled.status, 200, 'staged cancel status');
+    assertEqual(canceled.body.status, 'canceled', 'staged cancel body status');
+
+    const after = await authedJson('/api/agency/actions', token);
+    assert(!after.actions.some((action: any) => Number(action.id) === stagedId), 'canceled staged action leaves pending list');
   });
 } finally {
   await sql.end({ timeout: 5 }).catch(() => undefined);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);
-if (failed > 0) process.exit(1);
+process.exit(failed > 0 ? 1 : 0);
 
 async function ensureFixture(): Promise<{ userId: number; dealId: number }> {
   const trialEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
@@ -293,6 +352,62 @@ async function revokeFixtureDataRights(userId: number) {
   `;
 }
 
+async function ensureConversationFixture(userId: number, dealId: number): Promise<number> {
+  const [existing] = await sql`
+    SELECT id
+    FROM conversations
+    WHERE user_id = ${userId}
+      AND title = 'DEFINITIVE Route Fixture Conversation'
+    LIMIT 1
+  `;
+  if (existing?.id) {
+    await sql`
+      UPDATE conversations
+      SET deal_id = ${dealId},
+          journey = 'buy',
+          current_gate = 'B3',
+          league = 'L4',
+          updated_at = NOW()
+      WHERE id = ${Number(existing.id)}
+    `;
+    return Number(existing.id);
+  }
+
+  const [conversation] = await sql`
+    INSERT INTO conversations (
+      user_id, title, deal_id, journey, current_gate, league, gate_status, gate_label,
+      created_at, updated_at
+    )
+    VALUES (
+      ${userId},
+      'DEFINITIVE Route Fixture Conversation',
+      ${dealId},
+      'buy',
+      'B3',
+      'L4',
+      'active',
+      'B3',
+      NOW(),
+      NOW()
+    )
+    RETURNING id
+  `;
+  return Number(conversation.id);
+}
+
+async function cancelFixtureStagedActions(userId: number) {
+  await sql`
+    UPDATE agency_staged_actions
+    SET status = 'canceled',
+        canceled_at = NOW(),
+        updated_at = NOW()
+    WHERE user_id = ${userId}
+      AND tool_name = 'advance_gate'
+      AND input->>'sourceSurface' = ${FIXTURE_KEY}
+      AND status = 'pending'
+  `;
+}
+
 async function ensureAuditTrailFixture(userId: number, dealId: number): Promise<number> {
   await sql`
     DELETE FROM audit_trail
@@ -347,6 +462,7 @@ async function ensureAuditTrailFixture(userId: number, dealId: number): Promise<
       })}::jsonb,
       ${sql.json({
         auditPacket: {
+          schemaVersion: 'model-backed-chat-audit-v1',
           line: 'compute_only',
           source: 'definitive-auth-route-smoke',
           inputsHash: 'fixture-inputs-hash',
@@ -380,6 +496,163 @@ async function ensureAuditTrailFixture(userId: number, dealId: number): Promise<
     RETURNING id
   `;
   return Number(row.id);
+}
+
+async function ensureStudioExportFixture(userId: number, dealId: number): Promise<{ bookId: number; exportId: number }> {
+  await sql`
+    DELETE FROM studio_books
+    WHERE user_id = ${userId}
+      AND title = 'DEFINITIVE Route Fixture Book'
+  `;
+
+  const [book] = await sql`
+    INSERT INTO studio_books (user_id, deal_id, title, format, status, brief, created_at, updated_at)
+    VALUES (
+      ${userId},
+      ${dealId},
+      'DEFINITIVE Route Fixture Book',
+      'qoe_preview',
+      'draft',
+      'Route-smoke fixture for Studio export audit packet retrieval.',
+      NOW(),
+      NOW()
+    )
+    RETURNING id
+  `;
+  const bookId = Number(book.id);
+
+  const slides = [
+    {
+      id: 'fixture-slide-1',
+      title: 'DEFINITIVE Fixture',
+      subtitle: 'Route smoke',
+      body: 'Fixture slide used only to prove audit packet retrieval.',
+      bullets: ['Version pinned', 'Audit packet readable'],
+      provenance: {
+        factsUsed: ['fixture-fact'],
+        modelOutputsUsed: ['MODEL.QOE.LITE.v1'],
+        citationsUsed: ['methodology://v19'],
+        uncheckedClaims: [],
+      },
+      warningState: 'clean',
+    },
+  ];
+
+  const [version] = await sql`
+    INSERT INTO studio_book_versions (
+      book_id, version, title, outline, slides, assumptions, model_outputs, provenance, audit,
+      speaker_notes, created_by, spec_version, spec_uri, methodology_version, methodology_uri, created_at
+    )
+    VALUES (
+      ${bookId},
+      1,
+      'DEFINITIVE Route Fixture Book',
+      ${sql.json([{ title: 'DEFINITIVE Fixture', kind: 'summary' }])}::jsonb,
+      ${sql.json(slides)}::jsonb,
+      ${sql.json([])}::jsonb,
+      ${sql.json([])}::jsonb,
+      ${sql.json({ source: 'definitive-auth-route-smoke' })}::jsonb,
+      ${sql.json({ fixture: true })}::jsonb,
+      ${sql.json([])}::jsonb,
+      'route-smoke',
+      ${DEFINITIVE_SPEC_VERSION},
+      ${DEFINITIVE_SPEC_URI},
+      ${DEFINITIVE_METHODOLOGY_VERSION},
+      ${DEFINITIVE_METHODOLOGY_URI},
+      NOW()
+    )
+    RETURNING id
+  `;
+  const versionId = Number(version.id);
+
+  await sql`
+    UPDATE studio_books
+    SET current_version_id = ${versionId},
+        updated_at = NOW()
+    WHERE id = ${bookId}
+  `;
+
+  const auditPacket = {
+    schemaVersion: 'studio-export-audit-v1',
+    specVersion: DEFINITIVE_SPEC_VERSION,
+    specUri: DEFINITIVE_SPEC_URI,
+    methodologyVersion: DEFINITIVE_METHODOLOGY_VERSION,
+    methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+    book: {
+      id: bookId,
+      dealId,
+      versionId,
+      version: 1,
+      title: 'DEFINITIVE Route Fixture Book',
+      format: 'qoe_preview',
+      status: 'draft',
+    },
+    export: {
+      format: 'pdf',
+      status: 'ready',
+      outputHash: 'fixture-studio-output-hash',
+      inputHash: 'fixture-studio-input-hash',
+    },
+    counts: {
+      slides: 1,
+      sources: 0,
+      assumptions: 0,
+      modelOutputs: 0,
+      warnings: 0,
+    },
+    slideProvenance: [
+      {
+        slideId: 'fixture-slide-1',
+        slideNumber: 1,
+        title: 'DEFINITIVE Fixture',
+        warningState: 'clean',
+        factsUsed: ['fixture-fact'],
+        modelOutputsUsed: ['MODEL.QOE.LITE.v1'],
+        citationsUsed: ['methodology://v19'],
+        uncheckedClaims: [],
+      },
+    ],
+    sourceManifest: [],
+    modelManifest: [],
+    citationValidation: { valid: true, missing: [] },
+    warnings: [],
+    auditPacketHash: 'fixture-studio-audit-packet-hash',
+    generatedAt: '2026-05-21T00:00:00.000Z',
+  };
+
+  const [exportRow] = await sql`
+    INSERT INTO studio_exports (
+      book_id, version_id, format, status, output_hash, metadata,
+      spec_version, spec_uri, methodology_version, methodology_uri, created_at
+    )
+    VALUES (
+      ${bookId},
+      ${versionId},
+      'pdf',
+      'ready',
+      'fixture-studio-output-hash',
+      ${sql.json({
+        title: 'DEFINITIVE Route Fixture Book',
+        slideCount: 1,
+        exportedAt: '2026-05-21T00:00:00.000Z',
+        citationValidation: { valid: true, missing: [] },
+        warnings: [],
+        auditPacket,
+        specVersion: DEFINITIVE_SPEC_VERSION,
+        specUri: DEFINITIVE_SPEC_URI,
+        methodologyVersion: DEFINITIVE_METHODOLOGY_VERSION,
+        methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      })}::jsonb,
+      ${DEFINITIVE_SPEC_VERSION},
+      ${DEFINITIVE_SPEC_URI},
+      ${DEFINITIVE_METHODOLOGY_VERSION},
+      ${DEFINITIVE_METHODOLOGY_URI},
+      NOW()
+    )
+    RETURNING id
+  `;
+
+  return { bookId, exportId: Number(exportRow.id) };
 }
 
 async function test(name: string, fn: () => Promise<void>) {
