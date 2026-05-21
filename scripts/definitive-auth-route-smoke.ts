@@ -14,6 +14,8 @@ import 'dotenv/config';
 import jwt from 'jsonwebtoken';
 import { sql } from '../server/db.js';
 import {
+  DEFINITIVE_METHODOLOGY_VERSION,
+  DEFINITIVE_SPEC_URI,
   DEFINITIVE_METHODOLOGY_URI,
   DEFINITIVE_SPEC_VERSION,
 } from '../server/constants/definitive.js';
@@ -45,6 +47,85 @@ try {
     const body = await authedJson('/api/definitive/tools/list', token);
     assertEqual(body.status, 'internal_v0_1', 'tool inventory status');
     assert(body.tools.some((tool: any) => tool.name === 'compose_model_stack'), 'compose_model_stack is advertised');
+  });
+
+  await test('THE LINE inventory is available to authenticated agents', async () => {
+    const body = await authedJson('/api/definitive/line/inventory', token);
+    assertEqual(body.spec, DEFINITIVE_SPEC_VERSION, 'line inventory spec');
+    assertEqual(body.status, 'internal_inventory', 'line inventory status');
+    assert(body.summary.ok > 0, 'line inventory has ok actions');
+    assert(body.inventory.some((item: any) => item.toolName === 'record_corpus_observation'), 'corpus action is in THE LINE inventory');
+    assert(body.inventory.every((item: any) => Array.isArray(item.requiredScopes)), 'inventory exposes required scopes');
+  });
+
+  await test('Corpus observation types publish structured-only rules', async () => {
+    const body = await authedJson('/api/definitive/corpus/observation-types', token);
+    assertEqual(body.specVersion, DEFINITIVE_SPEC_VERSION, 'observation types spec');
+    assertEqual(body.grantType, 'anonymized_benchmark_observations', 'observation grant type');
+    assert(body.observationTypes.some((item: any) => item.type === 'escrow'), 'escrow observation type is supported');
+    assert(body.observationTypes.every((item: any) => item.structuredOnly === true), 'all observation types are structured only');
+    assert(body.observationTypes.every((item: any) => item.rawDocumentTextAllowed === false), 'raw document text is disallowed');
+    assert(body.observationTypes.every((item: any) => item.partyIdentifiersAllowed === false), 'party identifiers are disallowed');
+  });
+
+  await test('Corpus rights can be read and granted through authenticated routes', async () => {
+    await revokeFixtureDataRights(fixture.userId);
+
+    const before = await authedJson('/api/definitive/corpus/rights', token);
+    assertEqual(before.specVersion, DEFINITIVE_SPEC_VERSION, 'rights state spec');
+    assertEqual(before.active, false, 'fixture starts without active benchmark grant');
+    assertEqual(before.mandateChain.principal.userId, fixture.userId, 'rights mandate user');
+
+    const grantResponse = await postJson('/api/definitive/corpus/rights/grants', token, {
+      grantType: 'anonymized_benchmark_observations',
+      source: 'test',
+      sourceReference: FIXTURE_KEY,
+      metadata: { fixture: true, source: 'definitive-auth-route-smoke' },
+    });
+    assertEqual(grantResponse.status, 200, 'grant status');
+    assertEqual(grantResponse.body.ok, true, 'grant ok');
+    assertEqual(grantResponse.body.grant.status, 'active', 'grant active');
+    assertEqual(grantResponse.body.grant.grantType, 'anonymized_benchmark_observations', 'grant type');
+
+    const after = await authedJson('/api/definitive/corpus/rights', token);
+    assertEqual(after.active, true, 'rights active after grant');
+    assert(after.grants.some((grant: any) => grant.sourceReference === FIXTURE_KEY && grant.status === 'active'), 'fixture grant is readable');
+  });
+
+  await test('Corpus observation route strips identifiers and records safe structured data', async () => {
+    const response = await postJson('/api/definitive/corpus/observations', token, {
+      dealId: fixture.dealId,
+      observationType: 'escrow',
+      observation: {
+        escrowPercent: 10,
+        ppaEscrowPercent: 1,
+        rwi: false,
+        sellerName: 'Sensitive Seller LLC',
+        rawText: 'Do not store raw document language.',
+        note: 'Median general indemnity escrow input from structured testing.',
+      },
+      anonymizationBucket: {
+        industry: 'industrial services',
+        league: 'L4',
+        dealType: 'distressed real estate asset purchase',
+        year: 2026,
+        sellerName: 'Should not survive',
+      },
+      sourceArtifactType: 'route_smoke',
+      sourceArtifactId: FIXTURE_KEY,
+      minReleaseCount: 10,
+      metadata: { fixture: true },
+    });
+
+    assertEqual(response.status, 200, 'corpus observation status');
+    assertEqual(response.body.ok, true, 'corpus observation ok');
+    assertEqual(response.body.observation.observationType, 'escrow', 'corpus observation type');
+    assertEqual(response.body.releaseControl.rawDocumentTextAllowed, false, 'raw text remains disallowed');
+    assertEqual(response.body.releaseControl.partyIdentifiersAllowed, false, 'party identifiers remain disallowed');
+    assert(response.body.redactions.includes('sellerName'), 'seller name key was redacted');
+    assert(response.body.redactions.includes('rawText'), 'raw text key was redacted');
+    assert(!('sellerName' in response.body.observation.anonymizationBucket), 'bucket rejects identifying key');
+    assertEqual(response.body.specVersion, DEFINITIVE_SPEC_VERSION, 'corpus observation spec');
   });
 
   await test('Unsupported spec version is refused before execution', async () => {
@@ -98,6 +179,21 @@ try {
     assert(definitive.applicableMechanics.some((item: any) => item.slotId === 'M160'), 'G29 mechanics included');
     assert(definitive.applicableMechanics.some((item: any) => item.slotId === 'M187'), 'G30 mechanics included');
     assert(definitive.yuliaMechanicsBrief.some((line: string) => line.includes('applicable DEFINITIVE mechanics')), 'Yulia brief included');
+  });
+
+  await test('Audit packet route returns pinned reproducibility payload', async () => {
+    const auditTrailId = await ensureAuditTrailFixture(fixture.userId, fixture.dealId);
+    const body = await authedJson(`/api/definitive/audit-packets/${auditTrailId}`, token);
+
+    assertEqual(body.auditTrailId, auditTrailId, 'audit packet id');
+    assertEqual(body.dealId, fixture.dealId, 'audit packet deal');
+    assertEqual(body.specVersion, DEFINITIVE_SPEC_VERSION, 'audit packet spec');
+    assertEqual(body.specUri, DEFINITIVE_SPEC_URI, 'audit packet spec uri');
+    assertEqual(body.methodologyVersion, DEFINITIVE_METHODOLOGY_VERSION, 'audit packet methodology version');
+    assertEqual(body.methodologyUri, DEFINITIVE_METHODOLOGY_URI, 'audit packet methodology uri');
+    assertEqual(body.mandateChain.principal.userId, fixture.userId, 'audit packet mandate user');
+    assertEqual(body.auditPacket.line, 'compute_only', 'audit packet THE LINE marker');
+    assert(body.modelStack.triggeredOverlayGates.includes('G28'), 'audit packet carries route map');
   });
 } finally {
   await sql.end({ timeout: 5 }).catch(() => undefined);
@@ -182,6 +278,108 @@ async function ensureFixture(): Promise<{ userId: number; dealId: number }> {
     RETURNING id
   `;
   return { userId, dealId: Number(deal.id) };
+}
+
+async function revokeFixtureDataRights(userId: number) {
+  await sql`
+    UPDATE definitive_data_rights_grants
+    SET status = 'revoked',
+        revoked_at = NOW(),
+        updated_at = NOW()
+    WHERE user_id = ${userId}
+      AND source = 'test'
+      AND source_reference = ${FIXTURE_KEY}
+      AND status = 'active'
+  `;
+}
+
+async function ensureAuditTrailFixture(userId: number, dealId: number): Promise<number> {
+  await sql`
+    DELETE FROM audit_trail
+    WHERE user_id = ${userId}
+      AND session_id = ${FIXTURE_KEY}
+      AND turn_id = 'audit-packet-route-smoke'
+  `;
+
+  const mandateChain = {
+    spec: DEFINITIVE_SPEC_VERSION,
+    principal: {
+      userId,
+      beneficialCustomerId: null,
+      organizationId: null,
+      billingOrgId: null,
+    },
+    agent: {
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      sourceAgent: 'definitive-auth-route-smoke',
+    },
+    mandate: {
+      mandateId: 'mandate:definitive-auth-route-smoke',
+      status: 'route_smoke',
+      scope: ['audit:read'],
+      requestedScopes: ['audit:read'],
+      expiresAt: null,
+      spendCapCredits: null,
+    },
+    sourceSurface: 'mcp',
+  };
+
+  const [row] = await sql`
+    INSERT INTO audit_trail (
+      session_id, deal_id, user_id, conversation_id, turn_id, journey, league, deal_type,
+      model_stack, inputs_used, live_data_snapshots, citations_validated, mode_2_triggers, output_hash,
+      spec_version, spec_uri, methodology_version, methodology_uri,
+      beneficial_customer_id, billing_org_id, mandate_id, agent_id, agent_platform_id, mandate_chain
+    )
+    VALUES (
+      ${FIXTURE_KEY},
+      ${dealId},
+      ${userId},
+      NULL,
+      'audit-packet-route-smoke',
+      'buy',
+      'L4',
+      'distressed real estate asset purchase',
+      ${sql.json({
+        triggeredOverlayGates: ['G28', 'G29', 'G30'],
+        applicableMechanics: ['M151', 'M160', 'M187'],
+      })}::jsonb,
+      ${sql.json({
+        auditPacket: {
+          line: 'compute_only',
+          source: 'definitive-auth-route-smoke',
+          inputsHash: 'fixture-inputs-hash',
+          outputHash: 'fixture-output-hash',
+        },
+      })}::jsonb,
+      ${sql.json({
+        SOFR: {
+          source: 'fixture',
+          asOf: '2026-05-21',
+          value: 0.036,
+        },
+      })}::jsonb,
+      ${sql.json({
+        authorities: ['methodology://v19', 'definitive://v1'],
+        count: 2,
+      })}::jsonb,
+      ${sql.json([])}::jsonb,
+      'fixture-output-hash',
+      ${DEFINITIVE_SPEC_VERSION},
+      ${DEFINITIVE_SPEC_URI},
+      ${DEFINITIVE_METHODOLOGY_VERSION},
+      ${DEFINITIVE_METHODOLOGY_URI},
+      NULL,
+      NULL,
+      'mandate:definitive-auth-route-smoke',
+      'agent:definitive-auth-route-smoke',
+      'codex-local',
+      ${sql.json(mandateChain)}::jsonb
+    )
+    RETURNING id
+  `;
+  return Number(row.id);
 }
 
 async function test(name: string, fn: () => Promise<void>) {
