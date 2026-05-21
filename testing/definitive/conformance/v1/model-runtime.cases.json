@@ -2243,5 +2243,282 @@
       "status": "needs_inputs",
       "missingInputsIncludes": ["transfer_assets"]
     }
+  },
+  {
+    "id": "CONF.MODEL.RE.PROPERTY_ESCROW.001",
+    "title": "Property escrow sizing computes issue-specific holdbacks",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PROPERTY_ESCROW.HOLDBACK.v1",
+    "input": {
+      "general_buffer_rate": 0.1,
+      "issues": [
+        { "type": "environmental", "amount_cents": 100000, "holdback_pct": 1 },
+        { "type": "PCA deferred maintenance", "estimated_cost_cents": 200000, "holdback_pct": 0.5 },
+        { "type": "title exception", "cost_to_cure_cents": 50000 }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "property_issue_count": 3,
+        "environmental_escrow_cents": 110000,
+        "pca_reserve_escrow_cents": 110000,
+        "title_exception_escrow_cents": 55000,
+        "total_property_escrow_cents": 275000,
+        "pass_through_source_required_count": 3
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.PROPERTY_ESCROW.002",
+    "title": "Property escrow sizing refuses missing issues",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PROPERTY_ESCROW.HOLDBACK.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["issues"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.TITLE_SURVEY.001",
+    "title": "Title and survey checklist computes exception and curative status",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_SURVEY.CHECKLIST.v1",
+    "input": {
+      "title_commitment_received": true,
+      "survey_received": true,
+      "lender_policy_required": true,
+      "schedule_b_exceptions": [{ "name": "utility easement" }, { "name": "old lien" }],
+      "alta_endorsements_requested": ["9", "3.1"],
+      "curative_items": [
+        { "item": "Release old lien", "status": "open", "cost_to_cure_cents": 25000 },
+        { "item": "Survey update", "status": "resolved", "cost_to_cure_cents": 5000 }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "title_commitment_received": true,
+        "survey_received": true,
+        "schedule_b_exception_count": 2,
+        "lender_policy_required": true,
+        "alta_endorsements_requested_count": 2,
+        "curative_item_count": 2,
+        "open_curative_item_count": 1,
+        "curative_cost_to_cure_cents": 30000,
+        "closing_protection_letter_required": true,
+        "title_pass_through_source_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.TITLE_SURVEY.002",
+    "title": "Title and survey checklist refuses missing survey status",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.TITLE_SURVEY.CHECKLIST.v1",
+    "input": {
+      "title_commitment_received": true
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["survey_received"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.IP.CHAIN.001",
+    "title": "IP chain-of-title computes assignment and recording gaps",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.IP.CHAIN_OF_TITLE.v1",
+    "input": {
+      "assets": [
+        { "type": "patent", "name": "HVAC sensor", "assignment_count": 2, "current_owner_matches": true, "recorded_within_three_months": true, "contributor_assignments_complete": true },
+        { "type": "trademark", "name": "BRAND", "assignment_count": 1, "current_owner_matches": false, "recorded_within_three_months": false, "contributor_assignments_complete": false, "itu_assigned_after_allegation_of_use": false }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "ip_asset_count": 2,
+        "patent_asset_count": 1,
+        "trademark_asset_count": 1,
+        "assignment_gap_count": 1,
+        "late_recording_count": 1,
+        "contributor_assignment_gap_count": 1,
+        "itu_assignment_risk_count": 1,
+        "counsel_review_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.IP.CHAIN.002",
+    "title": "IP chain-of-title refuses missing assets",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.IP.CHAIN_OF_TITLE.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["assets"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.IP.LIENS.001",
+    "title": "IP lien search computes open lien and release requirements",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.IP.ENCUMBRANCE_LIEN_SEARCH.v1",
+    "input": {
+      "searches": [
+        { "track": "ucc", "jurisdiction": "DE", "hit_count": 2, "release_obtained": false },
+        { "track": "uspto patent security", "hit_count": 1, "release_obtained": true },
+        { "track": "copyright", "hit_count": 1, "release_obtained": false }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "search_track_count": 3,
+        "ucc_lien_hit_count": 2,
+        "uspto_security_hit_count": 1,
+        "copyright_security_hit_count": 1,
+        "open_lien_count": 3,
+        "release_required_count": 2,
+        "pass_through_search_source_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.IP.LIENS.002",
+    "title": "IP lien search refuses missing searches",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.IP.ENCUMBRANCE_LIEN_SEARCH.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["searches"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.IP.REPS.001",
+    "title": "IP representation set computes software and trademark rep scaffold",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.IP.REPRESENTATION_SET.v1",
+    "input": {
+      "deal_type": "software acquisition",
+      "material_ip_categories": ["software", "trademark"]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "deal_type": "software acquisition",
+        "material_ip_category_count": 2,
+        "representation_count": 8,
+        "schedule_count": 3,
+        "includes_oss_rep": true,
+        "includes_sufficiency_rep": true,
+        "enforceability_opinion_pass_through": true,
+        "counsel_drafting_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.IP.REPS.002",
+    "title": "IP representation set refuses missing categories",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.IP.REPRESENTATION_SET.v1",
+    "input": {
+      "deal_type": "asset purchase"
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["material_ip_categories"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.IP.EMPLOYEE_ASSIGN.001",
+    "title": "Employee IP assignment verification computes contributor gaps",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.IP.EMPLOYEE_ASSIGNMENT.VERIFICATION.v1",
+    "input": {
+      "contributors": [
+        { "name": "Founder", "state": "CA", "ip_assignment_executed": true, "work_for_hire_executed": true, "outside_scope_invention": true },
+        { "name": "Contractor", "state": "TX", "ip_assignment_executed": false, "work_for_hire_executed": false }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "contributor_count": 2,
+        "executed_assignment_count": 1,
+        "missing_assignment_count": 1,
+        "missing_work_for_hire_count": 1,
+        "california_2870_carveout_count": 1,
+        "all_contributors_papered": false,
+        "counsel_review_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.IP.EMPLOYEE_ASSIGN.002",
+    "title": "Employee IP assignment verification refuses missing contributors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.IP.EMPLOYEE_ASSIGNMENT.VERIFICATION.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["contributors"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.IP.OSS.001",
+    "title": "OSS exposure process classifies copyleft and escrow exposure",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.IP.OSS.EXPOSURE.v1",
+    "input": {
+      "components": [
+        { "name": "React", "license": "MIT", "remediation_cost_cents": 0 },
+        { "name": "Report lib", "license": "LGPL-3.0", "remediation_cost_cents": 50000 },
+        { "name": "Network tool", "license": "AGPL-3.0", "network_use": true, "proprietary_linking": true, "remediation_cost_cents": 250000 }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "component_count": 3,
+        "permissive_count": 1,
+        "weak_copyleft_count": 1,
+        "strong_copyleft_count": 1,
+        "agpl_network_count": 1,
+        "proprietary_strong_copyleft_count": 1,
+        "oss_specific_rep_required": true,
+        "indemnity_carveout_review_required": true,
+        "special_escrow_sizing_cents": 300000,
+        "sca_pass_through_source_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.IP.OSS.002",
+    "title": "OSS exposure process refuses missing components",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.IP.OSS.EXPOSURE.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["components"]
+    }
   }
 ]

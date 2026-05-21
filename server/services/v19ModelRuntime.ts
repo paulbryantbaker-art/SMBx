@@ -1162,6 +1162,84 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
       },
     };
   }),
+  'MODEL.RE.PROPERTY_ESCROW.HOLDBACK.v1': defineModel('MODEL.RE.PROPERTY_ESCROW.HOLDBACK.v1', ['issues'], ['[ALTA Endorsements]', '[Real Estate Practice Norms]'], input => {
+    const issues = objectArray(input.issues);
+    const generalBufferRate = number(input.general_buffer_rate) ?? 0;
+    const missing = requireInputs({ issues: issues.length ? issues : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const rows = issues.map((issue, index) => {
+      const rawType = String(issue.type || issue.category || 'other').toLowerCase();
+      const amount = cents(issue.amount_cents ?? issue.estimated_cost_cents ?? issue.cost_to_cure_cents) ?? 0;
+      const holdbackPct = number(issue.holdback_pct) ?? 1;
+      const category = /env|phase|remediation/.test(rawType) ? 'environmental'
+        : /pca|maintenance|deferred|capex/.test(rawType) ? 'pca'
+          : /title|survey|alta|lien/.test(rawType) ? 'title'
+            : /tenant|lease|rent/.test(rawType) ? 'tenant'
+              : /cure|repair/.test(rawType) ? 'cost_to_cure'
+                : 'other';
+      return {
+        issue: String(issue.name || issue.issue || `Property issue ${index + 1}`),
+        category,
+        source: String(issue.source || (category === 'other' ? 'user_supplied' : 'pass_through_report')),
+        amount_cents: amount,
+        holdback_pct: round(holdbackPct, 4),
+        escrow_cents: Math.round(amount * holdbackPct * (1 + generalBufferRate)),
+        pass_through_source_required: booleanInput(issue.pass_through_source_required) ?? ['environmental', 'pca', 'title'].includes(category),
+      };
+    });
+    const totalFor = (category: string) => rows.filter(row => row.category === category).reduce((sum, row) => sum + row.escrow_cents, 0);
+    return {
+      outputs: {
+        property_issue_count: rows.length,
+        general_buffer_rate: round(generalBufferRate, 4),
+        environmental_escrow_cents: totalFor('environmental'),
+        pca_reserve_escrow_cents: totalFor('pca'),
+        title_exception_escrow_cents: totalFor('title'),
+        tenant_dispute_escrow_cents: totalFor('tenant'),
+        cost_to_cure_escrow_cents: totalFor('cost_to_cure'),
+        other_property_escrow_cents: totalFor('other'),
+        total_property_escrow_cents: rows.reduce((sum, row) => sum + row.escrow_cents, 0),
+        pass_through_source_required_count: rows.filter(row => row.pass_through_source_required).length,
+        escrow_rows: rows,
+      },
+    };
+  }),
+  'MODEL.RE.TITLE_SURVEY.CHECKLIST.v1': defineModel('MODEL.RE.TITLE_SURVEY.CHECKLIST.v1', ['title_commitment_received', 'survey_received'], ['[ALTA Forms]', '[State Title Statutes]'], input => {
+    const titleCommitmentReceived = booleanInput(input.title_commitment_received);
+    const surveyReceived = booleanInput(input.survey_received);
+    const scheduleB = objectArray(input.schedule_b_exceptions);
+    const curativeItems = objectArray(input.curative_items);
+    const endorsements = stringArray(input.alta_endorsements_requested);
+    const missing = requireInputs({ title_commitment_received: titleCommitmentReceived, survey_received: surveyReceived });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const curativeRows = curativeItems.map((item, index) => {
+      const status = String(item.status || 'open').toLowerCase();
+      return {
+        item: String(item.item || item.name || `Curative item ${index + 1}`),
+        status,
+        cost_to_cure_cents: cents(item.cost_to_cure_cents) ?? 0,
+        open: !['closed', 'resolved', 'waived'].includes(status),
+      };
+    });
+    return {
+      outputs: {
+        title_commitment_received: titleCommitmentReceived,
+        survey_received: surveyReceived,
+        schedule_b_exception_count: scheduleB.length,
+        survey_review_required: surveyReceived === true,
+        owner_policy_required: booleanInput(input.owner_policy_required) ?? true,
+        lender_policy_required: booleanInput(input.lender_policy_required) ?? false,
+        alta_endorsements_requested_count: endorsements.length,
+        curative_item_count: curativeRows.length,
+        open_curative_item_count: curativeRows.filter(row => row.open).length,
+        curative_cost_to_cure_cents: curativeRows.reduce((sum, row) => sum + row.cost_to_cure_cents, 0),
+        closing_protection_letter_required: booleanInput(input.closing_protection_letter_required) ?? true,
+        title_pass_through_source_required: true,
+        process_steps: ['title_commitment', 'schedule_b_exception_review', 'survey_review', 'policy_and_endorsement_selection', 'curative_work_plan', 'closing_protection_letter'],
+        curative_rows: curativeRows,
+      },
+    };
+  }),
   'MODEL.RE.PCA.RESERVES.v1': defineModel('MODEL.RE.PCA.RESERVES.v1', ['pca_items'], ['[ASTM E2018]', '[Lender Practice]'], input => {
     const items = objectArray(input.pca_items);
     const lenderReservePct = number(input.lender_reserve_pct) ?? 1;
@@ -1233,6 +1311,107 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
       },
     };
   }),
+  'MODEL.IP.CHAIN_OF_TITLE.v1': defineModel('MODEL.IP.CHAIN_OF_TITLE.v1', ['assets'], ['[35 U.S.C. 261]', '[Lanham Act 10]', '[17 U.S.C. 205]', '[Clorox v. Chemical Bank]'], input => {
+    const assets = objectArray(input.assets);
+    const missing = requireInputs({ assets: assets.length ? assets : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const rows = assets.map((asset, index) => {
+      const type = String(asset.type || asset.asset_type || 'ip').toLowerCase();
+      const assignmentCount = number(asset.assignment_count) ?? objectArray(asset.assignments).length;
+      const currentOwnerMatches = booleanInput(asset.current_owner_matches) ?? false;
+      const recordedWithinThreeMonths = booleanInput(asset.recorded_within_three_months) ?? false;
+      const contributorAssignmentsComplete = booleanInput(asset.contributor_assignments_complete) ?? false;
+      const ituAssignedAfterAllegationOfUse = booleanInput(asset.itu_assigned_after_allegation_of_use);
+      return {
+        name: String(asset.name || asset.identifier || `IP asset ${index + 1}`),
+        type,
+        assignment_count: assignmentCount,
+        current_owner_matches: currentOwnerMatches,
+        recorded_within_three_months: recordedWithinThreeMonths,
+        contributor_assignments_complete: contributorAssignmentsComplete,
+        assignment_gap: assignmentCount <= 0 || !currentOwnerMatches,
+        late_recording_flag: assignmentCount > 0 && !recordedWithinThreeMonths,
+        contributor_gap: !contributorAssignmentsComplete,
+        itu_assignment_risk: type.includes('trademark') && ituAssignedAfterAllegationOfUse === false,
+      };
+    });
+    return {
+      outputs: {
+        ip_asset_count: rows.length,
+        patent_asset_count: rows.filter(row => row.type.includes('patent')).length,
+        trademark_asset_count: rows.filter(row => row.type.includes('trademark')).length,
+        copyright_asset_count: rows.filter(row => row.type.includes('copyright')).length,
+        assignment_gap_count: rows.filter(row => row.assignment_gap).length,
+        late_recording_count: rows.filter(row => row.late_recording_flag).length,
+        contributor_assignment_gap_count: rows.filter(row => row.contributor_gap).length,
+        itu_assignment_risk_count: rows.filter(row => row.itu_assignment_risk).length,
+        counsel_review_required: rows.some(row => row.assignment_gap || row.late_recording_flag || row.contributor_gap || row.itu_assignment_risk),
+        chain_rows: rows,
+      },
+    };
+  }),
+  'MODEL.IP.ENCUMBRANCE_LIEN_SEARCH.v1': defineModel('MODEL.IP.ENCUMBRANCE_LIEN_SEARCH.v1', ['searches'], ['[UCC Article 9]', '[17 U.S.C. 205]', '[In re Peregrine]', '[Rhone-Poulenc Agro v. DeKalb]'], input => {
+    const searches = objectArray(input.searches);
+    const missing = requireInputs({ searches: searches.length ? searches : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const rows = searches.map((search, index) => {
+      const track = String(search.track || search.type || 'ucc').toLowerCase();
+      const hitCount = number(search.hit_count) ?? (booleanInput(search.hit_found) ? 1 : 0);
+      const releaseRequired = hitCount > 0 && (booleanInput(search.release_obtained) !== true);
+      return {
+        search: String(search.name || search.jurisdiction || `Search ${index + 1}`),
+        track: track.includes('copyright') ? 'copyright' : track.includes('uspto') || track.includes('patent') || track.includes('trademark') ? 'uspto' : 'ucc',
+        hit_count: hitCount,
+        release_obtained: booleanInput(search.release_obtained) ?? false,
+        release_required: releaseRequired,
+        pass_through_search_source: String(search.source || 'pass_through_lien_search'),
+      };
+    });
+    return {
+      outputs: {
+        search_track_count: rows.length,
+        ucc_lien_hit_count: rows.filter(row => row.track === 'ucc').reduce((sum, row) => sum + row.hit_count, 0),
+        uspto_security_hit_count: rows.filter(row => row.track === 'uspto').reduce((sum, row) => sum + row.hit_count, 0),
+        copyright_security_hit_count: rows.filter(row => row.track === 'copyright').reduce((sum, row) => sum + row.hit_count, 0),
+        open_lien_count: rows.filter(row => row.release_required).reduce((sum, row) => sum + row.hit_count, 0),
+        release_required_count: rows.filter(row => row.release_required).length,
+        pass_through_search_source_required: true,
+        lien_search_rows: rows,
+      },
+    };
+  }),
+  'MODEL.IP.REPRESENTATION_SET.v1': defineModel('MODEL.IP.REPRESENTATION_SET.v1', ['deal_type', 'material_ip_categories'], ['[ABA Model SPA IP Representations]'], input => {
+    const dealType = text(input.deal_type);
+    const categories = stringArray(input.material_ip_categories).map(item => item.toLowerCase());
+    const missing = requireInputs({ deal_type: dealType, material_ip_categories: categories.length ? categories : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const hasSoftware = categories.some(item => /software|source|code|oss|saas/.test(item));
+    const hasPatent = categories.some(item => /patent|life science|device/.test(item));
+    const hasTrademark = categories.some(item => /trademark|brand|domain/.test(item));
+    const reps = [
+      'ownership',
+      'no_encumbrances',
+      'sufficiency',
+      'registered_ip_schedule',
+      'license_schedule',
+      ...(hasPatent ? ['limited_validity_patent_schedule'] : []),
+      ...(hasTrademark ? ['trademark_domain_schedule'] : []),
+      ...(hasSoftware ? ['oss_compliance', 'source_code_control'] : []),
+    ];
+    return {
+      outputs: {
+        deal_type: dealType,
+        material_ip_category_count: categories.length,
+        representation_count: reps.length,
+        schedule_count: reps.filter(rep => rep.includes('schedule')).length,
+        includes_oss_rep: hasSoftware,
+        includes_sufficiency_rep: reps.includes('sufficiency'),
+        enforceability_opinion_pass_through: true,
+        counsel_drafting_required: true,
+        representation_set: reps,
+      },
+    };
+  }),
   'MODEL.IP.LICENSE.DEPENDENCY.v1': defineModel('MODEL.IP.LICENSE.DEPENDENCY.v1', ['licenses'], ['[IP Licensing Industry Practice]'], input => {
     const licenses = objectArray(input.licenses);
     const missing = requireInputs({ licenses: licenses.length ? licenses : null });
@@ -1286,6 +1465,80 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
         update_frequency_months: updateFrequencyMonths,
         last_deposit_date: lastDepositDate,
         next_deposit_due_date: lastDepositDate ? addMonths(lastDepositDate, updateFrequencyMonths) : null,
+      },
+    };
+  }),
+  'MODEL.IP.EMPLOYEE_ASSIGNMENT.VERIFICATION.v1': defineModel('MODEL.IP.EMPLOYEE_ASSIGNMENT.VERIFICATION.v1', ['contributors'], ['[California Labor Code 2870]', '[State Employee-IP Statutes]'], input => {
+    const contributors = objectArray(input.contributors);
+    const missing = requireInputs({ contributors: contributors.length ? contributors : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const rows = contributors.map((contributor, index) => {
+      const state = String(contributor.state || contributor.work_state || '').toUpperCase();
+      const assignmentExecuted = booleanInput(contributor.ip_assignment_executed) ?? false;
+      const workForHireExecuted = booleanInput(contributor.work_for_hire_executed) ?? false;
+      const outsideScope = booleanInput(contributor.outside_scope_invention) ?? false;
+      return {
+        contributor: String(contributor.name || `Contributor ${index + 1}`),
+        role: String(contributor.role || 'not_supplied'),
+        state,
+        ip_assignment_executed: assignmentExecuted,
+        work_for_hire_executed: workForHireExecuted,
+        missing_assignment: !assignmentExecuted,
+        missing_work_for_hire: !workForHireExecuted,
+        california_2870_carveout_flag: state === 'CA' && outsideScope,
+      };
+    });
+    return {
+      outputs: {
+        contributor_count: rows.length,
+        executed_assignment_count: rows.filter(row => row.ip_assignment_executed).length,
+        missing_assignment_count: rows.filter(row => row.missing_assignment).length,
+        missing_work_for_hire_count: rows.filter(row => row.missing_work_for_hire).length,
+        california_2870_carveout_count: rows.filter(row => row.california_2870_carveout_flag).length,
+        all_contributors_papered: rows.every(row => !row.missing_assignment && !row.missing_work_for_hire),
+        counsel_review_required: rows.some(row => row.missing_assignment || row.missing_work_for_hire || row.california_2870_carveout_flag),
+        contributor_rows: rows,
+      },
+    };
+  }),
+  'MODEL.IP.OSS.EXPOSURE.v1': defineModel('MODEL.IP.OSS.EXPOSURE.v1', ['components'], ['[GPL]', '[AGPL]', '[LGPL]', '[MIT]', '[Apache]', '[BSD]', '[Morgan Lewis OSS Guidance]', '[Nixon Peabody OSS Guidance]', '[Morse OSS Guidance]'], input => {
+    const components = objectArray(input.components);
+    const missing = requireInputs({ components: components.length ? components : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const rows = components.map((component, index) => {
+      const license = String(component.license || component.license_name || '').toLowerCase();
+      const licenseClass = /\blgpl\b|\bmpl\b|\bepl\b/.test(license) ? 'weak_copyleft'
+        : /\bagpl\b|\bgpl\b|cc-by-sa/.test(license) ? 'strong_copyleft'
+          : /mit|bsd|apache|isc|unlicense/.test(license) ? 'permissive'
+            : 'unknown';
+      const networkUse = booleanInput(component.network_use) ?? false;
+      const proprietaryLinking = booleanInput(component.proprietary_linking) ?? false;
+      const remediationCost = cents(component.remediation_cost_cents) ?? 0;
+      return {
+        component: String(component.name || `OSS component ${index + 1}`),
+        license: license || 'not_supplied',
+        license_class: licenseClass,
+        network_use: networkUse,
+        proprietary_linking: proprietaryLinking,
+        agpl_network_flag: /agpl/.test(license) && networkUse,
+        strong_copyleft_embedded_flag: licenseClass === 'strong_copyleft' && proprietaryLinking,
+        remediation_cost_cents: remediationCost,
+      };
+    });
+    return {
+      outputs: {
+        component_count: rows.length,
+        permissive_count: rows.filter(row => row.license_class === 'permissive').length,
+        weak_copyleft_count: rows.filter(row => row.license_class === 'weak_copyleft').length,
+        strong_copyleft_count: rows.filter(row => row.license_class === 'strong_copyleft').length,
+        unknown_license_count: rows.filter(row => row.license_class === 'unknown').length,
+        agpl_network_count: rows.filter(row => row.agpl_network_flag).length,
+        proprietary_strong_copyleft_count: rows.filter(row => row.strong_copyleft_embedded_flag).length,
+        oss_specific_rep_required: true,
+        indemnity_carveout_review_required: rows.some(row => row.license_class === 'strong_copyleft' || row.license_class === 'unknown'),
+        special_escrow_sizing_cents: rows.reduce((sum, row) => sum + row.remediation_cost_cents, 0),
+        sca_pass_through_source_required: true,
+        oss_rows: rows,
       },
     };
   }),

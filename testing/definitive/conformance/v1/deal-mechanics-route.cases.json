@@ -15,8 +15,7 @@
     "expect": {
       "slotIdsInclude": ["M187", "M189", "M190", "M196", "M199"],
       "readinessAtLeast": {
-        "executable": 5,
-        "pass_through_required": 3,
+        "executable": 7,
         "professional_handoff": 2
       },
       "toolSurfacesInclude": {
@@ -84,8 +83,8 @@
     "expect": {
       "slotIdsInclude": ["M214", "M215", "M216", "M219", "M221", "M223"],
       "readinessAtLeast": {
-        "pass_through_required": 3,
-        "professional_handoff": 5
+        "executable": 6,
+        "professional_handoff": 1
       },
       "toolSurfacesInclude": {
         "pass_through_catalog": ["M214", "M215", "M221"],

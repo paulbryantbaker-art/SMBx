@@ -178,7 +178,8 @@ await test('DEFINITIVE route map makes every active M-slot usable by Yulia', asy
   assert(applicableMechanics.some(route => route.slotId === 'M189'), 'applicable mechanics include rent-roll model');
   assert(applicableMechanics.some(route => route.slotId === 'M196'), 'applicable mechanics include title and survey checklist');
   assert(applicableSummary.total > 0, 'applicable mechanics summary counts routes');
-  assert(applicableSummary.passThroughRequired > 0, 'applicable mechanics exposes pass-through requirements');
+  assert(applicableSummary.executable > 0, 'applicable mechanics exposes executable model-backed routes');
+  assert(applicableMechanics.some(route => route.toolSurfaces.includes('pass_through_catalog')), 'applicable mechanics exposes pass-through catalog surfaces');
   assert(yuliaBrief.some(line => line.includes('THE LINE')), 'Yulia mechanics brief calls out THE LINE boundaries');
 });
 
