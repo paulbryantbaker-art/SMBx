@@ -2728,5 +2728,214 @@
       "status": "needs_inputs",
       "missingInputsIncludes": ["new_security_value_cents"]
     }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.FEASIBILITY.001",
+    "title": "Plan feasibility computes DSCR, liquidity floors, and sensitivity",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.PLAN_FEASIBILITY.v1",
+    "input": {
+      "minimum_dscr": 1.1,
+      "minimum_liquidity_cents": 100000,
+      "forecast_periods": [
+        { "year": "2026", "cash_flow_cents": 1000000, "capex_cents": 100000, "working_capital_need_cents": 50000, "debt_service_cents": 600000, "ending_liquidity_cents": 200000 },
+        { "year": "2027", "cash_flow_cents": 900000, "capex_cents": 100000, "working_capital_need_cents": 50000, "debt_service_cents": 650000, "ending_liquidity_cents": 75000 }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "period_count": 2,
+        "minimum_dscr_floor": 1.1,
+        "minimum_liquidity_floor_cents": 100000,
+        "minimum_projected_dscr": 1.15,
+        "minimum_projected_liquidity_cents": 75000,
+        "dscr_floor_breached": false,
+        "liquidity_floor_breached": true,
+        "feasible_under_inputs": false,
+        "feasibility_opinion_handoff_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.FEASIBILITY.002",
+    "title": "Plan feasibility refuses missing forecast periods",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.PLAN_FEASIBILITY.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["forecast_periods"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.BIOC.001",
+    "title": "Best-interests model flags class-level liquidation shortfall",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.BIOC.v1",
+    "input": {
+      "creditor_classes": [
+        { "class_name": "Secured", "allowed_claim_cents": 1000000, "plan_distribution_cents": 1000000, "chapter7_distribution_cents": 900000 },
+        { "class_name": "GUC", "allowed_claim_cents": 500000, "plan_distribution_cents": 200000, "chapter7_distribution_cents": 250000 }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "class_count": 2,
+        "total_allowed_claims_cents": 1500000,
+        "total_plan_distribution_cents": 1200000,
+        "total_chapter7_distribution_cents": 1150000,
+        "all_classes_pass_best_interests": false,
+        "failing_class_count": 1,
+        "disclosure_statement_exhibit_handoff_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.BIOC.002",
+    "title": "Best-interests model refuses missing creditor classes",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.BIOC.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["creditor_classes"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.APR.001",
+    "title": "APR model flags junior value below dissenting impaired senior class",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.APR_NEW_VALUE.v1",
+    "input": {
+      "classes": [
+        { "class_name": "Senior secured", "priority_rank": 1, "allowed_claim_cents": 1000000, "plan_distribution_cents": 800000, "impaired": true, "accepted": false },
+        { "class_name": "Equity", "priority_rank": 3, "allowed_claim_cents": 0, "plan_distribution_cents": 100000 }
+      ],
+      "new_value": {
+        "contribution_cents": 150000,
+        "new_money_or_money_worth": true,
+        "necessary_to_reorganization": true,
+        "market_test_completed": true,
+        "reasonably_equivalent_value": true
+      }
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "class_count": 2,
+        "absolute_priority_issue_count": 1,
+        "apr_clear_under_inputs": false,
+        "new_value_scaffold_complete": true,
+        "court_determination_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.APR.002",
+    "title": "APR model refuses missing classes",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.APR_NEW_VALUE.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["classes"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.CRAMDOWN.001",
+    "title": "Cramdown rate model applies efficient-market framework in supported circuit",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.CRAMDOWN_RATE.v1",
+    "input": {
+      "base_rate": 0.08,
+      "risk_premium": 0.015,
+      "efficient_market_rate": 0.1025,
+      "efficient_market_exists": true,
+      "circuit": "2d"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "till_formula_rate": 0.095,
+        "efficient_market_rate": 0.1025,
+        "efficient_market_framework_supported": true,
+        "selected_framework": "efficient_market",
+        "indicated_cramdown_rate": 0.1025,
+        "court_sets_final_rate": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.CRAMDOWN.002",
+    "title": "Cramdown rate model refuses missing risk premium",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.CRAMDOWN_RATE.v1",
+    "input": {
+      "base_rate": 0.08
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["risk_premium"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.1111B.001",
+    "title": "1111(b) model computes election value trade-off and statutory vote flags",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.1111B_ELECTION.v1",
+    "input": {
+      "allowed_claim_cents": 1000000,
+      "collateral_value_cents": 600000,
+      "plan_payment_stream_cents": [250000, 250000, 250000, 250000, 250000],
+      "discount_rate": 0.1,
+      "guc_recovery_pct": 0.2,
+      "recourse": true,
+      "property_sold_under_363_or_plan": false,
+      "interest_inconsequential": false,
+      "class_vote_amount_pct": 0.7,
+      "class_vote_number_pct": 0.55
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "deficiency_claim_cents": 400000,
+        "no_election_value_cents": 680000,
+        "election_aggregate_payments_cents": 1250000,
+        "election_npv_cents": 947697,
+        "election_eligible": true,
+        "election_vote_passed": true,
+        "aggregate_face_test_passed": true,
+        "collateral_npv_test_passed": true,
+        "value_delta_election_vs_no_election_cents": 267697,
+        "election_filing_handoff_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.1111B.002",
+    "title": "1111(b) model refuses missing payment stream",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.1111B_ELECTION.v1",
+    "input": {
+      "allowed_claim_cents": 1000000,
+      "collateral_value_cents": 600000,
+      "discount_rate": 0.1
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["plan_payment_stream_cents"]
+    }
   }
 ]

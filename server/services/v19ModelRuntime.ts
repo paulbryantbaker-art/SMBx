@@ -1109,6 +1109,223 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
       },
     };
   }),
+  'MODEL.RESTRUCTURING.PLAN_FEASIBILITY.v1': defineModel('MODEL.RESTRUCTURING.PLAN_FEASIBILITY.v1', ['forecast_periods'], ['[11 U.S.C. 1129(a)(11)]'], input => {
+    const periods = objectArray(input.forecast_periods);
+    const minimumDscr = number(input.minimum_dscr) ?? 1.0;
+    const minimumLiquidity = cents(input.minimum_liquidity_cents) ?? 0;
+    const missing = requireInputs({ forecast_periods: periods.length ? periods : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const rows = periods.map((period, index) => {
+      const cashFlow = cents(period.cash_flow_cents ?? period.ebitda_cents) ?? 0;
+      const debtService = cents(period.debt_service_cents) ?? 0;
+      const capex = cents(period.capex_cents) ?? 0;
+      const workingCapitalNeed = cents(period.working_capital_need_cents) ?? 0;
+      const endingLiquidity = cents(period.ending_liquidity_cents) ?? 0;
+      const availableForDebtService = cashFlow - capex - workingCapitalNeed;
+      const dscr = debtService > 0 ? availableForDebtService / debtService : null;
+      return {
+        period: String(period.period || period.year || `Period ${index + 1}`),
+        cash_flow_cents: cashFlow,
+        capex_cents: capex,
+        working_capital_need_cents: workingCapitalNeed,
+        available_for_debt_service_cents: availableForDebtService,
+        debt_service_cents: debtService,
+        dscr: dscr == null ? null : round(dscr, 2),
+        ending_liquidity_cents: endingLiquidity,
+        dscr_floor_passed: dscr == null ? debtService === 0 : dscr >= minimumDscr,
+        liquidity_floor_passed: endingLiquidity >= minimumLiquidity,
+      };
+    });
+    const dscrValues = rows.map(row => row.dscr).filter((value): value is number => value !== null);
+    const stressedCases = [-0.1, -0.2].map(change => {
+      const stressedDscrs = rows.map(row => {
+        const stressedCashFlow = Math.round(row.cash_flow_cents * (1 + change));
+        const stressedAvailable = stressedCashFlow - row.capex_cents - row.working_capital_need_cents;
+        return row.debt_service_cents > 0 ? stressedAvailable / row.debt_service_cents : null;
+      }).filter((value): value is number => value !== null);
+      return {
+        cash_flow_change_pct: change,
+        minimum_dscr: stressedDscrs.length ? round(Math.min(...stressedDscrs), 2) : null,
+        dscr_floor_passed: stressedDscrs.length ? Math.min(...stressedDscrs) >= minimumDscr : true,
+      };
+    });
+    return {
+      outputs: {
+        period_count: rows.length,
+        minimum_dscr_floor: minimumDscr,
+        minimum_liquidity_floor_cents: minimumLiquidity,
+        minimum_projected_dscr: dscrValues.length ? round(Math.min(...dscrValues), 2) : null,
+        minimum_projected_liquidity_cents: Math.min(...rows.map(row => row.ending_liquidity_cents)),
+        dscr_floor_breached: rows.some(row => !row.dscr_floor_passed),
+        liquidity_floor_breached: rows.some(row => !row.liquidity_floor_passed),
+        feasible_under_inputs: rows.every(row => row.dscr_floor_passed && row.liquidity_floor_passed),
+        feasibility_opinion_handoff_required: true,
+        forecast_rows: rows,
+        cash_flow_sensitivity_cases: stressedCases,
+      },
+    };
+  }),
+  'MODEL.RESTRUCTURING.BIOC.v1': defineModel('MODEL.RESTRUCTURING.BIOC.v1', ['creditor_classes'], ['[11 U.S.C. 1129(a)(7)]', '[11 U.S.C. 726]'], input => {
+    const classes = objectArray(input.creditor_classes);
+    const missing = requireInputs({ creditor_classes: classes.length ? classes : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const rows = classes.map((claimClass, index) => {
+      const allowedClaim = cents(claimClass.allowed_claim_cents) ?? 0;
+      const planDistribution = cents(claimClass.plan_distribution_cents) ?? 0;
+      const chapter7Distribution = cents(claimClass.chapter7_distribution_cents) ?? 0;
+      return {
+        class_name: String(claimClass.class_name || claimClass.name || `Class ${index + 1}`),
+        allowed_claim_cents: allowedClaim,
+        plan_distribution_cents: planDistribution,
+        chapter7_distribution_cents: chapter7Distribution,
+        plan_recovery_pct: allowedClaim > 0 ? round(planDistribution / allowedClaim, 4) : 0,
+        chapter7_recovery_pct: allowedClaim > 0 ? round(chapter7Distribution / allowedClaim, 4) : 0,
+        best_interests_shortfall_cents: Math.max(0, chapter7Distribution - planDistribution),
+        best_interests_passed: planDistribution >= chapter7Distribution,
+      };
+    });
+    return {
+      outputs: {
+        class_count: rows.length,
+        total_allowed_claims_cents: rows.reduce((sum, row) => sum + row.allowed_claim_cents, 0),
+        total_plan_distribution_cents: rows.reduce((sum, row) => sum + row.plan_distribution_cents, 0),
+        total_chapter7_distribution_cents: rows.reduce((sum, row) => sum + row.chapter7_distribution_cents, 0),
+        all_classes_pass_best_interests: rows.every(row => row.best_interests_passed),
+        failing_class_count: rows.filter(row => !row.best_interests_passed).length,
+        disclosure_statement_exhibit_handoff_required: true,
+        class_rows: rows,
+      },
+    };
+  }),
+  'MODEL.RESTRUCTURING.APR_NEW_VALUE.v1': defineModel('MODEL.RESTRUCTURING.APR_NEW_VALUE.v1', ['classes'], ['[11 U.S.C. 1129(b)(2)]', '[203 N. LaSalle]', '[Castleton Plaza]'], input => {
+    const classes = objectArray(input.classes);
+    const newValue = safeObject(input.new_value);
+    const missing = requireInputs({ classes: classes.length ? classes : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const rows = classes
+      .map((claimClass, index) => {
+        const allowedClaim = cents(claimClass.allowed_claim_cents) ?? 0;
+        const planDistribution = cents(claimClass.plan_distribution_cents) ?? 0;
+        const priorityRank = number(claimClass.priority_rank) ?? index + 1;
+        const impaired = booleanInput(claimClass.impaired) ?? planDistribution < allowedClaim;
+        const accepted = booleanInput(claimClass.accepted) ?? false;
+        return {
+          class_name: String(claimClass.class_name || claimClass.name || `Class ${index + 1}`),
+          priority_rank: priorityRank,
+          allowed_claim_cents: allowedClaim,
+          plan_distribution_cents: planDistribution,
+          recovery_pct: allowedClaim > 0 ? round(planDistribution / allowedClaim, 4) : 0,
+          impaired,
+          accepted,
+        };
+      })
+      .sort((left, right) => left.priority_rank - right.priority_rank);
+    const issues = rows.flatMap(row => {
+      if (!row.impaired || row.accepted || row.allowed_claim_cents <= 0 || row.plan_distribution_cents >= row.allowed_claim_cents) return [];
+      const juniorValue = rows
+        .filter(candidate => candidate.priority_rank > row.priority_rank)
+        .reduce((sum, candidate) => sum + candidate.plan_distribution_cents, 0);
+      return juniorValue > 0 ? [{
+        senior_class_name: row.class_name,
+        senior_recovery_pct: row.recovery_pct,
+        junior_value_cents: juniorValue,
+      }] : [];
+    });
+    const contribution = cents(newValue.contribution_cents) ?? 0;
+    const newValueScaffold = {
+      contribution_cents: contribution,
+      new_money_or_money_worth: booleanInput(newValue.new_money_or_money_worth) ?? null,
+      necessary_to_reorganization: booleanInput(newValue.necessary_to_reorganization) ?? null,
+      market_test_completed: booleanInput(newValue.market_test_completed) ?? null,
+      reasonably_equivalent_value: booleanInput(newValue.reasonably_equivalent_value) ?? null,
+    };
+    const newValueElements = [
+      newValueScaffold.contribution_cents > 0,
+      newValueScaffold.new_money_or_money_worth === true,
+      newValueScaffold.necessary_to_reorganization === true,
+      newValueScaffold.market_test_completed === true,
+      newValueScaffold.reasonably_equivalent_value === true,
+    ];
+    return {
+      outputs: {
+        class_count: rows.length,
+        absolute_priority_issue_count: issues.length,
+        absolute_priority_issues: issues,
+        apr_clear_under_inputs: issues.length === 0,
+        new_value_scaffold: newValueScaffold,
+        new_value_scaffold_complete: newValueElements.every(Boolean),
+        court_determination_required: true,
+        class_rows: rows,
+      },
+    };
+  }),
+  'MODEL.RESTRUCTURING.CRAMDOWN_RATE.v1': defineModel('MODEL.RESTRUCTURING.CRAMDOWN_RATE.v1', ['base_rate', 'risk_premium'], ['[Till]', '[MPM Silicones]', '[Texas Grand Prairie]', '[Topp]'], input => {
+    const baseRate = number(input.base_rate);
+    const riskPremium = number(input.risk_premium);
+    const efficientMarketRate = number(input.efficient_market_rate);
+    const efficientMarketExists = booleanInput(input.efficient_market_exists) ?? efficientMarketRate != null;
+    const circuit = String(input.circuit || '').trim().toLowerCase();
+    const missing = requireInputs({ base_rate: baseRate, risk_premium: riskPremium });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const formulaRate = baseRate! + riskPremium!;
+    const efficientMarketCircuits = ['2d', '2nd', 'second', '5th', '5d', 'fifth', '6th', 'sixth', '8th', 'eighth'];
+    const efficientMarketFrameworkSupported = efficientMarketCircuits.includes(circuit);
+    const appliesEfficientMarket = efficientMarketExists && efficientMarketRate != null && efficientMarketFrameworkSupported;
+    return {
+      outputs: {
+        base_rate: round(baseRate!, 4),
+        risk_premium: round(riskPremium!, 4),
+        till_formula_rate: round(formulaRate, 4),
+        efficient_market_rate: efficientMarketRate == null ? null : round(efficientMarketRate, 4),
+        circuit: circuit || null,
+        efficient_market_framework_supported: efficientMarketFrameworkSupported,
+        selected_framework: appliesEfficientMarket ? 'efficient_market' : 'till_formula',
+        indicated_cramdown_rate: round(appliesEfficientMarket ? efficientMarketRate! : formulaRate, 4),
+        court_sets_final_rate: true,
+      },
+    };
+  }),
+  'MODEL.RESTRUCTURING.1111B_ELECTION.v1': defineModel('MODEL.RESTRUCTURING.1111B_ELECTION.v1', ['allowed_claim_cents', 'collateral_value_cents', 'plan_payment_stream_cents', 'discount_rate'], ['[11 U.S.C. 1111(b)]'], input => {
+    const allowedClaim = cents(input.allowed_claim_cents);
+    const collateralValue = cents(input.collateral_value_cents);
+    const paymentStream = arrayOfCents(input.plan_payment_stream_cents);
+    const discountRate = number(input.discount_rate);
+    const gucRecoveryPct = number(input.guc_recovery_pct) ?? 0;
+    const recourse = booleanInput(input.recourse) ?? true;
+    const propertySold = booleanInput(input.property_sold_under_363_or_plan) ?? false;
+    const interestInconsequential = booleanInput(input.interest_inconsequential) ?? false;
+    const voteAmountPct = number(input.class_vote_amount_pct);
+    const voteNumberPct = number(input.class_vote_number_pct);
+    const missing = requireInputs({
+      allowed_claim_cents: allowedClaim,
+      collateral_value_cents: collateralValue,
+      plan_payment_stream_cents: paymentStream.length ? paymentStream : null,
+      discount_rate: discountRate,
+    });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const deficiencyClaim = Math.max(0, allowedClaim! - collateralValue!);
+    const deficiencyRecovery = Math.round(deficiencyClaim * gucRecoveryPct);
+    const noElectionValue = collateralValue! + deficiencyRecovery;
+    const aggregatePayments = paymentStream.reduce((sum, value) => sum + value, 0);
+    const npvPayments = Math.round(paymentStream.reduce((sum, value, index) => sum + value / ((1 + discountRate!) ** (index + 1)), 0));
+    return {
+      outputs: {
+        allowed_claim_cents: allowedClaim,
+        collateral_value_cents: collateralValue,
+        deficiency_claim_cents: deficiencyClaim,
+        guc_recovery_pct: round(gucRecoveryPct, 4),
+        no_election_value_cents: noElectionValue,
+        election_aggregate_payments_cents: aggregatePayments,
+        election_npv_cents: npvPayments,
+        election_eligible: !interestInconsequential && !(recourse && propertySold),
+        election_vote_passed: voteAmountPct == null || voteNumberPct == null ? null : voteAmountPct >= (2 / 3) && voteNumberPct > 0.5,
+        aggregate_face_test_passed: aggregatePayments >= allowedClaim!,
+        collateral_npv_test_passed: npvPayments >= collateralValue!,
+        value_delta_election_vs_no_election_cents: npvPayments - noElectionValue,
+        election_filing_handoff_required: true,
+      },
+    };
+  }),
   'MODEL.RESTRUCTURING.CH7_WATERFALL.v1': defineModel('MODEL.RESTRUCTURING.CH7_WATERFALL.v1', ['estate_value_cents', 'claims'], ['[11 U.S.C. 507]', '[11 U.S.C. 726]'], input => {
     const estateValue = cents(input.estate_value_cents);
     const claims = objectArray(input.claims);

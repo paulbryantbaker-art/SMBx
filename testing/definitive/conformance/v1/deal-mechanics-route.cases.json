@@ -107,7 +107,8 @@
     "expect": {
       "slotIdsInclude": ["M151", "M152", "M153", "M154", "M155", "M156", "M158"],
       "readinessAtLeast": {
-        "professional_handoff": 8,
+        "executable": 8,
+        "professional_handoff": 5,
         "planning_only": 1
       },
       "yuliaBriefIncludes": ["professional handoff"]

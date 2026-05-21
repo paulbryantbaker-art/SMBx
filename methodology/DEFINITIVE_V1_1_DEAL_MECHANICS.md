@@ -157,7 +157,7 @@ The V19 runtime remains the current execution baseline while expanded DEFINITIVE
 
 ## Next Build Runs
 
-1. Continue deterministic runtime functions and schemas for the v1.1 executable batch. Forty-six models are executable with conformance coverage: M139, M148, M151, M157-M158, M160, M169-M172, M180, M182-M190, M192-M193, M195-M196, M198-M204, M206-M208, M210-M212, M214-M217, and M219-M223. Next targets are M152-M156, M159, M164-M168, M177-M179, and M181.
+1. Continue deterministic runtime functions and schemas for the v1.1 executable batch. Fifty-one models are executable with conformance coverage: M139, M148, M151-M158, M160, M169-M172, M180, M182-M190, M192-M193, M195-M196, M198-M204, M206-M208, M210-M212, M214-M217, and M219-M223. Next targets are M159, M164-M168, M177-M179, and M181.
 2. Expand Authority Register from 500+ target to 800+ target, prioritizing bankruptcy, restructuring, IRC/Treasury, real estate, IP, agreement architecture, pass-through pricing, recovery data, digital assets, and regulated-industry sources.
 3. Publish the Pass-Through Substrate Catalog with per-call cost, fixed margin, source type, and THE LINE boundary.
 4. Add Yulia prompt/runtime language so research-only, professional-handoff, and pass-through models are useful without crossing THE LINE.
@@ -165,4 +165,4 @@ The V19 runtime remains the current execution baseline while expanded DEFINITIVE
 
 Completed first pass: `compose_model_stack` now uses the route map as Yulia's deal-profile classifier. It returns applicable mechanics, readiness, tool surfaces, and THE LINE boundary by deal profile, including G28/G29/G30 trigger overlays.
 Completed runtime slices: M139, M148, M151, M157-M158, M160, M169-M172, M180, M182-M190, M192-M193, M195-M196, M198-M204, M206-M208, M210-M212, M214-M217, and M219-M223 are mapped to `MODEL.*.v1` runtime ids with deterministic functions, registry entries, and complete/missing-input fixtures.
-Completed first conformance pass: `npm run test:definitive-conformance` now includes 154 cases: 142 model-runtime cases and 12 deal-mechanics route cases spanning real estate, connected tax, agreement architecture, IP, restructuring, LME, capital structure, secondaries, crypto, carve-out/JV, and venture/PIPE profiles.
+Completed first conformance pass: `npm run test:definitive-conformance` now includes 164 cases: 152 model-runtime cases and 12 deal-mechanics route cases spanning real estate, connected tax, agreement architecture, IP, restructuring, LME, capital structure, secondaries, crypto, carve-out/JV, and venture/PIPE profiles.
