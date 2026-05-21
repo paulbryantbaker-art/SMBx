@@ -3320,5 +3320,284 @@
       "status": "needs_inputs",
       "missingInputsIncludes": ["exercise_price_cents"]
     }
+  },
+  {
+    "id": "CONF.MODEL.RE.CITT.001",
+    "title": "CITT model computes jurisdictional transfer tax",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.CITT.TRANSFER_TAX.v1",
+    "input": {
+      "jurisdiction": "CT",
+      "fmv_real_property_cents": 1000000,
+      "interest_transferred_pct": 0.8
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "jurisdiction": "CT",
+        "tax_base_cents": 800000,
+        "transfer_tax_rate": 0.0111,
+        "transfer_tax_cents": 8880,
+        "exemption_applies": false,
+        "aggregation_window_months": null,
+        "contested_state_position_handoff_required": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.CITT.002",
+    "title": "CITT model refuses missing transferred interest",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.CITT.TRANSFER_TAX.v1",
+    "input": {
+      "jurisdiction": "CT",
+      "fmv_real_property_cents": 1000000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["interest_transferred_pct"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.OPCO_PROPCO.001",
+    "title": "OpCo/PropCo model computes lease economics and recharacterization flag",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.OPCO_PROPCO.SEPARATION.v1",
+    "input": {
+      "real_property_value_cents": 1000000,
+      "target_cap_rate": 0.08,
+      "opco_ebitda_cents": 300000,
+      "lease_term_years": 35,
+      "residual_value_pct": 0.15
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "annual_master_lease_rent_cents": 80000,
+        "implied_rent_yield": 0.08,
+        "opco_ebitda_after_rent_cents": 220000,
+        "rent_to_ebitda_pct": 0.2667,
+        "recharacterization_review_required": true,
+        "tax_accounting_handoff_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.OPCO_PROPCO.002",
+    "title": "OpCo/PropCo model refuses missing OpCo EBITDA",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.OPCO_PROPCO.SEPARATION.v1",
+    "input": {
+      "real_property_value_cents": 1000000,
+      "target_cap_rate": 0.08
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["opco_ebitda_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.GROUND_LEASE.001",
+    "title": "Ground lease model computes lender tail and mortgageability",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.GROUND_LEASE.MECHANICS.v1",
+    "input": {
+      "ground_lease_expiry_date": "2060-01-01",
+      "loan_maturity_date": "2030-01-01",
+      "annual_ground_rent_cents": 120000,
+      "lender_recognition_agreement": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "tail_years_after_loan_maturity": 30,
+        "required_tail_years": 25,
+        "lender_tail_requirement_satisfied": true,
+        "lender_recognition_agreement": true,
+        "leasehold_mortgageability_flag": true,
+        "counsel_review_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.GROUND_LEASE.002",
+    "title": "Ground lease model refuses missing annual rent",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.GROUND_LEASE.MECHANICS.v1",
+    "input": {
+      "ground_lease_expiry_date": "2060-01-01",
+      "loan_maturity_date": "2030-01-01"
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["annual_ground_rent_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.TAX.SALT.001",
+    "title": "SALT transaction model computes state income and sales tax",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TAX.SALT_TRANSACTION.v1",
+    "input": {
+      "gain_cents": 1000000,
+      "state_apportionment_pct": 0.4,
+      "state_tax_rate": 0.06,
+      "sales_use_tax_base_cents": 200000,
+      "sales_use_tax_rate": 0.08,
+      "bulk_sale_clearance_required": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "apportioned_gain_cents": 400000,
+        "state_income_tax_cents": 24000,
+        "sales_use_tax_cents": 16000,
+        "total_state_transaction_tax_cents": 40000,
+        "bulk_sale_clearance_required": true,
+        "salt_specialist_handoff_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.TAX.SALT.002",
+    "title": "SALT transaction model refuses missing apportionment",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TAX.SALT_TRANSACTION.v1",
+    "input": {
+      "gain_cents": 1000000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["state_apportionment_pct"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.LEGAL.RWI_STACK.001",
+    "title": "RWI stack model computes retention, tower, and seller indemnity cap",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LEGAL.RWI_STACK.v1",
+    "input": {
+      "enterprise_value_cents": 1000000,
+      "retention_pct": 0.005,
+      "policy_tower_pct": 0.1,
+      "seller_indemnity_cap_pct": 0.01,
+      "exclusions": ["known tax", "forward-looking"],
+      "excess_layers": [{ "limit_cents": 50000 }]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "retention_cents": 5000,
+        "primary_policy_limit_cents": 100000,
+        "excess_layer_count": 1,
+        "excess_policy_limit_cents": 50000,
+        "total_policy_limit_cents": 150000,
+        "seller_indemnity_cap_cents": 10000,
+        "exclusion_count": 2,
+        "broker_handoff_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.LEGAL.RWI_STACK.002",
+    "title": "RWI stack model refuses missing enterprise value",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LEGAL.RWI_STACK.v1",
+    "input": {
+      "retention_pct": 0.005
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["enterprise_value_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.LEGAL.EARNOUT_ARCH.001",
+    "title": "Earnout architecture model computes metrics, triggers, dispute forum, and tax handoff",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LEGAL.EARNOUT_ARCHITECTURE.v1",
+    "input": {
+      "earnout_value_cents": 500000,
+      "metrics": ["EBITDA", "revenue"],
+      "acceleration_triggers": ["sale", "termination"],
+      "post_closing_covenants": ["commercially reasonable efforts"],
+      "dispute_forum": "accounting_arbitrator",
+      "tax_characterization": "section_453_installment"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "metric_count": 2,
+        "multiple_metric_earnout": true,
+        "acceleration_trigger_count": 2,
+        "post_closing_covenant_count": 1,
+        "accounting_arbitrator_selected": true,
+        "tax_characterization": "section_453_installment",
+        "counsel_and_tax_handoff_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.LEGAL.EARNOUT_ARCH.002",
+    "title": "Earnout architecture model refuses missing metrics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LEGAL.EARNOUT_ARCHITECTURE.v1",
+    "input": {
+      "earnout_value_cents": 500000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["metrics"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.IP.CARVEOUT_LICENSE_BACK.001",
+    "title": "IP carve-out model counts assigned, licensed, and license-back assets",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.IP.CARVEOUT_LICENSE_BACK.v1",
+    "input": {
+      "ip_assets": [
+        { "asset_name": "Brand", "disposition": "assigned_to_buyer" },
+        { "asset_name": "Platform", "disposition": "licensed_to_buyer", "transition_license_months": 12 },
+        { "asset_name": "Shared mark", "disposition": "license_back_to_seller" }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "asset_count": 3,
+        "assigned_to_buyer_count": 1,
+        "licensed_to_buyer_count": 1,
+        "licensed_back_to_seller_count": 1,
+        "transition_license_count": 1,
+        "tsa_ip_overlay_required": true,
+        "counsel_drafting_handoff_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.IP.CARVEOUT_LICENSE_BACK.002",
+    "title": "IP carve-out model refuses missing asset schedule",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.IP.CARVEOUT_LICENSE_BACK.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["ip_assets"]
+    }
   }
 ]

@@ -15,8 +15,8 @@
     "expect": {
       "slotIdsInclude": ["M187", "M189", "M190", "M196", "M199"],
       "readinessAtLeast": {
-        "executable": 7,
-        "professional_handoff": 2
+        "executable": 18,
+        "research_only": 4
       },
       "toolSurfacesInclude": {
         "pass_through_catalog": ["M190", "M196"]
@@ -39,8 +39,8 @@
     "expect": {
       "slotIdsInclude": ["M200", "M201", "M202", "M203", "M204"],
       "readinessAtLeast": {
-        "planning_only": 4,
-        "professional_handoff": 1
+        "planning_only": 6,
+        "executable": 12
       },
       "yuliaBriefIncludes": ["M200"]
     }
@@ -60,8 +60,8 @@
       "slotIdsInclude": ["M206", "M207", "M208", "M210", "M211", "M212"],
       "readinessAtLeast": {
         "planning_only": 5,
-        "executable": 6,
-        "professional_handoff": 4
+        "executable": 21,
+        "professional_handoff": 2
       },
       "toolSurfacesInclude": {
         "studio": ["M211", "M212"]
@@ -107,8 +107,7 @@
     "expect": {
       "slotIdsInclude": ["M151", "M152", "M153", "M154", "M155", "M156", "M158"],
       "readinessAtLeast": {
-        "executable": 14,
-        "professional_handoff": 1,
+        "executable": 15,
         "research_only": 1
       },
       "yuliaBriefIncludes": ["professional handoff"]
@@ -191,8 +190,8 @@
     "expect": {
       "slotIdsInclude": ["M177", "M178"],
       "readinessAtLeast": {
-        "executable": 3,
-        "professional_handoff": 4,
+        "executable": 18,
+        "professional_handoff": 1,
         "research_only": 4
       }
     }
@@ -231,9 +230,9 @@
     "expect": {
       "slotIdsInclude": ["M103", "M144", "M145", "M218"],
       "readinessAtLeast": {
-        "planning_only": 8,
-        "professional_handoff": 1,
-        "executable": 10
+        "planning_only": 12,
+        "executable": 13,
+        "research_only": 1
       }
     }
   },

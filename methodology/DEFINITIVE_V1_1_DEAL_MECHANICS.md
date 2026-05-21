@@ -118,7 +118,7 @@ This is the 95-model core that makes "substrate for all deal mechanics" credible
 
 ### v1.1 Staged Models
 
-M143, M161-M163, M191, M194, M197, M205, M209, M213, and M218.
+M143 and M161-M163.
 
 The LME set M161-M163 is explicitly research-only: uptier, drop-down, double-dip, and pari-plus outcomes depend on jurisdiction and exact loan-document language.
 
@@ -153,16 +153,16 @@ Agent-facing discovery includes:
 - `/.well-known/definitive.json`
 - `/api/definitive/spec`
 
-The V19 runtime remains the current execution baseline while expanded DEFINITIVE model functions land in batches. The first v1.1 executable slices are now implemented for 1060 allocation, FIRPTA withholding, 1031 timing, sale-leaseback/ASC 842, REIT compliance, rent-roll normalization, CAM true-up, RE-heavy asset/entity election, RE/operating-business bifurcation, NOI/cap-rate bridge, lease abstraction, property escrow/holdback sizing, title/survey checklist, PCA reserve modeling, FIRPTA v1.1, convertible/SAFE conversion, ABL borrowing base, make-whole/call protection, covenant baskets, 280G, 382 NOL limitation, connected transaction tax, indemnity ladder, survival periods, escrow/holdback sizing, closing true-up, conditions logic, termination-fee economics, IP chain-of-title, IP lien search, IP representation set, license dependency mapping, source-code escrow, employee IP assignment verification, OSS exposure process, IP-specific 1060 allocation, domain/trademark transfer mechanics, three-prong solvency, 363 sale mechanics, Chapter 7 waterfall, DIP sizing, and exchange-offer mechanics.
+The V19 runtime remains the current execution baseline while expanded DEFINITIVE model functions land in batches. The first v1.1 executable slices are now implemented for 1060 allocation, FIRPTA withholding, 1031 timing, sale-leaseback/ASC 842, REIT compliance, rent-roll normalization, CAM true-up, RE-heavy asset/entity election, RE/operating-business bifurcation, NOI/cap-rate bridge, lease abstraction, property escrow/holdback sizing, title/survey checklist, PCA reserve modeling, FIRPTA v1.1, CITT transfer tax, OpCo/PropCo separation, ground lease mechanics, convertible/SAFE conversion, venture-debt warrant coverage, ABL borrowing base, make-whole/call protection, covenant baskets, 280G, 382 NOL limitation, connected transaction tax, SALT transaction tax, indemnity ladder, survival periods, escrow/holdback sizing, RWI stack architecture, closing true-up, conditions logic, termination-fee economics, earnout architecture, IP chain-of-title, IP lien search, IP representation set, license dependency mapping, IP carve-out/license-back, source-code escrow, employee IP assignment verification, OSS exposure process, IP-specific 1060 allocation, domain/trademark transfer mechanics, three-prong solvency, 363 sale mechanics, plan feasibility, best-interests-of-creditors, APR/new-value, cramdown-rate, 1111(b) election, Chapter 7 waterfall, DIP sizing, exchange-offer mechanics, fulcrum security, RSA economics, ABC/Article 9 liquidation, claims trading, Subchapter V eligibility, Chapter 22 recidivism, LP-secondary/ECI withholding, strip-sale pricing, and NAV facility LTV.
 
 ## Next Build Runs
 
-1. Continue deterministic runtime functions and schemas for the v1.1 executable batch. Sixty-one models are executable with conformance coverage: M139, M148, M151-M160, M164-M172, M177-M190, M192-M193, M195-M196, M198-M204, M206-M208, M210-M212, M214-M217, and M219-M223. Next targets are M143, M161-M163, M191, M194, M197, M205, M209, M213, and M218.
+1. Continue deterministic runtime functions and schemas for the v1.1 executable batch. Sixty-eight models are executable with conformance coverage: M139, M148, M151-M160, M164-M172, and M177-M223. Next targets are M143, M161-M163, and M173-M176.
 2. Expand Authority Register from 500+ target to 800+ target, prioritizing bankruptcy, restructuring, IRC/Treasury, real estate, IP, agreement architecture, pass-through pricing, recovery data, digital assets, and regulated-industry sources.
 3. Publish the Pass-Through Substrate Catalog with per-call cost, fixed margin, source type, and THE LINE boundary.
 4. Add Yulia prompt/runtime language so research-only, professional-handoff, and pass-through models are useful without crossing THE LINE.
 5. Connect route-level applicable mechanics to Today, Pipeline, Files, and Studio surfaces after the chat/tool contract is stable.
 
 Completed first pass: `compose_model_stack` now uses the route map as Yulia's deal-profile classifier. It returns applicable mechanics, readiness, tool surfaces, and THE LINE boundary by deal profile, including G28/G29/G30 trigger overlays.
-Completed runtime slices: M139, M148, M151-M160, M164-M172, M177-M190, M192-M193, M195-M196, M198-M204, M206-M208, M210-M212, M214-M217, and M219-M223 are mapped to `MODEL.*.v1` runtime ids with deterministic functions, registry entries, and complete/missing-input fixtures.
-Completed first conformance pass: `npm run test:definitive-conformance` now includes 184 cases: 172 model-runtime cases and 12 deal-mechanics route cases spanning real estate, connected tax, agreement architecture, IP, restructuring, LME, capital structure, secondaries, crypto, carve-out/JV, and venture/PIPE profiles.
+Completed runtime slices: M139, M148, M151-M160, M164-M172, and M177-M223 are mapped to `MODEL.*.v1` runtime ids with deterministic functions, registry entries, and complete/missing-input fixtures.
+Completed first conformance pass: `npm run test:definitive-conformance` now includes 198 cases: 186 model-runtime cases and 12 deal-mechanics route cases spanning real estate, connected tax, agreement architecture, IP, restructuring, LME, capital structure, secondaries, crypto, carve-out/JV, and venture/PIPE profiles.

@@ -500,6 +500,33 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
       },
     };
   }),
+  'MODEL.LEGAL.RWI_STACK.v1': defineModel('MODEL.LEGAL.RWI_STACK.v1', ['enterprise_value_cents'], ['[ABA Private Target Deal Points Study 2023]', '[Marsh RWI Reports]', '[Aon RWI Reports]', '[Lockton RWI Reports]'], input => {
+    const enterpriseValue = cents(input.enterprise_value_cents);
+    const retentionPct = number(input.retention_pct) ?? 0.0075;
+    const towerPct = number(input.policy_tower_pct) ?? 0.10;
+    const sellerIndemnityCapPct = number(input.seller_indemnity_cap_pct) ?? 0.005;
+    const exclusions = stringArray(input.exclusions);
+    const excessLayers = objectArray(input.excess_layers);
+    const missing = requireInputs({ enterprise_value_cents: enterpriseValue });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const primaryLimit = Math.round(enterpriseValue! * towerPct);
+    const excessLimit = excessLayers.reduce((sum, layer) => sum + (cents(layer.limit_cents) ?? 0), 0);
+    return {
+      outputs: {
+        enterprise_value_cents: enterpriseValue,
+        retention_pct: round(retentionPct, 4),
+        retention_cents: Math.round(enterpriseValue! * retentionPct),
+        primary_policy_limit_cents: primaryLimit,
+        excess_layer_count: excessLayers.length,
+        excess_policy_limit_cents: excessLimit,
+        total_policy_limit_cents: primaryLimit + excessLimit,
+        seller_indemnity_cap_pct: round(sellerIndemnityCapPct, 4),
+        seller_indemnity_cap_cents: Math.round(enterpriseValue! * sellerIndemnityCapPct),
+        exclusion_count: exclusions.length,
+        broker_handoff_required: true,
+      },
+    };
+  }),
   'MODEL.TAX.TRANSACTION.MASTER.v1': defineModel('MODEL.TAX.TRANSACTION.MASTER.v1', ['seller_entity_type', 'deal_form', 'purchase_price_cents'], ['[IRC 1001]', '[IRC 338]', '[IRC 336]', '[IRC 351]', '[IRC 368]', '[IRC 721]', '[IRC 1060]'], input => {
     const sellerEntityType = text(input.seller_entity_type);
     const dealForm = text(input.deal_form);
@@ -685,6 +712,35 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
       },
     };
   }),
+  'MODEL.TAX.SALT_TRANSACTION.v1': defineModel('MODEL.TAX.SALT_TRANSACTION.v1', ['gain_cents', 'state_apportionment_pct'], ['[UDITPA]', '[State Nexus Statutes]', '[Bulk Sale Acts]'], input => {
+    const gain = cents(input.gain_cents);
+    const apportionmentPct = number(input.state_apportionment_pct);
+    const stateTaxRate = number(input.state_tax_rate) ?? 0;
+    const salesUseTaxBase = cents(input.sales_use_tax_base_cents) ?? 0;
+    const salesUseTaxRate = number(input.sales_use_tax_rate) ?? 0;
+    const bulkSaleClearanceRequired = booleanInput(input.bulk_sale_clearance_required) ?? false;
+    const contestedNexus = booleanInput(input.contested_nexus_position) ?? false;
+    const missing = requireInputs({ gain_cents: gain, state_apportionment_pct: apportionmentPct });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const apportionedGain = Math.round(gain! * apportionmentPct!);
+    const stateIncomeTax = Math.round(apportionedGain * stateTaxRate);
+    const salesUseTax = Math.round(salesUseTaxBase * salesUseTaxRate);
+    return {
+      outputs: {
+        gain_cents: gain,
+        state_apportionment_pct: round(apportionmentPct!, 4),
+        apportioned_gain_cents: apportionedGain,
+        state_tax_rate: round(stateTaxRate, 4),
+        state_income_tax_cents: stateIncomeTax,
+        sales_use_tax_base_cents: salesUseTaxBase,
+        sales_use_tax_cents: salesUseTax,
+        total_state_transaction_tax_cents: stateIncomeTax + salesUseTax,
+        bulk_sale_clearance_required: bulkSaleClearanceRequired,
+        contested_nexus_position: contestedNexus,
+        salt_specialist_handoff_required: contestedNexus || bulkSaleClearanceRequired,
+      },
+    };
+  }),
   'MODEL.LEGAL.SURVIVAL.PERIODS.v1': defineModel('MODEL.LEGAL.SURVIVAL.PERIODS.v1', ['closing_date'], ['[SRS Acquiom 2024]', '[SRS Acquiom 2025]', '[ABA Private Target Deal Points Study 2023]'], input => {
     const closingDate = dateText(input.closing_date);
     const rwiPresent = booleanInput(input.rwi_present) ?? false;
@@ -786,6 +842,29 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
         antitrust_reverse_fee_pct: round(antitrustFeePct, 4),
         antitrust_reverse_fee_cents: Math.round(transactionValue! * antitrustFeePct),
         counsel_review_flags: ['Confirm fiduciary-out, go-shop/no-shop, regulatory covenant, and enforceability framing with counsel.'],
+      },
+    };
+  }),
+  'MODEL.LEGAL.EARNOUT_ARCHITECTURE.v1': defineModel('MODEL.LEGAL.EARNOUT_ARCHITECTURE.v1', ['earnout_value_cents', 'metrics'], ['[SRS Acquiom Earnout Data]', '[IRC 453]', '[IRC 483]', '[IRC 1274]', '[ABA Earnout Reports]'], input => {
+    const earnoutValue = cents(input.earnout_value_cents);
+    const metrics = stringArray(input.metrics);
+    const accelerationTriggers = stringArray(input.acceleration_triggers);
+    const postClosingCovenants = stringArray(input.post_closing_covenants);
+    const disputeForum = text(input.dispute_forum) ?? 'accounting_arbitrator';
+    const taxCharacterization = text(input.tax_characterization) ?? 'requires_tax_review';
+    const missing = requireInputs({ earnout_value_cents: earnoutValue, metrics: metrics.length ? metrics : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    return {
+      outputs: {
+        earnout_value_cents: earnoutValue,
+        metric_count: metrics.length,
+        multiple_metric_earnout: metrics.length > 1,
+        acceleration_trigger_count: accelerationTriggers.length,
+        post_closing_covenant_count: postClosingCovenants.length,
+        dispute_forum: disputeForum,
+        accounting_arbitrator_selected: /accounting/i.test(disputeForum),
+        tax_characterization: taxCharacterization,
+        counsel_and_tax_handoff_required: true,
       },
     };
   }),
@@ -1953,6 +2032,84 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
       },
     };
   }),
+  'MODEL.RE.CITT.TRANSFER_TAX.v1': defineModel('MODEL.RE.CITT.TRANSFER_TAX.v1', ['jurisdiction', 'fmv_real_property_cents', 'interest_transferred_pct'], ['[State CITT Statutes]', '[CT 12-638]', '[MD Tax-Prop 12-117]', '[WA RCW 82.45]', '[NY Publication 576]'], input => {
+    const jurisdiction = text(input.jurisdiction);
+    const fmv = cents(input.fmv_real_property_cents);
+    const interestPct = number(input.interest_transferred_pct);
+    const userRate = number(input.transfer_tax_rate);
+    const exemptionApplies = booleanInput(input.exemption_applies) ?? false;
+    const missing = requireInputs({ jurisdiction, fmv_real_property_cents: fmv, interest_transferred_pct: interestPct });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const normalizedJurisdiction = jurisdiction!.toUpperCase();
+    const defaultRates: Record<string, number> = { CT: 0.0111, ME: 0.0044, WA: 0.0178, DC: 0.0145, MD: 0.01, NY: 0.0065 };
+    const defaultAggregationMonths: Record<string, number> = { MD: 12, WA: 36 };
+    const rate = userRate ?? defaultRates[normalizedJurisdiction] ?? 0;
+    const taxBase = Math.round(fmv! * interestPct!);
+    return {
+      outputs: {
+        jurisdiction: normalizedJurisdiction,
+        fmv_real_property_cents: fmv,
+        interest_transferred_pct: round(interestPct!, 4),
+        transfer_tax_rate: round(rate, 4),
+        tax_base_cents: taxBase,
+        transfer_tax_cents: exemptionApplies ? 0 : Math.round(taxBase * rate),
+        exemption_applies: exemptionApplies,
+        aggregation_window_months: defaultAggregationMonths[normalizedJurisdiction] ?? null,
+        contested_state_position_handoff_required: userRate == null && !(normalizedJurisdiction in defaultRates),
+      },
+    };
+  }),
+  'MODEL.RE.OPCO_PROPCO.SEPARATION.v1': defineModel('MODEL.RE.OPCO_PROPCO.SEPARATION.v1', ['real_property_value_cents', 'target_cap_rate', 'opco_ebitda_cents'], ['[IRC 163(j)]', '[IRC 856]', '[ASC 842]'], input => {
+    const propertyValue = cents(input.real_property_value_cents);
+    const capRate = number(input.target_cap_rate);
+    const opcoEbitda = cents(input.opco_ebitda_cents);
+    const suppliedRent = cents(input.annual_master_lease_rent_cents);
+    const leaseTermYears = number(input.lease_term_years);
+    const residualValuePct = number(input.residual_value_pct);
+    const missing = requireInputs({ real_property_value_cents: propertyValue, target_cap_rate: capRate, opco_ebitda_cents: opcoEbitda });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const rent = suppliedRent ?? Math.round(propertyValue! * capRate!);
+    const ebitdaAfterRent = opcoEbitda! - rent;
+    return {
+      outputs: {
+        real_property_value_cents: propertyValue,
+        annual_master_lease_rent_cents: rent,
+        implied_rent_yield: propertyValue! > 0 ? round(rent / propertyValue!, 4) : null,
+        opco_ebitda_before_rent_cents: opcoEbitda,
+        opco_ebitda_after_rent_cents: ebitdaAfterRent,
+        rent_to_ebitda_pct: opcoEbitda! > 0 ? round(rent / opcoEbitda!, 4) : null,
+        lease_term_years: leaseTermYears,
+        residual_value_pct: residualValuePct,
+        recharacterization_review_required: (leaseTermYears != null && leaseTermYears >= 30) || (residualValuePct != null && residualValuePct < 0.2),
+        tax_accounting_handoff_required: true,
+      },
+    };
+  }),
+  'MODEL.RE.GROUND_LEASE.MECHANICS.v1': defineModel('MODEL.RE.GROUND_LEASE.MECHANICS.v1', ['ground_lease_expiry_date', 'loan_maturity_date', 'annual_ground_rent_cents'], ['[Ground Lease Lender Practice]'], input => {
+    const expiryDate = dateText(input.ground_lease_expiry_date);
+    const maturityDate = dateText(input.loan_maturity_date);
+    const annualRent = cents(input.annual_ground_rent_cents);
+    const requiredTailYears = number(input.required_tail_years) ?? 25;
+    const rentResetType = text(input.rent_reset_type) ?? 'unspecified';
+    const lenderRecognitionAgreement = booleanInput(input.lender_recognition_agreement) ?? false;
+    const missing = requireInputs({ ground_lease_expiry_date: expiryDate, loan_maturity_date: maturityDate, annual_ground_rent_cents: annualRent });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const tailYears = yearsBetween(maturityDate!, expiryDate!);
+    return {
+      outputs: {
+        ground_lease_expiry_date: expiryDate,
+        loan_maturity_date: maturityDate,
+        annual_ground_rent_cents: annualRent,
+        rent_reset_type: rentResetType,
+        tail_years_after_loan_maturity: round(tailYears, 1),
+        required_tail_years: requiredTailYears,
+        lender_tail_requirement_satisfied: tailYears >= requiredTailYears,
+        lender_recognition_agreement: lenderRecognitionAgreement,
+        leasehold_mortgageability_flag: tailYears >= requiredTailYears && lenderRecognitionAgreement,
+        counsel_review_required: true,
+      },
+    };
+  }),
   'MODEL.IP.CHAIN_OF_TITLE.v1': defineModel('MODEL.IP.CHAIN_OF_TITLE.v1', ['assets'], ['[35 U.S.C. 261]', '[Lanham Act 10]', '[17 U.S.C. 205]', '[Clorox v. Chemical Bank]'], input => {
     const assets = objectArray(input.assets);
     const missing = requireInputs({ assets: assets.length ? assets : null });
@@ -2051,6 +2208,36 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
         enforceability_opinion_pass_through: true,
         counsel_drafting_required: true,
         representation_set: reps,
+      },
+    };
+  }),
+  'MODEL.IP.CARVEOUT_LICENSE_BACK.v1': defineModel('MODEL.IP.CARVEOUT_LICENSE_BACK.v1', ['ip_assets'], ['[IP Carve-Out Practice Norms]'], input => {
+    const assets = objectArray(input.ip_assets);
+    const tsaIpOverlay = booleanInput(input.tsa_ip_overlay_required) ?? false;
+    const missing = requireInputs({ ip_assets: assets.length ? assets : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const rows = assets.map((asset, index) => {
+      const disposition = text(asset.disposition) ?? 'assigned_to_buyer';
+      const transitionLicenseMonths = number(asset.transition_license_months) ?? 0;
+      return {
+        asset_name: String(asset.asset_name || asset.name || `IP asset ${index + 1}`),
+        disposition,
+        assigned_to_buyer: disposition === 'assigned_to_buyer',
+        licensed_to_buyer: disposition === 'licensed_to_buyer',
+        licensed_back_to_seller: booleanInput(asset.licensed_back_to_seller) ?? disposition === 'license_back_to_seller',
+        transition_license_months: transitionLicenseMonths,
+      };
+    });
+    return {
+      outputs: {
+        asset_count: rows.length,
+        assigned_to_buyer_count: rows.filter(row => row.assigned_to_buyer).length,
+        licensed_to_buyer_count: rows.filter(row => row.licensed_to_buyer).length,
+        licensed_back_to_seller_count: rows.filter(row => row.licensed_back_to_seller).length,
+        transition_license_count: rows.filter(row => row.transition_license_months > 0).length,
+        tsa_ip_overlay_required: tsaIpOverlay || rows.some(row => row.transition_license_months > 0),
+        counsel_drafting_handoff_required: true,
+        asset_rows: rows,
       },
     };
   }),
