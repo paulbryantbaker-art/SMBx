@@ -241,9 +241,15 @@ export function buildDefinitiveYuliaMechanicsBrief(
   const topMechanics = mechanics.slice(0, 6).map(mechanic => (
     `${mechanic.slotId} ${mechanic.name}: ${readinessLabel(mechanic.readiness)}.`
   ));
+  const lineGuidance = [
+    summary.professionalHandoff > 0 && 'Professional-handoff mechanics may compute the figure, checklist, or economics, but Yulia must route opinions, enforceability, tax/legal/accounting/appraisal conclusions, and court determinations to the named professional.',
+    summary.passThroughRequired > 0 && 'Pass-through mechanics require outside data/software inputs billed per call at cost or cost-plus-fixed margin; Yulia must not route paid human-service referrals or success-fee economics.',
+    summary.researchOnly > 0 && 'Research-only mechanics may summarize sourced inputs and compute scaffolding, but Yulia must state that authority, jurisdiction, or counsel-reviewed templates are not stable enough for production reliance.',
+  ].filter((line): line is string => Boolean(line));
 
   return [
     `${summary.total} applicable DEFINITIVE mechanics surfaced for this deal profile; ${summary.executable} are executable runtime models and ${lineLoad} carry THE LINE professional handoff, pass-through, or research-only boundaries.`,
+    ...lineGuidance,
     ...topMechanics,
   ];
 }

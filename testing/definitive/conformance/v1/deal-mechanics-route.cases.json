@@ -21,7 +21,7 @@
       "toolSurfacesInclude": {
         "pass_through_catalog": ["M190", "M196"]
       },
-      "yuliaBriefIncludes": ["THE LINE"]
+      "yuliaBriefIncludes": ["THE LINE", "Research-only mechanics"]
     }
   },
   {
@@ -65,7 +65,8 @@
       },
       "toolSurfacesInclude": {
         "studio": ["M211", "M212"]
-      }
+      },
+      "yuliaBriefIncludes": ["Professional-handoff mechanics"]
     }
   },
   {
@@ -89,7 +90,8 @@
       "toolSurfacesInclude": {
         "pass_through_catalog": ["M214", "M215", "M221"],
         "files": ["M214", "M221"]
-      }
+      },
+      "yuliaBriefIncludes": ["Professional-handoff mechanics"]
     }
   },
   {
@@ -212,7 +214,8 @@
       "slotIdsInclude": ["M174", "M175", "M176"],
       "readinessAtLeast": {
         "research_only": 3
-      }
+      },
+      "yuliaBriefIncludes": ["Research-only mechanics"]
     }
   },
   {
