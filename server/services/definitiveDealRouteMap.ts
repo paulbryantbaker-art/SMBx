@@ -324,8 +324,8 @@ function inferToolSurfaces(model: DefinitiveModelCatalogEntry, readiness: Defini
   const surfaces = new Set<DefinitiveToolSurface>(['yulia_chat', 'today', 'mcp']);
 
   if (readiness === 'executable') surfaces.add('model_runner');
-  if (readiness === 'pass_through_required') surfaces.add('pass_through_catalog');
-  if (readiness === 'professional_handoff' || readiness === 'pass_through_required' || hasAny(text, ['diligence', 'ip', 'title', 'survey', 'pca', 'oss', 'source-code', 'privacy', 'cyber', 'sanctions'])) surfaces.add('files');
+  if (readiness === 'pass_through_required' || PASS_THROUGH_MODEL_SLOTS.has(model.slotId)) surfaces.add('pass_through_catalog');
+  if (readiness === 'professional_handoff' || readiness === 'pass_through_required' || PASS_THROUGH_MODEL_SLOTS.has(model.slotId) || hasAny(text, ['diligence', 'ip', 'title', 'survey', 'pca', 'oss', 'source-code', 'privacy', 'cyber', 'sanctions'])) surfaces.add('files');
   if (model.gates.some(gate => ['G6', 'G7', 'G8', 'G9', 'G10', 'G15', 'G28', 'G29', 'G30'].includes(gate))) surfaces.add('pipeline');
   if (hasAny(text, ['studio', 'book', 'export', 'purchase agreement', 'indemnification', 'escrow', 'earnout', 'closing statement', 'conditions', 'termination', 'rwi', 'fairness'])) surfaces.add('studio');
 

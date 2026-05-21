@@ -1860,5 +1860,388 @@
       "status": "needs_inputs",
       "missingInputsIncludes": ["loss_corporation_value_cents"]
     }
+  },
+  {
+    "id": "CONF.MODEL.RE.ASSETENTITY.001",
+    "title": "RE-heavy asset-vs-entity election computes overlay, tax, and step-up mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.ASSET_ENTITY.ELECTION.v1",
+    "input": {
+      "enterprise_value_cents": 100000000,
+      "real_property_value_cents": 30000000,
+      "entity_carried_basis_cents": 60000000,
+      "transfer_tax_rate": 0.01,
+      "step_up_benefit_rate": 0.12,
+      "debt_assumable": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "real_estate_pct_of_ev": 0.3,
+        "g30_real_estate_overlay_triggered": true,
+        "buyer_step_up_cents": 40000000,
+        "buyer_step_up_pv_benefit_cents": 4800000,
+        "transfer_tax_cents": 300000,
+        "debt_assumability": "consent_or_refinance_required"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.ASSETENTITY.002",
+    "title": "RE-heavy asset-vs-entity election refuses missing EV",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.ASSET_ENTITY.ELECTION.v1",
+    "input": {
+      "real_property_value_cents": 30000000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["enterprise_value_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.BIFURCATION.001",
+    "title": "RE operating-business bifurcation reconciles NOI value to Class V/VI/VII",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.OPBUS.BIFURCATION.v1",
+    "input": {
+      "enterprise_value_cents": 100000000,
+      "noi_cents": 6000000,
+      "cap_rate": 0.075,
+      "class_vi_intangibles_cents": 15000000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "uncapped_real_estate_value_cents": 80000000,
+        "real_estate_value_cents": 80000000,
+        "operating_business_residual_value_cents": 20000000,
+        "class_v_real_property_and_tangible_cents": 80000000,
+        "class_vi_section_197_intangibles_cents": 15000000,
+        "class_vii_goodwill_going_concern_cents": 5000000
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.BIFURCATION.002",
+    "title": "RE operating-business bifurcation refuses missing cap rate",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.OPBUS.BIFURCATION.v1",
+    "input": {
+      "enterprise_value_cents": 100000000,
+      "noi_cents": 6000000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["cap_rate"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.NOI.001",
+    "title": "NOI and cap-rate bridge computes normalized NOI, value, and implied cap",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.NOI.CAP_RATE_BRIDGE.v1",
+    "input": {
+      "effective_gross_income_cents": 10000000,
+      "operating_expenses_cents": 3500000,
+      "replacement_reserve_cents": 500000,
+      "cap_rate": 0.08,
+      "purchase_price_cents": 80000000,
+      "market_cap_rate_from_pass_through_source": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "normalized_noi_cents": 6000000,
+        "value_from_cap_rate_cents": 75000000,
+        "implied_cap_rate": 0.075,
+        "pass_through_market_rate_required": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.NOI.002",
+    "title": "NOI bridge refuses missing operating expenses",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.NOI.CAP_RATE_BRIDGE.v1",
+    "input": {
+      "effective_gross_income_cents": 10000000,
+      "cap_rate": 0.08
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["operating_expenses_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.LEASES.001",
+    "title": "Lease abstraction computes WALT, rent, and consent counts",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_ABSTRACTION.v1",
+    "input": {
+      "leases": [
+        { "tenant": "A", "annual_rent_cents": 600000, "months_remaining": 24, "assignment_consent_required": true, "exclusive_use": true },
+        { "tenant": "B", "annual_rent_cents": 400000, "months_remaining": 12, "change_of_control_consent_required": true, "co_tenancy": true, "go_dark": true }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "lease_count": 2,
+        "annual_rent_cents": 1000000,
+        "walt_months": 19.2,
+        "assignment_consent_required_count": 1,
+        "change_of_control_consent_required_count": 1,
+        "exclusives_count": 1,
+        "co_tenancy_count": 1,
+        "go_dark_count": 1
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.LEASES.002",
+    "title": "Lease abstraction refuses missing leases",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.LEASE_ABSTRACTION.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["leases"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.PCA.001",
+    "title": "PCA reserve modeling structures immediate and replacement reserve buckets",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PCA.RESERVES.v1",
+    "input": {
+      "pca_items": [
+        { "item": "Roof", "immediate_repair_cents": 100000, "year_1_3_cents": 200000 },
+        { "item": "HVAC", "year_4_5_cents": 300000, "year_6_12_cents": 400000 }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "pca_item_count": 2,
+        "immediate_repair_escrow_cents": 100000,
+        "year_1_3_reserve_cents": 200000,
+        "year_4_5_reserve_cents": 300000,
+        "year_6_12_reserve_cents": 400000,
+        "total_replacement_reserve_cents": 1000000,
+        "pca_pass_through_source_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.PCA.002",
+    "title": "PCA reserve modeling refuses missing PCA items",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.PCA.RESERVES.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["pca_items"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.FIRPTA11.001",
+    "title": "FIRPTA v1.1 computes default withholding, form deadline, and 1031 gap flag",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.FIRPTA.WITHHOLDING.V11.v1",
+    "input": {
+      "amount_realized_cents": 100000000,
+      "seller_foreign_person": true,
+      "buyer_will_use_as_residence": false,
+      "closing_date": "2026-05-21",
+      "form_8288_b_reduced_withholding_requested": true,
+      "section_1031_exchange": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "withholding_rate": 0.15,
+        "withholding_amount_cents": 15000000,
+        "path": "default_firpta_withholding",
+        "forms_8288_due_date": "2026-06-10",
+        "reduced_certificate_processing_days_estimate": 90,
+        "section_1031_timing_gap_flag": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.FIRPTA11.002",
+    "title": "FIRPTA v1.1 refuses missing foreign-seller fact",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.FIRPTA.WITHHOLDING.V11.v1",
+    "input": {
+      "amount_realized_cents": 100000000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["seller_foreign_person"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.IP.LICENSES.001",
+    "title": "License dependency map computes inbound, outbound, consent, and dependency counts",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.IP.LICENSE.DEPENDENCY.v1",
+    "input": {
+      "licenses": [
+        { "name": "Core SDK", "direction": "inbound", "annual_royalty_cents": 100000, "terminates_on_change_of_control": true, "sublicensing_allowed": false },
+        { "name": "OEM grant", "direction": "outbound", "annual_royalty_cents": 50000, "change_of_control_consent_required": true }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "license_count": 2,
+        "inbound_license_count": 1,
+        "outbound_license_count": 1,
+        "annual_royalty_cents": 150000,
+        "change_of_control_consent_required_count": 1,
+        "terminates_on_change_of_control_count": 1,
+        "material_dependency_count": 1
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.IP.LICENSES.002",
+    "title": "License dependency map refuses missing licenses",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.IP.LICENSE.DEPENDENCY.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["licenses"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.IP.ESCROW.001",
+    "title": "Source-code escrow computes trigger count, verification tier, and next deposit",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.IP.SOURCE_CODE_ESCROW.v1",
+    "input": {
+      "release_triggers": ["insolvency", "support discontinuation", "material breach"],
+      "deposit_verification_tier": "build verified",
+      "last_deposit_date": "2026-05-21",
+      "update_frequency_months": 3
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "release_trigger_count": 3,
+        "deposit_verification_tier": "build_verified",
+        "build_verified": true,
+        "run_tested": false,
+        "next_deposit_due_date": "2026-08-21"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.IP.ESCROW.002",
+    "title": "Source-code escrow refuses missing verification tier",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.IP.SOURCE_CODE_ESCROW.v1",
+    "input": {
+      "release_triggers": ["insolvency"]
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["deposit_verification_tier"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.IP.1060.001",
+    "title": "IP-specific 1060 allocation maps Class V, VI, and VII",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.IP.1060.ALLOCATION.v1",
+    "input": {
+      "purchase_price_cents": 1000000,
+      "tangible_assets_cents": 200000,
+      "ip_intangibles_cents": 600000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "class_v_tangible_assets_cents": 200000,
+        "class_vi_ip_section_197_intangibles_cents": 600000,
+        "class_vii_goodwill_going_concern_cents": 200000,
+        "form_8594_reconciliation_total_cents": 1000000
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.IP.1060.002",
+    "title": "IP-specific 1060 allocation refuses missing IP value",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.IP.1060.ALLOCATION.v1",
+    "input": {
+      "purchase_price_cents": 1000000,
+      "tangible_assets_cents": 200000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["ip_intangibles_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.IP.DOMAIN_TM.001",
+    "title": "Domain and trademark transfer mechanics compute transfer requirements",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.IP.DOMAIN_TM.TRANSFER.v1",
+    "input": {
+      "transfer_assets": [
+        { "type": "domain", "name": "example.com", "transfer_lock_days_remaining": 45, "ssl_certificate_attached": true },
+        { "type": "trademark", "name": "EXAMPLE", "state_registered": true },
+        { "type": "social", "name": "@example" }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "transfer_asset_count": 3,
+        "domain_count": 1,
+        "trademark_count": 1,
+        "auth_code_required_count": 1,
+        "locked_domain_count": 1,
+        "uspto_assignment_recording_count": 1,
+        "state_assignment_required_count": 1,
+        "social_handle_transfer_count": 1,
+        "ssl_reissue_count": 1
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.IP.DOMAIN_TM.002",
+    "title": "Domain and trademark transfer mechanics refuses missing assets",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.IP.DOMAIN_TM.TRANSFER.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["transfer_assets"]
+    }
   }
 ]

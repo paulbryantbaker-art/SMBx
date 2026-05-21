@@ -153,16 +153,16 @@ Agent-facing discovery includes:
 - `/.well-known/definitive.json`
 - `/api/definitive/spec`
 
-The V19 runtime remains the current execution baseline while expanded DEFINITIVE model functions land in batches. The first v1.1 executable slices are now implemented for 1060 allocation, FIRPTA withholding, 1031 timing, sale-leaseback/ASC 842, REIT compliance, rent-roll normalization, CAM true-up, convertible/SAFE conversion, ABL borrowing base, make-whole/call protection, covenant baskets, 280G, 382 NOL limitation, connected transaction tax, indemnity ladder, survival periods, escrow/holdback sizing, closing true-up, conditions logic, and termination-fee economics.
+The V19 runtime remains the current execution baseline while expanded DEFINITIVE model functions land in batches. The first v1.1 executable slices are now implemented for 1060 allocation, FIRPTA withholding, 1031 timing, sale-leaseback/ASC 842, REIT compliance, rent-roll normalization, CAM true-up, RE-heavy asset/entity election, RE/operating-business bifurcation, NOI/cap-rate bridge, lease abstraction, PCA reserve modeling, FIRPTA v1.1, convertible/SAFE conversion, ABL borrowing base, make-whole/call protection, covenant baskets, 280G, 382 NOL limitation, connected transaction tax, indemnity ladder, survival periods, escrow/holdback sizing, closing true-up, conditions logic, termination-fee economics, license dependency mapping, source-code escrow, IP-specific 1060 allocation, and domain/trademark transfer mechanics.
 
 ## Next Build Runs
 
-1. Continue deterministic runtime functions and schemas for the v1.1 executable batch. Twenty-four models are executable with conformance coverage: M139, M169-M172, M180, M182-M186, M189, M192, M200-M204, M206-M208, and M210-M212. Next targets are M187-M188, M190, M193, M198-M199, M216, M219, M222, and M223.
+1. Continue deterministic runtime functions and schemas for the v1.1 executable batch. Thirty-four models are executable with conformance coverage: M139, M169-M172, M180, M182-M190, M192-M193, M198-M204, M206-M208, M210-M212, M216, M219, and M222-M223. Next targets are M195-M196, M214-M215, M217, and M220-M221.
 2. Expand Authority Register from 500+ target to 800+ target, prioritizing bankruptcy, restructuring, IRC/Treasury, real estate, IP, agreement architecture, pass-through pricing, recovery data, digital assets, and regulated-industry sources.
 3. Publish the Pass-Through Substrate Catalog with per-call cost, fixed margin, source type, and THE LINE boundary.
 4. Add Yulia prompt/runtime language so research-only, professional-handoff, and pass-through models are useful without crossing THE LINE.
 5. Connect route-level applicable mechanics to Today, Pipeline, Files, and Studio surfaces after the chat/tool contract is stable.
 
 Completed first pass: `compose_model_stack` now uses the route map as Yulia's deal-profile classifier. It returns applicable mechanics, readiness, tool surfaces, and THE LINE boundary by deal profile, including G28/G29/G30 trigger overlays.
-Completed runtime slices: M139, M169-M172, M180, M182-M186, M189, M192, M200-M204, M206-M208, and M210-M212 are mapped to `MODEL.*.v1` runtime ids with deterministic functions, registry entries, and complete/missing-input fixtures.
-Completed first conformance pass: `npm run test:definitive-conformance` now includes 110 cases: 98 model-runtime cases and 12 deal-mechanics route cases spanning real estate, connected tax, agreement architecture, IP, restructuring, LME, capital structure, secondaries, crypto, carve-out/JV, and venture/PIPE profiles.
+Completed runtime slices: M139, M169-M172, M180, M182-M190, M192-M193, M198-M204, M206-M208, M210-M212, M216, M219, and M222-M223 are mapped to `MODEL.*.v1` runtime ids with deterministic functions, registry entries, and complete/missing-input fixtures.
+Completed first conformance pass: `npm run test:definitive-conformance` now includes 130 cases: 118 model-runtime cases and 12 deal-mechanics route cases spanning real estate, connected tax, agreement architecture, IP, restructuring, LME, capital structure, secondaries, crypto, carve-out/JV, and venture/PIPE profiles.

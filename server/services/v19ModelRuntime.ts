@@ -1044,6 +1044,304 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
       },
     };
   }),
+  'MODEL.RE.ASSET_ENTITY.ELECTION.v1': defineModel('MODEL.RE.ASSET_ENTITY.ELECTION.v1', ['enterprise_value_cents', 'real_property_value_cents'], ['[IRC 1001]', '[IRC 1060]', '[IRC 197]'], input => {
+    const enterpriseValue = cents(input.enterprise_value_cents);
+    const realPropertyValue = cents(input.real_property_value_cents);
+    const entityCarriedBasis = cents(input.entity_carried_basis_cents) ?? 0;
+    const transferTaxRate = number(input.transfer_tax_rate) ?? 0;
+    const stepUpBenefitRate = number(input.step_up_benefit_rate) ?? 0;
+    const debtAssumable = booleanInput(input.debt_assumable);
+    const missing = requireInputs({ enterprise_value_cents: enterpriseValue, real_property_value_cents: realPropertyValue });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const realEstatePct = enterpriseValue! > 0 ? realPropertyValue! / enterpriseValue! : 0;
+    const transferTax = Math.round(realPropertyValue! * transferTaxRate);
+    const stepUp = Math.max(0, enterpriseValue! - entityCarriedBasis);
+    return {
+      outputs: {
+        enterprise_value_cents: enterpriseValue,
+        real_property_value_cents: realPropertyValue,
+        real_estate_pct_of_ev: round(realEstatePct, 4),
+        g30_real_estate_overlay_triggered: realEstatePct >= 0.25,
+        asset_deal_buyer_basis_cents: enterpriseValue,
+        entity_deal_buyer_outside_basis_cents: enterpriseValue,
+        entity_carried_basis_cents: entityCarriedBasis,
+        buyer_step_up_cents: stepUp,
+        buyer_step_up_pv_benefit_cents: Math.round(stepUp * stepUpBenefitRate),
+        transfer_tax_rate: round(transferTaxRate, 4),
+        transfer_tax_cents: transferTax,
+        debt_assumability: debtAssumable == null ? 'not_supplied' : debtAssumable ? 'assumable_on_supplied_facts' : 'consent_or_refinance_required',
+        in_place_lease_treatment: String(input.in_place_lease_treatment || 'assumption_or_assignment_to_confirm'),
+      },
+    };
+  }),
+  'MODEL.RE.OPBUS.BIFURCATION.v1': defineModel('MODEL.RE.OPBUS.BIFURCATION.v1', ['enterprise_value_cents', 'noi_cents', 'cap_rate'], ['[Treas. Reg. 1.338-6]', '[IRS Form 8594]'], input => {
+    const enterpriseValue = cents(input.enterprise_value_cents);
+    const noi = cents(input.noi_cents);
+    const capRate = number(input.cap_rate);
+    const classViIntangibles = cents(input.class_vi_intangibles_cents) ?? 0;
+    const missing = requireInputs({ enterprise_value_cents: enterpriseValue, noi_cents: noi, cap_rate: capRate });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const uncappedRealEstateValue = capRate! > 0 ? Math.round(noi! / capRate!) : 0;
+    const realEstateValue = Math.min(enterpriseValue!, uncappedRealEstateValue);
+    const remainingAfterClassV = Math.max(0, enterpriseValue! - realEstateValue);
+    const classVi = Math.min(classViIntangibles, remainingAfterClassV);
+    const classVii = Math.max(0, enterpriseValue! - realEstateValue - classVi);
+    return {
+      outputs: {
+        enterprise_value_cents: enterpriseValue,
+        noi_cents: noi,
+        cap_rate: round(capRate!, 4),
+        uncapped_real_estate_value_cents: uncappedRealEstateValue,
+        real_estate_value_cents: realEstateValue,
+        operating_business_residual_value_cents: Math.max(0, enterpriseValue! - realEstateValue),
+        class_v_real_property_and_tangible_cents: realEstateValue,
+        class_vi_section_197_intangibles_cents: classVi,
+        class_vii_goodwill_going_concern_cents: classVii,
+        form_8594_reconciliation_total_cents: realEstateValue + classVi + classVii,
+      },
+    };
+  }),
+  'MODEL.RE.NOI.CAP_RATE_BRIDGE.v1': defineModel('MODEL.RE.NOI.CAP_RATE_BRIDGE.v1', ['effective_gross_income_cents', 'operating_expenses_cents', 'cap_rate'], ['[Appraisal Institute Practice]', '[Real Estate Industry Practice]'], input => {
+    const effectiveGrossIncome = cents(input.effective_gross_income_cents);
+    const operatingExpenses = cents(input.operating_expenses_cents);
+    const capRate = number(input.cap_rate);
+    const purchasePrice = cents(input.purchase_price_cents);
+    const replacementReserve = cents(input.replacement_reserve_cents) ?? 0;
+    const missing = requireInputs({ effective_gross_income_cents: effectiveGrossIncome, operating_expenses_cents: operatingExpenses, cap_rate: capRate });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const normalizedNoi = effectiveGrossIncome! - operatingExpenses! - replacementReserve;
+    return {
+      outputs: {
+        effective_gross_income_cents: effectiveGrossIncome,
+        operating_expenses_cents: operatingExpenses,
+        replacement_reserve_cents: replacementReserve,
+        normalized_noi_cents: normalizedNoi,
+        cap_rate: round(capRate!, 4),
+        value_from_cap_rate_cents: capRate! > 0 ? Math.round(normalizedNoi / capRate!) : null,
+        purchase_price_cents: purchasePrice,
+        implied_cap_rate: purchasePrice && purchasePrice > 0 ? round(normalizedNoi / purchasePrice, 4) : null,
+        pass_through_market_rate_required: booleanInput(input.market_cap_rate_from_pass_through_source) !== true,
+      },
+    };
+  }),
+  'MODEL.RE.LEASE_ABSTRACTION.v1': defineModel('MODEL.RE.LEASE_ABSTRACTION.v1', ['leases'], ['[Lease Abstraction Industry Practice]'], input => {
+    const leases = objectArray(input.leases);
+    const asOfDate = dateText(input.as_of_date);
+    const missing = requireInputs({ leases: leases.length ? leases : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const rows = leases.map((lease, index) => {
+      const annualRent = cents(lease.annual_rent_cents) ?? 0;
+      const monthsRemaining = number(lease.months_remaining) ?? monthsUntil(dateText(lease.expiry_date), asOfDate);
+      const cocConsent = booleanInput(lease.change_of_control_consent_required) ?? false;
+      return {
+        tenant: String(lease.tenant || lease.name || `Lease ${index + 1}`),
+        annual_rent_cents: annualRent,
+        expiry_date: dateText(lease.expiry_date),
+        months_remaining: monthsRemaining,
+        assignment_consent_required: booleanInput(lease.assignment_consent_required) ?? false,
+        change_of_control_consent_required: cocConsent,
+        renewal_options_count: number(lease.renewal_options_count) ?? 0,
+        exclusive_use: booleanInput(lease.exclusive_use) ?? false,
+        co_tenancy: booleanInput(lease.co_tenancy) ?? false,
+        go_dark: booleanInput(lease.go_dark) ?? false,
+      };
+    });
+    const totalRent = rows.reduce((sum, row) => sum + row.annual_rent_cents, 0);
+    const waltNumerator = rows.reduce((sum, row) => sum + row.annual_rent_cents * (row.months_remaining ?? 0), 0);
+    return {
+      outputs: {
+        lease_count: rows.length,
+        annual_rent_cents: totalRent,
+        walt_months: totalRent > 0 ? round(waltNumerator / totalRent, 1) : null,
+        assignment_consent_required_count: rows.filter(row => row.assignment_consent_required).length,
+        change_of_control_consent_required_count: rows.filter(row => row.change_of_control_consent_required).length,
+        exclusives_count: rows.filter(row => row.exclusive_use).length,
+        co_tenancy_count: rows.filter(row => row.co_tenancy).length,
+        go_dark_count: rows.filter(row => row.go_dark).length,
+        abstraction_rows: rows,
+      },
+    };
+  }),
+  'MODEL.RE.PCA.RESERVES.v1': defineModel('MODEL.RE.PCA.RESERVES.v1', ['pca_items'], ['[ASTM E2018]', '[Lender Practice]'], input => {
+    const items = objectArray(input.pca_items);
+    const lenderReservePct = number(input.lender_reserve_pct) ?? 1;
+    const missing = requireInputs({ pca_items: items.length ? items : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const rows = items.map((item, index) => {
+      const immediate = cents(item.immediate_repair_cents) ?? 0;
+      const year1To3 = cents(item.year_1_3_cents) ?? cents(item.near_term_cents) ?? 0;
+      const year4To5 = cents(item.year_4_5_cents) ?? 0;
+      const year6To12 = cents(item.year_6_12_cents) ?? 0;
+      return {
+        item: String(item.item || item.name || `PCA item ${index + 1}`),
+        immediate_repair_cents: immediate,
+        year_1_3_cents: year1To3,
+        year_4_5_cents: year4To5,
+        year_6_12_cents: year6To12,
+        total_reserve_cents: immediate + year1To3 + year4To5 + year6To12,
+        source: String(item.source || 'pass_through_pca_report'),
+      };
+    });
+    const immediateTotal = rows.reduce((sum, row) => sum + row.immediate_repair_cents, 0);
+    return {
+      outputs: {
+        pca_item_count: rows.length,
+        immediate_repair_escrow_cents: Math.round(immediateTotal * lenderReservePct),
+        year_1_3_reserve_cents: rows.reduce((sum, row) => sum + row.year_1_3_cents, 0),
+        year_4_5_reserve_cents: rows.reduce((sum, row) => sum + row.year_4_5_cents, 0),
+        year_6_12_reserve_cents: rows.reduce((sum, row) => sum + row.year_6_12_cents, 0),
+        total_replacement_reserve_cents: rows.reduce((sum, row) => sum + row.total_reserve_cents, 0),
+        pca_pass_through_source_required: true,
+        reserve_rows: rows,
+      },
+    };
+  }),
+  'MODEL.RE.FIRPTA.WITHHOLDING.V11.v1': defineModel('MODEL.RE.FIRPTA.WITHHOLDING.V11.v1', ['amount_realized_cents', 'seller_foreign_person'], ['[IRC 897]', '[IRC 1445]', '[IRS Form 8288]', '[IRS Form 8288-A]', '[IRS Form 8288-B]'], input => {
+    const amountRealized = cents(input.amount_realized_cents);
+    const sellerForeign = booleanInput(input.seller_foreign_person);
+    const residenceUse = booleanInput(input.buyer_will_use_as_residence) ?? false;
+    const closingDate = dateText(input.closing_date);
+    const reducedCertificateRequested = booleanInput(input.form_8288_b_reduced_withholding_requested) ?? false;
+    const exchange1031 = booleanInput(input.section_1031_exchange) ?? false;
+    const missing = requireInputs({ amount_realized_cents: amountRealized, seller_foreign_person: sellerForeign });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    let withholdingRate = 0;
+    let path = 'not_foreign_seller';
+    if (sellerForeign) {
+      if (residenceUse && amountRealized! <= 30000000) {
+        path = 'personal_residence_300k_or_less_exemption';
+      } else if (residenceUse && amountRealized! <= 100000000) {
+        withholdingRate = 0.10;
+        path = 'personal_residence_300k_to_1m_reduced_rate';
+      } else {
+        withholdingRate = 0.15;
+        path = 'default_firpta_withholding';
+      }
+    }
+    return {
+      outputs: {
+        amount_realized_cents: amountRealized,
+        seller_foreign_person: sellerForeign,
+        buyer_will_use_as_residence: residenceUse,
+        withholding_rate: withholdingRate,
+        withholding_amount_cents: Math.round(amountRealized! * withholdingRate),
+        path,
+        forms_8288_due_date: sellerForeign && withholdingRate > 0 && closingDate ? addDays(closingDate, 20) : null,
+        form_8288_b_reduced_withholding_requested: reducedCertificateRequested,
+        reduced_certificate_processing_days_estimate: reducedCertificateRequested ? 90 : null,
+        section_1031_timing_gap_flag: exchange1031 && sellerForeign && withholdingRate > 0,
+      },
+    };
+  }),
+  'MODEL.IP.LICENSE.DEPENDENCY.v1': defineModel('MODEL.IP.LICENSE.DEPENDENCY.v1', ['licenses'], ['[IP Licensing Industry Practice]'], input => {
+    const licenses = objectArray(input.licenses);
+    const missing = requireInputs({ licenses: licenses.length ? licenses : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const rows = licenses.map((license, index) => {
+      const direction = String(license.direction || license.type || 'inbound').toLowerCase().includes('out') ? 'outbound' : 'inbound';
+      const annualRoyalty = cents(license.annual_royalty_cents ?? license.royalty_cents) ?? 0;
+      const cocConsent = booleanInput(license.change_of_control_consent_required) ?? false;
+      const terminates = booleanInput(license.terminates_on_change_of_control) ?? false;
+      const sublicensing = booleanInput(license.sublicensing_allowed) ?? false;
+      return {
+        name: String(license.name || license.license_name || `License ${index + 1}`),
+        direction,
+        scope: String(license.scope || 'not_supplied'),
+        exclusive: booleanInput(license.exclusive) ?? false,
+        annual_royalty_cents: annualRoyalty,
+        change_of_control_consent_required: cocConsent,
+        terminates_on_change_of_control: terminates,
+        sublicensing_allowed: sublicensing,
+        material_dependency_flag: direction === 'inbound' && (cocConsent || terminates || !sublicensing),
+      };
+    });
+    return {
+      outputs: {
+        license_count: rows.length,
+        inbound_license_count: rows.filter(row => row.direction === 'inbound').length,
+        outbound_license_count: rows.filter(row => row.direction === 'outbound').length,
+        annual_royalty_cents: rows.reduce((sum, row) => sum + row.annual_royalty_cents, 0),
+        change_of_control_consent_required_count: rows.filter(row => row.change_of_control_consent_required).length,
+        terminates_on_change_of_control_count: rows.filter(row => row.terminates_on_change_of_control).length,
+        material_dependency_count: rows.filter(row => row.material_dependency_flag).length,
+        license_rows: rows,
+      },
+    };
+  }),
+  'MODEL.IP.SOURCE_CODE_ESCROW.v1': defineModel('MODEL.IP.SOURCE_CODE_ESCROW.v1', ['release_triggers', 'deposit_verification_tier'], ['[Escode]', '[Codekeeper]', '[Iron Mountain Escrow Templates]'], input => {
+    const triggers = stringArray(input.release_triggers);
+    const tier = text(input.deposit_verification_tier);
+    const lastDepositDate = dateText(input.last_deposit_date);
+    const updateFrequencyMonths = number(input.update_frequency_months) ?? 3;
+    const missing = requireInputs({ release_triggers: triggers.length ? triggers : null, deposit_verification_tier: tier });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const normalizedTier = tier!.toLowerCase().replace(/\s+/g, '_');
+    return {
+      outputs: {
+        release_trigger_count: triggers.length,
+        release_triggers: triggers,
+        deposit_verification_tier: normalizedTier,
+        build_verified: /build|run|tested/.test(normalizedTier),
+        run_tested: /run|tested/.test(normalizedTier),
+        update_frequency_months: updateFrequencyMonths,
+        last_deposit_date: lastDepositDate,
+        next_deposit_due_date: lastDepositDate ? addMonths(lastDepositDate, updateFrequencyMonths) : null,
+      },
+    };
+  }),
+  'MODEL.IP.1060.ALLOCATION.v1': defineModel('MODEL.IP.1060.ALLOCATION.v1', ['purchase_price_cents', 'tangible_assets_cents', 'ip_intangibles_cents'], ['[IRC 1060]', '[Treas. Reg. 1.338-6(b)]', '[Treas. Reg. 1.1060-1]', '[IRS Form 8594]'], input => {
+    const purchasePrice = cents(input.purchase_price_cents);
+    const tangible = cents(input.tangible_assets_cents);
+    const ip = cents(input.ip_intangibles_cents);
+    const missing = requireInputs({ purchase_price_cents: purchasePrice, tangible_assets_cents: tangible, ip_intangibles_cents: ip });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const classV = Math.min(purchasePrice!, tangible!);
+    const remainingAfterV = Math.max(0, purchasePrice! - classV);
+    const classVi = Math.min(remainingAfterV, ip!);
+    const classVii = Math.max(0, purchasePrice! - classV - classVi);
+    return {
+      outputs: {
+        purchase_price_cents: purchasePrice,
+        class_v_tangible_assets_cents: classV,
+        class_vi_ip_section_197_intangibles_cents: classVi,
+        class_vii_goodwill_going_concern_cents: classVii,
+        ip_value_excess_over_purchase_price_cents: Math.max(0, ip! - remainingAfterV),
+        form_8594_reconciliation_total_cents: classV + classVi + classVii,
+      },
+    };
+  }),
+  'MODEL.IP.DOMAIN_TM.TRANSFER.v1': defineModel('MODEL.IP.DOMAIN_TM.TRANSFER.v1', ['transfer_assets'], ['[ICANN Transfer Rules]', '[USPTO Form PTO-1594]'], input => {
+    const assets = objectArray(input.transfer_assets);
+    const missing = requireInputs({ transfer_assets: assets.length ? assets : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const rows = assets.map((asset, index) => {
+      const type = String(asset.type || asset.asset_type || 'domain').toLowerCase();
+      return {
+        name: String(asset.name || asset.identifier || `Asset ${index + 1}`),
+        type,
+        auth_code_required: type.includes('domain'),
+        transfer_lock_days_remaining: number(asset.transfer_lock_days_remaining) ?? 0,
+        uspto_assignment_recording_required: type.includes('trademark'),
+        state_assignment_required: booleanInput(asset.state_registered) ?? false,
+        social_handle_transfer_required: type.includes('social'),
+        ssl_reissue_required: type.includes('ssl') || booleanInput(asset.ssl_certificate_attached) === true,
+      };
+    });
+    return {
+      outputs: {
+        transfer_asset_count: rows.length,
+        domain_count: rows.filter(row => row.type.includes('domain')).length,
+        trademark_count: rows.filter(row => row.type.includes('trademark')).length,
+        auth_code_required_count: rows.filter(row => row.auth_code_required).length,
+        locked_domain_count: rows.filter(row => row.transfer_lock_days_remaining > 0).length,
+        uspto_assignment_recording_count: rows.filter(row => row.uspto_assignment_recording_required).length,
+        state_assignment_required_count: rows.filter(row => row.state_assignment_required).length,
+        social_handle_transfer_count: rows.filter(row => row.social_handle_transfer_required).length,
+        ssl_reissue_count: rows.filter(row => row.ssl_reissue_required).length,
+        transfer_rows: rows,
+      },
+    };
+  }),
   'MODEL.BUYER.FIT.v1': defineModel('MODEL.BUYER.FIT.v1', ['industry', 'location', 'deal_size_cents', 'buyer_thesis', 'operating_needs'], ['[Pepperdine PCAP 2025]'], input => {
     const industry = text(input.industry);
     const location = text(input.location);

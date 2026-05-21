@@ -5,7 +5,7 @@ import {
   DEFINITIVE_SPEC_VERSION,
 } from '../constants/definitive.js';
 
-export const DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT = 98;
+export const DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT = 118;
 export const DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT = 12;
 export const DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT =
   DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT + DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT;
@@ -17,10 +17,12 @@ export const DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CATEGORIES = [
   'qoe_lite',
   'tax_structure',
   'real_estate_mechanics',
+  'real_estate_gap_closure',
   'agreement_economics',
   'connected_tax',
   'tax_allocation',
   'credit_mechanics',
+  'ip_mechanics',
   'dscr_stress',
   'sources_uses',
   'lbo',
@@ -70,6 +72,6 @@ export function buildDefinitiveConformanceStatus() {
       'refusal states',
     ],
     command: 'npm run test:definitive-conformance',
-    nextTarget: 100,
+    nextTarget: 150,
   };
 }

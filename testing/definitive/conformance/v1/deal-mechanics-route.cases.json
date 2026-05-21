@@ -15,7 +15,7 @@
     "expect": {
       "slotIdsInclude": ["M187", "M189", "M190", "M196", "M199"],
       "readinessAtLeast": {
-        "planning_only": 4,
+        "executable": 5,
         "pass_through_required": 3,
         "professional_handoff": 2
       },
@@ -60,7 +60,8 @@
     "expect": {
       "slotIdsInclude": ["M206", "M207", "M208", "M210", "M211", "M212"],
       "readinessAtLeast": {
-        "planning_only": 6,
+        "planning_only": 5,
+        "executable": 6,
         "professional_handoff": 4
       },
       "toolSurfacesInclude": {
