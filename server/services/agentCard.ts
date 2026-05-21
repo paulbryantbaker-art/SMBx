@@ -4,7 +4,10 @@ import { listV19ResourceContract } from './v19ResourceContract.js';
 import { listDefinitiveLineInventory } from './agencyActionRegistry.js';
 import { listDefinitiveCorpusObservationTypes } from './definitiveCorpusService.js';
 import { buildDefinitiveConformanceStatus } from './definitiveConformanceStatus.js';
-import { getDefinitiveDealRouteMapSummary } from './definitiveDealRouteMap.js';
+import {
+  buildDefinitiveSurfaceMechanicsSummary,
+  getDefinitiveDealRouteMapSummary,
+} from './definitiveDealRouteMap.js';
 import {
   getDefinitiveDealMappingCoverage,
   getDefinitiveDealMechanicsSummary,
@@ -21,6 +24,7 @@ export function buildAgentCard() {
   const dealMechanics = getDefinitiveDealMechanicsSummary();
   const dealMappingCoverage = getDefinitiveDealMappingCoverage();
   const dealRouteMap = getDefinitiveDealRouteMapSummary();
+  const surfaceMechanics = buildDefinitiveSurfaceMechanicsSummary();
   const passThroughSurface = getDefinitivePassThroughSurface();
   const lineSummary = lineInventory.reduce<Record<string, number>>((acc, contract) => {
     acc[contract.lineStatus] = (acc[contract.lineStatus] || 0) + 1;
@@ -149,6 +153,11 @@ export function buildAgentCard() {
         routeMapStatus: dealRouteMap.status,
         routeMapEntries: dealRouteMap.routeMapEntries,
         routeReadinessCounts: dealRouteMap.readinessCounts,
+        surfaces: surfaceMechanics.map(surface => ({
+          surface: surface.surface,
+          totalMechanics: surface.totalMechanics,
+          readiness: surface.readiness,
+        })),
       },
       {
         id: 'definitive_pass_through_surface',

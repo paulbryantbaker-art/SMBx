@@ -161,7 +161,7 @@ The V19 runtime remains the current execution baseline while expanded DEFINITIVE
 2. Expand Authority Register from 500+ target to 800+ target, prioritizing bankruptcy, restructuring, IRC/Treasury, real estate, IP, agreement architecture, pass-through pricing, recovery data, digital assets, and regulated-industry sources.
 3. Pass-Through Substrate Catalog first pass is published with per-call pricing posture, fixed margin, source type, provider examples, dependent model slots, and THE LINE boundary.
 4. Keep tightening Yulia prompt/runtime language so research-only, professional-handoff, and pass-through models are useful without crossing THE LINE.
-5. Connect route-level applicable mechanics to Today, Pipeline, Files, and Studio surfaces after the chat/tool contract is stable.
+5. Surface mechanics contract is now available for Today, Pipeline, Files, and Studio; next is visual rendering in saved V6 primitives after the chat/tool contract stays stable.
 
 Completed first pass: `compose_model_stack` now uses the route map as Yulia's deal-profile classifier. It returns applicable mechanics, readiness, tool surfaces, and THE LINE boundary by deal profile, including G28/G29/G30 trigger overlays.
 Completed runtime slices: M139, M148, M151-M160, M164-M172, and M177-M223 are mapped to `MODEL.*.v1` runtime ids with deterministic functions, registry entries, and complete/missing-input fixtures.

@@ -9,6 +9,7 @@ import { buildDefinitiveConformanceStatus } from './definitiveConformanceStatus.
 import { listDefinitiveCorpusObservationTypes } from './definitiveCorpusService.js';
 import {
   buildDefinitiveDealRouteMap,
+  buildDefinitiveSurfaceMechanicsSummary,
   getDefinitiveDealRouteMapSummary,
 } from './definitiveDealRouteMap.js';
 import {
@@ -28,6 +29,7 @@ export function buildDefinitiveSpecManifest() {
   const mappingCoverage = getDefinitiveDealMappingCoverage();
   const routeMapSummary = getDefinitiveDealRouteMapSummary();
   const routeMap = buildDefinitiveDealRouteMap();
+  const surfaceMechanics = buildDefinitiveSurfaceMechanicsSummary();
   const gateExpansions = listDefinitiveGateExpansions();
   const passThroughSurface = getDefinitivePassThroughSurface();
   const lineSummary = lineInventory.reduce<Record<string, number>>((acc, contract) => {
@@ -140,6 +142,7 @@ export function buildDefinitiveSpecManifest() {
           boundary: route.boundary,
         })),
       },
+      surfaceMechanics,
       catalogVersion: dealMechanics.version,
       catalogUri: dealMechanics.uri,
       gateExpansions: gateExpansions.map(gate => ({

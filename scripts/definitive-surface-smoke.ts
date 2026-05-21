@@ -22,6 +22,7 @@ import {
 } from '../server/services/definitiveConformanceStatus.js';
 import {
   buildDefinitiveDealRouteMap,
+  buildDefinitiveSurfaceMechanicsSummary,
   buildDefinitiveYuliaMechanicsBrief,
   composeDefinitiveApplicableMechanics,
   findDefinitiveDealRoutes,
@@ -103,6 +104,7 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assertEqual(mechanicsCapability.gates, DEFINITIVE_DEAL_MECHANICS_GATE_COUNT, 'deal mechanics capability gate count');
   assertDeepEqual(mechanicsCapability.newGates, ['G28', 'G29', 'G30'], 'deal mechanics new gates');
   assertEqual(mechanicsCapability.authorityRegisterTarget, DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'deal mechanics authority target');
+  assert(mechanicsCapability.surfaces.some((item: any) => item.surface === 'pipeline' && item.totalMechanics > 0), 'agent card exposes pipeline mechanics surface');
 });
 
 await test('DEFINITIVE manifest is a single stable discovery document', async () => {
@@ -130,6 +132,10 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assertEqual(manifest.dealMechanicsSurface.mappingCoverage.unmappedModelSlots, 0, 'manifest has no unmapped active model slots');
   assertEqual(manifest.dealMechanicsSurface.routeMap.summary.status, 'complete', 'manifest route map coverage status');
   assertEqual(manifest.dealMechanicsSurface.routeMap.entries.length, DEFINITIVE_DEAL_MECHANICS_MODEL_SLOT_COUNT, 'manifest route map entry count');
+  assert(manifest.dealMechanicsSurface.surfaceMechanics.some(item => item.surface === 'today'), 'manifest exposes Today mechanics summary');
+  assert(manifest.dealMechanicsSurface.surfaceMechanics.some(item => item.surface === 'pipeline'), 'manifest exposes Pipeline mechanics summary');
+  assert(manifest.dealMechanicsSurface.surfaceMechanics.some(item => item.surface === 'files'), 'manifest exposes Files mechanics summary');
+  assert(manifest.dealMechanicsSurface.surfaceMechanics.some(item => item.surface === 'studio'), 'manifest exposes Studio mechanics summary');
   assertDeepEqual(manifest.dealMechanicsSurface.summary.newGates, ['G28', 'G29', 'G30'], 'manifest new gates');
   assert(manifest.dealMechanicsSurface.gateExpansions.some(gate => gate.gateId === 'G28'), 'manifest includes G28');
   assert(manifest.dealMechanicsSurface.gateExpansions.some(gate => gate.gateId === 'G29'), 'manifest includes G29');
@@ -162,6 +168,7 @@ await test('DEFINITIVE catalog includes the M187-M223 closing-gap expansion', as
 await test('DEFINITIVE route map makes every active M-slot usable by Yulia', async () => {
   const routeMap = buildDefinitiveDealRouteMap();
   const summary = getDefinitiveDealRouteMapSummary();
+  const surfaceSummary = buildDefinitiveSurfaceMechanicsSummary();
   assertEqual(routeMap.length, DEFINITIVE_DEAL_MECHANICS_MODEL_SLOT_COUNT, 'route map covers every slot');
   assertEqual(summary.status, 'complete', 'route map summary is complete');
   assertEqual(summary.missingRouteEntries, 0, 'no active route entries are missing route metadata');
@@ -193,6 +200,10 @@ await test('DEFINITIVE route map makes every active M-slot usable by Yulia', asy
   assert(applicableSummary.executable > 0, 'applicable mechanics exposes executable model-backed routes');
   assert(applicableMechanics.some(route => route.toolSurfaces.includes('pass_through_catalog')), 'applicable mechanics exposes pass-through catalog surfaces');
   assert(yuliaBrief.some(line => line.includes('THE LINE')), 'Yulia mechanics brief calls out THE LINE boundaries');
+  assert(surfaceSummary.find(item => item.surface === 'today')?.yuliaGuidance.some(line => line.includes('next action')), 'Today summary tells Yulia how to prioritize');
+  assert(surfaceSummary.find(item => item.surface === 'pipeline')?.needs.professionalHandoff.length, 'Pipeline summary exposes handoff needs');
+  assert(surfaceSummary.find(item => item.surface === 'files')?.needs.passThrough.length, 'Files summary exposes pass-through needs');
+  assert(surfaceSummary.find(item => item.surface === 'studio')?.visibleModelSlots.includes('M206'), 'Studio summary includes agreement mechanics');
 });
 
 await test('THE LINE inventory includes explicit blocking states', async () => {

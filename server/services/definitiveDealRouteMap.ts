@@ -92,6 +92,22 @@ export interface DefinitiveApplicableMechanicsSummary {
   reserved: number;
 }
 
+export interface DefinitiveSurfaceMechanicsSummary {
+  surface: DefinitiveToolSurface;
+  title: string;
+  purpose: string;
+  totalMechanics: number;
+  readiness: DefinitiveApplicableMechanicsSummary;
+  visibleModelSlots: string[];
+  needs: {
+    executable: string[];
+    passThrough: string[];
+    professionalHandoff: string[];
+    researchOnly: string[];
+  };
+  yuliaGuidance: string[];
+}
+
 const PASS_THROUGH_MODEL_SLOTS = new Set(getDefinitivePassThroughSurface().dependentModelSlots);
 const ROUTE_PROFILE_STOPWORDS = new Set([
   'a',
@@ -254,6 +270,36 @@ export function buildDefinitiveYuliaMechanicsBrief(
   ];
 }
 
+export function buildDefinitiveSurfaceMechanicsSummary(): DefinitiveSurfaceMechanicsSummary[] {
+  const routes = buildDefinitiveDealRouteMap().filter(route => route.readiness !== 'reserved');
+  const surfaces: DefinitiveToolSurface[] = ['today', 'pipeline', 'files', 'studio'];
+
+  return surfaces.map(surface => {
+    const mechanics = routes
+      .filter(route => route.toolSurfaces.includes(surface))
+      .map(toApplicableMechanic);
+    const readiness = summarizeDefinitiveApplicableMechanics(mechanics);
+    const needs = {
+      executable: mechanics.filter(item => item.readiness === 'executable').map(item => item.slotId),
+      passThrough: mechanics
+        .filter(item => item.readiness === 'pass_through_required' || item.toolSurfaces.includes('pass_through_catalog'))
+        .map(item => item.slotId),
+      professionalHandoff: mechanics.filter(item => item.readiness === 'professional_handoff').map(item => item.slotId),
+      researchOnly: mechanics.filter(item => item.readiness === 'research_only').map(item => item.slotId),
+    };
+
+    return {
+      surface,
+      ...surfaceContract(surface),
+      totalMechanics: mechanics.length,
+      readiness,
+      visibleModelSlots: mechanics.map(item => item.slotId),
+      needs,
+      yuliaGuidance: surfaceYuliaGuidance(surface, readiness, needs.passThrough.length),
+    };
+  });
+}
+
 function buildRouteEntry(model: DefinitiveModelCatalogEntry): DefinitiveDealRouteMapEntry {
   const readiness = getReadiness(model);
   const journeys = readiness === 'reserved' ? [] : inferJourneys(model);
@@ -276,6 +322,65 @@ function buildRouteEntry(model: DefinitiveModelCatalogEntry): DefinitiveDealRout
     appliesWhen: buildAppliesWhen(model, journeys),
     boundary: buildBoundary(model, readiness),
   };
+}
+
+function surfaceContract(surface: DefinitiveToolSurface): { title: string; purpose: string } {
+  if (surface === 'today') {
+    return {
+      title: 'Today',
+      purpose: 'Show what needs attention now: executable model work, pass-through inputs, professional handoffs, and research-only caveats.',
+    };
+  }
+  if (surface === 'pipeline') {
+    return {
+      title: 'Pipeline',
+      purpose: 'Tie every opportunity to gates, model readiness, source gaps, and the next Yulia move before stage movement.',
+    };
+  }
+  if (surface === 'files') {
+    return {
+      title: 'Files',
+      purpose: 'Expose source, data-room, pass-through, and evidence requirements that unblock model-backed work.',
+    };
+  }
+  if (surface === 'studio') {
+    return {
+      title: 'Studio',
+      purpose: 'Keep work product grounded in model outputs, citations, source provenance, and handoff warnings before export.',
+    };
+  }
+  return {
+    title: surface,
+    purpose: 'DEFINITIVE route-map surface.',
+  };
+}
+
+function surfaceYuliaGuidance(
+  surface: DefinitiveToolSurface,
+  readiness: DefinitiveApplicableMechanicsSummary,
+  passThroughNeeds: number,
+): string[] {
+  const guidance = [
+    `${readiness.executable} executable mechanics can be shown as runnable model work.`,
+    passThroughNeeds > 0 && `${passThroughNeeds} mechanics need pass-through data/software before Yulia should present them as complete.`,
+    readiness.professionalHandoff > 0 && `${readiness.professionalHandoff} mechanics need the professional conclusion kept with counsel, advisor, specialist, or court.`,
+    readiness.researchOnly > 0 && `${readiness.researchOnly} mechanics are research-only and must be labeled before use.`,
+  ].filter((line): line is string => Boolean(line));
+
+  if (surface === 'pipeline') {
+    guidance.push('Pipeline movement should cite gate, model slot, source gap, and handoff state.');
+  }
+  if (surface === 'files') {
+    guidance.push('Files should show which source or pass-through input unblocks each mechanic.');
+  }
+  if (surface === 'studio') {
+    guidance.push('Studio exports should carry only sourced, model-backed, or explicitly caveated mechanics.');
+  }
+  if (surface === 'today') {
+    guidance.push('Today should prioritize the few mechanics that change the next action.');
+  }
+
+  return guidance;
 }
 
 function getReadiness(model: DefinitiveModelCatalogEntry): DefinitiveRouteReadiness {
