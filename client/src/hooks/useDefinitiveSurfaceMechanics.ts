@@ -77,10 +77,12 @@ export function useDefinitiveSurfaceMechanics() {
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 4500);
     setLoading(true);
     setError(null);
 
-    fetch("/api/definitive/spec")
+    fetch("/api/definitive/spec", { signal: controller.signal })
       .then(res => res.ok ? res.json() : Promise.reject(new Error(`definitive ${res.status}`)))
       .then((payload: DefinitiveSpecResponse) => {
         if (cancelled) return;
@@ -94,13 +96,18 @@ export function useDefinitiveSurfaceMechanics() {
       .catch((err: Error) => {
         if (cancelled) return;
         setContract(null);
-        setError(err.message);
+        setError(err.name === "AbortError" ? "definitive timeout" : err.message);
       })
       .finally(() => {
+        window.clearTimeout(timeout);
         if (!cancelled) setLoading(false);
       });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
   }, []);
 
   const bySurface = useMemo(() => {

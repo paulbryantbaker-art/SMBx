@@ -14,6 +14,7 @@ import {
   pickActionDeal,
   type ActionDeal,
 } from "../../../lib/v6ActionContracts";
+import { DefinitiveSurfacePanel } from "../shared/DefinitiveSurfacePanel";
 import type { SurfaceActionId } from "../../../lib/v6SurfaceActions";
 import { buildBigFakeInvestmentBoardTab } from "../../../lib/sampleInvestmentBoard";
 import { GATE_MAP, getGateV19Requirements, getJourneyGates, getNextGate } from "@shared/gateRegistry";
@@ -270,6 +271,14 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
           ))}
         </div>
       </V6Section>
+
+      <div style={P.definitivePanel}>
+        <DefinitiveSurfacePanel
+          surface="pipeline"
+          title="DEFINITIVE read for Pipeline."
+          onTalkToYulia={onTalkToYulia}
+        />
+      </div>
 
       <section style={P.boardShell}>
         <div style={P.boardHeader}>
@@ -813,6 +822,9 @@ const P: Record<string, CSSProperties> = {
     boxShadow: "0 22px 58px rgba(42,65,96,.11), inset 0 1px 0 rgba(255,255,255,.78)",
     backdropFilter: "blur(22px) saturate(155%)",
     WebkitBackdropFilter: "blur(22px) saturate(155%)",
+  },
+  definitivePanel: {
+    margin: "0 0 28px",
   },
   boardHeader: {
     display: "flex",

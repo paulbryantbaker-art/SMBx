@@ -16,6 +16,7 @@ import {
   studioListCardStyles,
   studioTextureCardStyles,
 } from "../styles/studioSurfaces";
+import { DefinitiveSurfacePanel } from "../shared/DefinitiveSurfacePanel";
 
 type Tone = "gold" | "cactus" | "oat" | "plum" | "charcoal";
 
@@ -569,6 +570,15 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
             <PriorityCard key={item.title} index={index + 1} {...item} />
           ))}
         </div>
+      </section>
+
+      <section style={T.section}>
+        <DefinitiveSurfacePanel
+          surface="today"
+          title="DEFINITIVE read for Today."
+          compact
+          onTalkToYulia={ask}
+        />
       </section>
 
       {operatingBrief && (

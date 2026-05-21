@@ -13,6 +13,7 @@ import {
   studioListCardStyles,
   studioTextureCardStyles,
 } from "../styles/studioSurfaces";
+import { DefinitiveSurfacePanel } from "../shared/DefinitiveSurfacePanel";
 
 interface MarketingStudioProps {
   tab: Tab;
@@ -390,6 +391,13 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
             ))}
           </div>
         </div>
+
+        <DefinitiveSurfacePanel
+          surface="studio"
+          title="DEFINITIVE read for Studio."
+          compact
+          onTalkToYulia={askYulia}
+        />
       </section>
     </main>
   );

@@ -15,6 +15,7 @@ import {
   studioTextureCardBackground,
   studioTextureCardStyles,
 } from "../styles/studioSurfaces";
+import { DefinitiveSurfacePanel } from "../shared/DefinitiveSurfacePanel";
 
 interface FilesRootProps {
   openTab: OpenTab;
@@ -248,6 +249,15 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
             );
           })}
         </div>
+      </section>
+
+      <section style={F.section}>
+        <DefinitiveSurfacePanel
+          surface="files"
+          title="DEFINITIVE read for Files."
+          compact
+          onTalkToYulia={ask}
+        />
       </section>
 
       <section className="m-flow-grid" style={F.grid}>
