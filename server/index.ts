@@ -130,6 +130,10 @@ app.get('/api/definitive/spec', (_req, res) => {
   res.json(buildDefinitiveSpecManifest());
 });
 
+app.get('/definitive/spec', (_req, res) => {
+  res.json(buildDefinitiveSpecManifest());
+});
+
 app.get('/api/definitive/pass-through-catalog', (_req, res) => {
   res.json(getDefinitivePassThroughSurface());
 });

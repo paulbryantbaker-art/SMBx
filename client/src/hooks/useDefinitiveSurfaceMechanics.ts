@@ -82,7 +82,7 @@ export function useDefinitiveSurfaceMechanics() {
     setLoading(true);
     setError(null);
 
-    fetch("/api/definitive/spec", { signal: controller.signal })
+    fetch("/definitive/spec", { signal: controller.signal })
       .then(res => res.ok ? res.json() : Promise.reject(new Error(`definitive ${res.status}`)))
       .then((payload: DefinitiveSpecResponse) => {
         if (cancelled) return;
