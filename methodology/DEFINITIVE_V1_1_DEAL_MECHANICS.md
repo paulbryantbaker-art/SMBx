@@ -157,10 +157,10 @@ The V19 runtime remains the current execution baseline while expanded DEFINITIVE
 
 ## Next Build Runs
 
-1. Continue deterministic runtime functions and schemas without changing THE LINE readiness. Sixty-eight models are executable with conformance coverage: M139, M148, M151-M160, M164-M172, and M177-M223. Eight volatile models now have research-only runtime scaffolds: M143, M161-M163, and M173-M176. Next targets are prompt/runtime language for research-only and handoff models plus authenticated route validation.
+1. Continue deterministic runtime functions and schemas without changing THE LINE readiness. Sixty-eight models are executable with conformance coverage: M139, M148, M151-M160, M164-M172, and M177-M223. Eight volatile models now have research-only runtime scaffolds: M143, M161-M163, and M173-M176. Prompt/runtime language for research-only, professional-handoff, and pass-through route briefs has a first pass; authenticated route validation is next once a DB/JWT fixture is available.
 2. Expand Authority Register from 500+ target to 800+ target, prioritizing bankruptcy, restructuring, IRC/Treasury, real estate, IP, agreement architecture, pass-through pricing, recovery data, digital assets, and regulated-industry sources.
-3. Publish the Pass-Through Substrate Catalog with per-call cost, fixed margin, source type, and THE LINE boundary.
-4. Add Yulia prompt/runtime language so research-only, professional-handoff, and pass-through models are useful without crossing THE LINE.
+3. Pass-Through Substrate Catalog first pass is published with per-call pricing posture, fixed margin, source type, provider examples, dependent model slots, and THE LINE boundary.
+4. Keep tightening Yulia prompt/runtime language so research-only, professional-handoff, and pass-through models are useful without crossing THE LINE.
 5. Connect route-level applicable mechanics to Today, Pipeline, Files, and Studio surfaces after the chat/tool contract is stable.
 
 Completed first pass: `compose_model_stack` now uses the route map as Yulia's deal-profile classifier. It returns applicable mechanics, readiness, tool surfaces, and THE LINE boundary by deal profile, including G28/G29/G30 trigger overlays.

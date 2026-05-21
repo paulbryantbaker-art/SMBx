@@ -77,6 +77,7 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assertEqual(card.definitive.toolsEndpoint, '/api/definitive/tools/list', 'tools endpoint');
   assertEqual(card.definitive.auditPacketEndpoint, '/api/definitive/audit-packets/{auditTrailId}', 'audit packet endpoint');
   assertEqual(card.definitive.corpusObservationTypesEndpoint, '/api/definitive/corpus/observation-types', 'corpus observation endpoint');
+  assertEqual(card.definitive.passThroughCatalogEndpoint, '/api/definitive/pass-through-catalog', 'pass-through catalog endpoint');
   assertEqual(card.definitive.dealMechanicsVersion, DEFINITIVE_DEAL_MECHANICS_VERSION, 'deal mechanics version');
   assertEqual(card.definitive.dealMechanicsModelSlots, DEFINITIVE_DEAL_MECHANICS_MODEL_SLOT_COUNT, 'deal mechanics model slots');
   assertEqual(card.definitive.dealMechanicsGates, DEFINITIVE_DEAL_MECHANICS_GATE_COUNT, 'deal mechanics gate count');
@@ -84,6 +85,7 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assertEqual(card.definitive.dealRouteMapStatus, 'complete', 'agent card route map status');
   assert(card.definitive.passThroughPricingRule.includes('cost-plus-fixed'), 'agent card exposes pass-through pricing rule');
   assert(card.publicEndpoints.includes('/.well-known/definitive.json'), 'definitive manifest endpoint is public');
+  assert(card.publicEndpoints.includes('/api/definitive/pass-through-catalog'), 'pass-through catalog endpoint is public discovery');
   assert(!card.publicEndpoints.includes('/api/definitive/tools/{toolName}/call'), 'tool execution is not public');
   assert(card.authenticatedEndpoints.includes('/api/definitive/line/inventory'), 'line inventory endpoint is authenticated');
   assert(card.authenticatedEndpoints.includes('/api/definitive/corpus/observation-types'), 'corpus observation endpoint is authenticated');
@@ -108,7 +110,9 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assertEqual(manifest.version, DEFINITIVE_SPEC_VERSION, 'manifest version');
   assertEqual(manifest.endpoints.specManifest, '/.well-known/definitive.json', 'manifest endpoint');
   assertEqual(manifest.endpoints.agentCard, '/.well-known/agent-card.json', 'manifest agent-card endpoint');
+  assertEqual(manifest.endpoints.passThroughCatalog, '/api/definitive/pass-through-catalog', 'manifest pass-through catalog endpoint');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/spec'), 'manifest spec API is public discovery');
+  assert(manifest.access.publicDiscovery.includes('/api/definitive/pass-through-catalog'), 'manifest pass-through catalog is public discovery');
   assert(manifest.access.authenticatedDiscovery.includes('/api/definitive/tools/list'), 'manifest tools list is authenticated discovery');
   assert(manifest.access.authenticatedExecution.includes('/api/definitive/tools/{toolName}/call'), 'manifest tool call is authenticated execution');
   assertDeepEqual(manifest.toolSurface.tools.map(tool => tool.name), expectedTools, 'manifest tool names');
@@ -131,6 +135,9 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assert(manifest.dealMechanicsSurface.gateExpansions.some(gate => gate.gateId === 'G29'), 'manifest includes G29');
   assert(manifest.dealMechanicsSurface.gateExpansions.some(gate => gate.gateId === 'G30'), 'manifest includes G30');
   assert(manifest.passThroughSurface.pricingRule.includes('per call'), 'manifest pass-through surface is exposed');
+  assert(manifest.passThroughSurface.catalog.length >= 8, 'manifest pass-through catalog has priced substrates');
+  assert(manifest.passThroughSurface.catalog.every(item => item.humanReferralCompensationAllowed === false), 'pass-through catalog prohibits paid human referrals');
+  assert(manifest.passThroughSurface.catalog.every(item => item.chargedRegardlessOfOutcome === true), 'pass-through catalog is outcome-independent');
 });
 
 await test('DEFINITIVE catalog includes the M187-M223 closing-gap expansion', async () => {
@@ -145,6 +152,11 @@ await test('DEFINITIVE catalog includes the M187-M223 closing-gap expansion', as
   assert(catalog.some(model => model.slotId === 'M223'), 'catalog includes IP/domain transfer closing model');
   assert(passThrough.allowed.some(item => item.includes('Data/software API')), 'pass-through allows data/software API calls');
   assert(passThrough.prohibited.some(item => item.includes('Success fee')), 'pass-through prohibits success-fee human routing');
+  assertEqual(passThrough.marginPolicy.dealOutcomeTied, false, 'pass-through margin is not outcome tied');
+  assertEqual(passThrough.marginPolicy.humanReferralCompensationAllowed, false, 'human referral compensation is blocked');
+  assert(passThrough.catalog.some(item => item.id === 'PASS.IP.SCA_SCAN' && item.dependentModelSlots.includes('M221')), 'SCA scan catalog maps to OSS model');
+  assert(passThrough.catalog.some(item => item.id === 'PASS.RE.TITLE_SURVEY' && item.dependentModelSlots.includes('M196')), 'title catalog maps to title/survey model');
+  assert(passThrough.catalog.some(item => item.id === 'PASS.HUMAN_SPECIALIST_DIRECTORY' && item.pricingMode === 'free_editorial_directory'), 'free specialist directory is explicit');
 });
 
 await test('DEFINITIVE route map makes every active M-slot usable by Yulia', async () => {

@@ -55,6 +55,7 @@ export function buildDefinitiveSpecManifest() {
       agentCard: '/.well-known/agent-card.json',
       specManifest: '/.well-known/definitive.json',
       specApi: '/api/definitive/spec',
+      passThroughCatalog: '/api/definitive/pass-through-catalog',
       toolsList: '/api/definitive/tools/list',
       toolCall: '/api/definitive/tools/{toolName}/call',
       lineInventory: '/api/definitive/line/inventory',
@@ -69,6 +70,7 @@ export function buildDefinitiveSpecManifest() {
         '/.well-known/definitive.json',
         '/api/agent-card',
         '/api/definitive/spec',
+        '/api/definitive/pass-through-catalog',
       ],
       authenticatedDiscovery: [
         '/api/definitive/tools/list',

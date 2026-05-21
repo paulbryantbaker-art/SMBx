@@ -42,11 +42,36 @@ export interface DefinitiveGateExpansion {
 
 export interface DefinitivePassThroughSurface {
   pricingRule: string;
+  priceListStatus: string;
+  marginPolicy: {
+    mode: 'cost_plus_fixed';
+    targetMarginRange: string;
+    chargedWhen: string;
+    dealOutcomeTied: false;
+    humanReferralCompensationAllowed: false;
+  };
   allowed: string[];
   prohibited: string[];
   humanDirectory: string;
   dependentModelSlots: string[];
   substrateCategories: string[];
+  catalog: DefinitivePassThroughCatalogEntry[];
+}
+
+export interface DefinitivePassThroughCatalogEntry {
+  id: string;
+  label: string;
+  sourceType: string;
+  exampleProviders: string[];
+  billingUnit: string;
+  pricingMode: 'vendor_cost_plus_fixed_margin' | 'free_public_record' | 'free_editorial_directory';
+  priceDisplay: string;
+  fixedMarginPolicy: string;
+  chargedRegardlessOfOutcome: true;
+  humanReferralCompensationAllowed: false;
+  dependentModelSlots: string[];
+  lineBoundary: string;
+  status: 'published' | 'planned';
 }
 
 function entry(
@@ -242,8 +267,154 @@ export const DEFINITIVE_GATE_EXPANSIONS: DefinitiveGateExpansion[] = [
   },
 ];
 
+export const DEFINITIVE_PASS_THROUGH_CATALOG: DefinitivePassThroughCatalogEntry[] = [
+  {
+    id: 'PASS.RE.MARKET_APPRAISAL_DATA',
+    label: 'Real estate market and appraisal data',
+    sourceType: 'data_api_or_report_input',
+    exampleProviders: ['CoStar', 'Reonomy', 'Green Street', 'Real Capital Analytics', 'broker cap-rate survey'],
+    billingUnit: 'per property, comp set, market survey, or report pull',
+    pricingMode: 'vendor_cost_plus_fixed_margin',
+    priceDisplay: 'Vendor/API cost plus fixed published margin, shown before call.',
+    fixedMarginPolicy: 'Cost-plus-fixed only; no percentage of deal value, no appraisal referral fee.',
+    chargedRegardlessOfOutcome: true,
+    humanReferralCompensationAllowed: false,
+    dependentModelSlots: ['M187', 'M188', 'M190', 'M194'],
+    lineBoundary: 'DEFINITIVE can consume market rent, cap-rate, comp, and appraisal data as inputs; appraisal conclusions and value opinions remain outside DEFINITIVE.',
+    status: 'published',
+  },
+  {
+    id: 'PASS.RE.ENV_PCA_ENGINEERING',
+    label: 'Environmental, PCA, and engineering reports',
+    sourceType: 'report_api_or_uploaded_specialist_report',
+    exampleProviders: ['AEI', 'Partner ESI', 'EBI', 'ERM', 'IVI'],
+    billingUnit: 'per ordered report, report parse, or uploaded report extraction',
+    pricingMode: 'vendor_cost_plus_fixed_margin',
+    priceDisplay: 'Vendor/report cost plus fixed published margin, shown before call.',
+    fixedMarginPolicy: 'Cost-plus-fixed only; remediation estimates and engineering conclusions remain specialist work.',
+    chargedRegardlessOfOutcome: true,
+    humanReferralCompensationAllowed: false,
+    dependentModelSlots: ['M195', 'M198'],
+    lineBoundary: 'DEFINITIVE structures reserves, escrows, and issue schedules from report inputs; Phase II, remediation, and engineering conclusions remain with specialists.',
+    status: 'published',
+  },
+  {
+    id: 'PASS.RE.TITLE_SURVEY',
+    label: 'Title, survey, and ALTA data',
+    sourceType: 'title_data_api_or_report_input',
+    exampleProviders: ['First American', 'Fidelity National Title', 'Stewart', 'Old Republic', 'ALTA survey provider'],
+    billingUnit: 'per property title pull, survey packet, or exception schedule',
+    pricingMode: 'vendor_cost_plus_fixed_margin',
+    priceDisplay: 'Vendor/title cost plus fixed published margin, shown before call.',
+    fixedMarginPolicy: 'Cost-plus-fixed only; no title-agent or law-firm referral fee.',
+    chargedRegardlessOfOutcome: true,
+    humanReferralCompensationAllowed: false,
+    dependentModelSlots: ['M195', 'M196'],
+    lineBoundary: 'DEFINITIVE sequences commitments, exceptions, endorsements, and curative tasks; title exception legal analysis remains with counsel/title professionals.',
+    status: 'published',
+  },
+  {
+    id: 'PASS.IP.PUBLIC_RECORDS',
+    label: 'USPTO, Copyright Office, ICANN, and trademark records',
+    sourceType: 'public_record_api',
+    exampleProviders: ['USPTO Patent Assignment Search', 'TEAS/TSDR', 'U.S. Copyright Office', 'ICANN/registrar records'],
+    billingUnit: 'per public-record query or record pull',
+    pricingMode: 'free_public_record',
+    priceDisplay: 'Free public record where available; any paid search wrapper is cost-plus-fixed.',
+    fixedMarginPolicy: 'No margin on free public records; paid wrappers use fixed published margin only.',
+    chargedRegardlessOfOutcome: true,
+    humanReferralCompensationAllowed: false,
+    dependentModelSlots: ['M214', 'M215', 'M223'],
+    lineBoundary: 'DEFINITIVE can collect and sequence public-record facts; validity, enforceability, likelihood-of-confusion, and legal conclusions remain with counsel.',
+    status: 'published',
+  },
+  {
+    id: 'PASS.IP.UCC_LIEN_SEARCH',
+    label: 'UCC and IP lien search',
+    sourceType: 'lien_search_api',
+    exampleProviders: ['CSC', 'Wolters Kluwer CT Corporation', 'Capitol Lien', 'state UCC filing offices'],
+    billingUnit: 'per debtor, jurisdiction, or collateral search',
+    pricingMode: 'vendor_cost_plus_fixed_margin',
+    priceDisplay: 'Vendor/search cost plus fixed published margin, shown before call.',
+    fixedMarginPolicy: 'Cost-plus-fixed only; lien priority and release legal conclusions remain outside DEFINITIVE.',
+    chargedRegardlessOfOutcome: true,
+    humanReferralCompensationAllowed: false,
+    dependentModelSlots: ['M215'],
+    lineBoundary: 'DEFINITIVE can normalize hit counts, release requirements, and record sources; lien priority/enforceability opinions remain with counsel.',
+    status: 'published',
+  },
+  {
+    id: 'PASS.IP.SCA_SCAN',
+    label: 'Software composition analysis scan',
+    sourceType: 'software_scan_api',
+    exampleProviders: ['Black Duck', 'FOSSA', 'Snyk', 'Mend', 'Sonatype'],
+    billingUnit: 'per repository, codebase, or scan package',
+    pricingMode: 'vendor_cost_plus_fixed_margin',
+    priceDisplay: 'Vendor/scan cost plus fixed published margin, shown before call.',
+    fixedMarginPolicy: 'Cost-plus-fixed only; no contingent fee tied to deal close or IP remediation outcome.',
+    chargedRegardlessOfOutcome: true,
+    humanReferralCompensationAllowed: false,
+    dependentModelSlots: ['M221'],
+    lineBoundary: 'DEFINITIVE classifies scan outputs into OSS exposure mechanics; specific copyleft-trigger opinions remain with IP counsel.',
+    status: 'published',
+  },
+  {
+    id: 'PASS.TAX_RESEARCH_DATA',
+    label: 'Tax and SALT research data',
+    sourceType: 'research_database',
+    exampleProviders: ['Bloomberg Tax', 'CCH AnswerConnect', 'Thomson Reuters Checkpoint', 'Tax Notes'],
+    billingUnit: 'per research lookup, statute pull, or state-tax dataset call',
+    pricingMode: 'vendor_cost_plus_fixed_margin',
+    priceDisplay: 'Vendor/database cost plus fixed published margin, shown before call.',
+    fixedMarginPolicy: 'Cost-plus-fixed only; tax opinions, controversy positions, and contested nexus conclusions remain with specialists.',
+    chargedRegardlessOfOutcome: true,
+    humanReferralCompensationAllowed: false,
+    dependentModelSlots: ['M191', 'M200', 'M203', 'M205'],
+    lineBoundary: 'DEFINITIVE computes tax mechanics from sourced inputs; tax advice, audit defense, international structuring, and contested SALT positions remain pass-through.',
+    status: 'published',
+  },
+  {
+    id: 'PASS.DEAL_TERMS_MARKET_DATA',
+    label: 'Deal-term and market benchmark data',
+    sourceType: 'market_data_or_research_database',
+    exampleProviders: ['SRS Acquiom MarketStandard', 'ABA Deal Points', 'Capital IQ', 'FactSet', 'PitchBook'],
+    billingUnit: 'per benchmark lookup, export, or data-room-supported market check',
+    pricingMode: 'vendor_cost_plus_fixed_margin',
+    priceDisplay: 'Vendor/database cost plus fixed published margin, shown before call.',
+    fixedMarginPolicy: 'Cost-plus-fixed only; no success fee, closing fee, or transaction-size fee.',
+    chargedRegardlessOfOutcome: true,
+    humanReferralCompensationAllowed: false,
+    dependentModelSlots: ['M206', 'M207', 'M208', 'M209', 'M212', 'M213'],
+    lineBoundary: 'DEFINITIVE can apply benchmark data to economic terms; negotiation, enforceability, and drafting decisions remain with the user and counsel.',
+    status: 'published',
+  },
+  {
+    id: 'PASS.HUMAN_SPECIALIST_DIRECTORY',
+    label: 'Human specialist directory',
+    sourceType: 'free_editorial_directory',
+    exampleProviders: ['deal counsel', 'tax counsel', 'appraiser', 'environmental consultant', 'IP counsel', 'lender', 'broker'],
+    billingUnit: 'free directory listing only',
+    pricingMode: 'free_editorial_directory',
+    priceDisplay: 'Free. DEFINITIVE receives no referral fee, success fee, deal-value percentage, or fee share.',
+    fixedMarginPolicy: 'No margin and no compensation. Retention is directly between user and specialist.',
+    chargedRegardlessOfOutcome: true,
+    humanReferralCompensationAllowed: false,
+    dependentModelSlots: ['M148', 'M151', 'M152', 'M153', 'M154', 'M155', 'M156', 'M158', 'M160', 'M191', 'M203', 'M205', 'M209', 'M211', 'M213', 'M214', 'M215', 'M217', 'M220', 'M221'],
+    lineBoundary: 'Editorial routing only. Specialist advice, opinions, negotiations, filings, appraisals, remediation estimates, and legal/tax/accounting conclusions never become DEFINITIVE revenue events.',
+    status: 'published',
+  },
+];
+
 export const DEFINITIVE_PASS_THROUGH_SURFACE: DefinitivePassThroughSurface = {
   pricingRule: 'External data/software APIs may be billed per call at cost or cost-plus-fixed margin, paid regardless of deal outcome. Human-service routing is editorial only and never success-tied, deal-value-tied, or referral-fee compensated.',
+  priceListStatus: 'Published discovery catalog; exact vendor cost is quoted before execution and the fixed margin is shown before the call.',
+  marginPolicy: {
+    mode: 'cost_plus_fixed',
+    targetMarginRange: '10-25 percent of underlying API/report cost unless a lower fixed platform margin is published for that substrate',
+    chargedWhen: 'Only when the user or governed agent authorizes the data/software call; charged regardless of deal outcome.',
+    dealOutcomeTied: false,
+    humanReferralCompensationAllowed: false,
+  },
   allowed: [
     'Data/software API calls billed per call regardless of outcome',
     'Fixed margin on pass-through API cost with published price list',
@@ -263,6 +434,7 @@ export const DEFINITIVE_PASS_THROUGH_SURFACE: DefinitivePassThroughSurface = {
     'software composition analysis',
     'SALT, tax, deal-comparable, and market-data research',
   ],
+  catalog: DEFINITIVE_PASS_THROUGH_CATALOG,
 };
 
 export function listDefinitiveDealMechanicsCatalog() {
@@ -275,6 +447,10 @@ export function listDefinitiveGateExpansions() {
 
 export function getDefinitivePassThroughSurface() {
   return DEFINITIVE_PASS_THROUGH_SURFACE;
+}
+
+export function listDefinitivePassThroughCatalog() {
+  return DEFINITIVE_PASS_THROUGH_CATALOG;
 }
 
 export function getDefinitiveDealMappingCoverage() {

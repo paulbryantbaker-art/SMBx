@@ -41,6 +41,7 @@ import { exportRouter } from './routes/export.js';
 import { startWorker } from './workers/discoveryWorker.js';
 import { buildAgentCard } from './services/agentCard.js';
 import { buildDefinitiveSpecManifest } from './services/definitiveSpecManifest.js';
+import { getDefinitivePassThroughSurface } from './services/definitiveDealMechanicsCatalog.js';
 import { ensureModelRegistrySeeded } from './services/modelRegistry.js';
 import rateLimit from 'express-rate-limit';
 import type { Request, Response, NextFunction } from 'express';
@@ -127,6 +128,10 @@ app.get('/api/agent-card', (_req, res) => {
 
 app.get('/api/definitive/spec', (_req, res) => {
   res.json(buildDefinitiveSpecManifest());
+});
+
+app.get('/api/definitive/pass-through-catalog', (_req, res) => {
+  res.json(getDefinitivePassThroughSurface());
 });
 
 app.get('/api/debug/check-ai', async (_req, res) => {
