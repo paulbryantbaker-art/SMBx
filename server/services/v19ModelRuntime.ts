@@ -1044,6 +1044,159 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
       },
     };
   }),
+  'MODEL.RESTRUCTURING.SOLVENCY.THREE_PRONG.v1': defineModel('MODEL.RESTRUCTURING.SOLVENCY.THREE_PRONG.v1', ['fair_value_assets_cents', 'liabilities_cents', 'projected_cash_flow_cents', 'debts_due_cents', 'available_capital_cents', 'required_capital_cents'], ['[11 U.S.C. 548]', '[UVTA]', '[Tribune]'], input => {
+    const assets = cents(input.fair_value_assets_cents);
+    const liabilities = cents(input.liabilities_cents);
+    const projectedCashFlow = cents(input.projected_cash_flow_cents);
+    const debtsDue = cents(input.debts_due_cents);
+    const availableCapital = cents(input.available_capital_cents);
+    const requiredCapital = cents(input.required_capital_cents);
+    const missing = requireInputs({
+      fair_value_assets_cents: assets,
+      liabilities_cents: liabilities,
+      projected_cash_flow_cents: projectedCashFlow,
+      debts_due_cents: debtsDue,
+      available_capital_cents: availableCapital,
+      required_capital_cents: requiredCapital,
+    });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const balanceSheetSurplus = assets! - liabilities!;
+    const cashFlowSurplus = projectedCashFlow! - debtsDue!;
+    const capitalSurplus = availableCapital! - requiredCapital!;
+    return {
+      outputs: {
+        balance_sheet_surplus_cents: balanceSheetSurplus,
+        balance_sheet_prong_passed: balanceSheetSurplus >= 0,
+        cash_flow_surplus_cents: cashFlowSurplus,
+        cash_flow_prong_passed: cashFlowSurplus >= 0,
+        capital_adequacy_surplus_cents: capitalSurplus,
+        capital_adequacy_prong_passed: capitalSurplus >= 0,
+        all_prongs_passed: balanceSheetSurplus >= 0 && cashFlowSurplus >= 0 && capitalSurplus >= 0,
+        solvency_opinion_handoff_required: true,
+      },
+    };
+  }),
+  'MODEL.RESTRUCTURING.363_SALE.v1': defineModel('MODEL.RESTRUCTURING.363_SALE.v1', ['purchase_price_cents', 'lien_amount_cents'], ['[11 U.S.C. 363]', '[11 U.S.C. 365]', '[RadLAX]', '[Fisker]'], input => {
+    const purchasePrice = cents(input.purchase_price_cents);
+    const liens = cents(input.lien_amount_cents);
+    const breakupFee = cents(input.breakup_fee_cents) ?? 0;
+    const creditBidClaim = cents(input.credit_bid_claim_cents) ?? 0;
+    const causeToDenyCreditBid = booleanInput(input.cause_to_deny_credit_bid) ?? false;
+    const prongs = safeObject(input.section_363f_prongs);
+    const missing = requireInputs({ purchase_price_cents: purchasePrice, lien_amount_cents: liens });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const computedPriceExceedsLiens = purchasePrice! > liens!;
+    const prongRows = [
+      ['applicable_non_bankruptcy_law_permits', booleanInput(prongs.applicable_non_bankruptcy_law_permits)],
+      ['consent', booleanInput(prongs.consent)],
+      ['price_exceeds_liens', booleanInput(prongs.price_exceeds_liens) ?? computedPriceExceedsLiens],
+      ['bona_fide_dispute', booleanInput(prongs.bona_fide_dispute)],
+      ['could_be_compelled_to_accept_money_satisfaction', booleanInput(prongs.could_be_compelled_to_accept_money_satisfaction)],
+    ].map(([name, passed]) => ({ prong: name, passed: passed === true }));
+    return {
+      outputs: {
+        purchase_price_cents: purchasePrice,
+        lien_amount_cents: liens,
+        breakup_fee_cents: breakupFee,
+        breakup_fee_pct_of_purchase_price: purchasePrice! > 0 ? round(breakupFee / purchasePrice!, 4) : null,
+        free_and_clear_prong_count: prongRows.filter(row => row.passed).length,
+        free_and_clear_path_available: prongRows.some(row => row.passed),
+        price_exceeds_aggregate_liens: computedPriceExceedsLiens,
+        credit_bid_claim_cents: creditBidClaim,
+        credit_bid_eligible: creditBidClaim > 0 && !causeToDenyCreditBid,
+        court_approval_required: true,
+        section_363f_prongs: prongRows,
+      },
+    };
+  }),
+  'MODEL.RESTRUCTURING.CH7_WATERFALL.v1': defineModel('MODEL.RESTRUCTURING.CH7_WATERFALL.v1', ['estate_value_cents', 'claims'], ['[11 U.S.C. 507]', '[11 U.S.C. 726]'], input => {
+    const estateValue = cents(input.estate_value_cents);
+    const claims = objectArray(input.claims);
+    const trusteeFee = cents(input.trustee_fee_cents) ?? 0;
+    const missing = requireInputs({ estate_value_cents: estateValue, claims: claims.length ? claims : null });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    let remaining = Math.max(0, estateValue! - trusteeFee);
+    const rows = claims
+      .map((claim, index) => ({
+        class_name: String(claim.class_name || claim.name || `Class ${index + 1}`),
+        priority_rank: number(claim.priority_rank) ?? 3,
+        allowed_claim_cents: cents(claim.allowed_claim_cents) ?? 0,
+      }))
+      .sort((left, right) => left.priority_rank - right.priority_rank)
+      .map(claim => {
+        const distribution = Math.min(remaining, claim.allowed_claim_cents);
+        remaining -= distribution;
+        return {
+          ...claim,
+          distribution_cents: distribution,
+          recovery_pct: claim.allowed_claim_cents > 0 ? round(distribution / claim.allowed_claim_cents, 4) : 0,
+        };
+      });
+    return {
+      outputs: {
+        estate_value_cents: estateValue,
+        trustee_fee_cents: trusteeFee,
+        distributable_estate_cents: Math.max(0, estateValue! - trusteeFee),
+        total_claims_cents: rows.reduce((sum, row) => sum + row.allowed_claim_cents, 0),
+        total_distributed_cents: rows.reduce((sum, row) => sum + row.distribution_cents, 0),
+        residual_to_equity_cents: remaining,
+        waterfall_rows: rows,
+      },
+    };
+  }),
+  'MODEL.RESTRUCTURING.DIP_SIZING.v1': defineModel('MODEL.RESTRUCTURING.DIP_SIZING.v1', ['thirteen_week_cash_need_cents', 'minimum_liquidity_cents'], ['[11 U.S.C. 364]', '[Collier 364.06]'], input => {
+    const cashNeed = cents(input.thirteen_week_cash_need_cents);
+    const minimumLiquidity = cents(input.minimum_liquidity_cents);
+    const openingCash = cents(input.opening_cash_cents) ?? 0;
+    const rollup = cents(input.rollup_amount_cents) ?? 0;
+    const professionalFeeCarveout = cents(input.professional_fee_carveout_cents) ?? 0;
+    const newMoneyMinimum = cents(input.new_money_minimum_cents) ?? 0;
+    const primingRequested = booleanInput(input.priming_requested) ?? false;
+    const missing = requireInputs({ thirteen_week_cash_need_cents: cashNeed, minimum_liquidity_cents: minimumLiquidity });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const liquidityNeed = Math.max(0, cashNeed! + minimumLiquidity! - openingCash);
+    const requiredCommitment = Math.max(liquidityNeed + rollup + professionalFeeCarveout, newMoneyMinimum + rollup + professionalFeeCarveout);
+    return {
+      outputs: {
+        thirteen_week_cash_need_cents: cashNeed,
+        opening_cash_cents: openingCash,
+        minimum_liquidity_cents: minimumLiquidity,
+        liquidity_need_cents: liquidityNeed,
+        rollup_amount_cents: rollup,
+        professional_fee_carveout_cents: professionalFeeCarveout,
+        required_dip_commitment_cents: requiredCommitment,
+        new_money_component_cents: Math.max(newMoneyMinimum, liquidityNeed),
+        rollup_pct_of_commitment: requiredCommitment > 0 ? round(rollup / requiredCommitment, 4) : null,
+        priming_requested: primingRequested,
+        court_approval_required: true,
+      },
+    };
+  }),
+  'MODEL.RESTRUCTURING.EXCHANGE_OFFER.v1': defineModel('MODEL.RESTRUCTURING.EXCHANGE_OFFER.v1', ['outstanding_debt_cents', 'participating_debt_cents', 'new_security_value_cents'], ['[Securities Act 3(a)(9)]', '[TIA 316(b)]'], input => {
+    const outstandingDebt = cents(input.outstanding_debt_cents);
+    const participatingDebt = cents(input.participating_debt_cents);
+    const newSecurityValue = cents(input.new_security_value_cents);
+    const minParticipationPct = number(input.minimum_participation_pct) ?? 0;
+    const oldSecurityValue = cents(input.old_security_value_cents) ?? participatingDebt ?? 0;
+    const missing = requireInputs({ outstanding_debt_cents: outstandingDebt, participating_debt_cents: participatingDebt, new_security_value_cents: newSecurityValue });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const participationPct = outstandingDebt! > 0 ? participatingDebt! / outstandingDebt! : 0;
+    return {
+      outputs: {
+        outstanding_debt_cents: outstandingDebt,
+        participating_debt_cents: participatingDebt,
+        holdout_debt_cents: Math.max(0, outstandingDebt! - participatingDebt!),
+        participation_pct: round(participationPct, 4),
+        minimum_participation_pct: round(minParticipationPct, 4),
+        minimum_participation_satisfied: participationPct >= minParticipationPct,
+        old_security_value_cents: oldSecurityValue,
+        new_security_value_cents: newSecurityValue,
+        exchange_discount_cents: Math.max(0, oldSecurityValue - newSecurityValue!),
+        codi_exposure_cents: Math.max(0, participatingDebt! - newSecurityValue!),
+        counsel_review_required: true,
+      },
+    };
+  }),
   'MODEL.RE.ASSET_ENTITY.ELECTION.v1': defineModel('MODEL.RE.ASSET_ENTITY.ELECTION.v1', ['enterprise_value_cents', 'real_property_value_cents'], ['[IRC 1001]', '[IRC 1060]', '[IRC 197]'], input => {
     const enterpriseValue = cents(input.enterprise_value_cents);
     const realPropertyValue = cents(input.real_property_value_cents);

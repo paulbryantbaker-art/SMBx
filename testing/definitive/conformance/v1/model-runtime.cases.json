@@ -2520,5 +2520,213 @@
       "status": "needs_inputs",
       "missingInputsIncludes": ["components"]
     }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.SOLVENCY.001",
+    "title": "Three-prong solvency computes balance sheet, cash flow, and capital adequacy",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.SOLVENCY.THREE_PRONG.v1",
+    "input": {
+      "fair_value_assets_cents": 1000000,
+      "liabilities_cents": 800000,
+      "projected_cash_flow_cents": 250000,
+      "debts_due_cents": 200000,
+      "available_capital_cents": 150000,
+      "required_capital_cents": 175000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "balance_sheet_surplus_cents": 200000,
+        "balance_sheet_prong_passed": true,
+        "cash_flow_surplus_cents": 50000,
+        "cash_flow_prong_passed": true,
+        "capital_adequacy_surplus_cents": -25000,
+        "capital_adequacy_prong_passed": false,
+        "all_prongs_passed": false,
+        "solvency_opinion_handoff_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.SOLVENCY.002",
+    "title": "Three-prong solvency refuses missing required capital",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.SOLVENCY.THREE_PRONG.v1",
+    "input": {
+      "fair_value_assets_cents": 1000000,
+      "liabilities_cents": 800000,
+      "projected_cash_flow_cents": 250000,
+      "debts_due_cents": 200000,
+      "available_capital_cents": 150000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["required_capital_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.363.001",
+    "title": "363 sale mechanics computes bid protection and free-and-clear path",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.363_SALE.v1",
+    "input": {
+      "purchase_price_cents": 1000000,
+      "lien_amount_cents": 900000,
+      "breakup_fee_cents": 25000,
+      "credit_bid_claim_cents": 500000,
+      "section_363f_prongs": {
+        "consent": true,
+        "bona_fide_dispute": false
+      }
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "breakup_fee_pct_of_purchase_price": 0.025,
+        "free_and_clear_prong_count": 2,
+        "free_and_clear_path_available": true,
+        "price_exceeds_aggregate_liens": true,
+        "credit_bid_eligible": true,
+        "court_approval_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.363.002",
+    "title": "363 sale mechanics refuses missing lien amount",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.363_SALE.v1",
+    "input": {
+      "purchase_price_cents": 1000000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["lien_amount_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.CH7.001",
+    "title": "Chapter 7 waterfall distributes estate by priority",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.CH7_WATERFALL.v1",
+    "input": {
+      "estate_value_cents": 1000000,
+      "trustee_fee_cents": 50000,
+      "claims": [
+        { "class_name": "Admin", "priority_rank": 1, "allowed_claim_cents": 200000 },
+        { "class_name": "Priority tax", "priority_rank": 2, "allowed_claim_cents": 300000 },
+        { "class_name": "GUC", "priority_rank": 3, "allowed_claim_cents": 600000 }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "distributable_estate_cents": 950000,
+        "total_claims_cents": 1100000,
+        "total_distributed_cents": 950000,
+        "residual_to_equity_cents": 0
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.CH7.002",
+    "title": "Chapter 7 waterfall refuses missing claims",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.CH7_WATERFALL.v1",
+    "input": {
+      "estate_value_cents": 1000000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["claims"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.DIP.001",
+    "title": "DIP sizing computes liquidity need, roll-up, and carve-out",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.DIP_SIZING.v1",
+    "input": {
+      "thirteen_week_cash_need_cents": 500000,
+      "minimum_liquidity_cents": 200000,
+      "opening_cash_cents": 100000,
+      "rollup_amount_cents": 150000,
+      "professional_fee_carveout_cents": 50000,
+      "new_money_minimum_cents": 650000,
+      "priming_requested": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "liquidity_need_cents": 600000,
+        "required_dip_commitment_cents": 850000,
+        "new_money_component_cents": 650000,
+        "rollup_pct_of_commitment": 0.1765,
+        "priming_requested": true,
+        "court_approval_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.DIP.002",
+    "title": "DIP sizing refuses missing minimum liquidity",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.DIP_SIZING.v1",
+    "input": {
+      "thirteen_week_cash_need_cents": 500000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["minimum_liquidity_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.EXCHANGE.001",
+    "title": "Exchange offer computes participation, holdout, and CODI exposure",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.EXCHANGE_OFFER.v1",
+    "input": {
+      "outstanding_debt_cents": 1000000,
+      "participating_debt_cents": 700000,
+      "old_security_value_cents": 700000,
+      "new_security_value_cents": 500000,
+      "minimum_participation_pct": 0.66
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "holdout_debt_cents": 300000,
+        "participation_pct": 0.7,
+        "minimum_participation_satisfied": true,
+        "exchange_discount_cents": 200000,
+        "codi_exposure_cents": 200000,
+        "counsel_review_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RESTRUCT.EXCHANGE.002",
+    "title": "Exchange offer refuses missing new-security value",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RESTRUCTURING.EXCHANGE_OFFER.v1",
+    "input": {
+      "outstanding_debt_cents": 1000000,
+      "participating_debt_cents": 700000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["new_security_value_cents"]
+    }
   }
 ]

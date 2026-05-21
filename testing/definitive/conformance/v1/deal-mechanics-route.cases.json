@@ -149,7 +149,7 @@
       "slotIdsInclude": ["M160", "M161", "M162", "M163", "M164"],
       "readinessAtLeast": {
         "research_only": 3,
-        "professional_handoff": 3
+        "professional_handoff": 2
       },
       "yuliaBriefIncludes": ["research-only"]
     }
