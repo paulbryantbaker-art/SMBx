@@ -1123,6 +1123,200 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
       },
     };
   }),
+  'MODEL.TAX.355.SPIN_RESEARCH.v1': defineModel('MODEL.TAX.355.SPIN_RESEARCH.v1', ['distributing_atb_years', 'controlled_atb_years', 'acquisition_pct_within_two_years'], ['[IRC 355]', '[IRC 355(e)]'], input => {
+    const distributingAtbYears = number(input.distributing_atb_years);
+    const controlledAtbYears = number(input.controlled_atb_years);
+    const acquisitionPct = number(input.acquisition_pct_within_two_years);
+    const deviceIndicators = stringArray(input.device_indicators);
+    const businessPurposeCount = stringArray(input.business_purposes).length;
+    const missing = requireInputs({
+      distributing_atb_years: distributingAtbYears,
+      controlled_atb_years: controlledAtbYears,
+      acquisition_pct_within_two_years: acquisitionPct,
+    });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const atbSatisfied = distributingAtbYears! >= 5 && controlledAtbYears! >= 5;
+    return {
+      outputs: {
+        distributing_atb_years: distributingAtbYears,
+        controlled_atb_years: controlledAtbYears,
+        active_trade_or_business_5yr_satisfied: atbSatisfied,
+        section_355e_acquisition_pct: round(acquisitionPct!, 4),
+        section_355e_50pct_test_triggered: acquisitionPct! >= 0.5,
+        device_indicator_count: deviceIndicators.length,
+        business_purpose_count: businessPurposeCount,
+        research_only: true,
+        tax_counsel_handoff_required: true,
+      },
+    };
+  }),
+  'MODEL.LME.UPTIER.RESEARCH.v1': defineModel('MODEL.LME.UPTIER.RESEARCH.v1', ['required_lender_pct', 'participating_lender_pct'], ['[Serta Simmons]', '[Mitel]'], input => {
+    const requiredLenderPct = number(input.required_lender_pct);
+    const participatingLenderPct = number(input.participating_lender_pct);
+    const newMoney = cents(input.new_money_cents) ?? 0;
+    const language = text(input.purchase_language) ?? '';
+    const sacredRights = stringArray(input.sacred_rights_implicated);
+    const missing = requireInputs({ required_lender_pct: requiredLenderPct, participating_lender_pct: participatingLenderPct });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const normalizedLanguage = language.toLowerCase();
+    return {
+      outputs: {
+        required_lender_pct: round(requiredLenderPct!, 4),
+        participating_lender_pct: round(participatingLenderPct!, 4),
+        required_lender_threshold_met: participatingLenderPct! >= requiredLenderPct!,
+        new_money_cents: newMoney,
+        open_market_purchase_language_present: normalizedLanguage.includes('open market'),
+        purchase_by_assignment_language_present: normalizedLanguage.includes('assignment'),
+        sacred_rights_flag_count: sacredRights.length,
+        research_only: true,
+        counsel_contract_interpretation_required: true,
+      },
+    };
+  }),
+  'MODEL.LME.DROPDOWN.RESEARCH.v1': defineModel('MODEL.LME.DROPDOWN.RESEARCH.v1', ['asset_transfer_value_cents', 'investment_basket_cents'], ['[J. Crew]', '[Envision]', '[Pluralsight]'], input => {
+    const transferValue = cents(input.asset_transfer_value_cents);
+    const investmentBasket = cents(input.investment_basket_cents);
+    const unrestrictedSubBasket = cents(input.unrestricted_sub_basket_cents) ?? 0;
+    const builderBasket = cents(input.builder_basket_cents) ?? 0;
+    const blockerPresent = booleanInput(input.blocker_present) ?? false;
+    const stackingAllowed = booleanInput(input.basket_stacking_allowed) ?? true;
+    const missing = requireInputs({ asset_transfer_value_cents: transferValue, investment_basket_cents: investmentBasket });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const aggregateCapacity = investmentBasket! + unrestrictedSubBasket + builderBasket;
+    return {
+      outputs: {
+        asset_transfer_value_cents: transferValue,
+        aggregate_basket_capacity_cents: aggregateCapacity,
+        capacity_surplus_cents: aggregateCapacity - transferValue!,
+        transfer_fits_capacity: aggregateCapacity >= transferValue!,
+        blocker_present: blockerPresent,
+        basket_stacking_allowed: stackingAllowed,
+        dropdown_vulnerability_flag: aggregateCapacity >= transferValue! && !blockerPresent,
+        research_only: true,
+        counsel_contract_interpretation_required: true,
+      },
+    };
+  }),
+  'MODEL.LME.DOUBLEDIP.RESEARCH.v1': defineModel('MODEL.LME.DOUBLEDIP.RESEARCH.v1', ['new_money_cents'], ['[At Home]', '[Trinseo]', '[Sabre]', '[ABA Business Law Today]'], input => {
+    const newMoney = cents(input.new_money_cents);
+    const directClaim = cents(input.direct_claim_cents) ?? newMoney;
+    const guaranteeClaim = cents(input.guarantee_claim_cents) ?? newMoney;
+    const structurallySeniorAssets = cents(input.structurally_senior_assets_cents) ?? 0;
+    const missing = requireInputs({ new_money_cents: newMoney });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const totalClaims = (directClaim ?? 0) + (guaranteeClaim ?? 0);
+    return {
+      outputs: {
+        new_money_cents: newMoney,
+        direct_claim_cents: directClaim,
+        guarantee_claim_cents: guaranteeClaim,
+        total_asserted_claims_cents: totalClaims,
+        claim_multiplier: newMoney! > 0 ? round(totalClaims / newMoney!, 4) : null,
+        structurally_senior_assets_cents: structurallySeniorAssets,
+        pari_plus_flag: structurallySeniorAssets > 0,
+        research_only: true,
+        counsel_contract_interpretation_required: true,
+      },
+    };
+  }),
+  'MODEL.PROJECT_FINANCE.COVERAGE_RESEARCH.v1': defineModel('MODEL.PROJECT_FINANCE.COVERAGE_RESEARCH.v1', ['cfads_periods_cents', 'debt_service_periods_cents', 'debt_balance_cents', 'remaining_project_cash_flow_cents'], ['[Project Finance Market Practice]'], input => {
+    const cfadsPeriods = arrayOfCents(input.cfads_periods_cents);
+    const debtServicePeriods = arrayOfCents(input.debt_service_periods_cents);
+    const debtBalance = cents(input.debt_balance_cents);
+    const remainingCashFlow = cents(input.remaining_project_cash_flow_cents);
+    const reserveBalance = cents(input.debt_service_reserve_cents) ?? 0;
+    const missing = requireInputs({
+      cfads_periods_cents: cfadsPeriods.length ? cfadsPeriods : null,
+      debt_service_periods_cents: debtServicePeriods.length ? debtServicePeriods : null,
+      debt_balance_cents: debtBalance,
+      remaining_project_cash_flow_cents: remainingCashFlow,
+    });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const periods = cfadsPeriods.map((cfads, index) => {
+      const debtService = debtServicePeriods[index] ?? 0;
+      return { period: index + 1, cfads_cents: cfads, debt_service_cents: debtService, dscr: debtService > 0 ? round(cfads / debtService, 4) : null };
+    });
+    const dscrValues = periods.map(period => period.dscr).filter((value): value is number => value != null);
+    const totalDebtService = debtServicePeriods.reduce((sum, value) => sum + value, 0);
+    return {
+      outputs: {
+        min_dscr: dscrValues.length ? Math.min(...dscrValues) : null,
+        average_dscr: dscrValues.length ? round(dscrValues.reduce((sum, value) => sum + value, 0) / dscrValues.length, 4) : null,
+        llcr: debtBalance! > 0 ? round((remainingCashFlow! + reserveBalance) / debtBalance!, 4) : null,
+        plcr: totalDebtService > 0 ? round(remainingCashFlow! / totalDebtService, 4) : null,
+        periods,
+        research_only: true,
+        lender_model_review_required: true,
+      },
+    };
+  }),
+  'MODEL.CRYPTO.TOKEN_TAXONOMY.RESEARCH.v1': defineModel('MODEL.CRYPTO.TOKEN_TAXONOMY.RESEARCH.v1', ['investment_of_money', 'common_enterprise', 'expectation_of_profits', 'efforts_of_others'], ['[Howey]', '[SEC Project Crypto]'], input => {
+    const investmentOfMoney = booleanInput(input.investment_of_money);
+    const commonEnterprise = booleanInput(input.common_enterprise);
+    const expectationOfProfits = booleanInput(input.expectation_of_profits);
+    const effortsOfOthers = booleanInput(input.efforts_of_others);
+    const missing = requireInputs({
+      investment_of_money: investmentOfMoney,
+      common_enterprise: commonEnterprise,
+      expectation_of_profits: expectationOfProfits,
+      efforts_of_others: effortsOfOthers,
+    });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    const prongs = [investmentOfMoney, commonEnterprise, expectationOfProfits, effortsOfOthers].filter(Boolean).length;
+    return {
+      outputs: {
+        howey_prongs_satisfied: prongs,
+        investment_of_money: investmentOfMoney,
+        common_enterprise: commonEnterprise,
+        expectation_of_profits: expectationOfProfits,
+        efforts_of_others: effortsOfOthers,
+        securities_law_review_flag: prongs >= 3,
+        project_crypto_rulemaking_pending: true,
+        research_only: true,
+        counsel_review_required: true,
+      },
+    };
+  }),
+  'MODEL.CRYPTO.STABLECOIN_PPS.RESEARCH.v1': defineModel('MODEL.CRYPTO.STABLECOIN_PPS.RESEARCH.v1', ['issuer_type', 'reserves_cents', 'stablecoins_outstanding_cents'], ['[GENIUS Act]'], input => {
+    const issuerType = text(input.issuer_type);
+    const reserves = cents(input.reserves_cents);
+    const outstanding = cents(input.stablecoins_outstanding_cents);
+    const permittedIssuerTypes = ['insured_depository_institution', 'approved_nonbank_issuer', 'state_qualified_issuer'];
+    const missing = requireInputs({ issuer_type: issuerType, reserves_cents: reserves, stablecoins_outstanding_cents: outstanding });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    return {
+      outputs: {
+        issuer_type: issuerType,
+        permitted_issuer_type: permittedIssuerTypes.includes(issuerType!),
+        reserves_cents: reserves,
+        stablecoins_outstanding_cents: outstanding,
+        reserve_coverage_ratio: outstanding! > 0 ? round(reserves! / outstanding!, 4) : null,
+        reserve_coverage_satisfied: outstanding! > 0 ? reserves! >= outstanding! : null,
+        research_only: true,
+        counsel_review_required: true,
+      },
+    };
+  }),
+  'MODEL.CRYPTO.BROKER_REPORTING.RESEARCH.v1': defineModel('MODEL.CRYPTO.BROKER_REPORTING.RESEARCH.v1', ['gross_proceeds_cents', 'customer_tin_collected'], ['[IRC 6045]', '[T.D. 10000]', '[Form 1099-DA]'], input => {
+    const grossProceeds = cents(input.gross_proceeds_cents);
+    const customerTinCollected = booleanInput(input.customer_tin_collected);
+    const transactionCount = number(input.transaction_count) ?? 1;
+    const costBasisCaptured = booleanInput(input.cost_basis_captured) ?? false;
+    const missing = requireInputs({ gross_proceeds_cents: grossProceeds, customer_tin_collected: customerTinCollected });
+    if (missing.length) return { missingInputs: missing, outputs: {} };
+    return {
+      outputs: {
+        transaction_count: transactionCount,
+        gross_proceeds_cents: grossProceeds,
+        form_1099_da_reporting_likely: grossProceeds! > 0 && transactionCount > 0,
+        customer_tin_collected: customerTinCollected,
+        cost_basis_captured: costBasisCaptured,
+        missing_reporting_data_flag: !customerTinCollected || !costBasisCaptured,
+        research_only: true,
+        tax_reporting_review_required: true,
+      },
+    };
+  }),
   'MODEL.RESTRUCTURING.SOLVENCY.THREE_PRONG.v1': defineModel('MODEL.RESTRUCTURING.SOLVENCY.THREE_PRONG.v1', ['fair_value_assets_cents', 'liabilities_cents', 'projected_cash_flow_cents', 'debts_due_cents', 'available_capital_cents', 'required_capital_cents'], ['[11 U.S.C. 548]', '[UVTA]', '[Tribune]'], input => {
     const assets = cents(input.fair_value_assets_cents);
     const liabilities = cents(input.liabilities_cents);

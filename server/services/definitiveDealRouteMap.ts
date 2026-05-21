@@ -274,8 +274,8 @@ function buildRouteEntry(model: DefinitiveModelCatalogEntry): DefinitiveDealRout
 
 function getReadiness(model: DefinitiveModelCatalogEntry): DefinitiveRouteReadiness {
   if (model.status === 'reserved' || model.lineCategory === 'reserved') return 'reserved';
-  if (model.implementedRuntimeModelId) return 'executable';
   if (model.status.includes('research') || model.lineCategory === 'research_only') return 'research_only';
+  if (model.implementedRuntimeModelId) return 'executable';
   if (PASS_THROUGH_MODEL_SLOTS.has(model.slotId)) return 'pass_through_required';
   if (model.lineCategory === 'professional_handoff') return 'professional_handoff';
   return 'planning_only';

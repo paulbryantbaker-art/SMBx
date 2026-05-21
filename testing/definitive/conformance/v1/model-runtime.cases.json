@@ -3599,5 +3599,320 @@
       "status": "needs_inputs",
       "missingInputsIncludes": ["ip_assets"]
     }
+  },
+  {
+    "id": "CONF.MODEL.TAX.355.001",
+    "title": "355 spin research scaffold computes ATB and 355(e) trigger flags",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TAX.355.SPIN_RESEARCH.v1",
+    "input": {
+      "distributing_atb_years": 5,
+      "controlled_atb_years": 5,
+      "acquisition_pct_within_two_years": 0.4,
+      "device_indicators": ["cash rich", "planned sale"],
+      "business_purposes": ["strategic separation"]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "active_trade_or_business_5yr_satisfied": true,
+        "section_355e_acquisition_pct": 0.4,
+        "section_355e_50pct_test_triggered": false,
+        "device_indicator_count": 2,
+        "business_purpose_count": 1,
+        "research_only": true,
+        "tax_counsel_handoff_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.TAX.355.002",
+    "title": "355 spin research scaffold refuses missing acquisition percentage",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TAX.355.SPIN_RESEARCH.v1",
+    "input": {
+      "distributing_atb_years": 5,
+      "controlled_atb_years": 5
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["acquisition_pct_within_two_years"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.LME.UPTIER.001",
+    "title": "LME uptier scaffold computes threshold and purchase-language flags",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LME.UPTIER.RESEARCH.v1",
+    "input": {
+      "required_lender_pct": 0.667,
+      "participating_lender_pct": 0.7,
+      "new_money_cents": 100000,
+      "purchase_language": "open market purchase by assignment",
+      "sacred_rights_implicated": ["pro rata sharing", "payment waterfall"]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "required_lender_threshold_met": true,
+        "new_money_cents": 100000,
+        "open_market_purchase_language_present": true,
+        "purchase_by_assignment_language_present": true,
+        "sacred_rights_flag_count": 2,
+        "research_only": true,
+        "counsel_contract_interpretation_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.LME.UPTIER.002",
+    "title": "LME uptier scaffold refuses missing participating-lender percentage",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LME.UPTIER.RESEARCH.v1",
+    "input": {
+      "required_lender_pct": 0.667
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["participating_lender_pct"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.LME.DROPDOWN.001",
+    "title": "LME drop-down scaffold computes basket capacity and blocker flags",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LME.DROPDOWN.RESEARCH.v1",
+    "input": {
+      "asset_transfer_value_cents": 100000,
+      "investment_basket_cents": 60000,
+      "unrestricted_sub_basket_cents": 30000,
+      "builder_basket_cents": 20000,
+      "blocker_present": false,
+      "basket_stacking_allowed": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "aggregate_basket_capacity_cents": 110000,
+        "capacity_surplus_cents": 10000,
+        "transfer_fits_capacity": true,
+        "blocker_present": false,
+        "basket_stacking_allowed": true,
+        "dropdown_vulnerability_flag": true,
+        "research_only": true,
+        "counsel_contract_interpretation_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.LME.DROPDOWN.002",
+    "title": "LME drop-down scaffold refuses missing investment basket",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LME.DROPDOWN.RESEARCH.v1",
+    "input": {
+      "asset_transfer_value_cents": 100000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["investment_basket_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.LME.DOUBLEDIP.001",
+    "title": "LME double-dip scaffold computes claim multiplier and pari-plus flag",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LME.DOUBLEDIP.RESEARCH.v1",
+    "input": {
+      "new_money_cents": 200000,
+      "direct_claim_cents": 200000,
+      "guarantee_claim_cents": 200000,
+      "structurally_senior_assets_cents": 500000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "total_asserted_claims_cents": 400000,
+        "claim_multiplier": 2,
+        "structurally_senior_assets_cents": 500000,
+        "pari_plus_flag": true,
+        "research_only": true,
+        "counsel_contract_interpretation_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.LME.DOUBLEDIP.002",
+    "title": "LME double-dip scaffold refuses missing new money",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LME.DOUBLEDIP.RESEARCH.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["new_money_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.PROJECT_FINANCE.COVERAGE.001",
+    "title": "Project-finance coverage scaffold computes DSCR, LLCR, and PLCR",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.PROJECT_FINANCE.COVERAGE_RESEARCH.v1",
+    "input": {
+      "cfads_periods_cents": [150000, 160000],
+      "debt_service_periods_cents": [100000, 120000],
+      "debt_balance_cents": 1000000,
+      "remaining_project_cash_flow_cents": 1300000,
+      "debt_service_reserve_cents": 100000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "min_dscr": 1.3333,
+        "average_dscr": 1.4167,
+        "llcr": 1.4,
+        "plcr": 5.9091,
+        "research_only": true,
+        "lender_model_review_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.PROJECT_FINANCE.COVERAGE.002",
+    "title": "Project-finance coverage scaffold refuses missing debt service periods",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.PROJECT_FINANCE.COVERAGE_RESEARCH.v1",
+    "input": {
+      "cfads_periods_cents": [150000],
+      "debt_balance_cents": 1000000,
+      "remaining_project_cash_flow_cents": 1300000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["debt_service_periods_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.CRYPTO.TOKEN.001",
+    "title": "Crypto token taxonomy scaffold computes Howey prong count",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.CRYPTO.TOKEN_TAXONOMY.RESEARCH.v1",
+    "input": {
+      "investment_of_money": true,
+      "common_enterprise": true,
+      "expectation_of_profits": true,
+      "efforts_of_others": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "howey_prongs_satisfied": 3,
+        "securities_law_review_flag": true,
+        "project_crypto_rulemaking_pending": true,
+        "research_only": true,
+        "counsel_review_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.CRYPTO.TOKEN.002",
+    "title": "Crypto token taxonomy scaffold refuses missing efforts-of-others prong",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.CRYPTO.TOKEN_TAXONOMY.RESEARCH.v1",
+    "input": {
+      "investment_of_money": true,
+      "common_enterprise": true,
+      "expectation_of_profits": true
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["efforts_of_others"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.CRYPTO.STABLECOIN.001",
+    "title": "Stablecoin PPS scaffold computes issuer and reserve coverage",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.CRYPTO.STABLECOIN_PPS.RESEARCH.v1",
+    "input": {
+      "issuer_type": "approved_nonbank_issuer",
+      "reserves_cents": 1000000,
+      "stablecoins_outstanding_cents": 800000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "permitted_issuer_type": true,
+        "reserve_coverage_ratio": 1.25,
+        "reserve_coverage_satisfied": true,
+        "research_only": true,
+        "counsel_review_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.CRYPTO.STABLECOIN.002",
+    "title": "Stablecoin PPS scaffold refuses missing reserves",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.CRYPTO.STABLECOIN_PPS.RESEARCH.v1",
+    "input": {
+      "issuer_type": "approved_nonbank_issuer",
+      "stablecoins_outstanding_cents": 800000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["reserves_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.CRYPTO.REPORTING.001",
+    "title": "Digital-asset reporting scaffold computes likely 1099-DA and missing-data flags",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.CRYPTO.BROKER_REPORTING.RESEARCH.v1",
+    "input": {
+      "transaction_count": 2,
+      "gross_proceeds_cents": 100000,
+      "customer_tin_collected": true,
+      "cost_basis_captured": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "transaction_count": 2,
+        "form_1099_da_reporting_likely": true,
+        "customer_tin_collected": true,
+        "cost_basis_captured": false,
+        "missing_reporting_data_flag": true,
+        "research_only": true,
+        "tax_reporting_review_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.CRYPTO.REPORTING.002",
+    "title": "Digital-asset reporting scaffold refuses missing TIN collection status",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.CRYPTO.BROKER_REPORTING.RESEARCH.v1",
+    "input": {
+      "gross_proceeds_cents": 100000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["customer_tin_collected"]
+    }
   }
 ]
