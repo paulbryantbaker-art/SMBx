@@ -37,6 +37,9 @@ const requiredTables = [
   'definitive_beneficial_customers',
   'definitive_agent_identities',
   'definitive_agent_mandates',
+  'definitive_data_rights_grants',
+  'definitive_corpus_observations',
+  'definitive_benchmark_release_controls',
 ] as const;
 
 const requiredColumns: Record<string, string[]> = {
@@ -52,6 +55,9 @@ const requiredColumns: Record<string, string[]> = {
   definitive_beneficial_customers: ['customer_key', 'user_id', 'organization_id', 'billing_org_id', 'customer_type', 'plan_key', 'metadata'],
   definitive_agent_identities: ['agent_id', 'agent_platform_id', 'platform_name', 'auth_subject', 'status'],
   definitive_agent_mandates: ['mandate_id', 'beneficial_customer_id', 'agent_identity_id', 'scope', 'spend_cap_credits', 'expires_at', 'status', 'signature_payload'],
+  definitive_data_rights_grants: ['user_id', 'organization_id', 'billing_org_id', 'beneficial_customer_id', 'grant_type', 'scope', 'status', 'source', 'source_reference', 'effective_at', 'expires_at', 'revoked_at'],
+  definitive_corpus_observations: ['observation_type', 'user_id', 'organization_id', 'billing_org_id', 'beneficial_customer_id', 'deal_id', 'grant_id', 'anonymization_bucket', 'observation', 'source_artifact_type', 'source_artifact_id', 'source_hash', 'observation_hash', 'eligibility_status', 'min_release_count', 'metadata'],
+  definitive_benchmark_release_controls: ['observation_type', 'benchmark_key', 'eligible_observation_count', 'min_release_count', 'release_status', 'last_counted_at', 'metadata'],
   firm_memory: ['memory_type', 'label', 'value', 'source', 'confidence', 'status'],
   today_operating_briefs: ['source_fingerprint', 'morning_brief', 'gate_countdown', 'deal_pulse', 'studio_refresh_needs', 'firm_memory_snapshot'],
 };

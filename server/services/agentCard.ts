@@ -1,13 +1,57 @@
 import { listRegisteredModels } from './modelRegistry.js';
+import { listDefinitiveMcpTools } from './definitiveMcp.js';
 import { listV19ResourceContract } from './v19ResourceContract.js';
+import { listDefinitiveLineInventory } from './agencyActionRegistry.js';
+import { listDefinitiveCorpusObservationTypes } from './definitiveCorpusService.js';
+import { buildDefinitiveConformanceStatus } from './definitiveConformanceStatus.js';
+import { getDefinitiveDealRouteMapSummary } from './definitiveDealRouteMap.js';
+import {
+  getDefinitiveDealMappingCoverage,
+  getDefinitiveDealMechanicsSummary,
+  getDefinitivePassThroughSurface,
+} from './definitiveDealMechanicsCatalog.js';
 
 export function buildAgentCard() {
   const models = listRegisteredModels();
   const resourceContract = listV19ResourceContract();
+  const definitiveTools = listDefinitiveMcpTools();
+  const lineInventory = listDefinitiveLineInventory();
+  const corpusContract = listDefinitiveCorpusObservationTypes();
+  const conformance = buildDefinitiveConformanceStatus();
+  const dealMechanics = getDefinitiveDealMechanicsSummary();
+  const dealMappingCoverage = getDefinitiveDealMappingCoverage();
+  const dealRouteMap = getDefinitiveDealRouteMapSummary();
+  const passThroughSurface = getDefinitivePassThroughSurface();
+  const lineSummary = lineInventory.reduce<Record<string, number>>((acc, contract) => {
+    acc[contract.lineStatus] = (acc[contract.lineStatus] || 0) + 1;
+    return acc;
+  }, {});
   return {
     name: 'smbx.ai Yulia Deal Desk',
-    version: 'v19-foundation',
-    description: 'Agent-ready M&A deal intelligence substrate for model-backed analysis, citation validation, and governed Yulia canvas actions.',
+    version: 'DEFINITIVE.v1.0',
+    description: 'Agent-ready M&A diligence substrate for model-backed analysis, citation validation, governed tool calls, and Yulia canvas actions.',
+    definitive: {
+      protocol: definitiveTools.protocol,
+      status: definitiveTools.status,
+      specVersion: definitiveTools.specVersion,
+      specUri: definitiveTools.specUri,
+      methodologyVersion: definitiveTools.methodologyVersion,
+      methodologyUri: definitiveTools.methodologyUri,
+      specManifestEndpoint: '/.well-known/definitive.json',
+      toolsEndpoint: '/api/definitive/tools/list',
+      callEndpoint: '/api/definitive/tools/{toolName}/call',
+      lineInventoryEndpoint: '/api/definitive/line/inventory',
+      auditPacketEndpoint: '/api/definitive/audit-packets/{auditTrailId}',
+      corpusObservationTypesEndpoint: '/api/definitive/corpus/observation-types',
+      corpusRightsEndpoint: '/api/definitive/corpus/rights',
+      dealMechanicsVersion: dealMechanics.version,
+      dealMechanicsUri: dealMechanics.uri,
+      dealMechanicsModelSlots: dealMechanics.totalModelSlots,
+      dealMechanicsGates: dealMechanics.totalGates,
+      dealMappingStatus: dealMappingCoverage.status,
+      dealRouteMapStatus: dealRouteMap.status,
+      passThroughPricingRule: passThroughSurface.pricingRule,
+    },
     pricing: {
       free: '$0',
       solo: '$79/mo',
@@ -53,6 +97,66 @@ export function buildAgentCard() {
         resources: resourceContract.resourceTemplates.map(resource => resource.uriTemplate),
         tools: resourceContract.toolContracts,
       },
+      {
+        id: 'definitive_mcp_v0_1',
+        label: 'DEFINITIVE MCP/API v0.1 tools',
+        status: 'internal',
+        protocol: definitiveTools.protocol,
+        tools: definitiveTools.tools.map(tool => ({
+          name: tool.name,
+          lineStatus: tool.lineStatus,
+          requiredScopes: tool.requiredScopes,
+        })),
+      },
+      {
+        id: 'definitive_line_inventory',
+        label: 'THE LINE action inventory',
+        status: 'internal',
+        summary: lineSummary,
+        endpoint: '/api/definitive/line/inventory',
+      },
+      {
+        id: 'definitive_corpus_foundation',
+        label: 'Data-rights gated anonymized corpus observations',
+        status: 'internal',
+        grantType: corpusContract.grantType,
+        observationTypes: corpusContract.observationTypes.map(item => item.type),
+        rawDocumentTextAllowed: false,
+        partyIdentifiersAllowed: false,
+      },
+      {
+        id: 'definitive_conformance_status',
+        label: 'DB-free DEFINITIVE conformance status',
+        status: conformance.status,
+        suite: conformance.suite,
+        caseCount: conformance.cases.total,
+        nextTarget: conformance.nextTarget,
+      },
+      {
+        id: 'definitive_deal_mechanics_v1_1',
+        label: 'DEFINITIVE v1.1 deal-mechanics catalog',
+        status: 'target',
+        version: dealMechanics.version,
+        modelSlots: dealMechanics.totalModelSlots,
+        activeModelSlots: dealMechanics.activeModelSlots,
+        gates: dealMechanics.totalGates,
+        newGates: dealMechanics.newGates,
+        authorityRegisterTarget: dealMechanics.authorityRegisterTarget,
+        lineCategoryCounts: dealMechanics.lineCategoryCounts,
+        mappingStatus: dealMappingCoverage.status,
+        unmappedModelSlots: dealMappingCoverage.unmappedModelSlots,
+        routeMapStatus: dealRouteMap.status,
+        routeMapEntries: dealRouteMap.routeMapEntries,
+        routeReadinessCounts: dealRouteMap.readinessCounts,
+      },
+      {
+        id: 'definitive_pass_through_surface',
+        label: 'THE LINE-safe pass-through substrate',
+        status: 'target',
+        pricingRule: passThroughSurface.pricingRule,
+        dependentModelSlots: passThroughSurface.dependentModelSlots,
+        prohibited: passThroughSurface.prohibited,
+      },
     ],
     resourceContract,
     models: models.map(model => ({
@@ -68,8 +172,29 @@ export function buildAgentCard() {
     })),
     publicEndpoints: [
       '/.well-known/agent-card.json',
+      '/.well-known/definitive.json',
       '/api/agent-card',
+      '/api/definitive/spec',
     ],
+    authenticatedEndpoints: [
+      '/api/definitive/tools/list',
+      '/api/definitive/line/inventory',
+      '/api/definitive/corpus/observation-types',
+      '/api/definitive/corpus/rights',
+      '/api/definitive/audit-packets/{auditTrailId}',
+      '/api/definitive/tools/{toolName}/call',
+      '/api/definitive/tools/call',
+      '/api/definitive/corpus/rights/grants',
+      '/api/definitive/corpus/rights/grants/{grantId}/revoke',
+      '/api/definitive/corpus/observations',
+    ],
+    endpointAccess: {
+      discoveryIsPublic: true,
+      executionRequiresAuthentication: true,
+      executionRequiresGovernedToolContract: true,
+      corpusWritesRequireDataRightsGrant: true,
+      auditPacketsRequireOwningUserOrOrgScope: true,
+    },
     generatedAt: new Date().toISOString(),
   };
 }

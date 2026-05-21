@@ -18,6 +18,7 @@ import {
   DEFINITIVE_SPEC_URI,
   DEFINITIVE_SPEC_VERSION,
 } from '../constants/definitive.js';
+import { buildModelBackedChatAuditPacket } from '../services/definitiveAuditPacket.js';
 import { resolveDefinitiveMandateContext } from '../services/definitiveMandateService.js';
 
 /** Safe SSE write — checks destroyed + writableEnded, catches errors */
@@ -66,22 +67,23 @@ async function writeAutomaticV19ChatAudit(input: {
   const readiness = await readDealV19Readiness(input.userId, Number(input.deal.id)).catch(() => null);
   if (!readiness && !containsModelBackedLanguage(input.assistantText)) return;
 
-  const modelStack = {
-    requiredModels: readiness?.requiredModels || [],
-    latestModels: readiness?.models || [],
-  };
+  const auditPacket = buildModelBackedChatAuditPacket({
+    userId: input.userId,
+    conversationId: input.conversationId,
+    assistantMessageId: input.assistantMessageId,
+    deal: input.deal,
+    assistantText: input.assistantText,
+    readiness,
+  });
+  const modelStack = auditPacket.modelStack;
   const inputsUsed = {
     responseMessageId: input.assistantMessageId,
     dealId: Number(input.deal.id),
-    responseLength: input.assistantText.length,
-    responseHash: crypto.createHash('sha256').update(input.assistantText).digest('hex'),
+    responseLength: auditPacket.response.responseLength,
+    responseHash: auditPacket.response.responseHash,
+    auditPacket,
   };
-  const outputHash = crypto.createHash('sha256').update(JSON.stringify({
-    conversationId: input.conversationId,
-    assistantMessageId: input.assistantMessageId,
-    response: input.assistantText,
-    modelStack,
-  })).digest('hex');
+  const outputHash = auditPacket.response.outputHash;
   const mandateContext = await resolveDefinitiveMandateContext({
     userId: input.userId,
     sourceSurface: 'chat',
@@ -108,13 +110,10 @@ async function writeAutomaticV19ChatAudit(input: {
       ${sql.json({
         readinessCheckedAt: readiness?.checkedAt || null,
         resourceUris: readiness?.resourceUris || [],
+        auditPacketHash: auditPacket.auditPacketHash,
       })}::jsonb,
-      ${sql.json((readiness?.citationValidation || {}) as any)}::jsonb,
-      ${sql.json((readiness?.issues || []).map(issue => ({
-        code: issue.code,
-        severity: issue.severity,
-        detail: issue.detail,
-      })))}::jsonb,
+      ${sql.json(auditPacket.citationsValidated as any)}::jsonb,
+      ${sql.json(auditPacket.mode2Triggers as any)}::jsonb,
       ${outputHash},
       ${DEFINITIVE_SPEC_VERSION},
       ${DEFINITIVE_SPEC_URI},

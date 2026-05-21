@@ -1,0 +1,1864 @@
+[
+  {
+    "id": "CONF.MODEL.VAL.EBITDA.001",
+    "title": "Adjusted EBITDA adds supported adjustments",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.VAL.EBITDA.v1",
+    "input": {
+      "ebitda_cents": 50000000,
+      "adjustments_cents": 5000000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "adjusted_ebitda_cents": 55000000
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.STRUCT.NWC.PEG.001",
+    "title": "Working capital peg averages supplied months",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.STRUCT.NWC.PEG.v1",
+    "input": {
+      "monthly_nwc_cents": [100000, 200000, 300000]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "peg_cents": 200000,
+        "observed_months": 3
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.VAL.TRIANGULATION.001",
+    "title": "Missing valuation inputs are explicit",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.VAL.TRIANGULATION.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": [
+        "normalized_earnings_cents",
+        "low_multiple",
+        "high_multiple"
+      ]
+    }
+  },
+  {
+    "id": "CONF.MODEL.QOE.LITE.001",
+    "title": "QoE Lite flags unsupported add-backs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.QOE.LITE.v1",
+    "input": {
+      "financial_facts": ["Revenue tied to 2025 P&L"],
+      "adjustments": [
+        { "label": "Owner comp", "source_id": "file-1" },
+        { "label": "Travel" }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "unsupported_adjustments": 1
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.TAX.STRUCTURE.001",
+    "title": "Tax structure routes rollover and NOL facts to counsel review",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TAX.STRUCTURE.v1",
+    "input": {
+      "deal_type": "asset sale with rollover",
+      "entity_type": "C-Corp",
+      "purchase_price_cents": 25000000,
+      "rollover_pct": 0.15,
+      "tax_facts": { "loss_carryforwards": true }
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "structure": "asset_sale_allocation",
+        "counsel_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.VAL.SDE.001",
+    "title": "Normalized SDE includes add-backs and owner compensation",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.VAL.SDE.v1",
+    "input": {
+      "seller_discretionary_earnings_cents": 100000,
+      "add_backs_cents": 20000,
+      "owner_comp_cents": 30000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "normalized_sde_cents": 150000
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.DSCR.STRESS.001",
+    "title": "DSCR stress produces base and downside cases",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.DSCR.STRESS.v1",
+    "input": {
+      "cash_flow_cents": 300000,
+      "annual_debt_service_cents": 200000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "base_dscr": 1.5,
+        "lender_floor": 1.25
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.SOURCES.USES.001",
+    "title": "Sources and uses reports funding gap",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.SOURCES.USES.v1",
+    "input": {
+      "sources_cents": [100000, 200000],
+      "uses_cents": [250000]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "total_sources_cents": 300000,
+        "total_uses_cents": 250000,
+        "funding_gap_cents": -50000
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.LBO.SBA.001",
+    "title": "SBA LBO checks equity and DSCR floors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LBO.SBA.v1",
+    "input": {
+      "purchase_price_cents": 1000000,
+      "cash_flow_cents": 200000,
+      "buyer_equity_cents": 100000,
+      "annual_debt_service_cents": 150000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "buyer_equity_pct": 0.1,
+        "dscr": 1.33,
+        "meets_sba_equity_floor": true,
+        "meets_sba_dscr_floor": true,
+        "max_7a_loan_cents": 500000000
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.HSR.TRIAGE.001",
+    "title": "HSR triage flags size-of-transaction threshold",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.HSR.TRIAGE.v1",
+    "input": {
+      "enterprise_value_cents": 13400000000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "hsr_size_triggered": true,
+        "threshold_cents": 13390000000,
+        "auto_reportable_cents": 53550000000
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.LEGAL.HALTSCAN.001",
+    "title": "Legal halt scan routes regulated and HSR facts to counsel",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LEGAL.HALTSCAN.v1",
+    "input": {
+      "deal_type": "asset sale",
+      "industry": "healthcare services",
+      "jurisdiction": "US-DE",
+      "enterprise_value_cents": 13400000000,
+      "legal_facts": {
+        "foreign_buyer": true
+      }
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "jurisdiction": "US-DE",
+        "hsr_size_triggered": true,
+        "counsel_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.STRUCT.EARNOUT.MC.001",
+    "title": "Earnout model computes probability-weighted present value",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.STRUCT.EARNOUT.MC.v1",
+    "input": {
+      "earnout_targets": [100000, 200000],
+      "probabilities": [0.5, 0.25],
+      "discount_rate": 0.1,
+      "term_years": 1
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "expected_gross_cents": 100000,
+        "expected_present_value_cents": 90909
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.DEAL.SCORE.001",
+    "title": "Deal score converts component scores into pursue/watch/pass",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.DEAL.SCORE.v1",
+    "input": {
+      "fit_score": 80,
+      "earnings_quality_score": 70,
+      "evidence_score": 90,
+      "risk_score": 20
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "deal_score": 80,
+        "score_band": "strong",
+        "pursue_watch_pass": "pursue"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.CAPTABLE.DILUTION.001",
+    "title": "Cap table dilution computes post-money ownership",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.CAPTABLE.DILUTION.v1",
+    "input": {
+      "pre_money_cents": 1000000,
+      "round_size_cents": 250000,
+      "option_pool_pct": 0.1,
+      "security_terms": {
+        "liquidation_pref_multiple": 1
+      }
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "post_money_cents": 1250000,
+        "investor_ownership_pct": 0.2,
+        "founder_ownership_pct": 0.7,
+        "liquidation_preference_cents": 250000
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.VAL.DCF.TWOSTAGE.001",
+    "title": "Two-stage DCF computes enterprise value from cash flows",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.VAL.DCF.TWOSTAGE.v1",
+    "input": {
+      "free_cash_flows_cents": [100000, 110000],
+      "discount_rate": 0.1,
+      "terminal_growth_rate": 0.03
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "terminal_value_cents": 1618571,
+        "pv_terminal_value_cents": 1337662,
+        "enterprise_value_cents": 1519480
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.LBO.LMM.001",
+    "title": "LMM LBO computes leverage, exit equity, MOIC, and simple IRR",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LBO.LMM.v1",
+    "input": {
+      "purchase_price_cents": 100000000,
+      "debt_cents": 60000000,
+      "sponsor_equity_cents": 40000000,
+      "entry_ebitda_cents": 20000000,
+      "exit_multiple": 6,
+      "hold_years": 5,
+      "ebitda_growth_pct": 0.05,
+      "debt_paydown_cents": 15000000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "entry_leverage": 3,
+        "sponsor_equity_pct": 0.4,
+        "exit_ebitda_cents": 25525631,
+        "exit_enterprise_value_cents": 153153786,
+        "exit_equity_value_cents": 108153786,
+        "moic": 2.7,
+        "simple_irr": 0.2201
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.STRUCT.PPA.001",
+    "title": "PPA allocation tracks allocated and unallocated purchase price",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.STRUCT.PPA.v1",
+    "input": {
+      "purchase_price_cents": 100000000,
+      "asset_classes": {
+        "working_capital": 10000000,
+        "equipment": 25000000,
+        "goodwill": 50000000
+      }
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "allocated_cents": 85000000,
+        "unallocated_cents": 15000000,
+        "requires_form_8594_consistency_review": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.STRUCT.ROLLOVER.001",
+    "title": "Rollover model requires tax review when rollover is present",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.STRUCT.ROLLOVER.v1",
+    "input": {
+      "rollover_pct": 0.2,
+      "entity_type": "LLC",
+      "deal_type": "equity rollover"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "rollover_pct": 0.2,
+        "rollover_present": true,
+        "tax_review_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.STRUCT.ANALYSIS.001",
+    "title": "Structure analysis counts SBA, rollover, asset-sale, and HSR actions",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.STRUCT.ANALYSIS.v1",
+    "input": {
+      "deal_type": "asset sale",
+      "structure_facts": {
+        "sba_financing": true,
+        "rollover_pct": 0.1,
+        "asset_sale": true,
+        "enterprise_value_cents": 14000000000
+      }
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "deal_type": "asset sale",
+        "action_count": 4,
+        "counsel_required": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.BUYER.FIT.001",
+    "title": "Buyer fit scores thesis, geography, operations, and financing",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.BUYER.FIT.v1",
+    "input": {
+      "industry": "HVAC",
+      "location": "Austin",
+      "deal_size_cents": 500000000,
+      "buyer_thesis": "HVAC platforms around Austin with route density",
+      "operating_needs": ["manager transition", "field tech retention"],
+      "buyer_criteria": {
+        "min_deal_size_cents": 100000000,
+        "max_deal_size_cents": 800000000
+      }
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "fit_score": 86,
+        "fit_band": "strong",
+        "recommended_next_action": "Prioritize outreach and diligence."
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.MARKET.CONTEXT.001",
+    "title": "Market context stamps series values as current or missing",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.MARKET.CONTEXT.v1",
+    "input": {
+      "series_ids": ["SOFR", "DGS10"],
+      "as_of_date": "2026-05-20",
+      "series_values": {
+        "SOFR": 3.6,
+        "DGS10": 4.1
+      }
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "as_of_date": "2026-05-20",
+        "series_count": 2,
+        "missing_value_series": []
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.SENSITIVITY.MATRIX.001",
+    "title": "Sensitivity matrix creates deterministic two-axis cases",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.SENSITIVITY.MATRIX.v1",
+    "input": {
+      "base_case": { "value": 100 },
+      "x_axis": { "values": [-0.1, 0, 0.1] },
+      "y_axis": { "values": [-0.2, 0.2] },
+      "output_metric": "enterprise_value"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "matrix": [[72, 80, 88], [108, 120, 132]],
+        "low_case": 72,
+        "high_case": 132
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.DEAL.COMPARISON.001",
+    "title": "Deal comparison ranks supplied deals by score",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.DEAL.COMPARISON.v1",
+    "input": {
+      "deal_ids": ["a", "b"],
+      "comparison_lens": "quality",
+      "assumption_scope": "same leverage",
+      "deals": [
+        { "id": "a", "name": "A", "score": 70, "purchase_price_cents": 1000000, "ebitda_cents": 200000 },
+        { "id": "b", "name": "B", "score": 85, "purchase_price_cents": 1200000, "ebitda_cents": 300000 }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "deal_count": 2,
+        "ranked_ids": ["b", "a"],
+        "top_deal_id": "b"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.COVENANT.COMPLIANCE.001",
+    "title": "Covenant compliance reports leverage, DSCR, and liquidity breaches",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.COVENANT.COMPLIANCE.v1",
+    "input": {
+      "forecast_periods": [
+        { "period": "2027", "ebitda_cents": 100000, "total_debt_cents": 350000, "cash_flow_cents": 120000, "debt_service_cents": 80000, "liquidity_cents": 50000 },
+        { "period": "2028", "ebitda_cents": 100000, "total_debt_cents": 250000, "cash_flow_cents": 100000, "debt_service_cents": 90000, "liquidity_cents": 20000 }
+      ],
+      "covenant_terms": {
+        "max_leverage": 3,
+        "min_dscr": 1.2,
+        "min_liquidity_cents": 30000
+      },
+      "debt_schedule": [
+        { "total_debt_cents": 350000, "debt_service_cents": 80000 },
+        { "total_debt_cents": 250000, "debt_service_cents": 90000 }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "status": "breach",
+        "breach_count": 3
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.PMI.VALUE.CREATION.001",
+    "title": "PMI value creation turns risks and levers into first-100-day actions",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.PMI.VALUE.CREATION.v1",
+    "input": {
+      "deal_findings": ["customer concentration", "manual dispatch"],
+      "integration_risks": ["key manager", "billing migration"],
+      "value_levers": [
+        { "name": "pricing cleanup", "value_cents": 50000 },
+        { "name": "routing efficiency", "value_cents": 75000 }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "finding_count": 2,
+        "risk_count": 2,
+        "identified_value_cents": 125000
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.DEALKILL.PROB.001",
+    "title": "Deal-kill probability aggregates weighted risk factors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.DEALKILL.PROB.v1",
+    "input": {
+      "risk_factors": [
+        { "label": "financing gap", "severity": 80, "probability": 0.5 },
+        { "label": "seller retrade", "severity": 60, "probability": 0.25 }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "deal_kill_probability": 0.275,
+        "risk_band": "low"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.TIMELINE.MC.001",
+    "title": "Timeline Monte Carlo estimates expected milestone days",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TIMELINE.MC.v1",
+    "input": {
+      "milestones": [
+        { "name": "LOI", "optimistic_days": 5, "base_days": 7, "downside_days": 14 },
+        { "name": "QoE", "optimistic_days": 21, "base_days": 35, "downside_days": 60 }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "expected_days": 44.6,
+        "milestone_count": 2
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.VAL.DCF.TWOSTAGE.002",
+    "title": "DCF refuses terminal-growth cases above discount rate",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.VAL.DCF.TWOSTAGE.v1",
+    "input": {
+      "free_cash_flows_cents": [100000],
+      "discount_rate": 0.03,
+      "terminal_growth_rate": 0.04
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["discount_rate_above_terminal_growth_rate"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.VAL.SDE.002",
+    "title": "SDE model refuses to normalize without seller earnings",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.VAL.SDE.v1",
+    "input": {
+      "add_backs_cents": 10000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["seller_discretionary_earnings_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.VAL.EBITDA.002",
+    "title": "EBITDA model refuses adjustments without base EBITDA",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.VAL.EBITDA.v1",
+    "input": {
+      "adjustments_cents": 25000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["ebitda_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.DSCR.STRESS.002",
+    "title": "DSCR stress refuses to run without debt service",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.DSCR.STRESS.v1",
+    "input": {
+      "cash_flow_cents": 240000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["annual_debt_service_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.STRUCT.NWC.PEG.002",
+    "title": "Working capital peg refuses empty month arrays",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.STRUCT.NWC.PEG.v1",
+    "input": {
+      "monthly_nwc_cents": []
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["monthly_nwc_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.SOURCES.USES.002",
+    "title": "Sources and uses refuses missing uses",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.SOURCES.USES.v1",
+    "input": {
+      "sources_cents": [100000]
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["uses_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.LBO.SBA.002",
+    "title": "SBA LBO flags failed equity and DSCR floors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LBO.SBA.v1",
+    "input": {
+      "purchase_price_cents": 1000000,
+      "cash_flow_cents": 100000,
+      "buyer_equity_cents": 50000,
+      "annual_debt_service_cents": 100000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "buyer_equity_pct": 0.05,
+        "dscr": 1,
+        "meets_sba_equity_floor": false,
+        "meets_sba_dscr_floor": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.HSR.TRIAGE.002",
+    "title": "HSR triage leaves below-threshold deals untriggered",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.HSR.TRIAGE.v1",
+    "input": {
+      "enterprise_value_cents": 5000000000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "hsr_size_triggered": false,
+        "threshold_cents": 13390000000
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.QOE.LITE.002",
+    "title": "QoE Lite refuses to opine without financial facts",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.QOE.LITE.v1",
+    "input": {
+      "adjustments": [{ "label": "Owner comp", "source_id": "file-1" }]
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["financial_facts"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.TAX.STRUCTURE.002",
+    "title": "Tax structure refuses missing purchase price",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TAX.STRUCTURE.v1",
+    "input": {
+      "deal_type": "asset sale",
+      "entity_type": "LLC"
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["purchase_price_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.LEGAL.HALTSCAN.002",
+    "title": "Legal halt scan can complete with no counsel triggers",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LEGAL.HALTSCAN.v1",
+    "input": {
+      "deal_type": "asset sale",
+      "industry": "landscaping",
+      "jurisdiction": "US-TX",
+      "enterprise_value_cents": 2500000000,
+      "legal_facts": {}
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "jurisdiction": "US-TX",
+        "hsr_size_triggered": false,
+        "counsel_required": false
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.LBO.LMM.002",
+    "title": "LMM LBO refuses missing exit multiple",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LBO.LMM.v1",
+    "input": {
+      "purchase_price_cents": 100000000,
+      "debt_cents": 60000000,
+      "sponsor_equity_cents": 40000000,
+      "entry_ebitda_cents": 20000000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["exit_multiple"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.STRUCT.PPA.002",
+    "title": "PPA allocation refuses missing asset classes",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.STRUCT.PPA.v1",
+    "input": {
+      "purchase_price_cents": 100000000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["asset_classes"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.STRUCT.ROLLOVER.002",
+    "title": "Rollover model allows clean no-rollover cases",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.STRUCT.ROLLOVER.v1",
+    "input": {
+      "rollover_pct": 0,
+      "entity_type": "sole proprietorship",
+      "deal_type": "cash purchase"
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "rollover_present": false,
+        "tax_review_required": false,
+        "counsel_flags": []
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.STRUCT.ANALYSIS.002",
+    "title": "Structure analysis refuses missing structure facts",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.STRUCT.ANALYSIS.v1",
+    "input": {
+      "deal_type": "asset sale"
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["structure_facts"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.BUYER.FIT.002",
+    "title": "Buyer fit refuses missing operating needs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.BUYER.FIT.v1",
+    "input": {
+      "industry": "HVAC",
+      "location": "Austin",
+      "deal_size_cents": 500000000,
+      "buyer_thesis": "HVAC route density in Austin"
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["operating_needs"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.MARKET.CONTEXT.002",
+    "title": "Market context keeps missing series values explicit",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.MARKET.CONTEXT.v1",
+    "input": {
+      "series_ids": ["SOFR", "DGS10"],
+      "as_of_date": "2026-05-20",
+      "series_values": {
+        "SOFR": 3.6
+      }
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "series_count": 2,
+        "missing_value_series": ["DGS10"]
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.SENSITIVITY.MATRIX.002",
+    "title": "Sensitivity matrix refuses missing x-axis cases",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.SENSITIVITY.MATRIX.v1",
+    "input": {
+      "base_case": { "value": 100 },
+      "y_axis": { "values": [0, 0.1] },
+      "output_metric": "enterprise_value"
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["x_axis"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.DEAL.COMPARISON.002",
+    "title": "Deal comparison refuses missing assumption scope",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.DEAL.COMPARISON.v1",
+    "input": {
+      "deal_ids": ["a", "b"],
+      "comparison_lens": "quality"
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["assumption_scope"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.COVENANT.COMPLIANCE.002",
+    "title": "Covenant compliance reports clean compliant periods",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.COVENANT.COMPLIANCE.v1",
+    "input": {
+      "forecast_periods": [
+        { "period": "2027", "ebitda_cents": 200000, "total_debt_cents": 300000, "cash_flow_cents": 220000, "debt_service_cents": 100000, "liquidity_cents": 90000 }
+      ],
+      "covenant_terms": {
+        "max_leverage": 2,
+        "min_dscr": 1.5,
+        "min_liquidity_cents": 50000
+      },
+      "debt_schedule": [
+        { "total_debt_cents": 300000, "debt_service_cents": 100000 }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "status": "compliant",
+        "breach_count": 0
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.PMI.VALUE.CREATION.002",
+    "title": "PMI value creation refuses missing value levers",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.PMI.VALUE.CREATION.v1",
+    "input": {
+      "deal_findings": ["customer concentration"],
+      "integration_risks": ["key manager"]
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["value_levers"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.DEALKILL.PROB.002",
+    "title": "Deal-kill probability refuses missing risk factors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.DEALKILL.PROB.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["risk_factors"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.TIMELINE.MC.002",
+    "title": "Timeline Monte Carlo refuses missing milestones",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TIMELINE.MC.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["milestones"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.FIRPTA.001",
+    "title": "FIRPTA computes reduced personal-residence withholding",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.FIRPTA.WITHHOLDING.v1",
+    "input": {
+      "amount_realized_cents": 80000000,
+      "seller_foreign_person": true,
+      "buyer_will_use_as_residence": true
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "withholding_rate": 0.1,
+        "withholding_amount_cents": 8000000,
+        "path": "personal_residence_300k_to_1m_reduced_rate",
+        "forms_due_within_days": 20
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.FIRPTA.002",
+    "title": "FIRPTA refuses missing amount realized",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.FIRPTA.WITHHOLDING.v1",
+    "input": {
+      "seller_foreign_person": true
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["amount_realized_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.1031.001",
+    "title": "1031 timing computes statutory deadlines and boot floor",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.1031.TIMING.v1",
+    "input": {
+      "transfer_date": "2026-05-21",
+      "relinquished_property_value_cents": 100000000,
+      "replacement_property_value_cents": 90000000,
+      "boot_received_cents": 5000000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "identification_deadline": "2026-07-05",
+        "exchange_deadline": "2026-11-17",
+        "value_shortfall_cents": 10000000,
+        "recognized_gain_floor_cents": 10000000
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.1031.002",
+    "title": "1031 timing refuses missing replacement property value",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.1031.TIMING.v1",
+    "input": {
+      "transfer_date": "2026-05-21",
+      "relinquished_property_value_cents": 100000000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["replacement_property_value_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.RENT_ROLL.001",
+    "title": "Rent roll normalizes occupancy, WALT, and concentration",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RENT_ROLL.NORMALIZE.v1",
+    "input": {
+      "rent_roll": [
+        { "tenant": "A", "annual_rent_cents": 6000000, "square_feet": 6000, "lease_months_remaining": 36, "occupied": true },
+        { "tenant": "B", "annual_rent_cents": 3000000, "square_feet": 3000, "lease_months_remaining": 24, "occupied": true },
+        { "tenant": "Vacant", "annual_rent_cents": 0, "square_feet": 1000, "lease_months_remaining": 0, "occupied": false }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "tenant_count": 3,
+        "occupied_tenant_count": 2,
+        "annual_rent_cents": 9000000,
+        "occupancy_pct": 0.6667,
+        "area_occupancy_pct": 0.9,
+        "walt_months": 32,
+        "top_tenant_rent_pct": 0.6667,
+        "tenant_concentration_flag": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.RENT_ROLL.002",
+    "title": "Rent roll refuses missing rent roll rows",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.RENT_ROLL.NORMALIZE.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["rent_roll"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.CAM.001",
+    "title": "CAM true-up computes prorated recoverable share",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.CAM.TRUEUP.v1",
+    "input": {
+      "recoverable_expenses_cents": 12000000,
+      "tenant_pro_rata_pct": 0.25,
+      "tenant_payments_cents": 2000000,
+      "closing_day_of_period": 180,
+      "period_days": 360
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "tenant_pro_rata_pct": 0.25,
+        "annual_tenant_share_cents": 3000000,
+        "prorated_tenant_share_through_closing_cents": 1500000,
+        "closing_true_up_cents": -500000
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.CAM.002",
+    "title": "CAM true-up refuses missing tenant pro-rata share",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.CAM.TRUEUP.v1",
+    "input": {
+      "recoverable_expenses_cents": 12000000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["tenant_pro_rata_pct"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.LEGAL.INDEMNITY.001",
+    "title": "Indemnity ladder computes cap and basket economics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LEGAL.INDEMNITY.LADDER.v1",
+    "input": {
+      "transaction_value_cents": 500000000,
+      "general_cap_pct": 0.105,
+      "basket_pct": 0.005,
+      "rwi_present": false
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "general_cap_cents": 52500000,
+        "basket_cents": 2500000,
+        "fundamental_reps_cap_cents": 500000000,
+        "materiality_scrape_default": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.LEGAL.INDEMNITY.002",
+    "title": "Indemnity ladder refuses missing transaction value",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LEGAL.INDEMNITY.LADDER.v1",
+    "input": {
+      "general_cap_pct": 0.1
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["transaction_value_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.LEGAL.ESCROW.001",
+    "title": "Escrow sizing computes RWI, PPA, and special escrows",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LEGAL.ESCROW.HOLDBACK.v1",
+    "input": {
+      "transaction_value_cents": 500000000,
+      "rwi_present": true,
+      "special_escrows_cents": [5000000, 3000000]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "general_escrow_cents": 2500000,
+        "ppa_escrow_cents": 5000000,
+        "special_escrow_cents": 8000000,
+        "aggregate_escrow_cents": 15500000
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.LEGAL.ESCROW.002",
+    "title": "Escrow sizing refuses missing transaction value",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LEGAL.ESCROW.HOLDBACK.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["transaction_value_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.TAX.MASTER.001",
+    "title": "Transaction tax master computes proceeds, tax, gross-up gap, and fired models",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TAX.TRANSACTION.MASTER.v1",
+    "input": {
+      "seller_entity_type": "S-Corp",
+      "deal_form": "asset_sale",
+      "purchase_price_cents": 100000000,
+      "seller_tax_basis_cents": 40000000,
+      "federal_tax_rate": 0.2,
+      "state_tax_rate": 0.05,
+      "seller_structure_tax_delta_cents": 5000000,
+      "consideration_mix": {
+        "cash_cents": 90000000,
+        "rollover_cents": 10000000
+      }
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "taxable_consideration_cents": 90000000,
+        "buyer_asset_basis_cents": 100000000,
+        "seller_taxable_gain_cents": 50000000,
+        "seller_tax_cents": 12500000,
+        "seller_after_tax_proceeds_cents": 87500000,
+        "gross_up_gap_cents": 6666667,
+        "fired_sub_models": ["M139", "M145", "M201"]
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.TAX.MASTER.002",
+    "title": "Transaction tax master refuses missing deal form",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TAX.TRANSACTION.MASTER.v1",
+    "input": {
+      "seller_entity_type": "S-Corp",
+      "purchase_price_cents": 100000000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["deal_form"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.TAX.GROSSUP.001",
+    "title": "338 and 336 gross-up computes breakeven and buyer net benefit",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TAX.GROSSUP.338_336.v1",
+    "input": {
+      "seller_tax_delta_cents": 8000000,
+      "seller_marginal_tax_rate": 0.25,
+      "buyer_step_up_pv_benefit_cents": 15000000,
+      "disposition_pct": 0.85,
+      "disposition_months": 10
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "breakeven_gross_up_cents": 10666667,
+        "buyer_net_benefit_after_gross_up_cents": 4333333,
+        "section_336e_80pct_12mo_test_passed": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.TAX.GROSSUP.002",
+    "title": "338 and 336 gross-up refuses missing seller tax delta",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TAX.GROSSUP.338_336.v1",
+    "input": {
+      "seller_marginal_tax_rate": 0.25
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["seller_tax_delta_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.TAX.BIG1374.001",
+    "title": "1374 BIG tax computes recognition-period tax base and tax",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TAX.BIG.1374.v1",
+    "input": {
+      "fmv_at_conversion_cents": 100000000,
+      "basis_at_conversion_cents": 60000000,
+      "conversion_date": "2023-01-01",
+      "sale_date": "2026-01-01",
+      "recognized_gain_cents": 50000000,
+      "taxable_income_cents": 30000000,
+      "corporate_tax_rate": 0.21
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "net_unrealized_built_in_gain_cents": 40000000,
+        "years_since_conversion": 3,
+        "within_recognition_period": true,
+        "recognized_big_tax_base_cents": 30000000,
+        "section_1374_tax_cents": 6300000
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.TAX.BIG1374.002",
+    "title": "1374 BIG tax refuses missing sale date",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TAX.BIG.1374.v1",
+    "input": {
+      "fmv_at_conversion_cents": 100000000,
+      "basis_at_conversion_cents": 60000000,
+      "conversion_date": "2023-01-01",
+      "recognized_gain_cents": 50000000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["sale_date"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.TAX.COSTS.001",
+    "title": "Transaction cost capitalization classifies safe-harbor, facilitative, and investigatory costs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TAX.TRANSACTION_COSTS.v1",
+    "input": {
+      "bright_line_date": "2026-03-01",
+      "rev_proc_2011_29_safe_harbor_elected": true,
+      "pe_owned_target": true,
+      "transaction_costs": [
+        { "label": "Banker success fee", "amount_cents": 10000000, "success_based": true, "incurred_date": "2026-04-01" },
+        { "label": "Legal drafting", "amount_cents": 2000000, "inherently_facilitative": true, "incurred_date": "2026-02-15" },
+        { "label": "Market study", "amount_cents": 1000000, "incurred_date": "2026-01-15" }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "deductible_cents": 7000000,
+        "capitalized_cents": 5000000,
+        "amortizable_195_cents": 1000000,
+        "pe_owned_target_success_fee_risk_flag": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.TAX.COSTS.002",
+    "title": "Transaction cost capitalization refuses missing cost rows",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TAX.TRANSACTION_COSTS.v1",
+    "input": {
+      "bright_line_date": "2026-03-01"
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["transaction_costs"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.TAX.INTEREST.001",
+    "title": "Imputed interest and OID computes AFR shortfall and 453A threshold exposure",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TAX.IMPUTED_INTEREST_OID.v1",
+    "input": {
+      "principal_cents": 10000000,
+      "stated_interest_rate": 0.02,
+      "afr_rate": 0.05,
+      "term_months": 24,
+      "installment_receivable_cents": 600000000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "imputed_rate_delta": 0.03,
+        "imputed_interest_cents": 600000,
+        "oid_floor_cents": 600000,
+        "section_453a_applies": true,
+        "section_453a_excess_receivable_cents": 100000000
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.TAX.INTEREST.002",
+    "title": "Imputed interest and OID refuses missing AFR",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TAX.IMPUTED_INTEREST_OID.v1",
+    "input": {
+      "principal_cents": 10000000,
+      "stated_interest_rate": 0.02,
+      "term_months": 24
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["afr_rate"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.LEGAL.SURVIVAL.001",
+    "title": "Survival period engine computes rep expiry dates",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LEGAL.SURVIVAL.PERIODS.v1",
+    "input": {
+      "closing_date": "2026-05-21",
+      "rwi_present": false,
+      "general_reps_months": 12
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "general_reps_expiry": "2027-05-21",
+        "fundamental_reps_expiry": "2032-05-21",
+        "tax_reps_expiry": "2032-05-21",
+        "fraud_carveout_from_exclusive_remedy": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.LEGAL.SURVIVAL.002",
+    "title": "Survival period engine refuses missing closing date",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LEGAL.SURVIVAL.PERIODS.v1",
+    "input": {
+      "rwi_present": true
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["closing_date"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.LEGAL.TRUEUP.001",
+    "title": "Closing statement true-up computes adjustment and dispute timeline",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LEGAL.CLOSING_TRUEUP.SEQUENCE.v1",
+    "input": {
+      "closing_date": "2026-05-21",
+      "peg_cents": 1000000,
+      "estimated_nwc_cents": 900000,
+      "actual_nwc_cents": 800000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "estimated_adjustment_cents": -100000,
+        "final_purchase_price_adjustment_cents": -200000,
+        "buyer_receivable_cents": 200000,
+        "seller_receivable_cents": 0,
+        "actual_statement_due_date": "2026-08-19",
+        "dispute_notice_due_date": "2026-09-18",
+        "good_faith_negotiation_end_date": "2026-10-18"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.LEGAL.TRUEUP.002",
+    "title": "Closing statement true-up refuses missing peg",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LEGAL.CLOSING_TRUEUP.SEQUENCE.v1",
+    "input": {
+      "closing_date": "2026-05-21",
+      "actual_nwc_cents": 800000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["peg_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.LEGAL.CONDITIONS.001",
+    "title": "Conditions logic identifies open closing blockers and professional-review flags",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LEGAL.CONDITIONS.LOGIC.v1",
+    "input": {
+      "conditions": [
+        { "name": "Bring-down reps", "type": "general", "satisfied": true },
+        { "name": "HSR approval", "type": "regulatory", "satisfied": false },
+        { "name": "Key customer consent", "type": "consent", "waived": true }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "condition_count": 3,
+        "satisfied_count": 1,
+        "waived_count": 1,
+        "open_condition_count": 1,
+        "closing_ready": false,
+        "professional_review_required": true,
+        "open_conditions": ["HSR approval"]
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.LEGAL.CONDITIONS.002",
+    "title": "Conditions logic refuses missing conditions",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LEGAL.CONDITIONS.LOGIC.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["conditions"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.LEGAL.TERMINATION.001",
+    "title": "Termination fee engine computes break, reverse, antitrust, and go-shop fees",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LEGAL.TERMINATION.FEES.v1",
+    "input": {
+      "transaction_value_cents": 100000000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "target_break_fee_cents": 2700000,
+        "go_shop_break_fee_cents": 1350000,
+        "reverse_termination_fee_cents": 4200000,
+        "antitrust_reverse_fee_cents": 5000000
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.LEGAL.TERMINATION.002",
+    "title": "Termination fee engine refuses missing transaction value",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.LEGAL.TERMINATION.FEES.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["transaction_value_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.TAX.1060.001",
+    "title": "1060 allocation applies residual method through Class VII",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TAX.1060.ALLOCATION.v1",
+    "input": {
+      "purchase_price_cents": 1000000,
+      "asset_classes": [
+        { "class_name": "Class V real property and equipment", "fair_market_value_cents": 600000 },
+        { "class_name": "Class VI customer intangibles", "fair_market_value_cents": 300000 },
+        { "class_name": "Class VII goodwill", "fair_market_value_cents": 0 }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "allocated_cents": 1000000,
+        "unallocated_cents": 0,
+        "class_v_tangible_cents": 600000,
+        "class_vi_section_197_intangibles_cents": 300000,
+        "class_vii_goodwill_cents": 100000
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.TAX.1060.002",
+    "title": "1060 allocation refuses missing purchase price",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TAX.1060.ALLOCATION.v1",
+    "input": {
+      "asset_classes": [{ "class_name": "Class V", "fair_market_value_cents": 600000 }]
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["purchase_price_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.SALELEASEBACK.001",
+    "title": "Sale-leaseback computes cap rate and ASC 842 indicators",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.SALE_LEASEBACK.ASC842.v1",
+    "input": {
+      "sale_price_cents": 100000000,
+      "annual_rent_cents": 7500000,
+      "lease_term_years": 10,
+      "economic_life_years": 20,
+      "pv_lease_payments_cents": 80000000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "cap_rate": 0.075,
+        "total_nominal_rent_cents": 75000000,
+        "lease_term_pct_of_economic_life": 0.5,
+        "pv_payments_pct_of_fair_value": 0.8,
+        "asc842_indicator_classification": "operating_lease_indicator_on_supplied_facts"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.SALELEASEBACK.002",
+    "title": "Sale-leaseback refuses missing rent",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.SALE_LEASEBACK.ASC842.v1",
+    "input": {
+      "sale_price_cents": 100000000,
+      "lease_term_years": 10
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["annual_rent_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.REIT.001",
+    "title": "REIT compliance triad passes 75/75/90 tests",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.REIT.COMPLIANCE.v1",
+    "input": {
+      "real_estate_income_cents": 800000,
+      "total_income_cents": 1000000,
+      "real_estate_assets_cents": 900000,
+      "total_assets_cents": 1000000,
+      "distributions_cents": 950000,
+      "taxable_income_cents": 1000000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "income_75_pct": 0.8,
+        "income_75_test_passed": true,
+        "asset_75_pct": 0.9,
+        "asset_75_test_passed": true,
+        "distribution_90_pct": 0.95,
+        "distribution_90_test_passed": true,
+        "all_tests_passed": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.RE.REIT.002",
+    "title": "REIT compliance refuses missing total assets",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.RE.REIT.COMPLIANCE.v1",
+    "input": {
+      "real_estate_income_cents": 800000,
+      "total_income_cents": 1000000,
+      "real_estate_assets_cents": 900000,
+      "distributions_cents": 950000,
+      "taxable_income_cents": 1000000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["total_assets_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.FINANCE.SAFE.001",
+    "title": "Convertible SAFE selects the best conversion price",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.FINANCE.CONVERTIBLE_SAFE.v1",
+    "input": {
+      "investment_cents": 1000000,
+      "priced_round_share_price_cents": 1000,
+      "discount_pct": 0.2,
+      "valuation_cap_cents": 80000000,
+      "pre_money_share_count": 100000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "discount_price_cents": 800,
+        "cap_price_cents": 800,
+        "conversion_price_cents": 800,
+        "converted_share_count": 1250,
+        "conversion_driver": "valuation_cap"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.FINANCE.SAFE.002",
+    "title": "Convertible SAFE refuses missing investment",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.FINANCE.CONVERTIBLE_SAFE.v1",
+    "input": {
+      "priced_round_share_price_cents": 1000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["investment_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.FINANCE.ABL.001",
+    "title": "ABL borrowing base computes advance rates, reserves, and commitment cap",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.FINANCE.ABL.BORROWING_BASE.v1",
+    "input": {
+      "eligible_ar_cents": 10000000,
+      "eligible_inventory_cents": 4000000,
+      "reserves_cents": 500000,
+      "commitment_cents": 9000000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "gross_borrowing_base_cents": 10500000,
+        "net_borrowing_base_cents": 10000000,
+        "availability_cents": 9000000
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.FINANCE.ABL.002",
+    "title": "ABL borrowing base refuses missing inventory",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.FINANCE.ABL.BORROWING_BASE.v1",
+    "input": {
+      "eligible_ar_cents": 10000000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["eligible_inventory_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.FINANCE.MAKEWHOLE.001",
+    "title": "Make-whole engine compares treasury-plus-spread and stated call economics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.FINANCE.MAKE_WHOLE_CALL.v1",
+    "input": {
+      "principal_cents": 100000000,
+      "coupon_rate": 0.08,
+      "treasury_rate": 0.05,
+      "spread_bps": 300,
+      "remaining_years": 1,
+      "call_price_pct": 1.02
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "make_whole_discount_rate": 0.08,
+        "make_whole_price_cents": 100000000,
+        "make_whole_premium_cents": 0,
+        "stated_call_price_cents": 102000000,
+        "lower_cost_redemption_path": "make_whole"
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.FINANCE.MAKEWHOLE.002",
+    "title": "Make-whole engine refuses missing spread",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.FINANCE.MAKE_WHOLE_CALL.v1",
+    "input": {
+      "principal_cents": 100000000,
+      "coupon_rate": 0.08,
+      "treasury_rate": 0.05,
+      "remaining_years": 1
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["spread_bps"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.FINANCE.BASKETS.001",
+    "title": "Covenant basket engine computes remaining capacity and blocked proposed uses",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.FINANCE.COVENANT_BASKETS.v1",
+    "input": {
+      "baskets": [
+        { "name": "Investment basket", "fixed_capacity_cents": 1000000, "grower_basis_cents": 10000000, "grower_pct": 0.1, "used_cents": 500000, "proposed_use_cents": 1000000 },
+        { "name": "Restricted payment basket", "fixed_capacity_cents": 500000, "used_cents": 400000, "proposed_use_cents": 200000 }
+      ]
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "basket_count": 2,
+        "aggregate_remaining_capacity_cents": 1600000,
+        "blocked_basket_count": 1
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.FINANCE.BASKETS.002",
+    "title": "Covenant basket engine refuses missing baskets",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.FINANCE.COVENANT_BASKETS.v1",
+    "input": {},
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["baskets"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.TAX.280G.001",
+    "title": "280G model computes trigger, excess payment, excise tax, and cleansing vote",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TAX.280G.PARACHUTE.v1",
+    "input": {
+      "base_amount_cents": 1000000,
+      "parachute_payments_cents": 3500000,
+      "shareholder_cleansing_vote_pct": 0.8
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "three_times_base_threshold_cents": 3000000,
+        "section_280g_triggered": true,
+        "excess_parachute_payment_cents": 2500000,
+        "excise_tax_20pct_cents": 500000,
+        "lost_employer_deduction_cents": 2500000,
+        "cleansing_vote_passed": true
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.TAX.280G.002",
+    "title": "280G model refuses missing parachute payments",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TAX.280G.PARACHUTE.v1",
+    "input": {
+      "base_amount_cents": 1000000
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["parachute_payments_cents"]
+    }
+  },
+  {
+    "id": "CONF.MODEL.TAX.382.001",
+    "title": "382 model computes annual NOL limitation and estimated use period",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TAX.382.NOL_LIMIT.v1",
+    "input": {
+      "loss_corporation_value_cents": 100000000,
+      "long_term_tax_exempt_rate": 0.04,
+      "nol_carryforward_cents": 10000000
+    },
+    "expect": {
+      "status": "complete",
+      "outputs": {
+        "annual_section_382_limitation_cents": 4000000,
+        "estimated_years_to_use_nol": 3
+      }
+    }
+  },
+  {
+    "id": "CONF.MODEL.TAX.382.002",
+    "title": "382 model refuses missing loss corporation value",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "modelId": "MODEL.TAX.382.NOL_LIMIT.v1",
+    "input": {
+      "long_term_tax_exempt_rate": 0.04
+    },
+    "expect": {
+      "status": "needs_inputs",
+      "missingInputsIncludes": ["loss_corporation_value_cents"]
+    }
+  }
+]

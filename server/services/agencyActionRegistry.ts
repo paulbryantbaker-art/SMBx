@@ -39,6 +39,21 @@ export type AgencySurface =
 
 export type CitationRequirement = 'none' | 'optional' | 'required';
 export type AuditRequirement = 'required';
+export type DefinitiveLineStatus =
+  | 'ok'
+  | 'human_approval_required'
+  | 'counsel_review_required'
+  | 'enterprise_scope_required'
+  | 'credit_budget_required'
+  | 'LINE_VIOLATION';
+
+export type DefinitiveLineRefusalBehavior =
+  | 'allow'
+  | 'stage_for_approval'
+  | 'route_to_counsel'
+  | 'require_enterprise_scope'
+  | 'require_credit_budget'
+  | 'refuse';
 
 export type AgencyUsageEventType =
   | 'action_run'
@@ -68,7 +83,7 @@ export interface AgencyActionContract {
   permissionLevel: PermissionLevel;
   riskLevel: RiskLevel;
   confirmation: ConfirmationPolicy;
-  writeScope: 'none' | 'conversation' | 'deal' | 'deliverable' | 'data_room' | 'review' | 'share' | 'sourcing' | 'support' | 'model';
+  writeScope: 'none' | 'conversation' | 'deal' | 'deliverable' | 'data_room' | 'review' | 'share' | 'sourcing' | 'support' | 'model' | 'corpus';
   actionClass?: ActionClass | 'dynamic_share';
   description: string;
   inputSchema?: JsonSchemaLite;
@@ -91,6 +106,13 @@ export interface CanonicalAgencyActionContract extends AgencyActionContract {
   auditRequirement: AuditRequirement;
   allowedSurfaces: AgencySurface[];
   externalAgentReady: boolean;
+}
+
+export interface DefinitiveLineContract extends CanonicalAgencyActionContract {
+  lineStatus: DefinitiveLineStatus;
+  lineReason: string;
+  refusalBehavior: DefinitiveLineRefusalBehavior;
+  lineRisks: string[];
 }
 
 const CONTRACTS: Record<string, AgencyActionContract> = {
@@ -170,6 +192,199 @@ const CONTRACTS: Record<string, AgencyActionContract> = {
     confirmation: 'none',
     writeScope: 'deliverable',
     description: 'Queue a real document or analysis deliverable from deal data.',
+  },
+  create_pitch_book: {
+    toolName: 'create_pitch_book',
+    label: 'Create Pitch Book Studio book',
+    methodologyRefs: ['DEFINITIVE Studio', 'V19 source-grounded work product'],
+    mode: 'author',
+    permissionLevel: 'A3_GENERATE_WORK_PRODUCT',
+    riskLevel: 'internal_write',
+    confirmation: 'none',
+    writeScope: 'deliverable',
+    description: 'Create an internal Studio book with slide-level provenance and readiness state.',
+  },
+  revise_pitch_book: {
+    toolName: 'revise_pitch_book',
+    label: 'Revise Pitch Book Studio book',
+    methodologyRefs: ['DEFINITIVE Studio', 'V19 source-grounded work product'],
+    mode: 'author',
+    permissionLevel: 'A3_GENERATE_WORK_PRODUCT',
+    riskLevel: 'internal_write',
+    confirmation: 'none',
+    writeScope: 'deliverable',
+    description: 'Create a new audited Studio version from user instructions.',
+  },
+  add_pitch_book_section: {
+    toolName: 'add_pitch_book_section',
+    label: 'Add Studio book section',
+    methodologyRefs: ['DEFINITIVE Studio', 'V19 source-grounded work product'],
+    mode: 'author',
+    permissionLevel: 'A3_GENERATE_WORK_PRODUCT',
+    riskLevel: 'internal_write',
+    confirmation: 'none',
+    writeScope: 'deliverable',
+    description: 'Add a Studio slide/section and mark it for source review until grounded.',
+  },
+  refresh_pitch_book_from_models: {
+    toolName: 'refresh_pitch_book_from_models',
+    label: 'Refresh Studio book from models',
+    methodologyRefs: ['DEFINITIVE Studio', 'V19 server-side model runtime'],
+    mode: 'auditor',
+    permissionLevel: 'A3_GENERATE_WORK_PRODUCT',
+    riskLevel: 'internal_write',
+    confirmation: 'none',
+    writeScope: 'deliverable',
+    description: 'Refresh a Studio book against linked deterministic model outputs and readiness states.',
+  },
+  export_pitch_book: {
+    toolName: 'export_pitch_book',
+    label: 'Export Pitch Book Studio book',
+    methodologyRefs: ['DEFINITIVE Studio', 'V19 audit appendix'],
+    mode: 'author',
+    permissionLevel: 'A5_EXTERNAL_DISCLOSURE',
+    riskLevel: 'external_disclosure',
+    confirmation: 'required',
+    writeScope: 'deliverable',
+    description: 'Prepare a PPTX/PDF export after source grounding and explicit user approval.',
+  },
+  compose_model_stack: {
+    toolName: 'compose_model_stack',
+    label: 'Compose model stack',
+    methodologyRefs: ['V19 model stack', 'DEFINITIVE model contract'],
+    mode: 'modeler',
+    permissionLevel: 'A3_GENERATE_WORK_PRODUCT',
+    riskLevel: 'internal_write',
+    confirmation: 'none',
+    writeScope: 'model',
+    description: 'Compose the required model stack plus applicable DEFINITIVE M101-M223 mechanics, readiness, tool surfaces, and THE LINE boundaries by journey, league, deal type, and gate.',
+  },
+  execute_model: {
+    toolName: 'execute_model',
+    label: 'Execute deterministic model',
+    methodologyRefs: ['V19 server-side model runtime', 'DEFINITIVE deterministic compute'],
+    mode: 'modeler',
+    permissionLevel: 'A3_GENERATE_WORK_PRODUCT',
+    riskLevel: 'internal_write',
+    confirmation: 'none',
+    writeScope: 'model',
+    description: 'Run a version-pinned deterministic model and persist input/output hashes and audit metadata.',
+  },
+  lookup_citation: {
+    toolName: 'lookup_citation',
+    label: 'Lookup citation',
+    methodologyRefs: ['DEFINITIVE Authority Register', 'V19 citation validation'],
+    mode: 'auditor',
+    permissionLevel: 'A0_READ',
+    riskLevel: 'safe',
+    confirmation: 'none',
+    writeScope: 'none',
+    description: 'Resolve claims to registered authority/source entries and freshness state.',
+  },
+  fetch_market_data: {
+    toolName: 'fetch_market_data',
+    label: 'Fetch market data',
+    methodologyRefs: ['DEFINITIVE market snapshot', 'V19 market-data cache'],
+    mode: 'auditor',
+    permissionLevel: 'A0_READ',
+    riskLevel: 'safe',
+    confirmation: 'none',
+    writeScope: 'none',
+    description: 'Return timestamped market/regulatory data with source and freshness state.',
+  },
+  read_v19_readiness: {
+    toolName: 'read_v19_readiness',
+    label: 'Read readiness state',
+    methodologyRefs: ['V19 readiness', 'DEFINITIVE audit gates'],
+    mode: 'auditor',
+    permissionLevel: 'A0_READ',
+    riskLevel: 'safe',
+    confirmation: 'none',
+    writeScope: 'none',
+    description: 'Read model/source/citation/export readiness for a deal or Studio book.',
+  },
+  read_v19_entitlements: {
+    toolName: 'read_v19_entitlements',
+    label: 'Read entitlement state',
+    methodologyRefs: ['V19 credits and tollgates', 'DEFINITIVE agent billing'],
+    mode: 'read',
+    permissionLevel: 'A0_READ',
+    riskLevel: 'safe',
+    confirmation: 'none',
+    writeScope: 'none',
+    description: 'Read plan allowances, credits, and tollgate states for the current user.',
+  },
+  validate_conformance: {
+    toolName: 'validate_conformance',
+    label: 'Read DEFINITIVE conformance status',
+    methodologyRefs: ['DEFINITIVE conformance harness', 'DEFINITIVE public spec'],
+    mode: 'auditor',
+    permissionLevel: 'A0_READ',
+    riskLevel: 'safe',
+    confirmation: 'none',
+    writeScope: 'none',
+    requiredScopes: ['conformance:read'],
+    billing: { eventType: 'external_agent_api_call', creditCost: 0, billable: false, unit: 'api_call' },
+    citationRequirement: 'optional',
+    description: 'Return the current DB-free conformance suite status, case count, categories, and validation command.',
+  },
+  update_firm_memory: {
+    toolName: 'update_firm_memory',
+    label: 'Update firm memory',
+    methodologyRefs: ['DEFINITIVE firm memory', 'V19 Today operating surface'],
+    mode: 'coordinator',
+    permissionLevel: 'A4_SHARED_WORKFLOW',
+    riskLevel: 'shared_workspace',
+    confirmation: 'required',
+    writeScope: 'deal',
+    description: 'Save reusable firm assumptions, patterns, or house preferences under governed scope.',
+  },
+  defer_to_counsel: {
+    toolName: 'defer_to_counsel',
+    label: 'Defer to counsel',
+    methodologyRefs: ['THE LINE', 'V19 legal/tax counsel halt rules'],
+    mode: 'handoff',
+    permissionLevel: 'A4_SHARED_WORKFLOW',
+    riskLevel: 'shared_workspace',
+    confirmation: 'none',
+    writeScope: 'review',
+    description: 'Create a structured legal/tax/professional-review routing packet.',
+  },
+  update_tax_position: {
+    toolName: 'update_tax_position',
+    label: 'Update tax position registry',
+    methodologyRefs: ['V19 tax position registry', 'THE LINE'],
+    mode: 'auditor',
+    permissionLevel: 'A4_SHARED_WORKFLOW',
+    riskLevel: 'shared_workspace',
+    confirmation: 'required',
+    writeScope: 'deal',
+    description: 'Track tax issue-spotting state and review status without giving tax conclusions.',
+  },
+  write_audit_trail: {
+    toolName: 'write_audit_trail',
+    label: 'Write audit trail',
+    methodologyRefs: ['DEFINITIVE audit trail', 'V19 audit records'],
+    mode: 'auditor',
+    permissionLevel: 'A2_INTERNAL_WRITE',
+    riskLevel: 'internal_write',
+    confirmation: 'none',
+    writeScope: 'deal',
+    description: 'Write a structured audit event with methodology/spec pins and supporting metadata.',
+  },
+  record_corpus_observation: {
+    toolName: 'record_corpus_observation',
+    label: 'Record anonymized corpus observation',
+    methodologyRefs: ['DEFINITIVE corpus', 'DEFINITIVE data rights'],
+    mode: 'auditor',
+    permissionLevel: 'A2_INTERNAL_WRITE',
+    riskLevel: 'internal_write',
+    confirmation: 'none',
+    writeScope: 'corpus',
+    requiredScopes: ['corpus:write', 'data-rights:read'],
+    billing: { eventType: 'external_agent_api_call', creditCost: 0, billable: false, unit: 'api_call' },
+    citationRequirement: 'optional',
+    description: 'Store a structured, anonymized deal-term observation only when a data-rights grant exists; raw documents and party identifiers are stripped.',
   },
   run_analysis: {
     toolName: 'run_analysis',
@@ -483,6 +698,51 @@ const CONTRACTS: Record<string, AgencyActionContract> = {
   },
 };
 
+const LINE_OVERRIDES: Record<string, Partial<Pick<DefinitiveLineContract, 'lineStatus' | 'lineReason' | 'refusalBehavior' | 'lineRisks'>>> = {
+  query_admin_data: {
+    lineStatus: 'enterprise_scope_required',
+    refusalBehavior: 'require_enterprise_scope',
+    lineReason: 'Administrative data is not a general agent surface and requires privileged enterprise/operator scope.',
+    lineRisks: ['admin_data', 'operator_only'],
+  },
+  update_firm_memory: {
+    lineStatus: 'enterprise_scope_required',
+    refusalBehavior: 'require_enterprise_scope',
+    lineReason: 'Firm memory changes affect reusable institutional context and require governed workspace scope.',
+    lineRisks: ['firm_memory', 'persistent_context'],
+  },
+  defer_to_counsel: {
+    lineStatus: 'counsel_review_required',
+    refusalBehavior: 'route_to_counsel',
+    lineReason: 'This tool exists to route legal, tax, regulated, or boundary-sensitive questions to counsel review.',
+    lineRisks: ['legal_tax_boundary', 'counsel_handoff'],
+  },
+  update_tax_position: {
+    lineStatus: 'counsel_review_required',
+    refusalBehavior: 'route_to_counsel',
+    lineReason: 'Tax-position tracking may organize facts, but tax conclusions require qualified counsel/CPA review.',
+    lineRisks: ['tax_position', 'professional_review'],
+  },
+  optimize_scenario: {
+    lineStatus: 'counsel_review_required',
+    refusalBehavior: 'route_to_counsel',
+    lineReason: 'Scenario optimization can rank model outputs for decision support, but tax/legal/negotiation conclusions must remain options and go to counsel when regulated.',
+    lineRisks: ['transaction_recommendation_boundary', 'tax_legal_boundary'],
+  },
+  record_loi_executed: {
+    lineStatus: 'counsel_review_required',
+    refusalBehavior: 'route_to_counsel',
+    lineReason: 'Recording a signed LOI is allowed only as workflow state after human confirmation; legal effect belongs with counsel.',
+    lineRisks: ['legal_document', 'irreversible_record'],
+  },
+  close_deal: {
+    lineStatus: 'human_approval_required',
+    refusalBehavior: 'stage_for_approval',
+    lineReason: 'Closing is an irreversible workflow state and must be explicitly confirmed by the user.',
+    lineRisks: ['irreversible_record', 'closing_state'],
+  },
+};
+
 export const TOOL_NAMES_REQUIRING_CONFIRMATION = new Set(
   Object.values(CONTRACTS)
     .filter(contract => contract.confirmation === 'required')
@@ -571,13 +831,95 @@ export function canonicalizeAgencyActionContract(contract: AgencyActionContract)
   };
 }
 
+function defaultLineStatus(contract: CanonicalAgencyActionContract): DefinitiveLineStatus {
+  if (contract.permissionLevel === 'A6_IMMUTABLE_OR_CLOSE') return 'human_approval_required';
+  if (contract.permissionLevel === 'A5_EXTERNAL_DISCLOSURE') return 'human_approval_required';
+  if (contract.confirmation === 'required') return 'human_approval_required';
+  return 'ok';
+}
+
+function defaultRefusalBehavior(status: DefinitiveLineStatus): DefinitiveLineRefusalBehavior {
+  switch (status) {
+    case 'human_approval_required':
+      return 'stage_for_approval';
+    case 'counsel_review_required':
+      return 'route_to_counsel';
+    case 'enterprise_scope_required':
+      return 'require_enterprise_scope';
+    case 'credit_budget_required':
+      return 'require_credit_budget';
+    case 'LINE_VIOLATION':
+      return 'refuse';
+    case 'ok':
+    default:
+      return 'allow';
+  }
+}
+
+function defaultLineRisks(contract: CanonicalAgencyActionContract): string[] {
+  const risks = new Set<string>();
+  if (contract.riskLevel !== 'safe') risks.add(contract.riskLevel);
+  if (contract.confirmation === 'required') risks.add('explicit_confirmation');
+  if (contract.permissionLevel === 'A5_EXTERNAL_DISCLOSURE') risks.add('external_disclosure');
+  if (contract.permissionLevel === 'A6_IMMUTABLE_OR_CLOSE') risks.add('irreversible_or_close');
+  if (contract.citationRequirement === 'required') risks.add('citation_required');
+  if (contract.billing.billable) risks.add('metered');
+  return Array.from(risks);
+}
+
+function defaultLineReason(contract: CanonicalAgencyActionContract, status: DefinitiveLineStatus): string {
+  if (status === 'ok') {
+    return 'Inside the software boundary when supported by the action contract, citations where required, and normal audit logging.';
+  }
+
+  if (status === 'human_approval_required') {
+    return 'Allowed only after explicit human approval because it changes shared, external, workflow, or irreversible state.';
+  }
+
+  if (status === 'counsel_review_required') {
+    return 'Allowed as issue spotting, fact organization, or counsel packet preparation; legal/tax conclusions require qualified review.';
+  }
+
+  if (status === 'enterprise_scope_required') {
+    return 'Requires governed enterprise scope because the action affects administrative, agent, connector, or firm-memory surfaces.';
+  }
+
+  if (status === 'credit_budget_required') {
+    return 'Requires included credits or a contracted compute budget before execution.';
+  }
+
+  return 'Refused by construction because it would cross THE LINE.';
+}
+
+export function toDefinitiveLineContract(contract: AgencyActionContract): DefinitiveLineContract {
+  const canonical = canonicalizeAgencyActionContract(contract);
+  const override = LINE_OVERRIDES[canonical.toolName] || {};
+  const lineStatus = override.lineStatus ?? defaultLineStatus(canonical);
+  return {
+    ...canonical,
+    lineStatus,
+    lineReason: override.lineReason ?? defaultLineReason(canonical, lineStatus),
+    refusalBehavior: override.refusalBehavior ?? defaultRefusalBehavior(lineStatus),
+    lineRisks: override.lineRisks ?? defaultLineRisks(canonical),
+  };
+}
+
 export function getAgencyActionContract(toolName: string): CanonicalAgencyActionContract | undefined {
   const contract = CONTRACTS[toolName];
   return contract ? canonicalizeAgencyActionContract(contract) : undefined;
 }
 
+export function getDefinitiveLineContract(toolName: string): DefinitiveLineContract | undefined {
+  const contract = CONTRACTS[toolName];
+  return contract ? toDefinitiveLineContract(contract) : undefined;
+}
+
 export function listAgencyActionContracts(): CanonicalAgencyActionContract[] {
   return Object.values(CONTRACTS).map(canonicalizeAgencyActionContract);
+}
+
+export function listDefinitiveLineInventory(): DefinitiveLineContract[] {
+  return Object.values(CONTRACTS).map(toDefinitiveLineContract);
 }
 
 export function inputHasExplicitConfirmation(input: Record<string, any>): boolean {
@@ -602,6 +944,10 @@ export function formatAgencyActionContractsForPrompt(): string {
     .map(contract => `- ${contract.actionId}: scopes=${contract.requiredScopes.join(', ')}; citations=${contract.citationRequirement}; meter=${contract.billing.eventType}:${contract.billing.creditCost}; surfaces=${contract.allowedSurfaces.join(', ')}`)
     .join('\n');
 
+  const lineSummary = listDefinitiveLineInventory()
+    .map(contract => `- ${contract.actionId}: line=${contract.lineStatus}; behavior=${contract.refusalBehavior}; risks=${contract.lineRisks.join(', ') || 'none'}`)
+    .join('\n');
+
   return `
 ## YULIA EXECUTION LAYER — V19 / V1 PUBLIC-GO-LIVE RUNTIME
 Every tool call is governed by a canonical action contract. The same contract shape serves chat, UI buttons, background jobs, analysis canvases, document/file actions, billing, audit, and future public agent surfaces.
@@ -620,5 +966,8 @@ ${confirmFirst}
 
 Public-agent-ready contracts:
 ${publicReady}
+
+DEFINITIVE THE LINE inventory:
+${lineSummary}
 `.trim();
 }

@@ -17,6 +17,8 @@
     "start:worker": "node dist/worker/worker.js",
     "test": "playwright test",
     "test:e2e": "playwright test",
+    "test:definitive-conformance": "npx tsx scripts/definitive-conformance.ts",
+    "test:definitive-surface": "npx tsx scripts/definitive-surface-smoke.ts",
     "test:v19-models": "npx tsx scripts/test-v19-model-runtime.ts",
     "verify:v19-schema": "npx tsx scripts/verify-v19-schema.ts",
     "seed:demo-user": "node scripts/seed-demo-user-data.mjs",

@@ -1,10 +1,10 @@
 # REPO_STATUS.md — what's current, what's stale
 
-**Last updated: 2026-05-20.**
+**Last updated: 2026-05-21.**
 
 This file is a stable reading-order map for anyone (human or AI) reviewing this repo on GitHub or as a fresh clone. Read this **first** after `CLAUDE.md`.
 
-The short version: production runs on `main`. V6 is live. V19 is the current methodology/runtime baseline, and **DEFINITIVE v1.0** is now the active agent-access/spec/substrate build target. Week 1 V19 foundation work started in migration `067_v19_foundation.sql`, `server/constants/v19Regulatory.ts`, and `server/constants/v19Leagues.ts`; DEFINITIVE rolls that work forward into Authority Register, MCP/API, beneficial-customer identity, mandate-chain audit, conformance, and THE LINE contracts. Runtime tax/legal prompt distillations are still V18-era until the V19/DEFINITIVE prompt migration lands.
+The short version: production runs on `main`. V6 is live. V19 is the current methodology/runtime baseline, **DEFINITIVE v1.0** is the current agent-access/spec/runtime pin, and **DEFINITIVE v1.1 / V20** is the expanded deal-mechanics catalog and gate-routing target. Week 1 V19 foundation work started in migration `067_v19_foundation.sql`, `server/constants/v19Regulatory.ts`, and `server/constants/v19Leagues.ts`; DEFINITIVE rolls that work forward into Authority Register, MCP/API, beneficial-customer identity, mandate-chain audit, conformance, THE LINE contracts, and the v1.1 123-model / 30-gate deal-mechanics catalog plus route map. `compose_model_stack` now exposes applicable mechanics, readiness, tool surfaces, and THE LINE boundaries for Yulia/agents by deal profile. The conformance harness has 110 DB-free cases: 98 runtime cases plus 12 deal-mechanics route cases. The first v1.1 executable mechanics slices are live for 1060 allocation, FIRPTA withholding, 1031 timing, sale-leaseback/ASC 842, REIT compliance, rent-roll normalization, CAM true-up, convertible/SAFE conversion, ABL borrowing base, make-whole/call protection, covenant baskets, 280G, 382 NOL limitation, connected transaction tax, indemnity ladder, survival periods, escrow/holdback sizing, closing true-up, conditions logic, and termination-fee economics. Runtime tax/legal prompt distillations are still V18-era until the V19/DEFINITIVE prompt migration lands.
 
 ---
 
@@ -18,6 +18,7 @@ The short version: production runs on `main`. V6 is live. V19 is the current met
 
 ### Methodology and agent substrate (V19 baseline -> DEFINITIVE target)
 - `methodology/DEFINITIVE_BUILD_PLAN.md` — current agent-access/spec/substrate build plan; read this first for new MCP/API/agent work
+- `methodology/DEFINITIVE_V1_1_DEAL_MECHANICS.md` — V20 deal-mechanics expansion: 123 model slots, G28-G30, 800+ Authority Register target, THE LINE categories, route map, and pass-through substrate rule
 - `methodology/METHODOLOGY_V19.md` — V19 methodology master
 - `methodology/CC_V19_IMPLEMENTATION_BRIEF.md` — V19 runtime implementation brief
 - `methodology/V19_BUILD_PLAN.md` — V19 baseline/status map and sequencing; new agent-access work maps to DEFINITIVE

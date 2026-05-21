@@ -6,6 +6,28 @@ import {
   DEFINITIVE_SPEC_VERSION,
 } from '../constants/definitive.js';
 import { LEAGUES, type League } from '../constants/v19Leagues.js';
+import {
+  buildDefinitiveStackOverlayMetadata,
+  evaluateDefinitiveStackOverlays,
+  normalizeDefinitiveStackSignals,
+  type DefinitiveStackOverlay,
+  type DefinitiveStackSignals,
+} from './definitiveStackOverlays.js';
+import {
+  buildDefinitiveYuliaMechanicsBrief,
+  composeDefinitiveApplicableMechanics,
+  getDefinitiveDealRouteMapSummary,
+  summarizeDefinitiveApplicableMechanics,
+  type DefinitiveApplicableMechanic,
+  type DefinitiveApplicableMechanicsSummary,
+} from './definitiveDealRouteMap.js';
+
+export {
+  evaluateDefinitiveStackOverlays,
+  normalizeDefinitiveStackSignals,
+  type DefinitiveStackOverlay,
+  type DefinitiveStackSignals,
+} from './definitiveStackOverlays.js';
 
 export type V19Journey = 'sell' | 'buy' | 'raise' | 'pmi';
 
@@ -16,6 +38,7 @@ export interface ComposeModelStackInput {
   dealType?: string | null;
   industry?: string | null;
   jurisdiction?: string | null;
+  signals?: DefinitiveStackSignals | null;
 }
 
 export interface V19ModelStack {
@@ -32,6 +55,17 @@ export interface V19ModelStack {
     jurisdiction?: string;
     primaryMetric: 'SDE' | 'EBITDA';
   };
+  definitive?: {
+    dealMechanicsVersion: string;
+    dealMechanicsUri: string;
+    routeMapStatus: string;
+    triggeredOverlayGates: Array<'G28' | 'G29' | 'G30'>;
+    overlays: DefinitiveStackOverlay[];
+    applicableMechanics: DefinitiveApplicableMechanic[];
+    applicableMechanicsSummary: DefinitiveApplicableMechanicsSummary;
+    yuliaMechanicsBrief: string[];
+    lineDoctrine: string;
+  };
 }
 
 export async function composeModelStack(input: ComposeModelStackInput): Promise<V19ModelStack> {
@@ -40,6 +74,20 @@ export async function composeModelStack(input: ComposeModelStackInput): Promise<
   const supporting = new Set<string>();
   const taxLegal = new Set<string>(['MODEL.TAX.STRUCTURE.v1', 'MODEL.LEGAL.HALTSCAN.v1']);
   const sensitivity = new Set<string>(['MODEL.SENSITIVITY.MATRIX.v1', 'MODEL.MARKET.CONTEXT.v1']);
+  const overlays = evaluateDefinitiveStackOverlays(input);
+  const definitive = buildDefinitiveStackOverlayMetadata(overlays);
+  const triggeredOverlayGates = definitive.triggeredOverlayGates;
+  const applicableMechanics = composeDefinitiveApplicableMechanics({
+    journey: input.journey,
+    league: input.league,
+    dealType: input.dealType,
+    industry: input.industry,
+    jurisdiction: input.jurisdiction,
+    triggeredGates: triggeredOverlayGates,
+  });
+  const applicableMechanicsSummary = summarizeDefinitiveApplicableMechanics(applicableMechanics);
+  const yuliaMechanicsBrief = buildDefinitiveYuliaMechanicsBrief(applicableMechanics, applicableMechanicsSummary);
+  const routeMapSummary = getDefinitiveDealRouteMapSummary();
 
   if (spec.primaryMetric === 'SDE') {
     primaryModels.add('MODEL.VAL.SDE.v1');
@@ -81,6 +129,11 @@ export async function composeModelStack(input: ComposeModelStackInput): Promise<
     sensitivity.add('MODEL.STRUCT.EARNOUT.MC.v1');
   }
 
+  if (triggeredOverlayGates.length > 0) {
+    taxLegal.add('MODEL.LEGAL.HALTSCAN.v1');
+    sensitivity.add('MODEL.MARKET.CONTEXT.v1');
+  }
+
   const stack: V19ModelStack = {
     journey: input.journey,
     league: input.league,
@@ -94,6 +147,13 @@ export async function composeModelStack(input: ComposeModelStackInput): Promise<
       industry: input.industry || undefined,
       jurisdiction: input.jurisdiction || undefined,
       primaryMetric: spec.primaryMetric,
+    },
+    definitive: {
+      ...definitive,
+      routeMapStatus: routeMapSummary.status,
+      applicableMechanics,
+      applicableMechanicsSummary,
+      yuliaMechanicsBrief,
     },
   };
 

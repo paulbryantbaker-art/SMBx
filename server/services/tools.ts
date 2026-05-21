@@ -44,7 +44,7 @@ import {
   refreshPitchBookFromModels,
   revisePitchBook,
 } from './pitchBookStudio.js';
-import { composeModelStack, type V19Journey } from './modelStackComposer.js';
+import { composeModelStack, normalizeDefinitiveStackSignals, type V19Journey } from './modelStackComposer.js';
 import { executeV19Model, persistV19ModelExecution } from './v19ModelRuntime.js';
 import { validateCitationTags } from './citationValidator.js';
 import { lookupAuthority } from './authorityRegister.js';
@@ -221,7 +221,7 @@ export const TOOL_DEFINITIONS: Tool[] = [
   },
   {
     name: 'compose_model_stack',
-    description: 'Compose and persist the canonical V19 model stack for a deal using journey, league, deal type, industry, and jurisdiction.',
+    description: 'Compose and persist the canonical V19 model stack for a deal using journey, league, deal type, industry, and jurisdiction. Also evaluates DEFINITIVE v1.1/V20 overlay gates G28 distressed/restructuring, G29 capital structure/liability management, and G30 real estate/asset-class overlays, then returns applicable M101-M223 mechanics with readiness, tool surfaces, and THE LINE boundaries without treating unimplemented catalog models as executable.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -229,6 +229,10 @@ export const TOOL_DEFINITIONS: Tool[] = [
         journey: { type: 'string', enum: ['sell', 'buy', 'raise', 'pmi'], description: 'Optional override when the deal journey is missing.' },
         league: { type: 'string', enum: ['L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10'], description: 'Optional override when the deal league is missing.' },
         dealType: { type: 'string', description: 'Optional deal type or structure override.' },
+        signals: {
+          type: 'object',
+          description: 'Optional deterministic V20 routing signals for G28/G29/G30, such as cashRunwayDays, fccr, securedDebtTradingPriceCents, maintenanceCovenantBreachWithinQuarters, realEstatePercentOfEv, digitalAssetsPercentOfEv, solvencyProngFailed, bankruptcyFilingPending, rsaInMarket, forbearanceExecuted, capitalStructureAction, liabilityManagementExercise, recapitalization, exchangeOffer, and covenantAmendment.',
+        },
       },
       required: ['dealId'],
     },
@@ -1535,6 +1539,7 @@ async function composeModelStackTool(input: Record<string, any>, userId: number)
     dealType: String(input.dealType || deal.deal_type || 'unknown'),
     industry: deal.industry || null,
     jurisdiction: deal.jurisdiction || null,
+    signals: normalizeDefinitiveStackSignals(input.signals || input),
   });
 
   return JSON.stringify({ success: true, dealId, stack });

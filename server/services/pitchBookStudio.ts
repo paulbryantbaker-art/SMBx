@@ -8,6 +8,7 @@ import {
   definitiveVersionPayload,
 } from '../constants/definitive.js';
 import { hasDealAccess } from './dealAccessService.js';
+import { createDefinitiveHash } from './definitiveAuditPacket.js';
 import { validateCitationTags } from './citationValidator.js';
 import { resolveDefinitiveMandateContext } from './definitiveMandateService.js';
 import { executeV19Model, persistV19ModelExecution, type V19ModelExecution } from './v19ModelRuntime.js';
@@ -388,6 +389,13 @@ export async function recordPitchBookExport(
   const outputHash = createHash('sha256').update(buffer).digest('hex');
   const citationValidation = await validateCitationTags(collectBookCitationTags(book));
   const warnings = buildExportWarnings(book, citationValidation);
+  const auditPacket = buildStudioExportAuditPacket({
+    book,
+    format,
+    outputHash,
+    citationValidation,
+    warnings,
+  });
   const [row] = await sql`
     INSERT INTO studio_exports (
       book_id, version_id, format, status, output_hash, metadata,
@@ -405,6 +413,7 @@ export async function recordPitchBookExport(
         exportedAt: new Date().toISOString(),
         citationValidation,
         warnings,
+        auditPacket,
         ...definitiveVersionPayload(),
       } as any)}::jsonb
       ,
@@ -426,6 +435,155 @@ export async function recordPitchBookExport(
     warnings,
   });
   return { exportId: Number(row.id), outputHash };
+}
+
+export async function getPitchBookExportAuditPacket(
+  userId: number,
+  bookId: number,
+  exportId?: number | null,
+): Promise<Record<string, any> | null> {
+  const rows = exportId
+    ? await sql`
+        SELECT e.id, e.book_id, e.version_id, e.format, e.status, e.output_hash, e.metadata,
+               e.spec_version, e.spec_uri, e.methodology_version, e.methodology_uri, e.created_at
+        FROM studio_exports e
+        JOIN studio_books b ON b.id = e.book_id
+        WHERE b.user_id = ${userId}
+          AND e.book_id = ${bookId}
+          AND e.id = ${exportId}
+        LIMIT 1
+      `
+    : await sql`
+        SELECT e.id, e.book_id, e.version_id, e.format, e.status, e.output_hash, e.metadata,
+               e.spec_version, e.spec_uri, e.methodology_version, e.methodology_uri, e.created_at
+        FROM studio_exports e
+        JOIN studio_books b ON b.id = e.book_id
+        WHERE b.user_id = ${userId}
+          AND e.book_id = ${bookId}
+        ORDER BY e.created_at DESC
+        LIMIT 1
+      `;
+  const row = (rows as any[])[0];
+  if (!row) return null;
+  const metadata = safeRecord(row.metadata);
+  return {
+    exportId: Number(row.id),
+    bookId: Number(row.book_id),
+    versionId: row.version_id == null ? null : Number(row.version_id),
+    format: row.format,
+    status: row.status,
+    outputHash: row.output_hash,
+    specVersion: row.spec_version,
+    specUri: row.spec_uri,
+    methodologyVersion: row.methodology_version,
+    methodologyUri: row.methodology_uri,
+    createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : String(row.created_at),
+    auditPacket: metadata.auditPacket || null,
+  };
+}
+
+export function buildStudioExportAuditPacket(input: {
+  book: PitchBookRecord;
+  format: 'pptx' | 'pdf';
+  outputHash: string;
+  citationValidation: Record<string, any>;
+  warnings: string[];
+}): Record<string, any> {
+  const sourceManifest = input.book.sources.map(source => ({
+    id: source.id ?? null,
+    sourceType: source.sourceType,
+    sourceId: source.sourceId ?? null,
+    label: source.label,
+    citationTag: source.citationTag ?? null,
+    status: source.status,
+    sourceUrl: source.sourceUrl ?? null,
+    metadataHash: createDefinitiveHash(safeRecord(source.metadata)),
+  }));
+
+  const modelManifest = input.book.modelOutputs.map(output => ({
+    executionId: output.executionId ?? null,
+    modelId: output.modelId ?? null,
+    version: output.version ?? null,
+    status: output.status ?? null,
+    citationTags: safeArray(output.citationTags),
+    missingInputs: safeArray(output.missingInputs),
+    outputHash: output.outputHash ?? null,
+    auditPayloadHash: output.auditPayload ? createDefinitiveHash(output.auditPayload) : null,
+  }));
+
+  const slideProvenance = input.book.slides.map((slide, index) => ({
+    slideId: slide.id,
+    slideNumber: index + 1,
+    title: slide.title,
+    warningState: slide.warningState,
+    factsUsed: slide.provenance.factsUsed,
+    modelOutputsUsed: slide.provenance.modelOutputsUsed,
+    citationsUsed: slide.provenance.citationsUsed,
+    uncheckedClaims: slide.provenance.uncheckedClaims,
+    speakerNotesHash: createDefinitiveHash({ speakerNotes: slide.speakerNotes }),
+  }));
+
+  const inputManifest = {
+    ...definitiveVersionPayload(),
+    bookId: input.book.id,
+    versionId: input.book.versionId,
+    version: input.book.version,
+    title: input.book.title,
+    bookFormat: input.book.format,
+    exportFormat: input.format,
+    outline: input.book.outline,
+    slides: input.book.slides.map(slide => ({
+      id: slide.id,
+      title: slide.title,
+      subtitle: slide.subtitle ?? null,
+      body: slide.body,
+      bullets: slide.bullets,
+      provenance: slide.provenance,
+      warningState: slide.warningState,
+    })),
+    assumptions: input.book.assumptions,
+    sourceManifest,
+    modelManifest,
+  };
+  const inputHash = createDefinitiveHash(inputManifest);
+  const status = input.warnings.length ? 'ready_with_warnings' : 'ready';
+  const packetCore = {
+    schemaVersion: 'studio-export-audit-v1',
+    ...definitiveVersionPayload(),
+    book: {
+      id: input.book.id,
+      dealId: input.book.dealId,
+      versionId: input.book.versionId,
+      version: input.book.version,
+      title: input.book.title,
+      format: input.book.format,
+      status: input.book.status,
+    },
+    export: {
+      format: input.format,
+      status,
+      outputHash: input.outputHash,
+      inputHash,
+    },
+    counts: {
+      slides: input.book.slides.length,
+      sources: input.book.sources.length,
+      assumptions: input.book.assumptions.length,
+      modelOutputs: input.book.modelOutputs.length,
+      warnings: input.warnings.length,
+    },
+    slideProvenance,
+    sourceManifest,
+    modelManifest,
+    citationValidation: input.citationValidation,
+    warnings: input.warnings,
+  };
+
+  return {
+    ...packetCore,
+    auditPacketHash: createDefinitiveHash(packetCore),
+    generatedAt: new Date().toISOString(),
+  };
 }
 
 export function pitchBookToExportContent(book: PitchBookRecord): Record<string, any> {

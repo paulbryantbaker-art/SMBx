@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   addPitchBookSection,
   createPitchBook,
+  getPitchBookExportAuditPacket,
   getPitchBookModelIds,
   getPitchBook,
   listPitchBookFormats,
@@ -212,6 +213,50 @@ studioRouter.get('/studio/pitch-books/:bookId/readiness', async (req, res) => {
   } catch (err: any) {
     console.error('[studio] read pitch book readiness failed:', err.message);
     return res.status(400).json({ error: err.message || 'Failed to read pitch book readiness' });
+  }
+});
+
+studioRouter.get('/studio/pitch-books/:bookId/exports/latest/audit-packet', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const bookId = parseId(req.params.bookId);
+  if (!bookId) return res.status(400).json({ error: 'Invalid pitch book id' });
+  try {
+    const packet = await getPitchBookExportAuditPacket(userId, bookId);
+    if (!packet) return res.status(404).json({ error: 'Studio export audit packet not found' });
+    res.set({
+      'Cache-Control': 'no-store',
+      'Content-Disposition': req.query.download === '1'
+        ? `attachment; filename="studio-book-${bookId}-audit-packet.json"`
+        : 'inline',
+    });
+    return res.json(packet);
+  } catch (err: any) {
+    console.error('[studio] read latest export audit packet failed:', err.message);
+    return res.status(500).json({ error: 'Failed to read Studio export audit packet' });
+  }
+});
+
+studioRouter.get('/studio/pitch-books/:bookId/exports/:exportId/audit-packet', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const bookId = parseId(req.params.bookId);
+  const exportId = parseId(req.params.exportId);
+  if (!bookId) return res.status(400).json({ error: 'Invalid pitch book id' });
+  if (!exportId) return res.status(400).json({ error: 'Invalid export id' });
+  try {
+    const packet = await getPitchBookExportAuditPacket(userId, bookId, exportId);
+    if (!packet) return res.status(404).json({ error: 'Studio export audit packet not found' });
+    res.set({
+      'Cache-Control': 'no-store',
+      'Content-Disposition': req.query.download === '1'
+        ? `attachment; filename="studio-export-${exportId}-audit-packet.json"`
+        : 'inline',
+    });
+    return res.json(packet);
+  } catch (err: any) {
+    console.error('[studio] read export audit packet failed:', err.message);
+    return res.status(500).json({ error: 'Failed to read Studio export audit packet' });
   }
 });
 

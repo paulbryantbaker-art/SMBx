@@ -1,0 +1,258 @@
+[
+  {
+    "id": "CONF.ROUTE.DEALMECH.RE.001",
+    "title": "Real estate overlay surfaces title, rent roll, NOI, FIRPTA, and pass-through boundaries",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L4",
+      "dealType": "real estate sale-leaseback title survey rent roll NOI 1031 FIRPTA ground lease CITT",
+      "industry": "property services",
+      "triggeredGates": ["G30"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M187", "M189", "M190", "M196", "M199"],
+      "readinessAtLeast": {
+        "planning_only": 4,
+        "pass_through_required": 3,
+        "professional_handoff": 2
+      },
+      "toolSurfacesInclude": {
+        "pass_through_catalog": ["M190", "M196"]
+      },
+      "yuliaBriefIncludes": ["THE LINE"]
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TAX.001",
+    "title": "Connected tax route surfaces master tax engine and gross-up components",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "sell",
+      "league": "L4",
+      "dealType": "asset deal stock deal S-corp 338 336 built in gain transaction cost seller note earnout installment SALT",
+      "triggeredGates": ["G2"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M200", "M201", "M202", "M203", "M204"],
+      "readinessAtLeast": {
+        "planning_only": 4,
+        "professional_handoff": 1
+      },
+      "yuliaBriefIncludes": ["M200"]
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.AGREEMENT.001",
+    "title": "Agreement architecture route surfaces indemnity, survival, escrow, closing, conditions, and termination mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "league": "L5",
+      "dealType": "purchase agreement indemnification survival escrow RWI closing statement conditions termination break fee earnout",
+      "triggeredGates": ["G7", "G8", "G9"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M206", "M207", "M208", "M210", "M211", "M212"],
+      "readinessAtLeast": {
+        "planning_only": 6,
+        "professional_handoff": 4
+      },
+      "toolSurfacesInclude": {
+        "studio": ["M211", "M212"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.IP.001",
+    "title": "IP-heavy software route surfaces chain-of-title, lien, license, OSS, escrow, and transfer mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L4",
+      "dealType": "software M&A IP diligence chain of title OSS source code domain trademark license encumbrance employee assignment",
+      "triggeredGates": ["G10"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M214", "M215", "M216", "M219", "M221", "M223"],
+      "readinessAtLeast": {
+        "pass_through_required": 3,
+        "professional_handoff": 5
+      },
+      "toolSurfacesInclude": {
+        "pass_through_catalog": ["M214", "M215", "M221"],
+        "files": ["M214", "M221"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.CH11.001",
+    "title": "Chapter 11 route surfaces plan, cramdown, DIP, BIOC, and waterfall mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L5",
+      "dealType": "Chapter 11 plan DIP financing 363 sale best interests cramdown 1111b liquidation",
+      "triggeredGates": ["G28"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M151", "M152", "M153", "M154", "M155", "M156", "M158"],
+      "readinessAtLeast": {
+        "professional_handoff": 8,
+        "planning_only": 1
+      },
+      "yuliaBriefIncludes": ["professional handoff"]
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.SUBV.001",
+    "title": "Small-business distressed route keeps Subchapter V eligibility in the lower-league band",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "sell",
+      "league": "L3",
+      "dealType": "small business Chapter 11 Subchapter V eligibility cash runway distressed sale",
+      "triggeredGates": ["G28"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M151", "M157", "M167"],
+      "readinessAtLeast": {
+        "planning_only": 2,
+        "professional_handoff": 4
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.LME.001",
+    "title": "Liability-management route surfaces research-only LME corpus",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "raise",
+      "league": "L5",
+      "dealType": "uptier drop-down double-dip pari-plus exchange offer covenant amendment RSA liability management",
+      "triggeredGates": ["G29"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M160", "M161", "M162", "M163", "M164"],
+      "readinessAtLeast": {
+        "research_only": 3,
+        "professional_handoff": 3
+      },
+      "yuliaBriefIncludes": ["research-only"]
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.CAPSTRUCT.001",
+    "title": "Capital-structure route surfaces convertible, SAFE, ABL, covenant, make-whole, and venture-debt mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "raise",
+      "league": "L4",
+      "dealType": "convertible SAFE venture debt ABL borrowing base make-whole covenant basket PIPE",
+      "triggeredGates": ["G15", "G29"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M180", "M181", "M182", "M183", "M184"],
+      "readinessAtLeast": {
+        "planning_only": 5,
+        "professional_handoff": 3
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.SECONDARIES.001",
+    "title": "LP/GP secondaries route surfaces LP secondary, strip sale, and NAV financing mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L5",
+      "dealType": "LP secondary NAV facility strip sale continuation fund GP-led",
+      "triggeredGates": ["G26", "G30"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M177", "M178"],
+      "readinessAtLeast": {
+        "research_only": 2
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.CRYPTO.001",
+    "title": "Digital-asset route keeps crypto mechanics research-only",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L6",
+      "dealType": "crypto M&A stablecoin token taxonomy 1099-DA digital asset",
+      "triggeredGates": ["G30"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M174", "M175", "M176"],
+      "readinessAtLeast": {
+        "research_only": 3
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.CARVEOUT.001",
+    "title": "Carve-out and joint-venture route surfaces F-reorg, 721/351, stranded-cost, and license-back mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "sell",
+      "league": "L4",
+      "dealType": "carve-out joint venture F reorg 721 351 704c license-back TSA stranded cost",
+      "triggeredGates": ["G15", "G10"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M103", "M144", "M145", "M218"],
+      "readinessAtLeast": {
+        "planning_only": 8,
+        "professional_handoff": 2
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.VENTURE.001",
+    "title": "Venture and PIPE financing route surfaces cap table, PIPE approval, SAFE, and warrant mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "raise",
+      "league": "L5",
+      "dealType": "PIPE convertible SAFE venture debt warrant coverage growth equity 19.99 shareholder approval",
+      "triggeredGates": ["G15", "G29"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M146", "M147", "M180", "M181"],
+      "readinessAtLeast": {
+        "executable": 1,
+        "planning_only": 4
+      },
+      "toolSurfacesInclude": {
+        "model_runner": ["M146"]
+      }
+    }
+  }
+]
