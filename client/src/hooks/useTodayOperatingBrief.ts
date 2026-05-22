@@ -73,6 +73,12 @@ export interface TodayFileReviewItem {
   status: string;
   tone: TodayTone;
   updatedAt?: string;
+  definitivePacketRowId?: number;
+  definitivePacketId?: string;
+  definitivePacketType?: string;
+  definitivePacketCid?: string;
+  definitiveStateCid?: string;
+  definitiveToolName?: string;
 }
 
 export interface TodayStudioRefreshItem {

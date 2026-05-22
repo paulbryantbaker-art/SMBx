@@ -351,6 +351,9 @@ try {
     const packetFile = brief.filesNeedingReview.find((item: any) => item.id?.startsWith('definitive-packet-'));
     assert(packetFile, 'files needing review includes a DEFINITIVE packet row');
     assertEqual(packetFile.status, 'Packet', 'packet row status');
+    assertEqual(packetFile.definitivePacketType, 'IOIPacket.v0.1', 'packet row exposes packet type for Files');
+    assertEqual(packetFile.definitiveStateCid, pulse.definitive.stateCid, 'packet row exposes DealState cid for Files');
+    assert(packetFile.definitivePacketRowId > 0, 'packet row exposes database row id for Files');
   });
 
   await test('Authenticated resume_deal returns current stage and next calls', async () => {

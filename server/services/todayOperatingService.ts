@@ -166,6 +166,12 @@ export interface TodayFileReviewItem {
   status: string;
   tone: Tone;
   updatedAt?: string;
+  definitivePacketRowId?: number;
+  definitivePacketId?: string;
+  definitivePacketType?: string;
+  definitivePacketCid?: string;
+  definitiveStateCid?: string;
+  definitiveToolName?: string;
 }
 
 export interface TodayStudioRefreshItem {
@@ -727,6 +733,12 @@ function buildFilesNeedingReview(
       status: 'Packet',
       tone: (index % 2 === 0 ? 'cactus' : 'oat') as Tone,
       updatedAt: packet.created_at,
+      definitivePacketRowId: packet.id,
+      definitivePacketId: packet.packet_id || undefined,
+      definitivePacketType: packet.packet_type,
+      definitivePacketCid: packet.packet_cid || undefined,
+      definitiveStateCid: packet.deal_state_cid || undefined,
+      definitiveToolName: packet.tool_name,
     }));
   return [...fromReviews, ...fromDeliverables, ...fromPackets].slice(0, 10);
 }

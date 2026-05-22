@@ -47,6 +47,12 @@ interface FileRow {
   analysisRunId?: number | null;
   analysisType?: string | null;
   analysisStatus?: string | null;
+  definitivePacketRowId?: number;
+  definitivePacketId?: string;
+  definitivePacketType?: string;
+  definitivePacketCid?: string;
+  definitiveStateCid?: string;
+  definitiveToolName?: string;
 }
 
 interface RoomRow {
@@ -186,6 +192,10 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
   };
 
   const openDoc = (row: FileRow) => {
+    if (row.definitivePacketRowId) {
+      openDefinitivePacket(row, openTab);
+      return;
+    }
     if (row.kind === "deal" && row.dealId) {
       openTab({ kind: "deal", title: row.dealTitle ?? row.title, id: row.dealId });
       return;
@@ -399,6 +409,10 @@ export function V6FilesListView({
   };
 
   const openDoc = (row: FileRow) => {
+    if (row.definitivePacketRowId) {
+      openDefinitivePacket(row, openTab);
+      return;
+    }
     if (row.kind === "deal" && row.dealId) {
       openTab({ kind: "deal", title: row.dealTitle ?? row.title, id: row.dealId });
       return;
@@ -592,6 +606,60 @@ function fileTabTitle(row: FileRow): string {
   return `${deal} · ${row.title}`;
 }
 
+function openDefinitivePacket(row: FileRow, openTab: OpenTab) {
+  const title = fileTabTitle(row);
+  openTab({
+    kind: "analysis",
+    id: row.definitivePacketRowId ? `definitive-packet-${row.definitivePacketRowId}` : row.id,
+    title,
+    tool: "artifact",
+    status: row.status,
+    markdown: definitivePacketMarkdown(row),
+    artifactData: {
+      type: "definitive_packet",
+      packetRowId: row.definitivePacketRowId,
+      packetId: row.definitivePacketId,
+      packetType: row.definitivePacketType,
+      packetCid: row.definitivePacketCid,
+      stateCid: row.definitiveStateCid,
+      toolName: row.definitiveToolName,
+      dealId: row.dealId,
+      dealTitle: row.dealTitle,
+      source: "files",
+    },
+  });
+}
+
+function definitivePacketMarkdown(row: FileRow): string {
+  const deal = fileDealName(row);
+  const packetType = row.definitivePacketType || row.title;
+  const toolName = row.definitiveToolName ? labelFromSlug(row.definitiveToolName) : "DEFINITIVE";
+  const packetLabel = row.definitivePacketId || (row.definitivePacketRowId ? `row ${row.definitivePacketRowId}` : "available packet");
+  const stateCid = row.definitiveStateCid || "not stamped on this row";
+  const packetCid = row.definitivePacketCid || "not stamped on this row";
+
+  return [
+    `# ${row.title}`,
+    "",
+    `This is a DEFINITIVE agent take-back packet for ${deal}. It is not a loose document; it is a handoff object from the deal operating system that lets Yulia or another agent resume the deal with the same state, gate context, and methodology boundary.`,
+    "",
+    "## Packet identity",
+    `- Packet: ${packetLabel}`,
+    `- Type: ${packetType}`,
+    `- Source tool: ${toolName}`,
+    `- DealState CID: ${stateCid}`,
+    `- Packet CID: ${packetCid}`,
+    "",
+    "## What it means",
+    "- The packet is the current portable state for this deal step.",
+    "- Yulia should use it to decide whether the next move is more information, IOI/LOI work, diligence, modeling, negotiation, data-room work, or a professional handoff.",
+    "- The packet can be carried back to another agent system without losing the methodology trail.",
+    "",
+    "## Ask Yulia next",
+    `Explain this ${packetType} for ${deal}. Show what is known, what is missing, which gate it belongs to, what should happen next, and what another agent can take back to its system.`,
+  ].join("\n");
+}
+
 function activeListCopy(view: FileListView) {
   const copy: Record<FileListView, { eyebrow: string; title: string; sub: string; prompt: string }> = {
     all: {
@@ -693,6 +761,14 @@ function slug(input: string): string {
   return input.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
+function labelFromSlug(input: string): string {
+  return input
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, letter => letter.toUpperCase());
+}
+
 function buildRealShortcuts(deals: WorkspaceDeal[], deliverables: WorkspaceDeliverable[], operatingFiles: TodayFileReviewItem[] = []): Shortcut[] {
   const docCount = deals.reduce((sum, deal) => sum + Number(deal.document_count ?? 0), 0);
   const actionCount = operatingFiles.length || deliverables.filter(d => ["queued", "generating", "failed", "draft"].includes(d.status)).length;
@@ -708,15 +784,22 @@ function buildRealShortcuts(deals: WorkspaceDeal[], deliverables: WorkspaceDeliv
 function operatingFileToFileRow(item: TodayFileReviewItem): FileRow {
   const basis = `${item.title} ${item.reason} ${item.status}`;
   const isAnalysis = /model|analysis|financial|p&l|chart|score|valuation|qoe|recast|sba|tax|legal|metric/i.test(basis);
+  const isDefinitivePacket = !!item.definitivePacketRowId;
   return {
     title: item.title,
     sub: `${item.dealTitle || "Workspace"} · ${item.reason}`,
     status: formatStatus(item.status),
-    kind: isAnalysis ? "chart" : "doc",
+    kind: isDefinitivePacket ? "doc" : isAnalysis ? "chart" : "doc",
     tone: todayFileTone(item),
     id: item.id,
     dealId: item.dealId,
     dealTitle: item.dealTitle,
+    definitivePacketRowId: item.definitivePacketRowId,
+    definitivePacketId: item.definitivePacketId,
+    definitivePacketType: item.definitivePacketType,
+    definitivePacketCid: item.definitivePacketCid,
+    definitiveStateCid: item.definitiveStateCid,
+    definitiveToolName: item.definitiveToolName,
   };
 }
 
