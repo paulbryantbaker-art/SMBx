@@ -112,7 +112,7 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assert(card.definitive.authoritySeedPlanEntries >= DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'agent card authority seed plan meets target');
   assertEqual(card.definitive.authoritySeedPlanStatus, 'ready_for_800_plus_seeding', 'agent card authority seed plan status');
   assertEqual(card.definitive.substratePrimitiveCount, 8, 'agent card substrate primitive count');
-  assertEqual(card.definitive.substrateNewMcpToolCount, 27, 'agent card substrate tool count');
+  assertEqual(card.definitive.substrateNewMcpToolCount, 28, 'agent card substrate tool count');
   assert(card.definitive.schemaRegistryNames.includes('DealPayload'), 'agent card exposes DealPayload schema');
   assert(card.definitive.schemaRegistryNames.includes('DealState'), 'agent card exposes DealState schema');
   assert(card.definitive.schemaRegistryNames.includes('DealStateDiff'), 'agent card exposes DealStateDiff schema');
@@ -161,7 +161,7 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   const substrateCapability = card.capabilities.find((item: any) => item.id === 'definitive_substrate_architecture') as any;
   assert(substrateCapability, 'substrate architecture capability exists');
   assertEqual(substrateCapability.primitiveCount, 8, 'substrate capability primitive count');
-  assertEqual(substrateCapability.newMcpToolCount, 27, 'substrate capability tool count');
+  assertEqual(substrateCapability.newMcpToolCount, 28, 'substrate capability tool count');
   assert(substrateCapability.agentOperatingDoctrine.noRejectionContract.includes('Agents are not rejected'), 'substrate capability blocks incomplete-payload rejection');
   assert(substrateCapability.lifecycleStages.includes('ioi'), 'substrate capability exposes IOI stage');
   assert(substrateCapability.lifecycleStages.includes('close_pmi'), 'substrate capability exposes close/PMI stage');
@@ -220,7 +220,7 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assert(manifest.authoritySurface.categoryIds.includes('ip_authorities'), 'manifest authority surface includes IP');
   assert(manifest.authoritySurface.categoryIds.includes('pass_through_pricing_boundary'), 'manifest authority surface includes THE LINE pricing boundary');
   assertEqual(manifest.substrateArchitectureSurface.primitiveCount, 8, 'manifest substrate primitive count');
-  assertEqual(manifest.substrateArchitectureSurface.newMcpToolCount, 27, 'manifest substrate tool count');
+  assertEqual(manifest.substrateArchitectureSurface.newMcpToolCount, 28, 'manifest substrate tool count');
   assert(manifest.substrateArchitectureSurface.agentOperatingDoctrine.productDoctrine.includes('Deal OS'), 'manifest substrate Deal OS doctrine');
   assert(manifest.substrateArchitectureSurface.agentOperatingDoctrine.noRejectionContract.includes('MissingInputContract'), 'manifest substrate no-rejection contract');
   assert(manifest.substrateArchitectureSurface.agentOperatingDoctrine.homeContract.includes('data rooms'), 'manifest substrate agent home contract includes data rooms');
@@ -343,7 +343,7 @@ await test('Authority Register seed plan is explicit and above 800 planned entri
 await test('Substrate architecture plan exposes the terminal orchestration primitives', async () => {
   const architecture = getDefinitiveSubstrateArchitecturePlan();
   assertEqual(architecture.primitiveCount, 8, 'substrate architecture primitive count');
-  assertEqual(architecture.newMcpToolCount, 27, 'substrate architecture tool count');
+  assertEqual(architecture.newMcpToolCount, 28, 'substrate architecture tool count');
   assert(architecture.agentOperatingDoctrine.productDoctrine.includes('Deal OS'), 'substrate plan is Deal OS');
   assert(architecture.agentOperatingDoctrine.noRejectionContract.includes('Agents are not rejected'), 'substrate plan accepts incomplete agent payloads');
   assert(architecture.agentOperatingDoctrine.homeContract.includes('documents'), 'substrate plan includes document creation surface');
@@ -355,6 +355,7 @@ await test('Substrate architecture plan exposes the terminal orchestration primi
   assert(architecture.routingAxes.includes('tax_classification'), 'routing axes include tax classification');
   assert(architecture.universalResponseFields.includes('next_suggested_calls'), 'response envelope includes next suggested calls');
   assert(architecture.workstreams.some(item => item.id === 'WS1' && item.mcpTools.includes('ingest_deal_payload')), 'payload ingest workstream exists');
+  assert(architecture.workstreams.some(item => item.id === 'WS4' && item.mcpTools.includes('compose_deal_package')), 'compose package workstream exists');
   assert(architecture.workstreams.some(item => item.id === 'WS4' && item.mcpTools.includes('finalize_deal_package')), 'package workstream exists');
   assert(architecture.workstreams.some(item => item.id === 'WS5' && item.mcpTools.includes('compute_best_vehicle')), 'best vehicle workstream exists');
   assert(architecture.lineDoctrine.includes('does not advise'), 'THE LINE invariant is explicit');

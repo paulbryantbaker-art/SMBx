@@ -326,10 +326,10 @@ const workstreams: DefinitiveSubstrateWorkstream[] = [
     name: 'Portable signed deal package',
     purpose: 'Produce a single replayable package with JSON, PDF/A-3 human render, archival bundle, signed manifest, timestamps, and selective disclosure proofs.',
     primitives: ['DealPackage', 'SignedManifest', 'Attestation', 'MerkleInclusionProof', 'signed_manifest_issuer'],
-    mcpTools: ['finalize_deal_package', 'verify_package', 'reopen_deal_package', 'disclose_subset'],
+    mcpTools: ['compose_deal_package', 'finalize_deal_package', 'verify_package', 'reopen_deal_package', 'disclose_subset'],
     objectTypes: ['DealPackage', 'SignedManifest', 'Attestation', 'MerkleInclusionProof'],
     buildPhase: 'Phase 3',
-    doneCondition: 'A downstream party can verify package integrity, methodology pin, audit trail, and selected subset proofs without trusting chat output.',
+    doneCondition: 'An agent can compose a portable take-back DealPackage now, then finalize signed manifests, verify integrity, and disclose subsets without trusting chat output.',
   },
   {
     id: 'WS5',
@@ -386,7 +386,7 @@ const phases: DefinitiveSubstratePhase[] = [
     window: 'Weeks 5-10',
     name: 'State spine',
     focus: 'Content-addressable state, dependency graph, action-key cache, shallow completeness.',
-    outputs: ['DealState CID revisions', 'model dependency graph', 'action-key cache', 'compose_deal_plan for Sell and Buy', 'shallow check_completeness'],
+    outputs: ['DealState CID revisions', 'model dependency graph', 'action-key cache', 'compose_deal_plan for Sell and Buy', 'compose_deal_package take-back packet', 'shallow check_completeness'],
   },
   {
     id: 'Phase 2',

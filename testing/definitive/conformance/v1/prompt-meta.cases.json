@@ -651,8 +651,10 @@
       "textIncludes": ["DealPayload", "CompletenessSpec", "DealPackage", "BestVehicleBlock"],
       "fields": [
         { "path": "primitiveCount", "equals": 8 },
-        { "path": "newMcpToolCount", "equals": 27 },
+        { "path": "newMcpToolCount", "equals": 28 },
+        { "path": "newMcpTools", "includes": "compose_deal_package" },
         { "path": "workstreamsById.WS1.mcpTools", "includes": "ingest_deal_payload" },
+        { "path": "workstreamsById.WS4.mcpTools", "includes": "compose_deal_package" },
         { "path": "workstreamsById.WS4.mcpTools", "includes": "finalize_deal_package" },
         { "path": "workstreamsById.WS5.mcpTools", "includes": "compute_best_vehicle" }
       ]
@@ -701,7 +703,7 @@
         { "path": "endpoints.substrateArchitecture", "equals": "/api/definitive/substrate-architecture" },
         { "path": "access.publicDiscovery", "includes": "/api/definitive/substrate-architecture" },
         { "path": "substrateArchitectureSurface.primitiveCount", "equals": 8 },
-        { "path": "substrateArchitectureSurface.newMcpToolCount", "equals": 27 },
+        { "path": "substrateArchitectureSurface.newMcpToolCount", "equals": 28 },
         { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "DealState" },
         { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "DealStateDiff" },
         { "path": "substrateArchitectureSurface.schemaRegistry.toolSchemaMap.ingest_deal_payload.output", "includes": "MissingInputContract" }

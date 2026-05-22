@@ -48,6 +48,7 @@ try {
     const body = await authedJson('/api/definitive/tools/list', token);
     assertEqual(body.status, 'internal_v0_1', 'tool inventory status');
     assert(body.tools.some((tool: any) => tool.name === 'compose_model_stack'), 'compose_model_stack is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'compose_deal_package'), 'compose_deal_package is advertised');
   });
 
   await test('THE LINE inventory is available to authenticated agents', async () => {
@@ -238,6 +239,45 @@ try {
     assert(definitive.applicableMechanics.some((item: any) => item.slotId === 'M160'), 'G29 mechanics included');
     assert(definitive.applicableMechanics.some((item: any) => item.slotId === 'M187'), 'G30 mechanics included');
     assert(definitive.yuliaMechanicsBrief.some((line: string) => line.includes('applicable DEFINITIVE mechanics')), 'Yulia brief included');
+  });
+
+  await test('Authenticated compose_deal_package returns portable DealPackage', async () => {
+    const response = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'compose_deal_package',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-state:read', 'deal-package:read'],
+      input: {
+        payload: {
+          journey: 'buy',
+          targetName: 'DEFINITIVE Route Fixture Deal',
+          industry: 'industrial services / real estate',
+          jurisdiction: 'US-DE',
+          ebitdaCents: 2_100_000_00,
+          dealStructure: 'distressed real estate asset purchase',
+          signals: {
+            cashRunwayDays: 45,
+            securedDebtTradingPriceCents: 55,
+            realEstatePercentOfEv: 42,
+          },
+          documents: [{ name: 'fixture QoE', type: 'qoe', hash: 'sha256:fixture-qoe' }],
+        },
+      },
+    });
+
+    assertEqual(response.status, 200, 'deal package route status');
+    assertEqual(response.body.ok, true, 'deal package route ok');
+    assertEqual(response.body.toolName, 'compose_deal_package', 'deal package tool name');
+    assert(response.body.requiredScopes.includes('deal-package:read'), 'deal package scope is exposed');
+    const dealPackage = response.body.result?.result?.dealPackage;
+    assert(dealPackage, 'DealPackage exists');
+    assert(dealPackage.packageCid.startsWith('definitive:deal-package:sha256:'), 'DealPackage is content addressed');
+    assert(dealPackage.takeBackArtifacts.includes('DealPackage'), 'DealPackage is a take-back artifact');
+    assert(dealPackage.excludedOrDeferred.some((item: any) => item.category === 'distressed_or_restructuring'), 'G28 package deferral is preserved');
+    assert(dealPackage.excludedOrDeferred.some((item: any) => item.category === 'capital_structure_or_lme'), 'G29 package deferral is preserved');
   });
 
   await test('Audit packet route returns pinned reproducibility payload', async () => {

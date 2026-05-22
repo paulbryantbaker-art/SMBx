@@ -895,24 +895,29 @@ function nextGateForLevel(level: DealReadinessLevel, classification: DefinitiveC
 }
 
 function normalizeSignals(payload: Record<string, any>): DefinitiveStackSignals | null {
-  return normalizeDefinitiveStackSignals({
-    ...(payload.signals && typeof payload.signals === 'object' ? payload.signals : {}),
-    cashRunwayDays: payload.cashRunwayDays,
-    fccr: payload.fccr,
-    securedDebtTradingPriceCents: payload.securedDebtTradingPriceCents,
-    maintenanceCovenantBreachWithinQuarters: payload.maintenanceCovenantBreachWithinQuarters,
-    realEstatePercentOfEv: payload.realEstatePercentOfEv,
-    digitalAssetsPercentOfEv: payload.digitalAssetsPercentOfEv,
-    solvencyProngFailed: payload.solvencyProngFailed,
-    bankruptcyFilingPending: payload.bankruptcyFilingPending,
-    rsaInMarket: payload.rsaInMarket,
-    forbearanceExecuted: payload.forbearanceExecuted,
-    capitalStructureAction: payload.capitalStructureAction,
-    liabilityManagementExercise: payload.liabilityManagementExercise,
-    recapitalization: payload.recapitalization,
-    exchangeOffer: payload.exchangeOffer,
-    covenantAmendment: payload.covenantAmendment,
-  });
+  const source = payload.signals && typeof payload.signals === 'object'
+    ? { ...(payload.signals as Record<string, unknown>) }
+    : {};
+  for (const key of [
+    'cashRunwayDays',
+    'fccr',
+    'securedDebtTradingPriceCents',
+    'maintenanceCovenantBreachWithinQuarters',
+    'realEstatePercentOfEv',
+    'digitalAssetsPercentOfEv',
+    'solvencyProngFailed',
+    'bankruptcyFilingPending',
+    'rsaInMarket',
+    'forbearanceExecuted',
+    'capitalStructureAction',
+    'liabilityManagementExercise',
+    'recapitalization',
+    'exchangeOffer',
+    'covenantAmendment',
+  ]) {
+    if (payload[key] != null && payload[key] !== '') source[key] = payload[key];
+  }
+  return normalizeDefinitiveStackSignals(source);
 }
 
 function normalizeSourceIndex(payload: Record<string, any>): Array<Record<string, any>> {
