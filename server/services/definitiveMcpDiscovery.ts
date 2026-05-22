@@ -10,6 +10,8 @@ const MCP_SERVER_DESCRIPTION =
   'Agent-ready M&A Deal OS and deterministic diligence substrate for working capital pegs, Section 1060 allocation, FIRPTA withholding, indemnification cap and basket, QoE adjustments, earnout construction, LBO model support, data rooms, audit packets, and recursive deal-state work.';
 
 const WRITE_TOOLS = new Set([
+  'ingest_deal_payload',
+  'update_deal_payload',
   'defer_to_counsel',
   'compose_model_stack',
   'execute_model',

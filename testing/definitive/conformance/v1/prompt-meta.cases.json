@@ -573,6 +573,15 @@
     "kind": "mcp_inventory",
     "expect": {
       "fields": [
+        { "path": "toolNames", "includes": "ingest_deal_payload" },
+        { "path": "toolNames", "includes": "update_deal_payload" },
+        { "path": "toolNames", "includes": "check_completeness" },
+        { "path": "toolNames", "includes": "get_definition_of_done" },
+        { "path": "toolsByName.ingest_deal_payload.description", "includes": "DealPayload" },
+        { "path": "toolsByName.ingest_deal_payload.description", "includes": "MissingInputContract" },
+        { "path": "toolsByName.ingest_deal_payload.description", "includes": "next_suggested_calls" },
+        { "path": "toolsByName.update_deal_payload.description", "includes": "recursive M&A lifecycle" },
+        { "path": "toolsByName.check_completeness.description", "includes": "definitions of done" },
         { "path": "toolNames", "includes": "compose_model_stack" },
         { "path": "toolsByName.compose_model_stack.description", "includes": "G28" },
         { "path": "toolsByName.compose_model_stack.description", "includes": "G29" },

@@ -56,6 +56,10 @@ import { evaluateDefinitiveStackOverlays } from '../server/services/definitiveSt
 import { executeDefinitiveMcpTool, listDefinitiveMcpTools } from '../server/services/definitiveMcp.js';
 
 const expectedTools = [
+  'ingest_deal_payload',
+  'update_deal_payload',
+  'check_completeness',
+  'get_definition_of_done',
   'lookup_citation',
   'fetch_market_data',
   'defer_to_counsel',
@@ -391,6 +395,92 @@ await test('MCP executor refuses unknown tools before DB work', async () => {
   });
   assertEqual(response.status, 404, 'unknown tool status');
   assert(response.body.supportedTools.includes('execute_model'), 'supported tool list is returned');
+});
+
+await test('DealPayload ingest accepts partial agent payloads and returns recursive DealState guidance', async () => {
+  const response = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'ingest_deal_payload',
+    input: {
+      idempotencyKey: 'smoke-agent-payload-001',
+      payload: {
+        intent: 'buy an HVAC services target with material real estate',
+        targetName: 'Big Fake Deal',
+        industry: 'HVAC services',
+        jurisdiction: 'US-TX',
+        revenueCents: 4_200_000_00,
+        documents: [{ name: 'seller P&L', type: 'financials', hash: 'sha256:demo' }],
+        signals: { realEstatePercentOfEv: 30 },
+      },
+    },
+    envelope: {},
+  });
+  assertEqual(response.status, 200, 'deal payload ingest status');
+  assertEqual(response.body.ok, true, 'deal payload ingest ok');
+  const toolResult = response.body.result;
+  const dealState = toolResult.result.dealState;
+  assertEqual(toolResult.action, 'ingest_deal_payload', 'deal payload action');
+  assert(dealState.cid.startsWith('definitive:deal-state:sha256:'), 'deal state is content addressed');
+  assertEqual(dealState.classificationKey.journey, 'buy', 'journey inferred');
+  assertEqual(dealState.classificationKey.industry, 'HVAC services', 'industry carried through');
+  assert(dealState.classificationKey.triggeredOverlayGates.includes('G30'), 'G30 overlay triggered');
+  assert(toolResult.result.next_suggested_calls.some((call: any) => call.toolName === 'compose_model_stack'), 'next calls include model-stack composition');
+  assert(toolResult.result.portableTakeBackArtifacts.includes('MissingInputContract'), 'take-back artifacts include missing-input contract');
+  assert(typeof toolResult.state_hash_after === 'string' && toolResult.state_hash_after.length === 64, 'state hash returned');
+});
+
+await test('DealState update improves completeness and preserves prior state link', async () => {
+  const initial = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'ingest_deal_payload',
+    input: { payload: { intent: 'sell a founder-owned software company' } },
+    envelope: {},
+  });
+  const priorState = initial.body.result.result.dealState;
+  const updated = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'update_deal_payload',
+    input: {
+      dealState: priorState,
+      patch: {
+        companyName: 'Sample Software LLC',
+        industry: 'software',
+        jurisdiction: 'US-DE',
+        ebitdaCents: 1_800_000_00,
+        dealStructure: 'asset sale with rollover discussion',
+        documents: [{ name: 'TTM financials', type: 'financials', hash: 'sha256:ttm' }],
+      },
+    },
+    envelope: {},
+  });
+  assertEqual(updated.status, 200, 'deal state update status');
+  const updatedState = updated.body.result.result.dealState;
+  assert(updatedState.parentCids.includes(priorState.cid), 'updated state links to prior cid');
+  assert(updated.body.result.completeness_contribution_delta > 0, 'update improves completeness');
+  assert(updatedState.completenessReport.score > priorState.completenessReport.score, 'updated score is higher');
+});
+
+await test('Completeness and definition-of-done tools are DB-free Deal OS control-plane calls', async () => {
+  const completeness = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'check_completeness',
+    input: { payload: { intent: 'evaluate IOI for a target', targetName: 'Pipeline Target' } },
+    envelope: {},
+  });
+  assertEqual(completeness.status, 200, 'completeness status');
+  assertEqual(completeness.body.result.action, 'check_completeness', 'completeness action');
+  assertEqual(completeness.body.result.result.completenessReport.canProceedWithPartialState, true, 'partial state can proceed');
+  assert(completeness.body.result.result.missingInputContract.items.length > 0, 'missing input contract returned');
+
+  const dod = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'get_definition_of_done',
+    input: { objective: 'loi' },
+    envelope: {},
+  });
+  assertEqual(dod.status, 200, 'definition of done status');
+  assert(dod.body.result.result.definitionOfDone.lifecycle.includes('IOI'), 'definition of done exposes lifecycle');
+  assert(dod.body.result.result.noRejectionContract.includes('partial payload is accepted'), 'definition of done exposes no-rejection contract');
 });
 
 await test('Corpus discovery and sanitizer block raw identifiers without DB work', async () => {

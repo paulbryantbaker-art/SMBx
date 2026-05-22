@@ -5,6 +5,7 @@ import {
   DEFINITIVE_SPEC_VERSION,
 } from '../constants/definitive.js';
 import { buildDefinitiveConformanceStatus } from './definitiveConformanceStatus.js';
+import { executeDefinitiveDealStateTool, isDefinitiveDealStateTool } from './definitiveDealState.js';
 import {
   getDefinitiveLineContract,
   inputHasExplicitConfirmation,
@@ -14,6 +15,10 @@ import {
 const DEFINITIVE_MCP_PROTOCOL = 'DEFINITIVE.mcp.v0.1';
 
 const DEFINITIVE_MCP_TOOLS = [
+  'ingest_deal_payload',
+  'update_deal_payload',
+  'check_completeness',
+  'get_definition_of_done',
   'lookup_citation',
   'fetch_market_data',
   'defer_to_counsel',
@@ -29,6 +34,48 @@ const DEFINITIVE_MCP_TOOLS = [
 type DefinitiveMcpToolName = typeof DEFINITIVE_MCP_TOOLS[number];
 
 const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { description: string; inputSchema: Record<string, any> }> = {
+  ingest_deal_payload: {
+    description: 'Accept a partial or complete agent-provided DealPayload, classify journey/league/overlays, create a content-addressed DealState, return a MissingInputContract, completeness score, and next_suggested_calls so the agent can keep working the entire deal lifecycle instead of being rejected for incomplete information.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        payload: { type: 'object', description: 'Partial or complete deal facts. Money values must be cents. May include journey, targetName, thesis, industry, jurisdiction, revenueCents, ebitdaCents, sdeCents, dealType, structure, documents, files, sourceIndex, and V20 routing signals.' },
+        idempotencyKey: { type: 'string', description: 'Optional caller-generated idempotency key for repeat-safe DealState creation.' },
+      },
+    },
+  },
+  update_deal_payload: {
+    description: 'Merge a patch into an existing DealState or partial payload, recompute ClassificationKey, MissingInputContract, completeness report, state hash, and next_suggested_calls for the recursive M&A lifecycle: information, IOI, LOI, diligence, modeling, negotiation, close, and PMI.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dealState: { type: 'object', description: 'Prior content-addressed DealState returned by ingest_deal_payload or update_deal_payload.' },
+        payload: { type: 'object', description: 'Optional base payload when no prior DealState exists.' },
+        patch: { type: 'object', description: 'Structured facts to merge into the current DealPayload. Money values must be cents.' },
+        idempotencyKey: { type: 'string', description: 'Optional caller-generated idempotency key.' },
+      },
+    },
+  },
+  check_completeness: {
+    description: 'Score a DealState or DealPayload against DEFINITIVE deal-lifecycle definitions of done, returning DRL level, missing inputs, blockers, next gate, and next_suggested_calls without crossing THE LINE.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dealState: { type: 'object', description: 'DealState to evaluate.' },
+        payload: { type: 'object', description: 'DealPayload to evaluate if a DealState is not available.' },
+        objective: { type: 'string', description: 'Optional objective, such as ioi, loi, diligence, model, negotiation, close, or pmi.' },
+      },
+    },
+  },
+  get_definition_of_done: {
+    description: 'Return the versioned DEFINITIVE definitions of done for the iterative Deal OS lifecycle, including how humans and agents move from intake to IOI, LOI, diligence, modeling, negotiation, close, and PMI.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        objective: { type: 'string', description: 'Optional objective or gate to explain.' },
+      },
+    },
+  },
   lookup_citation: {
     description: 'Resolve a claim or citation tag against the DEFINITIVE Authority Register and legacy V19 citation registry.',
     inputSchema: {
@@ -161,6 +208,10 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
 };
 
 const TOOL_SCOPE: Record<DefinitiveMcpToolName, string[]> = {
+  ingest_deal_payload: ['deal-state:write', 'deal:classify'],
+  update_deal_payload: ['deal-state:write', 'deal:classify'],
+  check_completeness: ['deal-state:read', 'completeness:read'],
+  get_definition_of_done: ['methodology:read', 'completeness:read'],
   lookup_citation: ['citation:read', 'authority:read'],
   fetch_market_data: ['market-data:read'],
   defer_to_counsel: ['counsel:deferral:create'],
@@ -302,6 +353,27 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
         lineRisks: line?.lineRisks || [],
         requiredScopes: requestedScopes,
         result: buildDefinitiveConformanceStatus(),
+        ...versionPayload(),
+      },
+    };
+  }
+
+  if (isDefinitiveDealStateTool(input.toolName)) {
+    const result = executeDefinitiveDealStateTool(input.toolName, input.input || {});
+    const ok = result.ok === true;
+    return {
+      status: ok ? 200 : 400,
+      body: {
+        ok,
+        toolName: input.toolName,
+        protocol: DEFINITIVE_MCP_PROTOCOL,
+        lineStatus: line?.lineStatus || 'ok',
+        lineReason: line?.lineReason || '',
+        refusalBehavior: line?.refusalBehavior || 'allow',
+        lineRisks: line?.lineRisks || [],
+        requiredScopes: requestedScopes,
+        result,
+        mandateChain: null,
         ...versionPayload(),
       },
     };
