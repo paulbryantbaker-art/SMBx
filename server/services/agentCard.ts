@@ -13,6 +13,7 @@ import {
   getDefinitiveDealMechanicsSummary,
   getDefinitivePassThroughSurface,
 } from './definitiveDealMechanicsCatalog.js';
+import { getDefinitiveAuthoritySeedPlan } from './definitiveAuthoritySeedPlan.js';
 
 export function buildAgentCard() {
   const models = listRegisteredModels();
@@ -26,6 +27,7 @@ export function buildAgentCard() {
   const dealRouteMap = getDefinitiveDealRouteMapSummary();
   const surfaceMechanics = buildDefinitiveSurfaceMechanicsSummary();
   const passThroughSurface = getDefinitivePassThroughSurface();
+  const authoritySeedPlan = getDefinitiveAuthoritySeedPlan();
   const lineSummary = lineInventory.reduce<Record<string, number>>((acc, contract) => {
     acc[contract.lineStatus] = (acc[contract.lineStatus] || 0) + 1;
     return acc;
@@ -53,6 +55,10 @@ export function buildAgentCard() {
       dealMechanicsUri: dealMechanics.uri,
       dealMechanicsModelSlots: dealMechanics.totalModelSlots,
       dealMechanicsGates: dealMechanics.totalGates,
+      authorityRegisterTarget: authoritySeedPlan.targetEntries,
+      authoritySeedPlanVersion: authoritySeedPlan.version,
+      authoritySeedPlanEntries: authoritySeedPlan.plannedEntries,
+      authoritySeedPlanStatus: authoritySeedPlan.status,
       dealMappingStatus: dealMappingCoverage.status,
       dealRouteMapStatus: dealRouteMap.status,
       passThroughPricingRule: passThroughSurface.pricingRule,
@@ -158,6 +164,18 @@ export function buildAgentCard() {
           totalMechanics: surface.totalMechanics,
           readiness: surface.readiness,
         })),
+      },
+      {
+        id: 'definitive_authority_seed_plan',
+        label: 'DEFINITIVE Authority Register seed plan',
+        status: authoritySeedPlan.status,
+        version: authoritySeedPlan.version,
+        targetEntries: authoritySeedPlan.targetEntries,
+        plannedEntries: authoritySeedPlan.plannedEntries,
+        categoryCount: authoritySeedPlan.categoryCount,
+        requiredCoverageSatisfied: authoritySeedPlan.requiredCoverageSatisfied,
+        requiredCategoryIds: authoritySeedPlan.requiredCategoryIds,
+        phaseCounts: authoritySeedPlan.phaseCounts,
       },
       {
         id: 'definitive_pass_through_surface',

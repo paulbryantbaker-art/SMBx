@@ -18,6 +18,7 @@ import {
   getDefinitivePassThroughSurface,
   listDefinitiveGateExpansions,
 } from './definitiveDealMechanicsCatalog.js';
+import { getDefinitiveAuthoritySeedPlan } from './definitiveAuthoritySeedPlan.js';
 import { listDefinitiveMcpTools } from './definitiveMcp.js';
 
 export function buildDefinitiveSpecManifest() {
@@ -32,6 +33,7 @@ export function buildDefinitiveSpecManifest() {
   const surfaceMechanics = buildDefinitiveSurfaceMechanicsSummary();
   const gateExpansions = listDefinitiveGateExpansions();
   const passThroughSurface = getDefinitivePassThroughSurface();
+  const authoritySeedPlan = getDefinitiveAuthoritySeedPlan();
   const lineSummary = lineInventory.reduce<Record<string, number>>((acc, contract) => {
     acc[contract.lineStatus] = (acc[contract.lineStatus] || 0) + 1;
     return acc;
@@ -156,6 +158,33 @@ export function buildDefinitiveSpecManifest() {
         lineNotes: gate.lineNotes,
       })),
       lineDoctrine: 'THE LINE is descriptive per model: DEFINITIVE computes deterministic figures and presents inputs; users, professionals, or courts make advice/opinion/legal determinations.',
+    },
+    authoritySurface: {
+      version: authoritySeedPlan.version,
+      uri: authoritySeedPlan.uri,
+      targetEntries: authoritySeedPlan.targetEntries,
+      plannedEntries: authoritySeedPlan.plannedEntries,
+      categoryCount: authoritySeedPlan.categoryCount,
+      categoryIds: authoritySeedPlan.categoryIds,
+      requiredCategoryIds: authoritySeedPlan.requiredCategoryIds,
+      requiredCoverageSatisfied: authoritySeedPlan.requiredCoverageSatisfied,
+      status: authoritySeedPlan.status,
+      phaseCounts: authoritySeedPlan.phaseCounts,
+      statusCounts: authoritySeedPlan.statusCounts,
+      categories: authoritySeedPlan.categories.map(category => ({
+        id: category.id,
+        label: category.label,
+        targetEntries: category.targetEntries,
+        phase: category.phase,
+        status: category.status,
+        sourceTypes: category.sourceTypes,
+        modelSlots: category.modelSlots,
+        gates: category.gates,
+        examples: category.examples,
+        freshnessPolicy: category.freshnessPolicy,
+        lineBoundary: category.lineBoundary,
+      })),
+      lineDoctrine: authoritySeedPlan.lineDoctrine,
     },
     passThroughSurface,
     generatedAt: new Date().toISOString(),

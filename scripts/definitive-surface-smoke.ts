@@ -41,6 +41,7 @@ import {
   getDefinitivePassThroughSurface,
   listDefinitiveDealMechanicsCatalog,
 } from '../server/services/definitiveDealMechanicsCatalog.js';
+import { getDefinitiveAuthoritySeedPlan } from '../server/services/definitiveAuthoritySeedPlan.js';
 import {
   listDefinitiveCorpusObservationTypes,
   sanitizeCorpusObservation,
@@ -88,6 +89,9 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assertEqual(card.definitive.dealMechanicsVersion, DEFINITIVE_DEAL_MECHANICS_VERSION, 'deal mechanics version');
   assertEqual(card.definitive.dealMechanicsModelSlots, DEFINITIVE_DEAL_MECHANICS_MODEL_SLOT_COUNT, 'deal mechanics model slots');
   assertEqual(card.definitive.dealMechanicsGates, DEFINITIVE_DEAL_MECHANICS_GATE_COUNT, 'deal mechanics gate count');
+  assertEqual(card.definitive.authorityRegisterTarget, DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'agent card authority target');
+  assert(card.definitive.authoritySeedPlanEntries >= DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'agent card authority seed plan meets target');
+  assertEqual(card.definitive.authoritySeedPlanStatus, 'ready_for_800_plus_seeding', 'agent card authority seed plan status');
   assertEqual(card.definitive.dealMappingStatus, 'complete', 'agent card deal mapping status');
   assertEqual(card.definitive.dealRouteMapStatus, 'complete', 'agent card route map status');
   assert(card.definitive.passThroughPricingRule.includes('cost-plus-fixed'), 'agent card exposes pass-through pricing rule');
@@ -111,6 +115,11 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assertDeepEqual(mechanicsCapability.newGates, ['G28', 'G29', 'G30'], 'deal mechanics new gates');
   assertEqual(mechanicsCapability.authorityRegisterTarget, DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'deal mechanics authority target');
   assert(mechanicsCapability.surfaces.some((item: any) => item.surface === 'pipeline' && item.totalMechanics > 0), 'agent card exposes pipeline mechanics surface');
+  const authorityCapability = card.capabilities.find((item: any) => item.id === 'definitive_authority_seed_plan') as any;
+  assert(authorityCapability, 'authority seed plan capability exists');
+  assertEqual(authorityCapability.targetEntries, DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'authority capability target');
+  assert(authorityCapability.plannedEntries >= DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'authority capability planned entries meet target');
+  assertEqual(authorityCapability.requiredCoverageSatisfied, true, 'authority capability required coverage');
 });
 
 await test('DEFINITIVE manifest is a single stable discovery document', async () => {
@@ -137,6 +146,14 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assertEqual(manifest.dealMechanicsSurface.summary.reservedModelSlots, 2, 'manifest reserved model slots');
   assertEqual(manifest.dealMechanicsSurface.summary.totalGates, DEFINITIVE_DEAL_MECHANICS_GATE_COUNT, 'manifest deal mechanics gate count');
   assertEqual(manifest.dealMechanicsSurface.summary.authorityRegisterTarget, DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'manifest authority target');
+  assertEqual(manifest.authoritySurface.targetEntries, DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'manifest authority surface target');
+  assert(manifest.authoritySurface.plannedEntries >= DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'manifest authority surface planned entries meet target');
+  assertEqual(manifest.authoritySurface.requiredCoverageSatisfied, true, 'manifest authority surface required coverage');
+  assertEqual(manifest.authoritySurface.status, 'ready_for_800_plus_seeding', 'manifest authority surface status');
+  assert(manifest.authoritySurface.categoryIds.includes('bankruptcy_code'), 'manifest authority surface includes bankruptcy');
+  assert(manifest.authoritySurface.categoryIds.includes('agreement_architecture'), 'manifest authority surface includes agreement architecture');
+  assert(manifest.authoritySurface.categoryIds.includes('ip_authorities'), 'manifest authority surface includes IP');
+  assert(manifest.authoritySurface.categoryIds.includes('pass_through_pricing_boundary'), 'manifest authority surface includes THE LINE pricing boundary');
   assertEqual(manifest.dealMechanicsSurface.mappingCoverage.status, 'complete', 'manifest deal mapping coverage status');
   assertEqual(manifest.dealMechanicsSurface.mappingCoverage.unmappedModelSlots, 0, 'manifest has no unmapped active model slots');
   assertEqual(manifest.dealMechanicsSurface.routeMap.summary.status, 'complete', 'manifest route map coverage status');
@@ -172,6 +189,24 @@ await test('DEFINITIVE catalog includes the M187-M223 closing-gap expansion', as
   assert(passThrough.catalog.some(item => item.id === 'PASS.IP.SCA_SCAN' && item.dependentModelSlots.includes('M221')), 'SCA scan catalog maps to OSS model');
   assert(passThrough.catalog.some(item => item.id === 'PASS.RE.TITLE_SURVEY' && item.dependentModelSlots.includes('M196')), 'title catalog maps to title/survey model');
   assert(passThrough.catalog.some(item => item.id === 'PASS.HUMAN_SPECIALIST_DIRECTORY' && item.pricingMode === 'free_editorial_directory'), 'free specialist directory is explicit');
+});
+
+await test('Authority Register seed plan is explicit and above 800 planned entries', async () => {
+  const seedPlan = getDefinitiveAuthoritySeedPlan();
+  assertEqual(seedPlan.targetEntries, DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'authority seed target');
+  assert(seedPlan.plannedEntries >= DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'authority seed planned entries meet target');
+  assertEqual(seedPlan.status, 'ready_for_800_plus_seeding', 'authority seed status');
+  assertEqual(seedPlan.requiredCoverageSatisfied, true, 'authority seed required coverage');
+  assert(seedPlan.categories.length >= 13, 'authority seed has enough categories');
+  assert(seedPlan.categoryIds.includes('bankruptcy_code'), 'authority seed includes bankruptcy code');
+  assert(seedPlan.categoryIds.includes('treasury_regulations'), 'authority seed includes Treasury regulations');
+  assert(seedPlan.categoryIds.includes('real_estate'), 'authority seed includes real estate');
+  assert(seedPlan.categoryIds.includes('connected_tax'), 'authority seed includes connected tax');
+  assert(seedPlan.categoryIds.includes('agreement_architecture'), 'authority seed includes agreement architecture');
+  assert(seedPlan.categoryIds.includes('ip_authorities'), 'authority seed includes IP');
+  assert(seedPlan.categoryIds.includes('regulated_industries'), 'authority seed includes regulated industries');
+  assert(seedPlan.categories.every(category => category.freshnessPolicy.length > 0), 'each authority category has freshness policy');
+  assert(seedPlan.categories.every(category => category.lineBoundary.length > 0), 'each authority category has a boundary statement');
 });
 
 await test('DEFINITIVE route map makes every active M-slot usable by Yulia', async () => {

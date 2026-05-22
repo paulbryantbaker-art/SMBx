@@ -236,8 +236,8 @@
       "fields": [
         { "path": "conformanceSurface.modelRuntimeCases", "equals": 202 },
         { "path": "conformanceSurface.dealMechanicsRouteCases", "equals": 60 },
-        { "path": "conformanceSurface.promptMetaCases", "equals": 25 },
-        { "path": "conformanceSurface.totalCases", "equals": 346 }
+        { "path": "conformanceSurface.promptMetaCases", "equals": 26 },
+        { "path": "conformanceSurface.totalCases", "equals": 347 }
       ]
     }
   },
@@ -251,6 +251,32 @@
       "fields": [
         { "path": "dealMechanicsSurface.lineDoctrine", "includes": "DEFINITIVE computes deterministic figures" },
         { "path": "dealMechanicsSurface.lineDoctrine", "includes": "users, professionals, or courts make advice/opinion/legal determinations" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.MANIFEST.AUTHORITY.001",
+    "title": "Manifest exposes the 800-plus Authority Register seed plan",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "manifest",
+    "expect": {
+      "fields": [
+        { "path": "authoritySurface.targetEntries", "equals": 800 },
+        { "path": "authoritySurface.plannedEntries", "min": 800 },
+        { "path": "authoritySurface.requiredCoverageSatisfied", "equals": true },
+        { "path": "authoritySurface.categoryIds", "includes": "bankruptcy_code" },
+        { "path": "authoritySurface.categoryIds", "includes": "restructuring_lme" },
+        { "path": "authoritySurface.categoryIds", "includes": "irc_sections" },
+        { "path": "authoritySurface.categoryIds", "includes": "treasury_regulations" },
+        { "path": "authoritySurface.categoryIds", "includes": "real_estate" },
+        { "path": "authoritySurface.categoryIds", "includes": "connected_tax" },
+        { "path": "authoritySurface.categoryIds", "includes": "agreement_architecture" },
+        { "path": "authoritySurface.categoryIds", "includes": "ip_authorities" },
+        { "path": "authoritySurface.categoryIds", "includes": "pass_through_pricing_boundary" },
+        { "path": "authoritySurface.categoryIds", "includes": "recovery_data" },
+        { "path": "authoritySurface.categoryIds", "includes": "digital_assets" },
+        { "path": "authoritySurface.categoryIds", "includes": "regulated_industries" }
       ]
     }
   },
@@ -290,10 +316,11 @@
     "methodologyUri": "methodology://v19",
     "kind": "agent_card",
     "expect": {
-      "textIncludes": ["definitive_conformance_status", "\"caseCount\":346", "definitive_deal_mechanics_v1_1"],
+      "textIncludes": ["definitive_conformance_status", "\"caseCount\":347", "definitive_deal_mechanics_v1_1"],
       "fields": [
         { "path": "definitive.dealMechanicsModelSlots", "equals": 123 },
         { "path": "definitive.dealMechanicsGates", "equals": 30 },
+        { "path": "definitive.authoritySeedPlanEntries", "min": 800 },
         { "path": "definitive.passThroughPricingRule", "includes": "cost-plus-fixed" }
       ]
     }
