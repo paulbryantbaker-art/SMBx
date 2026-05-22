@@ -369,6 +369,11 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     output: ['DealPackage', 'DealState', 'DealPlan', 'CompletenessReport', 'MissingInputContract', 'MCPCallHint'],
     takeBack: ['DealPackage', 'DealState', 'DealPlan', 'CompletenessReport', 'MissingInputContract'],
   },
+  resume_deal: {
+    input: ['DealState', 'DealPayload', 'DealPackage'],
+    output: ['DealState', 'DealPlan', 'DealPackage', 'CompletenessReport', 'MissingInputContract', 'MCPCallHint'],
+    takeBack: ['DealState', 'DealPlan', 'DealPackage', 'CompletenessReport', 'MissingInputContract'],
+  },
 };
 
 export function buildDefinitiveSchemaRegistry() {

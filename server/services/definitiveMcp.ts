@@ -22,6 +22,7 @@ const DEFINITIVE_MCP_TOOLS = [
   'compose_deal_plan',
   'diff_deal_state',
   'compose_deal_package',
+  'resume_deal',
   'lookup_citation',
   'fetch_market_data',
   'defer_to_counsel',
@@ -109,6 +110,18 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
       properties: {
         dealState: { type: 'object', description: 'Optional DealState returned by ingest_deal_payload or update_deal_payload.' },
         payload: { type: 'object', description: 'Optional DealPayload when a DealState is not yet available.' },
+        idempotencyKey: { type: 'string', description: 'Optional caller-generated idempotency key.' },
+      },
+    },
+  },
+  resume_deal: {
+    description: 'Resume iterative Deal OS work from a DealState or DealPayload, returning current stage, DealPlan, DealPackage, completeness report, missing-input contract, next_suggested_calls, and portable take-back artifacts so the agent can keep working IOI, LOI, diligence, modeling, negotiation, close, and PMI.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dealState: { type: 'object', description: 'Optional content-addressed DealState from a prior call.' },
+        dealPackage: { type: 'object', description: 'Optional DealPackage reference; include the companion DealState when available.' },
+        payload: { type: 'object', description: 'Optional DealPayload if a prior DealState is not available.' },
         idempotencyKey: { type: 'string', description: 'Optional caller-generated idempotency key.' },
       },
     },
@@ -252,6 +265,7 @@ const TOOL_SCOPE: Record<DefinitiveMcpToolName, string[]> = {
   compose_deal_plan: ['deal-state:read', 'deal-plan:read'],
   diff_deal_state: ['deal-state:read', 'deal-state:diff'],
   compose_deal_package: ['deal-state:read', 'deal-package:read'],
+  resume_deal: ['deal-state:read', 'deal-plan:read', 'deal-package:read'],
   lookup_citation: ['citation:read', 'authority:read'],
   fetch_market_data: ['market-data:read'],
   defer_to_counsel: ['counsel:deferral:create'],

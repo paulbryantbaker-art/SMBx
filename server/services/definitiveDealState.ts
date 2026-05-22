@@ -150,6 +150,8 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
       return diffDefinitiveDealState(input);
     case 'compose_deal_package':
       return composeDefinitiveDealPackage(input);
+    case 'resume_deal':
+      return resumeDefinitiveDeal(input);
     default:
       return {
         ok: false,
@@ -162,6 +164,7 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
           'compose_deal_plan',
           'diff_deal_state',
           'compose_deal_package',
+          'resume_deal',
         ],
       };
   }
@@ -176,6 +179,7 @@ export function isDefinitiveDealStateTool(toolName: string): boolean {
     'compose_deal_plan',
     'diff_deal_state',
     'compose_deal_package',
+    'resume_deal',
   ].includes(toolName);
 }
 
@@ -368,6 +372,45 @@ export function composeDefinitiveDealPackage(input: Record<string, any>) {
       dealState: state,
       next_suggested_calls: nextSuggestedCalls,
       portableTakeBackArtifacts: dealPackage.takeBackArtifacts,
+    },
+    state_hash_after: state.stateHash,
+    completeness_contribution_delta: 0,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
+export function resumeDefinitiveDeal(input: Record<string, any>) {
+  const state = stateFromInput(input);
+  const packageResult = composeDefinitiveDealPackage({ dealState: state });
+  const dealPackage = packageResult.result.dealPackage;
+  return {
+    ok: true,
+    action: 'resume_deal',
+    result: {
+      dealState: state,
+      currentStage: dealPackage.dealPlan.currentStage,
+      dealPlan: dealPackage.dealPlan,
+      completenessReport: state.completenessReport,
+      missingInputContract: state.missingInputContract,
+      next_suggested_calls: dealPackage.next_suggested_calls,
+      dealPackage,
+      resumeContract: {
+        acceptedInputs: ['DealState', 'DealPayload', 'DealPackage plus companion DealState'],
+        noRejectionContract:
+          'If the agent cannot supply complete facts, resume_deal returns current DealState, missing inputs, current stage, and next_suggested_calls.',
+        recursiveLoop:
+          'resume -> update_deal_payload -> compose_model_stack/execute_model -> check_completeness -> compose_deal_package -> repeat',
+        humanAndAgentSurfaces: ['today', 'pipeline', 'files', 'data_room', 'studio', 'models', 'audit_package'],
+      },
+      portableTakeBackArtifacts: [
+        'DealState',
+        'DealPlan',
+        'DealPackage',
+        'CompletenessReport',
+        'MissingInputContract',
+        'MCPCallHint[]',
+      ],
     },
     state_hash_after: state.stateHash,
     completeness_contribution_delta: 0,

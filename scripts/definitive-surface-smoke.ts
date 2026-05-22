@@ -64,6 +64,7 @@ const expectedTools = [
   'compose_deal_plan',
   'diff_deal_state',
   'compose_deal_package',
+  'resume_deal',
   'lookup_citation',
   'fetch_market_data',
   'defer_to_counsel',
@@ -300,6 +301,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.toolSchemaMap.ingest_deal_payload.output.includes('MissingInputContract'), 'ingest output maps missing input contract');
   assert(registry.toolSchemaMap.diff_deal_state.takeBack.includes('DealStateDiff'), 'diff take-back maps DealStateDiff');
   assert(registry.toolSchemaMap.compose_deal_package.takeBack.includes('DealPackage'), 'package take-back maps DealPackage');
+  assert(registry.toolSchemaMap.resume_deal.takeBack.includes('DealPackage'), 'resume take-back maps DealPackage');
   assert(registry.noRejectionContract.includes('DealPayload may be incomplete'), 'schema registry states no-rejection contract');
 });
 
@@ -590,6 +592,32 @@ await test('DealPackage gives agents a complete take-back packet', async () => {
   assert(dealPackage.takeBackArtifacts.includes('DealPackage'), 'package includes itself as take-back artifact');
   assert(dealPackage.next_suggested_calls.some((call: any) => call.toolName === 'compose_model_stack'), 'package includes next calls');
   assertEqual(dealPackage.classificationKey.journey, 'buy', 'package preserves classification');
+});
+
+await test('Resume deal returns current lifecycle position and next calls', async () => {
+  const response = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'resume_deal',
+    input: {
+      payload: {
+        journey: 'buy',
+        targetName: 'Resume Target',
+        industry: 'software',
+        jurisdiction: 'US-DE',
+        ebitdaCents: 1_900_000_00,
+        dealStructure: 'asset purchase',
+        documents: [{ name: 'CIM', type: 'cim', hash: 'sha256:resume-cim' }],
+      },
+    },
+    envelope: {},
+  });
+  assertEqual(response.status, 200, 'resume deal status');
+  const result = response.body.result.result;
+  assert(result.currentStage, 'resume exposes current stage');
+  assert(result.dealPlan.lifecycle.includes('information -> IOI -> LOI'), 'resume preserves lifecycle');
+  assert(result.dealPackage.takeBackArtifacts.includes('DealPackage'), 'resume includes deal package');
+  assert(result.resumeContract.recursiveLoop.includes('update_deal_payload'), 'resume explains recursive loop');
+  assert(result.next_suggested_calls.length > 0, 'resume includes next calls');
 });
 
 await test('Corpus discovery and sanitizer block raw identifiers without DB work', async () => {
