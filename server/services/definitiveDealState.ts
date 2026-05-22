@@ -158,6 +158,8 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
       return discloseDefinitiveSubset(input);
     case 'compose_document_draft':
       return composeDefinitiveDocumentDraft(input);
+    case 'prepare_negotiation_brief':
+      return prepareDefinitiveNegotiationBrief(input);
     default:
       return {
         ok: false,
@@ -174,6 +176,7 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
           'compose_data_room_index',
           'disclose_subset',
           'compose_document_draft',
+          'prepare_negotiation_brief',
         ],
       };
   }
@@ -192,6 +195,7 @@ export function isDefinitiveDealStateTool(toolName: string): boolean {
     'compose_data_room_index',
     'disclose_subset',
     'compose_document_draft',
+    'prepare_negotiation_brief',
   ].includes(toolName);
 }
 
@@ -699,6 +703,96 @@ export function composeDefinitiveDocumentDraft(input: Record<string, any>) {
   };
 }
 
+export function prepareDefinitiveNegotiationBrief(input: Record<string, any>) {
+  const state = stateFromInput(input);
+  const objective = textValue(input.objective) || 'negotiation_preparation';
+  const audience = textValue(input.audience) || 'internal_deal_team';
+  const openTerms = buildNegotiationOpenTerms(state);
+  const sourceGaps = uniqueStrings(openTerms.flatMap(term => term.missingSourceCategories)).map(category => ({
+    category,
+    reason: `Negotiation brief needs ${category} source support before external use.`,
+    suggestedTool: 'compose_data_room_index',
+  }));
+  const modelBackedRanges = buildNegotiationModelRanges(state);
+  const needsModelState = !state.completenessReport.satisfied.includes('model_state_present');
+  const handoffs = buildNegotiationHandoffs(state);
+  const briefHash = sha256(stableStringify({
+    dealStateHash: state.stateHash,
+    objective,
+    audience,
+    openTerms: openTerms.map(term => ({ id: term.id, status: term.status, missing: term.missingSourceCategories })),
+    modelBackedRanges,
+    handoffs,
+    methodologyVersion: DEFINITIVE_METHODOLOGY_VERSION,
+  }));
+  const negotiationBrief = {
+    briefId: `negbrief_${briefHash.slice(0, 16)}`,
+    schema: 'NegotiationBrief.v0.1',
+    dealStateCid: state.cid,
+    dealStateHash: state.stateHash,
+    objective,
+    audience,
+    stage: currentStageForState(state),
+    readinessLevel: state.completenessReport.level,
+    openTerms,
+    modelBackedRanges,
+    sourceGaps,
+    handoffs,
+    negotiationBoundary: {
+      computedOnly: true,
+      noRecommendation: true,
+      noNegotiationAuthority: true,
+      noExternalTransmission: true,
+      userDecides: 'The user and their advisors decide positions, concessions, legal language, and whether to send anything externally.',
+    },
+    next_suggested_calls: [
+      ...(sourceGaps.length
+        ? [{
+            toolName: 'compose_data_room_index',
+            priority: 'P1' as const,
+            reason: `Fill negotiation source gaps: ${sourceGaps.map(gap => gap.category).join(', ')}.`,
+            inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
+          }]
+        : []),
+      ...(needsModelState
+        ? [{
+            toolName: 'compose_model_stack',
+            priority: 'P1' as const,
+            reason: 'Negotiation brief should be tied to deterministic model outputs before relying on ranges.',
+            inputHint: { payload: state.payload },
+          }]
+        : []),
+      {
+        toolName: 'compose_document_draft',
+        priority: sourceGaps.length || needsModelState ? 'P2' as const : 'P1' as const,
+        reason: 'Render this control packet into a Studio negotiation brief scaffold when source/model readiness is acceptable.',
+        inputHint: {
+          dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision },
+          documentType: 'negotiation_brief',
+        },
+      },
+    ],
+    takeBackArtifacts: ['NegotiationBrief', 'DealState', 'SourceGapList', 'MCPCallHint[]'],
+    lineInvariant: LINE_INVARIANT,
+  };
+
+  return {
+    ok: true,
+    action: 'prepare_negotiation_brief',
+    result: {
+      negotiationBrief,
+      dealState: state,
+      missingInputContract: state.missingInputContract,
+      next_suggested_calls: negotiationBrief.next_suggested_calls,
+      portableTakeBackArtifacts: negotiationBrief.takeBackArtifacts,
+    },
+    state_hash_after: state.stateHash,
+    completeness_contribution_delta: 0,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
 function buildDealStateResult(action: 'ingest_deal_payload' | 'update_deal_payload', state: DefinitiveDealState, priorScore: number | null) {
   const scoreDelta = priorScore == null ? state.completenessReport.score : state.completenessReport.score - priorScore;
   return {
@@ -1078,6 +1172,108 @@ function sectionPlan(id: string, title: string, sourceCategories: string[], draf
     draftInstruction,
     lineBoundary,
   };
+}
+
+function buildNegotiationOpenTerms(state: DefinitiveDealState) {
+  type CategorizedSource = Record<string, any> & { category: string };
+  const plans = [
+    negotiationTermPlan('purchase_price', 'Purchase price and valuation frame', ['financials'], ['purchasePriceCents', 'valuationRangeCents', 'enterpriseValueCents', 'ebitdaCents']),
+    negotiationTermPlan('structure_tax', 'Structure and tax allocation', ['legal', 'tax'], ['dealStructure', 'structure', 'taxClassification', 'considerationMix']),
+    negotiationTermPlan('working_capital', 'Working capital peg and true-up', ['financials'], ['workingCapitalPegCents', 'nwcPegCents', 'closingStatement', 'trueUp']),
+    negotiationTermPlan('indemnity_escrow', 'Indemnity, escrow, and RWI stack', ['legal', 'financials'], ['escrowCents', 'escrowPercent', 'indemnityCapPercent', 'rwiLimitCents']),
+    negotiationTermPlan('earnout_seller_financing', 'Earnout, seller note, rollover, or contingent value', ['financials', 'legal'], ['earnout', 'earnoutCents', 'sellerNoteCents', 'rolloverPercent']),
+    negotiationTermPlan('conditions_timing', 'Conditions, approvals, and timing', ['legal', 'commercial'], ['closingConditions', 'approvals', 'consents', 'timeline']),
+  ];
+  const sourceIndex: CategorizedSource[] = state.sourceIndex.map(source => ({ ...source, category: inferDataRoomCategory(source) }));
+  return plans.map(plan => {
+    const explicitFacts = plan.payloadKeys.filter(key => hasAnyValue(state.payload, [key]));
+    const sourceRefs = sourceIndex
+      .filter(source => plan.sourceCategories.includes(source.category))
+      .map(source => ({
+        id: source.id,
+        name: source.name ?? source.id,
+        type: source.type,
+        category: source.category,
+        hash: source.hash,
+        citationReady: source.citationReady,
+      }));
+    const missingSourceCategories = plan.sourceCategories.filter(category => !sourceRefs.some(source => source.category === category));
+    return {
+      id: plan.id,
+      label: plan.label,
+      status: explicitFacts.length && !missingSourceCategories.length
+        ? 'source_ready'
+        : explicitFacts.length
+          ? 'facts_present_source_gap'
+          : 'needs_fact_and_source',
+      explicitFacts,
+      sourceCategories: plan.sourceCategories,
+      sourceRefs,
+      missingSourceCategories,
+      positionBoundary:
+        'DEFINITIVE organizes the issue, facts, sources, and computed ranges. The user and advisors choose negotiation positions, concessions, and legal language.',
+    };
+  });
+}
+
+function negotiationTermPlan(id: string, label: string, sourceCategories: string[], payloadKeys: string[]) {
+  return { id, label, sourceCategories, payloadKeys };
+}
+
+function buildNegotiationModelRanges(state: DefinitiveDealState) {
+  const modelState = firstPresentValue(state.payload, ['modelOutputs', 'modelRuns', 'valuation', 'lbo', 'workingCapital', 'earnoutModel']);
+  const ranges: Array<Record<string, any>> = [];
+  if (modelState) {
+    ranges.push({
+      id: 'current_model_state',
+      status: 'present',
+      source: 'DealPayload.modelOutputs/modelRuns/valuation/lbo',
+      hash: sha256(stableStringify(modelState)),
+      note: 'Model state is present in the DealPayload. Downstream renderer should cite individual model outputs when available.',
+    });
+  } else {
+    ranges.push({
+      id: 'current_model_state',
+      status: 'missing',
+      suggestedTool: 'compose_model_stack',
+      note: 'No deterministic model output is attached yet, so negotiation ranges must remain placeholders.',
+    });
+  }
+
+  for (const key of ['purchasePriceCents', 'enterpriseValueCents', 'workingCapitalPegCents', 'escrowCents', 'sellerNoteCents', 'earnoutCents']) {
+    const value = firstNumber(state.payload, [key]);
+    if (value != null) {
+      ranges.push({
+        id: key,
+        status: 'payload_fact_present',
+        valueCents: value,
+        source: 'DealPayload',
+      });
+    }
+  }
+  return ranges;
+}
+
+function buildNegotiationHandoffs(state: DefinitiveDealState) {
+  const handoffs: Array<Record<string, any>> = buildPackageDeferrals(state).map(deferral => ({
+    ...deferral,
+    lineStatus: 'requires_professional_or_user_determination',
+  }));
+  handoffs.push({
+    category: 'negotiation_strategy',
+    reason: 'Concessions, bargaining positions, and communications are user/advisor decisions, not DEFINITIVE outputs.',
+    suggestedTool: 'compose_document_draft',
+    lineStatus: 'user_determination_required',
+  });
+  if (state.classificationKey.triggeredOverlayGates.includes('G30')) {
+    handoffs.push({
+      category: 'asset_class_specialist',
+      reason: 'Real-estate, infrastructure, digital-asset, or secondaries specialist inputs may be required before relying on the brief.',
+      suggestedTool: 'compose_data_room_index',
+      lineStatus: 'specialist_input_required',
+    });
+  }
+  return handoffs;
 }
 
 function buildPlanStage(
@@ -1550,6 +1746,16 @@ function hasAnyValue(payload: Record<string, any>, keys: string[]): boolean {
     if (value && typeof value === 'object') return Object.keys(value).length > 0;
     return value != null && value !== '';
   });
+}
+
+function firstPresentValue(payload: Record<string, any>, keys: string[]): unknown {
+  for (const key of keys) {
+    const value = payload[key];
+    if (Array.isArray(value) && value.length > 0) return value;
+    if (value && typeof value === 'object' && Object.keys(value).length > 0) return value;
+    if (value != null && value !== '') return value;
+  }
+  return null;
 }
 
 function isPastEarlyStage(payload: Record<string, any>): boolean {

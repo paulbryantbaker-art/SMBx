@@ -68,6 +68,7 @@ const expectedTools = [
   'compose_data_room_index',
   'disclose_subset',
   'compose_document_draft',
+  'prepare_negotiation_brief',
   'lookup_citation',
   'fetch_market_data',
   'defer_to_counsel',
@@ -304,6 +305,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.schemaNames.includes('DataRoomIndex'), 'schema registry exposes DataRoomIndex');
   assert(registry.schemaNames.includes('DisclosureSubset'), 'schema registry exposes DisclosureSubset');
   assert(registry.schemaNames.includes('DocumentDraft'), 'schema registry exposes DocumentDraft');
+  assert(registry.schemaNames.includes('NegotiationBrief'), 'schema registry exposes NegotiationBrief');
   assertEqual(registry.schemas.DealPayload.properties.revenueCents.type, 'integer', 'money is cents integer');
   assert(registry.toolSchemaMap.ingest_deal_payload.output.includes('MissingInputContract'), 'ingest output maps missing input contract');
   assert(registry.toolSchemaMap.diff_deal_state.takeBack.includes('DealStateDiff'), 'diff take-back maps DealStateDiff');
@@ -312,6 +314,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.toolSchemaMap.compose_data_room_index.takeBack.includes('DataRoomIndex'), 'data room take-back maps DataRoomIndex');
   assert(registry.toolSchemaMap.disclose_subset.takeBack.includes('DisclosureSubset'), 'disclosure subset maps DisclosureSubset');
   assert(registry.toolSchemaMap.compose_document_draft.takeBack.includes('DocumentDraft'), 'document draft maps DocumentDraft');
+  assert(registry.toolSchemaMap.prepare_negotiation_brief.takeBack.includes('NegotiationBrief'), 'negotiation brief maps NegotiationBrief');
   assert(registry.noRejectionContract.includes('DealPayload may be incomplete'), 'schema registry states no-rejection contract');
 });
 
@@ -719,6 +722,37 @@ await test('DocumentDraft creates a source-aware Studio scaffold', async () => {
   assert(draft.sections.some((section: any) => section.status === 'needs_source'), 'draft marks source gaps by section');
   assertEqual(draft.exportBoundary.noExternalTransmission, true, 'draft does not export externally');
   assert(draft.takeBackArtifacts.includes('DocumentDraft'), 'document draft is portable');
+});
+
+await test('NegotiationBrief organizes open terms without negotiating', async () => {
+  const response = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'prepare_negotiation_brief',
+    input: {
+      payload: {
+        journey: 'buy',
+        targetName: 'Negotiation Target',
+        industry: 'software',
+        jurisdiction: 'US-DE',
+        ebitdaCents: 2_400_000_00,
+        purchasePriceCents: 18_000_000_00,
+        dealStructure: 'asset purchase with seller note',
+        documents: [
+          { id: 'qoe', name: 'QoE report', type: 'qoe', hash: 'sha256:qoe' },
+          { id: 'loi', name: 'LOI markup', type: 'loi', hash: 'sha256:loi' },
+        ],
+      },
+    },
+    envelope: {},
+  });
+  assertEqual(response.status, 200, 'negotiation brief status');
+  const brief = response.body.result.result.negotiationBrief;
+  assertEqual(brief.schema, 'NegotiationBrief.v0.1', 'negotiation brief schema');
+  assert(brief.openTerms.some((term: any) => term.id === 'purchase_price'), 'brief includes purchase price term');
+  assert(brief.modelBackedRanges.some((range: any) => range.id === 'purchasePriceCents'), 'brief carries deterministic payload range');
+  assertEqual(brief.negotiationBoundary.noNegotiationAuthority, true, 'brief does not negotiate');
+  assert(brief.next_suggested_calls.some((call: any) => call.toolName === 'compose_model_stack'), 'brief asks for model stack when missing');
+  assert(brief.takeBackArtifacts.includes('NegotiationBrief'), 'negotiation brief is portable');
 });
 
 await test('Corpus discovery and sanitizer block raw identifiers without DB work', async () => {

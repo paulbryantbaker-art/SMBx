@@ -586,6 +586,7 @@
         { "path": "toolNames", "includes": "compose_data_room_index" },
         { "path": "toolNames", "includes": "disclose_subset" },
         { "path": "toolNames", "includes": "compose_document_draft" },
+        { "path": "toolNames", "includes": "prepare_negotiation_brief" },
         { "path": "toolsByName.ingest_deal_payload.description", "includes": "DealPayload" },
         { "path": "toolsByName.ingest_deal_payload.description", "includes": "MissingInputContract" },
         { "path": "toolsByName.ingest_deal_payload.description", "includes": "next_suggested_calls" },
@@ -598,6 +599,7 @@
         { "path": "toolsByName.compose_data_room_index.description", "includes": "DataRoomIndex" },
         { "path": "toolsByName.disclose_subset.description", "includes": "DisclosureSubset" },
         { "path": "toolsByName.compose_document_draft.description", "includes": "DocumentDraft" },
+        { "path": "toolsByName.prepare_negotiation_brief.description", "includes": "NegotiationBrief" },
         { "path": "toolNames", "includes": "compose_model_stack" },
         { "path": "toolsByName.compose_model_stack.description", "includes": "G28" },
         { "path": "toolsByName.compose_model_stack.description", "includes": "G29" },
@@ -722,6 +724,7 @@
         { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "DataRoomIndex" },
         { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "DisclosureSubset" },
         { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "DocumentDraft" },
+        { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "NegotiationBrief" },
         { "path": "substrateArchitectureSurface.schemaRegistry.toolSchemaMap.ingest_deal_payload.output", "includes": "MissingInputContract" }
       ]
     }

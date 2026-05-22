@@ -361,6 +361,32 @@ const DocumentDraft: JsonSchema = {
   },
 };
 
+const NegotiationBrief: JsonSchema = {
+  $id: schemaId('NegotiationBrief'),
+  title: 'NegotiationBrief',
+  type: 'object',
+  additionalProperties: true,
+  required: ['briefId', 'schema', 'dealStateCid', 'dealStateHash', 'openTerms', 'modelBackedRanges', 'handoffs', 'negotiationBoundary', 'next_suggested_calls'],
+  properties: {
+    briefId: { type: 'string' },
+    schema: { type: 'string', const: 'NegotiationBrief.v0.1' },
+    dealStateCid: { type: 'string' },
+    dealStateHash: { type: 'string' },
+    objective: { type: 'string' },
+    audience: { type: 'string' },
+    stage: { type: 'string' },
+    readinessLevel: { type: 'string' },
+    openTerms: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    modelBackedRanges: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    sourceGaps: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    handoffs: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    negotiationBoundary: { type: 'object', additionalProperties: true },
+    next_suggested_calls: { type: 'array', items: { $ref: schemaId('MCPCallHint') } },
+    takeBackArtifacts: { type: 'array', items: { type: 'string' } },
+    lineInvariant: { type: 'string' },
+  },
+};
+
 const DefinitionOfDone: JsonSchema = {
   $id: schemaId('DefinitionOfDone'),
   title: 'DefinitionOfDone',
@@ -410,6 +436,7 @@ export const DEFINITIVE_SCHEMAS: Record<string, JsonSchema> = {
   DataRoomIndex,
   DisclosureSubset,
   DocumentDraft,
+  NegotiationBrief,
   DefinitionOfDone,
   DefinitiveToolEnvelope,
 };
@@ -469,6 +496,11 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     input: ['DealState', 'DealPayload'],
     output: ['DocumentDraft', 'DealState', 'MissingInputContract', 'MCPCallHint'],
     takeBack: ['DocumentDraft', 'SourceIndex', 'MissingInputContract'],
+  },
+  prepare_negotiation_brief: {
+    input: ['DealState', 'DealPayload'],
+    output: ['NegotiationBrief', 'DealState', 'MissingInputContract', 'MCPCallHint'],
+    takeBack: ['NegotiationBrief', 'SourceGapList', 'MCPCallHint'],
   },
 };
 
