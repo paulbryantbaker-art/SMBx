@@ -359,6 +359,18 @@ export function V6AnalysisView({
     );
   }
 
+  if (isDefinitivePacketArtifact(artifactData)) {
+    return (
+      <DefinitivePacketCanvas
+        title={title}
+        markdown={effectiveMarkdown}
+        artifactData={artifactData}
+        openTab={openTab}
+        onTalkToYulia={onTalkToYulia}
+      />
+    );
+  }
+
   if (effectiveTool === "artifact") {
     return (
       <ArtifactCanvas
@@ -2494,6 +2506,266 @@ function confidenceTone(confidence?: string): AnalysisTone {
   return "neutral";
 }
 
+function isDefinitivePacketArtifact(data?: Record<string, any>): boolean {
+  return data?.type === "definitive_packet";
+}
+
+function DefinitivePacketCanvas({
+  title,
+  markdown,
+  artifactData,
+  openTab,
+  onTalkToYulia,
+}: {
+  title: string;
+  markdown?: string;
+  artifactData?: Record<string, any>;
+  openTab?: OpenTab;
+  onTalkToYulia?: (prompt: string) => void;
+}) {
+  const packetRowId = numericMaybe(artifactData?.packetRowId);
+  const dealId = textMaybe(artifactData?.dealId);
+  const dealTitle = textMaybe(artifactData?.dealTitle) || "this deal";
+  const [packet, setPacket] = useState<Record<string, any> | null>(null);
+  const [packetLoading, setPacketLoading] = useState(false);
+  const [packetError, setPacketError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!dealId || !packetRowId) {
+      setPacket(null);
+      setPacketLoading(false);
+      setPacketError(null);
+      return;
+    }
+
+    let alive = true;
+    setPacketLoading(true);
+    setPacketError(null);
+    fetch(`/api/definitive/deal-packets?dealId=${encodeURIComponent(dealId)}&limit=50`, { headers: authHeaders() })
+      .then(async res => {
+        const payload = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(payload.error || `HTTP ${res.status}`);
+        return payload;
+      })
+      .then(payload => {
+        if (!alive) return;
+        const rows = Array.isArray(payload.packets) ? payload.packets : [];
+        setPacket(rows.find((item: any) => Number(item.id) === packetRowId) ?? rows[0] ?? null);
+      })
+      .catch((err: Error) => {
+        if (!alive) return;
+        setPacket(null);
+        setPacketError(err.message || "Could not load packet details.");
+      })
+      .finally(() => {
+        if (alive) setPacketLoading(false);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, [dealId, packetRowId]);
+
+  const packetType = textMaybe(packet?.packetType) || textMaybe(artifactData?.packetType) || title;
+  const packetId = textMaybe(packet?.packetId) || textMaybe(artifactData?.packetId) || (packetRowId ? `row ${packetRowId}` : "available packet");
+  const stateCid = textMaybe(packet?.dealStateCid) || textMaybe(artifactData?.stateCid) || "pending";
+  const packetCid = textMaybe(packet?.packetCid) || textMaybe(artifactData?.packetCid) || "pending";
+  const toolName = labelFromCode(textMaybe(packet?.toolName) || textMaybe(artifactData?.toolName) || "DEFINITIVE");
+  const nextCalls = arrayMaybe(packet?.nextSuggestedCalls);
+  const artifacts = arrayMaybe(packet?.takeBackArtifacts);
+  const payloadRows = summarizePacketPayload(packet?.payload || {});
+
+  const askPrompt = `Explain ${packetType} for ${dealTitle}. Use packet ${packetId}, DealState ${stateCid}, and show what is known, what is missing, the current gate, the next suggested calls, and what another agent can take back to its system.`;
+
+  return (
+    <div className="m-fade-up m-page-flow" style={DP.shell}>
+      <section className="m-card" style={DP.hero}>
+        <div style={DP.heroCopy}>
+          <div className="mono" style={DP.eyebrow}>DEFINITIVE PACKET · DEAL OS HANDOFF</div>
+          <h1 style={DP.title}>{title}</h1>
+          <p style={DP.deckline}>
+            This packet is a portable deal-state object, not a loose document. Yulia and external agents can use it to resume the deal, advance the next gate, or carry the current state back to another system.
+          </p>
+          <div style={DP.actions}>
+            <button className="m-btn filled" type="button" onClick={() => onTalkToYulia?.(askPrompt)}>
+              Ask Yulia to explain
+            </button>
+            {dealId && (
+              <button
+                className="m-btn outlined"
+                type="button"
+                onClick={() => openTab?.({ kind: "deal", id: dealId, title: dealTitle })}
+              >
+                Open deal
+              </button>
+            )}
+          </div>
+        </div>
+        <div style={DP.identityCard}>
+          <PacketDatum label="Packet" value={packetId} />
+          <PacketDatum label="Type" value={packetType} />
+          <PacketDatum label="Tool" value={toolName} />
+          <PacketDatum label="DealState CID" value={shortHash(stateCid)} />
+          <PacketDatum label="Packet CID" value={shortHash(packetCid)} />
+          <PacketDatum label="Methodology" value={textMaybe(packet?.methodologyVersion) || "DEFINITIVE"} />
+        </div>
+      </section>
+
+      {(packetLoading || packetError) && (
+        <div className="m-card" style={DP.notice}>
+          {packetLoading ? "Loading the persisted packet payload..." : `Packet metadata is available, but the persisted payload could not be loaded (${packetError}).`}
+        </div>
+      )}
+
+      <section style={DP.grid}>
+        <div className="m-card" style={DP.panel}>
+          <div className="mono" style={DP.panelEyebrow}>NEXT SUGGESTED CALLS</div>
+          <h2 style={DP.panelTitle}>Continue the deal from here</h2>
+          <div style={DP.stack}>
+            {nextCalls.length ? nextCalls.slice(0, 6).map((call, index) => (
+              <button
+                key={`next-call-${index}`}
+                type="button"
+                className="m-state"
+                style={DP.callRow}
+                onClick={() => onTalkToYulia?.(`Use ${packetType} for ${dealTitle}. Prepare or run the next suggested call: ${summarizePacketValue(call)}. Preserve THE LINE and tell me what information is still missing.`)}
+              >
+                <span style={DP.callIndex}>{String(index + 1).padStart(2, "0")}</span>
+                <span style={DP.callText}>
+                  <strong>{packetCallTitle(call)}</strong>
+                  <span>{summarizePacketValue(call)}</span>
+                </span>
+              </button>
+            )) : (
+              <div style={DP.empty}>No next call was persisted on this packet. Ask Yulia to infer the next gate from DealState.</div>
+            )}
+          </div>
+        </div>
+
+        <div className="m-card" style={DP.panel}>
+          <div className="mono" style={DP.panelEyebrow}>TAKE-BACK ARTIFACTS</div>
+          <h2 style={DP.panelTitle}>What another agent can carry out</h2>
+          <div style={DP.stack}>
+            {artifacts.length ? artifacts.slice(0, 6).map((artifact, index) => (
+              <button
+                key={`artifact-${index}`}
+                type="button"
+                className="m-state"
+                style={DP.artifactRow}
+                onClick={() => onTalkToYulia?.(`Explain this take-back artifact from ${packetType} for ${dealTitle}: ${summarizePacketValue(artifact)}`)}
+              >
+                <strong>{packetArtifactTitle(artifact, index)}</strong>
+                <span>{summarizePacketValue(artifact)}</span>
+              </button>
+            )) : (
+              <div style={DP.empty}>No separate artifacts were persisted. The packet identity and payload still remain reusable.</div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="m-card" style={DP.panel}>
+        <div className="mono" style={DP.panelEyebrow}>PAYLOAD READ</div>
+        <h2 style={DP.panelTitle}>State carried by this packet</h2>
+        <div style={DP.payloadGrid}>
+          {payloadRows.length ? payloadRows.map(row => (
+            <div key={row.label} style={DP.payloadItem}>
+              <strong>{row.label}</strong>
+              <span>{row.value}</span>
+            </div>
+          )) : (
+            <div style={DP.empty}>{markdown || "Only packet metadata is available in this view."}</div>
+          )}
+        </div>
+      </section>
+
+      {markdown && (
+        <details style={DP.rawDetails}>
+          <summary style={DP.rawSummary}>Packet opening note</summary>
+          <div className="m-card" style={A.markdownCard}>
+            <Markdown>{markdown}</Markdown>
+          </div>
+        </details>
+      )}
+    </div>
+  );
+}
+
+function PacketDatum({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={DP.identityRow}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function numericMaybe(value: unknown): number | null {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+function textMaybe(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function arrayMaybe(value: unknown): any[] {
+  return Array.isArray(value) ? value : [];
+}
+
+function labelFromCode(input: string): string {
+  return input
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, letter => letter.toUpperCase());
+}
+
+function shortHash(value: string): string {
+  if (!value || value === "pending") return value;
+  if (value.length <= 18) return value;
+  return `${value.slice(0, 10)}...${value.slice(-6)}`;
+}
+
+function packetCallTitle(call: any): string {
+  const raw = call?.toolName || call?.tool || call?.name || call?.action || call?.type || "Next call";
+  return labelFromCode(String(raw));
+}
+
+function packetArtifactTitle(artifact: any, index: number): string {
+  const raw = artifact?.title || artifact?.name || artifact?.type || artifact?.schema || `Artifact ${index + 1}`;
+  return labelFromCode(String(raw));
+}
+
+function summarizePacketPayload(payload: Record<string, any>): Array<{ label: string; value: string }> {
+  return Object.entries(payload || {})
+    .filter(([, value]) => value !== null && value !== undefined && value !== "")
+    .slice(0, 12)
+    .map(([key, value]) => ({
+      label: labelFromCode(key),
+      value: summarizePacketValue(value),
+    }));
+}
+
+function summarizePacketValue(value: any): string {
+  if (value === null || value === undefined) return "None";
+  if (typeof value === "string") return value.length > 220 ? `${value.slice(0, 217)}...` : value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (Array.isArray(value)) {
+    if (!value.length) return "Empty";
+    const preview = value.slice(0, 3).map(item => summarizePacketValue(item)).join("; ");
+    return value.length > 3 ? `${preview}; +${value.length - 3} more` : preview;
+  }
+  if (typeof value === "object") {
+    const record = value as Record<string, any>;
+    const preferred = record.title || record.name || record.label || record.summary || record.description || record.toolName || record.type || record.schema;
+    if (preferred) return summarizePacketValue(preferred);
+    const entries = Object.entries(record).slice(0, 4).map(([key, entryValue]) => `${labelFromCode(key)}: ${summarizePacketValue(entryValue)}`);
+    return entries.join("; ") || "Object";
+  }
+  return String(value);
+}
+
 function ArtifactCanvas({
   title,
   markdown,
@@ -3110,6 +3382,184 @@ function sectionEyebrow(title: string): string {
   if (/next|action|recommend/i.test(title)) return "NEXT MOVE";
   return "ANALYSIS BLOCK";
 }
+
+const DP: Record<string, CSSProperties> = {
+  shell: {
+    width: "min(100%, 1440px)",
+    maxWidth: 1440,
+    margin: "0 auto",
+    boxSizing: "border-box",
+  },
+  hero: {
+    padding: 28,
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+    gap: 22,
+    alignItems: "stretch",
+    background: "linear-gradient(135deg, rgba(247,250,255,0.92), rgba(232,239,250,0.78))",
+  },
+  heroCopy: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    gap: 16,
+    minWidth: 0,
+  },
+  eyebrow: {
+    fontSize: 9.5,
+    letterSpacing: "0.15em",
+    fontWeight: 900,
+    color: "var(--m-on-surface-mid)",
+  },
+  title: {
+    fontFamily: "var(--font-display)",
+    fontSize: "clamp(30px, 4.5vw, 58px)",
+    lineHeight: 0.95,
+    letterSpacing: 0,
+    color: "var(--m-on-surface)",
+    margin: "8px 0 0",
+  },
+  deckline: {
+    maxWidth: 820,
+    margin: 0,
+    color: "var(--m-on-surface-var)",
+    fontSize: 15,
+    lineHeight: 1.5,
+  },
+  actions: {
+    display: "flex",
+    gap: 10,
+    flexWrap: "wrap",
+  },
+  identityCard: {
+    display: "grid",
+    gap: 8,
+    alignContent: "start",
+    padding: 16,
+    borderRadius: 20,
+    border: "1px solid rgba(121,142,170,0.22)",
+    background: "rgba(255,255,255,0.66)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.78)",
+    minWidth: 0,
+  },
+  identityRow: {
+    display: "grid",
+    gap: 3,
+    padding: "8px 0",
+    borderBottom: "1px solid rgba(121,142,170,0.14)",
+    minWidth: 0,
+  },
+  notice: {
+    padding: "14px 16px",
+    color: "var(--m-on-surface-var)",
+    fontSize: 13,
+  },
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+    gap: 16,
+    alignItems: "stretch",
+  },
+  panel: {
+    padding: 22,
+    minWidth: 0,
+  },
+  panelEyebrow: {
+    fontSize: 9.5,
+    letterSpacing: "0.14em",
+    fontWeight: 900,
+    color: "var(--m-on-surface-mid)",
+  },
+  panelTitle: {
+    fontFamily: "var(--font-display)",
+    fontSize: 26,
+    lineHeight: 1,
+    letterSpacing: 0,
+    color: "var(--m-on-surface)",
+    margin: "5px 0 16px",
+  },
+  stack: {
+    display: "grid",
+    gap: 10,
+  },
+  callRow: {
+    all: "unset",
+    cursor: "pointer",
+    display: "grid",
+    gridTemplateColumns: "44px minmax(0, 1fr)",
+    gap: 12,
+    alignItems: "start",
+    padding: 14,
+    borderRadius: 18,
+    border: "1px solid rgba(121,142,170,0.18)",
+    background: "linear-gradient(145deg, rgba(255,255,255,0.84), rgba(241,246,252,0.70))",
+  },
+  callIndex: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    display: "grid",
+    placeItems: "center",
+    fontSize: 11,
+    fontWeight: 900,
+    color: "#3C5F96",
+    background: "rgba(222,232,249,0.9)",
+  },
+  callText: {
+    display: "grid",
+    gap: 4,
+    color: "var(--m-on-surface-var)",
+    fontSize: 12.5,
+    lineHeight: 1.4,
+    minWidth: 0,
+  },
+  artifactRow: {
+    all: "unset",
+    cursor: "pointer",
+    display: "grid",
+    gap: 5,
+    padding: 14,
+    borderRadius: 18,
+    border: "1px solid rgba(121,142,170,0.18)",
+    background: "rgba(255,255,255,0.74)",
+    color: "var(--m-on-surface-var)",
+    fontSize: 12.5,
+    lineHeight: 1.4,
+  },
+  empty: {
+    padding: 14,
+    borderRadius: 18,
+    background: "rgba(244,247,251,0.82)",
+    color: "var(--m-on-surface-var)",
+    fontSize: 13,
+    lineHeight: 1.45,
+  },
+  payloadGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: 10,
+  },
+  payloadItem: {
+    display: "grid",
+    gap: 5,
+    padding: 14,
+    borderRadius: 18,
+    border: "1px solid rgba(121,142,170,0.16)",
+    background: "rgba(255,255,255,0.72)",
+    color: "var(--m-on-surface-var)",
+    fontSize: 12.5,
+    lineHeight: 1.4,
+  },
+  rawDetails: {
+    marginTop: 2,
+  },
+  rawSummary: {
+    cursor: "pointer",
+    color: "var(--m-on-surface-var)",
+    fontSize: 13,
+    fontWeight: 800,
+  },
+};
 
 const IA: Record<string, CSSProperties> = {
   shell: {
