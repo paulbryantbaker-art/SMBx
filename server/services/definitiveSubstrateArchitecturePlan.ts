@@ -346,7 +346,7 @@ const workstreams: DefinitiveSubstrateWorkstream[] = [
     name: 'First-class service deliverables',
     purpose: 'Wrap document creation, data-room indexes, RWI submissions, negotiation economics, funds flow, regulatory filing scaffolds, and PMI plans as manifest-backed deliverables.',
     primitives: ['Deliverable', 'DocumentDraft', 'DataRoomIndex'],
-    mcpTools: ['prepare_rwi_submission', 'prepare_negotiation_brief', 'generate_funds_flow', 'prepare_regulatory_filings', 'compose_pmi_plan'],
+    mcpTools: ['compose_data_room_index', 'prepare_rwi_submission', 'prepare_negotiation_brief', 'generate_funds_flow', 'prepare_regulatory_filings', 'compose_pmi_plan'],
     objectTypes: ['Deliverable', 'DocumentDraft', 'DataRoomIndex'],
     buildPhase: 'Phase 4',
     doneCondition: 'Each service deliverable, document, or data-room index contributes to completeness, carries structured payload and human render, and preserves the compute-not-advise boundary.',

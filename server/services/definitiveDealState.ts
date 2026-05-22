@@ -152,6 +152,8 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
       return composeDefinitiveDealPackage(input);
     case 'resume_deal':
       return resumeDefinitiveDeal(input);
+    case 'compose_data_room_index':
+      return composeDefinitiveDataRoomIndex(input);
     default:
       return {
         ok: false,
@@ -165,6 +167,7 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
           'diff_deal_state',
           'compose_deal_package',
           'resume_deal',
+          'compose_data_room_index',
         ],
       };
   }
@@ -180,6 +183,7 @@ export function isDefinitiveDealStateTool(toolName: string): boolean {
     'diff_deal_state',
     'compose_deal_package',
     'resume_deal',
+    'compose_data_room_index',
   ].includes(toolName);
 }
 
@@ -419,6 +423,63 @@ export function resumeDefinitiveDeal(input: Record<string, any>) {
   };
 }
 
+export function composeDefinitiveDataRoomIndex(input: Record<string, any>) {
+  const state = stateFromInput(input);
+  const requiredCategories = requiredDataRoomCategories(state);
+  const categories = buildDataRoomCategories(state.sourceIndex, requiredCategories);
+  const missingCategories = categories.filter(category => category.status === 'missing').map(category => category.id);
+  const dataRoomIndex = {
+    indexId: `dataroom_${state.stateHash.slice(0, 16)}`,
+    schema: 'DataRoomIndex.v0.1',
+    dealStateCid: state.cid,
+    dealStateHash: state.stateHash,
+    classificationKey: state.classificationKey,
+    totalSources: state.sourceIndex.length,
+    citationReadyCount: state.sourceIndex.filter(source => source.citationReady).length,
+    categories,
+    sourceGaps: missingCategories.map(category => ({
+      category,
+      reason: `No source indexed for required ${category} diligence bucket.`,
+      suggestedTool: 'update_deal_payload',
+    })),
+    next_suggested_calls: [
+      ...missingCategories.slice(0, 4).map(category => ({
+        toolName: 'update_deal_payload',
+        priority: 'P0',
+        reason: `Add source files or indexed references for ${category}.`,
+        inputHint: {
+          dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision },
+          patch: { documents: [{ type: category, hash: '<sha256_or_source_ref>' }] },
+        },
+      })),
+      {
+        toolName: 'check_completeness',
+        priority: missingCategories.length ? 'P1' : 'P2',
+        reason: 'Re-score the deal after data-room coverage changes.',
+        inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
+      },
+    ],
+    takeBackArtifacts: ['DataRoomIndex', 'SourceIndex', 'MissingInputContract', 'MCPCallHint[]'],
+    lineInvariant: LINE_INVARIANT,
+  };
+
+  return {
+    ok: true,
+    action: 'compose_data_room_index',
+    result: {
+      dataRoomIndex,
+      dealState: state,
+      missingInputContract: state.missingInputContract,
+      next_suggested_calls: dataRoomIndex.next_suggested_calls,
+      portableTakeBackArtifacts: dataRoomIndex.takeBackArtifacts,
+    },
+    state_hash_after: state.stateHash,
+    completeness_contribution_delta: 0,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
 function buildDealStateResult(action: 'ingest_deal_payload' | 'update_deal_payload', state: DefinitiveDealState, priorScore: number | null) {
   const scoreDelta = priorScore == null ? state.completenessReport.score : state.completenessReport.score - priorScore;
   return {
@@ -567,6 +628,89 @@ function buildPackageDeferrals(state: DefinitiveDealState) {
     });
   }
   return deferrals;
+}
+
+function requiredDataRoomCategories(state: DefinitiveDealState): string[] {
+  const required = new Set(['financials', 'legal', 'tax', 'commercial']);
+  if (state.classificationKey.journey === 'pmi') required.add('operations');
+  if (state.classificationKey.triggeredOverlayGates.includes('G28')) required.add('restructuring');
+  if (state.classificationKey.triggeredOverlayGates.includes('G29')) required.add('financing');
+  if (state.classificationKey.triggeredOverlayGates.includes('G30') || state.classificationKey.assetClass === 'real_estate') required.add('real_estate');
+  if (matches(compactText([state.classificationKey.industry, state.payload.industry, state.payload.notes]), ['software', 'saas', 'ip', 'technology'])) {
+    required.add('ip');
+  }
+  return [...required];
+}
+
+function buildDataRoomCategories(sourceIndex: Array<Record<string, any>>, requiredCategories: string[]) {
+  const allCategories = [
+    'financials',
+    'tax',
+    'legal',
+    'commercial',
+    'operations',
+    'hr',
+    'ip',
+    'real_estate',
+    'financing',
+    'restructuring',
+    'regulatory',
+    'other',
+  ];
+  const categories = new Map(allCategories.map(id => [id, {
+    id,
+    label: dataRoomCategoryLabel(id),
+    required: requiredCategories.includes(id),
+    status: requiredCategories.includes(id) ? 'missing' : 'optional',
+    itemCount: 0,
+    citationReadyCount: 0,
+    items: [] as Array<Record<string, any>>,
+  }]));
+
+  for (const source of sourceIndex) {
+    const categoryId = inferDataRoomCategory(source);
+    const category = categories.get(categoryId) || categories.get('other');
+    if (!category) continue;
+    category.items.push({
+      id: source.id,
+      type: source.type,
+      hash: source.hash,
+      citationReady: source.citationReady,
+    });
+    category.itemCount += 1;
+    if (source.citationReady) category.citationReadyCount += 1;
+    category.status = category.required ? 'present' : 'optional_present';
+  }
+
+  return [...categories.values()]
+    .filter(category => category.required || category.itemCount > 0)
+    .map(category => ({
+      ...category,
+      missingReason: category.status === 'missing' ? `Required ${category.label} sources are not indexed yet.` : null,
+    }));
+}
+
+function dataRoomCategoryLabel(id: string): string {
+  return id
+    .split('_')
+    .map(part => part.toUpperCase() === 'IP' ? 'IP' : part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function inferDataRoomCategory(source: Record<string, any>): string {
+  const text = compactText([source.type, source.id, source.name, source.kind]).toLowerCase();
+  if (matches(text, ['qoe', 'financial', 'p&l', 'pnl', 'balance sheet', 'cash flow', 'trial balance', 'quality of earnings'])) return 'financials';
+  if (matches(text, ['tax', 'return', 'irs', 'state tax', 'salt', '1060', '338'])) return 'tax';
+  if (matches(text, ['legal', 'loi', 'purchase agreement', 'spa', 'apa', 'contract', 'litigation', 'corporate'])) return 'legal';
+  if (matches(text, ['customer', 'market', 'commercial', 'sales', 'pipeline', 'churn'])) return 'commercial';
+  if (matches(text, ['operations', 'ops', 'vendor', 'supply', 'inventory'])) return 'operations';
+  if (matches(text, ['employee', 'hr', 'benefit', 'payroll', 'compensation'])) return 'hr';
+  if (matches(text, ['ip', 'patent', 'trademark', 'copyright', 'software', 'source code', 'oss', 'license'])) return 'ip';
+  if (matches(text, ['real estate', 'lease', 'rent roll', 'title', 'survey', 'environmental', 'pca', 'property'])) return 'real_estate';
+  if (matches(text, ['debt', 'credit', 'loan', 'lender', 'financing', 'covenant', 'capital structure'])) return 'financing';
+  if (matches(text, ['chapter 11', '363', 'dip', 'rsa', 'forbearance', 'restructuring', 'claims'])) return 'restructuring';
+  if (matches(text, ['regulatory', 'hsr', 'cfius', 'permit', 'license', 'filing'])) return 'regulatory';
+  return 'other';
 }
 
 function buildPlanStage(

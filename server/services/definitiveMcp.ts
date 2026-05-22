@@ -23,6 +23,7 @@ const DEFINITIVE_MCP_TOOLS = [
   'diff_deal_state',
   'compose_deal_package',
   'resume_deal',
+  'compose_data_room_index',
   'lookup_citation',
   'fetch_market_data',
   'defer_to_counsel',
@@ -122,6 +123,17 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
         dealState: { type: 'object', description: 'Optional content-addressed DealState from a prior call.' },
         dealPackage: { type: 'object', description: 'Optional DealPackage reference; include the companion DealState when available.' },
         payload: { type: 'object', description: 'Optional DealPayload if a prior DealState is not available.' },
+        idempotencyKey: { type: 'string', description: 'Optional caller-generated idempotency key.' },
+      },
+    },
+  },
+  compose_data_room_index: {
+    description: 'Compose a portable DataRoomIndex from DealState or DealPayload source files, grouping documents into diligence buckets, identifying source gaps, and returning next_suggested_calls so humans or agents can manage Files and Data Room work as part of the full Deal OS lifecycle.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dealState: { type: 'object', description: 'Optional content-addressed DealState from a prior call.' },
+        payload: { type: 'object', description: 'Optional DealPayload with documents, files, sources, or sourceIndex.' },
         idempotencyKey: { type: 'string', description: 'Optional caller-generated idempotency key.' },
       },
     },
@@ -266,6 +278,7 @@ const TOOL_SCOPE: Record<DefinitiveMcpToolName, string[]> = {
   diff_deal_state: ['deal-state:read', 'deal-state:diff'],
   compose_deal_package: ['deal-state:read', 'deal-package:read'],
   resume_deal: ['deal-state:read', 'deal-plan:read', 'deal-package:read'],
+  compose_data_room_index: ['deal-state:read', 'data-room:read'],
   lookup_citation: ['citation:read', 'authority:read'],
   fetch_market_data: ['market-data:read'],
   defer_to_counsel: ['counsel:deferral:create'],

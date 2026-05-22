@@ -65,6 +65,7 @@ const expectedTools = [
   'diff_deal_state',
   'compose_deal_package',
   'resume_deal',
+  'compose_data_room_index',
   'lookup_citation',
   'fetch_market_data',
   'defer_to_counsel',
@@ -113,7 +114,7 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assert(card.definitive.authoritySeedPlanEntries >= DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'agent card authority seed plan meets target');
   assertEqual(card.definitive.authoritySeedPlanStatus, 'ready_for_800_plus_seeding', 'agent card authority seed plan status');
   assertEqual(card.definitive.substratePrimitiveCount, 8, 'agent card substrate primitive count');
-  assertEqual(card.definitive.substrateNewMcpToolCount, 28, 'agent card substrate tool count');
+  assertEqual(card.definitive.substrateNewMcpToolCount, 29, 'agent card substrate tool count');
   assert(card.definitive.schemaRegistryNames.includes('DealPayload'), 'agent card exposes DealPayload schema');
   assert(card.definitive.schemaRegistryNames.includes('DealState'), 'agent card exposes DealState schema');
   assert(card.definitive.schemaRegistryNames.includes('DealStateDiff'), 'agent card exposes DealStateDiff schema');
@@ -162,7 +163,7 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   const substrateCapability = card.capabilities.find((item: any) => item.id === 'definitive_substrate_architecture') as any;
   assert(substrateCapability, 'substrate architecture capability exists');
   assertEqual(substrateCapability.primitiveCount, 8, 'substrate capability primitive count');
-  assertEqual(substrateCapability.newMcpToolCount, 28, 'substrate capability tool count');
+  assertEqual(substrateCapability.newMcpToolCount, 29, 'substrate capability tool count');
   assert(substrateCapability.agentOperatingDoctrine.noRejectionContract.includes('Agents are not rejected'), 'substrate capability blocks incomplete-payload rejection');
   assert(substrateCapability.lifecycleStages.includes('ioi'), 'substrate capability exposes IOI stage');
   assert(substrateCapability.lifecycleStages.includes('close_pmi'), 'substrate capability exposes close/PMI stage');
@@ -221,7 +222,7 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assert(manifest.authoritySurface.categoryIds.includes('ip_authorities'), 'manifest authority surface includes IP');
   assert(manifest.authoritySurface.categoryIds.includes('pass_through_pricing_boundary'), 'manifest authority surface includes THE LINE pricing boundary');
   assertEqual(manifest.substrateArchitectureSurface.primitiveCount, 8, 'manifest substrate primitive count');
-  assertEqual(manifest.substrateArchitectureSurface.newMcpToolCount, 28, 'manifest substrate tool count');
+  assertEqual(manifest.substrateArchitectureSurface.newMcpToolCount, 29, 'manifest substrate tool count');
   assert(manifest.substrateArchitectureSurface.agentOperatingDoctrine.productDoctrine.includes('Deal OS'), 'manifest substrate Deal OS doctrine');
   assert(manifest.substrateArchitectureSurface.agentOperatingDoctrine.noRejectionContract.includes('MissingInputContract'), 'manifest substrate no-rejection contract');
   assert(manifest.substrateArchitectureSurface.agentOperatingDoctrine.homeContract.includes('data rooms'), 'manifest substrate agent home contract includes data rooms');
@@ -297,11 +298,13 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.schemaNames.includes('DealPlan'), 'schema registry exposes DealPlan');
   assert(registry.schemaNames.includes('DealStateDiff'), 'schema registry exposes DealStateDiff');
   assert(registry.schemaNames.includes('DealPackage'), 'schema registry exposes DealPackage');
+  assert(registry.schemaNames.includes('DataRoomIndex'), 'schema registry exposes DataRoomIndex');
   assertEqual(registry.schemas.DealPayload.properties.revenueCents.type, 'integer', 'money is cents integer');
   assert(registry.toolSchemaMap.ingest_deal_payload.output.includes('MissingInputContract'), 'ingest output maps missing input contract');
   assert(registry.toolSchemaMap.diff_deal_state.takeBack.includes('DealStateDiff'), 'diff take-back maps DealStateDiff');
   assert(registry.toolSchemaMap.compose_deal_package.takeBack.includes('DealPackage'), 'package take-back maps DealPackage');
   assert(registry.toolSchemaMap.resume_deal.takeBack.includes('DealPackage'), 'resume take-back maps DealPackage');
+  assert(registry.toolSchemaMap.compose_data_room_index.takeBack.includes('DataRoomIndex'), 'data room take-back maps DataRoomIndex');
   assert(registry.noRejectionContract.includes('DealPayload may be incomplete'), 'schema registry states no-rejection contract');
 });
 
@@ -345,7 +348,7 @@ await test('Authority Register seed plan is explicit and above 800 planned entri
 await test('Substrate architecture plan exposes the terminal orchestration primitives', async () => {
   const architecture = getDefinitiveSubstrateArchitecturePlan();
   assertEqual(architecture.primitiveCount, 8, 'substrate architecture primitive count');
-  assertEqual(architecture.newMcpToolCount, 28, 'substrate architecture tool count');
+  assertEqual(architecture.newMcpToolCount, 29, 'substrate architecture tool count');
   assert(architecture.agentOperatingDoctrine.productDoctrine.includes('Deal OS'), 'substrate plan is Deal OS');
   assert(architecture.agentOperatingDoctrine.noRejectionContract.includes('Agents are not rejected'), 'substrate plan accepts incomplete agent payloads');
   assert(architecture.agentOperatingDoctrine.homeContract.includes('documents'), 'substrate plan includes document creation surface');
@@ -359,6 +362,7 @@ await test('Substrate architecture plan exposes the terminal orchestration primi
   assert(architecture.workstreams.some(item => item.id === 'WS1' && item.mcpTools.includes('ingest_deal_payload')), 'payload ingest workstream exists');
   assert(architecture.workstreams.some(item => item.id === 'WS4' && item.mcpTools.includes('compose_deal_package')), 'compose package workstream exists');
   assert(architecture.workstreams.some(item => item.id === 'WS4' && item.mcpTools.includes('finalize_deal_package')), 'package workstream exists');
+  assert(architecture.workstreams.some(item => item.id === 'WS6' && item.mcpTools.includes('compose_data_room_index')), 'data room workstream exists');
   assert(architecture.workstreams.some(item => item.id === 'WS5' && item.mcpTools.includes('compute_best_vehicle')), 'best vehicle workstream exists');
   assert(architecture.lineDoctrine.includes('does not advise'), 'THE LINE invariant is explicit');
 });
@@ -618,6 +622,34 @@ await test('Resume deal returns current lifecycle position and next calls', asyn
   assert(result.dealPackage.takeBackArtifacts.includes('DealPackage'), 'resume includes deal package');
   assert(result.resumeContract.recursiveLoop.includes('update_deal_payload'), 'resume explains recursive loop');
   assert(result.next_suggested_calls.length > 0, 'resume includes next calls');
+});
+
+await test('DataRoomIndex groups files and names source gaps', async () => {
+  const response = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'compose_data_room_index',
+    input: {
+      payload: {
+        journey: 'buy',
+        targetName: 'Files Target',
+        industry: 'software',
+        jurisdiction: 'US-CA',
+        documents: [
+          { name: 'QoE report', type: 'qoe', hash: 'sha256:qoe' },
+          { name: 'Patent assignment schedule', type: 'ip', hash: 'sha256:ip' },
+          { name: 'Customer concentration export', type: 'commercial', hash: 'sha256:customer' },
+        ],
+      },
+    },
+    envelope: {},
+  });
+  assertEqual(response.status, 200, 'data room index status');
+  const index = response.body.result.result.dataRoomIndex;
+  assertEqual(index.schema, 'DataRoomIndex.v0.1', 'data room schema');
+  assert(index.categories.some((category: any) => category.id === 'financials' && category.status === 'present'), 'financial files are present');
+  assert(index.categories.some((category: any) => category.id === 'ip' && category.status === 'present'), 'IP files are present');
+  assert(index.sourceGaps.some((gap: any) => gap.category === 'legal'), 'legal source gap is named');
+  assert(index.takeBackArtifacts.includes('DataRoomIndex'), 'data room index is portable');
 });
 
 await test('Corpus discovery and sanitizer block raw identifiers without DB work', async () => {

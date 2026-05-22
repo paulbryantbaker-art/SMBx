@@ -283,6 +283,34 @@ const DealPackage: JsonSchema = {
   },
 };
 
+const DataRoomIndex: JsonSchema = {
+  $id: schemaId('DataRoomIndex'),
+  title: 'DataRoomIndex',
+  type: 'object',
+  additionalProperties: true,
+  required: ['indexId', 'schema', 'dealStateCid', 'dealStateHash', 'categories', 'sourceGaps', 'next_suggested_calls'],
+  properties: {
+    indexId: { type: 'string' },
+    schema: { type: 'string', const: 'DataRoomIndex.v0.1' },
+    dealStateCid: { type: 'string' },
+    dealStateHash: { type: 'string' },
+    classificationKey: { $ref: schemaId('ClassificationKey') },
+    totalSources: { type: 'integer' },
+    citationReadyCount: { type: 'integer' },
+    categories: {
+      type: 'array',
+      items: { type: 'object', additionalProperties: true },
+    },
+    sourceGaps: {
+      type: 'array',
+      items: { type: 'object', additionalProperties: true },
+    },
+    next_suggested_calls: { type: 'array', items: { $ref: schemaId('MCPCallHint') } },
+    takeBackArtifacts: { type: 'array', items: { type: 'string' } },
+    lineInvariant: { type: 'string' },
+  },
+};
+
 const DefinitionOfDone: JsonSchema = {
   $id: schemaId('DefinitionOfDone'),
   title: 'DefinitionOfDone',
@@ -329,6 +357,7 @@ export const DEFINITIVE_SCHEMAS: Record<string, JsonSchema> = {
   DealPlan,
   DealStateDiff,
   DealPackage,
+  DataRoomIndex,
   DefinitionOfDone,
   DefinitiveToolEnvelope,
 };
@@ -373,6 +402,11 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     input: ['DealState', 'DealPayload', 'DealPackage'],
     output: ['DealState', 'DealPlan', 'DealPackage', 'CompletenessReport', 'MissingInputContract', 'MCPCallHint'],
     takeBack: ['DealState', 'DealPlan', 'DealPackage', 'CompletenessReport', 'MissingInputContract'],
+  },
+  compose_data_room_index: {
+    input: ['DealState', 'DealPayload'],
+    output: ['DataRoomIndex', 'DealState', 'MissingInputContract', 'MCPCallHint'],
+    takeBack: ['DataRoomIndex', 'SourceIndex', 'MissingInputContract'],
   },
 };
 

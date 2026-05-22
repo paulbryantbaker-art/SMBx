@@ -50,6 +50,7 @@ try {
     assert(body.tools.some((tool: any) => tool.name === 'compose_model_stack'), 'compose_model_stack is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_deal_package'), 'compose_deal_package is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'resume_deal'), 'resume_deal is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'compose_data_room_index'), 'compose_data_room_index is advertised');
   });
 
   await test('THE LINE inventory is available to authenticated agents', async () => {
@@ -310,6 +311,38 @@ try {
     assert(result.resumeContract.recursiveLoop.includes('check_completeness'), 'resume recursive loop is exposed');
     assert(result.dealPackage.packageCid.startsWith('definitive:deal-package:sha256:'), 'resume package is content addressed');
     assert(result.next_suggested_calls.length > 0, 'resume next calls are exposed');
+  });
+
+  await test('Authenticated compose_data_room_index returns source gaps', async () => {
+    const response = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'compose_data_room_index',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-state:read', 'data-room:read'],
+      input: {
+        payload: {
+          journey: 'buy',
+          targetName: 'DEFINITIVE Route Fixture Deal',
+          industry: 'software',
+          jurisdiction: 'US-DE',
+          documents: [
+            { name: 'QoE report', type: 'qoe', hash: 'sha256:fixture-qoe' },
+            { name: 'Customer export', type: 'commercial', hash: 'sha256:fixture-customer' },
+          ],
+        },
+      },
+    });
+
+    assertEqual(response.status, 200, 'data room index route status');
+    assertEqual(response.body.ok, true, 'data room index route ok');
+    assertEqual(response.body.toolName, 'compose_data_room_index', 'data room index tool name');
+    const index = response.body.result?.result?.dataRoomIndex;
+    assert(index.categories.some((category: any) => category.id === 'financials' && category.status === 'present'), 'financial source bucket present');
+    assert(index.sourceGaps.some((gap: any) => gap.category === 'legal'), 'legal gap is exposed');
+    assert(index.takeBackArtifacts.includes('DataRoomIndex'), 'DataRoomIndex take-back artifact is exposed');
   });
 
   await test('Audit packet route returns pinned reproducibility payload', async () => {

@@ -583,6 +583,7 @@
         { "path": "toolNames", "includes": "diff_deal_state" },
         { "path": "toolNames", "includes": "compose_deal_package" },
         { "path": "toolNames", "includes": "resume_deal" },
+        { "path": "toolNames", "includes": "compose_data_room_index" },
         { "path": "toolsByName.ingest_deal_payload.description", "includes": "DealPayload" },
         { "path": "toolsByName.ingest_deal_payload.description", "includes": "MissingInputContract" },
         { "path": "toolsByName.ingest_deal_payload.description", "includes": "next_suggested_calls" },
@@ -592,6 +593,7 @@
         { "path": "toolsByName.diff_deal_state.description", "includes": "DealStateDiff" },
         { "path": "toolsByName.compose_deal_package.description", "includes": "DealPackage" },
         { "path": "toolsByName.resume_deal.description", "includes": "iterative Deal OS work" },
+        { "path": "toolsByName.compose_data_room_index.description", "includes": "DataRoomIndex" },
         { "path": "toolNames", "includes": "compose_model_stack" },
         { "path": "toolsByName.compose_model_stack.description", "includes": "G28" },
         { "path": "toolsByName.compose_model_stack.description", "includes": "G29" },
@@ -653,11 +655,13 @@
       "textIncludes": ["DealPayload", "CompletenessSpec", "DealPackage", "BestVehicleBlock"],
       "fields": [
         { "path": "primitiveCount", "equals": 8 },
-        { "path": "newMcpToolCount", "equals": 28 },
+        { "path": "newMcpToolCount", "equals": 29 },
         { "path": "newMcpTools", "includes": "compose_deal_package" },
+        { "path": "newMcpTools", "includes": "compose_data_room_index" },
         { "path": "workstreamsById.WS1.mcpTools", "includes": "ingest_deal_payload" },
         { "path": "workstreamsById.WS4.mcpTools", "includes": "compose_deal_package" },
         { "path": "workstreamsById.WS4.mcpTools", "includes": "finalize_deal_package" },
+        { "path": "workstreamsById.WS6.mcpTools", "includes": "compose_data_room_index" },
         { "path": "workstreamsById.WS5.mcpTools", "includes": "compute_best_vehicle" }
       ]
     }
@@ -705,9 +709,10 @@
         { "path": "endpoints.substrateArchitecture", "equals": "/api/definitive/substrate-architecture" },
         { "path": "access.publicDiscovery", "includes": "/api/definitive/substrate-architecture" },
         { "path": "substrateArchitectureSurface.primitiveCount", "equals": 8 },
-        { "path": "substrateArchitectureSurface.newMcpToolCount", "equals": 28 },
+        { "path": "substrateArchitectureSurface.newMcpToolCount", "equals": 29 },
         { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "DealState" },
         { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "DealStateDiff" },
+        { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "DataRoomIndex" },
         { "path": "substrateArchitectureSurface.schemaRegistry.toolSchemaMap.ingest_deal_payload.output", "includes": "MissingInputContract" }
       ]
     }
