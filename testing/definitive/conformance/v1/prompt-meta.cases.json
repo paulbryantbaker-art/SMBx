@@ -204,6 +204,8 @@
     "kind": "manifest",
     "expect": {
       "fields": [
+        { "path": "access.publicDiscovery", "includes": "/.well-known/mcp" },
+        { "path": "access.publicDiscovery", "includes": "/.well-known/mcp/server-card.json" },
         { "path": "access.publicDiscovery", "includes": "/api/definitive/pass-through-catalog" },
         { "path": "access.publicDiscovery", "includes": "/api/definitive/authority-seed-plan" },
         { "path": "access.publicDiscovery", "notIncludes": "/api/definitive/tools/{toolName}/call" },

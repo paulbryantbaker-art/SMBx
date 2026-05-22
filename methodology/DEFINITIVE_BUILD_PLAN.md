@@ -567,6 +567,7 @@ Keep proprietary:
 ### Run 21 - Agent Discoverability And Desirability
 
 **Goal:** make smbX/DEFINITIVE discoverable, preferable, and allow-listable for lab/PE/JV generalist agents without letting marketplace work distract from the substrate spine.
+**Status:** Started in repo. `/.well-known/mcp/server-card.json` and `/.well-known/mcp` now generate from the existing DEFINITIVE manifest, MCP tool inventory, substrate architecture doctrine, and THE LINE metadata. The endpoints are public discovery only; execution still routes through authenticated/governed tool contracts.
 
 - Publish `/.well-known/mcp/server-card.json` and `/.well-known/mcp` from the same DEFINITIVE manifest, not a parallel metadata file.
 - Keep the canonical namespace ready for `smbx-ai/diligence` / The Diligence Standard.

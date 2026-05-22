@@ -41,6 +41,10 @@ import { exportRouter } from './routes/export.js';
 import { startWorker } from './workers/discoveryWorker.js';
 import { buildAgentCard } from './services/agentCard.js';
 import { buildDefinitiveSpecManifest } from './services/definitiveSpecManifest.js';
+import {
+  buildDefinitiveMcpServerCard,
+  buildDefinitiveMcpWellKnownManifest,
+} from './services/definitiveMcpDiscovery.js';
 import { getDefinitivePassThroughSurface } from './services/definitiveDealMechanicsCatalog.js';
 import { getDefinitiveAuthoritySeedPlan } from './services/definitiveAuthoritySeedPlan.js';
 import { getDefinitiveSubstrateArchitecturePlan } from './services/definitiveSubstrateArchitecturePlan.js';
@@ -116,12 +120,35 @@ app.get('/api/config', (_req, res) => {
   });
 });
 
+function discoveryOrigin(req: Request) {
+  const configured = process.env.APP_URL?.replace(/\/+$/, '');
+  if (configured) return configured;
+  return `${req.protocol}://${req.get('host')}`;
+}
+
+function setWellKnownHeaders(res: Response) {
+  res.set({
+    'Cache-Control': 'public, max-age=300',
+    'X-Content-Type-Options': 'nosniff',
+  });
+}
+
 app.get('/.well-known/agent-card.json', (_req, res) => {
   res.json(buildAgentCard());
 });
 
 app.get('/.well-known/definitive.json', (_req, res) => {
   res.json(buildDefinitiveSpecManifest());
+});
+
+app.get('/.well-known/mcp/server-card.json', (req, res) => {
+  setWellKnownHeaders(res);
+  res.json(buildDefinitiveMcpServerCard(discoveryOrigin(req)));
+});
+
+app.get('/.well-known/mcp', (req, res) => {
+  setWellKnownHeaders(res);
+  res.json(buildDefinitiveMcpWellKnownManifest(discoveryOrigin(req)));
 });
 
 app.get('/api/agent-card', (_req, res) => {

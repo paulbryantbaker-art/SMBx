@@ -47,6 +47,10 @@ import {
   listDefinitiveCorpusObservationTypes,
   sanitizeCorpusObservation,
 } from '../server/services/definitiveCorpusService.js';
+import {
+  buildDefinitiveMcpServerCard,
+  buildDefinitiveMcpWellKnownManifest,
+} from '../server/services/definitiveMcpDiscovery.js';
 import { buildDefinitiveSpecManifest } from '../server/services/definitiveSpecManifest.js';
 import { evaluateDefinitiveStackOverlays } from '../server/services/definitiveStackOverlays.js';
 import { executeDefinitiveMcpTool, listDefinitiveMcpTools } from '../server/services/definitiveMcp.js';
@@ -83,6 +87,8 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   const card = buildAgentCard();
   assertEqual(card.version, 'DEFINITIVE.v1.0', 'agent card version');
   assertEqual(card.definitive.specManifestEndpoint, '/.well-known/definitive.json', 'spec manifest endpoint');
+  assertEqual(card.definitive.mcpDiscoveryEndpoint, '/.well-known/mcp', 'MCP discovery endpoint');
+  assertEqual(card.definitive.mcpServerCardEndpoint, '/.well-known/mcp/server-card.json', 'MCP server-card endpoint');
   assertEqual(card.definitive.toolsEndpoint, '/api/definitive/tools/list', 'tools endpoint');
   assertEqual(card.definitive.auditPacketEndpoint, '/api/definitive/audit-packets/{auditTrailId}', 'audit packet endpoint');
   assertEqual(card.definitive.corpusObservationTypesEndpoint, '/api/definitive/corpus/observation-types', 'corpus observation endpoint');
@@ -109,6 +115,8 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assertEqual(card.definitive.dealRouteMapStatus, 'complete', 'agent card route map status');
   assert(card.definitive.passThroughPricingRule.includes('cost-plus-fixed'), 'agent card exposes pass-through pricing rule');
   assert(card.publicEndpoints.includes('/.well-known/definitive.json'), 'definitive manifest endpoint is public');
+  assert(card.publicEndpoints.includes('/.well-known/mcp'), 'MCP discovery endpoint is public');
+  assert(card.publicEndpoints.includes('/.well-known/mcp/server-card.json'), 'MCP server-card endpoint is public');
   assert(card.publicEndpoints.includes('/api/definitive/pass-through-catalog'), 'pass-through catalog endpoint is public discovery');
   assert(card.publicEndpoints.includes('/api/definitive/authority-seed-plan'), 'authority seed plan endpoint is public discovery');
   assert(card.publicEndpoints.includes('/api/definitive/substrate-architecture'), 'substrate architecture endpoint is public discovery');
@@ -157,10 +165,14 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assertEqual(manifest.version, DEFINITIVE_SPEC_VERSION, 'manifest version');
   assertEqual(manifest.endpoints.specManifest, '/.well-known/definitive.json', 'manifest endpoint');
   assertEqual(manifest.endpoints.agentCard, '/.well-known/agent-card.json', 'manifest agent-card endpoint');
+  assertEqual(manifest.endpoints.mcpDiscovery, '/.well-known/mcp', 'manifest MCP discovery endpoint');
+  assertEqual(manifest.endpoints.mcpServerCard, '/.well-known/mcp/server-card.json', 'manifest MCP server-card endpoint');
   assertEqual(manifest.endpoints.passThroughCatalog, '/api/definitive/pass-through-catalog', 'manifest pass-through catalog endpoint');
   assertEqual(manifest.endpoints.authoritySeedPlan, '/api/definitive/authority-seed-plan', 'manifest authority seed plan endpoint');
   assertEqual(manifest.endpoints.substrateArchitecture, '/api/definitive/substrate-architecture', 'manifest substrate architecture endpoint');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/spec'), 'manifest spec API is public discovery');
+  assert(manifest.access.publicDiscovery.includes('/.well-known/mcp'), 'manifest MCP discovery is public');
+  assert(manifest.access.publicDiscovery.includes('/.well-known/mcp/server-card.json'), 'manifest MCP server-card is public');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/pass-through-catalog'), 'manifest pass-through catalog is public discovery');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/authority-seed-plan'), 'manifest authority seed plan is public discovery');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/substrate-architecture'), 'manifest substrate architecture is public discovery');
@@ -221,6 +233,32 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assert(manifest.passThroughSurface.catalog.length >= 8, 'manifest pass-through catalog has priced substrates');
   assert(manifest.passThroughSurface.catalog.every(item => item.humanReferralCompensationAllowed === false), 'pass-through catalog prohibits paid human referrals');
   assert(manifest.passThroughSurface.catalog.every(item => item.chargedRegardlessOfOutcome === true), 'pass-through catalog is outcome-independent');
+});
+
+await test('MCP well-known discovery is generated from DEFINITIVE manifest data', async () => {
+  const origin = 'https://example.smbx.ai';
+  const serverCard = buildDefinitiveMcpServerCard(origin);
+  const mcpManifest = buildDefinitiveMcpWellKnownManifest(origin);
+
+  assertEqual(serverCard.name, 'smbx-ai/diligence', 'MCP server namespace');
+  assertEqual(serverCard.version, DEFINITIVE_SPEC_VERSION, 'MCP server-card version');
+  assertEqual(serverCard.serverInfo.canonicalStandard, 'The Diligence Standard', 'MCP server-card standard');
+  assertEqual(serverCard.transport.endpoints.serverCard, `${origin}/.well-known/mcp/server-card.json`, 'MCP server-card endpoint URL');
+  assertDeepEqual(serverCard.tools.map((tool: any) => tool.name), expectedTools, 'MCP server-card tools');
+  assert(serverCard.tools.every((tool: any) => tool.outputSchema?.properties?.specVersion), 'MCP tools expose output schemas');
+  assert(serverCard.tools.every((tool: any) => typeof tool.annotations?.readOnlyHint === 'boolean'), 'MCP tools expose annotations');
+  assert(serverCard.definitive.toolMetadataDoctrine.semanticKeywords.includes('working capital peg'), 'MCP server-card exposes semantic keywords');
+  assertEqual(serverCard.definitive.publishedStandardDoctrine.name, 'The Diligence Standard', 'MCP server-card exposes published standard');
+  assertEqual(serverCard.security.noSuccessFees, true, 'MCP server-card blocks success fees');
+  assertEqual(serverCard.security.noReferralCompensation, true, 'MCP server-card blocks referral compensation');
+
+  assertEqual(mcpManifest.mcp_version, '2025-12-11', 'MCP manifest version');
+  assertEqual(mcpManifest.server_card, `${origin}/.well-known/mcp/server-card.json`, 'MCP manifest server-card URL');
+  assert(mcpManifest.endpoints.some((endpoint: any) => endpoint.type === 'definitive-manifest' && endpoint.auth === 'none'), 'MCP manifest points to public DEFINITIVE manifest');
+  assertEqual(mcpManifest.capabilities.outputSchema, true, 'MCP manifest declares output schemas');
+  assertEqual(mcpManifest.capabilities.auditTrail, true, 'MCP manifest declares audit trail support');
+  assertEqual(mcpManifest.doctrine.standard, 'The Diligence Standard', 'MCP manifest standard doctrine');
+  assertEqual(mcpManifest.doctrine.namingConvention, 'diligence_<phase>_<artifact>', 'MCP manifest naming convention');
 });
 
 await test('DEFINITIVE catalog includes the M187-M223 closing-gap expansion', async () => {

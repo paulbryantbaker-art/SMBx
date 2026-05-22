@@ -46,6 +46,8 @@ export function buildAgentCard() {
       methodologyVersion: definitiveTools.methodologyVersion,
       methodologyUri: definitiveTools.methodologyUri,
       specManifestEndpoint: '/.well-known/definitive.json',
+      mcpDiscoveryEndpoint: '/.well-known/mcp',
+      mcpServerCardEndpoint: '/.well-known/mcp/server-card.json',
       toolsEndpoint: '/api/definitive/tools/list',
       callEndpoint: '/api/definitive/tools/{toolName}/call',
       lineInventoryEndpoint: '/api/definitive/line/inventory',
@@ -242,6 +244,8 @@ export function buildAgentCard() {
     publicEndpoints: [
       '/.well-known/agent-card.json',
       '/.well-known/definitive.json',
+      '/.well-known/mcp',
+      '/.well-known/mcp/server-card.json',
       '/api/agent-card',
       '/api/definitive/spec',
       '/api/definitive/pass-through-catalog',

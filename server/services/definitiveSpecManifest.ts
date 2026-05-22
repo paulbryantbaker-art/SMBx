@@ -61,6 +61,8 @@ export function buildDefinitiveSpecManifest() {
     endpoints: {
       agentCard: '/.well-known/agent-card.json',
       specManifest: '/.well-known/definitive.json',
+      mcpDiscovery: '/.well-known/mcp',
+      mcpServerCard: '/.well-known/mcp/server-card.json',
       specApi: '/api/definitive/spec',
       passThroughCatalog: '/api/definitive/pass-through-catalog',
       authoritySeedPlan: '/api/definitive/authority-seed-plan',
@@ -77,6 +79,8 @@ export function buildDefinitiveSpecManifest() {
       publicDiscovery: [
         '/.well-known/agent-card.json',
         '/.well-known/definitive.json',
+        '/.well-known/mcp',
+        '/.well-known/mcp/server-card.json',
         '/api/agent-card',
         '/api/definitive/spec',
         '/api/definitive/pass-through-catalog',
