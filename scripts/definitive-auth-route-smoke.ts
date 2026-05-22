@@ -334,6 +334,25 @@ try {
     assert(packets.packets.some((packet: any) => packet.packetType === 'IOIPacket.v0.1'), 'IOI packet is listed for deal');
   });
 
+  await test('Today operating brief surfaces persisted DealState journals', async () => {
+    const brief = await authedJson('/api/agency/today-operating-brief?refresh=1', token);
+    assertEqual(brief.source, 'live', 'today operating source');
+    assert(brief.morningBrief.chips.some((chip: string) => /DealState/.test(chip)), 'morning brief includes DealState journal chip');
+
+    const pulse = brief.dealPulse.find((item: any) => item.dealId === String(fixture.dealId));
+    assert(pulse?.definitive, 'deal pulse includes definitive state');
+    assertEqual(pulse.definitive.latestPacketType, 'IOIPacket.v0.1', 'deal pulse latest packet type');
+    assert(pulse.definitive.packetTypes.includes('IOIPacket.v0.1'), 'deal pulse packet type list includes IOI');
+
+    const gate = brief.gateCountdown.find((item: any) => item.dealId === String(fixture.dealId));
+    assert(gate?.definitive, 'gate countdown includes definitive state');
+    assertEqual(gate.definitive.stateCid, pulse.definitive.stateCid, 'gate and pulse share state cid');
+
+    const packetFile = brief.filesNeedingReview.find((item: any) => item.id?.startsWith('definitive-packet-'));
+    assert(packetFile, 'files needing review includes a DEFINITIVE packet row');
+    assertEqual(packetFile.status, 'Packet', 'packet row status');
+  });
+
   await test('Authenticated resume_deal returns current stage and next calls', async () => {
     const response = await postJson('/api/definitive/tools/call', token, {
       toolName: 'resume_deal',
