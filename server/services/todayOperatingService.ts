@@ -65,6 +65,35 @@ interface StudioBookRow {
   provenance: any;
 }
 
+interface DefinitiveDealStateSnapshotRow {
+  id: number;
+  deal_id: number;
+  deal_name: string | null;
+  tool_name: string;
+  state_cid: string;
+  state_hash: string;
+  classification_key: Record<string, any> | null;
+  missing_input_contract: Record<string, any> | null;
+  completeness_report: Record<string, any> | null;
+  source_index: any[] | null;
+  created_at: string;
+}
+
+interface DefinitiveDealPacketRow {
+  id: number;
+  deal_id: number;
+  deal_name: string | null;
+  tool_name: string;
+  action: string | null;
+  packet_type: string;
+  packet_id: string | null;
+  packet_cid: string | null;
+  deal_state_cid: string | null;
+  next_suggested_calls: any[] | null;
+  take_back_artifacts: any[] | null;
+  created_at: string;
+}
+
 interface FirmMemoryRow {
   id: number;
   memory_type: string;
@@ -96,6 +125,7 @@ export interface TodayGateCountdownItem {
   requiredCitations: string[];
   nextAction: string;
   tone: Tone;
+  definitive?: TodayDefinitiveDealState;
 }
 
 export interface TodayDealPulseItem {
@@ -108,6 +138,23 @@ export interface TodayDealPulseItem {
   urgency: string;
   tone: Tone;
   nextAction: string;
+  definitive?: TodayDefinitiveDealState;
+}
+
+export interface TodayDefinitiveDealState {
+  stateCid: string;
+  readinessLevel: string;
+  score: number;
+  nextGate: string;
+  missingCount: number;
+  blockerCount: number;
+  sourceCount: number;
+  packetTypes: string[];
+  latestPacketType?: string;
+  latestPacketId?: string;
+  latestPacketAt?: string;
+  nextSuggestedTool?: string;
+  updatedAt: string;
 }
 
 export interface TodayFileReviewItem {
@@ -186,6 +233,8 @@ interface TodaySnapshot {
   reviews: ReviewRow[];
   studioBooks: StudioBookRow[];
   firmMemory: FirmMemoryRow[];
+  definitiveStates: DefinitiveDealStateSnapshotRow[];
+  definitivePackets: DefinitiveDealPacketRow[];
 }
 
 export async function getTodayOperatingBrief(userId: number, forceRefresh = false): Promise<TodayOperatingBrief> {
@@ -199,13 +248,14 @@ export async function getTodayOperatingBrief(userId: number, forceRefresh = fals
   }
 
   const generatedAt = new Date().toISOString();
+  const definitiveByDeal = buildDefinitiveStateMap(snapshot.definitiveStates, snapshot.definitivePackets);
   const brief: TodayOperatingBrief = {
     source: 'live',
     generatedAt,
     morningBrief: buildMorningBrief(snapshot, generatedAt),
-    gateCountdown: buildGateCountdown(snapshot.deals),
-    dealPulse: buildDealPulse(snapshot.deals),
-    filesNeedingReview: buildFilesNeedingReview(snapshot.deliverables, snapshot.reviews),
+    gateCountdown: buildGateCountdown(snapshot.deals, definitiveByDeal),
+    dealPulse: buildDealPulse(snapshot.deals, definitiveByDeal),
+    filesNeedingReview: buildFilesNeedingReview(snapshot.deliverables, snapshot.reviews, snapshot.definitivePackets),
     studioRefreshNeeds: buildStudioRefreshNeeds(snapshot.studioBooks),
     firmMemory: buildFirmMemorySnapshot(snapshot.firmMemory),
   };
@@ -274,7 +324,7 @@ async function buildSnapshot(userId: number): Promise<TodaySnapshot> {
     return [] as DealRow[];
   });
   const dealIds = deals.map(deal => deal.id);
-  const [deliverables, reviews, studioBooks, firmMemory] = await Promise.all([
+  const [deliverables, reviews, studioBooks, firmMemory, definitiveStates, definitivePackets] = await Promise.all([
     readDeliverables(userId, dealIds).catch(err => {
       console.warn('[today operating brief] deliverables unavailable:', err.message);
       return [] as DeliverableRow[];
@@ -291,8 +341,16 @@ async function buildSnapshot(userId: number): Promise<TodaySnapshot> {
       console.warn('[today operating brief] firm memory unavailable:', err.message);
       return [] as FirmMemoryRow[];
     }),
+    readDefinitiveStates(userId, dealIds).catch(err => {
+      console.warn('[today operating brief] DEFINITIVE states unavailable:', err.message);
+      return [] as DefinitiveDealStateSnapshotRow[];
+    }),
+    readDefinitivePackets(userId, dealIds).catch(err => {
+      console.warn('[today operating brief] DEFINITIVE packets unavailable:', err.message);
+      return [] as DefinitiveDealPacketRow[];
+    }),
   ]);
-  return { deals, deliverables, reviews, studioBooks, firmMemory };
+  return { deals, deliverables, reviews, studioBooks, firmMemory, definitiveStates, definitivePackets };
 }
 
 function normalizeFirmMemoryType(value: string): FirmMemoryType {
@@ -403,6 +461,37 @@ async function readFirmMemory(userId: number): Promise<FirmMemoryRow[]> {
   `;
 }
 
+async function readDefinitiveStates(userId: number, dealIds: number[]): Promise<DefinitiveDealStateSnapshotRow[]> {
+  if (!dealIds.length) return [];
+  return sql<DefinitiveDealStateSnapshotRow[]>`
+    SELECT DISTINCT ON (s.deal_id)
+           s.id, s.deal_id, d.business_name as deal_name, s.tool_name,
+           s.state_cid, s.state_hash, s.classification_key,
+           s.missing_input_contract, s.completeness_report, s.source_index,
+           s.created_at
+    FROM definitive_deal_state_snapshots s
+    LEFT JOIN deals d ON d.id = s.deal_id
+    WHERE s.user_id = ${userId}
+      AND s.deal_id = ANY(${dealIds})
+    ORDER BY s.deal_id, s.created_at DESC
+  `;
+}
+
+async function readDefinitivePackets(userId: number, dealIds: number[]): Promise<DefinitiveDealPacketRow[]> {
+  if (!dealIds.length) return [];
+  return sql<DefinitiveDealPacketRow[]>`
+    SELECT p.id, p.deal_id, d.business_name as deal_name, p.tool_name, p.action,
+           p.packet_type, p.packet_id, p.packet_cid, p.deal_state_cid,
+           p.next_suggested_calls, p.take_back_artifacts, p.created_at
+    FROM definitive_deal_packets p
+    LEFT JOIN deals d ON d.id = p.deal_id
+    WHERE p.user_id = ${userId}
+      AND p.deal_id = ANY(${dealIds})
+    ORDER BY p.created_at DESC
+    LIMIT 80
+  `;
+}
+
 async function ensureFirmMemoryDefaults(userId: number): Promise<void> {
   const defaults = [
     {
@@ -505,11 +594,13 @@ function buildMorningBrief(snapshot: TodaySnapshot, generatedAt: string): TodayM
   const reviewCount = snapshot.reviews.length;
   const studioNeeds = buildStudioRefreshNeeds(snapshot.studioBooks).length;
   const staleCount = snapshot.deliverables.filter(item => item.is_stale || item.status !== 'complete').length;
+  const stateCount = snapshot.definitiveStates.length;
   const chips = [
     `${snapshot.deals.length} active ${snapshot.deals.length === 1 ? 'deal' : 'deals'}`,
     `${reviewCount} review ${reviewCount === 1 ? 'item' : 'items'}`,
     `${studioNeeds} Studio ${studioNeeds === 1 ? 'refresh' : 'refreshes'}`,
-  ];
+    stateCount > 0 ? `${stateCount} DealState ${stateCount === 1 ? 'journal' : 'journals'}` : null,
+  ].filter(Boolean) as string[];
 
   if (!focus) {
     return {
@@ -529,7 +620,7 @@ function buildMorningBrief(snapshot: TodaySnapshot, generatedAt: string): TodayM
       : 'the next deal move is clear';
   return {
     title: `${name} is the current read.`,
-    lede: `${work}. Yulia is keeping gates, files, model outputs, and Studio drafts in one daily operating surface.`,
+    lede: `${work}. Yulia is keeping gates, files, model outputs, Studio drafts, and the DEFINITIVE DealState journal in one operating surface.`,
     focusDealId: String(focus.id),
     focusDealTitle: name,
     chips,
@@ -538,7 +629,7 @@ function buildMorningBrief(snapshot: TodaySnapshot, generatedAt: string): TodayM
   };
 }
 
-function buildGateCountdown(deals: DealRow[]): TodayGateCountdownItem[] {
+function buildGateCountdown(deals: DealRow[], definitiveByDeal: Map<string, TodayDefinitiveDealState>): TodayGateCountdownItem[] {
   const tones: Tone[] = ['cactus', 'gold', 'plum', 'oat', 'charcoal'];
   return deals
     .filter(deal => deal.current_gate)
@@ -547,7 +638,9 @@ function buildGateCountdown(deals: DealRow[]): TodayGateCountdownItem[] {
       const gateId = String(deal.current_gate || '');
       const gate = GATE_MAP[gateId];
       const requirements = getGateV19Requirements(gateId);
+      const definitive = definitiveByDeal.get(String(deal.id));
       const blockers = [
+        definitive && definitive.missingCount > 0 ? `${definitive.missingCount} DealState gap${definitive.missingCount === 1 ? '' : 's'}` : null,
         Number(deal.review_count || 0) > 0 ? `${deal.review_count} open review` : null,
         Number(deal.stale_deliverable_count || 0) > 0 ? `${deal.stale_deliverable_count} stale output` : null,
         !requirements.requiredModels.length ? null : `${requirements.requiredModels.length} model check`,
@@ -561,19 +654,21 @@ function buildGateCountdown(deals: DealRow[]): TodayGateCountdownItem[] {
         blockers: blockers.length ? blockers : ['No blocker surfaced'],
         requiredModels: requirements.requiredModels,
         requiredCitations: requirements.requiredCitations,
-        nextAction: nextGateAction(deal, requirements.requiredModels.length, requirements.requiredCitations.length),
+        nextAction: definitiveNextAction(definitive) || nextGateAction(deal, requirements.requiredModels.length, requirements.requiredCitations.length),
         tone: tones[index % tones.length],
+        definitive,
       };
     });
 }
 
-function buildDealPulse(deals: DealRow[]): TodayDealPulseItem[] {
+function buildDealPulse(deals: DealRow[], definitiveByDeal: Map<string, TodayDefinitiveDealState>): TodayDealPulseItem[] {
   const tones: Tone[] = ['cactus', 'gold', 'oat', 'plum', 'charcoal'];
   return [...deals]
     .sort((a, b) => fitScore(b) - fitScore(a))
     .slice(0, 6)
     .map((deal, index) => {
       const score = fitScore(deal);
+      const definitive = definitiveByDeal.get(String(deal.id));
       return {
         dealId: String(deal.id),
         title: dealName(deal),
@@ -581,18 +676,23 @@ function buildDealPulse(deals: DealRow[]): TodayDealPulseItem[] {
         fit: score,
         thesis: dealThesis(deal),
         metric: `${fmtCents(deal.sde || deal.ebitda)} ${deal.sde ? 'SDE' : deal.ebitda ? 'EBITDA' : 'metric'}`,
-        urgency: Number(deal.review_count || 0) > 0 ? 'review waiting' : gateLabel(deal.current_gate),
+        urgency: definitive ? `${shortReadinessLabel(definitive.readinessLevel)} · ${definitive.score}%` : Number(deal.review_count || 0) > 0 ? 'review waiting' : gateLabel(deal.current_gate),
         tone: tones[index % tones.length],
-        nextAction: Number(deal.review_count || 0) > 0
+        nextAction: definitiveNextAction(definitive) || (Number(deal.review_count || 0) > 0
           ? 'Clear review queue'
           : Number(deal.stale_deliverable_count || 0) > 0
             ? 'Refresh output'
-            : 'Open deal read',
+            : 'Open deal read'),
+        definitive,
       };
     });
 }
 
-function buildFilesNeedingReview(deliverables: DeliverableRow[], reviews: ReviewRow[]): TodayFileReviewItem[] {
+function buildFilesNeedingReview(
+  deliverables: DeliverableRow[],
+  reviews: ReviewRow[],
+  definitivePackets: DefinitiveDealPacketRow[] = [],
+): TodayFileReviewItem[] {
   const fromReviews = reviews.map((review, index) => ({
     id: `review-${review.id}`,
     title: review.doc_name || `${review.deal_name || 'Deal'} review`,
@@ -616,7 +716,64 @@ function buildFilesNeedingReview(deliverables: DeliverableRow[], reviews: Review
       tone: (item.is_stale ? 'gold' : index % 2 === 0 ? 'oat' : 'cactus') as Tone,
       updatedAt: item.completed_at || item.created_at,
     }));
-  return [...fromReviews, ...fromDeliverables].slice(0, 8);
+  const fromPackets = definitivePackets
+    .slice(0, 6)
+    .map((packet, index) => ({
+      id: `definitive-packet-${packet.id}`,
+      title: packetTypeLabel(packet.packet_type),
+      dealId: packet.deal_id ? String(packet.deal_id) : undefined,
+      dealTitle: packet.deal_name || undefined,
+      reason: `${labelFromSlug(packet.tool_name)} · agent take-back packet`,
+      status: 'Packet',
+      tone: (index % 2 === 0 ? 'cactus' : 'oat') as Tone,
+      updatedAt: packet.created_at,
+    }));
+  return [...fromReviews, ...fromDeliverables, ...fromPackets].slice(0, 10);
+}
+
+function buildDefinitiveStateMap(
+  states: DefinitiveDealStateSnapshotRow[],
+  packets: DefinitiveDealPacketRow[],
+): Map<string, TodayDefinitiveDealState> {
+  const packetsByDeal = new Map<number, DefinitiveDealPacketRow[]>();
+  packets.forEach(packet => {
+    if (!packet.deal_id) return;
+    const current = packetsByDeal.get(packet.deal_id) ?? [];
+    current.push(packet);
+    packetsByDeal.set(packet.deal_id, current);
+  });
+
+  const map = new Map<string, TodayDefinitiveDealState>();
+  states.forEach(state => {
+    if (!state.deal_id) return;
+    const completeness = asRecord(state.completeness_report);
+    const missingContract = asRecord(state.missing_input_contract);
+    const missing = safeArray(missingContract.items).length
+      || safeArray(completeness.missing).length;
+    const blockers = safeArray(completeness.blockers).length;
+    const dealPackets = packetsByDeal.get(state.deal_id) ?? [];
+    const latestPacket = dealPackets[0];
+    const packetTypes = Array.from(new Set(dealPackets.map(packet => packet.packet_type).filter(Boolean))).slice(0, 5);
+    const nextSuggestedTool = firstSuggestedTool(dealPackets)
+      || firstSuggestedToolFromContract(missingContract);
+
+    map.set(String(state.deal_id), {
+      stateCid: state.state_cid,
+      readinessLevel: String(completeness.level || 'DRL0_UNCLASSIFIED'),
+      score: clamp(Number(completeness.score || 0), 0, 100),
+      nextGate: String(completeness.nextGate || 'information'),
+      missingCount: missing,
+      blockerCount: blockers,
+      sourceCount: safeArray(state.source_index).length,
+      packetTypes,
+      latestPacketType: latestPacket?.packet_type,
+      latestPacketId: latestPacket?.packet_id || undefined,
+      latestPacketAt: latestPacket?.created_at,
+      nextSuggestedTool,
+      updatedAt: toIso(state.created_at),
+    });
+  });
+  return map;
 }
 
 function buildStudioRefreshNeeds(books: StudioBookRow[]): TodayStudioRefreshItem[] {
@@ -674,6 +831,39 @@ function buildFirmMemorySnapshot(rows: FirmMemoryRow[]): TodayFirmMemorySnapshot
   };
 }
 
+function definitiveNextAction(definitive?: TodayDefinitiveDealState): string | null {
+  if (!definitive) return null;
+  if (definitive.missingCount > 0) return 'Update DealState inputs';
+  if (definitive.nextSuggestedTool) return `Run ${labelFromSlug(definitive.nextSuggestedTool)}`;
+  if (definitive.latestPacketType) return `Open ${packetTypeLabel(definitive.latestPacketType)}`;
+  return 'Resume DealState loop';
+}
+
+function firstSuggestedTool(packets: DefinitiveDealPacketRow[]): string | undefined {
+  for (const packet of packets) {
+    const calls = safeArray(packet.next_suggested_calls);
+    const tool = firstToolNameFromCalls(calls);
+    if (tool) return tool;
+  }
+  return undefined;
+}
+
+function firstSuggestedToolFromContract(contract: Record<string, any>): string | undefined {
+  const tool = firstToolNameFromCalls(safeArray(contract.next_suggested_calls));
+  if (tool) return tool;
+  const items = safeArray(contract.items);
+  const surface = String(items[0]?.surface || '').trim();
+  if (surface === 'files') return 'compose_data_room_index';
+  if (surface === 'studio') return 'compose_document_draft';
+  if (surface === 'models') return 'compose_model_stack';
+  return undefined;
+}
+
+function firstToolNameFromCalls(calls: any[]): string | undefined {
+  const call = calls.find(item => typeof item?.toolName === 'string' && item.toolName.trim());
+  return call?.toolName;
+}
+
 function dedupeDeals(deals: DealRow[]): DealRow[] {
   const seen = new Set<number>();
   return deals.filter(deal => {
@@ -690,6 +880,8 @@ function hashSnapshot(snapshot: TodaySnapshot): string {
     reviews: snapshot.reviews.map(item => [item.id, item.status, item.created_at]),
     studio: snapshot.studioBooks.map(item => [item.id, item.updated_at, safeArray(item.slides).length, safeArray(item.model_outputs).length]),
     memory: snapshot.firmMemory.map(item => [item.id, item.updated_at, item.memory_type, item.label]),
+    definitiveStates: snapshot.definitiveStates.map(item => [item.id, item.deal_id, item.state_cid, item.state_hash, item.created_at]),
+    definitivePackets: snapshot.definitivePackets.map(item => [item.id, item.deal_id, item.packet_type, item.packet_id, item.created_at]),
   };
   return crypto.createHash('sha256').update(JSON.stringify(basis)).digest('hex');
 }
@@ -750,7 +942,22 @@ function firmMemoryText(row: FirmMemoryRow): string {
 function labelFromSlug(input: string): string {
   return String(input || 'Studio book')
     .replace(/[-_]+/g, ' ')
+    .replace(/\.+v\d+$/i, '')
     .replace(/\b\w/g, char => char.toUpperCase());
+}
+
+function packetTypeLabel(input: string): string {
+  const withoutVersion = String(input || 'DEFINITIVE packet').replace(/\.v\d+(\.\d+)?$/i, '');
+  return labelFromSlug(withoutVersion);
+}
+
+function shortReadinessLabel(level: string): string {
+  const match = String(level || '').match(/DRL\d+/);
+  return match?.[0] || 'DRL';
+}
+
+function asRecord(value: unknown): Record<string, any> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {};
 }
 
 function timeLabel(value: string): string {

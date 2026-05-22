@@ -32,6 +32,7 @@ export interface TodayGateCountdownItem {
   requiredCitations: string[];
   nextAction: string;
   tone: TodayTone;
+  definitive?: TodayDefinitiveDealState;
 }
 
 export interface TodayDealPulseItem {
@@ -44,6 +45,23 @@ export interface TodayDealPulseItem {
   urgency: string;
   tone: TodayTone;
   nextAction: string;
+  definitive?: TodayDefinitiveDealState;
+}
+
+export interface TodayDefinitiveDealState {
+  stateCid: string;
+  readinessLevel: string;
+  score: number;
+  nextGate: string;
+  missingCount: number;
+  blockerCount: number;
+  sourceCount: number;
+  packetTypes: string[];
+  latestPacketType?: string;
+  latestPacketId?: string;
+  latestPacketAt?: string;
+  nextSuggestedTool?: string;
+  updatedAt: string;
 }
 
 export interface TodayFileReviewItem {

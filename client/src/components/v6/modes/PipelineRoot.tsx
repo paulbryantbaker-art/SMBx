@@ -5,7 +5,7 @@ import type { Verdict } from "./cards";
 import type { IconName, OpenTab } from "../types";
 import { DEV_AUTH_BYPASS, type User } from "../../../hooks/useAuth";
 import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
-import { useTodayOperatingBrief, type TodayDealPulseItem, type TodayGateCountdownItem } from "../../../hooks/useTodayOperatingBrief";
+import { useTodayOperatingBrief, type TodayDealPulseItem, type TodayDefinitiveDealState, type TodayGateCountdownItem } from "../../../hooks/useTodayOperatingBrief";
 import { ART_HOUSE_TEXTURES, STUDIO_TEXTURES } from "../../../lib/randomTextures";
 import type { ModelPreference } from "../../../lib/modelPreference";
 import {
@@ -39,6 +39,7 @@ interface PipelineDeal {
   requiredCitations: number;
   blocker: string;
   yuliaMove: string;
+  definitive?: TodayDefinitiveDealState;
 }
 
 type PipelineStageId = "source" | "value" | "diligence" | "structure" | "close";
@@ -119,7 +120,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
   const activeLeagueCount = new Set(deals.map(deal => deal.league)).size;
   const modelCount = deals.reduce((sum, deal) => sum + deal.requiredModels, 0);
   const citationCount = deals.reduce((sum, deal) => sum + deal.requiredCitations, 0);
-  const autoMoveCount = deals.filter(deal => deal.requiredModels + deal.requiredCitations > 0).length;
+  const definitiveCount = deals.filter(deal => deal.definitive).length;
   const selectedHomeDeal = useSampleData ? null : pickActionDeal(realDeals);
   const actionDeal = selectedHomeDeal ? homeDealToActionDeal(selectedHomeDeal) : null;
   const actionDeals = realDeals.map(homeDealToActionDeal);
@@ -295,7 +296,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
           <MethodologyChip label="Leagues" value={activeLeagueCount || 0} />
           <MethodologyChip label="Models watched" value={modelCount} />
           <MethodologyChip label="Citations needed" value={citationCount} />
-          <MethodologyChip label="Auto-move checks" value={autoMoveCount} />
+          <MethodologyChip label="DealState journals" value={definitiveCount} />
         </div>
 
         <div className="m-flow-grid" style={P.kanbanGrid}>
@@ -358,7 +359,7 @@ function GateCountdownStrip({
               <strong>{item.title}</strong>
               <span>{item.gateName} · {item.nextAction}</span>
             </span>
-            <span style={P.gateMeta}>{item.blockers[0] || "No blocker surfaced"}</span>
+            <span style={P.gateMeta}>{item.definitive ? `${shortReadiness(item.definitive.readinessLevel)} · ${item.definitive.missingCount} gaps` : item.blockers[0] || "No blocker surfaced"}</span>
             <span style={P.chevron} aria-hidden="true">›</span>
           </button>
         ))}
@@ -442,6 +443,12 @@ function OpportunityCard({
           <span>{deal.requiredCitations} citations</span>
           <span>Next: {deal.nextGateName}</span>
         </span>
+        {deal.definitive && (
+          <span style={P.definitiveLine}>
+            <strong>{shortReadiness(deal.definitive.readinessLevel)} · {deal.definitive.score}%</strong>
+            <span>{deal.definitive.packetTypes.length || 0} packets · {deal.definitive.sourceCount} sources</span>
+          </span>
+        )}
         <span style={P.opportunityNote}>{deal.note}</span>
       </button>
       <button type="button" style={P.yuliaMove} onClick={onAsk}>
@@ -465,7 +472,9 @@ function PipelineStat({ label, value, tone }: { label: string; value: number; to
   );
 }
 
-type PipelineDealSeed = Pick<PipelineDeal, "verdict" | "id" | "name" | "sub" | "fit" | "sde" | "multiple" | "note" | "league" | "gateId" | "blocker">;
+type PipelineDealSeed = Pick<PipelineDeal, "verdict" | "id" | "name" | "sub" | "fit" | "sde" | "multiple" | "note" | "league" | "gateId" | "blocker"> & {
+  definitive?: TodayDefinitiveDealState;
+};
 
 function enrichPipelineDeal(seed: PipelineDealSeed): PipelineDeal {
   const gate = GATE_MAP[seed.gateId] ?? GATE_MAP.B2;
@@ -564,6 +573,7 @@ function dealPulseToPipelineDeal(item: TodayDealPulseItem, gateItem?: TodayGateC
     league: "L3",
     gateId: gateItem?.gateId || gateForVerdict(verdict),
     blocker: gateItem?.blockers[0] || item.nextAction,
+    definitive: item.definitive || gateItem?.definitive,
   });
 }
 
@@ -600,6 +610,10 @@ function inferLeague(d: HomeDeal): string {
   if (ebitda >= 1_000_000_00) return "L3";
   if (sde >= 300_000_00 || revenue >= 1_000_000_00) return "L2";
   return "L1";
+}
+
+function shortReadiness(level: string): string {
+  return level.match(/DRL\d+/)?.[0] || "DRL";
 }
 
 function journeyFromHomeDeal(d: HomeDeal): string {
@@ -1015,6 +1029,19 @@ const P: Record<string, CSSProperties> = {
     color: "var(--m-on-surface-mid)",
     fontSize: 10.5,
     lineHeight: 1,
+  },
+  definitiveLine: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+    padding: "8px 9px",
+    borderRadius: 12,
+    background: "rgba(236,243,255,.62)",
+    border: "1px solid rgba(153,176,209,.32)",
+    color: "var(--m-on-primary-container)",
+    fontSize: 10.5,
+    lineHeight: 1.15,
   },
   opportunityNote: {
     color: "var(--m-on-surface-var)",

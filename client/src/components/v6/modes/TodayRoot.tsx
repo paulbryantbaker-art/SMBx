@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { authHeaders, type User } from "../../../hooks/useAuth";
 import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
-import { useTodayOperatingBrief, type TodayFirmMemorySnapshot, type TodayGateCountdownItem, type TodayOperatingBrief, type TodayStudioRefreshItem } from "../../../hooks/useTodayOperatingBrief";
+import { useTodayOperatingBrief, type TodayDealPulseItem, type TodayDefinitiveDealState, type TodayFirmMemorySnapshot, type TodayGateCountdownItem, type TodayOperatingBrief, type TodayStudioRefreshItem } from "../../../hooks/useTodayOperatingBrief";
 import { useV6WorkspaceData, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
 import { LOGGED_OUT_HERO_COPY } from "../../../lib/copy";
 import { DESKTOP_TEXTURES } from "../../../lib/randomTextures";
@@ -30,6 +30,7 @@ interface TodayDeal {
   sde: string;
   multiple: string;
   tone: Tone;
+  definitive?: TodayDefinitiveDealState;
 }
 
 const DEALS: TodayDeal[] = [
@@ -207,7 +208,18 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const liveBrief = useSampleData ? null : portfolioBrief;
   const operatingBrief = useSampleData ? null : todayOperating.brief;
   const waitingForYuliaRead = !useSampleData && !liveBrief;
-  const deals = useSampleData ? DEALS : (liveBrief?.deals.length ? liveBrief.deals : realDeals.slice(0, 5).map(dealToTodayDeal));
+  const operatingDeals = operatingBrief?.dealPulse ?? [];
+  const operatingDealMap = useMemo(
+    () => new Map(operatingDeals.map(item => [item.dealId, item])),
+    [operatingDeals],
+  );
+  const deals = useSampleData
+    ? DEALS
+    : liveBrief?.deals.length
+      ? liveBrief.deals.map(deal => ({ ...deal, definitive: operatingDealMap.get(deal.id)?.definitive }))
+      : operatingDeals.length
+        ? operatingDeals.slice(0, 5).map(operatingDealToTodayDeal)
+        : realDeals.slice(0, 5).map(dealToTodayDeal);
   const liveDesk = liveBrief?.liveDesk?.length ? liveBrief.liveDesk : useSampleData ? WORK : [];
   const files = useMemo<TodayFile[]>(
     () => {
@@ -616,6 +628,11 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
                     <span style={T.dealMain}>
                       <span style={T.dealTitle}>{deal.title}</span>
                       <span style={T.dealMeta}>{deal.meta}</span>
+                      {deal.definitive && (
+                        <span style={T.dealDefinitiveMeta}>
+                          {shortReadiness(deal.definitive.readinessLevel)} · {deal.definitive.score}% · {deal.definitive.packetTypes.length} packets
+                        </span>
+                      )}
                     </span>
                     <span style={T.dealStats}>
                       <span style={{ ...T.dealTone, background: tone(deal.tone).soft, color: tone(deal.tone).ink }}>{deal.status}</span>
@@ -781,7 +798,10 @@ function GateCountdownCard({
             <span style={{ ...T.operatingDot, background: tone(item.tone).ink }} />
             <span style={T.operatingRowText}>
               <strong>{item.title}</strong>
-              <span>{item.gateId} · {item.gateName} · {item.nextAction}</span>
+              <span>
+                {item.gateId} · {item.gateName} · {item.nextAction}
+                {item.definitive ? ` · ${shortReadiness(item.definitive.readinessLevel)} ${item.definitive.score}%` : ""}
+              </span>
             </span>
           </button>
         ))}
@@ -921,6 +941,22 @@ function dealToTodayDeal(d: HomeDeal, index: number): TodayDeal {
   };
 }
 
+function operatingDealToTodayDeal(item: TodayDealPulseItem, index: number): TodayDeal {
+  const tones: Tone[] = ["cactus", "gold", "oat", "plum", "charcoal"];
+  return {
+    id: item.dealId,
+    title: item.title,
+    meta: `${item.metric} · ${item.urgency}`,
+    thesis: item.thesis,
+    status: item.status,
+    fit: item.fit,
+    sde: item.metric,
+    multiple: "--",
+    tone: item.tone || tones[index % tones.length],
+    definitive: item.definitive,
+  };
+}
+
 function deliverableToTodayFile(d: WorkspaceDeliverable): TodayFile {
   const title = d.name || d.slug.replace(/[-_]/g, " ").replace(/\b\w/g, c => c.toUpperCase());
   const analysis = /model|valuation|analysis|sba|comp|risk|tax|financial|score/i.test(`${d.slug} ${title}`);
@@ -932,6 +968,10 @@ function deliverableToTodayFile(d: WorkspaceDeliverable): TodayFile {
     tone: d.status === "complete" ? "plum" : d.status === "failed" ? "charcoal" : "gold",
     id: String(d.id),
   };
+}
+
+function shortReadiness(level: string): string {
+  return level.match(/DRL\d+/)?.[0] || "DRL";
 }
 
 const paperShadow = "0 18px 44px rgba(42,65,96,0.10), 0 4px 12px rgba(26,34,51,0.05), inset 0 1px 0 rgba(255,255,255,0.72)";
@@ -1502,6 +1542,20 @@ const T: Record<string, CSSProperties> = {
     marginTop: 3,
     fontSize: 12.5,
     color: "#7A8395",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+  },
+  dealDefinitiveMeta: {
+    marginTop: 5,
+    width: "fit-content",
+    maxWidth: "100%",
+    borderRadius: 999,
+    padding: "4px 8px",
+    background: "rgba(46,92,138,0.09)",
+    color: "var(--m-on-primary-container)",
+    fontSize: 11,
+    fontWeight: 850,
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
