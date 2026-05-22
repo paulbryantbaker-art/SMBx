@@ -21,6 +21,7 @@ import {
 import { getDefinitiveAuthoritySeedPlan } from './definitiveAuthoritySeedPlan.js';
 import { getDefinitiveSubstrateArchitecturePlan } from './definitiveSubstrateArchitecturePlan.js';
 import { listDefinitiveMcpTools } from './definitiveMcp.js';
+import { buildDefinitiveSchemaRegistry } from './definitiveSchemas.js';
 
 export function buildDefinitiveSpecManifest() {
   const tools = listDefinitiveMcpTools();
@@ -36,6 +37,7 @@ export function buildDefinitiveSpecManifest() {
   const passThroughSurface = getDefinitivePassThroughSurface();
   const authoritySeedPlan = getDefinitiveAuthoritySeedPlan();
   const substrateArchitecture = getDefinitiveSubstrateArchitecturePlan();
+  const schemaRegistry = buildDefinitiveSchemaRegistry();
   const lineSummary = lineInventory.reduce<Record<string, number>>((acc, contract) => {
     acc[contract.lineStatus] = (acc[contract.lineStatus] || 0) + 1;
     return acc;
@@ -63,6 +65,8 @@ export function buildDefinitiveSpecManifest() {
       specManifest: '/.well-known/definitive.json',
       mcpDiscovery: '/.well-known/mcp',
       mcpServerCard: '/.well-known/mcp/server-card.json',
+      schemaRegistry: '/api/definitive/schemas',
+      wellKnownSchemaRegistry: '/.well-known/definitive-schemas.json',
       specApi: '/api/definitive/spec',
       passThroughCatalog: '/api/definitive/pass-through-catalog',
       authoritySeedPlan: '/api/definitive/authority-seed-plan',
@@ -81,8 +85,10 @@ export function buildDefinitiveSpecManifest() {
         '/.well-known/definitive.json',
         '/.well-known/mcp',
         '/.well-known/mcp/server-card.json',
+        '/.well-known/definitive-schemas.json',
         '/api/agent-card',
         '/api/definitive/spec',
+        '/api/definitive/schemas',
         '/api/definitive/pass-through-catalog',
         '/api/definitive/authority-seed-plan',
         '/api/definitive/substrate-architecture',
@@ -213,6 +219,15 @@ export function buildDefinitiveSpecManifest() {
       publishedStandardDoctrine: substrateArchitecture.publishedStandardDoctrine,
       routingAxes: substrateArchitecture.routingAxes,
       universalResponseFields: substrateArchitecture.universalResponseFields,
+      schemaRegistry: {
+        version: schemaRegistry.version,
+        uri: schemaRegistry.uri,
+        endpoint: '/api/definitive/schemas',
+        wellKnownEndpoint: '/.well-known/definitive-schemas.json',
+        schemaCount: schemaRegistry.schemaCount,
+        schemaNames: schemaRegistry.schemaNames,
+        toolSchemaMap: schemaRegistry.toolSchemaMap,
+      },
       workstreams: substrateArchitecture.workstreams.map(workstream => ({
         id: workstream.id,
         name: workstream.name,

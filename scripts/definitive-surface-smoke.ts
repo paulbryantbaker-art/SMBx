@@ -51,6 +51,7 @@ import {
   buildDefinitiveMcpServerCard,
   buildDefinitiveMcpWellKnownManifest,
 } from '../server/services/definitiveMcpDiscovery.js';
+import { buildDefinitiveSchemaRegistry } from '../server/services/definitiveSchemas.js';
 import { buildDefinitiveSpecManifest } from '../server/services/definitiveSpecManifest.js';
 import { evaluateDefinitiveStackOverlays } from '../server/services/definitiveStackOverlays.js';
 import { executeDefinitiveMcpTool, listDefinitiveMcpTools } from '../server/services/definitiveMcp.js';
@@ -95,6 +96,8 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assertEqual(card.definitive.specManifestEndpoint, '/.well-known/definitive.json', 'spec manifest endpoint');
   assertEqual(card.definitive.mcpDiscoveryEndpoint, '/.well-known/mcp', 'MCP discovery endpoint');
   assertEqual(card.definitive.mcpServerCardEndpoint, '/.well-known/mcp/server-card.json', 'MCP server-card endpoint');
+  assertEqual(card.definitive.schemaRegistryEndpoint, '/api/definitive/schemas', 'schema registry endpoint');
+  assertEqual(card.definitive.wellKnownSchemaRegistryEndpoint, '/.well-known/definitive-schemas.json', 'well-known schema registry endpoint');
   assertEqual(card.definitive.toolsEndpoint, '/api/definitive/tools/list', 'tools endpoint');
   assertEqual(card.definitive.auditPacketEndpoint, '/api/definitive/audit-packets/{auditTrailId}', 'audit packet endpoint');
   assertEqual(card.definitive.corpusObservationTypesEndpoint, '/api/definitive/corpus/observation-types', 'corpus observation endpoint');
@@ -109,6 +112,9 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assertEqual(card.definitive.authoritySeedPlanStatus, 'ready_for_800_plus_seeding', 'agent card authority seed plan status');
   assertEqual(card.definitive.substratePrimitiveCount, 8, 'agent card substrate primitive count');
   assertEqual(card.definitive.substrateNewMcpToolCount, 27, 'agent card substrate tool count');
+  assert(card.definitive.schemaRegistryNames.includes('DealPayload'), 'agent card exposes DealPayload schema');
+  assert(card.definitive.schemaRegistryNames.includes('DealState'), 'agent card exposes DealState schema');
+  assert(card.definitive.schemaRegistryNames.includes('DealStateDiff'), 'agent card exposes DealStateDiff schema');
   assert(card.definitive.dealOsDoctrine.includes('Deal OS'), 'agent card exposes Deal OS doctrine');
   assert(card.definitive.agentHomeContract.includes('data rooms'), 'agent card exposes agent home data-room contract');
   assert(card.definitive.agentNoRejectionContract.includes('MissingInputContract'), 'agent card exposes no-rejection contract');
@@ -123,6 +129,8 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assert(card.publicEndpoints.includes('/.well-known/definitive.json'), 'definitive manifest endpoint is public');
   assert(card.publicEndpoints.includes('/.well-known/mcp'), 'MCP discovery endpoint is public');
   assert(card.publicEndpoints.includes('/.well-known/mcp/server-card.json'), 'MCP server-card endpoint is public');
+  assert(card.publicEndpoints.includes('/.well-known/definitive-schemas.json'), 'well-known schema registry endpoint is public');
+  assert(card.publicEndpoints.includes('/api/definitive/schemas'), 'schema registry endpoint is public');
   assert(card.publicEndpoints.includes('/api/definitive/pass-through-catalog'), 'pass-through catalog endpoint is public discovery');
   assert(card.publicEndpoints.includes('/api/definitive/authority-seed-plan'), 'authority seed plan endpoint is public discovery');
   assert(card.publicEndpoints.includes('/api/definitive/substrate-architecture'), 'substrate architecture endpoint is public discovery');
@@ -173,12 +181,16 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assertEqual(manifest.endpoints.agentCard, '/.well-known/agent-card.json', 'manifest agent-card endpoint');
   assertEqual(manifest.endpoints.mcpDiscovery, '/.well-known/mcp', 'manifest MCP discovery endpoint');
   assertEqual(manifest.endpoints.mcpServerCard, '/.well-known/mcp/server-card.json', 'manifest MCP server-card endpoint');
+  assertEqual(manifest.endpoints.schemaRegistry, '/api/definitive/schemas', 'manifest schema registry endpoint');
+  assertEqual(manifest.endpoints.wellKnownSchemaRegistry, '/.well-known/definitive-schemas.json', 'manifest well-known schema registry endpoint');
   assertEqual(manifest.endpoints.passThroughCatalog, '/api/definitive/pass-through-catalog', 'manifest pass-through catalog endpoint');
   assertEqual(manifest.endpoints.authoritySeedPlan, '/api/definitive/authority-seed-plan', 'manifest authority seed plan endpoint');
   assertEqual(manifest.endpoints.substrateArchitecture, '/api/definitive/substrate-architecture', 'manifest substrate architecture endpoint');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/spec'), 'manifest spec API is public discovery');
   assert(manifest.access.publicDiscovery.includes('/.well-known/mcp'), 'manifest MCP discovery is public');
   assert(manifest.access.publicDiscovery.includes('/.well-known/mcp/server-card.json'), 'manifest MCP server-card is public');
+  assert(manifest.access.publicDiscovery.includes('/.well-known/definitive-schemas.json'), 'manifest schema well-known is public');
+  assert(manifest.access.publicDiscovery.includes('/api/definitive/schemas'), 'manifest schema registry is public');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/pass-through-catalog'), 'manifest pass-through catalog is public discovery');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/authority-seed-plan'), 'manifest authority seed plan is public discovery');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/substrate-architecture'), 'manifest substrate architecture is public discovery');
@@ -223,6 +235,9 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assertEqual(manifest.substrateArchitectureSurface.publishedStandardDoctrine.name, 'The Diligence Standard', 'manifest substrate standard doctrine');
   assert(manifest.substrateArchitectureSurface.routingAxes.includes('tax_classification'), 'manifest substrate routing axes');
   assert(manifest.substrateArchitectureSurface.universalResponseFields.includes('next_suggested_calls'), 'manifest substrate next call hints');
+  assertEqual(manifest.substrateArchitectureSurface.schemaRegistry.endpoint, '/api/definitive/schemas', 'manifest substrate schema endpoint');
+  assert(manifest.substrateArchitectureSurface.schemaRegistry.schemaNames.includes('MissingInputContract'), 'manifest substrate schema registry exposes MissingInputContract');
+  assert(manifest.substrateArchitectureSurface.schemaRegistry.toolSchemaMap.ingest_deal_payload.output.includes('DealState'), 'manifest substrate schema map connects ingest to DealState');
   assertEqual(manifest.dealMechanicsSurface.mappingCoverage.status, 'complete', 'manifest deal mapping coverage status');
   assertEqual(manifest.dealMechanicsSurface.mappingCoverage.unmappedModelSlots, 0, 'manifest has no unmapped active model slots');
   assertEqual(manifest.dealMechanicsSurface.routeMap.summary.status, 'complete', 'manifest route map coverage status');
@@ -250,8 +265,10 @@ await test('MCP well-known discovery is generated from DEFINITIVE manifest data'
   assertEqual(serverCard.version, DEFINITIVE_SPEC_VERSION, 'MCP server-card version');
   assertEqual(serverCard.serverInfo.canonicalStandard, 'The Diligence Standard', 'MCP server-card standard');
   assertEqual(serverCard.transport.endpoints.serverCard, `${origin}/.well-known/mcp/server-card.json`, 'MCP server-card endpoint URL');
+  assertEqual(serverCard.transport.endpoints.schemaRegistry, `${origin}/api/definitive/schemas`, 'MCP server-card schema registry URL');
   assertDeepEqual(serverCard.tools.map((tool: any) => tool.name), expectedTools, 'MCP server-card tools');
   assert(serverCard.tools.every((tool: any) => tool.outputSchema?.properties?.specVersion), 'MCP tools expose output schemas');
+  assert(serverCard.tools.find((tool: any) => tool.name === 'ingest_deal_payload')?.structuredContentSchemas?.output.includes('DealState'), 'MCP ingest tool maps to DealState schema');
   assert(serverCard.tools.every((tool: any) => typeof tool.annotations?.readOnlyHint === 'boolean'), 'MCP tools expose annotations');
   assert(serverCard.definitive.toolMetadataDoctrine.semanticKeywords.includes('working capital peg'), 'MCP server-card exposes semantic keywords');
   assertEqual(serverCard.definitive.publishedStandardDoctrine.name, 'The Diligence Standard', 'MCP server-card exposes published standard');
@@ -261,10 +278,26 @@ await test('MCP well-known discovery is generated from DEFINITIVE manifest data'
   assertEqual(mcpManifest.mcp_version, '2025-12-11', 'MCP manifest version');
   assertEqual(mcpManifest.server_card, `${origin}/.well-known/mcp/server-card.json`, 'MCP manifest server-card URL');
   assert(mcpManifest.endpoints.some((endpoint: any) => endpoint.type === 'definitive-manifest' && endpoint.auth === 'none'), 'MCP manifest points to public DEFINITIVE manifest');
+  assert(mcpManifest.endpoints.some((endpoint: any) => endpoint.type === 'definitive-schema-registry' && endpoint.auth === 'none'), 'MCP manifest points to public schema registry');
   assertEqual(mcpManifest.capabilities.outputSchema, true, 'MCP manifest declares output schemas');
   assertEqual(mcpManifest.capabilities.auditTrail, true, 'MCP manifest declares audit trail support');
   assertEqual(mcpManifest.doctrine.standard, 'The Diligence Standard', 'MCP manifest standard doctrine');
   assertEqual(mcpManifest.doctrine.namingConvention, 'diligence_<phase>_<artifact>', 'MCP manifest naming convention');
+});
+
+await test('DEFINITIVE schema registry publishes portable agent contracts', async () => {
+  const registry = buildDefinitiveSchemaRegistry();
+  assertEqual(registry.version, 'DEFINITIVE.schemas.v0.1', 'schema registry version');
+  assert(registry.schemaNames.includes('DealPayload'), 'schema registry exposes DealPayload');
+  assert(registry.schemaNames.includes('DealState'), 'schema registry exposes DealState');
+  assert(registry.schemaNames.includes('MissingInputContract'), 'schema registry exposes MissingInputContract');
+  assert(registry.schemaNames.includes('CompletenessReport'), 'schema registry exposes CompletenessReport');
+  assert(registry.schemaNames.includes('DealPlan'), 'schema registry exposes DealPlan');
+  assert(registry.schemaNames.includes('DealStateDiff'), 'schema registry exposes DealStateDiff');
+  assertEqual(registry.schemas.DealPayload.properties.revenueCents.type, 'integer', 'money is cents integer');
+  assert(registry.toolSchemaMap.ingest_deal_payload.output.includes('MissingInputContract'), 'ingest output maps missing input contract');
+  assert(registry.toolSchemaMap.diff_deal_state.takeBack.includes('DealStateDiff'), 'diff take-back maps DealStateDiff');
+  assert(registry.noRejectionContract.includes('DealPayload may be incomplete'), 'schema registry states no-rejection contract');
 });
 
 await test('DEFINITIVE catalog includes the M187-M223 closing-gap expansion', async () => {

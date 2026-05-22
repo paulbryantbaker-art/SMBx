@@ -48,6 +48,7 @@ import {
 import { getDefinitivePassThroughSurface } from './services/definitiveDealMechanicsCatalog.js';
 import { getDefinitiveAuthoritySeedPlan } from './services/definitiveAuthoritySeedPlan.js';
 import { getDefinitiveSubstrateArchitecturePlan } from './services/definitiveSubstrateArchitecturePlan.js';
+import { buildDefinitiveSchemaRegistry, getDefinitiveSchema } from './services/definitiveSchemas.js';
 import { ensureModelRegistrySeeded } from './services/modelRegistry.js';
 import rateLimit from 'express-rate-limit';
 import type { Request, Response, NextFunction } from 'express';
@@ -141,6 +142,11 @@ app.get('/.well-known/definitive.json', (_req, res) => {
   res.json(buildDefinitiveSpecManifest());
 });
 
+app.get('/.well-known/definitive-schemas.json', (_req, res) => {
+  setWellKnownHeaders(res);
+  res.json(buildDefinitiveSchemaRegistry());
+});
+
 app.get('/.well-known/mcp/server-card.json', (req, res) => {
   setWellKnownHeaders(res);
   res.json(buildDefinitiveMcpServerCard(discoveryOrigin(req)));
@@ -157,6 +163,18 @@ app.get('/api/agent-card', (_req, res) => {
 
 app.get('/api/definitive/spec', (_req, res) => {
   res.json(buildDefinitiveSpecManifest());
+});
+
+app.get('/api/definitive/schemas', (_req, res) => {
+  res.json(buildDefinitiveSchemaRegistry());
+});
+
+app.get('/api/definitive/schemas/:schemaName', (req, res) => {
+  const schema = getDefinitiveSchema(req.params.schemaName);
+  if (!schema) {
+    return res.status(404).json({ ok: false, error: 'schema_not_found', schemaName: req.params.schemaName });
+  }
+  return res.json(schema);
 });
 
 app.get('/definitive/spec', (_req, res) => {

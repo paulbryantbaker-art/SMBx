@@ -2,6 +2,7 @@ import { DEFINITIVE_METHODOLOGY_URI, DEFINITIVE_METHODOLOGY_VERSION, DEFINITIVE_
 import { buildDefinitiveSpecManifest } from './definitiveSpecManifest.js';
 import { listDefinitiveMcpTools } from './definitiveMcp.js';
 import { getDefinitiveSubstrateArchitecturePlan } from './definitiveSubstrateArchitecturePlan.js';
+import { getDefinitiveToolSchemaMap } from './definitiveSchemas.js';
 
 const MCP_DISCOVERY_PROTOCOL_VERSION = '2025-12-11';
 const MCP_SERVER_NAME = 'smbx-ai/diligence';
@@ -70,6 +71,7 @@ function buildToolAnnotations(toolName: string, lineStatus: string) {
 }
 
 function buildDiscoveryTool(tool: ReturnType<typeof listDefinitiveMcpTools>['tools'][number]) {
+  const toolSchemaMap = getDefinitiveToolSchemaMap();
   return {
     name: tool.name,
     title: tool.name.replace(/_/g, ' '),
@@ -81,6 +83,7 @@ function buildDiscoveryTool(tool: ReturnType<typeof listDefinitiveMcpTools>['too
     lineStatus: tool.lineStatus,
     refusalBehavior: tool.refusalBehavior,
     metering: tool.metering,
+    structuredContentSchemas: toolSchemaMap[tool.name] || null,
   };
 }
 
@@ -116,6 +119,8 @@ export function buildDefinitiveMcpServerCard(baseUrl?: string) {
         toolCall: `${origin}${manifest.endpoints.toolCall}`,
         serverCard: `${origin}/.well-known/mcp/server-card.json`,
         discoveryManifest: `${origin}/.well-known/mcp`,
+        schemaRegistry: `${origin}/api/definitive/schemas`,
+        wellKnownSchemaRegistry: `${origin}/.well-known/definitive-schemas.json`,
       },
     },
     capabilities: {
@@ -134,6 +139,8 @@ export function buildDefinitiveMcpServerCard(baseUrl?: string) {
       passThroughCatalog: `${origin}${manifest.endpoints.passThroughCatalog}`,
       authoritySeedPlan: `${origin}${manifest.endpoints.authoritySeedPlan}`,
       substrateArchitecture: `${origin}${manifest.endpoints.substrateArchitecture}`,
+      schemaRegistry: `${origin}/api/definitive/schemas`,
+      wellKnownSchemaRegistry: `${origin}/.well-known/definitive-schemas.json`,
       toolMetadataDoctrine: substrateArchitecture.toolMetadataDoctrine,
       publishedStandardDoctrine: substrateArchitecture.publishedStandardDoctrine,
       agentDiscoverabilityLayers: substrateArchitecture.agentDiscoverabilityLayers.map(layer => layer.id),
@@ -167,6 +174,8 @@ export function buildDefinitiveMcpWellKnownManifest(baseUrl?: string) {
     endpoints: [
       { type: 'server-card', url: `${origin}/.well-known/mcp/server-card.json`, auth: 'none' },
       { type: 'mcp-discovery', url: `${origin}/.well-known/mcp`, auth: 'none' },
+      { type: 'definitive-schema-registry', url: `${origin}/api/definitive/schemas`, auth: 'none' },
+      { type: 'definitive-schema-registry-well-known', url: `${origin}/.well-known/definitive-schemas.json`, auth: 'none' },
       { type: 'definitive-manifest', url: `${origin}${manifest.endpoints.specManifest}`, auth: 'none' },
       { type: 'agent-card', url: `${origin}${manifest.endpoints.agentCard}`, auth: 'none' },
       { type: 'tools-list', url: `${origin}${manifest.endpoints.toolsList}`, auth: 'bearer' },

@@ -206,6 +206,8 @@
       "fields": [
         { "path": "access.publicDiscovery", "includes": "/.well-known/mcp" },
         { "path": "access.publicDiscovery", "includes": "/.well-known/mcp/server-card.json" },
+        { "path": "access.publicDiscovery", "includes": "/.well-known/definitive-schemas.json" },
+        { "path": "access.publicDiscovery", "includes": "/api/definitive/schemas" },
         { "path": "access.publicDiscovery", "includes": "/api/definitive/pass-through-catalog" },
         { "path": "access.publicDiscovery", "includes": "/api/definitive/authority-seed-plan" },
         { "path": "access.publicDiscovery", "notIncludes": "/api/definitive/tools/{toolName}/call" },
@@ -697,7 +699,10 @@
         { "path": "endpoints.substrateArchitecture", "equals": "/api/definitive/substrate-architecture" },
         { "path": "access.publicDiscovery", "includes": "/api/definitive/substrate-architecture" },
         { "path": "substrateArchitectureSurface.primitiveCount", "equals": 8 },
-        { "path": "substrateArchitectureSurface.newMcpToolCount", "equals": 27 }
+        { "path": "substrateArchitectureSurface.newMcpToolCount", "equals": 27 },
+        { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "DealState" },
+        { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "DealStateDiff" },
+        { "path": "substrateArchitectureSurface.schemaRegistry.toolSchemaMap.ingest_deal_payload.output", "includes": "MissingInputContract" }
       ]
     }
   },

@@ -15,6 +15,7 @@ import {
 } from './definitiveDealMechanicsCatalog.js';
 import { getDefinitiveAuthoritySeedPlan } from './definitiveAuthoritySeedPlan.js';
 import { getDefinitiveSubstrateArchitecturePlan } from './definitiveSubstrateArchitecturePlan.js';
+import { buildDefinitiveSchemaRegistry } from './definitiveSchemas.js';
 
 export function buildAgentCard() {
   const models = listRegisteredModels();
@@ -30,6 +31,7 @@ export function buildAgentCard() {
   const passThroughSurface = getDefinitivePassThroughSurface();
   const authoritySeedPlan = getDefinitiveAuthoritySeedPlan();
   const substrateArchitecture = getDefinitiveSubstrateArchitecturePlan();
+  const schemaRegistry = buildDefinitiveSchemaRegistry();
   const lineSummary = lineInventory.reduce<Record<string, number>>((acc, contract) => {
     acc[contract.lineStatus] = (acc[contract.lineStatus] || 0) + 1;
     return acc;
@@ -48,6 +50,8 @@ export function buildAgentCard() {
       specManifestEndpoint: '/.well-known/definitive.json',
       mcpDiscoveryEndpoint: '/.well-known/mcp',
       mcpServerCardEndpoint: '/.well-known/mcp/server-card.json',
+      schemaRegistryEndpoint: '/api/definitive/schemas',
+      wellKnownSchemaRegistryEndpoint: '/.well-known/definitive-schemas.json',
       toolsEndpoint: '/api/definitive/tools/list',
       callEndpoint: '/api/definitive/tools/{toolName}/call',
       lineInventoryEndpoint: '/api/definitive/line/inventory',
@@ -69,6 +73,10 @@ export function buildAgentCard() {
       substrateArchitectureUri: substrateArchitecture.uri,
       substratePrimitiveCount: substrateArchitecture.primitiveCount,
       substrateNewMcpToolCount: substrateArchitecture.newMcpToolCount,
+      schemaRegistryVersion: schemaRegistry.version,
+      schemaRegistryUri: schemaRegistry.uri,
+      schemaRegistryCount: schemaRegistry.schemaCount,
+      schemaRegistryNames: schemaRegistry.schemaNames,
       dealOsDoctrine: substrateArchitecture.agentOperatingDoctrine.productDoctrine,
       agentHomeContract: substrateArchitecture.agentOperatingDoctrine.homeContract,
       agentNoRejectionContract: substrateArchitecture.agentOperatingDoctrine.noRejectionContract,
@@ -219,6 +227,19 @@ export function buildAgentCard() {
         firstBuildTarget: substrateArchitecture.immediateBuildOrder[0],
       },
       {
+        id: 'definitive_schema_registry',
+        label: 'DEFINITIVE schema registry',
+        status: 'available',
+        version: schemaRegistry.version,
+        uri: schemaRegistry.uri,
+        endpoint: '/api/definitive/schemas',
+        wellKnownEndpoint: '/.well-known/definitive-schemas.json',
+        schemaCount: schemaRegistry.schemaCount,
+        schemaNames: schemaRegistry.schemaNames,
+        toolSchemaMap: schemaRegistry.toolSchemaMap,
+        noRejectionContract: schemaRegistry.noRejectionContract,
+      },
+      {
         id: 'definitive_pass_through_surface',
         label: 'THE LINE-safe pass-through substrate',
         status: 'target',
@@ -246,8 +267,10 @@ export function buildAgentCard() {
       '/.well-known/definitive.json',
       '/.well-known/mcp',
       '/.well-known/mcp/server-card.json',
+      '/.well-known/definitive-schemas.json',
       '/api/agent-card',
       '/api/definitive/spec',
+      '/api/definitive/schemas',
       '/api/definitive/pass-through-catalog',
       '/api/definitive/authority-seed-plan',
       '/api/definitive/substrate-architecture',
