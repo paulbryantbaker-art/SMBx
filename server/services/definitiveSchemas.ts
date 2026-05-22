@@ -498,6 +498,36 @@ const NegotiationBrief: JsonSchema = {
   },
 };
 
+const FundsFlow: JsonSchema = {
+  $id: schemaId('FundsFlow'),
+  title: 'FundsFlow',
+  type: 'object',
+  additionalProperties: true,
+  required: ['flowId', 'schema', 'dealStateCid', 'dealStateHash', 'sourceRows', 'useRows', 'reconciliation', 'fundsFlowBoundary', 'next_suggested_calls'],
+  properties: {
+    flowId: { type: 'string' },
+    schema: { type: 'string', const: 'FundsFlow.v0.1' },
+    dealStateCid: { type: 'string' },
+    dealStateHash: { type: 'string' },
+    objective: { type: 'string' },
+    audience: { type: 'string' },
+    stage: { type: 'string' },
+    readinessLevel: { type: 'string' },
+    sourceRows: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    useRows: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    adjustments: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    reconciliation: { type: 'object', additionalProperties: true },
+    sourceRefs: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    sourceGaps: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    handoffs: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    modelDependencies: { type: 'object', additionalProperties: true },
+    fundsFlowBoundary: { type: 'object', additionalProperties: true },
+    next_suggested_calls: { type: 'array', items: { $ref: schemaId('MCPCallHint') } },
+    takeBackArtifacts: { type: 'array', items: { type: 'string' } },
+    lineInvariant: { type: 'string' },
+  },
+};
+
 const PMIPlan: JsonSchema = {
   $id: schemaId('PMIPlan'),
   title: 'PMIPlan',
@@ -580,6 +610,7 @@ export const DEFINITIVE_SCHEMAS: Record<string, JsonSchema> = {
   DisclosureSubset,
   DocumentDraft,
   NegotiationBrief,
+  FundsFlow,
   PMIPlan,
   DefinitionOfDone,
   DefinitiveToolEnvelope,
@@ -665,6 +696,11 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     input: ['DealState', 'DealPayload'],
     output: ['NegotiationBrief', 'DealState', 'MissingInputContract', 'MCPCallHint'],
     takeBack: ['NegotiationBrief', 'SourceGapList', 'MCPCallHint'],
+  },
+  generate_funds_flow: {
+    input: ['DealState', 'DealPayload'],
+    output: ['FundsFlow', 'DealState', 'MissingInputContract', 'MCPCallHint'],
+    takeBack: ['FundsFlow', 'DealState', 'DocumentDraft', 'MCPCallHint'],
   },
   compose_pmi_plan: {
     input: ['DealState', 'DealPayload'],

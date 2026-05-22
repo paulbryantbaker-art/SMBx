@@ -591,6 +591,7 @@
         { "path": "toolNames", "includes": "disclose_subset" },
         { "path": "toolNames", "includes": "compose_document_draft" },
         { "path": "toolNames", "includes": "prepare_negotiation_brief" },
+        { "path": "toolNames", "includes": "generate_funds_flow" },
         { "path": "toolNames", "includes": "compose_pmi_plan" },
         { "path": "toolsByName.ingest_deal_payload.description", "includes": "DealPayload" },
         { "path": "toolsByName.ingest_deal_payload.description", "includes": "MissingInputContract" },
@@ -609,6 +610,7 @@
         { "path": "toolsByName.disclose_subset.description", "includes": "DisclosureSubset" },
         { "path": "toolsByName.compose_document_draft.description", "includes": "DocumentDraft" },
         { "path": "toolsByName.prepare_negotiation_brief.description", "includes": "NegotiationBrief" },
+        { "path": "toolsByName.generate_funds_flow.description", "includes": "FundsFlow" },
         { "path": "toolsByName.compose_pmi_plan.description", "includes": "PMIPlan" },
         { "path": "toolNames", "includes": "compose_model_stack" },
         { "path": "toolsByName.compose_model_stack.description", "includes": "G28" },
@@ -739,6 +741,7 @@
         { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "DisclosureSubset" },
         { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "DocumentDraft" },
         { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "NegotiationBrief" },
+        { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "FundsFlow" },
         { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "PMIPlan" },
         { "path": "substrateArchitectureSurface.schemaRegistry.toolSchemaMap.ingest_deal_payload.output", "includes": "MissingInputContract" }
       ]

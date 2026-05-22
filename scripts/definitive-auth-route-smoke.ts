@@ -58,6 +58,7 @@ try {
     assert(body.tools.some((tool: any) => tool.name === 'disclose_subset'), 'disclose_subset is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_document_draft'), 'compose_document_draft is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'prepare_negotiation_brief'), 'prepare_negotiation_brief is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'generate_funds_flow'), 'generate_funds_flow is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_pmi_plan'), 'compose_pmi_plan is advertised');
   });
 
@@ -605,6 +606,47 @@ try {
     assert(brief.openTerms.some((term: any) => term.id === 'purchase_price'), 'purchase price term exists');
     assertEqual(brief.negotiationBoundary.noRecommendation, true, 'negotiation brief does not recommend');
     assert(brief.takeBackArtifacts.includes('NegotiationBrief'), 'negotiation brief take-back exposed');
+  });
+
+  await test('Authenticated generate_funds_flow returns closing arithmetic packet', async () => {
+    const response = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'generate_funds_flow',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-state:read', 'studio:draft', 'model-stack:compose'],
+      input: {
+        payload: {
+          journey: 'buy',
+          targetName: 'DEFINITIVE Route Fixture Deal',
+          industry: 'software',
+          jurisdiction: 'US-DE',
+          purchasePriceCents: 9_000_000_00,
+          equityContributionCents: 4_000_000_00,
+          seniorDebtCents: 6_000_000_00,
+          escrowCents: 500_000_00,
+          transactionExpensesCents: 500_000_00,
+          documents: [
+            { id: 'qoe', name: 'Closing QoE', type: 'qoe', hash: 'sha256:fixture-qoe' },
+            { id: 'credit', name: 'Debt commitment', type: 'credit agreement', hash: 'sha256:fixture-credit' },
+            { id: 'closing', name: 'Closing checklist', type: 'legal', hash: 'sha256:fixture-closing' },
+            { id: 'tax', name: 'Tax allocation memo', type: 'tax', hash: 'sha256:fixture-tax' },
+          ],
+        },
+      },
+    });
+
+    assertEqual(response.status, 200, 'funds flow route status');
+    assertEqual(response.body.ok, true, 'funds flow route ok');
+    assertEqual(response.body.toolName, 'generate_funds_flow', 'funds flow tool name');
+    const flow = response.body.result?.result?.fundsFlow;
+    assertEqual(flow.schema, 'FundsFlow.v0.1', 'funds flow schema');
+    assertEqual(flow.reconciliation.status, 'balanced', 'funds flow is balanced');
+    assertEqual(flow.fundsFlowBoundary.noMoneyMovement, true, 'funds flow does not move money');
+    assertEqual(flow.fundsFlowBoundary.noWireInstructions, true, 'funds flow does not issue wire instructions');
+    assert(flow.takeBackArtifacts.includes('FundsFlow'), 'funds flow take-back exposed');
   });
 
   await test('Authenticated compose_pmi_plan returns post-close plan packet', async () => {

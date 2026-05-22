@@ -168,6 +168,8 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
       return composeDefinitiveDocumentDraft(input);
     case 'prepare_negotiation_brief':
       return prepareDefinitiveNegotiationBrief(input);
+    case 'generate_funds_flow':
+      return generateDefinitiveFundsFlow(input);
     case 'compose_pmi_plan':
       return composeDefinitivePmiPlan(input);
     default:
@@ -191,6 +193,7 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
           'disclose_subset',
           'compose_document_draft',
           'prepare_negotiation_brief',
+          'generate_funds_flow',
           'compose_pmi_plan',
         ],
       };
@@ -215,6 +218,7 @@ export function isDefinitiveDealStateTool(toolName: string): boolean {
     'disclose_subset',
     'compose_document_draft',
     'prepare_negotiation_brief',
+    'generate_funds_flow',
     'compose_pmi_plan',
   ].includes(toolName);
 }
@@ -1108,7 +1112,7 @@ export function composeDefinitiveDocumentDraft(input: Record<string, any>) {
   const audience = textValue(input.audience) || audienceForDocumentType(documentType);
   const sections = buildDocumentDraftSections(documentType, state);
   const missingSourceCategories = uniqueStrings(sections.flatMap(section => section.missingSourceCategories));
-  const needsModelState = ['ic_memo', 'loi_outline', 'negotiation_brief'].includes(documentType) && !state.completenessReport.satisfied.includes('model_state_present');
+  const needsModelState = ['ic_memo', 'loi_outline', 'negotiation_brief', 'funds_flow'].includes(documentType) && !state.completenessReport.satisfied.includes('model_state_present');
   const draftInput = {
     dealStateHash: state.stateHash,
     documentType,
@@ -1273,6 +1277,128 @@ export function prepareDefinitiveNegotiationBrief(input: Record<string, any>) {
       missingInputContract: state.missingInputContract,
       next_suggested_calls: negotiationBrief.next_suggested_calls,
       portableTakeBackArtifacts: negotiationBrief.takeBackArtifacts,
+    },
+    state_hash_after: state.stateHash,
+    completeness_contribution_delta: 0,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
+export function generateDefinitiveFundsFlow(input: Record<string, any>) {
+  const state = stateFromInput(input);
+  const objective = textValue(input.objective) || 'closing_funds_flow';
+  const audience = textValue(input.audience) || 'internal_deal_team_and_closing_advisors';
+  const sourceRefs = sourceRefsForCategories(state, ['financials', 'legal', 'tax', 'financing']);
+  const sourceGaps = ['financials', 'legal', 'tax', 'financing']
+    .filter(category => !sourceRefs.some(source => source.category === category))
+    .map(category => ({
+      category,
+      reason: `Funds flow needs ${category} source support before closing use.`,
+      suggestedTool: 'compose_data_room_index',
+    }));
+  const sourceRows = buildFundsFlowSources(state);
+  const useRows = buildFundsFlowUses(state);
+  const adjustments = buildFundsFlowAdjustments(state);
+  const reconciliation = buildFundsFlowReconciliation(sourceRows, useRows);
+  const handoffs = buildFundsFlowHandoffs(state);
+  const needsModelState = !state.completenessReport.satisfied.includes('model_state_present');
+  const flowHash = sha256(stableStringify({
+    dealStateHash: state.stateHash,
+    objective,
+    audience,
+    sourceRows,
+    useRows,
+    adjustments,
+    reconciliation,
+    sourceGaps,
+    methodologyVersion: DEFINITIVE_METHODOLOGY_VERSION,
+  }));
+  const fundsFlow = {
+    flowId: `fundsflow_${flowHash.slice(0, 16)}`,
+    schema: 'FundsFlow.v0.1',
+    dealStateCid: state.cid,
+    dealStateHash: state.stateHash,
+    objective,
+    audience,
+    stage: currentStageForState(state),
+    readinessLevel: state.completenessReport.level,
+    sourceRows,
+    useRows,
+    adjustments,
+    reconciliation,
+    sourceRefs,
+    sourceGaps,
+    handoffs,
+    modelDependencies: {
+      required: needsModelState,
+      status: needsModelState ? 'missing_model_state' : 'not_blocked',
+      suggestedTool: needsModelState ? 'compose_model_stack' : null,
+      preferredModels: ['sources_and_uses', 'M210', 'M208', 'M203', 'M204'],
+    },
+    fundsFlowBoundary: {
+      composedOnly: true,
+      noMoneyMovement: true,
+      noWireInstructions: true,
+      noEscrowAgentAuthority: true,
+      noClosingAuthority: true,
+      noLegalOrTaxOpinion: true,
+      noExternalTransmission: true,
+      userAndClosingTeamDecide:
+        'The user, counsel, lender, escrow/closing agent, and tax advisors decide final disbursement instructions, wire details, closing authority, payoff letters, and tax withholding positions.',
+    },
+    next_suggested_calls: [
+      ...(sourceGaps.length
+        ? [{
+            toolName: 'compose_data_room_index',
+            priority: 'P1' as const,
+            reason: `Fill funds-flow source gaps: ${sourceGaps.map(gap => gap.category).join(', ')}.`,
+            inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
+          }]
+        : []),
+      ...(needsModelState
+        ? [{
+            toolName: 'compose_model_stack',
+            priority: 'P1' as const,
+            reason: 'Tie funds-flow rows to deterministic model outputs before closing reliance.',
+            inputHint: {
+              journey: state.classificationKey.journey,
+              league: state.classificationKey.league === 'unknown' ? undefined : state.classificationKey.league,
+              dealType: state.payload.dealType || state.payload.structure || state.classificationKey.subJourney,
+              signals: state.signals || undefined,
+            },
+          }]
+        : []),
+      {
+        toolName: 'compose_document_draft',
+        priority: sourceGaps.length || needsModelState ? 'P2' as const : 'P1' as const,
+        reason: 'Render the funds-flow packet into a source-aware Studio closing scaffold.',
+        inputHint: {
+          dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision },
+          documentType: 'funds_flow',
+          audience,
+        },
+      },
+      {
+        toolName: 'compose_deal_package',
+        priority: reconciliation.status === 'balanced' ? 'P1' as const : 'P2' as const,
+        reason: 'Package funds-flow rows with DealState, source refs, and THE LINE boundaries for agent take-back.',
+        inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
+      },
+    ],
+    takeBackArtifacts: ['FundsFlow', 'DealState', 'DocumentDraft', 'MCPCallHint[]'],
+    lineInvariant: LINE_INVARIANT,
+  };
+
+  return {
+    ok: true,
+    action: 'generate_funds_flow',
+    result: {
+      fundsFlow,
+      dealState: state,
+      missingInputContract: state.missingInputContract,
+      next_suggested_calls: fundsFlow.next_suggested_calls,
+      portableTakeBackArtifacts: fundsFlow.takeBackArtifacts,
     },
     state_hash_after: state.stateHash,
     completeness_contribution_delta: 0,
@@ -2201,6 +2327,7 @@ function normalizeDocumentType(value: unknown): string {
   if (matches(text, ['ic', 'investment_committee', 'memo'])) return 'ic_memo';
   if (matches(text, ['diligence', 'request'])) return 'diligence_request';
   if (matches(text, ['negotiation'])) return 'negotiation_brief';
+  if (matches(text, ['funds_flow', 'funds flow', 'closing statement', 'settlement statement'])) return 'funds_flow';
   if (matches(text, ['pmi', 'integration', 'post_close'])) return 'pmi_plan';
   return 'deal_brief';
 }
@@ -2216,6 +2343,8 @@ function audienceForDocumentType(documentType: string): string {
       return 'deal_team_and_counterparty';
     case 'negotiation_brief':
       return 'internal_deal_team';
+    case 'funds_flow':
+      return 'internal_deal_team_and_closing_advisors';
     case 'pmi_plan':
       return 'operators_and_integration_team';
     default:
@@ -2236,6 +2365,8 @@ function documentDraftTitle(documentType: string, state: DefinitiveDealState): s
       return `${subject} diligence request list scaffold`;
     case 'negotiation_brief':
       return `${subject} negotiation brief scaffold`;
+    case 'funds_flow':
+      return `${subject} funds flow scaffold`;
     case 'pmi_plan':
       return `${subject} PMI plan scaffold`;
     default:
@@ -2305,6 +2436,12 @@ function documentSectionCategoryPlan(documentType: string) {
         sectionPlan('open_terms', 'Open terms', ['legal', 'financials'], 'Organize unresolved economics and source-backed positions.', commonBoundary),
         sectionPlan('model_backed_ranges', 'Model-backed ranges', ['financials', 'tax'], 'Show deterministic model dependencies and source gaps behind each economic range.', commonBoundary),
         sectionPlan('handoffs', 'Counsel and advisor handoffs', ['legal', 'tax'], 'Separate computed facts from legal, tax, fairness, solvency, feasibility, and negotiation determinations.', LINE_INVARIANT),
+      ];
+    case 'funds_flow':
+      return [
+        sectionPlan('funding_sources', 'Funding sources', ['financials', 'financing'], 'List source rows from supplied equity, debt, seller note, and rollover facts.', commonBoundary),
+        sectionPlan('uses_and_adjustments', 'Uses and adjustments', ['financials', 'legal', 'tax'], 'Track purchase price, payoff, escrow, working-capital adjustment, fees, and withholding rows.', LINE_INVARIANT),
+        sectionPlan('closing_handoffs', 'Closing handoffs', ['legal', 'financing', 'tax'], 'Separate arithmetic from wire instructions, escrow authority, payoff letters, and tax positions.', LINE_INVARIANT),
       ];
     case 'pmi_plan':
       return [
@@ -2480,6 +2617,131 @@ function buildPmiWorkstreams(state: DefinitiveDealState) {
       ],
     ),
   ];
+}
+
+function buildFundsFlowSources(state: DefinitiveDealState) {
+  const payload = state.payload;
+  return [
+    fundsFlowRow('equity_contribution', 'Equity contribution', 'source', firstNumber(payload, ['equityContributionCents', 'buyerEquityCents', 'sponsorEquityCents', 'cashEquityCents']), true, ['financials', 'financing'], 'Equity funding amount is organized from payload facts or model output; it is not a capital call or funding instruction.'),
+    fundsFlowRow('senior_debt', 'Senior debt / loan proceeds', 'source', firstNumber(payload, ['seniorDebtCents', 'debtFinancingCents', 'loanProceedsCents', 'sbaLoanCents']), true, ['financing'], 'Debt proceeds require lender documents and closing-agent confirmation before use.'),
+    fundsFlowRow('seller_note', 'Seller note', 'source', firstNumber(payload, ['sellerNoteCents', 'sellerFinancingCents']), false, ['legal', 'financing'], 'Seller note is tracked as consideration mechanics, not cash wired at closing unless closing advisors specify otherwise.'),
+    fundsFlowRow('rollover_equity', 'Rollover equity', 'source', firstNumber(payload, ['rolloverCents']), false, ['legal', 'tax'], 'Rollover is non-cash consideration tracked for agreement and tax review.'),
+  ].filter(row => row.status !== 'missing' || row.id === 'equity_contribution' || row.id === 'senior_debt');
+}
+
+function buildFundsFlowUses(state: DefinitiveDealState) {
+  const payload = state.payload;
+  return [
+    fundsFlowRow('purchase_price', 'Purchase price / seller consideration', 'use', firstNumber(payload, ['purchasePriceCents', 'headlinePriceCents', 'enterpriseValueCents']), true, ['financials', 'legal'], 'Purchase price is a payload or model fact until confirmed by signed documents and closing advisors.'),
+    fundsFlowRow('debt_payoff', 'Debt payoff', 'use', firstNumber(payload, ['debtPayoffCents', 'sellerDebtPayoffCents', 'payoffCents']), true, ['financing', 'legal'], 'Payoff requires signed payoff letters and closing-agent confirmation; DEFINITIVE does not issue payoff instructions.'),
+    fundsFlowRow('working_capital_adjustment', 'Working capital adjustment', 'use', firstNumber(payload, ['workingCapitalAdjustmentCents', 'nwcAdjustmentCents', 'closingStatementAdjustmentCents']), true, ['financials'], 'Working-capital adjustment must reconcile to closing statement mechanics and accounting review.'),
+    fundsFlowRow('escrow_holdback', 'Escrow / holdback funding', 'use', firstNumber(payload, ['escrowCents', 'holdbackCents']), true, ['legal', 'financials'], 'Escrow/holdback row is a draft allocation; escrow agreement and counsel control final terms.'),
+    fundsFlowRow('transaction_expenses', 'Transaction expenses and fees', 'use', firstNumber(payload, ['transactionExpensesCents', 'feesCents', 'closingCostsCents']), true, ['financials', 'tax'], 'Expense treatment and payment instructions require advisor/counsel review.'),
+    fundsFlowRow('tax_withholding', 'Tax withholding', 'use', firstNumber(payload, ['withholdingCents', 'taxWithholdingCents', 'firptaWithholdingCents']), true, ['tax'], 'Tax withholding is computed/organized only; tax advisors decide withholding positions and forms.'),
+  ].filter(row => row.status !== 'missing' || row.id === 'purchase_price');
+}
+
+function buildFundsFlowAdjustments(state: DefinitiveDealState) {
+  const payload = state.payload;
+  return [
+    fundsFlowAdjustment('cash_free_debt_free', 'Cash-free / debt-free adjustment', firstNumber(payload, ['cashFreeDebtFreeAdjustmentCents', 'netDebtAdjustmentCents']), ['financials', 'financing']),
+    fundsFlowAdjustment('working_capital_true_up', 'Working capital true-up', firstNumber(payload, ['workingCapitalAdjustmentCents', 'nwcAdjustmentCents', 'closingStatementAdjustmentCents']), ['financials']),
+    fundsFlowAdjustment('escrow_or_holdback', 'Escrow / holdback', firstNumber(payload, ['escrowCents', 'holdbackCents']), ['legal', 'financials']),
+    fundsFlowAdjustment('seller_expenses', 'Seller expenses', firstNumber(payload, ['sellerExpensesCents', 'sellerTransactionExpensesCents']), ['financials', 'tax']),
+    fundsFlowAdjustment('contingent_consideration', 'Contingent consideration / earnout', firstNumber(payload, ['earnoutCents', 'contingentConsiderationCents']), ['financials', 'legal', 'tax']),
+  ].filter(adjustment => adjustment.status !== 'missing');
+}
+
+function buildFundsFlowReconciliation(sourceRows: Array<Record<string, any>>, useRows: Array<Record<string, any>>) {
+  const cashSourcesCents = sumFundsFlowRows(sourceRows, true);
+  const cashUsesCents = sumFundsFlowRows(useRows, true);
+  const varianceCents = cashSourcesCents - cashUsesCents;
+  const missingCriticalRows = [
+    ...sourceRows.filter(row => row.status === 'missing' && row.cashFlowingAtClose).map(row => row.id),
+    ...useRows.filter(row => row.status === 'missing' && row.cashFlowingAtClose).map(row => row.id),
+  ];
+  return {
+    cashSourcesCents,
+    cashUsesCents,
+    varianceCents,
+    status: missingCriticalRows.length
+      ? 'missing_rows'
+      : varianceCents === 0
+        ? 'balanced'
+        : 'variance_present',
+    missingCriticalRows,
+    boundary:
+      'Reconciliation is arithmetic over supplied rows. Closing advisors, lender, escrow agent, and counsel confirm final settlement statement and disbursement flow.',
+  };
+}
+
+function buildFundsFlowHandoffs(state: DefinitiveDealState) {
+  const handoffs: Array<Record<string, any>> = buildPackageDeferrals(state).map(deferral => ({
+    ...deferral,
+    lineStatus: 'requires_professional_or_user_determination',
+  }));
+  handoffs.push({
+    category: 'closing_agent_or_escrow',
+    reason: 'Wire details, escrow ledger, payoff instructions, and final disbursement authority remain with the closing agent or escrow holder.',
+    suggestedTool: 'defer_to_counsel',
+    lineStatus: 'external_professional_required',
+  });
+  handoffs.push({
+    category: 'lender_and_payoff_letters',
+    reason: 'Debt proceeds and payoff rows require lender-approved closing documents and payoff letters.',
+    suggestedTool: 'compose_data_room_index',
+    lineStatus: 'source_required',
+  });
+  if (state.classificationKey.taxClassification !== 'unknown') {
+    handoffs.push({
+      category: 'tax_withholding_review',
+      reason: 'Withholding, allocation, and transaction-cost treatment require tax review before closing use.',
+      suggestedTool: 'defer_to_counsel',
+      lineStatus: 'tax_review_required',
+    });
+  }
+  return handoffs;
+}
+
+function fundsFlowRow(
+  id: string,
+  label: string,
+  direction: 'source' | 'use',
+  amountCents: number | null,
+  cashFlowingAtClose: boolean,
+  sourceCategories: string[],
+  boundary: string,
+) {
+  return {
+    id,
+    label,
+    direction,
+    status: amountCents == null ? 'missing' : 'payload_fact_present',
+    amountCents,
+    currency: 'USD',
+    cashFlowingAtClose,
+    sourceCategories,
+    boundary,
+  };
+}
+
+function fundsFlowAdjustment(id: string, label: string, amountCents: number | null, sourceCategories: string[]) {
+  return {
+    id,
+    label,
+    status: amountCents == null ? 'missing' : 'payload_fact_present',
+    amountCents,
+    currency: 'USD',
+    sourceCategories,
+    boundary:
+      'Adjustment is organized as closing arithmetic. The user, counsel, accountant, and closing agent decide final settlement treatment.',
+  };
+}
+
+function sumFundsFlowRows(rows: Array<Record<string, any>>, cashOnly: boolean) {
+  return rows
+    .filter(row => !cashOnly || row.cashFlowingAtClose)
+    .reduce((total, row) => total + (typeof row.amountCents === 'number' ? row.amountCents : 0), 0);
 }
 
 function pmiWorkstream(

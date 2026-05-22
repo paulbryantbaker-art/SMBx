@@ -31,6 +31,7 @@ const DEFINITIVE_MCP_TOOLS = [
   'disclose_subset',
   'compose_document_draft',
   'prepare_negotiation_brief',
+  'generate_funds_flow',
   'compose_pmi_plan',
   'lookup_citation',
   'fetch_market_data',
@@ -216,7 +217,7 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
       properties: {
         dealState: { type: 'object', description: 'Optional content-addressed DealState from a prior call.' },
         payload: { type: 'object', description: 'Optional DealPayload when a DealState is not yet available.' },
-        documentType: { type: 'string', description: 'Draft type: deal_brief, ioi, loi_outline, ic_memo, diligence_request, negotiation_brief, or pmi_plan.' },
+        documentType: { type: 'string', description: 'Draft type: deal_brief, ioi, loi_outline, ic_memo, diligence_request, negotiation_brief, funds_flow, or pmi_plan.' },
         audience: { type: 'string', description: 'Optional audience label for the Studio draft scaffold.' },
       },
     },
@@ -230,6 +231,18 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
         payload: { type: 'object', description: 'Optional DealPayload when a DealState is not yet available.' },
         objective: { type: 'string', description: 'Optional negotiation objective or topic.' },
         audience: { type: 'string', description: 'Optional audience label. Defaults to internal_deal_team.' },
+      },
+    },
+  },
+  generate_funds_flow: {
+    description: 'Generate a portable FundsFlow from a DealState or DealPayload for closing arithmetic, organizing funding sources, uses, adjustments, reconciliation, source gaps, model dependencies, handoffs, and next_suggested_calls. It does not move money, provide wire instructions, act as escrow/closing agent, provide legal/tax opinions, or transmit externally.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dealState: { type: 'object', description: 'Optional content-addressed DealState from a prior call.' },
+        payload: { type: 'object', description: 'Optional DealPayload with purchase price, debt proceeds, equity contribution, payoff amounts, escrow, working-capital adjustment, tax withholding, model outputs, or source index.' },
+        objective: { type: 'string', description: 'Optional funds-flow objective or topic.' },
+        audience: { type: 'string', description: 'Optional audience label. Defaults to internal_deal_team_and_closing_advisors.' },
       },
     },
   },
@@ -393,6 +406,7 @@ const TOOL_SCOPE: Record<DefinitiveMcpToolName, string[]> = {
   disclose_subset: ['deal-state:read', 'data-room:read', 'deal-package:compose'],
   compose_document_draft: ['deal-state:read', 'studio:draft'],
   prepare_negotiation_brief: ['deal-state:read', 'studio:draft', 'model-stack:compose'],
+  generate_funds_flow: ['deal-state:read', 'studio:draft', 'model-stack:compose'],
   compose_pmi_plan: ['deal-state:read', 'studio:draft', 'model-stack:compose'],
   lookup_citation: ['citation:read', 'authority:read'],
   fetch_market_data: ['market-data:read'],

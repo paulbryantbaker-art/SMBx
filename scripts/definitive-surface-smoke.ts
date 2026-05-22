@@ -73,6 +73,7 @@ const expectedTools = [
   'disclose_subset',
   'compose_document_draft',
   'prepare_negotiation_brief',
+  'generate_funds_flow',
   'compose_pmi_plan',
   'lookup_citation',
   'fetch_market_data',
@@ -315,6 +316,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.schemaNames.includes('DisclosureSubset'), 'schema registry exposes DisclosureSubset');
   assert(registry.schemaNames.includes('DocumentDraft'), 'schema registry exposes DocumentDraft');
   assert(registry.schemaNames.includes('NegotiationBrief'), 'schema registry exposes NegotiationBrief');
+  assert(registry.schemaNames.includes('FundsFlow'), 'schema registry exposes FundsFlow');
   assert(registry.schemaNames.includes('PMIPlan'), 'schema registry exposes PMIPlan');
   assertEqual(registry.schemas.DealPayload.properties.revenueCents.type, 'integer', 'money is cents integer');
   assert(registry.toolSchemaMap.ingest_deal_payload.output.includes('MissingInputContract'), 'ingest output maps missing input contract');
@@ -329,6 +331,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.toolSchemaMap.disclose_subset.takeBack.includes('DisclosureSubset'), 'disclosure subset maps DisclosureSubset');
   assert(registry.toolSchemaMap.compose_document_draft.takeBack.includes('DocumentDraft'), 'document draft maps DocumentDraft');
   assert(registry.toolSchemaMap.prepare_negotiation_brief.takeBack.includes('NegotiationBrief'), 'negotiation brief maps NegotiationBrief');
+  assert(registry.toolSchemaMap.generate_funds_flow.takeBack.includes('FundsFlow'), 'funds flow maps FundsFlow');
   assert(registry.toolSchemaMap.compose_pmi_plan.takeBack.includes('PMIPlan'), 'PMI plan maps PMIPlan');
   assert(registry.noRejectionContract.includes('DealPayload may be incomplete'), 'schema registry states no-rejection contract');
 });
@@ -899,6 +902,44 @@ await test('NegotiationBrief organizes open terms without negotiating', async ()
   assertEqual(brief.negotiationBoundary.noNegotiationAuthority, true, 'brief does not negotiate');
   assert(brief.next_suggested_calls.some((call: any) => call.toolName === 'compose_model_stack'), 'brief asks for model stack when missing');
   assert(brief.takeBackArtifacts.includes('NegotiationBrief'), 'negotiation brief is portable');
+});
+
+await test('FundsFlow organizes closing arithmetic without moving money', async () => {
+  const response = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'generate_funds_flow',
+    input: {
+      payload: {
+        journey: 'buy',
+        targetName: 'Closing Target',
+        industry: 'industrial services',
+        jurisdiction: 'US-TX',
+        purchasePriceCents: 9_000_000_00,
+        equityContributionCents: 4_000_000_00,
+        seniorDebtCents: 6_000_000_00,
+        sellerNoteCents: 1_000_000_00,
+        escrowCents: 500_000_00,
+        transactionExpensesCents: 500_000_00,
+        documents: [
+          { id: 'qoe', name: 'Closing QoE', type: 'qoe', hash: 'sha256:qoe' },
+          { id: 'credit', name: 'Debt commitment', type: 'credit agreement', hash: 'sha256:credit' },
+          { id: 'closing', name: 'Closing checklist', type: 'legal', hash: 'sha256:closing' },
+          { id: 'tax', name: 'Tax allocation memo', type: 'tax', hash: 'sha256:tax' },
+        ],
+      },
+    },
+    envelope: {},
+  });
+  assertEqual(response.status, 200, 'funds flow status');
+  const flow = response.body.result.result.fundsFlow;
+  assertEqual(flow.schema, 'FundsFlow.v0.1', 'funds flow schema');
+  assert(flow.sourceRows.some((row: any) => row.id === 'equity_contribution' && row.amountCents === 4_000_000_00), 'funds flow carries equity source');
+  assert(flow.useRows.some((row: any) => row.id === 'purchase_price' && row.amountCents === 9_000_000_00), 'funds flow carries purchase price use');
+  assertEqual(flow.reconciliation.status, 'balanced', 'funds flow reconciles supplied cash rows');
+  assertEqual(flow.fundsFlowBoundary.noMoneyMovement, true, 'funds flow does not move money');
+  assertEqual(flow.fundsFlowBoundary.noWireInstructions, true, 'funds flow does not issue wire instructions');
+  assert(flow.next_suggested_calls.some((call: any) => call.toolName === 'compose_document_draft'), 'funds flow can become Studio draft');
+  assert(flow.takeBackArtifacts.includes('FundsFlow'), 'funds flow is portable');
 });
 
 await test('PMIPlan organizes post-close work without operating authority', async () => {
