@@ -63,6 +63,7 @@ const expectedTools = [
   'get_definition_of_done',
   'compose_deal_plan',
   'diff_deal_state',
+  'compose_deal_package',
   'lookup_citation',
   'fetch_market_data',
   'defer_to_counsel',
@@ -294,9 +295,11 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.schemaNames.includes('CompletenessReport'), 'schema registry exposes CompletenessReport');
   assert(registry.schemaNames.includes('DealPlan'), 'schema registry exposes DealPlan');
   assert(registry.schemaNames.includes('DealStateDiff'), 'schema registry exposes DealStateDiff');
+  assert(registry.schemaNames.includes('DealPackage'), 'schema registry exposes DealPackage');
   assertEqual(registry.schemas.DealPayload.properties.revenueCents.type, 'integer', 'money is cents integer');
   assert(registry.toolSchemaMap.ingest_deal_payload.output.includes('MissingInputContract'), 'ingest output maps missing input contract');
   assert(registry.toolSchemaMap.diff_deal_state.takeBack.includes('DealStateDiff'), 'diff take-back maps DealStateDiff');
+  assert(registry.toolSchemaMap.compose_deal_package.takeBack.includes('DealPackage'), 'package take-back maps DealPackage');
   assert(registry.noRejectionContract.includes('DealPayload may be incomplete'), 'schema registry states no-rejection contract');
 });
 
@@ -561,6 +564,31 @@ await test('DealPlan and DealStateDiff make recursive agent work portable', asyn
   assert(dealStateDiff.changedPaths.includes('ebitdaCents'), 'diff tracks changed economic fact');
   assert(dealStateDiff.completenessScoreDelta > 0, 'diff tracks completeness gain');
   assert(diff.body.result.result.portableTakeBackArtifacts.includes('DealStateDiff'), 'diff is portable');
+});
+
+await test('DealPackage gives agents a complete take-back packet', async () => {
+  const response = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'compose_deal_package',
+    input: {
+      payload: {
+        journey: 'buy',
+        targetName: 'Package Target',
+        industry: 'business services',
+        jurisdiction: 'US-TX',
+        ebitdaCents: 3_100_000_00,
+        dealStructure: 'asset purchase with rollover',
+        documents: [{ name: 'QoE draft', type: 'qoe', hash: 'sha256:qoe' }],
+      },
+    },
+    envelope: {},
+  });
+  assertEqual(response.status, 200, 'deal package status');
+  const dealPackage = response.body.result.result.dealPackage;
+  assert(dealPackage.packageCid.startsWith('definitive:deal-package:sha256:'), 'deal package is content addressed');
+  assert(dealPackage.takeBackArtifacts.includes('DealPackage'), 'package includes itself as take-back artifact');
+  assert(dealPackage.next_suggested_calls.some((call: any) => call.toolName === 'compose_model_stack'), 'package includes next calls');
+  assertEqual(dealPackage.classificationKey.journey, 'buy', 'package preserves classification');
 });
 
 await test('Corpus discovery and sanitizer block raw identifiers without DB work', async () => {

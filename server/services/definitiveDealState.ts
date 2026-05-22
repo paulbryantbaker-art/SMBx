@@ -148,6 +148,8 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
       return composeDefinitiveDealPlan(input);
     case 'diff_deal_state':
       return diffDefinitiveDealState(input);
+    case 'compose_deal_package':
+      return composeDefinitiveDealPackage(input);
     default:
       return {
         ok: false,
@@ -159,6 +161,7 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
           'get_definition_of_done',
           'compose_deal_plan',
           'diff_deal_state',
+          'compose_deal_package',
         ],
       };
   }
@@ -172,6 +175,7 @@ export function isDefinitiveDealStateTool(toolName: string): boolean {
     'get_definition_of_done',
     'compose_deal_plan',
     'diff_deal_state',
+    'compose_deal_package',
   ].includes(toolName);
 }
 
@@ -322,6 +326,56 @@ export function diffDefinitiveDealState(input: Record<string, any>) {
   };
 }
 
+export function composeDefinitiveDealPackage(input: Record<string, any>) {
+  const state = stateFromInput(input);
+  const dealPlan = buildDealPlan(state);
+  const nextSuggestedCalls = buildNextCallHints(state);
+  const dealPackage = {
+    packageId: `dealpkg_${state.stateHash.slice(0, 16)}`,
+    packageCid: `definitive:deal-package:sha256:${sha256(stableStringify({
+      stateHash: state.stateHash,
+      dealPlanId: dealPlan.planId,
+      schema: 'DealPackage.v0.1',
+    }))}`,
+    schema: 'DealPackage.v0.1',
+    dealStateCid: state.cid,
+    dealStateHash: state.stateHash,
+    readinessLevel: state.completenessReport.level,
+    classificationKey: state.classificationKey,
+    completenessReport: state.completenessReport,
+    missingInputContract: state.missingInputContract,
+    dealPlan,
+    sourceIndex: state.sourceIndex,
+    next_suggested_calls: nextSuggestedCalls,
+    takeBackArtifacts: [
+      'DealPackage',
+      'DealState',
+      'DealPlan',
+      'ClassificationKey',
+      'CompletenessReport',
+      'MissingInputContract',
+      'MCPCallHint[]',
+    ],
+    excludedOrDeferred: buildPackageDeferrals(state),
+    lineInvariant: LINE_INVARIANT,
+  };
+
+  return {
+    ok: true,
+    action: 'compose_deal_package',
+    result: {
+      dealPackage,
+      dealState: state,
+      next_suggested_calls: nextSuggestedCalls,
+      portableTakeBackArtifacts: dealPackage.takeBackArtifacts,
+    },
+    state_hash_after: state.stateHash,
+    completeness_contribution_delta: 0,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
 function buildDealStateResult(action: 'ingest_deal_payload' | 'update_deal_payload', state: DefinitiveDealState, priorScore: number | null) {
   const scoreDelta = priorScore == null ? state.completenessReport.score : state.completenessReport.score - priorScore;
   return {
@@ -444,6 +498,32 @@ function buildDealPlan(state: DefinitiveDealState) {
     })),
     lineInvariant: LINE_INVARIANT,
   };
+}
+
+function buildPackageDeferrals(state: DefinitiveDealState) {
+  const deferrals: Array<Record<string, any>> = [];
+  if (state.classificationKey.triggeredOverlayGates.includes('G28')) {
+    deferrals.push({
+      category: 'distressed_or_restructuring',
+      reason: 'Court, counsel, CRO, FA, or creditor determinations remain outside THE LINE.',
+      suggestedTool: 'defer_to_counsel',
+    });
+  }
+  if (state.classificationKey.triggeredOverlayGates.includes('G29')) {
+    deferrals.push({
+      category: 'capital_structure_or_lme',
+      reason: 'Contract interpretation, execution risk, and negotiation strategy remain with counsel and the user.',
+      suggestedTool: 'defer_to_counsel',
+    });
+  }
+  if (state.classificationKey.taxClassification !== 'unknown') {
+    deferrals.push({
+      category: 'tax_review',
+      reason: 'DEFINITIVE can compute tax mechanics, but tax positions and opinions require qualified review.',
+      suggestedTool: 'defer_to_counsel',
+    });
+  }
+  return deferrals;
 }
 
 function buildPlanStage(

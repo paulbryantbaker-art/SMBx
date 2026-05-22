@@ -258,6 +258,31 @@ const DealStateDiff: JsonSchema = {
   },
 };
 
+const DealPackage: JsonSchema = {
+  $id: schemaId('DealPackage'),
+  title: 'DealPackage',
+  type: 'object',
+  additionalProperties: true,
+  required: ['packageId', 'packageCid', 'schema', 'dealStateCid', 'dealStateHash', 'classificationKey', 'completenessReport', 'dealPlan', 'next_suggested_calls'],
+  properties: {
+    packageId: { type: 'string' },
+    packageCid: { type: 'string', pattern: '^definitive:deal-package:sha256:' },
+    schema: { type: 'string', const: 'DealPackage.v0.1' },
+    dealStateCid: { type: 'string' },
+    dealStateHash: { type: 'string' },
+    readinessLevel: { type: 'string' },
+    classificationKey: { $ref: schemaId('ClassificationKey') },
+    completenessReport: { $ref: schemaId('CompletenessReport') },
+    missingInputContract: { $ref: schemaId('MissingInputContract') },
+    dealPlan: { $ref: schemaId('DealPlan') },
+    sourceIndex: { type: 'array', items: { $ref: schemaId('SourceIndexItem') } },
+    next_suggested_calls: { type: 'array', items: { $ref: schemaId('MCPCallHint') } },
+    takeBackArtifacts: { type: 'array', items: { type: 'string' } },
+    excludedOrDeferred: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    lineInvariant: { type: 'string' },
+  },
+};
+
 const DefinitionOfDone: JsonSchema = {
   $id: schemaId('DefinitionOfDone'),
   title: 'DefinitionOfDone',
@@ -303,6 +328,7 @@ export const DEFINITIVE_SCHEMAS: Record<string, JsonSchema> = {
   DealState,
   DealPlan,
   DealStateDiff,
+  DealPackage,
   DefinitionOfDone,
   DefinitiveToolEnvelope,
 };
@@ -337,6 +363,11 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     input: ['DealState', 'DealPayload'],
     output: ['DealStateDiff', 'MCPCallHint'],
     takeBack: ['DealStateDiff'],
+  },
+  compose_deal_package: {
+    input: ['DealState', 'DealPayload'],
+    output: ['DealPackage', 'DealState', 'DealPlan', 'CompletenessReport', 'MissingInputContract', 'MCPCallHint'],
+    takeBack: ['DealPackage', 'DealState', 'DealPlan', 'CompletenessReport', 'MissingInputContract'],
   },
 };
 

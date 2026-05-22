@@ -21,6 +21,7 @@ const DEFINITIVE_MCP_TOOLS = [
   'get_definition_of_done',
   'compose_deal_plan',
   'diff_deal_state',
+  'compose_deal_package',
   'lookup_citation',
   'fetch_market_data',
   'defer_to_counsel',
@@ -98,6 +99,17 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
         nextDealState: { type: 'object', description: 'Next DealState snapshot.' },
         previousPayload: { type: 'object', description: 'Prior DealPayload if a prior DealState is not available.' },
         nextPayload: { type: 'object', description: 'Next DealPayload if a next DealState is not available.' },
+      },
+    },
+  },
+  compose_deal_package: {
+    description: 'Compose a portable DealPackage from DealState or DealPayload so an external agent can take back the current classification, completeness report, missing-input contract, deal plan, source index, next_suggested_calls, and THE LINE deferrals.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dealState: { type: 'object', description: 'Optional DealState returned by ingest_deal_payload or update_deal_payload.' },
+        payload: { type: 'object', description: 'Optional DealPayload when a DealState is not yet available.' },
+        idempotencyKey: { type: 'string', description: 'Optional caller-generated idempotency key.' },
       },
     },
   },
@@ -239,6 +251,7 @@ const TOOL_SCOPE: Record<DefinitiveMcpToolName, string[]> = {
   get_definition_of_done: ['methodology:read', 'completeness:read'],
   compose_deal_plan: ['deal-state:read', 'deal-plan:read'],
   diff_deal_state: ['deal-state:read', 'deal-state:diff'],
+  compose_deal_package: ['deal-state:read', 'deal-package:read'],
   lookup_citation: ['citation:read', 'authority:read'],
   fetch_market_data: ['market-data:read'],
   defer_to_counsel: ['counsel:deferral:create'],
