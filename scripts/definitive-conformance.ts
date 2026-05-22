@@ -18,16 +18,25 @@ import {
 import {
   DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT,
   DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT,
+  DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT,
   DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT,
 } from '../server/services/definitiveConformanceStatus.js';
-import { DEFINITIVE_DEAL_MECHANICS_VERSION } from '../server/services/definitiveDealMechanicsCatalog.js';
+import { listDefinitiveLineInventory } from '../server/services/agencyActionRegistry.js';
+import { buildAgentCard } from '../server/services/agentCard.js';
+import {
+  DEFINITIVE_DEAL_MECHANICS_VERSION,
+  getDefinitivePassThroughSurface,
+} from '../server/services/definitiveDealMechanicsCatalog.js';
 import {
   buildDefinitiveYuliaMechanicsBrief,
   composeDefinitiveApplicableMechanics,
+  buildDefinitiveSurfaceMechanicsSummary,
   summarizeDefinitiveApplicableMechanics,
   type DefinitiveRouteReadiness,
   type DefinitiveToolSurface,
 } from '../server/services/definitiveDealRouteMap.js';
+import { buildDefinitiveSpecManifest } from '../server/services/definitiveSpecManifest.js';
+import { listDefinitiveMcpTools } from '../server/services/definitiveMcp.js';
 import { executeV19Model } from '../server/services/v19ModelRuntime.js';
 
 interface ConformanceCase {
@@ -66,21 +75,60 @@ interface DealMechanicsRouteCase {
   };
 }
 
+type PromptMetaCaseKind =
+  | 'empty_yulia_brief'
+  | 'yulia_brief'
+  | 'surface_summary'
+  | 'manifest'
+  | 'agent_card'
+  | 'line_inventory'
+  | 'mcp_inventory'
+  | 'pass_through_surface';
+
+interface PromptMetaFieldExpectation {
+  path: string;
+  equals?: any;
+  includes?: any;
+  notIncludes?: any;
+  min?: number;
+  max?: number;
+  exists?: boolean;
+  lengthAtLeast?: number;
+}
+
+interface PromptMetaCase {
+  id: string;
+  title: string;
+  specVersion: string;
+  methodologyUri: string;
+  kind: PromptMetaCaseKind;
+  input?: Record<string, any>;
+  expect: {
+    textIncludes?: string[];
+    textExcludes?: string[];
+    fields?: PromptMetaFieldExpectation[];
+  };
+}
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const caseFile = path.resolve(__dirname, '../testing/definitive/conformance/v1/model-runtime.cases.json');
 const routeCaseFile = path.resolve(__dirname, '../testing/definitive/conformance/v1/deal-mechanics-route.cases.json');
+const promptMetaCaseFile = path.resolve(__dirname, '../testing/definitive/conformance/v1/prompt-meta.cases.json');
 
 const cases: ConformanceCase[] = JSON.parse(await readFile(caseFile, 'utf8'));
 const routeCases: DealMechanicsRouteCase[] = JSON.parse(await readFile(routeCaseFile, 'utf8'));
+const promptMetaCases: PromptMetaCase[] = JSON.parse(await readFile(promptMetaCaseFile, 'utf8'));
 let passed = 0;
 let failed = 0;
 
 console.log('\nDEFINITIVE conformance harness');
 console.log(`Loaded ${cases.length} cases from ${path.relative(process.cwd(), caseFile)}`);
 console.log(`Loaded ${routeCases.length} route cases from ${path.relative(process.cwd(), routeCaseFile)}`);
+console.log(`Loaded ${promptMetaCases.length} prompt/meta cases from ${path.relative(process.cwd(), promptMetaCaseFile)}`);
 assertEqual(cases.length, DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT, 'conformance case count manifest');
 assertEqual(routeCases.length, DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT, 'deal route conformance case count manifest');
-assertEqual(cases.length + routeCases.length, DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT, 'total conformance case count manifest');
+assertEqual(promptMetaCases.length, DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT, 'prompt/meta conformance case count manifest');
+assertEqual(cases.length + routeCases.length + promptMetaCases.length, DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT, 'total conformance case count manifest');
 
 for (const item of cases) {
   try {
@@ -148,6 +196,30 @@ for (const item of routeCases) {
   }
 }
 
+for (const item of promptMetaCases) {
+  try {
+    assertEqual(item.specVersion, DEFINITIVE_SPEC_VERSION, `${item.id} specVersion`);
+    assertEqual(item.methodologyUri, DEFINITIVE_METHODOLOGY_URI, `${item.id} methodologyUri`);
+
+    const subject = buildPromptMetaSubject(item);
+    for (const expectedText of item.expect.textIncludes || []) {
+      assert(subject.text.includes(expectedText), `${item.id} expected prompt/meta text to include ${expectedText}`);
+    }
+    for (const blockedText of item.expect.textExcludes || []) {
+      assert(!subject.text.includes(blockedText), `${item.id} expected prompt/meta text to exclude ${blockedText}`);
+    }
+    for (const field of item.expect.fields || []) {
+      assertPromptMetaField(subject.data, field, item.id);
+    }
+
+    console.log(`  ✓ ${item.id} ${item.title}`);
+    passed++;
+  } catch (error: any) {
+    console.log(`  ✗ ${item.id} ${item.title} - ${error.message}`);
+    failed++;
+  }
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed > 0) process.exit(1);
 
@@ -178,4 +250,126 @@ function summaryCountForReadiness(
   if (readiness === 'executable') return summary.executable;
   if (readiness === 'reserved') return summary.reserved;
   return Number(summary[readiness as keyof typeof summary] || 0);
+}
+
+function buildPromptMetaSubject(item: PromptMetaCase): { text: string; data: Record<string, any> } {
+  if (item.kind === 'empty_yulia_brief') {
+    const brief = buildDefinitiveYuliaMechanicsBrief([]);
+    return { text: brief.join('\n'), data: { brief } };
+  }
+
+  if (item.kind === 'yulia_brief') {
+    const mechanics = composeDefinitiveApplicableMechanics(item.input || {});
+    const summary = summarizeDefinitiveApplicableMechanics(mechanics);
+    const brief = buildDefinitiveYuliaMechanicsBrief(mechanics, summary);
+    const data = {
+      input: item.input || {},
+      summary,
+      brief,
+      slots: mechanics.map(mechanic => mechanic.slotId),
+      surfaces: [...new Set(mechanics.flatMap(mechanic => mechanic.toolSurfaces))],
+      readiness: mechanics.reduce<Record<string, string[]>>((acc, mechanic) => {
+        acc[mechanic.readiness] = acc[mechanic.readiness] || [];
+        acc[mechanic.readiness].push(mechanic.slotId);
+        return acc;
+      }, {}),
+      professionalSlots: mechanics
+        .filter(mechanic => mechanic.lineCategory === 'professional_handoff' || mechanic.readiness === 'professional_handoff')
+        .map(mechanic => mechanic.slotId),
+      boundaries: mechanics.map(mechanic => mechanic.boundary),
+    };
+    return { text: [brief.join('\n'), JSON.stringify(data)].join('\n'), data };
+  }
+
+  if (item.kind === 'surface_summary') {
+    const surface = item.input?.surface;
+    const summary = buildDefinitiveSurfaceMechanicsSummary().find(item => item.surface === surface);
+    assert(summary, `${item.id} expected surface summary for ${surface}`);
+    return { text: JSON.stringify(summary), data: summary };
+  }
+
+  if (item.kind === 'manifest') {
+    const manifest = buildDefinitiveSpecManifest();
+    return { text: JSON.stringify(manifest), data: manifest };
+  }
+
+  if (item.kind === 'agent_card') {
+    const card = buildAgentCard();
+    return { text: JSON.stringify(card), data: card };
+  }
+
+  if (item.kind === 'line_inventory') {
+    const inventory = listDefinitiveLineInventory();
+    const statusCounts = inventory.reduce<Record<string, number>>((acc, contract) => {
+      acc[contract.lineStatus] = (acc[contract.lineStatus] || 0) + 1;
+      return acc;
+    }, {});
+    const tools = Object.fromEntries(inventory.map(contract => [contract.toolName, contract]));
+    const data = { statusCounts, tools, toolNames: inventory.map(contract => contract.toolName) };
+    return { text: JSON.stringify(data), data };
+  }
+
+  if (item.kind === 'mcp_inventory') {
+    const inventory = listDefinitiveMcpTools();
+    const tools = Object.fromEntries(inventory.tools.map(tool => [tool.name, tool]));
+    const data = { ...inventory, toolNames: inventory.tools.map(tool => tool.name), toolsByName: tools };
+    return { text: JSON.stringify(data), data };
+  }
+
+  if (item.kind === 'pass_through_surface') {
+    const surface = getDefinitivePassThroughSurface();
+    return { text: JSON.stringify(surface), data: surface };
+  }
+
+  throw new Error(`${item.id} unsupported prompt/meta case kind ${item.kind}`);
+}
+
+function assertPromptMetaField(data: Record<string, any>, field: PromptMetaFieldExpectation, caseId: string) {
+  const actual = valueAtPath(data, field.path);
+  if ('exists' in field) {
+    assert(field.exists ? actual !== undefined : actual === undefined, `${caseId} field ${field.path} existence mismatch`);
+  }
+  if ('equals' in field) {
+    assertEqual(actual, field.equals, `${caseId} field ${field.path}`);
+  }
+  if ('includes' in field) {
+    assertIncludes(actual, field.includes, `${caseId} field ${field.path}`);
+  }
+  if ('notIncludes' in field) {
+    assertNotIncludes(actual, field.notIncludes, `${caseId} field ${field.path}`);
+  }
+  if (typeof field.min === 'number') {
+    assert(Number(actual) >= field.min, `${caseId} field ${field.path} expected >= ${field.min}, got ${actual}`);
+  }
+  if (typeof field.max === 'number') {
+    assert(Number(actual) <= field.max, `${caseId} field ${field.path} expected <= ${field.max}, got ${actual}`);
+  }
+  if (typeof field.lengthAtLeast === 'number') {
+    assert(actual && typeof actual.length === 'number', `${caseId} field ${field.path} expected length-bearing value`);
+    assert(actual.length >= field.lengthAtLeast, `${caseId} field ${field.path} expected length >= ${field.lengthAtLeast}, got ${actual.length}`);
+  }
+}
+
+function valueAtPath(data: any, fieldPath: string): any {
+  return fieldPath.split('.').reduce((current, segment) => {
+    if (current === undefined || current === null) return undefined;
+    if (Array.isArray(current) && /^\d+$/.test(segment)) return current[Number(segment)];
+    return current[segment];
+  }, data);
+}
+
+function assertIncludes(actual: any, expected: any, message: string) {
+  if (Array.isArray(actual)) {
+    assert(actual.includes(expected), `${message} expected to include ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+    return;
+  }
+  assert(String(actual).includes(String(expected)), `${message} expected to include ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+}
+
+function assertNotIncludes(actual: any, expected: any, message: string) {
+  if (Array.isArray(actual)) {
+    assert(!actual.includes(expected), `${message} expected not to include ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+    return;
+  }
+  assert(!String(actual).includes(String(expected)), `${message} expected not to include ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
 }

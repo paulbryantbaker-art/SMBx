@@ -1,0 +1,402 @@
+[
+  {
+    "id": "CONF.PROMPT.EMPTY.001",
+    "title": "Empty Yulia mechanics brief asks for routing facts before claiming coverage",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "empty_yulia_brief",
+    "expect": {
+      "textIncludes": ["Ask for journey, league, deal type, industry, jurisdiction, and G28/G29/G30 signals"],
+      "textExcludes": ["applicable DEFINITIVE mechanics surfaced"]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.BRIEF.RE.001",
+    "title": "Real estate Yulia brief keeps executable mechanics tied to pass-through data boundaries",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "yulia_brief",
+    "input": {
+      "journey": "buy",
+      "league": "L4",
+      "dealType": "real estate sale-leaseback title survey rent roll NOI 1031 FIRPTA ground lease CITT",
+      "industry": "property services",
+      "triggeredGates": ["G30"]
+    },
+    "expect": {
+      "textIncludes": ["Pass-through mechanics require outside data/software inputs", "cost-plus-fixed margin", "must not route paid human-service referrals"],
+      "fields": [
+        { "path": "summary.executable", "min": 1 },
+        { "path": "slots", "includes": "M190" },
+        { "path": "slots", "includes": "M196" },
+        { "path": "surfaces", "includes": "pass_through_catalog" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.BRIEF.RESTRUCTURING.001",
+    "title": "Chapter 11 Yulia brief preserves professional handoff and court boundaries",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "yulia_brief",
+    "input": {
+      "journey": "buy",
+      "league": "L6",
+      "dealType": "Chapter 11 plan DIP feasibility best interests cramdown 1111b absolute priority fulcrum",
+      "industry": "industrial services",
+      "triggeredGates": ["G28"]
+    },
+    "expect": {
+      "textIncludes": ["Professional-handoff mechanics may compute", "court determinations", "THE LINE"],
+      "fields": [
+        { "path": "professionalSlots", "includes": "M152" },
+        { "path": "slots", "includes": "M152" },
+        { "path": "slots", "includes": "M155" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.BRIEF.LME.001",
+    "title": "LME Yulia brief labels volatile mechanics as research-only",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "yulia_brief",
+    "input": {
+      "journey": "raise",
+      "league": "L7",
+      "dealType": "uptier drop-down double-dip pari-plus Serta Mitel covenant baskets exchange offer",
+      "industry": "consumer products",
+      "triggeredGates": ["G29"]
+    },
+    "expect": {
+      "textIncludes": ["Research-only mechanics", "authority, jurisdiction, or counsel-reviewed templates"],
+      "fields": [
+        { "path": "summary.researchOnly", "min": 1 },
+        { "path": "slots", "includes": "M161" },
+        { "path": "slots", "includes": "M163" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.BRIEF.TAX.001",
+    "title": "Connected tax Yulia brief surfaces the master engine without losing THE LINE",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "yulia_brief",
+    "input": {
+      "journey": "sell",
+      "league": "L4",
+      "dealType": "asset deal stock deal S-corp 338 336 built in gain transaction cost seller note earnout installment SALT",
+      "triggeredGates": ["G2"]
+    },
+    "expect": {
+      "textIncludes": ["applicable DEFINITIVE mechanics surfaced", "THE LINE"],
+      "fields": [
+        { "path": "slots", "includes": "M200" },
+        { "path": "slots", "includes": "M201" },
+        { "path": "slots", "includes": "M204" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.BRIEF.IP.001",
+    "title": "IP and OSS Yulia brief surfaces chain-of-title and SCA pass-through dependencies",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "yulia_brief",
+    "input": {
+      "journey": "buy",
+      "league": "L5",
+      "dealType": "software IP OSS source code escrow domain trademark license chain of title lien search",
+      "industry": "software",
+      "triggeredGates": ["G10"]
+    },
+    "expect": {
+      "textIncludes": ["Pass-through mechanics require outside data/software inputs", "human-service referrals"],
+      "fields": [
+        { "path": "slots", "includes": "M214" },
+        { "path": "slots", "includes": "M221" },
+        { "path": "surfaces", "includes": "files" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.SURFACE.TODAY.001",
+    "title": "Today surface guidance prioritizes the few mechanics that change the next action",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "surface_summary",
+    "input": { "surface": "today" },
+    "expect": {
+      "textIncludes": ["Today should prioritize the few mechanics that change the next action"],
+      "fields": [
+        { "path": "title", "equals": "Today" },
+        { "path": "readiness.executable", "min": 1 },
+        { "path": "needs.passThrough", "includes": "M190" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.SURFACE.PIPELINE.001",
+    "title": "Pipeline surface guidance ties movement to gate, source, and handoff state",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "surface_summary",
+    "input": { "surface": "pipeline" },
+    "expect": {
+      "textIncludes": ["Pipeline movement should cite gate, model slot, source gap, and handoff state"],
+      "fields": [
+        { "path": "title", "equals": "Pipeline" },
+        { "path": "needs.professionalHandoff", "lengthAtLeast": 1 },
+        { "path": "visibleModelSlots", "includes": "M206" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.SURFACE.FILES.001",
+    "title": "Files surface guidance exposes source and pass-through blockers",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "surface_summary",
+    "input": { "surface": "files" },
+    "expect": {
+      "textIncludes": ["Files should show which source or pass-through input unblocks each mechanic"],
+      "fields": [
+        { "path": "title", "equals": "Files" },
+        { "path": "needs.passThrough", "includes": "M214" },
+        { "path": "needs.passThrough", "includes": "M221" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.SURFACE.STUDIO.001",
+    "title": "Studio surface guidance keeps exports sourced, model-backed, or caveated",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "surface_summary",
+    "input": { "surface": "studio" },
+    "expect": {
+      "textIncludes": ["Studio exports should carry only sourced, model-backed, or explicitly caveated mechanics"],
+      "fields": [
+        { "path": "title", "equals": "Studio" },
+        { "path": "visibleModelSlots", "includes": "M206" },
+        { "path": "visibleModelSlots", "includes": "M208" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.MANIFEST.PRICING.001",
+    "title": "Manifest pricing doctrine blocks wallet and success-fee drift",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "manifest",
+    "expect": {
+      "fields": [
+        { "path": "doctrine.pricing", "includes": "No wallet or success fees" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.MANIFEST.ACCESS.001",
+    "title": "Manifest separates public discovery from authenticated execution",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "manifest",
+    "expect": {
+      "fields": [
+        { "path": "access.publicDiscovery", "includes": "/api/definitive/pass-through-catalog" },
+        { "path": "access.publicDiscovery", "notIncludes": "/api/definitive/tools/{toolName}/call" },
+        { "path": "access.authenticatedExecution", "includes": "/api/definitive/tools/{toolName}/call" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.MANIFEST.LINE.001",
+    "title": "Manifest publishes every THE LINE status agents must understand",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "manifest",
+    "expect": {
+      "fields": [
+        { "path": "lineSurface.statuses", "includes": "human_approval_required" },
+        { "path": "lineSurface.statuses", "includes": "counsel_review_required" },
+        { "path": "lineSurface.statuses", "includes": "enterprise_scope_required" },
+        { "path": "lineSurface.statuses", "includes": "credit_budget_required" },
+        { "path": "lineSurface.statuses", "includes": "LINE_VIOLATION" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.MANIFEST.CONFORMANCE.001",
+    "title": "Manifest reports prompt/meta conformance as part of the total suite",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "manifest",
+    "expect": {
+      "fields": [
+        { "path": "conformanceSurface.modelRuntimeCases", "equals": 202 },
+        { "path": "conformanceSurface.dealMechanicsRouteCases", "equals": 48 },
+        { "path": "conformanceSurface.promptMetaCases", "equals": 25 },
+        { "path": "conformanceSurface.totalCases", "equals": 275 }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.MANIFEST.DEALMECH.001",
+    "title": "Manifest states THE LINE doctrine for deal mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "manifest",
+    "expect": {
+      "fields": [
+        { "path": "dealMechanicsSurface.lineDoctrine", "includes": "DEFINITIVE computes deterministic figures" },
+        { "path": "dealMechanicsSurface.lineDoctrine", "includes": "users, professionals, or courts make advice/opinion/legal determinations" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.MANIFEST.PASSTHROUGH.001",
+    "title": "Manifest pass-through surface is outcome-independent and blocks human referral compensation",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "manifest",
+    "expect": {
+      "fields": [
+        { "path": "passThroughSurface.marginPolicy.dealOutcomeTied", "equals": false },
+        { "path": "passThroughSurface.marginPolicy.humanReferralCompensationAllowed", "equals": false },
+        { "path": "passThroughSurface.pricingRule", "includes": "per call" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AGENT.ACCESS.001",
+    "title": "Agent card keeps execution authenticated and governed",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "agent_card",
+    "expect": {
+      "fields": [
+        { "path": "publicEndpoints", "includes": "/.well-known/definitive.json" },
+        { "path": "publicEndpoints", "notIncludes": "/api/definitive/tools/{toolName}/call" },
+        { "path": "authenticatedEndpoints", "includes": "/api/definitive/tools/{toolName}/call" },
+        { "path": "endpointAccess.executionRequiresGovernedToolContract", "equals": true }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AGENT.CONFORMANCE.001",
+    "title": "Agent card reports the expanded conformance count and deal-mechanics substrate",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "agent_card",
+    "expect": {
+      "textIncludes": ["definitive_conformance_status", "\"caseCount\":275", "definitive_deal_mechanics_v1_1"],
+      "fields": [
+        { "path": "definitive.dealMechanicsModelSlots", "equals": 123 },
+        { "path": "definitive.dealMechanicsGates", "equals": 30 },
+        { "path": "definitive.passThroughPricingRule", "includes": "cost-plus-fixed" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.LINE.HUMAN.001",
+    "title": "THE LINE inventory stages irreversible close actions for human approval",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "line_inventory",
+    "expect": {
+      "fields": [
+        { "path": "statusCounts.human_approval_required", "min": 1 },
+        { "path": "tools.close_deal.lineStatus", "equals": "human_approval_required" },
+        { "path": "tools.close_deal.refusalBehavior", "equals": "stage_for_approval" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.LINE.COUNSEL.001",
+    "title": "THE LINE inventory routes tax-position updates to counsel review",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "line_inventory",
+    "expect": {
+      "fields": [
+        { "path": "statusCounts.counsel_review_required", "min": 1 },
+        { "path": "tools.update_tax_position.lineStatus", "equals": "counsel_review_required" },
+        { "path": "tools.update_tax_position.refusalBehavior", "equals": "route_to_counsel" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.LINE.ENTERPRISE.001",
+    "title": "THE LINE inventory requires enterprise scope for privileged admin queries",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "line_inventory",
+    "expect": {
+      "fields": [
+        { "path": "statusCounts.enterprise_scope_required", "min": 1 },
+        { "path": "tools.query_admin_data.lineStatus", "equals": "enterprise_scope_required" },
+        { "path": "tools.query_admin_data.refusalBehavior", "equals": "require_enterprise_scope" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.MCP.MODELSTACK.001",
+    "title": "MCP compose_model_stack advertises G28/G29/G30 and M101-M223 routing",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "mcp_inventory",
+    "expect": {
+      "fields": [
+        { "path": "toolNames", "includes": "compose_model_stack" },
+        { "path": "toolsByName.compose_model_stack.description", "includes": "G28" },
+        { "path": "toolsByName.compose_model_stack.description", "includes": "G29" },
+        { "path": "toolsByName.compose_model_stack.description", "includes": "G30" },
+        { "path": "toolsByName.compose_model_stack.description", "includes": "M101-M223" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.MCP.CORPUS.001",
+    "title": "MCP corpus observation tool advertises structured-only anonymized writes",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "mcp_inventory",
+    "expect": {
+      "fields": [
+        { "path": "toolNames", "includes": "record_corpus_observation" },
+        { "path": "toolsByName.record_corpus_observation.description", "includes": "structured anonymized" },
+        { "path": "toolsByName.record_corpus_observation.description", "includes": "Raw document text and party identifiers are stripped" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.PASSTHROUGH.DIRECTORY.001",
+    "title": "Pass-through catalog keeps specialist directory free and editorial",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "pass_through_surface",
+    "expect": {
+      "textIncludes": ["PASS.HUMAN_SPECIALIST_DIRECTORY", "free_editorial_directory"],
+      "fields": [
+        { "path": "marginPolicy.humanReferralCompensationAllowed", "equals": false },
+        { "path": "prohibited", "includes": "Success fee for routing a user or deal to a human service provider" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.PASSTHROUGH.SOFTWARE.001",
+    "title": "Pass-through catalog allows only software/data API consumption at fixed margin",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "pass_through_surface",
+    "expect": {
+      "fields": [
+        { "path": "marginPolicy.mode", "equals": "cost_plus_fixed" },
+        { "path": "marginPolicy.dealOutcomeTied", "equals": false },
+        { "path": "allowed", "includes": "Data/software API calls billed per call regardless of outcome" },
+        { "path": "dependentModelSlots", "includes": "M221" }
+      ]
+    }
+  }
+]

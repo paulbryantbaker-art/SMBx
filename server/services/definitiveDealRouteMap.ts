@@ -253,13 +253,22 @@ export function buildDefinitiveYuliaMechanicsBrief(
     ];
   }
 
-  const lineLoad = summary.professionalHandoff + summary.passThroughRequired + summary.researchOnly;
+  const professionalNeeds = mechanics.filter(mechanic => (
+    mechanic.readiness === 'professional_handoff' ||
+    mechanic.lineCategory === 'professional_handoff'
+  )).length;
+  const passThroughNeeds = mechanics.filter(mechanic => (
+    mechanic.readiness === 'pass_through_required' ||
+    mechanic.toolSurfaces.includes('pass_through_catalog') ||
+    mechanic.boundary.toLowerCase().includes('pass-through')
+  )).length;
+  const lineLoad = professionalNeeds + passThroughNeeds + summary.researchOnly;
   const topMechanics = mechanics.slice(0, 6).map(mechanic => (
     `${mechanic.slotId} ${mechanic.name}: ${readinessLabel(mechanic.readiness)}.`
   ));
   const lineGuidance = [
-    summary.professionalHandoff > 0 && 'Professional-handoff mechanics may compute the figure, checklist, or economics, but Yulia must route opinions, enforceability, tax/legal/accounting/appraisal conclusions, and court determinations to the named professional.',
-    summary.passThroughRequired > 0 && 'Pass-through mechanics require outside data/software inputs billed per call at cost or cost-plus-fixed margin; Yulia must not route paid human-service referrals or success-fee economics.',
+    professionalNeeds > 0 && 'Professional-handoff mechanics may compute the figure, checklist, or economics, but Yulia must route opinions, enforceability, tax/legal/accounting/appraisal conclusions, and court determinations to the named professional.',
+    passThroughNeeds > 0 && 'Pass-through mechanics require outside data/software inputs billed per call at cost or cost-plus-fixed margin; Yulia must not route paid human-service referrals or success-fee economics.',
     summary.researchOnly > 0 && 'Research-only mechanics may summarize sourced inputs and compute scaffolding, but Yulia must state that authority, jurisdiction, or counsel-reviewed templates are not stable enough for production reliance.',
   ].filter((line): line is string => Boolean(line));
 

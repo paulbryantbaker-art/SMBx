@@ -119,6 +119,7 @@ export function buildDefinitiveSpecManifest() {
       status: conformance.status,
       modelRuntimeCases: conformance.cases.modelRuntime,
       dealMechanicsRouteCases: conformance.cases.dealMechanicsRoute,
+      promptMetaCases: conformance.cases.promptMeta,
       totalCases: conformance.cases.total,
       nextTarget: conformance.nextTarget,
       categories: conformance.categories,

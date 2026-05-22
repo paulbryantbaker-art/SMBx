@@ -7,8 +7,11 @@ import {
 
 export const DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT = 202;
 export const DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT = 48;
+export const DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT = 25;
 export const DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT =
-  DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT + DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT;
+  DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT +
+  DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT +
+  DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT;
 
 export const DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CATEGORIES = [
   'valuation',
@@ -46,6 +49,7 @@ export const DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CATEGORIES = [
   'deal_mechanics_route_map',
   'deal_mechanics_readiness',
   'pass_through_boundary',
+  'prompt_meta_behavior',
 ] as const;
 
 export function buildDefinitiveConformanceStatus() {
@@ -59,6 +63,7 @@ export function buildDefinitiveConformanceStatus() {
     cases: {
       modelRuntime: DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT,
       dealMechanicsRoute: DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT,
+      promptMeta: DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT,
       total: DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT,
     },
     categories: DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CATEGORIES,
@@ -70,6 +75,8 @@ export function buildDefinitiveConformanceStatus() {
       'nested deterministic outputs',
       'missing-input behavior',
       'refusal states',
+      'Yulia prompt/meta boundaries',
+      'surface guidance consistency',
     ],
     command: 'npm run test:definitive-conformance',
     authenticatedRouteSmoke: {
