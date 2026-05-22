@@ -93,6 +93,17 @@ export function buildDefinitiveConformanceStatus() {
         'staged agency action routes expose and cancel confirmation holds',
       ],
     },
+    entitlementSmoke: {
+      status: 'started',
+      command: 'npm run test:definitive-entitlements',
+      fixture: 'DB fixtures with TEST_MODE / DEV_NO_PAYWALL disabled inside the test process',
+      assertions: [
+        'Pro plan resolves without local dev entitlement bypass',
+        'Pro API access is allowed before allowance exhaustion',
+        'Pro API access returns credit_budget_required after allowance exhaustion',
+        'Free API access returns enterprise_scope_required for MCP/API scope',
+      ],
+    },
     nextTarget: 750,
   };
 }
