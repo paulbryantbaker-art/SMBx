@@ -51,6 +51,7 @@ try {
     assert(body.tools.some((tool: any) => tool.name === 'compose_deal_package'), 'compose_deal_package is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'resume_deal'), 'resume_deal is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_lifecycle_trace'), 'compose_lifecycle_trace is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'prepare_ioi_packet'), 'prepare_ioi_packet is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_data_room_index'), 'compose_data_room_index is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'prepare_diligence_request'), 'prepare_diligence_request is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'disclose_subset'), 'disclose_subset is advertised');
@@ -351,6 +352,41 @@ try {
     assert(trace.events.some((event: any) => event.id === 'evt-ioi'), 'lifecycle trace preserves event');
     assert(trace.loopContract.recursiveLoop.includes('update_deal_payload'), 'lifecycle recursive loop exposed');
     assert(trace.takeBackArtifacts.includes('LifecycleTrace'), 'lifecycle trace take-back exposed');
+  });
+
+  await test('Authenticated prepare_ioi_packet returns indication packet', async () => {
+    const response = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'prepare_ioi_packet',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-state:read', 'studio:draft', 'model-stack:compose'],
+      input: {
+        payload: {
+          journey: 'buy',
+          targetName: 'DEFINITIVE Route Fixture Deal',
+          industry: 'software',
+          jurisdiction: 'US-DE',
+          revenueCents: 8_000_000_00,
+          ebitdaCents: 2_100_000_00,
+          documents: [
+            { id: 'financials', name: 'Seller P&L', type: 'financials', hash: 'sha256:fixture-financials' },
+            { id: 'customers', name: 'Customer export', type: 'commercial', hash: 'sha256:fixture-customers' },
+          ],
+        },
+      },
+    });
+
+    assertEqual(response.status, 200, 'IOI packet route status');
+    assertEqual(response.body.ok, true, 'IOI packet route ok');
+    assertEqual(response.body.toolName, 'prepare_ioi_packet', 'IOI packet tool name');
+    const packet = response.body.result?.result?.ioiPacket;
+    assertEqual(packet.schema, 'IOIPacket.v0.1', 'IOI packet schema');
+    assert(packet.knownFacts.some((fact: any) => fact.id === 'deal_subject'), 'IOI packet deal subject present');
+    assertEqual(packet.indicationBoundary.noOfferAuthority, true, 'IOI packet does not make offer');
+    assert(packet.takeBackArtifacts.includes('IOIPacket'), 'IOI packet take-back exposed');
   });
 
   await test('Authenticated compose_data_room_index returns source gaps', async () => {

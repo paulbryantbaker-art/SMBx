@@ -154,6 +154,8 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
       return resumeDefinitiveDeal(input);
     case 'compose_lifecycle_trace':
       return composeDefinitiveLifecycleTrace(input);
+    case 'prepare_ioi_packet':
+      return prepareDefinitiveIoiPacket(input);
     case 'compose_data_room_index':
       return composeDefinitiveDataRoomIndex(input);
     case 'prepare_diligence_request':
@@ -178,6 +180,7 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
           'compose_deal_package',
           'resume_deal',
           'compose_lifecycle_trace',
+          'prepare_ioi_packet',
           'compose_data_room_index',
           'prepare_diligence_request',
           'disclose_subset',
@@ -199,6 +202,7 @@ export function isDefinitiveDealStateTool(toolName: string): boolean {
     'compose_deal_package',
     'resume_deal',
     'compose_lifecycle_trace',
+    'prepare_ioi_packet',
     'compose_data_room_index',
     'prepare_diligence_request',
     'disclose_subset',
@@ -524,6 +528,126 @@ export function composeDefinitiveLifecycleTrace(input: Record<string, any>) {
       missingInputContract: state.missingInputContract,
       next_suggested_calls: lifecycleTrace.next_suggested_calls,
       portableTakeBackArtifacts: lifecycleTrace.takeBackArtifacts,
+    },
+    state_hash_after: state.stateHash,
+    completeness_contribution_delta: 0,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
+export function prepareDefinitiveIoiPacket(input: Record<string, any>) {
+  const state = stateFromInput(input);
+  const objective = textValue(input.objective) || 'indication_of_interest';
+  const audience = textValue(input.audience) || 'internal_deal_team';
+  const sourceRefs = sourceRefsForCategories(state, ['financials', 'commercial']);
+  const sourceGaps = ['financials', 'commercial']
+    .filter(category => !sourceRefs.some(source => source.category === category))
+    .map(category => ({
+      category,
+      reason: `IOI packet needs ${category} source support before external use.`,
+      suggestedTool: 'compose_data_room_index',
+    }));
+  const knownFacts = buildIoiKnownFacts(state);
+  const preliminaryEconomics = buildIoiPreliminaryEconomics(state);
+  const missingInputs = state.missingInputContract.items
+    .filter(item => item.priority !== 'P2')
+    .map(item => ({
+      field: item.field,
+      label: item.label,
+      priority: item.priority,
+      reason: item.reason,
+      surface: item.surface,
+    }));
+  const needsModelState = !state.completenessReport.satisfied.includes('model_state_present');
+  const packetHash = sha256(stableStringify({
+    dealStateHash: state.stateHash,
+    objective,
+    audience,
+    knownFacts,
+    preliminaryEconomics,
+    sourceGaps,
+    missingInputs,
+    methodologyVersion: DEFINITIVE_METHODOLOGY_VERSION,
+  }));
+  const ioiPacket = {
+    packetId: `ioi_${packetHash.slice(0, 16)}`,
+    schema: 'IOIPacket.v0.1',
+    dealStateCid: state.cid,
+    dealStateHash: state.stateHash,
+    objective,
+    audience,
+    stage: currentStageForState(state),
+    readinessLevel: state.completenessReport.level,
+    knownFacts,
+    preliminaryEconomics,
+    sourceRefs,
+    sourceGaps,
+    missingInputs,
+    modelDependencies: {
+      required: needsModelState,
+      status: needsModelState ? 'missing_model_state' : 'not_blocked',
+      suggestedTool: needsModelState ? 'compose_model_stack' : null,
+    },
+    indicationBoundary: {
+      composedOnly: true,
+      noOfferAuthority: true,
+      noValuationOpinion: true,
+      noExternalTransmission: true,
+      userDecides: 'The user decides whether an IOI should be sent, what economics to indicate, and what conditions to include.',
+    },
+    next_suggested_calls: [
+      ...(sourceGaps.length
+        ? [{
+            toolName: 'compose_data_room_index',
+            priority: 'P1' as const,
+            reason: `Fill IOI source gaps: ${sourceGaps.map(gap => gap.category).join(', ')}.`,
+            inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
+          }]
+        : []),
+      ...(needsModelState
+        ? [{
+            toolName: 'compose_model_stack',
+            priority: 'P1' as const,
+            reason: 'Tie IOI economics to deterministic model outputs before export or counterparty use.',
+            inputHint: {
+              journey: state.classificationKey.journey,
+              league: state.classificationKey.league === 'unknown' ? undefined : state.classificationKey.league,
+              dealType: state.payload.dealType || state.payload.structure || state.classificationKey.subJourney,
+              signals: state.signals || undefined,
+            },
+          }]
+        : []),
+      {
+        toolName: 'compose_document_draft',
+        priority: sourceGaps.length || needsModelState ? 'P2' as const : 'P1' as const,
+        reason: 'Render the IOI packet into a source-aware Studio IOI scaffold.',
+        inputHint: {
+          dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision },
+          documentType: 'ioi',
+          audience,
+        },
+      },
+      {
+        toolName: 'prepare_diligence_request',
+        priority: 'P2' as const,
+        reason: 'Prepare the next diligence ask list for the learn-more loop after IOI.',
+        inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
+      },
+    ],
+    takeBackArtifacts: ['IOIPacket', 'DealState', 'DocumentDraft', 'MCPCallHint[]'],
+    lineInvariant: LINE_INVARIANT,
+  };
+
+  return {
+    ok: true,
+    action: 'prepare_ioi_packet',
+    result: {
+      ioiPacket,
+      dealState: state,
+      missingInputContract: state.missingInputContract,
+      next_suggested_calls: ioiPacket.next_suggested_calls,
+      portableTakeBackArtifacts: ioiPacket.takeBackArtifacts,
     },
     state_hash_after: state.stateHash,
     completeness_contribution_delta: 0,
@@ -1242,6 +1366,71 @@ function buildLifecycleArtifactRefs(state: DefinitiveDealState) {
     }
   }
   return refs;
+}
+
+function sourceRefsForCategories(state: DefinitiveDealState, categories: string[]) {
+  type CategorizedSource = Record<string, any> & { category: string };
+  const categorySet = new Set(categories);
+  const sourceIndex: CategorizedSource[] = state.sourceIndex.map(source => ({
+    ...source,
+    category: inferDataRoomCategory(source),
+  }));
+  return sourceIndex
+    .filter(source => categorySet.has(source.category))
+    .map(source => ({
+      id: source.id,
+      name: source.name ?? source.id,
+      type: source.type,
+      category: source.category,
+      hash: source.hash,
+      citationReady: source.citationReady,
+    }));
+}
+
+function buildIoiKnownFacts(state: DefinitiveDealState) {
+  const payload = state.payload;
+  const facts = [
+    ioiFact('deal_subject', 'Deal subject', firstPresentValue(payload, ['dealName', 'targetName', 'companyName', 'subject', 'thesis'])),
+    ioiFact('journey', 'Journey', state.classificationKey.journey),
+    ioiFact('industry', 'Industry', state.classificationKey.industry),
+    ioiFact('jurisdiction', 'Jurisdiction', state.classificationKey.jurisdiction),
+    ioiFact('league', 'V19 league', state.classificationKey.league),
+    ioiFact('structure', 'Structure', firstPresentValue(payload, ['dealStructure', 'structure', 'transactionType', 'dealType'])),
+  ];
+  return facts.filter(fact => fact.status !== 'missing');
+}
+
+function buildIoiPreliminaryEconomics(state: DefinitiveDealState) {
+  const payload = state.payload;
+  return [
+    ioiMoneyFact('revenueCents', 'Revenue', firstNumber(payload, ['revenueCents', 'ttmRevenueCents', 'salesCents'])),
+    ioiMoneyFact('ebitdaCents', 'EBITDA', firstNumber(payload, ['ebitdaCents', 'adjustedEbitdaCents'])),
+    ioiMoneyFact('sdeCents', 'SDE', firstNumber(payload, ['sdeCents', 'sellerDiscretionaryEarningsCents'])),
+    ioiMoneyFact('enterpriseValueCents', 'Enterprise value', firstNumber(payload, ['enterpriseValueCents'])),
+    ioiMoneyFact('purchasePriceCents', 'Purchase price', firstNumber(payload, ['purchasePriceCents'])),
+  ].filter(fact => fact.status !== 'missing');
+}
+
+function ioiFact(id: string, label: string, value: unknown) {
+  const present = value != null && value !== '' && value !== 'unknown';
+  return {
+    id,
+    label,
+    status: present ? 'present' : 'missing',
+    value: present ? value : null,
+    boundary: 'Fact is organized from DealPayload or ClassificationKey; it is not an offer, recommendation, or professional opinion.',
+  };
+}
+
+function ioiMoneyFact(id: string, label: string, valueCents: number | null) {
+  return {
+    id,
+    label,
+    status: valueCents == null ? 'missing' : 'payload_fact_present',
+    valueCents,
+    currency: 'USD',
+    boundary: 'Money values are payload facts in integer cents unless later tied to deterministic model output.',
+  };
 }
 
 function nextLifecycleTraceCalls(state: DefinitiveDealState, currentStage: string): DefinitiveMcpCallHint[] {
