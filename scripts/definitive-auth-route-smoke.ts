@@ -292,6 +292,48 @@ try {
     assert(dealPackage.excludedOrDeferred.some((item: any) => item.category === 'capital_structure_or_lme'), 'G29 package deferral is preserved');
   });
 
+  await test('DealState control packets are persisted for deal resume', async () => {
+    const response = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'prepare_ioi_packet',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      dealId: fixture.dealId,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-state:read', 'studio:draft', 'model-stack:compose'],
+      input: {
+        payload: {
+          dealId: fixture.dealId,
+          journey: 'buy',
+          targetName: 'DEFINITIVE Route Fixture Deal',
+          industry: 'industrial services / real estate',
+          jurisdiction: 'US-DE',
+          ebitdaCents: 2_100_000_00,
+          dealStructure: 'distressed real estate asset purchase',
+          documents: [{ id: 'cim', name: 'Fixture CIM', type: 'cim', hash: 'sha256:fixture-cim' }],
+        },
+      },
+    });
+
+    assertEqual(response.status, 200, 'persisted packet route status');
+    assertEqual(response.body.ok, true, 'persisted packet route ok');
+    assertEqual(response.body.persistence.ok, true, 'deal-state persistence ok');
+    assert(response.body.persistence.stateSnapshotId > 0, 'state snapshot id returned');
+    assert(response.body.persistence.packetId > 0, 'packet id returned');
+    assertEqual(response.body.persistence.packetType, 'IOIPacket.v0.1', 'IOI packet persisted');
+
+    const latest = await authedJson(`/api/definitive/deal-state/latest?dealId=${fixture.dealId}`, token);
+    assertEqual(latest.ok, true, 'latest deal state ok');
+    assertEqual(latest.snapshot.dealId, fixture.dealId, 'latest snapshot is tied to fixture deal');
+    assertEqual(latest.snapshot.stateCid, response.body.persistence.stateCid, 'latest snapshot cid matches persisted call');
+    assertEqual(latest.snapshot.specVersion, DEFINITIVE_SPEC_VERSION, 'latest snapshot is version pinned');
+
+    const packets = await authedJson(`/api/definitive/deal-packets?dealId=${fixture.dealId}&limit=5`, token);
+    assertEqual(packets.ok, true, 'deal packets route ok');
+    assert(packets.packets.some((packet: any) => packet.packetType === 'IOIPacket.v0.1'), 'IOI packet is listed for deal');
+  });
+
   await test('Authenticated resume_deal returns current stage and next calls', async () => {
     const response = await postJson('/api/definitive/tools/call', token, {
       toolName: 'resume_deal',

@@ -41,6 +41,8 @@ const requiredTables = [
   'definitive_data_rights_grants',
   'definitive_corpus_observations',
   'definitive_benchmark_release_controls',
+  'definitive_deal_state_snapshots',
+  'definitive_deal_packets',
 ] as const;
 
 const requiredColumns: Record<string, string[]> = {
@@ -59,6 +61,8 @@ const requiredColumns: Record<string, string[]> = {
   definitive_data_rights_grants: ['user_id', 'organization_id', 'billing_org_id', 'beneficial_customer_id', 'grant_type', 'scope', 'status', 'source', 'source_reference', 'effective_at', 'expires_at', 'revoked_at'],
   definitive_corpus_observations: ['observation_type', 'user_id', 'organization_id', 'billing_org_id', 'beneficial_customer_id', 'deal_id', 'grant_id', 'anonymization_bucket', 'observation', 'source_artifact_type', 'source_artifact_id', 'source_hash', 'observation_hash', 'eligibility_status', 'min_release_count', 'metadata'],
   definitive_benchmark_release_controls: ['observation_type', 'benchmark_key', 'eligible_observation_count', 'min_release_count', 'release_status', 'last_counted_at', 'metadata'],
+  definitive_deal_state_snapshots: ['user_id', 'deal_id', 'conversation_id', 'beneficial_customer_id', 'billing_org_id', 'mandate_id', 'agent_id', 'agent_platform_id', 'source_surface', 'tool_name', 'state_id', 'state_cid', 'state_hash', 'revision', 'parent_cids', 'payload', 'classification_key', 'missing_input_contract', 'completeness_report', 'source_index', 'input_hash', 'output_hash', 'spec_version', 'methodology_version', 'mandate_chain'],
+  definitive_deal_packets: ['state_snapshot_id', 'user_id', 'deal_id', 'conversation_id', 'beneficial_customer_id', 'billing_org_id', 'mandate_id', 'agent_id', 'agent_platform_id', 'source_surface', 'tool_name', 'action', 'packet_type', 'packet_id', 'packet_cid', 'deal_state_cid', 'deal_state_hash', 'packet_hash', 'payload', 'take_back_artifacts', 'next_suggested_calls', 'line_invariant', 'input_hash', 'output_hash', 'spec_version', 'methodology_version', 'mandate_chain'],
   firm_memory: ['memory_type', 'label', 'value', 'source', 'confidence', 'status'],
   today_operating_briefs: ['source_fingerprint', 'morning_brief', 'gate_countdown', 'deal_pulse', 'studio_refresh_needs', 'firm_memory_snapshot'],
 };

@@ -74,6 +74,8 @@ export function buildDefinitiveSpecManifest() {
       toolsList: '/api/definitive/tools/list',
       toolCall: '/api/definitive/tools/{toolName}/call',
       lineInventory: '/api/definitive/line/inventory',
+      latestDealState: '/api/definitive/deal-state/latest',
+      dealPackets: '/api/definitive/deal-packets',
       auditPacket: '/api/definitive/audit-packets/{auditTrailId}',
       corpusObservationTypes: '/api/definitive/corpus/observation-types',
       corpusRights: '/api/definitive/corpus/rights',
@@ -101,6 +103,8 @@ export function buildDefinitiveSpecManifest() {
       authenticatedExecution: [
         '/api/definitive/tools/call',
         '/api/definitive/tools/{toolName}/call',
+        '/api/definitive/deal-state/latest',
+        '/api/definitive/deal-packets',
         '/api/definitive/audit-packets/{auditTrailId}',
         '/api/definitive/corpus/rights',
         '/api/definitive/corpus/rights/grants',

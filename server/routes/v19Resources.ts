@@ -12,6 +12,11 @@ import {
 } from '../services/definitiveCorpusService.js';
 import { listDefinitiveLineInventory } from '../services/agencyActionRegistry.js';
 import {
+  listDefinitiveDealPackets,
+  persistDefinitiveDealStateCall,
+  readLatestDefinitiveDealStateSnapshot,
+} from '../services/definitiveDealStatePersistence.js';
+import {
   checkV19Entitlement,
   formatV19TollgateForYulia,
   readV19UsageMeter,
@@ -181,6 +186,13 @@ v19ResourcesRouter.post('/definitive/tools/call', async (req, res) => {
       input: req.body?.input && typeof req.body.input === 'object' ? req.body.input : {},
       envelope: req.body || {},
     });
+    (response.body as Record<string, any>).persistence = await persistDealStateCallBestEffort({
+      userId,
+      toolName,
+      toolInput: req.body?.input && typeof req.body.input === 'object' ? req.body.input : {},
+      envelope: req.body || {},
+      responseBody: response.body,
+    });
     return res.status(response.status).json(response.body);
   } catch (err: any) {
     console.error('[definitive] tool call failed:', err.message);
@@ -193,16 +205,63 @@ v19ResourcesRouter.post('/definitive/tools/:toolName/call', async (req, res) => 
   if (!Number.isFinite(userId) || userId <= 0) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
+    const toolInput = req.body?.input && typeof req.body.input === 'object' ? req.body.input : req.body || {};
     const response = await executeDefinitiveMcpTool({
       userId,
       toolName: String(req.params.toolName || '').trim(),
-      input: req.body?.input && typeof req.body.input === 'object' ? req.body.input : req.body || {},
+      input: toolInput,
       envelope: req.body || {},
+    });
+    (response.body as Record<string, any>).persistence = await persistDealStateCallBestEffort({
+      userId,
+      toolName: String(req.params.toolName || '').trim(),
+      toolInput,
+      envelope: req.body || {},
+      responseBody: response.body,
     });
     return res.status(response.status).json(response.body);
   } catch (err: any) {
     console.error('[definitive] tool call failed:', err.message);
     return res.status(500).json({ error: 'Failed to execute DEFINITIVE tool' });
+  }
+});
+
+v19ResourcesRouter.get('/definitive/deal-state/latest', async (req, res) => {
+  const userId = Number((req as any).userId);
+  if (!Number.isFinite(userId) || userId <= 0) return res.status(401).json({ error: 'Not authenticated' });
+
+  try {
+    const result = await readLatestDefinitiveDealStateSnapshot({
+      userId,
+      dealId: nullablePositiveNumber(req.query.dealId),
+      conversationId: nullablePositiveNumber(req.query.conversationId),
+      stateCid: typeof req.query.stateCid === 'string' ? req.query.stateCid : null,
+    });
+    if (!result.ok) return res.status(result.error === 'not_found' ? 404 : 400).json(result);
+    return res.json(result);
+  } catch (err: any) {
+    console.error('[definitive] read latest deal state failed:', err.message);
+    return res.status(500).json({ error: 'Failed to read DEFINITIVE deal state' });
+  }
+});
+
+v19ResourcesRouter.get('/definitive/deal-packets', async (req, res) => {
+  const userId = Number((req as any).userId);
+  if (!Number.isFinite(userId) || userId <= 0) return res.status(401).json({ error: 'Not authenticated' });
+
+  try {
+    const result = await listDefinitiveDealPackets({
+      userId,
+      dealId: nullablePositiveNumber(req.query.dealId),
+      conversationId: nullablePositiveNumber(req.query.conversationId),
+      stateCid: typeof req.query.stateCid === 'string' ? req.query.stateCid : null,
+      limit: nullablePositiveNumber(req.query.limit),
+    });
+    if (!result.ok) return res.status(400).json(result);
+    return res.json(result);
+  } catch (err: any) {
+    console.error('[definitive] list deal packets failed:', err.message);
+    return res.status(500).json({ error: 'Failed to list DEFINITIVE deal packets' });
   }
 });
 
@@ -267,4 +326,24 @@ v19ResourcesRouter.get('/v19/resources', async (req, res) => {
 function nullablePositiveNumber(value: unknown): number | null {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+async function persistDealStateCallBestEffort(input: {
+  userId: number;
+  toolName: string;
+  toolInput: Record<string, any>;
+  envelope: Record<string, any>;
+  responseBody: Record<string, any>;
+}) {
+  try {
+    return await persistDefinitiveDealStateCall(input);
+  } catch (err: any) {
+    console.warn('[definitive] deal-state persistence skipped:', err.message);
+    return {
+      ok: false,
+      skipped: true,
+      reason: 'persistence_failed',
+      message: err.message,
+    };
+  }
 }

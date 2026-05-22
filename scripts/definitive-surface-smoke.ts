@@ -112,6 +112,8 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assertEqual(card.definitive.schemaRegistryEndpoint, '/api/definitive/schemas', 'schema registry endpoint');
   assertEqual(card.definitive.wellKnownSchemaRegistryEndpoint, '/.well-known/definitive-schemas.json', 'well-known schema registry endpoint');
   assertEqual(card.definitive.toolsEndpoint, '/api/definitive/tools/list', 'tools endpoint');
+  assertEqual(card.definitive.latestDealStateEndpoint, '/api/definitive/deal-state/latest', 'latest deal-state endpoint');
+  assertEqual(card.definitive.dealPacketsEndpoint, '/api/definitive/deal-packets', 'deal packets endpoint');
   assertEqual(card.definitive.auditPacketEndpoint, '/api/definitive/audit-packets/{auditTrailId}', 'audit packet endpoint');
   assertEqual(card.definitive.corpusObservationTypesEndpoint, '/api/definitive/corpus/observation-types', 'corpus observation endpoint');
   assertEqual(card.definitive.passThroughCatalogEndpoint, '/api/definitive/pass-through-catalog', 'pass-through catalog endpoint');
@@ -150,6 +152,8 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assert(!card.publicEndpoints.includes('/api/definitive/tools/{toolName}/call'), 'tool execution is not public');
   assert(card.authenticatedEndpoints.includes('/api/definitive/line/inventory'), 'line inventory endpoint is authenticated');
   assert(card.authenticatedEndpoints.includes('/api/definitive/corpus/observation-types'), 'corpus observation endpoint is authenticated');
+  assert(card.authenticatedEndpoints.includes('/api/definitive/deal-state/latest'), 'latest deal-state endpoint is authenticated');
+  assert(card.authenticatedEndpoints.includes('/api/definitive/deal-packets'), 'deal packets endpoint is authenticated');
   assert(card.authenticatedEndpoints.includes('/api/definitive/audit-packets/{auditTrailId}'), 'audit packet endpoint is authenticated');
   assertEqual(card.endpointAccess.executionRequiresGovernedToolContract, true, 'execution requires governed tool contracts');
   const mcpCapability = card.capabilities.find((item: any) => item.id === 'definitive_mcp_v0_1') as any;
@@ -199,6 +203,8 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assertEqual(manifest.endpoints.passThroughCatalog, '/api/definitive/pass-through-catalog', 'manifest pass-through catalog endpoint');
   assertEqual(manifest.endpoints.authoritySeedPlan, '/api/definitive/authority-seed-plan', 'manifest authority seed plan endpoint');
   assertEqual(manifest.endpoints.substrateArchitecture, '/api/definitive/substrate-architecture', 'manifest substrate architecture endpoint');
+  assertEqual(manifest.endpoints.latestDealState, '/api/definitive/deal-state/latest', 'manifest latest deal-state endpoint');
+  assertEqual(manifest.endpoints.dealPackets, '/api/definitive/deal-packets', 'manifest deal packets endpoint');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/spec'), 'manifest spec API is public discovery');
   assert(manifest.access.publicDiscovery.includes('/.well-known/mcp'), 'manifest MCP discovery is public');
   assert(manifest.access.publicDiscovery.includes('/.well-known/mcp/server-card.json'), 'manifest MCP server-card is public');
@@ -209,6 +215,8 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assert(manifest.access.publicDiscovery.includes('/api/definitive/substrate-architecture'), 'manifest substrate architecture is public discovery');
   assert(manifest.access.authenticatedDiscovery.includes('/api/definitive/tools/list'), 'manifest tools list is authenticated discovery');
   assert(manifest.access.authenticatedExecution.includes('/api/definitive/tools/{toolName}/call'), 'manifest tool call is authenticated execution');
+  assert(manifest.access.authenticatedExecution.includes('/api/definitive/deal-state/latest'), 'manifest latest deal-state is authenticated execution');
+  assert(manifest.access.authenticatedExecution.includes('/api/definitive/deal-packets'), 'manifest deal packets is authenticated execution');
   assertDeepEqual(manifest.toolSurface.tools.map(tool => tool.name), expectedTools, 'manifest tool names');
   assertEqual(manifest.corpusSurface.rawDocumentTextAllowed, false, 'manifest disallows raw corpus text');
   assertEqual(manifest.corpusSurface.partyIdentifiersAllowed, false, 'manifest disallows party identifiers');
