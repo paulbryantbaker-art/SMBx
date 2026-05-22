@@ -1,4 +1,3 @@
-import { sql } from '../db.js';
 import {
   DEFINITIVE_METHODOLOGY_URI,
   DEFINITIVE_METHODOLOGY_VERSION,
@@ -84,6 +83,7 @@ export async function composeModelStack(input: ComposeModelStackInput): Promise<
     industry: input.industry,
     jurisdiction: input.jurisdiction,
     triggeredGates: triggeredOverlayGates,
+    limit: 72,
   });
   const applicableMechanicsSummary = summarizeDefinitiveApplicableMechanics(applicableMechanics);
   const yuliaMechanicsBrief = buildDefinitiveYuliaMechanicsBrief(applicableMechanics, applicableMechanicsSummary);
@@ -165,6 +165,7 @@ export async function composeModelStack(input: ComposeModelStackInput): Promise<
 }
 
 async function persistModelStack(dealId: number, stack: V19ModelStack): Promise<void> {
+  const { sql } = await import('../db.js');
   const [row] = await sql<{ version: number }[]>`
     SELECT (COALESCE(MAX(version), 0) + 1)::int as version
     FROM deal_model_stack

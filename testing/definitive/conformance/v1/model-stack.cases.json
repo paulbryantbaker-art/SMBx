@@ -1,0 +1,460 @@
+[
+  {
+    "id": "CONF.STACK.BASE.SELL_L2.001",
+    "title": "L2 seller stack uses SDE, SBA, DSCR, QoE, and working-capital support",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "sell",
+      "league": "L2",
+      "dealType": "seller pitch book working capital valuation"
+    },
+    "expect": {
+      "complexity": "LIGHT_MED",
+      "primaryModelsInclude": ["MODEL.VAL.SDE.v1", "MODEL.VAL.TRIANGULATION.v1", "MODEL.DEAL.SCORE.v1"],
+      "supportingInclude": ["MODEL.LBO.SBA.v1", "MODEL.DSCR.STRESS.v1", "MODEL.BUYER.FIT.v1", "MODEL.QOE.LITE.v1", "MODEL.STRUCT.NWC.PEG.v1"],
+      "taxLegalInclude": ["MODEL.TAX.STRUCTURE.v1", "MODEL.LEGAL.HALTSCAN.v1"],
+      "sensitivityInclude": ["MODEL.SENSITIVITY.MATRIX.v1", "MODEL.MARKET.CONTEXT.v1"],
+      "triggeredOverlayGates": []
+    }
+  },
+  {
+    "id": "CONF.STACK.BASE.BUY_L4.001",
+    "title": "L4 buyer stack uses EBITDA, buyer fit, LMM LBO, covenant, QoE, and comparison support",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L4",
+      "dealType": "healthy platform acquisition"
+    },
+    "expect": {
+      "complexity": "MEDIUM_HEAVY",
+      "primaryModelsInclude": ["MODEL.VAL.EBITDA.v1", "MODEL.VAL.TRIANGULATION.v1", "MODEL.DEAL.SCORE.v1", "MODEL.BUYER.FIT.v1"],
+      "supportingInclude": ["MODEL.STRUCT.NWC.PEG.v1", "MODEL.QOE.LITE.v1", "MODEL.DEAL.COMPARISON.v1", "MODEL.LBO.LMM.v1", "MODEL.COVENANT.COMPLIANCE.v1"],
+      "sensitivityInclude": ["MODEL.STRUCT.EARNOUT.MC.v1"],
+      "triggeredOverlayGates": []
+    }
+  },
+  {
+    "id": "CONF.STACK.BASE.RAISE_L5.001",
+    "title": "L5 raise stack adds cap table and DCF support without overlay triggers",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "raise",
+      "league": "L5",
+      "dealType": "growth equity financing"
+    },
+    "expect": {
+      "complexity": "HEAVY",
+      "primaryModelsInclude": ["MODEL.VAL.EBITDA.v1", "MODEL.CAPTABLE.DILUTION.v1", "MODEL.VAL.TRIANGULATION.v1", "MODEL.DEAL.SCORE.v1"],
+      "supportingInclude": ["MODEL.VAL.DCF.TWOSTAGE.v1", "MODEL.COVENANT.COMPLIANCE.v1"],
+      "sensitivityInclude": ["MODEL.STRUCT.EARNOUT.MC.v1"],
+      "triggeredOverlayGates": []
+    }
+  },
+  {
+    "id": "CONF.STACK.BASE.PMI_L3.001",
+    "title": "L3 PMI stack centers value creation and covenant tracking",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "pmi",
+      "league": "L3",
+      "dealType": "post-close integration"
+    },
+    "expect": {
+      "complexity": "MEDIUM",
+      "primaryModelsInclude": ["MODEL.VAL.EBITDA.v1", "MODEL.PMI.VALUE.CREATION.v1", "MODEL.VAL.TRIANGULATION.v1", "MODEL.DEAL.SCORE.v1"],
+      "supportingInclude": ["MODEL.STRUCT.NWC.PEG.v1", "MODEL.QOE.LITE.v1", "MODEL.COVENANT.COMPLIANCE.v1"],
+      "triggeredOverlayGates": []
+    }
+  },
+  {
+    "id": "CONF.STACK.G28.CASH.001",
+    "title": "Cash-runway distress signal makes G28 visible in the composed stack",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L4",
+      "dealType": "distressed acquisition",
+      "signals": {
+        "cashRunwayDays": 45
+      }
+    },
+    "expect": {
+      "triggeredOverlayGates": ["G28"],
+      "overlayReasonsInclude": {
+        "G28": ["cash runway is below 90 days"]
+      },
+      "applicableMechanicsInclude": ["M148", "M151", "M152", "M158"],
+      "applicableMechanicsSummaryAtLeast": {
+        "total": 4,
+        "executable": 1
+      },
+      "yuliaBriefIncludes": ["applicable DEFINITIVE mechanics", "Professional-handoff mechanics"]
+    }
+  },
+  {
+    "id": "CONF.STACK.G29.COVENANT.001",
+    "title": "Projected covenant breach makes G29 visible in the composed stack",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "raise",
+      "league": "L5",
+      "dealType": "capital structure review",
+      "signals": {
+        "maintenanceCovenantBreachWithinQuarters": 4
+      }
+    },
+    "expect": {
+      "triggeredOverlayGates": ["G29"],
+      "overlayReasonsInclude": {
+        "G29": ["maintenance covenant breach is projected within four quarters"]
+      },
+      "applicableMechanicsInclude": ["M158", "M160", "M184"],
+      "applicableMechanicsSummaryAtLeast": {
+        "total": 3,
+        "research_only": 1
+      },
+      "yuliaBriefIncludes": ["Research-only mechanics"]
+    }
+  },
+  {
+    "id": "CONF.STACK.G30.RE.001",
+    "title": "Real estate percentage makes G30 visible in the composed stack",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L4",
+      "dealType": "real estate operating business",
+      "signals": {
+        "realEstatePercentOfEv": 42
+      }
+    },
+    "expect": {
+      "triggeredOverlayGates": ["G30"],
+      "overlayReasonsInclude": {
+        "G30": ["real estate equals or exceeds 25 percent"]
+      },
+      "applicableMechanicsInclude": ["M187", "M188", "M190", "M196", "M199"],
+      "applicableMechanicsSummaryAtLeast": {
+        "total": 5,
+        "executable": 1
+      },
+      "yuliaBriefIncludes": ["Pass-through mechanics"]
+    }
+  },
+  {
+    "id": "CONF.STACK.ALL.COMBINED.001",
+    "title": "Combined distress, exchange offer, and real estate signals route all overlay gates",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L4",
+      "dealType": "distressed real estate asset purchase with exchange offer",
+      "signals": {
+        "cashRunwayDays": 45,
+        "securedDebtTradingPriceCents": 55,
+        "exchangeOffer": true,
+        "realEstatePercentOfEv": 42
+      }
+    },
+    "expect": {
+      "triggeredOverlayGates": ["G28", "G29", "G30"],
+      "applicableMechanicsInclude": ["M151", "M160", "M187", "M190"],
+      "applicableMechanicsSummaryAtLeast": {
+        "total": 30,
+        "executable": 20,
+        "research_only": 3
+      },
+      "taxLegalInclude": ["MODEL.LEGAL.HALTSCAN.v1"],
+      "sensitivityInclude": ["MODEL.MARKET.CONTEXT.v1"],
+      "yuliaBriefIncludes": ["THE LINE", "Research-only mechanics"]
+    }
+  },
+  {
+    "id": "CONF.STACK.DEBT_PRICE.NORMALIZED.001",
+    "title": "Decimal secured-debt trading price normalizes before stack overlay routing",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L6",
+      "dealType": "capital stack review",
+      "signals": {
+        "securedDebtTradingPriceCents": 0.55
+      }
+    },
+    "expect": {
+      "triggeredOverlayGates": ["G28", "G29"],
+      "overlayReasonsInclude": {
+        "G28": ["secured debt is trading below 60 cents"],
+        "G29": ["secured debt is trading below 80 cents"]
+      },
+      "applicableMechanicsInclude": ["M148", "M159", "M160", "M184"]
+    }
+  },
+  {
+    "id": "CONF.STACK.DEBT_PRICE.BOUNDARY.001",
+    "title": "Eighty-cent secured-debt trading price leaves overlay gates inactive",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L6",
+      "dealType": "capital stack review",
+      "signals": {
+        "securedDebtTradingPriceCents": 80
+      }
+    },
+    "expect": {
+      "triggeredOverlayGates": []
+    }
+  },
+  {
+    "id": "CONF.STACK.G28.TEXT.001",
+    "title": "Chapter 11 and DIP language route G28 through the composed stack",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L6",
+      "dealType": "Chapter 11 plan DIP feasibility best interests cramdown"
+    },
+    "expect": {
+      "triggeredOverlayGates": ["G28"],
+      "overlayReasonsInclude": {
+        "G28": ["deal text indicates distressed or restructuring process"]
+      },
+      "applicableMechanicsInclude": ["M152", "M153", "M154", "M155", "M156"]
+    }
+  },
+  {
+    "id": "CONF.STACK.G29.TEXT.LME.001",
+    "title": "LME language routes G29 without falsely routing standalone DIP restructuring",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "raise",
+      "league": "L7",
+      "dealType": "uptier drop-down double-dip pari-plus LME covenant baskets"
+    },
+    "expect": {
+      "triggeredOverlayGates": ["G29"],
+      "overlayReasonsInclude": {
+        "G29": ["deal text indicates capital-structure or liability-management mechanics"]
+      },
+      "applicableMechanicsInclude": ["M161", "M162", "M163", "M184"],
+      "applicableMechanicsSummaryAtLeast": {
+        "research_only": 3
+      }
+    }
+  },
+  {
+    "id": "CONF.STACK.G30.TEXT.CRYPTO.001",
+    "title": "Crypto language routes G30 without falsely routing ABL capital-structure mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L5",
+      "dealType": "stablecoin crypto digital asset token taxonomy"
+    },
+    "expect": {
+      "triggeredOverlayGates": ["G30"],
+      "overlayReasonsInclude": {
+        "G30": ["deal text indicates real estate, asset-class, or regulated-asset overlay"]
+      },
+      "applicableMechanicsInclude": ["M174", "M175", "M176"],
+      "applicableMechanicsSummaryAtLeast": {
+        "research_only": 3
+      }
+    }
+  },
+  {
+    "id": "CONF.STACK.G30.TEXT.SECONDARIES.001",
+    "title": "Secondaries language routes G30 and fund mechanics into the stack",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "raise",
+      "league": "L6",
+      "dealType": "LP secondary NAV facility strip sale continuation fund"
+    },
+    "expect": {
+      "triggeredOverlayGates": ["G30"],
+      "applicableMechanicsInclude": ["M120", "M177", "M178", "M179"],
+      "applicableMechanicsSummaryAtLeast": {
+        "total": 4
+      }
+    }
+  },
+  {
+    "id": "CONF.STACK.G30.TEXT.PROJECTFINANCE.001",
+    "title": "Project-finance language routes G30 and keeps coverage suite research-only",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L6",
+      "dealType": "project finance infrastructure concession DSCR LLCR PLCR"
+    },
+    "expect": {
+      "triggeredOverlayGates": ["G30"],
+      "applicableMechanicsInclude": ["M173"],
+      "applicableMechanicsSummaryAtLeast": {
+        "research_only": 1
+      }
+    }
+  },
+  {
+    "id": "CONF.STACK.G28G29.SOLVENCY_RECAP.001",
+    "title": "Solvency failure plus recapitalization routes G28 and G29",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "sell",
+      "league": "L5",
+      "dealType": "leveraged recap solvency surplus dividend",
+      "signals": {
+        "solvencyProngFailed": true,
+        "recapitalization": true
+      }
+    },
+    "expect": {
+      "triggeredOverlayGates": ["G28", "G29"],
+      "overlayReasonsInclude": {
+        "G28": ["M148 solvency signal failed"],
+        "G29": ["recapitalization is indicated"]
+      },
+      "applicableMechanicsInclude": ["M148", "M149", "M160", "M184"]
+    }
+  },
+  {
+    "id": "CONF.STACK.G28.RSA.001",
+    "title": "RSA and forbearance signals route G28 and surface RSA economics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L5",
+      "dealType": "restructuring support agreement forbearance",
+      "signals": {
+        "rsaInMarket": true,
+        "forbearanceExecuted": true
+      }
+    },
+    "expect": {
+      "triggeredOverlayGates": ["G28"],
+      "overlayReasonsInclude": {
+        "G28": ["RSA is in market", "forbearance has been executed"]
+      },
+      "applicableMechanicsInclude": ["M164", "M165"]
+    }
+  },
+  {
+    "id": "CONF.STACK.G29.EXCHANGE.001",
+    "title": "Exchange-offer signal routes G29 and surfaces exchange mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "raise",
+      "league": "L5",
+      "dealType": "out-of-court exchange offer",
+      "signals": {
+        "exchangeOffer": true
+      }
+    },
+    "expect": {
+      "triggeredOverlayGates": ["G29"],
+      "overlayReasonsInclude": {
+        "G29": ["exchange offer is indicated"]
+      },
+      "applicableMechanicsInclude": ["M160", "M150"]
+    }
+  },
+  {
+    "id": "CONF.STACK.G30.DIGITAL_PERCENT.001",
+    "title": "Digital-asset percentage signal routes G30 and surfaces crypto research mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L5",
+      "dealType": "digital asset issuer",
+      "signals": {
+        "digitalAssetsPercentOfEv": 10
+      }
+    },
+    "expect": {
+      "triggeredOverlayGates": ["G30"],
+      "overlayReasonsInclude": {
+        "G30": ["digital assets equal or exceed 10 percent"]
+      },
+      "applicableMechanicsInclude": ["M174", "M175", "M176"],
+      "yuliaBriefIncludes": ["Research-only mechanics"]
+    }
+  },
+  {
+    "id": "CONF.STACK.G30.OPCOPROPCO.001",
+    "title": "OpCo/PropCo language routes real-estate separation mechanics through G30",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "sell",
+      "league": "L4",
+      "dealType": "OpCo PropCo sale-leaseback ground lease CITT title survey"
+    },
+    "expect": {
+      "triggeredOverlayGates": ["G30"],
+      "applicableMechanicsInclude": ["M171", "M191", "M194", "M196", "M197"],
+      "applicableMechanicsSummaryAtLeast": {
+        "executable": 1
+      }
+    }
+  },
+  {
+    "id": "CONF.STACK.BOUNDARY.RE_PERCENT.001",
+    "title": "Below-threshold real estate signal leaves overlays inactive when text is generic",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L4",
+      "dealType": "services platform acquisition",
+      "signals": {
+        "realEstatePercentOfEv": 24.9
+      }
+    },
+    "expect": {
+      "triggeredOverlayGates": []
+    }
+  }
+]

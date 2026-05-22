@@ -299,7 +299,7 @@
       "slotIdsInclude": ["M109", "M119", "M128", "M190", "M199", "M209", "M210", "M211"],
       "readinessAtLeast": {
         "executable": 13,
-        "planning_only": 6,
+        "planning_only": 5,
         "professional_handoff": 2
       },
       "toolSurfacesInclude": {
@@ -461,7 +461,7 @@
         "executable": 11,
         "planning_only": 5,
         "professional_handoff": 3,
-        "research_only": 5
+        "research_only": 4
       }
     }
   },
@@ -696,9 +696,9 @@
       "slotIdsInclude": ["M103", "M121", "M145", "M146", "M180", "M184"],
       "readinessAtLeast": {
         "executable": 9,
-        "planning_only": 6,
+        "planning_only": 5,
         "professional_handoff": 3,
-        "research_only": 2
+        "research_only": 1
       }
     }
   },

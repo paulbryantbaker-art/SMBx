@@ -197,7 +197,7 @@ export function composeDefinitiveApplicableMechanics(
     input.jurisdiction,
   ].filter(Boolean).join(' '));
   const triggeredGates = [...new Set((input.triggeredGates || []).filter(Boolean).map(gate => gate.toUpperCase()))];
-  const limit = Number.isFinite(input.limit) && Number(input.limit) > 0 ? Number(input.limit) : 36;
+  const limit = Number.isFinite(input.limit) && Number(input.limit) > 0 ? Number(input.limit) : 72;
 
   for (const route of routeMap) {
     if (!routeMatchesBase(route, input)) continue;
@@ -227,8 +227,8 @@ export function summarizeDefinitiveApplicableMechanics(
     acc.total += 1;
     if (mechanic.readiness === 'executable') acc.executable += 1;
     if (mechanic.readiness === 'planning_only') acc.planningOnly += 1;
-    if (mechanic.readiness === 'professional_handoff') acc.professionalHandoff += 1;
-    if (mechanic.readiness === 'research_only') acc.researchOnly += 1;
+    if (mechanic.readiness === 'professional_handoff' || mechanic.lineCategory === 'professional_handoff') acc.professionalHandoff += 1;
+    if (mechanic.readiness === 'research_only' || mechanic.lineCategory === 'research_only') acc.researchOnly += 1;
     if (mechanic.readiness === 'pass_through_required') acc.passThroughRequired += 1;
     if (mechanic.readiness === 'reserved') acc.reserved += 1;
     return acc;
@@ -293,7 +293,9 @@ export function buildDefinitiveSurfaceMechanicsSummary(): DefinitiveSurfaceMecha
       passThrough: mechanics
         .filter(item => item.readiness === 'pass_through_required' || item.toolSurfaces.includes('pass_through_catalog'))
         .map(item => item.slotId),
-      professionalHandoff: mechanics.filter(item => item.readiness === 'professional_handoff').map(item => item.slotId),
+      professionalHandoff: mechanics
+        .filter(item => item.readiness === 'professional_handoff' || item.lineCategory === 'professional_handoff')
+        .map(item => item.slotId),
       researchOnly: mechanics.filter(item => item.readiness === 'research_only').map(item => item.slotId),
     };
 
@@ -416,11 +418,38 @@ function inferJourneys(model: DefinitiveModelCatalogEntry): DefinitiveJourney[] 
   if (model.slotId === 'M198') journeys.add('buy');
 
   if (hasAny(text, ['pmi', 'post-close', 'integration'])) journeys.add('pmi');
+  if (hasAny(text, ['solvency', 'lbo', 'fraudulent-transfer', 'fraudulent transfer'])) {
+    journeys.add('sell');
+    journeys.add('buy');
+    journeys.add('raise');
+  }
+  if (hasAny(text, ['dividend recap', 'distributable surplus', 'dgcl 170', 'surplus'])) {
+    journeys.add('sell');
+    journeys.add('raise');
+  }
+  if (hasAny(text, ['built-in gains', 's-corp', 's corp', '1374'])) {
+    journeys.add('sell');
+    journeys.add('raise');
+  }
+  if (hasAny(text, ['credit agreement', 'covenant', 'restricted payment', 'investment basket', 'lien', 'make-whole', 'call protection', 'high-yield bonds', 'term loans', 'unitranche', 'abl'])) {
+    journeys.add('sell');
+    journeys.add('buy');
+    journeys.add('raise');
+  }
+  if (hasAny(text, ['real estate', 'citt', 'transfer tax', 'opco', 'propco', 'sale-leaseback', 'ground lease', 'title', 'survey', 'firpta', '1031', 'pca'])) {
+    journeys.add('sell');
+    journeys.add('buy');
+  }
+  if (hasAny(text, ['continuation fund', 'lp secondary', 'gp-led', 'strip sale', 'nav facility'])) {
+    journeys.add('sell');
+    journeys.add('buy');
+    journeys.add('raise');
+  }
   if (hasAny(text, ['sell', 'seller', 'founder', 'sale', 'divestiture', 'carve-out', 'earnout', 'break-up fee', 'termination', 'escrow', 'indemnification', 'survival', 'transaction tax', 'after-tax proceeds', 'joint venture'])) journeys.add('sell');
   if (hasAny(text, ['buy', 'buyer', 'purchase', 'acquisition', 'diligence', 'tender', 'merger', 'target', 'rwi', 'closing', 'ip', 'real estate', 'lease', 'title', 'survey', 'transaction tax', 'buyer basis', 'joint venture', 'crypto', 'stablecoin', 'digital-asset'])) journeys.add('buy');
   if (hasAny(text, ['raise', 'financing', 'debt', 'convertible', 'safe', 'venture', 'nav', 'up-c', 'unitranche', 'abl', 'capital', 'pipe', 'recap', 'dip', 'make-whole', 'call protection', 'high-yield bonds', 'term loans', 'stablecoin'])) journeys.add('raise');
 
-  if (hasAny(text, ['bankruptcy', 'chapter 11', 'chapter 7', '363', 'restructuring', 'distressed', 'lme', 'exchange offer', 'liability management', 'claims trading', 'article 9'])) {
+  if (hasAny(text, ['bankruptcy', 'chapter 11', 'chapter 7', '363', 'dip', 'restructuring', 'distressed', 'lme', 'exchange offer', 'liability management', 'claims trading', 'article 9'])) {
     journeys.add('sell');
     journeys.add('buy');
     journeys.add('raise');
@@ -437,6 +466,7 @@ function inferJourneys(model: DefinitiveModelCatalogEntry): DefinitiveJourney[] 
 function inferLeagueRange(model: DefinitiveModelCatalogEntry): DefinitiveLeagueRange {
   const text = modelText(model);
 
+  if (model.slotId === 'M147') return { min: 'L4', max: 'L10' };
   if (hasAny(text, ['sba', 'smb', 'subchapter v', 'search fund'])) return { min: 'L1', max: 'L4' };
   if (hasAny(text, ['esop', 'independent sponsor'])) return { min: 'L1', max: 'L5' };
   if (hasAny(text, ['public', 'tender', '251(h)', 'pipe', 'fairness', 'controller', 'mfw', 'international', 'uk', 'eu', 'eumr', 'take-private'])) return { min: 'L5', max: 'L10' };
@@ -455,7 +485,14 @@ function inferToolSurfaces(model: DefinitiveModelCatalogEntry, readiness: Defini
 
   if (readiness === 'executable') surfaces.add('model_runner');
   if (readiness === 'pass_through_required' || PASS_THROUGH_MODEL_SLOTS.has(model.slotId)) surfaces.add('pass_through_catalog');
-  if (readiness === 'professional_handoff' || readiness === 'pass_through_required' || PASS_THROUGH_MODEL_SLOTS.has(model.slotId) || hasAny(text, ['diligence', 'ip', 'title', 'survey', 'pca', 'oss', 'source-code', 'privacy', 'cyber', 'sanctions', 'ground lease', 'domain', 'trademark'])) surfaces.add('files');
+  if (
+    readiness === 'professional_handoff' ||
+    model.lineCategory === 'professional_handoff' ||
+    readiness === 'pass_through_required' ||
+    PASS_THROUGH_MODEL_SLOTS.has(model.slotId) ||
+    hasAny(text, ['diligence', 'ip', 'title', 'survey', 'pca', 'oss', 'source-code', 'privacy', 'cyber', 'sanctions', 'ground lease', 'domain', 'trademark']) ||
+    hasAny(text, ['tax', 'irc', 'installment', 'deemed asset sale', 'esop', 'deferral', 'codi', 'exchange offer', 'seller note', 'stock purchase', 'asset deal', 'founder sale'])
+  ) surfaces.add('files');
   if (model.gates.some(gate => ['G6', 'G7', 'G8', 'G9', 'G10', 'G15', 'G28', 'G29', 'G30'].includes(gate))) surfaces.add('pipeline');
   if (hasAny(text, ['studio', 'book', 'export', 'purchase agreement', 'indemnification', 'escrow', 'earnout', 'closing statement', 'closing-statement', 'conditions', 'termination', 'rwi', 'fairness'])) surfaces.add('studio');
 
@@ -623,7 +660,16 @@ function normalizeText(value: string | null | undefined): string {
 }
 
 function hasAny(text: string, needles: string[]): boolean {
-  return needles.some(needle => text.includes(needle));
+  return needles.some(needle => matchesTerm(text, needle));
+}
+
+function matchesTerm(text: string, needle: string): boolean {
+  const escaped = escapeRegExp(needle);
+  return new RegExp(`(^|[^a-z0-9])${escaped}(?=$|[^a-z0-9])`).test(text);
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function countBy<T>(items: T[], getKey: (item: T) => string): Record<string, number> {

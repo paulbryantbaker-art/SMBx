@@ -9,11 +9,13 @@ export const DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT = 202;
 export const DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT = 48;
 export const DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT = 25;
 export const DEFINITIVE_CONFORMANCE_ROUTE_TRIGGER_CASE_COUNT = 30;
+export const DEFINITIVE_CONFORMANCE_MODEL_STACK_CASE_COUNT = 21;
 export const DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT =
   DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT +
   DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT +
   DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT +
-  DEFINITIVE_CONFORMANCE_ROUTE_TRIGGER_CASE_COUNT;
+  DEFINITIVE_CONFORMANCE_ROUTE_TRIGGER_CASE_COUNT +
+  DEFINITIVE_CONFORMANCE_MODEL_STACK_CASE_COUNT;
 
 export const DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CATEGORIES = [
   'valuation',
@@ -53,6 +55,7 @@ export const DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CATEGORIES = [
   'pass_through_boundary',
   'prompt_meta_behavior',
   'route_trigger_behavior',
+  'model_stack_behavior',
 ] as const;
 
 export function buildDefinitiveConformanceStatus() {
@@ -68,6 +71,7 @@ export function buildDefinitiveConformanceStatus() {
       dealMechanicsRoute: DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT,
       promptMeta: DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT,
       routeTrigger: DEFINITIVE_CONFORMANCE_ROUTE_TRIGGER_CASE_COUNT,
+      modelStack: DEFINITIVE_CONFORMANCE_MODEL_STACK_CASE_COUNT,
       total: DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT,
     },
     categories: DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CATEGORIES,
@@ -82,6 +86,7 @@ export function buildDefinitiveConformanceStatus() {
       'Yulia prompt/meta boundaries',
       'surface guidance consistency',
       'G28/G29/G30 trigger thresholds',
+      'compose_model_stack payload behavior',
     ],
     command: 'npm run test:definitive-conformance',
     authenticatedRouteSmoke: {

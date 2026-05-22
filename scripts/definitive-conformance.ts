@@ -17,6 +17,7 @@ import {
 } from '../server/constants/definitive.js';
 import {
   DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT,
+  DEFINITIVE_CONFORMANCE_MODEL_STACK_CASE_COUNT,
   DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT,
   DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT,
   DEFINITIVE_CONFORMANCE_ROUTE_TRIGGER_CASE_COUNT,
@@ -43,7 +44,9 @@ import {
   normalizeDefinitiveStackSignals,
   type DefinitiveStackSignals,
 } from '../server/services/definitiveStackOverlays.js';
+import { composeModelStack, type V19Journey } from '../server/services/modelStackComposer.js';
 import { executeV19Model } from '../server/services/v19ModelRuntime.js';
+import type { League } from '../server/constants/v19Leagues.js';
 
 interface ConformanceCase {
   id: string;
@@ -139,16 +142,46 @@ interface RouteTriggerCase {
   };
 }
 
+interface ModelStackCase {
+  id: string;
+  title: string;
+  specVersion: string;
+  methodologyUri: string;
+  dealMechanicsVersion: string;
+  input: {
+    journey: V19Journey;
+    league: League;
+    dealType?: string | null;
+    industry?: string | null;
+    jurisdiction?: string | null;
+    signals?: Record<string, any> | null;
+  };
+  expect: {
+    complexity?: string;
+    primaryModelsInclude?: string[];
+    supportingInclude?: string[];
+    taxLegalInclude?: string[];
+    sensitivityInclude?: string[];
+    triggeredOverlayGates: Array<'G28' | 'G29' | 'G30'>;
+    overlayReasonsInclude?: Partial<Record<'G28' | 'G29' | 'G30', string[]>>;
+    applicableMechanicsInclude?: string[];
+    applicableMechanicsSummaryAtLeast?: Partial<Record<DefinitiveRouteReadiness | 'total', number>>;
+    yuliaBriefIncludes?: string[];
+  };
+}
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const caseFile = path.resolve(__dirname, '../testing/definitive/conformance/v1/model-runtime.cases.json');
 const routeCaseFile = path.resolve(__dirname, '../testing/definitive/conformance/v1/deal-mechanics-route.cases.json');
 const promptMetaCaseFile = path.resolve(__dirname, '../testing/definitive/conformance/v1/prompt-meta.cases.json');
 const routeTriggerCaseFile = path.resolve(__dirname, '../testing/definitive/conformance/v1/route-trigger.cases.json');
+const modelStackCaseFile = path.resolve(__dirname, '../testing/definitive/conformance/v1/model-stack.cases.json');
 
 const cases: ConformanceCase[] = JSON.parse(await readFile(caseFile, 'utf8'));
 const routeCases: DealMechanicsRouteCase[] = JSON.parse(await readFile(routeCaseFile, 'utf8'));
 const promptMetaCases: PromptMetaCase[] = JSON.parse(await readFile(promptMetaCaseFile, 'utf8'));
 const routeTriggerCases: RouteTriggerCase[] = JSON.parse(await readFile(routeTriggerCaseFile, 'utf8'));
+const modelStackCases: ModelStackCase[] = JSON.parse(await readFile(modelStackCaseFile, 'utf8'));
 let passed = 0;
 let failed = 0;
 
@@ -157,11 +190,13 @@ console.log(`Loaded ${cases.length} cases from ${path.relative(process.cwd(), ca
 console.log(`Loaded ${routeCases.length} route cases from ${path.relative(process.cwd(), routeCaseFile)}`);
 console.log(`Loaded ${promptMetaCases.length} prompt/meta cases from ${path.relative(process.cwd(), promptMetaCaseFile)}`);
 console.log(`Loaded ${routeTriggerCases.length} route-trigger cases from ${path.relative(process.cwd(), routeTriggerCaseFile)}`);
+console.log(`Loaded ${modelStackCases.length} model-stack cases from ${path.relative(process.cwd(), modelStackCaseFile)}`);
 assertEqual(cases.length, DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT, 'conformance case count manifest');
 assertEqual(routeCases.length, DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT, 'deal route conformance case count manifest');
 assertEqual(promptMetaCases.length, DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT, 'prompt/meta conformance case count manifest');
 assertEqual(routeTriggerCases.length, DEFINITIVE_CONFORMANCE_ROUTE_TRIGGER_CASE_COUNT, 'route-trigger conformance case count manifest');
-assertEqual(cases.length + routeCases.length + promptMetaCases.length + routeTriggerCases.length, DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT, 'total conformance case count manifest');
+assertEqual(modelStackCases.length, DEFINITIVE_CONFORMANCE_MODEL_STACK_CASE_COUNT, 'model-stack conformance case count manifest');
+assertEqual(cases.length + routeCases.length + promptMetaCases.length + routeTriggerCases.length + modelStackCases.length, DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT, 'total conformance case count manifest');
 
 for (const item of cases) {
   try {
@@ -308,6 +343,58 @@ for (const item of routeTriggerCases) {
   }
 }
 
+for (const item of modelStackCases) {
+  try {
+    assertEqual(item.specVersion, DEFINITIVE_SPEC_VERSION, `${item.id} specVersion`);
+    assertEqual(item.methodologyUri, DEFINITIVE_METHODOLOGY_URI, `${item.id} methodologyUri`);
+    assertEqual(item.dealMechanicsVersion, DEFINITIVE_DEAL_MECHANICS_VERSION, `${item.id} dealMechanicsVersion`);
+
+    const stack = await composeModelStack(item.input);
+    assertEqual(stack.journey, item.input.journey, `${item.id} journey`);
+    assertEqual(stack.league, item.input.league, `${item.id} league`);
+    if (item.expect.complexity) {
+      assertEqual(stack.complexity, item.expect.complexity, `${item.id} complexity`);
+    }
+    assert(stack.definitive, `${item.id} expected DEFINITIVE metadata`);
+    assertEqual(stack.definitive.dealMechanicsVersion, DEFINITIVE_DEAL_MECHANICS_VERSION, `${item.id} stack dealMechanicsVersion`);
+    assertEqual(stack.definitive.routeMapStatus, 'complete', `${item.id} route map status`);
+    assertDeepEqual(stack.definitive.triggeredOverlayGates, item.expect.triggeredOverlayGates, `${item.id} triggered overlay gates`);
+
+    assertIncludesAll(stack.primaryModels, item.expect.primaryModelsInclude || [], `${item.id} primary models`);
+    assertIncludesAll(stack.supporting, item.expect.supportingInclude || [], `${item.id} supporting models`);
+    assertIncludesAll(stack.taxLegal, item.expect.taxLegalInclude || [], `${item.id} tax/legal models`);
+    assertIncludesAll(stack.sensitivity, item.expect.sensitivityInclude || [], `${item.id} sensitivity models`);
+
+    const byGate = new Map(stack.definitive.overlays.map(overlay => [overlay.gateId, overlay]));
+    for (const [gateId, reasons] of Object.entries(item.expect.overlayReasonsInclude || {}) as Array<['G28' | 'G29' | 'G30', string[]]>) {
+      const overlay = byGate.get(gateId);
+      assert(overlay, `${item.id} expected ${gateId} overlay`);
+      for (const reason of reasons) {
+        assert(overlay.reasons.some(item => item.includes(reason)), `${item.id} expected ${gateId} reason to include ${reason}`);
+      }
+    }
+
+    const applicableSlots = stack.definitive.applicableMechanics.map(mechanic => mechanic.slotId);
+    assertIncludesAll(applicableSlots, item.expect.applicableMechanicsInclude || [], `${item.id} applicable mechanics`);
+    for (const [readiness, minimum] of Object.entries(item.expect.applicableMechanicsSummaryAtLeast || {}) as Array<[DefinitiveRouteReadiness | 'total', number]>) {
+      const actual = readiness === 'total'
+        ? stack.definitive.applicableMechanicsSummary.total
+        : summaryCountForReadiness(stack.definitive.applicableMechanicsSummary, readiness);
+      assert(actual >= minimum, `${item.id} expected ${readiness} >= ${minimum}, got ${actual}`);
+    }
+
+    for (const expectedText of item.expect.yuliaBriefIncludes || []) {
+      assert(stack.definitive.yuliaMechanicsBrief.some(line => line.includes(expectedText)), `${item.id} expected Yulia brief to include ${expectedText}`);
+    }
+
+    console.log(`  ✓ ${item.id} ${item.title}`);
+    passed++;
+  } catch (error: any) {
+    console.log(`  ✗ ${item.id} ${item.title} - ${error.message}`);
+    failed++;
+  }
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed > 0) process.exit(1);
 
@@ -330,6 +417,12 @@ function assertEqual<T>(actual: T, expected: T, message: string) {
 function assertDeepEqual<T>(actual: T, expected: T, message: string) {
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
     throw new Error(`${message}. Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+  }
+}
+
+function assertIncludesAll(actual: string[], expected: string[], message: string) {
+  for (const item of expected) {
+    assert(actual.includes(item), `${message} expected to include ${item}, got ${JSON.stringify(actual)}`);
   }
 }
 

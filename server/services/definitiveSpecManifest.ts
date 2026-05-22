@@ -121,6 +121,7 @@ export function buildDefinitiveSpecManifest() {
       dealMechanicsRouteCases: conformance.cases.dealMechanicsRoute,
       promptMetaCases: conformance.cases.promptMeta,
       routeTriggerCases: conformance.cases.routeTrigger,
+      modelStackCases: conformance.cases.modelStack,
       totalCases: conformance.cases.total,
       nextTarget: conformance.nextTarget,
       categories: conformance.categories,
