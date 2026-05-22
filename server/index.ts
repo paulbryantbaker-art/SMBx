@@ -42,6 +42,7 @@ import { startWorker } from './workers/discoveryWorker.js';
 import { buildAgentCard } from './services/agentCard.js';
 import { buildDefinitiveSpecManifest } from './services/definitiveSpecManifest.js';
 import { getDefinitivePassThroughSurface } from './services/definitiveDealMechanicsCatalog.js';
+import { getDefinitiveAuthoritySeedPlan } from './services/definitiveAuthoritySeedPlan.js';
 import { ensureModelRegistrySeeded } from './services/modelRegistry.js';
 import rateLimit from 'express-rate-limit';
 import type { Request, Response, NextFunction } from 'express';
@@ -136,6 +137,10 @@ app.get('/definitive/spec', (_req, res) => {
 
 app.get('/api/definitive/pass-through-catalog', (_req, res) => {
   res.json(getDefinitivePassThroughSurface());
+});
+
+app.get('/api/definitive/authority-seed-plan', (_req, res) => {
+  res.json(getDefinitiveAuthoritySeedPlan());
 });
 
 app.get('/api/debug/check-ai', async (_req, res) => {

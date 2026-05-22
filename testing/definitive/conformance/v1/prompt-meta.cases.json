@@ -205,6 +205,7 @@
     "expect": {
       "fields": [
         { "path": "access.publicDiscovery", "includes": "/api/definitive/pass-through-catalog" },
+        { "path": "access.publicDiscovery", "includes": "/api/definitive/authority-seed-plan" },
         { "path": "access.publicDiscovery", "notIncludes": "/api/definitive/tools/{toolName}/call" },
         { "path": "access.authenticatedExecution", "includes": "/api/definitive/tools/{toolName}/call" }
       ]

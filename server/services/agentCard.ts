@@ -51,6 +51,7 @@ export function buildAgentCard() {
       corpusObservationTypesEndpoint: '/api/definitive/corpus/observation-types',
       corpusRightsEndpoint: '/api/definitive/corpus/rights',
       passThroughCatalogEndpoint: '/api/definitive/pass-through-catalog',
+      authoritySeedPlanEndpoint: '/api/definitive/authority-seed-plan',
       dealMechanicsVersion: dealMechanics.version,
       dealMechanicsUri: dealMechanics.uri,
       dealMechanicsModelSlots: dealMechanics.totalModelSlots,
@@ -206,6 +207,7 @@ export function buildAgentCard() {
       '/api/agent-card',
       '/api/definitive/spec',
       '/api/definitive/pass-through-catalog',
+      '/api/definitive/authority-seed-plan',
     ],
     authenticatedEndpoints: [
       '/api/definitive/tools/list',
