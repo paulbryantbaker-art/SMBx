@@ -42,6 +42,7 @@ import {
   listDefinitiveDealMechanicsCatalog,
 } from '../server/services/definitiveDealMechanicsCatalog.js';
 import { getDefinitiveAuthoritySeedPlan } from '../server/services/definitiveAuthoritySeedPlan.js';
+import { getDefinitiveSubstrateArchitecturePlan } from '../server/services/definitiveSubstrateArchitecturePlan.js';
 import {
   listDefinitiveCorpusObservationTypes,
   sanitizeCorpusObservation,
@@ -87,18 +88,26 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assertEqual(card.definitive.corpusObservationTypesEndpoint, '/api/definitive/corpus/observation-types', 'corpus observation endpoint');
   assertEqual(card.definitive.passThroughCatalogEndpoint, '/api/definitive/pass-through-catalog', 'pass-through catalog endpoint');
   assertEqual(card.definitive.authoritySeedPlanEndpoint, '/api/definitive/authority-seed-plan', 'authority seed plan endpoint');
+  assertEqual(card.definitive.substrateArchitectureEndpoint, '/api/definitive/substrate-architecture', 'substrate architecture endpoint');
   assertEqual(card.definitive.dealMechanicsVersion, DEFINITIVE_DEAL_MECHANICS_VERSION, 'deal mechanics version');
   assertEqual(card.definitive.dealMechanicsModelSlots, DEFINITIVE_DEAL_MECHANICS_MODEL_SLOT_COUNT, 'deal mechanics model slots');
   assertEqual(card.definitive.dealMechanicsGates, DEFINITIVE_DEAL_MECHANICS_GATE_COUNT, 'deal mechanics gate count');
   assertEqual(card.definitive.authorityRegisterTarget, DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'agent card authority target');
   assert(card.definitive.authoritySeedPlanEntries >= DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'agent card authority seed plan meets target');
   assertEqual(card.definitive.authoritySeedPlanStatus, 'ready_for_800_plus_seeding', 'agent card authority seed plan status');
+  assertEqual(card.definitive.substratePrimitiveCount, 8, 'agent card substrate primitive count');
+  assertEqual(card.definitive.substrateNewMcpToolCount, 27, 'agent card substrate tool count');
+  assert(card.definitive.dealOsDoctrine.includes('Deal OS'), 'agent card exposes Deal OS doctrine');
+  assert(card.definitive.agentHomeContract.includes('data rooms'), 'agent card exposes agent home data-room contract');
+  assert(card.definitive.agentNoRejectionContract.includes('MissingInputContract'), 'agent card exposes no-rejection contract');
+  assert(card.definitive.agentTakeBackArtifacts.includes('DealStateDiff'), 'agent card exposes portable take-back artifacts');
   assertEqual(card.definitive.dealMappingStatus, 'complete', 'agent card deal mapping status');
   assertEqual(card.definitive.dealRouteMapStatus, 'complete', 'agent card route map status');
   assert(card.definitive.passThroughPricingRule.includes('cost-plus-fixed'), 'agent card exposes pass-through pricing rule');
   assert(card.publicEndpoints.includes('/.well-known/definitive.json'), 'definitive manifest endpoint is public');
   assert(card.publicEndpoints.includes('/api/definitive/pass-through-catalog'), 'pass-through catalog endpoint is public discovery');
   assert(card.publicEndpoints.includes('/api/definitive/authority-seed-plan'), 'authority seed plan endpoint is public discovery');
+  assert(card.publicEndpoints.includes('/api/definitive/substrate-architecture'), 'substrate architecture endpoint is public discovery');
   assert(!card.publicEndpoints.includes('/api/definitive/tools/{toolName}/call'), 'tool execution is not public');
   assert(card.authenticatedEndpoints.includes('/api/definitive/line/inventory'), 'line inventory endpoint is authenticated');
   assert(card.authenticatedEndpoints.includes('/api/definitive/corpus/observation-types'), 'corpus observation endpoint is authenticated');
@@ -122,6 +131,17 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assertEqual(authorityCapability.targetEntries, DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'authority capability target');
   assert(authorityCapability.plannedEntries >= DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'authority capability planned entries meet target');
   assertEqual(authorityCapability.requiredCoverageSatisfied, true, 'authority capability required coverage');
+  const substrateCapability = card.capabilities.find((item: any) => item.id === 'definitive_substrate_architecture') as any;
+  assert(substrateCapability, 'substrate architecture capability exists');
+  assertEqual(substrateCapability.primitiveCount, 8, 'substrate capability primitive count');
+  assertEqual(substrateCapability.newMcpToolCount, 27, 'substrate capability tool count');
+  assert(substrateCapability.agentOperatingDoctrine.noRejectionContract.includes('Agents are not rejected'), 'substrate capability blocks incomplete-payload rejection');
+  assert(substrateCapability.lifecycleStages.includes('ioi'), 'substrate capability exposes IOI stage');
+  assert(substrateCapability.lifecycleStages.includes('close_pmi'), 'substrate capability exposes close/PMI stage');
+  assert(substrateCapability.workSurfaces.includes('data_room'), 'substrate capability exposes data room surface');
+  assert(substrateCapability.workSurfaces.includes('studio'), 'substrate capability exposes Studio document surface');
+  assert(substrateCapability.takeBackArtifacts.includes('DocumentDraft'), 'substrate capability exposes document take-back artifact');
+  assert(substrateCapability.routingAxes.includes('distress_posture'), 'substrate capability exposes routing axes');
 });
 
 await test('DEFINITIVE manifest is a single stable discovery document', async () => {
@@ -131,9 +151,11 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assertEqual(manifest.endpoints.agentCard, '/.well-known/agent-card.json', 'manifest agent-card endpoint');
   assertEqual(manifest.endpoints.passThroughCatalog, '/api/definitive/pass-through-catalog', 'manifest pass-through catalog endpoint');
   assertEqual(manifest.endpoints.authoritySeedPlan, '/api/definitive/authority-seed-plan', 'manifest authority seed plan endpoint');
+  assertEqual(manifest.endpoints.substrateArchitecture, '/api/definitive/substrate-architecture', 'manifest substrate architecture endpoint');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/spec'), 'manifest spec API is public discovery');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/pass-through-catalog'), 'manifest pass-through catalog is public discovery');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/authority-seed-plan'), 'manifest authority seed plan is public discovery');
+  assert(manifest.access.publicDiscovery.includes('/api/definitive/substrate-architecture'), 'manifest substrate architecture is public discovery');
   assert(manifest.access.authenticatedDiscovery.includes('/api/definitive/tools/list'), 'manifest tools list is authenticated discovery');
   assert(manifest.access.authenticatedExecution.includes('/api/definitive/tools/{toolName}/call'), 'manifest tool call is authenticated execution');
   assertDeepEqual(manifest.toolSurface.tools.map(tool => tool.name), expectedTools, 'manifest tool names');
@@ -158,6 +180,18 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assert(manifest.authoritySurface.categoryIds.includes('agreement_architecture'), 'manifest authority surface includes agreement architecture');
   assert(manifest.authoritySurface.categoryIds.includes('ip_authorities'), 'manifest authority surface includes IP');
   assert(manifest.authoritySurface.categoryIds.includes('pass_through_pricing_boundary'), 'manifest authority surface includes THE LINE pricing boundary');
+  assertEqual(manifest.substrateArchitectureSurface.primitiveCount, 8, 'manifest substrate primitive count');
+  assertEqual(manifest.substrateArchitectureSurface.newMcpToolCount, 27, 'manifest substrate tool count');
+  assert(manifest.substrateArchitectureSurface.agentOperatingDoctrine.productDoctrine.includes('Deal OS'), 'manifest substrate Deal OS doctrine');
+  assert(manifest.substrateArchitectureSurface.agentOperatingDoctrine.noRejectionContract.includes('MissingInputContract'), 'manifest substrate no-rejection contract');
+  assert(manifest.substrateArchitectureSurface.agentOperatingDoctrine.homeContract.includes('data rooms'), 'manifest substrate agent home contract includes data rooms');
+  assert(manifest.substrateArchitectureSurface.agentOperatingDoctrine.bidirectionalHandoff.includes('portable information'), 'manifest substrate bidirectional handoff');
+  assert(manifest.substrateArchitectureSurface.dealOsLifecycleStages.some(stage => stage.id === 'ioi'), 'manifest substrate lifecycle includes IOI');
+  assert(manifest.substrateArchitectureSurface.dealOsLifecycleStages.some(stage => stage.id === 'model_negotiation'), 'manifest substrate lifecycle includes modeling and negotiation prep');
+  assert(manifest.substrateArchitectureSurface.dealOsWorkSurfaces.some(surface => surface.id === 'data_room'), 'manifest substrate exposes data room work surface');
+  assert(manifest.substrateArchitectureSurface.agentTakeBackArtifacts.includes('DataRoomIndex'), 'manifest substrate exposes data-room take-back artifact');
+  assert(manifest.substrateArchitectureSurface.routingAxes.includes('tax_classification'), 'manifest substrate routing axes');
+  assert(manifest.substrateArchitectureSurface.universalResponseFields.includes('next_suggested_calls'), 'manifest substrate next call hints');
   assertEqual(manifest.dealMechanicsSurface.mappingCoverage.status, 'complete', 'manifest deal mapping coverage status');
   assertEqual(manifest.dealMechanicsSurface.mappingCoverage.unmappedModelSlots, 0, 'manifest has no unmapped active model slots');
   assertEqual(manifest.dealMechanicsSurface.routeMap.summary.status, 'complete', 'manifest route map coverage status');
@@ -211,6 +245,26 @@ await test('Authority Register seed plan is explicit and above 800 planned entri
   assert(seedPlan.categoryIds.includes('regulated_industries'), 'authority seed includes regulated industries');
   assert(seedPlan.categories.every(category => category.freshnessPolicy.length > 0), 'each authority category has freshness policy');
   assert(seedPlan.categories.every(category => category.lineBoundary.length > 0), 'each authority category has a boundary statement');
+});
+
+await test('Substrate architecture plan exposes the terminal orchestration primitives', async () => {
+  const architecture = getDefinitiveSubstrateArchitecturePlan();
+  assertEqual(architecture.primitiveCount, 8, 'substrate architecture primitive count');
+  assertEqual(architecture.newMcpToolCount, 27, 'substrate architecture tool count');
+  assert(architecture.agentOperatingDoctrine.productDoctrine.includes('Deal OS'), 'substrate plan is Deal OS');
+  assert(architecture.agentOperatingDoctrine.noRejectionContract.includes('Agents are not rejected'), 'substrate plan accepts incomplete agent payloads');
+  assert(architecture.agentOperatingDoctrine.homeContract.includes('documents'), 'substrate plan includes document creation surface');
+  assert(architecture.agentTakeBackArtifacts.includes('AuditPacket'), 'substrate plan exposes audit packet take-back artifact');
+  assert(architecture.dealOsWorkSurfaces.some(surface => surface.id === 'files'), 'substrate plan includes Files work surface');
+  assert(architecture.dealOsWorkSurfaces.some(surface => surface.id === 'data_room'), 'substrate plan includes Data Room work surface');
+  assert(architecture.dealOsLifecycleStages.some(stage => stage.id === 'loi'), 'substrate plan includes LOI stage');
+  assert(architecture.routingAxes.includes('distress_posture'), 'routing axes include distress posture');
+  assert(architecture.routingAxes.includes('tax_classification'), 'routing axes include tax classification');
+  assert(architecture.universalResponseFields.includes('next_suggested_calls'), 'response envelope includes next suggested calls');
+  assert(architecture.workstreams.some(item => item.id === 'WS1' && item.mcpTools.includes('ingest_deal_payload')), 'payload ingest workstream exists');
+  assert(architecture.workstreams.some(item => item.id === 'WS4' && item.mcpTools.includes('finalize_deal_package')), 'package workstream exists');
+  assert(architecture.workstreams.some(item => item.id === 'WS5' && item.mcpTools.includes('compute_best_vehicle')), 'best vehicle workstream exists');
+  assert(architecture.lineDoctrine.includes('does not advise'), 'THE LINE invariant is explicit');
 });
 
 await test('DEFINITIVE route map makes every active M-slot usable by Yulia', async () => {

@@ -7,7 +7,7 @@ import {
 
 export const DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT = 202;
 export const DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT = 60;
-export const DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT = 39;
+export const DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT = 49;
 export const DEFINITIVE_CONFORMANCE_ROUTE_TRIGGER_CASE_COUNT = 30;
 export const DEFINITIVE_CONFORMANCE_MODEL_STACK_CASE_COUNT = 29;
 export const DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT =
@@ -53,6 +53,7 @@ export const DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CATEGORIES = [
   'deal_mechanics_route_map',
   'deal_mechanics_readiness',
   'authority_seed_plan',
+  'substrate_architecture',
   'pass_through_boundary',
   'prompt_meta_behavior',
   'route_trigger_behavior',
@@ -87,6 +88,9 @@ export function buildDefinitiveConformanceStatus() {
       'Yulia prompt/meta boundaries',
       'surface guidance consistency',
       'Authority Register seed-plan coverage',
+      'terminal substrate architecture primitives',
+      'Deal OS non-rejection agent lifecycle',
+      'Deal OS iterative work surfaces and portable agent handoffs',
       'G28/G29/G30 trigger thresholds',
       'compose_model_stack payload behavior',
     ],

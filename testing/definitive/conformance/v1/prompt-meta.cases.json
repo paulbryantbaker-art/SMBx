@@ -237,8 +237,8 @@
       "fields": [
         { "path": "conformanceSurface.modelRuntimeCases", "equals": 202 },
         { "path": "conformanceSurface.dealMechanicsRouteCases", "equals": 60 },
-        { "path": "conformanceSurface.promptMetaCases", "equals": 39 },
-        { "path": "conformanceSurface.totalCases", "equals": 360 }
+        { "path": "conformanceSurface.promptMetaCases", "equals": 49 },
+        { "path": "conformanceSurface.totalCases", "equals": 370 }
       ]
     }
   },
@@ -512,7 +512,7 @@
     "methodologyUri": "methodology://v19",
     "kind": "agent_card",
     "expect": {
-      "textIncludes": ["definitive_conformance_status", "\"caseCount\":360", "definitive_deal_mechanics_v1_1"],
+      "textIncludes": ["definitive_conformance_status", "\"caseCount\":370", "definitive_deal_mechanics_v1_1"],
       "fields": [
         { "path": "definitive.dealMechanicsModelSlots", "equals": 123 },
         { "path": "definitive.dealMechanicsGates", "equals": 30 },
@@ -619,6 +619,171 @@
         { "path": "marginPolicy.dealOutcomeTied", "equals": false },
         { "path": "allowed", "includes": "Data/software API calls billed per call regardless of outcome" },
         { "path": "dependentModelSlots", "includes": "M221" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.SUBSTRATE.PRIMITIVES.001",
+    "title": "Substrate architecture exposes the eight terminal primitives",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "substrate_architecture",
+    "expect": {
+      "textIncludes": ["DealPayload", "CompletenessSpec", "DealPackage", "BestVehicleBlock"],
+      "fields": [
+        { "path": "primitiveCount", "equals": 8 },
+        { "path": "newMcpToolCount", "equals": 27 },
+        { "path": "workstreamsById.WS1.mcpTools", "includes": "ingest_deal_payload" },
+        { "path": "workstreamsById.WS4.mcpTools", "includes": "finalize_deal_package" },
+        { "path": "workstreamsById.WS5.mcpTools", "includes": "compute_best_vehicle" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.SUBSTRATE.ROUTING.001",
+    "title": "Substrate architecture pins the eight-axis routing key",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "substrate_architecture",
+    "expect": {
+      "fields": [
+        { "path": "routingAxes", "includes": "journey" },
+        { "path": "routingAxes", "includes": "distress_posture" },
+        { "path": "routingAxes", "includes": "asset_class" },
+        { "path": "routingAxes", "includes": "tax_classification" },
+        { "path": "workstreamsById.WS1.doneCondition", "includes": "activated gates/models" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.SUBSTRATE.ENVELOPE.001",
+    "title": "Substrate architecture adds next-call hints to every response envelope",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "substrate_architecture",
+    "expect": {
+      "fields": [
+        { "path": "universalResponseFields", "includes": "next_suggested_calls" },
+        { "path": "universalResponseFields", "includes": "state_hash_after" },
+        { "path": "universalResponseFields", "includes": "the_line_invariant" },
+        { "path": "workstreamsById.WS7.objectTypes", "includes": "MCPCallHint" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.SUBSTRATE.MANIFEST.001",
+    "title": "Manifest and agent card expose the terminal substrate architecture surface",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "manifest",
+    "expect": {
+      "textIncludes": ["substrateArchitectureSurface", "DealPayload", "next_suggested_calls"],
+      "fields": [
+        { "path": "endpoints.substrateArchitecture", "equals": "/api/definitive/substrate-architecture" },
+        { "path": "access.publicDiscovery", "includes": "/api/definitive/substrate-architecture" },
+        { "path": "substrateArchitectureSurface.primitiveCount", "equals": 8 },
+        { "path": "substrateArchitectureSurface.newMcpToolCount", "equals": 27 }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.SUBSTRATE.DEALOS.001",
+    "title": "Substrate architecture locks the Deal OS doctrine for humans and agents",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "substrate_architecture",
+    "expect": {
+      "textIncludes": ["Deal OS", "humans and agents", "same methodology-pinned DealState"],
+      "fields": [
+        { "path": "agentOperatingDoctrine.productDoctrine", "includes": "Deal OS" },
+        { "path": "agentOperatingDoctrine.productDoctrine", "includes": "same methodology-pinned DealState" },
+        { "path": "agentOperatingDoctrine.valuePreservation", "includes": "Every recursive step should add reusable DealState" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.SUBSTRATE.NOREJECT.001",
+    "title": "Substrate architecture prevents rejection of incomplete agent payloads",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "substrate_architecture",
+    "expect": {
+      "textIncludes": ["Agents are not rejected because they lack complete information", "MissingInputContract", "next_suggested_calls"],
+      "fields": [
+        { "path": "agentOperatingDoctrine.noRejectionContract", "includes": "Agents are not rejected" },
+        { "path": "agentOperatingDoctrine.noRejectionContract", "includes": "MissingInputContract" },
+        { "path": "agentOperatingDoctrine.recursiveWorkLoop", "includes": "update DealState" },
+        { "path": "workstreamsById.WS1.doneCondition", "includes": "without choosing a menu mode or being rejected for incompleteness" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.SUBSTRATE.LIFECYCLE.001",
+    "title": "Substrate architecture exposes the staged M&A lifecycle for recursive agent work",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "substrate_architecture",
+    "expect": {
+      "fields": [
+        { "path": "dealOsLifecycleStageIds", "includes": "intake" },
+        { "path": "dealOsLifecycleStageIds", "includes": "ioi" },
+        { "path": "dealOsLifecycleStageIds", "includes": "loi" },
+        { "path": "dealOsLifecycleStageIds", "includes": "confirmatory_diligence" },
+        { "path": "dealOsLifecycleStageIds", "includes": "model_negotiation" },
+        { "path": "dealOsLifecycleStageIds", "includes": "close_pmi" },
+        { "path": "agentOperatingDoctrine.recursiveWorkLoop", "includes": "IOI, LOI, diligence, modeling, negotiation prep, close, and PMI" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.SUBSTRATE.AGENTHOME.001",
+    "title": "Substrate architecture presents smbX as the recurring agent home for deal work",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "substrate_architecture",
+    "expect": {
+      "textIncludes": ["home for iterative deal work", "documents", "data rooms", "same DealState"],
+      "fields": [
+        { "path": "agentOperatingDoctrine.homeContract", "includes": "home for iterative deal work" },
+        { "path": "agentOperatingDoctrine.homeContract", "includes": "data rooms" },
+        { "path": "agentOperatingDoctrine.homeContract", "includes": "documents" },
+        { "path": "agentOperatingDoctrine.bidirectionalHandoff", "includes": "At each iteration the agent can take portable information back" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.SUBSTRATE.WORKSURFACES.001",
+    "title": "Substrate architecture exposes the Deal OS work surfaces agents can manage",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "substrate_architecture",
+    "expect": {
+      "fields": [
+        { "path": "dealOsWorkSurfaceIds", "includes": "today" },
+        { "path": "dealOsWorkSurfaceIds", "includes": "pipeline" },
+        { "path": "dealOsWorkSurfaceIds", "includes": "files" },
+        { "path": "dealOsWorkSurfaceIds", "includes": "data_room" },
+        { "path": "dealOsWorkSurfaceIds", "includes": "studio" },
+        { "path": "dealOsWorkSurfacesById.data_room.portableOutputs", "includes": "DataRoomIndex" },
+        { "path": "dealOsWorkSurfacesById.studio.portableOutputs", "includes": "DocumentDraft" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.SUBSTRATE.TAKEBACK.001",
+    "title": "Substrate architecture names portable artifacts agents can take back to their systems",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "substrate_architecture",
+    "expect": {
+      "fields": [
+        { "path": "agentTakeBackArtifacts", "includes": "DealStateDiff" },
+        { "path": "agentTakeBackArtifacts", "includes": "CompletenessReport" },
+        { "path": "agentTakeBackArtifacts", "includes": "DataRoomIndex" },
+        { "path": "agentTakeBackArtifacts", "includes": "DocumentDraft" },
+        { "path": "agentTakeBackArtifacts", "includes": "AuditPacket" },
+        { "path": "workstreamsById.WS6.primitives", "includes": "DocumentDraft" },
+        { "path": "workstreamsById.WS6.primitives", "includes": "DataRoomIndex" }
       ]
     }
   }

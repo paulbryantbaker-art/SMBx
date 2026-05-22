@@ -14,6 +14,7 @@ import {
   getDefinitivePassThroughSurface,
 } from './definitiveDealMechanicsCatalog.js';
 import { getDefinitiveAuthoritySeedPlan } from './definitiveAuthoritySeedPlan.js';
+import { getDefinitiveSubstrateArchitecturePlan } from './definitiveSubstrateArchitecturePlan.js';
 
 export function buildAgentCard() {
   const models = listRegisteredModels();
@@ -28,6 +29,7 @@ export function buildAgentCard() {
   const surfaceMechanics = buildDefinitiveSurfaceMechanicsSummary();
   const passThroughSurface = getDefinitivePassThroughSurface();
   const authoritySeedPlan = getDefinitiveAuthoritySeedPlan();
+  const substrateArchitecture = getDefinitiveSubstrateArchitecturePlan();
   const lineSummary = lineInventory.reduce<Record<string, number>>((acc, contract) => {
     acc[contract.lineStatus] = (acc[contract.lineStatus] || 0) + 1;
     return acc;
@@ -35,7 +37,7 @@ export function buildAgentCard() {
   return {
     name: 'smbx.ai Yulia Deal Desk',
     version: 'DEFINITIVE.v1.0',
-    description: 'Agent-ready M&A diligence substrate for model-backed analysis, citation validation, governed tool calls, and Yulia canvas actions.',
+    description: 'Agent-ready Deal OS for model-backed M&A analysis, citation validation, governed tool calls, recursive deal-state work, and Yulia canvas actions.',
     definitive: {
       protocol: definitiveTools.protocol,
       status: definitiveTools.status,
@@ -52,6 +54,7 @@ export function buildAgentCard() {
       corpusRightsEndpoint: '/api/definitive/corpus/rights',
       passThroughCatalogEndpoint: '/api/definitive/pass-through-catalog',
       authoritySeedPlanEndpoint: '/api/definitive/authority-seed-plan',
+      substrateArchitectureEndpoint: '/api/definitive/substrate-architecture',
       dealMechanicsVersion: dealMechanics.version,
       dealMechanicsUri: dealMechanics.uri,
       dealMechanicsModelSlots: dealMechanics.totalModelSlots,
@@ -60,6 +63,14 @@ export function buildAgentCard() {
       authoritySeedPlanVersion: authoritySeedPlan.version,
       authoritySeedPlanEntries: authoritySeedPlan.plannedEntries,
       authoritySeedPlanStatus: authoritySeedPlan.status,
+      substrateArchitectureVersion: substrateArchitecture.version,
+      substrateArchitectureUri: substrateArchitecture.uri,
+      substratePrimitiveCount: substrateArchitecture.primitiveCount,
+      substrateNewMcpToolCount: substrateArchitecture.newMcpToolCount,
+      dealOsDoctrine: substrateArchitecture.agentOperatingDoctrine.productDoctrine,
+      agentHomeContract: substrateArchitecture.agentOperatingDoctrine.homeContract,
+      agentNoRejectionContract: substrateArchitecture.agentOperatingDoctrine.noRejectionContract,
+      agentTakeBackArtifacts: substrateArchitecture.agentTakeBackArtifacts,
       dealMappingStatus: dealMappingCoverage.status,
       dealRouteMapStatus: dealRouteMap.status,
       passThroughPricingRule: passThroughSurface.pricingRule,
@@ -73,6 +84,8 @@ export function buildAgentCard() {
     },
     boundaries: [
       'Yulia provides deal intelligence, modeling, drafting, and orchestration.',
+      'Agents can start with incomplete deal data; Yulia/DEFINITIVE returns missing-input contracts and next calls rather than dead-ending the deal.',
+      'Agents can return repeatedly to manage the deal lifecycle, documents, data rooms, models, pipeline, and audit package from the same DealState.',
       'Licensed legal, tax, accounting, investment, and brokerage decisions remain with qualified professionals and the user.',
       'Financial values must be sourced from user documents, data-room facts, or registered market citations.',
     ],
@@ -179,6 +192,23 @@ export function buildAgentCard() {
         phaseCounts: authoritySeedPlan.phaseCounts,
       },
       {
+        id: 'definitive_substrate_architecture',
+        label: 'DEFINITIVE terminal substrate architecture',
+        status: substrateArchitecture.status,
+        version: substrateArchitecture.version,
+        uri: substrateArchitecture.uri,
+        primitiveCount: substrateArchitecture.primitiveCount,
+        newMcpToolCount: substrateArchitecture.newMcpToolCount,
+        agentOperatingDoctrine: substrateArchitecture.agentOperatingDoctrine,
+        lifecycleStages: substrateArchitecture.dealOsLifecycleStages.map(stage => stage.id),
+        workSurfaces: substrateArchitecture.dealOsWorkSurfaces.map(surface => surface.id),
+        takeBackArtifacts: substrateArchitecture.agentTakeBackArtifacts,
+        routingAxes: substrateArchitecture.routingAxes,
+        universalResponseFields: substrateArchitecture.universalResponseFields,
+        phaseCount: substrateArchitecture.phases.length,
+        firstBuildTarget: substrateArchitecture.immediateBuildOrder[0],
+      },
+      {
         id: 'definitive_pass_through_surface',
         label: 'THE LINE-safe pass-through substrate',
         status: 'target',
@@ -208,6 +238,7 @@ export function buildAgentCard() {
       '/api/definitive/spec',
       '/api/definitive/pass-through-catalog',
       '/api/definitive/authority-seed-plan',
+      '/api/definitive/substrate-architecture',
     ],
     authenticatedEndpoints: [
       '/api/definitive/tools/list',

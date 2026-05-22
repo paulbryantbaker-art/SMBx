@@ -4,11 +4,11 @@
 **Created:** May 20, 2026.  
 **Codename:** DEFINITIVE.  
 **Baseline:** V19 remains the current methodology/runtime baseline. DEFINITIVE v1.0 is the current public/spec/runtime pin. DEFINITIVE v1.1 / V20 supersedes the model-catalog and gate-routing portions for forward build planning.
-**Primary sources:** `/Users/paul/Downloads/v19/DEFINITIVE_v1_0.md.pdf` and `methodology/DEFINITIVE_V1_1_DEAL_MECHANICS.md`.
+**Primary sources:** `/Users/paul/Downloads/v19/DEFINITIVE_v1_0.md.pdf`, `methodology/DEFINITIVE_V1_1_DEAL_MECHANICS.md`, and `/Users/paul/Downloads/v19/DEFINITIVE Substrate Architecture_ From Model Corpus to Terminal M and A Deal Platform.pdf`.
 
 ## One-Line Doctrine
 
-smbX is the M&A diligence substrate. Yulia is the human reference surface.
+smbX is the Deal OS and M&A diligence substrate for humans and agents. Yulia is the human reference surface.
 
 Stop treating app vs infrastructure as a fork. Both ship. The app proves the substrate to humans; the substrate is the moat agents, enterprises, boards, and LPs can trust.
 
@@ -28,6 +28,8 @@ V19 docs remain useful and should not be discarded. New build work should map V1
 
 DEFINITIVE is a deterministic, versioned, citation-validated, methodology-pinned, audit-trailed M&A diligence layer callable by Yulia, the app, API clients, and external agents.
 
+The app is not a demo sitting on top of the substrate. The app is the Deal OS working environment. The agent surface is not a separate product. It is another way to operate the same DealState, methodology gates, source record, model stack, completeness contract, and package output.
+
 The stack has six layers:
 
 | Layer | Role | Determinism requirement |
@@ -41,6 +43,57 @@ The stack has six layers:
 
 L1 + L2 + L6 are the spine. L4 is a drafting layer, not the source of truth.
 
+The May 21 substrate-architecture memo adds the next distinction: the 123-model catalog is the library, not the terminal substrate. The terminal substrate needs eight orchestration primitives around the library:
+
+| Primitive | Build target |
+|---|---|
+| Deal payload ingest | One `ingest_deal_payload` entrypoint accepts arbitrary input and returns classification plus a missing-input contract. |
+| Eight-axis classification | Deterministic routing key: journey, sub-journey, league, jurisdiction, distress posture, asset class, industry, and tax classification. |
+| Persistent DealState | Content-addressable, versioned, durable state with parent CIDs and Merkle state hash. |
+| Dependency graph + action cache | Bazel-style action-key caching and cascade invalidation for model/gate recompute. |
+| Completeness contract | `CompletenessSpec` and `check_completeness` compute Deal Readiness Levels without implying deal quality. |
+| Permutation / best-vehicle engine | Enumerate structures, prune to Pareto frontier, and compute preference-vector outcomes without recommending. |
+| Portable signed package | `DealPackage` with JSON, PDF/A-3 render, signed manifest, timestamps, and selective disclosure proofs. |
+| Capability discovery + next calls | `introspect_capabilities` and universal `next_suggested_calls` guide thin agents to completion. |
+
+### Deal OS Agent Doctrine
+
+Agents should be welcomed into the deal even when they arrive with incomplete facts. The first call should not be a rejection because the agent lacks a full data room, final financials, counsel-reviewed terms, or a defined transaction type. It should return what DEFINITIVE can know now, what it cannot know yet, and what call or source would move the deal forward.
+
+The recursive loop is:
+
+`ingest payload -> classify -> compose plan -> execute deterministic work -> check completeness -> request/fetch missing inputs -> update DealState -> repeat`.
+
+That loop carries the same methodology a human user would follow:
+
+| Stage | What DEFINITIVE should do |
+|---|---|
+| Information intake | Accept partial facts, classify the deal, preserve provenance, and return a MissingInputContract. |
+| IOI / indication | Produce an early sourced/caveated indication package and assumption log when the facts support it. |
+| Deeper diligence | Add files, model refreshes, market facts, tax/legal mechanics, and pass-through inputs as they arrive. |
+| LOI / term architecture | Convert diligence into structure, economic terms, conditions, and counsel-safe drafting scaffolds. |
+| Confirmatory diligence | Re-run affected models, invalidate stale outputs, and surface blockers in Today, Files, and Pipeline. |
+| Modeling and negotiation prep | Compute scenarios, sensitivities, and negotiation economics without negotiating or recommending. |
+| Close / PMI | Finalize a verifiable package and preserve the surviving DealState for post-close work. |
+
+**No-rejection contract:** an incomplete external agent call returns `ClassificationKey`, `MissingInputContract`, current/created `DealState`, and `next_suggested_calls`. It does not dead-end unless the request itself violates THE LINE.
+
+### Agent Home And Take-Back Contract
+
+Agents should understand smbX as a place to **return to**, not just a service to call once. A deal is iterative: new facts arrive, documents are created, diligence expands, a data room becomes more complete, terms change, models re-run, and the next best work item changes. The Deal OS needs to preserve that continuity for both people and agents.
+
+| Deal OS surface | Agent can do here | Portable artifact the agent can take back |
+|---|---|---|
+| Today | Read blockers, priorities, and next actions. | `next_suggested_calls`, `CompletenessReport`, `DealStateDiff` |
+| Pipeline | Track gate/stage movement by methodology and source readiness. | `GateState`, `DealPlan`, `PipelineStageDelta` |
+| Files | Attach, classify, request, and cite source materials. | `SourceIndex`, `MissingInputContract`, `CitationRefs` |
+| Data Room | Maintain diligence indexes, source gaps, and disclosure subsets. | `DataRoomIndex`, `DisclosureSubset`, `SourceGapList` |
+| Studio | Create books, memos, briefs, diligence packets, and exports. | `DocumentDraft`, `StudioBook`, `ExportManifest` |
+| Models | Execute deterministic models and update assumptions. | `ModelOutput`, `AssumptionLog`, `OutputHash` |
+| Audit Package | Verify methodology pins, source hashes, model outputs, and final packages. | `AuditPacket`, `DealPackage`, `MerkleInclusionProof` |
+
+This is why the app must stay more than a model catalog. Yulia tracks the entire deal lifecycle, including document creation and data-room work. Agents should be able to come here, work the deal like a person, then take a structured update back to their own system after each iteration.
+
 ## Non-Negotiables
 
 1. Every serious number comes from a deterministic model, uploaded/source file, or timestamped market-data source.
@@ -51,6 +104,7 @@ L1 + L2 + L6 are the spine. L4 is a drafting layer, not the source of truth.
 6. THE LINE compliance is enforced in code through structured refusal states.
 7. Pricing remains software pricing: subscriptions, credits, per-call compute, fixed deliverables, enterprise platform/corpus fees. No success fees, no deal-value fees, no wallet revival.
 8. Human UI remains beautiful: Apple Glass + Neo for the app, Studio-style saved primitives reused without drift.
+9. Agent access remains Deal OS access: accept incomplete payloads, continue recursively, and preserve value in DealState at every step.
 
 ## v1.1 / V20 Target Scope
 
@@ -77,7 +131,7 @@ The repo is already partway there from V19:
 - Demo Yulia has public demo deal/portfolio context.
 - DEFINITIVE v1.1 deal-mechanics catalog is now code-addressable at `definitive://v1.1/deal-mechanics`, with 123 model slots, G28-G30, 800+ Authority Register target, THE LINE category per model, DB-free route/deal mapping coverage, a first-class route map, and a pass-through substrate pricing rule.
 
-The gap is not "start over." The gap is to formalize the substrate: Authority Register, expanded deal-mechanics catalog, spec-versioned MCP tools, beneficial-customer identity, mandate chain, conformance tests, and hard citation/audit gates across all high-stakes paths.
+The gap is not "start over." The gap is to formalize the substrate: Authority Register, expanded deal-mechanics catalog, spec-versioned MCP tools, beneficial-customer identity, mandate chain, conformance tests, hard citation/audit gates across all high-stakes paths, and the terminal substrate spine: payload ingest, DealState, dependency graph, completeness, permutations, package signing, capability discovery, and next-call hints.
 
 ## Build Lanes
 
@@ -108,8 +162,51 @@ Goal: every human action is backed by real deal state.
 Goal: agents can call the same work the app uses.
 
 - MCP/API surfaces are thin adapters over the internal runtime, not separate systems.
+- Agents may enter at any stage: fresh intake, IOI response, LOI package, diligence refresh, negotiation prep, close package, or PMI. The substrate should classify the entry point and continue the process.
+- Incomplete agent payloads are normal. Return `MissingInputContract` and `next_suggested_calls`, not a brittle rejection, unless THE LINE requires refusal.
 - Tools return structured JSON first; human rendering is a separate step.
 - Every call has actor, platform, beneficial customer, mandate, version pin, input hash, output hash, citation refs, billing attribution, and THE LINE status.
+- Every response should eventually carry `next_suggested_calls`, `completeness_contribution_delta`, `state_hash_after`, `methodology_version`, and `the_line_invariant`.
+- Agents should be able to operate in three modes: direct tool calls, plan-driven execution from `compose_deal_plan`, or hint-driven execution by repeatedly following `next_suggested_calls`.
+
+## Terminal Substrate Architecture
+
+The active substrate architecture plan is now code-addressable at `definitive://v1.1/substrate-architecture` and exposed at `/api/definitive/substrate-architecture`.
+
+### New Object Contracts
+
+- `DealPayload`
+- `MissingInputContract`
+- `ClassificationKey`
+- `DealState`
+- `DealPlan`
+- `CompletenessSpec`
+- `CompletenessReport`
+- `DealReadinessLevel`
+- `StructurePermutation`
+- `ParetoFrontier`
+- `BestVehicleBlock`
+- `Deliverable`
+- `DealPackage`
+- `SignedManifest`
+- `Attestation`
+- `MerkleInclusionProof`
+- `CapabilityCatalog`
+- `MCPCallHint`
+
+### New MCP Tools To Stage
+
+| Family | Tools |
+|---|---|
+| Payload/classification | `ingest_deal_payload`, `update_deal_payload` |
+| State/plan | `compose_deal_plan`, `get_deal_state`, `diff_deal_state`, `resume_deal`, `clone_deal_state`, `link_related_deal` |
+| Completeness | `check_completeness`, `get_definition_of_done` |
+| Package | `finalize_deal_package`, `verify_package`, `reopen_deal_package`, `disclose_subset` |
+| Permutations | `generate_permutations`, `score_permutation`, `set_objective_preference`, `compute_best_vehicle`, `expand_permutations` |
+| Deliverables | `prepare_rwi_submission`, `prepare_negotiation_brief`, `generate_funds_flow`, `prepare_regulatory_filings`, `compose_pmi_plan` |
+| Discovery/cost | `introspect_capabilities`, `describe_methodology`, `estimate_deal_cost` |
+
+These are build targets, not all current runtime tools. Existing MCP v0.1 remains the stable execution surface until each contract has schema, conformance, THE LINE status, and audit behavior.
 
 ## Agent Tool Surface v1
 
@@ -321,7 +418,7 @@ Keep proprietary:
 ### Run 8 - Conformance Harness
 
 **Goal:** test the substrate as a standard.
-**Status:** Started in repo. `npm run test:definitive-conformance` runs the first data-driven DEFINITIVE conformance harness against JSON cases in `testing/definitive/conformance/v1/`. The suite now has 360 passing cases: 202 model-runtime cases, 60 deal-mechanics route cases, 39 prompt/meta cases, 30 route-trigger cases, and 29 model-stack cases. Runtime cases cover valuation, SDE/EBITDA normalization, working-capital peg, QoE Lite, tax structure, DSCR stress, sources/uses, SBA LBO, LMM LBO, HSR triage, legal halt scan, earnout, PPA, rollover, structure analysis, buyer fit, market context, sensitivity, deal comparison, covenant compliance, PMI value creation, deal-kill probability, timeline, deal scoring, cap table dilution, DCF, FIRPTA withholding, 1031 timing, rent-roll normalization, CAM true-up, RE-heavy asset/entity election, RE/operating-business bifurcation, NOI/cap-rate bridge, lease abstraction, property escrow/holdback sizing, title/survey checklist, PCA reserve modeling, FIRPTA v1.1, CITT transfer tax, OpCo/PropCo separation, ground lease mechanics, indemnity ladder, survival periods, escrow/holdback sizing, RWI stack architecture, transaction tax master integration, 338/336 gross-up, 1374 built-in gains tax, transaction cost capitalization, imputed interest/OID/453A, SALT transaction tax, closing statement true-up, conditions-to-close logic, termination/break-fee economics, earnout architecture, 1060 allocation, sale-leaseback/ASC 842 mechanics, REIT 75/75/90 compliance, IP chain-of-title, IP lien search, IP representation set, license dependency mapping, IP carve-out/license-back, source-code escrow, employee IP assignment verification, OSS exposure process, IP-specific 1060 allocation, domain/trademark transfer mechanics, three-prong solvency, 363 sale mechanics, plan feasibility, best-interests-of-creditors, APR/new-value, cramdown-rate, 1111(b) election, Chapter 7 waterfall, DIP sizing, exchange-offer mechanics, fulcrum security, RSA economics, ABC/Article 9 liquidation, claims trading, Subchapter V eligibility, Chapter 22 recidivism, LP-secondary/ECI withholding, strip-sale pricing, NAV facility LTV, venture-debt warrant coverage, convertible/SAFE conversion, ABL borrowing base, make-whole/call protection, covenant baskets, 280G, 382 NOL limitation, 355 spin research, LME uptier/drop-down/double-dip research, project-finance coverage research, token taxonomy research, stablecoin PPS research, and digital-asset reporting research. Route cases cover real estate, connected tax, agreement architecture, IP, Chapter 11/Subchapter V, LME, capital structure, LP/GP secondaries, crypto, carve-out/JV, venture/PIPE, distress-trigger, healthy-buyer, founder-exit, public/tender, OpCo/PropCo, SaaS IP, project-finance, international, raise/capital-structure, fund-secondary, seller-tax, ESOP, RWI/indemnity, earnout-legal, Article 9, DIP financing, cramdown-rate, claims-trading, reorg/spin, JV/Up-C, property-escrow, lease, privacy/cyber, stablecoin, IP-carve-out, public-fairness, QSBS-founder, ESOP-trustee, UK W&I/MAC, recap-solvency, Up-C/TRA, asset-tax, CVR/earnout, ordinary-course, healthcare-regulatory, insurance-agency, defense/CFIUS, financial-services regulated, energy project-finance, multi-domain carve-out, retail lease, lower-middle-market buyer, out-of-court workout, REIT merger, OSS stack, connected-tax, employee-IP, and working-capital/PPA profiles. Prompt/meta cases cover empty-brief behavior, Yulia route-brief language for pass-through, professional-handoff, research-only, tax, and IP/OSS profiles, Today/Pipeline/Files/Studio surface guidance, manifest access/pricing/LINE/conformance doctrine, Authority Register seed-plan discovery and category-level seed coverage, agent-card execution boundaries, MCP tool descriptions, and pass-through catalog pricing rules. Route-trigger cases cover G28/G29/G30 threshold edges and text triggers: cash runway 89/90 days, FCCR 0.99/1.0x, secured-debt trading at 59/60/79/80 cents, maintenance-covenant breach at four/five quarters, solvency, bankruptcy, RSA, forbearance, LME, exchange-offer, covenant-amendment, real-estate 24.9/25 percent, digital-asset 9.9/10 percent, secondaries, project finance, combined multi-gate routing, and signal normalization. Model-stack cases cover the composed `compose_model_stack` payload for base sell/buy/raise/PMI stacks, overlay gates, applicable mechanics, readiness summaries, cross-domain/regulated stack profiles, and Yulia mechanics brief language. The cases verify version pins, audit payload pins, output hashes, nested deterministic outputs, edge cases, below-threshold states, missing-input behavior, deterministic refusal states, route readiness, pass-through boundaries, authority seed-plan coverage, tool surfaces, route-trigger thresholds, composed model-stack payloads, and Yulia mechanics briefs. `npm run test:definitive-surface` adds a DB-free smoke test for the agent card, MCP inventory, THE LINE inventory, spec manifest, corpus sanitizer, pre-DB refusal behavior, v1.1 deal-mechanics catalog discovery, Authority Register seed-plan coverage, and the `validate_conformance` status tool. `npm run test:definitive-auth-route` adds a live API smoke test for JWT auth, protected tool inventory, THE LINE inventory, corpus rules, data-rights grants, sanitized corpus observation writes, unsupported-version refusal, explicit human/counsel/enterprise refusal envelopes, mandate-chain output, protected `compose_model_stack` G28/G29/G30 routing, model-backed audit-packet retrieval, Studio export audit-packet retrieval, and staged-action list/cancel behavior.
+**Status:** Started in repo. `npm run test:definitive-conformance` runs the first data-driven DEFINITIVE conformance harness against JSON cases in `testing/definitive/conformance/v1/`. The suite now has 370 passing-target cases: 202 model-runtime cases, 60 deal-mechanics route cases, 49 prompt/meta cases, 30 route-trigger cases, and 29 model-stack cases. Runtime cases cover valuation, SDE/EBITDA normalization, working-capital peg, QoE Lite, tax structure, DSCR stress, sources/uses, SBA LBO, LMM LBO, HSR triage, legal halt scan, earnout, PPA, rollover, structure analysis, buyer fit, market context, sensitivity, deal comparison, covenant compliance, PMI value creation, deal-kill probability, timeline, deal scoring, cap table dilution, DCF, FIRPTA withholding, 1031 timing, rent-roll normalization, CAM true-up, RE-heavy asset/entity election, RE/operating-business bifurcation, NOI/cap-rate bridge, lease abstraction, property escrow/holdback sizing, title/survey checklist, PCA reserve modeling, FIRPTA v1.1, CITT transfer tax, OpCo/PropCo separation, ground lease mechanics, indemnity ladder, survival periods, escrow/holdback sizing, RWI stack architecture, transaction tax master integration, 338/336 gross-up, 1374 built-in gains tax, transaction cost capitalization, imputed interest/OID/453A, SALT transaction tax, closing statement true-up, conditions-to-close logic, termination/break-fee economics, earnout architecture, 1060 allocation, sale-leaseback/ASC 842 mechanics, REIT 75/75/90 compliance, IP chain-of-title, IP lien search, IP representation set, license dependency mapping, IP carve-out/license-back, source-code escrow, employee IP assignment verification, OSS exposure process, IP-specific 1060 allocation, domain/trademark transfer mechanics, three-prong solvency, 363 sale mechanics, plan feasibility, best-interests-of-creditors, APR/new-value, cramdown-rate, 1111(b) election, Chapter 7 waterfall, DIP sizing, exchange-offer mechanics, fulcrum security, RSA economics, ABC/Article 9 liquidation, claims trading, Subchapter V eligibility, Chapter 22 recidivism, LP-secondary/ECI withholding, strip-sale pricing, NAV facility LTV, venture-debt warrant coverage, convertible/SAFE conversion, ABL borrowing base, make-whole/call protection, covenant baskets, 280G, 382 NOL limitation, 355 spin research, LME uptier/drop-down/double-dip research, project-finance coverage research, token taxonomy research, stablecoin PPS research, and digital-asset reporting research. Route cases cover real estate, connected tax, agreement architecture, IP, Chapter 11/Subchapter V, LME, capital structure, LP/GP secondaries, crypto, carve-out/JV, venture/PIPE, distress-trigger, healthy-buyer, founder-exit, public/tender, OpCo/PropCo, SaaS IP, project-finance, international, raise/capital-structure, fund-secondary, seller-tax, ESOP, RWI/indemnity, earnout-legal, Article 9, DIP financing, cramdown-rate, claims-trading, reorg/spin, JV/Up-C, property-escrow, lease, privacy/cyber, stablecoin, IP-carve-out, public-fairness, QSBS-founder, ESOP-trustee, UK W&I/MAC, recap-solvency, Up-C/TRA, asset-tax, CVR/earnout, ordinary-course, healthcare-regulatory, insurance-agency, defense/CFIUS, financial-services regulated, energy project-finance, multi-domain carve-out, retail lease, lower-middle-market buyer, out-of-court workout, REIT merger, OSS stack, connected-tax, employee-IP, and working-capital/PPA profiles. Prompt/meta cases cover empty-brief behavior, Yulia route-brief language for pass-through, professional-handoff, research-only, tax, and IP/OSS profiles, Today/Pipeline/Files/Studio surface guidance, manifest access/pricing/LINE/conformance doctrine, Authority Register seed-plan discovery and category-level seed coverage, substrate-architecture primitives, Deal OS no-rejection agent lifecycle, iterative work surfaces, portable agent handoffs, agent-card execution boundaries, MCP tool descriptions, and pass-through catalog pricing rules. Route-trigger cases cover G28/G29/G30 threshold edges and text triggers: cash runway 89/90 days, FCCR 0.99/1.0x, secured-debt trading at 59/60/79/80 cents, maintenance-covenant breach at four/five quarters, solvency, bankruptcy, RSA, forbearance, LME, exchange-offer, covenant-amendment, real-estate 24.9/25 percent, digital-asset 9.9/10 percent, secondaries, project finance, combined multi-gate routing, and signal normalization. Model-stack cases cover the composed `compose_model_stack` payload for base sell/buy/raise/PMI stacks, overlay gates, applicable mechanics, readiness summaries, cross-domain/regulated stack profiles, and Yulia mechanics brief language. The cases verify version pins, audit payload pins, output hashes, nested deterministic outputs, edge cases, below-threshold states, missing-input behavior, deterministic refusal states, route readiness, pass-through boundaries, authority seed-plan coverage, substrate-architecture discovery, tool surfaces, route-trigger thresholds, composed model-stack payloads, Yulia mechanics briefs, the agent no-rejection lifecycle, iterative work surfaces, and portable take-back artifacts. `npm run test:definitive-surface` adds a DB-free smoke test for the agent card, MCP inventory, THE LINE inventory, spec manifest, corpus sanitizer, pre-DB refusal behavior, v1.1 deal-mechanics catalog discovery, Authority Register seed-plan coverage, substrate-architecture plan discovery, and the `validate_conformance` status tool. `npm run test:definitive-auth-route` adds a live API smoke test for JWT auth, protected tool inventory, THE LINE inventory, corpus rules, data-rights grants, sanitized corpus observation writes, unsupported-version refusal, explicit human/counsel/enterprise refusal envelopes, mandate-chain output, protected `compose_model_stack` G28/G29/G30 routing, model-backed audit-packet retrieval, Studio export audit-packet retrieval, and staged-action list/cancel behavior.
 
 - Add conformance test runner.
 - First 100-case target is met; keep expanding across WC peg, earnout, MAE, indemnification, tax, R&W, financing, post-close, controller/SB 21, route triggers, and meta tests.
@@ -439,6 +536,34 @@ Keep proprietary:
 
 **Done when:** first enterprise prospect can be shown a credible controls packet even before formal audit spend.
 
+### Run 19 - Terminal Substrate Spine
+
+**Goal:** turn the model corpus into the Deal OS substrate: hand any incomplete or complete deal stage in, recursively work the methodology, and get state/package outputs back.
+**Status:** Started as a public/code-addressable plan. `definitive://v1.1/substrate-architecture` and `/api/definitive/substrate-architecture` expose eight primitives, 27 staged MCP tool targets, the eight-axis classification key, six-phase solo-founder sequence, universal response-envelope fields, and THE LINE invariant.
+
+- Add versioned schemas for `DealPayload`, `ClassificationKey`, `MissingInputContract`, `DealState`, `CompletenessSpec`, `CompletenessReport`, and `DealPackage`.
+- Build `ingest_deal_payload` and rules-first classification into the eight-axis routing key.
+- Add idempotency keys to every MCP-shaped tool call.
+- Add content-addressable `DealState`, parent CID lineage, and `state_hash`.
+- Add model dependency graph and action-key cache for deterministic recompute.
+- Add shallow `check_completeness` and `get_definition_of_done`.
+- Add universal `next_suggested_calls` envelope.
+- Encode lifecycle stages from intake -> IOI -> deeper diligence -> LOI -> confirmatory diligence -> modeling/negotiation prep -> close/PMI.
+- Expose Deal OS work surfaces and take-back artifacts for Today, Pipeline, Files, Data Room, Studio, Models, and Audit Package.
+
+**Done when:** an external agent can ingest a raw or partial deal payload, receive classification plus missing inputs, execute a generated plan against persistent state, and see completeness progress without guessing which menu/page/tool to use or being rejected for ordinary incompleteness.
+
+### Run 20 - Permutations And Portable Package
+
+**Goal:** produce the terminal M&A package agents can hand back to principals, LPs, boards, counsel, and counterparties.
+
+- Build `generate_permutations`, `score_permutation`, `set_objective_preference`, `compute_best_vehicle`, and `expand_permutations`.
+- Preserve THE LINE: the substrate emits Pareto frontier and "computed-best given stated preferences," not recommendations.
+- Build `finalize_deal_package`, `verify_package`, `reopen_deal_package`, and `disclose_subset`.
+- Package outputs as structured JSON plus human render, with signed manifest, audit chain, source hashes, model output CIDs, citation chain, and selective disclosure proofs.
+
+**Done when:** a downstream verifier can prove what was computed, under which version, from which inputs, with which citations, without trusting Yulia's narrative.
+
 ## 90-Day Build Order
 
 1. Docs/naming lock.
@@ -451,6 +576,11 @@ Keep proprietary:
 8. First 100 conformance tests.
 9. Audit packet v1 for Studio export and model-backed chat.
 10. QoE Preview end-to-end through server models and source grounding.
+11. Terminal substrate schemas: `DealPayload`, `ClassificationKey`, `MissingInputContract`, `DealState`, `CompletenessSpec`, `CompletenessReport`, `DealPackage`.
+12. `ingest_deal_payload` with rules-first classification and idempotency-key contract.
+13. Content-addressable `DealState` plus shallow `check_completeness` and `next_suggested_calls`.
+14. Deal OS lifecycle contract so agent work advances recursively through intake, IOI, diligence, LOI, modeling, negotiation prep, close, and PMI.
+15. Agent home/take-back contract for document creation, data rooms, source indexes, model outputs, audit packets, and portable package updates.
 
 ## 12-Month Milestones
 
@@ -476,13 +606,14 @@ If scope slips:
 
 ## Current Next Actions
 
-1. Continue deterministic runtime functions and schemas without changing THE LINE readiness. Sixty-eight models are now executable with conformance coverage: M139, M148, M151-M160, M164-M172, and M177-M223. Eight volatile models now have research-only runtime scaffolds: M143, M161-M163, and M173-M176. Prompt/runtime language for research-only, professional-handoff, and pass-through route briefs is now covered by prompt/meta conformance cases. Authenticated route validation now has expanded DB/JWT coverage at `npm run test:definitive-auth-route`.
-2. Authority Register seed plan is expanded from 500+ to 800+ and now targets 920 planned entries across bankruptcy, restructuring, IRC/Treasury, real-estate, connected-tax, agreement-architecture, IP, pass-through pricing, recovery-data, digital-asset, regulated-industry, Delaware, market-data, methodology, and compliance/audit categories. Next step is actual staged ingestion beyond the first 50 seeded rows.
-3. Pass-Through Substrate Catalog first pass is published with per-call pricing posture, fixed margin, source type, dependent model slots, and THE LINE boundary.
-4. Surface mechanics contract is published for Today, Pipeline, Files, and Studio, and visual rendering now uses saved V6/Studio primitives without new page-specific logic.
-5. Grow conformance beyond the 360-case checkpoint toward 400 across additional prompt behavior, route-trigger behavior, model-stack behavior, deal-mechanics route profiles, and meta behavior.
-6. Keep extending authenticated route-level smoke coverage beyond the completed explicit THE LINE refusal envelopes for human approval, counsel review, and enterprise scope. Studio export packet retrieval, model-backed chat packet retrieval, staged approval list/cancel behavior, and direct budget/plan tollgate coverage now have tests.
-7. Live schema verification now passes with `.env` loading enabled: `npm run verify:v19-schema` checks static migrations plus the live Railway database and currently reports 341/341 checks passing with corpus/data-rights, mandate-chain, audit, Studio, market-data, firm-memory, and Today tables present.
+1. Build the terminal substrate schemas next: `DealPayload`, `ClassificationKey`, `MissingInputContract`, `DealState`, `CompletenessSpec`, `CompletenessReport`, and `DealPackage`.
+2. Continue deterministic runtime functions and schemas without changing THE LINE readiness. Sixty-eight models are now executable with conformance coverage: M139, M148, M151-M160, M164-M172, and M177-M223. Eight volatile models now have research-only runtime scaffolds: M143, M161-M163, and M173-M176. Prompt/runtime language for research-only, professional-handoff, pass-through route briefs, substrate-architecture primitives, agent no-rejection Deal OS lifecycle, iterative work surfaces, and portable agent handoffs is now covered by prompt/meta conformance cases. Authenticated route validation now has expanded DB/JWT coverage at `npm run test:definitive-auth-route`.
+3. Authority Register seed plan is expanded from 500+ to 800+ and now targets 920 planned entries across bankruptcy, restructuring, IRC/Treasury, real-estate, connected-tax, agreement-architecture, IP, pass-through pricing, recovery-data, digital-asset, regulated-industry, Delaware, market-data, methodology, and compliance/audit categories. Next step is actual staged ingestion beyond the first 50 seeded rows.
+4. Pass-Through Substrate Catalog first pass is published with per-call pricing posture, fixed margin, source type, dependent model slots, and THE LINE boundary.
+5. Surface mechanics contract is published for Today, Pipeline, Files, and Studio, and visual rendering now uses saved V6/Studio primitives without new page-specific logic.
+6. Grow conformance beyond the 370-case checkpoint toward 400 across substrate schemas, prompt behavior, route-trigger behavior, model-stack behavior, deal-mechanics route profiles, and meta behavior.
+7. Keep extending authenticated route-level smoke coverage beyond the completed explicit THE LINE refusal envelopes for human approval, counsel review, and enterprise scope. Studio export packet retrieval, model-backed chat packet retrieval, staged approval list/cancel behavior, and direct budget/plan tollgate coverage now have tests.
+8. Live schema verification now passes with `.env` loading enabled: `npm run verify:v19-schema` checks static migrations plus the live Railway database and currently reports 341/341 checks passing with corpus/data-rights, mandate-chain, audit, Studio, market-data, firm-memory, and Today tables present.
 
 ## Definition Of Done For DEFINITIVE v1.0 + v1.1 Deal Mechanics
 
@@ -501,4 +632,8 @@ DEFINITIVE is done when:
 - Every high-stakes action has citation, approval, enterprise, credit, or THE LINE gates.
 - Billing keys on beneficial customer.
 - Public spec and reference implementations exist.
+- Agents can ingest a raw `DealPayload`, receive a deterministic classification/missing-input contract, and proceed through DealState/completeness without guessing the app surface.
+- Agents can enter midstream with incomplete context, receive the next useful IOI/LOI/diligence/modeling/negotiation/close/PMI calls, and keep recursively advancing the same DealState.
+- Agents can manage document creation, data-room indexing, files, pipeline movement, models, and audit packages from the same DealState and take portable artifacts back after each iteration.
+- Outputs can be finalized into a portable package with version pins, source hashes, model outputs, citation chain, audit trail, and selective disclosure path.
 - No part of the system depends on a generic LLM claim being trusted without validation.

@@ -19,6 +19,7 @@ import {
   listDefinitiveGateExpansions,
 } from './definitiveDealMechanicsCatalog.js';
 import { getDefinitiveAuthoritySeedPlan } from './definitiveAuthoritySeedPlan.js';
+import { getDefinitiveSubstrateArchitecturePlan } from './definitiveSubstrateArchitecturePlan.js';
 import { listDefinitiveMcpTools } from './definitiveMcp.js';
 
 export function buildDefinitiveSpecManifest() {
@@ -34,6 +35,7 @@ export function buildDefinitiveSpecManifest() {
   const gateExpansions = listDefinitiveGateExpansions();
   const passThroughSurface = getDefinitivePassThroughSurface();
   const authoritySeedPlan = getDefinitiveAuthoritySeedPlan();
+  const substrateArchitecture = getDefinitiveSubstrateArchitecturePlan();
   const lineSummary = lineInventory.reduce<Record<string, number>>((acc, contract) => {
     acc[contract.lineStatus] = (acc[contract.lineStatus] || 0) + 1;
     return acc;
@@ -49,11 +51,12 @@ export function buildDefinitiveSpecManifest() {
       baseline: 'V19',
     },
     doctrine: {
-      substrate: 'smbX is the M&A diligence substrate. Yulia is the human reference surface.',
+      substrate: 'smbX is the Deal OS and M&A diligence substrate for humans and agents. Yulia is the human reference surface.',
       mathPath: 'Deterministic first: serious numbers come from models, source files, or timestamped market data.',
       citationPath: 'Material claims resolve to an authority/source or remain explicitly unsupported.',
       dataRights: 'Corpus writes require an active data-rights grant and structured anonymized observations only.',
       pricing: 'Subscriptions, credits, fixed software deliverables, and enterprise platform fees only. No wallet or success fees.',
+      agentAccess: 'Incomplete agent payloads are accepted, classified, converted into missing-input contracts, and advanced recursively through the deal lifecycle.',
     },
     endpoints: {
       agentCard: '/.well-known/agent-card.json',
@@ -61,6 +64,7 @@ export function buildDefinitiveSpecManifest() {
       specApi: '/api/definitive/spec',
       passThroughCatalog: '/api/definitive/pass-through-catalog',
       authoritySeedPlan: '/api/definitive/authority-seed-plan',
+      substrateArchitecture: '/api/definitive/substrate-architecture',
       toolsList: '/api/definitive/tools/list',
       toolCall: '/api/definitive/tools/{toolName}/call',
       lineInventory: '/api/definitive/line/inventory',
@@ -77,6 +81,7 @@ export function buildDefinitiveSpecManifest() {
         '/api/definitive/spec',
         '/api/definitive/pass-through-catalog',
         '/api/definitive/authority-seed-plan',
+        '/api/definitive/substrate-architecture',
       ],
       authenticatedDiscovery: [
         '/api/definitive/tools/list',
@@ -187,6 +192,30 @@ export function buildDefinitiveSpecManifest() {
         lineBoundary: category.lineBoundary,
       })),
       lineDoctrine: authoritySeedPlan.lineDoctrine,
+    },
+    substrateArchitectureSurface: {
+      version: substrateArchitecture.version,
+      uri: substrateArchitecture.uri,
+      status: substrateArchitecture.status,
+      primitiveCount: substrateArchitecture.primitiveCount,
+      newMcpToolCount: substrateArchitecture.newMcpToolCount,
+      agentOperatingDoctrine: substrateArchitecture.agentOperatingDoctrine,
+      dealOsLifecycleStages: substrateArchitecture.dealOsLifecycleStages,
+      dealOsWorkSurfaces: substrateArchitecture.dealOsWorkSurfaces,
+      agentTakeBackArtifacts: substrateArchitecture.agentTakeBackArtifacts,
+      routingAxes: substrateArchitecture.routingAxes,
+      universalResponseFields: substrateArchitecture.universalResponseFields,
+      workstreams: substrateArchitecture.workstreams.map(workstream => ({
+        id: workstream.id,
+        name: workstream.name,
+        buildPhase: workstream.buildPhase,
+        primitives: workstream.primitives,
+        mcpTools: workstream.mcpTools,
+        doneCondition: workstream.doneCondition,
+      })),
+      phases: substrateArchitecture.phases,
+      immediateBuildOrder: substrateArchitecture.immediateBuildOrder,
+      lineDoctrine: substrateArchitecture.lineDoctrine,
     },
     passThroughSurface,
     generatedAt: new Date().toISOString(),

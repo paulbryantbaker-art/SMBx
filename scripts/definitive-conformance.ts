@@ -39,6 +39,7 @@ import {
 } from '../server/services/definitiveDealRouteMap.js';
 import { buildDefinitiveSpecManifest } from '../server/services/definitiveSpecManifest.js';
 import { getDefinitiveAuthoritySeedPlan } from '../server/services/definitiveAuthoritySeedPlan.js';
+import { getDefinitiveSubstrateArchitecturePlan } from '../server/services/definitiveSubstrateArchitecturePlan.js';
 import { listDefinitiveMcpTools } from '../server/services/definitiveMcp.js';
 import {
   evaluateDefinitiveStackOverlays,
@@ -94,6 +95,7 @@ type PromptMetaCaseKind =
   | 'line_inventory'
   | 'mcp_inventory'
   | 'authority_seed_plan'
+  | 'substrate_architecture'
   | 'pass_through_surface';
 
 interface PromptMetaFieldExpectation {
@@ -514,6 +516,22 @@ function buildPromptMetaSubject(item: PromptMetaCase): { text: string; data: Rec
     const seedPlan = getDefinitiveAuthoritySeedPlan();
     const categoriesById = Object.fromEntries(seedPlan.categories.map(category => [category.id, category]));
     const data = { ...seedPlan, categoriesById };
+    return { text: JSON.stringify(data), data };
+  }
+
+  if (item.kind === 'substrate_architecture') {
+    const architecture = getDefinitiveSubstrateArchitecturePlan();
+    const workstreamsById = Object.fromEntries(architecture.workstreams.map(workstream => [workstream.id, workstream]));
+    const phasesById = Object.fromEntries(architecture.phases.map(phase => [phase.id, phase]));
+    const data = {
+      ...architecture,
+      workstreamsById,
+      phasesById,
+      dealOsWorkSurfacesById: Object.fromEntries(architecture.dealOsWorkSurfaces.map(surface => [surface.id, surface])),
+      dealOsLifecycleStageIds: architecture.dealOsLifecycleStages.map(stage => stage.id),
+      dealOsLifecycleStageLabels: architecture.dealOsLifecycleStages.map(stage => stage.label),
+      dealOsWorkSurfaceIds: architecture.dealOsWorkSurfaces.map(surface => surface.id),
+    };
     return { text: JSON.stringify(data), data };
   }
 
