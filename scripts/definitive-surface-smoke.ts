@@ -101,6 +101,10 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assert(card.definitive.agentHomeContract.includes('data rooms'), 'agent card exposes agent home data-room contract');
   assert(card.definitive.agentNoRejectionContract.includes('MissingInputContract'), 'agent card exposes no-rejection contract');
   assert(card.definitive.agentTakeBackArtifacts.includes('DealStateDiff'), 'agent card exposes portable take-back artifacts');
+  assertEqual(card.definitive.publishedStandard, 'The Diligence Standard', 'agent card exposes published standard');
+  assertEqual(card.definitive.toolMetadataNamingConvention, 'diligence_<phase>_<artifact>', 'agent card exposes tool metadata doctrine');
+  assert(card.definitive.agentDiscoverabilityLayers.includes('well_known_discovery'), 'agent card exposes well-known discovery layer');
+  assert(card.definitive.agentDesirabilitySignals.includes('semantic_tool_metadata'), 'agent card exposes semantic metadata signal');
   assertEqual(card.definitive.dealMappingStatus, 'complete', 'agent card deal mapping status');
   assertEqual(card.definitive.dealRouteMapStatus, 'complete', 'agent card route map status');
   assert(card.definitive.passThroughPricingRule.includes('cost-plus-fixed'), 'agent card exposes pass-through pricing rule');
@@ -141,6 +145,10 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assert(substrateCapability.workSurfaces.includes('data_room'), 'substrate capability exposes data room surface');
   assert(substrateCapability.workSurfaces.includes('studio'), 'substrate capability exposes Studio document surface');
   assert(substrateCapability.takeBackArtifacts.includes('DocumentDraft'), 'substrate capability exposes document take-back artifact');
+  assert(substrateCapability.discoverabilityLayers.includes('enterprise_allow_lists'), 'substrate capability exposes enterprise allow-list layer');
+  assert(substrateCapability.desirabilitySignals.includes('structured_outputs'), 'substrate capability exposes structured output signal');
+  assert(substrateCapability.toolMetadataDoctrine.semanticKeywords.includes('working capital peg'), 'substrate capability exposes query-aligned tool metadata');
+  assertEqual(substrateCapability.publishedStandardDoctrine.name, 'The Diligence Standard', 'substrate capability exposes standard doctrine');
   assert(substrateCapability.routingAxes.includes('distress_posture'), 'substrate capability exposes routing axes');
 });
 
@@ -190,6 +198,11 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assert(manifest.substrateArchitectureSurface.dealOsLifecycleStages.some(stage => stage.id === 'model_negotiation'), 'manifest substrate lifecycle includes modeling and negotiation prep');
   assert(manifest.substrateArchitectureSurface.dealOsWorkSurfaces.some(surface => surface.id === 'data_room'), 'manifest substrate exposes data room work surface');
   assert(manifest.substrateArchitectureSurface.agentTakeBackArtifacts.includes('DataRoomIndex'), 'manifest substrate exposes data-room take-back artifact');
+  assert(manifest.substrateArchitectureSurface.agentDiscoverabilityLayers.some(layer => layer.id === 'well_known_discovery'), 'manifest substrate exposes well-known discovery layer');
+  assert(manifest.substrateArchitectureSurface.agentDiscoverabilityLayers.some(layer => layer.id === 'enterprise_allow_lists'), 'manifest substrate exposes enterprise allow-list layer');
+  assert(manifest.substrateArchitectureSurface.agentDesirabilitySignals.some(signal => signal.id === 'citation_provenance'), 'manifest substrate exposes citation desirability signal');
+  assertEqual(manifest.substrateArchitectureSurface.toolMetadataDoctrine.namingConvention, 'diligence_<phase>_<artifact>', 'manifest substrate tool metadata doctrine');
+  assertEqual(manifest.substrateArchitectureSurface.publishedStandardDoctrine.name, 'The Diligence Standard', 'manifest substrate standard doctrine');
   assert(manifest.substrateArchitectureSurface.routingAxes.includes('tax_classification'), 'manifest substrate routing axes');
   assert(manifest.substrateArchitectureSurface.universalResponseFields.includes('next_suggested_calls'), 'manifest substrate next call hints');
   assertEqual(manifest.dealMechanicsSurface.mappingCoverage.status, 'complete', 'manifest deal mapping coverage status');

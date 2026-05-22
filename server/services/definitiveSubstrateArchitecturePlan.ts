@@ -36,6 +36,21 @@ export interface DefinitiveDealOsWorkSurface {
   portableOutputs: string[];
 }
 
+export interface DefinitiveAgentDiscoverabilityLayer {
+  id: string;
+  label: string;
+  purpose: string;
+  requiredSurface: string[];
+  status: string;
+}
+
+export interface DefinitiveAgentDesirabilitySignal {
+  id: string;
+  label: string;
+  implementationRule: string;
+  lineReason: string;
+}
+
 const routingAxes = [
   'journey',
   'sub_journey',
@@ -174,6 +189,106 @@ const agentTakeBackArtifacts = [
   'DealPackage',
   'SelectiveDisclosureProof',
 ] as const;
+
+const agentDiscoverabilityLayers: DefinitiveAgentDiscoverabilityLayer[] = [
+  {
+    id: 'canonical_registry',
+    label: 'Canonical MCP registry',
+    purpose: 'Make smbX discoverable as the authoritative diligence substrate namespace rather than an ad hoc local tool.',
+    requiredSurface: ['registry.modelcontextprotocol.io entry', 'canonical smbx-ai/diligence namespace', 'server metadata package'],
+    status: 'planned',
+  },
+  {
+    id: 'directory_layer',
+    label: 'Third-party MCP directories',
+    purpose: 'Ensure agents and developers find DEFINITIVE in the directories that aggregate and rank MCP servers.',
+    requiredSurface: ['PulseMCP', 'Glama', 'mcp.so', 'Smithery', 'Docker MCP Catalog', 'awesome-mcp-servers'],
+    status: 'planned',
+  },
+  {
+    id: 'well_known_discovery',
+    label: 'Well-known server-card discovery',
+    purpose: 'Let Claude, ChatGPT, VS Code, and other MCP clients inspect identity, transport, capabilities, tools, and security posture before connection.',
+    requiredSurface: ['/.well-known/mcp/server-card.json', '/.well-known/mcp', 'protocolVersion', 'serverInfo', 'transport', 'capabilities', 'tools[]'],
+    status: 'next_after_schema_spine',
+  },
+  {
+    id: 'client_app_stores',
+    label: 'Client-curated app stores',
+    purpose: 'Package DEFINITIVE for the agent ecosystems where enterprise users browse and approve tools.',
+    requiredSurface: ['Claude Connector Directory', 'ChatGPT Apps Directory', 'Microsoft Agent Store', 'Salesforce AgentExchange', 'Google Agent Gallery'],
+    status: 'planned_after_internal_contract_stabilizes',
+  },
+  {
+    id: 'enterprise_allow_lists',
+    label: 'Enterprise allow-list registries',
+    purpose: 'Help PE firms, portfolio companies, banks, and advisors add smbX to governed agent registries without bespoke security work.',
+    requiredSurface: ['GitHub Copilot registry JSON', 'AWS Q / Kiro registry JSON', 'Azure API Center blueprint', 'Bedrock AgentCore Cedar policy template'],
+    status: 'planned_with_enterprise_trust_path',
+  },
+];
+
+const agentDesirabilitySignals: DefinitiveAgentDesirabilitySignal[] = [
+  {
+    id: 'deterministic_outputs',
+    label: 'Deterministic outputs',
+    implementationRule: 'Every serious number comes from a model, source file, or timestamped market datum and returns idempotent output for the same pinned inputs.',
+    lineReason: 'Deterministic computation keeps Yulia from pretending judgment or negotiation is software output.',
+  },
+  {
+    id: 'structured_outputs',
+    label: 'Structured typed outputs',
+    implementationRule: 'Every tool must declare outputSchema and structuredContent-compatible payloads before marketplace submission.',
+    lineReason: 'Typed outputs make the substrate orchestrable by agents without relying on prose interpretation.',
+  },
+  {
+    id: 'citation_provenance',
+    label: 'Citation and provenance',
+    implementationRule: 'Every artifact carries methodology pin, authority/source refs, source hashes where available, and audit payload pointers.',
+    lineReason: 'Citation validation separates supported computation from unsupported claims.',
+  },
+  {
+    id: 'version_pinned_standard',
+    label: 'Version-pinned standard',
+    implementationRule: 'Publish The Diligence Standard / DEFINITIVE as a citable, semver-pinned spec with model IDs, gate IDs, authority register, and conformance cases.',
+    lineReason: 'A named standard makes smbX a reference substrate rather than a replaceable prompt bundle.',
+  },
+  {
+    id: 'semantic_tool_metadata',
+    label: 'Semantic tool metadata',
+    implementationRule: 'Tool names and descriptions must use the exact deal-language agents search for: working capital peg, Section 1060 allocation, FIRPTA withholding, indemnification cap and basket, QoE adjustments, earnout construction, LBO model.',
+    lineReason: 'Precise metadata improves discoverability without overstating what the tool does.',
+  },
+  {
+    id: 'regulatory_neutrality',
+    label: 'Regulatory neutrality / THE LINE',
+    implementationRule: 'Discovery descriptions must state that smbX is software, not a broker/advisor, and never charges success fees, deal-value fees, or referral compensation.',
+    lineReason: 'THE LINE is a procurement and compliance signal for enterprise agent allow-lists.',
+  },
+];
+
+const toolMetadataDoctrine = {
+  namingConvention: 'diligence_<phase>_<artifact>',
+  examples: [
+    'diligence_workingcapital_peg',
+    'diligence_section1060_allocation',
+    'diligence_firpta_withholding',
+    'diligence_indemnification_ladder',
+    'diligence_qoe_adjustments',
+    'diligence_earnout_construction',
+  ],
+  descriptionTemplate: 'Start with the user-query phrasing, name The Diligence Standard / DEFINITIVE methodology version and model ID, state the deterministic output, name the controlling authority/source category, declare outputSchema, and state THE LINE neutrality.',
+  outputSchemaRule: 'No marketplace-facing tool is complete until outputSchema, structuredContent shape, idempotency key behavior, read-only/destructive/open-world annotations, and result-size limits are defined.',
+  semanticKeywords: ['working capital peg', 'Section 1060 allocation', 'FIRPTA withholding', 'indemnification cap and basket', 'QoE adjustments', 'earnout construction', 'LBO model', 'data room', 'audit packet'],
+};
+
+const publishedStandardDoctrine = {
+  name: 'The Diligence Standard',
+  methodology: 'DEFINITIVE',
+  purpose: 'Make smbX the canonical, deterministic, citation-validated specialist substrate that generalist lab/PE/JV agents call instead of re-implementing.',
+  requiredPublicArtifacts: ['canonical spec URL', 'stable model and gate URLs', 'Authority Register references', 'open conformance suite', 'server-card metadata', 'THE LINE declaration'],
+  conformanceBadge: 'DEFINITIVE-conformant',
+};
 
 const workstreams: DefinitiveSubstrateWorkstream[] = [
   {
@@ -344,6 +459,18 @@ export function getDefinitiveSubstrateArchitecturePlan() {
       'Add shallow check_completeness and next_suggested_calls so agents can progress without guessing.',
       'Encode the Deal OS lifecycle so agents can move from intake to IOI, LOI, diligence, modeling, negotiation prep, close, and PMI by recursive calls.',
       'Expose Deal OS work surfaces and portable take-back artifacts so agents can manage documents, data rooms, models, pipeline, and audit packets iteratively.',
+      'Publish MCP server-card and well-known discovery metadata only after tool schemas, output schemas, idempotency, THE LINE annotations, and citation/provenance fields are stable.',
+    ],
+    agentDiscoverabilityLayers,
+    agentDesirabilitySignals,
+    toolMetadataDoctrine,
+    publishedStandardDoctrine,
+    marketplaceBuildOrder: [
+      'Build /.well-known/mcp/server-card.json and /.well-known/mcp over the same DEFINITIVE manifest, not a parallel metadata file.',
+      'Add query-aligned diligence tool metadata and outputSchema/structuredContent definitions for marketplace-facing tools.',
+      'Prepare registry submissions for Linux Foundation MCP Registry and third-party MCP directories.',
+      'Prepare Claude, ChatGPT, Microsoft, Salesforce, and Google app-store packages after the internal tool contract is stable.',
+      'Publish enterprise allow-list JSON, Azure/API Center blueprint, and Bedrock AgentCore policy templates with THE LINE scopes.',
     ],
     lineDoctrine: 'DEFINITIVE computes, presents, packages, and certifies completeness. It does not advise, recommend, negotiate, represent, guarantee, execute payments, or take transaction-based compensation.',
     doNotBuild: [

@@ -237,8 +237,8 @@
       "fields": [
         { "path": "conformanceSurface.modelRuntimeCases", "equals": 202 },
         { "path": "conformanceSurface.dealMechanicsRouteCases", "equals": 60 },
-        { "path": "conformanceSurface.promptMetaCases", "equals": 49 },
-        { "path": "conformanceSurface.totalCases", "equals": 370 }
+        { "path": "conformanceSurface.promptMetaCases", "equals": 52 },
+        { "path": "conformanceSurface.totalCases", "equals": 373 }
       ]
     }
   },
@@ -512,7 +512,7 @@
     "methodologyUri": "methodology://v19",
     "kind": "agent_card",
     "expect": {
-      "textIncludes": ["definitive_conformance_status", "\"caseCount\":370", "definitive_deal_mechanics_v1_1"],
+      "textIncludes": ["definitive_conformance_status", "\"caseCount\":373", "definitive_deal_mechanics_v1_1"],
       "fields": [
         { "path": "definitive.dealMechanicsModelSlots", "equals": 123 },
         { "path": "definitive.dealMechanicsGates", "equals": 30 },
@@ -784,6 +784,60 @@
         { "path": "agentTakeBackArtifacts", "includes": "AuditPacket" },
         { "path": "workstreamsById.WS6.primitives", "includes": "DocumentDraft" },
         { "path": "workstreamsById.WS6.primitives", "includes": "DataRoomIndex" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.SUBSTRATE.DISCOVERY.001",
+    "title": "Substrate architecture names the discovery stack agents and registries need",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "substrate_architecture",
+    "expect": {
+      "textIncludes": ["well-known", "canonical smbx-ai/diligence namespace", "enterprise allow-list"],
+      "fields": [
+        { "path": "agentDiscoverabilityLayerIds", "includes": "canonical_registry" },
+        { "path": "agentDiscoverabilityLayerIds", "includes": "directory_layer" },
+        { "path": "agentDiscoverabilityLayerIds", "includes": "well_known_discovery" },
+        { "path": "agentDiscoverabilityLayerIds", "includes": "client_app_stores" },
+        { "path": "agentDiscoverabilityLayerIds", "includes": "enterprise_allow_lists" },
+        { "path": "agentDiscoverabilityLayersById.well_known_discovery.requiredSurface", "includes": "/.well-known/mcp/server-card.json" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.SUBSTRATE.DESIRABILITY.001",
+    "title": "Substrate architecture preserves the desirability signals that make agents choose smbX",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "substrate_architecture",
+    "expect": {
+      "textIncludes": ["working capital peg", "Section 1060 allocation", "outputSchema", "THE LINE"],
+      "fields": [
+        { "path": "agentDesirabilitySignalIds", "includes": "deterministic_outputs" },
+        { "path": "agentDesirabilitySignalIds", "includes": "structured_outputs" },
+        { "path": "agentDesirabilitySignalIds", "includes": "citation_provenance" },
+        { "path": "agentDesirabilitySignalIds", "includes": "semantic_tool_metadata" },
+        { "path": "agentDesirabilitySignalIds", "includes": "regulatory_neutrality" },
+        { "path": "toolMetadataDoctrine.namingConvention", "equals": "diligence_<phase>_<artifact>" },
+        { "path": "toolMetadataDoctrine.semanticKeywords", "includes": "indemnification cap and basket" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.SUBSTRATE.STANDARD.001",
+    "title": "Substrate architecture positions DEFINITIVE as The Diligence Standard",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "substrate_architecture",
+    "expect": {
+      "textIncludes": ["The Diligence Standard", "DEFINITIVE-conformant", "open conformance suite"],
+      "fields": [
+        { "path": "publishedStandardDoctrine.name", "equals": "The Diligence Standard" },
+        { "path": "publishedStandardDoctrine.methodology", "equals": "DEFINITIVE" },
+        { "path": "publishedStandardDoctrine.requiredPublicArtifacts", "includes": "server-card metadata" },
+        { "path": "publishedStandardDoctrine.requiredPublicArtifacts", "includes": "THE LINE declaration" },
+        { "path": "marketplaceBuildOrder", "includes": "Build /.well-known/mcp/server-card.json and /.well-known/mcp over the same DEFINITIVE manifest, not a parallel metadata file." }
       ]
     }
   }

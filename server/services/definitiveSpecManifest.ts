@@ -203,6 +203,10 @@ export function buildDefinitiveSpecManifest() {
       dealOsLifecycleStages: substrateArchitecture.dealOsLifecycleStages,
       dealOsWorkSurfaces: substrateArchitecture.dealOsWorkSurfaces,
       agentTakeBackArtifacts: substrateArchitecture.agentTakeBackArtifacts,
+      agentDiscoverabilityLayers: substrateArchitecture.agentDiscoverabilityLayers,
+      agentDesirabilitySignals: substrateArchitecture.agentDesirabilitySignals,
+      toolMetadataDoctrine: substrateArchitecture.toolMetadataDoctrine,
+      publishedStandardDoctrine: substrateArchitecture.publishedStandardDoctrine,
       routingAxes: substrateArchitecture.routingAxes,
       universalResponseFields: substrateArchitecture.universalResponseFields,
       workstreams: substrateArchitecture.workstreams.map(workstream => ({
@@ -215,6 +219,7 @@ export function buildDefinitiveSpecManifest() {
       })),
       phases: substrateArchitecture.phases,
       immediateBuildOrder: substrateArchitecture.immediateBuildOrder,
+      marketplaceBuildOrder: substrateArchitecture.marketplaceBuildOrder,
       lineDoctrine: substrateArchitecture.lineDoctrine,
     },
     passThroughSurface,

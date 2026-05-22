@@ -528,9 +528,13 @@ function buildPromptMetaSubject(item: PromptMetaCase): { text: string; data: Rec
       workstreamsById,
       phasesById,
       dealOsWorkSurfacesById: Object.fromEntries(architecture.dealOsWorkSurfaces.map(surface => [surface.id, surface])),
+      agentDiscoverabilityLayersById: Object.fromEntries(architecture.agentDiscoverabilityLayers.map(layer => [layer.id, layer])),
+      agentDesirabilitySignalsById: Object.fromEntries(architecture.agentDesirabilitySignals.map(signal => [signal.id, signal])),
       dealOsLifecycleStageIds: architecture.dealOsLifecycleStages.map(stage => stage.id),
       dealOsLifecycleStageLabels: architecture.dealOsLifecycleStages.map(stage => stage.label),
       dealOsWorkSurfaceIds: architecture.dealOsWorkSurfaces.map(surface => surface.id),
+      agentDiscoverabilityLayerIds: architecture.agentDiscoverabilityLayers.map(layer => layer.id),
+      agentDesirabilitySignalIds: architecture.agentDesirabilitySignals.map(signal => signal.id),
     };
     return { text: JSON.stringify(data), data };
   }
