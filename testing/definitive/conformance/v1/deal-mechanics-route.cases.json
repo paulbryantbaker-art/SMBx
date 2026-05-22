@@ -486,5 +486,353 @@
       },
       "yuliaBriefIncludes": ["Professional-handoff mechanics", "Research-only mechanics"]
     }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.SELLTAXASSET.001",
+    "title": "Seller tax asset-vs-stock route surfaces gross-up, 1374, cost capitalization, OID, SALT, and 338/336 mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "sell",
+      "league": "L4",
+      "dealType": "asset sale stock sale S corp 338h10 336e gross up 1374 built in gains transaction cost 263 453A OID seller note SALT bulk sale",
+      "triggeredGates": ["G2", "G15"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M200", "M201", "M202", "M203", "M204", "M205"],
+      "readinessAtLeast": {
+        "executable": 12,
+        "planning_only": 13,
+        "research_only": 1
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.ESOPSELL.001",
+    "title": "ESOP sale route keeps 1042 deferral, leveraged ESOP, founder tax, and succession mechanics discoverable",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "sell",
+      "league": "L3",
+      "dealType": "ESOP 1042 leveraged ESOP trustee QRP seller deferral SBA founder succession",
+      "triggeredGates": ["G15", "G27"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M101", "M102", "M116", "M117", "M118", "M199"],
+      "readinessAtLeast": {
+        "executable": 4,
+        "planning_only": 13,
+        "research_only": 1
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.RWIINDEMNITY.001",
+    "title": "RWI indemnity route ties seller recourse, caps, baskets, survival, escrow, and RWI tower mechanics together",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L5",
+      "dealType": "RWI indemnification cap basket escrow holdback survival materiality scrape sandbagging purchase agreement reps",
+      "triggeredGates": ["G8"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M108", "M206", "M207", "M208", "M209", "M211", "M217"],
+      "readinessAtLeast": {
+        "executable": 13,
+        "professional_handoff": 2,
+        "research_only": 1
+      },
+      "toolSurfacesInclude": {
+        "studio": ["M108", "M206", "M207", "M208", "M209"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.EARNOUTLEGAL.001",
+    "title": "Earnout route combines revenue, EBITDA, architecture, dispute forum, and tax-characterization mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "sell",
+      "league": "L4",
+      "dealType": "earnout EBITDA revenue customer metric acceleration covenant dispute accounting arbitrator 453 contingent payment",
+      "triggeredGates": ["G9"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M111", "M112", "M113", "M114", "M115", "M204", "M213"],
+      "readinessAtLeast": {
+        "executable": 4,
+        "planning_only": 3
+      },
+      "toolSurfacesInclude": {
+        "studio": ["M213"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.ARTICLE9.001",
+    "title": "Out-of-court liquidation route surfaces ABC, Article 9, Chapter 7, DIP-adjacent, and Subchapter V mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L3",
+      "dealType": "Article 9 foreclosure ABC assignment for benefit creditors liquidation UCC 9-610 9-611 9-615",
+      "triggeredGates": ["G28"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M151", "M153", "M157", "M158", "M165", "M167"],
+      "readinessAtLeast": {
+        "executable": 15
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.DIPFINANCE.001",
+    "title": "DIP financing route surfaces 13-week cash, roll-up, carve-out, priming, liquidity, and capital-stack mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "raise",
+      "league": "L5",
+      "dealType": "DIP financing 13 week cash forecast roll up carve out priming adequate protection liquidity headroom",
+      "triggeredGates": ["G28", "G29"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M148", "M151", "M152", "M158", "M159", "M160", "M164"],
+      "readinessAtLeast": {
+        "executable": 25,
+        "planning_only": 4,
+        "professional_handoff": 3,
+        "research_only": 3
+      },
+      "yuliaBriefIncludes": ["Professional-handoff mechanics", "Research-only mechanics"]
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.CRAMDOWNRATE.001",
+    "title": "Cramdown-rate route keeps Till/MPM, feasibility, BIOC, APR, and secured-creditor mechanics together",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L6",
+      "dealType": "cramdown interest rate Till MPM Silicones efficient market secured creditor plan confirmation",
+      "triggeredGates": ["G28"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M152", "M153", "M154", "M155", "M156", "M158", "M164"],
+      "readinessAtLeast": {
+        "executable": 17
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.CLAIMSTRADING.001",
+    "title": "Claims-trading route surfaces recovery regression, IRR, fulcrum, exchange, and distressed waterfall mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L5",
+      "dealType": "claims trading recovery Moody URD post default trading price IRR fulcrum distressed debt",
+      "triggeredGates": ["G28"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M150", "M159", "M160", "M166", "M168"],
+      "readinessAtLeast": {
+        "executable": 15,
+        "planning_only": 1
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.REORGSPIN.001",
+    "title": "Tax-free reorg and spin route keeps 368, 355, RMT, 251(h), SB 21, and fairness boundaries visible",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "sell",
+      "league": "L7",
+      "dealType": "tax free reorg type A B C D E F G 368 spin 355 reverse Morris Trust 355e 50 percent test",
+      "triggeredGates": ["G15"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M126", "M127", "M135", "M140", "M141", "M143"],
+      "readinessAtLeast": {
+        "executable": 9,
+        "planning_only": 12,
+        "professional_handoff": 2,
+        "research_only": 2
+      },
+      "yuliaBriefIncludes": ["Professional-handoff mechanics", "Research-only mechanics"]
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.JVUPC.001",
+    "title": "JV and Up-C route surfaces 721, 351, 704(c), TRA, partnership contribution, and financing mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "raise",
+      "league": "L5",
+      "dealType": "joint venture 721 351 704c Up-C TRA 85 15 basis step up partnership contribution",
+      "triggeredGates": ["G15"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M103", "M121", "M145", "M146", "M180", "M184"],
+      "readinessAtLeast": {
+        "executable": 9,
+        "planning_only": 6,
+        "professional_handoff": 3,
+        "research_only": 2
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.PROPERTYESCROW.001",
+    "title": "Property-escrow route surfaces environmental, title, tenant, PCA, deferred-maintenance, and ALTA mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L4",
+      "dealType": "property environmental title exception tenant dispute PCA reserve deferred maintenance escrow holdback ALTA survey",
+      "triggeredGates": ["G30"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M195", "M196", "M198", "M208", "M213"],
+      "readinessAtLeast": {
+        "executable": 21,
+        "research_only": 4
+      },
+      "toolSurfacesInclude": {
+        "files": ["M195", "M196"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.LEASES.001",
+    "title": "Lease diligence route surfaces abstraction, CAM, WALT, ground lease, tenant concentration, and consent mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L3",
+      "dealType": "lease abstraction CAM reconciliation WALT tenant concentration go dark co tenancy assignment consent SNDA",
+      "triggeredGates": ["G30"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M189", "M192", "M193", "M197"],
+      "readinessAtLeast": {
+        "executable": 16
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.PRIVACYCYBER.001",
+    "title": "Privacy/cyber/regulatory diligence route surfaces files, professional handoffs, and EU AI research boundary",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L7",
+      "dealType": "cyber privacy GDPR CPRA sanctions OFAC ESG climate regulated diligence data room",
+      "triggeredGates": ["G24"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M129", "M130", "M131", "M132", "M133", "M134"],
+      "readinessAtLeast": {
+        "executable": 9,
+        "professional_handoff": 5,
+        "research_only": 1
+      },
+      "toolSurfacesInclude": {
+        "files": ["M130", "M131", "M132", "M133", "M134"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.STABLECOIN.001",
+    "title": "Stablecoin and digital-asset route keeps GENIUS, Howey, 1099-DA, reserves, and research-only caveats visible",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L6",
+      "dealType": "stablecoin GENIUS Act PPS token taxonomy Howey digital asset 1099-DA broker reporting reserves",
+      "triggeredGates": ["G30"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M174", "M175", "M176"],
+      "readinessAtLeast": {
+        "executable": 22,
+        "research_only": 5
+      },
+      "yuliaBriefIncludes": ["Research-only mechanics"]
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.IPCARVEOUT.001",
+    "title": "IP carve-out route surfaces license-back, source-code escrow, trademark/domain, OSS, and transition mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "sell",
+      "league": "L4",
+      "dealType": "IP carve out license back TSA source code escrow trademark domain employee assignment OSS",
+      "triggeredGates": ["G10"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M144", "M216", "M218", "M219", "M221", "M223"],
+      "readinessAtLeast": {
+        "executable": 10,
+        "planning_only": 2
+      },
+      "toolSurfacesInclude": {
+        "files": ["M215", "M221", "M223"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.PUBLICFAIRNESS.001",
+    "title": "Public fairness route surfaces fairness opinion, MFW, SB 21, MAE, ordinary-course, and specific-performance boundaries",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "sell",
+      "league": "L8",
+      "dealType": "fairness opinion specific performance ordinary course covenant MAE controller MFW SB21 take private",
+      "triggeredGates": ["G15"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M123", "M124", "M125", "M126", "M127", "M135"],
+      "readinessAtLeast": {
+        "executable": 5,
+        "planning_only": 12,
+        "professional_handoff": 2,
+        "research_only": 2
+      },
+      "yuliaBriefIncludes": ["Professional-handoff mechanics", "Research-only mechanics"]
+    }
   }
 ]

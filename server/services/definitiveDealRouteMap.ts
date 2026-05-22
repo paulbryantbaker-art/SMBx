@@ -396,6 +396,16 @@ function inferJourneys(model: DefinitiveModelCatalogEntry): DefinitiveJourney[] 
   const text = modelText(model);
   const journeys = new Set<DefinitiveJourney>();
 
+  if (model.slotId === 'M118') {
+    journeys.add('sell');
+    journeys.add('raise');
+  }
+  if (['M123', 'M124', 'M125', 'M126', 'M127', 'M135', 'M140', 'M141', 'M142', 'M143'].includes(model.slotId)) {
+    journeys.add('sell');
+    journeys.add('buy');
+  }
+  if (model.slotId === 'M198') journeys.add('buy');
+
   if (hasAny(text, ['pmi', 'post-close', 'integration'])) journeys.add('pmi');
   if (hasAny(text, ['sell', 'seller', 'founder', 'sale', 'divestiture', 'carve-out', 'earnout', 'break-up fee', 'termination', 'escrow', 'indemnification', 'survival', 'transaction tax', 'after-tax proceeds', 'joint venture'])) journeys.add('sell');
   if (hasAny(text, ['buy', 'buyer', 'purchase', 'acquisition', 'diligence', 'tender', 'merger', 'target', 'rwi', 'closing', 'ip', 'real estate', 'lease', 'title', 'survey', 'transaction tax', 'buyer basis', 'joint venture', 'crypto', 'stablecoin', 'digital-asset'])) journeys.add('buy');
