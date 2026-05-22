@@ -261,5 +261,230 @@
         "model_runner": ["M146"]
       }
     }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.DISTRESSED.001",
+    "title": "Distress trigger stack routes cash runway, covenant breach, trading price, DIP, and cramdown mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L4",
+      "dealType": "cash runway FCCR covenant breach secured debt trading bankruptcy DIP 363 plan cramdown 1111 feasibility liquidation",
+      "triggeredGates": ["G28"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M151", "M152", "M153", "M154", "M155", "M156", "M158", "M159", "M160", "M168"],
+      "readinessAtLeast": {
+        "executable": 17,
+        "planning_only": 1,
+        "research_only": 1
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.HEALTHYBUY.001",
+    "title": "Healthy buyer diligence route keeps QoE, working capital, RWI, HSR, and LOI mechanics together",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L3",
+      "dealType": "SBA buyer valuation QoE working capital LOI RWI HSR",
+      "triggeredGates": ["G7", "G14", "G15"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M109", "M119", "M128", "M190", "M199", "M209", "M210", "M211"],
+      "readinessAtLeast": {
+        "executable": 13,
+        "planning_only": 6,
+        "professional_handoff": 2
+      },
+      "toolSurfacesInclude": {
+        "studio": ["M108", "M209", "M210", "M211"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.FOUNDEREXIT.001",
+    "title": "Founder-exit tax route surfaces QSBS, ESOP, installment, earnout, 280G, and NOL mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "sell",
+      "league": "L3",
+      "dealType": "QSBS 1202 ESOP 1042 installment 453 280G 382 NOL founder exit",
+      "triggeredGates": ["G15"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M101", "M102", "M111", "M112", "M185", "M199"],
+      "readinessAtLeast": {
+        "executable": 4,
+        "planning_only": 11,
+        "research_only": 1
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.PUBLICTENDER.001",
+    "title": "Public/tender route surfaces 251(h), tender, MFW, SB 21, fairness, and take-private boundaries",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L7",
+      "dealType": "251h tender offer best price 13e3 take private MFW SB21 controller cleansing fairness opinion",
+      "triggeredGates": ["G15"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M126", "M127", "M135", "M141", "M142", "M160"],
+      "readinessAtLeast": {
+        "executable": 10,
+        "professional_handoff": 4,
+        "research_only": 3
+      },
+      "yuliaBriefIncludes": ["Professional-handoff mechanics", "Research-only mechanics"]
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.OPCOPROPCO.001",
+    "title": "OpCo/PropCo real-estate route keeps separation, sale-leaseback, REIT, ground lease, CITT, and title mechanics together",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L5",
+      "dealType": "opco propco sale leaseback REIT ground lease CITT title survey transfer tax",
+      "triggeredGates": ["G30"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M171", "M172", "M191", "M194", "M196", "M197", "M200"],
+      "readinessAtLeast": {
+        "executable": 24,
+        "professional_handoff": 1,
+        "research_only": 4
+      },
+      "toolSurfacesInclude": {
+        "files": ["M196", "M197"],
+        "pipeline": ["M171", "M194"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.IPSAAS.001",
+    "title": "SaaS IP route surfaces OSS, source-code escrow, employee assignment, liens, licenses, and domain transfer",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L4",
+      "dealType": "software OSS AGPL GPL source code escrow employee IP assignment domain trademark chain title lien license",
+      "triggeredGates": ["G10"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M214", "M215", "M216", "M219", "M220", "M221", "M223"],
+      "readinessAtLeast": {
+        "executable": 13
+      },
+      "toolSurfacesInclude": {
+        "files": ["M214", "M215", "M221", "M223"],
+        "pass_through_catalog": ["M214", "M215", "M221"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.PROJECTFINANCE.001",
+    "title": "Project-finance route labels DSCR/LLCR/PLCR as research-only while surfacing collateral mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L6",
+      "dealType": "infrastructure project finance DSCR LLCR PLCR concession agreement",
+      "triggeredGates": ["G30"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M173", "M187", "M188", "M190", "M195", "M196"],
+      "readinessAtLeast": {
+        "executable": 24,
+        "professional_handoff": 1,
+        "research_only": 4
+      },
+      "yuliaBriefIncludes": ["Research-only mechanics"]
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.INTERNATIONAL.001",
+    "title": "International route surfaces UK W&I/MAC, EUMR/FIRB/ACCC, privacy, sanctions, ESG, climate, and EU AI boundaries",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L8",
+      "dealType": "UK English W&I MAC EU merger control international FIRB ACCC EU AI Act cyber privacy sanctions ESG climate",
+      "triggeredGates": ["G23", "G24"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M106", "M107", "M110", "M129", "M130", "M131", "M132", "M133", "M134"],
+      "readinessAtLeast": {
+        "professional_handoff": 6,
+        "research_only": 3
+      },
+      "toolSurfacesInclude": {
+        "files": ["M130", "M131", "M132", "M133", "M134"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.RAISESTRUCTURE.001",
+    "title": "Raise/capital-structure route surfaces unitranche, ABL, baskets, make-whole, SAFE, venture debt, and PIPE mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "raise",
+      "league": "L4",
+      "dealType": "unitranche intercreditor ABL covenant basket make-whole SAFE venture debt PIPE",
+      "triggeredGates": ["G15", "G29"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M122", "M148", "M158", "M180", "M181", "M182", "M183", "M184"],
+      "readinessAtLeast": {
+        "executable": 11,
+        "planning_only": 5,
+        "professional_handoff": 3,
+        "research_only": 5
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.FUNDSECONDARY.001",
+    "title": "Fund secondaries route combines continuation fund, LP-secondary, strip-sale, NAV, and asset-class overlays",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L5",
+      "dealType": "continuation fund NAV facility strip sale LP secondary 1446f GP led",
+      "triggeredGates": ["G26", "G30"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M120", "M177", "M178", "M187", "M188", "M190", "M196"],
+      "readinessAtLeast": {
+        "executable": 18,
+        "professional_handoff": 1,
+        "research_only": 4
+      },
+      "yuliaBriefIncludes": ["Professional-handoff mechanics", "Research-only mechanics"]
+    }
   }
 ]
