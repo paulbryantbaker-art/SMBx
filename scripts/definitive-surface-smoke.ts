@@ -65,6 +65,7 @@ const expectedTools = [
   'diff_deal_state',
   'compose_deal_package',
   'resume_deal',
+  'compose_lifecycle_trace',
   'compose_data_room_index',
   'prepare_diligence_request',
   'disclose_subset',
@@ -303,6 +304,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.schemaNames.includes('DealPlan'), 'schema registry exposes DealPlan');
   assert(registry.schemaNames.includes('DealStateDiff'), 'schema registry exposes DealStateDiff');
   assert(registry.schemaNames.includes('DealPackage'), 'schema registry exposes DealPackage');
+  assert(registry.schemaNames.includes('LifecycleTrace'), 'schema registry exposes LifecycleTrace');
   assert(registry.schemaNames.includes('DataRoomIndex'), 'schema registry exposes DataRoomIndex');
   assert(registry.schemaNames.includes('DiligenceRequest'), 'schema registry exposes DiligenceRequest');
   assert(registry.schemaNames.includes('DisclosureSubset'), 'schema registry exposes DisclosureSubset');
@@ -313,6 +315,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.toolSchemaMap.diff_deal_state.takeBack.includes('DealStateDiff'), 'diff take-back maps DealStateDiff');
   assert(registry.toolSchemaMap.compose_deal_package.takeBack.includes('DealPackage'), 'package take-back maps DealPackage');
   assert(registry.toolSchemaMap.resume_deal.takeBack.includes('DealPackage'), 'resume take-back maps DealPackage');
+  assert(registry.toolSchemaMap.compose_lifecycle_trace.takeBack.includes('LifecycleTrace'), 'lifecycle trace maps LifecycleTrace');
   assert(registry.toolSchemaMap.compose_data_room_index.takeBack.includes('DataRoomIndex'), 'data room take-back maps DataRoomIndex');
   assert(registry.toolSchemaMap.prepare_diligence_request.takeBack.includes('DiligenceRequest'), 'diligence request maps DiligenceRequest');
   assert(registry.toolSchemaMap.disclose_subset.takeBack.includes('DisclosureSubset'), 'disclosure subset maps DisclosureSubset');
@@ -636,6 +639,39 @@ await test('Resume deal returns current lifecycle position and next calls', asyn
   assert(result.dealPackage.takeBackArtifacts.includes('DealPackage'), 'resume includes deal package');
   assert(result.resumeContract.recursiveLoop.includes('update_deal_payload'), 'resume explains recursive loop');
   assert(result.next_suggested_calls.length > 0, 'resume includes next calls');
+});
+
+await test('LifecycleTrace preserves iterative deal history for agent take-back', async () => {
+  const response = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'compose_lifecycle_trace',
+    input: {
+      payload: {
+        journey: 'buy',
+        targetName: 'Lifecycle Target',
+        industry: 'software',
+        jurisdiction: 'US-DE',
+        ebitdaCents: 2_000_000_00,
+        dealStructure: 'asset purchase',
+        dealEvents: [
+          { id: 'evt-ioi', eventType: 'ioi', label: 'IOI drafted', stage: 'ioi' },
+          { id: 'evt-qoe', eventType: 'diligence', label: 'QoE uploaded', stage: 'diligence', sourceRefs: ['qoe'] },
+        ],
+        documents: [
+          { id: 'qoe', name: 'QoE report', type: 'qoe', hash: 'sha256:qoe' },
+        ],
+      },
+    },
+    envelope: {},
+  });
+  assertEqual(response.status, 200, 'lifecycle trace status');
+  const trace = response.body.result.result.lifecycleTrace;
+  assertEqual(trace.schema, 'LifecycleTrace.v0.1', 'lifecycle trace schema');
+  assert(trace.events.some((event: any) => event.id === 'evt-ioi'), 'trace preserves supplied event');
+  assert(trace.stageTrace.some((stage: any) => stage.id === 'diligence'), 'trace includes staged lifecycle');
+  assert(trace.loopContract.recursiveLoop.includes('update_deal_payload'), 'trace explains recursive loop');
+  assert(trace.next_suggested_calls.some((call: any) => call.toolName === 'compose_deal_package'), 'trace can be packaged for take-back');
+  assert(trace.takeBackArtifacts.includes('LifecycleTrace'), 'lifecycle trace is portable');
 });
 
 await test('DataRoomIndex groups files and names source gaps', async () => {

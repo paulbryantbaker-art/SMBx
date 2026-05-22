@@ -23,6 +23,7 @@ const DEFINITIVE_MCP_TOOLS = [
   'diff_deal_state',
   'compose_deal_package',
   'resume_deal',
+  'compose_lifecycle_trace',
   'compose_data_room_index',
   'prepare_diligence_request',
   'disclose_subset',
@@ -127,6 +128,17 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
         dealState: { type: 'object', description: 'Optional content-addressed DealState from a prior call.' },
         dealPackage: { type: 'object', description: 'Optional DealPackage reference; include the companion DealState when available.' },
         payload: { type: 'object', description: 'Optional DealPayload if a prior DealState is not available.' },
+        idempotencyKey: { type: 'string', description: 'Optional caller-generated idempotency key.' },
+      },
+    },
+  },
+  compose_lifecycle_trace: {
+    description: 'Compose a portable LifecycleTrace from a DealState or DealPayload so humans and agents can understand the iterative deal history, current stage, stage trace, source/artifact refs, blockers, loop contract, and next_suggested_calls across IOI, LOI, diligence, model, negotiation, close, and PMI.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dealState: { type: 'object', description: 'Optional content-addressed DealState from a prior call.' },
+        payload: { type: 'object', description: 'Optional DealPayload with dealEvents, lifecycleEvents, activityLog, history, milestones, timeline, sources, model outputs, or documents.' },
         idempotencyKey: { type: 'string', description: 'Optional caller-generated idempotency key.' },
       },
     },
@@ -334,6 +346,7 @@ const TOOL_SCOPE: Record<DefinitiveMcpToolName, string[]> = {
   diff_deal_state: ['deal-state:read', 'deal-state:diff'],
   compose_deal_package: ['deal-state:read', 'deal-package:read'],
   resume_deal: ['deal-state:read', 'deal-plan:read', 'deal-package:read'],
+  compose_lifecycle_trace: ['deal-state:read', 'deal-plan:read'],
   compose_data_room_index: ['deal-state:read', 'data-room:read'],
   prepare_diligence_request: ['deal-state:read', 'data-room:read', 'studio:draft'],
   disclose_subset: ['deal-state:read', 'data-room:read', 'deal-package:compose'],

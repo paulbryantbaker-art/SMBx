@@ -50,6 +50,7 @@ try {
     assert(body.tools.some((tool: any) => tool.name === 'compose_model_stack'), 'compose_model_stack is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_deal_package'), 'compose_deal_package is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'resume_deal'), 'resume_deal is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'compose_lifecycle_trace'), 'compose_lifecycle_trace is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_data_room_index'), 'compose_data_room_index is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'prepare_diligence_request'), 'prepare_diligence_request is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'disclose_subset'), 'disclose_subset is advertised');
@@ -315,6 +316,41 @@ try {
     assert(result.resumeContract.recursiveLoop.includes('check_completeness'), 'resume recursive loop is exposed');
     assert(result.dealPackage.packageCid.startsWith('definitive:deal-package:sha256:'), 'resume package is content addressed');
     assert(result.next_suggested_calls.length > 0, 'resume next calls are exposed');
+  });
+
+  await test('Authenticated compose_lifecycle_trace returns iterative history packet', async () => {
+    const response = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'compose_lifecycle_trace',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-state:read', 'deal-plan:read'],
+      input: {
+        payload: {
+          journey: 'buy',
+          targetName: 'DEFINITIVE Route Fixture Deal',
+          industry: 'software',
+          jurisdiction: 'US-DE',
+          ebitdaCents: 2_100_000_00,
+          dealEvents: [
+            { id: 'evt-ioi', eventType: 'ioi', label: 'IOI drafted', stage: 'ioi' },
+            { id: 'evt-qoe', eventType: 'diligence', label: 'QoE uploaded', stage: 'diligence' },
+          ],
+          documents: [{ id: 'qoe', name: 'QoE report', type: 'qoe', hash: 'sha256:fixture-qoe' }],
+        },
+      },
+    });
+
+    assertEqual(response.status, 200, 'lifecycle trace route status');
+    assertEqual(response.body.ok, true, 'lifecycle trace route ok');
+    assertEqual(response.body.toolName, 'compose_lifecycle_trace', 'lifecycle trace tool name');
+    const trace = response.body.result?.result?.lifecycleTrace;
+    assertEqual(trace.schema, 'LifecycleTrace.v0.1', 'lifecycle trace schema');
+    assert(trace.events.some((event: any) => event.id === 'evt-ioi'), 'lifecycle trace preserves event');
+    assert(trace.loopContract.recursiveLoop.includes('update_deal_payload'), 'lifecycle recursive loop exposed');
+    assert(trace.takeBackArtifacts.includes('LifecycleTrace'), 'lifecycle trace take-back exposed');
   });
 
   await test('Authenticated compose_data_room_index returns source gaps', async () => {

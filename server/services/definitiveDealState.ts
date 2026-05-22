@@ -152,6 +152,8 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
       return composeDefinitiveDealPackage(input);
     case 'resume_deal':
       return resumeDefinitiveDeal(input);
+    case 'compose_lifecycle_trace':
+      return composeDefinitiveLifecycleTrace(input);
     case 'compose_data_room_index':
       return composeDefinitiveDataRoomIndex(input);
     case 'prepare_diligence_request':
@@ -175,6 +177,7 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
           'diff_deal_state',
           'compose_deal_package',
           'resume_deal',
+          'compose_lifecycle_trace',
           'compose_data_room_index',
           'prepare_diligence_request',
           'disclose_subset',
@@ -195,6 +198,7 @@ export function isDefinitiveDealStateTool(toolName: string): boolean {
     'diff_deal_state',
     'compose_deal_package',
     'resume_deal',
+    'compose_lifecycle_trace',
     'compose_data_room_index',
     'prepare_diligence_request',
     'disclose_subset',
@@ -431,6 +435,95 @@ export function resumeDefinitiveDeal(input: Record<string, any>) {
         'MissingInputContract',
         'MCPCallHint[]',
       ],
+    },
+    state_hash_after: state.stateHash,
+    completeness_contribution_delta: 0,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
+export function composeDefinitiveLifecycleTrace(input: Record<string, any>) {
+  const state = stateFromInput(input);
+  const dealPlan = buildDealPlan(state);
+  const rawEvents = normalizeLifecycleEvents(state.payload);
+  const events = rawEvents.length ? rawEvents : synthesizeLifecycleEvents(state, dealPlan);
+  const artifactRefs = buildLifecycleArtifactRefs(state);
+  const currentStage = dealPlan.currentStage;
+  const traceHash = sha256(stableStringify({
+    dealStateHash: state.stateHash,
+    currentStage,
+    events,
+    artifactRefs,
+    methodologyVersion: DEFINITIVE_METHODOLOGY_VERSION,
+  }));
+  const lifecycleTrace = {
+    traceId: `lifetrace_${traceHash.slice(0, 16)}`,
+    schema: 'LifecycleTrace.v0.1',
+    dealStateCid: state.cid,
+    dealStateHash: state.stateHash,
+    currentStage,
+    readinessLevel: state.completenessReport.level,
+    lifecycle: dealPlan.lifecycle,
+    stageTrace: dealPlan.stages.map(stage => ({
+      id: stage.id,
+      label: stage.label,
+      status: stage.status,
+      missing: stage.missing,
+      suggestedTools: stage.suggestedTools,
+    })),
+    events,
+    artifactRefs,
+    blockers: state.completenessReport.blockers,
+    loopContract: {
+      recursiveLoop:
+        'compose_lifecycle_trace -> update_deal_payload with new event/source/model output -> check_completeness -> compose_deal_package -> repeat',
+      noRejectionContract:
+        'Incomplete deal history is acceptable. The trace returns synthesized current-state events and next_suggested_calls instead of rejecting the agent.',
+      humanAndAgentSurfaces: ['today', 'pipeline', 'files', 'data_room', 'studio', 'models', 'audit_package'],
+    },
+    next_suggested_calls: [
+      {
+        toolName: 'update_deal_payload',
+        priority: events.length ? 'P2' as const : 'P1' as const,
+        reason: 'Append the next deal event, source, model output, or artifact reference after the next iterative work pass.',
+        inputHint: {
+          dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision },
+          patch: {
+            dealEvents: [
+              {
+                eventType: '<ioi|loi|diligence|model|negotiation|close|pmi>',
+                label: '<what happened>',
+                stage: currentStage,
+                sourceRefs: [],
+                artifactRefs: [],
+              },
+            ],
+          },
+        },
+      },
+      {
+        toolName: 'compose_deal_package',
+        priority: 'P1' as const,
+        reason: 'Package the lifecycle trace with the current DealState and next-call hints for agent take-back.',
+        inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
+      },
+      ...nextLifecycleTraceCalls(state, currentStage),
+    ],
+    takeBackArtifacts: ['LifecycleTrace', 'DealState', 'DealPlan', 'MCPCallHint[]'],
+    lineInvariant: LINE_INVARIANT,
+  };
+
+  return {
+    ok: true,
+    action: 'compose_lifecycle_trace',
+    result: {
+      lifecycleTrace,
+      dealState: state,
+      dealPlan,
+      missingInputContract: state.missingInputContract,
+      next_suggested_calls: lifecycleTrace.next_suggested_calls,
+      portableTakeBackArtifacts: lifecycleTrace.takeBackArtifacts,
     },
     state_hash_after: state.stateHash,
     completeness_contribution_delta: 0,
@@ -1042,6 +1135,147 @@ function buildDealPlan(state: DefinitiveDealState) {
     })),
     lineInvariant: LINE_INVARIANT,
   };
+}
+
+function normalizeLifecycleEvents(payload: Record<string, any>) {
+  const source = payload.dealEvents
+    ?? payload.lifecycleEvents
+    ?? payload.events
+    ?? payload.activityLog
+    ?? payload.history
+    ?? payload.milestones
+    ?? payload.timeline
+    ?? [];
+  const list = Array.isArray(source)
+    ? source
+    : source && typeof source === 'object'
+      ? Object.values(source as Record<string, unknown>)
+      : [source];
+  return list
+    .filter(item => item != null && item !== '')
+    .map((item, index) => normalizeLifecycleEvent(item, index))
+    .filter((event): event is Record<string, any> => Boolean(event));
+}
+
+function normalizeLifecycleEvent(item: unknown, index: number): Record<string, any> | null {
+  if (typeof item === 'string') {
+    return {
+      id: `event_${index + 1}`,
+      eventType: stageFromLifecycleText(item),
+      stage: stageFromLifecycleText(item),
+      label: item,
+      summary: item,
+      sourceRefs: [],
+      artifactRefs: [],
+    };
+  }
+  if (!item || typeof item !== 'object') return null;
+  const record = item as Record<string, any>;
+  const label = textValue(record.label) || textValue(record.title) || textValue(record.summary) || textValue(record.eventType) || `Deal event ${index + 1}`;
+  const stage = textValue(record.stage) || stageFromLifecycleText(compactText([label, record.eventType, record.kind, record.type]));
+  return {
+    id: textValue(record.id) || `event_${index + 1}`,
+    occurredAt: textValue(record.occurredAt) || textValue(record.date) || null,
+    eventType: textValue(record.eventType) || textValue(record.type) || stage,
+    stage,
+    label,
+    summary: textValue(record.summary) || label,
+    actor: textValue(record.actor) || textValue(record.owner) || null,
+    sourceRefs: Array.isArray(record.sourceRefs) ? record.sourceRefs : [],
+    artifactRefs: Array.isArray(record.artifactRefs) ? record.artifactRefs : [],
+    lineBoundary: LINE_INVARIANT,
+  };
+}
+
+function synthesizeLifecycleEvents(state: DefinitiveDealState, dealPlan: ReturnType<typeof buildDealPlan>) {
+  return [{
+    id: 'event_current_state',
+    eventType: 'state_snapshot',
+    stage: dealPlan.currentStage,
+    label: `${dealPlan.currentStage} state observed`,
+    summary: `DEFINITIVE synthesized this trace from the current DealState because no explicit dealEvents/history payload was supplied.`,
+    sourceRefs: state.sourceIndex.slice(0, 8).map(source => ({ id: source.id, hash: source.hash })),
+    artifactRefs: [],
+    lineBoundary: LINE_INVARIANT,
+  }];
+}
+
+function stageFromLifecycleText(value: string): string {
+  const text = value.toLowerCase();
+  if (matches(text, ['pmi', 'post close', 'post-close', 'integration', 'day 0'])) return 'close_pmi';
+  if (matches(text, ['close', 'closing', 'signed', 'funded'])) return 'close_pmi';
+  if (matches(text, ['negotiate', 'negotiation', 'markup', 'redline'])) return 'negotiation';
+  if (matches(text, ['model', 'valuation', 'lbo', 'working capital', 'qoe'])) return 'model';
+  if (matches(text, ['diligence', 'data room', 'files', 'request list'])) return 'diligence';
+  if (matches(text, ['loi', 'letter of intent', 'term sheet'])) return 'loi';
+  if (matches(text, ['ioi', 'indication'])) return 'ioi';
+  return 'intake';
+}
+
+function buildLifecycleArtifactRefs(state: DefinitiveDealState) {
+  const refs: Array<Record<string, any>> = [];
+  if (state.sourceIndex.length) {
+    refs.push({
+      id: 'source_index',
+      type: 'SourceIndex',
+      count: state.sourceIndex.length,
+      citationReadyCount: state.sourceIndex.filter(source => source.citationReady).length,
+    });
+  }
+  for (const [key, type] of [
+    ['ioi', 'IOI'],
+    ['loi', 'LOI'],
+    ['dataRoomIndex', 'DataRoomIndex'],
+    ['modelOutputs', 'ModelOutput'],
+    ['modelRuns', 'ModelOutput'],
+    ['valuation', 'ModelOutput'],
+    ['lbo', 'ModelOutput'],
+    ['negotiationBrief', 'NegotiationBrief'],
+    ['diligenceRequest', 'DiligenceRequest'],
+  ] as const) {
+    if (hasAnyValue(state.payload, [key])) {
+      refs.push({
+        id: key,
+        type,
+        hash: sha256(stableStringify(state.payload[key])),
+      });
+    }
+  }
+  return refs;
+}
+
+function nextLifecycleTraceCalls(state: DefinitiveDealState, currentStage: string): DefinitiveMcpCallHint[] {
+  const calls: DefinitiveMcpCallHint[] = [];
+  if (['diligence', 'model'].includes(currentStage)) {
+    calls.push({
+      toolName: 'prepare_diligence_request',
+      priority: 'P1',
+      reason: 'Convert the current lifecycle position into source-backed diligence asks.',
+      inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
+    });
+  }
+  if (currentStage === 'negotiation') {
+    calls.push({
+      toolName: 'prepare_negotiation_brief',
+      priority: 'P1',
+      reason: 'Convert the current lifecycle position into a source-aware negotiation brief.',
+      inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
+    });
+  }
+  if (!state.completenessReport.satisfied.includes('model_state_present')) {
+    calls.push({
+      toolName: 'compose_model_stack',
+      priority: 'P1',
+      reason: 'Refresh the deterministic model stack before claiming model-backed lifecycle progress.',
+      inputHint: {
+        journey: state.classificationKey.journey,
+        league: state.classificationKey.league === 'unknown' ? undefined : state.classificationKey.league,
+        dealType: state.payload.dealType || state.payload.structure || state.classificationKey.subJourney,
+        signals: state.signals || undefined,
+      },
+    });
+  }
+  return calls;
 }
 
 function buildPackageDeferrals(state: DefinitiveDealState) {

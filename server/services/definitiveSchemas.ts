@@ -283,6 +283,31 @@ const DealPackage: JsonSchema = {
   },
 };
 
+const LifecycleTrace: JsonSchema = {
+  $id: schemaId('LifecycleTrace'),
+  title: 'LifecycleTrace',
+  type: 'object',
+  additionalProperties: true,
+  required: ['traceId', 'schema', 'dealStateCid', 'dealStateHash', 'currentStage', 'stageTrace', 'events', 'loopContract', 'next_suggested_calls'],
+  properties: {
+    traceId: { type: 'string' },
+    schema: { type: 'string', const: 'LifecycleTrace.v0.1' },
+    dealStateCid: { type: 'string' },
+    dealStateHash: { type: 'string' },
+    currentStage: { type: 'string' },
+    readinessLevel: { type: 'string' },
+    lifecycle: { type: 'string' },
+    stageTrace: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    events: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    artifactRefs: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    blockers: { type: 'array', items: { type: 'string' } },
+    loopContract: { type: 'object', additionalProperties: true },
+    next_suggested_calls: { type: 'array', items: { $ref: schemaId('MCPCallHint') } },
+    takeBackArtifacts: { type: 'array', items: { type: 'string' } },
+    lineInvariant: { type: 'string' },
+  },
+};
+
 const DataRoomIndex: JsonSchema = {
   $id: schemaId('DataRoomIndex'),
   title: 'DataRoomIndex',
@@ -461,6 +486,7 @@ export const DEFINITIVE_SCHEMAS: Record<string, JsonSchema> = {
   DealPlan,
   DealStateDiff,
   DealPackage,
+  LifecycleTrace,
   DataRoomIndex,
   DiligenceRequest,
   DisclosureSubset,
@@ -510,6 +536,11 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     input: ['DealState', 'DealPayload', 'DealPackage'],
     output: ['DealState', 'DealPlan', 'DealPackage', 'CompletenessReport', 'MissingInputContract', 'MCPCallHint'],
     takeBack: ['DealState', 'DealPlan', 'DealPackage', 'CompletenessReport', 'MissingInputContract'],
+  },
+  compose_lifecycle_trace: {
+    input: ['DealState', 'DealPayload'],
+    output: ['LifecycleTrace', 'DealState', 'DealPlan', 'MissingInputContract', 'MCPCallHint'],
+    takeBack: ['LifecycleTrace', 'DealState', 'DealPlan', 'MCPCallHint'],
   },
   compose_data_room_index: {
     input: ['DealState', 'DealPayload'],
