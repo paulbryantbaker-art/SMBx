@@ -168,6 +168,8 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
       return composeDefinitiveDocumentDraft(input);
     case 'prepare_negotiation_brief':
       return prepareDefinitiveNegotiationBrief(input);
+    case 'compose_pmi_plan':
+      return composeDefinitivePmiPlan(input);
     default:
       return {
         ok: false,
@@ -189,6 +191,7 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
           'disclose_subset',
           'compose_document_draft',
           'prepare_negotiation_brief',
+          'compose_pmi_plan',
         ],
       };
   }
@@ -212,6 +215,7 @@ export function isDefinitiveDealStateTool(toolName: string): boolean {
     'disclose_subset',
     'compose_document_draft',
     'prepare_negotiation_brief',
+    'compose_pmi_plan',
   ].includes(toolName);
 }
 
@@ -1277,6 +1281,138 @@ export function prepareDefinitiveNegotiationBrief(input: Record<string, any>) {
   };
 }
 
+export function composeDefinitivePmiPlan(input: Record<string, any>) {
+  const state = stateFromInput(input);
+  const objective = textValue(input.objective) || 'post_close_pmi';
+  const audience = textValue(input.audience) || 'operators_and_integration_team';
+  const sourceRefs = sourceRefsForCategories(state, ['operations', 'financials', 'commercial', 'hr', 'legal']);
+  const sourceGaps = ['operations', 'financials', 'commercial', 'hr']
+    .filter(category => !sourceRefs.some(source => source.category === category))
+    .map(category => ({
+      category,
+      reason: `PMI plan needs ${category} source support before operating reliance.`,
+      suggestedTool: 'compose_data_room_index',
+    }));
+  const workstreams = buildPmiWorkstreams(state);
+  const milestones = buildPmiMilestones(state);
+  const risks = buildPmiRiskRegister(state, sourceGaps.map(gap => gap.category));
+  const needsModelState = !state.completenessReport.satisfied.includes('model_state_present');
+  const planHash = sha256(stableStringify({
+    dealStateHash: state.stateHash,
+    objective,
+    audience,
+    workstreams: workstreams.map(workstream => ({
+      id: workstream.id,
+      status: workstream.status,
+      missingSourceCategories: workstream.missingSourceCategories,
+    })),
+    milestones,
+    risks,
+    sourceGaps,
+    methodologyVersion: DEFINITIVE_METHODOLOGY_VERSION,
+  }));
+  const pmiPlan = {
+    planId: `pmi_${planHash.slice(0, 16)}`,
+    schema: 'PMIPlan.v0.1',
+    dealStateCid: state.cid,
+    dealStateHash: state.stateHash,
+    objective,
+    audience,
+    stage: currentStageForState(state),
+    readinessLevel: state.completenessReport.level,
+    workstreams,
+    milestones,
+    riskRegister: risks,
+    sourceRefs,
+    sourceGaps,
+    modelDependencies: {
+      required: needsModelState,
+      status: needsModelState ? 'missing_model_state' : 'not_blocked',
+      suggestedTool: needsModelState ? 'compose_model_stack' : null,
+      preferredModel: 'MODEL.PMI.VALUE.CREATION.v1',
+    },
+    pmiBoundary: {
+      composedOnly: true,
+      noOperatingAuthority: true,
+      noEmploymentAdvice: true,
+      noLegalOrTaxOpinion: true,
+      noExternalTransmission: true,
+      userDecides:
+        'The user and operating team decide operating changes, employee communications, legal notices, customer/vendor outreach, budgets, and execution timing.',
+    },
+    next_suggested_calls: [
+      ...(sourceGaps.length
+        ? [{
+            toolName: 'compose_data_room_index',
+            priority: 'P1' as const,
+            reason: `Fill PMI source gaps: ${sourceGaps.map(gap => gap.category).join(', ')}.`,
+            inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
+          }]
+        : []),
+      ...(needsModelState
+        ? [{
+            toolName: 'compose_model_stack',
+            priority: 'P1' as const,
+            reason: 'Tie PMI value-creation workstreams to deterministic model outputs before relying on impact estimates.',
+            inputHint: {
+              journey: 'pmi',
+              league: state.classificationKey.league === 'unknown' ? undefined : state.classificationKey.league,
+              dealType: state.payload.dealType || state.payload.structure || state.classificationKey.subJourney,
+              signals: state.signals || undefined,
+            },
+          }]
+        : []),
+      {
+        toolName: 'compose_document_draft',
+        priority: sourceGaps.length || needsModelState ? 'P2' as const : 'P1' as const,
+        reason: 'Render the PMI control packet into a source-aware Studio PMI plan scaffold.',
+        inputHint: {
+          dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision },
+          documentType: 'pmi_plan',
+          audience,
+        },
+      },
+      {
+        toolName: 'update_deal_payload',
+        priority: 'P2' as const,
+        reason: 'Append PMI events, completed actions, updated model outputs, and new source refs as the post-close loop progresses.',
+        inputHint: {
+          dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision },
+          patch: {
+            dealEvents: [
+              {
+                eventType: 'pmi',
+                stage: 'close_pmi',
+                label: '<PMI update or completed workstream>',
+                sourceRefs: [],
+                artifactRefs: [],
+              },
+            ],
+          },
+        },
+      },
+    ],
+    takeBackArtifacts: ['PMIPlan', 'DealState', 'DocumentDraft', 'MCPCallHint[]'],
+    lineInvariant: LINE_INVARIANT,
+  };
+
+  return {
+    ok: true,
+    action: 'compose_pmi_plan',
+    result: {
+      pmiPlan,
+      dealState: state,
+      missingInputContract: state.missingInputContract,
+      next_suggested_calls: pmiPlan.next_suggested_calls,
+      portableTakeBackArtifacts: pmiPlan.takeBackArtifacts,
+    },
+    state_hash_after: state.stateHash,
+    completeness_contribution_delta: 0,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
 function buildDealStateResult(action: 'ingest_deal_payload' | 'update_deal_payload', state: DefinitiveDealState, priorScore: number | null) {
   const scoreDelta = priorScore == null ? state.completenessReport.score : state.completenessReport.score - priorScore;
   return {
@@ -2295,6 +2431,148 @@ function buildNegotiationHandoffs(state: DefinitiveDealState) {
     });
   }
   return handoffs;
+}
+
+function buildPmiWorkstreams(state: DefinitiveDealState) {
+  return [
+    pmiWorkstream(
+      state,
+      'PMI0',
+      'Day 0 controls',
+      ['operations', 'financials', 'legal', 'hr'],
+      ['dayZero', 'day0', 'banking', 'payroll', 'insurance', 'accessControls'],
+      [
+        'Confirm operating access, cash controls, payroll continuity, insurance, permits, and source-of-truth reporting.',
+        'Freeze unsupported changes until operating facts and responsible owners are tracked.',
+      ],
+    ),
+    pmiWorkstream(
+      state,
+      'PMI1',
+      'Stabilization',
+      ['operations', 'financials', 'commercial', 'hr'],
+      ['stabilization', 'operatingRhythm', 'customerComms', 'vendorPlan', 'retentionPlan'],
+      [
+        'Track weekly cash, customer/vendor continuity, employee retention risks, and management cadence.',
+        'Attach new facts to DealState after each stabilization pass.',
+      ],
+    ),
+    pmiWorkstream(
+      state,
+      'PMI2',
+      'Assessment',
+      ['financials', 'commercial', 'operations'],
+      ['assessment', 'qualityOfEarnings', 'kpiBaseline', 'orgMap', 'systemsMap'],
+      [
+        'Compare post-close baseline to diligence assumptions, model outputs, and observed operating data.',
+        'Separate verified findings from unsupported claims before updating value-creation work.',
+      ],
+    ),
+    pmiWorkstream(
+      state,
+      'PMI3',
+      'Optimization',
+      ['financials', 'commercial', 'operations'],
+      ['valueCreation', 'valueLevers', 'pricing', 'margin', 'workingCapital', 'growthPlan'],
+      [
+        'Organize value-creation levers and dependencies for deterministic model refresh.',
+        'Keep execution decisions, budgets, and communications with the user and operating team.',
+      ],
+    ),
+  ];
+}
+
+function pmiWorkstream(
+  state: DefinitiveDealState,
+  id: string,
+  label: string,
+  sourceCategories: string[],
+  payloadKeys: string[],
+  tasks: string[],
+) {
+  const explicitFacts = payloadKeys.filter(key => hasAnyValue(state.payload, [key]));
+  const sourceRefs = refsForCategories(state, sourceCategories);
+  const missingSourceCategories = sourceCategories.filter(category => !sourceRefs.some(source => source.category === category));
+  return {
+    id,
+    label,
+    status: explicitFacts.length && !missingSourceCategories.length
+      ? 'source_ready'
+      : explicitFacts.length
+        ? 'facts_present_source_gap'
+        : 'needs_fact_and_source',
+    explicitFacts,
+    sourceCategories,
+    sourceRefs,
+    missingSourceCategories,
+    tasks,
+    boundary:
+      'DEFINITIVE organizes PMI workstreams and evidence dependencies. The user and operating team choose actions, owners, communications, and timing.',
+  };
+}
+
+function buildPmiMilestones(state: DefinitiveDealState) {
+  const closeDate = textValue(firstPresentValue(state.payload, ['closedDate', 'closingDate', 'effectiveDate']));
+  return [
+    pmiMilestone('pre_day_0', 'Before Day 0', closeDate, -7, 'Confirm access, cash controls, transition contacts, and minimum source set.'),
+    pmiMilestone('day_0', 'Day 0', closeDate, 0, 'Stabilize banking, payroll, customers, vendors, insurance, and operating cadence.'),
+    pmiMilestone('day_30', 'Day 30', closeDate, 30, 'Refresh baseline model, risks, KPIs, and first stabilization findings.'),
+    pmiMilestone('day_100', 'Day 100', closeDate, 100, 'Package value-creation priorities, owner map, and next-quarter model updates.'),
+  ];
+}
+
+function pmiMilestone(id: string, label: string, closeDate: string | null, dayOffset: number, purpose: string) {
+  return {
+    id,
+    label,
+    closeDate,
+    dayOffsetFromClose: dayOffset,
+    targetDate: closeDate ? addIsoDays(closeDate, dayOffset) : null,
+    purpose,
+    boundary: 'Milestone is planning scaffolding. The user and operators set actual deadlines, owners, and commitments.',
+  };
+}
+
+function buildPmiRiskRegister(state: DefinitiveDealState, missingSourceCategories: string[]) {
+  const risks: Array<Record<string, any>> = [];
+  if (missingSourceCategories.includes('operations')) {
+    risks.push(pmiRisk('operations_visibility', 'Operations source gap', 'No operations source is indexed for PMI planning.', 'compose_data_room_index'));
+  }
+  if (missingSourceCategories.includes('financials')) {
+    risks.push(pmiRisk('financial_reporting', 'Financial reporting source gap', 'No financial source is indexed for post-close reporting and model refresh.', 'compose_data_room_index'));
+  }
+  if (missingSourceCategories.includes('hr')) {
+    risks.push(pmiRisk('people_continuity', 'People continuity source gap', 'No HR or people source is indexed for retention and payroll continuity tracking.', 'compose_data_room_index'));
+  }
+  if (state.classificationKey.triggeredOverlayGates.includes('G30')) {
+    risks.push(pmiRisk('asset_class_overlay', 'Asset-class overlay', 'G30 overlay suggests real-estate, infrastructure, digital-asset, or secondaries inputs may affect PMI.', 'compose_data_room_index'));
+  }
+  if (!state.completenessReport.satisfied.includes('model_state_present')) {
+    risks.push(pmiRisk('model_refresh_missing', 'Model refresh missing', 'No deterministic model output is attached yet for value-creation or covenant tracking.', 'compose_model_stack'));
+  }
+  if (!risks.length) {
+    risks.push(pmiRisk('watchlist', 'PMI watchlist', 'No blocking PMI risk was detected from current DealState, but the plan should be refreshed as new facts arrive.', 'update_deal_payload'));
+  }
+  return risks;
+}
+
+function pmiRisk(id: string, label: string, reason: string, suggestedTool: string) {
+  return {
+    id,
+    label,
+    reason,
+    suggestedTool,
+    lineStatus: 'track_and_route_only',
+    boundary:
+      'Risk item is a tracking prompt, not an employment, legal, tax, or operating directive. The user and qualified advisors decide actions.',
+  };
+}
+
+function addIsoDays(isoDate: string, days: number): string | null {
+  const parsed = new Date(`${isoDate}T00:00:00.000Z`);
+  if (Number.isNaN(parsed.getTime())) return null;
+  parsed.setUTCDate(parsed.getUTCDate() + days);
+  return parsed.toISOString().slice(0, 10);
 }
 
 function buildPlanStage(

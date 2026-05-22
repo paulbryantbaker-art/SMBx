@@ -73,6 +73,7 @@ const expectedTools = [
   'disclose_subset',
   'compose_document_draft',
   'prepare_negotiation_brief',
+  'compose_pmi_plan',
   'lookup_citation',
   'fetch_market_data',
   'defer_to_counsel',
@@ -314,6 +315,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.schemaNames.includes('DisclosureSubset'), 'schema registry exposes DisclosureSubset');
   assert(registry.schemaNames.includes('DocumentDraft'), 'schema registry exposes DocumentDraft');
   assert(registry.schemaNames.includes('NegotiationBrief'), 'schema registry exposes NegotiationBrief');
+  assert(registry.schemaNames.includes('PMIPlan'), 'schema registry exposes PMIPlan');
   assertEqual(registry.schemas.DealPayload.properties.revenueCents.type, 'integer', 'money is cents integer');
   assert(registry.toolSchemaMap.ingest_deal_payload.output.includes('MissingInputContract'), 'ingest output maps missing input contract');
   assert(registry.toolSchemaMap.diff_deal_state.takeBack.includes('DealStateDiff'), 'diff take-back maps DealStateDiff');
@@ -327,6 +329,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.toolSchemaMap.disclose_subset.takeBack.includes('DisclosureSubset'), 'disclosure subset maps DisclosureSubset');
   assert(registry.toolSchemaMap.compose_document_draft.takeBack.includes('DocumentDraft'), 'document draft maps DocumentDraft');
   assert(registry.toolSchemaMap.prepare_negotiation_brief.takeBack.includes('NegotiationBrief'), 'negotiation brief maps NegotiationBrief');
+  assert(registry.toolSchemaMap.compose_pmi_plan.takeBack.includes('PMIPlan'), 'PMI plan maps PMIPlan');
   assert(registry.noRejectionContract.includes('DealPayload may be incomplete'), 'schema registry states no-rejection contract');
 });
 
@@ -896,6 +899,42 @@ await test('NegotiationBrief organizes open terms without negotiating', async ()
   assertEqual(brief.negotiationBoundary.noNegotiationAuthority, true, 'brief does not negotiate');
   assert(brief.next_suggested_calls.some((call: any) => call.toolName === 'compose_model_stack'), 'brief asks for model stack when missing');
   assert(brief.takeBackArtifacts.includes('NegotiationBrief'), 'negotiation brief is portable');
+});
+
+await test('PMIPlan organizes post-close work without operating authority', async () => {
+  const response = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'compose_pmi_plan',
+    input: {
+      payload: {
+        journey: 'pmi',
+        targetName: 'PMI Target',
+        industry: 'healthcare services',
+        jurisdiction: 'US-TX',
+        closedDate: '2026-05-20',
+        ebitdaCents: 1_800_000_00,
+        dayZero: { banking: true, payroll: true },
+        stabilization: { weeklyCadence: true },
+        valueLevers: ['revenue cycle cleanup', 'vendor consolidation'],
+        documents: [
+          { id: 'ops', name: 'Operations handoff', type: 'operations', hash: 'sha256:ops' },
+          { id: 'qoe', name: 'Closing QoE', type: 'qoe', hash: 'sha256:qoe' },
+          { id: 'customers', name: 'Customer handoff list', type: 'commercial', hash: 'sha256:customers' },
+          { id: 'hr', name: 'Employee roster', type: 'hr', hash: 'sha256:hr' },
+        ],
+      },
+    },
+    envelope: {},
+  });
+  assertEqual(response.status, 200, 'PMI plan status');
+  const plan = response.body.result.result.pmiPlan;
+  assertEqual(plan.schema, 'PMIPlan.v0.1', 'PMI plan schema');
+  assert(plan.workstreams.some((workstream: any) => workstream.id === 'PMI0'), 'PMI plan includes Day 0 controls');
+  assert(plan.workstreams.some((workstream: any) => workstream.id === 'PMI3'), 'PMI plan includes optimization');
+  assert(plan.milestones.some((milestone: any) => milestone.id === 'day_100' && milestone.targetDate === '2026-08-28'), 'PMI plan computes Day 100 target');
+  assertEqual(plan.pmiBoundary.noOperatingAuthority, true, 'PMI plan does not operate the business');
+  assert(plan.next_suggested_calls.some((call: any) => call.toolName === 'compose_document_draft'), 'PMI plan can become Studio draft');
+  assert(plan.takeBackArtifacts.includes('PMIPlan'), 'PMI plan is portable');
 });
 
 await test('Corpus discovery and sanitizer block raw identifiers without DB work', async () => {

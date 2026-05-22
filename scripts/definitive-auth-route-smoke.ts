@@ -58,6 +58,7 @@ try {
     assert(body.tools.some((tool: any) => tool.name === 'disclose_subset'), 'disclose_subset is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_document_draft'), 'compose_document_draft is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'prepare_negotiation_brief'), 'prepare_negotiation_brief is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'compose_pmi_plan'), 'compose_pmi_plan is advertised');
   });
 
   await test('THE LINE inventory is available to authenticated agents', async () => {
@@ -604,6 +605,44 @@ try {
     assert(brief.openTerms.some((term: any) => term.id === 'purchase_price'), 'purchase price term exists');
     assertEqual(brief.negotiationBoundary.noRecommendation, true, 'negotiation brief does not recommend');
     assert(brief.takeBackArtifacts.includes('NegotiationBrief'), 'negotiation brief take-back exposed');
+  });
+
+  await test('Authenticated compose_pmi_plan returns post-close plan packet', async () => {
+    const response = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'compose_pmi_plan',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-state:read', 'studio:draft', 'model-stack:compose'],
+      input: {
+        payload: {
+          journey: 'pmi',
+          targetName: 'DEFINITIVE Route Fixture Deal',
+          industry: 'software',
+          jurisdiction: 'US-DE',
+          closedDate: '2026-05-20',
+          dayZero: { banking: true, adminAccess: true },
+          valueLevers: ['pricing cleanup', 'support workflow'],
+          documents: [
+            { id: 'ops', name: 'Operations handoff', type: 'operations', hash: 'sha256:fixture-ops' },
+            { id: 'qoe', name: 'Closing QoE', type: 'qoe', hash: 'sha256:fixture-qoe' },
+            { id: 'customers', name: 'Customer export', type: 'commercial', hash: 'sha256:fixture-customers' },
+            { id: 'hr', name: 'Employee roster', type: 'hr', hash: 'sha256:fixture-hr' },
+          ],
+        },
+      },
+    });
+
+    assertEqual(response.status, 200, 'PMI plan route status');
+    assertEqual(response.body.ok, true, 'PMI plan route ok');
+    assertEqual(response.body.toolName, 'compose_pmi_plan', 'PMI plan tool name');
+    const plan = response.body.result?.result?.pmiPlan;
+    assertEqual(plan.schema, 'PMIPlan.v0.1', 'PMI plan schema');
+    assert(plan.workstreams.some((workstream: any) => workstream.id === 'PMI0'), 'PMI plan includes Day 0');
+    assertEqual(plan.pmiBoundary.noOperatingAuthority, true, 'PMI plan does not operate');
+    assert(plan.takeBackArtifacts.includes('PMIPlan'), 'PMI plan take-back exposed');
   });
 
   await test('Audit packet route returns pinned reproducibility payload', async () => {

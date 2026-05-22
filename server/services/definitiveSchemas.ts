@@ -498,6 +498,34 @@ const NegotiationBrief: JsonSchema = {
   },
 };
 
+const PMIPlan: JsonSchema = {
+  $id: schemaId('PMIPlan'),
+  title: 'PMIPlan',
+  type: 'object',
+  additionalProperties: true,
+  required: ['planId', 'schema', 'dealStateCid', 'dealStateHash', 'workstreams', 'milestones', 'riskRegister', 'pmiBoundary', 'next_suggested_calls'],
+  properties: {
+    planId: { type: 'string' },
+    schema: { type: 'string', const: 'PMIPlan.v0.1' },
+    dealStateCid: { type: 'string' },
+    dealStateHash: { type: 'string' },
+    objective: { type: 'string' },
+    audience: { type: 'string' },
+    stage: { type: 'string' },
+    readinessLevel: { type: 'string' },
+    workstreams: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    milestones: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    riskRegister: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    sourceRefs: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    sourceGaps: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    modelDependencies: { type: 'object', additionalProperties: true },
+    pmiBoundary: { type: 'object', additionalProperties: true },
+    next_suggested_calls: { type: 'array', items: { $ref: schemaId('MCPCallHint') } },
+    takeBackArtifacts: { type: 'array', items: { type: 'string' } },
+    lineInvariant: { type: 'string' },
+  },
+};
+
 const DefinitionOfDone: JsonSchema = {
   $id: schemaId('DefinitionOfDone'),
   title: 'DefinitionOfDone',
@@ -552,6 +580,7 @@ export const DEFINITIVE_SCHEMAS: Record<string, JsonSchema> = {
   DisclosureSubset,
   DocumentDraft,
   NegotiationBrief,
+  PMIPlan,
   DefinitionOfDone,
   DefinitiveToolEnvelope,
 };
@@ -636,6 +665,11 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     input: ['DealState', 'DealPayload'],
     output: ['NegotiationBrief', 'DealState', 'MissingInputContract', 'MCPCallHint'],
     takeBack: ['NegotiationBrief', 'SourceGapList', 'MCPCallHint'],
+  },
+  compose_pmi_plan: {
+    input: ['DealState', 'DealPayload'],
+    output: ['PMIPlan', 'DealState', 'MissingInputContract', 'MCPCallHint'],
+    takeBack: ['PMIPlan', 'DealState', 'DocumentDraft', 'MCPCallHint'],
   },
 };
 

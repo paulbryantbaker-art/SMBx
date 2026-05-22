@@ -31,6 +31,7 @@ const DEFINITIVE_MCP_TOOLS = [
   'disclose_subset',
   'compose_document_draft',
   'prepare_negotiation_brief',
+  'compose_pmi_plan',
   'lookup_citation',
   'fetch_market_data',
   'defer_to_counsel',
@@ -232,6 +233,18 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
       },
     },
   },
+  compose_pmi_plan: {
+    description: 'Compose a portable PMIPlan from a DealState or DealPayload for post-close integration work, organizing Day 0 controls, stabilization, assessment, optimization, source gaps, model dependencies, risk tracking, and next_suggested_calls. It does not make operating decisions, provide employment/legal/tax advice, or transmit externally.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dealState: { type: 'object', description: 'Optional content-addressed DealState from a prior call.' },
+        payload: { type: 'object', description: 'Optional DealPayload with close date, PMI facts, operations, financials, commercial, HR, model outputs, or source index.' },
+        objective: { type: 'string', description: 'Optional PMI objective or topic.' },
+        audience: { type: 'string', description: 'Optional audience label. Defaults to operators_and_integration_team.' },
+      },
+    },
+  },
   lookup_citation: {
     description: 'Resolve a claim or citation tag against the DEFINITIVE Authority Register and legacy V19 citation registry.',
     inputSchema: {
@@ -380,6 +393,7 @@ const TOOL_SCOPE: Record<DefinitiveMcpToolName, string[]> = {
   disclose_subset: ['deal-state:read', 'data-room:read', 'deal-package:compose'],
   compose_document_draft: ['deal-state:read', 'studio:draft'],
   prepare_negotiation_brief: ['deal-state:read', 'studio:draft', 'model-stack:compose'],
+  compose_pmi_plan: ['deal-state:read', 'studio:draft', 'model-stack:compose'],
   lookup_citation: ['citation:read', 'authority:read'],
   fetch_market_data: ['market-data:read'],
   defer_to_counsel: ['counsel:deferral:create'],
