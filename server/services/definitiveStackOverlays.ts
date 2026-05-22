@@ -223,5 +223,17 @@ function isBelow(value: number | null | undefined, threshold: number): boolean {
 }
 
 function hasAny(text: string, needles: string[]): boolean {
-  return needles.some(needle => text.includes(needle));
+  return needles.some(needle => matchesTerm(text, needle));
+}
+
+function matchesTerm(text: string, needle: string): boolean {
+  const escaped = escapeRegExp(needle);
+  if (['abl', 'dip', 'safe'].includes(needle)) {
+    return new RegExp(`(^|[\\s,.;:/()])${escaped}(?=$|[\\s,.;:/()])`).test(text);
+  }
+  return new RegExp(`(^|[^a-z0-9])${escaped}(?=$|[^a-z0-9])`).test(text);
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

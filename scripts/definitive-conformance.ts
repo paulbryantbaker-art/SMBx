@@ -19,6 +19,7 @@ import {
   DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT,
   DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT,
   DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT,
+  DEFINITIVE_CONFORMANCE_ROUTE_TRIGGER_CASE_COUNT,
   DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT,
 } from '../server/services/definitiveConformanceStatus.js';
 import { listDefinitiveLineInventory } from '../server/services/agencyActionRegistry.js';
@@ -37,6 +38,11 @@ import {
 } from '../server/services/definitiveDealRouteMap.js';
 import { buildDefinitiveSpecManifest } from '../server/services/definitiveSpecManifest.js';
 import { listDefinitiveMcpTools } from '../server/services/definitiveMcp.js';
+import {
+  evaluateDefinitiveStackOverlays,
+  normalizeDefinitiveStackSignals,
+  type DefinitiveStackSignals,
+} from '../server/services/definitiveStackOverlays.js';
 import { executeV19Model } from '../server/services/v19ModelRuntime.js';
 
 interface ConformanceCase {
@@ -110,14 +116,39 @@ interface PromptMetaCase {
   };
 }
 
+interface RouteTriggerCase {
+  id: string;
+  title: string;
+  specVersion: string;
+  methodologyUri: string;
+  dealMechanicsVersion: string;
+  input: {
+    dealType?: string | null;
+    industry?: string | null;
+    jurisdiction?: string | null;
+    signals?: Record<string, any> | null;
+    normalizeSignals?: boolean;
+  };
+  expect: {
+    triggeredGateIds: Array<'G28' | 'G29' | 'G30'>;
+    notTriggeredGateIds?: Array<'G28' | 'G29' | 'G30'>;
+    reasonsInclude?: Partial<Record<'G28' | 'G29' | 'G30', string[]>>;
+    catalogModelsInclude?: Partial<Record<'G28' | 'G29' | 'G30', string[]>>;
+    runtimeModelsInclude?: Partial<Record<'G28' | 'G29' | 'G30', string[]>>;
+    normalizedSignals?: Partial<DefinitiveStackSignals>;
+  };
+}
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const caseFile = path.resolve(__dirname, '../testing/definitive/conformance/v1/model-runtime.cases.json');
 const routeCaseFile = path.resolve(__dirname, '../testing/definitive/conformance/v1/deal-mechanics-route.cases.json');
 const promptMetaCaseFile = path.resolve(__dirname, '../testing/definitive/conformance/v1/prompt-meta.cases.json');
+const routeTriggerCaseFile = path.resolve(__dirname, '../testing/definitive/conformance/v1/route-trigger.cases.json');
 
 const cases: ConformanceCase[] = JSON.parse(await readFile(caseFile, 'utf8'));
 const routeCases: DealMechanicsRouteCase[] = JSON.parse(await readFile(routeCaseFile, 'utf8'));
 const promptMetaCases: PromptMetaCase[] = JSON.parse(await readFile(promptMetaCaseFile, 'utf8'));
+const routeTriggerCases: RouteTriggerCase[] = JSON.parse(await readFile(routeTriggerCaseFile, 'utf8'));
 let passed = 0;
 let failed = 0;
 
@@ -125,10 +156,12 @@ console.log('\nDEFINITIVE conformance harness');
 console.log(`Loaded ${cases.length} cases from ${path.relative(process.cwd(), caseFile)}`);
 console.log(`Loaded ${routeCases.length} route cases from ${path.relative(process.cwd(), routeCaseFile)}`);
 console.log(`Loaded ${promptMetaCases.length} prompt/meta cases from ${path.relative(process.cwd(), promptMetaCaseFile)}`);
+console.log(`Loaded ${routeTriggerCases.length} route-trigger cases from ${path.relative(process.cwd(), routeTriggerCaseFile)}`);
 assertEqual(cases.length, DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT, 'conformance case count manifest');
 assertEqual(routeCases.length, DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT, 'deal route conformance case count manifest');
 assertEqual(promptMetaCases.length, DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT, 'prompt/meta conformance case count manifest');
-assertEqual(cases.length + routeCases.length + promptMetaCases.length, DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT, 'total conformance case count manifest');
+assertEqual(routeTriggerCases.length, DEFINITIVE_CONFORMANCE_ROUTE_TRIGGER_CASE_COUNT, 'route-trigger conformance case count manifest');
+assertEqual(cases.length + routeCases.length + promptMetaCases.length + routeTriggerCases.length, DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT, 'total conformance case count manifest');
 
 for (const item of cases) {
   try {
@@ -220,6 +253,61 @@ for (const item of promptMetaCases) {
   }
 }
 
+for (const item of routeTriggerCases) {
+  try {
+    assertEqual(item.specVersion, DEFINITIVE_SPEC_VERSION, `${item.id} specVersion`);
+    assertEqual(item.methodologyUri, DEFINITIVE_METHODOLOGY_URI, `${item.id} methodologyUri`);
+    assertEqual(item.dealMechanicsVersion, DEFINITIVE_DEAL_MECHANICS_VERSION, `${item.id} dealMechanicsVersion`);
+
+    const signals = item.input.normalizeSignals
+      ? normalizeDefinitiveStackSignals(item.input.signals)
+      : item.input.signals as DefinitiveStackSignals | null | undefined;
+    const overlays = evaluateDefinitiveStackOverlays({
+      dealType: item.input.dealType,
+      industry: item.input.industry,
+      jurisdiction: item.input.jurisdiction,
+      signals,
+    });
+    const byGate = new Map(overlays.map(overlay => [overlay.gateId, overlay]));
+    const triggeredGateIds = overlays.filter(overlay => overlay.triggered).map(overlay => overlay.gateId);
+
+    assertDeepEqual(triggeredGateIds, item.expect.triggeredGateIds, `${item.id} triggered gates`);
+    for (const gateId of item.expect.notTriggeredGateIds || []) {
+      assert(!byGate.get(gateId)?.triggered, `${item.id} expected ${gateId} not to trigger`);
+    }
+    for (const [gateId, reasons] of Object.entries(item.expect.reasonsInclude || {}) as Array<['G28' | 'G29' | 'G30', string[]]>) {
+      const overlay = byGate.get(gateId);
+      assert(overlay, `${item.id} expected ${gateId} overlay`);
+      for (const reason of reasons) {
+        assert(overlay.reasons.some(item => item.includes(reason)), `${item.id} expected ${gateId} reason to include ${reason}`);
+      }
+    }
+    for (const [gateId, modelIds] of Object.entries(item.expect.catalogModelsInclude || {}) as Array<['G28' | 'G29' | 'G30', string[]]>) {
+      const overlay = byGate.get(gateId);
+      assert(overlay, `${item.id} expected ${gateId} overlay`);
+      for (const modelId of modelIds) {
+        assert(overlay.catalogModels.includes(modelId), `${item.id} expected ${gateId} catalog models to include ${modelId}`);
+      }
+    }
+    for (const [gateId, runtimeModelIds] of Object.entries(item.expect.runtimeModelsInclude || {}) as Array<['G28' | 'G29' | 'G30', string[]]>) {
+      const overlay = byGate.get(gateId);
+      assert(overlay, `${item.id} expected ${gateId} overlay`);
+      for (const modelId of runtimeModelIds) {
+        assert(overlay.executableRuntimeModels.includes(modelId), `${item.id} expected ${gateId} runtime models to include ${modelId}`);
+      }
+    }
+    for (const [signalKey, expected] of Object.entries(item.expect.normalizedSignals || {}) as Array<[keyof DefinitiveStackSignals, any]>) {
+      assertEqual(signals?.[signalKey], expected, `${item.id} normalized signal ${signalKey}`);
+    }
+
+    console.log(`  ✓ ${item.id} ${item.title}`);
+    passed++;
+  } catch (error: any) {
+    console.log(`  ✗ ${item.id} ${item.title} - ${error.message}`);
+    failed++;
+  }
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed > 0) process.exit(1);
 
@@ -235,6 +323,12 @@ function assertEqual<T>(actual: T, expected: T, message: string) {
     return;
   }
   if (actual !== expected) {
+    throw new Error(`${message}. Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+  }
+}
+
+function assertDeepEqual<T>(actual: T, expected: T, message: string) {
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
     throw new Error(`${message}. Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
   }
 }

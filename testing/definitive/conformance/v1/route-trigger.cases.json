@@ -1,0 +1,596 @@
+[
+  {
+    "id": "CONF.ROUTE.TRIGGER.G28.CASH_RUNWAY.001",
+    "title": "G28 fires when cash runway is below 90 days",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "signals": {
+        "cashRunwayDays": 89
+      }
+    },
+    "expect": {
+      "triggeredGateIds": ["G28"],
+      "notTriggeredGateIds": ["G29", "G30"],
+      "reasonsInclude": {
+        "G28": ["cash runway is below 90 days"]
+      },
+      "catalogModelsInclude": {
+        "G28": ["M148", "M151", "M158"]
+      },
+      "runtimeModelsInclude": {
+        "G28": ["MODEL.RESTRUCTURING.363_SALE.v1", "MODEL.RESTRUCTURING.DIP_SIZING.v1"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.G28.CASH_RUNWAY.002",
+    "title": "G28 does not fire at the 90-day cash-runway boundary",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "signals": {
+        "cashRunwayDays": 90
+      }
+    },
+    "expect": {
+      "triggeredGateIds": [],
+      "notTriggeredGateIds": ["G28", "G29", "G30"]
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.G28.FCCR.001",
+    "title": "G28 fires when FCCR is below 1.0x",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "signals": {
+        "fccr": 0.99
+      }
+    },
+    "expect": {
+      "triggeredGateIds": ["G28"],
+      "notTriggeredGateIds": ["G29", "G30"],
+      "reasonsInclude": {
+        "G28": ["FCCR is below 1.0x"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.G28.FCCR.002",
+    "title": "G28 does not fire at the 1.0x FCCR boundary",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "signals": {
+        "fccr": 1
+      }
+    },
+    "expect": {
+      "triggeredGateIds": [],
+      "notTriggeredGateIds": ["G28", "G29", "G30"]
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.DEBT_PRICE.001",
+    "title": "G28 and G29 fire when secured debt trades below 60 cents",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "signals": {
+        "securedDebtTradingPriceCents": 59
+      }
+    },
+    "expect": {
+      "triggeredGateIds": ["G28", "G29"],
+      "notTriggeredGateIds": ["G30"],
+      "reasonsInclude": {
+        "G28": ["secured debt is trading below 60 cents"],
+        "G29": ["secured debt is trading below 80 cents"]
+      },
+      "catalogModelsInclude": {
+        "G29": ["M160", "M184"]
+      },
+      "runtimeModelsInclude": {
+        "G29": ["MODEL.RESTRUCTURING.EXCHANGE_OFFER.v1", "MODEL.FINANCE.COVENANT_BASKETS.v1"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.DEBT_PRICE.002",
+    "title": "Only G29 fires when secured debt trades at 60 cents",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "signals": {
+        "securedDebtTradingPriceCents": 60
+      }
+    },
+    "expect": {
+      "triggeredGateIds": ["G29"],
+      "notTriggeredGateIds": ["G28", "G30"],
+      "reasonsInclude": {
+        "G29": ["secured debt is trading below 80 cents"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.DEBT_PRICE.003",
+    "title": "G29 fires when secured debt trades below 80 cents",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "signals": {
+        "securedDebtTradingPriceCents": 79
+      }
+    },
+    "expect": {
+      "triggeredGateIds": ["G29"],
+      "notTriggeredGateIds": ["G28", "G30"],
+      "reasonsInclude": {
+        "G29": ["secured debt is trading below 80 cents"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.DEBT_PRICE.004",
+    "title": "G29 does not fire at the 80-cent secured-debt boundary",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "signals": {
+        "securedDebtTradingPriceCents": 80
+      }
+    },
+    "expect": {
+      "triggeredGateIds": [],
+      "notTriggeredGateIds": ["G28", "G29", "G30"]
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.G29.COVENANT.001",
+    "title": "G29 fires when a maintenance covenant breach is within four quarters",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "signals": {
+        "maintenanceCovenantBreachWithinQuarters": 4
+      }
+    },
+    "expect": {
+      "triggeredGateIds": ["G29"],
+      "notTriggeredGateIds": ["G28", "G30"],
+      "reasonsInclude": {
+        "G29": ["maintenance covenant breach is projected within four quarters"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.G29.COVENANT.002",
+    "title": "G29 does not fire when a maintenance covenant breach is five quarters away",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "signals": {
+        "maintenanceCovenantBreachWithinQuarters": 5
+      }
+    },
+    "expect": {
+      "triggeredGateIds": [],
+      "notTriggeredGateIds": ["G28", "G29", "G30"]
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.G28.SOLVENCY.001",
+    "title": "G28 fires when any M148 solvency prong fails",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "signals": {
+        "solvencyProngFailed": true
+      }
+    },
+    "expect": {
+      "triggeredGateIds": ["G28"],
+      "notTriggeredGateIds": ["G29", "G30"],
+      "reasonsInclude": {
+        "G28": ["M148 solvency signal failed"]
+      },
+      "runtimeModelsInclude": {
+        "G28": ["MODEL.RESTRUCTURING.SOLVENCY.THREE_PRONG.v1"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.G28.BANKRUPTCY.001",
+    "title": "G28 fires when a bankruptcy filing is pending",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "signals": {
+        "bankruptcyFilingPending": true
+      }
+    },
+    "expect": {
+      "triggeredGateIds": ["G28"],
+      "notTriggeredGateIds": ["G29", "G30"],
+      "reasonsInclude": {
+        "G28": ["bankruptcy filing is pending"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.G28.RSA.001",
+    "title": "G28 fires when an RSA is in market",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "signals": {
+        "rsaInMarket": true
+      }
+    },
+    "expect": {
+      "triggeredGateIds": ["G28"],
+      "notTriggeredGateIds": ["G29", "G30"],
+      "reasonsInclude": {
+        "G28": ["RSA is in market"]
+      },
+      "runtimeModelsInclude": {
+        "G28": ["MODEL.RESTRUCTURING.RSA_ECONOMICS.v1"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.G28.FORBEARANCE.001",
+    "title": "G28 fires when forbearance is executed",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "signals": {
+        "forbearanceExecuted": true
+      }
+    },
+    "expect": {
+      "triggeredGateIds": ["G28"],
+      "notTriggeredGateIds": ["G29", "G30"],
+      "reasonsInclude": {
+        "G28": ["forbearance has been executed"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.G28.TEXT.001",
+    "title": "G28 fires from distressed process language",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "dealType": "Chapter 11 DIP restructuring 363 stalking horse"
+    },
+    "expect": {
+      "triggeredGateIds": ["G28"],
+      "notTriggeredGateIds": ["G29", "G30"],
+      "reasonsInclude": {
+        "G28": ["deal text indicates distressed or restructuring process"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.G29.CAPSTRUCT.001",
+    "title": "G29 fires when a capital-structure action is indicated",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "signals": {
+        "capitalStructureAction": true
+      }
+    },
+    "expect": {
+      "triggeredGateIds": ["G29"],
+      "notTriggeredGateIds": ["G28", "G30"],
+      "reasonsInclude": {
+        "G29": ["capital-structure action is indicated"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.G29.TEXT.001",
+    "title": "G29 fires from LME and liability-management language",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "dealType": "uptier drop-down double-dip pari-plus LME"
+    },
+    "expect": {
+      "triggeredGateIds": ["G29"],
+      "notTriggeredGateIds": ["G28", "G30"],
+      "reasonsInclude": {
+        "G29": ["deal text indicates capital-structure or liability-management mechanics"]
+      },
+      "catalogModelsInclude": {
+        "G29": ["M161", "M162", "M163"]
+      },
+      "runtimeModelsInclude": {
+        "G29": ["MODEL.LME.UPTIER.RESEARCH.v1", "MODEL.LME.DROPDOWN.RESEARCH.v1", "MODEL.LME.DOUBLEDIP.RESEARCH.v1"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.G29.EXCHANGE.001",
+    "title": "G29 fires when an exchange offer is indicated",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "signals": {
+        "exchangeOffer": true
+      }
+    },
+    "expect": {
+      "triggeredGateIds": ["G29"],
+      "notTriggeredGateIds": ["G28", "G30"],
+      "reasonsInclude": {
+        "G29": ["exchange offer is indicated"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.G29.COVENANT_AMENDMENT.001",
+    "title": "G29 fires when a covenant amendment is indicated",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "signals": {
+        "covenantAmendment": true
+      }
+    },
+    "expect": {
+      "triggeredGateIds": ["G29"],
+      "notTriggeredGateIds": ["G28", "G30"],
+      "reasonsInclude": {
+        "G29": ["covenant amendment is indicated"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.G30.RE_PERCENT.001",
+    "title": "G30 fires when real estate equals 25 percent of enterprise value",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "signals": {
+        "realEstatePercentOfEv": 25
+      }
+    },
+    "expect": {
+      "triggeredGateIds": ["G30"],
+      "notTriggeredGateIds": ["G28", "G29"],
+      "reasonsInclude": {
+        "G30": ["real estate equals or exceeds 25 percent"]
+      },
+      "catalogModelsInclude": {
+        "G30": ["M187", "M190", "M199"]
+      },
+      "runtimeModelsInclude": {
+        "G30": ["MODEL.RE.ASSET_ENTITY.ELECTION.v1", "MODEL.RE.NOI.CAP_RATE_BRIDGE.v1", "MODEL.RE.FIRPTA.WITHHOLDING.V11.v1"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.G30.RE_PERCENT.002",
+    "title": "G30 does not fire when real estate is below 25 percent of enterprise value",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "signals": {
+        "realEstatePercentOfEv": 24.9
+      }
+    },
+    "expect": {
+      "triggeredGateIds": [],
+      "notTriggeredGateIds": ["G28", "G29", "G30"]
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.G30.DIGITAL_PERCENT.001",
+    "title": "G30 fires when digital assets equal 10 percent of enterprise value",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "signals": {
+        "digitalAssetsPercentOfEv": 10
+      }
+    },
+    "expect": {
+      "triggeredGateIds": ["G30"],
+      "notTriggeredGateIds": ["G28", "G29"],
+      "reasonsInclude": {
+        "G30": ["digital assets equal or exceed 10 percent"]
+      },
+      "catalogModelsInclude": {
+        "G30": ["M174", "M175", "M176"]
+      },
+      "runtimeModelsInclude": {
+        "G30": ["MODEL.CRYPTO.TOKEN_TAXONOMY.RESEARCH.v1", "MODEL.CRYPTO.STABLECOIN_PPS.RESEARCH.v1"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.G30.DIGITAL_PERCENT.002",
+    "title": "G30 does not fire when digital assets are below 10 percent of enterprise value",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "signals": {
+        "digitalAssetsPercentOfEv": 9.9
+      }
+    },
+    "expect": {
+      "triggeredGateIds": [],
+      "notTriggeredGateIds": ["G28", "G29", "G30"]
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.G30.TEXT.RE.001",
+    "title": "G30 fires from real estate diligence language",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "dealType": "real estate title survey rent roll NOI cap rate transfer tax"
+    },
+    "expect": {
+      "triggeredGateIds": ["G30"],
+      "notTriggeredGateIds": ["G28", "G29"],
+      "reasonsInclude": {
+        "G30": ["deal text indicates real estate, asset-class, or regulated-asset overlay"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.G30.TEXT.CRYPTO.001",
+    "title": "G30 fires from crypto and stablecoin language",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "dealType": "stablecoin crypto digital asset"
+    },
+    "expect": {
+      "triggeredGateIds": ["G30"],
+      "notTriggeredGateIds": ["G28", "G29"],
+      "reasonsInclude": {
+        "G30": ["deal text indicates real estate, asset-class, or regulated-asset overlay"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.G30.TEXT.SECONDARIES.001",
+    "title": "G30 fires from LP secondary, NAV facility, and strip sale language",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "dealType": "LP secondary NAV facility strip sale"
+    },
+    "expect": {
+      "triggeredGateIds": ["G30"],
+      "notTriggeredGateIds": ["G28", "G29"],
+      "reasonsInclude": {
+        "G30": ["deal text indicates real estate, asset-class, or regulated-asset overlay"]
+      },
+      "catalogModelsInclude": {
+        "G30": ["M177", "M178", "M179"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.ALL.COMBINED.001",
+    "title": "G28, G29, and G30 fire together when distress, trading-price, and real-estate signals stack",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "dealType": "DIP sale-leaseback",
+      "signals": {
+        "cashRunwayDays": 45,
+        "securedDebtTradingPriceCents": 55,
+        "realEstatePercentOfEv": 30
+      }
+    },
+    "expect": {
+      "triggeredGateIds": ["G28", "G29", "G30"],
+      "reasonsInclude": {
+        "G28": ["cash runway is below 90 days", "secured debt is trading below 60 cents"],
+        "G29": ["secured debt is trading below 80 cents"],
+        "G30": ["real estate equals or exceeds 25 percent"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.NORMALIZE.001",
+    "title": "String signals normalize before G28, G29, and G30 trigger evaluation",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "normalizeSignals": true,
+      "signals": {
+        "cashRunwayDays": "45",
+        "solvencyProngFailed": "yes",
+        "covenantAmendment": "true",
+        "realEstatePercentOfEv": "30"
+      }
+    },
+    "expect": {
+      "triggeredGateIds": ["G28", "G29", "G30"],
+      "reasonsInclude": {
+        "G28": ["cash runway is below 90 days", "M148 solvency signal failed"],
+        "G29": ["covenant amendment is indicated"],
+        "G30": ["real estate equals or exceeds 25 percent"]
+      },
+      "normalizedSignals": {
+        "cashRunwayDays": 45,
+        "solvencyProngFailed": true,
+        "covenantAmendment": true,
+        "realEstatePercentOfEv": 30
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.EMPTY.001",
+    "title": "Empty route-trigger input leaves all overlay gates inactive",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {},
+    "expect": {
+      "triggeredGateIds": [],
+      "notTriggeredGateIds": ["G28", "G29", "G30"]
+    }
+  },
+  {
+    "id": "CONF.ROUTE.TRIGGER.G30.TEXT.PROJECT_FINANCE.001",
+    "title": "G30 fires from infrastructure and project-finance language",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "dealType": "project finance infrastructure concession DSCR"
+    },
+    "expect": {
+      "triggeredGateIds": ["G30"],
+      "notTriggeredGateIds": ["G28", "G29"],
+      "reasonsInclude": {
+        "G30": ["deal text indicates real estate, asset-class, or regulated-asset overlay"]
+      },
+      "catalogModelsInclude": {
+        "G30": ["M173"]
+      },
+      "runtimeModelsInclude": {
+        "G30": ["MODEL.PROJECT_FINANCE.COVERAGE_RESEARCH.v1"]
+      }
+    }
+  }
+]
