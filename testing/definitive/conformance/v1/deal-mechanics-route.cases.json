@@ -834,5 +834,234 @@
       },
       "yuliaBriefIncludes": ["Professional-handoff mechanics", "Research-only mechanics"]
     }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.QSBSFOUNDER.001",
+    "title": "Founder tax route keeps QSBS, installment, 338/336, gross-up, and master tax mechanics together",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "sell",
+      "league": "L4",
+      "dealType": "founder sale QSBS 1202 1045 rollover installment seller note asset sale stock sale goodwill",
+      "triggeredGates": ["G15"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M101", "M104", "M105", "M200", "M201", "M204"],
+      "readinessAtLeast": {
+        "executable": 5,
+        "planning_only": 3
+      },
+      "toolSurfacesInclude": {
+        "files": ["M104", "M105", "M200"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.ESOPTRUSTEE.001",
+    "title": "Leveraged ESOP route keeps 1042 deferral, ESOP cash flow, exchange, and CODI mechanics visible",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "sell",
+      "league": "L3",
+      "dealType": "ESOP leveraged sale 1042 deferral trustee SBA senior debt succession debt exchange CODI",
+      "triggeredGates": ["G27"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M102", "M118", "M150", "M160"],
+      "readinessAtLeast": {
+        "executable": 1,
+        "planning_only": 3
+      },
+      "toolSurfacesInclude": {
+        "files": ["M102", "M150", "M160"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.UKWIMAC.001",
+    "title": "UK and international buyer route keeps English W&I, MAC, and merger-control boundaries explicit",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L6",
+      "dealType": "UK English W&I insurance warranty indemnity English MAC overseas buyer EUMR FIRB ACCC",
+      "triggeredGates": ["G23"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M106", "M107", "M110"],
+      "readinessAtLeast": {
+        "planning_only": 1,
+        "professional_handoff": 1,
+        "research_only": 1
+      },
+      "yuliaBriefIncludes": ["Professional-handoff mechanics", "Research-only mechanics"]
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.RECAPSOLVENCY.001",
+    "title": "Leveraged recap route keeps solvency, surplus, and fraudulent-transfer boundaries together",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "raise",
+      "league": "L5",
+      "dealType": "leveraged recap dividend recap fraudulent transfer solvency distributable surplus DGCL 170",
+      "triggeredGates": ["G15", "G29"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M136", "M148", "M149"],
+      "readinessAtLeast": {
+        "executable": 9,
+        "planning_only": 4,
+        "professional_handoff": 1
+      },
+      "yuliaBriefIncludes": ["Professional-handoff mechanics"]
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.UPCTRA.001",
+    "title": "Up-C and TRA route connects partnership contribution, TRA economics, baskets, and closing conditions",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "raise",
+      "league": "L7",
+      "dealType": "Up-C TRA 85 15 tax receivable agreement 754 basis step-up public company 721 partnership contribution",
+      "triggeredGates": ["G15"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M121", "M145", "M164", "M184", "M202", "M203"],
+      "readinessAtLeast": {
+        "executable": 6,
+        "planning_only": 1,
+        "professional_handoff": 1
+      },
+      "toolSurfacesInclude": {
+        "studio": ["M164", "M210", "M211"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.ASSETTAX.001",
+    "title": "Asset-sale tax route keeps allocation, gross-up, BIG, cost capitalization, SALT, and escrow economics together",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "sell",
+      "league": "L4",
+      "dealType": "asset purchase 1060 seven class allocation 338 h 10 336e gross up built in gains cost capitalization SALT escrow indemnity survival",
+      "triggeredGates": ["G15"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M105", "M200", "M201", "M202", "M203", "M205", "M206", "M207", "M208"],
+      "readinessAtLeast": {
+        "executable": 11,
+        "planning_only": 4
+      },
+      "toolSurfacesInclude": {
+        "studio": ["M206", "M207", "M208"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.CVREARNOUT.001",
+    "title": "Earnout/CVR route keeps revenue, EBITDA, gross-profit, customer, regulatory, dispute, and tax mechanics together",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "sell",
+      "league": "L5",
+      "dealType": "earnout customer retention regulatory milestone CVR EBITDA revenue gross profit dispute tax characterization",
+      "triggeredGates": ["G9", "G15"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M111", "M112", "M113", "M114", "M115", "M204", "M213"],
+      "readinessAtLeast": {
+        "executable": 6,
+        "planning_only": 3
+      },
+      "toolSurfacesInclude": {
+        "studio": ["M111", "M112", "M113", "M114", "M115", "M213"]
+      }
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.ORDINARYCOURSE.001",
+    "title": "Ordinary-course dispute route keeps MAE, ordinary-course, and specific-performance research boundaries explicit",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "sell",
+      "league": "L6",
+      "dealType": "ordinary course covenant specific performance MAE AB Stable Akorn Channel Snow Phipps",
+      "triggeredGates": ["G15"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M123", "M124", "M125"],
+      "readinessAtLeast": {
+        "research_only": 3
+      },
+      "yuliaBriefIncludes": ["Research-only mechanics"]
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.HEALTHCAREREG.001",
+    "title": "Healthcare regulated route keeps compliance files, closing conditions, and counsel handoffs visible",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L5",
+      "dealType": "healthcare CON Stark AKS HIPAA regulated diligence compliance closing conditions data room leases licenses",
+      "triggeredGates": ["G10", "G24"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M129", "M130", "M131", "M132", "M133", "M134", "M211", "M214", "M221"],
+      "readinessAtLeast": {
+        "executable": 13,
+        "professional_handoff": 5,
+        "research_only": 1
+      },
+      "toolSurfacesInclude": {
+        "files": ["M130", "M131", "M132", "M133", "M134", "M214", "M221"]
+      },
+      "yuliaBriefIncludes": ["Professional-handoff mechanics", "Research-only mechanics"]
+    }
+  },
+  {
+    "id": "CONF.ROUTE.DEALMECH.TRIGGER.INSURANCEAGENCY.001",
+    "title": "Insurance agency roll-up route keeps RWI, indemnity, escrow, earnout, and working-capital mechanics together",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L4",
+      "dealType": "insurance agency rollup Form A RWI indemnity escrow working capital earnout seller note",
+      "triggeredGates": ["G8", "G9", "G15"]
+    },
+    "expect": {
+      "slotIdsInclude": ["M108", "M109", "M208", "M209", "M213"],
+      "readinessAtLeast": {
+        "executable": 10,
+        "professional_handoff": 1
+      },
+      "toolSurfacesInclude": {
+        "studio": ["M208", "M209", "M213"]
+      },
+      "yuliaBriefIncludes": ["Professional-handoff mechanics"]
+    }
   }
 ]
