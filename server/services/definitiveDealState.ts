@@ -168,6 +168,8 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
       return composeDefinitiveDocumentDraft(input);
     case 'prepare_negotiation_brief':
       return prepareDefinitiveNegotiationBrief(input);
+    case 'compose_close_readiness':
+      return composeDefinitiveCloseReadiness(input);
     case 'generate_funds_flow':
       return generateDefinitiveFundsFlow(input);
     case 'compose_pmi_plan':
@@ -193,6 +195,7 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
           'disclose_subset',
           'compose_document_draft',
           'prepare_negotiation_brief',
+          'compose_close_readiness',
           'generate_funds_flow',
           'compose_pmi_plan',
         ],
@@ -218,6 +221,7 @@ export function isDefinitiveDealStateTool(toolName: string): boolean {
     'disclose_subset',
     'compose_document_draft',
     'prepare_negotiation_brief',
+    'compose_close_readiness',
     'generate_funds_flow',
     'compose_pmi_plan',
   ].includes(toolName);
@@ -1285,6 +1289,99 @@ export function prepareDefinitiveNegotiationBrief(input: Record<string, any>) {
   };
 }
 
+export function composeDefinitiveCloseReadiness(input: Record<string, any>) {
+  const state = stateFromInput(input);
+  const objective = textValue(input.objective) || 'closing_readiness';
+  const audience = textValue(input.audience) || 'internal_deal_team_and_closing_advisors';
+  const requiredSourceCategories = closeReadinessSourceCategories(state);
+  const sourceRefs = sourceRefsForCategories(state, requiredSourceCategories);
+  const sourceGaps = requiredSourceCategories
+    .filter(category => !sourceRefs.some(source => source.category === category))
+    .map(category => ({
+      category,
+      reason: `Close readiness needs ${category} source support before a human can approve closing movement.`,
+      suggestedTool: 'compose_data_room_index',
+    }));
+  const checks = buildCloseReadinessChecks(state, requiredSourceCategories, sourceGaps);
+  const nonApprovalBlockers = checks.filter(check => check.blocking);
+  const closed = hasAnyValue(state.payload, ['closedDate', 'actualCloseDate']) || matches(compactText([state.payload.status, state.payload.stage]), ['closed', 'funded']);
+  const readinessStatus = closed
+    ? 'closed_pmi_ready'
+    : nonApprovalBlockers.length
+      ? 'blocked'
+      : 'ready_to_stage_for_human_approval';
+  const scoredChecks = checks.filter(check => check.scoreable);
+  const readyChecks = scoredChecks.filter(check => check.status === 'ready' || check.status === 'not_applicable');
+  const readinessScore = scoredChecks.length ? Math.round((readyChecks.length / scoredChecks.length) * 100) : 0;
+  const approvalMatrix = buildCloseApprovalMatrix(state, readinessStatus, checks);
+  const nextSuggestedCalls = buildCloseReadinessNextCalls(state, checks, readinessStatus);
+  const readinessHash = sha256(stableStringify({
+    dealStateHash: state.stateHash,
+    objective,
+    audience,
+    readinessStatus,
+    readinessScore,
+    checks,
+    sourceGaps,
+    methodologyVersion: DEFINITIVE_METHODOLOGY_VERSION,
+  }));
+  const closeReadiness = {
+    readinessId: `closeready_${readinessHash.slice(0, 16)}`,
+    schema: 'CloseReadiness.v0.1',
+    dealStateCid: state.cid,
+    dealStateHash: state.stateHash,
+    objective,
+    audience,
+    stage: currentStageForState(state),
+    readinessLevel: state.completenessReport.level,
+    readinessStatus,
+    readinessScore,
+    checks,
+    blockers: nonApprovalBlockers.map(check => ({
+      id: check.id,
+      label: check.label,
+      status: check.status,
+      severity: check.severity,
+      reason: check.reason,
+      suggestedTool: check.suggestedTool,
+    })),
+    sourceRefs,
+    sourceGaps,
+    approvalMatrix,
+    closeReadinessBoundary: {
+      composedOnly: true,
+      noClosingAuthority: true,
+      noMoneyMovement: true,
+      noWireInstructions: true,
+      noExternalTransmission: true,
+      noLegalOrTaxOpinion: true,
+      noEscrowAgentAuthority: true,
+      closeDealRequiresSeparateA6Approval: true,
+      userAndAdvisorsDecide:
+        'The user, counsel, lender, escrow/closing agent, tax advisors, and other required professionals decide whether closing conditions are satisfied and whether the transaction may close.',
+    },
+    next_suggested_calls: nextSuggestedCalls,
+    takeBackArtifacts: ['CloseReadiness', 'DealState', 'FundsFlow', 'PMIPlan', 'MCPCallHint[]'],
+    lineInvariant: LINE_INVARIANT,
+  };
+
+  return {
+    ok: true,
+    action: 'compose_close_readiness',
+    result: {
+      closeReadiness,
+      dealState: state,
+      missingInputContract: state.missingInputContract,
+      next_suggested_calls: closeReadiness.next_suggested_calls,
+      portableTakeBackArtifacts: closeReadiness.takeBackArtifacts,
+    },
+    state_hash_after: state.stateHash,
+    completeness_contribution_delta: 0,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
 export function generateDefinitiveFundsFlow(input: Record<string, any>) {
   const state = stateFromInput(input);
   const objective = textValue(input.objective) || 'closing_funds_flow';
@@ -2327,6 +2424,7 @@ function normalizeDocumentType(value: unknown): string {
   if (matches(text, ['ic', 'investment_committee', 'memo'])) return 'ic_memo';
   if (matches(text, ['diligence', 'request'])) return 'diligence_request';
   if (matches(text, ['negotiation'])) return 'negotiation_brief';
+  if (matches(text, ['close_readiness', 'closing_readiness', 'close readiness', 'closing readiness'])) return 'close_readiness';
   if (matches(text, ['funds_flow', 'funds flow', 'closing statement', 'settlement statement'])) return 'funds_flow';
   if (matches(text, ['pmi', 'integration', 'post_close'])) return 'pmi_plan';
   return 'deal_brief';
@@ -2343,6 +2441,7 @@ function audienceForDocumentType(documentType: string): string {
       return 'deal_team_and_counterparty';
     case 'negotiation_brief':
       return 'internal_deal_team';
+    case 'close_readiness':
     case 'funds_flow':
       return 'internal_deal_team_and_closing_advisors';
     case 'pmi_plan':
@@ -2365,6 +2464,8 @@ function documentDraftTitle(documentType: string, state: DefinitiveDealState): s
       return `${subject} diligence request list scaffold`;
     case 'negotiation_brief':
       return `${subject} negotiation brief scaffold`;
+    case 'close_readiness':
+      return `${subject} close readiness scaffold`;
     case 'funds_flow':
       return `${subject} funds flow scaffold`;
     case 'pmi_plan':
@@ -2436,6 +2537,12 @@ function documentSectionCategoryPlan(documentType: string) {
         sectionPlan('open_terms', 'Open terms', ['legal', 'financials'], 'Organize unresolved economics and source-backed positions.', commonBoundary),
         sectionPlan('model_backed_ranges', 'Model-backed ranges', ['financials', 'tax'], 'Show deterministic model dependencies and source gaps behind each economic range.', commonBoundary),
         sectionPlan('handoffs', 'Counsel and advisor handoffs', ['legal', 'tax'], 'Separate computed facts from legal, tax, fairness, solvency, feasibility, and negotiation determinations.', LINE_INVARIANT),
+      ];
+    case 'close_readiness':
+      return [
+        sectionPlan('readiness_checks', 'Readiness checks', ['financials', 'legal', 'tax'], 'Show close-readiness checks, blockers, source gaps, and model dependencies.', LINE_INVARIANT),
+        sectionPlan('funds_flow_and_conditions', 'Funds flow and conditions', ['financials', 'financing', 'legal'], 'Track funds-flow reconciliation, payoff/escrow status, closing conditions, approvals, and consents.', LINE_INVARIANT),
+        sectionPlan('approval_handoffs', 'Approval handoffs', ['legal', 'tax', 'financing'], 'Separate computed readiness from human approval, wire instructions, escrow authority, counsel/tax clearance, and close authority.', LINE_INVARIANT),
       ];
     case 'funds_flow':
       return [
@@ -2568,6 +2675,355 @@ function buildNegotiationHandoffs(state: DefinitiveDealState) {
     });
   }
   return handoffs;
+}
+
+function closeReadinessSourceCategories(state: DefinitiveDealState) {
+  const categories = new Set(['financials', 'legal', 'tax', 'financing']);
+  if (state.classificationKey.triggeredOverlayGates.includes('G28')) categories.add('restructuring');
+  if (state.classificationKey.triggeredOverlayGates.includes('G29')) categories.add('financing');
+  if (state.classificationKey.triggeredOverlayGates.includes('G30') || state.classificationKey.assetClass === 'real_estate') categories.add('real_estate');
+  if (hasAnyValue(state.payload, ['regulatoryApprovals', 'approvals', 'hsr', 'cfius']) || matches(compactText([state.payload.dealType, state.payload.notes, state.classificationKey.industry]), ['regulated', 'healthcare', 'defense', 'bank', 'insurance', 'fcc', 'ferc'])) {
+    categories.add('regulatory');
+  }
+  if (hasAnyValue(state.payload, ['pmiPlan', 'integrationPlan', 'dayZero'])) categories.add('operations');
+  return [...categories];
+}
+
+function buildCloseReadinessChecks(
+  state: DefinitiveDealState,
+  requiredSourceCategories: string[],
+  sourceGaps: Array<Record<string, any>>,
+) {
+  const payload = state.payload;
+  const termsPresent = state.completenessReport.satisfied.includes('term_architecture_present')
+    || hasAnyValue(payload, ['loi', 'keyTerms', 'terms', 'purchaseAgreement', 'definitiveAgreement']);
+  const fileUniversePresent = state.completenessReport.satisfied.includes('file_universe_present');
+  const modelStatePresent = state.completenessReport.satisfied.includes('model_state_present');
+  const closingConditionsPresent = hasAnyValue(payload, [
+    'closingConditions',
+    'conditions',
+    'consents',
+    'thirdPartyConsents',
+    'regulatoryApprovals',
+    'approvals',
+    'financingCondition',
+    'diligenceCondition',
+    'payoffLetters',
+  ]);
+  const professionalDeferrals = buildPackageDeferrals(state);
+  const hasProfessionalClearance = hasAnyValue(payload, [
+    'counselClearance',
+    'taxClearance',
+    'professionalClearance',
+    'professionalClearances',
+    'closingChecklist',
+    'closingChecklistApproved',
+  ]);
+  const sourceRows = buildFundsFlowSources(state);
+  const useRows = buildFundsFlowUses(state);
+  const fundsFlowReconciliation = buildFundsFlowReconciliation(sourceRows, useRows);
+  const fundsFlowReady = fundsFlowReconciliation.status === 'balanced';
+  const pmiPlanPresent = hasAnyValue(payload, ['pmiPlan', 'integrationPlan', 'dayZeroPlan']);
+  const closed = hasAnyValue(payload, ['closedDate', 'actualCloseDate']) || matches(compactText([payload.status, payload.stage]), ['closed', 'funded']);
+
+  return [
+    closeReadinessCheck({
+      id: 'deal_state_completeness',
+      label: 'DealState lifecycle readiness',
+      status: state.completenessReport.score >= 80 && state.completenessReport.blockers.length === 0 ? 'ready' : 'blocked',
+      severity: state.completenessReport.blockers.length ? 'P0' : 'P1',
+      reason: state.completenessReport.score >= 80
+        ? 'Core DealState facts are sufficient for late-stage work.'
+        : `DealState score is ${state.completenessReport.score}; closing readiness needs DRL4-level context.`,
+      suggestedTool: state.completenessReport.score >= 80 ? null : 'update_deal_payload',
+      evidence: {
+        readinessLevel: state.completenessReport.level,
+        score: state.completenessReport.score,
+        blockers: state.completenessReport.blockers,
+      },
+    }),
+    closeReadinessCheck({
+      id: 'source_universe',
+      label: 'Source and data-room support',
+      status: sourceGaps.length ? 'missing_source' : 'ready',
+      severity: sourceGaps.length ? 'P1' : 'P2',
+      reason: sourceGaps.length
+        ? `Missing close-supporting source categories: ${sourceGaps.map(gap => gap.category).join(', ')}.`
+        : 'Required close-supporting source categories are indexed.',
+      suggestedTool: sourceGaps.length ? 'compose_data_room_index' : null,
+      sourceCategories: requiredSourceCategories,
+      missingSourceCategories: sourceGaps.map(gap => gap.category),
+      evidence: {
+        indexedSourceCount: state.sourceIndex.length,
+        citationReadyCount: state.sourceIndex.filter(source => source.citationReady).length,
+      },
+    }),
+    closeReadinessCheck({
+      id: 'term_architecture',
+      label: 'Agreement and term architecture',
+      status: termsPresent ? 'ready' : 'blocked',
+      severity: 'P1',
+      reason: termsPresent
+        ? 'Term architecture or agreement facts are present.'
+        : 'Closing readiness needs LOI/definitive-agreement economics, conditions, or key terms tracked.',
+      suggestedTool: termsPresent ? null : 'prepare_loi_packet',
+      evidence: { termsPresent },
+    }),
+    closeReadinessCheck({
+      id: 'diligence_file_universe',
+      label: 'Diligence file universe',
+      status: fileUniversePresent ? 'ready' : 'missing_source',
+      severity: 'P1',
+      reason: fileUniversePresent
+        ? 'A file universe, data-room index, or document set is present.'
+        : 'Close readiness needs the diligence file universe tracked so unresolved items do not disappear.',
+      suggestedTool: fileUniversePresent ? null : 'compose_data_room_index',
+      evidence: { fileUniversePresent },
+    }),
+    closeReadinessCheck({
+      id: 'deterministic_model_state',
+      label: 'Deterministic model state',
+      status: modelStatePresent ? 'ready' : 'missing_model',
+      severity: 'P1',
+      reason: modelStatePresent
+        ? 'Model outputs or runs are attached to the DealState.'
+        : 'Closing readiness needs the current deterministic model stack attached or explicitly marked not needed.',
+      suggestedTool: modelStatePresent ? null : 'compose_model_stack',
+      evidence: { modelStatePresent },
+    }),
+    closeReadinessCheck({
+      id: 'closing_conditions',
+      label: 'Closing conditions and consents',
+      status: closingConditionsPresent ? 'ready' : 'blocked',
+      severity: 'P1',
+      reason: closingConditionsPresent
+        ? 'Closing-condition, consent, approval, financing, or payoff facts are present.'
+        : 'Closing readiness needs conditions, consents, approvals, financing, and payoff facts tracked before approval staging.',
+      suggestedTool: closingConditionsPresent ? null : 'prepare_loi_packet',
+      evidence: { closingConditionsPresent },
+    }),
+    closeReadinessCheck({
+      id: 'funds_flow_reconciliation',
+      label: 'Funds-flow reconciliation',
+      status: fundsFlowReady ? 'ready' : fundsFlowReconciliation.status,
+      severity: fundsFlowReady ? 'P2' : 'P0',
+      reason: fundsFlowReady
+        ? 'Cash sources equal cash uses on supplied rows.'
+        : 'Funds-flow arithmetic is not balanced or is missing critical rows.',
+      suggestedTool: fundsFlowReady ? null : 'generate_funds_flow',
+      evidence: fundsFlowReconciliation,
+    }),
+    closeReadinessCheck({
+      id: 'professional_handoffs',
+      label: 'Counsel, tax, lender, and specialist handoffs',
+      status: !professionalDeferrals.length || hasProfessionalClearance ? 'ready' : 'professional_handoff_required',
+      severity: professionalDeferrals.length && !hasProfessionalClearance ? 'P1' : 'P2',
+      reason: professionalDeferrals.length && !hasProfessionalClearance
+        ? 'Triggered tax, restructuring, capital-structure, or specialist handoffs need clearance before close approval.'
+        : 'No unresolved professional handoff blockers are visible from current payload.',
+      suggestedTool: professionalDeferrals.length && !hasProfessionalClearance ? 'defer_to_counsel' : null,
+      evidence: {
+        professionalDeferrals,
+        hasProfessionalClearance,
+      },
+    }),
+    closeReadinessCheck({
+      id: 'pmi_transition',
+      label: 'PMI transition plan',
+      status: pmiPlanPresent || closed ? 'ready' : 'needs_pmi_plan',
+      severity: 'P2',
+      reason: pmiPlanPresent || closed
+        ? 'PMI or close-to-PMI facts are present.'
+        : 'PMI plan is not required to approve closing, but it should be staged before Day 0.',
+      suggestedTool: pmiPlanPresent || closed ? null : 'compose_pmi_plan',
+      blocking: false,
+      evidence: { pmiPlanPresent, closed },
+    }),
+    closeReadinessCheck({
+      id: 'human_close_approval',
+      label: 'Explicit human close approval',
+      status: closed ? 'ready' : 'approval_required',
+      severity: 'P0',
+      reason: closed
+        ? 'Payload indicates the deal is already closed or funded.'
+        : 'Irreversible close movement requires a separate A6 close_deal action with explicit human approval.',
+      suggestedTool: closed ? null : 'close_deal',
+      blocking: false,
+      scoreable: false,
+      evidence: {
+        lineStatus: 'human_approval_required',
+        refusalBehavior: 'stage_for_approval',
+      },
+    }),
+  ];
+}
+
+function closeReadinessCheck(input: {
+  id: string;
+  label: string;
+  status: string;
+  severity: 'P0' | 'P1' | 'P2';
+  reason: string;
+  suggestedTool: string | null;
+  sourceCategories?: string[];
+  missingSourceCategories?: string[];
+  blocking?: boolean;
+  scoreable?: boolean;
+  evidence?: Record<string, any>;
+}) {
+  const blockingStatuses = new Set(['blocked', 'missing_source', 'missing_model', 'missing_rows', 'variance_present', 'professional_handoff_required']);
+  const blocking = input.blocking ?? blockingStatuses.has(input.status);
+  return {
+    id: input.id,
+    label: input.label,
+    status: input.status,
+    severity: input.severity,
+    blocking,
+    scoreable: input.scoreable ?? true,
+    reason: input.reason,
+    suggestedTool: input.suggestedTool,
+    sourceCategories: input.sourceCategories || [],
+    missingSourceCategories: input.missingSourceCategories || [],
+    evidence: input.evidence || {},
+    boundary:
+      'This is a readiness checkpoint, not a closing authorization. DEFINITIVE organizes blockers and evidence; users and required professionals decide whether the deal can close.',
+  };
+}
+
+function buildCloseApprovalMatrix(
+  state: DefinitiveDealState,
+  readinessStatus: string,
+  checks: Array<Record<string, any>>,
+) {
+  const blockers = checks.filter(check => check.blocking);
+  return [
+    {
+      id: 'user_close_approval',
+      label: 'User close approval',
+      status: readinessStatus === 'ready_to_stage_for_human_approval' ? 'ready_to_request' : readinessStatus === 'closed_pmi_ready' ? 'already_closed' : 'blocked',
+      requiredTool: 'close_deal',
+      lineStatus: 'human_approval_required',
+      refusalBehavior: 'stage_for_approval',
+      blockerCount: blockers.length,
+    },
+    {
+      id: 'counsel_and_tax_clearance',
+      label: 'Counsel/tax/professional clearance',
+      status: checks.some(check => check.id === 'professional_handoffs' && check.blocking) ? 'required_before_close' : 'not_blocked',
+      requiredTool: 'defer_to_counsel',
+      lineStatus: 'counsel_review_required_when_applicable',
+      blockerCount: checks.filter(check => check.id === 'professional_handoffs' && check.blocking).length,
+    },
+    {
+      id: 'closing_agent_or_escrow',
+      label: 'Closing agent / escrow confirmation',
+      status: checks.some(check => check.id === 'funds_flow_reconciliation' && check.status === 'ready') ? 'requires_external_confirmation' : 'blocked_until_funds_flow_ready',
+      requiredTool: 'generate_funds_flow',
+      lineStatus: 'external_professional_required',
+      blockerCount: checks.filter(check => check.id === 'funds_flow_reconciliation' && check.blocking).length,
+    },
+    {
+      id: 'agent_take_back',
+      label: 'Agent take-back packet',
+      status: 'available',
+      requiredTool: 'compose_deal_package',
+      lineStatus: 'ok',
+      blockerCount: 0,
+      packetHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
+    },
+  ];
+}
+
+function buildCloseReadinessNextCalls(
+  state: DefinitiveDealState,
+  checks: Array<Record<string, any>>,
+  readinessStatus: string,
+): DefinitiveMcpCallHint[] {
+  const hints: DefinitiveMcpCallHint[] = [];
+  const byTool = new Map<string, DefinitiveMcpCallHint>();
+  const addHint = (hint: DefinitiveMcpCallHint) => {
+    const existing = byTool.get(hint.toolName);
+    if (!existing || priorityRank(hint.priority) < priorityRank(existing.priority)) {
+      byTool.set(hint.toolName, hint);
+    }
+  };
+
+  for (const check of checks.filter(check => check.blocking && check.suggestedTool)) {
+    addHint({
+      toolName: check.suggestedTool,
+      priority: check.severity === 'P0' ? 'P0' : 'P1',
+      reason: `Resolve close-readiness blocker: ${check.label}. ${check.reason}`,
+      inputHint: closeReadinessInputHintForTool(state, check.suggestedTool),
+    });
+  }
+
+  if (checks.some(check => check.id === 'pmi_transition' && check.status === 'needs_pmi_plan')) {
+    addHint({
+      toolName: 'compose_pmi_plan',
+      priority: 'P2',
+      reason: 'Stage Day 0 and PMI work before closing so the deal has a post-close home.',
+      inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
+    });
+  }
+
+  addHint({
+    toolName: 'compose_document_draft',
+    priority: readinessStatus === 'blocked' ? 'P2' : 'P1',
+    reason: 'Render the close-readiness packet into a source-aware Studio scaffold.',
+    inputHint: {
+      dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision },
+      documentType: 'close_readiness',
+      audience: 'internal_deal_team_and_closing_advisors',
+    },
+  });
+
+  if (readinessStatus === 'ready_to_stage_for_human_approval') {
+    addHint({
+      toolName: 'close_deal',
+      priority: 'P1',
+      reason: 'All visible close-readiness blockers are clear. Stage the separate A6 human approval action; do not auto-close.',
+      inputHint: {
+        dealId: state.payload.dealId ?? '<deal_id>',
+        closedDate: state.payload.closingDate ?? '<confirmed_closing_date>',
+        finalPrice: firstNumber(state.payload, ['purchasePriceCents', 'headlinePriceCents', 'enterpriseValueCents']) ?? '<final_price_cents>',
+        confirmed: false,
+        note: 'Set confirmed=true only after explicit human approval.',
+      },
+    });
+  }
+
+  addHint({
+    toolName: 'compose_deal_package',
+    priority: 'P1',
+    reason: 'Package close-readiness blockers, current DealState, and next calls for agent take-back.',
+    inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
+  });
+
+  return [...byTool.values()].sort((a, b) => priorityRank(a.priority) - priorityRank(b.priority));
+}
+
+function closeReadinessInputHintForTool(state: DefinitiveDealState, toolName: string) {
+  if (toolName === 'compose_model_stack') {
+    return {
+      journey: state.classificationKey.journey,
+      league: state.classificationKey.league === 'unknown' ? undefined : state.classificationKey.league,
+      dealType: state.payload.dealType || state.payload.structure || state.classificationKey.subJourney,
+      signals: state.signals || undefined,
+    };
+  }
+  if (toolName === 'defer_to_counsel') {
+    return {
+      category: 'closing_readiness',
+      issue: 'Professional clearance required before human close approval.',
+      jurisdiction: state.classificationKey.jurisdiction,
+      dealId: state.payload.dealId,
+    };
+  }
+  return { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } };
+}
+
+function priorityRank(priority: 'P0' | 'P1' | 'P2') {
+  return priority === 'P0' ? 0 : priority === 'P1' ? 1 : 2;
 }
 
 function buildPmiWorkstreams(state: DefinitiveDealState) {
@@ -2893,7 +3349,7 @@ function suggestedToolsForStage(stage: string) {
     case 'negotiation':
       return ['defer_to_counsel', 'compose_model_stack', 'update_deal_payload'];
     case 'close_pmi':
-      return ['close_deal', 'update_deal_payload', 'check_completeness'];
+      return ['compose_close_readiness', 'generate_funds_flow', 'compose_pmi_plan', 'close_deal'];
     default:
       return ['check_completeness'];
   }

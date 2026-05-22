@@ -73,6 +73,7 @@ const expectedTools = [
   'disclose_subset',
   'compose_document_draft',
   'prepare_negotiation_brief',
+  'compose_close_readiness',
   'generate_funds_flow',
   'compose_pmi_plan',
   'lookup_citation',
@@ -123,7 +124,7 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assert(card.definitive.authoritySeedPlanEntries >= DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'agent card authority seed plan meets target');
   assertEqual(card.definitive.authoritySeedPlanStatus, 'ready_for_800_plus_seeding', 'agent card authority seed plan status');
   assertEqual(card.definitive.substratePrimitiveCount, 8, 'agent card substrate primitive count');
-  assertEqual(card.definitive.substrateNewMcpToolCount, 30, 'agent card substrate tool count');
+  assertEqual(card.definitive.substrateNewMcpToolCount, 31, 'agent card substrate tool count');
   assert(card.definitive.schemaRegistryNames.includes('DealPayload'), 'agent card exposes DealPayload schema');
   assert(card.definitive.schemaRegistryNames.includes('DealState'), 'agent card exposes DealState schema');
   assert(card.definitive.schemaRegistryNames.includes('DealStateDiff'), 'agent card exposes DealStateDiff schema');
@@ -172,7 +173,7 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   const substrateCapability = card.capabilities.find((item: any) => item.id === 'definitive_substrate_architecture') as any;
   assert(substrateCapability, 'substrate architecture capability exists');
   assertEqual(substrateCapability.primitiveCount, 8, 'substrate capability primitive count');
-  assertEqual(substrateCapability.newMcpToolCount, 30, 'substrate capability tool count');
+  assertEqual(substrateCapability.newMcpToolCount, 31, 'substrate capability tool count');
   assert(substrateCapability.agentOperatingDoctrine.noRejectionContract.includes('Agents are not rejected'), 'substrate capability blocks incomplete-payload rejection');
   assert(substrateCapability.lifecycleStages.includes('ioi'), 'substrate capability exposes IOI stage');
   assert(substrateCapability.lifecycleStages.includes('close_pmi'), 'substrate capability exposes close/PMI stage');
@@ -231,7 +232,7 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assert(manifest.authoritySurface.categoryIds.includes('ip_authorities'), 'manifest authority surface includes IP');
   assert(manifest.authoritySurface.categoryIds.includes('pass_through_pricing_boundary'), 'manifest authority surface includes THE LINE pricing boundary');
   assertEqual(manifest.substrateArchitectureSurface.primitiveCount, 8, 'manifest substrate primitive count');
-  assertEqual(manifest.substrateArchitectureSurface.newMcpToolCount, 30, 'manifest substrate tool count');
+  assertEqual(manifest.substrateArchitectureSurface.newMcpToolCount, 31, 'manifest substrate tool count');
   assert(manifest.substrateArchitectureSurface.agentOperatingDoctrine.productDoctrine.includes('Deal OS'), 'manifest substrate Deal OS doctrine');
   assert(manifest.substrateArchitectureSurface.agentOperatingDoctrine.noRejectionContract.includes('MissingInputContract'), 'manifest substrate no-rejection contract');
   assert(manifest.substrateArchitectureSurface.agentOperatingDoctrine.homeContract.includes('data rooms'), 'manifest substrate agent home contract includes data rooms');
@@ -316,6 +317,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.schemaNames.includes('DisclosureSubset'), 'schema registry exposes DisclosureSubset');
   assert(registry.schemaNames.includes('DocumentDraft'), 'schema registry exposes DocumentDraft');
   assert(registry.schemaNames.includes('NegotiationBrief'), 'schema registry exposes NegotiationBrief');
+  assert(registry.schemaNames.includes('CloseReadiness'), 'schema registry exposes CloseReadiness');
   assert(registry.schemaNames.includes('FundsFlow'), 'schema registry exposes FundsFlow');
   assert(registry.schemaNames.includes('PMIPlan'), 'schema registry exposes PMIPlan');
   assertEqual(registry.schemas.DealPayload.properties.revenueCents.type, 'integer', 'money is cents integer');
@@ -331,6 +333,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.toolSchemaMap.disclose_subset.takeBack.includes('DisclosureSubset'), 'disclosure subset maps DisclosureSubset');
   assert(registry.toolSchemaMap.compose_document_draft.takeBack.includes('DocumentDraft'), 'document draft maps DocumentDraft');
   assert(registry.toolSchemaMap.prepare_negotiation_brief.takeBack.includes('NegotiationBrief'), 'negotiation brief maps NegotiationBrief');
+  assert(registry.toolSchemaMap.compose_close_readiness.takeBack.includes('CloseReadiness'), 'close readiness maps CloseReadiness');
   assert(registry.toolSchemaMap.generate_funds_flow.takeBack.includes('FundsFlow'), 'funds flow maps FundsFlow');
   assert(registry.toolSchemaMap.compose_pmi_plan.takeBack.includes('PMIPlan'), 'PMI plan maps PMIPlan');
   assert(registry.noRejectionContract.includes('DealPayload may be incomplete'), 'schema registry states no-rejection contract');
@@ -376,7 +379,7 @@ await test('Authority Register seed plan is explicit and above 800 planned entri
 await test('Substrate architecture plan exposes the terminal orchestration primitives', async () => {
   const architecture = getDefinitiveSubstrateArchitecturePlan();
   assertEqual(architecture.primitiveCount, 8, 'substrate architecture primitive count');
-  assertEqual(architecture.newMcpToolCount, 30, 'substrate architecture tool count');
+  assertEqual(architecture.newMcpToolCount, 31, 'substrate architecture tool count');
   assert(architecture.agentOperatingDoctrine.productDoctrine.includes('Deal OS'), 'substrate plan is Deal OS');
   assert(architecture.agentOperatingDoctrine.noRejectionContract.includes('Agents are not rejected'), 'substrate plan accepts incomplete agent payloads');
   assert(architecture.agentOperatingDoctrine.homeContract.includes('documents'), 'substrate plan includes document creation surface');
@@ -940,6 +943,49 @@ await test('FundsFlow organizes closing arithmetic without moving money', async 
   assertEqual(flow.fundsFlowBoundary.noWireInstructions, true, 'funds flow does not issue wire instructions');
   assert(flow.next_suggested_calls.some((call: any) => call.toolName === 'compose_document_draft'), 'funds flow can become Studio draft');
   assert(flow.takeBackArtifacts.includes('FundsFlow'), 'funds flow is portable');
+});
+
+await test('CloseReadiness stages blockers without authorizing close', async () => {
+  const response = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'compose_close_readiness',
+    input: {
+      payload: {
+        journey: 'buy',
+        dealName: 'Closing Target',
+        targetName: 'Closing Target LLC',
+        industry: 'commercial services',
+        jurisdiction: 'US-DE',
+        revenueCents: 24_000_000_00,
+        purchasePriceCents: 9_000_000_00,
+        equityContributionCents: 4_000_000_00,
+        seniorDebtCents: 6_000_000_00,
+        escrowCents: 500_000_00,
+        transactionExpensesCents: 500_000_00,
+        structure: 'asset purchase',
+        keyTerms: { indemnity: 'escrow and RWI under review' },
+        closingConditions: { diligence: true, financing: true, thirdPartyConsents: true },
+        modelOutputs: { sourcesUses: 'balanced' },
+        counselClearance: true,
+        documents: [
+          { id: 'qoe', name: 'QoE report', type: 'financial', hash: 'sha256:qoe' },
+          { id: 'credit', name: 'Credit agreement', type: 'financing', hash: 'sha256:credit' },
+          { id: 'legal', name: 'Closing checklist', type: 'legal', hash: 'sha256:legal' },
+          { id: 'tax', name: 'Tax memo', type: 'tax', hash: 'sha256:tax' },
+        ],
+      },
+    },
+    envelope: {},
+  });
+  assertEqual(response.status, 200, 'close readiness status');
+  const readiness = response.body.result.result.closeReadiness;
+  assertEqual(readiness.schema, 'CloseReadiness.v0.1', 'close readiness schema');
+  assertEqual(readiness.readinessStatus, 'ready_to_stage_for_human_approval', 'close readiness staged status');
+  assertEqual(readiness.closeReadinessBoundary.noClosingAuthority, true, 'close readiness does not authorize close');
+  assertEqual(readiness.closeReadinessBoundary.noMoneyMovement, true, 'close readiness does not move money');
+  assert(readiness.approvalMatrix.some((item: any) => item.requiredTool === 'close_deal'), 'close approval matrix surfaces close_deal');
+  assert(readiness.next_suggested_calls.some((call: any) => call.toolName === 'close_deal'), 'close_deal is only staged as a next call');
+  assert(readiness.takeBackArtifacts.includes('CloseReadiness'), 'close readiness is portable');
 });
 
 await test('PMIPlan organizes post-close work without operating authority', async () => {

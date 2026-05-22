@@ -58,6 +58,7 @@ try {
     assert(body.tools.some((tool: any) => tool.name === 'disclose_subset'), 'disclose_subset is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_document_draft'), 'compose_document_draft is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'prepare_negotiation_brief'), 'prepare_negotiation_brief is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'compose_close_readiness'), 'compose_close_readiness is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'generate_funds_flow'), 'generate_funds_flow is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_pmi_plan'), 'compose_pmi_plan is advertised');
   });
@@ -647,6 +648,54 @@ try {
     assertEqual(flow.fundsFlowBoundary.noMoneyMovement, true, 'funds flow does not move money');
     assertEqual(flow.fundsFlowBoundary.noWireInstructions, true, 'funds flow does not issue wire instructions');
     assert(flow.takeBackArtifacts.includes('FundsFlow'), 'funds flow take-back exposed');
+  });
+
+  await test('Authenticated compose_close_readiness returns staged close blockers', async () => {
+    const response = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'compose_close_readiness',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-state:read', 'completeness:read', 'deal-package:read'],
+      input: {
+        payload: {
+          journey: 'buy',
+          dealName: 'DEFINITIVE Route Fixture Deal',
+          targetName: 'DEFINITIVE Route Fixture Deal',
+          industry: 'software',
+          jurisdiction: 'US-DE',
+          revenueCents: 25_000_000_00,
+          purchasePriceCents: 9_000_000_00,
+          equityContributionCents: 4_000_000_00,
+          seniorDebtCents: 6_000_000_00,
+          escrowCents: 500_000_00,
+          transactionExpensesCents: 500_000_00,
+          structure: 'asset purchase',
+          keyTerms: { indemnity: 'escrow and RWI under review' },
+          closingConditions: { diligence: true, financing: true, thirdPartyConsents: true },
+          modelOutputs: { sourcesUses: 'balanced' },
+          counselClearance: true,
+          documents: [
+            { id: 'qoe', name: 'Closing QoE', type: 'qoe', hash: 'sha256:fixture-qoe' },
+            { id: 'credit', name: 'Debt commitment', type: 'credit agreement', hash: 'sha256:fixture-credit' },
+            { id: 'closing', name: 'Closing checklist', type: 'legal', hash: 'sha256:fixture-closing' },
+            { id: 'tax', name: 'Tax allocation memo', type: 'tax', hash: 'sha256:fixture-tax' },
+          ],
+        },
+      },
+    });
+
+    assertEqual(response.status, 200, 'close readiness route status');
+    assertEqual(response.body.ok, true, 'close readiness route ok');
+    assertEqual(response.body.toolName, 'compose_close_readiness', 'close readiness tool name');
+    const readiness = response.body.result?.result?.closeReadiness;
+    assertEqual(readiness.schema, 'CloseReadiness.v0.1', 'close readiness schema');
+    assertEqual(readiness.readinessStatus, 'ready_to_stage_for_human_approval', 'close readiness staged for approval');
+    assertEqual(readiness.closeReadinessBoundary.noClosingAuthority, true, 'close readiness does not authorize close');
+    assert(readiness.approvalMatrix.some((item: any) => item.requiredTool === 'close_deal'), 'close approval matrix exposed');
+    assert(readiness.takeBackArtifacts.includes('CloseReadiness'), 'close readiness take-back exposed');
   });
 
   await test('Authenticated compose_pmi_plan returns post-close plan packet', async () => {

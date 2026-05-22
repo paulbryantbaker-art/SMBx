@@ -498,6 +498,35 @@ const NegotiationBrief: JsonSchema = {
   },
 };
 
+const CloseReadiness: JsonSchema = {
+  $id: schemaId('CloseReadiness'),
+  title: 'CloseReadiness',
+  type: 'object',
+  additionalProperties: true,
+  required: ['readinessId', 'schema', 'dealStateCid', 'dealStateHash', 'readinessStatus', 'checks', 'blockers', 'approvalMatrix', 'closeReadinessBoundary', 'next_suggested_calls'],
+  properties: {
+    readinessId: { type: 'string' },
+    schema: { type: 'string', const: 'CloseReadiness.v0.1' },
+    dealStateCid: { type: 'string' },
+    dealStateHash: { type: 'string' },
+    objective: { type: 'string' },
+    audience: { type: 'string' },
+    stage: { type: 'string' },
+    readinessLevel: { type: 'string' },
+    readinessStatus: { type: 'string' },
+    readinessScore: { type: 'integer' },
+    checks: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    blockers: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    sourceRefs: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    sourceGaps: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    approvalMatrix: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    closeReadinessBoundary: { type: 'object', additionalProperties: true },
+    next_suggested_calls: { type: 'array', items: { $ref: schemaId('MCPCallHint') } },
+    takeBackArtifacts: { type: 'array', items: { type: 'string' } },
+    lineInvariant: { type: 'string' },
+  },
+};
+
 const FundsFlow: JsonSchema = {
   $id: schemaId('FundsFlow'),
   title: 'FundsFlow',
@@ -610,6 +639,7 @@ export const DEFINITIVE_SCHEMAS: Record<string, JsonSchema> = {
   DisclosureSubset,
   DocumentDraft,
   NegotiationBrief,
+  CloseReadiness,
   FundsFlow,
   PMIPlan,
   DefinitionOfDone,
@@ -696,6 +726,11 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     input: ['DealState', 'DealPayload'],
     output: ['NegotiationBrief', 'DealState', 'MissingInputContract', 'MCPCallHint'],
     takeBack: ['NegotiationBrief', 'SourceGapList', 'MCPCallHint'],
+  },
+  compose_close_readiness: {
+    input: ['DealState', 'DealPayload'],
+    output: ['CloseReadiness', 'DealState', 'MissingInputContract', 'MCPCallHint'],
+    takeBack: ['CloseReadiness', 'DealState', 'FundsFlow', 'PMIPlan', 'MCPCallHint'],
   },
   generate_funds_flow: {
     input: ['DealState', 'DealPayload'],
