@@ -156,6 +156,8 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
       return composeDefinitiveDataRoomIndex(input);
     case 'disclose_subset':
       return discloseDefinitiveSubset(input);
+    case 'compose_document_draft':
+      return composeDefinitiveDocumentDraft(input);
     default:
       return {
         ok: false,
@@ -171,6 +173,7 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
           'resume_deal',
           'compose_data_room_index',
           'disclose_subset',
+          'compose_document_draft',
         ],
       };
   }
@@ -188,6 +191,7 @@ export function isDefinitiveDealStateTool(toolName: string): boolean {
     'resume_deal',
     'compose_data_room_index',
     'disclose_subset',
+    'compose_document_draft',
   ].includes(toolName);
 }
 
@@ -606,6 +610,95 @@ export function discloseDefinitiveSubset(input: Record<string, any>) {
   };
 }
 
+export function composeDefinitiveDocumentDraft(input: Record<string, any>) {
+  const state = stateFromInput(input);
+  const documentType = normalizeDocumentType(input.documentType ?? input.kind ?? input.objective);
+  const audience = textValue(input.audience) || audienceForDocumentType(documentType);
+  const sections = buildDocumentDraftSections(documentType, state);
+  const missingSourceCategories = uniqueStrings(sections.flatMap(section => section.missingSourceCategories));
+  const needsModelState = ['ic_memo', 'loi_outline', 'negotiation_brief'].includes(documentType) && !state.completenessReport.satisfied.includes('model_state_present');
+  const draftInput = {
+    dealStateHash: state.stateHash,
+    documentType,
+    audience,
+    sections: sections.map(section => ({
+      id: section.id,
+      status: section.status,
+      sourceRefs: section.sourceRefs.map(source => ({ id: source.id, hash: source.hash })),
+    })),
+    methodologyVersion: DEFINITIVE_METHODOLOGY_VERSION,
+  };
+  const draftHash = sha256(stableStringify(draftInput));
+  const documentDraft = {
+    draftId: `draft_${draftHash.slice(0, 16)}`,
+    schema: 'DocumentDraft.v0.1',
+    dealStateCid: state.cid,
+    dealStateHash: state.stateHash,
+    documentType,
+    stage: currentStageForState(state),
+    audience,
+    title: documentDraftTitle(documentType, state),
+    sections,
+    sourcePolicy: {
+      unsourcedClaimsAllowed: false,
+      uncheckedClaimsFlag: '[unverified]',
+      sourceRefsRequiredBeforeExternalExport: true,
+    },
+    modelDependencies: {
+      required: needsModelState,
+      status: needsModelState ? 'missing_model_state' : 'not_blocked',
+      suggestedTool: needsModelState ? 'compose_model_stack' : null,
+    },
+    exportBoundary: {
+      composedOnly: true,
+      noExternalTransmission: true,
+      externalExportRequires: 'A5_EXTERNAL_DISCLOSURE approval through a separate export/share action.',
+    },
+    next_suggested_calls: [
+      ...(missingSourceCategories.length
+        ? [{
+            toolName: 'compose_data_room_index',
+            priority: 'P1' as const,
+            reason: `Fill source gaps for draft sections: ${missingSourceCategories.join(', ')}.`,
+            inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
+          }]
+        : []),
+      ...(needsModelState
+        ? [{
+            toolName: 'compose_model_stack',
+            priority: 'P1' as const,
+            reason: `${documentDraftTitle(documentType, state)} should be tied to deterministic model outputs before export.`,
+            inputHint: { payload: state.payload },
+          }]
+        : []),
+      {
+        toolName: 'compose_deal_package',
+        priority: missingSourceCategories.length || needsModelState ? 'P2' as const : 'P1' as const,
+        reason: 'Package the draft with DealState, source refs, model dependencies, and next calls for agent take-back.',
+        inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
+      },
+    ],
+    takeBackArtifacts: ['DocumentDraft', 'SourceIndex', 'MissingInputContract', 'MCPCallHint[]'],
+    lineInvariant: LINE_INVARIANT,
+  };
+
+  return {
+    ok: true,
+    action: 'compose_document_draft',
+    result: {
+      documentDraft,
+      dealState: state,
+      missingInputContract: state.missingInputContract,
+      next_suggested_calls: documentDraft.next_suggested_calls,
+      portableTakeBackArtifacts: documentDraft.takeBackArtifacts,
+    },
+    state_hash_after: state.stateHash,
+    completeness_contribution_delta: 0,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
 function buildDealStateResult(action: 'ingest_deal_payload' | 'update_deal_payload', state: DefinitiveDealState, priorScore: number | null) {
   const scoreDelta = priorScore == null ? state.completenessReport.score : state.completenessReport.score - priorScore;
   return {
@@ -848,6 +941,143 @@ function disclosureCategoriesForObjective(objective: string | null, state: Defin
   if (matches(text, ['pmi', 'post close', 'integration'])) return ['operations', 'financials', 'commercial', 'hr'];
   if (matches(text, ['data room', 'diligence', 'due diligence'])) return requiredDataRoomCategories(state);
   return requiredDataRoomCategories(state).slice(0, 5);
+}
+
+function normalizeDocumentType(value: unknown): string {
+  const text = textValue(value)?.toLowerCase().replace(/[\s-]+/g, '_') || 'deal_brief';
+  if (matches(text, ['ioi', 'indication'])) return 'ioi';
+  if (matches(text, ['loi', 'letter_of_intent', 'term_sheet'])) return 'loi_outline';
+  if (matches(text, ['ic', 'investment_committee', 'memo'])) return 'ic_memo';
+  if (matches(text, ['diligence', 'request'])) return 'diligence_request';
+  if (matches(text, ['negotiation'])) return 'negotiation_brief';
+  if (matches(text, ['pmi', 'integration', 'post_close'])) return 'pmi_plan';
+  return 'deal_brief';
+}
+
+function audienceForDocumentType(documentType: string): string {
+  switch (documentType) {
+    case 'ioi':
+    case 'loi_outline':
+      return 'counterparty_and_internal_team';
+    case 'ic_memo':
+      return 'investment_committee';
+    case 'diligence_request':
+      return 'deal_team_and_counterparty';
+    case 'negotiation_brief':
+      return 'internal_deal_team';
+    case 'pmi_plan':
+      return 'operators_and_integration_team';
+    default:
+      return 'agent_or_principal';
+  }
+}
+
+function documentDraftTitle(documentType: string, state: DefinitiveDealState): string {
+  const subject = textValue(state.payload.dealName) || textValue(state.payload.targetName) || textValue(state.payload.companyName) || 'Deal';
+  switch (documentType) {
+    case 'ioi':
+      return `${subject} IOI scaffold`;
+    case 'loi_outline':
+      return `${subject} LOI architecture scaffold`;
+    case 'ic_memo':
+      return `${subject} IC memo scaffold`;
+    case 'diligence_request':
+      return `${subject} diligence request list scaffold`;
+    case 'negotiation_brief':
+      return `${subject} negotiation brief scaffold`;
+    case 'pmi_plan':
+      return `${subject} PMI plan scaffold`;
+    default:
+      return `${subject} deal brief scaffold`;
+  }
+}
+
+function buildDocumentDraftSections(documentType: string, state: DefinitiveDealState) {
+  const categoryPlan = documentSectionCategoryPlan(documentType);
+  type CategorizedSource = Record<string, any> & { category: string };
+  const sourceIndex: CategorizedSource[] = state.sourceIndex.map(source => ({ ...source, category: inferDataRoomCategory(source) }));
+  return categoryPlan.map(section => {
+    const sourceRefs = sourceIndex
+      .filter(source => section.sourceCategories.includes(source.category))
+      .map(source => ({
+        id: source.id,
+        name: source.name ?? source.id,
+        type: source.type,
+        category: source.category,
+        hash: source.hash,
+        citationReady: source.citationReady,
+      }));
+    const missingSourceCategories = section.sourceCategories.filter(category => !sourceRefs.some(source => source.category === category));
+    return {
+      id: section.id,
+      title: section.title,
+      purpose: section.purpose,
+      status: missingSourceCategories.length ? 'needs_source' : 'source_ready',
+      sourceCategories: section.sourceCategories,
+      sourceRefs,
+      missingSourceCategories,
+      draftInstruction: section.draftInstruction,
+      lineBoundary: section.lineBoundary || LINE_INVARIANT,
+    };
+  });
+}
+
+function documentSectionCategoryPlan(documentType: string) {
+  const commonBoundary = 'Use only source-backed facts and deterministic model outputs; flag unsupported claims as [unverified].';
+  switch (documentType) {
+    case 'ioi':
+      return [
+        sectionPlan('deal_snapshot', 'Deal snapshot', ['financials', 'commercial'], 'Frame the target/thesis, scale, and why-now from sourced facts.', commonBoundary),
+        sectionPlan('preliminary_economics', 'Preliminary economics', ['financials'], 'Summarize valuation range or economics only when model output exists or source facts support it.', commonBoundary),
+        sectionPlan('next_diligence', 'Next diligence asks', ['legal', 'tax'], 'List missing sources that must be collected before LOI or diligence movement.', commonBoundary),
+      ];
+    case 'loi_outline':
+      return [
+        sectionPlan('economic_terms', 'Economic terms', ['financials'], 'Structure price, consideration, working capital, escrow, and earnout placeholders from model-backed facts.', commonBoundary),
+        sectionPlan('structure_tax', 'Structure and tax mechanics', ['tax', 'legal'], 'Surface structure choices and tax/legal handoffs without drafting clauses or giving opinions.', LINE_INVARIANT),
+        sectionPlan('conditions_diligence', 'Conditions and diligence', ['legal', 'commercial'], 'Track conditions, consents, and diligence asks that must be verified before signing.', commonBoundary),
+      ];
+    case 'ic_memo':
+      return [
+        sectionPlan('thesis', 'Thesis and deal fit', ['commercial'], 'Explain thesis and fit from market and source facts.', commonBoundary),
+        sectionPlan('financial_model', 'Financial model summary', ['financials'], 'Tie economics to deterministic model outputs and cite source inputs.', commonBoundary),
+        sectionPlan('risk_boundary', 'Risks, gates, and handoffs', ['legal', 'tax'], 'State risks, overlay gates, and THE LINE handoffs for counsel/advisor/court determinations.', LINE_INVARIANT),
+      ];
+    case 'diligence_request':
+      return [
+        sectionPlan('financial_requests', 'Financial requests', ['financials'], 'Request missing financial, QoE, working-capital, and model-source files.', commonBoundary),
+        sectionPlan('legal_tax_requests', 'Legal and tax requests', ['legal', 'tax'], 'Request legal, tax, structure, consent, and authority-supporting files.', LINE_INVARIANT),
+        sectionPlan('commercial_operational_requests', 'Commercial and operational requests', ['commercial', 'operations'], 'Request customers, pipeline, vendors, operations, and PMI-relevant files.', commonBoundary),
+      ];
+    case 'negotiation_brief':
+      return [
+        sectionPlan('open_terms', 'Open terms', ['legal', 'financials'], 'Organize unresolved economics and source-backed positions.', commonBoundary),
+        sectionPlan('model_backed_ranges', 'Model-backed ranges', ['financials', 'tax'], 'Show deterministic model dependencies and source gaps behind each economic range.', commonBoundary),
+        sectionPlan('handoffs', 'Counsel and advisor handoffs', ['legal', 'tax'], 'Separate computed facts from legal, tax, fairness, solvency, feasibility, and negotiation determinations.', LINE_INVARIANT),
+      ];
+    case 'pmi_plan':
+      return [
+        sectionPlan('day_zero', 'Day 0 controls', ['operations', 'financials'], 'Track Day 0 operational and reporting actions from sourced facts.', commonBoundary),
+        sectionPlan('value_creation', 'Value creation workstreams', ['commercial', 'operations'], 'Tie PMI levers to model-backed or sourced assumptions.', commonBoundary),
+        sectionPlan('risk_tracking', 'Risk tracking', ['legal', 'hr'], 'Track people, legal, and transition risks without making professional determinations.', LINE_INVARIANT),
+      ];
+    default:
+      return [
+        sectionPlan('summary', 'Summary', ['financials', 'commercial'], 'Summarize current sourced deal facts.', commonBoundary),
+        sectionPlan('current_stage', 'Current stage and next actions', ['legal', 'tax'], 'Explain what the current DealState unlocks and what remains missing.', LINE_INVARIANT),
+      ];
+  }
+}
+
+function sectionPlan(id: string, title: string, sourceCategories: string[], draftInstruction: string, lineBoundary: string) {
+  return {
+    id,
+    title,
+    sourceCategories,
+    purpose: draftInstruction,
+    draftInstruction,
+    lineBoundary,
+  };
 }
 
 function buildPlanStage(
@@ -1273,6 +1503,10 @@ function normalizeStringList(value: unknown): string[] {
       .filter(Boolean);
   }
   return [];
+}
+
+function uniqueStrings(values: string[]): string[] {
+  return [...new Set(values.filter(Boolean))];
 }
 
 function normalizePayload(value: unknown): Record<string, any> {

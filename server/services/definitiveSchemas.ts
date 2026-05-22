@@ -336,6 +336,31 @@ const DisclosureSubset: JsonSchema = {
   },
 };
 
+const DocumentDraft: JsonSchema = {
+  $id: schemaId('DocumentDraft'),
+  title: 'DocumentDraft',
+  type: 'object',
+  additionalProperties: true,
+  required: ['draftId', 'schema', 'dealStateCid', 'dealStateHash', 'documentType', 'sections', 'sourcePolicy', 'next_suggested_calls'],
+  properties: {
+    draftId: { type: 'string' },
+    schema: { type: 'string', const: 'DocumentDraft.v0.1' },
+    dealStateCid: { type: 'string' },
+    dealStateHash: { type: 'string' },
+    documentType: { type: 'string' },
+    stage: { type: 'string' },
+    audience: { type: 'string' },
+    title: { type: 'string' },
+    sections: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    sourcePolicy: { type: 'object', additionalProperties: true },
+    modelDependencies: { type: 'object', additionalProperties: true },
+    exportBoundary: { type: 'object', additionalProperties: true },
+    next_suggested_calls: { type: 'array', items: { $ref: schemaId('MCPCallHint') } },
+    takeBackArtifacts: { type: 'array', items: { type: 'string' } },
+    lineInvariant: { type: 'string' },
+  },
+};
+
 const DefinitionOfDone: JsonSchema = {
   $id: schemaId('DefinitionOfDone'),
   title: 'DefinitionOfDone',
@@ -384,6 +409,7 @@ export const DEFINITIVE_SCHEMAS: Record<string, JsonSchema> = {
   DealPackage,
   DataRoomIndex,
   DisclosureSubset,
+  DocumentDraft,
   DefinitionOfDone,
   DefinitiveToolEnvelope,
 };
@@ -438,6 +464,11 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     input: ['DealState', 'DealPayload', 'DataRoomIndex'],
     output: ['DisclosureSubset', 'DealState', 'MissingInputContract', 'MCPCallHint'],
     takeBack: ['DisclosureSubset', 'SourceIndex', 'SelectiveDisclosureProof'],
+  },
+  compose_document_draft: {
+    input: ['DealState', 'DealPayload'],
+    output: ['DocumentDraft', 'DealState', 'MissingInputContract', 'MCPCallHint'],
+    takeBack: ['DocumentDraft', 'SourceIndex', 'MissingInputContract'],
   },
 };
 

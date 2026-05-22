@@ -52,6 +52,7 @@ try {
     assert(body.tools.some((tool: any) => tool.name === 'resume_deal'), 'resume_deal is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_data_room_index'), 'compose_data_room_index is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'disclose_subset'), 'disclose_subset is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'compose_document_draft'), 'compose_document_draft is advertised');
   });
 
   await test('THE LINE inventory is available to authenticated agents', async () => {
@@ -379,6 +380,42 @@ try {
     assert(subset.sources.some((source: any) => source.category === 'financials'), 'financial source selected');
     assertEqual(subset.disclosureBoundary.noExternalTransmission, true, 'subset is compose-only');
     assert(subset.takeBackArtifacts.includes('SelectiveDisclosureProof'), 'selective disclosure proof exposed');
+  });
+
+  await test('Authenticated compose_document_draft returns Studio scaffold', async () => {
+    const response = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'compose_document_draft',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-state:read', 'studio:draft'],
+      input: {
+        documentType: 'loi_outline',
+        payload: {
+          journey: 'buy',
+          targetName: 'DEFINITIVE Route Fixture Deal',
+          industry: 'software',
+          jurisdiction: 'US-DE',
+          ebitdaCents: 2_100_000_00,
+          documents: [
+            { id: 'qoe', name: 'QoE report', type: 'qoe', hash: 'sha256:fixture-qoe' },
+            { id: 'legal', name: 'Draft LOI', type: 'loi', hash: 'sha256:fixture-loi' },
+          ],
+        },
+      },
+    });
+
+    assertEqual(response.status, 200, 'document draft route status');
+    assertEqual(response.body.ok, true, 'document draft route ok');
+    assertEqual(response.body.toolName, 'compose_document_draft', 'document draft tool name');
+    const draft = response.body.result?.result?.documentDraft;
+    assertEqual(draft.schema, 'DocumentDraft.v0.1', 'document draft schema');
+    assertEqual(draft.documentType, 'loi_outline', 'document draft type');
+    assert(draft.sections.some((section: any) => section.id === 'economic_terms'), 'LOI draft has economic terms section');
+    assertEqual(draft.exportBoundary.noExternalTransmission, true, 'document draft is compose-only');
+    assert(draft.takeBackArtifacts.includes('DocumentDraft'), 'document draft take-back exposed');
   });
 
   await test('Audit packet route returns pinned reproducibility payload', async () => {
