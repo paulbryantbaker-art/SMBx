@@ -481,7 +481,7 @@ If scope slips:
 4. Surface mechanics contract is published for Today, Pipeline, Files, and Studio, and visual rendering now uses saved V6/Studio primitives without new page-specific logic.
 5. Grow conformance beyond the 250-case checkpoint toward 400 across prompt behavior, route-trigger behavior, deal-mechanics route profiles, and meta behavior.
 6. Keep extending authenticated route-level smoke coverage beyond the completed explicit THE LINE refusal envelopes for human approval, counsel review, and enterprise scope. Studio export packet retrieval, model-backed chat packet retrieval, staged approval list/cancel behavior, and direct budget/plan tollgate coverage now have tests.
-7. Run live schema verification against fresh and existing databases once the target DB is available; static migration verification currently passes with the corpus/data-rights tables included.
+7. Live schema verification now passes with `.env` loading enabled: `npm run verify:v19-schema` checks static migrations plus the live Railway database and currently reports 341/341 checks passing with corpus/data-rights, mandate-chain, audit, Studio, market-data, firm-memory, and Today tables present.
 
 ## Definition Of Done For DEFINITIVE v1.0 + v1.1 Deal Mechanics
 
