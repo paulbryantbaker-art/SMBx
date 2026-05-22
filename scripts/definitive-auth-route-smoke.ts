@@ -139,6 +139,64 @@ try {
     assertEqual(response.body.expected, DEFINITIVE_SPEC_VERSION, 'unsupported version expected pin');
   });
 
+  await test('THE LINE refuses unapproved human-approval actions', async () => {
+    const response = await postJson('/api/definitive/tools/close_deal/call', token, {
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      input: {
+        dealId: fixture.dealId,
+        closedDate: '2026-05-21',
+        finalPrice: 13_500_000_00,
+      },
+    });
+
+    assertEqual(response.status, 428, 'human approval status');
+    assertEqual(response.body.error, 'human_approval_required', 'human approval error');
+    assertEqual(response.body.lineStatus, 'human_approval_required', 'human approval line status');
+    assertEqual(response.body.refusalBehavior, 'stage_for_approval', 'human approval refusal behavior');
+    assertEqual(response.body.tollgate.code, 'human_approval_required', 'human approval tollgate code');
+  });
+
+  await test('THE LINE refuses uncleared counsel-review actions', async () => {
+    const response = await postJson('/api/definitive/tools/update_tax_position/call', token, {
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      input: {
+        dealId: fixture.dealId,
+        taxPosition: '338(h)(10) gross-up',
+        facts: { sellerEntity: 'S-corp' },
+      },
+    });
+
+    assertEqual(response.status, 428, 'counsel review status');
+    assertEqual(response.body.error, 'counsel_review_required', 'counsel review error');
+    assertEqual(response.body.lineStatus, 'counsel_review_required', 'counsel review line status');
+    assertEqual(response.body.refusalBehavior, 'route_to_counsel', 'counsel review refusal behavior');
+    assertEqual(response.body.tollgate.code, 'counsel_review_required', 'counsel review tollgate code');
+  });
+
+  await test('THE LINE refuses non-enterprise administrative scope', async () => {
+    const response = await postJson('/api/definitive/tools/query_admin_data/call', token, {
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      input: {
+        query: 'list operator-only workspace state',
+      },
+    });
+
+    assertEqual(response.status, 403, 'enterprise scope status');
+    assertEqual(response.body.error, 'enterprise_scope_required', 'enterprise scope error');
+    assertEqual(response.body.lineStatus, 'enterprise_scope_required', 'enterprise scope line status');
+    assertEqual(response.body.refusalBehavior, 'require_enterprise_scope', 'enterprise scope refusal behavior');
+    assertEqual(response.body.tollgate.code, 'enterprise_scope_required', 'enterprise scope tollgate code');
+  });
+
   await test('Authenticated compose_model_stack returns live route map', async () => {
     const response = await postJson('/api/definitive/tools/call', token, {
       toolName: 'compose_model_stack',

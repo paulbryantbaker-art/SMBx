@@ -21,6 +21,9 @@ const DEFINITIVE_MCP_TOOLS = [
   'execute_model',
   'record_corpus_observation',
   'validate_conformance',
+  'close_deal',
+  'update_tax_position',
+  'query_admin_data',
 ] as const;
 
 type DefinitiveMcpToolName = typeof DEFINITIVE_MCP_TOOLS[number];
@@ -119,6 +122,42 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
       },
     },
   },
+  close_deal: {
+    description: 'Mark a transaction closed only after explicit human approval. Used by agents to prove THE LINE approval envelopes.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dealId: { type: 'number', description: 'Deal ID to close.' },
+        closedDate: { type: 'string', description: 'ISO closing date.' },
+        finalPrice: { type: 'number', description: 'Final price in cents.' },
+        spawnPmi: { type: 'boolean', description: 'Whether to spawn a PMI workspace after close.' },
+        confirmed: { type: 'boolean', description: 'Explicit user confirmation flag.' },
+      },
+      required: ['dealId'],
+    },
+  },
+  update_tax_position: {
+    description: 'Organize transaction tax-position facts only after qualified tax/counsel review clearance.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dealId: { type: 'number', description: 'Deal ID.' },
+        taxPosition: { type: 'string', description: 'Tax position label.' },
+        facts: { type: 'object', description: 'Structured tax facts only.' },
+      },
+      required: ['dealId', 'taxPosition'],
+    },
+  },
+  query_admin_data: {
+    description: 'Privileged administrative query surface requiring governed enterprise scope.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Administrative query intent.' },
+      },
+      required: ['query'],
+    },
+  },
 };
 
 const TOOL_SCOPE: Record<DefinitiveMcpToolName, string[]> = {
@@ -129,6 +168,9 @@ const TOOL_SCOPE: Record<DefinitiveMcpToolName, string[]> = {
   execute_model: ['model:execute', 'audit:write'],
   record_corpus_observation: ['corpus:write', 'data-rights:read'],
   validate_conformance: ['conformance:read'],
+  close_deal: ['deal:write', 'immutable:write'],
+  update_tax_position: ['deal:write', 'counsel:review'],
+  query_admin_data: ['admin:read', 'enterprise:scope'],
 };
 
 const TOOL_INTERNAL_API_METER = new Set<DefinitiveMcpToolName>([

@@ -54,6 +54,9 @@ const expectedTools = [
   'execute_model',
   'record_corpus_observation',
   'validate_conformance',
+  'close_deal',
+  'update_tax_position',
+  'query_admin_data',
 ];
 
 let passed = 0;
