@@ -18,6 +18,7 @@ import { describeModelPreference, type ModelPreference } from './modelPreference
 import { formatAgencyActionContractsForPrompt } from './agencyActionRegistry.js';
 import { formatLatestYuliaBriefsForPrompt } from './yuliaBriefingService.js';
 import { readDealV19Readiness, type V19DealReadiness } from './v19ReadinessService.js';
+import { listDefinitiveDealPackets, readLatestDefinitiveDealStateSnapshot } from './definitiveDealStatePersistence.js';
 import { createSql } from '../dbConfig.js';
 
 const sql = createSql();
@@ -107,6 +108,41 @@ ${modelLines}
 
 Open readiness issues:
 ${issues}`;
+}
+
+function formatDefinitiveDealStateForPrompt(snapshotResult: any, packetsResult: any): string | null {
+  if (!snapshotResult?.ok || !snapshotResult.snapshot) return null;
+  const snapshot = snapshotResult.snapshot;
+  const completeness = snapshot.completenessReport || {};
+  const missing = Array.isArray(snapshot.missingInputContract?.items)
+    ? snapshot.missingInputContract.items
+    : [];
+  const packets = Array.isArray(packetsResult?.packets) ? packetsResult.packets : [];
+  const packetLines = packets.length
+    ? packets.slice(0, 6).map((packet: any) => {
+      const calls = Array.isArray(packet.nextSuggestedCalls) ? packet.nextSuggestedCalls : [];
+      const nextCall = calls.find((call: any) => call?.toolName)?.toolName;
+      return `- ${packet.packetType}${packet.createdAt ? ` (${packet.createdAt})` : ''}${nextCall ? ` → next ${nextCall}` : ''}`;
+    }).join('\n')
+    : '- No persisted take-back packets yet.';
+  const missingLines = missing.length
+    ? missing.slice(0, 6).map((item: any) => `- ${item.field || item.label}: ${item.reason || 'missing input'}${item.surface ? ` [${item.surface}]` : ''}`).join('\n')
+    : '- No missing inputs in the latest DealState.';
+
+  return `
+## DEFINITIVE DEALSTATE JOURNAL
+Use this as the current Deal OS resume state for humans and external agents. The deal can be worked iteratively: get information, prepare IOI, learn more, structure LOI, run diligence, model, negotiate, close, and continue into PMI. Do not reject partial agent context; ask for the minimal next input and keep the DealState loop moving.
+State CID: ${snapshot.stateCid}
+Readiness: ${completeness.level || 'DRL0_UNCLASSIFIED'} (${Number(completeness.score || 0)}%)
+Next gate/stage: ${completeness.nextGate || 'information'}
+Sources indexed: ${Array.isArray(snapshot.sourceIndex) ? snapshot.sourceIndex.length : 0}
+THE LINE: ${completeness.theLineInvariant || 'compute, organize, cite, and route; user/counsel/advisor/court decides.'}
+
+Missing inputs:
+${missingLines}
+
+Recent take-back packets:
+${packetLines}`;
 }
 
 const JOURNEY_CONTEXT: Record<string, string> = {
@@ -673,6 +709,12 @@ export async function buildSystemPrompt(
       const readiness = await readDealV19Readiness(user.id, deal.id);
       layers.push(formatV19ReadinessForPrompt(readiness));
     } catch { /* V19 readiness is non-critical prompt context */ }
+    try {
+      const latestState = await readLatestDefinitiveDealStateSnapshot({ userId: user.id, dealId: deal.id });
+      const packets = await listDefinitiveDealPackets({ userId: user.id, dealId: deal.id, limit: 6 });
+      const definitiveContext = formatDefinitiveDealStateForPrompt(latestState, packets);
+      if (definitiveContext) layers.push(definitiveContext);
+    } catch { /* DEFINITIVE DealState journal is non-critical prompt context */ }
 
     // Layer 3a+: Previous gate summaries for context carry-forward
     try {
