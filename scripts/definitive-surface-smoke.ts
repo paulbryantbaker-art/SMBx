@@ -60,6 +60,8 @@ const expectedTools = [
   'update_deal_payload',
   'check_completeness',
   'get_definition_of_done',
+  'compose_deal_plan',
+  'diff_deal_state',
   'lookup_citation',
   'fetch_market_data',
   'defer_to_counsel',
@@ -481,6 +483,51 @@ await test('Completeness and definition-of-done tools are DB-free Deal OS contro
   assertEqual(dod.status, 200, 'definition of done status');
   assert(dod.body.result.result.definitionOfDone.lifecycle.includes('IOI'), 'definition of done exposes lifecycle');
   assert(dod.body.result.result.noRejectionContract.includes('partial payload is accepted'), 'definition of done exposes no-rejection contract');
+});
+
+await test('DealPlan and DealStateDiff make recursive agent work portable', async () => {
+  const plan = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'compose_deal_plan',
+    input: {
+      payload: {
+        journey: 'buy',
+        targetName: 'Recursive Target',
+        industry: 'industrial services',
+        jurisdiction: 'US-DE',
+        ebitdaCents: 2_400_000_00,
+        documents: [{ name: 'CIM', type: 'cim', hash: 'sha256:cim' }],
+      },
+    },
+    envelope: {},
+  });
+  assertEqual(plan.status, 200, 'deal plan status');
+  const dealPlan = plan.body.result.result.dealPlan;
+  assert(dealPlan.lifecycle.includes('IOI -> LOI -> diligence -> model'), 'deal plan shows lifecycle');
+  assert(dealPlan.workSurfaces.includes('data_room'), 'deal plan includes data room surface');
+  assert(dealPlan.stages.some((stage: any) => stage.id === 'loi'), 'deal plan includes LOI stage');
+  assert(plan.body.result.result.portableTakeBackArtifacts.includes('DealPlan'), 'deal plan is portable');
+
+  const diff = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'diff_deal_state',
+    input: {
+      previousPayload: { journey: 'buy', targetName: 'Recursive Target' },
+      nextPayload: {
+        journey: 'buy',
+        targetName: 'Recursive Target',
+        industry: 'industrial services',
+        jurisdiction: 'US-DE',
+        ebitdaCents: 2_400_000_00,
+      },
+    },
+    envelope: {},
+  });
+  assertEqual(diff.status, 200, 'deal state diff status');
+  const dealStateDiff = diff.body.result.result.dealStateDiff;
+  assert(dealStateDiff.changedPaths.includes('ebitdaCents'), 'diff tracks changed economic fact');
+  assert(dealStateDiff.completenessScoreDelta > 0, 'diff tracks completeness gain');
+  assert(diff.body.result.result.portableTakeBackArtifacts.includes('DealStateDiff'), 'diff is portable');
 });
 
 await test('Corpus discovery and sanitizer block raw identifiers without DB work', async () => {

@@ -19,6 +19,8 @@ const DEFINITIVE_MCP_TOOLS = [
   'update_deal_payload',
   'check_completeness',
   'get_definition_of_done',
+  'compose_deal_plan',
+  'diff_deal_state',
   'lookup_citation',
   'fetch_market_data',
   'defer_to_counsel',
@@ -73,6 +75,29 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
       type: 'object',
       properties: {
         objective: { type: 'string', description: 'Optional objective or gate to explain.' },
+      },
+    },
+  },
+  compose_deal_plan: {
+    description: 'Compose a portable DealPlan from a DealState or DealPayload, showing the full M&A lifecycle from intake to IOI, LOI, due diligence, model, negotiation, close, and PMI with current stage, blocked stages, work surfaces, and next actions.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dealState: { type: 'object', description: 'Optional DealState returned by ingest_deal_payload or update_deal_payload.' },
+        payload: { type: 'object', description: 'Optional DealPayload when a DealState is not yet available.' },
+        idempotencyKey: { type: 'string', description: 'Optional caller-generated idempotency key.' },
+      },
+    },
+  },
+  diff_deal_state: {
+    description: 'Compare two DealState or DealPayload snapshots and return a portable DealStateDiff with changed paths, completeness delta, resolved missing inputs, new missing inputs, and overlay-gate changes for agent take-back.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        previousDealState: { type: 'object', description: 'Prior DealState snapshot.' },
+        nextDealState: { type: 'object', description: 'Next DealState snapshot.' },
+        previousPayload: { type: 'object', description: 'Prior DealPayload if a prior DealState is not available.' },
+        nextPayload: { type: 'object', description: 'Next DealPayload if a next DealState is not available.' },
       },
     },
   },
@@ -212,6 +237,8 @@ const TOOL_SCOPE: Record<DefinitiveMcpToolName, string[]> = {
   update_deal_payload: ['deal-state:write', 'deal:classify'],
   check_completeness: ['deal-state:read', 'completeness:read'],
   get_definition_of_done: ['methodology:read', 'completeness:read'],
+  compose_deal_plan: ['deal-state:read', 'deal-plan:read'],
+  diff_deal_state: ['deal-state:read', 'deal-state:diff'],
   lookup_citation: ['citation:read', 'authority:read'],
   fetch_market_data: ['market-data:read'],
   defer_to_counsel: ['counsel:deferral:create'],

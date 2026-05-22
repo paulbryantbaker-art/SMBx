@@ -144,17 +144,35 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
       return checkDefinitiveCompleteness(input);
     case 'get_definition_of_done':
       return getDefinitiveDefinitionOfDone(input);
+    case 'compose_deal_plan':
+      return composeDefinitiveDealPlan(input);
+    case 'diff_deal_state':
+      return diffDefinitiveDealState(input);
     default:
       return {
         ok: false,
         error: 'unsupported_deal_state_tool',
-        supportedTools: ['ingest_deal_payload', 'update_deal_payload', 'check_completeness', 'get_definition_of_done'],
+        supportedTools: [
+          'ingest_deal_payload',
+          'update_deal_payload',
+          'check_completeness',
+          'get_definition_of_done',
+          'compose_deal_plan',
+          'diff_deal_state',
+        ],
       };
   }
 }
 
 export function isDefinitiveDealStateTool(toolName: string): boolean {
-  return ['ingest_deal_payload', 'update_deal_payload', 'check_completeness', 'get_definition_of_done'].includes(toolName);
+  return [
+    'ingest_deal_payload',
+    'update_deal_payload',
+    'check_completeness',
+    'get_definition_of_done',
+    'compose_deal_plan',
+    'diff_deal_state',
+  ].includes(toolName);
 }
 
 export function ingestDefinitiveDealPayload(input: Record<string, any>) {
@@ -238,6 +256,72 @@ export function getDefinitiveDefinitionOfDone(input: Record<string, any> = {}) {
   };
 }
 
+export function composeDefinitiveDealPlan(input: Record<string, any>) {
+  const state = stateFromInput(input);
+  const dealPlan = buildDealPlan(state);
+  return {
+    ok: true,
+    action: 'compose_deal_plan',
+    result: {
+      dealState: state,
+      dealPlan,
+      classificationKey: state.classificationKey,
+      completenessReport: state.completenessReport,
+      next_suggested_calls: buildNextCallHints(state),
+      portableTakeBackArtifacts: ['DealPlan', 'DealState', 'CompletenessReport', 'MCPCallHint[]'],
+    },
+    state_hash_after: state.stateHash,
+    completeness_contribution_delta: 0,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
+export function diffDefinitiveDealState(input: Record<string, any>) {
+  const previous = stateFromInput({
+    dealState: input.previousDealState ?? input.beforeState,
+    payload: input.previousPayload ?? input.beforePayload ?? {},
+    idempotencyKey: input.previousIdempotencyKey,
+  });
+  const next = stateFromInput({
+    dealState: input.nextDealState ?? input.afterState ?? input.dealState,
+    payload: input.nextPayload ?? input.afterPayload ?? input.payload ?? {},
+    idempotencyKey: input.nextIdempotencyKey,
+  });
+  const changedPaths = diffObjects(previous.payload, next.payload);
+  const previousMissing = new Set(previous.missingInputContract.items.map(item => item.field));
+  const nextMissing = new Set(next.missingInputContract.items.map(item => item.field));
+  const previousGates = new Set(previous.classificationKey.triggeredOverlayGates);
+  const nextGates = new Set(next.classificationKey.triggeredOverlayGates);
+  return {
+    ok: true,
+    action: 'diff_deal_state',
+    result: {
+      dealStateDiff: {
+        previousCid: previous.cid,
+        nextCid: next.cid,
+        previousHash: previous.stateHash,
+        nextHash: next.stateHash,
+        changedPaths,
+        completenessScoreDelta: next.completenessReport.score - previous.completenessReport.score,
+        resolvedMissingInputs: [...previousMissing].filter(field => !nextMissing.has(field)),
+        newMissingInputs: [...nextMissing].filter(field => !previousMissing.has(field)),
+        addedOverlayGates: [...nextGates].filter(gate => !previousGates.has(gate)),
+        removedOverlayGates: [...previousGates].filter(gate => !nextGates.has(gate)),
+        previousLevel: previous.completenessReport.level,
+        nextLevel: next.completenessReport.level,
+      },
+      nextDealState: next,
+      next_suggested_calls: buildNextCallHints(next),
+      portableTakeBackArtifacts: ['DealStateDiff', 'DealState', 'MCPCallHint[]'],
+    },
+    state_hash_after: next.stateHash,
+    completeness_contribution_delta: next.completenessReport.score - previous.completenessReport.score,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
 function buildDealStateResult(action: 'ingest_deal_payload' | 'update_deal_payload', state: DefinitiveDealState, priorScore: number | null) {
   const scoreDelta = priorScore == null ? state.completenessReport.score : state.completenessReport.score - priorScore;
   return {
@@ -262,6 +346,17 @@ function buildDealStateResult(action: 'ingest_deal_payload' | 'update_deal_paylo
     methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
     the_line_invariant: LINE_INVARIANT,
   };
+}
+
+function stateFromInput(input: Record<string, any>): DefinitiveDealState {
+  const prior = normalizePriorState(input.dealState ?? input.state);
+  if (prior) return prior;
+  return buildDealState({
+    payload: normalizePayload(input.payload ?? input.dealPayload ?? input),
+    revision: 1,
+    idempotencyKey: nullableString(input.idempotencyKey),
+    parentCids: [],
+  });
 }
 
 function buildDealState(input: {
@@ -318,6 +413,99 @@ function buildDealState(input: {
     specVersion: DEFINITIVE_SPEC_VERSION,
     specUri: DEFINITIVE_SPEC_URI,
   };
+}
+
+function buildDealPlan(state: DefinitiveDealState) {
+  const currentStage = currentStageForState(state);
+  const stages = [
+    buildPlanStage(state, 'intake', 'Intake and classification', ['journey_classified', 'deal_subject_present'], currentStage),
+    buildPlanStage(state, 'ioi', 'IOI and indication of interest', ['economic_scale_present', 'source_trail_present'], currentStage),
+    buildPlanStage(state, 'loi', 'LOI and deal architecture', ['deal_structure_present', 'term_architecture_present'], currentStage),
+    buildPlanStage(state, 'diligence', 'Due diligence and data room', ['file_universe_present'], currentStage),
+    buildPlanStage(state, 'model', 'Model and deal mechanics', ['model_state_present'], currentStage),
+    buildPlanStage(state, 'negotiation', 'Negotiation preparation', ['term_architecture_present', 'model_state_present'], currentStage),
+    buildPlanStage(state, 'close_pmi', 'Close and PMI loop', ['file_universe_present', 'model_state_present'], currentStage),
+  ];
+  return {
+    planId: `dealplan_${state.stateHash.slice(0, 16)}`,
+    status: state.missingInputContract.status === 'missing_inputs' ? 'partial_but_actionable' : 'ready_for_next_step',
+    currentStage,
+    lifecycle:
+      'information -> IOI -> LOI -> diligence -> model -> negotiation -> close -> PMI, with DealState updated after every recursive pass',
+    routingKey: state.classificationKey,
+    stages,
+    overlayGates: state.classificationKey.triggeredOverlayGates,
+    workSurfaces: ['today', 'pipeline', 'files', 'studio', 'models', 'data_room'],
+    nextActions: state.missingInputContract.items.slice(0, 4).map(item => ({
+      label: item.label,
+      reason: item.reason,
+      surface: item.surface,
+      unlocks: item.unlocks,
+    })),
+    lineInvariant: LINE_INVARIANT,
+  };
+}
+
+function buildPlanStage(
+  state: DefinitiveDealState,
+  id: string,
+  label: string,
+  requiredSatisfied: string[],
+  currentStage: string,
+) {
+  const satisfied = new Set(state.completenessReport.satisfied);
+  const completed = requiredSatisfied.every(item => satisfied.has(item));
+  const status = completed ? 'completed' : id === currentStage ? 'current' : stageIsBefore(id, currentStage) ? 'blocked' : 'future';
+  return {
+    id,
+    label,
+    status,
+    requiredSatisfied,
+    missing: requiredSatisfied.filter(item => !satisfied.has(item)),
+    suggestedTools: suggestedToolsForStage(id),
+  };
+}
+
+function currentStageForState(state: DefinitiveDealState) {
+  switch (state.completenessReport.level) {
+    case 'DRL0_UNCLASSIFIED':
+      return 'intake';
+    case 'DRL1_CLASSIFIED':
+      return 'ioi';
+    case 'DRL2_INDICATION_READY':
+      return 'loi';
+    case 'DRL3_LOI_ARCHITECTURE_READY':
+      return 'diligence';
+    case 'DRL4_DILIGENCE_READY':
+    default:
+      return state.completenessReport.satisfied.includes('model_state_present') ? 'negotiation' : 'model';
+  }
+}
+
+function stageIsBefore(stage: string, currentStage: string) {
+  const order = ['intake', 'ioi', 'loi', 'diligence', 'model', 'negotiation', 'close_pmi'];
+  return order.indexOf(stage) < order.indexOf(currentStage);
+}
+
+function suggestedToolsForStage(stage: string) {
+  switch (stage) {
+    case 'intake':
+      return ['ingest_deal_payload', 'update_deal_payload', 'check_completeness'];
+    case 'ioi':
+      return ['compose_model_stack', 'execute_model', 'check_completeness'];
+    case 'loi':
+      return ['compose_model_stack', 'defer_to_counsel', 'check_completeness'];
+    case 'diligence':
+      return ['update_deal_payload', 'lookup_citation', 'compose_model_stack'];
+    case 'model':
+      return ['compose_model_stack', 'execute_model', 'check_completeness'];
+    case 'negotiation':
+      return ['defer_to_counsel', 'compose_model_stack', 'update_deal_payload'];
+    case 'close_pmi':
+      return ['close_deal', 'update_deal_payload', 'check_completeness'];
+    default:
+      return ['check_completeness'];
+  }
 }
 
 function classifyPayload(
@@ -779,4 +967,25 @@ function stableStringify(value: unknown): string {
 
 function sha256(value: string): string {
   return createHash('sha256').update(value).digest('hex');
+}
+
+function diffObjects(before: unknown, after: unknown, prefix = ''): string[] {
+  if (stableStringify(before) === stableStringify(after)) return [];
+  if (!isPlainObject(before) || !isPlainObject(after)) return [prefix || '$'];
+  const keys = new Set([...Object.keys(before), ...Object.keys(after)]);
+  const paths: string[] = [];
+  for (const key of [...keys].sort()) {
+    if (paths.length >= 50) break;
+    const nextPrefix = prefix ? `${prefix}.${key}` : key;
+    if (!(key in before) || !(key in after)) {
+      paths.push(nextPrefix);
+      continue;
+    }
+    paths.push(...diffObjects((before as Record<string, unknown>)[key], (after as Record<string, unknown>)[key], nextPrefix));
+  }
+  return paths.slice(0, 50);
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return Boolean(value && typeof value === 'object' && !Array.isArray(value));
 }
