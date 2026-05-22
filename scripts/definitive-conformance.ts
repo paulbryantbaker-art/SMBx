@@ -38,6 +38,7 @@ import {
   type DefinitiveToolSurface,
 } from '../server/services/definitiveDealRouteMap.js';
 import { buildDefinitiveSpecManifest } from '../server/services/definitiveSpecManifest.js';
+import { getDefinitiveAuthoritySeedPlan } from '../server/services/definitiveAuthoritySeedPlan.js';
 import { listDefinitiveMcpTools } from '../server/services/definitiveMcp.js';
 import {
   evaluateDefinitiveStackOverlays,
@@ -92,6 +93,7 @@ type PromptMetaCaseKind =
   | 'agent_card'
   | 'line_inventory'
   | 'mcp_inventory'
+  | 'authority_seed_plan'
   | 'pass_through_surface';
 
 interface PromptMetaFieldExpectation {
@@ -506,6 +508,13 @@ function buildPromptMetaSubject(item: PromptMetaCase): { text: string; data: Rec
   if (item.kind === 'pass_through_surface') {
     const surface = getDefinitivePassThroughSurface();
     return { text: JSON.stringify(surface), data: surface };
+  }
+
+  if (item.kind === 'authority_seed_plan') {
+    const seedPlan = getDefinitiveAuthoritySeedPlan();
+    const categoriesById = Object.fromEntries(seedPlan.categories.map(category => [category.id, category]));
+    const data = { ...seedPlan, categoriesById };
+    return { text: JSON.stringify(data), data };
   }
 
   throw new Error(`${item.id} unsupported prompt/meta case kind ${item.kind}`);

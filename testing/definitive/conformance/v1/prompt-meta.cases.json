@@ -237,8 +237,8 @@
       "fields": [
         { "path": "conformanceSurface.modelRuntimeCases", "equals": 202 },
         { "path": "conformanceSurface.dealMechanicsRouteCases", "equals": 60 },
-        { "path": "conformanceSurface.promptMetaCases", "equals": 26 },
-        { "path": "conformanceSurface.totalCases", "equals": 347 }
+        { "path": "conformanceSurface.promptMetaCases", "equals": 39 },
+        { "path": "conformanceSurface.totalCases", "equals": 360 }
       ]
     }
   },
@@ -296,6 +296,201 @@
     }
   },
   {
+    "id": "CONF.PROMPT.AUTHSEED.BANKRUPTCY_CODE.001",
+    "title": "Authority seed plan covers Bankruptcy Code anchors for G28",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_seed_plan",
+    "expect": {
+      "fields": [
+        { "path": "categoriesById.bankruptcy_code.targetEntries", "min": 40 },
+        { "path": "categoriesById.bankruptcy_code.gates", "includes": "G28" },
+        { "path": "categoriesById.bankruptcy_code.modelSlots", "includes": "M153" },
+        { "path": "categoriesById.bankruptcy_code.sourceTypes", "includes": "statute" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHSEED.BANKRUPTCY_CASES.001",
+    "title": "Authority seed plan covers restructuring case-law anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_seed_plan",
+    "expect": {
+      "fields": [
+        { "path": "categoriesById.bankruptcy_case_law.targetEntries", "min": 55 },
+        { "path": "categoriesById.bankruptcy_case_law.gates", "includes": "G28" },
+        { "path": "categoriesById.bankruptcy_case_law.modelSlots", "includes": "M155" },
+        { "path": "categoriesById.bankruptcy_case_law.examples", "includes": "Till" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHSEED.LME.001",
+    "title": "Authority seed plan keeps LME authorities research-queued and G29-bound",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_seed_plan",
+    "expect": {
+      "fields": [
+        { "path": "categoriesById.restructuring_lme.targetEntries", "min": 45 },
+        { "path": "categoriesById.restructuring_lme.status", "equals": "research_queue" },
+        { "path": "categoriesById.restructuring_lme.gates", "includes": "G29" },
+        { "path": "categoriesById.restructuring_lme.modelSlots", "includes": "M161" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHSEED.IRC.001",
+    "title": "Authority seed plan covers IRC sections for the connected tax spine",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_seed_plan",
+    "expect": {
+      "fields": [
+        { "path": "categoriesById.irc_sections.targetEntries", "min": 55 },
+        { "path": "categoriesById.irc_sections.gates", "includes": "G15" },
+        { "path": "categoriesById.irc_sections.modelSlots", "includes": "M200" },
+        { "path": "categoriesById.irc_sections.sourceTypes", "includes": "statute" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHSEED.TREASURY.001",
+    "title": "Authority seed plan covers Treasury regulations and IRS forms",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_seed_plan",
+    "expect": {
+      "fields": [
+        { "path": "categoriesById.treasury_regulations.targetEntries", "min": 60 },
+        { "path": "categoriesById.treasury_regulations.sourceTypes", "includes": "treasury_regulation" },
+        { "path": "categoriesById.treasury_regulations.modelSlots", "includes": "M203" },
+        { "path": "categoriesById.treasury_regulations.modelSlots", "includes": "M222" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHSEED.REAL_ESTATE.001",
+    "title": "Authority seed plan covers real-estate mechanics and G30",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_seed_plan",
+    "expect": {
+      "fields": [
+        { "path": "categoriesById.real_estate.targetEntries", "min": 60 },
+        { "path": "categoriesById.real_estate.gates", "includes": "G30" },
+        { "path": "categoriesById.real_estate.modelSlots", "includes": "M190" },
+        { "path": "categoriesById.real_estate.modelSlots", "includes": "M196" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHSEED.CONNECTED_TAX.001",
+    "title": "Authority seed plan covers the connected transaction-tax engine",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_seed_plan",
+    "expect": {
+      "fields": [
+        { "path": "categoriesById.connected_tax.targetEntries", "min": 60 },
+        { "path": "categoriesById.connected_tax.gates", "includes": "G2" },
+        { "path": "categoriesById.connected_tax.modelSlots", "includes": "M200" },
+        { "path": "categoriesById.connected_tax.modelSlots", "includes": "M205" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHSEED.AGREEMENT.001",
+    "title": "Authority seed plan covers legal agreement economics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_seed_plan",
+    "expect": {
+      "fields": [
+        { "path": "categoriesById.agreement_architecture.targetEntries", "min": 60 },
+        { "path": "categoriesById.agreement_architecture.gates", "includes": "G8" },
+        { "path": "categoriesById.agreement_architecture.modelSlots", "includes": "M206" },
+        { "path": "categoriesById.agreement_architecture.modelSlots", "includes": "M212" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHSEED.IP.001",
+    "title": "Authority seed plan covers IP, lien, license, and OSS mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_seed_plan",
+    "expect": {
+      "fields": [
+        { "path": "categoriesById.ip_authorities.targetEntries", "min": 65 },
+        { "path": "categoriesById.ip_authorities.gates", "includes": "G10" },
+        { "path": "categoriesById.ip_authorities.modelSlots", "includes": "M214" },
+        { "path": "categoriesById.ip_authorities.modelSlots", "includes": "M221" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHSEED.PASSTHROUGH.001",
+    "title": "Authority seed plan covers THE LINE pass-through pricing boundary",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_seed_plan",
+    "expect": {
+      "fields": [
+        { "path": "categoriesById.pass_through_pricing_boundary.targetEntries", "min": 35 },
+        { "path": "categoriesById.pass_through_pricing_boundary.modelSlots", "includes": "M221" },
+        { "path": "categoriesById.pass_through_pricing_boundary.lineBoundary", "includes": "success" },
+        { "path": "categoriesById.pass_through_pricing_boundary.lineBoundary", "includes": "prohibited" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHSEED.RECOVERY.001",
+    "title": "Authority seed plan covers recovery and credit datasets",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_seed_plan",
+    "expect": {
+      "fields": [
+        { "path": "categoriesById.recovery_data.targetEntries", "min": 35 },
+        { "path": "categoriesById.recovery_data.status", "equals": "requires_subscription_or_vendor_source" },
+        { "path": "categoriesById.recovery_data.gates", "includes": "G28" },
+        { "path": "categoriesById.recovery_data.modelSlots", "includes": "M166" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHSEED.DIGITAL.001",
+    "title": "Authority seed plan keeps digital-asset authorities in the research queue",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_seed_plan",
+    "expect": {
+      "fields": [
+        { "path": "categoriesById.digital_assets.targetEntries", "min": 45 },
+        { "path": "categoriesById.digital_assets.status", "equals": "research_queue" },
+        { "path": "categoriesById.digital_assets.gates", "includes": "G30" },
+        { "path": "categoriesById.digital_assets.modelSlots", "includes": "M174" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHSEED.REGULATED.001",
+    "title": "Authority seed plan covers regulated-industry overlays",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_seed_plan",
+    "expect": {
+      "fields": [
+        { "path": "categoriesById.regulated_industries.targetEntries", "min": 65 },
+        { "path": "categoriesById.regulated_industries.gates", "includes": "G24" },
+        { "path": "categoriesById.regulated_industries.modelSlots", "includes": "M130" },
+        { "path": "categoriesById.regulated_industries.sourceTypes", "includes": "regulation" }
+      ]
+    }
+  },
+  {
     "id": "CONF.PROMPT.AGENT.ACCESS.001",
     "title": "Agent card keeps execution authenticated and governed",
     "specVersion": "DEFINITIVE.v1.0",
@@ -317,7 +512,7 @@
     "methodologyUri": "methodology://v19",
     "kind": "agent_card",
     "expect": {
-      "textIncludes": ["definitive_conformance_status", "\"caseCount\":347", "definitive_deal_mechanics_v1_1"],
+      "textIncludes": ["definitive_conformance_status", "\"caseCount\":360", "definitive_deal_mechanics_v1_1"],
       "fields": [
         { "path": "definitive.dealMechanicsModelSlots", "equals": 123 },
         { "path": "definitive.dealMechanicsGates", "equals": 30 },
