@@ -156,6 +156,8 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
       return composeDefinitiveLifecycleTrace(input);
     case 'prepare_ioi_packet':
       return prepareDefinitiveIoiPacket(input);
+    case 'prepare_loi_packet':
+      return prepareDefinitiveLoiPacket(input);
     case 'compose_data_room_index':
       return composeDefinitiveDataRoomIndex(input);
     case 'prepare_diligence_request':
@@ -181,6 +183,7 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
           'resume_deal',
           'compose_lifecycle_trace',
           'prepare_ioi_packet',
+          'prepare_loi_packet',
           'compose_data_room_index',
           'prepare_diligence_request',
           'disclose_subset',
@@ -203,6 +206,7 @@ export function isDefinitiveDealStateTool(toolName: string): boolean {
     'resume_deal',
     'compose_lifecycle_trace',
     'prepare_ioi_packet',
+    'prepare_loi_packet',
     'compose_data_room_index',
     'prepare_diligence_request',
     'disclose_subset',
@@ -648,6 +652,142 @@ export function prepareDefinitiveIoiPacket(input: Record<string, any>) {
       missingInputContract: state.missingInputContract,
       next_suggested_calls: ioiPacket.next_suggested_calls,
       portableTakeBackArtifacts: ioiPacket.takeBackArtifacts,
+    },
+    state_hash_after: state.stateHash,
+    completeness_contribution_delta: 0,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
+export function prepareDefinitiveLoiPacket(input: Record<string, any>) {
+  const state = stateFromInput(input);
+  const objective = textValue(input.objective) || 'loi_architecture';
+  const audience = textValue(input.audience) || 'internal_deal_team_and_counsel';
+  const sourceRefs = sourceRefsForCategories(state, ['financials', 'legal', 'tax', 'commercial']);
+  const sourceGaps = ['financials', 'legal', 'tax', 'commercial']
+    .filter(category => !sourceRefs.some(source => source.category === category))
+    .map(category => ({
+      category,
+      reason: `LOI packet needs ${category} source support before counsel review or external use.`,
+      suggestedTool: 'compose_data_room_index',
+    }));
+  const dealArchitecture = buildLoiDealArchitecture(state);
+  const economicTerms = buildLoiEconomicTerms(state);
+  const closingConditions = buildLoiClosingConditions(state);
+  const handoffs = buildLoiHandoffs(state);
+  const missingInputs = state.missingInputContract.items
+    .filter(item => item.priority !== 'P2')
+    .map(item => ({
+      field: item.field,
+      label: item.label,
+      priority: item.priority,
+      reason: item.reason,
+      surface: item.surface,
+    }));
+  const needsModelState = !state.completenessReport.satisfied.includes('model_state_present');
+  const packetHash = sha256(stableStringify({
+    dealStateHash: state.stateHash,
+    objective,
+    audience,
+    dealArchitecture,
+    economicTerms,
+    closingConditions,
+    handoffs,
+    sourceGaps,
+    missingInputs,
+    methodologyVersion: DEFINITIVE_METHODOLOGY_VERSION,
+  }));
+  const loiPacket = {
+    packetId: `loi_${packetHash.slice(0, 16)}`,
+    schema: 'LOIPacket.v0.1',
+    dealStateCid: state.cid,
+    dealStateHash: state.stateHash,
+    objective,
+    audience,
+    stage: currentStageForState(state),
+    readinessLevel: state.completenessReport.level,
+    dealArchitecture,
+    economicTerms,
+    closingConditions,
+    sourceRefs,
+    sourceGaps,
+    missingInputs,
+    handoffs,
+    modelDependencies: {
+      required: needsModelState,
+      status: needsModelState ? 'missing_model_state' : 'not_blocked',
+      suggestedTool: needsModelState ? 'compose_model_stack' : null,
+    },
+    loiBoundary: {
+      composedOnly: true,
+      noBindingOffer: true,
+      noClauseDrafting: true,
+      noLegalOpinion: true,
+      noTaxOpinion: true,
+      noNegotiationAuthority: true,
+      noExternalTransmission: true,
+      userAndCounselDecide:
+        'The user and counsel decide whether to send an LOI, which terms to include, clause language, enforceability, signature authority, and counterparty communications.',
+    },
+    next_suggested_calls: [
+      ...(sourceGaps.length
+        ? [{
+            toolName: 'compose_data_room_index',
+            priority: 'P1' as const,
+            reason: `Fill LOI source gaps: ${sourceGaps.map(gap => gap.category).join(', ')}.`,
+            inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
+          }]
+        : []),
+      ...(needsModelState
+        ? [{
+            toolName: 'compose_model_stack',
+            priority: 'P1' as const,
+            reason: 'Tie LOI economics and agreement mechanics to deterministic model outputs before export or counterparty use.',
+            inputHint: {
+              journey: state.classificationKey.journey,
+              league: state.classificationKey.league === 'unknown' ? undefined : state.classificationKey.league,
+              dealType: state.payload.dealType || state.payload.structure || state.classificationKey.subJourney,
+              signals: state.signals || undefined,
+            },
+          }]
+        : []),
+      {
+        toolName: 'compose_document_draft',
+        priority: sourceGaps.length || needsModelState ? 'P2' as const : 'P1' as const,
+        reason: 'Render the LOI packet into a source-aware Studio LOI outline scaffold.',
+        inputHint: {
+          dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision },
+          documentType: 'loi_outline',
+          audience,
+        },
+      },
+      {
+        toolName: 'prepare_diligence_request',
+        priority: 'P2' as const,
+        reason: 'Prepare the diligence request list that follows the LOI architecture pass.',
+        inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
+      },
+      {
+        toolName: 'prepare_negotiation_brief',
+        priority: 'P2' as const,
+        reason: 'Track open terms and model-backed range status without negotiating or recommending concessions.',
+        inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
+      },
+    ],
+    takeBackArtifacts: ['LOIPacket', 'DealState', 'DocumentDraft', 'DiligenceRequest', 'MCPCallHint[]'],
+    lineInvariant: LINE_INVARIANT,
+  };
+
+  return {
+    ok: true,
+    action: 'prepare_loi_packet',
+    result: {
+      loiPacket,
+      dealState: state,
+      missingInputContract: state.missingInputContract,
+      next_suggested_calls: loiPacket.next_suggested_calls,
+      portableTakeBackArtifacts: loiPacket.takeBackArtifacts,
     },
     state_hash_after: state.stateHash,
     completeness_contribution_delta: 0,
@@ -1409,6 +1549,199 @@ function buildIoiPreliminaryEconomics(state: DefinitiveDealState) {
     ioiMoneyFact('enterpriseValueCents', 'Enterprise value', firstNumber(payload, ['enterpriseValueCents'])),
     ioiMoneyFact('purchasePriceCents', 'Purchase price', firstNumber(payload, ['purchasePriceCents'])),
   ].filter(fact => fact.status !== 'missing');
+}
+
+function buildLoiDealArchitecture(state: DefinitiveDealState) {
+  const payload = state.payload;
+  return [
+    loiFact(
+      state,
+      'structure',
+      'Transaction structure',
+      firstPresentValue(payload, ['dealStructure', 'structure', 'transactionType', 'dealType']) || state.classificationKey.subJourney,
+      ['legal', 'tax'],
+      ['M200', 'M201', 'M211'],
+      'DEFINITIVE organizes structure facts and model dependencies. Counsel and tax advisors decide clause language, legal form, and tax positions.',
+    ),
+    loiFact(
+      state,
+      'consideration_mix',
+      'Consideration mix',
+      firstPresentValue(payload, ['considerationMix', 'cashConsiderationCents', 'sellerNoteCents', 'rolloverPercent', 'earnoutCents']),
+      ['financials', 'legal', 'tax'],
+      ['M200', 'M204', 'M213'],
+      'DEFINITIVE organizes consideration mechanics. The user and advisors choose economics, offer authority, and binding terms.',
+    ),
+    loiFact(
+      state,
+      'tax_classification',
+      'Tax classification',
+      state.classificationKey.taxClassification,
+      ['tax'],
+      ['M200', 'M201', 'M202', 'M203', 'M204', 'M205'],
+      'DEFINITIVE computes tax mechanics from supplied facts. Tax positions and opinions remain with qualified tax review.',
+    ),
+    loiFact(
+      state,
+      'jurisdiction',
+      'Governing jurisdiction / deal jurisdiction',
+      state.classificationKey.jurisdiction,
+      ['legal'],
+      ['M211', 'M212'],
+      'DEFINITIVE tracks jurisdiction because it changes agreement mechanics and gates. Counsel decides governing law, enforceability, and filing posture.',
+    ),
+    loiFact(
+      state,
+      'overlay_gates',
+      'Triggered overlay gates',
+      state.classificationKey.triggeredOverlayGates.length ? state.classificationKey.triggeredOverlayGates : null,
+      ['legal', 'tax', 'financials'],
+      ['G28', 'G29', 'G30'],
+      'Overlay gates route additional mechanics and specialist review; they are not legal, tax, solvency, feasibility, or court determinations.',
+    ),
+  ];
+}
+
+function buildLoiEconomicTerms(state: DefinitiveDealState) {
+  const payload = state.payload;
+  return [
+    loiMoneyTerm(state, 'purchase_price', 'Purchase price', firstNumber(payload, ['purchasePriceCents', 'headlinePriceCents']), ['financials'], ['M206', 'M208']),
+    loiMoneyTerm(state, 'enterprise_value', 'Enterprise value', firstNumber(payload, ['enterpriseValueCents', 'evCents']), ['financials'], ['M200']),
+    loiMoneyTerm(state, 'revenue', 'Revenue', firstNumber(payload, ['revenueCents', 'ttmRevenueCents', 'salesCents']), ['financials'], ['M101-M223 routing']),
+    loiMoneyTerm(state, 'ebitda', 'EBITDA', firstNumber(payload, ['ebitdaCents', 'adjustedEbitdaCents']), ['financials'], ['M101-M223 routing']),
+    loiMoneyTerm(state, 'working_capital_peg', 'Working capital peg', firstNumber(payload, ['workingCapitalPegCents', 'nwcPegCents']), ['financials'], ['M109', 'M210']),
+    loiMoneyTerm(state, 'escrow_holdback', 'Escrow or holdback', firstNumber(payload, ['escrowCents', 'holdbackCents']), ['legal', 'financials'], ['M206', 'M208']),
+    loiMoneyTerm(state, 'seller_note', 'Seller note', firstNumber(payload, ['sellerNoteCents', 'sellerFinancingCents']), ['financials', 'legal', 'tax'], ['M204', 'M213']),
+    loiMoneyTerm(state, 'earnout', 'Earnout', firstNumber(payload, ['earnoutCents']), ['financials', 'legal', 'tax'], ['M111-M115', 'M213']),
+    {
+      id: 'rollover',
+      label: 'Rollover equity',
+      status: hasAnyValue(payload, ['rolloverPercent', 'rolloverCents']) ? 'payload_fact_present' : 'missing',
+      value: firstPresentValue(payload, ['rolloverPercent', 'rolloverCents']),
+      sourceRefs: refsForCategories(state, ['legal', 'tax', 'financials']),
+      missingSourceCategories: missingSourceCategoriesFor(state, ['legal', 'tax', 'financials']),
+      modelRefs: ['M200', 'M201', 'M213'],
+      boundary: 'Rollover mechanics are organized for modeling and counsel review; DEFINITIVE does not recommend economics or tax treatment.',
+    },
+  ];
+}
+
+function buildLoiClosingConditions(state: DefinitiveDealState) {
+  const payload = state.payload;
+  return [
+    loiCondition(state, 'diligence_condition', 'Diligence condition', firstPresentValue(payload, ['diligenceCondition', 'dueDiligenceCondition', 'diligence']), ['legal', 'commercial'], ['M211']),
+    loiCondition(state, 'financing_condition', 'Financing condition', firstPresentValue(payload, ['financingCondition', 'debtFinancing', 'financing']), ['legal', 'financials'], ['M211', 'M182', 'M183', 'M184']),
+    loiCondition(state, 'regulatory_approvals', 'Regulatory approvals', firstPresentValue(payload, ['regulatoryApprovals', 'approvals', 'hsr', 'cfius']), ['legal'], ['M128', 'M211']),
+    loiCondition(state, 'third_party_consents', 'Third-party consents', firstPresentValue(payload, ['consents', 'thirdPartyConsents', 'customerConsents', 'landlordConsents']), ['legal', 'commercial'], ['M211']),
+    loiCondition(state, 'exclusivity', 'Exclusivity / no-shop', firstPresentValue(payload, ['exclusivity', 'noShop', 'goShop']), ['legal'], ['M212']),
+    loiCondition(state, 'timing', 'Timing and signing/closing path', firstPresentValue(payload, ['timeline', 'closingTimeline', 'signingDate', 'closingDate']), ['legal', 'commercial'], ['M210', 'M211']),
+  ];
+}
+
+function buildLoiHandoffs(state: DefinitiveDealState) {
+  const handoffs: Array<Record<string, any>> = buildPackageDeferrals(state).map(deferral => ({
+    ...deferral,
+    lineStatus: 'requires_professional_or_user_determination',
+  }));
+  handoffs.push({
+    category: 'clause_language_and_enforceability',
+    reason: 'LOI clause drafting, binding/non-binding architecture, enforceability, and signature authority remain with counsel and the user.',
+    suggestedTool: 'defer_to_counsel',
+    lineStatus: 'counsel_review_required',
+  });
+  handoffs.push({
+    category: 'external_transmission',
+    reason: 'Sending an LOI externally requires a separate user-approved disclosure/export action.',
+    suggestedTool: 'disclose_subset',
+    lineStatus: 'external_approval_required',
+  });
+  if (state.classificationKey.triggeredOverlayGates.includes('G30')) {
+    handoffs.push({
+      category: 'asset_class_specialist',
+      reason: 'Real-estate, infrastructure, digital-asset, or secondaries overlays may require pass-through specialist inputs before LOI reliance.',
+      suggestedTool: 'compose_data_room_index',
+      lineStatus: 'specialist_input_required',
+    });
+  }
+  return handoffs;
+}
+
+function loiFact(
+  state: DefinitiveDealState,
+  id: string,
+  label: string,
+  value: unknown,
+  sourceCategories: string[],
+  modelRefs: string[],
+  boundary: string,
+) {
+  const present = value != null && value !== '' && value !== 'unknown' && (!Array.isArray(value) || value.length > 0);
+  return {
+    id,
+    label,
+    status: present ? 'present' : 'missing',
+    value: present ? value : null,
+    sourceCategories,
+    sourceRefs: refsForCategories(state, sourceCategories),
+    missingSourceCategories: missingSourceCategoriesFor(state, sourceCategories),
+    modelRefs,
+    boundary,
+  };
+}
+
+function loiMoneyTerm(
+  state: DefinitiveDealState,
+  id: string,
+  label: string,
+  valueCents: number | null,
+  sourceCategories: string[],
+  modelRefs: string[],
+) {
+  return {
+    id,
+    label,
+    status: valueCents == null ? 'missing' : 'payload_fact_present',
+    valueCents,
+    currency: 'USD',
+    sourceCategories,
+    sourceRefs: refsForCategories(state, sourceCategories),
+    missingSourceCategories: missingSourceCategoriesFor(state, sourceCategories),
+    modelRefs,
+    boundary:
+      'Money values are payload facts in integer cents unless tied to deterministic model output. DEFINITIVE does not recommend, offer, or negotiate economics.',
+  };
+}
+
+function loiCondition(
+  state: DefinitiveDealState,
+  id: string,
+  label: string,
+  value: unknown,
+  sourceCategories: string[],
+  modelRefs: string[],
+) {
+  const present = value != null && value !== '' && (!Array.isArray(value) || value.length > 0);
+  return {
+    id,
+    label,
+    status: present ? 'payload_fact_present' : 'missing',
+    value: present ? value : null,
+    sourceCategories,
+    sourceRefs: refsForCategories(state, sourceCategories),
+    missingSourceCategories: missingSourceCategoriesFor(state, sourceCategories),
+    modelRefs,
+    boundary:
+      'Condition is organized as agreement architecture. Counsel and the user decide enforceability, binding effect, and counterparty communications.',
+  };
+}
+
+function refsForCategories(state: DefinitiveDealState, categories: string[]) {
+  return sourceRefsForCategories(state, categories);
+}
+
+function missingSourceCategoriesFor(state: DefinitiveDealState, categories: string[]) {
+  const refs = refsForCategories(state, categories);
+  return categories.filter(category => !refs.some(source => source.category === category));
 }
 
 function ioiFact(id: string, label: string, value: unknown) {

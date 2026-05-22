@@ -67,6 +67,7 @@ const expectedTools = [
   'resume_deal',
   'compose_lifecycle_trace',
   'prepare_ioi_packet',
+  'prepare_loi_packet',
   'compose_data_room_index',
   'prepare_diligence_request',
   'disclose_subset',
@@ -307,6 +308,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.schemaNames.includes('DealPackage'), 'schema registry exposes DealPackage');
   assert(registry.schemaNames.includes('LifecycleTrace'), 'schema registry exposes LifecycleTrace');
   assert(registry.schemaNames.includes('IOIPacket'), 'schema registry exposes IOIPacket');
+  assert(registry.schemaNames.includes('LOIPacket'), 'schema registry exposes LOIPacket');
   assert(registry.schemaNames.includes('DataRoomIndex'), 'schema registry exposes DataRoomIndex');
   assert(registry.schemaNames.includes('DiligenceRequest'), 'schema registry exposes DiligenceRequest');
   assert(registry.schemaNames.includes('DisclosureSubset'), 'schema registry exposes DisclosureSubset');
@@ -319,6 +321,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.toolSchemaMap.resume_deal.takeBack.includes('DealPackage'), 'resume take-back maps DealPackage');
   assert(registry.toolSchemaMap.compose_lifecycle_trace.takeBack.includes('LifecycleTrace'), 'lifecycle trace maps LifecycleTrace');
   assert(registry.toolSchemaMap.prepare_ioi_packet.takeBack.includes('IOIPacket'), 'IOI packet maps IOIPacket');
+  assert(registry.toolSchemaMap.prepare_loi_packet.takeBack.includes('LOIPacket'), 'LOI packet maps LOIPacket');
   assert(registry.toolSchemaMap.compose_data_room_index.takeBack.includes('DataRoomIndex'), 'data room take-back maps DataRoomIndex');
   assert(registry.toolSchemaMap.prepare_diligence_request.takeBack.includes('DiligenceRequest'), 'diligence request maps DiligenceRequest');
   assert(registry.toolSchemaMap.disclose_subset.takeBack.includes('DisclosureSubset'), 'disclosure subset maps DisclosureSubset');
@@ -705,6 +708,44 @@ await test('IOIPacket organizes pre-LOI indication work without making an offer'
   assertEqual(packet.indicationBoundary.noOfferAuthority, true, 'IOI packet does not make an offer');
   assert(packet.next_suggested_calls.some((call: any) => call.toolName === 'compose_document_draft'), 'IOI packet can become Studio draft');
   assert(packet.takeBackArtifacts.includes('IOIPacket'), 'IOI packet is portable');
+});
+
+await test('LOIPacket organizes LOI architecture without drafting clauses', async () => {
+  const response = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'prepare_loi_packet',
+    input: {
+      payload: {
+        journey: 'buy',
+        targetName: 'LOI Target',
+        industry: 'industrial services',
+        jurisdiction: 'US-TX',
+        revenueCents: 8_000_000_00,
+        ebitdaCents: 1_200_000_00,
+        purchasePriceCents: 6_500_000_00,
+        dealStructure: 'asset purchase with seller note and rollover discussion',
+        sellerNoteCents: 900_000_00,
+        workingCapitalPegCents: 650_000_00,
+        closingConditions: { diligence: true, financing: true },
+        documents: [
+          { id: 'qoe', name: 'QoE report', type: 'qoe', hash: 'sha256:qoe' },
+          { id: 'loi', name: 'Prior LOI draft', type: 'legal', hash: 'sha256:loi' },
+          { id: 'tax', name: 'Tax return summary', type: 'tax', hash: 'sha256:tax' },
+          { id: 'customers', name: 'Customer export', type: 'commercial', hash: 'sha256:customers' },
+        ],
+      },
+    },
+    envelope: {},
+  });
+  assertEqual(response.status, 200, 'LOI packet status');
+  const packet = response.body.result.result.loiPacket;
+  assertEqual(packet.schema, 'LOIPacket.v0.1', 'LOI packet schema');
+  assert(packet.dealArchitecture.some((term: any) => term.id === 'structure'), 'LOI packet names structure');
+  assert(packet.economicTerms.some((term: any) => term.id === 'purchase_price' && term.valueCents === 6_500_000_00), 'LOI packet carries purchase price fact');
+  assertEqual(packet.loiBoundary.noBindingOffer, true, 'LOI packet does not make binding offer');
+  assertEqual(packet.loiBoundary.noClauseDrafting, true, 'LOI packet does not draft clauses');
+  assert(packet.next_suggested_calls.some((call: any) => call.toolName === 'compose_document_draft'), 'LOI packet can become Studio draft');
+  assert(packet.takeBackArtifacts.includes('LOIPacket'), 'LOI packet is portable');
 });
 
 await test('DataRoomIndex groups files and names source gaps', async () => {

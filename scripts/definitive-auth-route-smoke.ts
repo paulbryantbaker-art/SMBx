@@ -52,6 +52,7 @@ try {
     assert(body.tools.some((tool: any) => tool.name === 'resume_deal'), 'resume_deal is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_lifecycle_trace'), 'compose_lifecycle_trace is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'prepare_ioi_packet'), 'prepare_ioi_packet is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'prepare_loi_packet'), 'prepare_loi_packet is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_data_room_index'), 'compose_data_room_index is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'prepare_diligence_request'), 'prepare_diligence_request is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'disclose_subset'), 'disclose_subset is advertised');
@@ -387,6 +388,48 @@ try {
     assert(packet.knownFacts.some((fact: any) => fact.id === 'deal_subject'), 'IOI packet deal subject present');
     assertEqual(packet.indicationBoundary.noOfferAuthority, true, 'IOI packet does not make offer');
     assert(packet.takeBackArtifacts.includes('IOIPacket'), 'IOI packet take-back exposed');
+  });
+
+  await test('Authenticated prepare_loi_packet returns LOI architecture packet', async () => {
+    const response = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'prepare_loi_packet',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-state:read', 'studio:draft', 'model-stack:compose'],
+      input: {
+        payload: {
+          journey: 'buy',
+          targetName: 'DEFINITIVE Route Fixture Deal',
+          industry: 'software',
+          jurisdiction: 'US-DE',
+          revenueCents: 8_000_000_00,
+          ebitdaCents: 2_100_000_00,
+          purchasePriceCents: 11_000_000_00,
+          dealStructure: 'stock purchase with working capital true-up',
+          workingCapitalPegCents: 900_000_00,
+          closingConditions: { diligence: true, financing: true },
+          documents: [
+            { id: 'financials', name: 'Seller P&L', type: 'financials', hash: 'sha256:fixture-financials' },
+            { id: 'loi', name: 'LOI issue list', type: 'legal', hash: 'sha256:fixture-loi' },
+            { id: 'tax', name: 'Tax return summary', type: 'tax', hash: 'sha256:fixture-tax' },
+            { id: 'customers', name: 'Customer export', type: 'commercial', hash: 'sha256:fixture-customers' },
+          ],
+        },
+      },
+    });
+
+    assertEqual(response.status, 200, 'LOI packet route status');
+    assertEqual(response.body.ok, true, 'LOI packet route ok');
+    assertEqual(response.body.toolName, 'prepare_loi_packet', 'LOI packet tool name');
+    const packet = response.body.result?.result?.loiPacket;
+    assertEqual(packet.schema, 'LOIPacket.v0.1', 'LOI packet schema');
+    assert(packet.dealArchitecture.some((term: any) => term.id === 'structure'), 'LOI packet deal structure present');
+    assertEqual(packet.loiBoundary.noBindingOffer, true, 'LOI packet does not bind offer');
+    assertEqual(packet.loiBoundary.noClauseDrafting, true, 'LOI packet does not draft clauses');
+    assert(packet.takeBackArtifacts.includes('LOIPacket'), 'LOI packet take-back exposed');
   });
 
   await test('Authenticated compose_data_room_index returns source gaps', async () => {

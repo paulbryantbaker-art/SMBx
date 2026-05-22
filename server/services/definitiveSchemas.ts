@@ -336,6 +336,36 @@ const IOIPacket: JsonSchema = {
   },
 };
 
+const LOIPacket: JsonSchema = {
+  $id: schemaId('LOIPacket'),
+  title: 'LOIPacket',
+  type: 'object',
+  additionalProperties: true,
+  required: ['packetId', 'schema', 'dealStateCid', 'dealStateHash', 'dealArchitecture', 'economicTerms', 'closingConditions', 'loiBoundary', 'next_suggested_calls'],
+  properties: {
+    packetId: { type: 'string' },
+    schema: { type: 'string', const: 'LOIPacket.v0.1' },
+    dealStateCid: { type: 'string' },
+    dealStateHash: { type: 'string' },
+    objective: { type: 'string' },
+    audience: { type: 'string' },
+    stage: { type: 'string' },
+    readinessLevel: { type: 'string' },
+    dealArchitecture: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    economicTerms: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    closingConditions: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    sourceRefs: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    sourceGaps: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    missingInputs: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    handoffs: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    modelDependencies: { type: 'object', additionalProperties: true },
+    loiBoundary: { type: 'object', additionalProperties: true },
+    next_suggested_calls: { type: 'array', items: { $ref: schemaId('MCPCallHint') } },
+    takeBackArtifacts: { type: 'array', items: { type: 'string' } },
+    lineInvariant: { type: 'string' },
+  },
+};
+
 const DataRoomIndex: JsonSchema = {
   $id: schemaId('DataRoomIndex'),
   title: 'DataRoomIndex',
@@ -516,6 +546,7 @@ export const DEFINITIVE_SCHEMAS: Record<string, JsonSchema> = {
   DealPackage,
   LifecycleTrace,
   IOIPacket,
+  LOIPacket,
   DataRoomIndex,
   DiligenceRequest,
   DisclosureSubset,
@@ -575,6 +606,11 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     input: ['DealState', 'DealPayload'],
     output: ['IOIPacket', 'DealState', 'MissingInputContract', 'MCPCallHint'],
     takeBack: ['IOIPacket', 'DealState', 'DocumentDraft', 'MCPCallHint'],
+  },
+  prepare_loi_packet: {
+    input: ['DealState', 'DealPayload'],
+    output: ['LOIPacket', 'DealState', 'MissingInputContract', 'MCPCallHint'],
+    takeBack: ['LOIPacket', 'DealState', 'DocumentDraft', 'MCPCallHint'],
   },
   compose_data_room_index: {
     input: ['DealState', 'DealPayload'],
