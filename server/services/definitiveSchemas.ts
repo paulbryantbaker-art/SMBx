@@ -311,6 +311,34 @@ const DataRoomIndex: JsonSchema = {
   },
 };
 
+const DiligenceRequest: JsonSchema = {
+  $id: schemaId('DiligenceRequest'),
+  title: 'DiligenceRequest',
+  type: 'object',
+  additionalProperties: true,
+  required: ['requestId', 'schema', 'dealStateCid', 'dealStateHash', 'requestGroups', 'requestBoundary', 'next_suggested_calls'],
+  properties: {
+    requestId: { type: 'string' },
+    schema: { type: 'string', const: 'DiligenceRequest.v0.1' },
+    dealStateCid: { type: 'string' },
+    dealStateHash: { type: 'string' },
+    objective: { type: 'string' },
+    audience: { type: 'string' },
+    stage: { type: 'string' },
+    readinessLevel: { type: 'string' },
+    requestedCategories: { type: 'array', items: { type: 'string' } },
+    requestGroups: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    sourceGaps: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    missingInputs: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    modelDependencies: { type: 'object', additionalProperties: true },
+    handoffs: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    requestBoundary: { type: 'object', additionalProperties: true },
+    next_suggested_calls: { type: 'array', items: { $ref: schemaId('MCPCallHint') } },
+    takeBackArtifacts: { type: 'array', items: { type: 'string' } },
+    lineInvariant: { type: 'string' },
+  },
+};
+
 const DisclosureSubset: JsonSchema = {
   $id: schemaId('DisclosureSubset'),
   title: 'DisclosureSubset',
@@ -434,6 +462,7 @@ export const DEFINITIVE_SCHEMAS: Record<string, JsonSchema> = {
   DealStateDiff,
   DealPackage,
   DataRoomIndex,
+  DiligenceRequest,
   DisclosureSubset,
   DocumentDraft,
   NegotiationBrief,
@@ -486,6 +515,11 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     input: ['DealState', 'DealPayload'],
     output: ['DataRoomIndex', 'DealState', 'MissingInputContract', 'MCPCallHint'],
     takeBack: ['DataRoomIndex', 'SourceIndex', 'MissingInputContract'],
+  },
+  prepare_diligence_request: {
+    input: ['DealState', 'DealPayload', 'DataRoomIndex'],
+    output: ['DiligenceRequest', 'DealState', 'MissingInputContract', 'MCPCallHint'],
+    takeBack: ['DiligenceRequest', 'DataRoomIndex', 'MissingInputContract', 'MCPCallHint'],
   },
   disclose_subset: {
     input: ['DealState', 'DealPayload', 'DataRoomIndex'],

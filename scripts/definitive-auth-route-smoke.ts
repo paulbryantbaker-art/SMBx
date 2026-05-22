@@ -51,6 +51,7 @@ try {
     assert(body.tools.some((tool: any) => tool.name === 'compose_deal_package'), 'compose_deal_package is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'resume_deal'), 'resume_deal is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_data_room_index'), 'compose_data_room_index is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'prepare_diligence_request'), 'prepare_diligence_request is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'disclose_subset'), 'disclose_subset is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_document_draft'), 'compose_document_draft is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'prepare_negotiation_brief'), 'prepare_negotiation_brief is advertised');
@@ -346,6 +347,41 @@ try {
     assert(index.categories.some((category: any) => category.id === 'financials' && category.status === 'present'), 'financial source bucket present');
     assert(index.sourceGaps.some((gap: any) => gap.category === 'legal'), 'legal gap is exposed');
     assert(index.takeBackArtifacts.includes('DataRoomIndex'), 'DataRoomIndex take-back artifact is exposed');
+  });
+
+  await test('Authenticated prepare_diligence_request returns request packet', async () => {
+    const response = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'prepare_diligence_request',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-state:read', 'data-room:read', 'studio:draft'],
+      input: {
+        categories: ['financials', 'ip'],
+        payload: {
+          journey: 'buy',
+          targetName: 'DEFINITIVE Route Fixture Deal',
+          industry: 'software',
+          jurisdiction: 'US-DE',
+          ebitdaCents: 2_100_000_00,
+          documents: [
+            { id: 'qoe', name: 'QoE report', type: 'qoe', hash: 'sha256:fixture-qoe' },
+            { id: 'ip', name: 'IP schedule', type: 'ip', hash: 'sha256:fixture-ip' },
+          ],
+        },
+      },
+    });
+
+    assertEqual(response.status, 200, 'diligence request route status');
+    assertEqual(response.body.ok, true, 'diligence request route ok');
+    assertEqual(response.body.toolName, 'prepare_diligence_request', 'diligence request tool name');
+    const request = response.body.result?.result?.diligenceRequest;
+    assertEqual(request.schema, 'DiligenceRequest.v0.1', 'diligence request schema');
+    assert(request.requestGroups.some((group: any) => group.id === 'financials' && group.status === 'source_ready'), 'financial diligence group present');
+    assertEqual(request.requestBoundary.noExternalTransmission, true, 'diligence request is compose-only');
+    assert(request.takeBackArtifacts.includes('DiligenceRequest'), 'diligence request take-back exposed');
   });
 
   await test('Authenticated disclose_subset composes selective proof without sharing', async () => {

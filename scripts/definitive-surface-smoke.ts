@@ -66,6 +66,7 @@ const expectedTools = [
   'compose_deal_package',
   'resume_deal',
   'compose_data_room_index',
+  'prepare_diligence_request',
   'disclose_subset',
   'compose_document_draft',
   'prepare_negotiation_brief',
@@ -303,6 +304,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.schemaNames.includes('DealStateDiff'), 'schema registry exposes DealStateDiff');
   assert(registry.schemaNames.includes('DealPackage'), 'schema registry exposes DealPackage');
   assert(registry.schemaNames.includes('DataRoomIndex'), 'schema registry exposes DataRoomIndex');
+  assert(registry.schemaNames.includes('DiligenceRequest'), 'schema registry exposes DiligenceRequest');
   assert(registry.schemaNames.includes('DisclosureSubset'), 'schema registry exposes DisclosureSubset');
   assert(registry.schemaNames.includes('DocumentDraft'), 'schema registry exposes DocumentDraft');
   assert(registry.schemaNames.includes('NegotiationBrief'), 'schema registry exposes NegotiationBrief');
@@ -312,6 +314,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.toolSchemaMap.compose_deal_package.takeBack.includes('DealPackage'), 'package take-back maps DealPackage');
   assert(registry.toolSchemaMap.resume_deal.takeBack.includes('DealPackage'), 'resume take-back maps DealPackage');
   assert(registry.toolSchemaMap.compose_data_room_index.takeBack.includes('DataRoomIndex'), 'data room take-back maps DataRoomIndex');
+  assert(registry.toolSchemaMap.prepare_diligence_request.takeBack.includes('DiligenceRequest'), 'diligence request maps DiligenceRequest');
   assert(registry.toolSchemaMap.disclose_subset.takeBack.includes('DisclosureSubset'), 'disclosure subset maps DisclosureSubset');
   assert(registry.toolSchemaMap.compose_document_draft.takeBack.includes('DocumentDraft'), 'document draft maps DocumentDraft');
   assert(registry.toolSchemaMap.prepare_negotiation_brief.takeBack.includes('NegotiationBrief'), 'negotiation brief maps NegotiationBrief');
@@ -661,6 +664,36 @@ await test('DataRoomIndex groups files and names source gaps', async () => {
   assert(index.categories.some((category: any) => category.id === 'ip' && category.status === 'present'), 'IP files are present');
   assert(index.sourceGaps.some((gap: any) => gap.category === 'legal'), 'legal source gap is named');
   assert(index.takeBackArtifacts.includes('DataRoomIndex'), 'data room index is portable');
+});
+
+await test('DiligenceRequest organizes iterative asks without sending externally', async () => {
+  const response = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'prepare_diligence_request',
+    input: {
+      categories: ['financials', 'ip'],
+      payload: {
+        journey: 'buy',
+        targetName: 'Diligence Target',
+        industry: 'software',
+        jurisdiction: 'US-DE',
+        ebitdaCents: 2_300_000_00,
+        documents: [
+          { id: 'qoe', name: 'QoE report', type: 'qoe', hash: 'sha256:qoe' },
+          { id: 'ip-schedule', name: 'Patent assignment schedule', type: 'ip', hash: 'sha256:ip' },
+        ],
+      },
+    },
+    envelope: {},
+  });
+  assertEqual(response.status, 200, 'diligence request status');
+  const request = response.body.result.result.diligenceRequest;
+  assertEqual(request.schema, 'DiligenceRequest.v0.1', 'diligence request schema');
+  assert(request.requestGroups.some((group: any) => group.id === 'financials' && group.status === 'source_ready'), 'financial diligence group uses indexed source');
+  assert(request.requestGroups.some((group: any) => group.id === 'legal' && group.status === 'needs_source'), 'legal diligence group names source gap');
+  assertEqual(request.requestBoundary.noExternalTransmission, true, 'diligence request does not send externally');
+  assert(request.next_suggested_calls.some((call: any) => call.toolName === 'compose_document_draft'), 'diligence request can become Studio draft');
+  assert(request.takeBackArtifacts.includes('DiligenceRequest'), 'diligence request is portable');
 });
 
 await test('DisclosureSubset scopes data-room sources without external transmission', async () => {

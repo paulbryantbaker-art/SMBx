@@ -154,6 +154,8 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
       return resumeDefinitiveDeal(input);
     case 'compose_data_room_index':
       return composeDefinitiveDataRoomIndex(input);
+    case 'prepare_diligence_request':
+      return prepareDefinitiveDiligenceRequest(input);
     case 'disclose_subset':
       return discloseDefinitiveSubset(input);
     case 'compose_document_draft':
@@ -174,6 +176,7 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
           'compose_deal_package',
           'resume_deal',
           'compose_data_room_index',
+          'prepare_diligence_request',
           'disclose_subset',
           'compose_document_draft',
           'prepare_negotiation_brief',
@@ -193,6 +196,7 @@ export function isDefinitiveDealStateTool(toolName: string): boolean {
     'compose_deal_package',
     'resume_deal',
     'compose_data_room_index',
+    'prepare_diligence_request',
     'disclose_subset',
     'compose_document_draft',
     'prepare_negotiation_brief',
@@ -484,6 +488,129 @@ export function composeDefinitiveDataRoomIndex(input: Record<string, any>) {
       missingInputContract: state.missingInputContract,
       next_suggested_calls: dataRoomIndex.next_suggested_calls,
       portableTakeBackArtifacts: dataRoomIndex.takeBackArtifacts,
+    },
+    state_hash_after: state.stateHash,
+    completeness_contribution_delta: 0,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
+export function prepareDefinitiveDiligenceRequest(input: Record<string, any>) {
+  const state = stateFromInput(input);
+  const objective = textValue(input.objective) || 'iterative_due_diligence';
+  const audience = textValue(input.audience) || 'deal_team_and_counterparty';
+  const requestedCategories = uniqueStrings([
+    ...normalizeStringList(input.categories),
+    ...requiredDataRoomCategories(state),
+  ]);
+  const requestGroups = buildDiligenceRequestGroups(state, requestedCategories);
+  const sourceGaps = requestGroups
+    .filter(group => group.status !== 'source_ready')
+    .map(group => ({
+      category: group.id,
+      label: group.label,
+      reason: group.missingSourceCategories.length
+        ? `Missing source support for ${group.missingSourceCategories.join(', ')}.`
+        : 'Category needs review-ready source support.',
+      suggestedTool: 'compose_data_room_index',
+    }));
+  const missingInputs = state.missingInputContract.items.map(item => ({
+    field: item.field,
+    label: item.label,
+    priority: item.priority,
+    surface: item.surface,
+    unlocks: item.unlocks,
+  }));
+  const needsModelState = !state.completenessReport.satisfied.includes('model_state_present');
+  const handoffs = buildDiligenceHandoffs(state);
+  const requestHash = sha256(stableStringify({
+    dealStateHash: state.stateHash,
+    objective,
+    audience,
+    requestedCategories,
+    requestGroups: requestGroups.map(group => ({
+      id: group.id,
+      status: group.status,
+      missingSourceCategories: group.missingSourceCategories,
+      requestIds: group.requests.map(request => request.id),
+    })),
+    missingInputs,
+    methodologyVersion: DEFINITIVE_METHODOLOGY_VERSION,
+  }));
+  const diligenceRequest = {
+    requestId: `diligence_${requestHash.slice(0, 16)}`,
+    schema: 'DiligenceRequest.v0.1',
+    dealStateCid: state.cid,
+    dealStateHash: state.stateHash,
+    objective,
+    audience,
+    stage: currentStageForState(state),
+    readinessLevel: state.completenessReport.level,
+    requestedCategories,
+    requestGroups,
+    sourceGaps,
+    missingInputs,
+    modelDependencies: {
+      required: needsModelState,
+      status: needsModelState ? 'missing_model_state' : 'not_blocked',
+      suggestedTool: needsModelState ? 'compose_model_stack' : null,
+    },
+    handoffs,
+    requestBoundary: {
+      composedOnly: true,
+      noExternalTransmission: true,
+      noLegalDemand: true,
+      noNegotiationAuthority: true,
+      externalSendRequires: 'A5_EXTERNAL_DISCLOSURE approval through a separate share/send action.',
+      userDecides: 'The user and advisors decide what to send, to whom, and whether a request is appropriate.',
+    },
+    next_suggested_calls: [
+      ...(sourceGaps.length
+        ? [{
+            toolName: 'compose_data_room_index',
+            priority: 'P1' as const,
+            reason: `Refresh the data-room index and fill diligence source gaps: ${sourceGaps.map(gap => gap.category).join(', ')}.`,
+            inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
+          }]
+        : []),
+      ...(needsModelState
+        ? [{
+            toolName: 'compose_model_stack',
+            priority: 'P1' as const,
+            reason: 'Tie diligence asks to the deterministic model stack before relying on model-dependent requests.',
+            inputHint: {
+              journey: state.classificationKey.journey,
+              league: state.classificationKey.league === 'unknown' ? undefined : state.classificationKey.league,
+              dealType: state.payload.dealType || state.payload.structure || state.classificationKey.subJourney,
+              signals: state.signals || undefined,
+            },
+          }]
+        : []),
+      {
+        toolName: 'compose_document_draft',
+        priority: sourceGaps.length || needsModelState ? 'P2' as const : 'P1' as const,
+        reason: 'Render the diligence request packet into a Studio diligence request scaffold when ready.',
+        inputHint: {
+          dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision },
+          documentType: 'diligence_request',
+          audience,
+        },
+      },
+    ],
+    takeBackArtifacts: ['DiligenceRequest', 'DataRoomIndex', 'MissingInputContract', 'MCPCallHint[]'],
+    lineInvariant: LINE_INVARIANT,
+  };
+
+  return {
+    ok: true,
+    action: 'prepare_diligence_request',
+    result: {
+      diligenceRequest,
+      dealState: state,
+      missingInputContract: state.missingInputContract,
+      next_suggested_calls: diligenceRequest.next_suggested_calls,
+      portableTakeBackArtifacts: diligenceRequest.takeBackArtifacts,
     },
     state_hash_after: state.stateHash,
     completeness_contribution_delta: 0,
@@ -1024,6 +1151,144 @@ function inferDataRoomCategory(source: Record<string, any>): string {
   if (matches(text, ['chapter 11', '363', 'dip', 'rsa', 'forbearance', 'restructuring', 'claims'])) return 'restructuring';
   if (matches(text, ['regulatory', 'hsr', 'cfius', 'permit', 'license', 'filing'])) return 'regulatory';
   return 'other';
+}
+
+function buildDiligenceRequestGroups(state: DefinitiveDealState, requestedCategories: string[]) {
+  type CategorizedSource = Record<string, any> & { category: string };
+  const sourceIndex: CategorizedSource[] = state.sourceIndex.map(source => ({
+    ...source,
+    category: inferDataRoomCategory(source),
+  }));
+  return requestedCategories.map(category => {
+    const sourceRefs = sourceIndex
+      .filter(source => source.category === category)
+      .map(source => ({
+        id: source.id,
+        name: source.name ?? source.id,
+        type: source.type,
+        category: source.category,
+        hash: source.hash,
+        citationReady: source.citationReady,
+      }));
+    const requests = diligenceRequestsForCategory(category, state);
+    return {
+      id: category,
+      label: dataRoomCategoryLabel(category),
+      required: true,
+      status: sourceRefs.length ? 'source_ready' : 'needs_source',
+      sourceRefs,
+      missingSourceCategories: sourceRefs.length ? [] : [category],
+      requests,
+      lineBoundary: diligenceLineBoundaryForCategory(category),
+    };
+  });
+}
+
+function diligenceRequestsForCategory(category: string, state: DefinitiveDealState) {
+  const base: Record<string, string[]> = {
+    financials: [
+      'Monthly P&L, balance sheet, and cash-flow support for the trailing 24-36 months.',
+      'QoE adjustments, add-backs, revenue bridge, gross margin bridge, and working-capital detail.',
+      'Customer revenue by month, revenue recognition policy, and AR aging support.',
+    ],
+    tax: [
+      'Federal, state, and local tax returns plus entity classification and ownership history.',
+      'Transaction-structure facts for asset, stock, §338/§336(e), rollover, NOL, and SALT analysis.',
+      'Open audits, tax notices, tax-sharing agreements, and transfer-tax or withholding facts.',
+    ],
+    legal: [
+      'Organizational documents, capitalization, ownership records, board/manager approvals, and authority evidence.',
+      'Material contracts, change-of-control consent list, litigation docket, compliance matters, and draft LOI/SPA terms.',
+      'Indemnity, survival, escrow, RWI, closing-condition, and termination-fee economics for counsel review.',
+    ],
+    commercial: [
+      'Customer list, revenue concentration, churn, pipeline, backlog, pricing, and win/loss support.',
+      'Market thesis support, competitor set, channel partners, and supplier/customer dependency detail.',
+    ],
+    operations: [
+      'Operating KPIs, vendor list, inventory detail, fulfillment/service workflow, and capex/deferred-maintenance schedule.',
+      'Day 0 operating dependencies, TSA needs, systems map, and integration or PMI blockers.',
+    ],
+    hr: [
+      'Employee census, compensation, benefits, contractor list, equity/incentive plans, and retention risks.',
+      'Employment agreements, restrictive covenants, pending claims, and payroll/benefits compliance support.',
+    ],
+    ip: [
+      'Registered IP schedule, chain-of-title evidence, assignment agreements, and lien/encumbrance searches.',
+      'Inbound/outbound license map, OSS/SCA scan results, source-code escrow status, and domain/trademark transfer list.',
+    ],
+    real_estate: [
+      'Rent roll, lease abstracts, title commitment, survey, environmental/PCA reports, and property-level capex reserve.',
+      'NOI support, cap-rate source, transfer/CITT tax facts, FIRPTA status, ground-lease terms, and OpCo/PropCo facts.',
+    ],
+    financing: [
+      'Debt schedule, credit agreement, covenant calculations, liens, collateral, intercreditor terms, and lender consents.',
+      'ABL borrowing-base support, make-whole/call schedule, exchange-offer terms, and capital-structure change history.',
+    ],
+    restructuring: [
+      '13-week cash forecast, liquidity runway, forbearance/RSA status, creditor classes, claims schedule, and DIP/exit financing facts.',
+      '§363 sale process materials, stalking-horse APA, bid procedures, cure schedule, and plan/recovery support when applicable.',
+    ],
+    regulatory: [
+      'Required approvals, permits, HSR/CFIUS/FCC/FERC/Form A/healthcare/defense filings, and timing constraints.',
+      'Compliance policies, sanctions/cyber/privacy support, notices, and regulator correspondence.',
+    ],
+    other: [
+      'Any deal-specific files that do not fit a standard bucket, with source owner, date, and citation-ready hash.',
+    ],
+  };
+  const requests = base[category] || base.other;
+  return requests.map((requestText, index) => ({
+    id: `${category}_${index + 1}`,
+    requestText,
+    status: 'open',
+    sourceCategory: category,
+    surface: category === 'financials' || category === 'financing' ? 'models' : 'files',
+    lineBoundary: diligenceLineBoundaryForCategory(category),
+    modelOrGateContext: diligenceContextForCategory(category, state),
+  }));
+}
+
+function diligenceContextForCategory(category: string, state: DefinitiveDealState) {
+  const contexts: string[] = [];
+  if (category === 'financials') contexts.push('working-capital, QoE, valuation, DSCR, LBO, and deal-score models');
+  if (category === 'tax') contexts.push('M101-M105, M139-M140, M145, M150, M170, M185-M186, M200-M205 tax mechanics');
+  if (category === 'legal') contexts.push('M206-M213 agreement economics and THE LINE counsel handoffs');
+  if (category === 'ip') contexts.push('M214-M223 IP, OSS, source-code escrow, and transfer mechanics');
+  if (category === 'real_estate') contexts.push('G30 and M169-M199 real-estate/asset-class mechanics');
+  if (category === 'financing') contexts.push('G29 and M158-M160, M180-M184 capital-structure mechanics');
+  if (category === 'restructuring') contexts.push('G28 and M151-M168 distressed/restructuring mechanics');
+  if (state.classificationKey.triggeredOverlayGates.length) contexts.push(`triggered overlays: ${state.classificationKey.triggeredOverlayGates.join(', ')}`);
+  return contexts.length ? contexts.join('; ') : 'standard Deal OS diligence loop';
+}
+
+function diligenceLineBoundaryForCategory(category: string): string {
+  if (['legal', 'tax', 'regulatory', 'restructuring', 'financing'].includes(category)) {
+    return 'DEFINITIVE organizes required facts, sources, and deterministic computations only; counsel, advisors, counterparties, or courts make determinations.';
+  }
+  return 'DEFINITIVE organizes source-backed diligence asks and model dependencies; the user decides what to request or share externally.';
+}
+
+function buildDiligenceHandoffs(state: DefinitiveDealState) {
+  const handoffs: Array<Record<string, any>> = buildPackageDeferrals(state).map(deferral => ({
+    ...deferral,
+    lineStatus: 'requires_professional_or_user_determination',
+  }));
+  if (state.classificationKey.triggeredOverlayGates.includes('G30')) {
+    handoffs.push({
+      category: 'pass_through_specialist_inputs',
+      reason: 'Real-estate, environmental, title, appraisal, SCA, or other specialist/data API inputs may be needed before source-backed reliance.',
+      suggestedTool: 'compose_data_room_index',
+      lineStatus: 'specialist_input_required',
+    });
+  }
+  handoffs.push({
+    category: 'external_request_transmission',
+    reason: 'Sending diligence requests to a counterparty or service provider is a separate user-approved action.',
+    suggestedTool: 'disclose_subset',
+    lineStatus: 'external_disclosure_approval_required',
+  });
+  return handoffs;
 }
 
 function disclosureCategoriesForObjective(objective: string | null, state: DefinitiveDealState): string[] {
