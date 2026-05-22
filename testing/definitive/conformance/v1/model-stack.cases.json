@@ -456,5 +456,199 @@
     "expect": {
       "triggeredOverlayGates": []
     }
+  },
+  {
+    "id": "CONF.STACK.REGULATED.DEFENSE.001",
+    "title": "Defense contractor stack keeps CFIUS, cyber, sanctions, files, and closing-condition handoffs visible without overlay drift",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L6",
+      "dealType": "defense contractor ITAR CFIUS critical technology government contract cyber sanctions data room closing conditions"
+    },
+    "expect": {
+      "complexity": "HEAVY",
+      "primaryModelsInclude": ["MODEL.VAL.EBITDA.v1", "MODEL.BUYER.FIT.v1"],
+      "supportingInclude": ["MODEL.LBO.LMM.v1", "MODEL.COVENANT.COMPLIANCE.v1"],
+      "triggeredOverlayGates": [],
+      "applicableMechanicsInclude": ["M130", "M132", "M196", "M210", "M211"],
+      "applicableMechanicsSummaryAtLeast": {
+        "total": 5,
+        "executable": 3,
+        "professional_handoff": 4
+      },
+      "yuliaBriefIncludes": ["Professional-handoff mechanics", "Pass-through mechanics"]
+    }
+  },
+  {
+    "id": "CONF.STACK.REGULATED.ENERGY_PROJECT.001",
+    "title": "Energy infrastructure stack routes G30 and keeps project-finance research tied to collateral mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L6",
+      "dealType": "energy infrastructure FERC 203 project finance DSCR LLCR PLCR concession environmental title survey"
+    },
+    "expect": {
+      "triggeredOverlayGates": ["G30"],
+      "overlayReasonsInclude": {
+        "G30": ["deal text indicates real estate, asset-class, or regulated-asset overlay"]
+      },
+      "applicableMechanicsInclude": ["M173", "M187", "M190", "M195", "M196", "M198"],
+      "applicableMechanicsSummaryAtLeast": {
+        "total": 25,
+        "executable": 21,
+        "professional_handoff": 10,
+        "research_only": 4
+      },
+      "yuliaBriefIncludes": ["Professional-handoff mechanics", "Research-only mechanics"]
+    }
+  },
+  {
+    "id": "CONF.STACK.MULTIDOMAIN.CARVEOUT.001",
+    "title": "Manufacturing carve-out stack combines G30, stranded-cost, IP license-back, real-estate, and tax mechanics",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "sell",
+      "league": "L4",
+      "dealType": "manufacturing carve-out real estate leaseback IP license-back TSA stranded cost 1060 allocation transaction tax"
+    },
+    "expect": {
+      "triggeredOverlayGates": ["G30"],
+      "applicableMechanicsInclude": ["M144", "M188", "M200", "M203", "M216", "M218"],
+      "applicableMechanicsSummaryAtLeast": {
+        "total": 34,
+        "executable": 30,
+        "planning_only": 3,
+        "professional_handoff": 16,
+        "research_only": 1
+      },
+      "yuliaBriefIncludes": ["Professional-handoff mechanics", "Pass-through mechanics", "Research-only mechanics"]
+    }
+  },
+  {
+    "id": "CONF.STACK.LOWERMM.BUYER.001",
+    "title": "Lower-middle-market buyer stack keeps SBA/search, QoE, working capital, tax, escrow, and earnout mechanics together",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L2",
+      "dealType": "SBA buyer search fund seller note working capital QoE indemnity escrow earnout tax asset sale"
+    },
+    "expect": {
+      "complexity": "LIGHT_MED",
+      "primaryModelsInclude": ["MODEL.VAL.SDE.v1", "MODEL.BUYER.FIT.v1"],
+      "supportingInclude": ["MODEL.LBO.SBA.v1", "MODEL.DSCR.STRESS.v1"],
+      "triggeredOverlayGates": [],
+      "applicableMechanicsInclude": ["M109", "M112", "M119", "M139", "M200", "M208", "M213"],
+      "applicableMechanicsSummaryAtLeast": {
+        "total": 21,
+        "executable": 18,
+        "planning_only": 3,
+        "professional_handoff": 7
+      },
+      "yuliaBriefIncludes": ["Professional-handoff mechanics"]
+    }
+  },
+  {
+    "id": "CONF.STACK.RESTRUCT.OUT_OF_COURT.001",
+    "title": "Out-of-court workout stack routes G28 and G29 with exchange, claims, ABC, Article 9, and LME boundaries",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "raise",
+      "league": "L4",
+      "dealType": "out of court workout distressed debt exchange offer forbearance covenant amendment claims trading ABC Article 9"
+    },
+    "expect": {
+      "triggeredOverlayGates": ["G28", "G29"],
+      "applicableMechanicsInclude": ["M150", "M160", "M165", "M166", "M181", "M184"],
+      "applicableMechanicsSummaryAtLeast": {
+        "total": 28,
+        "executable": 21,
+        "professional_handoff": 14,
+        "research_only": 4
+      },
+      "taxLegalInclude": ["MODEL.LEGAL.HALTSCAN.v1"],
+      "yuliaBriefIncludes": ["Professional-handoff mechanics", "Research-only mechanics"]
+    }
+  },
+  {
+    "id": "CONF.STACK.RE.REIT_MERGER.001",
+    "title": "REIT merger stack routes G30 and keeps FIRPTA, CITT, OpCo/PropCo, sale-leaseback, and 75/75/90 mechanics together",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L7",
+      "dealType": "REIT 75 income 75 asset 90 distribution real estate merger FIRPTA CITT sale leaseback opco propco"
+    },
+    "expect": {
+      "triggeredOverlayGates": ["G30"],
+      "applicableMechanicsInclude": ["M169", "M171", "M172", "M187", "M191", "M194", "M199"],
+      "applicableMechanicsSummaryAtLeast": {
+        "total": 29,
+        "executable": 24,
+        "professional_handoff": 10,
+        "research_only": 4
+      },
+      "yuliaBriefIncludes": ["Professional-handoff mechanics", "Pass-through mechanics", "Research-only mechanics"]
+    }
+  },
+  {
+    "id": "CONF.STACK.TAX.CONNECTED.001",
+    "title": "Connected tax stack keeps partnership, Up-C, TRA, 338/336, 1060, SALT, and transaction-cost mechanics together",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L5",
+      "dealType": "partnership 704c 754 743b Up-C TRA 338 336 1060 SALT bulk sale transaction cost"
+    },
+    "expect": {
+      "triggeredOverlayGates": [],
+      "applicableMechanicsInclude": ["M139", "M145", "M200", "M201", "M203", "M205", "M222"],
+      "applicableMechanicsSummaryAtLeast": {
+        "total": 10,
+        "executable": 7,
+        "planning_only": 3,
+        "professional_handoff": 2
+      },
+      "yuliaBriefIncludes": ["Professional-handoff mechanics"]
+    }
+  },
+  {
+    "id": "CONF.STACK.LEGAL.NWC_PPA.001",
+    "title": "Working-capital PPA stack keeps peg, closing statement, true-up, escrow, and accounting-arbitrator mechanics together",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L4",
+      "dealType": "working capital peg closing statement PPA escrow purchase price adjustment accounting arbitrator true up"
+    },
+    "expect": {
+      "triggeredOverlayGates": [],
+      "applicableMechanicsInclude": ["M109", "M139", "M195", "M208", "M210", "M211"],
+      "applicableMechanicsSummaryAtLeast": {
+        "total": 16,
+        "executable": 13,
+        "planning_only": 3,
+        "professional_handoff": 4
+      },
+      "yuliaBriefIncludes": ["Professional-handoff mechanics", "Pass-through mechanics"]
+    }
   }
 ]
