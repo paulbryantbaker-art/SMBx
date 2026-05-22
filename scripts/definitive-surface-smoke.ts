@@ -66,6 +66,7 @@ const expectedTools = [
   'compose_deal_package',
   'resume_deal',
   'compose_data_room_index',
+  'disclose_subset',
   'lookup_citation',
   'fetch_market_data',
   'defer_to_counsel',
@@ -231,6 +232,7 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assert(manifest.substrateArchitectureSurface.dealOsLifecycleStages.some(stage => stage.id === 'model_negotiation'), 'manifest substrate lifecycle includes modeling and negotiation prep');
   assert(manifest.substrateArchitectureSurface.dealOsWorkSurfaces.some(surface => surface.id === 'data_room'), 'manifest substrate exposes data room work surface');
   assert(manifest.substrateArchitectureSurface.agentTakeBackArtifacts.includes('DataRoomIndex'), 'manifest substrate exposes data-room take-back artifact');
+  assert(manifest.substrateArchitectureSurface.agentTakeBackArtifacts.includes('DisclosureSubset'), 'manifest substrate exposes disclosure-subset take-back artifact');
   assert(manifest.substrateArchitectureSurface.agentDiscoverabilityLayers.some(layer => layer.id === 'well_known_discovery'), 'manifest substrate exposes well-known discovery layer');
   assert(manifest.substrateArchitectureSurface.agentDiscoverabilityLayers.some(layer => layer.id === 'enterprise_allow_lists'), 'manifest substrate exposes enterprise allow-list layer');
   assert(manifest.substrateArchitectureSurface.agentDesirabilitySignals.some(signal => signal.id === 'citation_provenance'), 'manifest substrate exposes citation desirability signal');
@@ -299,12 +301,14 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.schemaNames.includes('DealStateDiff'), 'schema registry exposes DealStateDiff');
   assert(registry.schemaNames.includes('DealPackage'), 'schema registry exposes DealPackage');
   assert(registry.schemaNames.includes('DataRoomIndex'), 'schema registry exposes DataRoomIndex');
+  assert(registry.schemaNames.includes('DisclosureSubset'), 'schema registry exposes DisclosureSubset');
   assertEqual(registry.schemas.DealPayload.properties.revenueCents.type, 'integer', 'money is cents integer');
   assert(registry.toolSchemaMap.ingest_deal_payload.output.includes('MissingInputContract'), 'ingest output maps missing input contract');
   assert(registry.toolSchemaMap.diff_deal_state.takeBack.includes('DealStateDiff'), 'diff take-back maps DealStateDiff');
   assert(registry.toolSchemaMap.compose_deal_package.takeBack.includes('DealPackage'), 'package take-back maps DealPackage');
   assert(registry.toolSchemaMap.resume_deal.takeBack.includes('DealPackage'), 'resume take-back maps DealPackage');
   assert(registry.toolSchemaMap.compose_data_room_index.takeBack.includes('DataRoomIndex'), 'data room take-back maps DataRoomIndex');
+  assert(registry.toolSchemaMap.disclose_subset.takeBack.includes('DisclosureSubset'), 'disclosure subset maps DisclosureSubset');
   assert(registry.noRejectionContract.includes('DealPayload may be incomplete'), 'schema registry states no-rejection contract');
 });
 
@@ -650,6 +654,37 @@ await test('DataRoomIndex groups files and names source gaps', async () => {
   assert(index.categories.some((category: any) => category.id === 'ip' && category.status === 'present'), 'IP files are present');
   assert(index.sourceGaps.some((gap: any) => gap.category === 'legal'), 'legal source gap is named');
   assert(index.takeBackArtifacts.includes('DataRoomIndex'), 'data room index is portable');
+});
+
+await test('DisclosureSubset scopes data-room sources without external transmission', async () => {
+  const response = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'disclose_subset',
+    input: {
+      categories: ['financials', 'ip'],
+      audience: 'external_agent',
+      payload: {
+        journey: 'buy',
+        targetName: 'Subset Target',
+        industry: 'software',
+        jurisdiction: 'US-DE',
+        documents: [
+          { id: 'qoe', name: 'QoE report', type: 'qoe', hash: 'sha256:qoe' },
+          { id: 'ip-schedule', name: 'Patent assignment schedule', type: 'ip', hash: 'sha256:ip' },
+          { id: 'customer-list', name: 'Customer concentration export', type: 'commercial', hash: 'sha256:customer' },
+        ],
+      },
+    },
+    envelope: {},
+  });
+  assertEqual(response.status, 200, 'disclosure subset status');
+  const subset = response.body.result.result.disclosureSubset;
+  assertEqual(subset.schema, 'DisclosureSubset.v0.1', 'disclosure subset schema');
+  assert(subset.sources.some((source: any) => source.category === 'financials'), 'financial source is selected');
+  assert(subset.sources.some((source: any) => source.category === 'ip'), 'IP source is selected');
+  assert(!subset.sources.some((source: any) => source.category === 'commercial'), 'commercial source is excluded from scoped subset');
+  assertEqual(subset.disclosureBoundary.noExternalTransmission, true, 'subset does not transmit externally');
+  assert(subset.takeBackArtifacts.includes('SelectiveDisclosureProof'), 'subset includes selective proof take-back');
 });
 
 await test('Corpus discovery and sanitizer block raw identifiers without DB work', async () => {

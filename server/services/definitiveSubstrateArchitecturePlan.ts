@@ -183,6 +183,7 @@ const agentTakeBackArtifacts = [
   'AssumptionLog',
   'SourceIndex',
   'DataRoomIndex',
+  'DisclosureSubset',
   'DocumentDraft',
   'StudioBook',
   'AuditPacket',

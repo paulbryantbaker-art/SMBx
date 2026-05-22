@@ -51,6 +51,7 @@ try {
     assert(body.tools.some((tool: any) => tool.name === 'compose_deal_package'), 'compose_deal_package is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'resume_deal'), 'resume_deal is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_data_room_index'), 'compose_data_room_index is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'disclose_subset'), 'disclose_subset is advertised');
   });
 
   await test('THE LINE inventory is available to authenticated agents', async () => {
@@ -343,6 +344,41 @@ try {
     assert(index.categories.some((category: any) => category.id === 'financials' && category.status === 'present'), 'financial source bucket present');
     assert(index.sourceGaps.some((gap: any) => gap.category === 'legal'), 'legal gap is exposed');
     assert(index.takeBackArtifacts.includes('DataRoomIndex'), 'DataRoomIndex take-back artifact is exposed');
+  });
+
+  await test('Authenticated disclose_subset composes selective proof without sharing', async () => {
+    const response = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'disclose_subset',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-state:read', 'data-room:read', 'deal-package:compose'],
+      input: {
+        categories: ['financials'],
+        audience: 'external_agent',
+        payload: {
+          journey: 'buy',
+          targetName: 'DEFINITIVE Route Fixture Deal',
+          industry: 'software',
+          jurisdiction: 'US-DE',
+          documents: [
+            { id: 'qoe', name: 'QoE report', type: 'qoe', hash: 'sha256:fixture-qoe' },
+            { id: 'customer', name: 'Customer export', type: 'commercial', hash: 'sha256:fixture-customer' },
+          ],
+        },
+      },
+    });
+
+    assertEqual(response.status, 200, 'disclosure subset route status');
+    assertEqual(response.body.ok, true, 'disclosure subset route ok');
+    assertEqual(response.body.toolName, 'disclose_subset', 'disclosure subset tool name');
+    const subset = response.body.result?.result?.disclosureSubset;
+    assertEqual(subset.schema, 'DisclosureSubset.v0.1', 'disclosure subset schema');
+    assert(subset.sources.some((source: any) => source.category === 'financials'), 'financial source selected');
+    assertEqual(subset.disclosureBoundary.noExternalTransmission, true, 'subset is compose-only');
+    assert(subset.takeBackArtifacts.includes('SelectiveDisclosureProof'), 'selective disclosure proof exposed');
   });
 
   await test('Audit packet route returns pinned reproducibility payload', async () => {

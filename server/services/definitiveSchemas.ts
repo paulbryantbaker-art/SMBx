@@ -311,6 +311,31 @@ const DataRoomIndex: JsonSchema = {
   },
 };
 
+const DisclosureSubset: JsonSchema = {
+  $id: schemaId('DisclosureSubset'),
+  title: 'DisclosureSubset',
+  type: 'object',
+  additionalProperties: true,
+  required: ['subsetId', 'schema', 'dealStateCid', 'dealStateHash', 'sources', 'selectiveDisclosureProof', 'disclosureBoundary', 'next_suggested_calls'],
+  properties: {
+    subsetId: { type: 'string' },
+    schema: { type: 'string', const: 'DisclosureSubset.v0.1' },
+    dealStateCid: { type: 'string' },
+    dealStateHash: { type: 'string' },
+    objective: { type: 'string' },
+    audience: { type: 'string' },
+    categories: { type: 'array', items: { type: 'string' } },
+    sources: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    excludedSources: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    sourceGaps: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    selectiveDisclosureProof: { type: 'object', additionalProperties: true },
+    disclosureBoundary: { type: 'object', additionalProperties: true },
+    next_suggested_calls: { type: 'array', items: { $ref: schemaId('MCPCallHint') } },
+    takeBackArtifacts: { type: 'array', items: { type: 'string' } },
+    lineInvariant: { type: 'string' },
+  },
+};
+
 const DefinitionOfDone: JsonSchema = {
   $id: schemaId('DefinitionOfDone'),
   title: 'DefinitionOfDone',
@@ -358,6 +383,7 @@ export const DEFINITIVE_SCHEMAS: Record<string, JsonSchema> = {
   DealStateDiff,
   DealPackage,
   DataRoomIndex,
+  DisclosureSubset,
   DefinitionOfDone,
   DefinitiveToolEnvelope,
 };
@@ -407,6 +433,11 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     input: ['DealState', 'DealPayload'],
     output: ['DataRoomIndex', 'DealState', 'MissingInputContract', 'MCPCallHint'],
     takeBack: ['DataRoomIndex', 'SourceIndex', 'MissingInputContract'],
+  },
+  disclose_subset: {
+    input: ['DealState', 'DealPayload', 'DataRoomIndex'],
+    output: ['DisclosureSubset', 'DealState', 'MissingInputContract', 'MCPCallHint'],
+    takeBack: ['DisclosureSubset', 'SourceIndex', 'SelectiveDisclosureProof'],
   },
 };
 

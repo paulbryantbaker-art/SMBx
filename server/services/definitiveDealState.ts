@@ -154,6 +154,8 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
       return resumeDefinitiveDeal(input);
     case 'compose_data_room_index':
       return composeDefinitiveDataRoomIndex(input);
+    case 'disclose_subset':
+      return discloseDefinitiveSubset(input);
     default:
       return {
         ok: false,
@@ -168,6 +170,7 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
           'compose_deal_package',
           'resume_deal',
           'compose_data_room_index',
+          'disclose_subset',
         ],
       };
   }
@@ -184,6 +187,7 @@ export function isDefinitiveDealStateTool(toolName: string): boolean {
     'compose_deal_package',
     'resume_deal',
     'compose_data_room_index',
+    'disclose_subset',
   ].includes(toolName);
 }
 
@@ -480,6 +484,128 @@ export function composeDefinitiveDataRoomIndex(input: Record<string, any>) {
   };
 }
 
+export function discloseDefinitiveSubset(input: Record<string, any>) {
+  const state = stateFromInput(input);
+  const explicitCategories = normalizeStringList(
+    input.categories ?? input.disclosureCategories ?? input.scope?.categories,
+  ).map(category => category.toLowerCase());
+  const selectedSourceIds = new Set(normalizeStringList(input.sourceIds ?? input.selectedSourceIds).map(String));
+  const objective = textValue(input.objective) || textValue(input.stage) || textValue(input.purpose) || state.completenessReport.nextGate;
+  const categories = explicitCategories.length ? explicitCategories : disclosureCategoriesForObjective(objective, state);
+  const maxSources = Math.max(1, Math.min(50, Number(input.maxSources ?? 20) || 20));
+  type CategorizedSource = Record<string, any> & { category: string };
+  const categorizedSources: CategorizedSource[] = state.sourceIndex.map(source => ({
+    ...source,
+    category: inferDataRoomCategory(source),
+  }));
+  const categorySet = new Set(categories);
+  let selectedSources: CategorizedSource[] = categorizedSources.filter(source => (
+    (categorySet.size === 0 || categorySet.has(source.category)) ||
+    selectedSourceIds.has(String(source.id))
+  ));
+
+  if (!selectedSources.length && selectedSourceIds.size > 0) {
+    selectedSources = categorizedSources.filter(source => selectedSourceIds.has(String(source.id)));
+  }
+  if (!selectedSources.length && categorySet.size === 0) {
+    selectedSources = categorizedSources;
+  }
+  selectedSources = selectedSources.slice(0, maxSources).map(source => ({
+    id: source.id,
+    name: source.name ?? source.id,
+    type: source.type,
+    category: source.category,
+    hash: source.hash,
+    sourceUri: source.sourceUri ?? null,
+    citationReady: source.citationReady,
+  }));
+
+  const selectedIds = new Set(selectedSources.map(source => String(source.id)));
+  const excludedSources = categorizedSources
+    .filter(source => !selectedIds.has(String(source.id)))
+    .map(source => ({
+      id: source.id,
+      category: source.category,
+      reason: selectedSourceIds.size > 0 || categorySet.size > 0 ? 'outside_requested_subset_scope' : 'above_max_sources_limit',
+    }));
+  const sourceGaps = categories
+    .filter(category => !selectedSources.some(source => source.category === category))
+    .map(category => ({
+      category,
+      reason: `No indexed source in requested ${category} disclosure scope.`,
+      suggestedTool: 'compose_data_room_index',
+    }));
+  const proofHash = sha256(stableStringify({
+    dealStateHash: state.stateHash,
+    objective,
+    categories,
+    selectedSources: selectedSources.map(source => ({
+      id: source.id,
+      hash: source.hash,
+      category: source.category,
+    })),
+    specVersion: DEFINITIVE_SPEC_VERSION,
+  }));
+  const disclosureSubset = {
+    subsetId: `subset_${proofHash.slice(0, 16)}`,
+    schema: 'DisclosureSubset.v0.1',
+    dealStateCid: state.cid,
+    dealStateHash: state.stateHash,
+    objective,
+    audience: textValue(input.audience) || textValue(input.recipientRole) || 'agent_or_principal',
+    categories,
+    sources: selectedSources,
+    excludedSources,
+    sourceGaps,
+    selectiveDisclosureProof: {
+      proofType: 'sha256:selected-source-manifest',
+      proofHash,
+      includesOnlySelectedSources: true,
+      sourceCount: selectedSources.length,
+      excludedSourceCount: excludedSources.length,
+    },
+    disclosureBoundary: {
+      composedOnly: true,
+      noExternalTransmission: true,
+      externalShareRequires: 'A5_EXTERNAL_DISCLOSURE approval through a separate share/export action.',
+    },
+    next_suggested_calls: [
+      ...(sourceGaps.length
+        ? [{
+            toolName: 'compose_data_room_index',
+            priority: 'P1' as const,
+            reason: 'Refresh the data-room index and fill missing requested disclosure categories.',
+            inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
+          }]
+        : []),
+      {
+        toolName: 'compose_deal_package',
+        priority: sourceGaps.length ? 'P2' as const : 'P1' as const,
+        reason: 'Attach the disclosure subset to the portable deal package when the receiving system needs a full take-back packet.',
+        inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
+      },
+    ],
+    takeBackArtifacts: ['DisclosureSubset', 'SourceIndex', 'SelectiveDisclosureProof', 'MCPCallHint[]'],
+    lineInvariant: LINE_INVARIANT,
+  };
+
+  return {
+    ok: true,
+    action: 'disclose_subset',
+    result: {
+      disclosureSubset,
+      dealState: state,
+      missingInputContract: state.missingInputContract,
+      next_suggested_calls: disclosureSubset.next_suggested_calls,
+      portableTakeBackArtifacts: disclosureSubset.takeBackArtifacts,
+    },
+    state_hash_after: state.stateHash,
+    completeness_contribution_delta: 0,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
 function buildDealStateResult(action: 'ingest_deal_payload' | 'update_deal_payload', state: DefinitiveDealState, priorScore: number | null) {
   const scoreDelta = priorScore == null ? state.completenessReport.score : state.completenessReport.score - priorScore;
   return {
@@ -711,6 +837,17 @@ function inferDataRoomCategory(source: Record<string, any>): string {
   if (matches(text, ['chapter 11', '363', 'dip', 'rsa', 'forbearance', 'restructuring', 'claims'])) return 'restructuring';
   if (matches(text, ['regulatory', 'hsr', 'cfius', 'permit', 'license', 'filing'])) return 'regulatory';
   return 'other';
+}
+
+function disclosureCategoriesForObjective(objective: string | null, state: DefinitiveDealState): string[] {
+  const text = compactText([objective]);
+  if (matches(text, ['ioi', 'indication'])) return ['financials', 'commercial'];
+  if (matches(text, ['loi', 'term sheet', 'deal architecture'])) return ['financials', 'legal', 'tax'];
+  if (matches(text, ['model', 'valuation', 'lbo', 'working capital', 'qoe'])) return ['financials', 'tax', 'financing'];
+  if (matches(text, ['negotiation', 'purchase agreement', 'indemnity', 'escrow'])) return ['legal', 'financials', 'tax'];
+  if (matches(text, ['pmi', 'post close', 'integration'])) return ['operations', 'financials', 'commercial', 'hr'];
+  if (matches(text, ['data room', 'diligence', 'due diligence'])) return requiredDataRoomCategories(state);
+  return requiredDataRoomCategories(state).slice(0, 5);
 }
 
 function buildPlanStage(
@@ -1114,10 +1251,28 @@ function normalizeSourceIndex(payload: Record<string, any>): Array<Record<string
     .filter(item => item && typeof item === 'object')
     .map((item, index) => ({
       id: (item as Record<string, any>).id || (item as Record<string, any>).name || `source_${index + 1}`,
+      name: (item as Record<string, any>).name || (item as Record<string, any>).title || null,
       type: (item as Record<string, any>).type || (item as Record<string, any>).kind || 'source',
+      kind: (item as Record<string, any>).kind || null,
       hash: (item as Record<string, any>).hash || null,
+      sourceUri: (item as Record<string, any>).sourceUri || (item as Record<string, any>).uri || null,
       citationReady: Boolean((item as Record<string, any>).hash || (item as Record<string, any>).citation || (item as Record<string, any>).sourceUri),
     }));
+}
+
+function normalizeStringList(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value
+      .map(item => textValue(item) || (item == null ? null : String(item).trim()))
+      .filter((item): item is string => Boolean(item));
+  }
+  if (typeof value === 'string') {
+    return value
+      .split(',')
+      .map(item => item.trim())
+      .filter(Boolean);
+  }
+  return [];
 }
 
 function normalizePayload(value: unknown): Record<string, any> {
