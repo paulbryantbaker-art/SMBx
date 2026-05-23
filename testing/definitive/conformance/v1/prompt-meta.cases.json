@@ -589,6 +589,8 @@
         { "path": "toolNames", "includes": "introspect_capabilities" },
         { "path": "toolNames", "includes": "describe_methodology" },
         { "path": "toolNames", "includes": "estimate_deal_cost" },
+        { "path": "toolNames", "includes": "get_deal_runbook" },
+        { "path": "toolNames", "includes": "lookup_model_slot" },
         { "path": "toolNames", "includes": "compose_deal_plan" },
         { "path": "toolNames", "includes": "diff_deal_state" },
         { "path": "toolNames", "includes": "compose_deal_package" },
@@ -613,6 +615,8 @@
         { "path": "toolsByName.introspect_capabilities.description", "includes": "next_suggested_calls" },
         { "path": "toolsByName.describe_methodology.description", "includes": "The Diligence Standard" },
         { "path": "toolsByName.estimate_deal_cost.description", "includes": "no success fee" },
+        { "path": "toolsByName.get_deal_runbook.description", "includes": "Deal OS runbook" },
+        { "path": "toolsByName.lookup_model_slot.description", "includes": "M101-M223" },
         { "path": "toolsByName.compose_deal_plan.description", "includes": "full M&A lifecycle" },
         { "path": "toolsByName.diff_deal_state.description", "includes": "DealStateDiff" },
         { "path": "toolsByName.compose_deal_package.description", "includes": "DealPackage" },
@@ -689,7 +693,7 @@
       "textIncludes": ["DealPayload", "CompletenessSpec", "DealPackage", "BestVehicleBlock"],
       "fields": [
         { "path": "primitiveCount", "equals": 8 },
-        { "path": "newMcpToolCount", "equals": 31 },
+        { "path": "newMcpToolCount", "equals": 33 },
         { "path": "newMcpTools", "includes": "compose_deal_package" },
         { "path": "newMcpTools", "includes": "disclose_subset" },
         { "path": "newMcpTools", "includes": "compose_data_room_index" },
@@ -731,7 +735,9 @@
         { "path": "universalResponseFields", "includes": "next_suggested_calls" },
         { "path": "universalResponseFields", "includes": "state_hash_after" },
         { "path": "universalResponseFields", "includes": "the_line_invariant" },
-        { "path": "workstreamsById.WS7.objectTypes", "includes": "MCPCallHint" }
+        { "path": "workstreamsById.WS7.objectTypes", "includes": "MCPCallHint" },
+        { "path": "workstreamsById.WS7.mcpTools", "includes": "get_deal_runbook" },
+        { "path": "workstreamsById.WS7.mcpTools", "includes": "lookup_model_slot" }
       ]
     }
   },
@@ -747,7 +753,7 @@
         { "path": "endpoints.substrateArchitecture", "equals": "/api/definitive/substrate-architecture" },
         { "path": "access.publicDiscovery", "includes": "/api/definitive/substrate-architecture" },
         { "path": "substrateArchitectureSurface.primitiveCount", "equals": 8 },
-        { "path": "substrateArchitectureSurface.newMcpToolCount", "equals": 31 },
+        { "path": "substrateArchitectureSurface.newMcpToolCount", "equals": 33 },
         { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "DealState" },
         { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "DealStateDiff" },
         { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "LifecycleTrace" },

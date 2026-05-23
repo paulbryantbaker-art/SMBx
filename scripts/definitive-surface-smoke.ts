@@ -76,6 +76,8 @@ const expectedTools = [
   'introspect_capabilities',
   'describe_methodology',
   'estimate_deal_cost',
+  'get_deal_runbook',
+  'lookup_model_slot',
   'compose_deal_plan',
   'diff_deal_state',
   'compose_deal_package',
@@ -148,7 +150,7 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assert(card.definitive.authoritySeedPlanEntries >= DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'agent card authority seed plan meets target');
   assertEqual(card.definitive.authoritySeedPlanStatus, 'ready_for_800_plus_seeding', 'agent card authority seed plan status');
   assertEqual(card.definitive.substratePrimitiveCount, 8, 'agent card substrate primitive count');
-  assertEqual(card.definitive.substrateNewMcpToolCount, 31, 'agent card substrate tool count');
+  assertEqual(card.definitive.substrateNewMcpToolCount, 33, 'agent card substrate tool count');
   assert(card.definitive.schemaRegistryNames.includes('DealPayload'), 'agent card exposes DealPayload schema');
   assert(card.definitive.schemaRegistryNames.includes('DealState'), 'agent card exposes DealState schema');
   assert(card.definitive.schemaRegistryNames.includes('DealStateDiff'), 'agent card exposes DealStateDiff schema');
@@ -208,7 +210,7 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   const substrateCapability = card.capabilities.find((item: any) => item.id === 'definitive_substrate_architecture') as any;
   assert(substrateCapability, 'substrate architecture capability exists');
   assertEqual(substrateCapability.primitiveCount, 8, 'substrate capability primitive count');
-  assertEqual(substrateCapability.newMcpToolCount, 31, 'substrate capability tool count');
+  assertEqual(substrateCapability.newMcpToolCount, 33, 'substrate capability tool count');
   assert(substrateCapability.agentOperatingDoctrine.noRejectionContract.includes('Agents are not rejected'), 'substrate capability blocks incomplete-payload rejection');
   assert(substrateCapability.lifecycleStages.includes('ioi'), 'substrate capability exposes IOI stage');
   assert(substrateCapability.lifecycleStages.includes('close_pmi'), 'substrate capability exposes close/PMI stage');
@@ -275,7 +277,7 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assert(manifest.authoritySurface.categoryIds.includes('ip_authorities'), 'manifest authority surface includes IP');
   assert(manifest.authoritySurface.categoryIds.includes('pass_through_pricing_boundary'), 'manifest authority surface includes THE LINE pricing boundary');
   assertEqual(manifest.substrateArchitectureSurface.primitiveCount, 8, 'manifest substrate primitive count');
-  assertEqual(manifest.substrateArchitectureSurface.newMcpToolCount, 31, 'manifest substrate tool count');
+  assertEqual(manifest.substrateArchitectureSurface.newMcpToolCount, 33, 'manifest substrate tool count');
   assert(manifest.substrateArchitectureSurface.agentOperatingDoctrine.productDoctrine.includes('Deal OS'), 'manifest substrate Deal OS doctrine');
   assert(manifest.substrateArchitectureSurface.agentOperatingDoctrine.noRejectionContract.includes('MissingInputContract'), 'manifest substrate no-rejection contract');
   assert(manifest.substrateArchitectureSurface.agentOperatingDoctrine.homeContract.includes('data rooms'), 'manifest substrate agent home contract includes data rooms');
@@ -414,6 +416,8 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.toolSchemaMap.introspect_capabilities.takeBack.includes('CapabilityCatalog'), 'capability introspection maps CapabilityCatalog');
   assert(registry.toolSchemaMap.describe_methodology.takeBack.includes('MethodologyDescription'), 'methodology description maps MethodologyDescription');
   assert(registry.toolSchemaMap.estimate_deal_cost.takeBack.includes('DealCostEstimate'), 'cost estimate maps DealCostEstimate');
+  assert(registry.toolSchemaMap.get_deal_runbook.takeBack.includes('DealPlan'), 'deal runbook maps DealPlan');
+  assert(registry.toolSchemaMap.lookup_model_slot.takeBack.includes('ModelOutput'), 'model slot lookup maps ModelOutput');
   assert(registry.toolSchemaMap.diff_deal_state.takeBack.includes('DealStateDiff'), 'diff take-back maps DealStateDiff');
   assert(registry.toolSchemaMap.compose_deal_package.takeBack.includes('DealPackage'), 'package take-back maps DealPackage');
   assert(registry.toolSchemaMap.resume_deal.takeBack.includes('DealPackage'), 'resume take-back maps DealPackage');
@@ -498,7 +502,7 @@ await test('Authority Register seed plan is explicit and above 800 planned entri
 await test('Substrate architecture plan exposes the terminal orchestration primitives', async () => {
   const architecture = getDefinitiveSubstrateArchitecturePlan();
   assertEqual(architecture.primitiveCount, 8, 'substrate architecture primitive count');
-  assertEqual(architecture.newMcpToolCount, 31, 'substrate architecture tool count');
+  assertEqual(architecture.newMcpToolCount, 33, 'substrate architecture tool count');
   assert(architecture.agentOperatingDoctrine.productDoctrine.includes('Deal OS'), 'substrate plan is Deal OS');
   assert(architecture.agentOperatingDoctrine.noRejectionContract.includes('Agents are not rejected'), 'substrate plan accepts incomplete agent payloads');
   assert(architecture.agentOperatingDoctrine.homeContract.includes('documents'), 'substrate plan includes document creation surface');
@@ -515,6 +519,8 @@ await test('Substrate architecture plan exposes the terminal orchestration primi
   assert(architecture.workstreams.some(item => item.id === 'WS6' && item.mcpTools.includes('compose_data_room_index')), 'data room workstream exists');
   assert(architecture.workstreams.some(item => item.id === 'WS6' && item.mcpTools.includes('compose_document_draft')), 'document draft workstream exists');
   assert(architecture.workstreams.some(item => item.id === 'WS5' && item.mcpTools.includes('compute_best_vehicle')), 'best vehicle workstream exists');
+  assert(architecture.workstreams.some(item => item.id === 'WS7' && item.mcpTools.includes('get_deal_runbook')), 'capability workstream includes deal runbook lookup');
+  assert(architecture.workstreams.some(item => item.id === 'WS7' && item.mcpTools.includes('lookup_model_slot')), 'capability workstream includes model slot lookup');
   assert(architecture.lineDoctrine.includes('does not advise'), 'THE LINE invariant is explicit');
 });
 
@@ -1206,7 +1212,7 @@ await test('Conformance status tool is DB-free and version pinned', async () => 
   assert(response.body.result.categories.includes('working_capital'), 'working capital category included');
 });
 
-await test('Agent capability, methodology, and cost tools are DB-free Deal OS entrypoints', async () => {
+await test('Agent capability, methodology, cost, runbook, and model-slot tools are DB-free Deal OS entrypoints', async () => {
   const capabilities = await executeDefinitiveMcpTool({
     userId: 1,
     toolName: 'introspect_capabilities',
@@ -1260,6 +1266,28 @@ await test('Agent capability, methodology, and cost tools are DB-free Deal OS en
   assertEqual(cost.body.result.recommendedPlan.id, 'pro', 'API/MCP deal work recommends Pro');
   assert(cost.body.result.pricingDoctrine.includes('No wallet'), 'cost tool preserves no-wallet doctrine');
   assertEqual(cost.body.result.passThrough.requestedCalls[0].humanReferralCompensationAllowed, false, 'pass-through blocks referral compensation');
+
+  const runbook = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'get_deal_runbook',
+    input: { journey: 'buy' },
+    envelope: {},
+  });
+  assertEqual(runbook.status, 200, 'deal runbook tool status');
+  assertEqual(runbook.body.result.schema, 'DEFINITIVE.deal-runbook.v0.1', 'deal runbook tool schema');
+  assert(runbook.body.result.stages.some((stage: any) => stage.stageId === 'loi'), 'deal runbook tool exposes LOI stage');
+  assert(runbook.body.result.next_suggested_calls.some((call: any) => call.toolName === 'resume_deal'), 'deal runbook tool helps agents resume work');
+
+  const modelSlot = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'lookup_model_slot',
+    input: { slotId: 'm200' },
+    envelope: {},
+  });
+  assertEqual(modelSlot.status, 200, 'model slot tool status');
+  assertEqual(modelSlot.body.result.schema, 'DEFINITIVE.model-slot.v0.1', 'model slot tool schema');
+  assertEqual(modelSlot.body.result.slotId, 'M200', 'model slot lookup normalizes id');
+  assertEqual(modelSlot.body.result.implementedRuntimeModelId, 'MODEL.TAX.TRANSACTION.MASTER.v1', 'model slot lookup returns runtime model');
 });
 
 await test('V20 overlay routing detects G28/G29/G30 without executing unbuilt models', async () => {

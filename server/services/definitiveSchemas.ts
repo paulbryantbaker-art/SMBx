@@ -682,6 +682,16 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     output: ['DealCostEstimate'],
     takeBack: ['DealCostEstimate'],
   },
+  get_deal_runbook: {
+    input: [],
+    output: ['DealPlan', 'MCPCallHint'],
+    takeBack: ['DealPlan', 'MCPCallHint'],
+  },
+  lookup_model_slot: {
+    input: [],
+    output: ['ModelOutput', 'DefinitionOfDone', 'MCPCallHint'],
+    takeBack: ['ModelOutput', 'MCPCallHint'],
+  },
   compose_deal_plan: {
     input: ['DealState', 'DealPayload'],
     output: ['DealPlan', 'MCPCallHint'],

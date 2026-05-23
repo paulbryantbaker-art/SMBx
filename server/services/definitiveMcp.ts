@@ -20,6 +20,14 @@ import {
 import { buildDefinitiveSchemaRegistry } from './definitiveSchemas.js';
 import { getDefinitiveSubstrateArchitecturePlan } from './definitiveSubstrateArchitecturePlan.js';
 import {
+  buildDefinitiveDealRunbooksSurface,
+  getDefinitiveDealRunbook,
+} from './definitiveDealRunbooks.js';
+import {
+  buildDefinitiveModelCatalogSurface,
+  getDefinitiveModelSlotSurface,
+} from './definitiveModelCatalogSurface.js';
+import {
   getDefinitiveLineContract,
   inputHasExplicitConfirmation,
   type DefinitiveLineContract,
@@ -35,6 +43,8 @@ const DEFINITIVE_MCP_TOOLS = [
   'introspect_capabilities',
   'describe_methodology',
   'estimate_deal_cost',
+  'get_deal_runbook',
+  'lookup_model_slot',
   'compose_deal_plan',
   'diff_deal_state',
   'compose_deal_package',
@@ -160,6 +170,24 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
             },
           },
         },
+      },
+    },
+  },
+  get_deal_runbook: {
+    description: 'Return the buy, sell, raise, or PMI Deal OS runbook so an external agent knows how to work the full iterative lifecycle: intake, IOI, diligence, LOI, confirmatory diligence, modeling, negotiation prep, close, and PMI. If no journey is supplied, returns all runbooks.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        journey: { type: 'string', enum: ['buy', 'sell', 'raise', 'pmi'], description: 'Optional journey. Omit to return the full runbook catalog.' },
+      },
+    },
+  },
+  lookup_model_slot: {
+    description: 'Look up a stable DEFINITIVE M101-M223 model slot by id, including gates, deal types, authority anchors, runtime model id when implemented, route surfaces, next_suggested_calls, and THE LINE boundary. If no slotId is supplied, returns the compact model catalog.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        slotId: { type: 'string', description: 'Optional model slot id such as M109, M148, M200, M206, or M221.' },
       },
     },
   },
@@ -482,6 +510,8 @@ const TOOL_SCOPE: Record<DefinitiveMcpToolName, string[]> = {
   introspect_capabilities: ['capability:read', 'methodology:read'],
   describe_methodology: ['methodology:read', 'authority:read'],
   estimate_deal_cost: ['pricing:read', 'pass-through:read'],
+  get_deal_runbook: ['methodology:read', 'deal-plan:read'],
+  lookup_model_slot: ['methodology:read', 'model-catalog:read'],
   compose_deal_plan: ['deal-state:read', 'deal-plan:read'],
   diff_deal_state: ['deal-state:read', 'deal-state:diff'],
   compose_deal_package: ['deal-state:read', 'deal-package:read'],
@@ -515,6 +545,8 @@ const TOOL_INTERNAL_API_METER = new Set<DefinitiveMcpToolName>([
   'introspect_capabilities',
   'describe_methodology',
   'estimate_deal_cost',
+  'get_deal_runbook',
+  'lookup_model_slot',
 ]);
 
 const WORKSPACE_PLANS = [
@@ -1071,21 +1103,49 @@ function normalizeScopes(value: unknown): string[] {
 
 function isStaticDefinitiveDiscoveryTool(
   toolName: DefinitiveMcpToolName,
-): toolName is 'introspect_capabilities' | 'describe_methodology' | 'estimate_deal_cost' {
+): toolName is 'introspect_capabilities' | 'describe_methodology' | 'estimate_deal_cost' | 'get_deal_runbook' | 'lookup_model_slot' {
   return (
     toolName === 'introspect_capabilities' ||
     toolName === 'describe_methodology' ||
-    toolName === 'estimate_deal_cost'
+    toolName === 'estimate_deal_cost' ||
+    toolName === 'get_deal_runbook' ||
+    toolName === 'lookup_model_slot'
   );
 }
 
 function executeStaticDefinitiveDiscoveryTool(
-  toolName: 'introspect_capabilities' | 'describe_methodology' | 'estimate_deal_cost',
+  toolName: 'introspect_capabilities' | 'describe_methodology' | 'estimate_deal_cost' | 'get_deal_runbook' | 'lookup_model_slot',
   toolInput: Record<string, any>,
 ) {
   if (toolName === 'introspect_capabilities') return buildCapabilityCatalog(toolInput);
   if (toolName === 'describe_methodology') return buildMethodologyDescription(toolInput);
+  if (toolName === 'get_deal_runbook') return buildDealRunbookToolResult(toolInput);
+  if (toolName === 'lookup_model_slot') return buildModelSlotLookupToolResult(toolInput);
   return buildDealCostEstimate(toolInput);
+}
+
+function buildDealRunbookToolResult(toolInput: Record<string, any>) {
+  const journey = normalizeJourney(toolInput.journey);
+  if (!journey) return buildDefinitiveDealRunbooksSurface();
+  const runbook = getDefinitiveDealRunbook(journey);
+  return runbook || {
+    schema: 'DEFINITIVE.deal-runbook.not-found.v0.1',
+    ok: false,
+    journey: toolInput.journey,
+    supportedJourneys: ['buy', 'sell', 'raise', 'pmi'],
+  };
+}
+
+function buildModelSlotLookupToolResult(toolInput: Record<string, any>) {
+  const slotId = nullableString(toolInput.slotId);
+  if (!slotId) return buildDefinitiveModelCatalogSurface();
+  const slot = getDefinitiveModelSlotSurface(slotId);
+  return slot || {
+    schema: 'DEFINITIVE.model-slot.not-found.v0.1',
+    ok: false,
+    slotId,
+    examples: ['M109', 'M148', 'M200', 'M206', 'M221'],
+  };
 }
 
 function buildCapabilityCatalog(toolInput: Record<string, any>) {

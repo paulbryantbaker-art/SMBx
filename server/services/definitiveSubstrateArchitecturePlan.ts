@@ -357,7 +357,7 @@ const workstreams: DefinitiveSubstrateWorkstream[] = [
     name: 'Capability discovery and next-call hints',
     purpose: 'Let thin agents discover only relevant tools/models and progress to completion by following server-provided next suggested calls.',
     primitives: ['CapabilityCatalog', 'MCPCallHint'],
-    mcpTools: ['introspect_capabilities', 'describe_methodology', 'estimate_deal_cost'],
+    mcpTools: ['introspect_capabilities', 'describe_methodology', 'estimate_deal_cost', 'get_deal_runbook', 'lookup_model_slot'],
     objectTypes: ['CapabilityCatalog', 'MCPCallHint'],
     buildPhase: 'Phase 4',
     doneCondition: 'Every substrate response can guide the agent to the next useful call, while contextual introspection avoids dumping the full corpus into context.',
