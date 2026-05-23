@@ -129,6 +129,10 @@ await test('MCP inventory advertises the v0.1 tool surface', async () => {
   assertEqual(inventory.methodologyUri, DEFINITIVE_METHODOLOGY_URI, 'methodology uri');
   assertDeepEqual(inventory.tools.map(tool => tool.name), expectedTools, 'tool names');
   assert(inventory.tools.every(tool => tool.requiredScopes.length > 0), 'each tool exposes scopes');
+  assert(inventory.tools.every(tool => tool.outputSchema?.definitiveOutputSchemas), 'each tool exposes output schema names');
+  assert(inventory.tools.every(tool => tool.structuredContent?.schemaVersion === 'DEFINITIVE.structured-content.v0.1'), 'each tool exposes structured content metadata');
+  assert(inventory.tools.every(tool => typeof tool.annotations?.readOnlyHint === 'boolean'), 'each tool exposes MCP annotations');
+  assert(inventory.tools.find(tool => tool.name === 'compute_best_vehicle')?.structuredContent.outputSchemaNames.includes('BestVehicleBlock'), 'best vehicle structured output is discoverable');
   assert(inventory.tools.find(tool => tool.name === 'defer_to_counsel')?.lineStatus === 'counsel_review_required', 'defer_to_counsel routes to counsel');
 });
 

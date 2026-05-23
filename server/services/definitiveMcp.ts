@@ -21,7 +21,11 @@ import {
   summarizeDefinitiveApplicableMechanics,
   type DefinitiveJourney,
 } from './definitiveDealRouteMap.js';
-import { buildDefinitiveSchemaRegistry } from './definitiveSchemas.js';
+import {
+  buildDefinitiveSchemaRegistry,
+  getDefinitiveSchema,
+  getDefinitiveToolSchemaMap,
+} from './definitiveSchemas.js';
 import { getDefinitiveSubstrateArchitecturePlan } from './definitiveSubstrateArchitecturePlan.js';
 import {
   buildDefinitiveDealRunbooksSurface,
@@ -787,6 +791,9 @@ export function listDefinitiveMcpTools() {
         name,
         description: tool.description,
         inputSchema: tool.inputSchema,
+        outputSchema: buildToolOutputSchema(name),
+        structuredContent: buildToolStructuredContent(name),
+        annotations: buildToolAnnotations(name),
         lineStatus: line?.lineStatus || 'ok',
         lineReason: line?.lineReason || '',
         refusalBehavior: line?.refusalBehavior || 'allow',
@@ -807,6 +814,50 @@ export function listDefinitiveMcpTools() {
       specVersion: DEFINITIVE_SPEC_VERSION,
       methodologyVersion: DEFINITIVE_METHODOLOGY_VERSION,
     },
+  };
+}
+
+function buildToolOutputSchema(name: DefinitiveMcpToolName) {
+  const schemaMap = getDefinitiveToolSchemaMap()[name];
+  return {
+    type: 'object',
+    additionalProperties: true,
+    description: `Structured result envelope for ${name}. The concrete result payload is mapped by DEFINITIVE schema names for agent tool-search and verifier use.`,
+    properties: {
+      ok: { type: 'boolean' },
+      result: { type: 'object', additionalProperties: true },
+    },
+    definitiveOutputSchemas: schemaMap?.output || [],
+    definitiveTakeBackSchemas: schemaMap?.takeBack || [],
+  };
+}
+
+function buildToolStructuredContent(name: DefinitiveMcpToolName) {
+  const schemaMap = getDefinitiveToolSchemaMap()[name];
+  const outputSchemas = Object.fromEntries((schemaMap?.output || []).map(schemaName => [schemaName, getDefinitiveSchema(schemaName)]));
+  return {
+    schemaVersion: 'DEFINITIVE.structured-content.v0.1',
+    outputSchemaNames: schemaMap?.output || [],
+    takeBackSchemaNames: schemaMap?.takeBack || [],
+    outputSchemas,
+    methodologyVersion: DEFINITIVE_METHODOLOGY_VERSION,
+    lineInvariant:
+      'Structured content describes software/data outputs only. Users and qualified professionals make regulated determinations.',
+  };
+}
+
+function buildToolAnnotations(name: DefinitiveMcpToolName) {
+  const scopes = TOOL_SCOPE[name] || [];
+  const writesInternally = scopes.some(scope => scope.endsWith(':write') || scope === 'audit:write' || scope === 'deal:write');
+  return {
+    readOnlyHint: !writesInternally,
+    destructiveHint: name === 'close_deal',
+    openWorldHint: ['fetch_market_data', 'lookup_citation', 'defer_to_counsel'].includes(name),
+    idempotentHint: true,
+    resultSize: 'bounded',
+    methodologyPinned: DEFINITIVE_METHODOLOGY_VERSION,
+    noSuccessFee: true,
+    noPaidHumanReferral: true,
   };
 }
 

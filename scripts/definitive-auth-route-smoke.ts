@@ -47,6 +47,9 @@ try {
   await test('Authenticated tool inventory is available', async () => {
     const body = await authedJson('/api/definitive/tools/list', token);
     assertEqual(body.status, 'internal_v0_1', 'tool inventory status');
+    assert(body.tools.every((tool: any) => tool.outputSchema?.definitiveOutputSchemas), 'authenticated inventory exposes output schemas');
+    assert(body.tools.every((tool: any) => tool.structuredContent?.schemaVersion === 'DEFINITIVE.structured-content.v0.1'), 'authenticated inventory exposes structured content');
+    assert(body.tools.every((tool: any) => typeof tool.annotations?.readOnlyHint === 'boolean'), 'authenticated inventory exposes MCP annotations');
     assert(body.tools.some((tool: any) => tool.name === 'compose_model_stack'), 'compose_model_stack is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'ingest_deal_payload'), 'ingest_deal_payload is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'update_deal_payload'), 'update_deal_payload is advertised');
