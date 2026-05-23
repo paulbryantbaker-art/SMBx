@@ -382,6 +382,18 @@ await test('Registry package gives enterprise admins allow-list templates', asyn
   assertEqual(registryPackage.registryEntry.trustSignals.noReferralCompensation, true, 'registry package blocks referral compensation');
   assertEqual(registryPackage.server.dealRunbooksUrl, `${origin}/api/definitive/deal-runbooks`, 'registry package exposes deal runbooks URL');
   assertEqual(registryPackage.enterpriseAllowListTemplates.schema, 'DEFINITIVE.enterprise-allow-lists.v0.1', 'registry package embeds allow-list templates');
+  assertEqual(registryPackage.registrySubmissionPackages.canonicalNamespace, 'smbx-ai/diligence', 'registry submissions preserve canonical namespace');
+  assertEqual(registryPackage.registrySubmissionPackages.canonicalMcpRegistry.serverCardUrl, `${origin}/.well-known/mcp/server-card.json`, 'canonical registry package has server card');
+  assert(registryPackage.registrySubmissionPackages.thirdPartyDirectories.some((surface: any) => surface.surfaceId === 'pulsemcp'), 'registry package includes PulseMCP submission surface');
+  assert(registryPackage.registrySubmissionPackages.thirdPartyDirectories.some((surface: any) => surface.surfaceId === 'glama'), 'registry package includes Glama submission surface');
+  assert(registryPackage.registrySubmissionPackages.thirdPartyDirectories.some((surface: any) => surface.surfaceId === 'smithery'), 'registry package includes Smithery submission surface');
+  assert(registryPackage.registrySubmissionPackages.thirdPartyDirectories.some((surface: any) => surface.surfaceId === 'docker_mcp_catalog'), 'registry package includes Docker MCP Catalog surface');
+  assert(registryPackage.registrySubmissionPackages.clientStorePackages.some((surface: any) => surface.surfaceId === 'claude_connector_directory'), 'registry package includes Claude connector candidate');
+  assert(registryPackage.registrySubmissionPackages.clientStorePackages.some((surface: any) => surface.surfaceId === 'chatgpt_apps_directory'), 'registry package includes ChatGPT app candidate');
+  assert(registryPackage.registrySubmissionPackages.clientStorePackages.some((surface: any) => surface.surfaceId === 'salesforce_agentexchange'), 'registry package includes Salesforce AgentExchange candidate');
+  assert(registryPackage.registrySubmissionPackages.clientStorePackages.some((surface: any) => surface.surfaceId === 'google_agent_gallery'), 'registry package includes Google Agent Gallery candidate');
+  assert(registryPackage.registrySubmissionPackages.semanticToolMetadataChecklist.some((item: string) => item.includes('outputSchema')), 'registry package checks outputSchema metadata');
+  assert(registryPackage.registrySubmissionPackages.semanticToolMetadataChecklist.some((item: string) => item.includes('recurring Deal OS')), 'registry package keeps Deal OS discoverability');
 
   assertEqual(allowLists.githubCopilotRegistry.policyMode, 'registry_only', 'GitHub Copilot registry-only posture');
   assertEqual(allowLists.githubCopilotRegistry.registry.servers[0].id, 'smbx-ai/diligence', 'GitHub registry server id');
