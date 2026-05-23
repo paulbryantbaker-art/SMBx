@@ -248,8 +248,8 @@
       "fields": [
         { "path": "conformanceSurface.modelRuntimeCases", "equals": 202 },
         { "path": "conformanceSurface.dealMechanicsRouteCases", "equals": 60 },
-        { "path": "conformanceSurface.promptMetaCases", "equals": 63 },
-        { "path": "conformanceSurface.totalCases", "equals": 384 }
+        { "path": "conformanceSurface.promptMetaCases", "equals": 79 },
+        { "path": "conformanceSurface.totalCases", "equals": 400 }
       ]
     }
   },
@@ -584,6 +584,257 @@
     }
   },
   {
+    "id": "CONF.PROMPT.AUTHMIGRATION.HSR.001",
+    "title": "Authority migration seeds include HSR threshold and statutory anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.FTC.HSR.2026.SIZE_TRANSACTION" },
+        { "path": "authorityIds", "includes": "AUTH.FTC.HSR.2026.AUTO_REPORTABLE" },
+        { "path": "authorityIds", "includes": "AUTH.HSR.ACT.15_USC_18A" },
+        { "path": "sourceFamilies", "includes": "hsr" },
+        { "path": "sourceFamilies", "includes": "antitrust" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.OBBBA.001",
+    "title": "Authority migration seeds include OBBBA tax anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.OBBBA.70301" },
+        { "path": "authorityIds", "includes": "AUTH.OBBBA.70425" },
+        { "path": "authorityIds", "includes": "AUTH.OBBBA.70505" },
+        { "path": "categories", "includes": "OBBBA" },
+        { "path": "sourceFamilies", "includes": "tax" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.RATES.001",
+    "title": "Authority migration seeds include rate and SBA operating anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.IRS.REVRUL.2026_09" },
+        { "path": "authorityIds", "includes": "AUTH.IRS.REVRUL.2026_03" },
+        { "path": "authorityIds", "includes": "AUTH.SBA.SOP_50_10_8" },
+        { "path": "sourceFamilies", "includes": "tax_rate" },
+        { "path": "sourceFamilies", "includes": "financing" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.MARKETDATA.001",
+    "title": "Authority migration seeds include valuation and private-capital market anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.DAMODARAN.2026" },
+        { "path": "authorityIds", "includes": "AUTH.KROLL.2024" },
+        { "path": "authorityIds", "includes": "AUTH.PEPPERDINE.PCAP.2025" },
+        { "path": "sourceFamilies", "includes": "market_study" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.DEALTERMS.001",
+    "title": "Authority migration seeds include deal-terms and RWI market anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.ABA.2025.PRIVATE_TARGET" },
+        { "path": "authorityIds", "includes": "AUTH.SRS.2025.DEAL_TERMS" },
+        { "path": "authorityIds", "includes": "AUTH.MARSH.TRI.2025" },
+        { "path": "sourceFamilies", "includes": "deal_terms" },
+        { "path": "sourceFamilies", "includes": "rwi" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.DELAWARE_CASES.001",
+    "title": "Authority migration seeds include Delaware MAE and ordinary-course anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.DE.AKORN.2018" },
+        { "path": "authorityIds", "includes": "AUTH.DE.AB_STABLE.2020" },
+        { "path": "authorityIds", "includes": "AUTH.DE.SNOW_PHIPPS.2021" },
+        { "path": "sourceFamilies", "includes": "delaware_case_law" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.DELAWARE_CLEANSING.001",
+    "title": "Authority migration seeds include Delaware cleansing and controller-process anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.DE.DGCL_144_SB21_2025" },
+        { "path": "authorityIds", "includes": "AUTH.DE.MFW.2014" },
+        { "path": "authorityIds", "includes": "AUTH.DE.MATCH_GROUP.2024" },
+        { "path": "sourceFamilies", "includes": "delaware_statute" },
+        { "path": "sourceFamilies", "includes": "delaware_case_law" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.IRC_FOUNDATION.001",
+    "title": "Authority migration seeds include founder, stock-election, NOL, and allocation IRC anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.IRC.1202" },
+        { "path": "authorityIds", "includes": "AUTH.IRC.338H10" },
+        { "path": "authorityIds", "includes": "AUTH.IRC.382" },
+        { "path": "authorityIds", "includes": "AUTH.IRC.1060" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.COMPLIANCE.001",
+    "title": "Authority migration seeds include compliance and national-security anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.SEC.AI_WASHING.2024_36" },
+        { "path": "authorityIds", "includes": "AUTH.HSR.ACT.15_USC_18A" },
+        { "path": "authorityIds", "includes": "AUTH.CFIUS.31_CFR_800" },
+        { "path": "sourceFamilies", "includes": "compliance" },
+        { "path": "sourceFamilies", "includes": "national_security" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.BANKRUPTCY_WATERFALL.001",
+    "title": "Authority migration seeds include bankruptcy waterfall and confirmation anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.BK.507" },
+        { "path": "authorityIds", "includes": "AUTH.BK.726" },
+        { "path": "authorityIds", "includes": "AUTH.BK.1129" },
+        { "path": "modelSlots", "includes": "M153" },
+        { "path": "modelSlots", "includes": "M157" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.BANKRUPTCY_DIP.001",
+    "title": "Authority migration seeds include DIP, sale, and credit-bid anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.BK.364" },
+        { "path": "authorityIds", "includes": "AUTH.CASE.RADLAX_2012" },
+        { "path": "authorityIds", "includes": "AUTH.CASE.FISKER_2014" },
+        { "path": "modelSlots", "includes": "M151" },
+        { "path": "modelSlots", "includes": "M158" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.SUBV.001",
+    "title": "Authority migration seeds include Subchapter V anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.BK.1181" },
+        { "path": "authorityIds", "includes": "AUTH.BK.1195" },
+        { "path": "modelSlots", "includes": "M167" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.PARTNERSHIP_TAX.001",
+    "title": "Authority migration seeds include partnership contribution and basis anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.IRC.721" },
+        { "path": "authorityIds", "includes": "AUTH.IRC.704C" },
+        { "path": "authorityIds", "includes": "AUTH.IRC.754" },
+        { "path": "authorityIds", "includes": "AUTH.IRC.743B" },
+        { "path": "modelSlots", "includes": "M145" },
+        { "path": "modelSlots", "includes": "M200" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.RE_TAX.001",
+    "title": "Authority migration seeds include real-estate tax and FIRPTA anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.IRC.897" },
+        { "path": "authorityIds", "includes": "AUTH.IRC.1031" },
+        { "path": "authorityIds", "includes": "AUTH.IRC.1445" },
+        { "path": "modelSlots", "includes": "M169" },
+        { "path": "modelSlots", "includes": "M170" },
+        { "path": "modelSlots", "includes": "M199" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.TREASURY_ALLOCATION.001",
+    "title": "Authority migration seeds include Treasury residual-method allocation anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.TREAS.1_338_6" },
+        { "path": "authorityIds", "includes": "AUTH.TREAS.1_1060_1" },
+        { "path": "modelSlots", "includes": "M139" },
+        { "path": "modelSlots", "includes": "M222" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.IP_TM_DOMAIN.001",
+    "title": "Authority migration seeds include trademark and domain-transfer IP anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.IP.LANHAM_10" },
+        { "path": "authorityIds", "includes": "AUTH.CASE.CLOROX_CHEMICAL_BANK" },
+        { "path": "sourceFamilies", "includes": "ip_case_law" },
+        { "path": "modelSlots", "includes": "M223" }
+      ]
+    }
+  },
+  {
     "id": "CONF.PROMPT.AGENT.ACCESS.001",
     "title": "Agent card keeps execution authenticated and governed",
     "specVersion": "DEFINITIVE.v1.0",
@@ -605,7 +856,7 @@
     "methodologyUri": "methodology://v19",
     "kind": "agent_card",
     "expect": {
-      "textIncludes": ["definitive_conformance_status", "\"caseCount\":384", "definitive_deal_mechanics_v1_1"],
+      "textIncludes": ["definitive_conformance_status", "\"caseCount\":400", "definitive_deal_mechanics_v1_1"],
       "fields": [
         { "path": "definitive.dealMechanicsModelSlots", "equals": 123 },
         { "path": "definitive.dealMechanicsGates", "equals": 30 },
