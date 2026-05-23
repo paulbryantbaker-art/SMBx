@@ -1,4 +1,4 @@
-import { type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 import type { Tab, OpenTab, ModeId } from "./types";
 import type { User } from "../../hooks/useAuth";
 import type { ModelPreference } from "../../lib/modelPreference";
@@ -35,10 +35,27 @@ interface CanvasProps {
 
 export function V6Canvas({ tabs, activeTabId, openTab, onPickMode, onTalkToYulia, user, onSignOut, modelPreference }: CanvasProps) {
   const activeTab = tabs.find(t => t.id === activeTabId) ?? tabs[0];
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const node = scrollRef.current;
+    if (!node) return;
+    let settleTimer = 0;
+    const onScroll = () => {
+      node.classList.add("is-scrolling");
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(() => node.classList.remove("is-scrolling"), 140);
+    };
+    node.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.clearTimeout(settleTimer);
+      node.removeEventListener("scroll", onScroll);
+    };
+  }, []);
 
   return (
     <div style={K.canvas}>
-      <div className="thin-scroll" style={K.canvasBody}>
+      <div ref={scrollRef} className="thin-scroll v6-canvas-scroll" style={K.canvasBody}>
         {activeTab && (
           <V6TabContent
             tab={activeTab}
