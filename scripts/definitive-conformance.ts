@@ -8,7 +8,7 @@
  * Run: npm run test:definitive-conformance
  */
 
-import { readFile } from 'fs/promises';
+import { readFile, readdir } from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import {
@@ -97,6 +97,7 @@ type PromptMetaCaseKind =
   | 'line_inventory'
   | 'mcp_inventory'
   | 'authority_seed_plan'
+  | 'authority_migration_seed'
   | 'substrate_architecture'
   | 'pass_through_surface'
   | 'schema_registry'
@@ -277,7 +278,7 @@ for (const item of promptMetaCases) {
     assertEqual(item.specVersion, DEFINITIVE_SPEC_VERSION, `${item.id} specVersion`);
     assertEqual(item.methodologyUri, DEFINITIVE_METHODOLOGY_URI, `${item.id} methodologyUri`);
 
-    const subject = buildPromptMetaSubject(item);
+    const subject = await buildPromptMetaSubject(item);
     for (const expectedText of item.expect.textIncludes || []) {
       assert(subject.text.includes(expectedText), `${item.id} expected prompt/meta text to include ${expectedText}`);
     }
@@ -428,6 +429,54 @@ function assertDeepEqual<T>(actual: T, expected: T, message: string) {
   }
 }
 
+async function buildAuthorityMigrationSeedSubject() {
+  const migrationDir = path.resolve(__dirname, '../server/migrations');
+  const files = (await readdir(migrationDir)).filter(file => file.endsWith('.sql')).sort();
+  const seededFiles: string[] = [];
+  const authorityIds: string[] = [];
+  const citeTags: string[] = [];
+  const categories: string[] = [];
+  const sourceFamilies = new Set<string>();
+  const gates = new Set<string>();
+  const modelSlots = new Set<string>();
+  const batchRowCounts: Record<string, number> = {};
+
+  for (const file of files) {
+    const sql = await readFile(path.resolve(migrationDir, file), 'utf8');
+    const rowMatches = [...sql.matchAll(/^\s*\('([^']+)',\s*'([^']*)',\s*'([^']*)'/gm)];
+    const authorityRows = rowMatches.filter(match => match[1].startsWith('AUTH.'));
+    if (authorityRows.length === 0) continue;
+
+    seededFiles.push(file);
+    batchRowCounts[file] = authorityRows.length;
+    for (const match of authorityRows) {
+      authorityIds.push(match[1]);
+      citeTags.push(match[2]);
+      categories.push(match[3]);
+    }
+    for (const match of sql.matchAll(/"source_family":"([^"]+)"/g)) sourceFamilies.add(match[1]);
+    for (const match of sql.matchAll(/"gates":\[(.*?)\]/g)) {
+      for (const gate of match[1].matchAll(/"([^"]+)"/g)) gates.add(gate[1]);
+    }
+    for (const match of sql.matchAll(/"model_slots":\[(.*?)\]/g)) {
+      for (const slot of match[1].matchAll(/"([^"]+)"/g)) modelSlots.add(slot[1]);
+    }
+  }
+
+  return {
+    rowCount: authorityIds.length,
+    uniqueAuthorityIdCount: new Set(authorityIds).size,
+    files: seededFiles,
+    batchRowCounts,
+    authorityIds,
+    citeTags,
+    categories: [...new Set(categories)].sort(),
+    sourceFamilies: [...sourceFamilies].sort(),
+    gates: [...gates].sort(),
+    modelSlots: [...modelSlots].sort(),
+  };
+}
+
 function assertIncludesAll(actual: string[], expected: string[], message: string) {
   for (const item of expected) {
     assert(actual.includes(item), `${message} expected to include ${item}, got ${JSON.stringify(actual)}`);
@@ -447,7 +496,7 @@ function summaryCountForReadiness(
   return Number(summary[readiness as keyof typeof summary] || 0);
 }
 
-function buildPromptMetaSubject(item: PromptMetaCase): { text: string; data: Record<string, any> } {
+async function buildPromptMetaSubject(item: PromptMetaCase): Promise<{ text: string; data: Record<string, any> }> {
   if (item.kind === 'empty_yulia_brief') {
     const brief = buildDefinitiveYuliaMechanicsBrief([]);
     return { text: brief.join('\n'), data: { brief } };
@@ -520,6 +569,11 @@ function buildPromptMetaSubject(item: PromptMetaCase): { text: string; data: Rec
     const seedPlan = getDefinitiveAuthoritySeedPlan();
     const categoriesById = Object.fromEntries(seedPlan.categories.map(category => [category.id, category]));
     const data = { ...seedPlan, categoriesById };
+    return { text: JSON.stringify(data), data };
+  }
+
+  if (item.kind === 'authority_migration_seed') {
+    const data = await buildAuthorityMigrationSeedSubject();
     return { text: JSON.stringify(data), data };
   }
 

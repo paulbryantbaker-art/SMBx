@@ -248,8 +248,8 @@
       "fields": [
         { "path": "conformanceSurface.modelRuntimeCases", "equals": 202 },
         { "path": "conformanceSurface.dealMechanicsRouteCases", "equals": 60 },
-        { "path": "conformanceSurface.promptMetaCases", "equals": 58 },
-        { "path": "conformanceSurface.totalCases", "equals": 379 }
+        { "path": "conformanceSurface.promptMetaCases", "equals": 63 },
+        { "path": "conformanceSurface.totalCases", "equals": 384 }
       ]
     }
   },
@@ -502,6 +502,88 @@
     }
   },
   {
+    "id": "CONF.PROMPT.AUTHMIGRATION.BASELINE.001",
+    "title": "Authority migration seeds have moved beyond the first 50-row foundation",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "rowCount", "min": 100 },
+        { "path": "uniqueAuthorityIdCount", "min": 100 },
+        { "path": "files", "includes": "073_definitive_authority_register.sql" },
+        { "path": "files", "includes": "078_definitive_authority_register_batch2.sql" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.G28.001",
+    "title": "Authority migration seeds include G28 bankruptcy and restructuring anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.BK.1129" },
+        { "path": "authorityIds", "includes": "AUTH.CASE.TILL_2004" },
+        { "path": "sourceFamilies", "includes": "bankruptcy_code" },
+        { "path": "gates", "includes": "G28" },
+        { "path": "modelSlots", "includes": "M155" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.G29.001",
+    "title": "Authority migration seeds include G29 LME and capital-structure anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.CASE.SERTA_2024" },
+        { "path": "authorityIds", "includes": "AUTH.CASE.MITEL_2024" },
+        { "path": "sourceFamilies", "includes": "lme_case_law" },
+        { "path": "gates", "includes": "G29" },
+        { "path": "modelSlots", "includes": "M161" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.TAX.001",
+    "title": "Authority migration seeds include connected tax and Treasury regulation anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.IRC.1374" },
+        { "path": "authorityIds", "includes": "AUTH.TREAS.1_263A_5" },
+        { "path": "authorityIds", "includes": "AUTH.TREAS.1_1445_1" },
+        { "path": "sourceFamilies", "includes": "treasury_regulation" },
+        { "path": "modelSlots", "includes": "M203" },
+        { "path": "modelSlots", "includes": "M199" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.IP.001",
+    "title": "Authority migration seeds include IP chain-of-title and lien anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.IP.35USC261" },
+        { "path": "authorityIds", "includes": "AUTH.UCC.9_310" },
+        { "path": "authorityIds", "includes": "AUTH.CASE.PEREGRINE" },
+        { "path": "sourceFamilies", "includes": "ip_statute" },
+        { "path": "gates", "includes": "G10" },
+        { "path": "modelSlots", "includes": "M214" },
+        { "path": "modelSlots", "includes": "M215" }
+      ]
+    }
+  },
+  {
     "id": "CONF.PROMPT.AGENT.ACCESS.001",
     "title": "Agent card keeps execution authenticated and governed",
     "specVersion": "DEFINITIVE.v1.0",
@@ -523,7 +605,7 @@
     "methodologyUri": "methodology://v19",
     "kind": "agent_card",
     "expect": {
-      "textIncludes": ["definitive_conformance_status", "\"caseCount\":379", "definitive_deal_mechanics_v1_1"],
+      "textIncludes": ["definitive_conformance_status", "\"caseCount\":384", "definitive_deal_mechanics_v1_1"],
       "fields": [
         { "path": "definitive.dealMechanicsModelSlots", "equals": 123 },
         { "path": "definitive.dealMechanicsGates", "equals": 30 },
