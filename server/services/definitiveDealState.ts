@@ -690,6 +690,7 @@ export function finalizeDefinitiveDealPackage(input: Record<string, any>) {
       lineBoundary: LINE_INVARIANT,
     },
   };
+  const humanRender = buildPackageHumanRender(dealPackage, packageVerification, auditPacket, signedManifest, merkleProof);
   const finalizedPackage = {
     schema: 'FinalizedDealPackage.v0.1',
     packageCid: nullableString(dealPackage.packageCid) || null,
@@ -700,6 +701,7 @@ export function finalizeDefinitiveDealPackage(input: Record<string, any>) {
     auditPacket,
     signedManifest: packageVerification.verified ? signedManifest : null,
     merkleProof: packageVerification.verified ? merkleProof : null,
+    humanRender,
     next_suggested_calls: [
       {
         toolName: 'verify_package',
@@ -720,7 +722,7 @@ export function finalizeDefinitiveDealPackage(input: Record<string, any>) {
         inputHint: { dealState: state ? { cid: state.cid } : undefined },
       },
     ],
-    takeBackArtifacts: ['DealPackage', 'PackageVerification', 'AuditPacket', 'SignedManifest', 'MerkleInclusionProof'],
+    takeBackArtifacts: ['DealPackage', 'PackageVerification', 'AuditPacket', 'SignedManifest', 'MerkleInclusionProof', 'HumanPackageRender'],
     lineInvariant: LINE_INVARIANT,
   };
 
@@ -733,6 +735,7 @@ export function finalizeDefinitiveDealPackage(input: Record<string, any>) {
       auditPacket,
       signedManifest: finalizedPackage.signedManifest,
       merkleProof: finalizedPackage.merkleProof,
+      humanRender,
       dealPackage,
       dealState: state || undefined,
       next_suggested_calls: finalizedPackage.next_suggested_calls,
@@ -2917,6 +2920,46 @@ function buildPackageMerkleProof(dealPackage: Record<string, any>, auditPacket: 
     leafHash,
     rootHash: sha256(stableStringify([leafHash, ...siblings])),
     proof: siblings,
+  };
+}
+
+function buildPackageHumanRender(
+  dealPackage: Record<string, any>,
+  packageVerification: Record<string, any>,
+  auditPacket: Record<string, any>,
+  signedManifest: Record<string, any>,
+  merkleProof: Record<string, any>,
+) {
+  const title = nullableString(dealPackage.dealPlan?.title)
+    || nullableString(dealPackage.classificationKey?.subJourney)
+    || 'DEFINITIVE deal package';
+  const markdown = [
+    `# ${title}`,
+    '',
+    `- Package CID: ${nullableString(dealPackage.packageCid) || 'missing'}`,
+    `- DealState CID: ${nullableString(dealPackage.dealStateCid) || 'missing'}`,
+    `- Readiness: ${nullableString(dealPackage.readinessLevel) || 'unknown'}`,
+    `- Verification: ${packageVerification.verified ? 'passed' : 'blocked'}`,
+    `- Audit packet: ${nullableString(auditPacket.packetId) || 'missing'}`,
+    `- Signed manifest: ${nullableString(signedManifest.manifestId) || 'not issued'}`,
+    `- Merkle root: ${nullableString(merkleProof.rootHash) || 'not issued'}`,
+    '',
+    '## THE LINE',
+    LINE_INVARIANT,
+    '',
+    '## Next Suggested Calls',
+    ...(Array.isArray(dealPackage.next_suggested_calls) && dealPackage.next_suggested_calls.length > 0
+      ? dealPackage.next_suggested_calls.map((call: any) => `- ${call.toolName}: ${call.reason}`)
+      : ['- None supplied.']),
+  ].join('\n');
+  return {
+    schema: 'HumanPackageRender.v0.1',
+    format: 'markdown',
+    title,
+    packageCid: nullableString(dealPackage.packageCid) || null,
+    renderHash: outputHashFor(markdown),
+    markdown,
+    lineInvariant: LINE_INVARIANT,
   };
 }
 

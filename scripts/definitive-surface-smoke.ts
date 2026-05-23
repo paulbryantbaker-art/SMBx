@@ -446,6 +446,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.schemaNames.includes('DealPackage'), 'schema registry exposes DealPackage');
   assert(registry.schemaNames.includes('PackageVerification'), 'schema registry exposes PackageVerification');
   assert(registry.schemaNames.includes('FinalizedDealPackage'), 'schema registry exposes FinalizedDealPackage');
+  assert(registry.schemaNames.includes('HumanPackageRender'), 'schema registry exposes HumanPackageRender');
   assert(registry.schemaNames.includes('ReopenedDealPackage'), 'schema registry exposes ReopenedDealPackage');
   assert(registry.schemaNames.includes('LifecycleTrace'), 'schema registry exposes LifecycleTrace');
   assert(registry.schemaNames.includes('IOIPacket'), 'schema registry exposes IOIPacket');
@@ -952,8 +953,11 @@ await test('FinalizedDealPackage produces audit and manifest take-back artifacts
   assertEqual(finalized.signedManifest.schema, 'SignedManifest.v0.1', 'signed manifest attached');
   assertEqual(finalized.signedManifest.attestation.schema, 'Attestation.v0.1', 'attestation attached');
   assertEqual(finalized.merkleProof.schema, 'MerkleInclusionProof.v0.1', 'merkle proof attached');
+  assertEqual(finalized.humanRender.schema, 'HumanPackageRender.v0.1', 'human render attached');
+  assert(finalized.humanRender.markdown.includes('THE LINE'), 'human render includes THE LINE');
   assert(finalized.takeBackArtifacts.includes('SignedManifest'), 'signed manifest is portable');
   assert(finalized.takeBackArtifacts.includes('MerkleInclusionProof'), 'merkle proof is portable');
+  assert(finalized.takeBackArtifacts.includes('HumanPackageRender'), 'human render is portable');
 });
 
 await test('ReopenedDealPackage keeps the recursive Deal OS loop alive after handoff', async () => {

@@ -677,6 +677,8 @@ try {
     assertEqual(finalizedPackage.auditPacket.schema, 'AuditPacket.v0.1', 'finalized package audit packet schema');
     assertEqual(finalizedPackage.signedManifest.schema, 'SignedManifest.v0.1', 'finalized package signed manifest schema');
     assertEqual(finalizedPackage.merkleProof.schema, 'MerkleInclusionProof.v0.1', 'finalized package merkle proof schema');
+    assertEqual(finalizedPackage.humanRender.schema, 'HumanPackageRender.v0.1', 'finalized package human render schema');
+    assert(finalizedPackage.humanRender.markdown.includes('THE LINE'), 'finalized package human render includes THE LINE');
     assert(finalization.body.persistence?.packetType === 'FinalizedDealPackage.v0.1', 'finalized package packet persisted');
 
     const reopened = await postJson('/api/definitive/tools/call', token, {

@@ -600,8 +600,26 @@ const FinalizedDealPackage: JsonSchema = {
     auditPacket: { $ref: schemaId('AuditPacket') },
     signedManifest: { anyOf: [{ $ref: schemaId('SignedManifest') }, { type: 'null' }] },
     merkleProof: { anyOf: [{ $ref: schemaId('MerkleInclusionProof') }, { type: 'null' }] },
+    humanRender: { $ref: schemaId('HumanPackageRender') },
     next_suggested_calls: { type: 'array', items: { $ref: schemaId('MCPCallHint') } },
     takeBackArtifacts: { type: 'array', items: { type: 'string' } },
+    lineInvariant: { type: 'string' },
+  },
+};
+
+const HumanPackageRender: JsonSchema = {
+  $id: schemaId('HumanPackageRender'),
+  title: 'HumanPackageRender',
+  type: 'object',
+  additionalProperties: true,
+  required: ['schema', 'format', 'title', 'packageCid', 'renderHash', 'markdown', 'lineInvariant'],
+  properties: {
+    schema: { type: 'string', const: 'HumanPackageRender.v0.1' },
+    format: { type: 'string', enum: ['markdown'] },
+    title: { type: 'string' },
+    packageCid: { type: ['string', 'null'] },
+    renderHash: { $ref: schemaId('OutputHash') },
+    markdown: { type: 'string' },
     lineInvariant: { type: 'string' },
   },
 };
@@ -1175,6 +1193,7 @@ export const DEFINITIVE_SCHEMAS: Record<string, JsonSchema> = {
   DealPackage,
   PackageVerification,
   FinalizedDealPackage,
+  HumanPackageRender,
   ReopenedDealPackage,
   LifecycleTrace,
   IOIPacket,
@@ -1279,8 +1298,8 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
   },
   finalize_deal_package: {
     input: ['DealPackage', 'DealState'],
-    output: ['FinalizedDealPackage', 'PackageVerification', 'AuditPacket', 'SignedManifest', 'Attestation', 'MerkleInclusionProof', 'DealPackage', 'DealState', 'MCPCallHint'],
-    takeBack: ['FinalizedDealPackage', 'PackageVerification', 'AuditPacket', 'SignedManifest', 'MerkleInclusionProof', 'DealPackage'],
+    output: ['FinalizedDealPackage', 'PackageVerification', 'AuditPacket', 'SignedManifest', 'Attestation', 'MerkleInclusionProof', 'HumanPackageRender', 'DealPackage', 'DealState', 'MCPCallHint'],
+    takeBack: ['FinalizedDealPackage', 'PackageVerification', 'AuditPacket', 'SignedManifest', 'MerkleInclusionProof', 'HumanPackageRender', 'DealPackage'],
   },
   reopen_deal_package: {
     input: ['DealPackage', 'DealState', 'DealPayload'],
