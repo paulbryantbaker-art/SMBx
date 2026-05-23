@@ -43,6 +43,7 @@ import { getDefinitiveSubstrateArchitecturePlan } from '../server/services/defin
 import { listDefinitiveMcpTools } from '../server/services/definitiveMcp.js';
 import { getDefinitiveDefinitionOfDone } from '../server/services/definitiveDealState.js';
 import { buildDefinitiveSchemaRegistry } from '../server/services/definitiveSchemas.js';
+import { buildDefinitiveRegistryPackage } from '../server/services/definitiveRegistryPackage.js';
 import {
   evaluateDefinitiveStackOverlays,
   normalizeDefinitiveStackSignals,
@@ -98,6 +99,7 @@ type PromptMetaCaseKind =
   | 'mcp_inventory'
   | 'authority_seed_plan'
   | 'authority_migration_seed'
+  | 'registry_package'
   | 'substrate_architecture'
   | 'pass_through_surface'
   | 'schema_registry'
@@ -574,6 +576,20 @@ async function buildPromptMetaSubject(item: PromptMetaCase): Promise<{ text: str
 
   if (item.kind === 'authority_migration_seed') {
     const data = await buildAuthorityMigrationSeedSubject();
+    return { text: JSON.stringify(data), data };
+  }
+
+  if (item.kind === 'registry_package') {
+    const registryPackage = buildDefinitiveRegistryPackage('https://smbx.ai');
+    const submissions = registryPackage.registrySubmissionPackages;
+    const data = {
+      ...registryPackage,
+      thirdPartyDirectoryIds: submissions.thirdPartyDirectories.map((surface: any) => surface.surfaceId),
+      clientStorePackageIds: submissions.clientStorePackages.map((surface: any) => surface.surfaceId),
+      registryReadinessChecks: submissions.canonicalMcpRegistry.readinessChecks,
+      semanticToolMetadataChecklist: submissions.semanticToolMetadataChecklist,
+      submissionOrder: submissions.submissionOrder,
+    };
     return { text: JSON.stringify(data), data };
   }
 

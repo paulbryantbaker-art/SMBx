@@ -248,8 +248,8 @@
       "fields": [
         { "path": "conformanceSurface.modelRuntimeCases", "equals": 202 },
         { "path": "conformanceSurface.dealMechanicsRouteCases", "equals": 60 },
-        { "path": "conformanceSurface.promptMetaCases", "equals": 84 },
-        { "path": "conformanceSurface.totalCases", "equals": 405 }
+        { "path": "conformanceSurface.promptMetaCases", "equals": 88 },
+        { "path": "conformanceSurface.totalCases", "equals": 409 }
       ]
     }
   },
@@ -951,12 +951,81 @@
     "methodologyUri": "methodology://v19",
     "kind": "agent_card",
     "expect": {
-      "textIncludes": ["definitive_conformance_status", "\"caseCount\":405", "definitive_deal_mechanics_v1_1"],
+      "textIncludes": ["definitive_conformance_status", "\"caseCount\":409", "definitive_deal_mechanics_v1_1"],
       "fields": [
         { "path": "definitive.dealMechanicsModelSlots", "equals": 123 },
         { "path": "definitive.dealMechanicsGates", "equals": 30 },
         { "path": "definitive.authoritySeedPlanEntries", "min": 800 },
         { "path": "definitive.passThroughPricingRule", "includes": "cost-plus-fixed" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.REGISTRY.CANONICAL.001",
+    "title": "Registry package preserves the canonical DEFINITIVE namespace",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "registry_package",
+    "expect": {
+      "textIncludes": ["smbx-ai/diligence", "THE LINE-safe agent access", "M101-M223", "Deal OS"],
+      "fields": [
+        { "path": "registrySubmissionPackages.canonicalNamespace", "equals": "smbx-ai/diligence" },
+        { "path": "registrySubmissionPackages.canonicalMcpRegistry.surfaceId", "equals": "linux_foundation_mcp_registry" },
+        { "path": "registrySubmissionPackages.canonicalMcpRegistry.serverJson.name", "equals": "smbx-ai/diligence" },
+        { "path": "registrySubmissionPackages.canonicalMcpRegistry.serverJson.tags", "includes": "working capital peg" },
+        { "path": "registryReadinessChecks", "includes": "structured-output-schemas" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.REGISTRY.DIRECTORIES.001",
+    "title": "Registry package names third-party MCP directory submission surfaces",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "registry_package",
+    "expect": {
+      "fields": [
+        { "path": "thirdPartyDirectoryIds", "includes": "pulsemcp" },
+        { "path": "thirdPartyDirectoryIds", "includes": "glama" },
+        { "path": "thirdPartyDirectoryIds", "includes": "mcp_so" },
+        { "path": "thirdPartyDirectoryIds", "includes": "smithery" },
+        { "path": "thirdPartyDirectoryIds", "includes": "docker_mcp_catalog" },
+        { "path": "thirdPartyDirectoryIds", "includes": "awesome_mcp_servers" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.REGISTRY.CLIENT_STORES.001",
+    "title": "Registry package names client app-store and connector candidates",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "registry_package",
+    "expect": {
+      "textIncludes": ["neutral_substrate_available_to_claude_chatgpt_copilot_gemini_agentforce_and_direct_agents"],
+      "fields": [
+        { "path": "clientStorePackageIds", "includes": "claude_connector_directory" },
+        { "path": "clientStorePackageIds", "includes": "chatgpt_apps_directory" },
+        { "path": "clientStorePackageIds", "includes": "microsoft_agent_store" },
+        { "path": "clientStorePackageIds", "includes": "salesforce_agentexchange" },
+        { "path": "clientStorePackageIds", "includes": "google_agent_gallery" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.REGISTRY.SEMANTIC_LINE.001",
+    "title": "Registry package keeps semantic metadata and THE LINE evidence together",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "registry_package",
+    "expect": {
+      "textIncludes": ["outputSchema", "recurring Deal OS", "no wallet, success fee, deal-value fee, or paid human-service referral"],
+      "fields": [
+        { "path": "semanticToolMetadataChecklist.0", "includes": "working capital peg" },
+        { "path": "semanticToolMetadataChecklist.1", "includes": "The Diligence Standard" },
+        { "path": "semanticToolMetadataChecklist.2", "includes": "outputSchema" },
+        { "path": "semanticToolMetadataChecklist.3", "includes": "no-success-fee" },
+        { "path": "semanticToolMetadataChecklist.4", "includes": "recurring Deal OS" },
+        { "path": "submissionOrder", "includes": "enterprise_allow_lists" }
       ]
     }
   },
