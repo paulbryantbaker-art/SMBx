@@ -667,6 +667,21 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     output: ['DefinitionOfDone'],
     takeBack: ['DefinitionOfDone'],
   },
+  introspect_capabilities: {
+    input: [],
+    output: ['CapabilityCatalog', 'MCPCallHint'],
+    takeBack: ['CapabilityCatalog', 'MCPCallHint'],
+  },
+  describe_methodology: {
+    input: [],
+    output: ['MethodologyDescription', 'DefinitionOfDone'],
+    takeBack: ['MethodologyDescription'],
+  },
+  estimate_deal_cost: {
+    input: [],
+    output: ['DealCostEstimate'],
+    takeBack: ['DealCostEstimate'],
+  },
   compose_deal_plan: {
     input: ['DealState', 'DealPayload'],
     output: ['DealPlan', 'MCPCallHint'],

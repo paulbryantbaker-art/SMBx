@@ -48,6 +48,18 @@ import {
 import { getDefinitivePassThroughSurface } from './services/definitiveDealMechanicsCatalog.js';
 import { getDefinitiveAuthoritySeedPlan } from './services/definitiveAuthoritySeedPlan.js';
 import { getDefinitiveSubstrateArchitecturePlan } from './services/definitiveSubstrateArchitecturePlan.js';
+import {
+  buildDefinitiveEnterpriseAllowListTemplates,
+  buildDefinitiveRegistryPackage,
+} from './services/definitiveRegistryPackage.js';
+import {
+  buildDefinitiveModelCatalogSurface,
+  getDefinitiveModelSlotSurface,
+} from './services/definitiveModelCatalogSurface.js';
+import {
+  buildDefinitiveDealRunbooksSurface,
+  getDefinitiveDealRunbook,
+} from './services/definitiveDealRunbooks.js';
 import { buildDefinitiveSchemaRegistry, getDefinitiveSchema } from './services/definitiveSchemas.js';
 import { ensureModelRegistrySeeded } from './services/modelRegistry.js';
 import rateLimit from 'express-rate-limit';
@@ -191,6 +203,46 @@ app.get('/api/definitive/authority-seed-plan', (_req, res) => {
 
 app.get('/api/definitive/substrate-architecture', (_req, res) => {
   res.json(getDefinitiveSubstrateArchitecturePlan());
+});
+
+app.get('/api/definitive/model-catalog', (_req, res) => {
+  res.json(buildDefinitiveModelCatalogSurface());
+});
+
+app.get('/api/definitive/deal-runbooks', (_req, res) => {
+  res.json(buildDefinitiveDealRunbooksSurface());
+});
+
+app.get('/api/definitive/deal-runbooks/:journey', (req, res) => {
+  const runbook = getDefinitiveDealRunbook(req.params.journey);
+  if (!runbook) {
+    return res.status(404).json({ ok: false, error: 'definitive_deal_runbook_not_found', journey: req.params.journey });
+  }
+  return res.json(runbook);
+});
+
+app.get('/api/definitive/model-catalog/:slotId', (req, res) => {
+  const model = getDefinitiveModelSlotSurface(req.params.slotId);
+  if (!model) {
+    return res.status(404).json({ ok: false, error: 'definitive_model_slot_not_found', slotId: req.params.slotId });
+  }
+  return res.json(model);
+});
+
+app.get('/api/definitive/deal-mechanics/models/:slotId', (req, res) => {
+  const model = getDefinitiveModelSlotSurface(req.params.slotId);
+  if (!model) {
+    return res.status(404).json({ ok: false, error: 'definitive_model_slot_not_found', slotId: req.params.slotId });
+  }
+  return res.json(model);
+});
+
+app.get('/api/definitive/registry-package', (req, res) => {
+  res.json(buildDefinitiveRegistryPackage(discoveryOrigin(req)));
+});
+
+app.get('/api/definitive/enterprise-allow-lists', (req, res) => {
+  res.json(buildDefinitiveEnterpriseAllowListTemplates(discoveryOrigin(req)));
 });
 
 app.get('/api/debug/check-ai', async (_req, res) => {

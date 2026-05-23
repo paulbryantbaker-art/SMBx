@@ -51,6 +51,18 @@ import {
   buildDefinitiveMcpServerCard,
   buildDefinitiveMcpWellKnownManifest,
 } from '../server/services/definitiveMcpDiscovery.js';
+import {
+  buildDefinitiveEnterpriseAllowListTemplates,
+  buildDefinitiveRegistryPackage,
+} from '../server/services/definitiveRegistryPackage.js';
+import {
+  buildDefinitiveModelCatalogSurface,
+  getDefinitiveModelSlotSurface,
+} from '../server/services/definitiveModelCatalogSurface.js';
+import {
+  buildDefinitiveDealRunbooksSurface,
+  getDefinitiveDealRunbook,
+} from '../server/services/definitiveDealRunbooks.js';
 import { buildDefinitiveSchemaRegistry } from '../server/services/definitiveSchemas.js';
 import { buildDefinitiveSpecManifest } from '../server/services/definitiveSpecManifest.js';
 import { evaluateDefinitiveStackOverlays } from '../server/services/definitiveStackOverlays.js';
@@ -61,6 +73,9 @@ const expectedTools = [
   'update_deal_payload',
   'check_completeness',
   'get_definition_of_done',
+  'introspect_capabilities',
+  'describe_methodology',
+  'estimate_deal_cost',
   'compose_deal_plan',
   'diff_deal_state',
   'compose_deal_package',
@@ -119,6 +134,13 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assertEqual(card.definitive.passThroughCatalogEndpoint, '/api/definitive/pass-through-catalog', 'pass-through catalog endpoint');
   assertEqual(card.definitive.authoritySeedPlanEndpoint, '/api/definitive/authority-seed-plan', 'authority seed plan endpoint');
   assertEqual(card.definitive.substrateArchitectureEndpoint, '/api/definitive/substrate-architecture', 'substrate architecture endpoint');
+  assertEqual(card.definitive.dealRunbooksEndpoint, '/api/definitive/deal-runbooks', 'deal runbooks endpoint');
+  assertEqual(card.definitive.dealRunbookEndpoint, '/api/definitive/deal-runbooks/{journey}', 'deal runbook endpoint');
+  assertEqual(card.definitive.modelCatalogEndpoint, '/api/definitive/model-catalog', 'model catalog endpoint');
+  assertEqual(card.definitive.modelSlotEndpoint, '/api/definitive/model-catalog/{slotId}', 'model slot endpoint');
+  assertEqual(card.definitive.dealMechanicsModelSlotEndpoint, '/api/definitive/deal-mechanics/models/{slotId}', 'deal mechanics model slot endpoint');
+  assertEqual(card.definitive.registryPackageEndpoint, '/api/definitive/registry-package', 'registry package endpoint');
+  assertEqual(card.definitive.enterpriseAllowListsEndpoint, '/api/definitive/enterprise-allow-lists', 'enterprise allow-list endpoint');
   assertEqual(card.definitive.dealMechanicsVersion, DEFINITIVE_DEAL_MECHANICS_VERSION, 'deal mechanics version');
   assertEqual(card.definitive.dealMechanicsModelSlots, DEFINITIVE_DEAL_MECHANICS_MODEL_SLOT_COUNT, 'deal mechanics model slots');
   assertEqual(card.definitive.dealMechanicsGates, DEFINITIVE_DEAL_MECHANICS_GATE_COUNT, 'deal mechanics gate count');
@@ -131,6 +153,8 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assert(card.definitive.schemaRegistryNames.includes('DealState'), 'agent card exposes DealState schema');
   assert(card.definitive.schemaRegistryNames.includes('DealStateDiff'), 'agent card exposes DealStateDiff schema');
   assert(card.definitive.dealOsDoctrine.includes('Deal OS'), 'agent card exposes Deal OS doctrine');
+  assertDeepEqual(card.definitive.dealRunbookJourneys, ['buy', 'sell', 'raise', 'pmi'], 'agent card exposes deal runbook journeys');
+  assert(card.definitive.dealRunbookLoopContract.includes('ingest_or_resume'), 'agent card exposes recursive runbook loop');
   assert(card.definitive.agentHomeContract.includes('data rooms'), 'agent card exposes agent home data-room contract');
   assert(card.definitive.agentNoRejectionContract.includes('MissingInputContract'), 'agent card exposes no-rejection contract');
   assert(card.definitive.agentTakeBackArtifacts.includes('DealStateDiff'), 'agent card exposes portable take-back artifacts');
@@ -149,6 +173,13 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assert(card.publicEndpoints.includes('/api/definitive/pass-through-catalog'), 'pass-through catalog endpoint is public discovery');
   assert(card.publicEndpoints.includes('/api/definitive/authority-seed-plan'), 'authority seed plan endpoint is public discovery');
   assert(card.publicEndpoints.includes('/api/definitive/substrate-architecture'), 'substrate architecture endpoint is public discovery');
+  assert(card.publicEndpoints.includes('/api/definitive/deal-runbooks'), 'deal runbooks endpoint is public discovery');
+  assert(card.publicEndpoints.includes('/api/definitive/deal-runbooks/{journey}'), 'deal runbook endpoint is public discovery');
+  assert(card.publicEndpoints.includes('/api/definitive/model-catalog'), 'model catalog endpoint is public discovery');
+  assert(card.publicEndpoints.includes('/api/definitive/model-catalog/{slotId}'), 'model slot endpoint is public discovery');
+  assert(card.publicEndpoints.includes('/api/definitive/deal-mechanics/models/{slotId}'), 'deal mechanics model slot endpoint is public discovery');
+  assert(card.publicEndpoints.includes('/api/definitive/registry-package'), 'registry package endpoint is public discovery');
+  assert(card.publicEndpoints.includes('/api/definitive/enterprise-allow-lists'), 'enterprise allow-list endpoint is public discovery');
   assert(!card.publicEndpoints.includes('/api/definitive/tools/{toolName}/call'), 'tool execution is not public');
   assert(card.authenticatedEndpoints.includes('/api/definitive/line/inventory'), 'line inventory endpoint is authenticated');
   assert(card.authenticatedEndpoints.includes('/api/definitive/corpus/observation-types'), 'corpus observation endpoint is authenticated');
@@ -203,6 +234,8 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assertEqual(manifest.endpoints.passThroughCatalog, '/api/definitive/pass-through-catalog', 'manifest pass-through catalog endpoint');
   assertEqual(manifest.endpoints.authoritySeedPlan, '/api/definitive/authority-seed-plan', 'manifest authority seed plan endpoint');
   assertEqual(manifest.endpoints.substrateArchitecture, '/api/definitive/substrate-architecture', 'manifest substrate architecture endpoint');
+  assertEqual(manifest.endpoints.registryPackage, '/api/definitive/registry-package', 'manifest registry package endpoint');
+  assertEqual(manifest.endpoints.enterpriseAllowLists, '/api/definitive/enterprise-allow-lists', 'manifest enterprise allow-list endpoint');
   assertEqual(manifest.endpoints.latestDealState, '/api/definitive/deal-state/latest', 'manifest latest deal-state endpoint');
   assertEqual(manifest.endpoints.dealPackets, '/api/definitive/deal-packets', 'manifest deal packets endpoint');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/spec'), 'manifest spec API is public discovery');
@@ -213,6 +246,8 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assert(manifest.access.publicDiscovery.includes('/api/definitive/pass-through-catalog'), 'manifest pass-through catalog is public discovery');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/authority-seed-plan'), 'manifest authority seed plan is public discovery');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/substrate-architecture'), 'manifest substrate architecture is public discovery');
+  assert(manifest.access.publicDiscovery.includes('/api/definitive/registry-package'), 'manifest registry package is public discovery');
+  assert(manifest.access.publicDiscovery.includes('/api/definitive/enterprise-allow-lists'), 'manifest enterprise allow-list is public discovery');
   assert(manifest.access.authenticatedDiscovery.includes('/api/definitive/tools/list'), 'manifest tools list is authenticated discovery');
   assert(manifest.access.authenticatedExecution.includes('/api/definitive/tools/{toolName}/call'), 'manifest tool call is authenticated execution');
   assert(manifest.access.authenticatedExecution.includes('/api/definitive/deal-state/latest'), 'manifest latest deal-state is authenticated execution');
@@ -260,6 +295,20 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assertEqual(manifest.substrateArchitectureSurface.schemaRegistry.endpoint, '/api/definitive/schemas', 'manifest substrate schema endpoint');
   assert(manifest.substrateArchitectureSurface.schemaRegistry.schemaNames.includes('MissingInputContract'), 'manifest substrate schema registry exposes MissingInputContract');
   assert(manifest.substrateArchitectureSurface.schemaRegistry.toolSchemaMap.ingest_deal_payload.output.includes('DealState'), 'manifest substrate schema map connects ingest to DealState');
+  assertEqual(manifest.endpoints.dealRunbooks, '/api/definitive/deal-runbooks', 'manifest deal runbooks endpoint');
+  assertEqual(manifest.endpoints.dealRunbook, '/api/definitive/deal-runbooks/{journey}', 'manifest deal runbook endpoint');
+  assert(manifest.access.publicDiscovery.includes('/api/definitive/deal-runbooks'), 'manifest public discovery includes deal runbooks');
+  assert(manifest.access.publicDiscovery.includes('/api/definitive/deal-runbooks/{journey}'), 'manifest public discovery includes deal runbook endpoint');
+  assertEqual(manifest.dealRunbooksSurface.summary.journeyCount, 4, 'manifest deal runbooks journey count');
+  assert(manifest.dealRunbooksSurface.summary.loopContract.includes('package_take_back'), 'manifest runbook surface exposes loop contract');
+  assert(manifest.dealRunbooksSurface.journeys.includes('buy'), 'manifest runbook surface includes buy journey');
+  assert(manifest.dealRunbooksSurface.universalTakeBackArtifacts.includes('DealPackage'), 'manifest runbook surface exposes take-back artifacts');
+  assertEqual(manifest.endpoints.modelCatalog, '/api/definitive/model-catalog', 'manifest model catalog endpoint');
+  assertEqual(manifest.endpoints.modelSlot, '/api/definitive/model-catalog/{slotId}', 'manifest model slot endpoint');
+  assertEqual(manifest.endpoints.dealMechanicsModelSlot, '/api/definitive/deal-mechanics/models/{slotId}', 'manifest deal mechanics model slot endpoint');
+  assert(manifest.access.publicDiscovery.includes('/api/definitive/model-catalog'), 'manifest public discovery includes model catalog');
+  assert(manifest.access.publicDiscovery.includes('/api/definitive/model-catalog/{slotId}'), 'manifest public discovery includes model slot endpoint');
+  assert(manifest.access.publicDiscovery.includes('/api/definitive/deal-mechanics/models/{slotId}'), 'manifest public discovery includes deal mechanics slot endpoint');
   assertEqual(manifest.dealMechanicsSurface.mappingCoverage.status, 'complete', 'manifest deal mapping coverage status');
   assertEqual(manifest.dealMechanicsSurface.mappingCoverage.unmappedModelSlots, 0, 'manifest has no unmapped active model slots');
   assertEqual(manifest.dealMechanicsSurface.routeMap.summary.status, 'complete', 'manifest route map coverage status');
@@ -294,6 +343,13 @@ await test('MCP well-known discovery is generated from DEFINITIVE manifest data'
   assert(serverCard.tools.every((tool: any) => typeof tool.annotations?.readOnlyHint === 'boolean'), 'MCP tools expose annotations');
   assert(serverCard.definitive.toolMetadataDoctrine.semanticKeywords.includes('working capital peg'), 'MCP server-card exposes semantic keywords');
   assertEqual(serverCard.definitive.publishedStandardDoctrine.name, 'The Diligence Standard', 'MCP server-card exposes published standard');
+  assertEqual(serverCard.definitive.dealRunbooks, `${origin}/api/definitive/deal-runbooks`, 'MCP server-card exposes deal runbooks URL');
+  assertEqual(serverCard.definitive.dealRunbook, `${origin}/api/definitive/deal-runbooks/{journey}`, 'MCP server-card exposes deal runbook URL');
+  assertEqual(serverCard.definitive.modelCatalog, `${origin}/api/definitive/model-catalog`, 'MCP server-card exposes model catalog URL');
+  assertEqual(serverCard.definitive.modelSlot, `${origin}/api/definitive/model-catalog/{slotId}`, 'MCP server-card exposes model slot URL');
+  assertEqual(serverCard.definitive.dealMechanicsModelSlot, `${origin}/api/definitive/deal-mechanics/models/{slotId}`, 'MCP server-card exposes deal mechanics model slot URL');
+  assertEqual(serverCard.definitive.registryPackage, `${origin}/api/definitive/registry-package`, 'MCP server-card exposes registry package URL');
+  assertEqual(serverCard.definitive.enterpriseAllowLists, `${origin}/api/definitive/enterprise-allow-lists`, 'MCP server-card exposes enterprise allow-list URL');
   assertEqual(serverCard.security.noSuccessFees, true, 'MCP server-card blocks success fees');
   assertEqual(serverCard.security.noReferralCompensation, true, 'MCP server-card blocks referral compensation');
 
@@ -301,10 +357,35 @@ await test('MCP well-known discovery is generated from DEFINITIVE manifest data'
   assertEqual(mcpManifest.server_card, `${origin}/.well-known/mcp/server-card.json`, 'MCP manifest server-card URL');
   assert(mcpManifest.endpoints.some((endpoint: any) => endpoint.type === 'definitive-manifest' && endpoint.auth === 'none'), 'MCP manifest points to public DEFINITIVE manifest');
   assert(mcpManifest.endpoints.some((endpoint: any) => endpoint.type === 'definitive-schema-registry' && endpoint.auth === 'none'), 'MCP manifest points to public schema registry');
+  assert(mcpManifest.endpoints.some((endpoint: any) => endpoint.type === 'definitive-deal-runbooks' && endpoint.auth === 'none'), 'MCP manifest points to public deal runbooks');
+  assert(mcpManifest.endpoints.some((endpoint: any) => endpoint.type === 'definitive-model-catalog' && endpoint.auth === 'none'), 'MCP manifest points to public model catalog');
   assertEqual(mcpManifest.capabilities.outputSchema, true, 'MCP manifest declares output schemas');
   assertEqual(mcpManifest.capabilities.auditTrail, true, 'MCP manifest declares audit trail support');
   assertEqual(mcpManifest.doctrine.standard, 'The Diligence Standard', 'MCP manifest standard doctrine');
   assertEqual(mcpManifest.doctrine.namingConvention, 'diligence_<phase>_<artifact>', 'MCP manifest naming convention');
+});
+
+await test('Registry package gives enterprise admins allow-list templates', async () => {
+  const origin = 'https://example.smbx.ai';
+  const registryPackage = buildDefinitiveRegistryPackage(origin);
+  const allowLists = buildDefinitiveEnterpriseAllowListTemplates(origin);
+
+  assertEqual(registryPackage.schema, 'DEFINITIVE.registry-package.v0.1', 'registry package schema');
+  assertEqual(registryPackage.registryEntry.namespace, 'smbx-ai/diligence', 'registry package namespace');
+  assertEqual(registryPackage.registryEntry.serverCardUrl, `${origin}/.well-known/mcp/server-card.json`, 'registry package server-card URL');
+  assert(registryPackage.registryEntry.tags.includes('working capital peg'), 'registry package has semantic tags');
+  assertEqual(registryPackage.registryEntry.trustSignals.noSuccessFees, true, 'registry package blocks success fees');
+  assertEqual(registryPackage.registryEntry.trustSignals.noReferralCompensation, true, 'registry package blocks referral compensation');
+  assertEqual(registryPackage.server.dealRunbooksUrl, `${origin}/api/definitive/deal-runbooks`, 'registry package exposes deal runbooks URL');
+  assertEqual(registryPackage.enterpriseAllowListTemplates.schema, 'DEFINITIVE.enterprise-allow-lists.v0.1', 'registry package embeds allow-list templates');
+
+  assertEqual(allowLists.githubCopilotRegistry.policyMode, 'registry_only', 'GitHub Copilot registry-only posture');
+  assertEqual(allowLists.githubCopilotRegistry.registry.servers[0].id, 'smbx-ai/diligence', 'GitHub registry server id');
+  assert(allowLists.githubCopilotRegistry.registry.servers[0].allowedTools.includes('introspect_capabilities'), 'allow-list includes capability introspection');
+  assert(allowLists.kiroAwsQRegistry.servers[0].allowTools.includes('describe_methodology'), 'Kiro/AWS registry includes methodology tool');
+  assert(allowLists.azureApiCenterBlueprint.endpoints.toolCall.endsWith('/api/definitive/tools/call'), 'Azure blueprint exposes tool call');
+  assert(allowLists.bedrockAgentCoreCedarPolicyTemplate.policy.includes('requestedToolLineStatus != "LINE_VIOLATION"'), 'Cedar policy preserves THE LINE');
+  assert(allowLists.microsoftEntraAgentIdTemplate.claimsRequired.includes('beneficial_customer_id'), 'Entra template requires beneficial customer claim');
 });
 
 await test('DEFINITIVE schema registry publishes portable agent contracts', async () => {
@@ -330,6 +411,9 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.schemaNames.includes('PMIPlan'), 'schema registry exposes PMIPlan');
   assertEqual(registry.schemas.DealPayload.properties.revenueCents.type, 'integer', 'money is cents integer');
   assert(registry.toolSchemaMap.ingest_deal_payload.output.includes('MissingInputContract'), 'ingest output maps missing input contract');
+  assert(registry.toolSchemaMap.introspect_capabilities.takeBack.includes('CapabilityCatalog'), 'capability introspection maps CapabilityCatalog');
+  assert(registry.toolSchemaMap.describe_methodology.takeBack.includes('MethodologyDescription'), 'methodology description maps MethodologyDescription');
+  assert(registry.toolSchemaMap.estimate_deal_cost.takeBack.includes('DealCostEstimate'), 'cost estimate maps DealCostEstimate');
   assert(registry.toolSchemaMap.diff_deal_state.takeBack.includes('DealStateDiff'), 'diff take-back maps DealStateDiff');
   assert(registry.toolSchemaMap.compose_deal_package.takeBack.includes('DealPackage'), 'package take-back maps DealPackage');
   assert(registry.toolSchemaMap.resume_deal.takeBack.includes('DealPackage'), 'resume take-back maps DealPackage');
@@ -364,6 +448,33 @@ await test('DEFINITIVE catalog includes the M187-M223 closing-gap expansion', as
   assert(passThrough.catalog.some(item => item.id === 'PASS.IP.SCA_SCAN' && item.dependentModelSlots.includes('M221')), 'SCA scan catalog maps to OSS model');
   assert(passThrough.catalog.some(item => item.id === 'PASS.RE.TITLE_SURVEY' && item.dependentModelSlots.includes('M196')), 'title catalog maps to title/survey model');
   assert(passThrough.catalog.some(item => item.id === 'PASS.HUMAN_SPECIALIST_DIRECTORY' && item.pricingMode === 'free_editorial_directory'), 'free specialist directory is explicit');
+});
+
+await test('Model catalog surface gives agents stable M-slot lookups', async () => {
+  const surface = buildDefinitiveModelCatalogSurface();
+  const m200 = getDefinitiveModelSlotSurface('m200') as any;
+  const m206 = getDefinitiveModelSlotSurface('M206') as any;
+  const missing = getDefinitiveModelSlotSurface('M999');
+
+  assertEqual(surface.schema, 'DEFINITIVE.model-catalog-surface.v0.1', 'model catalog surface schema');
+  assertEqual(surface.summary.totalModelSlots, DEFINITIVE_DEAL_MECHANICS_MODEL_SLOT_COUNT, 'model catalog surface total slots');
+  assertEqual(surface.mappingCoverage.status, 'complete', 'model catalog surface mapping coverage');
+  assertEqual(surface.routeMapSummary.status, 'complete', 'model catalog route map status');
+  assertEqual(surface.models.length, DEFINITIVE_DEAL_MECHANICS_MODEL_SLOT_COUNT, 'model catalog surface exposes compact model list');
+  assertEqual(surface.queryHints.bySlotEndpoint, '/api/definitive/model-catalog/{slotId}', 'model catalog slot lookup hint');
+  assertEqual(surface.queryHints.byDealMechanicsEndpoint, '/api/definitive/deal-mechanics/models/{slotId}', 'deal mechanics slot lookup hint');
+  assert(surface.models.some(model => model.slotId === 'M200' && model.implementedRuntimeModelId === 'MODEL.TAX.TRANSACTION.MASTER.v1'), 'model catalog exposes M200 runtime model id');
+  assert(surface.models.some(model => model.slotId === 'M206' && model.toolSurfaces.includes('studio')), 'model catalog exposes M206 Studio surface');
+  assert(surface.lineInvariant.includes('do not advise'), 'model catalog preserves THE LINE');
+
+  assertEqual(m200.schema, 'DEFINITIVE.model-slot.v0.1', 'model slot surface schema');
+  assertEqual(m200.slotId, 'M200', 'model slot normalizes lowercase input');
+  assertEqual(m200.implementedRuntimeModelId, 'MODEL.TAX.TRANSACTION.MASTER.v1', 'model slot exposes runtime model id');
+  assert(m200.next_suggested_calls.some((call: any) => call.toolName === 'execute_model'), 'runtime-backed model slot points to execute_model');
+  assert(m200.the_line_invariant.includes('Users, counsel, advisors'), 'model slot keeps professional determination boundary');
+  assertEqual(m206.slotId, 'M206', 'agreement architecture model slot resolves');
+  assert(m206.route.toolSurfaces.includes('studio'), 'agreement architecture model routes to Studio');
+  assertEqual(missing, null, 'unknown model slot returns null');
 });
 
 await test('Authority Register seed plan is explicit and above 800 planned entries', async () => {
@@ -405,6 +516,33 @@ await test('Substrate architecture plan exposes the terminal orchestration primi
   assert(architecture.workstreams.some(item => item.id === 'WS6' && item.mcpTools.includes('compose_document_draft')), 'document draft workstream exists');
   assert(architecture.workstreams.some(item => item.id === 'WS5' && item.mcpTools.includes('compute_best_vehicle')), 'best vehicle workstream exists');
   assert(architecture.lineDoctrine.includes('does not advise'), 'THE LINE invariant is explicit');
+});
+
+await test('Deal runbooks show agents how to run the full iterative Deal OS lifecycle', async () => {
+  const surface = buildDefinitiveDealRunbooksSurface();
+  const buyRunbook = getDefinitiveDealRunbook('buy') as any;
+  const sellRunbook = getDefinitiveDealRunbook('SELL') as any;
+  const pmiRunbook = getDefinitiveDealRunbook('pmi') as any;
+  const missing = getDefinitiveDealRunbook('brokerage');
+
+  assertEqual(surface.schema, 'DEFINITIVE.deal-runbooks.v0.1', 'deal runbooks surface schema');
+  assert(surface.doctrine.includes('Deal OS'), 'deal runbooks identify smbX as Deal OS');
+  assertEqual(surface.summary.journeyCount, 4, 'deal runbooks expose four journeys');
+  assert(surface.summary.loopContract.includes('ingest_or_resume'), 'deal runbooks expose recursive loop');
+  assert(surface.universalEntryTools.includes('resume_deal'), 'deal runbooks expose resume entry tool');
+  assert(surface.universalTakeBackArtifacts.includes('DealPackage'), 'deal runbooks expose package take-back artifact');
+  assert(surface.lineInvariant.includes('do not advise'), 'deal runbooks preserve THE LINE');
+
+  assertEqual(buyRunbook.schema, 'DEFINITIVE.deal-runbook.v0.1', 'single runbook schema');
+  assertEqual(buyRunbook.journey, 'buy', 'buy runbook resolves');
+  assert(buyRunbook.stages.some((stage: any) => stage.stageId === 'ioi' && stage.primaryTools.includes('prepare_ioi_packet')), 'buy runbook includes IOI packet step');
+  assert(buyRunbook.stages.some((stage: any) => stage.stageId === 'loi' && stage.primaryTools.includes('prepare_loi_packet')), 'buy runbook includes LOI packet step');
+  assert(buyRunbook.stages.some((stage: any) => stage.stageId === 'deeper_diligence' && stage.workSurfaces.includes('data_room')), 'buy runbook includes data-room diligence');
+  assert(buyRunbook.next_suggested_calls.some((call: any) => call.toolName === 'resume_deal'), 'buy runbook points returning agents to resume_deal');
+  assert(buyRunbook.representativeModelSlots.some((slot: any) => slot.slotId === 'M109'), 'buy runbook exposes working capital mechanics');
+  assertEqual(sellRunbook.journey, 'sell', 'uppercase sell journey normalizes');
+  assert(pmiRunbook.stages.some((stage: any) => stage.stageId === 'close_pmi' && stage.primaryTools.includes('compose_pmi_plan')), 'PMI runbook includes PMI plan tool');
+  assertEqual(missing, null, 'unknown runbook returns null');
 });
 
 await test('DEFINITIVE route map makes every active M-slot usable by Yulia', async () => {
@@ -1066,6 +1204,62 @@ await test('Conformance status tool is DB-free and version pinned', async () => 
   assertEqual(response.body.ok, true, 'conformance tool ok');
   assertEqual(response.body.result.cases.modelRuntime, DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT, 'conformance case count');
   assert(response.body.result.categories.includes('working_capital'), 'working capital category included');
+});
+
+await test('Agent capability, methodology, and cost tools are DB-free Deal OS entrypoints', async () => {
+  const capabilities = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'introspect_capabilities',
+    input: {
+      objective: 'prepare LOI for a real estate-heavy buy-side acquisition',
+      journey: 'buy',
+      league: 'L4',
+      dealType: 'real estate asset purchase with IP and indemnification',
+      jurisdiction: 'US-DE',
+      triggeredGates: ['G30'],
+      includeTools: true,
+    },
+    envelope: {},
+  });
+  assertEqual(capabilities.status, 200, 'capabilities tool status');
+  assertEqual(capabilities.body.result.schema, 'CapabilityCatalog.v0.1', 'capabilities schema');
+  assert(capabilities.body.result.lifecycleStages.some((stage: any) => stage.id === 'loi'), 'capabilities expose LOI lifecycle');
+  assert(capabilities.body.result.workSurfaces.some((surface: any) => surface.id === 'data_room'), 'capabilities expose data room surface');
+  assert(capabilities.body.result.relevantMechanics.length > 0, 'capabilities surface relevant mechanics');
+  assert(capabilities.body.result.next_suggested_calls.some((call: any) => call.toolName === 'ingest_deal_payload'), 'capabilities tell agent to ingest partial state');
+
+  const methodology = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'describe_methodology',
+    input: { section: 'overview', includeModelCatalog: true, includeAuthorityPlan: true },
+    envelope: {},
+  });
+  assertEqual(methodology.status, 200, 'methodology tool status');
+  assertEqual(methodology.body.result.schema, 'MethodologyDescription.v0.1', 'methodology schema');
+  assertEqual(methodology.body.result.standard.name, 'The Diligence Standard', 'methodology exposes published standard');
+  assertEqual(methodology.body.result.modelCatalog.summary.totalModelSlots, DEFINITIVE_DEAL_MECHANICS_MODEL_SLOT_COUNT, 'methodology exposes full model count');
+  assertEqual(methodology.body.result.modelCatalog.mappingCoverage.status, 'complete', 'methodology exposes route coverage');
+  assert(methodology.body.result.doctrine.noRejection.includes('MissingInputContract'), 'methodology exposes no-rejection contract');
+
+  const cost = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'estimate_deal_cost',
+    input: {
+      monthlyModelRuns: 24,
+      monthlyApiCalls: 300,
+      monthlyStudioBooks: 2,
+      monthlyStudioExports: 4,
+      teamSeats: 1,
+      needsApiMcp: true,
+      passThroughCalls: [{ id: 'PASS.OSS_SCA', quantity: 2 }],
+    },
+    envelope: {},
+  });
+  assertEqual(cost.status, 200, 'cost tool status');
+  assertEqual(cost.body.result.schema, 'DealCostEstimate.v0.1', 'cost schema');
+  assertEqual(cost.body.result.recommendedPlan.id, 'pro', 'API/MCP deal work recommends Pro');
+  assert(cost.body.result.pricingDoctrine.includes('No wallet'), 'cost tool preserves no-wallet doctrine');
+  assertEqual(cost.body.result.passThrough.requestedCalls[0].humanReferralCompensationAllowed, false, 'pass-through blocks referral compensation');
 });
 
 await test('V20 overlay routing detects G28/G29/G30 without executing unbuilt models', async () => {

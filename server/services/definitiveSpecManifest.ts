@@ -22,6 +22,7 @@ import { getDefinitiveAuthoritySeedPlan } from './definitiveAuthoritySeedPlan.js
 import { getDefinitiveSubstrateArchitecturePlan } from './definitiveSubstrateArchitecturePlan.js';
 import { listDefinitiveMcpTools } from './definitiveMcp.js';
 import { buildDefinitiveSchemaRegistry } from './definitiveSchemas.js';
+import { buildDefinitiveDealRunbooksSurface } from './definitiveDealRunbooks.js';
 
 export function buildDefinitiveSpecManifest() {
   const tools = listDefinitiveMcpTools();
@@ -38,6 +39,7 @@ export function buildDefinitiveSpecManifest() {
   const authoritySeedPlan = getDefinitiveAuthoritySeedPlan();
   const substrateArchitecture = getDefinitiveSubstrateArchitecturePlan();
   const schemaRegistry = buildDefinitiveSchemaRegistry();
+  const dealRunbooks = buildDefinitiveDealRunbooksSurface();
   const lineSummary = lineInventory.reduce<Record<string, number>>((acc, contract) => {
     acc[contract.lineStatus] = (acc[contract.lineStatus] || 0) + 1;
     return acc;
@@ -71,6 +73,13 @@ export function buildDefinitiveSpecManifest() {
       passThroughCatalog: '/api/definitive/pass-through-catalog',
       authoritySeedPlan: '/api/definitive/authority-seed-plan',
       substrateArchitecture: '/api/definitive/substrate-architecture',
+      dealRunbooks: '/api/definitive/deal-runbooks',
+      dealRunbook: '/api/definitive/deal-runbooks/{journey}',
+      modelCatalog: '/api/definitive/model-catalog',
+      modelSlot: '/api/definitive/model-catalog/{slotId}',
+      dealMechanicsModelSlot: '/api/definitive/deal-mechanics/models/{slotId}',
+      registryPackage: '/api/definitive/registry-package',
+      enterpriseAllowLists: '/api/definitive/enterprise-allow-lists',
       toolsList: '/api/definitive/tools/list',
       toolCall: '/api/definitive/tools/{toolName}/call',
       lineInventory: '/api/definitive/line/inventory',
@@ -94,6 +103,13 @@ export function buildDefinitiveSpecManifest() {
         '/api/definitive/pass-through-catalog',
         '/api/definitive/authority-seed-plan',
         '/api/definitive/substrate-architecture',
+        '/api/definitive/deal-runbooks',
+        '/api/definitive/deal-runbooks/{journey}',
+        '/api/definitive/model-catalog',
+        '/api/definitive/model-catalog/{slotId}',
+        '/api/definitive/deal-mechanics/models/{slotId}',
+        '/api/definitive/registry-package',
+        '/api/definitive/enterprise-allow-lists',
       ],
       authenticatedDiscovery: [
         '/api/definitive/tools/list',
@@ -244,6 +260,15 @@ export function buildDefinitiveSpecManifest() {
       immediateBuildOrder: substrateArchitecture.immediateBuildOrder,
       marketplaceBuildOrder: substrateArchitecture.marketplaceBuildOrder,
       lineDoctrine: substrateArchitecture.lineDoctrine,
+    },
+    dealRunbooksSurface: {
+      schema: dealRunbooks.schema,
+      doctrine: dealRunbooks.doctrine,
+      summary: dealRunbooks.summary,
+      journeys: dealRunbooks.runbooks.map(runbook => runbook.journey),
+      universalEntryTools: dealRunbooks.universalEntryTools,
+      universalTakeBackArtifacts: dealRunbooks.universalTakeBackArtifacts,
+      lineInvariant: dealRunbooks.lineInvariant,
     },
     passThroughSurface,
     generatedAt: new Date().toISOString(),

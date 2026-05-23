@@ -16,6 +16,7 @@ import {
 import { getDefinitiveAuthoritySeedPlan } from './definitiveAuthoritySeedPlan.js';
 import { getDefinitiveSubstrateArchitecturePlan } from './definitiveSubstrateArchitecturePlan.js';
 import { buildDefinitiveSchemaRegistry } from './definitiveSchemas.js';
+import { buildDefinitiveDealRunbooksSurface } from './definitiveDealRunbooks.js';
 
 export function buildAgentCard() {
   const models = listRegisteredModels();
@@ -32,6 +33,7 @@ export function buildAgentCard() {
   const authoritySeedPlan = getDefinitiveAuthoritySeedPlan();
   const substrateArchitecture = getDefinitiveSubstrateArchitecturePlan();
   const schemaRegistry = buildDefinitiveSchemaRegistry();
+  const dealRunbooks = buildDefinitiveDealRunbooksSurface();
   const lineSummary = lineInventory.reduce<Record<string, number>>((acc, contract) => {
     acc[contract.lineStatus] = (acc[contract.lineStatus] || 0) + 1;
     return acc;
@@ -63,6 +65,13 @@ export function buildAgentCard() {
       passThroughCatalogEndpoint: '/api/definitive/pass-through-catalog',
       authoritySeedPlanEndpoint: '/api/definitive/authority-seed-plan',
       substrateArchitectureEndpoint: '/api/definitive/substrate-architecture',
+      dealRunbooksEndpoint: '/api/definitive/deal-runbooks',
+      dealRunbookEndpoint: '/api/definitive/deal-runbooks/{journey}',
+      modelCatalogEndpoint: '/api/definitive/model-catalog',
+      modelSlotEndpoint: '/api/definitive/model-catalog/{slotId}',
+      dealMechanicsModelSlotEndpoint: '/api/definitive/deal-mechanics/models/{slotId}',
+      registryPackageEndpoint: '/api/definitive/registry-package',
+      enterpriseAllowListsEndpoint: '/api/definitive/enterprise-allow-lists',
       dealMechanicsVersion: dealMechanics.version,
       dealMechanicsUri: dealMechanics.uri,
       dealMechanicsModelSlots: dealMechanics.totalModelSlots,
@@ -80,6 +89,8 @@ export function buildAgentCard() {
       schemaRegistryCount: schemaRegistry.schemaCount,
       schemaRegistryNames: schemaRegistry.schemaNames,
       dealOsDoctrine: substrateArchitecture.agentOperatingDoctrine.productDoctrine,
+      dealRunbookJourneys: dealRunbooks.runbooks.map(runbook => runbook.journey),
+      dealRunbookLoopContract: dealRunbooks.summary.loopContract,
       agentHomeContract: substrateArchitecture.agentOperatingDoctrine.homeContract,
       agentNoRejectionContract: substrateArchitecture.agentOperatingDoctrine.noRejectionContract,
       agentTakeBackArtifacts: substrateArchitecture.agentTakeBackArtifacts,
@@ -276,6 +287,13 @@ export function buildAgentCard() {
       '/api/definitive/pass-through-catalog',
       '/api/definitive/authority-seed-plan',
       '/api/definitive/substrate-architecture',
+      '/api/definitive/deal-runbooks',
+      '/api/definitive/deal-runbooks/{journey}',
+      '/api/definitive/model-catalog',
+      '/api/definitive/model-catalog/{slotId}',
+      '/api/definitive/deal-mechanics/models/{slotId}',
+      '/api/definitive/registry-package',
+      '/api/definitive/enterprise-allow-lists',
     ],
     authenticatedEndpoints: [
       '/api/definitive/tools/list',

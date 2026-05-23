@@ -7,6 +7,19 @@ import {
 import { buildDefinitiveConformanceStatus } from './definitiveConformanceStatus.js';
 import { executeDefinitiveDealStateTool, isDefinitiveDealStateTool } from './definitiveDealState.js';
 import {
+  getDefinitiveDealMappingCoverage,
+  getDefinitiveDealMechanicsSummary,
+  getDefinitivePassThroughSurface,
+} from './definitiveDealMechanicsCatalog.js';
+import {
+  composeDefinitiveApplicableMechanics,
+  getDefinitiveDealRouteMapSummary,
+  summarizeDefinitiveApplicableMechanics,
+  type DefinitiveJourney,
+} from './definitiveDealRouteMap.js';
+import { buildDefinitiveSchemaRegistry } from './definitiveSchemas.js';
+import { getDefinitiveSubstrateArchitecturePlan } from './definitiveSubstrateArchitecturePlan.js';
+import {
   getDefinitiveLineContract,
   inputHasExplicitConfirmation,
   type DefinitiveLineContract,
@@ -19,6 +32,9 @@ const DEFINITIVE_MCP_TOOLS = [
   'update_deal_payload',
   'check_completeness',
   'get_definition_of_done',
+  'introspect_capabilities',
+  'describe_methodology',
+  'estimate_deal_cost',
   'compose_deal_plan',
   'diff_deal_state',
   'compose_deal_package',
@@ -88,6 +104,62 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
       type: 'object',
       properties: {
         objective: { type: 'string', description: 'Optional objective or gate to explain.' },
+      },
+    },
+  },
+  introspect_capabilities: {
+    description: 'Return a contextual CapabilityCatalog for an external agent entering smbX as the Deal OS. It explains relevant lifecycle stages, work surfaces, portable take-back artifacts, matching M101-M223 deal mechanics, and next_suggested_calls without dumping the full corpus into context.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        objective: { type: 'string', description: 'Optional objective, such as start a deal, prepare IOI, prepare LOI, diligence, modeling, negotiation, close, PMI, or verify package.' },
+        journey: { type: 'string', enum: ['sell', 'buy', 'raise', 'pmi'], description: 'Optional deal journey.' },
+        league: { type: 'string', enum: ['L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10'], description: 'Optional V19 league.' },
+        dealType: { type: 'string', description: 'Optional deal type or structure, such as asset purchase, 363 sale, real estate, LME, IP-heavy acquisition, or continuation fund.' },
+        industry: { type: 'string', description: 'Optional industry profile.' },
+        jurisdiction: { type: 'string', description: 'Optional jurisdiction, such as US-DE, US-TX, UK, or EU.' },
+        triggeredGates: { type: 'array', items: { type: 'string' }, description: 'Optional triggered gates such as G28, G29, and G30.' },
+        includeTools: { type: 'boolean', description: 'When true, include a compact tool inventory for the matching surface.' },
+      },
+    },
+  },
+  describe_methodology: {
+    description: 'Describe The Diligence Standard / DEFINITIVE methodology for agents: version pins, Deal OS lifecycle, M101-M223 model catalog, G1-G30 gate routing, schemas, authority target, conformance status, and THE LINE compute-not-advise boundary.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        section: { type: 'string', description: 'Optional section: overview, lifecycle, models, gates, schemas, pass_through, conformance, line, or agent_access.' },
+        includeModelCatalog: { type: 'boolean', description: 'When true, include model-catalog summary and mapping coverage.' },
+        includeAuthorityPlan: { type: 'boolean', description: 'When true, include authority-register target and versioned source posture.' },
+      },
+    },
+  },
+  estimate_deal_cost: {
+    description: 'Estimate the monthly workspace level and THE LINE-safe software/data pass-through posture for agentic deal work. Uses monthly subscription levels only; no wallet, no success fee, no referral fee, and no fee tied to deal value or outcome.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        monthlyModelRuns: { type: 'number', description: 'Expected deterministic model runs per month.' },
+        monthlyApiCalls: { type: 'number', description: 'Expected MCP/API calls per month.' },
+        monthlyStudioBooks: { type: 'number', description: 'Expected Studio books per month.' },
+        monthlyStudioExports: { type: 'number', description: 'Expected Studio exports per month.' },
+        teamSeats: { type: 'number', description: 'Expected workspace seats.' },
+        needsApiMcp: { type: 'boolean', description: 'Whether the user/agent needs API or MCP access.' },
+        supervisedAgents: { type: 'number', description: 'Number of supervised agent workflows.' },
+        autonomousAgents: { type: 'number', description: 'Number of governed autonomous agent workflows.' },
+        singleTenant: { type: 'boolean', description: 'Whether single-tenant deployment is required.' },
+        sso: { type: 'boolean', description: 'Whether SSO is required.' },
+        passThroughCalls: {
+          type: 'array',
+          description: 'Optional software/data pass-through calls to explain, billed at-cost or cost-plus-fixed per call regardless of deal outcome.',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'string', description: 'Pass-through catalog id, such as PASS.RE_MARKET_DATA or PASS.OSS_SCA.' },
+              quantity: { type: 'number', description: 'Expected call count.' },
+            },
+          },
+        },
       },
     },
   },
@@ -407,6 +479,9 @@ const TOOL_SCOPE: Record<DefinitiveMcpToolName, string[]> = {
   update_deal_payload: ['deal-state:write', 'deal:classify'],
   check_completeness: ['deal-state:read', 'completeness:read'],
   get_definition_of_done: ['methodology:read', 'completeness:read'],
+  introspect_capabilities: ['capability:read', 'methodology:read'],
+  describe_methodology: ['methodology:read', 'authority:read'],
+  estimate_deal_cost: ['pricing:read', 'pass-through:read'],
   compose_deal_plan: ['deal-state:read', 'deal-plan:read'],
   diff_deal_state: ['deal-state:read', 'deal-state:diff'],
   compose_deal_package: ['deal-state:read', 'deal-package:read'],
@@ -437,7 +512,48 @@ const TOOL_SCOPE: Record<DefinitiveMcpToolName, string[]> = {
 const TOOL_INTERNAL_API_METER = new Set<DefinitiveMcpToolName>([
   'fetch_market_data',
   'validate_conformance',
+  'introspect_capabilities',
+  'describe_methodology',
+  'estimate_deal_cost',
 ]);
+
+const WORKSPACE_PLANS = [
+  {
+    id: 'free',
+    label: 'Free',
+    monthlyPriceCents: 0,
+    priceLabel: '$0/mo',
+    builtFor: 'Trying Yulia on one real deal with one free deliverable.',
+  },
+  {
+    id: 'solo',
+    label: 'Solo',
+    monthlyPriceCents: 7900,
+    priceLabel: '$79/mo',
+    builtFor: 'One operator, one deal at a time.',
+  },
+  {
+    id: 'pro',
+    label: 'Pro',
+    monthlyPriceCents: 19900,
+    priceLabel: '$199/mo',
+    builtFor: 'Active dealmakers running the full deal stack, Studio output, models, and API/MCP access.',
+  },
+  {
+    id: 'team',
+    label: 'Team',
+    monthlyPriceCents: 49900,
+    priceLabel: '$499/mo',
+    builtFor: 'Boutiques and partner-led firms with shared vaults, templates, seats, and supervised agent work.',
+  },
+  {
+    id: 'enterprise',
+    label: 'Enterprise',
+    monthlyPriceCents: 250000,
+    priceLabel: 'From $2,500/mo',
+    builtFor: 'Larger teams and regulated environments needing SSO, single-tenant deployment, API controls, portfolio infrastructure, and governed autonomous agents.',
+  },
+] as const;
 
 interface DefinitiveToolCallInput {
   userId: number;
@@ -563,6 +679,25 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
         lineRisks: line?.lineRisks || [],
         requiredScopes: requestedScopes,
         result: buildDefinitiveConformanceStatus(),
+        ...versionPayload(),
+      },
+    };
+  }
+
+  if (isStaticDefinitiveDiscoveryTool(input.toolName)) {
+    return {
+      status: 200,
+      body: {
+        ok: true,
+        toolName: input.toolName,
+        protocol: DEFINITIVE_MCP_PROTOCOL,
+        lineStatus: line?.lineStatus || 'ok',
+        lineReason: line?.lineReason || '',
+        refusalBehavior: line?.refusalBehavior || 'allow',
+        lineRisks: line?.lineRisks || [],
+        requiredScopes: requestedScopes,
+        result: executeStaticDefinitiveDiscoveryTool(input.toolName, input.input || {}),
+        mandateChain: null,
         ...versionPayload(),
       },
     };
@@ -932,4 +1067,318 @@ function nullableNumber(value: unknown): number | null {
 function normalizeScopes(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return [...new Set(value.map(String).map(scope => scope.trim()).filter(Boolean))];
+}
+
+function isStaticDefinitiveDiscoveryTool(
+  toolName: DefinitiveMcpToolName,
+): toolName is 'introspect_capabilities' | 'describe_methodology' | 'estimate_deal_cost' {
+  return (
+    toolName === 'introspect_capabilities' ||
+    toolName === 'describe_methodology' ||
+    toolName === 'estimate_deal_cost'
+  );
+}
+
+function executeStaticDefinitiveDiscoveryTool(
+  toolName: 'introspect_capabilities' | 'describe_methodology' | 'estimate_deal_cost',
+  toolInput: Record<string, any>,
+) {
+  if (toolName === 'introspect_capabilities') return buildCapabilityCatalog(toolInput);
+  if (toolName === 'describe_methodology') return buildMethodologyDescription(toolInput);
+  return buildDealCostEstimate(toolInput);
+}
+
+function buildCapabilityCatalog(toolInput: Record<string, any>) {
+  const architecture = getDefinitiveSubstrateArchitecturePlan();
+  const mechanics = composeDefinitiveApplicableMechanics({
+    journey: normalizeJourney(toolInput.journey),
+    league: nullableString(toolInput.league),
+    dealType: nullableString(toolInput.dealType) || nullableString(toolInput.objective),
+    industry: nullableString(toolInput.industry),
+    jurisdiction: nullableString(toolInput.jurisdiction),
+    triggeredGates: normalizeStringArray(toolInput.triggeredGates),
+    includeResearchOnly: true,
+    limit: 24,
+  });
+  const includeTools = toolInput.includeTools === true;
+
+  return {
+    schema: 'CapabilityCatalog.v0.1',
+    standard: architecture.publishedStandardDoctrine.name,
+    methodologyVersion: DEFINITIVE_METHODOLOGY_VERSION,
+    methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+    objective: nullableString(toolInput.objective) || 'enter_or_continue_deal_os_work',
+    scope: {
+      journey: normalizeJourney(toolInput.journey) || 'unknown',
+      league: nullableString(toolInput.league) || 'unknown',
+      dealType: nullableString(toolInput.dealType) || 'unknown',
+      industry: nullableString(toolInput.industry) || 'unknown',
+      jurisdiction: nullableString(toolInput.jurisdiction) || 'unknown',
+      triggeredGates: normalizeStringArray(toolInput.triggeredGates),
+    },
+    noRejectionContract: architecture.agentOperatingDoctrine.noRejectionContract,
+    recursiveWorkLoop: architecture.agentOperatingDoctrine.recursiveWorkLoop,
+    lifecycleStages: architecture.dealOsLifecycleStages,
+    workSurfaces: architecture.dealOsWorkSurfaces,
+    takeBackArtifacts: architecture.agentTakeBackArtifacts,
+    relevantMechanics: mechanics,
+    relevantMechanicsSummary: summarizeDefinitiveApplicableMechanics(mechanics),
+    recommendedEntryTools: [
+      'ingest_deal_payload',
+      'resume_deal',
+      'check_completeness',
+      'compose_deal_plan',
+      'compose_model_stack',
+    ],
+    tools: includeTools
+      ? listDefinitiveMcpTools().tools.map(tool => ({
+        name: tool.name,
+        requiredScopes: tool.requiredScopes,
+        lineStatus: tool.lineStatus,
+        description: tool.description,
+      }))
+      : undefined,
+    next_suggested_calls: [
+      {
+        toolName: 'ingest_deal_payload',
+        priority: 'P0',
+        reason: 'Create or refresh DealState from whatever the agent already knows. Partial payloads are accepted.',
+        inputHint: { payload: { journey: normalizeJourney(toolInput.journey) || undefined, dealType: nullableString(toolInput.dealType) || undefined } },
+      },
+      {
+        toolName: 'compose_deal_plan',
+        priority: 'P1',
+        reason: 'Turn the current DealState into the iterative IOI -> LOI -> diligence -> model -> negotiation -> close -> PMI work plan.',
+        inputHint: { dealState: '<DealState from ingest_deal_payload>' },
+      },
+      {
+        toolName: 'compose_model_stack',
+        priority: mechanics.length ? 'P1' : 'P2',
+        reason: 'Map the current deal facts to the applicable M101-M223 deterministic mechanics and THE LINE boundaries.',
+        inputHint: {
+          journey: normalizeJourney(toolInput.journey) || undefined,
+          league: nullableString(toolInput.league) || undefined,
+          dealType: nullableString(toolInput.dealType) || undefined,
+        },
+      },
+    ],
+    the_line_invariant: architecture.lineDoctrine,
+  };
+}
+
+function buildMethodologyDescription(toolInput: Record<string, any>) {
+  const section = nullableString(toolInput.section) || 'overview';
+  const architecture = getDefinitiveSubstrateArchitecturePlan();
+  const mechanicsSummary = getDefinitiveDealMechanicsSummary();
+  const mappingCoverage = getDefinitiveDealMappingCoverage();
+  const routeSummary = getDefinitiveDealRouteMapSummary();
+  const schemaRegistry = buildDefinitiveSchemaRegistry();
+  const conformance = buildDefinitiveConformanceStatus();
+  const passThroughSurface = getDefinitivePassThroughSurface();
+
+  return {
+    schema: 'MethodologyDescription.v0.1',
+    section,
+    standard: architecture.publishedStandardDoctrine,
+    specVersion: DEFINITIVE_SPEC_VERSION,
+    specUri: DEFINITIVE_SPEC_URI,
+    methodologyVersion: DEFINITIVE_METHODOLOGY_VERSION,
+    methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+    doctrine: {
+      dealOs: architecture.agentOperatingDoctrine.productDoctrine,
+      agentHome: architecture.agentOperatingDoctrine.homeContract,
+      noRejection: architecture.agentOperatingDoctrine.noRejectionContract,
+      recursiveWorkLoop: architecture.agentOperatingDoctrine.recursiveWorkLoop,
+      bidirectionalHandoff: architecture.agentOperatingDoctrine.bidirectionalHandoff,
+      line: architecture.lineDoctrine,
+    },
+    lifecycleStages: section === 'overview' || section === 'lifecycle' || section === 'agent_access'
+      ? architecture.dealOsLifecycleStages
+      : undefined,
+    workSurfaces: section === 'overview' || section === 'lifecycle' || section === 'agent_access'
+      ? architecture.dealOsWorkSurfaces
+      : undefined,
+    modelCatalog: toolInput.includeModelCatalog === true || ['overview', 'models', 'gates'].includes(section)
+      ? {
+        summary: mechanicsSummary,
+        mappingCoverage,
+        routeSummary,
+      }
+      : undefined,
+    schemas: ['overview', 'schemas', 'agent_access'].includes(section)
+      ? {
+        registryVersion: schemaRegistry.version,
+        schemaCount: schemaRegistry.schemaCount,
+        schemaNames: schemaRegistry.schemaNames,
+        toolSchemaMap: schemaRegistry.toolSchemaMap,
+      }
+      : undefined,
+    passThrough: ['overview', 'pass_through', 'line'].includes(section)
+      ? {
+        pricingRule: passThroughSurface.pricingRule,
+        marginPolicy: passThroughSurface.marginPolicy,
+        allowed: passThroughSurface.allowed,
+        prohibited: passThroughSurface.prohibited,
+        humanDirectory: passThroughSurface.humanDirectory,
+      }
+      : undefined,
+    authorityPlan: toolInput.includeAuthorityPlan === true
+      ? {
+        authorityRegisterTarget: mechanicsSummary.authorityRegisterTarget,
+        posture: 'authority refs are versioned, citation-validatable anchors; live specialist data remains pass-through when required.',
+      }
+      : undefined,
+    conformance: ['overview', 'conformance'].includes(section) ? conformance : undefined,
+    next_suggested_calls: [
+      {
+        toolName: 'introspect_capabilities',
+        priority: 'P0',
+        reason: 'Ask for the relevant subset of the methodology before choosing tools for a specific deal.',
+        inputHint: { objective: 'continue deal', journey: '<sell|buy|raise|pmi>', dealType: '<known deal type>' },
+      },
+      {
+        toolName: 'ingest_deal_payload',
+        priority: 'P0',
+        reason: 'Move from methodology description to actual DealState work.',
+        inputHint: { payload: '<partial facts are okay>' },
+      },
+    ],
+    the_line_invariant: architecture.lineDoctrine,
+  };
+}
+
+function buildDealCostEstimate(toolInput: Record<string, any>) {
+  const monthlyModelRuns = nullableNonNegativeNumber(toolInput.monthlyModelRuns);
+  const monthlyApiCalls = nullableNonNegativeNumber(toolInput.monthlyApiCalls);
+  const monthlyStudioBooks = nullableNonNegativeNumber(toolInput.monthlyStudioBooks);
+  const monthlyStudioExports = nullableNonNegativeNumber(toolInput.monthlyStudioExports);
+  const teamSeats = nullableNonNegativeNumber(toolInput.teamSeats) || 1;
+  const supervisedAgents = nullableNonNegativeNumber(toolInput.supervisedAgents);
+  const autonomousAgents = nullableNonNegativeNumber(toolInput.autonomousAgents);
+  const passThroughSurface = getDefinitivePassThroughSurface();
+  const recommendedPlan = chooseWorkspacePlan({
+    monthlyModelRuns,
+    monthlyApiCalls,
+    monthlyStudioBooks,
+    monthlyStudioExports,
+    teamSeats,
+    needsApiMcp: toolInput.needsApiMcp === true,
+    supervisedAgents,
+    autonomousAgents,
+    singleTenant: toolInput.singleTenant === true,
+    sso: toolInput.sso === true,
+  });
+
+  return {
+    schema: 'DealCostEstimate.v0.1',
+    pricingDoctrine: 'Monthly subscriptions plus outcome-independent credits and software/data pass-through only. No wallet, no success fee, no referral fee, and no fee tied to deal value or closing.',
+    recommendedPlan,
+    plans: WORKSPACE_PLANS,
+    usageProfile: {
+      monthlyModelRuns,
+      monthlyApiCalls,
+      monthlyStudioBooks,
+      monthlyStudioExports,
+      teamSeats,
+      needsApiMcp: toolInput.needsApiMcp === true,
+      supervisedAgents,
+      autonomousAgents,
+      singleTenant: toolInput.singleTenant === true,
+      sso: toolInput.sso === true,
+    },
+    passThrough: {
+      pricingRule: passThroughSurface.pricingRule,
+      marginPolicy: passThroughSurface.marginPolicy,
+      requestedCalls: summarizePassThroughCalls(toolInput.passThroughCalls),
+      allowed: passThroughSurface.allowed,
+      prohibited: passThroughSurface.prohibited,
+      catalogStatus: passThroughSurface.priceListStatus,
+    },
+    next_suggested_calls: [
+      {
+        toolName: 'introspect_capabilities',
+        priority: 'P1',
+        reason: 'Map the user or agent workload to the exact deal mechanics and surfaces before estimating heavier usage.',
+        inputHint: { objective: 'price the expected deal workflow' },
+      },
+      {
+        toolName: 'check_completeness',
+        priority: 'P2',
+        reason: 'Completeness status usually determines whether the next cost is model work, Studio output, or pass-through data/software.',
+        inputHint: { dealState: '<DealState when available>' },
+      },
+    ],
+    the_line_invariant: 'DEFINITIVE may bill for software/data API consumption at per-call cost or cost-plus-fixed margin regardless of deal outcome. It may not receive success fees, deal-value fees, or human-service referral compensation.',
+  };
+}
+
+function chooseWorkspacePlan(input: {
+  monthlyModelRuns: number;
+  monthlyApiCalls: number;
+  monthlyStudioBooks: number;
+  monthlyStudioExports: number;
+  teamSeats: number;
+  needsApiMcp: boolean;
+  supervisedAgents: number;
+  autonomousAgents: number;
+  singleTenant: boolean;
+  sso: boolean;
+}) {
+  if (input.singleTenant || input.sso || input.autonomousAgents > 0) {
+    return { ...WORKSPACE_PLANS[4], reason: 'Enterprise governance, SSO, single-tenant deployment, or autonomous governed agent scope is required.' };
+  }
+  if (input.teamSeats > 1 || input.supervisedAgents > 0) {
+    return { ...WORKSPACE_PLANS[3], reason: 'Shared seats, supervised agent work, firm templates, and shared deal vaults need Team.' };
+  }
+  if (
+    input.needsApiMcp ||
+    input.monthlyApiCalls > 0 ||
+    input.monthlyModelRuns >= 10 ||
+    input.monthlyStudioBooks > 0 ||
+    input.monthlyStudioExports > 0
+  ) {
+    return { ...WORKSPACE_PLANS[2], reason: 'Active full-stack deal work and agent/API access belong on Pro.' };
+  }
+  if (input.monthlyModelRuns > 0) {
+    return { ...WORKSPACE_PLANS[1], reason: 'Solo fits one operator running a real deal without shared agent governance.' };
+  }
+  return { ...WORKSPACE_PLANS[0], reason: 'Free is a low-risk test drive for unlimited Yulia Q&A and one deliverable.' };
+}
+
+function summarizePassThroughCalls(value: unknown) {
+  const passThroughSurface = getDefinitivePassThroughSurface();
+  if (!Array.isArray(value)) return [];
+  return value.map(item => {
+    const call = item && typeof item === 'object' ? item as Record<string, any> : {};
+    const id = nullableString(call.id) || nullableString(call.substrateId) || 'unknown';
+    const quantity = nullableNonNegativeNumber(call.quantity) || 1;
+    const catalogEntry = passThroughSurface.catalog.find(entry => (
+      entry.id === id ||
+      entry.label.toLowerCase() === id.toLowerCase()
+    ));
+    return {
+      id,
+      quantity,
+      catalogLabel: catalogEntry?.label || null,
+      priceDisplay: catalogEntry?.priceDisplay || 'Use published vendor price plus fixed margin when cataloged.',
+      pricingMode: catalogEntry?.pricingMode || 'vendor_cost_plus_fixed_margin',
+      chargedRegardlessOfOutcome: true,
+      humanReferralCompensationAllowed: false,
+    };
+  });
+}
+
+function normalizeJourney(value: unknown): DefinitiveJourney | null {
+  if (value === 'sell' || value === 'buy' || value === 'raise' || value === 'pmi') return value;
+  return null;
+}
+
+function normalizeStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return [...new Set(value.map(String).map(item => item.trim()).filter(Boolean))];
+}
+
+function nullableNonNegativeNumber(value: unknown): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
 }
