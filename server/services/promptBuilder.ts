@@ -559,7 +559,7 @@ export async function buildDynamicAnonymousPrompt(
     layers.push(`\n## GATE CONTEXT\n${GATE_PROMPTS[convState.current_gate]}`);
   }
 
-  // Layer: Tax Implications Engine — V18 §9 (per amendment 18a, May 2 2026)
+  // Layer: Tax Implications Engine — V19 §9 / DEFINITIVE
   // Foundation always loads once we have any conversation state; league checklist
   // rides along when league is known.
   layers.push(TAX_ENGINE_FOUNDATION);
@@ -567,9 +567,9 @@ export async function buildDynamicAnonymousPrompt(
     layers.push(TAX_ENGINE_BY_LEAGUE[convState.league]);
   }
 
-  // Layer: Legal Frameworks Engine — V18 §10 (per amendment 18b, May 3 2026)
-  // Same composition pattern as the tax engine. Together they implement V18's
-  // tax + legal substrate. The two engines coordinate at the §1060 / F-reorg /
+  // Layer: Legal Frameworks Engine — V19 §10 / DEFINITIVE
+  // Same composition pattern as the tax engine. Together they implement V19's
+  // tax + legal Deal OS substrate. The two engines coordinate at the §1060 / F-reorg /
   // §280G interlock points; legalEngine references the tax module explicitly.
   layers.push(LEGAL_ENGINE_FOUNDATION);
   if (convState.league && LEGAL_ENGINE_BY_LEAGUE[convState.league]) {
@@ -752,7 +752,7 @@ export async function buildSystemPrompt(
       layers.push(GATE_PROMPTS[deal.current_gate]);
     }
 
-    // Layer 3c+: Tax Implications Engine — V18 §9 (per amendment 18a, May 2 2026)
+    // Layer 3c+: Tax Implications Engine — V19 §9 / DEFINITIVE
     // Foundation always loads in deal context; league workflow checklist rides
     // along when league is known. Slotted before subscription/support/knowledge
     // so tax posture frames downstream behavior.
@@ -762,9 +762,9 @@ export async function buildSystemPrompt(
       layers.push(TAX_ENGINE_BY_LEAGUE[dealLeague]);
     }
 
-    // Layer 3c++: Legal Frameworks Engine — V18 §10 (per amendment 18b, May 3 2026)
+    // Layer 3c++: Legal Frameworks Engine — V19 §10 / DEFINITIVE
     // Sibling to the tax engine — same composition pattern. Together they
-    // implement V18's tax + legal substrate. Coordinates with §9 at the
+    // implement V19's tax + legal Deal OS substrate. Coordinates with §9 at the
     // §1060 / F-reorg / §280G / rollover §83(b) interlock points.
     layers.push(LEGAL_ENGINE_FOUNDATION);
     if (dealLeague && LEGAL_ENGINE_BY_LEAGUE[dealLeague]) {
