@@ -61,6 +61,80 @@ try {
     assert(body.tools.some((tool: any) => tool.name === 'compose_close_readiness'), 'compose_close_readiness is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'generate_funds_flow'), 'generate_funds_flow is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_pmi_plan'), 'compose_pmi_plan is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'introspect_capabilities'), 'introspect_capabilities is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'describe_methodology'), 'describe_methodology is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'estimate_deal_cost'), 'estimate_deal_cost is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'get_deal_runbook'), 'get_deal_runbook is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'lookup_model_slot'), 'lookup_model_slot is advertised');
+  });
+
+  await test('Authenticated agent entrypoint tools expose Deal OS context', async () => {
+    const capabilities = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'introspect_capabilities',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      requestedScopes: ['capability:read', 'methodology:read'],
+      input: {
+        objective: 'prepare LOI for a buy-side acquisition from partial facts',
+        journey: 'buy',
+        league: 'L4',
+        dealType: 'asset purchase with working capital and indemnification',
+        includeTools: true,
+      },
+    });
+    assertEqual(capabilities.status, 200, 'capabilities route status');
+    assertEqual(capabilities.body.result?.schema, 'CapabilityCatalog.v0.1', 'capabilities schema');
+    assert(capabilities.body.result.lifecycleStages.some((stage: any) => stage.id === 'loi'), 'capabilities expose LOI lifecycle');
+    assert(capabilities.body.result.next_suggested_calls.some((call: any) => call.toolName === 'ingest_deal_payload'), 'capabilities expose no-rejection entry call');
+
+    const methodology = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'describe_methodology',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      requestedScopes: ['methodology:read', 'authority:read'],
+      input: { section: 'agent_access', includeModelCatalog: true, includeAuthorityPlan: true },
+    });
+    assertEqual(methodology.status, 200, 'methodology route status');
+    assertEqual(methodology.body.result?.schema, 'MethodologyDescription.v0.1', 'methodology schema');
+    assert(methodology.body.result.doctrine.noRejection.includes('MissingInputContract'), 'methodology exposes no-rejection doctrine');
+
+    const runbook = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'get_deal_runbook',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      requestedScopes: ['methodology:read', 'deal-plan:read'],
+      input: { journey: 'buy', limit: 5 },
+    });
+    assertEqual(runbook.status, 200, 'deal runbook route status');
+    assertEqual(runbook.body.result?.schema, 'DEFINITIVE.deal-runbook.v0.1', 'deal runbook schema');
+    assert(runbook.body.result.stages.some((stage: any) => stage.stageId === 'confirmatory_diligence'), 'runbook exposes recursive diligence stage');
+
+    const cost = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'estimate_deal_cost',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      requestedScopes: ['pricing:read', 'pass-through:read'],
+      input: { monthlyModelRuns: 18, monthlyApiCalls: 240, monthlyStudioBooks: 2, needsApiMcp: true },
+    });
+    assertEqual(cost.status, 200, 'cost route status');
+    assertEqual(cost.body.result?.schema, 'DealCostEstimate.v0.1', 'cost estimate schema');
+    assert(cost.body.result.pricingDoctrine.includes('No wallet'), 'cost estimate preserves no-wallet doctrine');
+
+    const modelSlot = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'lookup_model_slot',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      requestedScopes: ['model-catalog:read', 'methodology:read'],
+      input: { slotId: 'm200' },
+    });
+    assertEqual(modelSlot.status, 200, 'model slot route status');
+    assertEqual(modelSlot.body.result?.schema, 'DEFINITIVE.model-slot.v0.1', 'model slot schema');
+    assertEqual(modelSlot.body.result.slotId, 'M200', 'model slot normalizes id');
   });
 
   await test('THE LINE inventory is available to authenticated agents', async () => {
