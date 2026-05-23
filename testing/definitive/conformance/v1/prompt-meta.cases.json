@@ -248,8 +248,8 @@
       "fields": [
         { "path": "conformanceSurface.modelRuntimeCases", "equals": 202 },
         { "path": "conformanceSurface.dealMechanicsRouteCases", "equals": 60 },
-        { "path": "conformanceSurface.promptMetaCases", "equals": 79 },
-        { "path": "conformanceSurface.totalCases", "equals": 400 }
+        { "path": "conformanceSurface.promptMetaCases", "equals": 84 },
+        { "path": "conformanceSurface.totalCases", "equals": 405 }
       ]
     }
   },
@@ -835,6 +835,101 @@
     }
   },
   {
+    "id": "CONF.PROMPT.AUTHMIGRATION.AGREEMENT_TERMS.001",
+    "title": "Authority migration seeds include agreement economics and market-term anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.ABA.2023.PRIVATE_TARGET" },
+        { "path": "authorityIds", "includes": "AUTH.HOULIHAN.2023.TERMINATION_FEE" },
+        { "path": "authorityIds", "includes": "AUTH.ABA.MODEL_SPA" },
+        { "path": "sourceFamilies", "includes": "deal_terms" },
+        { "path": "sourceFamilies", "includes": "model_form" },
+        { "path": "modelSlots", "includes": "M206" },
+        { "path": "modelSlots", "includes": "M212" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.PASSTHROUGH_LINE.001",
+    "title": "Authority migration seeds include THE LINE pass-through pricing anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.EXCHANGE_ACT.15A" },
+        { "path": "authorityIds", "includes": "AUTH.EXCHANGE_ACT.15B13" },
+        { "path": "authorityIds", "includes": "AUTH.SEC.RANIERI_2013" },
+        { "path": "authorityIds", "includes": "AUTH.ABA.MODEL_RULE_7_2B" },
+        { "path": "sourceFamilies", "includes": "securities_law" },
+        { "path": "sourceFamilies", "includes": "sec_order" },
+        { "path": "sourceFamilies", "includes": "professional_responsibility" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.RECOVERY_DATA.001",
+    "title": "Authority migration seeds include recovery, claims, and bankruptcy-dataset anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.MOODYS.URD_2006" },
+        { "path": "authorityIds", "includes": "AUTH.SP.LOSSSTATS" },
+        { "path": "authorityIds", "includes": "AUTH.FRBP.3001" },
+        { "path": "sourceFamilies", "includes": "recovery_data" },
+        { "path": "sourceFamilies", "includes": "bankruptcy_rule" },
+        { "path": "modelSlots", "includes": "M166" },
+        { "path": "modelSlots", "includes": "M168" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.DIGITAL_ASSETS.001",
+    "title": "Authority migration seeds include digital-asset research anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.GENIUS.ACT_2025" },
+        { "path": "authorityIds", "includes": "AUTH.CLARITY.HR3633_2025" },
+        { "path": "authorityIds", "includes": "AUTH.TD_10000.DIGITAL_ASSET_REPORTING" },
+        { "path": "sourceFamilies", "includes": "digital_asset_statute" },
+        { "path": "sourceFamilies", "includes": "digital_asset_tax_guidance" },
+        { "path": "modelSlots", "includes": "M174" },
+        { "path": "modelSlots", "includes": "M175" },
+        { "path": "modelSlots", "includes": "M176" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.REGULATED_RE.001",
+    "title": "Authority migration seeds include regulated-industry and real-estate standard anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.HIPAA.45_CFR_160_164" },
+        { "path": "authorityIds", "includes": "AUTH.FERC.203" },
+        { "path": "authorityIds", "includes": "AUTH.ASC.842" },
+        { "path": "authorityIds", "includes": "AUTH.ASTM.E2018" },
+        { "path": "sourceFamilies", "includes": "regulated_industry_healthcare" },
+        { "path": "sourceFamilies", "includes": "regulated_industry_energy" },
+        { "path": "sourceFamilies", "includes": "accounting_standard" },
+        { "path": "sourceFamilies", "includes": "real_estate_standard" },
+        { "path": "modelSlots", "includes": "M130" },
+        { "path": "modelSlots", "includes": "M173" },
+        { "path": "modelSlots", "includes": "M198" }
+      ]
+    }
+  },
+  {
     "id": "CONF.PROMPT.AGENT.ACCESS.001",
     "title": "Agent card keeps execution authenticated and governed",
     "specVersion": "DEFINITIVE.v1.0",
@@ -856,7 +951,7 @@
     "methodologyUri": "methodology://v19",
     "kind": "agent_card",
     "expect": {
-      "textIncludes": ["definitive_conformance_status", "\"caseCount\":400", "definitive_deal_mechanics_v1_1"],
+      "textIncludes": ["definitive_conformance_status", "\"caseCount\":405", "definitive_deal_mechanics_v1_1"],
       "fields": [
         { "path": "definitive.dealMechanicsModelSlots", "equals": 123 },
         { "path": "definitive.dealMechanicsGates", "equals": 30 },

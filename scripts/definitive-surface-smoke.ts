@@ -517,7 +517,7 @@ await test('Authority Register seed plan is explicit and above 800 planned entri
   const stagedSeedRows = countAuthorityRegisterSeedRows();
   assertEqual(seedPlan.targetEntries, DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'authority seed target');
   assert(seedPlan.plannedEntries >= DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'authority seed planned entries meet target');
-  assert(stagedSeedRows >= 100, 'authority register staged migration seed rows meet 100-row baseline');
+  assert(stagedSeedRows >= 140, 'authority register staged migration seed rows meet 140-row baseline');
   assertEqual(seedPlan.status, 'ready_for_800_plus_seeding', 'authority seed status');
   assertEqual(seedPlan.requiredCoverageSatisfied, true, 'authority seed required coverage');
   assert(seedPlan.categories.length >= 13, 'authority seed has enough categories');
