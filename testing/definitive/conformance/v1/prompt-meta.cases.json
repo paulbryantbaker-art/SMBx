@@ -249,7 +249,7 @@
         { "path": "conformanceSurface.modelRuntimeCases", "equals": 202 },
         { "path": "conformanceSurface.dealMechanicsRouteCases", "equals": 60 },
         { "path": "conformanceSurface.promptMetaCases", "equals": 92 },
-        { "path": "conformanceSurface.totalCases", "equals": 413 }
+        { "path": "conformanceSurface.totalCases", "equals": 417 }
       ]
     }
   },
@@ -1027,7 +1027,7 @@
     "methodologyUri": "methodology://v19",
     "kind": "agent_card",
     "expect": {
-      "textIncludes": ["definitive_conformance_status", "\"caseCount\":413", "definitive_deal_mechanics_v1_1"],
+      "textIncludes": ["definitive_conformance_status", "\"caseCount\":417", "definitive_deal_mechanics_v1_1"],
       "fields": [
         { "path": "definitive.dealMechanicsModelSlots", "equals": 123 },
         { "path": "definitive.dealMechanicsGates", "equals": 30 },

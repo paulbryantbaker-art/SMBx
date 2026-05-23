@@ -418,6 +418,23 @@ function inferJourneys(model: DefinitiveModelCatalogEntry): DefinitiveJourney[] 
   if (model.slotId === 'M198') journeys.add('buy');
 
   if (hasAny(text, ['pmi', 'post-close', 'integration'])) journeys.add('pmi');
+  if (hasAny(text, ['purchase agreement', 'conditions-to-close', 'conditions to close', 'closing condition', 'third-party consent'])) {
+    journeys.add('sell');
+    journeys.add('buy');
+  }
+  if (hasAny(text, [
+    'working capital',
+    'true-up',
+    'closing-statement',
+    'closing statement',
+    'earnout',
+    'survival',
+    'escrow',
+    'holdback',
+    'indemnification',
+    'covenant',
+    'value creation',
+  ])) journeys.add('pmi');
   if (hasAny(text, ['solvency', 'lbo', 'fraudulent-transfer', 'fraudulent transfer'])) {
     journeys.add('sell');
     journeys.add('buy');

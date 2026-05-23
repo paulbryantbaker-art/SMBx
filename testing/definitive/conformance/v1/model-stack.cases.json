@@ -650,5 +650,112 @@
       },
       "yuliaBriefIncludes": ["Professional-handoff mechanics", "Pass-through mechanics"]
     }
+  },
+  {
+    "id": "CONF.STACK.ITERATIVE.IOI_TO_LOI.001",
+    "title": "IOI-to-LOI agent handoff keeps sourcing, financing, diligence, tax, escrow, and earnout mechanics together",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L2",
+      "dealType": "IOI LOI seller note SBA buyer search fund working capital QoE indemnity escrow earnout tax asset sale closing statement data room"
+    },
+    "expect": {
+      "complexity": "LIGHT_MED",
+      "primaryModelsInclude": ["MODEL.VAL.SDE.v1", "MODEL.BUYER.FIT.v1"],
+      "supportingInclude": ["MODEL.LBO.SBA.v1", "MODEL.DSCR.STRESS.v1", "MODEL.DEAL.COMPARISON.v1"],
+      "triggeredOverlayGates": [],
+      "applicableMechanicsInclude": ["M109", "M112", "M119", "M200", "M208", "M210", "M213"],
+      "applicableMechanicsSummaryAtLeast": {
+        "total": 22,
+        "executable": 19,
+        "planning_only": 3,
+        "professional_handoff": 8
+      },
+      "yuliaBriefIncludes": ["Professional-handoff mechanics", "Pass-through mechanics"]
+    }
+  },
+  {
+    "id": "CONF.STACK.ITERATIVE.DATAROOM_RED_FLAGS.001",
+    "title": "Data-room red-flag handoff keeps source gaps, real estate, IP, OSS, title, lease, and PCA mechanics visible",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "buy",
+      "league": "L4",
+      "dealType": "data room incomplete files source gaps IP license chain of title OSS real estate title survey environmental lease PCA"
+    },
+    "expect": {
+      "complexity": "MEDIUM_HEAVY",
+      "primaryModelsInclude": ["MODEL.VAL.EBITDA.v1", "MODEL.BUYER.FIT.v1"],
+      "supportingInclude": ["MODEL.QOE.LITE.v1", "MODEL.LBO.LMM.v1", "MODEL.COVENANT.COMPLIANCE.v1"],
+      "triggeredOverlayGates": ["G30"],
+      "overlayReasonsInclude": {
+        "G30": ["deal text indicates real estate, asset-class, or regulated-asset overlay"]
+      },
+      "applicableMechanicsInclude": ["M193", "M196", "M198", "M214", "M215", "M216", "M221"],
+      "applicableMechanicsSummaryAtLeast": {
+        "total": 33,
+        "executable": 29,
+        "professional_handoff": 15,
+        "research_only": 4
+      },
+      "yuliaBriefIncludes": ["Professional-handoff mechanics", "Pass-through mechanics", "Research-only mechanics"]
+    }
+  },
+  {
+    "id": "CONF.STACK.ITERATIVE.NEGOTIATION_UPDATE.001",
+    "title": "LOI negotiation update keeps agreement economics, working capital, RWI, conditions, and earnout architecture together",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "sell",
+      "league": "L4",
+      "dealType": "LOI negotiation working capital peg earnout indemnification survival escrow RWI closing statement break fee conditions purchase agreement"
+    },
+    "expect": {
+      "complexity": "MEDIUM_HEAVY",
+      "supportingInclude": ["MODEL.STRUCT.NWC.PEG.v1", "MODEL.QOE.LITE.v1", "MODEL.COVENANT.COMPLIANCE.v1"],
+      "triggeredOverlayGates": [],
+      "applicableMechanicsInclude": ["M206", "M207", "M208", "M209", "M211", "M213", "M184"],
+      "applicableMechanicsSummaryAtLeast": {
+        "total": 21,
+        "executable": 17,
+        "planning_only": 4,
+        "professional_handoff": 8
+      },
+      "yuliaBriefIncludes": ["Professional-handoff mechanics", "Pass-through mechanics"]
+    }
+  },
+  {
+    "id": "CONF.STACK.ITERATIVE.PMI_VALUE_CREATION.001",
+    "title": "Post-close PMI loop keeps value creation, working capital, covenants, earnouts, escrow, and survival mechanics visible",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "dealMechanicsVersion": "DEFINITIVE.v1.1",
+    "input": {
+      "journey": "pmi",
+      "league": "L4",
+      "dealType": "post-close PMI value creation working capital integration covenant compliance earnout synergy tracking"
+    },
+    "expect": {
+      "complexity": "MEDIUM_HEAVY",
+      "primaryModelsInclude": ["MODEL.PMI.VALUE.CREATION.v1"],
+      "supportingInclude": ["MODEL.STRUCT.NWC.PEG.v1", "MODEL.QOE.LITE.v1", "MODEL.COVENANT.COMPLIANCE.v1"],
+      "triggeredOverlayGates": [],
+      "applicableMechanicsInclude": ["M109", "M111", "M112", "M184", "M206", "M207", "M208", "M210", "M213"],
+      "applicableMechanicsSummaryAtLeast": {
+        "total": 20,
+        "executable": 16,
+        "planning_only": 3,
+        "professional_handoff": 5,
+        "research_only": 1
+      },
+      "yuliaBriefIncludes": ["Professional-handoff mechanics", "Pass-through mechanics", "Research-only mechanics"]
+    }
   }
 ]
