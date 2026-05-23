@@ -55,6 +55,7 @@ try {
     assert(body.tools.some((tool: any) => tool.name === 'get_deal_state'), 'get_deal_state is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_deal_plan'), 'compose_deal_plan is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'diff_deal_state'), 'diff_deal_state is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'clone_deal_state'), 'clone_deal_state is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_deal_package'), 'compose_deal_package is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'resume_deal'), 'resume_deal is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_lifecycle_trace'), 'compose_lifecycle_trace is advertised');
@@ -254,6 +255,32 @@ try {
     assertEqual(persistedState.body.result?.dealState?.cid, updatedState.cid, 'get persisted deal state returns latest cid');
     assert(persistedState.body.result?.next_suggested_calls?.some((call: any) => call.toolName === 'compose_deal_plan'), 'get persisted deal state returns next calls');
     assert(persistedState.body.result?.portableTakeBackArtifacts?.includes('DealState'), 'get persisted deal state is portable');
+
+    const clone = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'clone_deal_state',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-state:read', 'deal-state:write'],
+      input: {
+        dealState: updatedState,
+        cloneReason: 'parallel_agent_scenario',
+        patch: {
+          scenarioLabel: 'seller-note sensitivity',
+          sellerNoteCents: 500_000_00,
+        },
+      },
+    });
+    assertEqual(clone.status, 200, 'clone deal state route status');
+    assertEqual(clone.body.ok, true, 'clone deal state ok');
+    const clonedState = clone.body.result?.result?.dealState;
+    assert(clonedState.parentCids.includes(updatedState.cid), 'clone deal state preserves source parent cid');
+    assertEqual(clone.body.result?.result?.clone?.sourceCid, updatedState.cid, 'clone deal state source cid');
+    assertEqual(clone.body.persistence?.ok, true, 'clone deal state persists');
+    assertEqual(clone.body.persistence?.stateCid, clonedState.cid, 'clone deal state persistence cid');
+    assertEqual(clone.body.persistence?.packetType, 'DealStateControlPacket.v0.1', 'clone deal state control packet persisted');
 
     const completeness = await postJson('/api/definitive/tools/call', token, {
       toolName: 'check_completeness',

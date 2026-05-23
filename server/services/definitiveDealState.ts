@@ -222,6 +222,8 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
       return composeDefinitiveDealPlan(input);
     case 'diff_deal_state':
       return diffDefinitiveDealState(input);
+    case 'clone_deal_state':
+      return cloneDefinitiveDealState(input);
     case 'compose_deal_package':
       return composeDefinitiveDealPackage(input);
     case 'resume_deal':
@@ -259,6 +261,7 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
           'get_definition_of_done',
           'compose_deal_plan',
           'diff_deal_state',
+          'clone_deal_state',
           'compose_deal_package',
           'resume_deal',
           'compose_lifecycle_trace',
@@ -285,6 +288,7 @@ export function isDefinitiveDealStateTool(toolName: string): boolean {
     'get_definition_of_done',
     'compose_deal_plan',
     'diff_deal_state',
+    'clone_deal_state',
     'compose_deal_package',
     'resume_deal',
     'compose_lifecycle_trace',
@@ -446,6 +450,37 @@ export function diffDefinitiveDealState(input: Record<string, any>) {
     completeness_contribution_delta: next.completenessReport.score - previous.completenessReport.score,
     methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
     the_line_invariant: LINE_INVARIANT,
+  };
+}
+
+export function cloneDefinitiveDealState(input: Record<string, any>) {
+  const prior = normalizePriorState(input.dealState ?? input.state);
+  const basePayload = prior?.payload && typeof prior.payload === 'object'
+    ? prior.payload
+    : normalizePayload(input.payload ?? input.dealPayload ?? {});
+  const patch = normalizePayload(input.patch ?? input.clonePatch ?? {});
+  const state = buildDealState({
+    payload: deepMerge(basePayload, patch),
+    revision: (prior?.revision || 0) + 1,
+    idempotencyKey: nullableString(input.idempotencyKey),
+    parentCids: prior?.cid ? [prior.cid, ...(prior.parentCids || [])] : [],
+  });
+  const base = buildDealStateResult('clone_deal_state', state, prior?.completenessReport?.score ?? null);
+  return {
+    ...base,
+    result: {
+      ...base.result,
+      clone: {
+        sourceCid: prior?.cid || nullableString(input.sourceCid) || null,
+        clonedCid: state.cid,
+        cloneReason: nullableString(input.cloneReason) || nullableString(input.reason) || 'scenario_or_parallel_agent_work',
+        parentPreserved: Boolean(prior?.cid && state.parentCids.includes(prior.cid)),
+      },
+      portableTakeBackArtifacts: [
+        ...base.result.portableTakeBackArtifacts,
+        'DealStateDiff',
+      ],
+    },
   };
 }
 
@@ -1711,7 +1746,7 @@ export function composeDefinitivePmiPlan(input: Record<string, any>) {
   };
 }
 
-function buildDealStateResult(action: 'ingest_deal_payload' | 'update_deal_payload', state: DefinitiveDealState, priorScore: number | null) {
+function buildDealStateResult(action: 'ingest_deal_payload' | 'update_deal_payload' | 'clone_deal_state', state: DefinitiveDealState, priorScore: number | null) {
   const scoreDelta = priorScore == null ? state.completenessReport.score : state.completenessReport.score - priorScore;
   return {
     ok: true,

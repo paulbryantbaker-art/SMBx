@@ -83,6 +83,7 @@ const expectedTools = [
   'lookup_model_slot',
   'compose_deal_plan',
   'diff_deal_state',
+  'clone_deal_state',
   'compose_deal_package',
   'resume_deal',
   'compose_lifecycle_trace',
@@ -461,6 +462,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.toolSchemaMap.get_deal_state.takeBack.includes('DealState'), 'get deal state maps DealState');
   assert(registry.toolSchemaMap.lookup_model_slot.takeBack.includes('ModelOutput'), 'model slot lookup maps ModelOutput');
   assert(registry.toolSchemaMap.diff_deal_state.takeBack.includes('DealStateDiff'), 'diff take-back maps DealStateDiff');
+  assert(registry.toolSchemaMap.clone_deal_state.takeBack.includes('DealState'), 'clone take-back maps DealState');
   assert(registry.toolSchemaMap.compose_deal_package.takeBack.includes('DealPackage'), 'package take-back maps DealPackage');
   assert(registry.toolSchemaMap.resume_deal.takeBack.includes('DealPackage'), 'resume take-back maps DealPackage');
   assert(registry.toolSchemaMap.compose_lifecycle_trace.takeBack.includes('LifecycleTrace'), 'lifecycle trace maps LifecycleTrace');
@@ -736,6 +738,26 @@ await test('DealState update improves completeness and preserves prior state lin
   assert(updatedState.parentCids.includes(priorState.cid), 'updated state links to prior cid');
   assert(updated.body.result.completeness_contribution_delta > 0, 'update improves completeness');
   assert(updatedState.completenessReport.score > priorState.completenessReport.score, 'updated score is higher');
+
+  const cloned = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'clone_deal_state',
+    input: {
+      dealState: updatedState,
+      cloneReason: 'parallel_agent_scenario',
+      patch: {
+        scenarioLabel: 'seller-note sensitivity',
+        sellerNoteCents: 500_000_00,
+      },
+    },
+    envelope: {},
+  });
+  assertEqual(cloned.status, 200, 'deal state clone status');
+  const clonedState = cloned.body.result.result.dealState;
+  assert(clonedState.parentCids.includes(updatedState.cid), 'cloned state links to source cid');
+  assertEqual(cloned.body.result.result.clone.sourceCid, updatedState.cid, 'clone source cid returned');
+  assertEqual(cloned.body.result.result.clone.parentPreserved, true, 'clone parent lineage preserved');
+  assert(cloned.body.result.result.portableTakeBackArtifacts.includes('DealStateDiff'), 'clone exposes diff take-back');
 });
 
 await test('Completeness and definition-of-done tools are DB-free Deal OS control-plane calls', async () => {

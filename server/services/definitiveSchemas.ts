@@ -1179,6 +1179,11 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     output: ['DealStateDiff', 'MCPCallHint'],
     takeBack: ['DealStateDiff'],
   },
+  clone_deal_state: {
+    input: ['DealState', 'DealPayload'],
+    output: ['DealState', 'ClassificationKey', 'MissingInputContract', 'CompletenessReport', 'MCPCallHint'],
+    takeBack: ['DealState', 'DealStateDiff'],
+  },
   compose_deal_package: {
     input: ['DealState', 'DealPayload'],
     output: ['DealPackage', 'DealState', 'DealPlan', 'CompletenessReport', 'MissingInputContract', 'MCPCallHint'],

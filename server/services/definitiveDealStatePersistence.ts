@@ -277,7 +277,7 @@ function primaryPacketKey(toolName: string): string | null {
 }
 
 function fallbackPacketPayload(toolName: string, result: Record<string, any>) {
-  if (toolName === 'ingest_deal_payload' || toolName === 'update_deal_payload' || toolName === 'check_completeness') {
+  if (toolName === 'ingest_deal_payload' || toolName === 'update_deal_payload' || toolName === 'check_completeness' || toolName === 'clone_deal_state') {
     return {
       schema: 'DealStateControlPacket.v0.1',
       packetId: `${toolName}_${createDefinitiveHash(result).slice(0, 16)}`,
