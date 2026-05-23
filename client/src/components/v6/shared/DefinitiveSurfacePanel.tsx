@@ -1,6 +1,7 @@
 import { type CSSProperties } from "react";
 import {
   useDefinitiveSurfaceMechanics,
+  type DefinitiveDealRunbooksSurface,
   type DefinitiveSurfaceId,
   type DefinitiveSurfaceMechanics,
 } from "../../../hooks/useDefinitiveSurfaceMechanics";
@@ -61,7 +62,7 @@ export function DefinitiveSurfacePanel({
   title = "DEFINITIVE route map.",
   compact = false,
 }: DefinitiveSurfacePanelProps) {
-  const { getSurface, loading, error } = useDefinitiveSurfaceMechanics();
+  const { getSurface, loading, error, dealRunbooksSurface } = useDefinitiveSurfaceMechanics();
   const contract = getSurface(surface);
 
   if (loading && !contract) {
@@ -109,6 +110,7 @@ export function DefinitiveSurfacePanel({
           />
         ))}
       </div>
+      <DealOsLoop runbooks={dealRunbooksSurface} onTalkToYulia={onTalkToYulia} />
     </section>
   );
 }
@@ -137,6 +139,62 @@ function PanelHeader({ title, pill }: { title: string; pill: string }) {
     <div style={D.header}>
       <h2 style={D.title}>{title}</h2>
       <span style={D.pill}>{pill}</span>
+    </div>
+  );
+}
+
+function DealOsLoop({
+  runbooks,
+  onTalkToYulia,
+}: {
+  runbooks: DefinitiveDealRunbooksSurface | null;
+  onTalkToYulia?: (prompt: string) => void;
+}) {
+  const loop = runbooks?.summary?.loopContract || "ingest_or_resume -> classify -> ask_missing_inputs -> execute_or_route -> package_take_back -> repeat";
+  const entries = runbooks?.universalEntryTools?.slice(0, 4) ?? ["ingest_deal_payload", "resume_deal"];
+  const artifacts = runbooks?.universalTakeBackArtifacts?.slice(0, 5) ?? ["DealState", "DealPackage", "MCPCallHint[]"];
+  const actions = [
+    {
+      title: "Enter or resume",
+      text: "Start from partial facts, a source file, prior packet, or existing DealState.",
+      meta: summarizeSlots(entries, 4),
+      prompt: "Explain how an external agent should enter or resume a deal in smbX using partial information, DealState, and next_suggested_calls.",
+    },
+    {
+      title: "Work the loop",
+      text: "Move through IOI, LOI, diligence, models, negotiation, close, and PMI recursively.",
+      meta: loop.replace(/_/g, " "),
+      prompt: "Show the DEFINITIVE Deal OS lifecycle and tell me how Yulia should work the next iterative step without rejecting incomplete information.",
+    },
+    {
+      title: "Take back artifacts",
+      text: "Return portable state so another agent can continue without losing citations or boundaries.",
+      meta: summarizeSlots(artifacts, 5),
+      prompt: "List the portable DEFINITIVE artifacts another agent can take back to its system and explain how each preserves the deal trail.",
+    },
+  ];
+
+  return (
+    <div style={D.loop}>
+      <div style={D.loopHead}>
+        <strong>Agent Deal OS loop</strong>
+        <span>{runbooks?.summary?.journeyCount ?? 4} journeys · {runbooks?.summary?.lifecycleStageCount ?? 7} stages</span>
+      </div>
+      <div style={D.loopGrid}>
+        {actions.map(action => (
+          <button
+            key={action.title}
+            type="button"
+            className="m-nudge-soft"
+            style={D.loopButton}
+            onClick={() => onTalkToYulia?.(action.prompt)}
+          >
+            <strong style={D.loopButtonTitle}>{action.title}</strong>
+            <span style={D.loopButtonText}>{action.text}</span>
+            <span style={D.loopButtonMeta}>{action.meta}</span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -242,6 +300,43 @@ const D: Record<string, CSSProperties> = {
     ...studioCompeteCardStyles.grid,
     gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 190px), 1fr))",
     marginTop: 16,
+  },
+  loop: {
+    marginTop: 16,
+  },
+  loopHead: {
+    display: "flex",
+    justifyContent: "space-between",
+    gap: 12,
+    color: "#60708A",
+    fontSize: 12,
+    fontWeight: 850,
+  },
+  loopGrid: {
+    ...studioCompeteCardStyles.grid,
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))",
+    marginTop: 10,
+  },
+  loopButton: {
+    ...studioCompeteButtonItemStyles,
+    minHeight: 116,
+  },
+  loopButtonTitle: {
+    color: "#1A2233",
+    fontSize: 14,
+    lineHeight: 1.12,
+  },
+  loopButtonText: {
+    color: "#60708A",
+    fontSize: 12.5,
+    lineHeight: 1.35,
+  },
+  loopButtonMeta: {
+    alignSelf: "end",
+    color: "#2E5C8A",
+    fontSize: 11,
+    lineHeight: 1.25,
+    fontWeight: 850,
   },
   item: {
     ...studioCompeteButtonItemStyles,

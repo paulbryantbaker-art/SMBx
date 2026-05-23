@@ -57,6 +57,21 @@ export interface DefinitiveSurfaceContract {
   generatedAt?: string;
   surfaceMechanics: DefinitiveSurfaceMechanics[];
   passThroughCatalog: DefinitivePassThroughCatalogItem[];
+  dealRunbooksSurface?: DefinitiveDealRunbooksSurface;
+}
+
+export interface DefinitiveDealRunbooksSurface {
+  schema: string;
+  doctrine: string;
+  summary: {
+    journeyCount: number;
+    lifecycleStageCount: number;
+    workSurfaceCount: number;
+    loopContract: string;
+  };
+  universalEntryTools: string[];
+  universalTakeBackArtifacts: string[];
+  lineInvariant: string;
 }
 
 interface DefinitiveSpecResponse {
@@ -68,6 +83,7 @@ interface DefinitiveSpecResponse {
   passThroughSurface?: {
     catalog?: DefinitivePassThroughCatalogItem[];
   };
+  dealRunbooksSurface?: DefinitiveDealRunbooksSurface;
 }
 
 export function useDefinitiveSurfaceMechanics() {
@@ -91,6 +107,7 @@ export function useDefinitiveSurfaceMechanics() {
           generatedAt: payload.generatedAt,
           surfaceMechanics: payload.dealMechanicsSurface?.surfaceMechanics ?? [],
           passThroughCatalog: payload.passThroughSurface?.catalog ?? [],
+          dealRunbooksSurface: payload.dealRunbooksSurface,
         });
       })
       .catch((err: Error) => {
@@ -136,6 +153,7 @@ export function useDefinitiveSurfaceMechanics() {
     error,
     bySurface,
     passThroughByModel,
+    dealRunbooksSurface: contract?.dealRunbooksSurface ?? null,
     getSurface: (surface: DefinitiveSurfaceId) => bySurface.get(surface) ?? null,
     getPassThroughItems: (modelSlot: string) => passThroughByModel.get(modelSlot) ?? [],
   };
