@@ -248,8 +248,8 @@
       "fields": [
         { "path": "conformanceSurface.modelRuntimeCases", "equals": 202 },
         { "path": "conformanceSurface.dealMechanicsRouteCases", "equals": 60 },
-        { "path": "conformanceSurface.promptMetaCases", "equals": 88 },
-        { "path": "conformanceSurface.totalCases", "equals": 409 }
+        { "path": "conformanceSurface.promptMetaCases", "equals": 92 },
+        { "path": "conformanceSurface.totalCases", "equals": 413 }
       ]
     }
   },
@@ -509,10 +509,11 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "rowCount", "min": 100 },
-        { "path": "uniqueAuthorityIdCount", "min": 100 },
+        { "path": "rowCount", "min": 180 },
+        { "path": "uniqueAuthorityIdCount", "min": 180 },
         { "path": "files", "includes": "073_definitive_authority_register.sql" },
-        { "path": "files", "includes": "078_definitive_authority_register_batch2.sql" }
+        { "path": "files", "includes": "078_definitive_authority_register_batch2.sql" },
+        { "path": "files", "includes": "080_definitive_authority_register_batch4.sql" }
       ]
     }
   },
@@ -930,6 +931,81 @@
     }
   },
   {
+    "id": "CONF.PROMPT.AUTHMIGRATION.CITT.001",
+    "title": "Authority migration seeds include CITT and real-estate transfer-tax anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.CITT.CT_12_638" },
+        { "path": "authorityIds", "includes": "AUTH.CITT.MD_TP_12_117" },
+        { "path": "authorityIds", "includes": "AUTH.CITT.WA_82_45" },
+        { "path": "authorityIds", "includes": "AUTH.CITT.NY_PUB_576" },
+        { "path": "sourceFamilies", "includes": "real_estate_transfer_tax" },
+        { "path": "modelSlots", "includes": "M191" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.TAX_COSTS.001",
+    "title": "Authority migration seeds include transaction-cost, deferred-payment, and gross-up tax anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.IRC.453A" },
+        { "path": "authorityIds", "includes": "AUTH.IRS.REVPROC_2011_29" },
+        { "path": "authorityIds", "includes": "AUTH.CASE.INDOPCO_1992" },
+        { "path": "authorityIds", "includes": "AUTH.TREAS.1_336_2" },
+        { "path": "sourceFamilies", "includes": "tax_guidance" },
+        { "path": "sourceFamilies", "includes": "tax_case_law" },
+        { "path": "modelSlots", "includes": "M201" },
+        { "path": "modelSlots", "includes": "M203" },
+        { "path": "modelSlots", "includes": "M204" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.OSS_SCA.001",
+    "title": "Authority migration seeds include OSS license and SCA pass-through anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.OSS.AGPL_3_0" },
+        { "path": "authorityIds", "includes": "AUTH.OSS.APACHE_2_0" },
+        { "path": "authorityIds", "includes": "AUTH.BLACK_DUCK.SCA" },
+        { "path": "authorityIds", "includes": "AUTH.FOSSA.SCA" },
+        { "path": "sourceFamilies", "includes": "oss_license" },
+        { "path": "sourceFamilies", "includes": "software_pass_through" },
+        { "path": "modelSlots", "includes": "M221" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.PASSTHROUGH_DATA.001",
+    "title": "Authority migration seeds include data pass-through substrates for property, title, and lien work",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.CSC.UCC_SEARCH" },
+        { "path": "authorityIds", "includes": "AUTH.COSTAR.DATA" },
+        { "path": "authorityIds", "includes": "AUTH.GREEN_STREET.DATA" },
+        { "path": "authorityIds", "includes": "AUTH.ALTA.ENDORSEMENTS" },
+        { "path": "sourceFamilies", "includes": "software_pass_through" },
+        { "path": "sourceFamilies", "includes": "real_estate_standard" },
+        { "path": "modelSlots", "includes": "M190" },
+        { "path": "modelSlots", "includes": "M196" },
+        { "path": "modelSlots", "includes": "M215" }
+      ]
+    }
+  },
+  {
     "id": "CONF.PROMPT.AGENT.ACCESS.001",
     "title": "Agent card keeps execution authenticated and governed",
     "specVersion": "DEFINITIVE.v1.0",
@@ -951,7 +1027,7 @@
     "methodologyUri": "methodology://v19",
     "kind": "agent_card",
     "expect": {
-      "textIncludes": ["definitive_conformance_status", "\"caseCount\":409", "definitive_deal_mechanics_v1_1"],
+      "textIncludes": ["definitive_conformance_status", "\"caseCount\":413", "definitive_deal_mechanics_v1_1"],
       "fields": [
         { "path": "definitive.dealMechanicsModelSlots", "equals": 123 },
         { "path": "definitive.dealMechanicsGates", "equals": 30 },
