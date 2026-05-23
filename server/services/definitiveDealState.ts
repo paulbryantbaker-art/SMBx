@@ -226,6 +226,8 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
       return cloneDefinitiveDealState(input);
     case 'compose_deal_package':
       return composeDefinitiveDealPackage(input);
+    case 'verify_package':
+      return verifyDefinitiveDealPackage(input);
     case 'resume_deal':
       return resumeDefinitiveDeal(input);
     case 'compose_lifecycle_trace':
@@ -263,6 +265,7 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
           'diff_deal_state',
           'clone_deal_state',
           'compose_deal_package',
+          'verify_package',
           'resume_deal',
           'compose_lifecycle_trace',
           'prepare_ioi_packet',
@@ -290,6 +293,7 @@ export function isDefinitiveDealStateTool(toolName: string): boolean {
     'diff_deal_state',
     'clone_deal_state',
     'compose_deal_package',
+    'verify_package',
     'resume_deal',
     'compose_lifecycle_trace',
     'prepare_ioi_packet',
@@ -528,6 +532,70 @@ export function composeDefinitiveDealPackage(input: Record<string, any>) {
       portableTakeBackArtifacts: dealPackage.takeBackArtifacts,
     },
     state_hash_after: state.stateHash,
+    completeness_contribution_delta: 0,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
+export function verifyDefinitiveDealPackage(input: Record<string, any>) {
+  const dealPackage = normalizePackage(input.dealPackage ?? input.package ?? input);
+  const state = normalizePriorState(input.dealState ?? input.state ?? dealPackage.dealState);
+  const checks = buildPackageVerificationChecks(dealPackage, state, input);
+  const missing = checks
+    .filter(check => check.status === 'fail')
+    .map(check => check.id);
+  const warnings = checks
+    .filter(check => check.status === 'warn')
+    .map(check => check.id);
+  const packageCid = nullableString(dealPackage.packageCid) || null;
+  const nextSuggestedCalls: DefinitiveMcpCallHint[] = [
+    {
+      toolName: 'disclose_subset',
+      priority: 'P1',
+      reason: 'Create selective disclosure proof when the package leaves the deal room or another agent only needs part of the record.',
+      inputHint: { dealPackage: packageCid ? { packageCid } : undefined, dealState: state ? { cid: state.cid } : undefined },
+    },
+    {
+      toolName: 'compose_close_readiness',
+      priority: 'P1',
+      reason: 'Check close-readiness before any human treats the package as a closing workstream record.',
+      inputHint: { dealState: state ? { cid: state.cid } : undefined },
+    },
+    {
+      toolName: 'resume_deal',
+      priority: 'P2',
+      reason: 'Resume the recursive Deal OS loop from this package after the receiving agent adds new facts or documents.',
+      inputHint: { dealPackage: packageCid ? { packageCid } : undefined, dealState: state ? { cid: state.cid } : undefined },
+    },
+  ];
+  const verification = {
+    verificationId: `pkgverify_${sha256(stableStringify({ packageCid, checks })).slice(0, 16)}`,
+    schema: 'PackageVerification.v0.1',
+    packageId: nullableString(dealPackage.packageId) || null,
+    packageCid,
+    verified: missing.length === 0,
+    checks,
+    missing,
+    warnings,
+    expectedPackageCid: nullableString(input.expectedPackageCid) || null,
+    expectedDealStateCid: nullableString(input.expectedDealStateCid) || nullableString(input.expectedStateCid) || null,
+    next_suggested_calls: nextSuggestedCalls,
+    takeBackArtifacts: ['PackageVerification', 'DealPackage', 'MCPCallHint[]'],
+    lineInvariant: LINE_INVARIANT,
+  };
+
+  return {
+    ok: true,
+    action: 'verify_package',
+    result: {
+      packageVerification: verification,
+      dealPackage,
+      dealState: state || undefined,
+      next_suggested_calls: nextSuggestedCalls,
+      portableTakeBackArtifacts: verification.takeBackArtifacts,
+    },
+    state_hash_after: state?.stateHash || nullableString(dealPackage.dealStateHash) || null,
     completeness_contribution_delta: 0,
     methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
     the_line_invariant: LINE_INVARIANT,
@@ -2293,6 +2361,138 @@ function buildPackageDeferrals(state: DefinitiveDealState) {
     });
   }
   return deferrals;
+}
+
+type PackageVerificationStatus = 'pass' | 'warn' | 'fail';
+
+function normalizePackage(value: unknown): Record<string, any> {
+  if (isPlainObject(value)) return value as Record<string, any>;
+  return {};
+}
+
+function buildPackageVerificationChecks(
+  dealPackage: Record<string, any>,
+  state: DefinitiveDealState | null,
+  input: Record<string, any>,
+): Array<{ id: string; label: string; status: PackageVerificationStatus; detail: string }> {
+  const expectedPackageCid = nullableString(input.expectedPackageCid);
+  const expectedDealStateCid = nullableString(input.expectedDealStateCid) || nullableString(input.expectedStateCid);
+  const expectedCid = expectedPackageCid
+    || (nullableString(dealPackage.dealStateHash) && nullableString(dealPackage.dealPlan?.planId)
+      ? expectedDealPackageCid(dealPackage)
+      : null);
+  const artifacts = Array.isArray(dealPackage.takeBackArtifacts) ? dealPackage.takeBackArtifacts.map(String) : [];
+  const nextCalls = Array.isArray(dealPackage.next_suggested_calls) ? dealPackage.next_suggested_calls : [];
+  const checks = [
+    packageCheck(
+      'schema',
+      'DealPackage schema',
+      dealPackage.schema === 'DealPackage.v0.1',
+      `schema=${nullableString(dealPackage.schema) || 'missing'}`,
+    ),
+    packageCheck(
+      'package_cid',
+      'Package content address',
+      typeof dealPackage.packageCid === 'string' && dealPackage.packageCid.startsWith('definitive:deal-package:sha256:'),
+      `packageCid=${nullableString(dealPackage.packageCid) || 'missing'}`,
+    ),
+    packageCheck(
+      'package_cid_matches',
+      'Package CID recomputes',
+      Boolean(expectedCid && dealPackage.packageCid === expectedCid),
+      expectedCid ? `expected=${expectedCid}` : 'missing dealStateHash or dealPlan.planId for recompute',
+    ),
+    packageCheck(
+      'expected_package_cid',
+      'Caller expected package CID',
+      !expectedPackageCid || dealPackage.packageCid === expectedPackageCid,
+      expectedPackageCid ? `expected=${expectedPackageCid}` : 'no caller expected package CID supplied',
+      expectedPackageCid ? 'fail' : 'warn',
+    ),
+    packageCheck(
+      'deal_state_reference',
+      'DealState reference',
+      Boolean(dealPackage.dealStateCid && dealPackage.dealStateHash),
+      `dealStateCid=${nullableString(dealPackage.dealStateCid) || 'missing'}`,
+    ),
+    packageCheck(
+      'expected_deal_state_cid',
+      'Caller expected DealState CID',
+      !expectedDealStateCid || dealPackage.dealStateCid === expectedDealStateCid,
+      expectedDealStateCid ? `expected=${expectedDealStateCid}` : 'no caller expected DealState CID supplied',
+      expectedDealStateCid ? 'fail' : 'warn',
+    ),
+    packageCheck(
+      'companion_state_matches',
+      'Companion DealState matches package',
+      !state || (dealPackage.dealStateCid === state.cid && dealPackage.dealStateHash === state.stateHash),
+      state ? `state=${state.cid}` : 'no companion DealState supplied',
+      state ? 'fail' : 'warn',
+    ),
+    packageCheck(
+      'classification_key',
+      'Classification key present',
+      isPlainObject(dealPackage.classificationKey),
+      'package should carry the eight-axis routing key',
+    ),
+    packageCheck(
+      'completeness_report',
+      'Completeness report present',
+      isPlainObject(dealPackage.completenessReport),
+      'package should carry readiness and missing-input state',
+    ),
+    packageCheck(
+      'deal_plan',
+      'DealPlan present',
+      isPlainObject(dealPackage.dealPlan) && Boolean(dealPackage.dealPlan.planId),
+      `planId=${nullableString(dealPackage.dealPlan?.planId) || 'missing'}`,
+    ),
+    packageCheck(
+      'next_calls',
+      'Recursive next calls present',
+      nextCalls.length > 0,
+      `next_suggested_calls=${nextCalls.length}`,
+    ),
+    packageCheck(
+      'take_back_artifacts',
+      'Portable take-back artifacts present',
+      artifacts.includes('DealPackage') && artifacts.includes('DealState') && artifacts.includes('MissingInputContract'),
+      `takeBackArtifacts=${artifacts.join(',') || 'missing'}`,
+    ),
+    packageCheck(
+      'line_invariant',
+      'THE LINE invariant present',
+      nullableString(dealPackage.lineInvariant) === LINE_INVARIANT,
+      'package must preserve compute-not-advise boundary',
+    ),
+  ];
+  return checks;
+}
+
+function expectedDealPackageCid(dealPackage: Record<string, any>): string | null {
+  const stateHash = nullableString(dealPackage.dealStateHash);
+  const planId = nullableString(dealPackage.dealPlan?.planId);
+  if (!stateHash || !planId) return null;
+  return `definitive:deal-package:sha256:${sha256(stableStringify({
+    stateHash,
+    dealPlanId: planId,
+    schema: 'DealPackage.v0.1',
+  }))}`;
+}
+
+function packageCheck(
+  id: string,
+  label: string,
+  passes: boolean,
+  detail: string,
+  missingOptionalStatus: PackageVerificationStatus = 'fail',
+) {
+  return {
+    id,
+    label,
+    status: passes ? 'pass' as const : missingOptionalStatus,
+    detail,
+  };
 }
 
 function requiredDataRoomCategories(state: DefinitiveDealState): string[] {

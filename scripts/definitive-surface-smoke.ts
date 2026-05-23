@@ -85,6 +85,7 @@ const expectedTools = [
   'diff_deal_state',
   'clone_deal_state',
   'compose_deal_package',
+  'verify_package',
   'resume_deal',
   'compose_lifecycle_trace',
   'prepare_ioi_packet',
@@ -432,6 +433,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.schemaNames.includes('AuditPacket'), 'schema registry exposes AuditPacket');
   assert(registry.schemaNames.includes('MerkleInclusionProof'), 'schema registry exposes MerkleInclusionProof');
   assert(registry.schemaNames.includes('DealPackage'), 'schema registry exposes DealPackage');
+  assert(registry.schemaNames.includes('PackageVerification'), 'schema registry exposes PackageVerification');
   assert(registry.schemaNames.includes('LifecycleTrace'), 'schema registry exposes LifecycleTrace');
   assert(registry.schemaNames.includes('IOIPacket'), 'schema registry exposes IOIPacket');
   assert(registry.schemaNames.includes('LOIPacket'), 'schema registry exposes LOIPacket');
@@ -464,6 +466,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.toolSchemaMap.diff_deal_state.takeBack.includes('DealStateDiff'), 'diff take-back maps DealStateDiff');
   assert(registry.toolSchemaMap.clone_deal_state.takeBack.includes('DealState'), 'clone take-back maps DealState');
   assert(registry.toolSchemaMap.compose_deal_package.takeBack.includes('DealPackage'), 'package take-back maps DealPackage');
+  assert(registry.toolSchemaMap.verify_package.output.includes('PackageVerification'), 'verify package output maps PackageVerification');
   assert(registry.toolSchemaMap.resume_deal.takeBack.includes('DealPackage'), 'resume take-back maps DealPackage');
   assert(registry.toolSchemaMap.compose_lifecycle_trace.takeBack.includes('LifecycleTrace'), 'lifecycle trace maps LifecycleTrace');
   assert(registry.toolSchemaMap.prepare_ioi_packet.takeBack.includes('IOIPacket'), 'IOI packet maps IOIPacket');
@@ -854,6 +857,44 @@ await test('DealPackage gives agents a complete take-back packet', async () => {
   assert(dealPackage.takeBackArtifacts.includes('DealPackage'), 'package includes itself as take-back artifact');
   assert(dealPackage.next_suggested_calls.some((call: any) => call.toolName === 'compose_model_stack'), 'package includes next calls');
   assertEqual(dealPackage.classificationKey.journey, 'buy', 'package preserves classification');
+});
+
+await test('PackageVerification lets agents trust package handoff artifacts', async () => {
+  const packageResponse = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'compose_deal_package',
+    input: {
+      payload: {
+        journey: 'buy',
+        targetName: 'Verification Target',
+        industry: 'software',
+        jurisdiction: 'US-DE',
+        ebitdaCents: 2_600_000_00,
+        documents: [{ name: 'QoE', type: 'qoe', hash: 'sha256:verify-qoe' }],
+      },
+    },
+    envelope: {},
+  });
+  const packageResult = packageResponse.body.result.result;
+  const verifyResponse = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'verify_package',
+    input: {
+      dealPackage: packageResult.dealPackage,
+      dealState: packageResult.dealState,
+      expectedPackageCid: packageResult.dealPackage.packageCid,
+      expectedDealStateCid: packageResult.dealState.cid,
+    },
+    envelope: {},
+  });
+
+  assertEqual(verifyResponse.status, 200, 'package verification status');
+  const verification = verifyResponse.body.result.result.packageVerification;
+  assertEqual(verification.schema, 'PackageVerification.v0.1', 'package verification schema');
+  assertEqual(verification.verified, true, 'package verification passes');
+  assert(verification.checks.every((check: any) => check.status === 'pass'), 'all package verification checks pass');
+  assert(verification.takeBackArtifacts.includes('PackageVerification'), 'verification is portable');
+  assert(verification.next_suggested_calls.some((call: any) => call.toolName === 'disclose_subset'), 'verification points to selective disclosure');
 });
 
 await test('Resume deal returns current lifecycle position and next calls', async () => {

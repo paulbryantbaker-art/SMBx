@@ -57,6 +57,7 @@ try {
     assert(body.tools.some((tool: any) => tool.name === 'diff_deal_state'), 'diff_deal_state is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'clone_deal_state'), 'clone_deal_state is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_deal_package'), 'compose_deal_package is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'verify_package'), 'verify_package is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'resume_deal'), 'resume_deal is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_lifecycle_trace'), 'compose_lifecycle_trace is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'prepare_ioi_packet'), 'prepare_ioi_packet is advertised');
@@ -570,11 +571,35 @@ try {
     assertEqual(response.body.toolName, 'compose_deal_package', 'deal package tool name');
     assert(response.body.requiredScopes.includes('deal-package:read'), 'deal package scope is exposed');
     const dealPackage = response.body.result?.result?.dealPackage;
+    const dealState = response.body.result?.result?.dealState;
     assert(dealPackage, 'DealPackage exists');
+    assert(dealState, 'DealState exists for package verification');
     assert(dealPackage.packageCid.startsWith('definitive:deal-package:sha256:'), 'DealPackage is content addressed');
     assert(dealPackage.takeBackArtifacts.includes('DealPackage'), 'DealPackage is a take-back artifact');
     assert(dealPackage.excludedOrDeferred.some((item: any) => item.category === 'distressed_or_restructuring'), 'G28 package deferral is preserved');
     assert(dealPackage.excludedOrDeferred.some((item: any) => item.category === 'capital_structure_or_lme'), 'G29 package deferral is preserved');
+
+    const verification = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'verify_package',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-package:read', 'deal-package:verify'],
+      input: {
+        dealPackage,
+        dealState,
+        expectedPackageCid: dealPackage.packageCid,
+        expectedDealStateCid: dealState.cid,
+      },
+    });
+    assertEqual(verification.status, 200, 'package verification route status');
+    const packageVerification = verification.body.result?.result?.packageVerification;
+    assertEqual(packageVerification.schema, 'PackageVerification.v0.1', 'package verification schema');
+    assertEqual(packageVerification.verified, true, 'package verification passes');
+    assert(packageVerification.takeBackArtifacts.includes('PackageVerification'), 'PackageVerification is a take-back artifact');
+    assert(verification.body.persistence?.packetType === 'PackageVerification.v0.1', 'package verification packet persisted');
   });
 
   await test('DealState control packets are persisted for deal resume', async () => {

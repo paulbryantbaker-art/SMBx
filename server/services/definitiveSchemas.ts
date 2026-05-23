@@ -548,6 +548,42 @@ const DealPackage: JsonSchema = {
   },
 };
 
+const PackageVerification: JsonSchema = {
+  $id: schemaId('PackageVerification'),
+  title: 'PackageVerification',
+  type: 'object',
+  additionalProperties: true,
+  required: ['verificationId', 'schema', 'packageCid', 'verified', 'checks', 'next_suggested_calls', 'takeBackArtifacts', 'lineInvariant'],
+  properties: {
+    verificationId: { type: 'string' },
+    schema: { type: 'string', const: 'PackageVerification.v0.1' },
+    packageId: { type: ['string', 'null'] },
+    packageCid: { type: ['string', 'null'] },
+    verified: { type: 'boolean' },
+    checks: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: true,
+        required: ['id', 'label', 'status', 'detail'],
+        properties: {
+          id: { type: 'string' },
+          label: { type: 'string' },
+          status: { type: 'string', enum: ['pass', 'warn', 'fail'] },
+          detail: { type: 'string' },
+        },
+      },
+    },
+    missing: { type: 'array', items: { type: 'string' } },
+    warnings: { type: 'array', items: { type: 'string' } },
+    expectedPackageCid: { type: ['string', 'null'] },
+    expectedDealStateCid: { type: ['string', 'null'] },
+    next_suggested_calls: { type: 'array', items: { $ref: schemaId('MCPCallHint') } },
+    takeBackArtifacts: { type: 'array', items: { type: 'string' } },
+    lineInvariant: { type: 'string' },
+  },
+};
+
 const LifecycleTrace: JsonSchema = {
   $id: schemaId('LifecycleTrace'),
   title: 'LifecycleTrace',
@@ -1093,6 +1129,7 @@ export const DEFINITIVE_SCHEMAS: Record<string, JsonSchema> = {
   ParetoFrontier,
   BestVehicleBlock,
   DealPackage,
+  PackageVerification,
   LifecycleTrace,
   IOIPacket,
   LOIPacket,
@@ -1188,6 +1225,11 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     input: ['DealState', 'DealPayload'],
     output: ['DealPackage', 'DealState', 'DealPlan', 'CompletenessReport', 'MissingInputContract', 'MCPCallHint'],
     takeBack: ['DealPackage', 'DealState', 'DealPlan', 'CompletenessReport', 'MissingInputContract'],
+  },
+  verify_package: {
+    input: ['DealPackage', 'DealState'],
+    output: ['PackageVerification', 'DealPackage', 'DealState', 'MCPCallHint'],
+    takeBack: ['PackageVerification', 'DealPackage', 'MCPCallHint'],
   },
   resume_deal: {
     input: ['DealState', 'DealPayload', 'DealPackage'],
