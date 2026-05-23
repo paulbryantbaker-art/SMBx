@@ -8,6 +8,8 @@
  * Run: npm run test:definitive-surface
  */
 
+import { readFileSync, readdirSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
   DEFINITIVE_METHODOLOGY_URI,
   DEFINITIVE_SPEC_URI,
@@ -512,8 +514,10 @@ await test('Model catalog surface gives agents stable M-slot lookups', async () 
 
 await test('Authority Register seed plan is explicit and above 800 planned entries', async () => {
   const seedPlan = getDefinitiveAuthoritySeedPlan();
+  const stagedSeedRows = countAuthorityRegisterSeedRows();
   assertEqual(seedPlan.targetEntries, DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'authority seed target');
   assert(seedPlan.plannedEntries >= DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'authority seed planned entries meet target');
+  assert(stagedSeedRows >= 100, 'authority register staged migration seed rows meet 100-row baseline');
   assertEqual(seedPlan.status, 'ready_for_800_plus_seeding', 'authority seed status');
   assertEqual(seedPlan.requiredCoverageSatisfied, true, 'authority seed required coverage');
   assert(seedPlan.categories.length >= 13, 'authority seed has enough categories');
@@ -1393,4 +1397,14 @@ function assertDeepEqual<T>(actual: T, expected: T, message: string) {
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
     throw new Error(`${message}. Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
   }
+}
+
+function countAuthorityRegisterSeedRows() {
+  const migrationDir = resolve(process.cwd(), 'server/migrations');
+  return readdirSync(migrationDir)
+    .filter(file => file.endsWith('.sql'))
+    .reduce((total, file) => {
+      const sql = readFileSync(resolve(migrationDir, file), 'utf8');
+      return total + [...sql.matchAll(/^\s*\('AUTH\./gm)].length;
+    }, 0);
 }
