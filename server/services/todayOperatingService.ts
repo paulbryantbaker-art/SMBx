@@ -89,6 +89,7 @@ interface DefinitiveDealPacketRow {
   packet_id: string | null;
   packet_cid: string | null;
   deal_state_cid: string | null;
+  payload: Record<string, any> | null;
   next_suggested_calls: any[] | null;
   take_back_artifacts: any[] | null;
   created_at: string;
@@ -167,6 +168,12 @@ export interface TodayDefinitiveNextCall {
   reason: string;
 }
 
+export interface TodayDefinitiveSourceGap {
+  category: string;
+  reason: string;
+  suggestedTool?: string;
+}
+
 export interface TodayFileReviewItem {
   id: string;
   title: string;
@@ -184,6 +191,8 @@ export interface TodayFileReviewItem {
   definitiveToolName?: string;
   definitiveNextSuggestedCalls?: TodayDefinitiveNextCall[];
   definitiveTakeBackArtifacts?: string[];
+  definitiveSourceGaps?: TodayDefinitiveSourceGap[];
+  definitiveDisclosureStatus?: 'blocked_by_source_gaps' | 'source_gaps_open' | 'data_room_index_ready' | 'ready_for_user_controlled_disclosure';
 }
 
 export interface TodayStudioRefreshItem {
@@ -500,7 +509,7 @@ async function readDefinitivePackets(userId: number, dealIds: number[]): Promise
   return sql<DefinitiveDealPacketRow[]>`
     SELECT p.id, p.deal_id, d.business_name as deal_name, p.tool_name, p.action,
            p.packet_type, p.packet_id, p.packet_cid, p.deal_state_cid,
-           p.next_suggested_calls, p.take_back_artifacts, p.created_at
+           p.payload, p.next_suggested_calls, p.take_back_artifacts, p.created_at
     FROM definitive_deal_packets p
     LEFT JOIN deals d ON d.id = p.deal_id
     WHERE p.user_id = ${userId}
@@ -739,6 +748,8 @@ function buildFilesNeedingReview(
     .map((packet, index) => {
       const nextSuggestedCalls = collectNextSuggestedCalls([packet], {});
       const takeBackArtifacts = collectPortableArtifacts([packet]);
+      const sourceGaps = collectPacketSourceGaps(packet);
+      const disclosureStatus = disclosureStatusForPacket(packet, sourceGaps);
       return {
         id: `definitive-packet-${packet.id}`,
         title: packetTypeLabel(packet.packet_type),
@@ -756,6 +767,8 @@ function buildFilesNeedingReview(
         definitiveToolName: packet.tool_name,
         definitiveNextSuggestedCalls: nextSuggestedCalls,
         definitiveTakeBackArtifacts: takeBackArtifacts,
+        definitiveSourceGaps: sourceGaps,
+        definitiveDisclosureStatus: disclosureStatus,
       };
     });
   return [...fromReviews, ...fromDeliverables, ...fromPackets].slice(0, 10);
@@ -920,6 +933,48 @@ function collectPortableArtifacts(packets: DefinitiveDealPacketRow[]): string[] 
   return Array.from(new Set(
     packets.flatMap(packet => safeArray(packet.take_back_artifacts).map(item => String(item || '').trim()).filter(Boolean)),
   )).slice(0, 6);
+}
+
+function collectPacketSourceGaps(packet: DefinitiveDealPacketRow): TodayDefinitiveSourceGap[] {
+  const payload = asRecord(packet.payload);
+  const gaps = [
+    ...safeArray(payload.sourceGaps),
+    ...safeArray(asRecord(payload.disclosureSubset).sourceGaps),
+    ...safeArray(asRecord(payload.dataRoomIndex).sourceGaps),
+  ];
+  const seen = new Set<string>();
+  const normalized: TodayDefinitiveSourceGap[] = [];
+  for (const gap of gaps) {
+    const record = asRecord(gap);
+    const category = String(record.category || record.id || record.bucket || '').trim();
+    if (!category) continue;
+    const reason = String(record.reason || `No indexed source is available for ${category}.`).trim();
+    const key = `${category}:${reason}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const suggestedTool = String(record.suggestedTool || record.toolName || '').trim();
+    normalized.push({
+      category,
+      reason,
+      ...(suggestedTool ? { suggestedTool } : {}),
+    });
+  }
+  return normalized.slice(0, 8);
+}
+
+function disclosureStatusForPacket(
+  packet: DefinitiveDealPacketRow,
+  sourceGaps: TodayDefinitiveSourceGap[],
+): TodayFileReviewItem['definitiveDisclosureStatus'] {
+  const type = String(packet.packet_type || '');
+  const tool = String(packet.tool_name || '');
+  if (/DisclosureSubset/i.test(type) || tool === 'disclose_subset') {
+    return sourceGaps.length ? 'blocked_by_source_gaps' : 'ready_for_user_controlled_disclosure';
+  }
+  if (/DataRoomIndex/i.test(type) || tool === 'compose_data_room_index') {
+    return sourceGaps.length ? 'source_gaps_open' : 'data_room_index_ready';
+  }
+  return sourceGaps.length ? 'source_gaps_open' : undefined;
 }
 
 function lifecyclePositionForLevel(level: string, nextGate: string): string {

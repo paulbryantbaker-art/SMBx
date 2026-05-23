@@ -586,10 +586,13 @@ try {
       agentId: 'agent:definitive-auth-route-smoke',
       agentPlatformId: 'codex-local',
       requestedScopes: ['deal-state:read', 'data-room:read', 'deal-package:compose'],
+      dealId: fixture.dealId,
       input: {
-        categories: ['financials'],
+        dealId: fixture.dealId,
+        categories: ['financials', 'legal'],
         audience: 'external_agent',
         payload: {
+          dealId: fixture.dealId,
           journey: 'buy',
           targetName: 'DEFINITIVE Route Fixture Deal',
           industry: 'software',
@@ -608,8 +611,15 @@ try {
     const subset = response.body.result?.result?.disclosureSubset;
     assertEqual(subset.schema, 'DisclosureSubset.v0.1', 'disclosure subset schema');
     assert(subset.sources.some((source: any) => source.category === 'financials'), 'financial source selected');
+    assert(subset.sourceGaps.some((gap: any) => gap.category === 'legal'), 'disclosure subset exposes legal source gap');
     assertEqual(subset.disclosureBoundary.noExternalTransmission, true, 'subset is compose-only');
     assert(subset.takeBackArtifacts.includes('SelectiveDisclosureProof'), 'selective disclosure proof exposed');
+
+    const brief = await authedJson('/api/agency/today-operating-brief?refresh=1', token);
+    const disclosureFile = brief.filesNeedingReview.find((item: any) => item.definitivePacketType === 'DisclosureSubset.v0.1');
+    assert(disclosureFile, 'Files operating brief exposes DisclosureSubset packet row');
+    assertEqual(disclosureFile.definitiveDisclosureStatus, 'blocked_by_source_gaps', 'DisclosureSubset row exposes source-gap block');
+    assert(disclosureFile.definitiveSourceGaps?.some((gap: any) => gap.category === 'legal'), 'DisclosureSubset row exposes source gaps for Files');
   });
 
   await test('Authenticated compose_document_draft returns Studio scaffold', async () => {

@@ -55,6 +55,8 @@ interface FileRow {
   definitiveToolName?: string;
   definitiveNextSuggestedCalls?: Array<{ toolName: string; label: string; priority: "P0" | "P1" | "P2"; reason: string }>;
   definitiveTakeBackArtifacts?: string[];
+  definitiveSourceGaps?: Array<{ category: string; reason: string; suggestedTool?: string }>;
+  definitiveDisclosureStatus?: "blocked_by_source_gaps" | "source_gaps_open" | "data_room_index_ready" | "ready_for_user_controlled_disclosure";
 }
 
 interface RoomRow {
@@ -627,6 +629,8 @@ function openDefinitivePacket(row: FileRow, openTab: OpenTab) {
       toolName: row.definitiveToolName,
       nextSuggestedCalls: row.definitiveNextSuggestedCalls ?? [],
       takeBackArtifacts: row.definitiveTakeBackArtifacts ?? [],
+      sourceGaps: row.definitiveSourceGaps ?? [],
+      disclosureStatus: row.definitiveDisclosureStatus,
       dealId: row.dealId,
       dealTitle: row.dealTitle,
       source: "files",
@@ -643,6 +647,8 @@ function definitivePacketMarkdown(row: FileRow): string {
   const packetCid = row.definitivePacketCid || "not stamped on this row";
   const nextCalls = row.definitiveNextSuggestedCalls ?? [];
   const artifacts = row.definitiveTakeBackArtifacts ?? [];
+  const sourceGaps = row.definitiveSourceGaps ?? [];
+  const disclosureLabel = disclosureStatusLabel(row.definitiveDisclosureStatus, sourceGaps.length);
 
   return [
     `# ${row.title}`,
@@ -655,6 +661,17 @@ function definitivePacketMarkdown(row: FileRow): string {
     `- Source tool: ${toolName}`,
     `- DealState CID: ${stateCid}`,
     `- Packet CID: ${packetCid}`,
+    ...(disclosureLabel
+      ? [
+          `- Disclosure readiness: ${disclosureLabel}`,
+        ]
+      : []),
+    "",
+    "## Source gaps and disclosure boundary",
+    ...(sourceGaps.length
+      ? sourceGaps.map(gap => `- ${labelFromSlug(gap.category)}: ${gap.reason}${gap.suggestedTool ? ` Next call: ${labelFromSlug(gap.suggestedTool)}.` : ""}`)
+      : ["- No source gaps are stamped on this packet."]),
+    "- DEFINITIVE composes selective proof only. Nothing is transmitted externally from this packet without a separate user-controlled share/export approval.",
     "",
     "## Next agent calls",
     ...(nextCalls.length
@@ -723,6 +740,7 @@ function FileListRow({ row, last, onClick }: { row: FileRow; last: boolean; onCl
         {row.definitivePacketType && (
           <span style={F.fileDefinitiveMeta}>
             {row.definitivePacketType}
+            {row.definitiveDisclosureStatus ? ` · ${disclosureStatusLabel(row.definitiveDisclosureStatus, row.definitiveSourceGaps?.length ?? 0)}` : ""}
             {row.definitiveNextSuggestedCalls?.[0] ? ` · next ${row.definitiveNextSuggestedCalls[0].label}` : ""}
           </span>
         )}
@@ -791,6 +809,14 @@ function labelFromSlug(input: string): string {
     .replace(/\b\w/g, letter => letter.toUpperCase());
 }
 
+function disclosureStatusLabel(status: FileRow["definitiveDisclosureStatus"], gapCount: number): string {
+  if (status === "blocked_by_source_gaps") return `${gapCount || "source"} gap${gapCount === 1 ? "" : "s"} block disclosure`;
+  if (status === "source_gaps_open") return `${gapCount || "source"} gap${gapCount === 1 ? "" : "s"} open`;
+  if (status === "data_room_index_ready") return "data room index ready";
+  if (status === "ready_for_user_controlled_disclosure") return "ready for user-controlled disclosure";
+  return "";
+}
+
 function buildRealShortcuts(deals: WorkspaceDeal[], deliverables: WorkspaceDeliverable[], operatingFiles: TodayFileReviewItem[] = []): Shortcut[] {
   const docCount = deals.reduce((sum, deal) => sum + Number(deal.document_count ?? 0), 0);
   const actionCount = operatingFiles.length || deliverables.filter(d => ["queued", "generating", "failed", "draft"].includes(d.status)).length;
@@ -824,6 +850,8 @@ function operatingFileToFileRow(item: TodayFileReviewItem): FileRow {
     definitiveToolName: item.definitiveToolName,
     definitiveNextSuggestedCalls: item.definitiveNextSuggestedCalls,
     definitiveTakeBackArtifacts: item.definitiveTakeBackArtifacts,
+    definitiveSourceGaps: item.definitiveSourceGaps,
+    definitiveDisclosureStatus: item.definitiveDisclosureStatus,
   };
 }
 

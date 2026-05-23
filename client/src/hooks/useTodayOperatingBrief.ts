@@ -74,6 +74,12 @@ export interface TodayDefinitiveNextCall {
   reason: string;
 }
 
+export interface TodayDefinitiveSourceGap {
+  category: string;
+  reason: string;
+  suggestedTool?: string;
+}
+
 export interface TodayFileReviewItem {
   id: string;
   title: string;
@@ -91,6 +97,8 @@ export interface TodayFileReviewItem {
   definitiveToolName?: string;
   definitiveNextSuggestedCalls?: TodayDefinitiveNextCall[];
   definitiveTakeBackArtifacts?: string[];
+  definitiveSourceGaps?: TodayDefinitiveSourceGap[];
+  definitiveDisclosureStatus?: "blocked_by_source_gaps" | "source_gaps_open" | "data_room_index_ready" | "ready_for_user_controlled_disclosure";
 }
 
 export interface TodayStudioRefreshItem {
