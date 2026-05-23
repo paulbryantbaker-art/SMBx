@@ -86,6 +86,7 @@ const expectedTools = [
   'clone_deal_state',
   'compose_deal_package',
   'verify_package',
+  'finalize_deal_package',
   'resume_deal',
   'compose_lifecycle_trace',
   'prepare_ioi_packet',
@@ -434,6 +435,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.schemaNames.includes('MerkleInclusionProof'), 'schema registry exposes MerkleInclusionProof');
   assert(registry.schemaNames.includes('DealPackage'), 'schema registry exposes DealPackage');
   assert(registry.schemaNames.includes('PackageVerification'), 'schema registry exposes PackageVerification');
+  assert(registry.schemaNames.includes('FinalizedDealPackage'), 'schema registry exposes FinalizedDealPackage');
   assert(registry.schemaNames.includes('LifecycleTrace'), 'schema registry exposes LifecycleTrace');
   assert(registry.schemaNames.includes('IOIPacket'), 'schema registry exposes IOIPacket');
   assert(registry.schemaNames.includes('LOIPacket'), 'schema registry exposes LOIPacket');
@@ -467,6 +469,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.toolSchemaMap.clone_deal_state.takeBack.includes('DealState'), 'clone take-back maps DealState');
   assert(registry.toolSchemaMap.compose_deal_package.takeBack.includes('DealPackage'), 'package take-back maps DealPackage');
   assert(registry.toolSchemaMap.verify_package.output.includes('PackageVerification'), 'verify package output maps PackageVerification');
+  assert(registry.toolSchemaMap.finalize_deal_package.takeBack.includes('SignedManifest'), 'finalize package take-back maps signed manifest');
   assert(registry.toolSchemaMap.resume_deal.takeBack.includes('DealPackage'), 'resume take-back maps DealPackage');
   assert(registry.toolSchemaMap.compose_lifecycle_trace.takeBack.includes('LifecycleTrace'), 'lifecycle trace maps LifecycleTrace');
   assert(registry.toolSchemaMap.prepare_ioi_packet.takeBack.includes('IOIPacket'), 'IOI packet maps IOIPacket');
@@ -895,6 +898,48 @@ await test('PackageVerification lets agents trust package handoff artifacts', as
   assert(verification.checks.every((check: any) => check.status === 'pass'), 'all package verification checks pass');
   assert(verification.takeBackArtifacts.includes('PackageVerification'), 'verification is portable');
   assert(verification.next_suggested_calls.some((call: any) => call.toolName === 'disclose_subset'), 'verification points to selective disclosure');
+});
+
+await test('FinalizedDealPackage produces audit and manifest take-back artifacts', async () => {
+  const packageResponse = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'compose_deal_package',
+    input: {
+      payload: {
+        journey: 'sell',
+        companyName: 'Finalize Target',
+        industry: 'industrial services',
+        jurisdiction: 'US-TX',
+        ebitdaCents: 1_800_000_00,
+        documents: [{ name: 'source financials', type: 'financials', hash: 'sha256:finalize-financials' }],
+      },
+    },
+    envelope: {},
+  });
+  const packageResult = packageResponse.body.result.result;
+  const finalResponse = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'finalize_deal_package',
+    input: {
+      dealPackage: packageResult.dealPackage,
+      dealState: packageResult.dealState,
+      expectedPackageCid: packageResult.dealPackage.packageCid,
+      expectedDealStateCid: packageResult.dealState.cid,
+      signedAt: '2026-05-23T00:00:00.000Z',
+    },
+    envelope: {},
+  });
+
+  assertEqual(finalResponse.status, 200, 'finalized package status');
+  const finalized = finalResponse.body.result.result.finalizedPackage;
+  assertEqual(finalized.schema, 'FinalizedDealPackage.v0.1', 'finalized package schema');
+  assertEqual(finalized.status, 'finalized', 'package finalizes after verification');
+  assertEqual(finalized.auditPacket.schema, 'AuditPacket.v0.1', 'audit packet attached');
+  assertEqual(finalized.signedManifest.schema, 'SignedManifest.v0.1', 'signed manifest attached');
+  assertEqual(finalized.signedManifest.attestation.schema, 'Attestation.v0.1', 'attestation attached');
+  assertEqual(finalized.merkleProof.schema, 'MerkleInclusionProof.v0.1', 'merkle proof attached');
+  assert(finalized.takeBackArtifacts.includes('SignedManifest'), 'signed manifest is portable');
+  assert(finalized.takeBackArtifacts.includes('MerkleInclusionProof'), 'merkle proof is portable');
 });
 
 await test('Resume deal returns current lifecycle position and next calls', async () => {

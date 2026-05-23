@@ -228,6 +228,8 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
       return composeDefinitiveDealPackage(input);
     case 'verify_package':
       return verifyDefinitiveDealPackage(input);
+    case 'finalize_deal_package':
+      return finalizeDefinitiveDealPackage(input);
     case 'resume_deal':
       return resumeDefinitiveDeal(input);
     case 'compose_lifecycle_trace':
@@ -266,6 +268,7 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
           'clone_deal_state',
           'compose_deal_package',
           'verify_package',
+          'finalize_deal_package',
           'resume_deal',
           'compose_lifecycle_trace',
           'prepare_ioi_packet',
@@ -294,6 +297,7 @@ export function isDefinitiveDealStateTool(toolName: string): boolean {
     'clone_deal_state',
     'compose_deal_package',
     'verify_package',
+    'finalize_deal_package',
     'resume_deal',
     'compose_lifecycle_trace',
     'prepare_ioi_packet',
@@ -594,6 +598,121 @@ export function verifyDefinitiveDealPackage(input: Record<string, any>) {
       dealState: state || undefined,
       next_suggested_calls: nextSuggestedCalls,
       portableTakeBackArtifacts: verification.takeBackArtifacts,
+    },
+    state_hash_after: state?.stateHash || nullableString(dealPackage.dealStateHash) || null,
+    completeness_contribution_delta: 0,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
+export function finalizeDefinitiveDealPackage(input: Record<string, any>) {
+  const dealPackage = normalizePackage(input.dealPackage ?? input.package ?? input);
+  const state = normalizePriorState(input.dealState ?? input.state ?? dealPackage.dealState);
+  const verificationResult = verifyDefinitiveDealPackage({
+    dealPackage,
+    dealState: state || undefined,
+    expectedPackageCid: input.expectedPackageCid,
+    expectedDealStateCid: input.expectedDealStateCid || input.expectedStateCid,
+  });
+  const packageVerification = verificationResult.result.packageVerification;
+  const finalizedAt = nullableString(input.finalizedAt) || nullableString(input.signedAt) || new Date().toISOString();
+  const packageHash = outputHashFor(dealPackage);
+  const sourceHashes = buildPackageSourceHashes(dealPackage);
+  const modelOutputHashes = buildPackageModelHashes(dealPackage);
+  const auditHash = outputHashFor({
+    packageCid: dealPackage.packageCid,
+    dealStateHash: dealPackage.dealStateHash,
+    packageHash,
+    sourceHashes,
+    modelOutputHashes,
+    methodologyVersion: DEFINITIVE_METHODOLOGY_VERSION,
+    lineInvariant: LINE_INVARIANT,
+  });
+  const auditPacket = {
+    packetId: `audit_${auditHash.hash.slice(0, 16)}`,
+    schema: 'AuditPacket.v0.1',
+    methodologyVersion: DEFINITIVE_METHODOLOGY_VERSION,
+    sourceHashes,
+    modelOutputHashes,
+    auditHash,
+    retentionYears: 7,
+    lineInvariant: LINE_INVARIANT,
+  };
+  const merkleProof = buildPackageMerkleProof(dealPackage, auditPacket);
+  const signedHash = outputHashFor({
+    packageCid: dealPackage.packageCid,
+    auditHash: auditHash.hash,
+    rootHash: merkleProof.rootHash,
+    signedAt: finalizedAt,
+    lineInvariant: LINE_INVARIANT,
+  });
+  const signedManifest = {
+    manifestId: `manifest_${signedHash.hash.slice(0, 16)}`,
+    schema: 'SignedManifest.v0.1',
+    signedHash,
+    signer: nullableString(input.signer) || 'smbx.definitive.software',
+    signedAt: finalizedAt,
+    attestation: {
+      schema: 'Attestation.v0.1',
+      attestationType: 'software_package_manifest',
+      statement:
+        'This is a software manifest for a DEFINITIVE DealPackage. It verifies hashes, schema pins, and THE LINE boundary; it is not legal, tax, fairness, solvency, feasibility, negotiation, or closing advice.',
+      evidenceRefs: [
+        nullableString(dealPackage.packageCid),
+        auditPacket.packetId,
+        merkleProof.rootHash,
+      ].filter(Boolean),
+      lineBoundary: LINE_INVARIANT,
+    },
+  };
+  const finalizedPackage = {
+    schema: 'FinalizedDealPackage.v0.1',
+    packageCid: nullableString(dealPackage.packageCid) || null,
+    packageId: nullableString(dealPackage.packageId) || null,
+    status: packageVerification.verified ? 'finalized' : 'blocked_failed_verification',
+    finalizedAt,
+    packageVerification,
+    auditPacket,
+    signedManifest: packageVerification.verified ? signedManifest : null,
+    merkleProof: packageVerification.verified ? merkleProof : null,
+    next_suggested_calls: [
+      {
+        toolName: 'verify_package',
+        priority: 'P1',
+        reason: 'Let the receiving agent independently verify the finalized package before relying on it.',
+        inputHint: { dealPackage: { packageCid: nullableString(dealPackage.packageCid) || undefined } },
+      },
+      {
+        toolName: 'disclose_subset',
+        priority: 'P1',
+        reason: 'Create a selective disclosure proof before sharing less than the full package.',
+        inputHint: { dealPackage: { packageCid: nullableString(dealPackage.packageCid) || undefined } },
+      },
+      {
+        toolName: 'compose_pmi_plan',
+        priority: 'P2',
+        reason: 'If the deal closes, carry the same DealState into the post-close operating loop.',
+        inputHint: { dealState: state ? { cid: state.cid } : undefined },
+      },
+    ],
+    takeBackArtifacts: ['DealPackage', 'PackageVerification', 'AuditPacket', 'SignedManifest', 'MerkleInclusionProof'],
+    lineInvariant: LINE_INVARIANT,
+  };
+
+  return {
+    ok: true,
+    action: 'finalize_deal_package',
+    result: {
+      finalizedPackage,
+      packageVerification,
+      auditPacket,
+      signedManifest: finalizedPackage.signedManifest,
+      merkleProof: finalizedPackage.merkleProof,
+      dealPackage,
+      dealState: state || undefined,
+      next_suggested_calls: finalizedPackage.next_suggested_calls,
+      portableTakeBackArtifacts: finalizedPackage.takeBackArtifacts,
     },
     state_hash_after: state?.stateHash || nullableString(dealPackage.dealStateHash) || null,
     completeness_contribution_delta: 0,
@@ -2492,6 +2611,58 @@ function packageCheck(
     label,
     status: passes ? 'pass' as const : missingOptionalStatus,
     detail,
+  };
+}
+
+function outputHashFor(value: unknown) {
+  return {
+    algorithm: 'sha256',
+    hash: sha256(stableStringify(value)),
+    canonicalization: 'stable-json-v0.1',
+  };
+}
+
+function buildPackageSourceHashes(dealPackage: Record<string, any>) {
+  const sourceIndex = Array.isArray(dealPackage.sourceIndex) ? dealPackage.sourceIndex : [];
+  return sourceIndex.map((source: any, index: number) => {
+    const providedHash = nullableString(source?.hash) || nullableString(source?.sourceHash);
+    return {
+      algorithm: 'sha256',
+      hash: providedHash?.replace(/^sha256:/, '') || sha256(stableStringify(source)),
+      canonicalization: providedHash ? 'provided-source-hash' : `source-index-item-${index}-stable-json-v0.1`,
+    };
+  });
+}
+
+function buildPackageModelHashes(dealPackage: Record<string, any>) {
+  const modelRefs = [
+    ...(Array.isArray(dealPackage.dealPlan?.modelStack) ? dealPackage.dealPlan.modelStack : []),
+    ...(Array.isArray(dealPackage.modelOutputs) ? dealPackage.modelOutputs : []),
+  ];
+  return modelRefs.map((model: any, index: number) => ({
+    algorithm: 'sha256',
+    hash: nullableString(model?.outputHash)?.replace(/^sha256:/, '') || sha256(stableStringify(model)),
+    canonicalization: `model-output-${index}-stable-json-v0.1`,
+  }));
+}
+
+function buildPackageMerkleProof(dealPackage: Record<string, any>, auditPacket: Record<string, any>) {
+  const leafHash = outputHashFor({
+    packageCid: dealPackage.packageCid,
+    dealStateHash: dealPackage.dealStateHash,
+    packageId: dealPackage.packageId,
+  }).hash;
+  const siblings = [
+    outputHashFor(auditPacket.auditHash).hash,
+    outputHashFor(dealPackage.classificationKey || {}).hash,
+    outputHashFor(dealPackage.completenessReport || {}).hash,
+    outputHashFor(dealPackage.missingInputContract || {}).hash,
+  ];
+  return {
+    schema: 'MerkleInclusionProof.v0.1',
+    leafHash,
+    rootHash: sha256(stableStringify([leafHash, ...siblings])),
+    proof: siblings,
   };
 }
 

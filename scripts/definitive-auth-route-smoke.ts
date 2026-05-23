@@ -58,6 +58,7 @@ try {
     assert(body.tools.some((tool: any) => tool.name === 'clone_deal_state'), 'clone_deal_state is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_deal_package'), 'compose_deal_package is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'verify_package'), 'verify_package is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'finalize_deal_package'), 'finalize_deal_package is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'resume_deal'), 'resume_deal is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_lifecycle_trace'), 'compose_lifecycle_trace is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'prepare_ioi_packet'), 'prepare_ioi_packet is advertised');
@@ -600,6 +601,31 @@ try {
     assertEqual(packageVerification.verified, true, 'package verification passes');
     assert(packageVerification.takeBackArtifacts.includes('PackageVerification'), 'PackageVerification is a take-back artifact');
     assert(verification.body.persistence?.packetType === 'PackageVerification.v0.1', 'package verification packet persisted');
+
+    const finalization = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'finalize_deal_package',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-package:read', 'deal-package:verify', 'audit:write'],
+      input: {
+        dealPackage,
+        dealState,
+        expectedPackageCid: dealPackage.packageCid,
+        expectedDealStateCid: dealState.cid,
+        signedAt: '2026-05-23T00:00:00.000Z',
+      },
+    });
+    assertEqual(finalization.status, 200, 'package finalization route status');
+    const finalizedPackage = finalization.body.result?.result?.finalizedPackage;
+    assertEqual(finalizedPackage.schema, 'FinalizedDealPackage.v0.1', 'finalized package schema');
+    assertEqual(finalizedPackage.status, 'finalized', 'finalized package status');
+    assertEqual(finalizedPackage.auditPacket.schema, 'AuditPacket.v0.1', 'finalized package audit packet schema');
+    assertEqual(finalizedPackage.signedManifest.schema, 'SignedManifest.v0.1', 'finalized package signed manifest schema');
+    assertEqual(finalizedPackage.merkleProof.schema, 'MerkleInclusionProof.v0.1', 'finalized package merkle proof schema');
+    assert(finalization.body.persistence?.packetType === 'FinalizedDealPackage.v0.1', 'finalized package packet persisted');
   });
 
   await test('DealState control packets are persisted for deal resume', async () => {

@@ -584,6 +584,28 @@ const PackageVerification: JsonSchema = {
   },
 };
 
+const FinalizedDealPackage: JsonSchema = {
+  $id: schemaId('FinalizedDealPackage'),
+  title: 'FinalizedDealPackage',
+  type: 'object',
+  additionalProperties: true,
+  required: ['schema', 'packageCid', 'status', 'packageVerification', 'auditPacket', 'next_suggested_calls', 'takeBackArtifacts', 'lineInvariant'],
+  properties: {
+    schema: { type: 'string', const: 'FinalizedDealPackage.v0.1' },
+    packageId: { type: ['string', 'null'] },
+    packageCid: { type: ['string', 'null'] },
+    status: { type: 'string', enum: ['finalized', 'blocked_failed_verification'] },
+    finalizedAt: { type: 'string' },
+    packageVerification: { $ref: schemaId('PackageVerification') },
+    auditPacket: { $ref: schemaId('AuditPacket') },
+    signedManifest: { anyOf: [{ $ref: schemaId('SignedManifest') }, { type: 'null' }] },
+    merkleProof: { anyOf: [{ $ref: schemaId('MerkleInclusionProof') }, { type: 'null' }] },
+    next_suggested_calls: { type: 'array', items: { $ref: schemaId('MCPCallHint') } },
+    takeBackArtifacts: { type: 'array', items: { type: 'string' } },
+    lineInvariant: { type: 'string' },
+  },
+};
+
 const LifecycleTrace: JsonSchema = {
   $id: schemaId('LifecycleTrace'),
   title: 'LifecycleTrace',
@@ -1130,6 +1152,7 @@ export const DEFINITIVE_SCHEMAS: Record<string, JsonSchema> = {
   BestVehicleBlock,
   DealPackage,
   PackageVerification,
+  FinalizedDealPackage,
   LifecycleTrace,
   IOIPacket,
   LOIPacket,
@@ -1230,6 +1253,11 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     input: ['DealPackage', 'DealState'],
     output: ['PackageVerification', 'DealPackage', 'DealState', 'MCPCallHint'],
     takeBack: ['PackageVerification', 'DealPackage', 'MCPCallHint'],
+  },
+  finalize_deal_package: {
+    input: ['DealPackage', 'DealState'],
+    output: ['FinalizedDealPackage', 'PackageVerification', 'AuditPacket', 'SignedManifest', 'Attestation', 'MerkleInclusionProof', 'DealPackage', 'DealState', 'MCPCallHint'],
+    takeBack: ['FinalizedDealPackage', 'PackageVerification', 'AuditPacket', 'SignedManifest', 'MerkleInclusionProof', 'DealPackage'],
   },
   resume_deal: {
     input: ['DealState', 'DealPayload', 'DealPackage'],
