@@ -53,6 +53,8 @@ interface FileRow {
   definitivePacketCid?: string;
   definitiveStateCid?: string;
   definitiveToolName?: string;
+  definitiveNextSuggestedCalls?: Array<{ toolName: string; label: string; priority: "P0" | "P1" | "P2"; reason: string }>;
+  definitiveTakeBackArtifacts?: string[];
 }
 
 interface RoomRow {
@@ -623,6 +625,8 @@ function openDefinitivePacket(row: FileRow, openTab: OpenTab) {
       packetCid: row.definitivePacketCid,
       stateCid: row.definitiveStateCid,
       toolName: row.definitiveToolName,
+      nextSuggestedCalls: row.definitiveNextSuggestedCalls ?? [],
+      takeBackArtifacts: row.definitiveTakeBackArtifacts ?? [],
       dealId: row.dealId,
       dealTitle: row.dealTitle,
       source: "files",
@@ -637,6 +641,8 @@ function definitivePacketMarkdown(row: FileRow): string {
   const packetLabel = row.definitivePacketId || (row.definitivePacketRowId ? `row ${row.definitivePacketRowId}` : "available packet");
   const stateCid = row.definitiveStateCid || "not stamped on this row";
   const packetCid = row.definitivePacketCid || "not stamped on this row";
+  const nextCalls = row.definitiveNextSuggestedCalls ?? [];
+  const artifacts = row.definitiveTakeBackArtifacts ?? [];
 
   return [
     `# ${row.title}`,
@@ -649,6 +655,16 @@ function definitivePacketMarkdown(row: FileRow): string {
     `- Source tool: ${toolName}`,
     `- DealState CID: ${stateCid}`,
     `- Packet CID: ${packetCid}`,
+    "",
+    "## Next agent calls",
+    ...(nextCalls.length
+      ? nextCalls.map(call => `- ${call.priority} ${call.label}: ${call.reason}`)
+      : ["- Ask Yulia to infer the next gate from the DealState and current file context."]),
+    "",
+    "## Portable artifacts",
+    ...(artifacts.length
+      ? artifacts.map(item => `- ${item}`)
+      : ["- DealState", "- MCPCallHint[]"]),
     "",
     "## What it means",
     "- The packet is the current portable state for this deal step.",
@@ -704,6 +720,12 @@ function FileListRow({ row, last, onClick }: { row: FileRow; last: boolean; onCl
       <span style={F.fileText}>
         <strong>{row.title}</strong>
         <span>{row.sub}</span>
+        {row.definitivePacketType && (
+          <span style={F.fileDefinitiveMeta}>
+            {row.definitivePacketType}
+            {row.definitiveNextSuggestedCalls?.[0] ? ` · next ${row.definitiveNextSuggestedCalls[0].label}` : ""}
+          </span>
+        )}
       </span>
       <span style={{ ...F.filePill, background: t.soft, color: t.ink }}>{row.status}</span>
     </button>
@@ -800,6 +822,8 @@ function operatingFileToFileRow(item: TodayFileReviewItem): FileRow {
     definitivePacketCid: item.definitivePacketCid,
     definitiveStateCid: item.definitiveStateCid,
     definitiveToolName: item.definitiveToolName,
+    definitiveNextSuggestedCalls: item.definitiveNextSuggestedCalls,
+    definitiveTakeBackArtifacts: item.definitiveTakeBackArtifacts,
   };
 }
 
@@ -1144,6 +1168,20 @@ const F: Record<string, CSSProperties> = {
     ...studioListCardStyles.body,
     fontSize: 12.5,
     color: "var(--m-on-surface-mid)",
+  },
+  fileDefinitiveMeta: {
+    width: "fit-content",
+    maxWidth: "100%",
+    marginTop: 4,
+    padding: "4px 7px",
+    borderRadius: 999,
+    background: "rgba(46,92,138,0.09)",
+    color: "var(--m-on-primary-container)",
+    fontSize: 10.5,
+    fontWeight: 850,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
   },
   filePill: {
     borderRadius: 999,

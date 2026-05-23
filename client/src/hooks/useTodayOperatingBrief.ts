@@ -89,6 +89,8 @@ export interface TodayFileReviewItem {
   definitivePacketCid?: string;
   definitiveStateCid?: string;
   definitiveToolName?: string;
+  definitiveNextSuggestedCalls?: TodayDefinitiveNextCall[];
+  definitiveTakeBackArtifacts?: string[];
 }
 
 export interface TodayStudioRefreshItem {

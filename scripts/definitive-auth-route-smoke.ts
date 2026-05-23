@@ -363,6 +363,8 @@ try {
     assertEqual(packetFile.definitivePacketType, 'IOIPacket.v0.1', 'packet row exposes packet type for Files');
     assertEqual(packetFile.definitiveStateCid, pulse.definitive.stateCid, 'packet row exposes DealState cid for Files');
     assert(packetFile.definitivePacketRowId > 0, 'packet row exposes database row id for Files');
+    assert(packetFile.definitiveNextSuggestedCalls?.some((call: any) => call.toolName === 'compose_model_stack'), 'packet row exposes next calls for Files');
+    assert(packetFile.definitiveTakeBackArtifacts?.includes('IOIPacket'), 'packet row exposes take-back artifacts for Files');
   });
 
   await test('Authenticated resume_deal returns current stage and next calls', async () => {

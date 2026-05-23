@@ -182,6 +182,8 @@ export interface TodayFileReviewItem {
   definitivePacketCid?: string;
   definitiveStateCid?: string;
   definitiveToolName?: string;
+  definitiveNextSuggestedCalls?: TodayDefinitiveNextCall[];
+  definitiveTakeBackArtifacts?: string[];
 }
 
 export interface TodayStudioRefreshItem {
@@ -734,22 +736,28 @@ function buildFilesNeedingReview(
     }));
   const fromPackets = definitivePackets
     .slice(0, 6)
-    .map((packet, index) => ({
-      id: `definitive-packet-${packet.id}`,
-      title: packetTypeLabel(packet.packet_type),
-      dealId: packet.deal_id ? String(packet.deal_id) : undefined,
-      dealTitle: packet.deal_name || undefined,
-      reason: `${labelFromSlug(packet.tool_name)} · agent take-back packet`,
-      status: 'Packet',
-      tone: (index % 2 === 0 ? 'cactus' : 'oat') as Tone,
-      updatedAt: packet.created_at,
-      definitivePacketRowId: packet.id,
-      definitivePacketId: packet.packet_id || undefined,
-      definitivePacketType: packet.packet_type,
-      definitivePacketCid: packet.packet_cid || undefined,
-      definitiveStateCid: packet.deal_state_cid || undefined,
-      definitiveToolName: packet.tool_name,
-    }));
+    .map((packet, index) => {
+      const nextSuggestedCalls = collectNextSuggestedCalls([packet], {});
+      const takeBackArtifacts = collectPortableArtifacts([packet]);
+      return {
+        id: `definitive-packet-${packet.id}`,
+        title: packetTypeLabel(packet.packet_type),
+        dealId: packet.deal_id ? String(packet.deal_id) : undefined,
+        dealTitle: packet.deal_name || undefined,
+        reason: `${labelFromSlug(packet.tool_name)} · agent take-back packet`,
+        status: 'Packet',
+        tone: (index % 2 === 0 ? 'cactus' : 'oat') as Tone,
+        updatedAt: packet.created_at,
+        definitivePacketRowId: packet.id,
+        definitivePacketId: packet.packet_id || undefined,
+        definitivePacketType: packet.packet_type,
+        definitivePacketCid: packet.packet_cid || undefined,
+        definitiveStateCid: packet.deal_state_cid || undefined,
+        definitiveToolName: packet.tool_name,
+        definitiveNextSuggestedCalls: nextSuggestedCalls,
+        definitiveTakeBackArtifacts: takeBackArtifacts,
+      };
+    });
   return [...fromReviews, ...fromDeliverables, ...fromPackets].slice(0, 10);
 }
 
