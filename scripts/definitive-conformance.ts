@@ -13,10 +13,12 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import {
   DEFINITIVE_METHODOLOGY_URI,
+  DEFINITIVE_METHODOLOGY_VERSION,
   DEFINITIVE_SPEC_VERSION,
 } from '../server/constants/definitive.js';
 import {
   DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT,
+  DEFINITIVE_CONFORMANCE_DEAL_OS_ARTIFACT_CASE_COUNT,
   DEFINITIVE_CONFORMANCE_MODEL_STACK_CASE_COUNT,
   DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT,
   DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT,
@@ -44,6 +46,7 @@ import { listDefinitiveMcpTools } from '../server/services/definitiveMcp.js';
 import { getDefinitiveDefinitionOfDone } from '../server/services/definitiveDealState.js';
 import { buildDefinitiveSchemaRegistry } from '../server/services/definitiveSchemas.js';
 import { buildDefinitiveRegistryPackage } from '../server/services/definitiveRegistryPackage.js';
+import { executeDefinitiveDealStateTool } from '../server/services/definitiveDealState.js';
 import {
   evaluateDefinitiveStackOverlays,
   normalizeDefinitiveStackSignals,
@@ -181,18 +184,37 @@ interface ModelStackCase {
   };
 }
 
+interface DealOsArtifactCase {
+  id: string;
+  title: string;
+  specVersion: string;
+  methodologyUri: string;
+  toolName: string;
+  input: Record<string, any>;
+  expect: {
+    action: string;
+    artifactPath: string;
+    schema: string;
+    nextSuggestedToolsInclude?: string[];
+    takeBackArtifactsInclude?: string[];
+    fields?: PromptMetaFieldExpectation[];
+  };
+}
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const caseFile = path.resolve(__dirname, '../testing/definitive/conformance/v1/model-runtime.cases.json');
 const routeCaseFile = path.resolve(__dirname, '../testing/definitive/conformance/v1/deal-mechanics-route.cases.json');
 const promptMetaCaseFile = path.resolve(__dirname, '../testing/definitive/conformance/v1/prompt-meta.cases.json');
 const routeTriggerCaseFile = path.resolve(__dirname, '../testing/definitive/conformance/v1/route-trigger.cases.json');
 const modelStackCaseFile = path.resolve(__dirname, '../testing/definitive/conformance/v1/model-stack.cases.json');
+const dealOsArtifactCaseFile = path.resolve(__dirname, '../testing/definitive/conformance/v1/deal-os-artifact.cases.json');
 
 const cases: ConformanceCase[] = JSON.parse(await readFile(caseFile, 'utf8'));
 const routeCases: DealMechanicsRouteCase[] = JSON.parse(await readFile(routeCaseFile, 'utf8'));
 const promptMetaCases: PromptMetaCase[] = JSON.parse(await readFile(promptMetaCaseFile, 'utf8'));
 const routeTriggerCases: RouteTriggerCase[] = JSON.parse(await readFile(routeTriggerCaseFile, 'utf8'));
 const modelStackCases: ModelStackCase[] = JSON.parse(await readFile(modelStackCaseFile, 'utf8'));
+const dealOsArtifactCases: DealOsArtifactCase[] = JSON.parse(await readFile(dealOsArtifactCaseFile, 'utf8'));
 let passed = 0;
 let failed = 0;
 
@@ -202,12 +224,14 @@ console.log(`Loaded ${routeCases.length} route cases from ${path.relative(proces
 console.log(`Loaded ${promptMetaCases.length} prompt/meta cases from ${path.relative(process.cwd(), promptMetaCaseFile)}`);
 console.log(`Loaded ${routeTriggerCases.length} route-trigger cases from ${path.relative(process.cwd(), routeTriggerCaseFile)}`);
 console.log(`Loaded ${modelStackCases.length} model-stack cases from ${path.relative(process.cwd(), modelStackCaseFile)}`);
+console.log(`Loaded ${dealOsArtifactCases.length} Deal OS artifact cases from ${path.relative(process.cwd(), dealOsArtifactCaseFile)}`);
 assertEqual(cases.length, DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT, 'conformance case count manifest');
 assertEqual(routeCases.length, DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT, 'deal route conformance case count manifest');
 assertEqual(promptMetaCases.length, DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT, 'prompt/meta conformance case count manifest');
 assertEqual(routeTriggerCases.length, DEFINITIVE_CONFORMANCE_ROUTE_TRIGGER_CASE_COUNT, 'route-trigger conformance case count manifest');
 assertEqual(modelStackCases.length, DEFINITIVE_CONFORMANCE_MODEL_STACK_CASE_COUNT, 'model-stack conformance case count manifest');
-assertEqual(cases.length + routeCases.length + promptMetaCases.length + routeTriggerCases.length + modelStackCases.length, DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT, 'total conformance case count manifest');
+assertEqual(dealOsArtifactCases.length, DEFINITIVE_CONFORMANCE_DEAL_OS_ARTIFACT_CASE_COUNT, 'Deal OS artifact conformance case count manifest');
+assertEqual(cases.length + routeCases.length + promptMetaCases.length + routeTriggerCases.length + modelStackCases.length + dealOsArtifactCases.length, DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT, 'total conformance case count manifest');
 
 for (const item of cases) {
   try {
@@ -396,6 +420,43 @@ for (const item of modelStackCases) {
 
     for (const expectedText of item.expect.yuliaBriefIncludes || []) {
       assert(stack.definitive.yuliaMechanicsBrief.some(line => line.includes(expectedText)), `${item.id} expected Yulia brief to include ${expectedText}`);
+    }
+
+    console.log(`  ✓ ${item.id} ${item.title}`);
+    passed++;
+  } catch (error: any) {
+    console.log(`  ✗ ${item.id} ${item.title} - ${error.message}`);
+    failed++;
+  }
+}
+
+for (const item of dealOsArtifactCases) {
+  try {
+    assertEqual(item.specVersion, DEFINITIVE_SPEC_VERSION, `${item.id} specVersion`);
+    assertEqual(item.methodologyUri, DEFINITIVE_METHODOLOGY_URI, `${item.id} methodologyUri`);
+
+    const run = executeDefinitiveDealStateTool(item.toolName, item.input);
+    assertEqual(run.ok, true, `${item.id} ok`);
+    assertEqual(run.action, item.expect.action, `${item.id} action`);
+    assertEqual(run.methodology_version, DEFINITIVE_METHODOLOGY_VERSION, `${item.id} methodology version`);
+    assert(run.the_line_invariant.includes('DEFINITIVE computes'), `${item.id} THE LINE invariant`);
+    assert(typeof run.state_hash_after === 'string' && run.state_hash_after.length === 64, `${item.id} state hash should be sha256`);
+
+    const artifact = valueAtPath(run, item.expect.artifactPath);
+    assert(artifact && typeof artifact === 'object', `${item.id} expected artifact at ${item.expect.artifactPath}`);
+    assertEqual(artifact.schema, item.expect.schema, `${item.id} artifact schema`);
+    assertEqual(artifact.dealStateHash, run.state_hash_after, `${item.id} artifact state hash`);
+    assertEqual(artifact.lineInvariant, run.the_line_invariant, `${item.id} artifact line invariant`);
+
+    const nextSuggestedCalls = valueAtPath(run, 'result.next_suggested_calls') || artifact.next_suggested_calls || [];
+    const nextSuggestedTools = nextSuggestedCalls.map((call: any) => call.toolName).filter(Boolean);
+    assertIncludesAll(nextSuggestedTools, item.expect.nextSuggestedToolsInclude || [], `${item.id} next suggested tools`);
+
+    const takeBackArtifacts = valueAtPath(run, 'result.portableTakeBackArtifacts') || artifact.takeBackArtifacts || [];
+    assertIncludesAll(takeBackArtifacts, item.expect.takeBackArtifactsInclude || [], `${item.id} take-back artifacts`);
+
+    for (const field of item.expect.fields || []) {
+      assertPromptMetaField(run as Record<string, any>, field, item.id);
     }
 
     console.log(`  ✓ ${item.id} ${item.title}`);

@@ -10,12 +10,14 @@ export const DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT = 60;
 export const DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT = 92;
 export const DEFINITIVE_CONFORMANCE_ROUTE_TRIGGER_CASE_COUNT = 30;
 export const DEFINITIVE_CONFORMANCE_MODEL_STACK_CASE_COUNT = 33;
+export const DEFINITIVE_CONFORMANCE_DEAL_OS_ARTIFACT_CASE_COUNT = 12;
 export const DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT =
   DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT +
   DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT +
   DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT +
   DEFINITIVE_CONFORMANCE_ROUTE_TRIGGER_CASE_COUNT +
-  DEFINITIVE_CONFORMANCE_MODEL_STACK_CASE_COUNT;
+  DEFINITIVE_CONFORMANCE_MODEL_STACK_CASE_COUNT +
+  DEFINITIVE_CONFORMANCE_DEAL_OS_ARTIFACT_CASE_COUNT;
 
 export const DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CATEGORIES = [
   'valuation',
@@ -58,6 +60,7 @@ export const DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CATEGORIES = [
   'prompt_meta_behavior',
   'route_trigger_behavior',
   'model_stack_behavior',
+  'deal_os_artifact_behavior',
 ] as const;
 
 export function buildDefinitiveConformanceStatus() {
@@ -74,6 +77,7 @@ export function buildDefinitiveConformanceStatus() {
       promptMeta: DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT,
       routeTrigger: DEFINITIVE_CONFORMANCE_ROUTE_TRIGGER_CASE_COUNT,
       modelStack: DEFINITIVE_CONFORMANCE_MODEL_STACK_CASE_COUNT,
+      dealOsArtifact: DEFINITIVE_CONFORMANCE_DEAL_OS_ARTIFACT_CASE_COUNT,
       total: DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT,
     },
     categories: DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CATEGORIES,
@@ -99,6 +103,9 @@ export function buildDefinitiveConformanceStatus() {
       'The Diligence Standard publication doctrine',
       'G28/G29/G30 trigger thresholds',
       'compose_model_stack payload behavior',
+      'iterative Deal OS artifact schemas',
+      'portable agent take-back artifacts',
+      'document/data-room/IOI/LOI/negotiation/close/PMI boundaries',
     ],
     command: 'npm run test:definitive-conformance',
     authenticatedRouteSmoke: {

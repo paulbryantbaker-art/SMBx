@@ -664,6 +664,7 @@ const LifecycleTrace: JsonSchema = {
     events: { type: 'array', items: { type: 'object', additionalProperties: true } },
     artifactRefs: { type: 'array', items: { type: 'object', additionalProperties: true } },
     blockers: { type: 'array', items: { type: 'string' } },
+    humanAndAgentSurfaces: { type: 'array', items: { type: 'string' } },
     loopContract: { type: 'object', additionalProperties: true },
     next_suggested_calls: { type: 'array', items: { $ref: schemaId('MCPCallHint') } },
     takeBackArtifacts: { type: 'array', items: { type: 'string' } },

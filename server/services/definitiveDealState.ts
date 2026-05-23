@@ -1024,6 +1024,7 @@ export function composeDefinitiveLifecycleTrace(input: Record<string, any>) {
   const events = rawEvents.length ? rawEvents : synthesizeLifecycleEvents(state, dealPlan);
   const artifactRefs = buildLifecycleArtifactRefs(state);
   const currentStage = dealPlan.currentStage;
+  const humanAndAgentSurfaces = ['today', 'pipeline', 'files', 'data_room', 'studio', 'models', 'audit_package'];
   const traceHash = sha256(stableStringify({
     dealStateHash: state.stateHash,
     currentStage,
@@ -1049,12 +1050,13 @@ export function composeDefinitiveLifecycleTrace(input: Record<string, any>) {
     events,
     artifactRefs,
     blockers: state.completenessReport.blockers,
+    humanAndAgentSurfaces,
     loopContract: {
       recursiveLoop:
         'compose_lifecycle_trace -> update_deal_payload with new event/source/model output -> check_completeness -> compose_deal_package -> repeat',
       noRejectionContract:
         'Incomplete deal history is acceptable. The trace returns synthesized current-state events and next_suggested_calls instead of rejecting the agent.',
-      humanAndAgentSurfaces: ['today', 'pipeline', 'files', 'data_room', 'studio', 'models', 'audit_package'],
+      humanAndAgentSurfaces,
     },
     next_suggested_calls: [
       {

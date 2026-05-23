@@ -18,6 +18,7 @@ import {
 import { listDefinitiveLineInventory } from '../server/services/agencyActionRegistry.js';
 import { buildAgentCard } from '../server/services/agentCard.js';
 import {
+  DEFINITIVE_CONFORMANCE_DEAL_OS_ARTIFACT_CASE_COUNT,
   DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT,
   DEFINITIVE_CONFORMANCE_MODEL_STACK_CASE_COUNT,
   DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT,
@@ -278,6 +279,7 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assertEqual(manifest.conformanceSurface.promptMetaCases, DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT, 'manifest prompt/meta conformance case count');
   assertEqual(manifest.conformanceSurface.routeTriggerCases, DEFINITIVE_CONFORMANCE_ROUTE_TRIGGER_CASE_COUNT, 'manifest route-trigger conformance case count');
   assertEqual(manifest.conformanceSurface.modelStackCases, DEFINITIVE_CONFORMANCE_MODEL_STACK_CASE_COUNT, 'manifest model-stack conformance case count');
+  assertEqual(manifest.conformanceSurface.dealOsArtifactCases, DEFINITIVE_CONFORMANCE_DEAL_OS_ARTIFACT_CASE_COUNT, 'manifest Deal OS artifact conformance case count');
   assertEqual(manifest.conformanceSurface.totalCases, DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT, 'manifest total conformance case count');
   assertEqual(manifest.dealMechanicsSurface.summary.totalModelSlots, DEFINITIVE_DEAL_MECHANICS_MODEL_SLOT_COUNT, 'manifest deal mechanics model count');
   assertEqual(manifest.dealMechanicsSurface.summary.catalogedModelSlots, DEFINITIVE_DEAL_MECHANICS_MODEL_SLOT_COUNT, 'manifest cataloged model count');

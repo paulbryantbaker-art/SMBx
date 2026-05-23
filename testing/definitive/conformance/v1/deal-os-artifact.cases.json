@@ -1,0 +1,399 @@
+[
+  {
+    "id": "CONF.DEALOS.LIFECYCLE.001",
+    "title": "Lifecycle trace keeps the recursive Deal OS loop portable",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "compose_lifecycle_trace",
+    "input": {
+      "payload": {
+        "targetName": "Atlas HVAC Services",
+        "journey": "buy",
+        "dealType": "lower middle market HVAC acquisition",
+        "industry": "HVAC services",
+        "jurisdiction": "US-DE",
+        "purchasePriceCents": 540000000,
+        "enterpriseValueCents": 540000000,
+        "ebitdaCents": 82000000,
+        "revenueCents": 1120000000,
+        "sources": [
+          { "id": "src-fin", "name": "TTM financials", "type": "financials", "hash": "sha256:fin", "citationReady": true },
+          { "id": "src-legal", "name": "Draft LOI", "type": "legal", "hash": "sha256:legal", "citationReady": true },
+          { "id": "src-tax", "name": "Tax returns", "type": "tax", "hash": "sha256:tax", "citationReady": true },
+          { "id": "src-commercial", "name": "Customer cohort analysis", "type": "commercial", "hash": "sha256:commercial", "citationReady": true },
+          { "id": "src-ops", "name": "Operations KPI pack", "type": "operations", "hash": "sha256:ops", "citationReady": true },
+          { "id": "src-financing", "name": "Debt schedule", "type": "financing", "hash": "sha256:debt", "citationReady": true }
+        ],
+        "dealEvents": [
+          { "id": "evt-ioi", "eventType": "ioi", "stage": "ioi", "label": "IOI received", "sourceRefs": ["src-legal"], "artifactRefs": [] }
+        ]
+      }
+    },
+    "expect": {
+      "action": "compose_lifecycle_trace",
+      "artifactPath": "result.lifecycleTrace",
+      "schema": "LifecycleTrace.v0.1",
+      "nextSuggestedToolsInclude": ["update_deal_payload", "compose_deal_package"],
+      "takeBackArtifactsInclude": ["LifecycleTrace", "DealState", "DealPlan"],
+      "fields": [
+        { "path": "result.lifecycleTrace.loopContract.recursiveLoop", "includes": "update_deal_payload" },
+        { "path": "result.lifecycleTrace.humanAndAgentSurfaces", "includes": "data_room" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.IOI.001",
+    "title": "IOI packet stays non-binding and points agents to source/model gaps",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "prepare_ioi_packet",
+    "input": {
+      "payload": {
+        "targetName": "Atlas HVAC Services",
+        "journey": "buy",
+        "dealType": "HVAC acquisition",
+        "industry": "HVAC services",
+        "purchasePriceCents": 540000000,
+        "ebitdaCents": 82000000,
+        "sources": [
+          { "id": "src-fin", "name": "TTM financials", "type": "financials", "hash": "sha256:fin", "citationReady": true },
+          { "id": "src-commercial", "name": "Customer cohort analysis", "type": "commercial", "hash": "sha256:commercial", "citationReady": true }
+        ]
+      }
+    },
+    "expect": {
+      "action": "prepare_ioi_packet",
+      "artifactPath": "result.ioiPacket",
+      "schema": "IOIPacket.v0.1",
+      "nextSuggestedToolsInclude": ["compose_model_stack", "compose_document_draft", "prepare_diligence_request"],
+      "takeBackArtifactsInclude": ["IOIPacket", "DealState", "DocumentDraft"],
+      "fields": [
+        { "path": "result.ioiPacket.indicationBoundary.noExternalTransmission", "equals": true },
+        { "path": "result.ioiPacket.indicationBoundary.noOfferAuthority", "equals": true }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.LOI.001",
+    "title": "LOI packet separates economic architecture from clause drafting and authority",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "prepare_loi_packet",
+    "input": {
+      "payload": {
+        "targetName": "Atlas HVAC Services",
+        "journey": "buy",
+        "dealType": "asset acquisition with rollover",
+        "industry": "HVAC services",
+        "purchasePriceCents": 540000000,
+        "ebitdaCents": 82000000,
+        "workingCapitalPegCents": 64000000,
+        "escrowPercent": 10,
+        "sources": [
+          { "id": "src-fin", "name": "TTM financials", "type": "financials", "hash": "sha256:fin", "citationReady": true },
+          { "id": "src-legal", "name": "Draft LOI", "type": "legal", "hash": "sha256:legal", "citationReady": true },
+          { "id": "src-tax", "name": "Tax returns", "type": "tax", "hash": "sha256:tax", "citationReady": true },
+          { "id": "src-commercial", "name": "Customer cohort analysis", "type": "commercial", "hash": "sha256:commercial", "citationReady": true }
+        ]
+      }
+    },
+    "expect": {
+      "action": "prepare_loi_packet",
+      "artifactPath": "result.loiPacket",
+      "schema": "LOIPacket.v0.1",
+      "nextSuggestedToolsInclude": ["compose_model_stack", "compose_document_draft", "prepare_diligence_request", "prepare_negotiation_brief"],
+      "takeBackArtifactsInclude": ["LOIPacket", "DealState", "DocumentDraft", "DiligenceRequest"],
+      "fields": [
+        { "path": "result.loiPacket.loiBoundary.noClauseDrafting", "equals": true },
+        { "path": "result.loiPacket.loiBoundary.noNegotiationAuthority", "equals": true }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.DATAROOM.001",
+    "title": "Data room index groups source material and names remaining source gaps",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "compose_data_room_index",
+    "input": {
+      "payload": {
+        "targetName": "Atlas HVAC Services",
+        "journey": "buy",
+        "dealType": "real estate heavy acquisition",
+        "industry": "HVAC services",
+        "realEstatePercentOfEV": 28,
+        "sources": [
+          { "id": "src-fin", "name": "TTM financials", "type": "financials", "hash": "sha256:fin", "citationReady": true },
+          { "id": "src-legal", "name": "Draft LOI", "type": "legal", "hash": "sha256:legal", "citationReady": true },
+          { "id": "src-re", "name": "Rent roll and lease abstracts", "type": "real estate", "hash": "sha256:re", "citationReady": true }
+        ]
+      }
+    },
+    "expect": {
+      "action": "compose_data_room_index",
+      "artifactPath": "result.dataRoomIndex",
+      "schema": "DataRoomIndex.v0.1",
+      "nextSuggestedToolsInclude": ["update_deal_payload", "check_completeness"],
+      "takeBackArtifactsInclude": ["DataRoomIndex", "SourceIndex", "MissingInputContract"],
+      "fields": [
+        { "path": "result.dataRoomIndex.totalSources", "min": 3 },
+        { "path": "result.dataRoomIndex.categories", "lengthAtLeast": 3 }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.DILIGENCE.001",
+    "title": "Diligence request is source-aware but never externally transmits",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "prepare_diligence_request",
+    "input": {
+      "categories": ["financials", "legal", "tax", "ip"],
+      "payload": {
+        "targetName": "Atlas HVAC Services",
+        "journey": "buy",
+        "dealType": "software-enabled services acquisition",
+        "industry": "HVAC services software",
+        "sources": [
+          { "id": "src-fin", "name": "TTM financials", "type": "financials", "hash": "sha256:fin", "citationReady": true },
+          { "id": "src-ip", "name": "OSS scan summary", "type": "ip software oss", "hash": "sha256:ip", "citationReady": true }
+        ]
+      }
+    },
+    "expect": {
+      "action": "prepare_diligence_request",
+      "artifactPath": "result.diligenceRequest",
+      "schema": "DiligenceRequest.v0.1",
+      "nextSuggestedToolsInclude": ["compose_data_room_index", "compose_model_stack", "compose_document_draft"],
+      "takeBackArtifactsInclude": ["DiligenceRequest", "DataRoomIndex", "MissingInputContract"],
+      "fields": [
+        { "path": "result.diligenceRequest.requestBoundary.noExternalTransmission", "equals": true },
+        { "path": "result.diligenceRequest.requestGroups", "lengthAtLeast": 4 }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.DISCLOSURE.001",
+    "title": "Disclosure subset creates a proof without sending anything",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "disclose_subset",
+    "input": {
+      "categories": ["financials", "legal"],
+      "payload": {
+        "targetName": "Atlas HVAC Services",
+        "journey": "buy",
+        "sources": [
+          { "id": "src-fin", "name": "TTM financials", "type": "financials", "hash": "sha256:fin", "citationReady": true },
+          { "id": "src-legal", "name": "Draft LOI", "type": "legal", "hash": "sha256:legal", "citationReady": true },
+          { "id": "src-tax", "name": "Tax returns", "type": "tax", "hash": "sha256:tax", "citationReady": true }
+        ]
+      }
+    },
+    "expect": {
+      "action": "disclose_subset",
+      "artifactPath": "result.disclosureSubset",
+      "schema": "DisclosureSubset.v0.1",
+      "nextSuggestedToolsInclude": ["compose_deal_package"],
+      "takeBackArtifactsInclude": ["DisclosureSubset", "SourceIndex", "SelectiveDisclosureProof"],
+      "fields": [
+        { "path": "result.disclosureSubset.disclosureBoundary.noExternalTransmission", "equals": true },
+        { "path": "result.disclosureSubset.selectiveDisclosureProof.includesOnlySelectedSources", "equals": true }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.DOCUMENT.001",
+    "title": "Document draft requires sourced claims before external export",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "compose_document_draft",
+    "input": {
+      "documentType": "ic_memo",
+      "payload": {
+        "targetName": "Atlas HVAC Services",
+        "journey": "buy",
+        "dealType": "HVAC acquisition",
+        "purchasePriceCents": 540000000,
+        "sources": [
+          { "id": "src-fin", "name": "TTM financials", "type": "financials", "hash": "sha256:fin", "citationReady": true },
+          { "id": "src-commercial", "name": "Customer cohort analysis", "type": "commercial", "hash": "sha256:commercial", "citationReady": true }
+        ]
+      }
+    },
+    "expect": {
+      "action": "compose_document_draft",
+      "artifactPath": "result.documentDraft",
+      "schema": "DocumentDraft.v0.1",
+      "nextSuggestedToolsInclude": ["compose_data_room_index", "compose_model_stack", "compose_deal_package"],
+      "takeBackArtifactsInclude": ["DocumentDraft", "SourceIndex", "MissingInputContract"],
+      "fields": [
+        { "path": "result.documentDraft.sourcePolicy.unsourcedClaimsAllowed", "equals": false },
+        { "path": "result.documentDraft.exportBoundary.noExternalTransmission", "equals": true }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.NEGOTIATION.001",
+    "title": "Negotiation brief computes ranges and handoffs without negotiating",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "prepare_negotiation_brief",
+    "input": {
+      "payload": {
+        "targetName": "Atlas HVAC Services",
+        "journey": "buy",
+        "dealType": "asset acquisition",
+        "purchasePriceCents": 540000000,
+        "workingCapitalPegCents": 64000000,
+        "escrowPercent": 10,
+        "sources": [
+          { "id": "src-fin", "name": "TTM financials", "type": "financials", "hash": "sha256:fin", "citationReady": true },
+          { "id": "src-legal", "name": "Draft LOI", "type": "legal", "hash": "sha256:legal", "citationReady": true }
+        ]
+      }
+    },
+    "expect": {
+      "action": "prepare_negotiation_brief",
+      "artifactPath": "result.negotiationBrief",
+      "schema": "NegotiationBrief.v0.1",
+      "nextSuggestedToolsInclude": ["compose_data_room_index", "compose_model_stack", "compose_document_draft"],
+      "takeBackArtifactsInclude": ["NegotiationBrief", "DealState", "SourceGapList"],
+      "fields": [
+        { "path": "result.negotiationBrief.negotiationBoundary.noRecommendation", "equals": true },
+        { "path": "result.negotiationBrief.negotiationBoundary.noNegotiationAuthority", "equals": true }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.CLOSE.001",
+    "title": "Close readiness blocks money movement and closing authority",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "compose_close_readiness",
+    "input": {
+      "payload": {
+        "targetName": "Atlas HVAC Services",
+        "journey": "buy",
+        "dealType": "asset acquisition",
+        "purchasePriceCents": 540000000,
+        "closingConditions": ["HSR not required", "lender approval pending"],
+        "sources": [
+          { "id": "src-fin", "name": "TTM financials", "type": "financials", "hash": "sha256:fin", "citationReady": true },
+          { "id": "src-legal", "name": "Draft LOI", "type": "legal", "hash": "sha256:legal", "citationReady": true },
+          { "id": "src-financing", "name": "Debt schedule", "type": "financing", "hash": "sha256:debt", "citationReady": true }
+        ]
+      }
+    },
+    "expect": {
+      "action": "compose_close_readiness",
+      "artifactPath": "result.closeReadiness",
+      "schema": "CloseReadiness.v0.1",
+      "nextSuggestedToolsInclude": ["generate_funds_flow", "compose_document_draft"],
+      "takeBackArtifactsInclude": ["CloseReadiness", "DealState", "FundsFlow"],
+      "fields": [
+        { "path": "result.closeReadiness.closeReadinessBoundary.noMoneyMovement", "equals": true },
+        { "path": "result.closeReadiness.closeReadinessBoundary.noClosingAuthority", "equals": true }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.FUNDSFLOW.001",
+    "title": "Funds flow is a closing scaffold, not wire or escrow authority",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "generate_funds_flow",
+    "input": {
+      "payload": {
+        "targetName": "Atlas HVAC Services",
+        "journey": "buy",
+        "dealType": "asset acquisition",
+        "purchasePriceCents": 540000000,
+        "equityCents": 160000000,
+        "debtCents": 380000000,
+        "transactionCostsCents": 12000000,
+        "sources": [
+          { "id": "src-fin", "name": "TTM financials", "type": "financials", "hash": "sha256:fin", "citationReady": true },
+          { "id": "src-legal", "name": "Draft LOI", "type": "legal", "hash": "sha256:legal", "citationReady": true },
+          { "id": "src-tax", "name": "Tax returns", "type": "tax", "hash": "sha256:tax", "citationReady": true },
+          { "id": "src-financing", "name": "Debt schedule", "type": "financing", "hash": "sha256:debt", "citationReady": true }
+        ]
+      }
+    },
+    "expect": {
+      "action": "generate_funds_flow",
+      "artifactPath": "result.fundsFlow",
+      "schema": "FundsFlow.v0.1",
+      "nextSuggestedToolsInclude": ["compose_model_stack", "compose_document_draft", "compose_deal_package"],
+      "takeBackArtifactsInclude": ["FundsFlow", "DealState", "DocumentDraft"],
+      "fields": [
+        { "path": "result.fundsFlow.fundsFlowBoundary.noMoneyMovement", "equals": true },
+        { "path": "result.fundsFlow.fundsFlowBoundary.noWireInstructions", "equals": true }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.PMI.001",
+    "title": "PMI plan continues the deal loop without operating authority",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "compose_pmi_plan",
+    "input": {
+      "payload": {
+        "targetName": "Atlas HVAC Services",
+        "journey": "pmi",
+        "dealType": "post close integration",
+        "status": "closed",
+        "closedDate": "2026-05-20",
+        "sources": [
+          { "id": "src-ops", "name": "Operations KPI pack", "type": "operations", "hash": "sha256:ops", "citationReady": true },
+          { "id": "src-fin", "name": "TTM financials", "type": "financials", "hash": "sha256:fin", "citationReady": true },
+          { "id": "src-commercial", "name": "Customer cohort analysis", "type": "commercial", "hash": "sha256:commercial", "citationReady": true },
+          { "id": "src-hr", "name": "Employee census", "type": "hr", "hash": "sha256:hr", "citationReady": true }
+        ]
+      }
+    },
+    "expect": {
+      "action": "compose_pmi_plan",
+      "artifactPath": "result.pmiPlan",
+      "schema": "PMIPlan.v0.1",
+      "nextSuggestedToolsInclude": ["compose_model_stack", "compose_document_draft", "update_deal_payload"],
+      "takeBackArtifactsInclude": ["PMIPlan", "DealState", "DocumentDraft"],
+      "fields": [
+        { "path": "result.pmiPlan.pmiBoundary.noOperatingAuthority", "equals": true },
+        { "path": "result.pmiPlan.pmiBoundary.noExternalTransmission", "equals": true }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.PACKAGE.001",
+    "title": "Deal package remains portable and content-addressed for agent take-back",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "compose_deal_package",
+    "input": {
+      "payload": {
+        "targetName": "Atlas HVAC Services",
+        "journey": "buy",
+        "dealType": "asset acquisition",
+        "purchasePriceCents": 540000000,
+        "ebitdaCents": 82000000,
+        "sources": [
+          { "id": "src-fin", "name": "TTM financials", "type": "financials", "hash": "sha256:fin", "citationReady": true },
+          { "id": "src-legal", "name": "Draft LOI", "type": "legal", "hash": "sha256:legal", "citationReady": true }
+        ]
+      }
+    },
+    "expect": {
+      "action": "compose_deal_package",
+      "artifactPath": "result.dealPackage",
+      "schema": "DealPackage.v0.1",
+      "nextSuggestedToolsInclude": ["check_completeness"],
+      "takeBackArtifactsInclude": ["DealPackage", "DealState", "DealPlan", "MCPCallHint[]"],
+      "fields": [
+        { "path": "result.dealPackage.packageCid", "includes": "definitive:deal-package:sha256:" },
+        { "path": "result.dealPackage.dealPlan.lifecycle", "includes": "IOI" }
+      ]
+    }
+  }
+]
