@@ -88,6 +88,11 @@ const expectedTools = [
   'verify_package',
   'finalize_deal_package',
   'reopen_deal_package',
+  'generate_permutations',
+  'score_permutation',
+  'set_objective_preference',
+  'compute_best_vehicle',
+  'expand_permutations',
   'resume_deal',
   'compose_lifecycle_trace',
   'prepare_ioi_packet',
@@ -473,6 +478,8 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.toolSchemaMap.verify_package.output.includes('PackageVerification'), 'verify package output maps PackageVerification');
   assert(registry.toolSchemaMap.finalize_deal_package.takeBack.includes('SignedManifest'), 'finalize package take-back maps signed manifest');
   assert(registry.toolSchemaMap.reopen_deal_package.output.includes('ReopenedDealPackage'), 'reopen package output maps reopened package');
+  assert(registry.toolSchemaMap.generate_permutations.output.includes('ParetoFrontier'), 'generate permutations maps ParetoFrontier');
+  assert(registry.toolSchemaMap.compute_best_vehicle.output.includes('BestVehicleBlock'), 'best vehicle output maps BestVehicleBlock');
   assert(registry.toolSchemaMap.resume_deal.takeBack.includes('DealPackage'), 'resume take-back maps DealPackage');
   assert(registry.toolSchemaMap.compose_lifecycle_trace.takeBack.includes('LifecycleTrace'), 'lifecycle trace maps LifecycleTrace');
   assert(registry.toolSchemaMap.prepare_ioi_packet.takeBack.includes('IOIPacket'), 'IOI packet maps IOIPacket');
@@ -986,6 +993,68 @@ await test('ReopenedDealPackage keeps the recursive Deal OS loop alive after han
   assert(reopenedState.parentCids.includes(packageResult.dealPackage.packageCid), 'reopened state preserves package parent');
   assert(reopenRecord.changedPaths.includes('documents'), 'reopen record tracks new document');
   assert(reopenRecord.takeBackArtifacts.includes('ReopenedDealPackage'), 'reopen record is portable');
+});
+
+await test('Permutation engine computes frontiers without recommending a structure', async () => {
+  const payload = {
+    journey: 'buy',
+    targetName: 'Permutation Target',
+    industry: 'industrial services / real estate',
+    jurisdiction: 'US-DE',
+    ebitdaCents: 2_250_000_00,
+    dealStructure: 'asset purchase with seller note',
+    signals: {
+      realEstatePercentOfEv: 35,
+    },
+  };
+  const generated = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'generate_permutations',
+    input: { payload, objectivePreference: 'balanced' },
+    envelope: {},
+  });
+  assertEqual(generated.status, 200, 'generate permutations status');
+  const frontier = generated.body.result.result.paretoFrontier;
+  assertEqual(frontier.schema, 'ParetoFrontier.v0.1', 'pareto frontier schema');
+  assert(frontier.permutations.length > 0, 'frontier returns non-dominated permutations');
+  assert(generated.body.result.result.permutations.some((item: any) => item.structure === 'real_estate_entity_purchase'), 'G30 adds real estate structures');
+
+  const scored = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'score_permutation',
+    input: { payload, structure: 'asset_purchase', objectivePreference: 'buyer_basis' },
+    envelope: {},
+  });
+  assertEqual(scored.status, 200, 'score permutation status');
+  assertEqual(scored.body.result.result.permutation.structure, 'asset_purchase', 'scores requested structure');
+  assert(scored.body.result.result.permutation.modelOutputs[0].outputs.weightedScore >= 0, 'score has deterministic weighted output');
+
+  const preference = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'set_objective_preference',
+    input: { payload, objectivePreference: 'certainty' },
+    envelope: {},
+  });
+  assertEqual(preference.body.result.result.objectivePreference.name, 'certainty', 'objective preference is preserved');
+
+  const best = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'compute_best_vehicle',
+    input: { payload, objectivePreference: 'certainty', includeExpanded: true },
+    envelope: {},
+  });
+  assertEqual(best.status, 200, 'best vehicle status');
+  const bestVehicleBlock = best.body.result.result.bestVehicleBlock;
+  assertEqual(bestVehicleBlock.schema, 'BestVehicleBlock.v0.1', 'best vehicle schema');
+  assert(bestVehicleBlock.selectionBasis.includes('not a recommendation'), 'best vehicle preserves THE LINE');
+
+  const expanded = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'expand_permutations',
+    input: { payload, objectivePreference: 'balanced' },
+    envelope: {},
+  });
+  assert(expanded.body.result.result.permutations.some((item: any) => item.structure === 'asset_purchase_with_earnout'), 'expanded permutations include second-order variants');
 });
 
 await test('Resume deal returns current lifecycle position and next calls', async () => {

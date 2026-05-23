@@ -60,6 +60,11 @@ try {
     assert(body.tools.some((tool: any) => tool.name === 'verify_package'), 'verify_package is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'finalize_deal_package'), 'finalize_deal_package is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'reopen_deal_package'), 'reopen_deal_package is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'generate_permutations'), 'generate_permutations is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'score_permutation'), 'score_permutation is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'set_objective_preference'), 'set_objective_preference is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'compute_best_vehicle'), 'compute_best_vehicle is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'expand_permutations'), 'expand_permutations is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'resume_deal'), 'resume_deal is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_lifecycle_trace'), 'compose_lifecycle_trace is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'prepare_ioi_packet'), 'prepare_ioi_packet is advertised');
@@ -539,6 +544,49 @@ try {
     assert(definitive.applicableMechanics.some((item: any) => item.slotId === 'M160'), 'G29 mechanics included');
     assert(definitive.applicableMechanics.some((item: any) => item.slotId === 'M187'), 'G30 mechanics included');
     assert(definitive.yuliaMechanicsBrief.some((line: string) => line.includes('applicable DEFINITIVE mechanics')), 'Yulia brief included');
+  });
+
+  await test('Authenticated permutation tools compute structure frontier', async () => {
+    const payload = {
+      journey: 'buy',
+      targetName: 'DEFINITIVE Permutation Fixture',
+      industry: 'industrial services / real estate',
+      jurisdiction: 'US-DE',
+      ebitdaCents: 2_100_000_00,
+      dealStructure: 'distressed real estate asset purchase',
+      signals: {
+        cashRunwayDays: 45,
+        securedDebtTradingPriceCents: 55,
+        realEstatePercentOfEv: 42,
+      },
+    };
+    const generated = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'generate_permutations',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-state:read', 'permutation:read'],
+      input: { payload, objectivePreference: 'balanced' },
+    });
+    assertEqual(generated.status, 200, 'generate permutations route status');
+    assertEqual(generated.body.result?.result?.paretoFrontier.schema, 'ParetoFrontier.v0.1', 'permutation frontier schema');
+
+    const best = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'compute_best_vehicle',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-state:read', 'permutation:read'],
+      input: { payload, objectivePreference: 'certainty', includeExpanded: true },
+    });
+    assertEqual(best.status, 200, 'best vehicle route status');
+    const bestVehicleBlock = best.body.result?.result?.bestVehicleBlock;
+    assertEqual(bestVehicleBlock.schema, 'BestVehicleBlock.v0.1', 'best vehicle block schema');
+    assert(bestVehicleBlock.selectionBasis.includes('not a recommendation'), 'best vehicle preserves non-recommendation boundary');
   });
 
   await test('Authenticated compose_deal_package returns portable DealPackage', async () => {

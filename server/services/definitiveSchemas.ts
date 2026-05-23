@@ -1287,6 +1287,31 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     output: ['ReopenedDealPackage', 'DealState', 'ClassificationKey', 'CompletenessReport', 'MissingInputContract', 'MCPCallHint'],
     takeBack: ['ReopenedDealPackage', 'DealState', 'DealStateDiff', 'MCPCallHint'],
   },
+  generate_permutations: {
+    input: ['DealState', 'DealPayload'],
+    output: ['StructurePermutation', 'ParetoFrontier', 'DealState', 'MCPCallHint'],
+    takeBack: ['StructurePermutation', 'ParetoFrontier', 'MCPCallHint'],
+  },
+  score_permutation: {
+    input: ['DealState', 'DealPayload', 'StructurePermutation'],
+    output: ['StructurePermutation', 'ModelOutput', 'DealState', 'MCPCallHint'],
+    takeBack: ['StructurePermutation', 'ModelOutput', 'MCPCallHint'],
+  },
+  set_objective_preference: {
+    input: ['DealState', 'DealPayload'],
+    output: ['ParetoFrontier', 'StructurePermutation', 'DealState', 'MCPCallHint'],
+    takeBack: ['ParetoFrontier', 'StructurePermutation', 'MCPCallHint'],
+  },
+  compute_best_vehicle: {
+    input: ['DealState', 'DealPayload', 'StructurePermutation'],
+    output: ['BestVehicleBlock', 'ParetoFrontier', 'StructurePermutation', 'DealState', 'MCPCallHint'],
+    takeBack: ['BestVehicleBlock', 'ParetoFrontier', 'StructurePermutation', 'MCPCallHint'],
+  },
+  expand_permutations: {
+    input: ['DealState', 'DealPayload'],
+    output: ['StructurePermutation', 'ParetoFrontier', 'DealState', 'MCPCallHint'],
+    takeBack: ['StructurePermutation', 'ParetoFrontier', 'MCPCallHint'],
+  },
   resume_deal: {
     input: ['DealState', 'DealPayload', 'DealPackage'],
     output: ['DealState', 'DealPlan', 'DealPackage', 'CompletenessReport', 'MissingInputContract', 'MCPCallHint'],

@@ -232,6 +232,16 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
       return finalizeDefinitiveDealPackage(input);
     case 'reopen_deal_package':
       return reopenDefinitiveDealPackage(input);
+    case 'generate_permutations':
+      return generateDefinitivePermutations(input);
+    case 'score_permutation':
+      return scoreDefinitivePermutation(input);
+    case 'set_objective_preference':
+      return setDefinitiveObjectivePreference(input);
+    case 'compute_best_vehicle':
+      return computeDefinitiveBestVehicle(input);
+    case 'expand_permutations':
+      return expandDefinitivePermutations(input);
     case 'resume_deal':
       return resumeDefinitiveDeal(input);
     case 'compose_lifecycle_trace':
@@ -272,6 +282,11 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
           'verify_package',
           'finalize_deal_package',
           'reopen_deal_package',
+          'generate_permutations',
+          'score_permutation',
+          'set_objective_preference',
+          'compute_best_vehicle',
+          'expand_permutations',
           'resume_deal',
           'compose_lifecycle_trace',
           'prepare_ioi_packet',
@@ -302,6 +317,11 @@ export function isDefinitiveDealStateTool(toolName: string): boolean {
     'verify_package',
     'finalize_deal_package',
     'reopen_deal_package',
+    'generate_permutations',
+    'score_permutation',
+    'set_objective_preference',
+    'compute_best_vehicle',
+    'expand_permutations',
     'resume_deal',
     'compose_lifecycle_trace',
     'prepare_ioi_packet',
@@ -787,6 +807,169 @@ export function reopenDefinitiveDealPackage(input: Record<string, any>) {
     },
     state_hash_after: state.stateHash,
     completeness_contribution_delta: prior ? state.completenessReport.score - prior.completenessReport.score : state.completenessReport.score,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
+export function generateDefinitivePermutations(input: Record<string, any>) {
+  const state = stateFromInput(input);
+  const objective = normalizeObjectivePreference(input);
+  const permutations = buildStructurePermutations(state, objective, Boolean(input.includeExpanded));
+  const paretoFrontier = buildParetoFrontier(permutations, objective);
+  return {
+    ok: true,
+    action: 'generate_permutations',
+    result: {
+      dealState: state,
+      objectivePreference: objective,
+      permutations,
+      paretoFrontier,
+      next_suggested_calls: [
+        {
+          toolName: 'compute_best_vehicle',
+          priority: 'P1',
+          reason: 'Compute a best point only after the caller states objective preferences.',
+          inputHint: { dealState: { cid: state.cid }, objectivePreference: objective.name },
+        },
+      ],
+      portableTakeBackArtifacts: ['StructurePermutation', 'ParetoFrontier', 'MCPCallHint[]'],
+    },
+    state_hash_after: state.stateHash,
+    completeness_contribution_delta: 0,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
+export function scoreDefinitivePermutation(input: Record<string, any>) {
+  const state = stateFromInput(input);
+  const objective = normalizeObjectivePreference(input);
+  const structure = nullableString(input.structure)
+    || nullableString(input.permutation?.structure)
+    || nullableString(input.permutation?.structureKey)
+    || 'asset_purchase';
+  const permutation = scoreStructurePermutation(state, structure, objective);
+  return {
+    ok: true,
+    action: 'score_permutation',
+    result: {
+      dealState: state,
+      objectivePreference: objective,
+      permutation,
+      next_suggested_calls: [
+        {
+          toolName: 'compute_best_vehicle',
+          priority: 'P2',
+          reason: 'Compare this scored point against the other non-dominated structures when preferences are ready.',
+          inputHint: { dealState: { cid: state.cid }, objectivePreference: objective.name },
+        },
+      ],
+      portableTakeBackArtifacts: ['StructurePermutation', 'ModelOutput', 'MCPCallHint[]'],
+    },
+    state_hash_after: state.stateHash,
+    completeness_contribution_delta: 0,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
+export function setDefinitiveObjectivePreference(input: Record<string, any>) {
+  const state = stateFromInput(input);
+  const objective = normalizeObjectivePreference(input);
+  const permutations = buildStructurePermutations(state, objective, Boolean(input.includeExpanded));
+  const paretoFrontier = buildParetoFrontier(permutations, objective);
+  return {
+    ok: true,
+    action: 'set_objective_preference',
+    result: {
+      dealState: state,
+      objectivePreference: objective,
+      paretoFrontier,
+      next_suggested_calls: [
+        {
+          toolName: 'compute_best_vehicle',
+          priority: 'P1',
+          reason: 'Use the stated preference vector to compute the highest-scoring point without recommending a transaction structure.',
+          inputHint: { dealState: { cid: state.cid }, objectivePreference: objective.name },
+        },
+      ],
+      portableTakeBackArtifacts: ['ParetoFrontier', 'StructurePermutation', 'MCPCallHint[]'],
+    },
+    state_hash_after: state.stateHash,
+    completeness_contribution_delta: 0,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
+export function computeDefinitiveBestVehicle(input: Record<string, any>) {
+  const state = stateFromInput(input);
+  const objective = normalizeObjectivePreference(input);
+  const permutations = Array.isArray(input.permutations)
+    ? input.permutations.map((permutation: any) => scoreStructurePermutation(state, nullableString(permutation.structure) || 'asset_purchase', objective))
+    : buildStructurePermutations(state, objective, Boolean(input.includeExpanded));
+  const paretoFrontier = buildParetoFrontier(permutations, objective);
+  const selected = [...paretoFrontier.permutations].sort((a: any, b: any) => b.weightedScore - a.weightedScore)[0] || permutations[0];
+  const bestVehicleBlock = {
+    schema: 'BestVehicleBlock.v0.1',
+    selectedPermutationId: selected?.permutationId || 'none',
+    selectionBasis:
+      `Computed highest weighted score under caller-stated objectivePreference=${objective.name}. This is not a recommendation; the user and advisors decide whether to rely on it.`,
+    paretoFrontier,
+    unresolvedHandoffs: buildPermutationHandoffs(state, selected?.structure || ''),
+    lineBoundary: LINE_INVARIANT,
+    takeBackArtifacts: ['BestVehicleBlock', 'ParetoFrontier', 'StructurePermutation', 'MCPCallHint[]'],
+  };
+  return {
+    ok: true,
+    action: 'compute_best_vehicle',
+    result: {
+      dealState: state,
+      objectivePreference: objective,
+      bestVehicleBlock,
+      next_suggested_calls: [
+        {
+          toolName: 'compose_deal_package',
+          priority: 'P1',
+          reason: 'Package the computed structure comparison with the current DealState and source trail.',
+          inputHint: { dealState: { cid: state.cid } },
+        },
+      ],
+      portableTakeBackArtifacts: bestVehicleBlock.takeBackArtifacts,
+    },
+    state_hash_after: state.stateHash,
+    completeness_contribution_delta: 0,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
+export function expandDefinitivePermutations(input: Record<string, any>) {
+  const state = stateFromInput(input);
+  const objective = normalizeObjectivePreference(input);
+  const permutations = buildStructurePermutations(state, objective, true);
+  const paretoFrontier = buildParetoFrontier(permutations, objective);
+  return {
+    ok: true,
+    action: 'expand_permutations',
+    result: {
+      dealState: state,
+      objectivePreference: objective,
+      permutations,
+      paretoFrontier,
+      next_suggested_calls: [
+        {
+          toolName: 'score_permutation',
+          priority: 'P1',
+          reason: 'Score any caller-selected expanded structure before using it in a package.',
+          inputHint: { dealState: { cid: state.cid }, objectivePreference: objective.name },
+        },
+      ],
+      portableTakeBackArtifacts: ['StructurePermutation', 'ParetoFrontier', 'MCPCallHint[]'],
+    },
+    state_hash_after: state.stateHash,
+    completeness_contribution_delta: 0,
     methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
     the_line_invariant: LINE_INVARIANT,
   };
@@ -2735,6 +2918,186 @@ function buildPackageMerkleProof(dealPackage: Record<string, any>, auditPacket: 
     rootHash: sha256(stableStringify([leafHash, ...siblings])),
     proof: siblings,
   };
+}
+
+function normalizeObjectivePreference(input: Record<string, any>) {
+  const rawName = nullableString(input.objectivePreference)
+    || nullableString(input.preference)
+    || nullableString(input.objective)
+    || 'balanced';
+  const name = rawName.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+  const presetWeights: Record<string, Record<string, number>> = {
+    balanced: { sellerAfterTax: 0.2, buyerBasis: 0.2, certainty: 0.25, speed: 0.15, simplicity: 0.2 },
+    seller_cash: { sellerAfterTax: 0.4, buyerBasis: 0.1, certainty: 0.2, speed: 0.1, simplicity: 0.2 },
+    buyer_basis: { sellerAfterTax: 0.1, buyerBasis: 0.4, certainty: 0.2, speed: 0.1, simplicity: 0.2 },
+    certainty: { sellerAfterTax: 0.15, buyerBasis: 0.1, certainty: 0.45, speed: 0.15, simplicity: 0.15 },
+    speed: { sellerAfterTax: 0.1, buyerBasis: 0.1, certainty: 0.2, speed: 0.45, simplicity: 0.15 },
+    simplicity: { sellerAfterTax: 0.15, buyerBasis: 0.1, certainty: 0.2, speed: 0.15, simplicity: 0.4 },
+  };
+  const suppliedWeights = isPlainObject(input.weights) ? input.weights as Record<string, unknown> : {};
+  const weights = {
+    ...(presetWeights[name] || presetWeights.balanced),
+    ...Object.fromEntries(Object.entries(suppliedWeights).map(([key, value]) => [key, clampScore(Number(value) * 100) / 100])),
+  };
+  return {
+    schema: 'ObjectivePreference.v0.1',
+    name: presetWeights[name] ? name : 'balanced',
+    weights,
+    lineBoundary: LINE_INVARIANT,
+  };
+}
+
+function buildStructurePermutations(state: DefinitiveDealState, objective: Record<string, any>, expanded: boolean) {
+  const structures = new Set<string>();
+  const journey = state.classificationKey.journey;
+  if (journey === 'raise') {
+    ['senior_debt', 'unitranche', 'minority_growth_equity', 'preferred_equity'].forEach(item => structures.add(item));
+  } else if (journey === 'pmi') {
+    ['integration_base_case', 'value_creation_plan', 'add_on_acquisition', 'margin_expansion'].forEach(item => structures.add(item));
+  } else {
+    ['asset_purchase', 'stock_purchase', 'forward_merger', 'seller_note', 'earnout', 'rollover_equity'].forEach(item => structures.add(item));
+  }
+  if (state.classificationKey.triggeredOverlayGates.includes('G28')) {
+    ['section_363_sale', 'out_of_court_exchange', 'article_9_foreclosure'].forEach(item => structures.add(item));
+  }
+  if (state.classificationKey.triggeredOverlayGates.includes('G29')) {
+    ['debt_amendment', 'recapitalization', 'exchange_offer'].forEach(item => structures.add(item));
+  }
+  if (state.classificationKey.triggeredOverlayGates.includes('G30') || state.classificationKey.assetClass === 'real_estate') {
+    ['real_estate_entity_purchase', 'opco_propco_split', 'sale_leaseback'].forEach(item => structures.add(item));
+  }
+  if (expanded) {
+    ['asset_purchase_with_earnout', 'stock_purchase_with_338_election', 'rollover_plus_seller_note'].forEach(item => structures.add(item));
+  }
+  return [...structures].map(structure => scoreStructurePermutation(state, structure, objective));
+}
+
+function scoreStructurePermutation(state: DefinitiveDealState, structure: string, objective: Record<string, any>) {
+  const metrics = scoreStructureMetrics(state, structure);
+  const weightedScore = weightedPermutationScore(metrics, objective.weights || {});
+  const modelOutput = {
+    schema: 'ModelOutput.v0.1',
+    modelId: modelForStructure(structure),
+    modelName: 'DEFINITIVE structure permutation scorer',
+    methodologyVersion: DEFINITIVE_METHODOLOGY_VERSION,
+    inputHash: outputHashFor({ stateHash: state.stateHash, structure, objective }),
+    outputHash: outputHashFor({ metrics, weightedScore, structure }),
+    inputs: {
+      structure,
+      objectivePreference: objective.name,
+      stateHash: state.stateHash,
+      classificationKey: state.classificationKey,
+    },
+    outputs: {
+      ...metrics,
+      weightedScore,
+      scoreScale: '0-100',
+    },
+    assumptions: {
+      schema: 'AssumptionLog.v0.1',
+      assumptions: [
+        { key: 'preference_vector', value: objective.name, source: 'caller_or_default' },
+        { key: 'structure', value: structure, source: 'generated_permutation' },
+      ],
+    },
+    citations: [],
+    lineBoundary: LINE_INVARIANT,
+  };
+  return {
+    permutationId: `perm_${sha256(stableStringify({ stateHash: state.stateHash, structure, objective })).slice(0, 16)}`,
+    structure,
+    modelOutputs: [modelOutput],
+    constraints: buildPermutationConstraints(state, structure),
+    handoffs: buildPermutationHandoffs(state, structure),
+    metrics,
+    weightedScore,
+    lineBoundary: LINE_INVARIANT,
+  };
+}
+
+function scoreStructureMetrics(state: DefinitiveDealState, structure: string) {
+  const isAsset = structure.includes('asset');
+  const isStock = structure.includes('stock');
+  const isDebt = structure.includes('debt') || structure.includes('note') || structure.includes('unitranche');
+  const isDistressed = structure.includes('363') || structure.includes('exchange') || structure.includes('foreclosure');
+  const isRealEstate = structure.includes('real_estate') || structure.includes('propco') || structure.includes('leaseback');
+  const hasG28 = state.classificationKey.triggeredOverlayGates.includes('G28');
+  const hasG30 = state.classificationKey.triggeredOverlayGates.includes('G30');
+  return {
+    sellerAfterTax: clampScore(65 + (isStock ? 12 : 0) - (isAsset ? 8 : 0) - (isDistressed ? 10 : 0)),
+    buyerBasis: clampScore(55 + (isAsset ? 18 : 0) + (structure.includes('338') ? 12 : 0) - (isStock ? 8 : 0)),
+    certainty: clampScore(70 - (isDistressed ? 20 : 0) - (hasG28 ? 10 : 0) - (isRealEstate && hasG30 ? 6 : 0)),
+    speed: clampScore(68 - (isDistressed ? 14 : 0) - (isRealEstate ? 8 : 0) + (isDebt ? 5 : 0)),
+    simplicity: clampScore(72 - (structure.includes('earnout') ? 12 : 0) - (structure.includes('rollover') ? 8 : 0) - (isDistressed ? 16 : 0)),
+  };
+}
+
+function weightedPermutationScore(metrics: Record<string, number>, weights: Record<string, number>) {
+  const totalWeight = Object.values(weights).reduce((sum, weight) => sum + Number(weight || 0), 0) || 1;
+  const score = Object.entries(weights).reduce((sum, [key, weight]) => {
+    return sum + (metrics[key] || 0) * Number(weight || 0);
+  }, 0) / totalWeight;
+  return Math.round(score * 10) / 10;
+}
+
+function buildParetoFrontier(permutations: Array<Record<string, any>>, objective: Record<string, any>) {
+  const dominatedPermutationIds = permutations
+    .filter(candidate => permutations.some(other => dominatesPermutation(other.metrics, candidate.metrics)))
+    .map(candidate => candidate.permutationId);
+  return {
+    schema: 'ParetoFrontier.v0.1',
+    objectivePreference: objective.name,
+    permutations: permutations
+      .filter(permutation => !dominatedPermutationIds.includes(permutation.permutationId))
+      .sort((a, b) => b.weightedScore - a.weightedScore),
+    dominatedPermutationIds,
+    lineBoundary: LINE_INVARIANT,
+  };
+}
+
+function dominatesPermutation(a: Record<string, number>, b: Record<string, number>) {
+  const keys = ['sellerAfterTax', 'buyerBasis', 'certainty', 'speed', 'simplicity'];
+  return keys.every(key => (a[key] || 0) >= (b[key] || 0)) && keys.some(key => (a[key] || 0) > (b[key] || 0));
+}
+
+function buildPermutationConstraints(state: DefinitiveDealState, structure: string) {
+  const constraints: string[] = [];
+  if (structure.includes('338')) constraints.push('Requires §338(h)(10) or §336(e) eligibility and tax review.');
+  if (structure.includes('363')) constraints.push('Requires bankruptcy court process; DEFINITIVE computes mechanics only.');
+  if (structure.includes('exchange')) constraints.push('Requires securities/counsel review; DEFINITIVE computes participation and holdout math only.');
+  if (structure.includes('real_estate') || structure.includes('propco') || structure.includes('leaseback')) constraints.push('Requires G30 real estate overlay inputs.');
+  if (state.completenessReport.missing.length > 0) constraints.push('Missing inputs remain in the MissingInputContract.');
+  return constraints;
+}
+
+function buildPermutationHandoffs(state: DefinitiveDealState, structure: string) {
+  const handoffs: Array<Record<string, any>> = [];
+  if (structure.includes('338') || structure.includes('asset') || structure.includes('stock')) {
+    handoffs.push({ role: 'tax_counsel_or_cpa', reason: 'Tax position, election availability, and opinion remain outside THE LINE.' });
+  }
+  if (structure.includes('363') || structure.includes('exchange') || structure.includes('foreclosure')) {
+    handoffs.push({ role: 'deal_counsel', reason: 'Court process, contract interpretation, and execution risk remain outside THE LINE.' });
+  }
+  if (state.classificationKey.triggeredOverlayGates.includes('G30')) {
+    handoffs.push({ role: 'real_estate_specialist', reason: 'Appraisal, title, environmental, and zoning opinions are pass-through specialist work.' });
+  }
+  return handoffs;
+}
+
+function modelForStructure(structure: string) {
+  if (structure.includes('363')) return 'M151';
+  if (structure.includes('exchange')) return 'M160';
+  if (structure.includes('real_estate') || structure.includes('propco') || structure.includes('leaseback')) return 'M187';
+  if (structure.includes('338')) return 'M201';
+  if (structure.includes('asset')) return 'M139';
+  if (structure.includes('earnout')) return 'M213';
+  if (structure.includes('debt') || structure.includes('note') || structure.includes('unitranche')) return 'M184';
+  return 'M200';
+}
+
+function clampScore(value: number) {
+  if (!Number.isFinite(value)) return 0;
+  return Math.max(0, Math.min(100, Math.round(value * 10) / 10));
 }
 
 function requiredDataRoomCategories(state: DefinitiveDealState): string[] {
