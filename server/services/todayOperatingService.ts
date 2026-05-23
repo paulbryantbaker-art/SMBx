@@ -146,15 +146,25 @@ export interface TodayDefinitiveDealState {
   readinessLevel: string;
   score: number;
   nextGate: string;
+  lifecyclePosition: string;
   missingCount: number;
   blockerCount: number;
   sourceCount: number;
   packetTypes: string[];
+  portableArtifacts: string[];
   latestPacketType?: string;
   latestPacketId?: string;
   latestPacketAt?: string;
   nextSuggestedTool?: string;
+  nextSuggestedCalls: TodayDefinitiveNextCall[];
   updatedAt: string;
+}
+
+export interface TodayDefinitiveNextCall {
+  toolName: string;
+  label: string;
+  priority: 'P0' | 'P1' | 'P2';
+  reason: string;
 }
 
 export interface TodayFileReviewItem {
@@ -766,22 +776,28 @@ function buildDefinitiveStateMap(
     const dealPackets = packetsByDeal.get(state.deal_id) ?? [];
     const latestPacket = dealPackets[0];
     const packetTypes = Array.from(new Set(dealPackets.map(packet => packet.packet_type).filter(Boolean))).slice(0, 5);
-    const nextSuggestedTool = firstSuggestedTool(dealPackets)
+    const readinessLevel = String(completeness.level || 'DRL0_UNCLASSIFIED');
+    const nextSuggestedCalls = collectNextSuggestedCalls(dealPackets, missingContract);
+    const nextSuggestedTool = nextSuggestedCalls[0]?.toolName
       || firstSuggestedToolFromContract(missingContract);
+    const portableArtifacts = collectPortableArtifacts(dealPackets);
 
     map.set(String(state.deal_id), {
       stateCid: state.state_cid,
-      readinessLevel: String(completeness.level || 'DRL0_UNCLASSIFIED'),
+      readinessLevel,
       score: clamp(Number(completeness.score || 0), 0, 100),
       nextGate: String(completeness.nextGate || 'information'),
+      lifecyclePosition: lifecyclePositionForLevel(readinessLevel, String(completeness.nextGate || 'information')),
       missingCount: missing,
       blockerCount: blockers,
       sourceCount: safeArray(state.source_index).length,
       packetTypes,
+      portableArtifacts,
       latestPacketType: latestPacket?.packet_type,
       latestPacketId: latestPacket?.packet_id || undefined,
       latestPacketAt: latestPacket?.created_at,
       nextSuggestedTool,
+      nextSuggestedCalls,
       updatedAt: toIso(state.created_at),
     });
   });
@@ -851,15 +867,6 @@ function definitiveNextAction(definitive?: TodayDefinitiveDealState): string | n
   return 'Resume DealState loop';
 }
 
-function firstSuggestedTool(packets: DefinitiveDealPacketRow[]): string | undefined {
-  for (const packet of packets) {
-    const calls = safeArray(packet.next_suggested_calls);
-    const tool = firstToolNameFromCalls(calls);
-    if (tool) return tool;
-  }
-  return undefined;
-}
-
 function firstSuggestedToolFromContract(contract: Record<string, any>): string | undefined {
   const tool = firstToolNameFromCalls(safeArray(contract.next_suggested_calls));
   if (tool) return tool;
@@ -874,6 +881,51 @@ function firstSuggestedToolFromContract(contract: Record<string, any>): string |
 function firstToolNameFromCalls(calls: any[]): string | undefined {
   const call = calls.find(item => typeof item?.toolName === 'string' && item.toolName.trim());
   return call?.toolName;
+}
+
+function collectNextSuggestedCalls(
+  packets: DefinitiveDealPacketRow[],
+  missingContract: Record<string, any>,
+): TodayDefinitiveNextCall[] {
+  const calls = [
+    ...packets.flatMap(packet => safeArray(packet.next_suggested_calls)),
+    ...safeArray(missingContract.next_suggested_calls),
+  ];
+  const seen = new Set<string>();
+  const normalized: TodayDefinitiveNextCall[] = [];
+  for (const call of calls) {
+    const toolName = String(call?.toolName || '').trim();
+    if (!toolName || seen.has(toolName)) continue;
+    seen.add(toolName);
+    const priority = normalizePriority(call?.priority);
+    normalized.push({
+      toolName,
+      label: labelFromSlug(toolName),
+      priority,
+      reason: String(call?.reason || 'Continue the DealState loop with the next agent-callable step.'),
+    });
+  }
+  return normalized.slice(0, 4);
+}
+
+function collectPortableArtifacts(packets: DefinitiveDealPacketRow[]): string[] {
+  return Array.from(new Set(
+    packets.flatMap(packet => safeArray(packet.take_back_artifacts).map(item => String(item || '').trim()).filter(Boolean)),
+  )).slice(0, 6);
+}
+
+function lifecyclePositionForLevel(level: string, nextGate: string): string {
+  if (/DRL0/.test(level)) return 'Information intake';
+  if (/DRL1/.test(level)) return 'Classified; build IOI facts';
+  if (/DRL2/.test(level)) return 'IOI and model grounding';
+  if (/DRL3/.test(level)) return 'LOI architecture and diligence setup';
+  if (/DRL4/.test(level)) return 'Diligence, model, negotiation, and close loop';
+  return `Next gate: ${nextGate}`;
+}
+
+function normalizePriority(value: any): 'P0' | 'P1' | 'P2' {
+  const normalized = String(value || '').trim().toUpperCase();
+  return normalized === 'P0' || normalized === 'P2' ? normalized : 'P1';
 }
 
 function dedupeDeals(deals: DealRow[]): DealRow[] {
@@ -893,7 +945,16 @@ function hashSnapshot(snapshot: TodaySnapshot): string {
     studio: snapshot.studioBooks.map(item => [item.id, item.updated_at, safeArray(item.slides).length, safeArray(item.model_outputs).length]),
     memory: snapshot.firmMemory.map(item => [item.id, item.updated_at, item.memory_type, item.label]),
     definitiveStates: snapshot.definitiveStates.map(item => [item.id, item.deal_id, item.state_cid, item.state_hash, item.created_at]),
-    definitivePackets: snapshot.definitivePackets.map(item => [item.id, item.deal_id, item.packet_type, item.packet_id, item.created_at]),
+    definitivePackets: snapshot.definitivePackets.map(item => [
+      item.id,
+      item.deal_id,
+      item.packet_type,
+      item.packet_id,
+      item.created_at,
+      safeArray(item.next_suggested_calls).map(call => [call?.toolName, call?.priority, call?.reason]),
+      safeArray(item.take_back_artifacts),
+    ]),
+    shape: 'today-operating-dealos-next-calls-v1',
   };
   return crypto.createHash('sha256').update(JSON.stringify(basis)).digest('hex');
 }

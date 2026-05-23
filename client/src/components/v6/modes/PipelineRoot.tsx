@@ -347,22 +347,26 @@ function GateCountdownStrip({
         </button>
       </div>
       <div style={P.gateRows}>
-        {items.slice(0, 3).map(item => (
-          <button
-            key={`${item.dealId}-${item.gateId}`}
-            type="button"
-            style={P.gateRow}
-            onClick={() => openTab({ kind: "deal", id: item.dealId, title: item.title })}
-          >
-            <span style={P.gateBadge}>{item.gateId}</span>
-            <span style={P.gateText}>
-              <strong>{item.title}</strong>
-              <span>{item.gateName} · {item.nextAction}</span>
-            </span>
-            <span style={P.gateMeta}>{item.definitive ? `${shortReadiness(item.definitive.readinessLevel)} · ${item.definitive.missingCount} gaps` : item.blockers[0] || "No blocker surfaced"}</span>
-            <span style={P.chevron} aria-hidden="true">›</span>
-          </button>
-        ))}
+        {items.slice(0, 3).map(item => {
+          const nextCall = firstNextCall(item.definitive);
+          return (
+            <button
+              key={`${item.dealId}-${item.gateId}`}
+              type="button"
+              style={P.gateRow}
+              onClick={() => openTab({ kind: "deal", id: item.dealId, title: item.title })}
+            >
+              <span style={P.gateBadge}>{item.gateId}</span>
+              <span style={P.gateText}>
+                <strong>{item.title}</strong>
+                <span>{item.gateName} · {item.nextAction}</span>
+                {nextCall && <span style={P.gateCall}>Next agent call: {nextCall.label}</span>}
+              </span>
+              <span style={P.gateMeta}>{item.definitive ? `${shortReadiness(item.definitive.readinessLevel)} · ${item.definitive.missingCount} gaps` : item.blockers[0] || "No blocker surfaced"}</span>
+              <span style={P.chevron} aria-hidden="true">›</span>
+            </button>
+          );
+        })}
       </div>
     </section>
   );
@@ -421,6 +425,8 @@ function OpportunityCard({
   onAsk: () => void;
 }) {
   const tone = verdictTone(deal.verdict);
+  const nextCall = firstNextCall(deal.definitive);
+  const artifacts = deal.definitive?.portableArtifacts || [];
 
   return (
     <article style={P.opportunityCard}>
@@ -446,7 +452,19 @@ function OpportunityCard({
         {deal.definitive && (
           <span style={P.definitiveLine}>
             <strong>{shortReadiness(deal.definitive.readinessLevel)} · {deal.definitive.score}%</strong>
+            <span>{deal.definitive.lifecyclePosition || "DealState loop"}</span>
             <span>{deal.definitive.packetTypes.length || 0} packets · {deal.definitive.sourceCount} sources</span>
+          </span>
+        )}
+        {nextCall && (
+          <span style={P.agentCallLine}>
+            <strong>Next agent call</strong>
+            <span>{nextCall.label} · {nextCall.reason}</span>
+          </span>
+        )}
+        {artifacts.length > 0 && (
+          <span style={P.artifactLine}>
+            {artifacts.slice(0, 3).map(item => <span key={item} style={P.artifactPill}>{item}</span>)}
           </span>
         )}
         <span style={P.opportunityNote}>{deal.note}</span>
@@ -614,6 +632,22 @@ function inferLeague(d: HomeDeal): string {
 
 function shortReadiness(level: string): string {
   return level.match(/DRL\d+/)?.[0] || "DRL";
+}
+
+function firstNextCall(definitive?: TodayDefinitiveDealState): { label: string; reason: string } | null {
+  const call = definitive?.nextSuggestedCalls?.[0];
+  if (call?.label) return { label: call.label, reason: call.reason || "Continue the DealState loop." };
+  if (definitive?.nextSuggestedTool) {
+    return { label: labelFromSlug(definitive.nextSuggestedTool), reason: "Continue the DealState loop." };
+  }
+  return null;
+}
+
+function labelFromSlug(input: string): string {
+  return String(input || "next call")
+    .replace(/[-_]+/g, " ")
+    .replace(/\.+v\d+$/i, "")
+    .replace(/\b\w/g, char => char.toUpperCase());
 }
 
 function journeyFromHomeDeal(d: HomeDeal): string {
@@ -811,6 +845,11 @@ const P: Record<string, CSSProperties> = {
     color: "var(--m-on-surface)",
     fontSize: 14,
     lineHeight: 1.25,
+  },
+  gateCall: {
+    color: "var(--m-on-primary-container)",
+    fontSize: 11.5,
+    fontWeight: 820,
   },
   gateMeta: {
     justifySelf: "end",
@@ -1031,10 +1070,8 @@ const P: Record<string, CSSProperties> = {
     lineHeight: 1,
   },
   definitiveLine: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 8,
+    display: "grid",
+    gap: 4,
     padding: "8px 9px",
     borderRadius: 12,
     background: "rgba(236,243,255,.62)",
@@ -1042,6 +1079,31 @@ const P: Record<string, CSSProperties> = {
     color: "var(--m-on-primary-container)",
     fontSize: 10.5,
     lineHeight: 1.15,
+  },
+  agentCallLine: {
+    display: "grid",
+    gap: 4,
+    padding: "9px 10px",
+    borderRadius: 12,
+    background: "linear-gradient(180deg, rgba(255,255,255,.78), rgba(235,244,255,.58))",
+    border: "1px solid rgba(153,176,209,.34)",
+    color: "var(--m-on-surface)",
+    fontSize: 10.5,
+    lineHeight: 1.25,
+  },
+  artifactLine: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 5,
+    color: "var(--m-on-surface-mid)",
+    fontSize: 10,
+    lineHeight: 1,
+  },
+  artifactPill: {
+    padding: "4px 6px",
+    borderRadius: 999,
+    background: "rgba(236,243,255,.72)",
+    border: "1px solid rgba(153,176,209,.26)",
   },
   opportunityNote: {
     color: "var(--m-on-surface-var)",

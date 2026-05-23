@@ -53,15 +53,25 @@ export interface TodayDefinitiveDealState {
   readinessLevel: string;
   score: number;
   nextGate: string;
+  lifecyclePosition: string;
   missingCount: number;
   blockerCount: number;
   sourceCount: number;
   packetTypes: string[];
+  portableArtifacts: string[];
   latestPacketType?: string;
   latestPacketId?: string;
   latestPacketAt?: string;
   nextSuggestedTool?: string;
+  nextSuggestedCalls: TodayDefinitiveNextCall[];
   updatedAt: string;
+}
+
+export interface TodayDefinitiveNextCall {
+  toolName: string;
+  label: string;
+  priority: "P0" | "P1" | "P2";
+  reason: string;
 }
 
 export interface TodayFileReviewItem {

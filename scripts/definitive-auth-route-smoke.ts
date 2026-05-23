@@ -348,10 +348,14 @@ try {
     assert(pulse?.definitive, 'deal pulse includes definitive state');
     assertEqual(pulse.definitive.latestPacketType, 'IOIPacket.v0.1', 'deal pulse latest packet type');
     assert(pulse.definitive.packetTypes.includes('IOIPacket.v0.1'), 'deal pulse packet type list includes IOI');
+    assert(pulse.definitive.lifecyclePosition, 'deal pulse exposes lifecycle position');
+    assert(pulse.definitive.nextSuggestedCalls?.some((call: any) => call.toolName === 'compose_model_stack'), 'deal pulse exposes next agent calls');
+    assert(pulse.definitive.portableArtifacts?.includes('IOIPacket'), 'deal pulse exposes portable take-back artifacts');
 
     const gate = brief.gateCountdown.find((item: any) => item.dealId === String(fixture.dealId));
     assert(gate?.definitive, 'gate countdown includes definitive state');
     assertEqual(gate.definitive.stateCid, pulse.definitive.stateCid, 'gate and pulse share state cid');
+    assert(gate.definitive.nextSuggestedCalls?.some((call: any) => call.label === 'Compose Model Stack'), 'gate countdown exposes next-call labels');
 
     const packetFile = brief.filesNeedingReview.find((item: any) => item.id?.startsWith('definitive-packet-'));
     assert(packetFile, 'files needing review includes a DEFINITIVE packet row');

@@ -630,7 +630,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
                       <span style={T.dealMeta}>{deal.meta}</span>
                       {deal.definitive && (
                         <span style={T.dealDefinitiveMeta}>
-                          {shortReadiness(deal.definitive.readinessLevel)} · {deal.definitive.score}% · {deal.definitive.packetTypes.length} packets
+                          {shortReadiness(deal.definitive.readinessLevel)} · {deal.definitive.score}% · {deal.definitive.lifecyclePosition || "DealState loop"} · {deal.definitive.packetTypes.length} packets
                         </span>
                       )}
                     </span>
@@ -802,6 +802,11 @@ function GateCountdownCard({
                 {item.gateId} · {item.gateName} · {item.nextAction}
                 {item.definitive ? ` · ${shortReadiness(item.definitive.readinessLevel)} ${item.definitive.score}%` : ""}
               </span>
+              {item.definitive?.nextSuggestedCalls?.[0] && (
+                <span style={T.operatingNextCall}>
+                  Next agent call: {item.definitive.nextSuggestedCalls[0].label}
+                </span>
+              )}
             </span>
           </button>
         ))}
@@ -1461,6 +1466,11 @@ const T: Record<string, CSSProperties> = {
     color: "#6B7486",
     fontSize: 12.5,
     lineHeight: 1.35,
+  },
+  operatingNextCall: {
+    color: "var(--m-on-primary-container)",
+    fontSize: 11,
+    fontWeight: 850,
   },
   memoryLine: {
     display: "flex",
