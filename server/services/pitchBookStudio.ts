@@ -12,6 +12,7 @@ import { createDefinitiveHash } from './definitiveAuditPacket.js';
 import { validateCitationTags } from './citationValidator.js';
 import { resolveDefinitiveMandateContext } from './definitiveMandateService.js';
 import { executeV19Model, persistV19ModelExecution, type V19ModelExecution } from './v19ModelRuntime.js';
+import type { V19StudioReadiness } from './v19ReadinessService.js';
 
 export type PitchBookFormat =
   | 'buyer-pitch-book'
@@ -383,18 +384,24 @@ export async function recordPitchBookExport(
   bookId: number,
   format: 'pptx' | 'pdf',
   buffer: Buffer,
-): Promise<{ exportId: number; outputHash: string }> {
+  options: {
+    strict?: boolean;
+    readiness?: V19StudioReadiness | null;
+  } = {},
+): Promise<{ exportId: number; outputHash: string; auditPacketHash: string }> {
   const book = await getPitchBook(userId, bookId);
   if (!book) throw new Error('Pitch book not found');
   const outputHash = createHash('sha256').update(buffer).digest('hex');
   const citationValidation = await validateCitationTags(collectBookCitationTags(book));
-  const warnings = buildExportWarnings(book, citationValidation);
+  const warnings = buildExportWarnings(book, citationValidation, options.readiness || null);
   const auditPacket = buildStudioExportAuditPacket({
     book,
     format,
     outputHash,
     citationValidation,
     warnings,
+    strict: Boolean(options.strict),
+    readiness: options.readiness || null,
   });
   const [row] = await sql`
     INSERT INTO studio_exports (
@@ -434,7 +441,11 @@ export async function recordPitchBookExport(
     citationsValidated: citationValidation,
     warnings,
   });
-  return { exportId: Number(row.id), outputHash };
+  return {
+    exportId: Number(row.id),
+    outputHash,
+    auditPacketHash: String(auditPacket.auditPacketHash || ''),
+  };
 }
 
 export async function getPitchBookExportAuditPacket(
@@ -488,6 +499,8 @@ export function buildStudioExportAuditPacket(input: {
   outputHash: string;
   citationValidation: Record<string, any>;
   warnings: string[];
+  strict?: boolean;
+  readiness?: V19StudioReadiness | null;
 }): Record<string, any> {
   const sourceManifest = input.book.sources.map(source => ({
     id: source.id ?? null,
@@ -547,9 +560,19 @@ export function buildStudioExportAuditPacket(input: {
   };
   const inputHash = createDefinitiveHash(inputManifest);
   const status = input.warnings.length ? 'ready_with_warnings' : 'ready';
+  const readiness = formatStudioReadinessForAudit(input.readiness || null);
   const packetCore = {
     schemaVersion: 'studio-export-audit-v1',
     ...definitiveVersionPayload(),
+    line: 'compute_only',
+    exportBoundary: {
+      strictMode: Boolean(input.strict),
+      noCounterpartyTransmission: true,
+      noLegalOrTaxOpinion: true,
+      noRecommendationOrNegotiation: true,
+      userControlledDelivery: true,
+      invariant: 'Studio export is software work product. The user controls external use; counsel, advisors, specialists, boards, LPs, or courts make professional determinations.',
+    },
     book: {
       id: input.book.id,
       dealId: input.book.dealId,
@@ -565,6 +588,7 @@ export function buildStudioExportAuditPacket(input: {
       outputHash: input.outputHash,
       inputHash,
     },
+    readiness,
     counts: {
       slides: input.book.slides.length,
       sources: input.book.sources.length,
@@ -1032,8 +1056,12 @@ function collectBookCitationTags(book: PitchBookRecord): string[] {
   ])] as string[];
 }
 
-function buildExportWarnings(book: PitchBookRecord, citationValidation: { missing: string[] }): string[] {
-  return [
+function buildExportWarnings(
+  book: PitchBookRecord,
+  citationValidation: { missing: string[] },
+  readiness: V19StudioReadiness | null,
+): string[] {
+  return [...new Set([
     ...book.slides
       .filter(slide => slide.warningState !== 'clean')
       .map(slide => `${slide.title}: ${slide.warningState}`),
@@ -1041,7 +1069,44 @@ function buildExportWarnings(book: PitchBookRecord, citationValidation: { missin
       .filter(output => output.status !== 'complete')
       .map(output => `${output.modelId}: ${output.status}`),
     ...citationValidation.missing.map(tag => `Missing citation: ${tag}`),
-  ];
+    ...(readiness?.issues || []).map(issue => `${issue.code}: ${issue.detail}`),
+  ])];
+}
+
+function formatStudioReadinessForAudit(readiness: V19StudioReadiness | null) {
+  if (!readiness) {
+    return {
+      provided: false,
+      readyForInternalDraft: null,
+      readyForExternalDelivery: null,
+      blockerCount: null,
+      warningCount: null,
+      checkedAt: null,
+      issues: [],
+      resourceUris: [],
+    };
+  }
+  const issues = readiness.issues.map(issue => ({
+    code: issue.code,
+    severity: issue.severity,
+    label: issue.label,
+    detail: issue.detail,
+    resourceUri: issue.resourceUri || null,
+  }));
+  return {
+    provided: true,
+    readyForInternalDraft: readiness.readyForInternalDraft,
+    readyForExternalDelivery: readiness.readyForExternalDelivery,
+    slideGaps: readiness.slideGaps,
+    sourceGaps: readiness.sourceGaps,
+    modelGaps: readiness.modelGaps,
+    uncheckedClaims: readiness.uncheckedClaims,
+    blockerCount: issues.filter(issue => issue.severity === 'blocker').length,
+    warningCount: issues.filter(issue => issue.severity === 'warning').length,
+    checkedAt: readiness.checkedAt,
+    resourceUris: readiness.resourceUris,
+    issues,
+  };
 }
 
 function assumptionValue(assumptions: Array<Record<string, any>>, key: string): string | null {

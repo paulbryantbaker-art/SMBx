@@ -832,6 +832,11 @@ try {
       assertEqual(body.specVersion, DEFINITIVE_SPEC_VERSION, 'studio export spec');
       assertEqual(body.methodologyUri, DEFINITIVE_METHODOLOGY_URI, 'studio export methodology uri');
       assertEqual(body.auditPacket.schemaVersion, 'studio-export-audit-v1', 'studio audit packet schema');
+      assertEqual(body.auditPacket.line, 'compute_only', 'studio audit THE LINE marker');
+      assertEqual(body.auditPacket.exportBoundary.noCounterpartyTransmission, true, 'studio audit blocks automatic counterparty transmission');
+      assertEqual(body.auditPacket.exportBoundary.userControlledDelivery, true, 'studio audit marks user-controlled delivery');
+      assertEqual(body.auditPacket.readiness.provided, true, 'studio audit packet includes readiness decision');
+      assertEqual(body.auditPacket.readiness.readyForExternalDelivery, true, 'studio audit readiness status');
       assertEqual(body.auditPacket.export.outputHash, 'fixture-studio-output-hash', 'studio audit output hash');
       assertEqual(body.auditPacket.book.dealId, fixture.dealId, 'studio audit deal id');
     }
@@ -1201,6 +1206,15 @@ async function ensureStudioExportFixture(userId: number, dealId: number): Promis
     specUri: DEFINITIVE_SPEC_URI,
     methodologyVersion: DEFINITIVE_METHODOLOGY_VERSION,
     methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+    line: 'compute_only',
+    exportBoundary: {
+      strictMode: true,
+      noCounterpartyTransmission: true,
+      noLegalOrTaxOpinion: true,
+      noRecommendationOrNegotiation: true,
+      userControlledDelivery: true,
+      invariant: 'Studio export is software work product. The user controls external use; counsel, advisors, specialists, boards, LPs, or courts make professional determinations.',
+    },
     book: {
       id: bookId,
       dealId,
@@ -1215,6 +1229,20 @@ async function ensureStudioExportFixture(userId: number, dealId: number): Promis
       status: 'ready',
       outputHash: 'fixture-studio-output-hash',
       inputHash: 'fixture-studio-input-hash',
+    },
+    readiness: {
+      provided: true,
+      readyForInternalDraft: true,
+      readyForExternalDelivery: true,
+      slideGaps: 0,
+      sourceGaps: 0,
+      modelGaps: 0,
+      uncheckedClaims: 0,
+      blockerCount: 0,
+      warningCount: 0,
+      checkedAt: '2026-05-21T00:00:00.000Z',
+      resourceUris: [`studio://book/${bookId}`],
+      issues: [],
     },
     counts: {
       slides: 1,

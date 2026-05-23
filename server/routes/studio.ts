@@ -293,7 +293,10 @@ studioRouter.get('/studio/pitch-books/:bookId/export/:format', async (req, res) 
     const buffer = format === 'pptx'
       ? await exportPitchBookToPPTX(book)
       : await exportToPDF(content, book.title);
-    const exportRecord = await recordPitchBookExport(userId, book.id, format, buffer);
+    const exportRecord = await recordPitchBookExport(userId, book.id, format, buffer, {
+      strict,
+      readiness,
+    });
     await recordV19UsageEvent({
       userId,
       eventType: 'studio_export',
@@ -321,6 +324,7 @@ studioRouter.get('/studio/pitch-books/:bookId/export/:format', async (req, res) 
       'Cache-Control': 'no-store',
       'X-SMBX-Export-Id': String(exportRecord.exportId),
       'X-SMBX-Output-Hash': exportRecord.outputHash,
+      'X-SMBX-Audit-Packet-Hash': exportRecord.auditPacketHash,
       'X-SMBX-V19-Ready': readiness.readyForExternalDelivery ? 'true' : 'false',
       'X-SMBX-V19-Warnings': String(readiness.issues.length),
     });
