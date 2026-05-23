@@ -7,7 +7,7 @@ import {
 
 export const DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT = 202;
 export const DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT = 60;
-export const DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT = 52;
+export const DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT = 58;
 export const DEFINITIVE_CONFORMANCE_ROUTE_TRIGGER_CASE_COUNT = 30;
 export const DEFINITIVE_CONFORMANCE_MODEL_STACK_CASE_COUNT = 29;
 export const DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT =
@@ -89,6 +89,8 @@ export function buildDefinitiveConformanceStatus() {
       'surface guidance consistency',
       'Authority Register seed-plan coverage',
       'terminal substrate architecture primitives',
+      'terminal substrate schema registry contracts',
+      'CompletenessSpec definition-of-done contract',
       'Deal OS non-rejection agent lifecycle',
       'Deal OS iterative work surfaces and portable agent handoffs',
       'agent discoverability layers and marketplace metadata doctrine',

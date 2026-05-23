@@ -41,6 +41,8 @@ import { buildDefinitiveSpecManifest } from '../server/services/definitiveSpecMa
 import { getDefinitiveAuthoritySeedPlan } from '../server/services/definitiveAuthoritySeedPlan.js';
 import { getDefinitiveSubstrateArchitecturePlan } from '../server/services/definitiveSubstrateArchitecturePlan.js';
 import { listDefinitiveMcpTools } from '../server/services/definitiveMcp.js';
+import { getDefinitiveDefinitionOfDone } from '../server/services/definitiveDealState.js';
+import { buildDefinitiveSchemaRegistry } from '../server/services/definitiveSchemas.js';
 import {
   evaluateDefinitiveStackOverlays,
   normalizeDefinitiveStackSignals,
@@ -96,7 +98,9 @@ type PromptMetaCaseKind =
   | 'mcp_inventory'
   | 'authority_seed_plan'
   | 'substrate_architecture'
-  | 'pass_through_surface';
+  | 'pass_through_surface'
+  | 'schema_registry'
+  | 'definition_of_done';
 
 interface PromptMetaFieldExpectation {
   path: string;
@@ -516,6 +520,17 @@ function buildPromptMetaSubject(item: PromptMetaCase): { text: string; data: Rec
     const seedPlan = getDefinitiveAuthoritySeedPlan();
     const categoriesById = Object.fromEntries(seedPlan.categories.map(category => [category.id, category]));
     const data = { ...seedPlan, categoriesById };
+    return { text: JSON.stringify(data), data };
+  }
+
+  if (item.kind === 'schema_registry') {
+    const registry = buildDefinitiveSchemaRegistry();
+    return { text: JSON.stringify(registry), data: registry };
+  }
+
+  if (item.kind === 'definition_of_done') {
+    const result = getDefinitiveDefinitionOfDone(item.input || {});
+    const data = result.result;
     return { text: JSON.stringify(data), data };
   }
 

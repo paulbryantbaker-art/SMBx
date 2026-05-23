@@ -248,8 +248,8 @@
       "fields": [
         { "path": "conformanceSurface.modelRuntimeCases", "equals": 202 },
         { "path": "conformanceSurface.dealMechanicsRouteCases", "equals": 60 },
-        { "path": "conformanceSurface.promptMetaCases", "equals": 52 },
-        { "path": "conformanceSurface.totalCases", "equals": 373 }
+        { "path": "conformanceSurface.promptMetaCases", "equals": 58 },
+        { "path": "conformanceSurface.totalCases", "equals": 379 }
       ]
     }
   },
@@ -523,7 +523,7 @@
     "methodologyUri": "methodology://v19",
     "kind": "agent_card",
     "expect": {
-      "textIncludes": ["definitive_conformance_status", "\"caseCount\":373", "definitive_deal_mechanics_v1_1"],
+      "textIncludes": ["definitive_conformance_status", "\"caseCount\":379", "definitive_deal_mechanics_v1_1"],
       "fields": [
         { "path": "definitive.dealMechanicsModelSlots", "equals": 123 },
         { "path": "definitive.dealMechanicsGates", "equals": 30 },
@@ -925,6 +925,116 @@
         { "path": "publishedStandardDoctrine.requiredPublicArtifacts", "includes": "server-card metadata" },
         { "path": "publishedStandardDoctrine.requiredPublicArtifacts", "includes": "THE LINE declaration" },
         { "path": "marketplaceBuildOrder", "includes": "Build /.well-known/mcp/server-card.json and /.well-known/mcp over the same DEFINITIVE manifest, not a parallel metadata file." }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.SCHEMA.REGISTRY.001",
+    "title": "Schema registry exposes the terminal substrate spine",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "schema_registry",
+    "expect": {
+      "textIncludes": ["DealPayload", "CompletenessSpec", "DealPackage"],
+      "fields": [
+        { "path": "schemaNames", "includes": "DealPayload" },
+        { "path": "schemaNames", "includes": "ClassificationKey" },
+        { "path": "schemaNames", "includes": "MissingInputContract" },
+        { "path": "schemaNames", "includes": "DealState" },
+        { "path": "schemaNames", "includes": "CompletenessSpec" },
+        { "path": "schemaNames", "includes": "DealReadinessLevel" },
+        { "path": "schemaNames", "includes": "CompletenessReport" },
+        { "path": "schemaNames", "includes": "DealPackage" },
+        { "path": "terminalSubstrateSchemas", "includes": "DealPayload" },
+        { "path": "terminalSubstrateSchemas", "includes": "CompletenessSpec" },
+        { "path": "terminalSubstrateSchemas", "includes": "DealPackage" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.SCHEMA.TAKEBACK.001",
+    "title": "Schema registry publishes the portable agent take-back contracts",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "schema_registry",
+    "expect": {
+      "textIncludes": ["SourceGapList", "SelectiveDisclosureProof", "ModelOutput"],
+      "fields": [
+        { "path": "portableTakeBackSchemas", "includes": "SourceIndex" },
+        { "path": "portableTakeBackSchemas", "includes": "SourceGapList" },
+        { "path": "portableTakeBackSchemas", "includes": "SelectiveDisclosureProof" },
+        { "path": "portableTakeBackSchemas", "includes": "DocumentDraft" },
+        { "path": "portableTakeBackSchemas", "includes": "StudioBook" },
+        { "path": "portableTakeBackSchemas", "includes": "ModelOutput" },
+        { "path": "portableTakeBackSchemas", "includes": "AssumptionLog" },
+        { "path": "portableTakeBackSchemas", "includes": "OutputHash" },
+        { "path": "portableTakeBackSchemas", "includes": "AuditPacket" },
+        { "path": "portableTakeBackSchemas", "includes": "MerkleInclusionProof" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.SCHEMA.TOOLMAP.001",
+    "title": "Schema registry resolves agent entrypoint tool outputs to named contracts",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "schema_registry",
+    "expect": {
+      "fields": [
+        { "path": "toolSchemaMap.introspect_capabilities.output", "includes": "CapabilityCatalog" },
+        { "path": "toolSchemaMap.describe_methodology.output", "includes": "MethodologyDescription" },
+        { "path": "toolSchemaMap.estimate_deal_cost.output", "includes": "DealCostEstimate" },
+        { "path": "toolSchemaMap.lookup_model_slot.output", "includes": "ModelOutput" },
+        { "path": "toolSchemaMap.disclose_subset.takeBack", "includes": "SelectiveDisclosureProof" },
+        { "path": "toolSchemaMap.prepare_negotiation_brief.takeBack", "includes": "SourceGapList" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.SCHEMA.MODELOUTPUT.001",
+    "title": "ModelOutput contract pins deterministic model identifiers and hashes",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "schema_registry",
+    "expect": {
+      "fields": [
+        { "path": "schemas.ModelOutput.properties.modelId.pattern", "equals": "^M[0-9]{3}$" },
+        { "path": "schemas.ModelOutput.required", "includes": "modelId" },
+        { "path": "schemas.ModelOutput.required", "includes": "outputHash" },
+        { "path": "schemas.ModelOutput.required", "includes": "lineBoundary" },
+        { "path": "schemas.OutputHash.properties.algorithm.enum", "includes": "sha256" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.DOD.COMPLETENESS.001",
+    "title": "Definition of done returns the portable CompletenessSpec",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "definition_of_done",
+    "input": { "objective": "loi" },
+    "expect": {
+      "textIncludes": ["DEFINITIVE.completeness-spec.v0.1", "DRL2_INDICATION_READY", "source_trail_present"],
+      "fields": [
+        { "path": "completenessSpec.version", "equals": "DEFINITIVE.completeness-spec.v0.1" },
+        { "path": "completenessSpec.levels.2.id", "equals": "DRL2_INDICATION_READY" },
+        { "path": "completenessSpec.levels.4.id", "equals": "DRL4_DILIGENCE_READY" },
+        { "path": "completenessSpec.checks", "lengthAtLeast": 6 }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.DOD.NOREJECT.001",
+    "title": "Definition of done preserves the incomplete-payload no-rejection contract",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "definition_of_done",
+    "expect": {
+      "textIncludes": ["partial payload is accepted", "MissingInputContract", "next_suggested_calls"],
+      "fields": [
+        { "path": "noRejectionContract", "includes": "partial payload is accepted" },
+        { "path": "definitionOfDone.completenessSpec.noRejectionContract", "includes": "MissingInputContract" },
+        { "path": "definitionOfDone.completenessSpec.noRejectionContract", "includes": "next_suggested_calls" }
       ]
     }
   }
