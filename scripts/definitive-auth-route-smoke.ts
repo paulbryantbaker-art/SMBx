@@ -176,6 +176,9 @@ try {
     assertEqual(ingest.body.result?.result?.classificationKey?.journey, 'buy', 'recursive ingest classifies buy journey');
     assert(ingest.body.result?.result?.missingInputContract?.items.length > 0, 'recursive ingest returns missing-input contract');
     assert(ingest.body.result?.result?.next_suggested_calls?.some((call: any) => call.toolName === 'compose_model_stack'), 'recursive ingest exposes next calls');
+    assertEqual(ingest.body.persistence?.ok, true, 'recursive ingest persists DealState');
+    assertEqual(ingest.body.persistence?.stateCid, initialState.cid, 'recursive ingest persistence cid');
+    assertEqual(ingest.body.persistence?.packetType, 'DealStateControlPacket.v0.1', 'recursive ingest control packet persisted');
 
     const definition = await postJson('/api/definitive/tools/call', token, {
       toolName: 'get_definition_of_done',
@@ -228,6 +231,9 @@ try {
     assertEqual(updatedState.revision, 2, 'recursive update increments revision');
     assert(updatedState.parentCids.includes(initialState.cid), 'recursive update preserves parent cid');
     assert(update.body.result?.completeness_contribution_delta > 0, 'recursive update improves completeness');
+    assertEqual(update.body.persistence?.ok, true, 'recursive update persists DealState');
+    assertEqual(update.body.persistence?.stateCid, updatedState.cid, 'recursive update persistence cid');
+    assert(update.body.persistence?.stateSnapshotId > ingest.body.persistence?.stateSnapshotId, 'recursive update creates later snapshot');
 
     const completeness = await postJson('/api/definitive/tools/call', token, {
       toolName: 'check_completeness',
@@ -247,6 +253,8 @@ try {
     assertEqual(completeness.body.result?.result?.definitionOfDone?.version, 'DEFINITIVE.definition-of-done.v0.1', 'recursive completeness definition version');
     assert(completeness.body.result?.result?.completenessReport?.score >= ingest.body.result?.result?.completenessReport?.score, 'recursive completeness score is retained or improved');
     assert(completeness.body.result?.result?.next_suggested_calls?.length > 0, 'recursive completeness returns next calls');
+    assertEqual(completeness.body.persistence?.ok, true, 'recursive completeness persists DealState control packet');
+    assertEqual(completeness.body.persistence?.stateCid, updatedState.cid, 'recursive completeness persistence cid');
 
     const plan = await postJson('/api/definitive/tools/call', token, {
       toolName: 'compose_deal_plan',
@@ -288,6 +296,9 @@ try {
     assert(stateDiff.changedPaths.includes('documents'), 'recursive diff tracks source change');
     assert(stateDiff.completenessScoreDelta > 0, 'recursive diff tracks completeness delta');
     assert(diff.body.result?.result?.portableTakeBackArtifacts.includes('DealStateDiff'), 'recursive diff is portable');
+    assertEqual(diff.body.persistence?.ok, true, 'recursive diff persists DealStateDiff packet');
+    assertEqual(diff.body.persistence?.stateCid, updatedState.cid, 'recursive diff persistence cid');
+    assertEqual(diff.body.persistence?.packetType, 'DealStateDiff.v0.1', 'recursive diff packet persisted');
   });
 
   await test('THE LINE inventory is available to authenticated agents', async () => {
