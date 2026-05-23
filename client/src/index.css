@@ -300,6 +300,7 @@ input::placeholder, textarea::placeholder { color: var(--ink-4); }
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
   scroll-behavior: auto;
+  -webkit-overflow-scrolling: touch;
   contain: layout paint style;
   isolation: isolate;
 }
@@ -309,7 +310,35 @@ input::placeholder, textarea::placeholder { color: var(--ink-4); }
   contain-intrinsic-size: auto 420px;
 }
 
-.v6-canvas-scroll.is-scrolling :where(button, [role="button"], .m-state, .m-card.tap, .tab-new-btn) {
+.v6-canvas-scroll .m-page-flow > .m-flow-grid > :nth-child(n + 7) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
+}
+
+.v6-canvas-scroll.is-scrolling :where(button, [role="button"], .m-state, .m-card.tap, .tab-new-btn, .m-nudge-soft, .m-glass-control) {
+  transition-duration: 0.01ms !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+.v6-canvas-scroll.is-scrolling *,
+.v6-canvas-scroll.is-scrolling *::before,
+.v6-canvas-scroll.is-scrolling *::after {
+  animation-play-state: paused !important;
+  box-shadow: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition-duration: 0.01ms !important;
+}
+
+.v6-root.v6-is-scrolling :where(.tab-strip, .workspace-dock, .workspace-dock-tray) {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition-duration: 0.01ms !important;
+}
+
+.v6-root.v6-is-scrolling :where(button, [role="button"], .m-btn, .m-state, .m-card.tap, .m-nudge-soft, .m-glass-control, .tab, .mode-item, .dock-anchor, .dock-new-btn, .dock-tray-row, .dock-tray-close, .top-work-row, .top-work-item) {
   transition-duration: 0.01ms !important;
   transform: none !important;
   filter: none !important;

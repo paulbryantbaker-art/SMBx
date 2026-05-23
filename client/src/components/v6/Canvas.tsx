@@ -40,15 +40,34 @@ export function V6Canvas({ tabs, activeTabId, openTab, onPickMode, onTalkToYulia
   useEffect(() => {
     const node = scrollRef.current;
     if (!node) return;
+    const root = node.closest(".v6-root");
     let settleTimer = 0;
-    const onScroll = () => {
-      node.classList.add("is-scrolling");
-      window.clearTimeout(settleTimer);
-      settleTimer = window.setTimeout(() => node.classList.remove("is-scrolling"), 140);
+    let frame = 0;
+    let isScrolling = false;
+
+    const setScrolling = (next: boolean) => {
+      if (isScrolling === next) return;
+      isScrolling = next;
+      node.classList.toggle("is-scrolling", next);
+      root?.classList.toggle("v6-is-scrolling", next);
     };
+
+    const onScroll = () => {
+      if (!frame) {
+        frame = window.requestAnimationFrame(() => {
+          frame = 0;
+          setScrolling(true);
+        });
+      }
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(() => setScrolling(false), 120);
+    };
+
     node.addEventListener("scroll", onScroll, { passive: true });
     return () => {
+      if (frame) window.cancelAnimationFrame(frame);
       window.clearTimeout(settleTimer);
+      setScrolling(false);
       node.removeEventListener("scroll", onScroll);
     };
   }, []);
