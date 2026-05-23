@@ -48,6 +48,12 @@ try {
     const body = await authedJson('/api/definitive/tools/list', token);
     assertEqual(body.status, 'internal_v0_1', 'tool inventory status');
     assert(body.tools.some((tool: any) => tool.name === 'compose_model_stack'), 'compose_model_stack is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'ingest_deal_payload'), 'ingest_deal_payload is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'update_deal_payload'), 'update_deal_payload is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'check_completeness'), 'check_completeness is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'get_definition_of_done'), 'get_definition_of_done is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'compose_deal_plan'), 'compose_deal_plan is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'diff_deal_state'), 'diff_deal_state is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_deal_package'), 'compose_deal_package is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'resume_deal'), 'resume_deal is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_lifecycle_trace'), 'compose_lifecycle_trace is advertised');
@@ -135,6 +141,153 @@ try {
     assertEqual(modelSlot.status, 200, 'model slot route status');
     assertEqual(modelSlot.body.result?.schema, 'DEFINITIVE.model-slot.v0.1', 'model slot schema');
     assertEqual(modelSlot.body.result.slotId, 'M200', 'model slot normalizes id');
+  });
+
+  await test('Authenticated recursive DealState loop accepts partial facts and returns next calls', async () => {
+    const ingest = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'ingest_deal_payload',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-state:write', 'deal:classify', 'deal-plan:read', 'completeness:read'],
+      input: {
+        idempotencyKey: `${FIXTURE_KEY}:recursive-loop`,
+        payload: {
+          dealId: fixture.dealId,
+          journey: 'buy',
+          targetName: 'DEFINITIVE Route Fixture Deal',
+          industry: 'software',
+          jurisdiction: 'US-DE',
+          dealStructure: 'asset purchase with working capital true-up',
+          dealEvents: [{ id: 'evt-intake', eventType: 'intake', label: 'Agent supplied partial intake' }],
+        },
+      },
+    });
+    assertEqual(ingest.status, 200, 'recursive ingest route status');
+    assertEqual(ingest.body.ok, true, 'recursive ingest route ok');
+    assertEqual(ingest.body.toolName, 'ingest_deal_payload', 'recursive ingest tool name');
+    assertEqual(ingest.body.result?.action, 'ingest_deal_payload', 'recursive ingest action');
+    const initialState = ingest.body.result?.result?.dealState;
+    assert(initialState, 'recursive ingest returns DealState');
+    assertEqual(initialState.revision, 1, 'recursive ingest starts at revision 1');
+    assert(initialState.cid.startsWith('definitive:deal-state:sha256:'), 'recursive ingest returns content addressed state');
+    assertEqual(ingest.body.result?.result?.classificationKey?.journey, 'buy', 'recursive ingest classifies buy journey');
+    assert(ingest.body.result?.result?.missingInputContract?.items.length > 0, 'recursive ingest returns missing-input contract');
+    assert(ingest.body.result?.result?.next_suggested_calls?.some((call: any) => call.toolName === 'compose_model_stack'), 'recursive ingest exposes next calls');
+
+    const definition = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'get_definition_of_done',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['methodology:read', 'completeness:read'],
+      input: { objective: 'agent continues the whole deal lifecycle from partial facts' },
+    });
+    assertEqual(definition.status, 200, 'definition of done route status');
+    assertEqual(definition.body.result?.result?.definitionOfDone?.version, 'DEFINITIVE.definition-of-done.v0.1', 'definition of done version');
+    assert(definition.body.result?.result?.iterativeDealLoop.includes('update_deal_payload'), 'definition of done exposes recursive update loop');
+    assert(definition.body.result?.result?.noRejectionContract.includes('partial payload is accepted'), 'definition of done states no-rejection contract');
+
+    const update = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'update_deal_payload',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-state:write', 'deal:classify', 'deal-plan:read', 'completeness:read'],
+      input: {
+        dealState: initialState,
+        patch: {
+          purchasePriceCents: 11_000_000_00,
+          ebitdaCents: 2_100_000_00,
+          workingCapitalPegCents: 900_000_00,
+          documents: [
+            { id: 'financials', name: 'Seller P&L', type: 'financials', hash: 'sha256:fixture-financials' },
+            { id: 'qoe', name: 'QoE report', type: 'qoe', hash: 'sha256:fixture-qoe' },
+          ],
+          modelOutputs: {
+            valuation: { outputHash: 'sha256:fixture-valuation', evCents: 12_000_000_00 },
+          },
+          dealEvents: [
+            { id: 'evt-intake', eventType: 'intake', label: 'Agent supplied partial intake' },
+            { id: 'evt-qoe', eventType: 'diligence', label: 'QoE report added', stage: 'diligence' },
+          ],
+        },
+      },
+    });
+    assertEqual(update.status, 200, 'recursive update route status');
+    assertEqual(update.body.ok, true, 'recursive update route ok');
+    assertEqual(update.body.result?.action, 'update_deal_payload', 'recursive update action');
+    const updatedState = update.body.result?.result?.dealState;
+    assert(updatedState, 'recursive update returns DealState');
+    assertEqual(updatedState.revision, 2, 'recursive update increments revision');
+    assert(updatedState.parentCids.includes(initialState.cid), 'recursive update preserves parent cid');
+    assert(update.body.result?.completeness_contribution_delta > 0, 'recursive update improves completeness');
+
+    const completeness = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'check_completeness',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-state:read', 'completeness:read'],
+      input: {
+        objective: 'prepare next agent work item',
+        dealState: updatedState,
+      },
+    });
+    assertEqual(completeness.status, 200, 'recursive completeness route status');
+    assertEqual(completeness.body.ok, true, 'recursive completeness route ok');
+    assertEqual(completeness.body.result?.result?.definitionOfDone?.version, 'DEFINITIVE.definition-of-done.v0.1', 'recursive completeness definition version');
+    assert(completeness.body.result?.result?.completenessReport?.score >= ingest.body.result?.result?.completenessReport?.score, 'recursive completeness score is retained or improved');
+    assert(completeness.body.result?.result?.next_suggested_calls?.length > 0, 'recursive completeness returns next calls');
+
+    const plan = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'compose_deal_plan',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-state:read', 'deal-state:diff', 'deal-plan:read'],
+      input: { dealState: updatedState },
+    });
+    assertEqual(plan.status, 200, 'recursive deal plan route status');
+    assertEqual(plan.body.ok, true, 'recursive deal plan route ok');
+    const dealPlan = plan.body.result?.result?.dealPlan;
+    assert(dealPlan?.planId?.startsWith('dealplan_'), 'recursive deal plan id exists');
+    assert(dealPlan.lifecycle.includes('IOI'), 'recursive deal plan exposes lifecycle');
+    assert(dealPlan.workSurfaces.includes('studio'), 'recursive deal plan includes Studio surface');
+    assert(plan.body.result?.result?.portableTakeBackArtifacts.includes('DealPlan'), 'recursive deal plan is portable');
+
+    const diff = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'diff_deal_state',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-state:read', 'deal-state:diff', 'deal-plan:read'],
+      input: {
+        previousDealState: initialState,
+        nextDealState: updatedState,
+      },
+    });
+    assertEqual(diff.status, 200, 'recursive diff route status');
+    assertEqual(diff.body.ok, true, 'recursive diff route ok');
+    const stateDiff = diff.body.result?.result?.dealStateDiff;
+    assertEqual(stateDiff.previousCid, initialState.cid, 'recursive diff previous cid');
+    assertEqual(stateDiff.nextCid, updatedState.cid, 'recursive diff next cid');
+    assert(stateDiff.changedPaths.includes('purchasePriceCents'), 'recursive diff tracks price change');
+    assert(stateDiff.changedPaths.includes('documents'), 'recursive diff tracks source change');
+    assert(stateDiff.completenessScoreDelta > 0, 'recursive diff tracks completeness delta');
+    assert(diff.body.result?.result?.portableTakeBackArtifacts.includes('DealStateDiff'), 'recursive diff is portable');
   });
 
   await test('THE LINE inventory is available to authenticated agents', async () => {
