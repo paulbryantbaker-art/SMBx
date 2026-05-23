@@ -331,7 +331,12 @@ try {
 
     const packets = await authedJson(`/api/definitive/deal-packets?dealId=${fixture.dealId}&limit=5`, token);
     assertEqual(packets.ok, true, 'deal packets route ok');
-    assert(packets.packets.some((packet: any) => packet.packetType === 'IOIPacket.v0.1'), 'IOI packet is listed for deal');
+    const ioiPacket = packets.packets.find((packet: any) => packet.packetType === 'IOIPacket.v0.1');
+    assert(ioiPacket, 'IOI packet is listed for deal');
+
+    const packetByRow = await authedJson(`/api/definitive/deal-packets?packetRowId=${ioiPacket.id}`, token);
+    assertEqual(packetByRow.ok, true, 'deal packets route supports packet row lookup');
+    assertEqual(packetByRow.packets?.[0]?.id, ioiPacket.id, 'packet row lookup returns exact packet');
   });
 
   await test('Today operating brief surfaces persisted DealState journals', async () => {

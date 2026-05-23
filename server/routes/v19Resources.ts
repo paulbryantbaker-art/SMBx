@@ -255,6 +255,7 @@ v19ResourcesRouter.get('/definitive/deal-packets', async (req, res) => {
       dealId: nullablePositiveNumber(req.query.dealId),
       conversationId: nullablePositiveNumber(req.query.conversationId),
       stateCid: typeof req.query.stateCid === 'string' ? req.query.stateCid : null,
+      packetRowId: nullablePositiveNumber(req.query.packetRowId ?? req.query.rowId ?? req.query.id),
       limit: nullablePositiveNumber(req.query.limit),
     });
     if (!result.ok) return res.status(400).json(result);

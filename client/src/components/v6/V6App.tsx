@@ -242,6 +242,7 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
     const id = descriptor.id ?? `${descriptor.kind}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     const sourceMode = descriptor.kind === "mode-root" ? undefined : descriptor.sourceMode ?? activeMode;
     const nextTab = { ...descriptor, ...(sourceMode ? { sourceMode } : null), id } as Tab;
+    saveArtifactTab(nextTab);
     setTabs(prev => {
       const existing = prev.find(t => t.id === id);
       if (existing) {
@@ -672,6 +673,22 @@ function tabFromHash(tab: string | null, scope?: FileScope, title?: string, run?
       markdown: "",
       artifactData: { canvas_action: "show_content", title: title || "Yulia artifact" },
       status: "canvas artifact",
+    };
+  }
+  if (tab.startsWith("definitive-packet-")) {
+    const packetRowId = Number(tab.replace(/^definitive-packet-/, ""));
+    return readArtifactTab(tab) ?? {
+      id: tab,
+      kind: "analysis",
+      title: title || "DEFINITIVE packet",
+      tool: "artifact",
+      markdown: "",
+      artifactData: {
+        type: "definitive_packet",
+        packetRowId: Number.isFinite(packetRowId) && packetRowId > 0 ? packetRowId : undefined,
+        source: "hash",
+      },
+      status: "Packet",
     };
   }
   if (tab === "marketing-studio") {

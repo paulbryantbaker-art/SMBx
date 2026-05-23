@@ -25,6 +25,7 @@ interface ReadDealStateInput {
 
 interface ListPacketsInput extends ReadDealStateInput {
   limit?: number | null;
+  packetRowId?: number | null;
 }
 
 export async function persistDefinitiveDealStateCall(input: PersistDealStateCallInput) {
@@ -194,15 +195,19 @@ export async function readLatestDefinitiveDealStateSnapshot(input: ReadDealState
 }
 
 export async function listDefinitiveDealPackets(input: ListPacketsInput) {
-  const filters = normalizeReadFilters(input);
+  const packetRowId = nullableNumber(input.packetRowId);
+  const filters = packetRowId
+    ? { ok: true as const, dealId: null, conversationId: null, stateCid: null }
+    : normalizeReadFilters(input);
   if (!filters.ok) return filters;
 
   const sql = await getSql();
-  const limit = Math.min(Math.max(Number(input.limit || 25), 1), 100);
+  const limit = packetRowId ? 1 : Math.min(Math.max(Number(input.limit || 25), 1), 100);
   const rows = await sql`
     SELECT *
     FROM definitive_deal_packets
     WHERE user_id = ${input.userId}
+      AND (${packetRowId}::integer IS NULL OR id = ${packetRowId})
       AND (${filters.dealId}::integer IS NULL OR deal_id = ${filters.dealId})
       AND (${filters.conversationId}::integer IS NULL OR conversation_id = ${filters.conversationId})
       AND (${filters.stateCid}::text IS NULL OR deal_state_cid = ${filters.stateCid})

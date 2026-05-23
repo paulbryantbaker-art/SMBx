@@ -2531,7 +2531,7 @@ function DefinitivePacketCanvas({
   const [packetError, setPacketError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!dealId || !packetRowId) {
+    if (!packetRowId) {
       setPacket(null);
       setPacketLoading(false);
       setPacketError(null);
@@ -2541,7 +2541,11 @@ function DefinitivePacketCanvas({
     let alive = true;
     setPacketLoading(true);
     setPacketError(null);
-    fetch(`/api/definitive/deal-packets?dealId=${encodeURIComponent(dealId)}&limit=50`, { headers: authHeaders() })
+    const params = new URLSearchParams();
+    params.set("packetRowId", String(packetRowId));
+    if (dealId) params.set("dealId", dealId);
+    params.set("limit", "50");
+    fetch(`/api/definitive/deal-packets?${params.toString()}`, { headers: authHeaders() })
       .then(async res => {
         const payload = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(payload.error || `HTTP ${res.status}`);
