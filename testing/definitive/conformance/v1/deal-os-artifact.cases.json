@@ -395,5 +395,214 @@
         { "path": "result.dealPackage.dealPlan.lifecycle", "includes": "IOI" }
       ]
     }
+  },
+  {
+    "id": "CONF.DEALOS.PACKAGE_VERIFY.001",
+    "title": "Package verification recomputes package identity before agent reliance",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "setup": {
+      "toolName": "compose_deal_package",
+      "input": {
+        "payload": {
+          "targetName": "Atlas HVAC Services",
+          "journey": "buy",
+          "dealType": "asset acquisition",
+          "industry": "HVAC services",
+          "jurisdiction": "US-DE",
+          "purchasePriceCents": 540000000,
+          "ebitdaCents": 82000000,
+          "sources": [
+            { "id": "src-fin", "name": "TTM financials", "type": "financials", "hash": "sha256:fin", "citationReady": true },
+            { "id": "src-legal", "name": "Draft LOI", "type": "legal", "hash": "sha256:legal", "citationReady": true }
+          ]
+        }
+      },
+      "inject": [
+        { "fromPath": "result.dealPackage", "toPath": "dealPackage" },
+        { "fromPath": "result.dealState", "toPath": "dealState" },
+        { "fromPath": "result.dealPackage.packageCid", "toPath": "expectedPackageCid" },
+        { "fromPath": "result.dealState.cid", "toPath": "expectedDealStateCid" }
+      ]
+    },
+    "toolName": "verify_package",
+    "input": {},
+    "expect": {
+      "action": "verify_package",
+      "artifactPath": "result.packageVerification",
+      "schema": "PackageVerification.v0.1",
+      "dealStateHashPath": "result.dealPackage.dealStateHash",
+      "lineInvariantPath": "result.packageVerification.lineInvariant",
+      "nextSuggestedToolsInclude": ["disclose_subset", "compose_close_readiness", "resume_deal"],
+      "takeBackArtifactsInclude": ["PackageVerification", "DealPackage", "MCPCallHint[]"],
+      "fields": [
+        { "path": "result.packageVerification.verified", "equals": true },
+        { "path": "result.packageVerification.missing.length", "equals": 0 },
+        { "path": "result.packageVerification.checks.length", "min": 10 }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.PACKAGE_FINALIZE.001",
+    "title": "Finalized package emits audit, manifest, merkle, and human render artifacts",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "setup": {
+      "toolName": "compose_deal_package",
+      "input": {
+        "payload": {
+          "targetName": "Atlas HVAC Services",
+          "journey": "buy",
+          "dealType": "asset acquisition",
+          "industry": "HVAC services",
+          "jurisdiction": "US-DE",
+          "purchasePriceCents": 540000000,
+          "ebitdaCents": 82000000,
+          "sources": [
+            { "id": "src-fin", "name": "TTM financials", "type": "financials", "hash": "sha256:fin", "citationReady": true },
+            { "id": "src-legal", "name": "Draft LOI", "type": "legal", "hash": "sha256:legal", "citationReady": true }
+          ]
+        }
+      },
+      "inject": [
+        { "fromPath": "result.dealPackage", "toPath": "dealPackage" },
+        { "fromPath": "result.dealState", "toPath": "dealState" },
+        { "fromPath": "result.dealPackage.packageCid", "toPath": "expectedPackageCid" },
+        { "fromPath": "result.dealState.cid", "toPath": "expectedDealStateCid" }
+      ]
+    },
+    "toolName": "finalize_deal_package",
+    "input": { "finalizedAt": "2026-05-23T12:00:00.000Z" },
+    "expect": {
+      "action": "finalize_deal_package",
+      "artifactPath": "result.finalizedPackage",
+      "schema": "FinalizedDealPackage.v0.1",
+      "dealStateHashPath": "result.dealPackage.dealStateHash",
+      "lineInvariantPath": "result.finalizedPackage.lineInvariant",
+      "nextSuggestedToolsInclude": ["verify_package", "disclose_subset", "compose_pmi_plan"],
+      "takeBackArtifactsInclude": ["DealPackage", "PackageVerification", "AuditPacket", "SignedManifest", "MerkleInclusionProof", "HumanPackageRender"],
+      "fields": [
+        { "path": "result.finalizedPackage.status", "equals": "finalized" },
+        { "path": "result.finalizedPackage.signedManifest.schema", "equals": "SignedManifest.v0.1" },
+        { "path": "result.finalizedPackage.merkleProof.schema", "equals": "MerkleInclusionProof.v0.1" },
+        { "path": "result.finalizedPackage.humanRender.schema", "equals": "HumanPackageRender.v0.1" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.PACKAGE_REOPEN.001",
+    "title": "Reopened package preserves recursive Deal OS continuity after new facts arrive",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "setup": {
+      "toolName": "compose_deal_package",
+      "input": {
+        "payload": {
+          "targetName": "Atlas HVAC Services",
+          "journey": "buy",
+          "dealType": "asset acquisition",
+          "purchasePriceCents": 540000000,
+          "ebitdaCents": 82000000,
+          "sources": [
+            { "id": "src-fin", "name": "TTM financials", "type": "financials", "hash": "sha256:fin", "citationReady": true }
+          ]
+        }
+      },
+      "inject": [
+        { "fromPath": "result.dealPackage", "toPath": "dealPackage" },
+        { "fromPath": "result.dealState", "toPath": "dealState" }
+      ]
+    },
+    "toolName": "reopen_deal_package",
+    "input": {
+      "reopenReason": "new diligence source",
+      "reopenedAt": "2026-05-23T12:00:00.000Z",
+      "patch": {
+        "documents": [
+          { "id": "src-qoe", "name": "QoE update", "type": "qoe", "hash": "sha256:qoe" }
+        ],
+        "dealEvents": [
+          { "id": "evt-qoe", "eventType": "diligence", "stage": "diligence", "label": "QoE arrived", "sourceRefs": ["src-qoe"] }
+        ]
+      }
+    },
+    "expect": {
+      "action": "reopen_deal_package",
+      "artifactPath": "result.reopenRecord",
+      "schema": "ReopenedDealPackage.v0.1",
+      "dealStateHashPath": "result.reopenRecord.reopenedDealStateHash",
+      "lineInvariantPath": "result.reopenRecord.lineInvariant",
+      "nextSuggestedToolsInclude": ["update_deal_payload", "check_completeness", "compose_model_stack"],
+      "takeBackArtifactsInclude": ["DealState", "DealStateDiff", "ReopenedDealPackage", "MCPCallHint[]"],
+      "fields": [
+        { "path": "result.reopenRecord.changedPaths", "includes": "documents" },
+        { "path": "result.reopenRecord.reopenReason", "equals": "new diligence source" },
+        { "path": "result.classificationKey.journey", "equals": "buy" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.PERMUTATIONS.001",
+    "title": "Permutation frontier computes structure alternatives without recommending",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "generate_permutations",
+    "input": {
+      "objectivePreference": "certainty",
+      "payload": {
+        "targetName": "Atlas HVAC Services",
+        "journey": "buy",
+        "dealType": "asset acquisition",
+        "industry": "HVAC services",
+        "purchasePriceCents": 540000000,
+        "ebitdaCents": 82000000
+      }
+    },
+    "expect": {
+      "action": "generate_permutations",
+      "artifactPath": "result.paretoFrontier",
+      "schema": "ParetoFrontier.v0.1",
+      "dealStateHashPath": null,
+      "lineInvariantPath": "result.paretoFrontier.lineBoundary",
+      "nextSuggestedToolsInclude": ["compute_best_vehicle"],
+      "takeBackArtifactsInclude": ["StructurePermutation", "ParetoFrontier", "MCPCallHint[]"],
+      "fields": [
+        { "path": "result.paretoFrontier.objectivePreference", "equals": "certainty" },
+        { "path": "result.paretoFrontier.permutations.length", "min": 3 },
+        { "path": "result.paretoFrontier.permutations.0.modelOutputs.0.schema", "equals": "ModelOutput.v0.1" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.BEST_VEHICLE.001",
+    "title": "Best vehicle block computes under caller preference while preserving THE LINE",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "compute_best_vehicle",
+    "input": {
+      "objectivePreference": "certainty",
+      "payload": {
+        "targetName": "Atlas HVAC Services",
+        "journey": "buy",
+        "dealType": "asset acquisition",
+        "industry": "HVAC services",
+        "purchasePriceCents": 540000000,
+        "ebitdaCents": 82000000
+      }
+    },
+    "expect": {
+      "action": "compute_best_vehicle",
+      "artifactPath": "result.bestVehicleBlock",
+      "schema": "BestVehicleBlock.v0.1",
+      "dealStateHashPath": null,
+      "lineInvariantPath": "result.bestVehicleBlock.lineBoundary",
+      "nextSuggestedToolsInclude": ["compose_deal_package"],
+      "takeBackArtifactsInclude": ["BestVehicleBlock", "ParetoFrontier", "StructurePermutation", "MCPCallHint[]"],
+      "fields": [
+        { "path": "result.bestVehicleBlock.selectionBasis", "includes": "not a recommendation" },
+        { "path": "result.bestVehicleBlock.paretoFrontier.schema", "equals": "ParetoFrontier.v0.1" },
+        { "path": "result.bestVehicleBlock.unresolvedHandoffs.0.role", "equals": "tax_counsel_or_cpa" }
+      ]
+    }
   }
 ]

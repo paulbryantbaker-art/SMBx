@@ -189,12 +189,20 @@ interface DealOsArtifactCase {
   title: string;
   specVersion: string;
   methodologyUri: string;
+  setup?: {
+    toolName: string;
+    input: Record<string, any>;
+    inject?: Array<{ fromPath: string; toPath: string }>;
+  };
   toolName: string;
   input: Record<string, any>;
   expect: {
     action: string;
     artifactPath: string;
-    schema: string;
+    schema?: string;
+    schemaPath?: string;
+    dealStateHashPath?: string | null;
+    lineInvariantPath?: string | null;
     nextSuggestedToolsInclude?: string[];
     takeBackArtifactsInclude?: string[];
     fields?: PromptMetaFieldExpectation[];
@@ -435,7 +443,18 @@ for (const item of dealOsArtifactCases) {
     assertEqual(item.specVersion, DEFINITIVE_SPEC_VERSION, `${item.id} specVersion`);
     assertEqual(item.methodologyUri, DEFINITIVE_METHODOLOGY_URI, `${item.id} methodologyUri`);
 
-    const run = executeDefinitiveDealStateTool(item.toolName, item.input);
+    const runtimeInput = cloneJson(item.input || {});
+    if (item.setup) {
+      const setupRun = executeDefinitiveDealStateTool(item.setup.toolName, cloneJson(item.setup.input || {}));
+      assertEqual(setupRun.ok, true, `${item.id} setup ok`);
+      for (const injection of item.setup.inject || []) {
+        const value = valueAtPath(setupRun, injection.fromPath);
+        assert(value !== undefined, `${item.id} setup injection ${injection.fromPath} should exist`);
+        setValueAtPath(runtimeInput, injection.toPath, value);
+      }
+    }
+
+    const run = executeDefinitiveDealStateTool(item.toolName, runtimeInput);
     assertEqual(run.ok, true, `${item.id} ok`);
     assertEqual(run.action, item.expect.action, `${item.id} action`);
     assertEqual(run.methodology_version, DEFINITIVE_METHODOLOGY_VERSION, `${item.id} methodology version`);
@@ -444,9 +463,22 @@ for (const item of dealOsArtifactCases) {
 
     const artifact = valueAtPath(run, item.expect.artifactPath);
     assert(artifact && typeof artifact === 'object', `${item.id} expected artifact at ${item.expect.artifactPath}`);
-    assertEqual(artifact.schema, item.expect.schema, `${item.id} artifact schema`);
-    assertEqual(artifact.dealStateHash, run.state_hash_after, `${item.id} artifact state hash`);
-    assertEqual(artifact.lineInvariant, run.the_line_invariant, `${item.id} artifact line invariant`);
+    if (item.expect.schema) {
+      assertEqual(valueAtPath(artifact, item.expect.schemaPath || 'schema'), item.expect.schema, `${item.id} artifact schema`);
+    }
+
+    if (item.expect.dealStateHashPath !== null) {
+      const artifactStateHash = item.expect.dealStateHashPath
+        ? valueAtPath(run, item.expect.dealStateHashPath)
+        : artifact.dealStateHash;
+      assertEqual(artifactStateHash, run.state_hash_after, `${item.id} artifact state hash`);
+    }
+    if (item.expect.lineInvariantPath !== null) {
+      const artifactLineInvariant = item.expect.lineInvariantPath
+        ? valueAtPath(run, item.expect.lineInvariantPath)
+        : artifact.lineInvariant;
+      assertEqual(artifactLineInvariant, run.the_line_invariant, `${item.id} artifact line invariant`);
+    }
 
     const nextSuggestedCalls = valueAtPath(run, 'result.next_suggested_calls') || artifact.next_suggested_calls || [];
     const nextSuggestedTools = nextSuggestedCalls.map((call: any) => call.toolName).filter(Boolean);
@@ -720,6 +752,20 @@ function valueAtPath(data: any, fieldPath: string): any {
     if (Array.isArray(current) && /^\d+$/.test(segment)) return current[Number(segment)];
     return current[segment];
   }, data);
+}
+
+function setValueAtPath(data: any, fieldPath: string, value: any) {
+  const segments = fieldPath.split('.');
+  let current = data;
+  for (const segment of segments.slice(0, -1)) {
+    if (!current[segment] || typeof current[segment] !== 'object') current[segment] = {};
+    current = current[segment];
+  }
+  current[segments[segments.length - 1]] = value;
+}
+
+function cloneJson<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value));
 }
 
 function assertIncludes(actual: any, expected: any, message: string) {

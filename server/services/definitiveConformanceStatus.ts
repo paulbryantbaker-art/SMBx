@@ -10,7 +10,7 @@ export const DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT = 60;
 export const DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT = 92;
 export const DEFINITIVE_CONFORMANCE_ROUTE_TRIGGER_CASE_COUNT = 30;
 export const DEFINITIVE_CONFORMANCE_MODEL_STACK_CASE_COUNT = 33;
-export const DEFINITIVE_CONFORMANCE_DEAL_OS_ARTIFACT_CASE_COUNT = 12;
+export const DEFINITIVE_CONFORMANCE_DEAL_OS_ARTIFACT_CASE_COUNT = 17;
 export const DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT =
   DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT +
   DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT +
@@ -106,6 +106,8 @@ export function buildDefinitiveConformanceStatus() {
       'iterative Deal OS artifact schemas',
       'portable agent take-back artifacts',
       'document/data-room/IOI/LOI/negotiation/close/PMI boundaries',
+      'package verification/finalization/reopen behavior',
+      'structure permutation and best-vehicle computation boundaries',
     ],
     command: 'npm run test:definitive-conformance',
     authenticatedRouteSmoke: {
