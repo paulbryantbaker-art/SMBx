@@ -394,11 +394,27 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   const registry = buildDefinitiveSchemaRegistry();
   assertEqual(registry.version, 'DEFINITIVE.schemas.v0.1', 'schema registry version');
   assert(registry.schemaNames.includes('DealPayload'), 'schema registry exposes DealPayload');
+  assert(registry.schemaNames.includes('ClassificationKey'), 'schema registry exposes ClassificationKey');
   assert(registry.schemaNames.includes('DealState'), 'schema registry exposes DealState');
   assert(registry.schemaNames.includes('MissingInputContract'), 'schema registry exposes MissingInputContract');
+  assert(registry.schemaNames.includes('CompletenessSpec'), 'schema registry exposes CompletenessSpec');
+  assert(registry.schemaNames.includes('DealReadinessLevel'), 'schema registry exposes DealReadinessLevel');
   assert(registry.schemaNames.includes('CompletenessReport'), 'schema registry exposes CompletenessReport');
   assert(registry.schemaNames.includes('DealPlan'), 'schema registry exposes DealPlan');
+  assert(registry.schemaNames.includes('GateState'), 'schema registry exposes GateState');
+  assert(registry.schemaNames.includes('PipelineStageDelta'), 'schema registry exposes PipelineStageDelta');
   assert(registry.schemaNames.includes('DealStateDiff'), 'schema registry exposes DealStateDiff');
+  assert(registry.schemaNames.includes('CapabilityCatalog'), 'schema registry exposes CapabilityCatalog');
+  assert(registry.schemaNames.includes('MethodologyDescription'), 'schema registry exposes MethodologyDescription');
+  assert(registry.schemaNames.includes('DealCostEstimate'), 'schema registry exposes DealCostEstimate');
+  assert(registry.schemaNames.includes('ModelOutput'), 'schema registry exposes ModelOutput');
+  assert(registry.schemaNames.includes('SourceIndex'), 'schema registry exposes SourceIndex');
+  assert(registry.schemaNames.includes('SourceGapList'), 'schema registry exposes SourceGapList');
+  assert(registry.schemaNames.includes('SelectiveDisclosureProof'), 'schema registry exposes SelectiveDisclosureProof');
+  assert(registry.schemaNames.includes('AssumptionLog'), 'schema registry exposes AssumptionLog');
+  assert(registry.schemaNames.includes('OutputHash'), 'schema registry exposes OutputHash');
+  assert(registry.schemaNames.includes('AuditPacket'), 'schema registry exposes AuditPacket');
+  assert(registry.schemaNames.includes('MerkleInclusionProof'), 'schema registry exposes MerkleInclusionProof');
   assert(registry.schemaNames.includes('DealPackage'), 'schema registry exposes DealPackage');
   assert(registry.schemaNames.includes('LifecycleTrace'), 'schema registry exposes LifecycleTrace');
   assert(registry.schemaNames.includes('IOIPacket'), 'schema registry exposes IOIPacket');
@@ -411,7 +427,17 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.schemaNames.includes('CloseReadiness'), 'schema registry exposes CloseReadiness');
   assert(registry.schemaNames.includes('FundsFlow'), 'schema registry exposes FundsFlow');
   assert(registry.schemaNames.includes('PMIPlan'), 'schema registry exposes PMIPlan');
+  assert(registry.terminalSubstrateSchemas.includes('CompletenessSpec'), 'schema registry publishes terminal substrate schema list');
+  assert(registry.portableTakeBackSchemas.includes('ModelOutput'), 'schema registry publishes portable take-back schema list');
+  const referencedSchemas = new Set<string>();
+  Object.values(registry.toolSchemaMap).forEach((mapping: any) => {
+    [...mapping.input, ...mapping.output, ...mapping.takeBack].forEach((schemaName: string) => referencedSchemas.add(schemaName));
+  });
+  const danglingSchemas = [...referencedSchemas].filter(schemaName => !registry.schemaNames.includes(schemaName));
+  assertEqual(danglingSchemas.join(', '), '', 'all tool schema map refs resolve to published schemas');
   assertEqual(registry.schemas.DealPayload.properties.revenueCents.type, 'integer', 'money is cents integer');
+  assertEqual(registry.schemas.ModelOutput.properties.modelId.pattern, '^M[0-9]{3}$', 'ModelOutput pins deterministic M-slot identifiers');
+  assertEqual(registry.schemas.SelectiveDisclosureProof.required.includes('proofHash'), true, 'SelectiveDisclosureProof requires proof hash');
   assert(registry.toolSchemaMap.ingest_deal_payload.output.includes('MissingInputContract'), 'ingest output maps missing input contract');
   assert(registry.toolSchemaMap.introspect_capabilities.takeBack.includes('CapabilityCatalog'), 'capability introspection maps CapabilityCatalog');
   assert(registry.toolSchemaMap.describe_methodology.takeBack.includes('MethodologyDescription'), 'methodology description maps MethodologyDescription');
@@ -714,6 +740,9 @@ await test('Completeness and definition-of-done tools are DB-free Deal OS contro
   });
   assertEqual(dod.status, 200, 'definition of done status');
   assert(dod.body.result.result.definitionOfDone.lifecycle.includes('IOI'), 'definition of done exposes lifecycle');
+  assertEqual(dod.body.result.result.completenessSpec.version, 'DEFINITIVE.completeness-spec.v0.1', 'definition of done returns completeness spec');
+  assert(dod.body.result.result.completenessSpec.levels.some((level: any) => level.id === 'DRL2_INDICATION_READY'), 'completeness spec publishes readiness levels');
+  assert(dod.body.result.result.completenessSpec.checks.some((check: any) => check.id === 'source_trail_present'), 'completeness spec publishes source checks');
   assert(dod.body.result.result.noRejectionContract.includes('partial payload is accepted'), 'definition of done exposes no-rejection contract');
 });
 

@@ -100,35 +100,109 @@ export interface DefinitiveMcpCallHint {
 const LINE_INVARIANT =
   'DEFINITIVE computes, organizes, cites, and routes deal work. The user, counsel, advisor, or court makes legal, tax, fairness, feasibility, solvency, negotiation, and closing determinations.';
 
-const DEFINITION_OF_DONE = {
-  version: 'DEFINITIVE.definition-of-done.v0.1' as const,
-  levels: [
+const DEAL_READINESS_LEVELS = [
+  {
+    id: 'DRL0_UNCLASSIFIED',
+    label: 'Unclassified',
+    description: 'The payload exists but lacks enough facts to classify the deal journey.',
+    minimumScore: 0,
+    canProceedWithPartialState: true,
+    doneWhen: ['The payload exists and can be held as a DealState, even if the journey is unknown.'],
+    nextRecommendedTools: ['ingest_deal_payload', 'introspect_capabilities'],
+  },
+  {
+    id: 'DRL1_CLASSIFIED',
+    label: 'Classified',
+    description: 'Journey is known and either deal subject, industry, jurisdiction, or size is present.',
+    minimumScore: 20,
+    canProceedWithPartialState: true,
+    doneWhen: ['Journey is known.', 'At least one subject, industry, jurisdiction, or size fact is present.'],
+    nextRecommendedTools: ['check_completeness', 'compose_deal_plan'],
+  },
+  {
+    id: 'DRL2_INDICATION_READY',
+    label: 'Indication ready',
+    description: 'Enough deal facts exist to create an IOI/readiness artifact with explicit caveats.',
+    minimumScore: 55,
+    canProceedWithPartialState: true,
+    doneWhen: ['Deal subject and journey are known.', 'Economic scale and jurisdiction are present.', 'At least one source/document reference is present.'],
+    nextRecommendedTools: ['compose_model_stack', 'prepare_ioi_packet'],
+  },
+  {
+    id: 'DRL3_LOI_ARCHITECTURE_READY',
+    label: 'LOI architecture ready',
+    description: 'Structure, key terms, economic scale, and material risk or overlay gates are known.',
+    minimumScore: 75,
+    canProceedWithPartialState: true,
+    doneWhen: ['Deal structure or key terms are present.', 'Known risk/overlay gates are classified.', 'Economic terms can be organized without drafting clauses.'],
+    nextRecommendedTools: ['prepare_loi_packet', 'compose_document_draft', 'prepare_negotiation_brief'],
+  },
+  {
+    id: 'DRL4_DILIGENCE_READY',
+    label: 'Diligence ready',
+    description: 'Core documents, data room index, model outputs, and specialist/pass-through blockers are tracked.',
+    minimumScore: 90,
+    canProceedWithPartialState: false,
+    doneWhen: ['Core document categories are indexed.', 'Model outputs and unresolved source gaps are tracked.', 'Specialist/pass-through blockers are explicit.'],
+    nextRecommendedTools: ['compose_data_room_index', 'prepare_diligence_request', 'compose_close_readiness'],
+  },
+];
+
+const COMPLETENESS_SPEC = {
+  version: 'DEFINITIVE.completeness-spec.v0.1' as const,
+  definitionOfDoneVersion: 'DEFINITIVE.definition-of-done.v0.1' as const,
+  levels: DEAL_READINESS_LEVELS,
+  checks: [
     {
-      level: 'DRL0_UNCLASSIFIED',
-      doneWhen: ['The payload exists but lacks enough facts to classify the deal journey.'],
-      nextAction: 'Ask for the intended journey, target/deal subject, industry, jurisdiction, and one economic scale fact.',
+      id: 'journey_classified',
+      label: 'Journey classified',
+      requiredForLevel: 'DRL1_CLASSIFIED',
+      surfaces: ['today', 'pipeline'],
     },
     {
-      level: 'DRL1_CLASSIFIED',
-      doneWhen: ['Journey is known and either deal subject, industry, jurisdiction, or size is present.'],
-      nextAction: 'Build or update the DealState and ask only for the missing facts that unlock IOI work.',
+      id: 'economic_scale_present',
+      label: 'Economic scale present',
+      requiredForLevel: 'DRL2_INDICATION_READY',
+      modelSlots: ['M101-M223'],
+      surfaces: ['models', 'studio'],
     },
     {
-      level: 'DRL2_INDICATION_READY',
-      doneWhen: ['Deal subject, journey, economic scale, jurisdiction, and at least one source/document reference are present.'],
-      nextAction: 'Compose the model stack and produce IOI/readiness artifacts with caveats for missing sources.',
+      id: 'source_trail_present',
+      label: 'Source trail present',
+      requiredForLevel: 'DRL2_INDICATION_READY',
+      sourceCategories: ['financials', 'commercial', 'legal', 'tax', 'ip', 'real_estate'],
+      surfaces: ['files', 'data_room'],
     },
     {
-      level: 'DRL3_LOI_ARCHITECTURE_READY',
-      doneWhen: ['Structure, key terms, economic scale, and material risk/overlay gates are known.'],
-      nextAction: 'Prepare LOI/economic-term architecture and route legal/tax clause conclusions to counsel.',
+      id: 'term_architecture_present',
+      label: 'Term architecture present',
+      requiredForLevel: 'DRL3_LOI_ARCHITECTURE_READY',
+      surfaces: ['pipeline', 'studio'],
     },
     {
-      level: 'DRL4_DILIGENCE_READY',
-      doneWhen: ['Core documents, data room index, model outputs, and specialist/pass-through blockers are tracked.'],
-      nextAction: 'Run iterative diligence, model updates, negotiation prep, Studio outputs, and data-room maintenance.',
+      id: 'data_room_indexed',
+      label: 'Data room indexed',
+      requiredForLevel: 'DRL4_DILIGENCE_READY',
+      sourceCategories: ['financials', 'legal', 'tax', 'commercial'],
+      surfaces: ['files', 'data_room'],
+    },
+    {
+      id: 'model_state_present',
+      label: 'Model state present',
+      requiredForLevel: 'DRL4_DILIGENCE_READY',
+      modelSlots: ['M101-M223'],
+      surfaces: ['models'],
     },
   ],
+  noRejectionContract:
+    'A partial payload is accepted, classified where possible, scored for completeness, and returned with MissingInputContract plus next_suggested_calls instead of rejected.',
+  lineInvariant: LINE_INVARIANT,
+};
+
+const DEFINITION_OF_DONE = {
+  version: 'DEFINITIVE.definition-of-done.v0.1' as const,
+  completenessSpec: COMPLETENESS_SPEC,
+  levels: DEAL_READINESS_LEVELS,
   lifecycle:
     'Get information, form the IOI, learn more, structure the LOI, run diligence, model, negotiate, close, and continue into PMI as a recursive DealState loop.',
   lineInvariant: LINE_INVARIANT,
@@ -289,6 +363,7 @@ export function getDefinitiveDefinitionOfDone(input: Record<string, any> = {}) {
     result: {
       objective: nullableString(input.objective) || 'whole_deal_lifecycle',
       definitionOfDone: DEFINITION_OF_DONE,
+      completenessSpec: COMPLETENESS_SPEC,
       iterativeDealLoop: [
         'ingest_deal_payload',
         'update_deal_payload',

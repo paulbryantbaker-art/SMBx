@@ -539,9 +539,9 @@ Keep proprietary:
 ### Run 19 - Terminal Substrate Spine
 
 **Goal:** turn the model corpus into the Deal OS substrate: hand any incomplete or complete deal stage in, recursively work the methodology, and get state/package outputs back.
-**Status:** Started as a public/code-addressable plan. `definitive://v1.1/substrate-architecture` and `/api/definitive/substrate-architecture` expose eight primitives, 27 staged MCP tool targets, the eight-axis classification key, six-phase solo-founder sequence, universal response-envelope fields, and THE LINE invariant.
+**Status:** In progress with the terminal schema spine now code-addressable. `definitive://v1.1/substrate-architecture` and `/api/definitive/substrate-architecture` expose eight primitives, 27 staged MCP tool targets, the eight-axis classification key, six-phase solo-founder sequence, universal response-envelope fields, and THE LINE invariant. The schema registry now publishes `DealPayload`, `ClassificationKey`, `MissingInputContract`, `DealState`, `CompletenessSpec`, `DealReadinessLevel`, `CompletenessReport`, `DealPackage`, and the main agent take-back artifacts (`CapabilityCatalog`, `SourceIndex`, `SourceGapList`, `SelectiveDisclosureProof`, `ModelOutput`, `AssumptionLog`, `OutputHash`, `AuditPacket`, `MerkleInclusionProof`).
 
-- Add versioned schemas for `DealPayload`, `ClassificationKey`, `MissingInputContract`, `DealState`, `CompletenessSpec`, `CompletenessReport`, and `DealPackage`.
+- Complete: add versioned schemas for `DealPayload`, `ClassificationKey`, `MissingInputContract`, `DealState`, `CompletenessSpec`, `CompletenessReport`, and `DealPackage`.
 - Build `ingest_deal_payload` and rules-first classification into the eight-axis routing key.
 - Add idempotency keys to every MCP-shaped tool call.
 - Add content-addressable `DealState`, parent CID lineage, and `state_hash`.
@@ -624,7 +624,7 @@ If scope slips:
 
 ## Current Next Actions
 
-1. Build the terminal substrate schemas next: `DealPayload`, `ClassificationKey`, `MissingInputContract`, `DealState`, `CompletenessSpec`, `CompletenessReport`, and `DealPackage`.
+1. Terminal substrate schemas are now first-class in the schema registry: `DealPayload`, `ClassificationKey`, `MissingInputContract`, `DealState`, `CompletenessSpec`, `DealReadinessLevel`, `CompletenessReport`, `DealPackage`, plus the main portable take-back contracts. Surface smoke now fails if a tool map references a schema name the registry does not publish.
 2. Continue deterministic runtime functions and schemas without changing THE LINE readiness. Sixty-eight models are now executable with conformance coverage: M139, M148, M151-M160, M164-M172, and M177-M223. Eight volatile models now have research-only runtime scaffolds: M143, M161-M163, and M173-M176. Prompt/runtime language for research-only, professional-handoff, pass-through route briefs, substrate-architecture primitives, agent no-rejection Deal OS lifecycle, iterative work surfaces, and portable agent handoffs is now covered by prompt/meta conformance cases. Authenticated route validation now has expanded DB/JWT coverage at `npm run test:definitive-auth-route`.
 3. Authority Register seed plan is expanded from 500+ to 800+ and now targets 920 planned entries across bankruptcy, restructuring, IRC/Treasury, real-estate, connected-tax, agreement-architecture, IP, pass-through pricing, recovery-data, digital-asset, regulated-industry, Delaware, market-data, methodology, and compliance/audit categories. Next step is actual staged ingestion beyond the first 50 seeded rows.
 4. Pass-Through Substrate Catalog first pass is published with per-call pricing posture, fixed margin, source type, dependent model slots, and THE LINE boundary.
