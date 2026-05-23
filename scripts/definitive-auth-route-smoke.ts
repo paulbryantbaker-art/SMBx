@@ -52,6 +52,7 @@ try {
     assert(body.tools.some((tool: any) => tool.name === 'update_deal_payload'), 'update_deal_payload is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'check_completeness'), 'check_completeness is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'get_definition_of_done'), 'get_definition_of_done is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'get_deal_state'), 'get_deal_state is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_deal_plan'), 'compose_deal_plan is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'diff_deal_state'), 'diff_deal_state is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_deal_package'), 'compose_deal_package is advertised');
@@ -234,6 +235,25 @@ try {
     assertEqual(update.body.persistence?.ok, true, 'recursive update persists DealState');
     assertEqual(update.body.persistence?.stateCid, updatedState.cid, 'recursive update persistence cid');
     assert(update.body.persistence?.stateSnapshotId > ingest.body.persistence?.stateSnapshotId, 'recursive update creates later snapshot');
+
+    const persistedState = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'get_deal_state',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-state:read'],
+      input: {
+        dealId: fixture.dealId,
+      },
+    });
+    assertEqual(persistedState.status, 200, 'get persisted deal state route status');
+    assertEqual(persistedState.body.ok, true, 'get persisted deal state ok');
+    assertEqual(persistedState.body.result?.schema, 'PersistedDealState.v0.1', 'get persisted deal state schema');
+    assertEqual(persistedState.body.result?.dealState?.cid, updatedState.cid, 'get persisted deal state returns latest cid');
+    assert(persistedState.body.result?.next_suggested_calls?.some((call: any) => call.toolName === 'compose_deal_plan'), 'get persisted deal state returns next calls');
+    assert(persistedState.body.result?.portableTakeBackArtifacts?.includes('DealState'), 'get persisted deal state is portable');
 
     const completeness = await postJson('/api/definitive/tools/call', token, {
       toolName: 'check_completeness',

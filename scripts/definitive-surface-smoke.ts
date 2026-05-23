@@ -75,6 +75,7 @@ const expectedTools = [
   'update_deal_payload',
   'check_completeness',
   'get_definition_of_done',
+  'get_deal_state',
   'introspect_capabilities',
   'describe_methodology',
   'estimate_deal_cost',
@@ -457,6 +458,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.toolSchemaMap.describe_methodology.takeBack.includes('MethodologyDescription'), 'methodology description maps MethodologyDescription');
   assert(registry.toolSchemaMap.estimate_deal_cost.takeBack.includes('DealCostEstimate'), 'cost estimate maps DealCostEstimate');
   assert(registry.toolSchemaMap.get_deal_runbook.takeBack.includes('DealPlan'), 'deal runbook maps DealPlan');
+  assert(registry.toolSchemaMap.get_deal_state.takeBack.includes('DealState'), 'get deal state maps DealState');
   assert(registry.toolSchemaMap.lookup_model_slot.takeBack.includes('ModelOutput'), 'model slot lookup maps ModelOutput');
   assert(registry.toolSchemaMap.diff_deal_state.takeBack.includes('DealStateDiff'), 'diff take-back maps DealStateDiff');
   assert(registry.toolSchemaMap.compose_deal_package.takeBack.includes('DealPackage'), 'package take-back maps DealPackage');

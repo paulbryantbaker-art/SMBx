@@ -5,7 +5,11 @@ import {
   DEFINITIVE_SPEC_VERSION,
 } from '../constants/definitive.js';
 import { buildDefinitiveConformanceStatus } from './definitiveConformanceStatus.js';
-import { executeDefinitiveDealStateTool, isDefinitiveDealStateTool } from './definitiveDealState.js';
+import {
+  DEFINITIVE_DEAL_STATE_PROTOCOL,
+  executeDefinitiveDealStateTool,
+  isDefinitiveDealStateTool,
+} from './definitiveDealState.js';
 import {
   getDefinitiveDealMappingCoverage,
   getDefinitiveDealMechanicsSummary,
@@ -40,6 +44,7 @@ const DEFINITIVE_MCP_TOOLS = [
   'update_deal_payload',
   'check_completeness',
   'get_definition_of_done',
+  'get_deal_state',
   'introspect_capabilities',
   'describe_methodology',
   'estimate_deal_cost',
@@ -114,6 +119,17 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
       type: 'object',
       properties: {
         objective: { type: 'string', description: 'Optional objective or gate to explain.' },
+      },
+    },
+  },
+  get_deal_state: {
+    description: 'Read the latest persisted DealState snapshot by dealId, conversationId, or stateCid so an external agent can return to smbX as the Deal OS home, resume the recursive loop, and take back the current state without scraping app pages.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dealId: { type: 'number', description: 'Optional deal id to read the latest DealState snapshot for.' },
+        conversationId: { type: 'number', description: 'Optional conversation id to read the latest DealState snapshot for.' },
+        stateCid: { type: 'string', description: 'Optional content-addressed DealState CID to read exactly.' },
       },
     },
   },
@@ -511,6 +527,7 @@ const TOOL_SCOPE: Record<DefinitiveMcpToolName, string[]> = {
   update_deal_payload: ['deal-state:write', 'deal:classify'],
   check_completeness: ['deal-state:read', 'completeness:read'],
   get_definition_of_done: ['methodology:read', 'completeness:read'],
+  get_deal_state: ['deal-state:read'],
   introspect_capabilities: ['capability:read', 'methodology:read'],
   describe_methodology: ['methodology:read', 'authority:read'],
   estimate_deal_cost: ['pricing:read', 'pass-through:read'],
@@ -762,6 +779,40 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
         lineRisks: line?.lineRisks || [],
         requiredScopes: requestedScopes,
         result: executeStaticDefinitiveDiscoveryTool(input.toolName, input.input || {}),
+        mandateChain: null,
+        ...versionPayload(),
+      },
+    };
+  }
+
+  if (input.toolName === 'get_deal_state') {
+    const { readLatestDefinitiveDealStateSnapshot } = await import('./definitiveDealStatePersistence.js');
+    const read = await readLatestDefinitiveDealStateSnapshot({
+      userId: input.userId,
+      dealId: nullableNumber(input.input?.dealId),
+      conversationId: nullableNumber(input.input?.conversationId),
+      stateCid: nullableString(input.input?.stateCid),
+    });
+    const ok = read.ok === true;
+    const snapshot = (ok && 'snapshot' in read && read.snapshot ? read.snapshot : null) as Record<string, any> | null;
+    return {
+      status: ok ? 200 : read.error === 'not_found' ? 404 : 400,
+      body: {
+        ok,
+        ...responseMeta(),
+        toolName: input.toolName,
+        protocol: DEFINITIVE_MCP_PROTOCOL,
+        lineStatus: line?.lineStatus || 'ok',
+        lineReason: line?.lineReason || '',
+        refusalBehavior: line?.refusalBehavior || 'allow',
+        lineRisks: line?.lineRisks || [],
+        requiredScopes: requestedScopes,
+        result: ok
+          ? buildPersistedDealStateReadResult(snapshot)
+          : {
+              schema: 'PersistedDealState.v0.1',
+              error: read.error || 'deal_state_read_failed',
+            },
         mandateChain: null,
         ...versionPayload(),
       },
@@ -1149,6 +1200,79 @@ function resolveIdempotencyKey(input: DefinitiveToolCallInput, envelope: Record<
 function nullableNumber(value: unknown): number | null {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function buildPersistedDealStateReadResult(snapshot: Record<string, any> | null) {
+  if (!snapshot) {
+    return {
+      schema: 'PersistedDealState.v0.1',
+      snapshot: null,
+      dealState: null,
+      next_suggested_calls: [],
+      portableTakeBackArtifacts: ['DealState'],
+    };
+  }
+  const dealState = {
+    protocol: DEFINITIVE_DEAL_STATE_PROTOCOL,
+    stateId: snapshot.stateId,
+    cid: snapshot.stateCid,
+    stateHash: snapshot.stateHash,
+    revision: snapshot.revision,
+    parentCids: snapshot.parentCids || [],
+    idempotencyKey: snapshot.idempotencyKey || null,
+    payload: snapshot.payload || {},
+    classificationKey: snapshot.classificationKey || {},
+    overlays: snapshot.overlays || [],
+    signals: snapshot.signals || null,
+    missingInputContract: snapshot.missingInputContract || {},
+    completenessReport: snapshot.completenessReport || {},
+    sourceIndex: snapshot.sourceIndex || [],
+    methodologyVersion: snapshot.methodologyVersion || DEFINITIVE_METHODOLOGY_VERSION,
+    methodologyUri: snapshot.methodologyUri || DEFINITIVE_METHODOLOGY_URI,
+    specVersion: snapshot.specVersion || DEFINITIVE_SPEC_VERSION,
+    specUri: snapshot.specUri || DEFINITIVE_SPEC_URI,
+  };
+  return {
+    schema: 'PersistedDealState.v0.1',
+    snapshot,
+    dealState,
+    classificationKey: dealState.classificationKey,
+    missingInputContract: dealState.missingInputContract,
+    completenessReport: dealState.completenessReport,
+    next_suggested_calls: [
+      {
+        toolName: 'check_completeness',
+        label: 'Check Completeness',
+        why: 'Re-score the persisted DealState before the next work step.',
+        inputHint: { dealState: '<DealState>' },
+      },
+      {
+        toolName: 'compose_deal_plan',
+        label: 'Compose Deal Plan',
+        why: 'Return the current lifecycle position and next work surfaces.',
+        inputHint: { dealState: '<DealState>' },
+      },
+      {
+        toolName: 'compose_model_stack',
+        label: 'Compose Model Stack',
+        why: 'Re-map applicable deterministic mechanics from the persisted deal profile.',
+        inputHint: {
+          journey: dealState.classificationKey?.journey,
+          league: dealState.classificationKey?.league,
+          dealType: dealState.payload?.dealType || dealState.payload?.dealStructure || dealState.payload?.structure,
+        },
+      },
+    ],
+    portableTakeBackArtifacts: [
+      'DealState',
+      'ClassificationKey',
+      'MissingInputContract',
+      'CompletenessReport',
+      'MCPCallHint[]',
+    ],
+    lineInvariant:
+      'DEFINITIVE reads and organizes persisted deal state. The user, counsel, advisor, or court makes legal, tax, fairness, feasibility, solvency, negotiation, and closing determinations.',
+  };
 }
 
 function normalizeScopes(value: unknown): string[] {

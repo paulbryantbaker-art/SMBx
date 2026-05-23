@@ -1139,6 +1139,11 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     output: ['DefinitionOfDone'],
     takeBack: ['DefinitionOfDone'],
   },
+  get_deal_state: {
+    input: ['DealState'],
+    output: ['DealState', 'ClassificationKey', 'MissingInputContract', 'CompletenessReport', 'MCPCallHint'],
+    takeBack: ['DealState', 'ClassificationKey', 'MissingInputContract', 'CompletenessReport'],
+  },
   introspect_capabilities: {
     input: [],
     output: ['CapabilityCatalog', 'MCPCallHint'],
