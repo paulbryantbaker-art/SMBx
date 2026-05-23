@@ -456,6 +456,7 @@ await test('DEFINITIVE catalog includes the M187-M223 closing-gap expansion', as
 
 await test('Model catalog surface gives agents stable M-slot lookups', async () => {
   const surface = buildDefinitiveModelCatalogSurface();
+  const laterSurface = buildDefinitiveModelCatalogSurface({ limit: 50, cursor: 100 });
   const m200 = getDefinitiveModelSlotSurface('m200') as any;
   const m206 = getDefinitiveModelSlotSurface('M206') as any;
   const missing = getDefinitiveModelSlotSurface('M999');
@@ -464,11 +465,13 @@ await test('Model catalog surface gives agents stable M-slot lookups', async () 
   assertEqual(surface.summary.totalModelSlots, DEFINITIVE_DEAL_MECHANICS_MODEL_SLOT_COUNT, 'model catalog surface total slots');
   assertEqual(surface.mappingCoverage.status, 'complete', 'model catalog surface mapping coverage');
   assertEqual(surface.routeMapSummary.status, 'complete', 'model catalog route map status');
-  assertEqual(surface.models.length, DEFINITIVE_DEAL_MECHANICS_MODEL_SLOT_COUNT, 'model catalog surface exposes compact model list');
+  assertEqual(surface.models.length, 50, 'model catalog surface defaults to bounded model page');
+  assertEqual(surface.pagination.total, DEFINITIVE_DEAL_MECHANICS_MODEL_SLOT_COUNT, 'model catalog pagination preserves total');
+  assertEqual(surface.pagination.nextCursor, '50', 'model catalog pagination exposes next cursor');
   assertEqual(surface.queryHints.bySlotEndpoint, '/api/definitive/model-catalog/{slotId}', 'model catalog slot lookup hint');
   assertEqual(surface.queryHints.byDealMechanicsEndpoint, '/api/definitive/deal-mechanics/models/{slotId}', 'deal mechanics slot lookup hint');
-  assert(surface.models.some(model => model.slotId === 'M200' && model.implementedRuntimeModelId === 'MODEL.TAX.TRANSACTION.MASTER.v1'), 'model catalog exposes M200 runtime model id');
-  assert(surface.models.some(model => model.slotId === 'M206' && model.toolSurfaces.includes('studio')), 'model catalog exposes M206 Studio surface');
+  assert(surface.models.some(model => model.slotId === 'M109'), 'model catalog first page exposes core mechanics');
+  assert(laterSurface.models.some(model => model.slotId === 'M206' && model.toolSurfaces.includes('studio')), 'model catalog paged lookup exposes M206 Studio surface');
   assert(surface.lineInvariant.includes('do not advise'), 'model catalog preserves THE LINE');
 
   assertEqual(m200.schema, 'DEFINITIVE.model-slot.v0.1', 'model slot surface schema');
@@ -546,6 +549,8 @@ await test('Deal runbooks show agents how to run the full iterative Deal OS life
   assert(buyRunbook.stages.some((stage: any) => stage.stageId === 'deeper_diligence' && stage.workSurfaces.includes('data_room')), 'buy runbook includes data-room diligence');
   assert(buyRunbook.next_suggested_calls.some((call: any) => call.toolName === 'resume_deal'), 'buy runbook points returning agents to resume_deal');
   assert(buyRunbook.representativeModelSlots.some((slot: any) => slot.slotId === 'M109'), 'buy runbook exposes working capital mechanics');
+  assertEqual(buyRunbook.representativeModelSlotsPagination.limit, 24, 'runbook representative slots are bounded by default');
+  assert(buyRunbook.representativeModelSlotsPagination.total >= buyRunbook.representativeModelSlotCount, 'runbook pagination preserves total');
   assertEqual(sellRunbook.journey, 'sell', 'uppercase sell journey normalizes');
   assert(pmiRunbook.stages.some((stage: any) => stage.stageId === 'close_pmi' && stage.primaryTools.includes('compose_pmi_plan')), 'PMI runbook includes PMI plan tool');
   assertEqual(missing, null, 'unknown runbook returns null');
@@ -1270,24 +1275,38 @@ await test('Agent capability, methodology, cost, runbook, and model-slot tools a
   const runbook = await executeDefinitiveMcpTool({
     userId: 1,
     toolName: 'get_deal_runbook',
-    input: { journey: 'buy' },
-    envelope: {},
+    input: { journey: 'buy', limit: 5 },
+    envelope: { requestId: 'smoke-request-runbook-001' },
   });
   assertEqual(runbook.status, 200, 'deal runbook tool status');
+  assertEqual(runbook.body.requestId, 'smoke-request-runbook-001', 'deal runbook response echoes request id');
   assertEqual(runbook.body.result.schema, 'DEFINITIVE.deal-runbook.v0.1', 'deal runbook tool schema');
   assert(runbook.body.result.stages.some((stage: any) => stage.stageId === 'loi'), 'deal runbook tool exposes LOI stage');
+  assertEqual(runbook.body.result.representativeModelSlotsPagination.limit, 5, 'deal runbook tool honors bounded limit');
   assert(runbook.body.result.next_suggested_calls.some((call: any) => call.toolName === 'resume_deal'), 'deal runbook tool helps agents resume work');
 
   const modelSlot = await executeDefinitiveMcpTool({
     userId: 1,
     toolName: 'lookup_model_slot',
     input: { slotId: 'm200' },
-    envelope: {},
+    envelope: { requestId: 'smoke-request-modelslot-001' },
   });
   assertEqual(modelSlot.status, 200, 'model slot tool status');
+  assertEqual(modelSlot.body.requestId, 'smoke-request-modelslot-001', 'model slot response echoes request id');
   assertEqual(modelSlot.body.result.schema, 'DEFINITIVE.model-slot.v0.1', 'model slot tool schema');
   assertEqual(modelSlot.body.result.slotId, 'M200', 'model slot lookup normalizes id');
   assertEqual(modelSlot.body.result.implementedRuntimeModelId, 'MODEL.TAX.TRANSACTION.MASTER.v1', 'model slot lookup returns runtime model');
+
+  const scopeBlocked = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'lookup_model_slot',
+    input: { slotId: 'M200' },
+    envelope: { requestId: 'smoke-request-missing-scope-001', requestedScopes: ['methodology:read'] },
+  });
+  assertEqual(scopeBlocked.status, 403, 'missing required explicit scope is blocked');
+  assertEqual(scopeBlocked.body.error, 'missing_required_scope', 'missing scope error code');
+  assertEqual(scopeBlocked.body.requestId, 'smoke-request-missing-scope-001', 'scope error echoes request id');
+  assert(scopeBlocked.body.missingScopes.includes('model-catalog:read'), 'scope error names missing model-catalog scope');
 });
 
 await test('V20 overlay routing detects G28/G29/G30 without executing unbuilt models', async () => {

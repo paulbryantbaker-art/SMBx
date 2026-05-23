@@ -179,6 +179,8 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
       type: 'object',
       properties: {
         journey: { type: 'string', enum: ['buy', 'sell', 'raise', 'pmi'], description: 'Optional journey. Omit to return the full runbook catalog.' },
+        limit: { type: 'number', description: 'Optional page size for representative model slots. Defaults to 24 and caps at 50.' },
+        cursor: { type: 'string', description: 'Optional pagination cursor/offset for representative model slots.' },
       },
     },
   },
@@ -188,6 +190,8 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
       type: 'object',
       properties: {
         slotId: { type: 'string', description: 'Optional model slot id such as M109, M148, M200, M206, or M221.' },
+        limit: { type: 'number', description: 'Optional model catalog page size when slotId is omitted. Defaults to 50 and caps at 50.' },
+        cursor: { type: 'string', description: 'Optional pagination cursor/offset when slotId is omitted.' },
       },
     },
   },
@@ -644,6 +648,7 @@ export function listDefinitiveMcpTools() {
     }),
     responseShape: {
       ok: 'boolean',
+      requestId: 'string',
       toolName: 'string',
       result: 'object',
       mandateChain: 'object',
@@ -659,23 +664,48 @@ export function isDefinitiveMcpToolName(value: string): value is DefinitiveMcpTo
 
 export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
   const envelope = input.envelope || {};
+  const requestId = resolveRequestId(input, envelope);
+  const idempotencyKey = resolveIdempotencyKey(input, envelope);
+  const responseMeta = () => ({ requestId, idempotencyKey });
   const versionError = validateVersionEnvelope(envelope);
-  if (versionError) return { status: 400, body: versionError };
+  if (versionError) return { status: 400, body: { ...versionError, ...responseMeta() } };
 
   if (!isDefinitiveMcpToolName(input.toolName)) {
     return {
       status: 404,
       body: {
         ok: false,
+        ...responseMeta(),
         error: `Unsupported DEFINITIVE v0.1 tool: ${input.toolName}`,
         supportedTools: DEFINITIVE_MCP_TOOLS,
       },
     };
   }
 
+  const explicitRequestedScopes = normalizeScopes(envelope.requestedScopes);
   const requestedScopes = normalizeScopes(envelope.requestedScopes).length
     ? normalizeScopes(envelope.requestedScopes)
     : TOOL_SCOPE[input.toolName];
+  const missingScopes = explicitRequestedScopes.length
+    ? TOOL_SCOPE[input.toolName].filter(scope => !explicitRequestedScopes.includes(scope))
+    : [];
+  if (missingScopes.length) {
+    return {
+      status: 403,
+      body: {
+        ok: false,
+        ...responseMeta(),
+        error: 'missing_required_scope',
+        message: `${input.toolName} requires scopes not present in envelope.requestedScopes.`,
+        toolName: input.toolName,
+        protocol: DEFINITIVE_MCP_PROTOCOL,
+        requiredScopes: TOOL_SCOPE[input.toolName],
+        requestedScopes,
+        missingScopes,
+        ...versionPayload(),
+      },
+    };
+  }
   const line = getDefinitiveLineContract(input.toolName);
   const lineGate = evaluateLineGate(input.toolName, input.input || {}, envelope, line);
   if (!lineGate.allowed) {
@@ -683,6 +713,7 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
       status: lineGate.status,
       body: {
         ok: false,
+        ...responseMeta(),
         error: lineGate.code,
         message: lineGate.message,
         tollgate: lineGate.tollgate,
@@ -703,6 +734,7 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
       status: 200,
       body: {
         ok: true,
+        ...responseMeta(),
         toolName: input.toolName,
         protocol: DEFINITIVE_MCP_PROTOCOL,
         lineStatus: line?.lineStatus || 'ok',
@@ -721,6 +753,7 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
       status: 200,
       body: {
         ok: true,
+        ...responseMeta(),
         toolName: input.toolName,
         protocol: DEFINITIVE_MCP_PROTOCOL,
         lineStatus: line?.lineStatus || 'ok',
@@ -742,6 +775,7 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
       status: ok ? 200 : 400,
       body: {
         ok,
+        ...responseMeta(),
         toolName: input.toolName,
         protocol: DEFINITIVE_MCP_PROTOCOL,
         lineStatus: line?.lineStatus || 'ok',
@@ -803,6 +837,7 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
         status: gate.tollgate?.code === 'credit_budget_required' ? 402 : 403,
         body: {
           ok: false,
+          ...responseMeta(),
           error: gate.tollgate?.message || 'DEFINITIVE tool call is outside the current plan scope.',
           tollgate: formatV19TollgateForYulia(gate.tollgate),
           usage: gate.meter,
@@ -858,6 +893,7 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
       status: ok ? 200 : result.error === 'data_rights_required' ? 428 : 400,
       body: {
         ok,
+        ...responseMeta(),
         toolName: input.toolName,
         protocol: DEFINITIVE_MCP_PROTOCOL,
         lineStatus: line?.lineStatus || 'ok',
@@ -911,6 +947,7 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
     status: ok ? 200 : 400,
     body: {
       ok,
+      ...responseMeta(),
       toolName: input.toolName,
       protocol: DEFINITIVE_MCP_PROTOCOL,
       lineStatus: line?.lineStatus || 'ok',
@@ -1091,6 +1128,24 @@ function nullableString(value: unknown): string | null {
   return trimmed || null;
 }
 
+function resolveRequestId(input: DefinitiveToolCallInput, envelope: Record<string, any>) {
+  return (
+    nullableString(envelope.requestId) ||
+    nullableString(envelope.idempotencyKey) ||
+    nullableString(input.input?.requestId) ||
+    nullableString(input.input?.idempotencyKey) ||
+    `req_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`
+  );
+}
+
+function resolveIdempotencyKey(input: DefinitiveToolCallInput, envelope: Record<string, any>) {
+  return (
+    nullableString(envelope.idempotencyKey) ||
+    nullableString(input.input?.idempotencyKey) ||
+    null
+  );
+}
+
 function nullableNumber(value: unknown): number | null {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
@@ -1126,8 +1181,9 @@ function executeStaticDefinitiveDiscoveryTool(
 
 function buildDealRunbookToolResult(toolInput: Record<string, any>) {
   const journey = normalizeJourney(toolInput.journey);
-  if (!journey) return buildDefinitiveDealRunbooksSurface();
-  const runbook = getDefinitiveDealRunbook(journey);
+  const pageOptions = { limit: toolInput.limit, cursor: toolInput.cursor };
+  if (!journey) return buildDefinitiveDealRunbooksSurface(pageOptions);
+  const runbook = getDefinitiveDealRunbook(journey, pageOptions);
   return runbook || {
     schema: 'DEFINITIVE.deal-runbook.not-found.v0.1',
     ok: false,
@@ -1138,7 +1194,7 @@ function buildDealRunbookToolResult(toolInput: Record<string, any>) {
 
 function buildModelSlotLookupToolResult(toolInput: Record<string, any>) {
   const slotId = nullableString(toolInput.slotId);
-  if (!slotId) return buildDefinitiveModelCatalogSurface();
+  if (!slotId) return buildDefinitiveModelCatalogSurface({ limit: toolInput.limit, cursor: toolInput.cursor });
   const slot = getDefinitiveModelSlotSurface(slotId);
   return slot || {
     schema: 'DEFINITIVE.model-slot.not-found.v0.1',

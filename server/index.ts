@@ -206,15 +206,15 @@ app.get('/api/definitive/substrate-architecture', (_req, res) => {
 });
 
 app.get('/api/definitive/model-catalog', (_req, res) => {
-  res.json(buildDefinitiveModelCatalogSurface());
+  res.json(buildDefinitiveModelCatalogSurface({ limit: _req.query.limit, cursor: _req.query.cursor }));
 });
 
 app.get('/api/definitive/deal-runbooks', (_req, res) => {
-  res.json(buildDefinitiveDealRunbooksSurface());
+  res.json(buildDefinitiveDealRunbooksSurface({ limit: _req.query.limit, cursor: _req.query.cursor }));
 });
 
 app.get('/api/definitive/deal-runbooks/:journey', (req, res) => {
-  const runbook = getDefinitiveDealRunbook(req.params.journey);
+  const runbook = getDefinitiveDealRunbook(req.params.journey, { limit: req.query.limit, cursor: req.query.cursor });
   if (!runbook) {
     return res.status(404).json({ ok: false, error: 'definitive_deal_runbook_not_found', journey: req.params.journey });
   }

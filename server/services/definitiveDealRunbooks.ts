@@ -33,6 +33,11 @@ interface RunbookDefinition {
   stages: RunbookStageDefinition[];
 }
 
+interface RunbookPageOptions {
+  limit?: unknown;
+  cursor?: unknown;
+}
+
 const sharedStages: RunbookStageDefinition[] = [
   {
     stageId: 'intake',
@@ -151,7 +156,7 @@ const runbookDefinitions: RunbookDefinition[] = [
   },
 ];
 
-export function buildDefinitiveDealRunbooksSurface() {
+export function buildDefinitiveDealRunbooksSurface(options: RunbookPageOptions = {}) {
   const architecture = getDefinitiveSubstrateArchitecturePlan();
   return {
     schema: DEFINITIVE_DEAL_RUNBOOK_VERSION,
@@ -162,8 +167,9 @@ export function buildDefinitiveDealRunbooksSurface() {
       lifecycleStageCount: architecture.dealOsLifecycleStages.length,
       workSurfaceCount: architecture.dealOsWorkSurfaces.length,
       loopContract: 'ingest_or_resume -> classify -> ask_missing_inputs -> execute_or_route -> package_take_back -> repeat',
+      paginationRule: 'Runbook representativeModelSlots use limit/cursor. Default page size is 24; max page size is 50.',
     },
-    runbooks: runbookDefinitions.map(toRunbook),
+    runbooks: runbookDefinitions.map(runbook => toRunbook(runbook, options)),
     universalEntryTools: ['ingest_deal_payload', 'resume_deal', 'introspect_capabilities', 'describe_methodology'],
     universalTakeBackArtifacts: architecture.agentTakeBackArtifacts,
     lineInvariant:
@@ -171,18 +177,20 @@ export function buildDefinitiveDealRunbooksSurface() {
   };
 }
 
-export function getDefinitiveDealRunbook(journey: string) {
+export function getDefinitiveDealRunbook(journey: string, options: RunbookPageOptions = {}) {
   const normalized = String(journey || '').trim().toLowerCase() as DefinitiveJourney;
   const definition = runbookDefinitions.find(runbook => runbook.journey === normalized);
   if (!definition) return null;
-  return toRunbook(definition);
+  return toRunbook(definition, options);
 }
 
-function toRunbook(definition: RunbookDefinition) {
+function toRunbook(definition: RunbookDefinition, options: RunbookPageOptions = {}) {
   const routeMap = buildDefinitiveDealRouteMap();
-  const mechanics = routeMap
-    .filter(route => route.readiness !== 'reserved' && route.journeys.includes(definition.journey))
-    .slice(0, 24)
+  const matchingRoutes = routeMap
+    .filter(route => route.readiness !== 'reserved' && route.journeys.includes(definition.journey));
+  const page = normalizePage(options, matchingRoutes.length, 24, 50);
+  const mechanics = matchingRoutes
+    .slice(page.offset, page.offset + page.limit)
     .map(route => ({
       slotId: route.slotId,
       name: route.name,
@@ -204,6 +212,13 @@ function toRunbook(definition: RunbookDefinition) {
     })),
     representativeModelSlots: mechanics,
     representativeModelSlotCount: mechanics.length,
+    representativeModelSlotsPagination: {
+      total: matchingRoutes.length,
+      limit: page.limit,
+      offset: page.offset,
+      nextCursor: page.offset + page.limit < matchingRoutes.length ? String(page.offset + page.limit) : null,
+      previousCursor: page.offset > 0 ? String(Math.max(0, page.offset - page.limit)) : null,
+    },
     next_suggested_calls: [
       {
         toolName: 'ingest_deal_payload',
@@ -227,4 +242,21 @@ function toRunbook(definition: RunbookDefinition) {
     the_line_invariant:
       'This runbook gives workflow and deterministic tool routing only. Professional decisions remain with the user, counsel, advisors, specialists, or the court.',
   };
+}
+
+function normalizePage(
+  options: RunbookPageOptions,
+  total: number,
+  defaultLimit: number,
+  maxLimit: number,
+) {
+  const rawLimit = Number(options.limit);
+  const rawOffset = Number(options.cursor);
+  const limit = Number.isFinite(rawLimit)
+    ? Math.max(1, Math.min(maxLimit, Math.floor(rawLimit)))
+    : defaultLimit;
+  const offset = Number.isFinite(rawOffset)
+    ? Math.max(0, Math.min(Math.floor(rawOffset), Math.max(0, total - 1)))
+    : 0;
+  return { limit, offset };
 }

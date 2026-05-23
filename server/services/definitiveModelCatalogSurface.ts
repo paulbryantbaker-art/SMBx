@@ -10,10 +10,17 @@ import {
 
 export const DEFINITIVE_MODEL_CATALOG_SURFACE_VERSION = 'DEFINITIVE.model-catalog-surface.v0.1';
 
-export function buildDefinitiveModelCatalogSurface() {
+export interface DefinitiveCatalogPageOptions {
+  limit?: unknown;
+  cursor?: unknown;
+}
+
+export function buildDefinitiveModelCatalogSurface(options: DefinitiveCatalogPageOptions = {}) {
   const catalog = listDefinitiveDealMechanicsCatalog();
   const routeMap = buildDefinitiveDealRouteMap();
   const routeBySlot = new Map(routeMap.map(route => [route.slotId, route]));
+  const page = normalizePage(options, catalog.length, 50, 50);
+  const pagedCatalog = catalog.slice(page.offset, page.offset + page.limit);
 
   return {
     schema: DEFINITIVE_MODEL_CATALOG_SURFACE_VERSION,
@@ -24,9 +31,17 @@ export function buildDefinitiveModelCatalogSurface() {
       bySlotEndpoint: '/api/definitive/model-catalog/{slotId}',
       byDealMechanicsEndpoint: '/api/definitive/deal-mechanics/models/{slotId}',
       slotExamples: ['M109', 'M148', 'M200', 'M206', 'M221'],
+      pagination: 'Use limit and cursor query parameters. Default and maximum page size are 50 model slots.',
       agentUse: 'Use this compact catalog when selecting methodology slots. Use compose_model_stack or introspect_capabilities for deal-specific routing.',
     },
-    models: catalog.map(model => {
+    pagination: {
+      total: catalog.length,
+      limit: page.limit,
+      offset: page.offset,
+      nextCursor: page.offset + page.limit < catalog.length ? String(page.offset + page.limit) : null,
+      previousCursor: page.offset > 0 ? String(Math.max(0, page.offset - page.limit)) : null,
+    },
+    models: pagedCatalog.map(model => {
       const route = routeBySlot.get(model.slotId);
       return {
         slotId: model.slotId,
@@ -108,4 +123,21 @@ export function getDefinitiveModelSlotSurface(slotId: string) {
 
 function normalizeSlotId(slotId: string) {
   return String(slotId || '').trim().toUpperCase();
+}
+
+function normalizePage(
+  options: DefinitiveCatalogPageOptions,
+  total: number,
+  defaultLimit: number,
+  maxLimit: number,
+) {
+  const rawLimit = Number(options.limit);
+  const rawOffset = Number(options.cursor);
+  const limit = Number.isFinite(rawLimit)
+    ? Math.max(1, Math.min(maxLimit, Math.floor(rawLimit)))
+    : defaultLimit;
+  const offset = Number.isFinite(rawOffset)
+    ? Math.max(0, Math.min(Math.floor(rawOffset), Math.max(0, total - 1)))
+    : 0;
+  return { limit, offset };
 }
