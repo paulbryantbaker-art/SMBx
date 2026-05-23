@@ -87,6 +87,7 @@ const expectedTools = [
   'compose_deal_package',
   'verify_package',
   'finalize_deal_package',
+  'reopen_deal_package',
   'resume_deal',
   'compose_lifecycle_trace',
   'prepare_ioi_packet',
@@ -436,6 +437,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.schemaNames.includes('DealPackage'), 'schema registry exposes DealPackage');
   assert(registry.schemaNames.includes('PackageVerification'), 'schema registry exposes PackageVerification');
   assert(registry.schemaNames.includes('FinalizedDealPackage'), 'schema registry exposes FinalizedDealPackage');
+  assert(registry.schemaNames.includes('ReopenedDealPackage'), 'schema registry exposes ReopenedDealPackage');
   assert(registry.schemaNames.includes('LifecycleTrace'), 'schema registry exposes LifecycleTrace');
   assert(registry.schemaNames.includes('IOIPacket'), 'schema registry exposes IOIPacket');
   assert(registry.schemaNames.includes('LOIPacket'), 'schema registry exposes LOIPacket');
@@ -470,6 +472,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assert(registry.toolSchemaMap.compose_deal_package.takeBack.includes('DealPackage'), 'package take-back maps DealPackage');
   assert(registry.toolSchemaMap.verify_package.output.includes('PackageVerification'), 'verify package output maps PackageVerification');
   assert(registry.toolSchemaMap.finalize_deal_package.takeBack.includes('SignedManifest'), 'finalize package take-back maps signed manifest');
+  assert(registry.toolSchemaMap.reopen_deal_package.output.includes('ReopenedDealPackage'), 'reopen package output maps reopened package');
   assert(registry.toolSchemaMap.resume_deal.takeBack.includes('DealPackage'), 'resume take-back maps DealPackage');
   assert(registry.toolSchemaMap.compose_lifecycle_trace.takeBack.includes('LifecycleTrace'), 'lifecycle trace maps LifecycleTrace');
   assert(registry.toolSchemaMap.prepare_ioi_packet.takeBack.includes('IOIPacket'), 'IOI packet maps IOIPacket');
@@ -940,6 +943,49 @@ await test('FinalizedDealPackage produces audit and manifest take-back artifacts
   assertEqual(finalized.merkleProof.schema, 'MerkleInclusionProof.v0.1', 'merkle proof attached');
   assert(finalized.takeBackArtifacts.includes('SignedManifest'), 'signed manifest is portable');
   assert(finalized.takeBackArtifacts.includes('MerkleInclusionProof'), 'merkle proof is portable');
+});
+
+await test('ReopenedDealPackage keeps the recursive Deal OS loop alive after handoff', async () => {
+  const packageResponse = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'compose_deal_package',
+    input: {
+      payload: {
+        journey: 'buy',
+        targetName: 'Reopen Target',
+        industry: 'business services',
+        jurisdiction: 'US-DE',
+        ebitdaCents: 1_500_000_00,
+      },
+    },
+    envelope: {},
+  });
+  const packageResult = packageResponse.body.result.result;
+  const reopenedResponse = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'reopen_deal_package',
+    input: {
+      dealPackage: packageResult.dealPackage,
+      dealState: packageResult.dealState,
+      patch: {
+        documents: [{ name: 'seller follow-up QoE', type: 'qoe', hash: 'sha256:reopen-qoe' }],
+        notes: 'Seller provided updated working-capital support after package handoff.',
+      },
+      reopenReason: 'new_qoe_document_received',
+      reopenedAt: '2026-05-23T00:00:00.000Z',
+    },
+    envelope: {},
+  });
+
+  assertEqual(reopenedResponse.status, 200, 'reopened package status');
+  const reopenRecord = reopenedResponse.body.result.result.reopenRecord;
+  const reopenedState = reopenedResponse.body.result.result.dealState;
+  assertEqual(reopenRecord.schema, 'ReopenedDealPackage.v0.1', 'reopen record schema');
+  assertEqual(reopenRecord.packageCid, packageResult.dealPackage.packageCid, 'reopen record links package');
+  assert(reopenedState.parentCids.includes(packageResult.dealState.cid), 'reopened state preserves prior state parent');
+  assert(reopenedState.parentCids.includes(packageResult.dealPackage.packageCid), 'reopened state preserves package parent');
+  assert(reopenRecord.changedPaths.includes('documents'), 'reopen record tracks new document');
+  assert(reopenRecord.takeBackArtifacts.includes('ReopenedDealPackage'), 'reopen record is portable');
 });
 
 await test('Resume deal returns current lifecycle position and next calls', async () => {

@@ -59,6 +59,7 @@ try {
     assert(body.tools.some((tool: any) => tool.name === 'compose_deal_package'), 'compose_deal_package is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'verify_package'), 'verify_package is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'finalize_deal_package'), 'finalize_deal_package is advertised');
+    assert(body.tools.some((tool: any) => tool.name === 'reopen_deal_package'), 'reopen_deal_package is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'resume_deal'), 'resume_deal is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'compose_lifecycle_trace'), 'compose_lifecycle_trace is advertised');
     assert(body.tools.some((tool: any) => tool.name === 'prepare_ioi_packet'), 'prepare_ioi_packet is advertised');
@@ -626,6 +627,34 @@ try {
     assertEqual(finalizedPackage.signedManifest.schema, 'SignedManifest.v0.1', 'finalized package signed manifest schema');
     assertEqual(finalizedPackage.merkleProof.schema, 'MerkleInclusionProof.v0.1', 'finalized package merkle proof schema');
     assert(finalization.body.persistence?.packetType === 'FinalizedDealPackage.v0.1', 'finalized package packet persisted');
+
+    const reopened = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'reopen_deal_package',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-package:read', 'deal-state:write'],
+      input: {
+        dealPackage,
+        dealState,
+        patch: {
+          documents: [
+            { name: 'fixture updated QoE', type: 'qoe', hash: 'sha256:fixture-updated-qoe' },
+          ],
+          notes: 'External agent returned new diligence after package handoff.',
+        },
+        reopenReason: 'external_agent_returned_new_diligence',
+        reopenedAt: '2026-05-23T00:00:00.000Z',
+      },
+    });
+    assertEqual(reopened.status, 200, 'reopen package route status');
+    const reopenRecord = reopened.body.result?.result?.reopenRecord;
+    assertEqual(reopenRecord.schema, 'ReopenedDealPackage.v0.1', 'reopen record schema');
+    assertEqual(reopenRecord.packageCid, dealPackage.packageCid, 'reopen links package');
+    assert(reopened.body.result?.result?.dealState?.parentCids.includes(dealPackage.packageCid), 'reopened state preserves package cid');
+    assert(reopened.body.persistence?.packetType === 'ReopenedDealPackage.v0.1', 'reopened package packet persisted');
   });
 
   await test('DealState control packets are persisted for deal resume', async () => {

@@ -230,6 +230,8 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
       return verifyDefinitiveDealPackage(input);
     case 'finalize_deal_package':
       return finalizeDefinitiveDealPackage(input);
+    case 'reopen_deal_package':
+      return reopenDefinitiveDealPackage(input);
     case 'resume_deal':
       return resumeDefinitiveDeal(input);
     case 'compose_lifecycle_trace':
@@ -269,6 +271,7 @@ export function executeDefinitiveDealStateTool(toolName: string, input: Record<s
           'compose_deal_package',
           'verify_package',
           'finalize_deal_package',
+          'reopen_deal_package',
           'resume_deal',
           'compose_lifecycle_trace',
           'prepare_ioi_packet',
@@ -298,6 +301,7 @@ export function isDefinitiveDealStateTool(toolName: string): boolean {
     'compose_deal_package',
     'verify_package',
     'finalize_deal_package',
+    'reopen_deal_package',
     'resume_deal',
     'compose_lifecycle_trace',
     'prepare_ioi_packet',
@@ -716,6 +720,73 @@ export function finalizeDefinitiveDealPackage(input: Record<string, any>) {
     },
     state_hash_after: state?.stateHash || nullableString(dealPackage.dealStateHash) || null,
     completeness_contribution_delta: 0,
+    methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
+    the_line_invariant: LINE_INVARIANT,
+  };
+}
+
+export function reopenDefinitiveDealPackage(input: Record<string, any>) {
+  const dealPackage = normalizePackage(input.dealPackage ?? input.package ?? input);
+  const prior = normalizePriorState(input.dealState ?? input.state ?? dealPackage.dealState);
+  const patch = normalizePayload(input.patch ?? input.dealPayloadPatch ?? {});
+  const basePayload = prior?.payload && typeof prior.payload === 'object'
+    ? prior.payload
+    : normalizePayload(input.payload ?? input.dealPayload ?? {});
+  const reopenReason = nullableString(input.reopenReason) || nullableString(input.reason) || 'new_information_or_recursive_agent_update';
+  const reopenedAt = nullableString(input.reopenedAt) || new Date().toISOString();
+  const payload = deepMerge(basePayload, {
+    ...patch,
+    reopenedFromPackageCid: nullableString(dealPackage.packageCid) || null,
+    reopenReason,
+    reopenedAt,
+  });
+  const parentCids = [
+    ...(prior?.cid ? [prior.cid] : []),
+    ...(nullableString(dealPackage.packageCid) ? [String(dealPackage.packageCid)] : []),
+    ...(prior?.parentCids || []),
+  ];
+  const state = buildDealState({
+    payload,
+    revision: (prior?.revision || 0) + 1,
+    idempotencyKey: nullableString(input.idempotencyKey) || prior?.idempotencyKey || null,
+    parentCids: [...new Set(parentCids)],
+  });
+  const nextSuggestedCalls = buildNextCallHints(state);
+  const reopenRecord = {
+    reopenId: `reopen_${sha256(stableStringify({
+      packageCid: dealPackage.packageCid,
+      stateCid: state.cid,
+      patch,
+      reopenReason,
+    })).slice(0, 16)}`,
+    schema: 'ReopenedDealPackage.v0.1',
+    packageCid: nullableString(dealPackage.packageCid) || null,
+    sourceDealStateCid: prior?.cid || nullableString(dealPackage.dealStateCid) || null,
+    reopenedDealStateCid: state.cid,
+    reopenedDealStateHash: state.stateHash,
+    reopenReason,
+    reopenedAt,
+    changedPaths: diffObjects(basePayload, payload),
+    next_suggested_calls: nextSuggestedCalls,
+    takeBackArtifacts: ['DealState', 'DealStateDiff', 'ReopenedDealPackage', 'MCPCallHint[]'],
+    lineInvariant: LINE_INVARIANT,
+  };
+
+  return {
+    ok: true,
+    action: 'reopen_deal_package',
+    result: {
+      reopenRecord,
+      dealState: state,
+      dealPackage,
+      classificationKey: state.classificationKey,
+      missingInputContract: state.missingInputContract,
+      completenessReport: state.completenessReport,
+      next_suggested_calls: nextSuggestedCalls,
+      portableTakeBackArtifacts: reopenRecord.takeBackArtifacts,
+    },
+    state_hash_after: state.stateHash,
+    completeness_contribution_delta: prior ? state.completenessReport.score - prior.completenessReport.score : state.completenessReport.score,
     methodology_version: DEFINITIVE_METHODOLOGY_VERSION,
     the_line_invariant: LINE_INVARIANT,
   };

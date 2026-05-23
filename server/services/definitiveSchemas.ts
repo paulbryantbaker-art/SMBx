@@ -606,6 +606,28 @@ const FinalizedDealPackage: JsonSchema = {
   },
 };
 
+const ReopenedDealPackage: JsonSchema = {
+  $id: schemaId('ReopenedDealPackage'),
+  title: 'ReopenedDealPackage',
+  type: 'object',
+  additionalProperties: true,
+  required: ['reopenId', 'schema', 'packageCid', 'reopenedDealStateCid', 'reopenedDealStateHash', 'changedPaths', 'next_suggested_calls', 'takeBackArtifacts', 'lineInvariant'],
+  properties: {
+    reopenId: { type: 'string' },
+    schema: { type: 'string', const: 'ReopenedDealPackage.v0.1' },
+    packageCid: { type: ['string', 'null'] },
+    sourceDealStateCid: { type: ['string', 'null'] },
+    reopenedDealStateCid: { type: 'string' },
+    reopenedDealStateHash: { type: 'string' },
+    reopenReason: { type: 'string' },
+    reopenedAt: { type: 'string' },
+    changedPaths: { type: 'array', items: { type: 'string' } },
+    next_suggested_calls: { type: 'array', items: { $ref: schemaId('MCPCallHint') } },
+    takeBackArtifacts: { type: 'array', items: { type: 'string' } },
+    lineInvariant: { type: 'string' },
+  },
+};
+
 const LifecycleTrace: JsonSchema = {
   $id: schemaId('LifecycleTrace'),
   title: 'LifecycleTrace',
@@ -1153,6 +1175,7 @@ export const DEFINITIVE_SCHEMAS: Record<string, JsonSchema> = {
   DealPackage,
   PackageVerification,
   FinalizedDealPackage,
+  ReopenedDealPackage,
   LifecycleTrace,
   IOIPacket,
   LOIPacket,
@@ -1258,6 +1281,11 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     input: ['DealPackage', 'DealState'],
     output: ['FinalizedDealPackage', 'PackageVerification', 'AuditPacket', 'SignedManifest', 'Attestation', 'MerkleInclusionProof', 'DealPackage', 'DealState', 'MCPCallHint'],
     takeBack: ['FinalizedDealPackage', 'PackageVerification', 'AuditPacket', 'SignedManifest', 'MerkleInclusionProof', 'DealPackage'],
+  },
+  reopen_deal_package: {
+    input: ['DealPackage', 'DealState', 'DealPayload'],
+    output: ['ReopenedDealPackage', 'DealState', 'ClassificationKey', 'CompletenessReport', 'MissingInputContract', 'MCPCallHint'],
+    takeBack: ['ReopenedDealPackage', 'DealState', 'DealStateDiff', 'MCPCallHint'],
   },
   resume_deal: {
     input: ['DealState', 'DealPayload', 'DealPackage'],
