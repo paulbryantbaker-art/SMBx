@@ -291,6 +291,41 @@ const publishedStandardDoctrine = {
   conformanceBadge: 'DEFINITIVE-conformant',
 };
 
+const managedAgentTemplates = [
+  {
+    id: 'managed_agent_acquisition_analyst',
+    label: 'Acquisition Analyst Agent',
+    purpose: 'Runs intake, thesis-to-target context, model-stack selection, iterative valuation/model versions, and IOI/LOI support for buy-side teams that want a rented smbX agent.',
+    primaryTools: ['ingest_deal_payload', 'compose_deal_plan', 'compose_model_stack', 'run_model_iteration', 'generate_output_doc'],
+    takeBackArtifacts: ['DealState', 'CompletenessReport', 'ModelOutput', 'DocumentDraft', 'MCPCallHint[]'],
+    lineBoundary: 'Computes and packages deal work; does not advise whether to buy, submit, negotiate, or close.',
+  },
+  {
+    id: 'managed_agent_diligence_manager',
+    label: 'Diligence Manager Agent',
+    purpose: 'Maintains the data room, source gaps, diligence request list, disclosure subsets, model dependencies, and package verification loop.',
+    primaryTools: ['compose_data_room_index', 'prepare_diligence_request', 'disclose_subset', 'list_model_executions', 'verify_package'],
+    takeBackArtifacts: ['DataRoomIndex', 'DiligenceRequest', 'DisclosureSubset', 'SourceGapList', 'PackageVerification'],
+    lineBoundary: 'Organizes and verifies diligence state; does not provide legal opinions, transmit diligence externally, or certify legal sufficiency.',
+  },
+  {
+    id: 'managed_agent_document_builder',
+    label: 'Document Builder Agent',
+    purpose: 'Turns current DealState and model lineage into Studio output such as IOI, LOI, term sheet, CIM, IC memo, negotiation brief, funds flow, or PMI plan.',
+    primaryTools: ['generate_output_doc', 'compose_document_draft', 'prepare_ioi_packet', 'prepare_loi_packet', 'prepare_negotiation_brief'],
+    takeBackArtifacts: ['DocumentDraft', 'deliverableId', 'ModelExecutionId[]', 'OutputHash[]', 'AuditPacket'],
+    lineBoundary: 'Creates source-aware work-product scaffolds; counsel and the user own clause drafting, external transmission, and negotiation decisions.',
+  },
+  {
+    id: 'managed_agent_pmi_operator',
+    label: 'PMI Operator Agent',
+    purpose: 'Continues the Deal OS after close with PMI plans, value-creation tracking, source updates, model reruns, and monthly package refreshes.',
+    primaryTools: ['compose_pmi_plan', 'update_deal_payload', 'run_model_iteration', 'compose_deal_package', 'resume_deal'],
+    takeBackArtifacts: ['PMIPlan', 'DealStateDiff', 'ModelOutput', 'DealPackage', 'CompletenessReport'],
+    lineBoundary: 'Tracks and packages post-close work; does not operate the company or issue binding operating instructions.',
+  },
+];
+
 const workstreams: DefinitiveSubstrateWorkstream[] = [
   {
     id: 'WS1',
@@ -307,7 +342,7 @@ const workstreams: DefinitiveSubstrateWorkstream[] = [
     name: 'Persistent deal state and dependency graph',
     purpose: 'Turn model calls into a content-addressable DealState with action-key caching, cascade invalidation, and durable execution journaling.',
     primitives: ['DealState', 'DealPlan', 'model_dependency_graph', 'durable_execution_journal'],
-    mcpTools: ['compose_deal_plan', 'get_deal_state', 'diff_deal_state', 'resume_deal', 'clone_deal_state', 'link_related_deal'],
+    mcpTools: ['compose_deal_plan', 'get_deal_state', 'diff_deal_state', 'resume_deal', 'clone_deal_state', 'link_related_deal', 'run_model_iteration', 'list_model_executions'],
     objectTypes: ['DealState', 'DealPlan', 'ModelOutput', 'AuditEvent'],
     buildPhase: 'Phase 1',
     doneCondition: 'An agent can reattach to a deal by CID/session, execute a plan, reuse cache hits, and prove stale outputs are invalidated when inputs change.',
@@ -347,7 +382,7 @@ const workstreams: DefinitiveSubstrateWorkstream[] = [
     name: 'First-class service deliverables',
     purpose: 'Wrap document creation, data-room indexes, RWI submissions, negotiation economics, funds flow, regulatory filing scaffolds, and PMI plans as manifest-backed deliverables.',
     primitives: ['Deliverable', 'DocumentDraft', 'DataRoomIndex'],
-    mcpTools: ['compose_data_room_index', 'compose_document_draft', 'prepare_rwi_submission', 'prepare_negotiation_brief', 'compose_close_readiness', 'generate_funds_flow', 'prepare_regulatory_filings', 'compose_pmi_plan'],
+    mcpTools: ['compose_data_room_index', 'compose_document_draft', 'generate_output_doc', 'prepare_rwi_submission', 'prepare_negotiation_brief', 'compose_close_readiness', 'generate_funds_flow', 'prepare_regulatory_filings', 'compose_pmi_plan'],
     objectTypes: ['Deliverable', 'DocumentDraft', 'DataRoomIndex', 'CloseReadiness'],
     buildPhase: 'Phase 4',
     doneCondition: 'Each service deliverable, document, or data-room index contributes to completeness, carries structured payload and human render, and preserves the compute-not-advise boundary.',
@@ -466,6 +501,7 @@ export function getDefinitiveSubstrateArchitecturePlan() {
     agentDesirabilitySignals,
     toolMetadataDoctrine,
     publishedStandardDoctrine,
+    managedAgentTemplates,
     marketplaceBuildOrder: [
       'Build /.well-known/mcp/server-card.json and /.well-known/mcp over the same DEFINITIVE manifest, not a parallel metadata file.',
       'Add query-aligned diligence tool metadata and outputSchema/structuredContent definitions for marketplace-facing tools.',

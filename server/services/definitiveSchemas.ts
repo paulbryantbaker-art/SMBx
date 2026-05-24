@@ -1443,6 +1443,16 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     output: ['ModelExecutionHistory', 'ModelOutput', 'AssumptionLog', 'OutputHash', 'MCPCallHint'],
     takeBack: ['ModelExecutionHistory', 'ModelOutput', 'AssumptionLog', 'OutputHash'],
   },
+  run_model_iteration: {
+    input: ['ModelExecutionHistory', 'DealState'],
+    output: ['ModelOutput', 'AssumptionLog', 'OutputHash', 'MCPCallHint'],
+    takeBack: ['ModelOutput', 'AssumptionLog', 'OutputHash', 'MCPCallHint'],
+  },
+  generate_output_doc: {
+    input: ['DealState', 'DocumentDraft', 'ModelExecutionHistory'],
+    output: ['DocumentDraft', 'DealState', 'ModelOutput', 'MCPCallHint'],
+    takeBack: ['DocumentDraft', 'ModelExecutionHistory', 'ModelOutput', 'OutputHash', 'MCPCallHint'],
+  },
 };
 
 export function buildDefinitiveSchemaRegistry() {

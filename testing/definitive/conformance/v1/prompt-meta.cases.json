@@ -1294,7 +1294,15 @@
         { "path": "toolsByName.compose_model_stack.description", "includes": "G28" },
         { "path": "toolsByName.compose_model_stack.description", "includes": "G29" },
         { "path": "toolsByName.compose_model_stack.description", "includes": "G30" },
-        { "path": "toolsByName.compose_model_stack.description", "includes": "M101-M223" }
+        { "path": "toolsByName.compose_model_stack.description", "includes": "M101-M223" },
+        { "path": "toolNames", "includes": "run_model_iteration" },
+        { "path": "toolNames", "includes": "list_model_executions" },
+        { "path": "toolNames", "includes": "generate_output_doc" },
+        { "path": "toolsByName.run_model_iteration.description", "includes": "Iteratively run" },
+        { "path": "toolsByName.run_model_iteration.description", "includes": "parent output hash" },
+        { "path": "toolsByName.list_model_executions.description", "includes": "freshness" },
+        { "path": "toolsByName.generate_output_doc.description", "includes": "Term Sheet" },
+        { "path": "toolsByName.generate_output_doc.description", "includes": "current deal state and model lineage" }
       ]
     }
   },
@@ -1351,7 +1359,7 @@
       "textIncludes": ["DealPayload", "CompletenessSpec", "DealPackage", "BestVehicleBlock"],
       "fields": [
         { "path": "primitiveCount", "equals": 8 },
-        { "path": "newMcpToolCount", "equals": 33 },
+        { "path": "newMcpToolCount", "equals": 36 },
         { "path": "newMcpTools", "includes": "compose_deal_package" },
         { "path": "newMcpTools", "includes": "disclose_subset" },
         { "path": "newMcpTools", "includes": "compose_data_room_index" },
@@ -1411,7 +1419,7 @@
         { "path": "endpoints.substrateArchitecture", "equals": "/api/definitive/substrate-architecture" },
         { "path": "access.publicDiscovery", "includes": "/api/definitive/substrate-architecture" },
         { "path": "substrateArchitectureSurface.primitiveCount", "equals": 8 },
-        { "path": "substrateArchitectureSurface.newMcpToolCount", "equals": 33 },
+        { "path": "substrateArchitectureSurface.newMcpToolCount", "equals": 36 },
         { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "DealState" },
         { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "DealStateDiff" },
         { "path": "substrateArchitectureSurface.schemaRegistry.schemaNames", "includes": "LifecycleTrace" },
@@ -1616,9 +1624,15 @@
         { "path": "toolNames", "includes": "ingest_deal_payload" },
         { "path": "toolNames", "includes": "resume_deal" },
         { "path": "toolNames", "includes": "compose_document_draft" },
+        { "path": "toolNames", "includes": "run_model_iteration" },
+        { "path": "toolNames", "includes": "generate_output_doc" },
         { "path": "toolsByName.ingest_deal_payload.structuredContentSchemas.output", "includes": "DealState" },
         { "path": "toolsByName.resume_deal.structuredContentSchemas.takeBack", "includes": "DealPackage" },
         { "path": "toolsByName.compose_document_draft.structuredContentSchemas.output", "includes": "DocumentDraft" },
+        { "path": "toolsByName.run_model_iteration.structuredContentSchemas.output", "includes": "ModelOutput" },
+        { "path": "toolsByName.run_model_iteration.structuredContentSchemas.takeBack", "includes": "OutputHash" },
+        { "path": "toolsByName.generate_output_doc.structuredContentSchemas.output", "includes": "DocumentDraft" },
+        { "path": "toolsByName.generate_output_doc.structuredContentSchemas.takeBack", "includes": "ModelOutput" },
         { "path": "toolsByName.compose_close_readiness.structuredContentSchemas.takeBack", "includes": "PMIPlan" },
         { "path": "toolsByName.ingest_deal_payload.outputSchema.required", "includes": "methodologyVersion" }
       ]
@@ -1738,9 +1752,18 @@
         { "path": "enterpriseAllowListTemplates.githubCopilotRegistry.registry.servers.0.id", "equals": "smbx-ai/diligence" },
         { "path": "enterpriseAllowListTemplates.githubCopilotRegistry.registry.servers.0.allowedTools", "includes": "introspect_capabilities" },
         { "path": "enterpriseAllowListTemplates.githubCopilotRegistry.registry.servers.0.allowedTools", "includes": "resume_deal" },
+        { "path": "enterpriseAllowListTemplates.githubCopilotRegistry.registry.servers.0.allowedTools", "includes": "run_model_iteration" },
+        { "path": "enterpriseAllowListTemplates.githubCopilotRegistry.registry.servers.0.allowedTools", "includes": "generate_output_doc" },
         { "path": "enterpriseAllowListTemplates.kiroAwsQRegistry.servers.0.allowTools", "includes": "describe_methodology" },
         { "path": "enterpriseAllowListTemplates.azureApiCenterBlueprint.auth.productionTarget", "includes": "OAuth 2.1" },
-        { "path": "enterpriseAllowListTemplates.bedrockAgentCoreCedarPolicyTemplate.policy", "includes": "context.noSuccessFee == true" }
+        { "path": "enterpriseAllowListTemplates.bedrockAgentCoreCedarPolicyTemplate.policy", "includes": "context.noSuccessFee == true" },
+        { "path": "agentExecutionExamples.0.id", "equals": "agent_example_ev_only_entry" },
+        { "path": "agentExecutionExamples.0.sequence.0.toolName", "equals": "introspect_capabilities" },
+        { "path": "agentExecutionExamples.1.sequence.1.toolName", "equals": "run_model_iteration" },
+        { "path": "agentExecutionExamples.1.sequence.2.toolName", "equals": "generate_output_doc" },
+        { "path": "managedAgentTemplates.0.id", "equals": "managed_agent_acquisition_analyst" },
+        { "path": "managedAgentTemplates.0.starterRunbook", "includes": "run_model_iteration" },
+        { "path": "managedAgentTemplates.2.starterRunbook", "includes": "generate_output_doc" }
       ]
     }
   },
@@ -1801,6 +1824,10 @@
         { "path": "toolSchemaMap.describe_methodology.output", "includes": "MethodologyDescription" },
         { "path": "toolSchemaMap.estimate_deal_cost.output", "includes": "DealCostEstimate" },
         { "path": "toolSchemaMap.lookup_model_slot.output", "includes": "ModelOutput" },
+        { "path": "toolSchemaMap.run_model_iteration.output", "includes": "ModelOutput" },
+        { "path": "toolSchemaMap.run_model_iteration.takeBack", "includes": "OutputHash" },
+        { "path": "toolSchemaMap.generate_output_doc.output", "includes": "DocumentDraft" },
+        { "path": "toolSchemaMap.generate_output_doc.takeBack", "includes": "ModelOutput" },
         { "path": "toolSchemaMap.disclose_subset.takeBack", "includes": "SelectiveDisclosureProof" },
         { "path": "toolSchemaMap.prepare_negotiation_brief.takeBack", "includes": "SourceGapList" }
       ]

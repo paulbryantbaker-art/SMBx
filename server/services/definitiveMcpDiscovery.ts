@@ -16,6 +16,8 @@ const WRITE_TOOLS = new Set([
   'defer_to_counsel',
   'compose_model_stack',
   'execute_model',
+  'run_model_iteration',
+  'generate_output_doc',
   'record_corpus_observation',
   'close_deal',
   'update_tax_position',

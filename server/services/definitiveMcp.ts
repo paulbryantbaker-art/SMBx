@@ -83,7 +83,9 @@ const DEFINITIVE_MCP_TOOLS = [
   'defer_to_counsel',
   'compose_model_stack',
   'execute_model',
+  'run_model_iteration',
   'list_model_executions',
+  'generate_output_doc',
   'record_corpus_observation',
   'validate_conformance',
   'close_deal',
@@ -586,6 +588,20 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
       required: ['modelId', 'input'],
     },
   },
+  run_model_iteration: {
+    description: 'Iteratively run a first deterministic model pass or rerun a saved model execution with input overrides. Returns persisted execution lineage, parent output hash, missing inputs, citations, output hash, and next_suggested_calls so external agents can iterate deal models instead of treating modeling as one-and-done.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dealId: { type: 'number', description: 'Optional deal ID for audit context.' },
+        modelId: { type: 'string', description: 'Canonical MODEL.*.v1 id. Optional when executionId is supplied.' },
+        executionId: { type: 'number', description: 'Optional prior model execution ID to rerun from.' },
+        input: { type: 'object', description: 'New model inputs. Financial values must be cents.' },
+        overrides: { type: 'object', description: 'Assumption overrides layered on top of the prior execution inputs.' },
+        reason: { type: 'string', description: 'Why this iteration is being run, for audit and version history.' },
+      },
+    },
+  },
   list_model_executions: {
     description: 'List persisted model executions and iterative model canvas versions for a deal, canvas tab, or model type. Returns output hashes, ModelOutput/runtime-output envelopes, version snapshots, parent-output lineage, dependency contracts, freshness/rerun status against optional current assumptions, and next_suggested_calls so agents can understand what has already been modeled before rerunning the deal.',
     inputSchema: {
@@ -598,6 +614,21 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
         currentVersionNumber: { type: 'number', description: 'Optional current model canvas version number for version comparison.' },
         limit: { type: 'number', description: 'Optional page size. Defaults to 25 and caps at 100.' },
       },
+    },
+  },
+  generate_output_doc: {
+    description: 'Generate a deal output document by agent-friendly name such as Term Sheet, LOI, IOI, diligence_request, data_room_index, funds_flow, negotiation_brief, pmi_plan, CIM, IC memo, or valuation_report. Resolves the internal deliverable route from the current deal state and model lineage, queues the document, returns a Doc/Studio action, model-dependency context, and THE LINE boundaries without requiring agents to know smbX menu slugs.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dealId: { type: 'number', description: 'Deal ID.' },
+        documentType: { type: 'string', description: 'Output document type, for example term_sheet, loi, diligence_request, funds_flow, pmi_plan, cim, or ic_memo.' },
+        audience: { type: 'string', description: 'Optional audience label.' },
+        purpose: { type: 'string', description: 'Optional drafting purpose.' },
+        sourceModelExecutionIds: { type: 'array', items: { type: 'number' }, description: 'Optional saved model executions this document should rely on.' },
+        modelPreference: { type: 'string', enum: ['auto', 'fast', 'deep', 'drafting', 'research'], description: 'Optional generation preference.' },
+      },
+      required: ['dealId', 'documentType'],
     },
   },
   record_corpus_observation: {
@@ -707,7 +738,9 @@ const TOOL_SCOPE: Record<DefinitiveMcpToolName, string[]> = {
   defer_to_counsel: ['counsel:deferral:create'],
   compose_model_stack: ['model-stack:compose', 'deal:read'],
   execute_model: ['model:execute', 'audit:write'],
+  run_model_iteration: ['model:execute', 'audit:write', 'model:read'],
   list_model_executions: ['model:read', 'deal:read'],
+  generate_output_doc: ['deal-state:read', 'studio:draft', 'model:read'],
   record_corpus_observation: ['corpus:write', 'data-rights:read'],
   validate_conformance: ['conformance:read'],
   close_deal: ['deal:write', 'immutable:write'],
@@ -1668,6 +1701,28 @@ function buildCapabilityCatalog(toolInput: Record<string, any>) {
           journey: normalizeJourney(toolInput.journey) || undefined,
           league: nullableString(toolInput.league) || undefined,
           dealType: nullableString(toolInput.dealType) || undefined,
+        },
+      },
+      {
+        toolName: 'run_model_iteration',
+        priority: 'P1',
+        reason: 'Run or rerun a deterministic model version. Modeling is iterative; each version keeps input, output hash, and parent lineage.',
+        inputHint: {
+          dealId: '<deal id, if persisted>',
+          modelId: '<modelId from compose_model_stack or lookup_model_slot>',
+          input: {
+            enterpriseValueCents: nullableNonNegativeNumber(toolInput.enterpriseValueCents) || '<known EV in cents, if available>',
+          },
+        },
+      },
+      {
+        toolName: 'generate_output_doc',
+        priority: 'P2',
+        reason: 'Generate a source-aware Studio document after the current model version and source gaps are understood.',
+        inputHint: {
+          dealId: '<deal id>',
+          documentType: '<term_sheet|loi|diligence_request|funds_flow|data_room_index|negotiation_brief|pmi_plan>',
+          sourceModelExecutionIds: ['<latest model execution id>'],
         },
       },
     ],

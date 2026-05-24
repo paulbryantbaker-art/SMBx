@@ -111,6 +111,9 @@ const expectedTools = [
   'defer_to_counsel',
   'compose_model_stack',
   'execute_model',
+  'run_model_iteration',
+  'list_model_executions',
+  'generate_output_doc',
   'record_corpus_observation',
   'validate_conformance',
   'close_deal',
@@ -167,7 +170,7 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assert(card.definitive.authoritySeedPlanEntries >= DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'agent card authority seed plan meets target');
   assertEqual(card.definitive.authoritySeedPlanStatus, 'ready_for_800_plus_seeding', 'agent card authority seed plan status');
   assertEqual(card.definitive.substratePrimitiveCount, 8, 'agent card substrate primitive count');
-  assertEqual(card.definitive.substrateNewMcpToolCount, 33, 'agent card substrate tool count');
+  assertEqual(card.definitive.substrateNewMcpToolCount, 36, 'agent card substrate tool count');
   assert(card.definitive.schemaRegistryNames.includes('DealPayload'), 'agent card exposes DealPayload schema');
   assert(card.definitive.schemaRegistryNames.includes('DealState'), 'agent card exposes DealState schema');
   assert(card.definitive.schemaRegistryNames.includes('DealStateDiff'), 'agent card exposes DealStateDiff schema');
@@ -227,7 +230,7 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   const substrateCapability = card.capabilities.find((item: any) => item.id === 'definitive_substrate_architecture') as any;
   assert(substrateCapability, 'substrate architecture capability exists');
   assertEqual(substrateCapability.primitiveCount, 8, 'substrate capability primitive count');
-  assertEqual(substrateCapability.newMcpToolCount, 33, 'substrate capability tool count');
+  assertEqual(substrateCapability.newMcpToolCount, 36, 'substrate capability tool count');
   assert(substrateCapability.agentOperatingDoctrine.noRejectionContract.includes('Agents are not rejected'), 'substrate capability blocks incomplete-payload rejection');
   assert(substrateCapability.lifecycleStages.includes('ioi'), 'substrate capability exposes IOI stage');
   assert(substrateCapability.lifecycleStages.includes('close_pmi'), 'substrate capability exposes close/PMI stage');
@@ -295,7 +298,7 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assert(manifest.authoritySurface.categoryIds.includes('ip_authorities'), 'manifest authority surface includes IP');
   assert(manifest.authoritySurface.categoryIds.includes('pass_through_pricing_boundary'), 'manifest authority surface includes THE LINE pricing boundary');
   assertEqual(manifest.substrateArchitectureSurface.primitiveCount, 8, 'manifest substrate primitive count');
-  assertEqual(manifest.substrateArchitectureSurface.newMcpToolCount, 33, 'manifest substrate tool count');
+  assertEqual(manifest.substrateArchitectureSurface.newMcpToolCount, 36, 'manifest substrate tool count');
   assert(manifest.substrateArchitectureSurface.agentOperatingDoctrine.productDoctrine.includes('Deal OS'), 'manifest substrate Deal OS doctrine');
   assert(manifest.substrateArchitectureSurface.agentOperatingDoctrine.noRejectionContract.includes('MissingInputContract'), 'manifest substrate no-rejection contract');
   assert(manifest.substrateArchitectureSurface.agentOperatingDoctrine.homeContract.includes('data rooms'), 'manifest substrate agent home contract includes data rooms');
@@ -410,10 +413,17 @@ await test('Registry package gives enterprise admins allow-list templates', asyn
   assert(registryPackage.registrySubmissionPackages.clientStorePackages.some((surface: any) => surface.surfaceId === 'google_agent_gallery'), 'registry package includes Google Agent Gallery candidate');
   assert(registryPackage.registrySubmissionPackages.semanticToolMetadataChecklist.some((item: string) => item.includes('outputSchema')), 'registry package checks outputSchema metadata');
   assert(registryPackage.registrySubmissionPackages.semanticToolMetadataChecklist.some((item: string) => item.includes('recurring Deal OS')), 'registry package keeps Deal OS discoverability');
+  assert(registryPackage.agentExecutionExamples.some((item: any) => item.id === 'agent_example_ev_only_entry'), 'registry package includes EV-only agent entry example');
+  assert(registryPackage.agentExecutionExamples.some((item: any) => item.sequence.some((step: any) => step.toolName === 'run_model_iteration')), 'registry package examples include model iteration');
+  assert(registryPackage.agentExecutionExamples.some((item: any) => item.sequence.some((step: any) => step.toolName === 'generate_output_doc')), 'registry package examples include output document generation');
+  assert(registryPackage.managedAgentTemplates.some((item: any) => item.id === 'managed_agent_acquisition_analyst'), 'registry package includes managed acquisition agent template');
+  assert(registryPackage.managedAgentTemplates.some((item: any) => item.starterRunbook.includes('generate_output_doc')), 'managed agent templates include document generation');
 
   assertEqual(allowLists.githubCopilotRegistry.policyMode, 'registry_only', 'GitHub Copilot registry-only posture');
   assertEqual(allowLists.githubCopilotRegistry.registry.servers[0].id, 'smbx-ai/diligence', 'GitHub registry server id');
   assert(allowLists.githubCopilotRegistry.registry.servers[0].allowedTools.includes('introspect_capabilities'), 'allow-list includes capability introspection');
+  assert(allowLists.githubCopilotRegistry.registry.servers[0].allowedTools.includes('run_model_iteration'), 'allow-list includes model iteration');
+  assert(allowLists.githubCopilotRegistry.registry.servers[0].allowedTools.includes('generate_output_doc'), 'allow-list includes document generation');
   assert(allowLists.kiroAwsQRegistry.servers[0].allowTools.includes('describe_methodology'), 'Kiro/AWS registry includes methodology tool');
   assert(allowLists.azureApiCenterBlueprint.endpoints.toolCall.endsWith('/api/definitive/tools/call'), 'Azure blueprint exposes tool call');
   assert(allowLists.bedrockAgentCoreCedarPolicyTemplate.policy.includes('requestedToolLineStatus != "LINE_VIOLATION"'), 'Cedar policy preserves THE LINE');
@@ -574,7 +584,7 @@ await test('Authority Register seed plan is explicit and above 800 planned entri
 await test('Substrate architecture plan exposes the terminal orchestration primitives', async () => {
   const architecture = getDefinitiveSubstrateArchitecturePlan();
   assertEqual(architecture.primitiveCount, 8, 'substrate architecture primitive count');
-  assertEqual(architecture.newMcpToolCount, 33, 'substrate architecture tool count');
+  assertEqual(architecture.newMcpToolCount, 36, 'substrate architecture tool count');
   assert(architecture.agentOperatingDoctrine.productDoctrine.includes('Deal OS'), 'substrate plan is Deal OS');
   assert(architecture.agentOperatingDoctrine.noRejectionContract.includes('Agents are not rejected'), 'substrate plan accepts incomplete agent payloads');
   assert(architecture.agentOperatingDoctrine.homeContract.includes('documents'), 'substrate plan includes document creation surface');

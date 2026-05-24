@@ -153,6 +153,22 @@ export const TOOL_DEFINITIONS: Tool[] = [
     },
   },
   {
+    name: 'generate_output_doc',
+    description: 'Agent-friendly document generation contract. Use when an external agent or Yulia asks for a business output by normal name, such as term_sheet, loi, ioi, diligence_request, funds_flow, data_room_index, negotiation_brief, pmi_plan, CIM, or IC memo. The tool resolves the internal menu item, queues the document, returns a Studio/Doc tab action, and includes model-dependency context so the agent does not need to know smbX menu slugs.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId: { type: 'number', description: 'Deal ID' },
+        documentType: { type: 'string', description: 'Human/agent-facing document type, for example term_sheet, loi, ioi, diligence_request, funds_flow, data_room_index, negotiation_brief, pmi_plan, cim, ic_memo, or valuation_report.' },
+        audience: { type: 'string', description: 'Optional audience label, such as internal_deal_team, counsel, lender, seller, buyer, board, or investor.' },
+        purpose: { type: 'string', description: 'Optional purpose or drafting objective.' },
+        sourceModelExecutionIds: { type: 'array', items: { type: 'number' }, description: 'Optional saved model execution IDs this document should rely on.' },
+        modelPreference: { type: 'string', enum: ['auto', 'fast', 'deep', 'drafting', 'research'], description: 'Optional model preference. Auto is default.' },
+      },
+      required: ['dealId', 'documentType'],
+    },
+  },
+  {
     name: 'create_pitch_book',
     description: 'Create a source-grounded Pitch Book Studio book for a deal or blank mandate. Use for buyer pitch books, seller pitch books, IC decks, QoE preview books, CIM summary decks, board updates, and lender books. Returns a persisted Studio book with slide-level provenance.',
     input_schema: {
@@ -248,6 +264,21 @@ export const TOOL_DEFINITIONS: Tool[] = [
         dealId: { type: 'number', description: 'Optional deal ID for audit context.' },
       },
       required: ['modelId', 'input'],
+    },
+  },
+  {
+    name: 'run_model_iteration',
+    description: 'Agent-friendly model execution contract. Run a first model pass or rerun a saved model execution with overrides. Returns a persisted execution ID, output hash, parent-output lineage, missing inputs, citations, and next_suggested_calls so agents can iteratively work the deal rather than treating modeling as one-and-done.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId: { type: 'number', description: 'Optional deal ID for audit context.' },
+        modelId: { type: 'string', description: 'Canonical MODEL.*.v1 id. Optional when executionId is supplied.' },
+        executionId: { type: 'number', description: 'Optional prior model execution ID to rerun from.' },
+        input: { type: 'object', description: 'New model inputs. Financial values must be cents.' },
+        overrides: { type: 'object', description: 'Assumption overrides layered on top of the prior execution inputs.' },
+        reason: { type: 'string', description: 'Why this iteration is being run, for audit and version history.' },
+      },
     },
   },
   {
@@ -848,6 +879,8 @@ export async function executeTool(
         return await generateFreeDeliverable(input, userId);
       case 'generate_deal_deliverable':
         return await generateDealDeliverable(input, userId);
+      case 'generate_output_doc':
+        return await generateOutputDoc(input, userId);
       case 'create_pitch_book':
         return await createPitchBookTool(input, userId);
       case 'revise_pitch_book':
@@ -862,6 +895,8 @@ export async function executeTool(
         return await composeModelStackTool(input, userId);
       case 'execute_model':
         return await executeModelTool(input, userId, conversationId);
+      case 'run_model_iteration':
+        return await runModelIterationTool(input, userId, conversationId);
       case 'lookup_citation':
         return await lookupCitationTool(input, userId);
       case 'fetch_market_data':
@@ -1350,6 +1385,67 @@ async function generateDealDeliverable(input: Record<string, any>, userId: numbe
   });
 }
 
+async function generateOutputDoc(input: Record<string, any>, userId: number): Promise<string> {
+  const dealId = Number(input.dealId);
+  const documentType = normalizeOutputDocumentType(input.documentType || input.docType || input.kind);
+  if (!Number.isFinite(dealId) || dealId <= 0) return JSON.stringify({ error: 'dealId is required' });
+  if (!documentType) return JSON.stringify({ error: 'documentType is required' });
+
+  const [deal] = await sql`
+    SELECT id, business_name, user_id, journey_type, current_gate, league, industry, location,
+           revenue, sde, ebitda, asking_price, deal_type, jurisdiction, financials
+    FROM deals
+    WHERE id = ${dealId} AND user_id = ${userId}
+    LIMIT 1
+  `;
+  if (!deal) return JSON.stringify({ error: 'Deal not found' });
+
+  const resolved = resolveOutputDocMenuItem(documentType, deal.journey_type);
+  if (!resolved.menuItemSlug) {
+    return JSON.stringify({
+      error: 'unsupported_document_type',
+      documentType,
+      message: `No internal deliverable route is mapped for ${documentType} yet.`,
+      supportedDocumentTypes: OUTPUT_DOC_TYPES,
+    });
+  }
+
+  const dependencyIds = normalizeNumberArray(input.sourceModelExecutionIds);
+  const modelDependencies = dependencyIds.length
+    ? await readModelDependencySummaries(userId, dependencyIds)
+    : [];
+  const draftPayload = payloadFromDealForAgentDoc(deal, modelDependencies);
+  const { executeDefinitiveDealStateTool } = await import('./definitiveDealState.js');
+  const draft = executeDefinitiveDealStateTool('compose_document_draft', {
+    payload: draftPayload,
+    documentType: resolved.definitiveDocumentType,
+    audience: input.audience,
+    objective: input.purpose,
+  });
+
+  const generated = parseJsonResult(await generateDealDeliverable({
+    dealId,
+    menuItemSlug: resolved.menuItemSlug,
+    modelPreference: input.modelPreference || 'drafting',
+  }, userId));
+
+  return JSON.stringify({
+    success: !generated?.error,
+    schema: 'AgentOutputDocumentRun.v0.1',
+    documentType,
+    definitiveDocumentType: resolved.definitiveDocumentType,
+    menuItemSlug: resolved.menuItemSlug,
+    deliverable: generated,
+    documentDraft: (draft as any)?.result?.documentDraft || null,
+    modelDependencies,
+    sourceModelExecutionIds: dependencyIds,
+    next_suggested_calls: buildOutputDocNextCalls(documentType, dependencyIds, generated),
+    lineBoundary:
+      'generate_output_doc queues an internal work product and composes a source-aware scaffold. It does not transmit externally, negotiate, draft enforceability opinions, or provide legal/tax advice.',
+    takeBackArtifacts: ['deliverableId', 'DocumentDraft', 'ModelExecutionId[]', 'OutputHash[]', 'MCPCallHint[]'],
+  });
+}
+
 async function createPitchBookTool(input: Record<string, any>, userId: number): Promise<string> {
   const gate = await checkV19Entitlement(userId, 'studio_book', {
     actionId: 'create_pitch_book',
@@ -1589,6 +1685,126 @@ async function executeModelTool(input: Record<string, any>, userId: number, conv
     v19Readiness: readiness,
     v19Usage: await readV19UsageMeter(userId),
   });
+}
+
+async function runModelIterationTool(input: Record<string, any>, userId: number, conversationId: number): Promise<string> {
+  const dealId = input.dealId == null ? null : Number(input.dealId);
+  if (dealId && !(await hasDealAccess(dealId, userId))) return JSON.stringify({ error: 'Deal not found' });
+  const sourceSurface = String(input.sourceSurface || 'agent_model_iteration');
+
+  const prior = input.executionId == null
+    ? null
+    : await readModelExecutionForIteration(userId, Number(input.executionId));
+  if (input.executionId != null && !prior) return JSON.stringify({ error: 'Model execution not found' });
+
+  const modelId = String(input.modelId || prior?.model_id || '').trim();
+  if (!modelId) {
+    return JSON.stringify({
+      error: 'modelId_required',
+      message: 'Supply modelId for a first run, or executionId for a rerun from a saved model execution.',
+    });
+  }
+
+  const mergedInput = {
+    ...(prior?.inputs && typeof prior.inputs === 'object' ? prior.inputs : {}),
+    ...asRecord(input.input),
+    ...asRecord(input.overrides),
+  };
+
+  const gate = await checkV19Entitlement(userId, 'model_run', {
+      actionId: 'run_model_iteration',
+      toolName: 'run_model_iteration',
+      sourceSurface,
+      resourceType: 'model',
+      resourceId: modelId,
+    metadata: {
+      dealId,
+      parentExecutionId: prior?.id ?? null,
+      parentOutputHash: prior?.output_hash ?? null,
+    },
+  });
+  if (!gate.allowed) return stringifyV19Tollgate(gate);
+
+  try {
+    const execution = await executeV19Model({
+      modelId,
+      input: mergedInput,
+      dealId,
+      userId,
+      conversationId,
+    });
+    const record = await persistV19ModelExecution(execution, { toolName: 'run_model_iteration', sourceSurface });
+    if (prior) {
+      await sql`
+        UPDATE model_executions
+        SET parent_output_hash = ${prior.output_hash},
+            model_type = COALESCE(model_type, ${prior.model_type}),
+            model_title = COALESCE(model_title, ${prior.model_title})
+        WHERE id = ${Number(record.id)} AND user_id = ${userId}
+      `;
+    }
+
+    await recordV19UsageEvent({
+      userId,
+      eventType: 'model_run',
+      actionId: 'run_model_iteration',
+      toolName: 'run_model_iteration',
+      sourceSurface,
+      resourceType: 'model_execution',
+      resourceId: record.id,
+      metadata: {
+        dealId,
+        modelId: execution.modelId,
+        status: execution.status,
+        outputHash: execution.outputHash,
+        parentExecutionId: prior?.id ?? null,
+        parentOutputHash: prior?.output_hash ?? null,
+        reason: input.reason || null,
+      },
+    });
+
+    return JSON.stringify({
+      success: true,
+      schema: 'AgentModelIteration.v0.1',
+      modelExecutionId: record.id,
+      parentExecutionId: prior?.id ?? null,
+      parentOutputHash: prior?.output_hash ?? null,
+      modelId: execution.modelId,
+      status: execution.status,
+      inputs: execution.inputs,
+      outputs: execution.outputs,
+      missingInputs: execution.missingInputs,
+      citationTags: execution.citationTags,
+      outputHash: execution.outputHash,
+      auditPayload: execution.auditPayload,
+      iterationBoundary:
+        'Modeling is iterative. This run is one version in a lineage; agents should test changed assumptions, compare versions, and regenerate dependent documents when outputs change.',
+      next_suggested_calls: execution.status === 'needs_inputs'
+        ? ['update_deal_payload', 'run_model_iteration']
+        : ['list_model_executions', 'generate_output_doc', 'compose_model_stack'],
+      v19Readiness: dealId ? await readDealV19Readiness(userId, dealId).catch(() => null) : null,
+      v19Usage: await readV19UsageMeter(userId),
+    });
+  } catch (err: any) {
+    if (prior?.canvas_tab_id || prior?.model_type) {
+      return JSON.stringify({
+        success: true,
+        schema: 'AgentModelIteration.v0.1',
+        status: 'prepared_for_canvas_execution',
+        modelId,
+        parentExecutionId: prior.id,
+        parentOutputHash: prior.output_hash,
+        canvas_action: 'create_model_tab',
+        modelType: prior.model_type,
+        title: prior.model_title || `${prior.model_type || 'Model'} rerun`,
+        initialAssumptions: mergedInput,
+        message: 'This saved execution belongs to an interactive canvas model. The rerun has been prepared with merged assumptions; the browser canvas performs the deterministic UI calculation and persists the next version.',
+        next_suggested_calls: ['create_model_tab', 'update_model', 'list_model_executions'],
+        lineBoundary: 'Canvas reruns are internal model work. The agent receives the rerun packet and parent hash; the user/advisor decides reliance.',
+      });
+    }
+    return JSON.stringify({ error: 'model_iteration_failed', message: err.message, modelId });
+  }
 }
 
 async function readV19ReadinessTool(input: Record<string, any>, userId: number): Promise<string> {
@@ -1871,6 +2087,169 @@ function nullableNumber(value: unknown): number | null {
   if (value === null || value === undefined || value === '') return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+const OUTPUT_DOC_TYPES = [
+  'term_sheet',
+  'loi',
+  'ioi',
+  'diligence_request',
+  'data_room_index',
+  'funds_flow',
+  'negotiation_brief',
+  'pmi_plan',
+  'cim',
+  'ic_memo',
+  'valuation_report',
+] as const;
+
+function parseJsonResult(value: string): Record<string, any> {
+  try {
+    const parsed = JSON.parse(value);
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : { raw: parsed };
+  } catch {
+    return { raw: value };
+  }
+}
+
+function normalizeNumberArray(value: unknown): number[] {
+  return Array.isArray(value)
+    ? value
+        .map(item => Number(item))
+        .filter(item => Number.isFinite(item) && item > 0)
+        .map(item => Math.floor(item))
+    : [];
+}
+
+function normalizeOutputDocumentType(value: unknown): string {
+  const normalized = String(value || '').trim().toLowerCase().replace(/[\s-]+/g, '_');
+  if (normalized === 'termsheet' || normalized === 'term_sheet_analysis') return 'term_sheet';
+  if (normalized === 'letter_of_intent' || normalized === 'loi_draft' || normalized === 'loi_outline') return 'loi';
+  if (normalized === 'indication_of_interest') return 'ioi';
+  if (normalized === 'data_room' || normalized === 'data_room_structure') return 'data_room_index';
+  if (normalized === 'fundsflow') return 'funds_flow';
+  if (normalized === 'negotiation') return 'negotiation_brief';
+  if (normalized === 'pmi' || normalized === '100_day_plan') return 'pmi_plan';
+  if (normalized === 'confidential_information_memorandum') return 'cim';
+  if (normalized === 'investment_committee_memo' || normalized === 'ic_deck') return 'ic_memo';
+  if (normalized === 'valuation') return 'valuation_report';
+  return normalized;
+}
+
+function resolveOutputDocMenuItem(documentType: string, journeyValue: unknown) {
+  const journey = normalizeV19Journey(journeyValue);
+  const forJourney = {
+    sell: {
+      term_sheet: 'sell-loi-comparison',
+      loi: 'sell-loi-comparison',
+      ioi: 'sell-buyer-brief',
+      diligence_request: 'sell-dd-checklist',
+      data_room_index: 'sell-data-room-structure',
+      funds_flow: 'sell-funds-flow',
+      negotiation_brief: 'sell-deal-structure-analysis',
+      cim: 'sell-cim',
+      valuation_report: 'sell-valuation-report',
+    },
+    buy: {
+      term_sheet: 'buy-loi-draft',
+      loi: 'buy-loi-draft',
+      ioi: 'buy-deal-scorecard',
+      diligence_request: 'buy-dd-checklist',
+      data_room_index: 'buy-dd-checklist',
+      funds_flow: 'buy-funds-flow',
+      negotiation_brief: 'buy-capital-structure',
+      ic_memo: 'buy-dd-summary',
+      valuation_report: 'buy-valuation-model',
+    },
+    raise: {
+      term_sheet: 'raise-term-sheet-analysis',
+      loi: 'raise-term-sheet-analysis',
+      ioi: 'raise-readiness-assessment',
+      diligence_request: 'raise-data-room-structure',
+      data_room_index: 'raise-data-room-structure',
+      negotiation_brief: 'raise-counter-proposal',
+      pmi_plan: 'pmi-100-day-plan',
+      ic_memo: 'raise-pitch-deck',
+      valuation_report: 'raise-pre-post-model',
+    },
+    pmi: {
+      pmi_plan: 'pmi-100-day-plan',
+      diligence_request: 'pmi-ops-assessment',
+      data_room_index: 'pmi-day-zero-checklist',
+      negotiation_brief: 'pmi-strategic-roadmap',
+    },
+  } as const;
+  const menuItemSlug = (forJourney[journey] as Record<string, string | undefined> | undefined)?.[documentType]
+    || (forJourney.buy as Record<string, string | undefined>)[documentType]
+    || null;
+  const definitiveDocumentType = documentType === 'term_sheet' ? 'loi_outline' : documentType;
+  return { menuItemSlug, definitiveDocumentType };
+}
+
+function payloadFromDealForAgentDoc(deal: Record<string, any>, modelDependencies: Record<string, any>[]) {
+  return {
+    dealId: Number(deal.id),
+    targetName: deal.business_name || null,
+    journey: deal.journey_type || null,
+    currentGate: deal.current_gate || null,
+    league: deal.league || null,
+    industry: deal.industry || null,
+    location: deal.location || null,
+    jurisdiction: deal.jurisdiction || null,
+    revenueCents: nullableNumber(deal.revenue),
+    sdeCents: nullableNumber(deal.sde),
+    ebitdaCents: nullableNumber(deal.ebitda),
+    enterpriseValueCents: nullableNumber(deal.asking_price),
+    dealType: deal.deal_type || null,
+    financials: asRecord(deal.financials),
+    modelOutputs: modelDependencies,
+  };
+}
+
+async function readModelDependencySummaries(userId: number, ids: number[]) {
+  if (!ids.length) return [];
+  const rows = await sql`
+    SELECT id, model_id, status, deal_id, model_type, model_title, input_hash, output_hash,
+           missing_inputs, citation_tags, created_at
+    FROM model_executions
+    WHERE user_id = ${userId}
+      AND id IN ${sql(ids)}
+    ORDER BY created_at DESC
+  `;
+  return rows.map(row => ({
+    executionId: Number(row.id),
+    modelId: row.model_id,
+    modelType: row.model_type || null,
+    modelTitle: row.model_title || null,
+    status: row.status,
+    dealId: row.deal_id == null ? null : Number(row.deal_id),
+    inputHash: row.input_hash,
+    outputHash: row.output_hash,
+    missingInputs: Array.isArray(row.missing_inputs) ? row.missing_inputs : [],
+    citationTags: Array.isArray(row.citation_tags) ? row.citation_tags : [],
+    createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : String(row.created_at),
+  }));
+}
+
+function buildOutputDocNextCalls(documentType: string, dependencyIds: number[], generated: Record<string, any>) {
+  const calls = dependencyIds.length ? ['list_model_executions'] : ['compose_model_stack', 'run_model_iteration'];
+  if (generated?.deliverableId) calls.push('compose_document_draft');
+  if (documentType === 'term_sheet' || documentType === 'loi') calls.push('prepare_negotiation_brief');
+  return [...new Set(calls)];
+}
+
+async function readModelExecutionForIteration(userId: number, executionId: number) {
+  if (!Number.isFinite(executionId) || executionId <= 0) return null;
+  const [row] = await sql`
+    SELECT id, model_id, status, deal_id, user_id, inputs, outputs, missing_inputs,
+           citation_tags, output_hash, canvas_tab_id, model_type, model_title,
+           client_version_number, version_snapshot
+    FROM model_executions
+    WHERE id = ${Math.floor(executionId)}
+      AND user_id = ${userId}
+    LIMIT 1
+  `;
+  return row || null;
 }
 
 function nullableBoolean(value: unknown): boolean | null {
