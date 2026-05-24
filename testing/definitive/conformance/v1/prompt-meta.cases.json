@@ -248,8 +248,8 @@
       "fields": [
         { "path": "conformanceSurface.modelRuntimeCases", "equals": 202 },
         { "path": "conformanceSurface.dealMechanicsRouteCases", "equals": 60 },
-        { "path": "conformanceSurface.promptMetaCases", "equals": 92 },
-        { "path": "conformanceSurface.totalCases", "equals": 434 }
+        { "path": "conformanceSurface.promptMetaCases", "equals": 104 },
+        { "path": "conformanceSurface.totalCases", "equals": 472 }
       ]
     }
   },
@@ -509,11 +509,12 @@
     "kind": "authority_migration_seed",
     "expect": {
       "fields": [
-        { "path": "rowCount", "min": 180 },
-        { "path": "uniqueAuthorityIdCount", "min": 180 },
+        { "path": "rowCount", "min": 220 },
+        { "path": "uniqueAuthorityIdCount", "min": 220 },
         { "path": "files", "includes": "073_definitive_authority_register.sql" },
         { "path": "files", "includes": "078_definitive_authority_register_batch2.sql" },
-        { "path": "files", "includes": "080_definitive_authority_register_batch4.sql" }
+        { "path": "files", "includes": "080_definitive_authority_register_batch4.sql" },
+        { "path": "files", "includes": "081_definitive_authority_register_batch5.sql" }
       ]
     }
   },
@@ -1006,6 +1007,90 @@
     }
   },
   {
+    "id": "CONF.PROMPT.AUTHMIGRATION.BANKRUPTCY_PROCEDURE.001",
+    "title": "Authority migration seeds include deeper bankruptcy procedure anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "files", "includes": "081_definitive_authority_register_batch5.sql" },
+        { "path": "authorityIds", "includes": "AUTH.BK.1121" },
+        { "path": "authorityIds", "includes": "AUTH.BK.1125" },
+        { "path": "authorityIds", "includes": "AUTH.FRBP.3001" },
+        { "path": "authorityIds", "includes": "AUTH.FRBP.9019" },
+        { "path": "sourceFamilies", "includes": "bankruptcy_code" },
+        { "path": "sourceFamilies", "includes": "bankruptcy_rule" },
+        { "path": "modelSlots", "includes": "M164" },
+        { "path": "modelSlots", "includes": "M166" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.CRAMDOWN_CASES.001",
+    "title": "Authority migration seeds include circuit-level cramdown and 1111(b) case law",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.CASE.TEXAS_GRAND_PRAIRIE_2013" },
+        { "path": "authorityIds", "includes": "AUTH.CASE.AMERICAN_HOMEPATIENT_2005" },
+        { "path": "authorityIds", "includes": "AUTH.CASE.TOPP_2023" },
+        { "path": "authorityIds", "includes": "AUTH.CASE.BODY_TRANSIT_2020" },
+        { "path": "sourceFamilies", "includes": "bankruptcy_case_law" },
+        { "path": "modelSlots", "includes": "M155" },
+        { "path": "modelSlots", "includes": "M156" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.DEFERRED_TAX_FORMS.001",
+    "title": "Authority migration seeds include deferred-payment tax and FIRPTA form anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.IRC.1274A" },
+        { "path": "authorityIds", "includes": "AUTH.TREAS.1_483_1" },
+        { "path": "authorityIds", "includes": "AUTH.TREAS.1_1274_2" },
+        { "path": "authorityIds", "includes": "AUTH.IRS.FORM_8288_B" },
+        { "path": "sourceFamilies", "includes": "tax" },
+        { "path": "sourceFamilies", "includes": "treasury_regulation" },
+        { "path": "sourceFamilies", "includes": "tax_form" },
+        { "path": "modelSlots", "includes": "M204" },
+        { "path": "modelSlots", "includes": "M199" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.AUTHMIGRATION.RE_ASSET_UCC.001",
+    "title": "Authority migration seeds include real-estate, REIT, and Article 9 source anchors",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "authority_migration_seed",
+    "expect": {
+      "fields": [
+        { "path": "authorityIds", "includes": "AUTH.ASC.842" },
+        { "path": "authorityIds", "includes": "AUTH.ASTM.E2018" },
+        { "path": "authorityIds", "includes": "AUTH.REIT.IRC_856" },
+        { "path": "authorityIds", "includes": "AUTH.UCC.9_610" },
+        { "path": "authorityIds", "includes": "AUTH.UCC.9_307" },
+        { "path": "sourceFamilies", "includes": "accounting_standard" },
+        { "path": "sourceFamilies", "includes": "real_estate_standard" },
+        { "path": "sourceFamilies", "includes": "ucc_article_9" },
+        { "path": "gates", "includes": "G30" },
+        { "path": "gates", "includes": "G28" },
+        { "path": "gates", "includes": "G10" },
+        { "path": "modelSlots", "includes": "M171" },
+        { "path": "modelSlots", "includes": "M198" },
+        { "path": "modelSlots", "includes": "M165" },
+        { "path": "modelSlots", "includes": "M215" }
+      ]
+    }
+  },
+  {
     "id": "CONF.PROMPT.AGENT.ACCESS.001",
     "title": "Agent card keeps execution authenticated and governed",
     "specVersion": "DEFINITIVE.v1.0",
@@ -1027,7 +1112,7 @@
     "methodologyUri": "methodology://v19",
     "kind": "agent_card",
     "expect": {
-      "textIncludes": ["definitive_conformance_status", "\"caseCount\":434", "definitive_deal_mechanics_v1_1"],
+      "textIncludes": ["definitive_conformance_status", "\"caseCount\":472", "definitive_deal_mechanics_v1_1"],
       "fields": [
         { "path": "definitive.dealMechanicsModelSlots", "equals": 123 },
         { "path": "definitive.dealMechanicsGates", "equals": 30 },
@@ -1498,6 +1583,164 @@
         { "path": "publishedStandardDoctrine.requiredPublicArtifacts", "includes": "server-card metadata" },
         { "path": "publishedStandardDoctrine.requiredPublicArtifacts", "includes": "THE LINE declaration" },
         { "path": "marketplaceBuildOrder", "includes": "Build /.well-known/mcp/server-card.json and /.well-known/mcp over the same DEFINITIVE manifest, not a parallel metadata file." }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.MCP.SERVER_CARD.IDENTITY.001",
+    "title": "MCP server card publishes canonical identity and public discovery URLs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "mcp_server_card",
+    "expect": {
+      "textIncludes": ["working capital peg", "recursive deal-state work", "The Diligence Standard"],
+      "fields": [
+        { "path": "name", "equals": "smbx-ai/diligence" },
+        { "path": "protocolVersion", "equals": "2025-12-11" },
+        { "path": "serverUrl", "equals": "https://smbx.ai/api/definitive/tools/call" },
+        { "path": "serverInfo.canonicalStandard", "equals": "The Diligence Standard" },
+        { "path": "transport.endpoints.serverCard", "equals": "https://smbx.ai/.well-known/mcp/server-card.json" },
+        { "path": "transport.endpoints.schemaRegistry", "equals": "https://smbx.ai/api/definitive/schemas" },
+        { "path": "definitive.registryPackage", "equals": "https://smbx.ai/api/definitive/registry-package" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.MCP.SERVER_CARD.TOOLSCHEMAS.001",
+    "title": "MCP server card maps agent tools to structured take-back schemas",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "mcp_server_card",
+    "expect": {
+      "fields": [
+        { "path": "toolNames", "includes": "ingest_deal_payload" },
+        { "path": "toolNames", "includes": "resume_deal" },
+        { "path": "toolNames", "includes": "compose_document_draft" },
+        { "path": "toolsByName.ingest_deal_payload.structuredContentSchemas.output", "includes": "DealState" },
+        { "path": "toolsByName.resume_deal.structuredContentSchemas.takeBack", "includes": "DealPackage" },
+        { "path": "toolsByName.compose_document_draft.structuredContentSchemas.output", "includes": "DocumentDraft" },
+        { "path": "toolsByName.compose_close_readiness.structuredContentSchemas.takeBack", "includes": "PMIPlan" },
+        { "path": "toolsByName.ingest_deal_payload.outputSchema.required", "includes": "methodologyVersion" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.MCP.SERVER_CARD.LINE.001",
+    "title": "MCP server card exposes THE LINE and irreversible-tool annotations",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "mcp_server_card",
+    "expect": {
+      "textIncludes": ["noSuccessFees", "noReferralCompensation", "human_approval_required", "counsel_review_required"],
+      "fields": [
+        { "path": "security.executionRequiresAuthentication", "equals": true },
+        { "path": "security.noSuccessFees", "equals": true },
+        { "path": "security.noReferralCompensation", "equals": true },
+        { "path": "security.lineDeclaration", "includes": "does not advise" },
+        { "path": "toolsByName.close_deal.annotations.destructiveHint", "equals": true },
+        { "path": "toolsByName.close_deal.lineStatus", "equals": "human_approval_required" },
+        { "path": "toolsByName.update_tax_position.lineStatus", "equals": "counsel_review_required" },
+        { "path": "toolsByName.query_admin_data.lineStatus", "equals": "enterprise_scope_required" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.MCP.SERVER_CARD.SEMANTIC.001",
+    "title": "MCP server card keeps query-aligned M&A terms and desirability signals discoverable",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "mcp_server_card",
+    "expect": {
+      "fields": [
+        { "path": "definitive.toolMetadataDoctrine.namingConvention", "equals": "diligence_<phase>_<artifact>" },
+        { "path": "definitive.toolMetadataDoctrine.semanticKeywords", "includes": "working capital peg" },
+        { "path": "definitive.toolMetadataDoctrine.semanticKeywords", "includes": "indemnification cap and basket" },
+        { "path": "definitive.agentDiscoverabilityLayers", "includes": "enterprise_allow_lists" },
+        { "path": "definitive.agentDesirabilitySignals", "includes": "semantic_tool_metadata" },
+        { "path": "definitive.agentDesirabilitySignals", "includes": "regulatory_neutrality" },
+        { "path": "definitive.publishedStandardDoctrine.name", "equals": "The Diligence Standard" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.MCP.WELLKNOWN.001",
+    "title": "MCP well-known manifest separates public discovery from bearer execution",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "mcp_well_known",
+    "expect": {
+      "fields": [
+        { "path": "mcp_version", "equals": "2025-12-11" },
+        { "path": "server_card", "equals": "https://smbx.ai/.well-known/mcp/server-card.json" },
+        { "path": "publicEndpointTypes", "includes": "server-card" },
+        { "path": "publicEndpointTypes", "includes": "definitive-schema-registry" },
+        { "path": "publicEndpointTypes", "includes": "definitive-deal-runbooks" },
+        { "path": "publicEndpointTypes", "includes": "definitive-model-catalog" },
+        { "path": "bearerEndpointTypes", "includes": "tools-list" },
+        { "path": "bearerEndpointTypes", "includes": "tool-call" },
+        { "path": "capabilities.outputSchema", "equals": true },
+        { "path": "capabilities.structuredContent", "equals": true },
+        { "path": "doctrine.namingConvention", "equals": "diligence_<phase>_<artifact>" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.REGISTRY.TRUST.001",
+    "title": "Registry package carries deterministic, citation, and THE LINE trust signals",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "registry_package",
+    "expect": {
+      "fields": [
+        { "path": "registryEntry.namespace", "equals": "smbx-ai/diligence" },
+        { "path": "registryEntry.categories", "includes": "deal-os" },
+        { "path": "registryEntry.tags", "includes": "working capital peg" },
+        { "path": "registryEntry.trustSignals.deterministicOutputs", "equals": true },
+        { "path": "registryEntry.trustSignals.citationProvenanceRequired", "equals": true },
+        { "path": "registryEntry.trustSignals.noSuccessFees", "equals": true },
+        { "path": "registryEntry.trustSignals.noReferralCompensation", "equals": true },
+        { "path": "registryReadinessChecks", "includes": "structured-output-schemas" },
+        { "path": "registryReadinessChecks", "includes": "THE-LINE-declaration" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.REGISTRY.MARKETPLACES.001",
+    "title": "Registry package covers canonical, directory, and client-store submission surfaces",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "registry_package",
+    "expect": {
+      "fields": [
+        { "path": "thirdPartyDirectoryIds", "includes": "pulsemcp" },
+        { "path": "thirdPartyDirectoryIds", "includes": "mcp_so" },
+        { "path": "thirdPartyDirectoryIds", "includes": "awesome_mcp_servers" },
+        { "path": "clientStorePackageIds", "includes": "claude_connector_directory" },
+        { "path": "clientStorePackageIds", "includes": "chatgpt_apps_directory" },
+        { "path": "clientStorePackageIds", "includes": "microsoft_agent_store" },
+        { "path": "clientStorePackageIds", "includes": "salesforce_agentexchange" },
+        { "path": "clientStorePackageIds", "includes": "google_agent_gallery" },
+        { "path": "submissionOrder", "includes": "enterprise_allow_lists" },
+        { "path": "submissionOrder", "includes": "partner_connector_outreach" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.PROMPT.REGISTRY.ENTERPRISE_ALLOWLIST.001",
+    "title": "Enterprise allow-list templates make governed agent deployment copyable",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "kind": "registry_package",
+    "expect": {
+      "textIncludes": ["registry_only", "context.noSuccessFee == true", "requestedToolLineStatus"],
+      "fields": [
+        { "path": "enterpriseAllowListTemplates.githubCopilotRegistry.policyMode", "equals": "registry_only" },
+        { "path": "enterpriseAllowListTemplates.githubCopilotRegistry.registry.servers.0.id", "equals": "smbx-ai/diligence" },
+        { "path": "enterpriseAllowListTemplates.githubCopilotRegistry.registry.servers.0.allowedTools", "includes": "introspect_capabilities" },
+        { "path": "enterpriseAllowListTemplates.githubCopilotRegistry.registry.servers.0.allowedTools", "includes": "resume_deal" },
+        { "path": "enterpriseAllowListTemplates.kiroAwsQRegistry.servers.0.allowTools", "includes": "describe_methodology" },
+        { "path": "enterpriseAllowListTemplates.azureApiCenterBlueprint.auth.productionTarget", "includes": "OAuth 2.1" },
+        { "path": "enterpriseAllowListTemplates.bedrockAgentCoreCedarPolicyTemplate.policy", "includes": "context.noSuccessFee == true" }
       ]
     }
   },

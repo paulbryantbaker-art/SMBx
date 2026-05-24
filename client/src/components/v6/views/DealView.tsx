@@ -3,8 +3,10 @@ import { V6Section } from "../Canvas";
 import { V6Icon } from "../icons";
 import { V6DocStatus, type DocStatusKind } from "../modes/cards";
 import type { FileScope, OpenTab, TabKind } from "../types";
-import { authHeaders } from "../../../hooks/useAuth";
+import { authHeaders, type User } from "../../../hooks/useAuth";
+import { useTodayOperatingBrief, type TodayModelRefreshItem } from "../../../hooks/useTodayOperatingBrief";
 import type { ModelPreference } from "../../../lib/modelPreference";
+import { openSavedModelExecutionAsRerun } from "../../../lib/modelRerunActions";
 import { findDeal, type MarketIntel } from "../../../lib/sampleDeals";
 import {
   fileDeliverableToDataRoom,
@@ -57,6 +59,10 @@ interface DealFileItem {
   section: FileSectionKey;
   deliverableId?: number;
   documentId?: number;
+  provenanceLabel?: string;
+  modelOutputHash?: string;
+  modelType?: string;
+  modelTitle?: string;
 }
 
 /* ─── Sample fallbacks (used when no numeric deal id is in scope) ─── */
@@ -290,6 +296,7 @@ export function V6DealView({
   fileScope,
   onTalkToYulia,
   modelPreference,
+  user,
 }: {
   id: string;
   title: string;
@@ -297,6 +304,7 @@ export function V6DealView({
   fileScope?: FileScope;
   onTalkToYulia?: (prompt: string) => void;
   modelPreference?: ModelPreference;
+  user?: User | null;
 }) {
   const numericId = /^\d+$/.test(id) ? parseInt(id, 10) : null;
   const [data, setData] = useState<DealDetailResp | null>(null);
@@ -309,6 +317,7 @@ export function V6DealView({
   const [actionNote, setActionNote] = useState<string | null>(null);
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [activeFileScope, setActiveFileScope] = useState<FileScope | null>(fileScope ?? null);
+  const operating = useTodayOperatingBrief(user ?? null, !!user && numericId !== null);
 
   useEffect(() => {
     setActiveFileScope(fileScope ?? null);
@@ -375,6 +384,8 @@ export function V6DealView({
   const fileItems = numericId !== null && (linked || dataRoom)
     ? buildDealFilesFromReal(linked ?? [], dataRoom, dealName)
     : DEAL_FILES;
+  const modelRefreshNeeds = (operating.brief?.modelRefreshNeeds ?? [])
+    .filter(item => item.dealId === String(numericId));
   const primaryDeliverable = primaryDeliverableForJourney(real?.journey_type);
   const setDealFileScope = (scope: FileScope | null) => {
     setActiveFileScope(scope);
@@ -712,6 +723,7 @@ export function V6DealView({
           files={fileItems}
           onFileLatestToRoom={numericId !== null ? fileLatestPrivateToRoom : undefined}
           fileBusy={busyAction === "file"}
+          modelRefreshNeeds={modelRefreshNeeds}
         />
       )}
 
@@ -783,6 +795,7 @@ function DealFileExplorer({
   files,
   onFileLatestToRoom,
   fileBusy,
+  modelRefreshNeeds,
 }: {
   dealTitle: string;
   portfolioName: string;
@@ -794,10 +807,14 @@ function DealFileExplorer({
   files: DealFileItem[];
   onFileLatestToRoom?: () => void;
   fileBusy?: boolean;
+  modelRefreshNeeds: TodayModelRefreshItem[];
 }) {
+  const [rerunOpenedIds, setRerunOpenedIds] = useState<Set<string>>(() => new Set());
   const visible = files.filter(file => file.scopes.includes(activeScope));
   const folders = foldersForScope(activeScope, visible);
   const sections = sectionsForScope(activeScope, visible);
+  const activeModelRefreshNeeds = modelRefreshNeeds.filter(item => !rerunOpenedIds.has(item.id));
+  const showReliance = activeScope === "data-room" || activeScope === "shared";
   const counts = {
     all: files.filter(file => file.scopes.includes("all")).length,
     "data-room": files.filter(file => file.scopes.includes("data-room")).length,
@@ -807,6 +824,18 @@ function DealFileExplorer({
 
   const openFile = (file: DealFileItem) => {
     openTab({ kind: file.kind === "analysis" && !file.deliverableId ? "analysis" : "doc", title: `${dealTitle} · ${file.title}`, id: file.deliverableId ? String(file.deliverableId) : file.id });
+  };
+
+  const rerunModelRefresh = (item: TodayModelRefreshItem) => {
+    void openSavedModelExecutionAsRerun({
+      executionId: item.id,
+      dealTitle,
+      currentAssumptions: item.currentAssumptions,
+      sourceSurface: "data_room_reliance",
+      onTalkToYulia,
+    }).then(execution => {
+      if (execution) setRerunOpenedIds(prev => new Set(prev).add(item.id));
+    });
   };
 
   return (
@@ -864,6 +893,16 @@ function DealFileExplorer({
         ))}
       </div>
 
+      {showReliance && (
+        <DataRoomReliancePanel
+          dealTitle={dealTitle}
+          scopeLabel={copy.label}
+          modelRefreshNeeds={activeModelRefreshNeeds}
+          onTalkToYulia={onTalkToYulia}
+          onRerunModel={rerunModelRefresh}
+        />
+      )}
+
       <div style={D.fileGrid}>
         <aside style={D.folderCard}>
           <div className="mono" style={D.folderEyebrow}>HIERARCHY</div>
@@ -911,6 +950,7 @@ function DealFileExplorer({
                     file={file}
                     last={index === section.rows.length - 1}
                     onClick={() => openFile(file)}
+                    relianceWarning={fileRelianceWarning(file, activeModelRefreshNeeds, activeScope)}
                   />
                 ))}
               </div>
@@ -922,7 +962,103 @@ function DealFileExplorer({
   );
 }
 
-function DealFileRow({ file, last, onClick }: { file: DealFileItem; last: boolean; onClick: () => void }) {
+function fileRelianceWarning(file: DealFileItem, refreshNeeds: TodayModelRefreshItem[], activeScope: FileScope): string | undefined {
+  if (activeScope !== "data-room" || refreshNeeds.length === 0) return undefined;
+  if (!file.provenanceLabel && file.kind !== "analysis" && !file.deliverableId) return undefined;
+
+  const exact = refreshNeeds.find(item =>
+    (file.modelOutputHash && item.outputHash === file.modelOutputHash) ||
+    (file.modelType && item.modelType === file.modelType) ||
+    (file.modelTitle && item.modelTitle.toLowerCase() === file.modelTitle.toLowerCase())
+  );
+  const item = exact || refreshNeeds[0];
+  return `${item.modelTitle} needs rerun before external reliance`;
+}
+
+function DataRoomReliancePanel({
+  dealTitle,
+  scopeLabel,
+  modelRefreshNeeds,
+  onTalkToYulia,
+  onRerunModel,
+}: {
+  dealTitle: string;
+  scopeLabel: string;
+  modelRefreshNeeds: TodayModelRefreshItem[];
+  onTalkToYulia?: (prompt: string) => void;
+  onRerunModel?: (item: TodayModelRefreshItem) => void;
+}) {
+  const hasRefreshNeeds = modelRefreshNeeds.length > 0;
+  const headline = hasRefreshNeeds
+    ? "Model reruns before external reliance"
+    : `${scopeLabel} ready for controlled sharing`;
+  const body = hasRefreshNeeds
+    ? "The room can stay open, but agents should rerun affected models before taking these artifacts back to another system or using them in an IOI, LOI, diligence memo, or IC packet."
+    : "No stale model outputs are currently blocking this room. Yulia still preserves source gaps, approvals, and counsel/CPA handoff boundaries before anything is treated as final.";
+
+  const explainPrompt = hasRefreshNeeds
+    ? `On ${dealTitle}: explain the model freshness issues blocking data-room reliance. Start with ${modelRefreshNeeds[0]?.modelTitle}, show the changed assumptions, and tell me which model versions to rerun before an agent takes artifacts back to its system.`
+    : `On ${dealTitle}: explain why the ${scopeLabel} is ready for controlled sharing, including remaining source gaps, approvals, and THE LINE handoff boundaries.`;
+
+  return (
+    <div style={D.reliancePanel}>
+      <div style={D.relianceHead}>
+        <div>
+          <div className="mono" style={D.relianceEyebrow}>ROOM RELIANCE</div>
+          <h3 style={D.relianceTitle}>{headline}</h3>
+          <p style={D.relianceBody}>{body}</p>
+        </div>
+        <button
+          type="button"
+          className="m-btn outlined"
+          onClick={() => onTalkToYulia?.(explainPrompt)}
+        >
+          Ask Yulia
+        </button>
+      </div>
+      {hasRefreshNeeds && (
+        <div style={D.relianceRows}>
+          {modelRefreshNeeds.slice(0, 3).map(item => (
+            <div
+              key={item.id}
+              style={D.relianceRow}
+            >
+              <button
+                type="button"
+                style={D.relianceRowMain}
+                onClick={() => onTalkToYulia?.(`On ${dealTitle}: rerun or explain ${item.modelTitle}. It is marked ${item.statusLabel} because ${item.reason}. Recompute action: ${item.recomputeActionKey || item.recomputeSurfaceActionId || "execute_model"}. ${item.recomputePrompt || "Preserve parent-output lineage and identify downstream artifacts that become current."} Changed inputs: ${item.changedInputs.join(", ") || "not specified"}. Watched inputs: ${item.watchedInputs.join(", ") || "not specified"}.`)}
+              >
+                <span style={D.relianceRowText}>
+                  <strong>{item.modelTitle}</strong>
+                  <span>{item.recomputeActionKey ? `${item.reason} Recompute action: ${item.recomputeActionKey}.` : item.reason}</span>
+                </span>
+                <span className="mono" style={D.reliancePill}>{item.statusLabel}</span>
+                <span style={D.fileChevron} aria-hidden="true">›</span>
+              </button>
+              {onRerunModel && (
+                <button
+                  type="button"
+                  className="m-glint"
+                  style={D.relianceRerunButton}
+                  onClick={() => onRerunModel(item)}
+                >
+                  Rerun
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DealFileRow({ file, last, onClick, relianceWarning }: {
+  file: DealFileItem;
+  last: boolean;
+  onClick: () => void;
+  relianceWarning?: string;
+}) {
   const t = fileTone(file.tone);
   return (
     <button
@@ -936,6 +1072,8 @@ function DealFileRow({ file, last, onClick }: { file: DealFileItem; last: boolea
       <span style={D.fileRowText}>
         <strong>{file.title}</strong>
         <span>{file.meta}</span>
+        {file.provenanceLabel && <span style={D.fileProvenance}>Model provenance: {file.provenanceLabel}</span>}
+        {relianceWarning && <span style={D.fileWarning}>Model freshness: {relianceWarning}</span>}
         <span style={D.filePath}>Location: {file.location}</span>
       </span>
       <span style={{ ...D.fileStatus, background: t.soft, color: t.ink }}>{file.status}</span>
@@ -1496,6 +1634,14 @@ function dataRoomDocToFileItem(doc: DataRoomDocument, dealTitle: string): DealFi
   const review = ["review", "approved"].includes(doc.status);
   const section: FileSectionKey = executed ? "executed" : review ? "sent" : legal || doc.file_type === "deliverable" ? "room-docs" : "artifacts";
   const tone: FileTone = executed ? "executed" : review ? "sent" : "room";
+  const snapshot = doc.deliverable_snapshot || {};
+  const modelTitle = doc.model_execution_title || (typeof snapshot.artifactKind === "string" ? formatStatus(snapshot.artifactKind) : null);
+  const modelOutputHash = doc.model_output_hash || (typeof snapshot.outputHash === "string" ? snapshot.outputHash : null);
+  const provenanceLabel = modelOutputHash
+    ? `${modelTitle || "Model output"} · ${shortHash(modelOutputHash)}`
+    : doc.deliverable_folder_category === "models" || snapshot.canvasTabId
+      ? `${modelTitle || "Model artifact"} · provenance linked`
+      : undefined;
   return {
     id: `room-${doc.id}`,
     title: doc.name,
@@ -1508,6 +1654,10 @@ function dataRoomDocToFileItem(doc: DataRoomDocument, dealTitle: string): DealFi
     section,
     deliverableId: doc.deliverable_id ?? undefined,
     documentId: doc.id,
+    provenanceLabel,
+    modelOutputHash: modelOutputHash || undefined,
+    modelType: doc.model_execution_type || undefined,
+    modelTitle: modelTitle || undefined,
   };
 }
 
@@ -1707,6 +1857,12 @@ function fmtRelative(iso: string): string {
     if (d < 30) return `${d}d ago`;
     return new Date(iso).toLocaleDateString();
   } catch { return ""; }
+}
+
+function shortHash(value?: string | null): string {
+  if (!value) return "hash pending";
+  const clean = String(value).replace(/^sha256:/i, "");
+  return clean.length <= 12 ? clean : `${clean.slice(0, 6)}…${clean.slice(-4)}`;
 }
 
 const D: Record<string, CSSProperties> = {
@@ -2035,6 +2191,100 @@ const D: Record<string, CSSProperties> = {
     background: "rgba(255,255,255,0.18)",
     color: "#FFFFFF",
   },
+  reliancePanel: {
+    margin: "0 0 16px",
+    borderRadius: 20,
+    padding: 16,
+    background: "linear-gradient(135deg, rgba(248,250,255,0.98), rgba(255,255,255,0.90))",
+    border: "1px solid var(--m-outline-var)",
+  },
+  relianceHead: {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) auto",
+    alignItems: "start",
+    gap: 14,
+  },
+  relianceEyebrow: {
+    fontSize: 9.5,
+    letterSpacing: "0.16em",
+    color: "var(--m-on-primary-container)",
+    fontWeight: 800,
+  },
+  relianceTitle: {
+    margin: "4px 0 0",
+    fontFamily: "var(--font-display)",
+    fontSize: 19,
+    lineHeight: 1.05,
+    letterSpacing: "-0.04em",
+    color: "var(--m-on-surface)",
+  },
+  relianceBody: {
+    margin: "7px 0 0",
+    color: "var(--m-on-surface-var)",
+    fontSize: 12.5,
+    lineHeight: 1.4,
+    maxWidth: 860,
+  },
+  relianceRows: {
+    display: "grid",
+    gap: 8,
+    marginTop: 13,
+  },
+  relianceRow: {
+    minHeight: 58,
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) auto",
+    alignItems: "center",
+    gap: 10,
+    padding: "8px 10px",
+    borderRadius: 15,
+    background: "#FFFFFF",
+    border: "1px solid var(--m-outline-var)",
+    color: "var(--m-on-surface)",
+  },
+  relianceRowMain: {
+    all: "unset",
+    minWidth: 0,
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) auto 16px",
+    alignItems: "center",
+    gap: 12,
+    cursor: "pointer",
+  },
+  relianceRowText: {
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: 3,
+    fontSize: 12,
+    lineHeight: 1.32,
+    color: "var(--m-on-surface-var)",
+  },
+  reliancePill: {
+    borderRadius: 999,
+    padding: "7px 9px",
+    background: "rgba(214,163,92,0.16)",
+    color: "#7A5A22",
+    fontSize: 9,
+    fontWeight: 850,
+    letterSpacing: "0.1em",
+    whiteSpace: "nowrap",
+  },
+  relianceRerunButton: {
+    all: "unset",
+    minHeight: 34,
+    padding: "0 13px",
+    borderRadius: 999,
+    background: "linear-gradient(135deg, rgba(42,50,68,0.86), rgba(30,35,49,0.78))",
+    color: "#FFFFFF",
+    fontSize: 11.5,
+    fontWeight: 850,
+    cursor: "pointer",
+    border: "0.5px solid rgba(255,255,255,0.34)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.36), 0 11px 28px rgba(23,31,45,0.22)",
+    backdropFilter: "blur(7px) saturate(155%)",
+    WebkitBackdropFilter: "blur(7px) saturate(155%)",
+  },
   fileGrid: {
     display: "grid",
     gridTemplateColumns: "minmax(240px, 0.34fr) minmax(0, 1fr)",
@@ -2190,6 +2440,14 @@ const D: Record<string, CSSProperties> = {
     whiteSpace: "nowrap",
     color: "var(--m-on-surface-mid)",
     opacity: 0.78,
+  },
+  fileProvenance: {
+    color: "#4E659A",
+    fontWeight: 800,
+  },
+  fileWarning: {
+    color: "#7A5A22",
+    fontWeight: 800,
   },
   fileStatus: {
     borderRadius: 999,

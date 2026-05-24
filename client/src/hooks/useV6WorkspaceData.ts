@@ -68,6 +68,17 @@ export interface DataRoomDocument {
   updated_at: string;
   deliverable_status?: string | null;
   deliverable_completed_at?: string | null;
+  deliverable_is_stale?: boolean | null;
+  deliverable_stale_reason?: string | null;
+  deliverable_folder_category?: string | null;
+  deliverable_snapshot?: Record<string, any> | null;
+  model_execution_id?: number | null;
+  model_execution_type?: string | null;
+  model_execution_title?: string | null;
+  model_execution_version_number?: number | null;
+  model_output_hash?: string | null;
+  model_input_hash?: string | null;
+  model_execution_created_at?: string | null;
 }
 
 export interface DealDataRoom {

@@ -1,0 +1,13 @@
+{
+  "name": "@smbx/definitive-reference-ts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Internal TypeScript reference proof for DEFINITIVE deterministic deal mechanics.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "tsx ../../scripts/definitive-reference-smoke.ts"
+  }
+}

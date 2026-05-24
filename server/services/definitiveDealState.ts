@@ -5,7 +5,11 @@ import {
   DEFINITIVE_SPEC_URI,
   DEFINITIVE_SPEC_VERSION,
 } from '../constants/definitive.js';
-import { classifyV19LeagueFromCents, type League } from '../constants/v19Leagues.js';
+import {
+  classifyV19LeagueFromCents,
+  classifyV19LeagueFromEnterpriseValueCents,
+  type League,
+} from '../constants/v19Leagues.js';
 import {
   evaluateDefinitiveStackOverlays,
   normalizeDefinitiveStackSignals,
@@ -2306,6 +2310,21 @@ function buildDealPlan(state: DefinitiveDealState) {
     stages,
     overlayGates: state.classificationKey.triggeredOverlayGates,
     workSurfaces: ['today', 'pipeline', 'files', 'studio', 'models', 'data_room'],
+    modelingLoop: {
+      status: state.completenessReport.satisfied.includes('model_state_present')
+        ? 'model_versions_present'
+        : 'model_stack_needed',
+      principle:
+        'Modeling is iterative. Each updated EV, EBITDA, debt, working capital, tax, diligence, or term input should create a new versioned model run tied back to DealState.',
+      loop: [
+        'compose_model_stack from the current classification key',
+        'execute the needed deterministic model(s)',
+        'save the run as a versioned ModelState artifact',
+        'update_deal_payload with the new model output hash and source refs',
+        'check_completeness and decide whether IOI, LOI, diligence, negotiation, or PMI is now the right next step',
+      ],
+      portableArtifacts: ['ModelState', 'ModelVersion[]', 'ModelOutput', 'DealStateDiff'],
+    },
     nextActions: state.missingInputContract.items.slice(0, 4).map(item => ({
       label: item.label,
       reason: item.reason,
@@ -4528,7 +4547,7 @@ function buildNextCallHints(state: DefinitiveDealState): DefinitiveMcpCallHint[]
     hints.push({
       toolName: 'compose_model_stack',
       priority: state.completenessReport.score >= 45 ? 'P0' : 'P1',
-      reason: 'Translate the classification key and overlay gates into the applicable M101-M223 model stack.',
+      reason: 'Translate the classification key and overlay gates into the applicable M101-M223 model stack. Treat modeling as iterative: each revised EV, EBITDA, debt, NWC, tax, diligence, or term input should produce a new versioned model run.',
       inputHint: {
         journey: state.classificationKey.journey,
         league: state.classificationKey.league === 'unknown' ? undefined : state.classificationKey.league,
@@ -4557,10 +4576,36 @@ function inferJourney(text: string): Journey {
 }
 
 function inferLeague(payload: Record<string, any>): League | 'unknown' {
-  const ebitdaCents = firstNumber(payload, ['ebitdaCents', 'adjustedEbitdaCents']);
-  const sdeCents = firstNumber(payload, ['sdeCents', 'sellerDiscretionaryEarningsCents']);
-  const revenueCents = firstNumber(payload, ['revenueCents', 'ttmRevenueCents', 'salesCents']);
-  if (ebitdaCents == null && sdeCents == null && revenueCents == null) return 'unknown';
+  const ebitdaCents = firstMoneyCents(payload, ['ebitdaCents', 'adjustedEbitdaCents'], ['ebitda', 'adjustedEbitda']);
+  const sdeCents = firstMoneyCents(payload, ['sdeCents', 'sellerDiscretionaryEarningsCents'], ['sde', 'sellerDiscretionaryEarnings']);
+  const revenueCents = firstMoneyCents(payload, ['revenueCents', 'ttmRevenueCents', 'salesCents'], ['revenue', 'ttmRevenue', 'sales']);
+  const enterpriseValueCents = firstMoneyCents(
+    payload,
+    [
+      'enterpriseValueCents',
+      'evCents',
+      'purchasePriceCents',
+      'headlinePriceCents',
+      'transactionValueCents',
+      'dealValueCents',
+      'askingPriceCents',
+      'valuationCents',
+    ],
+    [
+      'enterpriseValue',
+      'ev',
+      'purchasePrice',
+      'headlinePrice',
+      'transactionValue',
+      'dealValue',
+      'askingPrice',
+      'valuation',
+    ],
+  );
+  if (ebitdaCents == null && sdeCents == null && revenueCents == null && enterpriseValueCents == null) return 'unknown';
+  if (ebitdaCents == null && sdeCents == null && revenueCents == null) {
+    return classifyV19LeagueFromEnterpriseValueCents(enterpriseValueCents);
+  }
   return classifyV19LeagueFromCents({ ebitdaCents, sdeCents, revenueCents });
 }
 
@@ -4760,6 +4805,39 @@ function firstNumber(payload: Record<string, any>, keys: string[]): number | nul
     if (Number.isFinite(numberValue)) return numberValue;
   }
   return null;
+}
+
+function firstMoneyCents(payload: Record<string, any>, centsKeys: string[], dollarKeys: string[] = []): number | null {
+  for (const key of centsKeys) {
+    const cents = coerceMoneyToCents(payload[key], 'cents');
+    if (cents != null) return cents;
+  }
+  for (const key of dollarKeys) {
+    const cents = coerceMoneyToCents(payload[key], 'dollars');
+    if (cents != null) return cents;
+  }
+  return null;
+}
+
+function coerceMoneyToCents(value: unknown, unit: 'cents' | 'dollars'): number | null {
+  if (value == null || value === '') return null;
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) return null;
+    return unit === 'cents' ? Math.round(value) : Math.round(value * 100);
+  }
+  if (typeof value !== 'string') return null;
+  const normalized = value.trim().toLowerCase().replace(/[$,\s]/g, '');
+  if (!normalized) return null;
+  const match = normalized.match(/^-?\d+(?:\.\d+)?/);
+  if (!match) return null;
+  let dollars = Number(match[0]);
+  if (!Number.isFinite(dollars)) return null;
+  if (normalized.includes('bn') || normalized.endsWith('b')) dollars *= 1_000_000_000;
+  else if (normalized.includes('mm') || normalized.endsWith('m')) dollars *= 1_000_000;
+  else if (normalized.endsWith('k')) dollars *= 1_000;
+  return unit === 'cents' && !/[a-z$]/.test(normalized)
+    ? Math.round(dollars)
+    : Math.round(dollars * 100);
 }
 
 function normalizeJourney(value: unknown): Journey | null {

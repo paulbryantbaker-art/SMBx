@@ -1,0 +1,117 @@
+[
+  {
+    "id": "REF.TS.M109.WORKING_CAPITAL.001",
+    "modelId": "M109",
+    "title": "Working capital peg computes trailing normalized NWC",
+    "input": {
+      "months": [
+        {
+          "month": "2026-01",
+          "accountsReceivableCents": 50000000,
+          "inventoryCents": 25000000,
+          "prepaidExpensesCents": 5000000,
+          "accountsPayableCents": 20000000,
+          "accruedExpensesCents": 10000000
+        },
+        {
+          "month": "2026-02",
+          "accountsReceivableCents": 52000000,
+          "inventoryCents": 26000000,
+          "prepaidExpensesCents": 4000000,
+          "accountsPayableCents": 21000000,
+          "accruedExpensesCents": 9500000
+        },
+        {
+          "month": "2026-03",
+          "accountsReceivableCents": 54000000,
+          "inventoryCents": 24500000,
+          "prepaidExpensesCents": 4500000,
+          "accountsPayableCents": 21500000,
+          "accruedExpensesCents": 11000000
+        }
+      ]
+    },
+    "expect": {
+      "specVersion": "DEFINITIVE.v1.0",
+      "methodologyUri": "methodology://v19",
+      "lineBoundary": "deterministic_compute_only",
+      "fields": [
+        { "path": "outputs.trailingMonthCount", "equals": 3 },
+        { "path": "outputs.pegCents", "equals": 50666667 },
+        { "path": "outputs.monthlyNormalizedNwc.1.normalizedNwcCents", "equals": 51500000 }
+      ]
+    }
+  },
+  {
+    "id": "REF.TS.M139.SECTION_1060.001",
+    "modelId": "M139",
+    "title": "Section 1060 residual method allocates Class VII residual",
+    "input": {
+      "purchasePriceCents": 100000000,
+      "fairMarketValuesCents": {
+        "classI": 5000000,
+        "classV": 60000000,
+        "classVI": 25000000
+      }
+    },
+    "expect": {
+      "specVersion": "DEFINITIVE.v1.0",
+      "methodologyUri": "methodology://v19",
+      "lineBoundary": "computed_for_professional_review",
+      "fields": [
+        { "path": "outputs.totalConsiderationCents", "equals": 100000000 },
+        { "path": "outputs.allocation.classI", "equals": 5000000 },
+        { "path": "outputs.allocation.classV", "equals": 60000000 },
+        { "path": "outputs.allocation.classVI", "equals": 25000000 },
+        { "path": "outputs.residualClassVIICents", "equals": 10000000 },
+        { "path": "warnings.0", "includes": "tax counsel" }
+      ]
+    }
+  },
+  {
+    "id": "REF.TS.M199.FIRPTA.001",
+    "modelId": "M199",
+    "title": "FIRPTA residence ladder applies 10 percent withholding from 300K to 1M",
+    "input": {
+      "amountRealizedCents": 80000000,
+      "sellerIsForeignPerson": true,
+      "buyerWillUseAsResidence": true
+    },
+    "expect": {
+      "specVersion": "DEFINITIVE.v1.0",
+      "methodologyUri": "methodology://v19",
+      "lineBoundary": "deterministic_compute_only",
+      "fields": [
+        { "path": "outputs.withholdingRateBps", "equals": 1000 },
+        { "path": "outputs.withholdingCents", "equals": 8000000 },
+        { "path": "outputs.buyerFilingDueDaysAfterTransfer", "equals": 20 },
+        { "path": "outputs.forms", "includes": "8288-A" }
+      ]
+    }
+  },
+  {
+    "id": "REF.TS.M206.INDEMNITY.001",
+    "modelId": "M206",
+    "title": "Indemnification ladder computes deductible basket and cap",
+    "input": {
+      "transactionValueCents": 5000000000,
+      "capBps": 1000,
+      "basketBps": 50,
+      "basketStyle": "deductible",
+      "lossesCents": 60000000
+    },
+    "expect": {
+      "specVersion": "DEFINITIVE.v1.0",
+      "methodologyUri": "methodology://v19",
+      "lineBoundary": "computed_for_professional_review",
+      "fields": [
+        { "path": "outputs.capCents", "equals": 500000000 },
+        { "path": "outputs.basketCents", "equals": 25000000 },
+        { "path": "outputs.recoverableBeforeCapCents", "equals": 35000000 },
+        { "path": "outputs.recoverableAfterCapCents", "equals": 35000000 },
+        { "path": "outputs.buyerRetainedLossCents", "equals": 25000000 },
+        { "path": "warnings.0", "includes": "Economic indemnity math only" }
+      ]
+    }
+  }
+]

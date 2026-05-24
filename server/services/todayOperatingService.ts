@@ -1,6 +1,13 @@
 import crypto from 'crypto';
 import { sql } from '../db.js';
 import { GATE_MAP, getGateV19Requirements } from '../../shared/gateRegistry.js';
+import {
+  buildModelFreshnessEnvelope,
+  extractAssumptionsFromModelExecution,
+  type ModelFreshnessEnvelope,
+  type ModelFreshnessStatus,
+} from '../../shared/modelStaleness.js';
+import { buildModelRecomputePlan } from '../../shared/modelActionRouting.js';
 
 type Tone = 'gold' | 'cactus' | 'oat' | 'plum' | 'charcoal';
 
@@ -92,6 +99,21 @@ interface DefinitiveDealPacketRow {
   payload: Record<string, any> | null;
   next_suggested_calls: any[] | null;
   take_back_artifacts: any[] | null;
+  created_at: string;
+}
+
+interface ModelExecutionFreshnessRow {
+  id: number;
+  model_id: string;
+  status: string;
+  deal_id: number | null;
+  canvas_tab_id: string | null;
+  model_type: string | null;
+  model_title: string | null;
+  client_version_number: number | string | null;
+  output_hash: string | null;
+  model_output: Record<string, any> | null;
+  version_snapshot: Record<string, any> | null;
   created_at: string;
 }
 
@@ -205,6 +227,30 @@ export interface TodayStudioRefreshItem {
   tone: Tone;
 }
 
+export interface TodayModelRefreshItem {
+  id: string;
+  dealId?: string;
+  dealTitle?: string;
+  modelType: string;
+  modelTitle: string;
+  status: Exclude<ModelFreshnessStatus, 'current'>;
+  statusLabel: string;
+  reason: string;
+  changedInputs: string[];
+  watchedInputs: string[];
+  rerunTriggers: string[];
+  currentAssumptions?: Record<string, unknown>;
+  nextSuggestedCalls: string[];
+  recomputeActionKey?: string;
+  recomputeToolName?: string;
+  recomputeSurfaceActionId?: string;
+  recomputePrompt?: string;
+  outputHash?: string;
+  versionNumber?: number;
+  updatedAt?: string;
+  freshness: ModelFreshnessEnvelope;
+}
+
 export interface TodayFirmMemorySnapshot {
   assumptions: FirmMemoryItem[];
   houseStyle: FirmMemoryItem[];
@@ -233,6 +279,7 @@ export interface TodayOperatingBrief {
   dealPulse: TodayDealPulseItem[];
   filesNeedingReview: TodayFileReviewItem[];
   studioRefreshNeeds: TodayStudioRefreshItem[];
+  modelRefreshNeeds: TodayModelRefreshItem[];
   firmMemory: TodayFirmMemorySnapshot;
 }
 
@@ -262,6 +309,7 @@ interface TodaySnapshot {
   firmMemory: FirmMemoryRow[];
   definitiveStates: DefinitiveDealStateSnapshotRow[];
   definitivePackets: DefinitiveDealPacketRow[];
+  modelExecutions: ModelExecutionFreshnessRow[];
 }
 
 export async function getTodayOperatingBrief(userId: number, forceRefresh = false): Promise<TodayOperatingBrief> {
@@ -276,14 +324,17 @@ export async function getTodayOperatingBrief(userId: number, forceRefresh = fals
 
   const generatedAt = new Date().toISOString();
   const definitiveByDeal = buildDefinitiveStateMap(snapshot.definitiveStates, snapshot.definitivePackets);
+  const modelRefreshNeeds = buildModelRefreshNeeds(snapshot);
+  const modelRefreshByDeal = groupModelRefreshByDeal(modelRefreshNeeds);
   const brief: TodayOperatingBrief = {
     source: 'live',
     generatedAt,
-    morningBrief: buildMorningBrief(snapshot, generatedAt),
-    gateCountdown: buildGateCountdown(snapshot.deals, definitiveByDeal),
-    dealPulse: buildDealPulse(snapshot.deals, definitiveByDeal),
-    filesNeedingReview: buildFilesNeedingReview(snapshot.deliverables, snapshot.reviews, snapshot.definitivePackets),
+    morningBrief: buildMorningBrief(snapshot, generatedAt, modelRefreshNeeds),
+    gateCountdown: buildGateCountdown(snapshot.deals, definitiveByDeal, modelRefreshByDeal),
+    dealPulse: buildDealPulse(snapshot.deals, definitiveByDeal, modelRefreshByDeal),
+    filesNeedingReview: buildFilesNeedingReview(snapshot.deliverables, snapshot.reviews, snapshot.definitivePackets, modelRefreshNeeds),
     studioRefreshNeeds: buildStudioRefreshNeeds(snapshot.studioBooks),
+    modelRefreshNeeds,
     firmMemory: buildFirmMemorySnapshot(snapshot.firmMemory),
   };
 
@@ -351,7 +402,7 @@ async function buildSnapshot(userId: number): Promise<TodaySnapshot> {
     return [] as DealRow[];
   });
   const dealIds = deals.map(deal => deal.id);
-  const [deliverables, reviews, studioBooks, firmMemory, definitiveStates, definitivePackets] = await Promise.all([
+  const [deliverables, reviews, studioBooks, firmMemory, definitiveStates, definitivePackets, modelExecutions] = await Promise.all([
     readDeliverables(userId, dealIds).catch(err => {
       console.warn('[today operating brief] deliverables unavailable:', err.message);
       return [] as DeliverableRow[];
@@ -376,8 +427,12 @@ async function buildSnapshot(userId: number): Promise<TodaySnapshot> {
       console.warn('[today operating brief] DEFINITIVE packets unavailable:', err.message);
       return [] as DefinitiveDealPacketRow[];
     }),
+    readLatestModelExecutions(userId, dealIds).catch(err => {
+      console.warn('[today operating brief] model executions unavailable:', err.message);
+      return [] as ModelExecutionFreshnessRow[];
+    }),
   ]);
-  return { deals, deliverables, reviews, studioBooks, firmMemory, definitiveStates, definitivePackets };
+  return { deals, deliverables, reviews, studioBooks, firmMemory, definitiveStates, definitivePackets, modelExecutions };
 }
 
 function normalizeFirmMemoryType(value: string): FirmMemoryType {
@@ -519,6 +574,22 @@ async function readDefinitivePackets(userId: number, dealIds: number[]): Promise
   `;
 }
 
+async function readLatestModelExecutions(userId: number, dealIds: number[]): Promise<ModelExecutionFreshnessRow[]> {
+  if (!dealIds.length) return [];
+  return sql<ModelExecutionFreshnessRow[]>`
+    SELECT DISTINCT ON (me.deal_id, COALESCE(NULLIF(me.canvas_tab_id, ''), NULLIF(me.model_type, ''), me.model_id))
+           me.id, me.model_id, me.status, me.deal_id, me.canvas_tab_id, me.model_type,
+           me.model_title, me.client_version_number, me.output_hash,
+           me.model_output, me.version_snapshot, me.created_at
+    FROM model_executions me
+    WHERE me.user_id = ${userId}
+      AND me.deal_id = ANY(${dealIds})
+      AND me.status = 'complete'
+    ORDER BY me.deal_id, COALESCE(NULLIF(me.canvas_tab_id, ''), NULLIF(me.model_type, ''), me.model_id), me.created_at DESC
+    LIMIT 80
+  `;
+}
+
 async function ensureFirmMemoryDefaults(userId: number): Promise<void> {
   const defaults = [
     {
@@ -560,7 +631,7 @@ async function ensureFirmMemoryDefaults(userId: number): Promise<void> {
 async function readCachedBrief(userId: number, fingerprint: string): Promise<TodayOperatingBrief | null> {
   const [row] = await sql`
     SELECT morning_brief, gate_countdown, deal_pulse, files_needing_review,
-           studio_refresh_needs, firm_memory_snapshot, generated_at
+           studio_refresh_needs, model_refresh_needs, firm_memory_snapshot, generated_at
     FROM today_operating_briefs
     WHERE user_id = ${userId}
       AND source_fingerprint = ${fingerprint}
@@ -577,6 +648,7 @@ async function readCachedBrief(userId: number, fingerprint: string): Promise<Tod
     dealPulse: safeArray(row.deal_pulse) as TodayDealPulseItem[],
     filesNeedingReview: safeArray(row.files_needing_review) as TodayFileReviewItem[],
     studioRefreshNeeds: safeArray(row.studio_refresh_needs) as TodayStudioRefreshItem[],
+    modelRefreshNeeds: safeArray(row.model_refresh_needs) as TodayModelRefreshItem[],
     firmMemory: row.firm_memory_snapshot as TodayFirmMemorySnapshot,
   };
 }
@@ -585,7 +657,7 @@ async function writeCachedBrief(userId: number, fingerprint: string, brief: Toda
   await sql`
     INSERT INTO today_operating_briefs (
       user_id, source_fingerprint, morning_brief, gate_countdown, deal_pulse,
-      files_needing_review, studio_refresh_needs, firm_memory_snapshot, generated_at, expires_at, status
+      files_needing_review, studio_refresh_needs, model_refresh_needs, firm_memory_snapshot, generated_at, expires_at, status
     )
     VALUES (
       ${userId},
@@ -595,6 +667,7 @@ async function writeCachedBrief(userId: number, fingerprint: string, brief: Toda
       ${sql.json(brief.dealPulse as any)}::jsonb,
       ${sql.json(brief.filesNeedingReview as any)}::jsonb,
       ${sql.json(brief.studioRefreshNeeds as any)}::jsonb,
+      ${sql.json(brief.modelRefreshNeeds as any)}::jsonb,
       ${sql.json(brief.firmMemory as any)}::jsonb,
       NOW(),
       NOW() + INTERVAL '8 hours',
@@ -608,6 +681,7 @@ async function writeCachedBrief(userId: number, fingerprint: string, brief: Toda
       deal_pulse = EXCLUDED.deal_pulse,
       files_needing_review = EXCLUDED.files_needing_review,
       studio_refresh_needs = EXCLUDED.studio_refresh_needs,
+      model_refresh_needs = EXCLUDED.model_refresh_needs,
       firm_memory_snapshot = EXCLUDED.firm_memory_snapshot,
       generated_at = NOW(),
       expires_at = NOW() + INTERVAL '8 hours',
@@ -615,17 +689,19 @@ async function writeCachedBrief(userId: number, fingerprint: string, brief: Toda
   `;
 }
 
-function buildMorningBrief(snapshot: TodaySnapshot, generatedAt: string): TodayMorningBrief {
+function buildMorningBrief(snapshot: TodaySnapshot, generatedAt: string, modelRefreshNeeds: TodayModelRefreshItem[]): TodayMorningBrief {
   const rankedDeals = [...snapshot.deals].sort((a, b) => fitScore(b) - fitScore(a));
   const focus = rankedDeals[0] ?? snapshot.deals[0] ?? null;
   const reviewCount = snapshot.reviews.length;
   const studioNeeds = buildStudioRefreshNeeds(snapshot.studioBooks).length;
   const staleCount = snapshot.deliverables.filter(item => item.is_stale || item.status !== 'complete').length;
   const stateCount = snapshot.definitiveStates.length;
+  const modelRefreshCount = modelRefreshNeeds.length;
   const chips = [
     `${snapshot.deals.length} active ${snapshot.deals.length === 1 ? 'deal' : 'deals'}`,
     `${reviewCount} review ${reviewCount === 1 ? 'item' : 'items'}`,
     `${studioNeeds} Studio ${studioNeeds === 1 ? 'refresh' : 'refreshes'}`,
+    modelRefreshCount > 0 ? `${modelRefreshCount} model ${modelRefreshCount === 1 ? 'rerun' : 'reruns'}` : null,
     stateCount > 0 ? `${stateCount} DealState ${stateCount === 1 ? 'journal' : 'journals'}` : null,
   ].filter(Boolean) as string[];
 
@@ -642,6 +718,8 @@ function buildMorningBrief(snapshot: TodaySnapshot, generatedAt: string): TodayM
   const name = dealName(focus);
   const work = reviewCount > 0
     ? `${reviewCount} review item${reviewCount === 1 ? '' : 's'} waiting`
+    : modelRefreshCount > 0
+      ? `${modelRefreshCount} model rerun${modelRefreshCount === 1 ? '' : 's'} waiting`
     : staleCount > 0
       ? `${staleCount} file or deliverable refresh${staleCount === 1 ? '' : 'es'} waiting`
       : 'the next deal move is clear';
@@ -656,7 +734,11 @@ function buildMorningBrief(snapshot: TodaySnapshot, generatedAt: string): TodayM
   };
 }
 
-function buildGateCountdown(deals: DealRow[], definitiveByDeal: Map<string, TodayDefinitiveDealState>): TodayGateCountdownItem[] {
+function buildGateCountdown(
+  deals: DealRow[],
+  definitiveByDeal: Map<string, TodayDefinitiveDealState>,
+  modelRefreshByDeal: Map<string, TodayModelRefreshItem[]>,
+): TodayGateCountdownItem[] {
   const tones: Tone[] = ['cactus', 'gold', 'plum', 'oat', 'charcoal'];
   return deals
     .filter(deal => deal.current_gate)
@@ -666,8 +748,10 @@ function buildGateCountdown(deals: DealRow[], definitiveByDeal: Map<string, Toda
       const gate = GATE_MAP[gateId];
       const requirements = getGateV19Requirements(gateId);
       const definitive = definitiveByDeal.get(String(deal.id));
+      const modelNeeds = modelRefreshByDeal.get(String(deal.id)) ?? [];
       const blockers = [
         definitive && definitive.missingCount > 0 ? `${definitive.missingCount} DealState gap${definitive.missingCount === 1 ? '' : 's'}` : null,
+        modelNeeds.length > 0 ? `${modelNeeds.length} model rerun${modelNeeds.length === 1 ? '' : 's'}` : null,
         Number(deal.review_count || 0) > 0 ? `${deal.review_count} open review` : null,
         Number(deal.stale_deliverable_count || 0) > 0 ? `${deal.stale_deliverable_count} stale output` : null,
         !requirements.requiredModels.length ? null : `${requirements.requiredModels.length} model check`,
@@ -681,14 +765,18 @@ function buildGateCountdown(deals: DealRow[], definitiveByDeal: Map<string, Toda
         blockers: blockers.length ? blockers : ['No blocker surfaced'],
         requiredModels: requirements.requiredModels,
         requiredCitations: requirements.requiredCitations,
-        nextAction: definitiveNextAction(definitive) || nextGateAction(deal, requirements.requiredModels.length, requirements.requiredCitations.length),
+        nextAction: modelNeeds[0] ? `Rerun ${modelNeeds[0].modelTitle}` : definitiveNextAction(definitive) || nextGateAction(deal, requirements.requiredModels.length, requirements.requiredCitations.length),
         tone: tones[index % tones.length],
         definitive,
       };
     });
 }
 
-function buildDealPulse(deals: DealRow[], definitiveByDeal: Map<string, TodayDefinitiveDealState>): TodayDealPulseItem[] {
+function buildDealPulse(
+  deals: DealRow[],
+  definitiveByDeal: Map<string, TodayDefinitiveDealState>,
+  modelRefreshByDeal: Map<string, TodayModelRefreshItem[]>,
+): TodayDealPulseItem[] {
   const tones: Tone[] = ['cactus', 'gold', 'oat', 'plum', 'charcoal'];
   return [...deals]
     .sort((a, b) => fitScore(b) - fitScore(a))
@@ -696,6 +784,7 @@ function buildDealPulse(deals: DealRow[], definitiveByDeal: Map<string, TodayDef
     .map((deal, index) => {
       const score = fitScore(deal);
       const definitive = definitiveByDeal.get(String(deal.id));
+      const modelNeeds = modelRefreshByDeal.get(String(deal.id)) ?? [];
       return {
         dealId: String(deal.id),
         title: dealName(deal),
@@ -703,9 +792,11 @@ function buildDealPulse(deals: DealRow[], definitiveByDeal: Map<string, TodayDef
         fit: score,
         thesis: dealThesis(deal),
         metric: `${fmtCents(deal.sde || deal.ebitda)} ${deal.sde ? 'SDE' : deal.ebitda ? 'EBITDA' : 'metric'}`,
-        urgency: definitive ? `${shortReadinessLabel(definitive.readinessLevel)} · ${definitive.score}%` : Number(deal.review_count || 0) > 0 ? 'review waiting' : gateLabel(deal.current_gate),
+        urgency: modelNeeds.length > 0
+          ? `${modelNeeds.length} model ${modelNeeds.length === 1 ? 'rerun' : 'reruns'}`
+          : definitive ? `${shortReadinessLabel(definitive.readinessLevel)} · ${definitive.score}%` : Number(deal.review_count || 0) > 0 ? 'review waiting' : gateLabel(deal.current_gate),
         tone: tones[index % tones.length],
-        nextAction: definitiveNextAction(definitive) || (Number(deal.review_count || 0) > 0
+        nextAction: modelNeeds[0] ? `Rerun ${modelNeeds[0].modelTitle}` : definitiveNextAction(definitive) || (Number(deal.review_count || 0) > 0
           ? 'Clear review queue'
           : Number(deal.stale_deliverable_count || 0) > 0
             ? 'Refresh output'
@@ -719,6 +810,7 @@ function buildFilesNeedingReview(
   deliverables: DeliverableRow[],
   reviews: ReviewRow[],
   definitivePackets: DefinitiveDealPacketRow[] = [],
+  modelRefreshNeeds: TodayModelRefreshItem[] = [],
 ): TodayFileReviewItem[] {
   const fromReviews = reviews.map((review, index) => ({
     id: `review-${review.id}`,
@@ -771,7 +863,133 @@ function buildFilesNeedingReview(
         definitiveDisclosureStatus: disclosureStatus,
       };
     });
-  return [...fromReviews, ...fromDeliverables, ...fromPackets].slice(0, 10);
+  const fromModels = modelRefreshNeeds
+    .slice(0, 6)
+    .map((item, index) => ({
+      id: `model-refresh-${item.id}`,
+      title: item.modelTitle,
+      dealId: item.dealId,
+      dealTitle: item.dealTitle,
+      reason: item.reason,
+      status: item.status === 'needs_rerun' ? 'Rerun' : item.statusLabel,
+      tone: (item.status === 'needs_rerun' ? 'plum' : index % 2 === 0 ? 'gold' : 'oat') as Tone,
+      updatedAt: item.updatedAt,
+    }));
+  return [...fromReviews, ...fromModels, ...fromDeliverables, ...fromPackets].slice(0, 10);
+}
+
+function buildModelRefreshNeeds(snapshot: TodaySnapshot): TodayModelRefreshItem[] {
+  const dealsById = new Map(snapshot.deals.map(deal => [deal.id, deal]));
+  return snapshot.modelExecutions
+    .flatMap(row => {
+      if (!row.deal_id) return [];
+      const deal = dealsById.get(row.deal_id);
+      if (!deal) return [];
+      const execution = {
+        modelOutput: row.model_output || {},
+        versionSnapshot: row.version_snapshot || {},
+      };
+      const savedAssumptions = extractAssumptionsFromModelExecution(execution);
+      const currentAssumptions = {
+        ...savedAssumptions,
+        ...dealAssumptionOverrides(deal),
+      };
+      const freshness = buildModelFreshnessEnvelope({
+        modelType: row.model_type || row.model_id,
+        currentAssumptions,
+        savedAssumptions,
+        currentVersionNumber: Number(row.client_version_number || 1),
+        savedVersionNumber: Number(row.client_version_number || 1),
+      });
+      if (freshness.status === 'current') return [];
+      const changedInputs = [
+        ...freshness.criticalInputChanges,
+        ...freshness.sensitiveInputChanges,
+      ].map(change => change.label);
+      const watchedInputs = freshness.watchedInputs.map(input => input.label);
+      const recomputePlan = buildModelRecomputePlan(row.model_type || row.model_id);
+      return [{
+        id: String(row.id),
+        dealId: String(row.deal_id),
+        dealTitle: dealName(deal),
+        modelType: freshness.modelType,
+        modelTitle: row.model_title || freshness.modelLabel,
+        status: freshness.status,
+        statusLabel: freshness.statusLabel,
+        reason: freshness.status === 'unknown'
+          ? freshness.rerunPrompt
+          : `${freshness.statusLabel}: ${changedInputs.length ? changedInputs.join(', ') : freshness.rerunTriggers[0] || 'tracked assumptions changed'}.`,
+        changedInputs,
+        watchedInputs,
+        rerunTriggers: freshness.rerunTriggers,
+        currentAssumptions,
+        nextSuggestedCalls: Array.from(new Set([
+          ...freshness.next_suggested_calls,
+          recomputePlan.actionKey,
+          recomputePlan.surfaceActionId,
+        ])),
+        recomputeActionKey: recomputePlan.actionKey,
+        recomputeToolName: recomputePlan.toolName,
+        recomputeSurfaceActionId: recomputePlan.surfaceActionId,
+        recomputePrompt: recomputePlan.prompt,
+        outputHash: row.output_hash || undefined,
+        versionNumber: Number(row.client_version_number || 1),
+        updatedAt: toIso(row.created_at),
+        freshness,
+      } satisfies TodayModelRefreshItem];
+    })
+    .sort((a, b) => modelRefreshRank(a.status) - modelRefreshRank(b.status))
+    .slice(0, 12);
+}
+
+function dealAssumptionOverrides(deal: DealRow): Record<string, unknown> {
+  const financials = asRecord(deal.financials);
+  const ev = firstKnownNumber(
+    deal.asking_price,
+    financials.enterpriseValue,
+    financials.ev,
+    financials.purchasePrice,
+    financials.askingPrice,
+    financials.salePrice,
+  );
+  return omitUndefined({
+    dealId: deal.id,
+    league: deal.league,
+    revenue: firstKnownNumber(deal.revenue, financials.revenue),
+    sde: firstKnownNumber(deal.sde, financials.sde, financials.sellerDiscretionaryEarnings),
+    ebitda: firstKnownNumber(deal.ebitda, financials.ebitda),
+    enterpriseValue: ev,
+    ev,
+    purchasePrice: ev,
+    askingPrice: ev,
+    salePrice: ev,
+    ownerComp: financials.ownerComp,
+    multipleOverride: financials.multipleOverride,
+    sellerBasis: financials.sellerBasis,
+    stateTaxRate: financials.stateTaxRate,
+    targetWorkingCapital: financials.targetWorkingCapital,
+    workingCapital: financials.workingCapital,
+    annualDebtService: financials.annualDebtService,
+    totalDebt: financials.totalDebt,
+    assetValue: financials.assetValue,
+  });
+}
+
+function groupModelRefreshByDeal(items: TodayModelRefreshItem[]): Map<string, TodayModelRefreshItem[]> {
+  const map = new Map<string, TodayModelRefreshItem[]>();
+  for (const item of items) {
+    if (!item.dealId) continue;
+    const current = map.get(item.dealId) ?? [];
+    current.push(item);
+    map.set(item.dealId, current);
+  }
+  return map;
+}
+
+function modelRefreshRank(status: TodayModelRefreshItem['status']): number {
+  if (status === 'needs_rerun') return 0;
+  if (status === 'superseded') return 1;
+  return 2;
 }
 
 function buildDefinitiveStateMap(
@@ -1017,7 +1235,16 @@ function hashSnapshot(snapshot: TodaySnapshot): string {
       safeArray(item.next_suggested_calls).map(call => [call?.toolName, call?.priority, call?.reason]),
       safeArray(item.take_back_artifacts),
     ]),
-    shape: 'today-operating-dealos-next-calls-v1',
+    modelExecutions: snapshot.modelExecutions.map(item => [
+      item.id,
+      item.deal_id,
+      item.model_type,
+      item.model_title,
+      item.client_version_number,
+      item.output_hash,
+      item.created_at,
+    ]),
+    shape: 'today-operating-dealos-model-freshness-v1',
   };
   return crypto.createHash('sha256').update(JSON.stringify(basis)).digest('hex');
 }
@@ -1044,6 +1271,21 @@ function fitScore(deal: DealRow): number {
   if (metric >= 1_000_000) return 80;
   if (metric >= 500_000) return 74;
   return 68;
+}
+
+function firstKnownNumber(...values: unknown[]): number | undefined {
+  for (const value of values) {
+    if (value === null || value === undefined || value === '') continue;
+    const n = Number(value);
+    if (Number.isFinite(n)) return n;
+  }
+  return undefined;
+}
+
+function omitUndefined(record: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(record).filter(([, value]) => value !== undefined && value !== null && value !== ''),
+  );
 }
 
 function nextGateAction(deal: DealRow, modelCount: number, citationCount: number): string {

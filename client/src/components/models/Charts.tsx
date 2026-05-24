@@ -17,15 +17,15 @@ ChartJS.register(
 );
 
 // Brand colors
-const TERRA = '#D4714E';
-const TERRA_LIGHT = 'rgba(186, 60, 96, 0.15)';
-const TEXT = '#1a1918';
-const MUTED = '#5e5d59';
-const CREAM = '#FAF8F4';
-const BORDER = '#DDD9D1';
-const GREEN = '#34A853';
-const YELLOW = '#FBBC04';
-const RED = '#EA4335';
+const TERRA = '#6A9BCC';
+const TERRA_LIGHT = 'rgba(106, 155, 204, 0.16)';
+const TEXT = '#1A2233';
+const MUTED = '#555E6F';
+const CREAM = '#F6F8FC';
+const BORDER = '#E1E8F2';
+const GREEN = '#629987';
+const YELLOW = '#D6A35C';
+const RED = '#B94B43';
 
 // ─── Valuation Range Chart ──────────────────────────────────────────
 

@@ -533,20 +533,20 @@ export const TOOL_DEFINITIONS: Tool[] = [
   },
   {
     name: 'create_model_tab',
-    description: 'Create a new interactive financial model tab on the canvas. The model calculates instantly on the client with no API calls. Use when the user wants to model a scenario, run valuation, check SBA financing, or analyze a deal. Returns the tab ID so you can reference it later.',
+    description: 'Create a new interactive, versioned financial model tab on the canvas. The model calculates instantly on the client with no API calls. Use when the user wants to model a scenario, run valuation, check SBA financing, analyze EV/purchase-price economics, or iterate deal assumptions. Returns the tab ID so later update_model calls can create additional scenario versions.',
     input_schema: {
       type: 'object' as const,
       properties: {
         modelType: { type: 'string', enum: ['valuation', 'lbo', 'sba_financing', 'dcf', 'sensitivity', 'comparison', 'cap_table', 'earnout', 'tax_impact', 'working_capital', 'covenant', 'sde_analysis'], description: 'Type of financial model' },
         title: { type: 'string', description: 'Tab title shown in the canvas tab bar' },
-        initialAssumptions: { type: 'object', description: 'Starting assumptions. For valuation: { sde, ebitda, league, revenue }. For lbo: { purchasePrice, ebitda, revenue, revenueGrowthRate, ebitdaMargin, exitMultiple, holdPeriod, seniorDebtPct, seniorRate }. For sba_financing: { purchasePrice, earnings, downPaymentPct, interestRate, termMonths }. All money in cents.' },
+        initialAssumptions: { type: 'object', description: 'Starting assumptions. For valuation: { sde, ebitda, league, revenue, enterpriseValue, purchasePrice }. For lbo: { purchasePrice, ebitda, revenue, revenueGrowthRate, ebitdaMargin, exitMultiple, holdPeriod, seniorDebtPct, seniorRate }. For sba_financing: { purchasePrice, earnings, downPaymentPct, interestRate, termMonths }. All money in cents.' },
       },
       required: ['modelType', 'title', 'initialAssumptions'],
     },
   },
   {
     name: 'update_model',
-    description: 'Update assumptions in an open financial model tab. The canvas recalculates and re-renders instantly (deterministic math, no API call). Use when the user says "what if EBITDA is $1.5M" or "change the exit multiple to 6x".',
+    description: 'Update assumptions in an open financial model tab. The canvas recalculates and saves a new scenario version instantly (deterministic math, no API call). Use repeatedly when the user or calling agent says "what if EV is $12M", "change EBITDA to $1.5M", "adjust debt", or "try a 6x exit". Modeling is iterative, not one-and-done.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -2895,7 +2895,7 @@ async function createModelTab(input: Record<string, any>, userId: number, conver
     tabId,
     analysisRunId: analysisRun?.id ?? null,
     initialAssumptions: initialAssumptions || {},
-    message: `I've opened a ${modelTitle} model on your canvas. You can adjust the assumptions with the sliders, or tell me what to change.`,
+    message: `I've opened a versioned ${modelTitle} model on your canvas. Adjust the assumptions with the inputs, or tell me what to change; each revision becomes another scenario Yulia can compare.`,
   });
 }
 

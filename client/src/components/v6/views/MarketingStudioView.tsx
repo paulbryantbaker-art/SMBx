@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { authHeaders, type User } from "../../../hooks/useAuth";
+import { useTodayOperatingBrief, type TodayModelRefreshItem } from "../../../hooks/useTodayOperatingBrief";
 import { STUDIO_TEXTURES } from "../../../lib/randomTextures";
 import type { OpenTab, StudioFormatId, Tab } from "../types";
 import { V19UsageMeter } from "../V19UsageMeter";
@@ -192,6 +193,8 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
   const [books, setBooks] = useState<PitchBookRecord[]>([]);
   const [loadingBooks, setLoadingBooks] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const operating = useTodayOperatingBrief(user, !!user);
+  const modelRefreshNeeds = operating.brief?.modelRefreshNeeds ?? [];
 
   const askYulia = (prompt: string) => onTalkToYulia?.(prompt);
 
@@ -392,6 +395,12 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
           </div>
         </div>
 
+        <StudioModelRefreshPanel
+          items={modelRefreshNeeds}
+          loading={operating.loading}
+          onAskYulia={askYulia}
+        />
+
         <DefinitiveSurfacePanel
           surface="studio"
           title="DEFINITIVE read for Studio."
@@ -400,6 +409,58 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
         />
       </section>
     </main>
+  );
+}
+
+function StudioModelRefreshPanel({
+  items,
+  loading,
+  onAskYulia,
+}: {
+  items: TodayModelRefreshItem[];
+  loading: boolean;
+  onAskYulia: (prompt: string) => void;
+}) {
+  return (
+    <div style={S.bookPanel}>
+      <div style={S.panelHeader}>
+        <h2 style={S.sectionTitle}>Model freshness</h2>
+        <span style={S.smallPill}>{loading ? "Reading" : `${items.length} queued`}</span>
+      </div>
+      <div style={S.bookStack}>
+        {items.length === 0 && (
+          <button
+            type="button"
+            className="m-nudge-soft"
+            style={S.bookRow}
+            onClick={() => onAskYulia("Explain how Studio keeps books current against saved model outputs and rerun triggers.")}
+          >
+            <span style={S.bookIcon}>OK</span>
+            <span style={S.bookBody}>
+              <strong>Model-linked books are clean</strong>
+              <small>No stale model output is blocking a Studio draft right now.</small>
+            </span>
+            <span style={S.cleanPill}>clean</span>
+          </button>
+        )}
+        {items.slice(0, 3).map(item => (
+          <button
+            key={item.id}
+            type="button"
+            className="m-nudge-soft"
+            style={S.bookRow}
+            onClick={() => onAskYulia(`For Studio, explain the stale model output ${item.modelTitle} on ${item.dealTitle || "this deal"}. Show which book claims or exports could be affected and what should be rerun first.`)}
+          >
+            <span style={S.bookIcon}>{item.modelTitle.slice(0, 2).toUpperCase()}</span>
+            <span style={S.bookBody}>
+              <strong>{item.modelTitle}</strong>
+              <small>{item.dealTitle ? `${item.dealTitle} / ` : ""}{item.changedInputs.slice(0, 2).join(", ") || item.rerunTriggers[0] || item.statusLabel}</small>
+            </span>
+            <span style={item.status === "needs_rerun" ? S.warnPill : S.smallPill}>{item.statusLabel}</span>
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
 

@@ -19,6 +19,7 @@ export interface TodayOperatingBrief {
   dealPulse: TodayDealPulseItem[];
   filesNeedingReview: TodayFileReviewItem[];
   studioRefreshNeeds: TodayStudioRefreshItem[];
+  modelRefreshNeeds: TodayModelRefreshItem[];
   firmMemory: TodayFirmMemorySnapshot;
 }
 
@@ -109,6 +110,29 @@ export interface TodayStudioRefreshItem {
   gaps: number;
   action: string;
   tone: TodayTone;
+}
+
+export interface TodayModelRefreshItem {
+  id: string;
+  dealId?: string;
+  dealTitle?: string;
+  modelType: string;
+  modelTitle: string;
+  status: "needs_rerun" | "superseded" | "unknown";
+  statusLabel: string;
+  reason: string;
+  changedInputs: string[];
+  watchedInputs: string[];
+  rerunTriggers: string[];
+  currentAssumptions?: Record<string, any>;
+  nextSuggestedCalls: string[];
+  recomputeActionKey?: string;
+  recomputeToolName?: string;
+  recomputeSurfaceActionId?: string;
+  recomputePrompt?: string;
+  outputHash?: string;
+  versionNumber?: number;
+  updatedAt?: string;
 }
 
 export interface TodayFirmMemorySnapshot {

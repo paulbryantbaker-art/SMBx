@@ -51,6 +51,7 @@ export const V19_TOOL_CONTRACTS = [
   'export_pitch_book',
   'compose_model_stack',
   'execute_model',
+  'list_model_executions',
   'lookup_citation',
   'fetch_market_data',
   'read_v19_readiness',

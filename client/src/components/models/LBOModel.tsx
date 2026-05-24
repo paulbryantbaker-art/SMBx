@@ -23,7 +23,7 @@ export default function LBOModel({ tabId }: Props) {
 
   const a = tab.assumptions;
   const lbo = tab.outputs.lbo;
-  if (!lbo) return <div className="p-5 text-sm text-[#5e5d59]">Set purchase price and EBITDA to begin.</div>;
+  if (!lbo) return <div className="p-5 text-sm" style={{ color: 'var(--m-on-surface-var)' }}>Set purchase price and EBITDA to begin.</div>;
 
   // Build sensitivity matrix on the fly
   const lboAssumptions: LBOAssumptions = tab.outputs.lboAssumptions;
@@ -60,17 +60,17 @@ export default function LBOModel({ tabId }: Props) {
         <KPICard
           label="IRR"
           value={pctDisplay(lbo.irr)}
-          color={lbo.irr >= 0.20 ? '#34A853' : lbo.irr >= 0.10 ? '#FBBC04' : '#EA4335'}
+          color={lbo.irr >= 0.20 ? 'var(--m-pursue)' : lbo.irr >= 0.10 ? 'var(--m-watch)' : 'var(--m-pass)'}
         />
         <KPICard
           label="MOIC"
           value={multDisplay(lbo.moic)}
-          color={lbo.moic >= 2.5 ? '#34A853' : lbo.moic >= 1.5 ? '#FBBC04' : '#EA4335'}
+          color={lbo.moic >= 2.5 ? 'var(--m-pursue)' : lbo.moic >= 1.5 ? 'var(--m-watch)' : 'var(--m-pass)'}
         />
         <KPICard
           label="Year 1 DSCR"
           value={lbo.dscrByYear[0] ? `${lbo.dscrByYear[0].toFixed(2)}x` : '—'}
-          color={lbo.dscrByYear[0] >= 1.25 ? '#34A853' : '#EA4335'}
+          color={lbo.dscrByYear[0] >= 1.25 ? 'var(--m-pursue)' : 'var(--m-pass)'}
           sublabel={lbo.dscrByYear[0] >= 1.25 ? 'SBA eligible' : 'Below threshold'}
         />
         <KPICard
@@ -84,7 +84,7 @@ export default function LBOModel({ tabId }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         {/* Left: Deal Inputs */}
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#5e5d59' }}>Deal Assumptions</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Deal Assumptions</h3>
 
           <ModelInput
             label="Purchase Price (EV)"
@@ -122,7 +122,7 @@ export default function LBOModel({ tabId }: Props) {
 
         {/* Middle: Exit & Structure */}
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#5e5d59' }}>Exit & Structure</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Exit & Structure</h3>
 
           <ModelSlider
             label="Exit Multiple"
@@ -139,7 +139,7 @@ export default function LBOModel({ tabId }: Props) {
             suffix=" years"
           />
 
-          <h4 className="text-[10px] font-bold uppercase tracking-wider mt-4 mb-2" style={{ color: '#5e5d59' }}>Debt Structure</h4>
+          <h4 className="text-[10px] font-bold uppercase tracking-wider mt-4 mb-2" style={{ color: 'var(--m-on-surface-var)' }}>Debt Structure</h4>
 
           <ModelSlider
             label="Senior Debt (% of EV)"
@@ -166,20 +166,20 @@ export default function LBOModel({ tabId }: Props) {
 
         {/* Right: Sources & Uses */}
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#5e5d59' }}>Sources & Uses</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Sources & Uses</h3>
           <SourcesUsesTable sources={lbo.sourcesUses.sources} uses={lbo.sourcesUses.uses} />
 
-          <div className="mt-4 rounded-lg p-3" style={{ background: '#FAF8F4', border: '1px solid #DDD9D1' }}>
+          <div className="mt-4 rounded-lg p-3" style={{ background: 'var(--m-surface-container)', border: '1px solid var(--m-outline-var)' }}>
             <div className="flex justify-between text-xs mb-1">
-              <span style={{ color: '#5e5d59' }}>Exit Value ({a.holdPeriod || 5}yr)</span>
+              <span style={{ color: 'var(--m-on-surface-var)' }}>Exit Value ({a.holdPeriod || 5}yr)</span>
               <span className="font-bold">{centsToDisplay(lbo.exitValue)}</span>
             </div>
             <div className="flex justify-between text-xs mb-1">
-              <span style={{ color: '#5e5d59' }}>Exit Equity</span>
-              <span className="font-bold" style={{ color: '#34A853' }}>{centsToDisplay(lbo.exitEquity)}</span>
+              <span style={{ color: 'var(--m-on-surface-var)' }}>Exit Equity</span>
+              <span className="font-bold" style={{ color: 'var(--m-pursue)' }}>{centsToDisplay(lbo.exitEquity)}</span>
             </div>
             <div className="flex justify-between text-xs">
-              <span style={{ color: '#5e5d59' }}>Cash-on-Cash</span>
+              <span style={{ color: 'var(--m-on-surface-var)' }}>Cash-on-Cash</span>
               <span className="font-bold">{pctDisplay(lbo.cashOnCash)}</span>
             </div>
           </div>
@@ -188,20 +188,20 @@ export default function LBOModel({ tabId }: Props) {
 
       {/* DSCR Timeline */}
       <div>
-        <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#5e5d59' }}>DSCR by Year</h3>
+        <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>DSCR by Year</h3>
         <DSCRTimeline dscrByYear={lbo.dscrByYear} />
       </div>
 
       {/* Pro Forma */}
       <div>
-        <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#5e5d59' }}>Pro Forma Projections</h3>
+        <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Pro Forma Projections</h3>
         <ProFormaTable years={lbo.proForma} />
       </div>
 
       {/* Sensitivity */}
       {sensitivityData && sensitivityData.var1Values.length > 0 && (
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#5e5d59' }}>IRR Sensitivity: EBITDA vs Exit Multiple</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>IRR Sensitivity: EBITDA vs Exit Multiple</h3>
           <SensitivityHeatmap {...sensitivityData} metric="irr" />
         </div>
       )}

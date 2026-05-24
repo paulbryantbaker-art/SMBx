@@ -8,6 +8,7 @@
  */
 import { create } from 'zustand';
 import { trackEvent } from './analytics';
+import { persistModelVersionSnapshot } from './modelExecutionPersistence';
 import {
   calculateValuation, calculateLBO, calculateSBAFinancing,
   calculateDSCRFull, calculateFCF, calculateBlendedValuation,
@@ -36,6 +37,17 @@ export interface ModelTab {
   outputs: Record<string, any>;
   linkedTabs: string[];
   createdAt: number;
+  updatedAt: number;
+  versionNumber: number;
+  versions: ModelVersion[];
+}
+
+export interface ModelVersion {
+  versionNumber: number;
+  createdAt: number;
+  changeReason: string;
+  assumptions: Record<string, any>;
+  keyOutputs: Record<string, any>;
 }
 
 interface ModelStore {
@@ -44,13 +56,13 @@ interface ModelStore {
 
   // Actions
   createTab: (type: ModelType, title: string, initialAssumptions?: Record<string, any>, dealId?: number) => string;
-  restoreTab: (id: string, type: ModelType, title: string, assumptions: Record<string, any>, dealId?: number) => void;
+  restoreTab: (id: string, type: ModelType, title: string, assumptions: Record<string, any>, dealId?: number, parentOutputHash?: string | null) => void;
   closeTab: (tabId: string) => void;
   setActiveTab: (tabId: string) => void;
   updateAssumption: (tabId: string, key: string, value: any) => void;
   updateAssumptions: (tabId: string, updates: Record<string, any>) => void;
   linkTabs: (sourceTabId: string, targetTabId: string) => void;
-  getTabSummaries: () => { tabId: string; title: string; type: ModelType; keyOutputs: Record<string, any> }[];
+  getTabSummaries: () => { tabId: string; title: string; type: ModelType; versionNumber: number; versionCount: number; keyOutputs: Record<string, any> }[];
 }
 
 // ─── Recalculation Engine ───────────────────────────────────────────
@@ -197,6 +209,10 @@ function recalculate(tab: ModelTab): Record<string, any> {
 // ─── Store ──────────────────────────────────────────────────────────
 
 let tabCounter = 0;
+const MODEL_VERSION_LIMIT = 20;
+const MODEL_PERSIST_DEBOUNCE_MS = 900;
+const modelPersistTimers = new Map<string, ReturnType<typeof setTimeout>>();
+const modelPersistParentHashes = new Map<string, string>();
 
 export const useModelStore = create<ModelStore>((set, get) => ({
   tabs: {},
@@ -210,18 +226,23 @@ export const useModelStore = create<ModelStore>((set, get) => ({
       outputs: {},
       linkedTabs: [],
       createdAt: Date.now(),
+      updatedAt: Date.now(),
+      versionNumber: 1,
+      versions: [],
     };
     tab.outputs = recalculate(tab);
+    tab.versions = [modelVersionSnapshot(tab, 'Initial model run')];
 
     set(state => ({
       tabs: { ...state.tabs, [id]: tab },
       activeTabId: id,
     }));
+    scheduleModelVersionPersist(tab);
     trackEvent('model_created', { model: type, title });
     return id;
   },
 
-  restoreTab: (id, type, title, assumptions, dealId) => {
+  restoreTab: (id, type, title, assumptions, dealId, parentOutputHash) => {
     // Used when hydrating canvas tabs from server — preserves the original tab id
     const tab: ModelTab = {
       id, type, title, dealId,
@@ -229,14 +250,26 @@ export const useModelStore = create<ModelStore>((set, get) => ({
       outputs: {},
       linkedTabs: [],
       createdAt: Date.now(),
+      updatedAt: Date.now(),
+      versionNumber: 1,
+      versions: [],
     };
     tab.outputs = recalculate(tab);
+    tab.versions = [modelVersionSnapshot(tab, 'Restored model state')];
     set(state => ({
       tabs: { ...state.tabs, [id]: tab },
+      activeTabId: id,
     }));
+    if (parentOutputHash) {
+      modelPersistParentHashes.set(id, parentOutputHash);
+    }
+    scheduleModelVersionPersist(tab);
   },
 
   closeTab: (tabId) => {
+    const timer = modelPersistTimers.get(tabId);
+    if (timer) clearTimeout(timer);
+    modelPersistTimers.delete(tabId);
     set(state => {
       const { [tabId]: _, ...rest } = state.tabs;
       const tabIds = Object.keys(rest);
@@ -252,6 +285,7 @@ export const useModelStore = create<ModelStore>((set, get) => ({
   setActiveTab: (tabId) => set({ activeTabId: tabId }),
 
   updateAssumption: (tabId, key, value) => {
+    const tabsToPersist: ModelTab[] = [];
     set(state => {
       const tab = state.tabs[tabId];
       if (!tab) return state;
@@ -259,25 +293,38 @@ export const useModelStore = create<ModelStore>((set, get) => ({
       const updated = {
         ...tab,
         assumptions: { ...tab.assumptions, [key]: value },
+        updatedAt: Date.now(),
+        versionNumber: tab.versionNumber + 1,
       };
       updated.outputs = recalculate(updated);
+      const versioned = appendModelVersion(updated, `Updated ${key}`);
 
       // Propagate to linked tabs
-      const newTabs = { ...state.tabs, [tabId]: updated };
-      for (const linkedId of updated.linkedTabs) {
+      const newTabs = { ...state.tabs, [tabId]: versioned };
+      tabsToPersist.push(versioned);
+      for (const linkedId of versioned.linkedTabs) {
         const linked = newTabs[linkedId];
         if (linked && linked.type === 'sensitivity') {
-          const linkedUpdated = { ...linked, assumptions: { ...linked.assumptions, sourceTabAssumptions: updated.assumptions } };
+          const linkedUpdated = {
+            ...linked,
+            assumptions: { ...linked.assumptions, sourceTabAssumptions: versioned.assumptions },
+            updatedAt: Date.now(),
+            versionNumber: linked.versionNumber + 1,
+          };
           linkedUpdated.outputs = recalculate(linkedUpdated);
-          newTabs[linkedId] = linkedUpdated;
+          const linkedVersioned = appendModelVersion(linkedUpdated, `Synced from ${versioned.title}`);
+          newTabs[linkedId] = linkedVersioned;
+          tabsToPersist.push(linkedVersioned);
         }
       }
 
       return { tabs: newTabs };
     });
+    tabsToPersist.forEach(scheduleModelVersionPersist);
   },
 
   updateAssumptions: (tabId, updates) => {
+    const tabsToPersist: ModelTab[] = [];
     set(state => {
       const tab = state.tabs[tabId];
       if (!tab) return state;
@@ -285,21 +332,33 @@ export const useModelStore = create<ModelStore>((set, get) => ({
       const updated = {
         ...tab,
         assumptions: { ...tab.assumptions, ...updates },
+        updatedAt: Date.now(),
+        versionNumber: tab.versionNumber + 1,
       };
       updated.outputs = recalculate(updated);
+      const versioned = appendModelVersion(updated, `Updated ${Object.keys(updates).join(', ') || 'assumptions'}`);
 
-      const newTabs = { ...state.tabs, [tabId]: updated };
-      for (const linkedId of updated.linkedTabs) {
+      const newTabs = { ...state.tabs, [tabId]: versioned };
+      tabsToPersist.push(versioned);
+      for (const linkedId of versioned.linkedTabs) {
         const linked = newTabs[linkedId];
         if (linked) {
-          const linkedUpdated = { ...linked, assumptions: { ...linked.assumptions, sourceTabAssumptions: updated.assumptions } };
+          const linkedUpdated = {
+            ...linked,
+            assumptions: { ...linked.assumptions, sourceTabAssumptions: versioned.assumptions },
+            updatedAt: Date.now(),
+            versionNumber: linked.versionNumber + 1,
+          };
           linkedUpdated.outputs = recalculate(linkedUpdated);
-          newTabs[linkedId] = linkedUpdated;
+          const linkedVersioned = appendModelVersion(linkedUpdated, `Synced from ${versioned.title}`);
+          newTabs[linkedId] = linkedVersioned;
+          tabsToPersist.push(linkedVersioned);
         }
       }
 
       return { tabs: newTabs };
     });
+    tabsToPersist.forEach(scheduleModelVersionPersist);
   },
 
   linkTabs: (sourceTabId, targetTabId) => {
@@ -323,10 +382,52 @@ export const useModelStore = create<ModelStore>((set, get) => ({
       tabId: tab.id,
       title: tab.title,
       type: tab.type,
+      versionNumber: tab.versionNumber,
+      versionCount: tab.versions.length,
       keyOutputs: extractKeyOutputs(tab),
     }));
   },
 }));
+
+function appendModelVersion(tab: ModelTab, changeReason: string): ModelTab {
+  return {
+    ...tab,
+    versions: [
+      modelVersionSnapshot(tab, changeReason),
+      ...(tab.versions || []),
+    ].slice(0, MODEL_VERSION_LIMIT),
+  };
+}
+
+function scheduleModelVersionPersist(tab: ModelTab) {
+  if (typeof window === 'undefined') return;
+  const existing = modelPersistTimers.get(tab.id);
+  if (existing) clearTimeout(existing);
+
+  const snapshot = tab.versions?.[0] || modelVersionSnapshot(tab, 'Model canvas run');
+  const timer = setTimeout(async () => {
+    modelPersistTimers.delete(tab.id);
+    const result = await persistModelVersionSnapshot({
+      tab,
+      versionSnapshot: snapshot,
+      parentOutputHash: modelPersistParentHashes.get(tab.id) || null,
+    });
+    if (result.ok && result.outputHash) {
+      modelPersistParentHashes.set(tab.id, result.outputHash);
+    }
+  }, MODEL_PERSIST_DEBOUNCE_MS);
+  modelPersistTimers.set(tab.id, timer);
+}
+
+function modelVersionSnapshot(tab: ModelTab, changeReason: string): ModelVersion {
+  return {
+    versionNumber: tab.versionNumber,
+    createdAt: tab.updatedAt || Date.now(),
+    changeReason,
+    assumptions: { ...tab.assumptions },
+    keyOutputs: extractKeyOutputs(tab),
+  };
+}
 
 function extractKeyOutputs(tab: ModelTab): Record<string, any> {
   const o = tab.outputs;

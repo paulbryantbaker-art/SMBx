@@ -83,6 +83,7 @@ const DEFINITIVE_MCP_TOOLS = [
   'defer_to_counsel',
   'compose_model_stack',
   'execute_model',
+  'list_model_executions',
   'record_corpus_observation',
   'validate_conformance',
   'close_deal',
@@ -585,6 +586,20 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
       required: ['modelId', 'input'],
     },
   },
+  list_model_executions: {
+    description: 'List persisted model executions and iterative model canvas versions for a deal, canvas tab, or model type. Returns output hashes, ModelOutput/runtime-output envelopes, version snapshots, parent-output lineage, dependency contracts, freshness/rerun status against optional current assumptions, and next_suggested_calls so agents can understand what has already been modeled before rerunning the deal.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dealId: { type: 'number', description: 'Optional deal id to list saved model runs for.' },
+        canvasTabId: { type: 'string', description: 'Optional model canvas tab id to read the saved version trail for.' },
+        modelType: { type: 'string', description: 'Optional UI model type such as valuation, lbo, dcf, working_capital, or tax_impact.' },
+        currentAssumptions: { type: 'object', description: 'Optional current model assumptions. When supplied, each saved execution is marked current, superseded, or needs_rerun against these assumptions.' },
+        currentVersionNumber: { type: 'number', description: 'Optional current model canvas version number for version comparison.' },
+        limit: { type: 'number', description: 'Optional page size. Defaults to 25 and caps at 100.' },
+      },
+    },
+  },
   record_corpus_observation: {
     description: 'Record a structured anonymized deal-term observation only when an active data-rights grant exists. Raw document text and party identifiers are stripped.',
     inputSchema: {
@@ -692,6 +707,7 @@ const TOOL_SCOPE: Record<DefinitiveMcpToolName, string[]> = {
   defer_to_counsel: ['counsel:deferral:create'],
   compose_model_stack: ['model-stack:compose', 'deal:read'],
   execute_model: ['model:execute', 'audit:write'],
+  list_model_executions: ['model:read', 'deal:read'],
   record_corpus_observation: ['corpus:write', 'data-rights:read'],
   validate_conformance: ['conformance:read'],
   close_deal: ['deal:write', 'immutable:write'],
@@ -1145,6 +1161,69 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
     };
   }
 
+  if (input.toolName === 'list_model_executions') {
+    const { listModelExecutions } = await import('./modelExecutionPersistence.js');
+    const result = await listModelExecutions({
+      userId: input.userId,
+      dealId: nullableNumber(input.input?.dealId),
+      canvasTabId: nullableString(input.input?.canvasTabId),
+      modelType: nullableString(input.input?.modelType),
+      currentAssumptions: safeRecord(input.input?.currentAssumptions),
+      currentVersionNumber: nullableNumber(input.input?.currentVersionNumber),
+      limit: nullableNumber(input.input?.limit),
+    });
+    if (routeMetersCall) {
+      await recordV19UsageEvent({
+        userId: input.userId,
+        eventType: 'api_call',
+        actionId: `definitive.${input.toolName}`,
+        toolName: input.toolName,
+        sourceSurface: 'mcp',
+        actorType: 'agent',
+        resourceType: 'model_execution',
+        resourceId: nullableString(input.input?.canvasTabId) || String(input.input?.dealId || input.toolName),
+        agentId: mandateContext.agentId,
+        agentPlatformId: mandateContext.agentPlatformId,
+        mandateId: mandateContext.mandateId,
+        requestedScopes,
+        metadata: {
+          protocol: DEFINITIVE_MCP_PROTOCOL,
+          lineStatus: line?.lineStatus || 'ok',
+          count: Array.isArray((result as any).executions) ? (result as any).executions.length : 0,
+        },
+      });
+    }
+    return {
+      status: 200,
+      body: {
+        ok: true,
+        ...responseMeta(),
+        toolName: input.toolName,
+        protocol: DEFINITIVE_MCP_PROTOCOL,
+        lineStatus: line?.lineStatus || 'ok',
+        lineReason: line?.lineReason || '',
+        refusalBehavior: line?.refusalBehavior || 'allow',
+        lineRisks: line?.lineRisks || [],
+        requiredScopes: requestedScopes,
+        result: {
+          schema: 'ModelExecutionHistory.v0.1',
+          filters: {
+            dealId: nullableNumber(input.input?.dealId),
+            canvasTabId: nullableString(input.input?.canvasTabId),
+            modelType: nullableString(input.input?.modelType),
+            freshnessCompared: Boolean(input.input?.currentAssumptions && typeof input.input.currentAssumptions === 'object'),
+          },
+          ...(result as Record<string, any>),
+          next_suggested_calls: ['execute_model', 'compose_model_stack', 'get_deal_state', 'diff_deal_state'],
+          lineBoundary:
+            'Model execution history is software audit state. The user or qualified professional decides reliance and next transaction action.',
+        },
+        mandateChain: mandateContext.mandateChain,
+        ...versionPayload(),
+      },
+    };
+  }
+
   const { executeGovernedTool } = await import('./governedToolExecutor.js');
   const raw = await executeGovernedTool(input.toolName, input.input || {}, input.userId, 0, {
     actorType: 'external_agent',
@@ -1386,6 +1465,10 @@ function resolveIdempotencyKey(input: DefinitiveToolCallInput, envelope: Record<
 function nullableNumber(value: unknown): number | null {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function safeRecord(value: unknown): Record<string, any> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {};
 }
 
 function buildPersistedDealStateReadResult(snapshot: Record<string, any> | null) {

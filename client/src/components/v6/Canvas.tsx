@@ -13,6 +13,7 @@ import { V6LibraryRoot } from "./modes/LibraryRoot";
 import { V6DealView } from "./views/DealView";
 import { V6DocView } from "./views/DocView";
 import { V6AnalysisView } from "./views/AnalysisView";
+import { V6ModelCanvasView } from "./views/ModelCanvasView";
 import { V6SettingsView } from "./views/SettingsView";
 import { V6HistoryView } from "./views/HistoryView";
 import { V6StarterView } from "./views/StarterView";
@@ -115,9 +116,10 @@ function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut, modelPrefe
     return <Placeholder label={`${tab.title} — root view`} note="Unknown mode root." />;
   }
   if (tab.kind === "files-list") return <V6FilesListView view={tab.fileListView ?? "all"} openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
-  if (tab.kind === "deal")     return <V6DealView id={tab.id} title={tab.title} openTab={openTab} fileScope={tab.fileScope} onTalkToYulia={onTalkToYulia} modelPreference={modelPreference} />;
+  if (tab.kind === "deal")     return <V6DealView id={tab.id} title={tab.title} openTab={openTab} fileScope={tab.fileScope} onTalkToYulia={onTalkToYulia} modelPreference={modelPreference} user={user} />;
   if (tab.kind === "doc")      return <V6DocView id={tab.id} title={tab.title} openTab={openTab} modelPreference={modelPreference} onTalkToYulia={onTalkToYulia} />;
   if (tab.kind === "analysis") return <V6AnalysisView title={tab.title} tool={tab.tool} markdown={tab.markdown} comparisonData={tab.comparisonData} analysisData={tab.analysisData} artifactData={tab.artifactData} analysisRunId={tab.analysisRunId} deliverableId={tab.deliverableId} status={tab.status} versionNumber={tab.versionNumber} resolvedMenuItemSlug={tab.resolvedMenuItemSlug} openTab={openTab} onTalkToYulia={onTalkToYulia} />;
+  if (tab.kind === "model")    return <V6ModelCanvasView tabId={tab.modelTabId ?? tab.id} title={tab.title} onTalkToYulia={onTalkToYulia} />;
   if (tab.kind === "feed-item") return <Placeholder label={`Feed · ${tab.title}`} note="Feed item reading view is a thin wrapper — coming after polish." />;
   if (tab.kind === "learn")    return <V6LearnView section={tab.section} anchor={tab.anchor} onTalkToYulia={onTalkToYulia} />;
   if (tab.kind === "marketing-studio") return <V6MarketingStudioView tab={tab} openTab={openTab} user={user} onTalkToYulia={onTalkToYulia} />;

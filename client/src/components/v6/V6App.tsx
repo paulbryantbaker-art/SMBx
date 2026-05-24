@@ -10,6 +10,7 @@ import { MODES, V6Icon } from "./icons";
 import { buildDesktopSurfaceContext, type SurfaceContext } from "../../lib/yuliaSurfaceContext";
 import { normalizeModelPreference, type ModelPreference } from "../../lib/modelPreference";
 import { buildBigFakeInvestmentBoardTab, shouldOpenSampleInvestmentBoard } from "../../lib/sampleInvestmentBoard";
+import { useModelStore, type ModelType } from "../../lib/modelStore";
 import type { FileListView, FileScope, Message, ModeId, Tab } from "./types";
 
 const VALID_MODES: ModeId[] = ["today", "pipeline", "search", "studio", "files", "docs", "analysis", "intel", "library"];
@@ -151,6 +152,9 @@ interface ShellProps {
 function V6AppShell({ user, chat, onSignOut }: ShellProps) {
   // ─── Tab + mode state, hydrated from URL hash ───
   const initial = readHashState();
+  const restoreModelTab = useModelStore(s => s.restoreTab);
+  const updateModelAssumptions = useModelStore(s => s.updateAssumptions);
+  const closeModelTab = useModelStore(s => s.closeTab);
 
   const [activeMode, setActiveMode] = useState<ModeId>(initial.mode);
   const [modelPreference, setModelPreference] = useState<ModelPreference>(() => {
@@ -181,6 +185,11 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
     return deepTab && !base.find(tab => tab.id === deepTab.id) ? [...base, deepTab] : base;
   });
   const [activeTabId, setActiveTabId] = useState(initial.tab ?? `${initial.mode}-root`);
+  const tabsRef = useRef<Tab[]>(tabs);
+
+  useEffect(() => {
+    tabsRef.current = tabs;
+  }, [tabs]);
 
   // Sync tab + mode to URL hash on every change
   useEffect(() => {
@@ -266,6 +275,9 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
   const closeTab = (id: string) => {
     if (id === "today-root") return;
     const tabToClose = tabs.find(t => t.id === id);
+    if (tabToClose?.kind === "model") {
+      closeModelTab(tabToClose.modelTabId ?? tabToClose.id);
+    }
     if (tabToClose?.kind === "marketing-studio" && tabToClose.studioView === "canvas" && tabToClose.studioDirty !== false) {
       const saveDraft = window.confirm(`Save "${tabToClose.title}" before closing?\n\nOK saves it to Pitch Book Studio. Cancel closes without saving.`);
       if (saveDraft) {
@@ -326,20 +338,38 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
         openTab(artifactTab);
       }
       if (detail.canvas_action === "create_model_tab" && detail.tabId) {
+        const modelType = normalizeCanvasModelType(detail.modelType);
+        if (modelType) {
+          restoreModelTab(
+            detail.tabId,
+            modelType,
+            detail.title || "Interactive model",
+            detail.initialAssumptions || {},
+            typeof detail.dealId === "number" ? detail.dealId : undefined,
+            typeof detail.parentOutputHash === "string" ? detail.parentOutputHash : null,
+          );
+        }
         openTab({
           id: detail.tabId,
-          kind: "analysis",
+          kind: modelType ? "model" : "analysis",
           title: detail.title || "Interactive model",
           dealId: detail.dealId ?? null,
           dealTitle: detail.dealTitle ?? null,
           tool: detail.modelType || "interactive_model",
+          modelTabId: modelType ? detail.tabId : undefined,
+          modelType: modelType || detail.modelType,
           analysisRunId: detail.analysisRunId ?? null,
           modelState: detail.initialAssumptions || {},
-          status: "saved model",
+          status: modelType ? "versioned model" : "saved model",
         });
       }
       if (detail.canvas_action === "update_model") {
         const targetId = detail.tabId && detail.tabId !== "active" ? detail.tabId : activeTabId;
+        const targetTab = tabsRef.current.find(tab => tab.id === targetId);
+        const updates = detail.updates && typeof detail.updates === "object" ? detail.updates : {};
+        if (targetTab?.kind === "model" && targetTab.modelTabId) {
+          updateModelAssumptions(targetTab.modelTabId, updates);
+        }
         setTabs(prev => prev.map(tab => tab.id === targetId ? applyCanvasModelUpdate(tab, detail) : tab));
       }
       if (detail.canvas_action === "read_tab_state" && detail.state) {
@@ -358,7 +388,7 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
     };
     window.addEventListener("smbx:canvas_action", onAction);
     return () => window.removeEventListener("smbx:canvas_action", onAction);
-  }, [activeTabId]);
+  }, [activeTabId, restoreModelTab, updateModelAssumptions]);
 
   // URL → tab bridge. Bookmarkable links / footer links open the matching
   // tab. After opening, the URL is rewritten to "/" so the tab state lives
@@ -607,6 +637,27 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
   );
 }
 
+const CANVAS_MODEL_TYPES = new Set<ModelType>([
+  "valuation",
+  "lbo",
+  "sba_financing",
+  "dcf",
+  "sensitivity",
+  "comparison",
+  "cap_table",
+  "earnout",
+  "tax_impact",
+  "working_capital",
+  "covenant",
+  "sde_analysis",
+]);
+
+function normalizeCanvasModelType(value: unknown): ModelType | null {
+  return typeof value === "string" && CANVAS_MODEL_TYPES.has(value as ModelType)
+    ? value as ModelType
+    : null;
+}
+
 /* ─── Hash-based URL state ───────────────────────────────── */
 
 function readHashState(): { mode: ModeId; tab: string | null; scope?: FileScope; title?: string; run?: number } {
@@ -662,6 +713,16 @@ function tabFromHash(tab: string | null, scope?: FileScope, title?: string, run?
       kind: "analysis",
       title: title || titleForAnalysisId(tab),
       analysisRunId: run ?? analysisRunIdFromTabId(tab),
+    };
+  }
+  if (tab.startsWith("model-")) {
+    return {
+      id: tab,
+      kind: "model",
+      title: title || titleForAnalysisId(tab),
+      modelTabId: tab,
+      analysisRunId: run,
+      status: "versioned model",
     };
   }
   if (tab.startsWith("artifact-")) {
@@ -844,7 +905,7 @@ function discardStudioDraft(tab: Tab) {
 
 function modeForTab(tab: Tab): ModeId | null {
   if (tab.kind === "mode-root") return tab.modeId ?? null;
-  if (tab.kind === "deal" || tab.kind === "analysis") return "pipeline";
+  if (tab.kind === "deal" || tab.kind === "analysis" || tab.kind === "model") return "pipeline";
   if (tab.kind === "doc") return inferredLauncherDealName(tab) ? "pipeline" : "files";
   if (tab.kind === "marketing-studio") return "studio";
   if (tab.kind === "files-list") return "files";
@@ -868,7 +929,7 @@ function tabBelongsToLauncherMode(tab: Tab, mode: ModeId, allTabs: Tab[]): boole
   if (tab.kind === "deal") return mode === "pipeline";
   const dealParent = owningLauncherDealForTab(tab, allTabs);
   if (dealParent || inferredLauncherDealName(tab)) return mode === "pipeline";
-  if (tab.kind === "analysis") return mode === "pipeline";
+  if (tab.kind === "analysis" || tab.kind === "model") return mode === "pipeline";
   if (tab.kind === "doc") return mode === "files";
   if (tab.sourceMode) return tab.sourceMode === mode;
   return false;
@@ -920,18 +981,19 @@ function launcherTabMatchesDeal(tab: Tab, deal: Tab): boolean {
   if (tab.dealId != null && String(tab.dealId) === String(deal.id)) return true;
   if (tab.dealTitle && sameLauncherDealName(tab.dealTitle, deal.title)) return true;
   if (tab.dealTitle) return false;
-  if (tab.kind === "analysis" && tab.id.startsWith("model-")) return false;
+  if ((tab.kind === "analysis" || tab.kind === "model") && tab.id.startsWith("model-")) return false;
   const dealTitle = normalizeLauncherDealTitle(deal.title);
   return sameLauncherDealName(inferredLauncherDealName(tab), dealTitle) || stripLauncherDealPrefix(tab.title, dealTitle) !== normalizeLauncherTabTitle(tab.title);
 }
 
 function inferredLauncherDealName(tab: Tab): string | null {
   if (tab.dealTitle) return tab.dealTitle;
-  if (tab.kind === "analysis" && tab.id.startsWith("model-")) return null;
+  if ((tab.kind === "analysis" || tab.kind === "model") && tab.id.startsWith("model-")) return null;
   const haystack = normalizeLauncherTabTitle([
     tab.id,
     tab.title,
     tab.kind === "analysis" ? tab.tool : "",
+    tab.kind === "model" ? tab.modelType : "",
     tab.kind === "doc" ? tab.status : "",
   ].filter(Boolean).join(" ")).toLowerCase();
 
@@ -961,6 +1023,7 @@ function topTabMeta(tab: Tab, allTabs: Tab[] = [], insideDeal = false): string {
   const withDeal = (label: string) => dealContext ? `${dealContext} · ${label}` : label;
   if (tab.kind === "deal") return "Deal page";
   if (tab.kind === "analysis") return withDeal(tab.tool ? `Analysis · ${tab.tool}` : "Analysis");
+  if (tab.kind === "model") return withDeal(tab.modelType ? `Model · ${tab.modelType}` : "Model");
   if (tab.kind === "files-list") return "File workspace";
   if (tab.kind === "doc") return withDeal(tab.status ? `Document · ${tab.status}` : "Document");
   if (tab.kind === "marketing-studio") return "Studio";

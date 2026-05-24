@@ -7,10 +7,10 @@ import {
 
 export const DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT = 202;
 export const DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT = 60;
-export const DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT = 92;
+export const DEFINITIVE_CONFORMANCE_PROMPT_META_CASE_COUNT = 104;
 export const DEFINITIVE_CONFORMANCE_ROUTE_TRIGGER_CASE_COUNT = 30;
 export const DEFINITIVE_CONFORMANCE_MODEL_STACK_CASE_COUNT = 33;
-export const DEFINITIVE_CONFORMANCE_DEAL_OS_ARTIFACT_CASE_COUNT = 17;
+export const DEFINITIVE_CONFORMANCE_DEAL_OS_ARTIFACT_CASE_COUNT = 43;
 export const DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT =
   DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT +
   DEFINITIVE_CONFORMANCE_DEAL_ROUTE_CASE_COUNT +
@@ -93,12 +93,17 @@ export function buildDefinitiveConformanceStatus() {
       'surface guidance consistency',
       'Authority Register seed-plan coverage',
       'Authority Register staged migration seed coverage',
+      'Authority Register staged seed coverage above 220 rows',
+      'bankruptcy procedure and cramdown case-law anchors',
+      'deferred-payment tax forms and real estate/UCC source anchors',
       'terminal substrate architecture primitives',
       'terminal substrate schema registry contracts',
       'CompletenessSpec definition-of-done contract',
       'Deal OS non-rejection agent lifecycle',
       'Deal OS iterative work surfaces and portable agent handoffs',
       'agent discoverability layers and marketplace metadata doctrine',
+      'MCP server-card and well-known discovery metadata',
+      'enterprise allow-list registry templates',
       'registry submission package coverage',
       'The Diligence Standard publication doctrine',
       'G28/G29/G30 trigger thresholds',
@@ -106,8 +111,12 @@ export function buildDefinitiveConformanceStatus() {
       'iterative Deal OS artifact schemas',
       'portable agent take-back artifacts',
       'document/data-room/IOI/LOI/negotiation/close/PMI boundaries',
+      'resume/lifecycle/data-room/Studio/close/PMI iterative agent loop behavior',
       'package verification/finalization/reopen behavior',
       'structure permutation and best-vehicle computation boundaries',
+      'partial ingest/update/diff/clone edge behavior',
+      'package mismatch detection and close/funds-flow blocker behavior',
+      'TypeScript and Python reference implementation smoke coverage',
     ],
     command: 'npm run test:definitive-conformance',
     authenticatedRouteSmoke: {
@@ -115,6 +124,10 @@ export function buildDefinitiveConformanceStatus() {
       command: 'npm run test:definitive-auth-route',
       fixture: 'DB fixture + JWT bearer token + live API server',
       assertions: [
+        'public MCP server-card route is discoverable without JWT',
+        'public MCP well-known manifest separates discovery from bearer execution',
+        'public registry package and enterprise allow-list templates are live routes',
+        'public schema, runbook, and model-catalog routes expose portable agent contracts',
         'protected endpoints reject missing JWT',
         'tool inventory is available with JWT',
         'THE LINE inventory is available with JWT',
@@ -140,6 +153,21 @@ export function buildDefinitiveConformanceStatus() {
         'Pro API access is allowed before allowance exhaustion',
         'Pro API access returns credit_budget_required after allowance exhaustion',
         'Free API access returns enterprise_scope_required for MCP/API scope',
+      ],
+    },
+    referenceImplementationSmoke: {
+      status: 'started',
+      command: 'npm run test:definitive-reference && npm run test:definitive-reference-python',
+      fixture: 'DB-free cloneable TypeScript and Python reference packages sharing one JSON fixture set',
+      casesPerRuntime: 4,
+      assertions: [
+        'reference packages execute without app shell, database, JWT, MCP server, or private services',
+        'M109 working-capital peg computes deterministic normalized NWC',
+        'M139 Section 1060 allocation computes residual-method classes from user-supplied values',
+        'M199 FIRPTA withholding computes the residence withholding ladder',
+        'M206 indemnification ladder computes cap, basket, and recoverable-loss math',
+        'outputs include spec pins, methodology pins, sample authority refs, input hashes, output hashes, and THE LINE boundaries',
+        'sample authority refs remain fixture-only and do not expose production Authority Register data',
       ],
     },
     nextTarget: 750,

@@ -9,7 +9,8 @@ import { centsToDisplay, pctDisplay, multDisplay } from '../../lib/calculations/
 
 interface Props { tabId: string; }
 
-const COLORS = ['#D4714E', '#4E8FD4', '#6B8F4E', '#8F6BD4', '#D4714E', '#4ECDC4', '#FF6B6B', '#5e5d59'];
+const CHART_MUTED = '#555E6F';
+const COLORS = ['#6A9BCC', '#4E8FD4', '#629987', '#8F6BD4', '#86C5C0', '#4ECDC4', '#B94B43', CHART_MUTED];
 
 export default function CapTableModel({ tabId }: Props) {
   const tab = useModelStore(s => s.tabs[tabId]);
@@ -57,38 +58,38 @@ export default function CapTableModel({ tabId }: Props) {
       {/* Rounds */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-[11px] font-bold uppercase tracking-wider m-0" style={{ color: '#5e5d59' }}>Investment Rounds</h3>
-          <button onClick={addRound} className="text-xs font-semibold px-3 py-1 rounded-full border-0 cursor-pointer" style={{ background: '#D4714E', color: 'white' }}>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider m-0" style={{ color: 'var(--m-on-surface-var)' }}>Investment Rounds</h3>
+          <button onClick={addRound} className="text-xs font-semibold px-3 py-1 rounded-full border-0 cursor-pointer" style={{ background: 'var(--m-primary)', color: 'white' }}>
             + Add Round
           </button>
         </div>
 
         {rounds.map((round: any, i: number) => (
-          <div key={i} className="rounded-lg p-3 mb-2" style={{ border: '1px solid #DDD9D1' }}>
+          <div key={i} className="rounded-lg p-3 mb-2" style={{ border: '1px solid var(--m-outline-var)' }}>
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold" style={{ color: COLORS[i % COLORS.length] }}>{round.label}</span>
-              <button onClick={() => removeRound(i)} className="text-[10px] px-2 py-0.5 rounded bg-transparent border border-[#DDD9D1] cursor-pointer" style={{ color: '#5e5d59' }}>Remove</button>
+              <button onClick={() => removeRound(i)} className="text-[10px] px-2 py-0.5 rounded bg-transparent border border-[var(--m-outline-var)] cursor-pointer" style={{ color: 'var(--m-on-surface-var)' }}>Remove</button>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <div>
-                <label className="block text-[9px] font-medium mb-0.5" style={{ color: '#5e5d59' }}>Investment</label>
+                <label className="block text-[9px] font-medium mb-0.5" style={{ color: 'var(--m-on-surface-var)' }}>Investment</label>
                 <input type="number" value={(round.investment || 0) / 100} onChange={e => updateRound(i, 'investment', Number(e.target.value) * 100)}
-                  className="w-full px-2 py-1 text-xs rounded border outline-none" style={{ borderColor: '#DDD9D1' }} />
+                  className="w-full px-2 py-1 text-xs rounded border outline-none" style={{ borderColor: 'var(--m-outline-var)' }} />
               </div>
               <div>
-                <label className="block text-[9px] font-medium mb-0.5" style={{ color: '#5e5d59' }}>Pre-Money Val</label>
+                <label className="block text-[9px] font-medium mb-0.5" style={{ color: 'var(--m-on-surface-var)' }}>Pre-Money Val</label>
                 <input type="number" value={(round.preMoneyVal || 0) / 100} onChange={e => updateRound(i, 'preMoneyVal', Number(e.target.value) * 100)}
-                  className="w-full px-2 py-1 text-xs rounded border outline-none" style={{ borderColor: '#DDD9D1' }} />
+                  className="w-full px-2 py-1 text-xs rounded border outline-none" style={{ borderColor: 'var(--m-outline-var)' }} />
               </div>
               <div>
-                <label className="block text-[9px] font-medium mb-0.5" style={{ color: '#5e5d59' }}>Option Pool</label>
+                <label className="block text-[9px] font-medium mb-0.5" style={{ color: 'var(--m-on-surface-var)' }}>Option Pool</label>
                 <input type="number" value={(round.optionPoolPct || 0) * 100} onChange={e => updateRound(i, 'optionPoolPct', Number(e.target.value) / 100)}
-                  className="w-full px-2 py-1 text-xs rounded border outline-none" style={{ borderColor: '#DDD9D1' }} />
+                  className="w-full px-2 py-1 text-xs rounded border outline-none" style={{ borderColor: 'var(--m-outline-var)' }} />
               </div>
               <div>
-                <label className="block text-[9px] font-medium mb-0.5" style={{ color: '#5e5d59' }}>Liq Pref</label>
+                <label className="block text-[9px] font-medium mb-0.5" style={{ color: 'var(--m-on-surface-var)' }}>Liq Pref</label>
                 <select value={round.liquidationPref || 1.0} onChange={e => updateRound(i, 'liquidationPref', Number(e.target.value))}
-                  className="w-full px-2 py-1 text-xs rounded border outline-none" style={{ borderColor: '#DDD9D1' }}>
+                  className="w-full px-2 py-1 text-xs rounded border outline-none" style={{ borderColor: 'var(--m-outline-var)' }}>
                   <option value={1.0}>1.0x</option>
                   <option value={1.5}>1.5x</option>
                   <option value={2.0}>2.0x</option>
@@ -104,7 +105,7 @@ export default function CapTableModel({ tabId }: Props) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Pie chart */}
           <div>
-            <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#5e5d59' }}>Ownership</h3>
+            <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Ownership</h3>
             <div style={{ height: 220 }}>
               <Doughnut
                 data={{
@@ -121,7 +122,7 @@ export default function CapTableModel({ tabId }: Props) {
                   maintainAspectRatio: false,
                   cutout: '55%',
                   plugins: {
-                    legend: { display: true, position: 'bottom', labels: { color: '#5e5d59', font: { size: 10 }, boxWidth: 10, padding: 8 } },
+                    legend: { display: true, position: 'bottom', labels: { color: CHART_MUTED, font: { size: 10 }, boxWidth: 10, padding: 8 } },
                     tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${(ctx.raw as number).toFixed(1)}%` } },
                   },
                 }}
@@ -131,7 +132,7 @@ export default function CapTableModel({ tabId }: Props) {
 
           {/* Table */}
           <div>
-            <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#5e5d59' }}>Cap Table</h3>
+            <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Cap Table</h3>
             <div className="space-y-1">
               {dilution.rows.map((r: any, i: number) => (
                 <div key={i} className="flex items-center justify-between text-xs py-1" style={{ borderBottom: '1px solid #e8e6dc' }}>
@@ -140,14 +141,14 @@ export default function CapTableModel({ tabId }: Props) {
                     <span>{r.stakeholder}</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="tabular-nums" style={{ color: '#5e5d59' }}>{r.shares.toLocaleString()} shares</span>
+                    <span className="tabular-nums" style={{ color: 'var(--m-on-surface-var)' }}>{r.shares.toLocaleString()} shares</span>
                     <span className="font-bold tabular-nums" style={{ width: 50, textAlign: 'right' }}>{pctDisplay(r.ownership)}</span>
                   </div>
                 </div>
               ))}
             </div>
             {dilution.postMoneyVal > 0 && (
-              <p className="text-[10px] mt-2" style={{ color: '#5e5d59' }}>Post-money: {centsToDisplay(dilution.postMoneyVal)}</p>
+              <p className="text-[10px] mt-2" style={{ color: 'var(--m-on-surface-var)' }}>Post-money: {centsToDisplay(dilution.postMoneyVal)}</p>
             )}
           </div>
         </div>
@@ -156,14 +157,14 @@ export default function CapTableModel({ tabId }: Props) {
       {/* Exit Waterfall Scenarios */}
       {waterfalls && waterfalls.length > 0 && (
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#5e5d59' }}>Exit Payout Scenarios</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Exit Payout Scenarios</h3>
           <div className="overflow-x-auto">
             <table className="text-xs w-full" style={{ borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ borderBottom: '2px solid #D4714E' }}>
-                  <th style={{ padding: '4px 8px', textAlign: 'left', fontSize: 10, color: '#5e5d59' }}>Stakeholder</th>
+                <tr style={{ borderBottom: '2px solid var(--m-primary)' }}>
+                  <th style={{ padding: '4px 8px', textAlign: 'left', fontSize: 10, color: 'var(--m-on-surface-var)' }}>Stakeholder</th>
                   {waterfalls.map((w: any) => (
-                    <th key={w.exitValue} style={{ padding: '4px 8px', textAlign: 'right', fontSize: 10, color: '#5e5d59' }}>
+                    <th key={w.exitValue} style={{ padding: '4px 8px', textAlign: 'right', fontSize: 10, color: 'var(--m-on-surface-var)' }}>
                       {centsToDisplay(w.exitValue)} Exit
                     </th>
                   ))}
@@ -177,7 +178,7 @@ export default function CapTableModel({ tabId }: Props) {
                       <td key={w.exitValue} style={{ padding: '4px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
                         {centsToDisplay(w.distributions[i]?.amount || 0)}
                         {w.distributions[i]?.moic > 0 && (
-                          <span style={{ color: '#5e5d59', marginLeft: 4 }}>({multDisplay(w.distributions[i].moic)})</span>
+                          <span style={{ color: 'var(--m-on-surface-var)', marginLeft: 4 }}>({multDisplay(w.distributions[i].moic)})</span>
                         )}
                       </td>
                     ))}
@@ -191,7 +192,7 @@ export default function CapTableModel({ tabId }: Props) {
 
       {/* Exit value inputs */}
       <div>
-        <label className="block text-[10px] font-medium mb-1" style={{ color: '#5e5d59' }}>Exit Scenarios (comma-separated, in dollars)</label>
+        <label className="block text-[10px] font-medium mb-1" style={{ color: 'var(--m-on-surface-var)' }}>Exit Scenarios (comma-separated, in dollars)</label>
         <input
           type="text"
           defaultValue={(a.exitValues || [50000000, 100000000, 250000000, 500000000]).map((v: number) => v / 100).join(', ')}
@@ -200,7 +201,7 @@ export default function CapTableModel({ tabId }: Props) {
             if (vals.length > 0) updateOne(tabId, 'exitValues', vals);
           }}
           className="w-full px-3 py-1.5 text-xs rounded-lg border outline-none"
-          style={{ borderColor: '#DDD9D1' }}
+          style={{ borderColor: 'var(--m-outline-var)' }}
           placeholder="500000, 1000000, 2500000, 5000000"
         />
       </div>

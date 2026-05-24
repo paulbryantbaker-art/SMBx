@@ -39,6 +39,72 @@ try {
     { expiresIn: '30m' },
   );
 
+  await test('Public MCP server card is discoverable without JWT', async () => {
+    const card = await publicJson('/.well-known/mcp/server-card.json');
+    assertEqual(card.name, 'smbx-ai/diligence', 'server-card namespace');
+    assertEqual(card.protocolVersion, '2025-12-11', 'server-card protocol version');
+    assertEqual(card.serverInfo?.canonicalStandard, 'The Diligence Standard', 'server-card canonical standard');
+    assert(String(card.transport?.endpoints?.serverCard || '').endsWith('/.well-known/mcp/server-card.json'), 'server-card URL is public discovery');
+    assert(String(card.transport?.endpoints?.schemaRegistry || '').endsWith('/api/definitive/schemas'), 'server-card schema registry URL');
+    assert(card.security?.executionRequiresAuthentication === true, 'server-card marks execution as authenticated');
+    assert(card.security?.noSuccessFees === true, 'server-card preserves no success fee');
+    assert(card.security?.noReferralCompensation === true, 'server-card preserves no paid human referral');
+    assert(card.tools.some((tool: any) => tool.name === 'ingest_deal_payload'), 'server-card advertises ingest_deal_payload');
+    assert(card.tools.some((tool: any) => tool.name === 'resume_deal'), 'server-card advertises resume_deal');
+    assert(card.tools.every((tool: any) => tool.outputSchema?.type === 'object'), 'server-card tools expose output schemas');
+    assert(card.tools.every((tool: any) => typeof tool.annotations?.readOnlyHint === 'boolean'), 'server-card tools expose MCP annotations');
+  });
+
+  await test('Public MCP well-known manifest separates discovery from bearer execution', async () => {
+    const manifest = await publicJson('/.well-known/mcp');
+    assertEqual(manifest.mcp_version, '2025-12-11', 'well-known MCP version');
+    assert(String(manifest.server_card || '').endsWith('/.well-known/mcp/server-card.json'), 'well-known server-card URL');
+    assert(manifest.endpoints.some((endpoint: any) => endpoint.type === 'server-card' && endpoint.auth === 'none'), 'server-card is public');
+    assert(manifest.endpoints.some((endpoint: any) => endpoint.type === 'definitive-schema-registry' && endpoint.auth === 'none'), 'schema registry is public');
+    assert(manifest.endpoints.some((endpoint: any) => endpoint.type === 'tools-list' && endpoint.auth === 'bearer'), 'tools list requires bearer');
+    assert(manifest.endpoints.some((endpoint: any) => endpoint.type === 'tool-call' && endpoint.auth === 'bearer'), 'tool call requires bearer');
+    assertEqual(manifest.capabilities?.outputSchema, true, 'well-known output schemas');
+    assertEqual(manifest.capabilities?.structuredContent, true, 'well-known structured content');
+    assertEqual(manifest.doctrine?.namingConvention, 'diligence_<phase>_<artifact>', 'well-known tool naming convention');
+  });
+
+  await test('Public registry package and allow-list templates are live routes', async () => {
+    const registry = await publicJson('/api/definitive/registry-package');
+    assertEqual(registry.registryEntry?.namespace, 'smbx-ai/diligence', 'registry namespace');
+    assert(registry.registryEntry?.categories?.includes('deal-os'), 'registry package includes Deal OS category');
+    assert(registry.registryEntry?.trustSignals?.deterministicOutputs === true, 'registry deterministic trust signal');
+    assert(registry.registryEntry?.trustSignals?.noSuccessFees === true, 'registry no success fee trust signal');
+    assert(registry.registrySubmissionPackages?.thirdPartyDirectories?.some((surface: any) => surface.surfaceId === 'pulsemcp'), 'registry package covers PulseMCP');
+    assert(registry.registrySubmissionPackages?.clientStorePackages?.some((surface: any) => surface.surfaceId === 'chatgpt_apps_directory'), 'registry package covers ChatGPT Apps Directory');
+
+    const allowLists = await publicJson('/api/definitive/enterprise-allow-lists');
+    assertEqual(allowLists.schema, 'DEFINITIVE.enterprise-allow-lists.v0.1', 'allow-list schema');
+    assertEqual(allowLists.githubCopilotRegistry?.policyMode, 'registry_only', 'GitHub Copilot registry policy');
+    assert(allowLists.githubCopilotRegistry?.registry?.servers?.[0]?.allowedTools?.includes('resume_deal'), 'allow-list exposes resume_deal');
+    assert(String(allowLists.azureApiCenterBlueprint?.auth?.productionTarget || '').includes('OAuth 2.1'), 'Azure blueprint keeps OAuth target');
+    assert(String(allowLists.bedrockAgentCoreCedarPolicyTemplate?.policy || '').includes('context.noSuccessFee == true'), 'Bedrock policy preserves THE LINE');
+  });
+
+  await test('Public schema, runbook, and model-catalog routes expose portable agent contracts', async () => {
+    const dealPackageSchema = await publicJson('/api/definitive/schemas/DealPackage');
+    assertEqual(dealPackageSchema.title, 'DealPackage', 'DealPackage schema route');
+    assertEqual(dealPackageSchema.type, 'object', 'DealPackage schema object');
+    assert(dealPackageSchema.required?.includes('packageId'), 'DealPackage schema requires packageId');
+
+    const buyRunbook = await publicJson('/api/definitive/deal-runbooks/buy');
+    assertEqual(buyRunbook.journey, 'buy', 'buy runbook journey');
+    assert(buyRunbook.stages.some((stage: any) => stage.stageId === 'confirmatory_diligence'), 'buy runbook includes diligence stage');
+    assert(buyRunbook.stages.some((stage: any) => stage.takeBackArtifacts?.includes('DealPackage')), 'buy runbook includes take-back artifacts');
+
+    const modelCatalog = await publicJson('/api/definitive/model-catalog?limit=5');
+    assertEqual(modelCatalog.schema, 'DEFINITIVE.model-catalog-surface.v0.1', 'model catalog schema');
+    assert(Number(modelCatalog.pagination?.total) >= 123, 'model catalog covers the full M101-M223 range');
+
+    const m200 = await publicJson('/api/definitive/model-catalog/M200');
+    assertEqual(m200.slotId, 'M200', 'M200 slot route');
+    assert(String(m200.name || '').toLowerCase().includes('transaction tax master'), 'M200 slot name');
+  });
+
   await test('Unauthenticated tool list is rejected', async () => {
     const response = await fetch(`${BASE_URL}/api/definitive/tools/list`);
     assertEqual(response.status, 401, 'unauthenticated status');
@@ -1757,6 +1823,13 @@ async function authedJson(path: string, token: string) {
   });
   const body = await response.json().catch(() => ({}));
   assert(response.ok, `${path} expected ok status, got ${response.status}: ${JSON.stringify(body)}`);
+  return body;
+}
+
+async function publicJson(path: string) {
+  const response = await fetch(`${BASE_URL}${path}`);
+  const body = await response.json().catch(() => ({}));
+  assert(response.ok, `${path} expected public ok status, got ${response.status}: ${JSON.stringify(body)}`);
   return body;
 }
 

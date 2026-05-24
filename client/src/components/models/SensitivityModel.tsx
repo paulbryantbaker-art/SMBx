@@ -17,7 +17,7 @@ export default function SensitivityModel({ tabId }: Props) {
   if (!matrix || !matrix.var1Values?.length) {
     return (
       <div className="p-5 text-center">
-        <p className="text-sm" style={{ color: '#5e5d59' }}>
+        <p className="text-sm" style={{ color: 'var(--m-on-surface-var)' }}>
           Link this sensitivity tab to a parent model to generate the matrix.
         </p>
       </div>
@@ -31,12 +31,12 @@ export default function SensitivityModel({ tabId }: Props) {
       </h2>
 
       <div className="mb-2">
-        <label className="block text-[10px] font-medium mb-1" style={{ color: '#5e5d59' }}>Output Metric</label>
+        <label className="block text-[10px] font-medium mb-1" style={{ color: 'var(--m-on-surface-var)' }}>Output Metric</label>
         <select
           value={tab.assumptions.outputMetric || 'irr'}
           onChange={e => update(tabId, 'outputMetric', e.target.value)}
           className="px-3 py-1.5 text-xs rounded-lg border outline-none"
-          style={{ borderColor: '#DDD9D1' }}
+          style={{ borderColor: 'var(--m-outline-var)' }}
         >
           <option value="irr">IRR</option>
           <option value="moic">MOIC</option>
@@ -53,7 +53,7 @@ export default function SensitivityModel({ tabId }: Props) {
         metric={tab.assumptions.outputMetric || 'irr'}
       />
 
-      <p className="text-[10px]" style={{ color: '#A9A49C' }}>
+      <p className="text-[10px]" style={{ color: 'var(--m-on-surface-mid)' }}>
         Green = exceeds target. Yellow = acceptable. Red = below threshold.
         All calculations are deterministic — same inputs always produce same outputs.
       </p>

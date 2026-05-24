@@ -604,5 +604,927 @@
         { "path": "result.bestVehicleBlock.unresolvedHandoffs.0.role", "equals": "tax_counsel_or_cpa" }
       ]
     }
+  },
+  {
+    "id": "CONF.DEALOS.INGEST_PARTIAL.001",
+    "title": "Partial agent payload is accepted and returned with missing inputs",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "ingest_deal_payload",
+    "input": {
+      "payload": {
+        "notes": "We want to buy a landscaping target, but only have the thesis right now."
+      }
+    },
+    "expect": {
+      "action": "ingest_deal_payload",
+      "artifactPath": "result.dealState",
+      "schema": "DEFINITIVE.deal-state.v0.1",
+      "schemaPath": "protocol",
+      "dealStateHashPath": "result.dealState.stateHash",
+      "lineInvariantPath": null,
+      "nextSuggestedToolsInclude": ["update_deal_payload", "check_completeness", "compose_model_stack"],
+      "takeBackArtifactsInclude": ["DealState", "MissingInputContract", "CompletenessReport"],
+      "fields": [
+        { "path": "result.classificationKey.journey", "equals": "buy" },
+        { "path": "result.missingInputContract.status", "equals": "missing_inputs" },
+        { "path": "result.missingInputContract.minimalNextInputSet", "includes": "economic_scale" },
+        { "path": "result.completenessReport.canProceedWithPartialState", "equals": true }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.UPDATE_PAYLOAD.001",
+    "title": "Payload updates resolve missing inputs and preserve parent DealState lineage",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "setup": {
+      "toolName": "ingest_deal_payload",
+      "input": {
+        "payload": {
+          "journey": "buy",
+          "thesis": "HVAC services acquisition"
+        }
+      },
+      "inject": [
+        { "fromPath": "result.dealState", "toPath": "dealState" }
+      ]
+    },
+    "toolName": "update_deal_payload",
+    "input": {
+      "patch": {
+        "targetName": "Atlas HVAC Services",
+        "industry": "HVAC services",
+        "jurisdiction": "US-TX",
+        "ebitdaCents": 82000000,
+        "sources": [
+          { "id": "src-fin", "name": "TTM financials", "type": "financials", "hash": "sha256:fin" }
+        ]
+      }
+    },
+    "expect": {
+      "action": "update_deal_payload",
+      "artifactPath": "result.dealState",
+      "schema": "DEFINITIVE.deal-state.v0.1",
+      "schemaPath": "protocol",
+      "dealStateHashPath": "result.dealState.stateHash",
+      "lineInvariantPath": null,
+      "nextSuggestedToolsInclude": ["update_deal_payload", "check_completeness", "compose_model_stack"],
+      "takeBackArtifactsInclude": ["DealState", "MissingInputContract", "CompletenessReport"],
+      "fields": [
+        { "path": "result.dealState.revision", "equals": 2 },
+        { "path": "result.dealState.parentCids.length", "min": 1 },
+        { "path": "completeness_contribution_delta", "min": 1 },
+        { "path": "result.classificationKey.league", "notIncludes": "unknown" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.CHECK_PARTIAL.001",
+    "title": "Completeness check scores partial state without rejecting the caller",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "check_completeness",
+    "input": {
+      "payload": {
+        "journey": "buy",
+        "thesis": "Find a commercial landscaping platform in Texas"
+      }
+    },
+    "expect": {
+      "action": "check_completeness",
+      "artifactPath": "result.completenessReport",
+      "schema": "DEFINITIVE.definition-of-done.v0.1",
+      "schemaPath": "definitionOfDoneVersion",
+      "dealStateHashPath": "result.dealState.stateHash",
+      "lineInvariantPath": "result.completenessReport.theLineInvariant",
+      "nextSuggestedToolsInclude": ["update_deal_payload", "check_completeness", "compose_model_stack"],
+      "fields": [
+        { "path": "result.missingInputContract.status", "equals": "missing_inputs" },
+        { "path": "result.completenessReport.level", "equals": "DRL1_CLASSIFIED" },
+        { "path": "result.completenessReport.blockers", "includes": "economic_scale" },
+        { "path": "result.definitionOfDone.completenessSpec.noRejectionContract", "includes": "MissingInputContract" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.PLAN_PARTIAL.001",
+    "title": "Deal plan keeps the full lifecycle visible for a partial agent entry",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "compose_deal_plan",
+    "input": {
+      "payload": {
+        "journey": "buy",
+        "thesis": "HVAC add-on search"
+      }
+    },
+    "expect": {
+      "action": "compose_deal_plan",
+      "artifactPath": "result.dealPlan",
+      "dealStateHashPath": "result.dealState.stateHash",
+      "lineInvariantPath": "result.dealPlan.lineInvariant",
+      "nextSuggestedToolsInclude": ["update_deal_payload", "check_completeness", "compose_model_stack"],
+      "takeBackArtifactsInclude": ["DealPlan", "DealState", "CompletenessReport"],
+      "fields": [
+        { "path": "result.dealPlan.status", "equals": "partial_but_actionable" },
+        { "path": "result.dealPlan.lifecycle", "includes": "IOI" },
+        { "path": "result.dealPlan.lifecycle", "includes": "PMI" },
+        { "path": "result.dealPlan.workSurfaces", "includes": "data_room" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.DIFF_RESOLVES.001",
+    "title": "DealState diff reports resolved inputs and completeness delta",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "diff_deal_state",
+    "input": {
+      "previousPayload": {
+        "journey": "buy",
+        "thesis": "HVAC services acquisition"
+      },
+      "nextPayload": {
+        "journey": "buy",
+        "targetName": "Atlas HVAC Services",
+        "industry": "HVAC services",
+        "jurisdiction": "US-TX",
+        "ebitdaCents": 82000000,
+        "sources": [
+          { "id": "src-fin", "name": "TTM financials", "type": "financials", "hash": "sha256:fin" }
+        ]
+      }
+    },
+    "expect": {
+      "action": "diff_deal_state",
+      "artifactPath": "result.dealStateDiff",
+      "dealStateHashPath": "result.dealStateDiff.nextHash",
+      "lineInvariantPath": null,
+      "nextSuggestedToolsInclude": ["update_deal_payload", "check_completeness", "compose_model_stack"],
+      "takeBackArtifactsInclude": ["DealStateDiff", "DealState", "MCPCallHint[]"],
+      "fields": [
+        { "path": "result.dealStateDiff.completenessScoreDelta", "min": 1 },
+        { "path": "result.dealStateDiff.resolvedMissingInputs", "includes": "economic_scale" },
+        { "path": "result.dealStateDiff.nextLevel", "equals": "DRL3_LOI_ARCHITECTURE_READY" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.CLONE_BRANCH.001",
+    "title": "Scenario clone preserves parent CID for parallel agent work",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "setup": {
+      "toolName": "ingest_deal_payload",
+      "input": {
+        "payload": {
+          "journey": "buy",
+          "targetName": "Atlas HVAC Services",
+          "industry": "HVAC services",
+          "jurisdiction": "US-TX",
+          "purchasePriceCents": 540000000,
+          "ebitdaCents": 82000000
+        }
+      },
+      "inject": [
+        { "fromPath": "result.dealState", "toPath": "dealState" }
+      ]
+    },
+    "toolName": "clone_deal_state",
+    "input": {
+      "cloneReason": "parallel tax-structure scenario",
+      "patch": {
+        "scenarioName": "asset purchase with seller note",
+        "structure": "asset purchase with seller note"
+      }
+    },
+    "expect": {
+      "action": "clone_deal_state",
+      "artifactPath": "result.clone",
+      "dealStateHashPath": "result.dealState.stateHash",
+      "lineInvariantPath": null,
+      "nextSuggestedToolsInclude": ["update_deal_payload", "check_completeness", "compose_model_stack"],
+      "takeBackArtifactsInclude": ["DealState", "DealStateDiff", "MissingInputContract"],
+      "fields": [
+        { "path": "result.clone.parentPreserved", "equals": true },
+        { "path": "result.clone.cloneReason", "equals": "parallel tax-structure scenario" },
+        { "path": "result.clone.sourceCid", "includes": "definitive:deal-state:sha256:" },
+        { "path": "result.dealState.parentCids.length", "min": 1 }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.PACKAGE_VERIFY_TAMPER.001",
+    "title": "Package verification blocks mismatched caller package identity",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "setup": {
+      "toolName": "compose_deal_package",
+      "input": {
+        "payload": {
+          "targetName": "Atlas HVAC Services",
+          "journey": "buy",
+          "dealType": "asset acquisition",
+          "purchasePriceCents": 540000000,
+          "ebitdaCents": 82000000,
+          "sources": [
+            { "id": "src-fin", "name": "TTM financials", "type": "financials", "hash": "sha256:fin" }
+          ]
+        }
+      },
+      "inject": [
+        { "fromPath": "result.dealPackage", "toPath": "dealPackage" },
+        { "fromPath": "result.dealState", "toPath": "dealState" }
+      ]
+    },
+    "toolName": "verify_package",
+    "input": {
+      "expectedPackageCid": "definitive:deal-package:sha256:not-the-right-package"
+    },
+    "expect": {
+      "action": "verify_package",
+      "artifactPath": "result.packageVerification",
+      "schema": "PackageVerification.v0.1",
+      "dealStateHashPath": "result.dealPackage.dealStateHash",
+      "lineInvariantPath": "result.packageVerification.lineInvariant",
+      "nextSuggestedToolsInclude": ["disclose_subset", "compose_close_readiness", "resume_deal"],
+      "takeBackArtifactsInclude": ["PackageVerification", "DealPackage", "MCPCallHint[]"],
+      "fields": [
+        { "path": "result.packageVerification.verified", "equals": false },
+        { "path": "result.packageVerification.missing", "includes": "expected_package_cid" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.DATAROOM_OVERLAY.001",
+    "title": "Data room index expands required buckets for real estate and IP overlays",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "compose_data_room_index",
+    "input": {
+      "payload": {
+        "targetName": "Atlas Software Campus",
+        "journey": "buy",
+        "dealType": "software-enabled real estate heavy acquisition",
+        "industry": "SaaS and property services",
+        "jurisdiction": "US-DE",
+        "realEstatePercentOfEV": 35,
+        "sources": [
+          { "id": "src-fin", "name": "TTM financials", "type": "financials", "hash": "sha256:fin" },
+          { "id": "src-ip", "name": "OSS scan", "type": "ip software oss", "hash": "sha256:ip" }
+        ]
+      }
+    },
+    "expect": {
+      "action": "compose_data_room_index",
+      "artifactPath": "result.dataRoomIndex",
+      "schema": "DataRoomIndex.v0.1",
+      "nextSuggestedToolsInclude": ["update_deal_payload", "check_completeness"],
+      "takeBackArtifactsInclude": ["DataRoomIndex", "SourceIndex", "MissingInputContract"],
+      "fields": [
+        { "path": "result.dataRoomIndex.classificationKey.triggeredOverlayGates", "includes": "G30" },
+        { "path": "result.dataRoomIndex.categories.4.id", "equals": "ip" },
+        { "path": "result.dataRoomIndex.sourceGaps.0.suggestedTool", "equals": "update_deal_payload" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.DISCLOSURE_GAP.001",
+    "title": "Disclosure subset names missing requested categories without external sharing",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "disclose_subset",
+    "input": {
+      "categories": ["ip"],
+      "payload": {
+        "targetName": "Atlas HVAC Services",
+        "journey": "buy",
+        "sources": [
+          { "id": "src-fin", "name": "TTM financials", "type": "financials", "hash": "sha256:fin" }
+        ]
+      }
+    },
+    "expect": {
+      "action": "disclose_subset",
+      "artifactPath": "result.disclosureSubset",
+      "schema": "DisclosureSubset.v0.1",
+      "nextSuggestedToolsInclude": ["compose_data_room_index", "compose_deal_package"],
+      "takeBackArtifactsInclude": ["DisclosureSubset", "SourceIndex", "SelectiveDisclosureProof"],
+      "fields": [
+        { "path": "result.disclosureSubset.sources.length", "equals": 0 },
+        { "path": "result.disclosureSubset.sourceGaps.0.category", "equals": "ip" },
+        { "path": "result.disclosureSubset.disclosureBoundary.noExternalTransmission", "equals": true },
+        { "path": "result.disclosureSubset.selectiveDisclosureProof.includesOnlySelectedSources", "equals": true }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.FUNDSFLOW_VARIANCE.001",
+    "title": "Funds flow exposes unbalanced or missing rows as arithmetic blockers only",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "generate_funds_flow",
+    "input": {
+      "payload": {
+        "targetName": "Atlas HVAC Services",
+        "journey": "buy",
+        "dealType": "asset acquisition",
+        "purchasePriceCents": 100000000,
+        "equityCents": 40000000,
+        "debtCents": 50000000,
+        "sources": [
+          { "id": "src-fin", "name": "TTM financials", "type": "financials", "hash": "sha256:fin" }
+        ]
+      }
+    },
+    "expect": {
+      "action": "generate_funds_flow",
+      "artifactPath": "result.fundsFlow",
+      "schema": "FundsFlow.v0.1",
+      "nextSuggestedToolsInclude": ["compose_data_room_index", "compose_model_stack", "compose_document_draft", "compose_deal_package"],
+      "takeBackArtifactsInclude": ["FundsFlow", "DealState", "DocumentDraft"],
+      "fields": [
+        { "path": "result.fundsFlow.reconciliation.status", "equals": "missing_rows" },
+        { "path": "result.fundsFlow.reconciliation.varianceCents", "equals": -100000000 },
+        { "path": "result.fundsFlow.fundsFlowBoundary.noWireInstructions", "equals": true },
+        { "path": "result.fundsFlow.handoffs.0.category", "equals": "closing_agent_or_escrow" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.CLOSE_BLOCKERS.001",
+    "title": "Close readiness reports blockers and only stages close_deal as human approval",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "compose_close_readiness",
+    "input": {
+      "payload": {
+        "targetName": "Atlas HVAC Services",
+        "journey": "buy",
+        "dealType": "asset acquisition",
+        "purchasePriceCents": 100000000,
+        "sources": [
+          { "id": "src-fin", "name": "TTM financials", "type": "financials", "hash": "sha256:fin" }
+        ]
+      }
+    },
+    "expect": {
+      "action": "compose_close_readiness",
+      "artifactPath": "result.closeReadiness",
+      "schema": "CloseReadiness.v0.1",
+      "nextSuggestedToolsInclude": ["update_deal_payload", "compose_data_room_index", "prepare_loi_packet", "generate_funds_flow", "compose_pmi_plan"],
+      "takeBackArtifactsInclude": ["CloseReadiness", "DealState", "FundsFlow"],
+      "fields": [
+        { "path": "result.closeReadiness.readinessStatus", "equals": "blocked" },
+        { "path": "result.dealState.classificationKey.league", "notIncludes": "unknown" },
+        { "path": "result.closeReadiness.blockers.length", "min": 3 },
+        { "path": "result.closeReadiness.approvalMatrix.0.requiredTool", "equals": "close_deal" },
+        { "path": "result.closeReadiness.closeReadinessBoundary.closeDealRequiresSeparateA6Approval", "equals": true }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.SCORE_PERMUTATION.001",
+    "title": "Single permutation scoring emits model output and THE LINE boundary",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "score_permutation",
+    "input": {
+      "structure": "stock_purchase",
+      "objectivePreference": "certainty",
+      "payload": {
+        "targetName": "Atlas HVAC Services",
+        "journey": "buy",
+        "dealType": "asset acquisition",
+        "industry": "HVAC services",
+        "purchasePriceCents": 540000000,
+        "ebitdaCents": 82000000
+      }
+    },
+    "expect": {
+      "action": "score_permutation",
+      "artifactPath": "result.permutation",
+      "dealStateHashPath": null,
+      "lineInvariantPath": "result.permutation.lineBoundary",
+      "nextSuggestedToolsInclude": ["compute_best_vehicle"],
+      "takeBackArtifactsInclude": ["StructurePermutation", "ModelOutput", "MCPCallHint[]"],
+      "fields": [
+        { "path": "result.permutation.structure", "equals": "stock_purchase" },
+        { "path": "result.permutation.modelOutputs.0.schema", "equals": "ModelOutput.v0.1" },
+        { "path": "result.objectivePreference.name", "equals": "certainty" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.SET_OBJECTIVE.001",
+    "title": "Objective preference turns caller weights into a comparison frontier",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "set_objective_preference",
+    "input": {
+      "objectivePreference": "seller_cash",
+      "payload": {
+        "targetName": "Atlas HVAC Services",
+        "journey": "buy",
+        "dealType": "asset acquisition",
+        "industry": "HVAC services",
+        "purchasePriceCents": 540000000,
+        "ebitdaCents": 82000000
+      }
+    },
+    "expect": {
+      "action": "set_objective_preference",
+      "artifactPath": "result.paretoFrontier",
+      "schema": "ParetoFrontier.v0.1",
+      "dealStateHashPath": null,
+      "lineInvariantPath": "result.paretoFrontier.lineBoundary",
+      "nextSuggestedToolsInclude": ["compute_best_vehicle"],
+      "takeBackArtifactsInclude": ["ParetoFrontier", "StructurePermutation", "MCPCallHint[]"],
+      "fields": [
+        { "path": "result.objectivePreference.name", "equals": "seller_cash" },
+        { "path": "result.paretoFrontier.objectivePreference", "equals": "seller_cash" },
+        { "path": "result.paretoFrontier.permutations.length", "min": 3 }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.EXPAND_PERMUTATIONS.001",
+    "title": "Expanded permutations add deeper structures for iterative agent scenario work",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "expand_permutations",
+    "input": {
+      "objectivePreference": "buyer_basis",
+      "payload": {
+        "targetName": "Atlas HVAC Services",
+        "journey": "buy",
+        "dealType": "asset acquisition",
+        "industry": "HVAC services",
+        "purchasePriceCents": 540000000,
+        "ebitdaCents": 82000000
+      }
+    },
+    "expect": {
+      "action": "expand_permutations",
+      "artifactPath": "result.paretoFrontier",
+      "schema": "ParetoFrontier.v0.1",
+      "dealStateHashPath": null,
+      "lineInvariantPath": "result.paretoFrontier.lineBoundary",
+      "nextSuggestedToolsInclude": ["score_permutation"],
+      "takeBackArtifactsInclude": ["StructurePermutation", "ParetoFrontier", "MCPCallHint[]"],
+      "fields": [
+        { "path": "result.objectivePreference.name", "equals": "buyer_basis" },
+        { "path": "result.permutations.length", "min": 8 },
+        { "path": "result.paretoFrontier.permutations.0.modelOutputs.0.schema", "equals": "ModelOutput.v0.1" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.RESUME_PARTIAL.001",
+    "title": "Resume accepts partial agent payloads and returns the recursive Deal OS contract",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "resume_deal",
+    "input": {
+      "payload": {
+        "journey": "buy",
+        "thesis": "software services target in Texas"
+      }
+    },
+    "expect": {
+      "action": "resume_deal",
+      "artifactPath": "result.resumeContract",
+      "dealStateHashPath": "result.dealState.stateHash",
+      "lineInvariantPath": null,
+      "nextSuggestedToolsInclude": ["update_deal_payload", "check_completeness", "compose_model_stack"],
+      "takeBackArtifactsInclude": ["DealState", "DealPlan", "DealPackage", "CompletenessReport", "MissingInputContract"],
+      "fields": [
+        { "path": "result.currentStage", "equals": "ioi" },
+        { "path": "result.resumeContract.noRejectionContract", "includes": "missing inputs" },
+        { "path": "result.resumeContract.recursiveLoop", "includes": "compose_deal_package" },
+        { "path": "result.resumeContract.humanAndAgentSurfaces", "includes": "data_room" },
+        { "path": "result.dealPackage.schema", "equals": "DealPackage.v0.1" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.LIFECYCLE_SYNTH.001",
+    "title": "Lifecycle trace synthesizes the current deal pass when an agent has no history",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "compose_lifecycle_trace",
+    "input": {
+      "payload": {
+        "journey": "buy",
+        "thesis": "software services target in Texas",
+        "sources": [
+          { "id": "src-thesis", "name": "Thesis note", "type": "commercial", "hash": "sha256:thesis" }
+        ]
+      }
+    },
+    "expect": {
+      "action": "compose_lifecycle_trace",
+      "artifactPath": "result.lifecycleTrace",
+      "schema": "LifecycleTrace.v0.1",
+      "nextSuggestedToolsInclude": ["update_deal_payload", "compose_deal_package", "compose_model_stack"],
+      "takeBackArtifactsInclude": ["LifecycleTrace", "DealState", "DealPlan", "MCPCallHint[]"],
+      "fields": [
+        { "path": "result.lifecycleTrace.currentStage", "equals": "ioi" },
+        { "path": "result.lifecycleTrace.events.0.id", "equals": "event_current_state" },
+        { "path": "result.lifecycleTrace.events.0.summary", "includes": "synthesized this trace" },
+        { "path": "result.lifecycleTrace.artifactRefs.0.type", "equals": "SourceIndex" },
+        { "path": "result.lifecycleTrace.loopContract.noRejectionContract", "includes": "Incomplete deal history" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.IOI_SOURCE_GAP.001",
+    "title": "IOI packet keeps working while naming missing financial source and model dependencies",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "prepare_ioi_packet",
+    "input": {
+      "payload": {
+        "journey": "buy",
+        "targetName": "Atlas HVAC Services",
+        "purchasePriceCents": 500000000,
+        "documents": [
+          { "id": "commercial", "name": "Market note", "type": "commercial", "hash": "sha256:comm" }
+        ]
+      }
+    },
+    "expect": {
+      "action": "prepare_ioi_packet",
+      "artifactPath": "result.ioiPacket",
+      "schema": "IOIPacket.v0.1",
+      "nextSuggestedToolsInclude": ["compose_data_room_index", "compose_model_stack", "compose_document_draft", "prepare_diligence_request"],
+      "takeBackArtifactsInclude": ["IOIPacket", "DealState", "DocumentDraft", "MCPCallHint[]"],
+      "fields": [
+        { "path": "result.ioiPacket.sourceRefs.0.category", "equals": "commercial" },
+        { "path": "result.ioiPacket.sourceGaps.0.category", "equals": "financials" },
+        { "path": "result.ioiPacket.modelDependencies.required", "equals": true },
+        { "path": "result.ioiPacket.indicationBoundary.noOfferAuthority", "equals": true },
+        { "path": "result.ioiPacket.indicationBoundary.noExternalTransmission", "equals": true }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.LOI_SOURCE_GAP.001",
+    "title": "LOI packet names legal, tax, and commercial gaps without drafting clauses",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "prepare_loi_packet",
+    "input": {
+      "payload": {
+        "journey": "buy",
+        "targetName": "Atlas HVAC Services",
+        "purchasePriceCents": 500000000,
+        "ebitdaCents": 80000000,
+        "documents": [
+          { "id": "qoe", "name": "QoE report", "type": "qoe", "hash": "sha256:qoe" }
+        ]
+      }
+    },
+    "expect": {
+      "action": "prepare_loi_packet",
+      "artifactPath": "result.loiPacket",
+      "schema": "LOIPacket.v0.1",
+      "nextSuggestedToolsInclude": ["compose_data_room_index", "compose_model_stack", "compose_document_draft", "prepare_diligence_request", "prepare_negotiation_brief"],
+      "takeBackArtifactsInclude": ["LOIPacket", "DealState", "DocumentDraft", "DiligenceRequest", "MCPCallHint[]"],
+      "fields": [
+        { "path": "result.loiPacket.sourceRefs.0.category", "equals": "financials" },
+        { "path": "result.loiPacket.sourceGaps.length", "equals": 3 },
+        { "path": "result.loiPacket.sourceGaps.0.category", "equals": "legal" },
+        { "path": "result.loiPacket.sourceGaps.1.category", "equals": "tax" },
+        { "path": "result.loiPacket.sourceGaps.2.category", "equals": "commercial" },
+        { "path": "result.loiPacket.loiBoundary.noClauseDrafting", "equals": true },
+        { "path": "result.loiPacket.loiBoundary.noLegalOpinion", "equals": true }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.DATAROOM_READY.001",
+    "title": "Data room index recognizes a source-ready deal room and only asks to re-score",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "compose_data_room_index",
+    "input": {
+      "payload": {
+        "journey": "buy",
+        "targetName": "Atlas HVAC Services",
+        "industry": "software",
+        "jurisdiction": "US-DE",
+        "documents": [
+          { "id": "qoe", "name": "QoE report", "type": "qoe", "hash": "sha256:qoe" },
+          { "id": "tax", "name": "Tax memo", "type": "tax", "hash": "sha256:tax" },
+          { "id": "legal", "name": "LOI markup", "type": "legal", "hash": "sha256:legal" },
+          { "id": "customers", "name": "Customer list", "type": "commercial", "hash": "sha256:customers" },
+          { "id": "ip", "name": "Patent assignment schedule", "type": "ip", "hash": "sha256:ip" }
+        ]
+      }
+    },
+    "expect": {
+      "action": "compose_data_room_index",
+      "artifactPath": "result.dataRoomIndex",
+      "schema": "DataRoomIndex.v0.1",
+      "nextSuggestedToolsInclude": ["check_completeness"],
+      "takeBackArtifactsInclude": ["DataRoomIndex", "SourceIndex", "MissingInputContract", "MCPCallHint[]"],
+      "fields": [
+        { "path": "result.dataRoomIndex.totalSources", "equals": 5 },
+        { "path": "result.dataRoomIndex.sourceGaps.length", "equals": 0 },
+        { "path": "result.dataRoomIndex.categories.0.status", "equals": "present" },
+        { "path": "result.dataRoomIndex.categories.4.id", "equals": "ip" },
+        { "path": "result.dataRoomIndex.categories.4.status", "equals": "present" }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.DILIGENCE_MIXED_READY.001",
+    "title": "Diligence request shows source-ready buckets and remaining data-room asks",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "prepare_diligence_request",
+    "input": {
+      "categories": ["financials", "ip"],
+      "payload": {
+        "journey": "buy",
+        "targetName": "Diligence Target",
+        "industry": "software",
+        "jurisdiction": "US-DE",
+        "ebitdaCents": 230000000,
+        "documents": [
+          { "id": "qoe", "name": "QoE report", "type": "qoe", "hash": "sha256:qoe" },
+          { "id": "ip-schedule", "name": "Patent assignment schedule", "type": "ip", "hash": "sha256:ip" }
+        ]
+      }
+    },
+    "expect": {
+      "action": "prepare_diligence_request",
+      "artifactPath": "result.diligenceRequest",
+      "schema": "DiligenceRequest.v0.1",
+      "nextSuggestedToolsInclude": ["compose_data_room_index", "compose_model_stack", "compose_document_draft"],
+      "takeBackArtifactsInclude": ["DiligenceRequest", "DataRoomIndex", "MissingInputContract", "MCPCallHint[]"],
+      "fields": [
+        { "path": "result.diligenceRequest.requestGroups.0.id", "equals": "financials" },
+        { "path": "result.diligenceRequest.requestGroups.0.status", "equals": "source_ready" },
+        { "path": "result.diligenceRequest.requestGroups.1.id", "equals": "ip" },
+        { "path": "result.diligenceRequest.requestGroups.1.status", "equals": "source_ready" },
+        { "path": "result.diligenceRequest.requestGroups.2.id", "equals": "legal" },
+        { "path": "result.diligenceRequest.requestGroups.2.status", "equals": "needs_source" },
+        { "path": "result.diligenceRequest.sourceGaps.length", "equals": 3 },
+        { "path": "result.diligenceRequest.requestBoundary.noExternalTransmission", "equals": true }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.DISCLOSURE_READY.001",
+    "title": "Selective disclosure gives an external agent only the requested data-room subset",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "disclose_subset",
+    "input": {
+      "categories": ["financials", "ip"],
+      "audience": "external_agent",
+      "payload": {
+        "journey": "buy",
+        "targetName": "Subset Target",
+        "industry": "software",
+        "jurisdiction": "US-DE",
+        "documents": [
+          { "id": "qoe", "name": "QoE report", "type": "qoe", "hash": "sha256:qoe" },
+          { "id": "ip-schedule", "name": "Patent assignment schedule", "type": "ip", "hash": "sha256:ip" },
+          { "id": "customer-list", "name": "Customer concentration export", "type": "commercial", "hash": "sha256:customer" }
+        ]
+      }
+    },
+    "expect": {
+      "action": "disclose_subset",
+      "artifactPath": "result.disclosureSubset",
+      "schema": "DisclosureSubset.v0.1",
+      "nextSuggestedToolsInclude": ["compose_deal_package"],
+      "takeBackArtifactsInclude": ["DisclosureSubset", "SourceIndex", "SelectiveDisclosureProof", "MCPCallHint[]"],
+      "fields": [
+        { "path": "result.disclosureSubset.audience", "equals": "external_agent" },
+        { "path": "result.disclosureSubset.sources.length", "equals": 2 },
+        { "path": "result.disclosureSubset.sources.0.category", "equals": "financials" },
+        { "path": "result.disclosureSubset.sources.1.category", "equals": "ip" },
+        { "path": "result.disclosureSubset.excludedSources.0.category", "equals": "commercial" },
+        { "path": "result.disclosureSubset.sourceGaps.length", "equals": 0 },
+        { "path": "result.disclosureSubset.disclosureBoundary.noExternalTransmission", "equals": true }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.DOCUMENT_DRAFT_GAPS.001",
+    "title": "Studio document draft marks source gaps and model dependencies before export",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "compose_document_draft",
+    "input": {
+      "documentType": "ic_memo",
+      "payload": {
+        "journey": "buy",
+        "targetName": "Studio Target",
+        "industry": "manufacturing",
+        "jurisdiction": "US-DE",
+        "ebitdaCents": 220000000,
+        "documents": [
+          { "id": "qoe", "name": "QoE report", "type": "qoe", "hash": "sha256:qoe" },
+          { "id": "customers", "name": "Customer list", "type": "commercial", "hash": "sha256:customer" }
+        ]
+      }
+    },
+    "expect": {
+      "action": "compose_document_draft",
+      "artifactPath": "result.documentDraft",
+      "schema": "DocumentDraft.v0.1",
+      "nextSuggestedToolsInclude": ["compose_data_room_index", "compose_model_stack", "compose_deal_package"],
+      "takeBackArtifactsInclude": ["DocumentDraft", "SourceIndex", "MissingInputContract", "MCPCallHint[]"],
+      "fields": [
+        { "path": "result.documentDraft.documentType", "equals": "ic_memo" },
+        { "path": "result.documentDraft.sections.0.status", "equals": "source_ready" },
+        { "path": "result.documentDraft.sections.1.id", "equals": "financial_model" },
+        { "path": "result.documentDraft.sections.2.status", "equals": "needs_source" },
+        { "path": "result.documentDraft.sections.2.missingSourceCategories", "includes": "legal" },
+        { "path": "result.documentDraft.sourcePolicy.unsourcedClaimsAllowed", "equals": false },
+        { "path": "result.documentDraft.modelDependencies.required", "equals": true },
+        { "path": "result.documentDraft.exportBoundary.noExternalTransmission", "equals": true }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.NEGOTIATION_MODEL_GAP.001",
+    "title": "Negotiation brief organizes open terms while refusing recommendation authority",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "prepare_negotiation_brief",
+    "input": {
+      "payload": {
+        "journey": "buy",
+        "targetName": "Negotiation Target",
+        "industry": "software",
+        "jurisdiction": "US-DE",
+        "ebitdaCents": 240000000,
+        "purchasePriceCents": 1800000000,
+        "dealStructure": "asset purchase with seller note",
+        "documents": [
+          { "id": "qoe", "name": "QoE report", "type": "qoe", "hash": "sha256:qoe" },
+          { "id": "loi", "name": "LOI markup", "type": "loi", "hash": "sha256:loi" }
+        ]
+      }
+    },
+    "expect": {
+      "action": "prepare_negotiation_brief",
+      "artifactPath": "result.negotiationBrief",
+      "schema": "NegotiationBrief.v0.1",
+      "nextSuggestedToolsInclude": ["compose_data_room_index", "compose_model_stack", "compose_document_draft"],
+      "takeBackArtifactsInclude": ["NegotiationBrief", "DealState", "SourceGapList", "MCPCallHint[]"],
+      "fields": [
+        { "path": "result.negotiationBrief.openTerms.0.id", "equals": "purchase_price" },
+        { "path": "result.negotiationBrief.openTerms.0.status", "equals": "source_ready" },
+        { "path": "result.negotiationBrief.sourceGaps.0.category", "equals": "tax" },
+        { "path": "result.negotiationBrief.modelBackedRanges.0.id", "equals": "current_model_state" },
+        { "path": "result.negotiationBrief.modelBackedRanges.0.status", "equals": "missing" },
+        { "path": "result.negotiationBrief.modelBackedRanges.1.id", "equals": "purchasePriceCents" },
+        { "path": "result.negotiationBrief.negotiationBoundary.noRecommendation", "equals": true },
+        { "path": "result.negotiationBrief.negotiationBoundary.noNegotiationAuthority", "equals": true }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.FUNDSFLOW_BALANCED.001",
+    "title": "Funds flow reconciles supplied source/use rows without moving money",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "generate_funds_flow",
+    "input": {
+      "payload": {
+        "journey": "buy",
+        "targetName": "Closing Target",
+        "industry": "industrial services",
+        "jurisdiction": "US-TX",
+        "purchasePriceCents": 900000000,
+        "equityContributionCents": 400000000,
+        "seniorDebtCents": 600000000,
+        "sellerNoteCents": 100000000,
+        "escrowCents": 50000000,
+        "transactionExpensesCents": 50000000,
+        "documents": [
+          { "id": "qoe", "name": "Closing QoE", "type": "qoe", "hash": "sha256:qoe" },
+          { "id": "credit", "name": "Debt commitment", "type": "credit agreement", "hash": "sha256:credit" },
+          { "id": "closing", "name": "Closing checklist", "type": "legal", "hash": "sha256:closing" },
+          { "id": "tax", "name": "Tax allocation memo", "type": "tax", "hash": "sha256:tax" }
+        ]
+      }
+    },
+    "expect": {
+      "action": "generate_funds_flow",
+      "artifactPath": "result.fundsFlow",
+      "schema": "FundsFlow.v0.1",
+      "nextSuggestedToolsInclude": ["compose_model_stack", "compose_document_draft", "compose_deal_package"],
+      "takeBackArtifactsInclude": ["FundsFlow", "DealState", "DocumentDraft", "MCPCallHint[]"],
+      "fields": [
+        { "path": "result.fundsFlow.sourceRows.0.id", "equals": "equity_contribution" },
+        { "path": "result.fundsFlow.sourceRows.0.amountCents", "equals": 400000000 },
+        { "path": "result.fundsFlow.useRows.0.id", "equals": "purchase_price" },
+        { "path": "result.fundsFlow.useRows.0.amountCents", "equals": 900000000 },
+        { "path": "result.fundsFlow.reconciliation.status", "equals": "balanced" },
+        { "path": "result.fundsFlow.reconciliation.varianceCents", "equals": 0 },
+        { "path": "result.fundsFlow.fundsFlowBoundary.noMoneyMovement", "equals": true },
+        { "path": "result.fundsFlow.fundsFlowBoundary.noWireInstructions", "equals": true }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.CLOSE_READY_STAGE.001",
+    "title": "Close readiness stages human approval without authorizing close",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "compose_close_readiness",
+    "input": {
+      "payload": {
+        "journey": "buy",
+        "dealName": "Closing Target",
+        "targetName": "Closing Target LLC",
+        "industry": "commercial services",
+        "jurisdiction": "US-DE",
+        "revenueCents": 2400000000,
+        "purchasePriceCents": 900000000,
+        "equityContributionCents": 400000000,
+        "seniorDebtCents": 600000000,
+        "escrowCents": 50000000,
+        "transactionExpensesCents": 50000000,
+        "structure": "asset purchase",
+        "keyTerms": { "indemnity": "escrow and RWI under review" },
+        "closingConditions": { "diligence": true, "financing": true, "thirdPartyConsents": true },
+        "modelOutputs": { "sourcesUses": "balanced" },
+        "counselClearance": true,
+        "documents": [
+          { "id": "qoe", "name": "QoE report", "type": "financial", "hash": "sha256:qoe" },
+          { "id": "credit", "name": "Credit agreement", "type": "financing", "hash": "sha256:credit" },
+          { "id": "legal", "name": "Closing checklist", "type": "legal", "hash": "sha256:legal" },
+          { "id": "tax", "name": "Tax memo", "type": "tax", "hash": "sha256:tax" }
+        ]
+      }
+    },
+    "expect": {
+      "action": "compose_close_readiness",
+      "artifactPath": "result.closeReadiness",
+      "schema": "CloseReadiness.v0.1",
+      "nextSuggestedToolsInclude": ["compose_document_draft", "close_deal", "compose_deal_package", "compose_pmi_plan"],
+      "takeBackArtifactsInclude": ["CloseReadiness", "DealState", "FundsFlow", "PMIPlan", "MCPCallHint[]"],
+      "fields": [
+        { "path": "result.closeReadiness.readinessStatus", "equals": "ready_to_stage_for_human_approval" },
+        { "path": "result.closeReadiness.blockers.length", "equals": 0 },
+        { "path": "result.closeReadiness.approvalMatrix.0.requiredTool", "equals": "close_deal" },
+        { "path": "result.closeReadiness.closeReadinessBoundary.noClosingAuthority", "equals": true },
+        { "path": "result.closeReadiness.closeReadinessBoundary.noMoneyMovement", "equals": true },
+        { "path": "result.closeReadiness.closeReadinessBoundary.closeDealRequiresSeparateA6Approval", "equals": true }
+      ]
+    }
+  },
+  {
+    "id": "CONF.DEALOS.PMI_DAY100.001",
+    "title": "PMI plan carries the closed deal into Day 0 through Day 100 without operating authority",
+    "specVersion": "DEFINITIVE.v1.0",
+    "methodologyUri": "methodology://v19",
+    "toolName": "compose_pmi_plan",
+    "input": {
+      "payload": {
+        "journey": "pmi",
+        "targetName": "PMI Target",
+        "industry": "healthcare services",
+        "jurisdiction": "US-TX",
+        "closedDate": "2026-05-20",
+        "ebitdaCents": 180000000,
+        "dayZero": { "banking": true, "payroll": true },
+        "stabilization": { "weeklyCadence": true },
+        "valueLevers": ["revenue cycle cleanup", "vendor consolidation"],
+        "documents": [
+          { "id": "ops", "name": "Operations handoff", "type": "operations", "hash": "sha256:ops" },
+          { "id": "qoe", "name": "Closing QoE", "type": "qoe", "hash": "sha256:qoe" },
+          { "id": "customers", "name": "Customer handoff list", "type": "commercial", "hash": "sha256:customers" },
+          { "id": "hr", "name": "Employee roster", "type": "hr", "hash": "sha256:hr" }
+        ]
+      }
+    },
+    "expect": {
+      "action": "compose_pmi_plan",
+      "artifactPath": "result.pmiPlan",
+      "schema": "PMIPlan.v0.1",
+      "nextSuggestedToolsInclude": ["compose_model_stack", "compose_document_draft", "update_deal_payload"],
+      "takeBackArtifactsInclude": ["PMIPlan", "DealState", "DocumentDraft", "MCPCallHint[]"],
+      "fields": [
+        { "path": "result.pmiPlan.workstreams.0.id", "equals": "PMI0" },
+        { "path": "result.pmiPlan.workstreams.1.id", "equals": "PMI1" },
+        { "path": "result.pmiPlan.workstreams.3.id", "equals": "PMI3" },
+        { "path": "result.pmiPlan.milestones.3.id", "equals": "day_100" },
+        { "path": "result.pmiPlan.milestones.3.targetDate", "equals": "2026-08-28" },
+        { "path": "result.pmiPlan.sourceGaps.length", "equals": 0 },
+        { "path": "result.pmiPlan.modelDependencies.required", "equals": true },
+        { "path": "result.pmiPlan.pmiBoundary.noOperatingAuthority", "equals": true }
+      ]
+    }
   }
 ]

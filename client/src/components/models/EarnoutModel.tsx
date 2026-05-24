@@ -8,6 +8,11 @@ import { centsToDisplay, pctDisplay } from '../../lib/calculations/core';
 
 interface Props { tabId: string; }
 
+const CHART_PRIMARY = '#6A9BCC';
+const CHART_PRIMARY_SOFT = 'rgba(106, 155, 204, 0.16)';
+const CHART_TEXT = '#1A2233';
+const CHART_MUTED = '#555E6F';
+
 export default function EarnoutModel({ tabId }: Props) {
   const tab = useModelStore(s => s.tabs[tabId]);
   const update = useModelStore(s => s.updateAssumptions);
@@ -36,7 +41,7 @@ export default function EarnoutModel({ tabId }: Props) {
       {/* KPIs */}
       {earnout && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <KPICard label="Expected Value" value={centsToDisplay(earnout.expectedValue)} color="#D4714E" sublabel="Probability-weighted" />
+          <KPICard label="Expected Value" value={centsToDisplay(earnout.expectedValue)} color="var(--m-primary)" sublabel="Probability-weighted" />
           <KPICard label="Max Payout" value={centsToDisplay(earnout.maxPayout)} sublabel="If all milestones hit" />
           <KPICard label="PV of Expected" value={centsToDisplay(earnout.pvExpected)} sublabel={`At ${pctDisplay(a.discountRate ?? 0.10)} discount`} />
         </div>
@@ -52,15 +57,15 @@ export default function EarnoutModel({ tabId }: Props) {
                 {
                   label: 'Max Payout',
                   data: earnout.byMilestone.map((m: any) => m.payout / 100),
-                  backgroundColor: 'rgba(186, 60, 96, 0.15)',
-                  borderColor: '#D4714E',
+                  backgroundColor: CHART_PRIMARY_SOFT,
+                  borderColor: CHART_PRIMARY,
                   borderWidth: 1,
                   borderRadius: 4,
                 },
                 {
                   label: 'Expected Value',
                   data: earnout.byMilestone.map((m: any) => m.ev / 100),
-                  backgroundColor: '#D4714E',
+                  backgroundColor: CHART_PRIMARY,
                   borderRadius: 4,
                 },
               ],
@@ -68,12 +73,12 @@ export default function EarnoutModel({ tabId }: Props) {
             options={{
               responsive: true, maintainAspectRatio: false,
               plugins: {
-                legend: { display: true, position: 'bottom', labels: { color: '#5e5d59', font: { size: 10 }, boxWidth: 10 } },
+                legend: { display: true, position: 'bottom', labels: { color: CHART_MUTED, font: { size: 10 }, boxWidth: 10 } },
                 tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${centsToDisplay(Number(ctx.raw) * 100)}` } },
               },
               scales: {
-                x: { grid: { display: false }, ticks: { color: '#1a1918', font: { size: 10 } } },
-                y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => centsToDisplay(Number(v) * 100), color: '#5e5d59', font: { size: 10 } } },
+                x: { grid: { display: false }, ticks: { color: CHART_TEXT, font: { size: 10 } } },
+                y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => centsToDisplay(Number(v) * 100), color: CHART_MUTED, font: { size: 10 } } },
               },
             }}
           />
@@ -86,32 +91,32 @@ export default function EarnoutModel({ tabId }: Props) {
       {/* Milestone inputs */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-[11px] font-bold uppercase tracking-wider m-0" style={{ color: '#5e5d59' }}>Milestones</h3>
-          <button onClick={addMilestone} className="text-xs font-semibold px-3 py-1 rounded-full border-0 cursor-pointer" style={{ background: '#D4714E', color: 'white' }}>+ Add</button>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider m-0" style={{ color: 'var(--m-on-surface-var)' }}>Milestones</h3>
+          <button onClick={addMilestone} className="text-xs font-semibold px-3 py-1 rounded-full border-0 cursor-pointer" style={{ background: 'var(--m-primary)', color: 'white' }}>+ Add</button>
         </div>
 
         {milestones.map((m: any, i: number) => (
-          <div key={i} className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 rounded-lg p-2" style={{ border: '1px solid #DDD9D1' }}>
+          <div key={i} className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 rounded-lg p-2" style={{ border: '1px solid var(--m-outline-var)' }}>
             <div>
-              <label className="block text-[9px] font-medium mb-0.5" style={{ color: '#5e5d59' }}>Year</label>
+              <label className="block text-[9px] font-medium mb-0.5" style={{ color: 'var(--m-on-surface-var)' }}>Year</label>
               <input type="number" value={m.year} onChange={e => updateMilestone(i, 'year', Number(e.target.value))}
-                className="w-full px-2 py-1 text-xs rounded border outline-none" style={{ borderColor: '#DDD9D1' }} />
+                className="w-full px-2 py-1 text-xs rounded border outline-none" style={{ borderColor: 'var(--m-outline-var)' }} />
             </div>
             <div>
-              <label className="block text-[9px] font-medium mb-0.5" style={{ color: '#5e5d59' }}>Target ($)</label>
+              <label className="block text-[9px] font-medium mb-0.5" style={{ color: 'var(--m-on-surface-var)' }}>Target ($)</label>
               <input type="number" value={m.target / 100} onChange={e => updateMilestone(i, 'target', Number(e.target.value) * 100)}
-                className="w-full px-2 py-1 text-xs rounded border outline-none" style={{ borderColor: '#DDD9D1' }} />
+                className="w-full px-2 py-1 text-xs rounded border outline-none" style={{ borderColor: 'var(--m-outline-var)' }} />
             </div>
             <div>
-              <label className="block text-[9px] font-medium mb-0.5" style={{ color: '#5e5d59' }}>Payout ($)</label>
+              <label className="block text-[9px] font-medium mb-0.5" style={{ color: 'var(--m-on-surface-var)' }}>Payout ($)</label>
               <input type="number" value={m.payout / 100} onChange={e => updateMilestone(i, 'payout', Number(e.target.value) * 100)}
-                className="w-full px-2 py-1 text-xs rounded border outline-none" style={{ borderColor: '#DDD9D1' }} />
+                className="w-full px-2 py-1 text-xs rounded border outline-none" style={{ borderColor: 'var(--m-outline-var)' }} />
             </div>
             <div>
-              <label className="block text-[9px] font-medium mb-0.5" style={{ color: '#5e5d59' }}>Probability</label>
+              <label className="block text-[9px] font-medium mb-0.5" style={{ color: 'var(--m-on-surface-var)' }}>Probability</label>
               <input type="range" min={0} max={1} step={0.05} value={m.probability} onChange={e => updateMilestone(i, 'probability', Number(e.target.value))}
                 className="w-full" />
-              <span className="text-[9px] font-medium" style={{ color: '#5e5d59' }}>{pctDisplay(m.probability)}</span>
+              <span className="text-[9px] font-medium" style={{ color: 'var(--m-on-surface-var)' }}>{pctDisplay(m.probability)}</span>
             </div>
           </div>
         ))}

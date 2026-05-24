@@ -21,11 +21,11 @@ export default function SBAModel({ tabId }: Props) {
 
   const a = tab.assumptions;
   const sba = tab.outputs.sba;
-  if (!sba) return <div className="p-5 text-sm text-[#5e5d59]">Set purchase price and earnings to begin.</div>;
+  if (!sba) return <div className="p-5 text-sm" style={{ color: 'var(--m-on-surface-var)' }}>Set purchase price and earnings to begin.</div>;
 
-  const GREEN = '#34A853';
-  const YELLOW = '#FBBC04';
-  const RED = '#EA4335';
+  const GREEN = 'var(--m-pursue)';
+  const YELLOW = 'var(--m-watch)';
+  const RED = 'var(--m-pass)';
   const goColor = sba.eligible ? GREEN : sba.dscr >= 1.0 ? YELLOW : RED;
   const goLabel = sba.eligible ? 'GO' : sba.dscr >= 1.0 ? 'MARGINAL' : 'NO-GO';
 
@@ -34,7 +34,7 @@ export default function SBAModel({ tabId }: Props) {
       {/* Go/No-Go Traffic Light */}
       <div className="rounded-xl p-5 text-center" style={{ background: `${goColor}10`, border: `2px solid ${goColor}` }}>
         <p className="text-3xl font-bold m-0" style={{ color: goColor, fontFamily: 'Figtree, system-ui, sans-serif' }}>{goLabel}</p>
-        <p className="text-sm m-0 mt-1" style={{ color: '#5e5d59' }}>
+        <p className="text-sm m-0 mt-1" style={{ color: 'var(--m-on-surface-var)' }}>
           {sba.eligible
             ? `DSCR ${sba.dscr.toFixed(2)}x passes SBA 1.25x threshold`
             : sba.dscr >= 1.0
@@ -56,34 +56,34 @@ export default function SBAModel({ tabId }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {/* Left: DSCR + Details */}
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#5e5d59' }}>Debt Service Coverage</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Debt Service Coverage</h3>
           <DSCRGauge dscr={sba.dscr} />
 
           <div className="mt-4 space-y-2">
             <div className="flex justify-between text-xs" style={{ borderBottom: '1px solid #e8e6dc', paddingBottom: 4 }}>
-              <span style={{ color: '#5e5d59' }}>Total Project Cost</span>
+              <span style={{ color: 'var(--m-on-surface-var)' }}>Total Project Cost</span>
               <span className="font-medium tabular-nums">{centsToDisplay(sba.totalProjectCost)}</span>
             </div>
             <div className="flex justify-between text-xs" style={{ borderBottom: '1px solid #e8e6dc', paddingBottom: 4 }}>
-              <span style={{ color: '#5e5d59' }}>SBA Loan</span>
+              <span style={{ color: 'var(--m-on-surface-var)' }}>SBA Loan</span>
               <span className="font-medium tabular-nums">{centsToDisplay(sba.loanAmount)}</span>
             </div>
             {sba.sellerNote > 0 && (
               <div className="flex justify-between text-xs" style={{ borderBottom: '1px solid #e8e6dc', paddingBottom: 4 }}>
-                <span style={{ color: '#5e5d59' }}>Seller Note</span>
+                <span style={{ color: 'var(--m-on-surface-var)' }}>Seller Note</span>
                 <span className="font-medium tabular-nums">{centsToDisplay(sba.sellerNote)}</span>
               </div>
             )}
             <div className="flex justify-between text-xs" style={{ borderBottom: '1px solid #e8e6dc', paddingBottom: 4 }}>
-              <span style={{ color: '#5e5d59' }}>Cash Equity Required</span>
+              <span style={{ color: 'var(--m-on-surface-var)' }}>Cash Equity Required</span>
               <span className="font-bold tabular-nums">{centsToDisplay(sba.equityRequired)}</span>
             </div>
             <div className="flex justify-between text-xs" style={{ borderBottom: '1px solid #e8e6dc', paddingBottom: 4 }}>
-              <span style={{ color: '#5e5d59' }}>Annual Debt Service</span>
+              <span style={{ color: 'var(--m-on-surface-var)' }}>Annual Debt Service</span>
               <span className="font-medium tabular-nums">{centsToDisplay(sba.annualDebtService)}</span>
             </div>
             <div className="flex justify-between text-xs">
-              <span style={{ color: '#5e5d59' }}>Max SBA Loan Capacity</span>
+              <span style={{ color: 'var(--m-on-surface-var)' }}>Max SBA Loan Capacity</span>
               <span className="font-medium tabular-nums">{centsToDisplay(sba.maxLoanCapacity)}</span>
             </div>
           </div>
@@ -91,7 +91,7 @@ export default function SBAModel({ tabId }: Props) {
 
         {/* Right: Controls */}
         <div>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#5e5d59' }}>Financing Terms</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Financing Terms</h3>
 
           <ModelInput
             label="Purchase Price"
@@ -123,12 +123,12 @@ export default function SBAModel({ tabId }: Props) {
           />
 
           <div className="mb-3">
-            <label className="block text-[10px] font-medium mb-1" style={{ color: '#5e5d59' }}>Loan Term</label>
+            <label className="block text-[10px] font-medium mb-1" style={{ color: 'var(--m-on-surface-var)' }}>Loan Term</label>
             <select
               value={a.termMonths ?? 120}
               onChange={e => update(tabId, 'termMonths', Number(e.target.value))}
               className="w-full rounded-lg border px-3 py-1.5 text-sm outline-none"
-              style={{ borderColor: '#DDD9D1', color: '#1a1918' }}
+              style={{ borderColor: 'var(--m-outline-var)', color: 'var(--m-on-surface)' }}
             >
               <option value={120}>10 years (equipment/working capital)</option>
               <option value={300}>25 years (real estate included)</option>
@@ -158,7 +158,7 @@ export default function SBAModel({ tabId }: Props) {
           <button
             onClick={() => setShowAmortization(!showAmortization)}
             className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider cursor-pointer bg-transparent border-0 p-0"
-            style={{ color: '#5e5d59' }}
+            style={{ color: 'var(--m-on-surface-var)' }}
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
               className={`transition-transform ${showAmortization ? 'rotate-180' : ''}`}>
@@ -171,9 +171,9 @@ export default function SBAModel({ tabId }: Props) {
             <div className="mt-2 overflow-x-auto max-h-[400px] overflow-y-auto">
               <table className="text-xs w-full" style={{ borderCollapse: 'collapse' }}>
                 <thead className="sticky top-0 bg-white">
-                  <tr style={{ borderBottom: '2px solid #D4714E' }}>
+                  <tr style={{ borderBottom: '2px solid var(--m-primary)' }}>
                     {['Month', 'Payment', 'Principal', 'Interest', 'Balance'].map(h => (
-                      <th key={h} style={{ padding: '4px 8px', textAlign: 'right', fontSize: 10, color: '#5e5d59', textTransform: 'uppercase' }}>
+                      <th key={h} style={{ padding: '4px 8px', textAlign: 'right', fontSize: 10, color: 'var(--m-on-surface-var)', textTransform: 'uppercase' }}>
                         {h}
                       </th>
                     ))}
@@ -185,7 +185,7 @@ export default function SBAModel({ tabId }: Props) {
                       <td style={{ padding: '4px 8px', textAlign: 'right' }}>{row.month}</td>
                       <td style={{ padding: '4px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{centsToDisplay(row.payment)}</td>
                       <td style={{ padding: '4px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{centsToDisplay(row.principal)}</td>
-                      <td style={{ padding: '4px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: '#EA4335' }}>{centsToDisplay(row.interest)}</td>
+                      <td style={{ padding: '4px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: 'var(--m-pass)' }}>{centsToDisplay(row.interest)}</td>
                       <td style={{ padding: '4px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>{centsToDisplay(row.balance)}</td>
                     </tr>
                   ))}

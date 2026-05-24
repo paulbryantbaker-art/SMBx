@@ -476,6 +476,51 @@ const ModelOutput: JsonSchema = {
   },
 };
 
+const ModelExecutionHistory: JsonSchema = {
+  $id: schemaId('ModelExecutionHistory'),
+  title: 'ModelExecutionHistory',
+  type: 'object',
+  additionalProperties: true,
+  required: ['schema', 'executions', 'lineBoundary'],
+  description:
+    'Persisted model execution and model-canvas version history for iterative human/agent deal modeling.',
+  properties: {
+    schema: { type: 'string', const: 'ModelExecutionHistory.v0.1' },
+    filters: { type: 'object', additionalProperties: true },
+    executions: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: true,
+        required: ['executionId', 'modelId', 'canvasTabId', 'clientVersionNumber', 'inputHash', 'outputHash'],
+        properties: {
+          executionId: { type: 'number' },
+          modelId: { type: 'string' },
+          modelSlotId: { type: ['string', 'null'] },
+          canvasTabId: { type: 'string' },
+          modelType: { type: 'string' },
+          modelTitle: { type: 'string' },
+          clientVersionNumber: { type: 'number' },
+          inputHash: { $ref: schemaId('OutputHash') },
+          outputHash: { $ref: schemaId('OutputHash') },
+          parentOutputHash: { type: ['string', 'null'] },
+          modelOutput: { type: 'object', additionalProperties: true },
+          versionSnapshot: { type: 'object', additionalProperties: true },
+          dependencyContract: { type: 'object', additionalProperties: true },
+          freshness: {
+            type: ['object', 'null'],
+            additionalProperties: true,
+            description: 'ModelFreshness.v0.1 envelope: current, superseded, needs_rerun, or unknown against supplied current assumptions.',
+          },
+          createdAt: { type: ['string', 'null'] },
+        },
+      },
+    },
+    next_suggested_calls: { type: 'array', items: { $ref: schemaId('MCPCallHint') } },
+    lineBoundary: { type: 'string' },
+  },
+};
+
 const StructurePermutation: JsonSchema = {
   $id: schemaId('StructurePermutation'),
   title: 'StructurePermutation',
@@ -1188,6 +1233,7 @@ export const DEFINITIVE_SCHEMAS: Record<string, JsonSchema> = {
   OutputHash,
   AssumptionLog,
   ModelOutput,
+  ModelExecutionHistory,
   StructurePermutation,
   ParetoFrontier,
   BestVehicleBlock,
@@ -1392,6 +1438,11 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     output: ['PMIPlan', 'DealState', 'MissingInputContract', 'MCPCallHint'],
     takeBack: ['PMIPlan', 'DealState', 'DocumentDraft', 'MCPCallHint'],
   },
+  list_model_executions: {
+    input: [],
+    output: ['ModelExecutionHistory', 'ModelOutput', 'AssumptionLog', 'OutputHash', 'MCPCallHint'],
+    takeBack: ['ModelExecutionHistory', 'ModelOutput', 'AssumptionLog', 'OutputHash'],
+  },
 };
 
 export function buildDefinitiveSchemaRegistry() {
@@ -1432,6 +1483,7 @@ export function buildDefinitiveSchemaRegistry() {
       'StudioBook',
       'ExportManifest',
       'ModelOutput',
+      'ModelExecutionHistory',
       'AssumptionLog',
       'OutputHash',
       'AuditPacket',

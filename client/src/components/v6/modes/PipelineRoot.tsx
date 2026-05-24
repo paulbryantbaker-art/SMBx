@@ -5,7 +5,7 @@ import type { Verdict } from "./cards";
 import type { IconName, OpenTab } from "../types";
 import { DEV_AUTH_BYPASS, type User } from "../../../hooks/useAuth";
 import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
-import { useTodayOperatingBrief, type TodayDealPulseItem, type TodayDefinitiveDealState, type TodayGateCountdownItem } from "../../../hooks/useTodayOperatingBrief";
+import { useTodayOperatingBrief, type TodayDealPulseItem, type TodayDefinitiveDealState, type TodayGateCountdownItem, type TodayModelRefreshItem } from "../../../hooks/useTodayOperatingBrief";
 import { ART_HOUSE_TEXTURES, STUDIO_TEXTURES } from "../../../lib/randomTextures";
 import type { ModelPreference } from "../../../lib/modelPreference";
 import {
@@ -39,6 +39,9 @@ interface PipelineDeal {
   requiredCitations: number;
   blocker: string;
   yuliaMove: string;
+  modelRefreshCount?: number;
+  modelRefreshReason?: string;
+  modelRefreshLabel?: string;
   definitive?: TodayDefinitiveDealState;
 }
 
@@ -103,11 +106,13 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
   const realDeals = home.inReview.length > 0 ? home.inReview : home.picks;
   const operatingDeals = operating.brief?.dealPulse ?? [];
   const gateCountdown = useSampleData ? [] : (operating.brief?.gateCountdown ?? []);
+  const modelRefreshNeeds = useSampleData ? [] : (operating.brief?.modelRefreshNeeds ?? []);
   const gateCountdownByDeal = new Map(gateCountdown.map(item => [item.dealId, item]));
+  const modelRefreshByDeal = groupModelRefreshByDeal(modelRefreshNeeds);
   const deals = useSampleData
     ? SAMPLE_DEALS
     : operatingDeals.length
-      ? operatingDeals.map(item => dealPulseToPipelineDeal(item, gateCountdownByDeal.get(item.dealId)))
+      ? operatingDeals.map(item => dealPulseToPipelineDeal(item, gateCountdownByDeal.get(item.dealId), modelRefreshByDeal.get(item.dealId) ?? []))
       : realDeals.map(dealToPipelineDeal);
 
   const pursue = deals.filter(d => d.verdict === "pursue");
@@ -120,6 +125,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
   const activeLeagueCount = new Set(deals.map(deal => deal.league)).size;
   const modelCount = deals.reduce((sum, deal) => sum + deal.requiredModels, 0);
   const citationCount = deals.reduce((sum, deal) => sum + deal.requiredCitations, 0);
+  const rerunCount = deals.reduce((sum, deal) => sum + (deal.modelRefreshCount || 0), 0);
   const definitiveCount = deals.filter(deal => deal.definitive).length;
   const selectedHomeDeal = useSampleData ? null : pickActionDeal(realDeals);
   const actionDeal = selectedHomeDeal ? homeDealToActionDeal(selectedHomeDeal) : null;
@@ -211,6 +217,10 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
     }
 
     if (action === "models") {
+      if (modelRefreshNeeds.length > 0) {
+        onTalkToYulia?.(`Show the stale model stack across my pipeline. Start with ${modelRefreshNeeds[0].dealTitle || "the highest-priority deal"} and explain which models need reruns, which assumptions changed, and what to rerun first.`);
+        return;
+      }
       await runPipelineAction("analysis");
       return;
     }
@@ -296,6 +306,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
           <MethodologyChip label="Leagues" value={activeLeagueCount || 0} />
           <MethodologyChip label="Models watched" value={modelCount} />
           <MethodologyChip label="Citations needed" value={citationCount} />
+          <MethodologyChip label="Model reruns" value={rerunCount} />
           <MethodologyChip label="DealState journals" value={definitiveCount} />
         </div>
 
@@ -407,7 +418,9 @@ function KanbanColumn({
             key={deal.id}
             deal={deal}
             onOpen={() => openTab({ kind: "deal", id: deal.id, title: deal.name })}
-            onAsk={() => onTalkToYulia?.(`For ${deal.name}, show the current ${deal.league} ${deal.gateId} methodology state, blockers, required models, required citations, and the next Yulia move.`)}
+            onAsk={() => onTalkToYulia?.(deal.modelRefreshCount
+              ? `For ${deal.name}, explain the stale model stack. Show which assumptions changed, which model versions are affected, and rerun the first model that should be refreshed.`
+              : `For ${deal.name}, show the current ${deal.league} ${deal.gateId} methodology state, blockers, required models, required citations, and the next Yulia move.`)}
           />
         ))}
       </div>
@@ -449,6 +462,12 @@ function OpportunityCard({
           <span>{deal.requiredCitations} citations</span>
           <span>Next: {deal.nextGateName}</span>
         </span>
+        {!!deal.modelRefreshCount && (
+          <span style={P.modelRefreshLine}>
+            <strong>{deal.modelRefreshCount} model {deal.modelRefreshCount === 1 ? "rerun" : "reruns"}</strong>
+            <span>{deal.modelRefreshReason || "Tracked assumptions changed since the saved output."}</span>
+          </span>
+        )}
         {deal.definitive && (
           <span style={P.definitiveLine}>
             <strong>{shortReadiness(deal.definitive.readinessLevel)} · {deal.definitive.score}%</strong>
@@ -492,6 +511,9 @@ function PipelineStat({ label, value, tone }: { label: string; value: number; to
 
 type PipelineDealSeed = Pick<PipelineDeal, "verdict" | "id" | "name" | "sub" | "fit" | "sde" | "multiple" | "note" | "league" | "gateId" | "blocker"> & {
   definitive?: TodayDefinitiveDealState;
+  modelRefreshCount?: number;
+  modelRefreshReason?: string;
+  modelRefreshLabel?: string;
 };
 
 function enrichPipelineDeal(seed: PipelineDealSeed): PipelineDeal {
@@ -572,7 +594,7 @@ function verdictFromGate(gate: string): Verdict {
   return "watch";
 }
 
-function dealPulseToPipelineDeal(item: TodayDealPulseItem, gateItem?: TodayGateCountdownItem): PipelineDeal {
+function dealPulseToPipelineDeal(item: TodayDealPulseItem, gateItem?: TodayGateCountdownItem, modelRefreshNeeds: TodayModelRefreshItem[] = []): PipelineDeal {
   const status = item.status.toLowerCase();
   const verdict: Verdict = status.includes("pursue")
     ? "pursue"
@@ -592,7 +614,21 @@ function dealPulseToPipelineDeal(item: TodayDealPulseItem, gateItem?: TodayGateC
     gateId: gateItem?.gateId || gateForVerdict(verdict),
     blocker: gateItem?.blockers[0] || item.nextAction,
     definitive: item.definitive || gateItem?.definitive,
+    modelRefreshCount: modelRefreshNeeds.length,
+    modelRefreshReason: modelRefreshNeeds[0]?.reason,
+    modelRefreshLabel: modelRefreshNeeds[0]?.modelTitle,
   });
+}
+
+function groupModelRefreshByDeal(items: TodayModelRefreshItem[]): Map<string, TodayModelRefreshItem[]> {
+  const map = new Map<string, TodayModelRefreshItem[]>();
+  for (const item of items) {
+    if (!item.dealId) continue;
+    const current = map.get(item.dealId) ?? [];
+    current.push(item);
+    map.set(item.dealId, current);
+  }
+  return map;
 }
 
 function dealToPipelineDeal(d: HomeDeal): PipelineDeal {
@@ -1079,6 +1115,17 @@ const P: Record<string, CSSProperties> = {
     color: "var(--m-on-primary-container)",
     fontSize: 10.5,
     lineHeight: 1.15,
+  },
+  modelRefreshLine: {
+    display: "grid",
+    gap: 4,
+    padding: "9px 10px",
+    borderRadius: 12,
+    background: "linear-gradient(180deg, rgba(255,255,255,.80), rgba(241,235,255,.62))",
+    border: "1px solid rgba(132,125,189,.30)",
+    color: "var(--m-on-surface)",
+    fontSize: 10.5,
+    lineHeight: 1.22,
   },
   agentCallLine: {
     display: "grid",

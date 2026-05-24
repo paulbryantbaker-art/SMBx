@@ -57,6 +57,7 @@ interface FileRow {
   definitiveTakeBackArtifacts?: string[];
   definitiveSourceGaps?: Array<{ category: string; reason: string; suggestedTool?: string }>;
   definitiveDisclosureStatus?: "blocked_by_source_gaps" | "source_gaps_open" | "data_room_index_ready" | "ready_for_user_controlled_disclosure";
+  modelRefreshPrompt?: string;
 }
 
 interface RoomRow {
@@ -196,6 +197,10 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
   };
 
   const openDoc = (row: FileRow) => {
+    if (row.modelRefreshPrompt) {
+      ask(row.modelRefreshPrompt);
+      return;
+    }
     if (row.definitivePacketRowId) {
       openDefinitivePacket(row, openTab);
       return;
@@ -413,6 +418,10 @@ export function V6FilesListView({
   };
 
   const openDoc = (row: FileRow) => {
+    if (row.modelRefreshPrompt) {
+      ask(row.modelRefreshPrompt);
+      return;
+    }
     if (row.definitivePacketRowId) {
       openDefinitivePacket(row, openTab);
       return;
@@ -833,15 +842,19 @@ function operatingFileToFileRow(item: TodayFileReviewItem): FileRow {
   const basis = `${item.title} ${item.reason} ${item.status}`;
   const isAnalysis = /model|analysis|financial|p&l|chart|score|valuation|qoe|recast|sba|tax|legal|metric/i.test(basis);
   const isDefinitivePacket = !!item.definitivePacketRowId;
+  const isModelRefresh = item.id.startsWith("model-refresh-");
   return {
     title: item.title,
     sub: `${item.dealTitle || "Workspace"} · ${item.reason}`,
     status: formatStatus(item.status),
-    kind: isDefinitivePacket ? "doc" : isAnalysis ? "chart" : "doc",
+    kind: isModelRefresh ? "chart" : isDefinitivePacket ? "doc" : isAnalysis ? "chart" : "doc",
     tone: todayFileTone(item),
     id: item.id,
     dealId: item.dealId,
     dealTitle: item.dealTitle,
+    modelRefreshPrompt: isModelRefresh
+      ? `Explain this model refresh queue item for ${item.dealTitle || "the deal"}: ${item.title}. Show why it is stale, which assumptions changed, and what should be rerun before the file or data-room artifact is relied on.`
+      : undefined,
     definitivePacketRowId: item.definitivePacketRowId,
     definitivePacketId: item.definitivePacketId,
     definitivePacketType: item.definitivePacketType,

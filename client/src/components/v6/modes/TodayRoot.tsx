@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { authHeaders, type User } from "../../../hooks/useAuth";
 import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
-import { useTodayOperatingBrief, type TodayDealPulseItem, type TodayDefinitiveDealState, type TodayFirmMemorySnapshot, type TodayGateCountdownItem, type TodayOperatingBrief, type TodayStudioRefreshItem } from "../../../hooks/useTodayOperatingBrief";
+import { useTodayOperatingBrief, type TodayDealPulseItem, type TodayDefinitiveDealState, type TodayFirmMemorySnapshot, type TodayGateCountdownItem, type TodayModelRefreshItem, type TodayOperatingBrief, type TodayStudioRefreshItem } from "../../../hooks/useTodayOperatingBrief";
 import { useV6WorkspaceData, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
 import { LOGGED_OUT_HERO_COPY } from "../../../lib/copy";
 import { DESKTOP_TEXTURES } from "../../../lib/randomTextures";
+import { openSavedModelExecutionAsRerun } from "../../../lib/modelRerunActions";
 import { executeSurfaceAction, type ActionDeal } from "../../../lib/v6ActionContracts";
 import { isSurfaceActionId, type SurfaceActionId } from "../../../lib/v6SurfaceActions";
 import type { OpenTab, StudioFormatId } from "../types";
@@ -181,6 +182,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const home = useHomeDeals(user);
   const workspace = useV6WorkspaceData(user);
   const [portfolioBrief, setPortfolioBrief] = useState<PortfolioBrief | null>(null);
+  const [rerunOpenedIds, setRerunOpenedIds] = useState<Set<string>>(() => new Set());
   const todayOperating = useTodayOperatingBrief(user, workspace.canFetch);
 
   useEffect(() => {
@@ -207,6 +209,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const realDeals = home.inReview.length > 0 ? home.inReview : home.picks;
   const liveBrief = useSampleData ? null : portfolioBrief;
   const operatingBrief = useSampleData ? null : todayOperating.brief;
+  const modelRefreshNeeds = operatingBrief?.modelRefreshNeeds.filter(item => !rerunOpenedIds.has(item.id)) ?? [];
   const waitingForYuliaRead = !useSampleData && !liveBrief;
   const operatingDeals = operatingBrief?.dealPulse ?? [];
   const operatingDealMap = useMemo(
@@ -321,6 +324,18 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
       title: item.title,
       studioView: "canvas",
       studioBookId: Number.isFinite(bookId) ? bookId : null,
+    });
+  };
+
+  const rerunModelRefresh = (item: TodayModelRefreshItem) => {
+    void openSavedModelExecutionAsRerun({
+      executionId: item.id,
+      dealTitle: item.dealTitle,
+      currentAssumptions: item.currentAssumptions,
+      sourceSurface: "today_model_refresh",
+      onTalkToYulia: ask,
+    }).then(execution => {
+      if (execution) setRerunOpenedIds(prev => new Set(prev).add(item.id));
     });
   };
 
@@ -601,6 +616,11 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
             onOpenDeal={(dealId, title) => openTab({ kind: "deal", id: dealId, title })}
             onAsk={ask}
           />
+          <ModelRefreshCard
+            items={modelRefreshNeeds}
+            onAsk={ask}
+            onRerun={rerunModelRefresh}
+          />
           <StudioRefreshCard
             items={operatingBrief.studioRefreshNeeds}
             onOpenBook={openStudioBook}
@@ -813,6 +833,60 @@ function GateCountdownCard({
       </div>
       <button className="m-glass-control" style={T.operatingAction} onClick={() => onAsk("Show my gate countdown with required models, citations, and blockers.")} type="button">
         Read gates <span aria-hidden="true">›</span>
+      </button>
+    </article>
+  );
+}
+
+function ModelRefreshCard({
+  items,
+  onAsk,
+  onRerun,
+}: {
+  items: TodayModelRefreshItem[];
+  onAsk: (prompt: string) => void;
+  onRerun: (item: TodayModelRefreshItem) => void;
+}) {
+  return (
+    <article style={T.operatingPanel}>
+      <div style={T.operatingHeader}>
+        <h3 style={T.operatingTitle}>Model refresh</h3>
+        <span style={T.operatingFreshness}>{items.length || 0}</span>
+      </div>
+      <div style={T.operatingList}>
+        {items.length === 0 && <EmptyOperatingLine text="Saved model outputs are current against tracked deal facts." />}
+        {items.slice(0, 3).map(item => (
+          <div
+            key={item.id}
+            style={T.operatingRowWithAction}
+          >
+            <button
+              style={T.operatingRow}
+              onClick={() => onAsk(`Explain the model refresh need for ${item.dealTitle || "this deal"}: ${item.modelTitle}. Recompute action: ${item.recomputeActionKey || item.recomputeSurfaceActionId || "execute_model"}. ${item.recomputePrompt || "Show changed assumptions, affected outputs, and the first rerun step."}`)}
+              type="button"
+            >
+              <span style={{ ...T.operatingDot, background: item.status === "needs_rerun" ? "#655fa7" : "#9C7128" }} />
+              <span style={T.operatingRowText}>
+                <strong>{item.modelTitle}</strong>
+                <span>{item.dealTitle ? `${item.dealTitle} · ` : ""}{item.statusLabel} · {item.changedInputs.slice(0, 2).join(", ") || item.rerunTriggers[0] || "tracked inputs"}</span>
+                {item.recomputeActionKey && (
+                  <span style={T.operatingNextCall}>Recompute: {item.recomputeActionKey}</span>
+                )}
+              </span>
+            </button>
+            <button
+              className="m-glint"
+              type="button"
+              style={T.operatingMiniAction}
+              onClick={() => onRerun(item)}
+            >
+              Rerun
+            </button>
+          </div>
+        ))}
+      </div>
+      <button className="m-glass-control" style={T.operatingAction} onClick={() => onAsk("Show stale and superseded model outputs across my deals, including changed assumptions, recompute action keys, and rerun order.")} type="button">
+        Review models <span aria-hidden="true">›</span>
       </button>
     </article>
   );
@@ -1440,6 +1514,12 @@ const T: Record<string, CSSProperties> = {
     gap: 8,
     marginTop: 2,
   },
+  operatingRowWithAction: {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) auto",
+    gap: 8,
+    alignItems: "center",
+  },
   operatingRow: {
     all: "unset",
     boxSizing: "border-box",
@@ -1471,6 +1551,21 @@ const T: Record<string, CSSProperties> = {
     color: "var(--m-on-primary-container)",
     fontSize: 11,
     fontWeight: 850,
+  },
+  operatingMiniAction: {
+    all: "unset",
+    minHeight: 32,
+    padding: "0 12px",
+    borderRadius: 999,
+    background: "rgba(34, 47, 68, 0.84)",
+    color: "#FFFFFF",
+    fontSize: 11.5,
+    fontWeight: 850,
+    cursor: "pointer",
+    border: "0.5px solid rgba(255,255,255,0.28)",
+    boxShadow: liquidDarkGlassShadow,
+    backdropFilter: liquidGlassFilter,
+    WebkitBackdropFilter: liquidGlassFilter,
   },
   memoryLine: {
     display: "flex",

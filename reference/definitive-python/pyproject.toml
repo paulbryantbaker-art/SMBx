@@ -1,0 +1,9 @@
+[project]
+name = "definitive-reference"
+version = "0.1.0"
+description = "Internal Python reference proof for DEFINITIVE deterministic deal mechanics."
+requires-python = ">=3.9"
+
+[tool.definitive]
+spec_version = "DEFINITIVE.v1.0"
+methodology_uri = "methodology://v19"

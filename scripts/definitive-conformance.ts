@@ -43,6 +43,10 @@ import { buildDefinitiveSpecManifest } from '../server/services/definitiveSpecMa
 import { getDefinitiveAuthoritySeedPlan } from '../server/services/definitiveAuthoritySeedPlan.js';
 import { getDefinitiveSubstrateArchitecturePlan } from '../server/services/definitiveSubstrateArchitecturePlan.js';
 import { listDefinitiveMcpTools } from '../server/services/definitiveMcp.js';
+import {
+  buildDefinitiveMcpServerCard,
+  buildDefinitiveMcpWellKnownManifest,
+} from '../server/services/definitiveMcpDiscovery.js';
 import { getDefinitiveDefinitionOfDone } from '../server/services/definitiveDealState.js';
 import { buildDefinitiveSchemaRegistry } from '../server/services/definitiveSchemas.js';
 import { buildDefinitiveRegistryPackage } from '../server/services/definitiveRegistryPackage.js';
@@ -100,6 +104,8 @@ type PromptMetaCaseKind =
   | 'agent_card'
   | 'line_inventory'
   | 'mcp_inventory'
+  | 'mcp_server_card'
+  | 'mcp_well_known'
   | 'authority_seed_plan'
   | 'authority_migration_seed'
   | 'registry_package'
@@ -652,6 +658,28 @@ async function buildPromptMetaSubject(item: PromptMetaCase): Promise<{ text: str
     const inventory = listDefinitiveMcpTools();
     const tools = Object.fromEntries(inventory.tools.map(tool => [tool.name, tool]));
     const data = { ...inventory, toolNames: inventory.tools.map(tool => tool.name), toolsByName: tools };
+    return { text: JSON.stringify(data), data };
+  }
+
+  if (item.kind === 'mcp_server_card') {
+    const card = buildDefinitiveMcpServerCard('https://smbx.ai');
+    const data = {
+      ...card,
+      toolNames: card.tools.map((tool: any) => tool.name),
+      toolsByName: Object.fromEntries(card.tools.map((tool: any) => [tool.name, tool])),
+      endpointUrls: Object.values(card.transport.endpoints),
+    };
+    return { text: JSON.stringify(data), data };
+  }
+
+  if (item.kind === 'mcp_well_known') {
+    const manifest = buildDefinitiveMcpWellKnownManifest('https://smbx.ai');
+    const data = {
+      ...manifest,
+      endpointTypes: manifest.endpoints.map((endpoint: any) => endpoint.type),
+      publicEndpointTypes: manifest.endpoints.filter((endpoint: any) => endpoint.auth === 'none').map((endpoint: any) => endpoint.type),
+      bearerEndpointTypes: manifest.endpoints.filter((endpoint: any) => endpoint.auth === 'bearer').map((endpoint: any) => endpoint.type),
+    };
     return { text: JSON.stringify(data), data };
   }
 

@@ -103,3 +103,21 @@ export function classifyV19LeagueFromCents(params: {
     revenue: params.revenueCents == null ? null : params.revenueCents / 100,
   });
 }
+
+// Enterprise value is often the only reliable first fact an outside agent or
+// buyer has. These bands intentionally classify model depth from deal scale
+// without pretending EV is a substitute for EBITDA, SDE, or revenue.
+export function classifyV19LeagueFromEnterpriseValueCents(evCents?: number | null): League {
+  if (evCents == null || !Number.isFinite(evCents)) return 'L2';
+  const ev = evCents / 100;
+  if (ev < 1_000_000) return 'L1';
+  if (ev < 5_000_000) return 'L2';
+  if (ev < 25_000_000) return 'L3';
+  if (ev < 175_000_000) return 'L4';
+  if (ev < 1_000_000_000) return 'L5';
+  if (ev < 3_125_000_000) return 'L6';
+  if (ev < 14_000_000_000) return 'L7';
+  if (ev < 77_500_000_000) return 'L8';
+  if (ev < 450_000_000_000) return 'L9';
+  return 'L10';
+}

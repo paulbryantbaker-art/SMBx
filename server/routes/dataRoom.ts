@@ -104,9 +104,34 @@ dataRoomRouter.get('/deals/:dealId/data-room', async (req, res) => {
       ? await sql`
           SELECT d.id, d.folder_id, d.name, d.file_type, d.status, d.version,
                  d.deliverable_id, d.created_at, d.updated_at,
-                 del.status as deliverable_status, del.completed_at as deliverable_completed_at
+                 del.status as deliverable_status,
+                 del.completed_at as deliverable_completed_at,
+                 del.is_stale as deliverable_is_stale,
+                 del.stale_reason as deliverable_stale_reason,
+                 del.folder_category as deliverable_folder_category,
+                 del.generated_from_snapshot as deliverable_snapshot,
+                 me.id as model_execution_id,
+                 me.model_type as model_execution_type,
+                 me.model_title as model_execution_title,
+                 me.client_version_number as model_execution_version_number,
+                 me.output_hash as model_output_hash,
+                 me.input_hash as model_input_hash,
+                 me.created_at as model_execution_created_at
           FROM data_room_documents d
           LEFT JOIN deliverables del ON del.id = d.deliverable_id
+          LEFT JOIN LATERAL (
+            SELECT id, model_type, model_title, client_version_number,
+                   output_hash, input_hash, created_at
+            FROM model_executions
+            WHERE deal_id = d.deal_id
+              AND del.generated_from_snapshot IS NOT NULL
+              AND (
+                canvas_tab_id = NULLIF(del.generated_from_snapshot->>'canvasTabId', '')
+                OR output_hash = NULLIF(del.generated_from_snapshot->>'outputHash', '')
+              )
+            ORDER BY created_at DESC
+            LIMIT 1
+          ) me ON TRUE
           WHERE d.deal_id = ${dealId} AND (d.folder_id = ANY(${visibleFolderIds}) OR d.folder_id IS NULL)
           ORDER BY d.created_at DESC
         `

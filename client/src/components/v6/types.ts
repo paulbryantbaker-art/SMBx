@@ -6,6 +6,7 @@ export type TabKind =
   | "deal"
   | "doc"
   | "analysis"
+  | "model"
   | "learn"
   | "marketing-studio"
   | "feed-item"
@@ -51,6 +52,8 @@ export interface Tab {
   analysisRunId?: number | null;
   deliverableId?: number | null;
   modelState?: Record<string, any>;
+  modelTabId?: string;
+  modelType?: string;
   versionNumber?: number | null;
   resolvedMenuItemSlug?: string;
   status?: string;

@@ -7,6 +7,7 @@ import LBOModel from './LBOModel';
 import SBAModel from './SBAModel';
 import TaxImpactModel from './TaxImpactModel';
 import CapTableModel from './CapTableModel';
+import DCFModel from './DCFModel';
 import SensitivityModel from './SensitivityModel';
 import ComparisonModel from './ComparisonModel';
 import EarnoutModel from './EarnoutModel';
@@ -23,7 +24,7 @@ export default function ModelRenderer({ tabId }: Props) {
   if (!tab) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p className="text-sm text-[#5e5d59]">Model not found.</p>
+        <p className="text-sm" style={{ color: 'var(--m-on-surface-var)' }}>Model not found.</p>
       </div>
     );
   }
@@ -36,6 +37,8 @@ export default function ModelRenderer({ tabId }: Props) {
       return <LBOModel tabId={tabId} />;
     case 'sba_financing':
       return <SBAModel tabId={tabId} />;
+    case 'dcf':
+      return <DCFModel tabId={tabId} />;
     case 'tax_impact':
       return <TaxImpactModel tabId={tabId} />;
     case 'cap_table':
@@ -53,9 +56,9 @@ export default function ModelRenderer({ tabId }: Props) {
     default:
       return (
         <div className="p-5">
-          <div className="rounded-xl p-6 text-center" style={{ background: '#FAF8F4', border: '1px solid #DDD9D1' }}>
-            <p className="text-sm font-medium m-0 mb-1" style={{ color: '#1a1918' }}>{tab.title}</p>
-            <p className="text-xs m-0" style={{ color: '#5e5d59' }}>Model type "{tab.type}" — coming soon.</p>
+          <div className="rounded-xl p-6 text-center" style={{ background: 'var(--m-surface-container)', border: '1px solid var(--m-outline-var)' }}>
+            <p className="text-sm font-medium m-0 mb-1" style={{ color: 'var(--m-on-surface)' }}>{tab.title}</p>
+            <p className="text-xs m-0" style={{ color: 'var(--m-on-surface-var)' }}>Model type "{tab.type}" — coming soon.</p>
           </div>
         </div>
       );

@@ -9,6 +9,10 @@ import { centsToDisplay } from '../../lib/calculations/core';
 interface Props { tabId: string; }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const CHART_PRIMARY = '#6A9BCC';
+const CHART_PRIMARY_SOFT = 'rgba(106, 155, 204, 0.14)';
+const CHART_TEXT = '#1A2233';
+const CHART_MUTED = '#555E6F';
 
 export default function WorkingCapitalModel({ tabId }: Props) {
   const tab = useModelStore(s => s.tabs[tabId]);
@@ -32,7 +36,7 @@ export default function WorkingCapitalModel({ tabId }: Props) {
       {wc && (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <KPICard label="Working Capital Peg" value={centsToDisplay(wc.peg)} color="#D4714E" sublabel="12-month average" />
+            <KPICard label="Working Capital Peg" value={centsToDisplay(wc.peg)} color="var(--m-primary)" sublabel="12-month average" />
             <KPICard label="Variance" value={centsToDisplay(wc.variance)} sublabel="Seasonal swing" />
             <KPICard label="Months Analyzed" value={String(wc.monthlyWC.filter((m: any) => m.wc !== 0).length)} />
           </div>
@@ -47,17 +51,17 @@ export default function WorkingCapitalModel({ tabId }: Props) {
                     {
                       label: 'Working Capital',
                       data: wc.monthlyWC.map((m: any) => m.wc / 100),
-                      borderColor: '#D4714E',
-                      backgroundColor: 'rgba(186,60,96,0.1)',
+                      borderColor: CHART_PRIMARY,
+                      backgroundColor: CHART_PRIMARY_SOFT,
                       fill: true,
                       tension: 0.3,
                       pointRadius: 4,
-                      pointBackgroundColor: '#D4714E',
+                      pointBackgroundColor: CHART_PRIMARY,
                     },
                     {
                       label: 'Peg (Average)',
                       data: wc.monthlyWC.map(() => wc.peg / 100),
-                      borderColor: '#5e5d59',
+                      borderColor: CHART_MUTED,
                       borderDash: [6, 3],
                       borderWidth: 1,
                       pointRadius: 0,
@@ -68,12 +72,12 @@ export default function WorkingCapitalModel({ tabId }: Props) {
                 options={{
                   responsive: true, maintainAspectRatio: false,
                   plugins: {
-                    legend: { display: true, position: 'bottom', labels: { color: '#5e5d59', font: { size: 10 }, boxWidth: 10 } },
+                    legend: { display: true, position: 'bottom', labels: { color: CHART_MUTED, font: { size: 10 }, boxWidth: 10 } },
                     tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${centsToDisplay(Number(ctx.raw) * 100)}` } },
                   },
                   scales: {
-                    y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => centsToDisplay(Number(v) * 100), color: '#5e5d59', font: { size: 10 } } },
-                    x: { grid: { display: false }, ticks: { color: '#1a1918', font: { size: 10 } } },
+                    y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => centsToDisplay(Number(v) * 100), color: CHART_MUTED, font: { size: 10 } } },
+                    x: { grid: { display: false }, ticks: { color: CHART_TEXT, font: { size: 10 } } },
                   },
                 }}
               />
@@ -84,15 +88,15 @@ export default function WorkingCapitalModel({ tabId }: Props) {
 
       {/* Monthly data input */}
       <div>
-        <h3 className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#5e5d59' }}>Monthly Data</h3>
+        <h3 className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--m-on-surface-var)' }}>Monthly Data</h3>
         <div className="overflow-x-auto">
           <table className="text-xs w-full" style={{ borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ borderBottom: '2px solid #D4714E' }}>
-                <th style={{ padding: '4px 6px', textAlign: 'left', fontSize: 10, color: '#5e5d59' }}>Month</th>
-                <th style={{ padding: '4px 6px', textAlign: 'right', fontSize: 10, color: '#5e5d59' }}>Current Assets ($)</th>
-                <th style={{ padding: '4px 6px', textAlign: 'right', fontSize: 10, color: '#5e5d59' }}>Current Liabilities ($)</th>
-                <th style={{ padding: '4px 6px', textAlign: 'right', fontSize: 10, color: '#5e5d59' }}>Net WC</th>
+              <tr style={{ borderBottom: '2px solid var(--m-primary)' }}>
+                <th style={{ padding: '4px 6px', textAlign: 'left', fontSize: 10, color: 'var(--m-on-surface-var)' }}>Month</th>
+                <th style={{ padding: '4px 6px', textAlign: 'right', fontSize: 10, color: 'var(--m-on-surface-var)' }}>Current Assets ($)</th>
+                <th style={{ padding: '4px 6px', textAlign: 'right', fontSize: 10, color: 'var(--m-on-surface-var)' }}>Current Liabilities ($)</th>
+                <th style={{ padding: '4px 6px', textAlign: 'right', fontSize: 10, color: 'var(--m-on-surface-var)' }}>Net WC</th>
               </tr>
             </thead>
             <tbody>
@@ -101,11 +105,11 @@ export default function WorkingCapitalModel({ tabId }: Props) {
                   <td style={{ padding: '4px 6px', fontWeight: 600 }}>{m.month}</td>
                   <td style={{ padding: '4px 6px' }}>
                     <input type="number" value={m.currentAssets / 100} onChange={e => updateMonth(i, 'currentAssets', Number(e.target.value) * 100)}
-                      className="w-full text-right text-xs border rounded px-2 py-0.5 outline-none" style={{ borderColor: '#DDD9D1' }} />
+                      className="w-full text-right text-xs border rounded px-2 py-0.5 outline-none" style={{ borderColor: 'var(--m-outline-var)' }} />
                   </td>
                   <td style={{ padding: '4px 6px' }}>
                     <input type="number" value={m.currentLiabilities / 100} onChange={e => updateMonth(i, 'currentLiabilities', Number(e.target.value) * 100)}
-                      className="w-full text-right text-xs border rounded px-2 py-0.5 outline-none" style={{ borderColor: '#DDD9D1' }} />
+                      className="w-full text-right text-xs border rounded px-2 py-0.5 outline-none" style={{ borderColor: 'var(--m-outline-var)' }} />
                   </td>
                   <td style={{ padding: '4px 6px', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: 500 }}>
                     {centsToDisplay(m.currentAssets - m.currentLiabilities)}
