@@ -139,6 +139,10 @@ await test('MCP inventory advertises the v0.1 tool surface', async () => {
   assert(inventory.tools.every(tool => typeof tool.annotations?.readOnlyHint === 'boolean'), 'each tool exposes MCP annotations');
   assert(inventory.tools.find(tool => tool.name === 'compute_best_vehicle')?.structuredContent.outputSchemaNames.includes('BestVehicleBlock'), 'best vehicle structured output is discoverable');
   assert(inventory.tools.find(tool => tool.name === 'defer_to_counsel')?.lineStatus === 'counsel_review_required', 'defer_to_counsel routes to counsel');
+  const executeModelInput = inventory.tools.find(tool => tool.name === 'execute_model')?.inputSchema?.properties || {};
+  const runIterationInput = inventory.tools.find(tool => tool.name === 'run_model_iteration')?.inputSchema?.properties || {};
+  assert(Boolean((executeModelInput as any).modelSlotId), 'execute_model accepts public M-slot IDs');
+  assert(Boolean((runIterationInput as any).modelSlotId), 'run_model_iteration accepts public M-slot IDs');
   const outputDocInput = inventory.tools.find(tool => tool.name === 'generate_output_doc')?.inputSchema?.properties || {};
   assert(Boolean((outputDocInput as any).requireFreshModels), 'generate_output_doc exposes requireFreshModels freshness gate');
   assert(Boolean((outputDocInput as any).currentAssumptions), 'generate_output_doc exposes currentAssumptions freshness comparison');

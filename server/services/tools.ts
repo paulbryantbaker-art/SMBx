@@ -45,6 +45,7 @@ import {
   revisePitchBook,
 } from './pitchBookStudio.js';
 import { composeModelStack, normalizeDefinitiveStackSignals, type V19Journey } from './modelStackComposer.js';
+import { getDefinitiveModelSlotSurface } from './definitiveModelCatalogSurface.js';
 import { executeV19Model, persistV19ModelExecution } from './v19ModelRuntime.js';
 import { validateCitationTags } from './citationValidator.js';
 import { lookupAuthority } from './authorityRegister.js';
@@ -265,11 +266,12 @@ export const TOOL_DEFINITIONS: Tool[] = [
     input_schema: {
       type: 'object' as const,
       properties: {
-        modelId: { type: 'string', description: 'Canonical model ID, for example MODEL.VAL.EBITDA.v1 or MODEL.DSCR.STRESS.v1.' },
+        modelId: { type: 'string', description: 'Canonical runtime model ID, for example MODEL.VAL.EBITDA.v1, or a public DEFINITIVE M-slot such as M200 when that slot has an executable runtime model.' },
+        modelSlotId: { type: 'string', description: 'Optional public DEFINITIVE M-slot ID, such as M109, M148, M200, M206, or M221. The tool resolves it to implementedRuntimeModelId when available.' },
         input: { type: 'object', description: 'Model inputs. Financial values must be cents.' },
         dealId: { type: 'number', description: 'Optional deal ID for audit context.' },
       },
-      required: ['modelId', 'input'],
+      required: ['input'],
     },
   },
   {
@@ -279,7 +281,8 @@ export const TOOL_DEFINITIONS: Tool[] = [
       type: 'object' as const,
       properties: {
         dealId: { type: 'number', description: 'Optional deal ID for audit context.' },
-        modelId: { type: 'string', description: 'Canonical MODEL.*.v1 id. Optional when executionId is supplied.' },
+        modelId: { type: 'string', description: 'Canonical MODEL.*.v1 id or public DEFINITIVE M-slot ID. Optional when executionId or modelSlotId is supplied.' },
+        modelSlotId: { type: 'string', description: 'Optional public DEFINITIVE M-slot ID, such as M109, M148, M200, M206, or M221. The tool resolves it to implementedRuntimeModelId when available.' },
         executionId: { type: 'number', description: 'Optional prior model execution ID to rerun from.' },
         input: { type: 'object', description: 'New model inputs. Financial values must be cents.' },
         overrides: { type: 'object', description: 'Assumption overrides layered on top of the prior execution inputs.' },
@@ -1669,21 +1672,84 @@ async function composeModelStackTool(input: Record<string, any>, userId: number)
   return JSON.stringify({ success: true, dealId, stack });
 }
 
+function resolveExecutableModelReference(input: Record<string, any>, fallbackModelId?: string | null) {
+  const requested = String(input.modelSlotId || input.modelId || fallbackModelId || '').trim();
+  if (!requested) {
+    return {
+      ok: false as const,
+      error: {
+        error: 'modelId_required',
+        message: 'Supply modelId/modelSlotId for a first run, or executionId for a rerun from a saved model execution.',
+      },
+    };
+  }
+
+  if (/^M\d{3}$/i.test(requested)) {
+    const slot = getDefinitiveModelSlotSurface(requested);
+    if (!slot) {
+      return {
+        ok: false as const,
+        error: {
+          error: 'model_slot_not_found',
+          modelSlotId: requested.toUpperCase(),
+          message: 'No DEFINITIVE model slot exists for the supplied M-slot id.',
+          next_suggested_calls: ['lookup_model_slot', 'compose_model_stack'],
+        },
+      };
+    }
+    if (!slot.implementedRuntimeModelId) {
+      return {
+        ok: false as const,
+        error: {
+          error: 'model_slot_not_executable',
+          modelSlotId: slot.slotId,
+          modelName: slot.name,
+          readiness: slot.route?.readiness || 'not_executable',
+          lineCategory: slot.lineCategory,
+          boundary: slot.route?.boundary || slot.the_line_invariant,
+          message: 'This public DEFINITIVE M-slot is routable in the Deal OS but does not yet have an executable server runtime model. Use compose_model_stack or lookup_model_slot to route the work and return missing inputs/handoffs.',
+          next_suggested_calls: ['lookup_model_slot', 'compose_model_stack', 'generate_output_doc'],
+        },
+      };
+    }
+    return {
+      ok: true as const,
+      modelId: slot.implementedRuntimeModelId,
+      requestedModelId: requested,
+      modelSlotId: slot.slotId,
+      modelSlotName: slot.name,
+      resolution: 'm_slot_to_runtime_model',
+    };
+  }
+
+  return {
+    ok: true as const,
+    modelId: requested,
+    requestedModelId: requested,
+    modelSlotId: input.modelSlotId ? String(input.modelSlotId).toUpperCase() : null,
+    modelSlotName: null,
+    resolution: 'runtime_model_id',
+  };
+}
+
 async function executeModelTool(input: Record<string, any>, userId: number, conversationId: number): Promise<string> {
   const dealId = input.dealId == null ? null : Number(input.dealId);
   if (dealId && !(await hasDealAccess(dealId, userId))) return JSON.stringify({ error: 'Deal not found' });
+  const modelRef = resolveExecutableModelReference(input);
+  if (!modelRef.ok) return JSON.stringify(modelRef.error);
+
   const gate = await checkV19Entitlement(userId, 'model_run', {
     actionId: 'execute_model',
     toolName: 'execute_model',
     sourceSurface: 'chat',
     resourceType: 'model',
-    resourceId: String(input.modelId || ''),
-    metadata: { dealId },
+    resourceId: modelRef.modelId,
+    metadata: { dealId, requestedModelId: modelRef.requestedModelId, modelSlotId: modelRef.modelSlotId },
   });
   if (!gate.allowed) return stringifyV19Tollgate(gate);
 
   const execution = await executeV19Model({
-    modelId: String(input.modelId || ''),
+    modelId: modelRef.modelId,
     input: asRecord(input.input),
     dealId,
     userId,
@@ -1701,6 +1767,8 @@ async function executeModelTool(input: Record<string, any>, userId: number, conv
     metadata: {
       dealId,
       modelId: execution.modelId,
+      requestedModelId: modelRef.requestedModelId,
+      modelSlotId: modelRef.modelSlotId,
       status: execution.status,
       outputHash: execution.outputHash,
     },
@@ -1709,6 +1777,13 @@ async function executeModelTool(input: Record<string, any>, userId: number, conv
   return JSON.stringify({
     success: true,
     modelExecutionId: record.id,
+    modelResolution: {
+      requestedModelId: modelRef.requestedModelId,
+      modelId: modelRef.modelId,
+      modelSlotId: modelRef.modelSlotId,
+      modelSlotName: modelRef.modelSlotName,
+      resolution: modelRef.resolution,
+    },
     execution,
     v19Readiness: readiness,
     v19Usage: await readV19UsageMeter(userId),
@@ -1725,13 +1800,9 @@ async function runModelIterationTool(input: Record<string, any>, userId: number,
     : await readModelExecutionForIteration(userId, Number(input.executionId));
   if (input.executionId != null && !prior) return JSON.stringify({ error: 'Model execution not found' });
 
-  const modelId = String(input.modelId || prior?.model_id || '').trim();
-  if (!modelId) {
-    return JSON.stringify({
-      error: 'modelId_required',
-      message: 'Supply modelId for a first run, or executionId for a rerun from a saved model execution.',
-    });
-  }
+  const modelRef = resolveExecutableModelReference(input, prior?.model_id);
+  if (!modelRef.ok) return JSON.stringify(modelRef.error);
+  const modelId = modelRef.modelId;
 
   const mergedInput = {
     ...(prior?.inputs && typeof prior.inputs === 'object' ? prior.inputs : {}),
@@ -1747,6 +1818,8 @@ async function runModelIterationTool(input: Record<string, any>, userId: number,
       resourceId: modelId,
     metadata: {
       dealId,
+      requestedModelId: modelRef.requestedModelId,
+      modelSlotId: modelRef.modelSlotId,
       parentExecutionId: prior?.id ?? null,
       parentOutputHash: prior?.output_hash ?? null,
     },
@@ -1783,6 +1856,8 @@ async function runModelIterationTool(input: Record<string, any>, userId: number,
       metadata: {
         dealId,
         modelId: execution.modelId,
+        requestedModelId: modelRef.requestedModelId,
+        modelSlotId: modelRef.modelSlotId,
         status: execution.status,
         outputHash: execution.outputHash,
         parentExecutionId: prior?.id ?? null,
@@ -1798,6 +1873,13 @@ async function runModelIterationTool(input: Record<string, any>, userId: number,
       parentExecutionId: prior?.id ?? null,
       parentOutputHash: prior?.output_hash ?? null,
       modelId: execution.modelId,
+      modelResolution: {
+        requestedModelId: modelRef.requestedModelId,
+        modelId: modelRef.modelId,
+        modelSlotId: modelRef.modelSlotId,
+        modelSlotName: modelRef.modelSlotName,
+        resolution: modelRef.resolution,
+      },
       status: execution.status,
       inputs: execution.inputs,
       outputs: execution.outputs,
@@ -1820,6 +1902,13 @@ async function runModelIterationTool(input: Record<string, any>, userId: number,
         schema: 'AgentModelIteration.v0.1',
         status: 'prepared_for_canvas_execution',
         modelId,
+        modelResolution: {
+          requestedModelId: modelRef.requestedModelId,
+          modelId: modelRef.modelId,
+          modelSlotId: modelRef.modelSlotId,
+          modelSlotName: modelRef.modelSlotName,
+          resolution: modelRef.resolution,
+        },
         parentExecutionId: prior.id,
         parentOutputHash: prior.output_hash,
         canvas_action: 'create_model_tab',

@@ -597,15 +597,16 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
     },
   },
   execute_model: {
-    description: 'Execute a deterministic server-side V19 model by MODEL.*.v1 id and return output hash, citations, missing inputs, and audit payload.',
+    description: 'Execute a deterministic server-side V19 model by MODEL.*.v1 runtime id or a public DEFINITIVE M101-M223 slot when that slot has an implemented runtime model. Returns output hash, citations, missing inputs, and audit payload.',
     inputSchema: {
       type: 'object',
       properties: {
-        modelId: { type: 'string', description: 'Canonical model ID, for example MODEL.VAL.EBITDA.v1 or MODEL.DSCR.STRESS.v1.' },
+        modelId: { type: 'string', description: 'Canonical runtime model ID, for example MODEL.VAL.EBITDA.v1, or a public DEFINITIVE M-slot such as M200 when executable.' },
+        modelSlotId: { type: 'string', description: 'Optional public DEFINITIVE M-slot ID, such as M109, M148, M200, M206, or M221. The tool resolves it to implementedRuntimeModelId when available.' },
         input: { type: 'object', description: 'Model inputs. Financial values must be cents.' },
         dealId: { type: 'number', description: 'Optional deal ID for audit context.' },
       },
-      required: ['modelId', 'input'],
+      required: ['input'],
     },
   },
   run_model_iteration: {
@@ -614,7 +615,8 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
       type: 'object',
       properties: {
         dealId: { type: 'number', description: 'Optional deal ID for audit context.' },
-        modelId: { type: 'string', description: 'Canonical MODEL.*.v1 id. Optional when executionId is supplied.' },
+        modelId: { type: 'string', description: 'Canonical MODEL.*.v1 id or public DEFINITIVE M-slot ID. Optional when executionId or modelSlotId is supplied.' },
+        modelSlotId: { type: 'string', description: 'Optional public DEFINITIVE M-slot ID, such as M109, M148, M200, M206, or M221. The tool resolves it to implementedRuntimeModelId when available.' },
         executionId: { type: 'number', description: 'Optional prior model execution ID to rerun from.' },
         input: { type: 'object', description: 'New model inputs. Financial values must be cents.' },
         overrides: { type: 'object', description: 'Assumption overrides layered on top of the prior execution inputs.' },
