@@ -170,7 +170,7 @@ export function buildDefinitiveDealRunbooksSurface(options: RunbookPageOptions =
       paginationRule: 'Runbook representativeModelSlots use limit/cursor. Default page size is 24; max page size is 50.',
     },
     runbooks: runbookDefinitions.map(runbook => toRunbook(runbook, options)),
-    universalEntryTools: ['ingest_deal_payload', 'resume_deal', 'introspect_capabilities', 'describe_methodology'],
+    universalEntryTools: ['assess_deal_entry', 'ingest_deal_payload', 'resume_deal', 'introspect_capabilities', 'describe_methodology'],
     universalTakeBackArtifacts: architecture.agentTakeBackArtifacts,
     lineInvariant:
       'Runbooks route and compute. They do not advise, negotiate, represent, guarantee, move money, or charge success/referral/deal-value fees.',

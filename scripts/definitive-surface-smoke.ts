@@ -77,6 +77,7 @@ const expectedTools = [
   'check_completeness',
   'get_definition_of_done',
   'get_deal_state',
+  'assess_deal_entry',
   'introspect_capabilities',
   'describe_methodology',
   'estimate_deal_cost',
@@ -419,6 +420,7 @@ await test('Registry package gives enterprise admins allow-list templates', asyn
   assert(registryPackage.registrySubmissionPackages.semanticToolMetadataChecklist.some((item: string) => item.includes('outputSchema')), 'registry package checks outputSchema metadata');
   assert(registryPackage.registrySubmissionPackages.semanticToolMetadataChecklist.some((item: string) => item.includes('recurring Deal OS')), 'registry package keeps Deal OS discoverability');
   assert(registryPackage.agentExecutionExamples.some((item: any) => item.id === 'agent_example_ev_only_entry'), 'registry package includes EV-only agent entry example');
+  assert(registryPackage.agentExecutionExamples.some((item: any) => item.sequence[0]?.toolName === 'assess_deal_entry'), 'registry package EV-only example starts with entry assessment');
   assert(registryPackage.agentExecutionExamples.some((item: any) => item.sequence.some((step: any) => step.toolName === 'run_model_iteration')), 'registry package examples include model iteration');
   assert(registryPackage.agentExecutionExamples.some((item: any) => item.sequence.some((step: any) => step.toolName === 'generate_output_doc')), 'registry package examples include output document generation');
   assert(registryPackage.managedAgentTemplates.some((item: any) => item.id === 'managed_agent_acquisition_analyst'), 'registry package includes managed acquisition agent template');
@@ -488,6 +490,7 @@ await test('DEFINITIVE schema registry publishes portable agent contracts', asyn
   assertEqual(registry.schemas.ModelOutput.properties.modelId.pattern, '^M[0-9]{3}$', 'ModelOutput pins deterministic M-slot identifiers');
   assertEqual(registry.schemas.SelectiveDisclosureProof.required.includes('proofHash'), true, 'SelectiveDisclosureProof requires proof hash');
   assert(registry.toolSchemaMap.ingest_deal_payload.output.includes('MissingInputContract'), 'ingest output maps missing input contract');
+  assert(registry.toolSchemaMap.assess_deal_entry.takeBack.includes('CapabilityCatalog'), 'entry assessment maps CapabilityCatalog');
   assert(registry.toolSchemaMap.introspect_capabilities.takeBack.includes('CapabilityCatalog'), 'capability introspection maps CapabilityCatalog');
   assert(registry.toolSchemaMap.describe_methodology.takeBack.includes('MethodologyDescription'), 'methodology description maps MethodologyDescription');
   assert(registry.toolSchemaMap.estimate_deal_cost.takeBack.includes('DealCostEstimate'), 'cost estimate maps DealCostEstimate');
@@ -1513,6 +1516,27 @@ await test('Conformance status tool is DB-free and version pinned', async () => 
 });
 
 await test('Agent capability, methodology, cost, runbook, and model-slot tools are DB-free Deal OS entrypoints', async () => {
+  const entry = await executeDefinitiveMcpTool({
+    userId: 1,
+    toolName: 'assess_deal_entry',
+    input: {
+      objective: 'prepare a term sheet from EV-only context',
+      journey: 'buy',
+      enterpriseValueCents: 12_500_000_00,
+      ebitdaCents: 2_100_000_00,
+      industry: 'industrial services',
+      dealType: 'private company acquisition',
+      knownArtifacts: ['teaser'],
+    },
+    envelope: { requestId: 'smoke-request-entry-001' },
+  });
+  assertEqual(entry.status, 200, 'entry assessment tool status');
+  assertEqual(entry.body.requestId, 'smoke-request-entry-001', 'entry assessment response echoes request id');
+  assertEqual(entry.body.result.schema, 'AgentEntryAssessment.v0.1', 'entry assessment schema');
+  assertEqual(entry.body.result.entryClassification.journey, 'buy', 'entry assessment preserves journey');
+  assertEqual(entry.body.result.iterativeModelingContract.firstPassWhenOnlyEvKnown, true, 'entry assessment treats EV as first-pass anchor');
+  assert(entry.body.result.next_suggested_calls.some((call: any) => call.toolName === 'run_model_iteration'), 'entry assessment routes to model iteration when EV is known');
+
   const capabilities = await executeDefinitiveMcpTool({
     userId: 1,
     toolName: 'introspect_capabilities',

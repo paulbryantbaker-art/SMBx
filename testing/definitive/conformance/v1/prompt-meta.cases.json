@@ -1244,6 +1244,7 @@
         { "path": "toolNames", "includes": "update_deal_payload" },
         { "path": "toolNames", "includes": "check_completeness" },
         { "path": "toolNames", "includes": "get_definition_of_done" },
+        { "path": "toolNames", "includes": "assess_deal_entry" },
         { "path": "toolNames", "includes": "introspect_capabilities" },
         { "path": "toolNames", "includes": "describe_methodology" },
         { "path": "toolNames", "includes": "estimate_deal_cost" },
@@ -1269,6 +1270,7 @@
         { "path": "toolsByName.ingest_deal_payload.description", "includes": "next_suggested_calls" },
         { "path": "toolsByName.update_deal_payload.description", "includes": "recursive M&A lifecycle" },
         { "path": "toolsByName.check_completeness.description", "includes": "definitions of done" },
+        { "path": "toolsByName.assess_deal_entry.description", "includes": "EV-only" },
         { "path": "toolsByName.introspect_capabilities.description", "includes": "CapabilityCatalog" },
         { "path": "toolsByName.introspect_capabilities.description", "includes": "next_suggested_calls" },
         { "path": "toolsByName.describe_methodology.description", "includes": "The Diligence Standard" },
@@ -1758,7 +1760,7 @@
         { "path": "enterpriseAllowListTemplates.azureApiCenterBlueprint.auth.productionTarget", "includes": "OAuth 2.1" },
         { "path": "enterpriseAllowListTemplates.bedrockAgentCoreCedarPolicyTemplate.policy", "includes": "context.noSuccessFee == true" },
         { "path": "agentExecutionExamples.0.id", "equals": "agent_example_ev_only_entry" },
-        { "path": "agentExecutionExamples.0.sequence.0.toolName", "equals": "introspect_capabilities" },
+        { "path": "agentExecutionExamples.0.sequence.0.toolName", "equals": "assess_deal_entry" },
         { "path": "agentExecutionExamples.1.sequence.1.toolName", "equals": "run_model_iteration" },
         { "path": "agentExecutionExamples.1.sequence.2.toolName", "equals": "generate_output_doc" },
         { "path": "managedAgentTemplates.0.id", "equals": "managed_agent_acquisition_analyst" },
@@ -1820,6 +1822,7 @@
     "kind": "schema_registry",
     "expect": {
       "fields": [
+        { "path": "toolSchemaMap.assess_deal_entry.output", "includes": "CapabilityCatalog" },
         { "path": "toolSchemaMap.introspect_capabilities.output", "includes": "CapabilityCatalog" },
         { "path": "toolSchemaMap.describe_methodology.output", "includes": "MethodologyDescription" },
         { "path": "toolSchemaMap.estimate_deal_cost.output", "includes": "DealCostEstimate" },

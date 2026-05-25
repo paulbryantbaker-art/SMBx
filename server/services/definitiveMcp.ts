@@ -49,6 +49,7 @@ const DEFINITIVE_MCP_TOOLS = [
   'check_completeness',
   'get_definition_of_done',
   'get_deal_state',
+  'assess_deal_entry',
   'introspect_capabilities',
   'describe_methodology',
   'estimate_deal_cost',
@@ -146,6 +147,25 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
         dealId: { type: 'number', description: 'Optional deal id to read the latest DealState snapshot for.' },
         conversationId: { type: 'number', description: 'Optional conversation id to read the latest DealState snapshot for.' },
         stateCid: { type: 'string', description: 'Optional content-addressed DealState CID to read exactly.' },
+      },
+    },
+  },
+  assess_deal_entry: {
+    description: 'Assess where an external agent or human is entering the M&A lifecycle from partial facts, EV-only context, existing artifacts, or a prior DealState. Returns the likely Deal OS stage, accepted missing inputs, model/document routing, and exact next_suggested_calls so the agent is never rejected for not knowing the whole process.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        objective: { type: 'string', description: 'Optional objective, such as start a deal, IOI, LOI, diligence, model rerun, term sheet, negotiation, close, or PMI.' },
+        journey: { type: 'string', enum: ['sell', 'buy', 'raise', 'pmi'], description: 'Optional expected journey.' },
+        payload: { type: 'object', description: 'Partial DealPayload or loose deal facts. Money values must be cents.' },
+        dealState: { type: 'object', description: 'Optional prior DealState when the agent is returning to a live deal.' },
+        knownArtifacts: { type: 'array', items: { type: 'string' }, description: 'Artifacts already in hand, such as teaser, IOI, LOI, data_room, model_output, term_sheet, diligence_request, closing_checklist, or pmi_plan.' },
+        enterpriseValueCents: { type: 'number', description: 'Known EV in cents. Agents often have this before full model inputs.' },
+        ebitdaCents: { type: 'number', description: 'Known EBITDA in cents.' },
+        revenueCents: { type: 'number', description: 'Known revenue in cents.' },
+        dealType: { type: 'string', description: 'Optional deal type or structure, such as asset purchase, distressed sale, real estate, IP-heavy acquisition, or raise.' },
+        industry: { type: 'string', description: 'Optional industry.' },
+        jurisdiction: { type: 'string', description: 'Optional jurisdiction.' },
       },
     },
   },
@@ -706,6 +726,7 @@ const TOOL_SCOPE: Record<DefinitiveMcpToolName, string[]> = {
   check_completeness: ['deal-state:read', 'completeness:read'],
   get_definition_of_done: ['methodology:read', 'completeness:read'],
   get_deal_state: ['deal-state:read'],
+  assess_deal_entry: ['capability:read', 'methodology:read', 'deal-plan:read'],
   introspect_capabilities: ['capability:read', 'methodology:read'],
   describe_methodology: ['methodology:read', 'authority:read'],
   estimate_deal_cost: ['pricing:read', 'pass-through:read'],
@@ -753,6 +774,7 @@ const TOOL_SCOPE: Record<DefinitiveMcpToolName, string[]> = {
 const TOOL_INTERNAL_API_METER = new Set<DefinitiveMcpToolName>([
   'fetch_market_data',
   'validate_conformance',
+  'assess_deal_entry',
   'introspect_capabilities',
   'describe_methodology',
   'estimate_deal_cost',
@@ -1593,8 +1615,9 @@ function normalizeScopes(value: unknown): string[] {
 
 function isStaticDefinitiveDiscoveryTool(
   toolName: DefinitiveMcpToolName,
-): toolName is 'introspect_capabilities' | 'describe_methodology' | 'estimate_deal_cost' | 'get_deal_runbook' | 'lookup_model_slot' {
+): toolName is 'assess_deal_entry' | 'introspect_capabilities' | 'describe_methodology' | 'estimate_deal_cost' | 'get_deal_runbook' | 'lookup_model_slot' {
   return (
+    toolName === 'assess_deal_entry' ||
     toolName === 'introspect_capabilities' ||
     toolName === 'describe_methodology' ||
     toolName === 'estimate_deal_cost' ||
@@ -1604,9 +1627,10 @@ function isStaticDefinitiveDiscoveryTool(
 }
 
 function executeStaticDefinitiveDiscoveryTool(
-  toolName: 'introspect_capabilities' | 'describe_methodology' | 'estimate_deal_cost' | 'get_deal_runbook' | 'lookup_model_slot',
+  toolName: 'assess_deal_entry' | 'introspect_capabilities' | 'describe_methodology' | 'estimate_deal_cost' | 'get_deal_runbook' | 'lookup_model_slot',
   toolInput: Record<string, any>,
 ) {
+  if (toolName === 'assess_deal_entry') return buildAgentEntryAssessment(toolInput);
   if (toolName === 'introspect_capabilities') return buildCapabilityCatalog(toolInput);
   if (toolName === 'describe_methodology') return buildMethodologyDescription(toolInput);
   if (toolName === 'get_deal_runbook') return buildDealRunbookToolResult(toolInput);
@@ -1636,6 +1660,105 @@ function buildModelSlotLookupToolResult(toolInput: Record<string, any>) {
     ok: false,
     slotId,
     examples: ['M109', 'M148', 'M200', 'M206', 'M221'],
+  };
+}
+
+function buildAgentEntryAssessment(toolInput: Record<string, any>) {
+  const payload = {
+    ...safeRecord(toolInput.payload),
+    ...safeRecord(toolInput.dealState?.payload),
+  };
+  const knownArtifacts = normalizeStringArray(toolInput.knownArtifacts || payload.knownArtifacts || payload.artifacts);
+  const objective = nullableString(toolInput.objective) || nullableString(payload.objective) || 'continue_deal';
+  const journey = normalizeJourney(toolInput.journey)
+    || normalizeJourney(payload.journey)
+    || normalizeJourney(payload.journeyType)
+    || inferJourneyFromEntry(objective, payload, knownArtifacts);
+  const dealType = nullableString(toolInput.dealType)
+    || nullableString(payload.dealType)
+    || nullableString(payload.dealStructure)
+    || nullableString(payload.structure)
+    || nullableString(objective);
+  const industry = nullableString(toolInput.industry) || nullableString(payload.industry);
+  const jurisdiction = nullableString(toolInput.jurisdiction) || nullableString(payload.jurisdiction);
+  const enterpriseValueCents = nullableNonNegativeNumber(toolInput.enterpriseValueCents)
+    || nullableNonNegativeNumber(payload.enterpriseValueCents)
+    || nullableNonNegativeNumber(payload.evCents)
+    || nullableNonNegativeNumber(payload.purchasePriceCents)
+    || nullableNonNegativeNumber(payload.askingPriceCents);
+  const ebitdaCents = nullableNonNegativeNumber(toolInput.ebitdaCents) || nullableNonNegativeNumber(payload.ebitdaCents);
+  const revenueCents = nullableNonNegativeNumber(toolInput.revenueCents) || nullableNonNegativeNumber(payload.revenueCents);
+  const stage = inferEntryStage(objective, payload, knownArtifacts);
+  const mechanics = composeDefinitiveApplicableMechanics({
+    journey,
+    league: nullableString(payload.league),
+    dealType,
+    industry,
+    jurisdiction,
+    triggeredGates: normalizeStringArray(payload.triggeredGates || payload.overlays),
+    includeResearchOnly: true,
+    limit: 18,
+  });
+  const normalizedPayloadHint = {
+    journey: journey || undefined,
+    targetName: nullableString(payload.targetName) || nullableString(payload.businessName) || undefined,
+    industry: industry || undefined,
+    jurisdiction: jurisdiction || undefined,
+    dealType: dealType || undefined,
+    enterpriseValueCents: enterpriseValueCents || undefined,
+    ebitdaCents: ebitdaCents || undefined,
+    revenueCents: revenueCents || undefined,
+  };
+
+  return {
+    schema: 'AgentEntryAssessment.v0.1',
+    standard: 'The Diligence Standard',
+    methodologyVersion: DEFINITIVE_METHODOLOGY_VERSION,
+    methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+    objective,
+    acceptedEntry:
+      'Partial information is accepted. DEFINITIVE creates or resumes DealState, names missing inputs, and returns next calls instead of rejecting the agent.',
+    entryClassification: {
+      journey: journey || 'unknown',
+      likelyStage: stage.stageId,
+      stageLabel: stage.label,
+      confidence: stage.confidence,
+      basis: stage.basis,
+      knownArtifacts,
+      knownFacts: {
+        enterpriseValueCents: enterpriseValueCents || null,
+        ebitdaCents: ebitdaCents || null,
+        revenueCents: revenueCents || null,
+        dealType: dealType || null,
+        industry: industry || null,
+        jurisdiction: jurisdiction || null,
+      },
+    },
+    missingInputPosture: {
+      blockingForEntry: false,
+      likelyMissingInputs: buildEntryMissingInputs({ journey, stageId: stage.stageId, enterpriseValueCents, ebitdaCents, revenueCents, payload }),
+      responseRule: 'Return MissingInputContract plus executable next_suggested_calls. Do not make the agent start over.',
+    },
+    iterativeModelingContract: {
+      rule: 'Modeling is versioned and recursive: run_model_iteration creates v1, reruns create child versions with parent output hashes, and documents should use generate_output_doc(requireFreshModels=true) when relying on model outputs.',
+      firstPassWhenOnlyEvKnown: enterpriseValueCents > 0,
+      staleFactsRequire: ['list_model_executions', 'run_model_iteration', 'diff_deal_state'],
+      documentDependencyRule:
+        'Before term sheets, LOIs, IC memos, valuation reports, and funds-flow scaffolds, attach the latest sourceModelExecutionIds or let generate_output_doc return a freshness gate.',
+    },
+    relevantMechanics: mechanics,
+    relevantMechanicsSummary: summarizeDefinitiveApplicableMechanics(mechanics),
+    next_suggested_calls: buildEntryNextSuggestedCalls({
+      journey,
+      stageId: stage.stageId,
+      payloadHint: normalizedPayloadHint,
+      enterpriseValueCents,
+      dealType,
+      knownArtifacts,
+    }),
+    takeBackArtifacts: ['AgentEntryAssessment', 'DealState', 'MissingInputContract', 'DealPlan', 'ModelOutput', 'DocumentDraft', 'MCPCallHint[]'],
+    the_line_invariant:
+      'This assessment routes software work only. It does not advise, negotiate, represent, guarantee, move money, or make legal, tax, fairness, solvency, feasibility, or closing determinations.',
   };
 }
 
@@ -1939,6 +2062,190 @@ function summarizePassThroughCalls(value: unknown) {
       humanReferralCompensationAllowed: false,
     };
   });
+}
+
+function inferJourneyFromEntry(
+  objective: string,
+  payload: Record<string, any>,
+  knownArtifacts: string[],
+): DefinitiveJourney | null {
+  const haystack = [
+    objective,
+    payload.intent,
+    payload.role,
+    payload.dealType,
+    payload.dealStructure,
+    payload.structure,
+    ...knownArtifacts,
+  ].map(value => String(value || '').toLowerCase()).join(' ');
+  if (/\b(pmi|post[- ]?close|integration|day 0|day zero)\b/.test(haystack)) return 'pmi';
+  if (/\b(raise|capital raise|investor|lender|debt|equity raise|recap)\b/.test(haystack)) return 'raise';
+  if (/\b(sell|seller|exit|owner|cim|teaser)\b/.test(haystack)) return 'sell';
+  if (/\b(buy|buyer|acquire|acquisition|target|ioi|loi|diligence)\b/.test(haystack)) return 'buy';
+  return null;
+}
+
+function inferEntryStage(
+  objective: string,
+  payload: Record<string, any>,
+  knownArtifacts: string[],
+) {
+  const artifacts = knownArtifacts.map(item => item.toLowerCase());
+  const haystack = [
+    objective,
+    payload.currentStage,
+    payload.stage,
+    payload.status,
+    payload.dealType,
+    payload.dealStructure,
+    payload.structure,
+    ...artifacts,
+  ].map(value => String(value || '').toLowerCase()).join(' ');
+
+  if (/\b(pmi|post[- ]?close|integration|closed|day 0|day zero|funds flow|closing checklist)\b/.test(haystack)) {
+    return {
+      stageId: 'close_pmi',
+      label: 'Close and PMI',
+      confidence: artifacts.some(item => item.includes('closing') || item.includes('pmi')) ? 'high' : 'medium',
+      basis: ['close_or_pmi_signal'],
+    };
+  }
+  if (/\b(negotiat|counter|redline|price gap|concession|best vehicle|scenario)\b/.test(haystack)) {
+    return {
+      stageId: 'model_negotiation',
+      label: 'Model and negotiation prep',
+      confidence: 'medium',
+      basis: ['negotiation_or_scenario_signal'],
+    };
+  }
+  if (/\b(confirmatory|post[- ]?loi|data room|dataroom|qoe|quality of earnings|diligence|source gap|files)\b/.test(haystack)) {
+    return {
+      stageId: artifacts.some(item => item.includes('loi')) ? 'confirmatory_diligence' : 'deeper_diligence',
+      label: artifacts.some(item => item.includes('loi')) ? 'Confirmatory diligence' : 'Deeper diligence',
+      confidence: 'medium',
+      basis: ['diligence_or_source_material_signal'],
+    };
+  }
+  if (/\b(loi|letter of intent|term sheet|termsheet)\b/.test(haystack)) {
+    return {
+      stageId: 'loi',
+      label: 'LOI / term architecture',
+      confidence: 'high',
+      basis: ['loi_or_term_sheet_signal'],
+    };
+  }
+  if (/\b(ioi|indication|teaser|valuation|ev|enterprise value|first pass|model)\b/.test(haystack)) {
+    return {
+      stageId: 'ioi',
+      label: 'IOI / first-pass model',
+      confidence: 'medium',
+      basis: ['early_value_or_indication_signal'],
+    };
+  }
+  return {
+    stageId: 'intake',
+    label: 'Intake and classification',
+    confidence: 'low',
+    basis: ['default_partial_entry'],
+  };
+}
+
+function buildEntryMissingInputs({
+  journey,
+  stageId,
+  enterpriseValueCents,
+  ebitdaCents,
+  revenueCents,
+  payload,
+}: {
+  journey: DefinitiveJourney | null;
+  stageId: string;
+  enterpriseValueCents: number;
+  ebitdaCents: number;
+  revenueCents: number;
+  payload: Record<string, any>;
+}) {
+  const missing: Array<{ field: string; why: string; blocksEntry: boolean }> = [];
+  const add = (field: string, why: string, blocksEntry = false) => missing.push({ field, why, blocksEntry });
+  if (!journey) add('journey', 'Needed to choose buy, sell, raise, or PMI runbook. If absent, DEFINITIVE can still start with intake.');
+  if (!nullableString(payload.targetName) && !nullableString(payload.businessName)) add('targetName', 'Needed for human-readable DealState and artifacts.');
+  if (!nullableString(payload.industry)) add('industry', 'Improves model routing, market lanes, and diligence asks.');
+  if (!nullableString(payload.jurisdiction)) add('jurisdiction', 'Needed for tax/legal/regulatory gates and THE LINE handoffs.');
+  if (stageId !== 'intake' && enterpriseValueCents <= 0) add('enterpriseValueCents', 'EV is the fastest anchor for first-pass model routing and document scaffolds.');
+  if (['ioi', 'loi', 'model_negotiation'].includes(stageId) && ebitdaCents <= 0 && revenueCents <= 0) {
+    add('ebitdaCents or revenueCents', 'At least one operating scale input is needed for a useful first model pass.');
+  }
+  if (['deeper_diligence', 'confirmatory_diligence', 'close_pmi'].includes(stageId) && !Array.isArray(payload.documents) && !Array.isArray(payload.files)) {
+    add('sourceIndex or documents', 'Diligence, close, and PMI loops should be tied to files or source references.');
+  }
+  if (stageId === 'model_negotiation' && !nullableString(payload.negotiationIssue)) {
+    add('negotiationIssue', 'Needed to frame model scenarios without negotiating or recommending.');
+  }
+  return missing;
+}
+
+function buildEntryNextSuggestedCalls({
+  journey,
+  stageId,
+  payloadHint,
+  enterpriseValueCents,
+  dealType,
+  knownArtifacts,
+}: {
+  journey: DefinitiveJourney | null;
+  stageId: string;
+  payloadHint: Record<string, any>;
+  enterpriseValueCents: number;
+  dealType: string | null;
+  knownArtifacts: string[];
+}) {
+  const calls: Array<Record<string, any>> = [
+    {
+      toolName: 'ingest_deal_payload',
+      priority: 'P0',
+      reason: 'Create or refresh the content-addressed DealState from whatever facts are known now.',
+      inputHint: { payload: payloadHint },
+    },
+    {
+      toolName: 'compose_deal_plan',
+      priority: 'P1',
+      reason: 'Turn the current DealState into the iterative IOI -> LOI -> diligence -> model -> negotiation -> close -> PMI plan.',
+      inputHint: { dealState: '<DealState from ingest_deal_payload>' },
+    },
+    {
+      toolName: 'compose_model_stack',
+      priority: 'P1',
+      reason: 'Map the deal to applicable M101-M223 mechanics before running or rerunning models.',
+      inputHint: { journey: journey || undefined, dealType: dealType || undefined, signals: '<optional G28/G29/G30 signals>' },
+    },
+  ];
+  if (enterpriseValueCents > 0) {
+    calls.push({
+      toolName: 'run_model_iteration',
+      priority: 'P1',
+      reason: 'Run the first model version from EV, then rerun as EBITDA, working capital, debt, or source facts change.',
+      inputHint: {
+        dealId: '<deal id if persisted>',
+        modelId: '<runtime model id from compose_model_stack>',
+        input: { enterpriseValueCents },
+        reason: 'EV-only or first-pass entry',
+      },
+    });
+  }
+  if (stageId === 'ioi') {
+    calls.push({ toolName: 'prepare_ioi_packet', priority: 'P2', reason: 'Create a non-binding indication packet plus source/model gaps.', inputHint: { dealState: '<DealState>' } });
+  } else if (stageId === 'loi') {
+    calls.push({ toolName: 'generate_output_doc', priority: 'P1', reason: 'Generate the LOI or term-sheet scaffold only after current model dependencies are fresh.', inputHint: { documentType: knownArtifacts.some(item => item.toLowerCase().includes('term')) ? 'term_sheet' : 'loi', sourceModelExecutionIds: ['<latest model execution id>'], requireFreshModels: true } });
+  } else if (stageId === 'deeper_diligence' || stageId === 'confirmatory_diligence') {
+    calls.push({ toolName: 'compose_data_room_index', priority: 'P1', reason: 'Index available files and expose source gaps for the next loop.', inputHint: { dealState: '<DealState>' } });
+    calls.push({ toolName: 'prepare_diligence_request', priority: 'P2', reason: 'Turn missing sources into a diligence request scaffold.', inputHint: { dealState: '<DealState>' } });
+  } else if (stageId === 'model_negotiation') {
+    calls.push({ toolName: 'prepare_negotiation_brief', priority: 'P1', reason: 'Package scenario math and unresolved handoff flags without negotiating for the user.', inputHint: { dealState: '<DealState>', sourceModelExecutionIds: ['<latest model execution id>'] } });
+  } else if (stageId === 'close_pmi') {
+    calls.push({ toolName: 'compose_close_readiness', priority: 'P1', reason: 'Stage close readiness for human approval without authorizing close.', inputHint: { dealState: '<DealState>' } });
+    calls.push({ toolName: 'compose_pmi_plan', priority: 'P2', reason: 'Carry surviving DealState into post-close value creation and risk tracking.', inputHint: { dealState: '<DealState>' } });
+  }
+  return calls;
 }
 
 function normalizeJourney(value: unknown): DefinitiveJourney | null {

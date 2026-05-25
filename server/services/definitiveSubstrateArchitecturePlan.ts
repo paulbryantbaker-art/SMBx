@@ -296,7 +296,7 @@ const managedAgentTemplates = [
     id: 'managed_agent_acquisition_analyst',
     label: 'Acquisition Analyst Agent',
     purpose: 'Runs intake, thesis-to-target context, model-stack selection, iterative valuation/model versions, and IOI/LOI support for buy-side teams that want a rented smbX agent.',
-    primaryTools: ['ingest_deal_payload', 'compose_deal_plan', 'compose_model_stack', 'run_model_iteration', 'generate_output_doc'],
+    primaryTools: ['assess_deal_entry', 'ingest_deal_payload', 'compose_deal_plan', 'compose_model_stack', 'run_model_iteration', 'generate_output_doc'],
     takeBackArtifacts: ['DealState', 'CompletenessReport', 'ModelOutput', 'DocumentDraft', 'MCPCallHint[]'],
     lineBoundary: 'Computes and packages deal work; does not advise whether to buy, submit, negotiate, or close.',
   },

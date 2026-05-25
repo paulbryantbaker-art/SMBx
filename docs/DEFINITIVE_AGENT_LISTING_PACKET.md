@@ -45,7 +45,7 @@ Every output is methodology-pinned, schema-shaped, citation/provenance-ready, an
 ## Agent Entry Examples
 
 1. EV-only entry:
-   `introspect_capabilities` -> `ingest_deal_payload` -> `compose_model_stack` -> `run_model_iteration` -> `prepare_ioi_packet`
+   `assess_deal_entry` -> `introspect_capabilities` -> `ingest_deal_payload` -> `compose_model_stack` -> `run_model_iteration` -> `prepare_ioi_packet`
 
 2. Model rerun to document:
    `list_model_executions` -> `run_model_iteration` -> `generate_output_doc(requireFreshModels=true)`
@@ -56,7 +56,7 @@ Every output is methodology-pinned, schema-shaped, citation/provenance-ready, an
 ## Core Tool Surface
 
 - Start and resume: `ingest_deal_payload`, `update_deal_payload`, `get_deal_state`, `resume_deal`
-- Routing and planning: `introspect_capabilities`, `compose_deal_plan`, `compose_model_stack`, `get_deal_runbook`, `lookup_model_slot`
+- Routing and planning: `assess_deal_entry`, `introspect_capabilities`, `compose_deal_plan`, `compose_model_stack`, `get_deal_runbook`, `lookup_model_slot`
 - Models: `execute_model`, `run_model_iteration`, `list_model_executions`
 - Documents and deal artifacts: `generate_output_doc`, `compose_document_draft`, `prepare_ioi_packet`, `prepare_loi_packet`, `compose_data_room_index`, `prepare_diligence_request`, `prepare_negotiation_brief`, `compose_close_readiness`, `generate_funds_flow`, `compose_pmi_plan`
 - Packaging and verification: `compose_deal_package`, `verify_package`, `finalize_deal_package`, `reopen_deal_package`, `disclose_subset`

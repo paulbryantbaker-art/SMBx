@@ -1293,6 +1293,11 @@ const TOOL_SCHEMA_MAP: Record<string, { input: string[]; output: string[]; takeB
     output: ['DealState', 'ClassificationKey', 'MissingInputContract', 'CompletenessReport', 'MCPCallHint'],
     takeBack: ['DealState', 'ClassificationKey', 'MissingInputContract', 'CompletenessReport'],
   },
+  assess_deal_entry: {
+    input: ['DealPayload', 'DealState'],
+    output: ['CapabilityCatalog', 'DealPlan', 'MCPCallHint'],
+    takeBack: ['CapabilityCatalog', 'DealPlan', 'MCPCallHint'],
+  },
   introspect_capabilities: {
     input: [],
     output: ['CapabilityCatalog', 'MCPCallHint'],
