@@ -231,7 +231,11 @@ export function buildAgentExecutionExamples() {
         {
           toolName: 'run_model_iteration',
           why: 'Run the first deterministic model version from the known EV and supplied assumptions.',
-          input: { dealId: '<deal id>', modelId: '<model from compose_model_stack>', input: { enterpriseValueCents: '<known EV in cents>' } },
+          input: {
+            dealId: '<deal id>',
+            modelSlotId: '<executable M-slot from compose_model_stack, e.g. M148 or M200>',
+            input: { enterpriseValueCents: '<known EV in cents>' },
+          },
         },
         {
           toolName: 'prepare_ioi_packet',
@@ -263,11 +267,12 @@ export function buildAgentExecutionExamples() {
         },
         {
           toolName: 'generate_output_doc',
-          why: 'Generate the requested Studio output with model dependency IDs attached.',
+          why: 'Generate the requested Studio output only after the model dependency IDs are current against the latest assumptions.',
           input: {
             dealId: '<deal id>',
             documentType: 'term_sheet',
             sourceModelExecutionIds: ['<new model execution id>'],
+            requireFreshModels: true,
             audience: 'internal_deal_team',
           },
         },

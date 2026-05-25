@@ -222,6 +222,11 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   const mcpCapability = card.capabilities.find((item: any) => item.id === 'definitive_mcp_v0_1') as any;
   assert(mcpCapability, 'mcp capability exists');
   assertDeepEqual(mcpCapability.tools.map((tool: any) => tool.name), expectedTools, 'agent-card tool names');
+  const v19Capability = card.capabilities.find((item: any) => item.id === 'v19_resource_contract') as any;
+  assert(v19Capability, 'V19 resource contract capability exists');
+  assert(v19Capability.resources.includes('model://slot/{slotId}'), 'V19 resource contract exposes public M-slots');
+  assert(v19Capability.tools.includes('assess_deal_entry'), 'V19 resource contract exposes agent entry assessment');
+  assert(v19Capability.tools.includes('generate_output_doc'), 'V19 resource contract exposes output doc generation');
   const conformanceCapability = card.capabilities.find((item: any) => item.id === 'definitive_conformance_status') as any;
   assert(conformanceCapability, 'conformance capability exists');
   assertEqual(conformanceCapability.caseCount, DEFINITIVE_CONFORMANCE_TOTAL_CASE_COUNT, 'agent-card conformance case count');

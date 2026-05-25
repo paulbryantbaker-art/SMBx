@@ -45,10 +45,10 @@ Every output is methodology-pinned, schema-shaped, citation/provenance-ready, an
 ## Agent Entry Examples
 
 1. EV-only entry:
-   `assess_deal_entry` -> `introspect_capabilities` -> `ingest_deal_payload` -> `compose_model_stack` -> `run_model_iteration` -> `prepare_ioi_packet`
+   `assess_deal_entry` -> `introspect_capabilities` -> `ingest_deal_payload` -> `compose_model_stack` -> `run_model_iteration(modelSlotId=<M-slot>)` -> `prepare_ioi_packet`
 
 2. Model rerun to document:
-   `list_model_executions` -> `run_model_iteration` -> `generate_output_doc(requireFreshModels=true)`
+   `list_model_executions` -> `run_model_iteration(modelSlotId=<M-slot> or executionId=<prior run>)` -> `generate_output_doc(sourceModelExecutionIds=[...], requireFreshModels=true)`
 
 3. Data-room diligence loop:
    `compose_data_room_index` -> `prepare_diligence_request` -> `update_deal_payload` -> `check_completeness`
@@ -60,6 +60,7 @@ Every output is methodology-pinned, schema-shaped, citation/provenance-ready, an
 - Models: `execute_model`, `run_model_iteration`, `list_model_executions`
 
 Model execution accepts either executable runtime IDs (`MODEL.*.v1`) or public DEFINITIVE M-slot IDs (`M101`-`M223`) when that slot has an implemented runtime model. If a slot is routable but not executable yet, the tool returns a structured route/handoff response instead of silently failing.
+Output document generation should include `sourceModelExecutionIds` and `requireFreshModels=true` when the document depends on model work. If the dependency is missing, stale, superseded, or unverifiable, smbX returns a freshness gate with the next model calls instead of producing a misleading artifact.
 - Documents and deal artifacts: `generate_output_doc`, `compose_document_draft`, `prepare_ioi_packet`, `prepare_loi_packet`, `compose_data_room_index`, `prepare_diligence_request`, `prepare_negotiation_brief`, `compose_close_readiness`, `generate_funds_flow`, `compose_pmi_plan`
 - Packaging and verification: `compose_deal_package`, `verify_package`, `finalize_deal_package`, `reopen_deal_package`, `disclose_subset`
 - Trust and governance: `validate_conformance`, `lookup_citation`, `record_corpus_observation`, `defer_to_counsel`
