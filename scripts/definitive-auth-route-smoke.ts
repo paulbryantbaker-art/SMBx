@@ -153,6 +153,97 @@ try {
     assert(body.tools.some((tool: any) => tool.name === 'lookup_model_slot'), 'lookup_model_slot is advertised');
   });
 
+  await test('Scoped agent token binds requested scopes to JWT claims', async () => {
+    const minted = await postJson('/api/definitive/agent-tokens', token, {
+      profile: 'discovery',
+      expiresInMinutes: 30,
+      scopes: ['capability:read', 'methodology:read'],
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      mandateId: 'mandate:definitive-auth-route-smoke',
+    });
+    assertEqual(minted.status, 200, 'human session can mint scoped agent token');
+    assertEqual(minted.body.tokenUse, 'definitive_agent', 'minted token is an agent token');
+    assertEqual(minted.body.agent?.agentId, 'agent:definitive-auth-route-smoke', 'minted token preserves agent id');
+    assert(minted.body.scopes?.includes('capability:read'), 'minted token exposes scopes');
+    const scopedAgentToken = minted.body.token;
+
+    const chainedMint = await postJson('/api/definitive/agent-tokens', scopedAgentToken, {
+      profile: 'discovery',
+      scopes: ['capability:read'],
+    });
+    assertEqual(chainedMint.status, 403, 'agent token cannot mint another agent token');
+    assertEqual(chainedMint.body.error, 'agent_token_cannot_mint_agent_token', 'agent token mint refusal code');
+
+    const unsupportedMint = await postJson('/api/definitive/agent-tokens', token, {
+      profile: 'deal_operator',
+      scopes: ['capability:read', 'admin:read'],
+      agentId: 'agent:definitive-auth-route-smoke',
+    });
+    assertEqual(unsupportedMint.status, 400, 'self-serve mint rejects unsupported scopes');
+    assertEqual(unsupportedMint.body.error, 'unsupported_agent_token_scopes', 'unsupported scope refusal code');
+    assert(unsupportedMint.body.unsupportedScopes?.includes('admin:read'), 'unsupported scope is reported');
+
+    const selfSignedScopedToken = jwt.sign(
+      {
+        userId: fixture.userId,
+        tokenUse: 'definitive_agent',
+        agentId: 'agent:definitive-auth-route-smoke',
+        agentPlatformId: 'codex-local',
+        mandateId: 'mandate:definitive-auth-route-smoke',
+        scopes: ['capability:read', 'methodology:read'],
+      },
+      process.env.JWT_SECRET || process.env.SESSION_SECRET || 'dev-secret-change-me',
+      { expiresIn: '30m' },
+    );
+    assert(selfSignedScopedToken, 'fixture can still construct scoped token for JWT parser coverage');
+
+    const allowed = await postJson('/api/definitive/tools/call', scopedAgentToken, {
+      toolName: 'introspect_capabilities',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      input: {
+        objective: 'agent starts from EV-only partial facts',
+        journey: 'buy',
+        includeTools: false,
+      },
+    });
+    assertEqual(allowed.status, 200, 'scoped token allows in-scope tool');
+    assert(allowed.body.requiredScopes?.includes('capability:read'), 'scoped token response keeps required scopes');
+
+    const missingRequired = await postJson('/api/definitive/tools/call', scopedAgentToken, {
+      toolName: 'ingest_deal_payload',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      input: {
+        payload: {
+          dealId: fixture.dealId,
+          journey: 'buy',
+          enterpriseValueCents: 12_000_000_00,
+        },
+      },
+    });
+    assertEqual(missingRequired.status, 403, 'scoped token blocks out-of-scope tool');
+    assertEqual(missingRequired.body.error, 'missing_required_scope', 'out-of-scope tool returns missing scope');
+    assert(missingRequired.body.missingScopes?.includes('deal-state:write'), 'missing scope names deal-state:write');
+
+    const exceeded = await postJson('/api/definitive/tools/call', scopedAgentToken, {
+      toolName: 'introspect_capabilities',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      requestedScopes: ['capability:read', 'methodology:read', 'deal-state:write'],
+      input: {
+        objective: 'try to over-claim scopes',
+      },
+    });
+    assertEqual(exceeded.status, 403, 'scoped token rejects over-claimed requested scopes');
+    assertEqual(exceeded.body.error, 'token_scope_exceeded', 'over-claimed requested scopes are token-bound');
+    assert(exceeded.body.unauthorizedScopes?.includes('deal-state:write'), 'unauthorized scope is reported');
+  });
+
   await test('Authenticated agent entrypoint tools expose Deal OS context', async () => {
     const capabilities = await postJson('/api/definitive/tools/call', token, {
       toolName: 'introspect_capabilities',

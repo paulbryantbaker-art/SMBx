@@ -57,6 +57,10 @@ import {
   type V19EntitlementCheck,
 } from './v19EntitlementService.js';
 import { upsertFirmMemory, type FirmMemoryType } from './todayOperatingService.js';
+import {
+  buildModelFreshnessEnvelope,
+  extractAssumptionsFromModelExecution,
+} from '../../shared/modelStaleness.js';
 
 const sql = createSql();
 
@@ -163,6 +167,8 @@ export const TOOL_DEFINITIONS: Tool[] = [
         audience: { type: 'string', description: 'Optional audience label, such as internal_deal_team, counsel, lender, seller, buyer, board, or investor.' },
         purpose: { type: 'string', description: 'Optional purpose or drafting objective.' },
         sourceModelExecutionIds: { type: 'array', items: { type: 'number' }, description: 'Optional saved model execution IDs this document should rely on.' },
+        currentAssumptions: { type: 'object', description: 'Optional current assumptions for freshness checking before drafting.' },
+        requireFreshModels: { type: 'boolean', description: 'When true, return a model refresh gate instead of generating if dependencies are missing, stale, superseded, or unknown.' },
         modelPreference: { type: 'string', enum: ['auto', 'fast', 'deep', 'drafting', 'research'], description: 'Optional model preference. Auto is default.' },
       },
       required: ['dealId', 'documentType'],
@@ -1411,9 +1417,30 @@ async function generateOutputDoc(input: Record<string, any>, userId: number): Pr
   }
 
   const dependencyIds = normalizeNumberArray(input.sourceModelExecutionIds);
+  const currentAssumptions = Object.keys(asRecord(input.currentAssumptions)).length
+    ? asRecord(input.currentAssumptions)
+    : dealAssumptionsForModelFreshness(deal);
   const modelDependencies = dependencyIds.length
-    ? await readModelDependencySummaries(userId, dependencyIds)
+    ? await readModelDependencySummaries(userId, dependencyIds, currentAssumptions)
     : [];
+  const dependencyGate = buildOutputDocDependencyGate(dependencyIds, modelDependencies);
+  if (input.requireFreshModels === true && !dependencyGate.ready) {
+    return JSON.stringify({
+      success: false,
+      schema: 'AgentOutputDocumentRun.v0.1',
+      error: 'model_dependencies_not_current',
+      documentType,
+      definitiveDocumentType: resolved.definitiveDocumentType,
+      menuItemSlug: resolved.menuItemSlug,
+      modelDependencies,
+      modelDependencyGate: dependencyGate,
+      sourceModelExecutionIds: dependencyIds,
+      next_suggested_calls: buildOutputDocNextCalls(documentType, dependencyIds, null, dependencyGate),
+      lineBoundary:
+        'generate_output_doc blocked generation because requireFreshModels=true and model dependencies are missing, stale, superseded, or unverifiable. This is a software freshness gate, not a professional reliance determination.',
+      takeBackArtifacts: ['ModelExecutionHistory', 'MCPCallHint[]'],
+    });
+  }
   const draftPayload = payloadFromDealForAgentDoc(deal, modelDependencies);
   const { executeDefinitiveDealStateTool } = await import('./definitiveDealState.js');
   const draft = executeDefinitiveDealStateTool('compose_document_draft', {
@@ -1438,8 +1465,9 @@ async function generateOutputDoc(input: Record<string, any>, userId: number): Pr
     deliverable: generated,
     documentDraft: (draft as any)?.result?.documentDraft || null,
     modelDependencies,
+    modelDependencyGate: dependencyGate,
     sourceModelExecutionIds: dependencyIds,
-    next_suggested_calls: buildOutputDocNextCalls(documentType, dependencyIds, generated),
+    next_suggested_calls: buildOutputDocNextCalls(documentType, dependencyIds, generated, dependencyGate),
     lineBoundary:
       'generate_output_doc queues an internal work product and composes a source-aware scaffold. It does not transmit externally, negotiate, draft enforceability opinions, or provide legal/tax advice.',
     takeBackArtifacts: ['deliverableId', 'DocumentDraft', 'ModelExecutionId[]', 'OutputHash[]', 'MCPCallHint[]'],
@@ -2206,36 +2234,137 @@ function payloadFromDealForAgentDoc(deal: Record<string, any>, modelDependencies
   };
 }
 
-async function readModelDependencySummaries(userId: number, ids: number[]) {
+async function readModelDependencySummaries(userId: number, ids: number[], currentAssumptions: Record<string, any>) {
   if (!ids.length) return [];
   const rows = await sql`
     SELECT id, model_id, status, deal_id, model_type, model_title, input_hash, output_hash,
-           missing_inputs, citation_tags, created_at
+           missing_inputs, citation_tags, model_output, version_snapshot, client_version_number,
+           parent_output_hash, deal_state_cid, source_surface, line_boundary, created_at
     FROM model_executions
     WHERE user_id = ${userId}
       AND id IN ${sql(ids)}
     ORDER BY created_at DESC
   `;
-  return rows.map(row => ({
-    executionId: Number(row.id),
-    modelId: row.model_id,
-    modelType: row.model_type || null,
-    modelTitle: row.model_title || null,
-    status: row.status,
-    dealId: row.deal_id == null ? null : Number(row.deal_id),
-    inputHash: row.input_hash,
-    outputHash: row.output_hash,
-    missingInputs: Array.isArray(row.missing_inputs) ? row.missing_inputs : [],
-    citationTags: Array.isArray(row.citation_tags) ? row.citation_tags : [],
-    createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : String(row.created_at),
-  }));
+  return rows.map(row => {
+    const execution = {
+      executionId: Number(row.id),
+      modelId: row.model_id,
+      modelSlotId: row.model_output?.schema === 'ModelOutput.v0.1' ? row.model_output?.modelId || null : null,
+      modelType: row.model_type || null,
+      modelTitle: row.model_title || null,
+      status: row.status,
+      dealId: row.deal_id == null ? null : Number(row.deal_id),
+      inputHash: row.input_hash,
+      outputHash: row.output_hash,
+      parentOutputHash: row.parent_output_hash || null,
+      dealStateCid: row.deal_state_cid || null,
+      sourceSurface: row.source_surface || null,
+      lineBoundary: row.line_boundary || null,
+      clientVersionNumber: Number(row.client_version_number || 1),
+      modelOutput: row.model_output || {},
+      versionSnapshot: row.version_snapshot || {},
+      missingInputs: Array.isArray(row.missing_inputs) ? row.missing_inputs : [],
+      citationTags: Array.isArray(row.citation_tags) ? row.citation_tags : [],
+      createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : String(row.created_at),
+    };
+    const savedAssumptions = extractAssumptionsFromModelExecution(execution);
+    return {
+      ...execution,
+      freshness: buildModelFreshnessEnvelope({
+        modelType: execution.modelType,
+        currentAssumptions,
+        savedAssumptions,
+        savedVersionNumber: execution.clientVersionNumber,
+      }),
+    };
+  });
 }
 
-function buildOutputDocNextCalls(documentType: string, dependencyIds: number[], generated: Record<string, any>) {
+function buildOutputDocDependencyGate(dependencyIds: number[], modelDependencies: Array<Record<string, any>>) {
+  const foundIds = new Set(modelDependencies.map(dep => Number(dep.executionId)));
+  const missingExecutionIds = dependencyIds.filter(id => !foundIds.has(Number(id)));
+  const notComplete = modelDependencies.filter(dep => dep.status && dep.status !== 'complete');
+  const needsRerun = modelDependencies.filter(dep => dep.freshness?.status === 'needs_rerun');
+  const superseded = modelDependencies.filter(dep => dep.freshness?.status === 'superseded');
+  const unknown = modelDependencies.filter(dep => !dep.freshness || dep.freshness.status === 'unknown');
+  const missingInputs = modelDependencies.filter(dep => Array.isArray(dep.missingInputs) && dep.missingInputs.length > 0);
+
+  const status = !dependencyIds.length
+    ? 'model_execution_required'
+    : missingExecutionIds.length
+      ? 'model_dependency_missing'
+      : notComplete.length || missingInputs.length
+        ? 'model_execution_not_ready'
+        : needsRerun.length
+          ? 'model_refresh_required'
+          : superseded.length
+            ? 'model_superseded'
+            : unknown.length
+              ? 'model_freshness_unknown'
+              : 'ready';
+
+  return {
+    schema: 'ModelDependencyGate.v0.1',
+    status,
+    ready: status === 'ready',
+    requestedExecutionIds: dependencyIds,
+    foundExecutionIds: [...foundIds],
+    missingExecutionIds,
+    needsRerunExecutionIds: needsRerun.map(dep => dep.executionId),
+    supersededExecutionIds: superseded.map(dep => dep.executionId),
+    unknownFreshnessExecutionIds: unknown.map(dep => dep.executionId),
+    notReadyExecutionIds: notComplete.map(dep => dep.executionId),
+    missingInputExecutionIds: missingInputs.map(dep => dep.executionId),
+    yuliaReadable: status === 'ready'
+      ? 'Model dependencies are current against the compared assumptions.'
+      : status === 'model_execution_required'
+        ? 'No model execution is linked to this document request yet.'
+        : status === 'model_dependency_missing'
+          ? 'One or more requested model executions could not be found for this user.'
+          : status === 'model_refresh_required'
+            ? 'One or more linked model executions need a rerun before this document should be relied on.'
+            : status === 'model_superseded'
+              ? 'One or more linked model executions are superseded by newer assumptions or versions.'
+              : status === 'model_freshness_unknown'
+                ? 'One or more linked model executions cannot be freshness-checked against the current assumptions.'
+                : 'One or more linked model executions are incomplete or have missing inputs.',
+    next_suggested_calls: status === 'ready'
+      ? ['generate_output_doc', 'compose_document_draft']
+      : ['list_model_executions', 'run_model_iteration', 'compose_model_stack'],
+  };
+}
+
+function buildOutputDocNextCalls(
+  documentType: string,
+  dependencyIds: number[],
+  generated: Record<string, any> | null,
+  dependencyGate?: Record<string, any>,
+) {
   const calls = dependencyIds.length ? ['list_model_executions'] : ['compose_model_stack', 'run_model_iteration'];
+  if (dependencyGate && dependencyGate.status !== 'ready') calls.push('run_model_iteration');
   if (generated?.deliverableId) calls.push('compose_document_draft');
   if (documentType === 'term_sheet' || documentType === 'loi') calls.push('prepare_negotiation_brief');
   return [...new Set(calls)];
+}
+
+function dealAssumptionsForModelFreshness(deal: Record<string, any>) {
+  const financials = asRecord(deal.financials);
+  const enterpriseValue = nullableNumber(deal.asking_price) ?? nullableNumber(financials.enterpriseValueCents) ?? nullableNumber(financials.enterpriseValue);
+  return {
+    ...financials,
+    revenue: nullableNumber(deal.revenue) ?? nullableNumber(financials.revenue),
+    revenueCents: nullableNumber(deal.revenue) ?? nullableNumber(financials.revenueCents),
+    sde: nullableNumber(deal.sde) ?? nullableNumber(financials.sde),
+    sdeCents: nullableNumber(deal.sde) ?? nullableNumber(financials.sdeCents),
+    ebitda: nullableNumber(deal.ebitda) ?? nullableNumber(financials.ebitda),
+    ebitdaCents: nullableNumber(deal.ebitda) ?? nullableNumber(financials.ebitdaCents),
+    enterpriseValue,
+    ev: enterpriseValue,
+    askingPrice: nullableNumber(deal.asking_price) ?? nullableNumber(financials.askingPrice),
+    purchasePrice: nullableNumber(financials.purchasePrice) ?? enterpriseValue,
+    salePrice: nullableNumber(financials.salePrice) ?? enterpriseValue,
+    league: deal.league || financials.league || null,
+  };
 }
 
 async function readModelExecutionForIteration(userId: number, executionId: number) {

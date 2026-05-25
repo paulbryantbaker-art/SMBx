@@ -11,6 +11,7 @@ import {
   revokeDefinitiveDataRightsGrant,
 } from '../services/definitiveCorpusService.js';
 import { listDefinitiveLineInventory } from '../services/agencyActionRegistry.js';
+import { signDefinitiveAgentToken } from '../middleware/auth.js';
 import {
   listDefinitiveDealPackets,
   persistDefinitiveDealStateCall,
@@ -63,6 +64,76 @@ v19ResourcesRouter.get('/definitive/line/inventory', (_req, res) => {
 
 v19ResourcesRouter.get('/definitive/corpus/observation-types', (_req, res) => {
   res.json(listDefinitiveCorpusObservationTypes());
+});
+
+v19ResourcesRouter.post('/definitive/agent-tokens', async (req, res) => {
+  const userId = Number((req as any).userId);
+  if (!Number.isFinite(userId) || userId <= 0) return res.status(401).json({ error: 'Not authenticated' });
+  const claims = (req as any).authClaims && typeof (req as any).authClaims === 'object' ? (req as any).authClaims : {};
+  if (claims.tokenUse === 'definitive_agent') {
+    return res.status(403).json({
+      ok: false,
+      error: 'agent_token_cannot_mint_agent_token',
+      message: 'Mint scoped DEFINITIVE agent tokens from a human app session or future OAuth authorization flow, not from another agent token.',
+    });
+  }
+
+  const profile = typeof req.body?.profile === 'string' ? req.body.profile : 'deal_operator';
+  const requestedScopes = normalizeScopeClaim(req.body?.scopes);
+  const scopes = requestedScopes.length ? requestedScopes : defaultAgentTokenScopes(profile);
+  const unsupportedScopes = scopes.filter(scope => !SELF_SERVE_AGENT_TOKEN_SCOPES.has(scope));
+  if (!scopes.length || unsupportedScopes.length) {
+    return res.status(400).json({
+      ok: false,
+      error: 'unsupported_agent_token_scopes',
+      message: 'The requested scopes are not available for self-serve DEFINITIVE agent tokens.',
+      requestedScopes: scopes,
+      unsupportedScopes,
+      supportedScopes: [...SELF_SERVE_AGENT_TOKEN_SCOPES].sort(),
+      profiles: DEFINITIVE_AGENT_TOKEN_PROFILES,
+    });
+  }
+
+  const ttlMinutes = clampNumber(Number(req.body?.expiresInMinutes), 5, 24 * 60, 8 * 60);
+  const agentId = typeof req.body?.agentId === 'string' && req.body.agentId.trim()
+    ? req.body.agentId.trim()
+    : `agent:definitive:${userId}:${Date.now()}`;
+  const agentPlatformId = typeof req.body?.agentPlatformId === 'string' && req.body.agentPlatformId.trim()
+    ? req.body.agentPlatformId.trim()
+    : 'external_agent';
+  const mandateId = typeof req.body?.mandateId === 'string' && req.body.mandateId.trim()
+    ? req.body.mandateId.trim()
+    : `mandate:definitive:${userId}`;
+  const token = signDefinitiveAgentToken({
+    userId,
+    scopes,
+    agentId,
+    agentPlatformId,
+    mandateId,
+    beneficialCustomerId: req.body?.beneficialCustomerId,
+    billingOrgId: req.body?.billingOrgId,
+    expiresInSeconds: ttlMinutes * 60,
+  });
+
+  return res.json({
+    ok: true,
+    schema: 'DEFINITIVE.agent-token.v0.1',
+    status: 'short_lived_scoped_jwt_bridge',
+    tokenType: 'Bearer',
+    tokenUse: 'definitive_agent',
+    token,
+    expiresInSeconds: ttlMinutes * 60,
+    expiresAt: new Date(Date.now() + ttlMinutes * 60 * 1000).toISOString(),
+    agent: {
+      agentId,
+      agentPlatformId,
+      mandateId,
+      profile,
+    },
+    scopes,
+    scopeRule: 'requestedScopes may be omitted or narrowed by the caller, but cannot exceed these token-bound scopes.',
+    productionTarget: 'OAuth 2.1 + PKCE + scoped, audience-bound agent tokens',
+  });
 });
 
 v19ResourcesRouter.get('/definitive/corpus/rights', async (req, res) => {
@@ -178,19 +249,21 @@ v19ResourcesRouter.post('/definitive/tools/call', async (req, res) => {
 
   const toolName = String(req.body?.toolName || '').trim();
   if (!toolName) return res.status(400).json({ error: 'toolName is required' });
+  const scopedEnvelope = buildTokenScopedDefinitiveEnvelope(req, req.body || {});
+  if (!scopedEnvelope.ok) return res.status(scopedEnvelope.status).json(scopedEnvelope.body);
 
   try {
     const response = await executeDefinitiveMcpTool({
       userId,
       toolName,
       input: req.body?.input && typeof req.body.input === 'object' ? req.body.input : {},
-      envelope: req.body || {},
+      envelope: scopedEnvelope.envelope,
     });
     (response.body as Record<string, any>).persistence = await persistDealStateCallBestEffort({
       userId,
       toolName,
       toolInput: req.body?.input && typeof req.body.input === 'object' ? req.body.input : {},
-      envelope: req.body || {},
+      envelope: scopedEnvelope.envelope,
       responseBody: response.body,
     });
     return res.status(response.status).json(response.body);
@@ -206,17 +279,19 @@ v19ResourcesRouter.post('/definitive/tools/:toolName/call', async (req, res) => 
 
   try {
     const toolInput = req.body?.input && typeof req.body.input === 'object' ? req.body.input : req.body || {};
+    const scopedEnvelope = buildTokenScopedDefinitiveEnvelope(req, req.body || {});
+    if (!scopedEnvelope.ok) return res.status(scopedEnvelope.status).json(scopedEnvelope.body);
     const response = await executeDefinitiveMcpTool({
       userId,
       toolName: String(req.params.toolName || '').trim(),
       input: toolInput,
-      envelope: req.body || {},
+      envelope: scopedEnvelope.envelope,
     });
     (response.body as Record<string, any>).persistence = await persistDealStateCallBestEffort({
       userId,
       toolName: String(req.params.toolName || '').trim(),
       toolInput,
-      envelope: req.body || {},
+      envelope: scopedEnvelope.envelope,
       responseBody: response.body,
     });
     return res.status(response.status).json(response.body);
@@ -327,6 +402,133 @@ v19ResourcesRouter.get('/v19/resources', async (req, res) => {
 function nullablePositiveNumber(value: unknown): number | null {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+const DEFINITIVE_AGENT_TOKEN_PROFILES = {
+  discovery: ['capability:read', 'methodology:read', 'model-catalog:read', 'deal-plan:read', 'pricing:read', 'pass-through:read'],
+  deal_operator: [
+    'capability:read',
+    'methodology:read',
+    'authority:read',
+    'deal-state:read',
+    'deal-state:write',
+    'deal:classify',
+    'deal:read',
+    'deal-plan:read',
+    'model-catalog:read',
+    'model-stack:compose',
+    'model:read',
+    'model:execute',
+    'studio:draft',
+    'data-room:read',
+    'completeness:read',
+    'deal-package:read',
+    'deal-package:compose',
+    'deal-package:verify',
+    'permutation:read',
+    'audit:write',
+  ],
+  document_builder: [
+    'methodology:read',
+    'deal-state:read',
+    'deal-plan:read',
+    'model:read',
+    'studio:draft',
+    'data-room:read',
+    'deal-package:read',
+    'deal-package:compose',
+    'completeness:read',
+  ],
+} as const;
+
+const SELF_SERVE_AGENT_TOKEN_SCOPES = new Set([
+  ...DEFINITIVE_AGENT_TOKEN_PROFILES.discovery,
+  ...DEFINITIVE_AGENT_TOKEN_PROFILES.deal_operator,
+  ...DEFINITIVE_AGENT_TOKEN_PROFILES.document_builder,
+  'citation:read',
+  'market-data:read',
+  'conformance:read',
+]);
+
+function defaultAgentTokenScopes(profile: string): string[] {
+  if (profile === 'discovery') return [...DEFINITIVE_AGENT_TOKEN_PROFILES.discovery];
+  if (profile === 'document_builder') return [...DEFINITIVE_AGENT_TOKEN_PROFILES.document_builder];
+  return [...DEFINITIVE_AGENT_TOKEN_PROFILES.deal_operator];
+}
+
+function clampNumber(value: number, min: number, max: number, fallback: number) {
+  if (!Number.isFinite(value)) return fallback;
+  return Math.max(min, Math.min(max, Math.floor(value)));
+}
+
+function buildTokenScopedDefinitiveEnvelope(req: any, envelope: Record<string, any>) {
+  const claims = req.authClaims && typeof req.authClaims === 'object' ? req.authClaims : {};
+  const tokenScopes = normalizeScopeClaim(claims.scopes ?? claims.scope);
+  const tokenLooksAgentScoped =
+    tokenScopes.length > 0 ||
+    claims.tokenUse === 'definitive_agent' ||
+    typeof claims.agentId === 'string' ||
+    typeof claims.agentPlatformId === 'string';
+
+  if (!tokenLooksAgentScoped) {
+    return { ok: true as const, envelope };
+  }
+
+  if (tokenScopes.length === 0) {
+    return {
+      ok: false as const,
+      status: 403,
+      body: {
+        ok: false,
+        error: 'agent_token_missing_scopes',
+        message: 'DEFINITIVE agent tokens must carry token-bound scopes. Use a human app JWT for internal UI calls or a scoped agent token for external agent calls.',
+      },
+    };
+  }
+
+  const requestedScopes = normalizeScopeClaim(envelope.requestedScopes);
+  const effectiveRequestedScopes = requestedScopes.length > 0 ? requestedScopes : tokenScopes;
+  const unauthorizedScopes = effectiveRequestedScopes.filter(scope => !tokenScopes.includes(scope));
+
+  if (unauthorizedScopes.length > 0) {
+    return {
+      ok: false as const,
+      status: 403,
+      body: {
+        ok: false,
+        error: 'token_scope_exceeded',
+        message: 'The requested DEFINITIVE scopes exceed the scopes bound to this agent token.',
+        requestedScopes: effectiveRequestedScopes,
+        tokenBoundScopes: tokenScopes,
+        unauthorizedScopes,
+      },
+    };
+  }
+
+  return {
+    ok: true as const,
+    envelope: {
+      ...envelope,
+      requestedScopes: effectiveRequestedScopes,
+      tokenBoundScopes: tokenScopes,
+      agentId: envelope.agentId ?? claims.agentId,
+      agentPlatformId: envelope.agentPlatformId ?? claims.agentPlatformId,
+      beneficialCustomerId: envelope.beneficialCustomerId ?? claims.beneficialCustomerId,
+      billingOrgId: envelope.billingOrgId ?? claims.billingOrgId,
+      mandateId: envelope.mandateId ?? claims.mandateId,
+      authMode: envelope.authMode ?? 'token_bound_agent_scope',
+    },
+  };
+}
+
+function normalizeScopeClaim(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return [...new Set(value.filter(item => typeof item === 'string').map(item => item.trim()).filter(Boolean))];
+  }
+  if (typeof value === 'string') {
+    return [...new Set(value.split(/[,\s]+/).map(item => item.trim()).filter(Boolean))];
+  }
+  return [];
 }
 
 async function persistDealStateCallBestEffort(input: {

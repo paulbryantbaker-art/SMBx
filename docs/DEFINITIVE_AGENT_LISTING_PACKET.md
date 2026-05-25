@@ -23,6 +23,15 @@ This is the copy/paste packet for listing `smbx-ai/diligence` as the agent-acces
 - Registry package: `https://smbx.ai/api/definitive/registry-package`
 - Enterprise allow-list templates: `https://smbx.ai/api/definitive/enterprise-allow-lists`
 
+## Auth Posture
+
+- Current: public discovery plus bearer-authenticated execution.
+- Internal app calls: existing smbX JWT.
+- External agent bridge: token-bound scoped JWTs with `tokenUse: definitive_agent`, `userId`, and `scopes`.
+- Token issue route: `POST https://smbx.ai/api/definitive/agent-tokens` from an authenticated human app session.
+- Scope rule: `requestedScopes` may be omitted or narrowed by the caller, but cannot exceed the scopes bound to the bearer token.
+- Production target: OAuth 2.1 + PKCE with scoped, audience-bound agent tokens.
+
 ## Short Description
 
 Deterministic M&A Deal OS and diligence substrate for private-company deal work: partial DealState intake, IOI/LOI/diligence/modeling/negotiation/close/PMI workflow, M101-M223 model mechanics, citation provenance, audit packets, and THE LINE-safe agent access.
@@ -39,7 +48,7 @@ Every output is methodology-pinned, schema-shaped, citation/provenance-ready, an
    `introspect_capabilities` -> `ingest_deal_payload` -> `compose_model_stack` -> `run_model_iteration` -> `prepare_ioi_packet`
 
 2. Model rerun to document:
-   `list_model_executions` -> `run_model_iteration` -> `generate_output_doc`
+   `list_model_executions` -> `run_model_iteration` -> `generate_output_doc(requireFreshModels=true)`
 
 3. Data-room diligence loop:
    `compose_data_room_index` -> `prepare_diligence_request` -> `update_deal_payload` -> `check_completeness`
@@ -73,4 +82,3 @@ npm run test:definitive-conformance
 npm run test:definitive-surface
 npm run build
 ```
-

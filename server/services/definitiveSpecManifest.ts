@@ -82,6 +82,7 @@ export function buildDefinitiveSpecManifest() {
       enterpriseAllowLists: '/api/definitive/enterprise-allow-lists',
       toolsList: '/api/definitive/tools/list',
       toolCall: '/api/definitive/tools/{toolName}/call',
+      agentTokenIssue: '/api/definitive/agent-tokens',
       lineInventory: '/api/definitive/line/inventory',
       latestDealState: '/api/definitive/deal-state/latest',
       dealPackets: '/api/definitive/deal-packets',
@@ -119,6 +120,7 @@ export function buildDefinitiveSpecManifest() {
       authenticatedExecution: [
         '/api/definitive/tools/call',
         '/api/definitive/tools/{toolName}/call',
+        '/api/definitive/agent-tokens',
         '/api/definitive/deal-state/latest',
         '/api/definitive/deal-packets',
         '/api/definitive/audit-packets/{auditTrailId}',
@@ -129,8 +131,10 @@ export function buildDefinitiveSpecManifest() {
       ],
     },
     transport: {
-      current: 'Public well-known discovery plus JWT-authenticated internal API/MCP-shaped calls',
+      current: 'Public well-known discovery plus JWT-authenticated internal calls and token-bound scoped agent calls',
       target: 'OAuth 2.1 + PKCE + audience-bound scoped tokens',
+      scopeEnforcement:
+        'Scoped agent bearer tokens must carry scopes in the token claims. requestedScopes may be omitted or narrowed, but cannot exceed token-bound scopes.',
     },
     toolSurface: {
       protocol: tools.protocol,

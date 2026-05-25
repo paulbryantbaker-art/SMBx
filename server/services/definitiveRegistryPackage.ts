@@ -88,6 +88,7 @@ export function buildDefinitiveRegistryPackage(baseUrl?: string) {
       'Include THE LINE declaration: software/data API access only; no success fee, deal-value fee, wallet, or paid human-service referral.',
       'Use the query-aligned tool language from the registry tags so agents can select the right tool without semantic drift.',
       'Include the EV-only and model-rerun examples so incoming agents understand that smbX accepts partial facts, runs iterative model versions, then generates source-aware documents.',
+      'For direct external agents, mint a short-lived scoped bridge token from /api/definitive/agent-tokens; requestedScopes cannot exceed token-bound scopes.',
       'If a customer does not operate its own agents, position managed smbX agents as permission-scoped renters of the same Deal OS tools, not a separate product surface.',
     ],
     generatedAt: new Date().toISOString(),
@@ -370,8 +371,10 @@ export function buildDefinitiveEnterpriseAllowListTemplates(baseUrl?: string) {
         toolCall: `${origin}/api/definitive/tools/call`,
       },
       auth: {
-        current: 'JWT bearer for internal app calls',
+        current: 'JWT bearer for internal app calls plus token-bound scoped agent calls',
         productionTarget: 'OAuth 2.1 + PKCE + scoped, audience-bound agent tokens',
+        scopeEnforcement:
+          'Agent tokens carry scopes in JWT claims. requestedScopes may be omitted or narrowed, but cannot exceed token-bound scopes.',
       },
       classifications: ['financial_services', 'm_and_a', 'private_equity', 'governed_agent_tool'],
       requiredReview: ['security', 'legal', 'compliance', 'data_retention'],
@@ -467,6 +470,7 @@ function baseServerDescriptor(origin: string) {
     passThroughCatalogUrl: `${origin}/api/definitive/pass-through-catalog`,
     registryPackageUrl: `${origin}/api/definitive/registry-package`,
     enterpriseAllowListsUrl: `${origin}/api/definitive/enterprise-allow-lists`,
+    agentTokenIssueUrl: `${origin}/api/definitive/agent-tokens`,
   };
 }
 

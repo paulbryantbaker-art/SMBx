@@ -626,6 +626,8 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
         audience: { type: 'string', description: 'Optional audience label.' },
         purpose: { type: 'string', description: 'Optional drafting purpose.' },
         sourceModelExecutionIds: { type: 'array', items: { type: 'number' }, description: 'Optional saved model executions this document should rely on.' },
+        currentAssumptions: { type: 'object', description: 'Optional current assumptions for model freshness checking before document generation.' },
+        requireFreshModels: { type: 'boolean', description: 'When true, return a model refresh gate instead of generating if dependencies are missing, stale, superseded, or unknown.' },
         modelPreference: { type: 'string', enum: ['auto', 'fast', 'deep', 'drafting', 'research'], description: 'Optional generation preference.' },
       },
       required: ['dealId', 'documentType'],
@@ -822,9 +824,16 @@ export function listDefinitiveMcpTools() {
     methodologyVersion: DEFINITIVE_METHODOLOGY_VERSION,
     methodologyUri: DEFINITIVE_METHODOLOGY_URI,
     auth: {
-      mode: 'oauth_ready_jwt_dev',
+      mode: 'jwt_internal_plus_scoped_agent_tokens',
       productionTarget: 'OAuth 2.1 + PKCE + audience-bound scoped tokens',
       localDev: 'Use the existing smbX JWT bearer token while the MCP transport is internal.',
+      scopedAgentTokenBridge: {
+        tokenUse: 'definitive_agent',
+        requiredClaims: ['userId', 'scopes'],
+        optionalClaims: ['agentId', 'agentPlatformId', 'beneficialCustomerId', 'billingOrgId', 'mandateId'],
+        scopeEnforcement:
+          'When a bearer token carries agent scopes, requestedScopes must be omitted or be a subset of token-bound scopes. Tool-required scopes are checked against that token-bound envelope before execution.',
+      },
     },
     identity: {
       actor: 'agent_id',
