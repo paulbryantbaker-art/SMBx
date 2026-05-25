@@ -40,6 +40,8 @@ Deterministic M&A Deal OS and diligence substrate for private-company deal work:
 
 smbX DEFINITIVE gives external agents and humans one recurring Deal OS for iterative M&A work. Agents can bring incomplete facts, including only EV and rough company context; smbX classifies the deal, returns missing inputs, maps the applicable M101-M223 deterministic model stack, runs and reruns model iterations with output-hash lineage, and generates source-aware documents such as IOIs, LOIs, Term Sheets, diligence requests, data-room indexes, negotiation briefs, funds flows, CIMs, IC memos, and PMI plans.
 
+Human users and agents use the same model loop. A human can manually adjust EV, EBITDA, debt, working capital, tax, terms, and exit assumptions in the model canvas; Yulia or an external agent can rerun the same scenario with `run_model_iteration`; and optimization requests should call `optimize_scenario` first, then create a fresh child model run before relying on the result in a document.
+
 Every output is methodology-pinned, schema-shaped, citation/provenance-ready, and governed by THE LINE: smbX computes, packages, and audits software/data outputs. It does not give legal, tax, investment, brokerage, negotiation, closing, or operating advice; it charges no success fee, no deal-value fee, no wallet, and no paid human-service referral.
 
 ## Agent Entry Examples
@@ -50,7 +52,10 @@ Every output is methodology-pinned, schema-shaped, citation/provenance-ready, an
 2. Model rerun to document:
    `list_model_executions` -> `run_model_iteration(modelSlotId=<M-slot> or executionId=<prior run>)` -> `generate_output_doc(sourceModelExecutionIds=[...], requireFreshModels=true)`
 
-3. Data-room diligence loop:
+3. Human/Yulia optimization loop:
+   `read_tab_state` -> `optimize_scenario(tabId=active)` -> `update_model` or `run_model_iteration(overrides=...)` -> `list_model_executions` -> `generate_output_doc(requireFreshModels=true)`
+
+4. Data-room diligence loop:
    `compose_data_room_index` -> `prepare_diligence_request` -> `update_deal_payload` -> `check_completeness`
 
 ## Core Tool Surface

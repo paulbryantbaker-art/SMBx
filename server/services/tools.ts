@@ -276,7 +276,7 @@ export const TOOL_DEFINITIONS: Tool[] = [
   },
   {
     name: 'run_model_iteration',
-    description: 'Agent-friendly model execution contract. Run a first model pass or rerun a saved model execution with overrides. Returns a persisted execution ID, output hash, parent-output lineage, missing inputs, citations, and next_suggested_calls so agents can iteratively work the deal rather than treating modeling as one-and-done.',
+    description: 'Agent-friendly model execution contract. Run a first model pass or rerun a saved model execution with overrides, including cases that started from human-edited model-canvas assumptions. Returns a persisted execution ID, output hash, parent-output lineage, missing inputs, citations, and next_suggested_calls so agents can iteratively work the deal rather than treating modeling as one-and-done.',
     input_schema: {
       type: 'object' as const,
       properties: {

@@ -102,7 +102,7 @@ const MODEL_RULES: Record<string, ModelDependencyRule> = {
       input('workingCapital', 'Working capital'),
     ],
     rerunTriggers: ['EV or purchase price changes', 'EBITDA changes', 'debt terms change', 'exit multiple or hold period changes'],
-    nextSuggestedCalls: ['list_model_executions', 'execute_model', 'create_model_tab:sensitivity', 'compose_deal_plan'],
+    nextSuggestedCalls: ['list_model_executions', 'run_model_iteration', 'optimize_scenario', 'create_model_tab:sensitivity', 'compose_deal_plan'],
   },
   dcf: {
     modelType: 'dcf',

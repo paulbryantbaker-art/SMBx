@@ -1742,9 +1742,11 @@ function buildAgentEntryAssessment(toolInput: Record<string, any>) {
       responseRule: 'Return MissingInputContract plus executable next_suggested_calls. Do not make the agent start over.',
     },
     iterativeModelingContract: {
-      rule: 'Modeling is versioned and recursive: run_model_iteration creates v1, reruns create child versions with parent output hashes, and documents should use generate_output_doc(requireFreshModels=true) when relying on model outputs.',
+      rule: 'Modeling is versioned and recursive for humans and agents: humans can manually adjust model-canvas inputs, optimize_scenario reads the active canvas, run_model_iteration creates v1 or child versions with parent output hashes, and documents should use generate_output_doc(requireFreshModels=true) when relying on model outputs.',
       firstPassWhenOnlyEvKnown: enterpriseValueCents > 0,
       staleFactsRequire: ['list_model_executions', 'run_model_iteration', 'diff_deal_state'],
+      optimizationRule:
+        'If the user or calling agent asks to optimize an LBO, valuation, financing structure, tax case, or term architecture, call optimize_scenario first, then persist the chosen assumption case as a new model iteration before generating downstream documents.',
       documentDependencyRule:
         'Before term sheets, LOIs, IC memos, valuation reports, and funds-flow scaffolds, attach the latest sourceModelExecutionIds or let generate_output_doc return a freshness gate.',
     },

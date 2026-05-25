@@ -16,9 +16,10 @@ import CovenantModel from './CovenantModel';
 
 interface Props {
   tabId: string;
+  onTalkToYulia?: (prompt: string) => void;
 }
 
-export default function ModelRenderer({ tabId }: Props) {
+export default function ModelRenderer({ tabId, onTalkToYulia }: Props) {
   const tab = useModelStore(s => s.tabs[tabId]);
 
   if (!tab) {
@@ -34,7 +35,7 @@ export default function ModelRenderer({ tabId }: Props) {
     case 'sde_analysis':
       return <ValuationExplorer tabId={tabId} />;
     case 'lbo':
-      return <LBOModel tabId={tabId} />;
+      return <LBOModel tabId={tabId} onTalkToYulia={onTalkToYulia} />;
     case 'sba_financing':
       return <SBAModel tabId={tabId} />;
     case 'dcf':

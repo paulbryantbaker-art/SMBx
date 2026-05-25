@@ -176,6 +176,7 @@ export function buildDefinitiveRegistrySubmissionPackages(baseUrl?: string) {
       'Every marketplace package must include no-success-fee and no-paid-human-referral declarations.',
       'Every package should point agents back to DealState, runbooks, model catalog, schema registry, and audit packet surfaces so smbX is understood as the recurring Deal OS.',
       'Every package should include the EV-only entry example and the model-iteration-to-document example so agents understand modeling is recursive and documents inherit model lineage.',
+      'Every package should state that human users can manually adjust model-canvas inputs, Yulia can optimize via optimize_scenario, and external agents should persist the selected case with run_model_iteration before generating output documents.',
     ],
     submissionOrder: [
       'canonical_mcp_registry',

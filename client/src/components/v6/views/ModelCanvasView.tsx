@@ -42,6 +42,9 @@ export function V6ModelCanvasView({
   const prompt = tab
     ? `Read the active model "${tab.title}" version ${tab.versionNumber}. Compare the saved versions, explain what changed, and tell me the next model iteration to run before IOI, LOI, diligence, negotiation, or PMI.`
     : `Reopen ${title} as an interactive model canvas and preserve the model versions for Yulia.`;
+  const optimizePrompt = tab
+    ? `Optimize the active model "${tab.title}" version ${tab.versionNumber}. First use optimize_scenario with tabId "active"; then explain the best risk-adjusted model path, which inputs to test next, what a human can manually adjust on the canvas, and what downstream IOI, LOI, diligence, negotiation, or PMI artifacts become ready only after the rerun.`
+    : `Reopen ${title} as an interactive model canvas, then optimize it through the saved model loop.`;
 
   useEffect(() => {
     if (!tab) return;
@@ -109,15 +112,20 @@ export function V6ModelCanvasView({
               {latestFreshness?.statusLabel || (latestSavedRun ? "checking" : "live")}
             </div>
           </div>
-          <button className="m-btn filled" type="button" onClick={() => onTalkToYulia?.(prompt)}>
-            Ask Yulia to compare
-          </button>
+          <div style={S.actionStack}>
+            <button className="m-btn filled m-glass-control" style={S.darkGlassButton} type="button" onClick={() => onTalkToYulia?.(optimizePrompt)}>
+              Ask Yulia to optimize
+            </button>
+            <button className="m-btn outlined" type="button" onClick={() => onTalkToYulia?.(prompt)}>
+              Compare versions
+            </button>
+          </div>
         </div>
       </section>
 
       <section style={S.grid}>
         <div className="m-card" style={S.modelSurface}>
-          <ModelRenderer tabId={tabId} />
+          <ModelRenderer tabId={tabId} onTalkToYulia={onTalkToYulia} />
         </div>
         <aside className="m-card" style={S.rail}>
           <div className="mono" style={S.eyebrow}>VERSION TRAIL</div>
@@ -359,6 +367,12 @@ const S: Record<string, CSSProperties> = {
     flexWrap: "wrap",
     justifyContent: "flex-end",
   },
+  actionStack: {
+    display: "flex",
+    gap: 8,
+    flexWrap: "wrap",
+    justifyContent: "flex-end",
+  },
   statusStack: {
     display: "grid",
     justifyItems: "end",
@@ -422,6 +436,14 @@ const S: Record<string, CSSProperties> = {
     border: "1px solid rgba(46,92,138,0.12)",
     fontSize: 10,
     letterSpacing: 0,
+  },
+  darkGlassButton: {
+    color: "#FFFFFF",
+    border: "1px solid rgba(255,255,255,0.28)",
+    background:
+      "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.2), transparent 38%), linear-gradient(135deg, rgba(26,34,51,0.92), rgba(26,34,51,0.72) 58%, rgba(46,92,138,0.54))",
+    boxShadow:
+      "0 16px 32px -22px rgba(0,0,0,0.62), inset 0 1px 0 rgba(255,255,255,0.32), inset 0 -1px 0 rgba(255,255,255,0.08)",
   },
   grid: {
     display: "grid",
