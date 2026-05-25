@@ -152,6 +152,7 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assertEqual(card.definitive.schemaRegistryEndpoint, '/api/definitive/schemas', 'schema registry endpoint');
   assertEqual(card.definitive.wellKnownSchemaRegistryEndpoint, '/.well-known/definitive-schemas.json', 'well-known schema registry endpoint');
   assertEqual(card.definitive.toolsEndpoint, '/api/definitive/tools/list', 'tools endpoint');
+  assertEqual(card.definitive.agentTokenIssueEndpoint, '/api/definitive/agent-tokens', 'agent token issue endpoint');
   assertEqual(card.definitive.latestDealStateEndpoint, '/api/definitive/deal-state/latest', 'latest deal-state endpoint');
   assertEqual(card.definitive.dealPacketsEndpoint, '/api/definitive/deal-packets', 'deal packets endpoint');
   assertEqual(card.definitive.auditPacketEndpoint, '/api/definitive/audit-packets/{auditTrailId}', 'audit packet endpoint');
@@ -211,6 +212,7 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assert(card.authenticatedEndpoints.includes('/api/definitive/deal-state/latest'), 'latest deal-state endpoint is authenticated');
   assert(card.authenticatedEndpoints.includes('/api/definitive/deal-packets'), 'deal packets endpoint is authenticated');
   assert(card.authenticatedEndpoints.includes('/api/definitive/audit-packets/{auditTrailId}'), 'audit packet endpoint is authenticated');
+  assert(card.authenticatedEndpoints.includes('/api/definitive/agent-tokens'), 'agent token issue endpoint is authenticated');
   assertEqual(card.endpointAccess.executionRequiresGovernedToolContract, true, 'execution requires governed tool contracts');
   const mcpCapability = card.capabilities.find((item: any) => item.id === 'definitive_mcp_v0_1') as any;
   assert(mcpCapability, 'mcp capability exists');
