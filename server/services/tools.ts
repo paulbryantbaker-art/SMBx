@@ -1737,6 +1737,7 @@ async function executeModelTool(input: Record<string, any>, userId: number, conv
   if (dealId && !(await hasDealAccess(dealId, userId))) return JSON.stringify({ error: 'Deal not found' });
   const modelRef = resolveExecutableModelReference(input);
   if (!modelRef.ok) return JSON.stringify(modelRef.error);
+  const effectiveConversationId = Number.isFinite(conversationId) && conversationId > 0 ? conversationId : null;
 
   const gate = await checkV19Entitlement(userId, 'model_run', {
     actionId: 'execute_model',
@@ -1753,7 +1754,7 @@ async function executeModelTool(input: Record<string, any>, userId: number, conv
     input: asRecord(input.input),
     dealId,
     userId,
-    conversationId,
+    conversationId: effectiveConversationId,
   });
   const record = await persistV19ModelExecution(execution, { toolName: 'execute_model' });
   await recordV19UsageEvent({
@@ -1794,6 +1795,7 @@ async function runModelIterationTool(input: Record<string, any>, userId: number,
   const dealId = input.dealId == null ? null : Number(input.dealId);
   if (dealId && !(await hasDealAccess(dealId, userId))) return JSON.stringify({ error: 'Deal not found' });
   const sourceSurface = String(input.sourceSurface || 'agent_model_iteration');
+  const effectiveConversationId = Number.isFinite(conversationId) && conversationId > 0 ? conversationId : null;
 
   const prior = input.executionId == null
     ? null
@@ -1832,7 +1834,7 @@ async function runModelIterationTool(input: Record<string, any>, userId: number,
       input: mergedInput,
       dealId,
       userId,
-      conversationId,
+      conversationId: effectiveConversationId,
     });
     const record = await persistV19ModelExecution(execution, { toolName: 'run_model_iteration', sourceSurface });
     if (prior) {

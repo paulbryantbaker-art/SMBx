@@ -311,6 +311,28 @@ try {
     assertEqual(modelSlot.status, 200, 'model slot route status');
     assertEqual(modelSlot.body.result?.schema, 'DEFINITIVE.model-slot.v0.1', 'model slot schema');
     assertEqual(modelSlot.body.result.slotId, 'M200', 'model slot normalizes id');
+
+    const entryAssessment = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'assess_deal_entry',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      requestedScopes: ['capability:read', 'methodology:read', 'deal-plan:read'],
+      input: {
+        journey: 'buy',
+        objective: 'Agent arrives with EV only and needs to keep working toward IOI, LOI, diligence, model iterations, and a term sheet.',
+        enterpriseValueCents: 12_500_000_00,
+        industry: 'industrial services',
+        jurisdiction: 'US-DE',
+        availableArtifacts: ['EV estimate'],
+      },
+    });
+    assertEqual(entryAssessment.status, 200, 'entry assessment route status');
+    assertEqual(entryAssessment.body.result?.schema, 'AgentEntryAssessment.v0.1', 'entry assessment schema');
+    assertEqual(entryAssessment.body.result?.entryClassification?.journey, 'buy', 'entry assessment preserves journey');
+    assert(entryAssessment.body.result?.missingInputPosture?.blockingForEntry === false, 'entry assessment does not reject partial EV-only facts');
+    assert(entryAssessment.body.result?.iterativeModelingContract?.staleFactsRequire?.includes('run_model_iteration'), 'entry assessment exposes iterative model loop');
+    assert(entryAssessment.body.result?.next_suggested_calls?.some((call: any) => call.toolName === 'run_model_iteration'), 'entry assessment routes EV-known agent to model iteration');
   });
 
   await test('Authenticated recursive DealState loop accepts partial facts and returns next calls', async () => {
@@ -704,6 +726,84 @@ try {
     assert(definitive.applicableMechanics.some((item: any) => item.slotId === 'M160'), 'G29 mechanics included');
     assert(definitive.applicableMechanics.some((item: any) => item.slotId === 'M187'), 'G30 mechanics included');
     assert(definitive.yuliaMechanicsBrief.some((line: string) => line.includes('applicable DEFINITIVE mechanics')), 'Yulia brief included');
+  });
+
+  await test('Authenticated model/document execution routes expose M-slot and freshness contracts', async () => {
+    const executableSlot = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'execute_model',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['model:execute', 'audit:write'],
+      input: {
+        dealId: fixture.dealId,
+        modelSlotId: 'M161',
+        input: {
+          participatingLenderPercent: 70,
+          requiredLenderPercent: 50.1,
+          creditAgreementText: 'Fixture open market purchase language with participating lender threshold support.',
+        },
+      },
+    });
+    assertEqual(executableSlot.status, 200, 'executable M-slot route status');
+    assertEqual(executableSlot.body.ok, true, 'executable M-slot route ok');
+    assertEqual(executableSlot.body.result?.success, true, 'executable M-slot tool success');
+    assertEqual(executableSlot.body.result?.modelResolution?.modelSlotId, 'M161', 'executable M-slot resolves public slot');
+    assertEqual(executableSlot.body.result?.modelResolution?.resolution, 'm_slot_to_runtime_model', 'executable M-slot maps to runtime model');
+    assert(Number(executableSlot.body.result?.modelExecutionId) > 0, 'executable M-slot persists a model execution');
+
+    const nonExecutableSlot = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'execute_model',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['model:execute', 'audit:write'],
+      input: {
+        dealId: fixture.dealId,
+        modelSlotId: 'M101',
+        input: {
+          stockAcquisitionDate: '2026-05-25',
+          holdingPeriodYears: 5,
+        },
+      },
+    });
+    assertEqual(nonExecutableSlot.status, 400, 'non-executable M-slot route status');
+    assertEqual(nonExecutableSlot.body.ok, false, 'non-executable M-slot route ok false');
+    assertEqual(nonExecutableSlot.body.result?.error, 'model_slot_not_executable', 'non-executable M-slot error');
+    assertEqual(nonExecutableSlot.body.result?.modelSlotId, 'M101', 'non-executable M-slot id is preserved');
+    assert(nonExecutableSlot.body.result?.next_suggested_calls?.includes('lookup_model_slot'), 'non-executable M-slot points back to slot lookup');
+    assert(String(nonExecutableSlot.body.result?.boundary || '').length > 0, 'non-executable M-slot carries THE LINE boundary');
+
+    const blockedDoc = await postJson('/api/definitive/tools/call', token, {
+      toolName: 'generate_output_doc',
+      specVersion: DEFINITIVE_SPEC_VERSION,
+      methodologyUri: DEFINITIVE_METHODOLOGY_URI,
+      sourceAgent: 'definitive-auth-route-smoke',
+      agentId: 'agent:definitive-auth-route-smoke',
+      agentPlatformId: 'codex-local',
+      requestedScopes: ['deal-state:read', 'studio:draft', 'model:read'],
+      input: {
+        dealId: fixture.dealId,
+        documentType: 'term_sheet',
+        requireFreshModels: true,
+        currentAssumptions: {
+          enterpriseValueCents: 12_500_000_00,
+          ebitdaCents: 2_100_000_00,
+        },
+      },
+    });
+    assertEqual(blockedDoc.status, 400, 'freshness-gated document route status');
+    assertEqual(blockedDoc.body.ok, false, 'freshness-gated document route ok false');
+    assertEqual(blockedDoc.body.result?.schema, 'AgentOutputDocumentRun.v0.1', 'freshness-gated document schema');
+    assertEqual(blockedDoc.body.result?.error, 'model_dependencies_not_current', 'freshness-gated document error');
+    assertEqual(blockedDoc.body.result?.modelDependencyGate?.status, 'model_execution_required', 'freshness gate requires a model execution');
+    assert(blockedDoc.body.result?.next_suggested_calls?.includes('run_model_iteration'), 'freshness gate routes to model rerun');
+    assert(blockedDoc.body.result?.takeBackArtifacts?.includes('ModelExecutionHistory'), 'freshness gate returns model-history take-back artifact');
+    assert(String(blockedDoc.body.result?.lineBoundary || '').includes('freshness gate'), 'freshness gate explains THE LINE-safe block');
   });
 
   await test('Authenticated permutation tools compute structure frontier', async () => {
