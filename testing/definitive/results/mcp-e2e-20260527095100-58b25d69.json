@@ -1,0 +1,137 @@
+{
+  "runId": "mcp-e2e-20260527095100-58b25d69",
+  "target": "http://127.0.0.1:3002",
+  "appBaseUrl": "http://localhost:5173",
+  "startedAt": "2026-05-27T09:51:00.830Z",
+  "fixtures": {
+    "buy": {
+      "dealId": 514,
+      "title": "MCP E2E BUY mcp-e2e-20260527095100-58b25d69",
+      "latestStateCid": "definitive:deal-state:sha256:ff3be8cad7f1d40e2ed0104361931c4638293f947f6b520fb89dd27e7c533a8c",
+      "latestStateHash": "ff3be8cad7f1d40e2ed0104361931c4638293f947f6b520fb89dd27e7c533a8c",
+      "expectedPacketTypes": [
+        "DealStateControlPacket.v0.1",
+        "LOIPacket.v0.1",
+        "DealPackage.v0.1"
+      ],
+      "packetRowIds": [
+        1040,
+        1041,
+        1042,
+        1043
+      ],
+      "modelExecutionIds": [
+        16
+      ]
+    },
+    "sell": {
+      "dealId": 515,
+      "title": "MCP E2E SELL mcp-e2e-20260527095100-58b25d69",
+      "latestStateCid": "definitive:deal-state:sha256:fa9f38fc5afc1fbc66e3138958db025527c4705a1bf9e666c3ba42bab9719fdf",
+      "latestStateHash": "fa9f38fc5afc1fbc66e3138958db025527c4705a1bf9e666c3ba42bab9719fdf",
+      "expectedPacketTypes": [
+        "DealStateControlPacket.v0.1",
+        "DataRoomIndex.v0.1",
+        "DiligenceRequest.v0.1",
+        "DocumentDraft.v0.1",
+        "LOIPacket.v0.1",
+        "NegotiationBrief.v0.1",
+        "CloseReadiness.v0.1",
+        "FundsFlow.v0.1"
+      ],
+      "packetRowIds": [
+        1044,
+        1045,
+        1046,
+        1047,
+        1048,
+        1049,
+        1050,
+        1051,
+        1052,
+        1053
+      ],
+      "modelExecutionIds": []
+    },
+    "raise": {
+      "dealId": 516,
+      "title": "MCP E2E RAISE mcp-e2e-20260527095100-58b25d69",
+      "latestStateCid": "definitive:deal-state:sha256:cb333bfeff9fc0db97709c6c008f21afe0a6e46993e7f5cfb74c06ee78583cf5",
+      "latestStateHash": "cb333bfeff9fc0db97709c6c008f21afe0a6e46993e7f5cfb74c06ee78583cf5",
+      "expectedPacketTypes": [
+        "DealStateControlPacket.v0.1",
+        "DocumentDraft.v0.1",
+        "DealPackage.v0.1"
+      ],
+      "packetRowIds": [
+        1054,
+        1055,
+        1056
+      ],
+      "modelExecutionIds": []
+    },
+    "pmi": {
+      "dealId": 517,
+      "title": "MCP E2E PMI mcp-e2e-20260527095100-58b25d69",
+      "latestStateCid": "definitive:deal-state:sha256:d10943774f37b7259ff7a6135d883ec1c0e32b1fe49b2e684c3b4162503b4853",
+      "latestStateHash": "d10943774f37b7259ff7a6135d883ec1c0e32b1fe49b2e684c3b4162503b4853",
+      "expectedPacketTypes": [
+        "DealStateControlPacket.v0.1",
+        "PMIPlan.v0.1",
+        "DealPackage.v0.1"
+      ],
+      "packetRowIds": [
+        1057,
+        1058,
+        1059
+      ],
+      "modelExecutionIds": []
+    }
+  },
+  "finishedAt": "2026-05-27T09:51:34.477Z",
+  "totals": {
+    "passed": 7,
+    "failed": 2,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "name": "public discovery, initialize, tools/list, and unauthenticated challenge",
+      "status": "pass"
+    },
+    {
+      "name": "FIX-BUY-LBO-001 executes through /mcp and persists LBO/LOI/package artifacts",
+      "status": "pass"
+    },
+    {
+      "name": "FIX-SELLREP-001 executes sell-side LOI/DD/close readiness through /mcp",
+      "status": "pass"
+    },
+    {
+      "name": "FIX-RAISE-001 executes raise-side investor material path through /mcp",
+      "status": "pass"
+    },
+    {
+      "name": "FIX-PMI-001 executes post-close PMI path through /mcp",
+      "status": "pass"
+    },
+    {
+      "name": "FIX-LINE-001 refuses an unauthorized close action over /mcp",
+      "status": "pass"
+    },
+    {
+      "name": "protected app APIs retrieve connector-created DealState, packets, and model rows",
+      "status": "fail",
+      "message": "sell appears in Today operating brief"
+    },
+    {
+      "name": "DB persistence/audit rows exist for DealState packets and model executions",
+      "status": "pass"
+    },
+    {
+      "name": "desktop and mobile app surfaces open connector-created work",
+      "status": "fail",
+      "message": "page.waitForFunction: Timeout 15000ms exceeded."
+    }
+  ]
+}

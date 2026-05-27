@@ -3,7 +3,7 @@ import express from 'express';
 import path from 'path';
 import postgres from 'postgres';
 import { fileURLToPath } from 'url';
-import { requireAuth } from './middleware/auth.js';
+import { optionalAuth, requireAuth } from './middleware/auth.js';
 import { authRouter } from './routes/auth.js';
 import { canvasTabsRouter } from './routes/canvasTabs.js';
 import { docViewsRouter } from './routes/docViews.js';
@@ -53,6 +53,27 @@ import {
   buildDefinitiveEnterpriseAllowListTemplates,
   buildDefinitiveRegistryPackage,
 } from './services/definitiveRegistryPackage.js';
+import { buildDefinitiveConnectorDistributionPackage } from './services/definitiveConnectorDistribution.js';
+import { buildDefinitiveAssistantDistributionReadiness } from './services/definitiveAssistantDistributionReadiness.js';
+import {
+  buildDefinitiveGptActionsOpenApiSpec,
+  buildDefinitiveOpenApiSpec,
+} from './services/definitiveOpenApiSpec.js';
+import {
+  buildDefinitiveMcpServerJson,
+  DEFINITIVE_REMOTE_MCP_PROTOCOL_VERSION,
+  handleDefinitiveRemoteMcpPost,
+} from './services/definitiveRemoteMcpTransport.js';
+import {
+  buildDefinitiveMcpProtectedResourceMetadata,
+  buildDefinitiveOAuthAuthorizationServerMetadata,
+} from './services/definitiveMcpAuthMetadata.js';
+import {
+  confirmDefinitiveOAuthAuthorization,
+  exchangeDefinitiveOAuthCode,
+  registerDefinitiveOAuthClient,
+  renderDefinitiveOAuthAuthorizePage,
+} from './services/definitiveMcpOAuth.js';
 import {
   buildDefinitiveModelCatalogSurface,
   getDefinitiveModelSlotSurface,
@@ -102,6 +123,26 @@ if (!process.env.ANTHROPIC_API_KEY) {
   console.warn('WARNING: ANTHROPIC_API_KEY not set — AI chat will fail');
 }
 
+function assertProductionBillingSafety(): void {
+  if (process.env.NODE_ENV !== 'production') return;
+
+  const unsafeBypasses = ['TEST_MODE', 'DEV_NO_PAYWALL'].filter(name => process.env[name] === 'true');
+  if (unsafeBypasses.length > 0) {
+    throw new Error(`Unsafe production billing bypass enabled: ${unsafeBypasses.join(', ')}. Set these to false before deploy.`);
+  }
+
+  const testStripeKeys = [
+    ['STRIPE_SECRET_KEY', 'sk_test_'],
+    ['STRIPE_PUBLISHABLE_KEY', 'pk_test_'],
+  ].filter(([name, prefix]) => (process.env[name] || '').startsWith(prefix));
+
+  if (testStripeKeys.length > 0) {
+    throw new Error(`Stripe test key configured in production: ${testStripeKeys.map(([name]) => name).join(', ')}. Use live keys before taking paid traffic.`);
+  }
+}
+
+assertProductionBillingSafety();
+
 (async () => {
   try {
     const sql = createSql();
@@ -121,6 +162,7 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), handl
 
 // ─── 2. Body parsing ───────────────────────────────────────
 app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: false }));
 
 // ─── 2. API routes (public) ────────────────────────────────
 app.get('/api/health', (_req, res) => {
@@ -147,6 +189,58 @@ function setWellKnownHeaders(res: Response) {
   });
 }
 
+function setMcpHeaders(req: Request, res: Response) {
+  res.set({
+    'Cache-Control': 'no-store',
+    'X-Content-Type-Options': 'nosniff',
+    'MCP-Protocol-Version': DEFINITIVE_REMOTE_MCP_PROTOCOL_VERSION,
+  });
+  const origin = req.get('origin');
+  if (origin && isAllowedMcpOrigin(req, origin)) {
+    res.set({
+      'Access-Control-Allow-Origin': origin,
+      'Access-Control-Allow-Headers': 'Authorization, Content-Type, Accept, MCP-Protocol-Version, Mcp-Session-Id, Last-Event-ID',
+      'Access-Control-Allow-Methods': 'POST, GET, DELETE, OPTIONS',
+      'Access-Control-Expose-Headers': 'WWW-Authenticate, MCP-Protocol-Version',
+      'Vary': 'Origin',
+    });
+  }
+}
+
+function isAllowedMcpOrigin(req: Request, origin: string) {
+  try {
+    const allowed = new Set<string>();
+    const appUrl = process.env.APP_URL?.trim();
+    if (appUrl) allowed.add(new URL(appUrl).origin);
+    const requestOrigin = `${req.protocol}://${req.get('host')}`;
+    allowed.add(new URL(requestOrigin).origin);
+    for (const configured of String(process.env.MCP_ALLOWED_ORIGINS || '').split(',')) {
+      const trimmed = configured.trim();
+      if (trimmed) allowed.add(new URL(trimmed).origin);
+    }
+    if (/^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/.test(origin)) return true;
+    return allowed.has(new URL(origin).origin);
+  } catch {
+    return false;
+  }
+}
+
+function rejectBadMcpOrigin(req: Request, res: Response) {
+  const origin = req.get('origin');
+  if (!origin || isAllowedMcpOrigin(req, origin)) return false;
+  setMcpHeaders(req, res);
+  res.status(403).json({
+    jsonrpc: '2.0',
+    id: null,
+    error: {
+      code: -32004,
+      message: 'Origin not allowed',
+      data: { origin },
+    },
+  });
+  return true;
+}
+
 app.get('/.well-known/agent-card.json', (_req, res) => {
   res.json(buildAgentCard());
 });
@@ -170,6 +264,126 @@ app.get('/.well-known/mcp', (req, res) => {
   res.json(buildDefinitiveMcpWellKnownManifest(discoveryOrigin(req)));
 });
 
+app.get('/server.json', (req, res) => {
+  setWellKnownHeaders(res);
+  res.json(buildDefinitiveMcpServerJson(discoveryOrigin(req)));
+});
+
+app.get('/.well-known/mcp/server.json', (req, res) => {
+  setWellKnownHeaders(res);
+  res.json(buildDefinitiveMcpServerJson(discoveryOrigin(req)));
+});
+
+app.get('/.well-known/oauth-protected-resource', (req, res) => {
+  setWellKnownHeaders(res);
+  res.json(buildDefinitiveMcpProtectedResourceMetadata(discoveryOrigin(req)));
+});
+
+app.get('/.well-known/oauth-protected-resource/mcp', (req, res) => {
+  setWellKnownHeaders(res);
+  res.json(buildDefinitiveMcpProtectedResourceMetadata(discoveryOrigin(req)));
+});
+
+app.get('/.well-known/oauth-authorization-server', (req, res) => {
+  setWellKnownHeaders(res);
+  res.json(buildDefinitiveOAuthAuthorizationServerMetadata(discoveryOrigin(req)));
+});
+
+app.get('/.well-known/openid-configuration', (req, res) => {
+  setWellKnownHeaders(res);
+  res.json(buildDefinitiveOAuthAuthorizationServerMetadata(discoveryOrigin(req)));
+});
+
+app.post('/oauth/register', async (req, res) => {
+  const response = await registerDefinitiveOAuthClient(req.body || {}, discoveryOrigin(req));
+  return res.status(response.status).json(response.body);
+});
+
+app.get('/oauth/authorize', (req, res) => {
+  setWellKnownHeaders(res);
+  res.type('html').send(renderDefinitiveOAuthAuthorizePage(req.query, discoveryOrigin(req)));
+});
+
+app.post('/oauth/authorize/confirm', requireAuth, async (req, res) => {
+  const response = await confirmDefinitiveOAuthAuthorization(Number((req as any).userId), req.body || {}, discoveryOrigin(req));
+  return res.status(response.status).json(response.body);
+});
+
+app.post('/oauth/token', async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.set('Pragma', 'no-cache');
+  const response = await exchangeDefinitiveOAuthCode(buildOAuthTokenRequestInput(req), discoveryOrigin(req));
+  return res.status(response.status).json(response.body);
+});
+
+function buildOAuthTokenRequestInput(req: Request) {
+  const input: Record<string, any> = { ...(req.body || {}) };
+  const header = req.get('authorization') || '';
+  if (header.toLowerCase().startsWith('basic ')) {
+    try {
+      const decoded = Buffer.from(header.slice(6), 'base64').toString('utf8');
+      const separator = decoded.indexOf(':');
+      if (separator >= 0) {
+        input.client_id ||= decodeURIComponent(decoded.slice(0, separator));
+        input.client_secret ||= decodeURIComponent(decoded.slice(separator + 1));
+      }
+    } catch {
+      // Malformed client authentication is handled by the OAuth service.
+    }
+  }
+  return input;
+}
+
+app.options('/mcp', (req, res) => {
+  setMcpHeaders(req, res);
+  if (rejectBadMcpOrigin(req, res)) return;
+  res.status(204).end();
+});
+
+app.get('/mcp', (req, res) => {
+  setMcpHeaders(req, res);
+  if (rejectBadMcpOrigin(req, res)) return;
+  res.set('Allow', 'POST, OPTIONS');
+  return res.status(405).json({
+    jsonrpc: '2.0',
+    id: null,
+    error: {
+      code: -32005,
+      message: 'Server-initiated SSE stream is not enabled. Use POST /mcp for Streamable HTTP JSON-RPC.',
+    },
+  });
+});
+
+app.delete('/mcp', (req, res) => {
+  setMcpHeaders(req, res);
+  if (rejectBadMcpOrigin(req, res)) return;
+  res.set('Allow', 'POST, OPTIONS');
+  return res.status(405).json({
+    jsonrpc: '2.0',
+    id: null,
+    error: {
+      code: -32006,
+      message: 'Stateless MCP sessions do not require DELETE termination.',
+    },
+  });
+});
+
+app.post('/mcp', optionalAuth, async (req, res) => {
+  setMcpHeaders(req, res);
+  if (rejectBadMcpOrigin(req, res)) return;
+  const response = await handleDefinitiveRemoteMcpPost(req.body, {
+    auth: {
+      userId: (req as any).userId,
+      claims: (req as any).authClaims,
+    },
+    headers: req.headers as Record<string, string | string[] | undefined>,
+    origin: discoveryOrigin(req),
+  });
+  if (response.headers) res.set(response.headers);
+  if (!response.body) return res.status(response.status).end();
+  return res.status(response.status).json(response.body);
+});
+
 app.get('/api/agent-card', (_req, res) => {
   res.json(buildAgentCard());
 });
@@ -188,6 +402,16 @@ app.get('/api/definitive/schemas/:schemaName', (req, res) => {
     return res.status(404).json({ ok: false, error: 'schema_not_found', schemaName: req.params.schemaName });
   }
   return res.json(schema);
+});
+
+app.get('/api/definitive/openapi.json', (req, res) => {
+  setWellKnownHeaders(res);
+  res.json(buildDefinitiveOpenApiSpec(discoveryOrigin(req)));
+});
+
+app.get('/api/definitive/gpt-actions/openapi.json', (req, res) => {
+  setWellKnownHeaders(res);
+  res.json(buildDefinitiveGptActionsOpenApiSpec(discoveryOrigin(req)));
 });
 
 app.get('/definitive/spec', (_req, res) => {
@@ -240,6 +464,18 @@ app.get('/api/definitive/deal-mechanics/models/:slotId', (req, res) => {
 
 app.get('/api/definitive/registry-package', (req, res) => {
   res.json(buildDefinitiveRegistryPackage(discoveryOrigin(req)));
+});
+
+app.get('/api/definitive/connector-distribution', (req, res) => {
+  res.json(buildDefinitiveConnectorDistributionPackage(discoveryOrigin(req)));
+});
+
+app.get('/api/definitive/assistant-distribution-readiness', (req, res) => {
+  res.json(buildDefinitiveAssistantDistributionReadiness(discoveryOrigin(req)));
+});
+
+app.get('/api/definitive/mcp-launch-readiness', (req, res) => {
+  res.json(buildDefinitiveAssistantDistributionReadiness(discoveryOrigin(req)));
 });
 
 app.get('/api/definitive/enterprise-allow-lists', (req, res) => {

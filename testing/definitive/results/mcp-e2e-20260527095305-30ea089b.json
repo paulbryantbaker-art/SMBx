@@ -1,0 +1,136 @@
+{
+  "runId": "mcp-e2e-20260527095305-30ea089b",
+  "target": "http://127.0.0.1:3002",
+  "appBaseUrl": "http://localhost:5173",
+  "startedAt": "2026-05-27T09:53:05.318Z",
+  "fixtures": {
+    "buy": {
+      "dealId": 518,
+      "title": "MCP E2E BUY mcp-e2e-20260527095305-30ea089b",
+      "latestStateCid": "definitive:deal-state:sha256:fd0fbe3656b7421e23dd46434a2afccd260dfe45cfae6260c86aa7bf90ba4630",
+      "latestStateHash": "fd0fbe3656b7421e23dd46434a2afccd260dfe45cfae6260c86aa7bf90ba4630",
+      "expectedPacketTypes": [
+        "DealStateControlPacket.v0.1",
+        "LOIPacket.v0.1",
+        "DealPackage.v0.1"
+      ],
+      "packetRowIds": [
+        1060,
+        1061,
+        1062,
+        1063
+      ],
+      "modelExecutionIds": [
+        17
+      ]
+    },
+    "sell": {
+      "dealId": 519,
+      "title": "MCP E2E SELL mcp-e2e-20260527095305-30ea089b",
+      "latestStateCid": "definitive:deal-state:sha256:3458c11dc0f188f1f5b4b0e82eb3b5b19d2967a0d7a258709ecefed5d2e01ea7",
+      "latestStateHash": "3458c11dc0f188f1f5b4b0e82eb3b5b19d2967a0d7a258709ecefed5d2e01ea7",
+      "expectedPacketTypes": [
+        "DealStateControlPacket.v0.1",
+        "DataRoomIndex.v0.1",
+        "DiligenceRequest.v0.1",
+        "DocumentDraft.v0.1",
+        "LOIPacket.v0.1",
+        "NegotiationBrief.v0.1",
+        "CloseReadiness.v0.1",
+        "FundsFlow.v0.1"
+      ],
+      "packetRowIds": [
+        1064,
+        1065,
+        1066,
+        1067,
+        1068,
+        1069,
+        1070,
+        1071,
+        1072,
+        1073
+      ],
+      "modelExecutionIds": []
+    },
+    "raise": {
+      "dealId": 520,
+      "title": "MCP E2E RAISE mcp-e2e-20260527095305-30ea089b",
+      "latestStateCid": "definitive:deal-state:sha256:6635123ef1115ec7b13a1411c4bf837df40d99b1361a5215e7742072efc889d1",
+      "latestStateHash": "6635123ef1115ec7b13a1411c4bf837df40d99b1361a5215e7742072efc889d1",
+      "expectedPacketTypes": [
+        "DealStateControlPacket.v0.1",
+        "DocumentDraft.v0.1",
+        "DealPackage.v0.1"
+      ],
+      "packetRowIds": [
+        1074,
+        1075,
+        1076
+      ],
+      "modelExecutionIds": []
+    },
+    "pmi": {
+      "dealId": 521,
+      "title": "MCP E2E PMI mcp-e2e-20260527095305-30ea089b",
+      "latestStateCid": "definitive:deal-state:sha256:58a71c4ff1354bd1480813bff947935931381dfee5ad3d07de4cbd2de9cdf81c",
+      "latestStateHash": "58a71c4ff1354bd1480813bff947935931381dfee5ad3d07de4cbd2de9cdf81c",
+      "expectedPacketTypes": [
+        "DealStateControlPacket.v0.1",
+        "PMIPlan.v0.1",
+        "DealPackage.v0.1"
+      ],
+      "packetRowIds": [
+        1077,
+        1078,
+        1079
+      ],
+      "modelExecutionIds": []
+    }
+  },
+  "finishedAt": "2026-05-27T09:53:42.146Z",
+  "totals": {
+    "passed": 8,
+    "failed": 1,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "name": "public discovery, initialize, tools/list, and unauthenticated challenge",
+      "status": "pass"
+    },
+    {
+      "name": "FIX-BUY-LBO-001 executes through /mcp and persists LBO/LOI/package artifacts",
+      "status": "pass"
+    },
+    {
+      "name": "FIX-SELLREP-001 executes sell-side LOI/DD/close readiness through /mcp",
+      "status": "pass"
+    },
+    {
+      "name": "FIX-RAISE-001 executes raise-side investor material path through /mcp",
+      "status": "pass"
+    },
+    {
+      "name": "FIX-PMI-001 executes post-close PMI path through /mcp",
+      "status": "pass"
+    },
+    {
+      "name": "FIX-LINE-001 refuses an unauthorized close action over /mcp",
+      "status": "pass"
+    },
+    {
+      "name": "protected app APIs retrieve connector-created DealState, packets, and model rows",
+      "status": "pass"
+    },
+    {
+      "name": "DB persistence/audit rows exist for DealState packets and model executions",
+      "status": "pass"
+    },
+    {
+      "name": "desktop and mobile app surfaces open connector-created work",
+      "status": "fail",
+      "message": "page.waitForFunction: Timeout 15000ms exceeded."
+    }
+  ]
+}

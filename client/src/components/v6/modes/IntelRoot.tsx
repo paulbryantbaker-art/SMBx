@@ -1,5 +1,5 @@
 import { type CSSProperties } from "react";
-import { V6Section } from "../Canvas";
+import { V6Section } from "../Section";
 import { V6Icon } from "../icons";
 import type { OpenTab } from "../types";
 

@@ -11,7 +11,7 @@ import {
 } from '../constants/definitive.js';
 import { classifyV19LeagueFromCents, type League } from '../constants/v19Leagues.js';
 import { checkGateReadinessSync as checkReadiness } from './gateReadinessService.js';
-import { generateProviderRecommendation, findProviders, trackReferral } from './providerMatchingService.js';
+import { generateProviderRecommendation, findProviders } from './providerMatchingService.js';
 import { matchFranchises } from './franchiseMatchingService.js';
 import { matchBuyersForSeller } from './buyerSourcingService.js';
 import { generateOptimizationPlan, saveOptimizationPlan, createOptimizationMilestone } from './optimizationPlanService.js';
@@ -36,6 +36,11 @@ import {
   queueIndustryDeepResearchJob,
   summarizeMarketIntelligenceProfile,
 } from './marketIntelligenceRuntime.js';
+import {
+  buildMarketMultiplePacketFromSources,
+  inferMarketMultipleNaicsCode,
+  resolveModelMarketMultipleInputs,
+} from './marketMultipleResolver.js';
 import {
   addPitchBookSection,
   createPitchBook,
@@ -146,7 +151,7 @@ export const TOOL_DEFINITIONS: Tool[] = [
   },
   {
     name: 'generate_deal_deliverable',
-    description: 'Generate a real paid or included deal deliverable from the menu catalog. Use when the user asks Yulia to draft or run a deliverable such as an LOI, CIM, valuation, SBA analysis, buyer list, pitch deck, DD summary, or data-room structure. This queues generation and opens the live document tab.',
+    description: 'Generate a real paid or included deal deliverable from the menu catalog. Use when the user asks Yulia to draft or run a deliverable such as an LOI, CIM, valuation, SBA analysis, buyer-universe map, pitch deck, DD summary, or data-room structure. This queues generation and opens the live document tab.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -270,6 +275,12 @@ export const TOOL_DEFINITIONS: Tool[] = [
         modelSlotId: { type: 'string', description: 'Optional public DEFINITIVE M-slot ID, such as M109, M148, M200, M206, or M221. The tool resolves it to implementedRuntimeModelId when available.' },
         input: { type: 'object', description: 'Model inputs. Financial values must be cents.' },
         dealId: { type: 'number', description: 'Optional deal ID for audit context.' },
+        marketMultiplePacket: { type: 'object', description: 'Optional MarketMultiplePacket.v0.1. For valuation/LBO models, the substrate uses this to populate low/high or exit multiples with provenance.' },
+        industry: { type: 'string', description: 'Optional industry context for automatic market-multiple lookup when valuation/LBO multiples are missing.' },
+        naicsCode: { type: 'string', description: 'Optional NAICS context for automatic market-multiple lookup.' },
+        geography: { type: 'string', description: 'Optional geography or jurisdiction context for market-multiple lookup.' },
+        league: { type: 'string', description: 'Optional deal-size league for market-multiple lookup.' },
+        metric: { type: 'string', enum: ['sde', 'ebitda', 'revenue'], description: 'Optional multiple basis for market-multiple lookup.' },
       },
       required: ['input'],
     },
@@ -287,6 +298,12 @@ export const TOOL_DEFINITIONS: Tool[] = [
         input: { type: 'object', description: 'New model inputs. Financial values must be cents.' },
         overrides: { type: 'object', description: 'Assumption overrides layered on top of the prior execution inputs.' },
         reason: { type: 'string', description: 'Why this iteration is being run, for audit and version history.' },
+        marketMultiplePacket: { type: 'object', description: 'Optional MarketMultiplePacket.v0.1. For valuation/LBO models, the substrate uses this to populate low/high or exit multiples with provenance.' },
+        industry: { type: 'string', description: 'Optional industry context for automatic market-multiple lookup when valuation/LBO multiples are missing.' },
+        naicsCode: { type: 'string', description: 'Optional NAICS context for automatic market-multiple lookup.' },
+        geography: { type: 'string', description: 'Optional geography or jurisdiction context for market-multiple lookup.' },
+        league: { type: 'string', description: 'Optional deal-size league for market-multiple lookup.' },
+        metric: { type: 'string', enum: ['sde', 'ebitda', 'revenue'], description: 'Optional multiple basis for market-multiple lookup.' },
       },
     },
   },
@@ -304,13 +321,20 @@ export const TOOL_DEFINITIONS: Tool[] = [
   },
   {
     name: 'fetch_market_data',
-    description: 'Fetch the latest cached V19 market data series from market_data_cache.',
+    description: 'Fetch the latest cached V19 market data series from market_data_cache, or resolve a market-multiple packet for valuation/LBO assumptions from NAICS benchmarks and closed-deal comps.',
     input_schema: {
       type: 'object' as const,
       properties: {
         seriesId: { type: 'string', description: 'Market data series ID, for example SOFR, DPRIME, or DGS10.' },
+        dataType: { type: 'string', enum: ['series', 'market_multiples'], description: 'Use market_multiples when the agent needs target, entry, base, or exit multiple support.' },
+        calculation: { type: 'string', description: 'Calculation needing market support, such as valuation, lbo, or comps.' },
+        industry: { type: 'string', description: 'Industry name, used to infer NAICS when naicsCode is absent.' },
+        naicsCode: { type: 'string', description: 'NAICS code for market multiple lookup.' },
+        geography: { type: 'string', description: 'Market geography or jurisdiction, such as US-TX.' },
+        league: { type: 'string', description: 'Optional deal-size league, such as L3 or L4.' },
+        metric: { type: 'string', enum: ['sde', 'ebitda', 'revenue'], description: 'Multiple basis to resolve.' },
       },
-      required: ['seriesId'],
+      required: [],
     },
   },
   {
@@ -462,11 +486,11 @@ export const TOOL_DEFINITIONS: Tool[] = [
   },
   {
     name: 'recommend_providers',
-    description: 'Recommend service providers (attorneys, CPAs, appraisers, etc.) based on the deal context. Call this when the user asks about finding a service provider, or proactively at gate transitions that typically require professional services. Can also search by type and location directly.',
+    description: 'Open a neutral service-provider directory panel (attorneys, CPAs, appraisers, etc.) based on deal context. Call this when the user asks about finding a service provider, or at gate transitions that typically require professional services. smbX does not choose the provider, contact the provider, or receive referral fees. Can also search by type and location directly.',
     input_schema: {
       type: 'object' as const,
       properties: {
-        dealId: { type: 'number', description: 'The deal ID for contextual recommendations. If provided, returns providers matched to the current gate.' },
+        dealId: { type: 'number', description: 'The deal ID for contextual directory results. If provided, returns providers matched to the current gate.' },
         type: { type: 'string', enum: ['attorney', 'cpa', 'appraiser', 're_agent', 'insurance', 'consultant'], description: 'Specific provider type to search for. If dealId is not provided, this is required.' },
         state: { type: 'string', description: 'State to filter providers (e.g., "TX", "CA")' },
       },
@@ -609,7 +633,7 @@ export const TOOL_DEFINITIONS: Tool[] = [
   },
   {
     name: 'optimize_scenario',
-    description: 'Optimize the currently open analysis/model scenario. Use when the user asks for the best scenario, best path, optimal structure, negotiation path, or how to improve the modeled outcome. Reads the active canvas, saved assumptions, evidence trail, user role, risk tolerance, and objective; then Yulia should recommend a risk-adjusted path plus the negotiation, diligence, reps/warranties, tax/legal, and work-product steps to get there.',
+    description: 'Optimize the currently open analysis/model scenario. Use when the user asks for the best scenario, best path, optimal structure, negotiation path, or how to improve the modeled outcome. Reads the active canvas, saved assumptions, evidence trail, user role, risk tolerance, and objective; then Yulia should compare risk-adjusted paths, explain tradeoffs, and surface negotiation-prep, diligence, reps/warranties, tax/legal, and work-product steps without choosing for the user.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -1732,6 +1756,75 @@ function resolveExecutableModelReference(input: Record<string, any>, fallbackMod
   };
 }
 
+async function prepareModelInputForMarketMultiples(args: {
+  modelId: string;
+  modelInput: Record<string, any>;
+  toolInput: Record<string, any>;
+  userId: number;
+  dealId: number | null;
+}) {
+  const dealContext = args.dealId ? await loadDealMarketContext(args.userId, args.dealId) : {};
+  const contextPayload = {
+    ...dealContext,
+    ...asRecord(args.toolInput.payload),
+    industry: stringValue(args.toolInput.industry) || args.modelInput.industry || dealContext.industry,
+    naicsCode: stringValue(args.toolInput.naicsCode || args.toolInput.naics_code) || args.modelInput.naicsCode || args.modelInput.naics_code || dealContext.naicsCode,
+    geography: stringValue(args.toolInput.geography || args.toolInput.jurisdiction || args.toolInput.location) || args.modelInput.geography || args.modelInput.jurisdiction || dealContext.geography,
+    league: stringValue(args.toolInput.league) || args.modelInput.league || dealContext.league,
+    metric: stringValue(args.toolInput.metric) || args.modelInput.metric,
+  };
+  let marketPacket = asRecord(args.toolInput.marketMultiplePacket || args.toolInput.marketPacket || args.modelInput.marketMultiplePacket || args.modelInput.marketPacket);
+  let preflight = resolveModelMarketMultipleInputs({
+    modelId: args.modelId,
+    input: args.modelInput,
+    payload: contextPayload,
+    marketPacket,
+  });
+
+  if (preflight.status !== 'ready' && !marketPacket.schema) {
+    marketPacket = await buildMarketMultiplePacketForContext({
+      calculation: preflight.calculation || undefined,
+      industry: stringValue(contextPayload.industry),
+      naicsCode: stringValue(contextPayload.naicsCode) || inferMarketMultipleNaicsCode(stringValue(contextPayload.industry)),
+      geography: stringValue(contextPayload.geography),
+      league: stringValue(contextPayload.league),
+      metric: stringValue(contextPayload.metric),
+    });
+    if (marketPacket.schema) {
+      preflight = resolveModelMarketMultipleInputs({
+        modelId: args.modelId,
+        input: args.modelInput,
+        payload: contextPayload,
+        marketPacket,
+      });
+    }
+  }
+
+  if (preflight.status !== 'ready') {
+    return {
+      ok: false as const,
+      response: {
+        success: false,
+        schema: 'ModelMarketPreflight.v0.1',
+        status: preflight.status,
+        modelId: args.modelId,
+        message: 'Market multiples must be supplied, sourced, or explicitly treated as scenario assumptions before valuation-sensitive model execution.',
+        marketMultipleResolution: preflight.marketMultipleResolution,
+        marketMultiplePacket: marketPacket.schema ? marketPacket : null,
+        next_suggested_calls: preflight.marketMultipleResolution?.next_suggested_calls?.map(call => call.toolName) || ['fetch_market_data', 'run_model_iteration'],
+        lineBoundary: preflight.lineBoundary,
+      },
+    };
+  }
+
+  return {
+    ok: true as const,
+    input: preflight.input,
+    marketMultipleResolution: preflight.marketMultipleResolution,
+    marketMultiplePacket: marketPacket.schema ? marketPacket : null,
+  };
+}
+
 async function executeModelTool(input: Record<string, any>, userId: number, conversationId: number): Promise<string> {
   const dealId = input.dealId == null ? null : Number(input.dealId);
   if (dealId && !(await hasDealAccess(dealId, userId))) return JSON.stringify({ error: 'Deal not found' });
@@ -1749,9 +1842,29 @@ async function executeModelTool(input: Record<string, any>, userId: number, conv
   });
   if (!gate.allowed) return stringifyV19Tollgate(gate);
 
+  const marketPreflight = await prepareModelInputForMarketMultiples({
+    modelId: modelRef.modelId,
+    modelInput: asRecord(input.input),
+    toolInput: input,
+    userId,
+    dealId,
+  });
+  if (!marketPreflight.ok) {
+    return JSON.stringify({
+      ...marketPreflight.response,
+      modelResolution: {
+        requestedModelId: modelRef.requestedModelId,
+        modelId: modelRef.modelId,
+        modelSlotId: modelRef.modelSlotId,
+        modelSlotName: modelRef.modelSlotName,
+        resolution: modelRef.resolution,
+      },
+    });
+  }
+
   const execution = await executeV19Model({
     modelId: modelRef.modelId,
-    input: asRecord(input.input),
+    input: marketPreflight.input,
     dealId,
     userId,
     conversationId: effectiveConversationId,
@@ -1786,6 +1899,8 @@ async function executeModelTool(input: Record<string, any>, userId: number, conv
       resolution: modelRef.resolution,
     },
     execution,
+    marketMultipleResolution: marketPreflight.marketMultipleResolution,
+    marketMultiplePacket: marketPreflight.marketMultiplePacket,
     v19Readiness: readiness,
     v19Usage: await readV19UsageMeter(userId),
   });
@@ -1828,10 +1943,33 @@ async function runModelIterationTool(input: Record<string, any>, userId: number,
   });
   if (!gate.allowed) return stringifyV19Tollgate(gate);
 
+  const marketPreflight = await prepareModelInputForMarketMultiples({
+    modelId,
+    modelInput: mergedInput,
+    toolInput: input,
+    userId,
+    dealId,
+  });
+  if (!marketPreflight.ok) {
+    return JSON.stringify({
+      ...marketPreflight.response,
+      schema: 'AgentModelIteration.v0.1',
+      parentExecutionId: prior?.id ?? null,
+      parentOutputHash: prior?.output_hash ?? null,
+      modelResolution: {
+        requestedModelId: modelRef.requestedModelId,
+        modelId: modelRef.modelId,
+        modelSlotId: modelRef.modelSlotId,
+        modelSlotName: modelRef.modelSlotName,
+        resolution: modelRef.resolution,
+      },
+    });
+  }
+
   try {
     const execution = await executeV19Model({
       modelId,
-      input: mergedInput,
+      input: marketPreflight.input,
       dealId,
       userId,
       conversationId: effectiveConversationId,
@@ -1887,6 +2025,8 @@ async function runModelIterationTool(input: Record<string, any>, userId: number,
       outputs: execution.outputs,
       missingInputs: execution.missingInputs,
       citationTags: execution.citationTags,
+      marketMultipleResolution: marketPreflight.marketMultipleResolution,
+      marketMultiplePacket: marketPreflight.marketMultiplePacket,
       outputHash: execution.outputHash,
       auditPayload: execution.auditPayload,
       iterationBoundary:
@@ -2023,7 +2163,16 @@ async function lookupCitationTool(input: Record<string, any>, userId: number): P
 }
 
 async function fetchMarketDataTool(input: Record<string, any>, userId: number): Promise<string> {
-  const seriesId = String(input.seriesId || '').trim();
+  const marketDataMode = String(input.dataType || input.kind || '').toLowerCase();
+  const explicitMarketMultipleMode = marketDataMode.includes('multiple');
+  const wantsMarketMultiples = explicitMarketMultipleMode
+    || String(input.calculation || '').toLowerCase().match(/valuation|lbo|comps?|multiple/) != null
+    || Boolean(input.industry || input.naicsCode || input.naics_code);
+  if (wantsMarketMultiples && !input.seriesId && (!input.key || explicitMarketMultipleMode)) {
+    return await fetchMarketMultiplePacketTool(input, userId);
+  }
+
+  const seriesId = String(input.seriesId || input.key || '').trim();
   if (!seriesId) return JSON.stringify({ error: 'seriesId is required' });
   const gate = await checkV19Entitlement(userId, 'api_call', {
     actionId: 'fetch_market_data',
@@ -2052,6 +2201,198 @@ async function fetchMarketDataTool(input: Record<string, any>, userId: number): 
     metadata: { found: !!row },
   });
   return JSON.stringify({ found: !!row, seriesId, data: row || null, v19Usage: await readV19UsageMeter(userId) });
+}
+
+async function fetchMarketMultiplePacketTool(input: Record<string, any>, userId: number): Promise<string> {
+  const industry = stringValue(input.industry);
+  const naicsCode = stringValue(input.naicsCode || input.naics_code) || inferMarketMultipleNaicsCode(industry);
+  const geography = stringValue(input.geography || input.jurisdiction || input.location);
+  const league = stringValue(input.league);
+  const metric = stringValue(input.metric);
+  const calculation = stringValue(input.calculation || input.purpose) || 'market_multiples';
+
+  const gate = await checkV19Entitlement(userId, 'api_call', {
+    actionId: 'fetch_market_data',
+    toolName: 'fetch_market_data',
+    sourceSurface: 'chat',
+    resourceType: 'market_multiple_packet',
+    resourceId: naicsCode || industry || 'unknown',
+    metadata: { calculation, industry, naicsCode, geography, league, metric },
+  });
+  if (!gate.allowed) return stringifyV19Tollgate(gate);
+  const packet = await buildMarketMultiplePacketForContext({ calculation, industry, naicsCode, geography, league, metric });
+
+  await recordV19UsageEvent({
+    userId,
+    eventType: 'api_call',
+    actionId: 'fetch_market_data',
+    toolName: 'fetch_market_data',
+    sourceSurface: 'chat',
+    resourceType: 'market_multiple_packet',
+    resourceId: naicsCode || industry || 'unknown',
+    metadata: {
+      status: packet.status,
+      sourceCount: packet.sourceCount,
+      citations: packet.citations,
+      metric: packet.metric,
+      league,
+    },
+  });
+
+  return JSON.stringify({
+    success: true,
+    found: packet.status === 'resolved',
+    dataType: 'market_multiples',
+    marketMultiplePacket: packet,
+    next_suggested_calls: packet.status === 'resolved'
+      ? ['execute_model', 'run_model_iteration']
+      : ['update_deal_payload', 'fetch_market_data'],
+    v19Usage: await readV19UsageMeter(userId),
+  });
+}
+
+async function buildMarketMultiplePacketForContext(input: {
+  calculation?: string | null;
+  industry?: string | null;
+  naicsCode?: string | null;
+  geography?: string | null;
+  league?: string | null;
+  metric?: string | null;
+}) {
+  const naicsCode = input.naicsCode || inferMarketMultipleNaicsCode(input.industry);
+  const [benchmark, closedDeals] = await Promise.all([
+    naicsCode ? loadNaicsMultipleBenchmark(naicsCode) : Promise.resolve(null),
+    naicsCode ? loadClosedDealMultipleStats(naicsCode, input.league || null) : Promise.resolve(null),
+  ]);
+  return buildMarketMultiplePacketFromSources(
+    {
+      calculation: input.calculation || 'market_multiples',
+      industry: input.industry,
+      naicsCode,
+      geography: input.geography,
+      league: input.league,
+      metric: input.metric,
+      asOfDate: todayIsoDate(),
+    },
+    { benchmark, closedDeals },
+  );
+}
+
+async function loadDealMarketContext(userId: number, dealId: number): Promise<Record<string, any>> {
+  try {
+    const [deal] = await sql`
+      SELECT industry, location, jurisdiction, league, revenue, sde, ebitda, asking_price, financials
+      FROM deals
+      WHERE id = ${dealId} AND user_id = ${userId}
+      LIMIT 1
+    `;
+    if (!deal) return {};
+    const financials = asRecord(deal.financials);
+    return {
+      industry: deal.industry || financials.industry || null,
+      geography: deal.jurisdiction || deal.location || financials.geography || null,
+      league: deal.league || financials.league || null,
+      revenueCents: deal.revenue == null ? financials.revenueCents : Number(deal.revenue),
+      sdeCents: deal.sde == null ? financials.sdeCents : Number(deal.sde),
+      ebitdaCents: deal.ebitda == null ? financials.ebitdaCents : Number(deal.ebitda),
+      purchasePriceCents: deal.asking_price == null ? financials.purchasePriceCents : Number(deal.asking_price),
+    };
+  } catch (error) {
+    console.warn('[model_market_preflight] deal market context unavailable:', (error as Error).message);
+    return {};
+  }
+}
+
+async function loadNaicsMultipleBenchmark(naicsCode: string) {
+  const prefix = `${naicsCode.slice(0, Math.max(2, Math.min(6, naicsCode.length)))}%`;
+  try {
+    const [row] = await sql`
+      SELECT naics_code, naics_label, state,
+             sde_multiple_low, sde_multiple_mid, sde_multiple_high,
+             ebitda_multiple_low, ebitda_multiple_mid, ebitda_multiple_high,
+             revenue_multiple_low, revenue_multiple_high,
+             data_year, source, data_sources, notes, updated_at
+      FROM naics_benchmarks
+      WHERE (naics_code = ${naicsCode} OR naics_code LIKE ${prefix} OR ${naicsCode} LIKE naics_code || '%')
+        AND (state IS NULL OR state = 'US' OR state = '')
+      ORDER BY
+        CASE WHEN naics_code = ${naicsCode} THEN 0 ELSE 1 END,
+        LENGTH(naics_code) DESC,
+        updated_at DESC NULLS LAST
+      LIMIT 1
+    `;
+    if (!row) return null;
+    return {
+      naicsCode: row.naics_code,
+      naicsLabel: row.naics_label,
+      state: row.state,
+      sdeMultipleLow: row.sde_multiple_low,
+      sdeMultipleMid: row.sde_multiple_mid,
+      sdeMultipleHigh: row.sde_multiple_high,
+      ebitdaMultipleLow: row.ebitda_multiple_low,
+      ebitdaMultipleMid: row.ebitda_multiple_mid,
+      ebitdaMultipleHigh: row.ebitda_multiple_high,
+      revenueMultipleLow: row.revenue_multiple_low,
+      revenueMultipleHigh: row.revenue_multiple_high,
+      dataYear: row.data_year,
+      source: row.source,
+      dataSources: Array.isArray(row.data_sources) ? row.data_sources.map(String) : [],
+      notes: row.notes,
+      updatedAt: row.updated_at instanceof Date ? row.updated_at.toISOString() : row.updated_at,
+    };
+  } catch (error) {
+    console.warn('[fetch_market_data] NAICS multiple benchmark unavailable:', (error as Error).message);
+    return null;
+  }
+}
+
+async function loadClosedDealMultipleStats(naicsCode: string, league: string | null) {
+  const prefix = `${naicsCode.slice(0, Math.max(2, Math.min(6, naicsCode.length)))}%`;
+  try {
+    const [row] = await sql`
+      SELECT
+        COUNT(*)::int AS deal_count,
+        ROUND((PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY sde_multiple))::numeric, 2) AS low_sde_multiple,
+        ROUND((PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY sde_multiple))::numeric, 2) AS median_sde_multiple,
+        ROUND((PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY sde_multiple))::numeric, 2) AS high_sde_multiple,
+        ROUND(AVG(sde_multiple), 2) AS avg_sde_multiple,
+        ROUND((PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY ebitda_multiple))::numeric, 2) AS low_ebitda_multiple,
+        ROUND((PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY ebitda_multiple))::numeric, 2) AS median_ebitda_multiple,
+        ROUND((PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY ebitda_multiple))::numeric, 2) AS high_ebitda_multiple,
+        ROUND(AVG(ebitda_multiple), 2) AS avg_ebitda_multiple,
+        MAX(closed_year)::int AS latest_closed_year
+      FROM closed_deals
+      WHERE (naics_code = ${naicsCode} OR naics_code LIKE ${prefix} OR ${naicsCode} LIKE naics_code || '%')
+        ${league ? sql`AND deal_size_league = ${league}` : sql``}
+    `;
+    if (!row || Number(row.deal_count || 0) === 0) return null;
+    return {
+      dealCount: row.deal_count,
+      lowSdeMultiple: row.low_sde_multiple,
+      medianSdeMultiple: row.median_sde_multiple,
+      highSdeMultiple: row.high_sde_multiple,
+      avgSdeMultiple: row.avg_sde_multiple,
+      lowEbitdaMultiple: row.low_ebitda_multiple,
+      medianEbitdaMultiple: row.median_ebitda_multiple,
+      highEbitdaMultiple: row.high_ebitda_multiple,
+      avgEbitdaMultiple: row.avg_ebitda_multiple,
+      latestClosedYear: row.latest_closed_year,
+      league,
+    };
+  } catch (error) {
+    console.warn('[fetch_market_data] closed-deal multiple stats unavailable:', (error as Error).message);
+    return null;
+  }
+}
+
+function stringValue(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+}
+
+function todayIsoDate(): string {
+  return new Date().toISOString().slice(0, 10);
 }
 
 async function deferToCounselTool(input: Record<string, any>, userId: number, conversationId: number): Promise<string> {
@@ -2878,19 +3219,12 @@ function getJourneyGates(journey: string): string[] {
 async function recommendProviders(input: Record<string, any>, userId: number): Promise<string> {
   const { dealId, type, state } = input;
 
-  // If dealId provided, use contextual recommendations
+  // If dealId provided, use contextual directory results.
   if (dealId) {
     const [deal] = await sql`SELECT id FROM deals WHERE id = ${dealId} AND user_id = ${userId}`;
     if (!deal) return JSON.stringify({ error: 'Deal not found' });
 
     const result = await generateProviderRecommendation(dealId);
-
-    // Track referrals for recommended providers
-    for (const [, providers] of Object.entries(result.recommendations)) {
-      for (const p of providers) {
-        await trackReferral(dealId, p.id, userId, `AI recommendation at gate`).catch(() => {});
-      }
-    }
 
     // Build provider summary markdown for canvas display
     const providerLines: string[] = [];
@@ -2911,8 +3245,8 @@ async function recommendProviders(input: Record<string, any>, userId: number): P
     return JSON.stringify({
       success: true,
       canvas_action: 'show_content',
-      title: 'Recommended Providers',
-      content: `# Professional Services — ${result.context}\n\n${providerLines.join('\n')}`,
+      title: 'Provider Directory',
+      content: `# Professional Services Directory — ${result.context}\n\nsmbX does not choose providers, contact providers, or receive referral fees. Review options and decide who to contact.\n\n${providerLines.join('\n')}`,
       context: result.context,
       neededTypes: result.neededTypes,
       recommendations: result.recommendations,
@@ -2930,7 +3264,7 @@ async function recommendProviders(input: Record<string, any>, userId: number): P
     });
   }
 
-  return JSON.stringify({ error: 'Provide dealId for contextual recommendations, or type for direct search' });
+  return JSON.stringify({ error: 'Provide dealId for contextual directory results, or type for direct search' });
 }
 
 async function analyzeBuyerDemandTool(input: Record<string, any>, userId: number): Promise<string> {
@@ -3673,13 +4007,13 @@ async function optimizeScenario(input: Record<string, any>, userId: number, conv
     optimizationBrief: {
       instruction: 'Use this saved canvas state as the source of truth. Do not invent a different model in chat.',
       outputShape: [
-        'Name the scenario/path Yulia would choose and why.',
+        'Name the strongest scenario/path candidates and why.',
         'State the key tradeoffs and constraints from the model and evidence.',
         'Explain how to get there: negotiation asks, fallback positions, reps/warranties, diligence requests, tax/legal/professional signoffs, and concrete work products.',
         'Call out what is a fact from the model versus what requires user/professional approval.',
       ],
     },
-    message: `I read the current scenario${savedScenarioName ? ` (${savedScenarioName})` : ''}. Optimize for ${objective} with ${riskTolerance} risk tolerance from the ${role} posture, and give the user the recommended path plus the execution steps to get there.`,
+    message: `I read the current scenario${savedScenarioName ? ` (${savedScenarioName})` : ''}. Optimize for ${objective} with ${riskTolerance} risk tolerance from the ${role} posture, and give the user the strongest option set plus the user/professional approval steps to get there.`,
   });
 }
 

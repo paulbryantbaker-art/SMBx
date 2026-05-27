@@ -25,7 +25,7 @@ interface PageMeta {
 }
 
 const DEFAULT_TITLE = 'Sell or Buy Any Business, Anywhere — smbx.ai';
-const DEFAULT_DESC = 'AI deal advisory from valuation to close. Sell, buy, raise capital, or integrate. Start free.';
+const DEFAULT_DESC = 'AI deal intelligence from valuation to close. Sell, buy, raise capital, or integrate. Start free.';
 // Default OG image — falls back to the primary logo until dedicated per-page
 // OG cards are generated. Every page supplies its own ogImage anyway.
 const DEFAULT_OG_IMAGE = 'https://smbx.ai/G3L.png';

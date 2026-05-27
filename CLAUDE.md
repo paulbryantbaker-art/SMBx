@@ -1,5 +1,5 @@
 CLAUDE.md — smbx.ai
-Last updated: 2026-05-16
+Last updated: 2026-05-25
 
 > **For a current-vs-stale map of the whole repo, read `REPO_STATUS.md` at the root.** Archived docs live in `docs/_archive/` — do not build against them.
 
@@ -13,17 +13,17 @@ AI-powered deal intelligence platform for business acquisitions from $300K to me
 - wouter for client routing
 - PostgreSQL via raw postgres-js (no ORM)
 - Claude API (primary), Google Gemini (secondary), OpenAI (tertiary)
-- Stripe monthly subscriptions: Free / $79 Solo / $199 Pro / $499 Team / $2,500+ Enterprise
+- Stripe monthly subscriptions: Free / $99 Solo / $249 Pro / $749 Team / $3,000+ Enterprise. Legacy $79 / $199 / $499 / $2,500+ references are early-access or annual-equivalent only.
 - JWT authentication (no sessions, no passport — sessions broke on Railway)
 - Railway deployment (GitHub push → auto-deploy, Dockerfile with Chromium)
 - Auto-migrations on server startup (server/index.ts runs all SQL in server/migrations/)
 - Tabbed canvas system — tools open as persistent tabs in the right canvas panel
-- 10 interactive financial models with deterministic calculation engine (zustand state)
+- 11 interactive canvas model components backed by legacy pure calculation helpers and zustand state
 - 5-stage sourcing engine with Google Places integration
 - Premium PDF export via Puppeteer (headless Chromium) + Chart.js
 
 ## Critical Rules — Read These First
-1. **MONTHLY SUBSCRIPTIONS.** Free (unlimited chat + 1 deliverable) / $79 Solo / $199 Pro / $499 Team / $2,500+ Enterprise. No per-deal fees. No wallet.
+1. **MONTHLY SUBSCRIPTIONS.** Free (unlimited chat + 1 deliverable) / $99 Solo / $249 Pro / $749 Team / $3,000+ Enterprise. Legacy $79 / $199 / $499 / $2,500+ references are early-access or annual-equivalent only. No per-deal fees. No wallet.
 2. **WALLET IS DEAD.** walletService, paywallService, dealExecutionFee, platformFeeService deleted. Never recreate.
 3. **FREE TIER.** Unlimited conversation. ONE free deliverable per user. Paywall triggers after first free deliverable, NOT at a fixed gate.
 4. **V6App.tsx is the ONLY current app shell.** Never create parallel layouts. All UI changes go through the V6 shell/components.
@@ -34,6 +34,7 @@ AI-powered deal intelligence platform for business acquisitions from $300K to me
 9. **Financial data: zero hallucination.** Extract exactly from documents, never invent numbers.
 10. **All money stored in cents (integers).** Never use floating point for financial values.
 11. **Mobile browser first.** Design for mobile, then adapt to desktop.
+12. **THE LINE is product law.** Read `THE_LINE_POLICY.md`. Yulia shows analysis, options, and implications; the user decides. No recommendations for regulated transaction decisions, negotiation, counterparty contact, custody, signing, filing, legal/tax/accounting/appraisal opinions, success fees, referral fees, or deal-value fees.
 
 ## Design System
 **The V6 design language is the two CD handoff bundles** at the repo root: `design_handoff_smbx_desktop_material/` (desktop) and `design_handoff_smbx_app store/` (mobile). Production implements them faithfully — see `DESIGN_SOURCE.md` for the file-by-file implementation map. For a quick token reference, read `DESIGN_TOKENS.md` (auto-generated from `client/src/index.css` by `npm run design:extract`). Reuse saved Studio/List/Compete/texture-card primitives; do not invent adjacent card/button styles when an existing primitive fits.
@@ -44,30 +45,32 @@ AI-powered deal intelligence platform for business acquisitions from $300K to me
 
 ## Pricing Model — Monthly Subscriptions
 **Free:** Unlimited Yulia Q&A, ONE ValueLens or deal score (email required)
-**$79 Solo:** Unlimited ValueLens, deal scoring, VRR, SDE/EBITDA analysis, exports
-**$199 Pro:** Everything in Solo + CIM, deal room, matching, sourcing, DD, LOI
-**$499 Team:** Shared deal vault, firm templates, seats, and specialist handoff coordination
-**$2,500+ Enterprise:** Everything in Team + single-tenant, SSO, API controls, portfolio infrastructure
+**$99 Solo:** Unlimited ValueLens, deal scoring, VRR, SDE/EBITDA analysis, exports, and one supervised MCP/agent key
+**$249 Pro:** Everything in Solo + CIM, deal room, market discovery, source routing, DD, LOI scaffolds, and three supervised MCP/agent keys
+**$749 Team:** Shared deal vault, firm templates, seats, specialist handoff coordination, and supervised agent workflows
+**$3,000+ Enterprise:** Everything in Team + single-tenant, SSO, API controls, portfolio infrastructure, custom governance, and governed autonomous agent scope
 
-## Four Journeys × Six Gates
+Credits are included plan allowances and governance controls, not a wallet. Event artifacts may have flat software prices or consume included credits, but no fee may vary with deal value, close, or outcome.
+
+## Journeys, Stages, and Deal-Mechanics Gates
+Top-level product journeys remain SELL, BUY, RAISE, and PMI. SELL/BUY/RAISE expose six user-facing stages; PMI exposes four post-close stages.
+
 - **SELL:** S0 Intake → S1 Financials → S2 Valuation → S3 Packaging → S4 Market Matching → S5 Closing
 - **BUY:** B0 Thesis → B1 Sourcing → B2 Valuation → B3 Due Diligence → B4 Structuring → B5 Closing
 - **RAISE:** R0 Intake → R1 Financial Package → R2 Investor Materials → R3 Outreach → R4 Terms → R5 Closing
 - **PMI:** PMI0 Day 0 → PMI1 Stabilization → PMI2 Assessment → PMI3 Optimization
 
-## Calculation Engine (client/src/lib/calculations/)
-22 formula types, all pure JS, <16ms, deterministic:
-- SDE, EBITDA, DSCR, IRR (Newton-Raphson), MOIC, FCF, DCF
-- Valuation (multiple-based, blended multi-methodology)
-- LBO full model (pro forma, sources/uses, exit analysis)
-- SBA financing (eligibility, amortization)
-- Tax impact (asset sale §1060, stock sale, goodwill §197, installment §453)
-- Cap table dilution + exit waterfall
-- Earnout expected value, covenant compliance, working capital
-- Sensitivity matrix builder
+The current DEFINITIVE substrate is broader than those stage labels. `server/services/definitiveDealMechanicsCatalog.ts` defines the active v1.1 deal-mechanics catalog: 30 gates and 123 model slots (M101-M223), including G28 Distressed / Restructuring, G29 Capital Structure & Liability Management, and G30 Real Estate & Asset-Class Overlays. Agents should route through `compose_model_stack`, the route map, and DealState rather than hard-coding only the four journey stage lists.
 
-## 10 Interactive Models (client/src/components/models/)
-Valuation Explorer, LBO, SBA Financing, Tax Impact, Cap Table, Sensitivity Matrix, Deal Comparison, Earnout, Working Capital, Covenant Compliance. All use zustand store, react-chartjs-2 charts, responsive grids.
+## Calculation and Model Runtime
+There are two layers:
+
+- **Client canvas calculation helpers:** `client/src/lib/calculations/core.ts` contains legacy pure JS helpers for the human interactive canvas: SDE, EBITDA, valuation, DSCR/debt service, SBA financing/amortization, IRR/MOIC, LBO/pro forma, sensitivity, FCF, working capital peg, covenant compliance, tax impact, cap table dilution, exit waterfall, earnout, installment sale, and DCF. This is not the complete substrate catalog.
+- **Server V19/DEFINITIVE runtime:** `server/services/v19ModelRuntime.ts` contains the model-backed runtime used by Yulia/agents, currently covering 100+ `MODEL.*.v1` definitions across valuation, QoE, financing, structure, tax, legal economics, real estate, IP, restructuring, capital structure, secondaries, PMI, and research-only overlays. `npm run test:definitive-conformance` currently covers 202 model-runtime cases.
+- **DEFINITIVE deal-mechanics catalog:** `server/services/definitiveDealMechanicsCatalog.ts` is the broader route/discovery catalog with 123 M-slots and 30 gates. Some slots are executable now, some are professional-handoff or research-only, and some are reserved.
+
+## 11 Interactive Canvas Models (client/src/components/models/)
+Valuation Explorer, LBO, SBA Financing, DCF, Tax Impact, Cap Table, Sensitivity Matrix, Deal Comparison, Earnout, Working Capital, and Covenant Compliance. These are the human canvas components, not the full agent/substrate model inventory.
 
 ## Yulia's Canvas Tools
 - `create_model_tab` — opens interactive models from conversation
@@ -79,6 +82,7 @@ Valuation Explorer, LBO, SBA Financing, Tax Impact, Cap Table, Sensitivity Matri
 ## Reference Documents
 - **YULIA_AGENCY_SPEC.md** — Product/architecture doctrine for Yulia as the agentic operating layer: advisor posture without licensed-advisor boundary crossing, permission levels, surface contracts, data-room/file architecture, and implementation priorities.
 - **YULIA_AGENCY_IMPLEMENTATION_PLAN.md** — Practical wiring plan for context packs, prompt governance, governed tool execution, staged approvals, surface actions, Today, Files, and Data Room.
+- **THE_LINE_POLICY.md** — Hard operating policy for pricing, artifacts, Yulia refusals, marketing language, and drift triggers around securities, UPL, tax/accounting/appraisal, brokerage, and transaction-compensation boundaries.
 - **DEFINITIVE v1.0** = `methodology/DEFINITIVE_BUILD_PLAN.md` + V19 baseline docs below.
   - DEFINITIVE is the current agent-access/spec/substrate build target as of May 20, 2026.
   - Doctrine: smbX is the M&A diligence substrate; Yulia is the human reference surface.
@@ -95,8 +99,10 @@ Valuation Explorer, LBO, SBA Financing, Tax Impact, Cap Table, Sensitivity Matri
 | File | Purpose |
 |------|---------|
 | client/src/components/v6/V6App.tsx | Current app shell — catch-all routes, desktop/mobile V6 workspace, tabbed canvas |
-| client/src/components/models/ | 10 interactive financial model components |
-| client/src/lib/calculations/core.ts | Deterministic calculation engine (22 formulas) |
+| client/src/components/models/ | 11 interactive financial model components for the human canvas |
+| client/src/lib/calculations/core.ts | Legacy pure calculation helpers for canvas models |
+| server/services/v19ModelRuntime.ts | Server-side V19 model runtime for executable/research `MODEL.*.v1` definitions |
+| server/services/definitiveDealMechanicsCatalog.ts | DEFINITIVE v1.1 123-slot / 30-gate deal-mechanics catalog |
 | client/src/lib/modelStore.ts | Zustand store for model tab state |
 | client/src/components/shared/ChatDock.tsx | THE chat input — used everywhere |
 | client/src/components/shared/DarkModeToggle.tsx | Dark mode + Safari toolbar color management |
@@ -109,6 +115,11 @@ Valuation Explorer, LBO, SBA Financing, Tax Impact, Cap Table, Sensitivity Matri
 | server/constants/v19Leagues.ts | V19 L1-L10 league classification constants |
 | server/services/sourcingPipelineService.ts | 5-stage sourcing engine |
 | server/services/tools.ts | 35 agentic tools |
+| server/services/definitiveConnectorDistribution.ts | Claude-first connector launch package and marketplace evidence pack |
+| server/services/definitiveAssistantDistributionReadiness.ts | Claude/ChatGPT/MCP launch readiness and revenue blocker map |
+| server/services/definitiveOpenApiSpec.ts | OpenAPI package for ChatGPT GPT Actions and enterprise review |
+| server/services/definitiveRemoteMcpTransport.ts | Streamable HTTP `/mcp` transport and registry `server.json` surface |
+| server/services/definitiveMcpAuthMetadata.ts | OAuth protected-resource metadata and `WWW-Authenticate` challenge helper for `/mcp` |
 | server/services/premiumPdfRenderer.ts | Puppeteer HTML→PDF with Chart.js |
 | server/services/chartService.ts | Chart configs for PDF export |
 | server/services/subscriptionService.ts | Subscription management + Stripe |
@@ -145,4 +156,5 @@ npm run build        # Build for production
 DATABASE_URL, ANTHROPIC_API_KEY, GOOGLE_AI_API_KEY, OPENAI_API_KEY,
 GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_PLACES_API_KEY,
 STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET,
+STRIPE_PRICE_SOLO, STRIPE_PRICE_PRO, STRIPE_PRICE_TEAM, STRIPE_PRICE_ENTERPRISE,
 JWT_SECRET, NODE_ENV, PORT, APP_URL, CENSUS_API_KEY, TEST_MODE

@@ -191,11 +191,11 @@ export function composeDefinitiveApplicableMechanics(
 ): DefinitiveApplicableMechanic[] {
   const routeMap = buildDefinitiveDealRouteMap();
   const matches = new Map<string, { route: DefinitiveDealRouteMapEntry; score: number }>();
-  const queryTokens = tokenizeRouteProfile([
+  const queryTokens = tokenizeRouteProfile(expandRouteProfileText([
     input.dealType,
     input.industry,
     input.jurisdiction,
-  ].filter(Boolean).join(' '));
+  ].filter(Boolean).join(' '), input.journey));
   const triggeredGates = [...new Set((input.triggeredGates || []).filter(Boolean).map(gate => gate.toUpperCase()))];
   const limit = Number.isFinite(input.limit) && Number(input.limit) > 0 ? Number(input.limit) : 72;
 
@@ -309,6 +309,26 @@ export function buildDefinitiveSurfaceMechanicsSummary(): DefinitiveSurfaceMecha
       yuliaGuidance: surfaceYuliaGuidance(surface, readiness, needs.passThrough.length),
     };
   });
+}
+
+function expandRouteProfileText(text: string, journey?: DefinitiveJourney | null) {
+  const normalized = normalizeText(text);
+  const aliases = [text];
+
+  if (journey === 'buy' && /healthy[_ ]buy[_ ]side|buy[_ ]side|acquisition|search/.test(normalized)) {
+    aliases.push('private company acquisition SMB acquisition asset purchase stock purchase cash deals working capital true-up quality of earnings purchase agreement financing');
+  }
+  if (journey === 'sell' && /healthy[_ ]sell[_ ]side|sell[_ ]side|sale|exit|go[_ ]to[_ ]market/.test(normalized)) {
+    aliases.push('business sale private company sale founder sale rollover deferred consideration working capital true-up quality of earnings taxable M&A');
+  }
+  if (journey === 'raise' && /capital raise|raise|fundraise|growth/.test(normalized)) {
+    aliases.push('capital raise financing convertible SAFE venture debt working capital true-up securities diligence');
+  }
+  if (journey === 'pmi' && /post close|post-close|pmi|integration/.test(normalized)) {
+    aliases.push('post close integration working capital true-up PMI close readiness operating handoff');
+  }
+
+  return aliases.join(' ');
 }
 
 function buildRouteEntry(model: DefinitiveModelCatalogEntry): DefinitiveDealRouteMapEntry {

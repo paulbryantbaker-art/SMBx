@@ -17,6 +17,7 @@ import { getDefinitiveAuthoritySeedPlan } from './definitiveAuthoritySeedPlan.js
 import { getDefinitiveSubstrateArchitecturePlan } from './definitiveSubstrateArchitecturePlan.js';
 import { buildDefinitiveSchemaRegistry } from './definitiveSchemas.js';
 import { buildDefinitiveDealRunbooksSurface } from './definitiveDealRunbooks.js';
+import { buildDefinitiveConnectorDistributionPackage } from './definitiveConnectorDistribution.js';
 
 export function buildAgentCard() {
   const models = listRegisteredModels();
@@ -34,6 +35,7 @@ export function buildAgentCard() {
   const substrateArchitecture = getDefinitiveSubstrateArchitecturePlan();
   const schemaRegistry = buildDefinitiveSchemaRegistry();
   const dealRunbooks = buildDefinitiveDealRunbooksSurface();
+  const connectorDistribution = buildDefinitiveConnectorDistributionPackage();
   const lineSummary = lineInventory.reduce<Record<string, number>>((acc, contract) => {
     acc[contract.lineStatus] = (acc[contract.lineStatus] || 0) + 1;
     return acc;
@@ -52,8 +54,18 @@ export function buildAgentCard() {
       specManifestEndpoint: '/.well-known/definitive.json',
       mcpDiscoveryEndpoint: '/.well-known/mcp',
       mcpServerCardEndpoint: '/.well-known/mcp/server-card.json',
+      mcpServerJsonEndpoint: '/server.json',
+      mcpEndpoint: '/mcp',
+      oauthProtectedResourceEndpoint: '/.well-known/oauth-protected-resource/mcp',
+      oauthAuthorizationServerEndpoint: '/.well-known/oauth-authorization-server',
+      oauthRegisterEndpoint: '/oauth/register',
+      oauthAuthorizeEndpoint: '/oauth/authorize',
+      oauthTokenEndpoint: '/oauth/token',
       schemaRegistryEndpoint: '/api/definitive/schemas',
       wellKnownSchemaRegistryEndpoint: '/.well-known/definitive-schemas.json',
+      openApiSpecEndpoint: '/api/definitive/openapi.json',
+      gptActionsOpenApiSpecEndpoint: '/api/definitive/gpt-actions/openapi.json',
+      gptActionsToolEndpoint: '/api/definitive/gpt-actions/{toolName}',
       toolsEndpoint: '/api/definitive/tools/list',
       callEndpoint: '/api/definitive/tools/{toolName}/call',
       agentTokenIssueEndpoint: '/api/definitive/agent-tokens',
@@ -73,6 +85,9 @@ export function buildAgentCard() {
       modelSlotEndpoint: '/api/definitive/model-catalog/{slotId}',
       dealMechanicsModelSlotEndpoint: '/api/definitive/deal-mechanics/models/{slotId}',
       registryPackageEndpoint: '/api/definitive/registry-package',
+      connectorDistributionEndpoint: '/api/definitive/connector-distribution',
+      assistantDistributionReadinessEndpoint: '/api/definitive/assistant-distribution-readiness',
+      mcpLaunchReadinessEndpoint: '/api/definitive/mcp-launch-readiness',
       enterpriseAllowListsEndpoint: '/api/definitive/enterprise-allow-lists',
       dealMechanicsVersion: dealMechanics.version,
       dealMechanicsUri: dealMechanics.uri,
@@ -100,6 +115,8 @@ export function buildAgentCard() {
       toolMetadataNamingConvention: substrateArchitecture.toolMetadataDoctrine.namingConvention,
       agentDiscoverabilityLayers: substrateArchitecture.agentDiscoverabilityLayers.map(layer => layer.id),
       agentDesirabilitySignals: substrateArchitecture.agentDesirabilitySignals.map(signal => signal.id),
+      connectorDistributionStatus: connectorDistribution.status,
+      connectorLaunchPriority: connectorDistribution.launchPriority,
       dealMappingStatus: dealMappingCoverage.status,
       dealRouteMapStatus: dealRouteMap.status,
       passThroughPricingRule: passThroughSurface.pricingRule,
@@ -154,8 +171,12 @@ export function buildAgentCard() {
       {
         id: 'definitive_mcp_v0_1',
         label: 'DEFINITIVE MCP/API v0.1 tools',
-        status: 'internal',
+        status: 'remote_mcp_ready_jwt_bearer',
         protocol: definitiveTools.protocol,
+        endpoint: '/mcp',
+        oauthProtectedResourceEndpoint: '/.well-known/oauth-protected-resource/mcp',
+        oauthAuthorizationServerEndpoint: '/.well-known/oauth-authorization-server',
+        transport: 'streamable-http',
         tools: definitiveTools.tools.map(tool => ({
           name: tool.name,
           lineStatus: tool.lineStatus,
@@ -255,6 +276,27 @@ export function buildAgentCard() {
         noRejectionContract: schemaRegistry.noRejectionContract,
       },
       {
+        id: 'definitive_connector_distribution',
+        label: 'Claude-first connector distribution package',
+        status: connectorDistribution.status,
+        version: connectorDistribution.schema,
+        endpoint: '/api/definitive/connector-distribution',
+        gptActionsOpenApiSpecEndpoint: '/api/definitive/gpt-actions/openapi.json',
+        launchPriority: connectorDistribution.launchPriority,
+        primaryWedge: connectorDistribution.positioning.primaryWedge,
+        submitNowBlockers: connectorDistribution.submitNowBlockers,
+      },
+      {
+        id: 'definitive_assistant_distribution_readiness',
+        label: 'Assistant distribution launch readiness',
+        status: 'available',
+        version: 'DEFINITIVE.assistant-distribution-readiness.v0.1',
+        endpoint: '/api/definitive/assistant-distribution-readiness',
+        legacyEndpoint: '/api/definitive/mcp-launch-readiness',
+        fastestRevenueLane: 'chatgpt_gpt_actions',
+        strategicConnectorLanes: ['claude_custom_connector', 'chatgpt_apps_sdk'],
+      },
+      {
         id: 'definitive_pass_through_surface',
         label: 'THE LINE-safe pass-through substrate',
         status: 'target',
@@ -282,10 +324,22 @@ export function buildAgentCard() {
       '/.well-known/definitive.json',
       '/.well-known/mcp',
       '/.well-known/mcp/server-card.json',
+      '/.well-known/mcp/server.json',
+      '/server.json',
+      '/.well-known/oauth-protected-resource',
+      '/.well-known/oauth-protected-resource/mcp',
+      '/.well-known/oauth-authorization-server',
+      '/.well-known/openid-configuration',
+      '/oauth/register',
+      '/oauth/authorize',
+      '/oauth/token',
+      '/mcp',
       '/.well-known/definitive-schemas.json',
       '/api/agent-card',
       '/api/definitive/spec',
       '/api/definitive/schemas',
+      '/api/definitive/openapi.json',
+      '/api/definitive/gpt-actions/openapi.json',
       '/api/definitive/pass-through-catalog',
       '/api/definitive/authority-seed-plan',
       '/api/definitive/substrate-architecture',
@@ -295,9 +349,13 @@ export function buildAgentCard() {
       '/api/definitive/model-catalog/{slotId}',
       '/api/definitive/deal-mechanics/models/{slotId}',
       '/api/definitive/registry-package',
+      '/api/definitive/connector-distribution',
+      '/api/definitive/assistant-distribution-readiness',
+      '/api/definitive/mcp-launch-readiness',
       '/api/definitive/enterprise-allow-lists',
     ],
     authenticatedEndpoints: [
+      '/mcp',
       '/api/definitive/tools/list',
       '/api/definitive/line/inventory',
       '/api/definitive/corpus/observation-types',
@@ -309,6 +367,7 @@ export function buildAgentCard() {
       '/api/definitive/agent-tokens',
       '/api/definitive/tools/{toolName}/call',
       '/api/definitive/tools/call',
+      '/api/definitive/gpt-actions/{toolName}',
       '/api/definitive/corpus/rights/grants',
       '/api/definitive/corpus/rights/grants/{grantId}/revoke',
       '/api/definitive/corpus/observations',

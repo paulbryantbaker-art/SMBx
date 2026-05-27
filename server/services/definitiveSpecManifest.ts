@@ -23,6 +23,7 @@ import { getDefinitiveSubstrateArchitecturePlan } from './definitiveSubstrateArc
 import { listDefinitiveMcpTools } from './definitiveMcp.js';
 import { buildDefinitiveSchemaRegistry } from './definitiveSchemas.js';
 import { buildDefinitiveDealRunbooksSurface } from './definitiveDealRunbooks.js';
+import { buildDefinitiveConnectorDistributionPackage } from './definitiveConnectorDistribution.js';
 
 export function buildDefinitiveSpecManifest() {
   const tools = listDefinitiveMcpTools();
@@ -40,6 +41,7 @@ export function buildDefinitiveSpecManifest() {
   const substrateArchitecture = getDefinitiveSubstrateArchitecturePlan();
   const schemaRegistry = buildDefinitiveSchemaRegistry();
   const dealRunbooks = buildDefinitiveDealRunbooksSurface();
+  const connectorDistribution = buildDefinitiveConnectorDistributionPackage();
   const lineSummary = lineInventory.reduce<Record<string, number>>((acc, contract) => {
     acc[contract.lineStatus] = (acc[contract.lineStatus] || 0) + 1;
     return acc;
@@ -67,8 +69,21 @@ export function buildDefinitiveSpecManifest() {
       specManifest: '/.well-known/definitive.json',
       mcpDiscovery: '/.well-known/mcp',
       mcpServerCard: '/.well-known/mcp/server-card.json',
+      mcpServerJson: '/server.json',
+      wellKnownMcpServerJson: '/.well-known/mcp/server.json',
+      mcpEndpoint: '/mcp',
+      oauthProtectedResource: '/.well-known/oauth-protected-resource',
+      oauthProtectedResourceMcp: '/.well-known/oauth-protected-resource/mcp',
+      oauthAuthorizationServer: '/.well-known/oauth-authorization-server',
+      oauthOpenIdConfiguration: '/.well-known/openid-configuration',
+      oauthRegister: '/oauth/register',
+      oauthAuthorize: '/oauth/authorize',
+      oauthToken: '/oauth/token',
       schemaRegistry: '/api/definitive/schemas',
       wellKnownSchemaRegistry: '/.well-known/definitive-schemas.json',
+      openApiSpec: '/api/definitive/openapi.json',
+      gptActionsOpenApiSpec: '/api/definitive/gpt-actions/openapi.json',
+      gptActionsToolCall: '/api/definitive/gpt-actions/{toolName}',
       specApi: '/api/definitive/spec',
       passThroughCatalog: '/api/definitive/pass-through-catalog',
       authoritySeedPlan: '/api/definitive/authority-seed-plan',
@@ -79,6 +94,9 @@ export function buildDefinitiveSpecManifest() {
       modelSlot: '/api/definitive/model-catalog/{slotId}',
       dealMechanicsModelSlot: '/api/definitive/deal-mechanics/models/{slotId}',
       registryPackage: '/api/definitive/registry-package',
+      connectorDistribution: '/api/definitive/connector-distribution',
+      assistantDistributionReadiness: '/api/definitive/assistant-distribution-readiness',
+      mcpLaunchReadiness: '/api/definitive/mcp-launch-readiness',
       enterpriseAllowLists: '/api/definitive/enterprise-allow-lists',
       toolsList: '/api/definitive/tools/list',
       toolCall: '/api/definitive/tools/{toolName}/call',
@@ -97,10 +115,22 @@ export function buildDefinitiveSpecManifest() {
         '/.well-known/definitive.json',
         '/.well-known/mcp',
         '/.well-known/mcp/server-card.json',
+        '/.well-known/mcp/server.json',
+        '/server.json',
+        '/.well-known/oauth-protected-resource',
+        '/.well-known/oauth-protected-resource/mcp',
+        '/.well-known/oauth-authorization-server',
+        '/.well-known/openid-configuration',
+        '/oauth/register',
+        '/oauth/authorize',
+        '/oauth/token',
+        '/mcp',
         '/.well-known/definitive-schemas.json',
         '/api/agent-card',
         '/api/definitive/spec',
         '/api/definitive/schemas',
+        '/api/definitive/openapi.json',
+        '/api/definitive/gpt-actions/openapi.json',
         '/api/definitive/pass-through-catalog',
         '/api/definitive/authority-seed-plan',
         '/api/definitive/substrate-architecture',
@@ -110,6 +140,9 @@ export function buildDefinitiveSpecManifest() {
         '/api/definitive/model-catalog/{slotId}',
         '/api/definitive/deal-mechanics/models/{slotId}',
         '/api/definitive/registry-package',
+        '/api/definitive/connector-distribution',
+        '/api/definitive/assistant-distribution-readiness',
+        '/api/definitive/mcp-launch-readiness',
         '/api/definitive/enterprise-allow-lists',
       ],
       authenticatedDiscovery: [
@@ -118,8 +151,10 @@ export function buildDefinitiveSpecManifest() {
         '/api/definitive/corpus/observation-types',
       ],
       authenticatedExecution: [
+        '/mcp',
         '/api/definitive/tools/call',
         '/api/definitive/tools/{toolName}/call',
+        '/api/definitive/gpt-actions/{toolName}',
         '/api/definitive/agent-tokens',
         '/api/definitive/deal-state/latest',
         '/api/definitive/deal-packets',
@@ -131,10 +166,29 @@ export function buildDefinitiveSpecManifest() {
       ],
     },
     transport: {
-      current: 'Public well-known discovery plus JWT-authenticated internal calls and token-bound scoped agent calls',
-      target: 'OAuth 2.1 + PKCE + audience-bound scoped tokens',
+      current: 'Public Streamable HTTP MCP endpoint at /mcp, public well-known discovery, OAuth protected-resource metadata, OAuth authorization-code/PKCE bridge, confidential GPT Actions OAuth client support, and audience-bound scoped-agent bearer execution',
+      target: 'OAuth 2.1 + PKCE/confidential connector clients + audience-bound scoped tokens',
+      mcpEndpoint: '/mcp',
+      oauthProtectedResource: '/.well-known/oauth-protected-resource/mcp',
+      oauthAuthorizationServer: '/.well-known/oauth-authorization-server',
+      oauthRegister: '/oauth/register',
+      oauthAuthorize: '/oauth/authorize',
+      oauthToken: '/oauth/token',
+      serverJson: '/server.json',
       scopeEnforcement:
         'Scoped agent bearer tokens must carry scopes in the token claims. requestedScopes may be omitted or narrowed, but cannot exceed token-bound scopes.',
+    },
+    connectorDistributionSurface: {
+      schema: connectorDistribution.schema,
+      status: connectorDistribution.status,
+      endpoint: '/api/definitive/connector-distribution',
+      openApiSpecEndpoint: '/api/definitive/openapi.json',
+      gptActionsOpenApiSpecEndpoint: '/api/definitive/gpt-actions/openapi.json',
+      assistantDistributionReadinessEndpoint: '/api/definitive/assistant-distribution-readiness',
+      primaryWedge: connectorDistribution.positioning.primaryWedge,
+      launchPriority: connectorDistribution.launchPriority,
+      proofEndpoints: connectorDistribution.proofEndpoints,
+      submitNowBlockers: connectorDistribution.submitNowBlockers,
     },
     toolSurface: {
       protocol: tools.protocol,

@@ -1,0 +1,135 @@
+{
+  "runId": "mcp-e2e-20260527095543-bf8f9477",
+  "target": "http://127.0.0.1:3002",
+  "appBaseUrl": "http://localhost:5173",
+  "startedAt": "2026-05-27T09:55:43.461Z",
+  "fixtures": {
+    "buy": {
+      "dealId": 522,
+      "title": "MCP E2E BUY mcp-e2e-20260527095543-bf8f9477",
+      "latestStateCid": "definitive:deal-state:sha256:0fc19a8910172c3f4dbba515fe0dedf860f1de67d9bd47a3a25a13845a1ef808",
+      "latestStateHash": "0fc19a8910172c3f4dbba515fe0dedf860f1de67d9bd47a3a25a13845a1ef808",
+      "expectedPacketTypes": [
+        "DealStateControlPacket.v0.1",
+        "LOIPacket.v0.1",
+        "DealPackage.v0.1"
+      ],
+      "packetRowIds": [
+        1080,
+        1081,
+        1082,
+        1083
+      ],
+      "modelExecutionIds": [
+        18
+      ]
+    },
+    "sell": {
+      "dealId": 523,
+      "title": "MCP E2E SELL mcp-e2e-20260527095543-bf8f9477",
+      "latestStateCid": "definitive:deal-state:sha256:e338ddb6b65f9214a5b5d30d61af3f58b20379eefde01b4cba9f00906c5511f0",
+      "latestStateHash": "e338ddb6b65f9214a5b5d30d61af3f58b20379eefde01b4cba9f00906c5511f0",
+      "expectedPacketTypes": [
+        "DealStateControlPacket.v0.1",
+        "DataRoomIndex.v0.1",
+        "DiligenceRequest.v0.1",
+        "DocumentDraft.v0.1",
+        "LOIPacket.v0.1",
+        "NegotiationBrief.v0.1",
+        "CloseReadiness.v0.1",
+        "FundsFlow.v0.1"
+      ],
+      "packetRowIds": [
+        1084,
+        1085,
+        1086,
+        1087,
+        1088,
+        1089,
+        1090,
+        1091,
+        1092,
+        1093
+      ],
+      "modelExecutionIds": []
+    },
+    "raise": {
+      "dealId": 524,
+      "title": "MCP E2E RAISE mcp-e2e-20260527095543-bf8f9477",
+      "latestStateCid": "definitive:deal-state:sha256:7103243cf1aac8af1b081c0e07c5311cd6a5bfdc822c3508cd45e336dd9ae62c",
+      "latestStateHash": "7103243cf1aac8af1b081c0e07c5311cd6a5bfdc822c3508cd45e336dd9ae62c",
+      "expectedPacketTypes": [
+        "DealStateControlPacket.v0.1",
+        "DocumentDraft.v0.1",
+        "DealPackage.v0.1"
+      ],
+      "packetRowIds": [
+        1094,
+        1095,
+        1096
+      ],
+      "modelExecutionIds": []
+    },
+    "pmi": {
+      "dealId": 525,
+      "title": "MCP E2E PMI mcp-e2e-20260527095543-bf8f9477",
+      "latestStateCid": "definitive:deal-state:sha256:707ceede84c7f013c9346ca08d3fa07a5786e75afdc2dfaa30571a8e01da600b",
+      "latestStateHash": "707ceede84c7f013c9346ca08d3fa07a5786e75afdc2dfaa30571a8e01da600b",
+      "expectedPacketTypes": [
+        "DealStateControlPacket.v0.1",
+        "PMIPlan.v0.1",
+        "DealPackage.v0.1"
+      ],
+      "packetRowIds": [
+        1097,
+        1098,
+        1099
+      ],
+      "modelExecutionIds": []
+    }
+  },
+  "finishedAt": "2026-05-27T09:56:04.298Z",
+  "totals": {
+    "passed": 9,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "name": "public discovery, initialize, tools/list, and unauthenticated challenge",
+      "status": "pass"
+    },
+    {
+      "name": "FIX-BUY-LBO-001 executes through /mcp and persists LBO/LOI/package artifacts",
+      "status": "pass"
+    },
+    {
+      "name": "FIX-SELLREP-001 executes sell-side LOI/DD/close readiness through /mcp",
+      "status": "pass"
+    },
+    {
+      "name": "FIX-RAISE-001 executes raise-side investor material path through /mcp",
+      "status": "pass"
+    },
+    {
+      "name": "FIX-PMI-001 executes post-close PMI path through /mcp",
+      "status": "pass"
+    },
+    {
+      "name": "FIX-LINE-001 refuses an unauthorized close action over /mcp",
+      "status": "pass"
+    },
+    {
+      "name": "protected app APIs retrieve connector-created DealState, packets, and model rows",
+      "status": "pass"
+    },
+    {
+      "name": "DB persistence/audit rows exist for DealState packets and model executions",
+      "status": "pass"
+    },
+    {
+      "name": "desktop and mobile app surfaces open connector-created work",
+      "status": "pass"
+    }
+  ]
+}

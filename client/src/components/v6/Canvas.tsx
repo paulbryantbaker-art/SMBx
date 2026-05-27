@@ -1,24 +1,26 @@
-import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useRef, type CSSProperties } from "react";
 import type { Tab, OpenTab, ModeId } from "./types";
 import type { User } from "../../hooks/useAuth";
 import type { ModelPreference } from "../../lib/modelPreference";
-import { V6TodayRoot } from "./modes/TodayRoot";
-import { V6PipelineRoot } from "./modes/PipelineRoot";
-import { V6FilesListView, V6FilesRoot } from "./modes/FilesRoot";
-import { V6SearchRoot } from "./modes/SearchRoot";
-import { V6DocsRoot } from "./modes/DocsRoot";
-import { V6AnalysisRoot } from "./modes/AnalysisRoot";
-import { V6IntelRoot } from "./modes/IntelRoot";
-import { V6LibraryRoot } from "./modes/LibraryRoot";
-import { V6DealView } from "./views/DealView";
-import { V6DocView } from "./views/DocView";
-import { V6AnalysisView } from "./views/AnalysisView";
-import { V6ModelCanvasView } from "./views/ModelCanvasView";
-import { V6SettingsView } from "./views/SettingsView";
-import { V6HistoryView } from "./views/HistoryView";
-import { V6StarterView } from "./views/StarterView";
-import { V6LearnView } from "./Learn";
-import { V6MarketingStudioView } from "./views/MarketingStudioView";
+
+const V6TodayRoot = lazy(() => import("./modes/TodayRoot").then(module => ({ default: module.V6TodayRoot })));
+const V6PipelineRoot = lazy(() => import("./modes/PipelineRoot").then(module => ({ default: module.V6PipelineRoot })));
+const V6FilesRoot = lazy(() => import("./modes/FilesRoot").then(module => ({ default: module.V6FilesRoot })));
+const V6FilesListView = lazy(() => import("./modes/FilesRoot").then(module => ({ default: module.V6FilesListView })));
+const V6SearchRoot = lazy(() => import("./modes/SearchRoot").then(module => ({ default: module.V6SearchRoot })));
+const V6DocsRoot = lazy(() => import("./modes/DocsRoot").then(module => ({ default: module.V6DocsRoot })));
+const V6AnalysisRoot = lazy(() => import("./modes/AnalysisRoot").then(module => ({ default: module.V6AnalysisRoot })));
+const V6IntelRoot = lazy(() => import("./modes/IntelRoot").then(module => ({ default: module.V6IntelRoot })));
+const V6LibraryRoot = lazy(() => import("./modes/LibraryRoot").then(module => ({ default: module.V6LibraryRoot })));
+const V6DealView = lazy(() => import("./views/DealView").then(module => ({ default: module.V6DealView })));
+const V6DocView = lazy(() => import("./views/DocView").then(module => ({ default: module.V6DocView })));
+const V6AnalysisView = lazy(() => import("./views/AnalysisView").then(module => ({ default: module.V6AnalysisView })));
+const V6ModelCanvasView = lazy(() => import("./views/ModelCanvasView").then(module => ({ default: module.V6ModelCanvasView })));
+const V6SettingsView = lazy(() => import("./views/SettingsView").then(module => ({ default: module.V6SettingsView })));
+const V6HistoryView = lazy(() => import("./views/HistoryView").then(module => ({ default: module.V6HistoryView })));
+const V6StarterView = lazy(() => import("./views/StarterView").then(module => ({ default: module.V6StarterView })));
+const V6LearnView = lazy(() => import("./Learn").then(module => ({ default: module.V6LearnView })));
+const V6MarketingStudioView = lazy(() => import("./views/MarketingStudioView").then(module => ({ default: module.V6MarketingStudioView })));
 
 interface CanvasProps {
   tabs: Tab[];
@@ -77,15 +79,17 @@ export function V6Canvas({ tabs, activeTabId, openTab, onPickMode, onTalkToYulia
     <div style={K.canvas}>
       <div ref={scrollRef} className="thin-scroll v6-canvas-scroll" style={K.canvasBody}>
         {activeTab && (
-          <V6TabContent
-            tab={activeTab}
-            openTab={openTab}
-            onPickMode={onPickMode}
-            onTalkToYulia={onTalkToYulia}
-            user={user}
-            onSignOut={onSignOut}
-            modelPreference={modelPreference}
-          />
+          <Suspense fallback={<CanvasContentLoader />}>
+            <V6TabContent
+              tab={activeTab}
+              openTab={openTab}
+              onPickMode={onPickMode}
+              onTalkToYulia={onTalkToYulia}
+              user={user}
+              onSignOut={onSignOut}
+              modelPreference={modelPreference}
+            />
+          </Suspense>
         )}
       </div>
     </div>
@@ -142,25 +146,15 @@ function Placeholder({ label, note }: { label: string; note?: string }) {
   );
 }
 
-export function V6Section({ eyebrow, title, sub, action, children }: {
-  eyebrow?: string;
-  title: string;
-  sub?: string;
-  action?: ReactNode;
-  children: ReactNode;
-}) {
+function CanvasContentLoader() {
   return (
-    <section style={{ marginBottom: 36 }}>
-      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 14 }}>
-        <div>
-          {eyebrow && <div className="mono" style={{ fontSize: 9.5, color: "var(--m-on-surface-mid)", letterSpacing: "0.14em", fontWeight: 600 }}>{eyebrow}</div>}
-          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 20, letterSpacing: "-0.025em", margin: "4px 0 0", color: "var(--m-on-surface)" }}>{title}</h2>
-          {sub && <div style={{ fontSize: 12.5, color: "var(--m-on-surface-mid)", marginTop: 3 }}>{sub}</div>}
-        </div>
-        {action}
+    <div style={K.loader}>
+      <div style={K.loaderPulse} />
+      <div>
+        <div style={K.loaderTitle}>Loading workspace</div>
+        <div style={K.loaderSub}>Preparing this surface...</div>
       </div>
-      {children}
-    </section>
+    </div>
   );
 }
 
@@ -177,5 +171,29 @@ const K: Record<string, CSSProperties> = {
     padding: "28px 40px 56px",
     width: "100%",
     boxSizing: "border-box",
+  },
+  loader: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    color: "var(--m-on-surface-mid)",
+    minHeight: 220,
+  },
+  loaderPulse: {
+    width: 10,
+    height: 10,
+    borderRadius: 999,
+    background: "var(--m-accent)",
+    boxShadow: "0 0 0 6px rgba(138,154,232,0.14)",
+  },
+  loaderTitle: {
+    fontFamily: "var(--font-display)",
+    fontWeight: 700,
+    fontSize: 14,
+    color: "var(--m-on-surface)",
+  },
+  loaderSub: {
+    fontSize: 12,
+    marginTop: 2,
   },
 };

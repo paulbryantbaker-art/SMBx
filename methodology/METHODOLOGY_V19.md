@@ -2269,7 +2269,7 @@ smbX.ai cannot match those advantages directly. The differentiation is **breadth
 
 **Advantage 3 — Anti-Drift:** Bain associates are humans. They forget, they assume, they get tired. The L1/L2/L6 separation means Yulia produces the SAME deterministic answer every time. Citations are validated every time.
 
-**Advantage 4 — Cost:** Bain's hourly rate-equivalent is $500–$2,000. smbX.ai at $199–$2,500/month is 50–500× cheaper.
+**Advantage 4 — Cost:** Bain's hourly rate-equivalent is $500–$2,000. smbX.ai at $199–$2,500+/month is still dramatically cheaper than traditional advisory labor.
 
 **Advantage 5 — 24/7 Availability:** Bain doesn't respond at 11pm. Yulia does.
 
@@ -2462,15 +2462,15 @@ Each CIM section carries a section-level audit record (which L1 model fed it, wh
 
 ## 21.0 SUBSCRIPTION MODEL (Carried from V17 § 15, AUTHORITATIVE Pricing)
 
-### 21.1 Pricing Tiers (LOCKED — March 26, 2026)
+### 21.1 Pricing Tiers (LOCKED — May 16, 2026)
 
 | Tier | Price | Inclusions |
 |---|---|---|
 | **Free** | $0 | Unlimited chat + 1 deliverable (email required after first deliverable) |
-| **Solo** | $79 / mo | Single user; unlimited deliverables; SDE / EBITDA / valuation / SBA / basic LBO |
-| **Pro** | $199 / mo | Single user; everything Solo + QoE Lite + CIM + full L4 model stack |
-| **Team** | $499 / mo | 5 seats; everything Pro + RBAC + deal-room sharing |
-| **Enterprise** | $2,500+ / mo | Custom seats; white-label; MCP server access (post-launch); SLA |
+| **Solo** | $79 / mo | Single user; unlimited deliverables; SDE / EBITDA / valuation / SBA / basic LBO; one supervised MCP/agent key |
+| **Pro** | $199 / mo | Single user; everything Solo + QoE Lite + CIM + full L4 model stack; three supervised MCP/agent keys |
+| **Team** | $499 / mo | 5 seats; everything Pro + RBAC + deal-room sharing + supervised agent workflows |
+| **Enterprise** | $2,500+ / mo | Custom seats; white-label; MCP/API access; governed autonomous agent scope; SLA |
 
 ### 21.2 Pricing Principles (LOCKED)
 
@@ -2492,7 +2492,7 @@ Each CIM section carries a section-level audit record (which L1 model fed it, wh
 
 ### 21.4 Enterprise Floor (LOCKED)
 
-$2,500+ / month — to capture corp dev and family office willingness-to-pay (not the prior $999 floor)
+$2,500+ / month — to capture corp dev and family office willingness-to-pay and reflect the MCP/audit substrate floor
 
 ### 21.5 MCP Server (Post-Launch Enterprise Feature)
 
@@ -2522,4 +2522,3 @@ $2,500+ / month Enterprise feature. Announced at launch, shipped 3–6 months la
 * `METHODOLOGY_V18b_LEGAL_AMENDMENT.md`
 
 **Effective:** May 14, 2026. CC implementation per `CC_V19_IMPLEMENTATION_BRIEF.md`.
-

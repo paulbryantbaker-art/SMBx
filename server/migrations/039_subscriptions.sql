@@ -1,6 +1,7 @@
 -- 039_subscriptions.sql
 -- Switch from one-time execution fee to monthly subscriptions.
--- Plans: free (default), starter ($49), professional ($149), enterprise ($999).
+-- Canonical monthly plans are free, solo, pro, team, enterprise.
+-- Legacy starter/professional keys may still exist in older subscription rows and are normalized in application code.
 
 -- ============================================================
 -- SUBSCRIPTIONS TABLE
@@ -8,7 +9,7 @@
 CREATE TABLE IF NOT EXISTS subscriptions (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id),
-  plan VARCHAR(20) NOT NULL DEFAULT 'free',       -- free | starter | professional | enterprise
+  plan VARCHAR(20) NOT NULL DEFAULT 'free',       -- free | solo | pro | team | enterprise | legacy starter/professional
   status VARCHAR(20) NOT NULL DEFAULT 'active',   -- active | canceled | past_due | trialing
   stripe_subscription_id VARCHAR(255),
   stripe_customer_id VARCHAR(255),

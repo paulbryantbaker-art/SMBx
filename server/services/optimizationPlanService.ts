@@ -64,7 +64,7 @@ interface DealFinancials {
 
 /**
  * Generate a comprehensive optimization plan for a seller.
- * Uses Claude to create personalized, industry-specific recommendations.
+ * Uses Claude to create personalized, industry-specific improvement options.
  */
 export async function generateOptimizationPlan(deal: DealFinancials): Promise<OptimizationPlan> {
   // 1. Fetch industry benchmarks if available
@@ -101,7 +101,7 @@ export async function generateOptimizationPlan(deal: DealFinancials): Promise<Op
   const response = await client.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 4096,
-    system: `You are an M&A advisor generating a seller value optimization plan. Return ONLY valid JSON.`,
+    system: `You are an M&A deal-intelligence operator generating a seller value optimization plan. Return ONLY valid JSON. Present improvement options with implications; do not provide legal, tax, or regulated transaction advice.`,
     messages: [{
       role: 'user',
       content: `Generate a value optimization plan for this business:

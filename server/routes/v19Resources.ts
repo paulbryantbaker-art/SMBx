@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { randomUUID } from 'node:crypto';
 import { listV19ResourceContract } from '../services/v19ResourceContract.js';
 import { readV19Resource } from '../services/v19ResourceReader.js';
 import { executeDefinitiveMcpTool, listDefinitiveMcpTools } from '../services/definitiveMcp.js';
@@ -23,8 +24,30 @@ import {
   readV19UsageMeter,
   recordV19UsageEvent,
 } from '../services/v19EntitlementService.js';
+import {
+  buildTokenScopedDefinitiveEnvelope as buildTokenScopedDefinitiveEnvelopeFromClaims,
+  normalizeScopeClaim,
+} from '../services/definitiveAgentTokenScope.js';
 
 export const v19ResourcesRouter = Router();
+
+const GPT_ACTION_TOOL_ALLOWLIST = new Set([
+  'introspect_capabilities',
+  'describe_methodology',
+  'estimate_deal_cost',
+  'get_deal_runbook',
+  'lookup_model_slot',
+  'compose_model_stack',
+  'ingest_deal_payload',
+  'update_deal_payload',
+  'check_completeness',
+  'compose_deal_plan',
+  'resume_deal',
+  'prepare_ioi_packet',
+  'prepare_loi_packet',
+  'compose_data_room_index',
+  'compose_close_readiness',
+]);
 
 v19ResourcesRouter.get('/v19/resource-contract', (_req, res) => {
   res.json(listV19ResourceContract());
@@ -112,6 +135,9 @@ v19ResourcesRouter.post('/definitive/agent-tokens', async (req, res) => {
     mandateId,
     beneficialCustomerId: req.body?.beneficialCustomerId,
     billingOrgId: req.body?.billingOrgId,
+    audience: `${requestOrigin(req)}/mcp`,
+    issuer: requestOrigin(req),
+    clientId: typeof req.body?.clientId === 'string' ? req.body.clientId : 'smbx-agent-token-bridge',
     expiresInSeconds: ttlMinutes * 60,
   });
 
@@ -240,6 +266,52 @@ v19ResourcesRouter.get('/definitive/audit-packets/:auditTrailId', async (req, re
   } catch (err: any) {
     console.error('[definitive] read audit packet failed:', err.message);
     return res.status(500).json({ error: 'Failed to read DEFINITIVE audit packet' });
+  }
+});
+
+v19ResourcesRouter.post('/definitive/gpt-actions/:toolName', async (req, res) => {
+  const userId = Number((req as any).userId);
+  if (!Number.isFinite(userId) || userId <= 0) return res.status(401).json({ error: 'Not authenticated' });
+
+  const toolName = String(req.params.toolName || '').trim();
+  if (!GPT_ACTION_TOOL_ALLOWLIST.has(toolName)) {
+    return res.status(404).json({
+      ok: false,
+      error: 'gpt_action_not_exposed',
+      message: 'This DEFINITIVE tool is not exposed through the focused GPT Actions facade. Use the MCP endpoint or generic tool-call API for broader tool access.',
+      allowedTools: [...GPT_ACTION_TOOL_ALLOWLIST].sort(),
+    });
+  }
+
+  const body = req.body && typeof req.body === 'object' ? req.body : {};
+  const toolInput = body.input && typeof body.input === 'object' ? body.input : stripEnvelopeFields(body);
+  const envelope = {
+    ...(body.envelope && typeof body.envelope === 'object' ? body.envelope : {}),
+    requestId: typeof body.requestId === 'string' ? body.requestId : `gpt-action-${randomUUID()}`,
+    sourceSurface: 'chatgpt_gpt',
+    agentPlatformId: 'chatgpt_gpt_actions',
+  };
+  const scopedEnvelope = buildTokenScopedDefinitiveEnvelope(req, envelope);
+  if (!scopedEnvelope.ok) return res.status(scopedEnvelope.status).json(scopedEnvelope.body);
+
+  try {
+    const response = await executeDefinitiveMcpTool({
+      userId,
+      toolName,
+      input: toolInput,
+      envelope: scopedEnvelope.envelope,
+    });
+    (response.body as Record<string, any>).persistence = await persistDealStateCallBestEffort({
+      userId,
+      toolName,
+      toolInput,
+      envelope: scopedEnvelope.envelope,
+      responseBody: response.body,
+    });
+    return res.status(response.status).json(response.body);
+  } catch (err: any) {
+    console.error('[definitive] GPT Action tool call failed:', err.message);
+    return res.status(500).json({ error: 'Failed to execute DEFINITIVE GPT Action' });
   }
 });
 
@@ -404,17 +476,31 @@ function nullablePositiveNumber(value: unknown): number | null {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
+function requestOrigin(req: any) {
+  const configured = process.env.APP_URL?.replace(/\/+$/, '');
+  if (configured) return configured;
+  const protocol = req.protocol || 'http';
+  const host = typeof req.get === 'function' ? req.get('host') : '127.0.0.1:3000';
+  return `${protocol}://${host}`;
+}
+
 const DEFINITIVE_AGENT_TOKEN_PROFILES = {
   discovery: ['capability:read', 'methodology:read', 'model-catalog:read', 'deal-plan:read', 'pricing:read', 'pass-through:read'],
   deal_operator: [
     'capability:read',
     'methodology:read',
     'authority:read',
+    'citation:read',
+    'market-data:read',
+    'conformance:read',
     'deal-state:read',
     'deal-state:write',
+    'deal-state:diff',
     'deal:classify',
     'deal:read',
     'deal-plan:read',
+    'pricing:read',
+    'pass-through:read',
     'model-catalog:read',
     'model-stack:compose',
     'model:read',
@@ -441,13 +527,10 @@ const DEFINITIVE_AGENT_TOKEN_PROFILES = {
   ],
 } as const;
 
-const SELF_SERVE_AGENT_TOKEN_SCOPES = new Set([
+const SELF_SERVE_AGENT_TOKEN_SCOPES: ReadonlySet<string> = new Set([
   ...DEFINITIVE_AGENT_TOKEN_PROFILES.discovery,
   ...DEFINITIVE_AGENT_TOKEN_PROFILES.deal_operator,
   ...DEFINITIVE_AGENT_TOKEN_PROFILES.document_builder,
-  'citation:read',
-  'market-data:read',
-  'conformance:read',
 ]);
 
 function defaultAgentTokenScopes(profile: string): string[] {
@@ -463,72 +546,23 @@ function clampNumber(value: number, min: number, max: number, fallback: number) 
 
 function buildTokenScopedDefinitiveEnvelope(req: any, envelope: Record<string, any>) {
   const claims = req.authClaims && typeof req.authClaims === 'object' ? req.authClaims : {};
-  const tokenScopes = normalizeScopeClaim(claims.scopes ?? claims.scope);
-  const tokenLooksAgentScoped =
-    tokenScopes.length > 0 ||
-    claims.tokenUse === 'definitive_agent' ||
-    typeof claims.agentId === 'string' ||
-    typeof claims.agentPlatformId === 'string';
-
-  if (!tokenLooksAgentScoped) {
-    return { ok: true as const, envelope };
-  }
-
-  if (tokenScopes.length === 0) {
-    return {
-      ok: false as const,
-      status: 403,
-      body: {
-        ok: false,
-        error: 'agent_token_missing_scopes',
-        message: 'DEFINITIVE agent tokens must carry token-bound scopes. Use a human app JWT for internal UI calls or a scoped agent token for external agent calls.',
-      },
-    };
-  }
-
-  const requestedScopes = normalizeScopeClaim(envelope.requestedScopes);
-  const effectiveRequestedScopes = requestedScopes.length > 0 ? requestedScopes : tokenScopes;
-  const unauthorizedScopes = effectiveRequestedScopes.filter(scope => !tokenScopes.includes(scope));
-
-  if (unauthorizedScopes.length > 0) {
-    return {
-      ok: false as const,
-      status: 403,
-      body: {
-        ok: false,
-        error: 'token_scope_exceeded',
-        message: 'The requested DEFINITIVE scopes exceed the scopes bound to this agent token.',
-        requestedScopes: effectiveRequestedScopes,
-        tokenBoundScopes: tokenScopes,
-        unauthorizedScopes,
-      },
-    };
-  }
-
-  return {
-    ok: true as const,
-    envelope: {
-      ...envelope,
-      requestedScopes: effectiveRequestedScopes,
-      tokenBoundScopes: tokenScopes,
-      agentId: envelope.agentId ?? claims.agentId,
-      agentPlatformId: envelope.agentPlatformId ?? claims.agentPlatformId,
-      beneficialCustomerId: envelope.beneficialCustomerId ?? claims.beneficialCustomerId,
-      billingOrgId: envelope.billingOrgId ?? claims.billingOrgId,
-      mandateId: envelope.mandateId ?? claims.mandateId,
-      authMode: envelope.authMode ?? 'token_bound_agent_scope',
-    },
-  };
+  return buildTokenScopedDefinitiveEnvelopeFromClaims(claims, envelope);
 }
 
-function normalizeScopeClaim(value: unknown): string[] {
-  if (Array.isArray(value)) {
-    return [...new Set(value.filter(item => typeof item === 'string').map(item => item.trim()).filter(Boolean))];
-  }
-  if (typeof value === 'string') {
-    return [...new Set(value.split(/[,\s]+/).map(item => item.trim()).filter(Boolean))];
-  }
-  return [];
+function stripEnvelopeFields(body: Record<string, any>) {
+  const {
+    envelope: _envelope,
+    requestId: _requestId,
+    requestedScopes: _requestedScopes,
+    sourceSurface: _sourceSurface,
+    agentId: _agentId,
+    agentPlatformId: _agentPlatformId,
+    mandateId: _mandateId,
+    beneficialCustomerId: _beneficialCustomerId,
+    billingOrgId: _billingOrgId,
+    ...input
+  } = body;
+  return input;
 }
 
 async function persistDealStateCallBestEffort(input: {

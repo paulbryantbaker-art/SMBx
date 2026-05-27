@@ -1587,10 +1587,10 @@ const PLANS: Plan[] = [
     price: 79,
     sub: "For one operator, one deal at a time.",
     cta: "Choose Solo",
-    prompt: "I'm interested in the $79 Solo plan. Walk me through the models, exports, and agent-ready workflow.",
+    prompt: "I'm interested in the $79 Solo plan. Walk me through the models, exports, and supervised MCP workflow.",
     features: [
       "Unlimited deliverables",
-      "Recast, Baseline, buyer engine",
+      "Recast, Baseline, market map",
       "One live deal room",
     ],
   },
@@ -1614,7 +1614,7 @@ const PLANS: Plan[] = [
     price: 499,
     sub: "For boutiques and partner-led firms.",
     cta: "Choose Team",
-    prompt: "I'm interested in Team at $499. How do seats, shared deal vaults, firm templates, and specialist handoffs work?",
+    prompt: "I'm interested in Team at $499. How do seats, shared deal vaults, firm templates, specialist handoffs, and supervised agent workflows work?",
     features: [
       "Up to 5 seats",
       "Shared vault and templates",
@@ -1627,7 +1627,7 @@ const PLANS: Plan[] = [
     price: "From $2,500",
     sub: "For larger teams and regulated environments.",
     cta: "Talk to Yulia",
-    prompt: "I want to learn more about Enterprise from $2,500 — SSO, single-tenant, SOC 2, custom seat count, API controls, and the named account manager.",
+    prompt: "I want to learn more about Enterprise from $2,500 — SSO, single-tenant, SOC 2, custom seat count, API controls, governed agent scope, and audit exports.",
     features: [
       "Custom seat count",
       "SSO, SOC 2, single tenant",
@@ -1639,11 +1639,11 @@ const PLANS: Plan[] = [
 const INCLUDED_GROUPS: Capability[] = [
   {
     title: "Every paid tier",
-    body: "Unlimited Yulia chat, Recast, Baseline valuation, 28 document generators, buyer-list engine, deal room, brand kit, and 180 days of post-close PMI support.",
+    body: "Unlimited Yulia chat, Recast, Baseline valuation, 28 document generators, buyer-universe analysis, deal room, brand kit, and 180 days of post-close PMI support.",
   },
   {
     title: "Pro adds the full deal stack",
-    body: "QofE Lite, full LBO with DCF and precedent comps, 22-gate scoring, audience-variant memos, sector buyer universes, negotiation drafts, tax/legal structuring, cap table, and API access.",
+    body: "QofE Lite, full LBO with DCF and precedent comps, 22-gate scoring, audience-variant memos, sector buyer universes, negotiation-prep scaffolds, tax/legal scenario models, cap table, and API access.",
   },
   {
     title: "Team adds firm infrastructure",
@@ -1671,7 +1671,7 @@ const COMPARE: CompareGroup[] = [
       { feature: "Yulia chat — unlimited",            cells: ["✓",          "✓",         "✓",         "✓",         "✓"] },
       { feature: "Recast + ValueLens valuation", cells: ["✓",          "✓",         "✓",         "✓",         "✓"] },
       { feature: "28 document generators",            cells: ["✓",          "✓",         "✓",         "✓",         "✓"] },
-      { feature: "Buyer-list engine",                 cells: ["preview",    "✓",         "✓",         "✓",         "✓"] },
+      { feature: "Buyer-universe analysis",           cells: ["preview",    "✓",         "✓",         "✓",         "✓"] },
       { feature: "SBA + structure modeling",          cells: ["preview",    "✓",         "✓",         "✓",         "✓"] },
       { feature: "Deal room + diligence tracker",     cells: ["—",          "one deal",  "✓",         "✓",         "✓"] },
       { feature: "Brand kit on every deliverable",    cells: ["—",          "✓",         "✓",         "✓",         "✓"] },
@@ -1688,7 +1688,7 @@ const COMPARE: CompareGroup[] = [
       { feature: "Seven-Factor deal scoring",                  cells: ["—", "—", "✓", "✓", "✓"] },
       { feature: "Sector-tuned buyer universes",          cells: ["—", "—", "✓", "✓", "✓"] },
       { feature: "Audience-variant memos · LP, IC, board",cells: ["—", "—", "✓", "✓", "✓"] },
-      { feature: "Negotiation tactics + counter drafting",cells: ["—", "—", "✓", "✓", "✓"] },
+      { feature: "Negotiation prep + option scaffolds",cells: ["—", "—", "✓", "✓", "✓"] },
       { feature: "Cap table + waterfall modeling",        cells: ["—", "—", "✓", "✓", "✓"] },
       { feature: "Owner-readiness scoring · CEPA",        cells: ["—", "—", "✓", "✓", "✓"] },
       { feature: "API access · standard rate limits",     cells: ["—", "—", "✓", "✓", "✓"] },
@@ -1697,12 +1697,12 @@ const COMPARE: CompareGroup[] = [
   {
     title: "V19 usage — included monthly",
     rows: [
-      { feature: "V19 allowance",                    cells: ["30",  "600",   "2,500",  "12,000", "custom"] },
+      { feature: "Included credits",                 cells: ["100", "2,000", "6,000",  "25,000", "custom"] },
       { feature: "Server model runs",                cells: ["20",  "300",   "1,200",  "6,000",  "custom"] },
       { feature: "Studio books",                     cells: ["1",   "12",    "60",     "300",    "custom"] },
       { feature: "Studio exports",                   cells: ["1",   "30",    "150",    "600",    "custom"] },
-      { feature: "API/MCP calls",                    cells: ["—",   "—",     "2,500",  "15,000", "custom"] },
-      { feature: "Agent usage",                      cells: ["—",   "—",     "—",      "supervised", "autonomous"] },
+      { feature: "API/MCP calls",                    cells: ["—",   "1,000", "6,000",  "15,000", "custom"] },
+      { feature: "Agent usage",                      cells: ["—",   "1 key", "3 keys", "supervised", "autonomous"] },
     ],
   },
   {
@@ -1727,7 +1727,7 @@ const COMPARE: CompareGroup[] = [
 const PRICING_CONTROL_ITEMS = [
   {
     title: "Monthly subscription",
-    body: "Free, Solo, Pro, Team, and Enterprise stay simple. No wallet, no success fee, no per-deal toll.",
+    body: "Free, Solo, Pro, Team, and Enterprise stay simple. No wallet, no success fee, no referral fee, no deal-value fee.",
   },
   {
     title: "Included credits",
@@ -1894,7 +1894,7 @@ function PricingSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) =>
                     ))}
                   </span>
                   <span style={P.pricingTierFooter}>
-                    {featured && <span style={P.recommendedPill}>Recommended</span>}
+                    {featured && <span style={P.recommendedPill}>Most used</span>}
                     <span style={P.pricingDarkPill}>{plan.cta}</span>
                   </span>
                 </button>

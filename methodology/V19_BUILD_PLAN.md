@@ -97,10 +97,10 @@ Implemented in `server/services/v19EntitlementService.ts`; events are written to
 
 | Plan | Monthly V19 allowance | Model runs | Studio exports | Studio books | API/MCP calls | Tool calls | Agent usage |
 |---|---:|---:|---:|---:|---:|---:|---|
-| Free | 30 | 20 | 1 | 1 | 0 | 60 | None |
-| Solo | 600 | 300 | 30 | 12 | 0 | 600 | None |
-| Pro | 2,500 | 1,200 | 150 | 60 | 2,500 | 2,500 | None |
-| Team | 12,000 | 6,000 | 600 | 300 | 15,000 | 10,000 | Supervised |
+| Free | 100 | 20 | 1 | 1 | 0 | 60 | None |
+| Solo | 2,000 | 300 | 30 | 12 | 1,000 | 600 | Supervised |
+| Pro | 6,000 | 1,200 | 150 | 60 | 6,000 | 6,000 | Supervised |
+| Team | 25,000 | 6,000 | 600 | 300 | 15,000 | 10,000 | Supervised |
 | Enterprise | Custom/unlimited by contract | Custom | Custom | Custom | Custom | Custom | Autonomous |
 
 ### What must be built

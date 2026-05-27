@@ -51,7 +51,7 @@ export function generateDataRoomStructure(input: DataRoomStructureInput): Record
   lines.push('---');
   lines.push(`**Total documents: ${totalItems}** | Priority items marked with ★`);
   lines.push('');
-  lines.push('*Upload documents in order of priority. Your advisor can help identify which items are most important for your specific situation.*');
+  lines.push('*Upload documents in order of priority. Yulia can organize the source gaps; your counsel, CPA, or other specialist confirms what is required for your specific situation.*');
 
   return {
     type: 'data_room_structure',

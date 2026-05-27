@@ -2,11 +2,8 @@ import { Router } from 'express';
 import type { Response } from 'express';
 import Anthropic from '@anthropic-ai/sdk';
 import multer from 'multer';
-import crypto from 'crypto';
 import path from 'path';
-import fs from 'fs';
 import { optionalAuth, requireAuth } from '../middleware/auth.js';
-import { extractFromDocument } from '../services/documentExtractor.js';
 import { buildSystemPrompt, buildDynamicAnonymousPrompt } from '../services/promptBuilder.js';
 import type { ConversationState } from '../services/promptBuilder.js';
 import { streamAgenticResponse } from '../services/aiService.js';
@@ -156,24 +153,15 @@ import { generateConversationTitle } from '../services/conversationNamer.js';
 import { generateValueReadinessReport } from '../services/generators/valueReadinessReport.js';
 import { generateThesisDocument } from '../services/generators/thesisDocument.js';
 import { generateSdeAnalysis } from '../services/generators/sdeAnalysis.js';
-import { getUploadRoot } from '../services/uploadRoot.js';
+import { extractFinancialsFromUploadBuffer, persistUploadedFile } from '../services/uploadPersistence.js';
 import { createSql } from '../dbConfig.js';
 import type { MessageParam } from '@anthropic-ai/sdk/resources/messages';
 
 const sql = createSql();
 
 // ─── File upload config ─────────────────────────────────────
-const UPLOAD_DIR = getUploadRoot();
-if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-
 const upload = multer({
-  storage: multer.diskStorage({
-    destination: UPLOAD_DIR,
-    filename: (_req, file, cb) => {
-      const ext = path.extname(file.originalname);
-      cb(null, `${crypto.randomUUID()}${ext}`);
-    },
-  }),
+  storage: multer.memoryStorage(),
   limits: { fileSize: 25 * 1024 * 1024 }, // 25MB — covers most CIM PDFs and pitch decks
   fileFilter: (_req, file, cb) => {
     // Broad allowlist — covers deal-adjacent file types. Google Docs and
@@ -1435,29 +1423,23 @@ chatRouter.post('/conversations/:id/upload', requireAuth, upload.single('file'),
       return res.status(404).json({ error: 'Conversation not found' });
     }
 
-    const fileInfo = {
-      originalName: req.file.originalname,
-      storedName: req.file.filename,
-      size: req.file.size,
-      mimeType: req.file.mimetype,
-    };
+    const fileInfo = await persistUploadedFile(`conversations/${conversationId}`, req.file);
 
     // Store file info in conversation extracted_data
     await sql`
       UPDATE conversations
-      SET extracted_data = COALESCE(extracted_data, '{}'::jsonb) || ${JSON.stringify({ uploaded_file: fileInfo })}::jsonb,
+      SET extracted_data = COALESCE(extracted_data, '{}'::jsonb) || ${sql.json({ uploaded_file: fileInfo } as any)}::jsonb,
           updated_at = NOW()
       WHERE id = ${conversationId}
     `;
 
     // Fire-and-forget: extract financial data from the document
-    const fullPath = path.resolve(UPLOAD_DIR, req.file.filename);
-    extractFromDocument(fullPath, req.file.originalname).then(async (extracted) => {
+    extractFinancialsFromUploadBuffer(req.file).then(async (extracted) => {
       if (extracted && extracted.confidence !== 'low') {
         try {
           await sql`
             UPDATE conversations
-            SET extracted_data = COALESCE(extracted_data, '{}'::jsonb) || ${JSON.stringify({ extracted_financials: extracted })}::jsonb
+            SET extracted_data = COALESCE(extracted_data, '{}'::jsonb) || ${sql.json({ extracted_financials: extracted } as any)}::jsonb
             WHERE id = ${conversationId}
           `;
         } catch (e: any) {

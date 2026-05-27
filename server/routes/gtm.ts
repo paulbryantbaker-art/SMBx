@@ -1,5 +1,10 @@
 /**
- * GTM Routes — Transaction tokens, escrow, velocity analytics, ghost profiles
+ * GTM Routes — velocity analytics, ghost profiles, and legacy-safe stubs.
+ *
+ * Pricing must stay on the software side of THE LINE: subscriptions,
+ * included credits, fixed deliverables, and outcome-independent data/API
+ * pass-through only. No route in this module may create a fee tied to deal
+ * value, close, success, referral, or counterparty routing.
  */
 import { Router } from 'express';
 import { sql } from '../db.js';
@@ -8,42 +13,33 @@ import { requireAuth } from '../middleware/auth.js';
 export const gtmRouter = Router();
 gtmRouter.use(requireAuth);
 
-// ─── Transaction Tokens ──────────────────────────────────────
+// ─── Retired Transaction Tokens ──────────────────────────────
 
 gtmRouter.post('/deals/:dealId/transaction-token', async (req, res) => {
   try {
-    const userId = (req as any).userId;
     const dealId = parseInt(req.params.dealId, 10);
-    const { dealValueCents } = req.body;
+    const userId = (req as any).userId;
+
+    if (!Number.isFinite(dealId)) {
+      return res.status(400).json({ error: 'Invalid deal id' });
+    }
 
     const [deal] = await sql`SELECT id FROM deals WHERE id = ${dealId} AND user_id = ${userId}`;
     if (!deal) return res.status(404).json({ error: 'Deal not found' });
 
-    if (!dealValueCents || dealValueCents <= 0) return res.status(400).json({ error: 'Deal value is required' });
-
-    const feeRate = 0.005; // 0.5%
-    const minimumFee = 200000; // $2,000
-    const calculatedFee = Math.round(dealValueCents * feeRate);
-    const feeCents = Math.max(calculatedFee, minimumFee);
-
-    const [token] = await sql`
-      INSERT INTO transaction_tokens (deal_id, user_id, deal_value_cents, fee_rate, fee_cents, minimum_fee_cents)
-      VALUES (${dealId}, ${userId}, ${dealValueCents}, ${feeRate}, ${feeCents}, ${minimumFee})
-      RETURNING id, deal_value_cents, fee_rate, fee_cents, status, created_at
-    `;
-
-    return res.status(201).json({
-      ...token,
-      feeDisplay: `$${(feeCents / 100).toLocaleString()}`,
-      dealValueDisplay: `$${(dealValueCents / 100).toLocaleString()}`,
+    return res.status(410).json({
+      error: 'Transaction-token fees are retired',
+      code: 'DEAL_VALUE_FEE_RETIRED',
+      message:
+        'smbX bills only monthly subscriptions, included credits, fixed software deliverables, and outcome-independent software/data pass-through. No deal-value, success, closing-contingent, or referral fee will be created.',
     });
   } catch (err: any) {
-    console.error('Transaction token error:', err.message);
-    return res.status(500).json({ error: 'Failed to create transaction token' });
+    console.error('Retired transaction-token route error:', err.message);
+    return res.status(500).json({ error: 'Failed to verify retired transaction-token route' });
   }
 });
 
-// ─── Escrow Management ───────────────────────────────────────
+// ─── Escrow / Holdback Tracking (No Custody) ─────────────────
 
 gtmRouter.get('/deals/:dealId/escrow', async (req, res) => {
   try {

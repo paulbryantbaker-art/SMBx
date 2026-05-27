@@ -118,13 +118,14 @@ function inferArtifactTitle(content: string): string {
     .find(line => /analysis|valuation|risk|buyer|market/i.test(line) && line.trim().length > 8);
 
   const candidate = heading || boldLine || phraseLine || "Yulia analysis artifact";
+  const trailingTitlePunctuation = new RegExp("\\s*[\\-:|]\\s*$", "g");
   const cleaned = candidate
     .replace(/[*_`#]/g, "")
     .replace(/\bfull\s+analysis\s+canvas\b/ig, "")
     .replace(/\banalysis\s+canvas\b/ig, "")
     .replace(/\s+/g, " ")
     .replace(/[\u2013\u2014\u00b7]\s*$/g, "")
-    .replace(/\s*[-:|]\s*$/g, "")
+    .replace(trailingTitlePunctuation, "")
     .trim();
 
   return truncateTitle(cleaned || "Yulia analysis artifact");

@@ -59,7 +59,7 @@ export interface ValuationReport {
   probability_of_sale: {
     score: number; // 0-100
     factors: Record<string, number>;
-    recommendation: string;
+    option_set: string;
   };
   narrative: string; // AI-generated narrative
   generated_at: string;
@@ -195,10 +195,10 @@ export async function generateValuationReport(input: ValuationInput): Promise<Va
     probFactors.business_quality * 0.20
   );
 
-  let recommendation: string;
-  if (probScore >= 70) recommendation = 'GO — Strong position for a successful sale.';
-  else if (probScore >= 50) recommendation = 'GO WITH CAVEATS — Proceed but address identified weaknesses.';
-  else recommendation = 'CONSIDER WAITING — Improve the business before going to market.';
+  let optionSet: string;
+  if (probScore >= 70) optionSet = 'GO PATH AVAILABLE — Strong position for a market-prep path; user decides whether to proceed.';
+  else if (probScore >= 50) optionSet = 'GO WITH CAVEATS PATH — Address identified weaknesses before or alongside market prep.';
+  else optionSet = 'WAIT / IMPROVE PATH — Improvement work may increase readiness before market prep.';
 
   // ─── AI: Generate narrative ──────────────────────────────
   const narrativePrompt = `Write a 3-paragraph valuation narrative for this business:
@@ -210,10 +210,10 @@ Valuation Range: $${(valLow / 100).toLocaleString()} to $${(valHigh / 100).toLoc
 Key Adjustments: ${adjustments.map(a => `${a.factor}: ${a.impact > 0 ? '+' : ''}${a.impact.toFixed(2)}x (${a.reason})`).join('; ')}
 Probability of Sale: ${probScore}/100
 
-Write as Yulia, the M&A advisor. Be direct, specific, and reference the actual numbers. No fluff.`;
+Write as Yulia, the M&A deal-intelligence operator. Be direct, specific, and reference the actual numbers. No fluff. Present options and implications; do not tell the user what to accept, reject, sign, or file.`;
 
   const narrative = await callClaude(
-    'You are Yulia, an M&A advisor writing a valuation summary. Be concise, data-driven, and direct.',
+    'You are Yulia, an M&A deal-intelligence operator writing a valuation summary. Be concise, data-driven, and direct. Present options and implications; the user decides.',
     [{ role: 'user', content: narrativePrompt }],
   );
 
@@ -241,7 +241,7 @@ Write as Yulia, the M&A advisor. Be direct, specific, and reference the actual n
     probability_of_sale: {
       score: probScore,
       factors: probFactors,
-      recommendation,
+      option_set: optionSet,
     },
     narrative,
     generated_at: new Date().toISOString(),

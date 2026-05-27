@@ -58,6 +58,7 @@ import {
   buildDefinitiveEnterpriseAllowListTemplates,
   buildDefinitiveRegistryPackage,
 } from '../server/services/definitiveRegistryPackage.js';
+import { buildDefinitiveConnectorDistributionPackage } from '../server/services/definitiveConnectorDistribution.js';
 import {
   buildDefinitiveModelCatalogSurface,
   getDefinitiveModelSlotSurface,
@@ -68,6 +69,20 @@ import {
 } from '../server/services/definitiveDealRunbooks.js';
 import { buildDefinitiveSchemaRegistry } from '../server/services/definitiveSchemas.js';
 import { buildDefinitiveSpecManifest } from '../server/services/definitiveSpecManifest.js';
+import { buildDefinitiveAssistantDistributionReadiness } from '../server/services/definitiveAssistantDistributionReadiness.js';
+import {
+  buildDefinitiveGptActionsOpenApiSpec,
+  buildDefinitiveOpenApiSpec,
+} from '../server/services/definitiveOpenApiSpec.js';
+import {
+  buildDefinitiveMcpServerJson,
+  DEFINITIVE_REMOTE_MCP_PROTOCOL_VERSION,
+  handleDefinitiveRemoteMcpPost,
+} from '../server/services/definitiveRemoteMcpTransport.js';
+import {
+  buildDefinitiveMcpProtectedResourceMetadata,
+  buildDefinitiveOAuthAuthorizationServerMetadata,
+} from '../server/services/definitiveMcpAuthMetadata.js';
 import { evaluateDefinitiveStackOverlays } from '../server/services/definitiveStackOverlays.js';
 import { executeDefinitiveMcpTool, listDefinitiveMcpTools } from '../server/services/definitiveMcp.js';
 
@@ -154,8 +169,15 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assertEqual(card.definitive.specManifestEndpoint, '/.well-known/definitive.json', 'spec manifest endpoint');
   assertEqual(card.definitive.mcpDiscoveryEndpoint, '/.well-known/mcp', 'MCP discovery endpoint');
   assertEqual(card.definitive.mcpServerCardEndpoint, '/.well-known/mcp/server-card.json', 'MCP server-card endpoint');
+  assertEqual(card.definitive.mcpServerJsonEndpoint, '/server.json', 'MCP server.json endpoint');
+  assertEqual(card.definitive.mcpEndpoint, '/mcp', 'remote MCP endpoint');
+  assertEqual(card.definitive.oauthProtectedResourceEndpoint, '/.well-known/oauth-protected-resource/mcp', 'MCP OAuth protected resource endpoint');
+  assertEqual(card.definitive.oauthAuthorizationServerEndpoint, '/.well-known/oauth-authorization-server', 'MCP OAuth authorization server endpoint');
   assertEqual(card.definitive.schemaRegistryEndpoint, '/api/definitive/schemas', 'schema registry endpoint');
   assertEqual(card.definitive.wellKnownSchemaRegistryEndpoint, '/.well-known/definitive-schemas.json', 'well-known schema registry endpoint');
+  assertEqual(card.definitive.openApiSpecEndpoint, '/api/definitive/openapi.json', 'OpenAPI GPT Actions endpoint');
+  assertEqual(card.definitive.gptActionsOpenApiSpecEndpoint, '/api/definitive/gpt-actions/openapi.json', 'focused GPT Actions OpenAPI endpoint');
+  assertEqual(card.definitive.gptActionsToolEndpoint, '/api/definitive/gpt-actions/{toolName}', 'focused GPT Actions tool endpoint');
   assertEqual(card.definitive.toolsEndpoint, '/api/definitive/tools/list', 'tools endpoint');
   assertEqual(card.definitive.agentTokenIssueEndpoint, '/api/definitive/agent-tokens', 'agent token issue endpoint');
   assertEqual(card.definitive.latestDealStateEndpoint, '/api/definitive/deal-state/latest', 'latest deal-state endpoint');
@@ -171,6 +193,8 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assertEqual(card.definitive.modelSlotEndpoint, '/api/definitive/model-catalog/{slotId}', 'model slot endpoint');
   assertEqual(card.definitive.dealMechanicsModelSlotEndpoint, '/api/definitive/deal-mechanics/models/{slotId}', 'deal mechanics model slot endpoint');
   assertEqual(card.definitive.registryPackageEndpoint, '/api/definitive/registry-package', 'registry package endpoint');
+  assertEqual(card.definitive.connectorDistributionEndpoint, '/api/definitive/connector-distribution', 'connector distribution endpoint');
+  assertEqual(card.definitive.assistantDistributionReadinessEndpoint, '/api/definitive/assistant-distribution-readiness', 'assistant distribution readiness endpoint');
   assertEqual(card.definitive.enterpriseAllowListsEndpoint, '/api/definitive/enterprise-allow-lists', 'enterprise allow-list endpoint');
   assertEqual(card.definitive.dealMechanicsVersion, DEFINITIVE_DEAL_MECHANICS_VERSION, 'deal mechanics version');
   assertEqual(card.definitive.dealMechanicsModelSlots, DEFINITIVE_DEAL_MECHANICS_MODEL_SLOT_COUNT, 'deal mechanics model slots');
@@ -193,14 +217,25 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assertEqual(card.definitive.toolMetadataNamingConvention, 'diligence_<phase>_<artifact>', 'agent card exposes tool metadata doctrine');
   assert(card.definitive.agentDiscoverabilityLayers.includes('well_known_discovery'), 'agent card exposes well-known discovery layer');
   assert(card.definitive.agentDesirabilitySignals.includes('semantic_tool_metadata'), 'agent card exposes semantic metadata signal');
+  assertEqual(card.definitive.connectorDistributionStatus, 'packaged_pending_platform_submission', 'agent card exposes connector distribution status');
+  assertEqual(card.definitive.connectorLaunchPriority[0], 'claude_connector', 'agent card connector distribution is Claude-first');
   assertEqual(card.definitive.dealMappingStatus, 'complete', 'agent card deal mapping status');
   assertEqual(card.definitive.dealRouteMapStatus, 'complete', 'agent card route map status');
   assert(card.definitive.passThroughPricingRule.includes('cost-plus-fixed'), 'agent card exposes pass-through pricing rule');
   assert(card.publicEndpoints.includes('/.well-known/definitive.json'), 'definitive manifest endpoint is public');
   assert(card.publicEndpoints.includes('/.well-known/mcp'), 'MCP discovery endpoint is public');
   assert(card.publicEndpoints.includes('/.well-known/mcp/server-card.json'), 'MCP server-card endpoint is public');
+  assert(card.publicEndpoints.includes('/server.json'), 'server.json endpoint is public');
+  assert(card.publicEndpoints.includes('/.well-known/oauth-protected-resource'), 'root OAuth protected-resource metadata endpoint is public');
+  assert(card.publicEndpoints.includes('/.well-known/oauth-protected-resource/mcp'), 'MCP OAuth protected-resource metadata endpoint is public');
+  assert(card.publicEndpoints.includes('/.well-known/oauth-authorization-server'), 'OAuth authorization-server metadata endpoint is public');
+  assert(card.publicEndpoints.includes('/oauth/register'), 'OAuth dynamic client registration endpoint is public');
+  assert(card.publicEndpoints.includes('/oauth/token'), 'OAuth token endpoint is public');
+  assert(card.publicEndpoints.includes('/mcp'), 'remote MCP endpoint is public');
   assert(card.publicEndpoints.includes('/.well-known/definitive-schemas.json'), 'well-known schema registry endpoint is public');
   assert(card.publicEndpoints.includes('/api/definitive/schemas'), 'schema registry endpoint is public');
+  assert(card.publicEndpoints.includes('/api/definitive/openapi.json'), 'OpenAPI GPT Actions endpoint is public discovery');
+  assert(card.publicEndpoints.includes('/api/definitive/gpt-actions/openapi.json'), 'focused GPT Actions endpoint is public discovery');
   assert(card.publicEndpoints.includes('/api/definitive/pass-through-catalog'), 'pass-through catalog endpoint is public discovery');
   assert(card.publicEndpoints.includes('/api/definitive/authority-seed-plan'), 'authority seed plan endpoint is public discovery');
   assert(card.publicEndpoints.includes('/api/definitive/substrate-architecture'), 'substrate architecture endpoint is public discovery');
@@ -210,6 +245,8 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assert(card.publicEndpoints.includes('/api/definitive/model-catalog/{slotId}'), 'model slot endpoint is public discovery');
   assert(card.publicEndpoints.includes('/api/definitive/deal-mechanics/models/{slotId}'), 'deal mechanics model slot endpoint is public discovery');
   assert(card.publicEndpoints.includes('/api/definitive/registry-package'), 'registry package endpoint is public discovery');
+  assert(card.publicEndpoints.includes('/api/definitive/connector-distribution'), 'connector distribution endpoint is public discovery');
+  assert(card.publicEndpoints.includes('/api/definitive/assistant-distribution-readiness'), 'assistant distribution readiness endpoint is public discovery');
   assert(card.publicEndpoints.includes('/api/definitive/enterprise-allow-lists'), 'enterprise allow-list endpoint is public discovery');
   assert(!card.publicEndpoints.includes('/api/definitive/tools/{toolName}/call'), 'tool execution is not public');
   assert(card.authenticatedEndpoints.includes('/api/definitive/line/inventory'), 'line inventory endpoint is authenticated');
@@ -218,9 +255,15 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assert(card.authenticatedEndpoints.includes('/api/definitive/deal-packets'), 'deal packets endpoint is authenticated');
   assert(card.authenticatedEndpoints.includes('/api/definitive/audit-packets/{auditTrailId}'), 'audit packet endpoint is authenticated');
   assert(card.authenticatedEndpoints.includes('/api/definitive/agent-tokens'), 'agent token issue endpoint is authenticated');
+  assert(card.authenticatedEndpoints.includes('/mcp'), 'remote MCP execution endpoint is authenticated');
   assertEqual(card.endpointAccess.executionRequiresGovernedToolContract, true, 'execution requires governed tool contracts');
   const mcpCapability = card.capabilities.find((item: any) => item.id === 'definitive_mcp_v0_1') as any;
   assert(mcpCapability, 'mcp capability exists');
+  assertEqual(mcpCapability.status, 'remote_mcp_ready_jwt_bearer', 'mcp capability marks remote MCP ready');
+  assertEqual(mcpCapability.endpoint, '/mcp', 'mcp capability exposes /mcp');
+  assertEqual(mcpCapability.oauthProtectedResourceEndpoint, '/.well-known/oauth-protected-resource/mcp', 'mcp capability exposes protected-resource metadata');
+  assertEqual(mcpCapability.oauthAuthorizationServerEndpoint, '/.well-known/oauth-authorization-server', 'mcp capability exposes authorization-server metadata');
+  assertEqual(mcpCapability.transport, 'streamable-http', 'mcp capability transport is streamable HTTP');
   assertDeepEqual(mcpCapability.tools.map((tool: any) => tool.name), expectedTools, 'agent-card tool names');
   const v19Capability = card.capabilities.find((item: any) => item.id === 'v19_resource_contract') as any;
   assert(v19Capability, 'V19 resource contract capability exists');
@@ -242,6 +285,13 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assertEqual(authorityCapability.targetEntries, DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'authority capability target');
   assert(authorityCapability.plannedEntries >= DEFINITIVE_DEAL_MECHANICS_AUTHORITY_TARGET, 'authority capability planned entries meet target');
   assertEqual(authorityCapability.requiredCoverageSatisfied, true, 'authority capability required coverage');
+  const connectorCapability = card.capabilities.find((item: any) => item.id === 'definitive_connector_distribution') as any;
+  assert(connectorCapability, 'connector distribution capability exists');
+  assertEqual(connectorCapability.launchPriority[0], 'claude_connector', 'connector capability is Claude-first');
+  assert(connectorCapability.submitNowBlockers.some((item: string) => item.includes('OAuth')), 'connector capability names OAuth blocker');
+  const distributionReadinessCapability = card.capabilities.find((item: any) => item.id === 'definitive_assistant_distribution_readiness') as any;
+  assert(distributionReadinessCapability, 'assistant distribution readiness capability exists');
+  assertEqual(distributionReadinessCapability.fastestRevenueLane, 'chatgpt_gpt_actions', 'GPT Actions are fastest revenue lane');
   const substrateCapability = card.capabilities.find((item: any) => item.id === 'definitive_substrate_architecture') as any;
   assert(substrateCapability, 'substrate architecture capability exists');
   assertEqual(substrateCapability.primitiveCount, 8, 'substrate capability primitive count');
@@ -266,27 +316,59 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assertEqual(manifest.endpoints.agentCard, '/.well-known/agent-card.json', 'manifest agent-card endpoint');
   assertEqual(manifest.endpoints.mcpDiscovery, '/.well-known/mcp', 'manifest MCP discovery endpoint');
   assertEqual(manifest.endpoints.mcpServerCard, '/.well-known/mcp/server-card.json', 'manifest MCP server-card endpoint');
+  assertEqual(manifest.endpoints.mcpServerJson, '/server.json', 'manifest MCP server.json endpoint');
+  assertEqual(manifest.endpoints.mcpEndpoint, '/mcp', 'manifest remote MCP endpoint');
+  assertEqual(manifest.endpoints.oauthProtectedResourceMcp, '/.well-known/oauth-protected-resource/mcp', 'manifest MCP OAuth protected resource endpoint');
+  assertEqual(manifest.endpoints.oauthAuthorizationServer, '/.well-known/oauth-authorization-server', 'manifest OAuth authorization-server endpoint');
+  assertEqual(manifest.endpoints.oauthToken, '/oauth/token', 'manifest OAuth token endpoint');
   assertEqual(manifest.endpoints.schemaRegistry, '/api/definitive/schemas', 'manifest schema registry endpoint');
   assertEqual(manifest.endpoints.wellKnownSchemaRegistry, '/.well-known/definitive-schemas.json', 'manifest well-known schema registry endpoint');
+  assertEqual(manifest.endpoints.openApiSpec, '/api/definitive/openapi.json', 'manifest OpenAPI GPT Actions endpoint');
+  assertEqual(manifest.endpoints.gptActionsOpenApiSpec, '/api/definitive/gpt-actions/openapi.json', 'manifest focused GPT Actions OpenAPI endpoint');
+  assertEqual(manifest.endpoints.gptActionsToolCall, '/api/definitive/gpt-actions/{toolName}', 'manifest focused GPT Actions tool endpoint');
   assertEqual(manifest.endpoints.passThroughCatalog, '/api/definitive/pass-through-catalog', 'manifest pass-through catalog endpoint');
   assertEqual(manifest.endpoints.authoritySeedPlan, '/api/definitive/authority-seed-plan', 'manifest authority seed plan endpoint');
   assertEqual(manifest.endpoints.substrateArchitecture, '/api/definitive/substrate-architecture', 'manifest substrate architecture endpoint');
   assertEqual(manifest.endpoints.registryPackage, '/api/definitive/registry-package', 'manifest registry package endpoint');
+  assertEqual(manifest.endpoints.connectorDistribution, '/api/definitive/connector-distribution', 'manifest connector distribution endpoint');
+  assertEqual(manifest.endpoints.assistantDistributionReadiness, '/api/definitive/assistant-distribution-readiness', 'manifest assistant distribution readiness endpoint');
   assertEqual(manifest.endpoints.enterpriseAllowLists, '/api/definitive/enterprise-allow-lists', 'manifest enterprise allow-list endpoint');
   assertEqual(manifest.endpoints.latestDealState, '/api/definitive/deal-state/latest', 'manifest latest deal-state endpoint');
   assertEqual(manifest.endpoints.dealPackets, '/api/definitive/deal-packets', 'manifest deal packets endpoint');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/spec'), 'manifest spec API is public discovery');
   assert(manifest.access.publicDiscovery.includes('/.well-known/mcp'), 'manifest MCP discovery is public');
   assert(manifest.access.publicDiscovery.includes('/.well-known/mcp/server-card.json'), 'manifest MCP server-card is public');
+  assert(manifest.access.publicDiscovery.includes('/server.json'), 'manifest server.json is public');
+  assert(manifest.access.publicDiscovery.includes('/.well-known/oauth-protected-resource/mcp'), 'manifest protected-resource metadata is public');
+  assert(manifest.access.publicDiscovery.includes('/.well-known/oauth-authorization-server'), 'manifest authorization-server metadata is public');
+  assert(manifest.access.publicDiscovery.includes('/oauth/register'), 'manifest dynamic client registration is public');
+  assert(manifest.access.publicDiscovery.includes('/oauth/token'), 'manifest token endpoint is public');
+  assert(manifest.access.publicDiscovery.includes('/mcp'), 'manifest remote MCP endpoint is public');
   assert(manifest.access.publicDiscovery.includes('/.well-known/definitive-schemas.json'), 'manifest schema well-known is public');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/schemas'), 'manifest schema registry is public');
+  assert(manifest.access.publicDiscovery.includes('/api/definitive/openapi.json'), 'manifest OpenAPI endpoint is public discovery');
+  assert(manifest.access.publicDiscovery.includes('/api/definitive/gpt-actions/openapi.json'), 'manifest focused GPT Actions endpoint is public discovery');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/pass-through-catalog'), 'manifest pass-through catalog is public discovery');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/authority-seed-plan'), 'manifest authority seed plan is public discovery');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/substrate-architecture'), 'manifest substrate architecture is public discovery');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/registry-package'), 'manifest registry package is public discovery');
+  assert(manifest.access.publicDiscovery.includes('/api/definitive/connector-distribution'), 'manifest connector distribution is public discovery');
+  assert(manifest.access.publicDiscovery.includes('/api/definitive/assistant-distribution-readiness'), 'manifest assistant readiness is public discovery');
   assert(manifest.access.publicDiscovery.includes('/api/definitive/enterprise-allow-lists'), 'manifest enterprise allow-list is public discovery');
+  assertEqual(manifest.connectorDistributionSurface.endpoint, '/api/definitive/connector-distribution', 'manifest connector distribution surface endpoint');
+  assertEqual(manifest.connectorDistributionSurface.openApiSpecEndpoint, '/api/definitive/openapi.json', 'manifest connector distribution names OpenAPI endpoint');
+  assertEqual(manifest.connectorDistributionSurface.gptActionsOpenApiSpecEndpoint, '/api/definitive/gpt-actions/openapi.json', 'manifest connector distribution names focused GPT Actions endpoint');
+  assertEqual(manifest.connectorDistributionSurface.assistantDistributionReadinessEndpoint, '/api/definitive/assistant-distribution-readiness', 'manifest connector distribution names readiness endpoint');
+  assertEqual(manifest.connectorDistributionSurface.launchPriority[0], 'claude_connector', 'manifest connector distribution is Claude-first');
+  assertEqual(manifest.transport.current.includes('/mcp'), true, 'manifest transport names /mcp');
+  assertEqual(manifest.transport.mcpEndpoint, '/mcp', 'manifest transport exposes /mcp');
+  assertEqual(manifest.transport.oauthProtectedResource, '/.well-known/oauth-protected-resource/mcp', 'manifest transport exposes protected-resource metadata');
+  assertEqual(manifest.transport.oauthAuthorizationServer, '/.well-known/oauth-authorization-server', 'manifest transport exposes authorization-server metadata');
+  assertEqual(manifest.transport.serverJson, '/server.json', 'manifest transport exposes server.json');
   assert(manifest.access.authenticatedDiscovery.includes('/api/definitive/tools/list'), 'manifest tools list is authenticated discovery');
+  assert(manifest.access.authenticatedExecution.includes('/mcp'), 'manifest remote MCP is authenticated execution');
   assert(manifest.access.authenticatedExecution.includes('/api/definitive/tools/{toolName}/call'), 'manifest tool call is authenticated execution');
+  assert(manifest.access.authenticatedExecution.includes('/api/definitive/gpt-actions/{toolName}'), 'manifest GPT Actions facade is authenticated execution');
   assert(manifest.access.authenticatedExecution.includes('/api/definitive/deal-state/latest'), 'manifest latest deal-state is authenticated execution');
   assert(manifest.access.authenticatedExecution.includes('/api/definitive/deal-packets'), 'manifest deal packets is authenticated execution');
   assertDeepEqual(manifest.toolSurface.tools.map(tool => tool.name), expectedTools, 'manifest tool names');
@@ -373,8 +455,16 @@ await test('MCP well-known discovery is generated from DEFINITIVE manifest data'
   assertEqual(serverCard.name, 'smbx-ai/diligence', 'MCP server namespace');
   assertEqual(serverCard.version, DEFINITIVE_SPEC_VERSION, 'MCP server-card version');
   assertEqual(serverCard.serverInfo.canonicalStandard, 'The Diligence Standard', 'MCP server-card standard');
+  assertEqual(serverCard.serverUrl, `${origin}/mcp`, 'MCP server-card points to remote MCP endpoint');
+  assertEqual(serverCard.transport.type, 'streamable-http', 'MCP server-card transport is Streamable HTTP');
+  assertEqual(serverCard.transport.status, 'remote_mcp_ready_jwt_bearer', 'MCP server-card marks remote transport ready');
+  assertEqual(serverCard.transport.endpoints.mcp, `${origin}/mcp`, 'MCP server-card exposes /mcp endpoint');
+  assertEqual(serverCard.transport.endpoints.oauthProtectedResource, `${origin}/.well-known/oauth-protected-resource/mcp`, 'MCP server-card exposes OAuth protected-resource metadata');
+  assertEqual(serverCard.transport.endpoints.oauthAuthorizationServer, `${origin}/.well-known/oauth-authorization-server`, 'MCP server-card exposes OAuth authorization-server metadata');
+  assertEqual(serverCard.transport.endpoints.serverJson, `${origin}/server.json`, 'MCP server-card exposes server.json endpoint');
   assertEqual(serverCard.transport.endpoints.serverCard, `${origin}/.well-known/mcp/server-card.json`, 'MCP server-card endpoint URL');
   assertEqual(serverCard.transport.endpoints.schemaRegistry, `${origin}/api/definitive/schemas`, 'MCP server-card schema registry URL');
+  assertEqual(serverCard.transport.endpoints.openApiSpec, `${origin}/api/definitive/openapi.json`, 'MCP server-card OpenAPI URL');
   assertDeepEqual(serverCard.tools.map((tool: any) => tool.name), expectedTools, 'MCP server-card tools');
   assert(serverCard.tools.every((tool: any) => tool.outputSchema?.properties?.specVersion), 'MCP tools expose output schemas');
   assert(serverCard.tools.find((tool: any) => tool.name === 'ingest_deal_payload')?.structuredContentSchemas?.output.includes('DealState'), 'MCP ingest tool maps to DealState schema');
@@ -387,16 +477,35 @@ await test('MCP well-known discovery is generated from DEFINITIVE manifest data'
   assertEqual(serverCard.definitive.modelSlot, `${origin}/api/definitive/model-catalog/{slotId}`, 'MCP server-card exposes model slot URL');
   assertEqual(serverCard.definitive.dealMechanicsModelSlot, `${origin}/api/definitive/deal-mechanics/models/{slotId}`, 'MCP server-card exposes deal mechanics model slot URL');
   assertEqual(serverCard.definitive.registryPackage, `${origin}/api/definitive/registry-package`, 'MCP server-card exposes registry package URL');
+  assertEqual(serverCard.definitive.connectorDistribution, `${origin}/api/definitive/connector-distribution`, 'MCP server-card exposes connector distribution URL');
+  assertEqual(serverCard.definitive.assistantDistributionReadiness, `${origin}/api/definitive/assistant-distribution-readiness`, 'MCP server-card exposes assistant readiness URL');
+  assertEqual(serverCard.definitive.openApiSpec, `${origin}/api/definitive/openapi.json`, 'MCP server-card exposes OpenAPI URL');
+  assertEqual(serverCard.definitive.mcpEndpoint, `${origin}/mcp`, 'MCP server-card exposes remote MCP URL');
+  assertEqual(serverCard.definitive.oauthProtectedResource, `${origin}/.well-known/oauth-protected-resource/mcp`, 'MCP server-card exposes protected-resource metadata URL');
+  assertEqual(serverCard.definitive.oauthAuthorizationServer, `${origin}/.well-known/oauth-authorization-server`, 'MCP server-card exposes authorization-server metadata URL');
+  assertEqual(serverCard.definitive.mcpServerJson, `${origin}/server.json`, 'MCP server-card exposes server.json URL');
   assertEqual(serverCard.definitive.enterpriseAllowLists, `${origin}/api/definitive/enterprise-allow-lists`, 'MCP server-card exposes enterprise allow-list URL');
   assertEqual(serverCard.security.noSuccessFees, true, 'MCP server-card blocks success fees');
   assertEqual(serverCard.security.noReferralCompensation, true, 'MCP server-card blocks referral compensation');
 
-  assertEqual(mcpManifest.mcp_version, '2025-12-11', 'MCP manifest version');
+  assertEqual(mcpManifest.mcp_version, DEFINITIVE_REMOTE_MCP_PROTOCOL_VERSION, 'MCP manifest version');
   assertEqual(mcpManifest.server_card, `${origin}/.well-known/mcp/server-card.json`, 'MCP manifest server-card URL');
+  assertEqual(mcpManifest.transport.type, 'streamable-http', 'MCP manifest transport type');
+  assertEqual(mcpManifest.transport.endpoint, `${origin}/mcp`, 'MCP manifest remote endpoint');
+  assertEqual(mcpManifest.transport.oauthProtectedResource, `${origin}/.well-known/oauth-protected-resource/mcp`, 'MCP manifest protected-resource metadata URL');
+  assertEqual(mcpManifest.transport.oauthAuthorizationServer, `${origin}/.well-known/oauth-authorization-server`, 'MCP manifest authorization-server metadata URL');
+  assert(mcpManifest.endpoints.some((endpoint: any) => endpoint.type === 'oauth-protected-resource-metadata' && endpoint.auth === 'none'), 'MCP manifest points to protected-resource metadata');
+  assert(mcpManifest.endpoints.some((endpoint: any) => endpoint.type === 'oauth-authorization-server-metadata' && endpoint.auth === 'none'), 'MCP manifest points to authorization-server metadata');
+  assert(mcpManifest.endpoints.some((endpoint: any) => endpoint.type === 'oauth-dynamic-client-registration' && endpoint.auth === 'none'), 'MCP manifest points to dynamic client registration');
+  assert(mcpManifest.endpoints.some((endpoint: any) => endpoint.type === 'mcp-streamable-http' && endpoint.auth === 'bearer'), 'MCP manifest points to /mcp transport');
+  assert(mcpManifest.endpoints.some((endpoint: any) => endpoint.type === 'mcp-server-json' && endpoint.auth === 'none'), 'MCP manifest points to server.json');
   assert(mcpManifest.endpoints.some((endpoint: any) => endpoint.type === 'definitive-manifest' && endpoint.auth === 'none'), 'MCP manifest points to public DEFINITIVE manifest');
   assert(mcpManifest.endpoints.some((endpoint: any) => endpoint.type === 'definitive-schema-registry' && endpoint.auth === 'none'), 'MCP manifest points to public schema registry');
+  assert(mcpManifest.endpoints.some((endpoint: any) => endpoint.type === 'openapi-gpt-actions' && endpoint.auth === 'none'), 'MCP manifest points to public OpenAPI GPT Actions spec');
   assert(mcpManifest.endpoints.some((endpoint: any) => endpoint.type === 'definitive-deal-runbooks' && endpoint.auth === 'none'), 'MCP manifest points to public deal runbooks');
   assert(mcpManifest.endpoints.some((endpoint: any) => endpoint.type === 'definitive-model-catalog' && endpoint.auth === 'none'), 'MCP manifest points to public model catalog');
+  assert(mcpManifest.endpoints.some((endpoint: any) => endpoint.type === 'definitive-connector-distribution' && endpoint.auth === 'none'), 'MCP manifest points to public connector distribution');
+  assert(mcpManifest.endpoints.some((endpoint: any) => endpoint.type === 'assistant-distribution-readiness' && endpoint.auth === 'none'), 'MCP manifest points to public assistant readiness');
   assertEqual(mcpManifest.capabilities.outputSchema, true, 'MCP manifest declares output schemas');
   assertEqual(mcpManifest.capabilities.auditTrail, true, 'MCP manifest declares audit trail support');
   assertEqual(mcpManifest.doctrine.standard, 'The Diligence Standard', 'MCP manifest standard doctrine');
@@ -407,6 +516,7 @@ await test('Registry package gives enterprise admins allow-list templates', asyn
   const origin = 'https://example.smbx.ai';
   const registryPackage = buildDefinitiveRegistryPackage(origin);
   const allowLists = buildDefinitiveEnterpriseAllowListTemplates(origin);
+  const connectorDistribution = buildDefinitiveConnectorDistributionPackage(origin);
 
   assertEqual(registryPackage.schema, 'DEFINITIVE.registry-package.v0.1', 'registry package schema');
   assertEqual(registryPackage.registryEntry.namespace, 'smbx-ai/diligence', 'registry package namespace');
@@ -415,14 +525,22 @@ await test('Registry package gives enterprise admins allow-list templates', asyn
   assertEqual(registryPackage.registryEntry.trustSignals.noSuccessFees, true, 'registry package blocks success fees');
   assertEqual(registryPackage.registryEntry.trustSignals.noReferralCompensation, true, 'registry package blocks referral compensation');
   assertEqual(registryPackage.server.dealRunbooksUrl, `${origin}/api/definitive/deal-runbooks`, 'registry package exposes deal runbooks URL');
+  assertEqual(registryPackage.server.connectorDistributionUrl, `${origin}/api/definitive/connector-distribution`, 'registry package exposes connector distribution URL');
+  assertEqual(registryPackage.server.assistantDistributionReadinessUrl, `${origin}/api/definitive/assistant-distribution-readiness`, 'registry package exposes assistant readiness URL');
+  assertEqual(registryPackage.server.openApiSpecUrl, `${origin}/api/definitive/openapi.json`, 'registry package exposes OpenAPI URL');
   assertEqual(registryPackage.enterpriseAllowListTemplates.schema, 'DEFINITIVE.enterprise-allow-lists.v0.1', 'registry package embeds allow-list templates');
+  assertEqual(registryPackage.connectorDistributionPackage.schema, 'DEFINITIVE.connector-distribution.v0.1', 'registry package embeds connector distribution package');
+  assertEqual(registryPackage.connectorDistributionPackage.launchPriority[0], 'claude_connector', 'registry package keeps Claude-first connector priority');
   assertEqual(registryPackage.registrySubmissionPackages.canonicalNamespace, 'smbx-ai/diligence', 'registry submissions preserve canonical namespace');
   assertEqual(registryPackage.registrySubmissionPackages.canonicalMcpRegistry.serverCardUrl, `${origin}/.well-known/mcp/server-card.json`, 'canonical registry package has server card');
+  assertEqual(registryPackage.registrySubmissionPackages.canonicalMcpRegistry.readinessStatus, 'remote_mcp_ready_jwt_bearer', 'canonical MCP registry sees remote MCP transport');
+  assertEqual(registryPackage.registrySubmissionPackages.canonicalMcpRegistry.serverJson.remotes[0].url, `${origin}/mcp`, 'canonical registry server.json points to /mcp');
   assert(registryPackage.registrySubmissionPackages.thirdPartyDirectories.some((surface: any) => surface.surfaceId === 'pulsemcp'), 'registry package includes PulseMCP submission surface');
   assert(registryPackage.registrySubmissionPackages.thirdPartyDirectories.some((surface: any) => surface.surfaceId === 'glama'), 'registry package includes Glama submission surface');
   assert(registryPackage.registrySubmissionPackages.thirdPartyDirectories.some((surface: any) => surface.surfaceId === 'smithery'), 'registry package includes Smithery submission surface');
   assert(registryPackage.registrySubmissionPackages.thirdPartyDirectories.some((surface: any) => surface.surfaceId === 'docker_mcp_catalog'), 'registry package includes Docker MCP Catalog surface');
   assert(registryPackage.registrySubmissionPackages.clientStorePackages.some((surface: any) => surface.surfaceId === 'claude_connector_directory'), 'registry package includes Claude connector candidate');
+  assert(registryPackage.registrySubmissionPackages.clientStorePackages.some((surface: any) => surface.surfaceId === 'chatgpt_gpt_actions'), 'registry package includes ChatGPT GPT Actions candidate');
   assert(registryPackage.registrySubmissionPackages.clientStorePackages.some((surface: any) => surface.surfaceId === 'chatgpt_apps_directory'), 'registry package includes ChatGPT app candidate');
   assert(registryPackage.registrySubmissionPackages.clientStorePackages.some((surface: any) => surface.surfaceId === 'salesforce_agentexchange'), 'registry package includes Salesforce AgentExchange candidate');
   assert(registryPackage.registrySubmissionPackages.clientStorePackages.some((surface: any) => surface.surfaceId === 'google_agent_gallery'), 'registry package includes Google Agent Gallery candidate');
@@ -435,15 +553,182 @@ await test('Registry package gives enterprise admins allow-list templates', asyn
   assert(registryPackage.managedAgentTemplates.some((item: any) => item.id === 'managed_agent_acquisition_analyst'), 'registry package includes managed acquisition agent template');
   assert(registryPackage.managedAgentTemplates.some((item: any) => item.starterRunbook.includes('generate_output_doc')), 'managed agent templates include document generation');
 
+  assertEqual(connectorDistribution.schema, 'DEFINITIVE.connector-distribution.v0.1', 'connector distribution schema');
+  assertEqual(connectorDistribution.launchPriority[0], 'claude_connector', 'connector distribution is Claude-first');
+  assert(connectorDistribution.platformPackages.some((pkg: any) => pkg.surfaceId === 'chatgpt_gpt_actions'), 'connector distribution includes GPT Actions package');
+  assert(connectorDistribution.platformPackages.some((pkg: any) => pkg.surfaceId === 'chatgpt_app'), 'connector distribution includes ChatGPT package');
+  assert(connectorDistribution.platformPackages.some((pkg: any) => pkg.surfaceId === 'microsoft_copilot_agent'), 'connector distribution includes Copilot package');
+  assert(connectorDistribution.safetyAndCompliance.refusedActivities.includes('external counterparty contact'), 'connector distribution blocks counterparty contact');
+  assert(connectorDistribution.submitNowBlockers.some((item: string) => item.includes('OAuth')), 'connector distribution names OAuth blocker');
+
   assertEqual(allowLists.githubCopilotRegistry.policyMode, 'registry_only', 'GitHub Copilot registry-only posture');
   assertEqual(allowLists.githubCopilotRegistry.registry.servers[0].id, 'smbx-ai/diligence', 'GitHub registry server id');
   assert(allowLists.githubCopilotRegistry.registry.servers[0].allowedTools.includes('introspect_capabilities'), 'allow-list includes capability introspection');
+  assertEqual(allowLists.githubCopilotRegistry.registry.servers[0].url, `${origin}/mcp`, 'allow-list points enterprise agents to /mcp');
   assert(allowLists.githubCopilotRegistry.registry.servers[0].allowedTools.includes('run_model_iteration'), 'allow-list includes model iteration');
   assert(allowLists.githubCopilotRegistry.registry.servers[0].allowedTools.includes('generate_output_doc'), 'allow-list includes document generation');
   assert(allowLists.kiroAwsQRegistry.servers[0].allowTools.includes('describe_methodology'), 'Kiro/AWS registry includes methodology tool');
   assert(allowLists.azureApiCenterBlueprint.endpoints.toolCall.endsWith('/api/definitive/tools/call'), 'Azure blueprint exposes tool call');
   assert(allowLists.bedrockAgentCoreCedarPolicyTemplate.policy.includes('requestedToolLineStatus != "LINE_VIOLATION"'), 'Cedar policy preserves THE LINE');
   assert(allowLists.microsoftEntraAgentIdTemplate.claimsRequired.includes('beneficial_customer_id'), 'Entra template requires beneficial customer claim');
+});
+
+await test('Assistant distribution readiness separates GPT Actions, connectors, and MCP registry', async () => {
+  const origin = 'https://example.smbx.ai';
+  const readiness = buildDefinitiveAssistantDistributionReadiness(origin);
+  const openApi = buildDefinitiveOpenApiSpec(origin);
+  const gptActionsOpenApi = buildDefinitiveGptActionsOpenApiSpec(origin);
+
+  assertEqual(readiness.schema, 'DEFINITIVE.assistant-distribution-readiness.v0.1', 'assistant readiness schema');
+  assertEqual(readiness.strategy.fastestRevenueLane, 'chatgpt_gpt_actions', 'assistant readiness fastest revenue lane');
+  assertEqual(readiness.strategy.mostStrategicLane, 'claude_custom_connector_and_chatgpt_apps_sdk', 'assistant readiness strategic lane');
+  assertEqual(readiness.proofEndpoints.openApiSpec, `${origin}/api/definitive/openapi.json`, 'assistant readiness exposes OpenAPI URL');
+  assertEqual(readiness.proofEndpoints.gptActionsOpenApiSpec, `${origin}/api/definitive/gpt-actions/openapi.json`, 'assistant readiness exposes focused GPT Actions URL');
+  assertEqual(readiness.proofEndpoints.mcpEndpoint, `${origin}/mcp`, 'assistant readiness exposes /mcp URL');
+  assertEqual(readiness.proofEndpoints.oauthProtectedResource, `${origin}/.well-known/oauth-protected-resource/mcp`, 'assistant readiness exposes protected-resource metadata URL');
+  assertEqual(readiness.proofEndpoints.oauthAuthorizationServer, `${origin}/.well-known/oauth-authorization-server`, 'assistant readiness exposes authorization-server metadata URL');
+  assertEqual(readiness.surfaces.remoteMcp.status, 'ready_streamable_http_jwt_bearer', 'assistant readiness marks remote MCP ready');
+  assertEqual(readiness.surfaces.oauthProtectedResource.status, 'ready_oauth_pkce_bridge', 'assistant readiness marks OAuth bridge ready');
+  assert(readiness.platformReadiness.some((platform: any) => platform.id === 'chatgpt_gpt_actions'), 'assistant readiness includes GPT Actions');
+  assert(readiness.platformReadiness.some((platform: any) => platform.id === 'claude_custom_connector'), 'assistant readiness includes Claude connector');
+  assert(readiness.platformReadiness.some((platform: any) => platform.id === 'chatgpt_apps_sdk'), 'assistant readiness includes ChatGPT Apps SDK');
+  assert(readiness.platformReadiness.some((platform: any) => platform.id === 'official_mcp_registry'), 'assistant readiness includes official MCP registry');
+  assertEqual(readiness.protocolReadiness.status, 'ready_streamable_http_jwt_bearer', 'assistant readiness marks protocol ready');
+  assert(readiness.protocolReadiness.readyPieces.includes('streamable_http_mcp_endpoint'), 'assistant readiness includes ready /mcp transport');
+  assert(readiness.protocolReadiness.readyPieces.includes('oauth_protected_resource_metadata'), 'assistant readiness includes protected-resource metadata');
+  assert(readiness.protocolReadiness.readyPieces.includes('oauth_authorization_code_pkce_exchange'), 'assistant readiness includes OAuth PKCE exchange');
+  assert(readiness.protocolReadiness.readyPieces.includes('oauth_confidential_client_exchange_for_gpt_actions'), 'assistant readiness includes GPT Actions confidential OAuth exchange');
+  assert(readiness.protocolReadiness.readyPieces.includes('audience_bound_mcp_access_tokens'), 'assistant readiness includes audience-bound tokens');
+  assert(readiness.protocolReadiness.readyPieces.includes('www_authenticate_resource_metadata_challenge'), 'assistant readiness includes WWW-Authenticate challenge');
+  assertEqual(readiness.submitNow.mcpDirectoryProfileOnly, true, 'assistant readiness allows profile-only directory prep');
+  assert(readiness.noGoClaims.some((claim: string) => claim.includes('Do not claim official MCP Registry submission complete')), 'assistant readiness prevents premature registry claims');
+
+  assertEqual(openApi.openapi, '3.1.0', 'OpenAPI version');
+  assertEqual(openApi.info.title, 'smbX DEFINITIVE Deal OS API', 'OpenAPI title');
+  assertEqual(openApi.servers[0].url, origin, 'OpenAPI origin');
+  assert(openApi.paths['/api/definitive/tools/call'].post.operationId === 'callDefinitiveTool', 'OpenAPI exposes tool call operation');
+  assert(openApi.paths['/api/definitive/assistant-distribution-readiness'].get.operationId === 'getAssistantDistributionReadiness', 'OpenAPI exposes readiness operation');
+  assert(openApi.paths['/server.json'].get.operationId === 'getDefinitiveMcpServerJson', 'OpenAPI exposes server.json operation');
+  assert(openApi.paths['/.well-known/oauth-protected-resource/mcp'].get.operationId === 'getDefinitiveMcpProtectedResourceMetadata', 'OpenAPI exposes protected-resource metadata operation');
+  assert(openApi.paths['/.well-known/oauth-authorization-server'].get.operationId === 'getDefinitiveOAuthAuthorizationServerMetadata', 'OpenAPI exposes authorization-server metadata operation');
+  assert(openApi.paths['/oauth/register'].post.operationId === 'registerDefinitiveOAuthClient', 'OpenAPI exposes OAuth registration operation');
+  assert(openApi.paths['/oauth/token'].post.operationId === 'exchangeDefinitiveOAuthCode', 'OpenAPI exposes OAuth token operation');
+  assert(openApi.components.securitySchemes.bearerAuth.type === 'http', 'OpenAPI exposes bearer auth');
+  assert(openApi['x-smbx'].pricingDeclaration.includes('No wallet'), 'OpenAPI preserves no-wallet pricing doctrine');
+
+  assertEqual(gptActionsOpenApi.openapi, '3.1.0', 'GPT Actions OpenAPI version');
+  assertEqual(gptActionsOpenApi.info.title, 'smbX Deal OS GPT Actions', 'GPT Actions OpenAPI title');
+  assertEqual(gptActionsOpenApi.servers[0].url, origin, 'GPT Actions OpenAPI origin');
+  assert(gptActionsOpenApi.paths['/api/definitive/gpt-actions/introspect_capabilities'].post.operationId === 'smbxIntrospectCapabilities', 'GPT Actions exposes named introspection operation');
+  assert(gptActionsOpenApi.paths['/api/definitive/gpt-actions/compose_model_stack'].post.operationId === 'smbxComposeModelStack', 'GPT Actions exposes model-stack operation');
+  assert(gptActionsOpenApi.paths['/api/definitive/gpt-actions/ingest_deal_payload'].post['x-openai-isConsequential'] === true, 'GPT Actions marks ingest as consequential');
+  assert(gptActionsOpenApi.components.securitySchemes.smbxOAuth.flows.authorizationCode.tokenUrl === `${origin}/oauth/token`, 'GPT Actions exposes OAuth token URL');
+  assert(gptActionsOpenApi['x-smbx'].mcpEndpoint === `${origin}/mcp`, 'GPT Actions links canonical MCP endpoint');
+});
+
+await test('Remote MCP Streamable HTTP transport speaks initialize, tools/list, and authenticated tools/call', async () => {
+  const origin = 'https://example.smbx.ai';
+  const serverJson = buildDefinitiveMcpServerJson(origin);
+  assertEqual(serverJson.remotes[0].type, 'streamable-http', 'server.json declares Streamable HTTP');
+  assertEqual(serverJson.remotes[0].url, `${origin}/mcp`, 'server.json remote URL is /mcp');
+  assert(serverJson.remotes[0].headers.some((header: any) => header.name === 'Authorization' && header.isRequired === true), 'server.json declares Authorization header');
+  assertEqual(serverJson.metadata.oauthProtectedResource, `${origin}/.well-known/oauth-protected-resource/mcp`, 'server.json exposes protected-resource metadata');
+
+  const protectedResource = buildDefinitiveMcpProtectedResourceMetadata(origin);
+  assertEqual(protectedResource.resource, `${origin}/mcp`, 'protected-resource metadata names /mcp resource');
+  assert(protectedResource.authorization_servers.includes(origin), 'protected-resource metadata names authorization server');
+  assert(protectedResource.scopes_supported.includes('capability:read'), 'protected-resource metadata exposes capability scope');
+  assert(protectedResource.scopes_supported.includes('deal-state:write'), 'protected-resource metadata exposes write scope');
+  const authorizationServer = buildDefinitiveOAuthAuthorizationServerMetadata(origin);
+  assertEqual(authorizationServer.issuer, origin, 'authorization-server metadata issuer');
+  assertEqual(authorizationServer.authorization_endpoint, `${origin}/oauth/authorize`, 'authorization-server metadata authorize endpoint');
+  assertEqual(authorizationServer.token_endpoint, `${origin}/oauth/token`, 'authorization-server metadata token endpoint');
+  assertEqual(authorizationServer.registration_endpoint, `${origin}/oauth/register`, 'authorization-server metadata registration endpoint');
+  assert(authorizationServer.code_challenge_methods_supported.includes('S256'), 'authorization-server metadata requires PKCE S256');
+  assert(authorizationServer.token_endpoint_auth_methods_supported.includes('client_secret_post'), 'authorization-server metadata supports confidential GPT Actions clients');
+
+  const initialized = await handleDefinitiveRemoteMcpPost({
+    jsonrpc: '2.0',
+    id: 1,
+    method: 'initialize',
+    params: {
+      protocolVersion: DEFINITIVE_REMOTE_MCP_PROTOCOL_VERSION,
+      capabilities: {},
+      clientInfo: { name: 'surface-smoke', version: '0.1' },
+    },
+  }, { origin, persist: false });
+  assertEqual(initialized.status, 200, 'MCP initialize status');
+  assertEqual(initialized.body?.result.protocolVersion, DEFINITIVE_REMOTE_MCP_PROTOCOL_VERSION, 'MCP initialize protocol');
+  assertEqual(initialized.body?.result.capabilities.tools.listChanged, false, 'MCP initialize advertises tools');
+
+  const tools = await handleDefinitiveRemoteMcpPost({
+    jsonrpc: '2.0',
+    id: 2,
+    method: 'tools/list',
+    params: {},
+  }, { origin, persist: false });
+  assertEqual(tools.status, 200, 'MCP tools/list status');
+  assertDeepEqual(tools.body?.result.tools.map((tool: any) => tool.name), expectedTools, 'MCP tools/list tool names');
+  assert(tools.body?.result.tools.every((tool: any) => tool.inputSchema?.type === 'object'), 'MCP tools expose input schemas');
+  assert(tools.body?.result.tools.every((tool: any) => tool._meta?.requiredScopes?.length > 0), 'MCP tools expose required scopes in metadata');
+
+  const unauthenticatedCall = await handleDefinitiveRemoteMcpPost({
+    jsonrpc: '2.0',
+    id: 3,
+    method: 'tools/call',
+    params: { name: 'introspect_capabilities', arguments: {} },
+  }, { origin, persist: false });
+  assertEqual(unauthenticatedCall.status, 401, 'MCP tools/call requires auth');
+  assertEqual(unauthenticatedCall.body?.error.code, -32001, 'MCP tools/call auth error code');
+  assert(String(unauthenticatedCall.headers?.['WWW-Authenticate'] || '').includes('resource_metadata="https://example.smbx.ai/.well-known/oauth-protected-resource/mcp"'), 'MCP unauthenticated call includes protected-resource challenge');
+
+  const outOfScopeCall = await handleDefinitiveRemoteMcpPost({
+    jsonrpc: '2.0',
+    id: 4,
+    method: 'tools/call',
+    params: {
+      name: 'update_deal_payload',
+      arguments: { dealId: 'deal_demo', patch: { objective: 'test insufficient scope path' } },
+    },
+  }, {
+    origin,
+    persist: false,
+    auth: {
+      userId: 1,
+      claims: { userId: 1, tokenUse: 'definitive_agent', scopes: ['capability:read'], agentId: 'surface-smoke-agent', aud: `${origin}/mcp` },
+    },
+  });
+  assertEqual(outOfScopeCall.status, 403, 'MCP scoped token receives HTTP 403 for insufficient scopes');
+  assertEqual(outOfScopeCall.body?.error.message, 'missing_required_scope', 'MCP scoped token returns scope error');
+  assert(String(outOfScopeCall.headers?.['WWW-Authenticate'] || '').includes('error="insufficient_scope"'), 'MCP scoped token response includes insufficient_scope challenge');
+
+  const call = await handleDefinitiveRemoteMcpPost({
+    jsonrpc: '2.0',
+    id: 5,
+    method: 'tools/call',
+    params: {
+      name: 'introspect_capabilities',
+      arguments: { objective: 'prepare buy-side diligence plan', journey: 'buy' },
+      _meta: { requestId: 'mcp-smoke-001' },
+    },
+  }, {
+    origin,
+    persist: false,
+    auth: {
+      userId: 1,
+      claims: { userId: 1 },
+    },
+  });
+  assertEqual(call.status, 200, 'MCP tools/call status');
+  assertEqual(call.body?.result.isError, false, 'MCP tools/call succeeds');
+  assertEqual(call.body?.result.structuredContent.requestId, 'mcp-smoke-001', 'MCP tools/call preserves request id');
+  assertEqual(call.body?.result.structuredContent.result.schema, 'CapabilityCatalog.v0.1', 'MCP tools/call returns structured content');
+
+  const notification = await handleDefinitiveRemoteMcpPost({
+    jsonrpc: '2.0',
+    method: 'notifications/initialized',
+  }, { origin, persist: false });
+  assertEqual(notification.status, 202, 'MCP initialized notification is accepted');
 });
 
 await test('DEFINITIVE schema registry publishes portable agent contracts', async () => {

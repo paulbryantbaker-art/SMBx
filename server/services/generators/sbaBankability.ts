@@ -71,7 +71,7 @@ export interface SBAReport {
     robs_notes: string;
   };
   risk_factors: string[];
-  recommendations: string[];
+  decision_points: string[];
   generated_at: string;
 }
 
@@ -181,28 +181,28 @@ export function generateSBAReport(input: SBAInput): SBAReport {
     }
   }
 
-  // ─── Risk factors & recommendations ──────────────────────
+  // ─── Risk factors & decision points ──────────────────────
   const risks: string[] = [];
-  const recs: string[] = [];
+  const decisionPoints: string[] = [];
 
   if (!dscrPassed && earnings > 0) {
     risks.push(`DSCR of ${dscr.toFixed(2)}x is below SBA threshold — deal doesn't cash flow at this price`);
-    recs.push('Negotiate a lower purchase price or larger seller note to improve DSCR');
+    decisionPoints.push('Model lower-price, larger seller-note, and larger-equity cases to see what clears the DSCR threshold.');
   }
 
   if (gap > 0) {
     risks.push(`Equity gap of $${(gap / 100).toLocaleString()} — need additional injection sources`);
-    if (robsEligible) recs.push(`ROBS eligible: $${(retirement / 100).toLocaleString()} in retirement funds available for rollover`);
-    if (homeEquity > 0) recs.push(`HELOC: $${(homeEquity / 100).toLocaleString()} available at ~7.31% rate`);
+    if (robsEligible) decisionPoints.push(`ROBS source to diligence: $${(retirement / 100).toLocaleString()} in retirement funds identified for possible rollover.`);
+    if (homeEquity > 0) decisionPoints.push(`HELOC source to diligence: $${(homeEquity / 100).toLocaleString()} available at approximately 7.31% rate.`);
   }
 
   if (input.seller_financing_available && !input.seller_standby_willing) {
     risks.push('Seller financing available but seller unwilling to go on full standby');
-    recs.push('2025 SBA rule: seller notes used as equity injection must be on FULL STANDBY (no payments) for entire loan term. Negotiate with seller — businesses offering seller financing sell for 20-30% more.');
+    decisionPoints.push('2025 SBA rule: seller notes used as equity injection must be on full standby for the entire loan term. Model a full-standby option and have lender/counsel confirm treatment.');
   }
 
   if (!input.buyer_credit_score) {
-    recs.push('Get credit score ASAP — SBA minimum is 690, most preferred lenders want 700+');
+    decisionPoints.push('Credit score is missing — SBA minimum is typically 690 and many preferred lenders look for 700+.');
   }
 
   const sellerNote = Math.round(input.deal_size * sellerNotePct);
@@ -246,7 +246,7 @@ export function generateSBAReport(input: SBAInput): SBAReport {
         : 'No retirement funds identified for ROBS eligibility.',
     },
     risk_factors: risks,
-    recommendations: recs,
+    decision_points: decisionPoints,
     generated_at: new Date().toISOString(),
   };
 }

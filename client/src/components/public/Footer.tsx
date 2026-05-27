@@ -37,7 +37,7 @@ export default function Footer() {
           <div>
             <Logo linked={false} />
             <p className="text-sm text-[#7A766E] leading-[1.55] mt-3 max-w-[280px]">
-              The AI deal advisor for brokers, owners, and investors. From valuation to close.
+              Deal intelligence for brokers, owners, and investors. From valuation to close.
             </p>
           </div>
 

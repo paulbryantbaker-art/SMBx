@@ -38,7 +38,7 @@ export interface DealScreeningMemo {
     location: string;
     league: string;
     overall_score: number;       // 0-100
-    verdict: 'PURSUE' | 'INVESTIGATE' | 'PASS';
+    verdict: 'STRONG_FIT' | 'DILIGENCE_NEEDED' | 'MATERIAL_GAPS';
     verdict_rationale: string;
   };
   financial_health: {
@@ -143,7 +143,7 @@ export async function generateDealScreeningMemo(input: DealScreeningInput): Prom
       valuationFlags.push(`Asking multiple (${impliedMultiple}x) slightly above league range`);
     } else if (impliedMultiple <= rangeMax * 1.3) {
       valuationScore = 40;
-      valuationFlags.push(`Asking multiple (${impliedMultiple}x) above league range — negotiate down`);
+      valuationFlags.push(`Asking multiple (${impliedMultiple}x) above league range — model lower-price and alternative-structure cases`);
     } else {
       valuationScore = 20;
       valuationFlags.push(`Asking multiple (${impliedMultiple}x) significantly above market — likely overpriced`);
@@ -157,9 +157,9 @@ export async function generateDealScreeningMemo(input: DealScreeningInput): Prom
   }
 
   let valuationAssessment: string;
-  if (valuationScore >= 80) valuationAssessment = 'Asking price is at or below market — attractive entry point.';
-  else if (valuationScore >= 60) valuationAssessment = 'Asking price is reasonable, within negotiable range.';
-  else if (valuationScore >= 40) valuationAssessment = 'Asking price is aggressive — plan to negotiate.';
+  if (valuationScore >= 80) valuationAssessment = 'Asking price is at or below the modeled market range.';
+  else if (valuationScore >= 60) valuationAssessment = 'Asking price is within the modeled diligence range.';
+  else if (valuationScore >= 40) valuationAssessment = 'Asking price is aggressive and needs pricing support plus structure review.';
   else valuationAssessment = 'Asking price appears disconnected from fundamentals — significant gap.';
 
   // ─── 3. Strategic Fit Score (0-100) ───────────────────────
@@ -289,14 +289,14 @@ export async function generateDealScreeningMemo(input: DealScreeningInput): Prom
   let verdictRationale: string;
 
   if (overallScore >= 70) {
-    verdict = 'PURSUE';
-    verdictRationale = 'This deal scores well across financial health, valuation, and strategic fit. Proceed to detailed due diligence.';
+    verdict = 'STRONG_FIT';
+    verdictRationale = 'This deal scores well across financial health, valuation, and strategic fit. Detailed diligence would test whether the supportable facts hold.';
   } else if (overallScore >= 50) {
-    verdict = 'INVESTIGATE';
-    verdictRationale = 'This deal has potential but needs more information before committing. Address the identified questions and risks first.';
+    verdict = 'DILIGENCE_NEEDED';
+    verdictRationale = 'This deal has potential but needs more information before commitment. Resolve the identified questions and risks before reliance.';
   } else {
-    verdict = 'PASS';
-    verdictRationale = 'Significant concerns across multiple dimensions. The risk/reward profile does not justify further investment of time and capital at this price point.';
+    verdict = 'MATERIAL_GAPS';
+    verdictRationale = 'Significant concerns appear across multiple dimensions. Additional facts or revised economics would be needed before treating this as a supportable acquisition case.';
   }
 
   // ─── 7. AI Narrative ──────────────────────────────────────
@@ -310,16 +310,16 @@ ${askingDollars ? `Asking Price: $${askingDollars.toLocaleString()}` : ''}
 ${impliedMultiple ? `Implied Multiple: ${impliedMultiple}x (league range: ${range.min}x–${range.max || 'N/A'}x)` : ''}
 League: ${input.league}
 
-Overall Score: ${overallScore}/100 — Verdict: ${verdict}
+Overall Score: ${overallScore}/100 — Screening Status: ${verdict}
 Financial Health: ${financialScore}/100
 Valuation Sanity: ${valuationScore}/100
 Strategic Fit: ${strategicScore}/100
 ${risks.length > 0 ? `Key Risks: ${risks.map(r => `${r.category} (${r.severity})`).join(', ')}` : 'No major risks identified'}
 
-Write as Yulia, the M&A advisor. Be direct and specific. Focus on whether the buyer should invest more time in this deal and what they need to watch out for.`;
+Write as Yulia, the M&A deal-intelligence operator. Be direct and specific. Focus on the option paths for further diligence, what would support each path, and what the buyer needs to watch out for. Do not tell the buyer to pursue, pass, offer, sign, or close.`;
 
   const narrative = await callClaude(
-    'You are Yulia, an M&A advisor writing a deal screening memo. Be concise, data-driven, and direct. Address the buyer.',
+    'You are Yulia, an M&A deal-intelligence operator writing a deal screening memo. Be concise, data-driven, and direct. Address the buyer with analysis, options, and implications.',
     [{ role: 'user', content: narrativePrompt }],
   );
 

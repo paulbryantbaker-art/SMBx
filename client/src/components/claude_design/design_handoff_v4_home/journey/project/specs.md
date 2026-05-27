@@ -141,7 +141,7 @@ type IntegratePageData = {
 1. **Which tier?** — Single lede paragraph. Rail's chips drive the router.
 2. **Plans** — 3-card grid: Explore (free) / Deal ($2,400/mo, featured dark) / Firm ($9,800/mo). Each: tier name, price, descriptor, 5–7 feature bullets, CTA button.
 3. **Compare** — 12-row feature-matrix table. ✓ / — / specific values per tier. No asterisks, no "contact us".
-4. **FAQ** — 4 cards: success fees, when to upgrade, legal counsel, what if deal doesn't close.
+4. **FAQ** — 4 cards: no transaction fees, when to upgrade, legal counsel, what if deal doesn't close.
 
 **Bottom close:** "Buying, selling, raising, or still deciding?"
 

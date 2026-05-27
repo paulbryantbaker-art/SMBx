@@ -1,31 +1,20 @@
 import { Router } from 'express';
 import crypto from 'crypto';
 import path from 'path';
-import fs from 'fs';
 import multer from 'multer';
 import { sql } from '../db.js';
 import { buildAnonymousPrompt } from '../services/promptBuilder.js';
 import { streamAnonymousResponse } from '../services/aiService.js';
 import { extractFields } from '../services/fieldExtractor.js';
 import { scoreSevenFactors, calculateCompositeScore, scoredFactorCount } from '../services/sevenFactorScoring.js';
-import { extractFromDocument } from '../services/documentExtractor.js';
-import { getUploadRoot } from '../services/uploadRoot.js';
+import { extractFinancialsFromUploadBuffer, persistUploadedFile } from '../services/uploadPersistence.js';
 import type { MessageParam } from '@anthropic-ai/sdk/resources/messages';
 
 export const anonymousRouter = Router();
 
 // Upload config
-const UPLOAD_DIR = getUploadRoot();
-if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-
 const upload = multer({
-  storage: multer.diskStorage({
-    destination: UPLOAD_DIR,
-    filename: (_req, file, cb) => {
-      const ext = path.extname(file.originalname);
-      cb(null, `${crypto.randomUUID()}${ext}`);
-    },
-  }),
+  storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
   fileFilter: (_req, file, cb) => {
     const allowed = ['.pdf', '.xlsx', '.xls', '.csv'];
@@ -264,29 +253,23 @@ anonymousRouter.post('/:sessionId/upload', upload.single('file'), async (req, re
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const fileInfo = {
-      originalName: req.file.originalname,
-      storedName: req.file.filename,
-      size: req.file.size,
-      mimeType: req.file.mimetype,
-    };
+    const fileInfo = await persistUploadedFile(`anonymous/${session.session_id}`, req.file);
 
     // Store file info in session data
     await sql`
       UPDATE anonymous_sessions
-      SET data = COALESCE(data, '{}'::jsonb) || ${JSON.stringify({ uploaded_file: fileInfo })}::jsonb,
+      SET data = COALESCE(data, '{}'::jsonb) || ${sql.json({ uploaded_file: fileInfo } as any)}::jsonb,
           last_active_at = NOW()
       WHERE id = ${session.id}
     `;
 
     // Fire-and-forget: extract financial data from the document
-    const fullPath = path.resolve(UPLOAD_DIR, req.file.filename);
-    extractFromDocument(fullPath, req.file.originalname).then(async (extracted) => {
+    extractFinancialsFromUploadBuffer(req.file).then(async (extracted) => {
       if (extracted && extracted.confidence !== 'low') {
         try {
           await sql`
             UPDATE anonymous_sessions
-            SET data = COALESCE(data, '{}'::jsonb) || ${JSON.stringify({ extracted_financials: extracted })}::jsonb
+            SET data = COALESCE(data, '{}'::jsonb) || ${sql.json({ extracted_financials: extracted } as any)}::jsonb
             WHERE id = ${session.id}
           `;
         } catch (e: any) {

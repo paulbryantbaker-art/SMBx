@@ -258,7 +258,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
       ? [
           {
             label: "Source",
-            text: "Find targets, buyers, capital, advisors, and market context without leaving the deal desk.",
+            text: "Find targets, buyers, capital, specialists, and market context without leaving the deal desk.",
           },
           {
             label: "Diligence",
@@ -277,7 +277,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           },
           {
             label: "Source",
-            text: "No card-level recommendation is shown until the briefing layer returns the sourced result.",
+            text: "No card-level next move is shown until the briefing layer returns the sourced result.",
           },
           {
             label: "Next",
@@ -399,7 +399,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           sub: "Yulia is the source of portfolio priorities. Ask for the read while the briefing layer refreshes.",
           cta: "Ask Yulia",
           tone: "plum" as Tone,
-          action: () => ask("Refresh my live portfolio read and tell me what needs action, with the source behind each recommendation."),
+          action: () => ask("Refresh my live portfolio read and tell me what needs action, with the source behind each next move."),
         },
       ]
     : lead
@@ -448,7 +448,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
         },
         {
           kicker: "SEARCH",
-          title: "Find buyers, targets, or advisors",
+              title: "Find buyers, targets, or specialists",
           sub: "Start with a thesis and let Yulia assemble the search surface.",
           cta: "Search",
           tone: "gold" as Tone,
@@ -483,7 +483,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
             {liveBrief?.hero.lede || (showLoggedOutMarketing
               ? "smbX.ai connects institutional deal intelligence, workflow execution, and continuous transaction context across the deal lifecycle — from sourcing and diligence through post-close value realization."
               : waitingForYuliaRead
-              ? "The page is holding the surface, but the recommendation copy belongs to Yulia's briefing layer. When it returns, the cards below will reflect her sourced read."
+              ? "The page is holding the surface, but the next-move copy belongs to Yulia's briefing layer. When it returns, the cards below will reflect her sourced read."
               : lead
               ? "The deal is still worth pursuing. Review the IOI, answer counsel on the NDA, and keep the buyer search narrow until working capital is buttoned up."
               : "No private workspace data is attached to this account yet. Start with a chat, source file, target, buyer pool, or deal thesis and Yulia will build the right surfaces around it.")}

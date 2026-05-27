@@ -1,5 +1,5 @@
 /**
- * Provider Routes — Service provider search, recommendations, and referrals.
+ * Provider Routes — Neutral service-provider directory search and user-selected contact logging.
  */
 import { Router } from 'express';
 import { sql } from '../db.js';
@@ -25,7 +25,7 @@ providerRouter.get('/providers/search', async (req, res) => {
   }
 });
 
-// Contextual recommendations for a deal
+// Contextual directory suggestions for a deal
 providerRouter.get('/providers/recommendations/:dealId', async (req, res) => {
   try {
     const userId = (req as any).userId;
@@ -38,23 +38,23 @@ providerRouter.get('/providers/recommendations/:dealId', async (req, res) => {
     const result = await generateProviderRecommendation(dealId);
     return res.json(result);
   } catch (err: any) {
-    console.error('Provider recommendations error:', err.message);
-    return res.status(500).json({ error: 'Failed to get recommendations' });
+    console.error('Provider directory error:', err.message);
+    return res.status(500).json({ error: 'Failed to get provider directory results' });
   }
 });
 
-// Track a referral
+// Legacy route: log a user-selected provider contact event. No compensation or referral fee.
 providerRouter.post('/providers/referrals', async (req, res) => {
   try {
     const userId = (req as any).userId;
     const { dealId, providerId, context } = req.body;
     if (!dealId || !providerId) return res.status(400).json({ error: 'dealId and providerId required' });
 
-    const referralId = await trackReferral(dealId, providerId, userId, context || 'User-initiated referral');
+    const referralId = await trackReferral(dealId, providerId, userId, context || 'User-selected provider contact');
     return res.status(201).json({ referralId });
   } catch (err: any) {
-    console.error('Track referral error:', err.message);
-    return res.status(500).json({ error: 'Failed to track referral' });
+    console.error('Provider contact log error:', err.message);
+    return res.status(500).json({ error: 'Failed to log provider contact' });
   }
 });
 

@@ -1,6 +1,6 @@
 -- Migration 036: Execution fee cleanup
 -- Ensure execution_stripe_id column exists (supplements stripe_payment_intent_id)
--- Drop the platform_fee_schedule table — fee is now always 0.1% of SDE/EBITDA, $999 min
+-- Drop the platform_fee_schedule table. Current pricing is monthly subscriptions only.
 
 ALTER TABLE deals ADD COLUMN IF NOT EXISTS execution_stripe_id VARCHAR(255);
 

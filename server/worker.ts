@@ -43,6 +43,17 @@ boss.on('error', (err: Error) => {
   console.error('pg-boss error:', err);
 });
 
+async function ensureQueue(name: string): Promise<void> {
+  try {
+    await (boss as any).createQueue(name);
+  } catch (err: any) {
+    const message = String(err?.message || '');
+    if (!/already exists|duplicate key|exists/i.test(message)) {
+      throw err;
+    }
+  }
+}
+
 // ─── Job Handlers ───────────────────────────────────────────
 
 async function handleGenerateDeliverable(job: { data: DeliverableJobData }) {
@@ -69,11 +80,16 @@ async function start() {
   await boss.start();
   console.log('pg-boss started');
 
+  await ensureQueue('generate-deliverable');
+  await ensureQueue('listing-match-check');
   await (boss as any).work('generate-deliverable', { teamSize: 3, teamConcurrency: 1 }, handleGenerateDeliverable);
   await (boss as any).work('listing-match-check', { teamSize: 2, teamConcurrency: 1 }, handleListingMatchCheck);
   console.log('Registered job handlers: generate-deliverable, listing-match-check');
 
   // Sourcing pipeline stage handlers
+  await ensureQueue('sourcing-stage-2');
+  await ensureQueue('sourcing-stage-3');
+  await ensureQueue('sourcing-stage-4');
   await (boss as any).work('sourcing-stage-2', { teamSize: 1, teamConcurrency: 1 }, async (job: { data: { portfolioId: number } }) => {
     console.log(`[worker] Running sourcing Stage 2 for portfolio ${job.data.portfolioId}`);
     await runStage2(job.data.portfolioId);

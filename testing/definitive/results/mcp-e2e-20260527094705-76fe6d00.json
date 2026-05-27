@@ -1,0 +1,107 @@
+{
+  "runId": "mcp-e2e-20260527094705-76fe6d00",
+  "target": "http://127.0.0.1:3000",
+  "appBaseUrl": "http://localhost:5173",
+  "startedAt": "2026-05-27T09:47:05.447Z",
+  "fixtures": {
+    "buy": {
+      "dealId": 506,
+      "title": "MCP E2E BUY mcp-e2e-20260527094705-76fe6d00",
+      "latestStateCid": "definitive:deal-state:sha256:74d367ca4f352b269523ca763bfcbd8240736255cec3555274c29f6705005f4e",
+      "latestStateHash": "74d367ca4f352b269523ca763bfcbd8240736255cec3555274c29f6705005f4e",
+      "expectedPacketTypes": [
+        "DealStateControlPacket.v0.1",
+        "LOIPacket.v0.1",
+        "DealPackage.v0.1"
+      ],
+      "packetRowIds": [
+        1015
+      ],
+      "modelExecutionIds": []
+    },
+    "raise": {
+      "dealId": 508,
+      "title": "MCP E2E RAISE mcp-e2e-20260527094705-76fe6d00",
+      "latestStateCid": "definitive:deal-state:sha256:db538cebb9c4b9dd55505ba360a8fa7ece4297420223b3cfa6a47c8eee45c1fc",
+      "latestStateHash": "db538cebb9c4b9dd55505ba360a8fa7ece4297420223b3cfa6a47c8eee45c1fc",
+      "expectedPacketTypes": [
+        "DealStateControlPacket.v0.1",
+        "DocumentDraft.v0.1",
+        "DealPackage.v0.1"
+      ],
+      "packetRowIds": [
+        1017,
+        1018,
+        1019
+      ],
+      "modelExecutionIds": []
+    },
+    "pmi": {
+      "dealId": 509,
+      "title": "MCP E2E PMI mcp-e2e-20260527094705-76fe6d00",
+      "latestStateCid": "definitive:deal-state:sha256:f7a01747ad0a7be50773642917f338366f05037dc69c81c5f42cb7bd3a525473",
+      "latestStateHash": "f7a01747ad0a7be50773642917f338366f05037dc69c81c5f42cb7bd3a525473",
+      "expectedPacketTypes": [
+        "DealStateControlPacket.v0.1",
+        "PMIPlan.v0.1",
+        "DealPackage.v0.1"
+      ],
+      "packetRowIds": [
+        1020,
+        1021,
+        1022
+      ],
+      "modelExecutionIds": []
+    }
+  },
+  "finishedAt": "2026-05-27T09:47:36.207Z",
+  "totals": {
+    "passed": 3,
+    "failed": 6,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "name": "public discovery, initialize, tools/list, and unauthenticated challenge",
+      "status": "pass"
+    },
+    {
+      "name": "FIX-BUY-LBO-001 executes through /mcp and persists LBO/LOI/package artifacts",
+      "status": "fail",
+      "message": "fetch_market_data succeeds. Expected false, got true"
+    },
+    {
+      "name": "FIX-SELLREP-001 executes sell-side LOI/DD/close readiness through /mcp",
+      "status": "fail",
+      "message": "sellrep representation side is sell-side. Expected \"sell_side\", got undefined"
+    },
+    {
+      "name": "FIX-RAISE-001 executes raise-side investor material path through /mcp",
+      "status": "pass"
+    },
+    {
+      "name": "FIX-PMI-001 executes post-close PMI path through /mcp",
+      "status": "pass"
+    },
+    {
+      "name": "FIX-LINE-001 refuses an unauthorized close action over /mcp",
+      "status": "fail",
+      "message": "close_deal governed error returns JSON-RPC 200 envelope. Expected 200, got 403"
+    },
+    {
+      "name": "protected app APIs retrieve connector-created DealState, packets, and model rows",
+      "status": "fail",
+      "message": "buy app packet API includes LOIPacket.v0.1"
+    },
+    {
+      "name": "DB persistence/audit rows exist for DealState packets and model executions",
+      "status": "fail",
+      "message": "buy DB packets include LOIPacket.v0.1"
+    },
+    {
+      "name": "desktop and mobile app surfaces open connector-created work",
+      "status": "fail",
+      "message": "page.waitForFunction: Timeout 15000ms exceeded."
+    }
+  ]
+}

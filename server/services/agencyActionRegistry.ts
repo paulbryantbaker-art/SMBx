@@ -942,7 +942,7 @@ const CONTRACTS: Record<string, AgencyActionContract> = {
   },
   recommend_providers: {
     toolName: 'recommend_providers',
-    label: 'Recommend deal professionals',
+    label: 'Find deal professionals',
     methodologyRefs: ['v17 §4 Functional Lifecycle', 'v17 §10 Legal Framework'],
     mode: 'coordinator',
     permissionLevel: 'A0_READ',
@@ -1081,7 +1081,7 @@ const CONTRACTS: Record<string, AgencyActionContract> = {
     riskLevel: 'safe',
     confirmation: 'none',
     writeScope: 'none',
-    description: 'Read a saved analysis/model scenario and have Yulia recommend the best risk-adjusted path plus negotiation, diligence, tax/legal, and work-product steps.',
+    description: 'Read a saved analysis/model scenario and have Yulia compare the strongest risk-adjusted path candidates plus negotiation-prep, diligence, tax/legal, and work-product steps.',
   },
   create_support_issue: {
     toolName: 'create_support_issue',

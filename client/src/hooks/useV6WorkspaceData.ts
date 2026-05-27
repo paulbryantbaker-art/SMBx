@@ -210,7 +210,17 @@ export async function generateDealDeliverable(input: GenerateDeliverableInput) {
     }),
   });
   const payload = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(payload.error || payload.message || `HTTP ${res.status}`);
+  if (!res.ok) {
+    const error = new Error(payload.message || payload.error || `HTTP ${res.status}`);
+    Object.assign(error, {
+      status: res.status,
+      code: payload.code,
+      requiredPlan: payload.requiredPlan,
+      checkoutUrl: payload.checkoutUrl,
+      priceDisplay: payload.priceDisplay,
+    });
+    throw error;
+  }
   return payload as { deliverableId: number; jobId?: string | null; status: string; title?: string };
 }
 

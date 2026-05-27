@@ -21,6 +21,7 @@ export const DEFINITIVE_DEAL_STATE_PROTOCOL = 'DEFINITIVE.deal-state.v0.1';
 
 type Confidence = 'explicit' | 'inferred' | 'missing';
 type Journey = 'sell' | 'buy' | 'raise' | 'pmi' | 'unknown';
+type RepresentationSide = 'sell_side' | 'buy_side' | 'raise_side' | 'pmi' | 'unknown';
 type DealReadinessLevel =
   | 'DRL0_UNCLASSIFIED'
   | 'DRL1_CLASSIFIED'
@@ -99,6 +100,31 @@ export interface DefinitiveMcpCallHint {
   priority: 'P0' | 'P1' | 'P2';
   reason: string;
   inputHint: Record<string, any>;
+}
+
+export interface DefinitiveRepresentationContext {
+  side: RepresentationSide;
+  actorRole:
+    | 'owner'
+    | 'owner_representative'
+    | 'sell_side_advisor'
+    | 'buyer'
+    | 'buyer_representative'
+    | 'capital_raiser'
+    | 'operator'
+    | 'agent_or_principal'
+    | 'unknown';
+  purpose:
+    | 'prepare_for_sale_process'
+    | 'prepare_for_incoming_loi'
+    | 'prepare_for_due_diligence'
+    | 'prepare_for_closing'
+    | 'evaluate_acquisition'
+    | 'raise_capital'
+    | 'operate_post_close'
+    | 'unknown';
+  authorityBoundary: string;
+  sellSidePreparationPath?: string[];
 }
 
 const LINE_INVARIANT =
@@ -426,6 +452,7 @@ export function getDefinitiveDefinitionOfDone(input: Record<string, any> = {}) {
 export function composeDefinitiveDealPlan(input: Record<string, any>) {
   const state = stateFromInput(input);
   const dealPlan = buildDealPlan(state);
+  const representationContext = inferRepresentationContext(state);
   return {
     ok: true,
     action: 'compose_deal_plan',
@@ -433,6 +460,7 @@ export function composeDefinitiveDealPlan(input: Record<string, any>) {
       dealState: state,
       dealPlan,
       classificationKey: state.classificationKey,
+      representationContext,
       completenessReport: state.completenessReport,
       next_suggested_calls: buildNextCallHints(state),
       portableTakeBackArtifacts: ['DealPlan', 'DealState', 'CompletenessReport', 'MCPCallHint[]'],
@@ -524,6 +552,7 @@ export function composeDefinitiveDealPackage(input: Record<string, any>) {
   const state = stateFromInput(input);
   const dealPlan = buildDealPlan(state);
   const nextSuggestedCalls = buildNextCallHints(state);
+  const representationContext = inferRepresentationContext(state);
   const dealPackage = {
     packageId: `dealpkg_${state.stateHash.slice(0, 16)}`,
     packageCid: `definitive:deal-package:sha256:${sha256(stableStringify({
@@ -536,6 +565,7 @@ export function composeDefinitiveDealPackage(input: Record<string, any>) {
     dealStateHash: state.stateHash,
     readinessLevel: state.completenessReport.level,
     classificationKey: state.classificationKey,
+    representationContext,
     completenessReport: state.completenessReport,
     missingInputContract: state.missingInputContract,
     dealPlan,
@@ -1116,6 +1146,7 @@ export function prepareDefinitiveIoiPacket(input: Record<string, any>) {
   const state = stateFromInput(input);
   const objective = textValue(input.objective) || 'indication_of_interest';
   const audience = textValue(input.audience) || 'internal_deal_team';
+  const representationContext = inferRepresentationContext(state);
   const sourceRefs = sourceRefsForCategories(state, ['financials', 'commercial']);
   const sourceGaps = ['financials', 'commercial']
     .filter(category => !sourceRefs.some(source => source.category === category))
@@ -1155,6 +1186,7 @@ export function prepareDefinitiveIoiPacket(input: Record<string, any>) {
     audience,
     stage: currentStageForState(state),
     readinessLevel: state.completenessReport.level,
+    representationContext,
     knownFacts,
     preliminaryEconomics,
     sourceRefs,
@@ -1236,6 +1268,7 @@ export function prepareDefinitiveLoiPacket(input: Record<string, any>) {
   const state = stateFromInput(input);
   const objective = textValue(input.objective) || 'loi_architecture';
   const audience = textValue(input.audience) || 'internal_deal_team_and_counsel';
+  const representationContext = inferRepresentationContext(state);
   const sourceRefs = sourceRefsForCategories(state, ['financials', 'legal', 'tax', 'commercial']);
   const sourceGaps = ['financials', 'legal', 'tax', 'commercial']
     .filter(category => !sourceRefs.some(source => source.category === category))
@@ -1279,6 +1312,7 @@ export function prepareDefinitiveLoiPacket(input: Record<string, any>) {
     audience,
     stage: currentStageForState(state),
     readinessLevel: state.completenessReport.level,
+    representationContext,
     dealArchitecture,
     economicTerms,
     closingConditions,
@@ -1370,6 +1404,7 @@ export function prepareDefinitiveLoiPacket(input: Record<string, any>) {
 
 export function composeDefinitiveDataRoomIndex(input: Record<string, any>) {
   const state = stateFromInput(input);
+  const representationContext = inferRepresentationContext(state);
   const requiredCategories = requiredDataRoomCategories(state);
   const categories = buildDataRoomCategories(state.sourceIndex, requiredCategories);
   const missingCategories = categories.filter(category => category.status === 'missing').map(category => category.id);
@@ -1379,6 +1414,7 @@ export function composeDefinitiveDataRoomIndex(input: Record<string, any>) {
     dealStateCid: state.cid,
     dealStateHash: state.stateHash,
     classificationKey: state.classificationKey,
+    representationContext,
     totalSources: state.sourceIndex.length,
     citationReadyCount: state.sourceIndex.filter(source => source.citationReady).length,
     categories,
@@ -1429,6 +1465,7 @@ export function prepareDefinitiveDiligenceRequest(input: Record<string, any>) {
   const state = stateFromInput(input);
   const objective = textValue(input.objective) || 'iterative_due_diligence';
   const audience = textValue(input.audience) || 'deal_team_and_counterparty';
+  const representationContext = inferRepresentationContext(state);
   const requestedCategories = uniqueStrings([
     ...normalizeStringList(input.categories),
     ...requiredDataRoomCategories(state),
@@ -1476,6 +1513,7 @@ export function prepareDefinitiveDiligenceRequest(input: Record<string, any>) {
     audience,
     stage: currentStageForState(state),
     readinessLevel: state.completenessReport.level,
+    representationContext,
     requestedCategories,
     requestGroups,
     sourceGaps,
@@ -1674,9 +1712,10 @@ export function composeDefinitiveDocumentDraft(input: Record<string, any>) {
   const state = stateFromInput(input);
   const documentType = normalizeDocumentType(input.documentType ?? input.kind ?? input.objective);
   const audience = textValue(input.audience) || audienceForDocumentType(documentType);
+  const representationContext = inferRepresentationContext(state);
   const sections = buildDocumentDraftSections(documentType, state);
   const missingSourceCategories = uniqueStrings(sections.flatMap(section => section.missingSourceCategories));
-  const needsModelState = ['ic_memo', 'loi_outline', 'negotiation_brief', 'funds_flow'].includes(documentType) && !state.completenessReport.satisfied.includes('model_state_present');
+  const needsModelState = ['ic_memo', 'loi_outline', 'seller_loi_readiness', 'seller_diligence_readiness', 'negotiation_brief', 'funds_flow'].includes(documentType) && !state.completenessReport.satisfied.includes('model_state_present');
   const draftInput = {
     dealStateHash: state.stateHash,
     documentType,
@@ -1697,6 +1736,7 @@ export function composeDefinitiveDocumentDraft(input: Record<string, any>) {
     documentType,
     stage: currentStageForState(state),
     audience,
+    representationContext,
     title: documentDraftTitle(documentType, state),
     sections,
     sourcePolicy: {
@@ -1763,6 +1803,7 @@ export function prepareDefinitiveNegotiationBrief(input: Record<string, any>) {
   const state = stateFromInput(input);
   const objective = textValue(input.objective) || 'negotiation_preparation';
   const audience = textValue(input.audience) || 'internal_deal_team';
+  const representationContext = inferRepresentationContext(state);
   const openTerms = buildNegotiationOpenTerms(state);
   const sourceGaps = uniqueStrings(openTerms.flatMap(term => term.missingSourceCategories)).map(category => ({
     category,
@@ -1790,6 +1831,7 @@ export function prepareDefinitiveNegotiationBrief(input: Record<string, any>) {
     audience,
     stage: currentStageForState(state),
     readinessLevel: state.completenessReport.level,
+    representationContext,
     openTerms,
     modelBackedRanges,
     sourceGaps,
@@ -1853,6 +1895,7 @@ export function composeDefinitiveCloseReadiness(input: Record<string, any>) {
   const state = stateFromInput(input);
   const objective = textValue(input.objective) || 'closing_readiness';
   const audience = textValue(input.audience) || 'internal_deal_team_and_closing_advisors';
+  const representationContext = inferRepresentationContext(state);
   const requiredSourceCategories = closeReadinessSourceCategories(state);
   const sourceRefs = sourceRefsForCategories(state, requiredSourceCategories);
   const sourceGaps = requiredSourceCategories
@@ -1894,6 +1937,7 @@ export function composeDefinitiveCloseReadiness(input: Record<string, any>) {
     audience,
     stage: currentStageForState(state),
     readinessLevel: state.completenessReport.level,
+    representationContext,
     readinessStatus,
     readinessScore,
     checks,
@@ -1946,6 +1990,7 @@ export function generateDefinitiveFundsFlow(input: Record<string, any>) {
   const state = stateFromInput(input);
   const objective = textValue(input.objective) || 'closing_funds_flow';
   const audience = textValue(input.audience) || 'internal_deal_team_and_closing_advisors';
+  const representationContext = inferRepresentationContext(state);
   const sourceRefs = sourceRefsForCategories(state, ['financials', 'legal', 'tax', 'financing']);
   const sourceGaps = ['financials', 'legal', 'tax', 'financing']
     .filter(category => !sourceRefs.some(source => source.category === category))
@@ -1980,6 +2025,7 @@ export function generateDefinitiveFundsFlow(input: Record<string, any>) {
     audience,
     stage: currentStageForState(state),
     readinessLevel: state.completenessReport.level,
+    representationContext,
     sourceRows,
     useRows,
     adjustments,
@@ -2198,12 +2244,14 @@ export function composeDefinitivePmiPlan(input: Record<string, any>) {
 
 function buildDealStateResult(action: 'ingest_deal_payload' | 'update_deal_payload' | 'clone_deal_state', state: DefinitiveDealState, priorScore: number | null) {
   const scoreDelta = priorScore == null ? state.completenessReport.score : state.completenessReport.score - priorScore;
+  const representationContext = inferRepresentationContext(state);
   return {
     ok: true,
     action,
     result: {
       dealState: state,
       classificationKey: state.classificationKey,
+      representationContext,
       missingInputContract: state.missingInputContract,
       completenessReport: state.completenessReport,
       next_suggested_calls: buildNextCallHints(state),
@@ -2291,6 +2339,7 @@ function buildDealState(input: {
 
 function buildDealPlan(state: DefinitiveDealState) {
   const currentStage = currentStageForState(state);
+  const representationContext = inferRepresentationContext(state);
   const stages = [
     buildPlanStage(state, 'intake', 'Intake and classification', ['journey_classified', 'deal_subject_present'], currentStage),
     buildPlanStage(state, 'ioi', 'IOI and indication of interest', ['economic_scale_present', 'source_trail_present'], currentStage),
@@ -2307,6 +2356,7 @@ function buildDealPlan(state: DefinitiveDealState) {
     lifecycle:
       'information -> IOI -> LOI -> diligence -> model -> negotiation -> close -> PMI, with DealState updated after every recursive pass',
     routingKey: state.classificationKey,
+    representationContext,
     stages,
     overlayGates: state.classificationKey.triggeredOverlayGates,
     workSurfaces: ['today', 'pipeline', 'files', 'studio', 'models', 'data_room'],
@@ -3398,6 +3448,8 @@ function disclosureCategoriesForObjective(objective: string | null, state: Defin
 
 function normalizeDocumentType(value: unknown): string {
   const text = textValue(value)?.toLowerCase().replace(/[\s-]+/g, '_') || 'deal_brief';
+  if (matches(text, ['seller_loi_readiness', 'incoming_loi_review', 'owner_loi_readiness', 'sell_side_loi'])) return 'seller_loi_readiness';
+  if (matches(text, ['seller_diligence_readiness', 'seller_dd_readiness', 'owner_dd_readiness', 'vendor_diligence', 'sell_side_diligence'])) return 'seller_diligence_readiness';
   if (matches(text, ['ioi', 'indication'])) return 'ioi';
   if (matches(text, ['loi', 'letter_of_intent', 'term_sheet'])) return 'loi_outline';
   if (matches(text, ['ic', 'investment_committee', 'memo'])) return 'ic_memo';
@@ -3411,6 +3463,9 @@ function normalizeDocumentType(value: unknown): string {
 
 function audienceForDocumentType(documentType: string): string {
   switch (documentType) {
+    case 'seller_loi_readiness':
+    case 'seller_diligence_readiness':
+      return 'owner_and_sell_side_advisors';
     case 'ioi':
     case 'loi_outline':
       return 'counterparty_and_internal_team';
@@ -3433,6 +3488,10 @@ function audienceForDocumentType(documentType: string): string {
 function documentDraftTitle(documentType: string, state: DefinitiveDealState): string {
   const subject = textValue(state.payload.dealName) || textValue(state.payload.targetName) || textValue(state.payload.companyName) || 'Deal';
   switch (documentType) {
+    case 'seller_loi_readiness':
+      return `${subject} seller LOI readiness scaffold`;
+    case 'seller_diligence_readiness':
+      return `${subject} seller diligence readiness scaffold`;
     case 'ioi':
       return `${subject} IOI scaffold`;
     case 'loi_outline':
@@ -3487,6 +3546,18 @@ function buildDocumentDraftSections(documentType: string, state: DefinitiveDealS
 function documentSectionCategoryPlan(documentType: string) {
   const commonBoundary = 'Use only source-backed facts and deterministic model outputs; flag unsupported claims as [unverified].';
   switch (documentType) {
+    case 'seller_loi_readiness':
+      return [
+        sectionPlan('seller_economics', 'Seller economics and valuation support', ['financials'], 'Tie asking price, purchase price, proceeds, SDE/EBITDA, working capital, escrow, seller note, earnout, and rollover facts to source-backed model outputs.', commonBoundary),
+        sectionPlan('incoming_terms_review', 'Incoming LOI term review map', ['legal', 'tax'], 'Organize structure, tax, exclusivity, conditions, authority, and counsel handoffs for owner-side review without drafting clauses or accepting terms.', LINE_INVARIANT),
+        sectionPlan('buyer_conditions_and_dd', 'Buyer conditions and diligence readiness', ['legal', 'commercial'], 'Identify conditions, consents, diligence topics, and data-room gaps that affect owner response readiness.', commonBoundary),
+      ];
+    case 'seller_diligence_readiness':
+      return [
+        sectionPlan('data_room_coverage', 'Data-room coverage', ['financials', 'legal', 'tax', 'commercial'], 'Show which core seller diligence categories are source-ready and which need owner/advisor follow-up.', commonBoundary),
+        sectionPlan('buyer_request_response', 'Buyer request response plan', ['financials', 'commercial', 'operations'], 'Organize likely buyer diligence questions and owner-side response dependencies from indexed sources.', commonBoundary),
+        sectionPlan('disclosure_controls', 'Disclosure controls and handoffs', ['legal', 'tax'], 'Separate private, selectively shareable, and counsel-reviewed materials before any external data-room release.', LINE_INVARIANT),
+      ];
     case 'ioi':
       return [
         sectionPlan('deal_snapshot', 'Deal snapshot', ['financials', 'commercial'], 'Frame the target/thesis, scale, and why-now from sourced facts.', commonBoundary),
@@ -4567,10 +4638,88 @@ function buildNextCallHints(state: DefinitiveDealState): DefinitiveMcpCallHint[]
   return hints;
 }
 
+function inferRepresentationContext(state: DefinitiveDealState): DefinitiveRepresentationContext {
+  const payload = state.payload;
+  const text = compactText([
+    payload.actorRole,
+    payload.agentRole,
+    payload.role,
+    payload.representing,
+    payload.representedParty,
+    payload.intent,
+    payload.objective,
+    payload.stage,
+    payload.notes,
+    payload.dealType,
+    payload.journey,
+  ]);
+
+  const side = inferRepresentationSide(state.classificationKey.journey, text);
+  const actorRole = inferActorRole(side, text);
+  const purpose = inferRepresentationPurpose(state.classificationKey.journey, text);
+  const context: DefinitiveRepresentationContext = {
+    side,
+    actorRole,
+    purpose,
+    authorityBoundary:
+      'DEFINITIVE may organize, compute, cite, and route the work. The represented principal, counsel, tax advisor, banker/broker, lender, closing agent, or other authorized professional decides positions, communications, legal language, external sharing, and closing authority.',
+  };
+
+  if (side === 'sell_side') {
+    context.sellSidePreparationPath = [
+      'classify owner/owner-rep mandate and sale-process stage',
+      'normalize SDE/EBITDA, add-backs, working capital, valuation, and market support',
+      'index data-room sources and identify seller-side source gaps',
+      'prepare for incoming IOIs/LOIs without drafting clauses, accepting terms, or sending externally',
+      'prepare diligence-response packets, disclosure subsets, and advisor/counsel handoffs',
+      'stage close-readiness and funds-flow arithmetic without closing authority or wire instructions',
+    ];
+  }
+
+  return context;
+}
+
+function inferRepresentationSide(journey: Journey, text: string): RepresentationSide {
+  if (journey === 'sell') return 'sell_side';
+  if (journey === 'buy') return 'buy_side';
+  if (journey === 'raise') return 'raise_side';
+  if (journey === 'pmi') return 'pmi';
+  if (matches(text, ['owner rep', 'owner representative', 'founder', 'shareholder', 'seller', 'sell-side', 'sell side', 'vendor diligence'])) return 'sell_side';
+  if (matches(text, ['buyer', 'buy-side', 'buy side', 'acquirer'])) return 'buy_side';
+  return 'unknown';
+}
+
+function inferActorRole(side: RepresentationSide, text: string): DefinitiveRepresentationContext['actorRole'] {
+  if (matches(text, ['owner rep', 'owner representative', 'represent the owner', 'representing the owner'])) return 'owner_representative';
+  if (matches(text, ['buyer rep', 'buyer representative', 'buy-side advisor', 'buy side advisor'])) return 'buyer_representative';
+  if (side === 'buy_side') return 'buyer';
+  if (matches(text, ['broker', 'investment banker', 'm&a advisor', 'sell-side advisor', 'sell side advisor'])) return 'sell_side_advisor';
+  if (matches(text, ['owner', 'founder', 'shareholder', 'seller'])) return 'owner';
+  if (side === 'raise_side') return 'capital_raiser';
+  if (side === 'pmi') return 'operator';
+  if (side === 'sell_side') return 'owner_representative';
+  return 'unknown';
+}
+
+function inferRepresentationPurpose(journey: Journey, text: string): DefinitiveRepresentationContext['purpose'] {
+  if (matches(text, ['close', 'closing', 'funds flow', 'settlement'])) return 'prepare_for_closing';
+  if (matches(text, ['diligence', 'due diligence', 'dd readiness', 'dd prep', 'for dd', 'loi/dd', 'data room', 'qoe', 'vendor diligence'])) return 'prepare_for_due_diligence';
+  if (matches(text, ['incoming loi', 'buyer loi', 'loi', 'letter of intent', 'term sheet', 'offer'])) return journey === 'buy' ? 'evaluate_acquisition' : 'prepare_for_incoming_loi';
+  if (journey === 'sell') return 'prepare_for_sale_process';
+  if (journey === 'buy') return 'evaluate_acquisition';
+  if (journey === 'raise') return 'raise_capital';
+  if (journey === 'pmi') return 'operate_post_close';
+  return 'unknown';
+}
+
 function inferJourney(text: string): Journey {
   if (matches(text, ['pmi', 'post close', 'post-close', 'integration', 'day 0', 'day one'])) return 'pmi';
   if (matches(text, ['raise', 'capital raise', 'fundraise', 'debt capital', 'equity capital'])) return 'raise';
-  if (matches(text, ['sell', 'seller', 'exit', 'go to market', 'sale process'])) return 'sell';
+  if (matches(text, ['sell', 'seller', 'exit', 'go to market', 'go-to-market', 'sale process', 'owner rep', 'owner representative', 'represent the owner', 'representing the owner', 'founder exit', 'incoming loi', 'buyer loi', 'vendor diligence', 'seller readiness'])) return 'sell';
+  if (
+    matches(text, ['owner', 'founder', 'shareholder', 'management team', 'target company']) &&
+    matches(text, ['loi', 'letter of intent', 'due diligence', 'dd readiness', 'dd prep', 'for dd', 'loi/dd', 'data room', 'buyer', 'sale', 'exit', 'process'])
+  ) return 'sell';
   if (matches(text, ['buy', 'buyer', 'acquire', 'acquisition', 'target', 'search thesis'])) return 'buy';
   return 'unknown';
 }

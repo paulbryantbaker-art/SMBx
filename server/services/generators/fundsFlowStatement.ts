@@ -39,7 +39,7 @@ export async function generateFundsFlowStatement(input: FundsFlowInput): Promise
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 3000,
-    system: `You are an M&A transaction advisor generating a Funds Flow Statement. Output clean markdown. All dollar amounts should be formatted with commas and two decimal places. Include all standard closing costs and adjustments.`,
+    system: `You are an M&A deal-intelligence operator generating a Funds Flow Statement. Output clean markdown. All dollar amounts should be formatted with commas and two decimal places. Include standard closing costs and adjustments as estimates for counsel, lender, escrow, and tax-advisor review.`,
     messages: [{
       role: 'user',
       content: `Generate a Funds Flow Statement for this deal:

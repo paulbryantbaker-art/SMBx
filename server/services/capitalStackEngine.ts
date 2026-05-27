@@ -151,7 +151,7 @@ function tier1SBA(input: CapitalStackInput): CapitalStackResult {
     dscrMeets = dscr >= SBA_DSCR_MIN;
     if (!dscrMeets) {
       warnings.push(`DSCR of ${dscr.toFixed(2)}x is below SBA minimum of ${SBA_DSCR_MIN}x — deal doesn't cash flow at this price`);
-      recommendations.push('Consider: (1) lower purchase price, (2) larger equity injection, (3) negotiate seller earnout to reduce upfront price');
+      recommendations.push('Option set: (1) lower purchase price, (2) larger equity injection, (3) seller earnout to reduce upfront price');
     }
   }
 
@@ -159,11 +159,11 @@ function tier1SBA(input: CapitalStackInput): CapitalStackResult {
   if (input.buyerEquity && input.buyerEquity < equity) {
     const gap = equity - input.buyerEquity;
     warnings.push(`Equity gap: need $${(equity / 100).toLocaleString()} but have $${(input.buyerEquity / 100).toLocaleString()} available`);
-    recommendations.push(`Gap of $${(gap / 100).toLocaleString()}. Options: ROBS (401k rollover), HELOC, investor equity, or negotiate seller financing`);
+    recommendations.push(`Gap of $${(gap / 100).toLocaleString()}. Options: ROBS (401k rollover), HELOC, investor equity, or seller financing scenario`);
   }
 
   if (input.sellerFinancingAvailable && !input.sellerStandbyWilling) {
-    recommendations.push('Seller willing to finance but not full standby — negotiate: full standby lets you count it as equity injection under 2025 SBA rules');
+    recommendations.push('Seller willing to finance but not full standby — model full standby because it may count as equity injection under 2025 SBA rules');
   }
 
   return {
@@ -312,7 +312,7 @@ function tier3SeniorMezz(input: CapitalStackInput): CapitalStackResult {
     dscr = Math.round((earnings / totalDebt) * 100) / 100;
   }
 
-  recommendations.push('R&W insurance recommended at this deal size — typical cost 2-3% of policy limit');
+  recommendations.push('R&W insurance is a common option at this deal size — typical cost 2-3% of policy limit');
   recommendations.push('Working capital revolving line: plan for $' + ((deal * 0.05 / 100).toLocaleString()) + ' day-one revolver');
 
   return {
@@ -651,7 +651,7 @@ export function formatCapitalStack(result: CapitalStackResult): string {
   }
 
   if (result.recommendations.length > 0) {
-    lines.push('\n**Recommendations:**');
+    lines.push('\n**Option Notes:**');
     for (const r of result.recommendations) lines.push(`→ ${r}`);
   }
 

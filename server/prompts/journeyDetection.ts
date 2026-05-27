@@ -17,7 +17,7 @@ Ask ONE clarifying question: "Are you looking to sell your business, buy one, ra
 
 DO NOT present a menu of options unless the user is truly undecided. If they said anything about selling, START the sell journey immediately.`;
 
-export const WELCOME_TEXT = `I'm Yulia, your M&A advisor. I handle the entire process — from first conversation to closing.
+export const WELCOME_TEXT = `I'm Yulia, your M&A deal-intelligence operator. I support the entire process — from first conversation to closing workplan.
 
 What are we working on?`;
 
@@ -25,19 +25,19 @@ export const JOURNEY_CARDS = [
   {
     id: 'sell',
     title: 'Sell My Business',
-    description: "I'll value your business, prepare it for market, find qualified buyers, and guide you through closing.",
+    description: "I'll value your business, prepare it for market, map qualified buyer categories, and guide the closing workplan.",
     prompt: 'I want to sell my business.',
   },
   {
     id: 'buy',
     title: 'Buy a Business',
-    description: "I'll help you define your thesis, source targets, run diligence, and structure the deal.",
+    description: "I'll help you define your thesis, source targets, run diligence, and model structure options.",
     prompt: 'I want to buy a business.',
   },
   {
     id: 'raise',
     title: 'Raise Capital',
-    description: "I'll build your investor materials, model your cap table, and manage the outreach process.",
+    description: "I'll build your investor materials, model your cap table, and prepare user-controlled outreach.",
     prompt: 'I want to raise capital for my business.',
   },
   {

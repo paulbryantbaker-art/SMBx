@@ -1,6 +1,7 @@
 /**
- * Provider Matching Service — Matches service providers to deals.
- * Contextual recommendations based on deal journey, gate, geography, and size.
+ * Provider Matching Service — Builds neutral service-provider directory results.
+ * Contextual directory suggestions are based on deal journey, gate, geography, and size.
+ * smbX does not choose providers, contact providers, or receive referral fees.
  */
 import { sql } from '../db.js';
 
@@ -99,8 +100,8 @@ export async function findProviders(params: ProviderSearchParams): Promise<Provi
 }
 
 /**
- * Given a deal's context, determine which provider types are needed NOW
- * and return top recommendations per type.
+ * Given a deal's context, determine which provider types are commonly needed NOW
+ * and return neutral directory suggestions per type.
  */
 export async function generateProviderRecommendation(dealId: number): Promise<{
   neededTypes: string[];
@@ -129,13 +130,14 @@ export async function generateProviderRecommendation(dealId: number): Promise<{
   const journeyName = deal.journey_type === 'sell' ? 'sell-side' : deal.journey_type === 'buy' ? 'buy-side' : deal.journey_type;
   const context = neededTypes.length > 0
     ? `At gate ${gate} of your ${journeyName} journey, you'll typically need: ${neededTypes.join(', ')}.`
-    : `No specific provider recommendations for gate ${gate} at this time.`;
+    : `No specific provider directory suggestions for gate ${gate} at this time.`;
 
   return { neededTypes, recommendations, context };
 }
 
 /**
- * Track a referral sent to a provider.
+ * Legacy audit hook for a user-selected provider contact event.
+ * This is an activity log only, not compensation, ranking, or referral-fee logic.
  */
 export async function trackReferral(
   dealId: number,
@@ -149,7 +151,7 @@ export async function trackReferral(
     RETURNING id
   `;
 
-  // Increment provider referral count
+  // Legacy activity count only; never use for compensation or pay-to-rank behavior.
   await sql`UPDATE service_providers SET smbx_referrals_sent = smbx_referrals_sent + 1 WHERE id = ${providerId}`;
 
   return referral.id;

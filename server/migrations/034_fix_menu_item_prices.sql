@@ -1,5 +1,5 @@
 -- Migration 034: Fix menu item prices (internal accounting only)
--- Users never see these prices. The execution fee (0.1% of SDE/EBITDA) is the only user-facing price.
+-- Users never see these internal accounting prices. User-facing pricing is monthly subscriptions only.
 
 UPDATE menu_items SET base_price_cents = 35000 WHERE slug = 'sell-valuation-report';
 UPDATE menu_items SET base_price_cents = 70000 WHERE slug = 'sell-cim';

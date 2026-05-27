@@ -519,7 +519,7 @@ function getDeliverableDescription(type: string): string {
     value_readiness_report: 'Your personalized business assessment with value readiness score, preliminary valuation range, and 12-month improvement roadmap.',
     thesis_document: 'Your acquisition thesis with criteria, SBA financing snapshot, and platform match intelligence.',
     sde_analysis: 'Detailed SDE/EBITDA calculation with add-back schedule and preliminary value range estimate.',
-    valuation_report: 'Full valuation with comparable transactions, quality score, and defensible multiple recommendation.',
+    valuation_report: 'Full valuation with comparable transactions, quality score, and defensible multiple range.',
     deal_screening_memo: 'Target evaluation with thesis fit, financial analysis, and risk assessment.',
     sba_financing_model: 'SBA 7(a) financing model with payment schedule, DSCR analysis, and equity requirements.',
   };

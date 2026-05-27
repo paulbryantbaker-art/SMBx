@@ -1606,9 +1606,11 @@
       "textIncludes": ["working capital peg", "recursive deal-state work", "The Diligence Standard"],
       "fields": [
         { "path": "name", "equals": "smbx-ai/diligence" },
-        { "path": "protocolVersion", "equals": "2025-12-11" },
-        { "path": "serverUrl", "equals": "https://smbx.ai/api/definitive/tools/call" },
+        { "path": "protocolVersion", "equals": "2025-11-25" },
+        { "path": "serverUrl", "equals": "https://smbx.ai/mcp" },
         { "path": "serverInfo.canonicalStandard", "equals": "The Diligence Standard" },
+        { "path": "transport.type", "equals": "streamable-http" },
+        { "path": "transport.endpoints.mcp", "equals": "https://smbx.ai/mcp" },
         { "path": "transport.endpoints.serverCard", "equals": "https://smbx.ai/.well-known/mcp/server-card.json" },
         { "path": "transport.endpoints.schemaRegistry", "equals": "https://smbx.ai/api/definitive/schemas" },
         { "path": "definitive.registryPackage", "equals": "https://smbx.ai/api/definitive/registry-package" }
@@ -1686,12 +1688,13 @@
     "kind": "mcp_well_known",
     "expect": {
       "fields": [
-        { "path": "mcp_version", "equals": "2025-12-11" },
+        { "path": "mcp_version", "equals": "2025-11-25" },
         { "path": "server_card", "equals": "https://smbx.ai/.well-known/mcp/server-card.json" },
         { "path": "publicEndpointTypes", "includes": "server-card" },
         { "path": "publicEndpointTypes", "includes": "definitive-schema-registry" },
         { "path": "publicEndpointTypes", "includes": "definitive-deal-runbooks" },
         { "path": "publicEndpointTypes", "includes": "definitive-model-catalog" },
+        { "path": "bearerEndpointTypes", "includes": "mcp-streamable-http" },
         { "path": "bearerEndpointTypes", "includes": "tools-list" },
         { "path": "bearerEndpointTypes", "includes": "tool-call" },
         { "path": "capabilities.outputSchema", "equals": true },

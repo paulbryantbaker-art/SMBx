@@ -52,8 +52,9 @@ function PlanBadge({ plan }: { plan: string | null }) {
   const normalized = (plan || '').toLowerCase();
 
   let classes = 'bg-[#f0eee6] text-[#5e5d59]';
-  if (normalized === 'starter') classes = 'bg-[#FBBC04]/10 text-[#FBBC04]';
-  else if (normalized === 'professional') classes = 'bg-[#D4714E]/10 text-[#D4714E]';
+  if (normalized === 'solo' || normalized === 'starter') classes = 'bg-[#FBBC04]/10 text-[#FBBC04]';
+  else if (normalized === 'pro' || normalized === 'professional') classes = 'bg-[#D4714E]/10 text-[#D4714E]';
+  else if (normalized === 'team') classes = 'bg-[#4E8FD4]/10 text-[#4E8FD4]';
   else if (normalized === 'enterprise') classes = 'bg-[#1a1918] text-white';
 
   return (

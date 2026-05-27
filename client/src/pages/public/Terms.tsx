@@ -15,7 +15,7 @@ export default function Terms() {
           <div>
             <h2 className="font-sans text-xl font-bold text-[#1a1918] mb-3 m-0">The service</h2>
             <p className="m-0">
-              smbx.ai provides AI-powered deal advisory tools including business valuations,
+              smbx.ai provides deal-intelligence software including business valuations,
               financial analysis, document generation, and deal management. By using the service,
               you agree to these terms.
             </p>
@@ -26,7 +26,7 @@ export default function Terms() {
             <p className="m-0">
               smbx.ai provides analytical tools and information to support your decision-making.
               Our work product is not a substitute for professional legal, financial, or tax advice.
-              We recommend consulting qualified professionals before making significant business
+              Consult qualified professionals before making significant business
               or financial decisions.
             </p>
           </div>
@@ -44,10 +44,11 @@ export default function Terms() {
           <div>
             <h2 className="font-sans text-xl font-bold text-[#1a1918] mb-3 m-0">Payments</h2>
             <p className="m-0">
-              smbx.ai uses a monthly subscription model. Plans start at $79/month and can be
-              canceled anytime. Your subscription covers every capability Yulia offers \u2014
-              tiers differ on deal volume, seats, and enterprise infrastructure, not on features.
-              No per-deal fees, no success fees, no hidden charges.
+              smbx.ai uses a monthly subscription model. Paid plans start at $79/month and can
+              be canceled anytime. Tiers differ on usage allowances, deal volume, seats, agent
+              scopes, and enterprise infrastructure. Included credits are plan allowances, not
+              a wallet. No per-deal fees, no success fees, no referral fees, no deal-value fees,
+              and no hidden charges.
             </p>
           </div>
 

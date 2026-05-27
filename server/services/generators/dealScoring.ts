@@ -45,10 +45,10 @@ export async function generateDealScoring(input: DealScoringInput): Promise<Reco
   const totalWeight = factors.reduce((sum, f) => sum + f.weight, 0);
   const overallScore = Math.round(weightedTotal / totalWeight);
 
-  const verdict = overallScore >= 80 ? 'Strong Buy' :
-                  overallScore >= 65 ? 'Attractive' :
-                  overallScore >= 50 ? 'Moderate' :
-                  overallScore >= 35 ? 'Below Average' : 'Pass';
+  const verdict = overallScore >= 80 ? 'Strong Fit' :
+                  overallScore >= 65 ? 'Attractive Fit' :
+                  overallScore >= 50 ? 'Diligence Needed' :
+                  overallScore >= 35 ? 'Material Gaps' : 'High Friction';
 
   // AI narrative for the summary
   const narrative = await generateNarrative(input, factors, overallScore, verdict);
@@ -145,7 +145,7 @@ async function generateNarrative(
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 1500,
-    system: 'You are an M&A analyst writing a concise deal scoring narrative. Be direct, factual, and actionable. 3-4 paragraphs max.',
+    system: 'You are an M&A deal-intelligence operator writing a concise deal scoring narrative. Be direct, factual, and action-oriented. Present analysis, options, implications, and diligence asks. Do not advise the buyer to proceed, pass, negotiate, offer, sign, or close. 3-4 paragraphs max.',
     messages: [{
       role: 'user',
       content: `Write a brief narrative for this deal scorecard:
@@ -166,7 +166,7 @@ Write:
 1. One-paragraph summary of the opportunity
 2. Key strengths (top 2-3 scoring factors)
 3. Key risks (bottom 2-3 scoring factors)
-4. Recommendation (proceed / negotiate / pass)`,
+4. Next diligence posture: what would support continuing, pausing, or restructuring the work. Do not call it a recommendation.`,
     }],
   });
 

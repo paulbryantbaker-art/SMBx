@@ -7,41 +7,63 @@
  */
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { randomUUID } from 'crypto';
 import { writeFile, readFile, mkdir } from 'fs/promises';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { getUploadRoot } from './uploadRoot.js';
 
 // ─── Configuration ──────────────────────────────────────────────────
 
 const S3_BUCKET = process.env.S3_BUCKET;
 const S3_REGION = process.env.S3_REGION || 'us-east-1';
-const USE_S3 = !!(S3_BUCKET && process.env.AWS_ACCESS_KEY_ID);
+const S3_ENDPOINT = process.env.S3_ENDPOINT || process.env.AWS_ENDPOINT_URL_S3;
+const S3_FORCE_PATH_STYLE = process.env.S3_FORCE_PATH_STYLE === 'true' || Boolean(S3_ENDPOINT);
+const USE_S3 = !!(S3_BUCKET && process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY);
 
 let s3: S3Client | null = null;
 
 if (USE_S3) {
   s3 = new S3Client({
     region: S3_REGION,
+    endpoint: S3_ENDPOINT || undefined,
+    forcePathStyle: S3_FORCE_PATH_STYLE,
     credentials: {
       accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
     },
   });
-  console.log(`[storage] S3 configured: bucket=${S3_BUCKET}, region=${S3_REGION}`);
+  console.log(`[storage] S3-compatible storage configured: bucket=${S3_BUCKET}, region=${S3_REGION}, endpoint=${S3_ENDPOINT || 'aws'}`);
 } else {
   console.log('[storage] S3 not configured — using local filesystem fallback');
+}
+
+function storageScopeToKeyPrefix(scope: number | string): string {
+  if (typeof scope === 'number') return `deals/${scope}`;
+
+  const normalized = scope
+    .split('/')
+    .map(segment => segment.replace(/[^a-zA-Z0-9._=-]/g, '_'))
+    .filter(Boolean)
+    .join('/');
+
+  return normalized || 'misc';
+}
+
+function safeStorageFilename(filename: string): string {
+  return filename.replace(/[^a-zA-Z0-9._-]/g, '_') || 'upload.bin';
 }
 
 // ─── Upload ─────────────────────────────────────────────────────────
 
 export async function uploadFile(
-  dealId: number,
+  storageScope: number | string,
   filename: string,
   buffer: Buffer,
   contentType?: string,
 ): Promise<{ key: string; url: string }> {
-  const safeFilename = `${Date.now()}_${filename.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-  const key = `deals/${dealId}/${safeFilename}`;
+  const prefix = storageScopeToKeyPrefix(storageScope);
+  const safeFilename = `${Date.now()}_${randomUUID()}_${safeStorageFilename(filename)}`;
+  const key = `${prefix}/${safeFilename}`;
 
   if (USE_S3 && s3) {
     await s3.send(new PutObjectCommand({
@@ -57,7 +79,7 @@ export async function uploadFile(
 
   // Local fallback
   const LOCAL_ROOT = getUploadRoot();
-  const dir = join(LOCAL_ROOT, String(dealId));
+  const dir = join(LOCAL_ROOT, prefix);
   await mkdir(dir, { recursive: true });
   const localPath = join(dir, safeFilename);
   await writeFile(localPath, buffer);
@@ -132,4 +154,24 @@ export async function deleteFile(fileUrl: string): Promise<void> {
 
 export function isS3Active(): boolean {
   return USE_S3;
+}
+
+export function getStorageStatus() {
+  const localRoot = getUploadRoot();
+  const resolvedLocalRoot = resolve(localRoot);
+  const localLooksPersistent = resolvedLocalRoot === '/data/uploads' || resolvedLocalRoot.startsWith('/data/uploads/');
+
+  return {
+    provider: USE_S3 ? 's3-compatible' : 'local',
+    persistent: USE_S3 || localLooksPersistent,
+    bucket: USE_S3 ? S3_BUCKET : null,
+    region: USE_S3 ? S3_REGION : null,
+    endpoint: USE_S3 ? S3_ENDPOINT || null : null,
+    localRoot: USE_S3 ? null : localRoot,
+    localLooksPersistent,
+  };
+}
+
+export function isPersistentStorageConfigured(): boolean {
+  return getStorageStatus().persistent;
 }

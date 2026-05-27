@@ -141,14 +141,14 @@ Your multiple within the ${multipleRange.min}x–${multipleRange.max || '?'}x ra
 
 ### Next Steps
 
-For the full valuation with comparable transactions, 7-factor quality score, and specific multiple recommendation:
+For the full valuation with comparable transactions, 7-factor quality score, and defensible multiple range:
 
 **Full Valuation Report — next phase**
 
 This includes:
 - Comparable transaction analysis
 - 7-factor quality scoring
-- Defensible multiple recommendation
+- Defensible multiple range and scenario options
 - Market positioning strategy`;
 
   return report;

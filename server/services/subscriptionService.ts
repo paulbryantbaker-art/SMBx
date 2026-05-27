@@ -4,17 +4,17 @@
  * Replaces: walletService, paywallService, dealExecutionFee, platformFeeService.
  *
  * Pricing model:
- *   Free     — $0      — Unlimited Yulia conversation + ONE structured deliverable (email required)
- *   Solo     — $79/mo  — Unlimited ValueLens, deal scoring, VRR, SDE/EBITDA, exports
- *   Pro      — $199/mo — Everything + CIM, deal room, matching, sourcing, DD/LOI, living docs
- *   Team     — $499/mo — Shared deal vault, firm templates, seats, and specialist handoff
- *   Enterprise — $2,500+/mo — Single-tenant, SSO, API controls, portfolio infrastructure
+ *   Free     — $0      — Unlimited Yulia conversation + ONE ValueLens / deal-score style deliverable (email required)
+ *   Solo     — $79/mo  — Unlimited ValueLens, deal scoring, VRR, SDE/EBITDA, exports, 1 supervised MCP/agent key
+ *   Pro      — $199/mo — Everything + CIM, deal room, market discovery, source routing, DD/LOI scaffolds, living docs, 3 supervised MCP/agent keys
+ *   Team     — $499/mo — Shared deal vault, firm templates, seats, specialist handoff, supervised agent workflows
+ *   Enterprise — $2,500+/mo — Single-tenant, SSO, API controls, portfolio infrastructure, governed autonomous agent scope
  *
  * Rules:
- *   - Monthly billing only. No annual pricing until 90 days of churn data.
+ *   - Published list pricing is monthly.
  *   - 30-day free trial of Pro available.
- *   - No per-deal fees. No success fees. No hidden charges.
- *   - Free deliverable is per-USER, not per-session/deal. Tracked on users table.
+ *   - No per-deal fees. No success fees. No referral fees. No deal-value fees.
+ *   - Free deliverable is per-USER, not per-session/deal, and limited to launch-hook deliverables.
  *   - Email capture required for the free deliverable (account creation moment).
  *   - Paywall triggers after first free deliverable, NOT at a fixed gate.
  *   - TEST_MODE=true bypasses all checks and grants enterprise access.
@@ -50,10 +50,10 @@ export interface PlanInfo {
 
 export const PLANS: Record<Plan, PlanInfo> = {
   free: { plan: 'free', name: 'Free', priceCents: 0, priceDisplay: 'Free', note: 'Unlimited Yulia conversation + one free deliverable' },
-  solo: { plan: 'solo', name: 'Solo', priceCents: 7900, priceDisplay: '$79/month', note: 'Unlimited analysis, valuations, exports, and solo deal desk workflows' },
-  pro: { plan: 'pro', name: 'Pro', priceCents: 19900, priceDisplay: '$199/month', note: 'CIM, deal room, matching, sourcing, living docs, and parallel deal work' },
-  team: { plan: 'team', name: 'Team', priceCents: 49900, priceDisplay: '$499/month', note: 'Seats, shared vaults, firm templates, and specialist handoffs' },
-  enterprise: { plan: 'enterprise', name: 'Enterprise', priceCents: 250000, priceDisplay: '$2,500+/month', note: 'Single-tenant, SSO, API controls, and portfolio infrastructure' },
+  solo: { plan: 'solo', name: 'Solo', priceCents: 7900, priceDisplay: '$79/month', note: 'Unlimited analysis, valuations, exports, solo deal desk workflows, and one supervised MCP/agent key' },
+  pro: { plan: 'pro', name: 'Pro', priceCents: 19900, priceDisplay: '$199/month', note: 'CIM, deal room, market discovery, source routing, living docs, and parallel deal work' },
+  team: { plan: 'team', name: 'Team', priceCents: 49900, priceDisplay: '$499/month', note: 'Seats, shared vaults, firm templates, specialist handoffs, and supervised agent workflows' },
+  enterprise: { plan: 'enterprise', name: 'Enterprise', priceCents: 250000, priceDisplay: '$2,500+/month', note: 'Single-tenant, SSO, API controls, portfolio infrastructure, and governed autonomous agent scope' },
 };
 
 // ─── Deliverable tier classification ────────────────────────
@@ -74,16 +74,17 @@ const STARTER_TYPES = new Set([
 ]);
 
 const PROFESSIONAL_TYPES = new Set([
-  'cim', 'sell_cim_draft',
+  'cim', 'sell_cim', 'sell_cim_draft',
   'valuation_report', 'sell_valuation_report', 'buy_valuation_model',
   'seven_factor', 'seven_factor_analysis',
   'blind_teaser', 'sell_blind_teaser',
-  'executive_summary', 'raise_executive_summary',
-  'data_room_structure',
+  'executive_summary', 'sell_executive_summary', 'raise_executive_summary',
+  'data_room_structure', 'sell_data_room_structure',
+  'sell_financial_summary_package',
   'buyer_list', 'sell_buyer_list',
-  'outreach_strategy',
-  'dd_checklist', 'dd_package', 'buy_dd_checklist',
-  'deal_structure_analysis',
+  'outreach_strategy', 'sell_outreach_strategy', 'sell_buyer_brief', 'sell_loi_comparison',
+  'dd_checklist', 'dd_package', 'sell_dd_checklist', 'buy_dd_checklist', 'buy_dd_summary',
+  'deal_structure_analysis', 'sell_deal_structure_analysis',
   'funds_flow_statement', 'sell_funds_flow', 'funds_flow',
   'closing_checklist', 'sell_closing_checklist', 'buy_closing_checklist',
   'working_capital_analysis', 'sell_working_capital',
@@ -92,14 +93,30 @@ const PROFESSIONAL_TYPES = new Set([
   'pitch_deck', 'raise_pitch_deck',
   'financial_model', 'sell_financial_model', 'raise_financial_model',
   'capital_structure_analysis', 'buy_capital_structure',
-  'intelligence_report',
+  'buy_sources_uses', 'buy_post_close_cash_flow',
+  'intelligence_report', 'universal_market_intelligence', 'universal_comp_analysis', 'universal_industry_report',
   'tax_impact_analysis',
   'sector_analysis',
   'lbo_model',
   'value_creation_plan',
   'pmi_integration_plan',
+  'raise_investor_list', 'raise_term_sheet_analysis', 'raise_closing_coordination',
   'deal_screening_memo', 'buy_deal_screening_memo',
 ]);
+
+const FREE_DELIVERABLE_TYPES = new Set([
+  'valuelens', 'value_lens',
+  'sell_valuation_report', 'valuation_report',
+  'sell_seven_factor_analysis', 'seven_factor', 'seven_factor_analysis',
+  'sell_probability_of_sale',
+  'deal_scoring', 'deal_score', 'buy_deal_scorecard',
+  'readiness_scorecard', 'buy_readiness_scorecard',
+  'raise_readiness',
+]);
+
+export function isEligibleFreeDeliverable(deliverableType: string): boolean {
+  return FREE_DELIVERABLE_TYPES.has(deliverableType.toLowerCase());
+}
 
 // ─── Stripe helpers ─────────────────────────────────────────
 
@@ -192,10 +209,10 @@ export async function canGenerateDeliverable(
     return { allowed: true, requiredPlan, currentPlan, isFreeDeliverable: false };
   }
 
-  // Free user — check if they still have their one free deliverable
+  // Free user — only the launch-hook deliverables are eligible for the one free use.
   if (currentPlan === 'free') {
     const [user] = await sql`SELECT free_deliverable_used FROM users WHERE id = ${userId}`;
-    if (user && !user.free_deliverable_used) {
+    if (user && !user.free_deliverable_used && isEligibleFreeDeliverable(deliverableType)) {
       return { allowed: true, requiredPlan, currentPlan, isFreeDeliverable: true };
     }
   }

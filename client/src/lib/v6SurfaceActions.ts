@@ -385,7 +385,7 @@ export const SURFACE_ACTIONS = {
     kind: "model",
     result: "chat",
     backendTool: "optimize_scenario",
-    description: "Ask Yulia to read the active model, saved scenarios, user role, and constraints, then recommend the best risk-adjusted path and execution strategy.",
+    description: "Ask Yulia to read the active model, saved scenarios, user role, and constraints, then compare the strongest risk-adjusted path candidates and approval steps.",
   },
   ask_yulia: {
     id: "ask_yulia",

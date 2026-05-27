@@ -10,6 +10,7 @@ import {
 } from './definitiveMcpDiscovery.js';
 import { listDefinitiveMcpTools } from './definitiveMcp.js';
 import { getDefinitiveSubstrateArchitecturePlan } from './definitiveSubstrateArchitecturePlan.js';
+import { buildDefinitiveConnectorDistributionPackage } from './definitiveConnectorDistribution.js';
 
 const REGISTRY_PACKAGE_VERSION = 'DEFINITIVE.registry-package.v0.1';
 const SERVER_ID = 'smbx-ai/diligence';
@@ -29,6 +30,7 @@ export function buildDefinitiveRegistryPackage(baseUrl?: string) {
   const registrySubmissionPackages = buildDefinitiveRegistrySubmissionPackages(origin);
   const agentExecutionExamples = buildAgentExecutionExamples();
   const managedAgentTemplates = buildManagedAgentTemplates();
+  const connectorDistributionPackage = buildDefinitiveConnectorDistributionPackage(origin);
 
   return {
     schema: REGISTRY_PACKAGE_VERSION,
@@ -49,6 +51,9 @@ export function buildDefinitiveRegistryPackage(baseUrl?: string) {
       homepageUrl: origin,
       serverCardUrl: `${origin}/.well-known/mcp/server-card.json`,
       discoveryManifestUrl: `${origin}/.well-known/mcp`,
+      serverJsonUrl: `${origin}/server.json`,
+      mcpEndpointUrl: `${origin}/mcp`,
+      oauthProtectedResourceUrl: `${origin}/.well-known/oauth-protected-resource/mcp`,
       toolListUrl: `${origin}/api/definitive/tools/list`,
       categories: ['finance', 'm-and-a', 'private-equity', 'diligence', 'deal-os'],
       tags: [
@@ -77,6 +82,7 @@ export function buildDefinitiveRegistryPackage(baseUrl?: string) {
     serverCard,
     wellKnown,
     enterpriseAllowListTemplates: allowListTemplates,
+    connectorDistributionPackage,
     agentExecutionExamples,
     managedAgentTemplates,
     registrySubmissionPackages,
@@ -90,6 +96,7 @@ export function buildDefinitiveRegistryPackage(baseUrl?: string) {
       'Include the EV-only and model-rerun examples so incoming agents understand that smbX accepts partial facts, runs iterative model versions, then generates source-aware documents.',
       'For direct external agents, mint a short-lived scoped bridge token from /api/definitive/agent-tokens; requestedScopes cannot exceed token-bound scopes.',
       'If a customer does not operate its own agents, position managed smbX agents as permission-scoped renters of the same Deal OS tools, not a separate product surface.',
+      'Use /api/definitive/connector-distribution as the canonical Claude-first connector launch package and reuse its common evidence pack for every client store.',
     ],
     generatedAt: new Date().toISOString(),
   };
@@ -99,11 +106,17 @@ export function buildDefinitiveRegistrySubmissionPackages(baseUrl?: string) {
   const origin = normalizeBaseUrl(baseUrl);
   const server = baseServerDescriptor(origin);
   const commonEvidence = {
+    mcpEndpointUrl: server.mcpEndpointUrl,
+    oauthProtectedResourceUrl: server.oauthProtectedResourceUrl,
+    serverJsonUrl: server.serverJsonUrl,
     serverCardUrl: server.serverCardUrl,
     discoveryManifestUrl: server.discoveryManifestUrl,
     definitiveManifestUrl: server.specManifestUrl,
     schemaRegistryUrl: server.schemaRegistryUrl,
+    openApiSpecUrl: server.openApiSpecUrl,
     registryPackageUrl: server.registryPackageUrl,
+    connectorDistributionUrl: server.connectorDistributionUrl,
+    assistantDistributionReadinessUrl: server.assistantDistributionReadinessUrl,
     lineDeclaration:
       'smbX is deterministic software/data infrastructure: no legal, tax, investment, brokerage, or negotiation advice; no wallet, success fee, deal-value fee, or paid human-service referral.',
     standard: 'The Diligence Standard',
@@ -148,10 +161,27 @@ export function buildDefinitiveRegistrySubmissionPackages(baseUrl?: string) {
         homepageUrl: origin,
         serverCardUrl: server.serverCardUrl,
         discoveryManifestUrl: server.discoveryManifestUrl,
-        transport: 'http',
+        oauthProtectedResourceUrl: server.oauthProtectedResourceUrl,
+        serverJsonUrl: server.serverJsonUrl,
+        remotes: [
+          {
+            type: 'streamable-http',
+            url: server.mcpEndpointUrl,
+            headers: [
+              {
+                name: 'Authorization',
+                description: 'Bearer token from smbX user session or scoped DEFINITIVE agent token.',
+                isRequired: true,
+                isSecret: true,
+              },
+            ],
+          },
+        ],
+        transport: 'streamable-http',
         tags: semanticKeywords,
       },
-      readinessChecks: ['server-card', 'well-known-mcp', 'structured-output-schemas', 'THE-LINE-declaration'],
+      readinessStatus: 'remote_mcp_ready_jwt_bearer',
+      readinessChecks: ['server-card', 'well-known-mcp', 'oauth-protected-resource-metadata', 'WWW-Authenticate-resource-metadata-challenge', 'structured-output-schemas', 'THE-LINE-declaration', 'streamable-http-mcp-endpoint', 'server.json-remotes'],
       ...commonEvidence,
     },
     thirdPartyDirectories: [
@@ -164,6 +194,7 @@ export function buildDefinitiveRegistrySubmissionPackages(baseUrl?: string) {
     ],
     clientStorePackages: [
       clientStorePackage('claude_connector_directory', 'Claude Connector Directory', 'financial-services connector candidate', origin, semanticKeywords, commonEvidence),
+      clientStorePackage('chatgpt_gpt_actions', 'ChatGPT GPT Actions', 'gpt_actions_candidate', origin, semanticKeywords, commonEvidence),
       clientStorePackage('chatgpt_apps_directory', 'ChatGPT Apps Directory', 'app submission candidate', origin, semanticKeywords, commonEvidence),
       clientStorePackage('microsoft_agent_store', 'Microsoft Agent Store / Commercial Marketplace', 'Copilot agent package candidate', origin, semanticKeywords, commonEvidence),
       clientStorePackage('salesforce_agentexchange', 'Salesforce AgentExchange', 'ISV MCP Tool Action listing candidate', origin, semanticKeywords, commonEvidence),
@@ -346,10 +377,11 @@ export function buildDefinitiveEnterpriseAllowListTemplates(baseUrl?: string) {
           {
             id: SERVER_ID,
             name: SERVER_TITLE,
-            url: `${origin}/api/definitive/tools/call`,
-            transport: 'http',
+            url: `${origin}/mcp`,
+            transport: 'streamable-http',
             serverCardUrl: `${origin}/.well-known/mcp/server-card.json`,
             discoveryManifestUrl: `${origin}/.well-known/mcp`,
+            oauthProtectedResourceUrl: `${origin}/.well-known/oauth-protected-resource/mcp`,
             allowedTools: allowedTools.map(tool => tool.name),
             requiredScopes: unique(allowedTools.flatMap(tool => tool.requiredScopes)),
           },
@@ -363,8 +395,10 @@ export function buildDefinitiveEnterpriseAllowListTemplates(baseUrl?: string) {
         {
           id: SERVER_ID,
           displayName: SERVER_TITLE,
-          endpoint: `${origin}/api/definitive/tools/call`,
+          endpoint: `${origin}/mcp`,
+          transport: 'streamable-http',
           serverCard: `${origin}/.well-known/mcp/server-card.json`,
+          oauthProtectedResource: `${origin}/.well-known/oauth-protected-resource/mcp`,
           allowTools: allowedTools.map(tool => tool.name),
           denyTools: tools.filter(tool => tool.lineStatus === 'LINE_VIOLATION').map(tool => tool.name),
           metadata: {
@@ -382,13 +416,16 @@ export function buildDefinitiveEnterpriseAllowListTemplates(baseUrl?: string) {
       kind: 'mcp_server',
       lifecycleStage: 'preview_internal_api_shape',
       endpoints: {
+        mcp: `${origin}/mcp`,
+        oauthProtectedResource: `${origin}/.well-known/oauth-protected-resource/mcp`,
         serverCard: `${origin}/.well-known/mcp/server-card.json`,
         discoveryManifest: `${origin}/.well-known/mcp`,
         toolsList: `${origin}/api/definitive/tools/list`,
         toolCall: `${origin}/api/definitive/tools/call`,
       },
       auth: {
-        current: 'JWT bearer for internal app calls plus token-bound scoped agent calls',
+        current: 'Streamable HTTP MCP at /mcp with JWT bearer for user sessions plus token-bound scoped agent calls',
+        oauthProtectedResource: `${origin}/.well-known/oauth-protected-resource/mcp`,
         productionTarget: 'OAuth 2.1 + PKCE + scoped, audience-bound agent tokens',
         scopeEnforcement:
           'Agent tokens carry scopes in JWT claims. requestedScopes may be omitted or narrowed, but cannot exceed token-bound scopes.',
@@ -414,7 +451,7 @@ export function buildDefinitiveEnterpriseAllowListTemplates(baseUrl?: string) {
     microsoftEntraAgentIdTemplate: {
       resource: SERVER_ID,
       displayName: SERVER_TITLE,
-      audience: `${origin}/api/definitive/tools/call`,
+      audience: `${origin}/mcp`,
       scopes: unique(allowedTools.flatMap(tool => tool.requiredScopes)),
       claimsRequired: ['agent_id', 'agent_platform_id', 'beneficial_customer_id', 'mandate_id'],
       tokenPosture: 'audience-bound scoped token; reject token passthrough',
@@ -439,11 +476,11 @@ function directoryPackage(
     surfaceId,
     label,
     submissionType: 'mcp_directory_listing',
-    installUrl: `${origin}/api/definitive/tools/call`,
+    installUrl: `${origin}/mcp`,
     homepageUrl: origin,
     shortDescription: 'Deterministic M&A Deal OS and diligence substrate for agent-run private-company deal work.',
     tags: semanticKeywords,
-    requiredAssets: ['README', 'server-card URL', 'well-known MCP URL', 'license/security posture', 'THE LINE declaration'],
+    requiredAssets: ['README', 'server-card URL', 'well-known MCP URL', 'OpenAPI GPT Actions URL', 'license/security posture', 'THE LINE declaration'],
     ...commonEvidence,
   };
 }
@@ -460,7 +497,7 @@ function clientStorePackage(
     surfaceId,
     label,
     submissionType,
-    endpointUrl: `${origin}/api/definitive/tools/call`,
+    endpointUrl: `${origin}/mcp`,
     homepageUrl: origin,
     appDescription:
       'smbX DEFINITIVE gives agents and humans one Deal OS for iterative M&A work: intake, IOI, LOI, diligence, model stack, data room, negotiation brief, close readiness, PMI, citations, and audit packets.',
@@ -476,6 +513,9 @@ function baseServerDescriptor(origin: string) {
     id: SERVER_ID,
     title: SERVER_TITLE,
     origin,
+    mcpEndpointUrl: `${origin}/mcp`,
+    oauthProtectedResourceUrl: `${origin}/.well-known/oauth-protected-resource/mcp`,
+    serverJsonUrl: `${origin}/server.json`,
     serverCardUrl: `${origin}/.well-known/mcp/server-card.json`,
     discoveryManifestUrl: `${origin}/.well-known/mcp`,
     specManifestUrl: `${origin}/.well-known/definitive.json`,
@@ -486,6 +526,9 @@ function baseServerDescriptor(origin: string) {
     modelSlotUrlTemplate: `${origin}/api/definitive/model-catalog/{slotId}`,
     passThroughCatalogUrl: `${origin}/api/definitive/pass-through-catalog`,
     registryPackageUrl: `${origin}/api/definitive/registry-package`,
+    connectorDistributionUrl: `${origin}/api/definitive/connector-distribution`,
+    assistantDistributionReadinessUrl: `${origin}/api/definitive/assistant-distribution-readiness`,
+    openApiSpecUrl: `${origin}/api/definitive/openapi.json`,
     enterpriseAllowListsUrl: `${origin}/api/definitive/enterprise-allow-lists`,
     agentTokenIssueUrl: `${origin}/api/definitive/agent-tokens`,
   };

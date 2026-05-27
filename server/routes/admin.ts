@@ -6,6 +6,7 @@ import { Router } from 'express';
 import { sql } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
 import { isSuperAdminUser } from '../adminAccess.js';
+import { PLANS, normalizePlan } from '../services/subscriptionService.js';
 
 export const adminRouter = Router();
 
@@ -24,6 +25,19 @@ function requireAdmin(req: any, res: any, next: any) {
 }
 
 adminRouter.use('/admin', requireAuth, requireAdmin);
+
+async function calculateMrrCents() {
+  const rows = await sql`
+    SELECT plan, COUNT(*)::int as count
+    FROM subscriptions
+    WHERE status IN ('active', 'trialing')
+    GROUP BY plan
+  `;
+  return rows.reduce((sum: number, row: any) => {
+    const plan = normalizePlan(row.plan);
+    return sum + (PLANS[plan].priceCents * Number(row.count || 0));
+  }, 0);
+}
 
 // ─── Test Emails ────────────────────────────────────────────
 adminRouter.post('/admin/test-emails', async (req, res) => {
@@ -48,15 +62,7 @@ adminRouter.get('/admin/metrics/overview', async (_req, res) => {
       WHERE updated_at > NOW() - INTERVAL '7 days' AND user_id IS NOT NULL
     `;
     const [deals] = await sql`SELECT COUNT(*)::int as total FROM deals WHERE status = 'active'`;
-    const [mrr] = await sql`
-      SELECT COALESCE(SUM(CASE
-        WHEN plan = 'starter' THEN 4900
-        WHEN plan = 'professional' THEN 14900
-        WHEN plan = 'enterprise' THEN 99900
-        ELSE 0
-      END), 0)::bigint as mrr_cents
-      FROM subscriptions WHERE status IN ('active', 'trialing')
-    `;
+    const mrrCents = await calculateMrrCents();
     const [deliverables] = await sql`
       SELECT COUNT(*)::int as total FROM deliverables WHERE created_at > NOW() - INTERVAL '30 days'
     `;
@@ -69,7 +75,7 @@ adminRouter.get('/admin/metrics/overview', async (_req, res) => {
       totalUsers: users.total,
       activeUsers7d: active7d.count,
       totalDeals: deals.total,
-      mrrCents: Number(mrr.mrr_cents),
+      mrrCents,
       deliverables30d: deliverables.total,
       errors24h: errors24h.total,
     });
@@ -152,16 +158,8 @@ adminRouter.get('/admin/metrics/revenue', async (_req, res) => {
       FROM subscriptions
       GROUP BY plan, status ORDER BY plan
     `;
-    const [mrr] = await sql`
-      SELECT COALESCE(SUM(CASE
-        WHEN plan = 'starter' THEN 4900
-        WHEN plan = 'professional' THEN 14900
-        WHEN plan = 'enterprise' THEN 99900
-        ELSE 0
-      END), 0)::bigint as mrr_cents
-      FROM subscriptions WHERE status IN ('active', 'trialing')
-    `;
-    res.json({ breakdown, mrrCents: Number(mrr.mrr_cents) });
+    const mrrCents = await calculateMrrCents();
+    res.json({ breakdown, mrrCents });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

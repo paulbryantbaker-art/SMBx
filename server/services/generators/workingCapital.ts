@@ -67,7 +67,7 @@ export interface WorkingCapitalReport {
     direction: 'improving' | 'declining' | 'stable';
     avg_nwc: number;
   };
-  recommendations: string[];
+  decision_points: string[];
   generated_at: string;
 }
 
@@ -124,7 +124,7 @@ export function generateWorkingCapitalAnalysis(input: WorkingCapitalInput): Work
     impact = `Working capital exceeds the peg by $${(surplusDeficit / 100).toLocaleString()} — seller may retain the excess or it may increase the purchase price.`;
     priceAdj = `Potential upward price adjustment of $${(surplusDeficit / 100).toLocaleString()}`;
   } else if (surplusDeficit < 0) {
-    impact = `Working capital is $${(Math.abs(surplusDeficit) / 100).toLocaleString()} below the peg — buyer should negotiate a price reduction or require seller to fund the deficit at closing.`;
+    impact = `Working capital is $${(Math.abs(surplusDeficit) / 100).toLocaleString()} below the peg — deal documents often address this through a downward purchase-price adjustment or seller-funded deficit at closing.`;
     priceAdj = `Potential downward price adjustment of $${(Math.abs(surplusDeficit) / 100).toLocaleString()}`;
   } else {
     impact = 'Working capital is at the peg — no price adjustment needed.';
@@ -177,33 +177,33 @@ export function generateWorkingCapitalAnalysis(input: WorkingCapitalInput): Work
     trend = { periods, values, direction, avg_nwc: avg };
   }
 
-  // Recommendations
-  const recs: string[] = [];
+  // Decision points
+  const decisionPoints: string[] = [];
 
   if (currentRatio < 1.0) {
-    recs.push('Current ratio below 1.0 — business may struggle to meet short-term obligations. Negotiate price reduction.');
+    decisionPoints.push('Current ratio below 1.0 — model liquidity needs, working-capital true-up, and post-close funding requirements.');
   } else if (currentRatio > 2.5) {
-    recs.push('High current ratio (>2.5) — excess working capital may be inflating the effective purchase price.');
+    decisionPoints.push('High current ratio (>2.5) — excess working capital may be inflating the effective purchase price.');
   }
 
   if (daysReceivable > 45) {
-    recs.push(`Days receivable of ${daysReceivable} is elevated — review collection practices and AR quality.`);
+    decisionPoints.push(`Days receivable of ${daysReceivable} is elevated — review collection practices and AR quality.`);
   }
 
   if (daysPayable > 60) {
-    recs.push(`Days payable of ${daysPayable} suggests the business may be stretching vendor payments — check for strained vendor relationships.`);
+    decisionPoints.push(`Days payable of ${daysPayable} suggests the business may be stretching vendor payments — check for strained vendor relationships.`);
   }
 
   if (cashConversionCycle > 60) {
-    recs.push(`Cash conversion cycle of ${cashConversionCycle} days is long — buyer will need additional working capital to operate.`);
+    decisionPoints.push(`Cash conversion cycle of ${cashConversionCycle} days is long — model the additional working capital needed to operate.`);
   }
 
   if (surplusDeficit < 0) {
-    recs.push('Negotiate a working capital adjustment mechanism in the purchase agreement with a true-up at closing.');
+    decisionPoints.push('Model a working-capital adjustment mechanism with a closing true-up for counsel/accounting review.');
   }
 
-  if (recs.length === 0) {
-    recs.push('Working capital position appears healthy — standard closing adjustment should suffice.');
+  if (decisionPoints.length === 0) {
+    decisionPoints.push('Working capital position appears healthy — a standard closing adjustment may be adequate, subject to accounting/counsel review.');
   }
 
   return {
@@ -236,7 +236,7 @@ export function generateWorkingCapitalAnalysis(input: WorkingCapitalInput): Work
       current_liabilities: clComponents,
     },
     trend,
-    recommendations: recs,
+    decision_points: decisionPoints,
     generated_at: new Date().toISOString(),
   };
 }

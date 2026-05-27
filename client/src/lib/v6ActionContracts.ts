@@ -255,11 +255,20 @@ export async function generateActionDeliverable({
 }: GenerateActionInput) {
   const numericId = typeof deal.id === "number" ? deal.id : Number(deal.id);
   if (!Number.isFinite(numericId)) throw new Error("This action needs a real deal before it can generate a deliverable.");
-  const result = await generateDealDeliverable({
-    dealId: numericId,
-    menuItemSlug: slug,
-    modelPreference,
-  });
+  let result: Awaited<ReturnType<typeof generateDealDeliverable>>;
+  try {
+    result = await generateDealDeliverable({
+      dealId: numericId,
+      menuItemSlug: slug,
+      modelPreference,
+    });
+  } catch (error: any) {
+    if (error?.checkoutUrl) {
+      onNote?.(`Opening ${error.requiredPlan || "paid"} checkout${error.priceDisplay ? ` at ${error.priceDisplay}` : ""}.`);
+      window.location.href = error.checkoutUrl;
+    }
+    throw error;
+  }
   const dealName = actionDealTitle(deal);
   const deliverableTitle = scopedWorkTitle(dealName, result.title, label);
   onNote?.(`${deliverableTitle} is queued for ${dealName}. Opening the live deliverable tab.`);
@@ -393,7 +402,7 @@ export async function executeSurfaceAction({
   }
 
   if (actionId === "optimize_scenario") {
-    onTalkToYulia?.(`${promptText} Use optimize_scenario with tabId "active" first, then recommend the risk-adjusted path and execution steps from the saved model and evidence trail.`);
+    onTalkToYulia?.(`${promptText} Use optimize_scenario with tabId "active" first, then compare the risk-adjusted path candidates and approval steps from the saved model and evidence trail.`);
     return { status: "sent_to_chat", actionId };
   }
 

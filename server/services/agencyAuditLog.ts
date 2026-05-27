@@ -6,7 +6,7 @@ const sql = createSql();
 
 interface AgencyActionEventInput {
   userId: number;
-  conversationId: number;
+  conversationId: number | null;
   toolName: string;
   contract?: AgencyActionContract;
   outcome: 'staged' | 'blocked' | 'executed' | 'error';
@@ -42,6 +42,9 @@ export async function recordAgencyActionEvent(event: AgencyActionEventInput): Pr
   const sourceSurface = event.sourceSurface ?? 'chat';
   const actorType = event.actorType ?? 'yulia';
   const actorId = event.actorId != null ? String(event.actorId) : null;
+  const conversationId = Number.isFinite(Number(event.conversationId)) && Number(event.conversationId) > 0
+    ? Number(event.conversationId)
+    : null;
   const mandateContext = await resolveDefinitiveMandateContext({
     userId: event.userId,
     organizationId: event.organizationId,
@@ -91,7 +94,7 @@ export async function recordAgencyActionEvent(event: AgencyActionEventInput): Pr
       VALUES (
         ${actionId},
         ${event.userId},
-        ${event.conversationId},
+        ${conversationId},
         ${event.toolName},
         ${contract?.label ?? null},
         ${contract?.permissionLevel ?? null},
@@ -149,7 +152,7 @@ export async function recordAgencyActionEvent(event: AgencyActionEventInput): Pr
         )
         VALUES (
           ${event.userId},
-          ${event.conversationId},
+          ${conversationId},
           ${event.toolName},
           ${contract?.label ?? null},
           ${contract?.permissionLevel ?? null},

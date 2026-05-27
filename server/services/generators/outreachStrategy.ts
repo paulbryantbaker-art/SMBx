@@ -1,8 +1,8 @@
 /**
  * Outreach Strategy Generator
  *
- * AI-generated multi-channel outreach plan for seller-side buyer targeting.
- * Includes messaging templates, timeline, and channel recommendations.
+ * AI-generated multi-channel outreach-prep plan for seller-side buyer-universe mapping.
+ * Includes user-controlled messaging templates, timeline options, and channel options.
  */
 import Anthropic from '@anthropic-ai/sdk';
 
@@ -39,10 +39,10 @@ export async function generateOutreachStrategy(input: OutreachStrategyInput): Pr
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 3500,
-    system: `You are a senior M&A advisor creating a buyer outreach strategy. Output clean markdown. Be specific and actionable — no generic advice. Tailor recommendations to the deal size and industry.`,
+    system: `You are a senior M&A deal-intelligence operator creating a buyer-universe and user-controlled outreach-prep plan. Output clean markdown. Be specific and actionable — no generic advice. Tailor option sets to the deal size and industry. Do not contact buyers, choose a buyer for the user, or imply transaction-based compensation.`,
     messages: [{
       role: 'user',
-      content: `Create a Buyer Outreach Strategy for this business:
+      content: `Create a Buyer Outreach Prep Plan for this business:
 
 Business: ${input.business_name || 'Target Company'}
 Industry: ${input.industry || 'General'}
@@ -54,28 +54,28 @@ ${input.asking_price ? `Asking Price: ${fmt(input.asking_price)}` : ''}
 ${input.growth_rate !== undefined ? `Growth Rate: ${input.growth_rate}%` : ''}
 ${input.employee_count ? `Employees: ${input.employee_count}` : ''}
 ${input.competitive_advantages ? `Key Strengths: ${input.competitive_advantages}` : ''}
-${input.buyer_types ? `Target Buyer Types: ${input.buyer_types}` : ''}
+	${input.buyer_types ? `Buyer Types to Map: ${input.buyer_types}` : ''}
 
 Structure the strategy as:
 
-# Outreach Strategy — [Business Name]
+	# Buyer Outreach Prep Plan — [Business Name]
 
-## Target Buyer Profiles
-3-4 specific buyer types most likely to acquire this business (e.g., strategic acquirers in adjacent industries, PE-backed platforms, individual operators, search funds). For each: why they'd buy, estimated interest level, typical deal structure preference.
+	## Buyer Universe Profiles
+	3-4 specific buyer types most likely to acquire this business (e.g., strategic acquirers in adjacent industries, PE-backed platforms, individual operators, search funds). For each: why they'd buy, estimated interest level, typical deal structure preference.
 
 ## Outreach Channels
-${isMainStreet ? 'Focus on: business-for-sale marketplaces, broker networks, local business communities, SBA lender referrals, industry associations.' : 'Focus on: targeted direct outreach, PE databases, investment banker networks, strategic corporate development contacts, industry conferences.'}
+${isMainStreet ? 'Focus on: business-for-sale marketplaces, broker networks, local business communities, SBA lender directories, industry associations.' : 'Focus on: user-approved direct outreach drafts, PE databases, investment banker networks, strategic corporate development contacts, industry conferences.'}
 
 For each channel: what to do, expected response rate, timeline.
 
 ## Messaging Templates
 Provide 2-3 actual email/message templates:
-1. Initial cold outreach (blind — no business name)
+1. Initial user-approved outreach draft (blind — no business name)
 2. Follow-up after NDA (revealing business details)
 3. Meeting request for qualified buyers
 
 ## Outreach Timeline
-Week-by-week timeline for the first 60 days of outreach.
+Week-by-week timeline options for the first 60 days of user-controlled outreach.
 
 ## Qualification Criteria
 How to screen inbound buyer interest — financial capability, strategic fit, timeline, experience.

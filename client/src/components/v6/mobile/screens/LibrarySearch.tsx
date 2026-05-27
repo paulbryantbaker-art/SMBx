@@ -445,14 +445,14 @@ export function SearchScreen({
       title: "PE and capital",
       sub: "Sponsors, independent sponsors, lenders.",
       tone: "blue",
-      prompt: "Find private equity firms, independent sponsors, family offices, and lenders relevant to this deal. Separate equity buyers from debt capital and rank them by likely appetite.",
+      prompt: "Find private equity firms, independent sponsors, family offices, and lenders relevant to this deal. Separate equity buyers from debt capital and compare them by likely appetite.",
     },
     {
       eyebrow: "PROFESSIONALS",
       title: "Deal professionals",
       sub: "Attorneys, QoE, tax, insurance, brokers.",
       tone: "sage",
-      prompt: "Find deal professionals for this transaction: M&A attorneys, QoE providers, tax advisors, insurance brokers, and diligence specialists. Prioritize experience with lower-middle-market transactions.",
+      prompt: "Find deal professionals for this transaction: M&A attorneys, QoE providers, tax advisors, insurance brokers, and diligence specialists. Compare experience with lower-middle-market transactions.",
     },
     {
       eyebrow: "REAL ESTATE",
@@ -527,7 +527,7 @@ export function SearchScreen({
           <input
             value={query}
             onChange={(event) => setQuery(event.currentTarget.value)}
-            placeholder="Find buyers, targets, PEs, advisors"
+            placeholder="Find buyers, targets, PEs, specialists"
             aria-label="Market discovery search"
             style={S.marketComposerInput}
           />
@@ -551,15 +551,15 @@ export function SearchScreen({
           <div style={S.heroGlow} />
           <div style={S.heroBody}>
             <div className="mb-mono" style={S.heroKicker}>ASK YULIA</div>
-            <h2 style={S.heroTitle}>Find the next right counterparty.</h2>
+            <h2 style={S.heroTitle}>Map the market around the deal.</h2>
             <p style={S.heroCopy}>
-              Search buyers, targets, capital, and deal professionals. Yulia turns a rough thesis into a short list.
+              Search buyers, targets, capital, and deal professionals. Yulia turns a rough thesis into a sourced market map.
             </p>
             <span style={S.searchHeroAction}>
               <YIcon size={42} kind="pursue" />
               <span style={S.searchHeroActionCopy}>
                 <span style={S.searchHeroActionTitle}>Start discovery</span>
-                <span style={S.searchHeroActionMeta}>Buyers, targets, capital, advisors</span>
+                <span style={S.searchHeroActionMeta}>Buyers, targets, capital, specialists</span>
               </span>
               <span style={S.searchHeroActionPill}>Start</span>
             </span>

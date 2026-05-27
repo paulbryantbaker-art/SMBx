@@ -1,11 +1,9 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent } from "react";
 import { DEV_AUTH_BYPASS, useAuth, type User } from "../../hooks/useAuth";
 import { useAnonymousChat } from "../../hooks/useAnonymousChat";
 import { useAuthChat } from "../../hooks/useAuthChat";
 import { useIsMobile } from "../../hooks/useIsMobile";
-import V6Mobile from "./mobile/V6Mobile";
 import { V6Chat } from "./Chat";
-import { V6Canvas } from "./Canvas";
 import { MODES, V6Icon } from "./icons";
 import { buildDesktopSurfaceContext, type SurfaceContext } from "../../lib/yuliaSurfaceContext";
 import { normalizeModelPreference, type ModelPreference } from "../../lib/modelPreference";
@@ -14,6 +12,9 @@ import { useModelStore, type ModelType } from "../../lib/modelStore";
 import type { FileListView, FileScope, Message, ModeId, Tab } from "./types";
 
 const VALID_MODES: ModeId[] = ["today", "pipeline", "search", "studio", "files", "docs", "analysis", "intel", "library"];
+
+const V6Mobile = lazy(() => import("./mobile/V6Mobile"));
+const V6Canvas = lazy(() => import("./Canvas").then(module => ({ default: module.V6Canvas })));
 
 interface ChatBridge {
   thread: Message[];
@@ -79,7 +80,11 @@ export default function V6App() {
   }
 
   if (isMobile) {
-    return <V6Mobile user={user} onSignOut={async () => { await auth.logout(); }} onDevSignIn={auth.devSignIn} />;
+    return (
+      <Suspense fallback={<V6ShellLoader />}>
+        <V6Mobile user={user} onSignOut={async () => { await auth.logout(); }} onDevSignIn={auth.devSignIn} />
+      </Suspense>
+    );
   }
 
   if (DEV_AUTH_BYPASS) {
@@ -618,21 +623,32 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
           <div style={A.dragGrip} />
         </div>
         <div className="v6-canvas-frame" style={A.canvasPane}>
-          <V6Canvas
-            tabs={tabs}
-            activeTabId={activeTabId}
-            setActiveTabId={setActiveTabId}
-            openTab={openTab}
-            closeTab={closeTab}
-            reorderTabs={reorderTabs}
-            onPickMode={pickMode}
-            onTalkToYulia={(prompt) => send(prompt)}
-            user={user}
-            onSignOut={onSignOut}
-            modelPreference={modelPreference}
-          />
+          <Suspense fallback={<V6ShellLoader />}>
+            <V6Canvas
+              tabs={tabs}
+              activeTabId={activeTabId}
+              setActiveTabId={setActiveTabId}
+              openTab={openTab}
+              closeTab={closeTab}
+              reorderTabs={reorderTabs}
+              onPickMode={pickMode}
+              onTalkToYulia={(prompt) => send(prompt)}
+              user={user}
+              onSignOut={onSignOut}
+              modelPreference={modelPreference}
+            />
+          </Suspense>
         </div>
       </div>
+    </div>
+  );
+}
+
+function V6ShellLoader() {
+  return (
+    <div style={A.shellLoader}>
+      <div style={A.shellLoaderDot} />
+      <span>Loading workspace...</span>
     </div>
   );
 }
@@ -1358,5 +1374,23 @@ const A: Record<string, CSSProperties> = {
     transform: "translate(-50%, -50%)",
     width: 3, height: 42, borderRadius: 999,
     background: "#778A9E", opacity: 0.18,
+  },
+  shellLoader: {
+    width: "100%",
+    minHeight: 220,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    color: "#5E6F83",
+    fontSize: 12,
+    fontWeight: 700,
+  },
+  shellLoaderDot: {
+    width: 9,
+    height: 9,
+    borderRadius: 999,
+    background: "#8A9AE8",
+    boxShadow: "0 0 0 6px rgba(138,154,232,0.14)",
   },
 };

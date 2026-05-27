@@ -147,7 +147,7 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
         "",
         "Yulia is opening this as a working market-discovery surface, not a document search.",
         "",
-        "The output should become ranked buyers, targets, capital providers, or deal professionals with evidence, fit rationale, outreach priority, and next action.",
+        "The output should become a sourced map of buyers, targets, capital providers, or deal professionals with evidence, fit rationale, outreach options, and next action options.",
         "",
         `**Search brief:** ${prompt}`,
       ].join("\n"),
@@ -161,7 +161,7 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
         <div style={S.heroCopy}>
           <h1 style={S.title}>Find the other side of the market.</h1>
           <p style={S.sub}>
-            Search here is not document search. It is market discovery: buyers, targets, capital, and the professionals who help deals close.
+            Search here is not document search. It is market discovery: buyers, targets, capital, and the professionals who help users get deals reviewed and closed.
           </p>
         </div>
 
@@ -202,7 +202,7 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
               style={S.listAction}
               type="button"
               onClick={() => {
-                openDiscoverySurface("Open a discovery map for my current sourcing work: buyers, targets, capital providers, and deal professionals grouped by thesis and next action.", "Discovery map");
+                openDiscoverySurface("Open a discovery map for my current sourcing work: buyers, targets, capital providers, and deal professionals grouped by thesis and next action options.", "Discovery map");
               }}
             >
               Open map

@@ -2653,7 +2653,7 @@ const MODEL_DEFINITIONS: Record<string, V19ModelDefinition> = {
         operating_fit: operatingFit,
         financing_fit: financingFit,
         risk_flags: operatingNeeds.map(item => `Operating need: ${item}`),
-        recommended_next_action: fitScore >= 75 ? 'Prioritize outreach and diligence.' : 'Keep in watch list until fit gaps are resolved.',
+        recommended_next_action: fitScore >= 75 ? 'Option: prepare user-controlled outreach and diligence.' : 'Option: keep in watch list until fit gaps are resolved.',
       },
     };
   }),

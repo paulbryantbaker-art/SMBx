@@ -13,6 +13,9 @@ export interface AuthTokenClaims {
   beneficialCustomerId?: string | number;
   billingOrgId?: string | number;
   mandateId?: string;
+  aud?: string | string[];
+  iss?: string;
+  clientId?: string;
   [key: string]: unknown;
 }
 
@@ -24,6 +27,9 @@ export interface DefinitiveAgentTokenInput {
   beneficialCustomerId?: string | number | null;
   billingOrgId?: string | number | null;
   mandateId?: string | null;
+  audience?: string | null;
+  issuer?: string | null;
+  clientId?: string | null;
   expiresInSeconds?: number;
 }
 
@@ -79,8 +85,13 @@ export function signDefinitiveAgentToken(input: DefinitiveAgentTokenInput): stri
       beneficialCustomerId: input.beneficialCustomerId || undefined,
       billingOrgId: input.billingOrgId || undefined,
       mandateId: input.mandateId || undefined,
+      clientId: input.clientId || undefined,
     },
     JWT_SECRET,
-    { expiresIn },
+    {
+      expiresIn,
+      ...(input.audience ? { audience: input.audience } : {}),
+      ...(input.issuer ? { issuer: input.issuer } : {}),
+    },
   );
 }

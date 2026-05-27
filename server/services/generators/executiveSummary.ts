@@ -44,7 +44,7 @@ export async function generateExecutiveSummary(input: ExecutiveSummaryInput): Pr
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 3000,
-    system: `You are a senior M&A advisor writing a concise executive summary for a business sale. Write exactly 2 pages worth of content — professional, factual, compelling. Output clean markdown. Do NOT invent financial numbers — use only what is provided.`,
+    system: `You are a senior M&A deal-intelligence operator writing a concise executive summary for a business sale. Write exactly 2 pages worth of content — professional, factual, compelling. Output clean markdown. Do NOT invent financial numbers — use only what is provided.`,
     messages: [{
       role: 'user',
       content: `Write an Executive Summary for this business:

@@ -5,8 +5,9 @@
  * Shows the document in TipTap (read-only) with professional styling.
  * Handles NDA gates, watermarks, and access controls.
  */
-import { useState, useEffect } from 'react';
-import DocumentEditor from '../components/documents/DocumentEditor';
+import { lazy, Suspense, useState, useEffect } from 'react';
+
+const DocumentEditor = lazy(() => import('../components/documents/DocumentEditor'));
 
 interface SharedDoc {
   accessLevel: string;
@@ -151,13 +152,15 @@ export default function SharedDocumentView({ token }: { token: string }) {
 
       {/* Document content */}
       <main className="max-w-[800px] mx-auto px-6 py-8">
-        <DocumentEditor
-          content={doc.content}
-          tiptapContent={doc.tiptapContent}
-          name={doc.docName}
-          editable={false}
-          docClass={doc.docClass || undefined}
-        />
+        <Suspense fallback={<DocumentEditorLoader />}>
+          <DocumentEditor
+            content={doc.content}
+            tiptapContent={doc.tiptapContent}
+            name={doc.docName}
+            editable={false}
+            docClass={doc.docClass || undefined}
+          />
+        </Suspense>
       </main>
 
       {/* Footer */}
@@ -169,6 +172,17 @@ export default function SharedDocumentView({ token }: { token: string }) {
           This document is confidential. Unauthorized distribution is prohibited.
         </p>
       </footer>
+    </div>
+  );
+}
+
+function DocumentEditorLoader() {
+  return (
+    <div className="min-h-[420px] bg-white border border-[#e8e6dc] rounded-lg flex items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-7 h-7 border-2 border-[#D4714E] border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs text-[#5e5d59]">Preparing document...</p>
+      </div>
     </div>
   );
 }

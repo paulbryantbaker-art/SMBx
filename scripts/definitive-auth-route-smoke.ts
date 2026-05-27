@@ -11,6 +11,7 @@
  */
 
 import 'dotenv/config';
+import { createHash, randomBytes } from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import { sql } from '../server/db.js';
 import {
@@ -42,9 +43,12 @@ try {
   await test('Public MCP server card is discoverable without JWT', async () => {
     const card = await publicJson('/.well-known/mcp/server-card.json');
     assertEqual(card.name, 'smbx-ai/diligence', 'server-card namespace');
-    assertEqual(card.protocolVersion, '2025-12-11', 'server-card protocol version');
+    assertEqual(card.protocolVersion, '2025-11-25', 'server-card protocol version');
     assertEqual(card.serverInfo?.canonicalStandard, 'The Diligence Standard', 'server-card canonical standard');
+    assert(String(card.serverUrl || '').endsWith('/mcp'), 'server-card remote MCP URL');
+    assertEqual(card.transport?.type, 'streamable-http', 'server-card transport');
     assert(String(card.transport?.endpoints?.serverCard || '').endsWith('/.well-known/mcp/server-card.json'), 'server-card URL is public discovery');
+    assert(String(card.transport?.endpoints?.oauthProtectedResource || '').endsWith('/.well-known/oauth-protected-resource/mcp'), 'server-card exposes protected-resource metadata');
     assert(String(card.transport?.endpoints?.schemaRegistry || '').endsWith('/api/definitive/schemas'), 'server-card schema registry URL');
     assert(card.security?.executionRequiresAuthentication === true, 'server-card marks execution as authenticated');
     assert(card.security?.noSuccessFees === true, 'server-card preserves no success fee');
@@ -57,15 +61,205 @@ try {
 
   await test('Public MCP well-known manifest separates discovery from bearer execution', async () => {
     const manifest = await publicJson('/.well-known/mcp');
-    assertEqual(manifest.mcp_version, '2025-12-11', 'well-known MCP version');
+    assertEqual(manifest.mcp_version, '2025-11-25', 'well-known MCP version');
     assert(String(manifest.server_card || '').endsWith('/.well-known/mcp/server-card.json'), 'well-known server-card URL');
     assert(manifest.endpoints.some((endpoint: any) => endpoint.type === 'server-card' && endpoint.auth === 'none'), 'server-card is public');
+    assert(manifest.endpoints.some((endpoint: any) => endpoint.type === 'oauth-protected-resource-metadata' && endpoint.auth === 'none'), 'protected-resource metadata is public');
+    assert(manifest.endpoints.some((endpoint: any) => endpoint.type === 'mcp-streamable-http' && endpoint.auth === 'bearer'), 'remote MCP transport requires bearer');
     assert(manifest.endpoints.some((endpoint: any) => endpoint.type === 'definitive-schema-registry' && endpoint.auth === 'none'), 'schema registry is public');
     assert(manifest.endpoints.some((endpoint: any) => endpoint.type === 'tools-list' && endpoint.auth === 'bearer'), 'tools list requires bearer');
     assert(manifest.endpoints.some((endpoint: any) => endpoint.type === 'tool-call' && endpoint.auth === 'bearer'), 'tool call requires bearer');
     assertEqual(manifest.capabilities?.outputSchema, true, 'well-known output schemas');
     assertEqual(manifest.capabilities?.structuredContent, true, 'well-known structured content');
     assertEqual(manifest.doctrine?.namingConvention, 'diligence_<phase>_<artifact>', 'well-known tool naming convention');
+  });
+
+  await test('Public OAuth protected-resource metadata describes the MCP resource', async () => {
+    const metadata = await publicJson('/.well-known/oauth-protected-resource/mcp');
+    assert(String(metadata.resource || '').endsWith('/mcp'), 'protected-resource resource is /mcp');
+    assert(Array.isArray(metadata.authorization_servers) && metadata.authorization_servers.length > 0, 'protected-resource metadata names authorization server');
+    assert(metadata.scopes_supported?.includes('capability:read'), 'protected-resource metadata exposes capability scope');
+    assert(metadata.scopes_supported?.includes('deal-state:write'), 'protected-resource metadata exposes write scope');
+    assertEqual(metadata.bearer_methods_supported?.[0], 'header', 'protected-resource metadata uses bearer header');
+  });
+
+  await test('Public OAuth authorization server metadata supports PKCE connector flow', async () => {
+    const metadata = await publicJson('/.well-known/oauth-authorization-server');
+    assert(String(metadata.issuer || '').startsWith(BASE_URL), 'authorization metadata issuer is local test origin');
+    assert(String(metadata.authorization_endpoint || '').endsWith('/oauth/authorize'), 'authorization endpoint exposed');
+    assert(String(metadata.token_endpoint || '').endsWith('/oauth/token'), 'token endpoint exposed');
+    assert(String(metadata.registration_endpoint || '').endsWith('/oauth/register'), 'registration endpoint exposed');
+    assert(metadata.code_challenge_methods_supported?.includes('S256'), 'PKCE S256 supported');
+    assert(metadata.token_endpoint_auth_methods_supported?.includes('client_secret_post'), 'confidential client auth supported');
+    assert(metadata.resource_indicators_supported === true, 'resource indicators supported');
+  });
+
+  await test('Public focused GPT Actions OpenAPI package is importable', async () => {
+    const spec = await publicJson('/api/definitive/gpt-actions/openapi.json');
+    assertEqual(spec.openapi, '3.1.0', 'GPT Actions OpenAPI version');
+    assertEqual(spec.info?.title, 'smbX Deal OS GPT Actions', 'GPT Actions title');
+    assert(spec.paths?.['/api/definitive/gpt-actions/introspect_capabilities']?.post, 'GPT Actions introspection path exists');
+    assert(spec.paths?.['/api/definitive/gpt-actions/compose_model_stack']?.post, 'GPT Actions model stack path exists');
+    assert(String(spec.components?.securitySchemes?.smbxOAuth?.flows?.authorizationCode?.tokenUrl || '').endsWith('/oauth/token'), 'GPT Actions OAuth token URL');
+  });
+
+  await test('Remote MCP endpoint initializes and lists tools without JWT', async () => {
+    const initialized = await postMcp({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        protocolVersion: '2025-11-25',
+        capabilities: {},
+        clientInfo: { name: 'auth-route-smoke', version: '0.1' },
+      },
+    });
+    assertEqual(initialized.status, 200, 'MCP initialize status');
+    assertEqual(initialized.body.result?.protocolVersion, '2025-11-25', 'MCP initialize protocol');
+
+    const tools = await postMcp({ jsonrpc: '2.0', id: 2, method: 'tools/list', params: {} });
+    assertEqual(tools.status, 200, 'MCP tools/list status');
+    assert(tools.body.result?.tools?.some((tool: any) => tool.name === 'ingest_deal_payload'), 'MCP tools/list exposes ingest_deal_payload');
+  });
+
+  await test('Remote MCP tools/call requires and accepts bearer auth', async () => {
+    const unauthenticated = await postMcp({
+      jsonrpc: '2.0',
+      id: 3,
+      method: 'tools/call',
+      params: { name: 'introspect_capabilities', arguments: {} },
+    });
+    assertEqual(unauthenticated.status, 401, 'MCP unauthenticated tools/call status');
+    assert(String(unauthenticated.headers.get('www-authenticate') || '').includes('resource_metadata='), 'MCP unauthenticated tools/call includes resource metadata challenge');
+
+    const authed = await postMcp({
+      jsonrpc: '2.0',
+      id: 4,
+      method: 'tools/call',
+      params: { name: 'introspect_capabilities', arguments: { journey: 'buy' }, _meta: { requestId: 'auth-route-mcp-001' } },
+    }, token);
+    assertEqual(authed.status, 200, 'MCP authenticated tools/call status');
+    assertEqual(authed.body.result?.isError, false, 'MCP authenticated tools/call succeeds');
+    assertEqual(authed.body.result?.structuredContent?.requestId, 'auth-route-mcp-001', 'MCP authenticated call echoes request id');
+  });
+
+  await test('OAuth PKCE bridge issues audience-bound MCP access tokens', async () => {
+    const redirectUri = 'http://127.0.0.1:45555/callback';
+    const registered = await publicPostJson('/oauth/register', {
+      client_name: 'auth-route-smoke',
+      redirect_uris: [redirectUri],
+      token_endpoint_auth_method: 'none',
+    });
+    assertEqual(registered.status, 201, 'OAuth client registration status');
+    assert(registered.body.client_id, 'OAuth registration returns client_id');
+
+    const verifier = randomBytes(32).toString('base64url');
+    const challenge = createHash('sha256').update(verifier).digest('base64url');
+    const confirmed = await postJson('/oauth/authorize/confirm', token, {
+      response_type: 'code',
+      client_id: registered.body.client_id,
+      redirect_uri: redirectUri,
+      scope: 'capability:read methodology:read deal-state:read',
+      state: 'oauth-smoke-state',
+      code_challenge: challenge,
+      code_challenge_method: 'S256',
+      resource: `${BASE_URL}/mcp`,
+    });
+    assertEqual(confirmed.status, 200, 'OAuth authorization confirmation status');
+    const redirect = new URL(confirmed.body.redirectTo);
+    assertEqual(redirect.searchParams.get('state'), 'oauth-smoke-state', 'OAuth state is preserved');
+    const code = redirect.searchParams.get('code');
+    assert(code, 'OAuth authorization returns code');
+
+    const tokenResponse = await publicPostForm('/oauth/token', {
+      grant_type: 'authorization_code',
+      code,
+      client_id: registered.body.client_id,
+      redirect_uri: redirectUri,
+      code_verifier: verifier,
+      resource: `${BASE_URL}/mcp`,
+    });
+    assertEqual(tokenResponse.status, 200, 'OAuth token exchange status');
+    assert(tokenResponse.body.access_token, 'OAuth token exchange returns access token');
+    assertEqual(tokenResponse.body.token_type, 'Bearer', 'OAuth token type');
+    assertEqual(tokenResponse.body.resource, `${BASE_URL}/mcp`, 'OAuth token response binds resource');
+
+    const oauthMcpCall = await postMcp({
+      jsonrpc: '2.0',
+      id: 5,
+      method: 'tools/call',
+      params: { name: 'introspect_capabilities', arguments: { journey: 'buy' }, _meta: { requestId: 'oauth-mcp-001' } },
+    }, tokenResponse.body.access_token);
+    assertEqual(oauthMcpCall.status, 200, 'OAuth access token can call MCP');
+    assertEqual(oauthMcpCall.body.result?.structuredContent?.requestId, 'oauth-mcp-001', 'OAuth MCP call preserves request id');
+
+    const replay = await publicPostForm('/oauth/token', {
+      grant_type: 'authorization_code',
+      code,
+      client_id: registered.body.client_id,
+      redirect_uri: redirectUri,
+      code_verifier: verifier,
+      resource: `${BASE_URL}/mcp`,
+    });
+    assertEqual(replay.status, 400, 'OAuth authorization code cannot be replayed');
+    assertEqual(replay.body.error, 'invalid_grant', 'OAuth replay returns invalid_grant');
+  });
+
+  if (process.env.SMBX_GPT_ACTIONS_CLIENT_ID && process.env.SMBX_GPT_ACTIONS_CLIENT_SECRET) {
+    await test('Confidential GPT Actions OAuth client exchanges authorization codes without PKCE', async () => {
+      const redirectUri = 'http://127.0.0.1:45555/callback';
+      const confirmed = await postJson('/oauth/authorize/confirm', token, {
+        response_type: 'code',
+        client_id: process.env.SMBX_GPT_ACTIONS_CLIENT_ID,
+        redirect_uri: redirectUri,
+        scope: 'capability:read methodology:read model-stack:compose deal-state:read deal:read',
+        state: 'gpt-actions-oauth-state',
+        resource: `${BASE_URL}/mcp`,
+      });
+      assertEqual(confirmed.status, 200, 'GPT Actions OAuth authorization confirmation status');
+      const redirect = new URL(confirmed.body.redirectTo);
+      assertEqual(redirect.searchParams.get('state'), 'gpt-actions-oauth-state', 'GPT Actions OAuth state is preserved');
+      const code = redirect.searchParams.get('code');
+      assert(code, 'GPT Actions OAuth authorization returns code');
+
+      const tokenResponse = await publicPostForm('/oauth/token', {
+        grant_type: 'authorization_code',
+        code,
+        client_id: process.env.SMBX_GPT_ACTIONS_CLIENT_ID,
+        client_secret: process.env.SMBX_GPT_ACTIONS_CLIENT_SECRET,
+        redirect_uri: redirectUri,
+        resource: `${BASE_URL}/mcp`,
+      });
+      assertEqual(tokenResponse.status, 200, 'GPT Actions OAuth token exchange status');
+      assert(tokenResponse.body.access_token, 'GPT Actions OAuth token exchange returns access token');
+      assertEqual(tokenResponse.body.scope.includes('model-stack:compose'), true, 'GPT Actions OAuth token carries requested scopes');
+
+      const action = await postJson('/api/definitive/gpt-actions/introspect_capabilities', tokenResponse.body.access_token, {
+        journey: 'buy',
+        objective: 'private GPT OAuth smoke',
+        includeTools: true,
+      });
+      assertEqual(action.status, 200, 'GPT Actions OAuth token can call facade');
+      assertEqual(action.body.ok, true, 'GPT Actions OAuth facade call ok');
+      assertEqual(action.body.toolName, 'introspect_capabilities', 'GPT Actions OAuth facade tool name');
+    });
+  }
+
+  await test('Focused GPT Actions facade calls governed tools', async () => {
+    const action = await postJson('/api/definitive/gpt-actions/introspect_capabilities', token, {
+      journey: 'buy',
+      objective: 'private GPT pilot smoke',
+      includeTools: true,
+    });
+    assertEqual(action.status, 200, 'GPT Actions facade status');
+    assertEqual(action.body.ok, true, 'GPT Actions facade ok');
+    assertEqual(action.body.toolName, 'introspect_capabilities', 'GPT Actions facade tool name');
+    assertEqual(action.body.requestId?.startsWith('gpt-action-'), true, 'GPT Actions facade injects request id');
+    assertEqual(action.body.result?.schema, 'CapabilityCatalog.v0.1', 'GPT Actions facade returns capability catalog');
+
+    const blocked = await postJson('/api/definitive/gpt-actions/close_deal', token, {});
+    assertEqual(blocked.status, 404, 'GPT Actions facade hides unsafe tools');
+    assertEqual(blocked.body.error, 'gpt_action_not_exposed', 'GPT Actions unsafe tool response');
   });
 
   await test('Public registry package and allow-list templates are live routes', async () => {
@@ -2024,6 +2218,32 @@ async function publicJson(path: string) {
   return body;
 }
 
+async function publicPostJson(path: string, body: Record<string, any>) {
+  const response = await fetch(`${BASE_URL}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  return {
+    status: response.status,
+    headers: response.headers,
+    body: await response.json().catch(() => ({})),
+  };
+}
+
+async function publicPostForm(path: string, body: Record<string, any>) {
+  const response = await fetch(`${BASE_URL}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams(Object.entries(body).map(([key, value]) => [key, String(value)])),
+  });
+  return {
+    status: response.status,
+    headers: response.headers,
+    body: await response.json().catch(() => ({})),
+  };
+}
+
 async function postJson(path: string, token: string, body: Record<string, any>) {
   const response = await fetch(`${BASE_URL}${path}`, {
     method: 'POST',
@@ -2035,6 +2255,24 @@ async function postJson(path: string, token: string, body: Record<string, any>) 
   });
   return {
     status: response.status,
+    headers: response.headers,
+    body: await response.json().catch(() => ({})),
+  };
+}
+
+async function postMcp(body: Record<string, any>, token?: string) {
+  const response = await fetch(`${BASE_URL}/mcp`, {
+    method: 'POST',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      'Accept': 'application/json, text/event-stream',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  return {
+    status: response.status,
+    headers: response.headers,
     body: await response.json().catch(() => ({})),
   };
 }

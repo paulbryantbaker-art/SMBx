@@ -575,7 +575,7 @@ export async function processDeliverable(data: DeliverableJobData): Promise<void
         break;
       }
 
-      // ─── Buyer List ─────────────────────────────────────────
+      // ─── Buyer Universe ─────────────────────────────────────
       case 'sell_buyer_list': {
         const markdown = await generateBuyerList({
           business_name: deal.business_name, industry: deal.industry, location: deal.location,
@@ -759,17 +759,18 @@ export async function processDeliverable(data: DeliverableJobData): Promise<void
       }
     }
 
-    const generationTime = Date.now() - startTime;
-
     // Classify document type
     const docClass = /loi|nda|agreement|term_sheet|counter_proposal|term-sheet|counter-proposal/i.test(normalizedType) ? 'legal'
       : /cim|teaser|pitch_deck|executive_summary|outreach|pitch-deck|executive-summary/i.test(normalizedType) ? 'marketing'
       : 'working';
 
+    result = applyDisclosureBlock(result, normalizedType, docClass);
+    const generationTime = Date.now() - startTime;
+
     await sql`
       UPDATE deliverables
       SET status = 'complete',
-          content = ${JSON.stringify(result)}::jsonb,
+          content = ${sql.json(result as any)}::jsonb,
           generation_model = ${model},
           generation_time_ms = ${generationTime},
           completed_at = NOW(),
@@ -795,11 +796,76 @@ export async function processDeliverable(data: DeliverableJobData): Promise<void
     await sql`
       UPDATE deliverables
       SET status = 'failed',
-          content = ${JSON.stringify({ error: err.message })}::jsonb
+          content = ${sql.json({ error: err.message } as any)}::jsonb
       WHERE id = ${deliverableId}
     `;
     throw err;
   }
+}
+
+function applyDisclosureBlock(result: any, deliverableType: string, docClass: string): any {
+  const markdown = extractResultMarkdown(result);
+  const disclosure = buildDisclosureBlock(deliverableType, docClass);
+
+  if (markdown.includes('smbX software disclosure') || markdown.includes('smbX disclosure')) {
+    return result;
+  }
+
+  return {
+    ...(typeof result === 'object' && result !== null ? result : { raw: result }),
+    markdown: `${disclosure}\n\n${markdown}\n\n${disclosure}`,
+    disclosure: {
+      title: 'smbX software disclosure',
+      content: disclosure.replace(/^> /gm, '').trim(),
+    },
+  };
+}
+
+function extractResultMarkdown(result: any): string {
+  if (typeof result === 'string') return result;
+  if (!result || typeof result !== 'object') return String(result ?? '');
+  if (typeof result.markdown === 'string') return result.markdown;
+  if (typeof result.content === 'string') return result.content;
+  if (typeof result.text === 'string') return result.text;
+
+  if (Array.isArray(result.sections)) {
+    const parts = result.sections
+      .map((section: any) => {
+        if (typeof section === 'string') return section;
+        if (!section || typeof section !== 'object') return '';
+        const title = section.title || section.heading || section.name;
+        const body = section.content || section.body || section.text;
+        return [title ? `## ${title}` : '', typeof body === 'string' ? body : ''].filter(Boolean).join('\n\n');
+      })
+      .filter(Boolean);
+    if (parts.length) return parts.join('\n\n');
+  }
+
+  return `\`\`\`json\n${JSON.stringify(result, null, 2)}\n\`\`\``;
+}
+
+function buildDisclosureBlock(deliverableType: string, docClass: string): string {
+  const notes = [
+    'This software-generated work product is for deal-intelligence, modeling, diligence workflow, and document-scaffolding support.',
+    'It is not legal, tax, accounting, audit, appraisal, investment, brokerage, fairness, solvency, escrow, negotiation, or closing advice.',
+    'smbX is not a broker-dealer, investment adviser, law firm, CPA firm, business broker, appraiser, escrow agent, fiduciary, or counterparty representative.',
+    'Users and their licensed professionals make all transaction, legal, tax, accounting, valuation, financing, negotiation, and closing decisions.',
+  ];
+
+  if (/qoe|quality_of_earnings|financial_spread/i.test(deliverableType)) {
+    notes.push('Quality-of-earnings style outputs are not an audit, review, compilation, or assurance engagement.');
+  }
+  if (/valuation|value_lens|valuelens|price_gap|probability_of_sale/i.test(deliverableType)) {
+    notes.push('Valuation outputs are valuation model outputs only, not an appraisal, USPAP report, or fair-market-value opinion.');
+  }
+  if (/tax|loi|agreement|term_sheet|structure|funds_flow|closing/i.test(`${deliverableType} ${docClass}`)) {
+    notes.push('Tax, legal, agreement, closing, and funds-flow materials are computations, issue lists, or working examples only, not opinions or binding documents.');
+  }
+
+  return [
+    '> **smbX software disclosure**',
+    ...notes.map(note => `> ${note}`),
+  ].join('\n');
 }
 
 // ─── Auto-filing: map deliverable types → folder name preferences ───
@@ -1045,7 +1111,7 @@ Use markdown tables for data presentation. All dollar amounts should be formatte
 - Structured analysis with clear methodology
 - Quantitative scoring where appropriate (use 1-10 scales or letter grades)
 - Risk identification with severity ratings (Low/Medium/High/Critical)
-- Specific, actionable recommendations
+- Specific, actionable option sets with implications
 - Supporting data and rationale for each conclusion
 Output as professional markdown with clear section hierarchy.`,
 
@@ -1063,7 +1129,7 @@ Format as markdown with checkbox syntax (- [ ]) for actionable items.`,
 - Fill-in-the-blank sections marked with [BRACKETS]
 - Talking points for verbal communications
 - FAQ sections for anticipated questions
-- Timing recommendations for each communication
+- Timing options for each communication
 Output as markdown with clear section headers and template formatting.`,
 
   pmi_plan: `You are generating a post-merger integration plan. Focus on:
@@ -1083,18 +1149,18 @@ Output as professional markdown with clear phasing and milestones.`,
 - Waterfall analysis for exit scenarios
 Present data in clean markdown tables. All percentages to 2 decimal places. Show both share counts and percentages.`,
 
-  term_sheet: `You are generating term sheet analysis or negotiation guidance. Focus on:
+  term_sheet: `You are generating term sheet analysis or negotiation-prep guidance. Focus on:
 - Plain-language explanation of each term
 - Market-standard benchmarks for comparison
 - Red flags and unusual terms highlighted
-- Negotiation leverage points and strategies
+- Negotiation-prep leverage points and option sets
 - Side-by-side comparison format if multiple terms
-- Specific counter-proposal language where appropriate
+- Specific counter-proposal draft language for user/counsel review where appropriate
 Output as professional markdown with term-by-term analysis.`,
 
   raise_docs: `You are generating fundraising support documents. Focus on:
-- Investor targeting criteria and match quality
-- Outreach strategy and messaging
+- Investor-universe criteria and fit quality
+- User-approved outreach strategy and messaging
 - Regulatory and compliance guidance
 - Professional formatting suitable for external sharing
 - Specific, actionable content (not generic advice)
@@ -1119,7 +1185,7 @@ function buildCategoryPrompt(category: string, deal: any, menuItem: any, deliver
 
   const financials = deal.financials ? JSON.stringify(deal.financials, null, 2) : 'None provided';
 
-  return `You are Yulia, an expert M&A advisor at smbx.ai. You are generating a professional deliverable for a client.
+  return `You are Yulia, an expert M&A deal-intelligence operator at smbx.ai. You are generating a professional deliverable for a client.
 
 ## DELIVERABLE
 Name: ${menuItem?.name || deliverableType}
@@ -1142,6 +1208,7 @@ ${financials}
 - Be thorough and professional — this is a paid deliverable
 - Financial amounts in dollars with proper formatting
 - Write in direct, authoritative prose — not hedging or generic
+- Present analysis, options, and implications; do not tell the user what to sign, accept, reject, offer, or file
 - Output clean markdown ready for rendering`;
 }
 

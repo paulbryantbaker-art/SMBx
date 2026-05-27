@@ -5,12 +5,29 @@ import { Router } from 'express';
 import { sql } from '../db.js';
 import { enqueueDeliverableGeneration } from '../services/jobQueue.js';
 import { processDeliverable } from '../services/deliverableProcessor.js';
-import { canGenerateDeliverable, markFreeDeliverableUsed, getUserPlan, planMeetsRequirement, getRequiredPlan } from '../services/subscriptionService.js';
+import {
+  canGenerateDeliverable,
+  createCheckout,
+  getRequiredPlan,
+  getUserPlan,
+  markFreeDeliverableUsed,
+  planMeetsRequirement,
+  PLANS,
+} from '../services/subscriptionService.js';
 import { hasDealAccess } from '../services/dealAccessService.js';
 import { isGateFree } from '../../shared/gateRegistry.js';
 import { markDeliverableRefreshed } from '../services/dealFreshnessService.js';
 
 export const deliverablesRouter = Router();
+
+async function enqueueDeliverableGenerationOrInline(jobData: Parameters<typeof enqueueDeliverableGeneration>[0]) {
+  try {
+    return await enqueueDeliverableGeneration(jobData);
+  } catch (err: any) {
+    console.warn('Deliverable queue unavailable; continuing with inline generation:', err.message);
+    return null;
+  }
+}
 
 // ─── List ALL deliverables across all user's deals ─────────
 
@@ -174,11 +191,24 @@ deliverablesRouter.post('/deals/:dealId/deliverables', async (req, res) => {
     const deliverableType = menuItem.slug.replace(/-/g, '_');
     const access = await canGenerateDeliverable(userId, deliverableType);
     if (!access.allowed) {
+      let checkoutUrl: string | null = null;
+      const planInfo = PLANS[access.requiredPlan];
+
+      try {
+        checkoutUrl = (await createCheckout(userId, access.requiredPlan)).url;
+      } catch (checkoutErr: any) {
+        console.error('Create checkout for deliverable paywall failed:', checkoutErr.message);
+      }
+
       return res.status(402).json({
         error: 'Subscription required',
+        code: 'SUBSCRIPTION_REQUIRED',
         requiredPlan: access.requiredPlan,
         currentPlan: access.currentPlan,
-        message: `This deliverable requires a ${access.requiredPlan} subscription.`,
+        priceDisplay: planInfo.priceDisplay,
+        checkoutUrl,
+        subscribeEndpoint: '/api/stripe/subscribe',
+        message: `This deliverable requires ${planInfo.name} (${planInfo.priceDisplay}).`,
       });
     }
 
@@ -198,7 +228,7 @@ deliverablesRouter.post('/deals/:dealId/deliverables', async (req, res) => {
       deliverableType: menuItem.slug.replace(/-/g, '_'),
       modelPreference,
     };
-    const jobId = await enqueueDeliverableGeneration(jobData);
+    const jobId = await enqueueDeliverableGenerationOrInline(jobData);
 
     // Mark free deliverable as used if this was the user's one free deliverable
     if (access.isFreeDeliverable) {
@@ -264,7 +294,7 @@ deliverablesRouter.post('/deliverables/:id/regenerate', async (req, res) => {
       deliverableType: slug.replace(/-/g, '_'),
       modelPreference: req.body?.modelPreference,
     };
-    const jobId = await enqueueDeliverableGeneration(jobData);
+    const jobId = await enqueueDeliverableGenerationOrInline(jobData);
 
     // Inline fallback
     setImmediate(() => {
@@ -351,7 +381,7 @@ deliverablesRouter.post('/deliverables/:id/revise', async (req, res) => {
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 8000,
-      system: 'You are an expert M&A advisor revising a document. Return ONLY the revised markdown — no explanations, no preamble. Preserve all sections and structure unless the user asks to change them.',
+      system: 'You are an expert M&A deal-intelligence operator revising a document. Return ONLY the revised markdown — no explanations, no preamble. Preserve all sections and structure unless the user asks to change them. Present analysis, options, and implications; do not tell the user what to sign, accept, reject, offer, or file.',
       messages: [{
         role: 'user',
         content: `Revise this document based on the following instruction:\n\nInstruction: ${prompt}\n\nCurrent document:\n\n${currentContent}`,

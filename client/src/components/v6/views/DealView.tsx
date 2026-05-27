@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
-import { V6Section } from "../Canvas";
+import { V6Section } from "../Section";
 import { V6Icon } from "../icons";
 import { V6DocStatus, type DocStatusKind } from "../modes/cards";
 import type { FileScope, OpenTab, TabKind } from "../types";
@@ -415,6 +415,11 @@ export function V6DealView({
       openTab({ kind: "doc", title: `${dealName} · ${result.title || label}`, id: String(result.deliverableId) });
       void refreshDealArtifacts();
     } catch (e: any) {
+      if (e?.checkoutUrl) {
+        setActionNote(`Opening ${e.requiredPlan || "paid"} checkout${e.priceDisplay ? ` at ${e.priceDisplay}` : ""}.`);
+        window.location.href = e.checkoutUrl;
+        return;
+      }
       setActionError(e?.message || `Could not generate ${label}`);
     } finally {
       setBusyAction(null);
@@ -462,7 +467,7 @@ export function V6DealView({
         menuItemSlug,
         openTab,
         modelPreference,
-        requestedFrom: "deal_recommended_action",
+        requestedFrom: "deal_next_move",
         onNote: setActionNote,
       });
     } catch (e: any) {
@@ -488,8 +493,8 @@ export function V6DealView({
           deal: realActionDeal,
           openTab,
           title: move.title || dealName,
-          prompt: move.prompt || `On ${dealName}: ${move.title || "run the recommended next action"}.`,
-          requestedFrom: "deal_recommended_action",
+          prompt: move.prompt || `On ${dealName}: ${move.title || "run the next action option"}.`,
+          requestedFrom: "deal_next_move",
           modelPreference,
           onNote: setActionNote,
           onTalkToYulia,
@@ -498,7 +503,7 @@ export function V6DealView({
           void refreshDealArtifacts();
         }
       } catch (e: any) {
-        setActionError(e?.message || `Could not run ${move.title || "recommended action"}`);
+        setActionError(e?.message || `Could not run ${move.title || "next action"}`);
       } finally {
         setBusyAction(null);
       }
@@ -1129,7 +1134,7 @@ function buildDealIntelligence({
         ]
       : [
           "Yulia has not produced a sourced deal read yet.",
-          "Generate the market intelligence canvas before relying on this deal page for recommendations.",
+          "Generate the market intelligence canvas before relying on this deal page for next moves.",
           "Attach source files so Yulia can ground the next read in evidence.",
         ];
 
@@ -1164,8 +1169,8 @@ function buildDealIntelligence({
     : [
         {
           title: "Generate Yulia's deal read",
-          why: "Recommendations should come from Yulia's sourced deal brief, not static page copy.",
-          prompt: `On ${dealName}: generate the sourced deal read, then return the recommended next actions with action IDs.`,
+          why: "Next moves should come from Yulia's sourced deal brief, not static page copy.",
+          prompt: `On ${dealName}: generate the sourced deal read, then return next action options with action IDs.`,
           actionId: "run_market_intelligence" as const,
         },
         {
@@ -1176,8 +1181,8 @@ function buildDealIntelligence({
         },
         {
           title: "Ask Yulia what is missing",
-          why: "If the deal brief is unavailable, Yulia should explain the missing inputs before recommending a move.",
-          prompt: `On ${dealName}: what evidence do you need before you can recommend the next action?`,
+          why: "If the deal brief is unavailable, Yulia should explain the missing inputs before surfacing a move.",
+          prompt: `On ${dealName}: what evidence do you need before you can surface next action options?`,
           actionId: "ask_yulia" as const,
         },
       ];
@@ -1192,7 +1197,7 @@ function buildDealIntelligence({
     researchNeeded: dealBrief?.marketRead?.researchNeeded ?? (!dealBrief?.marketRead && !sampleMarket ? ["Generate a current market intelligence read for this deal."] : []),
     reviewLabel: dealBrief?.verdict?.label || verdict.eyebrow.replace("VERDICT · ", ""),
     reviewScore: dealBrief?.verdict?.score ?? verdict.fit,
-    reviewText: dealBrief?.verdict?.text || sampleVerdictWhy || (hasYuliaDealRead ? verdict.text : "Yulia needs a refreshed deal brief before the page should make a deal-specific recommendation."),
+    reviewText: dealBrief?.verdict?.text || sampleVerdictWhy || (hasYuliaDealRead ? verdict.text : "Yulia needs a refreshed deal brief before the page should show deal-specific next moves."),
     tax: dealBrief?.taxLegal?.tax || (hasYuliaDealRead || sampleMarket
       ? "Spot purchase-price allocation, rollover/earnout/seller-note timing, entity form, state tax, and working-cap effects before signing."
       : "Run Yulia's tax/legal structure read before treating this as deal-specific tax or legal issue spotting."),
@@ -1799,7 +1804,7 @@ function deriveVerdict(d: DealRow): { kind: "pursue" | "watch" | "pass"; eyebrow
   // The note from financials.notes (if any) becomes the verdict text.
   const note = (d.financials?.notes as string | undefined) ||
     (d.status === "closed" ? "Closed reference deal — useful for comps and pattern matching." :
-      d.status === "stalled" ? "Stalled mid-process. Yulia recommends a status check before further work." :
+      d.status === "stalled" ? "Stalled mid-process. Yulia flags a status check before further work." :
       "Active in your pipeline. Open files Yulia has produced for the latest read.");
   const lateActive = /[345]$/.test(d.current_gate) && d.status === "active";
   const stalled = d.status === "stalled";

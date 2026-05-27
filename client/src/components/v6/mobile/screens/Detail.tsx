@@ -167,7 +167,7 @@ function mobileAnalysisForAction(actionId?: string) {
 }
 
 function runMobileDealAction(move: MobileDealMove, context: MobileDealActionContext) {
-  const prompt = move.prompt || `On ${context.dealTitle}: ${move.title || "run Yulia's recommended next action"}.`;
+  const prompt = move.prompt || `On ${context.dealTitle}: ${move.title || "run Yulia's next action option"}.`;
   const analysis = mobileAnalysisForAction(move.actionId);
 
   if (analysis && context.onRunAnalysis) {
@@ -188,7 +188,7 @@ function runMobileDealAction(move: MobileDealMove, context: MobileDealActionCont
   }
 
   if (move.actionId === "optimize_scenario") {
-    context.onAskYulia(`${prompt} Use optimize_scenario on the active deal model and return the best path, negotiation asks, reps and warranties, diligence asks, and sign-off needs.`);
+    context.onAskYulia(`${prompt} Use optimize_scenario on the active deal model and return the strongest path candidates, negotiation-prep asks, reps and warranties, diligence asks, and sign-off needs.`);
     return;
   }
 
@@ -201,8 +201,8 @@ function defaultMobileNextMoves(dealTitle: string, isSampleDeal: boolean): Mobil
       {
         actionId: "run_market_intelligence",
         title: "Generate Yulia's deal read",
-        why: "Recommendations should come from Yulia's sourced deal brief, not local card copy.",
-        prompt: `On ${dealTitle}: generate the sourced deal read, then return recommended next actions with action IDs.`,
+        why: "Next moves should come from Yulia's sourced deal brief, not local card copy.",
+        prompt: `On ${dealTitle}: generate the sourced deal read, then return next action options with action IDs.`,
       },
       {
         actionId: "run_qoe_analysis",
@@ -213,8 +213,8 @@ function defaultMobileNextMoves(dealTitle: string, isSampleDeal: boolean): Mobil
       {
         actionId: "ask_yulia",
         title: "Ask Yulia what is missing",
-        why: "Yulia should explain the missing inputs before recommending a move.",
-        prompt: `On ${dealTitle}: what evidence do you need before you can recommend the next action?`,
+        why: "Yulia should explain the missing inputs before surfacing a move.",
+        prompt: `On ${dealTitle}: what evidence do you need before you can surface the next action options?`,
       },
     ];
   }
@@ -234,9 +234,9 @@ function defaultMobileNextMoves(dealTitle: string, isSampleDeal: boolean): Mobil
     },
     {
       actionId: "run_buyer_fit_analysis",
-      title: "Pull the buyer list",
-      why: "Rank strategic roll-ups and founder-friendly sponsors before broad outreach.",
-      prompt: `On ${dealTitle}: open buyer-fit analysis and rank the best buyer pools for this deal.`,
+      title: "Map the buyer universe",
+      why: "Compare strategic roll-ups and founder-friendly sponsors before broad outreach.",
+      prompt: `On ${dealTitle}: open buyer-fit analysis and compare the strongest buyer pools for this deal.`,
     },
   ];
 }
@@ -295,7 +295,7 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
   const verdictBlurb = dealBrief?.verdict?.text
     ?? deal?.verdictWhy
     ?? (numericId !== null
-      ? "Yulia needs a refreshed deal brief before this page should make a deal-specific recommendation."
+      ? "Yulia needs a refreshed deal brief before this page should show deal-specific next moves."
       : VERDICT_BLURB[verdict]);
   const readBullets = dealBrief?.marketRead?.bullets?.filter(Boolean).slice(0, 3) ?? [];
   const sourceGaps = dealBrief?.marketRead?.researchNeeded?.filter(Boolean).slice(0, 3) ?? [];
@@ -307,7 +307,7 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
       ? "Sample Yulia read"
       : "Yulia's read is needed";
   const reviewTitle = hasLiveYuliaRead ? "Yulia review" : isSampleDeal ? "Sample review" : "Generate Yulia's review";
-  const recommendationTitle = hasLiveYuliaRead ? "Yulia recommends" : isSampleDeal ? "Sample next moves" : "Ask Yulia to recommend";
+  const recommendationTitle = hasLiveYuliaRead ? "Yulia next moves" : isSampleDeal ? "Sample next moves" : "Ask Yulia for options";
 
   const onShare = async () => {
     const url = window.location.href;
@@ -399,7 +399,7 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
           {dealBrief?.marketRead?.headline
             || (isSampleDeal
               ? "Recast is real. Clean add-backs and durable customer tenure support the pursue call, but working-capital and source-material gaps still need review before documents move."
-              : "Yulia has not generated a sourced read for this deal yet. Run market intelligence or ask Yulia for the deal read so the page can show live analysis-backed recommendations.")}
+              : "Yulia has not generated a sourced read for this deal yet. Run market intelligence or ask Yulia for the deal read so the page can show live analysis-backed next moves.")}
         </p>
         {(readBullets.length > 0 || sourceGaps.length > 0) && (
           <div style={D.readBulletStack}>
@@ -428,7 +428,7 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
             onClick={() => runMobileDealAction({
               actionId: "run_market_intelligence",
               title: "Generate Yulia's sourced read",
-              prompt: `On ${dealTitle}: generate the sourced deal read, then return recommended next actions with action IDs.`,
+	              prompt: `On ${dealTitle}: generate the sourced deal read, then return next action options with action IDs.`,
             }, { dealId, dealTitle, onRunAnalysis, onAskYulia })}
             style={D.marketAskBtn}
           >
@@ -511,7 +511,7 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
             key={`${move.title || move.actionId || "move"}-${index}`}
             eyebrow={mobileActionEyebrow(move.actionId)}
             title={move.title || "Ask Yulia for the next move"}
-            sub={move.why || "Open the right analysis, document, or chat context from Yulia's recommendation."}
+	            sub={move.why || "Open the right analysis, document, or chat context from Yulia's next move."}
             last={index === rows.length - 1}
             onTap={() => runMobileDealAction(move, { dealId, dealTitle, onRunAnalysis, onAskYulia })}
           />

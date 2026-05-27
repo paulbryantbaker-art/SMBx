@@ -3,8 +3,9 @@ import { buildDefinitiveSpecManifest } from './definitiveSpecManifest.js';
 import { listDefinitiveMcpTools } from './definitiveMcp.js';
 import { getDefinitiveSubstrateArchitecturePlan } from './definitiveSubstrateArchitecturePlan.js';
 import { getDefinitiveToolSchemaMap } from './definitiveSchemas.js';
+import { DEFINITIVE_REMOTE_MCP_PROTOCOL_VERSION } from './definitiveRemoteMcpTransport.js';
 
-const MCP_DISCOVERY_PROTOCOL_VERSION = '2025-12-11';
+const MCP_DISCOVERY_PROTOCOL_VERSION = DEFINITIVE_REMOTE_MCP_PROTOCOL_VERSION;
 const MCP_SERVER_NAME = 'smbx-ai/diligence';
 const MCP_SERVER_TITLE = 'smbX DEFINITIVE Diligence Substrate';
 const MCP_SERVER_DESCRIPTION =
@@ -102,7 +103,7 @@ export function buildDefinitiveMcpServerCard(baseUrl?: string) {
     description: MCP_SERVER_DESCRIPTION,
     version: manifest.version,
     protocolVersion: MCP_DISCOVERY_PROTOCOL_VERSION,
-    serverUrl: `${origin}/api/definitive/tools/call`,
+    serverUrl: `${origin}/mcp`,
     serverInfo: {
       name: MCP_SERVER_NAME,
       title: MCP_SERVER_TITLE,
@@ -113,16 +114,22 @@ export function buildDefinitiveMcpServerCard(baseUrl?: string) {
       methodologyUri: DEFINITIVE_METHODOLOGY_URI,
     },
     transport: {
-      type: 'http',
-      status: 'internal_api_shape_oauth_ready',
+      type: 'streamable-http',
+      status: 'remote_mcp_ready_jwt_bearer',
       target: manifest.transport.target,
       endpoints: {
+        mcp: `${origin}${manifest.endpoints.mcpEndpoint}`,
+        oauthProtectedResource: `${origin}${manifest.endpoints.oauthProtectedResourceMcp}`,
+        oauthAuthorizationServer: `${origin}${manifest.endpoints.oauthAuthorizationServer}`,
+        serverJson: `${origin}${manifest.endpoints.mcpServerJson}`,
         toolsList: `${origin}${manifest.endpoints.toolsList}`,
         toolCall: `${origin}${manifest.endpoints.toolCall}`,
         serverCard: `${origin}/.well-known/mcp/server-card.json`,
         discoveryManifest: `${origin}/.well-known/mcp`,
         schemaRegistry: `${origin}/api/definitive/schemas`,
         wellKnownSchemaRegistry: `${origin}/.well-known/definitive-schemas.json`,
+        openApiSpec: `${origin}/api/definitive/openapi.json`,
+        assistantDistributionReadiness: `${origin}/api/definitive/assistant-distribution-readiness`,
       },
     },
     capabilities: {
@@ -147,7 +154,14 @@ export function buildDefinitiveMcpServerCard(baseUrl?: string) {
       modelSlot: `${origin}${manifest.endpoints.modelSlot}`,
       dealMechanicsModelSlot: `${origin}${manifest.endpoints.dealMechanicsModelSlot}`,
       registryPackage: `${origin}${manifest.endpoints.registryPackage}`,
+      connectorDistribution: `${origin}${manifest.endpoints.connectorDistribution}`,
+      assistantDistributionReadiness: `${origin}${manifest.endpoints.assistantDistributionReadiness}`,
+      openApiSpec: `${origin}${manifest.endpoints.openApiSpec}`,
       enterpriseAllowLists: `${origin}${manifest.endpoints.enterpriseAllowLists}`,
+      mcpEndpoint: `${origin}${manifest.endpoints.mcpEndpoint}`,
+      oauthProtectedResource: `${origin}${manifest.endpoints.oauthProtectedResourceMcp}`,
+      oauthAuthorizationServer: `${origin}${manifest.endpoints.oauthAuthorizationServer}`,
+      mcpServerJson: `${origin}${manifest.endpoints.mcpServerJson}`,
       schemaRegistry: `${origin}/api/definitive/schemas`,
       wellKnownSchemaRegistry: `${origin}/.well-known/definitive-schemas.json`,
       toolMetadataDoctrine: substrateArchitecture.toolMetadataDoctrine,
@@ -183,19 +197,32 @@ export function buildDefinitiveMcpWellKnownManifest(baseUrl?: string) {
     endpoints: [
       { type: 'server-card', url: `${origin}/.well-known/mcp/server-card.json`, auth: 'none' },
       { type: 'mcp-discovery', url: `${origin}/.well-known/mcp`, auth: 'none' },
+      { type: 'oauth-protected-resource-metadata', url: `${origin}${manifest.endpoints.oauthProtectedResourceMcp}`, auth: 'none' },
+      { type: 'oauth-authorization-server-metadata', url: `${origin}${manifest.endpoints.oauthAuthorizationServer}`, auth: 'none' },
+      { type: 'oauth-dynamic-client-registration', url: `${origin}${manifest.endpoints.oauthRegister}`, auth: 'none' },
+      { type: 'oauth-authorization', url: `${origin}${manifest.endpoints.oauthAuthorize}`, auth: 'smbx-user-consent' },
+      { type: 'oauth-token', url: `${origin}${manifest.endpoints.oauthToken}`, auth: 'authorization_code_pkce' },
+      { type: 'mcp-streamable-http', url: `${origin}${manifest.endpoints.mcpEndpoint}`, auth: 'bearer' },
+      { type: 'mcp-server-json', url: `${origin}${manifest.endpoints.mcpServerJson}`, auth: 'none' },
       { type: 'definitive-schema-registry', url: `${origin}/api/definitive/schemas`, auth: 'none' },
       { type: 'definitive-schema-registry-well-known', url: `${origin}/.well-known/definitive-schemas.json`, auth: 'none' },
+      { type: 'openapi-gpt-actions', url: `${origin}/api/definitive/openapi.json`, auth: 'none' },
       { type: 'definitive-manifest', url: `${origin}${manifest.endpoints.specManifest}`, auth: 'none' },
       { type: 'definitive-deal-runbooks', url: `${origin}${manifest.endpoints.dealRunbooks}`, auth: 'none' },
       { type: 'definitive-model-catalog', url: `${origin}${manifest.endpoints.modelCatalog}`, auth: 'none' },
+      { type: 'definitive-connector-distribution', url: `${origin}${manifest.endpoints.connectorDistribution}`, auth: 'none' },
+      { type: 'assistant-distribution-readiness', url: `${origin}${manifest.endpoints.assistantDistributionReadiness}`, auth: 'none' },
       { type: 'agent-card', url: `${origin}${manifest.endpoints.agentCard}`, auth: 'none' },
       { type: 'tools-list', url: `${origin}${manifest.endpoints.toolsList}`, auth: 'bearer' },
       { type: 'tool-call', url: `${origin}${manifest.endpoints.toolCall}`, auth: 'bearer' },
     ],
     transport: {
-      type: 'http',
-      status: 'internal_api_shape_oauth_ready',
+      type: 'streamable-http',
+      status: 'remote_mcp_ready_jwt_bearer',
       target: manifest.transport.target,
+      endpoint: `${origin}${manifest.endpoints.mcpEndpoint}`,
+      oauthProtectedResource: `${origin}${manifest.endpoints.oauthProtectedResourceMcp}`,
+      oauthAuthorizationServer: `${origin}${manifest.endpoints.oauthAuthorizationServer}`,
     },
     capabilities: {
       tools: true,

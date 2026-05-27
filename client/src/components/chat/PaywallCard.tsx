@@ -22,16 +22,16 @@ interface PaywallCardProps {
 
 const PLAN_DISPLAY: Record<string, { name: string; price: string; note: string }> = {
   // Solo — for self-funded searchers, principal sellers/buyers, sole-operator brokers
-  solo:       { name: 'Solo',       price: '$79/month',    note: 'One active deal, unlimited deliverables' },
+  solo:       { name: 'Solo',       price: '$79/month',    note: 'One active deal desk, unlimited deliverables, one supervised MCP/agent key' },
   // Pro — for IS, search funders, LMM advisors, solo bankers (most-chosen tier)
-  pro:        { name: 'Pro',        price: '$199/month',   note: 'Unlimited parallel deals, every capability' },
+  pro:        { name: 'Pro',        price: '$199/month',   note: 'Parallel deals, CIM, deal room, market discovery, three supervised MCP/agent keys' },
   // Team — boutique firms, small corp dev, small FO direct-investing
-  team:       { name: 'Team',       price: '$499/month',   note: '5 seats, shared workspace, shared deal vault' },
+  team:       { name: 'Team',       price: '$499/month',   note: 'Seats, shared workspace, shared deal vault, supervised agent workflows' },
   // Enterprise — corp dev at serial acquirers, mid-market PE, MFOs, large advisory
-  enterprise: { name: 'Enterprise', price: '$2,500/month', note: 'SSO, single-tenant, SOC 2, 99.9% SLA, API' },
+  enterprise: { name: 'Enterprise', price: '$2,500+/month', note: 'SSO, single-tenant, API controls, portfolio infrastructure, custom governance' },
   // Legacy plan keys mapped forward so existing paywall payloads still render
-  starter:      { name: 'Solo',       price: '$79/month',  note: 'One active deal, unlimited deliverables' },
-  professional: { name: 'Pro',        price: '$199/month', note: 'Unlimited parallel deals, every capability' },
+  starter:      { name: 'Solo',       price: '$79/month',  note: 'One active deal desk, unlimited deliverables, one supervised MCP/agent key' },
+  professional: { name: 'Pro',        price: '$199/month', note: 'Parallel deals, CIM, deal room, market discovery, three supervised MCP/agent keys' },
 };
 
 export default function PaywallCard({ paywall, dealId, onUnlocked }: PaywallCardProps) {

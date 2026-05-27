@@ -2807,7 +2807,7 @@ One page. No "rack of 4 cards." No editorial quote break. No stepwise demo. Stru
 1. **Hero row** — tight stat headline aimed at M&A pros + one-line proof ("Acme, Inc. · sell-side mandate · this is live"). CTA is *"Start a deal"* / *"Talk to Yulia."*
 2. **The live deal canvas** — dominates the page. Yulia's chat pane on the left scripts a sell-side engagement *in real time*, and the right side is the deliverable being built: add-back schedule → readiness matrix → CIM pages → teaser drop → IOI grid. The two are synced — every line Yulia says causes something to update on the right.
 3. **Supporting cross-section** — below the live canvas: "what Yulia just produced." A compact list of deliverables she made during the demo (CIM, valuation memo, buyer list, teaser, DD response pack, LOI review notes) with time-stamps showing minutes-not-weeks.
-4. **Economics punchline** — "$149/month vs. $150K retainer + 4% success fee." Clean, dark section. One number each.
+4. **Economics punchline** — "monthly software subscription, no transaction fee." Clean, dark section. One pricing doctrine.
 5. **CTA** — "Talk to Yulia. First deal is free."
 
 ## Visual language — so it doesn't feel like Home
@@ -2841,10 +2841,10 @@ Locked. Building now.
 **What I'll ship:**
 
 - **Auto-playing live deal** — loads, Yulia narrates, canvas assembles itself over ~45s, loops. Chapter rail lets you jump.
-- **Audience: M&A pros.** Every word aimed at brokers/bankers/PE/search-fund reps. Copy uses their vocabulary (CIM, add-backs, IOI, retainer, success fee, analyst hours). Business-owner framing is out.
+- **Audience: M&A pros.** Every word aimed at brokers/bankers/PE/search-fund reps. Copy uses their vocabulary (CIM, add-backs, IOI, analyst hours, diligence workflow). Business-owner framing is out.
 - **Visual language distinct from Home:** oxblood/burgundy accent, bone-paper canvas, charcoal chat pane. No gold, no §, no editorial-quote break, no 4-card rack.
 - **Signature move:** chat-pane narration and canvas are **synced** — each line Yulia posts causes the canvas to update. That's the demo.
-- **Economics punchline** at the bottom: $149/mo vs. $150K retainer + 4% success fee, deliverable-by-deliverable.
+- **Economics punchline** at the bottom: monthly software subscription, included credits, no deal-value or closing-contingent fee.
 - **CTA:** "Talk to Yulia. First deal is free."
 
 Starting now. I'll surface it when it's coherent.
@@ -3032,4 +3032,3 @@ _[tool: done]_
 Ok this does not follow Grok Apple App store DL at all!
 
 ## Assistant
-

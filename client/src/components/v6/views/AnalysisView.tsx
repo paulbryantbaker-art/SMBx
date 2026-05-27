@@ -305,8 +305,8 @@ export function V6AnalysisView({
   };
 
   const optimizeFallbackScenario = () => {
-    onTalkToYulia?.(`${scenarioPrompt()} Use optimize_scenario if this canvas is linked to a live analysis run; otherwise optimize from these visible assumptions and tell me the best path, negotiation asks, fallback positions, reps and warranties, diligence requests, professional signoffs, and work products to create next.`);
-    setActionNote("Yulia has the scenario context and will optimize the path from the visible assumptions.");
+    onTalkToYulia?.(`${scenarioPrompt()} Use optimize_scenario if this canvas is linked to a live analysis run; otherwise optimize from these visible assumptions and compare the strongest path candidates, negotiation-prep asks, fallback positions, reps and warranties, diligence requests, professional signoffs, and work products to create next.`);
+    setActionNote("Yulia has the scenario context and will compare path candidates from the visible assumptions.");
   };
 
   const effectiveAnalysisData = analysisData ?? snapshotData ?? undefined;
@@ -2210,7 +2210,7 @@ function ScenarioAssumptionPanel({
         return `${item.label}: ${formatAssumptionDisplay(item.key, original)} to ${formatAssumptionDisplay(item.key, nextValue)}`;
       }).join("; ")
       : "use the current saved/base assumptions";
-    onTalkToYulia?.(`${yuliaContext ? `${yuliaContext}\n\n` : ""}Optimize scenario "${scenarioLabel}" for the selected canvas scope: ${analysisTitle}. Changed assumptions: ${changedText}. If a tool can target the selected comparison scope, use it; if tool state only reports the host tab, do not ask me to switch tabs and do not treat that as a mismatch. Optimize from the selected deal facts above and the visible sliders. Infer whether I am buying, selling, raising, divesting, or advising from the deal context; if that is ambiguous, ask one concise clarifying question before recommending. Pick the best risk-adjusted scenario, explain what changed, and show the path through negotiation asks, fallback positions, reps and warranties, diligence requests, professional signoffs, and concrete work products Yulia should create or update.`);
+    onTalkToYulia?.(`${yuliaContext ? `${yuliaContext}\n\n` : ""}Optimize scenario "${scenarioLabel}" for the selected canvas scope: ${analysisTitle}. Changed assumptions: ${changedText}. If a tool can target the selected comparison scope, use it; if tool state only reports the host tab, do not ask me to switch tabs and do not treat that as a mismatch. Optimize from the selected deal facts above and the visible sliders. Infer whether I am buying, selling, raising, divesting, or advising from the deal context; if that is ambiguous, ask one concise clarifying question before comparing options. Show the strongest risk-adjusted scenario candidates, explain what changed, and map the user/professional approval path through negotiation-prep asks, fallback positions, reps and warranties, diligence requests, professional signoffs, and concrete work products Yulia should create or update.`);
   };
 
   return (
@@ -2912,7 +2912,7 @@ function ArtifactNeedsPayload({
         <div className="mono" style={IA.eyebrow}>CANVAS ARTIFACT · NEEDS DATA</div>
         <h1 style={IA.title}>{cleanTitle}</h1>
         <p style={IA.deckline}>
-          This tab opened without the actual analysis payload, so I am not going to fake a board with empty cards. Rerun the analysis and Yulia should send the full table, metrics, risks, and recommendations into this canvas.
+          This tab opened without the actual analysis payload, so I am not going to fake a board with empty cards. Rerun the analysis and Yulia should send the full table, metrics, risks, and option notes into this canvas.
         </p>
         <div style={IA.needsPayloadActions}>
           <button

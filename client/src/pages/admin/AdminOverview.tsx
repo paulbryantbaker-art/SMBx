@@ -42,8 +42,11 @@ const JOURNEY_COLORS: Record<string, string> = {
 
 const PLAN_COLORS: Record<string, string> = {
   free: '#5e5d59',
+  solo: YELLOW,
   starter: YELLOW,
+  pro: TERRA,
   professional: TERRA,
+  team: BLUE,
   enterprise: '#1a1918',
 };
 

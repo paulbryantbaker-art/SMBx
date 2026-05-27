@@ -1,7 +1,7 @@
 /**
- * Buyer List Generator
+ * Buyer Universe Generator
  *
- * AI-generated categorized buyer list matched to the business profile.
+ * AI-generated categorized buyer-universe map matched to the business profile.
  * Adapts buyer types by league and industry.
  */
 import Anthropic from '@anthropic-ai/sdk';
@@ -43,10 +43,10 @@ export async function generateBuyerList(input: BuyerListInput): Promise<string> 
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 4000,
-    system: `You are an M&A deal sourcing specialist generating a qualified buyer list. Output clean markdown. Be specific about buyer categories and what makes each a good fit. Do NOT invent specific company names — use descriptive profiles instead.`,
+    system: `You are an M&A deal-intelligence specialist generating a qualified buyer-universe map. Output clean markdown. Be specific about buyer categories and what makes each a good fit. Do NOT invent specific company names — use descriptive profiles instead. Do not contact buyers, choose a buyer for the user, or imply transaction-based compensation.`,
     messages: [{
       role: 'user',
-      content: `Generate a Qualified Buyer List for this business:
+      content: `Generate a Qualified Buyer Universe Map for this business:
 
 Business: ${input.business_name || 'Target Company'}
 Industry: ${input.industry || 'General'}
@@ -65,7 +65,7 @@ Buyer categories to include: ${buyerCategories}
 
 Structure as:
 
-# Qualified Buyer List — [Business Name]
+# Qualified Buyer Universe — [Business Name]
 
 ## Buyer Profile Summary
 Brief overview of the ideal buyer profile and why this business is attractive.
@@ -74,7 +74,7 @@ Brief overview of the ideal buyer profile and why this business is attractive.
 **Why they buy this**: Strategic rationale
 **Typical profile**: Description of the ideal buyer in this category
 **Estimated universe**: How many potential buyers exist
-**Approach strategy**: How to reach them
+**User-controlled approach option**: How the user could reach them
 **Fit score**: High / Medium / Low
 
 (Repeat for each category — at minimum 4 categories)
@@ -84,8 +84,8 @@ Brief overview of the ideal buyer profile and why this business is attractive.
 |----------|-----------|-------------------|----------|-----------|
 (Fill with data for each category)
 
-## Priority Outreach Order
-Ranked list of which buyer categories to approach first and why.
+## Outreach Priority Options
+Ranked buyer-category options for user review, with why each category may fit.
 
 ## Disqualification Criteria
 Red flags that indicate a buyer is not serious or not qualified.`,

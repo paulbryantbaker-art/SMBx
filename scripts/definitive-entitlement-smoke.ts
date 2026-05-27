@@ -16,6 +16,10 @@ import {
   checkV19Entitlement,
   readV19UsageMeter,
 } from '../server/services/v19EntitlementService.js';
+import {
+  canGenerateDeliverable,
+  markFreeDeliverableUsed,
+} from '../server/services/subscriptionService.js';
 
 const PRO_FIXTURE_EMAIL = 'definitive-entitlement-pro@smbx.test';
 const FREE_FIXTURE_EMAIL = 'definitive-entitlement-free@smbx.test';
@@ -35,12 +39,13 @@ try {
   const proUserId = await ensureUser(PRO_FIXTURE_EMAIL, 'pro');
   const freeUserId = await ensureUser(FREE_FIXTURE_EMAIL, 'free');
   await clearFixtureUsage(proUserId);
+  await resetFreeDeliverable(freeUserId);
 
   await test('Pro fixture resolves to the real Pro entitlement outside dev bypass', async () => {
     const meter = await readV19UsageMeter(proUserId);
     assertEqual(meter.plan, 'pro', 'meter plan');
-    assertEqual(meter.entitlements.monthlyApiCalls, 2500, 'pro api allowance');
-    assertEqual(meter.entitlements.monthlyCreditBudget, 2500, 'pro credit allowance');
+    assertEqual(meter.entitlements.monthlyApiCalls, 6000, 'pro api allowance');
+    assertEqual(meter.entitlements.monthlyCreditBudget, 6000, 'pro credit allowance');
   });
 
   await test('Pro API call is allowed before the allowance is exhausted', async () => {
@@ -54,7 +59,7 @@ try {
   });
 
   await test('Pro API call returns a credit-budget tollgate after allowance exhaustion', async () => {
-    await seedApiUsage(proUserId, 2500);
+    await seedApiUsage(proUserId, 6000);
     const check = await checkV19Entitlement(proUserId, 'api_call', {
       actionId: 'definitive.execute_model',
       toolName: 'execute_model',
@@ -64,9 +69,9 @@ try {
     assertEqual(check.tollgate?.code, 'credit_budget_required', 'budget tollgate code');
     assertEqual(check.tollgate?.state, 'credit_budget_required', 'budget tollgate state');
     assertEqual(check.tollgate?.currentPlan, 'pro', 'budget current plan');
-    assertEqual(check.tollgate?.usage?.used, 2500, 'budget usage used');
+    assertEqual(check.tollgate?.usage?.used, 6000, 'budget usage used');
     assertEqual(check.tollgate?.usage?.requested, 1, 'budget usage requested');
-    assertEqual(check.tollgate?.usage?.limit, 2500, 'budget usage limit');
+    assertEqual(check.tollgate?.usage?.limit, 6000, 'budget usage limit');
   });
 
   await test('Free API access returns a plan-scope tollgate outside dev bypass', async () => {
@@ -78,7 +83,22 @@ try {
     assertEqual(check.allowed, false, 'free api allowed');
     assertEqual(check.tollgate?.code, 'enterprise_scope_required', 'free api tollgate code');
     assertEqual(check.tollgate?.currentPlan, 'free', 'free api current plan');
-    assertEqual(check.tollgate?.requiredPlan, 'pro', 'free api required plan');
+    assertEqual(check.tollgate?.requiredPlan, 'solo', 'free api required plan');
+  });
+
+  await test('Free deliverable allowance is limited to launch-hook artifacts', async () => {
+    const firstValueLens = await canGenerateDeliverable(freeUserId, 'sell_valuation_report');
+    assertEqual(firstValueLens.allowed, true, 'free ValueLens allowed');
+    assertEqual(firstValueLens.isFreeDeliverable, true, 'free ValueLens consumes allowance');
+
+    const firstCim = await canGenerateDeliverable(freeUserId, 'sell_cim');
+    assertEqual(firstCim.allowed, false, 'free CIM blocked');
+    assertEqual(firstCim.requiredPlan, 'pro', 'CIM requires Pro');
+
+    await markFreeDeliverableUsed(freeUserId, 'sell_valuation_report');
+    const secondHook = await canGenerateDeliverable(freeUserId, 'buy_deal_scorecard');
+    assertEqual(secondHook.allowed, false, 'second free hook blocked');
+    assertEqual(secondHook.requiredPlan, 'solo', 'second hook upgrades to Solo');
   });
 } finally {
   if (originalTestMode === undefined) delete process.env.TEST_MODE;
@@ -126,6 +146,17 @@ async function clearFixtureUsage(userId: number) {
     DELETE FROM agency_usage_events
     WHERE user_id = ${userId}
       AND metadata->>'fixture_key' = ${FIXTURE_KEY}
+  `;
+}
+
+async function resetFreeDeliverable(userId: number) {
+  await sql`
+    UPDATE users
+    SET free_deliverable_used = false,
+        free_deliverable_type = NULL,
+        free_deliverable_at = NULL,
+        updated_at = NOW()
+    WHERE id = ${userId}
   `;
 }
 

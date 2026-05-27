@@ -72,13 +72,13 @@ function VerifyEmail({ onDone }: { onDone: () => void }) {
   );
 }
 
-import V6App from './components/v6/V6App';
 import Login from './pages/public/Login';
 import Signup from './pages/public/Signup';
 import Privacy from './pages/public/Privacy';
 import Terms from './pages/public/Terms';
 
 // Lazy-load secondary pages
+const V6App = lazy(() => import('./components/v6/V6App'));
 const SharedDocument = lazy(() => import('./pages/public/SharedDocument'));
 const SharedDocumentView = lazy(() => import('./pages/SharedDocumentView'));
 const AcceptInvite = lazy(() => import('./pages/public/AcceptInvite'));
@@ -261,7 +261,11 @@ export default function App() {
 
         {/* Catch-all → V6 Files Workspace (canonical 2026-05-01).
             Replaced V3App. All retired routes fall through here. */}
-        <Route><V6App /></Route>
+        <Route>
+          <Suspense fallback={<PageLoader />}>
+            <V6App />
+          </Suspense>
+        </Route>
       </Switch>
     </ChatProvider>
   );

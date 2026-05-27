@@ -56,6 +56,20 @@ CREATE TABLE IF NOT EXISTS closed_deals (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- 028_closed_deals created the synthetic comparable-transaction corpus first
+-- in many environments. If that table already exists, backfill the operational
+-- close/archive columns expected by close_deal instead of failing on indexes.
+ALTER TABLE closed_deals
+  ADD COLUMN IF NOT EXISTS deal_id INTEGER REFERENCES deals(id) ON DELETE CASCADE,
+  ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  ADD COLUMN IF NOT EXISTS closing_date TIMESTAMP,
+  ADD COLUMN IF NOT EXISTS journey_type VARCHAR(20),
+  ADD COLUMN IF NOT EXISTS business_name VARCHAR(255);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_closed_deals_deal_id_unique
+  ON closed_deals(deal_id)
+  WHERE deal_id IS NOT NULL;
+
 CREATE INDEX IF NOT EXISTS idx_closed_deals_user_id ON closed_deals(user_id);
 
 -- NOTE: journey_type column on deals is VARCHAR (no enum constraint) per

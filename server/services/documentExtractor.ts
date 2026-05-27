@@ -7,7 +7,7 @@
  * Returns structured financial data for deal context and field extraction.
  */
 import Anthropic from '@anthropic-ai/sdk';
-import * as XLSX from 'xlsx';
+import XLSX from 'xlsx';
 import fs from 'fs';
 import path from 'path';
 

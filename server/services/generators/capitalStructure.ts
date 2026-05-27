@@ -48,7 +48,7 @@ export interface CapStructReport {
     cumulative_equity_paid: number[];
     estimated_equity_value: number[];
   };
-  recommendations: string[];
+  decision_points: string[];
   generated_at: string;
 }
 
@@ -85,7 +85,7 @@ export function generateCapitalStructureAnalysis(input: CapStructInput): CapStru
   const lowerPrice = Math.round(input.deal_size * 0.9);
   scenarios.push({
     name: '10% Lower Purchase Price',
-    description: `What if you negotiate the price down to $${(lowerPrice / 100).toLocaleString()}?`,
+    description: `What if the purchase price case is $${(lowerPrice / 100).toLocaleString()}?`,
     structure: buildCapitalStack(toStackInput({ dealSize: lowerPrice })),
   });
 
@@ -140,23 +140,23 @@ export function generateCapitalStructureAnalysis(input: CapStructInput): CapStru
     return Math.round(equityInvested * appreciation + cumulativeEquity[i] * 0.3);
   });
 
-  // ─── Recommendations ────────────────────────────────────
-  const recs: string[] = [];
+  // ─── Decision points ────────────────────────────────────
+  const decisionPoints: string[] = [];
 
   if (primary.dscr !== null && primary.dscr < 1.25) {
-    recs.push('DSCR below threshold — negotiate purchase price down or increase equity injection');
+    decisionPoints.push('DSCR below threshold — model lower-price, larger-equity, and seller-note scenarios before treating the case as financeable.');
   }
   if (primary.dscr !== null && primary.dscr >= 1.5) {
-    recs.push('Strong DSCR — well-positioned for favorable lending terms');
+    decisionPoints.push('Strong DSCR — compare lender term sheets, covenants, reserves, and closing conditions rather than relying on headline rate alone.');
   }
   if (!input.seller_standby && input.seller_financing) {
-    recs.push('Negotiate full standby on seller note — counts as equity injection under 2025 SBA rules');
+    decisionPoints.push('Model full standby on seller note — it may count as equity injection under 2025 SBA rules if lender and counsel confirm.');
   }
   if (primary.sbaEligible) {
-    recs.push('SBA 7(a) eligible — this is typically the lowest-cost financing for deals under $5M');
+    decisionPoints.push('SBA 7(a) eligible — compare SBA, conventional, seller-financed, and blended cases on DSCR, collateral, guaranty, timing, and covenants.');
   }
   if (primary.tier >= 4) {
-    recs.push('At this deal size, engage an investment bank for financing syndication');
+    decisionPoints.push('At this deal size, financing syndication needs review with a licensed investment bank or financing advisor.');
   }
 
   return {
@@ -173,7 +173,7 @@ export function generateCapitalStructureAnalysis(input: CapStructInput): CapStru
       cumulative_equity_paid: cumulativeEquity,
       estimated_equity_value: estimatedValues,
     },
-    recommendations: recs,
+    decision_points: decisionPoints,
     generated_at: new Date().toISOString(),
   };
 }
