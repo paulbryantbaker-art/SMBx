@@ -793,8 +793,8 @@ const P: Record<string, CSSProperties> = {
     background: "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.24), transparent 44%), linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05))",
     border: "0.5px solid rgba(255,255,255,0.36)",
     boxShadow: "0 16px 34px -22px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.34)",
-    backdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
-    WebkitBackdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
+    backdropFilter: "blur(5px)",
+    WebkitBackdropFilter: "blur(5px)",
   },
   statLabel: {
     display: "block",
@@ -818,8 +818,8 @@ const P: Record<string, CSSProperties> = {
     background: "linear-gradient(180deg, rgba(255,255,255,0.86), rgba(255,255,255,0.66))",
     border: "1px solid rgba(180, 197, 221, 0.74)",
     boxShadow: "0 26px 76px rgba(41,61,92,0.12), 0 8px 18px rgba(26,34,51,0.07), inset 0 1px 0 rgba(255,255,255,0.76)",
-    backdropFilter: "blur(12px) saturate(150%)",
-    WebkitBackdropFilter: "blur(12px) saturate(150%)",
+    backdropFilter: "blur(12px)",
+    WebkitBackdropFilter: "blur(12px)",
   },
   gateStripHead: {
     display: "flex",
@@ -909,8 +909,8 @@ const P: Record<string, CSSProperties> = {
     background: "radial-gradient(circle at 12% 0%, rgba(255,255,255,.58), transparent 38%), linear-gradient(135deg, rgba(255,255,255,.78), rgba(239,246,255,.48))",
     border: "1px solid rgba(255,255,255,.62)",
     boxShadow: "0 22px 58px rgba(42,65,96,.11), inset 0 1px 0 rgba(255,255,255,.78)",
-    backdropFilter: "blur(22px) saturate(155%)",
-    WebkitBackdropFilter: "blur(22px) saturate(155%)",
+    backdropFilter: "blur(22px)",
+    WebkitBackdropFilter: "blur(22px)",
   },
   definitivePanel: {
     margin: "0 0 28px",

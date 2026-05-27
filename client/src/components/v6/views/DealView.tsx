@@ -2287,8 +2287,8 @@ const D: Record<string, CSSProperties> = {
     cursor: "pointer",
     border: "0.5px solid rgba(255,255,255,0.34)",
     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.36), 0 11px 28px rgba(23,31,45,0.22)",
-    backdropFilter: "blur(7px) saturate(155%)",
-    WebkitBackdropFilter: "blur(7px) saturate(155%)",
+    backdropFilter: "blur(7px)",
+    WebkitBackdropFilter: "blur(7px)",
   },
   fileGrid: {
     display: "grid",

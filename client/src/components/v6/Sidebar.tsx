@@ -620,8 +620,8 @@ const S: Record<string, CSSProperties> = {
     borderLeftColor: "rgba(255, 255, 255, 0.78)",
     borderRadius: 16,
     boxShadow: "18px 0 34px rgba(37, 52, 74, 0.13), 0 1px 0 rgba(255,255,255,0.72) inset",
-    backdropFilter: "blur(18px) saturate(160%)",
-    WebkitBackdropFilter: "blur(18px) saturate(160%)",
+    backdropFilter: "blur(18px)",
+    WebkitBackdropFilter: "blur(18px)",
     overflow: "hidden",
   },
   treePanel: {

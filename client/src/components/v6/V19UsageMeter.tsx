@@ -250,8 +250,8 @@ const ENTITLEMENT_FALLBACK: Record<Plan, {
 };
 
 const glass: CSSProperties = {
-  backdropFilter: "blur(22px) saturate(150%)",
-  WebkitBackdropFilter: "blur(22px) saturate(150%)",
+  backdropFilter: "blur(22px)",
+  WebkitBackdropFilter: "blur(22px)",
 };
 
 const S: Record<string, CSSProperties> = {

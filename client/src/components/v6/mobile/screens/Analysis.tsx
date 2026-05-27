@@ -769,8 +769,8 @@ const glassPanel: CSSProperties = {
   background: "radial-gradient(circle at 16% 0%, rgba(255,255,255,0.30), transparent 34%), linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.055))",
   border: "1px solid rgba(255,255,255,0.46)",
   boxShadow: "0 16px 34px -22px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10)",
-  backdropFilter: "blur(6px) saturate(155%) contrast(1.08)",
-  WebkitBackdropFilter: "blur(6px) saturate(155%) contrast(1.08)",
+  backdropFilter: "blur(6px)",
+  WebkitBackdropFilter: "blur(6px)",
 };
 
 const S: Record<string, CSSProperties> = {
@@ -793,8 +793,8 @@ const S: Record<string, CSSProperties> = {
     zIndex: 20,
     display: "grid",
     placeItems: "center",
-    backdropFilter: "blur(10px) saturate(170%) contrast(1.06)",
-    WebkitBackdropFilter: "blur(10px) saturate(170%) contrast(1.06)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
   },
   floatShare: {
     position: "fixed",
@@ -809,8 +809,8 @@ const S: Record<string, CSSProperties> = {
     zIndex: 20,
     display: "grid",
     placeItems: "center",
-    backdropFilter: "blur(10px) saturate(170%) contrast(1.06)",
-    WebkitBackdropFilter: "blur(10px) saturate(170%) contrast(1.06)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
   },
   hero: {
     position: "relative",

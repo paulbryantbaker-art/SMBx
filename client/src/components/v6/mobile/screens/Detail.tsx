@@ -933,8 +933,8 @@ const D: Record<string, CSSProperties> = {
     background:
       "radial-gradient(circle at 20% 0%, rgba(255,255,255,0.14), transparent 40%), " +
       "linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.018))",
-    backdropFilter: "blur(5px) saturate(138%) brightness(1.01)",
-    WebkitBackdropFilter: "blur(5px) saturate(138%) brightness(1.01)",
+    backdropFilter: "blur(5px)",
+    WebkitBackdropFilter: "blur(5px)",
     borderTop: "0.5px solid rgba(255,255,255,0.32)",
     boxShadow:
       "0 12px 28px -20px rgba(0,0,0,0.46), " +
@@ -973,8 +973,8 @@ const D: Record<string, CSSProperties> = {
     position: "absolute", zIndex: 10,
     width: 32, height: 32, borderRadius: "50%",
     background: "rgba(255,255,255,0.78)",
-    backdropFilter: "blur(10px) saturate(170%) contrast(1.06)",
-    WebkitBackdropFilter: "blur(10px) saturate(170%) contrast(1.06)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
     border: "none",
     display: "flex", alignItems: "center", justifyContent: "center",
     boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
@@ -1068,8 +1068,8 @@ const D: Record<string, CSSProperties> = {
     paddingLeft: 14,
     display: "flex", alignItems: "flex-end", gap: 8,
     boxShadow: "0 6px 20px -6px rgba(0,0,0,0.12)",
-    backdropFilter: "blur(10px) saturate(185%) contrast(1.06)",
-    WebkitBackdropFilter: "blur(10px) saturate(185%) contrast(1.06)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
   },
   chatInputField: {
     flex: 1, minWidth: 0,

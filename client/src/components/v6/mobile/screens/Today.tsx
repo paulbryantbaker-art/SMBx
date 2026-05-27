@@ -717,8 +717,8 @@ const H: Record<string, CSSProperties> = {
     background:
       "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.14), transparent 42%), " +
       "linear-gradient(180deg, rgba(255,255,255,0.038), rgba(255,255,255,0.003))",
-    backdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
-    WebkitBackdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    backdropFilter: "blur(3px)",
+    WebkitBackdropFilter: "blur(3px)",
     border: "0.5px solid rgba(255,255,255,0.34)",
     boxShadow:
       "0 10px 26px -18px rgba(0,0,0,0.44), " +
@@ -765,8 +765,8 @@ const CTA: Record<string, CSSProperties> = {
     background:
       "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.14), transparent 42%), " +
       "linear-gradient(180deg, rgba(255,255,255,0.038), rgba(255,255,255,0.003))",
-    backdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
-    WebkitBackdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    backdropFilter: "blur(3px)",
+    WebkitBackdropFilter: "blur(3px)",
     border: "0.5px solid rgba(255,255,255,0.34)",
     boxShadow:
       "0 10px 26px -18px rgba(0,0,0,0.44), " +
@@ -884,8 +884,8 @@ const MI: Record<string, CSSProperties> = {
     background:
       "radial-gradient(circle at 20% 0%, rgba(255,255,255,0.095), transparent 40%), " +
       "linear-gradient(180deg, rgba(255,255,255,0.032), rgba(255,255,255,0.003))",
-    backdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
-    WebkitBackdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    backdropFilter: "blur(3px)",
+    WebkitBackdropFilter: "blur(3px)",
     border: "0.5px solid rgba(255,255,255,0.32)",
     boxShadow:
       "0 12px 28px -20px rgba(0,0,0,0.46), " +
@@ -990,8 +990,8 @@ const E: Record<string, CSSProperties> = {
     background:
       "radial-gradient(circle at 20% 0%, rgba(255,255,255,0.095), transparent 40%), " +
       "linear-gradient(180deg, rgba(255,255,255,0.032), rgba(255,255,255,0.003))",
-    backdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
-    WebkitBackdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    backdropFilter: "blur(3px)",
+    WebkitBackdropFilter: "blur(3px)",
     border: "0.5px solid rgba(255,255,255,0.32)",
     boxShadow:
       "0 12px 28px -20px rgba(0,0,0,0.46), " +

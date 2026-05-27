@@ -26,6 +26,8 @@
     "test:definitive-mcp-e2e": "npx tsx scripts/definitive-mcp-e2e-fixtures.ts",
     "test:definitive-remote-mcp": "npx tsx scripts/definitive-remote-mcp-demo-agent.ts",
     "test:definitive-surface": "npx tsx scripts/definitive-surface-smoke.ts",
+    "test:v6-desktop-smoke": "npx tsx scripts/v6-desktop-smoke.ts",
+    "test:v6-mobile-smoke": "npx tsx scripts/v6-mobile-smoke.ts",
     "test:v19-models": "npx tsx scripts/test-v19-model-runtime.ts",
     "verify:v19-schema": "npx tsx scripts/verify-v19-schema.ts",
     "seed:demo-user": "node scripts/seed-demo-user-data.mjs",

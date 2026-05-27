@@ -3,6 +3,8 @@ dist
 .env
 test-results/
 playwright-report/
+testing/v6-desktop-smoke/latest/
+testing/v6-mobile-smoke/latest/
 uploads/
 .DS_Store
 .claude/

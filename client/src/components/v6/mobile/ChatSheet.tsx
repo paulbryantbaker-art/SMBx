@@ -372,8 +372,8 @@ const S: Record<string, CSSProperties> = {
     paddingLeft: 14,
     display: "flex", alignItems: "flex-end", gap: 8,
     boxShadow: "0 6px 20px -6px rgba(0,0,0,0.12)",
-    backdropFilter: "blur(10px) saturate(185%) contrast(1.06)",
-    WebkitBackdropFilter: "blur(10px) saturate(185%) contrast(1.06)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
   },
   composerInput: {
     flex: 1, minWidth: 0,

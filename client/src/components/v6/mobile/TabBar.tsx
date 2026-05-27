@@ -122,8 +122,8 @@ const B: Record<string, CSSProperties> = {
       "radial-gradient(circle at 16% 0%, rgba(255,255,255,0.16), rgba(255,255,255,0.00) 34%), " +
       "radial-gradient(circle at 82% 120%, rgba(110,150,190,0.12), rgba(110,150,190,0.00) 46%), " +
       "linear-gradient(180deg, rgba(42,43,60,0.48), rgba(16,18,28,0.34))",
-    backdropFilter: "blur(16px) saturate(190%) contrast(1.08) brightness(1.02)",
-    WebkitBackdropFilter: "blur(16px) saturate(190%) contrast(1.08) brightness(1.02)",
+    backdropFilter: "blur(16px)",
+    WebkitBackdropFilter: "blur(16px)",
     boxShadow:
       "0 18px 34px -16px rgba(0,0,0,0.42), " +
       "inset 0 0 0 0.5px rgba(255,255,255,0.28), " +

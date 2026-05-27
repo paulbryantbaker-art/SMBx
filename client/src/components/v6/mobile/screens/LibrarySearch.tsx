@@ -1827,8 +1827,8 @@ const S: Record<string, CSSProperties> = {
     background:
       "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.14), transparent 42%), " +
       "linear-gradient(180deg, rgba(255,255,255,0.038), rgba(255,255,255,0.003))",
-    backdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
-    WebkitBackdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    backdropFilter: "blur(3px)",
+    WebkitBackdropFilter: "blur(3px)",
     border: "0.5px solid rgba(255,255,255,0.34)",
     borderRadius: 16,
     boxShadow:
@@ -1868,8 +1868,8 @@ const S: Record<string, CSSProperties> = {
     background:
       "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.14), transparent 42%), " +
       "linear-gradient(180deg, rgba(255,255,255,0.038), rgba(255,255,255,0.003))",
-    backdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
-    WebkitBackdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    backdropFilter: "blur(3px)",
+    WebkitBackdropFilter: "blur(3px)",
     border: "0.5px solid rgba(255,255,255,0.34)",
     boxShadow:
       "0 10px 26px -18px rgba(0,0,0,0.44), " +
@@ -1965,8 +1965,8 @@ const S: Record<string, CSSProperties> = {
     background:
       "radial-gradient(circle at 20% 0%, rgba(255,255,255,0.095), transparent 40%), " +
       "linear-gradient(180deg, rgba(255,255,255,0.032), rgba(255,255,255,0.003))",
-    backdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
-    WebkitBackdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    backdropFilter: "blur(3px)",
+    WebkitBackdropFilter: "blur(3px)",
     border: "0.5px solid rgba(255,255,255,0.32)",
     boxShadow:
       "0 12px 28px -20px rgba(0,0,0,0.46), " +
@@ -2251,8 +2251,8 @@ const S: Record<string, CSSProperties> = {
     gap: 8,
     padding: "8px 14px",
     background: "rgba(255,255,255,0.22)",
-    backdropFilter: "blur(6px) saturate(155%) contrast(1.08)",
-    WebkitBackdropFilter: "blur(6px) saturate(155%) contrast(1.08)",
+    backdropFilter: "blur(6px)",
+    WebkitBackdropFilter: "blur(6px)",
     border: "0.5px solid rgba(255,255,255,0.34)",
     borderRadius: 999,
     fontSize: 13.5,
@@ -2381,8 +2381,8 @@ const S: Record<string, CSSProperties> = {
     height: 32,
     borderRadius: "50%",
     background: "rgba(255,255,255,0.82)",
-    backdropFilter: "blur(10px) saturate(170%) contrast(1.06)",
-    WebkitBackdropFilter: "blur(10px) saturate(170%) contrast(1.06)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
     border: "none",
     display: "grid",
     placeItems: "center",
@@ -2398,8 +2398,8 @@ const S: Record<string, CSSProperties> = {
     height: 32,
     borderRadius: "50%",
     background: "rgba(255,255,255,0.82)",
-    backdropFilter: "blur(10px) saturate(170%) contrast(1.06)",
-    WebkitBackdropFilter: "blur(10px) saturate(170%) contrast(1.06)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
     border: "none",
     display: "grid",
     placeItems: "center",
@@ -2473,8 +2473,8 @@ const S: Record<string, CSSProperties> = {
       "0 10px 24px -20px rgba(0,0,0,0.44), " +
       "inset 0 1px 0 rgba(255,255,255,0.30), " +
       "inset 0 -1px 0 rgba(255,255,255,0.04)",
-    backdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
-    WebkitBackdropFilter: "blur(3px) saturate(130%) brightness(1.01)",
+    backdropFilter: "blur(3px)",
+    WebkitBackdropFilter: "blur(3px)",
   },
   finderStatValue: {
     fontSize: 15,
@@ -2908,8 +2908,8 @@ const S: Record<string, CSSProperties> = {
     border: "0.5px solid rgba(255,255,255,0.58)",
     borderRadius: 999,
     background: "rgba(255,255,255,0.84)",
-    backdropFilter: "blur(10px) saturate(185%) contrast(1.06)",
-    WebkitBackdropFilter: "blur(10px) saturate(185%) contrast(1.06)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
     boxShadow: "0 16px 34px -18px rgba(26,34,51,0.44), inset 0 1px 0 rgba(255,255,255,0.72)",
     color: "var(--mb-ink)",
     display: "flex",

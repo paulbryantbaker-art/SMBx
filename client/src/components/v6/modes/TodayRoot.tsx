@@ -1454,8 +1454,8 @@ const T: Record<string, CSSProperties> = {
     background: whiteCard,
     border: "1px solid rgba(255,255,255,0.62)",
     boxShadow: paperShadow,
-    backdropFilter: "blur(18px) saturate(150%)",
-    WebkitBackdropFilter: "blur(18px) saturate(150%)",
+    backdropFilter: "blur(18px)",
+    WebkitBackdropFilter: "blur(18px)",
     overflow: "hidden",
   },
   memoryPanel: {

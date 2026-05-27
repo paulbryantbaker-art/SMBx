@@ -374,8 +374,8 @@ const P: Record<string, CSSProperties> = {
     background:
       "radial-gradient(circle at 20% 0%, rgba(255,255,255,0.14), transparent 40%), " +
       "linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.018))",
-    backdropFilter: "blur(5px) saturate(138%) brightness(1.01)",
-    WebkitBackdropFilter: "blur(5px) saturate(138%) brightness(1.01)",
+    backdropFilter: "blur(5px)",
+    WebkitBackdropFilter: "blur(5px)",
     borderTop: "0.5px solid rgba(255,255,255,0.32)",
     boxShadow:
       "0 12px 28px -20px rgba(0,0,0,0.46), " +

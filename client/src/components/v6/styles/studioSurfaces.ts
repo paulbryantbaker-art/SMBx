@@ -13,8 +13,8 @@ export const studioFormatTextures: Record<StudioFormatId, string> = {
 };
 
 export const studioGlassBackdrop: CSSProperties = {
-  backdropFilter: "blur(22px) saturate(155%)",
-  WebkitBackdropFilter: "blur(22px) saturate(155%)",
+  backdropFilter: "blur(22px)",
+  WebkitBackdropFilter: "blur(22px)",
 };
 
 export const studioLiquidGlass =
@@ -41,8 +41,8 @@ export const studioDarkLiquidGlassPill: CSSProperties = {
     "inset 0 1px 0 rgba(255,255,255,0.58), " +
     "inset 0 -1px 0 rgba(255,255,255,0.16), " +
     "inset 0 0 0 0.5px rgba(255,255,255,0.22)",
-  backdropFilter: "blur(12px) saturate(175%) contrast(1.08) brightness(1.06)",
-  WebkitBackdropFilter: "blur(12px) saturate(175%) contrast(1.08) brightness(1.06)",
+  backdropFilter: "blur(12px)",
+  WebkitBackdropFilter: "blur(12px)",
 };
 
 export const studioHeroWash =

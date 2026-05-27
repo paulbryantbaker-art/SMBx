@@ -687,8 +687,8 @@ const C: Record<string, CSSProperties> = {
     fontSize: 11.5, fontWeight: 700, color: "var(--m-on-surface)",
     cursor: "pointer",
     boxShadow: "0 10px 22px -18px rgba(31,44,69,0.32), inset 0 1px 0 rgba(255,255,255,0.74)",
-    backdropFilter: "blur(8px) saturate(170%) contrast(1.04)",
-    WebkitBackdropFilter: "blur(8px) saturate(170%) contrast(1.04)",
+    backdropFilter: "blur(8px)",
+    WebkitBackdropFilter: "blur(8px)",
     transition: "background 120ms ease, transform 120ms ease, box-shadow 120ms ease",
   },
   stagedCard: {

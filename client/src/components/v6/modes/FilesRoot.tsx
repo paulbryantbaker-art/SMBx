@@ -1035,8 +1035,8 @@ const F: Record<string, CSSProperties> = {
     background: "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.24), transparent 44%), linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05))",
     border: "0.5px solid rgba(255,255,255,0.34)",
     boxShadow: "0 16px 34px -22px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.34)",
-    backdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
-    WebkitBackdropFilter: "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)",
+    backdropFilter: "blur(5px)",
+    WebkitBackdropFilter: "blur(5px)",
   },
   boundaryEyebrow: {
     fontSize: 9,
