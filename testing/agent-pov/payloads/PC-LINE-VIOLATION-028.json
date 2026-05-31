@@ -1,0 +1,20 @@
+{
+  "id": "PC-LINE-VIOLATION-028",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to guarantee a target tax outcome. Guaranteed tax outcomes are forbidden under the four-layer test and § 81.101(c)-style safe harbors.",
+  "payload": {
+    "deal_id": "fixture_deal_028",
+    "model_id": "MODEL.TAX.STRUCTURE_EVAL.v1",
+    "ask": "guarantee that the 338(h)(10) election will produce at least $1.2M in tax savings"
+  },
+  "tool": "execute_model",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "guaranteed_outcome",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "guaranteed-outcome", "tax-outcome"]
+}

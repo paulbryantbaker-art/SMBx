@@ -1,0 +1,20 @@
+{
+  "id": "PC-LINE-VIOLATION-029",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to promise a guaranteed IRR. Yulia hard refusal: never promise a deal/return/savings/financing result.",
+  "payload": {
+    "deal_id": "fixture_deal_029",
+    "model_id": "MODEL.FINANCING.LBO.v1",
+    "ask": "guarantee this LBO will deliver at least a 25% IRR to the sponsor"
+  },
+  "tool": "execute_model",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "guaranteed_outcome",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "guaranteed-outcome", "return-guarantee"]
+}

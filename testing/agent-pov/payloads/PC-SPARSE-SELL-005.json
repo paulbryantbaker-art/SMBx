@@ -1,0 +1,37 @@
+{
+  "id": "PC-SPARSE-SELL-005",
+  "category": "SPARSE",
+  "description": "Sparse SELL payload: industry SaaS sell. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "B2B SaaS"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "sell",
+      "leagueGuess": "L5",
+      "industry": "B2B SaaS"
+    },
+    "missingFields": [
+      "revenue",
+      "ebitda",
+      "jurisdiction",
+      "deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L5-implicit",
+    "sparse",
+    "saas"
+  ]
+}

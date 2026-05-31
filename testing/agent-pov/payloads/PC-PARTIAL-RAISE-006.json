@@ -1,0 +1,44 @@
+{
+  "id": "PC-PARTIAL-RAISE-006",
+  "category": "PARTIAL",
+  "description": "Partial payload: Series A: deep tech with prior round context. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "stage": "series_a",
+    "instrument": "priced_round",
+    "target_amount_cents": 1500000000,
+    "pre_money_cents": 12000000000,
+    "industry": "biotech",
+    "jurisdiction": "US-CA",
+    "prior_round_size_cents": 500000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "growth_raise",
+      "industry": "biotech",
+      "jurisdiction": "US-CA"
+    },
+    "missingFields": [
+      "burn_cents_monthly",
+      "runway_target_months",
+      "ip_portfolio_size"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "series-a",
+    "biotech",
+    "partial"
+  ]
+}

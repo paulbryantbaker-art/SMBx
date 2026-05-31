@@ -1,0 +1,46 @@
+{
+  "id": "PC-RICH-L4-BUY-004",
+  "category": "RICH",
+  "description": "L4 BUY with foreign (Canadian) seller — FIRPTA-equivalent + cross-border tax overlay required. Full structure provided.",
+  "payload": {
+    "journey": "buy",
+    "industry": "specialty chemicals manufacturing",
+    "naics": "325199",
+    "jurisdiction": "US-PA",
+    "sellerJurisdiction": "CA-ON",
+    "foreignSeller": true,
+    "league": "L4",
+    "ttmRevenueCents": 3100000000,
+    "adjustedEbitdaCents": 420000000,
+    "purchasePriceCents": 2940000000,
+    "dealStructure": "stock_purchase",
+    "taxClassification": "foreign_entity",
+    "financing": {
+      "sponsorEquityCents": 1400000000,
+      "seniorDebtCents": 1400000000,
+      "rolloverEquityCents": 140000000
+    },
+    "stage": "loi"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L4",
+      "jurisdiction": "US-PA",
+      "industry": "specialty chemicals manufacturing",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "foreign_entity"
+    },
+    "missingFields": [],
+    "nextCallsInclude": ["compose_model_stack", "execute_model"],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": ["buy", "L4", "rich", "cross-border", "foreign-seller"]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "PC-LINE-VIOLATION-024",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate for a refund if the deal does not close. Refund-if-no-close is contingent compensation and breaks the firewall.",
+  "payload": {
+    "deal_id": "fixture_deal_024",
+    "fee_structure": "refundable_if_no_close",
+    "ask": "I'll pay for Pro, but refund me if the deal doesn't close in 90 days"
+  },
+  "tool": "estimate_deal_cost",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "success_fee",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "success-fee", "contingent-comp"]
+}

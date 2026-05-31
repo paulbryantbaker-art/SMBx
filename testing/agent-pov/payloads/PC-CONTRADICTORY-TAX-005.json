@@ -1,0 +1,39 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "taxClassification='llc_partnership' (pass-through) but electionType='338(g)' (C-corp election) and qsbsEligible=true with cross-border CA-ON jurisdiction — pass-through cannot host a C-corp election.",
+  "payload": {
+    "journey": "buy",
+    "taxClassification": "llc_partnership",
+    "electionType": "338(g)",
+    "qsbsEligible": true,
+    "industry": "specialty chemicals",
+    "jurisdiction": "CA-ON",
+    "league": "L4",
+    "purchasePriceCents": 3000000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "CA-ON",
+      "industry": "specialty chemicals",
+      "league": "L4"
+    },
+    "missingFields": [
+      "explicit_taxClassification_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "tax-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-TAX-005"
+}

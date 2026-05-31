@@ -1,0 +1,41 @@
+{
+  "id": "PC-PARTIAL-BUY-007",
+  "category": "PARTIAL",
+  "description": "Partial payload: L3 buy: B2B services with EBITDA + ask. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "marketing agency",
+    "target_ebitda_cents": 200000000,
+    "target_revenue_cents": 1200000000,
+    "target_jurisdiction": "US-NY",
+    "purchase_price_range": "8M-12M"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L3",
+      "industry": "marketing agency",
+      "jurisdiction": "US-NY"
+    },
+    "missingFields": [
+      "buyer_role",
+      "financing_plan"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L3",
+    "partial"
+  ]
+}

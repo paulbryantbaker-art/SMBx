@@ -1,0 +1,52 @@
+{
+  "category": "RICH",
+  "description": "L6 strategic divestiture — public co spinning off non-core unit, full carve-out context.",
+  "payload": {
+    "journey": "sell",
+    "sellerRole": "banker",
+    "industry": "consumer electronics components",
+    "naics": "334413",
+    "jurisdiction": "US-CA",
+    "league": "L6",
+    "ttmRevenueCents": 32000000000,
+    "adjustedEbitdaCents": 3600000000,
+    "multiYearPnlPresent": true,
+    "yearsOfHistory": 4,
+    "askingPriceCents": 25200000000,
+    "carveOut": true,
+    "tsaRequired": true,
+    "standaloneCostUpliftCents": 240000000,
+    "taxClassification": "c_corp",
+    "stage": "marketing"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "banker_led",
+      "league": "L6",
+      "jurisdiction": "US-CA",
+      "industry": "consumer electronics components",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L6",
+    "rich",
+    "carve-out"
+  ],
+  "id": "PC-RICH-L6-SELL-004"
+}

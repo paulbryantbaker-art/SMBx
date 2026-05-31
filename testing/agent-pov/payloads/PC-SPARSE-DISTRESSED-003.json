@@ -1,0 +1,34 @@
+{
+  "id": "PC-SPARSE-DISTRESSED-003",
+  "category": "SPARSE",
+  "description": "Sparse DISTRESSED payload: single signal secured debt trading at 55. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "secured_debt_price_cents": 55
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "distressPosture": "distressed"
+    },
+    "missingFields": [
+      "journey",
+      "industry",
+      "jurisdiction",
+      "revenue",
+      "deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "distressed",
+    "sparse",
+    "debt-prices"
+  ]
+}

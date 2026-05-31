@@ -8,3 +8,7 @@ testing/v6-mobile-smoke/latest/
 uploads/
 .DS_Store
 .claude/
+
+# Generated test-run artifacts (not source)
+testing/agent-pov/results/
+testing/definitive/results/

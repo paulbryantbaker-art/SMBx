@@ -1,0 +1,57 @@
+{
+  "category": "RICH",
+  "description": "PMI assessment / value-capture program 6 months post-close.",
+  "payload": {
+    "journey": "pmi",
+    "pmiType": "value_capture_program",
+    "pmiStage": "assessment",
+    "dealClosedDate": "2025-11-01",
+    "acquirerName": "Cardinal LMM Partners",
+    "targetName": "Greenfield Coatings",
+    "industry": "specialty chemicals",
+    "jurisdiction": "US-NC",
+    "league": "L4",
+    "targetTtmRevenueCents": 2200000000,
+    "targetEbitdaCents": 320000000,
+    "initialSynergyTargetCents": 80000000,
+    "synergyRealizedToDateCents": 28000000,
+    "workstreams": [
+      "pricing_optimization",
+      "procurement_consolidation",
+      "sg_and_a_rightsizing",
+      "sales_org_optimization"
+    ],
+    "taxClassification": "s_corp",
+    "stage": "assessment"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "pmi",
+      "subJourney": "pmi_assessment",
+      "league": "L4",
+      "jurisdiction": "US-NC",
+      "industry": "specialty chemicals",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "s_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "pmi",
+    "L4",
+    "rich",
+    "value_capture_program"
+  ],
+  "id": "PC-RICH-PMI-003"
+}

@@ -1,0 +1,50 @@
+{
+  "category": "RICH",
+  "description": "L2 banker-led sale of regional landscaping company with full marketing process + buyer list signal.",
+  "payload": {
+    "journey": "sell",
+    "sellerRole": "banker",
+    "industry": "commercial landscaping services",
+    "naics": "561730",
+    "jurisdiction": "US-NC",
+    "league": "L2",
+    "ttmRevenueCents": 460000000,
+    "sdeCents": 92000000,
+    "ebitdaCents": 85000000,
+    "multiYearPnlPresent": true,
+    "yearsOfHistory": 5,
+    "askingPriceCents": 320000000,
+    "bankerProcess": "limited_auction",
+    "buyersInvited": 25,
+    "stage": "marketing"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "banker_led",
+      "league": "L2",
+      "jurisdiction": "US-NC",
+      "industry": "commercial landscaping services",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L2",
+    "rich",
+    "banker-led"
+  ],
+  "id": "PC-RICH-L2-SELL-003"
+}

@@ -1,0 +1,49 @@
+{
+  "id": "PC-PARTIAL-DISTRESSED-002",
+  "category": "PARTIAL",
+  "description": "Partial payload: Distressed sell: out-of-court restructuring. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "retail",
+    "jurisdiction": "US-NY",
+    "revenue_cents": 8000000000,
+    "ebitda_cents": -500000000,
+    "deal_type": "oocr",
+    "signals": {
+      "cashRunwayDays": 75
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "distressed_restructuring",
+      "league": "L4",
+      "industry": "retail",
+      "jurisdiction": "US-NY",
+      "distressPosture": "distressed"
+    },
+    "missingFields": [
+      "secured_debt_cents",
+      "lender_consent_status",
+      "forbearance_in_place"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "distressed",
+    "sell",
+    "L5",
+    "partial",
+    "oocr",
+    "G28"
+  ]
+}

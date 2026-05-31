@@ -1,0 +1,48 @@
+{
+  "id": "PC-PARTIAL-DISTRESSED-009",
+  "category": "PARTIAL",
+  "description": "Partial payload: Distressed Subchapter V eligibility check. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "small services",
+    "jurisdiction": "US-AZ",
+    "revenue_cents": 350000000,
+    "total_debt_cents": 500000000,
+    "seller_role": "principal",
+    "signals": {
+      "cashRunwayDays": 60
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "distressed_restructuring",
+      "league": "L2",
+      "industry": "small services",
+      "jurisdiction": "US-AZ",
+      "distressPosture": "distressed"
+    },
+    "missingFields": [
+      "ebitda_cents",
+      "noncontingent_debt_cents",
+      "subchapter_v_election"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "distressed",
+    "sell",
+    "partial",
+    "subchapter-v",
+    "G28"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "PC-SPARSE-CROSS-002",
+  "category": "SPARSE",
+  "description": "Sparse CROSS-DOMAIN payload: IP-heavy SaaS signal triggers IP + tax overlay. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "asset_class": "ip_heavy",
+    "industry": "enterprise SaaS"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "assetClass": "ip_heavy",
+      "industry": "enterprise SaaS"
+    },
+    "missingFields": [
+      "journey",
+      "ip_jurisdictions",
+      "revenue",
+      "licensing_revenue_cents"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "cross-domain",
+    "sparse",
+    "ip-heavy"
+  ]
+}

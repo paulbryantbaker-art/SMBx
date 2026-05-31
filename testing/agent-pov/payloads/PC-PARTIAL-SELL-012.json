@@ -1,0 +1,46 @@
+{
+  "id": "PC-PARTIAL-SELL-012",
+  "category": "PARTIAL",
+  "description": "Partial payload: L4 sell: logistics services with foreign owner. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "logistics services",
+    "jurisdiction": "US-NJ",
+    "revenue_cents": 1900000000,
+    "ebitda_cents": 480000000,
+    "seller_role": "principal",
+    "foreign_seller": true,
+    "taxClassification": "foreign_entity"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "principal_seller",
+      "league": "L3",
+      "industry": "logistics services",
+      "jurisdiction": "US-NJ",
+      "taxClassification": "foreign_entity"
+    },
+    "missingFields": [
+      "asking_price_cents",
+      "real_property_pct",
+      "amount_realized_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L4",
+    "partial",
+    "firpta"
+  ]
+}

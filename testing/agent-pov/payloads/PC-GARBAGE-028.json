@@ -1,0 +1,19 @@
+{
+  "id": "PC-GARBAGE-028",
+  "category": "GARBAGE",
+  "description": "Oversized: compose_model_stack called with a long triggered_gates array AND a non-coerceable monetary field (ebitda). Substrate's payload-shape validator must reject with structured 400 field-level guidance.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "manufacturing",
+    "triggered_gates": ["G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9", "G10"],
+    "ebitda": "long-array-fixture-but-bad-money"
+  },
+  "tool": "compose_model_stack",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "oversized", "long-array", "and-bad-money"]
+}

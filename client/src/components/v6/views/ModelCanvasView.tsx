@@ -77,26 +77,27 @@ export function V6ModelCanvasView({
 
   if (!tab) {
     return (
-      <div className="m-fade-up m-page-flow" style={S.shell}>
-        <section className="m-card" style={S.empty}>
-          <div className="mono" style={S.eyebrow}>MODEL CANVAS · NOT LOADED</div>
+      <div className="wk-content" style={S.shell}>
+        <div className="wkcard" style={S.empty}>
+          <div style={S.eyebrow}>MODEL CANVAS · NOT LOADED</div>
           <h1 style={S.title}>{title}</h1>
           <p style={S.body}>
             The canvas tab is here, but the in-memory model state is not loaded in this browser session. Ask Yulia to reopen it from the saved deal state or model run.
           </p>
-          <button className="m-btn filled" type="button" onClick={() => onTalkToYulia?.(prompt)}>
+          <button className="wkbtn dark" type="button" onClick={() => onTalkToYulia?.(prompt)}>
             Ask Yulia to reopen
           </button>
-        </section>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="m-fade-up m-page-flow" style={S.shell}>
-      <section className="m-card" style={S.header}>
+    <div className="wk-content" style={S.shell}>
+      {/* Header card */}
+      <div className="wkcard" style={S.header}>
         <div style={S.headerCopy}>
-          <div className="mono" style={S.eyebrow}>MODEL CANVAS · ITERATIVE</div>
+          <div style={S.eyebrow}>MODEL CANVAS · ITERATIVE</div>
           <h1 style={S.title}>{tab.title}</h1>
           <p style={S.body}>
             This is a working model, not a one-time answer. Adjust EV, EBITDA, debt, working capital, tax, and terms; each change is saved as a version Yulia can read back into the deal loop.
@@ -105,34 +106,39 @@ export function V6ModelCanvasView({
         <div style={S.headerActions}>
           <div style={S.statusStack}>
             <div style={S.versionPill}>v{tab.versionNumber}</div>
-            <div className="mono" style={S.hashPill}>
+            <div style={S.hashPill}>
               {latestSavedRun ? shortHash(latestSavedRun.outputHash) : readbackLabel(readbackState)}
             </div>
-            <div className="mono" style={{ ...S.freshnessPill, ...freshnessTone(latestFreshness?.status) }}>
+            <div style={{ ...S.freshnessPill, ...freshnessTone(latestFreshness?.status) }}>
               {latestFreshness?.statusLabel || (latestSavedRun ? "checking" : "live")}
             </div>
           </div>
           <div style={S.actionStack}>
-            <button className="m-btn filled m-glass-control" style={S.darkGlassButton} type="button" onClick={() => onTalkToYulia?.(optimizePrompt)}>
+            <button className="wkbtn dark" type="button" onClick={() => onTalkToYulia?.(optimizePrompt)}>
               Ask Yulia to optimize
             </button>
-            <button className="m-btn outlined" type="button" onClick={() => onTalkToYulia?.(prompt)}>
+            <button className="wkbtn" type="button" onClick={() => onTalkToYulia?.(prompt)}>
               Compare versions
             </button>
           </div>
         </div>
-      </section>
+      </div>
 
-      <section style={S.grid}>
-        <div className="m-card" style={S.modelSurface}>
+      <div style={S.grid}>
+        {/* Main model surface */}
+        <div className="wkcard" style={S.modelSurface}>
           <ModelRenderer tabId={tabId} onTalkToYulia={onTalkToYulia} />
         </div>
-        <aside className="m-card" style={S.rail}>
-          <div className="mono" style={S.eyebrow}>VERSION TRAIL</div>
+
+        {/* Rail / version history */}
+        <aside className="wkcard" style={S.rail}>
+          <div style={S.eyebrow}>VERSION TRAIL</div>
           <h2 style={S.railTitle}>Scenario history</h2>
           <div style={S.railHint}>
             Local changes stay fast. Saved runs become audit-stamped artifacts that Yulia and external agents can read back later.
           </div>
+
+          {/* Dependency / rerun triggers */}
           <div style={S.dependencyBox}>
             <div style={S.dependencyTitle}>Rerun if</div>
             <div style={S.triggerList}>
@@ -141,12 +147,13 @@ export function V6ModelCanvasView({
               ))}
             </div>
           </div>
+
+          {/* Version rows */}
           <div style={S.versionStack}>
             {versionRows.map(version => (
               <button
                 key={`${tab.id}-${version.versionNumber}-${version.createdAt}`}
                 type="button"
-                className="m-state"
                 style={S.versionRow}
                 onClick={() => {
                   const freshness = buildModelFreshnessEnvelope({
@@ -172,7 +179,9 @@ export function V6ModelCanvasView({
           </div>
 
           <div style={S.divider} />
-          <div className="mono" style={S.eyebrow}>SAVED RUNS</div>
+
+          {/* Saved runs */}
+          <div style={S.eyebrow}>SAVED RUNS</div>
           <h2 style={S.railTitleSmall}>Agent readback</h2>
           <div style={S.savedStack}>
             {savedRuns.slice(0, 6).map(run => {
@@ -188,9 +197,9 @@ export function V6ModelCanvasView({
                 <article key={`${run.executionId}-${run.outputHash}`} style={S.savedRun}>
                   <div style={S.savedHeader}>
                     <span style={S.savedVersion}>v{run.clientVersionNumber}</span>
-                    <span className="mono" style={S.savedHash}>{shortHash(run.outputHash)}</span>
+                    <span style={S.savedHash}>{shortHash(run.outputHash)}</span>
                   </div>
-                  <div className="mono" style={{ ...S.savedFreshness, ...freshnessTone(freshness.status) }}>
+                  <div style={{ ...S.savedFreshness, ...freshnessTone(freshness.status) }}>
                     {freshness.statusLabel}
                   </div>
                   <div style={S.savedMeta}>{formatSavedTime(run.createdAt)}</div>
@@ -200,7 +209,7 @@ export function V6ModelCanvasView({
                   )}
                   <div style={S.savedActions}>
                     <button
-                      className="m-btn ghost"
+                      className="wkbtn"
                       type="button"
                       style={S.miniButton}
                       onClick={() => onTalkToYulia?.(`Read saved model execution ${run.executionId} (${tab.title} v${run.clientVersionNumber}, output hash ${run.outputHash}). Freshness: ${freshness.statusLabel}. ${freshness.rerunPrompt} Recompute action: ${run.recomputePlan?.actionKey || run.recomputePlan?.surfaceActionId || "execute_model"}. Explain what changed, what this unlocks in the deal lifecycle, and what model input should be tested next.`)}
@@ -208,7 +217,7 @@ export function V6ModelCanvasView({
                       Explain
                     </button>
                     <button
-                      className="m-btn ghost"
+                      className="wkbtn"
                       type="button"
                       style={S.miniButton}
                       onClick={() => {
@@ -219,7 +228,7 @@ export function V6ModelCanvasView({
                       Rerun
                     </button>
                     <button
-                      className="m-btn ghost"
+                      className="wkbtn"
                       type="button"
                       style={S.miniButton}
                       disabled={!Object.keys(assumptions).length}
@@ -242,7 +251,7 @@ export function V6ModelCanvasView({
             )}
           </div>
         </aside>
-      </section>
+      </div>
     </div>
   );
 }
@@ -303,23 +312,23 @@ function summarizeFreshness(freshness: ModelFreshnessEnvelope): string {
 function freshnessTone(status?: ModelFreshnessEnvelope["status"] | null): CSSProperties {
   if (status === "needs_rerun") {
     return {
-      background: "rgba(188, 98, 34, 0.13)",
-      borderColor: "rgba(188, 98, 34, 0.26)",
-      color: "#8A3D12",
+      background: "var(--st-risk-bg)",
+      borderColor: "var(--st-risk-dot)",
+      color: "var(--st-risk-fg)",
     };
   }
   if (status === "superseded") {
     return {
-      background: "rgba(84, 106, 147, 0.12)",
-      borderColor: "rgba(84, 106, 147, 0.22)",
-      color: "var(--m-on-surface-mid)",
+      background: "var(--st-missing-bg)",
+      borderColor: "var(--st-missing-dot)",
+      color: "var(--st-missing-fg)",
     };
   }
   if (status === "current") {
     return {
-      background: "rgba(61, 124, 94, 0.13)",
-      borderColor: "rgba(61, 124, 94, 0.24)",
-      color: "#2F6C50",
+      background: "var(--st-good-bg)",
+      borderColor: "var(--st-good-dot)",
+      color: "var(--st-good-fg)",
     };
   }
   return {};
@@ -378,27 +387,31 @@ const S: Record<string, CSSProperties> = {
     justifyItems: "end",
     gap: 6,
   },
+  /* eyebrow: mono, ink-3, tight caps — inline var() since no .pg-eyebrow equiv for mono */
   eyebrow: {
-    color: "var(--m-on-surface-mid)",
+    fontFamily: "var(--font-mono)",
+    color: "var(--ink-3)",
     fontSize: 10,
     fontWeight: 700,
     letterSpacing: "0.14em",
+    textTransform: "uppercase",
   },
   title: {
     margin: "5px 0 8px",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     fontFamily: "var(--font-display)",
     fontSize: "clamp(28px, 4vw, 48px)",
     lineHeight: 1,
     letterSpacing: "-0.03em",
   },
   body: {
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-2)",
     margin: 0,
     fontSize: 14,
     lineHeight: 1.55,
     maxWidth: 740,
   },
+  /* version pill: accent-soft bg, accent-strong text, mono */
   versionPill: {
     minWidth: 54,
     height: 38,
@@ -406,11 +419,13 @@ const S: Record<string, CSSProperties> = {
     display: "grid",
     placeItems: "center",
     paddingInline: 14,
-    background: "var(--m-primary-container)",
-    color: "var(--m-on-primary-container)",
+    background: "var(--accent-soft)",
+    color: "var(--accent-strong)",
+    fontFamily: "var(--font-mono)",
     fontWeight: 800,
     fontVariantNumeric: "tabular-nums",
   },
+  /* hash pill: flat surface-2 bg, line border, mono */
   hashPill: {
     minWidth: 76,
     minHeight: 24,
@@ -418,12 +433,14 @@ const S: Record<string, CSSProperties> = {
     display: "grid",
     placeItems: "center",
     padding: "0 10px",
-    background: "rgba(46,92,138,0.1)",
-    color: "var(--m-on-surface-mid)",
-    border: "1px solid rgba(46,92,138,0.12)",
+    background: "var(--surface-2)",
+    color: "var(--ink-3)",
+    border: "1px solid var(--line)",
+    fontFamily: "var(--font-mono)",
     fontSize: 10,
     letterSpacing: 0,
   },
+  /* freshness pill: base style; freshnessTone() merges status-specific --st-* colours */
   freshnessPill: {
     minWidth: 76,
     minHeight: 24,
@@ -431,19 +448,12 @@ const S: Record<string, CSSProperties> = {
     display: "grid",
     placeItems: "center",
     padding: "0 10px",
-    background: "rgba(46,92,138,0.08)",
-    color: "var(--m-on-surface-mid)",
-    border: "1px solid rgba(46,92,138,0.12)",
+    background: "var(--surface-2)",
+    color: "var(--ink-3)",
+    border: "1px solid var(--line)",
+    fontFamily: "var(--font-mono)",
     fontSize: 10,
     letterSpacing: 0,
-  },
-  darkGlassButton: {
-    color: "#FFFFFF",
-    border: "1px solid rgba(255,255,255,0.28)",
-    background:
-      "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.2), transparent 38%), linear-gradient(135deg, rgba(26,34,51,0.92), rgba(26,34,51,0.72) 58%, rgba(46,92,138,0.54))",
-    boxShadow:
-      "0 16px 32px -22px rgba(0,0,0,0.62), inset 0 1px 0 rgba(255,255,255,0.32), inset 0 -1px 0 rgba(255,255,255,0.08)",
   },
   grid: {
     display: "grid",
@@ -451,6 +461,7 @@ const S: Record<string, CSSProperties> = {
     gap: 18,
     alignItems: "start",
   },
+  /* modelSurface: zero padding so ModelRenderer fills flush */
   modelSurface: {
     padding: 0,
     overflow: "hidden",
@@ -463,30 +474,33 @@ const S: Record<string, CSSProperties> = {
   railTitle: {
     margin: "4px 0 14px",
     fontSize: 22,
-    color: "var(--m-on-surface)",
+    fontWeight: 600,
+    color: "var(--ink)",
     letterSpacing: "-0.03em",
   },
   railTitleSmall: {
     margin: "4px 0 10px",
     fontSize: 17,
-    color: "var(--m-on-surface)",
+    fontWeight: 600,
+    color: "var(--ink)",
     letterSpacing: "-0.03em",
   },
   railHint: {
     margin: "-4px 0 14px",
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     fontSize: 12,
     lineHeight: 1.45,
   },
+  /* dependency box: flat surface-2, hairline border */
   dependencyBox: {
-    border: "1px solid var(--m-outline-var)",
-    borderRadius: 16,
+    border: "1px solid var(--line)",
+    borderRadius: 12,
     padding: 12,
     marginBottom: 14,
-    background: "rgba(255,255,255,0.62)",
+    background: "var(--surface-2)",
   },
   dependencyTitle: {
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     fontSize: 12,
     fontWeight: 800,
     marginBottom: 8,
@@ -499,8 +513,10 @@ const S: Record<string, CSSProperties> = {
   triggerChip: {
     borderRadius: 999,
     padding: "5px 8px",
-    background: "rgba(46,92,138,0.08)",
-    color: "var(--m-on-surface-mid)",
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
+    color: "var(--ink-2)",
+    fontFamily: "var(--font-mono)",
     fontSize: 11,
     lineHeight: 1,
   },
@@ -508,59 +524,65 @@ const S: Record<string, CSSProperties> = {
     display: "grid",
     gap: 10,
   },
+  /* version row button: flat surface bg, hairline border, no glass */
   versionRow: {
     width: "100%",
     display: "flex",
     gap: 12,
     alignItems: "center",
     textAlign: "left",
-    border: "1px solid var(--m-outline-var)",
-    borderRadius: 16,
-    background: "rgba(255,255,255,0.72)",
+    border: "1px solid var(--line)",
+    borderRadius: 12,
+    background: "var(--surface)",
     padding: 12,
     cursor: "pointer",
+    boxShadow: "0 1px 2px rgba(25,24,19,.06)",
   },
+  /* version index badge: accent bg, on-accent text, mono */
   versionIndex: {
     width: 44,
     height: 44,
-    borderRadius: 14,
+    borderRadius: 10,
     display: "grid",
     placeItems: "center",
-    background: "var(--m-primary)",
-    color: "var(--m-on-primary)",
+    background: "var(--accent)",
+    color: "var(--on-accent)",
+    fontFamily: "var(--font-mono)",
     fontWeight: 800,
     fontVariantNumeric: "tabular-nums",
     flex: "0 0 auto",
+    fontSize: 13,
   },
   versionText: {
     display: "grid",
     gap: 3,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     fontSize: 13,
   },
   emptyRail: {
-    border: "1px dashed var(--m-outline-var)",
-    borderRadius: 16,
+    border: "1px dashed var(--line-2)",
+    borderRadius: 12,
     padding: 14,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-3)",
     fontSize: 13,
     lineHeight: 1.45,
   },
   divider: {
     height: 1,
-    background: "var(--m-outline-var)",
+    background: "var(--line)",
     margin: "18px 0",
-    opacity: 0.7,
   },
   savedStack: {
     display: "grid",
     gap: 10,
   },
+  /* saved run card: flat surface bg, hairline border */
   savedRun: {
-    border: "1px solid var(--m-outline-var)",
-    borderRadius: 16,
-    background: "rgba(255,255,255,0.78)",
+    border: "1px solid var(--line)",
+    borderRadius: 12,
+    background: "var(--surface)",
     padding: 12,
+    boxShadow: "0 1px 2px rgba(25,24,19,.06)",
   },
   savedHeader: {
     display: "flex",
@@ -568,44 +590,53 @@ const S: Record<string, CSSProperties> = {
     justifyContent: "space-between",
     gap: 8,
   },
+  /* saved version label: mono, ink, tabular */
   savedVersion: {
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
+    fontFamily: "var(--font-mono)",
     fontWeight: 800,
     fontVariantNumeric: "tabular-nums",
   },
+  /* saved hash: mono, ink-3, small */
   savedHash: {
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-3)",
+    fontFamily: "var(--font-mono)",
     fontSize: 10,
     letterSpacing: 0,
   },
   savedMeta: {
     marginTop: 4,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-3)",
     fontSize: 12,
   },
+  /* freshness badge inside saved run — base; freshnessTone() merges --st-* */
   savedFreshness: {
     width: "max-content",
     borderRadius: 999,
     padding: "5px 8px",
     marginTop: 8,
-    border: "1px solid rgba(46,92,138,0.12)",
-    background: "rgba(46,92,138,0.08)",
-    color: "var(--m-on-surface-mid)",
+    border: "1px solid var(--line)",
+    background: "var(--surface-2)",
+    color: "var(--ink-3)",
+    fontFamily: "var(--font-mono)",
     fontSize: 10,
     letterSpacing: 0,
   },
+  /* saved outputs: mono for all figures */
   savedOutputs: {
     marginTop: 8,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
+    fontFamily: "var(--font-mono)",
     fontSize: 12,
     lineHeight: 1.4,
   },
+  /* freshness reason callout: risk-soft bg */
   freshnessReason: {
     marginTop: 8,
-    borderRadius: 12,
+    borderRadius: 10,
     padding: "8px 10px",
-    background: "rgba(188, 98, 34, 0.08)",
-    color: "var(--m-on-surface-var)",
+    background: "var(--st-risk-bg)",
+    color: "var(--ink-2)",
     fontSize: 12,
     lineHeight: 1.35,
   },

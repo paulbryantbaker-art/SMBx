@@ -1,0 +1,46 @@
+{
+  "category": "AMBIGUOUS",
+  "description": "Buy-side: provides diligence trackers AND closing checklist AND post-close integration plan — diligence vs closing vs PMI bleed.",
+  "payload": {
+    "journey": "buy",
+    "files": [
+      {
+        "name": "diligence_tracker.xlsx"
+      },
+      {
+        "name": "closing_checklist.xlsx"
+      },
+      {
+        "name": "pmi_plan.pdf"
+      }
+    ],
+    "industry": "B2B services",
+    "jurisdiction": "US-TX",
+    "league": "L4"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-TX",
+      "industry": "B2B services",
+      "league": "L4"
+    },
+    "missingFields": [
+      "deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "ambiguous",
+    "stage"
+  ],
+  "id": "PC-AMBIGUOUS-STAGE-005"
+}

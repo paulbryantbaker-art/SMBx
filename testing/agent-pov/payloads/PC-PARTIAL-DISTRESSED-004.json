@@ -1,0 +1,47 @@
+{
+  "id": "PC-PARTIAL-DISTRESSED-004",
+  "category": "PARTIAL",
+  "description": "Partial payload: Distressed: covenant breach + low FCCR. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "instrument": "amendment",
+    "covenant_breach": true,
+    "ebitda_cents": 600000000,
+    "total_debt_cents": 4500000000,
+    "industry": "industrial services",
+    "signals": {
+      "covenantAmendment": true
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "capital_structure_or_liability_management",
+      "industry": "industrial services",
+      "distressPosture": "stressed_or_liability_management"
+    },
+    "missingFields": [
+      "jurisdiction",
+      "covenant_type",
+      "lender_pool",
+      "amendment_consideration_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "distressed",
+    "raise",
+    "partial",
+    "covenant",
+    "G29"
+  ]
+}

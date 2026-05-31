@@ -1,0 +1,45 @@
+{
+  "id": "PC-PARTIAL-SELL-023",
+  "category": "PARTIAL",
+  "description": "Partial payload: L7 sell: business services with RWI. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "business services",
+    "jurisdiction": "US-IL",
+    "revenue_cents": 95000000000,
+    "ebitda_cents": 14000000000,
+    "seller_role": "banker_led",
+    "rwi_intent": true,
+    "asking_price_cents": 110000000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "banker_led",
+      "league": "L6",
+      "industry": "business services",
+      "jurisdiction": "US-IL"
+    },
+    "missingFields": [
+      "rwi_retention_cents",
+      "auction_round",
+      "customer_concentration"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L7",
+    "partial",
+    "rwi"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "id": "PC-PARTIAL-BUY-016",
+  "category": "PARTIAL",
+  "description": "Partial payload: L5 buy: precision manufacturing add-on. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "precision manufacturing",
+    "target_revenue_cents": 8000000000,
+    "target_ebitda_cents": 1000000000,
+    "target_jurisdiction": "US-OH",
+    "buyer_role": "strategic_acquirer",
+    "sponsorType": "strategic"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "strategic_tuck_in",
+      "league": "L4",
+      "industry": "precision manufacturing",
+      "jurisdiction": "US-OH"
+    },
+    "missingFields": [
+      "purchase_price_range",
+      "synergy_estimate_cents",
+      "integration_plan"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L5",
+    "partial",
+    "strategic"
+  ]
+}

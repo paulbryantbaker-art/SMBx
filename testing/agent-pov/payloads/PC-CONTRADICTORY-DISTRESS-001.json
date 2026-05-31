@@ -1,0 +1,44 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "Healthy financials (positive EBITDA $5M, FCCR 2.4, 18mo runway, secured debt at par) but deal narrative flags a chapter 11 / 363 stalking-horse process — substrate should refuse to silently pick healthy vs distressed posture.",
+  "payload": {
+    "journey": "buy",
+    "industry": "B2B services",
+    "dealType": "363 stalking-horse distressed restructuring acquisition",
+    "jurisdiction": "US-TX",
+    "league": "L4",
+    "ttmRevenueCents": 1800000000,
+    "ebitdaCents": 500000000,
+    "adjustedEbitdaCents": 500000000,
+    "signals": {
+      "fccr": 2.4,
+      "cashRunwayDays": 540,
+      "securedDebtTradingPriceCents": 98
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-TX",
+      "industry": "B2B services",
+      "league": "L4"
+    },
+    "missingFields": [
+      "explicit_distressPosture_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "distress-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-DISTRESS-001"
+}

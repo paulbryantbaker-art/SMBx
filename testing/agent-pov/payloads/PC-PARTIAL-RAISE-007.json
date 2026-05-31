@@ -1,0 +1,43 @@
+{
+  "id": "PC-PARTIAL-RAISE-007",
+  "category": "PARTIAL",
+  "description": "Partial payload: Series B priced: full growth metrics. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "stage": "series_b",
+    "instrument": "priced_round",
+    "arr_cents": 1800000000,
+    "target_amount_cents": 4000000000,
+    "pre_money_cents": 35000000000,
+    "industry": "vertical SaaS",
+    "growth_rate": 1.2
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "growth_raise",
+      "industry": "vertical SaaS"
+    },
+    "missingFields": [
+      "jurisdiction",
+      "gross_margin",
+      "net_dollar_retention"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "series-b",
+    "priced",
+    "partial"
+  ]
+}

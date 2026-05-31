@@ -1,0 +1,38 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "jurisdiction='US-CA' but cfiusReview=true with no foreign-buyer signal — CFIUS needs a non-US acquirer.",
+  "payload": {
+    "journey": "buy",
+    "jurisdiction": "US-CA",
+    "cfiusReview": true,
+    "industry": "aerospace components",
+    "league": "L6",
+    "ttmRevenueCents": 18000000000,
+    "buyerJurisdiction": "US-DE"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-CA",
+      "industry": "aerospace components",
+      "league": "L6"
+    },
+    "missingFields": [
+      "explicit_jurisdiction_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "jurisdiction-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-JURISDICTION-003"
+}

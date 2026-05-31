@@ -1,0 +1,40 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "taxClassification='pass_through' but electionType='338(h)(10)' alongside stock_purchase with §754 omitted — pass-through cannot host a C-corp-only election.",
+  "payload": {
+    "journey": "buy",
+    "taxClassification": "pass_through",
+    "electionType": "338(h)(10)",
+    "dealStructure": "stock_purchase",
+    "section754Election": false,
+    "industry": "B2B services",
+    "jurisdiction": "US-DE",
+    "league": "L4",
+    "purchasePriceCents": 2400000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-DE",
+      "industry": "B2B services",
+      "league": "L4"
+    },
+    "missingFields": [
+      "explicit_taxClassification_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "tax-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-TAX-004"
+}

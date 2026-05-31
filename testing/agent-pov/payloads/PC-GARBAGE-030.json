@@ -1,0 +1,17 @@
+{
+  "id": "PC-GARBAGE-030",
+  "category": "GARBAGE",
+  "description": "Junk-value variant of the oversized-update fixture: an update_deal_payload that pairs a deal_id with a non-coerceable monetary field (revenue). Substrate's payload-shape validator must reject with structured 400 and field-level guidance.",
+  "payload": {
+    "deal_id": "fixture_deal_garbage_030",
+    "revenue": "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ-not-a-number"
+  },
+  "tool": "update_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "oversized", "long-string-money"]
+}

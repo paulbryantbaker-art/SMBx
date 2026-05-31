@@ -1,0 +1,49 @@
+{
+  "category": "RICH",
+  "description": "Mezzanine raise to fund acquisition — full structure with warrants.",
+  "payload": {
+    "journey": "raise",
+    "raiseType": "debt_mezz",
+    "instrument": "subordinated_note_with_warrants",
+    "industry": "B2B services",
+    "jurisdiction": "US-DE",
+    "league": "L5",
+    "raiseAmountCents": 2500000000,
+    "tenor": "7_years",
+    "cashCouponPct": 11,
+    "pikCouponPct": 2,
+    "warrantCoveragePct": 5,
+    "stage": "commitment",
+    "taxClassification": "llc_partnership"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "debt_raise",
+      "league": "L5",
+      "jurisdiction": "US-DE",
+      "industry": "B2B services",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "llc_partnership"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "L5",
+    "rich",
+    "debt_mezz"
+  ],
+  "id": "PC-RICH-RAISE-008"
+}

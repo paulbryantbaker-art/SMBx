@@ -1,0 +1,46 @@
+{
+  "id": "PC-PARTIAL-DISTRESSED-006",
+  "category": "PARTIAL",
+  "description": "Partial payload: Distressed: LME exchange offer signal. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "instrument": "exchange_offer",
+    "existing_debt_cents": 12000000000,
+    "new_debt_cents": 8000000000,
+    "industry": "media",
+    "cash_runway_days": 180,
+    "signals": {
+      "exchangeOffer": true
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "capital_structure_or_liability_management",
+      "industry": "media",
+      "distressPosture": "stressed_or_liability_management"
+    },
+    "missingFields": [
+      "jurisdiction",
+      "required_lender_pct",
+      "participating_lender_pct"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "distressed",
+    "raise",
+    "partial",
+    "lme",
+    "G29"
+  ]
+}

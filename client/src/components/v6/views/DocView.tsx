@@ -51,9 +51,9 @@ interface DeliverableVersion {
 }
 
 const COMMENTS: Comment[] = [
-  { who: "JM", color: "var(--m-tertiary-container)", txt: "Earn-out should be tied to gross margin not EBITDA — too easy to game.", time: "1d" },
-  { who: "Y",  color: "var(--m-primary-container)",  txt: "Working cap target looks light vs trailing 12 ($487k avg). Suggest $460k.", time: "today" },
-  { who: "JM", color: "var(--m-tertiary-container)", txt: "Agree. Update before sending.", time: "2h" },
+  { who: "JM", color: "var(--surface-2)", txt: "Earn-out should be tied to gross margin not EBITDA — too easy to game.", time: "1d" },
+  { who: "Y",  color: "var(--accent-soft)",  txt: "Working cap target looks light vs trailing 12 ($487k avg). Suggest $460k.", time: "today" },
+  { who: "JM", color: "var(--surface-2)", txt: "Agree. Update before sending.", time: "2h" },
 ];
 
 interface Version { v: string; date: string; current?: boolean }
@@ -249,7 +249,7 @@ export function V6DocView({
   };
 
   return (
-    <div className="m-fade-up m-page-flow" style={V.shell}>
+    <div className="wk-content" style={V.shell}>
       <article style={V.article}>
         {/* Toolbar */}
         <div style={V.toolbar}>
@@ -257,7 +257,6 @@ export function V6DocView({
             <Fragment key={b.key}>
               {(i === 1 || i === 4) && <div style={V.toolbarDivider} />}
               <button
-                className="m-state"
                 aria-label={b.label}
                 type="button"
                 onClick={() => applyToolbar(b.key)}
@@ -271,7 +270,7 @@ export function V6DocView({
             </Fragment>
           ))}
           <div style={{ flex: 1 }} />
-          <button className="m-btn tonal" type="button" onClick={saveDraft} disabled={saveBusy} style={V.saveButton}>
+          <button className="wkbtn primary" type="button" onClick={saveDraft} disabled={saveBusy} style={V.saveButton}>
             {saveBusy ? "Saving..." : "Save"}
           </button>
           <span className="mono" style={V.savedAt}>{savedAt}</span>
@@ -280,17 +279,18 @@ export function V6DocView({
         {toolbarNote && <div style={V.toolbarNote}>{toolbarNote}</div>}
 
         {/* Body */}
-        <div style={{ fontFamily: "Iowan Old Style, Charter, Georgia, serif", color: "var(--m-on-surface)" }}>
+        <div style={{ fontFamily: "Iowan Old Style, Charter, Georgia, serif", color: "var(--ink)" }}>
           <div className="mono" style={V.docEyebrow}>{eyebrowLabel}</div>
           <h1 style={V.docH1}>{docTitle}</h1>
 
           {loading && (
-            <p className="mono" style={{ fontSize: 11, color: "var(--m-on-surface-mid)", letterSpacing: "0.1em" }}>LOADING DELIVERABLE…</p>
+            <p className="mono" style={{ fontSize: 11, color: "var(--ink-3)", letterSpacing: "0.1em" }}>LOADING DELIVERABLE…</p>
           )}
           {error && (
             <div style={{
               padding: "10px 12px", borderRadius: 8, marginBottom: 16,
-              background: "var(--m-pass-container)", color: "#4A1410", fontSize: 12.5,
+              background: "var(--st-risk-bg)", color: "var(--st-risk-fg)", fontSize: 12.5,
+              border: "1px solid var(--line)",
             }}>
               Couldn&rsquo;t load deliverable ({error}). Showing reference layout.
             </div>
@@ -353,7 +353,7 @@ export function V6DocView({
 
       {/* Right rail */}
       <aside style={V.rail}>
-        <div className="m-card" style={V.yuliaWatching}>
+        <div className="wkcard" style={V.yuliaWatching}>
           <div className="mono" style={V.yuliaWatchEyebrow}>YULIA · LIVE</div>
           <div style={V.yuliaWatchTitle}>{yuliaWatch.title}</div>
           <div style={V.yuliaWatchBody}>
@@ -361,18 +361,18 @@ export function V6DocView({
           </div>
         </div>
 
-        <div className="m-card" style={{ padding: "14px 16px" }}>
+        <div className="wkcard" style={{ padding: "14px 16px" }}>
           <div className="mono" style={V.commentsEyebrow}>DOCUMENT ACTIONS</div>
           <div style={V.actionStack}>
             <button
-              className="m-btn filled"
+              className="wkbtn primary"
               type="button"
               onClick={() => onTalkToYulia?.(`Read ${docTitle}${numericId ? ` (deliverable ${numericId})` : ""} and tell me what needs my attention, what is ready, and what should not move without counsel or CPA sign-off.`)}
             >
               Ask Yulia
             </button>
             <button
-              className="m-btn tonal"
+              className="wkbtn"
               type="button"
               disabled={actionBusy === "request_review"}
               onClick={() => { void runDocumentAction("request_review", "Stage a review request for this document. Decide the right reviewer role from the document context and ask me to confirm before notifying anyone."); }}
@@ -380,7 +380,7 @@ export function V6DocView({
               {actionBusy === "request_review" ? "Staging..." : "Request review"}
             </button>
             <button
-              className="m-btn tonal"
+              className="wkbtn"
               type="button"
               disabled={actionBusy === "file_to_data_room"}
               onClick={() => { void runDocumentAction("file_to_data_room", "Stage filing this deliverable into the correct data-room folder. Confirm the folder, permissions, and whether it is an artifact, drafted legal doc, review item, or executed record before moving it."); }}
@@ -388,7 +388,7 @@ export function V6DocView({
               {actionBusy === "file_to_data_room" ? "Staging..." : "File to data room"}
             </button>
             <button
-              className="m-btn tonal"
+              className="wkbtn"
               type="button"
               disabled={actionBusy === "share_document"}
               onClick={() => { void runDocumentAction("share_document", "Stage sharing this document. Ask me for the recipient, access level, expiry, and whether NDA or passkey protection is required before sending anything."); }}
@@ -396,7 +396,7 @@ export function V6DocView({
               {actionBusy === "share_document" ? "Staging..." : "Share safely"}
             </button>
             <button
-              className="m-btn outlined"
+              className="wkbtn"
               type="button"
               disabled={actionBusy === "regenerate"}
               onClick={() => { void regenerateDraft(); }}
@@ -406,7 +406,7 @@ export function V6DocView({
           </div>
         </div>
 
-        <div className="m-card" style={{ padding: "14px 16px" }}>
+        <div className="wkcard" style={{ padding: "14px 16px" }}>
           <div className="mono" style={V.commentsEyebrow}>COMMENTS · {normalizedComments.length}</div>
           {!showSample && !loading && normalizedComments.length === 0 && (
             <div style={V.emptyRailText}>No comments yet. Ask Yulia to review the document or route it to a reviewer.</div>
@@ -418,7 +418,7 @@ export function V6DocView({
                 display: "flex", gap: 10,
                 marginBottom: i === normalizedComments.length - 1 ? 0 : 10,
                 paddingBottom: i === normalizedComments.length - 1 ? 0 : 10,
-                borderBottom: i === normalizedComments.length - 1 ? "none" : "1px solid var(--m-outline-var)",
+                borderBottom: i === normalizedComments.length - 1 ? "none" : "1px solid var(--line)",
               }}
             >
               <div style={{ ...V.commentAvatar, background: c.color }}>{c.who}</div>
@@ -430,7 +430,7 @@ export function V6DocView({
           ))}
         </div>
 
-        <div className="m-card" style={{ padding: "14px 16px" }}>
+        <div className="wkcard" style={{ padding: "14px 16px" }}>
           <div className="mono" style={V.versionsEyebrow}>VERSION HISTORY</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {normalizedVersions.map(v => (
@@ -439,7 +439,7 @@ export function V6DocView({
                 style={{
                   display: "flex", justifyContent: "space-between", alignItems: "center",
                   fontSize: 11.5,
-                  color: v.current ? "var(--m-on-surface)" : "var(--m-on-surface-mid)",
+                  color: v.current ? "var(--ink)" : "var(--ink-2)",
                 }}
               >
                 <span style={{ fontWeight: v.current ? 600 : 400 }}>
@@ -484,7 +484,7 @@ function commentToRailComment(comment: LiveComment): Comment {
     .join("") || "T";
   return {
     who: initials,
-    color: comment.resolved ? "var(--m-pursue-container)" : "var(--m-primary-container)",
+    color: comment.resolved ? "var(--surface-2)" : "var(--accent-soft)",
     txt: comment.section_ref ? `${comment.section_ref}: ${comment.content}` : comment.content,
     time: fmtRelative(comment.created_at),
     resolved: comment.resolved,
@@ -572,73 +572,79 @@ const V: Record<string, CSSProperties> = {
     boxSizing: "border-box",
   },
   article: {
-    background: "var(--m-surface-on-light)",
-    borderRadius: 16,
-    boxShadow: "var(--m-elev-1)",
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
+    borderRadius: 14,
+    boxShadow: "0 1px 2px rgba(25,24,19,.06)",
     padding: "56px 64px",
     minHeight: 600,
   },
   toolbar: {
     display: "flex", alignItems: "center", gap: 4, marginBottom: 32,
-    paddingBottom: 16, borderBottom: "1px solid var(--m-outline-var)",
+    paddingBottom: 16, borderBottom: "1px solid var(--line)",
     marginLeft: -64, marginRight: -64,
     paddingLeft: 64, paddingRight: 64,
     marginTop: -56, paddingTop: 18,
   },
   toolbarDivider: {
-    width: 1, height: 18, background: "var(--m-outline-var)", margin: "0 6px",
+    width: 1, height: 18, background: "var(--line)", margin: "0 6px",
   },
   toolbarBtn: {
     all: "unset",
     padding: "5px 10px", borderRadius: 6,
-    fontSize: 12, color: "var(--m-on-surface-var)", cursor: "pointer",
+    fontSize: 12, color: "var(--ink-3)", cursor: "pointer",
   },
   saveButton: {
     height: 28,
     padding: "0 12px",
     marginRight: 8,
+    fontSize: ".82rem",
   },
   toolbarNote: {
     margin: "-22px 0 24px",
     padding: "9px 11px",
     borderRadius: 10,
-    background: "rgba(225, 242, 235, 0.9)",
-    color: "#246B50",
+    background: "var(--st-good-bg)",
+    color: "var(--st-good-fg)",
     fontSize: 12,
+    border: "1px solid var(--line)",
     fontFamily: "var(--font-body)",
   },
   savedAt: {
-    fontSize: 10.5, color: "var(--m-on-surface-mid)", letterSpacing: "0.1em",
+    fontSize: 10.5, color: "var(--ink-3)", letterSpacing: "0.1em",
+    fontFamily: "var(--font-mono)",
   },
   docEyebrow: {
-    fontSize: 10, color: "var(--m-on-surface-mid)",
+    fontSize: 10, color: "var(--ink-3)",
     letterSpacing: "0.14em", fontWeight: 600, marginBottom: 12,
   },
   docH1: {
     fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 30,
     letterSpacing: "-0.02em", margin: "0 0 20px", lineHeight: 1.15,
     textWrap: "balance",
+    color: "var(--ink)",
   },
   docMeta: {
-    fontSize: 13.5, color: "var(--m-on-surface-mid)",
+    fontSize: 13.5, color: "var(--ink-2)",
     marginBottom: 28, fontFamily: "var(--font-body)",
   },
-  docPara: { fontSize: 16, lineHeight: 1.7, marginBottom: 18 },
+  docPara: { fontSize: 16, lineHeight: 1.7, marginBottom: 18, color: "var(--ink)" },
   docH2: {
     fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 18,
     letterSpacing: "-0.015em", margin: "32px 0 12px", lineHeight: 1.3,
+    color: "var(--ink)",
   },
-  docList: { fontSize: 16, lineHeight: 1.75, paddingLeft: 24, margin: "0 0 18px" },
+  docList: { fontSize: 16, lineHeight: 1.75, paddingLeft: 24, margin: "0 0 18px", color: "var(--ink)" },
   highlight: {
-    background: "rgba(195, 139, 0, 0.16)",
+    background: "rgba(195, 139, 0, 0.12)",
     padding: "1px 4px", borderRadius: 3,
     position: "relative",
   },
   highlightDot: {
     position: "absolute", top: -4, right: -4,
     width: 8, height: 8, borderRadius: 999,
-    background: "var(--m-watch)",
-    boxShadow: "0 0 0 2px var(--m-surface-on-light)",
+    background: "var(--accent-strong)",
+    boxShadow: "0 0 0 2px var(--surface)",
   },
   rail: {
     position: "sticky", top: 0,
@@ -648,75 +654,86 @@ const V: Record<string, CSSProperties> = {
     display: "grid",
     gridTemplateColumns: "1fr",
     gap: 8,
+    marginTop: 10,
   },
   emptyRailText: {
     fontSize: 12,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     lineHeight: 1.45,
   },
   yuliaWatching: {
     padding: "14px 16px",
-    background: "var(--m-primary-container)",
-    color: "var(--m-on-primary-container)",
-    border: "none",
+    background: "var(--accent-soft)",
+    color: "var(--accent-strong)",
+    border: "1px solid var(--line)",
   },
   yuliaWatchEyebrow: {
-    fontSize: 9.5, letterSpacing: "0.14em", fontWeight: 600, opacity: 0.7,
+    fontSize: 9.5, letterSpacing: "0.14em", fontWeight: 600,
+    fontFamily: "var(--font-mono)",
+    opacity: 0.8,
   },
   yuliaWatchTitle: {
     fontSize: 12.5, fontWeight: 600, letterSpacing: "-0.01em", marginTop: 4,
+    color: "var(--ink)",
   },
   yuliaWatchBody: {
-    fontSize: 11.5, marginTop: 4, lineHeight: 1.45, opacity: 0.85,
+    fontSize: 11.5, marginTop: 4, lineHeight: 1.45,
+    color: "var(--ink-2)",
   },
   commentsEyebrow: {
-    fontSize: 9.5, color: "var(--m-on-surface-mid)",
+    fontSize: 9.5, color: "var(--ink-3)",
     letterSpacing: "0.14em", fontWeight: 600, marginBottom: 10,
+    fontFamily: "var(--font-mono)",
   },
   commentAvatar: {
     width: 22, height: 22, borderRadius: 7,
     display: "grid", placeItems: "center", flexShrink: 0,
     fontFamily: "var(--font-mono)", fontWeight: 600, fontSize: 9.5,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
+    border: "1px solid var(--line)",
   },
-  commentTxt: { fontSize: 12, color: "var(--m-on-surface)", lineHeight: 1.5 },
+  commentTxt: { fontSize: 12, color: "var(--ink)", lineHeight: 1.5 },
   commentTime: {
-    fontSize: 10, color: "var(--m-on-surface-mid)",
+    fontSize: 10, color: "var(--ink-3)",
     letterSpacing: "0.06em", marginTop: 3,
+    fontFamily: "var(--font-mono)",
   },
   versionsEyebrow: {
-    fontSize: 9.5, color: "var(--m-on-surface-mid)",
+    fontSize: 9.5, color: "var(--ink-3)",
     letterSpacing: "0.14em", fontWeight: 600, marginBottom: 8,
+    fontFamily: "var(--font-mono)",
   },
   docMarkdown: {
     fontSize: 16, lineHeight: 1.7,
     fontFamily: "Iowan Old Style, Charter, Georgia, serif",
+    color: "var(--ink)",
   },
   generatingCard: {
     marginTop: 20,
     padding: 22,
-    borderRadius: 18,
-    background: "linear-gradient(135deg, rgba(238,241,251,0.92), rgba(255,255,255,0.94))",
-    border: "1px solid var(--m-outline-var)",
-    boxShadow: "var(--m-elev-1)",
+    borderRadius: 14,
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
+    boxShadow: "0 1px 2px rgba(25,24,19,.06)",
     fontFamily: "var(--font-body)",
   },
   generatingEyebrow: {
     fontSize: 10,
     letterSpacing: "0.16em",
-    color: "var(--m-on-primary-container)",
+    color: "var(--accent-strong)",
     fontWeight: 800,
+    fontFamily: "var(--font-mono)",
   },
   generatingTitle: {
     margin: "7px 0 0",
     fontFamily: "var(--font-display)",
     fontSize: 24,
     lineHeight: 1,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   generatingBody: {
     margin: "8px 0 0",
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     fontSize: 13.5,
     lineHeight: 1.5,
   },

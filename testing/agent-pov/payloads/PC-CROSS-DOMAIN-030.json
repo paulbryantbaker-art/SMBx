@@ -1,0 +1,37 @@
+{
+  "id": "PC-CROSS-DOMAIN-030",
+  "category": "CROSS_DOMAIN",
+  "description": "SELL + RE-heavy + foreign seller: cross-border seller of US REIT-eligible assets requiring REIT compliance triad AND FIRPTA AND sale-leaseback overlay. M171 + M172 + M199 + M191 expected — three RE overlays plus foreign withholding must all surface.",
+  "payload": {
+    "journey": "sell",
+    "subjourney": "owner_rep",
+    "target_industry": "REIT-eligible industrial real estate",
+    "target_jurisdiction": "US-Multi",
+    "real_estate_pct_of_ev": 100,
+    "foreign_seller": true,
+    "seller_residence_country": "DE",
+    "asset_class_signal": "REIT",
+    "sale_leaseback_proposed": true,
+    "multi_state_properties_count": 14
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "real_estate_overlay",
+      "assetClass": "real_estate"
+    },
+    "missingFields": [
+      "firpta_withholding_certificate",
+      "treaty_relief_eligibility",
+      "income_tests",
+      "asc_842_classification_inputs",
+      "citt_by_state"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "sell", "G30", "FIRPTA", "REIT", "sale-leaseback", "multi-state"]
+}

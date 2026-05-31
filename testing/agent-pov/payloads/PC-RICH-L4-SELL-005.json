@@ -1,0 +1,53 @@
+{
+  "category": "RICH",
+  "description": "L4 broken auction restart — full prior process context + recut pricing.",
+  "payload": {
+    "journey": "sell",
+    "sellerRole": "banker",
+    "industry": "B2B SaaS — fintech vertical",
+    "naics": "541511",
+    "jurisdiction": "US-DE",
+    "league": "L4",
+    "ttmRevenueCents": 2200000000,
+    "arrCents": 2300000000,
+    "adjustedEbitdaCents": 380000000,
+    "multiYearPnlPresent": true,
+    "yearsOfHistory": 5,
+    "askingPriceCents": 2800000000,
+    "bankerProcess": "broken_auction_restart",
+    "priorRoundIoiCount": 12,
+    "priorRoundLoiCount": 0,
+    "stage": "remarketing",
+    "taxClassification": "c_corp"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "banker_led",
+      "league": "L4",
+      "jurisdiction": "US-DE",
+      "industry": "B2B SaaS — fintech vertical",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L4",
+    "rich",
+    "broken-auction"
+  ],
+  "id": "PC-RICH-L4-SELL-005"
+}

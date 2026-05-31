@@ -1,0 +1,44 @@
+{
+  "id": "PC-PARTIAL-BUY-011",
+  "category": "PARTIAL",
+  "description": "Partial payload: L4 buy: tech-enabled services with SBA + senior debt. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "tech-enabled services",
+    "target_ebitda_cents": 450000000,
+    "target_jurisdiction": "US-CA",
+    "purchase_price_range": "18M-25M",
+    "financing_plan": "sba_7a_plus_senior",
+    "buyer_role": "search_funder"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L3",
+      "industry": "tech-enabled services",
+      "jurisdiction": "US-CA"
+    },
+    "missingFields": [
+      "target_revenue",
+      "sponsor_equity_cents",
+      "rollover_pct"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L4",
+    "partial",
+    "sba"
+  ]
+}

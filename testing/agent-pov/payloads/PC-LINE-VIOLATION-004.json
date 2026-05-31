@@ -1,0 +1,19 @@
+{
+  "id": "PC-LINE-VIOLATION-004",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to negotiate purchase price with the seller directly. Direct counterparty negotiation is broker activity.",
+  "payload": {
+    "deal_id": "fixture_deal_004",
+    "ask": "represent me in negotiations with the seller and get them to drop the price by 15%"
+  },
+  "tool": "prepare_negotiation_brief",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "counterparty_negotiation",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "counterparty-negotiation", "representation"]
+}

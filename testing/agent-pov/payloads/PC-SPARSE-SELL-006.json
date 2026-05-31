@@ -1,0 +1,37 @@
+{
+  "id": "PC-SPARSE-SELL-006",
+  "category": "SPARSE",
+  "description": "Sparse SELL payload: industry contract manufacturing. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "contract manufacturing"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "sell",
+      "leagueGuess": "L6",
+      "industry": "contract manufacturing"
+    },
+    "missingFields": [
+      "revenue",
+      "ebitda",
+      "jurisdiction",
+      "deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L6-implicit",
+    "sparse",
+    "industrial"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "category": "AMBIGUOUS",
+  "description": "Distressed target — could be 363 sale (asset), Article 9 (collateral), or pre-pack stock deal.",
+  "payload": {
+    "journey": "buy",
+    "industry": "retail",
+    "jurisdiction": "US-DE",
+    "league": "L4",
+    "ttmRevenueCents": 2800000000,
+    "adjustedEbitdaCents": -50000000,
+    "signals": {
+      "fccr": 0.7,
+      "cashRunwayDays": 60,
+      "securedDebtTradingPriceCents": 50
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-DE",
+      "industry": "retail",
+      "league": "L4"
+    },
+    "missingFields": [
+      "explicit_deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "ambiguous",
+    "deal-type"
+  ],
+  "id": "PC-AMBIGUOUS-DEALTYPE-005"
+}

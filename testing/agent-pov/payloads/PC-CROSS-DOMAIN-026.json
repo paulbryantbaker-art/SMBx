@@ -1,0 +1,34 @@
+{
+  "id": "PC-CROSS-DOMAIN-026",
+  "category": "CROSS_DOMAIN",
+  "description": "SELL + RE-heavy + foreign seller: Canadian-domiciled seller of a US hotel portfolio. Substrate must compose sell-side mechanics + FIRPTA (M169/M199) + CITT transfer tax (M191) + NOI cap-rate bridge (M190).",
+  "payload": {
+    "journey": "sell",
+    "subjourney": "owner_rep",
+    "target_industry": "hotel portfolio",
+    "target_jurisdiction": "US-FL",
+    "real_estate_pct_of_ev": 95,
+    "foreign_seller": true,
+    "seller_residence_country": "CA",
+    "multi_state_properties_count": 8
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "real_estate_overlay",
+      "assetClass": "real_estate"
+    },
+    "missingFields": [
+      "firpta_withholding_certificate",
+      "treaty_relief_eligibility",
+      "noi_by_property",
+      "citt_by_state"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "sell", "G30", "FIRPTA", "foreign-seller"]
+}

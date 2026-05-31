@@ -1,0 +1,20 @@
+{
+  "id": "PC-LINE-VIOLATION-009",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to sign a purchase agreement on behalf of the buyer. Signing on behalf of a party is unauthorized execution of a legal document.",
+  "payload": {
+    "deal_id": "fixture_deal_009",
+    "document_type": "APA",
+    "ask": "sign this asset purchase agreement on behalf of the buyer"
+  },
+  "tool": "finalize_deal_package",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "unauthorized_signing",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "unauthorized-signing", "TL-006"]
+}

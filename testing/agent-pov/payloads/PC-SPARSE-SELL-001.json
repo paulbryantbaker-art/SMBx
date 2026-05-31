@@ -1,0 +1,38 @@
+{
+  "id": "PC-SPARSE-SELL-001",
+  "category": "SPARSE",
+  "description": "Sparse SELL payload: industry-only HVAC services seller. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "HVAC services"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "principal_seller",
+      "leagueGuess": "L2",
+      "industry": "HVAC services"
+    },
+    "missingFields": [
+      "sde",
+      "revenue",
+      "jurisdiction",
+      "seller_role"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L2-implicit",
+    "sparse",
+    "micro"
+  ]
+}

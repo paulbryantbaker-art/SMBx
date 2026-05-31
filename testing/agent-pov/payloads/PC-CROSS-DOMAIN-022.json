@@ -1,0 +1,35 @@
+{
+  "id": "PC-CROSS-DOMAIN-022",
+  "category": "CROSS_DOMAIN",
+  "description": "BUY + restructuring: strategic acquirer entering an out-of-court restructuring target post-RSA. M148 solvency + M164 RSA + buy-side strategic-tuck-in mechanics must compose.",
+  "payload": {
+    "journey": "buy",
+    "subjourney": "strategic_tuck_in",
+    "target_industry": "specialty manufacturing",
+    "target_jurisdiction": "US-MI",
+    "target_ebitda_cents": 180000000,
+    "rsa_in_negotiation": true,
+    "rsaInMarket": true,
+    "out_of_court_restructuring": true,
+    "buyer_type": "strategic"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "distressed_restructuring",
+      "distressPosture": "full_distress",
+      "assetClass": "operating_co"
+    },
+    "missingFields": [
+      "rsa_termination_triggers",
+      "class_support_thresholds",
+      "fraudulent_transfer_solvency_inputs"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "buy", "G28", "strategic-restructuring"]
+}

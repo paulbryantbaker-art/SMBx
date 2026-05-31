@@ -1,0 +1,42 @@
+{
+  "id": "PC-PARTIAL-RAISE-003",
+  "category": "PARTIAL",
+  "description": "Partial payload: Seed convertible note: discount + cap. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "stage": "seed",
+    "instrument": "convertible_note",
+    "target_amount_cents": 150000000,
+    "valuation_cap_cents": 1200000000,
+    "discount": 0.2,
+    "industry": "consumer hardware"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "early_stage_raise",
+      "industry": "consumer hardware"
+    },
+    "missingFields": [
+      "maturity_months",
+      "interest_rate",
+      "jurisdiction"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "seed",
+    "convertible",
+    "partial"
+  ]
+}

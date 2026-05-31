@@ -1,0 +1,35 @@
+{
+  "id": "PC-SPARSE-RAISE-008",
+  "category": "SPARSE",
+  "description": "Sparse RAISE payload: convertible note only. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "instrument": "convertible_note"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "early_stage_raise"
+    },
+    "missingFields": [
+      "target_amount",
+      "industry",
+      "valuation_cap",
+      "deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "sparse",
+    "convertible"
+  ]
+}

@@ -250,8 +250,8 @@ const ENTITLEMENT_FALLBACK: Record<Plan, {
 };
 
 const glass: CSSProperties = {
-  backdropFilter: "blur(22px)",
-  WebkitBackdropFilter: "blur(22px)",
+  backdropFilter: "none",
+  WebkitBackdropFilter: "none",
 };
 
 const S: Record<string, CSSProperties> = {
@@ -260,10 +260,10 @@ const S: Record<string, CSSProperties> = {
     gap: 16,
     padding: 20,
     borderRadius: 24,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     background:
-      "radial-gradient(circle at 15% 0%, rgba(255,255,255,.72), transparent 35%), " +
-      "linear-gradient(135deg, rgba(255,255,255,.76), rgba(238,246,255,.58) 58%, rgba(226,236,248,.44))",
+      "var(--ink)" +
+      "var(--surface)",
     border: "1px solid rgba(255,255,255,.68)",
     boxShadow:
       "0 24px 64px rgba(38,61,93,.12), inset 0 1px 0 rgba(255,255,255,.88), inset 0 0 0 1px rgba(166,190,220,.18)",
@@ -289,12 +289,12 @@ const S: Record<string, CSSProperties> = {
     lineHeight: 1,
     letterSpacing: 0,
     fontWeight: 850,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   copy: {
     margin: "7px 0 0",
     maxWidth: 620,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     fontSize: 15,
     lineHeight: 1.38,
   },
@@ -302,9 +302,9 @@ const S: Record<string, CSSProperties> = {
     flexShrink: 0,
     borderRadius: 999,
     padding: "8px 12px",
-    color: "#2E5C8A",
+    color: "#57534A",
     background: "rgba(234,243,251,.86)",
-    border: "1px solid rgba(152,181,215,.45)",
+    border: "1px solid rgba(25,24,19,0.10)",
     fontWeight: 850,
   },
   planPill: {
@@ -313,7 +313,7 @@ const S: Record<string, CSSProperties> = {
     padding: "9px 14px",
     color: "#FFFFFF",
     background:
-      "radial-gradient(circle at 20% 0%, rgba(255,255,255,.26), transparent 35%), linear-gradient(135deg, rgba(36,54,83,.86), rgba(48,88,128,.72))",
+      "var(--ink)",
     border: "1px solid rgba(255,255,255,.34)",
     boxShadow: "inset 0 1px 0 rgba(255,255,255,.28), 0 12px 24px rgba(42,65,96,.14)",
     fontWeight: 850,
@@ -332,7 +332,7 @@ const S: Record<string, CSSProperties> = {
   resetText: {
     display: "block",
     marginTop: 4,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     fontSize: 13,
     fontWeight: 650,
   },
@@ -354,7 +354,7 @@ const S: Record<string, CSSProperties> = {
   fill: {
     height: "100%",
     borderRadius: 999,
-    background: "linear-gradient(90deg, #8A9AE8, #6A9BCC 48%, #6FAE95)",
+    background: "var(--accent)",
     boxShadow: "0 0 0 1px rgba(255,255,255,.25) inset",
   },
   grid: {
@@ -383,7 +383,7 @@ const S: Record<string, CSSProperties> = {
     alignItems: "baseline",
     flexWrap: "wrap",
     gap: 10,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     fontSize: 13,
     fontWeight: 750,
     minWidth: 0,
@@ -394,7 +394,7 @@ const S: Record<string, CSSProperties> = {
   },
   metricValue: {
     flexShrink: 0,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   scopeRow: {
     display: "flex",
@@ -404,7 +404,7 @@ const S: Record<string, CSSProperties> = {
   scopePill: {
     borderRadius: 999,
     padding: "8px 11px",
-    color: "#355C84",
+    color: "#57534A",
     background: "rgba(234,243,251,.72)",
     border: "1px solid rgba(166,190,220,.32)",
     fontWeight: 800,
@@ -412,6 +412,6 @@ const S: Record<string, CSSProperties> = {
   loadingBar: {
     height: 12,
     borderRadius: 999,
-    background: "linear-gradient(90deg, rgba(198,214,234,.32), rgba(255,255,255,.72), rgba(198,214,234,.32))",
+    background: "var(--surface)",
   },
 };

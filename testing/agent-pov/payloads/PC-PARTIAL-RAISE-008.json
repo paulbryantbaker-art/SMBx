@@ -1,0 +1,44 @@
+{
+  "id": "PC-PARTIAL-RAISE-008",
+  "category": "PARTIAL",
+  "description": "Partial payload: Growth raise crossover: pre-IPO. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "stage": "growth",
+    "instrument": "priced_round",
+    "arr_cents": 8000000000,
+    "target_amount_cents": 15000000000,
+    "pre_money_cents": 200000000000,
+    "industry": "enterprise SaaS",
+    "jurisdiction": "US-DE"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "growth_raise",
+      "industry": "enterprise SaaS",
+      "jurisdiction": "US-DE"
+    },
+    "missingFields": [
+      "ipo_window",
+      "lead_investor",
+      "secondary_component_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "growth",
+    "crossover",
+    "partial"
+  ]
+}

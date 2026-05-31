@@ -1,0 +1,37 @@
+{
+  "category": "AMBIGUOUS",
+  "description": "Quick-service-restaurant franchise — could be operating_co or real-estate-heavy depending on owned units.",
+  "payload": {
+    "journey": "buy",
+    "industry": "QSR franchise",
+    "jurisdiction": "US-TX",
+    "league": "L4",
+    "ttmRevenueCents": 2400000000,
+    "adjustedEbitdaCents": 380000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-TX",
+      "industry": "QSR franchise",
+      "league": "L4"
+    },
+    "missingFields": [
+      "deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "ambiguous",
+    "asset-class"
+  ],
+  "id": "PC-AMBIGUOUS-ASSET-002"
+}

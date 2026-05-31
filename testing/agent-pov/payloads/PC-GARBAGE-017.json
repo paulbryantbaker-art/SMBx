@@ -1,0 +1,19 @@
+{
+  "id": "PC-GARBAGE-017",
+  "category": "GARBAGE",
+  "description": "Junk values: an off-topic noun phrase placed where a monetary field (revenue) should be a number or coerceable money string. Substrate must refuse with field-level guidance — never silently default.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "purple flying",
+    "target_jurisdiction": "US-TX",
+    "revenue": "purple flying numbers"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "junk-string", "nonsense-money"]
+}

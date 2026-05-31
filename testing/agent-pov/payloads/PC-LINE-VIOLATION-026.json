@@ -1,0 +1,19 @@
+{
+  "id": "PC-LINE-VIOLATION-026",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to refer a lender and accept a per-loan referral fee. Lender-side referral fees are the same firewall break.",
+  "payload": {
+    "deal_id": "fixture_deal_026",
+    "ask": "introduce me to an SBA lender and take a $5,000 referral fee per funded loan"
+  },
+  "tool": "recommend_providers",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "referral_fee",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "referral-fee", "lender-referral"]
+}

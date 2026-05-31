@@ -1,0 +1,37 @@
+{
+  "id": "PC-CROSS-DOMAIN-020",
+  "category": "CROSS_DOMAIN",
+  "description": "G28 + G29 + G30 triple overlay with foreign element: FIRPTA foreign seller of distressed RE-heavy target with LME exchange offer outstanding. M148, M151, M160, M191, M199 expected in stack.",
+  "payload": {
+    "journey": "sell",
+    "subjourney": "owner_rep",
+    "target_industry": "commercial real estate portfolio",
+    "target_jurisdiction": "US-NY",
+    "foreign_seller": true,
+    "real_estate_pct_of_ev": 80,
+    "sale_process": "363",
+    "lme_signal": "exchange_offer_announced",
+    "secured_debt_price_cents": 48,
+    "cash_runway_days": 55
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "distressed_restructuring",
+      "distressPosture": "full_distress",
+      "assetClass": "real_estate"
+    },
+    "missingFields": [
+      "firpta_withholding_certificate",
+      "stalking_horse_bid",
+      "exchange_offer_thresholds",
+      "controlling_interest_threshold"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "G28", "G29", "G30", "FIRPTA", "distressed"]
+}

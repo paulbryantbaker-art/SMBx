@@ -1,0 +1,45 @@
+{
+  "id": "PC-PARTIAL-PMI-005",
+  "category": "PARTIAL",
+  "description": "Partial payload: PMI carve-out separation scope. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "pmi",
+    "stage": "day_0",
+    "integration_type": "carve_out",
+    "acquired_entity": "carveout_x",
+    "parent_co": "public_seller_inc",
+    "separation_scope": [
+      "IT",
+      "HR",
+      "finance"
+    ],
+    "close_date": "2026-07-15"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "pmi",
+      "subJourney": "pmi_day_0"
+    },
+    "missingFields": [
+      "industry",
+      "tsa_terms",
+      "stranded_costs_cents",
+      "separation_budget_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "pmi",
+    "carve-out",
+    "day-0",
+    "partial"
+  ]
+}

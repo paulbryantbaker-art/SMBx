@@ -1,0 +1,36 @@
+{
+  "id": "PC-SPARSE-BUY-009",
+  "category": "SPARSE",
+  "description": "Sparse BUY payload: PE sponsor LMM range. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "buyer_role": "pe_sponsor_lmm"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "leagueGuess": "L5"
+    },
+    "missingFields": [
+      "target_industry",
+      "target_revenue",
+      "target_ebitda",
+      "target_jurisdiction"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "sparse",
+    "pe-sponsor"
+  ]
+}

@@ -1,6 +1,18 @@
 # REPO_STATUS.md — what's current, what's stale
 
-**Last updated: 2026-05-25.**
+**Last updated: 2026-05-27.**
+
+## 2026-05-27 locks
+
+Three decisions were locked on May 27, 2026, after an audit of the `/Users/paul/Downloads/v19/` Claude reports against actual repo state. Read these before doing pricing, compliance, or PMI work.
+
+- **Pricing locked at Free / $99 / $249 / $749 / $3,000+.** Canonical record: [SMBX_PRICING_LOCKED.md](SMBX_PRICING_LOCKED.md). `server/services/subscriptionService.ts` PLANS constant, `methodology/METHODOLOGY_V19.md` §21, and `CLAUDE.md` Critical Rule #1 all updated to match. The legacy $79 / $199 / $499 / $2,500 ladder is dead.
+- **Safe harbor citations locked into [THE_LINE_POLICY.md](THE_LINE_POLICY.md).** Added: federal publisher's exclusion (*Lowe v. SEC*, 472 U.S. 181), Texas Gov't Code § 81.101(c), N.C. Gen. Stat. § 84-2.2 (with 7-condition operational checklist), § 15(b)(13) marketing rule, four-layer "never even accused" test, state business-broker map note, and SEC enforcement-precedent context (Ranieri, StraightPath, VCP, Trigg).
+- **DEFINITIVE Extension formally deferred.** The 51-model / 6-gate / 4-persistent-object / 18-MCP-tool value-bridge + longitudinal-PMI layer from `/Users/paul/Downloads/v19/DEFINITIVE Extension_ Value Creation Modeling and Longitudinal PMI Management.pdf` is **not in v1.x scope**. Defer rationale and re-evaluation gate are in [methodology/DEFINITIVE_BUILD_PLAN.md § Deferred Scope](methodology/DEFINITIVE_BUILD_PLAN.md). Current PMI scope = the existing PMI0-PMI3 four-stage chat journey + the `pmi-100-day-plan` deliverable template + `compose_pmi_plan` MCP tool. Nothing changes there.
+
+Active build target after these locks: **(1) MCP server for any agent caller → (2) Claude + ChatGPT connectors → (3) finish web/mobile app**, in that order.
+
+---
 
 This file is a stable reading-order map for anyone (human or AI) reviewing this repo on GitHub or as a fresh clone. Read this **first** after `CLAUDE.md`.
 

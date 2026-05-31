@@ -1,0 +1,19 @@
+{
+  "id": "PC-VERSION-004",
+  "category": "VERSION",
+  "description": "Unknown spec version 'DEFINITIVE.v9.9' passed to compose_model_stack. Substrate must refuse with current DEFINITIVE_SPEC_VERSION (DEFINITIVE.v1.0) pointer.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "B2B services",
+    "target_jurisdiction": "US-TX",
+    "spec_version": "DEFINITIVE.v9.9"
+  },
+  "tool": "compose_model_stack",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "unsupported_version",
+    "persistsDealState": false
+  },
+  "tags": ["version", "unknown-spec", "future-spec"]
+}

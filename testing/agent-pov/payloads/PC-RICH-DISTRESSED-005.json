@@ -1,0 +1,63 @@
+{
+  "category": "RICH",
+  "description": "L5 multi-overlay distress — capital structure LME + covenant breach + real-estate-heavy + restructuring.",
+  "payload": {
+    "journey": "buy",
+    "industry": "multi-site hospitality",
+    "naics": "721110",
+    "jurisdiction": "US-NV",
+    "league": "L5",
+    "ttmRevenueCents": 12000000000,
+    "adjustedEbitdaCents": 280000000,
+    "purchasePriceCents": 6000000000,
+    "dealStructure": "stock_purchase",
+    "taxClassification": "c_corp",
+    "signals": {
+      "cashRunwayDays": 85,
+      "fccr": 0.95,
+      "securedDebtTradingPriceCents": 58,
+      "maintenanceCovenantBreachWithinQuarters": 1,
+      "forbearanceExecuted": true,
+      "covenantAmendment": true,
+      "liabilityManagementExercise": true,
+      "capitalStructureAction": true,
+      "realEstatePercentOfEv": 0.55
+    },
+    "financing": {
+      "sponsorEquityCents": 3500000000,
+      "seniorDebtCents": 2200000000,
+      "subordinatedDebtCents": 300000000
+    },
+    "stage": "loi"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "distressed_buy_side",
+      "league": "L5",
+      "jurisdiction": "US-NV",
+      "industry": "multi-site hospitality",
+      "distressPosture": "full_distress",
+      "assetClass": "mixed",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "rich",
+    "distressed",
+    "L5",
+    "buy"
+  ],
+  "id": "PC-RICH-DISTRESSED-005"
+}

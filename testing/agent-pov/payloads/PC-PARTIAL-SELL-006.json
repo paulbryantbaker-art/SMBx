@@ -1,0 +1,41 @@
+{
+  "id": "PC-PARTIAL-SELL-006",
+  "category": "PARTIAL",
+  "description": "Partial payload: L2 sell: trucking owner-operator. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "local trucking",
+    "jurisdiction": "US-TX",
+    "sde_cents": 70000000,
+    "revenue_cents": 700000000,
+    "seller_role": "principal"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "principal_seller",
+      "league": "L2",
+      "industry": "local trucking",
+      "jurisdiction": "US-TX"
+    },
+    "missingFields": [
+      "fleet_age",
+      "driver_count",
+      "asking_price_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L2",
+    "partial"
+  ]
+}

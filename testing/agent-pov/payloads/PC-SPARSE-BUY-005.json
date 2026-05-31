@@ -1,0 +1,38 @@
+{
+  "id": "PC-SPARSE-BUY-005",
+  "category": "SPARSE",
+  "description": "Sparse BUY payload: industry mid-market industrial implies L5-L7. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "mid-market industrial manufacturing"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "leagueGuess": "L6",
+      "industry": "mid-market industrial manufacturing"
+    },
+    "missingFields": [
+      "target_revenue",
+      "target_ebitda",
+      "target_jurisdiction",
+      "deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L6-implicit",
+    "sparse",
+    "industrial"
+  ]
+}

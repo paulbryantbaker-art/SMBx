@@ -1,0 +1,34 @@
+{
+  "id": "PC-CROSS-DOMAIN-027",
+  "category": "CROSS_DOMAIN",
+  "description": "SELL + RE-heavy + foreign seller: UK pension fund selling US net-lease portfolio + 1031 like-kind exchange consideration. M170 + M199 + M191 expected.",
+  "payload": {
+    "journey": "sell",
+    "subjourney": "banker_led",
+    "target_industry": "net-lease real estate",
+    "target_jurisdiction": "US-Multi",
+    "real_estate_pct_of_ev": 100,
+    "foreign_seller": true,
+    "seller_entity_type": "UK_pension_fund",
+    "exchange_consideration_1031": true
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "real_estate_overlay",
+      "assetClass": "real_estate"
+    },
+    "missingFields": [
+      "qualified_intermediary",
+      "identification_timeline",
+      "treaty_relief_eligibility",
+      "citt_by_state"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "sell", "G30", "FIRPTA", "1031", "foreign-pension"]
+}

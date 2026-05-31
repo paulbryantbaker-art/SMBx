@@ -1,0 +1,50 @@
+{
+  "id": "PC-PARTIAL-FIRPTA-005",
+  "category": "PARTIAL",
+  "description": "Partial payload: FIRPTA + treaty: foreign corp sells US partnership interest. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "real estate fund",
+    "jurisdiction": "US-DE",
+    "foreign_seller": true,
+    "seller_country": "NL",
+    "interest_being_sold": "partnership_interest",
+    "sale_price_cents": 12000000000,
+    "taxClassification": "foreign_entity",
+    "signals": {
+      "realEstatePercentOfEv": 100
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "industry": "real estate fund",
+      "jurisdiction": "US-DE",
+      "taxClassification": "foreign_entity",
+      "assetClass": "real_estate",
+      "subJourney": "real_estate_overlay"
+    },
+    "missingFields": [
+      "effectively_connected_status",
+      "treaty_relief_claim",
+      "partnership_real_property_pct"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "firpta",
+    "sell",
+    "partial",
+    "foreign-seller",
+    "treaty"
+  ]
+}

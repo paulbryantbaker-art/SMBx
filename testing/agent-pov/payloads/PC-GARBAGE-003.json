@@ -1,0 +1,19 @@
+{
+  "id": "PC-GARBAGE-003",
+  "category": "GARBAGE",
+  "description": "Wrong type: enterprise_value passed as an array of objects instead of a number-of-cents. Substrate's payload-shape validator must return structured 400 with field-level guidance on enterprise_value.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "tech",
+    "target_jurisdiction": "US-CA",
+    "enterprise_value": [{ "low": 1000000 }, { "high": 5000000 }]
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "wrong-type", "array-for-money"]
+}

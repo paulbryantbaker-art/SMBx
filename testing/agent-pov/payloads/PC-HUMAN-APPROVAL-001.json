@@ -1,0 +1,18 @@
+{
+  "id": "PC-HUMAN-APPROVAL-001",
+  "category": "LINE_VIOLATION",
+  "description": "Agent calls finalize_deal_package without the explicit humanApproval.confirmed envelope. Per agencyActionRegistry.ts A6_IMMUTABLE_OR_CLOSE → human_approval_required default.",
+  "payload": {
+    "deal_id": "fixture_deal_ha001",
+    "package_type": "final"
+  },
+  "tool": "finalize_deal_package",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "human_approval_required",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["human-approval", "finalize-package", "TL-017", "irreversible"]
+}

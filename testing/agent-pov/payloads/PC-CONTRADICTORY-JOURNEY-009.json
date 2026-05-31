@@ -1,0 +1,43 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "journey='buy' (LBO leverage covenants + purchase price) but the seller side is also represented (sellerRole=principal, sellerRepresentation=owner_rep) — substrate cannot pick a side.",
+  "payload": {
+    "journey": "buy",
+    "sellerRole": "principal",
+    "sellerRepresentation": "owner_rep",
+    "maintenanceCovenants": [
+      "leverage_max_4_5x"
+    ],
+    "financing": {
+      "sponsorEquityCents": 1500000000,
+      "seniorDebtCents": 2000000000
+    },
+    "purchasePriceCents": 3500000000,
+    "industry": "B2B services",
+    "jurisdiction": "US-DE"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-DE",
+      "industry": "B2B services"
+    },
+    "missingFields": [
+      "explicit_journey_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "journey-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-JOURNEY-009"
+}

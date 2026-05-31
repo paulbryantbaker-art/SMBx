@@ -26,6 +26,9 @@ const SERVER_TITLE = 'smbX DEFINITIVE Diligence Substrate';
 export interface DefinitiveRemoteMcpAuthContext {
   userId?: number | null;
   claims?: Record<string, any> | null;
+  /** Set when a bearer was presented but verification failed (expired, bad signature, etc.).
+   *  Used to construct RFC 6750-compliant WWW-Authenticate challenges with `error="invalid_token"`. */
+  error?: { code: 'invalid_token' | string; description?: string } | null;
 }
 
 export interface DefinitiveRemoteMcpRequestContext {
@@ -122,8 +125,32 @@ export function buildDefinitiveMcpServerJson(baseUrl?: string) {
             isSecret: true,
           },
         ],
+        // OAuth pointer at the REMOTE level — registries that scope auth
+        // metadata per-remote (rather than per-server) look here.
+        auth: {
+          type: 'oauth2',
+          protected_resource_metadata: `${origin}/.well-known/oauth-protected-resource/mcp`,
+          authorization_server_metadata: `${origin}/.well-known/oauth-authorization-server`,
+        },
       },
     ],
+    // OAuth pointer at the ROOT level — registries that scope auth metadata
+    // per-server (one auth config for all remotes) look here. We surface both
+    // root + per-remote + metadata.* because the MCP spec is still maturing
+    // and parsers differ; URL values are identical so there is no consistency
+    // risk. Cost is ~20 bytes of JSON; benefit is "no registry can reject the
+    // listing for missing auth metadata."
+    auth: {
+      type: 'oauth2',
+      protected_resource_metadata: `${origin}/.well-known/oauth-protected-resource/mcp`,
+      authorization_server_metadata: `${origin}/.well-known/oauth-authorization-server`,
+      openid_configuration: `${origin}/.well-known/openid-configuration`,
+      dynamic_client_registration: `${origin}/oauth/register`,
+      authorization_endpoint: `${origin}/oauth/authorize`,
+      token_endpoint: `${origin}/oauth/token`,
+      pkce_required: true,
+      bearer_methods_supported: ['header'],
+    },
     homepage: origin,
     repository: {
       url: origin,
@@ -177,12 +204,21 @@ async function callTool(
 
   const userId = Number(context.auth?.userId);
   if (!Number.isFinite(userId) || userId <= 0) {
+    // RFC 6750 §3 — if the request DID present a token but verification failed,
+    // surface the reason (invalid_token + description) so clients can decide to
+    // refresh vs re-auth. If no token was presented at all, omit `error` per spec.
+    const authError = context.auth?.error as { code?: string; description?: string } | undefined;
+    const challengeOptions = authError?.code
+      ? { error: authError.code, errorDescription: authError.description || 'Token could not be verified.' }
+      : {};
+    const errorMessage = authError?.description
+      || 'tools/call requires a signed smbX bearer token or scoped DEFINITIVE agent token.';
     return jsonRpcHttp(
       401,
-      jsonRpcError(id, -32001, 'Authentication required', 'tools/call requires a signed smbX bearer token or scoped DEFINITIVE agent token.'),
+      jsonRpcError(id, -32001, authError?.code === 'invalid_token' ? 'Invalid token' : 'Authentication required', errorMessage, authError ? { authError: authError.code } : undefined),
       protocolVersion,
       {
-        'WWW-Authenticate': buildDefinitiveMcpWwwAuthenticate(context.origin, listDefinitiveMcpRequiredScopes(toolName)),
+        'WWW-Authenticate': buildDefinitiveMcpWwwAuthenticate(context.origin, listDefinitiveMcpRequiredScopes(toolName), challengeOptions),
       },
     );
   }
@@ -229,6 +265,10 @@ async function callTool(
       toolName,
       input,
       envelope: scopedEnvelope.envelope,
+      // Pass JWT claims through so mandate-context resolution can prefer
+      // claims-bound agentId/agentPlatformId/mandateId over envelope-supplied
+      // (which is untrusted). Fixes MM-001 audit agent_id attribution.
+      authClaims: context.auth?.claims || null,
     });
     if (context.persist !== false) {
       (response.body as Record<string, any>).persistence = await persistDealStateCallBestEffort({

@@ -1,0 +1,40 @@
+{
+  "id": "PC-PARTIAL-PMI-009",
+  "category": "PARTIAL",
+  "description": "Partial payload: PMI assessment with culture risk. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "pmi",
+    "stage": "assessment",
+    "acquired_entity": "target_w_culture_risk",
+    "employee_count": 850,
+    "retention_risk_flagged": true,
+    "industry": "professional services"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "pmi",
+      "subJourney": "pmi_assessment",
+      "industry": "professional services"
+    },
+    "missingFields": [
+      "key_employee_count",
+      "retention_pool_cents",
+      "baseline_ebitda_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "pmi",
+    "assessment",
+    "retention",
+    "partial"
+  ]
+}

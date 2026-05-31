@@ -159,7 +159,20 @@ export function isS3Active(): boolean {
 export function getStorageStatus() {
   const localRoot = getUploadRoot();
   const resolvedLocalRoot = resolve(localRoot);
-  const localLooksPersistent = resolvedLocalRoot === '/data/uploads' || resolvedLocalRoot.startsWith('/data/uploads/');
+  // Persistent-storage criteria:
+  //   1. S3 configured: persistent across container redeploys (production
+  //      path on Railway).
+  //   2. Local /data/uploads mount: persistent on Railway (mounted volume).
+  //   3. Explicit opt-in via SMBX_LOCAL_PERSISTENT=true: allows local dev to
+  //      affirm persistence when running against a stable host filesystem
+  //      (e.g. macOS dev, EC2 with attached EBS). Without this opt-in the
+  //      default `./uploads` is treated as ephemeral because Railway-style
+  //      ephemeral containers would lose it on redeploy.
+  const explicitLocalPersistent = process.env.SMBX_LOCAL_PERSISTENT === 'true';
+  const localLooksPersistent =
+    resolvedLocalRoot === '/data/uploads'
+    || resolvedLocalRoot.startsWith('/data/uploads/')
+    || explicitLocalPersistent;
 
   return {
     provider: USE_S3 ? 's3-compatible' : 'local',
@@ -169,6 +182,7 @@ export function getStorageStatus() {
     endpoint: USE_S3 ? S3_ENDPOINT || null : null,
     localRoot: USE_S3 ? null : localRoot,
     localLooksPersistent,
+    explicitLocalPersistent,
   };
 }
 

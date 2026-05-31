@@ -1,0 +1,45 @@
+{
+  "id": "PC-PARTIAL-SELL-022",
+  "category": "PARTIAL",
+  "description": "Partial payload: L7 sell: medical devices cross-border. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "medical devices",
+    "jurisdiction": "US-MA",
+    "revenue_cents": 60000000000,
+    "ebitda_cents": 12000000000,
+    "seller_role": "banker_led",
+    "cross_border_buyer_likely": true
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "banker_led",
+      "league": "L6",
+      "industry": "medical devices",
+      "jurisdiction": "US-MA"
+    },
+    "missingFields": [
+      "fda_clearances",
+      "cfius_sensitivity_assessed",
+      "asking_price_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L7",
+    "partial",
+    "cross-border",
+    "cfius"
+  ]
+}

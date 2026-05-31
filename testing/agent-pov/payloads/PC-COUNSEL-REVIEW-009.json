@@ -1,0 +1,18 @@
+{
+  "id": "PC-COUNSEL-REVIEW-009",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate for the fair-market-value appraisal of the target. Appraisal language routes to counsel/qualified appraiser; substrate outputs are 'Valuation Model Output — Worked Example'.",
+  "payload": {
+    "deal_id": "fixture_deal_cr009",
+    "ask": "give me the fair-market-value appraisal of this business for the §170 charitable-contribution claim"
+  },
+  "tool": "execute_model",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "counsel_review_required",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["counsel-review", "appraisal", "TL-010", "fmv"]
+}

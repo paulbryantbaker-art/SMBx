@@ -1,0 +1,34 @@
+{
+  "id": "PC-CROSS-DOMAIN-004",
+  "category": "CROSS_DOMAIN",
+  "description": "G28 + G29: RSA in negotiation (G28+G29 dual hit via M164) + covenant amendment proposed + secured debt at 58 cents. Substrate must surface RSA economics (M164) on both gate paths without deduping out one gate's coverage.",
+  "payload": {
+    "journey": "raise",
+    "subjourney": "debt_raise",
+    "target_industry": "industrial manufacturing",
+    "target_jurisdiction": "US-IL",
+    "target_ebitda_cents": 120000000,
+    "rsa_in_negotiation": true,
+    "covenant_amendment_pending": true,
+    "secured_debt_price_cents": 58,
+    "cash_runway_days": 75
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "distressed_restructuring",
+      "distressPosture": "full_distress"
+    },
+    "missingFields": [
+      "class_support_thresholds",
+      "milestones",
+      "fiduciary_out_terms"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "G28", "G29", "RSA", "covenant-amendment"]
+}

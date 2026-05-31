@@ -1,0 +1,52 @@
+{
+  "id": "PC-PARTIAL-CROSS-003",
+  "category": "PARTIAL",
+  "description": "Partial payload: Distressed + RE-heavy: hotel portfolio. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "hotel portfolio",
+    "asset_class": "real_estate",
+    "revenue_cents": 4500000000,
+    "ebitda_cents": -300000000,
+    "cash_runway_days": 90,
+    "jurisdiction": "US-FL",
+    "signals": {
+      "realEstatePercentOfEv": 60
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "league": "L4",
+      "industry": "hotel portfolio",
+      "jurisdiction": "US-FL",
+      "assetClass": "real_estate",
+      "distressPosture": "healthy",
+      "subJourney": "real_estate_overlay"
+    },
+    "missingFields": [
+      "property_appraisals_cents",
+      "secured_debt_cents",
+      "pre_petition_lender_list"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "cross-overlay",
+    "sell",
+    "partial",
+    "distressed",
+    "re-heavy",
+    "G28",
+    "G30"
+  ]
+}

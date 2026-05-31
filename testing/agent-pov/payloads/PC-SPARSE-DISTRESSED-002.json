@@ -1,0 +1,34 @@
+{
+  "id": "PC-SPARSE-DISTRESSED-002",
+  "category": "SPARSE",
+  "description": "Sparse DISTRESSED payload: single distress signal FCCR below 1. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "fccr": 0.85
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "distressPosture": "distressed"
+    },
+    "missingFields": [
+      "journey",
+      "industry",
+      "jurisdiction",
+      "revenue",
+      "deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "distressed",
+    "sparse",
+    "fccr"
+  ]
+}

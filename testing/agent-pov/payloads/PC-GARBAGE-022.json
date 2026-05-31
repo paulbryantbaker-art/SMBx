@@ -1,0 +1,18 @@
+{
+  "id": "PC-GARBAGE-022",
+  "category": "GARBAGE",
+  "description": "Deep nesting: deeply-nested arrays-of-arrays (~25 levels). Substrate must enforce max-depth and return structured 400.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "manufacturing",
+    "extra": [[[[[[[[[[[[[[[[[[[[[[[["leaf"]]]]]]]]]]]]]]]]]]]]]]]]
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "deep-nesting", "array-depth-24"]
+}

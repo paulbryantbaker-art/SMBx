@@ -1,0 +1,38 @@
+{
+  "category": "AMBIGUOUS",
+  "description": "IP licensor with operating revenue — could be ip_heavy or operating_co primary.",
+  "payload": {
+    "journey": "sell",
+    "sellerRole": "banker",
+    "industry": "IP licensing & technology",
+    "jurisdiction": "US-DE",
+    "league": "L4",
+    "ttmRevenueCents": 1800000000,
+    "adjustedEbitdaCents": 1100000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "sell",
+      "jurisdiction": "US-DE",
+      "industry": "IP licensing & technology",
+      "league": "L4"
+    },
+    "missingFields": [
+      "deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "ambiguous",
+    "asset-class"
+  ],
+  "id": "PC-AMBIGUOUS-ASSET-003"
+}

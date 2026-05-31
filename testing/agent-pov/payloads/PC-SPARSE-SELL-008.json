@@ -1,0 +1,35 @@
+{
+  "id": "PC-SPARSE-SELL-008",
+  "category": "SPARSE",
+  "description": "Sparse SELL payload: auction broken signal. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "seller_role": "broken_auction"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "healthy_sell_side"
+    },
+    "missingFields": [
+      "industry",
+      "revenue",
+      "ebitda",
+      "jurisdiction"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "sparse",
+    "broken-auction"
+  ]
+}

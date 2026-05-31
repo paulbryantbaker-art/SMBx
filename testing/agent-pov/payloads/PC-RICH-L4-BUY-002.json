@@ -1,0 +1,47 @@
+{
+  "id": "PC-RICH-L4-BUY-002",
+  "category": "RICH",
+  "description": "L4 industrial distribution buyout, S-corp seller with §338(h)(10), full LBO context.",
+  "payload": {
+    "journey": "buy",
+    "industry": "industrial parts distribution",
+    "naics": "423840",
+    "jurisdiction": "US-OH",
+    "league": "L4",
+    "ttmRevenueCents": 4200000000,
+    "ebitdaCents": 480000000,
+    "adjustedEbitdaCents": 530000000,
+    "purchasePriceCents": 3000000000,
+    "dealStructure": "stock_purchase",
+    "taxClassification": "s_corp",
+    "electionType": "338(h)(10)",
+    "financing": {
+      "sponsorEquityCents": 1500000000,
+      "seniorDebtCents": 1100000000,
+      "subordinatedDebtCents": 250000000,
+      "earnoutCents": 150000000
+    },
+    "stage": "diligence"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L4",
+      "jurisdiction": "US-OH",
+      "industry": "industrial parts distribution",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "s_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": ["compose_model_stack", "execute_model"],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": ["buy", "L4", "rich", "scorp", "338h10"]
+}

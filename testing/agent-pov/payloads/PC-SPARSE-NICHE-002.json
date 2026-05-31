@@ -1,0 +1,33 @@
+{
+  "id": "PC-SPARSE-NICHE-002",
+  "category": "SPARSE",
+  "description": "Sparse NICHE payload: NAICS-only payload. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "naics": "722511"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "leagueGuess": "L1"
+    },
+    "missingFields": [
+      "journey",
+      "revenue",
+      "sde",
+      "jurisdiction"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "niche",
+    "sparse",
+    "naics-only"
+  ]
+}

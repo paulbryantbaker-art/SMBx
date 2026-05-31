@@ -1,0 +1,16 @@
+{
+  "id": "PC-GARBAGE-014",
+  "category": "GARBAGE",
+  "description": "Missing required: finalize_deal_package called with no deal_id and no package metadata. Must return structured 400 listing deal_id as required.",
+  "payload": {
+    "format": "json"
+  },
+  "tool": "finalize_deal_package",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "missing-required", "finalize-no-deal_id"]
+}

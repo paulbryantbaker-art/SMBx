@@ -1,0 +1,46 @@
+{
+  "id": "PC-PARTIAL-DISTRESSED-008",
+  "category": "PARTIAL",
+  "description": "Partial payload: Distressed: stalking horse positioning. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "restaurant chain",
+    "deal_type": "363_sale",
+    "target_jurisdiction": "US-FL",
+    "stalking_horse_intent": true,
+    "target_revenue_cents": 3000000000,
+    "dealType": "363_sale"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "distressed_363_sale",
+      "league": "L4",
+      "industry": "restaurant chain",
+      "jurisdiction": "US-FL",
+      "distressPosture": "distressed"
+    },
+    "missingFields": [
+      "proposed_bid_cents",
+      "breakup_fee_pct",
+      "overbid_increment_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "distressed",
+    "buy",
+    "partial",
+    "stalking-horse",
+    "G28"
+  ]
+}

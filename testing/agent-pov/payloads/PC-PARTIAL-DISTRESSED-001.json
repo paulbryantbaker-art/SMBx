@@ -1,0 +1,47 @@
+{
+  "id": "PC-PARTIAL-DISTRESSED-001",
+  "category": "PARTIAL",
+  "description": "Partial payload: Distressed buy: 363 sale signals. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "consumer products",
+    "deal_type": "363_sale",
+    "target_ebitda_cents": -200000000,
+    "target_revenue_cents": 1500000000,
+    "target_jurisdiction": "US-DE",
+    "dealType": "363_sale"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "distressed_363_sale",
+      "league": "L3",
+      "industry": "consumer products",
+      "jurisdiction": "US-DE",
+      "distressPosture": "distressed"
+    },
+    "missingFields": [
+      "stalking_horse_bid_cents",
+      "auction_date",
+      "cash_burn_monthly_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "distressed",
+    "buy",
+    "L4",
+    "partial",
+    "363",
+    "G28"
+  ]
+}

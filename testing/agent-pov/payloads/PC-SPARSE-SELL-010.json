@@ -1,0 +1,37 @@
+{
+  "id": "PC-SPARSE-SELL-010",
+  "category": "SPARSE",
+  "description": "Sparse SELL payload: principal seller jurisdiction-only US-TX. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "seller_role": "principal",
+    "jurisdiction": "US-TX"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "principal_seller",
+      "jurisdiction": "US-TX"
+    },
+    "missingFields": [
+      "industry",
+      "sde",
+      "revenue",
+      "ebitda"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "sparse",
+    "principal"
+  ]
+}

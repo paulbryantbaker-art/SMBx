@@ -1,0 +1,34 @@
+{
+  "id": "PC-CROSS-DOMAIN-011",
+  "category": "CROSS_DOMAIN",
+  "description": "G29 + G30: Healthy operating co running an exchange offer (G29 via M160) backed by an RE-heavy collateral package (G30 via M187, M188). Substrate must surface exchange-offer mechanics AND RE asset/entity election simultaneously.",
+  "payload": {
+    "journey": "raise",
+    "subjourney": "debt_raise",
+    "target_industry": "hospitality real estate",
+    "target_jurisdiction": "US-FL",
+    "target_ebitda_cents": 350000000,
+    "real_estate_pct_of_ev": 60,
+    "lme_signal": "exchange_offer_announced",
+    "exchange_offer_participation_target": 90
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "capital_structure_or_liability_management",
+      "distressPosture": "partial_distress",
+      "assetClass": "real_estate"
+    },
+    "missingFields": [
+      "indenture_consent_thresholds",
+      "noi_normalization_inputs",
+      "title_commitment"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "G29", "G30", "exchange-offer", "RE-collateral"]
+}

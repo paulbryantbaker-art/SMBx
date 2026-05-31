@@ -1,0 +1,44 @@
+{
+  "id": "PC-PARTIAL-RAISE-004",
+  "category": "PARTIAL",
+  "description": "Partial payload: Series A priced: ARR + amount + pre. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "stage": "series_a",
+    "instrument": "priced_round",
+    "arr_cents": 350000000,
+    "target_amount_cents": 1200000000,
+    "pre_money_cents": 8000000000,
+    "industry": "B2B SaaS",
+    "jurisdiction": "US-DE"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "growth_raise",
+      "industry": "B2B SaaS",
+      "jurisdiction": "US-DE"
+    },
+    "missingFields": [
+      "growth_rate",
+      "gross_margin",
+      "lead_investor"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "series-a",
+    "priced",
+    "partial"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "id": "PC-PARTIAL-SELL-021",
+  "category": "PARTIAL",
+  "description": "Partial payload: L7 sell: aerospace components banker-led. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "aerospace components",
+    "jurisdiction": "US-WA",
+    "revenue_cents": 80000000000,
+    "ebitda_cents": 10500000000,
+    "seller_role": "banker_led",
+    "asking_price_cents": 65000000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "banker_led",
+      "league": "L6",
+      "industry": "aerospace components",
+      "jurisdiction": "US-WA"
+    },
+    "missingFields": [
+      "itar_status",
+      "backlog_cents",
+      "rwi_intent"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L7",
+    "partial"
+  ]
+}

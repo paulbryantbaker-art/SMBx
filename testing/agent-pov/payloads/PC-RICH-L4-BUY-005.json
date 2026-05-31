@@ -1,0 +1,45 @@
+{
+  "id": "PC-RICH-L4-BUY-005",
+  "category": "RICH",
+  "description": "L4 healthcare services PE buyout with QSBS-eligible founder rollover — rich tax context.",
+  "payload": {
+    "journey": "buy",
+    "industry": "ambulatory healthcare services",
+    "naics": "621498",
+    "jurisdiction": "US-CA",
+    "league": "L4",
+    "ttmRevenueCents": 2800000000,
+    "adjustedEbitdaCents": 520000000,
+    "purchasePriceCents": 4160000000,
+    "dealStructure": "stock_purchase",
+    "taxClassification": "c_corp",
+    "qsbsEligible": true,
+    "financing": {
+      "sponsorEquityCents": 2200000000,
+      "seniorDebtCents": 1800000000,
+      "rolloverEquityCents": 160000000
+    },
+    "stage": "loi"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L4",
+      "jurisdiction": "US-CA",
+      "industry": "ambulatory healthcare services",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": ["compose_model_stack", "execute_model"],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": ["buy", "L4", "rich", "qsbs", "healthcare"]
+}

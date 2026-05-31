@@ -163,9 +163,9 @@ function buildRevenueEnvironmentChecks(origin: string) {
     envCheck('stripe_secret_key', 'Stripe live secret key configured', looksLiveStripeSecretKey(process.env.STRIPE_SECRET_KEY), 'Configure STRIPE_SECRET_KEY with the live-mode key before taking paid traffic.'),
     envCheck('stripe_publishable_key', 'Stripe live publishable key configured', looksLiveStripePublishableKey(process.env.STRIPE_PUBLISHABLE_KEY), 'Configure STRIPE_PUBLISHABLE_KEY with the live-mode key for checkout and upgrade UI.'),
     envCheck('stripe_webhook_secret', 'Stripe webhook secret configured', looksConfigured(process.env.STRIPE_WEBHOOK_SECRET), 'Configure STRIPE_WEBHOOK_SECRET and verify checkout/subscription webhooks.'),
-    envCheck('stripe_price_solo', 'Solo price ID configured', looksConfigured(process.env.STRIPE_PRICE_SOLO), 'Configure STRIPE_PRICE_SOLO for the $79/month Solo plan.'),
-    envCheck('stripe_price_pro', 'Pro price ID configured', looksConfigured(process.env.STRIPE_PRICE_PRO), 'Configure STRIPE_PRICE_PRO for the $199/month Pro plan.'),
-    envCheck('stripe_price_team', 'Team price ID configured', looksConfigured(process.env.STRIPE_PRICE_TEAM), 'Configure STRIPE_PRICE_TEAM for the $499/month Team plan.'),
+    envCheck('stripe_price_solo', 'Solo price ID configured', looksConfigured(process.env.STRIPE_PRICE_SOLO), 'Configure STRIPE_PRICE_SOLO for the $99/month Solo plan.'),
+    envCheck('stripe_price_pro', 'Pro price ID configured', looksConfigured(process.env.STRIPE_PRICE_PRO), 'Configure STRIPE_PRICE_PRO for the $249/month Pro plan.'),
+    envCheck('stripe_price_team', 'Team price ID configured', looksConfigured(process.env.STRIPE_PRICE_TEAM), 'Configure STRIPE_PRICE_TEAM for the $749/month Team plan.'),
     envCheck('persistent_file_storage', 'Persistent file storage configured', isPersistentStorageConfigured(), 'Configure S3/R2/B2-compatible storage, or mount a persistent Railway volume at /data/uploads.'),
     envCheck('test_mode_false', 'TEST_MODE explicitly disabled for production', process.env.TEST_MODE === 'false', 'Set TEST_MODE=false in production before sending marketplace traffic.'),
   ];
@@ -177,7 +177,7 @@ function buildRevenueEnvironmentChecks(origin: string) {
     status: required.every(check => check.status === 'ready') ? 'ready' : 'blocked',
     required,
     optional,
-    pricingModel: 'Free / $79 Solo / $199 Pro / $499 Team / $2,500+ Enterprise monthly subscriptions; no wallet, referral fee, success fee, or deal-value fee.',
+    pricingModel: 'Free / $99 Solo / $249 Pro / $749 Team / $3,000+ Enterprise monthly subscriptions; no wallet, referral fee, success fee, or deal-value fee. Locked record: SMBX_PRICING_LOCKED.md.',
   };
 }
 

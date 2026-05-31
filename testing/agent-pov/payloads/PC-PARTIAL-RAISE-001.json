@@ -1,0 +1,43 @@
+{
+  "id": "PC-PARTIAL-RAISE-001",
+  "category": "PARTIAL",
+  "description": "Partial payload: Seed SAFE: amount + cap + industry. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "stage": "seed",
+    "instrument": "safe",
+    "target_amount_cents": 200000000,
+    "valuation_cap_cents": 1500000000,
+    "industry": "developer tools",
+    "jurisdiction": "US-CA"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "early_stage_raise",
+      "industry": "developer tools",
+      "jurisdiction": "US-CA"
+    },
+    "missingFields": [
+      "mrr_cents",
+      "team_size",
+      "use_of_proceeds"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "seed",
+    "safe",
+    "partial"
+  ]
+}

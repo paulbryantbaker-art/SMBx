@@ -1,0 +1,33 @@
+{
+  "id": "PC-CROSS-DOMAIN-003",
+  "category": "CROSS_DOMAIN",
+  "description": "G28 + G29: in-court Chapter 11 with DIP sizing needed (G28) PLUS drop-down basket LME structure pending (G29). Substrate must surface DIP (M158), plan feasibility (M152), AND drop-down (M162) and covenant-basket (M184) simultaneously.",
+  "payload": {
+    "journey": "buy",
+    "subjourney": "distressed_buy_side",
+    "target_industry": "energy services",
+    "target_jurisdiction": "US-TX",
+    "bankruptcy_status": "chapter_11_filed",
+    "dip_lender_identity": "TBD",
+    "lme_signal": "drop_down_basket_pending",
+    "cash_runway_days": 30
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "distressed_buy_side",
+      "distressPosture": "full_distress"
+    },
+    "missingFields": [
+      "purchase_price_range",
+      "credit_bid_eligibility",
+      "investment_basket_capacity"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "G28", "G29", "chapter-11", "LME-dropdown"]
+}

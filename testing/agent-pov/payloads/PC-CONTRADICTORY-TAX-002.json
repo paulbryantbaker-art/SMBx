@@ -1,0 +1,40 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "taxClassification='s_corp' (pass-through) but electionType='338(h)(10)' surfaced for healthcare-services seller — pass-through cannot also be C-corp-election eligible without restructure (QSBS-rollover variant of pass_through_with_c_corp_election).",
+  "payload": {
+    "journey": "sell",
+    "taxClassification": "s_corp",
+    "electionType": "338(h)(10)",
+    "qsbsEligible": true,
+    "section1202OriginalIssue": false,
+    "industry": "healthcare services",
+    "jurisdiction": "US-CA",
+    "league": "L4",
+    "askingPriceCents": 4160000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "sell",
+      "jurisdiction": "US-CA",
+      "industry": "healthcare services",
+      "league": "L4"
+    },
+    "missingFields": [
+      "explicit_taxClassification_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "tax-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-TAX-002"
+}

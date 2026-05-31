@@ -1,0 +1,38 @@
+{
+  "id": "PC-SPARSE-BUY-001",
+  "category": "SPARSE",
+  "description": "Sparse BUY payload: industry-only B2B services. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "B2B services"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "leagueGuess": "L4",
+      "industry": "B2B services"
+    },
+    "missingFields": [
+      "target_revenue",
+      "target_ebitda",
+      "target_jurisdiction",
+      "purchase_price_range"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L4-implicit",
+    "sparse",
+    "industry-only"
+  ]
+}

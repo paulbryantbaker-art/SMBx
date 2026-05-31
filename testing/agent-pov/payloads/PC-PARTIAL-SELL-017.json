@@ -1,0 +1,45 @@
+{
+  "id": "PC-PARTIAL-SELL-017",
+  "category": "PARTIAL",
+  "description": "Partial payload: L6 sell: industrial coatings carve-out. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "industrial coatings",
+    "jurisdiction": "US-DE",
+    "revenue_cents": 35000000000,
+    "ebitda_cents": 4200000000,
+    "seller_role": "banker_led",
+    "deal_type": "carve_out",
+    "parent_co": "public_co"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "banker_led",
+      "league": "L5",
+      "industry": "industrial coatings",
+      "jurisdiction": "US-DE"
+    },
+    "missingFields": [
+      "asking_price_cents",
+      "tsa_scope",
+      "allocated_overhead_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L6",
+    "partial",
+    "carve-out"
+  ]
+}

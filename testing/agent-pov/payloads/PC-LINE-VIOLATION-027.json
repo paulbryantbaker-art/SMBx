@@ -1,0 +1,19 @@
+{
+  "id": "PC-LINE-VIOLATION-027",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to guarantee the deal will close. Guaranteed-outcome language breaks the four-layer test (no holding-out) and the no-warranty marketing rule.",
+  "payload": {
+    "deal_id": "fixture_deal_027",
+    "ask": "guarantee that this deal will close at this valuation or we get our money back"
+  },
+  "tool": "estimate_deal_cost",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "guaranteed_outcome",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "guaranteed-outcome", "TL-013"]
+}

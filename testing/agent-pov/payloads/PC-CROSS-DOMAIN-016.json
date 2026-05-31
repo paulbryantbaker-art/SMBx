@@ -1,0 +1,37 @@
+{
+  "id": "PC-CROSS-DOMAIN-016",
+  "category": "CROSS_DOMAIN",
+  "description": "G28 + G29 + G30 triple overlay: distressed retail RE-heavy operator (G28 via 35-day runway), pending DIP+exchange offer (G29 via M158/M160), and 70% RE composition (G30). Substrate must compose all three overlays without dedup loss.",
+  "payload": {
+    "journey": "buy",
+    "subjourney": "distressed_buy_side",
+    "target_industry": "specialty retail",
+    "target_jurisdiction": "US-DE",
+    "real_estate_pct_of_ev": 70,
+    "cash_runway_days": 35,
+    "secured_debt_price_cents": 52,
+    "lme_signal": "exchange_offer_announced",
+    "bankruptcy_status": "imminent_filing",
+    "dip_lender_identity": "TBD"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "distressed_buy_side",
+      "distressPosture": "full_distress",
+      "assetClass": "real_estate"
+    },
+    "missingFields": [
+      "dip_term_sheet",
+      "exchange_offer_thresholds",
+      "rent_roll",
+      "title_commitment"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "G28", "G29", "G30", "triple-overlay"]
+}

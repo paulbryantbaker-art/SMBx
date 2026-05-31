@@ -1,0 +1,49 @@
+{
+  "id": "PC-PARTIAL-FIRPTA-001",
+  "category": "PARTIAL",
+  "description": "Partial payload: FIRPTA buy: foreign seller of US real-estate-heavy co. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "self-storage",
+    "target_jurisdiction": "US-NV",
+    "foreign_seller": true,
+    "target_revenue_cents": 6000000000,
+    "taxClassification": "foreign_entity",
+    "signals": {
+      "realEstatePercentOfEv": 85.0
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "league": "L4",
+      "industry": "self-storage",
+      "jurisdiction": "US-NV",
+      "taxClassification": "foreign_entity",
+      "assetClass": "real_estate",
+      "subJourney": "real_estate_overlay"
+    },
+    "missingFields": [
+      "amount_realized_cents",
+      "withholding_certificate_status",
+      "fixed_place_of_business_us"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "firpta",
+    "buy",
+    "partial",
+    "foreign-seller",
+    "G30"
+  ]
+}

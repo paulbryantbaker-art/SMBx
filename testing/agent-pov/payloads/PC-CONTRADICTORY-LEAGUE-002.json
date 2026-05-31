@@ -1,0 +1,36 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "league='L2' explicit but ttmRevenue=$650M — financials are L6/L7, not L2.",
+  "payload": {
+    "journey": "buy",
+    "league": "L2",
+    "ttmRevenueCents": 65000000000,
+    "adjustedEbitdaCents": 11000000000,
+    "industry": "CPG",
+    "jurisdiction": "US-NY"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-NY",
+      "industry": "CPG"
+    },
+    "missingFields": [
+      "explicit_league_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "league-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-LEAGUE-002"
+}

@@ -1,5 +1,3 @@
-import { type CSSProperties } from "react";
-import { V6Section } from "../Section";
 import { V6Icon } from "../icons";
 import type { OpenTab } from "../types";
 
@@ -43,145 +41,109 @@ export function V6IntelRoot({ openTab, onTalkToYulia }: { openTab: OpenTab; onTa
   };
 
   return (
-    <div className="m-fade-up m-page-flow" style={I.page}>
-      <V6Section
-        eyebrow="MARKET INTELLIGENCE"
-        title="What's moving"
-        sub="Sector reads, deal flow, comps — all synthesized from the sources you watch."
-        action={<button className="m-btn outlined" style={{ height: 32 }} onClick={() => watchSector()} type="button">+ Watch a sector</button>}
-      >
-        <div />
-      </V6Section>
+    <div className="wk-content m-fade-up" style={{ maxWidth: 1180, margin: "0 auto" }}>
+      <div className="pg-head">
+        <div>
+          <div className="pg-eyebrow">Market intelligence</div>
+          <div className="pg-title">What's moving</div>
+          <p className="pg-sub">Sector reads, deal flow, comps — all synthesized from the sources you watch.</p>
+        </div>
+        <div className="pg-actions">
+          <button className="wkbtn" type="button" onClick={() => watchSector()}>+ Watch a sector</button>
+        </div>
+      </div>
 
       {featured.map(f => (
-        <section key={f.id} style={{ marginBottom: 28 }}>
+        <div key={f.id} className="wksec" style={{ marginTop: 24 }}>
           <div
-            className="m-card elevated tap"
+            className="wkcard tap"
             onClick={() => openTab({ kind: "feed-item", title: f.title, id: f.id })}
             role="button"
             tabIndex={0}
             aria-label={`Featured: ${f.title}`}
             onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openTab({ kind: "feed-item", title: f.title, id: f.id }); } }}
-            style={{
-              padding: "32px 36px",
-              background: "linear-gradient(135deg, #DCE7F3 0%, #B8CCE3 100%)",
-              border: "none",
-              cursor: "pointer",
-            }}
+            style={{ padding: "28px 32px", background: "var(--surface-2)", border: "1px solid var(--line)" }}
           >
-            <div className="mono" style={I.featuredEyebrow}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--ink-3)", letterSpacing: "0.12em", fontWeight: 600, marginBottom: 12 }}>
               FEATURED · {f.sector.toUpperCase()} · {f.time.toUpperCase()}
             </div>
-            <h2 style={I.featuredH2}>{f.title}</h2>
-            <div style={I.featuredSub}>{f.sub}</div>
+            <h2 style={{ margin: 0, fontWeight: 700, fontSize: "clamp(1.35rem, 2.2vw, 1.75rem)", letterSpacing: "-0.025em", lineHeight: 1.15, color: "var(--ink)" }}>
+              {f.title}
+            </h2>
+            <div style={{ fontSize: "0.9rem", color: "var(--ink-2)", marginTop: 10 }}>{f.sub}</div>
           </div>
-        </section>
+        </div>
       ))}
 
-      <V6Section eyebrow="SECTORS YOU WATCH" title="Activity this week">
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 10 }}>
+      <div className="wksec">
+        <div className="wksec-title">Activity this week</div>
+        <p className="pg-sub" style={{ marginTop: 0, marginBottom: 14 }}>Sectors you watch.</p>
+        <div className="wkgrid g4">
           {SECTORS.map(s => (
             <div
               key={s.id}
-              className="m-card filled-tonal m-state tap"
+              className="wkcard tap"
               role="button"
               tabIndex={0}
               aria-label={`${s.name} — ${s.count} new signals, ${s.trend} this week`}
               onClick={() => watchSector(s.name)}
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); watchSector(s.name); } }}
-              style={{ padding: "14px 16px", cursor: "pointer" }}
             >
-              <div style={I.sectorName}>{s.name}</div>
-              <div style={I.sectorBody}>
-                <span className="mono" style={I.sectorCount}>{s.count}</span>
-                <span className="mono" style={{
-                  fontSize: 11, fontWeight: 600,
-                  color: s.trend.startsWith("+") ? "var(--m-pursue)" : "var(--m-pass)",
+              <div className="wkcard-title" style={{ fontSize: "0.9rem" }}>{s.name}</div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: 10 }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "1.5rem", fontWeight: 700, color: "var(--ink)", letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums" }}>
+                  {s.count}
+                </span>
+                <span style={{
+                  fontFamily: "var(--font-mono)", fontSize: "0.78rem", fontWeight: 600,
+                  color: s.trend.startsWith("+") ? "var(--accent-strong)" : "var(--st-risk-fg)",
                 }}>{s.trend}</span>
               </div>
-              <div className="mono" style={I.sectorSub}>NEW SIGNALS</div>
-            </div>
-          ))}
-        </div>
-      </V6Section>
-
-      <V6Section eyebrow="FEED" title="More from Yulia">
-        <div className="m-card" style={{ overflow: "hidden", padding: 0 }}>
-          {rest.map((f, i) => (
-            <div
-              key={f.id}
-              className="m-state"
-              onClick={() => openTab({ kind: "feed-item", title: f.title, id: f.id })}
-              role="button"
-              tabIndex={0}
-              aria-label={f.title}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openTab({ kind: "feed-item", title: f.title, id: f.id }); } }}
-              style={{
-                padding: "16px 22px",
-                borderBottom: i === rest.length - 1 ? "none" : "1px solid var(--m-outline-var)",
-                cursor: "pointer",
-                display: "flex", alignItems: "center", gap: 18,
-              }}
-            >
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div className="mono" style={I.feedEyebrow}>{f.sector.toUpperCase()} · {f.time.toUpperCase()}</div>
-                <div style={I.feedTitle}>{f.title}</div>
-                <div style={I.feedSub}>{f.sub}</div>
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.66rem", color: "var(--ink-3)", letterSpacing: "0.1em", marginTop: 4 }}>
+                NEW SIGNALS
               </div>
-              <span style={{ transform: "rotate(180deg)", display: "inline-flex", color: "var(--m-on-surface-mid)" }} aria-hidden="true">
-                <V6Icon name="back" size={12} />
-              </span>
             </div>
           ))}
         </div>
-      </V6Section>
+      </div>
+
+      <div className="wksec">
+        <div className="wksec-title">More from Yulia</div>
+        <table className="wktable">
+          <thead>
+            <tr>
+              <th>Topic</th>
+              <th>Summary</th>
+              <th className="r">When</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rest.map(f => (
+              <tr
+                key={f.id}
+                onClick={() => openTab({ kind: "feed-item", title: f.title, id: f.id })}
+                role="button"
+                aria-label={f.title}
+              >
+                <td>
+                  <div className="cellname">
+                    <span className="logo"><V6Icon name="feed" size={14} /></span>
+                    <div>
+                      <div className="nm">{f.title}</div>
+                      <div className="sub"><span style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", letterSpacing: "0.08em" }}>{f.sector.toUpperCase()}</span></div>
+                    </div>
+                  </div>
+                </td>
+                <td><span className="muted">{f.sub}</span></td>
+                <td className="r muted">{f.time.toUpperCase()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="tabfoot">
+          <span>{rest.length} {rest.length === 1 ? "item" : "items"} in feed</span>
+        </div>
+      </div>
     </div>
   );
 }
-
-const I: Record<string, CSSProperties> = {
-  page: {
-    width: "min(100%, 1440px)",
-    maxWidth: 1440,
-    margin: "0 auto",
-    boxSizing: "border-box",
-  },
-  featuredEyebrow: {
-    fontSize: 10, color: "var(--m-on-primary-container)",
-    letterSpacing: "0.14em", fontWeight: 600, marginBottom: 14,
-  },
-  featuredH2: {
-    fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 28,
-    letterSpacing: "-0.025em", lineHeight: 1.15, margin: 0,
-    color: "var(--m-on-primary-container)", textWrap: "balance",
-  },
-  featuredSub: {
-    fontSize: 13.5, color: "var(--m-on-primary-container)",
-    opacity: 0.78, marginTop: 10,
-  },
-  sectorName: {
-    fontSize: 12.5, fontWeight: 600, color: "var(--m-on-surface)",
-    letterSpacing: "-0.01em",
-  },
-  sectorBody: {
-    display: "flex", justifyContent: "space-between", alignItems: "baseline",
-    marginTop: 8,
-  },
-  sectorCount: {
-    fontSize: 18, fontWeight: 700, color: "var(--m-on-surface)",
-    letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums",
-  },
-  sectorSub: {
-    fontSize: 9.5, color: "var(--m-on-surface-mid)",
-    letterSpacing: "0.1em", marginTop: 2,
-  },
-  feedEyebrow: {
-    fontSize: 9.5, color: "var(--m-on-surface-mid)",
-    letterSpacing: "0.14em", fontWeight: 600, marginBottom: 6,
-  },
-  feedTitle: {
-    fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 16,
-    letterSpacing: "-0.02em", color: "var(--m-on-surface)", textWrap: "pretty",
-  },
-  feedSub: { fontSize: 12, color: "var(--m-on-surface-mid)", marginTop: 3 },
-};

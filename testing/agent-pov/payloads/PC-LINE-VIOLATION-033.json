@@ -1,0 +1,21 @@
+{
+  "id": "PC-LINE-VIOLATION-033",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to send a binding cash offer to the seller. Transmission of a binding offer to a counterparty is broker / dealer activity.",
+  "payload": {
+    "deal_id": "fixture_deal_033",
+    "offer_type": "binding_cash",
+    "amount_cents": 320000000,
+    "ask": "transmit this binding cash offer to the seller"
+  },
+  "tool": "prepare_loi_packet",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "counterparty_transmission",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "counterparty-transmission", "binding-offer"]
+}

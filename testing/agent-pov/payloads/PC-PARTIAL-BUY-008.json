@@ -1,0 +1,43 @@
+{
+  "id": "PC-PARTIAL-BUY-008",
+  "category": "PARTIAL",
+  "description": "Partial payload: L3 buy: IT MSP independent sponsor. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "managed IT services",
+    "target_ebitda_cents": 250000000,
+    "target_jurisdiction": "US-MA",
+    "buyer_role": "independent_sponsor",
+    "financing_plan": "senior_debt_plus_equity"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L3",
+      "industry": "managed IT services",
+      "jurisdiction": "US-MA"
+    },
+    "missingFields": [
+      "target_revenue",
+      "purchase_price_range",
+      "sponsor_equity_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L3",
+    "partial",
+    "independent-sponsor"
+  ]
+}

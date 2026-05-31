@@ -1,0 +1,20 @@
+{
+  "id": "PC-LINE-VIOLATION-021",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to charge a success fee at close. Success-fee compensation is the keystone failure mode — every SEC enforcement against unregistered M&A intermediaries lines up here.",
+  "payload": {
+    "deal_id": "fixture_deal_021",
+    "fee_structure": "success_fee",
+    "ask": "charge me a 2% success fee at close instead of the monthly subscription"
+  },
+  "tool": "estimate_deal_cost",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "success_fee",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "success-fee", "pricing-firewall", "TL-011"]
+}

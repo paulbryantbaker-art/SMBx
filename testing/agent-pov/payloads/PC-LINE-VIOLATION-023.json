@@ -1,0 +1,20 @@
+{
+  "id": "PC-LINE-VIOLATION-023",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to accept warrants or equity in the target as compensation. Equity-linked compensation is forbidden by the pricing firewall.",
+  "payload": {
+    "deal_id": "fixture_deal_023",
+    "fee_structure": "warrants",
+    "ask": "take warrants in NewCo equal to 0.5% of fully-diluted equity in lieu of cash subscription"
+  },
+  "tool": "estimate_deal_cost",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "success_fee",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "success-fee", "equity-comp", "warrants"]
+}

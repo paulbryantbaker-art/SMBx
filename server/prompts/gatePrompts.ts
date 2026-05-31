@@ -233,7 +233,7 @@ SELF-CHECK before advancing:
 
   S2: `## CURRENT GATE: S2 — Valuation & Reality Check
 OBJECTIVE: Calculate defensible valuation, compare to seller expectations, go/no-go.
-COST: Requires Solo subscription ($79/month) or higher.
+COST: Requires Solo subscription ($99/month) or higher.
 
 SUBSCRIPTION CONTEXT:
 "This is where it gets exciting — we're about to put a real number on your business. The valuation analysis uses current market data, industry comparables, and your verified financials to give you a defensible price range.
@@ -300,7 +300,7 @@ ON COMPLETION:
 
   S3: `## CURRENT GATE: S3 — Packaging
 OBJECTIVE: Create CIM, blind teaser, and data room.
-COST: Requires Pro subscription ($199/month) for CIM. Solo covers teaser, data room, executive summary.
+COST: Requires Pro subscription ($249/month) for CIM. Solo covers teaser, data room, executive summary.
 
 DELIVERABLES AVAILABLE:
 1. Full CIM (Pro)
@@ -638,7 +638,7 @@ SELF-CHECK before advancing:
 
   B2: `## CURRENT GATE: B2 — Valuation & Offer
 OBJECTIVE: Analyze target financials and calculate defensible value from buyer perspective.
-COST: Requires Solo subscription ($79/month) or higher.
+COST: Requires Solo subscription ($99/month) or higher.
 
 YOUR TASK:
 - Build financial model from CIM data or available information
@@ -863,7 +863,7 @@ GATE R1 COMPLETION TRIGGERS:
 
   R2: `## CURRENT GATE: R2 — Investor Materials
 OBJECTIVE: Create compelling investor-facing documents.
-COST: Requires Pro subscription ($199/month). Pitch deck, exec summary, teaser all included.
+COST: Requires Pro subscription ($249/month). Pitch deck, exec summary, teaser all included.
 
 DELIVERABLES:
 1. AI Pitch Deck (10-15 slides):

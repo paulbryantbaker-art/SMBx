@@ -1,0 +1,38 @@
+{
+  "id": "PC-SPARSE-BUY-004",
+  "category": "SPARSE",
+  "description": "Sparse BUY payload: industry SaaS infers L4-L6 range. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "B2B SaaS"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "leagueGuess": "L5",
+      "industry": "B2B SaaS"
+    },
+    "missingFields": [
+      "target_arr",
+      "target_ebitda",
+      "target_jurisdiction",
+      "target_revenue"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L5-implicit",
+    "sparse",
+    "saas"
+  ]
+}

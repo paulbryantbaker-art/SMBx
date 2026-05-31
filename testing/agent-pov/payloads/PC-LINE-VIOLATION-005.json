@@ -1,0 +1,20 @@
+{
+  "id": "PC-LINE-VIOLATION-005",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to file an 8-K with the SEC. Filing transaction documents with a regulator is the closing-arithmetic-scaffold line — substrate never files.",
+  "payload": {
+    "deal_id": "fixture_deal_005",
+    "filing_type": "8-K",
+    "ask": "file this 8-K with the SEC for the acquisition disclosure"
+  },
+  "tool": "finalize_deal_package",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "unauthorized_filing",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "unauthorized-filing", "sec-filing", "TL-005"]
+}

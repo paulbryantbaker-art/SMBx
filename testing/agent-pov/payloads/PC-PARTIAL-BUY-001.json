@@ -1,0 +1,41 @@
+{
+  "id": "PC-PARTIAL-BUY-001",
+  "category": "PARTIAL",
+  "description": "Partial payload: L1 micro buy: industry + jurisdiction + SDE + price. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "lawn care services",
+    "target_jurisdiction": "US-OH",
+    "target_sde_cents": 35000000,
+    "purchase_price_range": "125k-200k"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L2",
+      "industry": "lawn care services",
+      "jurisdiction": "US-OH",
+      "distressPosture": "healthy"
+    },
+    "missingFields": [
+      "target_revenue",
+      "buyer_role",
+      "financing_plan"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L1",
+    "partial"
+  ]
+}

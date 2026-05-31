@@ -1,0 +1,56 @@
+{
+  "category": "RICH",
+  "description": "L8 cross-border (UK target, US buyer) — full structure with CFIUS-equivalent UK regulatory note.",
+  "payload": {
+    "journey": "buy",
+    "industry": "aerospace components manufacturing",
+    "naics": "336413",
+    "jurisdiction": "UK",
+    "buyerJurisdiction": "US-DE",
+    "league": "L8",
+    "ttmRevenueCents": 78000000000,
+    "adjustedEbitdaCents": 13000000000,
+    "purchasePriceCents": 156000000000,
+    "dealStructure": "stock_purchase",
+    "taxClassification": "foreign_entity",
+    "hsrReportable": true,
+    "nsiaReview": true,
+    "financing": {
+      "sponsorEquityCents": 90000000000,
+      "seniorDebtCents": 60000000000,
+      "subordinatedDebtCents": 6000000000
+    },
+    "stage": "loi"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L8",
+      "jurisdiction": "UK",
+      "industry": "aerospace components manufacturing",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "foreign_entity"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L8",
+    "rich",
+    "cross-border",
+    "nsia"
+  ],
+  "id": "PC-RICH-L8-BUY-003"
+}

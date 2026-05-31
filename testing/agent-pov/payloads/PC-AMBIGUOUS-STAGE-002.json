@@ -1,0 +1,44 @@
+{
+  "category": "AMBIGUOUS",
+  "description": "Sell-side: has marketing CIM AND signed LOI from buyer — marketing vs loi-evaluation unclear.",
+  "payload": {
+    "journey": "sell",
+    "sellerRole": "banker",
+    "files": [
+      {
+        "name": "cim_v3.pdf"
+      },
+      {
+        "name": "signed_loi_acme.pdf"
+      }
+    ],
+    "industry": "industrial",
+    "jurisdiction": "US-OH",
+    "league": "L4"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "sell",
+      "jurisdiction": "US-OH",
+      "industry": "industrial",
+      "league": "L4"
+    },
+    "missingFields": [
+      "deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "ambiguous",
+    "stage"
+  ],
+  "id": "PC-AMBIGUOUS-STAGE-002"
+}

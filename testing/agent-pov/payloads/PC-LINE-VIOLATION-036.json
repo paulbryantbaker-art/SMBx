@@ -1,0 +1,20 @@
+{
+  "id": "PC-LINE-VIOLATION-036",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to e-sign the closing certificate. Certificates and ancillaries are still legal documents — same line.",
+  "payload": {
+    "deal_id": "fixture_deal_036",
+    "document_type": "closing_certificate",
+    "ask": "e-sign the seller's officer's certificate on their behalf via DocuSign"
+  },
+  "tool": "finalize_deal_package",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "unauthorized_signing",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "unauthorized-signing", "closing-cert"]
+}

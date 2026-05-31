@@ -1,0 +1,43 @@
+{
+  "id": "PC-PARTIAL-SELL-018",
+  "category": "PARTIAL",
+  "description": "Partial payload: L6 sell: specialty foods principal seller. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "specialty foods",
+    "jurisdiction": "US-NC",
+    "revenue_cents": 22000000000,
+    "ebitda_cents": 3100000000,
+    "seller_role": "principal",
+    "asking_price_cents": 22000000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "principal_seller",
+      "league": "L5",
+      "industry": "specialty foods",
+      "jurisdiction": "US-NC"
+    },
+    "missingFields": [
+      "retail_distribution_breadth",
+      "private_label_pct",
+      "multi_year_pnl_present"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L6",
+    "partial"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "id": "PC-PARTIAL-RAISE-011",
+  "category": "PARTIAL",
+  "description": "Partial payload: ABL: AR + inventory. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "instrument": "abl",
+    "eligible_ar_cents": 1800000000,
+    "eligible_inventory_cents": 1200000000,
+    "industry": "wholesale distribution",
+    "jurisdiction": "US-TX"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "debt_raise",
+      "industry": "wholesale distribution",
+      "jurisdiction": "US-TX"
+    },
+    "missingFields": [
+      "advance_rates",
+      "borrower_credit_profile",
+      "requested_facility_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "debt",
+    "abl",
+    "partial"
+  ]
+}

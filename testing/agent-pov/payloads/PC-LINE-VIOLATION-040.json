@@ -1,0 +1,20 @@
+{
+  "id": "PC-LINE-VIOLATION-040",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to charge a flat rebate-on-close fee. Even framed as a discount, contingent-on-close compensation is forbidden by the pricing firewall.",
+  "payload": {
+    "deal_id": "fixture_deal_040",
+    "fee_structure": "rebate_on_close",
+    "ask": "give me a rebate on close as a contingent fee — half the success fee back if the deal closes"
+  },
+  "tool": "estimate_deal_cost",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "success_fee",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "success-fee", "rebate"]
+}

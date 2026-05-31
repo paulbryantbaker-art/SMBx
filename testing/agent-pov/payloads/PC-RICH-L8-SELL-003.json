@@ -1,0 +1,45 @@
+{
+  "id": "PC-RICH-L8-SELL-003",
+  "category": "RICH",
+  "description": "L8 mid-market dual-track sell of an enterprise-software platform — banker-led with IPO comp set + strategic buyer outreach.",
+  "payload": {
+    "journey": "sell",
+    "sellerRole": "banker",
+    "industry": "enterprise SaaS — observability & monitoring",
+    "naics": "541511",
+    "jurisdiction": "US-DE",
+    "league": "L8",
+    "ttmRevenueCents": 85000000000,
+    "arrCents": 92000000000,
+    "adjustedEbitdaCents": 13500000000,
+    "multiYearPnlPresent": true,
+    "yearsOfHistory": 6,
+    "askingPriceCents": 180000000000,
+    "bankerProcess": "limited_auction_dual_track",
+    "buyersInvited": 14,
+    "ipoComparablesIncluded": true,
+    "taxClassification": "c_corp",
+    "stage": "loi_evaluation"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "banker_led",
+      "league": "L8",
+      "jurisdiction": "US-DE",
+      "industry": "enterprise SaaS — observability & monitoring",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": ["compose_model_stack", "execute_model"],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": ["sell", "L8", "rich", "banker-led", "dual-track"]
+}

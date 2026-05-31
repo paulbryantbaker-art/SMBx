@@ -1,0 +1,34 @@
+{
+  "id": "PC-SPARSE-PMI-003",
+  "category": "SPARSE",
+  "description": "Sparse PMI payload: PMI assessment only. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "journey": "pmi",
+    "stage": "assessment"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "pmi",
+      "subJourney": "pmi_assessment"
+    },
+    "missingFields": [
+      "target_entity",
+      "industry",
+      "deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "pmi",
+    "sparse",
+    "assessment"
+  ]
+}

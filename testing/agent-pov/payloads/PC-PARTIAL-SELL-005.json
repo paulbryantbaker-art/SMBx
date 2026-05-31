@@ -1,0 +1,42 @@
+{
+  "id": "PC-PARTIAL-SELL-005",
+  "category": "PARTIAL",
+  "description": "Partial payload: L2 sell: small CPA practice. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "CPA firm",
+    "jurisdiction": "US-NY",
+    "sde_cents": 80000000,
+    "revenue_cents": 320000000,
+    "seller_role": "principal",
+    "naics": "541211"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "principal_seller",
+      "league": "L2",
+      "industry": "CPA firm",
+      "jurisdiction": "US-NY"
+    },
+    "missingFields": [
+      "client_retention_rate",
+      "asking_price_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L2",
+    "partial"
+  ]
+}

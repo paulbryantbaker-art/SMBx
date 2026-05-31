@@ -3,12 +3,12 @@
  *
  * Replaces: walletService, paywallService, dealExecutionFee, platformFeeService.
  *
- * Pricing model:
- *   Free     — $0      — Unlimited Yulia conversation + ONE ValueLens / deal-score style deliverable (email required)
- *   Solo     — $79/mo  — Unlimited ValueLens, deal scoring, VRR, SDE/EBITDA, exports, 1 supervised MCP/agent key
- *   Pro      — $199/mo — Everything + CIM, deal room, market discovery, source routing, DD/LOI scaffolds, living docs, 3 supervised MCP/agent keys
- *   Team     — $499/mo — Shared deal vault, firm templates, seats, specialist handoff, supervised agent workflows
- *   Enterprise — $2,500+/mo — Single-tenant, SSO, API controls, portfolio infrastructure, governed autonomous agent scope
+ * Pricing model (locked 2026-05-27, source of truth: SMBX_PRICING_LOCKED.md):
+ *   Free       — $0          — Unlimited Yulia conversation + ONE free deliverable (email required)
+ *   Solo       — $99/mo      — Unlimited ValueLens, deal scoring, VRR, SDE/EBITDA, exports, 1 supervised MCP/agent key
+ *   Pro        — $249/mo     — Everything + CIM, deal room, market discovery, source routing, DD/LOI scaffolds, 3 supervised MCP/agent keys
+ *   Team       — $749/mo     — Shared deal vault, firm templates, seats, specialist handoff, supervised agent workflows
+ *   Enterprise — $3,000+/mo  — Single-tenant, SSO, API controls, portfolio infrastructure, governed autonomous agent scope
  *
  * Rules:
  *   - Published list pricing is monthly.
@@ -50,10 +50,10 @@ export interface PlanInfo {
 
 export const PLANS: Record<Plan, PlanInfo> = {
   free: { plan: 'free', name: 'Free', priceCents: 0, priceDisplay: 'Free', note: 'Unlimited Yulia conversation + one free deliverable' },
-  solo: { plan: 'solo', name: 'Solo', priceCents: 7900, priceDisplay: '$79/month', note: 'Unlimited analysis, valuations, exports, solo deal desk workflows, and one supervised MCP/agent key' },
-  pro: { plan: 'pro', name: 'Pro', priceCents: 19900, priceDisplay: '$199/month', note: 'CIM, deal room, market discovery, source routing, living docs, and parallel deal work' },
-  team: { plan: 'team', name: 'Team', priceCents: 49900, priceDisplay: '$499/month', note: 'Seats, shared vaults, firm templates, specialist handoffs, and supervised agent workflows' },
-  enterprise: { plan: 'enterprise', name: 'Enterprise', priceCents: 250000, priceDisplay: '$2,500+/month', note: 'Single-tenant, SSO, API controls, portfolio infrastructure, and governed autonomous agent scope' },
+  solo: { plan: 'solo', name: 'Solo', priceCents: 9900, priceDisplay: '$99/month', note: 'Unlimited analysis, valuations, exports, solo deal desk workflows, and one supervised MCP/agent key' },
+  pro: { plan: 'pro', name: 'Pro', priceCents: 24900, priceDisplay: '$249/month', note: 'CIM, deal room, market discovery, source routing, living docs, and parallel deal work' },
+  team: { plan: 'team', name: 'Team', priceCents: 74900, priceDisplay: '$749/month', note: 'Seats, shared vaults, firm templates, specialist handoffs, and supervised agent workflows' },
+  enterprise: { plan: 'enterprise', name: 'Enterprise', priceCents: 300000, priceDisplay: '$3,000+/month', note: 'Single-tenant, SSO, API controls, portfolio infrastructure, and governed autonomous agent scope' },
 };
 
 // ─── Deliverable tier classification ────────────────────────

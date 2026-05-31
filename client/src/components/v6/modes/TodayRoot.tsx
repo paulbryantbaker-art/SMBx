@@ -1,22 +1,13 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { authHeaders, type User } from "../../../hooks/useAuth";
 import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
 import { useTodayOperatingBrief, type TodayDealPulseItem, type TodayDefinitiveDealState, type TodayFirmMemorySnapshot, type TodayGateCountdownItem, type TodayModelRefreshItem, type TodayOperatingBrief, type TodayStudioRefreshItem } from "../../../hooks/useTodayOperatingBrief";
 import { useV6WorkspaceData, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
-import { LOGGED_OUT_HERO_COPY } from "../../../lib/copy";
-import { DESKTOP_TEXTURES } from "../../../lib/randomTextures";
 import { openSavedModelExecutionAsRerun } from "../../../lib/modelRerunActions";
 import { executeSurfaceAction, type ActionDeal } from "../../../lib/v6ActionContracts";
 import { isSurfaceActionId, type SurfaceActionId } from "../../../lib/v6SurfaceActions";
 import type { OpenTab, StudioFormatId } from "../types";
 import { V6Icon } from "../icons";
-import {
-  studioCompeteButtonItemStyles,
-  studioCompeteCardStyles,
-  studioFormatCardBackground,
-  studioListCardStyles,
-  studioTextureCardStyles,
-} from "../styles/studioSurfaces";
 import { DefinitiveSurfacePanel } from "../shared/DefinitiveSurfacePanel";
 
 type Tone = "gold" | "cactus" | "oat" | "plum" | "charcoal";
@@ -178,6 +169,15 @@ interface TodayRootProps {
   user: User | null;
 }
 
+// Map tone key to muted statpill class for file/deal status chips
+function toneToStatpill(t: Tone): string {
+  if (t === "gold") return "review";
+  if (t === "cactus") return "diligence";
+  if (t === "plum") return "diligence";
+  if (t === "charcoal") return "missing";
+  return "missing";
+}
+
 export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const home = useHomeDeals(user);
   const workspace = useV6WorkspaceData(user);
@@ -234,7 +234,6 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
     [liveBrief?.files, workspace.canFetch, workspace.deliverables],
   );
   const lead = deals[0] ?? null;
-  const isLoggedOutHero = !home.isAuthed;
   const leadTitle = lead?.title ?? "your first deal";
   const marketIntel = liveBrief?.marketIntelligence ?? {
     eyebrow: waitingForYuliaRead ? "YULIA READ REFRESHING" : "MARKET INTELLIGENCE LIVE",
@@ -457,48 +456,103 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
       ]);
 
   return (
-    <div className="m-fade-up" style={showLoggedOutMarketing ? { ...T.page, ...T.loggedOutPage } : T.page}>
-      <div className="m-page-flow" style={T.pageContent}>
-      <section className="m-flow-grid" style={T.heroGrid}>
-        <article style={{ ...T.leadCard, backgroundImage: todayHeroWash(useSampleData) }}>
-          <div style={T.leadTop}>
-            <button className="m-glint m-glass-control" style={T.smallGhost} onClick={() => ask("Give me the short version of today's deal brief.")} type="button">
-              Ask Yulia <span aria-hidden="true">↗</span>
-            </button>
-          </div>
-
-          <h1 style={T.headline}>
-            {liveBrief?.hero.title || (showLoggedOutMarketing ? (
-              <>Connect sourcing, diligence, execution, and value creation in one workflow.</>
-            ) : waitingForYuliaRead ? (
-              <>Yulia is refreshing <span style={T.headlineSerif}>your portfolio read</span>.</>
-            ) : lead ? (
-              <>Yulia's read: <span style={T.headlineSerif}>{leadTitle}</span> needs your eye before the next buyer touch.</>
-            ) : (
-              <>Yulia is ready when <span style={T.headlineSerif}>your first deal</span> lands.</>
-            ))}
-          </h1>
-
-          <p style={T.lede}>
-            {liveBrief?.hero.lede || (showLoggedOutMarketing
-              ? "smbX.ai connects institutional deal intelligence, workflow execution, and continuous transaction context across the deal lifecycle — from sourcing and diligence through post-close value realization."
-              : waitingForYuliaRead
-              ? "The page is holding the surface, but the next-move copy belongs to Yulia's briefing layer. When it returns, the cards below will reflect her sourced read."
-              : lead
-              ? "The deal is still worth pursuing. Review the IOI, answer counsel on the NDA, and keep the buyer search narrow until working capital is buttoned up."
-              : "No private workspace data is attached to this account yet. Start with a chat, source file, target, buyer pool, or deal thesis and Yulia will build the right surfaces around it.")}
+    <div className="wk-content m-fade-up" style={{ maxWidth: 1180, margin: "0 auto" }}>
+      {/* ── Page header ── */}
+      <div className="pg-head">
+        <div>
+          <div className="pg-eyebrow">Operating brief</div>
+          <div className="pg-title">Today</div>
+          <p className="pg-sub">
+            {liveBrief?.hero.lede
+              || (showLoggedOutMarketing
+                ? "smbX connects sourcing, diligence, execution, and value creation in one workflow."
+                : waitingForYuliaRead
+                  ? "Yulia is refreshing your portfolio read."
+                  : lead
+                    ? `${lead.title} needs your eye before the next buyer touch.`
+                    : "No live workspace yet. Start with a deal, thesis, or source file.")}
           </p>
+        </div>
+        <div className="pg-actions">
+          <button className="kebab" type="button" aria-label="More" onClick={() => ask("Give me the short version of today's deal brief.")}>⋯</button>
+          <button className="wkbtn" type="button" onClick={() => ask("Give me the short version of today's deal brief.")}>Ask Yulia</button>
+          <button
+            className="wkbtn primary"
+            type="button"
+            onClick={() => liveBrief?.hero.primaryPrompt
+              ? ask(liveBrief.hero.primaryPrompt)
+              : showLoggedOutMarketing
+                ? ask("Help me connect sourcing, diligence, execution, and value creation in one workflow.")
+              : lead
+                ? openDoc(`${lead.title} · IOI v3`)
+                : ask("Help me start my first SMBx deal workspace.")}
+          >
+            {liveBrief?.hero.primaryLabel || (showLoggedOutMarketing ? "Chat with Yulia" : lead ? "Review IOI" : "Start with Yulia")}
+          </button>
+        </div>
+      </div>
 
-          <div className="m-flow-grid" style={T.briefNotes}>
+      {/* ── KPI metric tiles ── */}
+      <div className="mhead">
+        <div className="mh">
+          <span className="l">Deals active</span>
+          <span className="v">{deals.length}</span>
+          <span className="s">{deals.filter(d => d.status === "Pursue").length} pursue</span>
+        </div>
+        <div className="mh">
+          <span className="l">Priority queue</span>
+          <span className="v" style={{ color: "var(--accent-strong)" }}>{priorities.length}</span>
+          <span className="s">items surfaced</span>
+        </div>
+        <div className="mh">
+          <span className="l">Files</span>
+          <span className="v">{files.length}</span>
+          <span className="s">need your eye</span>
+        </div>
+        <div className="mh">
+          <span className="l">Intel</span>
+          <span className="v">{marketIntel.confidence}</span>
+          <span className="s">{marketIntel.sourceCount > 0 ? `${marketIntel.sourceCount} sources` : "market desk"}</span>
+        </div>
+      </div>
+
+      {/* ── Hero + Market desk two-col grid ── */}
+      <div className="wkgrid g2" style={{ gap: 16, marginTop: 4 }}>
+        {/* Hero card */}
+        <div className="wkcard" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+          <div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", letterSpacing: "0.08em", color: "var(--ink-3)", fontWeight: 600, textTransform: "uppercase", marginBottom: 8 }}>
+              {showLoggedOutMarketing ? "DEAL INTELLIGENCE" : waitingForYuliaRead ? "YULIA READ REFRESHING" : lead ? "LEAD DEAL" : "GET STARTED"}
+            </div>
+            <div style={{ fontSize: "clamp(1.45rem, 2.4vw, 2rem)", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1.1, color: "var(--ink)" }}>
+              {liveBrief?.hero.title || (showLoggedOutMarketing ? (
+                <>Connect sourcing, diligence, execution, and value creation.</>
+              ) : waitingForYuliaRead ? (
+                <>Yulia is refreshing your portfolio read.</>
+              ) : lead ? (
+                <>{leadTitle} needs your eye before the next buyer touch.</>
+              ) : (
+                <>Yulia is ready when your first deal lands.</>
+              ))}
+            </div>
+          </div>
+
+          {/* Brief notes */}
+          <div className="wkgrid g3" style={{ gap: 10 }}>
             {heroNotes.slice(0, 3).map(note => (
-              <BriefNote key={note.label} label={note.label} text={note.text} />
+              <div key={note.label} style={{ padding: "12px 14px", background: "var(--surface-2)", border: "1px solid var(--line)", borderRadius: 10 }}>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.68rem", letterSpacing: "0.1em", color: "var(--ink-3)", fontWeight: 600, textTransform: "uppercase", marginBottom: 6 }}>{note.label}</div>
+                <div style={{ fontSize: "0.84rem", lineHeight: 1.45, color: "var(--ink-2)" }}>{note.text}</div>
+              </div>
             ))}
           </div>
 
-          <div className="m-flow-grid" style={T.heroActionGrid}>
+          {/* Actions */}
+          <div style={{ display: "flex", gap: 9, marginTop: "auto" }}>
             <button
-              className="m-glint m-glass-control"
-              style={T.heroGlassAction}
+              className="wkbtn primary"
+              type="button"
+              style={{ flex: 1 }}
               onClick={() => liveBrief?.hero.primaryPrompt
                 ? ask(liveBrief.hero.primaryPrompt)
                 : showLoggedOutMarketing
@@ -506,18 +560,12 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
                 : lead
                   ? openDoc(`${lead.title} · IOI v3`)
                   : ask("Help me start my first SMBx deal workspace.")}
-              type="button"
             >
-              <span style={T.yTile}>Y</span>
-              <span style={T.heroActionCopy}>
-                <strong>{liveBrief?.hero.primaryLabel || (showLoggedOutMarketing ? "Chat with Yulia" : lead ? "Review IOI" : "Start with Yulia")}</strong>
-                <span>{showLoggedOutMarketing ? "Start with a thesis, source file, target, buyer, or deal question." : lead ? "Open the work product Yulia wants reviewed first." : "Chat first; Yulia will build the surface around the deal."}</span>
-              </span>
-              <span style={T.heroActionPill}>{showLoggedOutMarketing ? "Start" : lead ? "Open" : "Start"}</span>
+              {liveBrief?.hero.primaryLabel || (showLoggedOutMarketing ? "Chat with Yulia" : lead ? "Review IOI" : "Start with Yulia")}
             </button>
             <button
-              className="m-glint m-glass-control"
-              style={T.heroGlassActionSecondary}
+              className="wkbtn"
+              type="button"
               onClick={() => {
                 const secondaryId = liveBrief?.hero.secondaryDealId;
                 if (secondaryId) {
@@ -531,265 +579,261 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
                 }
                 openTab({ kind: "mode-root", modeId: "pipeline", id: "pipeline-root", title: "Pipeline", pinned: true });
               }}
-              type="button"
             >
-              <span>{liveBrief?.hero.secondaryLabel || (showLoggedOutMarketing ? "Try sample deal" : lead ? "Open deal" : "Open pipeline")}</span>
-              <span aria-hidden="true">›</span>
+              {liveBrief?.hero.secondaryLabel || (showLoggedOutMarketing ? "Try sample deal" : lead ? "Open deal" : "Open pipeline")}
             </button>
           </div>
-        </article>
+        </div>
 
-        <aside style={{ ...T.marketPanel, backgroundImage: todayPortfolioWash }}>
-          <div style={T.liveHeader}>
-            <div>
-              <div className="mono" style={T.marketEyebrow}>YULIA'S MARKET DESK</div>
-              <h2 style={T.panelTitle}>Portfolio intelligence</h2>
-            </div>
+        {/* Market desk card */}
+        <div className="wkcard" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", letterSpacing: "0.08em", color: "var(--ink-3)", fontWeight: 600, textTransform: "uppercase", marginBottom: 4 }}>YULIA'S MARKET DESK</div>
+            <div style={{ fontSize: "1.15rem", fontWeight: 700, letterSpacing: "-0.03em", color: "var(--ink)", lineHeight: 1.1 }}>Portfolio intelligence</div>
           </div>
 
-          <div className="m-flow-grid" style={T.workStack}>
+          {/* Intel lead */}
+          <button
+            type="button"
+            style={{ all: "unset", display: "block", cursor: "pointer", padding: "12px 14px", background: "var(--surface-2)", border: "1px solid var(--line)", borderRadius: 10, width: "100%", boxSizing: "border-box" }}
+            onClick={() => ask("Show me the portfolio market intelligence read. Separate market, buyer/capital, tax, legal, and source gaps.")}
+          >
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.68rem", letterSpacing: "0.10em", color: "var(--ink-3)", fontWeight: 600, textTransform: "uppercase", marginBottom: 6 }}>{marketIntel.eyebrow}</div>
+            <strong style={{ display: "block", color: "var(--ink)", fontSize: "0.94rem", lineHeight: 1.3, fontWeight: 700 }}>{marketIntel.headline}</strong>
+            <span style={{ display: "block", marginTop: 5, color: "var(--ink-2)", fontSize: "0.82rem", lineHeight: 1.42 }}>{marketIntel.subhead}</span>
+          </button>
+
+          {/* Intel bullets */}
+          {marketIntel.bullets?.length > 0 && marketIntel.bullets.slice(0, 3).map((bullet) => (
             <button
+              key={bullet}
               type="button"
-              className="m-nudge-soft"
-              style={T.intelLead}
-              onClick={() => ask("Show me the portfolio market intelligence read. Separate market, buyer/capital, tax, legal, and source gaps.")}
+              style={{ all: "unset", cursor: "pointer", display: "block", padding: "9px 12px", background: "var(--surface-2)", border: "1px solid var(--line)", borderRadius: 9, color: "var(--ink-2)", fontSize: "0.83rem", lineHeight: 1.38, width: "100%", boxSizing: "border-box" }}
+              onClick={() => ask(`Unpack this market intelligence note: ${bullet}`)}
             >
-              <div className="mono" style={T.intelLeadEyebrow}>{marketIntel.eyebrow}</div>
-              <strong style={T.intelLeadTitle}>{marketIntel.headline}</strong>
-              <span style={T.intelLeadSub}>{marketIntel.subhead}</span>
+              {bullet}
             </button>
+          ))}
 
-            {marketIntel.bullets?.length > 0 && marketIntel.bullets.slice(0, 3).map((bullet) => (
-                <button
-                  key={bullet}
-                  type="button"
-                  className="m-nudge-soft"
-                  style={T.intelBullet}
-                  onClick={() => ask(`Unpack this market intelligence note: ${bullet}`)}
-                >
-                  {bullet}
-                </button>
-            ))}
-
-            {liveDesk.map(item => (
-              <button
-                key={item.title}
-                className="m-nudge-soft"
-                style={T.workCard}
-                onClick={() => ask(item.prompt || `${item.eyebrow.toLowerCase()}: ${item.title}. What changed and what should I do next?`)}
-                type="button"
-              >
-                <div style={T.workTitle}>{item.title}</div>
-                <div style={T.workSub}>{item.sub}</div>
-                <div style={T.meterTrack}>
-                  <span style={{ ...T.meterFill, width: `${item.pct}%`, background: tone(item.tone).ink }} />
-                </div>
-              </button>
-            ))}
-          </div>
-        </aside>
-      </section>
-
-      <section style={T.section}>
-        <SectionHead eyebrow="YULIA PRIORITY QUEUE" title="What needs action" sub="Three moves surfaced from the live portfolio read." />
-        <div className="m-flow-grid" style={T.priorityGrid}>
-          {priorities.map((item, index) => (
-            <PriorityCard key={item.title} index={index + 1} {...item} />
+          {/* Live desk items */}
+          {liveDesk.map(item => (
+            <button
+              key={item.title}
+              type="button"
+              style={{ all: "unset", cursor: "pointer", display: "block", padding: "11px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", borderRadius: 10, width: "100%", boxSizing: "border-box" }}
+              onClick={() => ask(item.prompt || `${item.eyebrow.toLowerCase()}: ${item.title}. What changed and what should I do next?`)}
+            >
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.68rem", letterSpacing: "0.10em", color: "var(--ink-3)", fontWeight: 600, textTransform: "uppercase", marginBottom: 4 }}>{item.eyebrow}</div>
+              <div style={{ color: "var(--ink)", fontSize: "0.9rem", fontWeight: 600 }}>{item.title}</div>
+              <div style={{ color: "var(--ink-2)", fontSize: "0.82rem", lineHeight: 1.45, marginTop: 3 }}>{item.sub}</div>
+              {/* Flat progress bar replacing gradient meter */}
+              <div style={{ marginTop: 10, height: 4, borderRadius: 999, background: "var(--surface-2)", overflow: "hidden" }}>
+                <span style={{ display: "block", height: "100%", borderRadius: 999, width: `${item.pct}%`, background: "var(--accent-strong)" }} />
+              </div>
+            </button>
           ))}
         </div>
-      </section>
+      </div>
 
-      <section style={T.section}>
+      {/* ── Priority queue ── */}
+      <div className="wksec">
+        <div className="pg-head" style={{ alignItems: "center", marginBottom: 14 }}>
+          <div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", letterSpacing: "0.08em", color: "var(--ink-3)", fontWeight: 600, textTransform: "uppercase", marginBottom: 4 }}>YULIA PRIORITY QUEUE</div>
+            <div className="wksec-title" style={{ marginBottom: 0 }}>What needs action</div>
+          </div>
+          <div className="pg-actions">
+            <button className="kebab" type="button" aria-label="More" onClick={() => ask("Show my full priority queue with sources.")}>⋯</button>
+          </div>
+        </div>
+        <div className="wkgrid g3" style={{ gap: 14 }}>
+          {priorities.map((item, index) => (
+            <button key={item.title} className="wkcard tap" style={{ all: "unset", cursor: "pointer", display: "block", padding: "18px 20px", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 14, boxSizing: "border-box", width: "100%", transition: "border-color .18s, box-shadow .18s, transform .18s" }} onClick={item.action} type="button">
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.68rem", letterSpacing: "0.10em", color: "var(--ink-3)", fontWeight: 600, textTransform: "uppercase" }}>{item.kicker}</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", fontWeight: 600, color: "var(--ink-3)" }}>0{index + 1}</span>
+              </div>
+              <strong style={{ display: "block", color: "var(--ink)", fontSize: "1rem", fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.25, marginBottom: 8 }}>{item.title}</strong>
+              <span style={{ display: "block", color: "var(--ink-2)", fontSize: "0.84rem", lineHeight: 1.45, marginBottom: 14 }}>{item.sub}</span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "var(--font-body)", fontSize: "0.84rem", fontWeight: 600, color: "var(--accent-strong)", background: "var(--accent-soft)", borderRadius: 8, padding: "5px 11px" }}>
+                {item.cta} <span aria-hidden="true">›</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── DEFINITIVE surface panel ── */}
+      <div className="wksec">
         <DefinitiveSurfacePanel
           surface="today"
           title="DEFINITIVE read for Today."
           compact
           onTalkToYulia={ask}
         />
-      </section>
+      </div>
 
+      {/* ── Operating brief cards (only shown when live data available) ── */}
       {operatingBrief && (
-        <section className="m-flow-grid" style={T.operatingGrid}>
-          <OperatingBriefCard brief={operatingBrief.morningBrief} onAsk={ask} />
-          <GateCountdownCard
-            items={operatingBrief.gateCountdown}
-            onOpenDeal={(dealId, title) => openTab({ kind: "deal", id: dealId, title })}
-            onAsk={ask}
-          />
-          <ModelRefreshCard
-            items={modelRefreshNeeds}
-            onAsk={ask}
-            onRerun={rerunModelRefresh}
-          />
-          <StudioRefreshCard
-            items={operatingBrief.studioRefreshNeeds}
-            onOpenBook={openStudioBook}
-            onAsk={ask}
-          />
-          <FirmMemoryCard memory={operatingBrief.firmMemory} onAsk={ask} />
-        </section>
+        <div className="wksec">
+          <div className="wkgrid g4" style={{ gap: 14 }}>
+            <OperatingBriefCard brief={operatingBrief.morningBrief} onAsk={ask} />
+            <GateCountdownCard
+              items={operatingBrief.gateCountdown}
+              onOpenDeal={(dealId, title) => openTab({ kind: "deal", id: dealId, title })}
+              onAsk={ask}
+            />
+            <ModelRefreshCard
+              items={modelRefreshNeeds}
+              onAsk={ask}
+              onRerun={rerunModelRefresh}
+            />
+            <StudioRefreshCard
+              items={operatingBrief.studioRefreshNeeds}
+              onOpenBook={openStudioBook}
+              onAsk={ask}
+            />
+            <FirmMemoryCard memory={operatingBrief.firmMemory} onAsk={ask} />
+          </div>
+        </div>
       )}
 
-      <section className="m-flow-grid" style={T.midGrid}>
-        <div style={T.section}>
-          <SectionHead eyebrow="PIPELINE PULSE" title="Deals in motion" sub="Not every live deal deserves the same attention." />
-          <div style={T.dealBoard}>
-            {deals.length === 0 && (
-              <div style={T.emptyCard}>
-                <strong>No deals yet</strong>
-                <span>When you add a deal, Yulia will rank it here by urgency, fit, and next action.</span>
-              </div>
-            )}
-            {deals.length > 0 && (
-              <div className="m-flow-grid" style={T.listStack}>
-                {deals.map(deal => (
-                  <button key={deal.id} style={T.dealRow} onClick={() => openDeal(deal)} type="button">
-                    <span style={T.dealIcon}>{dealInitials(deal.title)}</span>
-                    <span style={T.dealMain}>
-                      <span style={T.dealTitle}>{deal.title}</span>
-                      <span style={T.dealMeta}>{deal.meta}</span>
-                      {deal.definitive && (
-                        <span style={T.dealDefinitiveMeta}>
-                          {shortReadiness(deal.definitive.readinessLevel)} · {deal.definitive.score}% · {deal.definitive.lifecyclePosition || "DealState loop"} · {deal.definitive.packetTypes.length} packets
-                        </span>
-                      )}
-                    </span>
-                    <span style={T.dealStats}>
-                      <span style={{ ...T.dealTone, background: tone(deal.tone).soft, color: tone(deal.tone).ink }}>{deal.status}</span>
-                      <span>{deal.sde}</span>
-                      <span>{deal.multiple}</span>
-                      <strong>{deal.fit}</strong>
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div style={T.section}>
-          <SectionHead eyebrow="FILES" title="Files needing your eye" sub="Docs, data room items, and analyses surfaced from today's work." />
-          <div style={T.fileCard}>
-            {files.length === 0 && (
-              <div style={T.emptyCard}>
-                <strong>No files yet</strong>
-                <span>Generated docs, analyses, uploaded artifacts, and data-room items will appear here.</span>
-              </div>
-            )}
-            {files.length > 0 && (
-              <div className="m-flow-grid" style={T.listStack}>
-                {files.map((file, index) => (
-                  <button
-                    key={`${file.id ?? file.title}-${index}`}
-                    style={T.fileRow}
-                    onClick={() => openDoc(file.title, file.id)}
-                    type="button"
-                  >
-                    <span style={T.fileIcon}>
-                      <V6Icon name={file.kind === "chart" ? "chart" : "doc"} size={18} />
-                    </span>
-                    <span style={T.fileText}>
-                      <span style={T.fileTitle}>{file.title}</span>
-                      <span style={T.fileSub}>{file.sub}</span>
-                    </span>
-                    <span style={{ ...T.fileStatus, color: tone(file.tone).ink, background: tone(file.tone).soft }}>{file.status}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      <section style={T.startSection}>
+      {/* ── Deals + Files two-col grid ── */}
+      <div className="wkgrid g2" style={{ gap: 16, marginTop: 34 }}>
+        {/* Pipeline pulse */}
         <div>
-          <div className="mono" style={T.startEyebrow}>START SOMETHING</div>
-          <h2 style={T.startTitle}>Give Yulia a clean sentence.</h2>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", letterSpacing: "0.08em", color: "var(--ink-3)", fontWeight: 600, textTransform: "uppercase", marginBottom: 6 }}>PIPELINE PULSE</div>
+          <div className="wksec-title" style={{ marginBottom: 2 }}>Deals in motion</div>
+          <p style={{ color: "var(--ink-2)", fontSize: "0.88rem", margin: "0 0 14px" }}>Not every live deal deserves the same attention.</p>
+
+          {deals.length === 0 ? (
+            <div className="wkcard" style={{ textAlign: "center", color: "var(--ink-2)" }}>
+              <div className="wkcard-title">No deals yet</div>
+              <div className="wkcard-sub">When you add a deal, Yulia will rank it here by urgency, fit, and next action.</div>
+            </div>
+          ) : (
+            <table className="wktable">
+              <thead><tr>
+                <th>Deal</th>
+                <th>Status</th>
+                <th className="r">SDE</th>
+                <th className="r">Fit</th>
+              </tr></thead>
+              <tbody>
+                {deals.map(deal => {
+                  const pillCls = deal.status === "Pursue" ? "good" : deal.status === "Watch" ? "review" : "missing";
+                  return (
+                    <tr key={deal.id} onClick={() => openDeal(deal)}>
+                      <td>
+                        <div className="cellname">
+                          <span className="logo">{dealInitials(deal.title)}</span>
+                          <div>
+                            <div className="nm">{deal.title}</div>
+                            <div className="sub">{deal.meta}</div>
+                            {deal.definitive && (
+                              <div className="sub" style={{ fontFamily: "var(--font-mono)", color: "var(--accent-strong)", marginTop: 2 }}>
+                                {shortReadiness(deal.definitive.readinessLevel)} · {deal.definitive.score}% · {deal.definitive.lifecyclePosition || "DealState"} · {deal.definitive.packetTypes.length} packets
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td><span className={`statpill ${pillCls}`}><span className="d" />{deal.status}</span></td>
+                      <td className="r amt">{deal.sde}</td>
+                      <td className="r">
+                        <span className="fit">
+                          <span className="fitn">{deal.fit}</span>
+                          <span className="ft"><span className="ff" style={{ width: `${deal.fit}%` }} /></span>
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
         </div>
-        <div className="m-flow-grid" style={T.quickGrid}>
+
+        {/* Files */}
+        <div>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", letterSpacing: "0.08em", color: "var(--ink-3)", fontWeight: 600, textTransform: "uppercase", marginBottom: 6 }}>FILES</div>
+          <div className="wksec-title" style={{ marginBottom: 2 }}>Files needing your eye</div>
+          <p style={{ color: "var(--ink-2)", fontSize: "0.88rem", margin: "0 0 14px" }}>Docs, data room items, and analyses surfaced from today's work.</p>
+
+          {files.length === 0 ? (
+            <div className="wkcard" style={{ textAlign: "center", color: "var(--ink-2)" }}>
+              <div className="wkcard-title">No files yet</div>
+              <div className="wkcard-sub">Generated docs, analyses, uploaded artifacts, and data-room items will appear here.</div>
+            </div>
+          ) : (
+            <table className="wktable">
+              <thead><tr>
+                <th>File</th>
+                <th>Status</th>
+                <th className="r">Action</th>
+              </tr></thead>
+              <tbody>
+                {files.map((file, index) => (
+                  <tr key={`${file.id ?? file.title}-${index}`} onClick={() => openDoc(file.title, file.id)}>
+                    <td>
+                      <div className="cellname">
+                        <span className="logo" style={{ color: "var(--ink-2)" }}>
+                          <V6Icon name={file.kind === "chart" ? "chart" : "doc"} size={16} />
+                        </span>
+                        <div>
+                          <div className="nm">{file.title}</div>
+                          <div className="sub">{file.sub}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td><span className={`statpill ${toneToStatpill(file.tone)}`}><span className="d" />{file.status}</span></td>
+                    <td className="r"><button type="button" className="reviewbtn" onClick={e => { e.stopPropagation(); openDoc(file.title, file.id); }}>Open</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+
+      {/* ── Quick starts ── */}
+      <div className="wksec" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 14, padding: "20px 22px", display: "grid", gridTemplateColumns: "minmax(200px, 0.42fr) minmax(0, 1fr)", gap: 20, alignItems: "center", marginTop: 34 }}>
+        <div>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", letterSpacing: "0.08em", color: "var(--ink-3)", fontWeight: 600, textTransform: "uppercase", marginBottom: 5 }}>START SOMETHING</div>
+          <div style={{ fontSize: "1.2rem", fontWeight: 700, letterSpacing: "-0.03em", color: "var(--ink)", lineHeight: 1.1 }}>Give Yulia a clean sentence.</div>
+        </div>
+        <div className="ynext" style={{ margin: 0 }}>
           {QUICK_STARTS.map(prompt => (
-            <button key={prompt} className="m-nudge-soft" style={T.quickChip} onClick={() => ask(prompt)} type="button">
-              {prompt}
-              <span aria-hidden="true">↗</span>
+            <button
+              key={prompt}
+              type="button"
+              className="yn"
+              onClick={() => ask(prompt)}
+            >
+              <span className="yn-t"><b>{prompt}</b></span>
+              <span aria-hidden="true" style={{ marginLeft: "auto", color: "var(--accent-strong)" }}>↗</span>
             </button>
           ))}
         </div>
-      </section>
       </div>
     </div>
-  );
-}
-
-function BriefNote({ label, text }: { label: string; text: string }) {
-  return (
-    <div style={T.note}>
-      <div className="mono" style={T.noteLabel}>{label}</div>
-      <div style={T.noteText}>{text}</div>
-    </div>
-  );
-}
-
-function SectionHead({ eyebrow, title, sub }: { eyebrow: string; title: string; sub: string }) {
-  return (
-    <div style={T.sectionHead}>
-      <div className="mono" style={T.eyebrowBlue}>{eyebrow}</div>
-      <h2 style={T.sectionTitle}>{title}</h2>
-      <p style={T.sectionSub}>{sub}</p>
-    </div>
-  );
-}
-
-function PriorityCard({
-  index,
-  kicker,
-  title,
-  sub,
-  cta,
-  action,
-}: {
-  index: number;
-  kicker: string;
-  title: string;
-  sub: string;
-  cta: string;
-  tone: Tone;
-  action: () => void;
-}) {
-  const cardIndex = index - 1;
-  const shouldFlipTexture = todayTextureCardShouldFlip(cardIndex);
-
-  return (
-    <button style={T.priorityCard} onClick={action} type="button">
-      <span
-        aria-hidden="true"
-        style={{
-          ...T.priorityCardArt,
-          backgroundImage: todayTextureCardBackground(cardIndex),
-          transform: shouldFlipTexture ? "scaleX(-1)" : undefined,
-        }}
-      />
-      <span className="mono" style={T.priorityKicker}>{kicker}</span>
-      <strong style={T.priorityTitle}>{title}</strong>
-      <span style={T.prioritySub}>{sub}</span>
-      <span style={T.priorityCta}>{cta}</span>
-    </button>
   );
 }
 
 function OperatingBriefCard({ brief, onAsk }: { brief: TodayOperatingBrief["morningBrief"]; onAsk: (prompt: string) => void }) {
   return (
-    <article style={T.operatingPanel}>
-      <div style={T.operatingHeader}>
-        <h3 style={T.operatingTitle}>{brief.title}</h3>
-        <span style={T.operatingFreshness}>{brief.freshness}</span>
+    <article className="wkcard" style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
+        <h3 style={{ margin: 0, color: "var(--ink)", fontSize: "1rem", fontWeight: 700, letterSpacing: "-0.02em" }}>{brief.title}</h3>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--ink-3)", background: "var(--surface-2)", borderRadius: 999, padding: "3px 9px", whiteSpace: "nowrap" }}>{brief.freshness}</span>
       </div>
-      <p style={T.operatingCopy}>{brief.lede}</p>
-      <div style={T.operatingChips}>
+      <p style={{ margin: 0, color: "var(--ink-2)", fontSize: "0.84rem", lineHeight: 1.45 }}>{brief.lede}</p>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
         {brief.chips.slice(0, 4).map(chip => (
-          <span key={chip} style={T.operatingChip}>{chip}</span>
+          <span key={chip} style={{ fontFamily: "var(--font-mono)", fontSize: "0.7rem", fontWeight: 600, padding: "4px 9px", background: "var(--surface-2)", borderRadius: 999, color: "var(--ink-2)", border: "1px solid var(--line)" }}>{chip}</span>
         ))}
       </div>
-      <button className="m-glass-control" style={T.operatingAction} onClick={() => onAsk(brief.prompt)} type="button">
+      <button className="wkbtn" style={{ marginTop: "auto", paddingTop: 14, borderTop: "none", background: "transparent", border: 0, cursor: "pointer", textAlign: "left", padding: "14px 0 0", color: "var(--ink-2)", fontSize: "0.84rem", fontWeight: 500, display: "flex", gap: 6, alignItems: "center" }} onClick={() => onAsk(brief.prompt)} type="button">
         Ask for the brief <span aria-hidden="true">›</span>
       </button>
     </article>
@@ -806,32 +850,32 @@ function GateCountdownCard({
   onAsk: (prompt: string) => void;
 }) {
   return (
-    <article style={T.operatingPanel}>
-      <div style={T.operatingHeader}>
-        <h3 style={T.operatingTitle}>Gate countdown</h3>
-        <span style={T.operatingFreshness}>{items.length || 0}</span>
+    <article className="wkcard" style={{ display: "flex", flexDirection: "column" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, marginBottom: 10 }}>
+        <h3 style={{ margin: 0, color: "var(--ink)", fontSize: "1rem", fontWeight: 700, letterSpacing: "-0.02em" }}>Gate countdown</h3>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--ink-3)", background: "var(--surface-2)", borderRadius: 999, padding: "3px 9px" }}>{items.length || 0}</span>
       </div>
-      <div style={T.operatingList}>
-        {items.length === 0 && <EmptyOperatingLine text="No active gate blockers surfaced." />}
+      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        {items.length === 0 && <span style={{ color: "var(--ink-3)", fontSize: "0.84rem", lineHeight: 1.4, padding: "4px 0" }}>No active gate blockers surfaced.</span>}
         {items.slice(0, 3).map(item => (
-          <button key={`${item.dealId}-${item.gateId}`} style={T.operatingRow} onClick={() => onOpenDeal(item.dealId, item.title)} type="button">
-            <span style={{ ...T.operatingDot, background: tone(item.tone).ink }} />
-            <span style={T.operatingRowText}>
-              <strong>{item.title}</strong>
-              <span>
+          <button key={`${item.dealId}-${item.gateId}`} style={{ all: "unset", cursor: "pointer", display: "grid", gridTemplateColumns: "8px minmax(0, 1fr)", gap: 10, alignItems: "start", padding: "8px 0", boxSizing: "border-box", borderBottom: "1px solid var(--line)", width: "100%" }} onClick={() => onOpenDeal(item.dealId, item.title)} type="button">
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--accent-strong)", marginTop: 6, display: "block" }} />
+            <span style={{ display: "flex", flexDirection: "column", gap: 2, color: "var(--ink-2)", fontSize: "0.82rem", lineHeight: 1.35 }}>
+              <strong style={{ color: "var(--ink)" }}>{item.title}</strong>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem" }}>
                 {item.gateId} · {item.gateName} · {item.nextAction}
                 {item.definitive ? ` · ${shortReadiness(item.definitive.readinessLevel)} ${item.definitive.score}%` : ""}
               </span>
               {item.definitive?.nextSuggestedCalls?.[0] && (
-                <span style={T.operatingNextCall}>
-                  Next agent call: {item.definitive.nextSuggestedCalls[0].label}
+                <span style={{ color: "var(--accent-strong)", fontSize: "0.72rem", fontFamily: "var(--font-mono)", fontWeight: 600 }}>
+                  Next: {item.definitive.nextSuggestedCalls[0].label}
                 </span>
               )}
             </span>
           </button>
         ))}
       </div>
-      <button className="m-glass-control" style={T.operatingAction} onClick={() => onAsk("Show my gate countdown with required models, citations, and blockers.")} type="button">
+      <button className="wkbtn" style={{ marginTop: "auto", padding: "12px 0 0", background: "transparent", border: 0, cursor: "pointer", color: "var(--ink-2)", fontSize: "0.84rem", fontWeight: 500, display: "flex", gap: 6, alignItems: "center" }} onClick={() => onAsk("Show my gate countdown with required models, citations, and blockers.")} type="button">
         Read gates <span aria-hidden="true">›</span>
       </button>
     </article>
@@ -848,36 +892,32 @@ function ModelRefreshCard({
   onRerun: (item: TodayModelRefreshItem) => void;
 }) {
   return (
-    <article style={T.operatingPanel}>
-      <div style={T.operatingHeader}>
-        <h3 style={T.operatingTitle}>Model refresh</h3>
-        <span style={T.operatingFreshness}>{items.length || 0}</span>
+    <article className="wkcard" style={{ display: "flex", flexDirection: "column" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, marginBottom: 10 }}>
+        <h3 style={{ margin: 0, color: "var(--ink)", fontSize: "1rem", fontWeight: 700, letterSpacing: "-0.02em" }}>Model refresh</h3>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--ink-3)", background: "var(--surface-2)", borderRadius: 999, padding: "3px 9px" }}>{items.length || 0}</span>
       </div>
-      <div style={T.operatingList}>
-        {items.length === 0 && <EmptyOperatingLine text="Saved model outputs are current against tracked deal facts." />}
+      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        {items.length === 0 && <span style={{ color: "var(--ink-3)", fontSize: "0.84rem", lineHeight: 1.4, padding: "4px 0" }}>Saved model outputs are current against tracked deal facts.</span>}
         {items.slice(0, 3).map(item => (
-          <div
-            key={item.id}
-            style={T.operatingRowWithAction}
-          >
+          <div key={item.id} style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: 8, alignItems: "center", borderBottom: "1px solid var(--line)", padding: "8px 0" }}>
             <button
-              style={T.operatingRow}
+              style={{ all: "unset", cursor: "pointer", display: "grid", gridTemplateColumns: "8px minmax(0, 1fr)", gap: 10, alignItems: "start", boxSizing: "border-box", width: "100%" }}
               onClick={() => onAsk(`Explain the model refresh need for ${item.dealTitle || "this deal"}: ${item.modelTitle}. Recompute action: ${item.recomputeActionKey || item.recomputeSurfaceActionId || "execute_model"}. ${item.recomputePrompt || "Show changed assumptions, affected outputs, and the first rerun step."}`)}
               type="button"
             >
-              <span style={{ ...T.operatingDot, background: item.status === "needs_rerun" ? "#655fa7" : "#9C7128" }} />
-              <span style={T.operatingRowText}>
-                <strong>{item.modelTitle}</strong>
-                <span>{item.dealTitle ? `${item.dealTitle} · ` : ""}{item.statusLabel} · {item.changedInputs.slice(0, 2).join(", ") || item.rerunTriggers[0] || "tracked inputs"}</span>
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: item.status === "needs_rerun" ? "var(--st-dilig-dot)" : "var(--st-review-dot)", marginTop: 6, display: "block" }} />
+              <span style={{ display: "flex", flexDirection: "column", gap: 2, color: "var(--ink-2)", fontSize: "0.82rem", lineHeight: 1.35 }}>
+                <strong style={{ color: "var(--ink)" }}>{item.modelTitle}</strong>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem" }}>{item.dealTitle ? `${item.dealTitle} · ` : ""}{item.statusLabel} · {item.changedInputs.slice(0, 2).join(", ") || item.rerunTriggers[0] || "tracked inputs"}</span>
                 {item.recomputeActionKey && (
-                  <span style={T.operatingNextCall}>Recompute: {item.recomputeActionKey}</span>
+                  <span style={{ color: "var(--accent-strong)", fontSize: "0.72rem", fontFamily: "var(--font-mono)", fontWeight: 600 }}>Recompute: {item.recomputeActionKey}</span>
                 )}
               </span>
             </button>
             <button
-              className="m-glint"
               type="button"
-              style={T.operatingMiniAction}
+              className="reviewbtn"
               onClick={() => onRerun(item)}
             >
               Rerun
@@ -885,7 +925,7 @@ function ModelRefreshCard({
           </div>
         ))}
       </div>
-      <button className="m-glass-control" style={T.operatingAction} onClick={() => onAsk("Show stale and superseded model outputs across my deals, including changed assumptions, recompute action keys, and rerun order.")} type="button">
+      <button className="wkbtn" style={{ marginTop: "auto", padding: "12px 0 0", background: "transparent", border: 0, cursor: "pointer", color: "var(--ink-2)", fontSize: "0.84rem", fontWeight: 500, display: "flex", gap: 6, alignItems: "center" }} onClick={() => onAsk("Show stale and superseded model outputs across my deals, including changed assumptions, recompute action keys, and rerun order.")} type="button">
         Review models <span aria-hidden="true">›</span>
       </button>
     </article>
@@ -902,24 +942,24 @@ function StudioRefreshCard({
   onAsk: (prompt: string) => void;
 }) {
   return (
-    <article style={T.operatingPanel}>
-      <div style={T.operatingHeader}>
-        <h3 style={T.operatingTitle}>Studio refresh</h3>
-        <span style={T.operatingFreshness}>{items.length || 0}</span>
+    <article className="wkcard" style={{ display: "flex", flexDirection: "column" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, marginBottom: 10 }}>
+        <h3 style={{ margin: 0, color: "var(--ink)", fontSize: "1rem", fontWeight: 700, letterSpacing: "-0.02em" }}>Studio refresh</h3>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--ink-3)", background: "var(--surface-2)", borderRadius: 999, padding: "3px 9px" }}>{items.length || 0}</span>
       </div>
-      <div style={T.operatingList}>
-        {items.length === 0 && <EmptyOperatingLine text="Studio books are clean enough for the next draft pass." />}
+      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        {items.length === 0 && <span style={{ color: "var(--ink-3)", fontSize: "0.84rem", lineHeight: 1.4, padding: "4px 0" }}>Studio books are clean enough for the next draft pass.</span>}
         {items.slice(0, 3).map(item => (
-          <button key={item.bookId} style={T.operatingRow} onClick={() => onOpenBook(item)} type="button">
-            <span style={{ ...T.operatingDot, background: tone(item.tone).ink }} />
-            <span style={T.operatingRowText}>
-              <strong>{item.title}</strong>
-              <span>{item.gaps} {item.gaps === 1 ? "gap" : "gaps"} · {item.reason}</span>
+          <button key={item.bookId} style={{ all: "unset", cursor: "pointer", display: "grid", gridTemplateColumns: "8px minmax(0, 1fr)", gap: 10, alignItems: "start", padding: "8px 0", borderBottom: "1px solid var(--line)", boxSizing: "border-box", width: "100%" }} onClick={() => onOpenBook(item)} type="button">
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--st-dilig-dot)", marginTop: 6, display: "block" }} />
+            <span style={{ display: "flex", flexDirection: "column", gap: 2, color: "var(--ink-2)", fontSize: "0.82rem", lineHeight: 1.35 }}>
+              <strong style={{ color: "var(--ink)" }}>{item.title}</strong>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem" }}>{item.gaps} {item.gaps === 1 ? "gap" : "gaps"} · {item.reason}</span>
             </span>
           </button>
         ))}
       </div>
-      <button className="m-glass-control" style={T.operatingAction} onClick={() => onAsk("Show me Studio drafts that need model refresh, source grounding, or export readiness work.")} type="button">
+      <button className="wkbtn" style={{ marginTop: "auto", padding: "12px 0 0", background: "transparent", border: 0, cursor: "pointer", color: "var(--ink-2)", fontSize: "0.84rem", fontWeight: 500, display: "flex", gap: 6, alignItems: "center" }} onClick={() => onAsk("Show me Studio drafts that need model refresh, source grounding, or export readiness work.")} type="button">
         Review Studio <span aria-hidden="true">›</span>
       </button>
     </article>
@@ -936,48 +976,25 @@ function FirmMemoryCard({ memory, onAsk }: { memory: TodayFirmMemorySnapshot; on
   ].slice(0, 3);
 
   return (
-    <article style={{ ...T.operatingPanel, ...T.memoryPanel }}>
-      <div style={T.operatingHeader}>
-        <h3 style={T.operatingTitle}>Firm memory</h3>
-        <span style={T.operatingFreshness}>{memory.stats.total}</span>
+    <article className="wkcard" style={{ display: "flex", flexDirection: "column" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, marginBottom: 10 }}>
+        <h3 style={{ margin: 0, color: "var(--ink)", fontSize: "1rem", fontWeight: 700, letterSpacing: "-0.02em" }}>Firm memory</h3>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--ink-3)", background: "var(--surface-2)", borderRadius: 999, padding: "3px 9px" }}>{memory.stats.total}</span>
       </div>
-      <div style={T.operatingList}>
-        {items.length === 0 && <EmptyOperatingLine text="Reusable assumptions and house style will accumulate here." />}
+      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        {items.length === 0 && <span style={{ color: "var(--ink-3)", fontSize: "0.84rem", lineHeight: 1.4, padding: "4px 0" }}>Reusable assumptions and house style will accumulate here.</span>}
         {items.map(item => (
-          <div key={item.id} style={T.memoryLine}>
-            <strong>{item.label}</strong>
+          <div key={item.id} style={{ display: "flex", flexDirection: "column", gap: 3, padding: "7px 0", borderBottom: "1px solid var(--line)", color: "var(--ink-2)", fontSize: "0.82rem", lineHeight: 1.35 }}>
+            <strong style={{ color: "var(--ink)" }}>{item.label}</strong>
             <span>{item.text}</span>
           </div>
         ))}
       </div>
-      <button className="m-glass-control" style={T.operatingAction} onClick={() => onAsk("Show the firm memory Yulia is using today, and what should be updated.")} type="button">
+      <button className="wkbtn" style={{ marginTop: "auto", padding: "12px 0 0", background: "transparent", border: 0, cursor: "pointer", color: "var(--ink-2)", fontSize: "0.84rem", fontWeight: 500, display: "flex", gap: 6, alignItems: "center" }} onClick={() => onAsk("Show the firm memory Yulia is using today, and what should be updated.")} type="button">
         Open memory <span aria-hidden="true">›</span>
       </button>
     </article>
   );
-}
-
-function EmptyOperatingLine({ text }: { text: string }) {
-  return <div style={T.emptyOperatingLine}>{text}</div>;
-}
-
-function tone(key: Tone) {
-  const tones: Record<Tone, { ink: string; soft: string }> = {
-    gold: { ink: "#9C7128", soft: "#FAF1E1" },
-    cactus: { ink: "#3f7d64", soft: "rgba(98, 153, 135, 0.16)" },
-    oat: { ink: "#6F7B96", soft: "rgba(238, 241, 251, 0.78)" },
-    plum: { ink: "#655fa7", soft: "rgba(130, 125, 189, 0.14)" },
-    charcoal: { ink: "#1A2233", soft: "rgba(26, 34, 51, 0.08)" },
-  };
-  return tones[key];
-}
-
-function todayTextureCardBackground(index: number): string {
-  return studioFormatCardBackground(TODAY_TEXTURE_CARDS[index % TODAY_TEXTURE_CARDS.length]);
-}
-
-function todayTextureCardShouldFlip(index: number): boolean {
-  return TODAY_TEXTURE_CARD_FLIPS[index % TODAY_TEXTURE_CARD_FLIPS.length];
 }
 
 function dealInitials(value: string): string {
@@ -1053,708 +1070,7 @@ function shortReadiness(level: string): string {
   return level.match(/DRL\d+/)?.[0] || "DRL";
 }
 
-const paperShadow = "0 18px 44px rgba(42,65,96,0.10), 0 4px 12px rgba(26,34,51,0.05), inset 0 1px 0 rgba(255,255,255,0.72)";
-const whiteCard = "linear-gradient(145deg, rgba(255,255,255,0.94), rgba(247,250,255,0.74))";
-const liquidGlass =
-  "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.34), transparent 34%), " +
-  "linear-gradient(135deg, rgba(255,255,255,0.19), rgba(255,255,255,0.06) 48%, rgba(255,255,255,0.025))";
-const liquidGlassFilter = "blur(5px) saturate(155%) contrast(1.08) brightness(1.04)";
-const liquidGlassShadow =
-  "0 16px 34px -22px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.34)";
-const liquidDarkGlassShadow =
-  "0 16px 34px -22px rgba(0,0,0,0.52), inset 0 1px 0 rgba(255,255,255,0.34), inset 0 -1px 0 rgba(255,255,255,0.08), inset 0 0 0 0.5px rgba(255,255,255,0.26)";
-const todayHeroWash = (sample: boolean) =>
-  sample
-    ? `linear-gradient(155deg, rgba(77,39,53,0.52) 0%, rgba(183,103,93,0.34) 48%, rgba(29,30,54,0.58) 100%), url('${DESKTOP_TEXTURES.todayHeroSample}')`
-    : `linear-gradient(155deg, rgba(18,51,61,0.58) 0%, rgba(78,128,111,0.35) 48%, rgba(13,26,46,0.62) 100%), url('${DESKTOP_TEXTURES.todayHeroWorkspace}')`;
-const todayPortfolioWash =
-  `radial-gradient(circle at 10% 0%, rgba(255,255,255,.58), transparent 38%), linear-gradient(135deg, rgba(255,255,255,.74), rgba(238,245,255,.44)), url('${DESKTOP_TEXTURES.todayPortfolio}')`;
-const TODAY_START_TEXTURE = "/textures/desktop/random/texture-random-10.png?v=20260516-start-cool-1";
-
-const T: Record<string, CSSProperties> = {
-  page: {
-    minHeight: "100%",
-    margin: "-28px -40px -56px",
-    padding: "34px 40px 72px",
-    background: "radial-gradient(circle at 50% -120px, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0) 44%), linear-gradient(180deg, #F6F8FC 0%, #EEF4FA 58%, #E8F0F8 100%)",
-    color: "#1A2233",
-  },
-  pageContent: {
-    width: "min(100%, 1440px)",
-    maxWidth: 1440,
-    margin: "0 auto",
-    boxSizing: "border-box",
-  },
-  loggedOutPage: {
-    background: "radial-gradient(circle at 48% -120px, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0) 42%), linear-gradient(180deg, #FFFFFF 0%, #FEFFFF 54%, #F8FBFF 100%)",
-  },
-  heroGrid: {
-    display: "grid",
-    gridTemplateColumns: "minmax(min(520px, 100%), 1.25fr) minmax(min(360px, 100%), 0.75fr)",
-    gap: 20,
-    alignItems: "stretch",
-  },
-  leadCard: {
-    position: "relative",
-    overflow: "hidden",
-    borderRadius: 24,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    backgroundRepeat: "no-repeat, no-repeat",
-    border: "1px solid rgba(255,255,255,0.46)",
-    boxShadow: "0 48px 118px rgba(52, 63, 90, 0.31), 0 20px 46px rgba(26, 34, 51, 0.16), 0 4px 12px rgba(26, 34, 51, 0.08), inset 0 1px 0 rgba(255,255,255,0.28)",
-    padding: 30,
-    minHeight: 560,
-    display: "flex",
-    flexDirection: "column",
-  },
-  leadTop: {
-    display: "flex",
-    justifyContent: "flex-end",
-    alignItems: "flex-start",
-    gap: 20,
-  },
-  eyebrow: {
-    fontSize: 10,
-    letterSpacing: "0.16em",
-    fontWeight: 700,
-    color: "#FFFFFF",
-  },
-  eyebrowBlue: {
-    fontSize: 10,
-    letterSpacing: "0.16em",
-    fontWeight: 700,
-    color: "#5967b5",
-  },
-  smallGhost: {
-    all: "unset",
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 8,
-    height: 34,
-    padding: "0 13px",
-    borderRadius: 999,
-    background: liquidGlass,
-    color: "#FFFFFF",
-    border: "0.5px solid rgba(255,255,255,0.36)",
-    boxShadow: liquidGlassShadow,
-    backdropFilter: liquidGlassFilter,
-    WebkitBackdropFilter: liquidGlassFilter,
-    fontWeight: 700,
-    fontSize: 12,
-    cursor: "pointer",
-  },
-  headline: {
-    margin: "24px 0 0",
-    maxWidth: 900,
-    fontFamily: "'Figtree', var(--font-body)",
-    fontWeight: 850,
-    fontSize: "clamp(38px, 4.5vw, 76px)",
-    lineHeight: 0.94,
-    letterSpacing: "-0.055em",
-    textWrap: "balance",
-    color: "#FFFFFF",
-    textShadow: "0 2px 18px rgba(26,34,51,0.20)",
-  },
-  headlineSerif: {
-    fontFamily: "'Instrument Serif', Georgia, serif",
-    fontWeight: 400,
-    letterSpacing: "-0.035em",
-  },
-  lede: {
-    maxWidth: 680,
-    margin: "18px 0 0",
-    fontSize: 17,
-    lineHeight: 1.55,
-    color: "#FFFFFF",
-    textWrap: "pretty",
-  },
-  briefNotes: {
-    display: "grid",
-    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-    gap: 10,
-    marginTop: 28,
-  },
-  note: {
-    minHeight: 112,
-    padding: 16,
-    borderRadius: 16,
-    background: liquidGlass,
-    border: "0.5px solid rgba(255,255,255,0.38)",
-    boxShadow: liquidGlassShadow,
-    backdropFilter: liquidGlassFilter,
-    WebkitBackdropFilter: liquidGlassFilter,
-  },
-  noteLabel: {
-    fontSize: 9.5,
-    letterSpacing: "0.14em",
-    color: "#FFFFFF",
-    fontWeight: 700,
-  },
-  noteText: {
-    marginTop: 10,
-    fontSize: 13,
-    lineHeight: 1.45,
-    color: "#FFFFFF",
-  },
-  heroActionGrid: {
-    display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) auto",
-    gap: 12,
-    alignItems: "stretch",
-    marginTop: "auto",
-    paddingTop: 24,
-  },
-  heroGlassAction: {
-    all: "unset",
-    minHeight: 72,
-    boxSizing: "border-box",
-    display: "grid",
-    gridTemplateColumns: "52px minmax(0, 1fr) auto",
-    alignItems: "center",
-    gap: 14,
-    padding: "11px 14px",
-    borderRadius: 22,
-    background: liquidGlass,
-    border: "0.5px solid rgba(255,255,255,0.42)",
-    boxShadow: liquidGlassShadow,
-    color: "#FFFFFF",
-    cursor: "pointer",
-    backdropFilter: liquidGlassFilter,
-    WebkitBackdropFilter: liquidGlassFilter,
-  },
-  heroGlassActionSecondary: {
-    all: "unset",
-    minWidth: 138,
-    minHeight: 72,
-    boxSizing: "border-box",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    padding: "0 18px",
-    borderRadius: 22,
-    background: "rgba(26,34,51,0.74)",
-    color: "#FFFFFF",
-    border: "1px solid rgba(255,255,255,0.20)",
-    boxShadow: liquidDarkGlassShadow,
-    fontWeight: 800,
-    fontSize: 13,
-    cursor: "pointer",
-    backdropFilter: liquidGlassFilter,
-    WebkitBackdropFilter: liquidGlassFilter,
-  },
-  yTile: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
-    display: "grid",
-    placeItems: "center",
-    background: "linear-gradient(145deg, #B7D8C6 0%, #5EA77F 100%)",
-    color: "#FFFFFF",
-    fontSize: 24,
-    fontWeight: 900,
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.58), 0 8px 18px rgba(26,34,51,0.13)",
-  },
-  heroActionCopy: {
-    minWidth: 0,
-    display: "flex",
-    flexDirection: "column",
-    gap: 3,
-    fontSize: 13,
-    lineHeight: 1.35,
-    color: "#FFFFFF",
-  },
-  heroActionPill: {
-    borderRadius: 999,
-    padding: "9px 13px",
-    background: "linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.025))",
-    color: "#FFFFFF",
-    fontWeight: 850,
-    fontSize: 12,
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.56)",
-  },
-  livePanel: {
-    borderRadius: 24,
-    background: "#1A2233",
-    color: "#FFFFFF",
-    padding: 22,
-    boxShadow: "0 24px 60px rgba(26, 34, 51, 0.22)",
-    display: "flex",
-    flexDirection: "column",
-  },
-  marketPanel: {
-    ...studioCompeteCardStyles.panel,
-    color: "#1A2233",
-    display: "flex",
-    flexDirection: "column",
-    overflow: "hidden",
-  },
-  liveHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    gap: 14,
-    alignItems: "flex-start",
-    marginBottom: 18,
-  },
-  panelTitle: {
-    margin: "5px 0 0",
-    fontSize: 28,
-    lineHeight: 1,
-    letterSpacing: "-0.04em",
-    color: "#1A2233",
-  },
-  marketEyebrow: {
-    fontSize: 10,
-    letterSpacing: "0.16em",
-    fontWeight: 800,
-    color: "#60708A",
-  },
-  workStack: {
-    ...studioCompeteCardStyles.grid,
-    flex: 1,
-  },
-  intelLead: {
-    ...studioCompeteButtonItemStyles,
-    display: "block",
-    width: "100%",
-    background: "rgba(255,255,255,.72)",
-    color: "#60708A",
-  },
-  intelLeadEyebrow: {
-    fontSize: 9,
-    letterSpacing: "0.16em",
-    color: "#60708A",
-    fontWeight: 800,
-  },
-  intelLeadTitle: {
-    display: "block",
-    marginTop: 9,
-    color: "#1A2233",
-    fontSize: 22,
-    lineHeight: 1.05,
-    letterSpacing: "-0.04em",
-    fontWeight: 850,
-  },
-  intelLeadSub: {
-    display: "block",
-    marginTop: 8,
-    color: "#60708A",
-    fontSize: 13,
-    lineHeight: 1.42,
-  },
-  intelBullet: {
-    ...studioCompeteButtonItemStyles,
-    display: "block",
-    background: "rgba(255,255,255,.72)",
-    color: "#60708A",
-    fontSize: 12.2,
-    lineHeight: 1.34,
-  },
-  workCard: {
-    ...studioCompeteButtonItemStyles,
-    display: "block",
-    background: "rgba(255,255,255,.72)",
-  },
-  workTitle: {
-    marginTop: 0,
-    color: "#1A2233",
-    fontSize: 21,
-    fontWeight: 850,
-    letterSpacing: "-0.04em",
-  },
-  workSub: {
-    marginTop: 3,
-    color: "#60708A",
-    fontSize: 13,
-    lineHeight: 1.45,
-  },
-  meterTrack: {
-    marginTop: 14,
-    height: 6,
-    borderRadius: 999,
-    background: "rgba(255, 255, 255, 0.12)",
-    overflow: "hidden",
-  },
-  meterFill: {
-    display: "block",
-    height: "100%",
-    borderRadius: 999,
-  },
-  section: {
-    marginTop: 34,
-  },
-  sectionHead: {
-    marginBottom: 14,
-  },
-  sectionTitle: {
-    margin: "4px 0 0",
-    fontSize: 29,
-    lineHeight: 1,
-    letterSpacing: "-0.045em",
-    color: "#1A2233",
-  },
-  sectionSub: {
-    margin: "8px 0 0",
-    fontSize: 14,
-    color: "#7A8395",
-  },
-  priorityGrid: {
-    ...studioTextureCardStyles.grid,
-  },
-  priorityCard: {
-    ...studioTextureCardStyles.card,
-    cursor: "pointer",
-    backgroundImage: undefined,
-  },
-  priorityCardArt: {
-    position: "absolute",
-    inset: 0,
-    zIndex: 0,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
-    pointerEvents: "none",
-    transformOrigin: "center",
-  },
-  priorityKicker: {
-    ...studioTextureCardStyles.meta,
-    position: "relative",
-    zIndex: 1,
-  },
-  priorityTitle: {
-    ...studioTextureCardStyles.title,
-    position: "relative",
-    zIndex: 1,
-  },
-  prioritySub: {
-    ...studioTextureCardStyles.detail,
-    position: "relative",
-    zIndex: 1,
-  },
-  priorityCta: {
-    ...studioTextureCardStyles.action,
-    position: "relative",
-    zIndex: 1,
-  },
-  operatingGrid: {
-    marginTop: 18,
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(270px, 1fr))",
-    gap: 12,
-    alignItems: "stretch",
-  },
-  operatingPanel: {
-    minHeight: 206,
-    boxSizing: "border-box",
-    display: "flex",
-    flexDirection: "column",
-    padding: 18,
-    borderRadius: 22,
-    background: whiteCard,
-    border: "1px solid rgba(255,255,255,0.62)",
-    boxShadow: paperShadow,
-    backdropFilter: "blur(18px)",
-    WebkitBackdropFilter: "blur(18px)",
-    overflow: "hidden",
-  },
-  memoryPanel: {
-    backgroundImage: `linear-gradient(145deg, rgba(255,255,255,0.94), rgba(239,244,255,0.72)), url('${TODAY_START_TEXTURE}')`,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-  },
-  operatingHeader: {
-    display: "flex",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 12,
-    marginBottom: 10,
-  },
-  operatingTitle: {
-    margin: 0,
-    color: "#1A2233",
-    fontSize: 20,
-    lineHeight: 1.05,
-    letterSpacing: "-0.04em",
-    fontWeight: 850,
-  },
-  operatingFreshness: {
-    flex: "0 0 auto",
-    borderRadius: 999,
-    padding: "6px 10px",
-    background: "rgba(225,235,250,0.78)",
-    color: "#2E5C8A",
-    fontSize: 12,
-    fontWeight: 850,
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.72)",
-  },
-  operatingCopy: {
-    margin: 0,
-    color: "#596477",
-    fontSize: 13.5,
-    lineHeight: 1.45,
-  },
-  operatingChips: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: 7,
-    marginTop: 14,
-  },
-  operatingChip: {
-    borderRadius: 999,
-    padding: "7px 10px",
-    background: "rgba(238, 243, 252, 0.86)",
-    color: "#596477",
-    fontSize: 12,
-    fontWeight: 800,
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.76)",
-  },
-  operatingList: {
-    display: "grid",
-    gap: 8,
-    marginTop: 2,
-  },
-  operatingRowWithAction: {
-    display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) auto",
-    gap: 8,
-    alignItems: "center",
-  },
-  operatingRow: {
-    all: "unset",
-    boxSizing: "border-box",
-    width: "100%",
-    display: "grid",
-    gridTemplateColumns: "10px minmax(0, 1fr)",
-    gap: 11,
-    alignItems: "start",
-    padding: "9px 0",
-    cursor: "pointer",
-  },
-  operatingDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 999,
-    marginTop: 7,
-    boxShadow: "0 0 0 4px rgba(226,235,249,0.72)",
-  },
-  operatingRowText: {
-    minWidth: 0,
-    display: "flex",
-    flexDirection: "column",
-    gap: 3,
-    color: "#6B7486",
-    fontSize: 12.5,
-    lineHeight: 1.35,
-  },
-  operatingNextCall: {
-    color: "var(--m-on-primary-container)",
-    fontSize: 11,
-    fontWeight: 850,
-  },
-  operatingMiniAction: {
-    all: "unset",
-    minHeight: 32,
-    padding: "0 12px",
-    borderRadius: 999,
-    background: "rgba(34, 47, 68, 0.84)",
-    color: "#FFFFFF",
-    fontSize: 11.5,
-    fontWeight: 850,
-    cursor: "pointer",
-    border: "0.5px solid rgba(255,255,255,0.28)",
-    boxShadow: liquidDarkGlassShadow,
-    backdropFilter: liquidGlassFilter,
-    WebkitBackdropFilter: liquidGlassFilter,
-  },
-  memoryLine: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 4,
-    padding: "8px 0",
-    color: "#6B7486",
-    fontSize: 12.5,
-    lineHeight: 1.35,
-  },
-  operatingAction: {
-    all: "unset",
-    minHeight: 38,
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    marginTop: "auto",
-    borderRadius: 999,
-    background: "rgba(34, 47, 68, 0.86)",
-    color: "#FFFFFF",
-    fontSize: 12.5,
-    fontWeight: 850,
-    cursor: "pointer",
-    border: "0.5px solid rgba(255,255,255,0.28)",
-    boxShadow: liquidDarkGlassShadow,
-    backdropFilter: liquidGlassFilter,
-    WebkitBackdropFilter: liquidGlassFilter,
-  },
-  emptyOperatingLine: {
-    color: "#7A8395",
-    fontSize: 13,
-    lineHeight: 1.4,
-    padding: "9px 0",
-  },
-  midGrid: {
-    display: "grid",
-    gridTemplateColumns: "minmax(min(520px, 100%), 1.1fr) minmax(min(360px, 100%), 0.9fr)",
-    gap: 20,
-    alignItems: "start",
-  },
-  dealBoard: {
-    ...studioListCardStyles.panel,
-  },
-  listStack: {
-    ...studioListCardStyles.stack,
-  },
-  dealRow: {
-    all: "unset",
-    ...studioListCardStyles.row,
-    boxSizing: "border-box",
-    cursor: "pointer",
-  },
-  dealIcon: {
-    ...studioListCardStyles.icon,
-  },
-  dealTone: {
-    borderRadius: 999,
-    padding: "6px 10px",
-    fontSize: 11,
-    fontWeight: 850,
-    textAlign: "center",
-  },
-  dealMain: {
-    minWidth: 0,
-    display: "flex",
-    flexDirection: "column",
-  },
-  dealTitle: {
-    fontSize: 15,
-    fontWeight: 850,
-    letterSpacing: "-0.025em",
-    color: "#1A2233",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-  },
-  dealMeta: {
-    marginTop: 3,
-    fontSize: 12.5,
-    color: "#7A8395",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-  },
-  dealDefinitiveMeta: {
-    marginTop: 5,
-    width: "fit-content",
-    maxWidth: "100%",
-    borderRadius: 999,
-    padding: "4px 8px",
-    background: "rgba(46,92,138,0.09)",
-    color: "var(--m-on-primary-container)",
-    fontSize: 11,
-    fontWeight: 850,
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-  },
-  dealStats: {
-    display: "flex",
-    gap: 9,
-    alignItems: "center",
-    color: "#555E6F",
-    fontWeight: 800,
-    fontVariantNumeric: "tabular-nums",
-    textAlign: "right",
-  },
-  fileCard: {
-    ...studioListCardStyles.panel,
-  },
-  fileRow: {
-    all: "unset",
-    ...studioListCardStyles.row,
-    boxSizing: "border-box",
-    cursor: "pointer",
-  },
-  fileIcon: {
-    ...studioListCardStyles.icon,
-  },
-  fileText: {
-    ...studioListCardStyles.body,
-  },
-  fileTitle: {
-    color: "#1A2233",
-    fontSize: 14.5,
-    fontWeight: 850,
-    letterSpacing: "-0.025em",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-  },
-  fileSub: {
-    marginTop: 2,
-    color: "#7A8395",
-    fontSize: 12.5,
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-  },
-  fileStatus: {
-    borderRadius: 999,
-    padding: "7px 11px",
-    fontSize: 12,
-    fontWeight: 850,
-    whiteSpace: "nowrap",
-  },
-  emptyCard: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 5,
-    padding: 20,
-    color: "#7A8395",
-    fontSize: 13,
-    lineHeight: 1.45,
-  },
-  startSection: {
-    ...studioCompeteCardStyles.panel,
-    marginTop: 36,
-    display: "grid",
-    gridTemplateColumns: "minmax(220px, 0.45fr) minmax(0, 1fr)",
-    gap: 20,
-    alignItems: "center",
-  },
-  startTitle: {
-    margin: "5px 0 0",
-    fontSize: 28,
-    lineHeight: 1,
-    letterSpacing: "-0.045em",
-    color: "#1A2233",
-  },
-  startEyebrow: {
-    fontSize: 10,
-    letterSpacing: "0.16em",
-    fontWeight: 800,
-    color: "#60708A",
-  },
-  quickGrid: {
-    ...studioCompeteCardStyles.grid,
-    marginTop: 0,
-  },
-  quickChip: {
-    ...studioCompeteButtonItemStyles,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    color: "#60708A",
-    fontSize: 14,
-    fontWeight: 850,
-    cursor: "pointer",
-  },
-};
+// Keep TODAY_TEXTURE_CARD_FLIPS and TODAY_TEXTURE_CARDS accessible for future use
+// (they are still referenced in the constants above)
+void TODAY_TEXTURE_CARDS;
+void TODAY_TEXTURE_CARD_FLIPS;

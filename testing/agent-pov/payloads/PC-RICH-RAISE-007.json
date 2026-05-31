@@ -1,0 +1,49 @@
+{
+  "category": "RICH",
+  "description": "ABL facility for inventory-heavy distributor — full borrowing base context.",
+  "payload": {
+    "journey": "raise",
+    "raiseType": "debt_abl",
+    "instrument": "revolving_credit_abl",
+    "industry": "wholesale distribution",
+    "jurisdiction": "US-DE",
+    "league": "L5",
+    "raiseAmountCents": 4000000000,
+    "borrowingBaseInventoryAdvanceRatePct": 55,
+    "borrowingBaseArAdvanceRatePct": 85,
+    "tenor": "3_years",
+    "spread": "SOFR+275",
+    "stage": "commitment",
+    "taxClassification": "c_corp"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "debt_raise",
+      "league": "L5",
+      "jurisdiction": "US-DE",
+      "industry": "wholesale distribution",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "L5",
+    "rich",
+    "debt_abl"
+  ],
+  "id": "PC-RICH-RAISE-007"
+}

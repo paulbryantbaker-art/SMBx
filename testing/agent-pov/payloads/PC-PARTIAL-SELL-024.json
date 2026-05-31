@@ -1,0 +1,43 @@
+{
+  "id": "PC-PARTIAL-SELL-024",
+  "category": "PARTIAL",
+  "description": "Partial payload: L8 sell: enterprise software banker-led. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "enterprise software",
+    "jurisdiction": "US-CA",
+    "revenue_cents": 220000000000,
+    "ebitda_cents": 50000000000,
+    "seller_role": "banker_led",
+    "asking_price_cents": 450000000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "banker_led",
+      "league": "L7",
+      "industry": "enterprise software",
+      "jurisdiction": "US-CA"
+    },
+    "missingFields": [
+      "arr_cents",
+      "churn_rate",
+      "rule_of_40_status"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L8",
+    "partial"
+  ]
+}

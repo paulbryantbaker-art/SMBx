@@ -1,0 +1,47 @@
+{
+  "id": "PC-RICH-L4-BUY-003",
+  "category": "RICH",
+  "description": "L4 commercial landscaping rollup add-on acquisition with full strategic tuck-in context.",
+  "payload": {
+    "journey": "buy",
+    "subJourneyHint": "strategic_tuck_in",
+    "sponsorType": "strategic",
+    "industry": "commercial landscaping services",
+    "naics": "561730",
+    "jurisdiction": "US-GA",
+    "league": "L4",
+    "ttmRevenueCents": 2400000000,
+    "adjustedEbitdaCents": 360000000,
+    "purchasePriceCents": 2160000000,
+    "dealStructure": "asset_purchase",
+    "taxClassification": "llc_partnership",
+    "financing": {
+      "sponsorEquityCents": 800000000,
+      "seniorDebtCents": 1200000000,
+      "rolloverEquityCents": 160000000
+    },
+    "synergyAssumptionsCents": 80000000,
+    "stage": "loi"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "strategic_tuck_in",
+      "league": "L4",
+      "jurisdiction": "US-GA",
+      "industry": "commercial landscaping services",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "llc_partnership"
+    },
+    "missingFields": [],
+    "nextCallsInclude": ["compose_model_stack", "execute_model"],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": ["buy", "L4", "rich", "tuck-in"]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "PC-GARBAGE-029",
+  "category": "GARBAGE",
+  "description": "Oversized: inputs object with 250 spurious keys for an execute_model call (runner expands; representative shows ~5). Substrate must reject with structured 400 explaining schema mismatch and key-count limit.",
+  "payload": {
+    "deal_id": "fixture_deal_garbage_029",
+    "model_id": "MODEL.VALUATION.LMM.v1",
+    "_generator": {
+      "kind": "oversized_keys",
+      "field": "inputs",
+      "topLevelKeyCount": 250,
+      "keyTemplate": "spurious_{i}",
+      "valueTemplate": 0
+    },
+    "inputs": {
+      "spurious_1": 0,
+      "spurious_2": 0,
+      "spurious_3": 0,
+      "spurious_4": 0,
+      "spurious_5": 0
+    }
+  },
+  "tool": "execute_model",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "oversized", "many-inputs-keys", "generator-hint"]
+}

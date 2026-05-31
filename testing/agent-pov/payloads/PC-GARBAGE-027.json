@@ -1,0 +1,18 @@
+{
+  "id": "PC-GARBAGE-027",
+  "category": "GARBAGE",
+  "description": "Junk-value variant of the oversized-string fixture: revenue is supplied as a long non-coerceable string instead of a numeric or money-coerceable value. Substrate's payload-shape validator must reject with structured 400 field-level guidance.",
+  "payload": {
+    "journey": "sell",
+    "target_industry": "B2B services",
+    "revenue": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA-not-a-number"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "oversized", "long-string-money"]
+}

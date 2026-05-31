@@ -1,0 +1,33 @@
+{
+  "id": "PC-CROSS-DOMAIN-013",
+  "category": "CROSS_DOMAIN",
+  "description": "G29 + G30: Convertible bond exchange (G29 via M160, M180) for an OpCo/PropCo target (G30 via M187, M194). Substrate must surface both LME mechanics and OpCo/PropCo separation.",
+  "payload": {
+    "journey": "raise",
+    "subjourney": "debt_raise",
+    "target_industry": "industrial REIT-adjacent",
+    "target_jurisdiction": "US-NY",
+    "convertible_exchange_proposed": true,
+    "opco_propco_signal": true,
+    "real_estate_pct_of_ev": 50,
+    "lme_signal": "exchange_offer_announced"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "capital_structure_or_liability_management",
+      "assetClass": "real_estate"
+    },
+    "missingFields": [
+      "conversion_price",
+      "if_converted_share_count",
+      "intercompany_lease_terms"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "G29", "G30", "convertible-exchange", "opco-propco"]
+}

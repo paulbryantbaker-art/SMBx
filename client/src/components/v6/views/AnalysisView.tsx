@@ -65,9 +65,9 @@ function V6Slider({ label, val, setVal, min, max, step, fmt }: SliderProps) {
   return (
     <div style={{ marginBottom: 16 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
-        <span style={{ fontSize: 12, color: "var(--m-on-surface-var)", fontWeight: 500 }}>{label}</span>
+        <span style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 500 }}>{label}</span>
         <span className="mono" style={{
-          fontSize: 13, color: "var(--m-on-surface)", fontWeight: 700,
+          fontSize: 13, color: "var(--ink)", fontWeight: 700,
           letterSpacing: "-0.01em", fontVariantNumeric: "tabular-nums",
         }}>{fmt(val)}</span>
       </div>
@@ -83,23 +83,23 @@ function V6Slider({ label, val, setVal, min, max, step, fmt }: SliderProps) {
 }
 
 const ACCENT_BG: Record<AccentKey, string> = {
-  primary:  "var(--m-primary-container)",
-  tertiary: "var(--m-tertiary-container)",
-  pursue:   "var(--m-pursue-container)",
-  watch:    "var(--m-watch-container)",
-  pass:     "var(--m-pass-container)",
+  primary:  "var(--accent-soft)",
+  tertiary: "var(--surface-2)",
+  pursue:   "var(--st-good-bg)",
+  watch:    "var(--st-review-bg)",
+  pass:     "var(--st-risk-bg)",
 };
 const ACCENT_FG: Record<AccentKey, string> = {
-  primary:  "var(--m-on-primary-container)",
-  tertiary: "var(--m-on-tertiary-container)",
-  pursue:   "var(--m-pursue-on-cont)",
+  primary:  "var(--accent-strong)",
+  tertiary: "var(--ink-2)",
+  pursue:   "var(--st-good-fg)",
   watch:    "#3F2E00",
   pass:     "#4A1410",
 };
 
 function V6OutputCard({ label, value, sub, accent }: { label: string; value: string; sub: string; accent: AccentKey }) {
   return (
-    <div className="m-card" style={{
+    <div className="wkcard" style={{
       padding: "16px 18px",
       background: ACCENT_BG[accent], color: ACCENT_FG[accent],
       border: "none",
@@ -124,27 +124,27 @@ interface FlowRowProps {
 }
 
 function V6FlowRow({ label, val, sign, big, total, accent }: FlowRowProps) {
-  const totalColor = accent === "pursue" ? "var(--m-pursue)"
-    : accent === "watch" ? "var(--m-watch)"
-    : accent === "pass" ? "var(--m-pass)"
-    : "var(--m-on-surface)";
+  const totalColor = accent === "pursue" ? "var(--st-good-fg)"
+    : accent === "watch" ? "var(--st-review-fg)"
+    : accent === "pass" ? "var(--st-risk-fg)"
+    : "var(--ink)";
   return (
     <div style={{
       display: "flex", justifyContent: "space-between", alignItems: "baseline",
       padding: "6px 0",
       fontSize: total ? 14 : 12.5,
       fontWeight: total || big ? 700 : 500,
-      color: total ? totalColor : "var(--m-on-surface-var)",
+      color: total ? totalColor : "var(--ink-3)",
     }}>
       <span>{label}</span>
       <span className="mono" style={{
         fontSize: total ? 18 : 13.5,
         fontWeight: total ? 800 : 600,
         letterSpacing: "-0.01em",
-        color: total ? totalColor : "var(--m-on-surface)",
+        color: total ? totalColor : "var(--ink)",
         fontVariantNumeric: "tabular-nums",
       }}>
-        <span style={{ color: "var(--m-on-surface-mid)", marginRight: 6 }}>{sign}</span>${val.toFixed(2)}M
+        <span style={{ color: "var(--ink-2)", marginRight: 6 }}>{sign}</span>${val.toFixed(2)}M
       </span>
     </div>
   );
@@ -406,7 +406,7 @@ export function V6AnalysisView({
   }
 
   return (
-    <div className="m-fade-up m-page-flow" style={{ width: "min(100%, 1440px)", maxWidth: 1440, margin: "0 auto", boxSizing: "border-box" }}>
+    <div className="wk-content m-fade-up" style={{ width: "min(100%, 1440px)", maxWidth: 1440, margin: "0 auto", boxSizing: "border-box" }}>
       <section style={{ marginBottom: 24 }}>
         <div className="mono" style={A.eyebrow}>{effectiveTool === "tool-compare" ? "ANALYSIS · COMPARISON · YULIA CAN REFINE" : "ANALYSIS · LIVE · YULIA RECOMPUTES AS YOU MOVE"}</div>
         <div style={A.headerRow}>
@@ -420,17 +420,17 @@ export function V6AnalysisView({
             </div>
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
-            <button className="m-btn outlined" type="button" onClick={resetScenario}>Reset</button>
-            <button className="m-btn outlined" type="button" onClick={draftScenarioNote}>Draft note</button>
-            <button className="m-btn outlined" type="button" onClick={optimizeFallbackScenario}>Optimize</button>
-            <button className="m-btn filled" type="button" onClick={askYuliaToFile}>Ask Yulia to file</button>
+            <button className="wkbtn" type="button" onClick={resetScenario}>Reset</button>
+            <button className="wkbtn" type="button" onClick={draftScenarioNote}>Draft note</button>
+            <button className="wkbtn" type="button" onClick={optimizeFallbackScenario}>Optimize</button>
+            <button className="wkbtn primary" type="button" onClick={askYuliaToFile}>Ask Yulia to file</button>
           </div>
         </div>
         {actionNote && <div style={A.actionNote}>{actionNote}</div>}
       </section>
 
       <div style={{ display: "grid", gridTemplateColumns: "380px 1fr", gap: 24, alignItems: "flex-start" }}>
-        <div className="m-card" style={{ padding: "20px 22px" }}>
+        <div className="wkcard" style={{ padding: "20px 22px" }}>
           <div style={A.cardTitle}>Inputs</div>
 
           <V6Slider label="Multiple of SDE"           val={multiple} setVal={setMultiple} min={5}    max={9}  step={0.1}  fmt={v => `${v.toFixed(1)}×`} />
@@ -439,13 +439,13 @@ export function V6AnalysisView({
           <V6Slider label="Interest rate (%)"         val={interest} setVal={setInterest} min={8}    max={14} step={0.25} fmt={v => `${v.toFixed(2)}%`} />
           <V6Slider label="Year-1 growth assumption"  val={growth}   setVal={setGrowth}   min={-5}   max={15} step={0.5}  fmt={v => `${v >= 0 ? "+" : ""}${v.toFixed(1)}%`} />
 
-          <div style={{ marginTop: 22, paddingTop: 18, borderTop: "1px solid var(--m-outline-var)" }}>
+          <div style={{ marginTop: 22, paddingTop: 18, borderTop: "1px solid var(--line)" }}>
             <div className="mono" style={A.scenariosEyebrow}>SCENARIOS</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {SCENARIOS.map(sc => (
-                <button key={sc.l} className="m-state" onClick={() => applyScenario(sc)} style={A.scenarioBtn}>
+                <button key={sc.l} className="wkcard tap" onClick={() => applyScenario(sc)} style={A.scenarioBtn}>
                   <span style={{ fontWeight: 600 }}>{sc.l}</span>
-                  <span className="mono" style={{ fontSize: 11, color: "var(--m-on-surface-mid)" }}>
+                  <span className="mono" style={{ fontSize: 11, color: "var(--ink-2)" }}>
                     {sc.m}× · ${sc.s}M · {sc.d}%
                   </span>
                 </button>
@@ -476,13 +476,13 @@ export function V6AnalysisView({
             />
           </div>
 
-          <div className="m-card" style={{ padding: "20px 24px", marginBottom: 20 }}>
+          <div className="wkcard" style={{ padding: "20px 24px", marginBottom: 20 }}>
             <div className="mono" style={A.cashFlowEyebrow}>CASH FLOW · YEAR 1</div>
             <V6FlowRow label="SDE (cash earnings)"     val={sde}          sign="+" big />
             <V6FlowRow label="Annual debt service"     val={annualDebt}   sign="−" />
             <V6FlowRow label="Working capital reserve" val={0.20}         sign="−" />
             <V6FlowRow label="Owner draw / cushion"    val={0.15}         sign="−" />
-            <div style={{ borderTop: "1px solid var(--m-outline-var)", margin: "12px 0 8px" }} />
+            <div style={{ borderTop: "1px solid var(--line)", margin: "12px 0 8px" }} />
             <V6FlowRow
               label="Free cash flow"
               val={+(cashFlow - 0.35).toFixed(2)}
@@ -492,7 +492,7 @@ export function V6AnalysisView({
             />
           </div>
 
-          <div className="m-card" style={A.yuliaRead}>
+          <div className="wkcard" style={A.yuliaRead}>
             <div style={{ display: "flex", gap: 12 }}>
               <div style={A.yuliaMark}>Y</div>
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -1020,7 +1020,7 @@ function StructuredAnalysisCanvas({
   };
 
   return (
-    <div className="m-fade-up m-page-flow" style={{ width: "min(100%, 1440px)", maxWidth: 1440, margin: "0 auto", boxSizing: "border-box" }}>
+    <div className="wk-content m-fade-up" style={{ width: "min(100%, 1440px)", maxWidth: 1440, margin: "0 auto", boxSizing: "border-box" }}>
       <section style={{ marginBottom: 24 }}>
         <div className="mono" style={A.eyebrow}>ANALYSIS · STRUCTURED · EVIDENCE LED</div>
         <div style={A.headerRow}>
@@ -1035,17 +1035,17 @@ function StructuredAnalysisCanvas({
             </div>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button className="m-btn outlined" type="button" disabled={savingModelArtifact} onClick={() => { void saveModelArtifact(); }}>
+            <button className="wkbtn" type="button" disabled={savingModelArtifact} onClick={() => { void saveModelArtifact(); }}>
               {savingModelArtifact ? "Saving..." : "Save model"}
             </button>
-            <button className="m-btn outlined" type="button" disabled={!!exportingModelArtifact || savingModelArtifact} onClick={() => { void exportModelArtifact("pdf"); }}>
+            <button className="wkbtn" type="button" disabled={!!exportingModelArtifact || savingModelArtifact} onClick={() => { void exportModelArtifact("pdf"); }}>
               {exportingModelArtifact === "pdf" ? "PDF..." : "PDF"}
             </button>
-            <button className="m-btn outlined" type="button" disabled={!!exportingModelArtifact || savingModelArtifact} onClick={() => { void exportModelArtifact("pptx"); }}>
+            <button className="wkbtn" type="button" disabled={!!exportingModelArtifact || savingModelArtifact} onClick={() => { void exportModelArtifact("pptx"); }}>
               {exportingModelArtifact === "pptx" ? "PowerPoint..." : "PowerPoint"}
             </button>
-            <button className="m-btn outlined" type="button" onClick={openScenarioNote}>Draft note</button>
-            <button className="m-btn filled" type="button" onClick={() => onTalkToYulia?.(primaryPrompt)}>Ask Yulia</button>
+            <button className="wkbtn" type="button" onClick={openScenarioNote}>Draft note</button>
+            <button className="wkbtn primary" type="button" onClick={() => onTalkToYulia?.(primaryPrompt)}>Ask Yulia</button>
           </div>
         </div>
       </section>
@@ -1070,14 +1070,14 @@ function StructuredAnalysisCanvas({
             />
           ) : (
             <>
-              <div className="m-card" style={A.structuredHero}>
+              <div className="wkcard" style={A.structuredHero}>
                 <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
                   <div style={{ ...A.verdictBadge, background: toneBg(primaryDisplayData.verdict?.tone), color: toneFg(primaryDisplayData.verdict?.tone) }}>
                     {primaryDisplayData.verdict?.score ?? "Y"}
                   </div>
                   <div>
                     <div className="mono" style={A.cardEyebrow}>{primaryDisplayData.verdict?.label || "YULIA READ"}</div>
-                    <div style={{ fontSize: 15, color: "var(--m-on-surface)", lineHeight: 1.45, fontWeight: 700 }}>
+                    <div style={{ fontSize: 15, color: "var(--ink)", lineHeight: 1.45, fontWeight: 700 }}>
                       {primaryDisplayData.summary}
                     </div>
                   </div>
@@ -1162,7 +1162,7 @@ function StructuredAnalysisCanvas({
         </main>
 
         <aside id="analysis-scenario-controls" style={A.analysisControlRail}>
-          <div className="m-card" style={A.controlRailCard}>
+          <div className="wkcard" style={A.controlRailCard}>
             <div className="mono" style={A.cardEyebrow}>MODEL CONTROLS</div>
             {comparisonActive && (
               <ComparisonScopePicker
@@ -1189,11 +1189,11 @@ function StructuredAnalysisCanvas({
               onTalkToYulia={onTalkToYulia}
             />
           </div>
-          <div className="m-card" style={A.controlRailCard}>
+          <div className="wkcard" style={A.controlRailCard}>
             <div className="mono" style={A.cardEyebrow}>INPUTS</div>
             <MiniFactList title={dealNameFromAnalysis(controlData)} rows={controlInputRows} />
           </div>
-          <div className="m-card" style={A.controlRailCard}>
+          <div className="wkcard" style={A.controlRailCard}>
             <div className="mono" style={A.cardEyebrow}>GOVERNANCE</div>
             <div style={A.sideTitle}>Review triggers</div>
             {controlProfessionalTriggers.length ? (
@@ -1201,34 +1201,34 @@ function StructuredAnalysisCanvas({
                 {controlProfessionalTriggers.map(item => (
                   <div key={`${item.role}-${item.trigger}`} style={A.controlListRow}>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 13, color: "var(--m-on-surface)", fontWeight: 850 }}>{item.role}</div>
-                      <div style={{ fontSize: 11.5, color: "var(--m-on-surface-var)", lineHeight: 1.42, marginTop: 3 }}>{item.trigger} {item.why}</div>
+                      <div style={{ fontSize: 13, color: "var(--ink)", fontWeight: 850 }}>{item.role}</div>
+                      <div style={{ fontSize: 11.5, color: "var(--ink-3)", lineHeight: 1.42, marginTop: 3 }}>{item.trigger} {item.why}</div>
                     </div>
                     <span style={{ ...A.smallBadge, color: toneFg("watch"), background: toneBg("watch") }}>review</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <div style={{ fontSize: 12.5, color: "var(--m-on-surface-var)", marginTop: 10 }}>No professional-review trigger is active yet.</div>
+              <div style={{ fontSize: 12.5, color: "var(--ink-3)", marginTop: 10 }}>No professional-review trigger is active yet.</div>
             )}
             <div style={{ marginTop: 14 }}>
               <MiniFactList title="Methodology refs" rows={(controlData.methodologyRefs ?? []).map(ref => ["Ref", ref])} />
             </div>
           </div>
-          <div className="m-card" style={A.controlRailCard}>
+          <div className="wkcard" style={A.controlRailCard}>
             <div className="mono" style={A.cardEyebrow}>YULIA NEXT</div>
             <div style={A.sideTitle}>Actions from the read</div>
             <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
               {controlNextActions.map(action => (
                 <button
                   key={`${action.actionType}-${action.label}`}
-                  className="m-state"
+                  className="wkcard tap"
                   type="button"
                   style={A.actionRow}
                   onClick={() => { void runScopedNextAction(action); }}
                 >
                   <span>{action.label}</span>
-                  <span style={{ color: "var(--m-primary)", fontWeight: 800 }}>→</span>
+                  <span style={{ color: "var(--accent)", fontWeight: 800 }}>→</span>
                 </button>
               ))}
             </div>
@@ -1295,7 +1295,7 @@ function InvestmentComparisonWorkspace({
           </p>
         </div>
         <button
-          className="m-btn filled"
+          className="wkbtn primary"
           type="button"
           onClick={() => onTalkToYulia?.(`Compare ${deals.map(item => dealNameFromAnalysis(item.data)).join(", ")} as a buyer. Tell me which one wins, what assumption would change the ranking, and what diligence I should run next.`)}
         >
@@ -1416,7 +1416,7 @@ function ComparisonDealPanel({
         </div>
         {onRemove && (
           <button
-            className="m-btn outlined"
+            className="wkbtn"
             type="button"
             style={A.compareIconButton}
             onClick={(event) => {
@@ -1456,7 +1456,7 @@ function ComparisonDealPanel({
 
       {action && (
         <button
-          className="m-state"
+          className="wkcard tap"
           type="button"
           style={A.compareActionButton}
           onClick={(event) => {
@@ -1489,7 +1489,7 @@ function ComparisonMetric({
   return (
     <div style={{ ...A.compareMetric, borderColor: toneBorder(tone) }}>
       <span className="mono">{label}</span>
-      <strong style={{ color: tone === "watch" ? "#88630F" : tone === "pass" ? "var(--m-pass)" : tone === "pursue" ? "var(--m-pursue)" : "var(--m-on-surface)" }}>{value}</strong>
+      <strong style={{ color: tone === "watch" ? "#88630F" : tone === "pass" ? "var(--st-risk-fg)" : tone === "pursue" ? "var(--st-good-fg)" : "var(--ink)" }}>{value}</strong>
     </div>
   );
 }
@@ -1538,7 +1538,7 @@ function ComparisonScopePicker({
           <button
             key={item.id}
             type="button"
-            className="m-state"
+            className="wkcard tap"
             style={{
               ...A.scopeChip,
               ...(item.id === selectedId ? A.scopeChipActive : null),
@@ -1571,7 +1571,7 @@ function ComparisonTray({
   const comparedDeals = activeDeals.filter(item => item.role === "comparison");
   return (
     <aside style={A.analysisCompareRail}>
-      <div className="m-card" style={A.compareTrayCard}>
+      <div className="wkcard" style={A.compareTrayCard}>
         <div className="mono" style={A.cardEyebrow}>COMPARE WITH</div>
         <div style={A.sideTitle}>Opportunity tray</div>
         <p style={A.compareTrayCopy}>
@@ -1583,11 +1583,11 @@ function ComparisonTray({
             <div style={A.compareTrayLabel}>On canvas</div>
             {comparedDeals.map(item => (
               <div key={item.id} style={A.activeCompareRow}>
-                <button type="button" className="m-state" style={A.activeCompareMain} onClick={() => onSelect(item.id)}>
+                <button type="button" className="wkcard tap" style={A.activeCompareMain} onClick={() => onSelect(item.id)}>
                   <span>{dealNameFromAnalysis(item.data)}</span>
                   <strong>{metricText(item.data, "fit") || item.data.verdict?.score || "—"}</strong>
                 </button>
-                <button type="button" className="m-btn outlined" style={A.compareIconButton} onClick={() => onRemove(item.id)} aria-label={`Remove ${dealNameFromAnalysis(item.data)}`}>
+                <button type="button" className="wkbtn" style={A.compareIconButton} onClick={() => onRemove(item.id)} aria-label={`Remove ${dealNameFromAnalysis(item.data)}`}>
                   ×
                 </button>
               </div>
@@ -1601,7 +1601,7 @@ function ComparisonTray({
             <button
               key={candidate.id}
               type="button"
-              className="m-state"
+              className="wkcard tap"
               style={A.compareCandidate}
               onClick={() => onAdd(candidate)}
             >
@@ -1617,7 +1617,7 @@ function ComparisonTray({
         </div>
 
         <button
-          className="m-btn outlined"
+          className="wkbtn"
           type="button"
           style={{ width: "100%", justifyContent: "center" }}
           onClick={() => onTalkToYulia?.("Find or open another buy opportunity to compare against this board. Put it on the same canvas when ready.")}
@@ -2038,7 +2038,7 @@ function StructuredChartView({ chart }: { chart: StructuredChart }) {
   const max = Math.max(1, ...values);
 
   return (
-    <div className="m-card" style={{ padding: "22px 24px" }}>
+    <div className="wkcard" style={{ padding: "22px 24px" }}>
       <div className="mono" style={A.cardEyebrow}>{chart.type.toUpperCase()}</div>
       <div style={A.sideTitle}>{chart.title}</div>
       <div style={{ display: "grid", gap: 10, marginTop: 16 }}>
@@ -2050,8 +2050,8 @@ function StructuredChartView({ chart }: { chart: StructuredChart }) {
           return (
             <div key={`${chart.title}-${label}`}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: 12.5, marginBottom: 5 }}>
-                <span style={{ color: "var(--m-on-surface-var)", fontWeight: 700 }}>{label}</span>
-                <span className="mono" style={{ color: "var(--m-on-surface)", fontWeight: 800 }}>{String(point.displayValue ?? value)}</span>
+                <span style={{ color: "var(--ink-3)", fontWeight: 700 }}>{label}</span>
+                <span className="mono" style={{ color: "var(--ink)", fontWeight: 800 }}>{String(point.displayValue ?? value)}</span>
               </div>
               <div style={A.barTrack}>
                 <div style={{ ...A.barFill, width, background: toneAccent(tone) }} />
@@ -2066,7 +2066,7 @@ function StructuredChartView({ chart }: { chart: StructuredChart }) {
 
 function StructuredTableView({ table }: { table: StructuredTable }) {
   return (
-    <div className="m-card" style={{ padding: 0, overflow: "hidden" }}>
+    <div className="wkcard" style={{ padding: 0, overflow: "hidden" }}>
       <div style={{ padding: "18px 22px 10px" }}>
         <div className="mono" style={A.cardEyebrow}>TABLE</div>
         <div style={A.sideTitle}>{table.title}</div>
@@ -2103,7 +2103,7 @@ function StructuredListCard({
   items: Array<{ key: string; label: string; sub: string; badge: string; tone: AnalysisTone }>;
 }) {
   return (
-    <div className="m-card" style={{ padding: "20px 22px" }}>
+    <div className="wkcard" style={{ padding: "20px 22px" }}>
       <div className="mono" style={A.cardEyebrow}>{eyebrow}</div>
       <div style={A.sideTitle}>{title}</div>
       {items.length ? (
@@ -2111,15 +2111,15 @@ function StructuredListCard({
           {items.map(item => (
             <div key={item.key} style={A.listRow}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 13.5, color: "var(--m-on-surface)", fontWeight: 800 }}>{item.label}</div>
-                <div style={{ fontSize: 12, color: "var(--m-on-surface-var)", lineHeight: 1.45, marginTop: 3 }}>{item.sub}</div>
+                <div style={{ fontSize: 13.5, color: "var(--ink)", fontWeight: 800 }}>{item.label}</div>
+                <div style={{ fontSize: 12, color: "var(--ink-3)", lineHeight: 1.45, marginTop: 3 }}>{item.sub}</div>
               </div>
               <span style={{ ...A.smallBadge, color: toneFg(item.tone), background: toneBg(item.tone) }}>{item.badge}</span>
             </div>
           ))}
         </div>
       ) : (
-        <div style={{ fontSize: 12.5, color: "var(--m-on-surface-var)", marginTop: 10 }}>{empty}</div>
+        <div style={{ fontSize: 12.5, color: "var(--ink-3)", marginTop: 10 }}>{empty}</div>
       )}
     </div>
   );
@@ -2217,8 +2217,8 @@ function ScenarioAssumptionPanel({
     <div>
       <div style={A.scenarioHeader}>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 900, color: "var(--m-on-surface)" }}>Scenario sliders</div>
-          <div style={{ fontSize: 11.5, color: "var(--m-on-surface-var)", marginTop: 2 }}>Save a version, then ask Yulia about it.</div>
+          <div style={{ fontSize: 13, fontWeight: 900, color: "var(--ink)" }}>Scenario sliders</div>
+          <div style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 2 }}>Save a version, then ask Yulia about it.</div>
         </div>
         <span className="mono" style={A.scenarioCount}>{changedRows.length} changed</span>
       </div>
@@ -2280,7 +2280,7 @@ function ScenarioAssumptionPanel({
         )}
         <div style={A.scenarioActions}>
           <button
-            className="m-btn filled"
+            className="wkbtn primary"
             type="button"
             style={A.scenarioSave}
             disabled={!changedRows.length || saving}
@@ -2289,7 +2289,7 @@ function ScenarioAssumptionPanel({
             {saving ? "Saving" : "Save scenario"}
           </button>
           <button
-            className="m-btn outlined"
+            className="wkbtn"
             type="button"
             style={A.scenarioSave}
             onClick={onOptimize ?? optimizeScenario}
@@ -2297,7 +2297,7 @@ function ScenarioAssumptionPanel({
             {optimizeLabel}
           </button>
           <button
-            className="m-btn outlined"
+            className="wkbtn"
             type="button"
             style={A.scenarioSave}
             onClick={discussScenario}
@@ -2328,8 +2328,8 @@ function VersionHistoryPanel({
     <div style={A.versionPanel}>
       <div style={A.scenarioHeader}>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 900, color: "var(--m-on-surface)" }}>Saved scenarios</div>
-          <div style={{ fontSize: 11.5, color: "var(--m-on-surface-var)", marginTop: 2 }}>
+          <div style={{ fontSize: 13, fontWeight: 900, color: "var(--ink)" }}>Saved scenarios</div>
+          <div style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 2 }}>
             Yulia can reference, compare, or restore any saved version.
           </div>
         </div>
@@ -2355,11 +2355,11 @@ function VersionHistoryPanel({
                   {version.summary && <div style={A.versionSummary}>{version.summary}</div>}
                 </div>
                 <div style={A.versionActions}>
-                  <button className="m-btn outlined" type="button" style={A.versionButton} onClick={() => onAskYulia(version)}>
+                  <button className="wkbtn" type="button" style={A.versionButton} onClick={() => onAskYulia(version)}>
                     Ask
                   </button>
                   <button
-                    className="m-btn outlined"
+                    className="wkbtn"
                     type="button"
                     style={A.versionButton}
                     disabled={active}
@@ -2393,11 +2393,11 @@ function formatVersionDate(value: string): string {
 function MiniFactList({ title, rows }: { title: string; rows: Array<[string, string]> }) {
   return (
     <div>
-      <div style={{ fontSize: 13, fontWeight: 800, color: "var(--m-on-surface)", marginBottom: 8 }}>{title}</div>
+      <div style={{ fontSize: 13, fontWeight: 800, color: "var(--ink)", marginBottom: 8 }}>{title}</div>
       <div style={{ display: "grid", gap: 8 }}>
         {rows.slice(0, 7).map(([label, value], index) => (
-          <div key={`${title}-${label}-${index}`} style={{ fontSize: 12, color: "var(--m-on-surface-var)", lineHeight: 1.4 }}>
-            <strong style={{ color: "var(--m-on-surface)" }}>{label}:</strong> {value}
+          <div key={`${title}-${label}-${index}`} style={{ fontSize: 12, color: "var(--ink-3)", lineHeight: 1.4 }}>
+            <strong style={{ color: "var(--ink)" }}>{label}:</strong> {value}
           </div>
         ))}
       </div>
@@ -2443,18 +2443,18 @@ function AnalysisRunState({
   onAction?: () => void;
 }) {
   return (
-    <div className="m-fade-up m-page-flow" style={{ maxWidth: 960 }}>
+    <div className="wk-content m-fade-up" style={{ maxWidth: 960 }}>
       <section style={{ marginBottom: 20 }}>
         <div className="mono" style={A.eyebrow}>{eyebrow}</div>
         <h1 style={A.h1}>{title}</h1>
       </section>
-      <div className="m-card" style={A.analysisRunState}>
+      <div className="wkcard" style={A.analysisRunState}>
         <div style={A.analysisRunIcon}>Y</div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div className="mono" style={A.cardEyebrow}>YULIA WORKSPACE</div>
           <div style={A.analysisRunBody}>{body}</div>
           {actionLabel && onAction && (
-            <button className="m-btn filled" type="button" style={{ marginTop: 16 }} onClick={onAction}>
+            <button className="wkbtn primary" type="button" style={{ marginTop: 16 }} onClick={onAction}>
               {actionLabel}
             </button>
           )}
@@ -2465,31 +2465,31 @@ function AnalysisRunState({
 }
 
 function toneAccent(tone?: AnalysisTone): string {
-  if (tone === "pursue") return "var(--m-pursue)";
-  if (tone === "watch") return "var(--m-watch)";
-  if (tone === "pass") return "var(--m-pass)";
-  return "var(--m-primary)";
+  if (tone === "pursue") return "var(--st-good-fg)";
+  if (tone === "watch") return "var(--st-review-fg)";
+  if (tone === "pass") return "var(--st-risk-fg)";
+  return "var(--accent)";
 }
 
 function toneBg(tone?: AnalysisTone): string {
-  if (tone === "pursue") return "var(--m-pursue-container)";
-  if (tone === "watch") return "var(--m-watch-container)";
-  if (tone === "pass") return "var(--m-pass-container)";
-  return "var(--m-primary-container)";
+  if (tone === "pursue") return "var(--st-good-bg)";
+  if (tone === "watch") return "var(--st-review-bg)";
+  if (tone === "pass") return "var(--st-risk-bg)";
+  return "var(--accent-soft)";
 }
 
 function toneFg(tone?: AnalysisTone): string {
-  if (tone === "pursue") return "var(--m-pursue-on-cont)";
+  if (tone === "pursue") return "var(--st-good-fg)";
   if (tone === "watch") return "#3F2E00";
   if (tone === "pass") return "#4A1410";
-  return "var(--m-on-primary-container)";
+  return "var(--accent-strong)";
 }
 
 function toneBorder(tone?: AnalysisTone): string {
   if (tone === "pursue") return "rgba(69, 133, 101, 0.28)";
   if (tone === "watch") return "rgba(188, 137, 31, 0.28)";
   if (tone === "pass") return "rgba(185, 75, 67, 0.28)";
-  return "var(--m-outline-var)";
+  return "var(--line)";
 }
 
 function priorityTone(priority: string): AnalysisTone {
@@ -2582,8 +2582,8 @@ function DefinitivePacketCanvas({
   const askPrompt = `Explain ${packetType} for ${dealTitle}. Use packet ${packetId}, DealState ${stateCid}, and show what is known, what is missing, the current gate, the next suggested calls, and what another agent can take back to its system.`;
 
   return (
-    <div className="m-fade-up m-page-flow" style={DP.shell}>
-      <section className="m-card" style={DP.hero}>
+    <div className="wk-content m-fade-up" style={DP.shell}>
+      <section className="wkcard" style={DP.hero}>
         <div style={DP.heroCopy}>
           <div className="mono" style={DP.eyebrow}>DEFINITIVE PACKET · DEAL OS HANDOFF</div>
           <h1 style={DP.title}>{title}</h1>
@@ -2591,12 +2591,12 @@ function DefinitivePacketCanvas({
             This packet is a portable deal-state object, not a loose document. Yulia and external agents can use it to resume the deal, advance the next gate, or carry the current state back to another system.
           </p>
           <div style={DP.actions}>
-            <button className="m-btn filled" type="button" onClick={() => onTalkToYulia?.(askPrompt)}>
+            <button className="wkbtn primary" type="button" onClick={() => onTalkToYulia?.(askPrompt)}>
               Ask Yulia to explain
             </button>
             {dealId && (
               <button
-                className="m-btn outlined"
+                className="wkbtn"
                 type="button"
                 onClick={() => openTab?.({ kind: "deal", id: dealId, title: dealTitle })}
               >
@@ -2616,13 +2616,13 @@ function DefinitivePacketCanvas({
       </section>
 
       {(packetLoading || packetError) && (
-        <div className="m-card" style={DP.notice}>
+        <div className="wkcard" style={DP.notice}>
           {packetLoading ? "Loading the persisted packet payload..." : `Packet metadata is available, but the persisted payload could not be loaded (${packetError}).`}
         </div>
       )}
 
       <section style={DP.grid}>
-        <div className="m-card" style={DP.panel}>
+        <div className="wkcard" style={DP.panel}>
           <div className="mono" style={DP.panelEyebrow}>NEXT SUGGESTED CALLS</div>
           <h2 style={DP.panelTitle}>Continue the deal from here</h2>
           <div style={DP.stack}>
@@ -2630,7 +2630,7 @@ function DefinitivePacketCanvas({
               <button
                 key={`next-call-${index}`}
                 type="button"
-                className="m-state"
+                className="wkcard tap"
                 style={DP.callRow}
                 onClick={() => onTalkToYulia?.(`Use ${packetType} for ${dealTitle}. Prepare or run the next suggested call: ${summarizePacketValue(call)}. Preserve THE LINE and tell me what information is still missing.`)}
               >
@@ -2646,7 +2646,7 @@ function DefinitivePacketCanvas({
           </div>
         </div>
 
-        <div className="m-card" style={DP.panel}>
+        <div className="wkcard" style={DP.panel}>
           <div className="mono" style={DP.panelEyebrow}>TAKE-BACK ARTIFACTS</div>
           <h2 style={DP.panelTitle}>What another agent can carry out</h2>
           <div style={DP.stack}>
@@ -2654,7 +2654,7 @@ function DefinitivePacketCanvas({
               <button
                 key={`artifact-${index}`}
                 type="button"
-                className="m-state"
+                className="wkcard tap"
                 style={DP.artifactRow}
                 onClick={() => onTalkToYulia?.(`Explain this take-back artifact from ${packetType} for ${dealTitle}: ${summarizePacketValue(artifact)}`)}
               >
@@ -2668,7 +2668,7 @@ function DefinitivePacketCanvas({
         </div>
       </section>
 
-      <section className="m-card" style={DP.panel}>
+      <section className="wkcard" style={DP.panel}>
         <div className="mono" style={DP.panelEyebrow}>PAYLOAD READ</div>
         <h2 style={DP.panelTitle}>State carried by this packet</h2>
         <div style={DP.payloadGrid}>
@@ -2686,7 +2686,7 @@ function DefinitivePacketCanvas({
       {markdown && (
         <details style={DP.rawDetails}>
           <summary style={DP.rawSummary}>Packet opening note</summary>
-          <div className="m-card" style={A.markdownCard}>
+          <div className="wkcard" style={A.markdownCard}>
             <Markdown>{markdown}</Markdown>
           </div>
         </details>
@@ -2806,7 +2806,7 @@ function ArtifactCanvas({
   }
 
   return (
-    <div className="m-fade-up m-page-flow" style={IA.shell}>
+    <div className="wk-content m-fade-up" style={IA.shell}>
       <section style={IA.hero}>
         <div style={IA.heroCopy}>
           <div className="mono" style={IA.eyebrow}>INVESTMENT BOARD · YULIA ARTIFACT</div>
@@ -2816,12 +2816,12 @@ function ArtifactCanvas({
 
         <div style={IA.decisionPanel}>
           <div className="mono" style={IA.decisionLabel}>DECISION SIGNAL</div>
-          <div style={{ ...IA.decisionValue, color: visual.verdictTone === "pass" ? "var(--m-pass)" : visual.verdictTone === "watch" ? "#8A6311" : "var(--m-pursue)" }}>
+          <div style={{ ...IA.decisionValue, color: visual.verdictTone === "pass" ? "var(--st-risk-fg)" : visual.verdictTone === "watch" ? "#8A6311" : "var(--st-good-fg)" }}>
             {visual.verdict}
           </div>
           <div style={IA.decisionSub}>{firstSignal}</div>
           <button
-            className="m-btn filled"
+            className="wkbtn primary"
             type="button"
             style={IA.heroAction}
             onClick={() => onTalkToYulia?.(`Use the open ${visual.title} investment board. Turn it into a structured interactive analysis with editable assumptions, charts, evidence, and next actions.`)}
@@ -2840,7 +2840,7 @@ function ArtifactCanvas({
       )}
 
       <div style={IA.boardGrid}>
-        <div className="m-card" style={IA.bridgePanel}>
+        <div className="wkcard" style={IA.bridgePanel}>
           <div style={IA.panelHeader}>
             <div>
               <div className="mono" style={IA.panelEyebrow}>{bridgeTable ? "MODEL BRIDGE" : "ANALYSIS READ"}</div>
@@ -2855,7 +2855,7 @@ function ArtifactCanvas({
           )}
         </div>
 
-        <aside className="m-card" style={IA.signalPanel}>
+        <aside className="wkcard" style={IA.signalPanel}>
           <div className="mono" style={IA.panelEyebrow}>BOARD READ</div>
           <h2 style={IA.panelTitle}>What matters now</h2>
           <div style={IA.signalStack}>
@@ -2863,7 +2863,7 @@ function ArtifactCanvas({
               <button
                 key={section.title}
                 type="button"
-                className="m-state"
+                className="wkcard tap"
                 style={IA.signalRow}
                 onClick={() => onTalkToYulia?.(`Work from the ${section.title} section on the open ${visual.title} board. Tell me the decision, evidence, and next action.`)}
               >
@@ -2889,7 +2889,7 @@ function ArtifactCanvas({
       {markdown && (
         <details style={IA.rawDetails}>
           <summary style={IA.rawSummary}>Original Yulia text</summary>
-          <div className="m-card" style={A.markdownCard}>
+          <div className="wkcard" style={A.markdownCard}>
             <Markdown>{markdown}</Markdown>
           </div>
         </details>
@@ -2907,8 +2907,8 @@ function ArtifactNeedsPayload({
 }) {
   const cleanTitle = /loading into the model/i.test(title) ? "Investment board" : title;
   return (
-    <div className="m-fade-up m-page-flow" style={IA.shell}>
-      <section className="m-card" style={IA.needsPayload}>
+    <div className="wk-content m-fade-up" style={IA.shell}>
+      <section className="wkcard" style={IA.needsPayload}>
         <div className="mono" style={IA.eyebrow}>CANVAS ARTIFACT · NEEDS DATA</div>
         <h1 style={IA.title}>{cleanTitle}</h1>
         <p style={IA.deckline}>
@@ -2916,7 +2916,7 @@ function ArtifactNeedsPayload({
         </p>
         <div style={IA.needsPayloadActions}>
           <button
-            className="m-btn filled"
+            className="wkbtn primary"
             type="button"
             onClick={() => {
               if (typeof window !== "undefined") {
@@ -2997,8 +2997,8 @@ function ArtifactMetricTile({ metric }: { metric: ArtifactMetric }) {
   return (
     <div style={{ ...IA.metricTile, borderColor: toneBorder(tone), background: tone === "neutral" ? "rgba(255,255,255,0.72)" : toneBg(tone) }}>
       <div className="mono" style={IA.metricLabel}>{metric.label}</div>
-      <div style={{ ...IA.metricValue, color: tone === "neutral" ? "var(--m-on-surface)" : toneFg(tone) }}>{metric.value}</div>
-      {metric.sub && <div style={{ ...IA.metricSub, color: tone === "neutral" ? "var(--m-on-surface-var)" : toneFg(tone) }}>{metric.sub}</div>}
+      <div style={{ ...IA.metricValue, color: tone === "neutral" ? "var(--ink)" : toneFg(tone) }}>{metric.value}</div>
+      {metric.sub && <div style={{ ...IA.metricSub, color: tone === "neutral" ? "var(--ink-3)" : toneFg(tone) }}>{metric.sub}</div>}
     </div>
   );
 }
@@ -3034,7 +3034,7 @@ function ArtifactBridge({ table }: { table: ArtifactTable }) {
 
 function ArtifactSectionCard({ section }: { section: ArtifactSection }) {
   return (
-    <article className="m-card" style={{ ...IA.sectionCard, borderColor: toneBorder(section.tone) }}>
+    <article className="wkcard" style={{ ...IA.sectionCard, borderColor: toneBorder(section.tone) }}>
       <div className="mono" style={IA.sectionEyebrow}>{section.eyebrow}</div>
       <h3 style={IA.sectionTitle}>{section.title}</h3>
       {section.summary && <p style={IA.sectionSummary}>{section.summary}</p>}
@@ -3400,7 +3400,7 @@ const DP: Record<string, CSSProperties> = {
     gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
     gap: 22,
     alignItems: "stretch",
-    background: "linear-gradient(135deg, rgba(247,250,255,0.92), rgba(232,239,250,0.78))",
+    background: "var(--surface)",
   },
   heroCopy: {
     display: "flex",
@@ -3413,20 +3413,20 @@ const DP: Record<string, CSSProperties> = {
     fontSize: 9.5,
     letterSpacing: "0.15em",
     fontWeight: 900,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
   },
   title: {
     fontFamily: "var(--font-display)",
     fontSize: "clamp(30px, 4.5vw, 58px)",
     lineHeight: 0.95,
     letterSpacing: 0,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     margin: "8px 0 0",
   },
   deckline: {
     maxWidth: 820,
     margin: 0,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     fontSize: 15,
     lineHeight: 1.5,
   },
@@ -3455,7 +3455,7 @@ const DP: Record<string, CSSProperties> = {
   },
   notice: {
     padding: "14px 16px",
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     fontSize: 13,
   },
   grid: {
@@ -3472,14 +3472,14 @@ const DP: Record<string, CSSProperties> = {
     fontSize: 9.5,
     letterSpacing: "0.14em",
     fontWeight: 900,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
   },
   panelTitle: {
     fontFamily: "var(--font-display)",
     fontSize: 26,
     lineHeight: 1,
     letterSpacing: 0,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     margin: "5px 0 16px",
   },
   stack: {
@@ -3496,7 +3496,7 @@ const DP: Record<string, CSSProperties> = {
     padding: 14,
     borderRadius: 18,
     border: "1px solid rgba(121,142,170,0.18)",
-    background: "linear-gradient(145deg, rgba(255,255,255,0.84), rgba(241,246,252,0.70))",
+    background: "var(--surface)",
   },
   callIndex: {
     width: 40,
@@ -3506,13 +3506,13 @@ const DP: Record<string, CSSProperties> = {
     placeItems: "center",
     fontSize: 11,
     fontWeight: 900,
-    color: "#3C5F96",
+    color: "#191813",
     background: "rgba(222,232,249,0.9)",
   },
   callText: {
     display: "grid",
     gap: 4,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     fontSize: 12.5,
     lineHeight: 1.4,
     minWidth: 0,
@@ -3526,7 +3526,7 @@ const DP: Record<string, CSSProperties> = {
     borderRadius: 18,
     border: "1px solid rgba(121,142,170,0.18)",
     background: "rgba(255,255,255,0.74)",
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     fontSize: 12.5,
     lineHeight: 1.4,
   },
@@ -3534,7 +3534,7 @@ const DP: Record<string, CSSProperties> = {
     padding: 14,
     borderRadius: 18,
     background: "rgba(244,247,251,0.82)",
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     fontSize: 13,
     lineHeight: 1.45,
   },
@@ -3550,7 +3550,7 @@ const DP: Record<string, CSSProperties> = {
     borderRadius: 18,
     border: "1px solid rgba(121,142,170,0.16)",
     background: "rgba(255,255,255,0.72)",
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     fontSize: 12.5,
     lineHeight: 1.4,
   },
@@ -3559,7 +3559,7 @@ const DP: Record<string, CSSProperties> = {
   },
   rawSummary: {
     cursor: "pointer",
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     fontSize: 13,
     fontWeight: 800,
   },
@@ -3572,9 +3572,9 @@ const IA: Record<string, CSSProperties> = {
   needsPayload: {
     padding: "34px 38px",
     maxWidth: 780,
-    background: "linear-gradient(145deg, rgba(255,255,255,0.95), rgba(242,247,252,0.9))",
+    background: "var(--surface)",
     borderColor: "rgba(184, 205, 226, 0.84)",
-    boxShadow: "var(--m-elev-2)",
+    boxShadow: "0 1px 2px rgba(25,24,19,.06)",
   },
   needsPayloadActions: {
     marginTop: 22,
@@ -3596,7 +3596,7 @@ const IA: Record<string, CSSProperties> = {
     fontSize: 9.5,
     letterSpacing: "0.16em",
     fontWeight: 900,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
   },
   title: {
     fontFamily: "var(--font-display)",
@@ -3605,7 +3605,7 @@ const IA: Record<string, CSSProperties> = {
     lineHeight: 1.03,
     letterSpacing: "-0.025em",
     margin: "7px 0 0",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     textWrap: "balance",
   },
   deckline: {
@@ -3613,20 +3613,20 @@ const IA: Record<string, CSSProperties> = {
     maxWidth: 780,
     fontSize: 15.5,
     lineHeight: 1.5,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
   },
   decisionPanel: {
     padding: "20px 22px",
     borderRadius: 18,
     border: "1px solid rgba(184, 205, 226, 0.84)",
-    background: "linear-gradient(145deg, rgba(255,255,255,0.92), rgba(238,246,251,0.84))",
-    boxShadow: "var(--m-elev-2)",
+    background: "var(--surface)",
+    boxShadow: "0 1px 2px rgba(25,24,19,.06)",
   },
   decisionLabel: {
     fontSize: 9,
     letterSpacing: "0.15em",
     fontWeight: 900,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
   },
   decisionValue: {
     marginTop: 8,
@@ -3640,7 +3640,7 @@ const IA: Record<string, CSSProperties> = {
     marginTop: 10,
     fontSize: 12.5,
     lineHeight: 1.45,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
   },
   heroAction: {
     marginTop: 16,
@@ -3664,7 +3664,7 @@ const IA: Record<string, CSSProperties> = {
     fontSize: 8.5,
     letterSpacing: "0.13em",
     fontWeight: 900,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     textTransform: "uppercase",
   },
   metricValue: {
@@ -3707,7 +3707,7 @@ const IA: Record<string, CSSProperties> = {
     fontSize: 9,
     letterSpacing: "0.15em",
     fontWeight: 900,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
   },
   panelTitle: {
     fontFamily: "var(--font-display)",
@@ -3715,13 +3715,13 @@ const IA: Record<string, CSSProperties> = {
     fontWeight: 900,
     letterSpacing: "-0.02em",
     margin: "5px 0 0",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   tableCount: {
     padding: "6px 8px",
     borderRadius: 999,
     background: "rgba(230, 240, 249, 0.9)",
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     fontSize: 9,
     letterSpacing: "0.12em",
     fontWeight: 900,
@@ -3739,7 +3739,7 @@ const IA: Record<string, CSSProperties> = {
     justifyContent: "space-between",
     gap: 16,
     fontSize: 12.5,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
   },
   bridgeTrack: {
     height: 13,
@@ -3755,7 +3755,7 @@ const IA: Record<string, CSSProperties> = {
   emptyRead: {
     fontSize: 14,
     lineHeight: 1.55,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
   },
   signalStack: {
     display: "grid",
@@ -3769,7 +3769,7 @@ const IA: Record<string, CSSProperties> = {
     gap: 11,
     alignItems: "start",
     padding: "10px 0",
-    borderBottom: "1px solid var(--m-outline-var)",
+    borderBottom: "1px solid var(--line)",
     cursor: "pointer",
   },
   signalDot: {
@@ -3784,7 +3784,7 @@ const IA: Record<string, CSSProperties> = {
     gap: 3,
     fontSize: 12,
     lineHeight: 1.35,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
   },
   sectionGrid: {
     display: "grid",
@@ -3805,7 +3805,7 @@ const IA: Record<string, CSSProperties> = {
     fontSize: 8.5,
     letterSpacing: "0.14em",
     fontWeight: 900,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
   },
   sectionTitle: {
     margin: 0,
@@ -3814,13 +3814,13 @@ const IA: Record<string, CSSProperties> = {
     lineHeight: 1.12,
     fontWeight: 900,
     letterSpacing: "-0.02em",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   sectionSummary: {
     margin: 0,
     fontSize: 12.5,
     lineHeight: 1.45,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
   },
   bulletStack: {
     display: "grid",
@@ -3834,12 +3834,12 @@ const IA: Record<string, CSSProperties> = {
     alignItems: "start",
     fontSize: 11.8,
     lineHeight: 1.35,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
   },
   miniTableWrap: {
     marginTop: "auto",
     paddingTop: 10,
-    borderTop: "1px solid var(--m-outline-var)",
+    borderTop: "1px solid var(--line)",
     overflowX: "auto",
   },
   miniTable: {
@@ -3850,12 +3850,12 @@ const IA: Record<string, CSSProperties> = {
   miniTd: {
     padding: "6px 0",
     borderBottom: "1px solid rgba(186, 204, 221, 0.42)",
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     verticalAlign: "top",
   },
   miniValue: {
     textAlign: "right",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     fontWeight: 850,
     fontVariantNumeric: "tabular-nums",
   },
@@ -3866,7 +3866,7 @@ const IA: Record<string, CSSProperties> = {
     cursor: "pointer",
     fontSize: 12,
     fontWeight: 850,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     marginBottom: 10,
   },
 };
@@ -3886,7 +3886,7 @@ function ComparisonCanvas({
   const hasDeals = deals.length >= 2;
 
   return (
-    <div className="m-fade-up m-page-flow" style={{ width: "min(100%, 1440px)", maxWidth: 1440, margin: "0 auto", boxSizing: "border-box" }}>
+    <div className="wk-content m-fade-up" style={{ width: "min(100%, 1440px)", maxWidth: 1440, margin: "0 auto", boxSizing: "border-box" }}>
       <section style={{ marginBottom: 24 }}>
         <div className="mono" style={A.eyebrow}>ANALYSIS · COMPARISON</div>
         <div style={A.headerRow}>
@@ -3895,7 +3895,7 @@ function ComparisonCanvas({
             <div style={A.sub}>Side-by-side deal read. Yulia can keep refining the ranking from here.</div>
           </div>
           <button
-            className="m-btn filled"
+            className="wkbtn primary"
             type="button"
             onClick={() => onTalkToYulia?.("Update this comparison with risks, source gaps, and the next action for each deal.")}
           >
@@ -3905,7 +3905,7 @@ function ComparisonCanvas({
       </section>
 
       {hasDeals ? (
-        <div className="m-card" style={{ padding: 0, overflow: "hidden", marginBottom: 20 }}>
+        <div className="wkcard" style={{ padding: 0, overflow: "hidden", marginBottom: 20 }}>
           <div style={{ ...A.compareGrid, gridTemplateColumns: `160px repeat(${deals.length}, minmax(180px, 1fr))` }}>
             <div style={A.compareHeaderCell}>Field</div>
             {deals.map(deal => (
@@ -3932,14 +3932,14 @@ function ComparisonCanvas({
           </div>
         </div>
       ) : (
-        <div className="m-card" style={A.compareEmpty}>
+        <div className="wkcard" style={A.compareEmpty}>
           <strong>Pick at least two live deals.</strong>
           <span>Once your workspace has deal rows, this tab becomes a side-by-side comparison surface instead of a chat-only answer.</span>
         </div>
       )}
 
       {markdown && (
-        <div className="m-card" style={A.markdownCard}>
+        <div className="wkcard" style={A.markdownCard}>
           <div className="mono" style={A.cardEyebrow}>YULIA READ</div>
           <Markdown>{markdown}</Markdown>
         </div>
@@ -3990,7 +3990,7 @@ function fmtMaybeCents(value: unknown): string {
 
 const A: Record<string, CSSProperties> = {
   eyebrow: {
-    fontSize: 10, color: "var(--m-on-surface-mid)",
+    fontSize: 10, color: "var(--ink-2)",
     letterSpacing: "0.14em", fontWeight: 600, marginBottom: 6,
   },
   headerRow: {
@@ -3998,38 +3998,38 @@ const A: Record<string, CSSProperties> = {
   },
   h1: {
     fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 32,
-    letterSpacing: "-0.025em", margin: 0, color: "var(--m-on-surface)",
+    letterSpacing: "-0.025em", margin: 0, color: "var(--ink)",
     textWrap: "balance",
   },
-  sub: { fontSize: 13.5, color: "var(--m-on-surface-var)", marginTop: 6 },
+  sub: { fontSize: 13.5, color: "var(--ink-3)", marginTop: 6 },
   cardTitle: {
     fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14,
-    letterSpacing: "-0.01em", color: "var(--m-on-surface)", marginBottom: 18,
+    letterSpacing: "-0.01em", color: "var(--ink)", marginBottom: 18,
   },
   scenariosEyebrow: {
-    fontSize: 9.5, color: "var(--m-on-surface-mid)",
+    fontSize: 9.5, color: "var(--ink-2)",
     letterSpacing: "0.14em", fontWeight: 600, marginBottom: 10,
   },
   scenarioBtn: {
     all: "unset",
     padding: "8px 12px", borderRadius: 8,
-    fontSize: 12, color: "var(--m-on-surface-var)", cursor: "pointer",
-    background: "var(--m-surface-2)",
+    fontSize: 12, color: "var(--ink-3)", cursor: "pointer",
+    background: "var(--surface-2)",
     display: "flex", justifyContent: "space-between", alignItems: "center",
   },
   cashFlowEyebrow: {
-    fontSize: 9.5, color: "var(--m-on-surface-mid)",
+    fontSize: 9.5, color: "var(--ink-2)",
     letterSpacing: "0.14em", fontWeight: 600, marginBottom: 14,
   },
   yuliaRead: {
     padding: "20px 24px",
-    background: "var(--m-primary-container)",
-    color: "var(--m-on-primary-container)",
+    background: "var(--accent-soft)",
+    color: "var(--accent-strong)",
     border: "none",
   },
   yuliaMark: {
     width: 28, height: 28, borderRadius: 8,
-    background: "var(--m-primary)", color: "#fff",
+    background: "var(--accent)", color: "#fff",
     display: "grid", placeItems: "center",
     fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 12,
     flexShrink: 0,
@@ -4040,15 +4040,15 @@ const A: Record<string, CSSProperties> = {
     display: "flex",
     gap: 16,
     alignItems: "flex-start",
-    background: "linear-gradient(145deg, rgba(255,255,255,0.94), rgba(232,242,253,0.78))",
+    background: "var(--surface)",
     borderColor: "rgba(111, 139, 177, 0.22)",
-    boxShadow: "var(--m-elev-2)",
+    boxShadow: "0 1px 2px rgba(25,24,19,.06)",
   },
   analysisRunIcon: {
     width: 44,
     height: 44,
     borderRadius: 14,
-    background: "linear-gradient(145deg, var(--m-primary), #79A892)",
+    background: "var(--accent)",
     color: "#fff",
     display: "grid",
     placeItems: "center",
@@ -4061,7 +4061,7 @@ const A: Record<string, CSSProperties> = {
   analysisRunBody: {
     fontSize: 14,
     lineHeight: 1.6,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     maxWidth: 740,
   },
   compareGrid: {
@@ -4070,23 +4070,23 @@ const A: Record<string, CSSProperties> = {
   },
   compareHeaderCell: {
     padding: "16px 18px",
-    background: "var(--m-surface-2)",
-    borderBottom: "1px solid var(--m-outline-var)",
-    color: "var(--m-on-surface)",
+    background: "var(--surface-2)",
+    borderBottom: "1px solid var(--line)",
+    color: "var(--ink)",
     fontWeight: 800,
     fontSize: 13,
   },
   compareLabel: {
     padding: "14px 18px",
-    borderBottom: "1px solid var(--m-outline-var)",
-    color: "var(--m-on-surface-mid)",
+    borderBottom: "1px solid var(--line)",
+    color: "var(--ink-2)",
     fontSize: 12,
     fontWeight: 700,
   },
   compareCell: {
     padding: "14px 18px",
-    borderBottom: "1px solid var(--m-outline-var)",
-    color: "var(--m-on-surface)",
+    borderBottom: "1px solid var(--line)",
+    color: "var(--ink)",
     fontSize: 13,
     fontVariantNumeric: "tabular-nums",
   },
@@ -4095,7 +4095,7 @@ const A: Record<string, CSSProperties> = {
     display: "flex",
     flexDirection: "column",
     gap: 6,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
   },
   markdownCard: {
     padding: "22px 26px",
@@ -4104,7 +4104,7 @@ const A: Record<string, CSSProperties> = {
   },
   cardEyebrow: {
     fontSize: 9.5,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     letterSpacing: "0.14em",
     fontWeight: 700,
     marginBottom: 10,
@@ -4112,9 +4112,9 @@ const A: Record<string, CSSProperties> = {
   structuredHero: {
     padding: "24px 26px",
     marginBottom: 22,
-    background: "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(239,245,255,0.88))",
+    background: "var(--surface)",
     borderColor: "rgba(103, 126, 174, 0.18)",
-    boxShadow: "var(--m-elev-2)",
+    boxShadow: "0 1px 2px rgba(25,24,19,.06)",
   },
   verdictBadge: {
     width: 52,
@@ -4131,7 +4131,7 @@ const A: Record<string, CSSProperties> = {
   structuredCopy: {
     fontSize: 13.5,
     lineHeight: 1.58,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     maxWidth: 900,
     margin: "8px 0 0",
   },
@@ -4161,7 +4161,7 @@ const A: Record<string, CSSProperties> = {
   },
   controlRailCard: {
     padding: "18px 20px",
-    background: "linear-gradient(145deg, rgba(255,255,255,0.94), rgba(242,247,252,0.88))",
+    background: "var(--surface)",
     borderColor: "rgba(181, 202, 222, 0.76)",
   },
   comparisonWorkspace: {
@@ -4175,9 +4175,9 @@ const A: Record<string, CSSProperties> = {
     gap: 18,
     padding: "24px 26px",
     borderRadius: 22,
-    background: "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(238,246,252,0.88))",
+    background: "var(--surface)",
     border: "1px solid rgba(181, 202, 222, 0.76)",
-    boxShadow: "var(--m-elev-1)",
+    boxShadow: "0 1px 2px rgba(25,24,19,.06)",
   },
   comparisonTitle: {
     margin: 0,
@@ -4186,14 +4186,14 @@ const A: Record<string, CSSProperties> = {
     lineHeight: 1.08,
     fontWeight: 900,
     letterSpacing: "-0.025em",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   comparisonSub: {
     margin: "8px 0 0",
     maxWidth: 680,
     fontSize: 13.5,
     lineHeight: 1.5,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
   },
   comparisonColumns: {
     display: "grid",
@@ -4204,9 +4204,9 @@ const A: Record<string, CSSProperties> = {
     minWidth: 0,
     padding: "18px",
     borderRadius: 18,
-    background: "linear-gradient(180deg, rgba(255,255,255,0.94), rgba(246,250,254,0.84))",
+    background: "var(--surface)",
     border: "1px solid rgba(181, 202, 222, 0.76)",
-    boxShadow: "var(--m-elev-1)",
+    boxShadow: "0 1px 2px rgba(25,24,19,.06)",
     display: "grid",
     gap: 13,
     cursor: "pointer",
@@ -4236,13 +4236,13 @@ const A: Record<string, CSSProperties> = {
     fontSize: 18,
     lineHeight: 1.12,
     fontWeight: 950,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     letterSpacing: "-0.018em",
   },
   compareDealMeta: {
     marginTop: 4,
     fontSize: 11.5,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     lineHeight: 1.35,
   },
   compareIconButton: {
@@ -4259,7 +4259,7 @@ const A: Record<string, CSSProperties> = {
     padding: "0 11px",
     borderRadius: 12,
     background: "rgba(236, 243, 250, 0.82)",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     fontSize: 12,
     fontWeight: 850,
     display: "flex",
@@ -4291,7 +4291,7 @@ const A: Record<string, CSSProperties> = {
     fontSize: 8.5,
     letterSpacing: "0.14em",
     fontWeight: 900,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
   },
   compareMiniBarRow: {
     display: "grid",
@@ -4303,7 +4303,7 @@ const A: Record<string, CSSProperties> = {
     gap: 10,
     fontSize: 11,
     lineHeight: 1.25,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
   },
   compareMiniBarTrack: {
     height: 9,
@@ -4328,7 +4328,7 @@ const A: Record<string, CSSProperties> = {
     alignItems: "start",
     fontSize: 11.5,
     lineHeight: 1.35,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
   },
   compareRiskDot: {
     width: 8,
@@ -4371,7 +4371,7 @@ const A: Record<string, CSSProperties> = {
     gap: 7,
     padding: "16px 18px",
     borderRadius: 16,
-    background: "linear-gradient(145deg, rgba(255,255,255,0.84), rgba(241,247,252,0.7))",
+    background: "var(--surface)",
     border: "1px solid rgba(181, 202, 222, 0.58)",
   },
   modelLeaderKicker: {
@@ -4379,7 +4379,7 @@ const A: Record<string, CSSProperties> = {
     fontSize: 12,
     lineHeight: 1.25,
     fontWeight: 850,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
   },
   modelLeaderName: {
     fontFamily: "var(--font-display)",
@@ -4387,21 +4387,21 @@ const A: Record<string, CSSProperties> = {
     lineHeight: 1,
     fontWeight: 900,
     letterSpacing: "-0.01em",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   modelLeaderCopy: {
     margin: "2px 0 0",
     maxWidth: 620,
     fontSize: 13.5,
     lineHeight: 1.45,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
   },
   modelAdviceNote: {
     marginTop: 5,
     padding: "9px 10px",
     borderRadius: 10,
     background: "rgba(232, 241, 249, 0.86)",
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     fontSize: 11.5,
     lineHeight: 1.35,
   },
@@ -4426,7 +4426,7 @@ const A: Record<string, CSSProperties> = {
     minHeight: 38,
     padding: "7px 0",
     borderBottom: "1px solid rgba(181, 202, 222, 0.46)",
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     fontSize: 12.5,
     lineHeight: 1.25,
   },
@@ -4436,8 +4436,8 @@ const A: Record<string, CSSProperties> = {
     borderRadius: 999,
     display: "grid",
     placeItems: "center",
-    background: "var(--m-primary-container)",
-    color: "var(--m-on-primary-container)",
+    background: "var(--accent-soft)",
+    color: "var(--accent-strong)",
     fontSize: 11,
     fontWeight: 900,
   },
@@ -4446,17 +4446,17 @@ const A: Record<string, CSSProperties> = {
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     fontWeight: 850,
   },
   rankScore: {
     justifySelf: "end",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     fontSize: 13,
   },
   rankRange: {
     justifySelf: "end",
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     fontSize: 12,
     whiteSpace: "nowrap",
   },
@@ -4480,22 +4480,22 @@ const A: Record<string, CSSProperties> = {
     gap: 4,
     padding: "11px 12px",
     borderRadius: 13,
-    background: "linear-gradient(145deg, rgba(255,255,255,0.78), rgba(241,246,252,0.68))",
+    background: "var(--surface)",
     border: "1px solid rgba(181, 202, 222, 0.56)",
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     fontSize: 11.5,
     lineHeight: 1.32,
   },
   benefitLabel: {
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
   },
   benefitWinner: {
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     fontSize: 13,
     lineHeight: 1.2,
   },
   benefitReason: {
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     lineHeight: 1.3,
   },
   comparisonChangeRows: {
@@ -4511,7 +4511,7 @@ const A: Record<string, CSSProperties> = {
     background: "rgba(255,255,255,0.62)",
     border: "1px solid rgba(181, 202, 222, 0.52)",
     fontSize: 11.5,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
   },
   comparisonMiniMatrix: {
     display: "grid",
@@ -4525,7 +4525,7 @@ const A: Record<string, CSSProperties> = {
     paddingBottom: 8,
     borderBottom: "1px solid rgba(181, 202, 222, 0.58)",
     fontSize: 12,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
   },
   scopePicker: {
     marginBottom: 14,
@@ -4538,7 +4538,7 @@ const A: Record<string, CSSProperties> = {
     marginBottom: 8,
     fontSize: 11,
     fontWeight: 850,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
   },
   scopeChips: {
     display: "flex",
@@ -4550,26 +4550,26 @@ const A: Record<string, CSSProperties> = {
     padding: "7px 9px",
     borderRadius: 999,
     background: "rgba(255,255,255,0.72)",
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     cursor: "pointer",
     fontSize: 11,
     fontWeight: 850,
   },
   scopeChipActive: {
-    background: "var(--m-primary-container)",
-    color: "var(--m-on-primary-container)",
+    background: "var(--accent-soft)",
+    color: "var(--accent-strong)",
     boxShadow: "inset 0 0 0 1px rgba(83, 128, 170, 0.24)",
   },
   compareTrayCard: {
     padding: "18px",
-    background: "linear-gradient(145deg, rgba(255,255,255,0.92), rgba(242,247,252,0.84))",
+    background: "var(--surface)",
     borderColor: "rgba(181, 202, 222, 0.76)",
   },
   compareTrayCopy: {
     margin: "8px 0 16px",
     fontSize: 12.3,
     lineHeight: 1.45,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
   },
   compareTrayGroup: {
     display: "grid",
@@ -4580,7 +4580,7 @@ const A: Record<string, CSSProperties> = {
     fontSize: 10.5,
     fontWeight: 900,
     letterSpacing: "0.1em",
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     textTransform: "uppercase",
   },
   compareCandidate: {
@@ -4600,7 +4600,7 @@ const A: Record<string, CSSProperties> = {
     display: "grid",
     gap: 3,
     minWidth: 0,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     fontSize: 12.5,
     lineHeight: 1.3,
   },
@@ -4608,7 +4608,7 @@ const A: Record<string, CSSProperties> = {
     width: 58,
     height: 58,
     borderRadius: 14,
-    background: "linear-gradient(180deg, rgba(241,246,252,0.9), rgba(255,255,255,0.74))",
+    background: "var(--surface)",
     border: "1px solid rgba(181, 202, 222, 0.66)",
     display: "grid",
     gridTemplateRows: "24px 1fr",
@@ -4648,7 +4648,7 @@ const A: Record<string, CSSProperties> = {
     padding: "10px 11px",
     borderRadius: 13,
     background: "rgba(236, 243, 250, 0.86)",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
@@ -4660,8 +4660,8 @@ const A: Record<string, CSSProperties> = {
     padding: "12px",
     borderRadius: 13,
     background: "rgba(244, 247, 251, 0.8)",
-    border: "1px solid var(--m-outline-var)",
-    color: "var(--m-on-surface-var)",
+    border: "1px solid var(--line)",
+    color: "var(--ink-3)",
     fontSize: 12,
   },
   controlListRow: {
@@ -4670,7 +4670,7 @@ const A: Record<string, CSSProperties> = {
     alignItems: "flex-start",
     gap: 10,
     paddingBottom: 10,
-    borderBottom: "1px solid var(--m-outline-var)",
+    borderBottom: "1px solid var(--line)",
   },
   metricCard: {
     padding: "16px 18px",
@@ -4682,13 +4682,13 @@ const A: Record<string, CSSProperties> = {
     fontWeight: 850,
     fontSize: 26,
     letterSpacing: "-0.025em",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     fontVariantNumeric: "tabular-nums",
   },
   metricSub: {
     fontSize: 11.5,
     lineHeight: 1.35,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     marginTop: 5,
   },
   sideTitle: {
@@ -4696,7 +4696,7 @@ const A: Record<string, CSSProperties> = {
     fontWeight: 800,
     fontSize: 18,
     letterSpacing: "-0.02em",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   barTrack: {
     height: 9,
@@ -4717,17 +4717,17 @@ const A: Record<string, CSSProperties> = {
   th: {
     textAlign: "left",
     padding: "12px 16px",
-    borderTop: "1px solid var(--m-outline-var)",
-    borderBottom: "1px solid var(--m-outline-var)",
-    color: "var(--m-on-surface-mid)",
-    background: "var(--m-surface-2)",
+    borderTop: "1px solid var(--line)",
+    borderBottom: "1px solid var(--line)",
+    color: "var(--ink-2)",
+    background: "var(--surface-2)",
     fontSize: 11,
     fontWeight: 800,
   },
   td: {
     padding: "12px 16px",
-    borderBottom: "1px solid var(--m-outline-var)",
-    color: "var(--m-on-surface-var)",
+    borderBottom: "1px solid var(--line)",
+    color: "var(--ink-3)",
     verticalAlign: "top",
   },
   listRow: {
@@ -4736,7 +4736,7 @@ const A: Record<string, CSSProperties> = {
     alignItems: "flex-start",
     gap: 12,
     paddingBottom: 12,
-    borderBottom: "1px solid var(--m-outline-var)",
+    borderBottom: "1px solid var(--line)",
   },
   smallBadge: {
     padding: "6px 9px",
@@ -4751,8 +4751,8 @@ const A: Record<string, CSSProperties> = {
     cursor: "pointer",
     padding: "11px 12px",
     borderRadius: 12,
-    background: "var(--m-surface-2)",
-    color: "var(--m-on-surface)",
+    background: "var(--surface-2)",
+    color: "var(--ink)",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
@@ -4770,7 +4770,7 @@ const A: Record<string, CSSProperties> = {
   },
   assumptionLabel: {
     fontSize: 11.5,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     fontWeight: 800,
   },
   assumptionControl: {
@@ -4782,11 +4782,11 @@ const A: Record<string, CSSProperties> = {
   assumptionInput: {
     width: "100%",
     boxSizing: "border-box",
-    border: "1px solid var(--m-outline-var)",
+    border: "1px solid var(--line)",
     borderRadius: 10,
     padding: "8px 10px",
     background: "rgba(255,255,255,0.8)",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     font: "inherit",
     fontSize: 12,
     outline: "none",
@@ -4807,8 +4807,8 @@ const A: Record<string, CSSProperties> = {
     flex: "0 0 auto",
     padding: "5px 8px",
     borderRadius: 999,
-    background: "var(--m-primary-container)",
-    color: "var(--m-on-primary-container)",
+    background: "var(--accent-soft)",
+    color: "var(--accent-strong)",
     fontSize: 10,
     fontWeight: 900,
     letterSpacing: "0.05em",
@@ -4821,7 +4821,7 @@ const A: Record<string, CSSProperties> = {
   sliderScenarioRow: {
     padding: "12px",
     borderRadius: 14,
-    background: "linear-gradient(145deg, rgba(255,255,255,0.78), rgba(241,246,252,0.72))",
+    background: "var(--surface)",
     border: "1px solid rgba(121, 142, 170, 0.16)",
     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.72)",
   },
@@ -4835,7 +4835,7 @@ const A: Record<string, CSSProperties> = {
   sliderScenarioValue: {
     fontSize: 12,
     fontWeight: 900,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     fontVariantNumeric: "tabular-nums",
     whiteSpace: "nowrap",
   },
@@ -4844,7 +4844,7 @@ const A: Record<string, CSSProperties> = {
     justifyContent: "space-between",
     gap: 8,
     marginTop: 6,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     fontSize: 10.5,
   },
   scenarioReadOnly: {
@@ -4853,13 +4853,13 @@ const A: Record<string, CSSProperties> = {
     padding: "10px 12px",
     borderRadius: 14,
     background: "rgba(244, 247, 251, 0.8)",
-    border: "1px solid var(--m-outline-var)",
+    border: "1px solid var(--line)",
   },
   scenarioReadOnlyRow: {
     display: "flex",
     justifyContent: "space-between",
     gap: 10,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     fontSize: 11.5,
   },
   scenarioActions: {
@@ -4876,7 +4876,7 @@ const A: Record<string, CSSProperties> = {
   versionPanel: {
     marginTop: 18,
     paddingTop: 16,
-    borderTop: "1px solid var(--m-outline-var)",
+    borderTop: "1px solid var(--line)",
   },
   versionRows: {
     display: "grid",
@@ -4888,25 +4888,25 @@ const A: Record<string, CSSProperties> = {
     alignItems: "flex-start",
     padding: "12px",
     borderRadius: 16,
-    background: "linear-gradient(145deg, rgba(255,255,255,0.82), rgba(241,246,252,0.70))",
+    background: "var(--surface)",
     border: "1px solid rgba(121, 142, 170, 0.16)",
     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.72)",
   },
   versionTitle: {
     fontSize: 13,
     fontWeight: 900,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   versionMeta: {
     marginTop: 3,
     fontSize: 11.5,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     lineHeight: 1.35,
   },
   versionSummary: {
     marginTop: 6,
     fontSize: 11.5,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     lineHeight: 1.45,
     maxWidth: 760,
   },
@@ -4924,8 +4924,8 @@ const A: Record<string, CSSProperties> = {
     padding: "12px",
     borderRadius: 14,
     background: "rgba(244, 247, 251, 0.8)",
-    border: "1px solid var(--m-outline-var)",
-    color: "var(--m-on-surface-var)",
+    border: "1px solid var(--line)",
+    color: "var(--ink-3)",
     fontSize: 12,
   },
   actionNote: {
@@ -4935,6 +4935,6 @@ const A: Record<string, CSSProperties> = {
     background: "rgba(225, 242, 235, 0.9)",
     color: "#246B50",
     fontSize: 12.5,
-    boxShadow: "var(--m-elev-1)",
+    boxShadow: "0 1px 2px rgba(25,24,19,.06)",
   },
 };

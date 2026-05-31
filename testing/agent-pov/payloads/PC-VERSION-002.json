@@ -1,0 +1,19 @@
+{
+  "id": "PC-VERSION-002",
+  "category": "VERSION",
+  "description": "Unknown methodology version 'V21-beta' supplied. Refusal envelope must include current supported version and effective_date.",
+  "payload": {
+    "journey": "sell",
+    "target_industry": "manufacturing",
+    "target_jurisdiction": "US-OH",
+    "methodology_version": "V21-beta"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "unsupported_version",
+    "persistsDealState": false
+  },
+  "tags": ["version", "unknown-methodology", "future-beta"]
+}

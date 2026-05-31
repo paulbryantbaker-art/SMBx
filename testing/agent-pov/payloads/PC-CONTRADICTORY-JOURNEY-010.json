@@ -1,0 +1,40 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "journey='buy' with both pre-close LOI structure AND post-close TSA scope, alongside sellerRole=principal — agent role straddles buyer and the post-close PMI seller, substrate cannot pick a side.",
+  "payload": {
+    "journey": "buy",
+    "sellerRole": "principal",
+    "sellerRepresentation": "banker",
+    "stage": "loi",
+    "tsaActive": true,
+    "tsaDurationMonths": 12,
+    "purchasePriceCents": 30000000000,
+    "dealClosedDate": null,
+    "industry": "industrial gases",
+    "jurisdiction": "US-DE"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-DE",
+      "industry": "industrial gases"
+    },
+    "missingFields": [
+      "explicit_journey_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "journey-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-JOURNEY-010"
+}

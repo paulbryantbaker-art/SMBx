@@ -1,0 +1,45 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "Deal narrative flags an LME / exchange-offer / liability-management process but FCCR > 3, secured debt trades at par, and EBITDA is positive — substrate cannot pick LME vs healthy sell-side silently.",
+  "payload": {
+    "journey": "sell",
+    "sellerRole": "banker",
+    "industry": "B2B services",
+    "jurisdiction": "US-DE",
+    "league": "L6",
+    "dealType": "LME exchange offer liability-management uptier covenant amendment process",
+    "ttmRevenueCents": 150000000000,
+    "ebitdaCents": 15000000000,
+    "adjustedEbitdaCents": 15000000000,
+    "signals": {
+      "fccr": 3.2,
+      "cashRunwayDays": 720,
+      "securedDebtTradingPriceCents": 100
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "sell",
+      "jurisdiction": "US-DE",
+      "industry": "B2B services",
+      "league": "L6"
+    },
+    "missingFields": [
+      "explicit_distressPosture_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "distress-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-DISTRESS-004"
+}

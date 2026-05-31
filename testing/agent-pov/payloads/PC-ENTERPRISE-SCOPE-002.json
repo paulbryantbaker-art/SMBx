@@ -1,0 +1,18 @@
+{
+  "id": "PC-ENTERPRISE-SCOPE-002",
+  "category": "LINE_VIOLATION",
+  "description": "General agent attempts update_firm_memory. Firm-memory mutation is enterprise-scoped per LINE_OVERRIDES.",
+  "payload": {
+    "memory_key": "firm.templates.loi.default",
+    "memory_value": "use Cooley template v3"
+  },
+  "tool": "update_firm_memory",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "enterprise_scope_required",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["enterprise-scope", "firm-memory"]
+}

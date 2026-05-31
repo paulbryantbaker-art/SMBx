@@ -1,0 +1,37 @@
+{
+  "category": "AMBIGUOUS",
+  "description": "Self-storage operator — could be operating_co or real-estate REIT-like.",
+  "payload": {
+    "journey": "buy",
+    "industry": "self storage",
+    "jurisdiction": "US-AZ",
+    "league": "L5",
+    "ttmRevenueCents": 9500000000,
+    "adjustedEbitdaCents": 5200000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-AZ",
+      "industry": "self storage",
+      "league": "L5"
+    },
+    "missingFields": [
+      "deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "ambiguous",
+    "asset-class"
+  ],
+  "id": "PC-AMBIGUOUS-ASSET-004"
+}

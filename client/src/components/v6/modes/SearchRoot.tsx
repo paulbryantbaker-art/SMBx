@@ -1,17 +1,6 @@
-import { type CSSProperties } from "react";
 import { V6Icon } from "../icons";
 import type { OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
-import { DESKTOP_TEXTURES, STUDIO_TEXTURES } from "../../../lib/randomTextures";
-import {
-  studioCompeteButtonItemStyles,
-  studioCompeteCardStyles,
-  studioListCardStyles,
-  studioLiquidGlassFilter,
-  studioLiquidGlassShadow,
-  studioTextureCardBackground,
-  studioTextureCardStyles,
-} from "../styles/studioSurfaces";
 
 interface SearchRootProps {
   openTab: OpenTab;
@@ -42,7 +31,7 @@ const CATEGORIES: Category[] = [
     title: "Targets to buy",
     audience: "Thesis, geography, check size",
     detail: "Target read, source confidence, fit rationale, and first outreach angle.",
-    texture: STUDIO_TEXTURES.green,
+    texture: "",
     prompt: "Find acquisition targets from this thesis: recurring revenue, lower-middle-market services, owner transition risk acceptable.",
   },
   {
@@ -50,7 +39,7 @@ const CATEGORIES: Category[] = [
     title: "Buyers and buy-side",
     audience: "Strategics, sponsors, buyer pools",
     detail: "Buyer universe ranked by strategic fit, ability to close, and relationship angle.",
-    texture: STUDIO_TEXTURES.rose,
+    texture: "",
     prompt: "Find likely buyers and buyer pools for Big Fake Deal. Rank strategic fit, ability to close, and relationship angle.",
   },
   {
@@ -58,7 +47,7 @@ const CATEGORIES: Category[] = [
     title: "PE and lenders",
     audience: "Sponsors, SBA, senior debt",
     detail: "Capital partners matched by mandate, check size, lender fit, and diligence ask.",
-    texture: STUDIO_TEXTURES.navy,
+    texture: "",
     prompt: "Find PE firms, independent sponsors, and senior debt lenders relevant to this deal size and industry.",
   },
   {
@@ -66,7 +55,7 @@ const CATEGORIES: Category[] = [
     title: "Deal professionals",
     audience: "M&A counsel, QoE, tax, insurance",
     detail: "Provider shortlist with why-now context, fit rationale, and handoff instructions.",
-    texture: STUDIO_TEXTURES.blue,
+    texture: "",
     prompt: "Find deal professionals for this transaction: M&A counsel, QoE, tax, insurance, and real estate support.",
   },
 ];
@@ -128,10 +117,6 @@ const MARKET_STACK = [
   },
 ];
 
-const LIQUID_GLASS_FILTER = "blur(5px) saturate(165%) contrast(1.08) brightness(1.04)";
-const SHORTCUT_DARK_GLASS_BACKGROUND =
-  "radial-gradient(circle at 20% -18%, rgba(255,255,255,0.24), transparent 42%), linear-gradient(145deg, rgba(21,28,42,0.88), rgba(39,49,70,0.70) 52%, rgba(10,14,22,0.84))";
-
 export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
   const ask = (prompt: string) => {
     onTalkToYulia?.(prompt);
@@ -156,104 +141,162 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
   };
 
   return (
-    <div className="m-fade-up m-page-flow" style={S.page}>
-      <section style={S.hero}>
-        <div style={S.heroCopy}>
-          <h1 style={S.title}>Find the other side of the market.</h1>
-          <p style={S.sub}>
+    <div className="wk-content m-fade-up" style={{ maxWidth: 1180, margin: "0 auto" }}>
+
+      {/* Page header */}
+      <div className="pg-head">
+        <div>
+          <div className="pg-eyebrow">Market discovery</div>
+          <div className="pg-title">Search</div>
+          <p className="pg-sub">
             Search here is not document search. It is market discovery: buyers, targets, capital, and the professionals who help users get deals reviewed and closed.
           </p>
         </div>
-
-        <div className="m-flow-grid" style={S.examples}>
-          {EXAMPLES.map(example => (
-            <button
-              key={example}
-              className="m-glint m-glass-control"
-              type="button"
-              style={S.examplePill}
-              onClick={() => {
-                openDiscoverySurface(`Run a market discovery search: ${example}`);
-              }}
-            >
-              {example}
-            </button>
-          ))}
+        <div className="pg-actions">
+          <button
+            className="wkbtn primary"
+            type="button"
+            onClick={() =>
+              openDiscoverySurface(
+                "Open a discovery map for my current sourcing work: buyers, targets, capital providers, and deal professionals grouped by thesis and next action options.",
+                "Discovery map"
+              )
+            }
+          >
+            Open discovery map
+          </button>
         </div>
-      </section>
+      </div>
 
-      <section style={S.section}>
-        <SectionTitle title="Market lanes" sub="Start broad, then let Yulia narrow by thesis, geography, check size, fit, and relationship angle." />
-        <div className="m-flow-grid" style={S.categoryGrid}>
+      {/* Example quick-launch pills */}
+      <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8, marginTop: 20 }}>
+        {EXAMPLES.map(example => (
+          <button
+            key={example}
+            className="wkbtn"
+            type="button"
+            onClick={() => openDiscoverySurface(`Run a market discovery search: ${example}`)}
+          >
+            {example}
+          </button>
+        ))}
+      </div>
+
+      {/* Market lanes section */}
+      <div className="wksec">
+        <div className="wksec-title">Market lanes</div>
+        <p style={{ margin: "0 0 16px", color: "var(--ink-2)", fontSize: ".92rem", lineHeight: 1.5, maxWidth: "72ch" }}>
+          Start broad, then let Yulia narrow by thesis, geography, check size, fit, and relationship angle.
+        </p>
+        <div className="wkgrid g4">
           {CATEGORIES.map(category => (
-            <CategoryCard key={category.title} category={category} onClick={() => openDiscoverySurface(category.prompt, category.title)} />
+            <CategoryCard
+              key={category.title}
+              category={category}
+              onClick={() => openDiscoverySurface(category.prompt, category.title)}
+            />
           ))}
         </div>
-      </section>
+      </div>
 
-      <section className="m-flow-grid" style={S.discoveryGrid}>
-        <div style={S.listCard}>
-          <div style={S.listTop}>
+      {/* Recent searches + built-for section */}
+      <div
+        className="wksec"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "minmax(min(520px, 100%), 0.95fr) minmax(min(420px, 100%), 1.05fr)",
+          gap: 16,
+          alignItems: "stretch",
+        }}
+      >
+        {/* Searches to reopen */}
+        <div className="wkcard" style={{ display: "flex", flexDirection: "column" as const, gap: 0 }}>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 16 }}>
             <div>
-              <h2 style={S.listTitle}>Searches to reopen</h2>
-              <p style={S.listSub}>Recent market maps, buyer pools, lenders, and provider searches.</p>
+              <div className="wkcard-title">Searches to reopen</div>
+              <div className="wkcard-sub">Recent market maps, buyer pools, lenders, and provider searches.</div>
             </div>
             <button
-              style={S.listAction}
+              className="wkbtn"
               type="button"
-              onClick={() => {
-                openDiscoverySurface("Open a discovery map for my current sourcing work: buyers, targets, capital providers, and deal professionals grouped by thesis and next action options.", "Discovery map");
-              }}
+              style={{ whiteSpace: "nowrap" as const, flexShrink: 0 }}
+              onClick={() =>
+                openDiscoverySurface(
+                  "Open a discovery map for my current sourcing work: buyers, targets, capital providers, and deal professionals grouped by thesis and next action options.",
+                  "Discovery map"
+                )
+              }
             >
               Open map
             </button>
           </div>
 
-          <div className="m-flow-grid" style={S.listStack}>
+          <div style={{ display: "flex", flexDirection: "column" as const, gap: 2 }}>
             {DISCOVERY.map(row => (
               <button
                 key={row.title}
                 type="button"
-                style={S.discoveryRow}
+                style={{
+                  all: "unset" as const,
+                  boxSizing: "border-box" as const,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "12px 0",
+                  borderBottom: "1px solid var(--line)",
+                  cursor: "pointer",
+                }}
                 onClick={() => openDiscoverySurface(row.prompt, row.title)}
               >
-                <span style={S.rowIcon}><V6Icon name={row.icon} size={18} /></span>
-                <span style={S.rowText}>
-                  <strong>{row.title}</strong>
-                  <span>{row.sub}</span>
+                <span
+                  style={{
+                    flex: "none",
+                    width: 34,
+                    height: 34,
+                    borderRadius: 9,
+                    background: "var(--surface-2)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "var(--ink-2)",
+                  }}
+                >
+                  <V6Icon name={row.icon} size={16} />
                 </span>
-                <span style={S.rowPill}>{row.pill}</span>
+                <span style={{ flex: 1, display: "flex", flexDirection: "column" as const, gap: 2, minWidth: 0 }}>
+                  <strong style={{ fontSize: ".88rem", fontWeight: 600, color: "var(--ink)" }}>{row.title}</strong>
+                  <span style={{ fontSize: ".8rem", color: "var(--ink-3)", lineHeight: 1.4 }}>{row.sub}</span>
+                </span>
+                <span
+                  className="statpill missing"
+                  style={{ whiteSpace: "nowrap" as const, fontFamily: "var(--font-mono)", fontSize: ".76rem" }}
+                >
+                  {row.pill}
+                </span>
               </button>
             ))}
           </div>
         </div>
 
-        <div style={S.competesCard}>
-          <h2 style={S.competeTitle}>Built for market work that becomes deal work.</h2>
-          <div className="m-flow-grid" style={S.competeGrid}>
+        {/* Built for market work */}
+        <div className="wkcard" style={{ display: "flex", flexDirection: "column" as const, gap: 16 }}>
+          <div className="wkcard-title">Built for market work that becomes deal work.</div>
+          <div className="wkgrid g2" style={{ marginTop: 0 }}>
             {MARKET_STACK.map(item => (
               <button
                 key={item.title}
                 type="button"
-                style={S.competeItem}
+                className="wkcard tap"
+                style={{ padding: "14px 16px", display: "flex", flexDirection: "column" as const, gap: 6, textAlign: "left" as const }}
                 onClick={() => ask(`Use Search to build this market work product: ${item.title}. ${item.sub}`)}
               >
-                <strong>{item.title}</strong>
-                <span>{item.sub}</span>
+                <strong style={{ fontSize: ".9rem", fontWeight: 600, color: "var(--ink)" }}>{item.title}</strong>
+                <span style={{ fontSize: ".82rem", color: "var(--ink-2)", lineHeight: 1.45 }}>{item.sub}</span>
               </button>
             ))}
           </div>
         </div>
-      </section>
-    </div>
-  );
-}
-
-function SectionTitle({ title, sub }: { title: string; sub: string }) {
-  return (
-    <div style={S.sectionHead}>
-      <h2 style={S.sectionTitle}>{title}</h2>
-      <p style={S.sectionSub}>{sub}</p>
+      </div>
     </div>
   );
 }
@@ -262,214 +305,51 @@ function CategoryCard({ category, onClick }: { category: Category; onClick: () =
   return (
     <button
       type="button"
-      className="m-nudge-soft"
-      style={{ ...S.categoryCard, backgroundImage: studioTextureCardBackground(category.texture) }}
+      className="wkcard tap"
+      style={{
+        all: "unset" as const,
+        boxSizing: "border-box" as const,
+        background: "var(--surface)",
+        border: "1px solid var(--line)",
+        borderRadius: 14,
+        padding: "18px 20px",
+        display: "flex",
+        flexDirection: "column" as const,
+        gap: 8,
+        cursor: "pointer",
+        transition: "border-color .18s, box-shadow .18s, transform .18s",
+        textAlign: "left" as const,
+        minHeight: 180,
+      }}
       onClick={onClick}
     >
-      <span style={S.categoryMeta}>{category.meta}</span>
-      <strong style={S.categoryTitle}>{category.title}</strong>
-      <span style={S.categoryAudience}>{category.audience}</span>
-      <span style={S.categoryDetail}>{category.detail}</span>
-      <span style={S.categoryAction}>Open</span>
+      <span
+        style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: ".74rem",
+          fontWeight: 500,
+          color: "var(--ink-3)",
+          letterSpacing: ".04em",
+          textTransform: "uppercase" as const,
+        }}
+      >
+        {category.meta}
+      </span>
+      <strong style={{ fontSize: "1.05rem", fontWeight: 600, color: "var(--ink)", lineHeight: 1.15 }}>
+        {category.title}
+      </strong>
+      <span style={{ fontSize: ".82rem", color: "var(--accent-strong)", fontWeight: 500 }}>
+        {category.audience}
+      </span>
+      <span style={{ fontSize: ".82rem", color: "var(--ink-2)", lineHeight: 1.45, marginTop: 2, flex: 1 }}>
+        {category.detail}
+      </span>
+      <span
+        className="wkbtn"
+        style={{ alignSelf: "flex-start" as const, marginTop: 4, padding: "5px 12px", fontSize: ".82rem" }}
+      >
+        Open
+      </span>
     </button>
   );
 }
-
-const S: Record<string, CSSProperties> = {
-  page: {
-    minHeight: "100%",
-    position: "relative",
-    width: "min(100%, 1440px)",
-    maxWidth: 1440,
-    margin: "0 auto",
-    boxSizing: "border-box",
-  },
-  hero: {
-    position: "relative",
-    overflow: "hidden",
-    padding: 34,
-    borderRadius: 24,
-    backgroundImage: `linear-gradient(135deg, rgba(20, 83, 77, 0.84) 0%, rgba(49, 113, 95, 0.66) 52%, rgba(214, 163, 92, 0.36) 100%), url('${DESKTOP_TEXTURES.searchHero}')`,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    border: "1px solid rgba(255,255,255,0.46)",
-    boxShadow: "0 46px 116px rgba(26, 84, 70, 0.30), 0 20px 46px rgba(26,34,51,0.16), 0 4px 12px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.22)",
-    marginBottom: 30,
-  },
-  heroCopy: {
-    maxWidth: 860,
-  },
-  eyebrow: {
-    fontSize: 10,
-    letterSpacing: "0.16em",
-    fontWeight: 800,
-    color: "#FFFFFF",
-  },
-  title: {
-    margin: 0,
-    fontSize: "clamp(44px, 5vw, 70px)",
-    lineHeight: 0.94,
-    letterSpacing: "-0.055em",
-    textWrap: "balance",
-    color: "#FFFFFF",
-  },
-  sub: {
-    margin: "16px 0 0",
-    maxWidth: 680,
-    fontSize: 16,
-    lineHeight: 1.55,
-    color: "#FFFFFF",
-  },
-  examples: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: 8,
-    marginTop: 26,
-  },
-  examplePill: {
-    all: "unset",
-    minHeight: 34,
-    padding: "0 14px",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 999,
-    background: SHORTCUT_DARK_GLASS_BACKGROUND,
-    border: "0.5px solid rgba(255,255,255,0.44)",
-    color: "#FFFFFF",
-    boxShadow: "0 16px 32px -20px rgba(0,0,0,0.64), inset 0 1px 0 rgba(255,255,255,0.36), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.22)",
-    backdropFilter: LIQUID_GLASS_FILTER,
-    WebkitBackdropFilter: LIQUID_GLASS_FILTER,
-    fontSize: 12.5,
-    fontWeight: 800,
-    textShadow: "0 1px 10px rgba(13,22,32,0.22)",
-    cursor: "pointer",
-  },
-  section: {
-    marginBottom: 34,
-  },
-  sectionHead: {
-    marginBottom: 14,
-  },
-  sectionEyebrow: {
-    fontSize: 10,
-    letterSpacing: "0.16em",
-    fontWeight: 800,
-    color: "var(--m-on-primary-container)",
-  },
-  sectionTitle: {
-    margin: 0,
-    fontSize: 32,
-    lineHeight: 1,
-    letterSpacing: "-0.045em",
-    color: "var(--m-on-surface)",
-  },
-  sectionSub: {
-    margin: "8px 0 0",
-    maxWidth: 760,
-    fontSize: 14,
-    color: "var(--m-on-surface-mid)",
-  },
-  categoryGrid: {
-    ...studioTextureCardStyles.grid,
-  },
-  categoryCard: {
-    ...studioTextureCardStyles.card,
-    cursor: "pointer",
-  },
-  categoryMeta: studioTextureCardStyles.meta,
-  categoryTitle: {
-    ...studioTextureCardStyles.title,
-  },
-  categoryAudience: {
-    ...studioTextureCardStyles.audience,
-  },
-  categoryDetail: {
-    ...studioTextureCardStyles.detail,
-  },
-  categoryAction: {
-    ...studioTextureCardStyles.action,
-  },
-  discoveryGrid: {
-    display: "grid",
-    gridTemplateColumns: "minmax(min(520px, 100%), 0.95fr) minmax(min(420px, 100%), 1.05fr)",
-    gap: 16,
-    alignItems: "stretch",
-  },
-  listCard: {
-    ...studioListCardStyles.panel,
-  },
-  listTop: {
-    display: "flex",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 16,
-    marginBottom: 16,
-  },
-  listTitle: {
-    margin: 0,
-    fontSize: 30,
-    lineHeight: 1,
-    letterSpacing: "-0.045em",
-    color: "var(--m-on-surface)",
-  },
-  listSub: {
-    margin: "8px 0 0",
-    fontSize: 13.5,
-    lineHeight: 1.4,
-    color: "var(--m-on-surface-mid)",
-  },
-  listAction: {
-    all: "unset",
-    borderRadius: 999,
-    padding: "8px 12px",
-    background: "rgba(34, 47, 68, 0.86)",
-    border: "0.5px solid rgba(255,255,255,0.28)",
-    color: "#FFFFFF",
-    boxShadow: studioLiquidGlassShadow,
-    backdropFilter: studioLiquidGlassFilter,
-    WebkitBackdropFilter: studioLiquidGlassFilter,
-    fontSize: 12.5,
-    fontWeight: 850,
-    cursor: "pointer",
-  },
-  listStack: {
-    ...studioListCardStyles.stack,
-    marginTop: 0,
-  },
-  discoveryRow: {
-    all: "unset",
-    ...studioListCardStyles.row,
-    boxSizing: "border-box",
-    cursor: "pointer",
-  },
-  rowIcon: {
-    ...studioListCardStyles.icon,
-  },
-  rowText: {
-    ...studioListCardStyles.body,
-    fontSize: 13,
-    lineHeight: 1.35,
-  },
-  rowPill: {
-    ...studioListCardStyles.cleanPill,
-    whiteSpace: "nowrap",
-  },
-  competesCard: {
-    ...studioCompeteCardStyles.panel,
-  },
-  competeTitle: {
-    margin: 0,
-    color: "#1A2233",
-    fontSize: 30,
-    lineHeight: 1,
-    letterSpacing: "-0.045em",
-  },
-  competeGrid: {
-    ...studioCompeteCardStyles.grid,
-  },
-  competeItem: {
-    ...studioCompeteButtonItemStyles,
-    color: "#60708A",
-  },
-};

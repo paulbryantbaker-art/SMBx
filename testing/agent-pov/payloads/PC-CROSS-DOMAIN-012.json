@@ -1,0 +1,33 @@
+{
+  "id": "PC-CROSS-DOMAIN-012",
+  "category": "CROSS_DOMAIN",
+  "description": "G29 + G30: NAV facility (G29 via M179) collateralized by a real-estate-heavy LP secondary portfolio (G30 via M177 LP secondary + ECI). Substrate must compose NAV-facility LTV AND LP-secondary ECI mechanics together.",
+  "payload": {
+    "journey": "raise",
+    "subjourney": "secondary_raise",
+    "target_industry": "private equity LP secondary",
+    "target_jurisdiction": "US-DE",
+    "nav_facility_proposed": true,
+    "real_estate_pct_of_ev": 70,
+    "lp_secondary_signal": true
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "real_estate_overlay",
+      "assetClass": "real_estate"
+    },
+    "missingFields": [
+      "nav_facility_advance_rate",
+      "collateral_pool_breakdown",
+      "ilpa_disclosures",
+      "ufrwa_irc_1446f_inputs"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "G29", "G30", "NAV-facility", "LP-secondary"]
+}

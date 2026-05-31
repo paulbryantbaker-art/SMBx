@@ -1,0 +1,43 @@
+{
+  "id": "PC-PARTIAL-RAISE-009",
+  "category": "PARTIAL",
+  "description": "Partial payload: Series C bridge: down-round risk. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "stage": "series_c",
+    "instrument": "safe",
+    "target_amount_cents": 3500000000,
+    "valuation_cap_cents": 40000000000,
+    "arr_cents": 2200000000,
+    "prior_pre_money_cents": 60000000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "growth_raise"
+    },
+    "missingFields": [
+      "industry",
+      "jurisdiction",
+      "runway_months",
+      "down_round_protection"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "series-c",
+    "bridge",
+    "partial",
+    "down-round"
+  ]
+}

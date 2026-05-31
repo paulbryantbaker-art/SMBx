@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import './loadEnv.js'; // must be first: loads .env + backfills empty ambient vars
 import express from 'express';
 import path from 'path';
 import postgres from 'postgres';
@@ -375,6 +375,7 @@ app.post('/mcp', optionalAuth, async (req, res) => {
     auth: {
       userId: (req as any).userId,
       claims: (req as any).authClaims,
+      error: (req as any).authError, // { code: 'invalid_token', description: '...' } if token presented but invalid
     },
     headers: req.headers as Record<string, string | string[] | undefined>,
     origin: discoveryOrigin(req),

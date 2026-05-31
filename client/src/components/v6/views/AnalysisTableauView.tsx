@@ -25,18 +25,18 @@ export function AnalysisTableauView({
   const insightRows = useMemo(() => buildInsightRows(data), [data]);
 
   return (
-    <section className="m-card" style={T.shell} aria-label="Analysis visual board">
+    <section className="wkcard" style={T.shell} aria-label="Analysis visual board">
       <div style={T.header}>
         <div>
           <div className="mono" style={T.eyebrow}>TABLEAU VIEW</div>
           <h2 style={T.title}>{data.title}</h2>
         </div>
         <div style={T.headerActions}>
-          <button className="m-btn outlined" type="button" onClick={onOpenScenarioControls}>
+          <button className="wkbtn" type="button" onClick={onOpenScenarioControls}>
             Change assumptions
           </button>
           <button
-            className="m-btn filled"
+            className="wkbtn primary"
             type="button"
             onClick={() => onTalkToYulia?.(`Use the open ${data.title} visual board. Tell me what changed, what matters most, and what I should do next.`)}
           >
@@ -66,7 +66,7 @@ export function AnalysisTableauView({
                   <button
                     key={chart.title}
                     type="button"
-                    className="m-state"
+                    className="wkcard tap"
                     style={{
                       ...T.chartTab,
                       ...(chart.title === selectedChart?.title ? T.chartTabActive : null),
@@ -110,7 +110,7 @@ export function AnalysisTableauView({
                   <button
                     key={`${action.actionType}-${action.label}`}
                     type="button"
-                    className="m-state"
+                    className="wkcard tap"
                     style={T.actionButton}
                     onClick={() => onTalkToYulia?.(action.prompt)}
                   >
@@ -257,10 +257,10 @@ function buildInsightRows(data: StructuredAnalysisData): Array<{ label: string; 
 }
 
 function toneAccent(tone?: AnalysisTone): string {
-  if (tone === "pursue") return "var(--m-pursue)";
-  if (tone === "watch") return "var(--m-watch)";
-  if (tone === "pass") return "var(--m-pass)";
-  return "var(--m-primary)";
+  if (tone === "pursue") return "var(--st-good-fg)";
+  if (tone === "watch") return "var(--st-review-fg)";
+  if (tone === "pass") return "var(--st-risk-fg)";
+  return "var(--accent)";
 }
 
 function toneBorder(tone?: AnalysisTone): string {
@@ -271,17 +271,17 @@ function toneBorder(tone?: AnalysisTone): string {
 }
 
 function toneValue(tone?: AnalysisTone): string {
-  if (tone === "pursue") return "var(--m-pursue)";
+  if (tone === "pursue") return "var(--st-good-fg)";
   if (tone === "watch") return "#88630F";
-  if (tone === "pass") return "var(--m-pass)";
-  return "var(--m-on-surface)";
+  if (tone === "pass") return "var(--st-risk-fg)";
+  return "var(--ink)";
 }
 
 const T: Record<string, CSSProperties> = {
   shell: {
     padding: "22px",
     marginBottom: 24,
-    background: "linear-gradient(180deg, rgba(248, 251, 255, 0.98), rgba(239, 245, 251, 0.94))",
+    background: "var(--surface)",
     borderColor: "rgba(187, 206, 224, 0.74)",
   },
   header: {
@@ -295,7 +295,7 @@ const T: Record<string, CSSProperties> = {
     fontSize: 9.5,
     letterSpacing: "0.16em",
     fontWeight: 800,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
   },
   title: {
     margin: "4px 0 0",
@@ -303,7 +303,7 @@ const T: Record<string, CSSProperties> = {
     fontSize: 22,
     fontWeight: 800,
     letterSpacing: "-0.02em",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   headerActions: {
     display: "flex",
@@ -329,7 +329,7 @@ const T: Record<string, CSSProperties> = {
     fontSize: 9,
     letterSpacing: "0.14em",
     fontWeight: 800,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
   },
   metricValue: {
     marginTop: 6,
@@ -343,7 +343,7 @@ const T: Record<string, CSSProperties> = {
     marginTop: 6,
     fontSize: 11.5,
     lineHeight: 1.35,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
   },
   boardGrid: {
     display: "grid",
@@ -370,13 +370,13 @@ const T: Record<string, CSSProperties> = {
     fontSize: 9,
     letterSpacing: "0.14em",
     fontWeight: 800,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
   },
   chartTitle: {
     marginTop: 3,
     fontSize: 16,
     fontWeight: 900,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   chartTabs: {
     display: "flex",
@@ -390,7 +390,7 @@ const T: Record<string, CSSProperties> = {
     borderRadius: 999,
     fontSize: 11,
     fontWeight: 800,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     cursor: "pointer",
     background: "rgba(236, 243, 250, 0.76)",
   },
@@ -412,7 +412,7 @@ const T: Record<string, CSSProperties> = {
     justifyContent: "space-between",
     gap: 16,
     fontSize: 12.5,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
   },
   bigTrack: {
     height: 16,
@@ -440,7 +440,7 @@ const T: Record<string, CSSProperties> = {
     fontSize: 9,
     letterSpacing: "0.12em",
     fontWeight: 800,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     textAlign: "center",
     alignSelf: "center",
   },
@@ -448,7 +448,7 @@ const T: Record<string, CSSProperties> = {
     fontSize: 10,
     letterSpacing: "0.08em",
     fontWeight: 800,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     alignSelf: "center",
   },
   matrixCell: {
@@ -460,14 +460,14 @@ const T: Record<string, CSSProperties> = {
     boxSizing: "border-box",
     fontSize: 12,
     fontWeight: 900,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     fontVariantNumeric: "tabular-nums",
   },
   emptyChart: {
     minHeight: 220,
     display: "grid",
     placeItems: "center",
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     fontSize: 13,
     textAlign: "center",
   },
@@ -484,7 +484,7 @@ const T: Record<string, CSSProperties> = {
     fontSize: 9,
     letterSpacing: "0.14em",
     fontWeight: 800,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     marginBottom: 10,
   },
   sideStack: {
@@ -506,13 +506,13 @@ const T: Record<string, CSSProperties> = {
   insightLabel: {
     fontSize: 13,
     fontWeight: 900,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   insightSub: {
     marginTop: 3,
     fontSize: 11.5,
     lineHeight: 1.42,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
   },
   actionStack: {
     display: "grid",
@@ -528,7 +528,7 @@ const T: Record<string, CSSProperties> = {
     justifyContent: "space-between",
     gap: 10,
     background: "rgba(236, 243, 250, 0.74)",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     fontSize: 12,
     fontWeight: 800,
     cursor: "pointer",

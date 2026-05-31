@@ -1,0 +1,44 @@
+{
+  "id": "PC-PARTIAL-CROSS-006",
+  "category": "PARTIAL",
+  "description": "Partial payload: RE + 1031 exchange: investment property swap. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "commercial real estate",
+    "asset_class": "real_estate",
+    "jurisdiction": "US-CA",
+    "sale_price_cents": 4500000000,
+    "deal_type": "1031_exchange_likely"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "industry": "commercial real estate",
+      "jurisdiction": "US-CA",
+      "assetClass": "real_estate"
+    },
+    "missingFields": [
+      "relinquished_property_value_cents",
+      "replacement_property_identified",
+      "qualified_intermediary"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "cross-overlay",
+    "sell",
+    "partial",
+    "re-heavy",
+    "tax-1031",
+    "G30"
+  ]
+}

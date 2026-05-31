@@ -1,0 +1,43 @@
+{
+  "id": "PC-PARTIAL-PMI-006",
+  "category": "PARTIAL",
+  "description": "Partial payload: PMI TSA wind-down planning. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "pmi",
+    "stage": "stabilization",
+    "acquired_entity": "carveout_y",
+    "tsa_exists": true,
+    "tsa_remaining_months": 6,
+    "industry": "consumer goods",
+    "critical_systems": [
+      "ERP",
+      "payroll"
+    ]
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "pmi",
+      "subJourney": "pmi_stabilization",
+      "industry": "consumer goods"
+    },
+    "missingFields": [
+      "cutover_plan_status",
+      "replacement_systems_selected",
+      "tsa_exit_fee_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "pmi",
+    "tsa-windown",
+    "partial"
+  ]
+}

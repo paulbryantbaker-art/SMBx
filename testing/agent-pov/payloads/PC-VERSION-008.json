@@ -1,0 +1,19 @@
+{
+  "id": "PC-VERSION-008",
+  "category": "VERSION",
+  "description": "Deprecated/superseded methodology version 'V18b' (archived). Substrate must refuse — V18 distillations exist in legacy prompt files but are not externally addressable methodology versions.",
+  "payload": {
+    "journey": "sell",
+    "target_industry": "professional services",
+    "target_jurisdiction": "US-NY",
+    "methodology_version": "V18b"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "unsupported_version",
+    "persistsDealState": false
+  },
+  "tags": ["version", "deprecated-methodology", "V18b-archived"]
+}

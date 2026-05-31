@@ -1,0 +1,39 @@
+{
+  "id": "PC-SPARSE-BUY-010",
+  "category": "SPARSE",
+  "description": "Sparse BUY payload: target ticker symbol only. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_jurisdiction": "US-NY",
+    "target_industry": "fintech"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "leagueGuess": "L5",
+      "industry": "fintech",
+      "jurisdiction": "US-NY"
+    },
+    "missingFields": [
+      "target_revenue",
+      "target_ebitda",
+      "purchase_price_range",
+      "buyer_role"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "sparse",
+    "fintech"
+  ]
+}

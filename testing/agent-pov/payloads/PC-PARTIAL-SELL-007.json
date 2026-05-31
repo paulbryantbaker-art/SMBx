@@ -1,0 +1,43 @@
+{
+  "id": "PC-PARTIAL-SELL-007",
+  "category": "PARTIAL",
+  "description": "Partial payload: L3 sell: marketing agency banker-led. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "digital marketing agency",
+    "jurisdiction": "US-NY",
+    "ebitda_cents": 220000000,
+    "revenue_cents": 1400000000,
+    "seller_role": "banker_led"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "banker_led",
+      "league": "L3",
+      "industry": "digital marketing agency",
+      "jurisdiction": "US-NY"
+    },
+    "missingFields": [
+      "asking_price_cents",
+      "process_letter_issued",
+      "auction_round"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L3",
+    "partial",
+    "banker-led"
+  ]
+}

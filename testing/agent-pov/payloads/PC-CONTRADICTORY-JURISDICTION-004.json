@@ -1,0 +1,38 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "jurisdiction='US-NY' but electionType='338(h)(10)' with foreign seller flagged — §338(h)(10) requires US seller eligible election.",
+  "payload": {
+    "journey": "buy",
+    "jurisdiction": "US-NY",
+    "foreignSeller": true,
+    "electionType": "338(h)(10)",
+    "industry": "specialty manufacturing",
+    "league": "L4",
+    "ttmRevenueCents": 3000000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-NY",
+      "industry": "specialty manufacturing",
+      "league": "L4"
+    },
+    "missingFields": [
+      "explicit_jurisdiction_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "jurisdiction-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-JURISDICTION-004"
+}

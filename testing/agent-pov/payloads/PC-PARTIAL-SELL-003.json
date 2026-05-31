@@ -1,0 +1,40 @@
+{
+  "id": "PC-PARTIAL-SELL-003",
+  "category": "PARTIAL",
+  "description": "Partial payload: L1 sell: lawn care owner-rep. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "lawn care",
+    "jurisdiction": "US-OH",
+    "sde_cents": 28000000,
+    "seller_role": "owner_rep"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "owner_rep",
+      "league": "L1",
+      "industry": "lawn care",
+      "jurisdiction": "US-OH"
+    },
+    "missingFields": [
+      "revenue",
+      "recurring_contracts_pct"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L1",
+    "partial",
+    "owner-rep"
+  ]
+}

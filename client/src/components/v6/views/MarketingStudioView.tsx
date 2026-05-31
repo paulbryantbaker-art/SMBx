@@ -1,19 +1,8 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { authHeaders, type User } from "../../../hooks/useAuth";
 import { useTodayOperatingBrief, type TodayModelRefreshItem } from "../../../hooks/useTodayOperatingBrief";
-import { STUDIO_TEXTURES } from "../../../lib/randomTextures";
 import type { OpenTab, StudioFormatId, Tab } from "../types";
 import { V19UsageMeter } from "../V19UsageMeter";
-import {
-  studioCompeteButtonItemStyles,
-  studioCompeteCardStyles,
-  studioFormatCardBackground as formatCardBackground,
-  studioGlassBackdrop as glassBackdrop,
-  studioHeroWash,
-  studioLiquidGlass as liquidGlass,
-  studioListCardStyles,
-  studioTextureCardStyles,
-} from "../styles/studioSurfaces";
 import { DefinitiveSurfacePanel } from "../shared/DefinitiveSurfacePanel";
 
 interface MarketingStudioProps {
@@ -321,80 +310,121 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
   }
 
   return (
-    <main className="m-fade-up m-page-flow" style={S.page}>
-      <section style={S.hero}>
-        <div style={S.heroTexture} />
-        <div style={S.heroInner}>
-          <h1 style={S.heroTitle}>Create finance-grade pitch books from the same deal brain.</h1>
-          <p style={S.heroCopy}>
+    <div className="wk-content m-fade-up" style={{ maxWidth: 1180, margin: "0 auto" }}>
+      {/* Page header */}
+      <div className="pg-head">
+        <div>
+          <div className="pg-eyebrow">Deliverables</div>
+          <div className="pg-title">Pitch Book Studio</div>
+          <p className="pg-sub">
             Build IC decks, QoE preview books, buyer books, lender books, and CIM summaries with slide-level sources, model links, and export-ready audit trails.
           </p>
         </div>
-      </section>
-
-      <section style={S.quickStartHeader}>
-        <div>
-          <h2 style={S.sectionTitle}>Start from a format.</h2>
-          <p style={S.sectionCopy}>
-            Choose the collateral Yulia should build. Use the chat rail for audience, source, and mandate instructions.
-          </p>
-        </div>
-      </section>
-      {error && <div style={S.errorNotice}>{error}</div>}
-      {user && <V19UsageMeter user={user} compact surface="studio" />}
-
-      <section className="m-flow-grid" style={S.formatGrid}>
-        {FORMATS.map(format => (
+        <div className="pg-actions">
           <button
-            key={format.id}
+            className="kebab"
             type="button"
-            className="m-nudge-soft"
-            style={{ ...S.formatCard, backgroundImage: formatCardBackground(format.id) }}
-            onClick={() => void createBook(format.id)}
+            aria-label="More"
+            onClick={() => askYulia("Summarize what Pitch Book Studio can build and how slide-level provenance, model links, and audit trails work.")}
           >
-            <span style={S.formatMeta}>{format.slideCount}</span>
-            <strong style={S.formatTitle}>{format.title}</strong>
-            <span style={S.formatAudience}>{format.audience}</span>
-            <span style={S.formatDetail}>{format.detail}</span>
-            <span style={S.formatAction}>Create</span>
+            ⋯
           </button>
-        ))}
-      </section>
+          <button
+            className="wkbtn primary"
+            type="button"
+            onClick={() => askYulia("Help me pick the right pitch book format for my current deal.")}
+          >
+            New book
+          </button>
+        </div>
+      </div>
 
-      <section className="m-flow-grid" style={S.lowerGrid}>
-        <div style={S.bookPanel}>
+      {/* Format grid */}
+      <div className="wksec">
+        <div className="wksec-title">Start from a format</div>
+        <p style={S.sectionCopy}>
+          Choose the collateral Yulia should build. Use the chat rail for audience, source, and mandate instructions.
+        </p>
+        {error && <div className="wkerr" style={{ marginTop: 12 }}>{error}</div>}
+        {user && <V19UsageMeter user={user} compact surface="studio" />}
+
+        <div className="wkgrid g3" style={{ marginTop: 18 }}>
+          {FORMATS.map(format => (
+            <button
+              key={format.id}
+              type="button"
+              className="wkcard tap"
+              style={S.formatCard}
+              onClick={() => void createBook(format.id)}
+            >
+              <span style={S.formatMeta}>{format.slideCount}</span>
+              <strong className="wkcard-title" style={{ display: "block", marginTop: 6 }}>{format.title}</strong>
+              <span className="wkcard-sub" style={{ display: "block" }}>{format.audience}</span>
+              <span style={S.formatDetail}>{format.detail}</span>
+              <span style={S.formatAction}>Create →</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Lower two-col layout: books list + workbench diff */}
+      <div className="wkgrid g2" style={{ marginTop: 28 }}>
+        {/* Books in Studio */}
+        <div className="wkcard" style={{ padding: 0 }}>
           <div style={S.panelHeader}>
-            <h2 style={S.sectionTitle}>Books in Studio</h2>
-            <span style={S.smallPill}>{loadingBooks ? "Loading" : "Current"}</span>
+            <span className="wkcard-title">Books in Studio</span>
+            <span className="statpill missing">
+              <span className="d" />
+              {loadingBooks ? "Loading" : "Current"}
+            </span>
           </div>
           <div style={S.bookStack}>
             {books.map(book => (
-              <button key={`${book.id}-${book.version}`} className="m-nudge-soft" style={S.bookRow} onClick={() => openBook(book)}>
+              <button
+                key={`${book.id}-${book.version}`}
+                type="button"
+                style={S.bookRow}
+                onClick={() => openBook(book)}
+              >
                 <span style={S.bookIcon}>{formatInitial(book.format)}</span>
                 <span style={S.bookBody}>
                   <strong>{book.title}</strong>
-                  <small>{formatLabel(book.format)} / v{book.version} / {book.slides.length} slides</small>
+                  <small style={S.bookMeta}>
+                    {formatLabel(book.format)} /&nbsp;
+                    <span style={{ fontFamily: "var(--font-mono)" }}>v{book.version}</span>
+                    &nbsp;/&nbsp;
+                    <span style={{ fontFamily: "var(--font-mono)" }}>{book.slides.length}</span> slides
+                  </small>
                 </span>
-                <span style={bookReadinessCount(book) ? S.warnPill : S.cleanPill}>
-                  {bookReadinessCount(book) ? `${bookReadinessCount(book)} gaps` : "clean"}
-                </span>
+                {bookReadinessCount(book) ? (
+                  <span className="statpill flag"><span className="d" />{bookReadinessCount(book)} gaps</span>
+                ) : (
+                  <span className="statpill good"><span className="d" />clean</span>
+                )}
               </button>
             ))}
           </div>
         </div>
 
-        <div style={S.diffPanel}>
-          <h2 style={S.sectionTitle}>Built to compete with finance workbenches.</h2>
-          <div style={S.diffGrid}>
+        {/* Workbench diff */}
+        <div className="wkcard">
+          <div className="wkcard-title">Built to compete with finance workbenches.</div>
+          <div className="wkgrid g2" style={{ marginTop: 14, gap: 10 }}>
             {WORKBENCH_STACK.map(item => (
-              <button key={item.title} type="button" className="m-nudge-soft" style={S.diffItem} onClick={() => askYulia(item.prompt)}>
-                <strong>{item.title}</strong>
-                <span>{item.body}</span>
+              <button
+                key={item.title}
+                type="button"
+                style={S.diffItem}
+                onClick={() => askYulia(item.prompt)}
+              >
+                <strong style={S.diffItemTitle}>{item.title}</strong>
+                <span style={S.diffItemBody}>{item.body}</span>
               </button>
             ))}
           </div>
         </div>
 
+        {/* Model freshness panel */}
         <StudioModelRefreshPanel
           items={modelRefreshNeeds}
           loading={operating.loading}
@@ -407,8 +437,8 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
           compact
           onTalkToYulia={askYulia}
         />
-      </section>
-    </main>
+      </div>
+    </div>
   );
 }
 
@@ -422,41 +452,46 @@ function StudioModelRefreshPanel({
   onAskYulia: (prompt: string) => void;
 }) {
   return (
-    <div style={S.bookPanel}>
+    <div className="wkcard" style={{ padding: 0 }}>
       <div style={S.panelHeader}>
-        <h2 style={S.sectionTitle}>Model freshness</h2>
-        <span style={S.smallPill}>{loading ? "Reading" : `${items.length} queued`}</span>
+        <span className="wkcard-title">Model freshness</span>
+        <span className="statpill missing">
+          <span className="d" />
+          {loading ? "Reading" : `${items.length} queued`}
+        </span>
       </div>
       <div style={S.bookStack}>
         {items.length === 0 && (
           <button
             type="button"
-            className="m-nudge-soft"
             style={S.bookRow}
             onClick={() => onAskYulia("Explain how Studio keeps books current against saved model outputs and rerun triggers.")}
           >
             <span style={S.bookIcon}>OK</span>
             <span style={S.bookBody}>
               <strong>Model-linked books are clean</strong>
-              <small>No stale model output is blocking a Studio draft right now.</small>
+              <small style={S.bookMeta}>No stale model output is blocking a Studio draft right now.</small>
             </span>
-            <span style={S.cleanPill}>clean</span>
+            <span className="statpill good"><span className="d" />clean</span>
           </button>
         )}
         {items.slice(0, 3).map(item => (
           <button
             key={item.id}
             type="button"
-            className="m-nudge-soft"
             style={S.bookRow}
             onClick={() => onAskYulia(`For Studio, explain the stale model output ${item.modelTitle} on ${item.dealTitle || "this deal"}. Show which book claims or exports could be affected and what should be rerun first.`)}
           >
             <span style={S.bookIcon}>{item.modelTitle.slice(0, 2).toUpperCase()}</span>
             <span style={S.bookBody}>
               <strong>{item.modelTitle}</strong>
-              <small>{item.dealTitle ? `${item.dealTitle} / ` : ""}{item.changedInputs.slice(0, 2).join(", ") || item.rerunTriggers[0] || item.statusLabel}</small>
+              <small style={S.bookMeta}>{item.dealTitle ? `${item.dealTitle} / ` : ""}{item.changedInputs.slice(0, 2).join(", ") || item.rerunTriggers[0] || item.statusLabel}</small>
             </span>
-            <span style={item.status === "needs_rerun" ? S.warnPill : S.smallPill}>{item.statusLabel}</span>
+            {item.status === "needs_rerun" ? (
+              <span className="statpill flag"><span className="d" />{item.statusLabel}</span>
+            ) : (
+              <span className="statpill review"><span className="d" />{item.statusLabel}</span>
+            )}
           </button>
         ))}
       </div>
@@ -610,52 +645,70 @@ function StudioCanvas({
   };
 
   return (
-    <main style={S.canvasPage}>
-      <header style={S.canvasHeader}>
+    <div className="wk-content" style={{ maxWidth: 1180, margin: "0 auto" }}>
+      {/* Canvas page header */}
+      <div className="pg-head" style={{ marginBottom: 18 }}>
         <div>
-          <div style={S.brandRail}><span style={S.brandDot}>Y</span><span>Pitch Book Studio</span></div>
-          <h1 style={S.canvasTitle}>{current.title}</h1>
-          <p style={S.canvasSub}>{output.detail}</p>
+          <div className="pg-eyebrow">Pitch Book Studio</div>
+          <div className="pg-title" style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)" }}>{current.title}</div>
+          <p className="pg-sub">{output.detail}</p>
         </div>
-        <div style={S.canvasActions}>
-          <span style={warningCount ? S.warnPill : S.cleanPill}>{warningCount ? `${warningCount} slide gaps` : "slides grounded"}</span>
-          <span style={modelHealth.gaps ? S.warnPill : S.cleanPill}>{modelHealth.label}</span>
-          <span style={!readiness || readiness.readyForExternalDelivery ? S.cleanPill : S.warnPill}>{readinessLabel}</span>
-          <button className="m-btn tonal" style={S.smallButton} onClick={() => void refresh()} disabled={!!busy}>Refresh models</button>
-          <button className="m-btn tonal" style={S.smallButton} onClick={() => void exportBook("pdf")} disabled={!!busy}>PDF</button>
-          <button className="m-btn filled" style={S.smallButton} onClick={() => void exportBook("pptx")} disabled={!!busy}>PowerPoint</button>
+        <div className="pg-actions">
+          {warningCount ? (
+            <span className="statpill flag"><span className="d" />{warningCount} slide gaps</span>
+          ) : (
+            <span className="statpill good"><span className="d" />slides grounded</span>
+          )}
+          {modelHealth.gaps ? (
+            <span className="statpill review"><span className="d" />{modelHealth.label}</span>
+          ) : (
+            <span className="statpill good"><span className="d" />{modelHealth.label}</span>
+          )}
+          {!readiness || readiness.readyForExternalDelivery ? (
+            <span className="statpill good"><span className="d" />{readinessLabel}</span>
+          ) : (
+            <span className="statpill flag"><span className="d" />{readinessLabel}</span>
+          )}
+          <button className="wkbtn" type="button" onClick={() => void refresh()} disabled={!!busy}>Refresh models</button>
+          <button className="wkbtn" type="button" onClick={() => void exportBook("pdf")} disabled={!!busy}>PDF</button>
+          <button className="wkbtn primary" type="button" onClick={() => void exportBook("pptx")} disabled={!!busy}>PowerPoint</button>
         </div>
-      </header>
+      </div>
 
+      {/* Workbench: slides + tool rail */}
       <div style={S.workbench}>
+        {/* Slide stage */}
         <section style={S.slideStage}>
           <div style={S.deckFrame}>
             {current.slides.map((slide, index) => (
-              <article key={slide.id} style={S.slideCard}>
+              <article key={slide.id} className="wkcard">
                 <div style={S.slideTop}>
                   <span style={S.slideNumber}>{String(index + 1).padStart(2, "0")}</span>
-                  <span style={slide.warningState === "clean" ? S.cleanPill : S.warnPill}>
-                    {slide.warningState === "clean" ? "grounded" : slide.warningState.replace("_", " ")}
-                  </span>
+                  {slide.warningState === "clean" ? (
+                    <span className="statpill good"><span className="d" />grounded</span>
+                  ) : (
+                    <span className="statpill flag"><span className="d" />{slide.warningState.replace("_", " ")}</span>
+                  )}
                 </div>
                 <h2 style={S.slideTitle}>{slide.title}</h2>
                 <p style={S.slideBody}>{slide.body}</p>
                 <div style={S.bulletGrid}>
-                  {slide.bullets.map(point => <span key={point}>{point}</span>)}
+                  {slide.bullets.map(point => <span key={point} style={S.bulletItem}>{point}</span>)}
                 </div>
                 <div style={S.provenanceStrip}>
-                  <span>{slide.provenance.factsUsed.length} facts</span>
-                  <span>{slide.provenance.modelOutputsUsed.length} models</span>
-                  <span>{slide.provenance.citationsUsed.length} cites</span>
-                  <span>{slide.provenance.uncheckedClaims.length} unchecked</span>
+                  <span style={{ fontFamily: "var(--font-mono)" }}>{slide.provenance.factsUsed.length} facts</span>
+                  <span style={{ fontFamily: "var(--font-mono)" }}>{slide.provenance.modelOutputsUsed.length} models</span>
+                  <span style={{ fontFamily: "var(--font-mono)" }}>{slide.provenance.citationsUsed.length} cites</span>
+                  <span style={{ fontFamily: "var(--font-mono)" }}>{slide.provenance.uncheckedClaims.length} unchecked</span>
                 </div>
               </article>
             ))}
           </div>
         </section>
 
+        {/* Tool rail */}
         <aside style={S.toolRail}>
-          <section style={S.railSection}>
+          <section className="wkcard">
             <strong style={S.railTitle}>Yulia instruction</strong>
             <textarea
               value={story}
@@ -663,74 +716,78 @@ function StudioCanvas({
               placeholder="Tell Yulia what to change: audience, tone, missing proof, or the decision the book needs to support."
               style={S.storyInput}
             />
-            <button className="m-btn filled" style={S.fullButton} onClick={() => void revise()} disabled={!!busy}>
+            <button className="wkbtn primary" style={S.fullButton} onClick={() => void revise()} disabled={!!busy}>
               {busy === "Revising" ? "Revising..." : "Revise book"}
             </button>
-            <button className="m-btn tonal" style={S.fullButton} onClick={() => onAskYulia(`${output.prompt} Review this open Studio book and tell me the three highest-impact improvements before export.`)}>
+            <button className="wkbtn" style={S.fullButton} onClick={() => onAskYulia(`${output.prompt} Review this open Studio book and tell me the three highest-impact improvements before export.`)}>
               Ask Yulia
             </button>
           </section>
 
-          <section style={S.railSection}>
+          <section className="wkcard">
             <strong style={S.railTitle}>Source tray</strong>
             <div style={S.sourceStack}>
               {current.sources.map(source => (
                 <div key={`${source.sourceType}-${source.id ?? source.label}`} style={S.sourceCard}>
                   <span style={source.status === "linked" ? S.cleanDot : S.warnDot} />
                   <span style={S.sourceText}>
-                    <strong>{source.label}</strong>
-                    <small>{source.sourceType}{source.citationTag ? ` / ${source.citationTag}` : ""}</small>
+                    <strong style={{ fontSize: 13 }}>{source.label}</strong>
+                    <small style={{ color: "var(--ink-3)", fontFamily: "var(--font-mono)", fontSize: 11 }}>{source.sourceType}{source.citationTag ? ` / ${source.citationTag}` : ""}</small>
                   </span>
                 </div>
               ))}
             </div>
           </section>
 
-          <section style={S.railSection}>
+          <section className="wkcard">
             <strong style={S.railTitle}>Assumptions</strong>
             {current.assumptions.map(item => (
               <div key={String(item.key)} style={S.assumptionRow}>
-                <span>{String(item.label || item.key)}</span>
-                <strong>{String(item.value ?? "-")}</strong>
+                <span style={{ color: "var(--ink-2)", fontSize: 13 }}>{String(item.label || item.key)}</span>
+                <strong style={{ fontFamily: "var(--font-mono)", fontSize: 13 }}>{String(item.value ?? "-")}</strong>
               </div>
             ))}
           </section>
-          <section style={S.railSection}>
+
+          <section className="wkcard">
             <strong style={S.railTitle}>Model tray</strong>
             <div style={S.modelStack}>
               {current.modelOutputs.map(item => (
                 <div key={String(item.modelId)} style={S.modelCard}>
                   <span style={modelDotStyle(item)} />
                   <span style={S.modelText}>
-                    <strong>{formatModelName(String(item.modelId || "MODEL.UNKNOWN.v1"))}</strong>
-                    <small>{modelSummary(item)}</small>
+                    <strong style={{ fontSize: 13, color: "var(--ink)" }}>{formatModelName(String(item.modelId || "MODEL.UNKNOWN.v1"))}</strong>
+                    <small style={{ color: "var(--ink-3)", fontSize: 12 }}>{modelSummary(item)}</small>
                   </span>
-                  {item.outputHash && <code style={S.modelHash}>{shortHash(String(item.outputHash))}</code>}
+                  {item.outputHash && (
+                    <code style={S.modelHash}>{shortHash(String(item.outputHash))}</code>
+                  )}
                 </div>
               ))}
             </div>
           </section>
-          <section style={S.railSection}>
+
+          <section className="wkcard">
             <strong style={S.railTitle}>Audit</strong>
             <p style={S.auditCopy}>
-              Version {current.version}. Exports write an output hash and include source and audit appendices.
+              Version <span style={{ fontFamily: "var(--font-mono)" }}>{current.version}</span>. Exports write an output hash and include source and audit appendices.
             </p>
             {readiness?.issues.length ? (
               <div style={S.readinessList}>
                 {readiness.issues.slice(0, 4).map((issue, index) => (
                   <div key={`${issue.code}-${index}`} style={S.readinessItem}>
-                    <strong>{issue.label}</strong>
-                    <span>{issue.detail}</span>
+                    <strong style={{ fontSize: 12, color: "var(--ink)" }}>{issue.label}</strong>
+                    <span style={{ fontSize: 12, color: "var(--ink-3)" }}>{issue.detail}</span>
                   </div>
                 ))}
               </div>
             ) : null}
-            {error && <p style={S.errorNotice}>{error}</p>}
+            {error && <div className="wkerr" style={{ marginTop: 10 }}>{error}</div>}
             {busy && <p style={S.busyText}>{busy}...</p>}
           </section>
         </aside>
       </div>
-    </main>
+    </div>
   );
 }
 
@@ -885,286 +942,327 @@ function readWorkingStudioDrafts(): Record<string, SavedStudioDraft> {
   return win[WORKING_DRAFTS_KEY] ?? {};
 }
 
+// Flat style tokens — all var(--...) from workspace.css, no gradients, no textures, no glass.
 const S: Record<string, CSSProperties> = {
-  page: {
-    width: "min(1440px, calc(100% - 32px))",
-    margin: "0 auto",
-    padding: "22px 0 72px",
-    color: "#172033",
-  },
-  hero: {
-    minHeight: 340,
-    borderRadius: 24,
-    position: "relative",
-    overflow: "hidden",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    padding: "clamp(24px, 3vw, 40px)",
-    backgroundImage: studioHeroWash,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    border: "1px solid rgba(255,255,255,0.46)",
-    boxShadow: "0 48px 118px rgba(52, 63, 90, 0.31), 0 20px 46px rgba(26, 34, 51, 0.16), 0 4px 12px rgba(26, 34, 51, 0.08), inset 0 1px 0 rgba(255,255,255,0.28)",
-  },
-  heroTexture: {
-    position: "absolute",
-    inset: 0,
-    pointerEvents: "none",
-    background: "radial-gradient(circle at 12% 6%, rgba(255,255,255,0.18), transparent 34%), linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0) 56%)",
-    opacity: 1,
-  },
-  heroInner: {
-    position: "relative",
-    zIndex: 1,
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    maxWidth: 820,
-    padding: 0,
-  },
-  brandDot: {
-    width: 28,
-    height: 28,
-    borderRadius: 10,
-    display: "inline-grid",
-    placeItems: "center",
-    color: "#fff",
-    background: "linear-gradient(145deg, #B7D8C6 0%, #5EA77F 100%)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.58), 0 8px 18px rgba(26,34,51,0.13)",
-  },
-  heroTitle: {
-    margin: 0,
-    maxWidth: 820,
-    fontFamily: "'Figtree', var(--font-body)",
-    fontWeight: 850,
-    fontSize: "clamp(34px, 4vw, 62px)",
-    lineHeight: 0.96,
-    letterSpacing: "-0.055em",
-    color: "#FFFFFF",
-    textWrap: "balance",
-    textShadow: "0 2px 18px rgba(26,34,51,0.20)",
-  },
-  heroCopy: {
-    maxWidth: 680,
-    margin: "18px 0 0",
-    color: "#FFFFFF",
-    fontSize: 17,
-    lineHeight: 1.55,
-    textWrap: "pretty",
-  },
-  quickStartHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "end",
-    gap: 18,
-    marginTop: 28,
-    padding: "0 6px",
-    flexWrap: "wrap",
-  },
-  sectionTitle: { margin: 0, fontSize: 28, lineHeight: 1.05 },
-  sectionCopy: { color: "#60708A", fontSize: 16, lineHeight: 1.5, maxWidth: 620 },
-  errorText: { display: "block", marginTop: 10, color: "#8B3F24", fontWeight: 800 },
-  errorNotice: {
-    margin: "12px 0 0",
-    padding: "12px 14px",
-    borderRadius: 18,
-    color: "#243653",
-    fontWeight: 850,
-    background:
-      "radial-gradient(circle at 18% 0%, rgba(255,255,255,.72), transparent 35%), linear-gradient(135deg, rgba(255,255,255,.72), rgba(234,243,251,.62))",
-    border: "1px solid rgba(166,190,220,.42)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,.76), 0 16px 34px rgba(42,65,96,.10)",
-    ...glassBackdrop,
-  },
-  busyText: { color: "#2E5C8A", fontWeight: 800 },
-  formatGrid: studioTextureCardStyles.grid,
-  formatCard: studioTextureCardStyles.card,
-  formatCardActive: studioTextureCardStyles.active,
-  formatMeta: studioTextureCardStyles.meta,
-  formatTitle: studioTextureCardStyles.title,
-  formatAudience: studioTextureCardStyles.audience,
-  formatDetail: studioTextureCardStyles.detail,
-  formatAction: studioTextureCardStyles.action,
-  lowerGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 420px), 1fr))", gap: 24, marginTop: 28 },
-  bookPanel: studioListCardStyles.panel,
-  panelHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 },
-  smallPill: {
-    padding: "7px 10px",
-    borderRadius: 999,
-    background: "rgba(138,154,232,.14)",
-    color: "#2E5C8A",
-    fontWeight: 800,
-    fontSize: 12,
-  },
-  bookStack: studioListCardStyles.stack,
-  bookRow: studioListCardStyles.row,
-  bookIcon: studioListCardStyles.icon,
-  bookBody: studioListCardStyles.body,
-  cleanPill: studioListCardStyles.cleanPill,
-  warnPill: studioListCardStyles.warnPill,
-  diffPanel: studioCompeteCardStyles.panel,
-  diffGrid: studioCompeteCardStyles.grid,
-  diffItem: studioCompeteButtonItemStyles,
-  canvasPage: {
-    width: "min(1440px, calc(100% - 32px))",
-    margin: "0 auto",
-    padding: "20px 0 72px",
-    color: "#172033",
-  },
-  canvasHeader: {
-    width: "100%",
-    margin: "0 auto 18px",
-    padding: 20,
+  // Format grid card extras (the .wkcard class handles the base box)
+  formatCard: {
+    all: "unset",
     boxSizing: "border-box",
-    borderRadius: 24,
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
+    padding: "18px 20px",
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
+    borderRadius: 14,
+    cursor: "pointer",
+    transition: "border-color .18s, box-shadow .18s, transform .18s",
+    textAlign: "left",
+    width: "100%",
+  },
+  formatMeta: {
+    fontFamily: "var(--font-mono)",
+    fontSize: 11,
+    color: "var(--ink-3)",
+    fontWeight: 500,
+  },
+  formatDetail: {
+    color: "var(--ink-2)",
+    fontSize: 13,
+    lineHeight: 1.45,
+    marginTop: 4,
+  },
+  formatAction: {
+    marginTop: "auto",
+    paddingTop: 12,
+    color: "var(--accent-strong)",
+    fontSize: 13,
+    fontWeight: 600,
+  },
+  sectionCopy: {
+    color: "var(--ink-2)",
+    fontSize: 15,
+    lineHeight: 1.5,
+    maxWidth: 620,
+    margin: "4px 0 0",
+  },
+
+  // Books list panel (inside .wkcard with padding:0)
+  panelHeader: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "flex-end",
-    gap: 20,
-    backgroundImage: `radial-gradient(circle at 12% 0%, rgba(255,255,255,.66), transparent 40%), linear-gradient(135deg, rgba(247,251,255,.84), rgba(224,237,251,.50)), url('${STUDIO_TEXTURES.green}')`,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    border: "1px solid rgba(255,255,255,.62)",
-    boxShadow: "0 18px 44px rgba(42,65,96,.10), inset 0 1px 0 rgba(255,255,255,.82)",
-    ...glassBackdrop,
+    alignItems: "center",
+    gap: 12,
+    padding: "16px 20px 14px",
+    borderBottom: "1px solid var(--line)",
   },
-  canvasTitle: { margin: "14px 0 6px", fontSize: "clamp(34px, 4vw, 54px)", lineHeight: 0.96, letterSpacing: 0 },
-  canvasSub: { margin: 0, color: "#4F6077", fontSize: 16, lineHeight: 1.42, maxWidth: 620 },
-  canvasActions: { display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" },
-  smallButton: { minHeight: 38 },
-  workbench: {
+  bookStack: {
+    display: "flex",
+    flexDirection: "column",
+  },
+  bookRow: {
+    all: "unset",
+    boxSizing: "border-box",
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    padding: "13px 20px",
+    borderBottom: "1px solid var(--line)",
+    cursor: "pointer",
+    transition: "background .15s",
     width: "100%",
-    maxWidth: 1440,
-    margin: "0 auto",
+  },
+  bookIcon: {
+    flex: "none",
+    width: 34,
+    height: 34,
+    borderRadius: 9,
+    background: "var(--surface-2)",
+    display: "grid",
+    placeItems: "center",
+    fontFamily: "var(--font-mono)",
+    fontSize: 11,
+    fontWeight: 700,
+    color: "var(--ink-2)",
+  },
+  bookBody: {
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    gap: 2,
+    minWidth: 0,
+    fontSize: 14,
+    color: "var(--ink)",
+  },
+  bookMeta: {
+    fontSize: 12,
+    color: "var(--ink-3)",
+  },
+
+  // Workbench diff items
+  diffItem: {
+    all: "unset",
+    boxSizing: "border-box",
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
+    padding: "14px 16px",
+    background: "var(--surface-2)",
+    border: "1px solid var(--line)",
+    borderRadius: 12,
+    cursor: "pointer",
+    transition: "border-color .18s, background .15s",
+    textAlign: "left",
+    width: "100%",
+  },
+  diffItemTitle: {
+    color: "var(--ink)",
+    fontWeight: 600,
+    fontSize: 13,
+  },
+  diffItemBody: {
+    color: "var(--ink-2)",
+    fontSize: 12,
+    lineHeight: 1.45,
+  },
+
+  // Canvas workbench layout
+  workbench: {
     display: "flex",
     flexWrap: "wrap",
     gap: "clamp(14px, 1.4vw, 22px)",
-    justifyContent: "center",
     alignItems: "start",
   },
-  leftRail: { display: "grid", gap: 14, flex: "0 1 340px", width: "min(100%, 340px)", maxWidth: 340 },
-  rightRail: {
-    display: "grid",
-    gap: 14,
-    flex: "0 1 360px",
-    width: "min(100%, 360px)",
-    maxWidth: 360,
-  },
-  toolRail: {
-    display: "grid",
-    gap: 12,
-    flex: "0 1 330px",
-    width: "min(100%, 330px)",
-    maxWidth: 330,
-    alignSelf: "flex-start",
-  },
-  railSection: {
-    borderRadius: 18,
-    padding: 16,
-    background: liquidGlass,
-    border: "1px solid rgba(255,255,255,.55)",
-    boxShadow: "0 14px 32px rgba(42,65,96,.09), inset 0 1px 0 rgba(255,255,255,.70)",
-    ...glassBackdrop,
-  },
-  railTitle: { display: "block", marginBottom: 12, fontSize: 16 },
-  storyInput: {
-    minHeight: 154,
-    width: "100%",
-    resize: "vertical",
-    borderRadius: 16,
-    border: "1px solid rgba(126,150,184,.42)",
-    padding: 12,
-    font: "inherit",
-    boxSizing: "border-box",
-  },
-  fullButton: { width: "100%", marginTop: 10, minHeight: 40 },
-  sourceStack: { display: "grid", gap: 9 },
-  sourceCard: { display: "grid", gridTemplateColumns: "12px minmax(0, 1fr)", gap: 9, alignItems: "start" },
-  sourceText: { display: "grid", gap: 2, minWidth: 0 },
-  modelStack: { display: "grid", gap: 10 },
-  modelCard: {
-    display: "grid",
-    gridTemplateColumns: "12px minmax(0, 1fr) auto",
-    gap: 10,
-    alignItems: "start",
-    padding: "10px 0",
-    borderBottom: "1px solid rgba(153,176,209,.24)",
-  },
-  modelText: { display: "grid", gap: 3, minWidth: 0 },
-  modelHash: {
-    alignSelf: "start",
-    padding: "3px 6px",
-    borderRadius: 8,
-    background: "rgba(138,154,232,.12)",
-    color: "#2E5C8A",
-    fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-    fontSize: 11,
-    fontWeight: 800,
-  },
-  cleanDot: { width: 9, height: 9, marginTop: 5, borderRadius: 99, background: "#6FAE95" },
-  warnDot: { width: 9, height: 9, marginTop: 5, borderRadius: 99, background: "#C9A24E" },
   slideStage: {
-    minHeight: 720,
+    minHeight: 480,
     maxWidth: 1000,
-    minWidth: "min(100%, 600px)",
-    flex: "1 1 760px",
-    borderRadius: 24,
-    padding: 16,
-    backgroundImage: `radial-gradient(circle at 20% 0%, rgba(255,255,255,.62), transparent 38%), linear-gradient(180deg, rgba(225,238,252,.82), rgba(255,255,255,.56)), url('${STUDIO_TEXTURES.blue}')`,
-    backgroundSize: "cover",
-    border: "1px solid rgba(255,255,255,.58)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,.88), 0 20px 46px rgba(42,65,96,.10)",
-    ...glassBackdrop,
+    minWidth: "min(100%, 560px)",
+    flex: "1 1 680px",
   },
-  deckFrame: { display: "grid", gap: 16 },
-  slideCard: {
-    minHeight: 382,
-    borderRadius: 22,
-    padding: 24,
-    backgroundImage: `radial-gradient(circle at 8% 0%, rgba(255,255,255,.76), transparent 40%), linear-gradient(135deg, rgba(255,255,255,.82), rgba(245,249,255,.58)), url('${STUDIO_TEXTURES.rose}')`,
-    backgroundSize: "cover",
-    border: "1px solid rgba(255,255,255,.58)",
-    boxShadow: "0 18px 44px rgba(42,65,96,.12), inset 0 1px 0 rgba(255,255,255,.80)",
-    ...glassBackdrop,
+  deckFrame: {
+    display: "grid",
+    gap: 16,
   },
-  slideTop: { display: "flex", justifyContent: "space-between", alignItems: "center" },
-  slideNumber: { fontWeight: 900, color: "#8A9AE8" },
-  slideTitle: { margin: "42px 0 14px", fontSize: 34, lineHeight: 0.98, maxWidth: 720, letterSpacing: 0 },
-  slideBody: { color: "#526176", fontSize: 17, lineHeight: 1.45, maxWidth: 760 },
-  bulletGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 180px), 1fr))", gap: 10, marginTop: 24 },
+  slideTop: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  slideNumber: {
+    fontFamily: "var(--font-mono)",
+    fontWeight: 700,
+    fontSize: 13,
+    color: "var(--accent-strong)",
+  },
+  slideTitle: {
+    margin: "24px 0 12px",
+    fontSize: "clamp(1.4rem, 2.2vw, 1.9rem)",
+    lineHeight: 1.05,
+    letterSpacing: "-0.02em",
+    color: "var(--ink)",
+    fontWeight: 600,
+  },
+  slideBody: {
+    color: "var(--ink-2)",
+    fontSize: 15,
+    lineHeight: 1.5,
+    maxWidth: 760,
+    margin: 0,
+  },
+  bulletGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 180px), 1fr))",
+    gap: 8,
+    marginTop: 18,
+  },
+  bulletItem: {
+    padding: "8px 12px",
+    background: "var(--surface-2)",
+    borderRadius: 8,
+    border: "1px solid var(--line)",
+    fontSize: 13,
+    color: "var(--ink-2)",
+  },
   provenanceStrip: {
     display: "flex",
     flexWrap: "wrap",
     gap: 8,
-    marginTop: 24,
-    color: "#60708A",
+    marginTop: 18,
+    color: "var(--ink-3)",
     fontSize: 12,
-    fontWeight: 800,
+    fontWeight: 500,
   },
+
+  // Tool rail
+  toolRail: {
+    display: "grid",
+    gap: 12,
+    flex: "0 1 310px",
+    width: "min(100%, 310px)",
+    alignSelf: "flex-start",
+  },
+  railTitle: {
+    display: "block",
+    marginBottom: 12,
+    fontSize: 14,
+    fontWeight: 600,
+    color: "var(--ink)",
+  },
+  storyInput: {
+    minHeight: 140,
+    width: "100%",
+    resize: "vertical",
+    borderRadius: 10,
+    border: "1px solid var(--line-2)",
+    padding: "10px 12px",
+    font: "inherit",
+    fontSize: 13,
+    boxSizing: "border-box",
+    background: "var(--surface)",
+    color: "var(--ink)",
+    outline: "none",
+  },
+  fullButton: {
+    width: "100%",
+    marginTop: 8,
+    minHeight: 38,
+  },
+
+  // Source tray
+  sourceStack: {
+    display: "grid",
+    gap: 8,
+  },
+  sourceCard: {
+    display: "grid",
+    gridTemplateColumns: "10px minmax(0, 1fr)",
+    gap: 8,
+    alignItems: "start",
+  },
+  sourceText: {
+    display: "grid",
+    gap: 2,
+    minWidth: 0,
+  },
+
+  // Model tray
+  modelStack: {
+    display: "grid",
+    gap: 8,
+  },
+  modelCard: {
+    display: "grid",
+    gridTemplateColumns: "10px minmax(0, 1fr) auto",
+    gap: 8,
+    alignItems: "start",
+    padding: "8px 0",
+    borderBottom: "1px solid var(--line)",
+  },
+  modelText: {
+    display: "grid",
+    gap: 2,
+    minWidth: 0,
+  },
+  modelHash: {
+    alignSelf: "start",
+    padding: "3px 6px",
+    borderRadius: 7,
+    background: "var(--accent-soft)",
+    color: "var(--accent-strong)",
+    fontFamily: "var(--font-mono)",
+    fontSize: 11,
+    fontWeight: 600,
+  },
+
+  // Status dots
+  cleanDot: {
+    width: 8,
+    height: 8,
+    marginTop: 5,
+    borderRadius: 99,
+    background: "var(--st-good-dot)",
+    flexShrink: 0,
+  },
+  warnDot: {
+    width: 8,
+    height: 8,
+    marginTop: 5,
+    borderRadius: 99,
+    background: "var(--st-review-dot)",
+    flexShrink: 0,
+  },
+
+  // Assumption row
   assumptionRow: {
     display: "flex",
     justifyContent: "space-between",
     gap: 10,
-    borderBottom: "1px solid rgba(153,176,209,.24)",
-    padding: "8px 0",
-    color: "#60708A",
+    borderBottom: "1px solid var(--line)",
+    padding: "7px 0",
   },
-  modelRow: {
+
+  // Audit section
+  auditCopy: {
+    color: "var(--ink-2)",
+    lineHeight: 1.45,
+    margin: 0,
+    fontSize: 13,
+  },
+  readinessList: {
     display: "grid",
-    gap: 3,
-    padding: "9px 0",
-    borderBottom: "1px solid rgba(153,176,209,.24)",
+    gap: 6,
+    marginTop: 12,
   },
-  auditCopy: { color: "#60708A", lineHeight: 1.45, margin: 0 },
-  readinessList: { display: "grid", gap: 8, marginTop: 12 },
   readinessItem: {
     display: "grid",
-    gap: 3,
-    padding: "9px 0",
-    borderTop: "1px solid rgba(153,176,209,.24)",
-    color: "#60708A",
-    fontSize: 12,
-    lineHeight: 1.35,
+    gap: 2,
+    padding: "7px 0",
+    borderTop: "1px solid var(--line)",
+  },
+  busyText: {
+    color: "var(--ink-3)",
+    fontWeight: 600,
+    fontSize: 13,
+    margin: "8px 0 0",
   },
 };

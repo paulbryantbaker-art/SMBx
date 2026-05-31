@@ -1,0 +1,46 @@
+{
+  "id": "PC-PARTIAL-CROSS-004",
+  "category": "PARTIAL",
+  "description": "Partial payload: Cross-border + IP-heavy: tech acquisition with CFIUS sensitivity. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "semiconductor design",
+    "asset_class": "ip_heavy",
+    "target_jurisdiction": "US-CA",
+    "cross_border": true,
+    "buyer_jurisdiction": "CN",
+    "target_revenue_cents": 25000000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "league": "L5",
+      "industry": "semiconductor design",
+      "jurisdiction": "US-CA",
+      "assetClass": "operating_business_or_unknown"
+    },
+    "missingFields": [
+      "cfius_pre_filing_intent",
+      "export_control_classification",
+      "target_ebitda_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "cross-overlay",
+    "buy",
+    "partial",
+    "cross-border",
+    "cfius",
+    "ip-heavy"
+  ]
+}

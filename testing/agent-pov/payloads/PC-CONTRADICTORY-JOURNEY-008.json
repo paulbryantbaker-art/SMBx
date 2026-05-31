@@ -1,0 +1,35 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "journey='buy' explicit but both acquirerRole='principal' and sellerRole='principal' set — agent is on both sides.",
+  "payload": {
+    "journey": "buy",
+    "acquirerRole": "principal",
+    "sellerRole": "principal",
+    "industry": "B2B services",
+    "jurisdiction": "US-NY",
+    "ttmRevenueCents": 2000000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "jurisdiction": "US-NY",
+      "industry": "B2B services"
+    },
+    "missingFields": [
+      "explicit_journey_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "journey-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-JOURNEY-008"
+}

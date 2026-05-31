@@ -1,0 +1,35 @@
+{
+  "category": "AMBIGUOUS",
+  "description": "\"retail\" — physical / ecommerce / DTC / wholesale / franchise.",
+  "payload": {
+    "journey": "sell",
+    "sellerRole": "principal",
+    "industry": "retail",
+    "jurisdiction": "US-FL",
+    "league": "L2"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "sell",
+      "jurisdiction": "US-FL",
+      "league": "L2"
+    },
+    "missingFields": [
+      "industry_subcategory_or_naics"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "ambiguous",
+    "industry"
+  ],
+  "id": "PC-AMBIGUOUS-INDUSTRY-009"
+}

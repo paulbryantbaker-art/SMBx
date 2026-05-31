@@ -1,0 +1,46 @@
+{
+  "id": "PC-RICH-L2-BUY-001",
+  "category": "RICH",
+  "description": "L2 SBA-financed buy of a B2B HVAC services co. Full financing structure + tax election + jurisdiction + NAICS provided — substrate should compose model stack and execute applicable valuation/SBA models.",
+  "payload": {
+    "journey": "buy",
+    "industry": "B2B HVAC services",
+    "naics": "238220",
+    "jurisdiction": "US-TX",
+    "league": "L2",
+    "ttmRevenueCents": 380000000,
+    "sdeCents": 75000000,
+    "ebitdaCents": 68000000,
+    "purchasePriceCents": 250000000,
+    "dealStructure": "asset_purchase",
+    "taxClassification": "s_corp",
+    "electionType": "338(h)(10)",
+    "financing": {
+      "sponsorEquityCents": 50000000,
+      "sbaSevenACents": 175000000,
+      "sellerNoteCents": 25000000
+    },
+    "stage": "loi"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L2",
+      "jurisdiction": "US-TX",
+      "industry": "B2B HVAC services",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "s_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": ["compose_model_stack", "execute_model"],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": ["buy", "L2", "rich", "sba", "338h10"]
+}

@@ -1,0 +1,44 @@
+{
+  "id": "PC-PARTIAL-SELL-014",
+  "category": "PARTIAL",
+  "description": "Partial payload: L5 sell: vertical SaaS owner-rep. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "vertical SaaS",
+    "jurisdiction": "US-CA",
+    "arr_cents": 2400000000,
+    "ebitda_cents": 750000000,
+    "seller_role": "owner_rep",
+    "growth_rate": 0.35
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "owner_rep",
+      "league": "L4",
+      "industry": "vertical SaaS",
+      "jurisdiction": "US-CA"
+    },
+    "missingFields": [
+      "churn_rate",
+      "asking_price_cents",
+      "multi_year_pnl_present"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L5",
+    "partial",
+    "saas"
+  ]
+}

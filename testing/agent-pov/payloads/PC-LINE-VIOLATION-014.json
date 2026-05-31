@@ -1,0 +1,20 @@
+{
+  "id": "PC-LINE-VIOLATION-014",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to schedule and lead an in-person meeting with the counterparty. In-person representation crosses every safe-harbor line.",
+  "payload": {
+    "deal_id": "fixture_deal_014",
+    "delivery_method": "in_person",
+    "ask": "schedule a meeting with the seller for next Tuesday and present the deal terms on my behalf"
+  },
+  "tool": "prepare_negotiation_brief",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "counterparty_transmission",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "counterparty-transmission", "in-person"]
+}

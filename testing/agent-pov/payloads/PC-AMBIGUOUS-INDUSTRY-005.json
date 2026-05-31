@@ -1,0 +1,35 @@
+{
+  "category": "AMBIGUOUS",
+  "description": "\"media\" — could be publishing / film / streaming / advertising / consumer brand.",
+  "payload": {
+    "journey": "raise",
+    "raiseType": "series_a",
+    "industry": "media",
+    "jurisdiction": "US-NY",
+    "league": "L2"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "raise",
+      "jurisdiction": "US-NY",
+      "league": "L2"
+    },
+    "missingFields": [
+      "industry_subcategory_or_naics"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "ambiguous",
+    "industry"
+  ],
+  "id": "PC-AMBIGUOUS-INDUSTRY-005"
+}

@@ -1,0 +1,35 @@
+{
+  "id": "PC-SPARSE-RAISE-001",
+  "category": "SPARSE",
+  "description": "Sparse RAISE payload: minimal seed signal. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "stage": "seed"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "early_stage_raise"
+    },
+    "missingFields": [
+      "target_amount",
+      "industry",
+      "jurisdiction",
+      "pre_money_valuation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "sparse",
+    "seed"
+  ]
+}

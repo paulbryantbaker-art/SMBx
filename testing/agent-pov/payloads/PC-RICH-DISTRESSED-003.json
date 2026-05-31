@@ -1,0 +1,59 @@
+{
+  "category": "RICH",
+  "description": "L3 Article 9 acquisition of secured assets from defaulted borrower — full structure.",
+  "payload": {
+    "journey": "buy",
+    "industry": "transportation equipment leasing",
+    "naics": "532411",
+    "jurisdiction": "US-IL",
+    "league": "L3",
+    "ttmRevenueCents": 1400000000,
+    "adjustedEbitdaCents": 80000000,
+    "purchasePriceCents": 280000000,
+    "dealStructure": "article_9_credit_bid",
+    "taxClassification": "llc_partnership",
+    "signals": {
+      "cashRunwayDays": 0,
+      "fccr": 0.3,
+      "securedDebtTradingPriceCents": 35,
+      "solvencyProngFailed": true,
+      "bankruptcyFilingPending": false
+    },
+    "foreclosurePosture": "completed",
+    "financing": {
+      "sponsorEquityCents": 280000000,
+      "seniorDebtCents": 0
+    },
+    "stage": "closing"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "distressed_buy_side",
+      "league": "L3",
+      "jurisdiction": "US-IL",
+      "industry": "transportation equipment leasing",
+      "distressPosture": "full_distress",
+      "assetClass": "operating_co",
+      "taxClassification": "llc_partnership"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "rich",
+    "distressed",
+    "L3",
+    "buy"
+  ],
+  "id": "PC-RICH-DISTRESSED-003"
+}

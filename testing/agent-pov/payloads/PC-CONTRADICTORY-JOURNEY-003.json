@@ -1,0 +1,41 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "journey='buy' but ownerPerks and multiYearPnlPresent populated (sell-side normalization signals).",
+  "payload": {
+    "journey": "buy",
+    "sellerRole": "principal",
+    "sellerRepresentation": "owner_rep",
+    "ownerPerks": [
+      "owner_compensation_excess",
+      "family_payroll"
+    ],
+    "multiYearPnlPresent": true,
+    "sdeCents": 75000000,
+    "industry": "plumbing services",
+    "jurisdiction": "US-FL"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-FL",
+      "industry": "plumbing services"
+    },
+    "missingFields": [
+      "explicit_journey_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "journey-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-JOURNEY-003"
+}

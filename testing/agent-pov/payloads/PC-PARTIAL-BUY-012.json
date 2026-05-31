@@ -1,0 +1,44 @@
+{
+  "id": "PC-PARTIAL-BUY-012",
+  "category": "PARTIAL",
+  "description": "Partial payload: L4 buy: healthcare services with rollover. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "home health services",
+    "target_ebitda_cents": 600000000,
+    "target_jurisdiction": "US-FL",
+    "purchase_price_range": "24M-32M",
+    "rollover_pct": 20,
+    "buyer_role": "pe_sponsor_lmm"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L4",
+      "industry": "home health services",
+      "jurisdiction": "US-FL"
+    },
+    "missingFields": [
+      "target_revenue",
+      "sponsor_equity_cents",
+      "senior_debt_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L4",
+    "partial",
+    "rollover"
+  ]
+}

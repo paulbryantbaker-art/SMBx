@@ -457,12 +457,17 @@ const CONTRACTS: Record<string, AgencyActionContract> = {
     mode: 'auditor',
     permissionLevel: 'A2_INTERNAL_WRITE',
     riskLevel: 'internal_write',
-    confirmation: 'none',
+    // Finalize produces a signed immutable artifact that downstream parties may rely on for
+    // diligence/audit/verification. Doctrine: even though the artifact does NOT authorize
+    // close or move funds, the act of finalizing into a signed Merkle-rooted manifest is
+    // a one-way operation that warrants explicit human approval. The substrate stages the
+    // call; the user/agent must confirm via humanApproval.confirmed envelope.
+    confirmation: 'required',
     writeScope: 'deal',
     requiredScopes: ['deal-package:read', 'deal-package:verify', 'audit:write'],
     billing: { eventType: 'external_agent_api_call', creditCost: 0, billable: false, unit: 'api_call' },
     citationRequirement: 'required',
-    description: 'Finalize a verified DealPackage into software manifest and audit artifacts for agent take-back without authorizing close, moving funds, or crossing THE LINE.',
+    description: 'Finalize a verified DealPackage into software manifest and audit artifacts for agent take-back without authorizing close, moving funds, or crossing THE LINE. Requires explicit human approval because the resulting signed manifest is one-way.',
   },
   reopen_deal_package: {
     toolName: 'reopen_deal_package',

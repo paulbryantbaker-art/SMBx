@@ -1,0 +1,44 @@
+{
+  "id": "PC-PARTIAL-DISTRESSED-007",
+  "category": "PARTIAL",
+  "description": "Partial payload: Distressed: Article 9 acquisition opportunity. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "specialty manufacturing",
+    "deal_type": "article_9_sale",
+    "target_jurisdiction": "US-IL",
+    "secured_debt_face_cents": 3200000000,
+    "notes": "article 9 foreclosure distressed UCC sale"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "distressed_restructuring",
+      "industry": "specialty manufacturing",
+      "jurisdiction": "US-IL",
+      "distressPosture": "distressed"
+    },
+    "missingFields": [
+      "collateral_appraisal_cents",
+      "public_notice_date",
+      "competing_bidders"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "distressed",
+    "buy",
+    "partial",
+    "article-9",
+    "G28"
+  ]
+}

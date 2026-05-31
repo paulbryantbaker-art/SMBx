@@ -1,0 +1,35 @@
+{
+  "id": "PC-CROSS-DOMAIN-007",
+  "category": "CROSS_DOMAIN",
+  "description": "G28 + G30: Article 9 foreclosure of RE-heavy operating co (RE = 40% EV) + ground-lease present. Substrate must surface ABC/Article 9 (M165), CH7 waterfall (M157), AND RE mechanics (M187, M188, M197 ground-lease) simultaneously.",
+  "payload": {
+    "journey": "buy",
+    "subjourney": "distressed_buy_side",
+    "target_industry": "automotive retail",
+    "target_jurisdiction": "US-CA",
+    "out_of_court_liquidation": "article_9",
+    "real_estate_pct_of_ev": 40,
+    "ground_lease_present": true,
+    "secured_debt_price_cents": 45
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "distressed_buy_side",
+      "distressPosture": "full_distress",
+      "assetClass": "real_estate"
+    },
+    "missingFields": [
+      "ground_lease_remaining_term",
+      "rent_reset_schedule",
+      "title_commitment",
+      "ucc_notice_recipients"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "G28", "G30", "article-9", "ground-lease"]
+}

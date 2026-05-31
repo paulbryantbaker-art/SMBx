@@ -1,0 +1,21 @@
+{
+  "id": "PC-GARBAGE-021",
+  "category": "GARBAGE",
+  "description": "Deep nesting: payload has ~25 levels of nested objects inside a single 'extra' field. Substrate must enforce a max-depth limit and return structured 400, never recurse infinitely or 500.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "B2B services",
+    "target_jurisdiction": "US-TX",
+    "extra": {
+      "a": { "b": { "c": { "d": { "e": { "f": { "g": { "h": { "i": { "j": { "k": { "l": { "m": { "n": { "o": { "p": { "q": { "r": { "s": { "t": { "u": { "v": { "w": { "x": { "y": "bottom" } } } } } } } } } } } } } } } } } } } } } } } }
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "deep-nesting", "depth-26"]
+}

@@ -1,0 +1,51 @@
+{
+  "category": "RICH",
+  "description": "L4 management buyout (MBO) — sell-side context with mgmt team financing structure.",
+  "payload": {
+    "journey": "sell",
+    "sellerRole": "principal",
+    "industry": "specialty food manufacturing",
+    "naics": "311991",
+    "jurisdiction": "US-OR",
+    "league": "L4",
+    "ttmRevenueCents": 3400000000,
+    "adjustedEbitdaCents": 460000000,
+    "multiYearPnlPresent": true,
+    "yearsOfHistory": 6,
+    "askingPriceCents": 2760000000,
+    "mboPath": true,
+    "mgmtEquityRolloverPct": 25,
+    "taxClassification": "s_corp",
+    "stage": "marketing"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "principal_seller",
+      "league": "L4",
+      "jurisdiction": "US-OR",
+      "industry": "specialty food manufacturing",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "s_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L4",
+    "rich",
+    "mbo"
+  ],
+  "id": "PC-RICH-L4-SELL-004"
+}

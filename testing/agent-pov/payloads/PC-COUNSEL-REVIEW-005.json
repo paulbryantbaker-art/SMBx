@@ -1,0 +1,18 @@
+{
+  "id": "PC-COUNSEL-REVIEW-005",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate for a FIRPTA opinion on the foreign seller. International tax positions must go to counsel.",
+  "payload": {
+    "deal_id": "fixture_deal_cr005",
+    "ask": "give me a FIRPTA opinion on the withholding requirements for this foreign-seller real-estate transaction"
+  },
+  "tool": "update_tax_position",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "counsel_review_required",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["counsel-review", "tax-opinion", "firpta", "cross-border"]
+}

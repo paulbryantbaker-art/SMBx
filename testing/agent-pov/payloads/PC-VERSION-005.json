@@ -1,0 +1,19 @@
+{
+  "id": "PC-VERSION-005",
+  "category": "VERSION",
+  "description": "Unknown spec version 'DEFINITIVE.v0.5' (pre-release). Substrate must refuse.",
+  "payload": {
+    "deal_id": "fixture_deal_version_005",
+    "model_id": "MODEL.VALUATION.LMM.v1",
+    "spec_version": "DEFINITIVE.v0.5",
+    "inputs": {}
+  },
+  "tool": "execute_model",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "unsupported_version",
+    "persistsDealState": false
+  },
+  "tags": ["version", "unknown-spec", "pre-release"]
+}

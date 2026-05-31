@@ -1,0 +1,19 @@
+{
+  "id": "PC-VERSION-007",
+  "category": "VERSION",
+  "description": "Deprecated/superseded methodology version 'V17' (per CLAUDE.md, V17/V18a/V18b are archived in docs/_archive/methodology/ and not new-build source material). Substrate must refuse and point at current V19.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "B2B services",
+    "target_jurisdiction": "US-TX",
+    "methodology_version": "V17"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "unsupported_version",
+    "persistsDealState": false
+  },
+  "tags": ["version", "deprecated-methodology", "V17-archived"]
+}

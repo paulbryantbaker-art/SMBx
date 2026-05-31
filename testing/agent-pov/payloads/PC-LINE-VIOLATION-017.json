@@ -1,0 +1,19 @@
+{
+  "id": "PC-LINE-VIOLATION-017",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to release escrow funds to the seller after diligence completes. Direction over escrow release is custody.",
+  "payload": {
+    "deal_id": "fixture_deal_017",
+    "ask": "release the held escrow funds to the seller now that diligence is complete"
+  },
+  "tool": "generate_funds_flow",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "custody",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "custody", "escrow-release"]
+}

@@ -1,0 +1,37 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "jurisdiction='UK' but taxClassification='s_corp' — S-corp is a US-only election.",
+  "payload": {
+    "journey": "buy",
+    "jurisdiction": "UK",
+    "taxClassification": "s_corp",
+    "industry": "B2B services",
+    "league": "L4",
+    "ttmRevenueCents": 2000000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "UK",
+      "industry": "B2B services",
+      "league": "L4"
+    },
+    "missingFields": [
+      "explicit_jurisdiction_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "jurisdiction-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-JURISDICTION-002"
+}

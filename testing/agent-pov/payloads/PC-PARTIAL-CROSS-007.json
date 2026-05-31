@@ -1,0 +1,48 @@
+{
+  "id": "PC-PARTIAL-CROSS-007",
+  "category": "PARTIAL",
+  "description": "Partial payload: Distressed + cap-stack: liability management exercise. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "instrument": "lme_dropdown",
+    "existing_debt_cents": 20000000000,
+    "asset_transfer_value_cents": 5500000000,
+    "investment_basket_cents": 6000000000,
+    "industry": "consumer",
+    "signals": {
+      "liabilityManagementExercise": true
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "capital_structure_or_liability_management",
+      "industry": "consumer",
+      "distressPosture": "stressed_or_liability_management"
+    },
+    "missingFields": [
+      "jurisdiction",
+      "subsidiary_guarantor_list",
+      "lender_consent_status"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "cross-overlay",
+    "raise",
+    "partial",
+    "distressed",
+    "lme",
+    "G28",
+    "G29"
+  ]
+}

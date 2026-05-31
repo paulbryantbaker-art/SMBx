@@ -48,6 +48,12 @@ try {
     }
   });
 
+  // The app is behind auth (logged-out "/" is the marketing site), so sign in via
+  // the dev account before exercising the mobile app surfaces.
+  await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded', timeout: 20_000 });
+  await page.getByText('Sign in as Paul').click();
+  await page.waitForTimeout(1800);
+
   await page.goto(`${BASE_URL}/#mode=today&tab=today-root`, { waitUntil: 'domcontentloaded', timeout: 20_000 });
   await page.waitForSelector('#root', { timeout: 10_000 });
   await page.waitForTimeout(800);

@@ -1,0 +1,20 @@
+{
+  "id": "PC-GARBAGE-023",
+  "category": "GARBAGE",
+  "description": "Deep nesting: ~22 levels of nested objects inside execute_model inputs. Substrate must enforce max-depth on tool input schema as well as ingest_deal_payload.",
+  "payload": {
+    "deal_id": "fixture_deal_garbage_023",
+    "model_id": "MODEL.VALUATION.LMM.v1",
+    "inputs": {
+      "wrap": { "wrap": { "wrap": { "wrap": { "wrap": { "wrap": { "wrap": { "wrap": { "wrap": { "wrap": { "wrap": { "wrap": { "wrap": { "wrap": { "wrap": { "wrap": { "wrap": { "wrap": { "wrap": { "wrap": { "wrap": { "value": 100 } } } } } } } } } } } } } } } } } } } } }
+    }
+  },
+  "tool": "execute_model",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "deep-nesting", "execute_model-depth"]
+}

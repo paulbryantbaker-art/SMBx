@@ -1,0 +1,56 @@
+{
+  "category": "RICH",
+  "description": "PMI optimization 18 months post-close — multi-deal integration platform.",
+  "payload": {
+    "journey": "pmi",
+    "pmiType": "multi_deal_integration",
+    "pmiStage": "optimization",
+    "dealClosedDate": "2024-10-01",
+    "acquirerName": "BlueRock Platform Co",
+    "targetName": "Platform of 4 add-ons since close",
+    "industry": "B2B services platform",
+    "jurisdiction": "US-TX",
+    "league": "L6",
+    "targetTtmRevenueCents": 28000000000,
+    "targetEbitdaCents": 4400000000,
+    "addOnCount": 4,
+    "workstreams": [
+      "platform_systems_unification",
+      "cross_sell_motion",
+      "shared_services_buildout",
+      "unified_brand"
+    ],
+    "taxClassification": "llc_partnership",
+    "stage": "optimization"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "pmi",
+      "subJourney": "pmi_optimization",
+      "league": "L6",
+      "jurisdiction": "US-TX",
+      "industry": "B2B services platform",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "llc_partnership"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "pmi",
+    "L6",
+    "rich",
+    "multi_deal_integration"
+  ],
+  "id": "PC-RICH-PMI-004"
+}

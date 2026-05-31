@@ -1,0 +1,41 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "journey='sell' with sellerRole=principal but the same payload also declares the agent as the acquirer (acquirerRole / buyerStrategy / sponsor financing) — substrate cannot tell which side the agent represents.",
+  "payload": {
+    "journey": "sell",
+    "sellerRole": "principal",
+    "acquirerRole": "principal",
+    "buyerStrategy": "sba_buyer",
+    "sponsorType": "individual",
+    "financing": {
+      "sponsorEquityCents": 800000000,
+      "sbaSevenACents": 1750000000
+    },
+    "industry": "B2B HVAC",
+    "jurisdiction": "US-TX"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "sell",
+      "jurisdiction": "US-TX",
+      "industry": "B2B HVAC"
+    },
+    "missingFields": [
+      "explicit_journey_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "journey-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-JOURNEY-006"
+}

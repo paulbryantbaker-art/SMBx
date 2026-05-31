@@ -1,0 +1,59 @@
+{
+  "category": "RICH",
+  "description": "PMI Day-0 for L8 mid-market deal with HSR cleared — full integration program kicked off.",
+  "payload": {
+    "journey": "pmi",
+    "pmiType": "tuck_in_integration",
+    "pmiStage": "day_0",
+    "dealClosedDate": "2026-05-20",
+    "acquirerName": "Summit Mid-Market Fund",
+    "targetName": "BrightCove Beauty Holdings",
+    "industry": "consumer packaged goods — beauty",
+    "jurisdiction": "US-NY",
+    "league": "L8",
+    "targetTtmRevenueCents": 65000000000,
+    "targetEbitdaCents": 11000000000,
+    "hsrCleared": true,
+    "synergyTargetCents": 1100000000,
+    "workstreams": [
+      "finance_consolidation",
+      "erp_migration",
+      "commercial_org",
+      "supply_chain",
+      "corp_dev_pipeline"
+    ],
+    "tsaRequired": false,
+    "taxClassification": "c_corp",
+    "stage": "planning"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "pmi",
+      "subJourney": "pmi_day_0",
+      "league": "L8",
+      "jurisdiction": "US-NY",
+      "industry": "consumer packaged goods — beauty",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "pmi",
+    "L8",
+    "rich",
+    "tuck_in_integration"
+  ],
+  "id": "PC-RICH-PMI-005"
+}

@@ -1,0 +1,45 @@
+{
+  "id": "PC-PARTIAL-CROSS-008",
+  "category": "PARTIAL",
+  "description": "Partial payload: Carve-out + RE: distribution center separation. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "distribution",
+    "deal_type": "carve_out",
+    "asset_class": "mixed",
+    "target_revenue_cents": 28000000000,
+    "real_estate_pct": 0.45,
+    "parent_co": "public_co"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "league": "L5",
+      "industry": "distribution",
+      "assetClass": "operating_business_or_unknown"
+    },
+    "missingFields": [
+      "target_ebitda_cents",
+      "jurisdiction",
+      "tsa_terms",
+      "real_estate_assets_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "cross-overlay",
+    "buy",
+    "partial",
+    "carve-out",
+    "mixed-assets"
+  ]
+}

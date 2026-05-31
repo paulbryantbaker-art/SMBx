@@ -1,0 +1,38 @@
+{
+  "id": "PC-CROSS-DOMAIN-019",
+  "category": "CROSS_DOMAIN",
+  "description": "G28 + G29 + G30 triple overlay: Chapter 11 cramdown (G28) + RSA (G28+G29) + sale-leaseback proposed (G30). All three must surface; M148, M152, M154, M155, M164, M171, M194 expected in stack.",
+  "payload": {
+    "journey": "raise",
+    "subjourney": "debt_raise",
+    "target_industry": "industrial real estate operator",
+    "target_jurisdiction": "US-PA",
+    "bankruptcy_status": "chapter_11_filed",
+    "bankruptcyFilingPending": true,
+    "rsa_in_negotiation": true,
+    "rsaInMarket": true,
+    "cramdown_proposed": true,
+    "sale_leaseback_proposed": true,
+    "real_estate_pct_of_ev": 65
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "distressed_restructuring",
+      "distressPosture": "full_distress",
+      "assetClass": "real_estate"
+    },
+    "missingFields": [
+      "plan_class_recoveries",
+      "rsa_milestones",
+      "asc_842_classification_inputs",
+      "cap_rate_assumptions"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "G28", "G29", "G30", "cramdown-RSA-sale-leaseback"]
+}

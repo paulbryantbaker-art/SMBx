@@ -36,11 +36,26 @@ interface CanvasProps {
   modelPreference?: ModelPreference;
 }
 
-export function V6Canvas({ tabs, activeTabId, openTab, onPickMode, onTalkToYulia, user, onSignOut, modelPreference }: CanvasProps) {
+export function V6Canvas({ tabs, activeTabId, setActiveTabId, closeTab, openTab, onPickMode, onTalkToYulia, user, onSignOut, modelPreference }: CanvasProps) {
   const activeTab = tabs.find(t => t.id === activeTabId) ?? tabs[0];
+  // Open work items (deals/docs/analyses/models/files) — mode-roots are reached
+  // via the sidebar, so the strip only surfaces the things you can't otherwise switch to.
+  const workTabs = tabs.filter(t => t.kind !== "mode-root");
 
   return (
     <div style={K.canvas}>
+      {workTabs.length > 0 && (
+        <div className="wktabstrip thin-scroll" role="tablist" aria-label="Open tabs">
+          {workTabs.map(t => (
+            <div key={t.id} className={`wktab ${t.id === activeTabId ? "on" : ""}`} role="tab" aria-selected={t.id === activeTabId}>
+              <button className="wktab-t" onClick={() => setActiveTabId(t.id)} title={t.title}>{t.title}</button>
+              <button className="wktab-x" onClick={(e) => { e.stopPropagation(); closeTab(t.id); }} aria-label={`Close ${t.title}`}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" /></svg>
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="thin-scroll v6-canvas-scroll" style={K.canvasBody}>
         {activeTab && (
           <Suspense fallback={<CanvasContentLoader />}>
@@ -99,13 +114,13 @@ function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut, modelPrefe
 
 function Placeholder({ label, note }: { label: string; note?: string }) {
   return (
-    <div className="m-fade-up m-page-flow" style={{ maxWidth: 720 }}>
-      <div className="mono" style={{ fontSize: 9.5, color: "var(--m-on-surface-mid)", letterSpacing: "0.14em", fontWeight: 600 }}>STUB</div>
+    <div className="wk-content m-fade-up" style={{ maxWidth: 720 }}>
+      <div className="mono" style={{ fontSize: 9.5, color: "var(--ink-2)", letterSpacing: "0.14em", fontWeight: 600 }}>STUB</div>
       <h1 style={{
         fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 24,
-        letterSpacing: "-0.025em", margin: "4px 0 8px", color: "var(--m-on-surface)",
+        letterSpacing: "-0.025em", margin: "4px 0 8px", color: "var(--ink)",
       }}>{label}</h1>
-      {note && <p style={{ fontSize: 13, color: "var(--m-on-surface-mid)", margin: 0 }}>{note}</p>}
+      {note && <p style={{ fontSize: 13, color: "var(--ink-2)", margin: 0 }}>{note}</p>}
     </div>
   );
 }
@@ -124,7 +139,7 @@ function CanvasContentLoader() {
 
 const K: Record<string, CSSProperties> = {
   canvas: {
-    background: "linear-gradient(180deg, #FFFFFF 0%, #FEFFFF 55%, #F8FBFF 100%)",
+    background: "var(--surface)",
     display: "flex", flexDirection: "column", flex: 1, minWidth: 0,
     minHeight: 0, width: "100%", height: "100%",
     borderRadius: "inherit",
@@ -140,21 +155,21 @@ const K: Record<string, CSSProperties> = {
     display: "flex",
     alignItems: "center",
     gap: 12,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     minHeight: 220,
   },
   loaderPulse: {
     width: 10,
     height: 10,
     borderRadius: 999,
-    background: "var(--m-accent)",
+    background: "var(--accent)",
     boxShadow: "0 0 0 6px rgba(138,154,232,0.14)",
   },
   loaderTitle: {
     fontFamily: "var(--font-display)",
     fontWeight: 700,
     fontSize: 14,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   loaderSub: {
     fontSize: 12,

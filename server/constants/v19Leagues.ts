@@ -74,6 +74,14 @@ export function classifyV19League(params: {
   if (sde !== null) {
     if (sde < 300_000) return 'L1';
     if (sde < 1_000_000) return 'L2';
+    // SDE > $1M is unusual but real (very-small operating businesses without
+    // formal owner-pay normalization). Treat SDE > $1M as EBITDA-equivalent —
+    // it's effectively cash-generative scale even if technically not normalized.
+    if (sde < 5_000_000) return 'L3';
+    if (sde < 25_000_000) return 'L4';
+    if (sde < 100_000_000) return 'L5';
+    if (sde < 250_000_000) return 'L6';
+    return 'L7';
   }
 
   if (revenue !== null) {

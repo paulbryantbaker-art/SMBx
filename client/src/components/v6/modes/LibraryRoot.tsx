@@ -1,5 +1,4 @@
-import { useState, type CSSProperties } from "react";
-import { V6Section } from "../Section";
+import { useState } from "react";
 import { V6Icon } from "../icons";
 import type { IconName, OpenTab, TabKind } from "../types";
 
@@ -28,60 +27,68 @@ export function V6LibraryRoot({ openTab }: { openTab: OpenTab }) {
   const [active, setActive] = useState(0);
 
   return (
-    <div className="m-fade-up m-page-flow" style={L.page}>
-      <V6Section
-        eyebrow="LIBRARY"
-        title="Everything you've touched"
-        sub="One place for deals, docs, analyses, and memos."
-      >
-        <div />
-      </V6Section>
+    <div className="wk-content m-fade-up" style={{ maxWidth: 1180, margin: "0 auto" }}>
+      <div className="pg-head">
+        <div>
+          <div className="pg-eyebrow">Library</div>
+          <div className="pg-title">Everything you've touched</div>
+          <p className="pg-sub">One place for deals, docs, analyses, and memos.</p>
+        </div>
+      </div>
 
-      <div role="tablist" aria-label="Filter library" style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
+      <div className="segmented" style={{ flexWrap: "wrap" }}>
         {FILTERS.map((t, i) => (
           <button
             key={t}
             onClick={() => setActive(i)}
-            className="m-state"
+            className={`seg ${active === i ? "on" : ""}`}
             role="tab"
             aria-selected={active === i}
-            style={{
-              all: "unset",
-              padding: "7px 14px",
-              borderRadius: 999,
-              fontSize: 12, fontWeight: 500,
-              background: active === i ? "var(--m-primary-container)" : "var(--m-surface-2)",
-              color: active === i ? "var(--m-on-primary-container)" : "var(--m-on-surface-var)",
-              cursor: "pointer",
-            }}
+            type="button"
           >{t}</button>
         ))}
       </div>
 
-      <div className="m-card" style={{ overflow: "hidden", padding: 0 }}>
-        {ITEMS.map((it, i) => (
-          <div
-            key={`${it.title}-${i}`}
-            className="m-state"
-            onClick={() => openTab({ kind: it.kind, title: it.title })}
-            role="button"
-            tabIndex={0}
-            aria-label={`${it.title}, ${it.sub}`}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openTab({ kind: it.kind, title: it.title }); } }}
-            style={{
-              ...L.row,
-              borderBottom: i === ITEMS.length - 1 ? "none" : "1px solid var(--m-outline-var)",
-            }}
-          >
-            <V6Icon name={iconForKind(it.kind)} size={14} />
-            <div style={L.title}>{it.title}</div>
-            <div style={L.sub}>{it.sub}</div>
-            <div className="mono" style={L.updated}>{it.updated.toUpperCase()}</div>
-            <span aria-label={it.starred ? "Starred" : "Not starred"} style={{
-              color: it.starred ? "var(--m-watch)" : "var(--m-outline)", fontSize: 14,
-            }}>{it.starred ? "★" : "☆"}</span>
-          </div>
-        ))}
+      <div style={{ marginTop: 22 }}>
+        <table className="wktable">
+          <thead>
+            <tr>
+              <th style={{ width: 32 }}></th>
+              <th>Title</th>
+              <th>Status</th>
+              <th className="r">Updated</th>
+              <th style={{ width: 28 }}></th>
+            </tr>
+          </thead>
+          <tbody>
+            {ITEMS.map((it, i) => (
+              <tr
+                key={`${it.title}-${i}`}
+                onClick={() => openTab({ kind: it.kind, title: it.title })}
+                role="button"
+                aria-label={`${it.title}, ${it.sub}`}
+              >
+                <td style={{ color: "var(--ink-3)" }}>
+                  <V6Icon name={iconForKind(it.kind)} size={14} />
+                </td>
+                <td>
+                  <div className="nm">{it.title}</div>
+                </td>
+                <td><span className="muted">{it.sub}</span></td>
+                <td className="r muted">{it.updated.toUpperCase()}</td>
+                <td style={{ textAlign: "center" }}>
+                  <span
+                    aria-label={it.starred ? "Starred" : "Not starred"}
+                    style={{ color: it.starred ? "var(--accent-strong)" : "var(--line-2)", fontSize: 14 }}
+                  >{it.starred ? "★" : "☆"}</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="tabfoot">
+          <span>{ITEMS.length} items</span>
+        </div>
       </div>
     </div>
   );
@@ -93,31 +100,3 @@ function iconForKind(kind: TabKind): IconName {
   if (kind === "analysis") return "chart";
   return "library";
 }
-
-const L: Record<string, CSSProperties> = {
-  page: {
-    width: "min(100%, 1440px)",
-    maxWidth: 1440,
-    margin: "0 auto",
-    boxSizing: "border-box",
-  },
-  row: {
-    display: "grid",
-    gridTemplateColumns: "32px 2fr 1.4fr 100px 24px",
-    alignItems: "center", gap: 16,
-    padding: "12px 18px",
-    cursor: "pointer",
-  },
-  title: {
-    fontSize: 13, fontWeight: 600, color: "var(--m-on-surface)",
-    letterSpacing: "-0.01em",
-    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-  },
-  sub: {
-    fontSize: 12, color: "var(--m-on-surface-mid)",
-    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-  },
-  updated: {
-    fontSize: 10.5, color: "var(--m-on-surface-mid)", letterSpacing: "0.1em",
-  },
-};

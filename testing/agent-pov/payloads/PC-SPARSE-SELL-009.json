@@ -1,0 +1,37 @@
+{
+  "id": "PC-SPARSE-SELL-009",
+  "category": "SPARSE",
+  "description": "Sparse SELL payload: large industrial sell L7. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "specialty chemicals"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "sell",
+      "leagueGuess": "L7",
+      "industry": "specialty chemicals"
+    },
+    "missingFields": [
+      "revenue",
+      "ebitda",
+      "jurisdiction",
+      "deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L7-implicit",
+    "sparse",
+    "chemicals"
+  ]
+}

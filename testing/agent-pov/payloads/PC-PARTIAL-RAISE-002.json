@@ -1,0 +1,43 @@
+{
+  "id": "PC-PARTIAL-RAISE-002",
+  "category": "PARTIAL",
+  "description": "Partial payload: Seed priced round: pre + amount. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "stage": "seed",
+    "instrument": "priced_round",
+    "target_amount_cents": 400000000,
+    "pre_money_cents": 2500000000,
+    "industry": "climate tech",
+    "jurisdiction": "US-DE"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "early_stage_raise",
+      "industry": "climate tech",
+      "jurisdiction": "US-DE"
+    },
+    "missingFields": [
+      "lead_investor",
+      "option_pool_pct",
+      "use_of_proceeds"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "seed",
+    "priced",
+    "partial"
+  ]
+}

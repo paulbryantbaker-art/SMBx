@@ -1,0 +1,40 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "taxClassification='s_corp' but electionType='338(h)(10)' alongside §1042 ESOP election — s_corp cannot host a C-corp election (1042 also requires C-corp ESOP).",
+  "payload": {
+    "journey": "buy",
+    "taxClassification": "s_corp",
+    "electionType": "338(h)(10)",
+    "esopBuyer": true,
+    "section1042Election": true,
+    "industry": "engineering services",
+    "jurisdiction": "US-MA",
+    "league": "L6",
+    "purchasePriceCents": 26000000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-MA",
+      "industry": "engineering services",
+      "league": "L6"
+    },
+    "missingFields": [
+      "explicit_taxClassification_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "tax-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-TAX-003"
+}

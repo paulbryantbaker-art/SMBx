@@ -34,15 +34,26 @@ export interface DefinitiveClassificationKey {
   subJourney: string;
   league: League | 'unknown';
   jurisdiction: string;
-  distressPosture: 'healthy_or_unknown' | 'stressed_or_liability_management' | 'distressed';
+  distressPosture: 'healthy' | 'healthy_or_unknown' | 'stressed_or_liability_management' | 'distressed';
   assetClass: 'operating_business_or_unknown' | 'real_estate' | 'digital_assets' | 'infrastructure';
   industry: string;
   taxClassification: string;
   triggeredOverlayGates: Array<'G28' | 'G29' | 'G30'>;
+  conflicts?: ClassificationConflict[];
   confidence: Record<
     'journey' | 'subJourney' | 'league' | 'jurisdiction' | 'distressPosture' | 'assetClass' | 'industry' | 'taxClassification',
     Confidence
   >;
+}
+
+export interface ClassificationConflict {
+  axis: 'journey' | 'league' | 'distressPosture' | 'taxClassification' | 'assetClass' | 'jurisdiction';
+  /** Short machine code for the conflict (e.g. `journey_buy_with_seller_role`). */
+  code: string;
+  /** Human-readable explanation for Yulia / agent. */
+  reason: string;
+  /** Field names the agent should resolve. */
+  fields: string[];
 }
 
 export interface DefinitiveMissingInputItem {
@@ -1031,8 +1042,14 @@ export function resumeDefinitiveDeal(input: Record<string, any>) {
         acceptedInputs: ['DealState', 'DealPayload', 'DealPackage plus companion DealState'],
         noRejectionContract:
           'If the agent cannot supply complete facts, resume_deal returns current DealState, missing inputs, current stage, and next_suggested_calls.',
-        recursiveLoop:
-          'resume -> update_deal_payload -> compose_model_stack/execute_model -> check_completeness -> compose_deal_package -> repeat',
+        recursiveLoop: [
+          'resume',
+          'update_deal_payload',
+          'compose_model_stack/execute_model',
+          'check_completeness',
+          'compose_deal_package',
+          'repeat',
+        ],
         humanAndAgentSurfaces: ['today', 'pipeline', 'files', 'data_room', 'studio', 'models', 'audit_package'],
       },
       portableTakeBackArtifacts: [
@@ -1086,8 +1103,13 @@ export function composeDefinitiveLifecycleTrace(input: Record<string, any>) {
     blockers: state.completenessReport.blockers,
     humanAndAgentSurfaces,
     loopContract: {
-      recursiveLoop:
-        'compose_lifecycle_trace -> update_deal_payload with new event/source/model output -> check_completeness -> compose_deal_package -> repeat',
+      recursiveLoop: [
+        'compose_lifecycle_trace',
+        'update_deal_payload',
+        'check_completeness',
+        'compose_deal_package',
+        'repeat',
+      ],
       noRejectionContract:
         'Incomplete deal history is acceptable. The trace returns synthesized current-state events and next_suggested_calls instead of rejecting the agent.',
       humanAndAgentSurfaces,
@@ -4421,17 +4443,35 @@ function classifyPayload(
   ]);
   const explicitJourney = normalizeJourney(payload.journey);
   const journey = explicitJourney || inferJourney(text);
-  const league = normalizeLeague(payload.league) || inferLeague(payload);
+  const explicitLeague = normalizeLeague(payload.league);
+  const inferredLeague = inferLeague(payload);
+  const league = explicitLeague || inferredLeague;
   const triggeredOverlayGates = overlays.filter(overlay => overlay.triggered).map(overlay => overlay.gateId);
+  const conflicts = detectClassificationConflicts({
+    payload,
+    explicitJourney,
+    inferredJourney: inferJourney(text),
+    explicitLeague,
+    inferredLeague,
+    overlays,
+    signals,
+  });
   const jurisdiction = textValue(payload.jurisdiction) || textValue(payload.state) || textValue(payload.country) || 'unknown';
   const industry = textValue(payload.industry) || 'unknown';
   const assetClass = inferAssetClass(payload, triggeredOverlayGates, signals, text);
+  // distressPosture: distinguish "actively healthy" (positive signals) from
+  // "unknown" (no signals either way). Previously these were collapsed into
+  // healthy_or_unknown, which is honest but breaks downstream routing that
+  // needs to know whether to apply healthy-deal model stacks or to wait for
+  // more info before composing them.
   const distressPosture = triggeredOverlayGates.includes('G28')
     ? 'distressed'
     : triggeredOverlayGates.includes('G29')
       ? 'stressed_or_liability_management'
-      : 'healthy_or_unknown';
-  const subJourney = inferSubJourney(journey, triggeredOverlayGates, assetClass, text);
+      : hasPositiveHealthSignals(payload, signals)
+        ? 'healthy'
+        : 'healthy_or_unknown';
+  const subJourney = inferSubJourney(journey, triggeredOverlayGates, assetClass, text, payload);
   const taxClassification = textValue(payload.taxClassification) || inferTaxClassification(text);
 
   return {
@@ -4444,12 +4484,17 @@ function classifyPayload(
     industry,
     taxClassification,
     triggeredOverlayGates,
+    // Conflicts surface contradictory signals (e.g. journey=buy with seller_role
+    // populated, healthy financials with bankruptcy_pending, explicit league
+    // mismatching inferred). When present, the missing-input contract should
+    // add an `explicit_*_confirmation` item.
+    conflicts,
     confidence: {
       journey: explicitJourney ? 'explicit' : journey === 'unknown' ? 'missing' : 'inferred',
       subJourney: subJourney === 'unknown' ? 'missing' : 'inferred',
       league: normalizeLeague(payload.league) ? 'explicit' : league === 'unknown' ? 'missing' : 'inferred',
       jurisdiction: jurisdiction === 'unknown' ? 'missing' : 'explicit',
-      distressPosture: triggeredOverlayGates.length ? 'inferred' : 'missing',
+      distressPosture: triggeredOverlayGates.length || distressPosture === 'healthy' ? 'inferred' : 'missing',
       assetClass: assetClass === 'operating_business_or_unknown' ? 'missing' : 'inferred',
       industry: industry === 'unknown' ? 'missing' : 'explicit',
       taxClassification: taxClassification === 'unknown' ? 'missing' : textValue(payload.taxClassification) ? 'explicit' : 'inferred',
@@ -4527,6 +4572,23 @@ function buildMissingInputContract(
     priority: 'P1',
     surface: 'files',
   });
+
+  // Conflicts → explicit confirmation items. The substrate never silently
+  // picks a side when signals contradict; instead it forces the agent to
+  // confirm explicitly. (Test plan §3.2 PC-CONTRADICTORY: substrate must
+  // surface the conflict, never silently pick.)
+  if (classification.conflicts && classification.conflicts.length > 0) {
+    for (const conflict of classification.conflicts) {
+      missing.push({
+        field: `explicit_${conflict.axis}_confirmation`,
+        label: `Confirm ${conflict.axis} explicitly`,
+        reason: conflict.reason,
+        unlocks: ['classification_resolution', 'model_stack_routing', 'gate_advancement'],
+        priority: 'P0',
+        surface: 'chat',
+      });
+    }
+  }
 
   const minimal = missing
     .filter(item => item.priority === 'P0')
@@ -4724,33 +4786,210 @@ function inferJourney(text: string): Journey {
   return 'unknown';
 }
 
+/**
+ * Build a set of key-name variants for a given canonical financial signal.
+ *
+ * Real-world agents send financial values under many naming conventions:
+ *   - camelCase: ebitdaCents, ebitda
+ *   - snake_case: ebitda_cents, ebitda
+ *   - POV-prefixed: target_ebitda_cents, seller_ebitda, buyer_ebitda_cents
+ *
+ * The substrate must accept all of these. Otherwise an agent saying
+ * "target EBITDA is $5M" via target_ebitda_cents would classify as league=unknown,
+ * which breaks methodology routing — the load-bearing substrate promise.
+ *
+ * Returns key variants in priority order (camelCase canonical first, then snake_case,
+ * then POV-prefixed). The first one that resolves to a value wins.
+ */
+/**
+ * Returns true when the payload signals an actively-healthy deal — positive
+ * EBITDA/SDE/revenue, no distress triggers, no liability-management signals.
+ * Used to distinguish `distressPosture: 'healthy'` (we see positive signals
+ * and no distress) from `distressPosture: 'healthy_or_unknown'` (no signals
+ * either way). Methodology routing benefits from the distinction.
+ */
+function hasPositiveHealthSignals(
+  payload: Record<string, any>,
+  signals: DefinitiveStackSignals | null,
+): boolean {
+  if (!signals) {
+    // No signals object but payload may still contain positive financials —
+    // fall through to the financial-signals check below.
+  } else {
+    // Active distress signals would have already triggered G28/G29
+    if (signals.cashRunwayDays != null && signals.cashRunwayDays < 90) return false;
+    if (signals.fccr != null && signals.fccr < 1.0) return false;
+    if (signals.securedDebtTradingPriceCents != null && signals.securedDebtTradingPriceCents < 60) return false;
+    if (signals.maintenanceCovenantBreachWithinQuarters != null && signals.maintenanceCovenantBreachWithinQuarters >= 4) return false;
+    if (signals.solvencyProngFailed) return false;
+    if (signals.bankruptcyFilingPending) return false;
+    if (signals.liabilityManagementExercise || signals.exchangeOffer || signals.covenantAmendment) return false;
+  }
+  // Positive EBITDA/SDE/revenue signal means we have economic info AND it's healthy
+  const ebitdaVariants = moneyKeyVariants('ebitda');
+  const sdeVariants = moneyKeyVariants('sde');
+  const revVariants = moneyKeyVariants('revenue');
+  const ebitda = firstMoneyCents(payload, ebitdaVariants.centsKeys, ebitdaVariants.dollarKeys);
+  const sde = firstMoneyCents(payload, sdeVariants.centsKeys, sdeVariants.dollarKeys);
+  const rev = firstMoneyCents(payload, revVariants.centsKeys, revVariants.dollarKeys);
+  if (ebitda != null && ebitda > 0) return true;
+  if (sde != null && sde > 0) return true;
+  if (rev != null && rev > 0) return true;
+  return false;
+}
+
+/**
+ * Detect contradictions in a payload — fields that suggest different classifications.
+ *
+ * The substrate must NEVER silently pick a side when signals conflict; instead it
+ * surfaces the conflict so the agent / user can resolve it explicitly. This is
+ * the "no-rejection contract" applied to ambiguity: provide useful classification
+ * for everything that's clear, and a `explicit_*_confirmation` missing-input
+ * item for everything that's contradictory.
+ */
+function detectClassificationConflicts(args: {
+  payload: Record<string, any>;
+  explicitJourney: Journey | null;
+  inferredJourney: Journey;
+  explicitLeague: League | null;
+  inferredLeague: League | 'unknown';
+  overlays: DefinitiveStackOverlay[];
+  signals: DefinitiveStackSignals | null;
+}): ClassificationConflict[] {
+  const conflicts: ClassificationConflict[] = [];
+  const { payload, explicitJourney, explicitLeague, inferredLeague, overlays, signals } = args;
+
+  // Journey conflict: journey=buy but seller-side role fields populated (or vice versa)
+  const sellerSignals = ['seller_role', 'sellerRole', 'seller_representation', 'sellerRepresentation', 'broker_engagement_type'];
+  const buyerSignals = ['acquirer_role', 'acquirerRole', 'buyer_strategy', 'buyerStrategy', 'sponsor_type', 'sponsorType'];
+  const hasSellerSignal = sellerSignals.some(k => payload[k] !== undefined && payload[k] !== null && payload[k] !== '');
+  const hasBuyerSignal = buyerSignals.some(k => payload[k] !== undefined && payload[k] !== null && payload[k] !== '');
+  if (explicitJourney === 'buy' && hasSellerSignal) {
+    conflicts.push({
+      axis: 'journey',
+      code: 'journey_buy_with_seller_role',
+      reason: 'Payload sets journey=buy but also includes sell-side role fields. The substrate cannot determine which side the agent represents.',
+      fields: ['journey', ...sellerSignals.filter(k => payload[k] !== undefined && payload[k] !== null && payload[k] !== '')],
+    });
+  }
+  if (explicitJourney === 'sell' && hasBuyerSignal) {
+    conflicts.push({
+      axis: 'journey',
+      code: 'journey_sell_with_buyer_role',
+      reason: 'Payload sets journey=sell but also includes buy-side role fields.',
+      fields: ['journey', ...buyerSignals.filter(k => payload[k] !== undefined && payload[k] !== null && payload[k] !== '')],
+    });
+  }
+
+  // League conflict: explicit league disagrees with financial-inferred league
+  if (explicitLeague && inferredLeague !== 'unknown' && explicitLeague !== inferredLeague) {
+    conflicts.push({
+      axis: 'league',
+      code: 'league_explicit_vs_inferred_mismatch',
+      reason: `Payload sets league=${explicitLeague} but financial signals (EBITDA/SDE/revenue/EV) imply ${inferredLeague}.`,
+      fields: ['league', 'ebitda', 'sde', 'revenue', 'purchase_price'],
+    });
+  }
+
+  // Distress conflict: healthy financials but distress signal flagged
+  const hasPositiveFinancials = hasPositiveHealthSignals(payload, signals);
+  const hasDistressTrigger = overlays.some(o => o.triggered && (o.gateId === 'G28' || o.gateId === 'G29'));
+  const hasExplicitDistressFlag = signals?.bankruptcyFilingPending || signals?.solvencyProngFailed || signals?.rsaInMarket || signals?.forbearanceExecuted;
+  if (hasPositiveFinancials && (hasDistressTrigger || hasExplicitDistressFlag)) {
+    conflicts.push({
+      axis: 'distressPosture',
+      code: 'healthy_financials_with_distress_signal',
+      reason: 'Payload shows healthy financial signals (positive EBITDA/SDE/revenue, no covenant breach, no liquidity stress) but also flags an active distress signal. Substrate cannot determine whether to apply healthy-deal or distressed-deal model stacks.',
+      fields: ['signals.bankruptcyFilingPending', 'signals.solvencyProngFailed', 'signals.cashRunwayDays', 'signals.fccr', 'ebitda', 'sde', 'revenue'],
+    });
+  }
+
+  // Tax-classification conflict: LLC pass-through but C-corp election fields
+  const llcSignals = payload.taxClassification === 'llc_partnership' || payload.taxClassification === 's_corp' || payload.taxClassification === 'pass_through';
+  const cCorpElections = ['338_h_10_election', '338(h)(10)', 'section_338_election', 'electionType'];
+  const hasCorpElection = cCorpElections.some(k => {
+    const v = payload[k] ?? payload.electionType;
+    return v && typeof v === 'string' && /338|c[_ ]?corp/i.test(v);
+  });
+  if (llcSignals && hasCorpElection) {
+    conflicts.push({
+      axis: 'taxClassification',
+      code: 'pass_through_with_c_corp_election',
+      reason: 'Payload sets a pass-through tax classification (LLC/S-corp/partnership) but also references a C-corp-only election (e.g. §338(h)(10)). These cannot both be true; counsel/tax review required.',
+      fields: ['taxClassification', 'electionType'],
+    });
+  }
+
+  return conflicts;
+}
+
+function moneyKeyVariants(canonicalBase: string): { centsKeys: string[]; dollarKeys: string[] } {
+  // canonicalBase is camelCase (e.g. 'ebitda', 'sde', 'revenue', 'purchasePrice')
+  // Produce a list of camelCase + snake_case + prefixed variants for both `*Cents` and bare.
+  const snakeBase = canonicalBase.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
+  const prefixes = ['', 'target_', 'seller_', 'buyer_', 'company_'];
+  const centsKeys: string[] = [`${canonicalBase}Cents`];
+  const dollarKeys: string[] = [canonicalBase];
+  for (const prefix of prefixes) {
+    if (prefix) {
+      // Snake-case prefixed
+      centsKeys.push(`${prefix}${snakeBase}_cents`);
+      dollarKeys.push(`${prefix}${snakeBase}`);
+      // CamelCase prefixed (e.g. targetEbitdaCents)
+      const camelPrefix = prefix.replace(/_$/, '');
+      const upperBase = canonicalBase.charAt(0).toUpperCase() + canonicalBase.slice(1);
+      centsKeys.push(`${camelPrefix}${upperBase}Cents`);
+      dollarKeys.push(`${camelPrefix}${upperBase}`);
+    } else {
+      // Bare snake_case
+      centsKeys.push(`${snakeBase}_cents`);
+      if (snakeBase !== canonicalBase) dollarKeys.push(snakeBase);
+    }
+  }
+  return { centsKeys, dollarKeys };
+}
+
 function inferLeague(payload: Record<string, any>): League | 'unknown' {
-  const ebitdaCents = firstMoneyCents(payload, ['ebitdaCents', 'adjustedEbitdaCents'], ['ebitda', 'adjustedEbitda']);
-  const sdeCents = firstMoneyCents(payload, ['sdeCents', 'sellerDiscretionaryEarningsCents'], ['sde', 'sellerDiscretionaryEarnings']);
-  const revenueCents = firstMoneyCents(payload, ['revenueCents', 'ttmRevenueCents', 'salesCents'], ['revenue', 'ttmRevenue', 'sales']);
-  const enterpriseValueCents = firstMoneyCents(
-    payload,
-    [
-      'enterpriseValueCents',
-      'evCents',
-      'purchasePriceCents',
-      'headlinePriceCents',
-      'transactionValueCents',
-      'dealValueCents',
-      'askingPriceCents',
-      'valuationCents',
-    ],
-    [
-      'enterpriseValue',
-      'ev',
-      'purchasePrice',
-      'headlinePrice',
-      'transactionValue',
-      'dealValue',
-      'askingPrice',
-      'valuation',
-    ],
-  );
+  // EBITDA (most common scale signal for buy/sell deals)
+  const ebitdaVariants = moneyKeyVariants('ebitda');
+  ebitdaVariants.centsKeys.push('adjustedEbitdaCents', 'normalizedEbitdaCents');
+  ebitdaVariants.dollarKeys.push('adjustedEbitda', 'normalizedEbitda');
+  const ebitdaCents = firstMoneyCents(payload, ebitdaVariants.centsKeys, ebitdaVariants.dollarKeys);
+
+  // SDE (seller-discretionary earnings, lower-LMM)
+  const sdeVariants = moneyKeyVariants('sde');
+  sdeVariants.centsKeys.push('sellerDiscretionaryEarningsCents');
+  sdeVariants.dollarKeys.push('sellerDiscretionaryEarnings');
+  const sdeCents = firstMoneyCents(payload, sdeVariants.centsKeys, sdeVariants.dollarKeys);
+
+  // Revenue
+  const revVariants = moneyKeyVariants('revenue');
+  revVariants.centsKeys.push('ttmRevenueCents', 'salesCents', 'arrCents');
+  revVariants.dollarKeys.push('ttmRevenue', 'sales', 'arr');
+  const revenueCents = firstMoneyCents(payload, revVariants.centsKeys, revVariants.dollarKeys);
+
+  // Enterprise value / purchase price / asking price (fall-back signal)
+  const purchasePriceVariants = moneyKeyVariants('purchasePrice');
+  const enterpriseValueVariants = moneyKeyVariants('enterpriseValue');
+  const evCentsKeys = [
+    ...enterpriseValueVariants.centsKeys,
+    ...purchasePriceVariants.centsKeys,
+    'evCents', 'headlinePriceCents', 'transactionValueCents', 'dealValueCents',
+    'askingPriceCents', 'valuationCents', 'raise_amount_cents', 'raiseAmountCents',
+    // Debt facility signals — sized by commitment / facility amount
+    'commitment_cents', 'commitmentCents', 'facility_amount_cents', 'facilityAmountCents',
+    'tranche_size_cents', 'trancheSizeCents', 'principal_cents', 'principalCents',
+  ];
+  const evDollarKeys = [
+    ...enterpriseValueVariants.dollarKeys,
+    ...purchasePriceVariants.dollarKeys,
+    'ev', 'headlinePrice', 'transactionValue', 'dealValue',
+    'askingPrice', 'valuation', 'raise_amount', 'raiseAmount',
+    'commitment', 'facility_amount', 'facilityAmount', 'tranche_size', 'trancheSize',
+    'principal',
+  ];
+  const enterpriseValueCents = firstMoneyCents(payload, evCentsKeys, evDollarKeys);
+
   if (ebitdaCents == null && sdeCents == null && revenueCents == null && enterpriseValueCents == null) return 'unknown';
   if (ebitdaCents == null && sdeCents == null && revenueCents == null) {
     return classifyV19LeagueFromEnterpriseValueCents(enterpriseValueCents);
@@ -4777,15 +5016,60 @@ function inferSubJourney(
   gates: Array<'G28' | 'G29' | 'G30'>,
   assetClass: DefinitiveClassificationKey['assetClass'],
   text: string,
+  payload: Record<string, any> = {},
 ) {
   if (gates.includes('G28')) return matches(text, ['363', 'stalking horse']) ? 'distressed_363_sale' : 'distressed_restructuring';
   if (gates.includes('G29')) return 'capital_structure_or_liability_management';
   if (assetClass === 'real_estate') return 'real_estate_overlay';
   if (assetClass === 'digital_assets') return 'digital_asset_overlay';
-  if (journey === 'buy') return 'healthy_buy_side';
-  if (journey === 'sell') return 'healthy_sell_side';
-  if (journey === 'raise') return 'capital_raise';
-  if (journey === 'pmi') return 'post_close_pmi';
+
+  // Sell-side sub-journey distinguishes principal seller / owner-rep (broker) /
+  // banker-led process. Without this, every sell-side deal classifies as
+  // healthy_sell_side regardless of representation type, breaking sell-side
+  // model-stack routing.
+  if (journey === 'sell') {
+    const sellerRole = textValue(payload.sellerRole) || textValue(payload.seller_role);
+    const sellerRepresentation = textValue(payload.sellerRepresentation) || textValue(payload.seller_representation);
+    const bankerProcess = payload.bankerProcess === true || payload.banker_process === true || textValue(payload.process) === 'banker_led';
+    if (sellerRole === 'principal') return 'principal_seller';
+    if (sellerRole === 'owner_rep' || sellerRepresentation === 'owner_rep') return 'owner_rep';
+    if (bankerProcess || sellerRepresentation === 'banker') return 'banker_led';
+    return 'healthy_sell_side';
+  }
+
+  // Buy-side sub-journey: distinguish strategic / IS / search / family-office /
+  // ESOP buyers when the payload signals one.
+  if (journey === 'buy') {
+    const sponsorType = textValue(payload.sponsorType) || textValue(payload.sponsor_type) || textValue(payload.acquirerType) || textValue(payload.acquirer_type);
+    if (sponsorType === 'strategic') return 'strategic_tuck_in';
+    if (sponsorType === 'independent_sponsor' || sponsorType === 'is') return 'independent_sponsor';
+    if (sponsorType === 'search_fund' || sponsorType === 'search') return 'search_fund';
+    if (sponsorType === 'family_office' || sponsorType === 'fo') return 'family_office';
+    if (sponsorType === 'esop' || payload.esopBuyer === true || payload.esop_buyer === true) return 'esop_buyer';
+    return 'healthy_buy_side';
+  }
+
+  // Raise sub-journey: distinguish stage if signaled.
+  if (journey === 'raise') {
+    const stage = textValue(payload.stage) || textValue(payload.raiseStage);
+    const instrument = textValue(payload.instrument);
+    if (stage === 'seed' || stage === 'pre_seed') return 'early_stage_raise';
+    if (stage === 'series_a' || stage === 'series_b' || stage === 'growth') return 'growth_raise';
+    if (stage === 'debt' || instrument === 'abl' || instrument === 'mezz' || instrument === 'term_loan') return 'debt_raise';
+    if (stage === 'secondary' || stage === 'continuation') return 'secondary_raise';
+    return 'capital_raise';
+  }
+
+  // PMI sub-journey
+  if (journey === 'pmi') {
+    const pmiStage = textValue(payload.pmiStage) || textValue(payload.stage);
+    if (pmiStage === 'day_0' || pmiStage === 'pmi0') return 'pmi_day_0';
+    if (pmiStage === 'stabilization' || pmiStage === 'pmi1') return 'pmi_stabilization';
+    if (pmiStage === 'assessment' || pmiStage === 'pmi2') return 'pmi_assessment';
+    if (pmiStage === 'optimization' || pmiStage === 'pmi3') return 'pmi_optimization';
+    return 'post_close_pmi';
+  }
+
   return 'unknown';
 }
 
@@ -4815,10 +5099,102 @@ function nextGateForLevel(level: DealReadinessLevel, classification: DefinitiveC
   }
 }
 
+/**
+ * Distress / capital-structure / real-estate signal aliases.
+ *
+ * The substrate's overlay engine expects camelCase field names (cashRunwayDays,
+ * securedDebtTradingPriceCents, etc.), but external agents naturally send snake_case
+ * and many use structured signal names (lme_signal, reit_compliance_breach). Without
+ * alias coverage, perfectly clear distress signals get ignored and the substrate
+ * misroutes a distressed deal to a healthy-buy-side model stack — a methodology-
+ * routing failure with regulatory consequences.
+ *
+ * Each canonical key maps to a list of accepted aliases. First match wins; the
+ * canonical key is preserved so the overlay engine sees what it expects.
+ */
+const SIGNAL_FIELD_ALIASES: Record<string, string[]> = {
+  cashRunwayDays: ['cash_runway_days', 'runway_days', 'cashRunway', 'liquidity_runway_days'],
+  fccr: ['fixed_charge_coverage_ratio', 'fixedChargeCoverageRatio', 'fcc_ratio'],
+  securedDebtTradingPriceCents: [
+    'secured_debt_trading_price_cents', 'securedDebtPriceCents', 'secured_debt_price_cents',
+    'secured_debt_trading_price', 'debt_trading_price_cents', 'first_lien_trading_price_cents',
+  ],
+  maintenanceCovenantBreachWithinQuarters: [
+    'maintenance_covenant_breach_within_quarters', 'covenant_breach_within_quarters',
+    'covenant_breach_projected_within_quarters', 'maintenance_covenant_breach_quarters',
+    'covenant_breach_quarters',
+  ],
+  realEstatePercentOfEv: [
+    'real_estate_percent_of_ev', 'real_estate_pct_of_ev', 're_percent_of_ev', 're_pct_of_ev',
+    'realEstatePctOfEv', 'realEstatePctEv',
+  ],
+  digitalAssetsPercentOfEv: [
+    'digital_assets_percent_of_ev', 'digital_asset_percent_of_ev',
+    'digital_assets_pct_of_ev', 'crypto_percent_of_ev', 'digitalAssetsPctOfEv',
+  ],
+  solvencyProngFailed: ['solvency_prong_failed', 'solvency_failure', 'three_prong_solvency_failed'],
+  bankruptcyFilingPending: [
+    'bankruptcy_filing_pending', 'bankruptcy_pending', 'chapter_11_pending', 'chapter_7_pending',
+    'filing_pending',
+  ],
+  rsaInMarket: ['rsa_in_market', 'restructuring_support_agreement', 'rsa_announced'],
+  forbearanceExecuted: ['forbearance_executed', 'forbearance_agreement_signed', 'forbearance_in_place'],
+  capitalStructureAction: ['capital_structure_action', 'cap_structure_action', 'capital_action_announced'],
+  liabilityManagementExercise: [
+    'liability_management_exercise', 'lme', 'lme_signal', 'lme_announced',
+    'liability_management_announced',
+  ],
+  recapitalization: ['recap_announced', 'recap_in_market', 'recapitalization_announced'],
+  exchangeOffer: ['exchange_offer', 'exchange_offer_announced', 'distressed_debt_exchange'],
+  covenantAmendment: [
+    'covenant_amendment', 'covenant_amendment_announced', 'covenant_breach_signaled',
+    'covenant_waiver',
+  ],
+};
+
+/**
+ * Some agents pass a single descriptive signal value that implies multiple substrate flags.
+ * E.g. `lme_signal: "exchange_offer_announced"` should set both `liabilityManagementExercise: true`
+ * AND `exchangeOffer: true`. Map structured values here.
+ */
+const STRUCTURED_SIGNAL_MAPPERS: Array<{
+  fields: string[];
+  match: (value: unknown) => Record<string, unknown> | null;
+}> = [
+  {
+    fields: ['lme_signal', 'lmeSignal', 'liability_management_signal'],
+    match: (value) => {
+      if (typeof value !== 'string') return null;
+      const v = value.toLowerCase();
+      const out: Record<string, unknown> = { liabilityManagementExercise: true };
+      if (v.includes('exchange')) out.exchangeOffer = true;
+      if (v.includes('uptier') || v.includes('drop_down') || v.includes('dropdown') || v.includes('double_dip')) {
+        out.capitalStructureAction = true;
+      }
+      return out;
+    },
+  },
+  {
+    fields: ['distress_signal', 'distressSignal'],
+    match: (value) => {
+      if (typeof value !== 'string') return null;
+      const v = value.toLowerCase();
+      if (v.includes('chapter_11') || v.includes('chapter_7') || v.includes('363')) {
+        return { bankruptcyFilingPending: true };
+      }
+      if (v.includes('forbearance')) return { forbearanceExecuted: true };
+      if (v.includes('rsa')) return { rsaInMarket: true };
+      return null;
+    },
+  },
+];
+
 function normalizeSignals(payload: Record<string, any>): DefinitiveStackSignals | null {
   const source = payload.signals && typeof payload.signals === 'object'
     ? { ...(payload.signals as Record<string, unknown>) }
     : {};
+
+  // 1. Pull top-level canonical keys onto the signals source (existing behavior).
   for (const key of [
     'cashRunwayDays',
     'fccr',
@@ -4838,6 +5214,37 @@ function normalizeSignals(payload: Record<string, any>): DefinitiveStackSignals 
   ]) {
     if (payload[key] != null && payload[key] !== '') source[key] = payload[key];
   }
+
+  // 2. Apply alias normalization — pull snake_case / variant names onto canonical
+  //    keys. Look at both the top-level payload AND the nested signals object.
+  for (const [canonical, aliases] of Object.entries(SIGNAL_FIELD_ALIASES)) {
+    if (source[canonical] != null && source[canonical] !== '') continue;
+    for (const alias of aliases) {
+      const fromTop = payload[alias];
+      const fromNested = (payload.signals as Record<string, unknown> | undefined)?.[alias];
+      const candidate = fromTop != null && fromTop !== '' ? fromTop : fromNested;
+      if (candidate != null && candidate !== '') {
+        source[canonical] = candidate;
+        break;
+      }
+    }
+  }
+
+  // 3. Apply structured signal mappers (lme_signal → multiple flags).
+  for (const mapper of STRUCTURED_SIGNAL_MAPPERS) {
+    for (const field of mapper.fields) {
+      const value = payload[field] ?? (payload.signals as Record<string, unknown> | undefined)?.[field];
+      if (value == null) continue;
+      const mapped = mapper.match(value);
+      if (mapped) {
+        for (const [k, v] of Object.entries(mapped)) {
+          if (source[k] == null) source[k] = v;
+        }
+        break;
+      }
+    }
+  }
+
   return normalizeDefinitiveStackSignals(source);
 }
 
@@ -4876,11 +5283,40 @@ function uniqueStrings(values: string[]): string[] {
   return [...new Set(values.filter(Boolean))];
 }
 
+/**
+ * Field aliases that external agents commonly use. Substrate normalizes these to
+ * the canonical key so the classifier doesn't miss obvious signals.
+ *
+ * Pattern: realistic agent payloads (especially from buy-side / sell-side agents)
+ * use POV-prefixed names like `target_industry`, `seller_jurisdiction`, etc.
+ * The substrate's classifier only looks at canonical names (`industry`, `jurisdiction`),
+ * so without alias normalization it would silently classify common payloads as `unknown`.
+ *
+ * The original keys are preserved on the payload too — only the canonical field
+ * is added if missing. Auditors can still see exactly what the agent sent.
+ */
+const PAYLOAD_FIELD_ALIASES: Record<string, string[]> = {
+  industry: ['target_industry', 'buyer_industry', 'seller_industry', 'targetIndustry', 'sectorIndustry'],
+  jurisdiction: ['target_jurisdiction', 'buyer_jurisdiction', 'seller_jurisdiction', 'targetJurisdiction', 'state'],
+  journey: ['transaction_type', 'transactionType', 'deal_type_journey'],
+  naics: ['target_naics', 'targetNaics', 'naics_code'],
+};
+
 function normalizePayload(value: unknown): Record<string, any> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
   const payload = { ...(value as Record<string, any>) };
   delete payload.envelope;
   delete payload.idempotencyKey;
+  // Apply alias normalization — add canonical key from first matching alias if canonical is absent
+  for (const [canonical, aliases] of Object.entries(PAYLOAD_FIELD_ALIASES)) {
+    if (payload[canonical] !== undefined && payload[canonical] !== null && payload[canonical] !== '') continue;
+    for (const alias of aliases) {
+      if (payload[alias] !== undefined && payload[alias] !== null && payload[alias] !== '') {
+        payload[canonical] = payload[alias];
+        break;
+      }
+    }
+  }
   return payload;
 }
 

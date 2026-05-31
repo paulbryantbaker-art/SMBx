@@ -1,0 +1,44 @@
+{
+  "id": "PC-PARTIAL-BUY-023",
+  "category": "PARTIAL",
+  "description": "Partial payload: L7 buy: rep & warranty insurance intent. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "business services",
+    "target_revenue_cents": 95000000000,
+    "target_ebitda_cents": 14000000000,
+    "target_jurisdiction": "US-IL",
+    "rwi_intent": true,
+    "purchase_price_range": "900M-1.2B"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L6",
+      "industry": "business services",
+      "jurisdiction": "US-IL"
+    },
+    "missingFields": [
+      "buyer_role",
+      "sponsor_equity_cents",
+      "rwi_retention_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L7",
+    "partial",
+    "rwi"
+  ]
+}

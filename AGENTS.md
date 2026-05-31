@@ -13,7 +13,7 @@ AI-powered deal intelligence platform for business acquisitions from $300K to me
 - wouter for client routing
 - PostgreSQL via raw postgres-js (no ORM)
 - Codex API (primary), Google Gemini (secondary), OpenAI (tertiary)
-- Stripe monthly subscriptions: Free / $99 Solo / $249 Pro / $749 Team / $3,000+ Enterprise. Legacy $79 / $199 / $499 / $2,500+ references are early-access or annual-equivalent only.
+- Stripe monthly subscriptions: Free / $99 Solo / $249 Pro / $749 Team / $3,000+ Enterprise. Canonical record: `SMBX_PRICING_LOCKED.md`. Any older ladder ($79 / $199 / $499 / $2,500) is stale — point at the locked file and update.
 - JWT authentication (no sessions, no passport — sessions broke on Railway)
 - Railway deployment (GitHub push → auto-deploy, Dockerfile with Chromium)
 - Auto-migrations on server startup (server/index.ts runs all SQL in server/migrations/)
@@ -23,7 +23,7 @@ AI-powered deal intelligence platform for business acquisitions from $300K to me
 - Premium PDF export via Puppeteer (headless Chromium) + Chart.js
 
 ## Critical Rules — Read These First
-1. **MONTHLY SUBSCRIPTIONS.** Free (unlimited chat + 1 deliverable) / $99 Solo / $249 Pro / $749 Team / $3,000+ Enterprise. Legacy $79 / $199 / $499 / $2,500+ references are early-access or annual-equivalent only. No per-deal fees. No wallet.
+1. **MONTHLY SUBSCRIPTIONS (LOCKED 2026-05-27).** Free (unlimited chat + 1 deliverable) / $99 Solo / $249 Pro / $749 Team / $3,000+ Enterprise. Canonical record: `SMBX_PRICING_LOCKED.md`. Any older table showing $79 / $199 / $499 / $2,500 is stale — point at the locked file and update. No per-deal fees. No wallet. No success/referral/contingent compensation.
 2. **WALLET IS DEAD.** walletService, paywallService, dealExecutionFee, platformFeeService deleted. Never recreate.
 3. **FREE TIER.** Unlimited conversation. ONE free deliverable per user. Paywall triggers after first free deliverable, NOT at a fixed gate.
 4. **V6App.tsx is the ONLY current app shell.** Never create parallel layouts. All UI changes go through the V6 shell/components.

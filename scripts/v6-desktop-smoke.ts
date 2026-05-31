@@ -2,9 +2,10 @@
 /**
  * V6 desktop smoke test.
  *
- * Catches the desktop glass/chrome regression where the app disabled shadows
- * and backdrop filters during canvas scroll, causing the shading to disappear
- * while scrolling and flicker back after the scroll settled.
+ * Verifies the flat CD "Ramp" app shell mounts and stays stable: the canvas
+ * scrolls, flat card chrome (hairline borders + soft shadows) renders and does
+ * not get toggled/stripped during scroll (the old bug disabled chrome via an
+ * `is-scrolling` class), and there's no horizontal overflow or runtime errors.
  *
  * Usage:
  *   V6_DESKTOP_BASE_URL=http://localhost:5173 npm run test:v6-desktop-smoke
@@ -45,6 +46,12 @@ try {
     }
   });
 
+  // The app is behind auth (logged-out "/" is the marketing site), so sign in via
+  // the dev account before exercising the app surfaces.
+  await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded', timeout: 20_000 });
+  await page.getByText('Sign in as Paul').click();
+  await page.waitForTimeout(1800);
+
   await page.goto(`${BASE_URL}/#mode=today&tab=today-root`, { waitUntil: 'domcontentloaded', timeout: 20_000 });
   await page.waitForSelector('.v6-root', { timeout: 10_000 });
   await page.waitForSelector('.v6-canvas-scroll', { timeout: 10_000 });
@@ -57,7 +64,7 @@ try {
     assert(!state.horizontalOverflow, overflowMessage(state));
   });
 
-  await test('desktop chrome keeps glass and shadows before scroll', async () => {
+  await test('desktop chrome renders flat card surfaces before scroll', async () => {
     const state = await readDesktopState(page);
     assertStableChrome(state, 'before scroll');
   });
@@ -137,20 +144,26 @@ async function readDesktopState(page: any) {
       };
     });
 
-    const visibleGlassSurfaces = Array.from(document.querySelectorAll('body *')).map(element => {
+    // Flat CD "Ramp" chrome = card/table/topbar surfaces with a hairline border
+    // and/or a soft shadow (the watercolor/glass + backdrop-filter look is retired).
+    const chromeSurfaces = Array.from(document.querySelectorAll('body *')).map(element => {
       const rect = element.getBoundingClientRect();
-      if (rect.width <= 0 || rect.height <= 0) return null;
+      if (rect.width < 80 || rect.height < 24) return null;
       if (rect.bottom < 0 || rect.top > window.innerHeight) return null;
       const style = window.getComputedStyle(element);
-      const backdropFilter = style.backdropFilter || (style as any).webkitBackdropFilter || 'none';
       const boxShadow = style.boxShadow;
-      if (backdropFilter === 'none' || boxShadow === 'none') return null;
+      const hasShadow = boxShadow !== 'none' && boxShadow !== '';
+      const borderW = parseFloat(style.borderTopWidth) || 0;
+      const borderColor = style.borderTopColor || '';
+      const hasBorder = borderW >= 1 && style.borderTopStyle !== 'none'
+        && borderColor !== 'transparent' && !borderColor.replace(/\s/g, '').endsWith(',0)');
+      if (!hasShadow && !hasBorder) return null;
       return {
         tag: element.tagName,
         className: String((element as HTMLElement).className || '').slice(0, 80),
         text: (element.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 60),
-        backdropFilter,
-        boxShadow: boxShadow.slice(0, 120),
+        boxShadow: hasShadow ? boxShadow.slice(0, 120) : 'none',
+        border: hasBorder ? `${style.borderTopWidth} ${style.borderTopStyle}` : 'none',
         width: Math.round(rect.width),
         height: Math.round(rect.height),
         top: Math.round(rect.top),
@@ -171,14 +184,14 @@ async function readDesktopState(page: any) {
         scrollHeight: canvas.scrollHeight,
         clientHeight: canvas.clientHeight,
       } : null,
-      visibleGlassSurfaces,
+      chromeSurfaces,
       overflowing,
     };
   });
 }
 
 function assertStableChrome(state: any, phase: string) {
-  assert(state.visibleGlassSurfaces.length > 0, `${phase}: no visible glass/shadow surfaces found`);
+  assert(state.chromeSurfaces.length > 0, `${phase}: no flat chrome surfaces (card border/shadow) found`);
 }
 
 function isExpectedLocalApiNoise(message: string) {

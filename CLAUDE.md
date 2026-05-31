@@ -23,7 +23,7 @@ AI-powered deal intelligence platform for business acquisitions from $300K to me
 - Premium PDF export via Puppeteer (headless Chromium) + Chart.js
 
 ## Critical Rules — Read These First
-1. **MONTHLY SUBSCRIPTIONS.** Free (unlimited chat + 1 deliverable) / $99 Solo / $249 Pro / $749 Team / $3,000+ Enterprise. Legacy $79 / $199 / $499 / $2,500+ references are early-access or annual-equivalent only. No per-deal fees. No wallet.
+1. **MONTHLY SUBSCRIPTIONS (LOCKED 2026-05-27).** Free (unlimited chat + 1 deliverable) / $99 Solo / $249 Pro / $749 Team / $3,000+ Enterprise. Canonical record: `SMBX_PRICING_LOCKED.md`. Any older table showing $79 / $199 / $499 / $2,500 is stale — point at the locked file and update. No per-deal fees. No wallet. No success/referral/contingent compensation.
 2. **WALLET IS DEAD.** walletService, paywallService, dealExecutionFee, platformFeeService deleted. Never recreate.
 3. **FREE TIER.** Unlimited conversation. ONE free deliverable per user. Paywall triggers after first free deliverable, NOT at a fixed gate.
 4. **V6App.tsx is the ONLY current app shell.** Never create parallel layouts. All UI changes go through the V6 shell/components.
@@ -82,7 +82,8 @@ Valuation Explorer, LBO, SBA Financing, DCF, Tax Impact, Cap Table, Sensitivity 
 ## Reference Documents
 - **YULIA_AGENCY_SPEC.md** — Product/architecture doctrine for Yulia as the agentic operating layer: advisor posture without licensed-advisor boundary crossing, permission levels, surface contracts, data-room/file architecture, and implementation priorities.
 - **YULIA_AGENCY_IMPLEMENTATION_PLAN.md** — Practical wiring plan for context packs, prompt governance, governed tool execution, staged approvals, surface actions, Today, Files, and Data Room.
-- **THE_LINE_POLICY.md** — Hard operating policy for pricing, artifacts, Yulia refusals, marketing language, and drift triggers around securities, UPL, tax/accounting/appraisal, brokerage, and transaction-compensation boundaries.
+- **SMBX_PRICING_LOCKED.md** — Locked canonical pricing record (2026-05-27): Free / $99 Solo / $249 Pro / $749 Team / $3,000+ Enterprise. If any other doc or code constant disagrees, this file wins.
+- **THE_LINE_POLICY.md** — Hard operating policy for pricing, artifacts, Yulia refusals, marketing language, and drift triggers around securities, UPL, tax/accounting/appraisal, brokerage, and transaction-compensation boundaries. Now includes statutory safe-harbor citations (Lowe v. SEC, Tex. Gov't Code § 81.101(c), N.C. Gen. Stat. § 84-2.2) and the "Never Even Accused" four-layer test.
 - **DEFINITIVE v1.0** = `methodology/DEFINITIVE_BUILD_PLAN.md` + V19 baseline docs below.
   - DEFINITIVE is the current agent-access/spec/substrate build target as of May 20, 2026.
   - Doctrine: smbX is the M&A diligence substrate; Yulia is the human reference surface.

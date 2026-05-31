@@ -1,0 +1,51 @@
+{
+  "category": "RICH",
+  "description": "L6 banker-led broad auction of industrial-gases co — full process + multi-year context.",
+  "payload": {
+    "journey": "sell",
+    "sellerRole": "banker",
+    "industry": "industrial gases — specialty",
+    "naics": "325120",
+    "jurisdiction": "US-DE",
+    "league": "L6",
+    "ttmRevenueCents": 18500000000,
+    "adjustedEbitdaCents": 3200000000,
+    "multiYearPnlPresent": true,
+    "yearsOfHistory": 5,
+    "askingPriceCents": 24000000000,
+    "bankerProcess": "broad_auction",
+    "buyersInvited": 120,
+    "taxClassification": "c_corp",
+    "stage": "loi_evaluation"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "banker_led",
+      "league": "L6",
+      "jurisdiction": "US-DE",
+      "industry": "industrial gases — specialty",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L6",
+    "rich",
+    "banker-led"
+  ],
+  "id": "PC-RICH-L6-SELL-001"
+}

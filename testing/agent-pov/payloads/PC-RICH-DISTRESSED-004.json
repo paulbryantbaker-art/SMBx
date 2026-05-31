@@ -1,0 +1,57 @@
+{
+  "category": "RICH",
+  "description": "L6 distressed sell-side wind-down — owner-rep representing creditors in 363 sale process.",
+  "payload": {
+    "journey": "sell",
+    "sellerRole": "owner_rep",
+    "industry": "commercial real-estate services",
+    "naics": "531390",
+    "jurisdiction": "US-FL",
+    "league": "L6",
+    "ttmRevenueCents": 22000000000,
+    "adjustedEbitdaCents": -150000000,
+    "askingPriceCents": 4400000000,
+    "dealStructure": "asset_purchase_363",
+    "taxClassification": "c_corp",
+    "signals": {
+      "cashRunwayDays": 30,
+      "fccr": 0.5,
+      "securedDebtTradingPriceCents": 45,
+      "maintenanceCovenantBreachWithinQuarters": 0,
+      "bankruptcyFilingPending": true,
+      "solvencyProngFailed": true
+    },
+    "bankruptcyChapter": "11",
+    "stage": "pre_filing"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "distressed_restructuring",
+      "league": "L6",
+      "jurisdiction": "US-FL",
+      "industry": "commercial real-estate services",
+      "distressPosture": "full_distress",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "rich",
+    "distressed",
+    "L6",
+    "sell"
+  ],
+  "id": "PC-RICH-DISTRESSED-004"
+}

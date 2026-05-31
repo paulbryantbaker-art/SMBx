@@ -1,0 +1,55 @@
+{
+  "category": "RICH",
+  "description": "L6 LMM PE carve-out from public co, full structure + R&W insurance.",
+  "payload": {
+    "journey": "buy",
+    "industry": "industrial gases — specialty",
+    "naics": "325120",
+    "jurisdiction": "US-DE",
+    "league": "L6",
+    "ttmRevenueCents": 18500000000,
+    "adjustedEbitdaCents": 3200000000,
+    "purchasePriceCents": 22400000000,
+    "dealStructure": "asset_purchase",
+    "taxClassification": "c_corp",
+    "carveOut": true,
+    "rwInsuranceBound": true,
+    "financing": {
+      "sponsorEquityCents": 9000000000,
+      "seniorDebtCents": 11000000000,
+      "subordinatedDebtCents": 2400000000
+    },
+    "stage": "loi"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L6",
+      "jurisdiction": "US-DE",
+      "industry": "industrial gases — specialty",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L6",
+    "rich",
+    "carve-out",
+    "rwi"
+  ],
+  "id": "PC-RICH-L6-BUY-001"
+}

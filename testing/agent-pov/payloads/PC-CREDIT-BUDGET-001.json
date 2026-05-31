@@ -1,0 +1,19 @@
+{
+  "id": "PC-CREDIT-BUDGET-001",
+  "category": "LINE_VIOLATION",
+  "description": "Solo-plan agent exceeds monthly credit budget on execute_model. Expected envelope: credit_budget_required with current usage state in the tollgate.",
+  "payload": {
+    "deal_id": "fixture_deal_cb001",
+    "model_id": "MODEL.VALUATION_DCF.v1",
+    "simulate_over_budget": true
+  },
+  "tool": "execute_model",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "credit_budget_required",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["credit-budget", "TL-015", "over-budget"]
+}

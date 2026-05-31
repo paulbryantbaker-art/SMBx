@@ -1,0 +1,40 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "journey='sell' explicit but target_purchase_price and financing.sponsorEquity provided — explicit SELL conflicts with buy-side fields.",
+  "payload": {
+    "journey": "sell",
+    "acquirerRole": "principal",
+    "sponsorType": "financial_sponsor",
+    "purchasePriceCents": 2500000000,
+    "financing": {
+      "sponsorEquityCents": 1600000000,
+      "seniorDebtCents": 800000000
+    },
+    "industry": "managed services",
+    "jurisdiction": "US-DE"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "sell",
+      "jurisdiction": "US-DE",
+      "industry": "managed services"
+    },
+    "missingFields": [
+      "explicit_journey_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "journey-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-JOURNEY-002"
+}

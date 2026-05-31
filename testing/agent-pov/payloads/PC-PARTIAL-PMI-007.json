@@ -1,0 +1,44 @@
+{
+  "id": "PC-PARTIAL-PMI-007",
+  "category": "PARTIAL",
+  "description": "Partial payload: PMI multi-deal integration. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "pmi",
+    "stage": "optimization",
+    "integration_type": "multi_deal",
+    "acquired_entities": [
+      "add_on_1",
+      "add_on_2",
+      "add_on_3"
+    ],
+    "baseline_ebitda_cents": 5500000000,
+    "industry": "home services rollup"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "pmi",
+      "subJourney": "pmi_optimization",
+      "industry": "home services rollup"
+    },
+    "missingFields": [
+      "integration_sequence",
+      "shared_services_design",
+      "synergy_target_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "pmi",
+    "multi-deal",
+    "rollup",
+    "partial"
+  ]
+}

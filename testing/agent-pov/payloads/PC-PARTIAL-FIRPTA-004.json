@@ -1,0 +1,44 @@
+{
+  "id": "PC-PARTIAL-FIRPTA-004",
+  "category": "PARTIAL",
+  "description": "Partial payload: FIRPTA + USRPHC determination: operating co with significant US RE. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "manufacturing with owned facilities",
+    "target_jurisdiction": "US-MI",
+    "foreign_seller": true,
+    "total_assets_cents": 30000000000,
+    "us_real_property_assets_cents": 18000000000,
+    "taxClassification": "foreign_entity"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "industry": "manufacturing with owned facilities",
+      "jurisdiction": "US-MI",
+      "taxClassification": "foreign_entity"
+    },
+    "missingFields": [
+      "usrphc_test_period_assessed",
+      "amount_realized_cents",
+      "withholding_amount_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "firpta",
+    "buy",
+    "partial",
+    "foreign-seller",
+    "usrphc"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "PC-GARBAGE-020",
+  "category": "GARBAGE",
+  "description": "Junk values: random Unicode noise placed where the ebitda field must be a numeric (cents) or coerceable money string. Substrate must reject with structured 400.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "ζωγραφ νοπζ",
+    "target_jurisdiction": "𓂀𓁹𓊝𓏏",
+    "ebitda": "ʞuǝʇʇǝp"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "junk-string", "unicode-noise"]
+}

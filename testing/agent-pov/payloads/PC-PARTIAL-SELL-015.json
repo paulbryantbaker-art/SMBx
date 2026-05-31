@@ -1,0 +1,44 @@
+{
+  "id": "PC-PARTIAL-SELL-015",
+  "category": "PARTIAL",
+  "description": "Partial payload: L5 sell: specialty distributor banker-led. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "specialty distributor",
+    "jurisdiction": "US-PA",
+    "revenue_cents": 12000000000,
+    "ebitda_cents": 1100000000,
+    "seller_role": "banker_led",
+    "asking_price_cents": 8500000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "banker_led",
+      "league": "L4",
+      "industry": "specialty distributor",
+      "jurisdiction": "US-PA"
+    },
+    "missingFields": [
+      "customer_concentration",
+      "multi_year_pnl_present",
+      "auction_round"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L5",
+    "partial",
+    "banker-led"
+  ]
+}

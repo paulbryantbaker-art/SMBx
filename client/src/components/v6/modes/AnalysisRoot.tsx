@@ -1,10 +1,10 @@
-import { useState, type CSSProperties } from "react";
-import { V6Section } from "../Section";
+import { useState } from "react";
 import { V6Icon } from "../icons";
 import { V6DocStatus, type DocStatusKind } from "./cards";
 import type { IconName, OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
-import { useV6WorkspaceData } from "../../../hooks/useV6WorkspaceData";
+import { useV6WorkspaceData, type WorkspaceDeal } from "../../../hooks/useV6WorkspaceData";
+import { GATE_MAP } from "@shared/gateRegistry";
 import type { ModelPreference } from "../../../lib/modelPreference";
 import {
   analysisActionForTool,
@@ -16,8 +16,6 @@ import {
 } from "../../../lib/v6ActionContracts";
 import type { SurfaceActionId } from "../../../lib/v6SurfaceActions";
 
-type ToneKey = "primary" | "secondary" | "tertiary" | "pursue" | "watch";
-
 interface RecentRun { id: string; title: string; deal: string; updated: string; status: DocStatusKind }
 
 const RECENTS: RecentRun[] = [
@@ -27,37 +25,43 @@ const RECENTS: RecentRun[] = [
   { id: "an-buyer",  title: "Big Fake Deal · Buyer fit",  deal: "Big Fake Deal · sample", updated: "Mar 24", status: "live"  },
 ];
 
-interface Tool { id: string; name: string; sub: string; icon: IconName; tone: ToneKey; actionId?: SurfaceActionId }
+interface Tool { id: string; name: string; sub: string; icon: IconName; actionId?: SurfaceActionId }
 
 const TOOLS: Tool[] = [
-  { id: "tool-recast",      name: "Recast P&L",       sub: "Find honest add-backs",          icon: "chart", tone: "tertiary", actionId: "run_recast_analysis" },
-  { id: "tool-qoe",         name: "QoE",              sub: "Earnings quality + proof",       icon: "search",tone: "primary",  actionId: "run_qoe_analysis" },
-  { id: "tool-comps",       name: "Comps",            sub: "Public + private benchmarks",    icon: "chart", tone: "primary",  actionId: "run_comps_analysis" },
-  { id: "tool-val",         name: "Valuation model",  sub: "Multiples + pricing bridge",     icon: "chart", tone: "pursue",   actionId: "run_valuation_analysis" },
-  { id: "tool-dcf",         name: "DCF",              sub: "Growth, WACC, terminal value",   icon: "chart", tone: "secondary",actionId: "run_dcf_analysis" },
-  { id: "tool-lbo",         name: "LBO",              sub: "Leverage, MOIC, IRR",            icon: "chart", tone: "watch",    actionId: "run_lbo_analysis" },
-  { id: "tool-sensitivity", name: "Sensitivity",      sub: "Scenario table with sliders",    icon: "chart", tone: "tertiary", actionId: "run_sensitivity_analysis" },
-  { id: "tool-tax",         name: "Tax impact",       sub: "Allocation + sign-off map",      icon: "deal",  tone: "primary",  actionId: "run_tax_impact_analysis" },
-  { id: "tool-earnout",     name: "Earnout",          sub: "Contingent value scenarios",     icon: "deal",  tone: "watch",    actionId: "run_earnout_analysis" },
-  { id: "tool-buyer",       name: "Buyer fit",        sub: "Score against your thesis",      icon: "deal",  tone: "secondary",actionId: "run_buyer_fit_analysis" },
-  { id: "tool-sba",         name: "SBA structure",    sub: "Model leverage scenarios",       icon: "chart", tone: "watch",    actionId: "run_sba_analysis" },
-  { id: "tool-compare",     name: "Compare deals",    sub: "Side-by-side next-action read",  icon: "deal",  tone: "tertiary", actionId: "compare_deals" },
+  { id: "tool-recast",      name: "Recast P&L",       sub: "Find honest add-backs",          icon: "chart",  actionId: "run_recast_analysis" },
+  { id: "tool-qoe",         name: "QoE",              sub: "Earnings quality + proof",       icon: "search", actionId: "run_qoe_analysis" },
+  { id: "tool-comps",       name: "Comps",            sub: "Public + private benchmarks",    icon: "chart",  actionId: "run_comps_analysis" },
+  { id: "tool-val",         name: "Valuation model",  sub: "Multiples + pricing bridge",     icon: "chart",  actionId: "run_valuation_analysis" },
+  { id: "tool-dcf",         name: "DCF",              sub: "Growth, WACC, terminal value",   icon: "chart",  actionId: "run_dcf_analysis" },
+  { id: "tool-lbo",         name: "LBO",              sub: "Leverage, MOIC, IRR",            icon: "chart",  actionId: "run_lbo_analysis" },
+  { id: "tool-sensitivity", name: "Sensitivity",      sub: "Scenario table with sliders",    icon: "chart",  actionId: "run_sensitivity_analysis" },
+  { id: "tool-tax",         name: "Tax impact",       sub: "Allocation + sign-off map",      icon: "deal",   actionId: "run_tax_impact_analysis" },
+  { id: "tool-earnout",     name: "Earnout",          sub: "Contingent value scenarios",     icon: "deal",   actionId: "run_earnout_analysis" },
+  { id: "tool-buyer",       name: "Buyer fit",        sub: "Score against your thesis",      icon: "deal",   actionId: "run_buyer_fit_analysis" },
+  { id: "tool-sba",         name: "SBA structure",    sub: "Model leverage scenarios",       icon: "chart",  actionId: "run_sba_analysis" },
+  { id: "tool-wc",          name: "Working capital",  sub: "Peg, true-up, and target NWC",   icon: "chart" },
+  { id: "tool-captable",    name: "Cap table",        sub: "Dilution + waterfall scenarios", icon: "deal" },
+  { id: "tool-covenant",    name: "Covenant check",   sub: "Compliance + headroom over time", icon: "chart" },
+  { id: "tool-compare",     name: "Compare deals",    sub: "Side-by-side next-action read",  icon: "deal",   actionId: "compare_deals" },
 ];
 
-const TONE_BG: Record<ToneKey, string> = {
-  primary:   "var(--m-primary-container)",
-  secondary: "var(--m-secondary-container)",
-  tertiary:  "var(--m-tertiary-container)",
-  pursue:    "var(--m-pursue-container)",
-  watch:     "var(--m-watch-container)",
-};
-const TONE_FG: Record<ToneKey, string> = {
-  primary:   "var(--m-on-primary-container)",
-  secondary: "var(--m-on-secondary-container)",
-  tertiary:  "var(--m-on-tertiary-container)",
-  pursue:    "var(--m-pursue-on-cont)",
-  watch:     "#3F2E00",
-};
+const TOOLS_BY_ID: Record<string, Tool> = Object.fromEntries(TOOLS.map(t => [t.id, t]));
+
+// Portfolio-aware recommendation: a deal's gate implies which analyses move it
+// forward (methodology gate → required models). Deterministic first pass; the
+// "Ask Yulia to recommend" button hands portfolio-wide judgment to the model.
+function recommendedToolIdsForGate(gate: string): string[] {
+  const stage = gate.match(/(\d+)\s*$/)?.[1] ?? "";
+  switch (stage) {
+    case "0":
+    case "1": return ["tool-buyer", "tool-comps", "tool-val"];
+    case "2": return ["tool-val", "tool-comps", "tool-dcf", "tool-recast"];
+    case "3": return ["tool-qoe", "tool-recast", "tool-wc", "tool-sensitivity"];
+    case "4": return ["tool-lbo", "tool-sba", "tool-tax", "tool-captable"];
+    case "5": return ["tool-covenant", "tool-tax", "tool-compare"];
+    default:  return ["tool-val", "tool-qoe", "tool-wc"];
+  }
+}
 
 export function V6AnalysisRoot({
   openTab,
@@ -75,8 +79,9 @@ export function V6AnalysisRoot({
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionNote, setActionNote] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
 
-  const runAnalysisAction = async (tool?: Tool) => {
+  const runAnalysisAction = async (tool?: Tool, dealOverride?: WorkspaceDeal) => {
     setActionError(null);
     setActionNote(null);
 
@@ -111,7 +116,7 @@ export function V6AnalysisRoot({
       return;
     }
 
-    const target = deal;
+    const target = dealOverride ?? deal;
     if (tool?.actionId && target) {
       setBusyAction(tool.id);
       try {
@@ -162,15 +167,22 @@ export function V6AnalysisRoot({
     }
   };
 
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? TOOLS.filter(t => t.name.toLowerCase().includes(q) || t.sub.toLowerCase().includes(q))
+    : TOOLS;
+
   return (
-    <div className="m-fade-up m-page-flow" style={A.page}>
-      <V6Section
-        eyebrow="ANALYSIS"
-        title="Run an analysis"
-        sub="Yulia handles the math. You read the result."
-        action={
+    <div className="wk-content m-fade-up" style={{ maxWidth: 1180, margin: "0 auto" }}>
+      <div className="pg-head">
+        <div>
+          <div className="pg-eyebrow">Analysis</div>
+          <div className="pg-title">Analyses</div>
+          <p className="pg-sub">Yulia recommends what to run next per deal and gate — or search the full methodology catalog.</p>
+        </div>
+        <div className="pg-actions">
           <button
-            className="m-btn filled"
+            className="wkbtn primary"
             aria-label="New analysis"
             type="button"
             onClick={() => { void runAnalysisAction(); }}
@@ -179,120 +191,163 @@ export function V6AnalysisRoot({
             <V6Icon name="plus" size={12} />
             <span style={{ marginLeft: 6 }}>{busyAction === "new-analysis" ? "Running..." : "New analysis"}</span>
           </button>
-        }
-      >
-        {(actionError || actionNote || workspace.error) && (
-          <div style={actionError || workspace.error ? A.actionError : A.actionNote}>
-            {actionError || workspace.error || actionNote}
+        </div>
+      </div>
+
+      {(actionError || actionNote || workspace.error) && (
+        <div className={actionError || workspace.error ? "wkerr" : "wknote"}>
+          {actionError || workspace.error || actionNote}
+        </div>
+      )}
+
+      {/* Portfolio-aware recommendations — each deal's gate maps to the next analyses */}
+      <div className="wksec">
+        <div className="pg-head" style={{ alignItems: "center" }}>
+          <div>
+            <div className="wksec-title" style={{ marginBottom: 2 }}>Recommended for your portfolio</div>
+            <p className="pg-sub" style={{ marginTop: 2 }}>Each deal's gate maps to the analyses that move it forward.</p>
+          </div>
+          <div className="pg-actions">
+            <button
+              className="wkbtn"
+              type="button"
+              onClick={() => onTalkToYulia?.("Look across my whole portfolio — for each deal, recommend the analyses and documents to run next based on its gate, status, and blockers, and tell me which deal to focus on first.")}
+            >
+              Ask Yulia to recommend
+            </button>
+          </div>
+        </div>
+        {workspace.deals.length > 0 ? (
+          <div className="wkgrid g2">
+            {workspace.deals.slice(0, 4).map(d => {
+              const gate = GATE_MAP[d.current_gate || ""];
+              const recs = recommendedToolIdsForGate(d.current_gate || "")
+                .map(id => TOOLS_BY_ID[id])
+                .filter(Boolean);
+              return (
+                <div key={d.id} className="wkcard">
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                    <div className="wkcard-title" style={{ fontSize: "0.98rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {d.business_name || `Deal #${d.id}`}
+                    </div>
+                    <span className="statpill diligence" style={{ flexShrink: 0 }}>
+                      <span className="d" />{(d.current_gate || "—").toUpperCase()}{gate ? ` · ${gate.name}` : ""}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 12 }}>
+                    {recs.map(t => (
+                      <button
+                        key={t.id}
+                        className="fchip"
+                        type="button"
+                        disabled={busyAction === t.id}
+                        onClick={() => { void runAnalysisAction(t, d); }}
+                      >
+                        {busyAction === t.id ? "Running…" : t.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="wkcard">
+            <div className="wkcard-title">No deals in your portfolio yet</div>
+            <div className="wkcard-sub">Add a deal and Yulia will recommend the analyses and documents that fit its stage. Meanwhile, browse the full catalog below.</div>
           </div>
         )}
-      </V6Section>
+      </div>
 
-      <V6Section eyebrow="TOOLS" title="What can I run">
-        <div className="m-flow-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
-          {TOOLS.map(t => (
-            <div
-              key={t.id}
-              className="m-card m-state tap"
-              onClick={() => { void runAnalysisAction(t); }}
-              role="button"
-              tabIndex={0}
-              aria-label={`Run ${t.name} — ${t.sub}`}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); void runAnalysisAction(t); } }}
-              style={{ padding: "18px 20px", cursor: "pointer" }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ ...A.toolIcon, background: TONE_BG[t.tone], color: TONE_FG[t.tone] }}>
-                  <V6Icon name={t.icon} size={16} />
+      {/* Searchable full catalog (show all) */}
+      <div className="wksec">
+        <div className="wksec-title">All analyses</div>
+        <div className="filterbar">
+          <label className="fsearch">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.7" /><path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
+            <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search analyses…" style={{ border: 0, background: "transparent", outline: "none", color: "var(--ink)", font: "inherit", width: "100%", minWidth: 120 }} />
+          </label>
+          <span className="grow" />
+          <span className="muted">{filtered.length} of {TOOLS.length}</span>
+        </div>
+        {filtered.length > 0 ? (
+          <div className="wkgrid g3" style={{ marginTop: 14 }}>
+            {filtered.map(t => (
+              <div
+                key={t.id}
+                className="wkcard tap"
+                onClick={() => { void runAnalysisAction(t); }}
+                role="button"
+                tabIndex={0}
+                aria-label={`Run ${t.name} — ${t.sub}`}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); void runAnalysisAction(t); } }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{
+                    width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                    display: "grid", placeItems: "center",
+                    background: "var(--surface-2)", color: "var(--ink-2)",
+                  }}>
+                    <V6Icon name={t.icon} size={16} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="wkcard-title" style={{ fontSize: "0.95rem" }}>
+                      {busyAction === t.id ? "Running..." : t.name}
+                    </div>
+                    <div className="wkcard-sub" style={{ fontSize: "0.82rem", marginTop: 2 }}>{t.sub}</div>
+                  </div>
+                  <span style={{ transform: "rotate(180deg)", display: "inline-flex", color: "var(--ink-3)" }} aria-hidden="true">
+                    <V6Icon name="back" size={11} />
+                  </span>
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={A.toolName}>{busyAction === t.id ? "Running..." : t.name}</div>
-                  <div style={A.toolSub}>{t.sub}</div>
-                </div>
-                <span style={{ transform: "rotate(180deg)", display: "inline-flex", color: "var(--m-on-surface-mid)" }} aria-hidden="true">
-                  <V6Icon name="back" size={11} />
-                </span>
               </div>
-            </div>
-          ))}
-        </div>
-      </V6Section>
+            ))}
+          </div>
+        ) : (
+          <div className="wkcard" style={{ marginTop: 14, textAlign: "center" }}>
+            <div className="wkcard-title">No analysis matches “{query}”</div>
+            <div className="wkcard-sub">Try a different term, or ask Yulia to run something custom.</div>
+          </div>
+        )}
+      </div>
 
-      <V6Section eyebrow="RECENT" title="Recently run" sub="Open any to keep iterating.">
-        <div className="m-card" style={{ overflow: "hidden", padding: 0 }}>
-          {RECENTS.map((r, i) => (
-            <div
-              key={r.id}
-              className="m-state"
-              onClick={() => openTab({ kind: "analysis", title: r.title, id: r.id })}
-              role="button"
-              tabIndex={0}
-              aria-label={`${r.title}, ${r.deal}`}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openTab({ kind: "analysis", title: r.title, id: r.id }); } }}
-              style={{
-                display: "grid", gridTemplateColumns: "32px 2fr 2fr 80px 80px",
-                alignItems: "center", gap: 16,
-                padding: "14px 18px",
-                borderBottom: i === RECENTS.length - 1 ? "none" : "1px solid var(--m-outline-var)",
-                cursor: "pointer",
-              }}
-            >
-              <V6Icon name="chart" size={14} />
-              <div style={A.recentTitle}>{r.title}</div>
-              <div style={A.recentDeal}>{r.deal}</div>
-              <V6DocStatus status={r.status} />
-              <div className="mono" style={A.recentDate}>{r.updated.toUpperCase()}</div>
-            </div>
-          ))}
+      <div className="wksec">
+        <div className="wksec-title">Recently run</div>
+        <p className="pg-sub" style={{ marginTop: 0, marginBottom: 14 }}>Open any to keep iterating.</p>
+        <table className="wktable">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Deal</th>
+              <th>Status</th>
+              <th className="r">Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            {RECENTS.map(r => (
+              <tr
+                key={r.id}
+                onClick={() => openTab({ kind: "analysis", title: r.title, id: r.id })}
+                role="button"
+                aria-label={`${r.title}, ${r.deal}`}
+              >
+                <td>
+                  <div className="cellname">
+                    <span className="logo"><V6Icon name="chart" size={14} /></span>
+                    <div className="nm">{r.title}</div>
+                  </div>
+                </td>
+                <td><span className="muted">{r.deal}</span></td>
+                <td><V6DocStatus status={r.status} /></td>
+                <td className="r muted">{r.updated.toUpperCase()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="tabfoot">
+          <span>{RECENTS.length} recent {RECENTS.length === 1 ? "analysis" : "analyses"}</span>
         </div>
-      </V6Section>
+      </div>
     </div>
   );
 }
-
-const A: Record<string, CSSProperties> = {
-  page: {
-    width: "min(100%, 1440px)",
-    maxWidth: 1440,
-    margin: "0 auto",
-    boxSizing: "border-box",
-  },
-  toolIcon: {
-    width: 36, height: 36, borderRadius: 10,
-    display: "grid", placeItems: "center",
-    flexShrink: 0,
-  },
-  toolName: {
-    fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14,
-    letterSpacing: "-0.01em", color: "var(--m-on-surface)",
-  },
-  toolSub: {
-    fontSize: 11.5, color: "var(--m-on-surface-mid)", marginTop: 1,
-    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-  },
-  recentTitle: {
-    fontSize: 13, fontWeight: 600, color: "var(--m-on-surface)",
-    letterSpacing: "-0.01em",
-  },
-  recentDeal: { fontSize: 12, color: "var(--m-on-surface-mid)" },
-  recentDate: {
-    fontSize: 10.5, color: "var(--m-on-surface-mid)",
-    letterSpacing: "0.1em", textAlign: "right",
-  },
-  actionNote: {
-    padding: "10px 12px",
-    borderRadius: 12,
-    background: "rgba(225, 242, 235, 0.9)",
-    color: "#246B50",
-    fontSize: 12.5,
-    boxShadow: "var(--m-elev-1)",
-  },
-  actionError: {
-    padding: "10px 12px",
-    borderRadius: 12,
-    background: "var(--m-pass-container)",
-    color: "#6F241E",
-    fontSize: 12.5,
-    boxShadow: "var(--m-elev-1)",
-  },
-};

@@ -1,0 +1,34 @@
+{
+  "id": "PC-CROSS-DOMAIN-025",
+  "category": "CROSS_DOMAIN",
+  "description": "BUY + restructuring: search-funder pursuing distressed-for-control fulcrum-security play. M159 fulcrum + M148 solvency + buy-side LMM mechanics must compose together.",
+  "payload": {
+    "journey": "buy",
+    "subjourney": "distressed_buy_side",
+    "target_industry": "specialty services",
+    "target_jurisdiction": "US-CO",
+    "target_ebitda_cents": 90000000,
+    "fulcrum_security_play": true,
+    "secured_debt_price_cents": 35,
+    "buyer_type": "search_fund_LMM"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "distressed_buy_side",
+      "distressPosture": "full_distress",
+      "assetClass": "operating_co"
+    },
+    "missingFields": [
+      "capital_stack_breakdown",
+      "fulcrum_tranche",
+      "search_fund_economics"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "buy", "G28", "fulcrum-security", "search-fund"]
+}

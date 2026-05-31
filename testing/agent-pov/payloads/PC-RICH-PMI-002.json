@@ -1,0 +1,64 @@
+{
+  "category": "RICH",
+  "description": "PMI carve-out integration with TSA in place — full TSA scope + wind-down.",
+  "payload": {
+    "journey": "pmi",
+    "pmiType": "carve_out_integration",
+    "pmiStage": "stabilization",
+    "dealClosedDate": "2026-03-01",
+    "acquirerName": "Spruce Capital Portfolio Co",
+    "targetName": "NorthLight Components",
+    "industry": "consumer electronics components",
+    "jurisdiction": "US-CA",
+    "league": "L6",
+    "targetTtmRevenueCents": 32000000000,
+    "targetEbitdaCents": 3600000000,
+    "tsaActive": true,
+    "tsaDurationMonths": 12,
+    "tsaServiceCategories": [
+      "it",
+      "hr_payroll",
+      "finance_close",
+      "legal_compliance"
+    ],
+    "standaloneCostUpliftCents": 240000000,
+    "workstreams": [
+      "standalone_it_buildout",
+      "hr_systems",
+      "finance_close_acceleration",
+      "brand_separation"
+    ],
+    "taxClassification": "c_corp",
+    "stage": "execution"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "pmi",
+      "subJourney": "pmi_stabilization",
+      "league": "L6",
+      "jurisdiction": "US-CA",
+      "industry": "consumer electronics components",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "pmi",
+    "L6",
+    "rich",
+    "carve_out_integration"
+  ],
+  "id": "PC-RICH-PMI-002"
+}

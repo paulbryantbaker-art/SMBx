@@ -1,0 +1,36 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "league='L8' explicit but ttmRevenue=$3.8M and ebitda=$680K — financials are L2/L3, not L8.",
+  "payload": {
+    "journey": "buy",
+    "league": "L8",
+    "ttmRevenueCents": 380000000,
+    "ebitdaCents": 68000000,
+    "industry": "B2B services",
+    "jurisdiction": "US-TX"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-TX",
+      "industry": "B2B services"
+    },
+    "missingFields": [
+      "explicit_league_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "league-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-LEAGUE-001"
+}

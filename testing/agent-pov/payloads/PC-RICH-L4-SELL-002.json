@@ -1,0 +1,51 @@
+{
+  "category": "RICH",
+  "description": "L4 banker-led auction of industrial-distribution co — full LMM auction context.",
+  "payload": {
+    "journey": "sell",
+    "sellerRole": "banker",
+    "industry": "industrial parts distribution",
+    "naics": "423840",
+    "jurisdiction": "US-OH",
+    "league": "L4",
+    "ttmRevenueCents": 4200000000,
+    "adjustedEbitdaCents": 530000000,
+    "multiYearPnlPresent": true,
+    "yearsOfHistory": 5,
+    "askingPriceCents": 3200000000,
+    "bankerProcess": "broad_auction",
+    "buyersInvited": 80,
+    "stage": "loi_evaluation",
+    "taxClassification": "s_corp"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "banker_led",
+      "league": "L4",
+      "jurisdiction": "US-OH",
+      "industry": "industrial parts distribution",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "s_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L4",
+    "rich",
+    "banker-led"
+  ],
+  "id": "PC-RICH-L4-SELL-002"
+}

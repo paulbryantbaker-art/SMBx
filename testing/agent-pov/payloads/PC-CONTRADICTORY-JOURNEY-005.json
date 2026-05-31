@@ -1,0 +1,41 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "journey='sell' but agent acts as principal acquirer (acquirerRole/sponsorType set) while still in LOI stage with sponsor-equity / senior-debt financing — substrate cannot tell which side the agent represents.",
+  "payload": {
+    "journey": "sell",
+    "acquirerRole": "principal",
+    "sponsorType": "independent_sponsor",
+    "stage": "loi",
+    "purchasePriceCents": 3000000000,
+    "financing": {
+      "sponsorEquityCents": 1500000000,
+      "seniorDebtCents": 1500000000
+    },
+    "industry": "industrial distribution",
+    "jurisdiction": "US-OH"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "sell",
+      "jurisdiction": "US-OH",
+      "industry": "industrial distribution"
+    },
+    "missingFields": [
+      "explicit_journey_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "journey-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-JOURNEY-005"
+}

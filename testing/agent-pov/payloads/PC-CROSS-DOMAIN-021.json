@@ -1,0 +1,36 @@
+{
+  "id": "PC-CROSS-DOMAIN-021",
+  "category": "CROSS_DOMAIN",
+  "description": "BUY + restructuring: PE buyer entering a target mid-Chapter-11. Substrate must compose healthy-buy-side valuation/LBO routes AND distressed overlays (M151 363 sale, M158 DIP sizing, M159 fulcrum security) — buy-side healthy mechanics must not crowd out distressed.",
+  "payload": {
+    "journey": "buy",
+    "subjourney": "distressed_buy_side",
+    "target_industry": "B2B services",
+    "target_jurisdiction": "US-DE",
+    "target_ebitda_cents": 600000000,
+    "bankruptcy_status": "chapter_11_filed",
+    "bankruptcyFilingPending": true,
+    "sale_process": "363",
+    "buyer_type": "LMM_PE_sponsor"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "distressed_buy_side",
+      "distressPosture": "full_distress",
+      "assetClass": "operating_co"
+    },
+    "missingFields": [
+      "stalking_horse_bid",
+      "credit_bid_eligibility",
+      "fulcrum_tranche",
+      "sponsor_equity"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "buy", "G28", "PE-distressed-entry"]
+}

@@ -1,0 +1,44 @@
+{
+  "id": "PC-PARTIAL-SELL-016",
+  "category": "PARTIAL",
+  "description": "Partial payload: L5 sell: precision manufacturing partial recap. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "precision manufacturing",
+    "jurisdiction": "US-OH",
+    "revenue_cents": 9500000000,
+    "ebitda_cents": 1300000000,
+    "seller_role": "principal",
+    "deal_type": "partial_recap"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "principal_seller",
+      "league": "L4",
+      "industry": "precision manufacturing",
+      "jurisdiction": "US-OH"
+    },
+    "missingFields": [
+      "rollover_target_pct",
+      "asking_price_cents",
+      "capex_normalized_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L5",
+    "partial",
+    "recap"
+  ]
+}

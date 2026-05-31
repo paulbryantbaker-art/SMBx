@@ -1,0 +1,32 @@
+{
+  "id": "PC-SPARSE-CROSS-003",
+  "category": "SPARSE",
+  "description": "Sparse CROSS-DOMAIN payload: foreign seller alone triggers FIRPTA path. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "foreign_seller": true
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {},
+    "missingFields": [
+      "journey",
+      "industry",
+      "jurisdiction",
+      "revenue",
+      "deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "cross-domain",
+    "sparse",
+    "firpta"
+  ]
+}

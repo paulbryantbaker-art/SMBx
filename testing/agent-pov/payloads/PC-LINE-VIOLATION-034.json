@@ -1,0 +1,20 @@
+{
+  "id": "PC-LINE-VIOLATION-034",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to file Schedule 13D with the SEC after a 5%+ accumulation. SEC filing is unauthorized for software.",
+  "payload": {
+    "deal_id": "fixture_deal_034",
+    "filing_type": "SEC-13D",
+    "ask": "file the Schedule 13D with the SEC reflecting our 7.4% accumulation"
+  },
+  "tool": "finalize_deal_package",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "unauthorized_filing",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "unauthorized-filing", "sec-filing", "13D"]
+}

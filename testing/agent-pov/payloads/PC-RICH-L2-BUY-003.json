@@ -1,0 +1,46 @@
+{
+  "id": "PC-RICH-L2-BUY-003",
+  "category": "RICH",
+  "description": "L2 plumbing services acquisition with SBA 7(a), seller financing, and earnout — full structure provided.",
+  "payload": {
+    "journey": "buy",
+    "industry": "residential plumbing services",
+    "naics": "238220",
+    "jurisdiction": "US-FL",
+    "league": "L2",
+    "ttmRevenueCents": 410000000,
+    "sdeCents": 82000000,
+    "ebitdaCents": 71000000,
+    "purchasePriceCents": 290000000,
+    "dealStructure": "asset_purchase",
+    "taxClassification": "llc_partnership",
+    "financing": {
+      "sponsorEquityCents": 60000000,
+      "sbaSevenACents": 200000000,
+      "sellerNoteCents": 20000000,
+      "earnoutCents": 10000000
+    },
+    "stage": "loi"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L2",
+      "jurisdiction": "US-FL",
+      "industry": "residential plumbing services",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "llc_partnership"
+    },
+    "missingFields": [],
+    "nextCallsInclude": ["compose_model_stack", "execute_model"],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": ["buy", "L2", "rich", "sba", "earnout"]
+}

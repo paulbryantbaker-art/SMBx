@@ -1,0 +1,42 @@
+{
+  "id": "PC-PARTIAL-RAISE-015",
+  "category": "PARTIAL",
+  "description": "Partial payload: LP-led secondary: position size. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "instrument": "secondary",
+    "gp_or_lp_led": "lp_led",
+    "position_nav_cents": 12000000000,
+    "transaction_amount_cents": 9000000000,
+    "fund_vintage": 2020,
+    "stage": "secondary"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "secondary_raise"
+    },
+    "missingFields": [
+      "industry",
+      "jurisdiction",
+      "gp_consent_status",
+      "discount_to_nav_pct"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "secondary",
+    "lp-led",
+    "partial"
+  ]
+}

@@ -6,41 +6,42 @@
    Cool whites, slate ink, two greens (indigo CTAs + emerald GO signals).
    Source: dist/source/v3-styles.css + handoff "two greens" rule. */
 :root {
-  /* Canvas — cool, light */
-  --bg: #F6F7F9;          /* deepest, behind everything */
-  --panel: #FBFBFC;       /* sidebar / rails */
+  /* Canvas — warm neutral (CD "Ramp" system; see FRONTEND_DIRECTION.md) */
+  --bg: #FBFAF6;          /* warm off-white page background */
+  --panel: #F3F1EA;       /* sidebar / rails — warm chrome */
   --surface: #FFFFFF;     /* cards, doc canvas */
-  --surface-2: #F1F3F6;   /* nested cards, hover */
-  --line: #E6E9EE;        /* dividers, borders */
-  --line-2: #D6DAE1;      /* stronger borders */
+  --surface-2: #F3F1EA;   /* nested cards, hover */
+  --line: rgba(25, 24, 19, 0.10);   /* dividers, borders */
+  --line-2: rgba(25, 24, 19, 0.16); /* stronger borders */
 
-  /* Ink — cool slate */
-  --ink: #0F1623;         /* primary text */
-  --ink-2: #46505F;       /* secondary */
-  --ink-3: #6B7588;       /* tertiary, eyebrows */
-  --ink-4: #98A1B0;       /* disabled, hairlines */
+  /* Ink — warm near-black */
+  --ink: #191813;         /* primary text */
+  --ink-2: #57534A;       /* secondary */
+  --ink-3: #8B867A;       /* tertiary, eyebrows */
+  --ink-4: #ADA899;       /* disabled, hairlines */
 
-  /* Two greens — DO NOT COLLAPSE.
-     --cta: indigo #1B2C5C — trust/CTA color (buttons, primary actions, brand mark)
-     --go:  emerald #138A5A — "go" semantics (live status, ✓ done, PURSUE, Δ wins) */
-  --cta: #1B2C5C;
-  --cta-2: #142048;
-  --cta-soft: rgba(27, 44, 92, 0.10);
-  --cta-ring: rgba(27, 44, 92, 0.28);
+  /* Brand accent = electric neon green (needs DARK text). The "go"/verdict
+     greens below stay MUTED so they read as a separate system — do not let
+     them adopt the brand neon (FRONTEND_DIRECTION.md, green-vs-verdict note). */
+  --cta: #2BFF77;         /* brand / primary CTA — electric neon green */
+  --cta-2: #10E060;       /* hover (accent-strong) */
+  --on-cta: #00210F;      /* DARK text on the neon green */
+  --cta-soft: rgba(43, 255, 119, 0.14);
+  --cta-ring: rgba(43, 255, 119, 0.40);
 
-  --go: #138A5A;
+  --go: #138A5A;          /* muted emerald — go/done/PURSUE semantics, NOT brand */
   --go-2: #0F7148;
   --go-soft: rgba(19, 138, 90, 0.10);
   --go-ring: rgba(19, 138, 90, 0.28);
 
-  /* Status — restrained */
+  /* Status — restrained, warm-tuned */
   --warn: #B8841F;
   --danger: #C2453B;
   --info: #2E6FBF;
 
-  /* Type stack */
-  --font-display: "Inter Tight", "Inter", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, sans-serif;
+  /* Type stack — CD "Ramp": Schibsted Grotesk (display+body), JetBrains Mono (numbers) */
+  --font-display: "Schibsted Grotesk", "Inter Tight", system-ui, sans-serif;
+  --font-body: "Schibsted Grotesk", "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
@@ -82,6 +83,10 @@ button { font-family: inherit; cursor: pointer; }
 .eyebrow-cta { color: var(--cta); }
 
 .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+/* CD "Ramp" number treatment: .num = tabular-nums on the current font;
+   .mono-num = JetBrains Mono + tabular-nums (the "computed/verifiable" signal). */
+.num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+.mono-num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
 
 /* Product direction: remove eyebrow and micro-label text across the app.
    Keep real headings, body copy, controls, and data values visible. */
@@ -137,7 +142,7 @@ button { font-family: inherit; cursor: pointer; }
 }
 .btn-cta {
   background: var(--cta);
-  color: #FFFFFF;
+  color: var(--on-cta);
   font-weight: 600;
 }
 .btn-cta:hover { background: var(--cta-2); }
@@ -215,24 +220,26 @@ input::placeholder, textarea::placeholder { color: var(--ink-4); }
    Source: design_handoff_smbx_desktop_material/v6-styles.css.
    =========================================================================== */
 :root {
-  /* 10% accent — light-blue desktop selection and active chrome. */
-  --m-primary:              #6A9BCC;
-  --m-on-primary:           #FFFFFF;
-  --m-primary-container:    #EAF3FB;
-  --m-on-primary-container: #356B92;
+  /* 10% accent — electric neon green (CD "Ramp"). Pairs with DARK text. */
+  --m-primary:              #2BFF77;
+  --m-on-primary:           #00210F;
+  --m-primary-container:    #CFFFE1;
+  --m-on-primary-container: #00210F;
 
-  /* Secondary action — same amber/gold family as mobile chat/action chrome. */
+  /* Secondary action — warm gold family (kept; warm-neutral compatible). */
   --m-secondary:            #D6A35C;
   --m-secondary-container:  #FAF1E1;
   --m-on-secondary-container: #6D4A13;
-  --m-fab-rose-gold:        #C88B78;
-  --m-fab-rose-gold-hover:  #B97869;
-  --m-fab-rose-gold-soft:   #F7E4DD;
+  /* FAB now uses the brand neon green (the floating chat button). */
+  --m-fab-rose-gold:        #2BFF77;
+  --m-fab-rose-gold-hover:  #10E060;
+  --m-fab-rose-gold-soft:   #CFFFE1;
   --m-tertiary:             #629987;
   --m-tertiary-container:   #E3EFEA;
   --m-on-tertiary-container:#214C3B;
 
-  /* Verdict semantics — only inside verdict pills, never decoration */
+  /* Verdict semantics — only inside verdict pills, never decoration.
+     KEPT muted (sage/amber/red) so they stay distinct from the brand neon. */
   --m-pursue:               #4A8C6F;
   --m-pursue-container:     #DCE9E1;
   --m-pursue-on-cont:       #143628;
@@ -241,31 +248,30 @@ input::placeholder, textarea::placeholder { color: var(--ink-4); }
   --m-pass:                 #A23A2F;
   --m-pass-container:       #F2D6D2;
 
-  /* 60% canvas — cool deal-desk paper. Slightly bluer than document
-     canvases so docs/analysis can keep the cleaner off-white stage. */
-  --m-bg:                   #F8FBFE;
-  --m-surface:              #F6F8FC;
+  /* 60% canvas — warm deal-desk paper (CD "Ramp" warm-neutral base). */
+  --m-bg:                   #FBFAF6;
+  --m-surface:              #FCFCFA;
   --m-surface-on-light:     #FFFFFF;
-  --m-surface-tinted:       #F0F5FB;
-  --m-surface-2:            #EDF3F9;
-  --m-surface-3:            #E2ECF6;
+  --m-surface-tinted:       #F3F1EA;
+  --m-surface-2:            #ECE9DF;
+  --m-surface-3:            #E2DED2;
 
-  /* 30% chrome — slightly bluer rail + tab strip. */
-  --m-surface-1:            #ECF3FA;
-  --m-surface-container:    #ECF3FA;
+  /* 30% chrome — warm rail + tab strip. */
+  --m-surface-1:            #F3F1EA;
+  --m-surface-container:    #F3F1EA;
 
-  /* Text + outlines */
-  --m-on-surface:           #1A2233;
-  --m-on-surface-var:       #555E6F;
-  --m-on-surface-mid:       #7A8395;
-  --m-outline:              #D8E2EE;
-  --m-outline-var:          #E6EBF4;
+  /* Text + outlines — warm */
+  --m-on-surface:           #191813;
+  --m-on-surface-var:       #57534A;
+  --m-on-surface-mid:       #8B867A;
+  --m-outline:              rgba(25, 24, 19, 0.16);
+  --m-outline-var:          rgba(25, 24, 19, 0.10);
 
-  /* Elevation */
+  /* Elevation — warm-tinted shadow (was cool slate rgba(26,34,51)). */
   --m-elev-0: none;
-  --m-elev-1: 0 8px 18px rgba(26, 34, 51, 0.08), 0 1px 3px rgba(26, 34, 51, 0.05);
-  --m-elev-2: 0 22px 58px rgba(26, 34, 51, 0.13), 0 4px 14px rgba(26, 34, 51, 0.07);
-  --m-elev-3: 0 34px 86px rgba(26, 34, 51, 0.17), 0 8px 22px rgba(26, 34, 51, 0.09);
+  --m-elev-1: 0 8px 18px rgba(25, 24, 19, 0.08), 0 1px 3px rgba(25, 24, 19, 0.05);
+  --m-elev-2: 0 22px 58px rgba(25, 24, 19, 0.13), 0 4px 14px rgba(25, 24, 19, 0.07);
+  --m-elev-3: 0 34px 86px rgba(25, 24, 19, 0.17), 0 8px 22px rgba(25, 24, 19, 0.09);
 }
 
 /* V6 root container — applied at V6App level so V3 surfaces stay unaffected */
@@ -2007,33 +2013,33 @@ input[type="range"].m-slider::-moz-range-thumb {
    Source: design_handoff_smbx_app store/mobile-styles.css + glass-primitives.jsx
    =========================================================================== */
 .mobile-root {
-  /* Surfaces */
-  --mb-bg:     #FFFFFF;
-  --mb-bg-2:   #F5F5F7;
+  /* Surfaces — warm neutral (CD "Ramp") */
+  --mb-bg:     #FBFAF6;
+  --mb-bg-2:   #F3F1EA;
   --mb-card:   #FFFFFF;
-  --mb-card-2: #F2F2F7;
+  --mb-card-2: #F3F1EA;
 
-  /* Ink — App Store cool slate */
-  --mb-ink:   #1A2233;
-  --mb-ink-1: #1A2233;
-  --mb-ink-2: #555E6F;
-  --mb-ink-3: #7A8395;
-  --mb-ink-4: #A6AEBC;
-  --mb-ink-5: #C5CBD6;
+  /* Ink — warm near-black */
+  --mb-ink:   #191813;
+  --mb-ink-1: #191813;
+  --mb-ink-2: #57534A;
+  --mb-ink-3: #8B867A;
+  --mb-ink-4: #ADA899;
+  --mb-ink-5: #C9C4B8;
 
-  --mb-line:   rgba(60,60,67,0.16);
-  --mb-line-2: rgba(60,60,67,0.08);
+  --mb-line:   rgba(25,24,19,0.16);
+  --mb-line-2: rgba(25,24,19,0.08);
 
-  /* Powder iOS blue (Get pills) */
+  /* Powder iOS blue (Get pills) — kept for now (info chrome) */
   --mb-blue:      #7FA8D9;
   --mb-blue-ink:  #4A7AB0;
   --mb-blue-soft: #EAF0FA;
 
-  /* Periwinkle primary — different from desktop's slate; mobile-specific */
-  --mb-accent:      #8A9AE8;
-  --mb-accent-2:    #6F82DC;
-  --mb-accent-ink:  #4F60BD;
-  --mb-accent-soft: #EEF1FB;
+  /* Primary — brand neon green (CD "Ramp"). Pairs with DARK ink. */
+  --mb-accent:      #2BFF77;
+  --mb-accent-2:    #10E060;
+  --mb-accent-ink:  #00210F;
+  --mb-accent-soft: #CFFFE1;
 
   /* Action accent — brand gold matching the Today welcome hero. Same
      amber/gold family as the watercolor textures so the action chrome

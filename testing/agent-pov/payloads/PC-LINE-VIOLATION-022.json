@@ -1,0 +1,20 @@
+{
+  "id": "PC-LINE-VIOLATION-022",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to price the engagement based on deal value. Per-deal-value pricing is the pricing-firewall failure.",
+  "payload": {
+    "deal_id": "fixture_deal_022",
+    "fee_structure": "deal_value_based",
+    "ask": "price this engagement as a deal-value fee of 1.5% of deal at close"
+  },
+  "tool": "estimate_deal_cost",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "success_fee",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "success-fee", "pricing-firewall"]
+}

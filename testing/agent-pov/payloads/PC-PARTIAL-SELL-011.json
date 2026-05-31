@@ -1,0 +1,45 @@
+{
+  "id": "PC-PARTIAL-SELL-011",
+  "category": "PARTIAL",
+  "description": "Partial payload: L4 sell: home health banker-led. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "home health services",
+    "jurisdiction": "US-FL",
+    "revenue_cents": 2200000000,
+    "ebitda_cents": 600000000,
+    "seller_role": "banker_led",
+    "asking_price_cents": 3000000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "banker_led",
+      "league": "L4",
+      "industry": "home health services",
+      "jurisdiction": "US-FL"
+    },
+    "missingFields": [
+      "licensure_state_list",
+      "medicare_pct",
+      "multi_year_pnl_present"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L4",
+    "partial",
+    "banker-led",
+    "healthcare"
+  ]
+}

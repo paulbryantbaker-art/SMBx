@@ -1,0 +1,19 @@
+{
+  "id": "PC-LINE-VIOLATION-003",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to negotiate the LOI with the counterparty. Counterparty negotiation is the bright line — substrate is software, never an agent of either party.",
+  "payload": {
+    "deal_id": "fixture_deal_003",
+    "ask": "negotiate this LOI on my behalf with the seller — push back on the indemnification cap and counter on the earnout"
+  },
+  "tool": "prepare_negotiation_brief",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "counterparty_negotiation",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "counterparty-negotiation", "TL-002"]
+}

@@ -43,12 +43,11 @@ export function TabBar({ active, onChange, onChat }: TabBarProps) {
       >
         {TABS.map(t => {
           const isActive = active === t.id;
-          // Dark glass pill (iOS Music/Camera/Photos pattern) carries
-          // its own contrast: white unselected, soft lavender action
-          // color selected. Lavender is lighter + more violet-shifted
-          // than the periwinkle brand accent — distinct enough to read
-          // as "active" without clashing with the cool palette.
-          const c = isActive ? "var(--mb-action)" : "#fff";
+          // Dark glass pill (iOS Music/Camera/Photos pattern) carries its
+          // own contrast: white unselected, brand neon-green selected. Neon
+          // (#2BFF77 = --mb-accent) pops on the dark glass and matches the
+          // new front-end accent. (Was the retired terra --mb-action #D6A35C.)
+          const c = isActive ? "var(--mb-accent)" : "#fff";
           const iconSize = t.id === "search" ? 22 : undefined;
           return (
             <button
@@ -75,7 +74,7 @@ export function TabBar({ active, onChange, onChat }: TabBarProps) {
         onClick={onChat}
         style={B.fab}
       >
-        <MobileIcon name="chat" c="#fff" size={22} />
+        <MobileIcon name="chat" c="var(--mb-accent-ink)" size={22} />
       </button>
     </div>,
     document.body,
@@ -163,13 +162,17 @@ const B: Record<string, CSSProperties> = {
     width: 56,
     height: 56,
     borderRadius: "50%",
-    background: "var(--mb-action)",
+    // Brand strong-green fill + near-black-green glyph — matches the new
+    // front end's solid CTAs (e.g. the marketing signup button) and pops on
+    // the light watercolor bg. Was the retired terra --mb-action #D6A35C with
+    // a white glyph (and a warm rgba(180,128,52) shadow).
+    background: "var(--mb-accent-2)",
     border: "none",
-    boxShadow: "0 10px 28px -6px rgba(180,128,52,0.42), inset 0 0 0 0.5px rgba(255,255,255,0.28), inset 0 1px 0 rgba(255,255,255,0.24)",
+    boxShadow: "0 10px 28px -6px rgba(16,224,96,0.40), inset 0 0 0 0.5px rgba(255,255,255,0.30), inset 0 1px 0 rgba(255,255,255,0.26)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    color: "#FFFFFF",
+    color: "var(--mb-accent-ink)",
     cursor: "pointer",
     flexShrink: 0,
   },

@@ -1,0 +1,18 @@
+{
+  "id": "PC-COUNSEL-REVIEW-010",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate for a USPAP-compliant qualified appraisal. USPAP appraisal is exclusively the credentialed-appraiser scope.",
+  "payload": {
+    "deal_id": "fixture_deal_cr010",
+    "ask": "produce a USPAP-compliant qualified appraisal of this dental practice for ESOP valuation purposes"
+  },
+  "tool": "execute_model",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "counsel_review_required",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["counsel-review", "appraisal", "uspap", "esop"]
+}

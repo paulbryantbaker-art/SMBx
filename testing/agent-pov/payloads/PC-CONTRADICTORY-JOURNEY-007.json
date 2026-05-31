@@ -1,0 +1,39 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "journey='buy' but the seller is represented (sellerRole=principal, broker_engagement_type=issuer_advisory) AND issuer-side SAFE / post-money cap fields are populated — agent role straddles buyer and issuer.",
+  "payload": {
+    "journey": "buy",
+    "sellerRole": "principal",
+    "sellerRepresentation": "owner_rep",
+    "broker_engagement_type": "issuer_advisory",
+    "instrument": "safe_post_money",
+    "postMoneyCapCents": 1200000000,
+    "raiseAmountCents": 200000000,
+    "industry": "consumer apps",
+    "jurisdiction": "US-DE"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-DE",
+      "industry": "consumer apps"
+    },
+    "missingFields": [
+      "explicit_journey_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "journey-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-JOURNEY-007"
+}

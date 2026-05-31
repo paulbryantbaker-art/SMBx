@@ -1,0 +1,52 @@
+{
+  "category": "RICH",
+  "description": "L8 cross-border sell (Canadian seller, US buyer pool) — banker-led with FIRPTA equivalent.",
+  "payload": {
+    "journey": "sell",
+    "sellerRole": "banker",
+    "industry": "natural resources — minerals processing",
+    "naics": "212393",
+    "jurisdiction": "CA-ON",
+    "targetBuyerJurisdiction": "US",
+    "league": "L8",
+    "ttmRevenueCents": 82000000000,
+    "adjustedEbitdaCents": 14000000000,
+    "multiYearPnlPresent": true,
+    "yearsOfHistory": 6,
+    "askingPriceCents": 168000000000,
+    "bankerProcess": "broad_auction",
+    "buyersInvited": 60,
+    "taxClassification": "foreign_entity",
+    "stage": "marketing"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "banker_led",
+      "league": "L8",
+      "jurisdiction": "CA-ON",
+      "industry": "natural resources — minerals processing",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "foreign_entity"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L8",
+    "rich",
+    "cross-border"
+  ],
+  "id": "PC-RICH-L8-SELL-002"
+}

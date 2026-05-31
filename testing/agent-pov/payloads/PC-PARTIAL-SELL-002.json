@@ -1,0 +1,40 @@
+{
+  "id": "PC-PARTIAL-SELL-002",
+  "category": "PARTIAL",
+  "description": "Partial payload: L1 sell: independent gas station. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "independent gas station",
+    "jurisdiction": "US-MO",
+    "sde_cents": 22000000,
+    "seller_role": "principal"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "principal_seller",
+      "league": "L1",
+      "industry": "independent gas station",
+      "jurisdiction": "US-MO"
+    },
+    "missingFields": [
+      "revenue",
+      "real_estate_owned",
+      "environmental_assessments"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L1",
+    "partial"
+  ]
+}

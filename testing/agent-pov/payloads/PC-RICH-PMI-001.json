@@ -1,0 +1,58 @@
+{
+  "category": "RICH",
+  "description": "PMI Day-0 plan for tuck-in acquisition that just closed — full integration scope.",
+  "payload": {
+    "journey": "pmi",
+    "pmiType": "tuck_in_integration",
+    "pmiStage": "day_0",
+    "dealClosedDate": "2026-05-15",
+    "acquirerName": "Acme Industrial Holdings",
+    "targetName": "Riverbend Maintenance Co",
+    "industry": "industrial maintenance services",
+    "jurisdiction": "US-OH",
+    "league": "L4",
+    "targetTtmRevenueCents": 1600000000,
+    "targetEbitdaCents": 220000000,
+    "synergyTargetCents": 60000000,
+    "workstreams": [
+      "finance_consolidation",
+      "erp_migration",
+      "sales_org_merge",
+      "hr_benefits",
+      "brand_consolidation"
+    ],
+    "tsaRequired": false,
+    "taxClassification": "llc_partnership",
+    "stage": "planning"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "pmi",
+      "subJourney": "pmi_day_0",
+      "league": "L4",
+      "jurisdiction": "US-OH",
+      "industry": "industrial maintenance services",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "llc_partnership"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "pmi",
+    "L4",
+    "rich",
+    "tuck_in_integration"
+  ],
+  "id": "PC-RICH-PMI-001"
+}

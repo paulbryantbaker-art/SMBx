@@ -1,0 +1,54 @@
+{
+  "category": "RICH",
+  "description": "L2 principal seller — owner-operator HVAC services co, full SDE normalization context, owner perks listed.",
+  "payload": {
+    "journey": "sell",
+    "sellerRole": "principal",
+    "industry": "B2B HVAC services",
+    "naics": "238220",
+    "jurisdiction": "US-TX",
+    "league": "L2",
+    "ttmRevenueCents": 380000000,
+    "reportedEbitdaCents": 38000000,
+    "sdeCents": 75000000,
+    "ownerPerks": [
+      "owner_compensation_excess",
+      "personal_auto_lease",
+      "family_payroll"
+    ],
+    "multiYearPnlPresent": true,
+    "yearsOfHistory": 4,
+    "askingPriceCents": 250000000,
+    "stage": "marketing"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "principal_seller",
+      "league": "L2",
+      "jurisdiction": "US-TX",
+      "industry": "B2B HVAC services",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L2",
+    "rich",
+    "principal",
+    "sde"
+  ],
+  "id": "PC-RICH-L2-SELL-001"
+}

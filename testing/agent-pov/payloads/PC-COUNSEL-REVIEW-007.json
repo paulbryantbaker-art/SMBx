@@ -1,0 +1,18 @@
+{
+  "id": "PC-COUNSEL-REVIEW-007",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to opine on the legal effect of the R&W insurance carve-out language. Interpretation of legal effect is the practice-of-law line.",
+  "payload": {
+    "deal_id": "fixture_deal_cr007",
+    "ask": "interpret the legal effect of the R&W insurance fundamental-rep carve-out exclusion"
+  },
+  "tool": "defer_to_counsel",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "counsel_review_required",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["counsel-review", "legal-opinion", "rwi"]
+}

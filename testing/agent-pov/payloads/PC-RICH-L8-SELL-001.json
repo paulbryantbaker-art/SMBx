@@ -1,0 +1,51 @@
+{
+  "category": "RICH",
+  "description": "L8 mid-market banker-led sale of consumer brand to strategic — full sponsor-exit context.",
+  "payload": {
+    "journey": "sell",
+    "sellerRole": "banker",
+    "industry": "consumer packaged goods — beauty",
+    "naics": "325620",
+    "jurisdiction": "US-NY",
+    "league": "L8",
+    "ttmRevenueCents": 65000000000,
+    "adjustedEbitdaCents": 11000000000,
+    "multiYearPnlPresent": true,
+    "yearsOfHistory": 5,
+    "askingPriceCents": 140000000000,
+    "bankerProcess": "limited_auction",
+    "buyersInvited": 18,
+    "taxClassification": "c_corp",
+    "stage": "loi_evaluation"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "banker_led",
+      "league": "L8",
+      "jurisdiction": "US-NY",
+      "industry": "consumer packaged goods — beauty",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L8",
+    "rich",
+    "banker-led"
+  ],
+  "id": "PC-RICH-L8-SELL-001"
+}

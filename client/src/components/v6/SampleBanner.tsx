@@ -19,7 +19,7 @@ export function SampleBanner({ onDismiss, onStartWorkspace }: SampleBannerProps)
         </span>
       </div>
       <div style={B.right}>
-        <button onClick={onStartWorkspace} style={B.cta} className="m-state">
+        <button onClick={onStartWorkspace} style={B.cta} className="m-nudge-soft">
           Start your workspace
           <span style={{ fontSize: 11, marginLeft: 4 }}>&rarr;</span>
         </button>
@@ -27,7 +27,7 @@ export function SampleBanner({ onDismiss, onStartWorkspace }: SampleBannerProps)
           onClick={onDismiss}
           aria-label="Dismiss working sample banner"
           style={B.dismiss}
-          className="m-state"
+          className="m-nudge-soft"
         >
           <V6Icon name="close" size={11} />
         </button>
@@ -40,9 +40,9 @@ const B: Record<string, CSSProperties> = {
   bar: {
     height: 36,
     flexShrink: 0,
-    background: "#EEF2F8",
-    color: "#4F60BD",
-    borderBottom: "1px solid rgba(111, 130, 220, 0.13)",
+    background: "#F3F1EA",
+    color: "#57534A",
+    borderBottom: "1px solid rgba(25, 24, 19, 0.10)",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
@@ -55,19 +55,19 @@ const B: Record<string, CSSProperties> = {
     fontSize: 9.5,
     letterSpacing: "0.14em",
     fontWeight: 700,
-    color: "#4F60BD",
+    color: "#57534A",
     flexShrink: 0,
   },
   divider: {
     width: 1,
     height: 12,
-    background: "rgba(111, 130, 220, 0.18)",
+    background: "rgba(25, 24, 19, 0.16)",
     flexShrink: 0,
   },
   text: {
     fontSize: 12,
     fontWeight: 500,
-    color: "#4F60BD",
+    color: "#57534A",
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
@@ -82,9 +82,9 @@ const B: Record<string, CSSProperties> = {
     borderRadius: 6,
     fontSize: 11.5,
     fontWeight: 600,
-    color: "#4F60BD",
+    color: "#191813",
     cursor: "pointer",
-    border: "1px solid rgba(111, 130, 220, 0.22)",
+    border: "1px solid rgba(43, 255, 119, 0.55)",
     transition: "background 120ms ease, border-color 120ms ease",
   },
   dismiss: {
@@ -95,6 +95,6 @@ const B: Record<string, CSSProperties> = {
     placeItems: "center",
     borderRadius: 6,
     cursor: "pointer",
-    color: "rgba(79, 96, 189, 0.68)",
+    color: "rgba(87, 83, 74, 0.68)",
   },
 };

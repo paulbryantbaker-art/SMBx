@@ -1,0 +1,19 @@
+{
+  "id": "PC-GARBAGE-002",
+  "category": "GARBAGE",
+  "description": "Wrong type: purchase_price is a non-coerceable noun phrase instead of a numeric (cents) or coerceable money string. Substrate's payload-shape validator must return structured 400 with field-level guidance pointing at purchase_price.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "B2B services",
+    "target_jurisdiction": "US-CA",
+    "purchase_price": "a few million bucks"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "wrong-type", "string-for-money"]
+}

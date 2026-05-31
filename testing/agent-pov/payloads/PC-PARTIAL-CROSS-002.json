@@ -1,0 +1,45 @@
+{
+  "id": "PC-PARTIAL-CROSS-002",
+  "category": "PARTIAL",
+  "description": "Partial payload: Carve-out + IP-heavy: SaaS unit from public co. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "enterprise software",
+    "deal_type": "carve_out",
+    "asset_class": "ip_heavy",
+    "parent_co": "public_co",
+    "target_revenue_cents": 12000000000,
+    "target_ebitda_cents": 2500000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "league": "L5",
+      "industry": "enterprise software",
+      "assetClass": "operating_business_or_unknown"
+    },
+    "missingFields": [
+      "transferred_ip_list",
+      "tsa_terms",
+      "jurisdiction",
+      "separation_scope"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "cross-overlay",
+    "buy",
+    "partial",
+    "carve-out",
+    "ip-heavy"
+  ]
+}

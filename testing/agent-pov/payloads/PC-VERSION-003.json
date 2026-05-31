@@ -1,0 +1,19 @@
+{
+  "id": "PC-VERSION-003",
+  "category": "VERSION",
+  "description": "Unknown methodology version 'V19.9' (close to current V19 but not exact). Substrate must refuse — partial-match fuzzy version coercion is forbidden.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "logistics",
+    "target_jurisdiction": "US-IL",
+    "methodology_version": "V19.9"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "unsupported_version",
+    "persistsDealState": false
+  },
+  "tags": ["version", "unknown-methodology", "fuzzy-near-match"]
+}

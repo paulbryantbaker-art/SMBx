@@ -97,6 +97,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
   const [view, setView] = useState<MobileView>(() => mobileViewFromHash(initial));
   const [libraryDocBack, setLibraryDocBack] = useState<MobileView | null>(null);
   const [chatOpen, setChatOpen] = useState(initial.chat);
+  const [acctOpen, setAcctOpen] = useState(false);
   const [learn, setLearn] = useState<{ open: boolean; section: "how" | "pricing"; anchor?: string }>({
     open: false, section: "how",
   });
@@ -353,20 +354,25 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
   };
   const onOpenWatching = () => setView({ kind: "watching" });
   const onAvatarClick = () => {
-    if (DEV_AUTH_BYPASS) {
-      if (user) onSignOut();
-      else onDevSignIn?.();
-      return;
-    }
     if (!user) {
-      navigate("/login");
+      if (DEV_AUTH_BYPASS) onDevSignIn?.();
+      else navigate("/login");
       return;
     }
-    // Authed: minimal confirm flow until a proper account sheet lands.
-    // Avoids accidental sign-out on a mistap.
-    if (typeof window !== "undefined" && window.confirm("Sign out of smbx.ai?")) {
-      onSignOut();
-    }
+    // Authed → open the account sheet (Sign out / preview).
+    setAcctOpen(true);
+  };
+
+  const handleSignOut = () => {
+    setAcctOpen(false);
+    // Reset the marketing→app threshold flags so the reload lands on the
+    // logged-out marketing site, then sign out and hard-navigate.
+    try {
+      sessionStorage.removeItem("smbx_app_entered");
+      sessionStorage.removeItem("smbx_preview_marketing");
+    } catch { /* ignore */ }
+    onSignOut();
+    window.location.assign("/");
   };
 
   // Detail and Watching are full-page surfaces with their own white
@@ -541,34 +547,49 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
         anchor={learn.anchor}
         onTalkToYulia={onLearnTalkToYulia}
       />
+
+      {/* Account sheet — Liquid-Glass bottom sheet with Sign out / preview. */}
+      {acctOpen && (
+        <>
+          <div onClick={() => setAcctOpen(false)} style={A.scrim} aria-hidden="true" />
+          <div style={A.sheet} role="dialog" aria-label="Account">
+            <div style={A.grab} />
+            <div style={A.id}>
+              <div style={A.name}>{user?.email || "Signed in"}</div>
+              <div style={A.sub}>smbX workspace</div>
+            </div>
+            <button type="button" style={A.item} onClick={() => { setAcctOpen(false); window.location.assign("/?marketing"); }}>Preview marketing site</button>
+            <button type="button" style={{ ...A.item, ...A.danger }} onClick={handleSignOut}>Sign out</button>
+          </div>
+        </>
+      )}
     </div>
     </TitleCollapseProvider>
   );
 }
 
-/* ─── Per-tab screen placeholder (M4/M5) ─────────────────── */
-
-const TAB_TITLES: Record<MobileTab, string> = {
-  today: "Today",
-  pipeline: "Pipeline",
-  search: "Search",
-  brief: "Files",
+const A: Record<string, CSSProperties> = {
+  scrim: { position: "fixed", inset: 0, zIndex: 9998, background: "rgba(0,0,0,0.28)" },
+  sheet: {
+    position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 9999,
+    background: "linear-gradient(180deg, rgba(255,255,255,.90), rgba(255,255,255,.82))",
+    WebkitBackdropFilter: "blur(30px) saturate(190%)", backdropFilter: "blur(30px) saturate(190%)",
+    borderTop: "1px solid rgba(255,255,255,.7)", borderRadius: "22px 22px 0 0",
+    boxShadow: "0 -22px 54px -20px rgba(25,24,19,.42)",
+    padding: "10px 16px calc(env(safe-area-inset-bottom, 0px) + 14px)",
+  },
+  grab: { width: 38, height: 4, borderRadius: 2, background: "var(--mb-ink-5)", margin: "0 auto 12px" },
+  id: { padding: "2px 6px 12px" },
+  name: { fontFamily: "var(--mb-font-display)", fontWeight: 700, fontSize: 16, color: "var(--mb-ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+  sub: { fontFamily: "var(--mb-font-mono)", fontSize: 11, color: "var(--mb-ink-3)", marginTop: 2 },
+  item: {
+    display: "block", width: "100%", textAlign: "left", padding: "15px 6px",
+    border: 0, borderTop: "1px solid rgba(25,24,19,.08)", background: "transparent",
+    fontFamily: "var(--mb-font-display)", fontSize: 16, color: "var(--mb-ink)", cursor: "pointer",
+  },
+  danger: { color: "#C0562F" },
 };
 
-function TabPlaceholder({ tab, initials }: { tab: MobileTab; initials: string }) {
-  return (
-    <div style={{ minHeight: "100vh", paddingBottom: 140 }}>
-      <GlassTopBar title={TAB_TITLES[tab]} initials={initials} />
-      <LargeTitle>{TAB_TITLES[tab]}</LargeTitle>
-      <div style={S.placeholderBody}>
-        <div className="mb-mono" style={S.placeholderTag}>STUB</div>
-        <div style={S.placeholderHint}>
-          {tab} screen lands in phase M{tab === "pipeline" ? "4" : "5"}.
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function computeInitials(user: User | null): string {
   if (!user) return "JM"; // sample-state placeholder per CD
@@ -800,16 +821,5 @@ const S: Record<string, CSSProperties> = {
     position: "relative",
     minHeight: "100lvh",
     paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 110px)",
-  },
-  placeholderBody: {
-    padding: "32px 22px",
-    display: "flex", flexDirection: "column", gap: 8,
-  },
-  placeholderTag: {
-    fontSize: 9.5, color: "var(--mb-ink-4)",
-    letterSpacing: "0.14em", fontWeight: 700,
-  },
-  placeholderHint: {
-    fontSize: 13, color: "var(--mb-ink-3)",
   },
 };

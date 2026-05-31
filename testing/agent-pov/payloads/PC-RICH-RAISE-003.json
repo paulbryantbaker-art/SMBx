@@ -1,0 +1,56 @@
+{
+  "category": "RICH",
+  "description": "Series A priced round — full cap table, post-money, liquidation prefs, anti-dilution.",
+  "payload": {
+    "journey": "raise",
+    "raiseType": "series_a",
+    "instrument": "preferred_stock_series_a",
+    "industry": "B2B fintech APIs",
+    "jurisdiction": "US-DE",
+    "league": "L2",
+    "raiseAmountCents": 1200000000,
+    "preMoneyCents": 4000000000,
+    "postMoneyCents": 5200000000,
+    "liquidationPreference": "1x_non_participating",
+    "antiDilution": "broad_based_weighted_average",
+    "newOptionPoolPostMoneyPct": 15,
+    "capTable": {
+      "founderPct": 55,
+      "optionPoolPct": 15,
+      "seedInvestorsPct": 25,
+      "newInvestorsPct": 23
+    },
+    "taxClassification": "c_corp",
+    "stage": "term_sheet"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "growth_raise",
+      "league": "L2",
+      "jurisdiction": "US-DE",
+      "industry": "B2B fintech APIs",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "L2",
+    "rich",
+    "series_a"
+  ],
+  "id": "PC-RICH-RAISE-003"
+}

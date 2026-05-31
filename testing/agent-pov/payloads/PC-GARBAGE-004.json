@@ -1,0 +1,19 @@
+{
+  "id": "PC-GARBAGE-004",
+  "category": "GARBAGE",
+  "description": "Wrong type: ebitda is a nested object instead of a number-of-cents or coerceable money string. Substrate's payload-shape validator must reject with a structured 400 referencing the ebitda field.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "manufacturing",
+    "target_jurisdiction": "US-OH",
+    "ebitda": { "amount": 5000000, "currency": "USD" }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "wrong-type", "object-for-number"]
+}

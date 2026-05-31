@@ -1,0 +1,59 @@
+{
+  "category": "RICH",
+  "description": "Series A convertible note bridge — full prior round + cap + discount + conversion terms.",
+  "payload": {
+    "journey": "raise",
+    "raiseType": "bridge",
+    "instrument": "convertible_note",
+    "industry": "climate tech — energy storage",
+    "jurisdiction": "US-DE",
+    "league": "L2",
+    "raiseAmountCents": 600000000,
+    "noteCapCents": 4000000000,
+    "noteDiscountPct": 20,
+    "interestRatePct": 8,
+    "maturityMonths": 18,
+    "priorRound": {
+      "name": "series_seed",
+      "raiseAmountCents": 300000000,
+      "postMoneyCents": 2000000000
+    },
+    "capTable": {
+      "founderPct": 65,
+      "optionPoolPct": 12,
+      "priorInvestorsPct": 23
+    },
+    "taxClassification": "c_corp",
+    "stage": "term_sheet"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "growth_raise",
+      "league": "L2",
+      "jurisdiction": "US-DE",
+      "industry": "climate tech — energy storage",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "L2",
+    "rich",
+    "bridge"
+  ],
+  "id": "PC-RICH-RAISE-004"
+}

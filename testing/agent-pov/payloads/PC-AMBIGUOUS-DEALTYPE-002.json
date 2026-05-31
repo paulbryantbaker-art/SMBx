@@ -1,0 +1,37 @@
+{
+  "category": "AMBIGUOUS",
+  "description": "Public-co divestiture mentioned — could be carve-out (asset) or full sub stock-sale.",
+  "payload": {
+    "journey": "buy",
+    "industry": "consumer electronics",
+    "jurisdiction": "US-CA",
+    "league": "L6",
+    "divestitureFromPublicCo": true,
+    "ttmRevenueCents": 32000000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-CA",
+      "industry": "consumer electronics",
+      "league": "L6"
+    },
+    "missingFields": [
+      "explicit_deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "ambiguous",
+    "deal-type"
+  ],
+  "id": "PC-AMBIGUOUS-DEALTYPE-002"
+}

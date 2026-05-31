@@ -1,0 +1,17 @@
+{
+  "id": "PC-VERSION-006",
+  "category": "VERSION",
+  "description": "Unknown spec version on lookup_citation. Even read-only tools must refuse unknown spec versions — version mismatch poisons downstream model output hashes.",
+  "payload": {
+    "authority_id": "IRC-1060",
+    "spec_version": "vNEXT"
+  },
+  "tool": "lookup_citation",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "unsupported_version",
+    "persistsDealState": false
+  },
+  "tags": ["version", "unknown-spec", "read-only-tool"]
+}

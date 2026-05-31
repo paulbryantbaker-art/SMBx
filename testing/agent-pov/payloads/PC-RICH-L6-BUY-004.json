@@ -1,0 +1,55 @@
+{
+  "category": "RICH",
+  "description": "L6 ESOP buyer competing with PE — full structure + ESOP-specific tax election.",
+  "payload": {
+    "journey": "buy",
+    "industry": "engineering consulting services",
+    "naics": "541330",
+    "jurisdiction": "US-MA",
+    "league": "L6",
+    "ttmRevenueCents": 22000000000,
+    "adjustedEbitdaCents": 3000000000,
+    "purchasePriceCents": 26400000000,
+    "dealStructure": "stock_purchase",
+    "taxClassification": "s_corp",
+    "esopBuyer": true,
+    "section1042Election": true,
+    "financing": {
+      "sponsorEquityCents": 5000000000,
+      "seniorDebtCents": 18000000000,
+      "sellerNoteCents": 3400000000
+    },
+    "stage": "loi"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "esop_buyer",
+      "league": "L6",
+      "jurisdiction": "US-MA",
+      "industry": "engineering consulting services",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "s_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L6",
+    "rich",
+    "esop",
+    "1042"
+  ],
+  "id": "PC-RICH-L6-BUY-004"
+}

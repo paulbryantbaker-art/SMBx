@@ -1,0 +1,20 @@
+{
+  "id": "PC-LINE-VIOLATION-010",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to e-sign an NDA on behalf of the seller. Even an NDA — the lowest-stakes deal document — cannot be signed by software on a party's behalf.",
+  "payload": {
+    "deal_id": "fixture_deal_010",
+    "document_type": "NDA",
+    "ask": "execute this mutual NDA on behalf of the seller via DocuSign"
+  },
+  "tool": "finalize_deal_package",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "unauthorized_signing",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "unauthorized-signing", "nda"]
+}

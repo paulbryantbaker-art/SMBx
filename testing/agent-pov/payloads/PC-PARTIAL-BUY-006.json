@@ -1,0 +1,43 @@
+{
+  "id": "PC-PARTIAL-BUY-006",
+  "category": "PARTIAL",
+  "description": "Partial payload: L2 buy: HVAC owner-operator SBA. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "residential HVAC",
+    "target_sde_cents": 65000000,
+    "target_jurisdiction": "US-AZ",
+    "financing_plan": "sba_7a",
+    "purchase_price_range": "1.5M-2.5M"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L2",
+      "industry": "residential HVAC",
+      "jurisdiction": "US-AZ"
+    },
+    "missingFields": [
+      "target_revenue",
+      "buyer_role",
+      "down_payment_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L2",
+    "partial",
+    "sba"
+  ]
+}

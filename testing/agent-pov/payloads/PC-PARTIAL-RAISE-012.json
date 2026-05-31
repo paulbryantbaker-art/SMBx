@@ -1,0 +1,41 @@
+{
+  "id": "PC-PARTIAL-RAISE-012",
+  "category": "PARTIAL",
+  "description": "Partial payload: Mezz: principal + leverage + EBITDA. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "instrument": "mezzanine",
+    "principal_cents": 3000000000,
+    "ebitda_cents": 800000000,
+    "total_leverage_target": 4.5,
+    "industry": "business services"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "debt_raise",
+      "industry": "business services"
+    },
+    "missingFields": [
+      "jurisdiction",
+      "senior_debt_cents",
+      "warrant_coverage_pct"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "debt",
+    "mezz",
+    "partial"
+  ]
+}

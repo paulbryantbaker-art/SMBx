@@ -630,6 +630,49 @@ If scope slips:
 6. Cut marketplace/listing work before core substrate.
 7. Cut UI experiments before app coherence and saved design primitives.
 
+## Deferred Scope — DEFINITIVE Extension (Value-Bridge + Longitudinal PMI)
+
+**Status:** Deferred 2026-05-27. Not in DEFINITIVE v1.x scope. Re-evaluation gate stated below.
+
+**Source document:** `/Users/paul/Downloads/v19/DEFINITIVE Extension_ Value Creation Modeling and Longitudinal PMI Management.pdf`. The PDF proposes extending DEFINITIVE from "deal-to-close" into the 12-36 month hold, multiplying per-deal MCP call volume by an order of magnitude. The strategic argument is real; the build cost is not justified yet.
+
+**What is deferred:**
+
+| Bucket | Scope |
+|---|---|
+| Models | 51 new models M224-M274 (M224 VALUE_BRIDGE; M225-M260 revenue/cost/working-capital/multiple-rerate/buy-and-build/financial/synergy levers; M261-M274 plans, variance, S-curves, course-correction, live exit, realized-value attribution, exit-readiness, realized-value-bridge certificate). |
+| Gates | 6 new gates G31-G36 (value-bridge thesis linkage, initiative-at-risk, exit readiness, hold-to-sell handoff, plus G35-G36 placeholders). |
+| Persistent objects | `HoldStateOverlay`, `IntegrationMilestoneLedger`, `SynergyRealizationLedger`, `ValueBridgeActualsSeries`. |
+| MCP tools | 18 new tools: `definitive.value.bridge_compute`, `definitive.value.lever_compute`, `definitive.value.synergy_model`, `definitive.value.multiple_rerate`, `definitive.plan.generate_100day`, `definitive.plan.generate_synergy_capture`, `definitive.plan.generate_tsa`, `definitive.plan.generate_imo`, `definitive.plan.register_playbook`, `definitive.hold.transition`, `definitive.hold.push_actuals`, `definitive.hold.update_milestone`, `definitive.hold.update_synergy_initiative`, `definitive.hold.register_event`, `definitive.hold.rebaseline`, plus three exit-readiness/certificate verbs. |
+| DealState lifecycle | `FINALIZED -> LIVE_HOLD` transition, baseline_v1/v2/current tiers, `resume_deal` reattachment. |
+| Authority Register seeds | Bain "12 is the new 5", McKinsey "Clearer view, tougher terrain", Acharya-Gottschalg-Hahn-Kehoe operational alpha, Simon-Kucher 2025, Hammer multiple-arbitrage research, Dealroom synergy benchmark, EY Exit Readiness 2025. |
+
+**What stays in v1.x scope** (so this defer does not break PMI):
+
+- The current four-stage PMI journey (PMI0 Day 0 → PMI1 Stabilization → PMI2 Assessment → PMI3 Optimization) in `server/prompts/gatePrompts.ts`.
+- The single `pmi-100-day-plan` deliverable template in `server/services/tools.ts`.
+- The `compose_pmi_plan` MCP tool entry point.
+- The PMI value-creation conformance cases already in the 472-case suite.
+- The Authority Register seeds that already cover post-close work (Bain "12 is the new 5" appears in marketing copy and can stay).
+
+**Why deferred:**
+
+1. **Priority order.** The current build target is: MCP server for any agent caller → Claude and ChatGPT connectors → web/mobile app finish. The Extension is downstream of all three.
+2. **Per-deal revenue economics.** The Extension's value comes from monthly tracking calls over 24-36 months × N initiatives. Without an active paying user base running deals through PMI in smbX, the call volume thesis is unproven and the 51-model build is speculative.
+3. **Substrate readiness.** The terminal-substrate spine (Run 19) is still in progress. Adding a hold-tier lifecycle on top of a spine that hasn't fully landed adds drift risk to v1.x.
+
+**Re-evaluation gate:**
+
+Reopen the Extension when **all three** are true:
+
+1. DEFINITIVE v1.0 + v1.1 are at "Definition Of Done" (this file's last section).
+2. Public spec is live and the Claude + ChatGPT connectors are listed and have been called by paying external users at least 30 days.
+3. At least 10 deals have passed through PMI0-PMI3 inside smbX with active user data on what hold-period features users actually request.
+
+When the gate fires: write a new memo (`DEFINITIVE_EXTENSION_REOPEN.md`), prioritize M224 VALUE_BRIDGE as the architectural anchor (everything else depends on it), and budget the Authority Register seed-pack for the seven empirical anchors above before any model lands.
+
+**Until then:** if someone (human or agent) cites the Extension PDF as in-flight scope, point them at this section. The PDF is a strategic option, not a commitment.
+
 ## Current Next Actions
 
 1. Terminal substrate schemas are now first-class in the schema registry: `DealPayload`, `ClassificationKey`, `MissingInputContract`, `DealState`, `CompletenessSpec`, `DealReadinessLevel`, `CompletenessReport`, `DealPackage`, plus the main portable take-back contracts. Surface smoke now fails if a tool map references a schema name the registry does not publish.

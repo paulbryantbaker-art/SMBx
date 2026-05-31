@@ -1,0 +1,46 @@
+{
+  "id": "PC-PARTIAL-BUY-010",
+  "category": "PARTIAL",
+  "description": "Partial payload: L4 LMM healthy buy: full intro fields. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "B2B services",
+    "target_jurisdiction": "US-TX",
+    "target_revenue_cents": 1800000000,
+    "target_ebitda_cents": 500000000,
+    "purchase_price_range": "20M-28M",
+    "buyer_role": "pe_sponsor_lmm",
+    "naics": "541512"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L4",
+      "industry": "B2B services",
+      "jurisdiction": "US-TX",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co"
+    },
+    "missingFields": [
+      "sponsor_equity_cents",
+      "senior_debt_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L4",
+    "partial",
+    "healthy"
+  ]
+}

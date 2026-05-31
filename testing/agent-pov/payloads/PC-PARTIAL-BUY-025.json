@@ -1,0 +1,44 @@
+{
+  "id": "PC-PARTIAL-BUY-025",
+  "category": "PARTIAL",
+  "description": "Partial payload: L8 buy: take-private platform. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "consumer apps",
+    "target_revenue_cents": 350000000000,
+    "target_ebitda_cents": 45000000000,
+    "target_jurisdiction": "US-DE",
+    "deal_type": "take_private",
+    "purchase_price_range": "4B-6B"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L7",
+      "industry": "consumer apps",
+      "jurisdiction": "US-DE"
+    },
+    "missingFields": [
+      "buyer_role",
+      "sponsor_equity_cents",
+      "rollover_pct"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L8",
+    "partial",
+    "take-private"
+  ]
+}

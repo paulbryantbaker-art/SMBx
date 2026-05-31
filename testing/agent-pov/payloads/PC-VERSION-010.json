@@ -1,0 +1,19 @@
+{
+  "id": "PC-VERSION-010",
+  "category": "VERSION",
+  "description": "Malformed version string 'banana' supplied for methodology_version. Substrate must refuse with unsupported_version envelope; must NOT silently strip/normalize/coerce to default.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "B2B services",
+    "target_jurisdiction": "US-TX",
+    "methodology_version": "banana"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "unsupported_version",
+    "persistsDealState": false
+  },
+  "tags": ["version", "malformed", "banana"]
+}

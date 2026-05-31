@@ -1,20 +1,9 @@
-import { useMemo, type CSSProperties } from "react";
+import { useMemo } from "react";
 import { V6Icon } from "../icons";
 import type { FileListView, FileScope, OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
 import { useTodayOperatingBrief, type TodayFileReviewItem } from "../../../hooks/useTodayOperatingBrief";
 import { useV6WorkspaceData, type WorkspaceDeal, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
-import { DESKTOP_TEXTURES, STUDIO_TEXTURES } from "../../../lib/randomTextures";
-import {
-  studioCompeteButtonItemStyles,
-  studioCompeteCardStyles,
-  studioGlassBackdrop,
-  studioListCardStyles,
-  studioLiquidGlassFilter,
-  studioLiquidGlassShadow,
-  studioTextureCardBackground,
-  studioTextureCardStyles,
-} from "../styles/studioSurfaces";
 import { DefinitiveSurfacePanel } from "../shared/DefinitiveSurfacePanel";
 
 interface FilesRootProps {
@@ -237,161 +226,259 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
   };
 
   return (
-    <div className="m-fade-up m-page-flow" style={F.page}>
-      <section style={F.hero}>
-        <div style={F.heroCopy}>
-          <h1 style={F.title}>Private deal libraries, plus shared data rooms.</h1>
-          <p style={F.sub}>
+    <div className="wk-content m-fade-up" style={{ maxWidth: 1180, margin: "0 auto" }}>
+      {/* Page header */}
+      <div className="pg-head">
+        <div>
+          <div className="pg-eyebrow">Files</div>
+          <div className="pg-title">Private deal libraries, plus shared data rooms.</div>
+          <p className="pg-sub">
             Every deal has its own file library. The data room is the shared diligence drive inside that library, with artifacts, drafted legal docs, review items, and executed docs.
           </p>
         </div>
-      </section>
+        <div className="pg-actions">
+          <button className="kebab" type="button" aria-label="More" onClick={() => ask("Summarize my files: counts by status, what needs action today, and the single most important file to review.")}>⋯</button>
+          <button className="wkbtn primary" type="button" onClick={() => ask("Help me upload or create a new file for this workspace.")}>Upload</button>
+        </div>
+      </div>
 
-      <section style={F.section}>
-        <SectionHead title="Source lanes" sub="Portfolio > deal > stage for all files. Data rooms add artifact, action, review, and executed status." />
-        <div className="m-flow-grid" style={F.shortcutGrid}>
-          {shortcuts.map(shortcut => {
-            return (
+      {/* KPI tiles */}
+      <div className="mhead">
+        <div className="mh">
+          <span className="l">All files</span>
+          <span className="v">{shortcuts[0]?.count ?? "—"}</span>
+          <span className="s">across deals</span>
+        </div>
+        <div className="mh">
+          <span className="l">Deal libraries</span>
+          <span className="v">{shortcuts[1]?.count ?? "—"}</span>
+          <span className="s">active deals</span>
+        </div>
+        <div className="mh">
+          <span className="l">Needs action</span>
+          <span className="v" style={{ color: "var(--accent-strong)" }}>{shortcuts[2]?.count ?? "—"}</span>
+          <span className="s">asks waiting</span>
+        </div>
+        <div className="mh">
+          <span className="l">Data rooms</span>
+          <span className="v">{shortcuts[3]?.count ?? "—"}</span>
+          <span className="s">shared rooms</span>
+        </div>
+      </div>
+
+      {/* Source lanes — flat shortcut cards */}
+      <div className="wksec">
+        <div className="wksec-title">Source lanes</div>
+        <p style={{ margin: "0 0 14px", color: "var(--ink-2)", fontSize: ".9rem" }}>
+          Portfolio › deal › stage for all files. Data rooms add artifact, action, review, and executed status.
+        </p>
+        <div className="wkgrid g4">
+          {shortcuts.map(shortcut => (
             <button
               key={shortcut.label}
               type="button"
-              className="m-nudge-soft"
-              style={{ ...F.shortcutCard, backgroundImage: studioTextureCardBackground(shortcutTexture(shortcut.tone)) }}
+              className="wkcard tap"
               onClick={() => runShortcut(shortcut)}
             >
-              <span style={F.shortcutMeta}>{shortcut.count} {shortcut.unit}</span>
-              <strong style={F.shortcutTitle}>{shortcut.label}</strong>
-              <span style={F.shortcutAudience}>{shortcut.audience}</span>
-              <span style={F.shortcutSub}>{shortcut.sub}</span>
-              <span style={F.shortcutAction}>Open</span>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
+                <span style={{
+                  width: 32, height: 32, borderRadius: 9,
+                  background: "var(--surface-2)",
+                  display: "grid", placeItems: "center",
+                  color: "var(--accent-strong)",
+                }}>
+                  <V6Icon name={shortcut.icon} size={16} />
+                </span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "1.6rem", fontWeight: 500, color: "var(--ink)", lineHeight: 1 }}>
+                  {shortcut.count}
+                </span>
+              </div>
+              <div className="wkcard-title">{shortcut.label}</div>
+              <div className="wkcard-sub">{shortcut.sub}</div>
+              <div style={{ marginTop: 10, fontFamily: "var(--font-mono)", fontSize: ".72rem", color: "var(--ink-3)" }}>
+                {shortcut.audience}
+              </div>
             </button>
-            );
-          })}
+          ))}
         </div>
-      </section>
+      </div>
 
-      <section style={F.section}>
+      {/* DEFINITIVE panel */}
+      <div className="wksec">
         <DefinitiveSurfacePanel
           surface="files"
           title="DEFINITIVE read for Files."
           compact
           onTalkToYulia={ask}
         />
-      </section>
+      </div>
 
-      <section className="m-flow-grid" style={F.grid}>
-        <div style={F.card}>
-          <div style={F.cardHead}>
-            <div>
-              <h2 style={F.cardTitle}>Recently touched</h2>
-              <p style={F.cardSub}>Last files Yulia or you touched, plus anything waiting on you.</p>
-            </div>
-            <button
-              style={F.cardAction}
-              type="button"
-              onClick={() => openTab({ id: "files-all", kind: "files-list", title: "All files", fileListView: "all" })}
-            >
-              See all
-            </button>
-          </div>
-          <div className="m-flow-grid" style={F.rows}>
-            {workspace.loading && <div className="mono" style={F.loading}>LOADING REAL FILES…</div>}
-            {workspace.error && <div style={F.inlineError}>Couldn&rsquo;t load workspace files ({workspace.error}).</div>}
-            {!workspace.loading && recents.length === 0 && (
-              <EmptyRows
-                title="No recent files yet"
-                text="Generated docs, analyses, uploads, and data-room artifacts will appear here once this account has workspace data."
-                action="Ask Yulia to start"
-                onClick={() => ask("Help me create or import the first file for this workspace.")}
-              />
-            )}
-            {recents.map((row, index) => (
-              <FileListRow key={`${row.id ?? row.title}-${index}`} row={row} last={index === recents.length - 1} onClick={() => openDoc(row)} />
-            ))}
-          </div>
-        </div>
-
-        <div style={F.card}>
-          <div style={F.cardHead}>
-            <div>
-              <h2 style={F.cardTitle}>Current rooms</h2>
-              <p style={F.cardSub}>Shared diligence drives by deal. Open a deal to see what is private versus in the room.</p>
-            </div>
-          </div>
-          <div className="m-flow-grid" style={F.rows}>
-            {!workspace.loading && rooms.length === 0 && (
-              <EmptyRows
-                title="No deal libraries yet"
-                text="When you add a deal, its private library and data-room boundary will show up here."
-                action="Create with Yulia"
-                onClick={() => ask("Help me create my first deal library.")}
-              />
-            )}
-            {rooms.map((room, index) => (
+      {/* Recently touched + Current rooms */}
+      <div className="wksec">
+        <div className="wkgrid g2">
+          {/* Recently touched */}
+          <div>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 14 }}>
+              <div>
+                <div className="wksec-title" style={{ marginBottom: 2 }}>Recently touched</div>
+                <p style={{ margin: 0, color: "var(--ink-2)", fontSize: ".84rem" }}>Last files Yulia or you touched, plus anything waiting on you.</p>
+              </div>
               <button
-                key={`${room.id}-${room.deal}`}
+                className="wkbtn"
                 type="button"
-                style={{ ...F.roomRow, borderBottom: index === rooms.length - 1 ? "none" : "1px solid var(--m-outline-var)" }}
-                onClick={() => openDeal(room, "data-room")}
+                style={{ whiteSpace: "nowrap", flexShrink: 0 }}
+                onClick={() => openTab({ id: "files-all", kind: "files-list", title: "All files", fileListView: "all" })}
               >
-                <span style={F.roomIcon}><V6Icon name="deal" size={18} /></span>
-                <span style={F.roomText}>
-                  <strong>{room.deal}</strong>
-                  <span>{room.meta}</span>
-                </span>
-                <span style={F.roomMeta}>
-                  <strong>{room.stage}</strong>
-                  <span>{room.count}</span>
-                </span>
+                See all
               </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section style={F.lowerGrid}>
-        <div style={F.controlCard}>
-          <h2 style={F.controlTitle}>Source control for deal work.</h2>
-          <div style={F.controlGrid}>
-            {FILE_CONTROL_STACK.map(item => (
-              <button
-                key={item.title}
-                type="button"
-                className="m-nudge-soft"
-                style={F.controlItem}
-                onClick={() => ask(`Explain file source control: ${item.title}. ${item.sub}`)}
-              >
-                <strong>{item.title}</strong>
-                <span>{item.sub}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div id="files-work-queue" style={F.card}>
-          <div style={F.cardHead}>
-            <div>
-              <h2 style={F.cardTitle}>Data-room work queue</h2>
-              <p style={F.cardSub}>Requests, reviews, execution items, and failed generations waiting for a decision.</p>
+            </div>
+            <div className="wkcard" style={{ padding: 0, overflow: "hidden" }}>
+              {workspace.loading && (
+                <div className="muted" style={{ padding: "14px 18px", letterSpacing: ".08em" }}>LOADING REAL FILES…</div>
+              )}
+              {workspace.error && (
+                <div style={{ margin: 12, padding: "9px 11px", borderRadius: 10, background: "#FBE7DD", color: "#B0461F", fontSize: 12 }}>
+                  Couldn&rsquo;t load workspace files ({workspace.error}).
+                </div>
+              )}
+              {!workspace.loading && recents.length === 0 && (
+                <EmptyRows
+                  title="No recent files yet"
+                  text="Generated docs, analyses, uploads, and data-room artifacts will appear here once this account has workspace data."
+                  action="Ask Yulia to start"
+                  onClick={() => ask("Help me create or import the first file for this workspace.")}
+                />
+              )}
+              {recents.map((row, index) => (
+                <FileListRow key={`${row.id ?? row.title}-${index}`} row={row} last={index === recents.length - 1} onClick={() => openDoc(row)} />
+              ))}
             </div>
           </div>
-          <div className="m-flow-grid" style={F.rows}>
-            {operating.loading && <div className="mono" style={F.loading}>READING TODAY QUEUE…</div>}
-            {operating.error && <div style={F.inlineError}>Couldn&rsquo;t load Today queue ({operating.error}).</div>}
-            {!workspace.loading && !operating.loading && actions.length === 0 && (
-              <EmptyRows
-                title="Nothing needs action"
-                text="Requests, reviews, execution items, and failed generations will appear here when they exist."
-                action="Ask Yulia"
-                onClick={() => ask("What should I work on next in my files?")}
-              />
-            )}
-            {actions.map((row, index) => (
-              <FileListRow key={`${row.id ?? row.title}-${index}`} row={row} last={index === actions.length - 1} onClick={() => openDoc(row)} />
-            ))}
+
+          {/* Current rooms */}
+          <div>
+            <div style={{ marginBottom: 14 }}>
+              <div className="wksec-title" style={{ marginBottom: 2 }}>Current rooms</div>
+              <p style={{ margin: 0, color: "var(--ink-2)", fontSize: ".84rem" }}>Shared diligence drives by deal. Open a deal to see what is private versus in the room.</p>
+            </div>
+            <div className="wkcard" style={{ padding: 0, overflow: "hidden" }}>
+              {!workspace.loading && rooms.length === 0 && (
+                <EmptyRows
+                  title="No deal libraries yet"
+                  text="When you add a deal, its private library and data-room boundary will show up here."
+                  action="Create with Yulia"
+                  onClick={() => ask("Help me create my first deal library.")}
+                />
+              )}
+              {rooms.map((room, index) => (
+                <button
+                  key={`${room.id}-${room.deal}`}
+                  type="button"
+                  style={{
+                    all: "unset",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    width: "100%",
+                    boxSizing: "border-box",
+                    padding: "14px 18px",
+                    borderBottom: index === rooms.length - 1 ? "none" : "1px solid var(--line)",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => openDeal(room, "data-room")}
+                >
+                  <span style={{
+                    flex: "none",
+                    width: 34, height: 34, borderRadius: 9,
+                    background: "var(--surface-2)",
+                    display: "grid", placeItems: "center",
+                    color: "var(--ink-2)",
+                  }}>
+                    <V6Icon name="deal" size={18} />
+                  </span>
+                  <span style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
+                    <strong style={{ color: "var(--ink)", fontWeight: 600, fontSize: ".9rem" }}>{room.deal}</strong>
+                    <span style={{ color: "var(--ink-3)", fontSize: ".78rem" }}>{room.meta}</span>
+                  </span>
+                  <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, flexShrink: 0 }}>
+                    <strong style={{ color: "var(--ink)", fontWeight: 500, fontSize: ".84rem" }}>{room.stage}</strong>
+                    <span className="muted">{room.count}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-      </section>
+      </div>
+
+      {/* Source control + Work queue */}
+      <div className="wksec">
+        <div className="wkgrid g2">
+          {/* Source control */}
+          <div className="wkcard">
+            <div className="wkcard-title" style={{ fontSize: "1.15rem", marginBottom: 4 }}>Source control for deal work.</div>
+            <div style={{ display: "grid", gap: 10, marginTop: 14 }}>
+              {FILE_CONTROL_STACK.map(item => (
+                <button
+                  key={item.title}
+                  type="button"
+                  style={{
+                    all: "unset",
+                    boxSizing: "border-box",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 4,
+                    padding: "13px 14px",
+                    borderRadius: 10,
+                    border: "1px solid var(--line)",
+                    background: "var(--surface-2)",
+                    cursor: "pointer",
+                    transition: "border-color .15s, background .15s",
+                  }}
+                  onClick={() => ask(`Explain file source control: ${item.title}. ${item.sub}`)}
+                >
+                  <strong style={{ color: "var(--ink)", fontWeight: 600, fontSize: ".9rem" }}>{item.title}</strong>
+                  <span style={{ color: "var(--ink-2)", fontSize: ".82rem", lineHeight: 1.45 }}>{item.sub}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Work queue */}
+          <div id="files-work-queue">
+            <div style={{ marginBottom: 14 }}>
+              <div className="wksec-title" style={{ marginBottom: 2 }}>Data-room work queue</div>
+              <p style={{ margin: 0, color: "var(--ink-2)", fontSize: ".84rem" }}>Requests, reviews, execution items, and failed generations waiting for a decision.</p>
+            </div>
+            <div className="wkcard" style={{ padding: 0, overflow: "hidden" }}>
+              {operating.loading && (
+                <div className="muted" style={{ padding: "14px 18px", letterSpacing: ".08em" }}>READING TODAY QUEUE…</div>
+              )}
+              {operating.error && (
+                <div style={{ margin: 12, padding: "9px 11px", borderRadius: 10, background: "#FBE7DD", color: "#B0461F", fontSize: 12 }}>
+                  Couldn&rsquo;t load Today queue ({operating.error}).
+                </div>
+              )}
+              {!workspace.loading && !operating.loading && actions.length === 0 && (
+                <EmptyRows
+                  title="Nothing needs action"
+                  text="Requests, reviews, execution items, and failed generations will appear here when they exist."
+                  action="Ask Yulia"
+                  onClick={() => ask("What should I work on next in my files?")}
+                />
+              )}
+              {actions.map((row, index) => (
+                <FileListRow key={`${row.id ?? row.title}-${index}`} row={row} last={index === actions.length - 1} onClick={() => openDoc(row)} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="tabfoot">
+        <span>{recents.length} recent · {rooms.length} rooms · {actions.length} queued</span>
+        <span>Files surface</span>
+      </div>
     </div>
   );
 }
@@ -409,7 +496,6 @@ export function V6FilesListView({
 }) {
   const { workspace, operating, allFiles, rooms, actions } = useFilesWorkspace(user);
   const copy = activeListCopy(view);
-  const s = detailTone(view);
   const listLoading = workspace.loading || (view === "needs-action" && operating.loading);
   const listError = workspace.error || (view === "needs-action" ? operating.error : null);
 
@@ -449,16 +535,20 @@ export function V6FilesListView({
   };
 
   return (
-    <div className="m-fade-up m-page-flow" style={F.detailPage}>
-      <section style={{ ...F.detailHero, backgroundImage: s.bg }}>
+    <div className="wk-content m-fade-up" style={{ maxWidth: 1180, margin: "0 auto" }}>
+      {/* Page header — flat, no texture/gradient */}
+      <div className="pg-head">
         <div>
-          <h1 style={F.detailTitle}>{copy.title}</h1>
-          <p style={F.detailSub}>{copy.sub}</p>
+          <div className="pg-eyebrow">{copy.eyebrow}</div>
+          <div className="pg-title">{copy.title}</div>
+          <p className="pg-sub">{copy.sub}</p>
         </div>
-        <button className="m-btn tonal" type="button" onClick={() => ask(copy.prompt)}>
-          Ask Yulia
-        </button>
-      </section>
+        <div className="pg-actions">
+          <button className="wkbtn primary" type="button" onClick={() => ask(copy.prompt)}>
+            Ask Yulia
+          </button>
+        </div>
+      </div>
 
       <ActiveFilesList
         activeList={view}
@@ -487,10 +577,19 @@ function EmptyRows({
   onClick: () => void;
 }) {
   return (
-    <div style={F.emptyRows}>
-      <strong>{title}</strong>
+    <div style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "flex-start",
+      gap: 9,
+      padding: "18px 18px 20px",
+      color: "var(--ink-2)",
+      fontSize: ".85rem",
+      lineHeight: 1.45,
+    }}>
+      <strong style={{ color: "var(--ink)", fontWeight: 600 }}>{title}</strong>
       <span>{text}</span>
-      <button className="m-btn tonal" type="button" onClick={onClick}>{action}</button>
+      <button className="wkbtn" type="button" onClick={onClick}>{action}</button>
     </div>
   );
 }
@@ -523,77 +622,123 @@ function ActiveFilesList({
   const roomScope: FileScope = activeList === "data-rooms" ? "data-room" : "all";
 
   return (
-    <div style={F.activeListCard}>
-      <div style={F.activeListHead}>
+    <div className="wksec">
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 16 }}>
         <div>
-          <h2 style={F.cardTitle}>{copy.title}</h2>
-          <p style={F.cardSub}>{copy.sub}</p>
+          <div className="wksec-title" style={{ marginBottom: 2 }}>{copy.title}</div>
+          <p style={{ margin: 0, color: "var(--ink-2)", fontSize: ".84rem" }}>{copy.sub}</p>
         </div>
-        <button className="m-btn tonal" type="button" onClick={() => ask(copy.prompt)}>
+        <button className="wkbtn" type="button" onClick={() => ask(copy.prompt)}>
           Ask Yulia
         </button>
       </div>
 
-      <div className="m-flow-grid" style={F.rows}>
-        {loading && <div className="mono" style={F.loading}>LOADING REAL FILES…</div>}
-        {error && <div style={F.inlineError}>Couldn&rsquo;t load workspace files ({error}).</div>}
+      {loading && (
+        <div className="muted" style={{ padding: "14px 0", letterSpacing: ".08em" }}>LOADING REAL FILES…</div>
+      )}
+      {error && (
+        <div style={{ marginBottom: 12, padding: "9px 11px", borderRadius: 10, background: "#FBE7DD", color: "#B0461F", fontSize: 12 }}>
+          Couldn&rsquo;t load workspace files ({error}).
+        </div>
+      )}
 
-        {!loading && showRooms && rooms.length === 0 && (
-          <EmptyRows
-            title="No deal libraries yet"
-            text="When you add a deal, its private library and data-room boundary will show up here."
-            action="Create with Yulia"
-            onClick={() => ask("Help me create my first deal library.")}
-          />
-        )}
+      {!loading && showRooms && rooms.length === 0 && (
+        <EmptyRows
+          title="No deal libraries yet"
+          text="When you add a deal, its private library and data-room boundary will show up here."
+          action="Create with Yulia"
+          onClick={() => ask("Help me create my first deal library.")}
+        />
+      )}
 
-        {!loading && !showRooms && rows.length === 0 && (
-          <EmptyRows
-            title={activeList === "needs-action" ? "Nothing needs action" : "No files yet"}
-            text={activeList === "needs-action"
-              ? "Requests, reviews, execution items, and failed generations will appear here when they exist."
-              : "Generated docs, analyses, uploads, and data-room artifacts will appear here once this account has workspace data."}
-            action="Ask Yulia"
-            onClick={() => ask(copy.prompt)}
-          />
-        )}
+      {!loading && !showRooms && rows.length === 0 && (
+        <EmptyRows
+          title={activeList === "needs-action" ? "Nothing needs action" : "No files yet"}
+          text={activeList === "needs-action"
+            ? "Requests, reviews, execution items, and failed generations will appear here when they exist."
+            : "Generated docs, analyses, uploads, and data-room artifacts will appear here once this account has workspace data."}
+          action="Ask Yulia"
+          onClick={() => ask(copy.prompt)}
+        />
+      )}
 
-        {showRooms && rooms.map((room, index) => (
-          <button
-            key={`${activeList}-${room.id}-${room.deal}`}
-            type="button"
-            style={{ ...F.roomRow, borderBottom: index === rooms.length - 1 ? "none" : "1px solid var(--m-outline-var)" }}
-            onClick={() => openDeal(room, roomScope)}
-          >
-            <span style={F.roomIcon}><V6Icon name={activeList === "data-rooms" ? "library" : "deal"} size={18} /></span>
-            <span style={F.roomText}>
-              <strong>{room.deal}</strong>
-              <span>{room.meta}</span>
-            </span>
-            <span style={F.roomMeta}>
-              <strong>{activeList === "data-rooms" ? room.stage : "Open library"}</strong>
-              <span>{room.count}</span>
-            </span>
-          </button>
-        ))}
+      {showRooms && rooms.length > 0 && (
+        <>
+          <table className="wktable">
+            <thead><tr>
+              <th>Deal</th>
+              <th>Details</th>
+              <th>Stage</th>
+              <th className="r">Items</th>
+              <th className="r">Action</th>
+            </tr></thead>
+            <tbody>
+              {rooms.map(room => (
+                <tr key={`${activeList}-${room.id}-${room.deal}`} onClick={() => openDeal(room, roomScope)}>
+                  <td>
+                    <div className="cellname">
+                      <span className="logo"><V6Icon name={activeList === "data-rooms" ? "library" : "deal"} size={16} /></span>
+                      <div><div className="nm">{room.deal}</div></div>
+                    </div>
+                  </td>
+                  <td><span className="muted">{room.meta}</span></td>
+                  <td>
+                    <span className={`statpill ${roomStagePill(room.stage)}`}>
+                      <span className="d" />{room.stage}
+                    </span>
+                  </td>
+                  <td className="r amt">{room.count}</td>
+                  <td className="r">
+                    <button
+                      type="button"
+                      className="reviewbtn"
+                      onClick={e => { e.stopPropagation(); openDeal(room, roomScope); }}
+                    >
+                      Open
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="tabfoot">
+            <span>{rooms.length} {rooms.length === 1 ? "room" : "rooms"}</span>
+            <span>{activeList === "data-rooms" ? "Shared diligence" : "Deal libraries"}</span>
+          </div>
+        </>
+      )}
 
-        {!showRooms && groups.map((group, groupIndex) => (
-          <div key={`${activeList}-${group.deal}`} style={F.fileGroup}>
-            <div style={F.fileGroupHead}>
-              <strong>{group.deal}</strong>
-              <span>{group.rows.length} {group.rows.length === 1 ? "file" : "files"}</span>
-            </div>
+      {!showRooms && groups.length > 0 && groups.map((group, groupIndex) => (
+        <div key={`${activeList}-${group.deal}`} style={{ marginTop: groupIndex > 0 ? 22 : 0 }}>
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+            padding: "6px 0 10px",
+            color: "var(--ink-3)",
+            fontSize: ".78rem",
+            fontWeight: 600,
+            letterSpacing: ".04em",
+            textTransform: "uppercase",
+            borderBottom: "1px solid var(--line)",
+            marginBottom: 0,
+          }}>
+            <strong style={{ fontWeight: 600, color: "var(--ink-2)" }}>{group.deal}</strong>
+            <span style={{ fontFamily: "var(--font-mono)" }}>{group.rows.length} {group.rows.length === 1 ? "file" : "files"}</span>
+          </div>
+          <div className="wkcard" style={{ padding: 0, overflow: "hidden" }}>
             {group.rows.map((row, index) => (
               <FileListRow
                 key={`${activeList}-${group.deal}-${row.id ?? row.title}-${index}`}
                 row={row}
-                last={index === group.rows.length - 1 && groupIndex === groups.length - 1}
+                last={index === group.rows.length - 1}
                 onClick={() => openDoc(row)}
               />
             ))}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -733,77 +878,81 @@ function activeListCopy(view: FileListView) {
 }
 
 function FileListRow({ row, last, onClick }: { row: FileRow; last: boolean; onClick: () => void }) {
-  const t = tone(row.tone);
+  const pill = toneToPill(row.tone);
   return (
     <button
       type="button"
-      style={{ ...F.fileRow, borderBottom: last ? "none" : "1px solid var(--m-outline-var)" }}
+      style={{
+        all: "unset",
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        width: "100%",
+        boxSizing: "border-box",
+        padding: "13px 18px",
+        borderBottom: last ? "none" : "1px solid var(--line)",
+        cursor: "pointer",
+        transition: "background .12s",
+      }}
       onClick={onClick}
     >
-      <span style={{ ...F.fileIcon, background: t.soft, color: t.ink }}>
+      <span style={{
+        flex: "none",
+        width: 34, height: 34, borderRadius: 9,
+        background: "var(--surface-2)",
+        display: "grid", placeItems: "center",
+        color: "var(--ink-2)",
+      }}>
         <V6Icon name={row.kind === "chart" ? "chart" : row.kind === "deal" ? "deal" : "doc"} size={18} />
       </span>
-      <span style={F.fileText}>
-        <strong>{row.title}</strong>
-        <span>{row.sub}</span>
+      <span style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
+        <strong style={{ color: "var(--ink)", fontWeight: 600, fontSize: ".9rem" }}>{row.title}</strong>
+        <span style={{ color: "var(--ink-3)", fontSize: ".78rem" }}>{row.sub}</span>
         {row.definitivePacketType && (
-          <span style={F.fileDefinitiveMeta}>
+          <span style={{
+            marginTop: 3,
+            width: "fit-content",
+            maxWidth: "100%",
+            padding: "3px 7px",
+            borderRadius: 999,
+            background: "var(--accent-soft)",
+            color: "var(--accent-strong)",
+            fontFamily: "var(--font-mono)",
+            fontSize: "10.5px",
+            fontWeight: 500,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}>
             {row.definitivePacketType}
             {row.definitiveDisclosureStatus ? ` · ${disclosureStatusLabel(row.definitiveDisclosureStatus, row.definitiveSourceGaps?.length ?? 0)}` : ""}
             {row.definitiveNextSuggestedCalls?.[0] ? ` · next ${row.definitiveNextSuggestedCalls[0].label}` : ""}
           </span>
         )}
       </span>
-      <span style={{ ...F.filePill, background: t.soft, color: t.ink }}>{row.status}</span>
+      <span className={`statpill ${pill.cls}`}>
+        <span className="d" />{row.status}
+      </span>
     </button>
   );
 }
 
-function SectionHead({ title, sub }: { title: string; sub: string }) {
-  return (
-    <div style={F.sectionHead}>
-      <h2 style={F.sectionTitle}>{title}</h2>
-      <p style={F.sectionSub}>{sub}</p>
-    </div>
-  );
+function toneToPill(name: FileRow["tone"]): { cls: string } {
+  const map: Record<FileRow["tone"], string> = {
+    draft: "review",
+    review: "diligence",
+    locked: "missing",
+    done: "good",
+  };
+  return { cls: map[name] };
 }
 
-function tone(name: FileRow["tone"]) {
-  const tones: Record<FileRow["tone"], { ink: string; soft: string }> = {
-    draft: { ink: "#9C7128", soft: "#FAF1E1" },
-    review: { ink: "#4F60BD", soft: "#EEF1FB" },
-    locked: { ink: "#555E6F", soft: "#F0F2F8" },
-    done: { ink: "#3F8A6A", soft: "#E3EFEA" },
-  };
-  return tones[name];
-}
-
-function shortcutTexture(name: Shortcut["tone"]) {
-  const textures: Record<Shortcut["tone"], string> = {
-    all: STUDIO_TEXTURES.navy,
-    deals: STUDIO_TEXTURES.green,
-    action: STUDIO_TEXTURES.rose,
-    room: STUDIO_TEXTURES.blue,
-  };
-  return textures[name];
-}
-
-function detailTone(view: FileListView) {
-  const map: Record<FileListView, { bg: string }> = {
-    all: {
-      bg: `linear-gradient(135deg, rgba(20,39,72,0.72), rgba(71,116,169,0.48) 56%, rgba(187,212,229,0.28)), url('${DESKTOP_TEXTURES.filesAll}')`,
-    },
-    "deal-libraries": {
-      bg: `linear-gradient(135deg, rgba(23,74,58,0.70), rgba(73,137,108,0.48) 58%, rgba(199,224,211,0.30)), url('${DESKTOP_TEXTURES.filesDeals}')`,
-    },
-    "needs-action": {
-      bg: `linear-gradient(135deg, rgba(114,74,18,0.70), rgba(198,145,64,0.48) 58%, rgba(249,226,173,0.30)), url('${DESKTOP_TEXTURES.filesAction}')`,
-    },
-    "data-rooms": {
-      bg: `linear-gradient(135deg, rgba(58,52,123,0.72), rgba(111,103,177,0.50) 56%, rgba(218,214,241,0.30)), url('${DESKTOP_TEXTURES.filesRoom}')`,
-    },
-  };
-  return map[view];
+function roomStagePill(stage: string): string {
+  const s = stage.toLowerCase();
+  if (s.includes("active") || s.includes("ready")) return "good";
+  if (s.includes("action")) return "review";
+  if (s.includes("attorney") || s.includes("review")) return "diligence";
+  return "missing";
 }
 
 function slug(input: string): string {
@@ -931,371 +1080,3 @@ function fmtRelative(iso?: string | null): string {
     return "recently";
   }
 }
-
-const filesHeroWash = `linear-gradient(135deg, rgba(13,36,62,0.68) 0%, rgba(42,96,128,0.48) 52%, rgba(18,74,79,0.62) 100%), url('${DESKTOP_TEXTURES.filesHero}')`;
-
-const F: Record<string, CSSProperties> = {
-  page: {
-    minHeight: "100%",
-    width: "min(100%, 1440px)",
-    maxWidth: 1440,
-    margin: "0 auto",
-    boxSizing: "border-box",
-  },
-  detailPage: {
-    minHeight: "100%",
-    width: "min(100%, 1440px)",
-    maxWidth: 1440,
-    margin: "0 auto",
-    boxSizing: "border-box",
-  },
-  detailHero: {
-    minHeight: 240,
-    borderRadius: 24,
-    padding: 30,
-    marginBottom: 22,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    border: "1px solid rgba(255,255,255,0.46)",
-    boxShadow: "0 44px 110px rgba(23,38,63,0.29), 0 18px 42px rgba(26,34,51,0.15), 0 4px 12px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.22)",
-    display: "flex",
-    alignItems: "flex-end",
-    justifyContent: "space-between",
-    gap: 24,
-  },
-  detailEyebrow: {
-    fontSize: 10,
-    letterSpacing: "0.16em",
-    fontWeight: 800,
-    color: "#FFFFFF",
-  },
-  detailTitle: {
-    margin: "8px 0 0",
-    maxWidth: 780,
-    fontSize: "clamp(42px, 4.2vw, 64px)",
-    lineHeight: 0.94,
-    letterSpacing: "-0.06em",
-    color: "#FFFFFF",
-    textWrap: "balance",
-  },
-  detailSub: {
-    margin: "14px 0 0",
-    maxWidth: 760,
-    fontSize: 15,
-    lineHeight: 1.5,
-    color: "#FFFFFF",
-  },
-  hero: {
-    display: "flex",
-    alignItems: "flex-end",
-    minHeight: 350,
-    padding: 34,
-    borderRadius: 24,
-    backgroundImage: filesHeroWash,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    border: "1px solid rgba(255,255,255,0.46)",
-    boxShadow: "0 46px 116px rgba(23,38,63,0.29), 0 20px 46px rgba(26,34,51,0.15), 0 4px 12px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.22)",
-    marginBottom: 30,
-    ...studioGlassBackdrop,
-  },
-  heroCopy: {
-    maxWidth: 900,
-  },
-  eyebrow: {
-    fontSize: 10,
-    letterSpacing: "0.16em",
-    fontWeight: 800,
-    color: "#FFFFFF",
-  },
-  title: {
-    margin: 0,
-    maxWidth: 880,
-    fontSize: "clamp(44px, 5vw, 70px)",
-    lineHeight: 0.94,
-    letterSpacing: "-0.055em",
-    textWrap: "balance",
-    color: "#FFFFFF",
-  },
-  sub: {
-    margin: "16px 0 0",
-    maxWidth: 760,
-    fontSize: 16,
-    lineHeight: 1.55,
-    color: "#FFFFFF",
-  },
-  boundaryCard: {
-    display: "grid",
-    gap: 12,
-    alignContent: "end",
-  },
-  boundaryItem: {
-    padding: 18,
-    borderRadius: 20,
-    background: "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.24), transparent 44%), linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05))",
-    border: "0.5px solid rgba(255,255,255,0.34)",
-    boxShadow: "0 16px 34px -22px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.34)",
-    backdropFilter: "blur(5px)",
-    WebkitBackdropFilter: "blur(5px)",
-  },
-  boundaryEyebrow: {
-    fontSize: 9,
-    letterSpacing: "0.14em",
-    color: "#FFFFFF",
-    fontWeight: 800,
-  },
-  boundaryTitle: {
-    display: "block",
-    marginTop: 7,
-    color: "#FFFFFF",
-    fontSize: 16,
-    letterSpacing: "-0.02em",
-  },
-  boundaryText: {
-    display: "block",
-    marginTop: 5,
-    color: "#FFFFFF",
-    fontSize: 13,
-    lineHeight: 1.45,
-  },
-  section: {
-    marginBottom: 34,
-  },
-  sectionHead: {
-    marginBottom: 14,
-  },
-  sectionEyebrow: {
-    fontSize: 10,
-    letterSpacing: "0.16em",
-    fontWeight: 800,
-    color: "var(--m-on-primary-container)",
-  },
-  sectionTitle: {
-    margin: 0,
-    fontSize: 32,
-    lineHeight: 1,
-    letterSpacing: "-0.045em",
-    color: "var(--m-on-surface)",
-  },
-  sectionSub: {
-    margin: "8px 0 0",
-    maxWidth: 780,
-    fontSize: 14,
-    color: "var(--m-on-surface-mid)",
-  },
-  shortcutGrid: {
-    ...studioTextureCardStyles.grid,
-  },
-  shortcutCard: {
-    ...studioTextureCardStyles.card,
-    cursor: "pointer",
-  },
-  shortcutMeta: studioTextureCardStyles.meta,
-  shortcutTitle: {
-    ...studioTextureCardStyles.title,
-  },
-  shortcutAudience: {
-    ...studioTextureCardStyles.audience,
-  },
-  shortcutSub: {
-    ...studioTextureCardStyles.detail,
-  },
-  shortcutAction: {
-    ...studioTextureCardStyles.action,
-  },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "minmax(360px, 0.9fr) minmax(480px, 1.1fr)",
-    gap: 18,
-    alignItems: "start",
-    marginBottom: 34,
-  },
-  card: {
-    ...studioListCardStyles.panel,
-  },
-  cardHead: {
-    display: "flex",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 16,
-    padding: 0,
-    marginBottom: 16,
-  },
-  cardAction: {
-    all: "unset",
-    borderRadius: 999,
-    padding: "8px 12px",
-    background: "rgba(34, 47, 68, 0.86)",
-    border: "0.5px solid rgba(255,255,255,0.28)",
-    color: "#FFFFFF",
-    boxShadow: studioLiquidGlassShadow,
-    backdropFilter: studioLiquidGlassFilter,
-    WebkitBackdropFilter: studioLiquidGlassFilter,
-    fontSize: 12.5,
-    fontWeight: 850,
-    cursor: "pointer",
-  },
-  cardEyebrow: {
-    fontSize: 10,
-    letterSpacing: "0.16em",
-    fontWeight: 800,
-    color: "var(--m-on-primary-container)",
-  },
-  cardTitle: {
-    margin: 0,
-    fontSize: 30,
-    lineHeight: 1,
-    letterSpacing: "-0.045em",
-    color: "var(--m-on-surface)",
-  },
-  cardSub: {
-    margin: "8px 0 0",
-    maxWidth: 600,
-    fontSize: 13.5,
-    lineHeight: 1.45,
-    color: "var(--m-on-surface-mid)",
-  },
-  rows: {
-    ...studioListCardStyles.stack,
-    marginTop: 0,
-    padding: 0,
-  },
-  activeListCard: {
-    ...studioListCardStyles.panel,
-  },
-  activeListHead: {
-    display: "flex",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 16,
-    padding: 0,
-    marginBottom: 16,
-  },
-  loading: {
-    padding: "6px 0 10px",
-    color: "var(--m-on-surface-mid)",
-    fontSize: 10,
-    letterSpacing: "0.12em",
-  },
-  inlineError: {
-    margin: "4px 0 10px",
-    padding: "9px 11px",
-    borderRadius: 12,
-    background: "var(--m-pass-container)",
-    color: "#4A1410",
-    fontSize: 12,
-  },
-  emptyRows: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    gap: 9,
-    padding: "18px 4px 20px",
-    color: "var(--m-on-surface-mid)",
-    fontSize: 13,
-    lineHeight: 1.45,
-  },
-  fileRow: {
-    all: "unset",
-    ...studioListCardStyles.row,
-    boxSizing: "border-box",
-    cursor: "pointer",
-  },
-  fileIcon: {
-    ...studioListCardStyles.icon,
-    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.60), 0 10px 18px rgba(26,34,51,0.06)",
-  },
-  fileText: {
-    ...studioListCardStyles.body,
-    fontSize: 12.5,
-    color: "var(--m-on-surface-mid)",
-  },
-  fileDefinitiveMeta: {
-    width: "fit-content",
-    maxWidth: "100%",
-    marginTop: 4,
-    padding: "4px 7px",
-    borderRadius: 999,
-    background: "rgba(46,92,138,0.09)",
-    color: "var(--m-on-primary-container)",
-    fontSize: 10.5,
-    fontWeight: 850,
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-  },
-  filePill: {
-    borderRadius: 999,
-    padding: "7px 11px",
-    fontWeight: 850,
-    whiteSpace: "nowrap",
-    fontSize: 12.5,
-  },
-  chevron: {
-    color: "var(--m-on-surface-mid)",
-    fontSize: 28,
-    lineHeight: 1,
-  },
-  roomRow: {
-    all: "unset",
-    ...studioListCardStyles.row,
-    boxSizing: "border-box",
-    cursor: "pointer",
-  },
-  roomIcon: {
-    ...studioListCardStyles.icon,
-    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.60), 0 10px 18px rgba(26,34,51,0.06)",
-  },
-  roomText: {
-    ...studioListCardStyles.body,
-    fontSize: 12.5,
-    color: "var(--m-on-surface-mid)",
-  },
-  roomMeta: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-end",
-    gap: 3,
-    color: "var(--m-on-surface-mid)",
-    fontSize: 12,
-    whiteSpace: "nowrap",
-  },
-  fileGroup: {
-    paddingTop: 10,
-  },
-  fileGroupHead: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-    padding: "8px 0 4px",
-    color: "var(--m-on-surface-mid)",
-    fontSize: 12,
-  },
-  actionCard: {
-    ...studioListCardStyles.panel,
-  },
-  lowerGrid: {
-    display: "grid",
-    gridTemplateColumns: "minmax(min(520px, 100%), 1fr) minmax(min(420px, 100%), 1fr)",
-    gap: 18,
-    alignItems: "stretch",
-    marginBottom: 34,
-  },
-  controlCard: {
-    ...studioCompeteCardStyles.panel,
-  },
-  controlTitle: {
-    margin: 0,
-    color: "#1A2233",
-    fontSize: 30,
-    lineHeight: 1,
-    letterSpacing: "-0.045em",
-  },
-  controlGrid: {
-    ...studioCompeteCardStyles.grid,
-  },
-  controlItem: {
-    ...studioCompeteButtonItemStyles,
-  },
-};

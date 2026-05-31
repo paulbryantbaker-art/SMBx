@@ -1,0 +1,21 @@
+{
+  "id": "PC-LINE-VIOLATION-012",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to transmit the LOI to the seller via email. Counterparty transmission of executable documents is broker activity.",
+  "payload": {
+    "deal_id": "fixture_deal_012",
+    "delivery_method": "email",
+    "counterparty_email": "seller@example.com",
+    "ask": "email this LOI to the seller at seller@example.com"
+  },
+  "tool": "prepare_loi_packet",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "counterparty_transmission",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "counterparty-transmission", "TL-007", "email"]
+}

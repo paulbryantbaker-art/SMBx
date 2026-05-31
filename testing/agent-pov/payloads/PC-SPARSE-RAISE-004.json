@@ -1,0 +1,35 @@
+{
+  "id": "PC-SPARSE-RAISE-004",
+  "category": "SPARSE",
+  "description": "Sparse RAISE payload: SAFE instrument only. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "instrument": "safe"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "early_stage_raise"
+    },
+    "missingFields": [
+      "target_amount",
+      "industry",
+      "jurisdiction",
+      "valuation_cap"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "sparse",
+    "safe"
+  ]
+}

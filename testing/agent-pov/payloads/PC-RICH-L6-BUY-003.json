@@ -1,0 +1,55 @@
+{
+  "category": "RICH",
+  "description": "L6 independent sponsor — software-enabled logistics platform, full equity/debt stack with sponsor promote.",
+  "payload": {
+    "journey": "buy",
+    "industry": "logistics software & freight brokerage",
+    "naics": "488510",
+    "jurisdiction": "US-IL",
+    "league": "L6",
+    "ttmRevenueCents": 31000000000,
+    "adjustedEbitdaCents": 3800000000,
+    "purchasePriceCents": 30400000000,
+    "dealStructure": "stock_purchase",
+    "taxClassification": "c_corp",
+    "independentSponsor": true,
+    "promoteStructure": "8/20",
+    "financing": {
+      "sponsorEquityCents": 14000000000,
+      "seniorDebtCents": 12000000000,
+      "subordinatedDebtCents": 3000000000,
+      "rolloverEquityCents": 1400000000
+    },
+    "stage": "loi"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L6",
+      "jurisdiction": "US-IL",
+      "industry": "logistics software & freight brokerage",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L6",
+    "rich",
+    "independent-sponsor"
+  ],
+  "id": "PC-RICH-L6-BUY-003"
+}

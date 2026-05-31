@@ -1,0 +1,42 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "jurisdiction listed as both 'US-DE' and a multi-state list, AND foreign tax overlay flagged — three jurisdictions implied.",
+  "payload": {
+    "journey": "sell",
+    "jurisdiction": "US-DE",
+    "multiState": [
+      "US-DE",
+      "US-NJ",
+      "US-PA"
+    ],
+    "foreignSeller": true,
+    "industry": "industrial distribution",
+    "league": "L4",
+    "ttmRevenueCents": 3800000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "sell",
+      "jurisdiction": "US-DE",
+      "industry": "industrial distribution",
+      "league": "L4"
+    },
+    "missingFields": [
+      "explicit_jurisdiction_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "jurisdiction-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-JURISDICTION-005"
+}

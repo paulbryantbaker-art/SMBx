@@ -1,0 +1,38 @@
+{
+  "id": "PC-SPARSE-SELL-004",
+  "category": "SPARSE",
+  "description": "Sparse SELL payload: owner-rep micro deli. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "neighborhood deli"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "principal_seller",
+      "leagueGuess": "L1",
+      "industry": "neighborhood deli"
+    },
+    "missingFields": [
+      "sde",
+      "revenue",
+      "jurisdiction",
+      "seller_role"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L1-implicit",
+    "sparse",
+    "micro"
+  ]
+}

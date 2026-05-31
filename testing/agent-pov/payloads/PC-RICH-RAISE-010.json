@@ -1,0 +1,49 @@
+{
+  "category": "RICH",
+  "description": "NAV facility for PE fund — full collateral + LTV + recourse terms.",
+  "payload": {
+    "journey": "raise",
+    "raiseType": "debt_nav_facility",
+    "instrument": "nav_facility",
+    "industry": "PE fund leverage",
+    "jurisdiction": "US-DE",
+    "league": "L8",
+    "raiseAmountCents": 50000000000,
+    "navCents": 250000000000,
+    "ltvPct": 20,
+    "tenor": "4_years",
+    "spread": "SOFR+325",
+    "stage": "commitment",
+    "taxClassification": "llc_partnership"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "debt_raise",
+      "league": "L8",
+      "jurisdiction": "US-DE",
+      "industry": "PE fund leverage",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "llc_partnership"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "L8",
+    "rich",
+    "debt_nav_facility"
+  ],
+  "id": "PC-RICH-RAISE-010"
+}

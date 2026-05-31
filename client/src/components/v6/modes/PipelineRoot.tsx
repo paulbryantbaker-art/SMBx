@@ -1,12 +1,10 @@
-import { useState, type CSSProperties } from "react";
-import { V6Section } from "../Section";
+import { useState, Fragment } from "react";
 import { V6Icon } from "../icons";
 import type { Verdict } from "./cards";
 import type { IconName, OpenTab } from "../types";
 import { DEV_AUTH_BYPASS, type User } from "../../../hooks/useAuth";
 import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
 import { useTodayOperatingBrief, type TodayDealPulseItem, type TodayDefinitiveDealState, type TodayGateCountdownItem, type TodayModelRefreshItem } from "../../../hooks/useTodayOperatingBrief";
-import { ART_HOUSE_TEXTURES, STUDIO_TEXTURES } from "../../../lib/randomTextures";
 import type { ModelPreference } from "../../../lib/modelPreference";
 import {
   executeSurfaceAction,
@@ -101,6 +99,9 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionNote, setActionNote] = useState<string | null>(null);
+  const [tabFilter, setTabFilter] = useState<"active" | "pursue" | "watch" | "pass">("active");
+  const [query, setQuery] = useState("");
+  const [attentionOnly, setAttentionOnly] = useState(false);
   const useSampleData = !home.isAuthed || DEV_AUTH_BYPASS;
   const operating = useTodayOperatingBrief(user, home.isAuthed && !DEV_AUTH_BYPASS);
   const realDeals = home.inReview.length > 0 ? home.inReview : home.picks;
@@ -118,10 +119,6 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
   const pursue = deals.filter(d => d.verdict === "pursue");
   const watch = deals.filter(d => d.verdict === "watch");
   const pass = deals.filter(d => d.verdict === "pass");
-  const boardStages = PIPELINE_STAGES.map(stage => ({
-    ...stage,
-    deals: deals.filter(deal => deal.stageId === stage.id),
-  }));
   const activeLeagueCount = new Set(deals.map(deal => deal.league)).size;
   const modelCount = deals.reduce((sum, deal) => sum + deal.requiredModels, 0);
   const citationCount = deals.reduce((sum, deal) => sum + deal.requiredCitations, 0);
@@ -235,100 +232,151 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
     onTalkToYulia?.(prompts[action]);
   };
 
+  const tabbed = tabFilter === "active" ? deals
+    : tabFilter === "pursue" ? pursue
+      : tabFilter === "watch" ? watch
+        : pass;
+  const q = query.trim().toLowerCase();
+  const rows = tabbed.filter(deal =>
+    (!q || deal.name.toLowerCase().includes(q) || deal.sub.toLowerCase().includes(q)) &&
+    (!attentionOnly || deal.verdict === "watch" || !!deal.blocker || !!deal.modelRefreshCount)
+  );
+
   return (
-    <div className="m-fade-up m-page-flow" style={P.page}>
-      <section style={P.hero}>
-        <div style={P.heroCopy}>
-          <div className="mono" style={P.eyebrow}>PIPELINE</div>
-          <h1 style={P.title}>Run every opportunity against the method.</h1>
-          <p style={P.sub}>Pipeline is the deal Kanban: Yulia tracks each opportunity by league, gate, model stack, source gaps, and the next move before it advances.</p>
+    <div className="wk-content m-fade-up" style={{ maxWidth: 1180, margin: "0 auto" }}>
+      <div className="pg-head">
+        <div>
+          <div className="pg-eyebrow">Deal flow</div>
+          <div className="pg-title">Pipeline</div>
+          <p className="pg-sub">Every opportunity run against the method — league, gate, model stack, citations, and the next move before it advances.</p>
         </div>
-        <div style={P.stats}>
-          <PipelineStat label="Pursue" value={pursue.length} tone="#92E1BC" />
-          <PipelineStat label="Watch" value={watch.length} tone="#F3D38C" />
-          <PipelineStat label="Pass" value={pass.length} tone="#F0A49C" />
+        <div className="pg-actions">
+          <button className="kebab" type="button" aria-label="More" onClick={() => onTalkToYulia?.("Summarize my pipeline: counts by verdict, what changed since yesterday, and the single most important deal to move today.")}>⋯</button>
+          <button className="wkbtn" type="button" onClick={() => onTalkToYulia?.("Rank my pipeline by methodology readiness, blockers, fit, urgency, and the next Yulia move for each deal.")}>Rank with Yulia</button>
+          <button className="wkbtn primary" type="button" onClick={() => onTalkToYulia?.("Help me create my first deal workspace.")}>New deal</button>
         </div>
-      </section>
-
-      {gateCountdown.length > 0 && (
-        <GateCountdownStrip
-          items={gateCountdown}
-          openTab={openTab}
-          onTalkToYulia={onTalkToYulia}
-        />
-      )}
-
-      <V6Section eyebrow="YULIA NEXT" title="Pipeline shortcuts">
-        {(actionError || actionNote) && (
-          <div style={actionError ? P.actionError : P.actionNote}>
-            {actionError || actionNote}
-          </div>
-        )}
-        <div className="m-flow-grid" style={P.actionGrid}>
-          {PIPELINE_SHORTCUTS.map(({ action, title, sub, icon, tone }) => (
-            <button
-              key={title}
-              style={{ ...P.actionCard, ...pipelineActionTone(tone) }}
-              onClick={() => { void runPipelineShortcut(action); }}
-              type="button"
-              disabled={busyAction === action}
-            >
-              <span style={P.actionIcon}><V6Icon name={icon} size={16} /></span>
-              <span style={P.actionText}>
-                <strong>{busyAction === action ? "Working..." : title}</strong>
-                <span>{sub}</span>
-              </span>
-            </button>
-          ))}
-        </div>
-      </V6Section>
-
-      <div style={P.definitivePanel}>
-        <DefinitiveSurfacePanel
-          surface="pipeline"
-          title="DEFINITIVE read for Pipeline."
-          onTalkToYulia={onTalkToYulia}
-        />
       </div>
 
-      <section style={P.boardShell}>
-        <div style={P.boardHeader}>
-          <div>
-            <h2 style={P.boardTitle}>Opportunity board</h2>
-            <p style={P.boardSub}>Stages are methodology gates. League determines how deep Yulia goes before a deal can move forward.</p>
-          </div>
-          <button className="m-btn tonal" onClick={() => onTalkToYulia?.("Rank my pipeline by methodology readiness, blockers, and the next Yulia move for each deal.")} type="button">
-            Rank with Yulia
+      <div className="segmented">
+        {([
+          ["active", "Active", deals.length],
+          ["pursue", "Pursue", pursue.length],
+          ["watch", "Watch", watch.length],
+          ["pass", "Pass", pass.length],
+        ] as const).map(([key, label, count]) => (
+          <button key={key} type="button" className={`seg ${tabFilter === key ? "on" : ""}`} onClick={() => setTabFilter(key)}>
+            {label} <span className="n">{count}</span>
           </button>
-        </div>
+        ))}
+      </div>
 
-        <div className="m-flow-grid" style={P.methodologyStrip}>
-          <MethodologyChip label="Leagues" value={activeLeagueCount || 0} />
-          <MethodologyChip label="Models watched" value={modelCount} />
-          <MethodologyChip label="Citations needed" value={citationCount} />
-          <MethodologyChip label="Model reruns" value={rerunCount} />
-          <MethodologyChip label="DealState journals" value={definitiveCount} />
-        </div>
+      <div className="mhead">
+        <div className="mh"><span className="l">Active deals</span><span className="v">{deals.length}</span><span className="s">{activeLeagueCount || 0} {activeLeagueCount === 1 ? "league" : "leagues"}</span></div>
+        <div className="mh"><span className="l">Pursue</span><span className="v" style={{ color: "var(--accent-strong)" }}>{pursue.length}</span><span className="s">ready to advance</span></div>
+        <div className="mh"><span className="l">Models watched</span><span className="v">{modelCount}</span><span className="s">{citationCount} citations needed</span></div>
+        <div className="mh"><span className="l">Model reruns</span><span className="v">{rerunCount}</span><span className="s">{definitiveCount} DealState {definitiveCount === 1 ? "journal" : "journals"}</span></div>
+      </div>
 
-        <div className="m-flow-grid" style={P.kanbanGrid}>
+      <div className="ynext">
+        {PIPELINE_SHORTCUTS.map(({ action, title, sub, icon }) => (
+          <button key={title} type="button" className="yn" disabled={busyAction === action} onClick={() => { void runPipelineShortcut(action); }}>
+            <span className="ic"><V6Icon name={icon} size={15} /></span>
+            <span className="yn-t"><b>{busyAction === action ? "Working…" : title}</b><span>{sub}</span></span>
+          </button>
+        ))}
+      </div>
+      {(actionError || actionNote) && <div className={actionError ? "wkerr" : "wknote"}>{actionError || actionNote}</div>}
+
+      <div className="filterbar">
+        <label className="fsearch">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.7" /><path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
+          <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search deals…" style={{ border: 0, background: "transparent", outline: "none", color: "var(--ink)", font: "inherit", width: "100%", minWidth: 120 }} />
+        </label>
+        <button type="button" className={`fchip ${attentionOnly ? "on" : ""}`} onClick={() => setAttentionOnly(v => !v)}>Needs attention</button>
+        <span className="grow" />
+        <div className="tabletools">
+          <button className="wkbtn" type="button" style={{ padding: "7px 12px" }} onClick={() => onTalkToYulia?.("Rank my pipeline by methodology readiness, blockers, and the next Yulia move for each deal.")}>Rank</button>
+        </div>
+      </div>
+
+      {rows.length === 0 ? (
+        <div className="wkcard" style={{ marginTop: 18, textAlign: "center", color: "var(--ink-2)" }}>
           {deals.length === 0 ? (
-            <div style={P.emptyCard}>
-              <strong>No deals yet</strong>
-              <span>Start with a chat, source file, thesis, target, or buyer pool and Yulia will create the first deal workspace.</span>
-              <button className="m-btn tonal" onClick={() => onTalkToYulia?.("Help me create my first deal workspace.")} type="button">
-                Start with Yulia
-              </button>
-            </div>
-          ) : boardStages.map(stage => (
-            <KanbanColumn
-              key={stage.id}
-              stage={stage}
-              openTab={openTab}
-              onTalkToYulia={onTalkToYulia}
-            />
-          ))}
+            <>
+              <div className="wkcard-title">No deals yet</div>
+              <div className="wkcard-sub">Start with a chat, source file, thesis, target, or buyer pool and Yulia will create the first deal workspace.</div>
+              <button className="wkbtn dark" type="button" style={{ marginTop: 14 }} onClick={() => onTalkToYulia?.("Help me create my first deal workspace.")}>Start with Yulia</button>
+            </>
+          ) : (
+            <>
+              <div className="wkcard-title">No deals match this view</div>
+              <div className="wkcard-sub">Clear the search or filter to see the rest of your pipeline.</div>
+            </>
+          )}
         </div>
-      </section>
+      ) : (
+        <>
+          <table className="wktable">
+            <thead><tr>
+              <th>Deal</th>
+              <th>Verdict</th>
+              <th className="r">SDE</th>
+              <th>Stage</th>
+              <th className="r">Fit</th>
+              <th className="r">Method</th>
+              <th className="r">Action</th>
+            </tr></thead>
+            <tbody>
+              {rows.map(deal => {
+                const pill = verdictStatpill(deal.verdict);
+                const flag = deal.modelRefreshCount
+                  ? `${deal.modelRefreshCount} model ${deal.modelRefreshCount === 1 ? "rerun" : "reruns"} — ${deal.modelRefreshReason || "tracked assumptions changed since the saved output."}`
+                  : deal.verdict === "watch" && deal.blocker
+                    ? `${deal.blocker}${deal.yuliaMove ? ` — ${deal.yuliaMove}.` : ""}`
+                    : null;
+                return (
+                  <Fragment key={deal.id}>
+                    <tr onClick={() => openTab({ kind: "deal", id: deal.id, title: deal.name })}>
+                      <td>
+                        <div className="cellname">
+                          <span className="logo">{dealInitials(deal.name)}</span>
+                          <div><div className="nm">{deal.name}</div><div className="sub">{deal.sub}</div></div>
+                        </div>
+                      </td>
+                      <td><span className={`statpill ${pill.cls}`}><span className="d" />{pill.label}</span></td>
+                      <td className="r amt">{deal.sde}</td>
+                      <td><span className="muted">{deal.league} · {deal.gateId} {deal.gateName}</span></td>
+                      <td className="r"><span className="fit"><span className="fitn">{deal.fit}</span><span className="ft"><span className="ff" style={{ width: `${deal.fit}%` }} /></span></span></td>
+                      <td className="r muted">{deal.requiredModels}m · {deal.requiredCitations}c</td>
+                      <td className="r"><button type="button" className="reviewbtn" onClick={e => { e.stopPropagation(); onTalkToYulia?.(yuliaPromptFor(deal)); }}>Review</button></td>
+                    </tr>
+                    {flag && (
+                      <tr><td colSpan={7} style={{ padding: 0 }}>
+                        <div className="rowflag">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" /></svg>
+                          <span>{flag}</span>
+                        </div>
+                      </td></tr>
+                    )}
+                  </Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+          <div className="tabfoot">
+            <span>{rows.length} of {deals.length} {deals.length === 1 ? "deal" : "deals"}</span>
+            <span>{pursue.length} pursue · {watch.length} watch · {pass.length} pass</span>
+          </div>
+        </>
+      )}
+
+      {gateCountdown.length > 0 && (
+        <GateCountdownStrip items={gateCountdown} openTab={openTab} onTalkToYulia={onTalkToYulia} />
+      )}
+
+      <div className="wksec">
+        <DefinitiveSurfacePanel surface="pipeline" title="DEFINITIVE read for Pipeline." onTalkToYulia={onTalkToYulia} />
+      </div>
     </div>
   );
 }
@@ -343,170 +391,58 @@ function GateCountdownStrip({
   onTalkToYulia?: (prompt: string) => void;
 }) {
   return (
-    <section style={P.gateStrip}>
-      <div style={P.gateStripHead}>
+    <div className="wksec">
+      <div className="pg-head" style={{ alignItems: "center" }}>
         <div>
-          <h2 style={P.gateTitle}>Gate countdown</h2>
-          <p style={P.gateSub}>Same operating read as Today: blockers, model needs, citations, and the next deal move.</p>
+          <div className="wksec-title" style={{ marginBottom: 2 }}>Gate countdown</div>
+          <p className="pg-sub" style={{ marginTop: 2 }}>Same operating read as Today — blockers, model needs, citations, and the next deal move.</p>
         </div>
-        <button
-          className="m-btn tonal"
-          type="button"
-          onClick={() => onTalkToYulia?.("Show my pipeline gate countdown, including blockers, required models, required citations, and next action.")}
-        >
-          Ask Yulia
-        </button>
+        <div className="pg-actions">
+          <button className="wkbtn" type="button" onClick={() => onTalkToYulia?.("Show my pipeline gate countdown, including blockers, required models, required citations, and next action.")}>Ask Yulia</button>
+        </div>
       </div>
-      <div style={P.gateRows}>
-        {items.slice(0, 3).map(item => {
-          const nextCall = firstNextCall(item.definitive);
-          return (
-            <button
-              key={`${item.dealId}-${item.gateId}`}
-              type="button"
-              style={P.gateRow}
-              onClick={() => openTab({ kind: "deal", id: item.dealId, title: item.title })}
-            >
-              <span style={P.gateBadge}>{item.gateId}</span>
-              <span style={P.gateText}>
-                <strong>{item.title}</strong>
-                <span>{item.gateName} · {item.nextAction}</span>
-                {nextCall && <span style={P.gateCall}>Next agent call: {nextCall.label}</span>}
-              </span>
-              <span style={P.gateMeta}>{item.definitive ? `${shortReadiness(item.definitive.readinessLevel)} · ${item.definitive.missingCount} gaps` : item.blockers[0] || "No blocker surfaced"}</span>
-              <span style={P.chevron} aria-hidden="true">›</span>
-            </button>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
-function MethodologyChip({ label, value }: { label: string; value: number | string }) {
-  return (
-    <div style={P.methodologyChip}>
-      <strong style={P.methodologyValue}>{value}</strong>
-      <span style={P.methodologyLabel}>{label}</span>
+      <table className="wktable">
+        <thead><tr>
+          <th style={{ width: 64 }}>Gate</th>
+          <th>Deal</th>
+          <th>Next action</th>
+          <th className="r">Readiness</th>
+        </tr></thead>
+        <tbody>
+          {items.slice(0, 6).map(item => {
+            const nextCall = firstNextCall(item.definitive);
+            return (
+              <tr key={`${item.dealId}-${item.gateId}`} onClick={() => openTab({ kind: "deal", id: item.dealId, title: item.title })}>
+                <td><span className="statpill diligence"><span className="d" />{item.gateId}</span></td>
+                <td><div className="cellname"><span className="logo">{dealInitials(item.title)}</span><div><div className="nm">{item.title}</div><div className="sub">{item.gateName}</div></div></div></td>
+                <td><span className="muted">{item.nextAction}{nextCall ? ` · next call: ${nextCall.label}` : ""}</span></td>
+                <td className="r muted">{item.definitive ? `${shortReadiness(item.definitive.readinessLevel)} · ${item.definitive.missingCount} gaps` : item.blockers[0] || "—"}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
 
-function KanbanColumn({
-  stage,
-  openTab,
-  onTalkToYulia,
-}: {
-  stage: PipelineStage & { deals: PipelineDeal[] };
-  openTab: OpenTab;
-  onTalkToYulia?: (prompt: string) => void;
-}) {
-  return (
-    <section style={P.kanbanColumn}>
-      <div style={P.kanbanHead}>
-        <div>
-          <h3 style={P.kanbanTitle}>{stage.title}</h3>
-          <p style={P.kanbanSub}>{stage.sub}</p>
-        </div>
-        <span style={P.kanbanCount}>{stage.deals.length}</span>
-      </div>
-      <div style={P.kanbanStack}>
-        {stage.deals.length === 0 ? (
-          <div style={P.kanbanEmpty}>No opportunities at this gate.</div>
-        ) : stage.deals.map(deal => (
-          <OpportunityCard
-            key={deal.id}
-            deal={deal}
-            onOpen={() => openTab({ kind: "deal", id: deal.id, title: deal.name })}
-            onAsk={() => onTalkToYulia?.(deal.modelRefreshCount
-              ? `For ${deal.name}, explain the stale model stack. Show which assumptions changed, which model versions are affected, and rerun the first model that should be refreshed.`
-              : `For ${deal.name}, show the current ${deal.league} ${deal.gateId} methodology state, blockers, required models, required citations, and the next Yulia move.`)}
-          />
-        ))}
-      </div>
-    </section>
-  );
+function dealInitials(name: string): string {
+  const words = String(name || "").replace(/[^a-zA-Z0-9 ]/g, " ").trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return "··";
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (words[0][0] + words[1][0]).toUpperCase();
 }
 
-function OpportunityCard({
-  deal,
-  onOpen,
-  onAsk,
-}: {
-  deal: PipelineDeal;
-  onOpen: () => void;
-  onAsk: () => void;
-}) {
-  const tone = verdictTone(deal.verdict);
-  const nextCall = firstNextCall(deal.definitive);
-  const artifacts = deal.definitive?.portableArtifacts || [];
-
-  return (
-    <article style={P.opportunityCard}>
-      <button type="button" style={P.opportunityMain} onClick={onOpen}>
-        <span style={{ ...P.opportunityAccent, background: tone.accent }} />
-        <span style={P.opportunityTop}>
-          <strong style={P.opportunityName}>{deal.name}</strong>
-          <span style={{ ...P.verdictPill, color: tone.ink, background: tone.soft }}>{tone.label}</span>
-        </span>
-        <span style={P.opportunitySub}>{deal.sub}</span>
-        <span style={P.gateLine}>
-          <strong>{deal.league}</strong>
-          <span>{deal.gateId} · {deal.gateName}</span>
-        </span>
-        <span style={P.progressTrack}>
-          <span style={{ ...P.progressFill, width: `${deal.methodologyProgress}%`, background: tone.accent }} />
-        </span>
-        <span style={P.opportunityMeta}>
-          <span>{deal.requiredModels} models</span>
-          <span>{deal.requiredCitations} citations</span>
-          <span>Next: {deal.nextGateName}</span>
-        </span>
-        {!!deal.modelRefreshCount && (
-          <span style={P.modelRefreshLine}>
-            <strong>{deal.modelRefreshCount} model {deal.modelRefreshCount === 1 ? "rerun" : "reruns"}</strong>
-            <span>{deal.modelRefreshReason || "Tracked assumptions changed since the saved output."}</span>
-          </span>
-        )}
-        {deal.definitive && (
-          <span style={P.definitiveLine}>
-            <strong>{shortReadiness(deal.definitive.readinessLevel)} · {deal.definitive.score}%</strong>
-            <span>{deal.definitive.lifecyclePosition || "DealState loop"}</span>
-            <span>{deal.definitive.packetTypes.length || 0} packets · {deal.definitive.sourceCount} sources</span>
-          </span>
-        )}
-        {nextCall && (
-          <span style={P.agentCallLine}>
-            <strong>Next agent call</strong>
-            <span>{nextCall.label} · {nextCall.reason}</span>
-          </span>
-        )}
-        {artifacts.length > 0 && (
-          <span style={P.artifactLine}>
-            {artifacts.slice(0, 3).map(item => <span key={item} style={P.artifactPill}>{item}</span>)}
-          </span>
-        )}
-        <span style={P.opportunityNote}>{deal.note}</span>
-      </button>
-      <button type="button" style={P.yuliaMove} onClick={onAsk}>
-        <span>{deal.yuliaMove}</span>
-        <span aria-hidden="true">›</span>
-      </button>
-      <div style={P.blockerLine}>
-        <span>Blocking</span>
-        <strong>{deal.blocker}</strong>
-      </div>
-    </article>
-  );
+function verdictStatpill(verdict: Verdict): { cls: string; label: string } {
+  if (verdict === "pursue") return { cls: "good", label: "Pursue" };
+  if (verdict === "pass") return { cls: "flag", label: "Pass" };
+  return { cls: "review", label: "Watch" };
 }
 
-function PipelineStat({ label, value, tone }: { label: string; value: number; tone: string }) {
-  return (
-    <div style={P.stat}>
-      <strong style={{ ...P.statValue, color: tone }}>{value}</strong>
-      <span style={P.statLabel}>{label}</span>
-    </div>
-  );
+function yuliaPromptFor(deal: PipelineDeal): string {
+  return deal.modelRefreshCount
+    ? `For ${deal.name}, explain the stale model stack. Show which assumptions changed, which model versions are affected, and rerun the first model that should be refreshed.`
+    : `For ${deal.name}, show the current ${deal.league} ${deal.gateId} methodology state, blockers, required models, required citations, and the next Yulia move.`;
 }
 
 type PipelineDealSeed = Pick<PipelineDeal, "verdict" | "id" | "name" | "sub" | "fit" | "sde" | "multiple" | "note" | "league" | "gateId" | "blocker"> & {
@@ -559,15 +495,6 @@ function yuliaMoveForGate(gateId: string, verdict: Verdict): string {
   if (/^(S|B)3$/.test(gateId)) return "Pull diligence into the file";
   if (/^(S|B|R)4$/.test(gateId)) return "Resolve structure and approvals";
   return "Prep closing or PMI work";
-}
-
-function verdictTone(verdict: Verdict) {
-  const tones: Record<Verdict, { label: string; accent: string; ink: string; soft: string }> = {
-    pursue: { label: "Pursue", accent: "#5EA987", ink: "#2F735D", soft: "rgba(111,174,149,.16)" },
-    watch: { label: "Watch", accent: "#C39A40", ink: "#8B6422", soft: "rgba(201,162,78,.17)" },
-    pass: { label: "Pass", accent: "#B96B64", ink: "#873E37", soft: "rgba(185,107,100,.15)" },
-  };
-  return tones[verdict];
 }
 
 function fmtCents(cents: number | null | undefined): string {
@@ -704,551 +631,3 @@ function homeDealToActionDeal(d: HomeDeal): ActionDeal {
     journey_type: journeyFromHomeDeal(d),
   };
 }
-
-const pipelineHeroWash = `linear-gradient(135deg, rgba(8,18,38,0.46) 0%, rgba(46,92,138,0.20) 46%, rgba(10,24,46,0.54) 100%), url('${STUDIO_TEXTURES.navy}')`;
-const ART_CARD_WASH = "linear-gradient(145deg, rgba(18,31,48,0.68) 0%, rgba(56,70,83,0.42) 52%, rgba(13,22,37,0.72) 100%)";
-const ART_CARD_FRAME: CSSProperties = {
-  backgroundSize: "cover, cover",
-  backgroundPosition: "center, center",
-  color: "#FFFFFF",
-  borderColor: "rgba(255,255,255,0.30)",
-  boxShadow: "0 30px 76px rgba(31,44,69,0.24), 0 8px 22px rgba(26,34,51,0.12), inset 0 1px 0 rgba(255,255,255,0.24)",
-};
-
-function pipelineActionTone(tone: PipelineShortcut["tone"]): CSSProperties {
-  const textures: Record<PipelineShortcut["tone"], string> = {
-    gold: ART_HOUSE_TEXTURES.pricing,
-    blue: ART_HOUSE_TEXTURES.pipeline,
-    green: ART_HOUSE_TEXTURES.search,
-    slate: ART_HOUSE_TEXTURES.studioPreview,
-    rose: STUDIO_TEXTURES.rose,
-    violet: STUDIO_TEXTURES.blue,
-  };
-  return {
-    ...ART_CARD_FRAME,
-    backgroundImage: `${ART_CARD_WASH}, url('${textures[tone]}')`,
-  };
-}
-
-const P: Record<string, CSSProperties> = {
-  page: {
-    width: "min(100%, 1440px)",
-    maxWidth: 1440,
-    margin: "0 auto",
-    boxSizing: "border-box",
-  },
-  hero: {
-    display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) minmax(320px, 0.38fr)",
-    alignItems: "stretch",
-    gap: 20,
-    minHeight: 320,
-    marginBottom: 34,
-    padding: 30,
-    borderRadius: 26,
-    backgroundImage: pipelineHeroWash,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    border: "1px solid rgba(255,255,255,0.30)",
-    boxShadow: "0 48px 118px rgba(37,46,82,0.32), 0 20px 46px rgba(17,24,39,0.17), 0 4px 12px rgba(17,24,39,0.08), inset 0 1px 0 rgba(255,255,255,0.22)",
-  },
-  heroCopy: {
-    alignSelf: "end",
-    maxWidth: 900,
-  },
-  eyebrow: {
-    fontSize: 10,
-    letterSpacing: "0.16em",
-    fontWeight: 800,
-    color: "#FFFFFF",
-  },
-  title: {
-    margin: "8px 0 0",
-    maxWidth: 880,
-    fontSize: "clamp(44px, 5vw, 72px)",
-    lineHeight: 0.92,
-    letterSpacing: "-0.06em",
-    textWrap: "balance",
-    color: "#FFFFFF",
-  },
-  sub: {
-    margin: "16px 0 0",
-    maxWidth: 680,
-    fontSize: 16,
-    lineHeight: 1.55,
-    color: "#FFFFFF",
-  },
-  stats: {
-    display: "grid",
-    gap: 12,
-    alignContent: "end",
-  },
-  stat: {
-    minHeight: 76,
-    padding: 18,
-    borderRadius: 20,
-    display: "flex",
-    alignItems: "center",
-    gap: 14,
-    background: "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.24), transparent 44%), linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05))",
-    border: "0.5px solid rgba(255,255,255,0.36)",
-    boxShadow: "0 16px 34px -22px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10), inset 0 0 0 0.5px rgba(255,255,255,0.34)",
-    backdropFilter: "blur(5px)",
-    WebkitBackdropFilter: "blur(5px)",
-  },
-  statLabel: {
-    display: "block",
-    marginTop: 2,
-    fontSize: 15,
-    letterSpacing: "-0.02em",
-    color: "rgba(255,255,255,.86)",
-    fontWeight: 850,
-  },
-  statValue: {
-    display: "block",
-    fontSize: 34,
-    lineHeight: 1,
-    fontVariantNumeric: "tabular-nums",
-    color: "#FFFFFF",
-  },
-  gateStrip: {
-    margin: "0 0 28px",
-    padding: 18,
-    borderRadius: 22,
-    background: "linear-gradient(180deg, rgba(255,255,255,0.86), rgba(255,255,255,0.66))",
-    border: "1px solid rgba(180, 197, 221, 0.74)",
-    boxShadow: "0 26px 76px rgba(41,61,92,0.12), 0 8px 18px rgba(26,34,51,0.07), inset 0 1px 0 rgba(255,255,255,0.76)",
-    backdropFilter: "blur(12px)",
-    WebkitBackdropFilter: "blur(12px)",
-  },
-  gateStripHead: {
-    display: "flex",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 18,
-    marginBottom: 12,
-  },
-  gateTitle: {
-    margin: 0,
-    fontSize: 24,
-    lineHeight: 1,
-    letterSpacing: "-0.045em",
-    color: "var(--m-on-surface)",
-  },
-  gateSub: {
-    margin: "6px 0 0",
-    maxWidth: 720,
-    fontSize: 13,
-    lineHeight: 1.45,
-    color: "var(--m-on-surface-mid)",
-  },
-  gateRows: {
-    display: "grid",
-    gap: 8,
-  },
-  gateRow: {
-    all: "unset",
-    minHeight: 58,
-    display: "grid",
-    gridTemplateColumns: "64px minmax(0, 1fr) minmax(160px, 0.32fr) 16px",
-    alignItems: "center",
-    gap: 12,
-    padding: "10px 12px",
-    borderRadius: 16,
-    background: "rgba(255,255,255,0.78)",
-    border: "1px solid rgba(180,197,221,0.62)",
-    boxShadow: "0 10px 22px rgba(26,34,51,0.06), inset 0 1px 0 rgba(255,255,255,0.72)",
-    cursor: "pointer",
-  },
-  gateBadge: {
-    height: 36,
-    minWidth: 52,
-    padding: "0 8px",
-    borderRadius: 999,
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "rgba(46,92,138,0.10)",
-    color: "var(--m-on-primary-container)",
-    fontSize: 12,
-    fontWeight: 900,
-    fontVariantNumeric: "tabular-nums",
-  },
-  gateText: {
-    minWidth: 0,
-    display: "grid",
-    gap: 2,
-    color: "var(--m-on-surface)",
-    fontSize: 14,
-    lineHeight: 1.25,
-  },
-  gateCall: {
-    color: "var(--m-on-primary-container)",
-    fontSize: 11.5,
-    fontWeight: 820,
-  },
-  gateMeta: {
-    justifySelf: "end",
-    maxWidth: 220,
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-    color: "var(--m-on-surface-mid)",
-    fontSize: 12,
-    fontWeight: 760,
-  },
-  chevron: {
-    color: "var(--m-on-surface-mid)",
-    fontSize: 24,
-    lineHeight: 1,
-  },
-  boardShell: {
-    margin: "0 0 30px",
-    padding: 20,
-    borderRadius: 26,
-    background: "radial-gradient(circle at 12% 0%, rgba(255,255,255,.58), transparent 38%), linear-gradient(135deg, rgba(255,255,255,.78), rgba(239,246,255,.48))",
-    border: "1px solid rgba(255,255,255,.62)",
-    boxShadow: "0 22px 58px rgba(42,65,96,.11), inset 0 1px 0 rgba(255,255,255,.78)",
-    backdropFilter: "blur(22px)",
-    WebkitBackdropFilter: "blur(22px)",
-  },
-  definitivePanel: {
-    margin: "0 0 28px",
-  },
-  boardHeader: {
-    display: "flex",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 18,
-    marginBottom: 14,
-  },
-  boardTitle: {
-    margin: 0,
-    color: "var(--m-on-surface)",
-    fontSize: 31,
-    lineHeight: 1,
-    letterSpacing: "-0.05em",
-  },
-  boardSub: {
-    margin: "7px 0 0",
-    maxWidth: 820,
-    color: "var(--m-on-surface-mid)",
-    fontSize: 14,
-    lineHeight: 1.45,
-  },
-  methodologyStrip: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-    gap: 10,
-    marginBottom: 14,
-  },
-  methodologyChip: {
-    minHeight: 58,
-    borderRadius: 18,
-    padding: "11px 13px",
-    display: "flex",
-    alignItems: "center",
-    gap: 10,
-    background: "rgba(247,250,255,.72)",
-    border: "1px solid rgba(153,176,209,.32)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,.72)",
-  },
-  methodologyLabel: {
-    display: "block",
-    fontSize: 13,
-    letterSpacing: "-0.015em",
-    color: "#6B7891",
-    fontWeight: 780,
-  },
-  methodologyValue: {
-    display: "block",
-    color: "var(--m-on-surface)",
-    fontSize: 22,
-    lineHeight: 1,
-    fontVariantNumeric: "tabular-nums",
-  },
-  kanbanGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(214px, 1fr))",
-    gap: 12,
-    alignItems: "stretch",
-  },
-  kanbanColumn: {
-    minHeight: 360,
-    borderRadius: 22,
-    padding: 12,
-    background: "rgba(239,245,255,.56)",
-    border: "1px solid rgba(153,176,209,.34)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,.62)",
-  },
-  kanbanHead: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: 10,
-    padding: "4px 4px 10px",
-  },
-  kanbanTitle: {
-    margin: 0,
-    color: "var(--m-on-surface)",
-    fontSize: 18,
-    lineHeight: 1,
-    letterSpacing: "-0.035em",
-  },
-  kanbanSub: {
-    margin: "5px 0 0",
-    color: "var(--m-on-surface-mid)",
-    fontSize: 11.5,
-    lineHeight: 1.25,
-  },
-  kanbanCount: {
-    minWidth: 28,
-    height: 28,
-    borderRadius: 999,
-    display: "inline-grid",
-    placeItems: "center",
-    background: "rgba(255,255,255,.76)",
-    color: "var(--m-on-primary-container)",
-    fontWeight: 900,
-    fontSize: 12,
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,.82)",
-  },
-  kanbanStack: {
-    display: "grid",
-    gap: 10,
-  },
-  kanbanEmpty: {
-    minHeight: 132,
-    display: "grid",
-    placeItems: "center",
-    textAlign: "center",
-    borderRadius: 18,
-    border: "1px dashed rgba(153,176,209,.42)",
-    color: "var(--m-on-surface-mid)",
-    fontSize: 12,
-    lineHeight: 1.4,
-    padding: 14,
-  },
-  opportunityCard: {
-    position: "relative",
-    borderRadius: 18,
-    background: "rgba(255,255,255,.82)",
-    border: "1px solid rgba(153,176,209,.34)",
-    boxShadow: "0 14px 32px rgba(42,65,96,.09), inset 0 1px 0 rgba(255,255,255,.72)",
-    overflow: "hidden",
-  },
-  opportunityMain: {
-    all: "unset",
-    display: "grid",
-    gap: 8,
-    width: "100%",
-    boxSizing: "border-box",
-    padding: 13,
-    cursor: "pointer",
-  },
-  opportunityAccent: {
-    position: "absolute",
-    inset: "0 auto 0 0",
-    width: 4,
-    opacity: 0.84,
-  },
-  opportunityTop: {
-    display: "flex",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 8,
-  },
-  opportunityName: {
-    minWidth: 0,
-    color: "var(--m-on-surface)",
-    fontSize: 15,
-    lineHeight: 1.1,
-    letterSpacing: "-0.025em",
-  },
-  verdictPill: {
-    flex: "0 0 auto",
-    borderRadius: 999,
-    padding: "4px 8px",
-    fontSize: 10,
-    fontWeight: 900,
-  },
-  opportunitySub: {
-    color: "var(--m-on-surface-mid)",
-    fontSize: 11.5,
-    lineHeight: 1.25,
-  },
-  gateLine: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    color: "var(--m-on-surface)",
-    fontSize: 12,
-    lineHeight: 1.2,
-  },
-  progressTrack: {
-    display: "block",
-    height: 5,
-    borderRadius: 999,
-    background: "rgba(198,211,232,.52)",
-    overflow: "hidden",
-  },
-  progressFill: {
-    display: "block",
-    height: "100%",
-    borderRadius: 999,
-  },
-  opportunityMeta: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: 6,
-    color: "var(--m-on-surface-mid)",
-    fontSize: 10.5,
-    lineHeight: 1,
-  },
-  definitiveLine: {
-    display: "grid",
-    gap: 4,
-    padding: "8px 9px",
-    borderRadius: 12,
-    background: "rgba(236,243,255,.62)",
-    border: "1px solid rgba(153,176,209,.32)",
-    color: "var(--m-on-primary-container)",
-    fontSize: 10.5,
-    lineHeight: 1.15,
-  },
-  modelRefreshLine: {
-    display: "grid",
-    gap: 4,
-    padding: "9px 10px",
-    borderRadius: 12,
-    background: "linear-gradient(180deg, rgba(255,255,255,.80), rgba(241,235,255,.62))",
-    border: "1px solid rgba(132,125,189,.30)",
-    color: "var(--m-on-surface)",
-    fontSize: 10.5,
-    lineHeight: 1.22,
-  },
-  agentCallLine: {
-    display: "grid",
-    gap: 4,
-    padding: "9px 10px",
-    borderRadius: 12,
-    background: "linear-gradient(180deg, rgba(255,255,255,.78), rgba(235,244,255,.58))",
-    border: "1px solid rgba(153,176,209,.34)",
-    color: "var(--m-on-surface)",
-    fontSize: 10.5,
-    lineHeight: 1.25,
-  },
-  artifactLine: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: 5,
-    color: "var(--m-on-surface-mid)",
-    fontSize: 10,
-    lineHeight: 1,
-  },
-  artifactPill: {
-    padding: "4px 6px",
-    borderRadius: 999,
-    background: "rgba(236,243,255,.72)",
-    border: "1px solid rgba(153,176,209,.26)",
-  },
-  opportunityNote: {
-    color: "var(--m-on-surface-var)",
-    fontSize: 12,
-    lineHeight: 1.35,
-  },
-  yuliaMove: {
-    all: "unset",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 8,
-    width: "100%",
-    boxSizing: "border-box",
-    padding: "10px 13px",
-    color: "var(--m-on-primary-container)",
-    background: "rgba(236,243,255,.70)",
-    borderTop: "1px solid rgba(153,176,209,.30)",
-    fontSize: 12,
-    fontWeight: 850,
-    cursor: "pointer",
-  },
-  blockerLine: {
-    display: "grid",
-    gap: 2,
-    padding: "10px 13px 12px",
-    borderTop: "1px solid rgba(153,176,209,.24)",
-    color: "var(--m-on-surface-mid)",
-    fontSize: 10.5,
-    lineHeight: 1.25,
-  },
-  dealGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-    gap: 14,
-  },
-  emptyCard: {
-    gridColumn: "1 / -1",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    gap: 10,
-    padding: 22,
-    borderRadius: 18,
-    background: "#FFFFFF",
-    border: "1px solid var(--m-outline-var)",
-    color: "var(--m-on-surface-mid)",
-    boxShadow: "var(--m-elev-1)",
-  },
-  actionGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-    gap: 12,
-  },
-  actionCard: {
-    all: "unset",
-    display: "flex",
-    gap: 12,
-    padding: 18,
-    borderRadius: 18,
-    border: "1px solid rgba(106,155,204,0.20)",
-    cursor: "pointer",
-  },
-  actionIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    background: "rgba(255,255,255,0.62)",
-    color: "currentColor",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.80), 0 10px 18px rgba(26,34,51,0.06)",
-    display: "grid",
-    placeItems: "center",
-    flexShrink: 0,
-  },
-  actionText: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 3,
-    color: "currentColor",
-    fontSize: 13,
-    lineHeight: 1.4,
-  },
-  actionNote: {
-    margin: "0 0 12px",
-    padding: "10px 12px",
-    borderRadius: 12,
-    background: "rgba(225, 242, 235, 0.9)",
-    color: "#246B50",
-    fontSize: 12.5,
-    boxShadow: "var(--m-elev-1)",
-  },
-  actionError: {
-    margin: "0 0 12px",
-    padding: "10px 12px",
-    borderRadius: 12,
-    background: "var(--m-pass-container)",
-    color: "#6F241E",
-    fontSize: 12.5,
-    boxShadow: "var(--m-elev-1)",
-  },
-};

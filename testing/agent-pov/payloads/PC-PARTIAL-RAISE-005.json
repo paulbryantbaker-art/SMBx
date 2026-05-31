@@ -1,0 +1,42 @@
+{
+  "id": "PC-PARTIAL-RAISE-005",
+  "category": "PARTIAL",
+  "description": "Partial payload: Series A convertible: ARR + amount + cap. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "stage": "series_a",
+    "instrument": "convertible_note",
+    "arr_cents": 280000000,
+    "target_amount_cents": 800000000,
+    "valuation_cap_cents": 6000000000,
+    "industry": "fintech"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "growth_raise",
+      "industry": "fintech"
+    },
+    "missingFields": [
+      "discount",
+      "maturity_months",
+      "jurisdiction"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "series-a",
+    "convertible",
+    "partial"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "PC-SPARSE-CROSS-001",
+  "category": "SPARSE",
+  "description": "Sparse CROSS-DOMAIN payload: REIT industry signal triggers G30 + REIT tax overlay. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "industry": "REIT"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "industry": "REIT",
+      "assetClass": "real_estate"
+    },
+    "missingFields": [
+      "journey",
+      "jurisdiction",
+      "real_estate_assets_cents",
+      "revenue"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "cross-domain",
+    "sparse",
+    "reit",
+    "G30"
+  ]
+}

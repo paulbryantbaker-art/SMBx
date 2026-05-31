@@ -1,0 +1,36 @@
+{
+  "id": "PC-CROSS-DOMAIN-017",
+  "category": "CROSS_DOMAIN",
+  "description": "G28 + G29 + G30 triple overlay: distressed REIT with covenant breach and LME structure on RE-collateralized debt. Substrate must surface plan feasibility, exchange-offer/LME mechanics, AND REIT compliance + RE valuation.",
+  "payload": {
+    "journey": "sell",
+    "subjourney": "owner_rep",
+    "target_industry": "REIT — net lease",
+    "target_jurisdiction": "US-MD",
+    "real_estate_pct_of_ev": 90,
+    "reit_compliance_breach": true,
+    "covenant_breach_projected_within_quarters": 1,
+    "lme_signal": "uptier_proposal",
+    "cash_runway_days": 50
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "distressed_restructuring",
+      "distressPosture": "full_distress",
+      "assetClass": "real_estate"
+    },
+    "missingFields": [
+      "plan_class_recoveries",
+      "indenture_consent_thresholds",
+      "income_tests",
+      "asset_tests"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "G28", "G29", "G30", "REIT-distressed"]
+}

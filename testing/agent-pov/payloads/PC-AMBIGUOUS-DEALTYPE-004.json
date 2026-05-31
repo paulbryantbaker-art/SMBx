@@ -1,0 +1,41 @@
+{
+  "category": "AMBIGUOUS",
+  "description": "Multi-entity target with both operating subs and IP holdco — could be full-stack acquisition or IP-only carve-out.",
+  "payload": {
+    "journey": "buy",
+    "industry": "IP-holding pharma",
+    "jurisdiction": "US-DE",
+    "league": "L6",
+    "targetEntities": [
+      "operating_sub",
+      "ip_holdco",
+      "manufacturing_sub"
+    ],
+    "ttmRevenueCents": 18000000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-DE",
+      "industry": "IP-holding pharma",
+      "league": "L6"
+    },
+    "missingFields": [
+      "explicit_deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "ambiguous",
+    "deal-type"
+  ],
+  "id": "PC-AMBIGUOUS-DEALTYPE-004"
+}

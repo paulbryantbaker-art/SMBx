@@ -1,0 +1,35 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "journey='buy' explicit but seller_role='principal' and asking_price provided — explicit BUY conflicts with sell-side fields.",
+  "payload": {
+    "journey": "buy",
+    "sellerRole": "principal",
+    "askingPriceCents": 250000000,
+    "industry": "B2B services",
+    "jurisdiction": "US-TX"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-TX",
+      "industry": "B2B services"
+    },
+    "missingFields": [
+      "explicit_journey_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "journey-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-JOURNEY-001"
+}

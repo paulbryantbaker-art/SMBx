@@ -1,0 +1,19 @@
+{
+  "id": "PC-GARBAGE-001",
+  "category": "GARBAGE",
+  "description": "Wrong type: revenue is a free-text string instead of a numeric (cents) integer or coerceable money string. Substrate's payload-shape validator must return structured 400 with field-level guidance pointing at revenue, NEVER coerce or 500.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "B2B services",
+    "target_jurisdiction": "US-TX",
+    "revenue": "eighteen million dollars"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "wrong-type", "string-for-number"]
+}

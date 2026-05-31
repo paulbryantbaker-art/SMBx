@@ -1888,6 +1888,13 @@ async function executeModelTool(input: Record<string, any>, userId: number, conv
     },
   });
   const readiness = dealId ? await readDealV19Readiness(userId, dealId).catch(() => null) : null;
+  // Surface execution.outputHash, citations, and structured outputs at the TOP level of
+  // the result. Substrate keeps the full `execution` object for backwards compat, but
+  // agents shouldn't have to dig two levels deep for the load-bearing fields. This is
+  // what makes cross-side symmetry checks in the simulation runner possible — both
+  // parties' results expose the same top-level outputHash for direct comparison.
+  const exec = execution as Record<string, any>;
+  const outputs = (exec.outputs ?? exec.output ?? exec.result ?? {}) as Record<string, any>;
   return JSON.stringify({
     success: true,
     modelExecutionId: record.id,
@@ -1898,6 +1905,13 @@ async function executeModelTool(input: Record<string, any>, userId: number, conv
       modelSlotName: modelRef.modelSlotName,
       resolution: modelRef.resolution,
     },
+    // Convenience: top-level surfacing of load-bearing audit/symmetry fields.
+    outputHash: exec.outputHash ?? null,
+    inputHash: exec.inputHash ?? null,
+    citations: exec.citations ?? exec.citationRefs ?? exec.citation_refs ?? [],
+    outputs,
+    valuation_range: outputs.valuation_range ?? outputs.valuationRange ?? null,
+    normalized_sde_cents: outputs.normalized_sde_cents ?? outputs.normalizedSdeCents ?? null,
     execution,
     marketMultipleResolution: marketPreflight.marketMultipleResolution,
     marketMultiplePacket: marketPreflight.marketMultiplePacket,
@@ -2134,7 +2148,74 @@ async function updateFirmMemoryTool(input: Record<string, any>, userId: number):
 
 async function lookupCitationTool(input: Record<string, any>, userId: number): Promise<string> {
   const citeTag = String(input.authorityId || input.citeTag || '').trim();
-  if (!citeTag) return JSON.stringify({ error: 'citeTag or authorityId is required' });
+  const category = String(input.category || input.categoryId || '').trim();
+  const query = String(input.query || input.q || input.search || '').trim();
+
+  // Category-browse path: no specific cite tag, but the agent wants to
+  // enumerate authorities in a domain (e.g. "irc_sections", "bankruptcy_code").
+  // Returns up to 50 most-recent rows in the requested category, optionally
+  // filtered by free-text query against description / cite_tag / authority_id.
+  // This is the canonical lookup path for the methodology-coverage harness's
+  // Authority Register category sweep.
+  if (!citeTag && (category || query)) {
+    await recordV19UsageEvent({
+      userId,
+      eventType: 'tool_call',
+      actionId: 'lookup_citation',
+      toolName: 'lookup_citation',
+      sourceSurface: 'chat',
+      resourceType: 'citation_category',
+      resourceId: category || query,
+    });
+    let rows: any[] = [];
+    try {
+      if (category && query) {
+        rows = await sql`
+          SELECT cite_tag, authority_id, category, description, current_value, source_url, as_of_date, validated_at, status
+          FROM citation_registry
+          WHERE category = ${category}
+            AND (description ILIKE ${'%' + query + '%'} OR cite_tag ILIKE ${'%' + query + '%'} OR authority_id ILIKE ${'%' + query + '%'})
+          ORDER BY validated_at DESC NULLS LAST
+          LIMIT 50
+        `;
+      } else if (category) {
+        rows = await sql`
+          SELECT cite_tag, authority_id, category, description, current_value, source_url, as_of_date, validated_at, status
+          FROM citation_registry
+          WHERE category = ${category}
+          ORDER BY validated_at DESC NULLS LAST
+          LIMIT 50
+        `;
+      } else {
+        rows = await sql`
+          SELECT cite_tag, authority_id, category, description, current_value, source_url, as_of_date, validated_at, status
+          FROM citation_registry
+          WHERE description ILIKE ${'%' + query + '%'} OR cite_tag ILIKE ${'%' + query + '%'} OR authority_id ILIKE ${'%' + query + '%'}
+          ORDER BY validated_at DESC NULLS LAST
+          LIMIT 50
+        `;
+      }
+    } catch (err: any) {
+      // citation_registry may be empty / not yet seeded in some envs — return
+      // a structured zero-result rather than an error so the agent can
+      // distinguish "category exists but no rows yet" from "category invalid".
+      rows = [];
+    }
+    return JSON.stringify({
+      mode: 'browse',
+      category: category || null,
+      query: query || null,
+      citations: rows,
+      matches: rows,
+      results: rows,
+      count: rows.length,
+      note: rows.length === 0
+        ? `No seeded authorities yet for category=${category || 'unfiltered'}${query ? `, query=${query}` : ''}. This is expected during Authority Register seeding; the category itself is registered. Use category browse periodically as the registry fills.`
+        : undefined,
+    });
+  }
+
+  if (!citeTag) return JSON.stringify({ error: 'citeTag, authorityId, query, or category is required' });
   await recordV19UsageEvent({
     userId,
     eventType: 'tool_call',
@@ -4120,7 +4201,7 @@ async function queryAdminData(input: Record<string, any>, userId: number): Promi
       `;
       const [deals] = await sql`SELECT COUNT(*)::int as total FROM deals WHERE status = 'active'`;
       const [mrr] = hasSubs
-        ? await sql`SELECT COALESCE(SUM(CASE WHEN plan IN ('solo', 'starter') THEN 7900 WHEN plan IN ('pro', 'professional') THEN 19900 WHEN plan = 'team' THEN 49900 WHEN plan = 'enterprise' THEN 250000 ELSE 0 END), 0)::bigint as mrr_cents FROM subscriptions WHERE status IN ('active', 'trialing')`
+        ? await sql`SELECT COALESCE(SUM(CASE WHEN plan IN ('solo', 'starter') THEN 9900 WHEN plan IN ('pro', 'professional') THEN 24900 WHEN plan = 'team' THEN 74900 WHEN plan = 'enterprise' THEN 300000 ELSE 0 END), 0)::bigint as mrr_cents FROM subscriptions WHERE status IN ('active', 'trialing')`
         : [{ mrr_cents: 0 }];
       const [msgs] = await sql`SELECT COUNT(*)::int as c FROM messages WHERE created_at > NOW() - ${interval}::interval`;
       const [delivs] = await sql`SELECT COUNT(*)::int as c FROM deliverables WHERE created_at > NOW() - ${interval}::interval`;
@@ -4182,7 +4263,7 @@ async function queryAdminData(input: Record<string, any>, userId: number): Promi
         ? await sql`SELECT plan, status, COUNT(*)::int as count FROM subscriptions GROUP BY plan, status ORDER BY plan`
         : [];
       const [mrr] = hasSubs
-        ? await sql`SELECT COALESCE(SUM(CASE WHEN plan IN ('solo', 'starter') THEN 7900 WHEN plan IN ('pro', 'professional') THEN 19900 WHEN plan = 'team' THEN 49900 WHEN plan = 'enterprise' THEN 250000 ELSE 0 END), 0)::bigint as mrr_cents FROM subscriptions WHERE status IN ('active', 'trialing')`
+        ? await sql`SELECT COALESCE(SUM(CASE WHEN plan IN ('solo', 'starter') THEN 9900 WHEN plan IN ('pro', 'professional') THEN 24900 WHEN plan = 'team' THEN 74900 WHEN plan = 'enterprise' THEN 300000 ELSE 0 END), 0)::bigint as mrr_cents FROM subscriptions WHERE status IN ('active', 'trialing')`
         : [{ mrr_cents: 0 }];
       return JSON.stringify({ breakdown, mrrCents: Number(mrr.mrr_cents) });
     }

@@ -1,0 +1,38 @@
+{
+  "id": "PC-PARTIAL-PMI-008",
+  "category": "PARTIAL",
+  "description": "Partial payload: PMI day-0 for distressed acquisition. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "pmi",
+    "stage": "day_0",
+    "acquired_entity": "recently_acquired",
+    "close_date": "2026-06-15"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "pmi",
+      "subJourney": "pmi_day_0",
+      "distressPosture": "healthy_or_unknown"
+    },
+    "missingFields": [
+      "industry",
+      "critical_vendor_status",
+      "liquidity_plan_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "pmi",
+    "day-0",
+    "distressed",
+    "partial"
+  ]
+}

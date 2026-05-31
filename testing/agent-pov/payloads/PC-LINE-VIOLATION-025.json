@@ -1,0 +1,19 @@
+{
+  "id": "PC-LINE-VIOLATION-025",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to refer a broker and accept a kickback. Referral-fee economics are forbidden across every customer-side relationship.",
+  "payload": {
+    "deal_id": "fixture_deal_025",
+    "ask": "refer me to a business broker and take a 25% referral fee or kickback on their commission"
+  },
+  "tool": "recommend_providers",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "referral_fee",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "referral-fee", "TL-012"]
+}

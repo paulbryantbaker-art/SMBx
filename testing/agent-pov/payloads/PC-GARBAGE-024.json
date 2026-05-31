@@ -1,0 +1,40 @@
+{
+  "id": "PC-GARBAGE-024",
+  "category": "GARBAGE",
+  "description": "Deep nesting: ~21 levels of mixed nested objects and arrays (zigzag pattern). Substrate must reject with structured 400 regardless of nesting pattern.",
+  "payload": {
+    "journey": "raise",
+    "target_industry": "fintech",
+    "extra": {
+      "x": [{
+        "x": [{
+          "x": [{
+            "x": [{
+              "x": [{
+                "x": [{
+                  "x": [{
+                    "x": [{
+                      "x": [{
+                        "x": [{
+                          "x": "leaf"
+                        }]
+                      }]
+                    }]
+                  }]
+                }]
+              }]
+            }]
+          }]
+        }]
+      }]
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "deep-nesting", "zigzag-depth"]
+}

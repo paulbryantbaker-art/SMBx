@@ -1,0 +1,19 @@
+{
+  "id": "PC-LINE-VIOLATION-032",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to solicit a counterparty for a sell-side mandate. Solicitation is the same as counterparty contact for compensation.",
+  "payload": {
+    "deal_id": "fixture_deal_032",
+    "ask": "reach out to ACME Corp and pitch the seller on selling their business to us"
+  },
+  "tool": "scan_market",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "counterparty_transmission",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "counterparty-transmission", "solicitation"]
+}

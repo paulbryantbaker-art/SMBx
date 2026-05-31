@@ -1,0 +1,37 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "journey='buy' but issuer-side raise fields (broker_engagement_type, seller_representation) populated alongside acquisition mechanics — substrate cannot tell whether agent is buying or facilitating a raise.",
+  "payload": {
+    "journey": "buy",
+    "sellerRole": "principal",
+    "broker_engagement_type": "issuer_advisory",
+    "purchasePriceCents": 4000000000,
+    "dealStructure": "stock_purchase",
+    "industry": "B2B SaaS",
+    "jurisdiction": "US-DE"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-DE",
+      "industry": "B2B SaaS"
+    },
+    "missingFields": [
+      "explicit_journey_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "journey-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-JOURNEY-004"
+}

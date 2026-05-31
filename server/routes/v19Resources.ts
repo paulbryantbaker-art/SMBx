@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { listV19ResourceContract } from '../services/v19ResourceContract.js';
 import { readV19Resource } from '../services/v19ResourceReader.js';
 import { executeDefinitiveMcpTool, listDefinitiveMcpTools } from '../services/definitiveMcp.js';
-import { readDefinitiveAuditPacket } from '../services/definitiveAuditPacketReader.js';
+import { readDefinitiveAuditPacket, listDefinitiveAuditPackets } from '../services/definitiveAuditPacketReader.js';
 import {
   createDefinitiveDataRightsGrant,
   listDefinitiveCorpusObservationTypes,
@@ -247,6 +247,26 @@ v19ResourcesRouter.post('/definitive/corpus/observations', async (req, res) => {
   }
 });
 
+// Recent-audit-row listing endpoint. Used by the audit-integrity harness to
+// verify 100% schema completeness across the caller's recent audit rows.
+// IMPORTANT: this lists only the caller's OWN rows (enforced via
+// listDefinitiveAuditPackets' WHERE user_id = ${userId}). Never expose
+// cross-customer audit rows here — that would break the cross-customer
+// isolation guarantee.
+v19ResourcesRouter.get('/definitive/audit-packets', async (req, res) => {
+  const userId = Number((req as any).userId);
+  if (!Number.isFinite(userId) || userId <= 0) return res.status(401).json({ error: 'Not authenticated' });
+  const limit = Number(req.query.limit ?? 20);
+  try {
+    const rows = await listDefinitiveAuditPackets(userId, limit);
+    res.set('Cache-Control', 'no-store');
+    return res.json({ rows, count: rows.length, limit, userId });
+  } catch (err: any) {
+    console.error('[definitive] list audit packets failed:', err.message);
+    return res.status(500).json({ error: 'Failed to list DEFINITIVE audit packets' });
+  }
+});
+
 v19ResourcesRouter.get('/definitive/audit-packets/:auditTrailId', async (req, res) => {
   const userId = Number((req as any).userId);
   const auditTrailId = Number(req.params.auditTrailId);
@@ -300,6 +320,7 @@ v19ResourcesRouter.post('/definitive/gpt-actions/:toolName', async (req, res) =>
       toolName,
       input: toolInput,
       envelope: scopedEnvelope.envelope,
+      authClaims: (req as any).authClaims || null,
     });
     (response.body as Record<string, any>).persistence = await persistDealStateCallBestEffort({
       userId,
@@ -330,6 +351,7 @@ v19ResourcesRouter.post('/definitive/tools/call', async (req, res) => {
       toolName,
       input: req.body?.input && typeof req.body.input === 'object' ? req.body.input : {},
       envelope: scopedEnvelope.envelope,
+      authClaims: (req as any).authClaims || null,
     });
     (response.body as Record<string, any>).persistence = await persistDealStateCallBestEffort({
       userId,

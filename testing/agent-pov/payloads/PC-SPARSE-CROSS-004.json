@@ -1,0 +1,37 @@
+{
+  "id": "PC-SPARSE-CROSS-004",
+  "category": "SPARSE",
+  "description": "Sparse CROSS-DOMAIN payload: distressed + RE-heavy simultaneous signals. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "cash_runway_days": 75,
+    "asset_class": "real_estate"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "distressPosture": "distressed"
+    },
+    "missingFields": [
+      "journey",
+      "industry",
+      "jurisdiction",
+      "revenue",
+      "deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "cross-domain",
+    "sparse",
+    "distressed-re",
+    "G28",
+    "G30"
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "category": "RICH",
+  "description": "Growth equity Series C — full cap table, prior rounds, secondary component noted.",
+  "payload": {
+    "journey": "raise",
+    "raiseType": "series_c",
+    "instrument": "preferred_stock_series_c",
+    "industry": "enterprise SaaS — devtools",
+    "jurisdiction": "US-DE",
+    "league": "L4",
+    "raiseAmountCents": 6000000000,
+    "primaryAllocationCents": 4500000000,
+    "secondaryAllocationCents": 1500000000,
+    "preMoneyCents": 30000000000,
+    "postMoneyCents": 36000000000,
+    "liquidationPreference": "1x_non_participating",
+    "priorRounds": [
+      "seed",
+      "series_a",
+      "series_b"
+    ],
+    "capTable": {
+      "founderPct": 28,
+      "optionPoolPct": 15,
+      "priorInvestorsPct": 40,
+      "newInvestorsPct": 17
+    },
+    "taxClassification": "c_corp",
+    "stage": "term_sheet"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "growth_raise",
+      "league": "L4",
+      "jurisdiction": "US-DE",
+      "industry": "enterprise SaaS — devtools",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "L4",
+    "rich",
+    "series_c"
+  ],
+  "id": "PC-RICH-RAISE-005"
+}

@@ -1,0 +1,34 @@
+{
+  "id": "PC-CROSS-DOMAIN-023",
+  "category": "CROSS_DOMAIN",
+  "description": "BUY + restructuring: independent sponsor pursuing Article 9 foreclosure purchase. M148 + M165 (ABC/Article 9) + sponsor-financing routes must surface together.",
+  "payload": {
+    "journey": "buy",
+    "subjourney": "distressed_buy_side",
+    "target_industry": "logistics",
+    "target_jurisdiction": "US-OH",
+    "target_revenue_cents": 1200000000,
+    "out_of_court_liquidation": "article_9",
+    "buyer_type": "independent_sponsor",
+    "secured_debt_price_cents": 40
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "distressed_buy_side",
+      "distressPosture": "full_distress",
+      "assetClass": "operating_co"
+    },
+    "missingFields": [
+      "ucc_notice_recipients",
+      "credit_bid_amount",
+      "sponsor_economics"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "buy", "G28", "article-9", "independent-sponsor"]
+}

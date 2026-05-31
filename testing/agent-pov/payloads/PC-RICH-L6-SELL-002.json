@@ -1,0 +1,53 @@
+{
+  "category": "RICH",
+  "description": "L6 IPO-prep / dual-track sell — full readiness signals + ATM / 10-K cadence.",
+  "payload": {
+    "journey": "sell",
+    "sellerRole": "banker",
+    "industry": "enterprise SaaS — cybersecurity",
+    "naics": "541511",
+    "jurisdiction": "US-DE",
+    "league": "L6",
+    "ttmRevenueCents": 35000000000,
+    "arrCents": 38000000000,
+    "adjustedEbitdaCents": 4200000000,
+    "multiYearPnlPresent": true,
+    "yearsOfHistory": 5,
+    "askingPriceCents": 60000000000,
+    "dualTrack": true,
+    "ipoReadinessScore": 0.85,
+    "taxClassification": "c_corp",
+    "stage": "marketing"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "banker_led",
+      "league": "L6",
+      "jurisdiction": "US-DE",
+      "industry": "enterprise SaaS — cybersecurity",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L6",
+    "rich",
+    "dual-track",
+    "ipo"
+  ],
+  "id": "PC-RICH-L6-SELL-002"
+}

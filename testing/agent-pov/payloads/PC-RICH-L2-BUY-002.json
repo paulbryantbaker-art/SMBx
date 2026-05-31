@@ -1,0 +1,48 @@
+{
+  "id": "PC-RICH-L2-BUY-002",
+  "category": "RICH",
+  "description": "L2 search-funder acquiring a small SaaS recurring-revenue business with full ARR + churn + GM context.",
+  "payload": {
+    "journey": "buy",
+    "industry": "B2B vertical SaaS",
+    "naics": "541511",
+    "jurisdiction": "US-DE",
+    "league": "L2",
+    "ttmRevenueCents": 220000000,
+    "arrCents": 240000000,
+    "ebitdaCents": 55000000,
+    "sdeCents": 70000000,
+    "grossMarginPct": 78,
+    "netRevenueRetentionPct": 108,
+    "purchasePriceCents": 320000000,
+    "dealStructure": "stock_purchase",
+    "taxClassification": "c_corp",
+    "financing": {
+      "sponsorEquityCents": 96000000,
+      "sbaSevenACents": 175000000,
+      "sellerNoteCents": 49000000
+    },
+    "stage": "diligence"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L2",
+      "jurisdiction": "US-DE",
+      "industry": "B2B vertical SaaS",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": ["compose_model_stack", "execute_model"],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": ["buy", "L2", "rich", "saas", "search-funder"]
+}

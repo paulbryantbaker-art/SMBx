@@ -1,0 +1,47 @@
+{
+  "category": "RICH",
+  "description": "GP-led secondary / continuation vehicle — full LP base + concentration context.",
+  "payload": {
+    "journey": "raise",
+    "raiseType": "secondary_gp_led",
+    "instrument": "continuation_fund",
+    "industry": "PE secondaries — single asset CV",
+    "jurisdiction": "US-DE",
+    "league": "L7",
+    "raiseAmountCents": 30000000000,
+    "transactionType": "single_asset_cv",
+    "lpRolloverPct": 25,
+    "taxClassification": "llc_partnership",
+    "stage": "secondary"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "secondary_raise",
+      "league": "L7",
+      "jurisdiction": "US-DE",
+      "industry": "PE secondaries — single asset CV",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "llc_partnership"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "L7",
+    "rich",
+    "secondary_gp_led"
+  ],
+  "id": "PC-RICH-RAISE-009"
+}

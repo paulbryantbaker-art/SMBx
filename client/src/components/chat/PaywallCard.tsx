@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { authHeaders } from '../../hooks/useAuth';
+import { getPricingTier } from '../../lib/pricing';
 
 interface PaywallData {
   gate: string;
@@ -20,19 +21,8 @@ interface PaywallCardProps {
   onUnlocked: (toGate: string, deliverableId?: number) => void;
 }
 
-const PLAN_DISPLAY: Record<string, { name: string; price: string; note: string }> = {
-  // Solo — for self-funded searchers, principal sellers/buyers, sole-operator brokers
-  solo:       { name: 'Solo',       price: '$79/month',    note: 'One active deal desk, unlimited deliverables, one supervised MCP/agent key' },
-  // Pro — for IS, search funders, LMM advisors, solo bankers (most-chosen tier)
-  pro:        { name: 'Pro',        price: '$199/month',   note: 'Parallel deals, CIM, deal room, market discovery, three supervised MCP/agent keys' },
-  // Team — boutique firms, small corp dev, small FO direct-investing
-  team:       { name: 'Team',       price: '$499/month',   note: 'Seats, shared workspace, shared deal vault, supervised agent workflows' },
-  // Enterprise — corp dev at serial acquirers, mid-market PE, MFOs, large advisory
-  enterprise: { name: 'Enterprise', price: '$2,500+/month', note: 'SSO, single-tenant, API controls, portfolio infrastructure, custom governance' },
-  // Legacy plan keys mapped forward so existing paywall payloads still render
-  starter:      { name: 'Solo',       price: '$79/month',  note: 'One active deal desk, unlimited deliverables, one supervised MCP/agent key' },
-  professional: { name: 'Pro',        price: '$199/month', note: 'Parallel deals, CIM, deal room, market discovery, three supervised MCP/agent keys' },
-};
+// Pricing source of truth: client/src/lib/pricing.ts → SMBX_PRICING_LOCKED.md.
+// Use `getPricingTier(planId)` below — it normalizes legacy 'starter'/'professional' keys.
 
 export default function PaywallCard({ paywall, dealId, onUnlocked }: PaywallCardProps) {
   const [purchasing, setPurchasing] = useState(false);
@@ -40,7 +30,9 @@ export default function PaywallCard({ paywall, dealId, onUnlocked }: PaywallCard
   const [success, setSuccess] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
 
-  const plan = PLAN_DISPLAY[paywall.requiredPlan || 'starter'] || PLAN_DISPLAY.starter;
+  const tier = getPricingTier(paywall.requiredPlan || 'solo');
+  // Render with the same {name, price, note} shape the rest of the component uses.
+  const plan = { name: tier.name, price: tier.priceDisplay, note: tier.note };
 
   const handlePurchase = async () => {
     setPurchasing(true);

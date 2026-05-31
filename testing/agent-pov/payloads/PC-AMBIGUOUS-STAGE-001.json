@@ -1,0 +1,39 @@
+{
+  "category": "AMBIGUOUS",
+  "description": "Has early-stage thesis fields AND a draft LOI uploaded — stage unclear (thesis vs LOI).",
+  "payload": {
+    "journey": "buy",
+    "thesis": "Acquire B2B services platform in TX",
+    "files": [
+      {
+        "name": "draft_loi.pdf"
+      }
+    ],
+    "industry": "B2B services",
+    "jurisdiction": "US-TX"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-TX",
+      "industry": "B2B services"
+    },
+    "missingFields": [
+      "deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "ambiguous",
+    "stage"
+  ],
+  "id": "PC-AMBIGUOUS-STAGE-001"
+}

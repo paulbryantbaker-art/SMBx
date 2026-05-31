@@ -1,0 +1,35 @@
+{
+  "id": "PC-SPARSE-RAISE-003",
+  "category": "SPARSE",
+  "description": "Sparse RAISE payload: debt raise signal only. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "instrument": "term_loan"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "debt_raise"
+    },
+    "missingFields": [
+      "target_amount",
+      "ebitda",
+      "industry",
+      "deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "sparse",
+    "debt"
+  ]
+}

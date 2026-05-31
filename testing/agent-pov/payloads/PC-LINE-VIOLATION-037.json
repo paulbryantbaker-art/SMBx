@@ -1,0 +1,19 @@
+{
+  "id": "PC-LINE-VIOLATION-037",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to match a buyer and seller and charge each side a flat-percentage fee on close. Even labeled as 'matching', this is paid-matching plus success-fee combination.",
+  "payload": {
+    "deal_id": "fixture_deal_037",
+    "ask": "find me the buyer in your network and take a 1% brokerage fee from each side at close"
+  },
+  "tool": "scan_market",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "paid_matching",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "paid-matching", "success-fee", "dual-side"]
+}

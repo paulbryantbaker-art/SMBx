@@ -1,17 +1,4 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { ART_HOUSE_TEXTURES, DESKTOP_TEXTURES, STUDIO_TEXTURES } from "../../lib/randomTextures";
-import {
-  studioCompeteButtonItemStyles,
-  studioCompeteCardStyles,
-  studioDarkLiquidGlassPill,
-  studioGlassBackdrop,
-  studioHeroWash,
-  studioLiquidGlass,
-  studioListButtonRowStyles,
-  studioListCardStyles,
-  studioTextureCardBackground,
-  studioTextureCardStyles,
-} from "./styles/studioSurfaces";
 
 type Section = "how" | "pricing";
 
@@ -20,7 +7,6 @@ type HeroConfig = {
   copy: string;
   cta: string;
   prompt: string;
-  background: string;
   dock: [string, string][];
 };
 
@@ -30,8 +16,6 @@ const LEARN_HERO: Record<Section, HeroConfig> = {
     copy: "Yulia turns chat, files, models, and decisions into one live work surface. The canvas shows the work; the chat rail stays the front door.",
     cta: "Ask Yulia to walk the desk",
     prompt: "Walk me through how Yulia runs the deal desk from chat to models, files, Studio, and audit trail.",
-    background:
-      `linear-gradient(155deg, rgba(15,34,58,0.76) 0%, rgba(54,100,142,0.46) 48%, rgba(14,25,48,0.78) 100%), url('${STUDIO_TEXTURES.navy}')`,
     dock: [
       ["Chat opens the work", "A question becomes a route into Today, Pipeline, Search, Files, Studio, or a deal detail page."],
       ["Models stay grounded", "Financial outputs come from deterministic V19 models, uploaded files, and cited sources."],
@@ -43,7 +27,6 @@ const LEARN_HERO: Record<Section, HeroConfig> = {
     copy: "Monthly plans stay simple. Credits and tollgates control expensive model runs, Studio exports, API/MCP calls, and agent usage without wallets or success fees.",
     cta: "Ask Yulia which plan fits",
     prompt: "Help me choose the right smbX plan based on deal volume, Studio exports, model runs, API/MCP access, and agent usage.",
-    background: studioHeroWash,
     dock: [
       ["Monthly plans", "Free, Solo, Pro, Team, and Enterprise map to how much real deal work needs to move."],
       ["Included credits", "Model runs, exports, Studio books, and API/tool calls are metered inside monthly allowances."],
@@ -63,8 +46,6 @@ export function V6LearnView({ section, anchor, onTalkToYulia }: LearnProps) {
   const hero = LEARN_HERO[active];
   useEffect(() => { if (section) setActive(section); }, [section]);
 
-  // Scroll to anchor whenever an anchor arrives — wait one frame so the
-  // newly-active section has mounted its DOM before we try to find it.
   useEffect(() => {
     if (!anchor) return;
     const raf = requestAnimationFrame(() => {
@@ -75,15 +56,15 @@ export function V6LearnView({ section, anchor, onTalkToYulia }: LearnProps) {
   }, [anchor, active]);
 
   return (
-    <div className="m-fade-up" style={L.page}>
-      <header style={{ ...L.hero, backgroundImage: hero.background }}>
-        <div style={L.heroGlow} aria-hidden="true" />
+    <div className="wk-content m-fade-up" style={L.page}>
+      {/* ── Hero ── flat dark ink block */}
+      <header style={L.hero}>
         <div style={L.heroMain}>
           <div>
             <h1 style={L.heroH1}>{hero.title}</h1>
             <p style={L.heroTag}>{hero.copy}</p>
             <button
-              className="m-state"
+              className="m-nudge-soft"
               style={L.heroCta}
               onClick={() => onTalkToYulia?.(hero.prompt)}
             >
@@ -102,6 +83,7 @@ export function V6LearnView({ section, anchor, onTalkToYulia }: LearnProps) {
         </div>
       </header>
 
+      {/* ── Section tabs ── */}
       <div role="tablist" aria-label="Learn sections" style={L.subnav}>
         {([
           { id: "how" as const,     label: "How it works" },
@@ -112,14 +94,14 @@ export function V6LearnView({ section, anchor, onTalkToYulia }: LearnProps) {
             role="tab"
             aria-selected={active === t.id}
             onClick={() => setActive(t.id)}
-            className="m-state"
+            className="m-nudge-soft"
             style={{
               ...L.subnavBtn,
               fontWeight: active === t.id ? 600 : 500,
-              color: active === t.id ? "var(--m-on-surface)" : "var(--m-on-surface-var)",
-              background: active === t.id ? "rgba(255,255,255,0.90)" : "transparent",
-              border: active === t.id ? "1px solid rgba(214,225,240,0.92)" : "1px solid transparent",
-              boxShadow: active === t.id ? "0 10px 24px -18px rgba(26,34,51,0.30), inset 0 1px 0 rgba(255,255,255,0.78)" : "none",
+              color: active === t.id ? "var(--ink)" : "var(--ink-3)",
+              background: active === t.id ? "var(--surface)" : "transparent",
+              border: active === t.id ? "1px solid var(--line)" : "1px solid transparent",
+              boxShadow: active === t.id ? "0 1px 3px rgba(25,24,19,.06)" : "none",
             }}
           >{t.label}</button>
         ))}
@@ -145,7 +127,7 @@ const DIFFERENCES: Difference[] = [
   {
     title: "A methodology engine, not a prompt trick",
     body: "Yulia carries journey, stage, deal size, role, documents, and prior work into the next move. We do not need to label the version on the website; the point is that the playbook is deep, mature, and deal-specific.",
-    accent: "#6A9BCC",
+    accent: "var(--accent-strong)",
   },
   {
     title: "Outputs built to survive third-party review",
@@ -257,7 +239,6 @@ const HOW_TEXTURE_CARDS = [
     audience: "Front door",
     detail: "Start with a question, file, target, buyer, or open decision. Yulia routes it to the right surface.",
     action: "Open work",
-    texture: STUDIO_TEXTURES.green,
   },
   {
     meta: "02",
@@ -265,7 +246,6 @@ const HOW_TEXTURE_CARDS = [
     audience: "Canvas",
     detail: "The answer becomes a model, buyer map, file read, pipeline move, or Studio draft instead of staying trapped in chat.",
     action: "Build context",
-    texture: STUDIO_TEXTURES.rose,
   },
   {
     meta: "03",
@@ -273,7 +253,6 @@ const HOW_TEXTURE_CARDS = [
     audience: "V19 models",
     detail: "Numbers come from deterministic models, source files, citations, and versioned assumptions.",
     action: "Verify",
-    texture: STUDIO_TEXTURES.navy,
   },
   {
     meta: "04",
@@ -281,7 +260,6 @@ const HOW_TEXTURE_CARDS = [
     audience: "Studio + files",
     detail: "Drafts, pitch books, memos, and exports keep their source trail and audit state.",
     action: "Deliver",
-    texture: STUDIO_TEXTURES.blue,
   },
 ];
 
@@ -311,7 +289,7 @@ function HowSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) => voi
         }
         @media (max-width: 760px) {
           .learn-info-panel {
-            border-radius: 22px !important;
+            border-radius: 14px !important;
             padding: 18px !important;
           }
         }
@@ -324,7 +302,7 @@ function HowSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) => voi
         <div style={L.textureGrid}>
           {HOW_TEXTURE_CARDS.map((card, index) => (
             <Reveal key={card.title} delay={index * 60}>
-              <article style={{ ...L.textureCard, backgroundImage: studioTextureCardBackground(card.texture) }}>
+              <article style={L.flatCard}>
                 <span style={L.textureMeta}>{card.meta}</span>
                 <strong style={L.textureTitle}>{card.title}</strong>
                 <span style={L.textureAudience}>{card.audience}</span>
@@ -416,7 +394,7 @@ function DifferenceDisclosure({ item, defaultOpen = false }: { item: Difference;
     <div className="learn-difference-row" style={H.differenceRow}>
       <button
         type="button"
-        className="m-state"
+        className="m-nudge-soft"
         aria-expanded={open}
         onClick={() => setOpen(!open)}
         style={H.differenceButton}
@@ -456,10 +434,10 @@ function stepBoardCardStyle(index: number): CSSProperties {
 
 function stepBadgeStyle(index: number): CSSProperties {
   const tones = [
-    { background: "rgba(214,232,250,0.92)", color: "#355F89" },
-    { background: "rgba(219,241,230,0.92)", color: "#326C55" },
-    { background: "rgba(250,235,192,0.92)", color: "#7A5A1F" },
-    { background: "rgba(255,255,255,0.22)", color: "#FFFFFF" },
+    { background: "var(--accent-soft)", color: "var(--accent-strong)" },
+    { background: "#DBF1E6", color: "#326C55" },
+    { background: "#FAF1D6", color: "#7A5A1F" },
+    { background: "var(--surface-2)", color: "var(--ink-2)" },
   ];
   return {
     ...A.storyNumber,
@@ -524,7 +502,7 @@ function stepCardStyle(index: number): CSSProperties {
   return {
     ...H.stepCard,
     boxShadow: index === 0
-      ? "0 24px 58px rgba(31,44,69,0.11), 0 6px 16px rgba(31,44,69,0.06), inset 0 1px 0 rgba(255,255,255,0.90)"
+      ? "0 2px 8px rgba(25,24,19,.08)"
       : H.stepCard.boxShadow,
   };
 }
@@ -538,36 +516,18 @@ function stepNumberStyle(index: number): CSSProperties {
 
 function surfaceCardStyle(tone: WorkSurface["tone"]): CSSProperties {
   const recipes: Record<WorkSurface["tone"], CSSProperties> = {
-    blue: {
-      backgroundImage:
-        `linear-gradient(145deg, rgba(19,55,92,0.70), rgba(87,137,187,0.42) 54%, rgba(18,35,65,0.66)), url('${DESKTOP_TEXTURES.filesAll}')`,
-      color: "#FFFFFF",
-    },
-    green: {
-      backgroundImage:
-        `linear-gradient(145deg, rgba(21,79,62,0.64), rgba(74,137,110,0.42) 54%, rgba(19,43,43,0.66)), url('${DESKTOP_TEXTURES.filesDeals}')`,
-      color: "#FFFFFF",
-    },
-    gold: {
-      backgroundImage:
-        `linear-gradient(145deg, rgba(120,80,28,0.58), rgba(205,159,86,0.34) 52%, rgba(68,45,25,0.58)), url('${DESKTOP_TEXTURES.filesAction}')`,
-      color: "#FFFFFF",
-    },
-    dark: {
-      backgroundImage:
-        `linear-gradient(145deg, rgba(50,46,108,0.62), rgba(116,108,184,0.40) 52%, rgba(24,30,68,0.66)), url('${DESKTOP_TEXTURES.filesRoom}')`,
-      color: "#FFFFFF",
-    },
+    blue:  { background: "var(--surface-2)", color: "var(--ink)" },
+    green: { background: "var(--surface-2)", color: "var(--ink)" },
+    gold:  { background: "var(--surface-2)", color: "var(--ink)" },
+    dark:  { background: "var(--ink)",       color: "#fff"       },
   };
-
   return {
     ...H.surfaceCard,
     ...recipes[tone],
   };
 }
 
-const LEARN_ACCENT_ART = "/textures/desktop/art-house/art-house-03.png?v=20260517-learn-accent-room-2";
-
+/* ─── "A" style block — story / system / art panels ── */
 const A: Record<string, CSSProperties> = {
   openGrid: {
     display: "grid",
@@ -578,12 +538,10 @@ const A: Record<string, CSSProperties> = {
   },
   openPanel: {
     minHeight: 430,
-    borderRadius: 30,
+    borderRadius: 16,
     padding: "38px 40px",
-    background:
-      "radial-gradient(circle at 14% 0%, rgba(106,155,204,0.14), transparent 34%), linear-gradient(155deg, rgba(255,255,255,0.97), rgba(247,251,255,0.90))",
-    border: "1px solid rgba(219,228,241,0.94)",
-    boxShadow: "0 34px 84px rgba(31,44,69,0.12), 0 8px 22px rgba(31,44,69,0.06), inset 0 1px 0 rgba(255,255,255,0.94)",
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
@@ -595,7 +553,7 @@ const A: Record<string, CSSProperties> = {
     letterSpacing: "-0.055em",
     margin: 0,
     maxWidth: 720,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     textWrap: "balance",
   },
   openLead: {
@@ -603,7 +561,7 @@ const A: Record<string, CSSProperties> = {
     maxWidth: 720,
     fontSize: 16,
     lineHeight: 1.62,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     textWrap: "pretty",
   },
   statRail: {
@@ -618,34 +576,27 @@ const A: Record<string, CSSProperties> = {
     alignItems: "center",
     padding: "0 12px",
     borderRadius: 999,
-    background: "linear-gradient(180deg, rgba(247,251,255,0.96), rgba(233,243,252,0.84))",
-    border: "1px solid rgba(211,224,239,0.88)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.92)",
-    color: "#355F89",
+    background: "var(--surface-2)",
+    border: "1px solid var(--line)",
+    color: "var(--ink-2)",
     fontSize: 12,
+    fontFamily: "var(--font-mono)",
     fontWeight: 800,
   },
+  /* flat dark card — replaces photo art card */
   artCard: {
     position: "relative",
     minHeight: 430,
-    borderRadius: 30,
+    borderRadius: 16,
     overflow: "hidden",
-    backgroundImage:
-      `linear-gradient(145deg, rgba(16,31,52,0.30), rgba(65,110,143,0.18)), url('${ART_HOUSE_TEXTURES.learn}')`,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    border: "1px solid rgba(255,255,255,0.46)",
-    boxShadow: "0 44px 110px rgba(31,44,69,0.22), 0 12px 28px rgba(31,44,69,0.10), inset 0 1px 0 rgba(255,255,255,0.30)",
+    background: "var(--ink)",
+    border: "1px solid var(--line)",
     color: "#FFFFFF",
     display: "flex",
     alignItems: "flex-end",
   },
   artWash: {
-    position: "absolute",
-    inset: 0,
-    background:
-      "linear-gradient(180deg, rgba(9,18,31,0.10), rgba(9,18,31,0.48)), radial-gradient(circle at 18% 0%, rgba(255,255,255,0.22), transparent 42%)",
-    pointerEvents: "none",
+    display: "none", /* removed — no overlay needed on flat dark */
   },
   artContent: {
     position: "relative",
@@ -661,7 +612,6 @@ const A: Record<string, CSSProperties> = {
     margin: 0,
     maxWidth: 460,
     color: "#FFFFFF",
-    textShadow: "0 3px 22px rgba(10,22,38,0.40)",
     textWrap: "balance",
   },
   artBody: {
@@ -669,8 +619,7 @@ const A: Record<string, CSSProperties> = {
     maxWidth: 470,
     fontSize: 14.5,
     lineHeight: 1.55,
-    color: "rgba(255,255,255,0.90)",
-    textShadow: "0 2px 14px rgba(10,22,38,0.32)",
+    color: "rgba(255,255,255,0.84)",
     textWrap: "pretty",
   },
   darkGlassPill: {
@@ -681,10 +630,11 @@ const A: Record<string, CSSProperties> = {
     alignItems: "center",
     gap: 10,
     padding: "0 16px",
-    color: "#FFFFFF",
+    color: "var(--on-accent)",
     fontSize: 13,
     fontWeight: 850,
-    ...studioDarkLiquidGlassPill,
+    background: "var(--accent)",
+    borderRadius: 999,
   },
   storySection: {
     marginBottom: 46,
@@ -698,7 +648,7 @@ const A: Record<string, CSSProperties> = {
     lineHeight: 1,
     letterSpacing: "-0.05em",
     margin: 0,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     textWrap: "balance",
   },
   sectionLead: {
@@ -706,7 +656,7 @@ const A: Record<string, CSSProperties> = {
     maxWidth: 760,
     fontSize: 14.5,
     lineHeight: 1.56,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     textWrap: "pretty",
   },
   storyStack: {
@@ -721,37 +671,31 @@ const A: Record<string, CSSProperties> = {
   },
   stepBoardCard: {
     minHeight: 238,
-    borderRadius: 26,
+    borderRadius: 14,
     padding: "24px 26px",
-    background: "linear-gradient(155deg, rgba(255,255,255,0.98), rgba(248,251,255,0.92))",
-    border: "1px solid rgba(219,228,241,0.94)",
-    boxShadow: "0 24px 62px rgba(31,44,69,0.10), 0 6px 16px rgba(31,44,69,0.06), inset 0 1px 0 rgba(255,255,255,0.94)",
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   stepCardBlue: {
-    background:
-      "radial-gradient(circle at 14% 0%, rgba(106,155,204,0.16), transparent 36%), linear-gradient(155deg, rgba(255,255,255,0.98), rgba(235,245,255,0.91))",
-    border: "1px solid rgba(176,205,232,0.82)",
+    background: "var(--surface-2)",
+    border: "1px solid var(--line)",
   },
   stepCardGreen: {
-    background:
-      "radial-gradient(circle at 14% 0%, rgba(98,153,135,0.15), transparent 36%), linear-gradient(155deg, rgba(255,255,255,0.98), rgba(235,248,241,0.91))",
-    border: "1px solid rgba(181,218,198,0.78)",
+    background: "var(--surface-2)",
+    border: "1px solid var(--line)",
   },
   stepCardGold: {
-    background:
-      "radial-gradient(circle at 14% 0%, rgba(214,163,92,0.18), transparent 36%), linear-gradient(155deg, rgba(255,255,255,0.98), rgba(255,247,225,0.91))",
-    border: "1px solid rgba(232,207,146,0.78)",
+    background: "var(--surface-2)",
+    border: "1px solid var(--line)",
   },
   stepCardDecision: {
-    background:
-      "radial-gradient(circle at 14% 0%, rgba(255,255,255,0.22), transparent 38%), linear-gradient(145deg, rgba(35,83,115,0.96), rgba(65,113,143,0.88) 54%, rgba(32,45,79,0.96))",
-    border: "1px solid rgba(255,255,255,0.26)",
+    background: "var(--ink)",
+    border: "1px solid var(--line)",
     color: "#FFFFFF",
-    boxShadow: "0 30px 78px rgba(40,88,122,0.22), 0 8px 22px rgba(31,44,69,0.10), inset 0 1px 0 rgba(255,255,255,0.22)",
   },
   stepTopline: {
     display: "flex",
@@ -766,9 +710,8 @@ const A: Record<string, CSSProperties> = {
     alignItems: "center",
     padding: "0 11px",
     borderRadius: 999,
-    background: "rgba(255,255,255,0.54)",
-    border: "1px solid rgba(255,255,255,0.42)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.78)",
+    background: "rgba(255,255,255,0.14)",
+    border: "1px solid rgba(255,255,255,0.22)",
     color: "currentColor",
     fontSize: 12,
     fontWeight: 850,
@@ -799,11 +742,10 @@ const A: Record<string, CSSProperties> = {
   },
   storyNode: {
     minHeight: 190,
-    borderRadius: 26,
+    borderRadius: 14,
     padding: "24px 26px",
-    background: "linear-gradient(155deg, rgba(255,255,255,0.98), rgba(248,251,255,0.92))",
-    border: "1px solid rgba(219,228,241,0.94)",
-    boxShadow: "0 24px 62px rgba(31,44,69,0.10), 0 6px 16px rgba(31,44,69,0.06), inset 0 1px 0 rgba(255,255,255,0.94)",
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
   },
   storyNumber: {
     display: "inline-grid",
@@ -811,12 +753,12 @@ const A: Record<string, CSSProperties> = {
     width: 42,
     height: 42,
     borderRadius: 15,
-    background: "linear-gradient(180deg, rgba(232,242,251,0.98), rgba(211,226,242,0.88))",
-    color: "#416F9C",
+    background: "var(--surface-2)",
+    color: "var(--ink-2)",
     fontSize: 12,
+    fontFamily: "var(--font-mono)",
     fontWeight: 850,
     letterSpacing: "0.1em",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.86), 0 10px 24px rgba(53,95,137,0.10)",
   },
   storyTitle: {
     fontFamily: "var(--font-display)",
@@ -824,7 +766,7 @@ const A: Record<string, CSSProperties> = {
     lineHeight: 1,
     letterSpacing: "-0.04em",
     margin: "18px 0 9px",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     textWrap: "balance",
   },
   storyBody: {
@@ -832,20 +774,19 @@ const A: Record<string, CSSProperties> = {
     maxWidth: 780,
     fontSize: 14,
     lineHeight: 1.55,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     textWrap: "pretty",
   },
   storyOutcome: {
     minHeight: 190,
-    borderRadius: 26,
+    borderRadius: 14,
     padding: "22px",
-    background: "linear-gradient(145deg, rgba(239,247,255,0.92), rgba(249,252,255,0.98))",
-    border: "1px solid rgba(211,224,239,0.90)",
-    boxShadow: "0 20px 52px rgba(31,44,69,0.08), inset 0 1px 0 rgba(255,255,255,0.94)",
+    background: "var(--surface-2)",
+    border: "1px solid var(--line)",
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
-    color: "#355F89",
+    color: "var(--ink)",
     fontSize: 20,
     lineHeight: 1.05,
     letterSpacing: "-0.025em",
@@ -854,27 +795,21 @@ const A: Record<string, CSSProperties> = {
     width: 46,
     height: 4,
     borderRadius: 999,
-    background: "linear-gradient(90deg, #6A9BCC, rgba(106,155,204,0.18))",
+    background: "var(--accent)",
   },
+  /* flat dark "system" block — replaces learnHero photo wash */
   systemPanel: {
     position: "relative",
     marginBottom: 46,
-    borderRadius: 30,
+    borderRadius: 16,
     padding: "32px",
     overflow: "hidden",
     color: "#FFFFFF",
-    backgroundImage:
-      `linear-gradient(145deg, rgba(17,43,73,0.78), rgba(63,112,151,0.46) 54%, rgba(17,32,59,0.74)), url('${DESKTOP_TEXTURES.learnHero}')`,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    border: "1px solid rgba(255,255,255,0.32)",
-    boxShadow: "0 40px 96px rgba(31,44,69,0.22), 0 10px 24px rgba(31,44,69,0.10), inset 0 1px 0 rgba(255,255,255,0.22)",
+    background: "var(--ink)",
+    border: "1px solid var(--line)",
   },
   systemVeil: {
-    position: "absolute",
-    inset: 0,
-    background: "linear-gradient(115deg, rgba(255,255,255,0.16), transparent 32%, rgba(255,255,255,0.08) 100%)",
-    pointerEvents: "none",
+    display: "none",
   },
   systemIntro: {
     position: "relative",
@@ -888,14 +823,13 @@ const A: Record<string, CSSProperties> = {
     letterSpacing: "-0.05em",
     margin: 0,
     color: "#FFFFFF",
-    textShadow: "0 3px 22px rgba(10,22,38,0.34)",
   },
   systemLead: {
     margin: "11px 0 0",
     maxWidth: 760,
     fontSize: 14.5,
     lineHeight: 1.55,
-    color: "rgba(255,255,255,0.86)",
+    color: "rgba(255,255,255,0.78)",
     textWrap: "pretty",
   },
   systemGrid: {
@@ -908,13 +842,9 @@ const A: Record<string, CSSProperties> = {
     position: "relative",
     marginTop: 14,
     overflow: "hidden",
-    borderRadius: 22,
-    background:
-      "radial-gradient(circle at 12% 0%, rgba(255,255,255,0.26), transparent 42%), linear-gradient(180deg, rgba(255,255,255,0.17), rgba(255,255,255,0.07))",
-    border: "0.5px solid rgba(255,255,255,0.36)",
-    boxShadow: "0 20px 50px rgba(10,22,38,0.24), inset 0 1px 0 rgba(255,255,255,0.32)",
-    backdropFilter: "blur(8px)",
-    WebkitBackdropFilter: "blur(8px)",
+    borderRadius: 12,
+    background: "rgba(255,255,255,0.08)",
+    border: "0.5px solid rgba(255,255,255,0.18)",
   },
   optionRow: {
     minHeight: 50,
@@ -923,21 +853,17 @@ const A: Record<string, CSSProperties> = {
     gap: 14,
     alignItems: "center",
     padding: "12px 16px",
-    borderBottom: "0.5px solid rgba(255,255,255,0.22)",
-    color: "rgba(255,255,255,0.88)",
+    borderBottom: "0.5px solid rgba(255,255,255,0.12)",
+    color: "rgba(255,255,255,0.84)",
     fontSize: 13,
     lineHeight: 1.3,
   },
   systemStep: {
     minHeight: 170,
-    borderRadius: 22,
+    borderRadius: 12,
     padding: "18px",
-    background:
-      "radial-gradient(circle at 12% 0%, rgba(255,255,255,0.26), transparent 42%), linear-gradient(180deg, rgba(255,255,255,0.17), rgba(255,255,255,0.06))",
-    border: "0.5px solid rgba(255,255,255,0.34)",
-    boxShadow: "0 18px 48px rgba(10,22,38,0.22), inset 0 1px 0 rgba(255,255,255,0.32)",
-    backdropFilter: "blur(5px)",
-    WebkitBackdropFilter: "blur(5px)",
+    background: "rgba(255,255,255,0.08)",
+    border: "0.5px solid rgba(255,255,255,0.14)",
   },
   systemNumber: {
     display: "inline-grid",
@@ -945,11 +871,11 @@ const A: Record<string, CSSProperties> = {
     width: 34,
     height: 34,
     borderRadius: 12,
-    background: "rgba(255,255,255,0.16)",
+    background: "rgba(255,255,255,0.12)",
     color: "#FFFFFF",
     fontSize: 12,
+    fontFamily: "var(--font-mono)",
     fontWeight: 850,
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.34)",
   },
   systemStepTitle: {
     fontFamily: "var(--font-display)",
@@ -963,7 +889,7 @@ const A: Record<string, CSSProperties> = {
     margin: 0,
     fontSize: 13,
     lineHeight: 1.5,
-    color: "rgba(255,255,255,0.84)",
+    color: "rgba(255,255,255,0.78)",
     textWrap: "pretty",
   },
   surfaceIndex: {
@@ -972,9 +898,10 @@ const A: Record<string, CSSProperties> = {
     borderRadius: 13,
     display: "grid",
     placeItems: "center",
-    background: "linear-gradient(180deg, rgba(232,242,251,0.98), rgba(211,226,242,0.86))",
-    color: "#416F9C",
+    background: "var(--surface-2)",
+    color: "var(--ink-2)",
     fontSize: 11,
+    fontFamily: "var(--font-mono)",
     fontWeight: 850,
     letterSpacing: "0.09em",
   },
@@ -990,38 +917,27 @@ const H: Record<string, CSSProperties> = {
     gap: 18,
     alignItems: "stretch",
   },
+  /* flat dark panel — replaces photo art panel */
   artPanel: {
     position: "relative",
     minHeight: 360,
-    borderRadius: 30,
+    borderRadius: 16,
     overflow: "hidden",
-    backgroundImage:
-      `linear-gradient(145deg, rgba(18,49,82,0.72), rgba(82,132,166,0.44) 54%, rgba(18,32,59,0.70)), url('${DESKTOP_TEXTURES.filesHero}')`,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    border: "1px solid rgba(255,255,255,0.48)",
-    boxShadow: "0 42px 104px rgba(31,44,69,0.18), 0 12px 28px rgba(31,44,69,0.10), inset 0 1px 0 rgba(255,255,255,0.30)",
+    background: "var(--ink)",
+    border: "1px solid var(--line)",
   },
   artPanelSheen: {
-    position: "absolute",
-    inset: 0,
-    background:
-      "linear-gradient(115deg, rgba(255,255,255,0.30) 0%, transparent 28%, transparent 62%, rgba(255,255,255,0.12) 100%)",
-    pointerEvents: "none",
+    display: "none",
   },
+  /* removed texture tile — replaced with a flat accent dot */
   artAccentTile: {
     position: "absolute",
     top: 24,
     right: 24,
-    width: 158,
-    height: 124,
-    borderRadius: 22,
-    backgroundImage:
-      `linear-gradient(145deg, rgba(13,30,52,0.18), rgba(255,255,255,0.08)), url('${LEARN_ACCENT_ART}')`,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    border: "1px solid rgba(255,255,255,0.34)",
-    boxShadow: "0 22px 58px rgba(10,22,38,0.20), inset 0 1px 0 rgba(255,255,255,0.26)",
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    background: "var(--accent)",
     opacity: 0.72,
   },
   artGlassMemo: {
@@ -1030,13 +946,9 @@ const H: Record<string, CSSProperties> = {
     right: 24,
     bottom: 24,
     padding: "22px 24px",
-    borderRadius: 24,
-    background:
-      "radial-gradient(circle at 10% 0%, rgba(255,255,255,0.34), transparent 42%), linear-gradient(180deg, rgba(255,255,255,0.24), rgba(31,57,84,0.24))",
-    border: "0.5px solid rgba(255,255,255,0.56)",
-    boxShadow: "0 28px 64px rgba(10,22,38,0.30), inset 0 1px 0 rgba(255,255,255,0.48), inset 0 -1px 0 rgba(255,255,255,0.12)",
-    backdropFilter: "blur(13px)",
-    WebkitBackdropFilter: "blur(13px)",
+    borderRadius: 14,
+    background: "rgba(255,255,255,0.10)",
+    border: "0.5px solid rgba(255,255,255,0.18)",
     color: "#FFFFFF",
   },
   artMemoTitle: {
@@ -1046,26 +958,21 @@ const H: Record<string, CSSProperties> = {
     letterSpacing: "-0.035em",
     margin: 0,
     color: "#FFFFFF",
-    textShadow: "0 2px 16px rgba(10,22,38,0.34)",
   },
   artMemoBody: {
     margin: "10px 0 0",
     fontSize: 14,
     lineHeight: 1.55,
-    color: "rgba(255,255,255,0.90)",
+    color: "rgba(255,255,255,0.84)",
     maxWidth: 560,
     textWrap: "pretty",
   },
   differencePanel: {
     minHeight: 430,
-    borderRadius: 30,
+    borderRadius: 16,
     padding: "30px 32px",
-    background:
-      "radial-gradient(circle at 16% 0%, rgba(106,155,204,0.14), transparent 35%), linear-gradient(155deg, rgba(255,255,255,0.86), rgba(246,250,255,0.72))",
-    border: "1px solid rgba(219,228,241,0.92)",
-    boxShadow: "0 30px 78px rgba(31,44,69,0.12), 0 8px 20px rgba(31,44,69,0.06), inset 0 1px 0 rgba(255,255,255,0.92)",
-    backdropFilter: "blur(10px)",
-    WebkitBackdropFilter: "blur(10px)",
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
   },
   sectionH2: {
     fontFamily: "var(--font-display)",
@@ -1073,7 +980,7 @@ const H: Record<string, CSSProperties> = {
     lineHeight: 1,
     letterSpacing: "-0.045em",
     margin: 0,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     textWrap: "balance",
   },
   sectionLead: {
@@ -1081,7 +988,7 @@ const H: Record<string, CSSProperties> = {
     maxWidth: 720,
     fontSize: 14.5,
     lineHeight: 1.55,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     textWrap: "pretty",
   },
   differenceStack: {
@@ -1090,13 +997,13 @@ const H: Record<string, CSSProperties> = {
     gap: 0,
     marginTop: 22,
     overflow: "hidden",
-    borderRadius: 22,
-    background: "rgba(255,255,255,0.58)",
-    border: "1px solid rgba(225,232,242,0.80)",
+    borderRadius: 12,
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
   },
   differenceRow: {
-    borderBottom: "1px solid rgba(213,225,239,0.72)",
-    background: "rgba(255,255,255,0.42)",
+    borderBottom: "1px solid var(--line)",
+    background: "var(--surface)",
   },
   differenceButton: {
     all: "unset",
@@ -1113,7 +1020,6 @@ const H: Record<string, CSSProperties> = {
     width: 9,
     height: 9,
     borderRadius: 999,
-    boxShadow: "0 8px 18px rgba(31,44,69,0.16)",
   },
   differenceButtonText: {
     minWidth: 0,
@@ -1126,11 +1032,11 @@ const H: Record<string, CSSProperties> = {
     fontWeight: 750,
     letterSpacing: "-0.02em",
     margin: 0,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   differenceHint: {
     fontSize: 11.5,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
   },
   differenceToggle: {
     width: 26,
@@ -1138,8 +1044,8 @@ const H: Record<string, CSSProperties> = {
     borderRadius: 10,
     display: "grid",
     placeItems: "center",
-    background: "rgba(236,243,251,0.84)",
-    color: "#51759B",
+    background: "var(--surface-2)",
+    color: "var(--ink-2)",
     fontSize: 15,
     fontWeight: 800,
     transition: "transform 180ms ease",
@@ -1149,7 +1055,7 @@ const H: Record<string, CSSProperties> = {
     padding: "0 56px 17px 42px",
     fontSize: 13,
     lineHeight: 1.58,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     textWrap: "pretty",
   },
   surfaceSection: {
@@ -1169,27 +1075,20 @@ const H: Record<string, CSSProperties> = {
   surfaceCard: {
     position: "relative",
     minHeight: 220,
-    borderRadius: 24,
+    borderRadius: 14,
     padding: 18,
     overflow: "hidden",
-    backgroundSize: "cover, cover, cover",
-    backgroundPosition: "center, center, center",
-    border: "1px solid rgba(255,255,255,0.46)",
-    boxShadow: "0 34px 86px rgba(31,44,69,0.16), 0 8px 22px rgba(31,44,69,0.08), inset 0 1px 0 rgba(255,255,255,0.28)",
+    border: "1px solid var(--line)",
     display: "flex",
     alignItems: "flex-end",
   },
   surfaceGlass: {
     width: "100%",
     minHeight: 122,
-    borderRadius: 20,
+    borderRadius: 12,
     padding: "17px 17px 16px",
-    background:
-      "radial-gradient(circle at 12% 0%, rgba(255,255,255,0.32), transparent 42%), linear-gradient(180deg, rgba(255,255,255,0.22), rgba(23,42,64,0.22))",
-    border: "0.5px solid rgba(255,255,255,0.52)",
-    boxShadow: "0 22px 52px rgba(10,22,38,0.26), inset 0 1px 0 rgba(255,255,255,0.48), inset 0 -1px 0 rgba(255,255,255,0.10)",
-    backdropFilter: "blur(12px)",
-    WebkitBackdropFilter: "blur(12px)",
+    background: "rgba(255,255,255,0.10)",
+    border: "0.5px solid rgba(255,255,255,0.18)",
   },
   surfaceTitle: {
     fontFamily: "var(--font-display)",
@@ -1198,7 +1097,6 @@ const H: Record<string, CSSProperties> = {
     letterSpacing: "-0.035em",
     margin: 0,
     color: "currentColor",
-    textShadow: "0 2px 14px rgba(10,22,38,0.32)",
   },
   surfaceBody: {
     margin: "10px 0 0",
@@ -1208,25 +1106,19 @@ const H: Record<string, CSSProperties> = {
     opacity: 0.9,
     textWrap: "pretty",
   },
+  /* flat dark "flow" block — replaces learnHero photo wash */
   flowPanel: {
     position: "relative",
     marginBottom: 42,
-    borderRadius: 30,
+    borderRadius: 16,
     padding: "30px 32px",
     overflow: "hidden",
     color: "#FFFFFF",
-    backgroundImage:
-      `linear-gradient(145deg, rgba(19,48,81,0.76), rgba(80,128,166,0.44) 54%, rgba(22,38,67,0.72)), url('${DESKTOP_TEXTURES.learnHero}')`,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    border: "1px solid rgba(255,255,255,0.30)",
-    boxShadow: "0 36px 94px rgba(31,44,69,0.20), 0 10px 24px rgba(31,44,69,0.10), inset 0 1px 0 rgba(255,255,255,0.20)",
+    background: "var(--ink)",
+    border: "1px solid var(--line)",
   },
   flowVeil: {
-    position: "absolute",
-    inset: 0,
-    background: "linear-gradient(110deg, rgba(255,255,255,0.13), transparent 34%, rgba(255,255,255,0.07) 100%)",
-    pointerEvents: "none",
+    display: "none",
   },
   flowIntro: {
     position: "relative",
@@ -1249,7 +1141,7 @@ const H: Record<string, CSSProperties> = {
     maxWidth: 420,
     fontSize: 14,
     lineHeight: 1.5,
-    color: "rgba(255,255,255,0.84)",
+    color: "rgba(255,255,255,0.78)",
     textWrap: "pretty",
   },
   flowSteps: {
@@ -1260,14 +1152,10 @@ const H: Record<string, CSSProperties> = {
   },
   flowStep: {
     minHeight: 178,
-    borderRadius: 22,
+    borderRadius: 12,
     padding: "18px 18px 17px",
-    background:
-      "radial-gradient(circle at 12% 0%, rgba(255,255,255,0.28), transparent 42%), linear-gradient(180deg, rgba(255,255,255,0.17), rgba(255,255,255,0.06))",
-    border: "0.5px solid rgba(255,255,255,0.34)",
-    boxShadow: "0 18px 48px rgba(10,22,38,0.22), inset 0 1px 0 rgba(255,255,255,0.32)",
-    backdropFilter: "blur(8px)",
-    WebkitBackdropFilter: "blur(8px)",
+    background: "rgba(255,255,255,0.08)",
+    border: "0.5px solid rgba(255,255,255,0.14)",
   },
   flowNumber: {
     display: "inline-grid",
@@ -1275,11 +1163,11 @@ const H: Record<string, CSSProperties> = {
     width: 34,
     height: 34,
     borderRadius: 12,
-    background: "rgba(255,255,255,0.16)",
+    background: "rgba(255,255,255,0.12)",
     color: "#FFFFFF",
     fontSize: 12,
+    fontFamily: "var(--font-mono)",
     fontWeight: 800,
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.34)",
   },
   flowTitle: {
     fontFamily: "var(--font-display)",
@@ -1293,17 +1181,15 @@ const H: Record<string, CSSProperties> = {
     margin: 0,
     fontSize: 13,
     lineHeight: 1.5,
-    color: "rgba(255,255,255,0.82)",
+    color: "rgba(255,255,255,0.78)",
     textWrap: "pretty",
   },
   capabilityLibrary: {
     marginBottom: 42,
-    borderRadius: 28,
+    borderRadius: 16,
     padding: 24,
-    background:
-      "linear-gradient(145deg, rgba(255,255,255,0.94), rgba(247,251,255,0.82))",
-    border: "1px solid rgba(219,228,241,0.92)",
-    boxShadow: "0 26px 68px rgba(31,44,69,0.10), 0 8px 20px rgba(31,44,69,0.05), inset 0 1px 0 rgba(255,255,255,0.92)",
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
   },
   capabilityLibraryHead: {
     display: "flex",
@@ -1315,9 +1201,9 @@ const H: Record<string, CSSProperties> = {
   capabilityRows: {
     display: "grid",
     overflow: "hidden",
-    borderRadius: 20,
-    border: "1px solid rgba(224,232,243,0.86)",
-    background: "rgba(255,255,255,0.72)",
+    borderRadius: 12,
+    border: "1px solid var(--line)",
+    background: "var(--surface)",
   },
   capabilityRow: {
     minHeight: 84,
@@ -1326,7 +1212,7 @@ const H: Record<string, CSSProperties> = {
     gap: 14,
     alignItems: "center",
     padding: "16px 20px",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   capabilityIndex: {
     width: 34,
@@ -1334,12 +1220,12 @@ const H: Record<string, CSSProperties> = {
     borderRadius: 12,
     display: "grid",
     placeItems: "center",
-    background: "linear-gradient(180deg, rgba(232,242,251,0.98), rgba(211,226,242,0.86))",
-    color: "#416F9C",
+    background: "var(--surface-2)",
+    color: "var(--ink-2)",
     fontSize: 12,
+    fontFamily: "var(--font-mono)",
     fontWeight: 850,
     letterSpacing: "0.08em",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.86), 0 10px 24px rgba(53,95,137,0.10)",
   },
   capabilityText: {
     display: "grid",
@@ -1351,12 +1237,12 @@ const H: Record<string, CSSProperties> = {
     fontSize: 16,
     fontWeight: 760,
     letterSpacing: "-0.02em",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   capabilityBody: {
     fontSize: 13,
     lineHeight: 1.48,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     textWrap: "pretty",
   },
   loopSpread: {
@@ -1367,16 +1253,15 @@ const H: Record<string, CSSProperties> = {
   },
   loopLead: {
     minHeight: 300,
-    borderRadius: 26,
+    borderRadius: 16,
     padding: "28px 30px",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
     overflow: "hidden",
-    background: "linear-gradient(150deg, rgba(255,255,255,0.98) 0%, rgba(248,251,255,0.96) 58%, rgba(235,243,252,0.92) 100%)",
-    border: "1px solid rgba(213,225,239,0.92)",
-    boxShadow: "0 26px 68px rgba(31,44,69,0.12), 0 8px 20px rgba(31,44,69,0.06), inset 0 1px 0 rgba(255,255,255,0.92)",
-    color: "var(--m-on-surface)",
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
+    color: "var(--ink)",
   },
   loopLeadTitle: {
     margin: 0,
@@ -1384,14 +1269,14 @@ const H: Record<string, CSSProperties> = {
     fontSize: 32,
     lineHeight: 1.02,
     letterSpacing: "-0.045em",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   loopLeadBody: {
     margin: "18px 0 0",
     maxWidth: 520,
     fontSize: 15.5,
     lineHeight: 1.58,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     textWrap: "pretty",
   },
   loopLeadRail: {
@@ -1402,11 +1287,8 @@ const H: Record<string, CSSProperties> = {
     width: "fit-content",
     padding: "10px 12px",
     borderRadius: 999,
-    background: "radial-gradient(circle at 12% 0%, rgba(255,255,255,0.34), transparent 42%), linear-gradient(180deg, rgba(255,255,255,0.22), rgba(30,45,66,0.22) 48%, rgba(16,28,45,0.28))",
-    border: "0.5px solid rgba(255,255,255,0.56)",
-    boxShadow: "0 16px 34px -22px rgba(0,0,0,0.50), inset 0 1px 0 rgba(255,255,255,0.50), inset 0 -1px 0 rgba(255,255,255,0.14)",
-    backdropFilter: "blur(10px)",
-    WebkitBackdropFilter: "blur(10px)",
+    background: "var(--ink)",
+    border: "0.5px solid rgba(255,255,255,0.12)",
     color: "#FFFFFF",
     fontSize: 12,
     fontWeight: 750,
@@ -1419,15 +1301,14 @@ const H: Record<string, CSSProperties> = {
   stepCard: {
     minHeight: 96,
     padding: "20px 22px",
-    borderRadius: 22,
+    borderRadius: 14,
     display: "grid",
     gridTemplateColumns: "56px minmax(0, 1fr)",
     gap: 18,
     alignItems: "start",
-    background: "rgba(255,255,255,0.96)",
-    border: "1px solid rgba(219,228,241,0.92)",
-    boxShadow: "0 18px 44px rgba(31,44,69,0.08), 0 4px 12px rgba(31,44,69,0.05), inset 0 1px 0 rgba(255,255,255,0.90)",
-    color: "var(--m-on-surface)",
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
+    color: "var(--ink)",
   },
   stepN: {
     width: 44,
@@ -1436,9 +1317,9 @@ const H: Record<string, CSSProperties> = {
     display: "grid",
     placeItems: "center",
     fontSize: 11,
-    color: "#355F89",
-    background: "linear-gradient(180deg, rgba(232,242,251,0.98), rgba(210,225,241,0.88))",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.86), 0 10px 24px rgba(53,95,137,0.12)",
+    color: "var(--ink-2)",
+    background: "var(--surface-2)",
+    fontFamily: "var(--font-mono)",
     fontWeight: 800,
     letterSpacing: "0.1em",
   },
@@ -1452,12 +1333,12 @@ const H: Record<string, CSSProperties> = {
   },
   chip: {
     fontSize: 10, padding: "3px 8px",
-    background: "var(--m-surface-2)", borderRadius: 999,
-    color: "var(--m-on-surface-var)", fontWeight: 600, letterSpacing: "0.1em",
+    background: "var(--surface-2)", borderRadius: 999,
+    color: "var(--ink-3)", fontWeight: 600, letterSpacing: "0.1em",
   },
   chipDark: {
-    background: "rgba(231,241,250,0.84)",
-    color: "#426A83",
+    background: "var(--surface-2)",
+    color: "var(--ink-2)",
     opacity: 0.9,
   },
   capabilityMosaic: {
@@ -1467,21 +1348,18 @@ const H: Record<string, CSSProperties> = {
   capCard: {
     minHeight: 146,
     padding: "22px 22px 20px",
-    borderRadius: 22,
-    background: "linear-gradient(180deg, rgba(255,255,255,0.98), rgba(249,251,255,0.94))",
-    border: "1px solid rgba(219,228,241,0.92)",
-    boxShadow: "0 18px 44px rgba(31,44,69,0.08), 0 4px 12px rgba(31,44,69,0.05), inset 0 1px 0 rgba(255,255,255,0.90)",
+    borderRadius: 14,
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
     display: "flex",
     flexDirection: "column",
     justifyContent: "flex-start",
     gap: 10,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   capCardWide: {
-    background: `linear-gradient(145deg, rgba(20,47,75,0.72) 0%, rgba(82,132,166,0.44) 52%, rgba(18,25,46,0.76) 100%), url('${DESKTOP_TEXTURES.searchFinancing}')`,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    border: "1px solid rgba(255,255,255,0.32)",
+    background: "var(--ink)",
+    border: "1px solid var(--line)",
     color: "#FFFFFF",
   },
   capTag: {
@@ -1494,7 +1372,7 @@ const H: Record<string, CSSProperties> = {
     letterSpacing: "-0.02em", margin: 0, color: "currentColor",
   },
   capBody: {
-    fontSize: 12.5, lineHeight: 1.55, color: "var(--m-on-surface-var)", margin: 0,
+    fontSize: 12.5, lineHeight: 1.55, color: "var(--ink-3)", margin: 0,
     opacity: 0.92,
     textWrap: "pretty",
   },
@@ -1506,30 +1384,26 @@ const H: Record<string, CSSProperties> = {
   },
   whyCard: {
     minHeight: 230,
-    borderRadius: 26,
+    borderRadius: 16,
     padding: "28px 32px",
-    background: "#FFFFFF",
-    border: "1px solid var(--m-outline-var)",
-    boxShadow: "0 24px 64px rgba(31,44,69,0.12), 0 6px 16px rgba(31,44,69,0.07)",
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
     display: "flex",
     alignItems: "center",
   },
   whyBody: {
     fontSize: 16,
     lineHeight: 1.7,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     margin: 0,
     textWrap: "pretty",
   },
   statPanel: {
     minHeight: 230,
-    borderRadius: 26,
+    borderRadius: 16,
     padding: "24px 26px",
-    backgroundImage: `linear-gradient(145deg, rgba(255,255,255,0.94) 0%, rgba(236,244,253,0.84) 52%, rgba(214,229,244,0.76) 100%), url('${DESKTOP_TEXTURES.pipelineCard}')`,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    border: "1px solid rgba(188,206,226,0.82)",
-    boxShadow: "0 24px 64px rgba(52,84,124,0.13), inset 0 1px 0 rgba(255,255,255,0.84)",
+    background: "var(--surface-2)",
+    border: "1px solid var(--line)",
     display: "flex",
     alignItems: "center",
   },
@@ -1539,22 +1413,24 @@ const H: Record<string, CSSProperties> = {
     gap: 14,
     alignItems: "baseline",
     padding: "10px 0",
-    borderBottom: "1px solid rgba(166,181,210,0.22)",
+    borderBottom: "1px solid var(--line)",
   },
   stat: {
-    fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 28,
-    letterSpacing: "-0.03em", color: "#274D73", minWidth: 72,
+    fontFamily: "var(--font-mono)", fontWeight: 800, fontSize: 28,
+    letterSpacing: "-0.03em", color: "var(--ink)", minWidth: 72,
   },
   statLabel: {
     fontSize: 13,
-    color: "#52657C",
+    color: "var(--ink-2)",
     opacity: 1,
   },
 };
 
 /* ─── PRICING ────────────────────────────────────────────── */
+// Pricing source of truth: client/src/lib/pricing.ts -> SMBX_PRICING_LOCKED.md.
+// When tiers change, update the lock doc first, then PRICING_TIERS in lib/pricing.ts, then mirror here.
 
-type PriceValue = number | "Free" | "From $2,500";
+type PriceValue = number | "Free" | "From $3,000";
 
 interface Plan {
   id: string;
@@ -1584,12 +1460,13 @@ const PLANS: Plan[] = [
   {
     id: "solo",
     name: "Solo",
-    price: 79,
+    price: 99,
     sub: "For one operator, one deal at a time.",
     cta: "Choose Solo",
-    prompt: "I'm interested in the $79 Solo plan. Walk me through the models, exports, and supervised MCP workflow.",
+    prompt: "I'm interested in the $99 Solo plan. Walk me through the models, exports, and supervised MCP workflow.",
     features: [
       "Unlimited deliverables",
+      "1 MCP / agent key · 1,000 calls",
       "Recast, Baseline, market map",
       "One live deal room",
     ],
@@ -1597,13 +1474,14 @@ const PLANS: Plan[] = [
   {
     id: "pro",
     name: "Pro",
-    price: 199,
+    price: 249,
     sub: "For active dealmakers and full-stack work.",
     cta: "Choose Pro",
-    prompt: "I'm interested in Pro at $199. Walk me through QofE Lite, the parallel-deal pipeline, and the audience-variant memos.",
+    prompt: "I'm interested in Pro at $249. Walk me through QofE Lite, the parallel-deal pipeline, and the audience-variant memos.",
     featured: true,
     features: [
       "QofE Lite pre-read",
+      "3 MCP / agent keys · 6,000 calls",
       "Unlimited active deals",
       "LBO, DCF, comps, tax, legal",
     ],
@@ -1611,12 +1489,13 @@ const PLANS: Plan[] = [
   {
     id: "team",
     name: "Team",
-    price: 499,
+    price: 749,
     sub: "For boutiques and partner-led firms.",
     cta: "Choose Team",
-    prompt: "I'm interested in Team at $499. How do seats, shared deal vaults, firm templates, specialist handoffs, and supervised agent workflows work?",
+    prompt: "I'm interested in Team at $749. How do seats, shared deal vaults, firm templates, specialist handoffs, and supervised agent workflows work?",
     features: [
       "Up to 5 seats",
+      "Supervised agents · 15,000 calls",
       "Shared vault and templates",
       "Specialist handoff coordination",
     ],
@@ -1624,14 +1503,15 @@ const PLANS: Plan[] = [
   {
     id: "enterprise",
     name: "Enterprise",
-    price: "From $2,500",
+    price: "From $3,000",
     sub: "For larger teams and regulated environments.",
     cta: "Talk to Yulia",
-    prompt: "I want to learn more about Enterprise from $2,500 — SSO, single-tenant, SOC 2, custom seat count, API controls, governed agent scope, and audit exports.",
+    prompt: "I want to learn more about Enterprise from $3,000 — SSO, single-tenant, SOC 2, custom seat count, API controls, governed agent scope, and audit exports.",
     features: [
-      "Custom seat count",
+      "Governed autonomous agents",
+      "Custom seat count + MCP scope",
       "SSO, SOC 2, single tenant",
-      "MCP and API infrastructure",
+      "Custom API/MCP rate limits",
     ],
   },
 ];
@@ -1643,7 +1523,7 @@ const INCLUDED_GROUPS: Capability[] = [
   },
   {
     title: "Pro adds the full deal stack",
-    body: "QofE Lite, full LBO with DCF and precedent comps, 22-gate scoring, audience-variant memos, sector buyer universes, negotiation-prep scaffolds, tax/legal scenario models, cap table, and API access.",
+    body: "QofE Lite, full LBO with DCF and precedent comps, 22-gate scoring, audience-variant memos, sector buyer universes, negotiation-prep scaffolds, tax/legal scenario models, cap table, and three supervised MCP/agent keys at 6,000 monthly API/MCP calls.",
   },
   {
     title: "Team adds firm infrastructure",
@@ -1651,7 +1531,7 @@ const INCLUDED_GROUPS: Capability[] = [
   },
   {
     title: "Enterprise adds governed deployment",
-    body: "Custom seats, SSO, single-tenant deployment, SOC 2 path, white-label exports, MCP server access after launch, higher API limits, uptime SLA, and a named account manager.",
+    body: "Custom seats, SSO, single-tenant deployment, SOC 2 path, white-label exports, governed autonomous agent scope, custom API/MCP rate limits, uptime SLA, and a named account manager.",
   },
 ];
 
@@ -1691,7 +1571,7 @@ const COMPARE: CompareGroup[] = [
       { feature: "Negotiation prep + option scaffolds",cells: ["—", "—", "✓", "✓", "✓"] },
       { feature: "Cap table + waterfall modeling",        cells: ["—", "—", "✓", "✓", "✓"] },
       { feature: "Owner-readiness scoring · CEPA",        cells: ["—", "—", "✓", "✓", "✓"] },
-      { feature: "API access · standard rate limits",     cells: ["—", "—", "✓", "✓", "✓"] },
+      { feature: "Higher API/MCP rate limits",            cells: ["—", "—", "✓", "✓", "✓"] },
     ],
   },
   {
@@ -1703,6 +1583,20 @@ const COMPARE: CompareGroup[] = [
       { feature: "Studio exports",                   cells: ["1",   "30",    "150",    "600",    "custom"] },
       { feature: "API/MCP calls",                    cells: ["—",   "1,000", "6,000",  "15,000", "custom"] },
       { feature: "Agent usage",                      cells: ["—",   "1 key", "3 keys", "supervised", "autonomous"] },
+    ],
+  },
+  {
+    title: "Agent / MCP access — call smbX from any assistant",
+    rows: [
+      { feature: "MCP server endpoint /mcp",          cells: ["—", "✓", "✓", "✓", "✓"] },
+      { feature: "Claude Connector",                  cells: ["—", "✓", "✓", "✓", "✓"] },
+      { feature: "ChatGPT GPT Actions",               cells: ["—", "✓", "✓", "✓", "✓"] },
+      { feature: "Copilot · Agentforce · Bedrock",    cells: ["—", "✓", "✓", "✓", "✓"] },
+      { feature: "Direct MCP client (any agent)",     cells: ["—", "✓", "✓", "✓", "✓"] },
+      { feature: "Supervised agent governance",       cells: ["—", "✓", "✓", "✓", "✓"] },
+      { feature: "Autonomous governed scope",         cells: ["—", "—", "—", "—", "✓"] },
+      { feature: "Audit trail + mandate chain",       cells: ["—", "✓", "✓", "✓", "✓"] },
+      { feature: "Beneficial-customer billing",       cells: ["—", "✓", "✓", "✓", "✓"] },
     ],
   },
   {
@@ -1738,20 +1632,62 @@ const PRICING_CONTROL_ITEMS = [
     body: "Expensive or sensitive actions can return credit budget, human approval, or enterprise-scope requirements.",
   },
   {
-    title: "Agent access",
-    body: "Pro starts API/MCP access. Team adds supervised agent use. Enterprise opens autonomous governed scope.",
+    title: "MCP / agent access",
+    body: "Solo includes 1 supervised key and 1,000 API/MCP calls. Pro: 3 keys + 6,000 calls. Team: shared firm scope + 15,000 calls. Enterprise: autonomous governed scope, custom limits.",
+  },
+];
+
+const ACCESS_CHANNELS = [
+  {
+    title: "Inside Claude",
+    body: "Add smbX as a custom connector. Streamable HTTP MCP at /mcp, OAuth 2.1 with PKCE. Yulia's tools, DealState, and audit packets are callable from Claude Code or Claude.ai.",
+    prompt: "How do I use smbX from inside Claude? Walk me through the connector setup, OAuth scopes, and what calls count against my API/MCP allowance.",
+  },
+  {
+    title: "Inside ChatGPT",
+    body: "Import the OpenAPI at /api/definitive/gpt-actions/openapi.json into a custom GPT. Confidential OAuth client. Same Yulia, same deterministic models, same audit trail.",
+    prompt: "How do I wire smbX into a ChatGPT GPT Action? What OAuth client config do I need and how do calls bill?",
+  },
+  {
+    title: "Copilot · Agentforce · Bedrock",
+    body: "MCP discovery at /.well-known/mcp plus enterprise allow-list templates for GitHub Copilot, AWS Q/Kiro, VS Code, and Bedrock AgentCore. Same /mcp endpoint, scoped tokens.",
+    prompt: "How does smbX integrate with Microsoft Copilot, Salesforce Agentforce, or AWS Bedrock AgentCore from an enterprise allow-list?",
+  },
+  {
+    title: "Any MCP client",
+    body: "Any MCP-aware agent can list tools, call them with structured inputs, and receive structured outputs plus citations, audit IDs, and the THE LINE invariant. OAuth bearer tokens.",
+    prompt: "I want to call smbX from my own MCP client. Walk me through tool discovery, OAuth, and how outputs come back.",
+  },
+];
+
+const MCP_RULES = [
+  {
+    icon: "$0",
+    title: "Bundled, never metered against your deal",
+    body: "MCP calls count against your plan's monthly API/MCP allowance. No success fee, no fee tied to deal value or closing. Same THE LINE doctrine as in-app use.",
+    pill: "THE LINE",
+  },
+  {
+    icon: "ID",
+    title: "Beneficial-customer billing",
+    body: "Every call carries agent identity, beneficial-customer ID, and mandate chain. Calls are billed and audited to you, not to the platform that routed them.",
+    pill: "Audited",
+  },
+  {
+    icon: "GV",
+    title: "Supervised vs autonomous governance",
+    body: "Solo, Pro, and Team operate in supervised mode — agent calls need identity, scope, and tollgate awareness. Enterprise opens autonomous governed scope with custom guardrails.",
+    pill: "Governed",
+  },
+  {
+    icon: "DT",
+    title: "Deterministic + cited outputs",
+    body: "Every tool response includes input/output hashes, model version pins, citation refs, and a structured refusal envelope when THE LINE applies. Same outputs the app gets.",
+    pill: "Substrate",
   },
 ];
 
 const PRICING_PLAN_ORDER = ["free", "solo", "pro", "team", "enterprise"] as const;
-
-const PLAN_TEXTURES: Record<string, string> = {
-  free: STUDIO_TEXTURES.green,
-  solo: STUDIO_TEXTURES.green,
-  pro: STUDIO_TEXTURES.navy,
-  team: STUDIO_TEXTURES.rose,
-  enterprise: ART_HOUSE_TEXTURES.studioPreview,
-};
 
 const PLAN_AUDIENCES: Record<string, string> = {
   free: "Test-drive Yulia",
@@ -1779,6 +1715,12 @@ const PRICING_FAQS = [
     title: "Credits create guardrails",
     body: "When an action needs more budget, approval, or enterprise scope, Yulia returns a clear tollgate instead of failing silently.",
     pill: "Governed",
+  },
+  {
+    icon: "MC",
+    title: "MCP and agent calls are bundled",
+    body: "Calls from Claude, ChatGPT, Copilot, Agentforce, or any direct MCP client count against your monthly API/MCP allowance. No separate per-call fee. No fee tied to deal closing.",
+    pill: "Substrate",
   },
   {
     icon: "EN",
@@ -1813,19 +1755,17 @@ function PricingSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) =>
           transform: translate3d(0, 0, 0);
           transition:
             box-shadow 180ms ease,
-            border-color 180ms ease,
-            filter 180ms ease;
+            border-color 180ms ease;
         }
         .pricing-tier-grid > div {
           min-width: 0;
           height: 100%;
         }
         .pricing-tier-card:hover {
-          filter: saturate(1.04) contrast(1.01);
-          border-color: rgba(255, 255, 255, 0.54) !important;
+          border-color: var(--accent) !important;
         }
         .pricing-tier-card:focus-visible {
-          outline: 3px solid rgba(214, 173, 91, 0.70);
+          outline: 3px solid var(--accent);
           outline-offset: 4px;
         }
         @media (max-width: 1280px) {
@@ -1851,7 +1791,7 @@ function PricingSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) =>
             grid-template-columns: 1fr !important;
           }
           .pricing-info-panel {
-            border-radius: 22px !important;
+            border-radius: 14px !important;
             padding: 18px !important;
           }
         }
@@ -1880,7 +1820,6 @@ function PricingSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) =>
                   onClick={() => handleCta(plan)}
                   style={{
                     ...P.pricingTierCard,
-                    backgroundImage: studioTextureCardBackground(PLAN_TEXTURES[plan.id]),
                     ...(featured ? P.pricingTierFeatured : {}),
                   }}
                 >
@@ -1908,6 +1847,61 @@ function PricingSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) =>
         <Reveal>
           <ComparePlans />
         </Reveal>
+      </LearnSection>
+
+      <LearnSection
+        id="mcp-agent-access"
+        title="Use smbX from any AI assistant."
+        sub="Your subscription includes /mcp access, OAuth-scoped agent tokens, and audit-trail recording. Call from Claude, ChatGPT, Copilot, Agentforce, or any direct MCP client — no extra charge, no fee tied to closing."
+      >
+        <div className="pricing-choice-grid" style={P.pricingChoiceGrid}>
+          <Reveal direction="right">
+            <div className="pricing-info-panel" style={P.pricingCompetePanel}>
+              <h2 style={L.infoTitle}>Callable from any assistant.</h2>
+              <div style={L.competeGrid}>
+                {ACCESS_CHANNELS.map((item) => (
+                  <button
+                    key={item.title}
+                    type="button"
+                    className="m-nudge-soft"
+                    style={L.competeItem}
+                    onClick={() => onTalkToYulia?.(item.prompt)}
+                  >
+                    <strong>{item.title}</strong>
+                    <span>{item.body}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+
+          <Reveal direction="left" delay={90}>
+            <div className="pricing-info-panel" style={P.planListPanel}>
+              <div style={L.panelHeader}>
+                <h2 style={L.infoTitle}>MCP / agent rules</h2>
+                <span style={L.softPill}>Substrate</span>
+              </div>
+              <div style={L.listStack}>
+                {MCP_RULES.map((item) => (
+                  <button
+                    key={item.title}
+                    type="button"
+                    className="m-nudge-soft"
+                    style={L.listRow}
+                    onClick={() => onTalkToYulia?.(`Explain this MCP / agent rule: ${item.title}. ${item.body}`)}
+                  >
+                    <span style={L.listIcon}>{item.icon}</span>
+                    <span style={L.listBody}>
+                      <strong>{item.title}</strong>
+                      <small>{item.body}</small>
+                    </span>
+                    <span style={L.cleanPill}>{item.pill}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+        </div>
       </LearnSection>
 
       <LearnSection
@@ -1981,7 +1975,7 @@ function ComparePlans() {
     },
     {
       plan: "Solo",
-      price: "$79/mo",
+      price: "$99/mo",
       builtFor: "Solo, one deal at a time",
       seats: "1",
       deals: "1",
@@ -1989,7 +1983,7 @@ function ComparePlans() {
     },
     {
       plan: "Pro",
-      price: "$199/mo",
+      price: "$249/mo",
       builtFor: "Active dealmakers, full stack",
       seats: "1",
       deals: "Unlimited",
@@ -1997,7 +1991,7 @@ function ComparePlans() {
     },
     {
       plan: "Team",
-      price: "$499/mo",
+      price: "$749/mo",
       builtFor: "Boutiques and partner-led firms",
       seats: "Up to 5",
       deals: "Unlimited",
@@ -2005,7 +1999,7 @@ function ComparePlans() {
     },
     {
       plan: "Enterprise",
-      price: "From $2,500/mo",
+      price: "From $3,000/mo",
       builtFor: "Larger teams and regulated environments",
       seats: "Custom",
       deals: "Unlimited",
@@ -2017,11 +2011,10 @@ function ComparePlans() {
     <div style={P.compareStage}>
       <style>{`
         .plan-compare-row {
-          transition: background 180ms ease, box-shadow 180ms ease;
+          transition: background 180ms ease;
         }
         .plan-compare-row:hover {
-          background: linear-gradient(90deg, rgba(239,246,255,0.76), rgba(255,255,255,0.92));
-          box-shadow: inset 3px 0 0 rgba(106,155,204,0.55);
+          background: var(--surface-2) !important;
         }
         @media (max-width: 900px) {
           .plan-compare-row {
@@ -2048,7 +2041,7 @@ function ComparePlans() {
           <div
             key={row.plan}
             className="plan-compare-row"
-            style={{ ...P.compareRow, borderBottom: index === rows.length - 1 ? "none" : "1px solid var(--m-outline-var)" }}
+            style={{ ...P.compareRow, borderBottom: index === rows.length - 1 ? "none" : "1px solid var(--line)" }}
           >
             <div style={P.comparePlanCell}>
               <strong>{row.plan}</strong>
@@ -2063,7 +2056,7 @@ function ComparePlans() {
         <div style={P.compareExpandWrap}>
           <button
             type="button"
-            className="m-state"
+            className="m-nudge-soft"
             aria-expanded={expanded}
             aria-controls={detailId}
             onClick={() => setExpanded(!expanded)}
@@ -2092,7 +2085,7 @@ function ComparePlans() {
                     className="plan-compare-row"
                     style={{
                       ...P.compareFeatureRow,
-                      borderBottom: rowIndex === group.rows.length - 1 ? "none" : "1px solid rgba(219,228,241,0.78)",
+                      borderBottom: rowIndex === group.rows.length - 1 ? "none" : "1px solid var(--line)",
                     }}
                   >
                     <strong style={P.compareFeatureName}>{row.feature}</strong>
@@ -2147,10 +2140,10 @@ function includedCardStyle(index: number): CSSProperties {
 
 function includedBadgeStyle(index: number): CSSProperties {
   const tones = [
-    { background: "rgba(214,232,250,0.88)", color: "#345F85" },
-    { background: "rgba(219,241,230,0.88)", color: "#346F58" },
-    { background: "rgba(250,235,192,0.90)", color: "#816124" },
-    { background: "rgba(229,226,250,0.88)", color: "#5B5796" },
+    { background: "var(--accent-soft)", color: "var(--accent-strong)" },
+    { background: "#DBF1E6", color: "#346F58" },
+    { background: "#FAF1D6", color: "#816124" },
+    { background: "var(--surface-2)", color: "var(--ink-2)" },
   ];
   return {
     ...A.surfaceIndex,
@@ -2177,9 +2170,6 @@ function LearnSection({ id, eyebrow, title, sub, children }: {
   );
 }
 
-const learnHeroWash =
-  `radial-gradient(circle at 14% 8%, rgba(255,255,255,0.20), transparent 34%), linear-gradient(110deg, rgba(13,36,62,0.76) 0%, rgba(58,111,148,0.48) 50%, rgba(17,34,61,0.72) 100%), url('${DESKTOP_TEXTURES.learnHero}')`;
-
 const L: Record<string, CSSProperties> = {
   page: {
     width: "min(100%, 1440px)",
@@ -2187,13 +2177,11 @@ const L: Record<string, CSSProperties> = {
     margin: "0 auto",
     boxSizing: "border-box",
   },
+  /* flat dark hero — replaces multi-layer photo wash */
   hero: {
-    backgroundImage: learnHeroWash,
-    backgroundSize: "cover, cover, cover",
-    backgroundPosition: "center, center, center",
-    border: "1px solid rgba(255,255,255,0.34)",
-    boxShadow: "0 46px 116px rgba(23,38,63,0.30), 0 20px 46px rgba(26,34,51,0.16), 0 4px 12px rgba(26,34,51,0.08), inset 0 1px 0 rgba(255,255,255,0.24)",
-    borderRadius: 26,
+    background: "var(--ink)",
+    border: "1px solid var(--line)",
+    borderRadius: 16,
     padding: "38px 46px 32px",
     marginBottom: 20,
     minHeight: 390,
@@ -2209,12 +2197,6 @@ const L: Record<string, CSSProperties> = {
     gap: 22,
     minHeight: 320,
   },
-  heroGlow: {
-    position: "absolute", top: -110, right: -80,
-    width: 340, height: 340, borderRadius: "50%",
-    background: "radial-gradient(circle, rgba(255,255,255,0.22) 0%, transparent 66%)",
-    pointerEvents: "none",
-  },
   heroEyebrow: {
     position: "relative",
     fontSize: 10, color: "#FFFFFF",
@@ -2226,13 +2208,11 @@ const L: Record<string, CSSProperties> = {
     lineHeight: 0.94, letterSpacing: "-0.048em",
     color: "#FFFFFF", margin: 0,
     maxWidth: 720, textWrap: "balance",
-    textShadow: "0 3px 24px rgba(10,22,38,0.34), 0 1px 2px rgba(10,22,38,0.26)",
   },
   heroTag: {
     position: "relative",
-    fontSize: 15.5, lineHeight: 1.55, color: "rgba(255,255,255,0.90)",
+    fontSize: 15.5, lineHeight: 1.55, color: "rgba(255,255,255,0.78)",
     margin: "14px 0 0", maxWidth: 620, textWrap: "pretty",
-    textShadow: "0 2px 16px rgba(10,22,38,0.28)",
   },
   heroCta: {
     all: "unset",
@@ -2245,10 +2225,10 @@ const L: Record<string, CSSProperties> = {
     gap: 12,
     padding: "0 18px",
     borderRadius: 999,
-    color: "#FFFFFF",
+    color: "var(--on-accent)",
+    background: "var(--accent)",
     fontSize: 13,
     fontWeight: 800,
-    ...studioDarkLiquidGlassPill,
   },
   heroDock: {
     width: 360,
@@ -2258,14 +2238,10 @@ const L: Record<string, CSSProperties> = {
   },
   heroDockItem: {
     padding: "14px 15px",
-    borderRadius: 18,
+    borderRadius: 12,
     color: "#FFFFFF",
-    background:
-      "radial-gradient(circle at 12% 0%, rgba(255,255,255,0.28), transparent 44%), linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.06))",
-    border: "0.5px solid rgba(255,255,255,0.42)",
-    boxShadow: "0 18px 44px rgba(10,22,38,0.20), inset 0 1px 0 rgba(255,255,255,0.38), inset 0 -1px 0 rgba(255,255,255,0.08)",
-    backdropFilter: "blur(9px)",
-    WebkitBackdropFilter: "blur(9px)",
+    background: "rgba(255,255,255,0.08)",
+    border: "0.5px solid rgba(255,255,255,0.14)",
   },
   heroDockTitle: {
     display: "block",
@@ -2280,7 +2256,7 @@ const L: Record<string, CSSProperties> = {
     marginTop: 7,
     fontSize: 12.5,
     lineHeight: 1.35,
-    color: "rgba(255,255,255,0.78)",
+    color: "rgba(255,255,255,0.72)",
     textWrap: "pretty",
   },
   heroProofDeck: {
@@ -2291,18 +2267,15 @@ const L: Record<string, CSSProperties> = {
   },
   heroProofCard: {
     padding: "15px 16px",
-    borderRadius: 18,
-    background: "radial-gradient(circle at 12% 0%, rgba(255,255,255,0.25), transparent 42%), linear-gradient(180deg, rgba(255,255,255,0.17), rgba(255,255,255,0.06))",
-    border: "0.5px solid rgba(255,255,255,0.36)",
-    boxShadow: "0 16px 34px -22px rgba(0,0,0,0.50), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.10)",
-    backdropFilter: "blur(5px)",
-    WebkitBackdropFilter: "blur(5px)",
+    borderRadius: 12,
+    background: "rgba(255,255,255,0.08)",
+    border: "0.5px solid rgba(255,255,255,0.14)",
   },
   heroProofEyebrow: {
     fontSize: 9,
     letterSpacing: "0.15em",
     color: "#FFFFFF",
-    opacity: 0.75,
+    opacity: 0.65,
     fontWeight: 800,
   },
   heroProofTitle: {
@@ -2317,25 +2290,22 @@ const L: Record<string, CSSProperties> = {
     display: "block",
     marginTop: 6,
     color: "#FFFFFF",
-    opacity: 0.78,
+    opacity: 0.72,
     fontSize: 12.5,
   },
   subnav: {
     display: "inline-flex", gap: 6, marginBottom: 22,
     padding: 4,
     borderRadius: 999,
-    background: "rgba(255,255,255,0.62)",
-    border: "1px solid rgba(214,225,240,0.80)",
-    boxShadow: "0 14px 30px -24px rgba(31,44,69,0.34), inset 0 1px 0 rgba(255,255,255,0.76)",
-    backdropFilter: "blur(8px)",
-    WebkitBackdropFilter: "blur(8px)",
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
   },
   subnavBtn: {
     all: "unset", cursor: "pointer",
     padding: "9px 15px",
     borderRadius: 999,
     fontSize: 13,
-    transition: "color 120ms ease, background 120ms ease, box-shadow 120ms ease",
+    transition: "color 120ms ease, background 120ms ease",
   },
   learnSection: {
     marginBottom: 40,
@@ -2349,9 +2319,10 @@ const L: Record<string, CSSProperties> = {
   },
   sectionEyebrow: {
     fontSize: 9.5,
-    color: "var(--m-on-primary-container)",
+    color: "var(--accent-strong)",
     letterSpacing: "0.16em",
     fontWeight: 800,
+    fontFamily: "var(--font-mono)",
   },
   sectionTitle: {
     fontFamily: "var(--font-display)",
@@ -2360,29 +2331,51 @@ const L: Record<string, CSSProperties> = {
     lineHeight: 1,
     letterSpacing: "-0.045em",
     margin: 0,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     textWrap: "balance",
   },
   sectionSub: {
     maxWidth: 720,
     fontSize: 14,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     lineHeight: 1.45,
   },
+  /* flat card grid replacing studioTextureCardStyles */
   textureGrid: {
-    ...studioTextureCardStyles.grid,
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
+    gap: 12,
+    marginTop: 16,
   },
-  textureCard: {
-    ...studioTextureCardStyles.card,
+  /* flat surface card — replaces photo-texture card */
+  flatCard: {
+    minHeight: 220,
+    position: "relative",
+    textAlign: "left",
+    borderRadius: 14,
+    padding: 17,
+    border: "1px solid var(--line)",
+    background: "var(--surface)",
+    color: "var(--ink)",
+    display: "flex",
+    flexDirection: "column",
+    gap: 8,
+    overflow: "hidden",
   },
-  textureMeta: studioTextureCardStyles.meta,
-  textureTitle: {
-    ...studioTextureCardStyles.title,
-    fontSize: 22,
+  textureMeta: { color: "var(--ink-3)", fontFamily: "var(--font-mono)", fontWeight: 850, fontSize: 12 },
+  textureTitle: { fontSize: 19, lineHeight: 1.05, color: "var(--ink)", fontFamily: "var(--font-display)" },
+  textureAudience: { color: "var(--ink-2)", fontWeight: 850, fontSize: 12 },
+  textureDetail: { color: "var(--ink-3)", fontSize: 13, lineHeight: 1.35, marginTop: "auto" },
+  textureAction: {
+    marginTop: 12,
+    alignSelf: "flex-start",
+    padding: "7px 12px",
+    fontSize: 12,
+    fontWeight: 850,
+    borderRadius: 999,
+    background: "var(--accent)",
+    color: "var(--on-accent)",
   },
-  textureAudience: studioTextureCardStyles.audience,
-  textureDetail: studioTextureCardStyles.detail,
-  textureAction: studioTextureCardStyles.action,
   twoColumnGrid: {
     display: "grid",
     gridTemplateColumns: "minmax(0, 1fr) minmax(360px, 0.88fr)",
@@ -2390,12 +2383,20 @@ const L: Record<string, CSSProperties> = {
     alignItems: "stretch",
     marginBottom: 40,
   },
+  /* flat compete panel — replaces studioCompeteCardStyles.panel (photo texture) */
   competePanel: {
-    ...studioCompeteCardStyles.panel,
+    borderRadius: 16,
+    padding: 22,
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
     minHeight: 360,
   },
+  /* flat list panel — replaces studioListCardStyles.panel (glass) */
   listPanel: {
-    ...studioListCardStyles.panel,
+    borderRadius: 16,
+    padding: 20,
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
     minHeight: 360,
   },
   infoTitle: {
@@ -2404,14 +2405,32 @@ const L: Record<string, CSSProperties> = {
     lineHeight: 1,
     letterSpacing: "-0.045em",
     margin: 0,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     textWrap: "balance",
   },
+  /* flat compete item grid */
   competeGrid: {
-    ...studioCompeteCardStyles.grid,
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 210px), 1fr))",
+    gap: 12,
+    marginTop: 20,
   },
   competeItem: {
-    ...studioCompeteButtonItemStyles,
+    all: "unset",
+    boxSizing: "border-box",
+    width: "100%",
+    textAlign: "left",
+    cursor: "pointer",
+    font: "inherit",
+    minHeight: 118,
+    borderRadius: 14,
+    padding: 14,
+    background: "var(--surface-2)",
+    border: "1px solid var(--line)",
+    display: "grid",
+    gap: 8,
+    alignContent: "start",
+    color: "var(--ink-2)",
   },
   panelHeader: {
     display: "flex",
@@ -2426,26 +2445,54 @@ const L: Record<string, CSSProperties> = {
     minHeight: 34,
     padding: "0 12px",
     borderRadius: 999,
-    background: "rgba(232,238,252,.78)",
-    color: "#3B6595",
+    background: "var(--accent-soft)",
+    color: "var(--accent-strong)",
     fontSize: 12,
     fontWeight: 900,
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,.72)",
   },
+  /* list stack */
   listStack: {
-    ...studioListCardStyles.stack,
+    display: "grid", gap: 10, marginTop: 18,
   },
+  /* flat list row — replaces studioListButtonRowStyles */
   listRow: {
-    ...studioListButtonRowStyles,
+    all: "unset",
+    boxSizing: "border-box",
+    display: "grid",
+    gridTemplateColumns: "48px minmax(0, 1fr) auto",
+    alignItems: "center",
+    gap: 12,
+    width: "100%",
+    padding: 12,
+    borderRadius: 14,
+    background: "var(--surface-2)",
+    border: "1px solid var(--line)",
+    textAlign: "left",
+    cursor: "pointer",
+    font: "inherit",
+    color: "var(--ink)",
   },
+  /* flat list icon — replaces gradient #8A9AE8→#2E5C8A with accent */
   listIcon: {
-    ...studioListCardStyles.icon,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    display: "grid",
+    placeItems: "center",
+    color: "var(--on-accent)",
+    fontFamily: "var(--font-mono)",
+    fontWeight: 900,
+    background: "var(--accent-strong)",
+    fontSize: 12,
   },
-  listBody: {
-    ...studioListCardStyles.body,
-  },
+  listBody: { display: "grid", gap: 3, minWidth: 0 },
   cleanPill: {
-    ...studioListCardStyles.cleanPill,
+    padding: "7px 10px",
+    borderRadius: 999,
+    background: "var(--accent-soft)",
+    color: "var(--accent-strong)",
+    fontWeight: 900,
+    fontSize: 12,
   },
   stepGrid: {
     display: "grid",
@@ -2453,7 +2500,10 @@ const L: Record<string, CSSProperties> = {
     gap: 12,
   },
   stepCard: {
-    ...studioListCardStyles.panel,
+    borderRadius: 16,
+    padding: 20,
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
     minHeight: 260,
     display: "flex",
     flexDirection: "column",
@@ -2465,15 +2515,18 @@ const L: Record<string, CSSProperties> = {
     gap: 10,
     marginBottom: 18,
   },
+  /* step number badge — replaces retired #8A9AE8/#2E5C8A gradient */
   stepNumber: {
     width: 42,
     height: 42,
     borderRadius: 15,
     display: "grid",
     placeItems: "center",
-    color: "#FFFFFF",
+    color: "var(--on-accent)",
+    fontFamily: "var(--font-mono)",
     fontWeight: 900,
-    background: "linear-gradient(135deg, #8A9AE8, #2E5C8A)",
+    background: "var(--accent-strong)",
+    fontSize: 12,
   },
   stepTitle: {
     fontFamily: "var(--font-display)",
@@ -2481,14 +2534,14 @@ const L: Record<string, CSSProperties> = {
     lineHeight: 1,
     letterSpacing: "-0.035em",
     margin: 0,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     textWrap: "balance",
   },
   stepBody: {
     margin: "10px 0 0",
     fontSize: 13,
     lineHeight: 1.48,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     textWrap: "pretty",
   },
 };
@@ -2497,18 +2550,15 @@ const P: Record<string, CSSProperties> = {
   toggleRow: { display: "flex", justifyContent: "center", marginBottom: 18 },
   toggleWrap: {
     display: "inline-flex", padding: 4,
-    background: "rgba(255,255,255,0.68)",
-    border: "1px solid rgba(214,225,240,0.78)",
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
     borderRadius: 999,
-    boxShadow: "0 14px 30px -24px rgba(31,44,69,0.34), inset 0 1px 0 rgba(255,255,255,0.76)",
-    backdropFilter: "blur(8px)",
-    WebkitBackdropFilter: "blur(8px)",
   },
   toggleBtn: {
     all: "unset", cursor: "pointer",
     padding: "8px 16px", borderRadius: 999,
     fontSize: 12.5, fontWeight: 600,
-    transition: "background 120ms ease, color 120ms ease, box-shadow 120ms ease",
+    transition: "background 120ms ease, color 120ms ease",
   },
   pricingTierGrid: {
     display: "grid",
@@ -2516,6 +2566,7 @@ const P: Record<string, CSSProperties> = {
     gap: 12,
     alignItems: "stretch",
   },
+  /* flat tier card — replaces texture card with ink dark */
   pricingTierCard: {
     boxSizing: "border-box",
     width: "100%",
@@ -2523,17 +2574,14 @@ const P: Record<string, CSSProperties> = {
     minHeight: 286,
     position: "relative",
     textAlign: "left",
-    borderRadius: studioTextureCardStyles.card.borderRadius,
+    borderRadius: 14,
     padding: 17,
-    border: "1px solid rgba(255,255,255,.28)",
+    border: "1px solid var(--line)",
     appearance: "none",
     WebkitAppearance: "none",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
+    background: "var(--ink)",
     color: "#FFFFFF",
-    boxShadow: "0 22px 52px rgba(42,65,96,.16), inset 0 1px 0 rgba(255,255,255,.28)",
     font: "inherit",
-    ...studioGlassBackdrop,
     display: "flex",
     flexDirection: "column",
     gap: 8,
@@ -2541,11 +2589,12 @@ const P: Record<string, CSSProperties> = {
     cursor: "pointer",
   },
   pricingTierFeatured: {
-    borderColor: "rgba(255,255,255,.82)",
-    boxShadow: "0 28px 68px rgba(31,55,93,.24), inset 0 0 0 1px rgba(255,255,255,.42)",
+    borderColor: "var(--accent)",
+    boxShadow: "0 0 0 2px var(--accent)",
   },
   pricingTierMeta: {
-    color: "rgba(255,255,255,.76)",
+    color: "rgba(255,255,255,.62)",
+    fontFamily: "var(--font-mono)",
     fontWeight: 900,
     fontSize: 11,
     textTransform: "uppercase",
@@ -2558,17 +2607,16 @@ const P: Record<string, CSSProperties> = {
     letterSpacing: "-0.045em",
     fontWeight: 850,
     color: "#FFFFFF",
-    textShadow: "0 2px 18px rgba(10,22,38,.28)",
   },
   pricingTierPrice: {
-    fontFamily: "var(--font-display)",
+    fontFamily: "var(--font-mono)",
     fontSize: 17,
     lineHeight: 1,
     fontWeight: 850,
-    color: "rgba(255,255,255,.94)",
+    color: "var(--accent)",
   },
   pricingTierSub: {
-    color: "rgba(255,255,255,.88)",
+    color: "rgba(255,255,255,.78)",
     fontSize: 12.5,
     lineHeight: 1.35,
     fontWeight: 700,
@@ -2577,7 +2625,7 @@ const P: Record<string, CSSProperties> = {
     display: "grid",
     gap: 6,
     marginTop: "auto",
-    color: "rgba(236,246,255,.90)",
+    color: "rgba(255,255,255,.72)",
     fontSize: 12.5,
     lineHeight: 1.32,
   },
@@ -2596,15 +2644,13 @@ const P: Record<string, CSSProperties> = {
     minHeight: 34,
     padding: "0 12px",
     borderRadius: 999,
-    background: "rgba(255,255,255,.20)",
+    background: "rgba(255,255,255,.10)",
     color: "#FFFFFF",
-    border: "1px solid rgba(255,255,255,.24)",
+    border: "1px solid rgba(255,255,255,.14)",
     fontSize: 12,
     fontWeight: 900,
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,.24)",
   },
   pricingDarkPill: {
-    ...studioTextureCardStyles.action,
     marginTop: 0,
     alignSelf: "auto",
     display: "inline-flex",
@@ -2614,6 +2660,9 @@ const P: Record<string, CSSProperties> = {
     padding: "0 15px",
     fontSize: 13,
     fontWeight: 900,
+    borderRadius: 999,
+    background: "var(--accent)",
+    color: "var(--on-accent)",
   },
   pricingChoiceGrid: {
     display: "grid",
@@ -2623,11 +2672,14 @@ const P: Record<string, CSSProperties> = {
     marginBottom: 6,
   },
   planListPanel: {
-    ...studioListCardStyles.panel,
+    borderRadius: 16,
+    padding: 20,
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
     minHeight: 0,
   },
   planListStack: {
-    ...studioListCardStyles.stack,
+    display: "grid", gap: 10, marginTop: 18,
   },
   planListRow: {
     boxSizing: "border-box",
@@ -2637,40 +2689,66 @@ const P: Record<string, CSSProperties> = {
     gap: 12,
     width: "100%",
     padding: 12,
-    borderRadius: 18,
-    background: "rgba(247,250,255,.82)",
-    border: "1px solid rgba(153,176,209,.32)",
-    color: "var(--m-on-surface)",
+    borderRadius: 14,
+    background: "var(--surface-2)",
+    border: "1px solid var(--line)",
+    color: "var(--ink)",
     font: "inherit",
     appearance: "none",
     WebkitAppearance: "none",
     textAlign: "left",
     cursor: "pointer",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,.76)",
   },
   planListIcon: {
-    ...studioListCardStyles.icon,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    display: "grid",
+    placeItems: "center",
+    color: "var(--on-accent)",
+    fontFamily: "var(--font-mono)",
+    fontWeight: 900,
+    background: "var(--accent-strong)",
+    fontSize: 12,
   },
   planListIconFeatured: {
-    ...studioListCardStyles.icon,
-    background: studioTextureCardBackground(STUDIO_TEXTURES.navy),
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    boxShadow: "0 14px 30px rgba(46,92,138,.20), inset 0 1px 0 rgba(255,255,255,.28)",
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    display: "grid",
+    placeItems: "center",
+    color: "var(--on-accent)",
+    fontFamily: "var(--font-mono)",
+    fontWeight: 900,
+    background: "var(--ink)",
+    fontSize: 12,
   },
   planListBody: {
-    ...studioListCardStyles.body,
+    display: "grid", gap: 3, minWidth: 0,
   },
   planListPill: {
-    ...studioListCardStyles.cleanPill,
+    padding: "7px 10px",
+    borderRadius: 999,
+    background: "var(--accent-soft)",
+    color: "var(--accent-strong)",
+    fontWeight: 900,
+    fontSize: 12,
     whiteSpace: "nowrap",
   },
   planFeaturedPill: {
-    ...studioListCardStyles.warnPill,
+    padding: "7px 10px",
+    borderRadius: 999,
+    background: "#FAF1D6",
+    color: "#816124",
+    fontWeight: 900,
+    fontSize: 12,
     whiteSpace: "nowrap",
   },
   pricingCompetePanel: {
-    ...studioCompeteCardStyles.panel,
+    borderRadius: 16,
+    padding: 22,
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
     minHeight: 0,
   },
   planGrid: {
@@ -2683,32 +2761,24 @@ const P: Record<string, CSSProperties> = {
     minHeight: 330,
     padding: "24px 24px 22px",
     position: "relative",
-    border: "1px solid rgba(255,255,255,.55)",
-    borderRadius: 24,
-    background: studioLiquidGlass,
-    boxShadow: "0 18px 44px rgba(42,65,96,.10), inset 0 1px 0 rgba(255,255,255,.72)",
+    border: "1px solid var(--line)",
+    borderRadius: 16,
+    background: "var(--surface)",
     display: "flex",
     flexDirection: "column",
-    color: "var(--m-on-surface)",
-    ...studioGlassBackdrop,
+    color: "var(--ink)",
   },
   planFeatured: {
-    border: "1px solid rgba(255,255,255,.34)",
-    background: studioTextureCardBackground(STUDIO_TEXTURES.navy),
-    backgroundSize: "cover",
-    backgroundPosition: "center",
+    border: "2px solid var(--accent)",
+    background: "var(--ink)",
     color: "#FFFFFF",
-    boxShadow: "0 22px 52px rgba(46,92,138,.24), inset 0 1px 0 rgba(255,255,255,.28)",
   },
   popular: {
     position: "absolute", top: -10, left: 24,
     fontSize: 11.5, fontWeight: 800, letterSpacing: 0,
-    background: "rgba(255,255,255,0.20)",
-    border: "1px solid rgba(255,255,255,0.28)",
-    color: "#FFFFFF",
+    background: "var(--accent)",
+    color: "var(--on-accent)",
     padding: "4px 10px", borderRadius: 999,
-    backdropFilter: "blur(5px)",
-    WebkitBackdropFilter: "blur(5px)",
   },
   planName: {
     fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 700,
@@ -2723,7 +2793,7 @@ const P: Record<string, CSSProperties> = {
     display: "flex", alignItems: "baseline", gap: 4, marginBottom: 16,
   },
   priceNumber: {
-    fontFamily: "var(--font-display)", fontSize: 36, fontWeight: 800,
+    fontFamily: "var(--font-mono)", fontSize: 36, fontWeight: 800,
     letterSpacing: "-0.03em", color: "currentColor",
   },
   priceUnit: { fontSize: 13, color: "currentColor", opacity: 0.62 },
@@ -2738,11 +2808,12 @@ const P: Record<string, CSSProperties> = {
     padding: "0 14px 0 16px",
     fontSize: 12.5,
     fontWeight: 800,
-    ...studioDarkLiquidGlassPill,
-    transition: "border-color 180ms ease",
+    background: "var(--accent)",
+    color: "var(--on-accent)",
+    transition: "opacity 180ms ease",
   },
   planActionFeatured: {
-    color: "#FFFFFF",
+    color: "var(--on-accent)",
   },
   featureRow: {
     display: "flex", gap: 8,
@@ -2751,9 +2822,11 @@ const P: Record<string, CSSProperties> = {
     lineHeight: 1.4,
   },
   compareStage: {
-    ...studioCompeteCardStyles.panel,
     overflow: "hidden",
     padding: 0,
+    borderRadius: 16,
+    border: "1px solid var(--line)",
+    background: "var(--surface)",
   },
   compareToolbar: {
     position: "relative",
@@ -2769,14 +2842,15 @@ const P: Record<string, CSSProperties> = {
     fontSize: 9.5,
     letterSpacing: "0.16em",
     fontWeight: 800,
-    color: "var(--m-on-primary-container)",
+    color: "var(--accent-strong)",
+    fontFamily: "var(--font-mono)",
   },
   compareToolbarTitle: {
     fontFamily: "var(--font-display)",
     fontSize: 24,
     lineHeight: 1,
     letterSpacing: "-0.04em",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     marginTop: 4,
     fontWeight: 760,
   },
@@ -2793,37 +2867,33 @@ const P: Record<string, CSSProperties> = {
     padding: "0 11px",
     borderRadius: 999,
     fontSize: 11,
+    fontFamily: "var(--font-mono)",
     fontWeight: 750,
-    color: "#345F85",
-    background: "rgba(255,255,255,0.64)",
-    border: "0.5px solid rgba(255,255,255,0.78)",
-    boxShadow: "0 12px 28px -22px rgba(31,44,69,0.36), inset 0 1px 0 rgba(255,255,255,0.86)",
-    backdropFilter: "blur(6px)",
-    WebkitBackdropFilter: "blur(6px)",
+    color: "var(--ink-2)",
+    background: "var(--surface-2)",
+    border: "1px solid var(--line)",
   },
   compareCard: {
     padding: 0,
     overflowX: "auto",
     overflowY: "hidden",
-    borderRadius: 28,
-    background: "rgba(255,255,255,0.72)",
-    border: "1px solid rgba(153,176,209,0.36)",
-    boxShadow: "0 18px 44px rgba(42,65,96,.10), inset 0 1px 0 rgba(255,255,255,.72)",
-    ...studioGlassBackdrop,
+    borderRadius: 14,
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
   },
   compareScroll: {
     overflowX: "auto",
   },
   compareHeader: {
     display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 1fr",
-    background: "linear-gradient(180deg, rgba(246,250,255,0.98), rgba(236,244,253,0.92))",
+    background: "var(--surface-2)",
     padding: "15px 18px",
     minWidth: 900,
     fontSize: 12.5,
     letterSpacing: 0,
     fontWeight: 850,
-    color: "var(--m-on-surface)",
-    borderBottom: "1px solid rgba(214,225,240,0.88)",
+    color: "var(--ink)",
+    borderBottom: "1px solid var(--line)",
   },
   compareGroupHeader: {
     padding: "15px 18px 10px",
@@ -2831,59 +2901,60 @@ const P: Record<string, CSSProperties> = {
     fontSize: 13,
     letterSpacing: 0,
     fontWeight: 850,
-    color: "var(--m-primary)",
-    background: "linear-gradient(90deg, rgba(244,249,255,0.92), rgba(255,255,255,0.96))",
-    borderTop: "1px solid var(--m-outline-var)",
-    borderBottom: "1px solid var(--m-outline-var)",
+    color: "var(--accent-strong)",
+    fontFamily: "var(--font-mono)",
+    background: "var(--surface-2)",
+    borderTop: "1px solid var(--line)",
+    borderBottom: "1px solid var(--line)",
   },
   compareRow: {
     display: "grid", gridTemplateColumns: "140px 130px minmax(220px, 1.4fr) 100px 120px 140px",
     gap: 18,
     padding: "16px 18px",
     fontSize: 13,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     alignItems: "center",
     minWidth: 880,
   },
   compareHeaderRow: {
     minHeight: 52,
-    background: "linear-gradient(180deg, rgba(246,250,255,0.98), rgba(236,244,253,0.92))",
-    color: "var(--m-on-surface-mid)",
+    background: "var(--surface-2)",
+    color: "var(--ink-2)",
     fontSize: 12.5,
     fontWeight: 800,
     letterSpacing: 0,
-    borderBottom: "1px solid rgba(214,225,240,0.88)",
+    borderBottom: "1px solid var(--line)",
   },
   comparePlanCell: {
     display: "grid",
     gap: 4,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   compareText: {
     margin: 0,
     fontSize: 13,
     lineHeight: 1.45,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     textWrap: "pretty",
   },
   compareTextMuted: {
     margin: 0,
     fontSize: 12.5,
     lineHeight: 1.45,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     textWrap: "pretty",
   },
   compareExpandWrap: {
-    borderTop: "1px solid rgba(214,225,240,0.88)",
+    borderTop: "1px solid var(--line)",
     padding: 12,
-    background: "linear-gradient(180deg, rgba(250,252,255,0.94), rgba(244,249,255,0.88))",
+    background: "var(--surface-2)",
   },
   compareExpandButton: {
     all: "unset",
     boxSizing: "border-box",
     width: "100%",
     minHeight: 48,
-    borderRadius: 16,
+    borderRadius: 12,
     padding: "0 16px",
     display: "flex",
     alignItems: "center",
@@ -2892,10 +2963,9 @@ const P: Record<string, CSSProperties> = {
     cursor: "pointer",
     fontSize: 14,
     fontWeight: 850,
-    color: "var(--m-on-surface)",
-    background: "rgba(255,255,255,0.74)",
-    border: "1px solid rgba(214,225,240,0.86)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.88)",
+    color: "var(--ink)",
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
   },
   compareExpandIcon: {
     width: 28,
@@ -2904,14 +2974,14 @@ const P: Record<string, CSSProperties> = {
     display: "grid",
     placeItems: "center",
     flexShrink: 0,
-    color: "var(--m-primary)",
-    background: "rgba(232,241,252,0.92)",
+    color: "var(--accent-strong)",
+    background: "var(--accent-soft)",
     transition: "transform 180ms ease",
   },
   compareDetails: {
     overflowX: "auto",
-    borderTop: "1px solid rgba(214,225,240,0.88)",
-    background: "rgba(255,255,255,0.72)",
+    borderTop: "1px solid var(--line)",
+    background: "var(--surface)",
   },
   compareFeatureRow: {
     display: "grid",
@@ -2921,12 +2991,24 @@ const P: Record<string, CSSProperties> = {
     minWidth: 900,
     alignItems: "center",
     fontSize: 13,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   compareFeatureName: {
     fontSize: 13,
     lineHeight: 1.35,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
+  },
+  compareCell: {
+    textAlign: "center",
+    minHeight: 30,
+    display: "grid",
+    placeItems: "center",
+    borderRadius: 8,
+    margin: "0 2px",
+    transition: "background 180ms ease",
+  },
+  compareProCell: {
+    background: "var(--accent-soft)",
   },
   includedGrid: {
     display: "grid",
@@ -2935,32 +3017,26 @@ const P: Record<string, CSSProperties> = {
   },
   includedCard: {
     minHeight: 190,
-    borderRadius: 24,
+    borderRadius: 16,
     padding: "22px 24px",
-    background: "rgba(255,255,255,.68)",
-    border: "1px solid rgba(153,176,209,.36)",
-    boxShadow: "0 18px 44px rgba(42,65,96,.10), inset 0 1px 0 rgba(255,255,255,.72)",
-    ...studioGlassBackdrop,
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
   },
   includedBlue: {
-    background:
-      "radial-gradient(circle at 14% 0%, rgba(106,155,204,0.18), transparent 36%), linear-gradient(155deg, rgba(255,255,255,0.98), rgba(235,245,255,0.90))",
-    border: "1px solid rgba(176,205,232,0.82)",
+    background: "var(--surface-2)",
+    border: "1px solid var(--line)",
   },
   includedGreen: {
-    background:
-      "radial-gradient(circle at 14% 0%, rgba(98,153,135,0.16), transparent 36%), linear-gradient(155deg, rgba(255,255,255,0.98), rgba(235,248,241,0.90))",
-    border: "1px solid rgba(181,218,198,0.78)",
+    background: "var(--surface-2)",
+    border: "1px solid var(--line)",
   },
   includedGold: {
-    background:
-      "radial-gradient(circle at 14% 0%, rgba(214,163,92,0.18), transparent 36%), linear-gradient(155deg, rgba(255,255,255,0.98), rgba(255,247,225,0.90))",
-    border: "1px solid rgba(232,207,146,0.78)",
+    background: "var(--surface-2)",
+    border: "1px solid var(--line)",
   },
   includedLavender: {
-    background:
-      "radial-gradient(circle at 14% 0%, rgba(130,125,189,0.15), transparent 36%), linear-gradient(155deg, rgba(255,255,255,0.98), rgba(242,240,255,0.90))",
-    border: "1px solid rgba(202,199,235,0.76)",
+    background: "var(--surface-2)",
+    border: "1px solid var(--line)",
   },
   includedTitle: {
     fontFamily: "var(--font-display)",
@@ -2968,50 +3044,32 @@ const P: Record<string, CSSProperties> = {
     lineHeight: 1,
     letterSpacing: "-0.03em",
     margin: "18px 0 8px",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   includedBody: {
     margin: 0,
     fontSize: 13,
     lineHeight: 1.55,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
     textWrap: "pretty",
   },
-  compareCell: {
-    textAlign: "center",
-    minHeight: 30,
-    display: "grid",
-    placeItems: "center",
-    borderRadius: 14,
-    margin: "0 2px",
-    transition: "background 180ms ease",
-  },
-  compareProCell: {
-    background: "linear-gradient(180deg, rgba(239,246,255,0.82), rgba(230,239,252,0.64))",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.88)",
-  },
+  /* flat guarantee block — was a photo-texture card, now flat ink dark */
   guaranteeCard: {
     padding: "28px 32px",
     display: "flex", justifyContent: "space-between",
     alignItems: "center", gap: 24, flexWrap: "wrap",
-    borderRadius: 26,
-    backgroundImage:
-      `linear-gradient(145deg, rgba(16,31,52,0.36), rgba(60,92,125,0.22)), url('${ART_HOUSE_TEXTURES.pricing}')`,
-    backgroundSize: "cover, cover",
-    backgroundPosition: "center, center",
-    border: "1px solid rgba(255,255,255,0.42)",
-    boxShadow: "0 34px 88px rgba(31,44,69,0.20), 0 9px 22px rgba(31,44,69,0.09), inset 0 1px 0 rgba(255,255,255,0.22)",
+    borderRadius: 16,
+    background: "var(--ink)",
+    border: "1px solid var(--line)",
     color: "#FFFFFF",
   },
   guaranteeH3: {
     fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700,
     letterSpacing: "-0.02em", margin: 0, color: "#FFFFFF",
-    textShadow: "0 2px 18px rgba(10,22,38,0.34)",
   },
   guaranteeBody: {
-    fontSize: 13.5, color: "rgba(255,255,255,0.88)",
+    fontSize: 13.5, color: "rgba(255,255,255,0.78)",
     margin: "6px 0 0", textWrap: "pretty",
-    textShadow: "0 2px 14px rgba(10,22,38,0.28)",
   },
   ctaGlassButton: {
     all: "unset",
@@ -3022,18 +3080,13 @@ const P: Record<string, CSSProperties> = {
     justifyContent: "center",
     padding: "0 16px",
     borderRadius: 999,
-    color: "#FFFFFF",
+    color: "var(--on-accent)",
     fontSize: 13,
     fontWeight: 850,
-    background:
-      "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.22), transparent 40%), linear-gradient(135deg, rgba(14,18,27,0.92), rgba(27,35,51,0.80) 52%, rgba(10,13,20,0.92))",
-    border: "0.5px solid rgba(255,255,255,0.52)",
-    boxShadow: "0 18px 36px -24px rgba(0,0,0,0.58), inset 0 1px 0 rgba(255,255,255,0.42), inset 0 -1px 0 rgba(255,255,255,0.12)",
-    backdropFilter: "blur(7px)",
-    WebkitBackdropFilter: "blur(7px)",
+    background: "var(--accent)",
   },
   ctaPrimaryButton: {
-    background:
-      "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.30), transparent 40%), linear-gradient(135deg, rgba(63,105,148,0.94), rgba(48,88,130,0.86) 52%, rgba(24,43,74,0.94))",
+    background: "var(--accent-strong)",
+    color: "#FFFFFF",
   },
 };

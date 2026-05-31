@@ -1,0 +1,34 @@
+{
+  "category": "AMBIGUOUS",
+  "description": "\"EU\" only — no member state specified; different tax/regulatory regimes apply.",
+  "payload": {
+    "journey": "buy",
+    "industry": "industrial",
+    "jurisdiction": "EU",
+    "league": "L4"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "industry": "industrial",
+      "league": "L4"
+    },
+    "missingFields": [
+      "explicit_jurisdiction"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "ambiguous",
+    "jurisdiction"
+  ],
+  "id": "PC-AMBIGUOUS-JURISDICTION-005"
+}

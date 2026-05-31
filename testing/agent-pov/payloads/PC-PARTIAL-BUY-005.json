@@ -1,0 +1,41 @@
+{
+  "id": "PC-PARTIAL-BUY-005",
+  "category": "PARTIAL",
+  "description": "Partial payload: L2 buy: dental practice search funder. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "dental practice",
+    "target_sde_cents": 90000000,
+    "target_jurisdiction": "US-CO",
+    "buyer_role": "search_funder"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L2",
+      "industry": "dental practice",
+      "jurisdiction": "US-CO"
+    },
+    "missingFields": [
+      "target_revenue",
+      "purchase_price_range",
+      "financing_plan"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L2",
+    "partial",
+    "search-funder"
+  ]
+}

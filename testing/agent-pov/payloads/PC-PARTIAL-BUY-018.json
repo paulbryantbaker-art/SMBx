@@ -1,0 +1,43 @@
+{
+  "id": "PC-PARTIAL-BUY-018",
+  "category": "PARTIAL",
+  "description": "Partial payload: L6 buy: family-office direct healthy. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "specialty foods",
+    "target_revenue_cents": 22000000000,
+    "target_ebitda_cents": 3000000000,
+    "target_jurisdiction": "US-NC",
+    "buyer_role": "family_office",
+    "purchase_price_range": "180M-240M"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L5",
+      "industry": "specialty foods",
+      "jurisdiction": "US-NC"
+    },
+    "missingFields": [
+      "sponsor_equity_cents",
+      "senior_debt_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L6",
+    "partial",
+    "family-office"
+  ]
+}

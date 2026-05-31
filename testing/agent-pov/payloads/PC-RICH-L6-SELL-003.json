@@ -1,0 +1,51 @@
+{
+  "category": "RICH",
+  "description": "L6 partial recap (sponsor selldown) — owner-rep representing rollover sellers.",
+  "payload": {
+    "journey": "sell",
+    "sellerRole": "owner_rep",
+    "industry": "specialty insurance brokerage",
+    "naics": "524210",
+    "jurisdiction": "US-NY",
+    "league": "L6",
+    "ttmRevenueCents": 28000000000,
+    "adjustedEbitdaCents": 4500000000,
+    "multiYearPnlPresent": true,
+    "yearsOfHistory": 5,
+    "askingPriceCents": 27000000000,
+    "partialRecap": true,
+    "rolloverEquityPct": 40,
+    "taxClassification": "c_corp",
+    "stage": "loi_evaluation"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "owner_rep",
+      "league": "L6",
+      "jurisdiction": "US-NY",
+      "industry": "specialty insurance brokerage",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L6",
+    "rich",
+    "partial-recap"
+  ],
+  "id": "PC-RICH-L6-SELL-003"
+}

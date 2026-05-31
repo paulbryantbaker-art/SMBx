@@ -1,0 +1,41 @@
+{
+  "id": "PC-PARTIAL-BUY-002",
+  "category": "PARTIAL",
+  "description": "Partial payload: L1 micro buy: cleaning company SDE + revenue. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "commercial cleaning",
+    "target_sde_cents": 25000000,
+    "target_revenue_cents": 200000000,
+    "target_jurisdiction": "US-GA"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L1",
+      "industry": "commercial cleaning",
+      "jurisdiction": "US-GA",
+      "distressPosture": "healthy"
+    },
+    "missingFields": [
+      "buyer_role",
+      "financing_plan",
+      "purchase_price_range"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L1",
+    "partial"
+  ]
+}

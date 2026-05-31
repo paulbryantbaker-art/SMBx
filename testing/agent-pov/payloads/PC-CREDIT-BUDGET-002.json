@@ -1,0 +1,19 @@
+{
+  "id": "PC-CREDIT-BUDGET-002",
+  "category": "LINE_VIOLATION",
+  "description": "Free-plan agent attempts generate_output_doc (Studio output) after exhausting the free deliverable. Expected envelope: credit_budget_required.",
+  "payload": {
+    "deal_id": "fixture_deal_cb002",
+    "doc_type": "cim",
+    "simulate_over_budget": true
+  },
+  "tool": "generate_output_doc",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "credit_budget_required",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["credit-budget", "free-deliverable-exhausted"]
+}

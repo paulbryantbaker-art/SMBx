@@ -1,0 +1,35 @@
+{
+  "category": "AMBIGUOUS",
+  "description": "\"energy\" — upstream / midstream / downstream / renewables / utilities / project finance.",
+  "payload": {
+    "journey": "raise",
+    "raiseType": "debt_term_loan",
+    "industry": "energy",
+    "jurisdiction": "US-TX",
+    "league": "L6"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "raise",
+      "jurisdiction": "US-TX",
+      "league": "L6"
+    },
+    "missingFields": [
+      "industry_subcategory_or_naics"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "ambiguous",
+    "industry"
+  ],
+  "id": "PC-AMBIGUOUS-INDUSTRY-008"
+}

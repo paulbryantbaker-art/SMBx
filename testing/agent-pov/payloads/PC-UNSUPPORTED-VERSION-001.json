@@ -1,0 +1,18 @@
+{
+  "id": "PC-UNSUPPORTED-VERSION-001",
+  "category": "LINE_VIOLATION",
+  "description": "Agent provides an unknown specVersion in the envelope. Expected: structured unsupported_version error returning the expected version pin, not a 500.",
+  "payload": {
+    "journey": "buy",
+    "envelope_override": { "specVersion": "v0.0.0-nonexistent" }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "unsupported_version",
+    "persistsDealState": false,
+    "auditRowWritten": false
+  },
+  "tags": ["unsupported-version", "version-pin"]
+}

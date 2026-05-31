@@ -1,0 +1,19 @@
+{
+  "id": "PC-GARBAGE-010",
+  "category": "GARBAGE",
+  "description": "Wrong type: sponsor_equity is the string 'maybe' instead of a number-of-cents. Substrate's payload-shape validator must reject with field-level guidance — never coerce 'maybe' to a number.",
+  "payload": {
+    "journey": "sell",
+    "target_industry": "hospitality",
+    "target_jurisdiction": "US-FL",
+    "sponsor_equity": "maybe"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "wrong-type", "string-for-money"]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "PC-ENTERPRISE-SCOPE-001",
+  "category": "LINE_VIOLATION",
+  "description": "Free-tier agent attempts query_admin_data. Admin surface is overridden to enterprise_scope_required by LINE_OVERRIDES.",
+  "payload": {
+    "scope": "admin"
+  },
+  "tool": "query_admin_data",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "enterprise_scope_required",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["enterprise-scope", "admin", "TL-014"]
+}

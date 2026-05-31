@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 
-const MOBILE_BREAKPOINT = "(max-width: 767px)";
+// Switch to the V6Mobile app for any window under 900px. Aligns with the
+// marketing site's 900px breakpoint and the desktop shell's cramped-below-980
+// layout, so both surfaces go narrow at the same width.
+const MOBILE_BREAKPOINT = "(max-width: 900px)";
 
 export function useIsMobile(): boolean {
   const [isMobile, setIsMobile] = useState<boolean>(() => {

@@ -1,0 +1,43 @@
+{
+  "id": "PC-PARTIAL-BUY-003",
+  "category": "PARTIAL",
+  "description": "Partial payload: L1 micro buy: laundromat SBA-financed. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "laundromat",
+    "target_sde_cents": 18000000,
+    "target_jurisdiction": "US-FL",
+    "financing_plan": "sba_7a",
+    "buyer_role": "individual"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L1",
+      "industry": "laundromat",
+      "jurisdiction": "US-FL"
+    },
+    "missingFields": [
+      "target_revenue",
+      "purchase_price_range",
+      "down_payment_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L1",
+    "partial",
+    "sba"
+  ]
+}

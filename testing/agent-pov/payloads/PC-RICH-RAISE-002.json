@@ -1,0 +1,54 @@
+{
+  "category": "RICH",
+  "description": "Seed priced round — full cap table + option pool sizing + pre/post money.",
+  "payload": {
+    "journey": "raise",
+    "raiseType": "seed_priced",
+    "instrument": "preferred_stock_series_seed",
+    "industry": "B2B vertical SaaS",
+    "jurisdiction": "US-DE",
+    "league": "L1",
+    "raiseAmountCents": 400000000,
+    "preMoneyCents": 1600000000,
+    "postMoneyCents": 2000000000,
+    "newOptionPoolPostMoneyPct": 12,
+    "priorInvestors": 3,
+    "capTable": {
+      "founderPct": 80,
+      "optionPoolPct": 8,
+      "priorInvestorsPct": 12
+    },
+    "taxClassification": "c_corp",
+    "stage": "term_sheet"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "early_stage_raise",
+      "league": "L1",
+      "jurisdiction": "US-DE",
+      "industry": "B2B vertical SaaS",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "L1",
+    "rich",
+    "seed_priced"
+  ],
+  "id": "PC-RICH-RAISE-002"
+}

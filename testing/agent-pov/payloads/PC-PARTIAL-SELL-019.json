@@ -1,0 +1,44 @@
+{
+  "id": "PC-PARTIAL-SELL-019",
+  "category": "PARTIAL",
+  "description": "Partial payload: L6 sell: engineering services pre-ESOP. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "engineering services",
+    "jurisdiction": "US-VA",
+    "revenue_cents": 28000000000,
+    "ebitda_cents": 3500000000,
+    "seller_role": "principal",
+    "exit_preference": "esop"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "principal_seller",
+      "league": "L5",
+      "industry": "engineering services",
+      "jurisdiction": "US-VA"
+    },
+    "missingFields": [
+      "asking_price_cents",
+      "employee_count",
+      "esop_feasibility_assessed"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L6",
+    "partial",
+    "esop"
+  ]
+}

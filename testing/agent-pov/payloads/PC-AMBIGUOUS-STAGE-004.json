@@ -1,0 +1,43 @@
+{
+  "category": "AMBIGUOUS",
+  "description": "PMI: dealClosedDate is yesterday AND TSA is winding down — day_0 vs stabilization vs assessment overlap.",
+  "payload": {
+    "journey": "pmi",
+    "dealClosedDate": "2026-05-26",
+    "tsaActive": true,
+    "tsaDurationMonths": 11,
+    "workstreams": [
+      "day_0_close_actions",
+      "stabilization_actions",
+      "assessment_actions"
+    ],
+    "industry": "industrial",
+    "jurisdiction": "US-DE",
+    "league": "L6"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "pmi",
+      "jurisdiction": "US-DE",
+      "industry": "industrial",
+      "league": "L6"
+    },
+    "missingFields": [
+      "deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "ambiguous",
+    "stage"
+  ],
+  "id": "PC-AMBIGUOUS-STAGE-004"
+}

@@ -1,0 +1,45 @@
+{
+  "id": "PC-PARTIAL-BUY-022",
+  "category": "PARTIAL",
+  "description": "Partial payload: L7 buy: cross-border w/ HSR. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "medical devices",
+    "target_revenue_cents": 60000000000,
+    "target_ebitda_cents": 12000000000,
+    "target_jurisdiction": "US-MA",
+    "cross_border": true,
+    "buyer_jurisdiction": "DE"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L6",
+      "industry": "medical devices",
+      "jurisdiction": "US-MA"
+    },
+    "missingFields": [
+      "purchase_price_range",
+      "hsr_filing_intent",
+      "cfius_intent"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L7",
+    "partial",
+    "cross-border",
+    "hsr"
+  ]
+}

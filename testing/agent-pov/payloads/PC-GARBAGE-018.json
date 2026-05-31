@@ -1,0 +1,19 @@
+{
+  "id": "PC-GARBAGE-018",
+  "category": "GARBAGE",
+  "description": "Junk values: a random alphabetic string passed where a numeric money field (purchase_price) must be a coerceable amount. Substrate must reject with structured 400 indicating numeric/coerceable format.",
+  "payload": {
+    "journey": "sell",
+    "target_industry": "manufacturing",
+    "target_jurisdiction": "qwertyasdf",
+    "purchase_price": "qwertyasdf"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "junk-string", "nonsense-money"]
+}

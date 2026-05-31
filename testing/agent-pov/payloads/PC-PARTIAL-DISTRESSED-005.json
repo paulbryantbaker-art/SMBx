@@ -1,0 +1,47 @@
+{
+  "id": "PC-PARTIAL-DISTRESSED-005",
+  "category": "PARTIAL",
+  "description": "Partial payload: Distressed: full distress runway 20d + debt @ 50. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "specialty retail",
+    "jurisdiction": "US-DE",
+    "revenue_cents": 6000000000,
+    "signals": {
+      "cashRunwayDays": 20,
+      "securedDebtTradingPriceCents": 50
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "league": "L4",
+      "industry": "specialty retail",
+      "jurisdiction": "US-DE",
+      "distressPosture": "distressed"
+    },
+    "missingFields": [
+      "seller_role",
+      "ebitda_cents",
+      "secured_debt_cents",
+      "subchapter_v_eligibility"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "distressed",
+    "sell",
+    "partial",
+    "full-distress",
+    "G28"
+  ]
+}

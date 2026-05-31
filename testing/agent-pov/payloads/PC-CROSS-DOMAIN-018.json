@@ -1,0 +1,36 @@
+{
+  "id": "PC-CROSS-DOMAIN-018",
+  "category": "CROSS_DOMAIN",
+  "description": "G28 + G29 + G30 triple overlay: 363 sale (G28) plus drop-down basket LME (G29) for a hotel REIT operator (G30). Substrate must produce 363, LME-research, AND RE/REIT mechanics simultaneously.",
+  "payload": {
+    "journey": "buy",
+    "subjourney": "distressed_buy_side",
+    "target_industry": "hotel REIT",
+    "target_jurisdiction": "US-FL",
+    "sale_process": "363",
+    "lme_signal": "drop_down_basket_pending",
+    "real_estate_pct_of_ev": 88,
+    "asset_class_signal": "REIT",
+    "cash_runway_days": 40
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "distressed_buy_side",
+      "distressPosture": "full_distress",
+      "assetClass": "real_estate"
+    },
+    "missingFields": [
+      "stalking_horse_bid",
+      "unrestricted_subsidiary_capacity",
+      "rent_roll",
+      "income_tests"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "G28", "G29", "G30", "hotel-REIT-distressed"]
+}

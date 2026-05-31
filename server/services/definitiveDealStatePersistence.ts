@@ -68,7 +68,35 @@ export async function persistDefinitiveDealStateCall(input: PersistDealStateCall
   const dealId = nullableNumber(envelope.dealId)
     ?? nullableNumber(input.toolInput?.dealId)
     ?? nullableNumber(input.toolInput?.payload?.dealId)
+    ?? nullableNumber(input.toolInput?.dealState?.payload?.dealId)
     ?? nullableNumber(state.payload?.dealId);
+  // Cross-customer ownership pre-INSERT check: if the call REFERENCES an
+  // existing dealId or parent stateCid that we don't own, refuse. Otherwise
+  // Customer B could pass `dealState: { cid: <A's cid>, payload: { dealId: <A's deal> } }`
+  // and we'd write a phantom snapshot under B's user_id referencing A's deal —
+  // a write-side leak the MM-003 harness flags. ingest_deal_payload skips this
+  // (no prior state to reference).
+  const referencedStateCid = nullableString(input.toolInput?.dealState?.cid)
+    || nullableString(input.toolInput?.stateCid)
+    || nullableString(input.toolInput?.parentStateCid);
+  // Skip ownership check for fresh-ingest tools (they create new state, don't reference).
+  const FRESH_INGEST_TOOLS = new Set(['ingest_deal_payload']);
+  if (!FRESH_INGEST_TOOLS.has(input.toolName) && (dealId != null || referencedStateCid)) {
+    const ownership = await verifyDealIdOwnership({
+      userId: input.userId,
+      dealId,
+      stateCid: referencedStateCid,
+    });
+    if (!ownership.ok) {
+      return {
+        ok: false,
+        skipped: true,
+        reason: 'cross_customer_isolation',
+        error: ownership.error,
+        message: `Cross-customer reference refused: dealId=${dealId ?? 'null'}, stateCid=${referencedStateCid ?? 'null'} not owned by user ${input.userId}.`,
+      };
+    }
+  }
   const conversationId = nullableNumber(envelope.conversationId)
     ?? nullableNumber(input.toolInput?.conversationId)
     ?? nullableNumber(input.toolInput?.payload?.conversationId)
@@ -160,6 +188,13 @@ export async function persistDefinitiveDealStateCall(input: PersistDealStateCall
     packetRow = row;
   }
 
+  // Surface `auditTrailId` (and snake_case alias) so external agents can
+  // refer to the audit row by a stable id. Substrate doctrine: the audit
+  // packet row IS the audit-trail entry, so the packet id is the audit
+  // trail id. When no packet was written (e.g. fresh ingest with no packet
+  // type), fall back to the state snapshot id — every successful call
+  // produces SOMETHING the agent can correlate to its audit packet.
+  const auditTrailId = packetRow ? Number(packetRow.id) : Number(snapshot.id);
   return {
     ok: true,
     stateSnapshotId: Number(snapshot.id),
@@ -167,11 +202,49 @@ export async function persistDefinitiveDealStateCall(input: PersistDealStateCall
     stateHash: state.stateHash,
     packetId: packetRow ? Number(packetRow.id) : null,
     packetType: packetRow?.packet_type || packet?.packetType || null,
+    auditTrailId,
+    audit_trail_id: auditTrailId,
     inputHash,
     outputHash,
     mandateChain: mandateContext.mandateChain,
     createdAt: toIso(snapshot.created_at),
   };
+}
+
+/**
+ * Verify that `dealId` (and/or `stateCid`) is owned by `userId`. Critical for
+ * cross-customer isolation: prevents Customer B from referencing Customer A's
+ * dealId in update/clone/finalize calls, which would otherwise write phantom
+ * rows under B's user_id pointing at A's deal — a write-side data leak.
+ *
+ * Returns:
+ *   { ok: true } if the (userId, dealId|stateCid) combination has at least one
+ *     prior snapshot OR if neither dealId nor stateCid was supplied (fresh ingest)
+ *   { ok: false, error: 'not_found' } if a reference was supplied but no row matches
+ */
+export async function verifyDealIdOwnership(input: {
+  userId: number | null | undefined;
+  dealId?: number | string | null;
+  stateCid?: string | null;
+}): Promise<{ ok: true } | { ok: false; error: 'not_found' | 'invalid_user' }> {
+  if (!Number.isFinite(Number(input.userId)) || Number(input.userId) <= 0) {
+    return { ok: false, error: 'invalid_user' };
+  }
+  const dealId = nullableNumber(input.dealId);
+  const stateCid = nullableString(input.stateCid);
+  // No reference → fresh call (ingest_deal_payload, etc.); allow.
+  if (dealId == null && !stateCid) return { ok: true };
+  const sql = await getSql();
+  const rows = await sql`
+    SELECT 1
+    FROM definitive_deal_state_snapshots
+    WHERE user_id = ${Number(input.userId)}
+      AND (${dealId}::integer IS NULL OR deal_id = ${dealId})
+      AND (${stateCid}::text IS NULL OR state_cid = ${stateCid})
+    LIMIT 1
+  `;
+  if (rows.length === 0) return { ok: false, error: 'not_found' };
+  return { ok: true };
 }
 
 export async function readLatestDefinitiveDealStateSnapshot(input: ReadDealStateInput) {

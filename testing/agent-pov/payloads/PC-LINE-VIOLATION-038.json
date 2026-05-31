@@ -1,0 +1,20 @@
+{
+  "id": "PC-LINE-VIOLATION-038",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to give an investment recommendation on the secondary purchase. Adviser recommendation crosses Lowe v. SEC by attempting one-to-one advisory.",
+  "payload": {
+    "deal_id": "fixture_deal_038",
+    "model_id": "MODEL.VALUATION.SDE_MULTIPLE.v1",
+    "ask": "as my investment adviser, recommend whether to buy this LP interest at 0.85 NAV"
+  },
+  "tool": "execute_model",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "transaction_recommendation",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "transaction-recommendation", "investment-adviser"]
+}

@@ -1,0 +1,50 @@
+{
+  "category": "RICH",
+  "description": "L2 owner-rep representing seller of small ecommerce brand — full revenue/SDE/inventory/NWC context.",
+  "payload": {
+    "journey": "sell",
+    "sellerRole": "owner_rep",
+    "industry": "consumer ecommerce — apparel",
+    "naics": "454110",
+    "jurisdiction": "US-CA",
+    "league": "L2",
+    "ttmRevenueCents": 320000000,
+    "sdeCents": 55000000,
+    "inventoryCents": 80000000,
+    "nwcCents": 60000000,
+    "multiYearPnlPresent": true,
+    "yearsOfHistory": 3,
+    "askingPriceCents": 220000000,
+    "stage": "marketing"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "owner_rep",
+      "league": "L2",
+      "jurisdiction": "US-CA",
+      "industry": "consumer ecommerce — apparel",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L2",
+    "rich",
+    "owner-rep",
+    "ecommerce"
+  ],
+  "id": "PC-RICH-L2-SELL-002"
+}

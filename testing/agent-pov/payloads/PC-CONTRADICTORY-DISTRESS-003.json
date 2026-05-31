@@ -1,0 +1,45 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "Distressed dealStructure (363 sale) but no distress signals at all — structure says distress, financials say healthy.",
+  "payload": {
+    "journey": "buy",
+    "industry": "retail",
+    "jurisdiction": "US-DE",
+    "league": "L4",
+    "ttmRevenueCents": 3000000000,
+    "ebitdaCents": 600000000,
+    "adjustedEbitdaCents": 600000000,
+    "dealStructure": "asset_purchase_363",
+    "dealType": "363 asset sale stalking horse acquisition",
+    "signals": {
+      "fccr": 2,
+      "cashRunwayDays": 360,
+      "securedDebtTradingPriceCents": 100
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-DE",
+      "industry": "retail",
+      "league": "L4"
+    },
+    "missingFields": [
+      "explicit_distressPosture_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "distress-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-DISTRESS-003"
+}

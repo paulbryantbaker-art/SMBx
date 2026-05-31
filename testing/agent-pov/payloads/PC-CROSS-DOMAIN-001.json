@@ -1,0 +1,38 @@
+{
+  "id": "PC-CROSS-DOMAIN-001",
+  "category": "CROSS_DOMAIN",
+  "description": "G28 + G29: 60-day cash runway (G28 trigger) + announced exchange offer (G29 trigger) + maintenance covenant breach projected in 2 quarters. Substrate must compose BOTH G28 and G29 overlays — distressed mechanics (M148, M151, M157, M158, M167) AND capital-structure/LME mechanics (M160, M161-M163, M164, M180-M184) — without one swallowing the other.",
+  "payload": {
+    "journey": "buy",
+    "subjourney": "distressed_buy_side",
+    "target_industry": "specialty retail",
+    "target_jurisdiction": "US-DE",
+    "target_ebitda_cents": 80000000,
+    "cash_runway_days": 60,
+    "covenant_breach_projected_within_quarters": 2,
+    "lme_signal": "exchange_offer_announced",
+    "secured_debt_price_cents": 72
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "distressed_buy_side",
+      "jurisdiction": "US-DE",
+      "industry": "specialty retail",
+      "distressPosture": "full_distress",
+      "assetClass": "operating_co"
+    },
+    "missingFields": [
+      "purchase_price_range",
+      "dip_lender_identity",
+      "credit_agreement_terms",
+      "exchange_offer_participation_threshold"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "G28", "G29", "distressed", "capital-structure"]
+}

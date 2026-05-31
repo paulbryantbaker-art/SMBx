@@ -1,0 +1,41 @@
+{
+  "category": "AMBIGUOUS",
+  "description": "Multi-state US operations with no entity-of-incorporation specified.",
+  "payload": {
+    "journey": "sell",
+    "sellerRole": "banker",
+    "industry": "multi-state services",
+    "jurisdiction": "US-multi",
+    "operatingStates": [
+      "US-CA",
+      "US-TX",
+      "US-FL",
+      "US-NY"
+    ],
+    "league": "L5"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "sell",
+      "industry": "multi-state services",
+      "league": "L5"
+    },
+    "missingFields": [
+      "explicit_jurisdiction"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "ambiguous",
+    "jurisdiction"
+  ],
+  "id": "PC-AMBIGUOUS-JURISDICTION-002"
+}

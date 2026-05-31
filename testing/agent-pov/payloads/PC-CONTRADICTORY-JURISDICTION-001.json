@@ -1,0 +1,38 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "jurisdiction='US-TX' but foreignSeller=true and sellerJurisdiction='DE-Berlin' — TX target with German seller is fine, but foreignSeller flag plus US-TX target needs disambiguation about which side is foreign.",
+  "payload": {
+    "journey": "buy",
+    "jurisdiction": "US-TX",
+    "foreignSeller": true,
+    "sellerJurisdiction": "DE-BE",
+    "industry": "industrial",
+    "league": "L4",
+    "ttmRevenueCents": 2500000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-TX",
+      "industry": "industrial",
+      "league": "L4"
+    },
+    "missingFields": [
+      "explicit_jurisdiction_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "jurisdiction-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-JURISDICTION-001"
+}

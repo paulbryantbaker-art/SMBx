@@ -1,0 +1,35 @@
+{
+  "id": "PC-CROSS-DOMAIN-010",
+  "category": "CROSS_DOMAIN",
+  "description": "G28 + G30: OpCo/PropCo split target in restructuring — distressed (G28) AND OpCo/PropCo mechanics (G30). Substrate must surface solvency/three-prong (M148), 363 sale (M151) and OpCo/PropCo separation (M194) + sale-leaseback ASC 842 (M171).",
+  "payload": {
+    "journey": "buy",
+    "subjourney": "distressed_buy_side",
+    "target_industry": "restaurant chain",
+    "target_jurisdiction": "US-NV",
+    "real_estate_pct_of_ev": 30,
+    "opco_propco_signal": true,
+    "sale_leaseback_proposed": true,
+    "cash_runway_days": 55,
+    "secured_debt_price_cents": 50
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "distressed_buy_side",
+      "distressPosture": "full_distress",
+      "assetClass": "real_estate"
+    },
+    "missingFields": [
+      "intercompany_lease_terms",
+      "asc_842_classification_inputs",
+      "purchase_price_range"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "G28", "G30", "opco-propco", "sale-leaseback"]
+}

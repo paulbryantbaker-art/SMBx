@@ -1,0 +1,44 @@
+{
+  "id": "PC-PARTIAL-SELL-013",
+  "category": "PARTIAL",
+  "description": "Partial payload: L4 sell: tech-enabled services with earnout pref. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "tech-enabled services",
+    "jurisdiction": "US-CA",
+    "revenue_cents": 1600000000,
+    "ebitda_cents": 420000000,
+    "seller_role": "principal",
+    "earnout_acceptable": true
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "principal_seller",
+      "league": "L3",
+      "industry": "tech-enabled services",
+      "jurisdiction": "US-CA"
+    },
+    "missingFields": [
+      "asking_price_cents",
+      "earnout_metrics",
+      "entity_type"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L4",
+    "partial",
+    "earnout"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "PC-CROSS-DOMAIN-002",
+  "category": "CROSS_DOMAIN",
+  "description": "G28 + G29: 45-day runway (G28) + LME uptier signal in credit agreement (G29) + FCCR 0.6x. Substrate must compose distressed (M148, M158, M165, M167) and LME (M161-M163) overlays simultaneously; LME models must be flagged research_only.",
+  "payload": {
+    "journey": "raise",
+    "subjourney": "debt_raise",
+    "target_industry": "media",
+    "target_jurisdiction": "US-NY",
+    "target_ebitda_cents": 250000000,
+    "cash_runway_days": 45,
+    "fccr": 0.6,
+    "lme_signal": "uptier_proposal",
+    "secured_debt_price_cents": 55
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "distressed_restructuring",
+      "jurisdiction": "US-NY",
+      "distressPosture": "full_distress"
+    },
+    "missingFields": [
+      "required_lender_threshold",
+      "sacred_rights_provisions",
+      "dip_term_sheet"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "G28", "G29", "LME-uptier"]
+}

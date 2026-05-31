@@ -1,0 +1,48 @@
+{
+  "id": "PC-PARTIAL-CROSS-010",
+  "category": "PARTIAL",
+  "description": "Partial payload: Sale-leaseback in carve-out. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "industrial",
+    "deal_type": "sale_leaseback",
+    "asset_class": "real_estate",
+    "sale_price_cents": 3500000000,
+    "annual_rent_cents": 280000000,
+    "lease_term_years": 20,
+    "signals": {
+      "realEstatePercentOfEv": 100
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "industry": "industrial",
+      "assetClass": "real_estate",
+      "subJourney": "real_estate_overlay"
+    },
+    "missingFields": [
+      "jurisdiction",
+      "asc842_classification",
+      "cap_rate_implied"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "cross-overlay",
+    "sell",
+    "partial",
+    "re-heavy",
+    "sale-leaseback",
+    "G30"
+  ]
+}

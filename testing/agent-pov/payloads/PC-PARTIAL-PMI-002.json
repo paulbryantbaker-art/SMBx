@@ -1,0 +1,40 @@
+{
+  "id": "PC-PARTIAL-PMI-002",
+  "category": "PARTIAL",
+  "description": "Partial payload: PMI stabilization with TSA. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "pmi",
+    "stage": "stabilization",
+    "acquired_entity": "carveout_unit_a",
+    "tsa_exists": true,
+    "tsa_term_months": 18,
+    "industry": "industrial coatings"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "pmi",
+      "subJourney": "pmi_stabilization",
+      "industry": "industrial coatings"
+    },
+    "missingFields": [
+      "critical_systems",
+      "tsa_services_list",
+      "baseline_ebitda_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "pmi",
+    "stabilization",
+    "tsa",
+    "partial"
+  ]
+}

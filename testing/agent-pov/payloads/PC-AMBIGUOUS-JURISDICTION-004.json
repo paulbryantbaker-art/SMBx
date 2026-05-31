@@ -1,0 +1,37 @@
+{
+  "category": "AMBIGUOUS",
+  "description": "US target with brief mention of a UK subsidiary — single jurisdiction or cross-border?",
+  "payload": {
+    "journey": "buy",
+    "industry": "B2B SaaS",
+    "jurisdiction": "US-DE",
+    "subsidiaries": [
+      "UK-LON"
+    ],
+    "league": "L4"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "industry": "B2B SaaS",
+      "league": "L4"
+    },
+    "missingFields": [
+      "explicit_jurisdiction"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "ambiguous",
+    "jurisdiction"
+  ],
+  "id": "PC-AMBIGUOUS-JURISDICTION-004"
+}

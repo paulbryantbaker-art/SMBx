@@ -1,0 +1,34 @@
+{
+  "id": "PC-CROSS-DOMAIN-029",
+  "category": "CROSS_DOMAIN",
+  "description": "SELL + RE-heavy + foreign seller: Asian sovereign-wealth seller of US ground-lease-encumbered office complex. M197 ground-lease + M199 FIRPTA + M191 CITT must compose.",
+  "payload": {
+    "journey": "sell",
+    "subjourney": "banker_led",
+    "target_industry": "commercial office",
+    "target_jurisdiction": "US-NY",
+    "real_estate_pct_of_ev": 100,
+    "foreign_seller": true,
+    "seller_entity_type": "sovereign_wealth_fund",
+    "ground_lease_present": true
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "real_estate_overlay",
+      "assetClass": "real_estate"
+    },
+    "missingFields": [
+      "firpta_withholding_certificate",
+      "ground_lease_remaining_term",
+      "rent_reset_schedule",
+      "controlling_interest_threshold"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "sell", "G30", "FIRPTA", "ground-lease", "sovereign"]
+}

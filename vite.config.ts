@@ -58,6 +58,12 @@ export default defineConfig({
     },
   },
   server: {
+    // host: true binds to all interfaces (0.0.0.0 + [::]), so the dev server
+    // is reachable on both 127.0.0.1 (IPv4) AND [::1] (IPv6). Vite 6's
+    // default is IPv6-only, which silently breaks any client pinned to
+    // IPv4 (Claude desktop embedded webviews, some MCP probes, etc.).
+    // For a solo founder on a laptop the network exposure tradeoff is fine.
+    host: true,
     proxy: {
       '/api': {
         target: 'http://localhost:3000',

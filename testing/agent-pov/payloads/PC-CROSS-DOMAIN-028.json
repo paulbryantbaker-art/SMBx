@@ -1,0 +1,35 @@
+{
+  "id": "PC-CROSS-DOMAIN-028",
+  "category": "CROSS_DOMAIN",
+  "description": "SELL + RE-heavy + foreign seller: foreign family office selling US OpCo/PropCo with PCA reserves needed. M187 + M188 + M194 + M198 + M199 expected.",
+  "payload": {
+    "journey": "sell",
+    "subjourney": "principal_seller",
+    "target_industry": "self-storage operator",
+    "target_jurisdiction": "US-TX",
+    "real_estate_pct_of_ev": 75,
+    "foreign_seller": true,
+    "seller_entity_type": "foreign_family_office",
+    "opco_propco_signal": true,
+    "pca_required": true
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "real_estate_overlay",
+      "assetClass": "real_estate"
+    },
+    "missingFields": [
+      "firpta_withholding_certificate",
+      "asc_842_classification_inputs",
+      "pca_report_inputs",
+      "intercompany_lease_terms"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "sell", "G30", "FIRPTA", "opco-propco", "PCA"]
+}

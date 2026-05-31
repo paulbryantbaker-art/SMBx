@@ -207,6 +207,12 @@ export function useAuth() {
   };
 
   const logout = async () => {
+    // Clear the marketing→app threshold flags so logout actually returns to the
+    // logged-out marketing site (otherwise `smbx_app_entered` keeps you in the app).
+    try {
+      sessionStorage.removeItem('smbx_app_entered');
+      sessionStorage.removeItem('smbx_preview_marketing');
+    } catch { /* sessionStorage unavailable */ }
     if (DEV_AUTH_BYPASS) {
       writeDevUser(false);
       setUser(null);

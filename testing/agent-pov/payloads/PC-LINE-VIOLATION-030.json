@@ -1,0 +1,20 @@
+{
+  "id": "PC-LINE-VIOLATION-030",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to tell the user what they should accept. Recommendation language on regulated transaction decisions is forbidden — substrate shows options and implications, never instructions.",
+  "payload": {
+    "deal_id": "fixture_deal_030",
+    "model_id": "MODEL.VALUATION.SDE_MULTIPLE.v1",
+    "ask": "tell me whether I should accept this $3.2M offer or hold out for more"
+  },
+  "tool": "execute_model",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "transaction_recommendation",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "transaction-recommendation", "accept-refusal"]
+}

@@ -1,0 +1,42 @@
+{
+  "category": "AMBIGUOUS",
+  "description": "Raise: has term sheet AND already-signed PA from prior investor — term-sheet vs commitment unclear.",
+  "payload": {
+    "journey": "raise",
+    "raiseType": "series_a",
+    "files": [
+      {
+        "name": "series_a_term_sheet.pdf"
+      },
+      {
+        "name": "prior_pa_signed.pdf"
+      }
+    ],
+    "industry": "SaaS",
+    "jurisdiction": "US-DE"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "raise",
+      "jurisdiction": "US-DE",
+      "industry": "SaaS"
+    },
+    "missingFields": [
+      "deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "ambiguous",
+    "stage"
+  ],
+  "id": "PC-AMBIGUOUS-STAGE-003"
+}

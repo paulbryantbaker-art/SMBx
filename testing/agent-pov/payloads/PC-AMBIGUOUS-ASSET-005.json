@@ -1,0 +1,37 @@
+{
+  "category": "AMBIGUOUS",
+  "description": "Data center colocation — could be infrastructure / real_estate / operating_co.",
+  "payload": {
+    "journey": "buy",
+    "industry": "data center colocation",
+    "jurisdiction": "US-VA",
+    "league": "L7",
+    "ttmRevenueCents": 75000000000,
+    "adjustedEbitdaCents": 35000000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-VA",
+      "industry": "data center colocation",
+      "league": "L7"
+    },
+    "missingFields": [
+      "deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "ambiguous",
+    "asset-class"
+  ],
+  "id": "PC-AMBIGUOUS-ASSET-005"
+}

@@ -1,0 +1,51 @@
+{
+  "id": "PC-PARTIAL-FIRPTA-003",
+  "category": "PARTIAL",
+  "description": "Partial payload: FIRPTA: hotel portfolio with foreign seller. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "hotel portfolio",
+    "jurisdiction": "US-CA",
+    "foreign_seller": true,
+    "revenue_cents": 8500000000,
+    "ebitda_cents": 1800000000,
+    "taxClassification": "foreign_entity",
+    "signals": {
+      "realEstatePercentOfEv": 92.0
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "league": "L4",
+      "industry": "hotel portfolio",
+      "jurisdiction": "US-CA",
+      "taxClassification": "foreign_entity",
+      "assetClass": "real_estate",
+      "subJourney": "real_estate_overlay"
+    },
+    "missingFields": [
+      "amount_realized_cents",
+      "seller_country_of_residence",
+      "treaty_relief_assessed"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "firpta",
+    "sell",
+    "partial",
+    "foreign-seller",
+    "L5",
+    "G30"
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "category": "RICH",
+  "description": "L4 out-of-court restructuring acquisition — RSA in market, exchange offer, LME context.",
+  "payload": {
+    "journey": "buy",
+    "industry": "industrial manufacturing",
+    "naics": "332710",
+    "jurisdiction": "US-NJ",
+    "league": "L4",
+    "ttmRevenueCents": 4800000000,
+    "adjustedEbitdaCents": 380000000,
+    "purchasePriceCents": 1900000000,
+    "dealStructure": "stock_purchase",
+    "taxClassification": "c_corp",
+    "signals": {
+      "cashRunwayDays": 110,
+      "fccr": 0.85,
+      "securedDebtTradingPriceCents": 72,
+      "maintenanceCovenantBreachWithinQuarters": 1,
+      "forbearanceExecuted": true,
+      "rsaInMarket": true,
+      "exchangeOffer": true,
+      "liabilityManagementExercise": true,
+      "capitalStructureAction": true
+    },
+    "financing": {
+      "sponsorEquityCents": 1500000000,
+      "seniorDebtCents": 400000000
+    },
+    "stage": "loi"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "distressed_buy_side",
+      "league": "L4",
+      "jurisdiction": "US-NJ",
+      "industry": "industrial manufacturing",
+      "distressPosture": "full_distress",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "rich",
+    "distressed",
+    "L4",
+    "buy"
+  ],
+  "id": "PC-RICH-DISTRESSED-002"
+}

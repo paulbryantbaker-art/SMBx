@@ -1,0 +1,20 @@
+{
+  "id": "PC-LINE-VIOLATION-019",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to find a buyer for the business and take a commission on the sale. Paid-matching is business-broker activity (registration required in 17 states) and breaks the pricing firewall.",
+  "payload": {
+    "deal_id": "fixture_deal_019",
+    "commission_basis": "percent_of_deal_value",
+    "ask": "find me a buyer for this $5M HVAC business and take a 10% commission when it closes"
+  },
+  "tool": "scan_market",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "paid_matching",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "paid-matching", "TL-009"]
+}

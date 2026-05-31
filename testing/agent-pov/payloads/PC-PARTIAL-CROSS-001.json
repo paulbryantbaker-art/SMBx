@@ -1,0 +1,52 @@
+{
+  "id": "PC-PARTIAL-CROSS-001",
+  "category": "PARTIAL",
+  "description": "Partial payload: RE-heavy + cap-stack signals: REIT acquisition w/ leverage. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "REIT",
+    "asset_class": "real_estate",
+    "target_jurisdiction": "US-DE",
+    "total_assets_cents": 60000000000,
+    "real_estate_assets_cents": 55000000000,
+    "target_leverage_target": 0.6,
+    "enterpriseValueCents": 60000000000,
+    "signals": {
+      "realEstatePercentOfEv": 90
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "league": "L5",
+      "industry": "REIT",
+      "jurisdiction": "US-DE",
+      "assetClass": "real_estate",
+      "subJourney": "real_estate_overlay",
+      "distressPosture": "healthy_or_unknown"
+    },
+    "missingFields": [
+      "cap_rate_assumption",
+      "mortgage_debt_cents",
+      "reit_election_intent"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "cross-overlay",
+    "buy",
+    "partial",
+    "reit",
+    "G29",
+    "G30"
+  ]
+}

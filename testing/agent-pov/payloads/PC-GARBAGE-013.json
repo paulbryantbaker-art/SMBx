@@ -1,0 +1,14 @@
+{
+  "id": "PC-GARBAGE-013",
+  "category": "GARBAGE",
+  "description": "Missing required: get_deal_state called without a deal_id. Substrate must return structured 400 indicating deal_id is required.",
+  "payload": {},
+  "tool": "get_deal_state",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "missing-required", "get-no-deal_id"]
+}

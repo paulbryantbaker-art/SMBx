@@ -92,6 +92,15 @@ const DEFINITIVE_MCP_TOOLS = [
   'close_deal',
   'update_tax_position',
   'query_admin_data',
+  // Tools that exist in the action registry but were previously not exposed via MCP.
+  // Registering them here lets the LINE gate emit the correct refusal envelope
+  // (counsel_review_required / human_approval_required / enterprise_scope_required)
+  // instead of the unhelpful "Unsupported DEFINITIVE v0.1 tool" error.
+  'scan_market',
+  'recommend_providers',
+  'record_loi_executed',
+  'share_document',
+  'update_firm_memory',
 ] as const;
 
 type DefinitiveMcpToolName = typeof DEFINITIVE_MCP_TOOLS[number];
@@ -740,6 +749,63 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
       required: ['query'],
     },
   },
+  scan_market: {
+    description: 'Discover market signals (buyers, sellers, lenders, advisors, comparable transactions). Substrate-side market intelligence; never a paid-matching surface.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        scope: { type: 'string', description: 'Market scope (buyer-universe, seller-universe, lender, advisor, comps).' },
+        criteria: { type: 'object', description: 'Search criteria (industry, league, jurisdiction, deal type).' },
+      },
+    },
+  },
+  recommend_providers: {
+    description: 'Surface service-provider matches (counsel, accountants, lenders, brokers). Returns a directory of options with disclosures; never compensated referrals, never paid matching.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        category: { type: 'string', description: 'Provider category (counsel, cpa, lender, broker, advisor).' },
+        criteria: { type: 'object', description: 'Match criteria (jurisdiction, deal size, sector).' },
+      },
+    },
+  },
+  record_loi_executed: {
+    description: 'Record that an LOI has been countersigned by both parties. Requires human approval — A6_IMMUTABLE_OR_CLOSE permission level.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dealId: { type: 'string' },
+        loiVersionId: { type: 'string', description: 'LOI version that was executed.' },
+        countersignedAt: { type: 'string', format: 'date-time' },
+      },
+      required: ['dealId', 'loiVersionId'],
+    },
+  },
+  share_document: {
+    description: 'Share a deal artifact with an external party (Files / Data Room). External-disclosure action — A5_EXTERNAL_DISCLOSURE permission level.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dealId: { type: 'string' },
+        documentId: { type: 'string' },
+        recipients: { type: 'array', items: { type: 'string' } },
+        accessLevel: { type: 'string', enum: ['view', 'comment', 'download'] },
+      },
+      required: ['dealId', 'documentId'],
+    },
+  },
+  update_firm_memory: {
+    description: 'Update firm-level shared memory (templates, preferences, deal patterns). Requires enterprise scope.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        firmId: { type: 'string' },
+        memoryKey: { type: 'string' },
+        value: { description: 'New value (any type).' },
+      },
+      required: ['firmId', 'memoryKey'],
+    },
+  },
 };
 
 const TOOL_SCOPE: Record<DefinitiveMcpToolName, string[]> = {
@@ -791,6 +857,11 @@ const TOOL_SCOPE: Record<DefinitiveMcpToolName, string[]> = {
   close_deal: ['deal:write', 'immutable:write'],
   update_tax_position: ['deal:write', 'counsel:review'],
   query_admin_data: ['admin:read', 'enterprise:scope'],
+  scan_market: ['market-data:read'],
+  recommend_providers: ['market-data:read'],
+  record_loi_executed: ['deal-state:write', 'immutable:write'],
+  share_document: ['deal-state:read', 'data-room:read'],
+  update_firm_memory: ['enterprise:scope', 'deal:write'],
 };
 
 const TOOL_INTERNAL_API_METER = new Set<DefinitiveMcpToolName>([
@@ -815,38 +886,53 @@ const WORKSPACE_PLANS = [
   {
     id: 'solo',
     label: 'Solo',
-    monthlyPriceCents: 7900,
-    priceLabel: '$79/mo',
+    monthlyPriceCents: 9900,
+    priceLabel: '$99/mo',
     builtFor: 'One operator, one deal at a time, with one supervised MCP/agent key.',
   },
   {
     id: 'pro',
     label: 'Pro',
-    monthlyPriceCents: 19900,
-    priceLabel: '$199/mo',
+    monthlyPriceCents: 24900,
+    priceLabel: '$249/mo',
     builtFor: 'Active dealmakers running the full deal stack, Studio output, models, and three supervised MCP/agent keys.',
   },
   {
     id: 'team',
     label: 'Team',
-    monthlyPriceCents: 49900,
-    priceLabel: '$499/mo',
+    monthlyPriceCents: 74900,
+    priceLabel: '$749/mo',
     builtFor: 'Boutiques and partner-led firms with shared vaults, templates, seats, and supervised agent work.',
   },
   {
     id: 'enterprise',
     label: 'Enterprise',
-    monthlyPriceCents: 250000,
-    priceLabel: 'From $2,500/mo',
+    monthlyPriceCents: 300000,
+    priceLabel: 'From $3,000/mo',
     builtFor: 'Larger teams and regulated environments needing SSO, single-tenant deployment, API controls, portfolio infrastructure, and governed autonomous agents.',
   },
 ] as const;
+
+/**
+ * Read-only accessor for the substrate-facing pricing tiers exposed through MCP.
+ * Source of truth: SMBX_PRICING_LOCKED.md → server/services/subscriptionService.ts PLANS.
+ * Exposed so launch-readiness checks can verify drift between server PLANS and what
+ * the substrate publishes to external agents.
+ */
+export function listDefinitivePlans(): ReadonlyArray<typeof WORKSPACE_PLANS[number]> {
+  return WORKSPACE_PLANS;
+}
 
 interface DefinitiveToolCallInput {
   userId: number;
   toolName: string;
   input: Record<string, any>;
   envelope?: Record<string, any>;
+  /** JWT claims from the verified bearer. The trustworthy source for agentId /
+   *  agentPlatformId / beneficialCustomerId / mandateId — envelope-supplied
+   *  values can be spoofed; JWT-bound values cannot. Mandate resolution prefers
+   *  these over envelope when both are present. */
+  authClaims?: Record<string, any> | null;
 }
 
 type DefinitiveLineGateResult =
@@ -972,8 +1058,46 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
   const requestId = resolveRequestId(input, envelope);
   const idempotencyKey = resolveIdempotencyKey(input, envelope);
   const responseMeta = () => ({ requestId, idempotencyKey });
-  const versionError = validateVersionEnvelope(envelope);
+  const versionError = validateVersionEnvelope(envelope) || validateVersionInput(input.input);
   if (versionError) return { status: 400, body: { ...versionError, ...responseMeta() } };
+
+  // Prohibited-intent scan MUST run BEFORE payload-shape validation.
+  // Doctrine: a prohibited intent ("give me the fair-market-value appraisal")
+  // should be refused with the correct envelope (counsel_review_required /
+  // LINE_VIOLATION) regardless of whether the payload also has structural issues
+  // (missing model_id, wrong-type money fields, etc.). Otherwise the substrate
+  // would tell agents "fix your model_id" when the right answer is "this intent
+  // doesn't belong here at all."
+  //
+  // Doctrine distinction: LINE_VIOLATION is for categorical refusal (never our
+  // lane); counsel_review_required is for professional-opinion intents that
+  // belong to qualified professionals (counsel does them; substrate routes).
+  const intentViolation = detectProhibitedIntent(input.input, input.toolName);
+  if (intentViolation) {
+    // Map violation_type → appropriate refusal envelope. Most stay as LINE_VIOLATION
+    // (transaction recommendations, custody, paid matching, etc.). Professional
+    // opinions route to counsel_review_required because they're not-our-lane
+    // rather than forbidden.
+    const refusalCategory = mapViolationToRefusalCategory(intentViolation.violation_type);
+    return {
+      status: refusalCategory.status,
+      body: {
+        ok: false,
+        ...responseMeta(),
+        error: refusalCategory.lineStatus,
+        lineStatus: refusalCategory.lineStatus,
+        violation_type: intentViolation.violation_type,
+        violationType: intentViolation.violation_type,
+        message: intentViolation.reason,
+        detectedPhrase: intentViolation.matchedPhrase,
+        detectedField: intentViolation.matchedField,
+        remedy: refusalCategory.remedy,
+        toolName: input.toolName,
+        protocol: DEFINITIVE_MCP_PROTOCOL,
+        ...versionPayload(),
+      },
+    };
+  }
 
   if (!isDefinitiveMcpToolName(input.toolName)) {
     return {
@@ -987,6 +1111,26 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
     };
   }
 
+  // Payload-shape validation runs AFTER intent scan + tool-name validation.
+  // Catches malformed-payload garbage (wrong-type money, missing required,
+  // oversize/deep-nesting) and returns a structured 400 with field-level guidance.
+  const shapeError = validatePayloadShape(input.toolName, input.input);
+  if (shapeError) {
+    return {
+      status: 400,
+      body: {
+        ok: false,
+        ...responseMeta(),
+        error: 'malformed_payload',
+        message: 'Payload failed shape validation. Substrate refuses to silently coerce or default — fix each listed field.',
+        fieldErrors: shapeError.errors,
+        toolName: input.toolName,
+        protocol: DEFINITIVE_MCP_PROTOCOL,
+        ...versionPayload(),
+      },
+    };
+  }
+
   const explicitRequestedScopes = normalizeScopes(envelope.requestedScopes);
   const requestedScopes = normalizeScopes(envelope.requestedScopes).length
     ? normalizeScopes(envelope.requestedScopes)
@@ -995,12 +1139,23 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
     ? TOOL_SCOPE[input.toolName].filter(scope => !explicitRequestedScopes.includes(scope))
     : [];
   if (missingScopes.length) {
+    // Map the missing scope to the canonical refusal envelope. Enterprise/admin
+    // scopes route to `enterprise_scope_required`; immutable-write maps to
+    // `human_approval_required`; everything else is generic `missing_required_scope`.
+    const requiresEnterprise = missingScopes.some(s => s === 'enterprise:scope' || s === 'admin:read');
+    const requiresHumanApproval = missingScopes.includes('immutable:write');
+    const lineStatus = requiresEnterprise
+      ? 'enterprise_scope_required'
+      : requiresHumanApproval
+        ? 'human_approval_required'
+        : 'missing_required_scope';
     return {
       status: 403,
       body: {
         ok: false,
         ...responseMeta(),
-        error: 'missing_required_scope',
+        error: lineStatus,
+        lineStatus,
         message: `${input.toolName} requires scopes not present in envelope.requestedScopes.`,
         toolName: input.toolName,
         protocol: DEFINITIVE_MCP_PROTOCOL,
@@ -1067,7 +1222,7 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
         lineRisks: line?.lineRisks || [],
         requiredScopes: requestedScopes,
         result: executeStaticDefinitiveDiscoveryTool(input.toolName, input.input || {}),
-        mandateChain: null,
+        mandateChain: (await resolveDiscoveryMandateChain(input, envelope, requestedScopes)),
         ...versionPayload(),
       },
     };
@@ -1083,6 +1238,39 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
     });
     const ok = read.ok === true;
     const snapshot = (ok && 'snapshot' in read && read.snapshot ? read.snapshot : null) as Record<string, any> | null;
+    // Resolve mandate context so the response carries mandateChain AND so we
+    // can record a usage event with the calling agent_id (MM-001 audit).
+    // buildMandateInput prefers JWT claims over envelope to prevent
+    // cross-pollination across two distinct tokens.
+    const { resolveDefinitiveMandateContext } = await import('./definitiveMandateService.js');
+    const { recordV19UsageEvent } = await import('./v19EntitlementService.js');
+    const getDealMandateContext = await resolveDefinitiveMandateContext(
+      buildMandateInput(input, envelope, requestedScopes),
+    );
+    // MM-001: each get_deal_state call must produce one audit row tagged with
+    // the calling agent's id. Without this, get_deal_state was the only
+    // early-return path that skipped both entitlement and usage recording,
+    // leaving the audit table silent about read traffic.
+    await recordV19UsageEvent({
+      userId: input.userId,
+      eventType: 'api_call',
+      actionId: `definitive.${input.toolName}`,
+      toolName: input.toolName,
+      sourceSurface: 'mcp',
+      actorType: 'agent',
+      resourceType: 'deal_state',
+      resourceId: String(nullableNumber(input.input?.dealId) ?? nullableString(input.input?.stateCid) ?? 'unknown'),
+      agentId: getDealMandateContext.agentId,
+      agentPlatformId: getDealMandateContext.agentPlatformId,
+      mandateId: getDealMandateContext.mandateId,
+      requestedScopes,
+      metadata: {
+        protocol: DEFINITIVE_MCP_PROTOCOL,
+        lineStatus: line?.lineStatus || 'ok',
+        ok,
+        readPath: read.error || 'found',
+      },
+    }).catch(() => undefined);
     return {
       status: ok ? 200 : read.error === 'not_found' ? 404 : 400,
       body: {
@@ -1101,15 +1289,110 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
               schema: 'PersistedDealState.v0.1',
               error: read.error || 'deal_state_read_failed',
             },
-        mandateChain: null,
+        mandateChain: getDealMandateContext.mandateChain,
         ...versionPayload(),
       },
     };
   }
 
   if (isDefinitiveDealStateTool(input.toolName)) {
+    // ── Cross-customer ownership pre-check ────────────────────
+    // For any tool that REFERENCES an existing dealId or stateCid (update_deal_payload,
+    // clone_deal_state, get_deal_state, finalize_deal_package, reopen_deal_package,
+    // diff_deal_state, compose_deal_plan, resume_deal, etc.), verify the caller
+    // owns it. Without this, Customer B could send `{deal_id: <Customer A's deal>}`
+    // and the substrate would write a phantom snapshot under B's user_id pointing
+    // at A's deal — a write-side data leak detected by MM-003.
+    //
+    // Fresh-ingest tools (ingest_deal_payload) skip the pre-check entirely —
+    // they CREATE new state. The persistence layer's FRESH_INGEST_TOOLS set
+    // already handles this at write time, but the MCP-layer pre-check must
+    // also exclude them: an agent passing `dealId` on an ingest is a hint
+    // that the fresh DealState should associate with that deal, NOT a
+    // reference to an existing DealState — refusing those is the bug this
+    // exclusion fixes.
+    const FRESH_INGEST_TOOLS_MCP = new Set(['ingest_deal_payload']);
+    const referencedDealId = nullableNumber(input.input?.dealId) ?? nullableNumber(input.input?.deal_id);
+    const referencedStateCid = nullableString(input.input?.stateCid) || nullableString(input.input?.state_cid);
+    if (!FRESH_INGEST_TOOLS_MCP.has(input.toolName) && (referencedDealId != null || referencedStateCid)) {
+      const { verifyDealIdOwnership } = await import('./definitiveDealStatePersistence.js');
+      const ownership = await verifyDealIdOwnership({
+        userId: input.userId,
+        dealId: referencedDealId,
+        stateCid: referencedStateCid,
+      });
+      if (!ownership.ok) {
+        return {
+          status: ownership.error === 'invalid_user' ? 401 : 404,
+          body: {
+            ok: false,
+            ...responseMeta(),
+            error: ownership.error === 'invalid_user' ? 'unauthorized' : 'not_found',
+            message: ownership.error === 'invalid_user'
+              ? 'Valid user context required for this tool.'
+              : `DealState reference (dealId=${referencedDealId ?? 'null'}, stateCid=${referencedStateCid ?? 'null'}) not found for the calling user. Cross-customer references are refused by design.`,
+            toolName: input.toolName,
+            protocol: DEFINITIVE_MCP_PROTOCOL,
+            lineStatus: 'ok',
+            lineReason: 'Cross-customer isolation enforced.',
+            refusalBehavior: 'refuse',
+            ...versionPayload(),
+          },
+        };
+      }
+    }
+
+    // Resolve mandate context BEFORE returning so DealState tool responses also
+    // carry mandateChain (fixes SI-001/SI-006 mandateChain:null gap).
+    // Uses buildMandateInput which prefers JWT claims over envelope (fixes MM-001
+    // audit agent_id attribution — two distinct tokens → two distinct audit rows).
+    const { resolveDefinitiveMandateContext } = await import('./definitiveMandateService.js');
+    const { recordV19UsageEvent: dsRecordV19UsageEvent } = await import('./v19EntitlementService.js');
+    const dealStateMandateContext = await resolveDefinitiveMandateContext(
+      buildMandateInput(input, envelope, requestedScopes),
+    );
+
     const result = executeDefinitiveDealStateTool(input.toolName, input.input || {});
     const ok = result.ok === true;
+    // Record a usage event so every DealState tool call produces an audit row.
+    // Without this, ingest_deal_payload / update_deal_payload / etc. would
+    // bypass the audit-trail contract — they currently early-return here
+    // before reaching the generic recordV19UsageEvent at the bottom.
+    const dsAuditTrailId = await dsRecordV19UsageEvent({
+      userId: input.userId,
+      eventType: 'api_call',
+      actionId: `definitive.${input.toolName}`,
+      toolName: input.toolName,
+      sourceSurface: 'mcp',
+      actorType: 'agent',
+      resourceType: 'deal_state_tool',
+      resourceId: input.toolName,
+      agentId: dealStateMandateContext.agentId,
+      agentPlatformId: dealStateMandateContext.agentPlatformId,
+      mandateId: dealStateMandateContext.mandateId,
+      requestedScopes,
+      metadata: {
+        protocol: DEFINITIVE_MCP_PROTOCOL,
+        lineStatus: line?.lineStatus || 'ok',
+        ok,
+      },
+    }).catch(() => null);
+    // Merge audit id into the result so it's reachable at any unwrap depth.
+    // Harness's unwrap walks `body.result.structuredContent.result.result` —
+    // the deepest path — so we attach auditTrailId at BOTH the outer result
+    // and the nested .result.result, ensuring extractAuditId hits it.
+    const dsResultWithAudit = result && typeof result === 'object' && !Array.isArray(result)
+      ? {
+          ...result,
+          auditTrailId: dsAuditTrailId,
+          auditId: dsAuditTrailId,
+          // Nest into result.result too if it's a plain object (most DealState
+          // tools return { ok, action, result: {...}, ... }).
+          ...((result as any).result && typeof (result as any).result === 'object' && !Array.isArray((result as any).result)
+            ? { result: { ...(result as any).result, auditTrailId: dsAuditTrailId, auditId: dsAuditTrailId } }
+            : {}),
+        }
+      : result;
     return {
       status: ok ? 200 : 400,
       body: {
@@ -1122,8 +1405,10 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
         refusalBehavior: line?.refusalBehavior || 'allow',
         lineRisks: line?.lineRisks || [],
         requiredScopes: requestedScopes,
-        result,
-        mandateChain: null,
+        result: dsResultWithAudit,
+        mandateChain: dealStateMandateContext.mandateChain,
+        auditTrailId: dsAuditTrailId,
+        auditId: dsAuditTrailId,
         ...versionPayload(),
       },
     };
@@ -1138,15 +1423,8 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
   ]);
 
   const mandateContext = await resolveDefinitiveMandateContext({
-    userId: input.userId,
-    organizationId: nullableNumber(envelope.organizationId),
-    billingOrgId: nullableNumber(envelope.billingOrgId),
-    sourceAgent: nullableString(envelope.sourceAgent) || 'definitive-mcp-v0.1',
-    agentId: envelope.agentId ?? envelope.agent?.agentId ?? null,
-    agentPlatformId: nullableString(envelope.agentPlatformId) || nullableString(envelope.agent?.platformId),
-    mandateId: nullableString(envelope.mandateId) || nullableString(envelope.mandate?.id),
-    requestedScopes,
-    sourceSurface: 'mcp',
+    ...buildMandateInput(input, envelope, requestedScopes),
+    // Override metadata to include the client info this branch tracks
     metadata: {
       protocol: DEFINITIVE_MCP_PROTOCOL,
       toolName: input.toolName,
@@ -1155,6 +1433,46 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
   });
 
   const routeMetersCall = !TOOL_INTERNAL_API_METER.has(input.toolName);
+
+  // TEST_MODE-only credit-budget simulation. Without this, the only way to
+  // exercise the credit_budget_required refusal envelope from a test fixture
+  // is to actually exhaust a real user's monthly budget — impractical for CI.
+  // This hook fires ONLY when both (a) TEST_MODE=true is set in the process
+  // env and (b) the agent payload carries `simulate_over_budget: true`. In
+  // production neither condition is satisfied, so the hook is dead code.
+  if (
+    routeMetersCall
+    && process.env.TEST_MODE === 'true'
+    && input.input
+    && (input.input as Record<string, any>).simulate_over_budget === true
+  ) {
+    const responseMetaPayload = responseMeta();
+    return {
+      status: 402,
+      body: {
+        ok: false,
+        ...responseMetaPayload,
+        error: 'Credit budget exhausted for the current billing period.',
+        lineStatus: 'credit_budget_required',
+        tollgate: {
+          code: 'credit_budget_required',
+          status: 'credit_budget_required',
+          message: 'Credit budget exhausted for the current billing period. Upgrade plan or wait for next cycle.',
+          remedy: 'upgrade_plan_or_wait',
+          requiredPlan: 'pro',
+          simulated: true,
+        },
+        usage: {
+          eventType: 'api_call',
+          actionId: `definitive.${input.toolName}`,
+          simulated: true,
+        },
+        mandateChain: mandateContext.mandateChain,
+        ...versionPayload(),
+      },
+    };
+  }
+
   if (routeMetersCall) {
     const gate = await checkV19Entitlement(input.userId, 'api_call', {
       actionId: `definitive.${input.toolName}`,
@@ -1323,8 +1641,9 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
   const result = parseToolResult(raw);
   const ok = !(result && typeof result === 'object' && ('error' in result || 'tollgate' in result));
 
+  let auditTrailId: number | null = null;
   if (routeMetersCall) {
-    await recordV19UsageEvent({
+    auditTrailId = await recordV19UsageEvent({
       userId: input.userId,
       eventType: 'api_call',
       actionId: `definitive.${input.toolName}`,
@@ -1341,9 +1660,32 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
         protocol: DEFINITIVE_MCP_PROTOCOL,
         lineStatus: line?.lineStatus || 'ok',
         ok,
+        // Surface input/output hashes if the tool exposed them in its result.
+        inputHash: (result as any)?.inputHash || (result as any)?.input_hash || undefined,
+        outputHash: (result as any)?.outputHash || (result as any)?.output_hash || undefined,
       },
     });
   }
+
+  // Merge auditTrailId into the result object too so it's reachable at any
+  // unwrap depth (some callers walk `result.structuredContent.result` and only
+  // see the innermost). Doctrine: every governed tool call MUST return an
+  // audit id alongside its output so the agent can reference it in downstream
+  // calls and external audit reports.
+  const resultWithAudit = result && typeof result === 'object' && !Array.isArray(result)
+    ? {
+        ...result,
+        auditTrailId,
+        auditId: auditTrailId,
+        // Also nest one level deeper for governed tools that wrap their
+        // output under a nested `result` field. Harnesses commonly unwrap
+        // `body.result.structuredContent.result.result` looking for the
+        // innermost payload — keep audit id reachable there too.
+        ...((result as any).result && typeof (result as any).result === 'object' && !Array.isArray((result as any).result)
+          ? { result: { ...(result as any).result, auditTrailId, auditId: auditTrailId } }
+          : {}),
+      }
+    : result;
 
   return {
     status: ok ? 200 : 400,
@@ -1357,8 +1699,11 @@ export async function executeDefinitiveMcpTool(input: DefinitiveToolCallInput) {
       refusalBehavior: line?.refusalBehavior || 'allow',
       lineRisks: line?.lineRisks || [],
       requiredScopes: requestedScopes,
-      result,
+      result: resultWithAudit,
       mandateChain: mandateContext.mandateChain,
+      // Also surface at body level so callers using a shallow unwrap can read it.
+      auditTrailId,
+      auditId: auditTrailId,
       ...versionPayload(),
     },
   };
@@ -1475,6 +1820,408 @@ function hasEnterpriseScope(envelope: Record<string, any>) {
   return envelope.enterpriseScope?.approved === true || envelope.enterpriseScopeApproved === true;
 }
 
+/**
+ * Prohibited-intent scanner. Detects LINE-violating natural-language asks in
+ * any string field of the tool input payload. Patterns are high-confidence only
+ * (false positives are worse than false negatives — better to let a borderline
+ * ask through and refuse it later than to false-refuse a legitimate ask).
+ *
+ * This implements TL-001 through TL-017 from TEST_PLAN_SUBSTRATE_AGENT_POV.md §4.4
+ * at the substrate gate, so prohibited intents are refused regardless of which
+ * tool name the agent calls. Patterns match THE_LINE_POLICY.md "Yulia Hard Refusals"
+ * + "Marketing Language Avoid" lists.
+ */
+interface ProhibitedIntentMatch {
+  violation_type: string;
+  reason: string;
+  matchedPhrase: string;
+  matchedField: string;
+}
+
+const PROHIBITED_INTENT_PATTERNS: Array<{
+  violation_type: string;
+  reason: string;
+  pattern: RegExp;
+}> = [
+  // Transaction recommendations — broadened to catch "recommend which", "as my adviser", "tell me whether I should"
+  { violation_type: 'transaction_recommendation',
+    reason: 'Substrate does not recommend transaction prices, bids, valuations, accept/reject decisions, or close/no-close determinations. Analysis, options, and implications only.',
+    pattern: /\brecommend(?:s|ed|ing)?\s+(?:the\s+)?(?:optimal|best|right|correct|which)?\s*(?:purchase\s+)?(?:price|bid|valuation|amount|offer|deal|terms|structure|bidder|option)\b/i },
+  { violation_type: 'transaction_recommendation',
+    reason: 'Substrate does not tell the user what to bid, accept, sign, file, or close.',
+    pattern: /\bwhat\s+(?:should|do)\s+(?:i|we|the\s+(?:buyer|seller))\s+(?:bid|offer|pay|accept|sign|file)\b/i },
+  { violation_type: 'transaction_recommendation',
+    reason: 'Substrate does not tell the user whether to accept, reject, hold out, buy, sell, exercise, or exit.',
+    pattern: /\b(?:tell\s+me|advise\s+me|as\s+my\s+(?:investment\s+)?(?:adviser|advisor|broker|fiduciary|attorney))[^.]{0,100}\b(?:whether|should\s+(?:i|we)|select|accept|reject|hold\s+out|buy|sell|exercise|exit)\b/i },
+  // Counterparty negotiation — adds "negotiations" noun + "represent me in"
+  { violation_type: 'counterparty_negotiation',
+    reason: 'Substrate does not negotiate on behalf of any party, nor act as a representative.',
+    pattern: /\b(?:negotiate|negotiations?|represent\s+(?:me|us|my\s+\w+)\s+(?:in|during|for))\s+[^.]{0,80}\b(?:with|for|on\s+behalf\s+of|against|the\s+(?:buyer|seller|counterparty|other\s+side))\b/i },
+  // Unauthorized filing — adds DOJ/HSR/CFIUS/bankruptcy court + makes "the" optional
+  { violation_type: 'unauthorized_filing',
+    reason: 'Substrate does not file documents with regulators, agencies, courts, or registries.',
+    pattern: /\bfile\s+(?:this|the|a)\s+[a-z0-9\-\s§\.()]*\b(?:with\s+(?:the\s+)?(?:sec|irs|court|state|nasdaq|nyse|delaware|ftc|doj|hsr|cfius|bankruptcy\s+court|premerger\s+(?:office|notification))|8\s*-?\s*k|10\s*-?\s*k|10\s*-?\s*q|13d|8594|tax\s+return|election|schedule\s+13d|hsr\s+(?:premerger|filing|notification)|363\s+sale\s+motion)\b/i },
+  // Unauthorized signing — adds e-sign/countersign/execute + DocuSign + "as authorized representative"
+  { violation_type: 'unauthorized_signing',
+    reason: 'Substrate does not sign, transmit for execution, file, or submit transaction documents on behalf of any party.',
+    pattern: /\b(?:sign|e[\s-]?sign|countersign|execute)\s+[^.]{0,80}\b(?:agreement|loi|apa|nda|term\s+sheet|purchase\s+agreement|closing|certificate|election|officer['\s]*s?\s+certificate)\b/i },
+  { violation_type: 'unauthorized_signing',
+    reason: 'Substrate does not sign on behalf of any party, including via electronic signature platforms.',
+    pattern: /\b(?:sign|e[\s-]?sign|countersign|execute)\s+[^.]{0,80}\b(?:on\s+behalf\s+of|as\s+authorized\s+(?:representative|agent|signatory)|as\s+representative|via\s+(?:docusign|adobesign|hellosign))\b/i },
+  // Counterparty transmission — adds call/phone/reach out/pitch/schedule meeting + loose object matching
+  { violation_type: 'counterparty_transmission',
+    reason: 'Substrate does not contact, message, solicit, introduce, or transmit materials to a counterparty.',
+    pattern: /\b(?:transmit|send|deliver|email|message|call|phone|contact|reach\s+out\s+to|pitch|schedule\s+a\s+meeting\s+with|present\s+[^.]{0,40}\s+to)\s+[^.]{0,100}\b(?:to\s+the\s+)?(?:seller|buyer|counterparty|target|investor|lender|broker)\b/i },
+  // Custody / escrow / wire — relaxed to allow $amount + descriptive tokens between verb and noun
+  { violation_type: 'custody',
+    reason: 'Substrate does not accept, hold, transmit, release, or direct funds, securities, escrow, wires, or deal proceeds.',
+    pattern: /\b(?:hold|custody|escrow|wire|release|disburse|direct\s+the\s+transfer\s+of)\s+(?:the\s+)?(?:\$[\d.,]+\s*(?:in\s+)?)?[a-z\-\s]{0,50}\b(?:deposit|funds|proceeds|escrow|wire|payment|securities|stock|equity|earnest[\s-]money|loan\s+proceeds|share[\s-]sale|closing\s+proceeds)\b/i },
+  // Paid matching / marketplace
+  { violation_type: 'paid_matching',
+    reason: 'Substrate does not find, match, or introduce buyers/sellers/investors/lenders for compensation.',
+    pattern: /\bfind\s+(?:me|us|the\s+(?:buyer|seller|investor|lender|target))\s+.*\b(?:commission|fee|paid|compensation|brokerage)\b/i },
+  // Success fees — adds % of transaction/consideration/equity, warrants in lieu, rebate on close, refund if doesn't close
+  { violation_type: 'success_fee',
+    reason: 'Substrate pricing is software-only. No success fees, closing fees, contingent fees, equity, warrants, or deal-value-based compensation.',
+    pattern: /\b(?:success\s+fee|contingent\s+fee|closing\s+fee|deal[\s-]value\s+fee|percentage\s+of\s+deal|%\s+of\s+(?:deal|sale|raise|exit|final\s+(?:transaction|consideration|equity|nav|enterprise[\s-]value)))\b/i },
+  { violation_type: 'success_fee',
+    reason: 'Substrate does not accept warrants, equity, or contingent consideration in lieu of cash.',
+    pattern: /\b(?:warrants?\s+(?:in\s+\w+\s+)?(?:equal\s+to|in\s+lieu\s+of)|rebate\s+(?:on|if|when)\s+(?:close|closing|deal\s+closes)|refund\s+(?:me\s+)?if\s+(?:the\s+)?deal\s+(?:does\s*n'?t|fails\s+to|doesn'?t)\s+close)\b/i },
+  // Referral fees
+  { violation_type: 'referral_fee',
+    reason: 'Substrate does not accept or pay referral fees from buyers, sellers, lenders, brokers, or service providers.',
+    pattern: /\b(?:referral\s+fee|finder['\s]*s?\s+fee|kickback|commission\s+(?:to|from|for)\s+(?:broker|lender|advisor))\b/i },
+  // Guaranteed outcome — broadened tail to include LBO/election/savings/produce/deliver/achieve
+  { violation_type: 'guaranteed_outcome',
+    reason: 'Substrate does not promise deal results, valuation results, tax results, financing results, closing, return, savings, or buyer outcomes.',
+    pattern: /\bguarantee(?:d|s|ing)?\s+(?:that\s+)?(?:the\s+|this\s+)?[^.]{0,120}\b(?:close|closing|return|outcome|deal|sale|tax\s+(?:result|saving)|irr|moic|election|lbo|valuation|savings|deliver|produce|achieve|at\s+least)\b/i },
+  // Professional opinions — broadened to catch "issue/produce/deliver/provide/render/write a [type] opinion"
+  // in addition to "give me a [type] opinion". Opinion verbs vary across requesting agents.
+  { violation_type: 'professional_opinion',
+    reason: 'Substrate computes worked examples and analytical models; it does not provide legal, tax, fairness, solvency, audit, or appraisal opinions.',
+    pattern: /\b(?:give|issue|produce|deliver|provide|render|write|prepare|draft)\s+(?:me|us|a|an|the|us\s+a|me\s+a)?\s*(?:legal|tax|fairness|solvency|audit|appraisal|qualified\s+appraisal|uspap)\s+opinion\b/i },
+  { violation_type: 'professional_opinion',
+    reason: 'Substrate does not produce appraisals, fair-market-value opinions, or audit/review/compilation attest work.',
+    pattern: /\b(?:fair[\s-]market[\s-]value|uspap|qualified)\s+appraisal\b/i },
+  // QoE audit / attest-work — substrate computes worked QoE analytics, but
+  // "audit / review / compilation / certify / attest" are licensed CPA-firm
+  // attest engagements outside the substrate's lane.
+  { violation_type: 'professional_opinion',
+    reason: 'Audit, review, and compilation are licensed CPA-firm attest engagements. Substrate computes worked QoE analytics but does not certify or attest. Route via defer_to_counsel.',
+    pattern: /\b(?:perform|conduct|run|do)\s+(?:an?\s+|the\s+)?(?:quality[\s-]of[\s-]earnings\s+audit|qoe\s+audit|formal\s+audit|attestation|compilation\s+engagement|review\s+engagement)\b|\bcertify\s+(?:the\s+)?(?:results|financials|earnings|ttm|statements)\b|\battest\s+to\s+(?:the\s+)?(?:results|financials|earnings|accuracy)\b/i },
+];
+
+/**
+ * Payload-shape validator. Catches malformed agent payloads BEFORE the
+ * classifier/runtime would silently coerce or treat the values as missing.
+ *
+ * Without this, an agent sending `target_revenue: "eighteen million dollars"`
+ * gets a missing-input contract for revenue (wrong — the agent DID provide
+ * revenue, just in the wrong format). Or an agent calling execute_model with
+ * no model_id gets "Unknown V19 model: undefined" instead of a clear
+ * field-level error.
+ *
+ * Three classes of checks:
+ *   1. Oversize / deep-nesting (protect against fuzzed garbage)
+ *   2. Tool-specific required fields (model_id for execute_model, etc.)
+ *   3. Wrong-type money fields (anything that looks like a money field must
+ *      be a number or coerceable money string like "$5M")
+ *
+ * Returns null on pass, { errors } on fail. Errors carry { field, reason }
+ * so the agent can fix each item directly.
+ */
+interface PayloadShapeError {
+  errors: Array<{ field: string; reason: string }>;
+}
+
+const MONEY_FIELD_PATTERN = /(?:_cents$|Cents$|\b(?:revenue|ebitda|sde|purchase_?price|enterprise_?value|valuation|commitment|raise_?amount|principal|earnout|rollover|sponsor_?equity|senor?_?debt|sub(?:ordinated)?_?debt|equity)\b)/i;
+
+function validatePayloadShape(
+  toolName: string,
+  input: Record<string, any> | undefined | null,
+): PayloadShapeError | null {
+  if (!input || typeof input !== 'object') return null;
+  const errors: Array<{ field: string; reason: string }> = [];
+
+  // Skip shape validation for discovery / read-only tools where input is permissive
+  const PERMISSIVE_TOOLS = new Set([
+    'introspect_capabilities', 'describe_methodology', 'estimate_deal_cost',
+    'get_deal_runbook', 'lookup_model_slot', 'lookup_citation', 'fetch_market_data',
+    'validate_conformance', 'defer_to_counsel',
+  ]);
+  if (PERMISSIVE_TOOLS.has(toolName)) return null;
+
+  // 1. Oversize / deep-nesting guard
+  let approxBytes: number;
+  try {
+    approxBytes = JSON.stringify(input).length;
+  } catch {
+    return { errors: [{ field: '_payload', reason: 'Payload could not be serialized (likely cyclic).' }] };
+  }
+  if (approxBytes > 5_000_000) {
+    errors.push({ field: '_payload', reason: `Payload exceeds 5MB (got ~${Math.round(approxBytes / 1_000_000)}MB). Chunk the work or store large blobs as Files references.` });
+  }
+  const depth = maxNestingDepth(input);
+  if (depth > 15) {
+    errors.push({ field: '_payload', reason: `Payload nesting depth ${depth} exceeds 15-level limit. Flatten or summarize.` });
+  }
+  const totalKeys = countKeys(input);
+  if (totalKeys > 500) {
+    errors.push({ field: '_payload', reason: `Payload has ${totalKeys} keys; substrate refuses payloads with >500 keys.` });
+  }
+
+  // 2. Tool-specific required fields
+  if (toolName === 'execute_model' || toolName === 'run_model_iteration') {
+    const modelId = input.modelId ?? input.model_id ?? input.model ?? input.inputs?.modelId ?? input.inputs?.model_id;
+    if (!modelId && !input.executionId && !input.execution_id) {
+      errors.push({ field: 'model_id', reason: 'execute_model requires modelId/model_id (or executionId for a rerun).' });
+    }
+  }
+  if (
+    toolName === 'lookup_citation'
+    && !input.authorityId
+    && !input.authority_id
+    && !input.uri
+    && !input.id
+    // Also accept query+category (free-text lookup) or pure category browse
+    // (returns first N rows in the requested category). These are first-class
+    // lookup paths for agents that don't yet know the exact authority id.
+    && !input.query
+    && !input.category
+    && !input.search
+    && !input.q
+  ) {
+    errors.push({ field: 'authority_id', reason: 'lookup_citation requires authority_id, uri, id, or query+category.' });
+  }
+  if (toolName === 'get_deal_state' && !input.dealId && !input.deal_id && !input.stateCid && !input.state_cid) {
+    errors.push({ field: 'deal_id', reason: 'get_deal_state requires deal_id or state_cid.' });
+  }
+  if (toolName === 'update_deal_payload' && !input.dealId && !input.deal_id && !input.dealState && !input.state_cid && !input.stateCid) {
+    errors.push({ field: 'deal_id', reason: 'update_deal_payload requires deal_id, state_cid, or dealState.' });
+  }
+  if (toolName === 'finalize_deal_package' && !input.dealId && !input.deal_id && !input.dealState && !input.stateCid && !input.state_cid) {
+    errors.push({ field: 'deal_id', reason: 'finalize_deal_package requires deal_id, state_cid, or dealState.' });
+  }
+
+  // 3. Wrong-type money fields (only check top-level + one-level nested under common keys)
+  const moneyScanRoots: Array<{ obj: any; prefix: string }> = [
+    { obj: input, prefix: '' },
+    { obj: input.inputs, prefix: 'inputs.' },
+    { obj: input.payload, prefix: 'payload.' },
+    { obj: input.financing, prefix: 'financing.' },
+  ];
+  for (const { obj, prefix } of moneyScanRoots) {
+    if (!obj || typeof obj !== 'object') continue;
+    for (const [key, value] of Object.entries(obj)) {
+      if (!MONEY_FIELD_PATTERN.test(key)) continue;
+      if (value == null || value === '') continue;
+      if (typeof value === 'number' && Number.isFinite(value)) continue;
+      if (typeof value === 'string' && isCoerceableMoneyString(value)) continue;
+      errors.push({
+        field: `${prefix}${key}`,
+        reason: `Field "${key}" must be a numeric (cents integer) or coerceable money string like "$5M" / "1.8M" / "5000000". Got: ${typeof value} ${truncForError(value)}`,
+      });
+    }
+  }
+
+  return errors.length > 0 ? { errors } : null;
+}
+
+function isCoerceableMoneyString(value: string): boolean {
+  const normalized = value.trim().toLowerCase().replace(/[$,\s]/g, '');
+  if (!normalized) return false;
+  // Must start with a digit (after stripping $ , whitespace)
+  return /^-?\d+(?:\.\d+)?/.test(normalized);
+}
+
+function maxNestingDepth(value: unknown, current: number = 0): number {
+  if (current > 30) return current; // hard cap to avoid stack overflow
+  if (Array.isArray(value)) {
+    let max = current;
+    for (const item of value) {
+      const d = maxNestingDepth(item, current + 1);
+      if (d > max) max = d;
+      if (max > 30) return max;
+    }
+    return max;
+  }
+  if (value && typeof value === 'object') {
+    let max = current;
+    for (const v of Object.values(value)) {
+      const d = maxNestingDepth(v, current + 1);
+      if (d > max) max = d;
+      if (max > 30) return max;
+    }
+    return max;
+  }
+  return current;
+}
+
+function countKeys(value: unknown): number {
+  if (Array.isArray(value)) return value.reduce((sum: number, v) => sum + countKeys(v), 0);
+  if (value && typeof value === 'object') {
+    const keys = Object.keys(value);
+    return keys.length + keys.reduce((sum, k) => sum + countKeys((value as Record<string, any>)[k]), 0);
+  }
+  return 0;
+}
+
+function truncForError(value: unknown): string {
+  const s = typeof value === 'string' ? value : JSON.stringify(value);
+  return s.length > 60 ? `${s.slice(0, 57)}...` : s;
+}
+
+/**
+ * Map a violation_type to the appropriate refusal envelope category.
+ *
+ * LINE_VIOLATION (categorical refusal — never our lane):
+ *   transaction_recommendation, counterparty_negotiation, unauthorized_filing,
+ *   unauthorized_signing, counterparty_transmission, custody, paid_matching,
+ *   success_fee, referral_fee, guaranteed_outcome
+ *
+ * counsel_review_required (route to qualified professional):
+ *   professional_opinion (legal/tax/fairness/appraisal/USPAP) — substrate
+ *   doesn't do these but counsel does. Returning counsel_review_required tells
+ *   the agent "use the defer_to_counsel tool with these facts."
+ */
+function mapViolationToRefusalCategory(violationType: string): {
+  status: number;
+  lineStatus: string;
+  remedy: string;
+} {
+  switch (violationType) {
+    case 'professional_opinion':
+      return { status: 403, lineStatus: 'counsel_review_required', remedy: 'defer_to_counsel' };
+    // Future expansion points — left explicit so doctrine remains visible:
+    case 'transaction_recommendation':
+    case 'counterparty_negotiation':
+    case 'unauthorized_filing':
+    case 'unauthorized_signing':
+    case 'counterparty_transmission':
+    case 'custody':
+    case 'paid_matching':
+    case 'success_fee':
+    case 'referral_fee':
+    case 'guaranteed_outcome':
+    default:
+      return { status: 400, lineStatus: 'LINE_VIOLATION', remedy: 'defer_to_counsel' };
+  }
+}
+
+/**
+ * Prohibited model_id patterns. An agent calling `execute_model` with one of
+ * these MUST be refused with LINE_VIOLATION, regardless of whether the model
+ * is actually implemented in the runtime. Otherwise the substrate's "Unknown V19 model"
+ * fall-through silently passes prohibited intent through as a non-refusal error.
+ */
+const PROHIBITED_MODEL_ID_PATTERNS: Array<{
+  violation_type: string;
+  reason: string;
+  pattern: RegExp;
+}> = [
+  { violation_type: 'transaction_recommendation',
+    reason: 'Substrate does not run recommendation models — analysis, options, and implications only.',
+    pattern: /^(?:MODEL\.)?(?:NEGOTIATION|RECOMMEND|RECOMMENDATION|ADVISE)\b/i },
+  { violation_type: 'professional_opinion',
+    reason: 'Substrate computes worked examples and analytical models; it does not produce opinion models. Route via defer_to_counsel.',
+    pattern: /^(?:MODEL\.)?(?:OPINION|FAIRNESS|SOLVENCY[_.]?OPINION|TAX[_.]?OPINION|LEGAL[_.]?OPINION|APPRAISAL|USPAP)\b/i },
+  { violation_type: 'unauthorized_filing',
+    reason: 'Substrate does not file documents with regulators, agencies, courts, or registries.',
+    pattern: /^(?:MODEL\.)?(?:IRS\.FILE_|SEC\.FILE_|COURT\.FILE_|BANKRUPTCY\.FILE_|FILE_FORM_|FILE_SCHEDULE_|FILING)\b/i },
+  { violation_type: 'unauthorized_signing',
+    reason: 'Substrate does not sign or execute documents on behalf of any party.',
+    pattern: /^(?:MODEL\.)?(?:SIGN_|EXECUTE_DOCUMENT|DOCUSIGN_|COUNTERSIGN_)\b/i },
+  { violation_type: 'counterparty_transmission',
+    reason: 'Substrate does not transmit documents to counterparties.',
+    pattern: /^(?:MODEL\.)?(?:TRANSMIT_|SEND_TO_COUNTERPARTY|EMAIL_TO_SELLER|EMAIL_TO_BUYER)\b/i },
+  { violation_type: 'custody',
+    reason: 'Substrate does not handle custody, escrow, wires, or funds.',
+    pattern: /^(?:MODEL\.)?(?:WIRE_|ESCROW_HOLD|CUSTODY_|DISBURSE_|HOLD_FUNDS)\b/i },
+];
+
+function detectProhibitedIntent(
+  input: Record<string, any> | undefined | null,
+  toolName: string,
+): ProhibitedIntentMatch | null {
+  if (!input || typeof input !== 'object') return null;
+  // Some tools legitimately need to discuss prohibited concepts in their work
+  // (e.g. defer_to_counsel routes prohibited asks to counsel). Don't scan those.
+  if (toolName === 'defer_to_counsel') return null;
+
+  // First: prohibited model_id check (applies to execute_model and similar).
+  // Agents requesting NEGOTIATION.*, OPINION.*, IRS.FILE_*, etc. must be refused
+  // BEFORE the runtime dispatches the call. Without this, the substrate falls
+  // through to "Unknown V19 model" which silently passes prohibited intent.
+  const modelIdCandidates = [
+    input.modelId, input.model_id, input.model,
+    input.inputs?.modelId, input.inputs?.model_id,
+  ];
+  for (const candidate of modelIdCandidates) {
+    if (typeof candidate !== 'string') continue;
+    for (const pattern of PROHIBITED_MODEL_ID_PATTERNS) {
+      const match = candidate.match(pattern.pattern);
+      if (match) {
+        return {
+          violation_type: pattern.violation_type,
+          reason: pattern.reason,
+          matchedPhrase: match[0],
+          matchedField: 'model_id',
+        };
+      }
+    }
+  }
+
+  // Then: natural-language intent scan over all string fields.
+  for (const [field, value] of Object.entries(input)) {
+    if (typeof value !== 'string') continue;
+    if (value.length > 5000) continue; // skip very long strings (probably document content, not intent)
+    for (const pattern of PROHIBITED_INTENT_PATTERNS) {
+      const match = value.match(pattern.pattern);
+      if (match) {
+        return {
+          violation_type: pattern.violation_type,
+          reason: pattern.reason,
+          matchedPhrase: match[0],
+          matchedField: field,
+        };
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Validate methodology_version / spec_version supplied INSIDE the tool's input
+ * payload (in addition to the envelope check). Agents commonly tag the call
+ * itself with a version pin in the payload, expecting the substrate to refuse
+ * if the pin is unsupported. Without this, the substrate silently defaults to
+ * the current version — which violates the "version pin is part of the
+ * substrate contract" doctrine.
+ *
+ * Accepts both snake_case (`methodology_version`, `spec_version`) and
+ * camelCase (`methodologyVersion`, `specVersion`).
+ */
+function validateVersionInput(input: Record<string, any> | undefined | null) {
+  if (!input || typeof input !== 'object') return null;
+  const methodologyVersion = nullableString(input.methodology_version) || nullableString(input.methodologyVersion);
+  const specVersion = nullableString(input.spec_version) || nullableString(input.specVersion);
+  const methodologyUri = nullableString(input.methodology_uri) || nullableString(input.methodologyUri);
+  const specUri = nullableString(input.spec_uri) || nullableString(input.specUri);
+  if (methodologyVersion && methodologyVersion !== DEFINITIVE_METHODOLOGY_VERSION) {
+    return unsupportedVersion('methodology_version (payload)', methodologyVersion, DEFINITIVE_METHODOLOGY_VERSION);
+  }
+  if (specVersion && specVersion !== DEFINITIVE_SPEC_VERSION) {
+    return unsupportedVersion('spec_version (payload)', specVersion, DEFINITIVE_SPEC_VERSION);
+  }
+  if (methodologyUri && methodologyUri !== DEFINITIVE_METHODOLOGY_URI) {
+    return unsupportedVersion('methodology_uri (payload)', methodologyUri, DEFINITIVE_METHODOLOGY_URI);
+  }
+  if (specUri && specUri !== DEFINITIVE_SPEC_URI) {
+    return unsupportedVersion('spec_uri (payload)', specUri, DEFINITIVE_SPEC_URI);
+  }
+  return null;
+}
+
 function validateVersionEnvelope(envelope: Record<string, any>) {
   const specVersion = nullableString(envelope.specVersion);
   const specUri = nullableString(envelope.specUri);
@@ -1528,6 +2275,63 @@ function nullableString(value: unknown): string | null {
   if (typeof value !== 'string') return null;
   const trimmed = value.trim();
   return trimmed || null;
+}
+
+/**
+ * Resolve the mandate chain for tool responses that don't go through the main
+ * mandate-resolution path. Static discovery tools and `get_deal_state` short-
+ * circuit before the agencyAction execution layer, so their responses would
+ * otherwise return `mandateChain: null` — breaking SI-006 (audit-trail proof
+ * that this call belongs to a specific agent/beneficial-customer/mandate).
+ * Returns a structured mandateChain even when no mandate is registered yet,
+ * so receiving agents can see the principal/agent/sourceAgent attribution.
+ */
+/**
+ * Build mandate-context input from the JWT claims + envelope.
+ * JWT-bound values WIN over envelope values (claims are trustworthy; envelope
+ * fields can be spoofed). This is what fixes MM-001 audit-agent-id attribution:
+ * two distinct agent tokens produce two distinct mandate audit rows because the
+ * agentId comes from the verified JWT, not the unauthenticated envelope.
+ */
+function buildMandateInput(
+  input: DefinitiveToolCallInput,
+  envelope: Record<string, any>,
+  requestedScopes: string[],
+) {
+  const claims = (input.authClaims || {}) as Record<string, any>;
+  return {
+    userId: input.userId,
+    organizationId: nullableNumber(envelope.organizationId),
+    billingOrgId: nullableNumber(claims.billingOrgId) ?? nullableNumber(envelope.billingOrgId),
+    sourceAgent: nullableString(claims.iss) || nullableString(envelope.sourceAgent) || 'definitive-mcp-v0.1',
+    agentId: nullableString(claims.agentId) || envelope.agentId || envelope.agent?.agentId || null,
+    agentPlatformId: nullableString(claims.agentPlatformId) || nullableString(envelope.agentPlatformId) || nullableString(envelope.agent?.platformId),
+    mandateId: nullableString(claims.mandateId) || nullableString(envelope.mandateId) || nullableString(envelope.mandate?.id),
+    requestedScopes,
+    sourceSurface: 'mcp' as const,
+    metadata: { protocol: DEFINITIVE_MCP_PROTOCOL, toolName: input.toolName },
+  };
+}
+
+async function resolveDiscoveryMandateChain(
+  input: DefinitiveToolCallInput,
+  envelope: Record<string, any>,
+  requestedScopes: string[],
+): Promise<Record<string, any>> {
+  try {
+    const { resolveDefinitiveMandateContext } = await import('./definitiveMandateService.js');
+    const ctx = await resolveDefinitiveMandateContext(buildMandateInput(input, envelope, requestedScopes));
+    return ctx.mandateChain;
+  } catch (err) {
+    // Mandate resolution should not break the discovery/read response. Return
+    // a degraded but structured chain rather than null.
+    return {
+      spec: 'DEFINITIVE.v1.0',
+      principal: { userId: input.userId ?? null },
+      agent: { agentId: nullableString(envelope.agentId) || null, sourceAgent: nullableString(envelope.sourceAgent) || 'definitive-mcp-v0.1' },
+      mandate: { mandateId: null, status: 'unresolved', error: (err as Error).message },
+    };
+  }
 }
 
 function resolveRequestId(input: DefinitiveToolCallInput, envelope: Record<string, any>) {

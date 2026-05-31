@@ -1,0 +1,34 @@
+{
+  "id": "PC-CROSS-DOMAIN-015",
+  "category": "CROSS_DOMAIN",
+  "description": "G29 + G30: ABL borrowing-base re-determination (G29 via M182) for a target with ground-lease properties (G30 via M197). Substrate must compose ABL borrowing-base AND ground-lease mechanics — financeability flag must surface.",
+  "payload": {
+    "journey": "raise",
+    "subjourney": "debt_raise",
+    "target_industry": "retail chain on ground leases",
+    "target_jurisdiction": "US-CA",
+    "abl_facility_present": true,
+    "abl_redetermination_pending": true,
+    "ground_lease_present": true,
+    "real_estate_pct_of_ev": 35
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "real_estate_overlay",
+      "assetClass": "real_estate"
+    },
+    "missingFields": [
+      "eligible_ar_aging",
+      "eligible_inventory_categories",
+      "ground_lease_remaining_term",
+      "leasehold_mortgageability_flag"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "G29", "G30", "ABL", "ground-lease"]
+}

@@ -1,0 +1,44 @@
+{
+  "id": "PC-PARTIAL-PMI-004",
+  "category": "PARTIAL",
+  "description": "Partial payload: PMI value-capture assessment. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "pmi",
+    "stage": "assessment",
+    "acquired_entity": "platform_c",
+    "baseline_ebitda_cents": 3000000000,
+    "value_capture_targets": [
+      "pricing",
+      "procurement",
+      "org_design"
+    ],
+    "industry": "specialty chemicals"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "pmi",
+      "subJourney": "pmi_assessment",
+      "industry": "specialty chemicals"
+    },
+    "missingFields": [
+      "target_quartile",
+      "one_year_run_rate_target_cents",
+      "investment_required_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "pmi",
+    "assessment",
+    "value-capture",
+    "partial"
+  ]
+}

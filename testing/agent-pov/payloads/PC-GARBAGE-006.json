@@ -1,0 +1,19 @@
+{
+  "id": "PC-GARBAGE-006",
+  "category": "GARBAGE",
+  "description": "Wrong type: compose_model_stack called with both triggered_gates as a single string AND a monetary field (ebitda) as a non-coerceable token. Substrate's payload-shape validator must return structured 400 with field-level guidance on the money field.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "B2B services",
+    "triggered_gates": "G28",
+    "ebitda": "not-a-number-payload"
+  },
+  "tool": "compose_model_stack",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "wrong-type", "string-for-money"]
+}

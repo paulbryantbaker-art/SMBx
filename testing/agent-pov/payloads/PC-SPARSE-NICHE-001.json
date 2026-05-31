@@ -1,0 +1,35 @@
+{
+  "id": "PC-SPARSE-NICHE-001",
+  "category": "SPARSE",
+  "description": "Sparse NICHE payload: idempotency key + journey only. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "idempotency_key": "x",
+    "journey": "buy"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side"
+    },
+    "missingFields": [
+      "target_industry",
+      "target_revenue",
+      "target_ebitda",
+      "target_jurisdiction"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "niche",
+    "sparse",
+    "idempotency-only"
+  ]
+}

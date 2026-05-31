@@ -1,0 +1,33 @@
+{
+  "id": "PC-SPARSE-L4-BUY-001",
+  "category": "SPARSE",
+  "description": "Cold-start buyer: industry + jurisdiction only. Substrate should classify as healthy_buy_side L?-guess and return complete MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "B2B services",
+    "target_jurisdiction": "US-TX"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "jurisdiction": "US-TX",
+      "industry": "B2B services"
+    },
+    "missingFields": [
+      "target_revenue",
+      "target_ebitda",
+      "purchase_price_range"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": ["buy", "L4-implicit", "sparse"]
+}

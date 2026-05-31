@@ -1,0 +1,47 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "maintenanceCovenantBreachWithinQuarters=0 (in breach today) but signals also rsaInMarket=false, forbearanceExecuted=false, no LME — partial conflict.",
+  "payload": {
+    "journey": "buy",
+    "industry": "manufacturing",
+    "jurisdiction": "US-PA",
+    "league": "L4",
+    "ttmRevenueCents": 2800000000,
+    "ebitdaCents": 600000000,
+    "adjustedEbitdaCents": 600000000,
+    "signals": {
+      "maintenanceCovenantBreachWithinQuarters": 0,
+      "rsaInMarket": false,
+      "forbearanceExecuted": false,
+      "liabilityManagementExercise": false,
+      "capitalStructureAction": false,
+      "fccr": 1.7,
+      "cashRunwayDays": 300
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-PA",
+      "industry": "manufacturing",
+      "league": "L4"
+    },
+    "missingFields": [
+      "explicit_distressPosture_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "distress-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-DISTRESS-005"
+}

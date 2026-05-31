@@ -1,0 +1,18 @@
+{
+  "id": "PC-GARBAGE-008",
+  "category": "GARBAGE",
+  "description": "Wrong type: model_id is a number instead of a MODEL.*.v1 string. Substrate must surface a structured tool error with field-level guidance, NEVER coerce or execute. (Uses snake_case model_id so the tool handler emits modelId_required at structuredContent.result level.)",
+  "payload": {
+    "deal_id": "fixture_deal_garbage_008",
+    "model_id": 12345,
+    "inputs": {}
+  },
+  "tool": "execute_model",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "wrong-type", "number-for-model-id"]
+}

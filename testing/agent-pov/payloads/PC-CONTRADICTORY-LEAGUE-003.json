@@ -1,0 +1,37 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "league='L4' but enterprise-scale HSR + RWI bound + $1.5B purchase price.",
+  "payload": {
+    "journey": "buy",
+    "league": "L4",
+    "purchasePriceCents": 150000000000,
+    "hsrReportable": true,
+    "rwInsuranceBound": true,
+    "industry": "industrial",
+    "jurisdiction": "US-DE"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-DE",
+      "industry": "industrial"
+    },
+    "missingFields": [
+      "explicit_league_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "league-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-LEAGUE-003"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "PC-PARTIAL-BUY-024",
+  "category": "PARTIAL",
+  "description": "Partial payload: L8 mid-market buy: enterprise software. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "enterprise software",
+    "target_revenue_cents": 220000000000,
+    "target_ebitda_cents": 50000000000,
+    "target_jurisdiction": "US-CA",
+    "purchase_price_range": "3.5B-5B",
+    "buyer_role": "pe_sponsor_mid"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L7",
+      "industry": "enterprise software",
+      "jurisdiction": "US-CA"
+    },
+    "missingFields": [
+      "sponsor_equity_cents",
+      "senior_debt_cents",
+      "hsr_filing_intent"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L8",
+    "partial"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "PC-LINE-VIOLATION-006",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to file a Form 8594 (asset-acquisition reporting) with the IRS. Tax-filing submission requires a licensed practitioner and is outside the publisher's exclusion.",
+  "payload": {
+    "deal_id": "fixture_deal_006",
+    "filing_type": "IRS-8594",
+    "ask": "file this Form 8594 with the IRS for the §1060 allocation"
+  },
+  "tool": "finalize_deal_package",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "unauthorized_filing",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "unauthorized-filing", "irs-filing"]
+}

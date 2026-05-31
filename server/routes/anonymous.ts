@@ -35,22 +35,50 @@ function getClientIp(req: any): string {
   return req.ip || req.connection?.remoteAddress || 'unknown';
 }
 
+/**
+ * Coerce a jsonb column back to a JS array.
+ *
+ * Historic rows wrote messages with `${JSON.stringify(arr)}::jsonb`, which
+ * postgres-js round-trips as a jsonb *string* (double-encoded) rather than an
+ * array — so `.filter`/`.map` throw "is not a function" and break the 2nd+
+ * message of every session. New writes use `sql.json(...)` (a real jsonb array);
+ * this keeps the old, corrupted rows readable.
+ */
+function asArray<T = any>(value: unknown): T[] {
+  if (Array.isArray(value)) return value as T[];
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? (parsed as T[]) : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
 // ─── Create anonymous session ───────────────────────────────
 
 anonymousRouter.post('/', async (req, res) => {
   const ip = getClientIp(req);
+  // Local dev (loopback) is never rate-limited, so the logged-out onboarding
+  // flow can be tested repeatedly. Real clients are never loopback, so this is
+  // a no-op in production.
+  const isLoopback = ip === '::1' || ip === '127.0.0.1' || ip.startsWith('::ffff:127.');
 
   try {
-    // Rate limit: max sessions per IP in last 24h
-    const [{ count }] = await sql`
-      SELECT COUNT(*)::int as count FROM anonymous_sessions
-      WHERE ip = ${ip} AND created_at > NOW() - INTERVAL '24 hours'
-    `;
+    if (!isLoopback) {
+      // Rate limit: max sessions per IP in last 24h
+      const [{ count }] = await sql`
+        SELECT COUNT(*)::int as count FROM anonymous_sessions
+        WHERE ip = ${ip} AND created_at > NOW() - INTERVAL '24 hours'
+      `;
 
-    if (count >= MAX_SESSIONS_PER_IP) {
-      return res.status(429).json({
-        error: 'Session limit reached. Sign up for unlimited access.',
-      });
+      if (count >= MAX_SESSIONS_PER_IP) {
+        return res.status(429).json({
+          error: 'Session limit reached. Sign up for unlimited access.',
+        });
+      }
     }
 
     const sessionId = crypto.randomUUID();
@@ -84,12 +112,13 @@ anonymousRouter.get('/:sessionId', async (req, res) => {
       return res.status(404).json({ error: 'Session not found or expired' });
     }
 
-    const userMsgCount = (session.messages as any[]).filter((m: any) => m.role === 'user').length;
+    const messages = asArray(session.messages);
+    const userMsgCount = messages.filter((m: any) => m.role === 'user').length;
 
     return res.json({
       sessionId: session.session_id,
       sourcePage: session.source_page,
-      messages: session.messages,
+      messages,
       messagesRemaining: MAX_MESSAGES - userMsgCount,
       limitReached: userMsgCount >= MAX_MESSAGES,
       sessionData: session.data || null,
@@ -116,7 +145,7 @@ anonymousRouter.post('/:sessionId/messages', async (req, res) => {
       return res.status(404).json({ error: 'Session not found or expired' });
     }
 
-    const msgs = (session.messages as any[]) || [];
+    const msgs = asArray(session.messages);
     const userMsgCount = msgs.filter((m: any) => m.role === 'user').length;
 
     if (userMsgCount >= MAX_MESSAGES) {
@@ -138,7 +167,7 @@ anonymousRouter.post('/:sessionId/messages', async (req, res) => {
     // Persist user message immediately
     await sql`
       UPDATE anonymous_sessions
-      SET messages = ${JSON.stringify(updatedMsgs)}::jsonb,
+      SET messages = ${sql.json(updatedMsgs)}::jsonb,
           message_count = ${updatedMsgs.length},
           last_active_at = NOW()
       WHERE id = ${session.id}
@@ -168,7 +197,7 @@ anonymousRouter.post('/:sessionId/messages', async (req, res) => {
         // Persist assistant response
         await sql`
           UPDATE anonymous_sessions
-          SET messages = ${JSON.stringify(finalMsgs)}::jsonb,
+          SET messages = ${sql.json(finalMsgs)}::jsonb,
               message_count = ${finalMsgs.length},
               last_active_at = NOW()
           WHERE id = ${session.id}
@@ -188,7 +217,7 @@ anonymousRouter.post('/:sessionId/messages', async (req, res) => {
             try {
               await sql`
                 UPDATE anonymous_sessions
-                SET data = COALESCE(data, '{}'::jsonb) || ${JSON.stringify(fields)}::jsonb
+                SET data = COALESCE(data, '{}'::jsonb) || ${sql.json(fields as any)}::jsonb
                 WHERE id = ${session.id}
               `;
 
@@ -204,7 +233,7 @@ anonymousRouter.post('/:sessionId/messages', async (req, res) => {
                   await sql`
                     UPDATE anonymous_sessions
                     SET data = COALESCE(data, '{}'::jsonb)
-                      || ${JSON.stringify({ seven_factor_scores: scores, seven_factor_composite: composite })}::jsonb
+                      || ${sql.json({ seven_factor_scores: scores, seven_factor_composite: composite })}::jsonb
                     WHERE id = ${session.id}
                   `;
                 }
@@ -314,7 +343,7 @@ anonymousRouter.post('/:sessionId/convert', async (req, res) => {
       return res.status(400).json({ error: 'userId is required' });
     }
 
-    const msgs = (session.messages as any[]) || [];
+    const msgs = asArray(session.messages);
 
     // Create a conversation for the user
     const [conv] = await sql`

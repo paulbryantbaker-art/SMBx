@@ -1,0 +1,42 @@
+{
+  "id": "PC-PARTIAL-RAISE-010",
+  "category": "PARTIAL",
+  "description": "Partial payload: Term loan: principal + EBITDA + industry. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "instrument": "term_loan",
+    "principal_cents": 5000000000,
+    "ebitda_cents": 1200000000,
+    "industry": "manufacturing",
+    "jurisdiction": "US-OH"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "debt_raise",
+      "industry": "manufacturing",
+      "jurisdiction": "US-OH"
+    },
+    "missingFields": [
+      "collateral_value_cents",
+      "leverage_ratio_target",
+      "tenor_years"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "debt",
+    "term-loan",
+    "partial"
+  ]
+}

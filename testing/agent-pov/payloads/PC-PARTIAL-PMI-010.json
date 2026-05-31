@@ -1,0 +1,42 @@
+{
+  "id": "PC-PARTIAL-PMI-010",
+  "category": "PARTIAL",
+  "description": "Partial payload: PMI optimization with shared procurement program. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "pmi",
+    "stage": "optimization",
+    "acquired_entity": "platform_z",
+    "baseline_ebitda_cents": 4000000000,
+    "synergy_target_cents": 500000000,
+    "primary_lever": "procurement",
+    "industry": "food service distribution"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "pmi",
+      "subJourney": "pmi_optimization",
+      "industry": "food service distribution"
+    },
+    "missingFields": [
+      "addressable_spend_cents",
+      "category_count",
+      "realization_curve_months"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "pmi",
+    "optimization",
+    "procurement",
+    "partial"
+  ]
+}

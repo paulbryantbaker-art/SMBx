@@ -1,0 +1,47 @@
+{
+  "id": "PC-RICH-L4-BUY-001",
+  "category": "RICH",
+  "description": "Core L4 LMM healthy BUY — B2B services PE acquisition with full sponsor equity, senior debt, NWC peg context, jurisdiction, NAICS, election type.",
+  "payload": {
+    "journey": "buy",
+    "industry": "B2B managed IT services",
+    "naics": "541512",
+    "jurisdiction": "US-TX",
+    "league": "L4",
+    "ttmRevenueCents": 1800000000,
+    "adjustedEbitdaCents": 500000000,
+    "purchasePriceCents": 2500000000,
+    "dealStructure": "stock_purchase",
+    "taxClassification": "llc_partnership",
+    "electionType": "338(h)(10)",
+    "financing": {
+      "sponsorEquityCents": 1600000000,
+      "seniorDebtCents": 800000000,
+      "sbaSevenACents": 0,
+      "rolloverEquityCents": 100000000
+    },
+    "nwcPegCents": 180000000,
+    "stage": "loi"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L4",
+      "jurisdiction": "US-TX",
+      "industry": "B2B managed IT services",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "llc_partnership"
+    },
+    "missingFields": [],
+    "nextCallsInclude": ["compose_model_stack", "execute_model"],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": ["buy", "L4", "rich", "lmm", "338h10"]
+}

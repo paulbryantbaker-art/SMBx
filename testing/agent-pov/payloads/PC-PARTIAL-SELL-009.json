@@ -1,0 +1,43 @@
+{
+  "id": "PC-PARTIAL-SELL-009",
+  "category": "PARTIAL",
+  "description": "Partial payload: L3 sell: specialty contractor owner-rep. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "electrical contractor",
+    "jurisdiction": "US-AZ",
+    "ebitda_cents": 280000000,
+    "revenue_cents": 1800000000,
+    "seller_role": "owner_rep"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "owner_rep",
+      "league": "L3",
+      "industry": "electrical contractor",
+      "jurisdiction": "US-AZ"
+    },
+    "missingFields": [
+      "backlog_cents",
+      "union_status",
+      "asking_price_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L3",
+    "partial",
+    "owner-rep"
+  ]
+}

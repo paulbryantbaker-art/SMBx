@@ -1,0 +1,40 @@
+{
+  "category": "AMBIGUOUS",
+  "description": "Senior-living operator with significant owned real-estate — could be operating_co or real_estate primary.",
+  "payload": {
+    "journey": "buy",
+    "industry": "senior living",
+    "jurisdiction": "US-FL",
+    "league": "L5",
+    "ttmRevenueCents": 12000000000,
+    "adjustedEbitdaCents": 1800000000,
+    "signals": {
+      "realEstatePercentOfEv": 0.45
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-FL",
+      "industry": "senior living",
+      "league": "L5"
+    },
+    "missingFields": [
+      "deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "ambiguous",
+    "asset-class"
+  ],
+  "id": "PC-AMBIGUOUS-ASSET-001"
+}

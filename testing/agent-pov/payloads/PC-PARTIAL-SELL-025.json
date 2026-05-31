@@ -1,0 +1,44 @@
+{
+  "id": "PC-PARTIAL-SELL-025",
+  "category": "PARTIAL",
+  "description": "Partial payload: L8 sell: consumer apps take-private candidate. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "consumer apps",
+    "jurisdiction": "US-DE",
+    "revenue_cents": 350000000000,
+    "ebitda_cents": 45000000000,
+    "seller_role": "banker_led",
+    "deal_type": "take_private_explore"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "banker_led",
+      "league": "L7",
+      "industry": "consumer apps",
+      "jurisdiction": "US-DE"
+    },
+    "missingFields": [
+      "public_float_pct",
+      "asking_price_cents",
+      "fairness_opinion_status"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L8",
+    "partial",
+    "take-private"
+  ]
+}

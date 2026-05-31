@@ -1,0 +1,34 @@
+{
+  "id": "PC-CROSS-DOMAIN-005",
+  "category": "CROSS_DOMAIN",
+  "description": "G28 + G29: Subchapter V eligible (G28 via M167) + ABL borrowing-base re-determination scheduled (G29 via M182) + 80-day runway. Substrate must surface BOTH overlays even though the deal is small enough for Subchapter V.",
+  "payload": {
+    "journey": "sell",
+    "subjourney": "principal_seller",
+    "target_industry": "wholesale distribution",
+    "target_jurisdiction": "US-AZ",
+    "target_revenue_cents": 750000000,
+    "total_debt_cents": 230000000,
+    "abl_facility_present": true,
+    "abl_redetermination_pending": true,
+    "cash_runway_days": 80
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "distressed_restructuring",
+      "distressPosture": "full_distress"
+    },
+    "missingFields": [
+      "subchapter_v_engagement",
+      "borrowing_base_components",
+      "eligible_ar_aging"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "G28", "G29", "subchapter-v", "ABL"]
+}

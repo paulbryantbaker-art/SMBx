@@ -1,0 +1,50 @@
+{
+  "id": "PC-PARTIAL-SELL-020",
+  "category": "PARTIAL",
+  "description": "Partial payload: L6 sell: self-storage RE-heavy. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "self-storage",
+    "jurisdiction": "US-TX",
+    "revenue_cents": 18000000000,
+    "ebitda_cents": 9500000000,
+    "seller_role": "banker_led",
+    "asset_class": "real_estate",
+    "asking_price_cents": 35000000000,
+    "signals": {
+      "realEstatePercentOfEv": 80
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "real_estate_overlay",
+      "league": "L5",
+      "industry": "self-storage",
+      "jurisdiction": "US-TX",
+      "assetClass": "real_estate"
+    },
+    "missingFields": [
+      "unit_count",
+      "occupancy_rate",
+      "real_estate_owned"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L6",
+    "partial",
+    "re-heavy",
+    "G30"
+  ]
+}

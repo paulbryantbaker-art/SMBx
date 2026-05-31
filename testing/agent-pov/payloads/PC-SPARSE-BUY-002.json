@@ -1,0 +1,36 @@
+{
+  "id": "PC-SPARSE-BUY-002",
+  "category": "SPARSE",
+  "description": "Sparse BUY payload: jurisdiction-only US-CA buyer. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_jurisdiction": "US-CA"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "jurisdiction": "US-CA"
+    },
+    "missingFields": [
+      "target_industry",
+      "target_revenue",
+      "target_ebitda",
+      "purchase_price_range"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "sparse",
+    "jurisdiction-only"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "id": "PC-PARTIAL-BUY-004",
+  "category": "PARTIAL",
+  "description": "Partial payload: L2 buy: pool-service rollup SDE + price + financing. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "pool service",
+    "target_sde_cents": 75000000,
+    "target_jurisdiction": "US-TX",
+    "purchase_price_range": "2M-3M",
+    "financing_plan": "sba_7a"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L2",
+      "industry": "pool service",
+      "jurisdiction": "US-TX"
+    },
+    "missingFields": [
+      "target_revenue",
+      "buyer_role"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L2",
+    "partial",
+    "sba"
+  ]
+}

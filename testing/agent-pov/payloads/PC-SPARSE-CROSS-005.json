@@ -1,0 +1,34 @@
+{
+  "id": "PC-SPARSE-CROSS-005",
+  "category": "SPARSE",
+  "description": "Sparse CROSS-DOMAIN payload: carve-out + IP-heavy signals. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "deal_type": "carve_out",
+    "asset_class": "ip_heavy"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "assetClass": "ip_heavy"
+    },
+    "missingFields": [
+      "journey",
+      "industry",
+      "jurisdiction",
+      "revenue"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "cross-domain",
+    "sparse",
+    "carve-out-ip"
+  ]
+}

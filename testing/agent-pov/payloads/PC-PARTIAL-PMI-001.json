@@ -1,0 +1,39 @@
+{
+  "id": "PC-PARTIAL-PMI-001",
+  "category": "PARTIAL",
+  "description": "Partial payload: PMI day-0 integration: acquired entity + close date + scope. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "pmi",
+    "stage": "day_0",
+    "acquired_entity": "target_lmm_services",
+    "close_date": "2026-06-01",
+    "integration_scope": "full",
+    "industry": "B2B services"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "pmi",
+      "subJourney": "pmi_day_0",
+      "industry": "B2B services"
+    },
+    "missingFields": [
+      "critical_systems",
+      "tsa_exists",
+      "employee_count"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "pmi",
+    "day-0",
+    "partial"
+  ]
+}

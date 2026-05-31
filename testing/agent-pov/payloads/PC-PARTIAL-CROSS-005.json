@@ -1,0 +1,46 @@
+{
+  "id": "PC-PARTIAL-CROSS-005",
+  "category": "PARTIAL",
+  "description": "Partial payload: Tax + distressed: \u00a7382 NOL preservation in 363 sale. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "deal_type": "363_sale",
+    "target_industry": "industrial",
+    "target_jurisdiction": "US-DE",
+    "target_nols_cents": 8000000000,
+    "ownership_change_pct": 0.55,
+    "dealType": "363_sale"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "distressed_363_sale",
+      "industry": "industrial",
+      "jurisdiction": "US-DE",
+      "distressPosture": "distressed"
+    },
+    "missingFields": [
+      "loss_corporation_value_cents",
+      "long_term_tax_exempt_rate",
+      "continuity_of_business"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "cross-overlay",
+    "buy",
+    "partial",
+    "distressed",
+    "tax-382",
+    "G28"
+  ]
+}

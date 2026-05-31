@@ -1,0 +1,44 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "Distress narrative (bankruptcy / restructuring / chapter 11 mentioned) but financials are positive: adjustedEbitda=$5M, growing, cash runway long, FCCR healthy, secured debt at par. Substrate cannot pick a posture silently.",
+  "payload": {
+    "journey": "buy",
+    "industry": "industrial",
+    "dealType": "chapter 11 restructuring distressed acquisition",
+    "jurisdiction": "US-OH",
+    "league": "L4",
+    "ttmRevenueCents": 4200000000,
+    "ebitdaCents": 500000000,
+    "adjustedEbitdaCents": 500000000,
+    "signals": {
+      "cashRunwayDays": 360,
+      "fccr": 2.6,
+      "securedDebtTradingPriceCents": 95
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-OH",
+      "industry": "industrial",
+      "league": "L4"
+    },
+    "missingFields": [
+      "explicit_distressPosture_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "distress-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-DISTRESS-002"
+}

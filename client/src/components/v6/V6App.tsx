@@ -5,11 +5,13 @@ import { useAuthChat } from "../../hooks/useAuthChat";
 import { useIsMobile } from "../../hooks/useIsMobile";
 import { V6Chat } from "./Chat";
 import { MODES, V6Icon } from "./icons";
+import "./workspace.css";
 import { buildDesktopSurfaceContext, type SurfaceContext } from "../../lib/yuliaSurfaceContext";
 import { normalizeModelPreference, type ModelPreference } from "../../lib/modelPreference";
+import { consumePendingMessage } from "../../marketing/useEnterApp";
 import { buildBigFakeInvestmentBoardTab, shouldOpenSampleInvestmentBoard } from "../../lib/sampleInvestmentBoard";
 import { useModelStore, type ModelType } from "../../lib/modelStore";
-import type { FileListView, FileScope, Message, ModeId, Tab } from "./types";
+import type { FileListView, FileScope, IconName, Message, ModeId, Tab } from "./types";
 
 const VALID_MODES: ModeId[] = ["today", "pipeline", "search", "studio", "files", "docs", "analysis", "intel", "library"];
 
@@ -190,6 +192,9 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
     return deepTab && !base.find(tab => tab.id === deepTab.id) ? [...base, deepTab] : base;
   });
   const [activeTabId, setActiveTabId] = useState(initial.tab ?? `${initial.mode}-root`);
+  // FAB chat open/closed (CD "Ramp" workspace — chat is a floating bubble).
+  const [chatOpen, setChatOpen] = useState(false);
+  const [acctOpen, setAcctOpen] = useState(false);
   const tabsRef = useRef<Tab[]>(tabs);
 
   useEffect(() => {
@@ -437,6 +442,22 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
     setTimeout(() => inputRef.current?.focus(), 50);
   };
 
+  // Marketing → app threshold: if the visitor submitted a message on the
+  // marketing site, consume it on mount, open Yulia, and send it so she answers
+  // the question they crossed over with. Fires once (consume clears it; ref
+  // guards against StrictMode double-invoke).
+  const pendingHandledRef = useRef(false);
+  useEffect(() => {
+    if (pendingHandledRef.current) return;
+    pendingHandledRef.current = true;
+    const pending = consumePendingMessage();
+    if (pending) {
+      setChatOpen(true);
+      setTimeout(() => send(pending), 60);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     try {
       localStorage.setItem("smbx_model_preference", modelPreference);
@@ -468,88 +489,6 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
   const modeLabel = MODES.find(m => m.id === activeMode)?.label ?? "Workspace";
   const launcherWork = (modeId: ModeId) => tabs.filter(tab => tabBelongsToLauncherMode(tab, modeId, tabs));
 
-  const renderLauncherTab = (tab: Tab, options: { child?: boolean; parentTitle?: string } = {}) => {
-    const parentDeal = options.parentTitle ? null : owningLauncherDealForTab(tab, tabs);
-    const dealContext = options.parentTitle ?? parentDeal?.title ?? inferredLauncherDealName(tab);
-    const label = cleanLauncherRepeatedScope(dealContext ? stripLauncherDealPrefix(tab.title, dealContext) : tab.title);
-    return (
-      <div
-        key={tab.id}
-        className={`top-work-row ${options.child ? "child" : "parent"} ${tab.id === activeTabId ? "active" : ""}`}
-      >
-        <button
-          className="top-work-item"
-          onClick={() => activateTab(tab.id)}
-          title={tab.title}
-        >
-          <span className="top-work-copy">
-            <span className="top-work-title">{label}</span>
-            <span className="top-work-meta">{topTabMeta(tab, tabs, Boolean(options.parentTitle || parentDeal))}</span>
-          </span>
-        </button>
-        <button
-          className="top-work-close"
-          onClick={(event) => {
-            event.stopPropagation();
-            closeTab(tab.id);
-          }}
-          aria-label={`Close ${tab.title}`}
-          title={`Close ${tab.title}`}
-        >
-          <V6Icon name="close" size={10} />
-        </button>
-      </div>
-    );
-  };
-
-  const renderLauncherWorkTree = (modeId: ModeId) => {
-    const modeTabs = launcherWork(modeId);
-    const tabTree = groupLauncherTabsByDeal(modeTabs);
-    if (modeTabs.length === 0) {
-      return null;
-    }
-    return (
-      <div className="top-work-stack" role="list">
-        {tabTree.deals.map(group => (
-          <div key={group.deal.id} className="top-work-branch" role="listitem">
-            {group.virtual ? (
-              <div className={`top-work-row parent virtual ${group.children.some(tab => tab.id === activeTabId) ? "active-parent" : ""}`}>
-                <button
-                  className="top-work-item"
-                  onClick={() => openTab({ id: launcherDealTabIdForTitle(group.deal.title), kind: "deal", title: group.deal.title, sourceMode: "pipeline" })}
-                >
-                  <span className="top-work-copy">
-                    <span className="top-work-title">{group.deal.title}</span>
-                    <span className="top-work-meta">Deal page</span>
-                  </span>
-                </button>
-              </div>
-            ) : renderLauncherTab(group.deal)}
-            {group.children.length > 0 && (
-              <div className="top-work-child-stack">
-                {group.children.map(tab => renderLauncherTab(tab, { child: true, parentTitle: group.deal.title }))}
-              </div>
-            )}
-          </div>
-        ))}
-        {tabTree.loose.map(tab => renderLauncherTab(tab))}
-      </div>
-    );
-  };
-
-  const renderLauncherChildren = (modeId: ModeId) => {
-    const openTabs = launcherWork(modeId);
-    if (openTabs.length === 0) return null;
-
-    return (
-      <div className="top-launcher-children">
-        <section className="top-work-section">
-          {renderLauncherWorkTree(modeId)}
-        </section>
-      </div>
-    );
-  };
-
   // ⌘K focuses Yulia from anywhere.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -562,85 +501,174 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // CD "Ramp" workspace sidebar nav, mapped to V6 modes. Diligence opens the
+  // Analyses hub (portfolio-aware recommendations + searchable catalog) instead
+  // of duplicating per-analysis links in the rail.
+  const wkNav: Array<{ section: string | null; items: Array<{ mode: ModeId; label: string; icon: IconName }> }> = [
+    { section: null, items: [{ mode: "today", label: "Home", icon: "today" }] },
+    { section: "Deal flow", items: [
+      { mode: "pipeline", label: "Pipeline", icon: "feed" },
+      { mode: "search", label: "Sourcing", icon: "search" },
+    ] },
+    { section: "Diligence", items: [
+      { mode: "analysis", label: "Analyses", icon: "chart" },
+    ] },
+    { section: "Documents", items: [
+      { mode: "studio", label: "CIMs & memos", icon: "studio" },
+      { mode: "files", label: "Data rooms", icon: "library" },
+      { mode: "library", label: "The Standard", icon: "doc" },
+    ] },
+  ];
+  const avatarInitials = ((user?.email || "SX").replace(/[^a-zA-Z]/g, "").slice(0, 2) || "SX").toUpperCase();
+
   return (
-    <div className="v6-root" style={A.shell}>
-      <div style={A.row}>
-        <div style={{ ...A.leftRail, width: chatWidth }}>
-          <div style={A.leftLauncherBar}>
-            <nav style={A.launcherStrip} aria-label="Workspace launchers">
-              {MODES.map(mode => {
-                const openCount = launcherWork(mode.id).length;
-                const launcherActive = activeMode === mode.id;
-                return (
-                  <div
-                    key={mode.id}
-                    className="top-launcher-wrap"
-                    style={A.topLauncherWrap}
-                  >
+    <div className="v6-root wk">
+      <div className="wk-app">
+        {/* SIDEBAR — CD sectioned IA, wired to V6 modes */}
+        <aside className="wknav">
+          <div className="wkbrand"><span className="brand-mark" />smb<b>X</b></div>
+          <nav className="wknavscroll" aria-label="Workspace">
+            {wkNav.map((grp, gi) => (
+              <div key={gi}>
+                {grp.section && <div className="navsec">{grp.section}</div>}
+                {grp.items.map((item, ii) => {
+                  const count = launcherWork(item.mode).length;
+                  const on = activeMode === item.mode;
+                  return (
                     <button
-                      className={`top-launcher ${launcherActive ? "active" : ""}`}
-                      style={{ ...A.topLauncher, ...(launcherActive ? A.topLauncherActive : undefined) }}
-                      onClick={() => pickMode(mode.id)}
-                      aria-label={mode.label}
-                      aria-current={launcherActive ? "page" : undefined}
+                      key={`${gi}-${ii}`}
+                      className={`navitem ${on ? "on" : ""}`}
+                      onClick={() => pickMode(item.mode)}
+                      aria-current={on ? "page" : undefined}
                     >
-                      <span className="top-launcher-icon" style={{ ...A.topLauncherIcon, ...(launcherActive ? A.topLauncherIconActive : undefined) }}>
-                        <V6Icon name={mode.icon} size={14} />
-                      </span>
-                      <span style={A.topLauncherLabel}>{mode.label}</span>
-                      {openCount > 0 && <span style={{ ...A.topLauncherBadge, ...(launcherActive ? A.topLauncherBadgeActive : undefined) }}>{openCount}</span>}
+                      <V6Icon name={item.icon} size={17} />
+                      <span>{item.label}</span>
+                      {count > 0 && <span className="badge">{count}</span>}
                     </button>
-                    {launcherActive && renderLauncherChildren(mode.id)}
-                  </div>
-                );
-              })}
-            </nav>
+                  );
+                })}
+              </div>
+            ))}
+          </nav>
+          <div className="wknav-foot">
+            <button className="askyulia" onClick={() => setChatOpen(true)}>
+              <span className="yg"><YuliaGlyphSvg size={18} /></span> Ask Yulia
+            </button>
           </div>
-          <div style={A.chatPane}>
-            <V6Chat
-              thread={chat.thread}
-              draft={draft}
-              setDraft={setDraft}
-              send={send}
-              inputRef={inputRef}
-              modeLabel={modeLabel}
-              onOpenTab={openTab}
-              sending={chat.sending}
-              streamingText={chat.streamingText}
-              activeTool={chat.activeTool}
-              error={chat.error}
-              modelPreference={modelPreference}
-              setModelPreference={setModelPreference}
-              showLearnLinks={!user}
-              showEmptySuggestions
-              onFileUpload={chat.uploadFile}
-              onConfirmStagedAction={chat.confirmStagedAction}
-              onCancelStagedAction={chat.cancelStagedAction}
-            />
+        </aside>
+
+        {/* MAIN — topbar + the tabbed canvas (V6Canvas keeps its engine) */}
+        <section className="wkmain">
+          <div className="wktopbar">
+            <button className="wksearch" onClick={() => pickMode("search")}>
+              <V6Icon name="search" size={15} />
+              Search deals, artifacts, methodology
+              <span className="kbd">⌘K</span>
+            </button>
+            <div className="wktop-r">
+              <button className="wkicon" title="New" onClick={() => pickMode("today")}><V6Icon name="plus" size={18} /></button>
+              <div className="wkacct-wrap">
+                <button
+                  className="wkav"
+                  title={user?.email || "Account"}
+                  aria-haspopup="menu"
+                  aria-expanded={acctOpen}
+                  onClick={() => setAcctOpen(o => !o)}
+                >{avatarInitials}</button>
+                {acctOpen && (
+                  <>
+                    <div className="wkacct-backdrop" onClick={() => setAcctOpen(false)} />
+                    <div className="wkacct" role="menu">
+                      <div className="wkacct-id">
+                        <div className="wkacct-name">{user?.email || "Signed in"}</div>
+                        <div className="wkacct-sub">smbX workspace</div>
+                      </div>
+                      <button className="wkacct-item" role="menuitem" onClick={() => { setAcctOpen(false); window.location.assign("/?marketing"); }}>Preview marketing site</button>
+                      <button className="wkacct-item danger" role="menuitem" onClick={() => {
+                        setAcctOpen(false);
+                        // Reset the marketing→app threshold ourselves so the reload lands on
+                        // the logged-out site, then sign the session out and hard-navigate.
+                        try {
+                          sessionStorage.removeItem("smbx_app_entered");
+                          sessionStorage.removeItem("smbx_preview_marketing");
+                        } catch { /* ignore */ }
+                        void onSignOut();
+                        window.location.assign("/");
+                      }}>Sign out</button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
+          <div className="wkcanvas">
+            <Suspense fallback={<V6ShellLoader />}>
+              <V6Canvas
+                tabs={tabs}
+                activeTabId={activeTabId}
+                setActiveTabId={setActiveTabId}
+                openTab={openTab}
+                closeTab={closeTab}
+                reorderTabs={reorderTabs}
+                onPickMode={pickMode}
+                onTalkToYulia={(prompt) => { setChatOpen(true); send(prompt); }}
+                user={user}
+                onSignOut={onSignOut}
+                modelPreference={modelPreference}
+              />
+            </Suspense>
+          </div>
+        </section>
+      </div>
+
+      {/* FAB CHAT — V6Chat lifted into a floating bubble */}
+      {!chatOpen && (
+        <button className="wk-fab" aria-label="Ask Yulia" onClick={() => setChatOpen(true)}>
+          <YuliaGlyphSvg size={24} /><span className="bdot" />
+        </button>
+      )}
+      <div className={`wk-chatwin ${chatOpen ? "open" : ""}`} role="dialog" aria-label="Yulia">
+        <div className="wk-chatwin-hd">
+          <span className="av"><YuliaGlyphSvg size={16} /></span>
+          <span className="nm">Yulia</span>
+          <button className="cx" aria-label="Close" onClick={() => setChatOpen(false)}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
+          </button>
         </div>
-        <div onMouseDown={onDragStart} title="Drag to resize chat" role="separator" aria-orientation="vertical" style={A.dragHandle}>
-          <div style={A.dragGrip} />
-        </div>
-        <div className="v6-canvas-frame" style={A.canvasPane}>
-          <Suspense fallback={<V6ShellLoader />}>
-            <V6Canvas
-              tabs={tabs}
-              activeTabId={activeTabId}
-              setActiveTabId={setActiveTabId}
-              openTab={openTab}
-              closeTab={closeTab}
-              reorderTabs={reorderTabs}
-              onPickMode={pickMode}
-              onTalkToYulia={(prompt) => send(prompt)}
-              user={user}
-              onSignOut={onSignOut}
-              modelPreference={modelPreference}
-            />
-          </Suspense>
+        <div className="wk-chatwin-body">
+          <V6Chat
+            thread={chat.thread}
+            draft={draft}
+            setDraft={setDraft}
+            send={send}
+            inputRef={inputRef}
+            modeLabel={modeLabel}
+            onOpenTab={openTab}
+            sending={chat.sending}
+            streamingText={chat.streamingText}
+            activeTool={chat.activeTool}
+            error={chat.error}
+            modelPreference={modelPreference}
+            setModelPreference={setModelPreference}
+            showLearnLinks={!user}
+            showEmptySuggestions
+            onFileUpload={chat.uploadFile}
+            onConfirmStagedAction={chat.confirmStagedAction}
+            onCancelStagedAction={chat.cancelStagedAction}
+          />
         </div>
       </div>
     </div>
+  );
+}
+
+/* Yulia glyph (half-filled circle) used in the workspace sidebar + FAB. */
+function YuliaGlyphSvg({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M12 3a9 9 0 010 18z" fill="currentColor" />
+    </svg>
   );
 }
 
@@ -1145,7 +1173,7 @@ const A: Record<string, CSSProperties> = {
   shell: {
     display: "flex", flexDirection: "column",
     height: "100vh", width: "100%", overflow: "hidden",
-    background: "linear-gradient(180deg, #DDE8F8 0%, #E2EBF9 48%, #EFF4FD 100%)",
+    background: "linear-gradient(180deg, #ECE9DF 0%, #ECE9DF 48%, #F3F1EA 100%)",
   },
   leftLauncherBar: {
     flex: "0 0 auto",
@@ -1187,14 +1215,14 @@ const A: Record<string, CSSProperties> = {
     gap: 8,
     cursor: "pointer",
     border: "1px solid transparent",
-    color: "#4D5B6E",
+    color: "#57534A",
     fontSize: 14,
     fontWeight: 720,
   },
   topLauncherActive: {
     background: "rgba(255,255,255,.42)",
     border: "1px solid rgba(166, 190, 216, 0.36)",
-    color: "#2F5F8D",
+    color: "#57534A",
     boxShadow: "inset 0 1px 0 rgba(255,255,255,.54)",
   },
   topLauncherIcon: {
@@ -1207,7 +1235,7 @@ const A: Record<string, CSSProperties> = {
   },
   topLauncherIconActive: {
     background: "rgba(255, 255, 255, 0.54)",
-    color: "#2F5F8D",
+    color: "#57534A",
   },
   topLauncherLabel: {
     lineHeight: 1,
@@ -1224,12 +1252,12 @@ const A: Record<string, CSSProperties> = {
     placeItems: "center",
     fontFamily: "var(--font-mono)",
     fontSize: 9.5,
-    color: "#3F6689",
+    color: "#57534A",
     background: "rgba(227, 240, 253, 0.96)",
     boxShadow: "inset 0 0 0 1px rgba(151, 183, 214, 0.62)",
   },
   topLauncherBadgeActive: {
-    color: "#2F5F8D",
+    color: "#57534A",
     background: "rgba(235, 244, 253, 0.78)",
     boxShadow: "0 0 0 1px rgba(150, 174, 205, 0.42)",
   },
@@ -1263,7 +1291,7 @@ const A: Record<string, CSSProperties> = {
     display: "grid",
     gridTemplateRows: "auto minmax(0, 1fr)",
     borderRadius: 0,
-    color: "#263245",
+    color: "#191813",
     background: "transparent",
     border: 0,
     boxShadow: "none",
@@ -1282,7 +1310,7 @@ const A: Record<string, CSSProperties> = {
     minWidth: 0,
   },
   railTabTitle: {
-    color: "#253244",
+    color: "#191813",
     fontSize: 13,
     lineHeight: 1.08,
     fontWeight: 850,
@@ -1292,7 +1320,7 @@ const A: Record<string, CSSProperties> = {
     whiteSpace: "nowrap",
   },
   railTabMeta: {
-    color: "#6D7D91",
+    color: "#8B867A",
     fontSize: 10.5,
     lineHeight: 1.05,
     fontWeight: 650,
@@ -1304,7 +1332,7 @@ const A: Record<string, CSSProperties> = {
     borderRadius: 999,
     display: "grid",
     placeItems: "center",
-    color: "#496B90",
+    color: "#8B867A",
     background: "rgba(255,255,255,.46)",
     boxShadow: "inset 0 0 0 1px rgba(170,196,222,.34)",
     fontSize: 10.5,
@@ -1353,7 +1381,7 @@ const A: Record<string, CSSProperties> = {
     position: "relative",
     borderRadius: 12,
     overflow: "hidden",
-    background: "linear-gradient(180deg, #FFFFFF 0%, #FEFFFF 58%, #F8FBFF 100%)",
+    background: "linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 58%, #FBFAF6 100%)",
     border: "1px solid rgba(158, 180, 207, 0.78)",
     boxShadow: [
       "0 0 0 1px rgba(255, 255, 255, 0.66)",
@@ -1373,7 +1401,7 @@ const A: Record<string, CSSProperties> = {
     position: "absolute", top: "50%", left: "50%",
     transform: "translate(-50%, -50%)",
     width: 3, height: 42, borderRadius: 999,
-    background: "#778A9E", opacity: 0.18,
+    background: "#8B867A", opacity: 0.18,
   },
   shellLoader: {
     width: "100%",
@@ -1382,7 +1410,7 @@ const A: Record<string, CSSProperties> = {
     alignItems: "center",
     justifyContent: "center",
     gap: 10,
-    color: "#5E6F83",
+    color: "#57534A",
     fontSize: 12,
     fontWeight: 700,
   },
@@ -1390,7 +1418,7 @@ const A: Record<string, CSSProperties> = {
     width: 9,
     height: 9,
     borderRadius: 999,
-    background: "#8A9AE8",
+    background: "#2BFF77",
     boxShadow: "0 0 0 6px rgba(138,154,232,0.14)",
   },
 };

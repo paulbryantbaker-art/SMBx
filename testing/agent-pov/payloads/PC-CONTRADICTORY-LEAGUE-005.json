@@ -1,0 +1,35 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "league='L10' (mega-cap) but the only context is SDE-based $80K monthly — micro/SDE territory.",
+  "payload": {
+    "journey": "sell",
+    "league": "L10",
+    "sdeCents": 96000000,
+    "industry": "plumbing services",
+    "jurisdiction": "US-FL"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "sell",
+      "jurisdiction": "US-FL",
+      "industry": "plumbing services"
+    },
+    "missingFields": [
+      "explicit_league_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "league-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-LEAGUE-005"
+}

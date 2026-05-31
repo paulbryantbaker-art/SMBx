@@ -121,12 +121,14 @@ export function buildAgentCard() {
       dealRouteMapStatus: dealRouteMap.status,
       passThroughPricingRule: passThroughSurface.pricingRule,
     },
+    // Pricing source of truth: SMBX_PRICING_LOCKED.md and server/services/subscriptionService.ts PLANS.
+    // If these strings disagree with PLANS, PLANS wins.
     pricing: {
       free: '$0',
-      solo: '$79/mo',
-      pro: '$199/mo',
-      team: '$499/mo',
-      enterprise: '$2,500+/mo',
+      solo: '$99/mo',
+      pro: '$249/mo',
+      team: '$749/mo',
+      enterprise: '$3,000+/mo',
     },
     boundaries: [
       'Yulia provides deal intelligence, modeling, drafting, and orchestration.',

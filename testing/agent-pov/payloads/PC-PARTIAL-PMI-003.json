@@ -1,0 +1,42 @@
+{
+  "id": "PC-PARTIAL-PMI-003",
+  "category": "PARTIAL",
+  "description": "Partial payload: PMI tuck-in integration synergy targets. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "pmi",
+    "stage": "optimization",
+    "acquired_entity": "tuck_in_b",
+    "integration_type": "tuck_in",
+    "baseline_ebitda_cents": 800000000,
+    "synergy_target_cents": 200000000,
+    "industry": "distribution"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "pmi",
+      "subJourney": "pmi_optimization",
+      "industry": "distribution"
+    },
+    "missingFields": [
+      "synergy_phasing",
+      "one_time_costs_cents",
+      "integration_owner"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "pmi",
+    "tuck-in",
+    "optimization",
+    "partial"
+  ]
+}

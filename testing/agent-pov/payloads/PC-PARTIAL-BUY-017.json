@@ -1,0 +1,44 @@
+{
+  "id": "PC-PARTIAL-BUY-017",
+  "category": "PARTIAL",
+  "description": "Partial payload: L6 LMM buy: carve-out from public co. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "industrial coatings",
+    "target_revenue_cents": 35000000000,
+    "target_ebitda_cents": 4000000000,
+    "target_jurisdiction": "US-DE",
+    "deal_type": "carve_out",
+    "buyer_role": "pe_sponsor_lmm"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L5",
+      "industry": "industrial coatings",
+      "jurisdiction": "US-DE"
+    },
+    "missingFields": [
+      "purchase_price_range",
+      "tsa_terms",
+      "separation_scope"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L6",
+    "partial",
+    "carve-out"
+  ]
+}

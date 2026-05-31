@@ -1,0 +1,59 @@
+{
+  "category": "RICH",
+  "description": "Seed-stage SAFE round — full cap table, post-money cap, MFN, prior angel notes.",
+  "payload": {
+    "journey": "raise",
+    "raiseType": "seed",
+    "instrument": "safe_post_money",
+    "industry": "consumer mobile apps",
+    "jurisdiction": "US-DE",
+    "league": "L1",
+    "raiseAmountCents": 200000000,
+    "postMoneyCapCents": 1200000000,
+    "mfnClause": true,
+    "priorInstruments": [
+      {
+        "type": "safe_pre_money",
+        "amountCents": 50000000,
+        "capCents": 600000000
+      }
+    ],
+    "capTable": {
+      "founderPct": 75,
+      "optionPoolPct": 10,
+      "priorInvestorsPct": 15
+    },
+    "taxClassification": "c_corp",
+    "stage": "term_sheet"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "early_stage_raise",
+      "league": "L1",
+      "jurisdiction": "US-DE",
+      "industry": "consumer mobile apps",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "L1",
+    "rich",
+    "seed"
+  ],
+  "id": "PC-RICH-RAISE-001"
+}

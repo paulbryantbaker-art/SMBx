@@ -1,0 +1,18 @@
+{
+  "id": "PC-UNSUPPORTED-VERSION-002",
+  "category": "LINE_VIOLATION",
+  "description": "Agent provides an unknown methodologyVersion in the envelope. Same structured-error path as 001 but for methodology pin.",
+  "payload": {
+    "journey": "buy",
+    "envelope_override": { "methodologyVersion": "V99-future" }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "unsupported_version",
+    "persistsDealState": false,
+    "auditRowWritten": false
+  },
+  "tags": ["unsupported-version", "methodology-pin"]
+}

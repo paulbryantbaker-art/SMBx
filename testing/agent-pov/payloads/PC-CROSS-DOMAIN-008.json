@@ -1,0 +1,36 @@
+{
+  "id": "PC-CROSS-DOMAIN-008",
+  "category": "CROSS_DOMAIN",
+  "description": "G28 + G30: Distressed REIT facing 75/75/90 compliance breach + Chapter 11 plan-feasibility analysis needed. Substrate must surface plan feasibility (M152), BIOC (M153), AND REIT compliance triad (M172).",
+  "payload": {
+    "journey": "sell",
+    "subjourney": "principal_seller",
+    "target_industry": "real estate investment trust",
+    "target_jurisdiction": "US-MD",
+    "asset_class_signal": "REIT",
+    "reit_compliance_breach": true,
+    "bankruptcy_status": "chapter_11_filed",
+    "bankruptcyFilingPending": true,
+    "real_estate_pct_of_ev": 95
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "distressed_restructuring",
+      "distressPosture": "full_distress",
+      "assetClass": "real_estate"
+    },
+    "missingFields": [
+      "income_tests",
+      "asset_tests",
+      "distribution_tests",
+      "plan_class_recoveries"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "G28", "G30", "REIT", "compliance-breach"]
+}

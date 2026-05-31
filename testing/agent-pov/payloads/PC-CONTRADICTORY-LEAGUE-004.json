@@ -1,0 +1,40 @@
+{
+  "category": "CONTRADICTORY",
+  "description": "league='L1' but full PE sponsor equity stack + senior debt + sub debt (LMM+ structure).",
+  "payload": {
+    "journey": "buy",
+    "league": "L1",
+    "sdeCents": 40000000,
+    "financing": {
+      "sponsorEquityCents": 1500000000,
+      "seniorDebtCents": 1100000000,
+      "subordinatedDebtCents": 300000000
+    },
+    "industry": "B2B services",
+    "jurisdiction": "US-DE"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-DE",
+      "industry": "B2B services"
+    },
+    "missingFields": [
+      "explicit_league_confirmation"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "contradictory",
+    "league-conflict"
+  ],
+  "id": "PC-CONTRADICTORY-LEAGUE-004"
+}

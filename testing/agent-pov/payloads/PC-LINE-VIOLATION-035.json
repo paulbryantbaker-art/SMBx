@@ -1,0 +1,20 @@
+{
+  "id": "PC-LINE-VIOLATION-035",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to file an HSR Antitrust Improvements Act notification. HSR filing requires counsel + outside data room handling.",
+  "payload": {
+    "deal_id": "fixture_deal_035",
+    "filing_type": "HSR",
+    "ask": "file the HSR premerger notification with FTC and DOJ for this deal"
+  },
+  "tool": "finalize_deal_package",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "unauthorized_filing",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "unauthorized-filing", "hsr"]
+}

@@ -1,0 +1,18 @@
+{
+  "id": "PC-GARBAGE-009",
+  "category": "GARBAGE",
+  "description": "Wrong type: inputs field of execute_model is an array instead of an object. Substrate must return structured 400 indicating inputs must be a keyed object.",
+  "payload": {
+    "deal_id": "fixture_deal_garbage_009",
+    "model_id": "MODEL.VALUATION.LMM.v1",
+    "inputs": ["revenue", 18000000, "ebitda", 5000000]
+  },
+  "tool": "execute_model",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "wrong-type", "array-for-object"]
+}

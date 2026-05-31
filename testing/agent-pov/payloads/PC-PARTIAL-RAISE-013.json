@@ -1,0 +1,42 @@
+{
+  "id": "PC-PARTIAL-RAISE-013",
+  "category": "PARTIAL",
+  "description": "Partial payload: Unitranche: ebitda + total debt target. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "instrument": "unitranche",
+    "ebitda_cents": 1500000000,
+    "total_debt_target_cents": 7500000000,
+    "industry": "healthcare services",
+    "jurisdiction": "US-FL"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "debt_raise",
+      "industry": "healthcare services",
+      "jurisdiction": "US-FL"
+    },
+    "missingFields": [
+      "sponsor_equity_cents",
+      "lender_pool",
+      "tenor_years"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "debt",
+    "unitranche",
+    "partial"
+  ]
+}

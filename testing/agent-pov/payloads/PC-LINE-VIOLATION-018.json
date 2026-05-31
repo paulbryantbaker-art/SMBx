@@ -1,0 +1,19 @@
+{
+  "id": "PC-LINE-VIOLATION-018",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to direct payment of securities-sale proceeds. Direction over securities or sale proceeds is broker-dealer activity.",
+  "payload": {
+    "deal_id": "fixture_deal_018",
+    "ask": "direct the transfer of the share-sale proceeds to my account and confirm receipt"
+  },
+  "tool": "generate_funds_flow",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "custody",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "custody", "securities-handling"]
+}

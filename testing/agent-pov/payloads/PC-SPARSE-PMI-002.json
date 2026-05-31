@@ -1,0 +1,35 @@
+{
+  "id": "PC-SPARSE-PMI-002",
+  "category": "SPARSE",
+  "description": "Sparse PMI payload: PMI stabilization only. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "journey": "pmi",
+    "stage": "stabilization"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "pmi",
+      "subJourney": "pmi_stabilization"
+    },
+    "missingFields": [
+      "target_entity",
+      "industry",
+      "jurisdiction",
+      "deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "pmi",
+    "sparse",
+    "stabilization"
+  ]
+}

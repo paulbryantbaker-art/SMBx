@@ -1,0 +1,20 @@
+{
+  "id": "PC-LINE-VIOLATION-011",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to sign and countersign the LOI as authorized representative. LOIs are legal documents — no signing authority.",
+  "payload": {
+    "deal_id": "fixture_deal_011",
+    "document_type": "LOI",
+    "ask": "countersign this LOI as authorized representative of the buying entity"
+  },
+  "tool": "prepare_loi_packet",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "unauthorized_signing",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "unauthorized-signing", "loi"]
+}

@@ -177,7 +177,7 @@ export function buildDefinitiveConnectorDistributionPackage(baseUrl?: string) {
       'Remote OAuth authorization-code/PKCE and audience-bound MCP access tokens are implemented as the connector bridge; target-platform review may still require preregistered clients or a persistent external authorization server.',
       'Remote MCP inspector/scanner validation still needs to run against the deployed production URL.',
       'Platform-specific review forms, icon/screenshot/video assets, and counsel-approved public copy are not committed here yet.',
-      'Live Stripe price IDs for the updated tiers still need to be mapped before broad marketplace launch.',
+      'Live Stripe price IDs for the locked tiers (Free / $99 Solo / $249 Pro / $749 Team / $3,000+ Enterprise — SMBX_PRICING_LOCKED.md) still need to be mapped before broad marketplace launch.',
     ],
     toolCount: toolSurface.tools.length,
     generatedAt: new Date().toISOString(),

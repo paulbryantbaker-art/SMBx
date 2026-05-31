@@ -1,0 +1,56 @@
+{
+  "category": "RICH",
+  "description": "L4 owner-rep + structured outcome (earnout + rollover) for healthcare-services seller.",
+  "payload": {
+    "journey": "sell",
+    "sellerRole": "owner_rep",
+    "industry": "ambulatory healthcare services",
+    "naics": "621498",
+    "jurisdiction": "US-CA",
+    "league": "L4",
+    "ttmRevenueCents": 2800000000,
+    "adjustedEbitdaCents": 520000000,
+    "multiYearPnlPresent": true,
+    "yearsOfHistory": 4,
+    "askingPriceCents": 4160000000,
+    "desiredStructure": {
+      "earnoutCents": 416000000,
+      "rolloverEquityPct": 20
+    },
+    "taxClassification": "c_corp",
+    "qsbsEligible": true,
+    "stage": "marketing"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "owner_rep",
+      "league": "L4",
+      "jurisdiction": "US-CA",
+      "industry": "ambulatory healthcare services",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L4",
+    "rich",
+    "earnout",
+    "rollover",
+    "qsbs"
+  ],
+  "id": "PC-RICH-L4-SELL-003"
+}

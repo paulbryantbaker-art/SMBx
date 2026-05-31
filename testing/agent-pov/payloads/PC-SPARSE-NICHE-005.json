@@ -1,0 +1,22 @@
+{
+  "id": "PC-SPARSE-NICHE-005",
+  "category": "SPARSE",
+  "description": "Sparse NICHE payload: methodology_version + journey only. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "methodology_version": "v19",
+    "journey": "sell"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "persistsDealState": false,
+    "versionPins": false,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "niche",
+    "sparse",
+    "methodology-only"
+  ]
+}

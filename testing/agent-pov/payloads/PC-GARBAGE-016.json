@@ -1,0 +1,19 @@
+{
+  "id": "PC-GARBAGE-016",
+  "category": "GARBAGE",
+  "description": "Junk values: an emoji glyph passed where a monetary field (ebitda) should be a number or coerceable money string. Substrate's payload-shape validator must return structured 400 explaining ebitda must be numeric/coerceable, NEVER guess.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "B2B services",
+    "target_jurisdiction": "US-TX",
+    "ebitda": "🤖"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "junk-string", "emoji-money"]
+}

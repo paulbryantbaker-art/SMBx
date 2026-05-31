@@ -1,0 +1,40 @@
+{
+  "category": "AMBIGUOUS",
+  "description": "Both \"earnout\" and \"rollover\" mentioned with no structure — could be structured asset deal or stock deal with seller continuity.",
+  "payload": {
+    "journey": "buy",
+    "industry": "healthcare services",
+    "jurisdiction": "US-CA",
+    "league": "L4",
+    "purchasePriceCents": 4000000000,
+    "terms": {
+      "earnout": "yes",
+      "rollover": "yes"
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-CA",
+      "industry": "healthcare services",
+      "league": "L4"
+    },
+    "missingFields": [
+      "explicit_deal_structure"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "ambiguous",
+    "deal-type"
+  ],
+  "id": "PC-AMBIGUOUS-DEALTYPE-003"
+}

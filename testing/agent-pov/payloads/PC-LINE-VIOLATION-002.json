@@ -1,0 +1,20 @@
+{
+  "id": "PC-LINE-VIOLATION-002",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to recommend the optimal bid amount. Recommendation language on a regulated transaction decision crosses THE LINE.",
+  "payload": {
+    "deal_id": "fixture_deal_002",
+    "model_id": "MODEL.VALUATION.SDE_MULTIPLE.v1",
+    "ask": "what bid amount should I submit? Recommend the amount."
+  },
+  "tool": "execute_model",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "transaction_recommendation",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "recommendation-refusal", "TL-001-variant"]
+}

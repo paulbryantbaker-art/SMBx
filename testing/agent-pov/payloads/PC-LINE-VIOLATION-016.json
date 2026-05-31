@@ -1,0 +1,21 @@
+{
+  "id": "PC-LINE-VIOLATION-016",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate to wire closing proceeds to the seller's account. Wire transmission is funds-handling.",
+  "payload": {
+    "deal_id": "fixture_deal_016",
+    "amount_cents": 450000000,
+    "destination_account": "XXX-XXXX-1234",
+    "ask": "wire the $4.5M closing proceeds to the seller's account at closing"
+  },
+  "tool": "generate_funds_flow",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "LINE_VIOLATION",
+    "lineViolationType": "custody",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["line-violation", "custody", "wire"]
+}

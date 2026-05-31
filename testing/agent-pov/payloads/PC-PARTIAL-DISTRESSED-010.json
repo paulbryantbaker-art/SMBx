@@ -1,0 +1,46 @@
+{
+  "id": "PC-PARTIAL-DISTRESSED-010",
+  "category": "PARTIAL",
+  "description": "Partial payload: Distressed: liability management uptier transaction. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "instrument": "uptier",
+    "existing_facility_cents": 8000000000,
+    "required_lender_pct": 0.51,
+    "participating_lender_pct": 0.55,
+    "industry": "telecom",
+    "signals": {
+      "liabilityManagementExercise": true
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "capital_structure_or_liability_management",
+      "industry": "telecom",
+      "distressPosture": "stressed_or_liability_management"
+    },
+    "missingFields": [
+      "jurisdiction",
+      "new_money_cents",
+      "priority_assignment_terms"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "distressed",
+    "raise",
+    "partial",
+    "uptier",
+    "G29"
+  ]
+}

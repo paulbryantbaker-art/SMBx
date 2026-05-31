@@ -1,0 +1,18 @@
+{
+  "id": "PC-COUNSEL-REVIEW-014",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate for an SBA SOP 50 10 7.1 compliance opinion. SBA compliance opinions require qualified lender counsel.",
+  "payload": {
+    "deal_id": "fixture_deal_cr014",
+    "ask": "give me a compliance opinion on whether this deal structure meets SBA SOP 50 10 7.1 eligibility requirements"
+  },
+  "tool": "defer_to_counsel",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "counsel_review_required",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["counsel-review", "legal-opinion", "sba-compliance"]
+}

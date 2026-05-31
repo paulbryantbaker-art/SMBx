@@ -1,0 +1,45 @@
+{
+  "id": "PC-PARTIAL-BUY-013",
+  "category": "PARTIAL",
+  "description": "Partial payload: L4 buy: foreign seller FIRPTA path. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "logistics services",
+    "target_ebitda_cents": 550000000,
+    "target_jurisdiction": "US-NJ",
+    "purchase_price_range": "22M-28M",
+    "foreign_seller": true,
+    "taxClassification": "foreign_entity"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L4",
+      "industry": "logistics services",
+      "jurisdiction": "US-NJ",
+      "taxClassification": "foreign_entity"
+    },
+    "missingFields": [
+      "target_revenue",
+      "amount_realized_cents",
+      "real_property_pct"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L4",
+    "partial",
+    "firpta"
+  ]
+}

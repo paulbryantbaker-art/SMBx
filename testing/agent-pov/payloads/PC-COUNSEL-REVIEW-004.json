@@ -1,0 +1,18 @@
+{
+  "id": "PC-COUNSEL-REVIEW-004",
+  "category": "LINE_VIOLATION",
+  "description": "Agent asks substrate for a §1031 like-kind exchange opinion. Real-estate tax-deferral structuring opinions must route to counsel.",
+  "payload": {
+    "deal_id": "fixture_deal_cr004",
+    "ask": "opine on whether this property qualifies for §1031 like-kind exchange treatment"
+  },
+  "tool": "update_tax_position",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "counsel_review_required",
+    "persistsDealState": false,
+    "auditRowWritten": true
+  },
+  "tags": ["counsel-review", "tax-opinion", "section-1031"]
+}

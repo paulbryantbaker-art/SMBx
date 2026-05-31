@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, lazy, Suspense, type ReactNode } from 'react';
 import { Route, Switch, Redirect, useLocation } from 'wouter';
 import { DEV_AUTH_BYPASS, useAuth, authHeaders } from './hooks/useAuth';
 import { ChatProvider } from './context/ChatContext';
@@ -77,8 +77,19 @@ import Signup from './pages/public/Signup';
 import Privacy from './pages/public/Privacy';
 import Terms from './pages/public/Terms';
 
+
 // Lazy-load secondary pages
 const V6App = lazy(() => import('./components/v6/V6App'));
+const MarketingHome = lazy(() => import('./marketing/pages/Home'));
+const MarketingBuy = lazy(() => import('./marketing/pages/Buy'));
+const MarketingSell = lazy(() => import('./marketing/pages/Sell'));
+const MarketingRaise = lazy(() => import('./marketing/pages/Raise'));
+const MarketingIntegrate = lazy(() => import('./marketing/pages/Integrate'));
+const MarketingPricing = lazy(() => import('./marketing/pages/Pricing'));
+const MarketingStandard = lazy(() => import('./marketing/pages/Standard'));
+const MarketingStandardModel = lazy(() => import('./marketing/pages/StandardModel'));
+const MarketingConnectors = lazy(() => import('./marketing/pages/Connectors'));
+const MarketingAbout = lazy(() => import('./marketing/pages/About'));
 const SharedDocument = lazy(() => import('./pages/public/SharedDocument'));
 const SharedDocumentView = lazy(() => import('./pages/SharedDocumentView'));
 const AcceptInvite = lazy(() => import('./pages/public/AcceptInvite'));
@@ -91,6 +102,21 @@ const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 export default function App() {
   const { user, loading, login, register, loginWithGoogle, migrateSession } = useAuth();
   const [location, navigate] = useLocation();
+
+  // Dev/preview escape hatch: `?marketing` forces the logged-out marketing view
+  // for the session (DEV_AUTH_BYPASS otherwise supplies a synthetic user, so the
+  // marketing branch is unreachable in dev). `?app` exits preview back to the app.
+  const [previewMarketing] = useState(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('app')) sessionStorage.removeItem('smbx_preview_marketing');
+      else if (params.has('marketing')) {
+        sessionStorage.setItem('smbx_preview_marketing', '1');
+        sessionStorage.removeItem('smbx_app_entered');
+      }
+      return sessionStorage.getItem('smbx_preview_marketing') === '1';
+    } catch { return false; }
+  });
 
   const [googleError, setGoogleError] = useState('');
   const googleInitRef = useRef(false);
@@ -180,6 +206,15 @@ export default function App() {
 
   if (loading) return <PageLoader />;
 
+  // Surface decision for a marketing path: render the marketing page when the
+  // Two-surface rule: logged-out ALWAYS sees marketing (no anonymous app); the
+  // app shell renders only for an authenticated user. `previewMarketing` lets a
+  // signed-in user peek at the logged-out site.
+  const marketingOrApp = (page: ReactNode): ReactNode =>
+    previewMarketing || !user
+      ? <Suspense fallback={<PageLoader />}>{page}</Suspense>
+      : <Suspense fallback={<PageLoader />}><V6App /></Suspense>;
+
   return (
     <ChatProvider>
       <Switch>
@@ -209,7 +244,9 @@ export default function App() {
 
         {/* Auth */}
         <Route path="/login">
-          {DEV_AUTH_BYPASS || user ? <Redirect to="/" /> : (
+          {/* Redirect only when actually signed in — NOT on DEV_AUTH_BYPASS, or a
+              logged-out dev user can never reach the page (and its "Sign in as Paul"). */}
+          {user ? <Redirect to="/" /> : (
             <Login
               onLogin={handleLoginSuccess}
               onGoogleLogin={handleGoogleLogin}
@@ -220,9 +257,12 @@ export default function App() {
           )}
         </Route>
         <Route path="/signup">
-          {DEV_AUTH_BYPASS || user ? <Redirect to="/" /> : (
+          {/* Reachable when logged out (incl. dev) so the marketing chat funnel
+              lands new prospects on onboarding, not a redirect. */}
+          {user ? <Redirect to="/" /> : (
             <Signup
               onRegister={handleRegisterSuccess}
+              onLogin={handleLoginSuccess}
               onGoogleLogin={handleGoogleLogin}
               onNavigateLogin={() => navigate('/login')}
             />
@@ -258,6 +298,22 @@ export default function App() {
             <Redirect to={user ? '/' : '/login'} />
           )}
         </Route>
+
+        {/* Marketing site (Surface 1, logged-out). Each page renders the
+            marketing surface when logged out + not-yet-entered; otherwise the
+            app shell. Submitting a chat / "Ask Yulia" sets the entered-app flag
+            and hard-reloads → the app renders. The model page must precede
+            /standard so the more specific path matches first. */}
+        <Route path="/buy">{marketingOrApp(<MarketingBuy />)}</Route>
+        <Route path="/sell">{marketingOrApp(<MarketingSell />)}</Route>
+        <Route path="/raise">{marketingOrApp(<MarketingRaise />)}</Route>
+        <Route path="/integrate">{marketingOrApp(<MarketingIntegrate />)}</Route>
+        <Route path="/pricing">{marketingOrApp(<MarketingPricing />)}</Route>
+        <Route path="/connectors">{marketingOrApp(<MarketingConnectors />)}</Route>
+        <Route path="/about">{marketingOrApp(<MarketingAbout />)}</Route>
+        <Route path="/standard/working-capital-peg">{marketingOrApp(<MarketingStandardModel />)}</Route>
+        <Route path="/standard">{marketingOrApp(<MarketingStandard />)}</Route>
+        <Route path="/">{marketingOrApp(<MarketingHome />)}</Route>
 
         {/* Catch-all → V6 Files Workspace (canonical 2026-05-01).
             Replaced V3App. All retired routes fall through here. */}

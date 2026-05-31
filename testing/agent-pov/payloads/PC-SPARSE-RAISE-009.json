@@ -1,0 +1,34 @@
+{
+  "id": "PC-SPARSE-RAISE-009",
+  "category": "SPARSE",
+  "description": "Sparse RAISE payload: NAV facility signal. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "instrument": "nav_facility"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "debt_raise"
+    },
+    "missingFields": [
+      "target_amount",
+      "industry",
+      "jurisdiction"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "sparse",
+    "nav-facility"
+  ]
+}

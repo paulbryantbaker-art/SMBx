@@ -1,0 +1,19 @@
+{
+  "id": "PC-GARBAGE-007",
+  "category": "GARBAGE",
+  "description": "Wrong type: sde passed as a string with non-numeric content. Substrate's payload-shape validator must reject with field-level type guidance.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "retail",
+    "target_jurisdiction": "US-NY",
+    "sde": "low"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "wrong-type", "string-for-money"]
+}

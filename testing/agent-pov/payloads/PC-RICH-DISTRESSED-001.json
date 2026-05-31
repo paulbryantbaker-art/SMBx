@@ -1,0 +1,62 @@
+{
+  "category": "RICH",
+  "description": "L4 363 sale acquisition — full distress signals: cash runway, secured-debt prices, covenant breach, bankruptcy filed.",
+  "payload": {
+    "journey": "buy",
+    "industry": "specialty retail",
+    "naics": "448140",
+    "jurisdiction": "US-DE",
+    "league": "L4",
+    "ttmRevenueCents": 3200000000,
+    "ebitdaCents": -120000000,
+    "adjustedEbitdaCents": -80000000,
+    "purchasePriceCents": 800000000,
+    "dealStructure": "asset_purchase_363",
+    "taxClassification": "c_corp",
+    "signals": {
+      "cashRunwayDays": 45,
+      "fccr": 0.6,
+      "securedDebtTradingPriceCents": 55,
+      "maintenanceCovenantBreachWithinQuarters": 0,
+      "bankruptcyFilingPending": false,
+      "solvencyProngFailed": true
+    },
+    "bankruptcyChapter": "11",
+    "stalkingHorseBid": true,
+    "financing": {
+      "sponsorEquityCents": 800000000,
+      "seniorDebtCents": 0
+    },
+    "stage": "stalking_horse"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "distressed_buy_side",
+      "league": "L4",
+      "jurisdiction": "US-DE",
+      "industry": "specialty retail",
+      "distressPosture": "full_distress",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "rich",
+    "distressed",
+    "L4",
+    "buy"
+  ],
+  "id": "PC-RICH-DISTRESSED-001"
+}

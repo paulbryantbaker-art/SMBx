@@ -198,15 +198,15 @@ function V6Msg({
     <div className="m-fade-up" style={{ display: "flex", gap: 10, marginBottom: 14 }}>
       <div style={{
         width: 24, height: 24, flexShrink: 0, borderRadius: 7,
-        background: isY ? "var(--m-primary-container)" : "var(--m-surface-2)",
-        color: isY ? "var(--m-on-primary-container)" : "var(--m-on-surface-var)",
+        background: isY ? "var(--accent-soft)" : "var(--surface-2)",
+        color: isY ? "var(--accent-strong)" : "var(--ink-3)",
         display: "grid", placeItems: "center",
         fontFamily: "var(--font-mono)", fontWeight: 600, fontSize: 10,
       }}>{isY ? "Y" : ">"}</div>
       <div style={{ flex: 1, minWidth: 0, paddingTop: 3 }}>
         <div style={{
           fontSize: 12.5, lineHeight: 1.55,
-          color: "var(--m-on-surface)",
+          color: "var(--ink)",
           whiteSpace: "pre-wrap", textWrap: "pretty",
         }}>{text}</div>
         {stagedAction && (
@@ -250,7 +250,7 @@ function StagedActionCard({
       <div style={C.stagedActions}>
         <button
           type="button"
-          className="m-btn"
+          className="wkbtn"
           style={C.stagedConfirm}
           disabled={!canAct}
           onClick={onConfirm}
@@ -259,7 +259,7 @@ function StagedActionCard({
         </button>
         <button
           type="button"
-          className="m-btn text"
+          className="wkbtn"
           style={C.stagedCancel}
           disabled={!canAct}
           onClick={onCancel}
@@ -276,7 +276,7 @@ function V6Streaming({ text, tool }: { text: string; tool: string | null }) {
     <div className="m-fade-up" style={{ display: "flex", gap: 10, marginBottom: 14 }}>
       <div style={{
         width: 24, height: 24, flexShrink: 0, borderRadius: 7,
-        background: "var(--m-primary-container)", color: "var(--m-on-primary-container)",
+        background: "var(--accent-soft)", color: "var(--accent-strong)",
         display: "grid", placeItems: "center",
         fontFamily: "var(--font-mono)", fontWeight: 600, fontSize: 10,
       }}>Y</div>
@@ -285,17 +285,17 @@ function V6Streaming({ text, tool }: { text: string; tool: string | null }) {
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 6,
             padding: "3px 9px",
-            background: "var(--m-surface-2)", borderRadius: 999,
-            fontSize: 11, color: "var(--m-on-surface-var)", fontWeight: 500,
+            background: "var(--surface-2)", borderRadius: 999,
+            fontSize: 11, color: "var(--ink-3)", fontWeight: 500,
             marginBottom: 8,
           }}>
-            <span className="pulse-dot" style={{ color: "var(--m-primary)" }} aria-hidden="true" />
+            <span className="pulse-dot" style={{ color: "var(--accent)" }} aria-hidden="true" />
             <span>{tool}…</span>
           </div>
         )}
         {text && (
           <div style={{
-            fontSize: 12.5, lineHeight: 1.55, color: "var(--m-on-surface)",
+            fontSize: 12.5, lineHeight: 1.55, color: "var(--ink)",
             whiteSpace: "pre-wrap", textWrap: "pretty",
           }}>{text}<span style={{ opacity: 0.5 }}>▍</span></div>
         )}
@@ -308,7 +308,7 @@ function V6Error({ message }: { message: string }) {
   return (
     <div className="m-fade-up" style={{
       padding: "10px 12px", borderRadius: 8,
-      background: "var(--m-pass-container)", color: "#4A1410",
+      background: "var(--st-risk-bg)", color: "#4A1410",
       fontSize: 12.5, marginBottom: 14,
     }}>
       {message}
@@ -418,12 +418,12 @@ function V6ChatEmpty({ modeLabel, onPick, onOpenTab, showLearnLinks, showSuggest
       <div style={C.emptyIntro}>
         <h1 style={{
           fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700,
-          letterSpacing: "-0.02em", lineHeight: 1.2, margin: "0 0 8px", color: "var(--m-on-surface)",
+          letterSpacing: "-0.02em", lineHeight: 1.2, margin: "0 0 8px", color: "var(--ink)",
           textWrap: "balance",
         }}>
           {copy.title}
         </h1>
-        <p style={{ fontSize: 12.5, lineHeight: 1.55, color: "var(--m-on-surface-var)", margin: 0, textWrap: "pretty" }}>
+        <p style={{ fontSize: 12.5, lineHeight: 1.55, color: "var(--ink-3)", margin: 0, textWrap: "pretty" }}>
           {copy.body}
         </p>
       </div>
@@ -435,10 +435,10 @@ function V6ChatEmpty({ modeLabel, onPick, onOpenTab, showLearnLinks, showSuggest
               <button
                 key={s}
                 onClick={() => onPick(s)}
-                className="m-state"
+                className="m-nudge-soft"
                 style={C.suggestionChip}
               >
-                <span style={{ color: "var(--m-primary)", fontSize: 11 }}>→</span>
+                <span style={{ color: "var(--accent)", fontSize: 11 }}>→</span>
                 <span>{s}</span>
               </button>
             ))}
@@ -502,7 +502,7 @@ function emptyCopy(modeLabel: string): { title: string; body: ReactNode; eyebrow
   }
   return {
     title: "Hi, I'm Yulia, your deal desk is ready.",
-    body: <>Start using the app completely for free. Use the <strong style={{ color: "var(--m-on-surface)" }}>Search Ideas</strong> below to explore, or just start chatting. Feel free to learn more about the app too.</>,
+    body: <>Start using the app completely for free. Use the <strong style={{ color: "var(--ink)" }}>Search Ideas</strong> below to explore, or just start chatting. Feel free to learn more about the app too.</>,
     eyebrow: "SEARCH IDEAS",
   };
 }
@@ -524,7 +524,7 @@ const C: Record<string, CSSProperties> = {
   },
   composer: {
     margin: 8,
-    background: "linear-gradient(180deg, #FFFFFF 0%, #FBFDFF 100%)",
+    background: "var(--surface)",
     borderRadius: 18,
     padding: 10,
     border: "1px solid rgba(166, 186, 212, 0.82)",
@@ -538,7 +538,7 @@ const C: Record<string, CSSProperties> = {
   composerInput: {
     width: "100%", boxSizing: "border-box",
     border: "none", background: "transparent",
-    fontSize: 13, lineHeight: 1.5, color: "var(--m-on-surface)",
+    fontSize: 13, lineHeight: 1.5, color: "var(--ink)",
     resize: "none", outline: "none", padding: "4px 6px",
     fontFamily: "var(--font-body)",
   },
@@ -565,7 +565,7 @@ const C: Record<string, CSSProperties> = {
     display: "inline-flex",
     alignItems: "center",
     gap: 4,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     background: "rgba(236, 242, 249, 0.72)",
     border: "1px solid rgba(204, 217, 232, 0.72)",
     fontSize: 11,
@@ -587,7 +587,7 @@ const C: Record<string, CSSProperties> = {
     display: "flex",
     alignItems: "center",
     gap: 6,
-    background: "#F2F7FC",
+    background: "#F3F1EA",
     border: "1px solid rgba(198, 214, 230, 0.82)",
   },
   attachmentIcon: {
@@ -596,7 +596,7 @@ const C: Record<string, CSSProperties> = {
     borderRadius: 6,
     display: "grid",
     placeItems: "center",
-    color: "#4F7FAB",
+    color: "#8B867A",
     background: "#FFFFFF",
   },
   attachmentName: {
@@ -604,13 +604,13 @@ const C: Record<string, CSSProperties> = {
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     fontSize: 11.5,
     fontWeight: 800,
   },
   attachmentSize: {
     flexShrink: 0,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     fontSize: 10.5,
     fontWeight: 650,
   },
@@ -621,7 +621,7 @@ const C: Record<string, CSSProperties> = {
     borderRadius: 999,
     display: "grid",
     placeItems: "center",
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-2)",
     cursor: "pointer",
   },
   modelSelect: {
@@ -630,14 +630,14 @@ const C: Record<string, CSSProperties> = {
     border: "1px solid rgba(204, 217, 232, 0.72)",
     borderRadius: 999,
     background: "rgba(236, 242, 249, 0.72)",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     padding: "0 7px",
     fontSize: 11,
     fontWeight: 800,
     outline: "none",
   },
   eyebrow: {
-    fontSize: 9.5, color: "var(--m-on-surface-mid)",
+    fontSize: 9.5, color: "var(--ink-2)",
     letterSpacing: "0.14em", fontWeight: 600,
     margin: "0 0 8px",
   },
@@ -673,7 +673,7 @@ const C: Record<string, CSSProperties> = {
     padding: "8px 12px",
     background: "#FFFFFF",
     borderRadius: 12,
-    fontSize: 12.5, color: "var(--m-on-surface-var)",
+    fontSize: 12.5, color: "var(--ink-3)",
     cursor: "pointer", boxSizing: "border-box", width: "100%",
     border: "1px solid rgba(215,222,236,0.72)",
   },
@@ -684,19 +684,19 @@ const C: Record<string, CSSProperties> = {
     background: "rgba(255,255,255,0.72)",
     border: "1px solid rgba(214,225,240,0.86)",
     borderRadius: 999,
-    fontSize: 11.5, fontWeight: 700, color: "var(--m-on-surface)",
+    fontSize: 11.5, fontWeight: 700, color: "var(--ink)",
     cursor: "pointer",
     boxShadow: "0 10px 22px -18px rgba(31,44,69,0.32), inset 0 1px 0 rgba(255,255,255,0.74)",
-    backdropFilter: "blur(8px)",
-    WebkitBackdropFilter: "blur(8px)",
+    backdropFilter: "none",
+    WebkitBackdropFilter: "none",
     transition: "background 120ms ease, transform 120ms ease, box-shadow 120ms ease",
   },
   stagedCard: {
     marginTop: 10,
     padding: 12,
     borderRadius: 14,
-    background: "linear-gradient(180deg, #FFFFFF 0%, #F8FBFF 100%)",
-    border: "1px solid #D9E4F1",
+    background: "var(--surface)",
+    border: "1px solid #ECE9DF",
     boxShadow: "0 12px 28px rgba(31, 44, 69, 0.10)",
   },
   stagedEyebrow: {
@@ -704,27 +704,27 @@ const C: Record<string, CSSProperties> = {
     fontSize: 9,
     letterSpacing: "0.15em",
     fontWeight: 700,
-    color: "var(--m-primary)",
+    color: "var(--accent)",
     marginBottom: 5,
   },
   stagedTitle: {
     fontSize: 13.5,
     fontWeight: 750,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     lineHeight: 1.2,
   },
   stagedSummary: {
     marginTop: 4,
     fontSize: 11.5,
     lineHeight: 1.45,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-3)",
   },
   stagedRisk: {
     flexShrink: 0,
     padding: "4px 8px",
     borderRadius: 999,
-    background: "#EEF3FA",
-    color: "#5D6A7D",
+    background: "#F3F1EA",
+    color: "#57534A",
     fontSize: 10.5,
     fontWeight: 700,
     textTransform: "capitalize",
@@ -739,8 +739,8 @@ const C: Record<string, CSSProperties> = {
     height: 30,
     padding: "0 13px",
     borderRadius: 999,
-    background: "#D6A653",
-    color: "#fff",
+    background: "#2BFF77",
+    color: "#00210F",
     border: "none",
     fontSize: 11.5,
     fontWeight: 800,

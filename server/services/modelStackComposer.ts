@@ -166,34 +166,51 @@ export async function composeModelStack(input: ComposeModelStackInput): Promise<
 
 async function persistModelStack(dealId: number, stack: V19ModelStack): Promise<void> {
   const { sql } = await import('../db.js');
-  const [row] = await sql<{ version: number }[]>`
-    SELECT (COALESCE(MAX(version), 0) + 1)::int as version
-    FROM deal_model_stack
-    WHERE deal_id = ${dealId}
-  `;
-  const version = Number(row?.version || 1);
-
-  await sql`
-    INSERT INTO deal_model_stack (
-      deal_id, journey, league, deal_type, primary_models, supporting, tax_legal, sensitivity,
-      version, spec_version, spec_uri, methodology_version, methodology_uri
-    )
-    VALUES (
-      ${dealId},
-      ${stack.journey},
-      ${stack.league},
-      ${stack.dealType},
-      ${sql.json(stack.primaryModels)}::jsonb,
-      ${sql.json(stack.supporting)}::jsonb,
-      ${sql.json(stack.taxLegal)}::jsonb,
-      ${sql.json(stack.sensitivity)}::jsonb,
-      ${version},
-      ${DEFINITIVE_SPEC_VERSION},
-      ${DEFINITIVE_SPEC_URI},
-      ${DEFINITIVE_METHODOLOGY_VERSION},
-      ${DEFINITIVE_METHODOLOGY_URI}
-    )
-  `;
+  // Race-safe insert. The previous implementation was a classic check-then-act:
+  //
+  //   SELECT MAX(version) + 1   -- two concurrent callers both see "5"
+  //   INSERT version=6           -- both try to insert v6 → unique-constraint
+  //                                 violation on (deal_id, version)
+  //
+  // Surfaced by the high-velocity-stress harness at ~8% failure rate when two
+  // agents on the same customer compose the model stack for the same deal
+  // concurrently. The fix collapses both operations into a single statement:
+  // the version is computed inside the INSERT via a correlated subquery, and
+  // ON CONFLICT DO NOTHING + RETURNING tells us whether we won the race. If
+  // we lost (zero rows returned), brief jittered backoff and retry — the next
+  // MAX(version) read will see the winning row. Bounded attempts prevent a
+  // pathological loop.
+  const MAX_RETRIES = 5;
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    const inserted = await sql<{ version: number }[]>`
+      INSERT INTO deal_model_stack (
+        deal_id, journey, league, deal_type, primary_models, supporting, tax_legal, sensitivity,
+        version, spec_version, spec_uri, methodology_version, methodology_uri
+      )
+      VALUES (
+        ${dealId},
+        ${stack.journey},
+        ${stack.league},
+        ${stack.dealType},
+        ${sql.json(stack.primaryModels)}::jsonb,
+        ${sql.json(stack.supporting)}::jsonb,
+        ${sql.json(stack.taxLegal)}::jsonb,
+        ${sql.json(stack.sensitivity)}::jsonb,
+        COALESCE((SELECT MAX(version) FROM deal_model_stack WHERE deal_id = ${dealId}), 0) + 1,
+        ${DEFINITIVE_SPEC_VERSION},
+        ${DEFINITIVE_SPEC_URI},
+        ${DEFINITIVE_METHODOLOGY_VERSION},
+        ${DEFINITIVE_METHODOLOGY_URI}
+      )
+      ON CONFLICT (deal_id, version) DO NOTHING
+      RETURNING version
+    `;
+    if (inserted.length > 0) return;
+    // Conflict — another transaction grabbed the version we wanted. Brief
+    // jittered backoff so we don't collide again on the very next try.
+    await new Promise(r => setTimeout(r, 5 + Math.random() * 15));
+  }
+  throw new Error(`compose_model_stack: failed to write deal_model_stack after ${MAX_RETRIES} attempts (dealId=${dealId}) — concurrency too high or unique constraint misconfigured`);
 }
 
 function leagueAtLeast(actual: League, threshold: League): boolean {

@@ -1,0 +1,17 @@
+{
+  "id": "PC-GARBAGE-011",
+  "category": "GARBAGE",
+  "description": "Missing required: execute_model called with no model_id at all, plus a non-coerceable money field (revenue) inside inputs. Substrate's payload-shape validator must return structured 400 listing model_id as a required field AND flagging revenue as wrong-type.",
+  "payload": {
+    "deal_id": "fixture_deal_garbage_011",
+    "inputs": { "revenue": "not-a-number", "ebitda_cents": 500000000 }
+  },
+  "tool": "execute_model",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "missing-required", "and-bad-money"]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "PC-GARBAGE-015",
+  "category": "GARBAGE",
+  "description": "Missing required: get_deal_state called with no deal_id and a non-coerceable money field (purchase_price). Substrate's payload-shape validator must return structured 400 with field-level guidance.",
+  "payload": {
+    "purchase_price": "not-a-number"
+  },
+  "tool": "get_deal_state",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "missing-required", "and-bad-money"]
+}

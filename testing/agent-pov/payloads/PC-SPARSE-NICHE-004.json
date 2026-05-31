@@ -1,0 +1,21 @@
+{
+  "id": "PC-SPARSE-NICHE-004",
+  "category": "SPARSE",
+  "description": "Sparse NICHE payload: spec_version-only payload. Substrate should classify what it can and return complete MissingInputContract.",
+  "payload": {
+    "spec_version": "definitive-v1.1"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "persistsDealState": false,
+    "versionPins": false,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "niche",
+    "sparse",
+    "version-only"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "PC-GARBAGE-012",
+  "category": "GARBAGE",
+  "description": "Missing required: update_deal_payload called with no deal_id. Without a CID anchor there is nothing to update — must return structured 400.",
+  "payload": {
+    "target_revenue_cents": 1800000000,
+    "target_ebitda_cents": 500000000
+  },
+  "tool": "update_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "missing-required", "update-no-deal_id"]
+}

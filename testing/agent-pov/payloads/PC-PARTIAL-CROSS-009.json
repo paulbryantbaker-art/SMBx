@@ -1,0 +1,44 @@
+{
+  "id": "PC-PARTIAL-CROSS-009",
+  "category": "PARTIAL",
+  "description": "Partial payload: IP-heavy + crypto signal: protocol acquisition. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "buy",
+    "target_industry": "blockchain protocol",
+    "asset_class": "ip_heavy",
+    "target_revenue_cents": 800000000,
+    "target_jurisdiction": "US-DE",
+    "token_taxonomy_status": "unclear"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "industry": "blockchain protocol",
+      "jurisdiction": "US-DE",
+      "assetClass": "ip_heavy"
+    },
+    "missingFields": [
+      "token_outstanding",
+      "securities_classification",
+      "target_ebitda_cents",
+      "reserves_cents"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "cross-overlay",
+    "buy",
+    "partial",
+    "ip-heavy",
+    "crypto"
+  ]
+}

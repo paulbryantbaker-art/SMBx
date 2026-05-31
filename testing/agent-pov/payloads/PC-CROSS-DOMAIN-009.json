@@ -1,0 +1,34 @@
+{
+  "id": "PC-CROSS-DOMAIN-009",
+  "category": "CROSS_DOMAIN",
+  "description": "G28 + G30: Distressed multi-property portfolio sale with FIRPTA foreign seller (RE-heavy + foreign). Substrate must compose distressed sale (M151 or M165), FIRPTA withholding (M169/M199), AND CITT transfer-tax mechanics (M191).",
+  "payload": {
+    "journey": "sell",
+    "subjourney": "owner_rep",
+    "target_industry": "commercial real estate",
+    "target_jurisdiction": "US-NY",
+    "real_estate_pct_of_ev": 100,
+    "foreign_seller": true,
+    "cash_runway_days": 70,
+    "sale_process": "363"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "distressed_restructuring",
+      "distressPosture": "full_distress",
+      "assetClass": "real_estate"
+    },
+    "missingFields": [
+      "firpta_withholding_certificate",
+      "controlling_interest_threshold",
+      "stalking_horse_bid"
+    ],
+    "nextCallsInclude": ["compose_model_stack"],
+    "persistsDealState": true
+  },
+  "tags": ["cross-domain", "G28", "G30", "FIRPTA", "distressed-RE"]
+}

@@ -1,0 +1,34 @@
+{
+  "category": "AMBIGUOUS",
+  "description": "\"consulting\" — could be management / IT / engineering / financial / niche.",
+  "payload": {
+    "journey": "buy",
+    "industry": "consulting",
+    "jurisdiction": "US-NY",
+    "league": "L4"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "jurisdiction": "US-NY",
+      "league": "L4"
+    },
+    "missingFields": [
+      "industry_subcategory_or_naics"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "ambiguous",
+    "industry"
+  ],
+  "id": "PC-AMBIGUOUS-INDUSTRY-002"
+}

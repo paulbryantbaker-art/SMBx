@@ -1,0 +1,35 @@
+{
+  "category": "AMBIGUOUS",
+  "description": "\"US\" only — no state, no entity-of-incorporation, no tax jurisdiction.",
+  "payload": {
+    "journey": "buy",
+    "industry": "B2B services",
+    "jurisdiction": "US",
+    "league": "L4",
+    "ttmRevenueCents": 2000000000
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_missing_inputs",
+    "classification": {
+      "journey": "buy",
+      "industry": "B2B services",
+      "league": "L4"
+    },
+    "missingFields": [
+      "explicit_jurisdiction"
+    ],
+    "nextCallsInclude": [
+      "update_deal_payload"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "ambiguous",
+    "jurisdiction"
+  ],
+  "id": "PC-AMBIGUOUS-JURISDICTION-001"
+}

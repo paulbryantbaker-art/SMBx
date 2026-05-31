@@ -15,7 +15,7 @@ const STARTER_PROMPTS: { label: string; prompt: string; eyebrow: string }[] = [
 
 export function V6StarterView({ onTalkToYulia }: StarterViewProps) {
   return (
-    <div className="m-fade-up m-page-flow" style={{ maxWidth: 720 }}>
+    <div className="wk-content m-fade-up" style={{ maxWidth: 720 }}>
       <div className="mono" style={S.eyebrow}>NEW TAB</div>
       <h1 style={S.h1}>What can Yulia help with?</h1>
       <p style={S.tag}>
@@ -26,7 +26,7 @@ export function V6StarterView({ onTalkToYulia }: StarterViewProps) {
         {STARTER_PROMPTS.map(p => (
           <button
             key={p.label}
-            className="m-card filled-tonal m-state tap"
+            className="wkcard tap"
             onClick={() => onTalkToYulia?.(p.prompt)}
             style={S.card}
           >
@@ -42,17 +42,17 @@ export function V6StarterView({ onTalkToYulia }: StarterViewProps) {
 
 const S: Record<string, CSSProperties> = {
   eyebrow: {
-    fontSize: 9.5, color: "var(--m-on-surface-mid)",
+    fontSize: 9.5, color: "var(--ink-2)",
     letterSpacing: "0.14em", fontWeight: 600,
     fontFamily: "var(--font-mono)",
   },
   h1: {
     fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 30,
     letterSpacing: "-0.03em", lineHeight: 1.1, margin: "6px 0 8px",
-    color: "var(--m-on-surface)", textWrap: "balance",
+    color: "var(--ink)", textWrap: "balance",
   },
   tag: {
-    fontSize: 13.5, lineHeight: 1.55, color: "var(--m-on-surface-mid)",
+    fontSize: 13.5, lineHeight: 1.55, color: "var(--ink-2)",
     margin: "0 0 22px", maxWidth: 520, textWrap: "pretty",
   },
   grid: {
@@ -69,17 +69,17 @@ const S: Record<string, CSSProperties> = {
     position: "relative",
   },
   cardEyebrow: {
-    fontSize: 9.5, color: "var(--m-on-surface-mid)",
+    fontSize: 9.5, color: "var(--ink-2)",
     letterSpacing: "0.14em", fontWeight: 600,
     fontFamily: "var(--font-mono)",
   },
   cardLabel: {
     fontSize: 13.5, fontWeight: 600,
-    color: "var(--m-on-surface)", letterSpacing: "-0.01em",
+    color: "var(--ink)", letterSpacing: "-0.01em",
     lineHeight: 1.35,
   },
   cardArrow: {
     position: "absolute", top: 14, right: 16,
-    fontSize: 13, color: "var(--m-primary)",
+    fontSize: 13, color: "var(--accent)",
   },
 };

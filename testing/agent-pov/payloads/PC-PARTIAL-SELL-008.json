@@ -1,0 +1,42 @@
+{
+  "id": "PC-PARTIAL-SELL-008",
+  "category": "PARTIAL",
+  "description": "Partial payload: L3 sell: insurance brokerage principal. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "insurance brokerage",
+    "jurisdiction": "US-FL",
+    "ebitda_cents": 175000000,
+    "revenue_cents": 950000000,
+    "seller_role": "principal"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "principal_seller",
+      "league": "L3",
+      "industry": "insurance brokerage",
+      "jurisdiction": "US-FL"
+    },
+    "missingFields": [
+      "retention_rate",
+      "asking_price_cents",
+      "multi_year_pnl_present"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L3",
+    "partial"
+  ]
+}

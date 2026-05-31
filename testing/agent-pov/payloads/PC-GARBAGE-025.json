@@ -1,0 +1,20 @@
+{
+  "id": "PC-GARBAGE-025",
+  "category": "GARBAGE",
+  "description": "Deep nesting: self-referential-looking key chain — every level has the same key name 'self' (depth ~24). Substrate must enforce max-depth, not loop.",
+  "payload": {
+    "journey": "pmi",
+    "target_industry": "B2B services",
+    "extra": {
+      "self": { "self": { "self": { "self": { "self": { "self": { "self": { "self": { "self": { "self": { "self": { "self": { "self": { "self": { "self": { "self": { "self": { "self": { "self": { "self": { "self": { "self": { "self": "end" } } } } } } } } } } } } } } } } } } } } } }
+    }
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "deep-nesting", "self-key-chain"]
+}

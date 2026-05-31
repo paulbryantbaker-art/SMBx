@@ -1,0 +1,19 @@
+{
+  "id": "PC-GARBAGE-005",
+  "category": "GARBAGE",
+  "description": "Wrong type: valuation is a boolean. Substrate's payload-shape validator must reject with structured 400 indicating valuation must be a numeric (cents) integer or coerceable money string, never coerce true/false.",
+  "payload": {
+    "journey": "sell",
+    "target_industry": "logistics",
+    "target_jurisdiction": "US-FL",
+    "valuation": true
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "structured_error",
+    "refusalType": "malformed_payload",
+    "persistsDealState": false
+  },
+  "tags": ["garbage", "wrong-type", "boolean-for-money"]
+}

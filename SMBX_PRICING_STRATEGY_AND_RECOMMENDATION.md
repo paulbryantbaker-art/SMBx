@@ -1,6 +1,8 @@
 # smbX.ai — Pricing Strategy & Recommendation
 
-**Status:** Canonical pricing document. Supersedes all prior pricing decisions.
+> ⚠️ **SUPERSEDED 2026-05-27.** The canonical pricing record is now [SMBX_PRICING_LOCKED.md](SMBX_PRICING_LOCKED.md): Free / $99 / $249 / $749 / $3,000+. This file is kept for the reasoning history — the WTP analysis, consolidation argument, and tier-shape rationale are still useful — but the *price points* below ($79 / $199 / $499 / $2,500) are stale. If you need to know what smbX charges today, read the locked file.
+
+**Status:** Reasoning history (April 2026). Price points stale; logic preserved.
 **Date:** April 2026.
 **Paired with:** `SMBX_STRATEGIC_POSITIONING_AND_AUDIENCE_DOC.md`, `SMBX_FEATURE_AUDIENCE_VALUE_MATRIX.md`
 **Purpose:** Resolve pricing. One recommendation, defensible against the research, structurally stable, launch-ready.

@@ -1,0 +1,19 @@
+{
+  "id": "PC-VERSION-009",
+  "category": "VERSION",
+  "description": "Caller pins an old methodology version (V18) on execute_model. Substrate must refuse with unsupported_version envelope rather than silently auto-pin to V19 — version drift is impossible by construction.",
+  "payload": {
+    "deal_id": "fixture_deal_version_009",
+    "model_id": "MODEL.RESTRUCTURING.SOLVENCY.THREE_PRONG.v1",
+    "methodology_version": "V18",
+    "inputs": {}
+  },
+  "tool": "execute_model",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "refusal",
+    "refusalType": "unsupported_version",
+    "persistsDealState": false
+  },
+  "tags": ["version", "stale-pin", "v18-rejected"]
+}

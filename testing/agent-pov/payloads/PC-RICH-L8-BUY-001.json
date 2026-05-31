@@ -1,0 +1,56 @@
+{
+  "category": "RICH",
+  "description": "L8 mid-market PE buyout of consumer brand, HSR-reportable, R&W bound.",
+  "payload": {
+    "journey": "buy",
+    "industry": "consumer packaged goods — beauty",
+    "naics": "325620",
+    "jurisdiction": "US-NY",
+    "league": "L8",
+    "ttmRevenueCents": 65000000000,
+    "adjustedEbitdaCents": 11000000000,
+    "purchasePriceCents": 132000000000,
+    "dealStructure": "stock_purchase",
+    "taxClassification": "c_corp",
+    "hsrReportable": true,
+    "rwInsuranceBound": true,
+    "financing": {
+      "sponsorEquityCents": 60000000000,
+      "seniorDebtCents": 55000000000,
+      "subordinatedDebtCents": 15000000000,
+      "rolloverEquityCents": 2000000000
+    },
+    "stage": "loi"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "buy",
+      "subJourney": "healthy_buy_side",
+      "league": "L8",
+      "jurisdiction": "US-NY",
+      "industry": "consumer packaged goods — beauty",
+      "distressPosture": "healthy",
+      "assetClass": "operating_co",
+      "taxClassification": "c_corp"
+    },
+    "missingFields": [],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "buy",
+    "L8",
+    "rich",
+    "mid-market",
+    "hsr"
+  ],
+  "id": "PC-RICH-L8-BUY-001"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "PC-PARTIAL-SELL-004",
+  "category": "PARTIAL",
+  "description": "Partial payload: L2 sell: HVAC principal SBA-eligible. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "sell",
+    "industry": "commercial HVAC",
+    "jurisdiction": "US-NV",
+    "sde_cents": 65000000,
+    "revenue_cents": 450000000,
+    "seller_role": "principal"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "sell",
+      "subJourney": "principal_seller",
+      "league": "L2",
+      "industry": "commercial HVAC",
+      "jurisdiction": "US-NV"
+    },
+    "missingFields": [
+      "multi_year_pnl_present",
+      "asking_price_cents",
+      "real_estate_owned"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "sell",
+    "L2",
+    "partial",
+    "sba"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "id": "PC-PARTIAL-RAISE-014",
+  "category": "PARTIAL",
+  "description": "Partial payload: GP-led continuation vehicle: NAV + portfolio assets. Substrate can begin routing models; surfaces remaining MissingInputContract.",
+  "payload": {
+    "journey": "raise",
+    "instrument": "continuation_vehicle",
+    "fund_vintage": 2018,
+    "nav_cents": 80000000000,
+    "target_amount_cents": 30000000000,
+    "gp_or_lp_led": "gp_led",
+    "stage": "continuation"
+  },
+  "tool": "ingest_deal_payload",
+  "expectations": {
+    "structuredResponse": true,
+    "responseType": "classification_with_work",
+    "classification": {
+      "journey": "raise",
+      "subJourney": "secondary_raise"
+    },
+    "missingFields": [
+      "industry",
+      "jurisdiction",
+      "lp_consent_status",
+      "fairness_process"
+    ],
+    "nextCallsInclude": [
+      "compose_model_stack",
+      "execute_model"
+    ],
+    "persistsDealState": true,
+    "versionPins": true,
+    "auditRowWritten": true
+  },
+  "tags": [
+    "raise",
+    "secondary",
+    "continuation-vehicle",
+    "partial"
+  ]
+}

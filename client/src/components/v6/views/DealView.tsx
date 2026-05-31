@@ -558,7 +558,7 @@ export function V6DealView({
   };
 
   return (
-    <div className="m-fade-up m-page-flow" style={{ width: "min(100%, 1440px)", maxWidth: 1440, margin: "0 auto", boxSizing: "border-box" }}>
+    <div className="wk-content" style={{ width: "min(100%, 1440px)", maxWidth: 1440, margin: "0 auto", boxSizing: "border-box" }}>
       {/* Hero strip */}
       <section id="deal-dashboard" style={{ marginBottom: 28 }}>
         <div className="mono" style={D.eyebrow}>{heroEyebrow}</div>
@@ -568,9 +568,9 @@ export function V6DealView({
             <div style={D.sub}>{heroSub}</div>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button className="m-btn outlined" type="button" onClick={() => setDealFileScope("all")}>Open files</button>
-            <button className="m-btn outlined" type="button" onClick={() => setDealFileScope("data-room")}>Data room</button>
-            <button className="m-btn filled" type="button" onClick={runGenerateDeliverable} disabled={busyAction === "generate"}>
+            <button className="wkbtn" type="button" onClick={() => setDealFileScope("all")}>Open files</button>
+            <button className="wkbtn" type="button" onClick={() => setDealFileScope("data-room")}>Data room</button>
+            <button className="wkbtn primary" type="button" onClick={runGenerateDeliverable} disabled={busyAction === "generate"}>
               {busyAction === "generate" ? "Generating..." : `Generate ${primaryDeliverable.label}`}
             </button>
           </div>
@@ -578,28 +578,25 @@ export function V6DealView({
       </section>
 
       {loading && (
-        <div className="mono" style={{ fontSize: 11, color: "var(--m-on-surface-mid)", marginBottom: 24 }}>
+        <div className="mono" style={{ fontSize: 11, color: "var(--ink-3)", marginBottom: 24 }}>
           LOADING DEAL…
         </div>
       )}
       {error && (
-        <div style={{
-          padding: "10px 12px", borderRadius: 8, marginBottom: 24,
-          background: "var(--m-pass-container)", color: "#4A1410", fontSize: 12.5,
-        }}>
+        <div className="wkerr" style={{ marginBottom: 24 }}>
           Couldn&rsquo;t load this deal ({error}). Showing reference layout.
         </div>
       )}
       {actionError && (
-        <div style={D.actionError}>{actionError}</div>
+        <div className="wkerr" style={D.actionBanner}>{actionError}</div>
       )}
       {actionNote && (
-        <div style={D.actionNote}>{actionNote}</div>
+        <div className="wknote" style={D.actionBanner}>{actionNote}</div>
       )}
 
       {/* Verdict banner */}
       <section style={{ marginBottom: 32 }}>
-        <div className="m-card" style={D.verdict}>
+        <div className="wkcard" style={D.verdict}>
           <div style={D.verdictMark} aria-hidden="true">
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
               <path d="M5 11l4 4 8-9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -620,17 +617,17 @@ export function V6DealView({
       <section style={{ marginBottom: 32 }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
           {stats.map(s => (
-            <div key={s.k} className="m-card" style={{ padding: "14px 18px" }}>
+            <div key={s.k} className="wkcard" style={{ padding: "14px 18px" }}>
               <div className="mono" style={D.statLabel}>{s.k.toUpperCase()}</div>
               <div className="mono" style={D.statValue}>{s.v}</div>
-              <div style={{ fontSize: 11.5, color: "var(--m-on-surface-mid)", marginTop: 2 }}>{s.sub}</div>
+              <div style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 2 }}>{s.sub}</div>
             </div>
           ))}
         </div>
       </section>
 
       <section style={D.intelligenceGrid}>
-        <div className="m-card" style={D.marketCard}>
+        <div className="wkcard" style={D.marketCard}>
           <div className="mono" style={D.intelEyebrow}>{intelligence.marketEyebrow}</div>
           <h2 style={D.intelTitle}>Market intelligence</h2>
           <p style={D.intelLead}>{intelligence.marketHeadline}</p>
@@ -663,7 +660,7 @@ export function V6DealView({
         </div>
 
         <div style={D.intelSideStack}>
-          <div className="m-card" style={D.reviewCard}>
+          <div className="wkcard" style={D.reviewCard}>
             <div className="mono" style={D.intelEyebrow}>YULIA REVIEW</div>
             <div style={D.reviewTop}>
               <div>
@@ -687,7 +684,7 @@ export function V6DealView({
             </div>
           </div>
 
-          <div className="m-card" style={D.nextCard}>
+          <div className="wkcard" style={D.nextCard}>
             <div className="mono" style={D.intelEyebrow}>YULIA RECOMMENDS</div>
             {intelligence.nextMoves.map((move, index) => {
               const action = resolveDealMoveAction(move, real?.journey_type, primaryDeliverable);
@@ -699,7 +696,7 @@ export function V6DealView({
                   disabled={!!busyAction}
                   style={{
                     ...D.nextMove,
-                    borderBottom: index === intelligence.nextMoves.length - 1 ? "none" : "1px solid var(--m-outline-var)",
+                    borderBottom: index === intelligence.nextMoves.length - 1 ? "none" : "1px solid var(--line)",
                     opacity: busyAction && !isBusy ? 0.58 : 1,
                   }}
                   onClick={() => { void runRecommendedMove(move); }}
@@ -737,7 +734,7 @@ export function V6DealView({
           {linkedFiles.map(f => (
             <div
               key={`${f.title}-${f.id ?? ""}`}
-              className="m-card m-state tap"
+              className="wkcard tap"
               role="button"
               tabIndex={0}
               aria-label={`${f.title} (${f.status})`}
@@ -750,7 +747,7 @@ export function V6DealView({
                 <V6DocStatus status={f.status} />
               </div>
               <div style={D.linkedTitle}>{f.title}</div>
-              <div style={{ fontSize: 11.5, color: "var(--m-on-surface-mid)", marginTop: 2 }}>{f.sub}</div>
+              <div style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 2 }}>{f.sub}</div>
             </div>
           ))}
         </div>
@@ -758,7 +755,7 @@ export function V6DealView({
 
       {yulia && (
         <V6Section eyebrow="YULIA'S READ" title={yulia.title}>
-          <div className="m-card" style={{ padding: "24px 28px" }}>
+          <div className="wkcard" style={{ padding: "24px 28px" }}>
             <div style={D.readBody}>
               {yulia.paragraphs.map((p, i) => (
                 <p key={i} style={{ margin: i === yulia.paragraphs.length - 1 ? 0 : "0 0 14px" }}>{p}</p>
@@ -770,16 +767,16 @@ export function V6DealView({
 
       {!yulia && (
         <V6Section eyebrow="YULIA'S READ" title="Why pursue">
-          <div className="m-card" style={{ padding: "24px 28px" }}>
+          <div className="wkcard" style={{ padding: "24px 28px" }}>
             <div style={D.readBody}>
               <p style={{ margin: "0 0 14px" }}>
-                The recurring revenue holds up. <strong style={{ color: "var(--m-on-surface)" }}>78% of revenue</strong> comes from monthly service contracts averaging 4.3 years tenure. Add-backs are unusually honest &mdash; owner&rsquo;s salary, family member on payroll, and a one-time legal expense from a 2023 dispute. None of the AI-flag stuff (boats, &ldquo;consulting&rdquo;, phantom mileage).
+                The recurring revenue holds up. <strong style={{ color: "var(--ink)" }}>78% of revenue</strong> comes from monthly service contracts averaging 4.3 years tenure. Add-backs are unusually honest &mdash; owner&rsquo;s salary, family member on payroll, and a one-time legal expense from a 2023 dispute. None of the AI-flag stuff (boats, &ldquo;consulting&rdquo;, phantom mileage).
               </p>
               <p style={{ margin: "0 0 14px" }}>
-                The customer concentration looks like a problem on paper. <strong style={{ color: "var(--m-on-surface)" }}>The top three customers are 38% of revenue.</strong> But two of them are decade-long relationships embedded in their operations &mdash; switching costs are real, not hypothetical. Read it as a moat.
+                The customer concentration looks like a problem on paper. <strong style={{ color: "var(--ink)" }}>The top three customers are 38% of revenue.</strong> But two of them are decade-long relationships embedded in their operations &mdash; switching costs are real, not hypothetical. Read it as a moat.
               </p>
               <p style={{ margin: 0 }}>
-                At <strong style={{ color: "var(--m-on-surface)" }}>$12.6M asking · 7.0× recast SDE</strong>, you&rsquo;re paying market for a clean operator. SBA-clears at 78% LTV with $200k working capital reserve. I&rsquo;d start at 6.5× and meet at 6.8×.
+                At <strong style={{ color: "var(--ink)" }}>$12.6M asking · 7.0× recast SDE</strong>, you&rsquo;re paying market for a clean operator. SBA-clears at 78% LTV with $200k working capital reserve. I&rsquo;d start at 6.5× and meet at 6.8×.
               </p>
             </div>
           </div>
@@ -853,7 +850,7 @@ function DealFileExplorer({
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
           <button
             type="button"
-            className="m-btn tonal"
+            className="wkbtn"
             onClick={() => onTalkToYulia?.(`Find the right ${dealTitle} file for me. I am looking at ${copy.label}.`)}
           >
             Ask Yulia for a file
@@ -861,7 +858,7 @@ function DealFileExplorer({
           {onFileLatestToRoom && (
             <button
               type="button"
-              className="m-btn outlined"
+              className="wkbtn"
               onClick={onFileLatestToRoom}
               disabled={fileBusy}
             >
@@ -1015,7 +1012,7 @@ function DataRoomReliancePanel({
         </div>
         <button
           type="button"
-          className="m-btn outlined"
+          className="wkbtn"
           onClick={() => onTalkToYulia?.(explainPrompt)}
         >
           Ask Yulia
@@ -1043,7 +1040,7 @@ function DataRoomReliancePanel({
               {onRerunModel && (
                 <button
                   type="button"
-                  className="m-glint"
+                  className="wkbtn dark"
                   style={D.relianceRerunButton}
                   onClick={() => onRerunModel(item)}
                 >
@@ -1068,7 +1065,7 @@ function DealFileRow({ file, last, onClick, relianceWarning }: {
   return (
     <button
       type="button"
-      style={{ ...D.fileRow, borderBottom: last ? "none" : "1px solid var(--m-outline-var)" }}
+      style={{ ...D.fileRow, borderBottom: last ? "none" : "1px solid var(--line)" }}
       onClick={onClick}
     >
       <span style={{ ...D.fileIcon, background: t.soft, color: t.ink }}>
@@ -1768,12 +1765,12 @@ function fileSection(eyebrow: string, title: string, files: DealFileItem[], keys
 
 function fileTone(tone: FileTone): { ink: string; soft: string } {
   const tones: Record<FileTone, { ink: string; soft: string }> = {
-    private: { ink: "#4F60BD", soft: "#EEF1FB" },
+    private: { ink: "#00210F", soft: "#CFFFE1" },
     room: { ink: "#3F7D64", soft: "rgba(98,153,135,0.16)" },
-    sent: { ink: "#655FA7", soft: "rgba(130,125,189,0.14)" },
+    sent: { ink: "#57534A", soft: "rgba(25,24,19,0.07)" },
     received: { ink: "#9C7128", soft: "#FAF1E1" },
     deferred: { ink: "#A85248", soft: "rgba(235,206,206,0.58)" },
-    executed: { ink: "#1A2233", soft: "rgba(26,34,51,0.08)" },
+    executed: { ink: "#191813", soft: "rgba(25,24,19,0.08)" },
   };
   return tones[tone];
 }
@@ -1872,7 +1869,7 @@ function shortHash(value?: string | null): string {
 
 const D: Record<string, CSSProperties> = {
   eyebrow: {
-    fontSize: 10, color: "var(--m-on-surface-mid)",
+    fontSize: 10, color: "var(--ink-3)",
     letterSpacing: "0.14em", fontWeight: 600, marginBottom: 6,
   },
   headerRow: {
@@ -1880,36 +1877,24 @@ const D: Record<string, CSSProperties> = {
   },
   h1: {
     fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 36,
-    letterSpacing: "-0.025em", margin: 0, color: "var(--m-on-surface)",
+    letterSpacing: "-0.025em", margin: 0, color: "var(--ink)",
     textWrap: "balance",
   },
-  sub: { fontSize: 14, color: "var(--m-on-surface-var)", marginTop: 6 },
-  actionError: {
-    padding: "10px 12px",
-    borderRadius: 10,
+  sub: { fontSize: 14, color: "var(--ink-2)", marginTop: 6 },
+  // wkbtn classes handle the banner styles; actionBanner provides margin
+  actionBanner: {
     marginBottom: 18,
-    background: "var(--m-pass-container)",
-    color: "#4A1410",
-    fontSize: 12.5,
-  },
-  actionNote: {
-    padding: "10px 12px",
-    borderRadius: 10,
-    marginBottom: 18,
-    background: "rgba(98,153,135,0.14)",
-    color: "#2F604C",
-    fontSize: 12.5,
   },
   verdict: {
     padding: "20px 24px",
-    background: "var(--m-pursue-container)",
-    color: "var(--m-pursue-on-cont)",
-    border: "none",
+    background: "var(--st-good-bg)",
+    color: "var(--st-good-fg)",
+    border: "1px solid var(--line)",
     display: "flex", alignItems: "center", gap: 24,
   },
   verdictMark: {
     width: 48, height: 48, borderRadius: 12,
-    background: "var(--m-pursue)", color: "#fff",
+    background: "var(--accent-strong)", color: "#fff",
     display: "grid", placeItems: "center", flexShrink: 0,
   },
   verdictEyebrow: { fontSize: 10, letterSpacing: "0.14em", fontWeight: 700, opacity: 0.7 },
@@ -1923,12 +1908,12 @@ const D: Record<string, CSSProperties> = {
   },
   fitLabel: { fontSize: 10, letterSpacing: "0.14em", fontWeight: 600, opacity: 0.7 },
   statLabel: {
-    fontSize: 10, color: "var(--m-on-surface-mid)",
+    fontSize: 10, color: "var(--ink-3)",
     letterSpacing: "0.14em", fontWeight: 600,
   },
   statValue: {
-    fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 22,
-    letterSpacing: "-0.02em", color: "var(--m-on-surface)",
+    fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 22,
+    letterSpacing: "-0.02em", color: "var(--ink)",
     marginTop: 4, fontVariantNumeric: "tabular-nums",
   },
   intelligenceGrid: {
@@ -1940,18 +1925,16 @@ const D: Record<string, CSSProperties> = {
   },
   marketCard: {
     padding: "24px 26px",
-    background: "linear-gradient(135deg, rgba(246,249,253,0.98), rgba(255,255,255,0.86))",
-    border: "1px solid var(--m-outline-var)",
   },
   intelEyebrow: {
     fontSize: 10,
     letterSpacing: "0.14em",
     fontWeight: 750,
-    color: "#5F72C8",
+    color: "var(--ink-3)",
   },
   intelTitle: {
     margin: "6px 0 0",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     fontFamily: "var(--font-display)",
     fontWeight: 750,
     fontSize: 28,
@@ -1960,7 +1943,7 @@ const D: Record<string, CSSProperties> = {
   },
   intelLead: {
     margin: "12px 0 0",
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-2)",
     fontSize: 14,
     lineHeight: 1.45,
     maxWidth: 760,
@@ -1972,22 +1955,23 @@ const D: Record<string, CSSProperties> = {
     marginTop: 18,
   },
   desktopMarketTile: {
-    borderRadius: 16,
+    borderRadius: 12,
     padding: "12px 13px",
-    background: "#FFFFFF",
-    border: "1px solid var(--m-outline-var)",
+    background: "var(--surface-2)",
+    border: "1px solid var(--line)",
   },
   desktopMarketTileLabel: {
     fontSize: 9,
     letterSpacing: "0.12em",
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-3)",
     fontWeight: 750,
   },
   desktopMarketTileValue: {
     marginTop: 7,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     fontSize: 15,
-    fontWeight: 850,
+    fontFamily: "var(--font-mono)",
+    fontWeight: 700,
     lineHeight: 1.1,
   },
   marketBulletStack: {
@@ -1998,11 +1982,11 @@ const D: Record<string, CSSProperties> = {
   marketBullet: {
     all: "unset",
     display: "block",
-    borderRadius: 15,
+    borderRadius: 10,
     padding: "11px 13px",
-    background: "rgba(234,243,251,0.74)",
-    border: "1px solid #DDE8F4",
-    color: "#344053",
+    background: "var(--surface)",
+    border: "1px solid var(--line-2)",
+    color: "var(--ink-2)",
     fontSize: 13,
     lineHeight: 1.35,
     cursor: "pointer",
@@ -2011,10 +1995,10 @@ const D: Record<string, CSSProperties> = {
     marginTop: 14,
     display: "grid",
     gap: 5,
-    borderRadius: 16,
+    borderRadius: 10,
     padding: "12px 13px",
-    background: "rgba(214,163,92,0.12)",
-    color: "#7A5A22",
+    background: "var(--st-review-bg)",
+    color: "var(--st-review-fg)",
     fontSize: 12.5,
     lineHeight: 1.35,
   },
@@ -2022,7 +2006,7 @@ const D: Record<string, CSSProperties> = {
     fontSize: 9,
     letterSpacing: "0.14em",
     fontWeight: 800,
-    color: "#9C7128",
+    color: "var(--st-review-fg)",
   },
   intelSideStack: {
     display: "grid",
@@ -2044,20 +2028,20 @@ const D: Record<string, CSSProperties> = {
     fontWeight: 800,
     fontSize: 24,
     letterSpacing: "-0.035em",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   reviewText: {
     margin: "8px 0 0",
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-2)",
     fontSize: 13,
     lineHeight: 1.42,
   },
   reviewScore: {
     width: 72,
     height: 72,
-    borderRadius: 18,
-    background: "var(--m-pursue-container)",
-    color: "var(--m-pursue-on-cont)",
+    borderRadius: 14,
+    background: "var(--st-good-bg)",
+    color: "var(--st-good-fg)",
     display: "grid",
     placeItems: "center",
     alignContent: "center",
@@ -2072,14 +2056,14 @@ const D: Record<string, CSSProperties> = {
     gridTemplateColumns: "1fr 1fr",
     gap: 12,
     marginTop: 18,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-2)",
     fontSize: 12.5,
     lineHeight: 1.36,
   },
   structureLabel: {
     display: "block",
     marginBottom: 5,
-    color: "#5F72C8",
+    color: "var(--ink-3)",
     fontSize: 9,
     letterSpacing: "0.14em",
     fontWeight: 800,
@@ -2096,7 +2080,7 @@ const D: Record<string, CSSProperties> = {
     width: "100%",
     boxSizing: "border-box",
     padding: "13px 0",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     cursor: "pointer",
   },
   nextMoveText: {
@@ -2106,32 +2090,32 @@ const D: Record<string, CSSProperties> = {
     gap: 3,
   },
   nextMoveTitle: {
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     fontSize: 14,
-    fontWeight: 850,
+    fontWeight: 700,
     letterSpacing: "-0.02em",
   },
   nextMoveSub: {
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-2)",
     fontSize: 12.2,
     lineHeight: 1.35,
   },
   nextArrow: {
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-3)",
     fontSize: 26,
     lineHeight: 1,
   },
   linkedTitle: {
     fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 13.5,
-    letterSpacing: "-0.01em", color: "var(--m-on-surface)", marginTop: 12,
+    letterSpacing: "-0.01em", color: "var(--ink)", marginTop: 12,
   },
   fileSystem: {
     marginBottom: 32,
     padding: 22,
-    borderRadius: 24,
-    background: "#FFFFFF",
-    border: "1px solid var(--m-outline-var)",
-    boxShadow: "var(--m-elev-2)",
+    borderRadius: 14,
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
+    boxShadow: "0 1px 2px rgba(25,24,19,.06)",
   },
   fileTop: {
     display: "flex",
@@ -2145,12 +2129,12 @@ const D: Record<string, CSSProperties> = {
     fontSize: 30,
     lineHeight: 1,
     letterSpacing: "-0.045em",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   fileSub: {
     margin: "8px 0 0",
     maxWidth: 780,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-3)",
     fontSize: 13.5,
     lineHeight: 1.45,
   },
@@ -2169,16 +2153,17 @@ const D: Record<string, CSSProperties> = {
     gap: 8,
     padding: "0 14px",
     borderRadius: 999,
-    background: "var(--m-surface-1)",
-    border: "1px solid var(--m-outline-var)",
-    color: "var(--m-on-surface)",
-    fontWeight: 850,
+    background: "var(--surface)",
+    border: "1px solid var(--line-2)",
+    color: "var(--ink)",
+    fontWeight: 600,
     cursor: "pointer",
+    fontSize: "0.88rem",
   },
   scopeChipActive: {
-    background: "var(--m-on-surface)",
+    background: "var(--ink)",
     color: "#FFFFFF",
-    borderColor: "var(--m-on-surface)",
+    borderColor: "var(--ink)",
   },
   scopeCount: {
     minWidth: 20,
@@ -2187,10 +2172,10 @@ const D: Record<string, CSSProperties> = {
     display: "inline-grid",
     placeItems: "center",
     borderRadius: 999,
-    background: "var(--m-surface-2)",
-    color: "var(--m-on-surface-mid)",
+    background: "var(--surface-2)",
+    color: "var(--ink-3)",
     fontSize: 10,
-    fontWeight: 800,
+    fontWeight: 600,
   },
   scopeCountActive: {
     background: "rgba(255,255,255,0.18)",
@@ -2198,10 +2183,10 @@ const D: Record<string, CSSProperties> = {
   },
   reliancePanel: {
     margin: "0 0 16px",
-    borderRadius: 20,
+    borderRadius: 12,
     padding: 16,
-    background: "linear-gradient(135deg, rgba(248,250,255,0.98), rgba(255,255,255,0.90))",
-    border: "1px solid var(--m-outline-var)",
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
   },
   relianceHead: {
     display: "grid",
@@ -2212,7 +2197,7 @@ const D: Record<string, CSSProperties> = {
   relianceEyebrow: {
     fontSize: 9.5,
     letterSpacing: "0.16em",
-    color: "var(--m-on-primary-container)",
+    color: "var(--accent-strong)",
     fontWeight: 800,
   },
   relianceTitle: {
@@ -2221,11 +2206,11 @@ const D: Record<string, CSSProperties> = {
     fontSize: 19,
     lineHeight: 1.05,
     letterSpacing: "-0.04em",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   relianceBody: {
     margin: "7px 0 0",
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-2)",
     fontSize: 12.5,
     lineHeight: 1.4,
     maxWidth: 860,
@@ -2242,10 +2227,10 @@ const D: Record<string, CSSProperties> = {
     alignItems: "center",
     gap: 10,
     padding: "8px 10px",
-    borderRadius: 15,
-    background: "#FFFFFF",
-    border: "1px solid var(--m-outline-var)",
-    color: "var(--m-on-surface)",
+    borderRadius: 10,
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
+    color: "var(--ink)",
   },
   relianceRowMain: {
     all: "unset",
@@ -2263,15 +2248,16 @@ const D: Record<string, CSSProperties> = {
     gap: 3,
     fontSize: 12,
     lineHeight: 1.32,
-    color: "var(--m-on-surface-var)",
+    color: "var(--ink-2)",
   },
   reliancePill: {
     borderRadius: 999,
-    padding: "7px 9px",
-    background: "rgba(214,163,92,0.16)",
-    color: "#7A5A22",
+    padding: "5px 9px",
+    background: "var(--st-review-bg)",
+    color: "var(--st-review-fg)",
     fontSize: 9,
-    fontWeight: 850,
+    fontFamily: "var(--font-mono)",
+    fontWeight: 700,
     letterSpacing: "0.1em",
     whiteSpace: "nowrap",
   },
@@ -2280,15 +2266,12 @@ const D: Record<string, CSSProperties> = {
     minHeight: 34,
     padding: "0 13px",
     borderRadius: 999,
-    background: "linear-gradient(135deg, rgba(42,50,68,0.86), rgba(30,35,49,0.78))",
+    background: "var(--ink)",
     color: "#FFFFFF",
     fontSize: 11.5,
-    fontWeight: 850,
+    fontWeight: 700,
     cursor: "pointer",
-    border: "0.5px solid rgba(255,255,255,0.34)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.36), 0 11px 28px rgba(23,31,45,0.22)",
-    backdropFilter: "blur(7px)",
-    WebkitBackdropFilter: "blur(7px)",
+    border: "1px solid var(--line)",
   },
   fileGrid: {
     display: "grid",
@@ -2297,21 +2280,21 @@ const D: Record<string, CSSProperties> = {
     alignItems: "start",
   },
   folderCard: {
-    borderRadius: 20,
+    borderRadius: 12,
     padding: 16,
-    background: "linear-gradient(180deg, #F8F9FF 0%, #FFFFFF 100%)",
-    border: "1px solid var(--m-outline-var)",
+    background: "var(--surface-2)",
+    border: "1px solid var(--line)",
   },
   folderEyebrow: {
     fontSize: 9.5,
     letterSpacing: "0.16em",
-    color: "var(--m-on-primary-container)",
+    color: "var(--accent-strong)",
     fontWeight: 800,
   },
   folderRoot: {
     display: "block",
     marginTop: 6,
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
     fontSize: 14,
     letterSpacing: "-0.02em",
   },
@@ -2328,14 +2311,14 @@ const D: Record<string, CSSProperties> = {
     alignItems: "center",
     gap: 10,
     padding: "8px 9px",
-    borderRadius: 14,
+    borderRadius: 10,
     cursor: "pointer",
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-3)",
   },
   folderIcon: {
     width: 34,
     height: 34,
-    borderRadius: 11,
+    borderRadius: 9,
     display: "grid",
     placeItems: "center",
   },
@@ -2349,14 +2332,15 @@ const D: Record<string, CSSProperties> = {
   },
   folderCount: {
     fontSize: 10,
-    color: "var(--m-on-surface-mid)",
-    fontWeight: 800,
+    color: "var(--ink-3)",
+    fontFamily: "var(--font-mono)",
+    fontWeight: 700,
   },
   fileListCard: {
-    borderRadius: 20,
-    border: "1px solid var(--m-outline-var)",
+    borderRadius: 12,
+    border: "1px solid var(--line)",
     overflow: "hidden",
-    background: "#FFFFFF",
+    background: "var(--surface)",
   },
   searchBar: {
     height: 52,
@@ -2364,9 +2348,9 @@ const D: Record<string, CSSProperties> = {
     alignItems: "center",
     gap: 10,
     padding: "0 16px",
-    background: "var(--m-surface-1)",
-    color: "var(--m-on-surface-mid)",
-    borderBottom: "1px solid var(--m-outline-var)",
+    background: "var(--surface-2)",
+    color: "var(--ink-3)",
+    borderBottom: "1px solid var(--line)",
     fontSize: 13,
   },
   kbd: {
@@ -2375,16 +2359,16 @@ const D: Record<string, CSSProperties> = {
     height: 26,
     display: "inline-grid",
     placeItems: "center",
-    borderRadius: 8,
-    border: "1px solid var(--m-outline-var)",
-    background: "#FFFFFF",
-    color: "var(--m-on-surface-mid)",
+    borderRadius: 6,
+    border: "1px solid var(--line-2)",
+    background: "var(--surface)",
+    color: "var(--ink-3)",
     fontSize: 11,
     fontFamily: "var(--font-mono)",
   },
   fileSection: {
     padding: "18px 18px 6px",
-    borderBottom: "1px solid var(--m-outline-var)",
+    borderBottom: "1px solid var(--line)",
   },
   fileSectionHead: {
     display: "flex",
@@ -2396,7 +2380,7 @@ const D: Record<string, CSSProperties> = {
   fileSectionEyebrow: {
     fontSize: 9.5,
     letterSpacing: "0.16em",
-    color: "var(--m-on-primary-container)",
+    color: "var(--accent-strong)",
     fontWeight: 800,
   },
   fileSectionTitle: {
@@ -2404,12 +2388,13 @@ const D: Record<string, CSSProperties> = {
     fontSize: 20,
     lineHeight: 1,
     letterSpacing: "-0.04em",
-    color: "var(--m-on-surface)",
+    color: "var(--ink)",
   },
   fileSectionCount: {
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-3)",
     fontSize: 10,
-    fontWeight: 800,
+    fontFamily: "var(--font-mono)",
+    fontWeight: 700,
   },
   fileRow: {
     all: "unset",
@@ -2426,48 +2411,49 @@ const D: Record<string, CSSProperties> = {
   fileIcon: {
     width: 42,
     height: 42,
-    borderRadius: 15,
+    borderRadius: 11,
     display: "grid",
     placeItems: "center",
-    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.60), 0 10px 18px rgba(26,34,51,0.06)",
+    border: "1px solid var(--line)",
   },
   fileRowText: {
     minWidth: 0,
     display: "flex",
     flexDirection: "column",
     gap: 2,
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-3)",
     fontSize: 12,
   },
   filePath: {
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-3)",
     opacity: 0.78,
   },
   fileProvenance: {
-    color: "#4E659A",
-    fontWeight: 800,
+    color: "var(--ink-2)",
+    fontWeight: 700,
   },
   fileWarning: {
-    color: "#7A5A22",
-    fontWeight: 800,
+    color: "var(--st-review-fg)",
+    fontWeight: 700,
   },
   fileStatus: {
     borderRadius: 999,
-    padding: "7px 10px",
+    padding: "5px 10px",
     fontSize: 12,
-    fontWeight: 850,
+    fontFamily: "var(--font-mono)",
+    fontWeight: 600,
     whiteSpace: "nowrap",
   },
   fileChevron: {
-    color: "var(--m-on-surface-mid)",
+    color: "var(--ink-3)",
     fontSize: 24,
     lineHeight: 1,
   },
   readBody: {
     fontSize: 14.5, lineHeight: 1.65,
-    color: "var(--m-on-surface-var)", textWrap: "pretty",
+    color: "var(--ink-2)", textWrap: "pretty",
   },
 };
