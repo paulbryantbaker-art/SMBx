@@ -58,13 +58,16 @@ interface AnalysesHubProps {
   initials: string;
   onAvatarClick: () => void;
   onSearch?: () => void;
+  /** Opens the notifications sheet + unread badge count. Omitted → no bell. */
+  onNotif?: () => void;
+  notifCount?: number;
   /** Live deal rows (today slice); null when anon / no deals. */
   deals: MobilePipelineRow[] | null;
   onRunDealAnalysis: (input: AnalysesRunInput) => void;
   onAskYulia: (prompt: string) => void;
 }
 
-export function MobileAnalysesScreen({ initials, onAvatarClick, onSearch, deals, onRunDealAnalysis, onAskYulia }: AnalysesHubProps) {
+export function MobileAnalysesScreen({ initials, onAvatarClick, onSearch, onNotif, notifCount, deals, onRunDealAnalysis, onAskYulia }: AnalysesHubProps) {
   const [query, setQuery] = useState("");
   const primaryDeal = deals && deals.length > 0 ? deals[0] : null;
 
@@ -91,7 +94,7 @@ export function MobileAnalysesScreen({ initials, onAvatarClick, onSearch, deals,
 
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 110 }}>
-      <GlassTopBar title="Analyses" initials={initials} onAvatarClick={onAvatarClick} onSearch={onSearch} />
+      <GlassTopBar title="Analyses" initials={initials} onAvatarClick={onAvatarClick} onSearch={onSearch} onNotif={onNotif} notifCount={notifCount} />
       <LargeTitle>Analyses</LargeTitle>
 
       <div style={{ padding: "0 22px 6px" }}>

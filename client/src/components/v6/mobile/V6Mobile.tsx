@@ -16,6 +16,8 @@ import { LibraryDetailScreen, LibraryDocumentScreen, LibraryFinderScreen, Librar
 import { MobileAnalysesScreen } from "./screens/Analyses";
 import { ChatSheet } from "./ChatSheet";
 import { LearnSheet } from "./LearnSheet";
+import { NotificationsSheet } from "./NotificationsSheet";
+import { useNotifications, type AppNotification } from "../../../hooks/useNotifications";
 import { useAudience } from "../../../hooks/useAudience";
 import { runDealAnalysis } from "../../../hooks/useV6WorkspaceData";
 import { buildMobileSurfaceContext } from "../../../lib/yuliaSurfaceContext";
@@ -103,6 +105,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
   const [libraryDocBack, setLibraryDocBack] = useState<MobileView | null>(null);
   const [chatOpen, setChatOpen] = useState(initial.chat);
   const [acctOpen, setAcctOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const [learn, setLearn] = useState<{ open: boolean; section: "how" | "pricing"; anchor?: string }>({
     open: false, section: "how",
   });
@@ -385,6 +388,64 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
     setAcctOpen(true);
   };
 
+  // Notifications (@mention + deal). Only poll for a real signed-in user —
+  // anon / dev-bypass have no token, so /api/notifications would 401. The
+  // bell + sheet are hidden in that case (onNotif left undefined below).
+  const notifEnabled = !!user && !DEV_AUTH_BYPASS;
+  const { notifications, unreadCount, markRead, markAllRead, refresh: refreshNotifs } =
+    useNotifications(notifEnabled);
+
+  // Resolve a notification's action_url (a desktop V6 hash route like
+  // `/#mode=pipeline&tab=deal-team-123` or `/#mode=...&tab=deal-45`) to the
+  // closest mobile surface. Deal-scoped routes open the deal detail; bare
+  // mode routes switch tabs; anything else just closes the sheet.
+  const resolveNotifNav = (n: AppNotification) => {
+    if (!n.read_at) markRead(n.id);
+    setNotifOpen(false);
+    try {
+      const url = n.action_url || "";
+      const hashIndex = url.indexOf("#");
+      const rawHash = hashIndex >= 0 ? url.slice(hashIndex + 1) : "";
+      const params = new URLSearchParams(rawHash);
+      const tabParam = params.get("tab") || "";
+      const modeParam = params.get("mode") || "";
+
+      // Deal-scoped: deal-team-{id} (mention) or deal-{id} → open detail.
+      const dealMatch = tabParam.match(/^deal(?:-team)?-(.+)$/);
+      const dealId = dealMatch ? dealMatch[1] : n.deal_id != null ? String(n.deal_id) : "";
+      if (dealId) {
+        onOpenDeal(dealId, n.title?.replace(/\s*·\s*Team$/, "") || "Deal");
+        return;
+      }
+
+      // Mode-level routes → switch the matching mobile tab.
+      if (modeParam === "pipeline") { setView({ kind: "tab", tab: "pipeline" }); return; }
+      if (modeParam === "search") { setView({ kind: "search", tab: "search" }); return; }
+      if (modeParam === "library" || modeParam === "files" || modeParam === "docs") {
+        setView({ kind: "tab", tab: "brief" });
+        return;
+      }
+      if (modeParam === "analysis" || modeParam === "intel") {
+        setView({ kind: "analyses", tab: activeTab });
+        return;
+      }
+      // Fallback: a deal id on the notification but no parseable route.
+      if (n.deal_id != null) onOpenDeal(String(n.deal_id), n.title || "Deal");
+    } catch {
+      /* malformed action_url — sheet already closed */
+    }
+  };
+
+  const onOpenNotif = () => {
+    refreshNotifs();
+    setNotifOpen(true);
+  };
+  // Props spread into every chrome-bearing GlassTopBar. Undefined onNotif →
+  // the bell is hidden (anon / dev-bypass), so screens stay clean for guests.
+  const notifBarProps = notifEnabled
+    ? { onNotif: onOpenNotif, notifCount: unreadCount }
+    : {};
+
   const handleSignOut = () => {
     setAcctOpen(false);
     // Reset the marketing→app threshold flags so the reload lands on the
@@ -448,6 +509,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           showAudienceSwitcher={isAnonAudience}
           realEmpty={realEmpty}
           onOpenAnalyses={onOpenAnalyses}
+          {...notifBarProps}
         />
       )}
       {view.kind === "tab" && activeTab === "pipeline" && (
@@ -462,6 +524,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           userFeatured={userDeals.hasData ? userDeals.featured : null}
           userPicks={userDeals.hasData ? userDeals.picks : null}
           realEmpty={realEmpty}
+          {...notifBarProps}
         />
       )}
       {view.kind === "tab" && activeTab === "brief" && (
@@ -473,6 +536,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           onOpenDetail={onOpenLibraryDoc}
           onOpenDealLibrary={onOpenLibraryDetail}
           realEmpty={realEmpty}
+          {...notifBarProps}
         />
       )}
       {view.kind === "tab" && activeTab === "search" && (
@@ -482,6 +546,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           onOpenSearch={onOpenSearch}
           onChat={onChat}
           onAskYulia={onAskYulia}
+          {...notifBarProps}
         />
       )}
       {view.kind === "detail" && (
@@ -507,6 +572,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           onOpenSearch={onOpenSearch}
           onChat={onChat}
           onAskYulia={onAskYulia}
+          {...notifBarProps}
         />
       )}
       {view.kind === "library" && (
@@ -518,6 +584,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           onOpenDetail={onOpenLibraryDoc}
           onOpenDealLibrary={onOpenLibraryDetail}
           realEmpty={realEmpty}
+          {...notifBarProps}
         />
       )}
       {view.kind === "library-finder" && (
@@ -567,6 +634,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           deals={userDeals.hasData ? userDeals.today : null}
           onRunDealAnalysis={onRunDealAnalysis}
           onAskYulia={onAskYulia}
+          {...notifBarProps}
         />
       )}
       {view.kind === "analysis" && (
@@ -610,6 +678,16 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
         section={learn.section}
         anchor={learn.anchor}
         onTalkToYulia={onLearnTalkToYulia}
+      />
+
+      {/* Notifications sheet — @mention + deal notifications (DT-5). */}
+      <NotificationsSheet
+        open={notifOpen}
+        onClose={() => setNotifOpen(false)}
+        notifications={notifications}
+        unreadCount={unreadCount}
+        onRow={resolveNotifNav}
+        onMarkAllRead={markAllRead}
       />
 
       {/* Account sheet — Liquid-Glass bottom sheet with Sign out / preview. */}

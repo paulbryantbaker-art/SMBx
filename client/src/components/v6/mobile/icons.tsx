@@ -62,6 +62,19 @@ const ICONS: Record<IconName, (p: IconProps) => ReactElement> = {
       <path d="M8 13V3M8 3L3.5 7.5M8 3L12.5 7.5" stroke={c} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
+  bell: ({ size = 17, c = "currentColor" }) => (
+    <svg width={size} height={size} viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <path d="M9 2.2C6.4 2.2 4.6 4.1 4.6 6.6V9.4C4.6 10.4 4.2 11.3 3.5 12L3 12.6H15L14.5 12C13.8 11.3 13.4 10.4 13.4 9.4V6.6C13.4 4.1 11.6 2.2 9 2.2Z" stroke={c} strokeWidth="1.6" strokeLinejoin="round"/>
+      <path d="M7.4 14.4C7.7 15.3 8.3 15.8 9 15.8C9.7 15.8 10.3 15.3 10.6 14.4" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  bellOff: ({ size = 26, c = "currentColor" }) => (
+    <svg width={size} height={size} viewBox="0 0 26 26" fill="none" aria-hidden="true">
+      <path d="M7 9.2C7 6 9.7 3.4 13 3.4C16.3 3.4 19 6 19 9.2V12.6C19 13.9 19.5 15.2 20.5 16.1L21.2 16.8H4.8L5.5 16.1C6.5 15.2 7 13.9 7 12.6V9.2Z" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+      <path d="M10.6 20C11 21.1 11.9 21.8 13 21.8C14.1 21.8 15 21.1 15.4 20" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M3.5 3.5L22.5 22.5" stroke={c} strokeWidth="1.6" strokeLinecap="round"/>
+    </svg>
+  ),
   today: ({ c = "currentColor", active = false }) => (
     <svg width={22} height={22} viewBox="0 0 22 22" fill={active ? c : "none"} stroke={c} strokeWidth="1.5" aria-hidden="true">
       <rect x="4" y="3" width="14" height="16" rx="2"/>

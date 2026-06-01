@@ -47,6 +47,9 @@ interface SharedChromeProps {
   initials: string;
   onAvatarClick: () => void;
   onOpenSearch: () => void;
+  /** Opens the notifications sheet + unread badge count. Omitted → no bell. */
+  onNotif?: () => void;
+  notifCount?: number;
 }
 
 interface LibraryScreenProps extends SharedChromeProps {
@@ -267,6 +270,8 @@ export function LibraryScreen({
   initials,
   onAvatarClick,
   onOpenSearch,
+  onNotif,
+  notifCount,
   onOpenDetail,
   onOpenFinder,
   onOpenDealLibrary,
@@ -280,6 +285,8 @@ export function LibraryScreen({
           initials={initials}
           onAvatarClick={onAvatarClick}
           onSearch={onOpenSearch}
+          onNotif={onNotif}
+          notifCount={notifCount}
         />
         <LargeTitle>Files</LargeTitle>
 
@@ -308,6 +315,8 @@ export function LibraryScreen({
         initials={initials}
         onAvatarClick={onAvatarClick}
         onSearch={onOpenSearch}
+        onNotif={onNotif}
+        notifCount={notifCount}
       />
       <LargeTitle>Files</LargeTitle>
 
@@ -476,6 +485,8 @@ export function SearchScreen({
   initials,
   onAvatarClick,
   onOpenSearch,
+  onNotif,
+  notifCount,
   onChat,
   onAskYulia,
 }: SearchScreenProps) {
@@ -567,6 +578,8 @@ export function SearchScreen({
         initials={initials}
         onAvatarClick={onAvatarClick}
         onSearch={onOpenSearch}
+        onNotif={onNotif}
+        notifCount={notifCount}
       />
       <LargeTitle>Search</LargeTitle>
 

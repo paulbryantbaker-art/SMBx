@@ -5,6 +5,7 @@ import { useAuthChat } from "../../hooks/useAuthChat";
 import { useIsMobile } from "../../hooks/useIsMobile";
 import { V6Chat } from "./Chat";
 import { MODES, V6Icon } from "./icons";
+import V6NotificationBell from "./V6NotificationBell";
 import "./workspace.css";
 import { buildDesktopSurfaceContext, type SurfaceContext } from "../../lib/yuliaSurfaceContext";
 import { normalizeModelPreference, type ModelPreference } from "../../lib/modelPreference";
@@ -255,6 +256,42 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
     const mode = tab ? modeForTab(tab) : null;
     if (mode) setActiveMode(mode);
     setActiveTabId(id);
+  };
+
+  // Apply a notification's action_url. These are V6 hash routes —
+  // `/#mode=pipeline&tab=deal-team-123` (mention), `/#mode=...&tab=deal-456`,
+  // etc. Driving them through the hash lets the existing hashchange decoder
+  // (the `onHash` effect above) build the right canvas tab — one source of
+  // routing truth. Assigning window.location.hash fires hashchange; if the
+  // target equals the current hash it would be a no-op, so we read+apply the
+  // decoded state directly in that case.
+  const navigateToActionUrl = (actionUrl: string) => {
+    try {
+      const hashIndex = actionUrl.indexOf("#");
+      const rawHash = hashIndex >= 0 ? actionUrl.slice(hashIndex + 1) : "";
+      if (!rawHash) return;
+      const nextHash = `#${rawHash}`;
+      if (window.location.hash === nextHash) {
+        // Same hash → hashchange won't fire; decode + apply inline.
+        const next = readHashState();
+        const rootId = `${next.mode}-root`;
+        setActiveMode(next.mode);
+        const deepTab = tabFromHash(next.tab, next.scope, next.title, next.run);
+        if (deepTab) {
+          setTabs(prev =>
+            prev.find(t => t.id === deepTab.id)
+              ? prev.map(t => (t.id === deepTab.id ? { ...t, ...deepTab } : t))
+              : [...prev, deepTab],
+          );
+        }
+        setActiveTabId(next.tab ?? rootId);
+      } else {
+        // Different hash → let the hashchange listener do the decoding.
+        window.location.hash = nextHash;
+      }
+    } catch {
+      /* malformed action_url — ignore */
+    }
   };
 
   const openTab: (descriptor: Omit<Tab, "id"> & { id?: string }) => void = (descriptor) => {
@@ -567,6 +604,7 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
             </button>
             <div className="wktop-r">
               <button className="wkicon" title="New" onClick={() => pickMode("today")}><V6Icon name="plus" size={18} /></button>
+              {user && <V6NotificationBell onNavigate={navigateToActionUrl} />}
               <div className="wkacct-wrap">
                 <button
                   className="wkav"

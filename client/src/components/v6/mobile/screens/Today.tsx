@@ -37,6 +37,9 @@ interface TodayProps {
   /** Opens the Analyses launcher (run valuation/QoE/LBO/etc.). */
   onOpenAnalyses: () => void;
   onAvatarClick: () => void;
+  /** Opens the notifications sheet + unread badge count. Omitted → no bell. */
+  onNotif?: () => void;
+  notifCount?: number;
   /** Authed user's deals (from useMobileDeals). Null = anon or empty,
       in which case the hardcoded SAMPLE_PIPELINE renders instead. */
   userPipeline: MobilePipelineRow[] | null;
@@ -101,7 +104,7 @@ const SAMPLE_MARKET_INTEL: PortfolioMarketIntelligence = {
 
 export function TodayScreen({
   isAnon, initials, onOpenDeal, onOpenLibrary, onOpenLibraryDetail, onChat, onSearch, onAskYulia, onLearn: _onLearn, onOpenAnalyses,
-  onAvatarClick, userPipeline, realEmpty,
+  onAvatarClick, onNotif, notifCount, userPipeline, realEmpty,
   audience,
 }: TodayProps) {
   // realEmpty = a real signed-in user with zero deals. In that case we do
@@ -136,7 +139,7 @@ export function TodayScreen({
 
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
-      <GlassTopBar title="Today" initials={initials} onAvatarClick={onAvatarClick} onSearch={onSearch ?? onChat} />
+      <GlassTopBar title="Today" initials={initials} onAvatarClick={onAvatarClick} onSearch={onSearch ?? onChat} onNotif={onNotif} notifCount={notifCount} />
       <LargeTitle>Today</LargeTitle>
 
       {/* Hero — anon = welcome, authed = today's brief teaser. */}

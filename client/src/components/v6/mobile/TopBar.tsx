@@ -54,6 +54,11 @@ interface GlassTopBarProps {
   initials?: string;
   onAvatarClick?: () => void;
   onSearch?: () => void;
+  /** Opens the notifications sheet. When provided, a bell renders in the
+   *  floating chrome (left of search). Omitted → no bell (anon / sample). */
+  onNotif?: () => void;
+  /** Unread count for the bell badge. 0 / undefined → no badge. */
+  notifCount?: number;
 }
 
 export function GlassTopBar({
@@ -64,6 +69,8 @@ export function GlassTopBar({
   initials = "JM",
   onAvatarClick,
   onSearch,
+  onNotif,
+  notifCount = 0,
 }: GlassTopBarProps) {
   const { collapsed, scrolled } = useContext(TitleCollapseContext);
   return (
@@ -147,6 +154,21 @@ export function GlassTopBar({
       <div style={T.floatingChrome}>
         {rightSlot ?? (
           <>
+            {onNotif && (
+              <button
+                type="button"
+                aria-label={notifCount > 0 ? `Notifications, ${notifCount} unread` : "Notifications"}
+                onClick={onNotif}
+                style={{ ...T.searchBtn, position: "relative" }}
+              >
+                <MobileIcon name="bell" size={16} c="var(--mb-ink-1)" />
+                {notifCount > 0 && (
+                  <span style={T.notifBadge} aria-hidden="true">
+                    {notifCount > 9 ? "9+" : notifCount}
+                  </span>
+                )}
+              </button>
+            )}
             <button
               type="button"
               aria-label="Search"
@@ -325,6 +347,15 @@ const T: Record<string, CSSProperties> = {
     cursor: "pointer",
     padding: 0,
   },
+  notifBadge: {
+    position: "absolute", top: -3, right: -3,
+    minWidth: 16, height: 16, padding: "0 4px",
+    borderRadius: 999, background: "#C0562F", color: "#fff",
+    fontFamily: "var(--mb-font-mono)", fontSize: 9, fontWeight: 700,
+    lineHeight: "16px", textAlign: "center",
+    boxShadow: "0 0 0 2px rgba(255,255,255,0.85)",
+    pointerEvents: "none",
+  },
   avatar: {
     width: 32, height: 32, borderRadius: "50%",
     background: "linear-gradient(145deg, #4D5666, #1F2530)",
@@ -337,8 +368,11 @@ const T: Record<string, CSSProperties> = {
     fontFamily: "var(--mb-font-display)", fontWeight: 800,
     fontSize: 34, letterSpacing: "-1px",
     margin: 0, lineHeight: 1.05,
-    // Right padding clears the floating avatar+search (32+8+32+16=88).
-    padding: "6px 96px 12px 22px",
+    // Right padding clears the floating chrome. With the notifications bell
+    // the cluster is bell+search+avatar (32+8+32+8+32+16 = 128); titles are
+    // short ("Today"/"Pipeline"/"Brief"/"Analyses") so the extra right
+    // whitespace on bell-less screens reads fine.
+    padding: "6px 132px 12px 22px",
     color: "var(--mb-ink)",
     textWrap: "balance",
   },

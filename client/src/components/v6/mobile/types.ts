@@ -63,7 +63,7 @@ export type YIconKind = Verdict | "default" | "cool";
 
 export type IconName =
   | "chat" | "search" | "back" | "share" | "close" | "download"
-  | "chevron" | "star" | "arrowUp"
+  | "chevron" | "star" | "arrowUp" | "bell" | "bellOff"
   | "today" | "pipeline" | "brief";
 
 export type GlassTint = "light" | "chrome" | "dark" | "onColor";

@@ -23,6 +23,9 @@ interface PipelineProps {
   onOpenWatching: () => void;
   onAvatarClick: () => void;
   onSearch: () => void;
+  /** Opens the notifications sheet + unread badge count. Omitted → no bell. */
+  onNotif?: () => void;
+  notifCount?: number;
   /** Authed user's watching list (null = anon or empty → samples render). */
   userWatching: MobileWatchRow[] | null;
   /** Authed user's "NEW TODAY" featured hero (null = anon or empty → sample). */
@@ -67,7 +70,7 @@ const SAMPLE_FEATURED: FeaturedDef = {
   revLabel: "$5.4M REV",
 };
 
-export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, onAvatarClick, onSearch, userWatching, userFeatured, userPicks, realEmpty }: PipelineProps) {
+export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, onAvatarClick, onSearch, onNotif, notifCount, userWatching, userFeatured, userPicks, realEmpty }: PipelineProps) {
   const FEATURED: FeaturedDef = userFeatured ?? SAMPLE_FEATURED;
   const [activeChip, setActiveChip] = useState<DealStage>("watching");
   const { isWatched, toggle } = useWatchlist();
@@ -91,7 +94,7 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
 
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
-      <GlassTopBar title="Pipeline" initials={initials} onAvatarClick={onAvatarClick} onSearch={onSearch} />
+      <GlassTopBar title="Pipeline" initials={initials} onAvatarClick={onAvatarClick} onSearch={onSearch} onNotif={onNotif} notifCount={notifCount} />
       <LargeTitle>Pipeline</LargeTitle>
 
       {/* Logged-out callout */}
