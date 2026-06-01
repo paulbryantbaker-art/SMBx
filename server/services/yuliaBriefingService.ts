@@ -227,6 +227,26 @@ export interface PortfolioBriefResponse {
 
 const MODEL = 'claude-sonnet-4-6';
 
+// Hard ceiling on the brief AI call. A normal Sonnet brief lands in ~10-18s;
+// past this we stop waiting and serve the deterministic brief instead.
+const BRIEF_AI_TIMEOUT_MS = Number(process.env.BRIEF_AI_TIMEOUT_MS) || 22000;
+
+/**
+ * Races a promise against a timer that REJECTS. A bare `await` on a slow/stuck
+ * AI call hangs the whole HTTP request forever — and a try/catch can't catch a
+ * hang, only a rejection. Wrapping the call converts "hangs forever" into
+ * "throws after ms", which the existing catch turns into the deterministic
+ * fallback brief. This is why portfolio-brief could return HTTP 000 (timeout)
+ * for large accounts: the AI call never settled and nothing reclaimed it.
+ */
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer)) as Promise<T>;
+}
+
 export async function getPortfolioBriefForUser(userId: number, forceRefresh = false): Promise<PortfolioBriefResponse> {
   const snapshot = await buildPortfolioSnapshot(userId);
   const fingerprint = fingerprintOf(snapshot.fingerprintBasis);
@@ -254,7 +274,7 @@ export async function getPortfolioBriefForUser(userId: number, forceRefresh = fa
 
   if (process.env.ANTHROPIC_API_KEY) {
     try {
-      generated = await generatePortfolioBrief(snapshot, fallback);
+      generated = await withTimeout(generatePortfolioBrief(snapshot, fallback), BRIEF_AI_TIMEOUT_MS, 'portfolio-brief');
     } catch (err: any) {
       status = 'failed';
       errorMessage = err.message || 'Brief generation failed';
@@ -318,7 +338,7 @@ export async function getDealBriefForUser(userId: number, dealId: number, forceR
 
   if (process.env.ANTHROPIC_API_KEY && snapshot.deal) {
     try {
-      generated = await generateDealBrief(snapshot, fallback);
+      generated = await withTimeout(generateDealBrief(snapshot, fallback), BRIEF_AI_TIMEOUT_MS, 'deal-brief');
     } catch (err: any) {
       status = 'failed';
       errorMessage = err.message || 'Deal brief generation failed';

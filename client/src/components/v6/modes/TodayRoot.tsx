@@ -235,6 +235,11 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   );
   const lead = deals[0] ?? null;
   const leadTitle = lead?.title ?? "your first deal";
+  // First run = real-data path, brief resolved, genuinely zero deals. Render a
+  // warm journey picker instead of the sparse generic empty hero. Excludes
+  // sample/logged-out (useSampleData) and the loading window (waitingForYuliaRead).
+  const firstRun = !useSampleData && !waitingForYuliaRead && deals.length === 0;
+  const firstName = ((user as any)?.name || (user as any)?.displayName || "").toString().trim().split(/\s+/)[0] || "";
   const marketIntel = liveBrief?.marketIntelligence ?? {
     eyebrow: waitingForYuliaRead ? "YULIA READ REFRESHING" : "MARKET INTELLIGENCE LIVE",
     headline: waitingForYuliaRead
@@ -492,7 +497,46 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
         </div>
       </div>
 
-      {/* ── KPI metric tiles ── */}
+      {/* ── First-run welcome (authed, zero deals): journey quick-starts ── */}
+      {firstRun && (
+        <div className="wkcard" style={{ marginTop: 16, marginBottom: 18, padding: "26px 28px 24px" }}>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", letterSpacing: "0.1em", color: "var(--accent-strong)", fontWeight: 700, textTransform: "uppercase", marginBottom: 10 }}>
+            {firstName ? `Welcome, ${firstName}` : "Welcome"}
+          </div>
+          <div style={{ fontSize: "clamp(1.5rem, 2.6vw, 2.05rem)", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1.12, color: "var(--ink)", marginBottom: 8 }}>
+            You're set up. Let's start your first deal.
+          </div>
+          <p style={{ color: "var(--ink-2)", fontSize: "0.92rem", lineHeight: 1.5, margin: "0 0 22px", maxWidth: 640 }}>
+            Yulia runs the deal work end-to-end — sourcing, recasts, valuation, diligence, packaging, and closing support. Tell her what you're working on and she builds the workspace around it.
+          </p>
+          <div className="wkgrid g2" style={{ gap: 12 }}>
+            {[
+              { kicker: "SELL", title: "Sell a business", sub: "Recast the financials, set a defensible range, and build the package.", prompt: "I'm exploring selling my business. Walk me through how we start — what you need from me and what you'll build first." },
+              { kicker: "BUY", title: "Acquire a business", sub: "Set a thesis, value a target, and run diligence with Yulia.", prompt: "I'm looking to acquire a business. Help me set up my buy-side workspace and first analysis." },
+              { kicker: "RAISE", title: "Raise capital", sub: "Build the financial package and investor materials.", prompt: "I want to raise capital for my business. Help me start the raise workspace and investor materials." },
+              { kicker: "EVALUATE", title: "Analyze a deal", sub: "Drop in the numbers — Yulia values it and flags the risks.", prompt: "I have a business to analyze. Help me value it and spot the key risks — I'll share the numbers." },
+            ].map(j => (
+              <button
+                key={j.kicker}
+                type="button"
+                style={{ all: "unset", cursor: "pointer", display: "block", padding: "14px 16px", background: "var(--surface-2)", border: "1px solid var(--line)", borderRadius: 12, boxSizing: "border-box" }}
+                onClick={() => ask(j.prompt)}
+              >
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.66rem", letterSpacing: "0.12em", color: "var(--accent-strong)", fontWeight: 700, textTransform: "uppercase", marginBottom: 6 }}>{j.kicker}</div>
+                <div style={{ color: "var(--ink)", fontSize: "1rem", fontWeight: 700, letterSpacing: "-0.02em", marginBottom: 4 }}>{j.title}</div>
+                <div style={{ color: "var(--ink-2)", fontSize: "0.84rem", lineHeight: 1.4 }}>{j.sub}</div>
+              </button>
+            ))}
+          </div>
+          <div style={{ marginTop: 18, display: "flex", gap: 9, flexWrap: "wrap" }}>
+            <button className="wkbtn primary" type="button" onClick={() => ask("Help me start my first SMBx deal workspace. Ask me what I'm working on.")}>Start with Yulia</button>
+            <button className="wkbtn" type="button" onClick={() => openTab({ kind: "mode-root", modeId: "search", id: "search-root", title: "Search", pinned: true })}>Explore the market</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── KPI metric tiles + hero grid (hidden on first run) ── */}
+      {!firstRun && (<>
       <div className="mhead">
         <div className="mh">
           <span className="l">Deals active</span>
@@ -634,6 +678,8 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           ))}
         </div>
       </div>
+
+      </>)}
 
       {/* ── Priority queue ── */}
       <div className="wksec">
