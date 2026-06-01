@@ -305,9 +305,9 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
     portfolioName = "Buy",
     dealStage = "all",
   ) => setView({ kind: "library-detail", tab: activeTab, dealTitle, dealMeta, portfolioName, dealStage });
-  const onOpenLibraryDoc = (docTitle = "IOI · v3", docMeta = "Yulia · drafting · 2 min ago", docKind = "draft") => {
+  const onOpenLibraryDoc = (docTitle = "IOI · v3", docMeta = "Yulia · drafting · 2 min ago", docKind = "draft", deliverableId?: number) => {
     setLibraryDocBack(view);
-    setView({ kind: "library-doc", tab: activeTab, docTitle, docMeta, docKind });
+    setView({ kind: "library-doc", tab: activeTab, docTitle, docMeta, docKind, deliverableId });
   };
   const onChatClose = () => setChatOpen(false);
   const onLearn = (section: "how" | "pricing", anchor?: string) =>
@@ -540,11 +540,13 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
             dealMeta: view.dealMeta,
             portfolioName: view.portfolioName,
             dealStage: stage,
+            dealRawId: view.dealRawId,
           })}
           dealTitle={view.dealTitle}
           dealMeta={view.dealMeta}
           portfolioName={view.portfolioName}
           dealStage={view.dealStage as "all" | "data-room" | undefined}
+          dealRawId={view.dealRawId ?? null}
         />
       )}
       {view.kind === "library-doc" && (
@@ -554,6 +556,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           title={view.docTitle}
           meta={view.docMeta}
           kind={view.docKind}
+          deliverableId={view.deliverableId ?? null}
         />
       )}
       {view.kind === "analyses" && (
@@ -577,14 +580,22 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           onAskYulia={onAskYulia}
           onOpenDeal={onOpenDeal}
           onOpenDocument={onOpenLibraryDoc}
-          onOpenDealFiles={(_dealId, dealTitle, scope) => {
+          onOpenDealFiles={(dealId, dealTitle, scope) => {
+            // dealId is the real numeric deal id (stringified) from the
+            // analysis surface action. Thread it as dealRawId so the data
+            // room opens against the REAL backend deal, not a sample.
+            const rawId = Number(dealId);
             setView({
               kind: "library-detail",
               tab: activeTab,
               dealTitle,
               dealMeta: view.dealMeta,
               portfolioName: "Deal files",
-              dealStage: scope,
+              // "shared" maps to the data-room scope on mobile (library-detail
+              // only has all | data-room). Anything else → data-room view too,
+              // since opening "deal files" from an analysis means the room.
+              dealStage: scope === "all" ? "all" : "data-room",
+              dealRawId: Number.isFinite(rawId) ? rawId : undefined,
             });
           }}
           onRunDealAnalysis={onRunDealAnalysis}
@@ -667,6 +678,8 @@ function readMobileHashState(): {
   dealMeta: string | null;
   portfolioName: string | null;
   dealStage: string | null;
+  dealRawId: number | null;
+  deliverableId: number | null;
   filesFilter: string | null;
   analysisRunId: number | null;
   analysisTitle: string | null;
@@ -697,6 +710,10 @@ function readMobileHashState(): {
     const dealMeta = params.get("dm");
     const portfolioName = params.get("p");
     const dealStage = params.get("s");
+    const dealRawIdParam = params.get("drid");
+    const deliverableIdParam = params.get("did");
+    const dealRawId = dealRawIdParam ? Number(dealRawIdParam) : NaN;
+    const deliverableId = deliverableIdParam ? Number(deliverableIdParam) : NaN;
     const filesFilter = params.get("filter");
     const runParam = params.get("run");
     const versionParam = params.get("v");
@@ -717,6 +734,8 @@ function readMobileHashState(): {
       dealMeta,
       portfolioName,
       dealStage,
+      dealRawId: Number.isFinite(dealRawId) ? dealRawId : null,
+      deliverableId: Number.isFinite(deliverableId) ? deliverableId : null,
       filesFilter,
       analysisRunId: Number.isFinite(analysisRunId) ? analysisRunId : null,
       analysisTitle,
@@ -743,6 +762,8 @@ function emptyMobileHashState(): ReturnType<typeof readMobileHashState> {
     dealMeta: null,
     portfolioName: null,
     dealStage: null,
+    dealRawId: null,
+    deliverableId: null,
     filesFilter: null,
     analysisRunId: null,
     analysisTitle: null,
@@ -764,6 +785,8 @@ function mobileViewFromHash(state: ReturnType<typeof readMobileHashState>): Mobi
       dealMeta: state.dealMeta ?? undefined,
       portfolioName: state.portfolioName ?? undefined,
       dealStage: state.dealStage ?? undefined,
+      dealRawId: state.dealRawId ?? undefined,
+      deliverableId: state.deliverableId ?? undefined,
       docTitle: state.docTitle ?? undefined,
       docMeta: state.docMeta ?? undefined,
       docKind: state.docKind ?? undefined,
@@ -799,11 +822,13 @@ function buildMobileHash(view: MobileView, chatOpen: boolean): string {
         if (view.dealMeta) params.set("dm", view.dealMeta);
         if (view.portfolioName) params.set("p", view.portfolioName);
         if (view.dealStage) params.set("s", view.dealStage);
+        if (view.dealRawId != null) params.set("drid", String(view.dealRawId));
       }
       if (view.kind === "library-doc") {
         if (view.docTitle) params.set("doc", view.docTitle);
         if (view.docMeta) params.set("m", view.docMeta);
         if (view.docKind) params.set("k", view.docKind);
+        if (view.deliverableId != null) params.set("did", String(view.deliverableId));
       }
       if (view.kind === "analysis") {
         if (view.analysisTitle) params.set("at", view.analysisTitle);

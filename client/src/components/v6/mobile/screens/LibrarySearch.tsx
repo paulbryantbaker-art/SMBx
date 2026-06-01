@@ -17,6 +17,12 @@ import { MobileIcon } from "../icons";
 import { ChatStarterPill } from "../ChatStarterPill";
 import { YIcon } from "../YIcon";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
+import { authHeaders } from "../../../../hooks/useAuth";
+import {
+  useMobileDataRoom,
+  type MobileDataRoomDocument,
+  type MobileDataRoomGroup,
+} from "../../../../hooks/useMobileDataRoom";
 
 interface SharedChromeProps {
   initials: string;
@@ -46,6 +52,9 @@ interface LibraryDetailScreenProps {
   dealMeta?: string;
   portfolioName?: string;
   dealStage?: DealStageScope;
+  /** Real numeric deal id. When present the screen loads the REAL data room
+   *  (folders + documents) instead of the sample sections. */
+  dealRawId?: number | null;
 }
 
 interface LibraryFinderScreenProps {
@@ -62,13 +71,16 @@ interface LibraryDocumentScreenProps {
   title?: string;
   meta?: string;
   kind?: string;
+  /** Real deliverable id. When present the reader loads the REAL deliverable
+   *  (title / status / body) instead of the sample text. */
+  deliverableId?: number | null;
 }
 
 type DocTone = "ai" | "memo" | "draft" | "contract" | "signed" | "pdf" | "excel" | "image";
 type PillTone = "draft" | "lock" | "review" | "awaiting" | "signed" | "needed";
 type FilesFilter = "all" | "deals" | "actionable" | "docs" | "analysis" | "data-room" | "shared" | "secure";
 type DealStageScope = "all" | "data-room";
-type OpenDocHandler = (title?: string, meta?: string, kind?: string) => void;
+type OpenDocHandler = (title?: string, meta?: string, kind?: string, deliverableId?: number) => void;
 type OpenDealLibraryHandler = (dealTitle?: string, dealMeta?: string, portfolioName?: string, dealStage?: DealStageScope) => void;
 type OpenFilesHandler = (filter?: FilesFilter) => void;
 
@@ -653,7 +665,26 @@ export function LibraryDetailScreen({
   dealMeta = "$5.4M · East Texas · industrial services",
   portfolioName = "Buy",
   dealStage = "all",
+  dealRawId = null,
 }: LibraryDetailScreenProps) {
+  // REAL data-room read path — only when a real deal id is threaded in.
+  // The hook is a no-op (no fetch) when dealRawId is null, so the sample
+  // experience below is untouched in the anon / no-deal context.
+  const room = useMobileDataRoom(dealRawId);
+  if (dealRawId != null) {
+    return (
+      <RealDealDataRoom
+        dealRawId={dealRawId}
+        dealTitle={dealTitle}
+        dealMeta={dealMeta}
+        portfolioName={portfolioName}
+        room={room}
+        onBack={onBack}
+        onOpenDoc={onOpenDoc}
+      />
+    );
+  }
+
   const deal = dealLibraries.find((item) => item.title === dealTitle) ?? dealLibraries[0];
   const currentTitle = dealTitle || deal.title;
   const currentMeta = dealMeta || deal.meta;
@@ -861,13 +892,286 @@ export function LibraryDetailScreen({
   );
 }
 
+/* ─── REAL data-room (mobile parity with desktop DealView scope rail) ─────
+   Renders the live folders + documents returned by GET /api/deals/:id/data-room.
+   Mirrors the desktop dataRoomDocToFileItem status→tone and file_type→icon
+   mapping, but with the App Store glass primitives (breadcrumb, float chrome,
+   DocSection/DocRow, StatusPill, DocIcon) used by the sample screen above. */
+function RealDealDataRoom({
+  dealRawId,
+  dealTitle,
+  dealMeta,
+  portfolioName,
+  room,
+  onBack,
+  onOpenDoc,
+}: {
+  dealRawId: number;
+  dealTitle?: string;
+  dealMeta?: string;
+  portfolioName?: string;
+  room: ReturnType<typeof useMobileDataRoom>;
+  onBack: () => void;
+  onOpenDoc: OpenDocHandler;
+}) {
+  const currentTitle = room.dealName || dealTitle || "Deal";
+  const currentMeta = dealMeta || "";
+  const portfolio = portfolioName || "Deal files";
+  const docCount = room.documents.length;
+
+  const Chrome = (
+    <>
+      <button type="button" onClick={onBack} aria-label="Back" style={S.floatBack}>
+        <MobileIcon name="back" size={14} c="var(--mb-ink-1)" />
+      </button>
+      <button type="button" aria-label="Share" style={S.floatShare}>
+        <MobileIcon name="share" size={16} c="var(--mb-ink-1)" />
+      </button>
+
+      <div style={S.breadcrumb}>
+        <span style={S.breadcrumbLink}>Files</span>
+        <MobileIcon name="chevron" c="var(--mb-ink-4)" size={9} />
+        <span style={S.breadcrumbLink}>{portfolio}</span>
+        <MobileIcon name="chevron" c="var(--mb-ink-4)" size={9} />
+        <span style={S.breadcrumbLink}>{currentTitle}</span>
+        <MobileIcon name="chevron" c="var(--mb-ink-4)" size={9} />
+        <span>Data room</span>
+      </div>
+
+      <div style={S.detailHero}>
+        <h1 style={S.detailTitle}>{currentTitle}</h1>
+        {currentMeta ? <div style={S.detailSub}>{currentMeta}</div> : null}
+        <div style={S.detailMeta}>
+          <span style={S.detailCount}>
+            {room.loading ? "Loading data room…" : `${docCount} ${docCount === 1 ? "file" : "files"} · Live data room`}
+          </span>
+        </div>
+      </div>
+    </>
+  );
+
+  // Loading
+  if (room.loading) {
+    return (
+      <div className="mb-fade-up" style={{ ...S.page, position: "relative" }}>
+        {Chrome}
+        <div style={S.realStatePad}>
+          <div className="mb-as-card" style={S.realStateCard}>
+            <div className="mb-mono" style={S.realStateKicker}>DATA ROOM</div>
+            <div style={S.realStateTitle}>Loading files…</div>
+            <div style={S.realStateCopy}>Fetching the live diligence room for this deal.</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error
+  if (room.error) {
+    return (
+      <div className="mb-fade-up" style={{ ...S.page, position: "relative" }}>
+        {Chrome}
+        <div style={S.realStatePad}>
+          <div className="mb-as-card" style={S.realStateCard}>
+            <div className="mb-mono" style={S.realStateKicker}>DATA ROOM</div>
+            <div style={S.realStateTitle}>Couldn&rsquo;t load this room</div>
+            <div style={S.realStateCopy}>{room.error}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Empty (real, but nothing filed yet)
+  if (room.groups.length === 0) {
+    return (
+      <div className="mb-fade-up" style={{ ...S.page, position: "relative" }}>
+        {Chrome}
+        <div style={S.realStatePad}>
+          <div className="mb-as-card" style={S.realStateCard}>
+            <div aria-hidden="true" style={S.realStateIcon}>
+              <FolderKanban size={26} strokeWidth={2} />
+            </div>
+            <div style={S.realStateTitle}>Nothing in this room yet</div>
+            <div style={S.realStateCopy}>
+              Source artifacts, analyses, and legal documents show up here as they&rsquo;re filed into this deal&rsquo;s data room.
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Real folders → documents
+  return (
+    <div className="mb-fade-up" style={{ ...S.page, position: "relative" }}>
+      {Chrome}
+
+      {room.groups.length > 1 && (
+        <div style={S.roomCategoryPad}>
+          <div className="mb-section-eyebrow" style={S.roomCategoryEyebrow}>IN THIS ROOM</div>
+          <div className="mb-hide-scroll" style={S.roomCategoryRail}>
+            {room.groups.map((group, index) => (
+              <button
+                type="button"
+                key={group.folder?.id ?? `unfiled-${index}`}
+                onClick={() => document.getElementById(realGroupAnchor(group, index))?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                style={S.roomCategoryChip}
+              >
+                <span style={S.roomCategoryLabel}>{group.folder?.name ?? "Unfiled"}</span>
+                <span className="mb-mono" style={S.roomCategoryCount}>{group.documents.length}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {room.groups.map((group, index) => (
+        <DocSection
+          key={group.folder?.id ?? `unfiled-${index}`}
+          anchorId={realGroupAnchor(group, index)}
+          title={group.folder?.name ?? "Unfiled"}
+          sub={realFolderSub(group.folder?.name)}
+          rows={group.documents.map((doc) => realDocToRow(doc, dealRawId, onOpenDoc))}
+          cap={6}
+        />
+      ))}
+    </div>
+  );
+}
+
+function realGroupAnchor(group: MobileDataRoomGroup, index: number): string {
+  return `data-room-${group.folder?.id ?? `unfiled-${index}`}`;
+}
+
+function realFolderSub(name?: string): string {
+  const n = (name || "").toLowerCase();
+  if (n.includes("financ")) return "Financial statements, recasts, and supporting schedules.";
+  if (n.includes("legal") || n.includes("contract")) return "Transaction documents, agreements, and executed records.";
+  if (n.includes("analys") || n.includes("model")) return "Analyses, recasts, scorecards, and model artifacts.";
+  if (n.includes("commercial") || n.includes("customer")) return "Customer, revenue, and commercial diligence materials.";
+  return "Documents filed in this folder of the data room.";
+}
+
+/* Maps a real DataRoomDocument to the mobile DocRowData shape, mirroring the
+   desktop dataRoomDocToFileItem status→pill and file_type→icon logic. */
+function realDocToRow(
+  doc: MobileDataRoomDocument,
+  dealRawId: number,
+  onOpenDoc: OpenDocHandler,
+): DocRowData {
+  const tone = realDocTone(doc);
+  const pill = realDocPill(doc);
+  const versionLabel = doc.version ? `v${doc.version}` : null;
+  const staleLabel = doc.deliverable_is_stale ? "stale" : null;
+  const meta = [
+    formatRealFileType(doc.file_type),
+    formatRealStatus(doc.status),
+    versionLabel,
+    staleLabel,
+  ].filter(Boolean).join(" · ");
+  const isArtifact = !doc.deliverable_id; // backend streams file_url for these
+  const canOpenDoc = doc.deliverable_id != null;
+
+  return {
+    name: doc.name,
+    meta,
+    pill,
+    icon: <DocIcon kind={tone} />,
+    docKind: tone,
+    onClick: canOpenDoc
+      ? () => onOpenDoc(doc.name, meta, tone, doc.deliverable_id ?? undefined)
+      : isArtifact
+        ? () => void downloadDataRoomDocument(doc.id, doc.name)
+        : undefined,
+  };
+}
+
+function realDocTone(doc: MobileDataRoomDocument): DocTone {
+  const ft = (doc.file_type || "").toLowerCase();
+  const name = (doc.name || "").toLowerCase();
+  const status = (doc.status || "").toLowerCase();
+  if (["executed", "locked", "agreed", "signed"].includes(status)) return "signed";
+  if (/\.pdf$|^pdf$/.test(ft) || ft.includes("pdf")) return "pdf";
+  if (ft.includes("xls") || ft.includes("csv") || ft.includes("sheet") || /p&l|customer list/.test(name)) return "excel";
+  if (ft.includes("png") || ft.includes("jpg") || ft.includes("jpeg") || ft.includes("image") || name.includes("photo")) return "image";
+  if (/loi|ioi|nda|agreement|disclosure|schedule|term|contract/.test(name)) return "contract";
+  if (ft === "deliverable" || /model|valuation|analysis|recast|score|risk|memo|qoe/.test(name)) {
+    return /model|valuation|analysis|recast|score|risk|qoe/.test(name) ? "ai" : "memo";
+  }
+  return "memo";
+}
+
+function realDocPill(doc: MobileDataRoomDocument): ReactNode {
+  const status = (doc.status || "").toLowerCase();
+  if (["executed", "locked", "agreed", "signed"].includes(status)) return <StatusPill tone="signed">Executed</StatusPill>;
+  if (["review", "approved", "in_review"].includes(status)) return <StatusPill tone="review">In review</StatusPill>;
+  if (status === "draft") return <StatusPill tone="draft">Draft</StatusPill>;
+  if (doc.deliverable_is_stale) return <StatusPill tone="needed">Stale</StatusPill>;
+  // Artifacts (no deliverable) → download; deliverables → open
+  return doc.deliverable_id != null ? "Open" : "Download";
+}
+
+function formatRealFileType(input: string): string {
+  if (!input) return "File";
+  if (input === "deliverable") return "Document";
+  if (input.length <= 5) return input.toUpperCase();
+  return formatRealStatus(input);
+}
+
+function formatRealStatus(input: string): string {
+  if (!input) return "";
+  return input
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/* Download a data-room artifact via the authed endpoint. The backend streams
+   the file (or redirects to a presigned S3 URL), so we can't use window.open
+   with an auth header — fetch→blob→anchor is the auth-safe path. */
+async function downloadDataRoomDocument(docId: number, name: string) {
+  try {
+    const res = await fetch(`/api/data-room/documents/${docId}/download`, {
+      headers: authHeaders(),
+    });
+    if (!res.ok) return;
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name || "data-room-file";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  } catch {
+    /* download unavailable — leave the row as-is */
+  }
+}
+
 export function LibraryDocumentScreen({
   onBack,
   onAskYulia,
   title = "IOI · v3",
   meta = "Yulia · drafting · 2 min ago",
   kind = "draft",
+  deliverableId = null,
 }: LibraryDocumentScreenProps) {
+  // REAL deliverable reader — only when a real deliverable id is threaded in.
+  // Keeps the sample reader below for the anon / no-id context.
+  if (deliverableId != null) {
+    return (
+      <RealDocumentReader
+        deliverableId={deliverableId}
+        fallbackTitle={title}
+        fallbackMeta={meta}
+        fallbackKind={kind}
+        onBack={onBack}
+        onAskYulia={onAskYulia}
+      />
+    );
+  }
+
   const tone = docToneFromKind(kind);
   const isData = tone === "excel" || tone === "pdf";
   const statusTone: PillTone = tone === "draft" ? "draft" : tone === "signed" ? "signed" : tone === "contract" || tone === "ai" || tone === "memo" ? "review" : "lock";
@@ -971,6 +1275,223 @@ export function LibraryDocumentScreen({
       </div>
     </div>
   );
+}
+
+interface RealDeliverable {
+  id: number;
+  deal_id?: number;
+  type?: string;
+  status?: string;
+  content?: unknown;
+  name?: string;
+  slug?: string;
+  version_number?: number | null;
+  updated_at?: string;
+}
+
+/* REAL deliverable reader — mobile parity with desktop DocView.
+   Loads GET /api/deliverables/:id (mirrors loadDocumentContext) and renders
+   the real title, status, and body (markdown / sections via extractMarkdown).
+   Polls while the deliverable is still generating, like DocView does. */
+function RealDocumentReader({
+  deliverableId,
+  fallbackTitle,
+  fallbackMeta,
+  fallbackKind,
+  onBack,
+  onAskYulia,
+}: {
+  deliverableId: number;
+  fallbackTitle: string;
+  fallbackMeta: string;
+  fallbackKind: string;
+  onBack: () => void;
+  onAskYulia: (prompt: string) => void;
+}) {
+  const [doc, setDoc] = useState<RealDeliverable | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    let poll: ReturnType<typeof setInterval> | null = null;
+    const load = async (withSpinner: boolean) => {
+      if (withSpinner) setLoading(true);
+      try {
+        const res = await fetch(`/api/deliverables/${deliverableId}`, { headers: authHeaders() });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const payload = (await res.json()) as RealDeliverable;
+        if (cancelled) return;
+        setDoc(payload);
+        setError(null);
+        if (!["queued", "generating"].includes(payload?.status || "") && poll) {
+          clearInterval(poll);
+          poll = null;
+        }
+      } catch (e: any) {
+        if (!cancelled) setError(e?.message || "Failed to load document");
+      } finally {
+        if (!cancelled && withSpinner) setLoading(false);
+      }
+    };
+    void load(true);
+    poll = setInterval(() => void load(false), 4000);
+    return () => {
+      cancelled = true;
+      if (poll) clearInterval(poll);
+    };
+  }, [deliverableId]);
+
+  const markdown = extractDeliverableMarkdown(doc?.content);
+  const title = doc?.name || fallbackTitle;
+  const docType = doc?.type || doc?.slug || "document";
+  const status = doc?.status || "";
+  const isGenerating = !!doc && ["queued", "generating"].includes(status) && !markdown;
+  const tone = realDeliverableTone(docType, status, title);
+  const statusTone: PillTone =
+    status === "complete" ? "review" :
+    status === "draft" ? "draft" :
+    ["executed", "locked"].includes(status) ? "signed" :
+    isGenerating ? "draft" : "review";
+  const statusLabel =
+    isGenerating ? "Generating" :
+    status ? formatRealStatus(status) :
+    "Document";
+  const metaLine = doc
+    ? [formatRealStatus(docType), doc.version_number ? `v${doc.version_number}` : null, doc.updated_at ? fmtRelativeShort(doc.updated_at) : null]
+        .filter(Boolean).join(" · ")
+    : fallbackMeta;
+  const eyebrow = `${docType.replace(/[-_]/g, " ").toUpperCase()}${status ? ` · ${status.toUpperCase()}` : ""}`;
+
+  return (
+    <div className="mb-fade-up" style={{ ...S.page, position: "relative" }}>
+      <button type="button" onClick={onBack} aria-label="Back" style={S.floatBack}>
+        <MobileIcon name="back" size={14} c="var(--mb-ink-1)" />
+      </button>
+      <button type="button" aria-label="Share" style={S.floatShare}>
+        <MobileIcon name="share" size={16} c="var(--mb-ink-1)" />
+      </button>
+
+      <div style={S.breadcrumb}>
+        <span style={S.breadcrumbLink}>Files</span>
+        <MobileIcon name="chevron" c="var(--mb-ink-4)" size={9} />
+        <span>Document</span>
+      </div>
+
+      <div style={S.docReaderHero}>
+        <DocIcon kind={tone} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h1 style={S.docReaderTitle}>{title}</h1>
+          <div style={S.detailSub}>{metaLine}</div>
+        </div>
+      </div>
+
+      <div style={S.docReaderMeta}>
+        <StatusPill tone={statusTone}>{statusLabel}</StatusPill>
+        <span style={S.detailCount}>{doc ? "Live deliverable" : "Loading…"}</span>
+      </div>
+
+      <section style={S.readerPad}>
+        <div style={S.readerSurface}>
+          <div style={S.readerToolbar}>
+            <span className="mb-mono" style={S.readerKicker}>{eyebrow}</span>
+            <span style={S.readerPageCount}>{isGenerating ? "Generating" : "Live"}</span>
+          </div>
+          <div style={S.readerPage}>
+            {loading && !doc ? (
+              <p style={S.readerParagraph}>Loading document…</p>
+            ) : error ? (
+              <p style={S.readerParagraph}>{error}</p>
+            ) : isGenerating ? (
+              <>
+                <div className="mb-mono" style={S.readerDocKicker}>YULIA</div>
+                <h2 style={S.readerDocTitle}>{title}</h2>
+                <p style={S.readerParagraph}>Yulia is still generating this document. It will appear here as soon as it&rsquo;s ready.</p>
+              </>
+            ) : markdown ? (
+              <>
+                <h2 style={S.readerDocTitle}>{title}</h2>
+                <div style={S.readerMarkdown}>{markdown}</div>
+              </>
+            ) : (
+              <>
+                <h2 style={S.readerDocTitle}>{title}</h2>
+                <p style={S.readerParagraph}>This document has no readable body yet.</p>
+              </>
+            )}
+          </div>
+        </div>
+      </section>
+      <div style={S.docChatDock}>
+        <ChatStarterPill
+          placeholder="Message Yulia"
+          ariaLabel={`Message Yulia about ${title}`}
+          onSend={(message) => onAskYulia(`About ${title}: ${message}`)}
+        />
+      </div>
+    </div>
+  );
+}
+
+function realDeliverableTone(docType: string, status: string, name: string): DocTone {
+  const t = `${docType} ${name}`.toLowerCase();
+  if (["executed", "locked"].includes(status)) return "signed";
+  if (/loi|ioi|nda|agreement|contract|term/.test(t)) return "contract";
+  if (/model|valuation|analysis|recast|score|risk|qoe|sensitivity|lbo|dcf/.test(t)) return "ai";
+  if (/cim|memo|brief|summary|letter/.test(t)) return "memo";
+  if (status === "draft") return "draft";
+  return "memo";
+}
+
+/* Mirror of DocView.extractMarkdown — pulls a readable string out of the
+   deliverable content (string, {markdown|content|text}, or {sections[]}),
+   falling back to a fenced JSON dump so nothing real renders blank. */
+function extractDeliverableMarkdown(content: unknown): string | null {
+  if (content == null) return null;
+  if (typeof content === "string") {
+    const trimmed = content.trim();
+    if (!trimmed) return null;
+    if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+      try {
+        return extractDeliverableMarkdown(JSON.parse(trimmed)) || content;
+      } catch {
+        return content;
+      }
+    }
+    return content;
+  }
+  if (typeof content !== "object") return null;
+  const obj = content as Record<string, any>;
+  if (typeof obj.markdown === "string") return obj.markdown;
+  if (typeof obj.content === "string") return obj.content;
+  if (typeof obj.text === "string") return obj.text;
+  if (Array.isArray(obj.sections)) {
+    const parts = obj.sections
+      .map((section: any) => {
+        if (typeof section === "string") return section;
+        if (!section || typeof section !== "object") return "";
+        const heading = section.title || section.heading || section.name;
+        const body = section.content || section.body || section.text;
+        return [heading ? `## ${heading}` : "", typeof body === "string" ? body : ""].filter(Boolean).join("\n\n");
+      })
+      .filter(Boolean);
+    if (parts.length) return parts.join("\n\n");
+  }
+  return "```json\n" + JSON.stringify(content, null, 2) + "\n```";
+}
+
+function fmtRelativeShort(iso: string): string {
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return "";
+  const diff = Date.now() - then;
+  const min = Math.floor(diff / 60000);
+  if (min < 1) return "just now";
+  if (min < 60) return `${min} min ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr} hr ago`;
+  const day = Math.floor(hr / 24);
+  if (day < 30) return `${day}d ago`;
+  return new Date(iso).toLocaleDateString();
 }
 
 export function LibraryFinderScreen({
@@ -1763,6 +2284,47 @@ const S: Record<string, CSSProperties> = {
   },
   emptyPad: {
     padding: "8px 16px 0",
+  },
+  realStatePad: {
+    padding: "10px 16px 0",
+  },
+  realStateCard: {
+    padding: "26px 22px 24px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+  },
+  realStateIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    background: "var(--mb-accent-soft)",
+    color: "var(--mb-accent-ink)",
+    display: "grid",
+    placeItems: "center",
+    marginBottom: 14,
+  },
+  realStateKicker: {
+    fontSize: 11,
+    fontWeight: 600,
+    letterSpacing: "0.06em",
+    color: "var(--mb-ink-3)",
+    marginBottom: 8,
+  },
+  realStateTitle: {
+    fontFamily: "var(--mb-font-display)",
+    fontWeight: 800,
+    fontSize: 20,
+    letterSpacing: "-0.4px",
+    lineHeight: 1.15,
+    color: "var(--mb-ink)",
+  },
+  realStateCopy: {
+    fontSize: 14,
+    lineHeight: 1.45,
+    color: "var(--mb-ink-3)",
+    marginTop: 8,
+    textWrap: "pretty",
   },
   emptyCard: {
     padding: "40px 24px 36px",
@@ -2927,6 +3489,14 @@ const S: Record<string, CSSProperties> = {
     lineHeight: 1.55,
     color: "var(--mb-ink-2)",
     margin: "0 0 14px",
+  },
+  readerMarkdown: {
+    fontSize: 15,
+    lineHeight: 1.6,
+    color: "var(--mb-ink-2)",
+    whiteSpace: "pre-wrap",
+    wordBreak: "break-word",
+    margin: 0,
   },
   readerCallout: {
     marginTop: 22,
