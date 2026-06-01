@@ -11,6 +11,7 @@ export type MobileViewKind =
   | "library-finder"
   | "library-detail"
   | "library-doc"
+  | "analyses"
   | "analysis";
 
 export interface MobileView {

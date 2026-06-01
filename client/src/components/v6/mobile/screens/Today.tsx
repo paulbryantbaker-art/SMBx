@@ -34,10 +34,17 @@ interface TodayProps {
   onSearch?: () => void;
   onAskYulia: (prompt: string) => void;
   onLearn: (section: "how" | "pricing", anchor?: string) => void;
+  /** Opens the Analyses launcher (run valuation/QoE/LBO/etc.). */
+  onOpenAnalyses: () => void;
   onAvatarClick: () => void;
   /** Authed user's deals (from useMobileDeals). Null = anon or empty,
       in which case the hardcoded SAMPLE_PIPELINE renders instead. */
   userPipeline: MobilePipelineRow[] | null;
+  /** True ONLY when a genuinely signed-in user has zero deals. When set,
+      the pipeline section renders an honest empty state instead of
+      falling back to SAMPLE_PIPELINE. Anon/dev preview passes false so
+      samples keep showing via the userPipeline ?? SAMPLE_PIPELINE path. */
+  realEmpty?: boolean;
   /** Current audience (drives copy + tip chips). */
   audience: Audience;
   /** Update audience (used by the inline switcher pill). */
@@ -93,10 +100,15 @@ const SAMPLE_MARKET_INTEL: PortfolioMarketIntelligence = {
 };
 
 export function TodayScreen({
-  isAnon, initials, onOpenDeal, onOpenLibrary, onOpenLibraryDetail, onChat, onSearch, onAskYulia, onLearn: _onLearn,
-  onAvatarClick, userPipeline,
+  isAnon, initials, onOpenDeal, onOpenLibrary, onOpenLibraryDetail, onChat, onSearch, onAskYulia, onLearn: _onLearn, onOpenAnalyses,
+  onAvatarClick, userPipeline, realEmpty,
   audience,
 }: TodayProps) {
+  // realEmpty = a real signed-in user with zero deals. In that case we do
+  // NOT fall back to SAMPLE_PIPELINE — we render an honest empty state so
+  // we never show a real user fake deals. Anon/dev preview leaves realEmpty
+  // false, so the userPipeline ?? SAMPLE_PIPELINE fallback still shows
+  // samples.
   const PIPELINE: TodayPipelineRow[] = userPipeline ?? SAMPLE_PIPELINE;
   const { isWatched, toggle } = useWatchlist();
   const C = copyFor(audience);
@@ -165,11 +177,41 @@ export function TodayScreen({
       <div style={{ marginTop: 24, padding: "0 16px" }}>
         <LibraryPreviewCard onOpenFinder={onOpenLibrary} />
       </div>
+
+      {/* Analyses launcher — the discoverable, top-level way to run a model
+          (valuation, QoE, LBO, working capital…). Opens the Analyses hub. */}
+      <div style={{ marginTop: 14, padding: "0 16px" }}>
+        <button
+          type="button"
+          onClick={onOpenAnalyses}
+          aria-label="Open analyses"
+          style={{
+            display: "flex", alignItems: "center", gap: 13, width: "100%",
+            padding: "15px 16px", background: "#fff", borderRadius: 16,
+            border: "0.5px solid var(--mb-line-2)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+            cursor: "pointer", textAlign: "left",
+          }}
+        >
+          <span style={{ width: 38, height: 38, borderRadius: 11, flexShrink: 0, display: "grid", placeItems: "center", background: "var(--mb-accent-soft)" }}>
+            <MobileIcon name="brief" c="var(--mb-accent-ink)" size={18} />
+          </span>
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ display: "block", fontWeight: 700, fontSize: 15.5, color: "var(--mb-ink)", fontFamily: "var(--mb-font-display)" }}>Analyses</span>
+            <span style={{ display: "block", fontSize: 12.5, color: "var(--mb-ink-3)", marginTop: 1 }}>Valuation, QoE, LBO, working capital &amp; more</span>
+          </span>
+          <span style={{ transform: "rotate(180deg)", display: "inline-flex", color: "var(--mb-ink-4)" }} aria-hidden="true">
+            <MobileIcon name="back" size={12} c="var(--mb-ink-4)" />
+          </span>
+        </button>
+      </div>
       <div style={{ marginTop: 14, padding: "0 16px" }}>
         <LibraryActivityList onOpenDetail={onOpenLibraryDetail} limit={3} />
       </div>
 
-      {/* Pipeline section — content per audience via copy.ts */}
+      {/* Pipeline section — content per audience via copy.ts.
+          realEmpty (a real signed-in user with zero deals) swaps the
+          sample list for an honest empty state; never show a real user
+          fake deals. */}
       <div style={{ marginTop: 24, padding: "0 16px" }}>
         <div className="mb-as-card" style={{ padding: "20px 0 6px" }}>
           <div style={{ padding: "0 22px 4px" }}>
@@ -177,20 +219,27 @@ export function TodayScreen({
             <div className="mb-section-title">{C.todayIntelTitle}</div>
             <div style={S.subText}>{C.todayIntelSub}</div>
           </div>
-          {PIPELINE.map((d, i) => (
-            <PipelineRow
-              key={d.id}
-              name={d.name}
-              sub={d.sub}
-              action={d.action}
-              price={d.action === "get" ? d.price : undefined}
-              verdict={"verdict" in d ? d.verdict : undefined}
-              last={i === PIPELINE.length - 1}
-              onTap={() => onOpenDeal(d.id, d.name)}
-              watched={isWatched(d.id)}
-              onToggleWatch={() => toggle(d.id, d.name)}
+          {realEmpty ? (
+            <PipelineEmptyState
+              onSource={() => onAskYulia("Help me source and add my first deal")}
+              onChat={onChat}
             />
-          ))}
+          ) : (
+            PIPELINE.map((d, i) => (
+              <PipelineRow
+                key={d.id}
+                name={d.name}
+                sub={d.sub}
+                action={d.action}
+                price={d.action === "get" ? d.price : undefined}
+                verdict={"verdict" in d ? d.verdict : undefined}
+                last={i === PIPELINE.length - 1}
+                onTap={() => onOpenDeal(d.id, d.name)}
+                watched={isWatched(d.id)}
+                onToggleWatch={() => toggle(d.id, d.name)}
+              />
+            ))
+          )}
         </div>
       </div>
 
@@ -646,11 +695,87 @@ function PipelineRow({
   );
 }
 
+/* ─── PipelineEmptyState ─────────────────────────────────
+   Shown to a genuinely signed-in user with zero deals (realEmpty).
+   Honest: no fake rows. Sits inside the same mb-as-card shell the
+   pipeline list normally fills, so it inherits the screen's glass card
+   styling. Primary action routes to Yulia sourcing; secondary opens
+   plain chat. */
+
+function PipelineEmptyState({
+  onSource, onChat,
+}: {
+  onSource: () => void;
+  onChat: () => void;
+}) {
+  return (
+    <div style={S.emptyWrap}>
+      <div style={S.emptyHeading}>Your pipeline is empty</div>
+      <div style={S.emptySub}>
+        Add a deal you&rsquo;re evaluating, or let Yulia source targets &mdash;
+        your live pipeline shows up here.
+      </div>
+      <button
+        type="button"
+        className="mb-tap"
+        style={S.emptyCta}
+        onClick={onSource}
+      >Source your first deal</button>
+      <button
+        type="button"
+        className="mb-tap"
+        style={S.emptyChat}
+        onClick={onChat}
+      >Ask Yulia</button>
+    </div>
+  );
+}
+
 const S: Record<string, CSSProperties> = {
   subText: {
     fontSize: 13.5, color: "var(--mb-ink-3)",
     marginTop: 4, lineHeight: 1.45,
     textWrap: "pretty",
+  },
+  emptyWrap: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: 10,
+    padding: "16px 22px 18px",
+  },
+  emptyHeading: {
+    fontFamily: "var(--mb-font-display)",
+    fontSize: 18, fontWeight: 700,
+    color: "var(--mb-ink)",
+    letterSpacing: "-0.3px",
+    lineHeight: 1.2,
+  },
+  emptySub: {
+    fontSize: 13.5, color: "var(--mb-ink-3)",
+    lineHeight: 1.45, textWrap: "pretty",
+    maxWidth: 340,
+  },
+  emptyCta: {
+    marginTop: 4,
+    minHeight: 40,
+    border: "none",
+    borderRadius: 999,
+    padding: "9px 20px",
+    background: "linear-gradient(180deg, var(--mb-accent), var(--mb-accent-2))",
+    color: "var(--mb-accent-ink)",
+    fontSize: 14, fontWeight: 750,
+    letterSpacing: "-0.1px",
+    cursor: "pointer",
+    boxShadow: "0 8px 20px -10px rgba(16,224,96,0.55)",
+  },
+  emptyChat: {
+    border: "none",
+    background: "transparent",
+    padding: "2px 0",
+    color: "var(--mb-accent-ink)",
+    fontSize: 13.5, fontWeight: 650,
+    cursor: "pointer",
   },
   tryNum: {
     width: 32, height: 32, borderRadius: "50%",

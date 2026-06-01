@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import { useLocation } from "wouter";
 import { useAnonymousChat } from "../../../hooks/useAnonymousChat";
 import { useAuthChat } from "../../../hooks/useAuthChat";
-import { DEV_AUTH_BYPASS } from "../../../hooks/useAuth";
+import { DEV_AUTH_BYPASS, authHeaders } from "../../../hooks/useAuth";
 import type { User } from "../../../hooks/useAuth";
 import { useMobileDeals } from "../../../hooks/useMobileDeals";
 import { TabBar } from "./TabBar";
@@ -13,6 +13,7 @@ import { DetailScreen } from "./screens/Detail";
 import { WatchingScreen } from "./screens/Watching";
 import { MobileAnalysisScreen } from "./screens/Analysis";
 import { LibraryDetailScreen, LibraryDocumentScreen, LibraryFinderScreen, LibraryScreen, SearchScreen } from "./screens/LibrarySearch";
+import { MobileAnalysesScreen } from "./screens/Analyses";
 import { ChatSheet } from "./ChatSheet";
 import { LearnSheet } from "./LearnSheet";
 import { useAudience } from "../../../hooks/useAudience";
@@ -92,6 +93,10 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
   // with no deals yet are also passed through — screens render their
   // empty state in that case.
   const userDeals = useMobileDeals(user);
+  // A real, signed-in user (not anon, not the dev-bypass preview) whose deal
+  // fetch resolved with ZERO deals → screens show an honest empty state + a
+  // "source your first deal" CTA instead of silently falling back to samples.
+  const realEmpty = !!user && !DEV_AUTH_BYPASS && userDeals.loaded && !userDeals.hasData;
 
   const initial = readMobileHashState();
   const [view, setView] = useState<MobileView>(() => mobileViewFromHash(initial));
@@ -160,9 +165,25 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
     };
   }, [isStandalone]);
 
-  // URL hash sync
+  // URL hash sync + browser-history integration. Forward navigation (going
+  // deeper: tab → deal → analysis) PUSHES a history entry so the OS back gesture
+  // steps back through screens; lateral/shallower moves REPLACE so the stack
+  // doesn't balloon on every tab tap. The hashchange listener below restores
+  // `view` when back pops an entry. With the post-login navigate({replace}) in
+  // App.tsx, back walks the app and only exits (to marketing) from a root tab —
+  // never back to the auth screen.
+  const navDepthRef = useRef(0);
   useEffect(() => {
-    writeMobileHashState(view, chatOpen);
+    const next = buildMobileHash(view, chatOpen);
+    if (window.location.hash === next) {
+      navDepthRef.current = viewDepth(view);
+      return; // already at this hash (e.g. restored by a back gesture)
+    }
+    const full = window.location.pathname + window.location.search + next;
+    const depth = viewDepth(view);
+    if (depth > navDepthRef.current) window.history.pushState(null, "", full);
+    else window.history.replaceState(null, "", full);
+    navDepthRef.current = depth;
   }, [view, chatOpen]);
 
   // Scroll-to-top on every navigation. Tab taps and deal opens both flow
@@ -276,6 +297,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
   const onChat = () => setChatOpen(true);
   const onOpenSearch = () => setView({ kind: "search", tab: "search" });
   const onOpenLibrary = () => setView({ kind: "library", tab: activeTab });
+  const onOpenAnalyses = () => setView({ kind: "analyses", tab: activeTab });
   const onOpenLibraryFinder = (filter = "all") => setView({ kind: "library-finder", tab: activeTab, filesFilter: filter });
   const onOpenLibraryDetail = (
     dealTitle = "Big Fake Deal",
@@ -375,6 +397,22 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
     window.location.assign("/");
   };
 
+  // Opens the Stripe Customer Portal to manage subscription/billing. The
+  // /api/stripe/portal route is now behind requireAuth, so authHeaders() is
+  // required. Hidden for the dev-bypass preview (no real token → would 401).
+  const handleManageBilling = async () => {
+    try {
+      const res = await fetch("/api/stripe/portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+      });
+      if (res.ok) {
+        const { url } = await res.json();
+        if (url) window.location.assign(url);
+      }
+    } catch { /* portal unavailable — leave the sheet open */ }
+  };
+
   // Detail and Watching are full-page surfaces with their own white
   // backgrounds. Tabs share the home gradient.
   const isWhitePage =
@@ -408,6 +446,8 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           audience={audience}
           onAudienceChange={setAudience}
           showAudienceSwitcher={isAnonAudience}
+          realEmpty={realEmpty}
+          onOpenAnalyses={onOpenAnalyses}
         />
       )}
       {view.kind === "tab" && activeTab === "pipeline" && (
@@ -421,6 +461,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           userWatching={userDeals.hasData ? userDeals.watching : null}
           userFeatured={userDeals.hasData ? userDeals.featured : null}
           userPicks={userDeals.hasData ? userDeals.picks : null}
+          realEmpty={realEmpty}
         />
       )}
       {view.kind === "tab" && activeTab === "brief" && (
@@ -431,6 +472,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           onOpenFinder={onOpenLibraryFinder}
           onOpenDetail={onOpenLibraryDoc}
           onOpenDealLibrary={onOpenLibraryDetail}
+          realEmpty={realEmpty}
         />
       )}
       {view.kind === "tab" && activeTab === "search" && (
@@ -475,6 +517,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           onOpenFinder={onOpenLibraryFinder}
           onOpenDetail={onOpenLibraryDoc}
           onOpenDealLibrary={onOpenLibraryDetail}
+          realEmpty={realEmpty}
         />
       )}
       {view.kind === "library-finder" && (
@@ -511,6 +554,16 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           title={view.docTitle}
           meta={view.docMeta}
           kind={view.docKind}
+        />
+      )}
+      {view.kind === "analyses" && (
+        <MobileAnalysesScreen
+          initials={initials}
+          onAvatarClick={onAvatarClick}
+          onSearch={onOpenSearch}
+          deals={userDeals.hasData ? userDeals.today : null}
+          onRunDealAnalysis={onRunDealAnalysis}
+          onAskYulia={onAskYulia}
         />
       )}
       {view.kind === "analysis" && (
@@ -558,6 +611,9 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
               <div style={A.name}>{user?.email || "Signed in"}</div>
               <div style={A.sub}>smbX workspace</div>
             </div>
+            {user && !DEV_AUTH_BYPASS && (
+              <button type="button" style={A.item} onClick={handleManageBilling}>Manage subscription</button>
+            )}
             <button type="button" style={A.item} onClick={() => { setAcctOpen(false); window.location.assign("/?marketing"); }}>Preview marketing site</button>
             <button type="button" style={{ ...A.item, ...A.danger }} onClick={handleSignOut}>Sign out</button>
           </div>
@@ -619,7 +675,7 @@ function readMobileHashState(): {
   versionNumber: number | null;
   chat: boolean;
   watching: boolean;
-  view: "search" | "library" | "library-finder" | "library-detail" | "library-doc" | "analysis" | null;
+  view: "search" | "library" | "library-finder" | "library-detail" | "library-doc" | "analyses" | "analysis" | null;
 } {
   try {
     const hash = window.location.hash.replace(/^#/, "");
@@ -630,7 +686,7 @@ function readMobileHashState(): {
     const tab: MobileTab = rawTab && VALID_TABS.includes(rawTab) ? rawTab : "today";
     const rawView = params.get("view");
     const pushedView =
-      rawView === "search" || rawView === "library" || rawView === "library-finder" || rawView === "library-detail" || rawView === "library-doc" || rawView === "analysis"
+      rawView === "search" || rawView === "library" || rawView === "library-finder" || rawView === "library-detail" || rawView === "library-doc" || rawView === "analyses" || rawView === "analysis"
         ? rawView
         : null;
     const detail = params.get("deal");
@@ -724,7 +780,7 @@ function mobileViewFromHash(state: ReturnType<typeof readMobileHashState>): Mobi
   return { kind: "tab", tab: state.tab };
 }
 
-function writeMobileHashState(view: MobileView, chatOpen: boolean) {
+function buildMobileHash(view: MobileView, chatOpen: boolean): string {
   try {
     const params = new URLSearchParams();
     if (view.kind === "detail" && view.dealId) {
@@ -734,7 +790,7 @@ function writeMobileHashState(view: MobileView, chatOpen: boolean) {
       if (view.dealTitle) params.set("t", view.dealTitle);
     } else if (view.kind === "watching") {
       params.set("view", "watching");
-    } else if (view.kind === "search" || view.kind === "library" || view.kind === "library-finder" || view.kind === "library-detail" || view.kind === "library-doc" || view.kind === "analysis") {
+    } else if (view.kind === "search" || view.kind === "library" || view.kind === "library-finder" || view.kind === "library-detail" || view.kind === "library-doc" || view.kind === "analyses" || view.kind === "analysis") {
       params.set("view", view.kind);
       if (view.tab) params.set("tab", view.tab);
       if (view.kind === "library-finder" && view.filesFilter) params.set("filter", view.filesFilter);
@@ -762,11 +818,27 @@ function writeMobileHashState(view: MobileView, chatOpen: boolean) {
     // Chat-open is URL-driven so the post-reload mount can rehydrate it
     // (and so index.html's body-bg script can paint white when present).
     if (chatOpen) params.set("chat", "open");
-    const next = params.toString() ? `#${params.toString()}` : "";
-    if (window.location.hash !== next) {
-      window.history.replaceState(null, "", window.location.pathname + window.location.search + next);
-    }
-  } catch { /* noop */ }
+    return params.toString() ? `#${params.toString()}` : "";
+  } catch {
+    return "";
+  }
+}
+
+/** Navigation depth — drives push (going deeper) vs replace (lateral/shallower)
+ *  in the history-sync effect, so the OS back gesture pops one screen at a time. */
+function viewDepth(view: MobileView): number {
+  switch (view.kind) {
+    case "tab":
+    case "search":
+      return 0;
+    case "detail":
+    case "watching":
+    case "library":
+    case "analyses":
+      return 1;
+    default:
+      return 2; // library-finder / library-detail / library-doc / analysis
+  }
 }
 
 // .mobile-root gradient: white throughout the page, fading to periwinkle

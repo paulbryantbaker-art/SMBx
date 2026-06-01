@@ -29,6 +29,9 @@ interface PipelineProps {
   userFeatured: MobileFeatured | null;
   /** Picks formerly shown on the Brief tab; now appended to Pipeline. */
   userPicks: MobilePick[] | null;
+  /** True ONLY when a signed-in user genuinely has zero deals. Anon/dev
+      preview passes false and keeps showing samples. */
+  realEmpty?: boolean;
 }
 
 interface ChipDef { id: DealStage; label: string; n: number }
@@ -64,11 +67,27 @@ const SAMPLE_FEATURED: FeaturedDef = {
   revLabel: "$5.4M REV",
 };
 
-export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, onAvatarClick, onSearch, userWatching: _userWatching, userFeatured, userPicks }: PipelineProps) {
+export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, onAvatarClick, onSearch, userWatching, userFeatured, userPicks, realEmpty }: PipelineProps) {
   const FEATURED: FeaturedDef = userFeatured ?? SAMPLE_FEATURED;
   const [activeChip, setActiveChip] = useState<DealStage>("watching");
   const { isWatched, toggle } = useWatchlist();
   const filtered: SampleDeal[] = dealsByStage(activeChip);
+
+  // A real signed-in user WITH deals: render their live watching list instead
+  // of the chip-filtered samples. Anon/dev preview (isAnon) always stays on
+  // samples. Real stage data isn't in this shape, so chips are hidden for
+  // real users and the live list renders straight from userWatching.
+  const hasRealDeals = !isAnon && !!userWatching && userWatching.length > 0;
+  // Map each MobileWatchRow → PipeRow props. Verdict derives from the row's
+  // icon/pill: cool icon → pursue, explicit Pass pill → pass, else watch.
+  const realRows = (userWatching ?? []).map((row): {
+    id: string; name: string; sub: string; verdict: Verdict;
+  } => ({
+    id: row.id,
+    name: row.name,
+    sub: row.sub,
+    verdict: row.icon === "cool" ? "pursue" : row.pill === "Pass" ? "pass" : "watch",
+  }));
 
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
@@ -84,7 +103,10 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
         </div>
       )}
 
-      {/* Category chips */}
+      {/* Category chips — sample-only. Real stage data isn't in the
+          watch-row shape, so chips are hidden for real signed-in users
+          (live list or honest empty state below). */}
+      {!hasRealDeals && !realEmpty && (
       <div className="mb-hide-scroll" style={P.chipsRow}>
         {CHIPS.map(c => {
           const isActive = activeChip === c.id;
@@ -115,15 +137,22 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
           );
         })}
       </div>
+      )}
 
       {/* New today section — was wrapped in .on-color when the gradient
-          carried a gold/sage band; page is white now, default dark text. */}
+          carried a gold/sage band; page is white now, default dark text.
+          Suppressed for realEmpty: FEATURED falls back to SAMPLE_FEATURED
+          when userFeatured is null, and we must not show samples to a
+          genuinely empty signed-in user. */}
+      {!realEmpty && (
       <div style={{ padding: "0 22px 8px" }}>
         <div className="mb-section-eyebrow">{isAnon ? "VIEW SAMPLE · NEW TODAY" : "NEW TODAY"}</div>
         <div className="mb-section-title">{FEATURED.name}</div>
         <div style={P.subText}>The strongest source this week &mdash; tap to see why.</div>
       </div>
+      )}
 
+      {!realEmpty && (
       <div style={{ padding: "12px 16px 4px" }}>
         <div
           className="mb-tap"
@@ -167,12 +196,56 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
           </div>
         </div>
       </div>
+      )}
 
-      {/* Stage section — heading + rows now live inside one card,
-          App Store-style ("NOW TRENDING / Play These Popular Games"
-          on the same surface as the list below it). Header sits at
-          the card's top with internal padding; rows follow. */}
-      {filtered.length === 0 ? (
+      {/* Stage section — three modes:
+          1. realEmpty  → honest empty state + first-deal CTA (signed-in,
+             zero deals). No samples.
+          2. hasRealDeals → the user's live watching list straight from
+             userWatching (no chip filtering — stage data isn't in this shape).
+          3. otherwise  → sample, chip-filtered experience (anon/dev preview).
+          Heading + rows live inside one card, App Store-style. */}
+      {realEmpty ? (
+        <div className="mb-as-card" style={{ margin: "24px 16px 0", padding: "28px 22px 26px", textAlign: "center" }}>
+          <h2 style={{ ...P.watchTitle, marginBottom: 6 }}>No deals yet</h2>
+          <div style={{ ...P.subText, marginTop: 0 }}>
+            Source a target or add a deal you&rsquo;re tracking &mdash; Yulia takes it from there.
+          </div>
+          <button
+            type="button"
+            className="mb-get-pill solid"
+            style={{ marginTop: 18, padding: "11px 26px", fontSize: 15 }}
+            onClick={onSearch}
+          >Source a deal</button>
+        </div>
+      ) : hasRealDeals ? (
+        <div className="mb-as-card" style={{ margin: "24px 16px 0", padding: "20px 0 6px" }}>
+          <div style={{ padding: "0 22px 12px" }}>
+            <button
+              type="button"
+              onClick={onOpenWatching}
+              aria-label="Open full watching list"
+              style={P.headingBtn}
+            >
+              <h2 style={P.watchTitle}>Yulia is watching</h2>
+              <MobileIcon name="chevron" c="var(--mb-ink-3)" size={11} />
+            </button>
+            <div style={P.subText}>The deals you&rsquo;re tracking — Yulia revisits these for you.</div>
+          </div>
+          {realRows.map((d, i) => (
+            <PipeRow
+              key={d.id}
+              name={d.name}
+              sub={d.sub}
+              verdict={d.verdict}
+              watched={isWatched(d.id)}
+              last={i === realRows.length - 1}
+              onTap={() => onOpenDeal(d.id, d.name)}
+              onToggleWatch={() => toggle(d.id, d.name)}
+            />
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="mb-as-card" style={{ margin: "24px 16px 0", padding: "20px 22px 22px" }}>
           {activeChip === "watching" ? (
             <button
@@ -225,6 +298,10 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
         </div>
       )}
 
+      {/* Brief dock — suppressed for realEmpty: BriefDigestSection falls
+          back to SAMPLE_PICKS when userPicks is null, and an empty signed-in
+          user must not be shown sample picks. */}
+      {!realEmpty && (
       <div style={P.briefDock}>
         <div style={{ padding: "0 22px 12px" }}>
           <div className="mb-section-eyebrow">BRIEF</div>
@@ -233,6 +310,7 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
         </div>
         <BriefDigestSection isAnon={isAnon} onOpenDeal={onOpenDeal} userPicks={userPicks} />
       </div>
+      )}
     </div>
   );
 }

@@ -147,7 +147,7 @@ export default function App() {
             }
             await migrateSessionConversations();
             try { localStorage.setItem('smbx_auth_fresh', String(Date.now())); } catch { /* noop */ }
-            navigate('/');
+            navigate('/', { replace: true });
           } catch (err: any) {
             console.error('Google login error:', err.message);
             setGoogleError(err.message || 'Google sign-in failed. Please try email/password.');
@@ -171,7 +171,7 @@ export default function App() {
       sessionStorage.removeItem('smbx_anon_session');
     }
     await migrateSessionConversations();
-    navigate('/');
+    navigate('/', { replace: true });
   }, [login, migrateSession, navigate]);
 
   const handleRegisterSuccess = useCallback(async (name: string, email: string, password: string) => {
@@ -182,7 +182,7 @@ export default function App() {
       sessionStorage.removeItem('smbx_anon_session');
     }
     await migrateSessionConversations();
-    navigate('/');
+    navigate('/', { replace: true });
   }, [register, migrateSession, navigate]);
 
   // Load public config

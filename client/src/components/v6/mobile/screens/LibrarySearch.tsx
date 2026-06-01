@@ -28,6 +28,7 @@ interface LibraryScreenProps extends SharedChromeProps {
   onOpenDetail: OpenDocHandler;
   onOpenFinder: OpenFilesHandler;
   onOpenDealLibrary: OpenDealLibraryHandler;
+  realEmpty?: boolean;
 }
 
 interface SearchScreenProps extends SharedChromeProps {
@@ -235,7 +236,37 @@ export function LibraryScreen({
   onOpenDetail,
   onOpenFinder,
   onOpenDealLibrary,
+  realEmpty = false,
 }: LibraryScreenProps) {
+  if (realEmpty) {
+    return (
+      <div className="mb-fade-up" style={{ ...S.page, ...S.filesPage }}>
+        <GlassTopBar
+          title="Files"
+          initials={initials}
+          onAvatarClick={onAvatarClick}
+          onSearch={onOpenSearch}
+        />
+        <LargeTitle>Files</LargeTitle>
+
+        <div style={S.emptyPad}>
+          <div className="mb-as-card" style={S.emptyCard}>
+            <div aria-hidden="true" style={S.emptyIcon}>
+              <FolderKanban size={30} strokeWidth={2} />
+            </div>
+            <h2 style={S.emptyTitle}>Nothing filed yet</h2>
+            <p style={S.emptyCopy}>
+              Your IOIs, memos, analyses, and data rooms show up here as you and Yulia create them.
+            </p>
+            <button type="button" onClick={onOpenSearch} style={S.emptyCta}>
+              Start with Yulia
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mb-fade-up" style={{ ...S.page, ...S.filesPage }}>
       <GlassTopBar
@@ -384,23 +415,13 @@ function DealBoundaryCard({
         </div>
         <div style={S.boundaryActions}>
           {isDataRoom ? (
-            <>
-              <button type="button" onClick={onOpenDealLibrary} style={S.boundarySecondaryButton}>
-                Deal library
-              </button>
-              <button type="button" style={S.boundaryPrimaryButton}>
-                Share file
-              </button>
-            </>
+            <button type="button" onClick={onOpenDealLibrary} style={S.boundaryPrimaryButton}>
+              Deal library
+            </button>
           ) : (
-            <>
-              <button type="button" style={S.boundarySecondaryButton}>
-                Share to data room
-              </button>
-              <button type="button" onClick={onOpenDataRoom} style={S.boundaryPrimaryButton}>
-                Open data room
-              </button>
-            </>
+            <button type="button" onClick={onOpenDataRoom} style={S.boundaryPrimaryButton}>
+              Open data room
+            </button>
           )}
         </div>
       </div>
@@ -1740,6 +1761,57 @@ const S: Record<string, CSSProperties> = {
   cardPad: {
     padding: "0 16px",
   },
+  emptyPad: {
+    padding: "8px 16px 0",
+  },
+  emptyCard: {
+    padding: "40px 24px 36px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  emptyIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    background: "var(--mb-accent-soft)",
+    color: "var(--mb-accent-ink)",
+    display: "grid",
+    placeItems: "center",
+    marginBottom: 18,
+  },
+  emptyTitle: {
+    fontFamily: "var(--mb-font-display)",
+    fontWeight: 800,
+    fontSize: 24,
+    letterSpacing: "-0.6px",
+    lineHeight: 1.1,
+    color: "var(--mb-ink)",
+    margin: 0,
+    textWrap: "balance",
+  },
+  emptyCopy: {
+    fontSize: 14.5,
+    lineHeight: 1.45,
+    color: "var(--mb-ink-3)",
+    margin: "10px 0 0",
+    maxWidth: 300,
+    textWrap: "pretty",
+  },
+  emptyCta: {
+    marginTop: 22,
+    border: "none",
+    borderRadius: 999,
+    padding: "13px 26px",
+    background: "linear-gradient(180deg, var(--mb-accent), var(--mb-accent-2))",
+    color: "var(--mb-ink)",
+    fontSize: 15,
+    fontWeight: 800,
+    letterSpacing: "-0.2px",
+    cursor: "pointer",
+    boxShadow: "0 10px 24px -10px rgba(43,255,119,0.5), inset 0 1px 0 rgba(255,255,255,0.4)",
+  },
   librarySectionPad: {
     marginTop: 36,
     padding: "0 16px",
@@ -2666,7 +2738,7 @@ const S: Record<string, CSSProperties> = {
   },
   boundaryActions: {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr",
+    gridTemplateColumns: "1fr",
     gap: 10,
     marginTop: 14,
   },
@@ -2676,16 +2748,6 @@ const S: Record<string, CSSProperties> = {
     padding: "10px 12px",
     background: "var(--mb-ink)",
     color: "#fff",
-    fontSize: 13,
-    fontWeight: 760,
-    cursor: "pointer",
-  },
-  boundarySecondaryButton: {
-    border: "none",
-    borderRadius: 999,
-    padding: "10px 12px",
-    background: "var(--mb-accent-soft)",
-    color: "var(--mb-accent-ink)",
     fontSize: 13,
     fontWeight: 760,
     cursor: "pointer",

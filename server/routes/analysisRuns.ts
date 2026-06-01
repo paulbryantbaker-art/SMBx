@@ -805,6 +805,7 @@ analysisRunsRouter.get('/analysis-runs/:analysisRunId', async (req, res) => {
       analysisData: hydrateAnalysisEvidence(structuredAnalysis, snapshot.evidence),
       evidence: snapshot.evidence,
       commentaryMarkdown: snapshot.commentaryMarkdown,
+      deliverableId: snapshot.deliverableId,
     });
   } catch (err: any) {
     console.error('[analysis-runs] read snapshot error:', err.message);

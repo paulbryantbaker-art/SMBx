@@ -533,7 +533,7 @@ app.get('/api/debug/check-ai', async (_req, res) => {
 app.use('/api/auth', authLimiter, authRouter);
 app.use('/api/chat/anonymous', chatLimiter, anonymousRouter);
 app.use('/api/chat', chatLimiter, chatRouter);
-app.use('/api/stripe', stripeRouter);
+app.use('/api/stripe', requireAuth, stripeRouter); // routes read req.userId; this mount is before the blanket requireAuth, so gate it here (webhook is mounted separately above, stays public)
 app.use('/api', shareLinksRouter); // has both public (/shared/:token) and protected routes
 
 // ─── Public document share viewer (no auth — token-based) ────────

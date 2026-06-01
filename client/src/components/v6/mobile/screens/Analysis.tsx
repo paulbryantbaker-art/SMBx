@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { authHeaders } from "../../../../hooks/useAuth";
+import { exportDeliverableFile } from "../../../../hooks/useV6WorkspaceData";
 import {
   defaultScenarioName,
   formatAssumptionDisplay,
@@ -71,11 +72,58 @@ export function MobileAnalysisScreen({
   const [versions, setVersions] = useState<AnalysisVersionSummary[]>([]);
   const [versionsLoading, setVersionsLoading] = useState(false);
   const [note, setNote] = useState<string | null>(null);
+  const [deliverableId, setDeliverableId] = useState<number | null>(() => deliverableIdFromAnalysisData(analysisData));
+  const [commentaryMarkdown, setCommentaryMarkdown] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   useEffect(() => {
     setData(analysisData);
     setCurrentVersion(versionNumber);
+    const embedded = deliverableIdFromAnalysisData(analysisData);
+    if (embedded != null) setDeliverableId(embedded);
   }, [analysisData, versionNumber]);
+
+  // Resolve the deliverable id (for PDF export) and any text commentary from the saved run.
+  useEffect(() => {
+    if (!analysisRunId) {
+      setDeliverableId(prev => prev ?? null);
+      return;
+    }
+    let cancelled = false;
+    fetch(`/api/analysis-runs/${analysisRunId}`, { headers: authHeaders() })
+      .then(res => res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`)))
+      .then(payload => {
+        if (cancelled) return;
+        const id = deliverableIdFromRunPayload(payload);
+        if (id != null) setDeliverableId(id);
+        const markdown = typeof payload?.commentaryMarkdown === "string" ? payload.commentaryMarkdown.trim() : "";
+        if (markdown) setCommentaryMarkdown(markdown);
+      })
+      .catch(() => { /* export/commentary stay unavailable; the screen degrades gracefully */ });
+    return () => { cancelled = true; };
+  }, [analysisRunId]);
+
+  const exportPdf = async () => {
+    if (deliverableId == null || exporting) return;
+    setExportError(null);
+    setExporting(true);
+    try {
+      const { blob, filename } = await exportDeliverableFile(deliverableId, "pdf");
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    } catch (err: any) {
+      setExportError(err?.message ? `Export failed: ${err.message}` : "Export failed. Try again or ask Yulia.");
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const refreshVersions = async () => {
     if (!analysisRunId) {
@@ -121,23 +169,47 @@ export function MobileAnalysisScreen({
   }, [analysisRunId, data, onUpdate, status]);
 
   if (!isStructuredAnalysis(data)) {
+    const fallbackSummary = typeof data?.summary === "string" ? data.summary.trim() : "";
+    const fallbackMarkdown = commentaryMarkdown
+      || (typeof data?.commentaryMarkdown === "string" ? data.commentaryMarkdown.trim() : "")
+      || (typeof data?.analysisMarkdown === "string" ? data.analysisMarkdown.trim() : "");
+    const fallbackText = fallbackMarkdown || fallbackSummary;
     return (
       <div style={S.page}>
-        <FloatingChrome onBack={onBack} />
+        <FloatingChrome onBack={onBack} shareTitle={title} />
         <section style={S.emptyCard}>
           <div className="mb-mono" style={S.eyebrow}>ANALYSIS</div>
           <h1 style={S.title}>{title}</h1>
-          <p style={S.copy}>
-            Yulia opened this analysis, but the structured canvas payload is not loaded on mobile yet.
-          </p>
+          {fallbackText ? (
+            <p style={{ ...S.copy, whiteSpace: "pre-wrap" }}>{fallbackText}</p>
+          ) : (
+            <p style={S.copy}>
+              The interactive canvas for this analysis is not available on this phone, but Yulia can walk you through it in chat.
+            </p>
+          )}
           {note && <div style={S.note}>{note}</div>}
+          {exportError && <div style={S.note}>{exportError}</div>}
           <button
             type="button"
             style={S.primaryButton}
-            onClick={() => onAskYulia(`Open ${title} as an interactive analysis canvas and explain what is available on mobile.`)}
+            onClick={() => onAskYulia(
+              fallbackText
+                ? `Walk me through ${title}: what it found, what decision it supports, and what to verify next.`
+                : `Open ${title} as an interactive analysis canvas and explain what is available on mobile.`,
+            )}
           >
             Ask Yulia
           </button>
+          {deliverableId != null && (
+            <button
+              type="button"
+              disabled={exporting}
+              style={{ ...S.readButton, opacity: exporting ? 0.6 : 1 }}
+              onClick={() => { void exportPdf(); }}
+            >
+              {exporting ? "Exporting…" : "Export PDF"}
+            </button>
+          )}
         </section>
       </div>
     );
@@ -349,7 +421,7 @@ export function MobileAnalysisScreen({
 
   return (
     <div style={S.page}>
-      <FloatingChrome onBack={onBack} />
+      <FloatingChrome onBack={onBack} shareTitle={structured.title || title} />
 
       <section style={S.hero}>
         <div style={S.heroWash} />
@@ -360,6 +432,19 @@ export function MobileAnalysisScreen({
           <span>{analysisRunId ? `Run ${analysisRunId}` : "Live canvas"}</span>
           <span>{currentVersion ? `v${currentVersion}` : status || "ready"}</span>
         </div>
+        {deliverableId != null && (
+          <div style={S.heroActions}>
+            <button
+              type="button"
+              disabled={exporting}
+              style={{ ...S.heroActionButton, opacity: exporting ? 0.6 : 1 }}
+              onClick={() => { void exportPdf(); }}
+            >
+              <MobileIcon name="share" size={15} c="#FFFFFF" />
+              {exporting ? "Exporting…" : "Export PDF"}
+            </button>
+          </div>
+        )}
         {structured.verdict && (
           <div style={S.verdictPanel}>
             <div style={S.scoreOrb}>{structured.verdict.score ?? "Y"}</div>
@@ -478,6 +563,7 @@ export function MobileAnalysisScreen({
         </section>
       ) : null}
 
+      {exportError && <div style={S.floatingNote}>{exportError}</div>}
       {note && <div style={S.floatingNote}>{note}</div>}
 
       <div style={S.chatDock}>
@@ -490,6 +576,37 @@ export function MobileAnalysisScreen({
       </div>
     </div>
   );
+}
+
+function coerceDeliverableId(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) return value;
+  if (typeof value === "string" && value.trim() && Number.isFinite(Number(value))) {
+    const parsed = Number(value);
+    return parsed > 0 ? parsed : null;
+  }
+  return null;
+}
+
+// The deliverable id can ride along inside the structured analysis payload (calculations block).
+function deliverableIdFromAnalysisData(value: unknown): number | null {
+  if (!value || typeof value !== "object") return null;
+  const record = value as Record<string, any>;
+  const direct = coerceDeliverableId(record.deliverableId ?? record.deliverable_id);
+  if (direct != null) return direct;
+  const calc = record.calculations;
+  if (calc && typeof calc === "object") {
+    return coerceDeliverableId((calc as Record<string, any>).deliverableId ?? (calc as Record<string, any>).deliverable_id);
+  }
+  return null;
+}
+
+// The saved-run endpoint may expose the deliverable id at the top level or nested in analysisData.
+function deliverableIdFromRunPayload(payload: unknown): number | null {
+  if (!payload || typeof payload !== "object") return null;
+  const record = payload as Record<string, any>;
+  const top = coerceDeliverableId(record.deliverableId ?? record.deliverable_id);
+  if (top != null) return top;
+  return deliverableIdFromAnalysisData(record.analysisData);
 }
 
 function isMobileFileAction(actionId: SurfaceActionId): boolean {
@@ -512,13 +629,25 @@ function mobileFileScopeForAction(actionId: SurfaceActionId): "all" | "data-room
   }
 }
 
-function FloatingChrome({ onBack }: { onBack: () => void }) {
+function FloatingChrome({ onBack, shareTitle }: { onBack: () => void; shareTitle: string }) {
+  const onShare = async () => {
+    const url = window.location.href;
+    if (typeof navigator !== "undefined" && "share" in navigator) {
+      try {
+        await navigator.share({ title: shareTitle, url });
+        return;
+      } catch { /* user cancelled */ }
+    }
+    // Desktop / unsupported: copy URL to clipboard.
+    try { await navigator.clipboard?.writeText(url); } catch { /* noop */ }
+  };
+
   return (
     <>
       <button type="button" onClick={onBack} aria-label="Back" style={S.floatBack}>
         <MobileIcon name="back" size={14} c="var(--mb-ink-1)" />
       </button>
-      <button type="button" aria-label="Share" style={S.floatShare}>
+      <button type="button" onClick={() => { void onShare(); }} aria-label="Share" style={S.floatShare}>
         <MobileIcon name="share" size={16} c="var(--mb-ink-1)" />
       </button>
     </>
@@ -862,6 +991,27 @@ const S: Record<string, CSSProperties> = {
     marginTop: 18,
     fontSize: 13,
     color: "#FFFFFF",
+  },
+  heroActions: {
+    position: "relative",
+    zIndex: 1,
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 10,
+    marginTop: 16,
+  },
+  heroActionButton: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 8,
+    minHeight: 44,
+    borderRadius: 22,
+    border: "1px solid rgba(255,255,255,0.28)",
+    background: "rgba(255,255,255,0.14)",
+    color: "#FFFFFF",
+    padding: "0 18px",
+    fontWeight: 900,
+    fontSize: 15,
   },
   verdictPanel: {
     ...glassPanel,

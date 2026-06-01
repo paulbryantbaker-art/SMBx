@@ -42,6 +42,7 @@ interface AnalysisRunSnapshot {
   assumptions: Record<string, any>;
   outputs: Record<string, any>;
   commentaryMarkdown: string | null;
+  deliverableId?: number | null;
   evidence: AnalysisEvidenceItem[];
 }
 
@@ -380,7 +381,7 @@ export async function updateAnalysisRunStatus(
 export async function readAnalysisRunSnapshot(analysisRunId: number, userId: number): Promise<AnalysisRunSnapshot | null> {
   try {
     const [row] = await sql`
-      SELECT id, deal_id, analysis_type, input_payload, canvas_tab_id, version_number, assumptions, outputs, commentary_markdown
+      SELECT id, deal_id, analysis_type, input_payload, canvas_tab_id, version_number, assumptions, outputs, commentary_markdown, deliverable_id
       FROM analysis_runs
       WHERE id = ${analysisRunId} AND user_id = ${userId}
       LIMIT 1
@@ -397,6 +398,7 @@ export async function readAnalysisRunSnapshot(analysisRunId: number, userId: num
       assumptions: safeRecord(row.assumptions),
       outputs: safeRecord(row.outputs),
       commentaryMarkdown: row.commentary_markdown ?? null,
+      deliverableId: row.deliverable_id ? Number(row.deliverable_id) : null,
       evidence,
     };
   } catch (err) {
