@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
   Brain,
   BriefcaseBusiness,
@@ -6,10 +6,14 @@ import {
   FileCheck2,
   FileImage,
   FilePenLine,
+  FilePlus2,
   FileSignature,
   FileSpreadsheet,
   FileText,
   ScrollText,
+  UploadCloud,
+  Loader2,
+  ChevronRight,
   type LucideIcon,
 } from "lucide-react";
 import { GlassTopBar, LargeTitle } from "../TopBar";
@@ -22,6 +26,8 @@ import {
   useMobileDataRoom,
   type MobileDataRoomDocument,
   type MobileDataRoomGroup,
+  type MobileDataRoomFolder,
+  type MobileUnfiledDeliverable,
 } from "../../../../hooks/useMobileDataRoom";
 
 interface SharedChromeProps {
@@ -92,6 +98,9 @@ interface DocRowData {
   docKind?: string;
   stage?: "data-room";
   onClick?: () => void;
+  /** Optional control rendered below the row (real data-room status advance).
+   *  Sample rows never set this, so their layout is unchanged. */
+  statusControl?: ReactNode;
 }
 
 const draftRows: DocRowData[] = [
@@ -919,13 +928,90 @@ function RealDealDataRoom({
   const portfolio = portfolioName || "Deal files";
   const docCount = room.documents.length;
 
+  // ── Write state (real path only) ───────────────────────────────────────
+  // The folder the next upload / file-to-room action targets. null = root.
+  const [targetFolderId, setTargetFolderId] = useState<number | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [busyDocId, setBusyDocId] = useState<number | null>(null);
+  const [filingId, setFilingId] = useState<number | null>(null);
+  const [writeError, setWriteError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Keep the upload target valid if folders change underneath us.
+  useEffect(() => {
+    if (targetFolderId != null && !room.folders.some((f) => f.id === targetFolderId)) {
+      setTargetFolderId(null);
+    }
+  }, [room.folders, targetFolderId]);
+
+  const onPickFile = async (file: File | null) => {
+    if (!file) return;
+    setWriteError(null);
+    setUploading(true);
+    try {
+      await room.uploadFile(file, targetFolderId, undefined);
+    } catch (e: any) {
+      setWriteError(e?.message || "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const onFileDeliverable = async (deliverableId: number) => {
+    setWriteError(null);
+    setFilingId(deliverableId);
+    try {
+      await room.fileToRoom(deliverableId, targetFolderId);
+    } catch (e: any) {
+      setWriteError(e?.message || "Couldn’t file to room");
+    } finally {
+      setFilingId(null);
+    }
+  };
+
+  const onAdvanceStatus = async (docId: number, next: string) => {
+    setWriteError(null);
+    setBusyDocId(docId);
+    try {
+      await room.setDocStatus(docId, next);
+    } catch (e: any) {
+      setWriteError(e?.message || "Couldn’t update status");
+    } finally {
+      setBusyDocId(null);
+    }
+  };
+
+  const HiddenFileInput = (
+    <input
+      ref={fileInputRef}
+      type="file"
+      accept=".pdf,.xlsx,.xls,.csv,.png,.jpg,.jpeg,application/pdf,image/*"
+      style={{ display: "none" }}
+      onChange={(e) => {
+        const file = e.currentTarget.files?.[0] ?? null;
+        e.currentTarget.value = ""; // allow re-picking the same file
+        void onPickFile(file);
+      }}
+    />
+  );
+
   const Chrome = (
     <>
+      {HiddenFileInput}
       <button type="button" onClick={onBack} aria-label="Back" style={S.floatBack}>
         <MobileIcon name="back" size={14} c="var(--mb-ink-1)" />
       </button>
-      <button type="button" aria-label="Share" style={S.floatShare}>
-        <MobileIcon name="share" size={16} c="var(--mb-ink-1)" />
+      <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        disabled={uploading}
+        aria-label="Upload a file to the data room"
+        aria-busy={uploading}
+        style={{ ...S.floatShare, opacity: uploading ? 0.6 : 1 }}
+      >
+        {uploading
+          ? <Loader2 size={15} strokeWidth={2.4} color="var(--mb-ink-1)" style={S.spin} />
+          : <UploadCloud size={16} strokeWidth={2.2} color="var(--mb-ink-1)" />}
       </button>
 
       <div style={S.breadcrumb}>
@@ -982,11 +1068,17 @@ function RealDealDataRoom({
     );
   }
 
-  // Empty (real, but nothing filed yet)
+  // Empty (real, but nothing filed yet). Still expose the write affordances so
+  // the owner can upload or file an existing deliverable from an empty room.
   if (room.groups.length === 0) {
     return (
       <div className="mb-fade-up" style={{ ...S.page, position: "relative" }}>
         {Chrome}
+        {writeError && (
+          <div style={S.realWritePad}>
+            <div style={S.writeErrorBanner} role="alert">{writeError}</div>
+          </div>
+        )}
         <div style={S.realStatePad}>
           <div className="mb-as-card" style={S.realStateCard}>
             <div aria-hidden="true" style={S.realStateIcon}>
@@ -998,6 +1090,19 @@ function RealDealDataRoom({
             </div>
           </div>
         </div>
+        <RealUploadBar
+          folders={room.folders}
+          targetFolderId={targetFolderId}
+          onTargetChange={setTargetFolderId}
+          onUploadClick={() => fileInputRef.current?.click()}
+          uploading={uploading}
+        />
+        <RealUnfiledSection
+          deliverables={room.unfiledDeliverables}
+          onFile={onFileDeliverable}
+          filingId={filingId}
+          targetFolderName={room.folders.find((f) => f.id === targetFolderId)?.name ?? null}
+        />
       </div>
     );
   }
@@ -1006,6 +1111,27 @@ function RealDealDataRoom({
   return (
     <div className="mb-fade-up" style={{ ...S.page, position: "relative" }}>
       {Chrome}
+
+      {writeError && (
+        <div style={S.realWritePad}>
+          <div style={S.writeErrorBanner} role="alert">{writeError}</div>
+        </div>
+      )}
+
+      <RealUploadBar
+        folders={room.folders}
+        targetFolderId={targetFolderId}
+        onTargetChange={setTargetFolderId}
+        onUploadClick={() => fileInputRef.current?.click()}
+        uploading={uploading}
+      />
+
+      <RealUnfiledSection
+        deliverables={room.unfiledDeliverables}
+        onFile={onFileDeliverable}
+        filingId={filingId}
+        targetFolderName={room.folders.find((f) => f.id === targetFolderId)?.name ?? null}
+      />
 
       {room.groups.length > 1 && (
         <div style={S.roomCategoryPad}>
@@ -1032,11 +1158,152 @@ function RealDealDataRoom({
           anchorId={realGroupAnchor(group, index)}
           title={group.folder?.name ?? "Unfiled"}
           sub={realFolderSub(group.folder?.name)}
-          rows={group.documents.map((doc) => realDocToRow(doc, dealRawId, onOpenDoc))}
+          rows={group.documents.map((doc) =>
+            realDocToRow(doc, dealRawId, onOpenDoc, {
+              busy: busyDocId === doc.id,
+              onAdvance: (next) => void onAdvanceStatus(doc.id, next),
+            }),
+          )}
           cap={6}
         />
       ))}
     </div>
+  );
+}
+
+/* Upload affordance + folder target picker. The picked folder is the
+   destination for both the header Upload action and Unfiled "File to room". */
+function RealUploadBar({
+  folders,
+  targetFolderId,
+  onTargetChange,
+  onUploadClick,
+  uploading,
+}: {
+  folders: MobileDataRoomFolder[];
+  targetFolderId: number | null;
+  onTargetChange: (id: number | null) => void;
+  onUploadClick: () => void;
+  uploading: boolean;
+}) {
+  return (
+    <div style={S.realWritePad}>
+      <div className="mb-as-card" style={S.uploadCard}>
+        <div style={S.uploadCardHead}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="mb-section-eyebrow">ADD TO ROOM</div>
+            <div style={S.uploadCardTitle}>Upload a file</div>
+            <div style={S.uploadCardSub}>PDF, spreadsheet, CSV, or image. Filed into the selected folder.</div>
+          </div>
+          <button
+            type="button"
+            onClick={onUploadClick}
+            disabled={uploading}
+            style={{ ...S.uploadButton, opacity: uploading ? 0.6 : 1 }}
+          >
+            {uploading
+              ? <Loader2 size={15} strokeWidth={2.4} color="#fff" style={S.spin} />
+              : <UploadCloud size={15} strokeWidth={2.3} color="#fff" />}
+            <span>{uploading ? "Uploading…" : "Upload"}</span>
+          </button>
+        </div>
+        {folders.length > 0 && (
+          <div className="mb-hide-scroll" style={S.folderTargetRail}>
+            <FolderTargetChip
+              label="Root"
+              active={targetFolderId == null}
+              onClick={() => onTargetChange(null)}
+            />
+            {folders.map((folder) => (
+              <FolderTargetChip
+                key={folder.id}
+                label={folder.name}
+                active={targetFolderId === folder.id}
+                onClick={() => onTargetChange(folder.id)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function FolderTargetChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        ...S.folderTargetChip,
+        background: active ? "var(--mb-ink)" : "#fff",
+        color: active ? "#fff" : "var(--mb-ink-1)",
+        boxShadow: active ? "none" : "0 1px 3px rgba(0,0,0,0.06), inset 0 0 0 0.5px var(--mb-line-2)",
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
+/* Unfiled deliverables (owner-only). Each can be filed into the room. */
+function RealUnfiledSection({
+  deliverables,
+  onFile,
+  filingId,
+  targetFolderName,
+}: {
+  deliverables: MobileUnfiledDeliverable[];
+  onFile: (deliverableId: number) => void;
+  filingId: number | null;
+  targetFolderName: string | null;
+}) {
+  if (!deliverables.length) return null;
+  const dest = targetFolderName || "Root";
+  return (
+    <section style={S.docSection}>
+      <div style={S.docHeader}>
+        <h2 style={S.docTitle}>Unfiled</h2>
+        <div style={S.docSub}>Deliverables you’ve generated that aren’t in the room yet. File into {dest}.</div>
+      </div>
+      <div style={S.docRows}>
+        {deliverables.map((d, index) => {
+          const tone = realDeliverableTone(d.slug || "", d.status || "", d.name || "");
+          const busy = filingId === d.id;
+          const last = index === deliverables.length - 1;
+          const meta = [
+            d.tier ? formatRealStatus(d.tier) : null,
+            d.status ? formatRealStatus(d.status) : null,
+            d.created_at ? fmtRelativeShort(d.created_at) : null,
+          ].filter(Boolean).join(" · ");
+          return (
+            <div
+              key={d.id}
+              style={{ ...S.docRow, cursor: "default", borderBottom: last ? "none" : "0.5px solid var(--mb-line-2)" }}
+            >
+              <DocIcon kind={tone} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={S.rowTitle}>{d.name || "Deliverable"}</div>
+                <div style={S.rowMeta}>{meta || "Deliverable"}</div>
+              </div>
+              <span style={S.rowTrailing}>
+                <button
+                  type="button"
+                  onClick={() => onFile(d.id)}
+                  disabled={busy}
+                  style={{ ...S.fileToRoomButton, opacity: busy ? 0.6 : 1 }}
+                >
+                  {busy
+                    ? <Loader2 size={13} strokeWidth={2.4} color="var(--mb-accent-ink)" style={S.spin} />
+                    : <FilePlus2 size={13} strokeWidth={2.3} color="var(--mb-accent-ink)" />}
+                  <span>{busy ? "Filing…" : "File to room"}</span>
+                </button>
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -1053,12 +1320,41 @@ function realFolderSub(name?: string): string {
   return "Documents filed in this folder of the data room.";
 }
 
+/* Forward-only lifecycle the mobile status control offers. This is a strict
+   subset of the backend documentLifecycle TRANSITIONS for every doc_class, so
+   the next step is always a legal forward move; the server stays the source of
+   truth and rejects anything it disallows (surfaced inline). The read endpoint
+   doesn't return doc_class, hence the conservative shared chain. */
+const REAL_STATUS_FLOW: Record<string, string> = {
+  draft: "review",
+  review: "approved",
+  approved: "locked",
+};
+
+const REAL_STATUS_LABEL: Record<string, string> = {
+  draft: "Draft",
+  review: "In review",
+  approved: "Approved",
+  locked: "Locked",
+  agreed: "Agreed",
+  executed: "Executed",
+  archived: "Archived",
+};
+
+interface RealStatusAdvance {
+  busy: boolean;
+  onAdvance: (next: string) => void;
+}
+
 /* Maps a real DataRoomDocument to the mobile DocRowData shape, mirroring the
-   desktop dataRoomDocToFileItem status→pill and file_type→icon logic. */
+   desktop dataRoomDocToFileItem status→pill and file_type→icon logic. When an
+   advance config is supplied and the document has a legal forward transition,
+   the row carries an inline status control. */
 function realDocToRow(
   doc: MobileDataRoomDocument,
   dealRawId: number,
   onOpenDoc: OpenDocHandler,
+  advance?: RealStatusAdvance,
 ): DocRowData {
   const tone = realDocTone(doc);
   const pill = realDocPill(doc);
@@ -1073,18 +1369,65 @@ function realDocToRow(
   const isArtifact = !doc.deliverable_id; // backend streams file_url for these
   const canOpenDoc = doc.deliverable_id != null;
 
+  const status = (doc.status || "").toLowerCase();
+  const next = REAL_STATUS_FLOW[status];
+  const statusControl = advance && next
+    ? (
+        <StatusAdvanceControl
+          currentLabel={REAL_STATUS_LABEL[status] || formatRealStatus(doc.status)}
+          nextLabel={REAL_STATUS_LABEL[next] || formatRealStatus(next)}
+          busy={advance.busy}
+          onAdvance={() => advance.onAdvance(next)}
+        />
+      )
+    : undefined;
+
   return {
     name: doc.name,
     meta,
     pill,
     icon: <DocIcon kind={tone} />,
     docKind: tone,
+    statusControl,
     onClick: canOpenDoc
       ? () => onOpenDoc(doc.name, meta, tone, doc.deliverable_id ?? undefined)
       : isArtifact
         ? () => void downloadDataRoomDocument(doc.id, doc.name)
         : undefined,
   };
+}
+
+/* Inline forward-only status control for a real data-room document row. Shows
+   the current status and a single button to advance to the next stage. */
+function StatusAdvanceControl({
+  currentLabel,
+  nextLabel,
+  busy,
+  onAdvance,
+}: {
+  currentLabel: string;
+  nextLabel: string;
+  busy: boolean;
+  onAdvance: () => void;
+}) {
+  return (
+    <div style={S.statusControlRow}>
+      <span className="mb-mono" style={S.statusControlCurrent}>{currentLabel.toUpperCase()}</span>
+      <ChevronRight size={12} strokeWidth={2.4} color="var(--mb-ink-4)" />
+      <button
+        type="button"
+        onClick={onAdvance}
+        disabled={busy}
+        aria-label={`Advance to ${nextLabel}`}
+        style={{ ...S.statusAdvanceButton, opacity: busy ? 0.6 : 1 }}
+      >
+        {busy
+          ? <Loader2 size={12} strokeWidth={2.4} color="var(--mb-accent-ink)" style={S.spin} />
+          : null}
+        <span>{busy ? "Saving…" : `Mark ${nextLabel}`}</span>
+      </button>
+    </div>
+  );
 }
 
 function realDocTone(doc: MobileDataRoomDocument): DocTone {
@@ -2119,6 +2462,23 @@ function DocRow({ row, last, showChevron = false }: { row: DocRowData; last: boo
       </span>
     </>
   );
+
+  // A status control turns the row into a stacked container (row + control)
+  // so the control gets its own tap target below the clickable row.
+  if (row.statusControl) {
+    return (
+      <div style={{ ...S.docRowStack, borderBottom: last ? "none" : "0.5px solid var(--mb-line-2)" }}>
+        {row.onClick ? (
+          <button type="button" onClick={row.onClick} style={{ ...S.docRow, padding: "12px 0 0" }}>
+            {body}
+          </button>
+        ) : (
+          <div style={{ ...S.docRow, padding: "12px 0 0" }}>{body}</div>
+        )}
+        {row.statusControl}
+      </div>
+    );
+  }
 
   if (row.onClick) {
     return (
@@ -3356,6 +3716,130 @@ const S: Record<string, CSSProperties> = {
     fontSize: 10.5,
     fontWeight: 700,
   },
+
+  // ── Real data-room write controls ─────────────────────────────────────
+  spin: {
+    animation: "spin 0.9s linear infinite",
+  },
+  realWritePad: {
+    padding: "12px 16px 0",
+  },
+  writeErrorBanner: {
+    borderRadius: 14,
+    padding: "11px 14px",
+    background: "var(--mb-danger-soft)",
+    color: "var(--mb-danger-ink)",
+    fontSize: 13,
+    fontWeight: 600,
+    lineHeight: 1.4,
+    textWrap: "pretty",
+    boxShadow: "inset 0 0 0 0.5px rgba(216,139,132,0.4)",
+  },
+  uploadCard: {
+    padding: "16px 16px 14px",
+  },
+  uploadCardHead: {
+    display: "flex",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  uploadCardTitle: {
+    fontFamily: "var(--mb-font-display)",
+    fontWeight: 700,
+    fontSize: 18,
+    letterSpacing: "-0.4px",
+    color: "var(--mb-ink)",
+    marginTop: 2,
+  },
+  uploadCardSub: {
+    fontSize: 12.5,
+    color: "var(--mb-ink-3)",
+    marginTop: 3,
+    lineHeight: 1.4,
+    textWrap: "pretty",
+  },
+  uploadButton: {
+    flexShrink: 0,
+    border: "none",
+    borderRadius: 999,
+    padding: "9px 14px",
+    background: "var(--mb-ink)",
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: 760,
+    letterSpacing: "-0.1px",
+    cursor: "pointer",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 7,
+    whiteSpace: "nowrap",
+  },
+  folderTargetRail: {
+    display: "flex",
+    gap: 8,
+    overflowX: "auto",
+    marginTop: 13,
+    paddingBottom: 2,
+  },
+  folderTargetChip: {
+    flexShrink: 0,
+    border: "none",
+    borderRadius: 999,
+    padding: "7px 13px",
+    fontSize: 12.5,
+    fontWeight: 700,
+    letterSpacing: "-0.1px",
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+  },
+  fileToRoomButton: {
+    border: "none",
+    borderRadius: 999,
+    padding: "7px 12px",
+    background: "var(--mb-accent-soft)",
+    color: "var(--mb-accent-ink)",
+    fontSize: 12,
+    fontWeight: 760,
+    letterSpacing: "-0.1px",
+    cursor: "pointer",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    whiteSpace: "nowrap",
+  },
+  docRowStack: {
+    display: "flex",
+    flexDirection: "column",
+    paddingBottom: 12,
+  },
+  statusControlRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: 7,
+    padding: "10px 0 0 50px",
+  },
+  statusControlCurrent: {
+    fontSize: 10.5,
+    fontWeight: 700,
+    letterSpacing: "0.04em",
+    color: "var(--mb-ink-3)",
+  },
+  statusAdvanceButton: {
+    border: "none",
+    borderRadius: 999,
+    padding: "6px 12px",
+    background: "var(--mb-accent-soft)",
+    color: "var(--mb-accent-ink)",
+    fontSize: 11.5,
+    fontWeight: 760,
+    letterSpacing: "-0.1px",
+    cursor: "pointer",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 5,
+    whiteSpace: "nowrap",
+  },
+
   finderSection: {
     marginTop: 30,
     padding: "0 16px",
