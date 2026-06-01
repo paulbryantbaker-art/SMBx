@@ -13,6 +13,7 @@ export type MobileViewKind =
   | "library-doc"
   | "analyses"
   | "analysis"
+  | "deals-list"
   | "deal-team";
 
 export interface MobileView {

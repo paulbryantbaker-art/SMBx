@@ -36,6 +36,8 @@ interface TodayProps {
   onLearn: (section: "how" | "pricing", anchor?: string) => void;
   /** Opens the Analyses launcher (run valuation/QoE/LBO/etc.). */
   onOpenAnalyses: () => void;
+  /** Opens the full "All deals" list (See all from the pipeline preview). */
+  onOpenDealsList: () => void;
   onAvatarClick: () => void;
   /** Opens the notifications sheet + unread badge count. Omitted → no bell. */
   onNotif?: () => void;
@@ -103,7 +105,7 @@ const SAMPLE_MARKET_INTEL: PortfolioMarketIntelligence = {
 };
 
 export function TodayScreen({
-  isAnon, initials, onOpenDeal, onOpenLibrary, onOpenLibraryDetail, onChat, onSearch, onAskYulia, onLearn: _onLearn, onOpenAnalyses,
+  isAnon, initials, onOpenDeal, onOpenLibrary, onOpenLibraryDetail, onChat, onSearch, onAskYulia, onLearn: _onLearn, onOpenAnalyses, onOpenDealsList,
   onAvatarClick, onNotif, notifCount, userPipeline, realEmpty,
   audience,
 }: TodayProps) {
@@ -219,7 +221,10 @@ export function TodayScreen({
         <div className="mb-as-card" style={{ padding: "20px 0 6px" }}>
           <div style={{ padding: "0 22px 4px" }}>
             <div className="mb-section-eyebrow">{C.todayIntelEyebrow}</div>
-            <div className="mb-section-title">{C.todayIntelTitle}</div>
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
+              <div className="mb-section-title">{C.todayIntelTitle}</div>
+              <button type="button" onClick={onOpenDealsList} aria-label="See all deals" style={{ all: "unset", cursor: "pointer", color: "var(--mb-accent-ink)", fontSize: 13, fontWeight: 700, whiteSpace: "nowrap" }}>See all →</button>
+            </div>
             <div style={S.subText}>{C.todayIntelSub}</div>
           </div>
           {realEmpty ? (

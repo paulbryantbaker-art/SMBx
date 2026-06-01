@@ -11,6 +11,7 @@ import { TodayScreen } from "./screens/Today";
 import { PipelineScreen } from "./screens/Pipeline";
 import { DetailScreen } from "./screens/Detail";
 import { WatchingScreen } from "./screens/Watching";
+import { MobileDealsListScreen } from "./screens/DealsListScreen";
 import { MobileAnalysisScreen } from "./screens/Analysis";
 import { LibraryDetailScreen, LibraryDocumentScreen, LibraryFinderScreen, LibraryScreen, SearchScreen } from "./screens/LibrarySearch";
 import { MobileAnalysesScreen } from "./screens/Analyses";
@@ -387,6 +388,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
     setView({ kind: "deal-team", tab: activeTab, dealRawId: rawId ?? undefined, dealTitle: title });
   };
   const onOpenWatching = () => setView({ kind: "watching" });
+  const onOpenDealsList = () => setView({ kind: "deals-list", tab: activeTab });
   const onAvatarClick = () => {
     if (!user) {
       if (DEV_AUTH_BYPASS) onDevSignIn?.();
@@ -488,6 +490,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
   const isWhitePage =
     view.kind === "detail" ||
     view.kind === "watching" ||
+    view.kind === "deals-list" ||
     view.kind === "library-finder" ||
     view.kind === "library-detail" ||
     view.kind === "library-doc" ||
@@ -519,6 +522,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           showAudienceSwitcher={isAnonAudience}
           realEmpty={realEmpty}
           onOpenAnalyses={onOpenAnalyses}
+          onOpenDealsList={onOpenDealsList}
           {...notifBarProps}
         />
       )}
@@ -528,6 +532,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           initials={initials}
           onOpenDeal={onOpenDeal}
           onOpenWatching={onOpenWatching}
+          onOpenDealsList={onOpenDealsList}
           onAvatarClick={onAvatarClick}
           onSearch={onOpenSearch}
           userWatching={userDeals.hasData ? userDeals.watching : null}
@@ -574,6 +579,13 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
         <WatchingScreen
           onBack={() => setView({ kind: "tab", tab: "pipeline" })}
           onOpenDeal={onOpenDeal}
+        />
+      )}
+      {view.kind === "deals-list" && (
+        <MobileDealsListScreen
+          onBack={() => setView({ kind: "tab", tab: view.tab ?? "pipeline" })}
+          onOpenDeal={onOpenDeal}
+          user={user}
         />
       )}
       {view.kind === "search" && (
@@ -800,7 +812,7 @@ function readMobileHashState(): {
   versionNumber: number | null;
   chat: boolean;
   watching: boolean;
-  view: "search" | "library" | "library-finder" | "library-detail" | "library-doc" | "analyses" | "analysis" | "deal-team" | null;
+  view: "search" | "library" | "library-finder" | "library-detail" | "library-doc" | "analyses" | "analysis" | "deals-list" | "deal-team" | null;
 } {
   try {
     const hash = window.location.hash.replace(/^#/, "");
@@ -811,7 +823,7 @@ function readMobileHashState(): {
     const tab: MobileTab = rawTab && VALID_TABS.includes(rawTab) ? rawTab : "today";
     const rawView = params.get("view");
     const pushedView =
-      rawView === "search" || rawView === "library" || rawView === "library-finder" || rawView === "library-detail" || rawView === "library-doc" || rawView === "analyses" || rawView === "analysis" || rawView === "deal-team"
+      rawView === "search" || rawView === "library" || rawView === "library-finder" || rawView === "library-detail" || rawView === "library-doc" || rawView === "analyses" || rawView === "analysis" || rawView === "deals-list" || rawView === "deal-team"
         ? rawView
         : null;
     const detail = params.get("deal");
@@ -934,7 +946,7 @@ function buildMobileHash(view: MobileView, chatOpen: boolean): string {
       if (view.dealTitle) params.set("t", view.dealTitle);
     } else if (view.kind === "watching") {
       params.set("view", "watching");
-    } else if (view.kind === "search" || view.kind === "library" || view.kind === "library-finder" || view.kind === "library-detail" || view.kind === "library-doc" || view.kind === "analyses" || view.kind === "analysis" || view.kind === "deal-team") {
+    } else if (view.kind === "search" || view.kind === "library" || view.kind === "library-finder" || view.kind === "library-detail" || view.kind === "library-doc" || view.kind === "analyses" || view.kind === "analysis" || view.kind === "deals-list" || view.kind === "deal-team") {
       params.set("view", view.kind);
       if (view.tab) params.set("tab", view.tab);
       if (view.kind === "library-finder" && view.filesFilter) params.set("filter", view.filesFilter);
@@ -988,6 +1000,7 @@ function viewDepth(view: MobileView): number {
     case "library":
     case "analyses":
     case "deal-team":
+    case "deals-list":
       return 1;
     default:
       return 2; // library-finder / library-detail / library-doc / analysis

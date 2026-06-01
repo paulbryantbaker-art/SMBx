@@ -21,6 +21,7 @@ interface PipelineProps {
   initials: string;
   onOpenDeal: (id: string, title: string) => void;
   onOpenWatching: () => void;
+  onOpenDealsList: () => void;
   onAvatarClick: () => void;
   onSearch: () => void;
   /** Opens the notifications sheet + unread badge count. Omitted → no bell. */
@@ -70,7 +71,7 @@ const SAMPLE_FEATURED: FeaturedDef = {
   revLabel: "$5.4M REV",
 };
 
-export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, onAvatarClick, onSearch, onNotif, notifCount, userWatching, userFeatured, userPicks, realEmpty }: PipelineProps) {
+export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, onOpenDealsList, onAvatarClick, onSearch, onNotif, notifCount, userWatching, userFeatured, userPicks, realEmpty }: PipelineProps) {
   const FEATURED: FeaturedDef = userFeatured ?? SAMPLE_FEATURED;
   const [activeChip, setActiveChip] = useState<DealStage>("watching");
   const { isWatched, toggle } = useWatchlist();
@@ -247,6 +248,15 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
               onToggleWatch={() => toggle(d.id, d.name)}
             />
           ))}
+          <button
+            type="button"
+            onClick={onOpenDealsList}
+            aria-label="See all deals"
+            style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, width: "100%", padding: "13px 18px", background: "transparent", border: "none", borderTop: "0.5px solid var(--mb-line-2)", color: "var(--mb-accent-ink)", fontSize: 14, fontWeight: 700, cursor: "pointer" }}
+          >
+            See all deals
+            <MobileIcon name="chevron" c="var(--mb-accent-ink)" size={11} />
+          </button>
         </div>
       ) : filtered.length === 0 ? (
         <div className="mb-as-card" style={{ margin: "24px 16px 0", padding: "20px 22px 22px" }}>
