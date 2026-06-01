@@ -67,16 +67,28 @@ interface Props {
 export function MobileDealsListScreen({ onBack, onOpenDeal, user }: Props) {
   const workspace = useV6WorkspaceData(user);
   const [query, setQuery] = useState("");
+  const [journey, setJourney] = useState<"all" | "buy" | "sell" | "raise" | "pmi">("all");
   const isSample = !workspace.canFetch;
   const all = isSample ? SAMPLE : workspace.deals;
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return all;
-    return all.filter(d =>
-      [d.business_name, d.industry, d.location, d.league, d.current_gate].some(v => (v || "").toLowerCase().includes(q)),
-    );
-  }, [all, query]);
+    return all.filter(d => {
+      if (journey !== "all" && (d.journey_type || "").toLowerCase() !== journey) return false;
+      if (!q) return true;
+      return [d.business_name, d.industry, d.location, d.league, d.current_gate].some(v => (v || "").toLowerCase().includes(q));
+    });
+  }, [all, query, journey]);
+
+  const chip = (active: boolean): CSSProperties => ({
+    flexShrink: 0,
+    padding: "6px 14px", borderRadius: 999, cursor: "pointer",
+    fontSize: 13, fontWeight: 600,
+    border: `1px solid ${active ? "var(--mb-accent-ink)" : "var(--mb-line-2)"}`,
+    background: active ? "var(--mb-accent-ink)" : "transparent",
+    color: active ? "#fff" : "var(--mb-ink-2)",
+    WebkitTapHighlightColor: "transparent",
+  });
 
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
@@ -101,6 +113,13 @@ export function MobileDealsListScreen({ onBack, onOpenDeal, user }: Props) {
           placeholder="Search deals…"
           style={D.search}
         />
+      </div>
+      <div style={{ display: "flex", gap: 7, padding: "2px 16px 10px", overflowX: "auto" }}>
+        {(["all", "buy", "sell", "raise", "pmi"] as const).map(j => (
+          <button key={j} type="button" onClick={() => setJourney(j)} style={chip(journey === j)}>
+            {j === "all" ? "All" : JOURNEY_LABEL[j]}
+          </button>
+        ))}
       </div>
 
       {filtered.length === 0 ? (

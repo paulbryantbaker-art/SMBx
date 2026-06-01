@@ -227,8 +227,8 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
           <div style={{ padding: "0 22px 12px" }}>
             <button
               type="button"
-              onClick={onOpenWatching}
-              aria-label="Open full watching list"
+              onClick={onOpenDealsList}
+              aria-label="See all deals"
               style={P.headingBtn}
             >
               <h2 style={P.watchTitle}>Yulia is watching</h2>
@@ -248,15 +248,6 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
               onToggleWatch={() => toggle(d.id, d.name)}
             />
           ))}
-          <button
-            type="button"
-            onClick={onOpenDealsList}
-            aria-label="See all deals"
-            style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, width: "100%", padding: "13px 18px", background: "transparent", border: "none", borderTop: "0.5px solid var(--mb-line-2)", color: "var(--mb-accent-ink)", fontSize: 14, fontWeight: 700, cursor: "pointer" }}
-          >
-            See all deals
-            <MobileIcon name="chevron" c="var(--mb-accent-ink)" size={11} />
-          </button>
         </div>
       ) : filtered.length === 0 ? (
         <div className="mb-as-card" style={{ margin: "24px 16px 0", padding: "20px 22px 22px" }}>
