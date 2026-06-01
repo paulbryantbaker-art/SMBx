@@ -12,15 +12,18 @@ export type MobileViewKind =
   | "library-detail"
   | "library-doc"
   | "analyses"
-  | "analysis";
+  | "analysis"
+  | "deal-team";
 
 export interface MobileView {
   kind: MobileViewKind;
   tab?: MobileTab;
   dealId?: string;
-  /** Real numeric deal id, threaded into library-detail so the data-room
-   *  read path can fetch GET /api/deals/:dealRawId/data-room. Absent in the
-   *  anon / sample context, which keeps the hardcoded sample experience. */
+  /** Real numeric deal id, threaded into library-detail (data-room read path,
+   *  GET /api/deals/:dealRawId/data-room) and deal-team (participants + deal
+   *  messages, GET /api/deals/:dealRawId/participants|messages). Absent in the
+   *  anon / sample context, which keeps the hardcoded sample experience and
+   *  makes the deal-team view simply unreachable without a real deal. */
   dealRawId?: number;
   /** Real deliverable id, threaded into library-doc so the document reader
    *  can fetch GET /api/deliverables/:deliverableId. Absent → sample text. */

@@ -63,6 +63,9 @@ interface DetailProps {
     label: string;
     prompt: string;
   }) => void;
+  /** Open the Deal Team screen for this deal. Only meaningful with a real
+      numeric deal id (parsed from dealId); sample/anon deals omit the entry. */
+  onOpenTeam?: (rawId: number, dealTitle: string) => void;
 }
 
 interface MobileDealBrief {
@@ -241,7 +244,7 @@ function defaultMobileNextMoves(dealTitle: string, isSampleDeal: boolean): Mobil
   ];
 }
 
-export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, onRunAnalysis }: DetailProps) {
+export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, onRunAnalysis, onOpenTeam }: DetailProps) {
   const { isWatched, toggle } = useWatchlist();
   const watched = isWatched(dealId);
   const numericId = /^\d+$/.test(dealId) ? parseInt(dealId, 10) : null;
@@ -357,6 +360,14 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
                 color: watched ? "#fff" : "var(--mb-accent-ink)",
               }}
             >{watched ? "✓ Watching" : "+ Watch"}</button>
+            {numericId !== null && onOpenTeam && (
+              <button
+                type="button"
+                onClick={() => onOpenTeam(numericId, dealTitle)}
+                aria-label="Open the deal team"
+                style={D.teamBtn}
+              >Team</button>
+            )}
           </div>
           <div style={D.verdictCaption}>
             <span style={{ color: "var(--mb-ink-3)" }}>{VERDICT_LABEL[verdict]}</span>
@@ -833,6 +844,17 @@ const D: Record<string, CSSProperties> = {
     transition: "background-color 200ms ease, color 200ms ease",
     boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
     minWidth: 100,
+  },
+
+  /* Team — secondary nav pill next to Watch. Opens the Deal Team screen.
+     Quieter than Watch (outline, not filled) since it's navigation, not the
+     primary save action. */
+  teamBtn: {
+    padding: "6px 16px",
+    fontSize: 13, fontWeight: 700, letterSpacing: "-0.1px",
+    border: "none", borderRadius: 999, cursor: "pointer",
+    background: "var(--mb-card-2)", color: "var(--mb-ink-1)",
+    boxShadow: "inset 0 0 0 0.5px var(--mb-line-2)",
   },
 
   /* Caption clarifies what each pill means — the verdict is informational,

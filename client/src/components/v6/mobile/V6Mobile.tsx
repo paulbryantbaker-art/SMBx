@@ -14,6 +14,7 @@ import { WatchingScreen } from "./screens/Watching";
 import { MobileAnalysisScreen } from "./screens/Analysis";
 import { LibraryDetailScreen, LibraryDocumentScreen, LibraryFinderScreen, LibraryScreen, SearchScreen } from "./screens/LibrarySearch";
 import { MobileAnalysesScreen } from "./screens/Analyses";
+import { MobileDealTeamScreen } from "./screens/DealTeam";
 import { ChatSheet } from "./ChatSheet";
 import { LearnSheet } from "./LearnSheet";
 import { NotificationsSheet } from "./NotificationsSheet";
@@ -377,6 +378,12 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
   const onOpenDeal = (id: string, title: string) => {
     setView({ kind: "detail", dealId: id, dealTitle: title });
   };
+  // Deal Team (DT-2) — only reachable with a real numeric deal id. Detail
+  // threads its parsed numeric id up through onOpenTeam; sample/anon deals
+  // never call this, so the team surface stays unreachable without a real deal.
+  const onOpenTeam = (rawId: number, title: string) => {
+    setView({ kind: "deal-team", tab: activeTab, dealRawId: rawId, dealTitle: title });
+  };
   const onOpenWatching = () => setView({ kind: "watching" });
   const onAvatarClick = () => {
     if (!user) {
@@ -482,7 +489,8 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
     view.kind === "library-finder" ||
     view.kind === "library-detail" ||
     view.kind === "library-doc" ||
-    view.kind === "analysis";
+    view.kind === "analysis" ||
+    view.kind === "deal-team";
   const rootStyle: CSSProperties = {
     ...(isStandalone ? S.rootPwa : S.rootSafari),
     background: isWhitePage ? "#FFFFFF" : rootGradient(isAnon),
@@ -557,6 +565,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           onChat={onChat}
           onAskYulia={onAskYulia}
           onRunAnalysis={onRunDealAnalysis}
+          onOpenTeam={onOpenTeam}
         />
       )}
       {view.kind === "watching" && (
@@ -670,6 +679,20 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           onUpdate={(patch) => setView(prev => prev.kind === "analysis" ? { ...prev, ...patch } : prev)}
         />
       )}
+      {view.kind === "deal-team" && view.dealRawId != null && (
+        <MobileDealTeamScreen
+          dealId={view.dealRawId}
+          dealTitle={view.dealTitle ?? "Deal"}
+          userId={user?.id ?? null}
+          userEmail={user?.email ?? null}
+          initials={initials}
+          onAvatarClick={onAvatarClick}
+          // Back to the deal it belongs to. dealRawId stringifies into the
+          // detail's dealId (Detail re-parses the numeric id), so this works
+          // even after a reload restored the team view from the URL hash.
+          onBack={() => onOpenDeal(String(view.dealRawId), view.dealTitle ?? "Deal")}
+        />
+      )}
       <TabBar active={activeTab} onChange={onTabChange} onChat={onChat} />
       <ChatSheet open={chatOpen} onClose={onChatClose} chat={chatWithSurface} />
       <LearnSheet
@@ -766,7 +789,7 @@ function readMobileHashState(): {
   versionNumber: number | null;
   chat: boolean;
   watching: boolean;
-  view: "search" | "library" | "library-finder" | "library-detail" | "library-doc" | "analyses" | "analysis" | null;
+  view: "search" | "library" | "library-finder" | "library-detail" | "library-doc" | "analyses" | "analysis" | "deal-team" | null;
 } {
   try {
     const hash = window.location.hash.replace(/^#/, "");
@@ -777,7 +800,7 @@ function readMobileHashState(): {
     const tab: MobileTab = rawTab && VALID_TABS.includes(rawTab) ? rawTab : "today";
     const rawView = params.get("view");
     const pushedView =
-      rawView === "search" || rawView === "library" || rawView === "library-finder" || rawView === "library-detail" || rawView === "library-doc" || rawView === "analyses" || rawView === "analysis"
+      rawView === "search" || rawView === "library" || rawView === "library-finder" || rawView === "library-detail" || rawView === "library-doc" || rawView === "analyses" || rawView === "analysis" || rawView === "deal-team"
         ? rawView
         : null;
     const detail = params.get("deal");
@@ -855,6 +878,12 @@ function emptyMobileHashState(): ReturnType<typeof readMobileHashState> {
 }
 
 function mobileViewFromHash(state: ReturnType<typeof readMobileHashState>): MobileView {
+  // Deal Team needs a real numeric deal id to fetch participants/messages. If a
+  // restored / hand-edited hash names the view without one, fall back to the tab
+  // rather than rendering a blank screen.
+  if (state.view === "deal-team" && state.dealRawId == null) {
+    return { kind: "tab", tab: state.tab };
+  }
   if (state.view) {
     return {
       kind: state.view,
@@ -891,10 +920,16 @@ function buildMobileHash(view: MobileView, chatOpen: boolean): string {
       if (view.dealTitle) params.set("t", view.dealTitle);
     } else if (view.kind === "watching") {
       params.set("view", "watching");
-    } else if (view.kind === "search" || view.kind === "library" || view.kind === "library-finder" || view.kind === "library-detail" || view.kind === "library-doc" || view.kind === "analyses" || view.kind === "analysis") {
+    } else if (view.kind === "search" || view.kind === "library" || view.kind === "library-finder" || view.kind === "library-detail" || view.kind === "library-doc" || view.kind === "analyses" || view.kind === "analysis" || view.kind === "deal-team") {
       params.set("view", view.kind);
       if (view.tab) params.set("tab", view.tab);
       if (view.kind === "library-finder" && view.filesFilter) params.set("filter", view.filesFilter);
+      if (view.kind === "deal-team") {
+        // drid (real numeric deal id) is the durable carrier the team view
+        // rehydrates from; title rides along for the header on cold reload.
+        if (view.dealRawId != null) params.set("drid", String(view.dealRawId));
+        if (view.dealTitle) params.set("t", view.dealTitle);
+      }
       if (view.kind === "library-detail") {
         if (view.dealTitle) params.set("t", view.dealTitle);
         if (view.dealMeta) params.set("dm", view.dealMeta);
@@ -938,6 +973,7 @@ function viewDepth(view: MobileView): number {
     case "watching":
     case "library":
     case "analyses":
+    case "deal-team":
       return 1;
     default:
       return 2; // library-finder / library-detail / library-doc / analysis
