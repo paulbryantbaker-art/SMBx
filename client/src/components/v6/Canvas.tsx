@@ -13,6 +13,7 @@ const V6AnalysisRoot = lazy(() => import("./modes/AnalysisRoot").then(module => 
 const V6IntelRoot = lazy(() => import("./modes/IntelRoot").then(module => ({ default: module.V6IntelRoot })));
 const V6LibraryRoot = lazy(() => import("./modes/LibraryRoot").then(module => ({ default: module.V6LibraryRoot })));
 const V6DealView = lazy(() => import("./views/DealView").then(module => ({ default: module.V6DealView })));
+const V6DealTeamView = lazy(() => import("./views/DealTeamView").then(module => ({ default: module.V6DealTeamView })));
 const V6DocView = lazy(() => import("./views/DocView").then(module => ({ default: module.V6DocView })));
 const V6AnalysisView = lazy(() => import("./views/AnalysisView").then(module => ({ default: module.V6AnalysisView })));
 const V6ModelCanvasView = lazy(() => import("./views/ModelCanvasView").then(module => ({ default: module.V6ModelCanvasView })));
@@ -100,6 +101,7 @@ function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut, modelPrefe
   }
   if (tab.kind === "files-list") return <V6FilesListView view={tab.fileListView ?? "all"} openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
   if (tab.kind === "deal")     return <V6DealView id={tab.id} title={tab.title} openTab={openTab} fileScope={tab.fileScope} onTalkToYulia={onTalkToYulia} modelPreference={modelPreference} user={user} />;
+  if (tab.kind === "deal-team") return <V6DealTeamView dealId={String(tab.dealId ?? tab.id)} dealTitle={tab.dealTitle ?? tab.title} openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
   if (tab.kind === "doc")      return <V6DocView id={tab.id} title={tab.title} openTab={openTab} modelPreference={modelPreference} onTalkToYulia={onTalkToYulia} />;
   if (tab.kind === "analysis") return <V6AnalysisView title={tab.title} tool={tab.tool} markdown={tab.markdown} comparisonData={tab.comparisonData} analysisData={tab.analysisData} artifactData={tab.artifactData} analysisRunId={tab.analysisRunId} deliverableId={tab.deliverableId} status={tab.status} versionNumber={tab.versionNumber} resolvedMenuItemSlug={tab.resolvedMenuItemSlug} openTab={openTab} onTalkToYulia={onTalkToYulia} />;
   if (tab.kind === "model")    return <V6ModelCanvasView tabId={tab.modelTabId ?? tab.id} title={tab.title} onTalkToYulia={onTalkToYulia} />;

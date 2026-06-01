@@ -740,6 +740,18 @@ function tabFromHash(tab: string | null, scope?: FileScope, title?: string, run?
       };
     }
   }
+  if (tab.startsWith("deal-team-")) {
+    const rawDealId = tab.replace(/^deal-team-/, "");
+    const numericDealId = Number(rawDealId);
+    const dealTitle = title ? title.replace(/\s*·\s*Team$/, "") : titleForDealId(rawDealId);
+    return {
+      id: tab,
+      kind: "deal-team",
+      title: title || `${dealTitle} · Team`,
+      dealId: Number.isFinite(numericDealId) && numericDealId > 0 ? numericDealId : rawDealId,
+      dealTitle,
+    };
+  }
   if (tab.startsWith("deal-")) {
     return {
       id: tab,
@@ -949,7 +961,7 @@ function discardStudioDraft(tab: Tab) {
 
 function modeForTab(tab: Tab): ModeId | null {
   if (tab.kind === "mode-root") return tab.modeId ?? null;
-  if (tab.kind === "deal" || tab.kind === "analysis" || tab.kind === "model") return "pipeline";
+  if (tab.kind === "deal" || tab.kind === "deal-team" || tab.kind === "analysis" || tab.kind === "model") return "pipeline";
   if (tab.kind === "doc") return inferredLauncherDealName(tab) ? "pipeline" : "files";
   if (tab.kind === "marketing-studio") return "studio";
   if (tab.kind === "files-list") return "files";
@@ -973,7 +985,7 @@ function tabBelongsToLauncherMode(tab: Tab, mode: ModeId, allTabs: Tab[]): boole
   if (tab.kind === "deal") return mode === "pipeline";
   const dealParent = owningLauncherDealForTab(tab, allTabs);
   if (dealParent || inferredLauncherDealName(tab)) return mode === "pipeline";
-  if (tab.kind === "analysis" || tab.kind === "model") return mode === "pipeline";
+  if (tab.kind === "analysis" || tab.kind === "model" || tab.kind === "deal-team") return mode === "pipeline";
   if (tab.kind === "doc") return mode === "files";
   if (tab.sourceMode) return tab.sourceMode === mode;
   return false;
@@ -1066,6 +1078,7 @@ function topTabMeta(tab: Tab, allTabs: Tab[] = [], insideDeal = false): string {
   const dealContext = insideDeal ? null : (owningLauncherDealForTab(tab, allTabs)?.title ?? inferredLauncherDealName(tab));
   const withDeal = (label: string) => dealContext ? `${dealContext} · ${label}` : label;
   if (tab.kind === "deal") return "Deal page";
+  if (tab.kind === "deal-team") return withDeal("Deal team");
   if (tab.kind === "analysis") return withDeal(tab.tool ? `Analysis · ${tab.tool}` : "Analysis");
   if (tab.kind === "model") return withDeal(tab.modelType ? `Model · ${tab.modelType}` : "Model");
   if (tab.kind === "files-list") return "File workspace";

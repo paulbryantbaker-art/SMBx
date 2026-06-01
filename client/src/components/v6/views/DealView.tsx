@@ -391,6 +391,15 @@ export function V6DealView({
     setActiveFileScope(scope);
     openTab({ id, kind: "deal", title: dealName, fileScope: scope ?? undefined });
   };
+  const openDealTeam = () => {
+    openTab({
+      id: `deal-team-${id}`,
+      kind: "deal-team",
+      title: `${dealName} · Team`,
+      dealId: numericId ?? id,
+      dealTitle: dealName,
+    });
+  };
   const refreshDealArtifacts = async () => {
     if (numericId === null) return;
     const [dels, room] = await Promise.all([
@@ -570,6 +579,7 @@ export function V6DealView({
           <div style={{ display: "flex", gap: 8 }}>
             <button className="wkbtn" type="button" onClick={() => setDealFileScope("all")}>Open files</button>
             <button className="wkbtn" type="button" onClick={() => setDealFileScope("data-room")}>Data room</button>
+            <button className="wkbtn" type="button" onClick={openDealTeam}>Team</button>
             <button className="wkbtn primary" type="button" onClick={runGenerateDeliverable} disabled={busyAction === "generate"}>
               {busyAction === "generate" ? "Generating..." : `Generate ${primaryDeliverable.label}`}
             </button>

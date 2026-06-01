@@ -4,6 +4,7 @@ export type TabKind =
   | "mode-root"
   | "files-list"
   | "deal"
+  | "deal-team"
   | "doc"
   | "analysis"
   | "model"
