@@ -44,9 +44,8 @@ export function MarketingNav() {
     <>
       <nav className={`nav${scrolled ? ' scrolled' : ''}`}>
         <div className="nav-inner">
-          <Link href="/" className="brand">
-            <BrandMark />
-            <span>smb<b>X</b></span>
+          <Link href="/" className="brand" aria-label="smbX.ai — home">
+            <img src="/newNeonLogo.png" alt="smbX.ai" draggable={false} style={{ height: 26, width: 'auto', display: 'block' }} />
           </Link>
           <div className="nav-links">
             {NAV_LINKS.map(link => (
