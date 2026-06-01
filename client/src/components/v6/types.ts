@@ -3,6 +3,7 @@ export type ModeId = "today" | "pipeline" | "search" | "studio" | "files" | "doc
 export type TabKind =
   | "mode-root"
   | "files-list"
+  | "deals-list"
   | "deal"
   | "deal-team"
   | "doc"
@@ -60,6 +61,7 @@ export interface Tab {
   status?: string;
   fileScope?: FileScope;
   fileListView?: FileListView;
+  dealsListView?: "all";
   studioView?: StudioView;
   studioFormat?: StudioFormatId;
   studioDraftId?: string;

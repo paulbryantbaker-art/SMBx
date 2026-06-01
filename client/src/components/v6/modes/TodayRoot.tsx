@@ -749,7 +749,16 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
         {/* Pipeline pulse */}
         <div>
           <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", letterSpacing: "0.08em", color: "var(--ink-3)", fontWeight: 600, textTransform: "uppercase", marginBottom: 6 }}>PIPELINE PULSE</div>
-          <div className="wksec-title" style={{ marginBottom: 2 }}>Deals in motion</div>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
+            <div className="wksec-title" style={{ marginBottom: 2 }}>Deals in motion</div>
+            <button
+              type="button"
+              onClick={() => openTab({ id: "deals-all", kind: "deals-list", title: "All deals", dealsListView: "all" })}
+              style={{ all: "unset", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.04em", color: "var(--accent-strong)", whiteSpace: "nowrap" }}
+            >
+              See all{!useSampleData && workspace.deals.length ? ` ${workspace.deals.length}` : ""} →
+            </button>
+          </div>
           <p style={{ color: "var(--ink-2)", fontSize: "0.88rem", margin: "0 0 14px" }}>Not every live deal deserves the same attention.</p>
 
           {deals.length === 0 ? (

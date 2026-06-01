@@ -295,6 +295,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
         <button type="button" className={`fchip ${attentionOnly ? "on" : ""}`} onClick={() => setAttentionOnly(v => !v)}>Needs attention</button>
         <span className="grow" />
         <div className="tabletools">
+          <button className="wkbtn" type="button" style={{ padding: "7px 12px" }} onClick={() => openTab({ id: "deals-all", kind: "deals-list", title: "All deals", dealsListView: "all" })}>All deals</button>
           <button className="wkbtn" type="button" style={{ padding: "7px 12px" }} onClick={() => onTalkToYulia?.("Rank my pipeline by methodology readiness, blockers, and the next Yulia move for each deal.")}>Rank</button>
         </div>
       </div>
