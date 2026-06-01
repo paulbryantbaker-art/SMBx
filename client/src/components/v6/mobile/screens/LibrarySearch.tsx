@@ -42,6 +42,7 @@ import {
   useMobileShareLinks,
   type MobileShareLink,
 } from "../../../../hooks/useMobileShareLinks";
+import { DeliverableComments } from "./DeliverableComments";
 
 interface SharedChromeProps {
   initials: string;
@@ -2117,6 +2118,17 @@ function RealDocumentReader({
           </div>
         </div>
       </section>
+
+      {/* Comments thread — only on a real deliverable. Participant @mentions are
+          sourced from the deliverable's deal (deal_id from the loaded doc). */}
+      <div style={S.commentsPad}>
+        <DeliverableComments
+          deliverableId={deliverableId}
+          dealId={doc?.deal_id ?? null}
+          defaultCollapsed
+        />
+      </div>
+
       <div style={S.docChatDock}>
         <ChatStarterPill
           placeholder="Message Yulia"
@@ -4302,6 +4314,9 @@ const S: Record<string, CSSProperties> = {
   },
   readerPad: {
     padding: "22px 16px 0",
+  },
+  commentsPad: {
+    padding: "4px 16px 0",
   },
   readerSurface: {
     borderRadius: 24,

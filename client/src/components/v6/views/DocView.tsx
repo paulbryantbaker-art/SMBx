@@ -6,6 +6,7 @@ import type { ModelPreference } from "../../../lib/modelPreference";
 import { executeSurfaceAction } from "../../../lib/v6ActionContracts";
 import type { SurfaceActionId } from "../../../lib/v6SurfaceActions";
 import type { OpenTab } from "../types";
+import { DealCommentsThread } from "../shared/DealCommentsThread";
 
 interface DeliverableRow {
   id: number;
@@ -406,29 +407,30 @@ export function V6DocView({
           </div>
         </div>
 
-        <div className="wkcard" style={{ padding: "14px 16px" }}>
-          <div className="mono" style={V.commentsEyebrow}>COMMENTS · {normalizedComments.length}</div>
-          {!showSample && !loading && normalizedComments.length === 0 && (
-            <div style={V.emptyRailText}>No comments yet. Ask Yulia to review the document or route it to a reviewer.</div>
-          )}
-          {normalizedComments.map((c, i) => (
-            <div
-              key={i}
-              style={{
-                display: "flex", gap: 10,
-                marginBottom: i === normalizedComments.length - 1 ? 0 : 10,
-                paddingBottom: i === normalizedComments.length - 1 ? 0 : 10,
-                borderBottom: i === normalizedComments.length - 1 ? "none" : "1px solid var(--line)",
-              }}
-            >
-              <div style={{ ...V.commentAvatar, background: c.color }}>{c.who}</div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={V.commentTxt}>{c.txt}</div>
-                <div className="mono" style={V.commentTime}>{c.resolved ? "RESOLVED · " : ""}{c.time.toUpperCase()}</div>
+        {numericId !== null ? (
+          <DealCommentsThread deliverableId={numericId} />
+        ) : (
+          <div className="wkcard" style={{ padding: "14px 16px" }}>
+            <div className="mono" style={V.commentsEyebrow}>COMMENTS · {normalizedComments.length}</div>
+            {normalizedComments.map((c, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "flex", gap: 10,
+                  marginBottom: i === normalizedComments.length - 1 ? 0 : 10,
+                  paddingBottom: i === normalizedComments.length - 1 ? 0 : 10,
+                  borderBottom: i === normalizedComments.length - 1 ? "none" : "1px solid var(--line)",
+                }}
+              >
+                <div style={{ ...V.commentAvatar, background: c.color }}>{c.who}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={V.commentTxt}>{c.txt}</div>
+                  <div className="mono" style={V.commentTime}>{c.resolved ? "RESOLVED · " : ""}{c.time.toUpperCase()}</div>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         <div className="wkcard" style={{ padding: "14px 16px" }}>
           <div className="mono" style={V.versionsEyebrow}>VERSION HISTORY</div>

@@ -33,6 +33,7 @@ import {
 } from "../../../lib/sampleInvestmentBoard";
 import type { FileScope, OpenTab } from "../types";
 import { AnalysisTableauView } from "./AnalysisTableauView";
+import { DealCommentsThread } from "../shared/DealCommentsThread";
 
 type AccentKey = "primary" | "tertiary" | "pursue" | "watch" | "pass";
 
@@ -505,6 +506,8 @@ export function V6AnalysisView({
           </div>
         </div>
       </div>
+
+      {deliverableId != null && <DealCommentsThread deliverableId={deliverableId} />}
     </div>
   );
 }
@@ -1257,6 +1260,8 @@ function StructuredAnalysisCanvas({
       </div>
 
       {saveNote && <div style={A.actionNote}>{saveNote}</div>}
+
+      {deliverableId != null && <DealCommentsThread deliverableId={deliverableId} />}
     </div>
   );
 }

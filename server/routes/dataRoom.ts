@@ -309,7 +309,7 @@ dataRoomRouter.post('/deliverables/:deliverableId/comments', async (req, res) =>
   try {
     const userId = (req as any).userId;
     const deliverableId = parseInt(req.params.deliverableId, 10);
-    const { content, sectionRef } = req.body;
+    const { content, sectionRef, mentions } = req.body;
 
     if (!content?.trim()) return res.status(400).json({ error: 'Comment content required' });
 
@@ -330,6 +330,44 @@ dataRoomRouter.post('/deliverables/:deliverableId/comments', async (req, res) =>
       commentId: comment.id,
       section: sectionRef,
     });
+
+    // Notify the deal team (mirror of deal_messages @mention logic): @mentioned
+    // participants get a distinct 'mention' notification; everyone else on the
+    // deal gets the generic 'deal_comment' notification (no double-notify).
+    const [deal] = await sql`SELECT user_id, name FROM deals WHERE id = ${deliverable.deal_id}`;
+    const dealParticipants = await sql`
+      SELECT user_id FROM deal_participants WHERE deal_id = ${deliverable.deal_id} AND accepted_at IS NOT NULL
+    `;
+    const [sender] = await sql`SELECT display_name, email FROM users WHERE id = ${userId}`;
+    const senderName = sender?.display_name || sender?.email || 'Someone';
+    const dealName = deal?.name || 'a deal';
+    const dealUrl = `/#mode=pipeline&tab=deal-${deliverable.deal_id}`;
+    const validUserIds = new Set<number>(
+      [deal?.user_id, ...dealParticipants.map((p: any) => p.user_id)].filter(Boolean),
+    );
+    validUserIds.delete(userId);
+    const mentionedIds = new Set<number>();
+    if (Array.isArray(mentions)) {
+      for (const raw of mentions) {
+        const id = typeof raw === 'number' ? raw : parseInt(raw, 10);
+        if (Number.isInteger(id) && validUserIds.has(id)) mentionedIds.add(id);
+      }
+    }
+    for (const recipientId of mentionedIds) {
+      await createNotification({
+        userId: recipientId, dealId: deliverable.deal_id, type: 'mention',
+        title: `${senderName} mentioned you on ${dealName}`,
+        body: content.trim().substring(0, 120), actionUrl: dealUrl,
+      });
+    }
+    for (const recipientId of validUserIds) {
+      if (mentionedIds.has(recipientId)) continue;
+      await createNotification({
+        userId: recipientId, dealId: deliverable.deal_id, type: 'deal_comment',
+        title: `${senderName} commented on ${dealName}`,
+        body: content.trim().substring(0, 120), actionUrl: dealUrl,
+      });
+    }
 
     return res.status(201).json(comment);
   } catch (err: any) {

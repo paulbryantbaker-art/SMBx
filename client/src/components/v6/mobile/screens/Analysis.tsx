@@ -15,6 +15,7 @@ import {
 } from "../../../../lib/analysisCanvasModel";
 import { getSurfaceActionContract, isSurfaceActionId, type SurfaceActionId } from "../../../../lib/v6SurfaceActions";
 import { ChatStarterPill } from "../ChatStarterPill";
+import { DeliverableComments } from "./DeliverableComments";
 import { MobileIcon } from "../icons";
 import { YIcon } from "../YIcon";
 
@@ -168,6 +169,10 @@ export function MobileAnalysisScreen({
     return () => { cancelled = true; };
   }, [analysisRunId, data, onUpdate, status]);
 
+  // Deal id for the comments @mention autocomplete (deliverable → deal → participants).
+  // Available to both the structured and fallback render paths below.
+  const commentsDealId = dealIdFromAnalysisData(data);
+
   if (!isStructuredAnalysis(data)) {
     const fallbackSummary = typeof data?.summary === "string" ? data.summary.trim() : "";
     const fallbackMarkdown = commentaryMarkdown
@@ -211,6 +216,9 @@ export function MobileAnalysisScreen({
             </button>
           )}
         </section>
+
+        {/* Comments — renders only when this run resolved a real deliverable id. */}
+        <DeliverableComments deliverableId={deliverableId} dealId={commentsDealId} defaultCollapsed />
       </div>
     );
   }
@@ -563,6 +571,10 @@ export function MobileAnalysisScreen({
         </section>
       ) : null}
 
+      {/* Comments — shared async thread on this analysis's deliverable. Renders
+          only when the run resolved a real deliverable id (sample runs skip it). */}
+      <DeliverableComments deliverableId={deliverableId} dealId={commentsDealId} defaultCollapsed />
+
       {exportError && <div style={S.floatingNote}>{exportError}</div>}
       {note && <div style={S.floatingNote}>{note}</div>}
 
@@ -596,6 +608,23 @@ function deliverableIdFromAnalysisData(value: unknown): number | null {
   const calc = record.calculations;
   if (calc && typeof calc === "object") {
     return coerceDeliverableId((calc as Record<string, any>).deliverableId ?? (calc as Record<string, any>).deliverable_id);
+  }
+  return null;
+}
+
+// Deal id for participant-sourced @mentions. Rides inside the structured
+// analysis payload (calculations.dealId) the same way the deliverable id does.
+// Best-effort: when absent/non-numeric the comments thread simply ships without
+// @mention autocomplete (the backend still notifies the team on every comment).
+function dealIdFromAnalysisData(value: unknown): number | null {
+  if (!value || typeof value !== "object") return null;
+  const record = value as Record<string, any>;
+  const calc = record.calculations;
+  const raw = (calc && typeof calc === "object" ? (calc as Record<string, any>).dealId : undefined) ?? record.dealId ?? record.deal_id;
+  if (typeof raw === "number" && Number.isFinite(raw) && raw > 0) return raw;
+  if (typeof raw === "string" && raw.trim() && Number.isFinite(Number(raw))) {
+    const parsed = Number(raw);
+    return parsed > 0 ? parsed : null;
   }
   return null;
 }
