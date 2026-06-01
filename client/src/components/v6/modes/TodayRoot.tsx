@@ -474,8 +474,8 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           </p>
         </div>
         <div className="pg-actions">
-          <button className="kebab" type="button" aria-label="More" onClick={() => ask("Give me the short version of today's deal brief.")}>⋯</button>
-          <button className="wkbtn" type="button" onClick={() => ask("Give me the short version of today's deal brief.")}>Ask Yulia</button>
+          {/* One meaningful, contextual action. The generic "Ask Yulia" + duplicate
+              kebab were removed — the floating FAB is the single Ask-Yulia entry. */}
           <button
             className="wkbtn primary"
             type="button"

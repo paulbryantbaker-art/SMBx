@@ -561,9 +561,16 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
   return (
     <div className="v6-root wk">
       <div className="wk-app">
-        {/* SIDEBAR — CD sectioned IA, wired to V6 modes */}
+        {/* SIDEBAR — CD sectioned IA, wired to V6 modes. Holds search (top) +
+            the toolbar (foot): New, notifications, account. */}
         <aside className="wknav">
           <div className="wkbrand"><span className="brand-mark" />smb<b>X</b></div>
+          {/* Search launcher — moved out of the (now removed) topbar. */}
+          <button className="wknav-search" onClick={() => pickMode("search")} title="Search deals, artifacts, methodology">
+            <V6Icon name="search" size={16} />
+            <span className="wknav-search-label">Search</span>
+            <span className="kbd">⌘K</span>
+          </button>
           <nav className="wknavscroll" aria-label="Workspace">
             {wkNav.map((grp, gi) => (
               <div key={gi}>
@@ -587,58 +594,48 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
               </div>
             ))}
           </nav>
+          {/* FOOT TOOLBAR — relocated from the topbar: New, notifications, account.
+              Popovers open UPWARD/RIGHTWARD from here (see .wknav-foot CSS). */}
           <div className="wknav-foot">
-            <button className="askyulia" onClick={() => setChatOpen(true)}>
-              <span className="yg"><YuliaGlyphSvg size={18} /></span> Ask Yulia
-            </button>
+            <button className="wkicon" title="New" onClick={() => pickMode("today")}><V6Icon name="plus" size={18} /></button>
+            {user && <V6NotificationBell onNavigate={navigateToActionUrl} />}
+            <div className="wkacct-wrap">
+              <button
+                className="wkav"
+                title={user?.email || "Account"}
+                aria-haspopup="menu"
+                aria-expanded={acctOpen}
+                onClick={() => setAcctOpen(o => !o)}
+              >{avatarInitials}</button>
+              {acctOpen && (
+                <>
+                  <div className="wkacct-backdrop" onClick={() => setAcctOpen(false)} />
+                  <div className="wkacct" role="menu">
+                    <div className="wkacct-id">
+                      <div className="wkacct-name">{user?.email || "Signed in"}</div>
+                      <div className="wkacct-sub">smbX workspace</div>
+                    </div>
+                    <button className="wkacct-item" role="menuitem" onClick={() => { setAcctOpen(false); window.location.assign("/?marketing"); }}>Preview marketing site</button>
+                    <button className="wkacct-item danger" role="menuitem" onClick={() => {
+                      setAcctOpen(false);
+                      // Reset the marketing→app threshold ourselves so the reload lands on
+                      // the logged-out site, then sign the session out and hard-navigate.
+                      try {
+                        sessionStorage.removeItem("smbx_app_entered");
+                        sessionStorage.removeItem("smbx_preview_marketing");
+                      } catch { /* ignore */ }
+                      void onSignOut();
+                      window.location.assign("/");
+                    }}>Sign out</button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </aside>
 
-        {/* MAIN — topbar + the tabbed canvas (V6Canvas keeps its engine) */}
+        {/* MAIN — just the tabbed canvas now (topbar removed; canvas sits at top). */}
         <section className="wkmain">
-          <div className="wktopbar">
-            <button className="wksearch" onClick={() => pickMode("search")}>
-              <V6Icon name="search" size={15} />
-              Search deals, artifacts, methodology
-              <span className="kbd">⌘K</span>
-            </button>
-            <div className="wktop-r">
-              <button className="wkicon" title="New" onClick={() => pickMode("today")}><V6Icon name="plus" size={18} /></button>
-              {user && <V6NotificationBell onNavigate={navigateToActionUrl} />}
-              <div className="wkacct-wrap">
-                <button
-                  className="wkav"
-                  title={user?.email || "Account"}
-                  aria-haspopup="menu"
-                  aria-expanded={acctOpen}
-                  onClick={() => setAcctOpen(o => !o)}
-                >{avatarInitials}</button>
-                {acctOpen && (
-                  <>
-                    <div className="wkacct-backdrop" onClick={() => setAcctOpen(false)} />
-                    <div className="wkacct" role="menu">
-                      <div className="wkacct-id">
-                        <div className="wkacct-name">{user?.email || "Signed in"}</div>
-                        <div className="wkacct-sub">smbX workspace</div>
-                      </div>
-                      <button className="wkacct-item" role="menuitem" onClick={() => { setAcctOpen(false); window.location.assign("/?marketing"); }}>Preview marketing site</button>
-                      <button className="wkacct-item danger" role="menuitem" onClick={() => {
-                        setAcctOpen(false);
-                        // Reset the marketing→app threshold ourselves so the reload lands on
-                        // the logged-out site, then sign the session out and hard-navigate.
-                        try {
-                          sessionStorage.removeItem("smbx_app_entered");
-                          sessionStorage.removeItem("smbx_preview_marketing");
-                        } catch { /* ignore */ }
-                        void onSignOut();
-                        window.location.assign("/");
-                      }}>Sign out</button>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
           <div className="wkcanvas">
             <Suspense fallback={<V6ShellLoader />}>
               <V6Canvas

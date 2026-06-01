@@ -35,8 +35,11 @@
 /* ---- App grid ---- */
 .wk-app { display: grid; grid-template-columns: 248px 1fr; height: 100vh; min-height: 0; }
 
-/* ---- Sidebar ---- */
-.wk-app .wknav { background: var(--nav); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+/* ---- Sidebar ----
+   overflow:visible (not hidden) so the foot's account + notification
+   popovers can escape upward/rightward beyond the nav bounds. The nav
+   list still scrolls via .wknavscroll's own min-height:0 + overflow-y:auto. */
+.wk-app .wknav { background: var(--nav); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; overflow: visible; position: relative; z-index: 5; }
 .wk-app .wkbrand { display: flex; align-items: center; gap: 9px; padding: 16px 16px 10px; font-weight: 600; font-size: 1.18rem; letter-spacing: -.04em; color: var(--ink); }
 .wk-app .wkbrand .brand-mark { width: 15px; height: 15px; background: var(--accent); transform: rotate(45deg); border-radius: 3px; position: relative; flex: none; }
 .wk-app .wkbrand .brand-mark::after { content: ""; position: absolute; inset: 4px; background: var(--nav); border-radius: 1px; }
@@ -46,6 +49,12 @@
 .wk-app .setup .sn { font-family: var(--font-mono); font-size: .7rem; color: var(--ink-3); margin: 7px 0 8px; }
 .wk-app .setup .sbar { height: 5px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
 .wk-app .setup .sbar i { display: block; height: 100%; width: 38%; background: var(--accent); border-radius: 3px; }
+/* nav search launcher — sits under the brand, sized to nav width (moved from topbar) */
+.wk-app .wknav-search { display: flex; align-items: center; gap: 9px; width: calc(100% - 24px); margin: 2px 12px 6px; padding: 8px 11px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line); color: var(--ink-3); font-size: .86rem; font-weight: 450; cursor: pointer; font-family: var(--font-body); text-align: left; }
+.wk-app .wknav-search:hover { background: var(--surface-3); color: var(--ink-2); }
+.wk-app .wknav-search svg { flex: none; }
+.wk-app .wknav-search .wknav-search-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wk-app .wknav-search .kbd { font-family: var(--font-mono); font-size: .64rem; background: var(--surface); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; margin-left: auto; flex: none; }
 .wk-app .wknavscroll { flex: 1; overflow-y: auto; min-height: 0; padding: 4px 10px; }
 .wk-app .navitem { display: flex; align-items: center; gap: 11px; padding: 7px 10px; border-radius: 9px; font-size: .9rem; color: var(--ink-2); cursor: pointer; font-weight: 450; border: 0; background: transparent; width: 100%; text-align: left; }
 .wk-app .navitem:hover { background: rgba(25,24,19,.05); }
@@ -56,28 +65,22 @@
 .wk-app .navsec { font-size: .66rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); padding: 14px 10px 5px; }
 .wk-app .navsub { display: flex; flex-direction: column; gap: 1px; margin: 1px 0 2px 30px; }
 .wk-app .navsub .navitem { padding: 5px 10px; font-size: .86rem; }
-.wk-app .wknav-foot { padding: 10px 12px 14px; border-top: 1px solid var(--line); }
-.wk-app .askyulia { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 11px; background: var(--ink); color: #fff; cursor: pointer; font-size: .9rem; font-weight: 500; border: 0; width: 100%; }
-.wk-app .askyulia:hover { background: #000; }
-.wk-app .askyulia .yg { color: var(--accent); display: flex; }
+/* nav foot — compact horizontal toolbar (New · notifications · account),
+   relocated from the removed topbar. Popovers open upward from here. */
+.wk-app .wknav-foot { display: flex; align-items: center; gap: 4px; padding: 8px 12px 12px; border-top: 1px solid var(--line); }
+.wk-app .wknav-foot .wkacct-wrap { margin-left: auto; }
 
-/* ---- Main column ---- */
+/* ---- Main column — topbar removed; the canvas sits at the top. ---- */
 .wk-app .wkmain { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
-.wk-app .wkstrip { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 8px; background: var(--accent-soft); font-size: .82rem; color: var(--accent-strong); border-bottom: 1px solid var(--line); }
-.wk-app .wkstrip b { color: var(--ink); font-weight: 600; }
-.wk-app .wkstrip .gs { background: var(--accent); color: var(--on-accent); font-weight: 600; border-radius: 7px; padding: 4px 11px; cursor: pointer; font-size: .78rem; border: 0; }
-.wk-app .wktopbar { display: flex; align-items: center; gap: 12px; padding: 11px 22px; border-bottom: 1px solid var(--line); flex: none; }
-.wk-app .wksearch { flex: 1; display: flex; align-items: center; gap: 10px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 11px; padding: 9px 14px; color: var(--ink-3); font-size: .88rem; cursor: text; max-width: 560px; margin: 0 auto; }
-.wk-app .wksearch .kbd { font-family: var(--font-mono); font-size: .66rem; background: var(--surface); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; margin-left: auto; }
-.wk-app .wktop-r { display: flex; align-items: center; gap: 6px; flex: none; }
 .wk-app .wkicon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; color: var(--ink-2); cursor: pointer; border: 0; background: transparent; }
 .wk-app .wkicon:hover { background: var(--surface-2); color: var(--ink); }
 .wk-app .wkav { width: 32px; height: 32px; border-radius: 50%; background: #2BFF77; color: #06371A; display: flex; align-items: center; justify-content: center; font-size: .72rem; font-weight: 600; cursor: pointer; border: 0; }
 
-/* ---- account menu (avatar dropdown — Sign out / preview) ---- */
+/* ---- account menu (avatar dropdown — Sign out / preview) ----
+   Anchored to the nav foot, so it opens UPWARD and to the RIGHT. */
 .wk-app .wkacct-wrap { position: relative; display: flex; }
 .wk-app .wkacct-backdrop { position: fixed; inset: 0; z-index: 1300; }
-.wk-app .wkacct { position: absolute; top: calc(100% + 8px); right: 0; z-index: 1301; min-width: 224px; background: var(--surface); border: 1px solid var(--line-2); border-radius: 12px; box-shadow: 0 18px 44px -18px rgba(25,24,19,.42); padding: 6px; }
+.wk-app .wkacct { position: absolute; bottom: calc(100% + 8px); left: 0; z-index: 1301; min-width: 224px; background: var(--surface); border: 1px solid var(--line-2); border-radius: 12px; box-shadow: 0 18px 44px -18px rgba(25,24,19,.42); padding: 6px; }
 .wk-app .wkacct-id { padding: 9px 11px 10px; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
 .wk-app .wkacct-name { font-size: .88rem; font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .wk-app .wkacct-sub { font-size: .72rem; color: var(--ink-3); font-family: var(--font-mono); margin-top: 1px; }
@@ -86,11 +89,12 @@
 .wk-app .wkacct-item.danger { color: #C0562F; }
 .wk-app .wkacct-item.danger:hover { background: #FBE7DD; color: #C0562F; }
 
-/* ---- notifications bell (topbar — @mention + deal notifications) ---- */
+/* ---- notifications bell (nav foot — @mention + deal notifications) ----
+   Anchored to the nav foot, so the popover opens UPWARD and to the RIGHT. */
 .wk-app .wknotif-wrap { position: relative; display: flex; }
 .wk-app .wknotif-btn { position: relative; }
 .wk-app .wknotif-badge { position: absolute; top: 2px; right: 2px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; background: #C0562F; color: #fff; font-family: var(--font-mono); font-size: .6rem; font-weight: 600; line-height: 16px; text-align: center; box-shadow: 0 0 0 2px var(--bg); pointer-events: none; }
-.wk-app .wknotif-pop { position: absolute; top: calc(100% + 8px); right: 0; z-index: 1301; width: 340px; max-width: calc(100vw - 32px); background: var(--surface); border: 1px solid var(--line-2); border-radius: 14px; box-shadow: 0 18px 44px -18px rgba(25,24,19,.42); overflow: hidden; }
+.wk-app .wknotif-pop { position: absolute; bottom: calc(100% + 8px); left: 0; z-index: 1301; width: 340px; max-width: calc(100vw - 32px); background: var(--surface); border: 1px solid var(--line-2); border-radius: 14px; box-shadow: 0 18px 44px -18px rgba(25,24,19,.42); overflow: hidden; }
 .wk-app .wknotif-head { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; border-bottom: 1px solid var(--line); background: var(--surface-2); }
 .wk-app .wknotif-title { font-size: .82rem; font-weight: 600; color: var(--ink); }
 .wk-app .wknotif-allread { border: 0; background: transparent; color: var(--accent-strong); font-size: .74rem; font-weight: 600; cursor: pointer; font-family: var(--font-body); padding: 0; }
@@ -116,14 +120,15 @@
 .wk-app .wkcanvas { flex: 1; min-height: 0; min-width: 0; display: flex; }
 .wk-app .wkcanvas .v6-canvas-frame { flex: 1; min-width: 0; }
 
-/* ---- Open-tabs strip (deals / docs / analyses / models) ---- */
-.wk-app .wktabstrip { display: flex; align-items: stretch; gap: 3px; padding: 6px 16px 0; border-bottom: 1px solid var(--line); background: var(--nav); overflow-x: auto; flex: none; }
-.wk-app .wktab { display: inline-flex; align-items: center; gap: 2px; padding-left: 12px; border: 1px solid transparent; border-bottom: 0; border-radius: 9px 9px 0 0; color: var(--ink-2); white-space: nowrap; max-width: 240px; }
+/* ---- Open-tabs strip (deals / docs / analyses / models) ----
+   Slim: a thin row with a hairline divider, no heavy colored band. */
+.wk-app .wktabstrip { display: flex; align-items: center; gap: 2px; padding: 3px 14px; border-bottom: 1px solid var(--line); background: transparent; overflow-x: auto; flex: none; }
+.wk-app .wktab { display: inline-flex; align-items: center; gap: 1px; padding-left: 10px; border: 1px solid transparent; border-radius: 7px; color: var(--ink-2); white-space: nowrap; max-width: 220px; }
 .wk-app .wktab:hover { background: var(--surface-2); }
-.wk-app .wktab.on { background: var(--surface); color: var(--ink); border-color: var(--line); box-shadow: inset 0 2px 0 var(--accent); margin-bottom: -1px; }
-.wk-app .wktab-t { all: unset; cursor: pointer; padding: 8px 2px; font-size: .85rem; font-weight: 450; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 196px; }
+.wk-app .wktab.on { background: var(--surface-2); color: var(--ink); }
+.wk-app .wktab-t { all: unset; cursor: pointer; padding: 5px 2px; font-size: .82rem; font-weight: 450; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 184px; }
 .wk-app .wktab.on .wktab-t { font-weight: 600; }
-.wk-app .wktab-x { display: inline-flex; width: 18px; height: 18px; border-radius: 5px; align-items: center; justify-content: center; color: var(--ink-3); border: 0; background: transparent; cursor: pointer; flex: none; margin-right: 6px; }
+.wk-app .wktab-x { display: inline-flex; width: 16px; height: 16px; border-radius: 5px; align-items: center; justify-content: center; color: var(--ink-3); border: 0; background: transparent; cursor: pointer; flex: none; margin-right: 5px; }
 .wk-app .wktab-x:hover { background: var(--line-2); color: var(--ink); }
 
 /* ---- FAB chat ---- */
@@ -154,7 +159,11 @@
 
 @media (max-width: 980px) {
   .wk-app { grid-template-columns: 64px 1fr; }
-  .wk-app .wknav .wkbrand b, .wk-app .navitem span:not(.badge), .wk-app .navsec, .wk-app .navsub, .wk-app .setup, .wk-app .askyulia span:not(.yg) { display: none; }
+  .wk-app .wknav .wkbrand b, .wk-app .navitem span:not(.badge), .wk-app .navsec, .wk-app .navsub, .wk-app .setup, .wk-app .wknav-search .wknav-search-label, .wk-app .wknav-search .kbd { display: none; }
+  /* collapsed rail: search shrinks to an icon button, foot toolbar stacks */
+  .wk-app .wknav-search { width: auto; margin: 2px auto 6px; padding: 8px; justify-content: center; }
+  .wk-app .wknav-foot { flex-direction: column; gap: 6px; padding: 8px 6px 12px; }
+  .wk-app .wknav-foot .wkacct-wrap { margin-left: 0; }
 }
 
 /* ============================================================

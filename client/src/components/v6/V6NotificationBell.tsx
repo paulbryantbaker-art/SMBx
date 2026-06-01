@@ -1,10 +1,12 @@
 /**
- * V6NotificationBell — desktop topbar notifications bell (CD "Ramp" chrome).
+ * V6NotificationBell — desktop nav-foot notifications bell (CD "Ramp" chrome).
  *
- * Sits in `.wktop-r` beside the account avatar. Renders a bell button with an
- * unread-count badge; clicking opens a popover listing recent notifications.
- * Clicking a row marks it read and navigates via its action_url. "Mark all
- * read" clears the badge.
+ * Sits in `.wknav-foot` beside the New (+) button and the account avatar.
+ * Renders a bell button with an unread-count badge; clicking opens a popover
+ * listing recent notifications. Because it's anchored to the nav foot, the
+ * popover opens UPWARD (`bottom: 100%`) and to the RIGHT (see `.wknotif-pop`
+ * in workspace.css). Clicking a row marks it read and navigates via its
+ * action_url. "Mark all read" clears the badge.
  *
  * Navigation: action_url is a V6 hash route (e.g.
  * `/#mode=pipeline&tab=deal-team-123`). The V6App hashchange listener already
@@ -14,7 +16,7 @@
  *
  * Tokens only (--surface / --line / --ink*). No position:fixed full-viewport
  * background (Safari toolbar-tint rule); the backdrop is a transparent
- * click-catcher, the panel is position:absolute under the bell.
+ * click-catcher, the panel is position:absolute anchored to the bell.
  */
 import { useEffect, useRef, useState } from 'react';
 import { Bell, BellOff } from 'lucide-react';
