@@ -525,6 +525,9 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
 
   const modeLabel = MODES.find(m => m.id === activeMode)?.label ?? "Workspace";
   const launcherWork = (modeId: ModeId) => tabs.filter(tab => tabBelongsToLauncherMode(tab, modeId, tabs));
+  // Open work items surfaced in the nav "Open" section (mode-roots are reached
+  // through the module groups, so they're excluded here).
+  const workTabs = tabs.filter(t => t.kind !== "mode-root");
 
   // ⌘K focuses Yulia from anywhere.
   useEffect(() => {
@@ -593,6 +596,39 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
                 })}
               </div>
             ))}
+            {/* OPEN — work items (deals/docs/analyses/models/files) live here now
+                instead of a vertical strip on the canvas, so the canvas is pure
+                content. Mode-roots are reached via the groups above. */}
+            {workTabs.length > 0 && (
+              <div role="tablist" aria-label="Open tabs">
+                <div className="navsec">Open</div>
+                {workTabs.map(t => {
+                  const on = t.id === activeTabId;
+                  return (
+                    <div key={t.id} className={`navtab ${on ? "on" : ""}`} role="presentation">
+                      <button
+                        className="navtab-t"
+                        onClick={() => activateTab(t.id)}
+                        title={t.title}
+                        role="tab"
+                        aria-selected={on}
+                        aria-current={on ? "page" : undefined}
+                      >
+                        <V6Icon name={navTabIcon(t)} size={16} />
+                        <span>{t.title}</span>
+                      </button>
+                      <button
+                        className="navtab-x"
+                        onClick={e => { e.stopPropagation(); closeTab(t.id); }}
+                        aria-label={`Close ${t.title}`}
+                      >
+                        <V6Icon name="close" size={13} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </nav>
           {/* FOOT TOOLBAR — relocated from the topbar: New, notifications, account.
               Popovers open UPWARD/RIGHTWARD from here (see .wknav-foot CSS). */}
@@ -992,6 +1028,15 @@ function discardStudioDraft(tab: Tab) {
   } catch {
     // Best-effort session cleanup.
   }
+}
+
+// Small per-kind glyph for the nav "Open" rows: deals get the briefcase,
+// analyses/models the chart, everything else (docs, files, studio, settings…)
+// a generic document icon.
+function navTabIcon(tab: Tab): IconName {
+  if (tab.kind === "deal" || tab.kind === "deal-team") return "deal";
+  if (tab.kind === "analysis" || tab.kind === "model") return "chart";
+  return "doc";
 }
 
 function modeForTab(tab: Tab): ModeId | null {

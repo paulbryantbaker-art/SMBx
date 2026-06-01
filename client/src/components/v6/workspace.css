@@ -65,6 +65,22 @@
 .wk-app .navsec { font-size: .66rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); padding: 14px 10px 5px; }
 .wk-app .navsub { display: flex; flex-direction: column; gap: 1px; margin: 1px 0 2px 30px; }
 .wk-app .navsub .navitem { padding: 5px 10px; font-size: .86rem; }
+
+/* ---- Open work tabs (deals / docs / analyses / models / files) ----
+   Relocated from the canvas strip into the nav "Open" section. Each row is a
+   title button + a close button (NOT nested), styled like .navitem. The × is
+   dimmed until hover/active so the row reads clean at rest. */
+.wk-app .navtab { display: flex; align-items: center; gap: 3px; border-radius: 9px; color: var(--ink-2); }
+.wk-app .navtab:hover { background: rgba(25,24,19,.05); }
+.wk-app .navtab.on { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(25,24,19,.05); }
+.wk-app .navtab-t { display: flex; align-items: center; gap: 11px; flex: 1; min-width: 0; padding: 7px 2px 7px 10px; border: 0; background: transparent; color: inherit; font-size: .9rem; font-weight: 450; font-family: var(--font-body); text-align: left; cursor: pointer; }
+.wk-app .navtab.on .navtab-t { font-weight: 500; }
+.wk-app .navtab-t span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wk-app .navtab-t svg { color: var(--ink-3); flex: none; }
+.wk-app .navtab.on .navtab-t svg { color: var(--ink); }
+.wk-app .navtab-x { display: flex; align-items: center; justify-content: center; flex: none; width: 22px; height: 22px; margin-right: 6px; border-radius: 6px; border: 0; background: transparent; color: var(--ink-3); cursor: pointer; opacity: 0; transition: opacity .12s, background .12s, color .12s; }
+.wk-app .navtab:hover .navtab-x, .wk-app .navtab.on .navtab-x { opacity: 1; }
+.wk-app .navtab-x:hover { background: var(--surface-2); color: var(--accent-strong); }
 /* nav foot — compact horizontal toolbar (New · notifications · account),
    relocated from the removed topbar. Popovers open upward from here. */
 .wk-app .wknav-foot { display: flex; align-items: center; gap: 4px; padding: 8px 12px 12px; border-top: 1px solid var(--line); }
@@ -119,17 +135,6 @@
 /* ---- Canvas body host (V6Canvas renders inside) ---- */
 .wk-app .wkcanvas { flex: 1; min-height: 0; min-width: 0; display: flex; }
 .wk-app .wkcanvas .v6-canvas-frame { flex: 1; min-width: 0; }
-
-/* ---- Open-tabs strip (deals / docs / analyses / models) ----
-   Slim: a thin row with a hairline divider, no heavy colored band. */
-.wk-app .wktabstrip { display: flex; align-items: center; gap: 2px; padding: 3px 14px; border-bottom: 1px solid var(--line); background: transparent; overflow-x: auto; flex: none; }
-.wk-app .wktab { display: inline-flex; align-items: center; gap: 1px; padding-left: 10px; border: 1px solid transparent; border-radius: 7px; color: var(--ink-2); white-space: nowrap; max-width: 220px; }
-.wk-app .wktab:hover { background: var(--surface-2); }
-.wk-app .wktab.on { background: var(--surface-2); color: var(--ink); }
-.wk-app .wktab-t { all: unset; cursor: pointer; padding: 5px 2px; font-size: .82rem; font-weight: 450; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 184px; }
-.wk-app .wktab.on .wktab-t { font-weight: 600; }
-.wk-app .wktab-x { display: inline-flex; width: 16px; height: 16px; border-radius: 5px; align-items: center; justify-content: center; color: var(--ink-3); border: 0; background: transparent; cursor: pointer; flex: none; margin-right: 5px; }
-.wk-app .wktab-x:hover { background: var(--line-2); color: var(--ink); }
 
 /* ---- FAB chat ---- */
 .v6-root.wk .wk-fab {

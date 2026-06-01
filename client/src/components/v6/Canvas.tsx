@@ -37,26 +37,13 @@ interface CanvasProps {
   modelPreference?: ModelPreference;
 }
 
-export function V6Canvas({ tabs, activeTabId, setActiveTabId, closeTab, openTab, onPickMode, onTalkToYulia, user, onSignOut, modelPreference }: CanvasProps) {
+export function V6Canvas({ tabs, activeTabId, openTab, onPickMode, onTalkToYulia, user, onSignOut, modelPreference }: CanvasProps) {
   const activeTab = tabs.find(t => t.id === activeTabId) ?? tabs[0];
-  // Open work items (deals/docs/analyses/models/files) — mode-roots are reached
-  // via the sidebar, so the strip only surfaces the things you can't otherwise switch to.
-  const workTabs = tabs.filter(t => t.kind !== "mode-root");
+  // The open-tabs strip lives in the left nav ("Open" section) now, so the
+  // canvas is pure content: just the active tab's body at full height.
 
   return (
     <div style={K.canvas}>
-      {workTabs.length > 0 && (
-        <div className="wktabstrip thin-scroll" role="tablist" aria-label="Open tabs">
-          {workTabs.map(t => (
-            <div key={t.id} className={`wktab ${t.id === activeTabId ? "on" : ""}`} role="tab" aria-selected={t.id === activeTabId}>
-              <button className="wktab-t" onClick={() => setActiveTabId(t.id)} title={t.title}>{t.title}</button>
-              <button className="wktab-x" onClick={(e) => { e.stopPropagation(); closeTab(t.id); }} aria-label={`Close ${t.title}`}>
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" /></svg>
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
       <div className="thin-scroll v6-canvas-scroll" style={K.canvasBody}>
         {activeTab && (
           <Suspense fallback={<CanvasContentLoader />}>
