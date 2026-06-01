@@ -18,21 +18,13 @@ import {
   useDealTeam,
   DEAL_TEAM_ROLES,
   DEAL_TEAM_ACCESS_LEVELS,
+  DEAL_TEAM_ROLE_LABELS,
   type DealTeamAccessLevel,
   type DealTeamMessage,
   type DealTeamParticipant,
 } from "../hooks/useDealTeam";
 
-const ROLE_LABELS: Record<string, string> = {
-  owner: "Owner",
-  attorney: "Attorney",
-  cpa: "CPA",
-  broker: "Broker",
-  lender: "Lender",
-  consultant: "Consultant",
-  counterparty: "Counterparty",
-  auditor: "Auditor",
-};
+const ROLE_LABELS: Record<string, string> = DEAL_TEAM_ROLE_LABELS;
 
 /** Map a role onto one of the existing statpill status tones so badges stay on-palette. */
 function roleTone(role: string | null | undefined): "good" | "review" | "diligence" | "flag" | "missing" {
@@ -44,6 +36,12 @@ function roleTone(role: string | null | undefined): "good" | "review" | "diligen
     case "lender": return "review";
     case "counterparty": return "flag";
     case "auditor": return "diligence";
+    // Transaction-services professionals.
+    case "re_agent": return "good";
+    case "appraiser": return "review";
+    case "escrow": return "diligence";
+    case "title": return "diligence";
+    case "insurance": return "review";
     case "consultant":
     default: return "missing";
   }

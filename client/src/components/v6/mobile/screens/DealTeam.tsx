@@ -31,20 +31,12 @@ import {
   useDealTeam,
   DEAL_TEAM_ROLES,
   DEAL_TEAM_ACCESS_LEVELS,
+  DEAL_TEAM_ROLE_LABELS,
   type DealTeamAccessLevel,
   type DealTeamMessage,
 } from "../../hooks/useDealTeam";
 
-const ROLE_LABELS: Record<string, string> = {
-  owner: "Owner",
-  attorney: "Attorney",
-  cpa: "CPA",
-  broker: "Broker",
-  lender: "Lender",
-  consultant: "Consultant",
-  counterparty: "Counterparty",
-  auditor: "Auditor",
-};
+const ROLE_LABELS: Record<string, string> = DEAL_TEAM_ROLE_LABELS;
 
 const ACCESS_LABELS: Record<DealTeamAccessLevel, string> = {
   full: "Full access",
@@ -57,6 +49,7 @@ function roleTone(role: string | null | undefined): { bg: string; ink: string; d
   switch (role) {
     case "owner":
     case "broker":
+    case "re_agent":
       return { bg: "var(--mb-verdict-pursue-soft)", ink: "var(--mb-verdict-pursue-ink)", dot: "var(--mb-verdict-pursue)" };
     case "counterparty":
       return { bg: "var(--mb-danger-soft)", ink: "var(--mb-danger-ink)", dot: "var(--mb-danger)" };
@@ -64,6 +57,10 @@ function roleTone(role: string | null | undefined): { bg: string; ink: string; d
     case "lender":
     case "attorney":
     case "auditor":
+    case "appraiser":
+    case "escrow":
+    case "title":
+    case "insurance":
       return { bg: "var(--mb-warn-soft)", ink: "var(--mb-warn-ink)", dot: "var(--mb-warn)" };
     case "consultant":
     default:

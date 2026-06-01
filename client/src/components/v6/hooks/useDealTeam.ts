@@ -26,8 +26,30 @@ export const DEAL_TEAM_ROLES = [
   "consultant",
   "counterparty",
   "auditor",
+  "re_agent",
+  "appraiser",
+  "escrow",
+  "title",
+  "insurance",
 ] as const;
 export type DealTeamRole = (typeof DEAL_TEAM_ROLES)[number] | "owner";
+
+/** Human-readable labels for each invitable role (owner is implicit, but included for badges). */
+export const DEAL_TEAM_ROLE_LABELS: Record<string, string> = {
+  owner: "Owner",
+  attorney: "Attorney",
+  cpa: "CPA",
+  broker: "Broker",
+  lender: "Lender",
+  consultant: "Consultant",
+  counterparty: "Counterparty",
+  auditor: "Auditor",
+  re_agent: "Real estate agent",
+  appraiser: "Appraiser",
+  escrow: "Escrow",
+  title: "Title",
+  insurance: "Insurance",
+};
 
 /** Mirrors VALID_ACCESS_LEVELS in server/services/dealAccessService.ts. */
 export const DEAL_TEAM_ACCESS_LEVELS = ["full", "comment", "read"] as const;
