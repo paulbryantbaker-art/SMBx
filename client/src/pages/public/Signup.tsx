@@ -27,6 +27,22 @@ const DEV_PASSWORD = 'test123';
 export default function Signup({ onLogin, onGoogleLogin, onNavigateLogin }: SignupProps) {
   const [devLoading, setDevLoading] = useState(false);
   const [devError, setDevError] = useState('');
+  // "Sign in as Paul" is auto-visible in local dev. On prod it's opt-in so it
+  // never shows for the public: visit /signup?dev=1 (or ?paul=1) once on a device
+  // to persist the flag, then the button appears on that device. pbaker@smbx.ai
+  // is the superadmin seed account that owns the demo/test deal portfolio.
+  const [showDevLogin] = useState<boolean>(() => {
+    if (isDev) return true;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('dev') === '1' || params.get('paul') === '1') {
+        localStorage.setItem('smbx_dev_login', '1');
+      }
+      return localStorage.getItem('smbx_dev_login') === '1';
+    } catch {
+      return false;
+    }
+  });
 
   const handleDevLogin = async () => {
     if (!onLogin) return;
@@ -63,7 +79,7 @@ export default function Signup({ onLogin, onGoogleLogin, onNavigateLogin }: Sign
           Continue with Google
         </button>
 
-        {isDev && (
+        {showDevLogin && (
           <>
             <div className="flex items-center gap-3 my-5">
               <div className="h-px bg-[rgba(15,16,18,0.08)] flex-1" />
