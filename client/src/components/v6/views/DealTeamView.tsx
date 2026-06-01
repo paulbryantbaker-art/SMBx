@@ -10,7 +10,7 @@
  * inherits the desktop slate-blue palette. No terra/cream. No fixed full-viewport
  * backgrounds (Safari toolbar rule).
  */
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { V6Icon } from "../icons";
 import type { OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
@@ -473,9 +473,27 @@ function buildThreads(messages: DealTeamMessage[]): ThreadNode[] {
   }));
 }
 
+/** A person who can be @mentioned: deal owner or any participant (pending or accepted). */
+interface MentionCandidate {
+  userId: number;
+  name: string;
+  role: string;
+}
+
+/** Strip an @display-name to its bare token for matching/insertion (drop spaces). */
+function mentionToken(name: string): string {
+  return name.replace(/\s+/g, "");
+}
+
 function ChatColumn({ team, currentUserEmail }: { team: ReturnType<typeof useDealTeam>; currentUserEmail?: string }) {
   const [draft, setDraft] = useState("");
   const [replyTo, setReplyTo] = useState<DealTeamMessage | null>(null);
+  // user-ids the author has @mentioned in the current draft (server re-validates).
+  const [mentionIds, setMentionIds] = useState<number[]>([]);
+  // open @-autocomplete state: the query after the active "@" and where it began.
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+  const [mentionStart, setMentionStart] = useState<number>(-1);
+  const [mentionActive, setMentionActive] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -483,16 +501,107 @@ function ChatColumn({ team, currentUserEmail }: { team: ReturnType<typeof useDea
   const threads = useMemo(() => buildThreads(team.messages), [team.messages]);
   const isMe = (email: string) => !!currentUserEmail && email === currentUserEmail;
 
+  // Mention candidates: owner first, then accepted participants. Skip people without
+  // a resolvable user-id, and skip yourself (you don't mention yourself).
+  const candidates = useMemo<MentionCandidate[]>(() => {
+    const out: MentionCandidate[] = [];
+    const seen = new Set<number>();
+    const push = (userId: number | null | undefined, name: string | null, email: string, role: string) => {
+      if (userId == null || seen.has(userId)) return;
+      if (currentUserEmail && email === currentUserEmail) return;
+      seen.add(userId);
+      out.push({ userId, name: name || email.split("@")[0], role });
+    };
+    if (team.owner) push(team.owner.id, team.owner.display_name, team.owner.email, "owner");
+    for (const p of team.participants) {
+      if (p.accepted_at == null) continue; // only people who can actually be notified
+      push(p.user_id, p.display_name, p.email, p.role);
+    }
+    return out;
+  }, [team.owner, team.participants, currentUserEmail]);
+
+  // Candidates matching the active @-query (case-insensitive prefix on the bare token).
+  const mentionMatches = useMemo<MentionCandidate[]>(() => {
+    if (mentionQuery == null) return [];
+    const q = mentionQuery.toLowerCase();
+    return candidates
+      .filter(c => q === "" || mentionToken(c.name).toLowerCase().startsWith(q) || c.name.toLowerCase().startsWith(q))
+      .slice(0, 6);
+  }, [candidates, mentionQuery]);
+
   // Keep the latest message in view as the poll brings new ones in.
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: "end" });
   }, [team.messages.length]);
 
+  const closeMention = () => {
+    setMentionQuery(null);
+    setMentionStart(-1);
+    setMentionActive(0);
+  };
+
+  // Re-derive the active @-query from the caret position after every change.
+  const syncMentionState = (value: string, caret: number) => {
+    // Look back from the caret for an "@" that starts a token: it must sit at the
+    // start of the text or right after whitespace, with no whitespace between it
+    // and the caret.
+    const upToCaret = value.slice(0, caret);
+    const at = upToCaret.lastIndexOf("@");
+    if (at === -1) { closeMention(); return; }
+    const charBefore = at === 0 ? "" : upToCaret[at - 1];
+    const atWordBoundary = at === 0 || /\s/.test(charBefore);
+    const token = upToCaret.slice(at + 1);
+    const tokenHasSpace = /\s/.test(token);
+    if (atWordBoundary && !tokenHasSpace) {
+      setMentionQuery(token);
+      setMentionStart(at);
+      setMentionActive(0);
+    } else {
+      closeMention();
+    }
+  };
+
+  const onDraftChange = (value: string, caret: number) => {
+    setDraft(value);
+    syncMentionState(value, caret);
+    // Drop any recorded mention whose "@Name" text no longer appears in the draft.
+    setMentionIds(prev => prev.filter(id => {
+      const c = candidates.find(x => x.userId === id);
+      return c ? value.includes(`@${c.name}`) : false;
+    }));
+  };
+
+  const selectMention = (c: MentionCandidate | undefined) => {
+    if (!c || mentionStart < 0 || !textareaRef.current) return;
+    const el = textareaRef.current;
+    const caret = el.selectionStart ?? draft.length;
+    const before = draft.slice(0, mentionStart);
+    const after = draft.slice(caret);
+    const insert = `@${c.name} `;
+    const next = before + insert + after;
+    setDraft(next);
+    setMentionIds(prev => (prev.includes(c.userId) ? prev : [...prev, c.userId]));
+    closeMention();
+    // Restore caret just after the inserted mention.
+    const nextCaret = before.length + insert.length;
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(nextCaret, nextCaret);
+    });
+  };
+
   const handleSend = async () => {
     if (!draft.trim()) return;
-    const ok = await team.sendMessage(draft, replyTo?.id ?? null);
+    // Only send mentions whose "@Name" text is actually present in the final draft.
+    const activeMentions = mentionIds.filter(id => {
+      const c = candidates.find(x => x.userId === id);
+      return c ? draft.includes(`@${c.name}`) : false;
+    });
+    const ok = await team.sendMessage(draft, replyTo?.id ?? null, activeMentions);
     if (ok) {
       setDraft("");
+      setMentionIds([]);
+      closeMention();
       setReplyTo(null);
       textareaRef.current?.focus();
     }
@@ -563,17 +672,48 @@ function ChatColumn({ team, currentUserEmail }: { team: ReturnType<typeof useDea
           )}
           {team.canPost ? (
             <div style={T.composeRow}>
-              <textarea
-                ref={textareaRef}
-                value={draft}
-                onChange={e => setDraft(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void handleSend(); }
-                }}
-                placeholder={replyTo ? "Write a reply…" : "Message your deal team…"}
-                rows={1}
-                style={T.textarea}
-              />
+              <div style={T.composeField}>
+                {mentionQuery != null && mentionMatches.length > 0 && (
+                  <div style={T.mentionMenu} role="listbox" aria-label="Mention a teammate">
+                    <div className="mono" style={T.mentionMenuHead}>MENTION</div>
+                    {mentionMatches.map((c, i) => (
+                      <button
+                        key={c.userId}
+                        type="button"
+                        role="option"
+                        aria-selected={i === mentionActive}
+                        style={{ ...T.mentionItem, ...(i === mentionActive ? T.mentionItemActive : null) }}
+                        onMouseEnter={() => setMentionActive(i)}
+                        // mousedown (not click) so the textarea doesn't blur first.
+                        onMouseDown={e => { e.preventDefault(); selectMention(c); }}
+                      >
+                        <span style={T.mentionAvatar}>{c.name.charAt(0).toUpperCase()}</span>
+                        <span style={T.mentionName}>{c.name}</span>
+                        <RoleBadge role={c.role} />
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <textarea
+                  ref={textareaRef}
+                  value={draft}
+                  onChange={e => onDraftChange(e.target.value, e.target.selectionStart ?? e.target.value.length)}
+                  onClick={e => syncMentionState((e.target as HTMLTextAreaElement).value, (e.target as HTMLTextAreaElement).selectionStart ?? 0)}
+                  onKeyDown={e => {
+                    const menuOpen = mentionQuery != null && mentionMatches.length > 0;
+                    if (menuOpen) {
+                      if (e.key === "ArrowDown") { e.preventDefault(); setMentionActive(a => (a + 1) % mentionMatches.length); return; }
+                      if (e.key === "ArrowUp") { e.preventDefault(); setMentionActive(a => (a - 1 + mentionMatches.length) % mentionMatches.length); return; }
+                      if (e.key === "Enter" || e.key === "Tab") { e.preventDefault(); selectMention(mentionMatches[mentionActive]); return; }
+                      if (e.key === "Escape") { e.preventDefault(); closeMention(); return; }
+                    }
+                    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void handleSend(); }
+                  }}
+                  placeholder={replyTo ? "Write a reply…" : "Message your deal team…  (@ to mention)"}
+                  rows={1}
+                  style={T.textarea}
+                />
+              </div>
               <button
                 type="button"
                 className="wkbtn primary"
@@ -594,6 +734,33 @@ function ChatColumn({ team, currentUserEmail }: { team: ReturnType<typeof useDea
       </div>
     </div>
   );
+}
+
+/**
+ * Render message text with @mentions highlighted. We don't know the exact set of
+ * names client-side for historical messages, so we accent any "@Word" run (letters,
+ * digits, ., _, -) — the same shape selectMention inserts. Purely visual.
+ */
+function renderWithMentions(text: string, mine: boolean): ReactNode {
+  const parts: ReactNode[] = [];
+  const re = /(^|[\s(])(@[A-Za-z0-9][A-Za-z0-9._-]*)/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let key = 0;
+  while ((m = re.exec(text)) !== null) {
+    const lead = m[1];
+    const handle = m[2];
+    const start = m.index + lead.length;
+    if (start > last) parts.push(text.slice(last, start));
+    parts.push(
+      <span key={`mention-${key++}`} style={mine ? T.mentionTokenMine : T.mentionToken}>
+        {handle}
+      </span>,
+    );
+    last = start + handle.length;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return parts.length ? parts : text;
 }
 
 function MessageBubble({
@@ -617,7 +784,7 @@ function MessageBubble({
         <span style={T.bubbleTime}>{timeAgo(message.created_at)}</span>
       </div>
       <div style={{ ...T.bubble, ...(mine ? T.bubbleMine : T.bubbleOther), ...(reply ? T.bubbleReply : null) }}>
-        {message.content}
+        {renderWithMentions(message.content, mine)}
       </div>
       {canReply && !reply && (
         <button type="button" style={{ ...T.replyBtn, alignSelf: mine ? "flex-end" : "flex-start" }} onClick={onReply}>
@@ -767,13 +934,44 @@ const T: Record<string, CSSProperties> = {
   replyChipText: { flex: 1, minWidth: 0, fontSize: 11.5, color: "var(--ink-2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
   replyChipClose: { all: "unset", cursor: "pointer", color: "var(--ink-3)", display: "grid", placeItems: "center", padding: 2 },
   composeRow: { display: "flex", alignItems: "flex-end", gap: 8 },
+  composeField: { flex: 1, minWidth: 0, position: "relative" },
   textarea: {
-    flex: 1, resize: "none", maxHeight: 120, minHeight: 40,
+    width: "100%", boxSizing: "border-box",
+    resize: "none", maxHeight: 120, minHeight: 40,
     padding: "10px 13px", borderRadius: 12, border: "1px solid var(--line-2)",
     background: "var(--surface-2)", color: "var(--ink)", fontSize: 14,
     fontFamily: "var(--font-body)", outline: "none", lineHeight: 1.4,
   },
   sendBtn: { width: 40, height: 40, padding: 0, justifyContent: "center", borderRadius: 999, flexShrink: 0 },
+
+  // @-mention autocomplete (anchored above the textarea)
+  mentionMenu: {
+    position: "absolute", left: 0, right: 0, bottom: "calc(100% + 6px)",
+    background: "var(--surface)", border: "1px solid var(--line-2)", borderRadius: 12,
+    boxShadow: "0 10px 28px rgba(0,0,0,0.14)", padding: 5, zIndex: 20,
+    display: "flex", flexDirection: "column", gap: 2,
+  },
+  mentionMenuHead: {
+    fontSize: 9, letterSpacing: "0.16em", fontWeight: 800,
+    color: "var(--ink-3)", padding: "4px 8px 2px",
+  },
+  mentionItem: {
+    all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 9,
+    padding: "7px 9px", borderRadius: 9, boxSizing: "border-box",
+  },
+  mentionItemActive: { background: "var(--surface-2)" },
+  mentionAvatar: {
+    width: 24, height: 24, borderRadius: 999, flexShrink: 0,
+    display: "grid", placeItems: "center",
+    background: "var(--surface-2)", color: "var(--ink-2)",
+    fontSize: 11, fontWeight: 800, border: "1px solid var(--line)",
+  },
+  mentionName: {
+    flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, color: "var(--ink)",
+    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+  },
+  mentionToken: { color: "var(--accent-strong)", fontWeight: 700 },
+  mentionTokenMine: { color: "var(--on-accent)", fontWeight: 800, textDecoration: "underline" },
 
   emptyCard: { padding: "26px 28px", maxWidth: 620 },
   emptyTitle: { margin: 0, fontFamily: "var(--font-display)", fontWeight: 750, fontSize: 20, letterSpacing: "-0.02em", color: "var(--ink)" },

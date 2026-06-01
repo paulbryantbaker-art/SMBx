@@ -337,7 +337,7 @@ collaborationRouter.post('/deals/:dealId/messages', async (req, res) => {
   try {
     const userId = (req as any).userId;
     const dealId = parseInt(req.params.dealId, 10);
-    const { content, parentId } = req.body;
+    const { content, parentId, mentions } = req.body;
 
     if (!content?.trim()) return res.status(400).json({ error: 'Message content is required' });
 
@@ -354,23 +354,55 @@ collaborationRouter.post('/deals/:dealId/messages', async (req, res) => {
     await logActivity(dealId, userId, 'commented', 'message', message.id);
 
     // Notify all other participants + deal owner
-    const [deal] = await sql`SELECT user_id FROM deals WHERE id = ${dealId}`;
+    const [deal] = await sql`SELECT user_id, name FROM deals WHERE id = ${dealId}`;
     const participants = await sql`
       SELECT user_id FROM deal_participants WHERE deal_id = ${dealId} AND accepted_at IS NOT NULL
     `;
     const [sender] = await sql`SELECT display_name, email FROM users WHERE id = ${userId}`;
     const senderName = sender?.display_name || sender?.email || 'Someone';
-    const allUserIds = new Set([deal?.user_id, ...participants.map((p: any) => p.user_id)].filter(Boolean));
-    allUserIds.delete(userId); // Don't notify the sender
+    const dealName = deal?.name || 'a deal';
+    // Deep-link straight to this deal's Deal Team tab in the V6 shell.
+    const dealTeamUrl = `/#mode=pipeline&tab=deal-team-${dealId}`;
 
-    for (const recipientId of allUserIds) {
+    // Valid notification audience = deal owner + accepted participants, minus the sender.
+    const validUserIds = new Set<number>(
+      [deal?.user_id, ...participants.map((p: any) => p.user_id)].filter(Boolean),
+    );
+    validUserIds.delete(userId); // Never notify the sender
+
+    // Resolve @mentions: keep only ids that are real, accepted participants (or owner),
+    // are not the sender, and de-duplicate. Invalid ids are silently ignored.
+    const mentionedIds = new Set<number>();
+    if (Array.isArray(mentions)) {
+      for (const raw of mentions) {
+        const id = typeof raw === 'number' ? raw : parseInt(raw, 10);
+        if (Number.isInteger(id) && validUserIds.has(id)) mentionedIds.add(id);
+      }
+    }
+
+    // Mentioned users get a distinct 'mention' notification...
+    for (const recipientId of mentionedIds) {
+      await createNotification({
+        userId: recipientId,
+        dealId,
+        type: 'mention',
+        title: `${senderName} mentioned you on ${dealName}`,
+        body: content.trim().substring(0, 120),
+        actionUrl: dealTeamUrl,
+      });
+    }
+
+    // ...everyone else on the deal gets the generic new-message notification.
+    // Mentioned users are skipped here so they aren't double-notified.
+    for (const recipientId of validUserIds) {
+      if (mentionedIds.has(recipientId)) continue;
       await createNotification({
         userId: recipientId,
         dealId,
         type: 'deal_comment',
-        title: `${senderName} commented on a deal`,
+        title: `${senderName} commented on ${dealName}`,
         body: content.trim().substring(0, 120),
-        actionUrl: `/chat`,
+        actionUrl: dealTeamUrl,
       });
     }
 

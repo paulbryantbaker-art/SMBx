@@ -98,7 +98,7 @@ export interface UseDealTeam {
   loadingMessages: boolean;
   messagesError: string | null;
   canPost: boolean;
-  sendMessage: (content: string, parentId?: number | null) => Promise<boolean>;
+  sendMessage: (content: string, parentId?: number | null, mentions?: number[]) => Promise<boolean>;
   sending: boolean;
   refreshMessages: () => Promise<void>;
 }
@@ -260,14 +260,20 @@ export function useDealTeam(dealId: number | null, userId?: number | null): UseD
     finally { setMutatingParticipantId(null); }
   }, [dealId, refreshTeam]);
 
-  const sendMessage = useCallback(async (content: string, parentId?: number | null): Promise<boolean> => {
+  const sendMessage = useCallback(async (content: string, parentId?: number | null, mentions?: number[]): Promise<boolean> => {
     if (dealId === null || !content.trim() || sending) return false;
     setSending(true);
     try {
+      // Dedupe mention ids; the server re-validates them against real participants.
+      const mentionIds = Array.isArray(mentions) ? Array.from(new Set(mentions)) : [];
       const res = await fetch(`/api/deals/${dealId}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...authHeaders() },
-        body: JSON.stringify({ content: content.trim(), ...(parentId ? { parentId } : null) }),
+        body: JSON.stringify({
+          content: content.trim(),
+          ...(parentId ? { parentId } : null),
+          ...(mentionIds.length ? { mentions: mentionIds } : null),
+        }),
       });
       if (!res.ok) {
         setMessagesError(res.status === 403 ? "Your access level is read-only, so you can't post here." : "Couldn't send your message.");
