@@ -14,6 +14,15 @@ import {
   UploadCloud,
   Loader2,
   ChevronRight,
+  Link2,
+  Copy,
+  Check,
+  ShieldCheck,
+  Eye,
+  CalendarClock,
+  Trash2,
+  X,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 import { GlassTopBar, LargeTitle } from "../TopBar";
@@ -29,6 +38,10 @@ import {
   type MobileDataRoomFolder,
   type MobileUnfiledDeliverable,
 } from "../../../../hooks/useMobileDataRoom";
+import {
+  useMobileShareLinks,
+  type MobileShareLink,
+} from "../../../../hooks/useMobileShareLinks";
 
 interface SharedChromeProps {
   initials: string;
@@ -937,6 +950,15 @@ function RealDealDataRoom({
   const [writeError, setWriteError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  // ── Share-links state (real path only) ─────────────────────────────────
+  // Opens the glass Share bottom-sheet from the header Share control.
+  const [shareOpen, setShareOpen] = useState(false);
+  const share = useMobileShareLinks(dealRawId);
+  // The link points at the deal's living CIM. No current endpoint exposes one
+  // to the client, so the create flow shows a graceful "generate a CIM first"
+  // state until a living CIM id is available (see useMobileShareLinks notes).
+  const livingCimId: number | null = null;
+
   // Keep the upload target valid if folders change underneath us.
   useEffect(() => {
     if (targetFolderId != null && !room.folders.some((f) => f.id === targetFolderId)) {
@@ -995,6 +1017,8 @@ function RealDealDataRoom({
     />
   );
 
+  const activeLinkCount = share.links.filter((l) => !l.revoked_at).length;
+
   const Chrome = (
     <>
       {HiddenFileInput}
@@ -1013,6 +1037,25 @@ function RealDealDataRoom({
           ? <Loader2 size={15} strokeWidth={2.4} color="var(--mb-ink-1)" style={S.spin} />
           : <UploadCloud size={16} strokeWidth={2.2} color="var(--mb-ink-1)" />}
       </button>
+      <button
+        type="button"
+        onClick={() => setShareOpen(true)}
+        aria-label="Share this data room"
+        style={S.floatShareLink}
+      >
+        <MobileIcon name="share" size={15} c="var(--mb-ink-1)" />
+        {activeLinkCount > 0 && (
+          <span className="mb-mono" style={S.floatShareBadge}>{activeLinkCount}</span>
+        )}
+      </button>
+
+      <ShareSheet
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        dealTitle={currentTitle}
+        share={share}
+        livingCimId={livingCimId}
+      />
 
       <div style={S.breadcrumb}>
         <span style={S.breadcrumbLink}>Files</span>
@@ -1169,6 +1212,302 @@ function RealDealDataRoom({
       ))}
     </div>
   );
+}
+
+/* ─── Share sheet ─────────────────────────────────────────────────────────
+   Glass bottom-sheet (mirrors the V6Mobile account-sheet scrim + sheet) that
+   lists the deal's CIM share links and creates new ones. Each access level
+   (blind / teaser / full) hands a buyer a different slice of the living CIM.
+   The shareable URL is client-side: `${origin}/shared/:token`. When the deal
+   has no living CIM, the create form is replaced by a "generate a CIM first"
+   state so nothing renders a form that would 400. */
+const SHARE_ACCESS: { value: "blind" | "teaser" | "full"; label: string; hint: string }[] = [
+  { value: "blind", label: "Blind", hint: "Anonymous teaser — no identifying detail" },
+  { value: "teaser", label: "Teaser", hint: "Headline metrics, business stays masked" },
+  { value: "full", label: "Full CIM", hint: "Complete confidential memorandum" },
+];
+
+function ShareSheet({
+  open,
+  onClose,
+  dealTitle,
+  share,
+  livingCimId,
+}: {
+  open: boolean;
+  onClose: () => void;
+  dealTitle: string;
+  share: ReturnType<typeof useMobileShareLinks>;
+  livingCimId: number | null;
+}) {
+  const [accessLevel, setAccessLevel] = useState<"blind" | "teaser" | "full">("teaser");
+  const [requiresNda, setRequiresNda] = useState(true);
+  const [maxViews, setMaxViews] = useState("");
+  const [expiresInDays, setExpiresInDays] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<number | null>(null);
+
+  // Lock background scroll while the sheet is open (matches LearnSheet).
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [open]);
+
+  if (!open) return null;
+
+  const activeLinks = share.links.filter((l) => !l.revoked_at);
+  const canCreate = livingCimId != null;
+
+  const onCreate = async () => {
+    if (!canCreate || creating) return;
+    setCreateError(null);
+    setCreating(true);
+    try {
+      const parsedViews = maxViews.trim() ? Math.max(1, Math.floor(Number(maxViews))) : null;
+      const parsedDays = expiresInDays.trim() ? Math.max(1, Math.floor(Number(expiresInDays))) : null;
+      await share.createLink({
+        livingCimId,
+        accessLevel,
+        requiresNda,
+        maxViews: Number.isFinite(parsedViews as number) ? parsedViews : null,
+        expiresInDays: Number.isFinite(parsedDays as number) ? parsedDays : null,
+      });
+      // Reset the optional fields; keep access level + NDA for fast re-create.
+      setMaxViews("");
+      setExpiresInDays("");
+    } catch (e: any) {
+      setCreateError(e?.message || "Couldn’t create link");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const onCopy = (link: MobileShareLink) => {
+    const url = `${window.location.origin}/shared/${link.token}`;
+    const mark = () => { setCopiedId(link.id); setTimeout(() => setCopiedId((c) => (c === link.id ? null : c)), 1800); };
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(url).then(mark).catch(() => mark());
+    } else {
+      mark();
+    }
+  };
+
+  return (
+    <>
+      <div onClick={onClose} style={SH.scrim} aria-hidden="true" />
+      <div style={SH.sheet} role="dialog" aria-label={`Share ${dealTitle}`}>
+        <div style={SH.grab} />
+        <div style={SH.head}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="mb-mono" style={SH.kicker}>SHARE DATA ROOM</div>
+            <div style={SH.title}>{dealTitle}</div>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Close" style={SH.closeBtn}>
+            <X size={18} strokeWidth={2.4} color="var(--mb-ink-2)" />
+          </button>
+        </div>
+
+        <div style={SH.scroll}>
+          {/* Active links */}
+          <div className="mb-section-eyebrow" style={SH.sectionEyebrow}>ACTIVE LINKS</div>
+          {share.loading && activeLinks.length === 0 ? (
+            <div style={SH.stateNote}>
+              <Loader2 size={14} strokeWidth={2.4} color="var(--mb-ink-3)" style={S.spin} />
+              <span>Loading links…</span>
+            </div>
+          ) : share.error ? (
+            <div style={SH.errorBanner} role="alert">{share.error}</div>
+          ) : activeLinks.length === 0 ? (
+            <div style={SH.emptyNote}>No active links yet. Create one below to hand a buyer a controlled view.</div>
+          ) : (
+            <div className="mb-as-card" style={SH.linkList}>
+              {activeLinks.map((link, i) => (
+                <ShareLinkRow
+                  key={link.id}
+                  link={link}
+                  last={i === activeLinks.length - 1}
+                  copied={copiedId === link.id}
+                  onCopy={() => onCopy(link)}
+                  onRevoke={() => void share.revokeLink(link.id)}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Create */}
+          <div className="mb-section-eyebrow" style={{ ...SH.sectionEyebrow, marginTop: 22 }}>CREATE LINK</div>
+          {canCreate ? (
+            <div className="mb-as-card" style={SH.createCard}>
+              <div style={SH.fieldLabel}>Access level</div>
+              <div style={SH.accessRow}>
+                {SHARE_ACCESS.map((opt) => {
+                  const active = accessLevel === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setAccessLevel(opt.value)}
+                      style={{
+                        ...SH.accessChip,
+                        background: active ? "var(--mb-ink)" : "#fff",
+                        color: active ? "#fff" : "var(--mb-ink-1)",
+                        boxShadow: active ? "none" : "0 1px 3px rgba(0,0,0,0.06), inset 0 0 0 0.5px var(--mb-line-2)",
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <div style={SH.accessHint}>{SHARE_ACCESS.find((o) => o.value === accessLevel)?.hint}</div>
+
+              <button
+                type="button"
+                onClick={() => setRequiresNda((v) => !v)}
+                role="switch"
+                aria-checked={requiresNda}
+                style={SH.ndaRow}
+              >
+                <span style={SH.ndaIcon}>
+                  <ShieldCheck size={15} strokeWidth={2.2} color={requiresNda ? "var(--mb-accent-ink)" : "var(--mb-ink-4)"} />
+                </span>
+                <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                  <span style={SH.ndaTitle}>Require NDA</span>
+                  <span style={SH.ndaSub}>Viewer signs before the CIM unlocks</span>
+                </span>
+                <span style={{ ...SH.toggle, background: requiresNda ? "var(--mb-accent-2)" : "var(--mb-ink-5)" }}>
+                  <span style={{ ...SH.toggleDot, transform: requiresNda ? "translateX(16px)" : "translateX(0)" }} />
+                </span>
+              </button>
+
+              <div style={SH.numberRow}>
+                <label style={SH.numberField}>
+                  <span style={SH.numberLabel}><Eye size={12} strokeWidth={2.2} color="var(--mb-ink-3)" /> Max views</span>
+                  <input
+                    className="mb-mono"
+                    type="number"
+                    inputMode="numeric"
+                    min={1}
+                    placeholder="∞"
+                    value={maxViews}
+                    onChange={(e) => setMaxViews(e.target.value)}
+                    style={SH.numberInput}
+                  />
+                </label>
+                <label style={SH.numberField}>
+                  <span style={SH.numberLabel}><CalendarClock size={12} strokeWidth={2.2} color="var(--mb-ink-3)" /> Expires (days)</span>
+                  <input
+                    className="mb-mono"
+                    type="number"
+                    inputMode="numeric"
+                    min={1}
+                    placeholder="Never"
+                    value={expiresInDays}
+                    onChange={(e) => setExpiresInDays(e.target.value)}
+                    style={SH.numberInput}
+                  />
+                </label>
+              </div>
+
+              {createError && <div style={{ ...SH.errorBanner, marginTop: 12 }} role="alert">{createError}</div>}
+
+              <button
+                type="button"
+                onClick={() => void onCreate()}
+                disabled={creating}
+                style={{ ...SH.createButton, opacity: creating ? 0.6 : 1 }}
+              >
+                {creating
+                  ? <Loader2 size={15} strokeWidth={2.4} color="#fff" style={S.spin} />
+                  : <Link2 size={15} strokeWidth={2.3} color="#fff" />}
+                <span>{creating ? "Creating…" : "Create link"}</span>
+              </button>
+            </div>
+          ) : (
+            <div className="mb-as-card" style={SH.noCimCard}>
+              <div aria-hidden="true" style={SH.noCimIcon}>
+                <Sparkles size={22} strokeWidth={2} color="var(--mb-accent-ink)" />
+              </div>
+              <div style={SH.noCimTitle}>Generate a CIM first</div>
+              <div style={SH.noCimCopy}>
+                Share links hand a buyer a view of this deal&rsquo;s living CIM. Ask Yulia to build the confidential memorandum, then come back here to create blind, teaser, or full links.
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function ShareLinkRow({
+  link,
+  last,
+  copied,
+  onCopy,
+  onRevoke,
+}: {
+  link: MobileShareLink;
+  last: boolean;
+  copied: boolean;
+  onCopy: () => void;
+  onRevoke: () => void;
+}) {
+  const status = shareLinkStatus(link);
+  const meta = [
+    formatRealStatus(link.access_level),
+    link.requires_nda ? "NDA" : null,
+    `${link.view_count}${link.max_views != null ? `/${link.max_views}` : ""} views`,
+    shareExpiryLabel(link.expires_at),
+  ].filter(Boolean).join(" · ");
+  return (
+    <div style={{ ...SH.linkRow, borderBottom: last ? "none" : "0.5px solid var(--mb-line-2)" }}>
+      <span style={SH.linkIcon}>
+        <Link2 size={15} strokeWidth={2.2} color="var(--mb-accent-ink)" />
+      </span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={SH.linkTitle}>
+          {formatRealStatus(link.access_level)} link
+          <span style={{ ...SH.linkBadge, background: status.bg, color: status.color }}>{status.label}</span>
+        </div>
+        <div className="mb-mono" style={SH.linkMeta}>{meta}</div>
+      </div>
+      <div style={SH.linkActions}>
+        <button type="button" onClick={onCopy} aria-label="Copy link" style={SH.copyButton}>
+          {copied
+            ? <Check size={13} strokeWidth={2.6} color="var(--mb-accent-ink)" />
+            : <Copy size={13} strokeWidth={2.3} color="var(--mb-accent-ink)" />}
+          <span>{copied ? "Copied" : "Copy"}</span>
+        </button>
+        <button type="button" onClick={onRevoke} aria-label="Revoke link" style={SH.revokeButton}>
+          <Trash2 size={13} strokeWidth={2.3} color="var(--mb-danger-ink)" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function shareLinkStatus(link: MobileShareLink): { label: string; bg: string; color: string } {
+  if (link.revoked_at) return { label: "Revoked", bg: "var(--mb-card-2)", color: "var(--mb-ink-3)" };
+  if (link.expires_at && new Date(link.expires_at).getTime() < Date.now()) {
+    return { label: "Expired", bg: "var(--mb-warn-soft)", color: "var(--mb-warn-ink)" };
+  }
+  if (link.max_views != null && link.view_count >= link.max_views) {
+    return { label: "Maxed", bg: "var(--mb-warn-soft)", color: "var(--mb-warn-ink)" };
+  }
+  return { label: "Active", bg: "var(--mb-verdict-pursue-soft)", color: "var(--mb-verdict-pursue-ink)" };
+}
+
+function shareExpiryLabel(expiresAt: string | null): string | null {
+  if (!expiresAt) return null;
+  const ms = new Date(expiresAt).getTime() - Date.now();
+  if (Number.isNaN(ms)) return null;
+  if (ms <= 0) return "expired";
+  const days = Math.ceil(ms / 86400000);
+  return days <= 1 ? "expires <1d" : `expires ${days}d`;
 }
 
 /* Upload affordance + folder target picker. The picked folder is the
@@ -3400,6 +3739,38 @@ const S: Record<string, CSSProperties> = {
     boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
     cursor: "pointer",
   },
+  floatShareLink: {
+    position: "absolute",
+    top: "calc(env(safe-area-inset-top, 44px) + 16px)",
+    right: 56,
+    zIndex: 10,
+    minWidth: 32,
+    height: 32,
+    padding: "0 6px",
+    borderRadius: 999,
+    background: "rgba(255,255,255,0.82)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
+    border: "none",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+    cursor: "pointer",
+  },
+  floatShareBadge: {
+    minWidth: 16,
+    height: 16,
+    padding: "0 4px",
+    borderRadius: 999,
+    background: "var(--mb-accent-soft)",
+    color: "var(--mb-accent-ink)",
+    fontSize: 10,
+    fontWeight: 800,
+    lineHeight: "16px",
+    textAlign: "center",
+  },
   finderIntro: {
     padding: "calc(env(safe-area-inset-top, 44px) + 60px) 22px 18px",
   },
@@ -4061,4 +4432,132 @@ const S: Record<string, CSSProperties> = {
     flexShrink: 0,
     whiteSpace: "nowrap",
   },
+};
+
+/* Share bottom-sheet styling. Mirrors the V6Mobile account-sheet (scrim +
+   glass sheet + grab handle) and reuses the same --mb-* tokens / mono numbers
+   as the rest of the data room. */
+const SH: Record<string, CSSProperties> = {
+  scrim: { position: "fixed", inset: 0, zIndex: 9998, background: "rgba(0,0,0,0.28)" },
+  sheet: {
+    position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 9999,
+    maxHeight: "86vh",
+    display: "flex",
+    flexDirection: "column",
+    background: "linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.85))",
+    WebkitBackdropFilter: "blur(30px) saturate(190%)", backdropFilter: "blur(30px) saturate(190%)",
+    borderTop: "1px solid rgba(255,255,255,.7)", borderRadius: "22px 22px 0 0",
+    boxShadow: "0 -22px 54px -20px rgba(25,24,19,.42)",
+    padding: "10px 16px calc(env(safe-area-inset-bottom, 0px) + 16px)",
+  },
+  grab: { width: 38, height: 4, borderRadius: 2, background: "var(--mb-ink-5)", margin: "0 auto 10px", flexShrink: 0 },
+  head: { display: "flex", alignItems: "flex-start", gap: 10, padding: "2px 6px 12px", flexShrink: 0 },
+  kicker: { fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", color: "var(--mb-ink-3)" },
+  title: {
+    fontFamily: "var(--mb-font-display)", fontWeight: 800, fontSize: 20, letterSpacing: "-0.4px",
+    color: "var(--mb-ink)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+  },
+  closeBtn: {
+    flexShrink: 0, width: 30, height: 30, borderRadius: "50%", border: "none",
+    background: "var(--mb-card-2)", display: "grid", placeItems: "center", cursor: "pointer",
+  },
+  scroll: { overflowY: "auto", WebkitOverflowScrolling: "touch", paddingBottom: 4 },
+  sectionEyebrow: { padding: "0 4px 8px" },
+  stateNote: {
+    display: "flex", alignItems: "center", gap: 8, padding: "12px 14px",
+    fontSize: 13, color: "var(--mb-ink-3)", fontWeight: 600,
+  },
+  emptyNote: {
+    padding: "14px 16px", fontSize: 13.5, lineHeight: 1.45, color: "var(--mb-ink-3)",
+    background: "var(--mb-card-2)", borderRadius: 14, textWrap: "pretty",
+  },
+  errorBanner: {
+    borderRadius: 14, padding: "11px 14px", background: "var(--mb-danger-soft)", color: "var(--mb-danger-ink)",
+    fontSize: 13, fontWeight: 600, lineHeight: 1.4, textWrap: "pretty",
+    boxShadow: "inset 0 0 0 0.5px rgba(216,139,132,0.4)",
+  },
+  linkList: { padding: "2px 14px" },
+  linkRow: { display: "flex", alignItems: "center", gap: 10, padding: "12px 0" },
+  linkIcon: {
+    flexShrink: 0, width: 34, height: 34, borderRadius: 10, background: "var(--mb-accent-soft)",
+    display: "grid", placeItems: "center",
+  },
+  linkTitle: {
+    fontSize: 14.5, fontWeight: 700, color: "var(--mb-ink)", letterSpacing: "-0.2px",
+    display: "flex", alignItems: "center", gap: 7, minWidth: 0,
+  },
+  linkBadge: {
+    flexShrink: 0, padding: "1.5px 7px", borderRadius: 999, fontSize: 9.5, fontWeight: 800,
+    letterSpacing: "0.02em", textTransform: "uppercase", lineHeight: 1.4,
+  },
+  linkMeta: {
+    fontSize: 11.5, color: "var(--mb-ink-3)", marginTop: 3,
+    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+  },
+  linkActions: { display: "inline-flex", alignItems: "center", gap: 6, flexShrink: 0 },
+  copyButton: {
+    border: "none", borderRadius: 999, padding: "6px 11px", background: "var(--mb-accent-soft)",
+    color: "var(--mb-accent-ink)", fontSize: 12, fontWeight: 760, letterSpacing: "-0.1px",
+    cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 5, whiteSpace: "nowrap",
+  },
+  revokeButton: {
+    border: "none", borderRadius: 999, width: 30, height: 30, background: "var(--mb-danger-soft)",
+    display: "grid", placeItems: "center", cursor: "pointer", flexShrink: 0,
+  },
+  createCard: { padding: "16px 16px 16px" },
+  fieldLabel: {
+    fontSize: 12.5, fontWeight: 700, color: "var(--mb-ink-2)", letterSpacing: "-0.1px", marginBottom: 8,
+  },
+  accessRow: { display: "flex", gap: 8 },
+  accessChip: {
+    flex: 1, border: "none", borderRadius: 999, padding: "9px 6px", fontSize: 13, fontWeight: 700,
+    letterSpacing: "-0.1px", cursor: "pointer", whiteSpace: "nowrap",
+  },
+  accessHint: { fontSize: 12, color: "var(--mb-ink-3)", marginTop: 8, lineHeight: 1.4, textWrap: "pretty" },
+  ndaRow: {
+    width: "100%", display: "flex", alignItems: "center", gap: 11, marginTop: 16, padding: "0",
+    border: "none", background: "transparent", cursor: "pointer",
+  },
+  ndaIcon: {
+    flexShrink: 0, width: 32, height: 32, borderRadius: 9, background: "var(--mb-card-2)",
+    display: "grid", placeItems: "center",
+  },
+  ndaTitle: { display: "block", fontSize: 14, fontWeight: 700, color: "var(--mb-ink)", letterSpacing: "-0.2px" },
+  ndaSub: { display: "block", fontSize: 12, color: "var(--mb-ink-3)", marginTop: 1, lineHeight: 1.3 },
+  toggle: {
+    flexShrink: 0, width: 38, height: 22, borderRadius: 999, position: "relative",
+    transition: "background 0.18s ease",
+  },
+  toggleDot: {
+    position: "absolute", top: 2, left: 2, width: 18, height: 18, borderRadius: "50%",
+    background: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.25)", transition: "transform 0.18s ease",
+  },
+  numberRow: { display: "flex", gap: 10, marginTop: 16 },
+  numberField: { flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 6 },
+  numberLabel: {
+    display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11.5, fontWeight: 700,
+    color: "var(--mb-ink-3)", letterSpacing: "-0.05px",
+  },
+  numberInput: {
+    width: "100%", boxSizing: "border-box", border: "none", borderRadius: 11, padding: "10px 12px",
+    background: "var(--mb-card-2)", color: "var(--mb-ink)", fontSize: 14, fontWeight: 700,
+    outline: "none", boxShadow: "inset 0 0 0 0.5px var(--mb-line-2)",
+  },
+  createButton: {
+    width: "100%", marginTop: 18, border: "none", borderRadius: 999, padding: "13px 16px",
+    background: "var(--mb-ink)", color: "#fff", fontSize: 14.5, fontWeight: 780, letterSpacing: "-0.1px",
+    cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
+  },
+  noCimCard: {
+    padding: "22px 20px 20px", display: "flex", flexDirection: "column", alignItems: "flex-start",
+  },
+  noCimIcon: {
+    width: 46, height: 46, borderRadius: 14, background: "var(--mb-accent-soft)",
+    display: "grid", placeItems: "center", marginBottom: 12,
+  },
+  noCimTitle: {
+    fontFamily: "var(--mb-font-display)", fontWeight: 800, fontSize: 18, letterSpacing: "-0.4px",
+    color: "var(--mb-ink)",
+  },
+  noCimCopy: { fontSize: 13.5, lineHeight: 1.45, color: "var(--mb-ink-3)", marginTop: 8, textWrap: "pretty" },
 };
