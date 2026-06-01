@@ -378,11 +378,13 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
   const onOpenDeal = (id: string, title: string) => {
     setView({ kind: "detail", dealId: id, dealTitle: title });
   };
-  // Deal Team (DT-2) — only reachable with a real numeric deal id. Detail
-  // threads its parsed numeric id up through onOpenTeam; sample/anon deals
-  // never call this, so the team surface stays unreachable without a real deal.
-  const onOpenTeam = (rawId: number, title: string) => {
-    setView({ kind: "deal-team", tab: activeTab, dealRawId: rawId, dealTitle: title });
+  // Deal Team (DT-2) — Detail threads its parsed numeric id up through
+  // onOpenTeam. Real deals carry a numeric id and get the live participants +
+  // messages backend. Sample/dev-bypass deals pass null; the team screen then
+  // renders sample collaboration data so the surface is reviewable in dev,
+  // consistent with the rest of the mobile sample-data experience.
+  const onOpenTeam = (rawId: number | null, title: string) => {
+    setView({ kind: "deal-team", tab: activeTab, dealRawId: rawId ?? undefined, dealTitle: title });
   };
   const onOpenWatching = () => setView({ kind: "watching" });
   const onAvatarClick = () => {
@@ -679,18 +681,27 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           onUpdate={(patch) => setView(prev => prev.kind === "analysis" ? { ...prev, ...patch } : prev)}
         />
       )}
-      {view.kind === "deal-team" && view.dealRawId != null && (
+      {view.kind === "deal-team" && (
         <MobileDealTeamScreen
-          dealId={view.dealRawId}
+          // Real deals carry a numeric id → live participants/messages. Sample
+          // and dev-bypass deals have no numeric id → null, which switches the
+          // screen to sample collaboration data (reviewable in dev).
+          dealId={view.dealRawId ?? null}
           dealTitle={view.dealTitle ?? "Deal"}
           userId={user?.id ?? null}
           userEmail={user?.email ?? null}
           initials={initials}
           onAvatarClick={onAvatarClick}
-          // Back to the deal it belongs to. dealRawId stringifies into the
-          // detail's dealId (Detail re-parses the numeric id), so this works
-          // even after a reload restored the team view from the URL hash.
-          onBack={() => onOpenDeal(String(view.dealRawId), view.dealTitle ?? "Deal")}
+          // Back to the deal it belongs to. For a real deal, dealRawId
+          // stringifies into the detail's dealId (Detail re-parses the numeric
+          // id), so this works even after a reload restored the team view from
+          // the URL hash. Sample deals have no numeric id to reconstruct the
+          // detail route from, so fall back to the current tab.
+          onBack={() =>
+            view.dealRawId != null
+              ? onOpenDeal(String(view.dealRawId), view.dealTitle ?? "Deal")
+              : setView({ kind: "tab", tab: activeTab })
+          }
         />
       )}
       <TabBar active={activeTab} onChange={onTabChange} onChat={onChat} />
@@ -878,9 +889,12 @@ function emptyMobileHashState(): ReturnType<typeof readMobileHashState> {
 }
 
 function mobileViewFromHash(state: ReturnType<typeof readMobileHashState>): MobileView {
-  // Deal Team needs a real numeric deal id to fetch participants/messages. If a
-  // restored / hand-edited hash names the view without one, fall back to the tab
-  // rather than rendering a blank screen.
+  // Deal Team with a real numeric deal id fetches live participants/messages;
+  // without one it renders sample data (dev/sample deals). Sample mode has no
+  // durable URL carrier (drid is only written for real deals), so a restored /
+  // hand-edited deal-team hash with no drid can't be rehydrated into the sample
+  // deal it came from — fall back to the tab rather than a contextless screen.
+  // In-session sample navigation goes through setView directly, not this path.
   if (state.view === "deal-team" && state.dealRawId == null) {
     return { kind: "tab", tab: state.tab };
   }

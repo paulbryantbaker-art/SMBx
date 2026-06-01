@@ -12,8 +12,15 @@
                   rendered messages, and hides for read-only seats (canPost).
 
    Pure data comes from useDealTeam(dealId, userId) — the same hook the desktop
-   surface uses. The screen is only reachable with a real numeric dealId; the
-   anon / sample context never routes here.
+   surface uses, whenever there is a real numeric dealId.
+
+   Dev / sample deals have no numeric id (dealId === null). Rather than hide the
+   surface, the screen renders the SAME Team / Messages UI populated with sample
+   collaboration data (a small fixed team + a short threaded conversation with an
+   @mention and a reply), so reviewers can see deal-team chat in dev — consistent
+   with the rest of the mobile app's sample-data experience. The invite form and
+   compose box render but are inert in sample mode, with an honest "Sample" note.
+   PRODUCTION is unaffected: real deals always have numeric ids → live path.
 
    Numbers in mono. No new deps beyond lucide-react (already used on mobile). */
 
@@ -106,14 +113,58 @@ export function MobileDealTeamScreen({
   onBack,
   onAvatarClick,
 }: {
-  /** Real numeric deal id — the screen is only reachable with one. */
-  dealId: number;
+  /** Real numeric deal id for the live participants/messages backend, or null
+   *  for a sample/dev deal (renders sample collaboration data instead). */
+  dealId: number | null;
   dealTitle: string;
   /** Signed-in user id (drives owner-only controls + canPost). */
   userId?: number | null;
   /** Current-user email — marks "You" on your bubbles + excludes you from @mentions. */
   userEmail?: string | null;
   /** Header avatar initials. */
+  initials?: string;
+  onBack: () => void;
+  onAvatarClick?: () => void;
+}) {
+  // Sample / dev deal (no numeric id): render the same UI with sample data so
+  // the surface is reviewable in dev. Real deals fall through to the live hook.
+  if (dealId == null) {
+    return (
+      <DemoDealTeamScreen
+        dealTitle={dealTitle}
+        initials={initials}
+        onBack={onBack}
+        onAvatarClick={onAvatarClick}
+      />
+    );
+  }
+
+  return (
+    <LiveDealTeamScreen
+      dealId={dealId}
+      dealTitle={dealTitle}
+      userId={userId}
+      userEmail={userEmail}
+      initials={initials}
+      onBack={onBack}
+      onAvatarClick={onAvatarClick}
+    />
+  );
+}
+
+function LiveDealTeamScreen({
+  dealId,
+  dealTitle,
+  userId,
+  userEmail,
+  initials,
+  onBack,
+  onAvatarClick,
+}: {
+  dealId: number;
+  dealTitle: string;
+  userId?: number | null;
+  userEmail?: string | null;
   initials?: string;
   onBack: () => void;
   onAvatarClick?: () => void;
@@ -165,6 +216,263 @@ export function MobileDealTeamScreen({
       ) : (
         <MessagesSection team={team} currentUserEmail={userEmail ?? undefined} />
       )}
+    </div>
+  );
+}
+
+/* ─── Demo / sample Deal Team (no real deal id) ────────────────
+
+   Renders the exact Team / Messages UI — same chrome, Segment, RoleBadge,
+   bubbles, role badges, times, and @Name highlight — but populated from a
+   fixed sample team + thread instead of the live hook. Invite + compose are
+   visible (so the surface reads complete) but inert, with an honest note that
+   this is sample data. Reachable only in dev/sample mode; production deals
+   always have a numeric id and use the live path above. */
+
+interface DemoMember {
+  name: string;
+  email: string;
+  role: string;
+  accessLevel: DealTeamAccessLevel;
+  isOwnerRow?: boolean;
+}
+
+interface DemoMessage {
+  id: number;
+  parentId: number | null;
+  name: string;
+  role: string;
+  mine?: boolean;
+  /** Minutes ago, turned into a real timestamp at render so timeAgo() works. */
+  minutesAgo: number;
+  content: string;
+}
+
+const DEMO_MEMBERS: DemoMember[] = [
+  { name: "You", email: "you@smbx.ai", role: "owner", accessLevel: "full", isOwnerRow: true },
+  { name: "Jordan Lee", email: "jordan.lee@harborlaw.com", role: "attorney", accessLevel: "full" },
+  { name: "Priya Shah", email: "priya.shah@shahcpa.com", role: "cpa", accessLevel: "comment" },
+  { name: "Marcus Reed", email: "marcus.reed@firstcapital.com", role: "lender", accessLevel: "comment" },
+  { name: "Dana Whitfield", email: "dana@whitfieldbrokers.com", role: "counterparty", accessLevel: "read" },
+];
+
+const DEMO_MESSAGES: DemoMessage[] = [
+  {
+    id: 1, parentId: null, name: "You", role: "owner", mine: true, minutesAgo: 182,
+    content: "Kicking off the deal team here. Working file is the FY recast + the SBA structure. @Priya Shah can you sanity-check the add-backs before we send anything to the lender?",
+  },
+  {
+    id: 2, parentId: 1, name: "Priya Shah", role: "cpa", minutesAgo: 168,
+    content: "On it. The owner-comp and one-time legal add-backs look supportable; the vehicle add-back I want to tie to the depreciation schedule before we rely on it.",
+  },
+  {
+    id: 3, parentId: null, name: "Marcus Reed", role: "lender", minutesAgo: 95,
+    content: "Once the recast is locked I can run it against a 10-year 7(a). Early read is DSCR clears comfortably at the current asking, but I'll need the normalized SDE Priya signs off on.",
+  },
+  {
+    id: 4, parentId: null, name: "Jordan Lee", role: "attorney", minutesAgo: 47,
+    content: "Flagging that the lease assignment will need landlord consent — that's usually the long pole. I'll draft the LOI scaffold so structure and contingencies are spelled out before anyone signs.",
+  },
+  {
+    id: 5, parentId: null, name: "Dana Whitfield", role: "counterparty", minutesAgo: 12,
+    content: "Seller is motivated and open to a short transition period. Happy to get you the trailing-twelve P&L this week so your team can verify against the recast.",
+  },
+];
+
+function DemoDealTeamScreen({
+  dealTitle,
+  initials,
+  onBack,
+  onAvatarClick,
+}: {
+  dealTitle: string;
+  initials?: string;
+  onBack: () => void;
+  onAvatarClick?: () => void;
+}) {
+  const [section, setSection] = useState<Section>("team");
+  const memberCount = DEMO_MEMBERS.length;
+
+  return (
+    <div className="mb-fade-up" style={{ ...T.page, position: "relative" }}>
+      <button type="button" onClick={onBack} aria-label="Back" style={T.floatBack}>
+        <MobileIcon name="back" size={14} c="var(--mb-ink-1)" />
+      </button>
+      {onAvatarClick && (
+        <button type="button" onClick={onAvatarClick} aria-label="Account" style={T.floatAvatar}>
+          <span style={T.floatAvatarText}>{initials || "JM"}</span>
+        </button>
+      )}
+
+      <div style={T.breadcrumb}>
+        <span style={T.breadcrumbLink}>{dealTitle}</span>
+        <MobileIcon name="chevron" c="var(--mb-ink-4)" size={9} />
+        <span>Deal team</span>
+      </div>
+
+      <div style={T.hero}>
+        <h1 style={T.h1}>Deal team</h1>
+        <div style={T.heroSub}>{dealTitle}</div>
+        <div style={T.heroMeta}>
+          <span className="mb-mono" style={T.heroCount}>{memberCount} PEOPLE</span>
+          <span style={T.heroDot} aria-hidden="true">·</span>
+          <span style={T.heroRole}>You own it</span>
+        </div>
+      </div>
+
+      {/* Honest sample banner — this is demo data, not a live deal team. */}
+      <div style={T.sampleBanner} role="note">
+        <span className="mb-mono" style={T.sampleBannerKicker}>SAMPLE MODE</span>
+        <span style={T.sampleBannerText}>
+          Sample deal team. Sign in with a real deal for live collaboration — invite and messaging are inactive here.
+        </span>
+      </div>
+
+      {/* Segmented control — Team / Messages */}
+      <div style={T.segmentRow}>
+        <Segment label="Team" count={memberCount} active={section === "team"} onClick={() => setSection("team")} />
+        <Segment label="Messages" count={DEMO_MESSAGES.length} active={section === "messages"} onClick={() => setSection("messages")} />
+      </div>
+
+      {section === "team" ? <DemoTeamSection dealTitle={dealTitle} /> : <DemoMessagesSection />}
+    </div>
+  );
+}
+
+function DemoTeamSection({ dealTitle }: { dealTitle: string }) {
+  const [showInvite, setShowInvite] = useState(false);
+
+  return (
+    <div style={T.sectionPad}>
+      <button
+        type="button"
+        onClick={() => setShowInvite(v => !v)}
+        style={{ ...T.inviteToggle, ...(showInvite ? T.inviteToggleOpen : null) }}
+      >
+        <UserPlus size={16} strokeWidth={2.2} color={showInvite ? "var(--mb-ink-2)" : "var(--mb-accent-ink)"} />
+        <span>{showInvite ? "Close invite" : "Invite to this deal"}</span>
+      </button>
+
+      {showInvite && (
+        <div className="mb-as-card" style={T.inviteCard}>
+          <label style={T.fieldLabel} htmlFor="mdt-demo-invite-email">Email</label>
+          <input
+            id="mdt-demo-invite-email"
+            type="email"
+            inputMode="email"
+            autoComplete="off"
+            autoCapitalize="none"
+            placeholder={`Invite to ${dealTitle}`}
+            style={T.input}
+            disabled
+          />
+          <div style={T.fieldRow}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <label style={T.fieldLabel} htmlFor="mdt-demo-invite-role">Role</label>
+              <div style={T.selectWrap}>
+                <select id="mdt-demo-invite-role" style={T.select} disabled defaultValue="consultant">
+                  {DEAL_TEAM_ROLES.map(r => (
+                    <option key={r} value={r}>{roleLabel(r)}</option>
+                  ))}
+                </select>
+                <span aria-hidden="true" style={T.selectChevron}><MobileIcon name="chevron" size={11} c="var(--mb-ink-3)" /></span>
+              </div>
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <label style={T.fieldLabel} htmlFor="mdt-demo-invite-access">Access</label>
+              <div style={T.selectWrap}>
+                <select id="mdt-demo-invite-access" style={T.select} disabled defaultValue="comment">
+                  {DEAL_TEAM_ACCESS_LEVELS.map(a => (
+                    <option key={a} value={a}>{ACCESS_LABELS[a]}</option>
+                  ))}
+                </select>
+                <span aria-hidden="true" style={T.selectChevron}><MobileIcon name="chevron" size={11} c="var(--mb-ink-3)" /></span>
+              </div>
+            </div>
+          </div>
+          <button type="button" disabled style={{ ...T.primaryBtn, opacity: 0.55, cursor: "default" }}>
+            Send invitation
+          </button>
+          <p style={T.inviteHint}>Sample — sign in with a real deal to send invites.</p>
+        </div>
+      )}
+
+      <div style={T.memberList}>
+        {DEMO_MEMBERS.map(m => (
+          <div key={m.email} style={T.memberRow}>
+            <span style={m.isOwnerRow ? T.avatarOwner : T.avatar}>{initialsFor(m.name, m.email)}</span>
+            <span style={T.memberText}>
+              <strong style={T.memberName}>{m.name}</strong>
+              <span style={T.memberMeta}>
+                {m.email}
+                {!m.isOwnerRow && ` · ${ACCESS_LABELS[m.accessLevel]}`}
+              </span>
+            </span>
+            <RoleBadge role={m.role} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DemoMessagesSection() {
+  // Turn relative minutes into stable timestamps once per mount so timeAgo()
+  // renders "Xh ago" / "Xm ago" exactly like the live thread.
+  const now = useRef(Date.now()).current;
+  const stamp = (minutesAgo: number) => new Date(now - minutesAgo * 60_000).toISOString();
+  const roots = DEMO_MESSAGES.filter(m => m.parentId == null);
+  const repliesOf = (id: number) => DEMO_MESSAGES.filter(m => m.parentId === id);
+
+  return (
+    <div style={T.chatSectionPad}>
+      <div style={T.chatScroll}>
+        {roots.map(root => (
+          <div key={root.id} style={T.threadBlock}>
+            <DemoBubble message={root} createdAt={stamp(root.minutesAgo)} />
+            {repliesOf(root.id).length > 0 && (
+              <div style={T.replyStack}>
+                {repliesOf(root.id).map(reply => (
+                  <DemoBubble key={reply.id} message={reply} createdAt={stamp(reply.minutesAgo)} reply />
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Inert compose — looks live, but disabled in sample mode. */}
+      <div style={T.composeWrap}>
+        <div style={T.composeRow}>
+          <div style={T.composeField}>
+            <textarea
+              placeholder="Sample — sign in with a real deal to message your team"
+              rows={1}
+              style={{ ...T.textarea, opacity: 0.7 }}
+              disabled
+            />
+          </div>
+          <button type="button" aria-label="Send message" disabled style={{ ...T.sendBtn, opacity: 0.5, cursor: "default" }}>
+            <span style={{ transform: "rotate(90deg)", display: "grid", placeItems: "center" }}><MobileIcon name="back" size={15} c="#fff" /></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DemoBubble({ message, createdAt, reply = false }: { message: DemoMessage; createdAt: string; reply?: boolean }) {
+  const mine = !!message.mine;
+  return (
+    <div style={{ ...T.bubbleWrap, alignItems: mine ? "flex-end" : "flex-start" }}>
+      <div style={{ ...T.bubbleMeta, flexDirection: mine ? "row-reverse" : "row" }}>
+        <strong style={T.bubbleName}>{mine ? "You" : message.name}</strong>
+        <RoleBadge role={message.role} />
+        <span style={T.bubbleTime}>{timeAgo(createdAt)}</span>
+      </div>
+      <div style={{ ...T.bubble, ...(mine ? T.bubbleMine : T.bubbleOther), ...(reply ? T.bubbleReply : null) }}>
+        {renderWithMentions(message.content, mine)}
+      </div>
     </div>
   );
 }
@@ -1081,4 +1389,13 @@ const T: Record<string, CSSProperties> = {
     marginTop: 6, padding: "14px 16px", borderRadius: 16,
     background: "var(--mb-card-2)", fontSize: 13.5, lineHeight: 1.45, color: "var(--mb-ink-3)", textWrap: "pretty",
   },
+
+  // sample-mode banner (demo deal team only — honest "this is sample data")
+  sampleBanner: {
+    margin: "0 22px 14px", padding: "11px 14px", borderRadius: 14,
+    background: "var(--mb-card-2)", boxShadow: "inset 0 0 0 0.5px var(--mb-line-2)",
+    display: "flex", flexDirection: "column", gap: 4,
+  },
+  sampleBannerKicker: { fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: "var(--mb-ink-3)" },
+  sampleBannerText: { fontSize: 12.5, lineHeight: 1.4, color: "var(--mb-ink-2)", textWrap: "pretty" },
 };

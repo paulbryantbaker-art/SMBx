@@ -63,9 +63,11 @@ interface DetailProps {
     label: string;
     prompt: string;
   }) => void;
-  /** Open the Deal Team screen for this deal. Only meaningful with a real
-      numeric deal id (parsed from dealId); sample/anon deals omit the entry. */
-  onOpenTeam?: (rawId: number, dealTitle: string) => void;
+  /** Open the Deal Team screen for this deal. `rawId` is the parsed numeric
+      deal id for a real backend deal, or null for a sample/anon deal — the
+      team screen renders sample collaboration data in that case so reviewers
+      can see it in dev. */
+  onOpenTeam?: (rawId: number | null, dealTitle: string) => void;
 }
 
 interface MobileDealBrief {
@@ -360,7 +362,7 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
                 color: watched ? "#fff" : "var(--mb-accent-ink)",
               }}
             >{watched ? "✓ Watching" : "+ Watch"}</button>
-            {numericId !== null && onOpenTeam && (
+            {onOpenTeam && (
               <button
                 type="button"
                 onClick={() => onOpenTeam(numericId, dealTitle)}
