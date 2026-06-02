@@ -254,6 +254,48 @@ collaborationRouter.post('/deal-requests/:participantId/decline', async (req, re
   }
 });
 
+// Respond to MY pending request for a specific deal. Drives the notification
+// bell's inline Accept/Decline — a deal_request notification carries deal_id,
+// not the participant id, so we key on (deal_id, me, accepted_at IS NULL).
+collaborationRouter.post('/deals/:dealId/request/accept', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const dealId = parseInt(req.params.dealId, 10);
+    const [p] = await sql`
+      UPDATE deal_participants SET accepted_at = NOW()
+      WHERE deal_id = ${dealId} AND user_id = ${userId} AND accepted_at IS NULL
+      RETURNING id, role, invited_by
+    `;
+    if (!p) return res.status(404).json({ error: 'No pending request' });
+    await logActivity(dealId, userId, 'joined', 'participant', p.id, { role: p.role });
+    if (p.invited_by) {
+      const [me] = await sql`SELECT display_name FROM users WHERE id = ${userId}`.catch(() => [null]);
+      await createNotification({ userId: p.invited_by, dealId, type: 'deal_request_accepted', title: `${me?.display_name || 'A participant'} joined your deal`, actionUrl: `/#mode=pipeline&tab=deal-team-${dealId}` });
+    }
+    return res.json({ ok: true, dealId });
+  } catch (err: any) {
+    console.error('accept deal request (by deal) error:', err.message);
+    return res.status(500).json({ error: 'Failed to accept' });
+  }
+});
+
+collaborationRouter.post('/deals/:dealId/request/decline', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const dealId = parseInt(req.params.dealId, 10);
+    const [p] = await sql`
+      DELETE FROM deal_participants
+      WHERE deal_id = ${dealId} AND user_id = ${userId} AND accepted_at IS NULL
+      RETURNING id
+    `;
+    if (!p) return res.status(404).json({ error: 'No pending request' });
+    return res.json({ ok: true });
+  } catch (err: any) {
+    console.error('decline deal request (by deal) error:', err.message);
+    return res.status(500).json({ error: 'Failed to decline' });
+  }
+});
+
 // ─── Remove participant ──────────────────────────────────────
 
 collaborationRouter.delete('/deals/:dealId/participants/:participantId', async (req, res) => {

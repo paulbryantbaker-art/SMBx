@@ -15,6 +15,7 @@ interface Props {
   unreadCount: number;
   onRow: (n: AppNotification) => void;
   onMarkAllRead: () => void;
+  onRespondToDealRequest: (n: AppNotification, action: "accept" | "decline") => void;
 }
 
 export function NotificationsSheet({
@@ -24,6 +25,7 @@ export function NotificationsSheet({
   unreadCount,
   onRow,
   onMarkAllRead,
+  onRespondToDealRequest,
 }: Props) {
   if (!open) return null;
   return (
@@ -48,6 +50,39 @@ export function NotificationsSheet({
           ) : (
             notifications.map((n) => {
               const unread = !n.read_at;
+              // Deal requests are actionable inline (Accept / Decline) — a div,
+              // since the action controls are nested buttons.
+              if (n.type === "deal_request") {
+                const responded = n._responded;
+                return (
+                  <div key={n.id} style={{ ...S.row, ...(unread ? S.rowUnread : null) }}>
+                    <span style={{ ...S.dot, background: unread ? "#C0562F" : "transparent" }} aria-hidden="true" />
+                    <div style={S.body}>
+                      <div style={{ ...S.rowTitle, fontWeight: unread ? 700 : 600, color: unread ? "var(--mb-ink)" : "var(--mb-ink-2)" }}>
+                        {n.title}
+                      </div>
+                      {responded ? (
+                        <div style={{ ...S.rowSub, WebkitLineClamp: 1, color: responded === "accepted" ? "var(--mb-accent-2)" : "var(--mb-ink-3)", fontWeight: 600 }}>
+                          {responded === "accepted" ? "✓ Joined the deal" : "Declined"}
+                        </div>
+                      ) : (
+                        <>
+                          {n.body && <div style={S.rowSub}>{n.body}</div>}
+                          <div style={{ display: "flex", gap: 8, marginTop: 9 }}>
+                            <button type="button" style={S.accept} onClick={() => onRespondToDealRequest(n, "accept")}>
+                              Accept
+                            </button>
+                            <button type="button" style={S.decline} onClick={() => onRespondToDealRequest(n, "decline")}>
+                              Decline
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    <span style={S.time}>{notifTimeAgo(n.created_at)}</span>
+                  </div>
+                );
+              }
               return (
                 <button
                   key={n.id}
@@ -120,4 +155,12 @@ const S: Record<string, CSSProperties> = {
     display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
   },
   time: { flex: "none", fontFamily: "var(--mb-font-mono)", fontSize: 11, color: "var(--mb-ink-4)", marginTop: 1 },
+  accept: {
+    border: 0, borderRadius: 10, padding: "7px 16px", background: "var(--mb-accent-2, #10E060)",
+    color: "#00210F", fontFamily: "var(--mb-font-display)", fontSize: 13, fontWeight: 700, cursor: "pointer",
+  },
+  decline: {
+    borderRadius: 10, padding: "7px 16px", background: "transparent", color: "var(--mb-ink-2)",
+    border: "1px solid var(--mb-ink-5)", fontFamily: "var(--mb-font-display)", fontSize: 13, fontWeight: 600, cursor: "pointer",
+  },
 };

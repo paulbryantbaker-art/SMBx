@@ -403,7 +403,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
   // anon / dev-bypass have no token, so /api/notifications would 401. The
   // bell + sheet are hidden in that case (onNotif left undefined below).
   const notifEnabled = !!user && !DEV_AUTH_BYPASS;
-  const { notifications, unreadCount, markRead, markAllRead, refresh: refreshNotifs } =
+  const { notifications, unreadCount, markRead, markAllRead, refresh: refreshNotifs, respondToDealRequest } =
     useNotifications(notifEnabled);
 
   // Resolve a notification's action_url (a desktop V6 hash route like
@@ -734,6 +734,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
         unreadCount={unreadCount}
         onRow={resolveNotifNav}
         onMarkAllRead={markAllRead}
+        onRespondToDealRequest={respondToDealRequest}
       />
 
       {/* Account sheet — Liquid-Glass bottom sheet with Sign out / preview. */}

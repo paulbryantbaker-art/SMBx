@@ -28,7 +28,7 @@ interface Props {
 }
 
 export default function V6NotificationBell({ onNavigate }: Props) {
-  const { notifications, unreadCount, markRead, markAllRead, refresh } = useNotifications();
+  const { notifications, unreadCount, markRead, markAllRead, refresh, respondToDealRequest } = useNotifications();
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
 
@@ -95,6 +95,49 @@ export default function V6NotificationBell({ onNavigate }: Props) {
               ) : (
                 notifications.map(n => {
                   const unread = !n.read_at;
+                  // A deal request is actionable inline (Accept / Decline). Render
+                  // it as a div — the action controls are buttons, and buttons
+                  // can't nest inside a button row.
+                  if (n.type === 'deal_request') {
+                    const responded = n._responded;
+                    return (
+                      <div key={n.id} className={`wknotif-row${unread ? ' unread' : ''}`} role="menuitem">
+                        {unread && <span className="wknotif-dot" aria-hidden="true" />}
+                        <div className="wknotif-body">
+                          <div className="wknotif-row-title">{n.title}</div>
+                          {responded ? (
+                            <div
+                              className="wknotif-row-sub"
+                              style={{ color: responded === 'accepted' ? 'var(--cta, #10E060)' : 'var(--ink-3, #9a968c)', fontWeight: 600 }}
+                            >
+                              {responded === 'accepted' ? '✓ Joined the deal' : 'Declined'}
+                            </div>
+                          ) : (
+                            <>
+                              {n.body && <div className="wknotif-row-sub">{n.body}</div>}
+                              <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                                <button
+                                  type="button"
+                                  onClick={() => respondToDealRequest(n, 'accept')}
+                                  style={{ background: 'var(--cta, #10E060)', color: '#00210F', border: 'none', borderRadius: 8, padding: '5px 14px', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}
+                                >
+                                  Accept
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => respondToDealRequest(n, 'decline')}
+                                  style={{ background: 'transparent', color: 'var(--ink-2, #55524c)', border: '1px solid var(--line, #e3e0d8)', borderRadius: 8, padding: '5px 14px', fontWeight: 600, fontSize: 12, cursor: 'pointer' }}
+                                >
+                                  Decline
+                                </button>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                        <span className="wknotif-time">{notifTimeAgo(n.created_at)}</span>
+                      </div>
+                    );
+                  }
                   return (
                     <button
                       key={n.id}

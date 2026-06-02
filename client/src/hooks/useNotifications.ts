@@ -23,6 +23,9 @@ export interface AppNotification {
   action_url: string | null;
   read_at: string | null;
   created_at: string;
+  /** Client-only: set after the user accepts/declines an inline deal_request,
+   *  so the row shows a resolved label instead of the action buttons. */
+  _responded?: 'accepted' | 'declined';
 }
 
 const POLL_MS = 30000;
@@ -44,7 +47,15 @@ export function useNotifications(enabled = true) {
       const data = await res.json();
       // A local mutation happened mid-flight → drop this stale snapshot.
       if (stamp !== mutationRef.current) return;
-      setNotifications(Array.isArray(data.notifications) ? data.notifications : []);
+      const incoming: AppNotification[] = Array.isArray(data.notifications) ? data.notifications : [];
+      setNotifications(prev => {
+        // Preserve a locally-resolved deal_request across polls — the server row
+        // persists after accept/decline, and we don't want the buttons to reappear.
+        const responded = new Map(prev.filter(n => n._responded).map(n => [n.id, n._responded!]));
+        return responded.size
+          ? incoming.map(n => (responded.has(n.id) ? { ...n, _responded: responded.get(n.id) } : n))
+          : incoming;
+      });
       setUnreadCount(typeof data.unreadCount === 'number' ? data.unreadCount : 0);
     } catch {
       /* network blip — keep last known state, next poll retries */
@@ -90,7 +101,42 @@ export function useNotifications(enabled = true) {
     }
   }, []);
 
-  return { notifications, unreadCount, loaded, refresh, markRead, markAllRead };
+  // Accept / decline an in-app deal request inline from the bell. The
+  // deal_request notification carries deal_id; we POST by deal, then resolve the
+  // row locally (optimistic) so the buttons swap to a status label immediately.
+  const respondToDealRequest = useCallback(
+    async (
+      notif: AppNotification,
+      action: 'accept' | 'decline',
+    ): Promise<{ ok: boolean; dealId?: number }> => {
+      if (!notif.deal_id) return { ok: false };
+      mutationRef.current += 1;
+      const resolved = action === 'accept' ? 'accepted' : 'declined';
+      setNotifications(prev =>
+        prev.map(n =>
+          n.id === notif.id
+            ? { ...n, _responded: resolved, read_at: n.read_at || new Date().toISOString() }
+            : n,
+        ),
+      );
+      if (!notif.read_at) setUnreadCount(prev => Math.max(0, prev - 1));
+      try {
+        const res = await fetch(`/api/deals/${notif.deal_id}/request/${action}`, {
+          method: 'POST',
+          headers: authHeaders(),
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        return { ok: true, dealId: notif.deal_id };
+      } catch {
+        // Roll back the optimistic resolve so the user can retry.
+        setNotifications(prev => prev.map(n => (n.id === notif.id ? { ...n, _responded: undefined } : n)));
+        return { ok: false };
+      }
+    },
+    [],
+  );
+
+  return { notifications, unreadCount, loaded, refresh, markRead, markAllRead, respondToDealRequest };
 }
 
 /** "now" / "5m" / "3h" / "2d" relative timestamp for notification rows. */
