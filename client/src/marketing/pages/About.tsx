@@ -15,7 +15,7 @@ const BELIEFS: Array<{ n: string; h: string; p: string }> = [
   {
     n: '01',
     h: 'Diligence should be computable.',
-    p: 'Most of what a deal team produces in the first weeks of a deal is calculation, not judgment. smbX computes it — fast, traceable, and the same every time.',
+    p: 'Most of what a deal team produces in the first weeks of a deal is calculation, not judgment. smbX.ai computes it — fast, traceable, and the same every time.',
   },
   {
     n: '02',
@@ -25,7 +25,7 @@ const BELIEFS: Array<{ n: string; h: string; p: string }> = [
   {
     n: '03',
     h: 'The line is a feature.',
-    p: 'smbX does not advise, recommend, negotiate, or represent. That restraint is what keeps you — and us — on the right side of the line. It is deliberate, and it is permanent.',
+    p: 'smbX.ai does not advise, recommend, negotiate, or represent. That restraint is what keeps you — and us — on the right side of the line. It is deliberate, and it is permanent.',
   },
 ];
 

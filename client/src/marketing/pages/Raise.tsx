@@ -86,7 +86,7 @@ export default function Raise() {
             <Stage code="R2 · Investor materials" title="Deck & data room">
               A deck and data room drafted from the package.
             </Stage>
-            <Stage code="R3 · Outreach" title="Who funds deals like yours" note="smbX does not solicit or contact investors on your behalf.">
+            <Stage code="R3 · Outreach" title="Who funds deals like yours" note="smbX.ai does not solicit or contact investors on your behalf.">
               Understand who funds deals like yours and what they underwrite to.
             </Stage>
             <Stage code="R4 · Terms" title="Model every term">

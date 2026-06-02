@@ -78,8 +78,8 @@ const FAQ: Array<{ q: string; a: string }> = [
     a: 'Yes — see per-artifact pricing above. Each is a one-time software fee.',
   },
   {
-    q: 'Is smbX a broker or advisor?',
-    a: 'smbX is software. It computes the diligence work — valuations, models, allocations, and documents. It does not broker, advise, negotiate, or represent any party.',
+    q: 'Is smbX.ai a broker or advisor?',
+    a: 'smbX.ai is software. It computes the diligence work — valuations, models, allocations, and documents. It does not broker, advise, negotiate, or represent any party.',
   },
 ];
 

@@ -94,7 +94,7 @@ export default function Sell() {
               A CIM drafted from your actuals, with the working capital and
               quality-of-earnings views a buyer expects.
             </Stage>
-            <Stage code="S4 · Market matching" title="Understand the buyer landscape" note="smbX does not contact buyers or broker the sale.">
+            <Stage code="S4 · Market matching" title="Understand the buyer landscape" note="smbX.ai does not contact buyers or broker the sale.">
               Yulia helps you understand the buyer landscape and what each type will value.
             </Stage>
             <Stage code="S5 · Closing" title="Close-ready and portable">
