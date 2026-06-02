@@ -8,7 +8,7 @@ import { useState, type CSSProperties } from "react";
 import { GlassTopBar, LargeTitle } from "../TopBar";
 import { YIcon } from "../YIcon";
 import { IndustryIcon } from "../IndustryIcon";
-import { MobileIcon } from "../icons";
+import { SectionHeader } from "../SectionHeader";
 import type { Verdict } from "../types";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
 import type { MobileWatchRow, MobileFeatured, MobilePick } from "../../../../hooks/useMobileDeals";
@@ -224,18 +224,13 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
         </div>
       ) : hasRealDeals ? (
         <div className="mb-as-card" style={{ margin: "24px 16px 0", padding: "20px 0 6px" }}>
-          <div style={{ padding: "0 22px 12px" }}>
-            <button
-              type="button"
-              onClick={onOpenDealsList}
-              aria-label="See all deals"
-              style={P.headingBtn}
-            >
-              <h2 style={P.watchTitle}>Yulia is watching</h2>
-              <MobileIcon name="chevron" c="var(--mb-ink-3)" size={11} />
-            </button>
-            <div style={P.subText}>The deals you&rsquo;re tracking — Yulia revisits these for you.</div>
-          </div>
+          <SectionHeader
+            title="Yulia is watching"
+            subtitle="The deals you're tracking — Yulia revisits these for you."
+            onSeeAll={onOpenDealsList}
+            seeAllAria="See all deals"
+            padding="0 22px 12px"
+          />
           {realRows.map((d, i) => (
             <PipeRow
               key={d.id}
@@ -251,42 +246,26 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
         </div>
       ) : filtered.length === 0 ? (
         <div className="mb-as-card" style={{ margin: "24px 16px 0", padding: "20px 22px 22px" }}>
-          {activeChip === "watching" ? (
-            <button
-              type="button"
-              onClick={onOpenWatching}
-              aria-label="Open full watching list"
-              style={P.headingBtn}
-            >
-              <h2 style={P.watchTitle}>{STAGE_TITLES[activeChip]}</h2>
-              <MobileIcon name="chevron" c="var(--mb-ink-3)" size={11} />
-            </button>
-          ) : (
-            <h2 style={P.watchTitle}>{STAGE_TITLES[activeChip]}</h2>
-          )}
-          <div style={P.subText}>{STAGE_SUBS[activeChip]}</div>
+          <SectionHeader
+            title={STAGE_TITLES[activeChip]}
+            subtitle={STAGE_SUBS[activeChip]}
+            onSeeAll={activeChip === "watching" ? onOpenWatching : onOpenDealsList}
+            seeAllAria="See all deals"
+            padding="0"
+          />
           <div style={{ marginTop: 16, fontSize: 13, color: "var(--mb-ink-4)", textAlign: "center" }}>
             No deals at this stage right now.
           </div>
         </div>
       ) : (
         <div className="mb-as-card" style={{ margin: "24px 16px 0", padding: "20px 0 6px" }}>
-          <div style={{ padding: "0 22px 12px" }}>
-            {activeChip === "watching" ? (
-              <button
-                type="button"
-                onClick={onOpenWatching}
-                aria-label="Open full watching list"
-                style={P.headingBtn}
-              >
-                <h2 style={P.watchTitle}>{STAGE_TITLES[activeChip]}</h2>
-                <MobileIcon name="chevron" c="var(--mb-ink-3)" size={11} />
-              </button>
-            ) : (
-              <h2 style={P.watchTitle}>{STAGE_TITLES[activeChip]}</h2>
-            )}
-            <div style={P.subText}>{STAGE_SUBS[activeChip]}</div>
-          </div>
+          <SectionHeader
+            title={STAGE_TITLES[activeChip]}
+            subtitle={STAGE_SUBS[activeChip]}
+            onSeeAll={activeChip === "watching" ? onOpenWatching : onOpenDealsList}
+            seeAllAria="See all deals"
+            padding="0 22px 12px"
+          />
           {filtered.map((d, i) => (
             <PipeRow
               key={d.id}

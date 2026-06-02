@@ -20,6 +20,7 @@ import { MobileIcon } from "../icons";
 import { LibraryActivityList, LibraryPreviewCard } from "./LibrarySearch";
 import type { Verdict, YIconKind } from "../types";
 import type { MobilePipelineRow } from "../../../../hooks/useMobileDeals";
+import { SectionHeader } from "../SectionHeader";
 import { useWatchlist } from "../../../../hooks/useWatchlist";
 import { copyFor, LOGGED_OUT_HERO_COPY } from "../../../../lib/copy";
 import { type Audience } from "../../../../lib/audience";
@@ -219,14 +220,14 @@ export function TodayScreen({
           fake deals. */}
       <div style={{ marginTop: 24, padding: "0 16px" }}>
         <div className="mb-as-card" style={{ padding: "20px 0 6px" }}>
-          <div style={{ padding: "0 22px 4px" }}>
-            <div className="mb-section-eyebrow">{C.todayIntelEyebrow}</div>
-            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
-              <div className="mb-section-title">{C.todayIntelTitle}</div>
-              <button type="button" onClick={onOpenDealsList} aria-label="See all deals" style={{ all: "unset", cursor: "pointer", color: "var(--mb-accent-ink)", fontSize: 13, fontWeight: 700, whiteSpace: "nowrap" }}>See all →</button>
-            </div>
-            <div style={S.subText}>{C.todayIntelSub}</div>
-          </div>
+          <SectionHeader
+            eyebrow={C.todayIntelEyebrow}
+            title={C.todayIntelTitle}
+            subtitle={C.todayIntelSub}
+            onSeeAll={onOpenDealsList}
+            seeAllAria="See all deals"
+            padding="0 22px 4px"
+          />
           {realEmpty ? (
             <PipelineEmptyState
               onSource={() => onAskYulia("Help me source and add my first deal")}
