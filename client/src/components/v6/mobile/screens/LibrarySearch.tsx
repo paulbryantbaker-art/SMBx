@@ -206,7 +206,6 @@ export function LibraryPreviewCard({
     <div style={S.libraryPortal}>
       <div style={S.portalGlow} />
       <div style={S.portalHeader}>
-        <div className="mb-mono" style={S.heroKicker}>FILES</div>
         <h2 style={S.portalTitle}>Files that need your eye.</h2>
         <p style={S.portalCopy}>
           Working docs, analysis, action items, and shared diligence rooms are organized by deal.
@@ -255,7 +254,6 @@ export function LibraryActivityList({
   const rows = libraryActivity.slice(0, limit).map((row) => withDocClick(row, onOpenDetail));
   const head = (
     <>
-      <div className="mb-section-eyebrow">RECENTS</div>
       <div className="mb-section-title">Recents</div>
       <div style={S.activitySub}>Recently touched docs, plus anything waiting on you.</div>
     </>
@@ -347,7 +345,6 @@ export function LibraryScreen({
       </div>
 
       <div style={S.librarySectionPad}>
-        <div className="mb-section-eyebrow" style={S.eyebrowInset}>YULIA IS DRAFTING</div>
         <button
           type="button"
           onClick={() => onOpenDetail("IOI draft · v3", "Big Fake Deal · updated 2 min ago", "draft")}
@@ -355,7 +352,6 @@ export function LibraryScreen({
         >
           <div style={S.heroGlow} />
           <div style={S.heroBody}>
-            <div className="mb-mono" style={S.heroKicker}>IOI · v3 · BIG FAKE DEAL</div>
             <h2 style={S.heroTitle}>Yulia&rsquo;s writing your IOI right now.</h2>
             <p style={S.heroCopy}>
               Recurring rev framing, $7.8M target, 60-day diligence window.
@@ -377,7 +373,6 @@ export function LibraryScreen({
         <div className="mb-as-card" style={S.activeRoomsCard}>
           <button type="button" onClick={() => onOpenFinder("all")} style={S.activeRoomsHeader}>
             <div>
-              <div className="mb-section-eyebrow">OPEN FILES</div>
               <div style={S.finderCtaTitle}>Browse all files</div>
               <div style={S.finderCtaSub}>Portfolio → deal → stage across docs, analysis, and data rooms.</div>
             </div>
@@ -452,7 +447,6 @@ function DealBoundaryCard({
   return (
     <div style={S.boundaryPad}>
       <div className="mb-as-card" style={isDataRoom ? S.sharedBoundaryCard : S.privateBoundaryCard}>
-        <div className="mb-section-eyebrow">{isDataRoom ? "SHARED DRIVE" : "PRIVATE WORKSPACE"}</div>
         <div style={S.boundaryTitle}>{isDataRoom ? "Visible to the deal team" : "Private deal library"}</div>
         <div style={S.boundaryCopy}>
           {isDataRoom
@@ -632,11 +626,9 @@ export function SearchScreen({
       </div>
 
       <div style={S.cardPad}>
-        <div className="mb-section-eyebrow" style={S.eyebrowInset}>DISCOVERY</div>
         <button type="button" onClick={onChat} style={S.searchHero}>
           <div style={S.heroGlow} />
           <div style={S.heroBody}>
-            <div className="mb-mono" style={S.heroKicker}>ASK YULIA</div>
             <h2 style={S.heroTitle}>Map the market around the deal.</h2>
             <p style={S.heroCopy}>
               Search buyers, targets, capital, and deal professionals. Yulia turns a rough thesis into a sourced market map.
@@ -653,7 +645,7 @@ export function SearchScreen({
         </button>
       </div>
 
-      <SectionHeader eyebrow="BROWSE" title="Discovery cards" />
+      <SectionHeader title="Discovery cards" />
       <div style={S.categoryGrid}>
         {categories.map((cat) => (
           <CategoryCard
@@ -667,7 +659,7 @@ export function SearchScreen({
         ))}
       </div>
 
-      <SectionHeader eyebrow="QUICK START" title="Start from a plain sentence" />
+      <SectionHeader title="Start from a plain sentence" />
       <div style={S.quickStartPad}>
         {quickStarts.map((item) => (
           <button
@@ -681,7 +673,7 @@ export function SearchScreen({
         ))}
       </div>
 
-      <SectionHeader eyebrow="RECENT" title="Recent discovery searches" />
+      <SectionHeader title="Recent discovery searches" />
       <div style={S.cardPad}>
         <div className="mb-as-card" style={S.listCard}>
           {recent.map((item, index) => (
@@ -838,7 +830,6 @@ export function LibraryDetailScreen({
 
       <div style={S.stageBannerPad}>
         <div className="mb-as-card" style={isDataRoom ? S.stageBannerDataRoom : S.stageBanner}>
-          <div className="mb-section-eyebrow">{isDataRoom ? "CURRENT STAGE" : "CURRENT VIEW"}</div>
           <div style={S.stageBannerTitle}>{stageLabel}</div>
           <div style={S.stageBannerSub}>{stageSub}</div>
         </div>
@@ -1117,7 +1108,6 @@ function RealDealDataRoom({
         {Chrome}
         <div style={S.realStatePad}>
           <div className="mb-as-card" style={S.realStateCard}>
-            <div className="mb-mono" style={S.realStateKicker}>DATA ROOM</div>
             <div style={S.realStateTitle}>Loading files…</div>
             <div style={S.realStateCopy}>Fetching the live diligence room for this deal.</div>
           </div>
@@ -1133,7 +1123,6 @@ function RealDealDataRoom({
         {Chrome}
         <div style={S.realStatePad}>
           <div className="mb-as-card" style={S.realStateCard}>
-            <div className="mb-mono" style={S.realStateKicker}>DATA ROOM</div>
             <div style={S.realStateTitle}>Couldn&rsquo;t load this room</div>
             <div style={S.realStateCopy}>{room.error}</div>
           </div>
@@ -1561,7 +1550,6 @@ function RealUploadBar({
       <div className="mb-as-card" style={S.uploadCard}>
         <div style={S.uploadCardHead}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="mb-section-eyebrow">ADD TO ROOM</div>
             <div style={S.uploadCardTitle}>Upload a file</div>
             <div style={S.uploadCardSub}>PDF, spreadsheet, CSV, or image. Filed into the selected folder.</div>
           </div>
@@ -2276,7 +2264,6 @@ export function LibraryFinderScreen({
 
       <div style={S.finderHero}>
         <div style={S.finderHeroGlow} />
-        <div className="mb-mono" style={S.heroKicker}>FILES</div>
         <h2 style={S.finderHeroTitle}>Find files across every deal library.</h2>
         <div style={S.finderStatRow}>
           <FinderStat value="3" label="Deals" />
@@ -2331,7 +2318,6 @@ export function LibraryFinderScreen({
           {getDataRoomStatusSections(onOpenDetail).map((section) => (
             <FinderSection
               key={section.title}
-              eyebrow={section.eyebrow}
               title={section.title}
               sub={section.sub}
               rows={section.rows}
@@ -2343,7 +2329,6 @@ export function LibraryFinderScreen({
       {visibleSections.map((section) => (
         <FinderSection
           key={section.title}
-          eyebrow={section.eyebrow}
           title={section.title}
           sub={section.sub}
           rows={section.rows}
@@ -2359,7 +2344,6 @@ function DealLibrarySection({ onOpenDealLibrary }: { onOpenDealLibrary: OpenDeal
       <div className="mb-as-card" style={S.finderListCard}>
         <div style={S.finderCardHead}>
           <div>
-            <div className="mb-section-eyebrow">PORTFOLIO → DEAL</div>
             <div style={S.finderTitleRow}>
               <h2 style={S.docTitle}>Deal libraries</h2>
               <MobileIcon name="chevron" c="var(--mb-ink-4)" size={13} />
@@ -2392,7 +2376,6 @@ function DataRoomDealSection({ onOpenDealLibrary }: { onOpenDealLibrary: OpenDea
       <div className="mb-as-card" style={S.finderListCard}>
         <div style={S.finderCardHead}>
           <div>
-            <div className="mb-section-eyebrow">PORTFOLIO → DEAL → DATA ROOM</div>
             <div style={S.finderTitleRow}>
               <h2 style={S.docTitle}>Active data rooms</h2>
               <MobileIcon name="chevron" c="var(--mb-ink-4)" size={13} />
@@ -2738,12 +2721,10 @@ function docToneFromKind(kind?: string): DocTone {
 }
 
 function FinderSection({
-  eyebrow,
   title,
   sub,
   rows,
 }: {
-  eyebrow: string;
   title: string;
   sub: string;
   rows: DocRowData[];
@@ -2753,7 +2734,6 @@ function FinderSection({
       <div className="mb-as-card" style={S.finderListCard}>
         <div style={S.finderCardHead}>
           <div>
-            <div className="mb-section-eyebrow">{eyebrow}</div>
             <div style={S.finderTitleRow}>
               <h2 style={S.docTitle}>{title}</h2>
               <MobileIcon name="chevron" c="var(--mb-ink-4)" size={13} />
@@ -2769,10 +2749,9 @@ function FinderSection({
   );
 }
 
-function SectionHeader({ eyebrow, title }: { eyebrow: string; title: string }) {
+function SectionHeader({ title }: { title: string }) {
   return (
     <div style={S.sectionHeader}>
-      <div className="mb-section-eyebrow">{eyebrow}</div>
       <div className="mb-section-title" style={{ fontSize: 24 }}>{title}</div>
     </div>
   );
@@ -3045,13 +3024,6 @@ const S: Record<string, CSSProperties> = {
     placeItems: "center",
     marginBottom: 14,
   },
-  realStateKicker: {
-    fontSize: 11,
-    fontWeight: 600,
-    letterSpacing: "0.06em",
-    color: "var(--mb-ink-3)",
-    marginBottom: 8,
-  },
   realStateTitle: {
     fontFamily: "var(--mb-font-display)",
     fontWeight: 800,
@@ -3119,9 +3091,6 @@ const S: Record<string, CSSProperties> = {
     marginTop: 36,
     padding: "0 16px",
   },
-  eyebrowInset: {
-    padding: "0 6px 6px",
-  },
   goldHero: {
     all: "unset",
     boxSizing: "border-box",
@@ -3172,12 +3141,6 @@ const S: Record<string, CSSProperties> = {
   heroBody: {
     position: "relative",
     padding: "18px 22px 14px",
-  },
-  heroKicker: {
-    fontSize: 11,
-    fontWeight: 600,
-    letterSpacing: "0.06em",
-    textTransform: "uppercase",
   },
   heroTitle: {
     fontFamily: "var(--mb-font-display)",

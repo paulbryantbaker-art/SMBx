@@ -9,7 +9,6 @@ interface SearchRootProps {
 }
 
 interface Category {
-  meta: string;
   title: string;
   audience: string;
   detail: string;
@@ -27,7 +26,6 @@ interface DiscoveryRow {
 
 const CATEGORIES: Category[] = [
   {
-    meta: "Market lane",
     title: "Targets to buy",
     audience: "Thesis, geography, check size",
     detail: "Target read, source confidence, fit rationale, and first outreach angle.",
@@ -35,7 +33,6 @@ const CATEGORIES: Category[] = [
     prompt: "Find acquisition targets from this thesis: recurring revenue, lower-middle-market services, owner transition risk acceptable.",
   },
   {
-    meta: "Buyer lane",
     title: "Buyers and buy-side",
     audience: "Strategics, sponsors, buyer pools",
     detail: "Buyer universe ranked by strategic fit, ability to close, and relationship angle.",
@@ -43,7 +40,6 @@ const CATEGORIES: Category[] = [
     prompt: "Find likely buyers and buyer pools for Big Fake Deal. Rank strategic fit, ability to close, and relationship angle.",
   },
   {
-    meta: "Capital lane",
     title: "PE and lenders",
     audience: "Sponsors, SBA, senior debt",
     detail: "Capital partners matched by mandate, check size, lender fit, and diligence ask.",
@@ -51,7 +47,6 @@ const CATEGORIES: Category[] = [
     prompt: "Find PE firms, independent sponsors, and senior debt lenders relevant to this deal size and industry.",
   },
   {
-    meta: "Provider lane",
     title: "Deal professionals",
     audience: "M&A counsel, QoE, tax, insurance",
     detail: "Provider shortlist with why-now context, fit rationale, and handoff instructions.",
@@ -146,7 +141,6 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
       {/* Page header */}
       <div className="pg-head">
         <div>
-          <div className="pg-eyebrow">Market discovery</div>
           <div className="pg-title">Search</div>
           <p className="pg-sub">
             Search here is not document search. It is market discovery: buyers, targets, capital, and the professionals who help users get deals reviewed and closed.
@@ -323,18 +317,6 @@ function CategoryCard({ category, onClick }: { category: Category; onClick: () =
       }}
       onClick={onClick}
     >
-      <span
-        style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: ".74rem",
-          fontWeight: 500,
-          color: "var(--ink-3)",
-          letterSpacing: ".04em",
-          textTransform: "uppercase" as const,
-        }}
-      >
-        {category.meta}
-      </span>
       <strong style={{ fontSize: "1.05rem", fontWeight: 600, color: "var(--ink)", lineHeight: 1.15 }}>
         {category.title}
       </strong>

@@ -97,7 +97,6 @@ export function MobileDealsListScreen({ onBack, onOpenDeal, user }: Props) {
       </button>
 
       <div style={D.heroHeader}>
-        <div style={D.heroEyebrow}>PIPELINE</div>
         <h1 style={D.heroTitle}>All deals</h1>
         <p style={D.heroSub}>
           {workspace.loading
@@ -184,10 +183,6 @@ const D: Record<string, CSSProperties> = {
     cursor: "pointer",
   },
   heroHeader: { padding: "calc(env(safe-area-inset-top, 44px) + 64px) 22px 6px" },
-  heroEyebrow: {
-    fontFamily: "var(--mb-font-mono)", fontSize: 11, letterSpacing: "0.08em",
-    color: "var(--mb-ink-3)", fontWeight: 600, textTransform: "uppercase",
-  },
   heroTitle: {
     fontFamily: "var(--mb-font-display)", fontWeight: 700, fontSize: 32,
     letterSpacing: "-0.7px", lineHeight: 1.05, margin: "6px 0 0", color: "var(--mb-ink)",

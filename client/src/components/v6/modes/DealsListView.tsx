@@ -112,7 +112,6 @@ export function V6DealsListView({ openTab, user }: Props) {
       {/* Page header */}
       <div className="pg-head">
         <div>
-          <div className="pg-eyebrow">Pipeline</div>
           <div className="pg-title">All deals</div>
           <p className="pg-sub">
             {workspace.loading

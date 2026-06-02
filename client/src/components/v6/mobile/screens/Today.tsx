@@ -221,7 +221,6 @@ export function TodayScreen({
       <div style={{ marginTop: 24, padding: "0 16px" }}>
         <div className="mb-as-card" style={{ padding: "20px 0 6px" }}>
           <SectionHeader
-            eyebrow={C.todayIntelEyebrow}
             title={C.todayIntelTitle}
             subtitle={C.todayIntelSub}
             onSeeAll={onOpenDealsList}
@@ -371,13 +370,6 @@ function WelcomeHero({
     <HeroFrame kind="welcome" onTap={onChat}>
       <HeroVisualPursue />
 
-      {/* Brand eyebrow on the left. Shortened from "WELCOME TO SMBX ·
-          WORKING SAMPLE" to just "WORKING SAMPLE" so it doesn't collide
-          with the audience switcher pill on the right. The "Welcome"
-          framing is already carried by the headline below. */}
-      <div style={H.eyebrowSlot}>
-        <div className="mb-eyebrow">WORKING SAMPLE</div>
-      </div>
       <div style={H.titleBlock}>
         <h2 style={H.h2}>{LOGGED_OUT_HERO_COPY.headline}</h2>
         <p style={H.tag}>{heroTag}</p>
@@ -409,10 +401,6 @@ function DailyHero({ onOpenDeal }: { onOpenDeal: () => void }) {
   return (
     <HeroFrame kind="pursue" onTap={onOpenDeal}>
       <HeroVisualPursue />
-
-      <div style={H.eyebrowSlot}>
-        <div className="mb-eyebrow">TODAY &middot; YULIA&rsquo;S TOP PICK</div>
-      </div>
 
       <div style={H.titleBlock}>
         <h2 style={H.h2}>Recurring revenue.<br/>Honest capex story.</h2>
@@ -554,9 +542,6 @@ function ExploreCard({
 }) {
   return (
     <div style={E.card}>
-      <div style={E.eyebrowSlot}>
-        <div className="mb-eyebrow" style={E.eyebrow}>{isAnon ? "EXPLORE SMBX" : "GET THE MOST FROM YULIA"}</div>
-      </div>
       <div style={E.titleBlock}>
         <h3 style={E.h3}>{isAnon ? "Pick a way in." : "Today's quick wins."}</h3>
         <p style={E.tag}>
@@ -821,7 +806,6 @@ const S: Record<string, CSSProperties> = {
 };
 
 const H: Record<string, CSSProperties> = {
-  eyebrowSlot: { position: "absolute", top: 18, left: 22 },
   /* Audience switcher anchor — top-right of the welcome hero card.
      Independent of the eyebrow's absolute slot on the left so the
      two never push each other into wrapping. zIndex sits above the
@@ -1098,11 +1082,6 @@ const E: Record<string, CSSProperties> = {
       " inset 0 -1px 0 rgba(0,0,0,0.20)",
     padding: "20px 16px 16px",
     position: "relative",
-  },
-  eyebrowSlot: { padding: "0 6px 4px" },
-  eyebrow: {
-    color: "#fff",
-    fontWeight: 700,
   },
   titleBlock: { padding: "0 6px 14px" },
   h3: {

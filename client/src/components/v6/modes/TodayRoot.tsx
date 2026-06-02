@@ -465,7 +465,6 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
       {/* ── Page header ── */}
       <div className="pg-head">
         <div>
-          <div className="pg-eyebrow">Operating brief</div>
           <div className="pg-title">Today</div>
           <p className="pg-sub">
             {liveBrief?.hero.lede
@@ -500,11 +499,8 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
       {/* ── First-run welcome (authed, zero deals): journey quick-starts ── */}
       {firstRun && (
         <div className="wkcard" style={{ marginTop: 16, marginBottom: 18, padding: "26px 28px 24px" }}>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", letterSpacing: "0.1em", color: "var(--accent-strong)", fontWeight: 700, textTransform: "uppercase", marginBottom: 10 }}>
-            {firstName ? `Welcome, ${firstName}` : "Welcome"}
-          </div>
           <div style={{ fontSize: "clamp(1.5rem, 2.6vw, 2.05rem)", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1.12, color: "var(--ink)", marginBottom: 8 }}>
-            You're set up. Let's start your first deal.
+            {firstName ? `You're set up, ${firstName}. Let's start your first deal.` : "You're set up. Let's start your first deal."}
           </div>
           <p style={{ color: "var(--ink-2)", fontSize: "0.92rem", lineHeight: 1.5, margin: "0 0 22px", maxWidth: 640 }}>
             Yulia runs the deal work end-to-end — sourcing, recasts, valuation, diligence, packaging, and closing support. Tell her what you're working on and she builds the workspace around it.
@@ -522,7 +518,6 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
                 style={{ all: "unset", cursor: "pointer", display: "block", padding: "14px 16px", background: "var(--surface-2)", border: "1px solid var(--line)", borderRadius: 12, boxSizing: "border-box" }}
                 onClick={() => ask(j.prompt)}
               >
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.66rem", letterSpacing: "0.12em", color: "var(--accent-strong)", fontWeight: 700, textTransform: "uppercase", marginBottom: 6 }}>{j.kicker}</div>
                 <div style={{ color: "var(--ink)", fontSize: "1rem", fontWeight: 700, letterSpacing: "-0.02em", marginBottom: 4 }}>{j.title}</div>
                 <div style={{ color: "var(--ink-2)", fontSize: "0.84rem", lineHeight: 1.4 }}>{j.sub}</div>
               </button>
@@ -565,9 +560,6 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
         {/* Hero card */}
         <div className="wkcard" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", letterSpacing: "0.08em", color: "var(--ink-3)", fontWeight: 600, textTransform: "uppercase", marginBottom: 8 }}>
-              {showLoggedOutMarketing ? "DEAL INTELLIGENCE" : waitingForYuliaRead ? "YULIA READ REFRESHING" : lead ? "LEAD DEAL" : "GET STARTED"}
-            </div>
             <div style={{ fontSize: "clamp(1.45rem, 2.4vw, 2rem)", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1.1, color: "var(--ink)" }}>
               {liveBrief?.hero.title || (showLoggedOutMarketing ? (
                 <>Connect sourcing, diligence, execution, and value creation.</>
@@ -585,7 +577,6 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           <div className="wkgrid g3" style={{ gap: 10 }}>
             {heroNotes.slice(0, 3).map(note => (
               <div key={note.label} style={{ padding: "12px 14px", background: "var(--surface-2)", border: "1px solid var(--line)", borderRadius: 10 }}>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.68rem", letterSpacing: "0.1em", color: "var(--ink-3)", fontWeight: 600, textTransform: "uppercase", marginBottom: 6 }}>{note.label}</div>
                 <div style={{ fontSize: "0.84rem", lineHeight: 1.45, color: "var(--ink-2)" }}>{note.text}</div>
               </div>
             ))}
@@ -632,7 +623,6 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
         {/* Market desk card */}
         <div className="wkcard" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", letterSpacing: "0.08em", color: "var(--ink-3)", fontWeight: 600, textTransform: "uppercase", marginBottom: 4 }}>YULIA'S MARKET DESK</div>
             <div style={{ fontSize: "1.15rem", fontWeight: 700, letterSpacing: "-0.03em", color: "var(--ink)", lineHeight: 1.1 }}>Portfolio intelligence</div>
           </div>
 
@@ -642,7 +632,6 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
             style={{ all: "unset", display: "block", cursor: "pointer", padding: "12px 14px", background: "var(--surface-2)", border: "1px solid var(--line)", borderRadius: 10, width: "100%", boxSizing: "border-box" }}
             onClick={() => ask("Show me the portfolio market intelligence read. Separate market, buyer/capital, tax, legal, and source gaps.")}
           >
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.68rem", letterSpacing: "0.10em", color: "var(--ink-3)", fontWeight: 600, textTransform: "uppercase", marginBottom: 6 }}>{marketIntel.eyebrow}</div>
             <strong style={{ display: "block", color: "var(--ink)", fontSize: "0.94rem", lineHeight: 1.3, fontWeight: 700 }}>{marketIntel.headline}</strong>
             <span style={{ display: "block", marginTop: 5, color: "var(--ink-2)", fontSize: "0.82rem", lineHeight: 1.42 }}>{marketIntel.subhead}</span>
           </button>
@@ -685,7 +674,6 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
       <div className="wksec">
         <div className="pg-head" style={{ alignItems: "center", marginBottom: 14 }}>
           <div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", letterSpacing: "0.08em", color: "var(--ink-3)", fontWeight: 600, textTransform: "uppercase", marginBottom: 4 }}>YULIA PRIORITY QUEUE</div>
             <div className="wksec-title" style={{ marginBottom: 0 }}>What needs action</div>
           </div>
           <div className="pg-actions">
@@ -695,8 +683,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
         <div className="wkgrid g3" style={{ gap: 14 }}>
           {priorities.map((item, index) => (
             <button key={item.title} className="wkcard tap" style={{ all: "unset", cursor: "pointer", display: "block", padding: "18px 20px", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 14, boxSizing: "border-box", width: "100%", transition: "border-color .18s, box-shadow .18s, transform .18s" }} onClick={item.action} type="button">
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.68rem", letterSpacing: "0.10em", color: "var(--ink-3)", fontWeight: 600, textTransform: "uppercase" }}>{item.kicker}</span>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", marginBottom: 10 }}>
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", fontWeight: 600, color: "var(--ink-3)" }}>0{index + 1}</span>
               </div>
               <strong style={{ display: "block", color: "var(--ink)", fontSize: "1rem", fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.25, marginBottom: 8 }}>{item.title}</strong>
@@ -748,7 +735,6 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
       <div className="wkgrid g2" style={{ gap: 16, marginTop: 34 }}>
         {/* Pipeline pulse */}
         <div>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", letterSpacing: "0.08em", color: "var(--ink-3)", fontWeight: 600, textTransform: "uppercase", marginBottom: 6 }}>PIPELINE PULSE</div>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
             <div className="wksec-title" style={{ marginBottom: 2 }}>Deals in motion</div>
             <button
@@ -811,7 +797,6 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
 
         {/* Files */}
         <div>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", letterSpacing: "0.08em", color: "var(--ink-3)", fontWeight: 600, textTransform: "uppercase", marginBottom: 6 }}>FILES</div>
           <div className="wksec-title" style={{ marginBottom: 2 }}>Files needing your eye</div>
           <p style={{ color: "var(--ink-2)", fontSize: "0.88rem", margin: "0 0 14px" }}>Docs, data room items, and analyses surfaced from today's work.</p>
 
@@ -854,7 +839,6 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
       {/* ── Quick starts ── */}
       <div className="wksec" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 14, padding: "20px 22px", display: "grid", gridTemplateColumns: "minmax(200px, 0.42fr) minmax(0, 1fr)", gap: 20, alignItems: "center", marginTop: 34 }}>
         <div>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", letterSpacing: "0.08em", color: "var(--ink-3)", fontWeight: 600, textTransform: "uppercase", marginBottom: 5 }}>START SOMETHING</div>
           <div style={{ fontSize: "1.2rem", fontWeight: 700, letterSpacing: "-0.03em", color: "var(--ink)", lineHeight: 1.1 }}>Give Yulia a clean sentence.</div>
         </div>
         <div className="ynext" style={{ margin: 0 }}>

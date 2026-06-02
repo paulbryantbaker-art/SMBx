@@ -107,7 +107,6 @@ export function V6DocsRoot({
     <div className="wk-content m-fade-up" style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div className="pg-head">
         <div>
-          <div className="pg-eyebrow">Docs</div>
           <div className="pg-title">Documents</div>
           <p className="pg-sub">Drafts, final versions, and signed paper.</p>
         </div>

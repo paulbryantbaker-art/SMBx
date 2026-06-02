@@ -176,7 +176,6 @@ export function V6AnalysisRoot({
     <div className="wk-content m-fade-up" style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div className="pg-head">
         <div>
-          <div className="pg-eyebrow">Analysis</div>
           <div className="pg-title">Analyses</div>
           <p className="pg-sub">Yulia recommends what to run next per deal and gate — or search the full methodology catalog.</p>
         </div>

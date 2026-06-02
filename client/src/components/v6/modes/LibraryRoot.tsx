@@ -30,7 +30,6 @@ export function V6LibraryRoot({ openTab }: { openTab: OpenTab }) {
     <div className="wk-content m-fade-up" style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div className="pg-head">
         <div>
-          <div className="pg-eyebrow">Library</div>
           <div className="pg-title">Everything you've touched</div>
           <p className="pg-sub">One place for deals, docs, analyses, and memos.</p>
         </div>

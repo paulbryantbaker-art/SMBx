@@ -150,7 +150,6 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
           genuinely empty signed-in user. */}
       {!realEmpty && (
       <div style={{ padding: "0 22px 8px" }}>
-        <div className="mb-section-eyebrow">{isAnon ? "VIEW SAMPLE · NEW TODAY" : "NEW TODAY"}</div>
         <div className="mb-section-title">{FEATURED.name}</div>
         <div style={P.subText}>The strongest source this week &mdash; tap to see why.</div>
       </div>
@@ -287,7 +286,6 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
       {!realEmpty && (
       <div style={P.briefDock}>
         <div style={{ padding: "0 22px 12px" }}>
-          <div className="mb-section-eyebrow">BRIEF</div>
           <div className="mb-section-title">Yulia&rsquo;s ranked read</div>
           <div style={P.subText}>The daily brief now lives with Pipeline, where the deal flow is.</div>
         </div>

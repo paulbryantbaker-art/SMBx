@@ -230,7 +230,6 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
       {/* Page header */}
       <div className="pg-head">
         <div>
-          <div className="pg-eyebrow">Files</div>
           <div className="pg-title">Private deal libraries, plus shared data rooms.</div>
           <p className="pg-sub">
             Every deal has its own file library. The data room is the shared diligence drive inside that library, with artifacts, drafted legal docs, review items, and executed docs.
@@ -539,7 +538,6 @@ export function V6FilesListView({
       {/* Page header — flat, no texture/gradient */}
       <div className="pg-head">
         <div>
-          <div className="pg-eyebrow">{copy.eyebrow}</div>
           <div className="pg-title">{copy.title}</div>
           <p className="pg-sub">{copy.sub}</p>
         </div>
@@ -848,27 +846,23 @@ function definitivePacketMarkdown(row: FileRow): string {
 }
 
 function activeListCopy(view: FileListView) {
-  const copy: Record<FileListView, { eyebrow: string; title: string; sub: string; prompt: string }> = {
+  const copy: Record<FileListView, { title: string; sub: string; prompt: string }> = {
     all: {
-      eyebrow: "ALL FILES",
       title: "Every file across deal libraries",
       sub: "Private docs, analyses, data-room artifacts, shared docs, and executed records across portfolios.",
       prompt: "Show every file across my portfolio, grouped by portfolio, deal, stage, and data room status.",
     },
     "deal-libraries": {
-      eyebrow: "DEAL LIBRARIES",
       title: "Deal libraries",
       sub: "Each deal opens to its private workspace, analysis, drafts, shared docs, and data-room boundary.",
       prompt: "Show my deal libraries and summarize which one needs attention first.",
     },
     "needs-action": {
-      eyebrow: "NEEDS ACTION",
       title: "Files needing action",
       sub: "Drafts, requests, reviews, failed generations, markups, and submissions waiting on you.",
       prompt: "Show files that need action from me and rank them by urgency.",
     },
     "data-rooms": {
-      eyebrow: "DATA ROOMS",
       title: "Active data rooms",
       sub: "Shared diligence drives by deal, separate from private workspaces and analyses.",
       prompt: "Show active data rooms and separate artifacts, drafted docs, review items, and executed docs.",

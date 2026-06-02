@@ -85,7 +85,6 @@ export function BriefDigestSection({
           style={Br.editorial}
         >
           <div style={{ padding: "24px 22px 12px" }}>
-            <div className="mb-eyebrow">YULIA &middot; 3 PICKS &middot; 10 MIN</div>
             <h2 style={Br.editorialH2}>
               Three worth your<br/>10 minutes today
             </h2>
@@ -101,7 +100,6 @@ export function BriefDigestSection({
       <div style={{ marginTop: 24, padding: "0 16px" }}>
         <div className="mb-as-card" style={{ padding: "20px 0 6px" }}>
           <div style={{ padding: "0 22px 4px" }}>
-            <div className="mb-section-eyebrow">{isAnon ? "RANKED · SAMPLE" : "RANKED"}</div>
             <div className="mb-section-title">Today&rsquo;s three picks</div>
           </div>
           {PICKS.map((p, i) => (

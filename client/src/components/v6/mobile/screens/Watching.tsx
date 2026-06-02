@@ -45,7 +45,6 @@ export function WatchingScreen({ onBack, onOpenDeal }: WatchingProps) {
 
       {/* Hero header: editorial title, lots of breathing room */}
       <div style={W.heroHeader}>
-        <div style={W.heroEyebrow}>YULIA&rsquo;S WATCHLIST</div>
         <h1 style={W.heroTitle}>Deals worth a second look</h1>
         <p style={W.heroSub}>
           The full list Yulia revisits — strong signals, watchful flags, and
@@ -57,9 +56,6 @@ export function WatchingScreen({ onBack, onOpenDeal }: WatchingProps) {
       <div style={{ padding: "0 16px 8px" }}>
         <div style={W.editorial}>
           <div style={W.editorialBody}>
-            <div className="mb-eyebrow" style={{ color: "#fff" }}>
-              SAMPLE · {feed.length} DEALS
-            </div>
             <h2 style={W.editorialTitle}>
               Where the next deal might come from.
             </h2>
@@ -184,12 +180,6 @@ const W: Record<string, CSSProperties> = {
   },
   heroHeader: {
     padding: "calc(env(safe-area-inset-top, 44px) + 64px) 22px 8px",
-  },
-  heroEyebrow: {
-    fontFamily: "var(--mb-font-mono)",
-    fontSize: 11, letterSpacing: "0.08em",
-    color: "var(--mb-ink-3)", fontWeight: 600,
-    textTransform: "uppercase",
   },
   heroTitle: {
     fontFamily: "var(--mb-font-display)", fontWeight: 700,

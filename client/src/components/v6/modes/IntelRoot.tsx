@@ -44,7 +44,6 @@ export function V6IntelRoot({ openTab, onTalkToYulia }: { openTab: OpenTab; onTa
     <div className="wk-content m-fade-up" style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div className="pg-head">
         <div>
-          <div className="pg-eyebrow">Market intelligence</div>
           <div className="pg-title">What's moving</div>
           <p className="pg-sub">Sector reads, deal flow, comps — all synthesized from the sources you watch.</p>
         </div>

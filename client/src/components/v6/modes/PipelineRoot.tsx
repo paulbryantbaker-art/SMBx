@@ -246,7 +246,6 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
     <div className="wk-content m-fade-up" style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div className="pg-head">
         <div>
-          <div className="pg-eyebrow">Deal flow</div>
           <div className="pg-title">Pipeline</div>
           <p className="pg-sub">Every opportunity run against the method — league, gate, model stack, citations, and the next move before it advances.</p>
         </div>
