@@ -43,6 +43,8 @@ AI-powered deal intelligence platform for business acquisitions from $300K to me
 
 **Safari toolbar rule still applies:** never use `position:fixed` full-viewport divs with a background color (Safari reads them for toolbar tinting and it breaks dark-mode switching). Use `position:absolute` inside a relative parent instead.
 
+**No gratuitous eyebrows or micro text (LOCKED 2026-06-01).** Do NOT add decorative eyebrow kickers (small uppercase mono labels like `PIPELINE`, `RECENTS`, `MARKET INTELLIGENCE LIVE`) or micro status/subtitle lines (like `deal intelligence · online`) by default — they clutter and read as AI filler. Lead with the title alone. Add a label or secondary line ONLY when it carries information the user genuinely needs and cannot infer from context. When in doubt, leave it out. Applies to new components, headers, cards, chat surfaces, and FABs; when reskinning or refactoring existing UI, prefer removing these over preserving them.
+
 ## Pricing Model — Monthly Subscriptions
 **Free:** Unlimited Yulia Q&A, ONE ValueLens or deal score (email required)
 **$99 Solo:** Unlimited ValueLens, deal scoring, VRR, SDE/EBITDA analysis, exports, and one supervised MCP/agent key
