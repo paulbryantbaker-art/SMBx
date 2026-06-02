@@ -109,7 +109,7 @@ export function ChatSheet({ open, onClose, chat }: ChatSheetProps) {
           </button>
           <div style={S.headerTitleWrap}>
             <div style={S.headerTitle}>Yulia</div>
-            <div className="mb-mono" style={S.headerMeta}>{chat.activeTool ?? "online"}</div>
+            {chat.activeTool ? <div className="mb-mono" style={S.headerMeta}>{chat.activeTool}</div> : null}
           </div>
           <button
             type="button"
