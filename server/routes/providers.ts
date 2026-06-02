@@ -63,12 +63,14 @@ providerRouter.post('/providers/referrals', async (req, res) => {
 
 // ─── Self-serve provider profile (free; being a provider has no plan gate) ──
 
-// My provider listing, or null if I haven't created one.
+// My provider listing, or null if I haven't created one. Also returns the
+// account-level "represents clients" flag (paid-tier upsell hint, not a gate).
 providerRouter.get('/providers/me', async (req, res) => {
   try {
     const userId = (req as any).userId;
     const [me] = await sql`SELECT * FROM service_providers WHERE claimed_by_user_id = ${userId}`;
-    return res.json({ provider: me || null });
+    const [u] = await sql`SELECT represents_clients FROM users WHERE id = ${userId}`;
+    return res.json({ provider: me || null, representsClients: !!u?.represents_clients });
   } catch (err: any) {
     console.error('get my provider error:', err.message);
     return res.status(500).json({ error: 'Failed to load provider profile' });
@@ -82,6 +84,12 @@ providerRouter.put('/providers/me', async (req, res) => {
     const b = req.body || {};
     if (!b.type || !PROVIDER_TYPES.includes(b.type)) return res.status(400).json({ error: 'Valid provider type required' });
     if (!b.name || !String(b.name).trim()) return res.status(400).json({ error: 'Name required' });
+
+    // Account-level "represents clients" flag (paid-tier upsell hint, not a gate).
+    // Only written when the key is present in the body.
+    if ('representsClients' in b) {
+      await sql`UPDATE users SET represents_clients = ${!!b.representsClients} WHERE id = ${userId}`;
+    }
 
     const [u] = await sql`SELECT email FROM users WHERE id = ${userId}`;
     const f = {
@@ -135,7 +143,8 @@ providerRouter.put('/providers/me', async (req, res) => {
         RETURNING *
       `;
     }
-    return res.json({ provider: row });
+    const [u2] = await sql`SELECT represents_clients FROM users WHERE id = ${userId}`;
+    return res.json({ provider: row, representsClients: !!u2?.represents_clients });
   } catch (err: any) {
     console.error('upsert my provider error:', err.message);
     return res.status(500).json({ error: 'Failed to save provider profile' });

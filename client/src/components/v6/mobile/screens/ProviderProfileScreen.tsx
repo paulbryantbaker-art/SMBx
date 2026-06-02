@@ -78,7 +78,7 @@ function ChipInput({
 }
 
 export function MobileProviderProfileScreen({ onBack, user }: Props) {
-  const { provider, loading, loadError, saving, saveError, saved, save } = useProviderProfile();
+  const { provider, representsClients, loading, loadError, saving, saveError, saved, save } = useProviderProfile();
   const fallbackEmail = user?.email ?? "";
 
   const [form, setForm] = useState<ProviderProfileInput>(() => toInput(null, fallbackEmail));
@@ -90,13 +90,13 @@ export function MobileProviderProfileScreen({ onBack, user }: Props) {
 
   useEffect(() => {
     if (loading || hydrated) return;
-    const next = toInput(provider, fallbackEmail);
+    const next = toInput(provider, fallbackEmail, representsClients);
     setForm(next);
     setDealMin(centsToDollars(next.dealSizeMin));
     setDealMax(centsToDollars(next.dealSizeMax));
     setRadius(next.serviceRadiusMiles != null ? String(next.serviceRadiusMiles) : "");
     setHydrated(true);
-  }, [loading, hydrated, provider, fallbackEmail]);
+  }, [loading, hydrated, provider, fallbackEmail, representsClients]);
 
   const set = <K extends keyof ProviderProfileInput>(key: K, value: ProviderProfileInput[K]) =>
     setForm(prev => ({ ...prev, [key]: value }));
@@ -233,6 +233,22 @@ export function MobileProviderProfileScreen({ onBack, user }: Props) {
               {FEE_STRUCTURES.map(f => <option key={f} value={f}>{FEE_STRUCTURE_LABELS[f]}</option>)}
             </select>
           </Field>
+
+          {/* Represent-clients mode: account flag + paid-tier upsell hint (not a gate). */}
+          <label style={D.repRow}>
+            <input
+              type="checkbox"
+              checked={form.representsClients}
+              onChange={e => set("representsClients", e.target.checked)}
+              style={D.checkbox}
+            />
+            <span style={{ fontSize: 15, color: "var(--mb-ink)", lineHeight: 1.4 }}>I represent clients</span>
+          </label>
+          {form.representsClients && (
+            <div style={{ ...D.note, marginTop: 10, marginBottom: 4 }}>
+              Representing clients uses Pro or Team — multiple client deals, shared templates, and seats.
+            </div>
+          )}
         </div>
 
         {/* Save */}
@@ -309,6 +325,14 @@ const D: Record<string, CSSProperties> = {
   },
   error: { fontSize: 13, color: "#D9534F", fontWeight: 600 },
   ok: { fontSize: 13, color: "var(--mb-accent-ink)", fontWeight: 700 },
+  repRow: {
+    display: "flex", alignItems: "flex-start", gap: 10,
+    marginTop: 4, marginBottom: 10, cursor: "pointer",
+  },
+  checkbox: {
+    width: 20, height: 20, marginTop: 1, flex: "0 0 auto",
+    accentColor: "var(--mb-accent)", cursor: "pointer",
+  },
 };
 
 export default MobileProviderProfileScreen;

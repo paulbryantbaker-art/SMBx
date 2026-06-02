@@ -115,7 +115,7 @@ function ChipInput({
 }
 
 export function V6ProviderProfileView({ user }: Props) {
-  const { provider, loading, loadError, saving, saveError, saved, save } = useProviderProfile();
+  const { provider, representsClients, loading, loadError, saving, saveError, saved, save } = useProviderProfile();
   const fallbackEmail = user?.email ?? "";
 
   const [form, setForm] = useState<ProviderProfileInput>(() => toInput(null, fallbackEmail));
@@ -128,13 +128,13 @@ export function V6ProviderProfileView({ user }: Props) {
   // Hydrate the form once the GET resolves (provider may be null → blank create).
   useEffect(() => {
     if (loading || hydrated) return;
-    const next = toInput(provider, fallbackEmail);
+    const next = toInput(provider, fallbackEmail, representsClients);
     setForm(next);
     setDealMin(centsToDollars(next.dealSizeMin));
     setDealMax(centsToDollars(next.dealSizeMax));
     setRadius(next.serviceRadiusMiles != null ? String(next.serviceRadiusMiles) : "");
     setHydrated(true);
-  }, [loading, hydrated, provider, fallbackEmail]);
+  }, [loading, hydrated, provider, fallbackEmail, representsClients]);
 
   const set = <K extends keyof ProviderProfileInput>(key: K, value: ProviderProfileInput[K]) =>
     setForm(prev => ({ ...prev, [key]: value }));
@@ -283,6 +283,28 @@ export function V6ProviderProfileView({ user }: Props) {
             </select>
           </Field>
         </div>
+
+        {/* Represent-clients mode: account flag + paid-tier upsell hint (not a gate). */}
+        <label style={{ display: "flex", alignItems: "flex-start", gap: 10, marginTop: 18, cursor: "pointer" }}>
+          <input
+            type="checkbox"
+            checked={form.representsClients}
+            onChange={e => set("representsClients", e.target.checked)}
+            style={{ width: 16, height: 16, marginTop: 2, accentColor: "var(--cta)", cursor: "pointer", flex: "0 0 auto" }}
+          />
+          <span style={{ fontSize: "0.9rem", color: "var(--ink)", lineHeight: 1.4 }}>I represent clients</span>
+        </label>
+        {form.representsClients && (
+          <div
+            style={{
+              marginTop: 10, padding: "10px 14px", borderRadius: 10,
+              background: "var(--surface-2)", border: "1px solid var(--line)",
+              color: "var(--ink-2)", fontSize: "0.86rem", lineHeight: 1.45,
+            }}
+          >
+            Representing clients uses Pro or Team — multiple client deals, shared templates, and seats.
+          </div>
+        )}
       </Section>
 
       {/* Save bar */}

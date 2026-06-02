@@ -60,86 +60,98 @@ collaborationRouter.get('/deals/:dealId/participants', async (req, res) => {
 
 // ─── Invite participant ──────────────────────────────────────
 
+/**
+ * Create a deal invite (shared by the /invite route and the invite_to_deal Yulia
+ * tool, so both take exactly one code path). If the email is an existing user,
+ * creates a PENDING deal_participant (accepted_at NULL = NO access until they
+ * accept; hasDealAccess gates on it) + an in-app notification; otherwise an
+ * email-token invitation. Returns an HTTP-shaped { status, body }.
+ */
+export async function createDealInvite(opts: {
+  dealId: number;
+  inviterUserId: number;
+  email: string;
+  role: string;
+  accessLevel?: string;
+  folderScope?: number[] | null;
+}): Promise<{ status: number; body: any }> {
+  const { dealId, inviterUserId, email, role, accessLevel, folderScope } = opts;
+
+  if (!email) return { status: 400, body: { error: 'Email is required' } };
+  if (!(VALID_ROLES as readonly string[]).includes(role || '')) return { status: 400, body: { error: 'Invalid role' } };
+
+  const isOwner = await isDealOwner(dealId, inviterUserId);
+  if (!isOwner) return { status: 403, body: { error: 'Only deal owner can invite participants' } };
+
+  // Already a participant?
+  const [existing] = await sql`
+    SELECT id FROM deal_participants dp
+    JOIN users u ON u.id = dp.user_id
+    WHERE dp.deal_id = ${dealId} AND u.email = ${email}
+  `;
+  if (existing) return { status: 400, body: { error: 'User is already a participant' } };
+
+  // Pending invitation?
+  const [pendingInvite] = await sql`
+    SELECT id FROM deal_invitations
+    WHERE deal_id = ${dealId} AND email = ${email} AND accepted_at IS NULL AND expires_at > NOW()
+  `;
+  if (pendingInvite) return { status: 400, body: { error: 'Invitation already pending for this email' } };
+
+  // Existing user → in-app deal request: a PENDING participant + notification.
+  const [existingUser] = await sql`SELECT id FROM users WHERE lower(email) = ${String(email).toLowerCase().trim()}`;
+  if (existingUser) {
+    const [pending] = await sql`
+      INSERT INTO deal_participants (deal_id, user_id, role, access_level, folder_scope, invited_by, accepted_at)
+      VALUES (${dealId}, ${existingUser.id}, ${role || 'consultant'}, ${accessLevel || 'read'}, ${folderScope || null}, ${inviterUserId}, NULL)
+      ON CONFLICT (deal_id, user_id) DO UPDATE SET role = ${role || 'consultant'}, access_level = ${accessLevel || 'read'}, folder_scope = ${folderScope || null}, invited_by = ${inviterUserId}
+      RETURNING id, role, access_level
+    `;
+    await logActivity(dealId, inviterUserId, 'invited', 'participant', pending.id, { email, role, mode: 'in_app' });
+    const [dealRow] = await sql`SELECT name, business_name FROM deals WHERE id = ${dealId}`.catch(() => [null]);
+    const [inviter] = await sql`SELECT display_name FROM users WHERE id = ${inviterUserId}`.catch(() => [null]);
+    await createNotification({
+      userId: existingUser.id,
+      dealId,
+      type: 'deal_request',
+      title: `${inviter?.display_name || 'A deal owner'} added you to ${dealRow?.name || dealRow?.business_name || 'a deal'} as ${role || 'consultant'}`,
+      body: 'Accept to join the deal and its chat.',
+      actionUrl: '/#mode=deal-requests',
+    });
+    return { status: 201, body: { mode: 'in_app_request', participant: pending } };
+  }
+
+  // Non-user → email-token invitation.
+  const token = crypto.randomBytes(32).toString('hex');
+  const [invitation] = await sql`
+    INSERT INTO deal_invitations (deal_id, email, role, access_level, folder_scope, token, invited_by)
+    VALUES (${dealId}, ${email}, ${role || 'consultant'}, ${accessLevel || 'read'}, ${folderScope || null}, ${token}, ${inviterUserId})
+    RETURNING id, email, role, access_level, token, expires_at, created_at
+  `;
+  await logActivity(dealId, inviterUserId, 'invited', 'participant', invitation.id, { email, role });
+
+  const inviteUrl = `/invite/${token}`;
+  console.log(`[INVITE] Deal ${dealId} → ${email} (${role}): ${inviteUrl}`);
+  const [deal] = await sql`SELECT name FROM deals WHERE id = ${dealId}`.catch(() => [null]);
+  const [inviter] = await sql`SELECT display_name FROM users WHERE id = ${inviterUserId}`.catch(() => [null]);
+  sendInvitationEmail({
+    email,
+    token,
+    role: role || 'consultant',
+    dealName: deal?.name,
+    inviterName: inviter?.display_name,
+  }).catch(() => {});
+
+  return { status: 201, body: { invitation, inviteLink: inviteUrl } };
+}
+
 collaborationRouter.post('/deals/:dealId/invite', async (req, res) => {
   try {
     const userId = (req as any).userId;
     const dealId = parseInt(req.params.dealId, 10);
     const { email, role, accessLevel, folderScope } = req.body;
-
-    if (!email) return res.status(400).json({ error: 'Email is required' });
-    if (!VALID_ROLES.includes(role || '')) return res.status(400).json({ error: 'Invalid role' });
-
-    const isOwner = await isDealOwner(dealId, userId);
-    if (!isOwner) return res.status(403).json({ error: 'Only deal owner can invite participants' });
-
-    // Check if already a participant
-    const [existing] = await sql`
-      SELECT id FROM deal_participants dp
-      JOIN users u ON u.id = dp.user_id
-      WHERE dp.deal_id = ${dealId} AND u.email = ${email}
-    `;
-    if (existing) return res.status(400).json({ error: 'User is already a participant' });
-
-    // Check for pending invitation
-    const [pendingInvite] = await sql`
-      SELECT id FROM deal_invitations
-      WHERE deal_id = ${dealId} AND email = ${email} AND accepted_at IS NULL AND expires_at > NOW()
-    `;
-    if (pendingInvite) return res.status(400).json({ error: 'Invitation already pending for this email' });
-
-    // Existing user → in-app deal request: a PENDING participant (accepted_at
-    // NULL = NO data-room access until they accept; hasDealAccess gates on it) +
-    // an in-app notification. Non-users still get the email-token invite below.
-    const [existingUser] = await sql`SELECT id FROM users WHERE lower(email) = ${String(email).toLowerCase().trim()}`;
-    if (existingUser) {
-      const [pending] = await sql`
-        INSERT INTO deal_participants (deal_id, user_id, role, access_level, folder_scope, invited_by, accepted_at)
-        VALUES (${dealId}, ${existingUser.id}, ${role || 'consultant'}, ${accessLevel || 'read'}, ${folderScope || null}, ${userId}, NULL)
-        ON CONFLICT (deal_id, user_id) DO UPDATE SET role = ${role || 'consultant'}, access_level = ${accessLevel || 'read'}, folder_scope = ${folderScope || null}, invited_by = ${userId}
-        RETURNING id, role, access_level
-      `;
-      await logActivity(dealId, userId, 'invited', 'participant', pending.id, { email, role, mode: 'in_app' });
-      const [dealRow] = await sql`SELECT name, business_name FROM deals WHERE id = ${dealId}`.catch(() => [null]);
-      const [inviter] = await sql`SELECT display_name FROM users WHERE id = ${userId}`.catch(() => [null]);
-      await createNotification({
-        userId: existingUser.id,
-        dealId,
-        type: 'deal_request',
-        title: `${inviter?.display_name || 'A deal owner'} added you to ${dealRow?.name || dealRow?.business_name || 'a deal'} as ${role || 'consultant'}`,
-        body: 'Accept to join the deal and its chat.',
-        actionUrl: '/#mode=deal-requests',
-      });
-      return res.status(201).json({ mode: 'in_app_request', participant: pending });
-    }
-
-    const token = crypto.randomBytes(32).toString('hex');
-
-    const [invitation] = await sql`
-      INSERT INTO deal_invitations (deal_id, email, role, access_level, folder_scope, token, invited_by)
-      VALUES (${dealId}, ${email}, ${role || 'consultant'}, ${accessLevel || 'read'}, ${folderScope || null}, ${token}, ${userId})
-      RETURNING id, email, role, access_level, token, expires_at, created_at
-    `;
-
-    await logActivity(dealId, userId, 'invited', 'participant', invitation.id, { email, role });
-
-    const inviteUrl = `/invite/${token}`;
-    console.log(`[INVITE] Deal ${dealId} → ${email} (${role}): ${inviteUrl}`);
-
-    // Send invitation email (async, non-blocking)
-    const [deal] = await sql`SELECT name FROM deals WHERE id = ${dealId}`.catch(() => [null]);
-    const [inviter] = await sql`SELECT display_name FROM users WHERE id = ${userId}`.catch(() => [null]);
-    sendInvitationEmail({
-      email,
-      token,
-      role: role || 'consultant',
-      dealName: deal?.name,
-      inviterName: inviter?.display_name,
-    }).catch(() => {});
-
-    return res.status(201).json({
-      invitation,
-      inviteLink: inviteUrl,
-    });
+    const result = await createDealInvite({ dealId, inviterUserId: userId, email, role, accessLevel, folderScope });
+    return res.status(result.status).json(result.body);
   } catch (err: any) {
     console.error('Invite participant error:', err.message);
     return res.status(500).json({ error: 'Failed to send invitation' });

@@ -12,6 +12,7 @@ import {
 import { classifyV19LeagueFromCents, type League } from '../constants/v19Leagues.js';
 import { checkGateReadinessSync as checkReadiness } from './gateReadinessService.js';
 import { getProviderDirectoryForDeal, findProviders } from './providerMatchingService.js';
+import { createDealInvite } from '../routes/collaboration.js';
 import { matchFranchises } from './franchiseMatchingService.js';
 import { matchBuyersForSeller } from './buyerSourcingService.js';
 import { generateOptimizationPlan, saveOptimizationPlan, createOptimizationMilestone } from './optimizationPlanService.js';
@@ -499,6 +500,20 @@ export const TOOL_DEFINITIONS: Tool[] = [
     },
   },
   {
+    name: 'invite_to_deal',
+    description: 'Invite a specific person the USER has chosen — a provider they picked from the find_providers directory, or someone they named — onto a deal as a participant with a role. Use ONLY when the user explicitly asks to invite or add a specific person; never pick the provider for the user. The invitee gets NO data-room access until they accept (existing users get an in-app request, others an email invite).',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId: { type: 'number', description: 'The deal to invite them to. Must be owned by the user.' },
+        providerId: { type: 'number', description: 'A service-provider directory id from find_providers; its on-file email is used to invite.' },
+        email: { type: 'string', description: 'Direct email to invite, if not using a directory providerId.' },
+        role: { type: 'string', description: 'Their role on the deal: attorney, cpa, broker, lender, consultant, counterparty, auditor, re_agent, appraiser, escrow, title, or insurance.' },
+      },
+      required: ['dealId', 'role'],
+    },
+  },
+  {
     name: 'analyze_buyer_demand',
     description: 'Analyze buyer demand for a seller\'s business. Returns matching active buyer count (anonymized), buyer type analysis, and demand signal strength. Call this when a seller asks "who would buy my business?" or wants to understand their market of potential buyers.',
     input_schema: {
@@ -953,6 +968,8 @@ export async function executeTool(
         return await fileDeliverableToDataRoom(input, userId);
       case 'find_providers':
         return await findProvidersHandler(input, userId);
+      case 'invite_to_deal':
+        return await inviteToDealHandler(input, userId);
       case 'analyze_buyer_demand':
         return await analyzeBuyerDemandTool(input, userId);
       case 'match_franchises':
@@ -3296,6 +3313,40 @@ function getJourneyGates(journey: string): string[] {
     pmi: ['PMI0 Day Zero', 'PMI1 Stabilization', 'PMI2 Assessment', 'PMI3 Optimization'],
   };
   return gates[journey] || [];
+}
+
+async function inviteToDealHandler(input: Record<string, any>, userId: number): Promise<string> {
+  const dealId = Number(input.dealId);
+  const role = String(input.role || '').trim();
+  let email = input.email ? String(input.email).trim() : '';
+
+  if (!dealId) return JSON.stringify({ error: 'dealId is required' });
+  if (!role) return JSON.stringify({ error: 'role is required (attorney, cpa, broker, lender, consultant, counterparty, auditor, re_agent, appraiser, escrow, title, or insurance)' });
+
+  // Resolve the email from a chosen smbX directory provider when none was given.
+  if (!email && input.providerId) {
+    const [prov] = await sql`SELECT email, name FROM service_providers WHERE id = ${Number(input.providerId)}`;
+    if (!prov) return JSON.stringify({ error: 'Provider not found in the directory.' });
+    if (!prov.email) return JSON.stringify({ error: `No email on file for ${prov.name}. Ask the user for the provider's email, then invite by email.` });
+    email = String(prov.email).trim();
+  }
+  if (!email) return JSON.stringify({ error: 'Provide an email, or a providerId for a directory listing that has an email on file.' });
+
+  // The user chose this person; Yulia is executing an explicit instruction, not
+  // recommending. createDealInvite enforces deal ownership + the accept gate.
+  const result = await createDealInvite({ dealId, inviterUserId: userId, email, role });
+  if (result.status >= 400) return JSON.stringify({ error: result.body?.error || 'Invite failed' });
+
+  const mode = result.body?.mode === 'in_app_request' ? 'in_app_request' : 'email_invite';
+  return JSON.stringify({
+    success: true,
+    invited: email,
+    role,
+    mode,
+    summary: mode === 'in_app_request'
+      ? `Sent ${email} an in-app request to join the deal as ${role}. They have no data-room access until they accept.`
+      : `Emailed ${email} an invitation to join the deal as ${role}. They sign up and accept; no access until they do.`,
+  });
 }
 
 async function findProvidersHandler(input: Record<string, any>, userId: number): Promise<string> {

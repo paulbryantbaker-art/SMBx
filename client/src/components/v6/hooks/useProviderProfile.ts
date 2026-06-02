@@ -97,10 +97,14 @@ export interface ProviderProfileInput {
   financingExperience: string[];
   feeStructure: FeeStructure | "";
   licenses: string[];
+  /** Account-level flag: I manage deals for clients (paid-tier upsell hint). */
+  representsClients: boolean;
 }
 
 export interface UseProviderProfile {
   provider: ProviderProfile | null;
+  /** Account-level "represents clients" flag (paid-tier upsell hint, not a gate). */
+  representsClients: boolean;
   loading: boolean;
   loadError: string | null;
   saving: boolean;
@@ -112,6 +116,7 @@ export interface UseProviderProfile {
 
 export function useProviderProfile(): UseProviderProfile {
   const [provider, setProvider] = useState<ProviderProfile | null>(null);
+  const [representsClients, setRepresentsClients] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -129,6 +134,7 @@ export function useProviderProfile(): UseProviderProfile {
       }
       const data = await res.json();
       setProvider(data?.provider ?? null);
+      setRepresentsClients(!!data?.representsClients);
     } catch {
       setLoadError("Network error loading your listing.");
     } finally {
@@ -158,6 +164,7 @@ export function useProviderProfile(): UseProviderProfile {
       }
       const data = await res.json();
       setProvider(data?.provider ?? null);
+      setRepresentsClients(!!data?.representsClients);
       setSaved(true);
       return true;
     } catch {
@@ -168,7 +175,7 @@ export function useProviderProfile(): UseProviderProfile {
     }
   }, [saving]);
 
-  return { provider, loading, loadError, saving, saveError, saved, refresh, save };
+  return { provider, representsClients, loading, loadError, saving, saveError, saved, refresh, save };
 }
 
 /** Parse the licenses column (stored as JSON text) into a string[] best-effort. */
@@ -183,8 +190,14 @@ export function parseLicenses(raw: unknown): string[] {
   return [];
 }
 
-/** Build the camelCase PUT body from a snake_case profile row (for prefill). */
-export function toInput(p: ProviderProfile | null, fallbackEmail: string): ProviderProfileInput {
+/** Build the camelCase PUT body from a snake_case profile row (for prefill).
+ * `representsClients` is account-level (not on the provider row), so it's passed
+ * in separately from the hook's state. */
+export function toInput(
+  p: ProviderProfile | null,
+  fallbackEmail: string,
+  representsClients = false,
+): ProviderProfileInput {
   return {
     type: (p?.type as ProviderType) ?? "",
     name: p?.name ?? "",
@@ -204,6 +217,7 @@ export function toInput(p: ProviderProfile | null, fallbackEmail: string): Provi
     financingExperience: p?.financing_experience ?? [],
     feeStructure: (p?.fee_structure as FeeStructure) ?? "",
     licenses: parseLicenses(p?.licenses),
+    representsClients,
   };
 }
 
