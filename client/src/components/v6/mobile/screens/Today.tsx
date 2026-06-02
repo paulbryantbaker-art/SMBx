@@ -211,7 +211,7 @@ export function TodayScreen({
         </button>
       </div>
       <div style={{ marginTop: 14, padding: "0 16px" }}>
-        <LibraryActivityList onOpenDetail={onOpenLibraryDetail} limit={3} />
+        <LibraryActivityList onOpenDetail={onOpenLibraryDetail} limit={3} onSeeAll={() => onOpenLibrary("all")} />
       </div>
 
       {/* Pipeline section — content per audience via copy.ts.

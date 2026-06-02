@@ -245,19 +245,36 @@ export function LibraryPreviewCard({
 
 export function LibraryActivityList({
   onOpenDetail,
+  onSeeAll,
   limit = 4,
 }: {
   onOpenDetail: OpenDocHandler;
+  onSeeAll?: () => void;
   limit?: number;
 }) {
   const rows = libraryActivity.slice(0, limit).map((row) => withDocClick(row, onOpenDetail));
+  const head = (
+    <>
+      <div className="mb-section-eyebrow">RECENTS</div>
+      <div className="mb-section-title">Recents</div>
+      <div style={S.activitySub}>Recently touched docs, plus anything waiting on you.</div>
+    </>
+  );
   return (
     <div className="mb-as-card" style={S.activityCard}>
-      <div style={{ padding: "0 22px 6px" }}>
-        <div className="mb-section-eyebrow">RECENTS</div>
-        <div className="mb-section-title">Recents</div>
-        <div style={S.activitySub}>Recently touched docs, plus anything waiting on you.</div>
-      </div>
+      {onSeeAll ? (
+        <button
+          type="button"
+          onClick={onSeeAll}
+          aria-label="See all recent files"
+          style={{ all: "unset", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, width: "100%", padding: "0 22px 6px", boxSizing: "border-box", cursor: "pointer" }}
+        >
+          <div style={{ minWidth: 0 }}>{head}</div>
+          <MobileIcon name="chevron" c="var(--mb-ink-3)" size={13} />
+        </button>
+      ) : (
+        <div style={{ padding: "0 22px 6px" }}>{head}</div>
+      )}
       <div style={S.activityRows}>
         {rows.map((row, index) => (
           <DocRow key={row.name} row={row} last={index === rows.length - 1} showChevron />
@@ -326,7 +343,7 @@ export function LibraryScreen({
       </div>
 
       <div style={{ marginTop: 24, padding: "0 16px" }}>
-        <LibraryActivityList onOpenDetail={onOpenDetail} />
+        <LibraryActivityList onOpenDetail={onOpenDetail} onSeeAll={() => onOpenFinder("all")} />
       </div>
 
       <div style={S.librarySectionPad}>
