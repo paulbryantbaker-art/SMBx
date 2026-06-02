@@ -11,16 +11,16 @@ interface LogoProps {
 export default function Logo({ className = '', light = false, linked = true, height = 28 }: LogoProps) {
   const { user } = useAuth();
 
-  // Green "smbX.ai" wordmark badge (dark text on neon-green #2BFF77), corners
-  // rounded proportionally to height. `light` retained for API compat but unused.
+  // Green "smbX.ai" wordmark badge — dark border + rounded corners baked into
+  // the asset (GreenLogoBlkBorder.png). `light` retained for API compat, unused.
   void light;
   const mark = (
     <img
-      src="/GreenLogo.png"
+      src="/GreenLogoBlkBorder.png"
       alt="smbx.ai"
       draggable={false}
       className={className}
-      style={{ height, objectFit: 'contain', display: 'block', borderRadius: Math.round(height * 0.2), border: '2px solid #00210F', boxSizing: 'border-box' }}
+      style={{ height, objectFit: 'contain', display: 'block' }}
     />
   );
 
