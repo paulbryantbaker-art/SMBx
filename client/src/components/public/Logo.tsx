@@ -20,7 +20,7 @@ export default function Logo({ className = '', light = false, linked = true, hei
       alt="smbx.ai"
       draggable={false}
       className={className}
-      style={{ height, objectFit: 'contain', display: 'block', borderRadius: Math.round(height * 0.2) }}
+      style={{ height, objectFit: 'contain', display: 'block', borderRadius: Math.round(height * 0.2), border: '2px solid #00210F', boxSizing: 'border-box' }}
     />
   );
 

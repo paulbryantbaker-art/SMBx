@@ -45,7 +45,7 @@ export function MarketingNav() {
       <nav className={`nav${scrolled ? ' scrolled' : ''}`}>
         <div className="nav-inner">
           <Link href="/" className="brand" aria-label="smbX.ai — home">
-            <img src="/GreenLogo.png" alt="smbX.ai" draggable={false} style={{ height: 26, width: 'auto', display: 'block', borderRadius: 5 }} />
+            <img src="/GreenLogo.png" alt="smbX.ai" draggable={false} style={{ height: 26, width: 'auto', display: 'block', borderRadius: 5, border: '2px solid #00210F', boxSizing: 'border-box' }} />
           </Link>
           <div className="nav-links">
             {NAV_LINKS.map(link => (
