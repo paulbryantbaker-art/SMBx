@@ -87,6 +87,31 @@ collaborationRouter.post('/deals/:dealId/invite', async (req, res) => {
     `;
     if (pendingInvite) return res.status(400).json({ error: 'Invitation already pending for this email' });
 
+    // Existing user → in-app deal request: a PENDING participant (accepted_at
+    // NULL = NO data-room access until they accept; hasDealAccess gates on it) +
+    // an in-app notification. Non-users still get the email-token invite below.
+    const [existingUser] = await sql`SELECT id FROM users WHERE lower(email) = ${String(email).toLowerCase().trim()}`;
+    if (existingUser) {
+      const [pending] = await sql`
+        INSERT INTO deal_participants (deal_id, user_id, role, access_level, folder_scope, invited_by, accepted_at)
+        VALUES (${dealId}, ${existingUser.id}, ${role || 'consultant'}, ${accessLevel || 'read'}, ${folderScope || null}, ${userId}, NULL)
+        ON CONFLICT (deal_id, user_id) DO UPDATE SET role = ${role || 'consultant'}, access_level = ${accessLevel || 'read'}, folder_scope = ${folderScope || null}, invited_by = ${userId}
+        RETURNING id, role, access_level
+      `;
+      await logActivity(dealId, userId, 'invited', 'participant', pending.id, { email, role, mode: 'in_app' });
+      const [dealRow] = await sql`SELECT name, business_name FROM deals WHERE id = ${dealId}`.catch(() => [null]);
+      const [inviter] = await sql`SELECT display_name FROM users WHERE id = ${userId}`.catch(() => [null]);
+      await createNotification({
+        userId: existingUser.id,
+        dealId,
+        type: 'deal_request',
+        title: `${inviter?.display_name || 'A deal owner'} added you to ${dealRow?.name || dealRow?.business_name || 'a deal'} as ${role || 'consultant'}`,
+        body: 'Accept to join the deal and its chat.',
+        actionUrl: '/#mode=deal-requests',
+      });
+      return res.status(201).json({ mode: 'in_app_request', participant: pending });
+    }
+
     const token = crypto.randomBytes(32).toString('hex');
 
     const [invitation] = await sql`
@@ -162,6 +187,70 @@ collaborationRouter.post('/invitations/:token/accept', async (req, res) => {
   } catch (err: any) {
     console.error('Accept invitation error:', err.message);
     return res.status(500).json({ error: 'Failed to accept invitation' });
+  }
+});
+
+// ─── In-app deal requests (pending participant where I am the invitee) ──
+
+// List my pending deal requests (someone added me; I haven't accepted yet).
+collaborationRouter.get('/deal-requests', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const rows = await sql`
+      SELECT dp.id, dp.deal_id, dp.role, dp.access_level, dp.created_at,
+             d.name AS deal_name, d.business_name,
+             inviter.display_name AS inviter_name, inviter.email AS inviter_email
+      FROM deal_participants dp
+      JOIN deals d ON d.id = dp.deal_id
+      LEFT JOIN users inviter ON inviter.id = dp.invited_by
+      WHERE dp.user_id = ${userId} AND dp.accepted_at IS NULL
+      ORDER BY dp.created_at DESC
+    `;
+    return res.json(rows);
+  } catch (err: any) {
+    console.error('list deal-requests error:', err.message);
+    return res.status(500).json({ error: 'Failed to load requests' });
+  }
+});
+
+// Accept → become an active participant (role + RBAC turn on via accepted_at).
+collaborationRouter.post('/deal-requests/:participantId/accept', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const id = parseInt(req.params.participantId, 10);
+    const [p] = await sql`
+      UPDATE deal_participants SET accepted_at = NOW()
+      WHERE id = ${id} AND user_id = ${userId} AND accepted_at IS NULL
+      RETURNING deal_id, role, invited_by
+    `;
+    if (!p) return res.status(404).json({ error: 'Request not found' });
+    await logActivity(p.deal_id, userId, 'joined', 'participant', id, { role: p.role });
+    if (p.invited_by) {
+      const [me] = await sql`SELECT display_name FROM users WHERE id = ${userId}`.catch(() => [null]);
+      await createNotification({ userId: p.invited_by, dealId: p.deal_id, type: 'deal_request_accepted', title: `${me?.display_name || 'A participant'} joined your deal`, actionUrl: `/#mode=pipeline&tab=deal-team-${p.deal_id}` });
+    }
+    return res.json({ ok: true, dealId: p.deal_id });
+  } catch (err: any) {
+    console.error('accept deal-request error:', err.message);
+    return res.status(500).json({ error: 'Failed to accept' });
+  }
+});
+
+// Decline → drop the pending participant.
+collaborationRouter.post('/deal-requests/:participantId/decline', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const id = parseInt(req.params.participantId, 10);
+    const [p] = await sql`
+      DELETE FROM deal_participants
+      WHERE id = ${id} AND user_id = ${userId} AND accepted_at IS NULL
+      RETURNING deal_id
+    `;
+    if (!p) return res.status(404).json({ error: 'Request not found' });
+    return res.json({ ok: true });
+  } catch (err: any) {
+    console.error('decline deal-request error:', err.message);
+    return res.status(500).json({ error: 'Failed to decline' });
   }
 });
 
