@@ -5,6 +5,7 @@
  * Yulia" — because every conversion path routes to chat (never "contact
  * sales"). Desktop-only; mobile has no footer (chat pill owns the bottom).
  */
+import Logo from '../public/Logo';
 
 interface Props {
   dark: boolean;
@@ -72,14 +73,8 @@ export default function DesktopFooter({ dark, onTalkToYulia, onNavigate }: Props
       >
         {/* Brand + CTA */}
         <div>
-          <div style={{
-            fontFamily: "'Figtree', system-ui, sans-serif",
-            fontSize: 20, fontWeight: 800,
-            letterSpacing: '-0.02em',
-            color: heading,
-            marginBottom: 10,
-          }}>
-            smbx.ai
+          <div style={{ marginBottom: 10 }}>
+            <Logo light={dark} linked={false} height={24} />
           </div>
           <p style={{
             margin: 0,
