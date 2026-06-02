@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { enterApp } from './useEnterApp';
+import { Brand } from './Brand';
 import Logo from '../components/public/Logo';
 
 /* Yulia glyph — the half-filled circle mark used across the marketing site. */
@@ -127,16 +128,16 @@ export function MarketingFooter() {
             <ul>
               <li><Link href="/legal/terms">Terms</Link></li>
               <li><Link href="/legal/privacy">Privacy</Link></li>
-              <li><Link href="/about">What smbX Is / Isn't</Link></li>
+              <li><Link href="/about">What <Brand /> Is / Isn't</Link></li>
             </ul>
           </div>
         </div>
         <div className="fbar">
           <p>
-            smbX is software for M&amp;A diligence. It is not a broker-dealer, investment
+            <Brand /> is software for M&amp;A diligence. It is not a broker-dealer, investment
             adviser, business broker, law firm, accounting firm, or appraiser. Every
             artifact is software-generated and is not a substitute for a licensed
-            professional. © 2026 smbX.
+            professional. © 2026 <Brand />.
           </p>
           <span className="fmono">DEFINITIVE.v1.0 · methodology V19</span>
         </div>

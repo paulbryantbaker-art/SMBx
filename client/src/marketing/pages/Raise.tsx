@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { MarketingShell } from '../MarketingShell';
+import { Brand } from '../Brand';
 import { YuliaLauncher } from '../YuliaChat';
 import { enterApp } from '../useEnterApp';
 
@@ -154,7 +155,7 @@ export default function Raise() {
               package — consistent numbers, every figure cited.
             </p>
             <p className="mono" style={{ marginTop: 18, fontSize: '.8rem', color: 'rgba(255,255,255,.5)' }}>
-              smbX does not solicit or contact investors on your behalf.
+              <Brand /> does not solicit or contact investors on your behalf.
             </p>
           </div>
           <div className="reveal" data-d="1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>

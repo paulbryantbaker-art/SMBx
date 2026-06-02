@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { MarketingShell } from '../MarketingShell';
+import { Brand } from '../Brand';
 import { YuliaLauncher } from '../YuliaChat';
 import { enterApp } from '../useEnterApp';
 
@@ -110,7 +111,7 @@ export default function Sell() {
             <span className="amber">No</span> broker fee.<br />No agenda.
           </h2>
           <p className="lead" style={{ margin: '24px auto 0', maxWidth: '46ch' }}>
-            smbX charges a flat software fee, never a percentage of your sale. Yulia has
+            <Brand /> charges a flat software fee, never a percentage of your sale. Yulia has
             no incentive to push you toward a deal or a price. She shows you the analysis;
             the decisions are yours.
           </p>

@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 import { Link } from 'wouter';
 import { MarketingShell } from '../MarketingShell';
+import { Brand } from '../Brand';
 import { enterApp } from '../useEnterApp';
 
 type LibItem = { name: string; desc: string; href?: string };
@@ -37,7 +38,7 @@ export default function Standard() {
                 The methodology, in the open.
               </h1>
               <p className="lead" style={{ marginTop: 24, maxWidth: '50ch' }}>
-                Every calculation smbX performs is documented here — its inputs, its
+                Every calculation <Brand /> performs is documented here — its inputs, its
                 computation, the authorities that govern it, and a worked example.
                 Read it, check it, cite it. No account required.
               </p>
@@ -113,7 +114,7 @@ Adj = delivered NWC − Peg   <span style={{ color: 'var(--accent)' }}>→ +$15,
                 <div key={item.name} className="lib-row" role="button" tabIndex={0} onClick={() => enterApp()}>
                   <span className="ln">{item.name}</span>
                   <span className="ld">{item.desc}</span>
-                  <span className="lgo">Generate in smbX →</span>
+                  <span className="lgo">Generate in <Brand /> →</span>
                 </div>
               )
             )}

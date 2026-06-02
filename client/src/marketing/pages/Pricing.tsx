@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { MarketingShell } from '../MarketingShell';
+import { Brand } from '../Brand';
 import { enterApp } from '../useEnterApp';
 
 const TIERS: Array<{ name: string; price: string; per?: string; desc: string; features: string[] }> = [
@@ -185,7 +186,7 @@ export default function Pricing() {
             <span className="eyebrow">The line</span>
             <h2 style={{ marginTop: 18, maxWidth: '14ch' }}>What we never charge.</h2>
             <p className="lead" style={{ marginTop: 22, maxWidth: '44ch' }}>
-              smbX is software. Every fee is flat — a subscription or a per-artifact price,
+              <Brand /> is software. Every fee is flat — a subscription or a per-artifact price,
               charged on generation. Nothing we charge moves with the size or outcome of
               your deal.
             </p>

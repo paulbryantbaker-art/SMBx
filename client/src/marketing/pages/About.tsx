@@ -1,4 +1,5 @@
 import { MarketingShell } from '../MarketingShell';
+import { Brand } from '../Brand';
 import { enterApp } from '../useEnterApp';
 
 /* Stat band */
@@ -42,7 +43,7 @@ export default function About() {
             We built the diligence work, not the advice.
           </h1>
           <p className="lead" style={{ marginTop: 24, maxWidth: '54ch' }}>
-            smbX is software. It computes the analysis that M&amp;A used to require a team to produce
+            <Brand /> is software. It computes the analysis that M&amp;A used to require a team to produce
             — and it stops, deliberately, at the line where software ends and licensed judgment
             begins.
           </p>
@@ -111,14 +112,14 @@ export default function About() {
       {/* WHAT SMBX IS NOT — dark safe-harbor block (reused from Home) */}
       <section className="dark">
         <div className="wrap center">
-          <h2 className="reveal" style={{ maxWidth: '20ch', margin: '0 auto' }}>smbX is software.</h2>
+          <h2 className="reveal" style={{ maxWidth: '20ch', margin: '0 auto' }}><Brand /> is software.</h2>
           <p className="lead reveal measure-wide" data-d="1" style={{ margin: '24px auto 0' }}>
             It is not a broker-dealer, investment adviser, or business broker. It is not
             a law firm, accounting firm, or appraiser. It does not negotiate, sign, file,
             hold funds, recommend transactions, or match buyers and sellers for a fee.
           </p>
           <p className="reveal" data-d="2" style={{ margin: '22px auto 0', fontFamily: 'var(--mono)', letterSpacing: '.04em', color: 'var(--accent)' }}>
-            smbX computes. You decide.
+            <Brand /> computes. You decide.
           </p>
         </div>
       </section>

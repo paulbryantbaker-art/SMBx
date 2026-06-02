@@ -1,4 +1,5 @@
 import { MarketingShell } from '../MarketingShell';
+import { Brand } from '../Brand';
 import { enterApp } from '../useEnterApp';
 
 /* Where-it-runs surfaces */
@@ -81,10 +82,10 @@ export default function Connectors() {
             className="display"
             style={{ fontSize: 'clamp(2.3rem,4.6vw,4rem)', margin: '18px auto 0', maxWidth: '15ch' }}
           >
-            smbX is the substrate. Use it anywhere.
+            <Brand /> is the substrate. Use it anywhere.
           </h1>
           <p className="lead" style={{ margin: '22px auto 0', maxWidth: '52ch' }}>
-            Yulia lives in the smbX app — and inside Claude, ChatGPT, and any agent that speaks MCP.
+            Yulia lives in the <Brand /> app — and inside Claude, ChatGPT, and any agent that speaks MCP.
             Same diligence tools, same hash-verifiable artifacts, same audit trail, wherever you
             already work.
           </p>
