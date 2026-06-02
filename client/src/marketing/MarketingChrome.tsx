@@ -13,10 +13,6 @@ export function YuliaGlyph({ size = 20 }: { size?: number }) {
   );
 }
 
-export function BrandMark() {
-  return <span className="brand-mark" aria-hidden="true" />;
-}
-
 const NAV_LINKS: Array<{ href: string; label: string }> = [
   { href: '/buy', label: 'Buy' },
   { href: '/sell', label: 'Sell' },
@@ -96,7 +92,7 @@ export function MarketingFooter() {
       <div className="wrap">
         <div className="fcols">
           <div>
-            <div className="brand"><BrandMark /><span>smb<b>X</b></span></div>
+            <div className="brand"><Logo light linked={false} height={26} /></div>
             <p className="ftag">
               M&amp;A diligence software, accessed through Yulia. Computed, not advised.
             </p>
