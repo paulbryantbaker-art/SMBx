@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { enterApp } from './useEnterApp';
+import Logo from '../components/public/Logo';
 
 /* Yulia glyph — the half-filled circle mark used across the marketing site. */
 export function YuliaGlyph({ size = 20 }: { size?: number }) {
@@ -45,7 +46,7 @@ export function MarketingNav() {
       <nav className={`nav${scrolled ? ' scrolled' : ''}`}>
         <div className="nav-inner">
           <Link href="/" className="brand" aria-label="smbX.ai — home">
-            <img src="/GreenLogoBlkBorder.png" alt="smbX.ai" draggable={false} style={{ height: 26, width: 'auto', display: 'block' }} />
+            <Logo linked={false} height={30} />
           </Link>
           <div className="nav-links">
             {NAV_LINKS.map(link => (
