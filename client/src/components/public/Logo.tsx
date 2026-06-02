@@ -19,6 +19,9 @@ export default function Logo({ className = '', light = false, linked = true, hei
   const { user } = useAuth();
 
   const ink = light ? '#FAF9F5' : 'var(--ink, #191813)';
+  // Bright neon pops on dark; on light surfaces (white/cream nav) #2BFF77 reads
+  // faint, so deepen the X to the brand's --mb-accent-2 (#10E060) for contrast.
+  const xGreen = light ? '#2BFF77' : '#10E060';
   const fontSize = Math.round(height * 0.86);
   const mark = (
     <span
@@ -37,7 +40,7 @@ export default function Logo({ className = '', light = false, linked = true, hei
         userSelect: 'none',
       }}
     >
-      smb<span style={{ color: '#2BFF77', fontWeight: 800 }}>X</span>.ai
+      smb<span style={{ color: xGreen, fontWeight: 800 }}>X</span>.ai
     </span>
   );
 
