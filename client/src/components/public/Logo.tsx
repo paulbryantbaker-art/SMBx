@@ -9,7 +9,7 @@ interface LogoProps {
 }
 
 /**
- * Text wordmark "smbX.ai" — brand display type, dark ink, with a bolder
+ * Text wordmark "smbX.ai" — Orbitron (80s high-tech), dark ink, with a bolder
  * neon-green capital X as the accent. No box, no image: renders crisp at any
  * size and tunes (color/weight/size) in one line. `height` drives the font
  * size; `light` flips the ink to a light tone for dark surfaces (the green X
@@ -26,10 +26,10 @@ export default function Logo({ className = '', light = false, linked = true, hei
       role="img"
       aria-label="smbX.ai"
       style={{
-        fontFamily: 'var(--font-display, "Schibsted Grotesk", system-ui, sans-serif)',
+        fontFamily: '"Orbitron", "Schibsted Grotesk", system-ui, sans-serif',
         fontSize,
-        fontWeight: 600,
-        letterSpacing: '-0.035em',
+        fontWeight: 700,
+        letterSpacing: '0',
         lineHeight: 1,
         color: ink,
         display: 'inline-block',
