@@ -37,7 +37,7 @@ export function LearnSheet({ open, onClose, section, anchor, onTalkToYulia }: Le
         <Drawer.Content style={S.content}>
           <div style={S.handle} aria-hidden="true" />
           <header style={S.header}>
-            <Drawer.Title style={S.title}>About smbX</Drawer.Title>
+            <Drawer.Title style={S.title}>About smbX.ai</Drawer.Title>
             <button
               type="button"
               onClick={onClose}

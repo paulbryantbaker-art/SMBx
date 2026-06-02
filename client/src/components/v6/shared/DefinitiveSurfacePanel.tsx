@@ -152,7 +152,7 @@ function DealOsLoop({
       title: "Enter or resume",
       text: "Start from partial facts, a source file, prior packet, or existing DealState.",
       meta: summarizeSlots(entries, 4),
-      prompt: "Explain how an external agent should enter or resume a deal in smbX using partial information, DealState, and next_suggested_calls.",
+      prompt: "Explain how an external agent should enter or resume a deal in smbX.ai using partial information, DealState, and next_suggested_calls.",
     },
     {
       title: "Work the loop",

@@ -26,7 +26,7 @@ const LEARN_HERO: Record<Section, HeroConfig> = {
     title: "Start free. Scale with governed deal work.",
     copy: "Monthly plans stay simple. Credits and tollgates control expensive model runs, Studio exports, API/MCP calls, and agent usage without wallets or success fees.",
     cta: "Ask Yulia which plan fits",
-    prompt: "Help me choose the right smbX plan based on deal volume, Studio exports, model runs, API/MCP access, and agent usage.",
+    prompt: "Help me choose the right smbX.ai plan based on deal volume, Studio exports, model runs, API/MCP access, and agent usage.",
     dock: [
       ["Monthly plans", "Free, Solo, Pro, Team, and Enterprise map to how much real deal work needs to move."],
       ["Included credits", "Model runs, exports, Studio books, and API/tool calls are metered inside monthly allowances."],
@@ -325,7 +325,7 @@ function HowSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) => voi
                   type="button"
                   className="m-nudge-soft"
                   style={L.competeItem}
-                  onClick={() => onTalkToYulia?.(`Explain ${title} in the smbX deal operating layer. ${body}`)}
+                  onClick={() => onTalkToYulia?.(`Explain ${title} in the smbX.ai deal operating layer. ${body}`)}
                 >
                   <strong>{title}</strong>
                   <span>{body}</span>
@@ -1586,7 +1586,7 @@ const COMPARE: CompareGroup[] = [
     ],
   },
   {
-    title: "Agent / MCP access — call smbX from any assistant",
+    title: "Agent / MCP access — call smbX.ai from any assistant",
     rows: [
       { feature: "MCP server endpoint /mcp",          cells: ["—", "✓", "✓", "✓", "✓"] },
       { feature: "Claude Connector",                  cells: ["—", "✓", "✓", "✓", "✓"] },
@@ -1640,23 +1640,23 @@ const PRICING_CONTROL_ITEMS = [
 const ACCESS_CHANNELS = [
   {
     title: "Inside Claude",
-    body: "Add smbX as a custom connector. Streamable HTTP MCP at /mcp, OAuth 2.1 with PKCE. Yulia's tools, DealState, and audit packets are callable from Claude Code or Claude.ai.",
-    prompt: "How do I use smbX from inside Claude? Walk me through the connector setup, OAuth scopes, and what calls count against my API/MCP allowance.",
+    body: "Add smbX.ai as a custom connector. Streamable HTTP MCP at /mcp, OAuth 2.1 with PKCE. Yulia's tools, DealState, and audit packets are callable from Claude Code or Claude.ai.",
+    prompt: "How do I use smbX.ai from inside Claude? Walk me through the connector setup, OAuth scopes, and what calls count against my API/MCP allowance.",
   },
   {
     title: "Inside ChatGPT",
     body: "Import the OpenAPI at /api/definitive/gpt-actions/openapi.json into a custom GPT. Confidential OAuth client. Same Yulia, same deterministic models, same audit trail.",
-    prompt: "How do I wire smbX into a ChatGPT GPT Action? What OAuth client config do I need and how do calls bill?",
+    prompt: "How do I wire smbX.ai into a ChatGPT GPT Action? What OAuth client config do I need and how do calls bill?",
   },
   {
     title: "Copilot · Agentforce · Bedrock",
     body: "MCP discovery at /.well-known/mcp plus enterprise allow-list templates for GitHub Copilot, AWS Q/Kiro, VS Code, and Bedrock AgentCore. Same /mcp endpoint, scoped tokens.",
-    prompt: "How does smbX integrate with Microsoft Copilot, Salesforce Agentforce, or AWS Bedrock AgentCore from an enterprise allow-list?",
+    prompt: "How does smbX.ai integrate with Microsoft Copilot, Salesforce Agentforce, or AWS Bedrock AgentCore from an enterprise allow-list?",
   },
   {
     title: "Any MCP client",
     body: "Any MCP-aware agent can list tools, call them with structured inputs, and receive structured outputs plus citations, audit IDs, and the THE LINE invariant. OAuth bearer tokens.",
-    prompt: "I want to call smbX from my own MCP client. Walk me through tool discovery, OAuth, and how outputs come back.",
+    prompt: "I want to call smbX.ai from my own MCP client. Walk me through tool discovery, OAuth, and how outputs come back.",
   },
 ];
 
@@ -1851,7 +1851,7 @@ function PricingSection({ onTalkToYulia }: { onTalkToYulia?: (prompt: string) =>
 
       <LearnSection
         id="mcp-agent-access"
-        title="Use smbX from any AI assistant."
+        title="Use smbX.ai from any AI assistant."
         sub="Your subscription includes /mcp access, OAuth-scoped agent tokens, and audit-trail recording. Call from Claude, ChatGPT, Copilot, Agentforce, or any direct MCP client — no extra charge, no fee tied to closing."
       >
         <div className="pricing-choice-grid" style={P.pricingChoiceGrid}>

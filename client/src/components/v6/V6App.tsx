@@ -649,7 +649,7 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
                   <div className="wkacct" role="menu">
                     <div className="wkacct-id">
                       <div className="wkacct-name">{user?.email || "Signed in"}</div>
-                      <div className="wkacct-sub">smbX workspace</div>
+                      <div className="wkacct-sub">smbX.ai workspace</div>
                     </div>
                     <button className="wkacct-item" role="menuitem" onClick={() => { setAcctOpen(false); window.location.assign("/?marketing"); }}>Preview marketing site</button>
                     <button className="wkacct-item danger" role="menuitem" onClick={() => {

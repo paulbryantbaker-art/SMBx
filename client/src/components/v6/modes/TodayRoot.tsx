@@ -469,7 +469,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           <p className="pg-sub">
             {liveBrief?.hero.lede
               || (showLoggedOutMarketing
-                ? "smbX connects sourcing, diligence, execution, and value creation in one workflow."
+                ? "smbX.ai connects sourcing, diligence, execution, and value creation in one workflow."
                 : waitingForYuliaRead
                   ? "Yulia is refreshing your portfolio read."
                   : lead

@@ -744,7 +744,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
             <div style={A.grab} />
             <div style={A.id}>
               <div style={A.name}>{user?.email || "Signed in"}</div>
-              <div style={A.sub}>smbX workspace</div>
+              <div style={A.sub}>smbX.ai workspace</div>
             </div>
             {user && !DEV_AUTH_BYPASS && (
               <button type="button" style={A.item} onClick={handleManageBilling}>Manage subscription</button>

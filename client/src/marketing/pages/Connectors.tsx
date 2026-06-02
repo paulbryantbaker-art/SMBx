@@ -7,12 +7,12 @@ const SURFACES: Array<{ glyph: 'circle' | 'diamond' | 'square'; h: string; p: st
   {
     glyph: 'circle',
     h: 'Claude',
-    p: 'Install the smbX Custom Connector. Ask Yulia for a valuation or a working capital peg without leaving Claude.',
+    p: 'Install the smbX.ai Custom Connector. Ask Yulia for a valuation or a working capital peg without leaving Claude.',
   },
   {
     glyph: 'diamond',
     h: 'ChatGPT',
-    p: 'Add smbX as a GPT Action. Yulia’s tools, available in your GPT.',
+    p: 'Add smbX.ai as a GPT Action. Yulia’s tools, available in your GPT.',
   },
   {
     glyph: 'square',
@@ -151,7 +151,7 @@ export default function Connectors() {
             <h2 style={{ marginTop: 18, maxWidth: '13ch' }}>Connected in three steps.</h2>
             <div style={{ marginTop: 30, display: 'flex', flexDirection: 'column', gap: 22 }}>
               {[
-                { n: '1', h: 'Add the connector', p: 'Drop in the smbX endpoint and authorize with OAuth.' },
+                { n: '1', h: 'Add the connector', p: 'Drop in the smbX.ai endpoint and authorize with OAuth.' },
                 { n: '2', h: 'Scope what it can touch', p: 'Choose the deals, tools, and data the agent may access.' },
                 { n: '3', h: 'Ask Yulia, anywhere', p: 'Request a valuation or a peg from inside your agent — same artifacts, same audit trail.' },
               ].map(step => (
