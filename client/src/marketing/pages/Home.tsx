@@ -3,24 +3,7 @@ import { MarketingShell } from '../MarketingShell';
 import { Brand } from '../Brand';
 import { YuliaLauncher } from '../YuliaChat';
 import { enterApp } from '../useEnterApp';
-
-/* KV row helper */
-function KV({ k, v, accent }: { k: string; v: string; accent?: boolean }) {
-  return (
-    <div className="kv">
-      <span className="k">{k}</span>
-      <span className="v" style={accent ? { color: 'var(--accent-strong)' } : undefined}>{v}</span>
-    </div>
-  );
-}
-
-const SENSITIVITY = [
-  { m: '3.0×', w: '58%', v: '$3.17M' },
-  { m: '3.5×', w: '70%', v: '$3.70M' },
-  { m: '4.0×', w: '80%', v: '$4.23M' },
-  { m: '4.5×', w: '91%', v: '$4.76M' },
-  { m: '5.0×', w: '100%', v: '$5.29M' },
-];
+import { HeroShowcase } from '../components/HeroShowcase';
 
 const CAPABILITIES = [
   ['Working capital peg', 'Quality-of-earnings preview', 'LBO & SBA models'],
@@ -58,44 +41,10 @@ export default function Home() {
           </div>
         </div>
 
-        {/* hero artifact */}
+        {/* hero artifact — animated "you talk, Yulia builds" showcase */}
         <div className="wrap-wide reveal" data-d="4" style={{ marginTop: 64 }}>
-          <div className="mock" style={{ maxWidth: 880, margin: '0 auto' }}>
-            <div className="mock-bar">
-              <span className="mock-dot" /><span className="mock-dot" /><span className="mock-dot" />
-              <span className="mock-title">Valuation baseline</span>
-              <span className="mock-tag"><span className="vdot" />computed · methodology v2.4</span>
-            </div>
-            <div className="mock-body">
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: 34, alignItems: 'start' }}>
-                <div>
-                  <div className="mono" style={{ fontSize: '.72rem', letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>Enterprise value baseline</div>
-                  <div className="mono" style={{ fontSize: '2.6rem', fontWeight: 500, letterSpacing: '-.03em', margin: '6px 0 2px' }}>$4.24M</div>
-                  <div style={{ fontSize: '.86rem', color: 'var(--ink-3)', marginBottom: 20 }}>Range $3.8M – $4.7M · blended of three methods</div>
-                  <KV k="Adjusted EBITDA" v="$1,058,000" />
-                  <KV k="Applied multiple" v="4.0×" />
-                  <KV k="SDE (normalized)" v="$1,312,000" />
-                  <KV k="DCF (10yr, 18% WACC)" v="$4,410,000" />
-                  <KV k="Comparable median" v="3.8×" />
-                </div>
-                <div>
-                  <div className="mono" style={{ fontSize: '.72rem', letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--ink-3)', marginBottom: 16 }}>Sensitivity — value at each multiple</div>
-                  <div className="bars">
-                    {SENSITIVITY.map(row => (
-                      <div className="bar-row" key={row.m}>
-                        <span className="bl">{row.m}</span>
-                        <span className="bar-track"><span className="bar-fill" style={{ width: row.w }} /></span>
-                        <span className="bv">{row.v}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mono" style={{ marginTop: 22, fontSize: '.74rem', color: 'var(--ink-3)', display: 'flex', alignItems: 'center', gap: 7, borderTop: '1px solid var(--line)', paddingTop: 14 }}>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3FAE6B', display: 'inline-block' }} />
-                    Every figure traces to its source · hash 0x9f3a…d21
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div style={{ maxWidth: 1040, margin: '0 auto' }}>
+            <HeroShowcase />
           </div>
         </div>
       </section>
