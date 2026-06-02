@@ -8,6 +8,7 @@ const V6PipelineRoot = lazy(() => import("./modes/PipelineRoot").then(module => 
 const V6FilesRoot = lazy(() => import("./modes/FilesRoot").then(module => ({ default: module.V6FilesRoot })));
 const V6FilesListView = lazy(() => import("./modes/FilesRoot").then(module => ({ default: module.V6FilesListView })));
 const V6DealsListView = lazy(() => import("./modes/DealsListView").then(module => ({ default: module.V6DealsListView })));
+const V6ProviderProfileView = lazy(() => import("./modes/ProviderProfileView").then(module => ({ default: module.V6ProviderProfileView })));
 const V6SearchRoot = lazy(() => import("./modes/SearchRoot").then(module => ({ default: module.V6SearchRoot })));
 const V6DocsRoot = lazy(() => import("./modes/DocsRoot").then(module => ({ default: module.V6DocsRoot })));
 const V6AnalysisRoot = lazy(() => import("./modes/AnalysisRoot").then(module => ({ default: module.V6AnalysisRoot })));
@@ -89,6 +90,7 @@ function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut, modelPrefe
   }
   if (tab.kind === "files-list") return <V6FilesListView view={tab.fileListView ?? "all"} openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
   if (tab.kind === "deals-list") return <V6DealsListView view={tab.dealsListView ?? "all"} openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
+  if (tab.kind === "provider-profile") return <V6ProviderProfileView user={user} />;
   if (tab.kind === "deal")     return <V6DealView id={tab.id} title={tab.title} openTab={openTab} fileScope={tab.fileScope} onTalkToYulia={onTalkToYulia} modelPreference={modelPreference} user={user} />;
   if (tab.kind === "deal-team") return <V6DealTeamView dealId={String(tab.dealId ?? tab.id)} dealTitle={tab.dealTitle ?? tab.title} openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
   if (tab.kind === "doc")      return <V6DocView id={tab.id} title={tab.title} openTab={openTab} modelPreference={modelPreference} onTalkToYulia={onTalkToYulia} />;

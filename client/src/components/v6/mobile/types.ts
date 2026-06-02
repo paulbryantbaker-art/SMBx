@@ -14,7 +14,8 @@ export type MobileViewKind =
   | "analyses"
   | "analysis"
   | "deals-list"
-  | "deal-team";
+  | "deal-team"
+  | "provider-profile";
 
 export interface MobileView {
   kind: MobileViewKind;

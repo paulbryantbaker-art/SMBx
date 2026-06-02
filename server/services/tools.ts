@@ -486,13 +486,14 @@ export const TOOL_DEFINITIONS: Tool[] = [
   },
   {
     name: 'find_providers',
-    description: 'Open a neutral, UNRANKED service-provider directory panel (attorneys, CPAs, appraisers, etc.) based on deal context. Call this when the user asks about finding a service provider, or at gate transitions that typically require professional services. Return results; the user decides. smbX does not recommend, rank, choose, or contact the provider, and never receives or pays a referral fee. Can also search by type and location directly.',
+    description: 'Open a neutral, UNRANKED service-provider directory panel (attorneys, CPAs, appraisers, etc.) based on deal context. Merges the smbX directory with public Google Places listings so thin-coverage areas still return options. Call this when the user asks about finding a service provider, or at gate transitions that typically require professional services. Return results; the user decides. smbX does not recommend, rank, choose, or contact the provider, and never receives or pays a referral fee. Can also search by type and location directly.',
     input_schema: {
       type: 'object' as const,
       properties: {
         dealId: { type: 'number', description: 'The deal ID for contextual directory results. If provided, returns providers matched to the current gate.' },
-        type: { type: 'string', enum: ['attorney', 'cpa', 'appraiser', 're_agent', 'insurance', 'consultant'], description: 'Specific provider type to search for. If dealId is not provided, this is required.' },
+        type: { type: 'string', enum: ['attorney', 'cpa', 'appraiser', 're_agent', 'insurance', 'consultant', 'escrow', 'title'], description: 'Specific provider type to search for. If dealId is not provided, this is required.' },
         state: { type: 'string', description: 'State to filter providers (e.g., "TX", "CA")' },
+        city: { type: 'string', description: 'Optional city to scope results (improves the public-listing top-up when the smbX directory is sparse).' },
       },
       required: [],
     },
@@ -3308,6 +3309,8 @@ async function findProvidersHandler(input: Record<string, any>, userId: number):
     const result = await getProviderDirectoryForDeal(dealId);
 
     // Build provider summary markdown for canvas display (neutral, unranked).
+    // Local (smbX) and Google Places listings are shown together in the order the
+    // directory returned them — no quality/ranking ordering, per THE LINE.
     const providerLines: string[] = [];
     for (const [provType, providers] of Object.entries(result.byType)) {
       if ((providers as any[]).length > 0) {
@@ -3316,8 +3319,11 @@ async function findProvidersHandler(input: Record<string, any>, userId: number):
           providerLines.push(`**${p.name}**${p.firmName ? ` — ${p.firmName}` : ''}`);
           const details = [p.locationCity, p.locationState].filter(Boolean).join(', ');
           if (details) providerLines.push(`${details}`);
+          if (p.phone) providerLines.push(`Phone: ${p.phone}`);
           if (p.practiceAreas?.length) providerLines.push(`Practice areas: ${p.practiceAreas.join(', ')}`);
           if (p.clientRating) providerLines.push(`Market rating: ${p.clientRating}/5`);
+          // Provenance line (factual, neutral): Places entries are raw third-party data.
+          providerLines.push(p.source === 'google_places' ? '_Listed via Google Places (public data)_' : '_smbX directory listing_');
           providerLines.push('');
         }
       }
@@ -3327,22 +3333,26 @@ async function findProvidersHandler(input: Record<string, any>, userId: number):
       success: true,
       canvas_action: 'show_content',
       title: 'Provider Directory',
-      content: `# Professional Services Directory — ${result.context}\n\nThese results are unranked. smbX does not recommend, rank, choose, or contact providers, and receives no referral fee. Review the options and decide who to contact.\n\n${providerLines.join('\n')}`,
+      content: `# Professional Services Directory — ${result.context}\n\nThese results are unranked and come from the smbX directory plus public Google Places data. smbX does not recommend, rank, choose, or contact providers, and receives no referral fee. Review the options and decide who to contact.\n\n${providerLines.join('\n')}`,
       context: result.context,
       neededTypes: result.neededTypes,
       directory: result.byType,
     });
   }
 
-  // Direct search by type
+  // Direct search by type. Each provider already carries `source`
+  // ('smbx' | 'google_places') and `inviteable` (true only when an email exists),
+  // so the UI can show an invite affordance only for inviteable (local) listings.
   if (type) {
-    const providers = await findProviders({ type, state, limit: 5 });
+    const { city } = input;
+    const providers = await findProviders({ type, state, city, limit: 5 });
     return JSON.stringify({
       success: true,
       type,
       state: state || 'all',
+      city: city || undefined,
       unranked: true,
-      disclosure: 'Unranked directory results. smbX does not recommend, rank, or choose a provider, and receives no referral fee. The user decides.',
+      disclosure: 'Unranked directory results from the smbX directory plus public Google Places data. smbX does not recommend, rank, or choose a provider, and receives no referral fee. Google Places entries are raw third-party listings you evaluate. The user decides.',
       providers,
     });
   }

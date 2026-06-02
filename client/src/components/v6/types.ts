@@ -6,6 +6,7 @@ export type TabKind =
   | "deals-list"
   | "deal"
   | "deal-team"
+  | "provider-profile"
   | "doc"
   | "analysis"
   | "model"
