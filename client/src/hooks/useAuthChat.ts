@@ -87,7 +87,7 @@ const TOOL_LABELS: Record<string, string> = {
   run_analysis: 'Running analysis',
   file_deliverable_to_data_room: 'Filing to data room',
   compare_deals: 'Comparing deals',
-  recommend_providers: 'Finding service providers',
+  find_providers: 'Finding service providers',
   analyze_buyer_demand: 'Analyzing buyer demand',
   match_franchises: 'Matching franchises',
 };

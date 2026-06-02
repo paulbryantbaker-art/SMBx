@@ -11,7 +11,7 @@ import {
 } from '../constants/definitive.js';
 import { classifyV19LeagueFromCents, type League } from '../constants/v19Leagues.js';
 import { checkGateReadinessSync as checkReadiness } from './gateReadinessService.js';
-import { generateProviderRecommendation, findProviders } from './providerMatchingService.js';
+import { getProviderDirectoryForDeal, findProviders } from './providerMatchingService.js';
 import { matchFranchises } from './franchiseMatchingService.js';
 import { matchBuyersForSeller } from './buyerSourcingService.js';
 import { generateOptimizationPlan, saveOptimizationPlan, createOptimizationMilestone } from './optimizationPlanService.js';
@@ -485,8 +485,8 @@ export const TOOL_DEFINITIONS: Tool[] = [
     },
   },
   {
-    name: 'recommend_providers',
-    description: 'Open a neutral service-provider directory panel (attorneys, CPAs, appraisers, etc.) based on deal context. Call this when the user asks about finding a service provider, or at gate transitions that typically require professional services. smbX does not choose the provider, contact the provider, or receive referral fees. Can also search by type and location directly.',
+    name: 'find_providers',
+    description: 'Open a neutral, UNRANKED service-provider directory panel (attorneys, CPAs, appraisers, etc.) based on deal context. Call this when the user asks about finding a service provider, or at gate transitions that typically require professional services. Return results; the user decides. smbX does not recommend, rank, choose, or contact the provider, and never receives or pays a referral fee. Can also search by type and location directly.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -950,8 +950,8 @@ export async function executeTool(
         return await runAnalysis(input, userId, conversationId);
       case 'file_deliverable_to_data_room':
         return await fileDeliverableToDataRoom(input, userId);
-      case 'recommend_providers':
-        return await recommendProviders(input, userId);
+      case 'find_providers':
+        return await findProvidersHandler(input, userId);
       case 'analyze_buyer_demand':
         return await analyzeBuyerDemandTool(input, userId);
       case 'match_franchises':
@@ -3297,7 +3297,7 @@ function getJourneyGates(journey: string): string[] {
   return gates[journey] || [];
 }
 
-async function recommendProviders(input: Record<string, any>, userId: number): Promise<string> {
+async function findProvidersHandler(input: Record<string, any>, userId: number): Promise<string> {
   const { dealId, type, state } = input;
 
   // If dealId provided, use contextual directory results.
@@ -3305,19 +3305,19 @@ async function recommendProviders(input: Record<string, any>, userId: number): P
     const [deal] = await sql`SELECT id FROM deals WHERE id = ${dealId} AND user_id = ${userId}`;
     if (!deal) return JSON.stringify({ error: 'Deal not found' });
 
-    const result = await generateProviderRecommendation(dealId);
+    const result = await getProviderDirectoryForDeal(dealId);
 
-    // Build provider summary markdown for canvas display
+    // Build provider summary markdown for canvas display (neutral, unranked).
     const providerLines: string[] = [];
-    for (const [provType, providers] of Object.entries(result.recommendations)) {
+    for (const [provType, providers] of Object.entries(result.byType)) {
       if ((providers as any[]).length > 0) {
         providerLines.push(`## ${provType.charAt(0).toUpperCase() + provType.slice(1)}s`);
         for (const p of providers as any[]) {
-          providerLines.push(`**${p.name}**${p.firm_name ? ` — ${p.firm_name}` : ''}`);
-          const details = [p.location_city, p.location_state].filter(Boolean).join(', ');
+          providerLines.push(`**${p.name}**${p.firmName ? ` — ${p.firmName}` : ''}`);
+          const details = [p.locationCity, p.locationState].filter(Boolean).join(', ');
           if (details) providerLines.push(`${details}`);
-          if (p.practice_areas?.length) providerLines.push(`Practice areas: ${p.practice_areas.join(', ')}`);
-          if (p.client_rating) providerLines.push(`Rating: ${p.client_rating}/5`);
+          if (p.practiceAreas?.length) providerLines.push(`Practice areas: ${p.practiceAreas.join(', ')}`);
+          if (p.clientRating) providerLines.push(`Market rating: ${p.clientRating}/5`);
           providerLines.push('');
         }
       }
@@ -3327,10 +3327,10 @@ async function recommendProviders(input: Record<string, any>, userId: number): P
       success: true,
       canvas_action: 'show_content',
       title: 'Provider Directory',
-      content: `# Professional Services Directory — ${result.context}\n\nsmbX does not choose providers, contact providers, or receive referral fees. Review options and decide who to contact.\n\n${providerLines.join('\n')}`,
+      content: `# Professional Services Directory — ${result.context}\n\nThese results are unranked. smbX does not recommend, rank, choose, or contact providers, and receives no referral fee. Review the options and decide who to contact.\n\n${providerLines.join('\n')}`,
       context: result.context,
       neededTypes: result.neededTypes,
-      recommendations: result.recommendations,
+      directory: result.byType,
     });
   }
 
@@ -3341,6 +3341,8 @@ async function recommendProviders(input: Record<string, any>, userId: number): P
       success: true,
       type,
       state: state || 'all',
+      unranked: true,
+      disclosure: 'Unranked directory results. smbX does not recommend, rank, or choose a provider, and receives no referral fee. The user decides.',
       providers,
     });
   }

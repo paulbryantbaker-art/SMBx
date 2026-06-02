@@ -97,7 +97,7 @@ const DEFINITIVE_MCP_TOOLS = [
   // (counsel_review_required / human_approval_required / enterprise_scope_required)
   // instead of the unhelpful "Unsupported DEFINITIVE v0.1 tool" error.
   'scan_market',
-  'recommend_providers',
+  'find_providers',
   'record_loi_executed',
   'share_document',
   'update_firm_memory',
@@ -759,7 +759,7 @@ const DEFINITIVE_MCP_TOOL_DEFINITIONS: Record<DefinitiveMcpToolName, { descripti
       },
     },
   },
-  recommend_providers: {
+  find_providers: {
     description: 'Surface service-provider matches (counsel, accountants, lenders, brokers). Returns a directory of options with disclosures; never compensated referrals, never paid matching.',
     inputSchema: {
       type: 'object',
@@ -858,7 +858,7 @@ const TOOL_SCOPE: Record<DefinitiveMcpToolName, string[]> = {
   update_tax_position: ['deal:write', 'counsel:review'],
   query_admin_data: ['admin:read', 'enterprise:scope'],
   scan_market: ['market-data:read'],
-  recommend_providers: ['market-data:read'],
+  find_providers: ['market-data:read'],
   record_loi_executed: ['deal-state:write', 'immutable:write'],
   share_document: ['deal-state:read', 'data-room:read'],
   update_firm_memory: ['enterprise:scope', 'deal:write'],

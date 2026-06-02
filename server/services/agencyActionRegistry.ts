@@ -945,8 +945,8 @@ const CONTRACTS: Record<string, AgencyActionContract> = {
     writeScope: 'data_room',
     description: 'Move a private deliverable into the shared diligence drive.',
   },
-  recommend_providers: {
-    toolName: 'recommend_providers',
+  find_providers: {
+    toolName: 'find_providers',
     label: 'Find deal professionals',
     methodologyRefs: ['v17 §4 Functional Lifecycle', 'v17 §10 Legal Framework'],
     mode: 'coordinator',

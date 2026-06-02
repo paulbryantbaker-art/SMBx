@@ -1,7 +1,11 @@
 /**
- * Provider Matching Service — Builds neutral service-provider directory results.
- * Contextual directory suggestions are based on deal journey, gate, geography, and size.
- * smbX does not choose providers, contact providers, or receive referral fees.
+ * Provider Matching Service — neutral service-provider DIRECTORY results.
+ *
+ * THE LINE (product law): smbX does not recommend, rank, endorse, contact, or
+ * receive any fee from providers. This service only (a) detects which provider
+ * TYPES are commonly needed at a deal's gate, and (b) returns a neutral,
+ * UNRANKED directory list the user chooses from. No quality scoring, no
+ * preference ordering, no referral-fee or pay-to-rank logic. See THE_LINE_POLICY.md.
  */
 import { sql } from '../db.js';
 
@@ -23,12 +27,14 @@ interface ProviderResult {
   locationCity: string | null;
   credentials: string[];
   practiceAreas: string[];
-  clientRating: number | null;
+  clientRating: number | null;   // provider's own market rating (e.g. Google) shown as raw data — NOT an smbX score
   feeStructure: string | null;
-  relevanceScore: number;
+  servesYourState: boolean;      // factual match flags (neutral) — NOT a ranking
+  servesYourDealSize: boolean;
 }
 
-/** Provider types needed at each gate */
+/** Provider types commonly needed at each gate — drives "you may need X" prompts,
+ *  never a recommendation of a specific provider. */
 const GATE_PROVIDER_NEEDS: Record<string, string[]> = {
   S2: ['appraiser', 'cpa'],               // Valuation stage
   S3: ['attorney', 'cpa'],                 // Packaging for sale
@@ -45,7 +51,8 @@ const GATE_PROVIDER_NEEDS: Record<string, string[]> = {
 };
 
 /**
- * Search for service providers matching criteria.
+ * Search the provider directory. Results are returned UNRANKED — ordered
+ * neutrally (by city, then name). smbX expresses no preference among providers.
  */
 export async function findProviders(params: ProviderSearchParams): Promise<ProviderResult[]> {
   const { type, state, dealSize, financingType, limit = 10 } = params;
@@ -77,9 +84,11 @@ export async function findProviders(params: ProviderSearchParams): Promise<Provi
 
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
+  // Neutral order ONLY (geographic grouping + alphabetical). No rating / platform
+  // track-record / pay-to-rank ordering — that would be ranking, which THE LINE forbids.
   const providers = await sql.unsafe(
     `SELECT * FROM service_providers ${whereClause}
-     ORDER BY client_rating DESC NULLS LAST, smbx_deals_closed DESC, created_at DESC
+     ORDER BY location_city ASC NULLS LAST, name ASC
      LIMIT $${paramIdx}`,
     [...values, limit],
   );
@@ -95,87 +104,66 @@ export async function findProviders(params: ProviderSearchParams): Promise<Provi
     practiceAreas: p.practice_areas || [],
     clientRating: p.client_rating ? parseFloat(p.client_rating) : null,
     feeStructure: p.fee_structure,
-    relevanceScore: computeRelevanceScore(p, params),
+    servesYourState: !!(params.state && p.location_state === params.state),
+    servesYourDealSize: !!(
+      params.dealSize && p.deal_size_min && p.deal_size_max &&
+      params.dealSize >= p.deal_size_min && params.dealSize <= p.deal_size_max
+    ),
   }));
 }
 
 /**
- * Given a deal's context, determine which provider types are commonly needed NOW
- * and return neutral directory suggestions per type.
+ * Given a deal's context, determine which provider TYPES are commonly needed now
+ * and return a neutral, unranked directory list per type. This is "you may need
+ * an attorney" + a directory to choose from — never a recommendation of a
+ * specific provider.
  */
-export async function generateProviderRecommendation(dealId: number): Promise<{
+export async function getProviderDirectoryForDeal(dealId: number): Promise<{
   neededTypes: string[];
-  recommendations: Record<string, ProviderResult[]>;
+  byType: Record<string, ProviderResult[]>;
   context: string;
 }> {
   const [deal] = await sql`SELECT * FROM deals WHERE id = ${dealId}`;
-  if (!deal) return { neededTypes: [], recommendations: {}, context: 'Deal not found' };
+  if (!deal) return { neededTypes: [], byType: {}, context: 'Deal not found' };
 
   const gate = deal.current_gate || 'S0';
   const neededTypes = GATE_PROVIDER_NEEDS[gate] || [];
   const state = deal.location?.split(',').pop()?.trim() || null;
   const dealSize = deal.asking_price || deal.revenue || null;
 
-  const recommendations: Record<string, ProviderResult[]> = {};
-
+  const byType: Record<string, ProviderResult[]> = {};
   for (const type of neededTypes) {
-    recommendations[type] = await findProviders({
+    byType[type] = await findProviders({
       type,
       state: state || undefined,
       dealSize: dealSize || undefined,
-      limit: 3,
+      limit: 5,
     });
   }
 
   const journeyName = deal.journey_type === 'sell' ? 'sell-side' : deal.journey_type === 'buy' ? 'buy-side' : deal.journey_type;
   const context = neededTypes.length > 0
-    ? `At gate ${gate} of your ${journeyName} journey, you'll typically need: ${neededTypes.join(', ')}.`
-    : `No specific provider directory suggestions for gate ${gate} at this time.`;
+    ? `At gate ${gate} of your ${journeyName} journey you may want: ${neededTypes.join(', ')}. These are unranked directory results — smbX does not choose or endorse a provider; you decide who to contact.`
+    : `No specific provider types are commonly flagged for gate ${gate}.`;
 
-  return { neededTypes, recommendations, context };
+  return { neededTypes, byType, context };
 }
 
 /**
- * Legacy audit hook for a user-selected provider contact event.
- * This is an activity log only, not compensation, ranking, or referral-fee logic.
+ * Audit-log a user-initiated decision to contact a provider. Activity record
+ * ONLY — no compensation, no referral fee, no ranking signal. smbX never charges
+ * or is charged for an introduction (THE_LINE_POLICY.md: no provider referral-fee rail).
  */
-export async function trackReferral(
+export async function logProviderContact(
   dealId: number,
   providerId: number,
   userId: number,
   context: string,
 ): Promise<number> {
-  const [referral] = await sql`
+  const [row] = await sql`
     INSERT INTO service_referrals (deal_id, provider_id, user_id, referral_context)
     VALUES (${dealId}, ${providerId}, ${userId}, ${context})
     RETURNING id
   `;
-
-  // Legacy activity count only; never use for compensation or pay-to-rank behavior.
-  await sql`UPDATE service_providers SET smbx_referrals_sent = smbx_referrals_sent + 1 WHERE id = ${providerId}`;
-
-  return referral.id;
-}
-
-/** Compute a relevance score for ranking */
-function computeRelevanceScore(provider: any, params: ProviderSearchParams): number {
-  let score = 50; // base
-
-  // Location match
-  if (params.state && provider.location_state === params.state) score += 20;
-
-  // Deal size fit
-  if (params.dealSize && provider.deal_size_min && provider.deal_size_max) {
-    if (params.dealSize >= provider.deal_size_min && params.dealSize <= provider.deal_size_max) {
-      score += 15;
-    }
-  }
-
-  // Client rating bonus
-  if (provider.client_rating) score += Math.min(15, Math.round(provider.client_rating * 3));
-
-  // Platform track record
-  if (provider.smbx_deals_closed > 0) score += Math.min(10, provider.smbx_deals_closed * 2);
-
-  return Math.min(100, score);
+  return row.id;
 }
