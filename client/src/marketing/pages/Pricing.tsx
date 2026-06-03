@@ -90,7 +90,7 @@ export default function Pricing() {
     <MarketingShell>
       {/* HERO */}
       <section style={{ paddingBottom: 'calc(var(--pad-y) * .5)' }}>
-        <div className="wrap center reveal" style={{ maxWidth: '54ch', margin: '0 auto' }}>
+        <div className="wrap-wide center reveal">
           <span className="eyebrow" style={{ justifyContent: 'center' }}>Pricing</span>
           <h1 className="display" style={{ fontSize: 'clamp(2.3rem,4.4vw,3.8rem)', marginTop: 18 }}>
             Flat software pricing. Nothing tied to your deal.

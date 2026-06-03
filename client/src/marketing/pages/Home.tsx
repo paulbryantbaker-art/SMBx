@@ -50,9 +50,7 @@ export default function Home() {
 
         {/* hero artifact — animated "you talk, Yulia builds" showcase */}
         <div className="wrap-wide reveal" data-d="4" style={{ marginTop: 64 }}>
-          <div style={{ maxWidth: 1040, margin: '0 auto' }}>
-            <HeroShowcase />
-          </div>
+          <HeroShowcase />
         </div>
       </section>
 
