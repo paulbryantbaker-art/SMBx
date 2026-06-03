@@ -1272,85 +1272,146 @@
 }
 
 /* ============================================================
-   JOURNEY STEPPER — shared interactive stage walkthrough
+   JOURNEY STEPPER — ZIG-ZAG stage walkthrough (all stages visible)
    (Raise R0–R5 · Integrate PMI0–PMI3). See components/JourneyStepper.tsx.
-   A horizontal/wrapping tablist of stage pills + an animated panel.
-   Tokens only; the panel reuses the .mock chrome.
+
+   No tabs, no single panel. Every stage is a row in a 2-column grid whose
+   text/visual sides ALTERNATE down the page (row 0: text left / visual right;
+   row 1: swapped; …) — the zig-zag. A thin vertical spine with a node per
+   stage runs down the center gutter (desktop) / left edge (mobile) as the
+   connecting element. Rows scroll-reveal via a CSS keyframe — even rows slide
+   in from the text (left) side, odd rows from the right — staggered by index.
+   Visuals self-frame (page `.mock` or `.mkt-*` chrome), so `.zz-visual` adds
+   NO card of its own (avoids double-framing while keeping rows consistent).
+   Tokens only. `.jstep-head` / `.jstep-intro` are reused by the component.
    ============================================================ */
-.mkt .jstep { display: flex; flex-direction: column; }
-.mkt .jstep-head { max-width: 60ch; margin-bottom: clamp(26px, 3.4vw, 40px); }
+.mkt .zigzag { display: flex; flex-direction: column; }
+.mkt .jstep-head { max-width: 60ch; margin-bottom: clamp(28px, 3.6vw, 48px); }
 .mkt .jstep-intro { margin-top: 16px; }
 
-/* stage rail — wrapping pills on desktop */
-.mkt .jstep-rail {
-  display: flex; flex-wrap: wrap; gap: 10px;
-  margin-bottom: clamp(20px, 2.4vw, 28px);
+/* ---- the track: a relative container; the spine is its ::before ---- */
+.mkt .zz-track {
+  --zz-gutter: clamp(56px, 7vw, 104px);   /* center column that holds the spine */
+  --zz-row-gap: clamp(40px, 6vw, 92px);   /* vertical breathing room between rows */
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: var(--zz-row-gap);
+  position: relative;
 }
-.mkt .jstep-tab {
-  display: inline-flex; align-items: baseline; gap: 9px;
-  font-family: var(--sans); letter-spacing: -.01em;
-  color: var(--ink-2); background: var(--surface); border: 1px solid var(--line-2);
-  border-radius: 999px; padding: 9px 16px; cursor: pointer;
-  transition: background .18s var(--ease), border-color .18s, color .18s, transform .12s;
+/* the spine — a thin vertical line down the center gutter, fading at both ends */
+.mkt .zz-track::before {
+  content: ""; position: absolute; top: 6px; bottom: 6px;
+  left: calc(50% - 0.5px); width: 1px;
+  background: linear-gradient(180deg, transparent, var(--line-2) 8%, var(--line-2) 92%, transparent);
 }
-.mkt .jstep-tab:hover { border-color: var(--ink); color: var(--ink); }
-.mkt .jstep-tab:active { transform: translateY(1px); }
-.mkt .jstep-tab.is-active { background: var(--ink); color: #fff; border-color: var(--ink); }
-.mkt .jstep-tab:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 2px; }
-.mkt .jstep-tab-code { font-size: .74rem; font-weight: 600; color: var(--accent-strong); flex: none; }
-.mkt .jstep-tab.is-active .jstep-tab-code { color: var(--accent); }
-.mkt .jstep-tab-title { font-size: .92rem; font-weight: 500; }
 
-/* panel (.mock supplies the frame/shadow) */
-.mkt .jstep-panel { width: 100%; }
-.mkt .jstep-panel:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 3px; }
-.mkt .jstep-panel-inner {
-  display: grid; grid-template-columns: 1fr 1.05fr;
-  gap: clamp(28px, 4vw, 52px); padding: clamp(24px, 3vw, 38px); align-items: center;
+/* ---- a row: text | spine-gutter | visual; alternates via .is-odd ---- */
+.mkt .zz-row {
+  display: grid;
+  grid-template-columns: 1fr var(--zz-gutter) 1fr;
+  align-items: center;
+  position: relative;
 }
-/* stages with no visual: let the copy use the full width on a comfortable measure */
-.mkt .jstep-panel-inner.is-solo { grid-template-columns: 1fr; max-width: 64ch; }
+.mkt .zz-text { grid-column: 1; min-width: 0; display: flex; flex-direction: column; }
+.mkt .zz-visual { grid-column: 3; min-width: 0; }
+/* odd rows swap sides → the zig-zag */
+.mkt .zz-row.is-odd .zz-text { grid-column: 3; }
+.mkt .zz-row.is-odd .zz-visual { grid-column: 1; }
+/* a stage with no visual (e.g. Raise R0): keep the copy on the text side
+   (column 1), capped to a comfortable measure, so it doesn't cross the spine */
+.mkt .zz-row:not(:has(.zz-visual)) .zz-text {
+  grid-column: 1; max-width: 60ch;
+}
 
-.mkt .jstep-panel-copy { display: flex; flex-direction: column; min-width: 0; }
-.mkt .jstep-panel-title {
-  font-size: clamp(1.45rem, 2.2vw, 1.95rem); letter-spacing: -.02em; line-height: 1.1;
+/* spine node — a token dot centered on the gutter for this stage */
+.mkt .zz-node {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--surface); border: 1px solid var(--line-2);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 16px -10px rgba(25,24,19,.5);
+  z-index: 1;
 }
-.mkt .jstep-build {
+.mkt .zz-node-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+/* ---- text side ---- */
+.mkt .zz-code {
+  font-size: .76rem; font-weight: 600; letter-spacing: .04em;
+  color: var(--accent-strong);
+}
+.mkt .zz-title {
+  margin-top: 8px;
+  font-size: clamp(1.5rem, 2.3vw, 2.05rem); letter-spacing: -.022em; line-height: 1.08;
+}
+.mkt .zz-build {
   display: flex; flex-direction: column; gap: 6px;
   margin-top: 18px; padding: 14px 16px;
   background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 12px;
 }
-.mkt .jstep-build-label {
+.mkt .zz-build-label {
   font-size: .66rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
   color: var(--accent-strong);
 }
-.mkt .jstep-build-text { font-size: 1.02rem; font-weight: 600; color: var(--ink); letter-spacing: -.01em; }
-.mkt .jstep-panel-blurb {
+.mkt .zz-build-text { font-size: 1.02rem; font-weight: 600; color: var(--ink); letter-spacing: -.01em; }
+.mkt .zz-blurb {
   margin-top: 18px; font-size: 1.04rem; line-height: 1.55; color: var(--ink-2);
   max-width: 52ch; text-wrap: pretty;
 }
-.mkt .jstep-panel-note {
+/* scope/boundary note — rendered verbatim; muted mono */
+.mkt .zz-note {
   margin-top: 14px; font-size: .78rem; line-height: 1.5; color: var(--ink-3);
   letter-spacing: .01em; max-width: 52ch;
 }
-.mkt .jstep-panel-visual { min-width: 0; }
 
-/* panel reveal — replays on each selection via React `key={active}` remount.
-   A CSS animation (not a frame-loop) settles on its visible end-state reliably. */
-.mkt .jstep-anim { animation: jstep-reveal .34s var(--ease) both; }
-@keyframes jstep-reveal { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) {
-  .mkt .jstep-anim { animation: none; }
+/* ---- reveal: each row slides in from its text side, staggered by index.
+   CSS keyframe with `both` settles on the visible end-state reliably even when
+   the tab is backgrounded (rAF/framer entrance anims freeze; this doesn't).
+   --zz-i is set inline per row. ---- */
+.mkt .zz-row {
+  animation: zz-in-left .6s var(--ease) both;
+  animation-delay: calc(var(--zz-i, 0) * 90ms);
+}
+.mkt .zz-row.is-odd { animation-name: zz-in-right; }
+@keyframes zz-in-left {
+  from { opacity: 0; transform: translateX(-26px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes zz-in-right {
+  from { opacity: 0; transform: translateX(26px); }
+  to   { opacity: 1; transform: none; }
 }
 
-/* journey-stepper responsive */
-@media (max-width: 760px) {
-  /* the panel stacks copy over visual; both go full-width */
-  .mkt .jstep-panel-inner,
-  .mkt .jstep-panel-inner.is-solo { grid-template-columns: 1fr; gap: 24px; max-width: none; }
-  /* rail becomes a vertical stack of full-width stage rows */
-  .mkt .jstep-rail { flex-direction: column; gap: 8px; }
-  .mkt .jstep-tab { width: 100%; justify-content: flex-start; padding: 12px 16px; }
+/* ---- zig-zag responsive: collapse to one column, TEXT FIRST every row so the
+   alternating order never strands a visual above its own text. Spine + nodes
+   move to the left edge and become a true timeline rail. ---- */
+@media (max-width: 860px) {
+  .mkt .zz-track {
+    --zz-rail: 30px;             /* left rail width that holds the spine/nodes */
+    --zz-row-gap: clamp(34px, 9vw, 56px);
+    gap: var(--zz-row-gap);
+  }
+  .mkt .zz-track::before { left: calc(var(--zz-rail) / 2); }
+  .mkt .zz-row {
+    grid-template-columns: var(--zz-rail) 1fr;
+    align-items: start;
+    row-gap: 18px;
+  }
+  /* text first, visual second — on EVERY row regardless of .is-odd */
+  .mkt .zz-row .zz-text,
+  .mkt .zz-row.is-odd .zz-text { grid-column: 2; grid-row: 1; }
+  .mkt .zz-row .zz-visual,
+  .mkt .zz-row.is-odd .zz-visual { grid-column: 2; grid-row: 2; }
+  .mkt .zz-row:not(:has(.zz-visual)) .zz-text {
+    grid-column: 2; max-width: none; padding-right: 0;
+  }
+  /* node rides the left rail, aligned to the heading row */
+  .mkt .zz-node { left: calc(var(--zz-rail) / 2); top: 14px; transform: translate(-50%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mkt .zz-row, .mkt .zz-row.is-odd { animation: none; opacity: 1; transform: none; }
 }
 
 /* ============================================================
