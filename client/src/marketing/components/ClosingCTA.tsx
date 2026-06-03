@@ -1,6 +1,37 @@
 import type { ReactNode } from 'react';
+import { Link } from 'wouter';
 import { YuliaLauncher } from '../YuliaChat';
 import { enterApp } from '../useEnterApp';
+
+/** Capabilities shown in the shared closer; each chip links into the Standard. */
+const CLOSER_CAPABILITIES = [
+  'Working capital peg', 'Quality-of-earnings preview', 'LBO & SBA models',
+  'Valuation baseline', '§1060 allocation', 'CIM & pitch books',
+  'Structuring scenarios', 'Covenant compliance', '100-day plan',
+];
+
+/**
+ * ComputedCloser — the shared "computed" proof strip rendered by ClosingCTA
+ * directly above the CTA band, so every marketing page ends the same way.
+ * The capability chips link into The Diligence Standard; the line states the
+ * trust property. Replaces the old Home-only static proof strip.
+ */
+function ComputedCloser() {
+  return (
+    <section className="section-tight">
+      <div className="wrap reveal computed-closer">
+        <div className="tags computed-closer-tags">
+          {CLOSER_CAPABILITIES.map(c => (
+            <Link key={c} href="/standard" className="tag tag-link">{c}</Link>
+          ))}
+        </div>
+        <p className="computed-closer-note mono">
+          Every artifact is computed, hash-verifiable, and pinned to the methodology that produced it.
+        </p>
+      </div>
+    </section>
+  );
+}
 
 /**
  * ClosingCTA — the one shared closing-CTA primitive for every marketing page.
@@ -33,7 +64,9 @@ export function ClosingCTA({
   secondary?: { label: ReactNode; onClick?: () => void };
 }) {
   return (
-    <section className="cta">
+    <>
+      <ComputedCloser />
+      <section className="cta">
       <div className="cta-inner reveal">
         <h2>{heading}</h2>
         {sub ? <p className="cta-sub">{sub}</p> : null}
@@ -56,6 +89,7 @@ export function ClosingCTA({
           </button>
         </div>
       </div>
-    </section>
+      </section>
+    </>
   );
 }

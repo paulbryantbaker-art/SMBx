@@ -12,12 +12,6 @@ import {
   PRODUCE_MOCKS,
 } from '../components/ProductMocks';
 
-const CAPABILITIES = [
-  ['Working capital peg', 'Quality-of-earnings preview', 'LBO & SBA models'],
-  ['Valuation baseline', '§1060 allocation', 'CIM & pitch books'],
-  ['Structuring scenarios', 'Covenant compliance', '100-day plan'],
-].flat();
-
 const PRODUCES: Array<{ h: string; p: string }> = [
   { h: 'Valuation', p: 'A defensible valuation baseline — multiples, DCF, and the sensitivities that move the number.' },
   { h: 'Quality of earnings', p: 'A QoE-style adjustment preview that normalizes SDE and EBITDA the way a buyer’s diligence team will. (Not an audit, review, or compilation.)' },
@@ -65,20 +59,6 @@ export default function Home() {
         >
           <div style={{ maxWidth: 1840, margin: '0 auto' }}>
             <HeroWorkspace />
-          </div>
-        </div>
-      </section>
-
-      {/* PROOF STRIP */}
-      <section className="section-tight">
-        <div className="wrap">
-          <div className="reveal" style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div className="tags" style={{ flex: 1, minWidth: 280 }}>
-              {CAPABILITIES.map(c => <span className="tag" key={c}>{c}</span>)}
-            </div>
-            <p className="body mono" style={{ maxWidth: '30ch', fontSize: '.95rem', lineHeight: 1.55, color: 'var(--ink-3)' }}>
-              Every artifact is computed, hash-verifiable, and pinned to the methodology that produced it.
-            </p>
           </div>
         </div>
       </section>
