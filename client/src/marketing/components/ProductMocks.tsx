@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type ReactNode, Fragment, useEffect, useRef, useState } from 'react';
 import { motion, useInView, useReducedMotion, animate } from 'framer-motion';
 import { YuliaGlyph } from '../MarketingChrome';
 
@@ -443,3 +443,378 @@ export const PRODUCE_MOCKS = [
   MiniStructure,
   MiniDocuments,
 ] as const;
+
+/* ============================================================
+   3 · PAGE SURFACES — larger, browser-chromed surfaces for the
+   Buy / Sell / Raise / Connectors feature sections. Each is a sibling
+   of the hero Valuation card and meant to sit inside a <ProductFrame>.
+   All figures stay IC-grade (PE / family-office / sponsor scale).
+   ============================================================ */
+
+/** BUY · sourcing — a deal-pipeline / candidate list with fit scores + a header tally. */
+export function DealPipelineMock() {
+  const ROWS: Array<{ name: string; sector: string; ebitda: string; fit: number; stage: string }> = [
+    { name: 'Northwind Industrial', sector: 'Industrial svcs', ebitda: '$8.4M', fit: 91, stage: 'Diligence' },
+    { name: 'Cedar Park Logistics', sector: 'Transportation', ebitda: '$6.2M', fit: 84, stage: 'IOI sent' },
+    { name: 'Atlas Facility Group', sector: 'Facility svcs', ebitda: '$11.3M', fit: 78, stage: 'Screening' },
+    { name: 'Brightway Components', sector: 'Manufacturing', ebitda: '$5.1M', fit: 64, stage: 'Sourced' },
+  ];
+  return (
+    <InView className="mkt-pipe" amount={0.35}>
+      {(run, reduce) => (
+        <>
+          <div className="mkt-pipe-head">
+            <span className="mkt-pipe-title">Acquisition pipeline</span>
+            <span className="mkt-pipe-tally mono num">42 screened · 4 live</span>
+          </div>
+          <div className="mkt-pipe-list">
+            {ROWS.map((r, i) => (
+              <div className="mkt-pipe-row" key={r.name}>
+                <span className="mkt-pipe-co">
+                  <span className="mkt-pipe-coname">{r.name}</span>
+                  <span className="mkt-pipe-cosub mono">{r.sector} · {r.ebitda} EBITDA</span>
+                </span>
+                <span className="mkt-pipe-stage mono">{r.stage}</span>
+                <span className={`mkt-pipe-fit${r.fit >= 80 ? ' hi' : r.fit >= 70 ? ' mid' : ''}`}>
+                  <span className="mkt-pipe-fitnum mono num">{r.fit}</span>
+                  <span className="mkt-pipe-fittrack" aria-hidden="true">
+                    <motion.span
+                      className="mkt-pipe-fitfill"
+                      initial={reduce ? { width: `${r.fit}%` } : { width: '0%' }}
+                      animate={run ? { width: `${r.fit}%` } : {}}
+                      transition={{ duration: 0.7, ease: EASE, delay: 0.15 + i * 0.08 }}
+                    />
+                  </span>
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="mkt-pipe-foot mono">
+            <span className="mkt-val-vdot" />
+            Scored against thesis · industrial · $5M–$15M EBITDA
+          </div>
+        </>
+      )}
+    </InView>
+  );
+}
+
+/** BUY · LBO + sensitivity — IRR sensitivity matrix across entry multiple × exit multiple. */
+export function SensitivityMock() {
+  // IRR (%) grid: rows = exit multiple, cols = entry multiple. Center cell is base case.
+  const COLS = ['5.0×', '5.5×', '6.0×'];
+  const ROWS = ['6.0×', '6.5×', '7.0×'];
+  const GRID = [
+    [18, 21, 24],
+    [22, 24, 27],
+    [26, 29, 32],
+  ];
+  // shade intensity 0..1 used for the accent-soft → accent fill
+  const lo = 18, hi = 32;
+  const shade = (v: number) => (v - lo) / (hi - lo);
+  return (
+    <div className="mkt-sens">
+      <div className="mkt-sens-head">
+        <span className="mkt-sens-title">IRR sensitivity</span>
+        <span className="mkt-sens-base mono num">Base 24%</span>
+      </div>
+      <div className="mkt-sens-axis mono">Entry multiple →</div>
+      <div className="mkt-sens-grid">
+        <span className="mkt-sens-corner mono">Exit ↓</span>
+        {COLS.map((c) => (
+          <span className="mkt-sens-colh mono" key={c}>{c}</span>
+        ))}
+        {ROWS.map((rlabel, ri) => (
+          <Fragment key={rlabel}>
+            <span className="mkt-sens-rowh mono">{rlabel}</span>
+            {GRID[ri].map((v, ci) => {
+              const isBase = ri === 1 && ci === 1;
+              return (
+                <span
+                  className={`mkt-sens-cell mono num${isBase ? ' base' : ''}`}
+                  key={ci}
+                  style={{ ['--sens' as string]: shade(v).toFixed(3) }}
+                >
+                  {v}%
+                </span>
+              );
+            })}
+          </Fragment>
+        ))}
+      </div>
+      <div className="mkt-sens-foot mono">
+        <span className="mkt-val-vdot" />
+        5.5× entry · 6.5× exit · $30M senior · 3.2× leverage
+      </div>
+    </div>
+  );
+}
+
+/** Data room / DD checklist — a file list with status pills + a request-tracker bar.
+ *  Reusable for Buy (DD) and Sell (buyer data room). */
+export function DataRoomMock({
+  title = 'Data room',
+  variant = 'diligence',
+}: {
+  title?: string;
+  variant?: 'diligence' | 'sell';
+}) {
+  const ITEMS: Array<{ name: string; meta: string; state: 'done' | 'review' | 'open' }> =
+    variant === 'sell'
+      ? [
+          { name: 'Financial statements', meta: 'FY21–FY24 · 14 files', state: 'done' },
+          { name: 'Quality of earnings', meta: 'Normalized EBITDA $8.4M', state: 'done' },
+          { name: 'Customer contracts', meta: '38 of 41 uploaded', state: 'review' },
+          { name: 'Legal & corporate', meta: 'Cap table, org docs', state: 'done' },
+          { name: 'Management presentation', meta: 'Draft in review', state: 'open' },
+        ]
+      : [
+          { name: 'Quality of earnings', meta: 'Add-backs reconciled', state: 'done' },
+          { name: 'Working capital analysis', meta: 'Peg $5.8M', state: 'done' },
+          { name: 'Customer concentration', meta: 'Top-10 = 38% rev', state: 'review' },
+          { name: 'Contracts & leases', meta: '3 items outstanding', state: 'open' },
+          { name: 'Tax & compliance', meta: '§1060, nexus review', state: 'done' },
+        ];
+  const STATE_LABEL = { done: 'Cleared', review: 'In review', open: 'Open' } as const;
+  const done = ITEMS.filter((i) => i.state === 'done').length;
+  return (
+    <InView className="mkt-dr" amount={0.35}>
+      {(run, reduce) => (
+        <>
+          <div className="mkt-dr-head">
+            <span className="mkt-dr-title">{title}</span>
+            <span className="mkt-dr-count mono num">{done} / {ITEMS.length} cleared</span>
+          </div>
+          <div className="mkt-dr-track" aria-hidden="true">
+            <motion.span
+              className="mkt-dr-trackfill"
+              initial={reduce ? { width: `${(done / ITEMS.length) * 100}%` } : { width: '0%' }}
+              animate={run ? { width: `${(done / ITEMS.length) * 100}%` } : {}}
+              transition={{ duration: 0.9, ease: EASE, delay: 0.1 }}
+            />
+          </div>
+          <div className="mkt-dr-list">
+            {ITEMS.map((it) => (
+              <div className="mkt-dr-row" key={it.name}>
+                <span className="mkt-dr-fileicon" aria-hidden="true">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                    <path d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+                    <path d="M14 3v4h4" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+                  </svg>
+                </span>
+                <span className="mkt-dr-meta">
+                  <span className="mkt-dr-name">{it.name}</span>
+                  <span className="mkt-dr-sub mono">{it.meta}</span>
+                </span>
+                <span className={`mkt-dr-pill mono ${it.state}`}>{STATE_LABEL[it.state]}</span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </InView>
+  );
+}
+
+/** SELL · buyer management — a ranked buyer list (type, fit, indicated range, status). */
+export function BuyerListMock() {
+  const ROWS: Array<{ name: string; type: string; range: string; fit: number; status: string }> = [
+    { name: 'Sponsor — platform', type: 'Private equity', range: '$44M – $50M', fit: 92, status: 'IOI' },
+    { name: 'Strategic acquirer', type: 'Industry buyer', range: '$46M – $54M', fit: 88, status: 'NDA' },
+    { name: 'Family office', type: 'Long-hold', range: '$40M – $46M', fit: 81, status: 'Intro' },
+    { name: 'Search fund', type: 'Independent', range: '$38M – $43M', fit: 67, status: 'Screening' },
+  ];
+  return (
+    <InView className="mkt-pipe" amount={0.35}>
+      {(run, reduce) => (
+        <>
+          <div className="mkt-pipe-head">
+            <span className="mkt-pipe-title">Buyer landscape</span>
+            <span className="mkt-pipe-tally mono num">4 buyer types modeled</span>
+          </div>
+          <div className="mkt-pipe-list">
+            {ROWS.map((r, i) => (
+              <div className="mkt-pipe-row" key={r.name}>
+                <span className="mkt-pipe-co">
+                  <span className="mkt-pipe-coname">{r.name}</span>
+                  <span className="mkt-pipe-cosub mono">{r.type} · indicated {r.range}</span>
+                </span>
+                <span className="mkt-pipe-stage mono">{r.status}</span>
+                <span className={`mkt-pipe-fit${r.fit >= 80 ? ' hi' : r.fit >= 70 ? ' mid' : ''}`}>
+                  <span className="mkt-pipe-fitnum mono num">{r.fit}</span>
+                  <span className="mkt-pipe-fittrack" aria-hidden="true">
+                    <motion.span
+                      className="mkt-pipe-fitfill"
+                      initial={reduce ? { width: `${r.fit}%` } : { width: '0%' }}
+                      animate={run ? { width: `${r.fit}%` } : {}}
+                      transition={{ duration: 0.7, ease: EASE, delay: 0.15 + i * 0.08 }}
+                    />
+                  </span>
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="mkt-pipe-foot mono">
+            <span className="mkt-val-vdot" />
+            Fit by what each buyer underwrites · no buyers contacted
+          </div>
+        </>
+      )}
+    </InView>
+  );
+}
+
+/** RAISE · investor materials — an IC / investor deck preview: slide thumbnails + a lead slide. */
+export function InvestorDeckMock() {
+  const THUMBS = ['Thesis', 'Market', 'Model', 'Use of funds'];
+  const BARS = [48, 63, 71, 84, 96]; // ARR ramp on the lead slide
+  return (
+    <InView className="mkt-deck" amount={0.35}>
+      {(run, reduce) => (
+        <>
+          <div className="mkt-deck-stage">
+            <div className="mkt-deck-slide">
+              <div className="mkt-deck-slidehd">
+                <span className="mkt-deck-slidekicker mono">Investment thesis</span>
+                <span className="mkt-deck-slidepage mono num">03 / 14</span>
+              </div>
+              <div className="mkt-deck-slidetitle">A capital-efficient compounder</div>
+              <div className="mkt-deck-chart" aria-hidden="true">
+                {BARS.map((h, i) => (
+                  <div className="mkt-deck-barslot" key={i}>
+                    <motion.div
+                      className="mkt-deck-bar"
+                      initial={reduce ? { height: `${h}%` } : { height: '0%' }}
+                      animate={run ? { height: `${h}%` } : {}}
+                      transition={{ duration: 0.6, ease: EASE, delay: 0.15 + i * 0.08 }}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="mkt-deck-slidekpis">
+                <div className="mkt-deck-slidekpi">
+                  <span className="mkt-deck-kv mono num"><CountUp to={9.2} fmt={(n) => `$${n.toFixed(1)}M`} run={run} reduce={reduce} /></span>
+                  <span className="mkt-deck-kk mono">ARR</span>
+                </div>
+                <div className="mkt-deck-slidekpi">
+                  <span className="mkt-deck-kv mono num"><CountUp to={142} fmt={(n) => `${Math.round(n)}%`} run={run} reduce={reduce} delay={0.1} /></span>
+                  <span className="mkt-deck-kk mono">Net retention</span>
+                </div>
+                <div className="mkt-deck-slidekpi">
+                  <span className="mkt-deck-kv mono num"><CountUp to={47} fmt={(n) => `${Math.round(n)}`} run={run} reduce={reduce} delay={0.2} /></span>
+                  <span className="mkt-deck-kk mono">Rule of 40</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="mkt-deck-thumbs">
+            {THUMBS.map((t) => (
+              <div className="mkt-deck-thumb" key={t}>
+                <span className="mkt-deck-thumbline" />
+                <span className="mkt-deck-thumbline short" />
+                <span className="mkt-deck-thumblabel mono">{t}</span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </InView>
+  );
+}
+
+/** RAISE · cap table — an ownership / dilution table with pre vs. post-round bars. */
+export function CapTableMock() {
+  const ROWS: Array<{ name: string; pre: number; post: number }> = [
+    { name: 'Founders', pre: 78, post: 61 },
+    { name: 'Existing investors', pre: 14, post: 11 },
+    { name: 'New round', pre: 0, post: 22 },
+    { name: 'Option pool', pre: 8, post: 6 },
+  ];
+  return (
+    <InView className="mkt-cap" amount={0.4}>
+      {(run, reduce) => (
+        <>
+          <div className="mkt-cap-head">
+            <span className="mkt-cap-title">Ownership · pre / post round</span>
+            <span className="mkt-cap-raise mono num">$12M Series A</span>
+          </div>
+          <div className="mkt-cap-legend mono">
+            <span className="mkt-cap-legitem"><span className="mkt-cap-swatch pre" />Pre</span>
+            <span className="mkt-cap-legitem"><span className="mkt-cap-swatch post" />Post</span>
+          </div>
+          <div className="mkt-cap-rows">
+            {ROWS.map((r, i) => (
+              <div className="mkt-cap-row" key={r.name}>
+                <span className="mkt-cap-name">{r.name}</span>
+                <span className="mkt-cap-bars">
+                  <span className="mkt-cap-bartrack">
+                    <motion.span
+                      className="mkt-cap-bar pre"
+                      initial={reduce ? { width: `${r.pre}%` } : { width: '0%' }}
+                      animate={run ? { width: `${r.pre}%` } : {}}
+                      transition={{ duration: 0.7, ease: EASE, delay: 0.1 + i * 0.07 }}
+                    />
+                  </span>
+                  <span className="mkt-cap-bartrack">
+                    <motion.span
+                      className="mkt-cap-bar post"
+                      initial={reduce ? { width: `${r.post}%` } : { width: '0%' }}
+                      animate={run ? { width: `${r.post}%` } : {}}
+                      transition={{ duration: 0.7, ease: EASE, delay: 0.18 + i * 0.07 }}
+                    />
+                  </span>
+                </span>
+                <span className="mkt-cap-pct mono num">{r.post}%</span>
+              </div>
+            ))}
+          </div>
+          <div className="mkt-cap-foot mono">
+            <span className="mkt-val-vdot" />
+            $54M post-money · founder dilution 17 pts · pool topped to 6%
+          </div>
+        </>
+      )}
+    </InView>
+  );
+}
+
+/** CONNECTORS · smbX inside an assistant — a Claude/ChatGPT-style thread where a
+ *  tool call returns a real smbX artifact (valuation) with an audit + hash stamp. */
+export function AssistantSurfaceMock({ assistant = 'Claude' }: { assistant?: string }) {
+  return (
+    <div className="mkt-asst">
+      <div className="mkt-asst-hd">
+        <span className="mkt-asst-name mono">{assistant}</span>
+        <span className="mkt-asst-conn mono">
+          <span className="mkt-asst-conndot" />
+          smbX connector
+        </span>
+      </div>
+      <div className="mkt-asst-user">
+        What&rsquo;s Northwind worth at 5.5× on $8.4M EBITDA?
+      </div>
+      <div className="mkt-asst-tool">
+        <span className="mkt-asst-toolhd mono">
+          <span className="mkt-asst-toolglyph" aria-hidden="true">
+            <YuliaGlyph size={13} />
+          </span>
+          smbX · valuation.run
+          <span className="mkt-asst-toolok mono">200 OK</span>
+        </span>
+        <div className="mkt-asst-toolbody">
+          <div className="mkt-asst-kv"><span>Enterprise value</span><span className="mono num">$46.2M</span></div>
+          <div className="mkt-asst-kv"><span>EV / EBITDA</span><span className="mono num">5.5×</span></div>
+          <div className="mkt-asst-kv"><span>Range</span><span className="mono num">$38M – $52M</span></div>
+        </div>
+        <div className="mkt-asst-stamp mono">
+          <span>method v2.4</span>
+          <span className="mkt-asst-hash">hash 0x9f3a…d21 <span className="mkt-asst-match">✓ matches app</span></span>
+        </div>
+      </div>
+      <div className="mkt-asst-reply">
+        At a 5.5× entry on $8.4M normalized EBITDA, the enterprise value is $46.2M,
+        inside a $38M–$52M range. Every figure traces to its source.
+      </div>
+    </div>
+  );
+}

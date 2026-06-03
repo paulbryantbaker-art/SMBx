@@ -3,6 +3,8 @@ import { MarketingShell } from '../MarketingShell';
 import { Brand } from '../Brand';
 import { YuliaLauncher } from '../YuliaChat';
 import { enterApp } from '../useEnterApp';
+import { ProductFrame } from '../components/ProductFrame';
+import { InvestorDeckMock, CapTableMock, MiniQoE } from '../components/ProductMocks';
 
 /* One stage row in the journey walkthrough */
 function Stage({ code, title, children, note }: { code: string; title: string; children: ReactNode; note?: string }) {
@@ -71,10 +73,21 @@ export default function Raise() {
       {/* THE RAISE PATH */}
       <section>
         <div className="wrap">
-          <div className="reveal" style={{ maxWidth: '60ch', marginBottom: 56 }}>
+          <div className="reveal" style={{ maxWidth: '60ch', marginBottom: 44 }}>
             <span className="eyebrow">The work, stage by stage</span>
             <h2 style={{ marginTop: 18 }}>From intake to closing the round.</h2>
           </div>
+
+          {/* product surfaces for the raise path — investor deck (R2), cap table (R4) */}
+          <div className="grid g2 reveal" style={{ gap: 24, marginBottom: 64 }}>
+            <ProductFrame variant="browser" url="app.smbx.ai/deck" delay={0.05}>
+              <InvestorDeckMock />
+            </ProductFrame>
+            <ProductFrame variant="browser" url="app.smbx.ai/captable" delay={0.1}>
+              <CapTableMock />
+            </ProductFrame>
+          </div>
+
           <div className="stages reveal">
             <Stage code="R0 · Intake" title="What, why, against what">
               What you&rsquo;re raising, why, and against what.
@@ -139,6 +152,10 @@ export default function Raise() {
                   <div className="mono" style={{ fontSize: '1.5rem', fontWeight: 500 }}>47</div>
                 </div>
               </div>
+            </div>
+            {/* normalized earnings underneath the projection — the QoE a lender expects */}
+            <div className="reveal" data-d="2" style={{ marginTop: 18 }}>
+              <MiniQoE />
             </div>
           </div>
         </div>

@@ -1,6 +1,8 @@
 import { MarketingShell } from '../MarketingShell';
 import { Brand } from '../Brand';
 import { enterApp } from '../useEnterApp';
+import { ProductFrame } from '../components/ProductFrame';
+import { AssistantSurfaceMock } from '../components/ProductMocks';
 
 /* Where-it-runs surfaces */
 const SURFACES: Array<{ glyph: 'circle' | 'diamond' | 'square'; h: string; p: string }> = [
@@ -103,6 +105,13 @@ export default function Connectors() {
                 <p style={{ marginTop: 8 }}>{s.p}</p>
               </div>
             ))}
+          </div>
+
+          {/* smbX inside the assistant — a real tool call returning a hash-stamped artifact */}
+          <div className="reveal" data-d="1" style={{ maxWidth: 560, margin: '56px auto 0' }}>
+            <ProductFrame variant="browser" url="claude.ai/chat" delay={0.1}>
+              <AssistantSurfaceMock assistant="Claude" />
+            </ProductFrame>
           </div>
         </div>
       </section>

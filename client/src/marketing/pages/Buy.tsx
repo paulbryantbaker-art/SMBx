@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 import { MarketingShell } from '../MarketingShell';
 import { YuliaLauncher } from '../YuliaChat';
 import { enterApp } from '../useEnterApp';
+import { ProductFrame } from '../components/ProductFrame';
+import { DealPipelineMock, SensitivityMock, DataRoomMock } from '../components/ProductMocks';
 
 /* KV row helper (mirrors Home.tsx) */
 function KV({ k, v, accent, tone }: { k: string; v: string; accent?: boolean; tone?: 'pos' | 'neg' }) {
@@ -86,10 +88,26 @@ export default function Buy() {
       {/* THE BUY-SIDE PATH */}
       <section>
         <div className="wrap">
-          <div className="reveal" style={{ maxWidth: '60ch', marginBottom: 56 }}>
+          <div className="reveal" style={{ maxWidth: '60ch', marginBottom: 44 }}>
             <span className="eyebrow">The work, stage by stage</span>
             <h2 style={{ marginTop: 18 }}>From thesis to close.</h2>
           </div>
+
+          {/* product surfaces for the buy-side path — sourcing, returns, diligence */}
+          <div className="reveal" style={{ marginBottom: 24 }}>
+            <ProductFrame variant="browser" url="app.smbx.ai/sourcing" delay={0.05}>
+              <DealPipelineMock />
+            </ProductFrame>
+          </div>
+          <div className="grid g2 reveal" style={{ gap: 24, marginBottom: 64 }}>
+            <ProductFrame variant="browser" url="app.smbx.ai/lbo" delay={0.1}>
+              <SensitivityMock />
+            </ProductFrame>
+            <ProductFrame variant="browser" url="app.smbx.ai/dataroom" delay={0.15}>
+              <DataRoomMock variant="diligence" />
+            </ProductFrame>
+          </div>
+
           <div className="stages reveal">
             <Stage code="B0 · Thesis" title="Define the box">
               Define the box: industry, size, geography, return targets. Yulia

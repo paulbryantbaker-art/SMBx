@@ -3,6 +3,8 @@ import { MarketingShell } from '../MarketingShell';
 import { Brand } from '../Brand';
 import { YuliaLauncher } from '../YuliaChat';
 import { enterApp } from '../useEnterApp';
+import { ProductFrame } from '../components/ProductFrame';
+import { MiniValuation, CIMDeliverMock, BuyerListMock, DataRoomMock } from '../components/ProductMocks';
 
 /* One stage row in the journey walkthrough */
 function Stage({ code, title, children, note }: { code: string; title: string; children: ReactNode; note?: string }) {
@@ -66,6 +68,11 @@ export default function Sell() {
               <span className="mono" style={{ fontSize: '1.1rem', fontWeight: 500, color: 'var(--accent-strong)' }}>2.1&times; lift</span>
             </div>
           </div>
+
+          {/* the valuation baseline that follows from the normalized number */}
+          <div className="reveal" data-d="1" style={{ maxWidth: 460, margin: '36px auto 0' }}>
+            <MiniValuation />
+          </div>
         </div>
       </section>
 
@@ -74,10 +81,26 @@ export default function Sell() {
       {/* THE SELL-SIDE PATH */}
       <section>
         <div className="wrap">
-          <div className="reveal" style={{ maxWidth: '60ch', marginBottom: 56 }}>
+          <div className="reveal" style={{ maxWidth: '60ch', marginBottom: 44 }}>
             <span className="eyebrow">The work, stage by stage</span>
             <h2 style={{ marginTop: 18 }}>From first question to closing table.</h2>
           </div>
+
+          {/* product surfaces for the sell-side path — CIM, data room, buyer landscape */}
+          <div className="grid g2 reveal" style={{ gap: 24, marginBottom: 24 }}>
+            <ProductFrame variant="browser" url="app.smbx.ai/cim" delay={0.05}>
+              <CIMDeliverMock />
+            </ProductFrame>
+            <ProductFrame variant="browser" url="app.smbx.ai/dataroom" delay={0.1}>
+              <DataRoomMock title="Seller data room" variant="sell" />
+            </ProductFrame>
+          </div>
+          <div className="reveal" style={{ marginBottom: 64 }}>
+            <ProductFrame variant="browser" url="app.smbx.ai/buyers" delay={0.15}>
+              <BuyerListMock />
+            </ProductFrame>
+          </div>
+
           <div className="stages reveal">
             <Stage code="S0 · Intake" title="Frame what a buyer wants to see">
               Tell Yulia about the business. She frames what a buyer will want to see.

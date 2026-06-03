@@ -554,6 +554,212 @@
   .mkt-doc-chart { height: 58px; }
 }
 
+/* ============================================================
+   PAGE SURFACES — Buy / Sell / Raise / Connectors feature surfaces.
+   Siblings of the hero Valuation card. Tokens only; meant to sit
+   inside a <ProductFrame>.
+   ============================================================ */
+
+/* ---- PIPELINE / BUYER LIST (Buy sourcing · Sell buyer landscape) ---- */
+.mkt-pipe { display: flex; flex-direction: column; gap: 14px; }
+.mkt-pipe-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.mkt-pipe-title { font-size: 1.02rem; font-weight: 600; letter-spacing: -.02em; color: var(--ink); }
+.mkt-pipe-tally { font-size: .72rem; letter-spacing: .04em; color: var(--ink-3); }
+.mkt-pipe-list { display: flex; flex-direction: column; }
+.mkt-pipe-row {
+  display: grid; grid-template-columns: 1fr auto 96px; align-items: center; gap: 16px;
+  padding: 12px 0; border-bottom: 1px solid var(--line);
+}
+.mkt-pipe-row:last-child { border-bottom: 0; }
+.mkt-pipe-co { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.mkt-pipe-coname { font-size: .92rem; font-weight: 500; color: var(--ink); letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mkt-pipe-cosub { font-size: .7rem; color: var(--ink-3); letter-spacing: .01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mkt-pipe-stage {
+  font-size: .68rem; color: var(--ink-2); background: var(--surface-2);
+  border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; white-space: nowrap;
+}
+.mkt-pipe-fit { display: flex; align-items: center; gap: 9px; justify-content: flex-end; }
+.mkt-pipe-fitnum { font-size: .92rem; font-weight: 600; color: var(--ink-3); width: 22px; text-align: right; }
+.mkt-pipe-fit.mid .mkt-pipe-fitnum { color: var(--ink); }
+.mkt-pipe-fit.hi .mkt-pipe-fitnum { color: var(--accent-strong); }
+.mkt-pipe-fittrack { width: 52px; height: 7px; background: var(--surface-2); border-radius: 5px; overflow: hidden; flex: none; }
+.mkt-pipe-fitfill { display: block; height: 100%; border-radius: 5px; background: var(--surface-3); }
+.mkt-pipe-fit.mid .mkt-pipe-fitfill { background: linear-gradient(90deg, var(--accent-soft), var(--accent)); }
+.mkt-pipe-fit.hi .mkt-pipe-fitfill { background: linear-gradient(90deg, var(--accent-strong), var(--accent)); }
+.mkt-pipe-foot {
+  display: flex; align-items: center; gap: 7px; margin-top: 4px; padding-top: 13px;
+  border-top: 1px solid var(--line); font-size: .7rem; color: var(--ink-3);
+}
+
+/* ---- SENSITIVITY MATRIX (Buy LBO) ---- */
+.mkt-sens { display: flex; flex-direction: column; gap: 12px; }
+.mkt-sens-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.mkt-sens-title { font-size: 1.02rem; font-weight: 600; letter-spacing: -.02em; color: var(--ink); }
+.mkt-sens-base { font-size: .78rem; font-weight: 500; color: var(--accent-strong); }
+.mkt-sens-axis { font-size: .66rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+.mkt-sens-grid {
+  display: grid; grid-template-columns: auto repeat(3, 1fr); gap: 6px; align-items: stretch;
+}
+.mkt-sens-corner { font-size: .64rem; color: var(--ink-3); display: flex; align-items: center; }
+.mkt-sens-colh, .mkt-sens-rowh { font-size: .7rem; color: var(--ink-3); display: flex; align-items: center; justify-content: center; }
+.mkt-sens-rowh { justify-content: flex-end; padding-right: 4px; }
+.mkt-sens-cell {
+  /* --sens (0..1) drives the green tint; uses color-mix so it stays on-token */
+  background: color-mix(in srgb, var(--accent) calc(var(--sens, 0) * 64%), var(--surface-2));
+  border: 1px solid var(--line); border-radius: 8px;
+  padding: 12px 6px; text-align: center; font-size: .9rem; font-weight: 500;
+  color: var(--ink); font-variant-numeric: tabular-nums;
+}
+.mkt-sens-cell.base {
+  border-color: var(--accent-strong); box-shadow: 0 0 0 1px var(--accent-strong) inset;
+  color: var(--on-accent); font-weight: 600;
+}
+.mkt-sens-foot {
+  display: flex; align-items: center; gap: 7px; margin-top: 2px; padding-top: 12px;
+  border-top: 1px solid var(--line); font-size: .7rem; color: var(--ink-3);
+}
+
+/* ---- DATA ROOM / DD CHECKLIST (Buy DD · Sell data room) ---- */
+.mkt-dr { display: flex; flex-direction: column; gap: 13px; }
+.mkt-dr-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.mkt-dr-title { font-size: 1.02rem; font-weight: 600; letter-spacing: -.02em; color: var(--ink); }
+.mkt-dr-count { font-size: .72rem; letter-spacing: .04em; color: var(--ink-3); }
+.mkt-dr-track { height: 7px; background: var(--surface-2); border-radius: 5px; overflow: hidden; }
+.mkt-dr-trackfill { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--accent-strong), var(--accent)); }
+.mkt-dr-list { display: flex; flex-direction: column; }
+.mkt-dr-row {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px;
+  padding: 11px 0; border-bottom: 1px solid var(--line);
+}
+.mkt-dr-row:last-child { border-bottom: 0; }
+.mkt-dr-fileicon {
+  flex: none; width: 30px; height: 30px; border-radius: 8px; background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center; color: var(--ink-2);
+}
+.mkt-dr-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mkt-dr-name { font-size: .9rem; font-weight: 500; color: var(--ink); letter-spacing: -.01em; }
+.mkt-dr-sub { font-size: .7rem; color: var(--ink-3); letter-spacing: .01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mkt-dr-pill {
+  font-size: .66rem; letter-spacing: .03em; border-radius: 999px; padding: 4px 10px;
+  white-space: nowrap; border: 1px solid var(--line);
+}
+.mkt-dr-pill.done { color: var(--accent-strong); background: var(--accent-soft); border-color: var(--accent); }
+.mkt-dr-pill.review { color: var(--ink); background: var(--surface-2); }
+.mkt-dr-pill.open { color: var(--ink-3); background: var(--surface); }
+
+/* ---- INVESTOR DECK (Raise investor materials) ---- */
+.mkt-deck { display: flex; flex-direction: column; gap: 14px; }
+.mkt-deck-stage { width: 100%; }
+.mkt-deck-slide {
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px;
+  padding: 16px; display: flex; flex-direction: column; gap: 13px;
+}
+.mkt-deck-slidehd { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.mkt-deck-slidekicker { font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: var(--accent-strong); }
+.mkt-deck-slidepage { font-size: .68rem; color: var(--ink-3); }
+.mkt-deck-slidetitle { font-size: 1.18rem; font-weight: 600; letter-spacing: -.02em; color: var(--ink); line-height: 1.15; }
+.mkt-deck-chart { display: flex; align-items: flex-end; gap: 9px; height: 64px; }
+.mkt-deck-barslot { flex: 1; height: 100%; display: flex; align-items: flex-end; }
+.mkt-deck-bar { width: 100%; min-height: 4px; border-radius: 4px 4px 0 0; background: linear-gradient(180deg, var(--accent), var(--accent-strong)); }
+.mkt-deck-barslot:last-child .mkt-deck-bar { background: linear-gradient(180deg, var(--accent-soft), var(--accent)); }
+.mkt-deck-slidekpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; border-top: 1px solid var(--line); padding-top: 12px; }
+.mkt-deck-slidekpi { display: flex; flex-direction: column; gap: 2px; }
+.mkt-deck-kv { font-size: 1.08rem; font-weight: 500; letter-spacing: -.02em; color: var(--ink); }
+.mkt-deck-slidekpi:last-child .mkt-deck-kv { color: var(--accent-strong); }
+.mkt-deck-kk { font-size: .62rem; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3); }
+.mkt-deck-thumbs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.mkt-deck-thumb {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 9px;
+  padding: 10px; display: flex; flex-direction: column; gap: 6px; min-width: 0;
+}
+.mkt-deck-thumbline { height: 5px; border-radius: 3px; background: var(--surface-2); width: 100%; }
+.mkt-deck-thumbline.short { width: 62%; }
+.mkt-deck-thumblabel { font-size: .62rem; letter-spacing: .02em; color: var(--ink-3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---- CAP TABLE (Raise terms) ---- */
+.mkt-cap { display: flex; flex-direction: column; gap: 12px; }
+.mkt-cap-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.mkt-cap-title { font-size: 1.02rem; font-weight: 600; letter-spacing: -.02em; color: var(--ink); }
+.mkt-cap-raise { font-size: .78rem; font-weight: 500; color: var(--accent-strong); }
+.mkt-cap-legend { display: flex; gap: 16px; }
+.mkt-cap-legitem { display: inline-flex; align-items: center; gap: 6px; font-size: .68rem; color: var(--ink-3); }
+.mkt-cap-swatch { width: 10px; height: 10px; border-radius: 3px; }
+.mkt-cap-swatch.pre { background: var(--surface-3); }
+.mkt-cap-swatch.post { background: var(--accent); }
+.mkt-cap-rows { display: flex; flex-direction: column; }
+.mkt-cap-row {
+  display: grid; grid-template-columns: 130px 1fr 42px; align-items: center; gap: 14px;
+  padding: 10px 0; border-bottom: 1px solid var(--line);
+}
+.mkt-cap-row:last-child { border-bottom: 0; }
+.mkt-cap-name { font-size: .86rem; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mkt-cap-bars { display: flex; flex-direction: column; gap: 5px; }
+.mkt-cap-bartrack { height: 7px; background: var(--surface-2); border-radius: 5px; overflow: hidden; }
+.mkt-cap-bar { display: block; height: 100%; border-radius: 5px; }
+.mkt-cap-bar.pre { background: var(--surface-3); }
+.mkt-cap-bar.post { background: linear-gradient(90deg, var(--accent-strong), var(--accent)); }
+.mkt-cap-pct { font-size: .82rem; font-weight: 500; text-align: right; color: var(--ink); }
+.mkt-cap-foot {
+  display: flex; align-items: center; gap: 7px; margin-top: 2px; padding-top: 12px;
+  border-top: 1px solid var(--line); font-size: .68rem; color: var(--ink-3);
+}
+
+/* ---- ASSISTANT SURFACE (Connectors — smbX inside Claude/ChatGPT) ---- */
+.mkt-asst { display: flex; flex-direction: column; gap: 12px; }
+.mkt-asst-hd { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.mkt-asst-name { font-size: .82rem; font-weight: 600; letter-spacing: .02em; color: var(--ink); }
+.mkt-asst-conn { display: inline-flex; align-items: center; gap: 6px; font-size: .68rem; color: var(--ink-3); }
+.mkt-asst-conndot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-strong); flex: none; }
+.mkt-asst-user {
+  align-self: flex-end; max-width: 82%; background: var(--ink); color: #fff;
+  font-size: .9rem; line-height: 1.45; padding: 10px 13px; border-radius: 14px 14px 5px 14px;
+}
+.mkt-asst-tool {
+  background: var(--surface-2); border: 1px solid var(--line-2); border-radius: 12px;
+  overflow: hidden; box-shadow: 0 12px 26px -20px rgba(25,24,19,.4);
+}
+.mkt-asst-toolhd {
+  display: flex; align-items: center; gap: 8px; padding: 10px 13px;
+  border-bottom: 1px solid var(--line); font-size: .74rem; color: var(--ink-2); font-weight: 500;
+}
+.mkt-asst-toolglyph { color: var(--accent-strong); display: flex; flex: none; }
+.mkt-asst-toolok {
+  margin-left: auto; font-size: .64rem; color: var(--accent-strong);
+  background: var(--accent-soft); border-radius: 999px; padding: 3px 9px;
+}
+.mkt-asst-toolbody { padding: 4px 13px 6px; }
+.mkt-asst-kv {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  padding: 8px 0; border-bottom: 1px solid var(--line); font-size: .86rem; color: var(--ink-2);
+}
+.mkt-asst-kv:last-child { border-bottom: 0; }
+.mkt-asst-kv .mono { color: var(--ink); font-weight: 500; }
+.mkt-asst-stamp {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  padding: 9px 13px; border-top: 1px solid var(--line); background: var(--surface);
+  font-size: .64rem; color: var(--ink-3); letter-spacing: .01em;
+}
+.mkt-asst-hash { color: var(--ink-3); }
+.mkt-asst-match { color: var(--accent-strong); font-weight: 500; }
+.mkt-asst-reply {
+  align-self: flex-start; max-width: 92%; background: var(--surface); border: 1px solid var(--line);
+  color: var(--ink); font-size: .9rem; line-height: 1.5; padding: 11px 14px;
+  border-radius: 14px 14px 14px 5px;
+}
+
+/* page-surface responsive */
+@media (max-width: 680px) {
+  .mkt-pipe-row { grid-template-columns: 1fr auto; gap: 8px 12px; }
+  .mkt-pipe-fit { grid-column: 1 / -1; justify-content: flex-start; }
+  .mkt-pipe-fittrack { flex: 1; max-width: 160px; }
+  .mkt-sens-cell { padding: 10px 4px; font-size: .82rem; }
+  .mkt-sens-colh, .mkt-sens-rowh { font-size: .64rem; }
+  .mkt-deck-thumbs { grid-template-columns: repeat(2, 1fr); }
+  .mkt-deck-chart { height: 56px; }
+  .mkt-cap-row { grid-template-columns: 104px 1fr 38px; gap: 10px; }
+  .mkt-cap-name { font-size: .82rem; }
+}
+
 /* ---- CARDS / GRIDS ---- */
 .mkt .grid { display: grid; gap: var(--gap); }
 .mkt .g2 { grid-template-columns: repeat(2,1fr); }
