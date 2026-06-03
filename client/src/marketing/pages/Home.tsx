@@ -4,6 +4,7 @@ import { Brand } from '../Brand';
 import { YuliaLauncher } from '../YuliaChat';
 import { ClosingCTA } from '../components/ClosingCTA';
 import { HeroWorkspace } from '../components/HeroWorkspace';
+import { ScrollGrow } from '../components/ScrollGrow';
 import { ProductFrame } from '../components/ProductFrame';
 import {
   ChatIngestMock,
@@ -45,10 +46,8 @@ export default function Home() {
             Breaks out of the page wrap edge-to-edge, with a side gutter and an
             inner max-width cap so it stays sane on ultrawide displays. */}
         <div
-          className="reveal"
-          data-d="4"
           style={{
-            marginTop: 32,
+            marginTop: 'clamp(44px, 7vw, 92px)',
             width: '100vw',
             marginLeft: 'calc(50% - 50vw)',
             marginRight: 'calc(50% - 50vw)',
@@ -57,7 +56,9 @@ export default function Home() {
           }}
         >
           <div style={{ maxWidth: 1840, margin: '0 auto' }}>
-            <HeroWorkspace />
+            <ScrollGrow>
+              <HeroWorkspace />
+            </ScrollGrow>
           </div>
         </div>
       </section>
