@@ -375,6 +375,185 @@
   .mkt-hero-pill { right: 8px; top: 12px; }
 }
 
+/* ============================================================
+   PRODUCT MOCKS — walkthrough surfaces + produces-grid mini surfaces
+   Siblings of the hero Valuation card. Tokens only.
+   ============================================================ */
+
+/* ---- step layout: stack frame above its copy on the 3-step walkthrough ----
+   The .step keeps its top padding so the absolute-positioned number (.sn) has
+   room to sit above the heading. */
+.mkt .step-showcase { display: grid; gap: 14px; }
+
+/* ---- WALKTHROUGH 1 · ingest (chat + file chip + extracted figures) ---- */
+.mkt-ingest { display: flex; flex-direction: column; gap: 16px; }
+.mkt-ingest-thread { display: flex; flex-direction: column; gap: 12px; }
+.mkt-ingest-yulia { display: flex; gap: 10px; align-items: flex-start; }
+.mkt-ingest-av {
+  flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--accent-soft);
+  display: flex; align-items: center; justify-content: center; color: var(--accent-strong);
+}
+.mkt-ingest-text {
+  background: var(--surface-2); border: 1px solid var(--line); color: var(--ink);
+  padding: 10px 13px; border-radius: 14px 14px 14px 4px; font-size: .9rem; line-height: 1.45; max-width: 90%;
+}
+.mkt-ingest-file {
+  display: flex; align-items: center; gap: 11px;
+  background: var(--surface); border: 1px solid var(--line-2); border-radius: 12px; padding: 11px 13px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 12px 26px -20px rgba(25,24,19,.4);
+}
+.mkt-ingest-fileicon {
+  flex: none; width: 34px; height: 34px; border-radius: 9px; background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center; color: var(--ink-2);
+}
+.mkt-ingest-filemeta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mkt-ingest-filename { font-size: .9rem; font-weight: 500; color: var(--ink); letter-spacing: -.01em; }
+.mkt-ingest-filesub { font-size: .72rem; color: var(--ink-3); letter-spacing: .02em; }
+.mkt-ingest-check {
+  margin-left: auto; flex: none; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--accent-soft); color: var(--accent-strong);
+  display: flex; align-items: center; justify-content: center;
+}
+.mkt-ingest-extract { display: flex; flex-direction: column; }
+.mkt-ingest-row {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  padding: 9px 0; border-bottom: 1px solid var(--line);
+}
+.mkt-ingest-row:last-child { border-bottom: 0; }
+.mkt-ingest-k { color: var(--ink-2); font-size: .88rem; }
+.mkt-ingest-v { font-size: .98rem; font-weight: 500; color: var(--ink); }
+.mkt-ingest-row:last-child .mkt-ingest-v { color: var(--accent-strong); }
+
+/* ---- WALKTHROUGH 3 · deliver (CIM doc surface) ---- */
+.mkt-doc { display: flex; flex-direction: column; gap: 16px; }
+.mkt-doc-head { display: flex; flex-direction: column; gap: 7px; }
+.mkt-doc-kicker { font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-strong); }
+.mkt-doc-title { font-size: 1.18rem; font-weight: 600; letter-spacing: -.02em; color: var(--ink); line-height: 1.2; }
+.mkt-doc-lines { display: flex; flex-direction: column; gap: 8px; }
+.mkt-doc-line { height: 8px; border-radius: 4px; background: var(--surface-2); }
+.mkt-doc-line.w-full { width: 100%; } .mkt-doc-line.w-92 { width: 92%; } .mkt-doc-line.w-78 { width: 78%; }
+.mkt-doc-sections { display: flex; flex-wrap: wrap; gap: 8px; }
+.mkt-doc-section {
+  font-size: .78rem; color: var(--ink-2); background: var(--surface-2);
+  border: 1px solid var(--line); border-radius: 999px; padding: 5px 11px;
+}
+.mkt-doc-chartblock {
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 14px;
+}
+.mkt-doc-chartmeta { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.mkt-doc-chartlabel { font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+.mkt-doc-chartval { font-size: .98rem; font-weight: 500; color: var(--ink); }
+.mkt-doc-chart { display: flex; align-items: flex-end; gap: 9px; height: 70px; }
+.mkt-doc-barslot { flex: 1; height: 100%; display: flex; align-items: flex-end; }
+.mkt-doc-bar { width: 100%; min-height: 4px; border-radius: 4px 4px 0 0; background: linear-gradient(180deg, var(--accent), var(--accent-strong)); }
+.mkt-doc-barslot:last-child .mkt-doc-bar { background: linear-gradient(180deg, var(--accent-soft), var(--accent)); }
+
+/* ---- MINI FRAME (produces grid) — slim chrome, no faux URL ---- */
+.mkt-mini {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+  box-shadow: 0 1px 0 rgba(255,255,255,.7) inset, 0 22px 44px -30px rgba(16,224,96,.22), 0 14px 28px -20px rgba(25,24,19,.16);
+  margin-bottom: 18px;
+}
+.mkt-mini-bar {
+  display: flex; align-items: center; gap: 9px; padding: 9px 13px;
+  border-bottom: 1px solid var(--line); background: var(--surface);
+}
+.mkt-mini-dots { display: inline-flex; gap: 5px; flex: none; }
+.mkt-mini-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--surface-3); display: block; }
+.mkt-mini-title { font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); margin-left: 2px; }
+.mkt-mini-body { padding: 15px 15px 17px; display: flex; flex-direction: column; gap: 12px; }
+
+/* shared mini key/value rows */
+.mkt-mini-kvs { display: flex; flex-direction: column; }
+.mkt-mini-kv {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  padding: 7px 0; border-bottom: 1px solid var(--line); font-size: .85rem; color: var(--ink-2);
+}
+.mkt-mini-kv:last-child { border-bottom: 0; }
+.mkt-mini-kv .mono { color: var(--ink); font-weight: 500; }
+
+/* mini · valuation range */
+.mkt-mini-rangeval { font-size: 1.12rem; font-weight: 500; letter-spacing: -.02em; color: var(--ink); }
+.mkt-mini-track { height: 9px; background: var(--surface-2); border-radius: 6px; overflow: hidden; position: relative; }
+.mkt-mini-fill { height: 100%; border-radius: 6px; position: relative; background: linear-gradient(90deg, var(--accent-strong), var(--accent)); }
+.mkt-mini-knob {
+  position: absolute; right: 0; top: 50%; transform: translate(50%, -50%);
+  width: 12px; height: 12px; border-radius: 50%; background: var(--surface);
+  border: 3px solid var(--accent-strong); box-shadow: 0 2px 5px -1px rgba(25,24,19,.3);
+}
+
+/* mini · QoE add-backs */
+.mkt-mini-addbacks { display: flex; flex-direction: column; }
+.mkt-mini-addrow {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  padding: 7px 0; border-bottom: 1px solid var(--line); font-size: .85rem;
+}
+.mkt-mini-addrow:last-child { border-bottom: 0; }
+.mkt-mini-addk { color: var(--ink-2); }
+.mkt-mini-addv { color: var(--ink); font-weight: 500; }
+.mkt-mini-addv.pos { color: #2E8C5A; }
+.mkt-mini-addrow.total { border-top: 1px solid var(--line-2); border-bottom: 0; margin-top: 3px; padding-top: 10px; }
+.mkt-mini-addrow.total .mkt-mini-addk { color: var(--ink); font-weight: 600; }
+.mkt-mini-addrow.total .mkt-mini-addv { color: var(--accent-strong); }
+
+/* mini · working capital peg bars */
+.mkt-mini-pegrow { display: grid; grid-template-columns: 64px 1fr 46px; align-items: center; gap: 10px; }
+.mkt-mini-peglabel { font-size: .76rem; color: var(--ink-3); }
+.mkt-mini-pegtrack { height: 8px; background: var(--surface-2); border-radius: 5px; overflow: hidden; }
+.mkt-mini-pegfill { height: 100%; border-radius: 5px; background: var(--surface-3); }
+.mkt-mini-pegfill.peg { background: linear-gradient(90deg, var(--accent-strong), var(--accent)); }
+.mkt-mini-pegval { font-size: .8rem; text-align: right; color: var(--ink); font-weight: 500; }
+.mkt-mini-adjust {
+  display: flex; align-items: center; gap: 7px; font-size: .78rem; color: var(--ink-2);
+  border-top: 1px solid var(--line); padding-top: 11px; margin-top: 2px;
+}
+.mkt-mini-adjust .mono { color: var(--accent-strong); font-weight: 500; margin-left: auto; }
+.mkt-mini-adjdot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-strong); flex: none; }
+
+/* mini · financing returns */
+.mkt-mini-returns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mkt-mini-return {
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px;
+  padding: 11px 12px; display: flex; flex-direction: column; gap: 3px;
+}
+.mkt-mini-returnv { font-size: 1.3rem; font-weight: 500; letter-spacing: -.02em; color: var(--accent-strong); }
+.mkt-mini-returnk { font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+
+/* mini · structure (asset vs stock) */
+.mkt-mini-struct { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mkt-mini-structcol {
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px;
+  padding: 11px 12px; display: flex; flex-direction: column; gap: 3px;
+}
+.mkt-mini-structcol.active { border-color: var(--accent); background: var(--accent-soft); }
+.mkt-mini-structname { font-size: .8rem; font-weight: 500; color: var(--ink); }
+.mkt-mini-structnum { font-size: 1.08rem; font-weight: 500; letter-spacing: -.02em; color: var(--ink); }
+.mkt-mini-structcol.active .mkt-mini-structnum { color: var(--accent-strong); }
+.mkt-mini-structnote { font-size: .64rem; letter-spacing: .03em; color: var(--ink-3); }
+.mkt-mini-structfoot {
+  font-size: .68rem; color: var(--ink-3); letter-spacing: .02em;
+  border-top: 1px solid var(--line); padding-top: 10px; margin-top: 2px;
+}
+
+/* mini · documents preview */
+.mkt-mini-doc { display: flex; flex-direction: column; gap: 9px; }
+.mkt-mini-doctitle { font-size: .92rem; font-weight: 600; letter-spacing: -.01em; color: var(--ink); }
+.mkt-mini-docline { height: 7px; border-radius: 4px; background: var(--surface-2); }
+.mkt-mini-docline.w-full { width: 100%; } .mkt-mini-docline.w-85 { width: 85%; } .mkt-mini-docline.w-70 { width: 70%; }
+.mkt-mini-docchips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 3px; }
+.mkt-mini-docchip {
+  font-size: .68rem; color: var(--ink); background: var(--surface-2);
+  border: 1px solid var(--line-2); border-radius: 999px; padding: 4px 10px;
+}
+
+/* produces grid: give each feature card room for its mini surface */
+.mkt .feature-showcase .mkt-mini { margin-bottom: 16px; }
+
+@media (max-width: 680px) {
+  .mkt-mini-pegrow { grid-template-columns: 56px 1fr 44px; gap: 8px; }
+  .mkt-doc-chart { height: 58px; }
+}
+
 /* ---- CARDS / GRIDS ---- */
 .mkt .grid { display: grid; gap: var(--gap); }
 .mkt .g2 { grid-template-columns: repeat(2,1fr); }

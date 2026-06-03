@@ -12,17 +12,17 @@ import { FloatingCard } from './FloatingCard';
 
 const EASE: [number, number, number, number] = [0.22, 0.61, 0.36, 1];
 
-/* Illustrative SMB demo numbers — clearly a sample deal. */
+/* Illustrative mid-market demo numbers — clearly a sample deal. */
 const KPIS = [
-  { label: 'SDE (normalized)', to: 640_000, fmt: (n: number) => `$${Math.round(n / 1000)}K` },
-  { label: 'Applied multiple', to: 3.8, fmt: (n: number) => `${n.toFixed(1)}×` },
-  { label: 'Midpoint value', to: 2_700_000, fmt: (n: number) => `$${(n / 1_000_000).toFixed(1)}M` },
+  { label: 'EBITDA (normalized)', to: 8_400_000, fmt: (n: number) => `$${(n / 1_000_000).toFixed(1)}M` },
+  { label: 'Entry multiple', to: 5.5, fmt: (n: number) => `${n.toFixed(1)}×` },
+  { label: 'Enterprise value', to: 46_000_000, fmt: (n: number) => `$${Math.round(n / 1_000_000)}M` },
 ] as const;
 
-/* SDE / EBITDA columns — grow upward. heights are % of the plot area. */
+/* Revenue / EBITDA / Adj. columns — grow upward. heights are % of the plot area. */
 const COLUMNS = [
-  { label: 'SDE', h: 88 },
-  { label: 'EBITDA', h: 72 },
+  { label: 'EBITDA', h: 88 },
+  { label: 'EBIT', h: 70 },
   { label: 'Adj.', h: 96 },
 ] as const;
 
@@ -163,14 +163,14 @@ export function HeroShowcase() {
             <div className="mkt-val">
               {/* range bar */}
               <div className="mkt-val-rangehead">
-                <span className="mkt-val-label">Valuation range</span>
-                <span className="mkt-val-range mono num">$2.1M&nbsp;–&nbsp;$3.4M</span>
+                <span className="mkt-val-label">Enterprise value range</span>
+                <span className="mkt-val-range mono num">$38M&nbsp;–&nbsp;$52M</span>
               </div>
               <div className="mkt-val-track">
                 <motion.div
                   className="mkt-val-fill"
-                  initial={reduce ? { width: '74%' } : { width: '0%' }}
-                  animate={cardLive ? { width: '74%' } : {}}
+                  initial={reduce ? { width: '64%' } : { width: '0%' }}
+                  animate={cardLive ? { width: '64%' } : {}}
                   transition={{ duration: 1.0, ease: EASE, delay: 0.1 }}
                 >
                   <motion.span
@@ -233,8 +233,8 @@ export function HeroShowcase() {
             parallax={34}
           >
             <span className="mkt-hero-pill-dot" />
-            <span className="mkt-hero-pill-k">Valuation</span>
-            <span className="mkt-hero-pill-v mono num">$2.7M</span>
+            <span className="mkt-hero-pill-k">Enterprise value</span>
+            <span className="mkt-hero-pill-v mono num">$46M</span>
           </FloatingCard>
 
           {/* second, smaller float — a confidence mini-stat */}
@@ -244,8 +244,8 @@ export function HeroShowcase() {
             delay={cardLive ? 1.35 : 0.4}
             parallax={-22}
           >
-            <span className="mkt-hero-ministat-v mono num">3.8×</span>
-            <span className="mkt-hero-ministat-k">applied multiple</span>
+            <span className="mkt-hero-ministat-v mono num">5.5×</span>
+            <span className="mkt-hero-ministat-k">entry multiple</span>
           </FloatingCard>
         </div>
       </div>

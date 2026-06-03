@@ -4,6 +4,13 @@ import { Brand } from '../Brand';
 import { YuliaLauncher } from '../YuliaChat';
 import { enterApp } from '../useEnterApp';
 import { HeroShowcase } from '../components/HeroShowcase';
+import { ProductFrame } from '../components/ProductFrame';
+import {
+  ChatIngestMock,
+  ModelBuildMock,
+  CIMDeliverMock,
+  PRODUCE_MOCKS,
+} from '../components/ProductMocks';
 
 const CAPABILITIES = [
   ['Working capital peg', 'Quality-of-earnings preview', 'LBO & SBA models'],
@@ -72,10 +79,25 @@ export default function Home() {
             <span className="eyebrow">How it works</span>
             <h2 style={{ marginTop: 18 }}>You talk. Yulia builds.</h2>
           </div>
-          <div className="grid" style={{ gap: 38, maxWidth: 720 }}>
-            <div className="step reveal"><span className="sn">01</span><h3>Tell Yulia what you’re working on.</h3><p>A business you’re buying, selling, raising for, or integrating. Upload a tax return, paste a few numbers, or just name the company.</p></div>
-            <div className="step reveal" data-d="1"><span className="sn">02</span><h3>Yulia computes the work product.</h3><p>Not a summary of what you should do — the actual model, allocation, or document, with assumptions you can change and sources you can check.</p></div>
-            <div className="step reveal" data-d="2"><span className="sn">03</span><h3>Take it anywhere.</h3><p>Export to PDF, Excel, or Word. Or keep working — Yulia carries the deal state forward as the deal moves.</p></div>
+          <div className="grid g3" style={{ gap: 38 }}>
+            <div className="step-showcase reveal">
+              <ProductFrame variant="browser" url="app.smbx.ai/chat" delay={0.05}>
+                <ChatIngestMock />
+              </ProductFrame>
+              <div className="step"><span className="sn">01</span><h3>Tell Yulia what you’re working on.</h3><p>A business you’re buying, selling, raising for, or integrating. Upload a tax return, paste a few numbers, or just name the company.</p></div>
+            </div>
+            <div className="step-showcase reveal" data-d="1">
+              <ProductFrame variant="browser" url="app.smbx.ai/deal" delay={0.1}>
+                <ModelBuildMock />
+              </ProductFrame>
+              <div className="step"><span className="sn">02</span><h3>Yulia computes the work product.</h3><p>Not a summary of what you should do — the actual model, allocation, or document, with assumptions you can change and sources you can check.</p></div>
+            </div>
+            <div className="step-showcase reveal" data-d="2">
+              <ProductFrame variant="browser" url="app.smbx.ai/cim" delay={0.15}>
+                <CIMDeliverMock />
+              </ProductFrame>
+              <div className="step"><span className="sn">03</span><h3>Take it anywhere.</h3><p>Export to PDF, Excel, or Word. Or keep working — Yulia carries the deal state forward as the deal moves.</p></div>
+            </div>
           </div>
         </div>
       </section>
@@ -90,12 +112,16 @@ export default function Home() {
             <h2 style={{ marginTop: 18 }}>Real artifacts, not advice.</h2>
           </div>
           <div className="grid g3">
-            {PRODUCES.map((f, i) => (
-              <div className="feature reveal" data-d={(i % 3)} key={f.h}>
-                <h3>{f.h}</h3>
-                <p>{f.p}</p>
-              </div>
-            ))}
+            {PRODUCES.map((f, i) => {
+              const Mock = PRODUCE_MOCKS[i];
+              return (
+                <div className="feature feature-showcase reveal" data-d={(i % 3)} key={f.h}>
+                  {Mock && <Mock />}
+                  <h3>{f.h}</h3>
+                  <p>{f.p}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
