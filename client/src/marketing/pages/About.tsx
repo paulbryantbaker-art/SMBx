@@ -34,19 +34,21 @@ export default function About() {
     <MarketingShell>
       {/* HERO */}
       <section style={{ paddingBottom: 'calc(var(--pad-y) * .5)' }}>
-        <div className="wrap reveal" style={{ maxWidth: '60ch' }}>
-          <span className="eyebrow">About</span>
-          <h1
-            className="display"
-            style={{ fontSize: 'clamp(2.3rem,4.6vw,4rem)', marginTop: 18, maxWidth: '15ch' }}
-          >
-            We built the diligence work, not the advice.
-          </h1>
-          <p className="lead" style={{ marginTop: 24, maxWidth: '54ch' }}>
-            <Brand /> is software. It computes the analysis that M&amp;A used to require a team to produce
-            — and it stops, deliberately, at the line where software ends and licensed judgment
-            begins.
-          </p>
+        <div className="wrap">
+          <div className="reveal" style={{ maxWidth: '60ch' }}>
+            <span className="eyebrow">About</span>
+            <h1
+              className="display"
+              style={{ fontSize: 'clamp(2.3rem,4.6vw,4rem)', marginTop: 18, maxWidth: '15ch' }}
+            >
+              We built the diligence work, not the advice.
+            </h1>
+            <p className="lead" style={{ marginTop: 24, maxWidth: '54ch' }}>
+              <Brand /> is software. It computes the analysis that M&amp;A used to require a team to produce
+              — and it stops, deliberately, at the line where software ends and licensed judgment
+              begins.
+            </p>
+          </div>
         </div>
       </section>
 
