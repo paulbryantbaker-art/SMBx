@@ -1476,6 +1476,13 @@
 /* tag pills */
 .mkt .tags { display: flex; flex-wrap: wrap; gap: 10px; }
 .mkt .tag { font-family: var(--mono); font-size: .82rem; color: var(--ink); background: var(--surface); border: 1px solid var(--line-2); border-radius: 999px; padding: 8px 15px; letter-spacing: -.01em; }
+/* clickable tag — used in the shared 'computed' closer (→ the Standard) */
+.mkt a.tag-link { cursor: pointer; text-decoration: none; transition: background .18s var(--ease), border-color .18s var(--ease), color .18s var(--ease); }
+.mkt a.tag-link:hover { background: var(--accent-soft); border-color: var(--accent-strong); color: var(--on-accent); }
+/* shared computed closer — chips + proof line, centered, sits above the CTA on every page */
+.mkt .computed-closer { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px; }
+.mkt .computed-closer-tags { justify-content: center; max-width: 760px; }
+.mkt .computed-closer-note { max-width: 56ch; font-size: .9rem; line-height: 1.6; color: var(--ink-3); }
 
 /* stat band — 4 metric cells in one outlined card (About · Connectors).
    Dividers must follow the layout: vertical between columns on desktop,
