@@ -53,30 +53,11 @@ export default function About() {
       {/* STAT BAND */}
       <section style={{ paddingTop: 0, paddingBottom: 0 }}>
         <div className="wrap">
-          <div
-            className="reveal grid g4"
-            style={{
-              gap: 0,
-              border: '1px solid var(--line)',
-              borderRadius: 'var(--radius)',
-              overflow: 'hidden',
-            }}
-          >
-            {STATS.map((s, i) => (
-              <div
-                key={s.c}
-                style={{
-                  padding: '28px 26px',
-                  borderLeft: i === 0 ? 'none' : '1px solid var(--line)',
-                }}
-              >
-                <div
-                  className="mono"
-                  style={{ fontSize: '1.7rem', fontWeight: 500, letterSpacing: '-.02em' }}
-                >
-                  {s.n}
-                </div>
-                <div style={{ marginTop: 8, fontSize: '.92rem', color: 'var(--ink-2)' }}>{s.c}</div>
+          <div className="reveal statband">
+            {STATS.map((s) => (
+              <div className="statband-cell" key={s.c}>
+                <div className="statband-num">{s.n}</div>
+                <div className="statband-cap">{s.c}</div>
               </div>
             ))}
           </div>

@@ -58,13 +58,15 @@
 .mkt button { font-family: inherit; }
 .mkt ::selection { background: var(--accent); color: var(--on-accent); }
 
-/* ---- Type ---- */
-.mkt h1, .mkt h2, .mkt h3, .mkt h4 { margin: 0; font-weight: 600; letter-spacing: -.022em; line-height: 1.05; color: var(--ink); }
+/* ---- Type ----
+   text-wrap: balance evens out heading line lengths and kills ugly one-word
+   last-line orphans (e.g. a lone "deal." / "move.") across every page. */
+.mkt h1, .mkt h2, .mkt h3, .mkt h4 { margin: 0; font-weight: 600; letter-spacing: -.022em; line-height: 1.05; color: var(--ink); text-wrap: balance; }
 .mkt .display { font-size: clamp(2.7rem,6.2vw,5.1rem); font-weight: 600; letter-spacing: -.03em; line-height: 1.0; }
 .mkt h2 { font-size: clamp(2rem,3.8vw,3.2rem); }
 .mkt h3 { font-size: clamp(1.3rem,2vw,1.6rem); letter-spacing: -.018em; }
 .mkt p { margin: 0; }
-.mkt .lead { font-size: clamp(1.18rem,1.7vw,1.45rem); line-height: 1.5; color: var(--ink-2); font-weight: 400; letter-spacing: -.01em; }
+.mkt .lead { font-size: clamp(1.18rem,1.7vw,1.45rem); line-height: 1.5; color: var(--ink-2); font-weight: 400; letter-spacing: -.01em; text-wrap: pretty; }
 .mkt .body { color: var(--ink-2); }
 .mkt strong { font-weight: 600; color: var(--ink); }
 .mkt .eyebrow {
@@ -373,6 +375,167 @@
   .mkt-frame-content { padding: 16px; }
   .mkt-hero-ministat { display: none; }
   .mkt-hero-pill { right: 8px; top: 12px; }
+}
+
+/* ============================================================
+   HERO WORKSPACE — full-bleed 3-pane smbX window
+   ============================================================ */
+.mkt-ws { position: relative; }
+.mkt-ws-glow {
+  position: absolute; z-index: 0; inset: -10% -2% auto; height: 78%;
+  background: radial-gradient(55% 80% at 78% 26%, rgba(43,255,119,.20), transparent 72%);
+  filter: blur(10px); pointer-events: none;
+}
+
+/* ONE browser window holding all three panes */
+.mkt-ws-frame {
+  position: relative; z-index: 1;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  overflow: hidden; text-align: left;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.7) inset,
+    0 40px 90px -40px rgba(16,224,96,.30),
+    0 26px 54px -24px rgba(25,24,19,.16);
+}
+.mkt-ws-bar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 16px; border-bottom: 1px solid var(--line); background: var(--surface);
+}
+.mkt-ws-dots { display: inline-flex; gap: 7px; flex: none; }
+.mkt-ws-dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--surface-3); display: block; }
+.mkt-ws-url {
+  display: inline-flex; align-items: center; gap: 7px; margin: 0 auto;
+  font-family: var(--mono); font-size: .74rem; letter-spacing: .01em; color: var(--ink-3);
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: 8px; padding: 5px 14px; max-width: 44%;
+}
+.mkt-ws-url svg { color: var(--ink-3); flex: none; }
+
+/* 3-pane body: rail (~16%) · chat (~38%) · canvas (~46%) */
+.mkt-ws-body {
+  display: grid;
+  grid-template-columns: 16% minmax(0, 38%) minmax(0, 1fr);
+  align-items: stretch;
+  min-height: 520px;
+}
+
+/* The three panes are <section>/<aside> elements, so the global
+   `.mkt section { padding: var(--pad-y) 0 }` rule out-specifies a bare
+   `.mkt-ws-canvas` and zeroes their horizontal padding (content goes flush to
+   the frame/divider edges). Scope every pane-padding rule under `.mkt-ws-body`
+   so it wins specificity at every breakpoint. */
+
+/* LEFT RAIL — deal context */
+.mkt-ws-body .mkt-ws-rail {
+  border-right: 1px solid var(--line); background: var(--surface-2);
+  padding: 22px 18px; display: flex; flex-direction: column; gap: 22px; min-width: 0;
+}
+.mkt-ws-deal { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.mkt-ws-deal-name { font-weight: 600; font-size: 1rem; letter-spacing: -.018em; color: var(--ink); }
+.mkt-ws-deal-sub { font-family: var(--mono); font-size: .76rem; letter-spacing: .01em; color: var(--ink-3); }
+.mkt-ws-stages { display: flex; flex-direction: column; gap: 4px; }
+.mkt-ws-stage {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 11px; border-radius: 9px; font-size: .9rem; color: var(--ink-3);
+}
+.mkt-ws-stage.is-active {
+  background: var(--surface); color: var(--ink); font-weight: 500;
+  border: 1px solid var(--line);
+}
+.mkt-ws-stage-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-strong); flex: none; }
+
+/* CENTER — chat thread + pinned input */
+.mkt-ws-body .mkt-ws-chat {
+  border-right: 1px solid var(--line); background: var(--surface);
+  display: flex; flex-direction: column; min-width: 0;
+  padding: 20px 22px 18px;
+}
+.mkt-ws-chat-hd { display: flex; align-items: center; gap: 9px; margin-bottom: 16px; }
+.mkt-ws-av {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--accent-soft);
+  display: flex; align-items: center; justify-content: center; color: var(--accent-strong); flex: none;
+}
+.mkt-ws-chat-name { font-weight: 600; font-size: .96rem; letter-spacing: -.01em; }
+.mkt-ws-thread {
+  flex: 1; display: flex; flex-direction: column; gap: 12px;
+  justify-content: flex-end; min-height: 0; overflow: hidden;
+}
+.mkt-ws-bubble {
+  font-size: .94rem; line-height: 1.5; padding: 11px 14px; border-radius: 14px; max-width: 92%;
+}
+.mkt-ws-bubble.user {
+  align-self: flex-end; background: var(--ink); color: #fff; border-bottom-right-radius: 5px;
+}
+.mkt-ws-bubble.yulia {
+  align-self: flex-start; background: var(--surface-2); color: var(--ink);
+  border: 1px solid var(--line); border-bottom-left-radius: 5px;
+}
+.mkt-ws-thinking { display: inline-flex; gap: 5px; align-items: center; }
+/* reuse the existing mkt-dot pulse keyframes (see .mkt-msg.mkt-thinking) */
+.mkt-ws-thinking .mkt-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--ink-2); opacity: .5;
+  animation: mkt-dot 1.2s infinite ease-in-out;
+}
+.mkt-ws-thinking .mkt-dot:nth-child(2) { animation-delay: .18s; }
+.mkt-ws-thinking .mkt-dot:nth-child(3) { animation-delay: .36s; }
+
+.mkt-ws-input {
+  display: flex; align-items: center; gap: 10px; margin-top: 16px;
+  padding: 9px 9px 9px 14px; background: var(--surface-2);
+  border: 1px solid var(--line); border-radius: 13px;
+}
+.mkt-ws-input-glyph { color: var(--accent-strong); display: flex; flex: none; }
+.mkt-ws-input-ph { flex: 1; font-size: .94rem; color: var(--ink-3); min-width: 0; letter-spacing: -.01em; }
+.mkt-ws-input-send {
+  flex: none; width: 36px; height: 36px; border-radius: 10px;
+  background: var(--accent); color: var(--on-accent);
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* RIGHT — model canvas. Generous internal padding so the range bar, KPI values,
+   and footnote never touch the frame's right inner edge or the chat divider. */
+.mkt-ws-body .mkt-ws-canvas {
+  position: relative; background: var(--surface);
+  padding: 28px 34px; display: flex; min-width: 0;
+}
+.mkt-ws-val { width: 100%; justify-content: center; }
+/* wider canvas → let the chart breathe a touch more than the two-up card */
+.mkt-ws-val-body { grid-template-columns: .9fr 1.1fr; gap: 32px; }
+.mkt-ws-val .mkt-val-chart { height: 150px; }
+
+/* floating accent pill near the model */
+.mkt-ws-pill {
+  top: 18px; right: 24px;
+  background: var(--ink); border-color: transparent;
+  box-shadow: 0 18px 40px -14px rgba(16,224,96,.5), 0 10px 22px -12px rgba(25,24,19,.35);
+}
+.mkt-ws-pill-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; }
+.mkt-ws-pill-k { color: rgba(255,255,255,.7); font-size: .8rem; }
+.mkt-ws-pill-v { color: var(--accent); font-size: .92rem; font-weight: 500; }
+
+/* WORKSPACE responsive: drop the rail, stack chat + canvas */
+@media (max-width: 1100px) {
+  .mkt-ws-body { grid-template-columns: 15% minmax(0, 40%) minmax(0, 1fr); }
+  .mkt-ws-body .mkt-ws-canvas { padding: 24px 26px; }
+  .mkt-ws-val-body { gap: 24px; }
+}
+@media (max-width: 860px) {
+  .mkt-ws-body { grid-template-columns: 1fr; min-height: 0; }
+  .mkt-ws-body .mkt-ws-rail { display: none; }
+  .mkt-ws-body .mkt-ws-chat {
+    border-right: 0; border-bottom: 1px solid var(--line);
+    min-height: 360px;
+  }
+  .mkt-ws-body .mkt-ws-canvas { padding: 24px 22px 28px; }
+  .mkt-ws-pill { top: 12px; right: 16px; }
+}
+@media (max-width: 560px) {
+  .mkt-ws-glow { display: none; }
+  .mkt-ws-val-body { grid-template-columns: 1fr; gap: 20px; }
+  .mkt-ws-val .mkt-val-chart { height: 110px; }
+  .mkt-val-range { font-size: 1.3rem; }
+  .mkt-ws-body .mkt-ws-chat { padding: 18px 16px; min-height: 320px; }
+  .mkt-ws-body .mkt-ws-canvas { padding: 20px 16px 24px; }
 }
 
 /* ============================================================
@@ -793,6 +956,24 @@
 .mkt .tags { display: flex; flex-wrap: wrap; gap: 10px; }
 .mkt .tag { font-family: var(--mono); font-size: .82rem; color: var(--ink); background: var(--surface); border: 1px solid var(--line-2); border-radius: 999px; padding: 8px 15px; letter-spacing: -.01em; }
 
+/* stat band — 4 metric cells in one outlined card (About · Connectors).
+   Dividers must follow the layout: vertical between columns on desktop,
+   horizontal between rows once the grid wraps, with no dangling edge border.
+   Driven by row-start nth-child rules per breakpoint. */
+.mkt .statband {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+  border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
+}
+.mkt .statband-cell { padding: 28px 26px; border-left: 1px solid var(--line); }
+.mkt .statband-cell:nth-child(4n + 1) { border-left: 0; }   /* first in each 4-row */
+.mkt .statband-num { font-family: var(--mono); font-size: 1.7rem; font-weight: 500; letter-spacing: -.02em; color: var(--ink); }
+.mkt .statband-cap { margin-top: 8px; font-size: .92rem; color: var(--ink-2); }
+
+/* Sell before→after lift arrow — points right between two side-by-side figures;
+   centers and rotates to point down once the comparison stacks on mobile. */
+.mkt .mkt-liftarrow { display: flex; justify-content: center; }
+.mkt .mkt-liftarrow svg { transition: transform .2s var(--ease); }
+
 /* statement (big quote) */
 .mkt .statement { font-size: clamp(2rem,4.6vw,3.6rem); font-weight: 600; letter-spacing: -.03em; line-height: 1.05; max-width: 18ch; }
 .mkt .statement .amber { color: var(--accent-strong); }
@@ -808,7 +989,8 @@
 
 /* pricing */
 .mkt .tiers { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; align-items: start; }
-.mkt .tier { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; display: flex; flex-direction: column; min-height: 100%; }
+.mkt .tier { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; display: flex; flex-direction: column; min-height: 100%; transition: transform .25s var(--ease), box-shadow .25s, border-color .25s; }
+.mkt .tier:hover { transform: translateY(-4px); box-shadow: 0 24px 50px -34px rgba(25,24,19,.4); border-color: var(--line-2); }
 .mkt .tier .tname { font-weight: 600; font-size: 1.15rem; }
 .mkt .tier .tprice { font-family: var(--mono); font-size: 1.7rem; font-weight: 500; margin: 14px 0 4px; letter-spacing: -.02em; }
 .mkt .tier .tprice small { font-size: .85rem; color: var(--ink-3); font-weight: 400; }
@@ -975,7 +1157,15 @@
   .mkt .mock[style*="position:absolute"] { display: none !important; }
   .mkt .mock-body { padding: 16px; }
   .mkt .hscroll { margin-left: -20px; margin-right: -20px; padding-left: 20px; padding-right: 20px; }
+  /* stat band → 2 columns: vertical divider only between the two columns,
+     horizontal divider on the second row. Reset the 4-col rules first. */
   .mkt .statband { grid-template-columns: 1fr 1fr; }
+  .mkt .statband-cell { padding: 22px 20px; border-left: 1px solid var(--line); border-top: 0; }
+  .mkt .statband-cell:nth-child(2n + 1) { border-left: 0; }
+  .mkt .statband-cell:nth-child(n + 3) { border-top: 1px solid var(--line); }
+  /* the lift arrow now points down the stacked column */
+  .mkt .mkt-liftarrow svg { transform: rotate(90deg); }
+  .mkt .mkt-liftarrow { padding: 4px 0; }
   .mkt .tiers, .mkt .oneoff { grid-template-columns: 1fr; }
 }
 @media (max-width: 560px) {
@@ -983,7 +1173,10 @@
   .mkt .g4, .mkt .tiers, .mkt .stage { grid-template-columns: 1fr; }
   .mkt .lib-row { grid-template-columns: 1fr; gap: 6px; }
   .mkt .lib-row .lgo { display: none; }
+  /* stat band → single column: horizontal dividers between rows, no left edge. */
   .mkt .statband { grid-template-columns: 1fr; }
+  .mkt .statband-cell { border-left: 0; border-top: 1px solid var(--line); }
+  .mkt .statband-cell:first-child { border-top: 0; }
   .mkt .nav-inner { height: 60px; }
   .mkt .brand { font-size: 1.2rem; }
   .mkt .footer .fcols { grid-template-columns: 1fr 1fr; gap: 26px; }

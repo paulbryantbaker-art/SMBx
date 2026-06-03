@@ -3,7 +3,7 @@ import { MarketingShell } from '../MarketingShell';
 import { Brand } from '../Brand';
 import { YuliaLauncher } from '../YuliaChat';
 import { enterApp } from '../useEnterApp';
-import { HeroShowcase } from '../components/HeroShowcase';
+import { HeroWorkspace } from '../components/HeroWorkspace';
 import { ProductFrame } from '../components/ProductFrame';
 import {
   ChatIngestMock,
@@ -48,9 +48,24 @@ export default function Home() {
           </div>
         </div>
 
-        {/* hero artifact — animated "you talk, Yulia builds" showcase */}
-        <div className="wrap-wide reveal" data-d="4" style={{ marginTop: 64 }}>
-          <HeroShowcase />
+        {/* hero artifact — full-bleed animated "you talk, Yulia builds" workspace.
+            Breaks out of the page wrap edge-to-edge, with a side gutter and an
+            inner max-width cap so it stays sane on ultrawide displays. */}
+        <div
+          className="reveal"
+          data-d="4"
+          style={{
+            marginTop: 64,
+            width: '100vw',
+            marginLeft: 'calc(50% - 50vw)',
+            marginRight: 'calc(50% - 50vw)',
+            paddingLeft: 22,
+            paddingRight: 22,
+          }}
+        >
+          <div style={{ maxWidth: 1840, margin: '0 auto' }}>
+            <HeroWorkspace />
+          </div>
         </div>
       </section>
 
