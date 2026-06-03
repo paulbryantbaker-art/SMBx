@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
+import { useLocation } from 'wouter';
 import './marketing.css';
 import { MarketingNav, MarketingFooter } from './MarketingChrome';
 import { YuliaFab } from './YuliaChat';
@@ -11,6 +12,19 @@ import { YuliaFab } from './YuliaChat';
  * `dark` is unused at the shell level — individual sections opt into `.dark`.
  */
 export function MarketingShell({ children }: { children: ReactNode }) {
+  const [location] = useLocation();
+  // Reset scroll to the top on every route change. wouter reuses this shell
+  // instance across marketing routes, and the footer (which holds the nav
+  // links) sits at the page bottom — so without this, navigating from the
+  // footer would land the next page still scrolled to the bottom.
+  // The marketing scroll container is <body> (height:100vh + overflow:auto),
+  // NOT the window/<html> — so reset all candidates to be robust.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+  }, [location]);
+
   // Marketing pages scroll naturally; the app locks body scroll on desktop,
   // so we release it while a marketing page is mounted.
   useEffect(() => {

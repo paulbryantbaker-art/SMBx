@@ -119,8 +119,6 @@ export function MarketingFooter() {
             <h5>The Standard</h5>
             <ul>
               <li><Link href="/standard">Methodology</Link></li>
-              <li><Link href="/standard">Authorities</Link></li>
-              <li><Link href="/standard">Versioning</Link></li>
             </ul>
           </div>
           <div>
