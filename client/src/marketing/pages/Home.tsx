@@ -160,13 +160,12 @@ export default function Home() {
       </section>
 
       {/* PRICING SUMMARY */}
-      <section>
+      <section className="center">
         <div className="wrap">
-          <div className="reveal" style={{ maxWidth: '54ch', marginBottom: 44 }}>
-            <span className="eyebrow">Pricing</span>
-            <h2 style={{ marginTop: 18 }}>Flat software pricing. Nothing tied to your deal.</h2>
+          <div className="reveal" style={{ margin: '0 auto 44px' }}>
+            <h2 style={{ fontSize: 'clamp(1.9rem,3.2vw,2.6rem)', maxWidth: '20ch', marginInline: 'auto' }}>Flat software pricing. Nothing tied to your deal.</h2>
           </div>
-          <div className="grid" style={{ gap: 10, maxWidth: 720 }}>
+          <div className="grid" style={{ gap: 10, maxWidth: 720, margin: '0 auto' }}>
             <PriceRow plan="Free" note="Talk to Yulia as much as you want. One deliverable, free." />
             <PriceRow plan="$99 / mo" note="Unlimited valuation, scoring, and diligence artifacts." />
             <PriceRow plan="$249 / mo" note="+ CIMs, deal rooms, structuring, and market discovery." />
