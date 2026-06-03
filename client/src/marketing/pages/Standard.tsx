@@ -1,149 +1,194 @@
-import { type ReactNode } from 'react';
 import { Link } from 'wouter';
 import { MarketingShell } from '../MarketingShell';
 import { Brand } from '../Brand';
 import { enterApp } from '../useEnterApp';
-
-type LibItem = { name: string; desc: string; href?: string };
-
-const LIBRARY: LibItem[] = [
-  { name: 'Valuation', desc: 'Multiples, DCF, comparable analysis, sensitivities' },
-  { name: 'Earnings quality', desc: 'SDE/EBITDA normalization, add-backs, QoE method' },
-  { name: 'Working capital', desc: 'The peg, targets, and purchase-price adjustment', href: '/standard/working-capital-peg' },
-  { name: 'Financing', desc: 'SBA DSCR, LBO, debt schedules, IRR/MOIC' },
-  { name: 'Structure', desc: 'Asset vs. stock, §1060, earnouts, installment sales' },
-  { name: 'Tax', desc: 'Allocation, entity treatment, transfer taxes' },
-  { name: 'Legal economics', desc: 'Indemnification, escrow, reps & warranties economics' },
-  { name: 'Restructuring', desc: 'Distressed, capital structure, liability management' },
-  { name: 'Real estate', desc: 'Asset-class overlays' },
-  { name: 'Post-close', desc: 'Integration, value-bridge, 100-day planning' },
-];
+import { ClosingCTA } from '../components/ClosingCTA';
+import {
+  StatRail,
+  GateModelExplorer,
+  ModelAnatomy,
+  ConformanceConsole,
+} from '../components/StandardInteractive';
 
 function ArrowRight() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+      <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }
+
+/* The four defensibility pillars (§5). Copy is verbatim from the spec. */
+const PILLARS: Array<{ title: string; body: string }> = [
+  {
+    title: 'Deterministic.',
+    body: 'No language model touches the math path. Same inputs, same version, same output — always.',
+  },
+  {
+    title: 'Cited.',
+    body: 'Every figure resolves to a controlling authority — IRC section, case, or market study — from a 233-source register. Unverifiable claims are stripped before delivery.',
+  },
+  {
+    title: 'Verifiable.',
+    body: 'Each output carries an input hash, an output hash, its model version, and its methodology pin. Reproduce it or audit it.',
+  },
+  {
+    title: 'Bounded.',
+    body: 'THE LINE is enforced in code: the Standard computes; it never advises, negotiates, brokers, or opines. Every output is labeled deterministic, professional-handoff, or research-only.',
+  },
+];
 
 export default function Standard() {
   return (
     <MarketingShell>
-      {/* HERO — dark, with stat rail */}
-      <section className="dark" style={{ paddingBottom: 'calc(var(--pad-y) * .7)' }}>
+      {/* ============================================================
+          1 · HERO — dark band, version tag, count-up stat rail
+          ============================================================ */}
+      <section className="dark std-hero-sec">
         <div className="wrap">
-          <div className="std-hero" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 56, alignItems: 'end' }}>
-            <div className="reveal">
-              <span className="eyebrow">The Diligence Standard</span>
-              <h1 className="display" style={{ fontSize: 'clamp(2.4rem,4.8vw,4.2rem)', marginTop: 20, maxWidth: '13ch' }}>
-                The methodology, in the open.
-              </h1>
-              <p className="lead" style={{ marginTop: 24, maxWidth: '50ch' }}>
-                Every calculation <Brand /> performs is documented here — its inputs, its
-                computation, the authorities that govern it, and a worked example.
-                Read it, check it, cite it. No account required.
-              </p>
-            </div>
-            <div className="reveal" data-d="1" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <StatRow value="10" label={<>methodology<br />sections</>} />
-              <hr className="divider" />
-              <StatRow value="v2.4" label={<>current<br />version</>} />
-              <hr className="divider" />
-              <StatRow value="0" label={<>black<br />boxes</>} />
-            </div>
+          <div className="reveal std-hero">
+            <span className="std-vtag mono">DEFINITIVE v1.1 · METHODOLOGY V19</span>
+            <h1 className="display std-hero-h1">The Diligence Standard.</h1>
+            <p className="std-hero-sub">
+              An open specification for computational M&amp;A diligence.
+            </p>
+            <p className="lead std-hero-lead">
+              Every model, gate, and authority behind Yulia&rsquo;s numbers —
+              published, versioned, and conformance-tested. Read it, run it,
+              build against it. No account required.
+            </p>
+          </div>
+          <div className="reveal" data-d="1">
+            <StatRail />
           </div>
         </div>
       </section>
 
-      {/* FEATURED WORKED EXAMPLE */}
-      <section style={{ paddingTop: 'calc(var(--pad-y) * .55)', paddingBottom: 0 }}>
+      {/* ============================================================
+          2 · WHAT IT IS — not a black box
+          ============================================================ */}
+      <section className="std-what">
         <div className="wrap">
-          <div className="reveal std-featured" style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius)', padding: 40, display: 'grid', gridTemplateColumns: '1fr 1.05fr', gap: 48, alignItems: 'center' }}>
-            <div>
-              <span className="eyebrow">Featured · worked example</span>
-              <h2 style={{ marginTop: 16, fontSize: 'clamp(1.6rem,2.6vw,2.2rem)', maxWidth: '14ch' }}>
-                Every method, shown working.
-              </h2>
-              <p className="lead" style={{ marginTop: 18, fontSize: '1.12rem', maxWidth: '42ch' }}>
-                Take the working capital peg: the inputs, the computation, the
-                controlling authorities, and a fully computed example — so you can
-                check the math before you trust the model.
-              </p>
-              <Link href="/standard/working-capital-peg" className="btn btn-ink" style={{ marginTop: 24 }}>
-                Read the worked example <ArrowRight />
-              </Link>
-            </div>
-            <div className="mock">
-              <div className="mock-bar">
-                <span className="mock-dot" /><span className="mock-dot" /><span className="mock-dot" />
-                <span className="mock-title">standard / working-capital-peg</span>
-                <span className="mock-tag"><span className="vdot" />v2.4</span>
-              </div>
-              <div className="mock-body" style={{ background: 'var(--dk)', margin: -20, padding: 22 }}>
-                <pre className="mono" style={{ fontSize: '.84rem', lineHeight: 1.8, color: 'rgba(255,255,255,.85)', margin: 0, whiteSpace: 'pre-wrap' }}>
-<span style={{ color: 'rgba(255,255,255,.4)' }}># net working capital</span>{'\n'}
-NWC = current assets − current liabilities{'\n'}
-<span style={{ color: 'rgba(255,255,255,.4)' }}># the peg</span>{'\n'}
-Peg = avg(NWC) over reference period{'\n'}
-<span style={{ color: 'rgba(255,255,255,.4)' }}># purchase-price adjustment</span>{'\n'}
-Adj = delivered NWC − Peg   <span style={{ color: 'var(--accent)' }}>→ +$15,700</span>
-                </pre>
-              </div>
-            </div>
+          <div className="reveal std-what-grid">
+            <h2 className="std-what-h2">Not a black box. A computational substrate.</h2>
+            <p className="lead std-what-body">
+              <Brand /> computes M&amp;A diligence — it doesn&rsquo;t advise. The
+              Standard is the deterministic engine underneath: 123 models across
+              30 decision gates, every output traced to a controlling authority
+              and reproducible from its inputs. Same inputs, same methodology
+              version, same numbers — every time.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* LIBRARY */}
-      <section style={{ paddingTop: 'calc(var(--pad-y) * .6)' }}>
+      {/* ============================================================
+          3 · HOW · INTERACTIVE #1 — gate → model explorer
+          ============================================================ */}
+      <section className="std-browse">
         <div className="wrap">
-          <div className="reveal" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 16, marginBottom: 8 }}>
-            <h2>The library</h2>
-            <span className="mono" style={{ fontSize: '.8rem', color: 'var(--ink-3)' }}>
-              Each entry: inputs · computation · authorities · worked example
-            </span>
+          <div className="reveal std-sec-head">
+            <h2>Browse the substrate.</h2>
+            <p className="lead std-sec-intro">
+              Thirty gates route a deal to the models it needs. Pick a domain to
+              see what&rsquo;s inside — and how each model is classified.
+            </p>
           </div>
-          <div className="reveal lib">
-            {LIBRARY.map(item =>
-              item.href ? (
-                <Link key={item.name} href={item.href} className="lib-row">
-                  <span className="ln">{item.name}</span>
-                  <span className="ld">{item.desc}</span>
-                  <span className="lgo">Read →</span>
-                </Link>
-              ) : (
-                <div key={item.name} className="lib-row" role="button" tabIndex={0} onClick={() => enterApp()}>
-                  <span className="ln">{item.name}</span>
-                  <span className="ld">{item.desc}</span>
-                  <span className="lgo">Generate in <Brand /> →</span>
-                </div>
-              )
-            )}
+          <div className="reveal" data-d="1">
+            <GateModelExplorer />
           </div>
-          <p className="reveal" style={{ marginTop: 28, fontFamily: 'var(--mono)', fontSize: '.82rem', color: 'var(--ink-3)', maxWidth: '64ch', lineHeight: 1.6 }}>
-            The Standard is versioned. Each page shows the methodology version it
-            documents; superseded versions remain readable.
+        </div>
+      </section>
+
+      {/* ============================================================
+          4 · HOW · INTERACTIVE #2 — anatomy of a model
+          ============================================================ */}
+      <section className="std-anat-sec">
+        <div className="wrap">
+          <div className="reveal std-sec-head">
+            <h2>Anatomy of a model.</h2>
+            <p className="lead std-sec-intro">
+              Open one up. Every model declares its inputs, its computation, the
+              authorities that govern it, a worked example, and an audit packet
+              you can verify.
+            </p>
+          </div>
+          <div className="reveal" data-d="1">
+            <ModelAnatomy />
+          </div>
+          <div className="reveal std-anat-more" data-d="2">
+            <Link href="/standard/working-capital-peg" className="link-arrow">
+              See the full worked example <ArrowRight />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          5 · WHY — defensibility + why use it
+          ============================================================ */}
+      <section className="std-why">
+        <div className="wrap">
+          <div className="reveal std-sec-head">
+            <h2>Why you can trust the number — and build on it.</h2>
+          </div>
+          <div className="reveal std-pillars" data-d="1">
+            {PILLARS.map((p) => (
+              <div className="std-pillar" key={p.title}>
+                <span className="std-pillar-mark" aria-hidden="true" />
+                <h3 className="std-pillar-title">{p.title}</h3>
+                <p className="std-pillar-body">{p.body}</p>
+              </div>
+            ))}
+          </div>
+          <p className="reveal std-why-foot" data-d="2">
+            For a deal team, that&rsquo;s analyst-grade work in minutes —
+            auditable and portable. For an agent, it&rsquo;s a substrate you can
+            call, conform to, and trust.
           </p>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="section-tight center" style={{ background: 'var(--surface-2)' }}>
-        <div className="wrap stack reveal" style={{ alignItems: 'center' }}>
-          <h2 style={{ maxWidth: '20ch' }}>Read the method. Then watch Yulia run it on your numbers.</h2>
-          <div style={{ marginTop: 26 }}>
-            <button className="btn btn-accent btn-lg" onClick={() => enterApp()}>Ask Yulia</button>
+      {/* ============================================================
+          6 · OPEN SPEC · INTERACTIVE #3 — proposal + conformance + discovery
+          ============================================================ */}
+      <section className="dark std-open">
+        <div className="wrap">
+          <div className="reveal std-open-head">
+            <h2>Published, versioned, and yours to run.</h2>
+            <p className="lead std-open-lead">
+              We publish The Diligence Standard as an open specification — and
+              propose it as the shared reference for computational M&amp;A
+              diligence. Not a manifesto: a spec you can read, a conformance
+              suite you can run, and reference implementations you can clone.
+            </p>
+          </div>
+
+          <div className="reveal" data-d="1">
+            <ConformanceConsole />
+          </div>
+
+          <p className="reveal std-open-caveat mono" data-d="2">
+            Reference implementations cover four core models today (M109, M139,
+            M199, M206); the full corpus is rolling out. We&rsquo;re proposing a
+            standard, not claiming an industry.
+          </p>
+
+          <div className="reveal std-open-actions" data-d="2">
+            <button className="btn btn-accent" onClick={() => enterApp()}>
+              Ask Yulia
+            </button>
+            <Link href="/connectors" className="link-arrow std-open-buildlink">
+              Build against the Standard <ArrowRight />
+            </Link>
           </div>
         </div>
       </section>
-    </MarketingShell>
-  );
-}
 
-function StatRow({ value, label }: { value: string; label: ReactNode }) {
-  return (
-    <div style={{ display: 'flex', gap: 14 }}>
-      <div className="mono" style={{ fontSize: '2.4rem', fontWeight: 500, color: '#fff', lineHeight: 1 }}>{value}</div>
-      <div className="mono" style={{ fontSize: '.74rem', color: 'rgba(255,255,255,.5)', alignSelf: 'center', lineHeight: 1.4 }}>{label}</div>
-    </div>
+      {/* ============================================================
+          7 · Closing CTA (unchanged)
+          ============================================================ */}
+      <ClosingCTA heading="Read the method. Then watch Yulia run it on your numbers." />
+    </MarketingShell>
   );
 }

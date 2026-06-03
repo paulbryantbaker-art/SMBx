@@ -923,6 +923,466 @@
   .mkt-cap-name { font-size: .82rem; }
 }
 
+/* ============================================================
+   THE DILIGENCE STANDARD — /standard page
+   Open-specification methodology page. Three interactive pieces
+   (gate→model explorer · model anatomy toggle · conformance console)
+   + the surrounding sections. Tokens only; built on .mock chrome.
+   See pages/Standard.tsx + components/StandardInteractive.tsx.
+   ============================================================ */
+
+/* ---- shared section heads ---- */
+.mkt .std-sec-head { max-width: 62ch; margin-bottom: clamp(28px, 4vw, 44px); }
+.mkt .std-sec-intro { margin-top: 18px; }
+
+/* ---- 1 · HERO ---- */
+.mkt .std-hero-sec { padding-bottom: calc(var(--pad-y) * .8); }
+.mkt .std-vtag {
+  font-size: .74rem; font-weight: 500; letter-spacing: .14em;
+  color: var(--accent); display: inline-flex; align-items: center; gap: .6em;
+}
+.mkt .std-vtag::before {
+  content: ""; width: 7px; height: 7px; background: var(--accent);
+  transform: rotate(45deg); display: inline-block; flex: none;
+}
+.mkt .std-hero-h1 {
+  font-size: clamp(2.6rem, 6vw, 5rem); margin-top: 22px; max-width: 16ch;
+}
+.mkt .std-hero-sub {
+  margin-top: 18px; font-size: clamp(1.3rem, 2.4vw, 1.9rem); font-weight: 500;
+  letter-spacing: -.02em; color: #fff; max-width: 28ch; line-height: 1.18;
+}
+.mkt .std-hero-lead { margin-top: 22px; max-width: 56ch; }
+
+/* hero stat rail — 4 count-up cells, ruled */
+.mkt .std-statrail {
+  margin-top: clamp(40px, 5vw, 60px);
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+  border-top: 1px solid var(--dk-line); border-bottom: 1px solid var(--dk-line);
+}
+.mkt .std-stat {
+  padding: 26px 24px; display: flex; flex-direction: column; gap: 8px;
+  border-left: 1px solid var(--dk-line);
+}
+.mkt .std-stat:first-child { border-left: 0; padding-left: 0; }
+.mkt .std-stat-v {
+  font-size: clamp(2.2rem, 4vw, 3.2rem); font-weight: 500; line-height: 1;
+  color: var(--accent); letter-spacing: -.02em;
+}
+.mkt .std-stat-k { font-size: .8rem; letter-spacing: .04em; color: rgba(255,255,255,.55); }
+
+/* ---- 2 · WHAT IT IS ---- */
+.mkt .std-what-grid {
+  display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(32px, 5vw, 64px);
+  align-items: start;
+}
+.mkt .std-what-h2 { max-width: 14ch; }
+.mkt .std-what-body { font-size: clamp(1.18rem, 1.7vw, 1.42rem); }
+
+/* ============================================================
+   3 · GATE → MODEL EXPLORER (interactive #1)
+   ============================================================ */
+.mkt .std-explorer { display: flex; flex-direction: column; gap: 22px; }
+
+/* domain selector pills */
+.mkt .std-domains { display: flex; flex-wrap: wrap; gap: 10px; }
+.mkt .std-domain {
+  font-family: var(--sans); font-size: .9rem; font-weight: 500; letter-spacing: -.01em;
+  color: var(--ink-2); background: var(--surface); border: 1px solid var(--line-2);
+  border-radius: 999px; padding: 9px 16px; cursor: pointer;
+  transition: background .18s var(--ease), border-color .18s, color .18s, transform .12s;
+}
+.mkt .std-domain:hover { border-color: var(--ink); color: var(--ink); }
+.mkt .std-domain:active { transform: translateY(1px); }
+.mkt .std-domain.is-active {
+  background: var(--ink); color: #fff; border-color: var(--ink);
+}
+.mkt .std-domain:focus-visible {
+  outline: 2px solid var(--accent-strong); outline-offset: 2px;
+}
+
+/* the model panel (.mock chrome already provides the frame) */
+.mkt .std-explorer-mock { width: 100%; }
+.mkt .std-explorer-body { padding: 8px 20px; }
+.mkt .std-modelrows { display: flex; flex-direction: column; }
+.mkt .std-modelrow {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 14px 0; border-bottom: 1px solid var(--line);
+}
+.mkt .std-modelrow:last-child { border-bottom: 0; }
+.mkt .std-modelrow-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.mkt .std-modelrow-name { font-size: .98rem; font-weight: 500; color: var(--ink); letter-spacing: -.01em; }
+.mkt .std-modelrow-auth { font-size: .74rem; color: var(--ink-3); letter-spacing: .01em; }
+.mkt .std-modelrow-meta { display: flex; align-items: center; gap: 10px; flex: none; }
+.mkt .std-modelrow-code {
+  font-size: .72rem; font-weight: 500; color: var(--ink-2);
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: 6px; padding: 3px 8px; white-space: nowrap;
+}
+
+/* tier badges */
+.mkt .std-tier {
+  font-family: var(--mono); font-size: .66rem; font-weight: 500; letter-spacing: .02em;
+  border-radius: 999px; padding: 4px 10px; white-space: nowrap; border: 1px solid transparent;
+}
+.mkt .std-tier.det { color: var(--accent-strong); background: var(--accent-soft); border-color: var(--accent); }
+.mkt .std-tier.pro { color: #946200; background: #FBEFD6; border-color: #ECCB8A; }
+.mkt .std-tier.res { color: var(--ink-3); background: var(--surface-2); border-color: var(--line-2); }
+
+/* tier legend */
+.mkt .std-legend {
+  display: flex; flex-wrap: wrap; gap: 14px 22px;
+  padding: 16px 20px; border-top: 1px solid var(--line); background: var(--surface-2);
+}
+.mkt .std-legend-item {
+  display: inline-flex; align-items: center; gap: 9px;
+  font-size: .78rem; color: var(--ink-2);
+}
+
+/* ============================================================
+   4 · ANATOMY OF A MODEL (interactive #2)
+   ============================================================ */
+.mkt .std-anatomy { display: flex; flex-direction: column; gap: 20px; }
+
+/* model toggle (segmented) */
+.mkt .std-anatomy-toggle {
+  display: inline-flex; gap: 0; padding: 5px;
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px;
+  align-self: flex-start; max-width: 100%; flex-wrap: wrap;
+}
+.mkt .std-anatomy-tab {
+  display: inline-flex; align-items: baseline; gap: 9px;
+  font-family: var(--sans); font-size: .92rem; color: var(--ink-2);
+  background: transparent; border: 0; border-radius: 10px; padding: 10px 16px;
+  cursor: pointer; transition: background .18s var(--ease), color .18s, box-shadow .18s;
+  white-space: nowrap;
+}
+.mkt .std-anatomy-tab:hover { color: var(--ink); }
+.mkt .std-anatomy-tab.is-active {
+  background: var(--surface); color: var(--ink); font-weight: 500;
+  box-shadow: 0 1px 0 rgba(255,255,255,.7) inset, 0 8px 18px -12px rgba(25,24,19,.3);
+}
+.mkt .std-anatomy-tab:focus-visible {
+  outline: 2px solid var(--accent-strong); outline-offset: 2px;
+}
+.mkt .std-anatomy-tab-code { font-size: .78rem; font-weight: 600; color: var(--accent-strong); }
+.mkt .std-anatomy-tab-name { letter-spacing: -.01em; }
+
+/* anatomy panel grid: a 2-col masonry-ish layout that stacks on mobile */
+.mkt .std-anatomy-mock { width: 100%; }
+.mkt .std-anatomy-body {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: clamp(18px, 2.4vw, 28px); padding: 26px;
+}
+.mkt .std-anat-part { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.mkt .std-anat-part-wide { grid-column: 1 / -1; }
+.mkt .std-anat-label {
+  font-size: .68rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--ink-3);
+}
+.mkt .std-anat-inputs { font-size: .92rem; line-height: 1.55; color: var(--ink-2); margin: 0; }
+.mkt .std-tok {
+  font-family: var(--mono); font-size: .82em; color: var(--ink);
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: 5px; padding: 1px 6px; white-space: nowrap;
+}
+
+/* computation — dark mono block, clearly NOT secret */
+.mkt .std-anat-comp {
+  background: var(--dk); color: rgba(255,255,255,.9); border-radius: 10px;
+  padding: 16px 18px; font-size: .82rem; line-height: 1.75; margin: 0;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.mkt .std-c-cmt { color: rgba(255,255,255,.42); }
+
+/* worked example k/v */
+.mkt .std-anat-kvs { display: flex; flex-direction: column; }
+.mkt .std-anat-kv {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  padding: 8px 0; border-bottom: 1px solid var(--line); font-size: .88rem;
+}
+.mkt .std-anat-kv:last-child { border-bottom: 0; }
+.mkt .std-anat-kv-k { color: var(--ink-2); }
+.mkt .std-anat-kv-v { color: var(--ink); font-weight: 500; }
+.mkt .std-anat-kv-v.accent { color: var(--accent-strong); }
+
+/* authorities list */
+.mkt .std-anat-auth { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.mkt .std-anat-auth li {
+  display: flex; gap: 9px; align-items: flex-start;
+  font-size: .86rem; color: var(--ink-2); line-height: 1.45;
+}
+.mkt .std-anat-auth-icon { color: var(--ink-3); flex: none; margin-top: 2px; }
+
+/* audit packet chips */
+.mkt .std-anat-audit { display: flex; flex-wrap: wrap; gap: 8px; }
+.mkt .std-anat-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: .7rem; background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: 8px; padding: 5px 9px; white-space: nowrap;
+}
+.mkt .std-anat-chip-k { color: var(--ink-3); letter-spacing: .02em; }
+.mkt .std-anat-chip-v { color: var(--ink); font-weight: 500; }
+
+/* THE LINE note */
+.mkt .std-anat-line {
+  background: var(--accent-soft); border-radius: 12px; padding: 16px 18px;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.mkt .std-anat-line-tag {
+  font-size: .68rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--accent-strong);
+}
+.mkt .std-anat-line p { margin: 0; font-size: .92rem; color: var(--ink); line-height: 1.5; }
+
+.mkt .std-anat-more { margin-top: 26px; }
+
+/* ============================================================
+   5 · WHY — defensibility pillars
+   ============================================================ */
+.mkt .std-pillars { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.mkt .std-pillar {
+  background: var(--surface); padding: clamp(24px, 3vw, 34px);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.mkt .std-pillar-mark { width: 9px; height: 9px; background: var(--accent); transform: rotate(45deg); }
+.mkt .std-pillar-title { font-size: 1.18rem; letter-spacing: -.02em; }
+.mkt .std-pillar-body { color: var(--ink-2); font-size: .96rem; line-height: 1.55; margin: 0; }
+.mkt .std-why-foot {
+  margin-top: clamp(28px, 4vw, 40px); font-size: clamp(1.06rem, 1.5vw, 1.3rem);
+  line-height: 1.5; color: var(--ink); max-width: 60ch; font-weight: 500; letter-spacing: -.01em;
+}
+
+/* ============================================================
+   6 · OPEN SPEC — conformance console + discovery (interactive #3)
+   ============================================================ */
+.mkt .std-open-head { max-width: 64ch; margin-bottom: clamp(30px, 4vw, 46px); }
+.mkt .std-open-lead { margin-top: 18px; }
+
+.mkt .std-console {
+  display: grid; grid-template-columns: 1fr 1fr; gap: clamp(18px, 2.6vw, 30px);
+  align-items: start;
+}
+
+/* terminal */
+.mkt .std-term-mock { width: 100%; }
+.mkt .std-term-body {
+  background: var(--dk); padding: 20px 22px; min-height: 232px;
+  font-size: .86rem; line-height: 1.7; display: flex; flex-direction: column; gap: 2px;
+}
+.mkt .std-term-line { color: rgba(255,255,255,.88); display: flex; align-items: center; gap: 9px; }
+.mkt .std-term-cmd { color: rgba(255,255,255,.6); margin-bottom: 6px; }
+.mkt .std-term-pass { gap: 8px; }
+.mkt .std-term-check { color: var(--accent); font-weight: 600; flex: none; }
+.mkt .std-term-n { color: #fff; font-weight: 500; min-width: 2.6em; }
+.mkt .std-term-lbl { color: rgba(255,255,255,.7); }
+.mkt .std-term-total {
+  color: var(--accent); font-weight: 500; margin-top: 8px; padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,.12);
+}
+.mkt .std-term-caret {
+  display: inline-block; width: 8px; height: 1.05em; background: var(--accent);
+  margin-top: 4px; border-radius: 1px; animation: mkt-caret 1s steps(2) infinite;
+}
+
+/* discovery surface — endpoint rows in their own card */
+.mkt .std-discovery {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  padding: 8px 20px; box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 22px 44px -34px rgba(16,224,96,.3);
+}
+.mkt .std-discovery-row {
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 12px; padding: 13px 0;
+}
+.mkt .std-discovery-label { font-size: .82rem; color: var(--ink-2); min-width: 130px; flex: none; }
+.mkt .std-discovery-cont { min-width: 130px; }
+.mkt .std-discovery-value {
+  font-size: .82rem; color: var(--ink); background: var(--surface-2);
+  border: 1px solid var(--line); border-radius: 6px; padding: 3px 9px;
+  overflow-wrap: anywhere; word-break: break-word;
+}
+.mkt .std-discovery-note { font-size: .7rem; color: var(--ink-3); letter-spacing: .01em; }
+.mkt .std-discovery-div { display: block; height: 1px; background: var(--line); }
+
+/* open-spec caveat + actions (this section is .dark) */
+.mkt .std-open-caveat {
+  margin-top: clamp(22px, 3vw, 30px); font-size: .82rem; line-height: 1.6;
+  color: rgba(255,255,255,.5); max-width: 70ch;
+}
+.mkt .std-open-actions {
+  margin-top: 22px; display: flex; align-items: center; gap: 22px; flex-wrap: wrap;
+}
+.mkt .std-open-buildlink { color: #fff; border-bottom-color: rgba(255,255,255,.3); }
+.mkt .std-open-buildlink:hover { border-bottom-color: var(--accent); }
+
+/* dark-section overrides for the discovery card so it reads on the dark band */
+.mkt .dark .std-discovery {
+  background: var(--dk-2); border-color: var(--dk-line);
+  box-shadow: 0 22px 44px -34px rgba(0,0,0,.5);
+}
+.mkt .dark .std-discovery-label { color: var(--dk-ink-2); }
+.mkt .dark .std-discovery-value {
+  color: #fff; background: rgba(255,255,255,.06); border-color: var(--dk-line);
+}
+.mkt .dark .std-discovery-note { color: rgba(255,255,255,.42); }
+.mkt .dark .std-discovery-div { background: var(--dk-line); }
+
+/* ============================================================
+   STANDARD — responsive
+   ============================================================ */
+@media (max-width: 920px) {
+  .mkt .std-what-grid { grid-template-columns: 1fr; gap: 18px; }
+  .mkt .std-what-h2 { max-width: none; }
+  .mkt .std-console { grid-template-columns: 1fr; }
+  .mkt .std-statrail { grid-template-columns: repeat(2, 1fr); }
+  .mkt .std-stat { padding: 22px 20px; }
+  /* 2×2 stat grid: kill the left border on the first cell of each row */
+  .mkt .std-stat:nth-child(2n + 1) { border-left: 0; padding-left: 0; }
+  .mkt .std-stat:nth-child(n + 3) { border-top: 1px solid var(--dk-line); }
+}
+@media (max-width: 760px) {
+  /* anatomy panes stack; computation stays full-width readable */
+  .mkt .std-anatomy-body { grid-template-columns: 1fr; gap: 22px; padding: 20px; }
+  .mkt .std-pillars { grid-template-columns: 1fr; }
+  /* the global 680px rule forces single-column grids with !important; our
+     pillars/explorer rows are flex so they're unaffected — only re-assert the
+     bits that the blanket rule would otherwise leave mid-width. */
+}
+@media (max-width: 560px) {
+  .mkt .std-statrail { grid-template-columns: 1fr; }
+  .mkt .std-stat { border-left: 0; padding-left: 0; border-top: 1px solid var(--dk-line); }
+  .mkt .std-stat:first-child { border-top: 0; }
+  .mkt .std-stat:nth-child(n + 3) { border-top: 1px solid var(--dk-line); }
+  /* anatomy toggle goes full-width, each tab equal share */
+  .mkt .std-anatomy-toggle { display: flex; width: 100%; }
+  .mkt .std-anatomy-tab { flex: 1; justify-content: center; padding: 10px 8px; }
+  .mkt .std-anatomy-tab-name { display: none; }
+  .mkt .std-anatomy-tab-code { font-size: .92rem; }
+  /* model rows: let the meta wrap under the name on very narrow screens */
+  .mkt .std-modelrow { align-items: flex-start; flex-direction: column; gap: 8px; }
+  .mkt .std-modelrow-meta { gap: 8px; }
+  .mkt .std-explorer-body { padding: 6px 16px; }
+  .mkt .std-discovery-row { padding: 12px 0; }
+  .mkt .std-discovery-label { min-width: 0; }
+}
+
+/* reduced-motion: the terminal caret is the only infinite animation we add;
+   stop it (count-ups + reveals are already handled in JS / the global rule). */
+@media (prefers-reduced-motion: reduce) {
+  .mkt .std-term-caret { animation: none; display: none; }
+}
+
+/* ============================================================
+   JOURNEY STEPPER — shared interactive stage walkthrough
+   (Raise R0–R5 · Integrate PMI0–PMI3). See components/JourneyStepper.tsx.
+   A horizontal/wrapping tablist of stage pills + an animated panel.
+   Tokens only; the panel reuses the .mock chrome.
+   ============================================================ */
+.mkt .jstep { display: flex; flex-direction: column; }
+.mkt .jstep-head { max-width: 60ch; margin-bottom: clamp(26px, 3.4vw, 40px); }
+.mkt .jstep-intro { margin-top: 16px; }
+
+/* stage rail — wrapping pills on desktop */
+.mkt .jstep-rail {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  margin-bottom: clamp(20px, 2.4vw, 28px);
+}
+.mkt .jstep-tab {
+  display: inline-flex; align-items: baseline; gap: 9px;
+  font-family: var(--sans); letter-spacing: -.01em;
+  color: var(--ink-2); background: var(--surface); border: 1px solid var(--line-2);
+  border-radius: 999px; padding: 9px 16px; cursor: pointer;
+  transition: background .18s var(--ease), border-color .18s, color .18s, transform .12s;
+}
+.mkt .jstep-tab:hover { border-color: var(--ink); color: var(--ink); }
+.mkt .jstep-tab:active { transform: translateY(1px); }
+.mkt .jstep-tab.is-active { background: var(--ink); color: #fff; border-color: var(--ink); }
+.mkt .jstep-tab:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 2px; }
+.mkt .jstep-tab-code { font-size: .74rem; font-weight: 600; color: var(--accent-strong); flex: none; }
+.mkt .jstep-tab.is-active .jstep-tab-code { color: var(--accent); }
+.mkt .jstep-tab-title { font-size: .92rem; font-weight: 500; }
+
+/* panel (.mock supplies the frame/shadow) */
+.mkt .jstep-panel { width: 100%; }
+.mkt .jstep-panel:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 3px; }
+.mkt .jstep-panel-inner {
+  display: grid; grid-template-columns: 1fr 1.05fr;
+  gap: clamp(28px, 4vw, 52px); padding: clamp(24px, 3vw, 38px); align-items: center;
+}
+/* stages with no visual: let the copy use the full width on a comfortable measure */
+.mkt .jstep-panel-inner.is-solo { grid-template-columns: 1fr; max-width: 64ch; }
+
+.mkt .jstep-panel-copy { display: flex; flex-direction: column; min-width: 0; }
+.mkt .jstep-panel-title {
+  font-size: clamp(1.45rem, 2.2vw, 1.95rem); letter-spacing: -.02em; line-height: 1.1;
+}
+.mkt .jstep-build {
+  display: flex; flex-direction: column; gap: 6px;
+  margin-top: 18px; padding: 14px 16px;
+  background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 12px;
+}
+.mkt .jstep-build-label {
+  font-size: .66rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--accent-strong);
+}
+.mkt .jstep-build-text { font-size: 1.02rem; font-weight: 600; color: var(--ink); letter-spacing: -.01em; }
+.mkt .jstep-panel-blurb {
+  margin-top: 18px; font-size: 1.04rem; line-height: 1.55; color: var(--ink-2);
+  max-width: 52ch; text-wrap: pretty;
+}
+.mkt .jstep-panel-note {
+  margin-top: 14px; font-size: .78rem; line-height: 1.5; color: var(--ink-3);
+  letter-spacing: .01em; max-width: 52ch;
+}
+.mkt .jstep-panel-visual { min-width: 0; }
+
+/* panel reveal — replays on each selection via React `key={active}` remount.
+   A CSS animation (not a frame-loop) settles on its visible end-state reliably. */
+.mkt .jstep-anim { animation: jstep-reveal .34s var(--ease) both; }
+@keyframes jstep-reveal { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .mkt .jstep-anim { animation: none; }
+}
+
+/* journey-stepper responsive */
+@media (max-width: 760px) {
+  /* the panel stacks copy over visual; both go full-width */
+  .mkt .jstep-panel-inner,
+  .mkt .jstep-panel-inner.is-solo { grid-template-columns: 1fr; gap: 24px; max-width: none; }
+  /* rail becomes a vertical stack of full-width stage rows */
+  .mkt .jstep-rail { flex-direction: column; gap: 8px; }
+  .mkt .jstep-tab { width: 100%; justify-content: flex-start; padding: 12px 16px; }
+}
+
+/* ============================================================
+   JOURNEY/RAISE/INTEGRATE MOCK REVEALS — CSS-keyframe driven.
+   Used by the hero readiness/clock mocks and the in-panel charts on
+   /raise + /integrate. CSS animations (with `forwards`) settle on their
+   end-state reliably even when frame-based JS animation is unavailable,
+   and respect prefers-reduced-motion via the global override below.
+   Each element sets its own `animation-delay` inline for staggering.
+   ============================================================ */
+.mkt .jr-rowin { animation: jr-rowin .42s var(--ease) both; }
+@keyframes jr-rowin { from { opacity: 0; transform: translateX(8px); } to { opacity: 1; transform: none; } }
+
+/* horizontal bar fill: animate width from 0 → its target (the target width is
+   set inline as `width` on the element; we animate via a scaleX transform on a
+   wrapper-free fill so the final laid-out width is the source of truth). */
+.mkt .jr-barfill { transform-origin: left center; animation: jr-bargrow .7s var(--ease) both; }
+@keyframes jr-bargrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* segmented composition bar (Integrate PMI2): grow each segment in */
+.mkt .jr-seg { transform-origin: left center; animation: jr-bargrow .55s var(--ease) both; }
+
+/* progress bar fill (Integrate hero clock) */
+.mkt .jr-progress { transform-origin: left center; animation: jr-bargrow .85s var(--ease) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mkt .jr-rowin,
+  .mkt .jr-barfill,
+  .mkt .jr-seg,
+  .mkt .jr-progress { animation: none; }
+}
+
 /* ---- CARDS / GRIDS ---- */
 .mkt .grid { display: grid; gap: var(--gap); }
 .mkt .g2 { grid-template-columns: repeat(2,1fr); }
@@ -986,6 +1446,28 @@
 .mkt .dark .divider { background: var(--dk-line); }
 .mkt .dark .card { background: var(--dk-2); border-color: var(--dk-line); }
 .mkt .dark .kv { border-color: var(--dk-line); }
+
+/* ── closing CTA band ──────────────────────────────────────────────
+   One shared end-of-page CTA (see ClosingCTA.tsx). A full-bleed warm
+   band like `.dark`, with a soft green glow echoing the hero and a
+   display-scale heading — replaces five drifted `.center` /
+   `.section-tight center` one-offs. surface-2 (not dark, not green) so
+   it never collides with an adjacent dark block and the neon button
+   keeps maximum pop. `.mkt section` already gives it --pad-y + relative. */
+.mkt .cta { background: var(--surface-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); overflow: hidden; }
+.mkt .cta::before {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: min(1120px, 94vw); height: min(560px, 64vw);
+  transform: translate(-50%, -56%);
+  background: radial-gradient(ellipse at center, rgba(43,255,119,.18) 0%, rgba(43,255,119,0) 64%);
+  pointer-events: none; z-index: 0;
+}
+.mkt .cta-inner { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.mkt .cta h2 { font-size: clamp(2.1rem, 4.2vw, 3.5rem); line-height: 1.03; letter-spacing: -.028em; max-width: 20ch; }
+.mkt .cta-sub { margin-top: 20px; max-width: 48ch; font-size: clamp(1.06rem, 1.4vw, 1.28rem); line-height: 1.5; color: var(--ink-2); text-wrap: pretty; }
+.mkt .cta-launcher { margin-top: clamp(28px, 4vw, 38px); width: 100%; max-width: 720px; }
+.mkt .cta-actions { margin-top: clamp(26px, 3.4vw, 36px); display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.mkt .cta-launcher + .cta-actions { margin-top: 18px; }
 
 /* pricing */
 .mkt .tiers { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; align-items: start; }

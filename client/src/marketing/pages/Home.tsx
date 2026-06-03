@@ -2,7 +2,7 @@ import { Link } from 'wouter';
 import { MarketingShell } from '../MarketingShell';
 import { Brand } from '../Brand';
 import { YuliaLauncher } from '../YuliaChat';
-import { enterApp } from '../useEnterApp';
+import { ClosingCTA } from '../components/ClosingCTA';
 import { HeroWorkspace } from '../components/HeroWorkspace';
 import { ProductFrame } from '../components/ProductFrame';
 import {
@@ -143,11 +143,13 @@ export default function Home() {
 
       {/* THE DILIGENCE STANDARD */}
       <section>
-        <div className="wrap">
-          <div className="reveal" style={{ maxWidth: '52ch' }}>
+        <div className="wrap" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 56, alignItems: 'start' }}>
+          <div className="reveal">
             <span className="eyebrow">The Diligence Standard</span>
             <h2 style={{ marginTop: 18 }}>The methodology is open. Read it before you trust it.</h2>
-            <p className="lead" style={{ marginTop: 22 }}>
+          </div>
+          <div className="reveal" data-d="1">
+            <p className="lead" style={{ margin: 0 }}>
               Every number Yulia produces traces to The Diligence Standard — our published
               methodology library. Each model has its inputs, its computation, its
               controlling authorities, and a worked example. No black box.
@@ -206,14 +208,7 @@ export default function Home() {
       <hr className="divider" />
 
       {/* CLOSING CTA */}
-      <section className="center">
-        <div className="wrap stack" style={{ alignItems: 'center' }}>
-          <h2 className="reveal" style={{ maxWidth: '18ch' }}>Bring a deal. See what Yulia builds.</h2>
-          <div className="reveal" data-d="1" style={{ marginTop: 30 }}>
-            <button className="btn btn-accent btn-lg" onClick={() => enterApp()}>Ask Yulia</button>
-          </div>
-        </div>
-      </section>
+      <ClosingCTA heading="Bring a deal. See what Yulia builds." />
     </MarketingShell>
   );
 }

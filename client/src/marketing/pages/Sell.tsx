@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { MarketingShell } from '../MarketingShell';
 import { Brand } from '../Brand';
 import { YuliaLauncher } from '../YuliaChat';
-import { enterApp } from '../useEnterApp';
+import { ClosingCTA } from '../components/ClosingCTA';
 import { ProductFrame } from '../components/ProductFrame';
 import { MiniValuation, CIMDeliverMock, BuyerListMock, DataRoomMock } from '../components/ProductMocks';
 
@@ -129,7 +129,7 @@ export default function Sell() {
 
       {/* NO BROKER FEE — dark statement */}
       <section className="dark center">
-        <div className="wrap reveal" style={{ maxWidth: '24ch', margin: '0 auto' }}>
+        <div className="wrap reveal" style={{ margin: '0 auto' }}>
           <h2 className="statement" style={{ margin: '0 auto' }}>
             <span className="amber">No</span> broker fee.<br />No agenda.
           </h2>
@@ -142,17 +142,7 @@ export default function Sell() {
       </section>
 
       {/* CLOSING CTA */}
-      <section className="center">
-        <div className="wrap stack reveal" style={{ alignItems: 'center' }}>
-          <h2 style={{ maxWidth: '18ch' }}>Thinking about selling? Start with what it&rsquo;s worth.</h2>
-          <div style={{ marginTop: 30, width: '100%' }}>
-            <YuliaLauncher />
-          </div>
-          <div style={{ marginTop: 18 }}>
-            <button className="btn btn-accent btn-lg" onClick={() => enterApp()}>Ask Yulia</button>
-          </div>
-        </div>
-      </section>
+      <ClosingCTA heading="Thinking about selling? Start with what it’s worth." launcher />
     </MarketingShell>
   );
 }

@@ -1,6 +1,6 @@
 import { MarketingShell } from '../MarketingShell';
 import { Brand } from '../Brand';
-import { enterApp } from '../useEnterApp';
+import { ClosingCTA } from '../components/ClosingCTA';
 
 /* Stat band */
 const STATS: Array<{ n: string; c: string }> = [
@@ -137,14 +137,7 @@ export default function About() {
       </section>
 
       {/* CTA */}
-      <section className="section-tight center">
-        <div className="wrap stack reveal" style={{ alignItems: 'center' }}>
-          <h2 style={{ maxWidth: '18ch' }}>Bring a deal. See what Yulia builds.</h2>
-          <div style={{ marginTop: 26 }}>
-            <button className="btn btn-accent btn-lg" onClick={() => enterApp()}>Ask Yulia</button>
-          </div>
-        </div>
-      </section>
+      <ClosingCTA heading="Bring a deal. See what Yulia builds." />
     </MarketingShell>
   );
 }

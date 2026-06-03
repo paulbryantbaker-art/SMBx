@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { MarketingShell } from '../MarketingShell';
 import { Brand } from '../Brand';
 import { enterApp } from '../useEnterApp';
+import { ClosingCTA } from '../components/ClosingCTA';
 
 const TIERS: Array<{ name: string; price: string; per?: string; desc: string; features: string[] }> = [
   {
@@ -227,14 +228,7 @@ export default function Pricing() {
       </section>
 
       {/* CLOSING CTA */}
-      <section className="center" style={{ background: 'var(--surface-2)' }}>
-        <div className="wrap stack reveal" style={{ alignItems: 'center' }}>
-          <h2 style={{ maxWidth: '18ch' }}>Start free. One deliverable, no card.</h2>
-          <div style={{ marginTop: 28 }}>
-            <button className="btn btn-accent btn-lg" onClick={() => enterApp()}>Ask Yulia</button>
-          </div>
-        </div>
-      </section>
+      <ClosingCTA heading="Start free. One deliverable, no card." />
     </MarketingShell>
   );
 }

@@ -1,6 +1,6 @@
 import { MarketingShell } from '../MarketingShell';
 import { Brand } from '../Brand';
-import { enterApp } from '../useEnterApp';
+import { ClosingCTA } from '../components/ClosingCTA';
 import { ProductFrame } from '../components/ProductFrame';
 import { AssistantSurfaceMock } from '../components/ProductMocks';
 
@@ -239,18 +239,7 @@ hash      0x9f3a…d21  ✓ matches app`}
       </section>
 
       {/* CTA */}
-      <section className="section-tight center">
-        <div className="wrap stack reveal" style={{ alignItems: 'center' }}>
-          <h2 style={{ maxWidth: '18ch' }}>Want Yulia where you already work?</h2>
-          <div style={{ marginTop: 28, display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
-            <button className="btn btn-ink btn-lg" onClick={() => enterApp()}>
-              See connector setup
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            </button>
-            <button className="btn btn-accent btn-lg" onClick={() => enterApp()}>Ask Yulia</button>
-          </div>
-        </div>
-      </section>
+      <ClosingCTA heading="Want Yulia where you already work?" secondary={{ label: 'See connector setup' }} />
     </MarketingShell>
   );
 }
