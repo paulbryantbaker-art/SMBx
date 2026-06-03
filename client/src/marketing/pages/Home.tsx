@@ -25,13 +25,12 @@ export default function Home() {
   return (
     <MarketingShell>
       {/* HERO */}
-      <section style={{ paddingTop: 'clamp(60px,9vw,110px)', paddingBottom: 0 }}>
+      <section style={{ paddingTop: 'clamp(28px,4vw,56px)', paddingBottom: 0 }}>
         <div className="wrap center stack" style={{ alignItems: 'center', gap: 0 }}>
-          <span className="eyebrow reveal">M&amp;A diligence, computed</span>
-          <h1 className="display reveal" data-d="1" style={{ margin: '22px 0 0', maxWidth: '16ch' }}>
+          <h1 className="display reveal" data-d="1" style={{ margin: 0, maxWidth: '16ch' }}>
             Analyst-grade deal work. On demand.
           </h1>
-          <p className="lead reveal measure-wide" data-d="2" style={{ margin: '26px auto 0', textAlign: 'center' }}>
+          <p className="lead reveal measure-wide" data-d="2" style={{ margin: '20px auto 0', textAlign: 'center' }}>
             Yulia is an AI deal-intelligence assistant. She builds the valuations,
             quality-of-earnings adjustments, working capital pegs, financing models,
             and CIMs that used to take a deal team — from your real numbers, with
@@ -49,7 +48,7 @@ export default function Home() {
           className="reveal"
           data-d="4"
           style={{
-            marginTop: 64,
+            marginTop: 32,
             width: '100vw',
             marginLeft: 'calc(50% - 50vw)',
             marginRight: 'calc(50% - 50vw)',
