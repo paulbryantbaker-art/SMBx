@@ -25,13 +25,13 @@ const PRODUCES: Array<{ h: string; p: string }> = [
 export default function Home() {
   return (
     <MarketingShell>
-      {/* HERO */}
-      <section style={{ paddingTop: 'clamp(28px,4vw,56px)', paddingBottom: 0 }}>
+      {/* HERO — full-bleed dark band (like the Standard page hero) */}
+      <section className="dark" style={{ paddingTop: 'clamp(56px,9vw,120px)', paddingBottom: 'clamp(52px,8vw,104px)' }}>
         <div className="wrap center stack" style={{ alignItems: 'center', gap: 0 }}>
           <h1 className="display reveal" data-d="1" style={{ margin: 0, maxWidth: '16ch' }}>
             Analyst-grade deal work. On demand.
           </h1>
-          <p className="lead reveal measure-wide" data-d="2" style={{ margin: '20px auto 0', textAlign: 'center' }}>
+          <p className="lead reveal measure-wide" data-d="2" style={{ margin: '22px auto 0', textAlign: 'center' }}>
             Yulia is an AI deal-intelligence assistant. She builds the valuations,
             quality-of-earnings adjustments, working capital pegs, financing models,
             and CIMs that used to take a deal team — from your real numbers, with
@@ -41,13 +41,13 @@ export default function Home() {
             <YuliaLauncher />
           </div>
         </div>
+      </section>
 
-        {/* hero artifact — full-bleed animated "you talk, Yulia builds" workspace.
-            Breaks out of the page wrap edge-to-edge, with a side gutter and an
-            inner max-width cap so it stays sane on ultrawide displays. */}
+      {/* HERO ARTIFACT — full-bleed workspace that grows into focus as you scroll.
+          Breaks out of the page wrap edge-to-edge with a side gutter + inner cap. */}
+      <section style={{ paddingTop: 'clamp(28px,4vw,56px)', paddingBottom: 0 }}>
         <div
           style={{
-            marginTop: 'clamp(44px, 7vw, 92px)',
             width: '100vw',
             marginLeft: 'calc(50% - 50vw)',
             marginRight: 'calc(50% - 50vw)',
