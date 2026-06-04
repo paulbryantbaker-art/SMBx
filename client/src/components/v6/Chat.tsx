@@ -100,7 +100,7 @@ export function V6Chat({
                 onCancelStagedAction={onCancelStagedAction}
               />
             ))}
-            {sending && (streamingText || activeTool) && (
+            {sending && (
               <V6Streaming text={streamingText ?? ""} tool={activeTool ?? null} />
             )}
             {error && <V6Error message={error} />}
@@ -298,6 +298,17 @@ function V6Streaming({ text, tool }: { text: string; tool: string | null }) {
             fontSize: 12.5, lineHeight: 1.55, color: "var(--ink)",
             whiteSpace: "pre-wrap", textWrap: "pretty",
           }}>{text}<span style={{ opacity: 0.5 }}>▍</span></div>
+        )}
+        {!tool && !text && (
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: 6,
+            padding: "3px 9px",
+            background: "var(--surface-2)", borderRadius: 999,
+            fontSize: 11, color: "var(--ink-3)", fontWeight: 500,
+          }}>
+            <span className="pulse-dot" style={{ color: "var(--accent)" }} aria-hidden="true" />
+            <span>Yulia is thinking…</span>
+          </div>
         )}
       </div>
     </div>
