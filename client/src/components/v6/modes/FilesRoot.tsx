@@ -123,25 +123,6 @@ const ACTIONS: FileRow[] = [
   { title: "NDA countersigned", sub: "Big Fake Deal · executed and immutable", status: "Executed", kind: "doc", tone: "done" },
 ];
 
-const FILE_CONTROL_STACK = [
-  {
-    title: "Private library",
-    sub: "Internal notes, models, memos, and draft work stay inside the deal until you share them.",
-  },
-  {
-    title: "Data-room boundary",
-    sub: "Shared artifacts and transaction documents stay separated from private work product.",
-  },
-  {
-    title: "Source trail",
-    sub: "Files should carry source status, citation links, access scope, and audit record when they support a claim.",
-  },
-  {
-    title: "Execution state",
-    sub: "Draft, review, signed, locked, and missing-source states should be visible without turning the page into storage.",
-  },
-];
-
 function useFilesWorkspace(user: User | null) {
   const workspace = useV6WorkspaceData(user);
   const operating = useTodayOperatingBrief(user, workspace.canFetch);
@@ -241,30 +222,6 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
         </div>
       </div>
 
-      {/* KPI tiles */}
-      <div className="mhead">
-        <div className="mh">
-          <span className="l">All files</span>
-          <span className="v">{shortcuts[0]?.count ?? "—"}</span>
-          <span className="s">across deals</span>
-        </div>
-        <div className="mh">
-          <span className="l">Deal libraries</span>
-          <span className="v">{shortcuts[1]?.count ?? "—"}</span>
-          <span className="s">active deals</span>
-        </div>
-        <div className="mh">
-          <span className="l">Needs action</span>
-          <span className="v" style={{ color: "var(--accent-strong)" }}>{shortcuts[2]?.count ?? "—"}</span>
-          <span className="s">asks waiting</span>
-        </div>
-        <div className="mh">
-          <span className="l">Data rooms</span>
-          <span className="v">{shortcuts[3]?.count ?? "—"}</span>
-          <span className="s">shared rooms</span>
-        </div>
-      </div>
-
       {/* Source lanes — flat shortcut cards */}
       <div className="wksec">
         <div className="wksec-title">Source lanes</div>
@@ -294,9 +251,6 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
               </div>
               <div className="wkcard-title">{shortcut.label}</div>
               <div className="wkcard-sub">{shortcut.sub}</div>
-              <div style={{ marginTop: 10, fontFamily: "var(--font-mono)", fontSize: ".72rem", color: "var(--ink-3)" }}>
-                {shortcut.audience}
-              </div>
             </button>
           ))}
         </div>
@@ -401,73 +355,37 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
         </div>
       </div>
 
-      {/* Source control + Work queue */}
-      <div className="wksec">
-        <div className="wkgrid g2">
-          {/* Source control */}
-          <div className="wkcard">
-            <div className="wkcard-title" style={{ fontSize: "1.15rem", marginBottom: 4 }}>Source control for deal work.</div>
-            <div style={{ display: "grid", gap: 10, marginTop: 14 }}>
-              {FILE_CONTROL_STACK.map(item => (
-                <button
-                  key={item.title}
-                  type="button"
-                  style={{
-                    all: "unset",
-                    boxSizing: "border-box",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 4,
-                    padding: "13px 14px",
-                    borderRadius: 10,
-                    border: "1px solid var(--line)",
-                    background: "var(--surface-2)",
-                    cursor: "pointer",
-                    transition: "border-color .15s, background .15s",
-                  }}
-                  onClick={() => ask(`Explain file source control: ${item.title}. ${item.sub}`)}
-                >
-                  <strong style={{ color: "var(--ink)", fontWeight: 600, fontSize: ".9rem" }}>{item.title}</strong>
-                  <span style={{ color: "var(--ink-2)", fontSize: ".82rem", lineHeight: 1.45 }}>{item.sub}</span>
-                </button>
-              ))}
+      {/* Work queue */}
+      <div className="wksec" id="files-work-queue">
+        <div style={{ marginBottom: 14 }}>
+          <div className="wksec-title" style={{ marginBottom: 2 }}>Data-room work queue</div>
+          <p style={{ margin: 0, color: "var(--ink-2)", fontSize: ".84rem" }}>Requests, reviews, execution items, and failed generations waiting for a decision.</p>
+        </div>
+        <div className="wkcard" style={{ padding: 0, overflow: "hidden" }}>
+          {operating.loading && (
+            <div style={{ padding: 14 }}><YuliaSkeleton rows={2} label="Yulia is reading the queue…" /></div>
+          )}
+          {operating.error && (
+            <div style={{ margin: 12, padding: "9px 11px", borderRadius: 10, background: "#FBE7DD", color: "#B0461F", fontSize: 12 }}>
+              Couldn&rsquo;t load Today queue ({operating.error}).
             </div>
-          </div>
-
-          {/* Work queue */}
-          <div id="files-work-queue">
-            <div style={{ marginBottom: 14 }}>
-              <div className="wksec-title" style={{ marginBottom: 2 }}>Data-room work queue</div>
-              <p style={{ margin: 0, color: "var(--ink-2)", fontSize: ".84rem" }}>Requests, reviews, execution items, and failed generations waiting for a decision.</p>
-            </div>
-            <div className="wkcard" style={{ padding: 0, overflow: "hidden" }}>
-              {operating.loading && (
-                <div style={{ padding: 14 }}><YuliaSkeleton rows={2} label="Yulia is reading the queue…" /></div>
-              )}
-              {operating.error && (
-                <div style={{ margin: 12, padding: "9px 11px", borderRadius: 10, background: "#FBE7DD", color: "#B0461F", fontSize: 12 }}>
-                  Couldn&rsquo;t load Today queue ({operating.error}).
-                </div>
-              )}
-              {!workspace.loading && !operating.loading && actions.length === 0 && (
-                <EmptyRows
-                  title="Nothing needs action"
-                  text="Requests, reviews, execution items, and failed generations will appear here when they exist."
-                  action="Ask Yulia"
-                  onClick={() => ask("What should I work on next in my files?")}
-                />
-              )}
-              {actions.map((row, index) => (
-                <FileListRow key={`${row.id ?? row.title}-${index}`} row={row} last={index === actions.length - 1} onClick={() => openDoc(row)} />
-              ))}
-            </div>
-          </div>
+          )}
+          {!workspace.loading && !operating.loading && actions.length === 0 && (
+            <EmptyRows
+              title="Nothing needs action"
+              text="Requests, reviews, execution items, and failed generations will appear here when they exist."
+              action="Ask Yulia"
+              onClick={() => ask("What should I work on next in my files?")}
+            />
+          )}
+          {actions.map((row, index) => (
+            <FileListRow key={`${row.id ?? row.title}-${index}`} row={row} last={index === actions.length - 1} onClick={() => openDoc(row)} />
+          ))}
         </div>
       </div>
 
       <div className="tabfoot">
         <span>{recents.length} recent · {rooms.length} rooms · {actions.length} queued</span>
-        <span>Files surface</span>
       </div>
     </div>
   );
@@ -623,7 +541,7 @@ function ActiveFilesList({
       </div>
 
       {loading && (
-        <div className="muted" style={{ padding: "14px 0", letterSpacing: ".08em" }}>LOADING REAL FILES…</div>
+        <div style={{ padding: "8px 0" }}><YuliaSkeleton rows={3} label="Loading files…" /></div>
       )}
       {error && (
         <div style={{ marginBottom: 12, padding: "9px 11px", borderRadius: 10, background: "#FBE7DD", color: "#B0461F", fontSize: 12 }}>
@@ -893,27 +811,6 @@ function FileListRow({ row, last, onClick }: { row: FileRow; last: boolean; onCl
       <span style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
         <strong style={{ color: "var(--ink)", fontWeight: 600, fontSize: ".9rem" }}>{row.title}</strong>
         <span style={{ color: "var(--ink-3)", fontSize: ".78rem" }}>{row.sub}</span>
-        {row.definitivePacketType && (
-          <span style={{
-            marginTop: 3,
-            width: "fit-content",
-            maxWidth: "100%",
-            padding: "3px 7px",
-            borderRadius: 999,
-            background: "var(--accent-soft)",
-            color: "var(--accent-strong)",
-            fontFamily: "var(--font-mono)",
-            fontSize: "10.5px",
-            fontWeight: 500,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}>
-            {row.definitivePacketType}
-            {row.definitiveDisclosureStatus ? ` · ${disclosureStatusLabel(row.definitiveDisclosureStatus, row.definitiveSourceGaps?.length ?? 0)}` : ""}
-            {row.definitiveNextSuggestedCalls?.[0] ? ` · next ${row.definitiveNextSuggestedCalls[0].label}` : ""}
-          </span>
-        )}
       </span>
       <span className={`statpill ${pill.cls}`}>
         <span className="d" />{row.status}
