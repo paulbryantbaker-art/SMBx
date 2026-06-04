@@ -1,7 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { V6Section } from "../Section";
 import { V6Icon } from "../icons";
-import { DealJourneyFlow } from "../shared/DealJourneyFlow";
 import { V6DocStatus, type DocStatusKind } from "../modes/cards";
 import type { FileScope, OpenTab, TabKind } from "../types";
 import { authHeaders, type User } from "../../../hooks/useAuth";
@@ -605,15 +604,35 @@ export function V6DealView({
         <div className="wknote" style={D.actionBanner}>{actionNote}</div>
       )}
 
-      {/* Where this deal stands — the methodology flow + current position. This
-          leads the page: the journey's stages in plain English, what's done,
-          where we are, and what the current stage needs to advance. */}
-      <DealJourneyFlow
-        journeyType={(real as any)?.journey_type}
-        currentGate={(real as any)?.current_gate}
-        league={(real as any)?.league}
-        onAsk={onTalkToYulia}
-      />
+      {/* Yulia's verdict — her call, rendered straight from the deal brief
+          (substrate). No app-computed verdict; honest "analyzing" when her
+          read isn't ready. */}
+      {dealBrief?.verdict?.label || dealBrief?.verdict?.text ? (
+        <section style={{ marginBottom: 28 }}>
+          <div className="wkcard" style={{ display: "flex", alignItems: "center", gap: 18 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: "1.05rem", fontWeight: 700, color: "var(--ink)", letterSpacing: "-0.02em" }}>{dealBrief.verdict.label || "Yulia's read"}</div>
+              {dealBrief.verdict.text && <p style={{ margin: "6px 0 0", color: "var(--ink-2)", fontSize: "0.9rem", lineHeight: 1.5 }}>{dealBrief.verdict.text}</p>}
+            </div>
+            {typeof dealBrief.verdict.score === "number" && (
+              <div style={{ textAlign: "right", flexShrink: 0 }}>
+                <div style={{ fontSize: "2rem", fontWeight: 800, color: "var(--accent-strong)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{dealBrief.verdict.score}</div>
+                <div className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-3)", fontWeight: 600, letterSpacing: "0.08em" }}>FIT</div>
+              </div>
+            )}
+          </div>
+        </section>
+      ) : numericId !== null ? (
+        <section style={{ marginBottom: 28 }}>
+          <div className="wkcard" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: "1.05rem", fontWeight: 700, color: "var(--ink)" }}>Yulia is analyzing this deal</div>
+              <p style={{ margin: "6px 0 0", color: "var(--ink-2)", fontSize: "0.9rem", lineHeight: 1.5 }}>Her verdict, market read, and next moves appear once she's read it.</p>
+            </div>
+            <button className="wkbtn primary" type="button" onClick={() => onTalkToYulia?.(`Give me your read on ${dealName}: your verdict, the key risks, and the next move.`)}>Ask for the read</button>
+          </div>
+        </section>
+      ) : null}
 
       {/* Stats row */}
       <section style={{ marginBottom: 32 }}>
