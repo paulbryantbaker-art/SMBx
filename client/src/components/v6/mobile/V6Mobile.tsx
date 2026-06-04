@@ -675,6 +675,8 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           title={view.analysisTitle ?? "Analysis"}
           analysisRunId={view.analysisRunId}
           analysisData={view.analysisData}
+          comparisonData={view.comparisonData}
+          modelState={view.modelState}
           status={view.status}
           versionNumber={view.versionNumber}
           onBack={() => setView({ kind: "tab", tab: activeTab })}

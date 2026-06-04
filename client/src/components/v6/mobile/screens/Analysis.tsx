@@ -31,6 +31,8 @@ interface MobileAnalysisScreenProps {
   title: string;
   analysisRunId?: number | null;
   analysisData?: Record<string, any>;
+  comparisonData?: Record<string, any>[];
+  modelState?: Record<string, any>;
   status?: string;
   versionNumber?: number | null;
   onBack: () => void;
@@ -54,10 +56,47 @@ interface MobileAnalysisScreenProps {
   }) => void;
 }
 
+/* Generic read-only renderers — show a model's values + a comparison grid on
+   mobile when the interactive canvas (sliders) can't render here. */
+function prettyKey(k: string): string {
+  return k.replace(/[_-]+/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+}
+function formatVal(v: unknown): string {
+  if (typeof v === "number") return Number.isFinite(v) ? v.toLocaleString(undefined, { maximumFractionDigits: 2 }) : String(v);
+  if (typeof v === "boolean") return v ? "Yes" : "No";
+  return String(v);
+}
+function readableEntries(obj: Record<string, any> | undefined | null): [string, unknown][] {
+  if (!obj || typeof obj !== "object") return [];
+  return Object.entries(obj).filter(([k, v]) =>
+    !k.startsWith("_")
+    && (typeof v === "string" || typeof v === "number" || typeof v === "boolean")
+    && v !== "" && v != null,
+  );
+}
+function comparisonRowTitle(row: Record<string, any>, i: number): string {
+  return String(row.name || row.business_name || row.title || row.deal || `Option ${i + 1}`);
+}
+function ReadonlyValues({ entries }: { entries: [string, unknown][] }) {
+  if (entries.length === 0) return null;
+  return (
+    <div>
+      {entries.slice(0, 24).map(([k, v]) => (
+        <div key={k} style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "6px 0", borderBottom: "0.5px solid var(--mb-line-2)" }}>
+          <span style={{ fontSize: 13, color: "var(--mb-ink-3)" }}>{prettyKey(k)}</span>
+          <span style={{ fontSize: 13.5, fontWeight: 600, color: "var(--mb-ink)", textAlign: "right" }}>{formatVal(v)}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function MobileAnalysisScreen({
   title,
   analysisRunId,
   analysisData,
+  comparisonData,
+  modelState,
   status,
   versionNumber,
   onBack,
@@ -179,6 +218,11 @@ export function MobileAnalysisScreen({
       || (typeof data?.commentaryMarkdown === "string" ? data.commentaryMarkdown.trim() : "")
       || (typeof data?.analysisMarkdown === "string" ? data.analysisMarkdown.trim() : "");
     const fallbackText = fallbackMarkdown || fallbackSummary;
+    // Read-only model + comparison content so phones SEE the figures even when
+    // the interactive canvas (sliders) can't render here.
+    const modelEntries = readableEntries(modelState);
+    const comparisonRows = Array.isArray(comparisonData) ? comparisonData.filter(r => r && typeof r === "object") : [];
+    const hasReadOnly = modelEntries.length > 0 || comparisonRows.length > 0;
     return (
       <div style={S.page}>
         <FloatingChrome onBack={onBack} shareTitle={title} />
@@ -187,6 +231,8 @@ export function MobileAnalysisScreen({
           <h1 style={S.title}>{title}</h1>
           {fallbackText ? (
             <p style={{ ...S.copy, whiteSpace: "pre-wrap" }}>{fallbackText}</p>
+          ) : hasReadOnly ? (
+            <p style={S.copy}>Read-only view of this model — open on desktop for the interactive sliders and adjustments.</p>
           ) : (
             <p style={S.copy}>
               The interactive canvas for this analysis is not available on this phone, but Yulia can walk you through it in chat.
@@ -198,7 +244,7 @@ export function MobileAnalysisScreen({
             type="button"
             style={S.primaryButton}
             onClick={() => onAskYulia(
-              fallbackText
+              fallbackText || hasReadOnly
                 ? `Walk me through ${title}: what it found, what decision it supports, and what to verify next.`
                 : `Open ${title} as an interactive analysis canvas and explain what is available on mobile.`,
             )}
@@ -216,6 +262,25 @@ export function MobileAnalysisScreen({
             </button>
           )}
         </section>
+
+        {modelEntries.length > 0 && (
+          <section style={S.whiteCard}>
+            <div className="mb-mono" style={S.cardEyebrow}>MODEL VALUES</div>
+            <ReadonlyValues entries={modelEntries} />
+          </section>
+        )}
+
+        {comparisonRows.length > 0 && (
+          <section style={S.whiteCard}>
+            <div className="mb-mono" style={S.cardEyebrow}>COMPARISON</div>
+            {comparisonRows.slice(0, 6).map((row, i) => (
+              <div key={i} style={{ padding: "10px 0", borderTop: i ? "0.5px solid var(--mb-line-2)" : "none" }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--mb-ink)", marginBottom: 4 }}>{comparisonRowTitle(row, i)}</div>
+                <ReadonlyValues entries={readableEntries(row).filter(([k]) => !["name", "business_name", "title", "deal"].includes(k))} />
+              </div>
+            ))}
+          </section>
+        )}
 
         {/* Comments — renders only when this run resolved a real deliverable id. */}
         <DeliverableComments deliverableId={deliverableId} dealId={commentsDealId} defaultCollapsed />
