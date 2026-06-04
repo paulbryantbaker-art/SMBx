@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { authHeaders, type User } from "../../../hooks/useAuth";
 import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
-import { useTodayOperatingBrief, type TodayDealPulseItem, type TodayDefinitiveDealState, type TodayModelRefreshItem, type TodayStudioRefreshItem } from "../../../hooks/useTodayOperatingBrief";
+import { useNextActions } from "../../../hooks/useNextActions";
+import { useNotifications, notifTimeAgo } from "../../../hooks/useNotifications";
+import { useTodayOperatingBrief, type TodayDealPulseItem, type TodayDefinitiveDealState } from "../../../hooks/useTodayOperatingBrief";
 import { YuliaSkeleton } from "../shared/YuliaSkeleton";
 import { useV6WorkspaceData, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
-import { openSavedModelExecutionAsRerun } from "../../../lib/modelRerunActions";
-import { executeSurfaceAction, type ActionDeal } from "../../../lib/v6ActionContracts";
-import { isSurfaceActionId, type SurfaceActionId } from "../../../lib/v6SurfaceActions";
 import { PIPELINE_STAGES, stageForGate, type PipelineStageId } from "../../../lib/pipelineStages";
 import type { OpenTab } from "../types";
 import { V6Icon } from "../icons";
@@ -26,10 +25,7 @@ interface TodayDeal {
   definitive?: TodayDefinitiveDealState;
 }
 
-// One row in the single "What needs you today" feed. Brief signals (gate
-// blockers, stale models, studio gaps, AI priorities) and deal-derived next
-// steps all normalize to this shape so the feed is one ranked list, not five
-// competing cards.
+// One row in the single "What needs you today" feed.
 interface FeedRow {
   key: string;
   title: string;
@@ -68,24 +64,13 @@ const QUICK_STARTS = [
   "Show files that need my eye.",
 ];
 
-// Server brief shapes (enrichment — may come back empty; never gate the page on these)
-interface LiveDeskItem { eyebrow: string; title: string; sub: string; pct: number; tone: Tone; prompt?: string; }
-interface PortfolioBriefNote { label: string; text: string; }
-interface PortfolioBriefHero { title: string; lede: string; primaryLabel: string; primaryPrompt?: string; secondaryLabel: string; secondaryDealId?: string; notes: PortfolioBriefNote[]; }
-interface PortfolioMarketIntelligence { eyebrow: string; headline: string; subhead: string; bullets: string[]; sourceCount: number; confidence: string; }
-interface PortfolioPriority {
-  kicker: string; title: string; sub: string; cta: string; tone: Tone;
-  actionId?: SurfaceActionId; dealId?: string; dealTitle?: string; docId?: string; docTitle?: string; prompt?: string; tabKind?: string;
-}
+// Server brief shapes (enrichment for hero copy + deal/file lists — may be empty,
+// never gates the page).
+interface PortfolioBriefHero { title: string; lede: string; primaryLabel: string; primaryPrompt?: string; secondaryLabel: string; secondaryDealId?: string; notes: { label: string; text: string }[]; }
 interface PortfolioBrief {
   source: "live";
   generatedAt: string;
-  modelUsed?: string;
-  intelligenceMode?: string;
-  marketIntelligence?: PortfolioMarketIntelligence;
   hero: PortfolioBriefHero;
-  liveDesk: LiveDeskItem[];
-  priorities: PortfolioPriority[];
   files: TodayFile[];
   deals: TodayDeal[];
 }
@@ -106,8 +91,9 @@ function toneToStatpill(t: Tone): string {
 export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const home = useHomeDeals(user);
   const workspace = useV6WorkspaceData(user);
+  const nextActions = useNextActions(user, workspace.canFetch);
+  const notif = useNotifications(!!user && workspace.canFetch);
   const [portfolioBrief, setPortfolioBrief] = useState<PortfolioBrief | null>(null);
-  const [rerunOpenedIds, setRerunOpenedIds] = useState<Set<string>>(() => new Set());
   const todayOperating = useTodayOperatingBrief(user, workspace.canFetch);
 
   useEffect(() => {
@@ -128,12 +114,6 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const realDeals = home.inReview.length > 0 ? home.inReview : home.picks;
   const liveBrief = useSampleData ? null : portfolioBrief;
   const operatingBrief = useSampleData ? null : todayOperating.brief;
-  const modelRefreshNeeds = operatingBrief?.modelRefreshNeeds.filter(item => !rerunOpenedIds.has(item.id)) ?? [];
-  const waitingForYuliaRead = !useSampleData && !liveBrief;
-  // True while the AI read is still resolving — show a skeleton in the feed, but
-  // the rest of the page (KPIs, stage strip, deals, files) renders from real
-  // deal data immediately and never blocks on the brief.
-  const isUpdating = waitingForYuliaRead || (!useSampleData && todayOperating.loading);
   const operatingDeals = operatingBrief?.dealPulse ?? [];
   const operatingDealMap = useMemo(
     () => new Map(operatingDeals.map(item => [item.dealId, item])),
@@ -156,11 +136,11 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
     [liveBrief?.files, workspace.canFetch, workspace.deliverables],
   );
 
-  // ── State selection — drives which Today layout renders ──
+  // ── State selection ──
   const activeCount = useSampleData ? deals.length : home.totalActive;
   const closedCount = useSampleData ? 0 : home.totalClosed;
-  const firstRun = !useSampleData && !waitingForYuliaRead && home.totalActive === 0 && deals.length === 0;
-  const single = !useSampleData && !waitingForYuliaRead && home.totalActive === 1;
+  const firstRun = !useSampleData && !home.loading && home.totalActive === 0;
+  const single = !useSampleData && !home.loading && home.totalActive === 1;
   const lead = deals[0] ?? null;
   const leadTitle = lead?.title ?? "your first deal";
   const firstName = ((user as any)?.name || (user as any)?.displayName || "").toString().trim().split(/\s+/)[0] || "";
@@ -191,133 +171,56 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
     openTab({ kind: "doc", title, id: id ?? `doc-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}` });
   };
 
-  const openStudioBook = (item: TodayStudioRefreshItem) => {
-    const bookId = Number(item.bookId);
-    openTab({
-      kind: "marketing-studio",
-      modeId: "studio",
-      id: Number.isFinite(bookId) ? `studio-book-${bookId}` : `studio-book-${item.bookId}`,
-      title: item.title,
-      studioView: "canvas",
-      studioBookId: Number.isFinite(bookId) ? bookId : null,
-    });
-  };
-
-  const rerunModelRefresh = (item: TodayModelRefreshItem) => {
-    void openSavedModelExecutionAsRerun({
-      executionId: item.id,
-      dealTitle: item.dealTitle,
-      currentAssumptions: item.currentAssumptions,
-      sourceSurface: "today_model_refresh",
-      onTalkToYulia: ask,
-    }).then(execution => {
-      if (execution) setRerunOpenedIds(prev => new Set(prev).add(item.id));
-    });
-  };
-
-  const todayDealToActionDeal = (deal: TodayDeal | null | undefined): ActionDeal | null => {
-    if (!deal) return null;
-    return { id: deal.id, business_name: deal.title, name: deal.title };
-  };
-
-  const actionDealForPriority = (item: PortfolioPriority): ActionDeal | null => {
-    if (item.dealId) {
-      const matched = deals.find(deal => deal.id === item.dealId);
-      if (matched) return todayDealToActionDeal(matched);
-      return { id: item.dealId, business_name: item.dealTitle || item.title, name: item.dealTitle || item.title };
-    }
-    return todayDealToActionDeal(lead);
-  };
-
-  const actionDeals = deals.map(todayDealToActionDeal).filter(Boolean) as ActionDeal[];
-
-  const executePriority = (item: PortfolioPriority) => {
-    const actionId = isSurfaceActionId(item.actionId) ? item.actionId : null;
-    const prompt = item.prompt || `${item.title}: ${item.sub}`;
-    if (!actionId) { ask(prompt); return; }
-    void executeSurfaceAction({
-      actionId,
-      deal: actionDealForPriority(item),
-      deals: actionDeals,
-      document: { id: item.docId, title: item.docTitle || item.title },
-      title: item.title,
-      prompt,
-      openTab,
-      requestedFrom: "today_priority",
-      onTalkToYulia: ask,
-    }).catch(() => ask(prompt));
-  };
-
-  // ── The single action feed: merge every "needs you" signal into one ranked
-  // list. Real AI priorities first, then gate/model/studio signals, then
-  // deal-derived next steps so the feed is always populated when you own deals. ──
+  // ── "What needs you today" — the real next-steps feed. Source of truth is the
+  // gate-aware next-actions engine (/api/user/next-actions). Deal-derived rows
+  // are only a fallback for the brief moment before the engine responds (or if
+  // it errors), so the section is never empty when you own deals. ──
   const feed: FeedRow[] = [];
   if (useSampleData) {
     for (const d of deals.slice(0, 3)) {
       feed.push({ key: `s-${d.id}`, title: `Review ${d.title}`, sub: d.thesis, cta: "Open", onClick: () => openDeal(d) });
     }
+  } else if (nextActions.actions.length) {
+    for (const a of nextActions.actions) {
+      feed.push({
+        key: a.id,
+        title: a.title,
+        sub: a.description,
+        cta: a.cta,
+        onClick: () => {
+          if (a.prefill) ask(a.prefill);
+          else if (a.dealId) openTab({ kind: "deal", id: String(a.dealId), title: a.dealName || `Deal #${a.dealId}` });
+          else ask(a.title);
+        },
+      });
+    }
   } else {
-    if (liveBrief?.priorities?.length) {
-      for (const p of liveBrief.priorities) {
-        feed.push({ key: `p-${p.title}`, title: p.title, sub: p.sub, cta: p.cta, onClick: () => executePriority(p) });
-      }
-    }
-    for (const g of operatingBrief?.gateCountdown ?? []) {
+    const src = home.inReview.length ? home.inReview : home.picks;
+    for (const d of src) {
+      if (feed.length >= 5) break;
       feed.push({
-        key: `g-${g.dealId}-${g.gateId}`,
-        title: `Clear ${g.gateName} — ${g.title}`,
-        sub: `${g.gateId} · ${g.nextAction}`,
+        key: `d-${d.id}`,
+        title: `Advance ${d.business_name || d.industry || `Deal #${d.id}`}`,
+        sub: stageNextAction(stageForGate(d.current_gate)),
         cta: "Open deal",
-        onClick: () => openTab({ kind: "deal", id: g.dealId, title: g.title }),
+        onClick: () => openTab({ kind: "deal", id: String(d.id), title: d.business_name || `Deal #${d.id}` }),
       });
-    }
-    for (const m of modelRefreshNeeds) {
-      feed.push({
-        key: `m-${m.id}`,
-        title: `Rerun ${m.modelTitle}`,
-        sub: `${m.dealTitle ? `${m.dealTitle} · ` : ""}${m.statusLabel} · ${m.changedInputs.slice(0, 2).join(", ") || m.rerunTriggers[0] || "tracked inputs"}`,
-        cta: "Rerun",
-        onClick: () => rerunModelRefresh(m),
-      });
-    }
-    for (const s of operatingBrief?.studioRefreshNeeds ?? []) {
-      feed.push({
-        key: `st-${s.bookId}`,
-        title: `Refresh ${s.title}`,
-        sub: `${s.gaps} ${s.gaps === 1 ? "gap" : "gaps"} · ${s.reason}`,
-        cta: "Open book",
-        onClick: () => openStudioBook(s),
-      });
-    }
-    // Floor: derive next steps from the deals you most recently touched.
-    if (feed.length < 4) {
-      const src = home.inReview.length ? home.inReview : home.picks;
-      for (const d of src) {
-        if (feed.length >= 5) break;
-        const key = `d-${d.id}`;
-        if (feed.some(f => f.key === key)) continue;
-        feed.push({
-          key,
-          title: `Advance ${d.business_name || d.industry || `Deal #${d.id}`}`,
-          sub: stageNextAction(stageForGate(d.current_gate)),
-          cta: "Open deal",
-          onClick: () => openTab({ kind: "deal", id: String(d.id), title: d.business_name || `Deal #${d.id}` }),
-        });
-      }
     }
   }
   const feedItems = feed.slice(0, 6);
+  const feedLoading = !useSampleData && nextActions.loading && nextActions.actions.length === 0 && feed.length === 0;
 
-  // Header copy + primary action (contextual, real)
+  // Updates — real events (reviews, @mentions, completed analyses)
+  const updates = notif.notifications.slice(0, 5);
+
+  // Header copy + primary action
   const headerSub = showLoggedOutMarketing
     ? "smbX.ai connects sourcing, diligence, execution, and value creation in one workflow."
     : firstRun
       ? "No live workspace yet. Start with a deal, thesis, or source file."
       : single
         ? `${leadTitle} is your focus today.`
-        : waitingForYuliaRead
-          ? `${feedItems.length || "—"} on deck · Yulia is refreshing the read.`
-          : `${feedItems.length} need your eye · ${activeCount} active · ${closedCount} closed.`;
+        : `${feedItems.length} need your eye · ${activeCount} active · ${closedCount} closed.`;
 
   const primaryLabel = liveBrief?.hero.primaryLabel
     || (showLoggedOutMarketing ? "Chat with Yulia" : firstRun ? "Start with Yulia" : single ? `Open ${leadTitle}` : "Open top deal");
@@ -325,6 +228,11 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
     if (liveBrief?.hero.primaryPrompt) { ask(liveBrief.hero.primaryPrompt); return; }
     if (showLoggedOutMarketing || firstRun) { ask("Help me start my first SMBx deal workspace."); return; }
     openDeal(lead);
+  };
+
+  const onUpdateClick = (n: typeof updates[number]) => {
+    notif.markRead(n.id);
+    if (n.deal_id) openTab({ kind: "deal", id: String(n.deal_id), title: `Deal #${n.deal_id}` });
   };
 
   return (
@@ -425,20 +333,20 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
         </div>
       )}
 
-      {/* ── What needs you today — ONE merged, ranked feed (all states) ── */}
+      {/* ── What needs you today — the real next-actions feed ── */}
       <div className="wksec">
         <div className="pg-head" style={{ alignItems: "center", marginBottom: 14 }}>
           <div><div className="wksec-title" style={{ marginBottom: 0 }}>What needs you today</div></div>
           <div className="pg-actions">
-            <button className="kebab" type="button" aria-label="More" onClick={() => ask("Show my full priority queue across the portfolio, with the source behind each item.")}>⋯</button>
+            <button className="kebab" type="button" aria-label="More" onClick={() => ask("Walk me through everything that needs my attention across the portfolio, most urgent first.")}>⋯</button>
           </div>
         </div>
-        {isUpdating && feedItems.length === 0 ? (
-          <YuliaSkeleton rows={3} label="Yulia is building today's read…" />
+        {feedLoading ? (
+          <YuliaSkeleton rows={3} label="Reading your deals for the next moves…" />
         ) : feedItems.length === 0 ? (
           <div className="wkcard" style={{ textAlign: "center", color: "var(--ink-2)" }}>
             <div className="wkcard-title">You're clear</div>
-            <div className="wkcard-sub">No blockers, stale models, or files waiting. Ask Yulia what's worth getting ahead of.</div>
+            <div className="wkcard-sub">No gate blockers, pending reviews, or stalled deals. Ask Yulia what's worth getting ahead of.</div>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -463,6 +371,39 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           </div>
         )}
       </div>
+
+      {/* ── Updates — real events (reviews, mentions, completed analyses) ── */}
+      {!useSampleData && (
+        <div className="wksec">
+          <div className="wksec-title" style={{ marginBottom: 12 }}>Updates</div>
+          {!notif.loaded ? (
+            <YuliaSkeleton rows={2} label={null} />
+          ) : updates.length === 0 ? (
+            <div className="wkcard" style={{ textAlign: "center", color: "var(--ink-2)" }}>
+              <div className="wkcard-title">No new updates</div>
+              <div className="wkcard-sub">Review requests, @mentions, and finished analyses land here as they happen.</div>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {updates.map(n => (
+                <button
+                  key={n.id}
+                  type="button"
+                  onClick={() => onUpdateClick(n)}
+                  style={{ all: "unset", cursor: "pointer", boxSizing: "border-box", width: "100%", display: "grid", gridTemplateColumns: "8px minmax(0, 1fr) auto", gap: 12, alignItems: "start", padding: "13px 16px", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 12 }}
+                >
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", marginTop: 6, background: n.read_at ? "transparent" : "var(--accent-strong)", border: n.read_at ? "1px solid var(--line-2)" : "none" }} />
+                  <span style={{ minWidth: 0 }}>
+                    <strong style={{ display: "block", color: "var(--ink)", fontSize: "0.9rem", fontWeight: n.read_at ? 600 : 700, letterSpacing: "-0.01em", lineHeight: 1.3 }}>{n.title}</strong>
+                    {n.body && <span style={{ display: "block", color: "var(--ink-2)", fontSize: "0.82rem", lineHeight: 1.4, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{n.body}</span>}
+                  </span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--ink-3)", whiteSpace: "nowrap", marginTop: 1 }}>{notifTimeAgo(n.created_at)}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── Portfolio at a glance — active deals by stage (portfolio only) ── */}
       {!firstRun && !single && !useSampleData && home.all.length > 0 && (
@@ -494,9 +435,8 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
         </div>
       )}
 
-      {/* ── Deals in motion + Files (portfolio + single both show files) ── */}
+      {/* ── Deals in motion + Files ── */}
       <div className="wkgrid g2" style={{ gap: 16, marginTop: 34 }}>
-        {/* Deals in motion (hidden in single — the hero already is the deal) */}
         {!single && (
           <div>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
