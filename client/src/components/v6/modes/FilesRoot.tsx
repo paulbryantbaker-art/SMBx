@@ -224,7 +224,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
 
       {/* Source lanes — flat shortcut cards */}
       <div className="wksec">
-        <div className="wksec-title">Source lanes</div>
+        <div className="wksec-title">Files that need your eye</div>
         <p style={{ margin: "0 0 14px", color: "var(--ink-2)", fontSize: ".9rem" }}>
           Portfolio › deal › stage for all files. Data rooms add artifact, action, review, and executed status.
         </p>
@@ -264,7 +264,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
           <div>
             <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 14 }}>
               <div>
-                <div className="wksec-title" style={{ marginBottom: 2 }}>Recently touched</div>
+                <div className="wksec-title" style={{ marginBottom: 2 }}>Recents</div>
                 <p style={{ margin: 0, color: "var(--ink-2)", fontSize: ".84rem" }}>Last files Yulia or you touched, plus anything waiting on you.</p>
               </div>
               <button
@@ -302,7 +302,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
           {/* Current rooms */}
           <div>
             <div style={{ marginBottom: 14 }}>
-              <div className="wksec-title" style={{ marginBottom: 2 }}>Current rooms</div>
+              <div className="wksec-title" style={{ marginBottom: 2 }}>Data rooms</div>
               <p style={{ margin: 0, color: "var(--ink-2)", fontSize: ".84rem" }}>Shared diligence drives by deal. Open a deal to see what is private versus in the room.</p>
             </div>
             <div className="wkcard" style={{ padding: 0, overflow: "hidden" }}>
@@ -358,7 +358,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
       {/* Work queue */}
       <div className="wksec" id="files-work-queue">
         <div style={{ marginBottom: 14 }}>
-          <div className="wksec-title" style={{ marginBottom: 2 }}>Data-room work queue</div>
+          <div className="wksec-title" style={{ marginBottom: 2 }}>Needs action</div>
           <p style={{ margin: 0, color: "var(--ink-2)", fontSize: ".84rem" }}>Requests, reviews, execution items, and failed generations waiting for a decision.</p>
         </div>
         <div className="wkcard" style={{ padding: 0, overflow: "hidden" }}>
