@@ -55,7 +55,6 @@ interface PipelineShortcut {
 }
 
 const PIPELINE_SHORTCUTS: PipelineShortcut[] = [
-  { action: "rank", title: "Rank pipeline", sub: "Sort pursue, watch, pass by what deserves today.", icon: "feed", tone: "blue" },
   { action: "blockers", title: "Show blockers", sub: "List what stops each deal from moving gates.", icon: "pin", tone: "rose" },
   { action: "models", title: "Refresh model stack", sub: "Check required models, citations, and stale outputs.", icon: "chart", tone: "violet" },
   { action: "files", title: "Review files", sub: "Open diligence docs and data-room items needing attention.", icon: "library", tone: "gold" },
@@ -107,7 +106,6 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
   const pursue = deals.filter(d => d.verdict === "pursue");
   const watch = deals.filter(d => d.verdict === "watch");
   const pass = deals.filter(d => d.verdict === "pass");
-  const activeLeagueCount = new Set(deals.map(deal => deal.league)).size;
   const selectedHomeDeal = useSampleData ? null : pickActionDeal(realDeals);
   const actionDeal = selectedHomeDeal ? homeDealToActionDeal(selectedHomeDeal) : null;
   const actionDeals = realDeals.map(homeDealToActionDeal);
@@ -231,7 +229,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
       <div className="pg-head">
         <div>
           <div className="pg-title">Pipeline</div>
-          <p className="pg-sub">Every opportunity run against the method — league, gate, model stack, citations, and the next move before it advances.</p>
+          <p className="pg-sub">Every deal you own, grouped by stage, with the next move before it advances.</p>
         </div>
         <div className="pg-actions">
           <button className="kebab" type="button" aria-label="More" onClick={() => onTalkToYulia?.("Summarize my pipeline: counts by verdict, what changed since yesterday, and the single most important deal to move today.")}>⋯</button>
@@ -253,13 +251,6 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
         ))}
       </div>
 
-      <div className="mhead">
-        <div className="mh"><span className="l">Deals</span><span className="v">{deals.length}</span><span className="s">{activeLeagueCount || 0} {activeLeagueCount === 1 ? "league" : "leagues"}</span></div>
-        <div className="mh"><span className="l">Pursue</span><span className="v" style={{ color: "var(--accent-strong)" }}>{pursue.length}</span><span className="s">ready to advance</span></div>
-        <div className="mh"><span className="l">Watch</span><span className="v">{watch.length}</span><span className="s">need a check</span></div>
-        <div className="mh"><span className="l">Pass</span><span className="v">{pass.length}</span><span className="s">holding</span></div>
-      </div>
-
       <div className="ynext">
         {PIPELINE_SHORTCUTS.map(({ action, title, sub, icon }) => (
           <button key={title} type="button" className="yn" disabled={busyAction === action} onClick={() => { void runPipelineShortcut(action); }}>
@@ -279,7 +270,6 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
         <span className="grow" />
         <div className="tabletools">
           <button className="wkbtn" type="button" style={{ padding: "7px 12px" }} onClick={() => openTab({ id: "deals-all", kind: "deals-list", title: "All deals", dealsListView: "all" })}>All deals</button>
-          <button className="wkbtn" type="button" style={{ padding: "7px 12px" }} onClick={() => onTalkToYulia?.("Rank my pipeline by methodology readiness, blockers, and the next Yulia move for each deal.")}>Rank</button>
         </div>
       </div>
 
@@ -307,7 +297,6 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
               <th className="r">SDE</th>
               <th>Stage</th>
               <th className="r">Fit</th>
-              <th className="r">Method</th>
               <th className="r">Action</th>
             </tr></thead>
             {PIPELINE_STAGES.map(stage => {
@@ -316,7 +305,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
               return (
                 <tbody key={stage.id}>
                   <tr className="stage-row">
-                    <td colSpan={7}>
+                    <td colSpan={6}>
                       <span className="stage-name">{stage.title}</span>
                       <span className="stage-count">{stageRows.length}</span>
                       <span className="stage-sub">{stage.sub}</span>
@@ -336,9 +325,6 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
         </>
       )}
 
-      {gateCountdown.length > 0 && (
-        <GateCountdownStrip items={gateCountdown} openTab={openTab} onTalkToYulia={onTalkToYulia} />
-      )}
     </div>
   );
 }
@@ -371,11 +357,10 @@ function PipelineDealRow({
         <td className="r amt">{deal.sde}</td>
         <td><span className="muted">{deal.league} · {deal.gateId} {deal.gateName}</span></td>
         <td className="r"><span className="fit"><span className="fitn">{deal.fit}</span><span className="ft"><span className="ff" style={{ width: `${deal.fit}%` }} /></span></span></td>
-        <td className="r muted">{deal.requiredModels}m · {deal.requiredCitations}c</td>
         <td className="r"><button type="button" className="reviewbtn" onClick={e => { e.stopPropagation(); onTalkToYulia?.(yuliaPromptFor(deal)); }}>Review</button></td>
       </tr>
       {flag && (
-        <tr><td colSpan={7} style={{ padding: 0 }}>
+        <tr><td colSpan={6} style={{ padding: 0 }}>
           <div className="rowflag">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" /></svg>
             <span>{flag}</span>
@@ -383,51 +368,6 @@ function PipelineDealRow({
         </td></tr>
       )}
     </Fragment>
-  );
-}
-
-function GateCountdownStrip({
-  items,
-  openTab,
-  onTalkToYulia,
-}: {
-  items: TodayGateCountdownItem[];
-  openTab: OpenTab;
-  onTalkToYulia?: (prompt: string) => void;
-}) {
-  return (
-    <div className="wksec">
-      <div className="pg-head" style={{ alignItems: "center" }}>
-        <div>
-          <div className="wksec-title" style={{ marginBottom: 2 }}>Gate countdown</div>
-          <p className="pg-sub" style={{ marginTop: 2 }}>Same operating read as Today — blockers, model needs, citations, and the next deal move.</p>
-        </div>
-        <div className="pg-actions">
-          <button className="wkbtn" type="button" onClick={() => onTalkToYulia?.("Show my pipeline gate countdown, including blockers, required models, required citations, and next action.")}>Ask Yulia</button>
-        </div>
-      </div>
-      <table className="wktable">
-        <thead><tr>
-          <th style={{ width: 64 }}>Gate</th>
-          <th>Deal</th>
-          <th>Next action</th>
-          <th className="r">Readiness</th>
-        </tr></thead>
-        <tbody>
-          {items.slice(0, 6).map(item => {
-            const nextCall = firstNextCall(item.definitive);
-            return (
-              <tr key={`${item.dealId}-${item.gateId}`} onClick={() => openTab({ kind: "deal", id: item.dealId, title: item.title })}>
-                <td><span className="statpill diligence"><span className="d" />{item.gateId}</span></td>
-                <td><div className="cellname"><span className="logo">{dealInitials(item.title)}</span><div><div className="nm">{item.title}</div><div className="sub">{item.gateName}</div></div></div></td>
-                <td><span className="muted">{item.nextAction}{nextCall ? ` · next call: ${nextCall.label}` : ""}</span></td>
-                <td className="r muted">{item.definitive ? `${shortReadiness(item.definitive.readinessLevel)} · ${item.definitive.missingCount} gaps` : item.blockers[0] || "—"}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
   );
 }
 
@@ -588,26 +528,6 @@ function inferLeague(d: HomeDeal): string {
   if (ebitda >= 1_000_000_00) return "L3";
   if (sde >= 300_000_00 || revenue >= 1_000_000_00) return "L2";
   return "L1";
-}
-
-function shortReadiness(level: string): string {
-  return level.match(/DRL\d+/)?.[0] || "DRL";
-}
-
-function firstNextCall(definitive?: TodayDefinitiveDealState): { label: string; reason: string } | null {
-  const call = definitive?.nextSuggestedCalls?.[0];
-  if (call?.label) return { label: call.label, reason: call.reason || "Continue the DealState loop." };
-  if (definitive?.nextSuggestedTool) {
-    return { label: labelFromSlug(definitive.nextSuggestedTool), reason: "Continue the DealState loop." };
-  }
-  return null;
-}
-
-function labelFromSlug(input: string): string {
-  return String(input || "next call")
-    .replace(/[-_]+/g, " ")
-    .replace(/\.+v\d+$/i, "")
-    .replace(/\b\w/g, char => char.toUpperCase());
 }
 
 function journeyFromHomeDeal(d: HomeDeal): string {
