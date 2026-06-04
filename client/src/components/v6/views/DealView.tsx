@@ -7,7 +7,6 @@ import { authHeaders, type User } from "../../../hooks/useAuth";
 import { useTodayOperatingBrief, type TodayModelRefreshItem } from "../../../hooks/useTodayOperatingBrief";
 import type { ModelPreference } from "../../../lib/modelPreference";
 import { openSavedModelExecutionAsRerun } from "../../../lib/modelRerunActions";
-import { findDeal, type MarketIntel } from "../../../lib/sampleDeals";
 import {
   fileDeliverableToDataRoom,
   generateDealDeliverable,
@@ -66,23 +65,6 @@ interface DealFileItem {
 }
 
 /* ─── Sample fallbacks (used when no numeric deal id is in scope) ─── */
-
-const SAMPLE_STATS: Stat[] = [
-  { k: "Revenue",   v: "$5.4M",  sub: "TTM" },
-  { k: "SDE",       v: "$1.80M", sub: "33% margin" },
-  { k: "Asking",    v: "$12.6M", sub: "7.0× SDE" },
-  { k: "EBITDA",    v: "$1.45M", sub: "Recast" },
-  { k: "Customers", v: "47",     sub: "Top 3 = 38%" },
-];
-
-const SAMPLE_LINKED: LinkedFile[] = [
-  { kind: "doc",      title: "LOI v3",          status: "draft", sub: "Last edited 3 days ago" },
-  { kind: "doc",      title: "QoE Lite report", status: "live",  sub: "Auto-updated last night" },
-  { kind: "analysis", title: "Recast P&L",      status: "live",  sub: "5 add-backs surfaced" },
-  { kind: "analysis", title: "Comps · 7 deals", status: "saved", sub: "Range: 5.8× — 7.2×" },
-  { kind: "analysis", title: "Buyer fit",       status: "live",  sub: "92 against your thesis" },
-  { kind: "doc",      title: "Memo v2",         status: "draft", sub: "Awaiting your read" },
-];
 
 const DEAL_FILES: DealFileItem[] = [
   {
@@ -351,11 +333,10 @@ export function V6DealView({
 
   // ─── Derive display data ──────────────────────────────────────────
   const real = data?.deal;
-  const sampleDeal = findDeal(id);
-  const stats: Stat[] = real ? buildStats(real) : SAMPLE_STATS;
+  const stats: Stat[] = real ? buildStats(real) : [];
   const linkedFiles: LinkedFile[] = linked && linked.length > 0
     ? linked.map(deliverableToLinkedFile)
-    : SAMPLE_LINKED;
+    : [];
 
   const heroSub = real
     ? [
@@ -369,21 +350,12 @@ export function V6DealView({
     ? `${real.journey_type.toUpperCase()} · ${real.league ?? "—"} · GATE ${real.current_gate}${real.status !== "active" ? ` · ${real.status.toUpperCase()}` : ""}`
     : "DEAL · UPDATED 12 MIN AGO";
 
-  const verdict = real ? deriveVerdict(real) : { kind: "pursue" as const, eyebrow: "VERDICT · PURSUE", text: "Recurring revenue, honest add-backs. The concentration reads as a moat, not a risk.", fit: 92 };
-  const yulia = real ? deriveYuliaRead(real) : null;
   const dealName = real?.business_name || title;
-  const intelligence = buildDealIntelligence({
-    dealName,
-    real,
-    sampleMarket: sampleDeal?.marketIntel,
-    sampleVerdictWhy: sampleDeal?.verdictWhy,
-    dealBrief,
-    verdict,
-  });
+  const intelligence = buildDealIntelligence({ dealName, real, dealBrief });
   const portfolioName = samplePortfolioForDeal(id, title);
   const fileItems = numericId !== null && (linked || dataRoom)
     ? buildDealFilesFromReal(linked ?? [], dataRoom, dealName)
-    : DEAL_FILES;
+    : [];
   const modelRefreshNeeds = (operating.brief?.modelRefreshNeeds ?? [])
     .filter(item => item.dealId === String(numericId));
   const primaryDeliverable = primaryDeliverableForJourney(real?.journey_type);
@@ -774,30 +746,6 @@ export function V6DealView({
         </div>
       </V6Section>
 
-      {yulia && (
-        <V6Section eyebrow="YULIA'S READ" title={yulia.title}>
-          <div className="wkcard" style={{ padding: "24px 28px" }}>
-            <div style={D.readBody}>
-              {yulia.paragraphs.map((p, i) => (
-                <p key={i} style={{ margin: i === yulia.paragraphs.length - 1 ? 0 : "0 0 14px" }}>{p}</p>
-              ))}
-            </div>
-          </div>
-        </V6Section>
-      )}
-
-      {!yulia && (
-        <V6Section eyebrow="YULIA'S READ" title="Yulia's read">
-          <div className="wkcard" style={{ padding: "24px 28px", display: "flex", flexDirection: "column", gap: 12, alignItems: "flex-start" }}>
-            <p style={{ margin: 0, color: "var(--ink-2)", fontSize: ".9rem", lineHeight: 1.5 }}>
-              Yulia hasn&rsquo;t written a read on this deal yet. Ask her to analyze the financials, surface the risks, and lay out the next move.
-            </p>
-            <button className="wkbtn primary" type="button" onClick={() => onTalkToYulia?.(`Give me your read on ${real?.business_name || title}: what the financials say, the key risks, and the next move.`)}>
-              Ask Yulia for her read
-            </button>
-          </div>
-        </V6Section>
-      )}
     </div>
   );
 }
@@ -1102,122 +1050,46 @@ function DealFileRow({ file, last, onClick, relianceWarning }: {
 
 /* ─── Helpers ────────────────────────────────────────────────────── */
 
+// Renders ONLY Yulia's deal brief (substrate) + real deal facts. No
+// fabrication: when Yulia hasn't read the deal, fields say so honestly and
+// route to "ask Yulia" rather than inventing a market read / verdict / tax copy.
 function buildDealIntelligence({
   dealName,
   real,
-  sampleMarket,
-  sampleVerdictWhy,
   dealBrief,
-  verdict,
 }: {
   dealName: string;
   real: DealRow | undefined;
-  sampleMarket?: MarketIntel;
-  sampleVerdictWhy?: string;
   dealBrief: DealBrief | null;
-  verdict: { kind: "pursue" | "watch" | "pass"; eyebrow: string; text: string; fit: number };
 }) {
-  const marketHeadline =
-    dealBrief?.marketRead?.headline ||
-    sampleMarket?.blurb ||
-    `${dealName} needs a deal-specific market read tied to industry, geography, buyer universe, financing climate, and current diligence gaps.`;
-
-  const marketTiles = sampleMarket
-    ? [
-        { label: "AVG MULTIPLE", value: sampleMarket.avgMultiple },
-        { label: "AVG DEAL SIZE", value: sampleMarket.avgDealSize },
-        { label: "ACTIVE BUYERS", value: sampleMarket.activeBuyers },
-        { label: "MARKET TREND", value: sampleMarket.yoyActivity },
-      ]
-    : [
-        { label: "INDUSTRY", value: real?.industry || "Research needed" },
-        { label: "GEOGRAPHY", value: real?.location || "Research needed" },
-        { label: "REVENUE", value: fmtCents(real?.revenue ?? null) },
-        { label: "EARNINGS", value: fmtCents(real?.ebitda ?? real?.sde ?? null) },
-      ];
-
-  const hasYuliaDealRead = !!dealBrief;
-  const marketBullets = dealBrief?.marketRead?.bullets?.length
-    ? dealBrief.marketRead.bullets.slice(0, 3)
-    : sampleMarket
-      ? [
-          sampleMarket.blurb,
-          `Buyer activity: ${sampleMarket.activeBuyers}.`,
-          `Transaction activity: ${sampleMarket.yoyActivity}; typical pricing ${sampleMarket.avgMultiple}.`,
-        ]
-      : [
-          "Yulia has not produced a sourced deal read yet.",
-          "Generate the market intelligence canvas before relying on this deal page for next moves.",
-          "Attach source files so Yulia can ground the next read in evidence.",
-        ];
-
-  const nextMoves = dealBrief?.nextMoves?.length
-    ? dealBrief.nextMoves.slice(0, 3).map(move => ({
-        title: move.title || "Open next move",
-        why: move.why || "Yulia has this queued as the next action.",
-        prompt: move.prompt,
-        actionId: isSurfaceActionId(move.actionId) ? move.actionId : undefined,
-      }))
-    : !real || sampleMarket
-    ? [
-        {
-          title: "Run the deeper market read",
-          why: "Comps, buyer appetite, financing climate, and source gaps belong in the deal file.",
-          prompt: `On ${dealName}: run the deeper market intelligence read.`,
-          actionId: "run_market_intelligence" as const,
-        },
-        {
-          title: "Map tax and legal implications",
-          why: "Structure choices need issue spotting before documents move.",
-          prompt: `On ${dealName}: map tax, legal, and structure implications. Flag CPA and counsel sign-off points.`,
-          actionId: "run_tax_legal_structure" as const,
-        },
-        {
-          title: "Model the decision scenarios",
-          why: "Price, structure, downside case, and sign-off points need to be visible before the next move.",
-          prompt: `On ${dealName}: open the interactive sensitivity model and show the scenarios I should review.`,
-          actionId: "run_sensitivity_analysis" as const,
-        },
-      ]
-    : [
-        {
-          title: "Generate Yulia's deal read",
-          why: "Next moves should come from Yulia's sourced deal brief, not static page copy.",
-          prompt: `On ${dealName}: generate the sourced deal read, then return next action options with action IDs.`,
-          actionId: "run_market_intelligence" as const,
-        },
-        {
-          title: "Run QoE evidence check",
-          why: "Yulia needs to separate supported earnings quality from missing source material.",
-          prompt: `On ${dealName}: run a QoE evidence check and tell me which source materials are missing.`,
-          actionId: "run_qoe_analysis" as const,
-        },
-        {
-          title: "Ask Yulia what is missing",
-          why: "If the deal brief is unavailable, Yulia should explain the missing inputs before surfacing a move.",
-          prompt: `On ${dealName}: what evidence do you need before you can surface next action options?`,
-          actionId: "ask_yulia" as const,
-        },
-      ];
-
+  const hasRead = !!dealBrief;
   return {
-    marketEyebrow: sampleMarket?.naics
-      ? `${sampleMarket.industry.toUpperCase()} · NAICS ${sampleMarket.naics}`
-      : (real?.industry || "DEAL MARKET").toUpperCase(),
-    marketHeadline,
-    marketTiles,
-    marketBullets,
-    researchNeeded: dealBrief?.marketRead?.researchNeeded ?? (!dealBrief?.marketRead && !sampleMarket ? ["Generate a current market intelligence read for this deal."] : []),
-    reviewLabel: dealBrief?.verdict?.label || verdict.eyebrow.replace("VERDICT · ", ""),
-    reviewScore: dealBrief?.verdict?.score ?? verdict.fit,
-    reviewText: dealBrief?.verdict?.text || sampleVerdictWhy || (hasYuliaDealRead ? verdict.text : "Yulia needs a refreshed deal brief before the page should show deal-specific next moves."),
-    tax: dealBrief?.taxLegal?.tax || (hasYuliaDealRead || sampleMarket
-      ? "Spot purchase-price allocation, rollover/earnout/seller-note timing, entity form, state tax, and working-cap effects before signing."
-      : "Run Yulia's tax/legal structure read before treating this as deal-specific tax or legal issue spotting."),
-    legal: dealBrief?.taxLegal?.legal || (hasYuliaDealRead || sampleMarket
-      ? "Spot diligence scope, data-room permissions, third-party approvals, draft/review/execute status, and counsel sign-off before external sharing."
-      : "Run Yulia's legal issue matrix before treating this as deal-specific legal issue spotting."),
-    nextMoves,
+    hasRead,
+    marketEyebrow: (real?.industry || "Deal market").toUpperCase(),
+    marketHeadline: dealBrief?.marketRead?.headline || `Yulia hasn't built a market read for ${dealName} yet.`,
+    // Facts from the deal record (not judgment).
+    marketTiles: [
+      { label: "INDUSTRY", value: real?.industry || "—" },
+      { label: "GEOGRAPHY", value: real?.location || "—" },
+      { label: "REVENUE", value: fmtCents(real?.revenue ?? null) },
+      { label: "EARNINGS", value: fmtCents(real?.ebitda ?? real?.sde ?? null) },
+    ],
+    marketBullets: dealBrief?.marketRead?.bullets?.filter(Boolean).slice(0, 3) ?? [],
+    researchNeeded: dealBrief?.marketRead?.researchNeeded?.filter(Boolean).slice(0, 3) ?? [],
+    reviewLabel: dealBrief?.verdict?.label || (hasRead ? "Yulia's review" : "Review pending"),
+    reviewScore: dealBrief?.verdict?.score,
+    reviewText: dealBrief?.verdict?.text || "Yulia is analyzing this deal — her review appears once she's read it.",
+    tax: dealBrief?.taxLegal?.tax || "Ask Yulia to run the tax & structure read for this deal.",
+    legal: dealBrief?.taxLegal?.legal || "Ask Yulia to run the legal issue read for this deal.",
+    nextMoves: (dealBrief?.nextMoves?.length
+      ? dealBrief.nextMoves.slice(0, 3)
+      : [{ title: "Ask Yulia for the next moves", why: "Yulia surfaces the next actions once she's read the deal.", prompt: `On ${dealName}: read this deal and tell me the next moves.`, actionId: "ask_yulia" }]
+    ).map(move => ({
+      title: move.title || "Open next move",
+      why: move.why || "",
+      prompt: move.prompt,
+      actionId: isSurfaceActionId(move.actionId) ? move.actionId : undefined,
+    })),
   };
 }
 
@@ -1621,7 +1493,7 @@ function buildDealFilesFromReal(
     .map(d => deliverableToFileItem(d as DeliverableRow, dealTitle));
 
   const merged = [...privateFiles, ...unfiledFiles, ...roomFiles];
-  return merged.length > 0 ? merged : DEAL_FILES;
+  return merged;
 }
 
 function deliverableToFileItem(d: DeliverableRow, dealTitle: string): DealFileItem {
@@ -1810,36 +1682,6 @@ function buildStats(d: DealRow): Stat[] {
     { k: "EBITDA",  v: fmtCents(d.ebitda),        sub: multiple ? `${multiple.toFixed(1)}× target` : "Recast" },
     { k: "Gate",    v: d.current_gate,            sub: d.league ?? "—" },
   ];
-}
-
-function deriveVerdict(d: DealRow): { kind: "pursue" | "watch" | "pass"; eyebrow: string; text: string; fit: number } {
-  // Late-stage active gate → pursue. Stalled → watch. Closed → reference.
-  // The note from financials.notes (if any) becomes the verdict text.
-  const note = (d.financials?.notes as string | undefined) ||
-    (d.status === "closed" ? "Closed reference deal — useful for comps and pattern matching." :
-      d.status === "stalled" ? "Stalled mid-process. Yulia flags a status check before further work." :
-      "Active in your pipeline. Open files Yulia has produced for the latest read.");
-  const lateActive = /[345]$/.test(d.current_gate) && d.status === "active";
-  const stalled = d.status === "stalled";
-  const kind: "pursue" | "watch" | "pass" = lateActive ? "pursue" : stalled ? "pass" : "watch";
-  const eyebrow = `VERDICT · ${kind.toUpperCase()}`;
-  // Fit: late active → 80-92, watch → 65-79, stalled → 40-60.
-  const fit = kind === "pursue" ? 88 : kind === "watch" ? 76 : 52;
-  return { kind, eyebrow, text: note, fit };
-}
-
-function deriveYuliaRead(d: DealRow): { title: string; paragraphs: string[] } | null {
-  const note = d.financials?.notes as string | undefined;
-  if (!note) return null;
-  // Use the seeded note as the first paragraph, append a quantitative summary.
-  const summary = [
-    d.revenue && d.sde ? `${fmtCents(d.revenue)} revenue at ${fmtCents(d.sde)} SDE` : null,
-    d.asking_price ? `asking ${fmtCents(d.asking_price)}` : null,
-    d.financials?.multiple ? `roughly ${(d.financials.multiple as number).toFixed(1)}× SDE` : null,
-  ].filter(Boolean).join(" · ");
-  const paragraphs = [note];
-  if (summary) paragraphs.push(`Headline numbers: ${summary}.`);
-  return { title: d.status === "closed" ? "Why this is a useful reference" : "Why open this", paragraphs };
 }
 
 function deliverableToLinkedFile(d: DeliverableRow): LinkedFile {
