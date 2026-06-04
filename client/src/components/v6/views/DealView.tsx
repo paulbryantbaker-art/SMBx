@@ -776,19 +776,14 @@ export function V6DealView({
       )}
 
       {!yulia && (
-        <V6Section eyebrow="YULIA'S READ" title="Why pursue">
-          <div className="wkcard" style={{ padding: "24px 28px" }}>
-            <div style={D.readBody}>
-              <p style={{ margin: "0 0 14px" }}>
-                The recurring revenue holds up. <strong style={{ color: "var(--ink)" }}>78% of revenue</strong> comes from monthly service contracts averaging 4.3 years tenure. Add-backs are unusually honest &mdash; owner&rsquo;s salary, family member on payroll, and a one-time legal expense from a 2023 dispute. None of the AI-flag stuff (boats, &ldquo;consulting&rdquo;, phantom mileage).
-              </p>
-              <p style={{ margin: "0 0 14px" }}>
-                The customer concentration looks like a problem on paper. <strong style={{ color: "var(--ink)" }}>The top three customers are 38% of revenue.</strong> But two of them are decade-long relationships embedded in their operations &mdash; switching costs are real, not hypothetical. Read it as a moat.
-              </p>
-              <p style={{ margin: 0 }}>
-                At <strong style={{ color: "var(--ink)" }}>$12.6M asking · 7.0× recast SDE</strong>, you&rsquo;re paying market for a clean operator. SBA-clears at 78% LTV with $200k working capital reserve. I&rsquo;d start at 6.5× and meet at 6.8×.
-              </p>
-            </div>
+        <V6Section eyebrow="YULIA'S READ" title="Yulia's read">
+          <div className="wkcard" style={{ padding: "24px 28px", display: "flex", flexDirection: "column", gap: 12, alignItems: "flex-start" }}>
+            <p style={{ margin: 0, color: "var(--ink-2)", fontSize: ".9rem", lineHeight: 1.5 }}>
+              Yulia hasn&rsquo;t written a read on this deal yet. Ask her to analyze the financials, surface the risks, and lay out the next move.
+            </p>
+            <button className="wkbtn primary" type="button" onClick={() => onTalkToYulia?.(`Give me your read on ${real?.business_name || title}: what the financials say, the key risks, and the next move.`)}>
+              Ask Yulia for her read
+            </button>
           </div>
         </V6Section>
       )}
