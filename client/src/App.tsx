@@ -278,6 +278,7 @@ export default function App() {
               onRegister={handleRegisterSuccess}
               onLogin={handleLoginSuccess}
               onGoogleLogin={handleGoogleLogin}
+              googleReady={googleReady}
               onNavigateLogin={() => navigate('/login')}
             />
           )}
