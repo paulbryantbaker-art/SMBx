@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { V6Section } from "../Section";
 import { V6Icon } from "../icons";
+import { DealJourneyFlow } from "../shared/DealJourneyFlow";
 import { V6DocStatus, type DocStatusKind } from "../modes/cards";
 import type { FileScope, OpenTab, TabKind } from "../types";
 import { authHeaders, type User } from "../../../hooks/useAuth";
@@ -604,24 +605,15 @@ export function V6DealView({
         <div className="wknote" style={D.actionBanner}>{actionNote}</div>
       )}
 
-      {/* Verdict banner */}
-      <section style={{ marginBottom: 32 }}>
-        <div className="wkcard" style={D.verdict}>
-          <div style={D.verdictMark} aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-              <path d="M5 11l4 4 8-9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="mono" style={D.verdictEyebrow}>{verdict.eyebrow}</div>
-            <div style={D.verdictText}>{verdict.text}</div>
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <div style={D.fitNumber}>{verdict.fit}</div>
-            <div className="mono" style={D.fitLabel}>FIT</div>
-          </div>
-        </div>
-      </section>
+      {/* Where this deal stands — the methodology flow + current position. This
+          leads the page: the journey's stages in plain English, what's done,
+          where we are, and what the current stage needs to advance. */}
+      <DealJourneyFlow
+        journeyType={(real as any)?.journey_type}
+        currentGate={(real as any)?.current_gate}
+        league={(real as any)?.league}
+        onAsk={onTalkToYulia}
+      />
 
       {/* Stats row */}
       <section style={{ marginBottom: 32 }}>
