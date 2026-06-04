@@ -211,6 +211,9 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const operatingBrief = useSampleData ? null : todayOperating.brief;
   const modelRefreshNeeds = operatingBrief?.modelRefreshNeeds.filter(item => !rerunOpenedIds.has(item.id)) ?? [];
   const waitingForYuliaRead = !useSampleData && !liveBrief;
+  // True while Yulia is generating/refreshing the live read — render a skeleton
+  // instead of scaffold/placeholder content, then populate when it resolves.
+  const isUpdating = waitingForYuliaRead || (!useSampleData && todayOperating.loading);
   const operatingDeals = operatingBrief?.dealPulse ?? [];
   const operatingDealMap = useMemo(
     () => new Map(operatingDeals.map(item => [item.dealId, item])),
@@ -626,6 +629,14 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
             <div style={{ fontSize: "1.15rem", fontWeight: 700, letterSpacing: "-0.03em", color: "var(--ink)", lineHeight: 1.1 }}>Portfolio intelligence</div>
           </div>
 
+          {isUpdating ? (
+            <>
+              <div className="wk-skel" style={{ height: 64 }} />
+              <div className="wk-skel" style={{ height: 52 }} />
+              <div className="wk-skel" style={{ height: 52 }} />
+              <div className="wk-skel-label"><span className="wk-skel-dot" />Yulia is updating this read…</div>
+            </>
+          ) : (<>
           {/* Intel lead */}
           <button
             type="button"
@@ -665,6 +676,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
               </div>
             </button>
           ))}
+          </>)}
         </div>
       </div>
 
