@@ -273,6 +273,12 @@ function Streaming({ text, tool }: { text: string; tool: string | null }) {
             <span style={{ opacity: 0.5 }}>▍</span>
           </span>
         )}
+        {!tool && !text && (
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 7, color: "var(--mb-ink-2)" }}>
+            <span className="pulse-dot" style={{ color: "var(--mb-accent-ink)" }} aria-hidden="true" />
+            Yulia is thinking…
+          </span>
+        )}
       </div>
     </div>
   );

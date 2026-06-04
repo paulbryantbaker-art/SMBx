@@ -24,7 +24,7 @@ export function YuliaSkeleton({
       {Array.from({ length: rows }).map((_, i) => (
         <div
           key={i}
-          style={{ padding: "13px 14px", border: "1px solid var(--line)", borderRadius: 10, background: "var(--surface)" }}
+          style={{ padding: "13px 14px", border: "1px solid rgba(132,132,144,0.18)", borderRadius: 10 }}
         >
           <div className="wk-skel" style={{ height: 11, width: i === 0 ? "58%" : "44%", borderRadius: 6 }} />
           <div className="wk-skel" style={{ height: 9, width: "92%", marginTop: 11, borderRadius: 6 }} />
