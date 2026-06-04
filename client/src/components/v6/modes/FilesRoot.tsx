@@ -5,6 +5,7 @@ import type { User } from "../../../hooks/useAuth";
 import { useTodayOperatingBrief, type TodayFileReviewItem } from "../../../hooks/useTodayOperatingBrief";
 import { useV6WorkspaceData, type WorkspaceDeal, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
 import { DefinitiveSurfacePanel } from "../shared/DefinitiveSurfacePanel";
+import { YuliaSkeleton } from "../shared/YuliaSkeleton";
 
 interface FilesRootProps {
   openTab: OpenTab;
@@ -333,7 +334,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
             </div>
             <div className="wkcard" style={{ padding: 0, overflow: "hidden" }}>
               {workspace.loading && (
-                <div className="muted" style={{ padding: "14px 18px", letterSpacing: ".08em" }}>LOADING REAL FILES…</div>
+                <div style={{ padding: 14 }}><YuliaSkeleton rows={3} label="Loading files…" /></div>
               )}
               {workspace.error && (
                 <div style={{ margin: 12, padding: "9px 11px", borderRadius: 10, background: "#FBE7DD", color: "#B0461F", fontSize: 12 }}>
@@ -451,7 +452,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
             </div>
             <div className="wkcard" style={{ padding: 0, overflow: "hidden" }}>
               {operating.loading && (
-                <div className="muted" style={{ padding: "14px 18px", letterSpacing: ".08em" }}>READING TODAY QUEUE…</div>
+                <div style={{ padding: 14 }}><YuliaSkeleton rows={2} label="Yulia is reading the queue…" /></div>
               )}
               {operating.error && (
                 <div style={{ margin: 12, padding: "9px 11px", borderRadius: 10, background: "#FBE7DD", color: "#B0461F", fontSize: 12 }}>

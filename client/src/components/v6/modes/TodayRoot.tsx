@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { authHeaders, type User } from "../../../hooks/useAuth";
 import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
 import { useTodayOperatingBrief, type TodayDealPulseItem, type TodayDefinitiveDealState, type TodayFirmMemorySnapshot, type TodayGateCountdownItem, type TodayModelRefreshItem, type TodayOperatingBrief, type TodayStudioRefreshItem } from "../../../hooks/useTodayOperatingBrief";
+import { YuliaSkeleton } from "../shared/YuliaSkeleton";
 import { useV6WorkspaceData, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
 import { openSavedModelExecutionAsRerun } from "../../../lib/modelRerunActions";
 import { executeSurfaceAction, type ActionDeal } from "../../../lib/v6ActionContracts";
@@ -630,16 +631,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           </div>
 
           {isUpdating ? (
-            <>
-              {[0, 1, 2].map(i => (
-                <div key={i} style={{ padding: "13px 14px", border: "1px solid var(--line)", borderRadius: 10, background: "var(--surface)" }}>
-                  <div className="wk-skel" style={{ height: 11, width: i === 0 ? "58%" : "44%", borderRadius: 6 }} />
-                  <div className="wk-skel" style={{ height: 9, width: "92%", marginTop: 11, borderRadius: 6 }} />
-                  <div className="wk-skel" style={{ height: 9, width: i === 0 ? "74%" : "62%", marginTop: 7, borderRadius: 6 }} />
-                </div>
-              ))}
-              <div className="wk-skel-label"><span className="wk-skel-dot" />Yulia is updating this read…</div>
-            </>
+            <YuliaSkeleton rows={3} label="Yulia is updating this read…" />
           ) : (<>
           {/* Intel lead */}
           <button
@@ -696,6 +688,13 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
             <button className="kebab" type="button" aria-label="More" onClick={() => ask("Show my full priority queue with sources.")}>⋯</button>
           </div>
         </div>
+        {isUpdating ? (
+          <div className="wkgrid g3" style={{ gap: 14 }}>
+            <YuliaSkeleton rows={1} label={null} />
+            <YuliaSkeleton rows={1} label={null} />
+            <YuliaSkeleton rows={1} label={null} />
+          </div>
+        ) : (
         <div className="wkgrid g3" style={{ gap: 14 }}>
           {priorities.map((item, index) => (
             <button key={item.title} className="wkcard tap" style={{ all: "unset", cursor: "pointer", display: "block", padding: "18px 20px", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 14, boxSizing: "border-box", width: "100%", transition: "border-color .18s, box-shadow .18s, transform .18s" }} onClick={item.action} type="button">
@@ -710,6 +709,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
             </button>
           ))}
         </div>
+        )}
       </div>
 
       {/* ── DEFINITIVE surface panel ── */}
