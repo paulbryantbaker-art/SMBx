@@ -217,13 +217,14 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
       ) : hasRealDeals ? (
         <>
           {PIPELINE_STAGES.map(stage => {
-            const stageRows = (userAll ?? []).filter(d => d.stageId === stage.id);
-            if (stageRows.length === 0) return null;
+            const stageAll = (userAll ?? []).filter(d => d.stageId === stage.id);
+            if (stageAll.length === 0) return null;
+            const stageRows = stageAll.slice(0, 20); // preview cap — chevron opens the full list
             return (
               <div key={stage.id} className="mb-as-card" style={{ margin: "20px 16px 0", padding: "20px 0 6px" }}>
                 <SectionHeader
                   title={stage.title}
-                  subtitle={`${stageRows.length} ${stageRows.length === 1 ? "deal" : "deals"} · ${stage.sub}`}
+                  subtitle={`${stageAll.length} ${stageAll.length === 1 ? "deal" : "deals"} · ${stage.sub}`}
                   onSeeAll={onOpenDealsList}
                   seeAllAria="See all deals"
                   padding="0 22px 12px"

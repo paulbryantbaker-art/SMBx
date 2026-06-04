@@ -249,7 +249,11 @@ function defaultMobileNextMoves(dealTitle: string, isSampleDeal: boolean): Mobil
 export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, onRunAnalysis, onOpenTeam }: DetailProps) {
   const { isWatched, toggle } = useWatchlist();
   const watched = isWatched(dealId);
-  const numericId = /^\d+$/.test(dealId) ? parseInt(dealId, 10) : null;
+  // Mobile rows pass "123" (full list) or "deal-123" (Today/Watching/Pipeline);
+  // strip the prefix so a real deal always resolves by numeric id. Non-numeric
+  // sample ids (e.g. "deal-bigfake") still fall through to findDeal below.
+  const cleanDealId = dealId.replace(/^deal-/, "");
+  const numericId = /^\d+$/.test(cleanDealId) ? parseInt(cleanDealId, 10) : null;
   const [dealBrief, setDealBrief] = useState<MobileDealBrief | null>(null);
   const [realDetail, setRealDetail] = useState<MobileDealDetail | null>(null);
   const [briefLoading, setBriefLoading] = useState(false);

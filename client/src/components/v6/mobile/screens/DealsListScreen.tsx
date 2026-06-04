@@ -80,6 +80,10 @@ export function MobileDealsListScreen({ onBack, onOpenDeal, user }: Props) {
     });
   }, [all, query, journey]);
 
+  // Cap the rendered list at 100 for mobile performance; search + the journey
+  // chips narrow within the full set. (Stress-tested with hundreds of deals.)
+  const shown = filtered.slice(0, 100);
+
   const chip = (active: boolean): CSSProperties => ({
     flexShrink: 0,
     padding: "6px 14px", borderRadius: 999, cursor: "pointer",
@@ -101,7 +105,9 @@ export function MobileDealsListScreen({ onBack, onOpenDeal, user }: Props) {
         <p style={D.heroSub}>
           {workspace.loading
             ? "Loading deals…"
-            : `${filtered.length}${filtered.length !== all.length ? ` of ${all.length}` : ""} ${all.length === 1 ? "deal" : "deals"}${isSample ? " · sample" : ""}`}
+            : filtered.length > shown.length
+              ? `Showing ${shown.length} of ${filtered.length} deals${isSample ? " · sample" : ""}`
+              : `${filtered.length}${filtered.length !== all.length ? ` of ${all.length}` : ""} ${all.length === 1 ? "deal" : "deals"}${isSample ? " · sample" : ""}`}
         </p>
       </div>
 
@@ -127,11 +133,11 @@ export function MobileDealsListScreen({ onBack, onOpenDeal, user }: Props) {
         </div>
       ) : (
         <div className="mb-as-card" style={{ margin: "4px 16px 0", padding: "4px 0" }}>
-          {filtered.map((d, i) => (
+          {shown.map((d, i) => (
             <DealRow
               key={d.id}
               deal={d}
-              last={i === filtered.length - 1}
+              last={i === shown.length - 1}
               onTap={() => onOpenDeal(String(d.id), d.business_name || `Deal #${d.id}`)}
             />
           ))}
