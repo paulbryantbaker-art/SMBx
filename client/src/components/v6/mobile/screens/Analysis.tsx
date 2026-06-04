@@ -59,12 +59,37 @@ interface MobileAnalysisScreenProps {
 /* Generic read-only renderers — show a model's values + a comparison grid on
    mobile when the interactive canvas (sliders) can't render here. */
 function prettyKey(k: string): string {
-  return k.replace(/[_-]+/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+  return k
+    .replace(/[_-]+/g, " ")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")            // split camelCase
+    .replace(/\b\w/g, c => c.toUpperCase())
+    .replace(/\b(Ebitda|Sde|Nwc|Dcf|Irr|Moic|Lbo|Sba|Dscr|Roi|Wacc|Capex|Ltv|Noi)\b/g, m => m.toUpperCase())
+    .trim();
 }
-function formatVal(v: unknown): string {
-  if (typeof v === "number") return Number.isFinite(v) ? v.toLocaleString(undefined, { maximumFractionDigits: 2 }) : String(v);
+function formatMoneyCents(cents: number): string {
+  const d = cents / 100;
+  const sign = d < 0 ? "-" : "";
+  const abs = Math.abs(d);
+  if (abs >= 1_000_000) return `${sign}$${(abs / 1_000_000).toFixed(2).replace(/\.?0+$/, "")}M`;
+  if (abs >= 1_000) return `${sign}$${Math.round(abs / 1_000)}K`;
+  return `${sign}$${Math.round(abs).toLocaleString()}`;
+}
+// Key-aware: money is stored in CENTS, rates/margins as decimals (0.11 → 11%),
+// multiples as ratios (3.4 → 3.4×). The key name is the only unit signal.
+function formatModelValue(key: string, v: unknown): string {
   if (typeof v === "boolean") return v ? "Yes" : "No";
-  return String(v);
+  if (typeof v === "string") return v;
+  if (typeof v !== "number" || !Number.isFinite(v)) return String(v);
+  const k = key.toLowerCase();
+  if (/(rate|margin|pct|percent|growth|yield|irr|wacc|discount)/.test(k) && Math.abs(v) <= 10) {
+    return `${(v * 100).toFixed(1).replace(/\.0$/, "")}%`;
+  }
+  if (/multiple|multiplier/.test(k)) return `${v.toFixed(1).replace(/\.0$/, "")}×`;
+  if (/years|periods|months|count|\bnum/.test(k)) return String(Math.round(v));
+  if (/(revenue|ebitda|sde|value|price|cost|debt|equity|cash|capex|nwc|working|amount|payment|proceeds|\bfee|salary|sales|income|profit|valuation|purchase|enterprise|loan|principal|asset)/.test(k)) {
+    return formatMoneyCents(v);
+  }
+  return v.toLocaleString(undefined, { maximumFractionDigits: 2 });
 }
 function readableEntries(obj: Record<string, any> | undefined | null): [string, unknown][] {
   if (!obj || typeof obj !== "object") return [];
@@ -84,7 +109,7 @@ function ReadonlyValues({ entries }: { entries: [string, unknown][] }) {
       {entries.slice(0, 24).map(([k, v]) => (
         <div key={k} style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "6px 0", borderBottom: "0.5px solid var(--mb-line-2)" }}>
           <span style={{ fontSize: 13, color: "var(--mb-ink-3)" }}>{prettyKey(k)}</span>
-          <span style={{ fontSize: 13.5, fontWeight: 600, color: "var(--mb-ink)", textAlign: "right" }}>{formatVal(v)}</span>
+          <span style={{ fontSize: 13.5, fontWeight: 600, color: "var(--mb-ink)", textAlign: "right" }}>{formatModelValue(k, v)}</span>
         </div>
       ))}
     </div>
@@ -1061,11 +1086,11 @@ const S: Record<string, CSSProperties> = {
   title: {
     position: "relative",
     zIndex: 1,
-    margin: "12px 0 0",
+    margin: "10px 0 0",
     fontFamily: "var(--mb-font-display)",
-    fontSize: 42,
-    lineHeight: 0.96,
-    letterSpacing: 0,
+    fontSize: 28,
+    lineHeight: 1.1,
+    letterSpacing: "-0.01em",
     color: "#FFFFFF",
   },
   copy: {
@@ -1463,13 +1488,12 @@ const S: Record<string, CSSProperties> = {
   },
   emptyCard: {
     borderRadius: 28,
-    padding: 24,
+    padding: 22,
     background: "#172135",
     color: "#FFFFFF",
-    minHeight: 360,
     display: "flex",
     flexDirection: "column",
-    justifyContent: "flex-end",
+    justifyContent: "flex-start",
   },
   note: {
     marginTop: 12,
