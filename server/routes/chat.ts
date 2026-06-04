@@ -1127,16 +1127,33 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
     // Load context
     const [user] = await sql`SELECT id, email, display_name, league FROM users WHERE id = ${userId} LIMIT 1`;
 
-    // Load deal if linked
+    // Resolve the deal this message is about. Priority:
+    //   1. The deal the user has OPEN on the canvas (surfaceContext.dealId) —
+    //      what they're actively working on. The conversation follows it, so
+    //      "run a DCF" targets the deal on screen, not a guess.
+    //   2. The conversation's already-linked deal.
+    //   3. Last resort: most-recently-updated active deal (only when nothing is
+    //      open and the conversation isn't general Q&A). That guess is wrong for
+    //      users with many deals, so the open-deal signal takes precedence.
     let deal: any = null;
-    if (conv.deal_id) {
+
+    const rawOpenDealId = surfaceContext?.dealId != null ? String(surfaceContext.dealId).replace(/^deal-/, '') : '';
+    const openDealId = /^\d+$/.test(rawOpenDealId) ? parseInt(rawOpenDealId, 10) : null;
+    if (openDealId) {
+      const [d] = await sql`SELECT * FROM deals WHERE id = ${openDealId} AND user_id = ${userId} LIMIT 1`;
+      if (d) {
+        deal = d;
+        if (!conv.is_general && Number(conv.deal_id) !== d.id) {
+          await sql`UPDATE conversations SET deal_id = ${d.id} WHERE id = ${convId}`;
+        }
+      }
+    }
+
+    if (!deal && conv.deal_id) {
       const [d] = await sql`SELECT * FROM deals WHERE id = ${conv.deal_id} AND user_id = ${userId} LIMIT 1`;
       deal = d || null;
     }
 
-    // Auto-link to active deal — but NOT if conversation is marked as general Q&A.
-    // General conversations stay unlinked so they group correctly in the sidebar.
-    // Yulia can still create a deal via create_deal tool if the conversation evolves.
     if (!deal && !conv.is_general) {
       const [activeDeal] = await sql`
         SELECT * FROM deals WHERE user_id = ${userId} AND status = 'active'
@@ -1144,7 +1161,6 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
       `;
       if (activeDeal) {
         deal = activeDeal;
-        // Link conversation to deal
         await sql`UPDATE conversations SET deal_id = ${activeDeal.id} WHERE id = ${convId}`;
       }
     }
