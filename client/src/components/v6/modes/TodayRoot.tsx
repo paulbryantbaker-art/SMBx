@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { authHeaders, type User } from "../../../hooks/useAuth";
 import { useHomeDeals, type HomeDeal } from "../../../hooks/useHomeDeals";
 import { useNextActions } from "../../../hooks/useNextActions";
+import { usePortfolioSummary } from "../../../hooks/usePortfolioSummary";
 import { useNotifications, notifTimeAgo } from "../../../hooks/useNotifications";
 import { useTodayOperatingBrief, type TodayDealPulseItem, type TodayDefinitiveDealState } from "../../../hooks/useTodayOperatingBrief";
 import { YuliaSkeleton } from "../shared/YuliaSkeleton";
@@ -92,6 +93,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const home = useHomeDeals(user);
   const workspace = useV6WorkspaceData(user);
   const nextActions = useNextActions(user, workspace.canFetch);
+  const portfolioSummary = usePortfolioSummary(user, workspace.canFetch);
   const notif = useNotifications(!!user && workspace.canFetch);
   const [portfolioBrief, setPortfolioBrief] = useState<PortfolioBrief | null>(null);
   const todayOperating = useTodayOperatingBrief(user, workspace.canFetch);
@@ -146,10 +148,13 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const firstName = ((user as any)?.name || (user as any)?.displayName || "").toString().trim().split(/\s+/)[0] || "";
 
   // Real portfolio rollups (from /api/deals, always populated when authed)
-  // Sum active-deal value (cents). Numeric columns arrive as STRINGS from
-  // postgres-js, so coerce per-deal — a raw `+` would string-concatenate the
-  // values into a giant string that overflows to Infinity ($InfinityB).
-  const pipelineValue = useMemo(() => {
+  // Pipeline value tile = server-computed weighted EV (Σ deal value ×
+  // close-probability), the consistent probability-weighted figure. The
+  // client-side raw asking-value sum below is only a fallback for the moment
+  // before /portfolio/summary responds (or if it errors). Numeric columns
+  // arrive as STRINGS from postgres-js, so coerce per-deal — a raw `+` would
+  // string-concatenate into a giant string that overflows to Infinity.
+  const rawPipelineValue = useMemo(() => {
     let sum = 0;
     for (const d of home.all) {
       if (d.status !== "active") continue;
@@ -158,6 +163,9 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
     }
     return sum;
   }, [home.all]);
+  const weightedEvCents = portfolioSummary.summary?.weightedEvCents;
+  const usingWeightedEv = typeof weightedEvCents === "number" && weightedEvCents > 0;
+  const pipelineDisplayCents = usingWeightedEv ? weightedEvCents : rawPipelineValue;
   const stageCounts = useMemo(() => {
     const counts: Record<PipelineStageId, number> = { source: 0, value: 0, diligence: 0, structure: 0, close: 0 };
     for (const d of home.all) {
@@ -330,8 +338,8 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           </div>
           <div className="mh">
             <span className="l">Pipeline value</span>
-            <span className="v">{pipelineValue > 0 ? fmtPipelineValue(pipelineValue) : "—"}</span>
-            <span className="s">active deals</span>
+            <span className="v">{fmtPipelineValue(pipelineDisplayCents)}</span>
+            <span className="s">{usingWeightedEv ? "weighted EV" : "active deals"}</span>
           </div>
           <div className="mh">
             <span className="l">Files</span>
