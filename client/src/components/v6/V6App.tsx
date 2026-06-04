@@ -545,18 +545,18 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
   // Analyses hub (portfolio-aware recommendations + searchable catalog) instead
   // of duplicating per-analysis links in the rail.
   const wkNav: Array<{ section: string | null; items: Array<{ mode: ModeId; label: string; icon: IconName }> }> = [
-    { section: null, items: [{ mode: "today", label: "Home", icon: "today" }] },
+    { section: null, items: [{ mode: "today", label: "Today", icon: "today" }] },
     { section: "Deal flow", items: [
       { mode: "pipeline", label: "Pipeline", icon: "feed" },
-      { mode: "search", label: "Sourcing", icon: "search" },
+      { mode: "search", label: "Search", icon: "search" },
     ] },
     { section: "Diligence", items: [
       { mode: "analysis", label: "Analyses", icon: "chart" },
     ] },
     { section: "Documents", items: [
-      { mode: "studio", label: "CIMs & memos", icon: "studio" },
-      { mode: "files", label: "Data rooms", icon: "library" },
-      { mode: "library", label: "The Standard", icon: "doc" },
+      { mode: "studio", label: "Studio", icon: "studio" },
+      { mode: "files", label: "Files", icon: "library" },
+      { mode: "library", label: "Library", icon: "doc" },
     ] },
   ];
   const avatarInitials = ((user?.email || "SX").replace(/[^a-zA-Z]/g, "").slice(0, 2) || "SX").toUpperCase();
