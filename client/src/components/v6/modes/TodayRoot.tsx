@@ -146,10 +146,18 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const firstName = ((user as any)?.name || (user as any)?.displayName || "").toString().trim().split(/\s+/)[0] || "";
 
   // Real portfolio rollups (from /api/deals, always populated when authed)
-  const pipelineValue = useMemo(
-    () => home.all.reduce((sum, d) => d.status === "active" ? sum + (d.asking_price ?? d.revenue ?? 0) : sum, 0),
-    [home.all],
-  );
+  // Sum active-deal value (cents). Numeric columns arrive as STRINGS from
+  // postgres-js, so coerce per-deal — a raw `+` would string-concatenate the
+  // values into a giant string that overflows to Infinity ($InfinityB).
+  const pipelineValue = useMemo(() => {
+    let sum = 0;
+    for (const d of home.all) {
+      if (d.status !== "active") continue;
+      const v = Number(d.asking_price ?? d.revenue ?? 0);
+      if (Number.isFinite(v)) sum += v;
+    }
+    return sum;
+  }, [home.all]);
   const stageCounts = useMemo(() => {
     const counts: Record<PipelineStageId, number> = { source: 0, value: 0, diligence: 0, structure: 0, close: 0 };
     for (const d of home.all) {
@@ -579,6 +587,7 @@ function fmtCents(cents: number | null | undefined): string {
 }
 
 function fmtPipelineValue(cents: number): string {
+  if (!Number.isFinite(cents) || cents <= 0) return "—";
   const dollars = cents / 100;
   if (dollars >= 1_000_000_000) return `$${(dollars / 1_000_000_000).toFixed(1).replace(/\.0$/, "")}B`;
   if (dollars >= 1_000_000) return `$${(dollars / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
