@@ -119,49 +119,51 @@ export default function App() {
   });
 
   const [googleError, setGoogleError] = useState('');
+  const [googleReady, setGoogleReady] = useState(false);
   const googleInitRef = useRef(false);
 
-  const handleGoogleLogin = useCallback(() => {
-    const clientId = (window as any).__GOOGLE_CLIENT_ID;
-    if (!clientId) {
-      setGoogleError('Google Sign-In is not configured yet. Please try again in a moment or contact support if the issue persists.');
-      return;
+  // Shared credential handler — runs whether the credential comes from the
+  // rendered Google button (reliable) or the One Tap prompt (fallback).
+  const handleGoogleCredential = useCallback(async (response: any) => {
+    try {
+      await loginWithGoogle(response.credential);
+      const anonId = sessionStorage.getItem('smbx_anon_session');
+      if (anonId) {
+        await migrateSession(anonId);
+        sessionStorage.removeItem('smbx_anon_session');
+      }
+      await migrateSessionConversations();
+      try { localStorage.setItem('smbx_auth_fresh', String(Date.now())); } catch { /* noop */ }
+      navigate('/', { replace: true });
+    } catch (err: any) {
+      console.error('Google login error:', err.message);
+      setGoogleError(err.message || 'Google sign-in failed. Please try again.');
     }
+  }, [loginWithGoogle, migrateSession, navigate]);
+
+  // Initialize Google Identity Services once (idempotent). Returns false until
+  // both the GSI script and the client id are available.
+  const ensureGoogleInit = useCallback(() => {
+    const clientId = (window as any).__GOOGLE_CLIENT_ID;
     const google = (window as any).google;
-    if (!google?.accounts?.id) {
+    if (!clientId || !google?.accounts?.id) return false;
+    if (!googleInitRef.current) {
+      google.accounts.id.initialize({ client_id: clientId, callback: handleGoogleCredential });
+      googleInitRef.current = true;
+    }
+    return true;
+  }, [handleGoogleCredential]);
+
+  // Fallback trigger (One Tap) for surfaces that still call onGoogleLogin. The
+  // primary path is now the rendered button (see `googleReady`).
+  const handleGoogleLogin = useCallback(() => {
+    if (!ensureGoogleInit()) {
       setGoogleError('Google Sign-In is loading. Please try again in a moment.');
       return;
     }
     setGoogleError('');
-
-    if (!googleInitRef.current) {
-      google.accounts.id.initialize({
-        client_id: clientId,
-        callback: async (response: any) => {
-          try {
-            await loginWithGoogle(response.credential);
-            const anonId = sessionStorage.getItem('smbx_anon_session');
-            if (anonId) {
-              await migrateSession(anonId);
-              sessionStorage.removeItem('smbx_anon_session');
-            }
-            await migrateSessionConversations();
-            try { localStorage.setItem('smbx_auth_fresh', String(Date.now())); } catch { /* noop */ }
-            navigate('/', { replace: true });
-          } catch (err: any) {
-            console.error('Google login error:', err.message);
-            setGoogleError(err.message || 'Google sign-in failed. Please try email/password.');
-          }
-        },
-      });
-      googleInitRef.current = true;
-    }
-    google.accounts.id.prompt((notification: any) => {
-      if (notification?.isNotDisplayed() || notification?.isSkippedMoment()) {
-        setGoogleError('Google sign-in is temporarily unavailable. Please use email/password, or try again in a few minutes.');
-      }
-    });
-  }, [loginWithGoogle, migrateSession, navigate]);
+    (window as any).google.accounts.id.prompt();
+  }, [ensureGoogleInit]);
 
   const handleLoginSuccess = useCallback(async (email: string, password: string) => {
     await login(email, password);
@@ -185,12 +187,23 @@ export default function App() {
     navigate('/', { replace: true });
   }, [register, migrateSession, navigate]);
 
-  // Load public config
+  // Load public config, then initialize Google Identity Services so the rendered
+  // sign-in button can mount. The GSI script is async, so poll briefly until ready.
   useEffect(() => {
+    let cancelled = false;
     fetch('/api/config').then(r => r.json()).then(cfg => {
-      if (cfg.googleClientId) (window as any).__GOOGLE_CLIENT_ID = cfg.googleClientId;
+      if (cancelled || !cfg.googleClientId) return;
+      (window as any).__GOOGLE_CLIENT_ID = cfg.googleClientId;
+      let tries = 0;
+      const tick = () => {
+        if (cancelled) return;
+        if (ensureGoogleInit()) setGoogleReady(true);
+        else if (tries++ < 50) setTimeout(tick, 100);
+      };
+      tick();
     }).catch(() => {});
-  }, []);
+    return () => { cancelled = true; };
+  }, [ensureGoogleInit]);
 
   // Page view tracking
   const prevPath = useRef(location);
@@ -250,6 +263,7 @@ export default function App() {
             <Login
               onLogin={handleLoginSuccess}
               onGoogleLogin={handleGoogleLogin}
+              googleReady={googleReady}
               googleError={googleError}
               onNavigateSignup={() => navigate('/signup')}
               onNavigateForgot={() => navigate('/forgot-password')}

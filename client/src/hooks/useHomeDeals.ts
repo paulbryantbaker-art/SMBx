@@ -30,6 +30,7 @@ export interface HomeDeal {
 }
 
 export interface CategorizedHome {
+  all: HomeDeal[];        // every deal the user owns (unsliced) — for the full pipeline
   picks: HomeDeal[];      // top 5 active deals by ebitda (quality proxy)
   inReview: HomeDeal[];   // active deals mid-journey, ordered by recency
   closed: HomeDeal[];     // closed deals, most recent 4
@@ -45,7 +46,7 @@ export interface UseHomeDealsResult extends CategorizedHome {
 }
 
 const EMPTY: CategorizedHome = {
-  picks: [], inReview: [], closed: [],
+  all: [], picks: [], inReview: [], closed: [],
   totalActive: 0, totalClosed: 0,
 };
 
@@ -77,6 +78,7 @@ function categorize(deals: HomeDeal[]): CategorizedHome {
     .slice(0, 4);
 
   return {
+    all: deals,
     picks,
     inReview,
     closed: closedRecent,

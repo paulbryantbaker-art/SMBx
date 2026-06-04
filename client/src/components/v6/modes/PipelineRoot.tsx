@@ -16,6 +16,7 @@ import { DefinitiveSurfacePanel } from "../shared/DefinitiveSurfacePanel";
 import type { SurfaceActionId } from "../../../lib/v6SurfaceActions";
 import { buildBigFakeInvestmentBoardTab } from "../../../lib/sampleInvestmentBoard";
 import { GATE_MAP, getGateV19Requirements, getJourneyGates, getNextGate } from "@shared/gateRegistry";
+import { PIPELINE_STAGES, stageForGate, type PipelineStageId } from "../../../lib/pipelineStages";
 
 interface PipelineDeal {
   verdict: Verdict;
@@ -43,14 +44,6 @@ interface PipelineDeal {
   definitive?: TodayDefinitiveDealState;
 }
 
-type PipelineStageId = "source" | "value" | "diligence" | "structure" | "close";
-
-interface PipelineStage {
-  id: PipelineStageId;
-  title: string;
-  sub: string;
-}
-
 type PipelineSurfaceAction = "drafts" | "analysis" | "buyers";
 type PipelineShortcutAction = PipelineSurfaceAction | "rank" | "blockers" | "models" | "files" | "touch";
 
@@ -61,14 +54,6 @@ interface PipelineShortcut {
   icon: IconName;
   tone: "gold" | "blue" | "green" | "slate" | "rose" | "violet";
 }
-
-const PIPELINE_STAGES: PipelineStage[] = [
-  { id: "source", title: "Source", sub: "Thesis, intake, first read" },
-  { id: "value", title: "Value", sub: "Valuation and finance fit" },
-  { id: "diligence", title: "Diligence", sub: "QoE, files, legal watch" },
-  { id: "structure", title: "Structure", sub: "Terms, tax, approvals" },
-  { id: "close", title: "Close / PMI", sub: "Closing and value creation" },
-];
 
 const PIPELINE_SHORTCUTS: PipelineShortcut[] = [
   { action: "rank", title: "Rank pipeline", sub: "Sort pursue, watch, pass by what deserves today.", icon: "feed", tone: "blue" },
@@ -110,20 +95,20 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
   const modelRefreshNeeds = useSampleData ? [] : (operating.brief?.modelRefreshNeeds ?? []);
   const gateCountdownByDeal = new Map(gateCountdown.map(item => [item.dealId, item]));
   const modelRefreshByDeal = groupModelRefreshByDeal(modelRefreshNeeds);
+  // Full pipeline: EVERY deal the user owns, grouped by stage below. Deals that
+  // also appear in the operating brief get its richer read (DealState, model
+  // reruns); the rest map from the base deal record.
+  const operatingById = new Map(
+    operatingDeals.map(item => [item.dealId, dealPulseToPipelineDeal(item, gateCountdownByDeal.get(item.dealId), modelRefreshByDeal.get(item.dealId) ?? [])]),
+  );
   const deals = useSampleData
     ? SAMPLE_DEALS
-    : operatingDeals.length
-      ? operatingDeals.map(item => dealPulseToPipelineDeal(item, gateCountdownByDeal.get(item.dealId), modelRefreshByDeal.get(item.dealId) ?? []))
-      : realDeals.map(dealToPipelineDeal);
+    : home.all.map(d => operatingById.get(String(d.id)) ?? dealToPipelineDeal(d));
 
   const pursue = deals.filter(d => d.verdict === "pursue");
   const watch = deals.filter(d => d.verdict === "watch");
   const pass = deals.filter(d => d.verdict === "pass");
   const activeLeagueCount = new Set(deals.map(deal => deal.league)).size;
-  const modelCount = deals.reduce((sum, deal) => sum + deal.requiredModels, 0);
-  const citationCount = deals.reduce((sum, deal) => sum + deal.requiredCitations, 0);
-  const rerunCount = deals.reduce((sum, deal) => sum + (deal.modelRefreshCount || 0), 0);
-  const definitiveCount = deals.filter(deal => deal.definitive).length;
   const selectedHomeDeal = useSampleData ? null : pickActionDeal(realDeals);
   const actionDeal = selectedHomeDeal ? homeDealToActionDeal(selectedHomeDeal) : null;
   const actionDeals = realDeals.map(homeDealToActionDeal);
@@ -258,7 +243,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
 
       <div className="segmented">
         {([
-          ["active", "Active", deals.length],
+          ["active", "All", deals.length],
           ["pursue", "Pursue", pursue.length],
           ["watch", "Watch", watch.length],
           ["pass", "Pass", pass.length],
@@ -270,10 +255,10 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
       </div>
 
       <div className="mhead">
-        <div className="mh"><span className="l">Active deals</span><span className="v">{deals.length}</span><span className="s">{activeLeagueCount || 0} {activeLeagueCount === 1 ? "league" : "leagues"}</span></div>
+        <div className="mh"><span className="l">Deals</span><span className="v">{deals.length}</span><span className="s">{activeLeagueCount || 0} {activeLeagueCount === 1 ? "league" : "leagues"}</span></div>
         <div className="mh"><span className="l">Pursue</span><span className="v" style={{ color: "var(--accent-strong)" }}>{pursue.length}</span><span className="s">ready to advance</span></div>
-        <div className="mh"><span className="l">Models watched</span><span className="v">{modelCount}</span><span className="s">{citationCount} citations needed</span></div>
-        <div className="mh"><span className="l">Model reruns</span><span className="v">{rerunCount}</span><span className="s">{definitiveCount} DealState {definitiveCount === 1 ? "journal" : "journals"}</span></div>
+        <div className="mh"><span className="l">Watch</span><span className="v">{watch.length}</span><span className="s">need a check</span></div>
+        <div className="mh"><span className="l">Pass</span><span className="v">{pass.length}</span><span className="s">holding</span></div>
       </div>
 
       <div className="ynext">
@@ -326,45 +311,27 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
               <th className="r">Method</th>
               <th className="r">Action</th>
             </tr></thead>
-            <tbody>
-              {rows.map(deal => {
-                const pill = verdictStatpill(deal.verdict);
-                const flag = deal.modelRefreshCount
-                  ? `${deal.modelRefreshCount} model ${deal.modelRefreshCount === 1 ? "rerun" : "reruns"} — ${deal.modelRefreshReason || "tracked assumptions changed since the saved output."}`
-                  : deal.verdict === "watch" && deal.blocker
-                    ? `${deal.blocker}${deal.yuliaMove ? ` — ${deal.yuliaMove}.` : ""}`
-                    : null;
-                return (
-                  <Fragment key={deal.id}>
-                    <tr onClick={() => openTab({ kind: "deal", id: deal.id, title: deal.name })}>
-                      <td>
-                        <div className="cellname">
-                          <span className="logo">{dealInitials(deal.name)}</span>
-                          <div><div className="nm">{deal.name}</div><div className="sub">{deal.sub}</div></div>
-                        </div>
-                      </td>
-                      <td><span className={`statpill ${pill.cls}`}><span className="d" />{pill.label}</span></td>
-                      <td className="r amt">{deal.sde}</td>
-                      <td><span className="muted">{deal.league} · {deal.gateId} {deal.gateName}</span></td>
-                      <td className="r"><span className="fit"><span className="fitn">{deal.fit}</span><span className="ft"><span className="ff" style={{ width: `${deal.fit}%` }} /></span></span></td>
-                      <td className="r muted">{deal.requiredModels}m · {deal.requiredCitations}c</td>
-                      <td className="r"><button type="button" className="reviewbtn" onClick={e => { e.stopPropagation(); onTalkToYulia?.(yuliaPromptFor(deal)); }}>Review</button></td>
-                    </tr>
-                    {flag && (
-                      <tr><td colSpan={7} style={{ padding: 0 }}>
-                        <div className="rowflag">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" /></svg>
-                          <span>{flag}</span>
-                        </div>
-                      </td></tr>
-                    )}
-                  </Fragment>
-                );
-              })}
-            </tbody>
+            {PIPELINE_STAGES.map(stage => {
+              const stageRows = rows.filter(deal => deal.stageId === stage.id);
+              if (stageRows.length === 0) return null;
+              return (
+                <tbody key={stage.id}>
+                  <tr className="stage-row">
+                    <td colSpan={7}>
+                      <span className="stage-name">{stage.title}</span>
+                      <span className="stage-count">{stageRows.length}</span>
+                      <span className="stage-sub">{stage.sub}</span>
+                    </td>
+                  </tr>
+                  {stageRows.map(deal => (
+                    <PipelineDealRow key={deal.id} deal={deal} openTab={openTab} onTalkToYulia={onTalkToYulia} />
+                  ))}
+                </tbody>
+              );
+            })}
           </table>
           <div className="tabfoot">
-            <span>{rows.length} of {deals.length} {deals.length === 1 ? "deal" : "deals"}</span>
+            <span>{rows.length} of {deals.length} {deals.length === 1 ? "deal" : "deals"} across {PIPELINE_STAGES.filter(s => rows.some(d => d.stageId === s.id)).length} stages</span>
             <span>{pursue.length} pursue · {watch.length} watch · {pass.length} pass</span>
           </div>
         </>
@@ -378,6 +345,49 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
         <DefinitiveSurfacePanel surface="pipeline" title="DEFINITIVE read for Pipeline." onTalkToYulia={onTalkToYulia} />
       </div>
     </div>
+  );
+}
+
+function PipelineDealRow({
+  deal,
+  openTab,
+  onTalkToYulia,
+}: {
+  deal: PipelineDeal;
+  openTab: OpenTab;
+  onTalkToYulia?: (prompt: string) => void;
+}) {
+  const pill = verdictStatpill(deal.verdict);
+  const flag = deal.modelRefreshCount
+    ? `${deal.modelRefreshCount} model ${deal.modelRefreshCount === 1 ? "rerun" : "reruns"} — ${deal.modelRefreshReason || "tracked assumptions changed since the saved output."}`
+    : deal.verdict === "watch" && deal.blocker
+      ? `${deal.blocker}${deal.yuliaMove ? ` — ${deal.yuliaMove}.` : ""}`
+      : null;
+  return (
+    <Fragment>
+      <tr onClick={() => openTab({ kind: "deal", id: deal.id, title: deal.name })}>
+        <td>
+          <div className="cellname">
+            <span className="logo">{dealInitials(deal.name)}</span>
+            <div><div className="nm">{deal.name}</div><div className="sub">{deal.sub}</div></div>
+          </div>
+        </td>
+        <td><span className={`statpill ${pill.cls}`}><span className="d" />{pill.label}</span></td>
+        <td className="r amt">{deal.sde}</td>
+        <td><span className="muted">{deal.league} · {deal.gateId} {deal.gateName}</span></td>
+        <td className="r"><span className="fit"><span className="fitn">{deal.fit}</span><span className="ft"><span className="ff" style={{ width: `${deal.fit}%` }} /></span></span></td>
+        <td className="r muted">{deal.requiredModels}m · {deal.requiredCitations}c</td>
+        <td className="r"><button type="button" className="reviewbtn" onClick={e => { e.stopPropagation(); onTalkToYulia?.(yuliaPromptFor(deal)); }}>Review</button></td>
+      </tr>
+      {flag && (
+        <tr><td colSpan={7} style={{ padding: 0 }}>
+          <div className="rowflag">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" /></svg>
+            <span>{flag}</span>
+          </div>
+        </td></tr>
+      )}
+    </Fragment>
   );
 }
 
@@ -470,14 +480,6 @@ function enrichPipelineDeal(seed: PipelineDealSeed): PipelineDeal {
     requiredCitations: requirements.requiredCitations.length,
     yuliaMove: yuliaMoveForGate(gate.id, seed.verdict),
   };
-}
-
-function stageForGate(gateId: string): PipelineStageId {
-  if (/^(S|B|R)[01]$/.test(gateId)) return "source";
-  if (/^(S|B|R)2$/.test(gateId)) return "value";
-  if (/^(S|B)3$/.test(gateId) || gateId === "R3") return "diligence";
-  if (/^(S|B|R)4$/.test(gateId)) return "structure";
-  return "close";
 }
 
 function methodologyProgressForGate(gateId: string): number {

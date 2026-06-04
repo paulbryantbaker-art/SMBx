@@ -251,6 +251,13 @@
 .wk-content .wktable td.r { text-align: right; }
 .wk-content .wktable tbody tr { cursor: pointer; }
 .wk-content .wktable tbody tr:hover { background: var(--surface-2); }
+/* Pipeline stage groups — one <tbody> per stage with a non-clickable header row. */
+.wk-content .wktable tbody tr.stage-row { cursor: default; }
+.wk-content .wktable tbody tr.stage-row:hover { background: transparent; }
+.wk-content .wktable tr.stage-row td { padding: 20px 16px 8px; }
+.wk-content .stage-name { font-size: .82rem; font-weight: 600; color: var(--ink); letter-spacing: .01em; }
+.wk-content .stage-count { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 18px; padding: 0 6px; margin-left: 8px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); font-family: var(--font-mono); font-size: .7rem; font-weight: 600; }
+.wk-content .stage-sub { margin-left: 12px; font-size: .76rem; color: var(--ink-3); }
 .wk-content .cellname { display: flex; align-items: center; gap: 12px; }
 .wk-content .cellname .logo { flex: none; width: 34px; height: 34px; border-radius: 9px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: .78rem; font-weight: 700; color: var(--ink-2); overflow: hidden; }
 .wk-content .cellname .nm { font-weight: 600; color: var(--ink); }

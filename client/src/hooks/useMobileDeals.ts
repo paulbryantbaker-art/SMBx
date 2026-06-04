@@ -15,6 +15,7 @@
 import { useEffect, useState } from "react";
 import { DEV_AUTH_BYPASS, authHeaders, type User } from "./useAuth";
 import type { Verdict, YIconKind } from "../components/v6/mobile/types";
+import { stageForGate, type PipelineStageId } from "../lib/pipelineStages";
 
 export interface RawDeal {
   id: number;
@@ -79,6 +80,18 @@ export interface MobileFeatured {
   fit: number;
 }
 
+/** Every deal the user owns, tagged with its pipeline stage — for the full
+ *  stage-grouped mobile Pipeline. */
+export interface MobileStageRow {
+  id: string;
+  rawId: number;
+  name: string;
+  sub: string;
+  verdict: Verdict;
+  gate: string;
+  stageId: PipelineStageId;
+}
+
 export interface UseMobileDealsResult {
   loading: boolean;
   loaded: boolean;
@@ -88,6 +101,7 @@ export interface UseMobileDealsResult {
   watching: MobileWatchRow[];
   picks: MobilePick[];
   featured: MobileFeatured | null;
+  all: MobileStageRow[];
 }
 
 const EMPTY: Omit<UseMobileDealsResult, "loading" | "loaded" | "isAuthed" | "hasData"> = {
@@ -95,6 +109,7 @@ const EMPTY: Omit<UseMobileDealsResult, "loading" | "loaded" | "isAuthed" | "has
   watching: [],
   picks: [],
   featured: null,
+  all: [],
 };
 
 /* ─── derivation helpers ──────────────────────────────────── */
@@ -156,8 +171,23 @@ function priceWord(verdict: Verdict): string {
 /* ─── shape per-screen ────────────────────────────────────── */
 
 function shape(deals: RawDeal[]): Omit<UseMobileDealsResult, "loading" | "loaded" | "isAuthed" | "hasData"> {
+  // Full pipeline: every deal the user owns (all statuses), tagged with its
+  // gate-derived stage so the mobile Pipeline can group them like desktop.
+  const all: MobileStageRow[] = deals.map(d => {
+    const v = dealVerdict(d);
+    return {
+      id: `deal-${d.id}`,
+      rawId: d.id,
+      name: nameOf(d),
+      sub: buildSub(d),
+      verdict: v,
+      gate: d.current_gate || "B2",
+      stageId: stageForGate(d.current_gate || "B2"),
+    };
+  });
+
   const active = deals.filter(d => d.status === "active");
-  if (active.length === 0) return EMPTY;
+  if (active.length === 0) return { ...EMPTY, all };
 
   // Sort by recency for the Today list (what Yulia is "currently working").
   const recent = [...active].sort(
@@ -223,7 +253,7 @@ function shape(deals: RawDeal[]): Omit<UseMobileDealsResult, "loading" | "loaded
       }
     : null;
 
-  return { today, watching, picks, featured };
+  return { today, watching, picks, featured, all };
 }
 
 /* ─── hook ────────────────────────────────────────────────── */

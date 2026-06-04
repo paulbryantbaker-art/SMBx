@@ -11,8 +11,9 @@ import { IndustryIcon } from "../IndustryIcon";
 import { SectionHeader } from "../SectionHeader";
 import type { Verdict } from "../types";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
-import type { MobileWatchRow, MobileFeatured, MobilePick } from "../../../../hooks/useMobileDeals";
+import type { MobileWatchRow, MobileFeatured, MobilePick, MobileStageRow } from "../../../../hooks/useMobileDeals";
 import { dealsByStage, type DealStage, type SampleDeal } from "../../../../lib/sampleDeals";
+import { PIPELINE_STAGES } from "../../../../lib/pipelineStages";
 import { useWatchlist } from "../../../../hooks/useWatchlist";
 import { BriefDigestSection } from "./Brief";
 
@@ -33,6 +34,9 @@ interface PipelineProps {
   userFeatured: MobileFeatured | null;
   /** Picks formerly shown on the Brief tab; now appended to Pipeline. */
   userPicks: MobilePick[] | null;
+  /** Every deal the user owns, tagged with stage — the full stage-grouped
+      pipeline for real signed-in users. */
+  userAll: MobileStageRow[] | null;
   /** True ONLY when a signed-in user genuinely has zero deals. Anon/dev
       preview passes false and keeps showing samples. */
   realEmpty?: boolean;
@@ -71,27 +75,16 @@ const SAMPLE_FEATURED: FeaturedDef = {
   revLabel: "$5.4M REV",
 };
 
-export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, onOpenDealsList, onAvatarClick, onSearch, onNotif, notifCount, userWatching, userFeatured, userPicks, realEmpty }: PipelineProps) {
+export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, onOpenDealsList, onAvatarClick, onSearch, onNotif, notifCount, userFeatured, userPicks, userAll, realEmpty }: PipelineProps) {
   const FEATURED: FeaturedDef = userFeatured ?? SAMPLE_FEATURED;
   const [activeChip, setActiveChip] = useState<DealStage>("watching");
   const { isWatched, toggle } = useWatchlist();
   const filtered: SampleDeal[] = dealsByStage(activeChip);
 
-  // A real signed-in user WITH deals: render their live watching list instead
-  // of the chip-filtered samples. Anon/dev preview (isAnon) always stays on
-  // samples. Real stage data isn't in this shape, so chips are hidden for
-  // real users and the live list renders straight from userWatching.
-  const hasRealDeals = !isAnon && !!userWatching && userWatching.length > 0;
-  // Map each MobileWatchRow → PipeRow props. Verdict derives from the row's
-  // icon/pill: cool icon → pursue, explicit Pass pill → pass, else watch.
-  const realRows = (userWatching ?? []).map((row): {
-    id: string; name: string; sub: string; verdict: Verdict;
-  } => ({
-    id: row.id,
-    name: row.name,
-    sub: row.sub,
-    verdict: row.icon === "cool" ? "pursue" : row.pill === "Pass" ? "pass" : "watch",
-  }));
+  // A real signed-in user WITH deals: render their FULL pipeline grouped by
+  // stage (same five stages as desktop). Anon/dev preview (isAnon) stays on the
+  // chip-filtered samples below.
+  const hasRealDeals = !isAnon && !!userAll && userAll.length > 0;
 
   return (
     <div className="mb-fade-up" style={{ minHeight: "100vh", paddingBottom: 90 }}>
@@ -222,27 +215,35 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
           >Source a deal</button>
         </div>
       ) : hasRealDeals ? (
-        <div className="mb-as-card" style={{ margin: "24px 16px 0", padding: "20px 0 6px" }}>
-          <SectionHeader
-            title="Yulia is watching"
-            subtitle="The deals you're tracking — Yulia revisits these for you."
-            onSeeAll={onOpenDealsList}
-            seeAllAria="See all deals"
-            padding="0 22px 12px"
-          />
-          {realRows.map((d, i) => (
-            <PipeRow
-              key={d.id}
-              name={d.name}
-              sub={d.sub}
-              verdict={d.verdict}
-              watched={isWatched(d.id)}
-              last={i === realRows.length - 1}
-              onTap={() => onOpenDeal(d.id, d.name)}
-              onToggleWatch={() => toggle(d.id, d.name)}
-            />
-          ))}
-        </div>
+        <>
+          {PIPELINE_STAGES.map(stage => {
+            const stageRows = (userAll ?? []).filter(d => d.stageId === stage.id);
+            if (stageRows.length === 0) return null;
+            return (
+              <div key={stage.id} className="mb-as-card" style={{ margin: "20px 16px 0", padding: "20px 0 6px" }}>
+                <SectionHeader
+                  title={stage.title}
+                  subtitle={`${stageRows.length} ${stageRows.length === 1 ? "deal" : "deals"} · ${stage.sub}`}
+                  onSeeAll={onOpenDealsList}
+                  seeAllAria="See all deals"
+                  padding="0 22px 12px"
+                />
+                {stageRows.map((d, i) => (
+                  <PipeRow
+                    key={d.id}
+                    name={d.name}
+                    sub={d.sub}
+                    verdict={d.verdict}
+                    watched={isWatched(d.id)}
+                    last={i === stageRows.length - 1}
+                    onTap={() => onOpenDeal(d.id, d.name)}
+                    onToggleWatch={() => toggle(d.id, d.name)}
+                  />
+                ))}
+              </div>
+            );
+          })}
+        </>
       ) : filtered.length === 0 ? (
         <div className="mb-as-card" style={{ margin: "24px 16px 0", padding: "20px 22px 22px" }}>
           <SectionHeader

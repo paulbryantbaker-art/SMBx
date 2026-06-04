@@ -4,10 +4,15 @@ import crypto from 'crypto';
 import { requireAuth, signToken } from '../middleware/auth.js';
 import { sendEmail, sendWelcomeEmail, brandedEmail } from '../services/emailService.js';
 import { createSql } from '../dbConfig.js';
+import { OAuth2Client } from 'google-auth-library';
 
 const BCRYPT_ROUNDS = 12;
 
 const sql = createSql();
+
+// Verifies Google ID tokens against Google's published public keys (signature),
+// plus audience/issuer/expiry. A singleton so its JWKS cert cache is reused.
+const googleOAuthClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const authRouter = Router();
 
@@ -122,28 +127,31 @@ authRouter.post('/google', async (req, res) => {
       return res.status(500).json({ error: 'Google OAuth not configured' });
     }
 
-    // Decode the JWT payload (Google ID token)
-    const parts = credential.split('.');
-    if (parts.length !== 3) {
-      return res.status(400).json({ error: 'Invalid credential format' });
+    // Cryptographically verify the ID token: signature (against Google's public
+    // keys), audience, issuer, and expiry — all in one call. This replaces a
+    // prior manual base64 decode that checked aud/exp but NOT the signature, so a
+    // forged token with the right aud could mint a session (including superadmin).
+    let payload;
+    try {
+      const ticket = await googleOAuthClient.verifyIdToken({
+        idToken: credential,
+        audience: googleClientId,
+      });
+      payload = ticket.getPayload();
+    } catch {
+      return res.status(401).json({ error: 'Invalid Google credential' });
+    }
+    if (!payload) {
+      return res.status(401).json({ error: 'Invalid Google credential' });
     }
 
-    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
-
-    // Verify audience matches our client ID
-    if (payload.aud !== googleClientId) {
-      return res.status(401).json({ error: 'Invalid token audience' });
-    }
-
-    // Check expiration
-    if (payload.exp && payload.exp * 1000 < Date.now()) {
-      return res.status(401).json({ error: 'Token expired' });
-    }
-
-    const { sub: googleId, email, name, picture } = payload;
+    const { sub: googleId, email, email_verified: emailVerified, name } = payload;
 
     if (!email) {
       return res.status(400).json({ error: 'No email in Google credential' });
+    }
+    if (emailVerified === false) {
+      return res.status(401).json({ error: 'Google email is not verified' });
     }
 
     const emailLower = email.toLowerCase();

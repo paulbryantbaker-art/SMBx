@@ -541,6 +541,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           userWatching={userDeals.hasData ? userDeals.watching : null}
           userFeatured={userDeals.hasData ? userDeals.featured : null}
           userPicks={userDeals.hasData ? userDeals.picks : null}
+          userAll={userDeals.hasData ? userDeals.all : null}
           realEmpty={realEmpty}
           {...notifBarProps}
         />
