@@ -3,7 +3,6 @@ import { authHeaders, type User } from "../../../hooks/useAuth";
 import { useTodayOperatingBrief, type TodayModelRefreshItem } from "../../../hooks/useTodayOperatingBrief";
 import type { OpenTab, StudioFormatId, Tab } from "../types";
 import { V19UsageMeter } from "../V19UsageMeter";
-import { DefinitiveSurfacePanel } from "../shared/DefinitiveSurfacePanel";
 
 interface MarketingStudioProps {
   tab: Tab;
@@ -429,13 +428,6 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
           items={modelRefreshNeeds}
           loading={operating.loading}
           onAskYulia={askYulia}
-        />
-
-        <DefinitiveSurfacePanel
-          surface="studio"
-          title="DEFINITIVE read for Studio."
-          compact
-          onTalkToYulia={askYulia}
         />
       </div>
     </div>

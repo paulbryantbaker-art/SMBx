@@ -4,7 +4,6 @@ import type { FileListView, FileScope, OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
 import { useTodayOperatingBrief, type TodayFileReviewItem } from "../../../hooks/useTodayOperatingBrief";
 import { useV6WorkspaceData, type WorkspaceDeal, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
-import { DefinitiveSurfacePanel } from "../shared/DefinitiveSurfacePanel";
 import { YuliaSkeleton } from "../shared/YuliaSkeleton";
 
 interface FilesRootProps {
@@ -303,15 +302,6 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
         </div>
       </div>
 
-      {/* DEFINITIVE panel */}
-      <div className="wksec">
-        <DefinitiveSurfacePanel
-          surface="files"
-          title="DEFINITIVE read for Files."
-          compact
-          onTalkToYulia={ask}
-        />
-      </div>
 
       {/* Recently touched + Current rooms */}
       <div className="wksec">

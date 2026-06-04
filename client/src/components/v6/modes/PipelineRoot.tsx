@@ -12,7 +12,6 @@ import {
   pickActionDeal,
   type ActionDeal,
 } from "../../../lib/v6ActionContracts";
-import { DefinitiveSurfacePanel } from "../shared/DefinitiveSurfacePanel";
 import type { SurfaceActionId } from "../../../lib/v6SurfaceActions";
 import { buildBigFakeInvestmentBoardTab } from "../../../lib/sampleInvestmentBoard";
 import { GATE_MAP, getGateV19Requirements, getJourneyGates, getNextGate } from "@shared/gateRegistry";
@@ -340,10 +339,6 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user, modelPreference }
       {gateCountdown.length > 0 && (
         <GateCountdownStrip items={gateCountdown} openTab={openTab} onTalkToYulia={onTalkToYulia} />
       )}
-
-      <div className="wksec">
-        <DefinitiveSurfacePanel surface="pipeline" title="DEFINITIVE read for Pipeline." onTalkToYulia={onTalkToYulia} />
-      </div>
     </div>
   );
 }
