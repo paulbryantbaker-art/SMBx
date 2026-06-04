@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { V6Icon } from "../icons";
 import { V6DocStatus, type DocStatusKind } from "./cards";
 import type { IconName, OpenTab } from "../types";
@@ -15,15 +15,6 @@ import {
   yuliaComparePrompt,
 } from "../../../lib/v6ActionContracts";
 import type { SurfaceActionId } from "../../../lib/v6SurfaceActions";
-
-interface RecentRun { id: string; title: string; deal: string; updated: string; status: DocStatusKind }
-
-const RECENTS: RecentRun[] = [
-  { id: "an-recast", title: "Big Fake Deal · Recast",     deal: "Big Fake Deal · sample", updated: "Mar 25", status: "live"  },
-  { id: "an-comps",  title: "Pest Control · Comps",       deal: "Pest Control · FL",      updated: "Mar 20", status: "saved" },
-  { id: "an-val",    title: "Electrical · Valuation",     deal: "Electrical · TX",        updated: "Mar 18", status: "saved" },
-  { id: "an-buyer",  title: "Big Fake Deal · Buyer fit",  deal: "Big Fake Deal · sample", updated: "Mar 24", status: "live"  },
-];
 
 interface Tool { id: string; name: string; sub: string; icon: IconName; actionId?: SurfaceActionId }
 
@@ -50,6 +41,35 @@ const TOOLS_BY_ID: Record<string, Tool> = Object.fromEntries(TOOLS.map(t => [t.i
 // Portfolio-aware recommendation: a deal's gate implies which analyses move it
 // forward (methodology gate → required models). Deterministic first pass; the
 // "Ask Yulia to recommend" button hands portfolio-wide judgment to the model.
+function timeOf(iso?: string | null): number {
+  if (!iso) return 0;
+  const t = new Date(iso).getTime();
+  return Number.isFinite(t) ? t : 0;
+}
+
+function fmtRelative(iso?: string | null): string {
+  if (!iso) return "—";
+  const t = timeOf(iso);
+  if (!t) return "—";
+  const min = Math.max(0, Math.round((Date.now() - t) / 60000));
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.round(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const day = Math.round(hr / 24);
+  if (day < 30) return `${day}d ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
+function formatSlug(input: string): string {
+  return (input || "Analysis").replace(/[-_]/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function mapRunStatus(s?: string | null): DocStatusKind {
+  const v = (s || "").toLowerCase();
+  if (/generat|queue|run|progress|live|pending/.test(v)) return "live";
+  return "saved";
+}
+
 function recommendedToolIdsForGate(gate: string): string[] {
   const stage = gate.match(/(\d+)\s*$/)?.[1] ?? "";
   switch (stage) {
@@ -171,6 +191,24 @@ export function V6AnalysisRoot({
   const filtered = q
     ? TOOLS.filter(t => t.name.toLowerCase().includes(q) || t.sub.toLowerCase().includes(q))
     : TOOLS;
+
+  // Recently run = the user's real analysis deliverables (those with an
+  // analysis_run_id), newest first. Replaces the hardcoded sample table.
+  const recentRuns = useMemo(
+    () => workspace.deliverables
+      .filter(d => d.analysis_run_id != null)
+      .map(d => ({
+        analysisRunId: d.analysis_run_id as number,
+        title: d.name || formatSlug(d.slug),
+        deal: d.deal_name || "Deal",
+        status: mapRunStatus(d.analysis_status || d.status),
+        updatedIso: d.completed_at || d.updated_at || d.created_at,
+        analysisType: d.analysis_type ?? undefined,
+      }))
+      .sort((a, b) => timeOf(b.updatedIso) - timeOf(a.updatedIso))
+      .slice(0, 8),
+    [workspace.deliverables],
+  );
 
   return (
     <div className="wk-content m-fade-up" style={{ maxWidth: 1180, margin: "0 auto" }}>
@@ -313,39 +351,48 @@ export function V6AnalysisRoot({
       <div className="wksec">
         <div className="wksec-title">Recently run</div>
         <p className="pg-sub" style={{ marginTop: 0, marginBottom: 14 }}>Open any to keep iterating.</p>
-        <table className="wktable">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Deal</th>
-              <th>Status</th>
-              <th className="r">Updated</th>
-            </tr>
-          </thead>
-          <tbody>
-            {RECENTS.map(r => (
-              <tr
-                key={r.id}
-                onClick={() => openTab({ kind: "analysis", title: r.title, id: r.id })}
-                role="button"
-                aria-label={`${r.title}, ${r.deal}`}
-              >
-                <td>
-                  <div className="cellname">
-                    <span className="logo"><V6Icon name="chart" size={14} /></span>
-                    <div className="nm">{r.title}</div>
-                  </div>
-                </td>
-                <td><span className="muted">{r.deal}</span></td>
-                <td><V6DocStatus status={r.status} /></td>
-                <td className="r muted">{r.updated.toUpperCase()}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="tabfoot">
-          <span>{RECENTS.length} recent {RECENTS.length === 1 ? "analysis" : "analyses"}</span>
-        </div>
+        {recentRuns.length === 0 ? (
+          <div className="wkcard" style={{ textAlign: "center" }}>
+            <div className="wkcard-title">Nothing run yet</div>
+            <div className="wkcard-sub">Pick an analysis above and your runs will collect here.</div>
+          </div>
+        ) : (
+          <>
+            <table className="wktable">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Deal</th>
+                  <th>Status</th>
+                  <th className="r">Updated</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentRuns.map(r => (
+                  <tr
+                    key={r.analysisRunId}
+                    onClick={() => openTab({ kind: "analysis", title: r.title, id: `analysis-${r.analysisRunId}`, analysisRunId: r.analysisRunId, tool: r.analysisType })}
+                    role="button"
+                    aria-label={`${r.title}, ${r.deal}`}
+                  >
+                    <td>
+                      <div className="cellname">
+                        <span className="logo"><V6Icon name="chart" size={14} /></span>
+                        <div className="nm">{r.title}</div>
+                      </div>
+                    </td>
+                    <td><span className="muted">{r.deal}</span></td>
+                    <td><V6DocStatus status={r.status} /></td>
+                    <td className="r muted">{fmtRelative(r.updatedIso)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="tabfoot">
+              <span>{recentRuns.length} recent {recentRuns.length === 1 ? "analysis" : "analyses"}</span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
