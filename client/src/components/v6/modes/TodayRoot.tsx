@@ -631,9 +631,13 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
 
           {isUpdating ? (
             <>
-              <div className="wk-skel" style={{ height: 64 }} />
-              <div className="wk-skel" style={{ height: 52 }} />
-              <div className="wk-skel" style={{ height: 52 }} />
+              {[0, 1, 2].map(i => (
+                <div key={i} style={{ padding: "13px 14px", border: "1px solid var(--line)", borderRadius: 10, background: "var(--surface)" }}>
+                  <div className="wk-skel" style={{ height: 11, width: i === 0 ? "58%" : "44%", borderRadius: 6 }} />
+                  <div className="wk-skel" style={{ height: 9, width: "92%", marginTop: 11, borderRadius: 6 }} />
+                  <div className="wk-skel" style={{ height: 9, width: i === 0 ? "74%" : "62%", marginTop: 7, borderRadius: 6 }} />
+                </div>
+              ))}
               <div className="wk-skel-label"><span className="wk-skel-dot" />Yulia is updating this read…</div>
             </>
           ) : (<>
