@@ -149,34 +149,6 @@ const FORMATS: StudioFormat[] = [
   },
 ];
 
-const SAMPLE_BOOKS: PitchBookRecord[] = [
-  localBook("qoe-preview-book", "Big Fake Deal - QoE Preview Book"),
-  localBook("buyer-pitch-book", "Pest Control FL - Buyer Pitch Book"),
-];
-
-const WORKBENCH_STACK = [
-  {
-    title: "Unified inputs",
-    body: "Files, model runs, citations, and Yulia's narrative live in one book.",
-    prompt: "Explain how Pitch Book Studio keeps files, model runs, citations, and Yulia narrative unified in one book.",
-  },
-  {
-    title: "Slide provenance",
-    body: "Each slide tracks facts, models, citations, and unchecked claims.",
-    prompt: "Explain Studio slide provenance: facts used, model outputs used, citations used, and unchecked claims.",
-  },
-  {
-    title: "Export discipline",
-    body: "PPTX/PDF exports include source and audit appendices.",
-    prompt: "Explain how Studio export discipline works for PPTX/PDF, source footnotes, and audit appendices.",
-  },
-  {
-    title: "Deal-native",
-    body: "The book opens in the same canvas as Today, Files, and Pipeline.",
-    prompt: "Explain what deal-native Studio means and how books connect to Today, Files, Pipeline, and chat.",
-  },
-];
-
 export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: MarketingStudioProps) {
   const [books, setBooks] = useState<PitchBookRecord[]>([]);
   const [loadingBooks, setLoadingBooks] = useState(false);
@@ -188,7 +160,7 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
 
   useEffect(() => {
     if (!user) {
-      setBooks(SAMPLE_BOOKS);
+      setBooks([]);
       return;
     }
     let alive = true;
@@ -199,10 +171,10 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
         return res.json();
       })
       .then(data => {
-        if (alive) setBooks(Array.isArray(data.books) && data.books.length ? data.books : SAMPLE_BOOKS);
+        if (alive) setBooks(Array.isArray(data.books) ? data.books : []);
       })
       .catch(() => {
-        if (alive) setBooks(SAMPLE_BOOKS);
+        if (alive) setBooks([]);
       })
       .finally(() => {
         if (alive) setLoadingBooks(false);
@@ -313,7 +285,6 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
       {/* Page header */}
       <div className="pg-head">
         <div>
-          <div className="pg-eyebrow">Deliverables</div>
           <div className="pg-title">Pitch Book Studio</div>
           <p className="pg-sub">
             Build IC decks, QoE preview books, buyer books, lender books, and CIM summaries with slide-level sources, model links, and export-ready audit trails.
@@ -374,10 +345,16 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
             <span className="wkcard-title">Books in Studio</span>
             <span className="statpill missing">
               <span className="d" />
-              {loadingBooks ? "Loading" : "Current"}
+              {loadingBooks ? "Loading" : `${books.length}`}
             </span>
           </div>
           <div style={S.bookStack}>
+            {!loadingBooks && books.length === 0 && (
+              <div style={{ padding: 18, color: "var(--ink-2)", fontSize: ".85rem", lineHeight: 1.45 }}>
+                <strong style={{ display: "block", color: "var(--ink)", marginBottom: 4 }}>No books yet</strong>
+                Pick a format above and Yulia builds the first book here.
+              </div>
+            )}
             {books.map(book => (
               <button
                 key={`${book.id}-${book.version}`}
@@ -400,24 +377,6 @@ export function V6MarketingStudioView({ tab, openTab, user, onTalkToYulia }: Mar
                 ) : (
                   <span className="statpill good"><span className="d" />clean</span>
                 )}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Workbench diff */}
-        <div className="wkcard">
-          <div className="wkcard-title">Built to compete with finance workbenches.</div>
-          <div className="wkgrid g2" style={{ marginTop: 14, gap: 10 }}>
-            {WORKBENCH_STACK.map(item => (
-              <button
-                key={item.title}
-                type="button"
-                style={S.diffItem}
-                onClick={() => askYulia(item.prompt)}
-              >
-                <strong style={S.diffItemTitle}>{item.title}</strong>
-                <span style={S.diffItemBody}>{item.body}</span>
               </button>
             ))}
           </div>
