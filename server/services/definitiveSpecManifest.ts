@@ -3,6 +3,7 @@ import {
   DEFINITIVE_METHODOLOGY_VERSION,
   DEFINITIVE_SPEC_URI,
   DEFINITIVE_SPEC_VERSION,
+  DEFINITIVE_USAGE_MODES,
 } from '../constants/definitive.js';
 import { listDefinitiveLineInventory } from './agencyActionRegistry.js';
 import { buildDefinitiveConformanceStatus } from './definitiveConformanceStatus.js';
@@ -64,6 +65,8 @@ export function buildDefinitiveSpecManifest() {
       pricing: 'Subscriptions, credits, fixed software deliverables, and enterprise platform fees only. No wallet or success fees.',
       agentAccess: 'Incomplete agent payloads are accepted, classified, converted into missing-input contracts, and advanced recursively through the deal lifecycle.',
     },
+    // One-time analysis vs extended methodology — each with its take-back artifact.
+    usageModes: DEFINITIVE_USAGE_MODES,
     endpoints: {
       agentCard: '/.well-known/agent-card.json',
       specManifest: '/.well-known/definitive.json',

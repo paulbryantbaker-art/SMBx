@@ -417,6 +417,7 @@ await test('DEFINITIVE manifest is a single stable discovery document', async ()
   assert(manifest.access.authenticatedExecution.includes('/api/definitive/deal-state/latest'), 'manifest latest deal-state is authenticated execution');
   assert(manifest.access.authenticatedExecution.includes('/api/definitive/deal-packets'), 'manifest deal packets is authenticated execution');
   assertDeepEqual(manifest.toolSurface.tools.map(tool => tool.name), expectedTools, 'manifest tool names');
+  assert(Boolean((manifest as any).usageModes?.oneTimeAnalysis?.carryBack && (manifest as any).usageModes?.extendedMethodology?.carryBack), 'manifest exposes one-time + extended usage modes');
   assertEqual(manifest.corpusSurface.rawDocumentTextAllowed, false, 'manifest disallows raw corpus text');
   assertEqual(manifest.corpusSurface.partyIdentifiersAllowed, false, 'manifest disallows party identifiers');
   assertEqual(manifest.conformanceSurface.modelRuntimeCases, DEFINITIVE_CONFORMANCE_MODEL_RUNTIME_CASE_COUNT, 'manifest conformance case count');
@@ -514,6 +515,7 @@ await test('MCP well-known discovery is generated from DEFINITIVE manifest data'
   assert(serverCard.tools.every((tool: any) => tool.outputSchema?.properties?.specVersion), 'MCP tools expose output schemas');
   assert(serverCard.tools.find((tool: any) => tool.name === 'ingest_deal_payload')?.structuredContentSchemas?.output.includes('DealState'), 'MCP ingest tool maps to DealState schema');
   assert(serverCard.tools.every((tool: any) => typeof tool.annotations?.readOnlyHint === 'boolean'), 'MCP tools expose annotations');
+  assert(Boolean((serverCard as any).usageModes?.oneTimeAnalysis?.carryBack && (serverCard as any).usageModes?.extendedMethodology?.carryBack), 'MCP server-card exposes one-time + extended usage modes');
   assert(serverCard.definitive.toolMetadataDoctrine.semanticKeywords.includes('working capital peg'), 'MCP server-card exposes semantic keywords');
   assertEqual(serverCard.definitive.publishedStandardDoctrine.name, 'The Diligence Standard', 'MCP server-card exposes published standard');
   assertEqual(serverCard.definitive.dealRunbooks, `${origin}/api/definitive/deal-runbooks`, 'MCP server-card exposes deal runbooks URL');

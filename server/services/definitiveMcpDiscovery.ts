@@ -1,4 +1,4 @@
-import { DEFINITIVE_METHODOLOGY_URI, DEFINITIVE_METHODOLOGY_VERSION, DEFINITIVE_SPEC_VERSION } from '../constants/definitive.js';
+import { DEFINITIVE_METHODOLOGY_URI, DEFINITIVE_METHODOLOGY_VERSION, DEFINITIVE_SPEC_VERSION, DEFINITIVE_USAGE_MODES } from '../constants/definitive.js';
 import { buildDefinitiveSpecManifest } from './definitiveSpecManifest.js';
 import { listDefinitiveMcpTools } from './definitiveMcp.js';
 import { getDefinitiveSubstrateArchitecturePlan } from './definitiveSubstrateArchitecturePlan.js';
@@ -102,6 +102,8 @@ export function buildDefinitiveMcpServerCard(baseUrl?: string) {
     name: MCP_SERVER_NAME,
     title: MCP_SERVER_TITLE,
     description: MCP_SERVER_DESCRIPTION,
+    // Two ways to get value, each with its take-back — visible at MCP discovery.
+    usageModes: DEFINITIVE_USAGE_MODES,
     version: manifest.version,
     protocolVersion: MCP_DISCOVERY_PROTOCOL_VERSION,
     serverUrl: `${origin}/mcp`,
