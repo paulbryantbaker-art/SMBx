@@ -1,4 +1,5 @@
 import { listRegisteredModels } from './modelRegistry.js';
+import { DEFINITIVE_USAGE_MODES } from '../constants/definitive.js';
 import { listDefinitiveMcpTools } from './definitiveMcp.js';
 import { listV19ResourceContract } from './v19ResourceContract.js';
 import { listDefinitiveLineInventory } from './agencyActionRegistry.js';
@@ -106,6 +107,7 @@ export function buildAgentCard() {
       schemaRegistryCount: schemaRegistry.schemaCount,
       schemaRegistryNames: schemaRegistry.schemaNames,
       dealOsDoctrine: substrateArchitecture.agentOperatingDoctrine.productDoctrine,
+      usageModes: DEFINITIVE_USAGE_MODES,
       dealRunbookJourneys: dealRunbooks.runbooks.map(runbook => runbook.journey),
       dealRunbookLoopContract: dealRunbooks.summary.loopContract,
       agentHomeContract: substrateArchitecture.agentOperatingDoctrine.homeContract,

@@ -198,6 +198,13 @@ await test('assess_deal_entry closes the agent loop (task lane + contract + educ
   assertEqual(full.loopContract.steps.length, 5, 'loop contract has 5 steps (orient/pick/execute/iterate/close)');
   assert(full.methodologyEducation.calls.some((call: any) => call.toolName === 'describe_methodology'), 'education points to describe_methodology');
   assert(full.methodologyEducation.calls.some((call: any) => call.toolName === 'get_deal_runbook'), 'education points to get_deal_runbook');
+
+  // Value modes: one-time analysis vs extended methodology, each with carry-back
+  assert(Boolean(full.valueModes?.oneTimeAnalysis?.carryBack), 'value modes describe one-time-analysis carry-back');
+  assert(Boolean(full.valueModes?.extendedMethodology?.carryBack), 'value modes describe extended-methodology carry-back');
+  assert(full.taskLane.detected === false && Array.isArray(full.valueModes.extendedMethodology.startWith), 'extended-methodology mode lists where to start');
+  // Every entry next-call names the gate it advances (gate-aware iteration)
+  assert(full.next_suggested_calls.every((call: any) => 'advancesGate' in call), 'every entry next-call names the gate it advances');
 });
 
 await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
@@ -245,6 +252,7 @@ await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {
   assert(card.definitive.schemaRegistryNames.includes('DealState'), 'agent card exposes DealState schema');
   assert(card.definitive.schemaRegistryNames.includes('DealStateDiff'), 'agent card exposes DealStateDiff schema');
   assert(card.definitive.dealOsDoctrine.includes('Deal OS'), 'agent card exposes Deal OS doctrine');
+  assert(Boolean(card.definitive.usageModes?.oneTimeAnalysis?.carryBack) && Boolean(card.definitive.usageModes?.extendedMethodology?.carryBack), 'agent card exposes one-time + extended usage modes with carry-back');
   assertDeepEqual(card.definitive.dealRunbookJourneys, ['buy', 'sell', 'raise', 'pmi'], 'agent card exposes deal runbook journeys');
   assert(card.definitive.dealRunbookLoopContract.includes('ingest_or_resume'), 'agent card exposes recursive runbook loop');
   assert(card.definitive.agentHomeContract.includes('data rooms'), 'agent card exposes agent home data-room contract');

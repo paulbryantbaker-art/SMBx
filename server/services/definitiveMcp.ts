@@ -3,6 +3,7 @@ import {
   DEFINITIVE_METHODOLOGY_VERSION,
   DEFINITIVE_SPEC_URI,
   DEFINITIVE_SPEC_VERSION,
+  DEFINITIVE_USAGE_MODES,
 } from '../constants/definitive.js';
 import { buildDefinitiveConformanceStatus } from './definitiveConformanceStatus.js';
 import {
@@ -3235,6 +3236,8 @@ export function buildAgentEntryAssessment(toolInput: Record<string, any>) {
     objective,
     acceptedEntry:
       'Partial information is accepted. DEFINITIVE creates or resumes DealState, names missing inputs, and returns next calls instead of rejecting the agent.',
+    // Understand the value fast: two modes, both end in a portable take-back.
+    valueModes: DEFINITIVE_USAGE_MODES,
     entryClassification: {
       journey: journey || 'unknown',
       likelyStage: stage.stageId,
@@ -3728,6 +3731,20 @@ function buildEntryMissingInputs({
   return missing;
 }
 
+/** Map an inferred entry stage to the methodology gate its next-calls advance —
+ *  same gate vocabulary as nextGateForLevel, so entry and iteration agree. */
+function entryStageGate(stageId: string): string {
+  switch (stageId) {
+    case 'ioi': return 'ioi_readiness';
+    case 'loi': return 'loi_architecture';
+    case 'deeper_diligence':
+    case 'confirmatory_diligence': return 'diligence_and_modeling';
+    case 'model_negotiation':
+    case 'close_pmi': return 'negotiation_close_pmi_loop';
+    default: return 'intake_classification';
+  }
+}
+
 function buildEntryNextSuggestedCalls({
   journey,
   stageId,
@@ -3789,7 +3806,10 @@ function buildEntryNextSuggestedCalls({
     calls.push({ toolName: 'compose_close_readiness', priority: 'P1', reason: 'Stage close readiness for human approval without authorizing close.', inputHint: { dealState: '<DealState>' } });
     calls.push({ toolName: 'compose_pmi_plan', priority: 'P2', reason: 'Carry surviving DealState into post-close value creation and risk tracking.', inputHint: { dealState: '<DealState>' } });
   }
-  return calls;
+  // Tag each call with the gate it moves the deal toward, so the entry path and
+  // the iteration loop speak the same gate vocabulary.
+  const targetGate = entryStageGate(stageId);
+  return calls.map(call => ({ advancesGate: targetGate, ...call }));
 }
 
 function normalizeJourney(value: unknown): DefinitiveJourney | null {

@@ -628,23 +628,27 @@ export function verifyDefinitiveDealPackage(input: Record<string, any>) {
     .filter(check => check.status === 'warn')
     .map(check => check.id);
   const packageCid = nullableString(dealPackage.packageCid) || null;
+  const pkgGate = state?.completenessReport?.nextGate ?? null;
   const nextSuggestedCalls: DefinitiveMcpCallHint[] = [
     {
       toolName: 'disclose_subset',
       priority: 'P1',
       reason: 'Create selective disclosure proof when the package leaves the deal room or another agent only needs part of the record.',
+      advancesGate: null,
       inputHint: { dealPackage: packageCid ? { packageCid } : undefined, dealState: state ? { cid: state.cid } : undefined },
     },
     {
       toolName: 'compose_close_readiness',
       priority: 'P1',
       reason: 'Check close-readiness before any human treats the package as a closing workstream record.',
+      advancesGate: pkgGate,
       inputHint: { dealState: state ? { cid: state.cid } : undefined },
     },
     {
       toolName: 'resume_deal',
       priority: 'P2',
       reason: 'Resume the recursive Deal OS loop from this package after the receiving agent adds new facts or documents.',
+      advancesGate: null,
       inputHint: { dealPackage: packageCid ? { packageCid } : undefined, dealState: state ? { cid: state.cid } : undefined },
     },
   ];
@@ -2809,7 +2813,8 @@ function nextLifecycleTraceCalls(state: DefinitiveDealState, currentStage: strin
       },
     });
   }
-  return calls;
+  const nextGate = state.completenessReport.nextGate || null;
+  return calls.map(call => ({ advancesGate: nextGate, ...call }));
 }
 
 function buildPackageDeferrals(state: DefinitiveDealState) {
@@ -4077,7 +4082,10 @@ function buildCloseReadinessNextCalls(
     inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
   });
 
-  return [...byTool.values()].sort((a, b) => priorityRank(a.priority) - priorityRank(b.priority));
+  const nextGate = state.completenessReport.nextGate || null;
+  return [...byTool.values()]
+    .map(hint => ({ advancesGate: nextGate, ...hint }))
+    .sort((a, b) => priorityRank(a.priority) - priorityRank(b.priority));
 }
 
 function closeReadinessInputHintForTool(state: DefinitiveDealState, toolName: string) {
