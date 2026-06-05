@@ -3136,7 +3136,51 @@ function buildModelSlotLookupToolResult(toolInput: Record<string, any>) {
   };
 }
 
-function buildAgentEntryAssessment(toolInput: Record<string, any>) {
+/**
+ * Narrow-task lane. When an agent is handed ONE specific task (not the whole
+ * journey), match the objective to a focused tool sequence so it runs a straight
+ * path instead of walking intake → close. Each step is annotated from the tool's
+ * own decision card (title / requires / purpose), so the lane is self-describing
+ * and Phase-1 cards + Phase-2 routing reinforce each other.
+ */
+const TASK_LANE_PATTERNS: Array<{ test: RegExp; intent: string; lane: DefinitiveMcpToolName[] }> = [
+  { test: /\b(qoe|quality of earnings|working capital|nwc|valuation|ebitda|sde|lbo|dcf|dscr|debt service|irr|moic|accretion|run (a|the) model|model run)\b/i, intent: 'run_a_model', lane: ['lookup_model_slot', 'execute_model', 'run_model_iteration'] },
+  { test: /\b(data ?room|index the (docs|files|sources)|organi[sz]e (docs|files|sources)|bucket the)\b/i, intent: 'organize_data_room', lane: ['compose_data_room_index', 'prepare_diligence_request'] },
+  { test: /\b(diligence (request|list|ask|checklist)|dd (request|list)|request list)\b/i, intent: 'prepare_diligence', lane: ['prepare_diligence_request', 'disclose_subset'] },
+  { test: /\b(ioi|indication of interest)\b/i, intent: 'prepare_ioi', lane: ['prepare_ioi_packet', 'compose_document_draft'] },
+  { test: /\b(loi|letter of intent|term ?sheet)\b/i, intent: 'prepare_loi', lane: ['prepare_loi_packet', 'compose_document_draft'] },
+  { test: /\b(funds ?flow|sources and uses|sources & uses|closing arithmetic)\b/i, intent: 'build_funds_flow', lane: ['generate_funds_flow', 'compose_close_readiness'] },
+  { test: /\b(negotiation|open terms|concession|counter ?offer)\b/i, intent: 'negotiation_prep', lane: ['prepare_negotiation_brief'] },
+  { test: /\b(pmi|integration plan|post.?close|day 0|day one|100.?day)\b/i, intent: 'plan_pmi', lane: ['compose_pmi_plan'] },
+  { test: /\b(citation|authority|cite|source for the)\b/i, intent: 'resolve_authority', lane: ['lookup_citation'] },
+  { test: /\b(market data|multiple|comps|comparable|sofr|prime rate|hsr|naics)\b/i, intent: 'fetch_market_data', lane: ['fetch_market_data', 'execute_model'] },
+  { test: /\b(structure|permutation|vehicle|asset vs stock|asset or stock|363 sale|sale.?leaseback)\b/i, intent: 'compare_structures', lane: ['generate_permutations', 'compute_best_vehicle'] },
+  { test: /\b(close readiness|closing checklist|ready to close)\b/i, intent: 'close_readiness', lane: ['compose_close_readiness', 'generate_funds_flow'] },
+  { test: /\b(cim|ic memo|investment memo|deal brief|valuation report|generate (a |the )?(doc|document|memo|report))\b/i, intent: 'generate_document', lane: ['compose_document_draft', 'generate_output_doc'] },
+];
+
+function buildTaskLane(objective: string | null, payloadHint: Record<string, any>) {
+  const text = `${objective || ''} ${payloadHint?.dealType || ''}`.trim().toLowerCase();
+  const generic = !text || ['continue_deal', 'start', 'start a deal', 'begin', 'continue', 'unknown'].includes(text);
+  const match = generic ? undefined : TASK_LANE_PATTERNS.find(pattern => pattern.test.test(text));
+  if (!match) {
+    return {
+      detected: false,
+      note: 'No single narrow task detected — this looks like full-lifecycle work. Follow next_suggested_calls, which advance the deal gate by gate.',
+    };
+  }
+  return {
+    detected: true,
+    taskIntent: match.intent,
+    note: 'You were handed a specific task. Run this focused lane top to bottom; you do not need to walk the whole journey. Each tool\'s full card (whenToUse / whenNotToUse / requires / produces) is on tools/list.',
+    lane: match.lane.map((toolName, index) => {
+      const guide = DEFINITIVE_TOOL_GUIDE[toolName];
+      return { step: index + 1, toolName, title: guide.title, requires: guide.requires, why: guide.purpose };
+    }),
+  };
+}
+
+export function buildAgentEntryAssessment(toolInput: Record<string, any>) {
   const payload = {
     ...safeRecord(toolInput.payload),
     ...safeRecord(toolInput.dealState?.payload),
@@ -3231,7 +3275,32 @@ function buildAgentEntryAssessment(toolInput: Record<string, any>) {
       dealType,
       knownArtifacts,
     }),
-    takeBackArtifacts: ['AgentEntryAssessment', 'DealState', 'MissingInputContract', 'DealPlan', 'ModelOutput', 'DocumentDraft', 'MCPCallHint[]'],
+    // Phase 2 — narrow-task lane. If the agent was handed one task, this is the
+    // straight path; otherwise it says "follow the full-lifecycle next calls".
+    taskLane: buildTaskLane(objective, normalizedPayloadHint),
+    // Phase 3 — methodology education. Cheap, stateless reads that teach the
+    // agent the methodology so it iterates correctly rather than guessing.
+    methodologyEducation: {
+      rule: 'Educate yourself before deep work so your iteration is methodology-correct. These reads are cheap and stateless.',
+      calls: [
+        { toolName: 'describe_methodology', why: 'Deal OS doctrine: lifecycle, gates G1-G30, models M101-M223, schemas, and THE LINE boundary.' },
+        { toolName: 'get_deal_runbook', why: `Ordered runbook for the ${journey || 'detected'} journey: stages, minimum inputs, primary tools, done-when.`, inputHint: { journey: journey || undefined } },
+        { toolName: 'introspect_capabilities', why: 'Which capabilities and M-slots apply to THIS deal shape before you act.' },
+      ],
+    },
+    // The closed loop, stated explicitly: orient → pick (by card) → execute →
+    // iterate (next_suggested_calls carry advancesGate) → close (take back package).
+    loopContract: {
+      rule: 'The agent loop is closed and iterative. Repeat until the definition of done is met, then take back the package.',
+      steps: [
+        'ORIENT — read this assessment; for doctrine read describe_methodology / get_deal_runbook.',
+        'PICK — choose a tool by its card (title, whenToUse, whenNotToUse, requires) on tools/list. If you were handed one task, use taskLane.',
+        'EXECUTE — call the tool with the inputHint.',
+        'ITERATE — read the result’s next_suggested_calls: each names the tool, the reason, and advancesGate (which gate it clears).',
+        'CLOSE — when next_suggested_calls offers compose_deal_package and no P0 remains, the required-input loop is satisfied; take back the package or proceed to the next gate.',
+      ],
+    },
+    takeBackArtifacts: ['AgentEntryAssessment', 'TaskLane', 'DealState', 'MissingInputContract', 'DealPlan', 'ModelOutput', 'DocumentDraft', 'MCPCallHint[]'],
     the_line_invariant:
       'This assessment routes software work only. It does not advise, negotiate, represent, guarantee, move money, or make legal, tax, fairness, solvency, feasibility, or closing determinations.',
   };

@@ -84,7 +84,7 @@ import {
   buildDefinitiveOAuthAuthorizationServerMetadata,
 } from '../server/services/definitiveMcpAuthMetadata.js';
 import { evaluateDefinitiveStackOverlays } from '../server/services/definitiveStackOverlays.js';
-import { executeDefinitiveMcpTool, listDefinitiveMcpTools } from '../server/services/definitiveMcp.js';
+import { buildAgentEntryAssessment, executeDefinitiveMcpTool, listDefinitiveMcpTools } from '../server/services/definitiveMcp.js';
 
 const expectedTools = [
   'ingest_deal_payload',
@@ -135,6 +135,13 @@ const expectedTools = [
   'close_deal',
   'update_tax_position',
   'query_admin_data',
+  // Registered so THE LINE gate emits the correct refusal envelope (see
+  // DEFINITIVE_MCP_TOOLS). These complete the 53-tool surface.
+  'scan_market',
+  'find_providers',
+  'record_loi_executed',
+  'share_document',
+  'update_firm_memory',
 ];
 
 let passed = 0;
@@ -161,6 +168,36 @@ await test('MCP inventory advertises the v0.1 tool surface', async () => {
   const outputDocInput = inventory.tools.find(tool => tool.name === 'generate_output_doc')?.inputSchema?.properties || {};
   assert(Boolean((outputDocInput as any).requireFreshModels), 'generate_output_doc exposes requireFreshModels freshness gate');
   assert(Boolean((outputDocInput as any).currentAssumptions), 'generate_output_doc exposes currentAssumptions freshness comparison');
+});
+
+await test('Every tool is decision-legible (agent-facing decision cards)', async () => {
+  const inventory = listDefinitiveMcpTools();
+  assert(inventory.tools.every(tool => typeof (tool as any).title === 'string' && (tool as any).title.length > 0), 'every tool exposes a title');
+  assert(inventory.tools.every(tool => Boolean((tool as any).guide)), 'every tool exposes a decision card (guide)');
+  assert(inventory.tools.every(tool => {
+    const g = (tool as any).guide;
+    return g && g.purpose && Array.isArray(g.whenToUse) && Array.isArray(g.whenNotToUse)
+      && g.requires && g.produces && Array.isArray(g.typicalNext) && Array.isArray(g.stage);
+  }), 'every card has purpose/whenToUse/whenNotToUse/requires/produces/typicalNext/stage');
+  const names = new Set(inventory.tools.map(tool => tool.name));
+  assert(inventory.tools.every(tool => ((tool as any).guide.typicalNext as string[]).every(next => names.has(next))), 'typicalNext only references real tools');
+  const standalone = inventory.tools.filter(tool => ['none', 'model_input', 'partial_facts'].includes((tool as any).guide.requires));
+  assert(standalone.length >= 10, 'at least 10 tools are standalone-capable (the narrow-task signal)');
+  assertEqual((inventory.tools.find(tool => tool.name === 'execute_model') as any)?.guide.requires, 'model_input', 'execute_model requires only model_input');
+});
+
+await test('assess_deal_entry closes the agent loop (task lane + contract + education)', async () => {
+  const narrow: any = buildAgentEntryAssessment({ objective: 'run a working capital / QoE model on this deal' });
+  assertEqual(narrow.taskLane.detected, true, 'narrow task is detected');
+  assertEqual(narrow.taskLane.taskIntent, 'run_a_model', 'narrow task routes to the run_a_model lane');
+  assert(narrow.taskLane.lane.length >= 1 && narrow.taskLane.lane[0].toolName === 'lookup_model_slot', 'lane starts at lookup_model_slot');
+  assert(narrow.taskLane.lane.every((step: any) => step.toolName && step.title && step.requires), 'each lane step carries its card fields');
+
+  const full: any = buildAgentEntryAssessment({ objective: 'help me sell my business', journey: 'sell' });
+  assertEqual(full.taskLane.detected, false, 'full-journey work is not a narrow task');
+  assertEqual(full.loopContract.steps.length, 5, 'loop contract has 5 steps (orient/pick/execute/iterate/close)');
+  assert(full.methodologyEducation.calls.some((call: any) => call.toolName === 'describe_methodology'), 'education points to describe_methodology');
+  assert(full.methodologyEducation.calls.some((call: any) => call.toolName === 'get_deal_runbook'), 'education points to get_deal_runbook');
 });
 
 await test('Agent card exposes DEFINITIVE endpoints and tools', async () => {

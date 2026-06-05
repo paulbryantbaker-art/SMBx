@@ -111,6 +111,12 @@ export interface DefinitiveMcpCallHint {
   priority: 'P0' | 'P1' | 'P2';
   reason: string;
   inputHint: Record<string, any>;
+  /**
+   * Which methodology gate/stage this call moves the deal toward, so an agent
+   * iterating the loop sees not just WHAT to call next but WHICH gate it clears.
+   * `null` for meta/re-score calls that don't advance a gate.
+   */
+  advancesGate?: string | null;
 }
 
 export interface DefinitiveRepresentationContext {
@@ -4659,11 +4665,16 @@ function buildCompletenessReport(
 
 function buildNextCallHints(state: DefinitiveDealState): DefinitiveMcpCallHint[] {
   const hints: DefinitiveMcpCallHint[] = [];
+  // The gate this iteration is working toward — attached to each call so the
+  // agent sees which gate a given next-step advances, closing the loop between
+  // "what do I call" and "where does it move the deal".
+  const nextGate = state.completenessReport.nextGate || null;
   if (state.missingInputContract.items.length > 0) {
     hints.push({
       toolName: 'update_deal_payload',
       priority: 'P0',
       reason: `Collect the minimal next input set: ${state.missingInputContract.minimalNextInputSet.join(', ') || 'any missing source fact'}.`,
+      advancesGate: nextGate,
       inputHint: {
         dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision },
         patch: Object.fromEntries(state.missingInputContract.minimalNextInputSet.map(field => [field, '<user_or_agent_supplied_value>'])),
@@ -4674,6 +4685,7 @@ function buildNextCallHints(state: DefinitiveDealState): DefinitiveMcpCallHint[]
     toolName: 'check_completeness',
     priority: 'P1',
     reason: 'Re-score the current DealState before creating or updating artifacts.',
+    advancesGate: null,
     inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
   });
   if (state.classificationKey.journey !== 'unknown') {
@@ -4681,6 +4693,7 @@ function buildNextCallHints(state: DefinitiveDealState): DefinitiveMcpCallHint[]
       toolName: 'compose_model_stack',
       priority: state.completenessReport.score >= 45 ? 'P0' : 'P1',
       reason: 'Translate the classification key and overlay gates into the applicable M101-M223 model stack. Treat modeling as iterative: each revised EV, EBITDA, debt, NWC, tax, diligence, or term input should produce a new versioned model run.',
+      advancesGate: nextGate,
       inputHint: {
         journey: state.classificationKey.journey,
         league: state.classificationKey.league === 'unknown' ? undefined : state.classificationKey.league,
@@ -4694,7 +4707,22 @@ function buildNextCallHints(state: DefinitiveDealState): DefinitiveMcpCallHint[]
       toolName: 'get_definition_of_done',
       priority: 'P2',
       reason: `Explain what done means for triggered overlays ${state.classificationKey.triggeredOverlayGates.join(', ')} without crossing THE LINE.`,
+      advancesGate: state.classificationKey.triggeredOverlayGates.join('+'),
       inputHint: { objective: state.classificationKey.triggeredOverlayGates.join(',') },
+    });
+  }
+  // Loop closure. When the required-input loop for the current gate is satisfied
+  // (no P0 fact-collection left), the agent should know the loop has a terminal:
+  // take back a portable package, or continue iterating to the next gate. Without
+  // this, a "complete enough" state would only ever suggest re-scoring — the agent
+  // could never tell it had reached done.
+  if (state.missingInputContract.items.length === 0) {
+    hints.push({
+      toolName: 'compose_deal_package',
+      priority: 'P1',
+      reason: `Required inputs for ${nextGate || 'the current gate'} are satisfied. Take back a portable DealPackage, or keep iterating toward ${nextGate || 'the next gate'}.`,
+      advancesGate: nextGate,
+      inputHint: { dealState: { cid: state.cid, stateHash: state.stateHash, revision: state.revision } },
     });
   }
   return hints;
