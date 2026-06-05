@@ -19,6 +19,7 @@
     "test:e2e": "playwright test",
     "test:definitive-auth-route": "npx tsx scripts/definitive-auth-route-smoke.ts",
     "test:definitive-agent-methodology": "npx tsx scripts/definitive-agent-methodology-matrix.ts",
+    "test:definitive-agent-coverage": "npx tsx scripts/definitive-agent-coverage-matrix.ts",
     "test:definitive-conformance": "npx tsx scripts/definitive-conformance.ts",
     "test:definitive-entitlements": "npx tsx scripts/definitive-entitlement-smoke.ts",
     "test:definitive-reference": "npx tsx scripts/definitive-reference-smoke.ts",
