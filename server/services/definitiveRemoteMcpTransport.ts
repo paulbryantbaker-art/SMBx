@@ -338,12 +338,16 @@ function buildToolsListResult(params: unknown) {
   return {
     tools: selected.map(tool => ({
       name: tool.name,
-      title: tool.name.replace(/_/g, ' '),
+      title: tool.title || tool.name.replace(/_/g, ' '),
       description: tool.description,
       inputSchema: tool.inputSchema,
       outputSchema: tool.outputSchema,
       annotations: tool.annotations,
       _meta: {
+        // Agent-facing decision card: when to use / when not to / what it needs
+        // (requires) / what it produces / typical next calls / stage / THE LINE.
+        // Lets an agent pick the right tool cold and iterate the methodology.
+        guide: tool.guide,
         requiredScopes: tool.requiredScopes,
         lineStatus: tool.lineStatus,
         lineReason: tool.lineReason,

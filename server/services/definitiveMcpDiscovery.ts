@@ -77,11 +77,12 @@ function buildDiscoveryTool(tool: ReturnType<typeof listDefinitiveMcpTools>['too
   const toolSchemaMap = getDefinitiveToolSchemaMap();
   return {
     name: tool.name,
-    title: tool.name.replace(/_/g, ' '),
+    title: tool.title || tool.name.replace(/_/g, ' '),
     description: `${tool.description} Implements ${DEFINITIVE_SPEC_VERSION} / The Diligence Standard with THE LINE status ${tool.lineStatus}.`,
     inputSchema: tool.inputSchema,
     outputSchema: buildToolOutputSchema(tool.name),
     annotations: buildToolAnnotations(tool.name, tool.lineStatus),
+    guide: tool.guide,
     requiredScopes: tool.requiredScopes,
     lineStatus: tool.lineStatus,
     refusalBehavior: tool.refusalBehavior,
