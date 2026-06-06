@@ -1309,6 +1309,16 @@
 @media (max-width: 760px) {
   .mkt .home-price-split { grid-template-columns: 1fr; gap: 30px; }
 }
+/* ---- generic responsive 2-col split (hero / setup / guarantees, etc.) ---- */
+.mkt .mkt-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(40px, 5vw, 64px);
+  align-items: center;
+}
+@media (max-width: 860px) {
+  .mkt .mkt-split { grid-template-columns: 1fr; gap: 36px; }
+}
 /* capability chips when placed on a dark section (Home "is software") */
 .mkt .dark .computed-closer-tags .tag {
   background: rgba(255, 255, 255, .05);

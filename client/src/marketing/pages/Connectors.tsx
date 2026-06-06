@@ -23,7 +23,7 @@ const SURFACES: Array<{ glyph: 'circle' | 'diamond' | 'square'; h: string; p: st
   },
 ];
 
-/* Stat band */
+/* Proof strip */
 const STATS: Array<{ n: string; c: string }> = [
   { n: '53', c: 'deterministic tools, exposed over MCP' },
   { n: 'OAuth', c: 'scoped access on every connection' },
@@ -45,6 +45,13 @@ const GUARANTEES: Array<{ label: string; p: string }> = [
     label: 'THE LINE HOLDS EVERYWHERE',
     p: 'Yulia refuses the same things in every surface — no recommendations, no negotiation, no counterparty contact.',
   },
+];
+
+/* Setup steps */
+const STEPS: Array<{ n: string; h: string; p: string }> = [
+  { n: '1', h: 'Add the connector', p: 'Drop in the smbX.ai endpoint and authorize with OAuth.' },
+  { n: '2', h: 'Scope what it can touch', p: 'Choose the deals, tools, and data the agent may access.' },
+  { n: '3', h: 'Ask Yulia, anywhere', p: 'Request a valuation or a peg from inside your agent — same artifacts, same audit trail.' },
 ];
 
 function SurfaceGlyph({ kind }: { kind: 'circle' | 'diamond' | 'square' }) {
@@ -76,27 +83,37 @@ function SurfaceGlyph({ kind }: { kind: 'circle' | 'diamond' | 'square' }) {
 export default function Connectors() {
   return (
     <MarketingShell>
-      {/* HERO */}
-      <section style={{ paddingBottom: 'calc(var(--pad-y) * .55)' }}>
-        <div className="wrap center reveal" style={{ maxWidth: '54ch', margin: '0 auto' }}>
-          <span className="eyebrow" style={{ justifyContent: 'center' }}>Connectors</span>
-          <h1
-            className="display"
-            style={{ margin: '18px auto 0', maxWidth: '15ch' }}
-          >
-            <Brand /> is the substrate. Use it anywhere.
-          </h1>
-          <p className="lead" style={{ margin: '22px auto 0', maxWidth: '52ch' }}>
-            Yulia lives in the <Brand /> app — and inside Claude, ChatGPT, and any agent that speaks MCP.
-            Same diligence tools, same hash-verifiable artifacts, same audit trail, wherever you
-            already work.
-          </p>
+      {/* HERO — copy left, Yulia-in-Claude as the product right (one full-width unit) */}
+      <section style={{ paddingBottom: 'clamp(44px,6vw,84px)' }}>
+        <div className="wrap mkt-split">
+          <div className="reveal">
+            <span className="eyebrow">Connectors</span>
+            <h1 className="display" style={{ marginTop: 18, fontSize: 'clamp(2.5rem,4.3vw,3.9rem)', maxWidth: '15ch' }}>
+              <Brand /> is the substrate. Use it anywhere.
+            </h1>
+            <p className="lead" style={{ marginTop: 22, maxWidth: '48ch' }}>
+              Yulia lives in the <Brand /> app — and inside Claude, ChatGPT, and any agent that
+              speaks MCP. Same tools, same hash-verifiable artifacts, same audit trail, wherever
+              you already work.
+            </p>
+          </div>
+          <div className="reveal" data-d="1">
+            <ProductFrame variant="browser" url="claude.ai/chat" delay={0.05}>
+              <AssistantSurfaceMock assistant="Claude" />
+            </ProductFrame>
+          </div>
         </div>
       </section>
 
-      {/* WHERE IT RUNS */}
-      <section style={{ paddingTop: 0 }}>
+      {/* THREE SURFACES + PROOF — grouped on one tint band */}
+      <section className="tint">
         <div className="wrap">
+          <div className="reveal" style={{ maxWidth: '52ch', marginBottom: 'clamp(40px,4.6vw,60px)' }}>
+            <h2>Three surfaces. One substrate.</h2>
+            <p className="lead" style={{ marginTop: 18 }}>
+              However you reach Yulia, the tools and the guarantees are identical.
+            </p>
+          </div>
           <div className="grid g3">
             {SURFACES.map((s, i) => (
               <div className="card hoverable reveal" data-d={i % 3} key={s.h}>
@@ -106,20 +123,7 @@ export default function Connectors() {
               </div>
             ))}
           </div>
-
-          {/* smbX inside the assistant — a real tool call returning a hash-stamped artifact */}
-          <div className="reveal" data-d="1" style={{ maxWidth: 560, margin: '56px auto 0' }}>
-            <ProductFrame variant="browser" url="claude.ai/chat" delay={0.1}>
-              <AssistantSurfaceMock assistant="Claude" />
-            </ProductFrame>
-          </div>
-        </div>
-      </section>
-
-      {/* STAT BAND */}
-      <section style={{ paddingTop: 0 }}>
-        <div className="wrap">
-          <div className="reveal statband">
+          <div className="reveal statband" style={{ marginTop: 'clamp(44px,5vw,68px)' }}>
             {STATS.map((s) => (
               <div className="statband-cell" key={s.n}>
                 <div className="statband-num">{s.n}</div>
@@ -130,21 +134,13 @@ export default function Connectors() {
         </div>
       </section>
 
-      {/* SETUP FLOW */}
-      <section style={{ paddingTop: 'calc(var(--pad-y) * .5)' }}>
-        <div
-          className="wrap"
-          style={{ display: 'grid', gridTemplateColumns: '1fr 1.05fr', gap: 56, alignItems: 'center' }}
-        >
+      {/* SETUP — three steps + the config (2-col) */}
+      <section>
+        <div className="wrap mkt-split">
           <div className="reveal">
-            <span className="eyebrow">Setup</span>
-            <h2 style={{ marginTop: 18, maxWidth: '13ch' }}>Connected in three steps.</h2>
+            <h2 style={{ maxWidth: '13ch' }}>Connected in three steps.</h2>
             <div style={{ marginTop: 30, display: 'flex', flexDirection: 'column', gap: 22 }}>
-              {[
-                { n: '1', h: 'Add the connector', p: 'Drop in the smbX.ai endpoint and authorize with OAuth.' },
-                { n: '2', h: 'Scope what it can touch', p: 'Choose the deals, tools, and data the agent may access.' },
-                { n: '3', h: 'Ask Yulia, anywhere', p: 'Request a valuation or a peg from inside your agent — same artifacts, same audit trail.' },
-              ].map(step => (
+              {STEPS.map(step => (
                 <div key={step.n} style={{ position: 'relative', paddingLeft: 46, minHeight: 38 }}>
                   <span
                     className="mono"
@@ -194,29 +190,29 @@ export default function Connectors() {
         </div>
       </section>
 
-      {/* THE GUARANTEES */}
+      {/* GUARANTEES — claims left, a real audit record right (2-col, dark) */}
       <section className="dark">
-        <div className="wrap">
-          <div className="reveal" style={{ maxWidth: '50ch', marginBottom: 52 }}>
-            <span className="eyebrow">The guarantees</span>
-            <h2 style={{ marginTop: 18 }}>The same work, verifiable across surfaces.</h2>
-          </div>
-          <div className="grid g3">
-            {GUARANTEES.map((g, i) => (
-              <div className="reveal" data-d={i % 3} key={g.label}>
-                <div
-                  className="mono"
-                  style={{ fontSize: '.74rem', color: 'var(--accent)', letterSpacing: '.06em', marginBottom: 12 }}
-                >
-                  {g.label}
+        <div className="wrap mkt-split">
+          <div className="reveal">
+            <h2 style={{ maxWidth: '15ch' }}>The same work, verifiable across surfaces.</h2>
+            <div style={{ marginTop: 32, display: 'flex', flexDirection: 'column', gap: 24 }}>
+              {GUARANTEES.map((g) => (
+                <div key={g.label}>
+                  <div
+                    className="mono"
+                    style={{ fontSize: '.74rem', color: 'var(--accent)', letterSpacing: '.06em', marginBottom: 8 }}
+                  >
+                    {g.label}
+                  </div>
+                  <p>{g.p}</p>
                 </div>
-                <p>{g.p}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
           <div
             className="mock reveal"
-            style={{ marginTop: 44, background: 'var(--dk-2)', borderColor: 'var(--dk-line)', maxWidth: 620 }}
+            data-d="1"
+            style={{ background: 'var(--dk-2)', borderColor: 'var(--dk-line)' }}
           >
             <div className="mock-bar" style={{ background: 'var(--dk-2)', borderColor: 'var(--dk-line)' }}>
               <span className="mock-title" style={{ color: 'rgba(255,255,255,.5)' }}>audit record</span>
