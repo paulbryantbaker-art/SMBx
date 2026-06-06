@@ -1516,7 +1516,7 @@
 .mkt a.tag-link:hover { background: var(--accent-soft); border-color: var(--accent-strong); color: var(--on-accent); }
 /* shared computed closer — chips + proof line, centered, sits above the CTA on every page */
 .mkt .computed-closer { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px; }
-.mkt .computed-closer-tags { justify-content: center; max-width: 760px; }
+.mkt .computed-closer-tags { justify-content: center; max-width: 920px; }
 .mkt .computed-closer-note { max-width: 56ch; font-size: .9rem; line-height: 1.6; color: var(--ink-3); }
 
 /* stat band — 4 metric cells in one outlined card (About · Connectors).
@@ -1560,15 +1560,15 @@
 .mkt .cta { background: var(--surface-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); overflow: hidden; }
 .mkt .cta::before {
   content: ""; position: absolute; left: 50%; top: 50%;
-  width: min(1120px, 94vw); height: min(560px, 64vw);
+  width: min(1320px, 96vw); height: min(580px, 64vw);
   transform: translate(-50%, -56%);
   background: radial-gradient(ellipse at center, rgba(43,255,119,.18) 0%, rgba(43,255,119,0) 64%);
   pointer-events: none; z-index: 0;
 }
-.mkt .cta-inner { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; align-items: center; text-align: center; }
-.mkt .cta h2 { font-size: clamp(2.1rem, 4.2vw, 3.5rem); line-height: 1.03; letter-spacing: -.028em; max-width: 20ch; }
-.mkt .cta-sub { margin-top: 20px; max-width: 48ch; font-size: clamp(1.06rem, 1.4vw, 1.28rem); line-height: 1.5; color: var(--ink-2); text-wrap: pretty; }
-.mkt .cta-launcher { margin-top: clamp(28px, 4vw, 38px); width: 100%; max-width: 720px; }
+.mkt .cta-inner { position: relative; z-index: 1; max-width: var(--maxw); margin: 0 auto; padding: 0 32px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.mkt .cta h2 { font-size: clamp(2.4rem, 4.8vw, 4.2rem); line-height: 1.02; letter-spacing: -.03em; max-width: 24ch; }
+.mkt .cta-sub { margin-top: 22px; max-width: 54ch; font-size: clamp(1.08rem, 1.45vw, 1.3rem); line-height: 1.5; color: var(--ink-2); text-wrap: pretty; }
+.mkt .cta-launcher { margin-top: clamp(28px, 4vw, 38px); width: 100%; max-width: 760px; }
 .mkt .cta-actions { margin-top: clamp(26px, 3.4vw, 36px); display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
 .mkt .cta-launcher + .cta-actions { margin-top: 18px; }
 
