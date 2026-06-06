@@ -1555,8 +1555,12 @@
 .mkt .tiers { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; align-items: start; }
 .mkt .tier { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; display: flex; flex-direction: column; min-height: 100%; transition: transform .25s var(--ease), box-shadow .25s, border-color .25s; }
 .mkt .tier:hover { transform: translateY(-4px); box-shadow: 0 24px 50px -34px rgba(25,24,19,.4); border-color: var(--line-2); }
+/* Recommended tier — the one elevated card (accent border, green-tinted lift, badge). */
+.mkt .tier.is-recommended { position: relative; border-color: var(--accent); border-width: 2px; box-shadow: 0 2px 8px -2px rgba(25,24,19,.06), 0 34px 70px -38px rgba(16,224,96,.32); }
+.mkt .tier.is-recommended:hover { border-color: var(--accent); }
+.mkt .tbadge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent); color: var(--on-accent); font-family: var(--mono); font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 6px 13px; border-radius: 999px; white-space: nowrap; box-shadow: 0 6px 16px -6px rgba(16,224,96,.5); }
 .mkt .tier .tname { font-weight: 600; font-size: 1.15rem; }
-.mkt .tier .tprice { font-family: var(--mono); font-size: 1.7rem; font-weight: 500; margin: 14px 0 4px; letter-spacing: -.02em; }
+.mkt .tier .tprice { font-family: var(--mono); font-size: 1.9rem; font-weight: 500; margin: 14px 0 4px; letter-spacing: -.02em; font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
 .mkt .tier .tprice small { font-size: .85rem; color: var(--ink-3); font-weight: 400; }
 .mkt .tier .tdesc { font-size: .92rem; color: var(--ink-2); margin-bottom: 18px; }
 .mkt .tier ul { list-style: none; margin: 0 0 22px; padding: 0; display: flex; flex-direction: column; gap: 9px; flex: 1; }

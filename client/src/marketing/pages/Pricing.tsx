@@ -4,7 +4,7 @@ import { Brand } from '../Brand';
 import { enterApp } from '../useEnterApp';
 import { ClosingCTA } from '../components/ClosingCTA';
 
-const TIERS: Array<{ name: string; price: string; per?: string; desc: string; features: string[] }> = [
+const TIERS: Array<{ name: string; price: string; per?: string; desc: string; features: string[]; recommended?: boolean }> = [
   {
     name: 'Free',
     price: '$0',
@@ -31,6 +31,7 @@ const TIERS: Array<{ name: string; price: string; per?: string; desc: string; fe
     name: 'Pro',
     price: '$249',
     per: '/ month',
+    recommended: true,
     desc: 'Everything in Solo, plus:',
     features: [
       'CIM and pitch-book generation',
@@ -108,14 +109,15 @@ export default function Pricing() {
         <div className="wrap-wide">
           <div className="tiers reveal">
             {TIERS.map(t => (
-              <div className="tier" key={t.name}>
+              <div className={`tier${t.recommended ? ' is-recommended' : ''}`} key={t.name}>
+                {t.recommended && <div className="tbadge">Recommended</div>}
                 <div className="tname">{t.name}</div>
                 <div className="tprice">{t.price}{t.per && <small> {t.per}</small>}</div>
                 <div className="tdesc">{t.desc}</div>
                 <ul>
                   {t.features.map(f => <li key={f}>{f}</li>)}
                 </ul>
-                <button className="btn btn-ghost" style={{ width: '100%' }} onClick={() => enterApp()}>
+                <button className={`btn ${t.recommended ? 'btn-accent' : 'btn-ghost'}`} style={{ width: '100%' }} onClick={() => enterApp()}>
                   Ask Yulia
                 </button>
               </div>
