@@ -39,7 +39,7 @@
   --d: 1;
   --pad-y: calc(148px * var(--d));
   --gap: calc(28px * var(--d));
-  --maxw: 1240px;
+  --maxw: 1280px;
   --radius: 16px;
   --radius-sm: 10px;
   --ease: cubic-bezier(.22,.61,.36,1);
@@ -86,7 +86,7 @@
 
 /* ---- Layout ---- */
 .mkt .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 32px; width: 100%; }
-.mkt .wrap-wide { max-width: 1320px; margin: 0 auto; padding: 0 32px; width: 100%; }
+.mkt .wrap-wide { max-width: var(--maxw); margin: 0 auto; padding: 0 32px; width: 100%; }   /* unified with .wrap — one site-wide column */
 .mkt section { padding: var(--pad-y) 0; position: relative; }
 .mkt .section-tight { padding: calc(var(--pad-y) * .55) 0; }
 .mkt .tint { background: var(--surface-2); }   /* soft warm panel — white product cards pop on it (Notion-style) */
