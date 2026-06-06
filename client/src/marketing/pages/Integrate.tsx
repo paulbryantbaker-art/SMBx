@@ -336,7 +336,7 @@ export default function Integrate() {
       <section style={{ paddingBottom: 'calc(var(--pad-y) * .5)' }}>
         <div className="wrap" style={{ display: 'grid', gridTemplateColumns: '1.05fr .95fr', gap: 56, alignItems: 'center' }}>
           <div className="reveal">
-            <h1 className="display" data-d="1" style={{ fontSize: 'clamp(2.4rem,4.6vw,4rem)', maxWidth: '14ch' }}>
+            <h1 className="display" data-d="1" style={{ maxWidth: '14ch' }}>
               The first 100 days, planned from the actuals.
             </h1>
             <p className="lead reveal" data-d="2" style={{ marginTop: 24, maxWidth: '47ch' }}>

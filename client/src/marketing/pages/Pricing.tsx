@@ -93,7 +93,7 @@ export default function Pricing() {
       <section style={{ paddingBottom: 'calc(var(--pad-y) * .5)' }}>
         <div className="wrap-wide center reveal">
           <span className="eyebrow" style={{ justifyContent: 'center' }}>Pricing</span>
-          <h1 className="display" style={{ fontSize: 'clamp(2.3rem,4.4vw,3.8rem)', marginTop: 18 }}>
+          <h1 className="display" style={{ marginTop: 18 }}>
             Flat software pricing. Nothing tied to your deal.
           </h1>
           <p className="lead" style={{ marginTop: 22, maxWidth: '52ch', marginLeft: 'auto', marginRight: 'auto' }}>

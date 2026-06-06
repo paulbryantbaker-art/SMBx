@@ -43,23 +43,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* HERO ARTIFACT — full-bleed workspace that grows into focus as you scroll.
-          Breaks out of the page wrap edge-to-edge with a side gutter + inner cap. */}
+      {/* HERO ARTIFACT — the workspace as a contained, elevated card (Notion-style)
+          that grows into focus as you scroll, rather than bleeding edge-to-edge. */}
       <section style={{ paddingTop: 'clamp(28px,4vw,56px)', paddingBottom: 0 }}>
-        <div
-          style={{
-            width: '100vw',
-            marginLeft: 'calc(50% - 50vw)',
-            marginRight: 'calc(50% - 50vw)',
-            paddingLeft: 22,
-            paddingRight: 22,
-          }}
-        >
-          <div style={{ maxWidth: 1840, margin: '0 auto' }}>
-            <ScrollGrow>
-              <HeroWorkspace />
-            </ScrollGrow>
-          </div>
+        <div className="wrap" style={{ maxWidth: 1280 }}>
+          <ScrollGrow>
+            <HeroWorkspace />
+          </ScrollGrow>
         </div>
       </section>
 
@@ -98,7 +88,7 @@ export default function Home() {
       <hr className="divider" />
 
       {/* WHAT SMBX PRODUCES */}
-      <section>
+      <section className="tint">
         <div className="wrap">
           <div className="reveal" style={{ maxWidth: '60ch', marginBottom: 56 }}>
             <span className="eyebrow">The work product</span>

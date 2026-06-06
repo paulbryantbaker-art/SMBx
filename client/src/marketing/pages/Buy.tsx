@@ -43,7 +43,7 @@ export default function Buy() {
         <div className="wrap" style={{ display: 'grid', gridTemplateColumns: '1.05fr .95fr', gap: 56, alignItems: 'center' }}>
           <div className="reveal">
             <span className="eyebrow">For buyers</span>
-            <h1 className="display" data-d="1" style={{ fontSize: 'clamp(2.4rem,4.6vw,4rem)', marginTop: 20, maxWidth: '14ch' }}>
+            <h1 className="display" data-d="1" style={{ marginTop: 20, maxWidth: '14ch' }}>
               Diligence at the speed you need to move.
             </h1>
             <p className="lead reveal" data-d="2" style={{ marginTop: 24, maxWidth: '46ch' }}>

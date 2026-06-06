@@ -82,7 +82,7 @@ export default function Connectors() {
           <span className="eyebrow" style={{ justifyContent: 'center' }}>Connectors</span>
           <h1
             className="display"
-            style={{ fontSize: 'clamp(2.3rem,4.6vw,4rem)', margin: '18px auto 0', maxWidth: '15ch' }}
+            style={{ margin: '18px auto 0', maxWidth: '15ch' }}
           >
             <Brand /> is the substrate. Use it anywhere.
           </h1>

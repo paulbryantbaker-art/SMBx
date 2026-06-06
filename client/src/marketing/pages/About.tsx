@@ -39,7 +39,7 @@ export default function About() {
             <span className="eyebrow">About</span>
             <h1
               className="display"
-              style={{ fontSize: 'clamp(2.3rem,4.6vw,4rem)', marginTop: 18, maxWidth: '15ch' }}
+              style={{ marginTop: 18, maxWidth: '15ch' }}
             >
               We built the diligence work, not the advice.
             </h1>
