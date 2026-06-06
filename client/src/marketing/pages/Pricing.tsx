@@ -182,29 +182,6 @@ export default function Pricing() {
         </div>
       </section>
 
-      {/* WHAT WE NEVER CHARGE — safe-harbor anchor */}
-      <section className="dark">
-        <div className="wrap" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 56, alignItems: 'center' }}>
-          <div className="reveal">
-            <span className="eyebrow">The line</span>
-            <h2 style={{ marginTop: 18, maxWidth: '14ch' }}>What we never charge.</h2>
-            <p className="lead" style={{ marginTop: 22, maxWidth: '44ch' }}>
-              <Brand /> is software. Every fee is flat — a subscription or a per-artifact price,
-              charged on generation. Nothing we charge moves with the size or outcome of
-              your deal.
-            </p>
-          </div>
-          <div className="reveal" data-d="1" style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {NEVER.map(n => (
-              <div className="kv" key={n} style={{ padding: '16px 0' }}>
-                <span style={{ color: '#fff', fontWeight: 500 }}>{n}</span>
-                <span className="mono" style={{ fontSize: '.82rem', color: 'var(--accent)' }}>never</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* FAQ */}
       <section style={{ paddingTop: 'var(--pad-y)' }}>
         <div className="wrap">
@@ -223,6 +200,29 @@ export default function Pricing() {
                 <div className="faq-a">
                   <p>{item.a}</p>
                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* WHAT WE NEVER CHARGE — safe-harbor anchor, closing trust note before the CTA */}
+      <section className="dark">
+        <div className="wrap" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 56, alignItems: 'center' }}>
+          <div className="reveal">
+            <span className="eyebrow">The line</span>
+            <h2 style={{ marginTop: 18, maxWidth: '14ch' }}>What we never charge.</h2>
+            <p className="lead" style={{ marginTop: 22, maxWidth: '44ch' }}>
+              <Brand /> is software. Every fee is flat — a subscription or a per-artifact price,
+              charged on generation. Nothing we charge moves with the size or outcome of
+              your deal.
+            </p>
+          </div>
+          <div className="reveal" data-d="1" style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            {NEVER.map(n => (
+              <div className="kv" key={n} style={{ padding: '16px 0' }}>
+                <span style={{ color: '#fff', fontWeight: 500 }}>{n}</span>
+                <span className="mono" style={{ fontSize: '.82rem', color: 'var(--accent)' }}>never</span>
               </div>
             ))}
           </div>
