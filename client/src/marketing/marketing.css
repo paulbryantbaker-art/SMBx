@@ -32,6 +32,7 @@
 
   /* type */
   --sans: 'Schibsted Grotesk', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --serif: 'Fraunces', 'Spectral', Georgia, 'Times New Roman', serif;  /* editorial display — headlines only */
   --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
   /* density + scale */
@@ -61,10 +62,16 @@
 /* ---- Type ----
    text-wrap: balance evens out heading line lengths and kills ugly one-word
    last-line orphans (e.g. a lone "deal." / "move.") across every page. */
-.mkt h1, .mkt h2, .mkt h3, .mkt h4 { margin: 0; font-weight: 600; letter-spacing: -.022em; line-height: 1.05; color: var(--ink); text-wrap: balance; }
-.mkt .display { font-size: clamp(2.7rem,6.2vw,5.1rem); font-weight: 600; letter-spacing: -.03em; line-height: 1.0; }
+.mkt h1, .mkt h2, .mkt h3, .mkt h4 { margin: 0; color: var(--ink); text-wrap: balance; }
+/* Editorial serif on the display + section headlines (the premium moments).
+   Body, h3/h4, eyebrows, and labels stay Schibsted Grotesk. A serif wants looser
+   tracking + a touch more leading than the tight grotesk, and reads more elegant
+   a hair lighter — so weight drops from 600 to ~520-540. */
+.mkt .display, .mkt h1, .mkt h2 { font-family: var(--serif); font-optical-sizing: auto; font-weight: 540; letter-spacing: -.012em; line-height: 1.08; }
+.mkt h3, .mkt h4 { font-weight: 600; letter-spacing: -.02em; line-height: 1.08; }
+.mkt .display { font-size: clamp(2.7rem,6.2vw,5.1rem); font-weight: 520; letter-spacing: -.018em; line-height: 1.02; }
 .mkt h2 { font-size: clamp(2rem,3.8vw,3.2rem); }
-.mkt h3 { font-size: clamp(1.3rem,2vw,1.6rem); letter-spacing: -.018em; }
+.mkt h3 { font-size: clamp(1.3rem,2vw,1.6rem); }
 .mkt p { margin: 0; }
 .mkt .lead { font-size: clamp(1.18rem,1.7vw,1.45rem); line-height: 1.5; color: var(--ink-2); font-weight: 400; letter-spacing: -.01em; text-wrap: pretty; }
 .mkt .body { color: var(--ink-2); }
