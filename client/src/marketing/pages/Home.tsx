@@ -25,8 +25,9 @@ const PRODUCES: Array<{ h: string; p: string }> = [
 export default function Home() {
   return (
     <MarketingShell>
-      {/* HERO — full-bleed dark band (like the Standard page hero) */}
-      <section className="dark" style={{ paddingTop: 'clamp(56px,9vw,120px)', paddingBottom: 'clamp(52px,8vw,104px)' }}>
+      {/* HERO — one unit: headline, lead, launcher, AND the deal card, all on the
+          dark band (Notion-style — the white product card sits on the dark hero). */}
+      <section className="dark" style={{ paddingTop: 'clamp(56px,9vw,120px)', paddingBottom: 'clamp(56px,8vw,110px)' }}>
         <div className="wrap center stack" style={{ alignItems: 'center', gap: 0 }}>
           <h1 className="display reveal" data-d="1" style={{ margin: 0, maxWidth: '16ch' }}>
             Analyst-grade deal work. On demand.
@@ -41,12 +42,9 @@ export default function Home() {
             <YuliaLauncher />
           </div>
         </div>
-      </section>
-
-      {/* HERO ARTIFACT — the workspace as a contained, elevated card (Notion-style)
-          that grows into focus as you scroll, rather than bleeding edge-to-edge. */}
-      <section style={{ paddingTop: 'clamp(28px,4vw,56px)', paddingBottom: 0 }}>
-        <div className="wrap">
+        {/* The deal workspace, inside the hero. color:var(--ink) resets the inherited
+            text to dark so the white card reads correctly on the dark band. */}
+        <div className="wrap" style={{ marginTop: 'clamp(44px,6vw,80px)', color: 'var(--ink)' }}>
           <ScrollGrow>
             <HeroWorkspace />
           </ScrollGrow>
