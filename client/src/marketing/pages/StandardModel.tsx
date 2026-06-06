@@ -1,4 +1,3 @@
-import { type CSSProperties } from 'react';
 import { Link } from 'wouter';
 import { MarketingShell } from '../MarketingShell';
 import { enterApp } from '../useEnterApp';
@@ -34,14 +33,6 @@ const EXAMPLE_LINES: Array<{ line: string; amount: string }> = [
   { line: 'Accrued liabilities', amount: '$(38,000)' },
 ];
 
-/* page-local list style — matches CD's .doc ul (diamond marker, ruled rows) */
-const listStyle: CSSProperties = { margin: '0 0 12px', padding: 0, listStyle: 'none', maxWidth: '64ch' };
-const liStyle: CSSProperties = { padding: '8px 0 8px 22px', position: 'relative', color: 'var(--ink-2)', borderBottom: '1px solid var(--line)' };
-
-function Diamond() {
-  return <span style={{ position: 'absolute', left: 2, top: 15, width: 6, height: 6, background: 'var(--accent)', transform: 'rotate(45deg)' }} />;
-}
-
 export default function StandardModel() {
   return (
     <MarketingShell>
@@ -57,7 +48,7 @@ export default function StandardModel() {
           <div className="std-doc" style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 56, alignItems: 'start' }}>
             {/* main column */}
             <div className="reveal">
-              <h1 className="display" style={{ fontSize: 'clamp(2rem,3.6vw,3rem)', marginBottom: 14 }}>
+              <h1 className="display" style={{ fontSize: 'clamp(2.6rem,4.2vw,3.8rem)', marginBottom: 18 }}>
                 Working capital peg
               </h1>
               <p style={{ fontSize: '1.1rem', color: 'var(--ink-2)', maxWidth: '64ch' }}>
@@ -67,18 +58,18 @@ export default function StandardModel() {
                 dollar.
               </p>
 
-              <h2 style={{ fontSize: '1.5rem', margin: '42px 0 14px' }}>When it matters</h2>
+              <h2>When it matters</h2>
               <p style={{ color: 'var(--ink-2)', maxWidth: '64ch' }}>
                 Set during structuring (B4 / S3), trued up at close (B5 / S5). Gets
                 contentious when the business is seasonal or working-capital-intensive.
               </p>
 
-              <h2 style={{ fontSize: '1.5rem', margin: '42px 0 14px' }}>Inputs</h2>
-              <ul style={listStyle}>
-                {INPUTS.map(i => <li key={i} style={liStyle}><Diamond />{i}</li>)}
+              <h2>Inputs</h2>
+              <ul className="doc-list">
+                {INPUTS.map(i => <li key={i}>{i}</li>)}
               </ul>
 
-              <h2 style={{ fontSize: '1.5rem', margin: '42px 0 14px' }}>Computation</h2>
+              <h2>Computation</h2>
               <pre className="mono" style={{ background: 'var(--dk)', color: '#fff', borderRadius: 12, padding: '22px 24px', fontSize: '.92rem', lineHeight: 1.8, whiteSpace: 'pre-wrap', maxWidth: '64ch', margin: '6px 0 12px' }}>
 <span style={{ color: 'rgba(255,255,255,.4)' }}># net working capital</span>{'\n'}
 NWC = included current assets − included current liabilities{'\n'}
@@ -92,12 +83,12 @@ Adj = delivered NWC − Peg{'\n'}
 {'      '}<span style={{ color: 'var(--accent)' }}>(−)</span> buyer pays less
               </pre>
 
-              <h2 style={{ fontSize: '1.5rem', margin: '42px 0 14px' }}>Controlling authorities &amp; conventions</h2>
-              <ul style={listStyle}>
-                {AUTHORITIES.map(a => <li key={a} style={liStyle}><Diamond />{a}</li>)}
+              <h2>Controlling authorities &amp; conventions</h2>
+              <ul className="doc-list">
+                {AUTHORITIES.map(a => <li key={a}>{a}</li>)}
               </ul>
 
-              <h2 style={{ fontSize: '1.5rem', margin: '42px 0 14px' }}>Worked example</h2>
+              <h2>Worked example</h2>
               <p style={{ color: 'var(--ink-2)', maxWidth: '64ch' }}>
                 Trailing-12-month reference period, cash-free / debt-free basis.
               </p>

@@ -942,6 +942,12 @@
 /* ---- shared section heads ---- */
 .mkt .std-sec-head { max-width: 62ch; margin-bottom: clamp(28px, 4vw, 44px); }
 .mkt .std-sec-intro { margin-top: 18px; }
+/* Methodology doc pages — Notion-style editorial: serif section headings with
+   generous top air, and ruled lists with a diamond marker. */
+.mkt .std-doc h2 { font-size: clamp(1.5rem, 2.2vw, 1.95rem); letter-spacing: -.012em; margin: clamp(50px, 5vw, 76px) 0 16px; }
+.mkt .doc-list { margin: 0 0 14px; padding: 0; list-style: none; max-width: 64ch; }
+.mkt .doc-list li { position: relative; padding: 11px 0 11px 22px; color: var(--ink-2); border-bottom: 1px solid var(--line); }
+.mkt .doc-list li::before { content: ""; position: absolute; left: 2px; top: 18px; width: 6px; height: 6px; background: var(--accent); transform: rotate(45deg); }
 
 /* ---- 1 · HERO ---- */
 .mkt .std-hero-sec { padding-bottom: calc(var(--pad-y) * .8); }
