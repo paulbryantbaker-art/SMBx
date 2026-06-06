@@ -37,7 +37,7 @@
 
   /* density + scale */
   --d: 1;
-  --pad-y: calc(120px * var(--d));
+  --pad-y: calc(148px * var(--d));
   --gap: calc(28px * var(--d));
   --maxw: 1180px;
   --radius: 16px;
@@ -69,11 +69,11 @@
    a hair lighter — so weight drops from 600 to ~520-540. */
 .mkt .display, .mkt h1, .mkt h2 { font-family: var(--serif); font-optical-sizing: auto; font-weight: 540; letter-spacing: -.012em; line-height: 1.08; }
 .mkt h3, .mkt h4 { font-weight: 600; letter-spacing: -.02em; line-height: 1.08; }
-.mkt .display { font-size: clamp(2.7rem,6.2vw,5.1rem); font-weight: 520; letter-spacing: -.018em; line-height: 1.02; }
-.mkt h2 { font-size: clamp(2rem,3.8vw,3.2rem); }
+.mkt .display { font-size: clamp(3.1rem,6.6vw,5.6rem); font-weight: 560; letter-spacing: -.022em; line-height: 1.0; }
+.mkt h2 { font-size: clamp(2.3rem,4.3vw,3.6rem); }
 .mkt h3 { font-size: clamp(1.3rem,2vw,1.6rem); }
 .mkt p { margin: 0; }
-.mkt .lead { font-size: clamp(1.18rem,1.7vw,1.45rem); line-height: 1.5; color: var(--ink-2); font-weight: 400; letter-spacing: -.01em; text-wrap: pretty; }
+.mkt .lead { font-size: clamp(1.28rem,1.85vw,1.58rem); line-height: 1.5; color: var(--ink-2); font-weight: 400; letter-spacing: -.01em; text-wrap: pretty; }
 .mkt .body { color: var(--ink-2); }
 .mkt strong { font-weight: 600; color: var(--ink); }
 .mkt .eyebrow {
@@ -163,7 +163,7 @@
 .mkt .launcher-note { font-family: var(--mono); font-size: .78rem; color: var(--ink-3); margin-top: 14px; letter-spacing: .01em; }
 
 /* ---- PRODUCT MOCKUPS ---- */
-.mkt .mock { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 30px 60px -38px rgba(25,24,19,.45); overflow: hidden; text-align: left; }
+.mkt .mock { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 1px 0 rgba(255,255,255,.7) inset, 0 2px 6px -2px rgba(25,24,19,.05), 0 26px 56px -34px rgba(25,24,19,.32); overflow: hidden; text-align: left; }
 .mkt .mock-bar { display: flex; align-items: center; gap: 8px; padding: 11px 14px; border-bottom: 1px solid var(--line); background: var(--surface); }
 .mkt .mock-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--surface-3); }
 .mkt .mock-title { font-family: var(--mono); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-left: 6px; }
