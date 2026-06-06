@@ -4,7 +4,7 @@ import { YuliaLauncher } from '../YuliaChat';
 import { enterApp } from '../useEnterApp';
 
 /** Capabilities shown in the shared closer; each chip links into the Standard. */
-const CLOSER_CAPABILITIES = [
+export const CLOSER_CAPABILITIES = [
   'Working capital peg', 'Quality-of-earnings preview', 'LBO & SBA models',
   'Valuation baseline', '§1060 allocation', 'CIM & pitch books',
   'Structuring scenarios', 'Covenant compliance', '100-day plan',

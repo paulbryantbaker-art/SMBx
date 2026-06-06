@@ -2,7 +2,8 @@ import { Link } from 'wouter';
 import { MarketingShell } from '../MarketingShell';
 import { Brand } from '../Brand';
 import { YuliaLauncher } from '../YuliaChat';
-import { ClosingCTA } from '../components/ClosingCTA';
+import { CLOSER_CAPABILITIES } from '../components/ClosingCTA';
+import { enterApp } from '../useEnterApp';
 import { HeroWorkspace } from '../components/HeroWorkspace';
 import { ScrollGrow } from '../components/ScrollGrow';
 import { ProductFrame } from '../components/ProductFrame';
@@ -144,34 +145,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PRICING SUMMARY */}
-      <section className="center">
-        <div className="wrap">
-          <div className="reveal" style={{ margin: '0 auto 44px' }}>
-            <h2 style={{ fontSize: 'clamp(1.9rem,3.2vw,2.6rem)', maxWidth: '20ch', marginInline: 'auto' }}>Flat software pricing. Nothing tied to your deal.</h2>
-          </div>
-          <div className="grid" style={{ gap: 10, maxWidth: 720, margin: '0 auto' }}>
-            <PriceRow plan="Free" note="Talk to Yulia as much as you want. One deliverable, free." />
-            <PriceRow plan="$99 / mo" note="Unlimited valuation, scoring, and diligence artifacts." />
-            <PriceRow plan="$249 / mo" note="+ CIMs, deal rooms, structuring, and market discovery." />
-            <PriceRow plan="$749 / mo" note="+ shared vault, firm templates, and seats." />
-            <PriceRow plan="$3,000+ / mo" note="+ single-tenant, SSO, and governed agent scope." />
-          </div>
-          <p className="mono" style={{ marginTop: 26, fontSize: '.9rem', color: 'var(--ink-3)' }}>
-            No success fees. No percentage of your deal. No fee tied to whether it closes.
-          </p>
-          <div style={{ marginTop: 24 }}>
-            <Link href="/pricing" className="link-arrow">
-              See full pricing
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-
-      {/* CLOSING CTA */}
-      <ClosingCTA heading="Bring a deal. See what Yulia builds." />
+      {/* CLOSING ZIG-ZAG — pricing + CTA combined into one wide alternating band */}
+      <ClosingZigzag />
     </MarketingShell>
   );
 }
@@ -179,8 +154,70 @@ export default function Home() {
 function PriceRow({ plan, note }: { plan: string; note: string }) {
   return (
     <div className="row" style={{ justifyContent: 'space-between', gap: 20, padding: '14px 0', borderBottom: '1px solid var(--line)' }}>
-      <span className="mono" style={{ fontWeight: 500, minWidth: 120 }}>{plan}</span>
-      <span style={{ color: 'var(--ink-2)', fontSize: '.95rem', textAlign: 'right' }}>{note}</span>
+      <span className="mono" style={{ fontWeight: 500, minWidth: 110 }}>{plan}</span>
+      <span style={{ color: 'var(--ink-2)', fontSize: '.92rem', textAlign: 'right' }}>{note}</span>
     </div>
+  );
+}
+
+/**
+ * ClosingZigzag — Home's combined pricing + CTA closer, built on the shared
+ * journey-stepper zig-zag (.zz-* classes): two rows alternating down a center
+ * spine. Replaces the two narrow centered sections that read sparse once the
+ * column went wide. Row 1 = pricing (copy left, price-list card right); row 2 =
+ * CTA (capability chips left, heading + Ask Yulia right).
+ */
+function ClosingZigzag() {
+  return (
+    <section style={{ paddingBottom: 'clamp(44px,6vw,84px)' }}>
+      <div className="wrap">
+        <ol className="zz-track" style={{ listStyle: 'none' }}>
+          <li className="zz-row" style={{ ['--zz-i' as string]: '0' }}>
+            <span className="zz-node" aria-hidden="true"><span className="zz-node-dot" /></span>
+            <div className="zz-text">
+              <h2 className="zz-title">Flat software pricing. Nothing tied to your deal.</h2>
+              <p className="mono" style={{ marginTop: 20, fontSize: '.9rem', color: 'var(--ink-3)', lineHeight: 1.6 }}>
+                No success fees. No percentage of your deal. No fee tied to whether it closes.
+              </p>
+              <div style={{ marginTop: 24 }}>
+                <Link href="/pricing" className="link-arrow">
+                  See full pricing
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                </Link>
+              </div>
+            </div>
+            <div className="zz-visual">
+              <div className="mock" style={{ padding: '6px 24px' }}>
+                <PriceRow plan="Free" note="One deliverable, free." />
+                <PriceRow plan="$99 / mo" note="Valuation, scoring, diligence." />
+                <PriceRow plan="$249 / mo" note="+ CIMs, deal rooms, discovery." />
+                <PriceRow plan="$749 / mo" note="+ shared vault, templates, seats." />
+                <PriceRow plan="$3,000+ / mo" note="+ single-tenant, SSO, agents." />
+              </div>
+            </div>
+          </li>
+          <li className="zz-row is-odd" style={{ ['--zz-i' as string]: '1' }}>
+            <span className="zz-node" aria-hidden="true"><span className="zz-node-dot" /></span>
+            <div className="zz-text">
+              <h2 className="zz-title">Bring a deal. See what Yulia builds.</h2>
+              <p style={{ marginTop: 18, color: 'var(--ink-2)', fontSize: '1.05rem', lineHeight: 1.55 }}>
+                Paste a few numbers or a tax return — Yulia turns it into analyst-grade work,
+                with every figure traceable to its source.
+              </p>
+              <div style={{ marginTop: 26 }}>
+                <button className="btn btn-accent btn-lg" onClick={() => enterApp()}>Ask Yulia</button>
+              </div>
+            </div>
+            <div className="zz-visual">
+              <div className="tags computed-closer-tags">
+                {CLOSER_CAPABILITIES.map(c => (
+                  <Link key={c} href="/standard" className="tag tag-link">{c}</Link>
+                ))}
+              </div>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
   );
 }
