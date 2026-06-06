@@ -90,7 +90,6 @@ export default function About() {
         </div>
       </section>
 
-      <hr className="divider" />
 
       {/* WHAT SMBX IS NOT — dark safe-harbor block (reused from Home) */}
       <section className="dark">

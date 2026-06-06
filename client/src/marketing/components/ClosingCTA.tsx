@@ -11,29 +11,6 @@ const CLOSER_CAPABILITIES = [
 ];
 
 /**
- * ComputedCloser — the shared "computed" proof strip rendered by ClosingCTA
- * directly above the CTA band, so every marketing page ends the same way.
- * The capability chips link into The Diligence Standard; the line states the
- * trust property. Replaces the old Home-only static proof strip.
- */
-function ComputedCloser() {
-  return (
-    <section className="section-tight">
-      <div className="wrap reveal computed-closer">
-        <div className="tags computed-closer-tags">
-          {CLOSER_CAPABILITIES.map(c => (
-            <Link key={c} href="/standard" className="tag tag-link">{c}</Link>
-          ))}
-        </div>
-        <p className="computed-closer-note mono">
-          Every artifact is computed, hash-verifiable, and pinned to the methodology that produced it.
-        </p>
-      </div>
-    </section>
-  );
-}
-
-/**
  * ClosingCTA — the one shared closing-CTA primitive for every marketing page.
  *
  * Before this, each page hand-rolled its own end-of-page CTA: five different
@@ -64,10 +41,13 @@ export function ClosingCTA({
   secondary?: { label: ReactNode; onClick?: () => void };
 }) {
   return (
-    <>
-      <ComputedCloser />
-      <section className="cta">
+    <section className="cta">
       <div className="cta-inner reveal">
+        <div className="tags computed-closer-tags" style={{ justifyContent: 'center', marginBottom: 'clamp(28px,3.5vw,44px)' }}>
+          {CLOSER_CAPABILITIES.map(c => (
+            <Link key={c} href="/standard" className="tag tag-link">{c}</Link>
+          ))}
+        </div>
         <h2>{heading}</h2>
         {sub ? <p className="cta-sub">{sub}</p> : null}
         {launcher ? (
@@ -88,8 +68,10 @@ export function ClosingCTA({
             Ask Yulia
           </button>
         </div>
+        <p className="computed-closer-note mono" style={{ marginTop: 'clamp(24px,3vw,36px)' }}>
+          Every artifact is computed, hash-verifiable, and pinned to the methodology that produced it.
+        </p>
       </div>
-      </section>
-    </>
+    </section>
   );
 }

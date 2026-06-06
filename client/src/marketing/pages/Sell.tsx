@@ -76,7 +76,6 @@ export default function Sell() {
         </div>
       </section>
 
-      <hr className="divider" />
 
       {/* THE SELL-SIDE PATH */}
       <section>

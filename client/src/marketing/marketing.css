@@ -39,7 +39,7 @@
   --d: 1;
   --pad-y: calc(148px * var(--d));
   --gap: calc(28px * var(--d));
-  --maxw: 1180px;
+  --maxw: 1240px;
   --radius: 16px;
   --radius-sm: 10px;
   --ease: cubic-bezier(.22,.61,.36,1);

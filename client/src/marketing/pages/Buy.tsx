@@ -83,7 +83,6 @@ export default function Buy() {
         </div>
       </section>
 
-      <hr className="divider" />
 
       {/* THE BUY-SIDE PATH */}
       <section>

@@ -357,7 +357,6 @@ export default function Integrate() {
         </div>
       </section>
 
-      <hr className="divider" />
 
       {/* THE FIRST 100 DAYS, STAGE BY STAGE — interactive stepper */}
       <section>

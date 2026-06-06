@@ -359,7 +359,6 @@ export default function Raise() {
         </div>
       </section>
 
-      <hr className="divider" />
 
       {/* THE RAISE, STAGE BY STAGE — interactive stepper */}
       <section>

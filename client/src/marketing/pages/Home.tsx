@@ -46,14 +46,13 @@ export default function Home() {
       {/* HERO ARTIFACT — the workspace as a contained, elevated card (Notion-style)
           that grows into focus as you scroll, rather than bleeding edge-to-edge. */}
       <section style={{ paddingTop: 'clamp(28px,4vw,56px)', paddingBottom: 0 }}>
-        <div className="wrap" style={{ maxWidth: 1280 }}>
+        <div className="wrap">
           <ScrollGrow>
             <HeroWorkspace />
           </ScrollGrow>
         </div>
       </section>
 
-      <hr className="divider" />
 
       {/* HOW IT WORKS */}
       <section>
@@ -85,7 +84,6 @@ export default function Home() {
         </div>
       </section>
 
-      <hr className="divider" />
 
       {/* WHAT SMBX PRODUCES */}
       <section className="tint">
@@ -109,7 +107,6 @@ export default function Home() {
         </div>
       </section>
 
-      <hr className="divider" />
 
       {/* THE DILIGENCE STANDARD */}
       <section>
@@ -174,7 +171,6 @@ export default function Home() {
         </div>
       </section>
 
-      <hr className="divider" />
 
       {/* CLOSING CTA */}
       <ClosingCTA heading="Bring a deal. See what Yulia builds." />
