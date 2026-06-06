@@ -1299,6 +1299,27 @@
    NO card of its own (avoids double-framing while keeping rows consistent).
    Tokens only. `.jstep-head` / `.jstep-intro` are reused by the component.
    ============================================================ */
+/* ---- Home closer: flat-pricing split (copy | price card) ---- */
+.mkt .home-price-split {
+  display: grid;
+  grid-template-columns: 1.04fr 1fr;
+  gap: clamp(36px, 5vw, 76px);
+  align-items: center;
+}
+@media (max-width: 760px) {
+  .mkt .home-price-split { grid-template-columns: 1fr; gap: 30px; }
+}
+/* capability chips when placed on a dark section (Home "is software") */
+.mkt .dark .computed-closer-tags .tag {
+  background: rgba(255, 255, 255, .05);
+  border-color: rgba(255, 255, 255, .16);
+  color: rgba(255, 255, 255, .84);
+}
+.mkt .dark .computed-closer-tags .tag:hover {
+  border-color: var(--accent);
+  color: #fff;
+}
+
 .mkt .zigzag { display: flex; flex-direction: column; }
 .mkt .jstep-head { max-width: 60ch; margin-bottom: clamp(28px, 3.6vw, 48px); }
 .mkt .jstep-intro { margin-top: 16px; }

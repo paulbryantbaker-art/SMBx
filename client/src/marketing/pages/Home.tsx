@@ -142,11 +142,16 @@ export default function Home() {
           <p className="reveal" data-d="2" style={{ margin: '22px auto 0', fontFamily: 'var(--mono)', letterSpacing: '.04em', color: 'var(--accent)' }}>
             <Brand /> computes. You decide.
           </p>
+          <div className="reveal computed-closer-tags" data-d="3" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 10, maxWidth: '56ch', margin: 'clamp(36px,4.4vw,56px) auto 0' }}>
+            {CLOSER_CAPABILITIES.map(c => (
+              <Link key={c} href="/standard" className="tag tag-link">{c}</Link>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* CLOSING ZIG-ZAG — pricing + CTA combined into one wide alternating band */}
-      <ClosingZigzag />
+      {/* CLOSER — flat-pricing split + the closing CTA band */}
+      <HomeCloser />
     </MarketingShell>
   );
 }
@@ -161,32 +166,30 @@ function PriceRow({ plan, note }: { plan: string; note: string }) {
 }
 
 /**
- * ClosingZigzag — Home's combined pricing + CTA closer, built on the shared
- * journey-stepper zig-zag (.zz-* classes): two rows alternating down a center
- * spine. Replaces the two narrow centered sections that read sparse once the
- * column went wide. Row 1 = pricing (copy left, price-list card right); row 2 =
- * CTA (capability chips left, heading + Ask Yulia right).
+ * HomeCloser — the bottom of Home: a flat-pricing split (copy left, price-card
+ * right) above the closing CTA band. The capability chips that used to sit here
+ * now live up in the "smbX is software" section — in an alternating layout they
+ * stranded far from the CTA and read orphaned.
  */
-function ClosingZigzag() {
+function HomeCloser() {
   return (
-    <section style={{ paddingBottom: 'clamp(44px,6vw,84px)' }}>
-      <div className="wrap">
-        <ol className="zz-track" style={{ listStyle: 'none' }}>
-          <li className="zz-row" style={{ ['--zz-i' as string]: '0' }}>
-            <span className="zz-node" aria-hidden="true"><span className="zz-node-dot" /></span>
-            <div className="zz-text">
-              <h2 className="zz-title">Flat software pricing. Nothing tied to your deal.</h2>
-              <p className="mono" style={{ marginTop: 20, fontSize: '.9rem', color: 'var(--ink-3)', lineHeight: 1.6 }}>
+    <>
+      <section style={{ paddingBottom: 'clamp(40px,5vw,72px)' }}>
+        <div className="wrap">
+          <div className="home-price-split">
+            <div className="reveal">
+              <h2>Flat software pricing. Nothing tied to your deal.</h2>
+              <p className="mono" style={{ marginTop: 22, fontSize: '.9rem', color: 'var(--ink-3)', lineHeight: 1.6, maxWidth: '34ch' }}>
                 No success fees. No percentage of your deal. No fee tied to whether it closes.
               </p>
-              <div style={{ marginTop: 24 }}>
+              <div style={{ marginTop: 26 }}>
                 <Link href="/pricing" className="link-arrow">
                   See full pricing
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 </Link>
               </div>
             </div>
-            <div className="zz-visual">
+            <div className="reveal" data-d="1">
               <div className="mock" style={{ padding: '6px 24px' }}>
                 <PriceRow plan="Free" note="One deliverable, free." />
                 <PriceRow plan="$99 / mo" note="Valuation, scoring, diligence." />
@@ -195,29 +198,25 @@ function ClosingZigzag() {
                 <PriceRow plan="$3,000+ / mo" note="+ single-tenant, SSO, agents." />
               </div>
             </div>
-          </li>
-          <li className="zz-row is-odd" style={{ ['--zz-i' as string]: '1' }}>
-            <span className="zz-node" aria-hidden="true"><span className="zz-node-dot" /></span>
-            <div className="zz-text">
-              <h2 className="zz-title">Bring a deal. See what Yulia builds.</h2>
-              <p style={{ marginTop: 18, color: 'var(--ink-2)', fontSize: '1.05rem', lineHeight: 1.55 }}>
-                Paste a few numbers or a tax return — Yulia turns it into analyst-grade work,
-                with every figure traceable to its source.
-              </p>
-              <div style={{ marginTop: 26 }}>
-                <button className="btn btn-accent btn-lg" onClick={() => enterApp()}>Ask Yulia</button>
-              </div>
-            </div>
-            <div className="zz-visual">
-              <div className="tags computed-closer-tags">
-                {CLOSER_CAPABILITIES.map(c => (
-                  <Link key={c} href="/standard" className="tag tag-link">{c}</Link>
-                ))}
-              </div>
-            </div>
-          </li>
-        </ol>
-      </div>
-    </section>
+          </div>
+        </div>
+      </section>
+
+      <section className="cta">
+        <div className="cta-inner reveal">
+          <h2>Bring a deal. See what Yulia builds.</h2>
+          <p className="cta-sub">
+            Paste a few numbers or a tax return — Yulia turns it into analyst-grade work,
+            with every figure traceable to its source.
+          </p>
+          <div className="cta-actions">
+            <button className="btn btn-accent btn-lg" onClick={() => enterApp()}>Ask Yulia</button>
+          </div>
+          <p className="computed-closer-note mono" style={{ marginTop: 'clamp(24px,3vw,36px)' }}>
+            Every artifact is computed, hash-verifiable, and pinned to the methodology that produced it.
+          </p>
+        </div>
+      </section>
+    </>
   );
 }
