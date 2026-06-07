@@ -16,6 +16,20 @@ import {
 } from "../../../hooks/useV6WorkspaceData";
 import { executeSurfaceAction, runActionAnalysis, type ActionDeal } from "../../../lib/v6ActionContracts";
 import { isSurfaceActionId, type SurfaceActionId } from "../../../lib/v6SurfaceActions";
+import { getJourneyGates } from "@shared/gateRegistry";
+
+/* ─── Methodology stage progress ─── */
+interface StageCell { id: string; name: string; state: "done" | "current" | "upcoming" }
+interface StageProgress {
+  journeyLabel: string;
+  stages: StageCell[];
+  currentIndex: number;
+  currentName: string;
+  total: number;
+  nextName: string | null;
+  deliverablesDone: number;
+  deliverablesTotal: number;
+}
 
 interface Stat { k: string; v: string; sub: string }
 interface LinkedFile {
@@ -271,6 +285,45 @@ interface DeliverableRow {
   artifact_kind?: string | null;
 }
 
+/* Reference-layout samples (shown only when no numeric deal id is in scope). */
+const SAMPLE_STAGE_PROGRESS: StageProgress = {
+  journeyLabel: "BUY",
+  stages: [
+    { id: "B0", name: "Thesis", state: "done" },
+    { id: "B1", name: "Sourcing", state: "done" },
+    { id: "B2", name: "Valuation", state: "current" },
+    { id: "B3", name: "Due Diligence", state: "upcoming" },
+    { id: "B4", name: "Structuring", state: "upcoming" },
+    { id: "B5", name: "Closing", state: "upcoming" },
+  ],
+  currentIndex: 2,
+  currentName: "Valuation",
+  total: 6,
+  nextName: "Due Diligence",
+  deliverablesDone: 3,
+  deliverablesTotal: 7,
+};
+
+const SAMPLE_STATS: Stat[] = [
+  { k: "Revenue", v: "$8.4M", sub: "Trailing twelve months" },
+  { k: "SDE", v: "$1.9M", sub: "23% of revenue" },
+  { k: "EBITDA", v: "$1.6M", sub: "19% margin" },
+  { k: "Asking price", v: "$9.2M", sub: "5.8× earnings" },
+  { k: "Modeled valuation", v: "$7.6M–$9.1M", sub: "From Yulia's model" },
+];
+
+const SAMPLE_LINKED_WORK: { analyses: LinkedFile[]; documents: LinkedFile[] } = {
+  analyses: [
+    { kind: "analysis", title: "Valuation triangulation", status: "live", sub: "DCF · comps · precedent · 2h ago", id: "sample-val" },
+    { kind: "analysis", title: "LBO — base / downside", status: "live", sub: "IRR 24% · MOIC 2.6× · 1d ago", id: "sample-lbo" },
+    { kind: "analysis", title: "Working capital peg", status: "saved", sub: "12-mo avg · $486K · 3d ago", id: "sample-wc" },
+  ],
+  documents: [
+    { kind: "doc", title: "IOI draft · v3", status: "draft", sub: "Yulia drafting · 2m ago", id: "sample-ioi" },
+    { kind: "doc", title: "Buyer fit memo", status: "live", sub: "4 pages · 1h ago", id: "sample-memo" },
+  ],
+};
+
 export function V6DealView({
   id,
   title,
@@ -333,11 +386,7 @@ export function V6DealView({
 
   // ─── Derive display data ──────────────────────────────────────────
   const real = data?.deal;
-  const stats: Stat[] = real ? buildStats(real) : [];
-  const linkedFiles: LinkedFile[] = linked && linked.length > 0
-    ? linked.map(deliverableToLinkedFile)
-    : [];
-
+  const stats: Stat[] = real ? buildStats(real) : numericId === null ? SAMPLE_STATS : [];
   const heroSub = real
     ? [
         real.revenue ? `${fmtCents(real.revenue)} revenue` : null,
@@ -359,6 +408,12 @@ export function V6DealView({
   const modelRefreshNeeds = (operating.brief?.modelRefreshNeeds ?? [])
     .filter(item => item.dealId === String(numericId));
   const primaryDeliverable = primaryDeliverableForJourney(real?.journey_type);
+  const stageProgress = real
+    ? buildStageProgress(real, data?.gates ?? [], data?.deliverableStats)
+    : numericId === null ? SAMPLE_STAGE_PROGRESS : null;
+  const linkedWork = (linked && linked.length > 0)
+    ? splitLinkedWork(linked)
+    : numericId === null ? SAMPLE_LINKED_WORK : { analyses: [], documents: [] };
   const setDealFileScope = (scope: FileScope | null) => {
     setActiveFileScope(scope);
     openTab({ id, kind: "deal", title: dealName, fileScope: scope ?? undefined });
@@ -576,6 +631,41 @@ export function V6DealView({
         <div className="wknote" style={D.actionBanner}>{actionNote}</div>
       )}
 
+      {/* Methodology "you are here" — the deal's stage in its journey, what's
+          done, and what's next. Driven by gate_progress + current_gate. */}
+      {stageProgress && (
+        <section style={{ marginBottom: 28 }}>
+          <div className="wkcard" style={D.stageCard}>
+            <div style={D.stageHead}>
+              <div style={{ minWidth: 0 }}>
+                <div className="mono" style={D.intelEyebrow}>WHERE THIS DEAL IS · {stageProgress.journeyLabel} METHODOLOGY</div>
+                <h2 style={D.stageTitle}>Stage {stageProgress.currentIndex + 1} of {stageProgress.total} — {stageProgress.currentName}</h2>
+              </div>
+              <div style={D.stageMeta}>
+                {stageProgress.nextName ? <span>Next: <strong style={{ color: "var(--ink)" }}>{stageProgress.nextName}</strong></span> : <span>Final stage</span>}
+                {stageProgress.deliverablesTotal > 0 && (
+                  <span style={{ display: "block", marginTop: 3 }}>{stageProgress.deliverablesDone} of {stageProgress.deliverablesTotal} deliverables complete</span>
+                )}
+              </div>
+            </div>
+            <div style={D.stageTrack}>
+              {stageProgress.stages.flatMap((s, i) => {
+                const node = (
+                  <div key={s.id} style={D.stageNodeWrap}>
+                    <div style={{ ...D.stageNode, ...(s.state === "done" ? D.stageNodeDone : s.state === "current" ? D.stageNodeCurrent : {}) }}>
+                      {s.state === "done" ? "✓" : i + 1}
+                    </div>
+                    <div style={{ ...D.stageNodeLabel, ...(s.state === "current" ? { color: "var(--ink)", fontWeight: 700 } : s.state === "done" ? { color: "var(--ink-2)" } : {}) }}>{s.name}</div>
+                  </div>
+                );
+                if (i === stageProgress.stages.length - 1) return [node];
+                return [node, <div key={`c-${s.id}`} style={{ ...D.stageConnector, ...(s.state === "done" ? { background: "var(--accent-strong)" } : {}) }} />];
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Yulia's verdict — her call, rendered straight from the deal brief
           (substrate). No app-computed verdict; honest "analyzing" when her
           read isn't ready. */}
@@ -654,18 +744,9 @@ export function V6DealView({
 
         <div style={D.intelSideStack}>
           <div className="wkcard" style={D.reviewCard}>
-            <div className="mono" style={D.intelEyebrow}>YULIA REVIEW</div>
-            <div style={D.reviewTop}>
-              <div>
-                <h2 style={D.reviewTitle}>{intelligence.reviewLabel}</h2>
-                <p style={D.reviewText}>{intelligence.reviewText}</p>
-              </div>
-              <div style={D.reviewScore}>
-                <strong>{intelligence.reviewScore}</strong>
-                <span>fit</span>
-              </div>
-            </div>
-            <div style={D.structureGrid}>
+            <div className="mono" style={D.intelEyebrow}>STRUCTURE READ</div>
+            <p style={{ ...D.reviewText, margin: "8px 0 0" }}>How structure, tax, and legal shape this deal before documents move.</p>
+            <div style={{ ...D.structureGrid, marginTop: 16 }}>
               <div>
                 <span className="mono" style={D.structureLabel}>TAX</span>
                 <p>{intelligence.tax}</p>
@@ -722,29 +803,35 @@ export function V6DealView({
         />
       )}
 
-      <V6Section eyebrow="LINKED WORK" title="Files Yulia produced" sub="Click any to open in a new tab.">
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 12 }}>
-          {linkedFiles.map(f => (
-            <div
-              key={`${f.title}-${f.id ?? ""}`}
-              className="wkcard tap"
-              role="button"
-              tabIndex={0}
-              aria-label={`${f.title} (${f.status})`}
-              onClick={() => openTab({ kind: f.kind, title: `${real?.business_name || title} · ${f.title}`, id: f.id })}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openTab({ kind: f.kind, title: `${real?.business_name || title} · ${f.title}`, id: f.id }); } }}
-              style={{ padding: "14px 16px", cursor: "pointer" }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <V6Icon name={f.kind === "doc" ? "doc" : "chart"} size={14} />
-                <V6DocStatus status={f.status} />
-              </div>
-              <div style={D.linkedTitle}>{f.title}</div>
-              <div style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 2 }}>{f.sub}</div>
-            </div>
-          ))}
-        </div>
+      {/* What Yulia has produced — analyses/models first (DCF, LBO, valuation,
+          working capital, QoE), then documents. Each links to open in a tab. */}
+      <V6Section
+        eyebrow="ANALYSES & MODELS"
+        title="Analyses Yulia has run"
+        sub={linkedWork.analyses.length ? "Valuations, models, and diligence analysis — click any to open." : undefined}
+      >
+        {linkedWork.analyses.length > 0 ? (
+          <div style={D.workGrid}>
+            {linkedWork.analyses.map(f => (
+              <WorkCard key={`a-${f.title}-${f.id ?? ""}`} file={f} dealName={real?.business_name || title} openTab={openTab} />
+            ))}
+          </div>
+        ) : (
+          <div className="wkcard" style={D.emptyWork}>
+            No DCF, LBO, or valuation modeled for this deal yet. Run one from <strong>Yulia recommends</strong> above, or ask Yulia to value it.
+          </div>
+        )}
       </V6Section>
+
+      {linkedWork.documents.length > 0 && (
+        <V6Section eyebrow="DOCUMENTS" title="Documents Yulia has drafted" sub="CIMs, LOIs, and memos — click any to open.">
+          <div style={D.workGrid}>
+            {linkedWork.documents.map(f => (
+              <WorkCard key={`d-${f.title}-${f.id ?? ""}`} file={f} dealName={real?.business_name || title} openTab={openTab} />
+            ))}
+          </div>
+        </V6Section>
+      )}
 
     </div>
   );
@@ -1045,6 +1132,29 @@ function DealFileRow({ file, last, onClick, relianceWarning }: {
       <span style={{ ...D.fileStatus, background: t.soft, color: t.ink }}>{file.status}</span>
       <span style={D.fileChevron} aria-hidden="true">›</span>
     </button>
+  );
+}
+
+// A single produced-work card (analysis/model or document); opens in a tab.
+function WorkCard({ file, dealName, openTab }: { file: LinkedFile; dealName: string; openTab: OpenTab }) {
+  const open = () => openTab({ kind: file.kind, title: `${dealName} · ${file.title}`, id: file.id });
+  return (
+    <div
+      className="wkcard tap"
+      role="button"
+      tabIndex={0}
+      aria-label={`${file.title} (${file.status})`}
+      onClick={open}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } }}
+      style={{ padding: "14px 16px", cursor: "pointer" }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <V6Icon name={file.kind === "doc" ? "doc" : "chart"} size={14} />
+        <V6DocStatus status={file.status} />
+      </div>
+      <div style={D.linkedTitle}>{file.title}</div>
+      <div style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 2 }}>{file.sub}</div>
+    </div>
   );
 }
 
@@ -1672,16 +1782,69 @@ function fmtCents(cents: number | null): string {
 }
 
 function buildStats(d: DealRow): Stat[] {
-  const margin = d.revenue && d.sde ? `${Math.round((d.sde / d.revenue) * 100)}% margin` : "—";
-  const askingMultiple = d.asking_price && d.sde ? `${(d.asking_price / d.sde).toFixed(1)}× SDE` : "—";
-  const multiple = (d.financials?.multiple as number | undefined);
+  const sdeMargin = d.revenue && d.sde ? `${Math.round((d.sde / d.revenue) * 100)}% of revenue` : "Owner earnings";
+  const ebitdaMargin = d.revenue && d.ebitda ? `${Math.round((d.ebitda / d.revenue) * 100)}% margin` : "Operating earnings";
+  const earnings = d.ebitda || d.sde || null;
+  const askingMultiple = d.asking_price && earnings ? `${(d.asking_price / earnings).toFixed(1)}× earnings` : "Not set";
+  const valuation = (d.financials?.valuation_midpoint ?? d.financials?.valuation ?? d.financials?.enterprise_value ?? null) as number | null;
   return [
-    { k: "Revenue", v: fmtCents(d.revenue),       sub: "TTM" },
-    { k: "SDE",     v: fmtCents(d.sde),           sub: margin },
-    { k: "Asking",  v: fmtCents(d.asking_price),  sub: askingMultiple },
-    { k: "EBITDA",  v: fmtCents(d.ebitda),        sub: multiple ? `${multiple.toFixed(1)}× target` : "Recast" },
-    { k: "Gate",    v: d.current_gate,            sub: d.league ?? "—" },
+    { k: "Revenue", v: fmtCents(d.revenue), sub: "Trailing twelve months" },
+    { k: "SDE", v: fmtCents(d.sde), sub: sdeMargin },
+    { k: "EBITDA", v: fmtCents(d.ebitda), sub: ebitdaMargin },
+    { k: "Asking price", v: fmtCents(d.asking_price), sub: askingMultiple },
+    { k: "Modeled valuation", v: valuation ? fmtCents(valuation) : "—", sub: valuation ? "From Yulia's model" : "Not modeled yet" },
   ];
+}
+
+// Methodology "you are here": map the deal's journey to its ordered stages and
+// mark each done / current / upcoming from gate_progress + current_gate.
+function buildStageProgress(
+  d: DealRow,
+  gates: { gate: string; status: string; completed_at: string | null }[],
+  stats?: { total: number; completed: number; in_progress: number },
+): StageProgress | null {
+  const journeyGates = getJourneyGates(d.journey_type);
+  if (journeyGates.length === 0) return null;
+  const completedSet = new Set(
+    gates.filter(g => g.completed_at || /complete|done|passed/i.test(g.status)).map(g => g.gate),
+  );
+  const currentIndex = Math.max(0, journeyGates.findIndex(g => g.id === d.current_gate));
+  const stages: StageCell[] = journeyGates.map((g, i) => ({
+    id: g.id,
+    name: g.name,
+    state: completedSet.has(g.id) || i < currentIndex ? "done" : i === currentIndex ? "current" : "upcoming",
+  }));
+  return {
+    journeyLabel: d.journey_type.toUpperCase(),
+    stages,
+    currentIndex,
+    currentName: journeyGates[currentIndex]?.name ?? "—",
+    total: journeyGates.length,
+    nextName: journeyGates[currentIndex + 1]?.name ?? null,
+    deliverablesDone: stats?.completed ?? 0,
+    deliverablesTotal: stats?.total ?? 0,
+  };
+}
+
+// Split produced work into analyses/models (DCF, LBO, valuation, working
+// capital, QoE…) vs. documents (CIM, LOI, memos) so each can be shown plainly.
+const ANALYSIS_KEYWORDS = /valuation|dcf|lbo|capital[-\s]?structure|working[-\s]?capital|\bqoe\b|quality[-\s]?of[-\s]?earnings|sensitivity|earnout|\bsba\b|dscr|comps?\b|scorecard|\bmodel\b|recast|tax[-\s]?impact|financial[-\s]?spread|cap[-\s]?table|covenant/i;
+
+function isAnalysisDeliverable(d: DeliverableRow): boolean {
+  if (d.artifact_kind && /model|analysis|snapshot|comparison/i.test(d.artifact_kind)) return true;
+  if (d.folder_category && /model|analys/i.test(d.folder_category)) return true;
+  return ANALYSIS_KEYWORDS.test(`${d.slug || ""} ${d.name || ""}`);
+}
+
+function splitLinkedWork(linked: DeliverableRow[]): { analyses: LinkedFile[]; documents: LinkedFile[] } {
+  const analyses: LinkedFile[] = [];
+  const documents: LinkedFile[] = [];
+  for (const d of linked) {
+    const base = deliverableToLinkedFile(d);
+    if (isAnalysisDeliverable(d)) analyses.push({ ...base, kind: "analysis" });
+    else documents.push(base);
+  }
+  return { analyses, documents };
 }
 
 function deliverableToLinkedFile(d: DeliverableRow): LinkedFile {
@@ -1774,6 +1937,19 @@ const D: Record<string, CSSProperties> = {
     letterSpacing: "-0.02em", color: "var(--ink)",
     marginTop: 4, fontVariantNumeric: "tabular-nums",
   },
+  stageCard: { padding: "22px 26px" },
+  stageHead: { display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 22 },
+  stageTitle: { fontFamily: "var(--font-display)", fontWeight: 750, fontSize: 22, letterSpacing: "-0.02em", margin: "4px 0 0", color: "var(--ink)" },
+  stageMeta: { fontSize: 12.5, color: "var(--ink-3)", textAlign: "right", lineHeight: 1.5, flexShrink: 0 },
+  stageTrack: { display: "flex", alignItems: "flex-start", gap: 0 },
+  stageNodeWrap: { display: "flex", flexDirection: "column", alignItems: "center", gap: 8, flex: "0 0 auto", width: 96 },
+  stageNode: { width: 30, height: 30, borderRadius: "50%", border: "1.5px solid var(--line-2)", display: "grid", placeItems: "center", fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700, color: "var(--ink-3)", background: "var(--surface)", fontVariantNumeric: "tabular-nums" },
+  stageNodeDone: { background: "var(--accent-strong)", borderColor: "var(--accent-strong)", color: "#fff" },
+  stageNodeCurrent: { borderColor: "var(--accent-strong)", color: "var(--accent-strong)", borderWidth: 2, boxShadow: "0 0 0 4px var(--accent-soft)" },
+  stageNodeLabel: { fontSize: 11.5, color: "var(--ink-3)", lineHeight: 1.25, textAlign: "center", maxWidth: 100 },
+  stageConnector: { flex: 1, height: 2, background: "var(--line)", marginTop: 14, minWidth: 12, borderRadius: 2 },
+  workGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 12 },
+  emptyWork: { padding: "18px 20px", fontSize: 13.5, color: "var(--ink-2)", lineHeight: 1.55 },
   intelligenceGrid: {
     display: "grid",
     gridTemplateColumns: "minmax(0, 1.15fr) minmax(360px, 0.85fr)",
