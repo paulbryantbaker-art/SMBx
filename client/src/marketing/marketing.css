@@ -1529,7 +1529,7 @@
 .mkt .computed-closer-tags { justify-content: center; max-width: 920px; }
 .mkt .computed-closer-note { max-width: 56ch; font-size: .9rem; line-height: 1.6; color: var(--ink-3); }
 
-/* stat band — 4 metric cells in one outlined card (About · Connectors).
+/* stat band — 4 metric cells in one outlined card (Connectors).
    Dividers must follow the layout: vertical between columns on desktop,
    horizontal between rows once the grid wraps, with no dangling edge border.
    Driven by row-start nth-child rules per breakpoint. */

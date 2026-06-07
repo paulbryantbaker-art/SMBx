@@ -89,7 +89,6 @@ const MarketingPricing = lazy(() => import('./marketing/pages/Pricing'));
 const MarketingStandard = lazy(() => import('./marketing/pages/Standard'));
 const MarketingStandardModel = lazy(() => import('./marketing/pages/StandardModel'));
 const MarketingConnectors = lazy(() => import('./marketing/pages/Connectors'));
-const MarketingAbout = lazy(() => import('./marketing/pages/About'));
 const SharedDocument = lazy(() => import('./pages/public/SharedDocument'));
 const SharedDocumentView = lazy(() => import('./pages/SharedDocumentView'));
 const AcceptInvite = lazy(() => import('./pages/public/AcceptInvite'));
@@ -325,7 +324,6 @@ export default function App() {
         <Route path="/integrate">{marketingOrApp(<MarketingIntegrate />)}</Route>
         <Route path="/pricing">{marketingOrApp(<MarketingPricing />)}</Route>
         <Route path="/connectors">{marketingOrApp(<MarketingConnectors />)}</Route>
-        <Route path="/about">{marketingOrApp(<MarketingAbout />)}</Route>
         <Route path="/standard/working-capital-peg">{marketingOrApp(<MarketingStandardModel />)}</Route>
         <Route path="/standard">{marketingOrApp(<MarketingStandard />)}</Route>
         <Route path="/">{marketingOrApp(<MarketingHome />)}</Route>

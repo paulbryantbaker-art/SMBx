@@ -77,7 +77,6 @@ export function MarketingNav() {
           <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)}>{link.label}</Link>
         ))}
         <Link href="/connectors" onClick={() => setMenuOpen(false)}>Connectors</Link>
-        <Link href="/about" onClick={() => setMenuOpen(false)}>About</Link>
         <a className="mm-link" onClick={() => { setMenuOpen(false); window.location.assign('/login'); }} style={{ cursor: 'pointer' }}>Sign in</a>
         <button className="btn btn-accent btn-lg mm-cta" style={{ width: '100%' }} onClick={() => enterApp()}>
           Ask Yulia
@@ -110,7 +109,6 @@ export function MarketingFooter() {
           <div>
             <h5>Company</h5>
             <ul>
-              <li><Link href="/about">About</Link></li>
               <li><Link href="/connectors">Connectors</Link></li>
               <li><Link href="/pricing">Pricing</Link></li>
             </ul>
@@ -126,7 +124,6 @@ export function MarketingFooter() {
             <ul>
               <li><Link href="/legal/terms">Terms</Link></li>
               <li><Link href="/legal/privacy">Privacy</Link></li>
-              <li><Link href="/about">What <Brand /> Is / Isn't</Link></li>
             </ul>
           </div>
         </div>
