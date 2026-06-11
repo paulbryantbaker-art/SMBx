@@ -66,6 +66,18 @@ function prettyKey(k: string): string {
     .replace(/\b(Ebitda|Sde|Nwc|Dcf|Irr|Moic|Lbo|Sba|Dscr|Roi|Wacc|Capex|Ltv|Noi)\b/g, m => m.toUpperCase())
     .trim();
 }
+// Labels can arrive ALL-CAPS from older payloads ("ENTERPRISE VALUE", "PURSUE").
+// Render them sentence case — visible labels, not shouty kickers — while
+// keeping finance acronyms and already-mixed-case labels intact.
+function sentenceLabel(value: string): string {
+  const s = String(value ?? "").trim();
+  if (!s || s !== s.toUpperCase()) return s;
+  const cased = s.toLowerCase().replace(
+    /\b(ebitda|sde|nwc|dcf|irr|moic|lbo|sba|dscr|roi|wacc|capex|ltv|noi|ev|cim|loi|qoe|pmi)\b/g,
+    m => m.toUpperCase(),
+  );
+  return cased.charAt(0).toUpperCase() + cased.slice(1);
+}
 function formatMoneyCents(cents: number): string {
   const d = cents / 100;
   const sign = d < 0 ? "-" : "";
@@ -252,7 +264,6 @@ export function MobileAnalysisScreen({
       <div style={S.page}>
         <FloatingChrome onBack={onBack} shareTitle={title} />
         <section style={S.emptyCard}>
-          <div className="mb-mono" style={S.eyebrow}>ANALYSIS</div>
           <h1 style={S.title}>{title}</h1>
           {fallbackText ? (
             <p style={{ ...S.copy, whiteSpace: "pre-wrap" }}>{fallbackText}</p>
@@ -290,14 +301,14 @@ export function MobileAnalysisScreen({
 
         {modelEntries.length > 0 && (
           <section style={S.whiteCard}>
-            <div className="mb-mono" style={S.cardEyebrow}>MODEL VALUES</div>
+            <h2 style={S.cardTitle}>Model values</h2>
             <ReadonlyValues entries={modelEntries} />
           </section>
         )}
 
         {comparisonRows.length > 0 && (
           <section style={S.whiteCard}>
-            <div className="mb-mono" style={S.cardEyebrow}>COMPARISON</div>
+            <h2 style={S.cardTitle}>Comparison</h2>
             {comparisonRows.slice(0, 6).map((row, i) => (
               <div key={i} style={{ padding: "10px 0", borderTop: i ? "0.5px solid var(--mb-line-2)" : "none" }}>
                 <div style={{ fontSize: 14, fontWeight: 600, color: "var(--mb-ink)", marginBottom: 4 }}>{comparisonRowTitle(row, i)}</div>
@@ -427,7 +438,7 @@ export function MobileAnalysisScreen({
     const nextData = patchStructuredDataAssumptions(structured, updates);
     const modelState = scenarioName ? { ...updates, _scenario_name: scenarioName } : updates;
     setData(nextData);
-    setNote("Scenario updated on this phone. Saving version...");
+    setNote("Scenario updated on this phone. Saving version…");
     onUpdate?.({ analysisData: nextData, modelState });
 
     window.dispatchEvent(new CustomEvent("smbx:canvas_action", {
@@ -485,7 +496,7 @@ export function MobileAnalysisScreen({
 
   const restoreVersion = async (targetVersion: number) => {
     if (!analysisRunId) return;
-    setNote(`Restoring v${targetVersion}...`);
+    setNote(`Restoring v${targetVersion}…`);
     try {
       const res = await fetch(`/api/analysis-runs/${analysisRunId}/versions/${targetVersion}/restore`, {
         method: "POST",
@@ -523,7 +534,6 @@ export function MobileAnalysisScreen({
 
       <section style={S.hero}>
         <div style={S.heroWash} />
-        <div className="mb-mono" style={S.eyebrow}>ANALYSIS · LIVE MODEL</div>
         <h1 style={S.title}>{structured.title || title}</h1>
         <p style={S.copy}>{structured.summary}</p>
         <div style={S.metaLine}>
@@ -547,7 +557,7 @@ export function MobileAnalysisScreen({
           <div style={S.verdictPanel}>
             <div style={S.scoreOrb}>{structured.verdict.score ?? "Y"}</div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="mb-mono" style={S.glassEyebrow}>{structured.verdict.label}</div>
+              <div style={S.verdictLabel}>{sentenceLabel(structured.verdict.label)}</div>
               <div style={S.verdictText}>{structured.verdict.rationale}</div>
             </div>
           </div>
@@ -558,7 +568,7 @@ export function MobileAnalysisScreen({
         <section style={S.metricsGrid}>
           {structured.metrics.slice(0, 6).map(metric => (
             <div key={metric.key} style={S.metricTile}>
-              <div className="mb-mono" style={S.metricLabel}>{metric.label}</div>
+              <div style={S.metricLabel}>{sentenceLabel(metric.label)}</div>
               <div style={S.metricValue}>{metric.displayValue}</div>
               {metric.sub && <div style={S.metricSub}>{metric.sub}</div>}
             </div>
@@ -571,7 +581,6 @@ export function MobileAnalysisScreen({
           <div style={S.readHeader}>
             <YIcon size={44} kind="pursue" />
             <div>
-              <div className="mb-mono" style={S.darkEyebrow}>YULIA READ</div>
               <div style={S.readTitle}>What moved</div>
             </div>
           </div>
@@ -584,7 +593,7 @@ export function MobileAnalysisScreen({
 
       {structured.charts?.length ? (
         <section style={S.whiteCard}>
-          <div className="mb-mono" style={S.cardEyebrow}>MODEL OUTPUT</div>
+          <h2 style={S.cardTitle}>Model output</h2>
           {structured.charts.slice(0, 2).map(chart => (
             <ChartBlock key={chart.title} title={chart.title} rows={chart.data} />
           ))}
@@ -618,7 +627,6 @@ export function MobileAnalysisScreen({
 
       {structured.nextActions?.length ? (
         <section style={S.whiteCard}>
-          <div className="mb-mono" style={S.cardEyebrow}>YULIA NEXT</div>
           <h2 style={S.sectionTitle}>Act on the read</h2>
           <div style={S.nextActionStack}>
             {structured.nextActions.map(action => (
@@ -641,7 +649,6 @@ export function MobileAnalysisScreen({
 
       {structured.evidenceRefs?.length ? (
         <section style={S.whiteCard}>
-          <div className="mb-mono" style={S.cardEyebrow}>YULIA EVIDENCE</div>
           <MiniList
             title="Evidence Yulia used"
             rows={structured.evidenceRefs.map(item => [
@@ -654,7 +661,6 @@ export function MobileAnalysisScreen({
 
       {(structured.risks?.length || structured.missingData?.length || structured.professionalTriggers?.length) ? (
         <section style={S.whiteCard}>
-          <div className="mb-mono" style={S.cardEyebrow}>DILIGENCE CONTROL</div>
           <MiniList title="Risks" rows={(structured.risks ?? []).map(item => [item.label, item.detail])} />
           <MiniList title="Missing data" rows={(structured.missingData ?? []).map(item => [item.label, item.why])} />
           <MiniList title="Professional triggers" rows={(structured.professionalTriggers ?? []).map(item => [item.role, item.why])} />
@@ -870,11 +876,10 @@ function ScenarioPanel({
 
   return (
     <div>
-      <div className="mb-mono" style={S.cardEyebrow}>SCENARIO MODEL</div>
       <h2 style={S.sectionTitle}>Play with the inputs</h2>
       <p style={S.sectionCopy}>Save a scenario, then Yulia can compare it against the base case in chat.</p>
       <label style={S.scenarioName}>
-        <span className="mb-mono" style={S.smallLabel}>NAME</span>
+        <span style={S.smallLabel}>Name</span>
         <input
           value={scenarioName}
           placeholder={defaultScenarioName(analysisTitle)}
@@ -943,11 +948,10 @@ function MobileVersionHistory({
   const rows = versions.slice(0, 5);
   return (
     <div>
-      <div className="mb-mono" style={S.cardEyebrow}>VERSIONS</div>
       <h2 style={S.sectionTitle}>Saved scenarios</h2>
       <p style={S.sectionCopy}>Restore one, or ask Yulia how it changes the decision.</p>
       {loading ? (
-        <div style={S.versionEmpty}>Loading version history...</div>
+        <div style={S.versionEmpty}>Loading version history…</div>
       ) : rows.length ? (
         <div style={S.versionStack}>
           {rows.map(version => {
@@ -1075,14 +1079,6 @@ const S: Record<string, CSSProperties> = {
     background: "radial-gradient(circle at 22% 10%, rgba(255,255,255,0.26), transparent 34%), radial-gradient(circle at 88% 100%, rgba(9,22,54,0.42), transparent 36%)",
     pointerEvents: "none",
   },
-  eyebrow: {
-    position: "relative",
-    zIndex: 1,
-    fontSize: 12,
-    letterSpacing: "0.18em",
-    fontWeight: 900,
-    color: "#FFFFFF",
-  },
   title: {
     position: "relative",
     zIndex: 1,
@@ -1155,10 +1151,11 @@ const S: Record<string, CSSProperties> = {
     fontWeight: 900,
     flexShrink: 0,
   },
-  glassEyebrow: {
-    fontSize: 10,
-    letterSpacing: "0.18em",
-    color: "#FFFFFF",
+  // Verdict label — information-bearing, visible sentence case on the hero glass panel.
+  verdictLabel: {
+    fontSize: 12.5,
+    fontWeight: 700,
+    color: "rgba(255,255,255,0.92)",
   },
   verdictText: {
     marginTop: 5,
@@ -1180,10 +1177,11 @@ const S: Record<string, CSSProperties> = {
     border: "1px solid rgba(216,224,237,0.86)",
     boxShadow: "0 14px 34px -28px rgba(30,45,80,0.5)",
   },
+  // Metric tile label — visible sentence case ("Enterprise value"), never a kicker.
   metricLabel: {
-    fontSize: 10,
-    letterSpacing: "0.16em",
-    color: "var(--mb-accent-ink)",
+    fontSize: 12.5,
+    fontWeight: 600,
+    color: "var(--mb-ink-3)",
   },
   metricValue: {
     marginTop: 7,
@@ -1209,11 +1207,6 @@ const S: Record<string, CSSProperties> = {
     display: "flex",
     alignItems: "center",
     gap: 12,
-  },
-  darkEyebrow: {
-    fontSize: 10,
-    letterSpacing: "0.18em",
-    color: "#8D9BF1",
   },
   readTitle: {
     fontSize: 24,
@@ -1243,11 +1236,12 @@ const S: Record<string, CSSProperties> = {
     border: "1px solid rgba(219,226,238,0.92)",
     boxShadow: "0 18px 48px -34px rgba(35,49,78,0.5)",
   },
-  cardEyebrow: {
-    fontSize: 11,
-    letterSpacing: "0.18em",
-    color: "var(--mb-accent-ink)",
-    fontWeight: 900,
+  // Section header for cards whose only title this is ("Model values", "Comparison").
+  cardTitle: {
+    margin: "0 0 6px",
+    fontSize: 14,
+    fontWeight: 600,
+    color: "var(--mb-ink)",
   },
   sectionTitle: {
     margin: "8px 0 0",
@@ -1319,9 +1313,10 @@ const S: Record<string, CSSProperties> = {
     gap: 7,
     marginTop: 16,
   },
+  // Scenario-name field label — visible sentence case, 12px.
   smallLabel: {
-    fontSize: 10,
-    letterSpacing: "0.16em",
+    fontSize: 12,
+    fontWeight: 600,
     color: "var(--mb-ink-3)",
   },
   scenarioInput: {

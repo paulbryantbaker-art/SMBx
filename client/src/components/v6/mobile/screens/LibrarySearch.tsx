@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import Markdown, { type Components } from "react-markdown";
 import {
   Brain,
   BriefcaseBusiness,
@@ -30,7 +31,8 @@ import { MobileIcon } from "../icons";
 import { ChatStarterPill } from "../ChatStarterPill";
 import { YIcon } from "../YIcon";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
-import { authHeaders } from "../../../../hooks/useAuth";
+import { DEV_AUTH_BYPASS, authHeaders } from "../../../../hooks/useAuth";
+import type { WorkspaceDeal, WorkspaceDeliverable } from "../../../../hooks/useV6WorkspaceData";
 import {
   useMobileDataRoom,
   type MobileDataRoomDocument,
@@ -197,11 +199,197 @@ const activeDataRooms = [
   },
 ];
 
+/* ─── REAL workspace files (authed users) ─────────────────────────────────
+   V6Mobile doesn't thread workspace deals/deliverables into the Files
+   surfaces, so this mirrors useV6WorkspaceData's fetch directly (same
+   endpoints, same honesty rules: real data or nothing — never samples for a
+   signed-in user). A module-level cache dedupes the network call across
+   LibraryScreen / LibraryPreviewCard / LibraryActivityList / Finder mounting
+   in the same session. Anon and dev-bypass keep the sample experience. */
+
+interface LibraryWorkspaceSnapshot {
+  deals: WorkspaceDeal[];
+  deliverables: WorkspaceDeliverable[];
+}
+
+let libraryWorkspaceCache: { promise: Promise<LibraryWorkspaceSnapshot>; at: number } | null = null;
+
+function fetchLibraryWorkspace(): Promise<LibraryWorkspaceSnapshot> {
+  const now = Date.now();
+  if (libraryWorkspaceCache && now - libraryWorkspaceCache.at < 30_000) {
+    return libraryWorkspaceCache.promise;
+  }
+  const promise = (async (): Promise<LibraryWorkspaceSnapshot> => {
+    const [dealRes, deliverableRes] = await Promise.all([
+      fetch("/api/deals", { headers: authHeaders() }),
+      fetch("/api/deliverables/all", { headers: authHeaders() }),
+    ]);
+    if (!dealRes.ok) throw new Error(`deals ${dealRes.status}`);
+    if (!deliverableRes.ok) throw new Error(`deliverables ${deliverableRes.status}`);
+    const [deals, deliverables] = await Promise.all([dealRes.json(), deliverableRes.json()]);
+    return {
+      deals: Array.isArray(deals) ? deals : [],
+      deliverables: Array.isArray(deliverables) ? deliverables : [],
+    };
+  })();
+  libraryWorkspaceCache = { promise, at: now };
+  promise.catch(() => {
+    if (libraryWorkspaceCache?.promise === promise) libraryWorkspaceCache = null;
+  });
+  return promise;
+}
+
+function useLibraryWorkspace(): {
+  /** A real signed-in user (token present, not the dev-bypass preview). */
+  real: boolean;
+  /** Fetch settled (success or failure). Failure → empty arrays, never samples. */
+  loaded: boolean;
+  deals: WorkspaceDeal[];
+  deliverables: WorkspaceDeliverable[];
+} {
+  const [real] = useState(() => !DEV_AUTH_BYPASS && Boolean(authHeaders().Authorization));
+  const [state, setState] = useState<{ loaded: boolean } & LibraryWorkspaceSnapshot>({
+    loaded: false,
+    deals: [],
+    deliverables: [],
+  });
+  useEffect(() => {
+    if (!real) return;
+    let cancelled = false;
+    fetchLibraryWorkspace()
+      .then((data) => {
+        if (!cancelled) setState({ loaded: true, ...data });
+      })
+      .catch(() => {
+        if (!cancelled) setState({ loaded: true, deals: [], deliverables: [] });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [real]);
+  return { real, ...state };
+}
+
+function deliverableWhen(d: WorkspaceDeliverable): string {
+  return d.updated_at || d.completed_at || d.created_at || "";
+}
+
+function sortDeliverablesByRecency(deliverables: WorkspaceDeliverable[]): WorkspaceDeliverable[] {
+  return [...deliverables].sort(
+    (a, b) => new Date(deliverableWhen(b)).getTime() - new Date(deliverableWhen(a)).getTime(),
+  );
+}
+
+function isActionableDeliverable(d: WorkspaceDeliverable): boolean {
+  return ["queued", "generating", "failed", "draft"].includes(d.status);
+}
+
+/** Mirrors desktop deliverableToFileRow's analysis heuristic. */
+function isAnalysisDeliverable(d: WorkspaceDeliverable): boolean {
+  if (d.analysis_run_id) return true;
+  if (d.folder_category === "models") return true;
+  return /model|valuation|analysis|recast|sba|comp|score|risk|qoe|sensitivity|lbo|dcf/i.test(
+    `${d.slug || ""} ${d.name || ""}`,
+  );
+}
+
+function realDeliverablePill(status: string): ReactNode {
+  if (["queued", "generating"].includes(status)) return <StatusPill tone="draft">Generating</StatusPill>;
+  if (status === "failed") return <StatusPill tone="needed">Failed</StatusPill>;
+  if (status === "draft") return <StatusPill tone="draft">Draft</StatusPill>;
+  if (status === "complete") return "Open";
+  return formatRealStatus(status) || "Open";
+}
+
+/** Maps a real workspace deliverable to a tappable row that opens the REAL
+ *  document reader (deliverableId threaded through OpenDocHandler). */
+function realDeliverableRow(d: WorkspaceDeliverable, onOpen: OpenDocHandler): DocRowData {
+  const tone = realDeliverableTone(d.slug || "", d.status, d.name || "");
+  const when = fmtRelativeShort(deliverableWhen(d));
+  const meta = [d.deal_name, formatRealStatus(d.status), when].filter(Boolean).join(" · ");
+  const name = d.name || formatRealStatus(d.slug || "") || "Document";
+  return {
+    name,
+    meta,
+    pill: realDeliverablePill(d.status),
+    icon: <DocIcon kind={tone} />,
+    docKind: tone,
+    onClick: () => onOpen(name, meta, tone, d.id),
+  };
+}
+
+function dealDisplayTitle(deal: WorkspaceDeal): string {
+  return deal.business_name || deal.industry || `Deal #${deal.id}`;
+}
+
+function dealDisplayMeta(deal: WorkspaceDeal): string {
+  return [formatRealStatus(deal.journey_type || ""), deal.location || deal.industry]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+/** Resolves a deal title (as built by dealDisplayTitle) back to its numeric id
+ *  so the detail screen can open the REAL data room even though V6Mobile's
+ *  onOpenLibraryDetail doesn't thread a dealRawId. */
+function findRealDealIdByTitle(deals: WorkspaceDeal[], title?: string): number | null {
+  if (!title) return null;
+  const clean = title.trim().toLowerCase();
+  const match = deals.find((deal) => dealDisplayTitle(deal).trim().toLowerCase() === clean);
+  return match ? match.id : null;
+}
+
+/** A real deal rendered as a data-room row (Files hub + finder). */
+function realDealRoomRow(deal: WorkspaceDeal, onOpenDealLibrary: OpenDealLibraryHandler): DocRowData {
+  const title = dealDisplayTitle(deal);
+  const docs = Number(deal.document_count ?? 0);
+  const meta = [dealDisplayMeta(deal), `${docs} ${docs === 1 ? "file" : "files"} in room`]
+    .filter(Boolean)
+    .join(" · ");
+  return {
+    name: title,
+    meta,
+    pill: "Open",
+    icon: <PortfolioIcon />,
+    onClick: () => onOpenDealLibrary(title, dealDisplayMeta(deal), "Deals", "data-room"),
+  };
+}
+
+/** A real deal rendered as a deal-library row (finder "Deals" scope). */
+function realDealLibraryRow(deal: WorkspaceDeal, onOpenDealLibrary: OpenDealLibraryHandler): DocRowData {
+  const title = dealDisplayTitle(deal);
+  const items = Number(deal.deliverable_count ?? 0) + Number(deal.document_count ?? 0);
+  const meta = [dealDisplayMeta(deal), `${items} ${items === 1 ? "file" : "files"}`]
+    .filter(Boolean)
+    .join(" · ");
+  return {
+    name: title,
+    meta,
+    pill: "Open",
+    icon: <DealLibraryIcon />,
+    onClick: () => onOpenDealLibrary(title, dealDisplayMeta(deal), "Deals", "data-room"),
+  };
+}
+
 export function LibraryPreviewCard({
   onOpenFinder,
 }: {
   onOpenFinder: OpenFilesHandler;
 }) {
+  const workspace = useLibraryWorkspace();
+  // Real signed-in user → counts derived from real workspace data only. While
+  // loading (or after a failed fetch with nothing to count) no number renders —
+  // never an invented one (desktop buildRealShortcuts honesty pattern).
+  const realCounts = useMemo(() => {
+    if (!workspace.real || !workspace.loaded) return null;
+    const docCount = workspace.deals.reduce((sum, deal) => sum + Number(deal.document_count ?? 0), 0);
+    return {
+      all: String(workspace.deliverables.length + docCount),
+      deals: String(workspace.deals.length),
+      action: String(workspace.deliverables.filter(isActionableDeliverable).length),
+      docs: String(workspace.deliverables.filter((d) => !isAnalysisDeliverable(d)).length),
+    };
+  }, [workspace.real, workspace.loaded, workspace.deals, workspace.deliverables]);
+
   return (
     <div style={S.libraryPortal}>
       <div style={S.portalGlow} />
@@ -215,25 +403,25 @@ export function LibraryPreviewCard({
         <PortalLink
           label="All files"
           sub="Browse by portfolio, deal, and stage"
-          count="24"
+          count={workspace.real ? realCounts?.all : "24"}
           onTap={() => onOpenFinder("all")}
         />
         <PortalLink
           label="Deal libraries"
           sub="Portfolio → deal → stage"
-          count="3"
+          count={workspace.real ? realCounts?.deals : "3"}
           onTap={() => onOpenFinder("deals")}
         />
         <PortalLink
           label="Needs action"
           sub="Review, signature, or decision"
-          count="4"
+          count={workspace.real ? realCounts?.action : "4"}
           onTap={() => onOpenFinder("actionable")}
         />
         <PortalLink
           label="Working docs"
           sub="Drafts, analysis, memos, contracts"
-          count="10"
+          count={workspace.real ? realCounts?.docs : "10"}
           onTap={() => onOpenFinder("docs")}
           last
         />
@@ -251,7 +439,19 @@ export function LibraryActivityList({
   onSeeAll?: () => void;
   limit?: number;
 }) {
-  const rows = libraryActivity.slice(0, limit).map((row) => withDocClick(row, onOpenDetail));
+  const workspace = useLibraryWorkspace();
+  // Real signed-in user → real deliverables (or an honest empty/loading state).
+  // Anon / dev-bypass → the sample showroom rows.
+  const rows = workspace.real
+    ? sortDeliverablesByRecency(workspace.deliverables)
+        .slice(0, limit)
+        .map((d) => realDeliverableRow(d, onOpenDetail))
+    : libraryActivity.slice(0, limit).map((row) => withDocClick(row, onOpenDetail));
+  const emptyCopy = workspace.real && rows.length === 0
+    ? workspace.loaded
+      ? "Nothing here yet. Files you and Yulia create show up here."
+      : "Loading your files…"
+    : null;
   const head = (
     <>
       <div className="mb-section-title">Recents</div>
@@ -275,8 +475,9 @@ export function LibraryActivityList({
       )}
       <div style={S.activityRows}>
         {rows.map((row, index) => (
-          <DocRow key={row.name} row={row} last={index === rows.length - 1} showChevron />
+          <DocRow key={`${index}-${row.name}`} row={row} last={index === rows.length - 1} showChevron />
         ))}
+        {emptyCopy && <div style={S.activityEmpty}>{emptyCopy}</div>}
       </div>
     </div>
   );
@@ -293,6 +494,8 @@ export function LibraryScreen({
   onOpenDealLibrary,
   realEmpty = false,
 }: LibraryScreenProps) {
+  const workspace = useLibraryWorkspace();
+
   if (realEmpty) {
     return (
       <div className="mb-fade-up" style={{ ...S.page, ...S.filesPage }}>
@@ -318,6 +521,104 @@ export function LibraryScreen({
             <button type="button" onClick={onOpenSearch} style={S.emptyCta}>
               Start with Yulia
             </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Real signed-in user → real bindings only ──────────────────────────
+  // Recents and shortcut counts bind to real deliverables (inside
+  // LibraryPreviewCard / LibraryActivityList). The gold hero renders ONLY
+  // while a real deliverable is queued/generating. Data rooms list real deals.
+  if (workspace.real) {
+    const generating = sortDeliverablesByRecency(workspace.deliverables).find((d) =>
+      ["queued", "generating"].includes(d.status),
+    );
+    const generatingName = generating ? (generating.name || formatRealStatus(generating.slug || "") || "document") : "";
+    const generatingMeta = generating
+      ? [generating.deal_name, "Generating", fmtRelativeShort(deliverableWhen(generating))].filter(Boolean).join(" · ")
+      : "";
+    const rooms = workspace.deals.slice(0, 6);
+    return (
+      <div className="mb-fade-up" style={{ ...S.page, ...S.filesPage }}>
+        <GlassTopBar
+          title="Files"
+          initials={initials}
+          onAvatarClick={onAvatarClick}
+          onSearch={onOpenSearch}
+          onNotif={onNotif}
+          notifCount={notifCount}
+        />
+        <LargeTitle>Files</LargeTitle>
+
+        <div style={S.cardPad}>
+          <LibraryPreviewCard onOpenFinder={onOpenFinder} />
+        </div>
+
+        <div style={{ marginTop: 24, padding: "0 16px" }}>
+          <LibraryActivityList onOpenDetail={onOpenDetail} onSeeAll={() => onOpenFinder("all")} />
+        </div>
+
+        {generating && (
+          <div style={S.librarySectionPad}>
+            <button
+              type="button"
+              onClick={() =>
+                onOpenDetail(
+                  generatingName,
+                  generatingMeta,
+                  realDeliverableTone(generating.slug || "", generating.status, generatingName),
+                  generating.id,
+                )
+              }
+              style={S.goldHero}
+            >
+              <div style={S.heroGlow} />
+              <div style={S.heroBody}>
+                <h2 style={S.heroTitle}>Yulia&rsquo;s writing your {generatingName} right now.</h2>
+                <p style={S.heroCopy}>
+                  {generating.deal_name ? `For ${generating.deal_name}. ` : ""}
+                  Open it to watch it take shape — it lands in Recents when it&rsquo;s done.
+                </p>
+              </div>
+              <div style={S.heroAction}>
+                <SimpleDocIcon kind="memo" />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={S.heroActionTitle}>{generatingName}</div>
+                  <div style={S.heroActionMeta}>{generatingMeta}</div>
+                </div>
+                <span style={S.heroButton}>Open</span>
+              </div>
+            </button>
+          </div>
+        )}
+
+        <div style={S.finderCtaPad}>
+          <div className="mb-as-card" style={S.activeRoomsCard}>
+            <button type="button" onClick={() => onOpenFinder("all")} style={S.activeRoomsHeader}>
+              <div>
+                <div style={S.finderCtaTitle}>Browse all files</div>
+                <div style={S.finderCtaSub}>Portfolio → deal → stage across docs, analysis, and data rooms.</div>
+              </div>
+              <MobileIcon name="chevron" c="var(--mb-accent-ink)" size={13} />
+            </button>
+            <div style={S.roomsLabel}>Data rooms</div>
+            <div style={S.activityRows}>
+              {rooms.map((deal, index) => (
+                <DocRow
+                  key={deal.id}
+                  row={realDealRoomRow(deal, onOpenDealLibrary)}
+                  last={index === rooms.length - 1}
+                  showChevron
+                />
+              ))}
+              {rooms.length === 0 && (
+                <div style={S.activityEmpty}>
+                  {workspace.loaded ? "No data rooms yet. They open as deals enter diligence." : "Loading your deals…"}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -378,7 +679,7 @@ export function LibraryScreen({
             </div>
             <MobileIcon name="chevron" c="var(--mb-accent-ink)" size={13} />
           </button>
-          <div className="mb-section-eyebrow" style={S.activeRoomsEyebrow}>CURRENT DATA ROOMS</div>
+          <div style={S.roomsLabel}>Data rooms</div>
           <div style={S.activityRows}>
             {activeDataRooms.map((room, index) => (
               <DocRow
@@ -410,7 +711,8 @@ function PortalLink({
 }: {
   label: string;
   sub: string;
-  count: string;
+  /** Omitted / undefined → no number renders (never invent a count). */
+  count?: string;
   onTap: () => void;
   last?: boolean;
 }) {
@@ -423,7 +725,7 @@ function PortalLink({
         borderBottom: last ? "none" : "0.5px solid rgba(255,255,255,0.16)",
       }}
     >
-      <span style={S.portalCount}>{count}</span>
+      {count != null && <span style={S.portalCount}>{count}</span>}
       <span style={{ flex: 1, minWidth: 0 }}>
         <span style={S.portalLabel}>{label}</span>
         <span style={S.portalSub}>{sub}</span>
@@ -712,14 +1014,19 @@ export function LibraryDetailScreen({
   dealStage = "all",
   dealRawId = null,
 }: LibraryDetailScreenProps) {
-  // REAL data-room read path — only when a real deal id is threaded in.
-  // The hook is a no-op (no fetch) when dealRawId is null, so the sample
-  // experience below is untouched in the anon / no-deal context.
-  const room = useMobileDataRoom(dealRawId);
-  if (dealRawId != null) {
+  // REAL data-room read path. A real deal id can be threaded in directly
+  // (analysis surfaces) or resolved from the deal title against the user's
+  // real workspace deals — V6Mobile's onOpenLibraryDetail doesn't pass a
+  // dealRawId, so Files-hub / finder rows arrive title-only. The hook is a
+  // no-op (no fetch) while the id is null, so the sample experience below is
+  // untouched in the anon / dev-bypass context.
+  const workspace = useLibraryWorkspace();
+  const resolvedDealId = dealRawId ?? (workspace.real ? findRealDealIdByTitle(workspace.deals, dealTitle) : null);
+  const room = useMobileDataRoom(resolvedDealId);
+  if (resolvedDealId != null) {
     return (
       <RealDealDataRoom
-        dealRawId={dealRawId}
+        dealRawId={resolvedDealId}
         dealTitle={dealTitle}
         dealMeta={dealMeta}
         portfolioName={portfolioName}
@@ -727,6 +1034,41 @@ export function LibraryDetailScreen({
         onBack={onBack}
         onOpenDoc={onOpenDoc}
       />
+    );
+  }
+
+  // A real signed-in user never sees the sample library. If the deal can't be
+  // resolved (still loading, or it isn't in the workspace) say so honestly.
+  if (workspace.real) {
+    return (
+      <div className="mb-fade-up" style={{ ...S.page, position: "relative" }}>
+        <button type="button" onClick={onBack} aria-label="Back" style={S.floatBack}>
+          <MobileIcon name="back" size={14} c="var(--mb-ink-1)" />
+        </button>
+        <div style={{ paddingTop: "calc(env(safe-area-inset-top, 44px) + 60px)" }}>
+          <div style={S.realStatePad}>
+            <div className="mb-as-card" style={S.realStateCard}>
+              {workspace.loaded ? (
+                <>
+                  <div aria-hidden="true" style={S.realStateIcon}>
+                    <FolderKanban size={26} strokeWidth={2} />
+                  </div>
+                  <div style={S.realStateTitle}>Couldn&rsquo;t find this deal&rsquo;s library</div>
+                  <div style={S.realStateCopy}>
+                    {dealTitle ? `“${dealTitle}” isn’t` : "This deal isn’t"} in your workspace yet.
+                    Go back to Files to browse your deals, or ask Yulia to set it up.
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={S.realStateTitle}>Loading deal library…</div>
+                  <div style={S.realStateCopy}>Looking up {dealTitle || "this deal"} in your workspace.</div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -767,9 +1109,6 @@ export function LibraryDetailScreen({
     <div className="mb-fade-up" style={{ ...S.page, position: "relative" }}>
       <button type="button" onClick={onBack} aria-label="Back" style={S.floatBack}>
         <MobileIcon name="back" size={14} c="var(--mb-ink-1)" />
-      </button>
-      <button type="button" aria-label="Share" style={S.floatShare}>
-        <MobileIcon name="share" size={16} c="var(--mb-ink-1)" />
       </button>
 
       <div style={S.breadcrumb}>
@@ -1899,9 +2238,6 @@ export function LibraryDocumentScreen({
       <button type="button" onClick={onBack} aria-label="Back" style={S.floatBack}>
         <MobileIcon name="back" size={14} c="var(--mb-ink-1)" />
       </button>
-      <button type="button" aria-label="Share" style={S.floatShare}>
-        <MobileIcon name="share" size={16} c="var(--mb-ink-1)" />
-      </button>
 
       <div style={S.breadcrumb}>
         <span style={S.breadcrumbLink}>Files</span>
@@ -2012,6 +2348,11 @@ function RealDocumentReader({
   const [doc, setDoc] = useState<RealDeliverable | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [shareCopied, setShareCopied] = useState(false);
+  const shareCopiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (shareCopiedTimer.current) clearTimeout(shareCopiedTimer.current);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -2062,16 +2403,42 @@ function RealDocumentReader({
     ? [formatRealStatus(docType), doc.version_number ? `v${doc.version_number}` : null, doc.updated_at ? fmtRelativeShort(doc.updated_at) : null]
         .filter(Boolean).join(" · ")
     : fallbackMeta;
-  const eyebrow = `${docType.replace(/[-_]/g, " ").toUpperCase()}${status ? ` · ${status.toUpperCase()}` : ""}`;
+
+  // Native share sheet when available; clipboard copy (with an inline
+  // confirmation) everywhere else. The doc URL is the current hash route, so
+  // location.href round-trips back into this reader.
+  const onShare = async () => {
+    const url = window.location.href;
+    if (typeof navigator.share === "function") {
+      try {
+        await navigator.share({ title, url });
+        return;
+      } catch (e: any) {
+        if (e?.name === "AbortError") return; // user dismissed the sheet
+        /* share failed — fall through to clipboard */
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareCopied(true);
+      if (shareCopiedTimer.current) clearTimeout(shareCopiedTimer.current);
+      shareCopiedTimer.current = setTimeout(() => setShareCopied(false), 2200);
+    } catch {
+      /* clipboard unavailable — nothing to confirm */
+    }
+  };
 
   return (
     <div className="mb-fade-up" style={{ ...S.page, position: "relative" }}>
       <button type="button" onClick={onBack} aria-label="Back" style={S.floatBack}>
         <MobileIcon name="back" size={14} c="var(--mb-ink-1)" />
       </button>
-      <button type="button" aria-label="Share" style={S.floatShare}>
+      <button type="button" onClick={() => void onShare()} aria-label="Share this document" style={S.floatShare}>
         <MobileIcon name="share" size={16} c="var(--mb-ink-1)" />
       </button>
+      {shareCopied && (
+        <span role="status" style={S.shareCopiedPill}>Link copied</span>
+      )}
 
       <div style={S.breadcrumb}>
         <span style={S.breadcrumbLink}>Files</span>
@@ -2095,7 +2462,7 @@ function RealDocumentReader({
       <section style={S.readerPad}>
         <div style={S.readerSurface}>
           <div style={S.readerToolbar}>
-            <span className="mb-mono" style={S.readerKicker}>{eyebrow}</span>
+            <span style={S.readerToolbarLabel}>{formatRealStatus(docType)}</span>
             <span style={S.readerPageCount}>{isGenerating ? "Generating" : "Live"}</span>
           </div>
           <div style={S.readerPage}>
@@ -2105,14 +2472,15 @@ function RealDocumentReader({
               <p style={S.readerParagraph}>{error}</p>
             ) : isGenerating ? (
               <>
-                <div className="mb-mono" style={S.readerDocKicker}>YULIA</div>
                 <h2 style={S.readerDocTitle}>{title}</h2>
                 <p style={S.readerParagraph}>Yulia is still generating this document. It will appear here as soon as it&rsquo;s ready.</p>
               </>
             ) : markdown ? (
               <>
                 <h2 style={S.readerDocTitle}>{title}</h2>
-                <div style={S.readerMarkdown}>{markdown}</div>
+                <div style={S.readerMarkdown}>
+                  <Markdown components={MD_COMPONENTS}>{markdown}</Markdown>
+                </div>
               </>
             ) : (
               <>
@@ -2192,6 +2560,42 @@ function extractDeliverableMarkdown(content: unknown): string | null {
   return "```json\n" + JSON.stringify(content, null, 2) + "\n```";
 }
 
+/* Mobile markdown typography for the real reader — react-markdown (same
+   renderer desktop DocView uses) with inline element styles tuned for a
+   ~380px reading column: 16px body, 1.6 line-height, scaled headings. */
+const MD: Record<string, CSSProperties> = {
+  h1: { fontFamily: "var(--mb-font-display)", fontWeight: 800, fontSize: 22, lineHeight: 1.2, letterSpacing: "-0.5px", color: "var(--mb-ink)", margin: "22px 0 10px" },
+  h2: { fontFamily: "var(--mb-font-display)", fontWeight: 750, fontSize: 19, lineHeight: 1.25, letterSpacing: "-0.4px", color: "var(--mb-ink)", margin: "20px 0 8px" },
+  h3: { fontWeight: 700, fontSize: 16.5, lineHeight: 1.3, color: "var(--mb-ink)", margin: "16px 0 6px" },
+  h4: { fontWeight: 700, fontSize: 15.5, lineHeight: 1.3, color: "var(--mb-ink)", margin: "14px 0 6px" },
+  p: { fontSize: 16, lineHeight: 1.6, color: "var(--mb-ink-2)", margin: "0 0 14px" },
+  list: { margin: "0 0 14px", paddingLeft: 22 },
+  li: { fontSize: 16, lineHeight: 1.6, color: "var(--mb-ink-2)", marginBottom: 6 },
+  strong: { fontWeight: 750, color: "var(--mb-ink)" },
+  a: { color: "var(--mb-accent-ink)", fontWeight: 600 },
+  blockquote: { margin: "0 0 14px", padding: "2px 0 2px 14px", borderLeft: "3px solid var(--mb-line)", color: "var(--mb-ink-3)" },
+  code: { fontFamily: "var(--mb-font-mono)", fontSize: 13.5, background: "var(--mb-card-2)", padding: "1px 5px", borderRadius: 5 },
+  pre: { background: "var(--mb-card-2)", padding: 14, borderRadius: 12, overflowX: "auto", fontSize: 12.5, lineHeight: 1.5, margin: "0 0 14px" },
+  hr: { border: "none", borderTop: "0.5px solid var(--mb-line-2)", margin: "18px 0" },
+};
+
+const MD_COMPONENTS: Components = {
+  h1: ({ node: _n, ...props }) => <h2 style={MD.h1} {...props} />,
+  h2: ({ node: _n, ...props }) => <h3 style={MD.h2} {...props} />,
+  h3: ({ node: _n, ...props }) => <h4 style={MD.h3} {...props} />,
+  h4: ({ node: _n, ...props }) => <h5 style={MD.h4} {...props} />,
+  p: ({ node: _n, ...props }) => <p style={MD.p} {...props} />,
+  ul: ({ node: _n, ...props }) => <ul style={MD.list} {...props} />,
+  ol: ({ node: _n, ...props }) => <ol style={MD.list} {...props} />,
+  li: ({ node: _n, ...props }) => <li style={MD.li} {...props} />,
+  strong: ({ node: _n, ...props }) => <strong style={MD.strong} {...props} />,
+  a: ({ node: _n, ...props }) => <a style={MD.a} target="_blank" rel="noreferrer" {...props} />,
+  blockquote: ({ node: _n, ...props }) => <blockquote style={MD.blockquote} {...props} />,
+  code: ({ node: _n, ...props }) => <code style={MD.code} {...props} />,
+  pre: ({ node: _n, ...props }) => <pre style={MD.pre} {...props} />,
+  hr: ({ node: _n, ...props }) => <hr style={MD.hr} {...props} />,
+};
+
 function fmtRelativeShort(iso: string): string {
   const then = new Date(iso).getTime();
   if (Number.isNaN(then)) return "";
@@ -2213,31 +2617,86 @@ export function LibraryFinderScreen({
   initialFilter = "all",
   onFilterChange,
 }: LibraryFinderScreenProps) {
-  const [activeFilter, setActiveFilter] = useState<FilesFilter>(initialFilter);
-  useEffect(() => setActiveFilter(initialFilter), [initialFilter]);
+  const workspace = useLibraryWorkspace();
+  const real = workspace.real;
+  const [rawFilter, setRawFilter] = useState<FilesFilter>(initialFilter);
+  useEffect(() => setRawFilter(initialFilter), [initialFilter]);
+  // Shared/secure are sample-only scopes — fold them into the nearest real one.
+  const activeFilter: FilesFilter = real
+    ? rawFilter === "shared" ? "all" : rawFilter === "secure" ? "data-room" : rawFilter
+    : rawFilter;
   const chooseFilter = (filter: FilesFilter) => {
-    setActiveFilter(filter);
+    setRawFilter(filter);
     onFilterChange?.(filter);
   };
-  const filters = [
-    { id: "all", label: "All", count: 24 },
-    { id: "deals", label: "Portfolios", count: 2 },
-    { id: "data-room", label: "Data room", count: 12 },
-    { id: "actionable", label: "Actionable", count: 4 },
-    { id: "docs", label: "Docs", count: 10 },
-    { id: "analysis", label: "Analysis", count: 5 },
-    { id: "shared", label: "Shared", count: 2 },
-    { id: "secure", label: "Secure", count: 1 },
-  ] satisfies { id: FilesFilter; label: string; count: number }[];
-  const sections = getFilesSections(onOpenDetail);
+
+  // Live client-side search across the visible rows (real and sample alike).
+  const [query, setQuery] = useState("");
+  const q = query.trim().toLowerCase();
+  const matchesQuery = (row: DocRowData) => !q || `${row.name} ${row.meta}`.toLowerCase().includes(q);
+
+  // ── Real workspace union: deliverables grouped by deal, deals as rooms ──
+  const docCount = workspace.deals.reduce((sum, deal) => sum + Number(deal.document_count ?? 0), 0);
+  const roomCount = workspace.deals.filter((deal) => Number(deal.document_count ?? 0) > 0).length;
+  const actionables = workspace.deliverables.filter(isActionableDeliverable);
+  const analyses = workspace.deliverables.filter(isAnalysisDeliverable);
+  const docsOnly = workspace.deliverables.filter((d) => !isAnalysisDeliverable(d));
+
+  const filters: { id: FilesFilter; label: string; count: number | null }[] = real
+    ? [
+        { id: "all", label: "All", count: workspace.loaded ? workspace.deliverables.length + docCount : null },
+        { id: "deals", label: "Deals", count: workspace.loaded ? workspace.deals.length : null },
+        { id: "data-room", label: "Data rooms", count: workspace.loaded ? roomCount : null },
+        { id: "actionable", label: "Actionable", count: workspace.loaded ? actionables.length : null },
+        { id: "docs", label: "Docs", count: workspace.loaded ? docsOnly.length : null },
+        { id: "analysis", label: "Analyses", count: workspace.loaded ? analyses.length : null },
+      ]
+    : [
+        { id: "all", label: "All", count: 24 },
+        { id: "deals", label: "Portfolios", count: 2 },
+        { id: "data-room", label: "Data room", count: 12 },
+        { id: "actionable", label: "Actionable", count: 4 },
+        { id: "docs", label: "Docs", count: 10 },
+        { id: "analysis", label: "Analysis", count: 5 },
+        { id: "shared", label: "Shared", count: 2 },
+        { id: "secure", label: "Secure", count: 1 },
+      ];
+
   const dataRoomView = activeFilter === "data-room" || activeFilter === "secure";
   const showDealLibraries = activeFilter === "all" || activeFilter === "deals";
-  const visibleSections = activeFilter === "all"
-    ? sections
-    : activeFilter === "deals" || dataRoomView
-    ? []
-    : sections.filter((section) => section.filters.includes(activeFilter));
-  const scopeLabel = dataRoomView ? "Data room files" : activeFilter === "deals" ? "Portfolios" : "All deal files";
+
+  // Real: deliverables for the active scope, grouped by deal.
+  const realScope =
+    activeFilter === "actionable" ? actionables :
+    activeFilter === "analysis" ? analyses :
+    activeFilter === "docs" ? docsOnly :
+    activeFilter === "all" ? workspace.deliverables :
+    [];
+  const realSections = real ? groupRealDeliverablesByDeal(realScope, onOpenDetail, matchesQuery) : [];
+  const realDealRows = real
+    ? workspace.deals.map((deal) => realDealLibraryRow(deal, onOpenDealLibrary)).filter(matchesQuery)
+    : [];
+  const realRoomRows = real
+    ? workspace.deals.map((deal) => realDealRoomRow(deal, onOpenDealLibrary)).filter(matchesQuery)
+    : [];
+  const realVisibleCount =
+    realSections.reduce((sum, section) => sum + section.rows.length, 0) +
+    (showDealLibraries ? realDealRows.length : 0) +
+    (dataRoomView ? realRoomRows.length : 0);
+
+  // Sample: existing showroom sections, filtered by the live search.
+  const sampleSections = real ? [] : getFilesSections(onOpenDetail);
+  const visibleSampleSections = (
+    activeFilter === "all"
+      ? sampleSections
+      : activeFilter === "deals" || dataRoomView
+      ? []
+      : sampleSections.filter((section) => section.filters.includes(activeFilter))
+  )
+    .map((section) => ({ ...section, rows: section.rows.filter(matchesQuery) }))
+    .filter((section) => section.rows.length > 0 || !q);
+
+  const scopeLabel = dataRoomView ? "Data room files" : activeFilter === "deals" ? (real ? "Deals" : "Portfolios") : "All deal files";
   const scopeSub = dataRoomView
     ? "Browse shared diligence rooms by portfolio, deal, category, and status."
     : "Browse deal libraries, documents, analysis, shared files, and secure data rooms.";
@@ -2247,9 +2706,6 @@ export function LibraryFinderScreen({
     <div className="mb-fade-up" style={{ ...S.page, position: "relative" }}>
       <button type="button" onClick={onBack} aria-label="Back" style={S.floatBack}>
         <MobileIcon name="back" size={14} c="var(--mb-ink-1)" />
-      </button>
-      <button type="button" aria-label="Search files" style={S.floatShare}>
-        <MobileIcon name="search" size={16} c="var(--mb-ink-1)" />
       </button>
 
       <div style={S.finderIntro}>
@@ -2265,11 +2721,23 @@ export function LibraryFinderScreen({
       <div style={S.finderHero}>
         <div style={S.finderHeroGlow} />
         <h2 style={S.finderHeroTitle}>Find files across every deal library.</h2>
-        <div style={S.finderStatRow}>
-          <FinderStat value="3" label="Deals" />
-          <FinderStat value="24" label="Files" />
-          <FinderStat value="12" label="Data room" />
-        </div>
+        {/* Counts are real workspace numbers for a signed-in user; nothing
+            renders while they load. Anon keeps the sample showroom stats. */}
+        {real ? (
+          workspace.loaded && (
+            <div style={S.finderStatRow}>
+              <FinderStat value={String(workspace.deals.length)} label="Deals" />
+              <FinderStat value={String(workspace.deliverables.length + docCount)} label="Files" />
+              <FinderStat value={String(roomCount)} label={roomCount === 1 ? "Data room" : "Data rooms"} />
+            </div>
+          )
+        ) : (
+          <div style={S.finderStatRow}>
+            <FinderStat value="3" label="Deals" />
+            <FinderStat value="24" label="Files" />
+            <FinderStat value="12" label="Data room" />
+          </div>
+        )}
       </div>
 
       <div className="mb-hide-scroll" style={S.filterRow}>
@@ -2286,16 +2754,18 @@ export function LibraryFinderScreen({
             }}
           >
             {filter.label}
-            <span
-              className="mb-mono"
-              style={{
-                ...S.filterCount,
-                background: activeFilter === filter.id ? "rgba(255,255,255,0.2)" : "var(--mb-card-2)",
-                color: activeFilter === filter.id ? "#fff" : "var(--mb-ink-3)",
-              }}
-            >
-              {filter.count}
-            </span>
+            {filter.count != null && (
+              <span
+                style={{
+                  ...S.filterCount,
+                  fontFamily: "var(--mb-font-mono)",
+                  background: activeFilter === filter.id ? "rgba(255,255,255,0.2)" : "var(--mb-card-2)",
+                  color: activeFilter === filter.id ? "#fff" : "var(--mb-ink-3)",
+                }}
+              >
+                {filter.count}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -2303,19 +2773,99 @@ export function LibraryFinderScreen({
       <div style={S.detailSearchPad}>
         <div style={S.searchField}>
           <MobileIcon name="search" c="var(--mb-ink-3)" size={16} />
-          <span style={S.searchText}>{searchCopy}</span>
-          <span className="mb-mono" style={S.keyHint}>K</span>
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.currentTarget.value)}
+            placeholder={searchCopy}
+            aria-label={searchCopy}
+            style={S.searchInput}
+          />
+          {query && (
+            <button type="button" onClick={() => setQuery("")} aria-label="Clear search" style={S.searchClear}>
+              <X size={14} strokeWidth={2.4} />
+            </button>
+          )}
         </div>
       </div>
 
-      {showDealLibraries && (
-        <DealLibrarySection onOpenDealLibrary={onOpenDealLibrary} />
-      )}
-
-      {dataRoomView && (
+      {real ? (
         <>
-          <DataRoomDealSection onOpenDealLibrary={onOpenDealLibrary} />
-          {getDataRoomStatusSections(onOpenDetail).map((section) => (
+          {!workspace.loaded && (
+            <div style={S.realStatePad}>
+              <div className="mb-as-card" style={S.realStateCard}>
+                <div style={S.realStateTitle}>Loading files…</div>
+                <div style={S.realStateCopy}>Fetching your deals and deliverables.</div>
+              </div>
+            </div>
+          )}
+
+          {workspace.loaded && showDealLibraries && realDealRows.length > 0 && (
+            <FinderSection
+              title="Deal libraries"
+              sub="Open a deal to browse its files and data room."
+              rows={realDealRows}
+            />
+          )}
+
+          {workspace.loaded && dataRoomView && realRoomRows.length > 0 && (
+            <FinderSection
+              title="Active data rooms"
+              sub="Open a deal's shared diligence room."
+              rows={realRoomRows}
+            />
+          )}
+
+          {workspace.loaded && realSections.map((section) => (
+            <FinderSection
+              key={section.title}
+              title={section.title}
+              sub={section.sub}
+              rows={section.rows}
+            />
+          ))}
+
+          {workspace.loaded && realVisibleCount === 0 && (
+            <div style={S.realStatePad}>
+              <div className="mb-as-card" style={S.realStateCard}>
+                <div aria-hidden="true" style={S.realStateIcon}>
+                  <FolderKanban size={26} strokeWidth={2} />
+                </div>
+                <div style={S.realStateTitle}>
+                  {q ? `No files match “${query.trim()}”` : "Nothing filed here yet"}
+                </div>
+                <div style={S.realStateCopy}>
+                  {q
+                    ? "Try a different name, deal, or status."
+                    : "Files you and Yulia create show up here, organized by deal."}
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          {showDealLibraries && (
+            <DealLibrarySection onOpenDealLibrary={onOpenDealLibrary} query={q} />
+          )}
+
+          {dataRoomView && (
+            <>
+              <DataRoomDealSection onOpenDealLibrary={onOpenDealLibrary} query={q} />
+              {getDataRoomStatusSections(onOpenDetail)
+                .map((section) => ({ ...section, rows: section.rows.filter(matchesQuery) }))
+                .filter((section) => section.rows.length > 0 || !q)
+                .map((section) => (
+                  <FinderSection
+                    key={section.title}
+                    title={section.title}
+                    sub={section.sub}
+                    rows={section.rows}
+                  />
+                ))}
+            </>
+          )}
+
+          {visibleSampleSections.map((section) => (
             <FinderSection
               key={section.title}
               title={section.title}
@@ -2325,20 +2875,38 @@ export function LibraryFinderScreen({
           ))}
         </>
       )}
-
-      {visibleSections.map((section) => (
-        <FinderSection
-          key={section.title}
-          title={section.title}
-          sub={section.sub}
-          rows={section.rows}
-        />
-      ))}
     </div>
   );
 }
 
-function DealLibrarySection({ onOpenDealLibrary }: { onOpenDealLibrary: OpenDealLibraryHandler }) {
+/** Groups real deliverables by deal for the finder, newest first, applying
+ *  the live search filter. Sections with no matching rows are dropped. */
+function groupRealDeliverablesByDeal(
+  deliverables: WorkspaceDeliverable[],
+  onOpenDetail: OpenDocHandler,
+  matchesQuery: (row: DocRowData) => boolean,
+): Array<{ title: string; sub: string; rows: DocRowData[] }> {
+  const groups = new Map<string, WorkspaceDeliverable[]>();
+  for (const d of sortDeliverablesByRecency(deliverables)) {
+    const key = d.deal_name || "Workspace";
+    const list = groups.get(key) ?? [];
+    list.push(d);
+    groups.set(key, list);
+  }
+  return [...groups.entries()]
+    .map(([dealName, items]) => ({
+      title: dealName,
+      sub: `${items.length} ${items.length === 1 ? "file" : "files"}`,
+      rows: items.map((item) => realDeliverableRow(item, onOpenDetail)).filter(matchesQuery),
+    }))
+    .filter((section) => section.rows.length > 0);
+}
+
+function DealLibrarySection({ onOpenDealLibrary, query = "" }: { onOpenDealLibrary: OpenDealLibraryHandler; query?: string }) {
+  const visible = dealLibraries.filter(
+    (deal) => !query || `${deal.title} ${deal.meta} ${deal.portfolio}`.toLowerCase().includes(query),
+  );
+  if (query && visible.length === 0) return null;
   return (
     <section style={S.finderSection}>
       <div className="mb-as-card" style={S.finderListCard}>
@@ -2351,7 +2919,7 @@ function DealLibrarySection({ onOpenDealLibrary }: { onOpenDealLibrary: OpenDeal
             <div style={S.docSub}>Open a portfolio deal to browse stages and files.</div>
           </div>
         </div>
-        {dealLibraries.map((deal, index) => (
+        {visible.map((deal, index) => (
           <DocRow
             key={deal.title}
             row={{
@@ -2361,7 +2929,7 @@ function DealLibrarySection({ onOpenDealLibrary }: { onOpenDealLibrary: OpenDeal
               icon: <DealLibraryIcon />,
               onClick: () => onOpenDealLibrary(deal.title, deal.meta, deal.portfolio, "all"),
             }}
-            last={index === dealLibraries.length - 1}
+            last={index === visible.length - 1}
             showChevron
           />
         ))}
@@ -2370,7 +2938,11 @@ function DealLibrarySection({ onOpenDealLibrary }: { onOpenDealLibrary: OpenDeal
   );
 }
 
-function DataRoomDealSection({ onOpenDealLibrary }: { onOpenDealLibrary: OpenDealLibraryHandler }) {
+function DataRoomDealSection({ onOpenDealLibrary, query = "" }: { onOpenDealLibrary: OpenDealLibraryHandler; query?: string }) {
+  const visible = activeDataRooms.filter(
+    (room) => !query || `${room.title} ${room.meta}`.toLowerCase().includes(query),
+  );
+  if (query && visible.length === 0) return null;
   return (
     <section style={S.finderSection}>
       <div className="mb-as-card" style={S.finderListCard}>
@@ -2383,7 +2955,7 @@ function DataRoomDealSection({ onOpenDealLibrary }: { onOpenDealLibrary: OpenDea
             <div style={S.docSub}>Open a deal&rsquo;s shared diligence room.</div>
           </div>
         </div>
-        {activeDataRooms.map((room, index) => (
+        {visible.map((room, index) => (
           <DocRow
             key={room.title}
             row={{
@@ -2393,7 +2965,7 @@ function DataRoomDealSection({ onOpenDealLibrary }: { onOpenDealLibrary: OpenDea
               icon: <PortfolioIcon />,
               onClick: () => onOpenDealLibrary(room.dealTitle, room.dealMeta, room.portfolio, "data-room"),
             }}
-            last={index === activeDataRooms.length - 1}
+            last={index === visible.length - 1}
             showChevron
           />
         ))}
@@ -2742,7 +3314,7 @@ function FinderSection({
           </div>
         </div>
         {rows.map((row, index) => (
-          <DocRow key={row.name} row={row} last={index === rows.length - 1} showChevron />
+          <DocRow key={`${index}-${row.name}`} row={row} last={index === rows.length - 1} showChevron />
         ))}
       </div>
     </section>
@@ -2787,7 +3359,7 @@ function DocSection({
           const clickableRow = onOpenDoc && !row.onClick ? withDocClick(row, onOpenDoc) : row;
           return (
             <DocRow
-              key={row.name}
+              key={`${index}-${row.name}`}
               row={clickableRow}
               last={index === visible.length - 1 && (!hasMore || open)}
               showChevron={Boolean(clickableRow.onClick)}
@@ -3369,6 +3941,19 @@ const S: Record<string, CSSProperties> = {
     lineHeight: 1.4,
     textWrap: "pretty",
   },
+  activityEmpty: {
+    padding: "14px 4px 16px",
+    fontSize: 14,
+    lineHeight: 1.45,
+    color: "var(--mb-ink-3)",
+    textWrap: "pretty",
+  },
+  roomsLabel: {
+    padding: "2px 4px 4px",
+    fontSize: 13.5,
+    fontWeight: 700,
+    color: "var(--mb-ink-3)",
+  },
   finderCtaPad: {
     marginTop: 30,
     padding: "0 16px",
@@ -3573,6 +4158,30 @@ const S: Record<string, CSSProperties> = {
     whiteSpace: "nowrap",
     overflow: "hidden",
     textOverflow: "ellipsis",
+  },
+  // Real controlled search input (16px keeps iOS Safari from zooming on focus).
+  searchInput: {
+    flex: 1,
+    minWidth: 0,
+    fontSize: 16,
+    color: "var(--mb-ink)",
+    background: "transparent",
+    border: "none",
+    outline: "none",
+    padding: 0,
+  },
+  searchClear: {
+    flexShrink: 0,
+    width: 24,
+    height: 24,
+    borderRadius: "50%",
+    border: "none",
+    background: "var(--mb-line-2)",
+    color: "var(--mb-ink-2)",
+    display: "grid",
+    placeItems: "center",
+    cursor: "pointer",
+    padding: 0,
   },
   keyHint: {
     fontSize: 11,
@@ -4323,6 +4932,30 @@ const S: Record<string, CSSProperties> = {
     fontSize: 12.5,
     color: "var(--mb-ink-3)",
   },
+  // Sentence-case toolbar label for the real reader (replaces the caps-mono
+  // kicker the eyebrow kill rule silently hid).
+  readerToolbarLabel: {
+    fontSize: 12.5,
+    fontWeight: 700,
+    color: "var(--mb-ink-3)",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
+  // Inline confirmation under the wired Share control.
+  shareCopiedPill: {
+    position: "absolute",
+    top: "calc(env(safe-area-inset-top, 44px) + 54px)",
+    right: 16,
+    zIndex: 10,
+    padding: "6px 12px",
+    borderRadius: 999,
+    background: "var(--mb-ink)",
+    color: "#fff",
+    fontSize: 12.5,
+    fontWeight: 700,
+    boxShadow: "0 8px 20px -10px rgba(0,0,0,0.4)",
+  },
   readerPage: {
     margin: "18px",
     padding: "24px 22px",
@@ -4354,10 +4987,9 @@ const S: Record<string, CSSProperties> = {
     margin: "0 0 14px",
   },
   readerMarkdown: {
-    fontSize: 15,
+    fontSize: 16,
     lineHeight: 1.6,
     color: "var(--mb-ink-2)",
-    whiteSpace: "pre-wrap",
     wordBreak: "break-word",
     margin: 0,
   },

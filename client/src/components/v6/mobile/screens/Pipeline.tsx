@@ -9,8 +9,10 @@ import { GlassTopBar, LargeTitle } from "../TopBar";
 import { YIcon } from "../YIcon";
 import { IndustryIcon } from "../IndustryIcon";
 import { SectionHeader } from "../SectionHeader";
+import { VerdictPill } from "../VerdictPill";
 import type { Verdict } from "../types";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
+import { DEV_AUTH_BYPASS } from "../../../../hooks/useAuth";
 import type { MobileWatchRow, MobileFeatured, MobilePick, MobileStageRow } from "../../../../hooks/useMobileDeals";
 import { dealsByStage, type DealStage, type SampleDeal } from "../../../../lib/sampleDeals";
 import { PIPELINE_STAGES } from "../../../../lib/pipelineStages";
@@ -67,22 +69,29 @@ const STAGE_SUBS: Record<DealStage, string> = {
   "watching":  "Sample sources Yulia revisits weekly — yours go here.",
 };
 
-interface FeaturedDef { id: string; name: string; sub: string; revLabel: string }
+interface FeaturedDef { id: string; name: string; sub: string; revLabel: string; fit: number; verdict: Verdict }
 const SAMPLE_FEATURED: FeaturedDef = {
   id: "deal-bigfake",
   name: "Big Fake Deal · sample",
   sub: "East Texas · sample seed",
-  revLabel: "$5.4M REV",
+  revLabel: "$5.4M revenue",
+  fit: 92,
+  verdict: "pursue",
 };
 
 export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, onOpenDealsList, onAvatarClick, onSearch, onNotif, notifCount, userFeatured, userPicks, userAll, realEmpty }: PipelineProps) {
+  // Sample content is ONLY for anon and the dev-bypass preview. A real
+  // signed-in user never sees "Big Fake Deal" or fabricated chip counts —
+  // including mid-load (honest loading card below instead).
+  const showSamples = isAnon || DEV_AUTH_BYPASS;
+  const isRealFeatured = !showSamples && !!userFeatured;
   const FEATURED: FeaturedDef = userFeatured ?? SAMPLE_FEATURED;
   const [activeChip, setActiveChip] = useState<DealStage>("watching");
   const { isWatched, toggle } = useWatchlist();
   const filtered: SampleDeal[] = dealsByStage(activeChip);
 
   // A real signed-in user WITH deals: render their FULL pipeline grouped by
-  // stage (same five stages as desktop). Anon/dev preview (isAnon) stays on the
+  // stage (same five stages as desktop). Anon/dev preview stays on the
   // chip-filtered samples below.
   const hasRealDeals = !isAnon && !!userAll && userAll.length > 0;
 
@@ -100,10 +109,10 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
         </div>
       )}
 
-      {/* Category chips — sample-only. Real stage data isn't in the
-          watch-row shape, so chips are hidden for real signed-in users
-          (live list or honest empty state below). */}
-      {!hasRealDeals && !realEmpty && (
+      {/* Category chips — sample-only (anon/dev preview). The counts are
+          sample-seed numbers, so they must never render for a real
+          signed-in user — not even mid-load. */}
+      {showSamples && !hasRealDeals && (
       <div className="mb-hide-scroll" style={P.chipsRow}>
         {CHIPS.map(c => {
           const isActive = activeChip === c.id;
@@ -136,19 +145,23 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
       </div>
       )}
 
-      {/* New today section — was wrapped in .on-color when the gradient
-          carried a gold/sage band; page is white now, default dark text.
-          Suppressed for realEmpty: FEATURED falls back to SAMPLE_FEATURED
-          when userFeatured is null, and we must not show samples to a
-          genuinely empty signed-in user. */}
-      {!realEmpty && (
+      {/* New today section — sample hero for anon/dev preview; for a real
+          signed-in user it renders ONLY from their real featured deal
+          (highest-fit active deal), with headline/fit/verdict derived from
+          that deal — never the hardcoded sample copy. Hidden while the
+          deals fetch is in flight and for realEmpty. */}
+      {(showSamples || isRealFeatured) && (
       <div style={{ padding: "0 22px 8px" }}>
         <div className="mb-section-title">{FEATURED.name}</div>
-        <div style={P.subText}>The strongest source this week &mdash; tap to see why.</div>
+        <div style={P.subText}>
+          {isRealFeatured
+            ? "Your highest-fit active deal — tap to see why."
+            : "The strongest source this week — tap to see why."}
+        </div>
       </div>
       )}
 
-      {!realEmpty && (
+      {(showSamples || isRealFeatured) && (
       <div style={{ padding: "12px 16px 4px" }}>
         <div
           className="mb-tap"
@@ -167,18 +180,31 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
           <div style={{ height: 200, position: "relative" }}>
             <div style={P.featuredGlow} aria-hidden="true" />
             <div style={P.featuredCorner}>
-              <div className="mb-eyebrow">FIT {userFeatured?.fit ?? 92} &middot; PURSUE</div>
+              {/* Visible fit + verdict — replaces the mono-caps eyebrow
+                  ("FIT 92 · PURSUE") that the app-wide micro-label kill
+                  rule display:none'd. Plain mono numeral + tonal pill. */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                <span style={P.fitNum}>
+                  {FEATURED.fit}
+                  <span style={P.fitWord}> fit</span>
+                </span>
+                <VerdictPill kind={FEATURED.verdict} />
+              </div>
               <div style={P.featuredHeadline}>
-                Recurring revenue.<br/>Honest capex story.
+                {isRealFeatured
+                  ? FEATURED.sub
+                  : <>Recurring revenue.<br/>Honest capex story.</>}
               </div>
             </div>
             <div style={P.featuredRev}>{FEATURED.revLabel}</div>
           </div>
           <div style={P.featuredFooter}>
-            <YIcon size={42} kind="cool" />
+            <YIcon size={42} kind={FEATURED.verdict === "pursue" ? "cool" : "default"} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={P.featuredName}>{FEATURED.name}</div>
-              <div style={P.featuredSub}>{FEATURED.sub}</div>
+              <div style={P.featuredSub}>
+                {isRealFeatured ? "Highest-fit active deal in your pipeline" : FEATURED.sub}
+              </div>
             </div>
             <button
               type="button"
@@ -194,12 +220,13 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
       </div>
       )}
 
-      {/* Stage section — three modes:
+      {/* Stage section — four modes:
           1. realEmpty  → honest empty state + first-deal CTA (signed-in,
              zero deals). No samples.
-          2. hasRealDeals → the user's live watching list straight from
-             userWatching (no chip filtering — stage data isn't in this shape).
-          3. otherwise  → sample, chip-filtered experience (anon/dev preview).
+          2. hasRealDeals → the user's full pipeline grouped by stage.
+          3. real signed-in user, fetch in flight → honest loading card
+             (never the sample list).
+          4. anon/dev preview → sample, chip-filtered experience.
           Heading + rows live inside one card, App Store-style. */}
       {realEmpty ? (
         <div className="mb-as-card" style={{ margin: "24px 16px 0", padding: "28px 22px 26px", textAlign: "center" }}>
@@ -245,6 +272,12 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
             );
           })}
         </>
+      ) : !showSamples ? (
+        <div className="mb-as-card" style={{ margin: "24px 16px 0", padding: "26px 22px" }}>
+          <div style={{ fontSize: 13.5, color: "var(--mb-ink-3)", textAlign: "center" }}>
+            Loading your pipeline&hellip;
+          </div>
+        </div>
       ) : filtered.length === 0 ? (
         <div className="mb-as-card" style={{ margin: "24px 16px 0", padding: "20px 22px 22px" }}>
           <SectionHeader
@@ -282,10 +315,10 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
         </div>
       )}
 
-      {/* Brief dock — suppressed for realEmpty: BriefDigestSection falls
-          back to SAMPLE_PICKS when userPicks is null, and an empty signed-in
-          user must not be shown sample picks. */}
-      {!realEmpty && (
+      {/* Brief dock — sample picks for anon/dev preview only; for a real
+          signed-in user it renders only when they have real picks (hidden
+          for realEmpty and mid-load). */}
+      {(showSamples || (userPicks?.length ?? 0) > 0) && (
       <div style={P.briefDock}>
         <div style={{ padding: "0 22px 12px" }}>
           <div className="mb-section-title">Yulia&rsquo;s ranked read</div>
@@ -426,9 +459,21 @@ const P: Record<string, CSSProperties> = {
   },
   featuredRev: {
     position: "absolute", top: 18, right: 22,
-    fontFamily: "var(--mb-font-mono)", fontSize: 11,
+    fontFamily: "var(--mb-font-mono)", fontSize: 12.5,
     color: "#fff",
-    letterSpacing: 0.1, fontWeight: 600,
+    fontWeight: 650,
+    fontVariantNumeric: "tabular-nums",
+  },
+  /* Visible fit numeral on the featured hero — plain inline mono (no
+     .mb-mono class, no caps) so the micro-label kill rule can't touch it. */
+  fitNum: {
+    fontFamily: "var(--mb-font-mono)",
+    fontSize: 15, fontWeight: 700, color: "#fff",
+    fontVariantNumeric: "tabular-nums",
+    lineHeight: 1,
+  },
+  fitWord: {
+    fontSize: 12.5, fontWeight: 600, color: "#fff",
   },
   featuredFooter: {
     padding: "12px 14px",

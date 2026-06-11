@@ -1,8 +1,12 @@
 /* V6 Mobile — Today screen.
-   Anonymous: WORKING SAMPLE welcome hero + Three ways to explore guide +
-              5 sample deals + Brief teaser.
-   Authed: hero collapses to a daily-brief teaser; TryThisCard hides; eyebrow
-           strips "WORKING SAMPLE" prefix.
+   Anonymous (and dev-bypass preview): WORKING SAMPLE welcome hero + Three
+              ways to explore guide + 5 sample deals + sample files/recents.
+   Authed (real sign-in): every surface binds real workspace data — hero from
+              the user's highest-fit recent deal, recents from
+              GET /api/deliverables/all, market intel from the portfolio
+              brief — with honest empty/loading states. A real signed-in user
+              NEVER sees sample content ("Big Fake Deal" etc.), including
+              mid-load.
 
    Copy resolution: desktop's longer welcome H1 + tag win where they conflict
    with CD's mobile bundle copy. Sample pipeline matches desktop's Big Fake
@@ -15,7 +19,7 @@ import { YIcon } from "../YIcon";
 import { IndustryIcon } from "../IndustryIcon";
 import { VerdictPill } from "../VerdictPill";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
-import { authHeaders } from "../../../../hooks/useAuth";
+import { DEV_AUTH_BYPASS, authHeaders } from "../../../../hooks/useAuth";
 import { MobileIcon } from "../icons";
 import { LibraryActivityList, LibraryPreviewCard } from "./LibrarySearch";
 import type { Verdict, YIconKind } from "../types";
@@ -30,7 +34,10 @@ interface TodayProps {
   initials: string;
   onOpenDeal: (id: string, title: string) => void;
   onOpenLibrary: (filter?: "all" | "deals" | "actionable" | "docs" | "analysis" | "data-room" | "shared" | "secure") => void;
-  onOpenLibraryDetail: (title?: string, meta?: string, kind?: string) => void;
+  /** Opens the document reader. The 4th arg is the REAL deliverable id —
+   *  V6Mobile passes onOpenLibraryDoc, which already accepts it, so real
+   *  recents open the real document instead of sample text. */
+  onOpenLibraryDetail: (title?: string, meta?: string, kind?: string, deliverableId?: number) => void;
   onChat: () => void;
   onSearch?: () => void;
   onAskYulia: (prompt: string) => void;
@@ -43,13 +50,14 @@ interface TodayProps {
   /** Opens the notifications sheet + unread badge count. Omitted → no bell. */
   onNotif?: () => void;
   notifCount?: number;
-  /** Authed user's deals (from useMobileDeals). Null = anon or empty,
-      in which case the hardcoded SAMPLE_PIPELINE renders instead. */
+  /** Authed user's deals (from useMobileDeals). For a real signed-in user
+      this is the ONLY pipeline source — null means "still loading" and
+      renders an honest loading row, never SAMPLE_PIPELINE. Samples render
+      solely for anon / dev-bypass preview. Also feeds the daily hero
+      (highest-fit row). */
   userPipeline: MobilePipelineRow[] | null;
-  /** True ONLY when a genuinely signed-in user has zero deals. When set,
-      the pipeline section renders an honest empty state instead of
-      falling back to SAMPLE_PIPELINE. Anon/dev preview passes false so
-      samples keep showing via the userPipeline ?? SAMPLE_PIPELINE path. */
+  /** True ONLY when a genuinely signed-in user has zero deals → honest
+      empty states (pipeline section + starter hero). */
   realEmpty?: boolean;
   /** Current audience (drives copy + tip chips). */
   audience: Audience;
@@ -69,6 +77,22 @@ interface TodayPipelineRow {
   action: "open" | "get";
   verdict?: Verdict;
   price?: string;
+  fit?: number;
+  metricValue?: string;
+  metricLabel?: string;
+}
+
+/** Row from GET /api/deliverables/all — the real "Recents" source. */
+interface RecentDeliverable {
+  id: number;
+  deal_id: number;
+  status: string;
+  created_at: string | null;
+  completed_at: string | null;
+  artifact_kind: string | null;
+  slug: string | null;
+  name: string | null;
+  deal_name: string | null;
 }
 
 interface PortfolioMarketIntelligence {
@@ -110,18 +134,27 @@ export function TodayScreen({
   onAvatarClick, onNotif, notifCount, userPipeline, realEmpty,
   audience,
 }: TodayProps) {
-  // realEmpty = a real signed-in user with zero deals. In that case we do
-  // NOT fall back to SAMPLE_PIPELINE — we render an honest empty state so
-  // we never show a real user fake deals. Anon/dev preview leaves realEmpty
-  // false, so the userPipeline ?? SAMPLE_PIPELINE fallback still shows
-  // samples.
-  const PIPELINE: TodayPipelineRow[] = userPipeline ?? SAMPLE_PIPELINE;
+  // Sample content is ONLY for anon and the dev-bypass preview. A real
+  // signed-in user (showSamples false) binds real data everywhere, with
+  // honest empty/loading states — never "Big Fake Deal".
+  const showSamples = isAnon || DEV_AUTH_BYPASS;
+  const PIPELINE: TodayPipelineRow[] = showSamples ? SAMPLE_PIPELINE : (userPipeline ?? []);
+  // Authed + deals fetch not resolved yet (V6Mobile passes null until
+  // hasData; realEmpty only flips once loaded with zero deals).
+  const authedLoading = !showSamples && userPipeline == null && !realEmpty;
+  // Hero = the highest-fit row among the user's recent active deals
+  // (same fit scoring the Pipeline "NEW TODAY" featured hero uses).
+  const heroDeal = !showSamples && userPipeline?.length
+    ? userPipeline.reduce((a, b) => ((b.fit ?? -1) > (a.fit ?? -1) ? b : a))
+    : null;
   const { isWatched, toggle } = useWatchlist();
   const C = copyFor(audience);
   const [brief, setBrief] = useState<PortfolioBrief | null>(null);
+  // Real recents — null until the fetch resolves, [] on empty/error.
+  const [docs, setDocs] = useState<RecentDeliverable[] | null>(null);
 
   useEffect(() => {
-    if (isAnon) {
+    if (showSamples) {
       setBrief(null);
       return;
     }
@@ -135,9 +168,28 @@ export function TodayScreen({
         if (!cancelled) setBrief(null);
       });
     return () => { cancelled = true; };
-  }, [isAnon]);
+  }, [showSamples]);
 
-  const marketIntel = brief?.marketIntelligence ?? SAMPLE_MARKET_INTEL;
+  useEffect(() => {
+    if (showSamples) {
+      setDocs(null);
+      return;
+    }
+    let cancelled = false;
+    fetch("/api/deliverables/all", { headers: authHeaders() })
+      .then(res => res.ok ? res.json() : Promise.reject(new Error(`deliverables ${res.status}`)))
+      .then((rows: RecentDeliverable[]) => {
+        if (!cancelled) setDocs(Array.isArray(rows) ? rows : []);
+      })
+      .catch(() => {
+        if (!cancelled) setDocs([]);
+      });
+    return () => { cancelled = true; };
+  }, [showSamples]);
+
+  // Market intel: sample copy ONLY for anon/dev preview. Authed users get
+  // the real portfolio brief, or an honest "ask Yulia" card when none.
+  const marketIntel = showSamples ? SAMPLE_MARKET_INTEL : brief?.marketIntelligence ?? null;
   const marketPrompt = "Show me the market intelligence behind the deal of the day. Include buyer universe, financing climate, tax/legal structure issues, and source gaps.";
 
   return (
@@ -145,24 +197,52 @@ export function TodayScreen({
       <GlassTopBar title="Today" initials={initials} onAvatarClick={onAvatarClick} onSearch={onSearch ?? onChat} onNotif={onNotif} notifCount={notifCount} />
       <LargeTitle>Today</LargeTitle>
 
-      {/* Hero — anon = welcome, authed = today's brief teaser. */}
+      {/* Hero — anon = welcome; dev preview = sample daily hero; authed =
+          the user's real lead deal, or an honest starter card when empty.
+          While the deals fetch is in flight nothing renders (no sample
+          flash for real users). */}
       <div style={{ padding: "4px 16px 0" }}>
         {isAnon ? (
           <WelcomeHero
             onChat={onChat}
             heroTag={C.todayHeroTag}
           />
-        ) : (
-          <DailyHero onOpenDeal={() => onOpenDeal("deal-bigfake", "Big Fake Deal · sample")} />
-        )}
+        ) : showSamples ? (
+          <DailyHero
+            deal={SAMPLE_HERO}
+            onOpen={() => onOpenDeal("deal-bigfake", "Big Fake Deal · sample")}
+            onAsk={onAskYulia}
+          />
+        ) : heroDeal ? (
+          <DailyHero
+            deal={{
+              name: heroDeal.name,
+              sub: heroDeal.sub,
+              fit: heroDeal.fit,
+              verdict: heroDeal.verdict ?? "watch",
+              metricValue: heroDeal.metricValue,
+              metricLabel: heroDeal.metricLabel,
+            }}
+            onOpen={() => onOpenDeal(heroDeal.id, heroDeal.name)}
+            onAsk={onAskYulia}
+          />
+        ) : realEmpty ? (
+          <StarterHero
+            onSource={() => onAskYulia("Help me source and add my first deal")}
+          />
+        ) : null}
       </div>
 
       <div style={{ padding: "14px 16px 0" }}>
-        <MarketIntelCard
-          intel={marketIntel}
-          onAskYulia={onAskYulia}
-          fullPrompt={marketPrompt}
-        />
+        {marketIntel ? (
+          <MarketIntelCard
+            intel={marketIntel}
+            onAskYulia={onAskYulia}
+            fullPrompt={marketPrompt}
+          />
+        ) : (
+          <MarketIntelAskCard onAskYulia={onAskYulia} fullPrompt={marketPrompt} />
+        )}
       </div>
 
       {/* Explore SMBX — about/learn surface. Persona-aware: 1 fixed
@@ -178,46 +258,60 @@ export function TodayScreen({
         />
       </div>
 
-      {/* Library — quick routes + docs that need attention. Brief moved
-          to Pipeline so Today can point straight at the workbench. */}
+      {/* Library — quick routes + docs that need attention. Sample portal
+          card for anon/dev preview only; authed users get a launcher whose
+          count comes from their real deliverables. */}
       <div style={{ marginTop: 24, padding: "0 16px" }}>
-        <LibraryPreviewCard onOpenFinder={onOpenLibrary} />
+        {showSamples ? (
+          <LibraryPreviewCard onOpenFinder={onOpenLibrary} />
+        ) : (
+          <WhiteLauncher
+            title="Files"
+            sub={
+              docs == null
+                ? "Your deal files and working docs"
+                : docs.length > 0
+                  ? `${docs.length} working ${docs.length === 1 ? "doc" : "docs"} across your deals`
+                  : "Your deal files and working docs live here"
+            }
+            aria="Open files"
+            onTap={() => onOpenLibrary("all")}
+          />
+        )}
       </div>
 
       {/* Analyses launcher — the discoverable, top-level way to run a model
           (valuation, QoE, LBO, working capital…). Opens the Analyses hub. */}
       <div style={{ marginTop: 14, padding: "0 16px" }}>
-        <button
-          type="button"
-          onClick={onOpenAnalyses}
-          aria-label="Open analyses"
-          style={{
-            display: "flex", alignItems: "center", gap: 13, width: "100%",
-            padding: "15px 16px", background: "#fff", borderRadius: 16,
-            border: "0.5px solid var(--mb-line-2)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-            cursor: "pointer", textAlign: "left",
-          }}
-        >
-          <span style={{ width: 38, height: 38, borderRadius: 11, flexShrink: 0, display: "grid", placeItems: "center", background: "var(--mb-accent-soft)" }}>
-            <MobileIcon name="brief" c="var(--mb-accent-ink)" size={18} />
-          </span>
-          <span style={{ flex: 1, minWidth: 0 }}>
-            <span style={{ display: "block", fontWeight: 700, fontSize: 15.5, color: "var(--mb-ink)", fontFamily: "var(--mb-font-display)" }}>Analyses</span>
-            <span style={{ display: "block", fontSize: 12.5, color: "var(--mb-ink-3)", marginTop: 1 }}>Valuation, QoE, LBO, working capital &amp; more</span>
-          </span>
-          <span style={{ transform: "rotate(180deg)", display: "inline-flex", color: "var(--mb-ink-4)" }} aria-hidden="true">
-            <MobileIcon name="back" size={12} c="var(--mb-ink-4)" />
-          </span>
-        </button>
+        <WhiteLauncher
+          title="Analyses"
+          sub="Valuation, QoE, LBO, working capital & more"
+          aria="Open analyses"
+          onTap={onOpenAnalyses}
+        />
       </div>
       <div style={{ marginTop: 14, padding: "0 16px" }}>
-        <LibraryActivityList onOpenDetail={onOpenLibraryDetail} limit={3} onSeeAll={() => onOpenLibrary("all")} />
+        {showSamples ? (
+          <LibraryActivityList onOpenDetail={onOpenLibraryDetail} limit={3} onSeeAll={() => onOpenLibrary("all")} />
+        ) : (
+          <RecentDocsCard
+            docs={docs}
+            onOpen={(d) => onOpenLibraryDetail(
+              d.name ?? "Document",
+              `${d.deal_name ?? "Deal"} · ${timeAgo(d.completed_at ?? d.created_at)}`,
+              d.artifact_kind ?? "draft",
+              d.id,
+            )}
+            onSeeAll={() => onOpenLibrary("all")}
+            onChat={onChat}
+          />
+        )}
       </div>
 
-      {/* Pipeline section — content per audience via copy.ts.
-          realEmpty (a real signed-in user with zero deals) swaps the
-          sample list for an honest empty state; never show a real user
-          fake deals. */}
+      {/* Pipeline section — content per audience via copy.ts. Real rows
+          for signed-in users (honest loading/empty rows otherwise);
+          SAMPLE_PIPELINE only for anon/dev preview. Never show a real
+          user fake deals. */}
       <div style={{ marginTop: 24, padding: "0 16px" }}>
         <div className="mb-as-card" style={{ padding: "20px 0 6px" }}>
           <SectionHeader
@@ -232,6 +326,10 @@ export function TodayScreen({
               onSource={() => onAskYulia("Help me source and add my first deal")}
               onChat={onChat}
             />
+          ) : authedLoading ? (
+            <div style={S.quietNote}>Loading your deals&hellip;</div>
+          ) : PIPELINE.length === 0 ? (
+            <div style={S.quietNote}>No active deals right now.</div>
           ) : (
             PIPELINE.map((d, i) => (
               <PipelineRow
@@ -240,7 +338,7 @@ export function TodayScreen({
                 sub={d.sub}
                 action={d.action}
                 price={d.action === "get" ? d.price : undefined}
-                verdict={"verdict" in d ? d.verdict : undefined}
+                verdict={d.action === "open" ? d.verdict : undefined}
                 last={i === PIPELINE.length - 1}
                 onTap={() => onOpenDeal(d.id, d.name)}
                 watched={isWatched(d.id)}
@@ -264,7 +362,9 @@ function MarketIntelCard({
   onAskYulia: (prompt: string) => void;
   fullPrompt: string;
 }) {
-  const bullets = intel.bullets?.length ? intel.bullets.slice(0, 3) : SAMPLE_MARKET_INTEL.bullets;
+  // Only ever render the intel's OWN bullets — never backfill an authed
+  // user's real brief with sample bullets.
+  const bullets = (intel.bullets ?? []).slice(0, 3);
   return (
     <section
       style={MI.card}
@@ -274,17 +374,48 @@ function MarketIntelCard({
       <h3 style={MI.title}>{intel.headline}</h3>
       <p style={MI.sub}>{intel.subhead}</p>
 
-      <div style={MI.rows}>
-        {bullets.map((bullet, index) => (
-          <MarketIntelRow
-            key={bullet}
-            index={index + 1}
-            text={bullet}
-            onTap={() => onAskYulia(`Unpack this market intelligence signal from today's deal: ${bullet}`)}
-          />
-        ))}
-      </div>
+      {bullets.length > 0 && (
+        <div style={MI.rows}>
+          {bullets.map((bullet, index) => (
+            <MarketIntelRow
+              key={bullet}
+              index={index + 1}
+              text={bullet}
+              onTap={() => onAskYulia(`Unpack this market intelligence signal from today's deal: ${bullet}`)}
+            />
+          ))}
+        </div>
+      )}
 
+      <TexturedActionCta
+        title="Ask Yulia for the read"
+        sub="Buyer universe, structure, source gaps"
+        actionLabel="Ask"
+        icon={<YIcon size={42} kind="pursue" />}
+        onTap={() => onAskYulia(fullPrompt)}
+      />
+    </section>
+  );
+}
+
+/* Honest market-intel state for an authed user with no portfolio brief
+   yet: no sample bullets, no fake source counts — just the real way to
+   get one. Same textured shell so the page rhythm holds. */
+function MarketIntelAskCard({
+  onAskYulia,
+  fullPrompt,
+}: {
+  onAskYulia: (prompt: string) => void;
+  fullPrompt: string;
+}) {
+  return (
+    <section style={MI.card} aria-label="Market intelligence">
+      <div style={MI.glow} aria-hidden="true" />
+      <h3 style={MI.title}>No market read yet.</h3>
+      <p style={MI.sub}>
+        Yulia can read your pipeline against buyer appetite, financing
+        climate, and diligence gaps &mdash; ask for the brief.
+      </p>
       <TexturedActionCta
         title="Ask Yulia for the read"
         sub="Buyer universe, structure, source gaps"
@@ -368,7 +499,7 @@ function WelcomeHero({
 }) {
   return (
     <HeroFrame kind="welcome" onTap={onChat}>
-      <HeroVisualPursue />
+      <HeroVisual value="$1.80M" label="SDE" note="+$760K normalized" />
 
       <div style={H.titleBlock}>
         <h2 style={H.h2}>{LOGGED_OUT_HERO_COPY.headline}</h2>
@@ -387,37 +518,111 @@ function WelcomeHero({
           onClick={(e) => { e.stopPropagation(); onChat(); }}
         >Start</button>
       </GlassSurface>
-
-      <div style={H.metaRow}>
-        <span className="mb-mono" style={H.metaText}>FREE &middot; 3 SAMPLE DEALS</span>
-      </div>
     </HeroFrame>
   );
 }
 
-/* ─── Daily hero (authed) ─────────────────────────────── */
+/* ─── Daily hero (authed) ─────────────────────────────────
+   Binds a REAL deal: name, sub (real financials line), fit numeral,
+   verdict pill, and the deal's revenue/SDE as the big numeral. The
+   sample variant (SAMPLE_HERO) renders only for the dev-bypass preview. */
 
-function DailyHero({ onOpenDeal }: { onOpenDeal: () => void }) {
+interface HeroDeal {
+  name: string;
+  sub: string;
+  fit?: number;
+  verdict: Verdict;
+  metricValue?: string;
+  metricLabel?: string;
+  metricNote?: string;
+}
+
+const SAMPLE_HERO: HeroDeal = {
+  name: "Big Fake Deal · sample",
+  sub: "Recurring revenue · honest capex story",
+  fit: 92,
+  verdict: "pursue",
+  metricValue: "$1.80M",
+  metricLabel: "SDE",
+  metricNote: "+$760K normalized",
+};
+
+function DailyHero({
+  deal, onOpen, onAsk,
+}: {
+  deal: HeroDeal;
+  onOpen: () => void;
+  onAsk: (prompt: string) => void;
+}) {
   return (
-    <HeroFrame kind="pursue" onTap={onOpenDeal}>
-      <HeroVisualPursue />
+    <HeroFrame kind={deal.verdict} onTap={onOpen}>
+      <HeroVisual value={deal.metricValue} label={deal.metricLabel} note={deal.metricNote} />
 
       <div style={H.titleBlock}>
-        <h2 style={H.h2}>Recurring revenue.<br/>Honest capex story.</h2>
-        <p style={H.tag}>The strongest source this week. Verdict, recast, and drafts ready when you are.</p>
+        <h2 style={H.h2}>{deal.name}</h2>
+        <p style={H.tag}>{deal.sub}</p>
+      </div>
+
+      <GlassSurface tint="onColor" radius={16} style={H.innerCell}>
+        <YIcon size={42} kind={deal.verdict} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={H.innerName}>Yulia&rsquo;s full read</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 4 }}>
+            {typeof deal.fit === "number" && (
+              <span style={H.fitNum}>
+                {deal.fit}
+                <span style={H.fitWord}> fit</span>
+              </span>
+            )}
+            <VerdictPill kind={deal.verdict} />
+          </div>
+        </div>
+        <button
+          type="button"
+          style={H.innerButton}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAsk(`Give me the full read on ${deal.name} — verdict, risks, and next steps.`);
+          }}
+        >Ask</button>
+        <button
+          type="button"
+          style={H.innerButton}
+          onClick={(e) => { e.stopPropagation(); onOpen(); }}
+        >Open</button>
+      </GlassSurface>
+    </HeroFrame>
+  );
+}
+
+/* ─── Starter hero (authed, zero deals) ───────────────────
+   Honest replacement for the sample hero: no fake deal, no fake numbers —
+   just the real way to get a lead deal onto this card. */
+
+function StarterHero({ onSource }: { onSource: () => void }) {
+  return (
+    <HeroFrame kind="welcome" onTap={onSource}>
+      <HeroVisual height={150} />
+
+      <div style={H.titleBlock}>
+        <h2 style={H.h2}>Your pipeline starts here.</h2>
+        <p style={H.tag}>
+          Add a deal you&rsquo;re evaluating or have Yulia source targets &mdash;
+          your lead deal takes over this card.
+        </p>
       </div>
 
       <GlassSurface tint="onColor" radius={16} style={H.innerCell}>
         <YIcon size={42} kind="pursue" />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={H.innerName}>Big Fake Deal &middot; sample</div>
-          <div style={H.innerSub}>92 FIT &middot; pursue</div>
+          <div style={H.innerName}>Source your first deal</div>
+          <div style={H.innerSub}>Yulia screens and ranks as you go</div>
         </div>
         <button
           type="button"
           style={H.innerButton}
-          onClick={(e) => { e.stopPropagation(); onOpenDeal(); }}
-        >Open</button>
+          onClick={(e) => { e.stopPropagation(); onSource(); }}
+        >Start</button>
       </GlassSurface>
     </HeroFrame>
   );
@@ -510,16 +715,29 @@ function HeroFrame({
   );
 }
 
-function HeroVisualPursue() {
+/* Hero ambient visual + the deal's headline number. The old version used
+   mono-caps micro labels (.mb-mono at 11px) that the index.css micro-label
+   kill rule display:none'd — these labels are redesigned as plain
+   sentence-case text at a visible size so the number stays explained. */
+function HeroVisual({
+  value, label, note, height = 280,
+}: {
+  value?: string;
+  label?: string;
+  note?: string;
+  height?: number;
+}) {
   return (
-    <div style={{ position: "relative", height: 280, overflow: "hidden" }} aria-hidden="true">
+    <div style={{ position: "relative", height, overflow: "hidden" }} aria-hidden="true">
       <div style={{ position: "absolute", top: -60, right: -40, width: 240, height: 240, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.18), transparent 60%)" }}/>
       <div style={{ position: "absolute", bottom: -80, left: -30, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.078), transparent 60%)" }}/>
-      <div style={{ position: "absolute", bottom: 18, right: 22, textAlign: "right" }}>
-        <div className="mb-mono" style={{ fontSize: 11, color: "#fff", letterSpacing: 0.1 }}>SDE</div>
-        <div style={{ fontFamily: "var(--mb-font-display)", fontWeight: 800, fontSize: 56, letterSpacing: -2, lineHeight: 1, color: "#fff" }}>$1.80M</div>
-        <div className="mb-mono" style={{ fontSize: 11, color: "#fff", marginTop: 2 }}>+$760K NORMALIZED</div>
-      </div>
+      {value && (
+        <div style={{ position: "absolute", bottom: 18, right: 22, textAlign: "right" }}>
+          {label && <div style={{ fontSize: 12.5, fontWeight: 600, color: "#fff" }}>{label}</div>}
+          <div style={{ fontFamily: "var(--mb-font-display)", fontWeight: 800, fontSize: 56, letterSpacing: -2, lineHeight: 1, color: "#fff", marginTop: 2 }}>{value}</div>
+          {note && <div style={{ fontSize: 12.5, fontWeight: 600, color: "#fff", marginTop: 4 }}>{note}</div>}
+        </div>
+      )}
     </div>
   );
 }
@@ -612,6 +830,153 @@ function ExploreRow({
         <div style={E.rowSub}>{sub}</div>
       </div>
       <MobileIcon name="chevron" c="#fff" size={11} />
+    </div>
+  );
+}
+
+/* ─── WhiteLauncher ─────────────────────────────────────────
+   Shared white launcher row (Analyses, Files). Same visual the Analyses
+   button always had — extracted so Files can reuse it with a real count. */
+
+function WhiteLauncher({
+  title, sub, aria, onTap,
+}: {
+  title: string;
+  sub: string;
+  aria: string;
+  onTap: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onTap}
+      aria-label={aria}
+      style={{
+        display: "flex", alignItems: "center", gap: 13, width: "100%",
+        padding: "15px 16px", background: "#fff", borderRadius: 16,
+        border: "0.5px solid var(--mb-line-2)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+        cursor: "pointer", textAlign: "left",
+      }}
+    >
+      <span style={{ width: 38, height: 38, borderRadius: 11, flexShrink: 0, display: "grid", placeItems: "center", background: "var(--mb-accent-soft)" }}>
+        <MobileIcon name="brief" c="var(--mb-accent-ink)" size={18} />
+      </span>
+      <span style={{ flex: 1, minWidth: 0 }}>
+        <span style={{ display: "block", fontWeight: 700, fontSize: 15.5, color: "var(--mb-ink)", fontFamily: "var(--mb-font-display)" }}>{title}</span>
+        <span style={{ display: "block", fontSize: 12.5, color: "var(--mb-ink-3)", marginTop: 1 }}>{sub}</span>
+      </span>
+      <span style={{ transform: "rotate(180deg)", display: "inline-flex", color: "var(--mb-ink-4)" }} aria-hidden="true">
+        <MobileIcon name="back" size={12} c="var(--mb-ink-4)" />
+      </span>
+    </button>
+  );
+}
+
+/* ─── RecentDocsCard ────────────────────────────────────────
+   Real "Recents" for authed users — bound to GET /api/deliverables/all.
+   Replaces the sample LibraryActivityList ("IOI · Big Fake Deal" etc.),
+   which now renders only for anon/dev preview. Honest empty + loading
+   rows; all relative times computed from Date.now(). */
+
+function timeAgo(iso: string | null): string {
+  if (!iso) return "";
+  const t = new Date(iso).getTime();
+  if (!Number.isFinite(t)) return "";
+  const mins = Math.max(0, Math.round((Date.now() - t) / 60000));
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.round(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.round(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(t).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+const DOC_STATUS_TONES: Record<string, { label: string; bg: string; ink: string }> = {
+  completed:  { label: "Ready",    bg: "var(--mb-verdict-pursue-soft)", ink: "var(--mb-verdict-pursue-ink)" },
+  generating: { label: "Drafting", bg: "var(--mb-warn-soft)",           ink: "var(--mb-warn-ink)" },
+  pending:    { label: "Queued",   bg: "var(--mb-warn-soft)",           ink: "var(--mb-warn-ink)" },
+  failed:     { label: "Failed",   bg: "var(--mb-danger-soft)",         ink: "var(--mb-danger-ink)" },
+};
+
+function StatusTag({ status }: { status: string }) {
+  const tone = DOC_STATUS_TONES[status] ?? {
+    label: status ? status.charAt(0).toUpperCase() + status.slice(1) : "Doc",
+    bg: "var(--mb-card-2)",
+    ink: "var(--mb-ink-3)",
+  };
+  return (
+    <span
+      style={{
+        display: "inline-flex", alignItems: "center",
+        padding: "4px 10px", borderRadius: 999,
+        fontSize: 11.5, fontWeight: 650, lineHeight: 1,
+        whiteSpace: "nowrap", flexShrink: 0,
+        background: tone.bg, color: tone.ink,
+      }}
+    >{tone.label}</span>
+  );
+}
+
+function RecentDocsCard({
+  docs, onOpen, onSeeAll, onChat,
+}: {
+  docs: RecentDeliverable[] | null;
+  onOpen: (d: RecentDeliverable) => void;
+  onSeeAll: () => void;
+  onChat: () => void;
+}) {
+  const rows = (docs ?? []).slice(0, 3);
+  return (
+    <div className="mb-as-card" style={{ padding: "20px 0 6px" }}>
+      <SectionHeader
+        title="Recents"
+        subtitle="Your latest docs and analyses."
+        onSeeAll={onSeeAll}
+        seeAllAria="See all files"
+        padding="0 22px 4px"
+      />
+      {docs == null ? (
+        <div style={S.quietNote}>Loading your files&hellip;</div>
+      ) : rows.length === 0 ? (
+        <div style={S.emptyWrap}>
+          <div style={S.quietNoteFlush}>
+            Nothing filed yet &mdash; IOIs, memos, and analyses you create
+            with Yulia land here.
+          </div>
+          <button type="button" className="mb-tap" style={S.emptyChat} onClick={onChat}>
+            Start with Yulia
+          </button>
+        </div>
+      ) : (
+        rows.map((d, i) => (
+          <div
+            key={d.id}
+            className="mb-tap"
+            role="button"
+            tabIndex={0}
+            onClick={() => onOpen(d)}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(d); } }}
+            style={{
+              display: "flex", alignItems: "center", gap: 12,
+              padding: "13px 22px",
+              borderBottom: i === rows.length - 1 ? "none" : "0.5px solid var(--mb-line-2)",
+              cursor: "pointer",
+            }}
+          >
+            <span style={{ width: 38, height: 38, borderRadius: 11, flexShrink: 0, display: "grid", placeItems: "center", background: "var(--mb-card-2)" }}>
+              <MobileIcon name="brief" c="var(--mb-ink-3)" size={17} />
+            </span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={S.rowName}>{d.name ?? "Document"}</div>
+              <div style={S.rowSub}>
+                {(d.deal_name ?? "Deal") + " · " + timeAgo(d.completed_at ?? d.created_at)}
+              </div>
+            </div>
+            <StatusTag status={d.status} />
+          </div>
+        ))
+      )}
     </div>
   );
 }
@@ -730,6 +1095,16 @@ const S: Record<string, CSSProperties> = {
     fontSize: 13.5, color: "var(--mb-ink-3)",
     marginTop: 4, lineHeight: 1.45,
     textWrap: "pretty",
+  },
+  /* Quiet inline note rows (loading / honest "none yet") inside list cards. */
+  quietNote: {
+    padding: "14px 22px 18px",
+    fontSize: 13.5, color: "var(--mb-ink-3)",
+    lineHeight: 1.45, textWrap: "pretty",
+  },
+  quietNoteFlush: {
+    fontSize: 13.5, color: "var(--mb-ink-3)",
+    lineHeight: 1.45, textWrap: "pretty",
   },
   emptyWrap: {
     display: "flex",
@@ -852,10 +1227,10 @@ const H: Record<string, CSSProperties> = {
   innerButton: {
     flexShrink: 0,
     minHeight: 34,
-    minWidth: 62,
+    minWidth: 58,
     border: "none",
     borderRadius: 999,
-    padding: "6px 14px",
+    padding: "6px 13px",
     background: "linear-gradient(180deg, rgba(255,255,255,0.078), rgba(255,255,255,0.02))",
     color: "#fff",
     fontSize: 13,
@@ -863,13 +1238,17 @@ const H: Record<string, CSSProperties> = {
     letterSpacing: "-0.08px",
     cursor: "pointer",
   },
-  metaRow: {
-    padding: "0 22px 18px",
-    display: "flex", alignItems: "center", justifyContent: "flex-end",
+  /* Visible fit numeral inside the hero's inner cell — plain inline mono
+     (no .mb-mono class, no caps) so the micro-label kill rule can't
+     touch it. */
+  fitNum: {
+    fontFamily: "var(--mb-font-mono)",
+    fontSize: 14, fontWeight: 700, color: "#fff",
+    fontVariantNumeric: "tabular-nums",
+    lineHeight: 1,
   },
-  metaText: {
-    fontSize: 10.5, color: "#fff",
-    letterSpacing: "0.1em", fontWeight: 600,
+  fitWord: {
+    fontSize: 11.5, fontWeight: 600, color: "#fff",
   },
 };
 

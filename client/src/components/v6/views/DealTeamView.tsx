@@ -145,7 +145,6 @@ function TeamHeader({
 }) {
   return (
     <section style={{ marginBottom: 24 }}>
-      <div className="mono" style={T.eyebrow}>DEAL TEAM</div>
       <div className="pg-head" style={{ justifyContent: "space-between", alignItems: "flex-end" }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <h1 style={T.h1}>{dealTitle}</h1>
@@ -178,7 +177,6 @@ function TeamColumn({ team, dealTitle }: { team: ReturnType<typeof useDealTeam>;
     <div style={T.col}>
       <div style={T.colHead}>
         <div>
-          <div className="mono" style={T.colEyebrow}>PARTICIPANTS</div>
           <h2 style={T.colTitle}>Team</h2>
         </div>
         {team.isOwner && (
@@ -201,7 +199,7 @@ function TeamColumn({ team, dealTitle }: { team: ReturnType<typeof useDealTeam>;
       )}
 
       {team.loadingTeam && !team.owner && (
-        <div className="mono" style={T.loadingNote}>LOADING TEAM…</div>
+        <div style={T.loadingNote}>Loading team…</div>
       )}
 
       <div style={T.memberList}>
@@ -243,7 +241,7 @@ function TeamColumn({ team, dealTitle }: { team: ReturnType<typeof useDealTeam>;
 
       {team.pendingInvitations.length > 0 && (
         <div style={{ marginTop: 18 }}>
-          <div className="mono" style={T.colEyebrow}>PENDING INVITATIONS</div>
+          <div style={T.listLabel}>Pending invitations</div>
           <div style={{ ...T.memberList, marginTop: 8 }}>
             {team.pendingInvitations.map(inv => (
               <div key={inv.id} style={{ ...T.memberRow, opacity: 0.72 }}>
@@ -609,7 +607,6 @@ function ChatColumn({ team, currentUserEmail }: { team: ReturnType<typeof useDea
     <div style={T.col}>
       <div style={T.colHead}>
         <div>
-          <div className="mono" style={T.colEyebrow}>DEAL DISCUSSION</div>
           <h2 style={T.colTitle}>Team chat</h2>
         </div>
         <span className="mono" style={T.msgCount}>{team.messages.length}</span>
@@ -618,7 +615,7 @@ function ChatColumn({ team, currentUserEmail }: { team: ReturnType<typeof useDea
       <div className="wkcard" style={T.chatCard}>
         <div ref={scrollRef} className="thin-scroll" style={T.chatScroll}>
           {team.loadingMessages && team.messages.length === 0 && (
-            <div className="mono" style={T.loadingNote}>LOADING DISCUSSION…</div>
+            <div style={T.loadingNote}>Loading discussion…</div>
           )}
 
           {!team.loadingMessages && team.messages.length === 0 && !team.messagesError && (
@@ -673,7 +670,6 @@ function ChatColumn({ team, currentUserEmail }: { team: ReturnType<typeof useDea
               <div style={T.composeField}>
                 {mentionQuery != null && mentionMatches.length > 0 && (
                   <div style={T.mentionMenu} role="listbox" aria-label="Mention a teammate">
-                    <div className="mono" style={T.mentionMenuHead}>MENTION</div>
                     {mentionMatches.map((c, i) => (
                       <button
                         key={c.userId}
@@ -797,7 +793,6 @@ function MessageBubble({
 
 const T: Record<string, CSSProperties> = {
   shell: { width: "min(100%, 1280px)", maxWidth: 1280, margin: "0 auto", boxSizing: "border-box" },
-  eyebrow: { fontSize: 10, color: "var(--ink-3)", letterSpacing: "0.14em", fontWeight: 700, marginBottom: 6 },
   h1: {
     fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 32,
     letterSpacing: "-0.025em", margin: 0, color: "var(--ink)", textWrap: "balance",
@@ -814,13 +809,14 @@ const T: Record<string, CSSProperties> = {
     display: "flex", alignItems: "flex-end", justifyContent: "space-between",
     gap: 12, marginBottom: 12,
   },
-  colEyebrow: { fontSize: 9.5, letterSpacing: "0.16em", fontWeight: 800, color: "var(--accent-strong)" },
   colTitle: {
-    margin: "4px 0 0", fontFamily: "var(--font-display)", fontWeight: 750,
+    margin: 0, fontFamily: "var(--font-display)", fontWeight: 750,
     fontSize: 22, letterSpacing: "-0.03em", color: "var(--ink)", lineHeight: 1,
   },
   msgCount: { fontSize: 12, color: "var(--ink-3)", fontFamily: "var(--font-mono)", fontWeight: 700 },
-  loadingNote: { fontSize: 11, color: "var(--ink-3)", letterSpacing: "0.12em", padding: "10px 2px" },
+  loadingNote: { fontSize: 12, color: "var(--ink-3)", padding: "10px 2px" },
+  // Information-bearing list label — visible sentence case, never a kicker.
+  listLabel: { fontSize: 12, fontWeight: 600, color: "var(--ink-3)" },
 
   // member list
   memberList: { display: "grid", gap: 6 },
@@ -875,9 +871,12 @@ const T: Record<string, CSSProperties> = {
 
   // invite form
   inviteCard: { padding: 16, marginBottom: 12 },
+  // Visible sentence-case field label (12px). No uppercase/letter-spacing —
+  // the old mono-caps treatment was display:none'd by the eyebrow kill rule
+  // and users saw three bare inputs.
   fieldLabel: {
-    display: "block", fontSize: 9.5, letterSpacing: "0.14em", fontWeight: 800,
-    color: "var(--ink-3)", marginBottom: 5, textTransform: "uppercase",
+    display: "block", fontSize: 12, fontWeight: 600,
+    color: "var(--ink-3)", marginBottom: 5,
   },
   fieldRow: { display: "flex", gap: 10, marginTop: 12 },
   input: {
@@ -948,10 +947,6 @@ const T: Record<string, CSSProperties> = {
     background: "var(--surface)", border: "1px solid var(--line-2)", borderRadius: 12,
     boxShadow: "0 10px 28px rgba(0,0,0,0.14)", padding: 5, zIndex: 20,
     display: "flex", flexDirection: "column", gap: 2,
-  },
-  mentionMenuHead: {
-    fontSize: 9, letterSpacing: "0.16em", fontWeight: 800,
-    color: "var(--ink-3)", padding: "4px 8px 2px",
   },
   mentionItem: {
     all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 9,

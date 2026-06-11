@@ -68,6 +68,10 @@ interface DetailProps {
       team screen renders sample collaboration data in that case so reviewers
       can see it in dev. */
   onOpenTeam?: (rawId: number | null, dealTitle: string) => void;
+  /** Open the deal's file surfaces for a REAL backend deal. `dealRawId` is
+      the numeric deal id; `stage` of "data-room" opens the data room view,
+      omitted opens all deal files. Hero buttons hide when this is absent. */
+  onOpenDealFiles?: (dealRawId: number, stage?: string) => void;
 }
 
 interface MobileDealBrief {
@@ -84,6 +88,8 @@ interface MobileDealBrief {
     signoffFlags?: string[];
   };
   nextMoves?: Array<{ title?: string; why?: string; prompt?: string; actionId?: string }>;
+  /** ISO timestamp the brief was generated (sent by /api/agency/deals/:id/brief). */
+  generatedAt?: string;
 }
 
 interface MobileDealDetail {
@@ -95,6 +101,7 @@ interface MobileDealDetail {
     industry?: string | null;
     location?: string | null;
     journey_type?: string | null;
+    league?: string | null;
   };
 }
 
@@ -107,23 +114,45 @@ interface MobileDealActionContext {
   onAskYulia: DetailProps["onAskYulia"];
 }
 
+/** Format a money amount stored in CENTS (backend integer convention) as
+    $X.XM / $XXXK. Returns null for null/zero/non-finite so callers can hide
+    the tile instead of inventing a number. */
 function fmtMoney(value?: number | null, label?: string): string | null {
-  const amount = Number(value);
-  if (!Number.isFinite(amount)) return null;
-  const abs = Math.abs(amount);
+  const cents = Number(value);
+  if (!Number.isFinite(cents) || cents === 0) return null;
+  const dollars = cents / 100;
+  const abs = Math.abs(dollars);
   const pretty = abs >= 1_000_000
-    ? `$${(amount / 1_000_000).toFixed(abs >= 10_000_000 ? 0 : 1)}M`
-    : `$${Math.round(amount / 1_000)}K`;
+    ? `$${(dollars / 1_000_000).toFixed(abs >= 10_000_000 ? 0 : 1)}M`
+    : abs >= 1_000
+      ? `$${Math.round(dollars / 1_000)}K`
+      : `$${Math.round(dollars).toLocaleString()}`;
   return label ? `${pretty} ${label}` : pretty;
 }
 
-function mobileActionEyebrow(actionId?: string) {
-  if (!actionId) return "YULIA ACTION";
-  return actionId
-    .replace(/^run_/, "")
-    .replace(/^generate_/, "")
-    .replace(/_/g, " ")
-    .toUpperCase();
+/** Map a deal-brief verdict label (LLM: STRONG FIT | WATCH | HIGH RISK |
+    NEEDS DATA; deterministic: PURSUE | WATCH | PASS) onto the mobile
+    Verdict scale. Returns null when the label doesn't carry a call
+    (e.g. NEEDS DATA) so the UI can stay honest instead of guessing. */
+function verdictFromLabel(label?: string | null): Verdict | null {
+  if (!label) return null;
+  const norm = label.trim().toUpperCase();
+  if (norm.includes("PURSUE") || norm.includes("STRONG")) return "pursue";
+  if (norm.includes("PASS") || norm.includes("RISK")) return "pass";
+  if (norm.includes("WATCH")) return "watch";
+  return null;
+}
+
+function timeAgo(dateStr?: string): string {
+  if (!dateStr) return "";
+  const then = new Date(dateStr).getTime();
+  if (Number.isNaN(then)) return "";
+  const diff = Math.floor((Date.now() - then) / 1000);
+  if (diff < 60) return "just now";
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+  return new Date(dateStr).toLocaleDateString();
 }
 
 function mobileAnalysisForAction(actionId?: string) {
@@ -246,7 +275,7 @@ function defaultMobileNextMoves(dealTitle: string, isSampleDeal: boolean): Mobil
   ];
 }
 
-export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, onRunAnalysis, onOpenTeam }: DetailProps) {
+export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, onRunAnalysis, onOpenTeam, onOpenDealFiles }: DetailProps) {
   const { isWatched, toggle } = useWatchlist();
   const watched = isWatched(dealId);
   // Mobile rows pass "123" (full list) or "deal-123" (Today/Watching/Pipeline);
@@ -282,14 +311,17 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
     return () => { cancelled = true; };
   }, [numericId]);
 
-  /* Pull the real verdict + fit from the sample deal bank so the page reflects
-     this specific deal — not a hardcoded "Pursue / 92" that contradicts what
-     Yulia says in chat. Falls back to "watch / 70" for unknown ids so the
-     page still renders cleanly. */
+  /* Verdict resolution order: Yulia's live deal brief (real deals) → the
+     sample deal bank (sample ids) → an honest "no call yet" state. The badge
+     for real deals renders the brief's own label, never an invented one. */
   const deal = findDeal(dealId);
   const isSampleDeal = Boolean(deal);
-  const verdict: Verdict = deal?.verdict ?? "watch";
-  const fit = dealBrief?.verdict?.score ?? deal?.fit ?? 70;
+  const isRealDeal = numericId !== null;
+  const briefVerdictLabel = dealBrief?.verdict?.label?.trim() || null;
+  const briefVerdict = verdictFromLabel(briefVerdictLabel);
+  const verdict: Verdict = briefVerdict ?? deal?.verdict ?? "watch";
+  /* Real deals without a brief score show an empty ring (0), not a made-up 70. */
+  const fit = dealBrief?.verdict?.score ?? deal?.fit ?? (isRealDeal ? 0 : 70);
   const real = realDetail?.deal;
   const dealSub = real
     ? [
@@ -298,6 +330,38 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
         real.industry || null,
       ].filter(Boolean).join(" · ")
     : deal?.sub ?? "";
+
+  /* Hero verdict badge content. Real deals: the brief's own label (colored by
+     the parsed call, neutral for NEEDS DATA / missing). Samples: bank verdict. */
+  const badgeLabel = isRealDeal
+    ? (briefVerdictLabel ?? (briefLoading ? "Analyzing" : "No read yet"))
+    : VERDICT_LABEL[verdict];
+  const badgeHasCall = isRealDeal ? briefVerdict !== null : true;
+  const briefAge = timeAgo(dealBrief?.generatedAt);
+
+  /* Stats strip: real deals bind to the backend deal row (cents). Tiles with
+     no data are hidden — never invented. Sample tiles only for sample ids. */
+  const realEarnings = real?.sde ? { label: "SDE", value: real.sde } : real?.ebitda ? { label: "EBITDA", value: real.ebitda } : null;
+  const realMultipleBase = Number(real?.ebitda || real?.sde || 0);
+  const realMultiple = real?.asking_price && realMultipleBase > 0
+    ? `${(Number(real.asking_price) / realMultipleBase).toFixed(1)}×`
+    : null;
+  const realStats: Array<{ top: string; label: string; sub?: ReactNode }> = [];
+  if (isRealDeal) {
+    const revenueText = fmtMoney(real?.revenue);
+    if (revenueText) realStats.push({ top: revenueText, label: "Revenue" });
+    const earningsText = realEarnings ? fmtMoney(realEarnings.value) : null;
+    if (realEarnings && earningsText) realStats.push({ top: earningsText, label: realEarnings.label });
+    const askingText = fmtMoney(real?.asking_price);
+    if (askingText) realStats.push({ top: askingText, label: "Asking" });
+    if (realMultiple) realStats.push({ top: realMultiple, label: "Multiple", sub: realEarnings ? `of ${realEarnings.label}` : undefined });
+  }
+
+  /* Tag chips: real deals derive from real fields only; the hardcoded demo
+     chips render solely on the sample (non-numeric id) path. */
+  const realTags = isRealDeal
+    ? [real?.industry, real?.location, real?.league].filter((t): t is string => Boolean(t))
+    : [];
   /* Per-deal verdict reasoning beats the generic blurb when present.
      This is what answers the user's "is this a watch or pursue?" question
      by spelling out the specific math + the criteria that would flip it. */
@@ -343,18 +407,18 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
         <FitGauge score={fit} verdict={verdict} size={108} strokeRatio={0.09} />
         <div style={{ flex: 1, minWidth: 0, paddingTop: 4 }}>
           <h1 style={D.h1}>{dealTitle}</h1>
-          <div style={D.dealMeta}>{dealSub || "Sample deal"}</div>
-          <div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center" }}>
+          <div style={D.dealMeta}>{dealSub || (isRealDeal ? "Active deal" : "Sample deal")}</div>
+          <div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
             <span style={{
               ...D.verdictBadge,
-              background: VERDICT_BG[verdict],
-              color: VERDICT_INK[verdict],
+              background: badgeHasCall ? VERDICT_BG[verdict] : "var(--mb-card-2)",
+              color: badgeHasCall ? VERDICT_INK[verdict] : "var(--mb-ink-2)",
             }}>
               <span
                 aria-hidden="true"
-                style={{ ...D.verdictDot, background: VERDICT_DOT[verdict] }}
+                style={{ ...D.verdictDot, background: badgeHasCall ? VERDICT_DOT[verdict] : "var(--mb-ink-4)" }}
               />
-              {VERDICT_LABEL[verdict]}
+              {badgeLabel}
             </span>
             <button
               type="button"
@@ -376,42 +440,91 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
             )}
           </div>
           <div style={D.verdictCaption}>
-            <span style={{ color: "var(--mb-ink-3)" }}>{VERDICT_LABEL[verdict]}</span>
-            {" is Yulia's verdict — Watch saves it to your list."}
+            {badgeHasCall ? (
+              <>
+                <span style={{ color: "var(--mb-ink-3)" }}>{badgeLabel}</span>
+                {" is Yulia's verdict — Watch saves it to your list."}
+              </>
+            ) : (
+              "Yulia hasn't issued a verdict yet — Watch saves it to your list."
+            )}
           </div>
         </div>
       </div>
 
-      {/* Stats strip — FIT SCORE removed since the hero gauge already
-          carries it; replaced with EBITDA so the user sees both
-          earnings views at once. */}
-      <div style={D.statsStrip}>
-        <Stat top="$1.80M" label="NORM. SDE" sub={<span style={{ color: "var(--mb-accent)" }}>+$760K</span>} divider />
-        <Stat top="$2.10M" label="EBITDA"    sub="adj." divider />
-        <Stat top="7.0×"   label="MULTIPLE"  sub="SBA-clear" divider />
-        <Stat top="#3"     label="THIS WEEK" sub="of 142" />
-      </div>
+      {/* Hero actions — open the deal's real file surfaces. Real deals only;
+          hides gracefully when the shell doesn't pass the handler. */}
+      {isRealDeal && onOpenDealFiles && (
+        <div style={D.heroActions}>
+          <button
+            type="button"
+            className="mb-tap"
+            onClick={() => onOpenDealFiles(numericId)}
+            style={D.heroActionBtn}
+          >
+            <span>Files</span>
+            <MobileIcon name="chevron" size={11} c="var(--mb-accent-ink)" />
+          </button>
+          <button
+            type="button"
+            className="mb-tap"
+            onClick={() => onOpenDealFiles(numericId, "data-room")}
+            style={D.heroActionBtn}
+          >
+            <span>Data room</span>
+            <MobileIcon name="chevron" size={11} c="var(--mb-accent-ink)" />
+          </button>
+        </div>
+      )}
 
-      {/* Tag chips */}
-      <div className="mb-hide-scroll" style={D.tagsRow}>
-        {["Industrial", "Services", "Recurring", "SBA-clear", "Sun Belt"].map(t => (
-          <div key={t} style={D.tag}>{t}</div>
-        ))}
-      </div>
+      {/* Stats strip — real deals bind to the backend deal economics
+          (cents → $X.XM); tiles without data are hidden, never invented.
+          The sample tiles render only on the sample (non-numeric id) path. */}
+      {isRealDeal ? (
+        realStats.length > 0 && (
+          <div style={{ ...D.statsStrip, gridTemplateColumns: `repeat(${realStats.length}, 1fr)` }}>
+            {realStats.map((stat, index) => (
+              <Stat
+                key={stat.label}
+                top={stat.top}
+                label={stat.label}
+                sub={stat.sub}
+                divider={index < realStats.length - 1}
+              />
+            ))}
+          </div>
+        )
+      ) : (
+        <div style={D.statsStrip}>
+          <Stat top="$1.80M" label="Norm. SDE" sub={<span style={{ color: "var(--mb-accent)" }}>+$760K</span>} divider />
+          <Stat top="$2.10M" label="EBITDA"    sub="adj." divider />
+          <Stat top="7.0×"   label="Multiple"  sub="SBA-clear" divider />
+          <Stat top="#3"     label="This week" sub="of 142" />
+        </div>
+      )}
+
+      {/* Tag chips — real deals show real fields (industry, location, league);
+          the demo chips are sample-only. Row hides when there's nothing real. */}
+      {isRealDeal ? (
+        realTags.length > 0 && (
+          <div className="mb-hide-scroll" style={D.tagsRow}>
+            {realTags.map(t => (
+              <div key={t} style={D.tag}>{t}</div>
+            ))}
+          </div>
+        )
+      ) : (
+        <div className="mb-hide-scroll" style={D.tagsRow}>
+          {["Industrial", "Services", "Recurring", "SBA-clear", "Sun Belt"].map(t => (
+            <div key={t} style={D.tag}>{t}</div>
+          ))}
+        </div>
+      )}
 
       {/* Yulia's read. Live briefs come from the briefing layer; sample
           copy is labeled as sample; real deals without a brief show a
           refresh/request state instead of pretending a card authored it. */}
       <Section title={readSectionTitle} chevron>
-        <div className="mb-mono" style={D.versionLine}>
-          {hasLiveYuliaRead
-            ? "FROM YULIA'S DEAL BRIEF"
-            : isSampleDeal
-              ? "SAMPLE MODE · DEMO READ"
-              : briefLoading
-                ? "YULIA IS REFRESHING THIS DEAL"
-                : "NO SOURCED DEAL BRIEF YET"}
-        </div>
         <p style={D.body}>
           {dealBrief?.marketRead?.headline
             || (isSampleDeal
@@ -458,7 +571,7 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
       {/* A closer look — horizontal artifact rail */}
       <Section title="A closer look" pad={false}>
         <div className="mb-hide-scroll" style={D.artifactsRow}>
-          <ArtifactPreview kind="recast" title="Recast walk" big={fmtMoney(real?.sde, "SDE") || "$1.80M"} sub="Open the recast canvas" onTap={() => {
+          <ArtifactPreview kind="recast" title="Recast walk" big={fmtMoney(real?.sde, "SDE") || (isRealDeal ? "Run" : "$1.80M")} sub="Open the recast canvas" onTap={() => {
             runMobileDealAction({
               actionId: "run_recast_analysis",
               title: "Open recast analysis",
@@ -503,6 +616,16 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
             <div style={D.confidenceBody}>
               {verdictBlurb}
             </div>
+            {/* Basis line — descriptive provenance only, never a
+                recommendation (THE LINE). Real deals with a live brief only.
+                fontSize stays ≥13 so the mono micro-label kill rule in
+                index.css doesn't hide it. */}
+            {isRealDeal && dealBrief?.verdict && (
+              <div className="mb-mono" style={D.basisLine}>
+                From Yulia's read of this deal · descriptive, not advice
+                {briefAge ? ` · ${briefAge}` : ""}
+              </div>
+            )}
           </div>
         </div>
 
@@ -526,7 +649,6 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
         {(liveNextMoves.length > 0 ? liveNextMoves : defaultMobileNextMoves(dealTitle, isSampleDeal)).map((move, index, rows) => (
           <NextAction
             key={`${move.title || move.actionId || "move"}-${index}`}
-            eyebrow={mobileActionEyebrow(move.actionId)}
             title={move.title || "Ask Yulia for the next move"}
 	            sub={move.why || "Open the right analysis, document, or chat context from Yulia's next move."}
             last={index === rows.length - 1}
@@ -541,23 +663,78 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
       <DealChatInput dealTitle={dealTitle} onAskYulia={onAskYulia} />
 
       {/* Market intelligence — below the chat pill in its own section.
-          Per-deal data lives on SampleDeal.marketIntel; in production
-          this will be wired to the marketIntelligence subsystem so each
-          deal pulls fresh comps, multiples, buyer activity. Hidden
-          gracefully when no data on the deal. */}
-      {deal?.marketIntel && (
+          Real deals render Yulia's live market read (dealBrief.marketRead)
+          or an honest "no read yet" state; the SampleDeal.marketIntel block
+          is sample-only. */}
+      {isRealDeal ? (
+        <Section title="Market intelligence" chevron>
+          {dealBrief?.marketRead?.headline || (dealBrief?.marketRead?.bullets?.some(Boolean)) ? (
+            <>
+              {dealBrief?.marketRead?.headline && (
+                <p style={D.marketBlurb}>{dealBrief.marketRead.headline}</p>
+              )}
+              {(dealBrief?.marketRead?.bullets?.filter(Boolean) ?? []).length > 0 && (
+                <div style={D.marketReadStack}>
+                  {dealBrief!.marketRead!.bullets!.filter(Boolean).slice(0, 4).map((bullet, index) => (
+                    <div key={`${bullet}-${index}`} style={D.marketTile}>
+                      <div style={D.marketReadText}>{bullet}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <button
+                type="button"
+                className="mb-tap"
+                onClick={() => {
+                  const prompt = `On ${dealTitle}: deeper market intelligence — recent comparable transactions, who else is bidding, where multiples are trending. Open the market intelligence analysis canvas.`;
+                  if (onRunAnalysis) {
+                    onRunAnalysis({ dealId, dealTitle, analysisType: "market_intelligence", menuItemSlug: "universal-market-intelligence", label: "market intelligence read", prompt });
+                  } else {
+                    onAskYulia(prompt);
+                  }
+                }}
+                style={D.marketAskBtn}
+              >
+                <span>Ask Yulia for the deeper market read</span>
+                <MobileIcon name="chevron" size={11} c="var(--mb-accent-ink)" />
+              </button>
+            </>
+          ) : (
+            <>
+              <p style={D.marketBlurb}>
+                {briefLoading
+                  ? "Yulia is refreshing this deal's market read…"
+                  : "No market read on this deal yet — ask Yulia to generate one from the deal's industry, geography, and buyer universe."}
+              </p>
+              <button
+                type="button"
+                className="mb-tap"
+                onClick={() => runMobileDealAction({
+                  actionId: "run_market_intelligence",
+                  title: "Generate the market read",
+                  prompt: `On ${dealTitle}: generate the market intelligence read — comps, multiples, buyer activity — and open the analysis canvas.`,
+                }, { dealId, dealTitle, onRunAnalysis, onAskYulia })}
+                style={D.marketAskBtn}
+              >
+                <span>{briefLoading ? "Refreshing…" : "Ask Yulia for the market read"}</span>
+                <MobileIcon name="chevron" size={11} c="var(--mb-accent-ink)" />
+              </button>
+            </>
+          )}
+        </Section>
+      ) : deal?.marketIntel ? (
         <Section title="Market intelligence" chevron>
           <div style={D.marketIntroLine}>
-            <span className="mb-mono" style={D.marketIndustry}>
-              {deal.marketIntel.industry.toUpperCase()}
+            <span style={D.marketIndustry}>
+              {deal.marketIntel.industry}
               {deal.marketIntel.naics && ` · NAICS ${deal.marketIntel.naics}`}
             </span>
           </div>
           <div style={D.marketGrid}>
-            <MarketTile label="AVG MULTIPLE"  value={deal.marketIntel.avgMultiple} />
-            <MarketTile label="AVG DEAL SIZE" value={deal.marketIntel.avgDealSize} />
-            <MarketTile label="ACTIVE BUYERS" value={deal.marketIntel.activeBuyers} />
-            <MarketTile label="MARKET TREND"  value={deal.marketIntel.yoyActivity} />
+            <MarketTile label="Avg multiple"  value={deal.marketIntel.avgMultiple} />
+            <MarketTile label="Avg deal size" value={deal.marketIntel.avgDealSize} />
+            <MarketTile label="Active buyers" value={deal.marketIntel.activeBuyers} />
+            <MarketTile label="Market trend"  value={deal.marketIntel.yoyActivity} />
           </div>
           <p style={D.marketBlurb}>{deal.marketIntel.blurb}</p>
           <button
@@ -577,7 +754,7 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
             <MobileIcon name="chevron" size={11} c="var(--mb-accent-ink)" />
           </button>
         </Section>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -587,7 +764,7 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
 function MarketTile({ label, value }: { label: string; value: string }) {
   return (
     <div style={D.marketTile}>
-      <div className="mb-mono" style={D.marketTileLabel}>{label}</div>
+      <div style={D.marketTileLabel}>{label}</div>
       <div style={D.marketTileValue}>{value}</div>
     </div>
   );
@@ -596,8 +773,8 @@ function MarketTile({ label, value }: { label: string; value: string }) {
 /* ─── Recommended-action row ─────────────────────────────── */
 
 function NextAction({
-  eyebrow, title, sub, last, onTap,
-}: { eyebrow: string; title: string; sub: string; last?: boolean; onTap: () => void }) {
+  title, sub, last, onTap,
+}: { title: string; sub: string; last?: boolean; onTap: () => void }) {
   return (
     <div
       className="mb-tap"
@@ -618,7 +795,6 @@ function NextAction({
       }}
     >
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div className="mb-mono" style={D.nextEyebrow}>{eyebrow}</div>
         <div style={D.nextTitle}>{title}</div>
         <div style={D.nextSub}>{sub}</div>
       </div>
@@ -634,8 +810,8 @@ function DealChatInput({
 }: { dealTitle: string; onAskYulia: (prompt: string) => void }) {
   return (
     <div style={D.chatInputWrap}>
-      <div className="mb-mono" style={D.chatInputEyebrow}>
-        ASK YULIA · ABOUT THIS DEAL
+      <div style={D.chatInputLabel}>
+        Ask Yulia about this deal
       </div>
       <ChatStarterPill
         placeholder="Message Yulia"
@@ -674,7 +850,7 @@ function FloatingNav({ onBack, onShare }: { onBack: () => void; onShare: () => v
 
 /* ─── Stat cell ─────────────────────────────────────────── */
 
-function Stat({ top, label, sub, divider }: { top: string; label: string; sub: ReactNode; divider?: boolean }) {
+function Stat({ top, label, sub, divider }: { top: string; label: string; sub?: ReactNode; divider?: boolean }) {
   return (
     <div style={{
       borderRight: divider ? "0.5px solid var(--mb-line-2)" : "none",
@@ -682,7 +858,7 @@ function Stat({ top, label, sub, divider }: { top: string; label: string; sub: R
     }}>
       <div style={D.statLabel}>{label}</div>
       <div style={D.statTop}>{top}</div>
-      <div style={D.statSub}>{sub}</div>
+      {sub != null && <div style={D.statSub}>{sub}</div>}
     </div>
   );
 }
@@ -794,7 +970,9 @@ function ArtifactPreview({
     >
       <div style={{ height: 130, position: "relative" }}>
         <div style={D.artifactGlow} aria-hidden="true" />
-        <div className="mb-mono" style={D.artifactCaption}>{title.toUpperCase()}</div>
+        {/* Sentence-case visible caption — the old mono micro-caps version
+            was silently display:none'd by the index.css eyebrow kill rule. */}
+        <div style={D.artifactCaption}>{title}</div>
         <div style={D.artifactBig}>{big}</div>
       </div>
       <div style={D.artifactFooter}>
@@ -869,6 +1047,24 @@ const D: Record<string, CSSProperties> = {
     fontSize: 11, color: "var(--mb-ink-4)", marginTop: 6,
     lineHeight: 1.35,
   },
+
+  /* Hero actions — Files / Data room. ≥44px tap targets into the deal's
+     real file surfaces. */
+  heroActions: {
+    display: "flex", gap: 10,
+    padding: "0 22px 18px",
+  },
+  heroActionBtn: {
+    flex: 1, minHeight: 44,
+    display: "flex", alignItems: "center", justifyContent: "space-between",
+    gap: 8, padding: "0 16px",
+    background: "var(--mb-accent-soft)",
+    color: "var(--mb-accent-ink)",
+    border: "none", borderRadius: 14,
+    fontSize: 14.5, fontWeight: 600, letterSpacing: "-0.1px",
+    fontFamily: "inherit",
+    cursor: "pointer",
+  },
   statsStrip: {
     display: "grid", gridTemplateColumns: "repeat(4, 1fr)",
     padding: "4px 22px 18px",
@@ -896,9 +1092,6 @@ const D: Record<string, CSSProperties> = {
     background: "var(--mb-card-2)",
     fontSize: 13, color: "var(--mb-ink-1)", fontWeight: 500,
     whiteSpace: "nowrap",
-  },
-  versionLine: {
-    fontSize: 12, color: "var(--mb-ink-4)", marginBottom: 6,
   },
   body: {
     fontSize: 15, color: "var(--mb-ink-1)", lineHeight: 1.45,
@@ -945,13 +1138,15 @@ const D: Record<string, CSSProperties> = {
     width: 140, height: 140, borderRadius: "50%",
     background: "radial-gradient(circle, rgba(255,255,255,0.18), transparent 70%)",
   },
+  /* Sentence-case visible caption (the old mono micro-caps recipe matched
+     the index.css eyebrow kill rule and never rendered). */
   artifactCaption: {
     position: "absolute", bottom: 12, left: 16,
-    fontSize: 10, letterSpacing: 0.1,
-    color: "#fff",
+    fontSize: 11.5, fontWeight: 600,
+    color: "rgba(255,255,255,0.92)",
   },
   artifactBig: {
-    position: "absolute", bottom: 24, left: 16,
+    position: "absolute", bottom: 28, left: 16,
     fontFamily: "var(--mb-font-display)", fontWeight: 800,
     fontSize: 36, letterSpacing: "-1px", lineHeight: 1,
     color: "#fff",
@@ -981,6 +1176,12 @@ const D: Record<string, CSSProperties> = {
   confidenceBody: {
     marginTop: 6, fontSize: 12.5, color: "var(--mb-ink-2)", lineHeight: 1.4,
     textWrap: "pretty",
+  },
+  /* Verdict basis line — mono provenance under Yulia's verdict text.
+     fontSize must stay ≥13: the index.css kill rule hides .mb-mono at
+     inline font-size 9–12. No letter-spacing, no uppercase. */
+  basisLine: {
+    marginTop: 8, fontSize: 13, color: "var(--mb-ink-4)", lineHeight: 1.4,
   },
   userNote: {
     marginTop: 16, padding: 14,
@@ -1013,8 +1214,9 @@ const D: Record<string, CSSProperties> = {
   marketIntroLine: {
     marginBottom: 12,
   },
+  /* Sentence-case visible context line (replaces a CSS-killed mono eyebrow). */
   marketIndustry: {
-    fontSize: 10.5, letterSpacing: "0.08em", fontWeight: 700,
+    fontSize: 12.5, fontWeight: 600,
     color: "var(--mb-ink-3)",
   },
   marketGrid: {
@@ -1029,10 +1231,20 @@ const D: Record<string, CSSProperties> = {
     padding: "12px 14px",
     border: "0.5px solid var(--mb-line-2)",
   },
+  /* Sentence-case visible tile label (replaces a CSS-killed mono eyebrow). */
   marketTileLabel: {
-    fontSize: 9.5, letterSpacing: "0.08em", fontWeight: 700,
+    fontSize: 11, fontWeight: 600,
     color: "var(--mb-ink-4)",
     marginBottom: 4,
+  },
+  /* Yulia's live market-read bullets, rendered as tiles for real deals. */
+  marketReadStack: {
+    display: "grid", gap: 10,
+    marginTop: 14,
+  },
+  marketReadText: {
+    fontSize: 13.5, color: "var(--mb-ink-1)", lineHeight: 1.45,
+    textWrap: "pretty",
   },
   marketTileValue: {
     fontFamily: "var(--mb-font-display)", fontWeight: 700,
@@ -1059,11 +1271,6 @@ const D: Record<string, CSSProperties> = {
   },
 
   /* Yulia next-action rows */
-  nextEyebrow: {
-    fontSize: 10, letterSpacing: "0.08em", fontWeight: 700,
-    color: "var(--mb-ink-3)", textTransform: "uppercase",
-    marginBottom: 2,
-  },
   nextTitle: {
     fontSize: 15, fontWeight: 600, color: "var(--mb-ink)",
     letterSpacing: "-0.2px", lineHeight: 1.25,
@@ -1084,9 +1291,10 @@ const D: Record<string, CSSProperties> = {
     borderRadius: 18,
     border: "0.5px solid var(--mb-line-2)",
   },
-  chatInputEyebrow: {
-    fontSize: 10.5, letterSpacing: "0.08em", fontWeight: 700,
-    color: "var(--mb-ink-3)", marginBottom: 10, paddingLeft: 4,
+  /* Sentence-case visible label (replaces a CSS-killed mono eyebrow). */
+  chatInputLabel: {
+    fontSize: 13, fontWeight: 600,
+    color: "var(--mb-ink-2)", marginBottom: 10, paddingLeft: 4,
   },
   chatInputForm: {
     background: "rgba(255,255,255,0.92)",

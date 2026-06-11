@@ -20,6 +20,7 @@ import { MobileDealTeamScreen } from "./screens/DealTeam";
 import { ChatSheet } from "./ChatSheet";
 import { LearnSheet } from "./LearnSheet";
 import { NotificationsSheet } from "./NotificationsSheet";
+import { ToastHost } from "../../mobile/ToastHost";
 import { useNotifications, type AppNotification } from "../../../hooks/useNotifications";
 import { useAudience } from "../../../hooks/useAudience";
 import { runDealAnalysis } from "../../../hooks/useV6WorkspaceData";
@@ -57,12 +58,17 @@ function V6MobileAnon({
     thread: chat.messages.map(m => ({
       who: m.role === "user" ? "u" : "y",
       text: m.content,
+      stagedAction: null,
     })),
     sending: chat.sending,
     streamingText: chat.streamingText,
     activeTool: null,
+    toolTrace: [],
     error: chat.error,
+    paywallData: null,
     send: (text, surfaceContext) => chat.sendMessage(text, undefined, surfaceContext),
+    // uploadFile / confirmStagedAction / cancelStagedAction stay undefined for
+    // anon — the sheet renders sign-in-gated affordances instead.
   }), [chat.messages, chat.sending, chat.streamingText, chat.error, chat.sendMessage]);
   return <V6MobileShell user={user} chat={bridge} onSignOut={onSignOut} onDevSignIn={onDevSignIn} />;
 }
@@ -73,13 +79,19 @@ function V6MobileAuthed({ user, onSignOut }: { user: User; onSignOut: () => void
     thread: chat.messages.map(m => ({
       who: m.role === "user" ? "u" : "y",
       text: m.content,
+      stagedAction: m.metadata?.stagedAction ?? null,
     })),
     sending: chat.sending,
     streamingText: chat.streamingText,
     activeTool: chat.activeTool,
-    error: null,
+    toolTrace: chat.toolTrace,
+    error: null, // useAuthChat surfaces errors via toasts (ToastHost below)
+    paywallData: chat.paywallData,
     send: chat.sendMessage,
-  }), [chat.messages, chat.sending, chat.streamingText, chat.activeTool, chat.sendMessage]);
+    uploadFile: chat.uploadFile,
+    confirmStagedAction: chat.confirmStagedAction,
+    cancelStagedAction: chat.cancelStagedAction,
+  }), [chat.messages, chat.sending, chat.streamingText, chat.activeTool, chat.toolTrace, chat.paywallData, chat.sendMessage, chat.uploadFile, chat.confirmStagedAction, chat.cancelStagedAction]);
   return <V6MobileShell user={user} chat={bridge} onSignOut={onSignOut} />;
 }
 
@@ -181,12 +193,15 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
   const navDepthRef = useRef(0);
   useEffect(() => {
     const next = buildMobileHash(view, chatOpen);
+    // The chat sheet counts as one level deeper than the screen under it, so
+    // opening it PUSHES a history entry (OS back then closes the chat instead
+    // of navigating the hidden screen underneath) and closing it REPLACES.
+    const depth = viewDepth(view) + (chatOpen ? 1 : 0);
     if (window.location.hash === next) {
-      navDepthRef.current = viewDepth(view);
+      navDepthRef.current = depth;
       return; // already at this hash (e.g. restored by a back gesture)
     }
     const full = window.location.pathname + window.location.search + next;
-    const depth = viewDepth(view);
     if (depth > navDepthRef.current) window.history.pushState(null, "", full);
     else window.history.replaceState(null, "", full);
     navDepthRef.current = depth;
@@ -213,6 +228,10 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
     const onHash = () => {
       const next = readMobileHashState();
       setView(mobileViewFromHash(next));
+      // OS back from a pushed chat-open entry lands on a hash without
+      // `chat=open` — close the sheet instead of navigating underneath it.
+      // (Forward into a chat-open entry symmetrically reopens it.)
+      setChatOpen(next.chat);
     };
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
@@ -265,11 +284,35 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
         setView({
           kind: "analysis",
           tab: activeTab,
+          // Model lineage — keep the deal + parent analysis linkage that the
+          // server sends (desktop threads these into its model tabs too).
+          dealId: detail.dealId != null ? String(detail.dealId) : undefined,
+          dealTitle: detail.dealTitle ?? undefined,
+          parentOutputHash: typeof detail.parentOutputHash === "string" ? detail.parentOutputHash : undefined,
           analysisTitle: detail.title || "Interactive model",
           analysisTool: detail.modelType || "interactive_model",
           analysisRunId: detail.analysisRunId ?? null,
           status: "saved model",
           modelState: detail.initialAssumptions || {},
+        });
+        setChatOpen(false);
+      }
+
+      // Long-form Yulia artifacts (show_content) — without this branch the
+      // tool result vanished on mobile and chat just said "I opened it on
+      // the canvas". The Analysis screen's fallback path renders
+      // analysisData.analysisMarkdown as readable text.
+      if (detail.canvas_action === "show_content") {
+        const markdown = detail.content || detail.markdown || detail.message || "";
+        setView({
+          kind: "analysis",
+          tab: activeTab,
+          analysisTitle: detail.title || "Yulia artifact",
+          analysisTool: "artifact",
+          analysisRunId: detail.analysisRunId ?? null,
+          analysisMarkdown: markdown,
+          analysisData: { analysisMarkdown: markdown },
+          status: "canvas artifact",
         });
         setChatOpen(false);
       }
@@ -577,6 +620,19 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           onAskYulia={onAskYulia}
           onRunAnalysis={onRunDealAnalysis}
           onOpenTeam={onOpenTeam}
+          // Contract with Detail.tsx (DealFiles entry point): Detail passes the
+          // REAL numeric deal id; this opens the deal's library/data room
+          // through the same library-detail navigation the analysis view uses.
+          onOpenDealFiles={(dealRawId: number, stage?: string) => {
+            setView({
+              kind: "library-detail",
+              tab: activeTab,
+              dealTitle: view.dealTitle ?? view.dealId ?? "Deal",
+              portfolioName: "Deal files",
+              dealStage: stage ?? "all",
+              dealRawId,
+            });
+          }}
         />
       )}
       {view.kind === "watching" && (
@@ -730,6 +786,12 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
       )}
       <TabBar active={activeTab} onChange={onTabChange} onChat={onChat} />
       <ChatSheet open={chatOpen} onClose={onChatClose} chat={chatWithSurface} />
+
+      {/* Toast bus output — useAuthChat's send-failure Retry and staged-action
+          error toasts go through lib/toast and need exactly one mounted host.
+          zIndex above the chat sheet (9999) because most of these toasts fire
+          while the sheet is open. */}
+      <ToastHost zIndex={10000} />
       <LearnSheet
         open={learn.open}
         onClose={onLearnClose}

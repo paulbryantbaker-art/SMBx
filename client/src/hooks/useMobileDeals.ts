@@ -50,6 +50,13 @@ export interface MobilePipelineRow {
   action: "open" | "get";
   verdict?: Verdict;
   price?: string;
+  /** Fit score (composite/multiple-derived) — lets Today derive its hero
+   *  from real rows instead of hardcoded sample copy. */
+  fit?: number;
+  /** Headline money figure for hero surfaces, value-only (e.g. "$5.4M"). */
+  metricValue?: string;
+  /** Label for metricValue (e.g. "Revenue", "SDE"). */
+  metricLabel?: string;
 }
 
 export interface MobileWatchRow {
@@ -76,8 +83,9 @@ export interface MobileFeatured {
   rawId: number;
   name: string;
   sub: string;
-  revLabel: string;  // "$5.4M REV"
+  revLabel: string;  // "$5.4M revenue"
   fit: number;
+  verdict: Verdict;
 }
 
 /** Every deal the user owns, tagged with its pipeline stage — for the full
@@ -90,6 +98,14 @@ export interface MobileStageRow {
   verdict: Verdict;
   gate: string;
   stageId: PipelineStageId;
+  /** Raw financials in CENTS (passthrough from RawDeal) — for Pipeline
+   *  financial columns. Null when the deal record has no value. */
+  sde: number | null;
+  askingPrice: number | null;
+  ebitda: number | null;
+  /** seven_factor_composite clamped to 0–99, or null when the deal has no
+   *  real composite — do NOT substitute a fabricated score here. */
+  fit: number | null;
 }
 
 export interface UseMobileDealsResult {
@@ -145,6 +161,25 @@ function fmtMoney(cents: number | null, suffix: string): string | null {
   return `$${Math.round(dollars)} ${suffix}`;
 }
 
+/** Value-only money format ("$5.4M") — for hero numerals where the label
+ *  renders separately. */
+function fmtMoneyValue(cents: number | null): string | null {
+  if (typeof cents !== "number" || cents <= 0) return null;
+  const dollars = cents / 100;
+  if (dollars >= 1_000_000) return `$${(dollars / 1_000_000).toFixed(1)}M`;
+  if (dollars >= 1_000)     return `$${Math.round(dollars / 1_000)}K`;
+  return `$${Math.round(dollars)}`;
+}
+
+/** Honest fit: the real seven_factor_composite (clamped 0–99) or null.
+ *  Unlike fitScore() below, this never invents a number. */
+function compositeFit(d: RawDeal): number | null {
+  if (typeof d.seven_factor_composite === "number") {
+    return Math.max(0, Math.min(99, d.seven_factor_composite));
+  }
+  return null;
+}
+
 function buildSub(d: RawDeal): string {
   const sde   = fmtMoney(d.sde, "SDE");
   const rev   = fmtMoney(d.revenue, "rev");
@@ -183,6 +218,10 @@ function shape(deals: RawDeal[]): Omit<UseMobileDealsResult, "loading" | "loaded
       verdict: v,
       gate: d.current_gate || "B2",
       stageId: stageForGate(d.current_gate || "B2"),
+      sde: d.sde ?? null,
+      askingPrice: d.asking_price ?? null,
+      ebitda: d.ebitda ?? null,
+      fit: compositeFit(d),
     };
   });
 
@@ -198,6 +237,8 @@ function shape(deals: RawDeal[]): Omit<UseMobileDealsResult, "loading" | "loaded
   const today: MobilePipelineRow[] = recent.slice(0, 5).map(d => {
     const v = dealVerdict(d);
     const isOpen = v === "pursue";
+    const revValue = fmtMoneyValue(d.revenue);
+    const sdeValue = fmtMoneyValue(d.sde);
     return {
       id: `deal-${d.id}`,
       rawId: d.id,
@@ -205,7 +246,14 @@ function shape(deals: RawDeal[]): Omit<UseMobileDealsResult, "loading" | "loaded
       name: nameOf(d),
       sub: buildSub(d),
       action: isOpen ? "open" : "get",
-      ...(isOpen ? { verdict: v } : { price: priceWord(v) }),
+      verdict: v,
+      ...(isOpen ? {} : { price: priceWord(v) }),
+      fit: fitScore(d),
+      ...(revValue
+        ? { metricValue: revValue, metricLabel: "Revenue" }
+        : sdeValue
+          ? { metricValue: sdeValue, metricLabel: "SDE" }
+          : {}),
     };
   });
 
@@ -248,8 +296,9 @@ function shape(deals: RawDeal[]): Omit<UseMobileDealsResult, "loading" | "loaded
         rawId: top.id,
         name: nameOf(top),
         sub: buildSub(top),
-        revLabel: fmtMoney(top.revenue, "REV") ?? fmtMoney(top.sde, "SDE") ?? "ACTIVE",
+        revLabel: fmtMoney(top.revenue, "revenue") ?? fmtMoney(top.sde, "SDE") ?? "Active",
         fit: ranked[0]?.fit ?? fitScore(top),
+        verdict: dealVerdict(top),
       }
     : null;
 

@@ -22,9 +22,13 @@ const TONE_BG: Record<string, string> = {
 interface Props {
   /** Lifts the toast above the portaled chat pill. ~120px clears the pill + safe-area. */
   bottomOffset?: number;
+  /** Stacking level. Default sits above page chrome; pass a higher value when
+   *  the host must clear fullscreen sheets (e.g. the V6 mobile chat sheet at
+   *  9999, whose send-failure Retry toasts render through this host). */
+  zIndex?: number;
 }
 
-export function ToastHost({ bottomOffset = 110 }: Props) {
+export function ToastHost({ bottomOffset = 110, zIndex = 95 }: Props) {
   const [toast, setToast] = useState<ToastSpec | null>(null);
 
   useEffect(() => subscribeToasts(setToast), []);
@@ -45,7 +49,7 @@ export function ToastHost({ bottomOffset = 110 }: Props) {
             left: 16,
             right: 16,
             bottom: `calc(${bottomOffset}px + env(safe-area-inset-bottom))`,
-            zIndex: 95,
+            zIndex,
             display: 'flex',
             alignItems: 'center',
             gap: 12,
