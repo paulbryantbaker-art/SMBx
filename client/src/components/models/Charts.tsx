@@ -2,6 +2,7 @@
  * Interactive Chart Components — react-chartjs-2 wrappers with smbx.ai brand.
  * These render in the browser (not server-side). Tooltips, hover, responsive.
  */
+import type { CSSProperties } from 'react';
 import { Bar, Doughnut, Radar, Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -217,8 +218,10 @@ export function SensitivityHeatmap({ matrix, var1Values, var2Values, var1Key, va
   };
 
   return (
-    <div className="overflow-x-auto">
-      <table className="text-xs" style={{ borderCollapse: 'collapse', width: '100%' }}>
+    /* minWidth keeps the matrix legible on phones — it scrolls sideways
+       instead of crushing the cells. */
+    <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <table className="text-xs" style={{ borderCollapse: 'collapse', width: '100%', minWidth: 480 }}>
         <thead>
           <tr>
             <th style={{ padding: '6px 8px', fontSize: 10, color: MUTED, textAlign: 'left' }}>{var1Key} \ {var2Key}</th>
@@ -256,8 +259,9 @@ export function SensitivityHeatmap({ matrix, var1Values, var2Values, var1Key, va
 
 export function ProFormaTable({ years }: { years: { year: number; revenue: number; ebitda: number; debtService: number; fcf: number; debtBalance: number }[] }) {
   return (
-    <div className="overflow-x-auto">
-      <table className="text-xs w-full" style={{ borderCollapse: 'collapse' }}>
+    /* Six money columns — scroll sideways on phones rather than squeezing. */
+    <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <table className="text-xs w-full" style={{ borderCollapse: 'collapse', minWidth: 560 }}>
         <thead>
           <tr style={{ borderBottom: `2px solid ${TERRA}` }}>
             {['Year', 'Revenue', 'EBITDA', 'Debt Service', 'Free Cash Flow', 'Debt Balance'].map(h => (
@@ -414,6 +418,8 @@ export function ModelSlider({ label, value, onChange, min, max, step, format = '
         <span className="text-sm sm:text-xs font-semibold tabular-nums" style={{ color: TEXT }}>{displayValue()}</span>
       </div>
       <div className="py-2">
+        {/* .model-range (index.css) draws the track from --mr-fill and gives
+            the thumb a ≥28px visual / 44px hit size on touch devices. */}
         <input
           type="range"
           min={min}
@@ -421,10 +427,10 @@ export function ModelSlider({ label, value, onChange, min, max, step, format = '
           step={step}
           value={value}
           onChange={e => onChange(Number(e.target.value))}
-          className="w-full cursor-pointer"
+          className="model-range w-full cursor-pointer"
           style={{
-            background: `linear-gradient(to right, ${TERRA} 0%, ${TERRA} ${pct}%, #e8e6dc ${pct}%, #e8e6dc 100%)`,
-          }}
+            '--mr-fill': `linear-gradient(to right, ${TERRA} 0%, ${TERRA} ${pct}%, #e8e6dc ${pct}%, #e8e6dc 100%)`,
+          } as CSSProperties}
         />
       </div>
     </div>

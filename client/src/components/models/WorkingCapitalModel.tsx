@@ -89,8 +89,10 @@ export default function WorkingCapitalModel({ tabId }: Props) {
       {/* Monthly data input */}
       <div>
         <h3 className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--m-on-surface-var)' }}>Monthly Data</h3>
-        <div className="overflow-x-auto">
-          <table className="text-xs w-full" style={{ borderCollapse: 'collapse' }}>
+        {/* Four columns with live inputs — scroll sideways on phones rather
+            than crushing the number fields. */}
+        <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <table className="text-xs w-full" style={{ borderCollapse: 'collapse', minWidth: 440 }}>
             <thead>
               <tr style={{ borderBottom: '2px solid var(--m-primary)' }}>
                 <th style={{ padding: '4px 6px', textAlign: 'left', fontSize: 10, color: 'var(--m-on-surface-var)' }}>Month</th>

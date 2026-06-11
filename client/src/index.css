@@ -459,6 +459,57 @@ input[type="range"].m-slider::-moz-range-thumb {
   box-shadow: 0 2px 6px rgba(25, 24, 19, 0.18);
 }
 
+/* ─── Interactive model canvas sliders (components/models/Charts.tsx) ───
+   ModelSlider paints its green fill through --mr-fill (inline CSS var) so
+   the track lives on the ::slider-track pseudo while the input itself stays
+   transparent and tall enough to be a real touch target. Thumb scales to
+   ≥28px visual inside a 44px hit height on coarse (touch) pointers. */
+input[type="range"].model-range {
+  -webkit-appearance: none; appearance: none;
+  height: 28px; margin: 0;
+  background: transparent; outline: none;
+}
+input[type="range"].model-range::-webkit-slider-runnable-track {
+  height: 6px; border-radius: 999px;
+  background: var(--mr-fill, #e8e6dc);
+}
+input[type="range"].model-range::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 20px; height: 20px; margin-top: -7px;
+  border-radius: 50%;
+  background: var(--m-primary, #2E8C5A);
+  border: 3px solid #fff; cursor: grab;
+  box-shadow: 0 2px 6px rgba(25, 24, 19, 0.22);
+}
+input[type="range"].model-range::-moz-range-track {
+  height: 6px; border-radius: 999px;
+  background: var(--mr-fill, #e8e6dc);
+}
+input[type="range"].model-range::-moz-range-thumb {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--m-primary, #2E8C5A);
+  border: 3px solid #fff; cursor: grab;
+  box-shadow: 0 2px 6px rgba(25, 24, 19, 0.22);
+}
+@media (pointer: coarse) {
+  input[type="range"].model-range { height: 44px; }
+  input[type="range"].model-range::-webkit-slider-thumb {
+    width: 28px; height: 28px; margin-top: -11px;
+  }
+  input[type="range"].model-range::-moz-range-thumb {
+    width: 28px; height: 28px;
+  }
+}
+
+/* Mobile model screen (v6/mobile/screens/Model.tsx): the screen owns the
+   16px gutters, so the model root's p-5 collapses horizontally; 16px fonts
+   on every input/select stop iOS Safari's focus zoom (!important beats the
+   text-xs utilities and ModelInput's inline font-size:inherit). */
+.mobile-model-body .p-5 { padding-left: 0; padding-right: 0; }
+.mobile-model-body input,
+.mobile-model-body select,
+.mobile-model-body textarea { font-size: 16px !important; }
+
 /* Browser-style tabs */
 .tab-strip {
   display: flex; align-items: stretch;

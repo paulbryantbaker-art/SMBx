@@ -158,8 +158,9 @@ export default function CapTableModel({ tabId }: Props) {
       {waterfalls && waterfalls.length > 0 && (
         <div>
           <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Exit Payout Scenarios</h3>
-          <div className="overflow-x-auto">
-            <table className="text-xs w-full" style={{ borderCollapse: 'collapse' }}>
+          {/* One column per exit scenario — scrolls sideways on phones. */}
+          <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <table className="text-xs w-full" style={{ borderCollapse: 'collapse', minWidth: 480 }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid var(--m-primary)' }}>
                   <th style={{ padding: '4px 8px', textAlign: 'left', fontSize: 10, color: 'var(--m-on-surface-var)' }}>Stakeholder</th>

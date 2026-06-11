@@ -13,7 +13,7 @@ import { VerdictPill } from "../VerdictPill";
 import type { Verdict } from "../types";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
 import { DEV_AUTH_BYPASS } from "../../../../hooks/useAuth";
-import type { MobileWatchRow, MobileFeatured, MobilePick, MobileStageRow } from "../../../../hooks/useMobileDeals";
+import type { MobileFeatured, MobilePick, MobileStageRow } from "../../../../hooks/useMobileDeals";
 import { dealsByStage, type DealStage, type SampleDeal } from "../../../../lib/sampleDeals";
 import { PIPELINE_STAGES } from "../../../../lib/pipelineStages";
 import { useWatchlist } from "../../../../hooks/useWatchlist";
@@ -30,8 +30,6 @@ interface PipelineProps {
   /** Opens the notifications sheet + unread badge count. Omitted → no bell. */
   onNotif?: () => void;
   notifCount?: number;
-  /** Authed user's watching list (null = anon or empty → samples render). */
-  userWatching: MobileWatchRow[] | null;
   /** Authed user's "NEW TODAY" featured hero (null = anon or empty → sample). */
   userFeatured: MobileFeatured | null;
   /** Picks formerly shown on the Brief tab; now appended to Pipeline. */
@@ -42,6 +40,9 @@ interface PipelineProps {
   /** True ONLY when a signed-in user genuinely has zero deals. Anon/dev
       preview passes false and keeps showing samples. */
   realEmpty?: boolean;
+  /** Opens the structured add-deal sheet. When absent, the empty-state CTA
+      falls back to its original behavior (onSearch). */
+  onAddDeal?: () => void;
 }
 
 interface ChipDef { id: DealStage; label: string; n: number }
@@ -90,7 +91,7 @@ function fmtM(cents: number | null | undefined): string | null {
   return `$${Math.round(d)}`;
 }
 
-export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, onOpenDealsList, onAvatarClick, onSearch, onNotif, notifCount, userFeatured, userPicks, userAll, realEmpty }: PipelineProps) {
+export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, onOpenDealsList, onAvatarClick, onSearch, onNotif, notifCount, userFeatured, userPicks, userAll, realEmpty, onAddDeal }: PipelineProps) {
   // Sample content is ONLY for anon and the dev-bypass preview. A real
   // signed-in user never sees "Big Fake Deal" or fabricated chip counts —
   // including mid-load (honest loading card below instead).
@@ -256,7 +257,7 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
             type="button"
             className="mb-get-pill solid"
             style={{ marginTop: 18, padding: "11px 26px", fontSize: 15 }}
-            onClick={onSearch}
+            onClick={onAddDeal ?? onSearch}
           >Source a deal</button>
         </div>
       ) : hasRealDeals ? (

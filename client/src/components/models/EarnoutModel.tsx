@@ -115,7 +115,7 @@ export default function EarnoutModel({ tabId }: Props) {
             <div>
               <label className="block text-[9px] font-medium mb-0.5" style={{ color: 'var(--m-on-surface-var)' }}>Probability</label>
               <input type="range" min={0} max={1} step={0.05} value={m.probability} onChange={e => updateMilestone(i, 'probability', Number(e.target.value))}
-                className="w-full" />
+                className="model-range w-full" />
               <span className="text-[9px] font-medium" style={{ color: 'var(--m-on-surface-var)' }}>{pctDisplay(m.probability)}</span>
             </div>
           </div>

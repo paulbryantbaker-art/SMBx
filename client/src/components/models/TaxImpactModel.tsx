@@ -83,8 +83,8 @@ export default function TaxImpactModel({ tabId }: Props) {
           <p className="text-xs mb-2" style={{ color: 'var(--m-on-surface-var)' }}>
             Gross Profit Ratio: {pctDisplay(installment.grossProfitRatio)}
           </p>
-          <div className="overflow-x-auto">
-            <table className="text-xs w-full" style={{ borderCollapse: 'collapse' }}>
+          <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <table className="text-xs w-full" style={{ borderCollapse: 'collapse', minWidth: 400 }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid var(--m-primary)' }}>
                   {['Year', 'Payment', 'Taxable Gain', 'Tax Due'].map(h => (

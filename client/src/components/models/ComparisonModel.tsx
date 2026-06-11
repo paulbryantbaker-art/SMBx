@@ -31,8 +31,9 @@ export default function ComparisonModel({ tabId }: Props) {
       <h2 className="text-base font-bold m-0" style={{ fontFamily: 'var(--font-body)' }}>Deal Comparison</h2>
 
       {/* Side-by-side KPI cards */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
+      {/* One column per linked deal — scrolls sideways on phones. */}
+      <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <table className="w-full text-xs" style={{ borderCollapse: 'collapse', minWidth: 480 }}>
           <thead>
             <tr style={{ borderBottom: '2px solid var(--m-primary)' }}>
               <th style={{ padding: '6px 10px', textAlign: 'left', fontSize: 10, color: 'var(--m-on-surface-var)' }}>Metric</th>

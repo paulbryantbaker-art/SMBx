@@ -168,8 +168,8 @@ export default function SBAModel({ tabId }: Props) {
           </button>
 
           {showAmortization && (
-            <div className="mt-2 overflow-x-auto max-h-[400px] overflow-y-auto">
-              <table className="text-xs w-full" style={{ borderCollapse: 'collapse' }}>
+            <div className="mt-2 overflow-x-auto max-h-[400px] overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+              <table className="text-xs w-full" style={{ borderCollapse: 'collapse', minWidth: 440 }}>
                 <thead className="sticky top-0 bg-white">
                   <tr style={{ borderBottom: '2px solid var(--m-primary)' }}>
                     {['Month', 'Payment', 'Principal', 'Interest', 'Balance'].map(h => (

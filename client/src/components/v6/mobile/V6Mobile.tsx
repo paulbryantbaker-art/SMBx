@@ -14,10 +14,14 @@ import { WatchingScreen } from "./screens/Watching";
 import { MobileDealsListScreen } from "./screens/DealsListScreen";
 import { MobileProviderProfileScreen } from "./screens/ProviderProfileScreen";
 import { MobileAnalysisScreen } from "./screens/Analysis";
+import { MobileModelScreen, ensureModelTabFromCanvasAction } from "./screens/Model";
+import { MobileUsageScreen } from "./screens/Usage";
 import { LibraryDetailScreen, LibraryDocumentScreen, LibraryFinderScreen, LibraryScreen, SearchScreen } from "./screens/LibrarySearch";
 import { MobileAnalysesScreen } from "./screens/Analyses";
 import { MobileDealTeamScreen } from "./screens/DealTeam";
 import { ChatSheet } from "./ChatSheet";
+import { AddDealSheet } from "./AddDealSheet";
+import { useModelStore } from "../../../lib/modelStore";
 import { LearnSheet } from "./LearnSheet";
 import { NotificationsSheet } from "./NotificationsSheet";
 import { ToastHost } from "../../mobile/ToastHost";
@@ -123,10 +127,15 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
 
   const initial = readMobileHashState();
   const [view, setView] = useState<MobileView>(() => mobileViewFromHash(initial));
+  // Latest view for event handlers that must not re-subscribe on every
+  // navigation (the canvas_action listener below keys on [activeTab] only).
+  const viewRef = useRef(view);
+  viewRef.current = view;
   const [libraryDocBack, setLibraryDocBack] = useState<MobileView | null>(null);
   const [chatOpen, setChatOpen] = useState(initial.chat);
   const [acctOpen, setAcctOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [addDealOpen, setAddDealOpen] = useState(false);
   const [learn, setLearn] = useState<{ open: boolean; section: "how" | "pricing"; anchor?: string }>({
     open: false, section: "how",
   });
@@ -287,21 +296,31 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
       }
 
       if (detail.canvas_action === "create_model_tab" && detail.tabId) {
-        setView({
-          kind: "analysis",
-          tab: activeTab,
-          // Model lineage — keep the deal + parent analysis linkage that the
-          // server sends (desktop threads these into its model tabs too).
-          dealId: detail.dealId != null ? String(detail.dealId) : undefined,
-          dealTitle: detail.dealTitle ?? undefined,
-          parentOutputHash: typeof detail.parentOutputHash === "string" ? detail.parentOutputHash : undefined,
-          analysisTitle: detail.title || "Interactive model",
-          analysisTool: detail.modelType || "interactive_model",
-          analysisRunId: detail.analysisRunId ?? null,
-          status: "saved model",
-          modelState: detail.initialAssumptions || {},
-        });
-        setChatOpen(false);
+        // Real model canvas first: try to build a live modelStore tab from
+        // the SSE detail. Success → the dedicated model screen (the zustand
+        // modelStore is the source of truth from here on). Failure → the
+        // pre-existing fold-to-analysis-sliders fallback below, untouched.
+        const ensured = ensureModelTabFromCanvasAction(detail);
+        if (ensured) {
+          setView({ kind: "model", modelTabId: ensured.tabId, title: ensured.title, tab: activeTab });
+          setChatOpen(false);
+        } else {
+          setView({
+            kind: "analysis",
+            tab: activeTab,
+            // Model lineage — keep the deal + parent analysis linkage that the
+            // server sends (desktop threads these into its model tabs too).
+            dealId: detail.dealId != null ? String(detail.dealId) : undefined,
+            dealTitle: detail.dealTitle ?? undefined,
+            parentOutputHash: typeof detail.parentOutputHash === "string" ? detail.parentOutputHash : undefined,
+            analysisTitle: detail.title || "Interactive model",
+            analysisTool: detail.modelType || "interactive_model",
+            analysisRunId: detail.analysisRunId ?? null,
+            status: "saved model",
+            modelState: detail.initialAssumptions || {},
+          });
+          setChatOpen(false);
+        }
       }
 
       // Long-form Yulia artifacts (show_content) — without this branch the
@@ -321,6 +340,18 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           status: "canvas artifact",
         });
         setChatOpen(false);
+      }
+
+      // Real model view: the zustand modelStore is the source of truth —
+      // apply Yulia's assumption updates there and let the model screen
+      // re-render from its store subscription. read_tab_state needs no write
+      // (detail.state is an echo of what the store already holds). The
+      // analysis branch below is untouched: its functional setView is a
+      // no-op when the current view is kind 'model'.
+      if (detail.canvas_action === "update_model" && viewRef.current.kind === "model") {
+        const targetId = detail.tabId && detail.tabId !== "active" ? detail.tabId : viewRef.current.modelTabId;
+        const updates = detail.updates && typeof detail.updates === "object" ? detail.updates : null;
+        if (targetId && updates) useModelStore.getState().updateAssumptions(targetId, updates);
       }
 
       if ((detail.canvas_action === "update_model" || detail.canvas_action === "read_tab_state") && (detail.analysisData || detail.versionNumber || detail.state)) {
@@ -378,6 +409,9 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
     sendWithSurface(prompt);
     setChatOpen(true);
   };
+  // Add-deal sheet trigger — Pipeline's "Source a deal" CTA (and Today's
+  // starter CTA) open the structured composer instead of a generic prompt.
+  const onAddDeal = () => setAddDealOpen(true);
   const onRunDealAnalysis = async (input: {
     dealId: string;
     dealTitle: string;
@@ -547,6 +581,8 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
     view.kind === "library-detail" ||
     view.kind === "library-doc" ||
     view.kind === "analysis" ||
+    view.kind === "model" ||
+    view.kind === "usage" ||
     view.kind === "deal-team";
   const rootStyle: CSSProperties = {
     ...(isStandalone ? S.rootPwa : S.rootSafari),
@@ -576,6 +612,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           realEmpty={realEmpty}
           onOpenAnalyses={onOpenAnalyses}
           onOpenDealsList={onOpenDealsList}
+          onAddDeal={onAddDeal}
           {...notifBarProps}
         />
       )}
@@ -588,11 +625,11 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           onOpenDealsList={onOpenDealsList}
           onAvatarClick={onAvatarClick}
           onSearch={onOpenSearch}
-          userWatching={userDeals.hasData ? userDeals.watching : null}
           userFeatured={userDeals.hasData ? userDeals.featured : null}
           userPicks={userDeals.hasData ? userDeals.picks : null}
           userAll={userDeals.hasData ? userDeals.all : null}
           realEmpty={realEmpty}
+          onAddDeal={onAddDeal}
           {...notifBarProps}
         />
       )}
@@ -769,6 +806,21 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           onUpdate={(patch) => setView(prev => prev.kind === "analysis" ? { ...prev, ...patch } : prev)}
         />
       )}
+      {view.kind === "model" && view.modelTabId && (
+        <MobileModelScreen
+          modelTabId={view.modelTabId}
+          title={view.title ?? "Interactive model"}
+          onBack={() => setView({ kind: "tab", tab: activeTab })}
+          onTalkToYulia={onAskYulia}
+        />
+      )}
+      {view.kind === "usage" && (
+        <MobileUsageScreen
+          user={user}
+          onBack={() => setView({ kind: "tab", tab: view.tab ?? activeTab })}
+          onManageBilling={handleManageBilling}
+        />
+      )}
       {view.kind === "deal-team" && (
         <MobileDealTeamScreen
           // Real deals carry a numeric id → live participants/messages. Sample
@@ -794,6 +846,19 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
       )}
       <TabBar active={activeTab} onChange={onTabChange} onChat={onChat} />
       <ChatSheet open={chatOpen} onClose={onChatClose} chat={chatWithSurface} />
+
+      {/* Add-deal sheet — structured deal composer. Submission routes through
+          the same surface-context chat send as onAskYulia, then opens the
+          chat sheet so the user watches Yulia create the deal. */}
+      <AddDealSheet
+        open={addDealOpen}
+        onClose={() => setAddDealOpen(false)}
+        onSubmit={(prompt) => {
+          setAddDealOpen(false);
+          sendWithSurface(prompt);
+          setChatOpen(true);
+        }}
+      />
 
       {/* Toast bus output — useAuthChat's send-failure Retry and staged-action
           error toasts go through lib/toast and need exactly one mounted host.
@@ -831,6 +896,9 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
             </div>
             {user && (
               <button type="button" style={A.item} onClick={() => { setAcctOpen(false); onOpenProviderProfile(); }}>Provider profile</button>
+            )}
+            {user && (
+              <button type="button" style={A.item} onClick={() => { setAcctOpen(false); setView({ kind: "usage", tab: activeTab }); }}>Account &amp; usage</button>
             )}
             {user && !DEV_AUTH_BYPASS && (
               <button type="button" style={A.item} onClick={handleManageBilling}>Manage subscription</button>
@@ -896,9 +964,10 @@ function readMobileHashState(): {
   analysisTool: string | null;
   status: string | null;
   versionNumber: number | null;
+  modelTabId: string | null;
   chat: boolean;
   watching: boolean;
-  view: "search" | "library" | "library-finder" | "library-detail" | "library-doc" | "analyses" | "analysis" | "deals-list" | "deal-team" | "provider-profile" | null;
+  view: "search" | "library" | "library-finder" | "library-detail" | "library-doc" | "analyses" | "analysis" | "deals-list" | "deal-team" | "provider-profile" | "model" | "usage" | null;
 } {
   try {
     const hash = window.location.hash.replace(/^#/, "");
@@ -909,7 +978,7 @@ function readMobileHashState(): {
     const tab: MobileTab = rawTab && VALID_TABS.includes(rawTab) ? rawTab : "today";
     const rawView = params.get("view");
     const pushedView =
-      rawView === "search" || rawView === "library" || rawView === "library-finder" || rawView === "library-detail" || rawView === "library-doc" || rawView === "analyses" || rawView === "analysis" || rawView === "deals-list" || rawView === "deal-team" || rawView === "provider-profile"
+      rawView === "search" || rawView === "library" || rawView === "library-finder" || rawView === "library-detail" || rawView === "library-doc" || rawView === "analyses" || rawView === "analysis" || rawView === "deals-list" || rawView === "deal-team" || rawView === "provider-profile" || rawView === "model" || rawView === "usage"
         ? rawView
         : null;
     const detail = params.get("deal");
@@ -932,6 +1001,7 @@ function readMobileHashState(): {
     const analysisTitle = params.get("at") ?? dealTitle;
     const analysisTool = params.get("tool");
     const status = params.get("status");
+    const modelTabId = params.get("mtab");
     const chat = params.get("chat") === "open";
     const watching = params.get("view") === "watching";
     return {
@@ -952,6 +1022,7 @@ function readMobileHashState(): {
       analysisTool,
       status,
       versionNumber: Number.isFinite(versionNumber) ? versionNumber : null,
+      modelTabId,
       chat,
       watching,
       view: pushedView,
@@ -980,6 +1051,7 @@ function emptyMobileHashState(): ReturnType<typeof readMobileHashState> {
     analysisTool: null,
     status: null,
     versionNumber: null,
+    modelTabId: null,
     chat: false,
     watching: false,
     view: null,
@@ -995,6 +1067,19 @@ function mobileViewFromHash(state: ReturnType<typeof readMobileHashState>): Mobi
   // In-session sample navigation goes through setView directly, not this path.
   if (state.view === "deal-team" && state.dealRawId == null) {
     return { kind: "tab", tab: state.tab };
+  }
+  // Model canvas needs a live modelStore tab pointer (mtab) — without one
+  // there is nothing to render, so fall back to the tab (mirrors deal-team's
+  // drid guard). With one, the Model screen owns rehydration/missing-tab
+  // presentation (the store is in-memory, so a cold reload may have lost it).
+  if (state.view === "model") {
+    if (!state.modelTabId) return { kind: "tab", tab: state.tab };
+    return {
+      kind: "model",
+      tab: state.tab,
+      modelTabId: state.modelTabId,
+      title: state.dealTitle ?? "Interactive model",
+    };
   }
   if (state.view) {
     return {
@@ -1032,7 +1117,7 @@ function buildMobileHash(view: MobileView, chatOpen: boolean): string {
       if (view.dealTitle) params.set("t", view.dealTitle);
     } else if (view.kind === "watching") {
       params.set("view", "watching");
-    } else if (view.kind === "search" || view.kind === "library" || view.kind === "library-finder" || view.kind === "library-detail" || view.kind === "library-doc" || view.kind === "analyses" || view.kind === "analysis" || view.kind === "deals-list" || view.kind === "deal-team" || view.kind === "provider-profile") {
+    } else if (view.kind === "search" || view.kind === "library" || view.kind === "library-finder" || view.kind === "library-detail" || view.kind === "library-doc" || view.kind === "analyses" || view.kind === "analysis" || view.kind === "deals-list" || view.kind === "deal-team" || view.kind === "provider-profile" || view.kind === "model" || view.kind === "usage") {
       params.set("view", view.kind);
       if (view.tab) params.set("tab", view.tab);
       if (view.kind === "library-finder" && view.filesFilter) params.set("filter", view.filesFilter);
@@ -1062,6 +1147,12 @@ function buildMobileHash(view: MobileView, chatOpen: boolean): string {
         if (view.versionNumber) params.set("v", String(view.versionNumber));
         if (view.status) params.set("status", view.status);
       }
+      if (view.kind === "model") {
+        // mtab (live modelStore tab id) is the durable carrier the model
+        // screen rehydrates from; title rides along for the header.
+        if (view.modelTabId) params.set("mtab", view.modelTabId);
+        if (view.title) params.set("t", view.title);
+      }
     } else if (view.tab) {
       params.set("tab", view.tab);
     }
@@ -1088,9 +1179,10 @@ function viewDepth(view: MobileView): number {
     case "deal-team":
     case "deals-list":
     case "provider-profile":
+    case "usage":
       return 1;
     default:
-      return 2; // library-finder / library-detail / library-doc / analysis
+      return 2; // library-finder / library-detail / library-doc / analysis / model
   }
 }
 

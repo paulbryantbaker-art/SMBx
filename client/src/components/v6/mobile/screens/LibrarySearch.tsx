@@ -854,28 +854,6 @@ export function SearchScreen({
     },
   ] as const;
 
-  const recent = [
-    {
-      q: "Strategic buyers for route-density pest control in Florida",
-      meta: "Buyer search · 18 candidates · 2h ago",
-      prompt: "Refresh the buyer search for route-density pest control companies in Florida. Rank strategic buyers, PE-backed platforms, and local consolidators.",
-    },
-    {
-      q: "HVAC platform targets with service mix under review",
-      meta: "Target thesis · 31 companies · yesterday",
-      prompt: "Reopen the HVAC platform target search. Focus on recurring service revenue, owner-operated businesses, and add-on fit.",
-    },
-    {
-      q: "Seller-side M&A attorneys in Texas industrial services",
-      meta: "Professional search · 9 firms · Mon",
-      prompt: "Find seller-side M&A attorneys for a Texas industrial services transaction. Prioritize lower-middle-market experience and practical closing support.",
-    },
-    {
-      q: "SBA and senior debt lenders for $2M service businesses",
-      meta: "Capital search · 12 lenders · last week",
-      prompt: "Refresh the lender search for $2M service-business acquisitions. Separate SBA lenders, conventional senior debt, and seller-note-friendly lenders.",
-    },
-  ];
   const quickStarts = [
     "Find buyers for my company",
     "Build a target list from a thesis",
@@ -979,31 +957,9 @@ export function SearchScreen({
         ))}
       </div>
 
-      <SectionHeader title="Recent discovery searches" />
-      <div style={S.cardPad}>
-        <div className="mb-as-card" style={S.listCard}>
-          {recent.map((item, index) => (
-            <button
-              type="button"
-              key={item.q}
-              onClick={() => submitSearch(item.prompt)}
-              style={{
-                ...S.recentRow,
-                borderBottom: index === recent.length - 1 ? "none" : "0.5px solid var(--mb-line-2)",
-              }}
-            >
-              <div style={S.recentIcon}>
-                <MobileIcon name="search" c="currentColor" size={15} />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={S.rowTitle}>{item.q}</div>
-                <div style={S.rowMeta}>{item.meta}</div>
-              </div>
-              <MobileIcon name="chevron" c="var(--mb-ink-4)" size={11} />
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* "Recent discovery searches" removed 2026-06-11 — there is no real
+          recents endpoint, so the list was fabricated. Do not restore it
+          without a real backing store. */}
     </div>
   );
 }
@@ -4422,30 +4378,6 @@ const S: Record<string, CSSProperties> = {
     fontSize: 12.5,
     fontWeight: 700,
     cursor: "pointer",
-  },
-  listCard: {
-    padding: "4px 0",
-  },
-  recentRow: {
-    width: "100%",
-    background: "transparent",
-    border: "none",
-    display: "flex",
-    alignItems: "center",
-    gap: 14,
-    padding: "14px 18px",
-    textAlign: "left",
-    cursor: "pointer",
-  },
-  recentIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    background: "var(--mb-accent-soft)",
-    color: "var(--mb-accent-ink)",
-    display: "grid",
-    placeItems: "center",
-    flexShrink: 0,
   },
   // Floating chrome controls are 44×44 (Apple HIG minimum tap target) — the
   // upload control is a primary write action, so no sub-44 hit areas here.

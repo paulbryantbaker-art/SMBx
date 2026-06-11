@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent } from "react";
-import { DEV_AUTH_BYPASS, useAuth, type User } from "../../hooks/useAuth";
+import { authHeaders, DEV_AUTH_BYPASS, useAuth, type User } from "../../hooks/useAuth";
 import { useAnonymousChat } from "../../hooks/useAnonymousChat";
 import { useAuthChat } from "../../hooks/useAuthChat";
 import { useIsMobile } from "../../hooks/useIsMobile";
@@ -198,6 +198,10 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
   // FAB chat open/closed (CD "Ramp" workspace — chat is a floating bubble).
   const [chatOpen, setChatOpen] = useState(false);
   const [acctOpen, setAcctOpen] = useState(false);
+  // Stripe Customer Portal session state for the account popover's
+  // "Manage subscription" item (desktop parity with mobile billing).
+  const [billingBusy, setBillingBusy] = useState(false);
+  const [billingError, setBillingError] = useState<string | null>(null);
   const tabsRef = useRef<Tab[]>(tabs);
 
   useEffect(() => {
@@ -603,6 +607,31 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
   ];
   const avatarInitials = ((user?.email || "SX").replace(/[^a-zA-Z]/g, "").slice(0, 2) || "SX").toUpperCase();
 
+  // Opens the Stripe Customer Portal — desktop parity with mobile's
+  // handleManageBilling (V6Mobile). /api/stripe/portal is behind
+  // requireAuth, so authHeaders() is required; the item is hidden for
+  // the dev-bypass preview (no real token → would 401).
+  const handleManageBilling = async () => {
+    if (billingBusy) return;
+    setBillingBusy(true);
+    setBillingError(null);
+    try {
+      const res = await fetch("/api/stripe/portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+      });
+      if (res.ok) {
+        const { url } = await res.json();
+        if (url) { window.location.assign(url); return; }
+      }
+      setBillingError("Couldn’t open the billing portal. Try again.");
+    } catch {
+      setBillingError("Couldn’t open the billing portal. Try again.");
+    } finally {
+      setBillingBusy(false);
+    }
+  };
+
   return (
     <div className="v6-root wk">
       <div className="wk-app">
@@ -696,7 +725,7 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
                 title={user?.email || "Account"}
                 aria-haspopup="menu"
                 aria-expanded={acctOpen}
-                onClick={() => setAcctOpen(o => !o)}
+                onClick={() => { setAcctOpen(o => !o); setBillingError(null); }}
               >{avatarInitials}</button>
               {acctOpen && (
                 <>
@@ -707,6 +736,24 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
                       <div className="wkacct-sub">smbX.ai workspace</div>
                     </div>
                     {user && <button className="wkacct-item" role="menuitem" onClick={() => { setAcctOpen(false); openTab({ kind: "provider-profile", title: "Provider profile" }); }}>Provider profile</button>}
+                    {/* Stripe Customer Portal — popover stays open on failure so
+                        the inline error below is visible; success navigates away. */}
+                    {user && !DEV_AUTH_BYPASS && (
+                      <button
+                        className="wkacct-item"
+                        role="menuitem"
+                        disabled={billingBusy}
+                        style={billingBusy ? { opacity: 0.6, cursor: "default" } : undefined}
+                        onClick={() => { void handleManageBilling(); }}
+                      >
+                        {billingBusy ? "Opening billing portal…" : "Manage subscription"}
+                      </button>
+                    )}
+                    {billingError && (
+                      <div style={{ padding: "2px 11px 8px", fontSize: ".76rem", lineHeight: 1.35, color: "#C0562F" }} role="alert">
+                        {billingError}
+                      </div>
+                    )}
                     <button className="wkacct-item" role="menuitem" onClick={() => { setAcctOpen(false); window.location.assign("/?marketing"); }}>Preview marketing site</button>
                     <button className="wkacct-item danger" role="menuitem" onClick={() => {
                       setAcctOpen(false);

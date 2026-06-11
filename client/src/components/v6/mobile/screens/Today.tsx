@@ -71,6 +71,9 @@ interface TodayProps {
       Explore card. False for authed users (their audience is captured
       server-side, not toggled). */
   showAudienceSwitcher: boolean;
+  /** Opens the structured add-deal sheet. When absent, the starter CTAs
+      fall back to their original ask-Yulia prompt. */
+  onAddDeal?: () => void;
 }
 
 interface TodayPipelineRow {
@@ -135,7 +138,7 @@ const SAMPLE_MARKET_INTEL: PortfolioMarketIntelligence = {
 
 export function TodayScreen({
   isAnon, initials, onOpenDeal, onOpenLibrary, onOpenLibraryDetail, onChat, onSearch, onAskYulia, onLearn: _onLearn, onOpenAnalyses, onOpenDealsList,
-  onAvatarClick, onNotif, notifCount, userPipeline, featured, realEmpty,
+  onAvatarClick, onNotif, notifCount, userPipeline, featured, realEmpty, onAddDeal,
   audience,
 }: TodayProps) {
   // Sample content is ONLY for anon and the dev-bypass preview. A real
@@ -233,7 +236,7 @@ export function TodayScreen({
           />
         ) : realEmpty ? (
           <StarterHero
-            onSource={() => onAskYulia("Help me source and add my first deal")}
+            onSource={onAddDeal ?? (() => onAskYulia("Help me source and add my first deal"))}
           />
         ) : null}
       </div>
@@ -328,7 +331,7 @@ export function TodayScreen({
           />
           {realEmpty ? (
             <PipelineEmptyState
-              onSource={() => onAskYulia("Help me source and add my first deal")}
+              onSource={onAddDeal ?? (() => onAskYulia("Help me source and add my first deal"))}
               onChat={onChat}
             />
           ) : authedLoading ? (

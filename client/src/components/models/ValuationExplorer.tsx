@@ -58,7 +58,7 @@ export default function ValuationExplorer({ tabId }: Props) {
         <div className="rounded-xl p-4" style={{ background: 'var(--m-surface-container)', border: '1px solid var(--m-outline-var)' }}>
           <h3 className="text-sm font-bold m-0 mb-3" style={{ fontFamily: 'var(--font-body)' }}>Estimated Value Range</h3>
 
-          <div className="flex justify-between items-end mb-4 px-8">
+          <div className="flex justify-between items-end mb-4 px-2 sm:px-8">
             <div className="text-center">
               <p className="text-[9px] font-bold uppercase tracking-wider m-0 mb-1" style={{ color: 'var(--m-on-surface-var)' }}>Low</p>
               <p className="text-lg font-bold m-0" style={{ color: 'var(--m-on-surface-var)' }}>{centsToDisplay(val.low)}</p>

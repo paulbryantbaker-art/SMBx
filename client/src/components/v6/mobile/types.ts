@@ -20,7 +20,9 @@ export type MobileViewKind =
   | "analysis"
   | "deals-list"
   | "deal-team"
-  | "provider-profile";
+  | "provider-profile"
+  | "model"
+  | "usage";
 
 export interface MobileView {
   kind: MobileViewKind;
@@ -56,6 +58,12 @@ export interface MobileView {
    *  run that spawned it). Carried on the view so later phases can save /
    *  re-run against the correct parent output. */
   parentOutputHash?: string | null;
+  /** Live zustand modelStore tab id — set for kind 'model' (the real model
+   *  canvas). The store, not the view, is the source of truth for model
+   *  state; the view only carries the pointer (hash param `mtab`). */
+  modelTabId?: string;
+  /** Display title for kind 'model' (hash param `t`). */
+  title?: string;
 }
 
 export interface MobileMessage {

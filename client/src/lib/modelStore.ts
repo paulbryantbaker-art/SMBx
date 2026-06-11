@@ -419,6 +419,13 @@ function scheduleModelVersionPersist(tab: ModelTab) {
   modelPersistTimers.set(tab.id, timer);
 }
 
+/** Read-only: the last outputHash the persist path returned for a tab
+ *  (null until the first successful save). Lets surfaces render a WorkSeal
+ *  from a REAL substrate hash — never fabricate one when this is null. */
+export function getPersistedOutputHash(tabId: string): string | null {
+  return modelPersistParentHashes.get(tabId) ?? null;
+}
+
 function modelVersionSnapshot(tab: ModelTab, changeReason: string): ModelVersion {
   return {
     versionNumber: tab.versionNumber,
