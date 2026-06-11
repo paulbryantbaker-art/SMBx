@@ -6,6 +6,8 @@ playwright-report/
 testing/v6-desktop-smoke/latest/
 testing/v6-mobile-smoke/latest/
 uploads/
+# Texture masters moved out of public/ (2026-06-11 ship-weight fix) — local archive only
+client/textures_backup/
 .DS_Store
 .claude/
 

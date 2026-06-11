@@ -33,6 +33,17 @@ export interface MobileDataRoomDocument {
   deliverable_is_stale?: boolean | null;
   deliverable_stale_reason?: string | null;
   deliverable_folder_category?: string | null;
+  /* Working Paper provenance — the model execution the deliverable was
+     generated from (server-side lateral join on model_executions). Present
+     only when the document's deliverable snapshot matches a real signed run.
+     `model_output_hash` is the REAL substrate hash; never fabricated. */
+  model_execution_id?: number | null;
+  model_execution_type?: string | null;
+  model_execution_title?: string | null;
+  model_execution_version_number?: number | null;
+  model_output_hash?: string | null;
+  model_input_hash?: string | null;
+  model_execution_created_at?: string | null;
 }
 
 /** A deliverable that exists for the deal but has NOT yet been filed into the
@@ -57,6 +68,9 @@ interface DealDataRoomResponse {
   ndaRequired?: boolean;
   ndaSigned?: boolean;
   dealName?: string;
+  /** Latest completed CIM-family deliverable for the deal — share-link
+   *  creation is anchored to it. null when no CIM has been generated yet. */
+  livingCimId?: number | null;
 }
 
 /** One folder plus the documents filed under it. Documents whose folder_id
@@ -78,6 +92,9 @@ export interface MobileDataRoomState {
   /** Deliverables generated for the deal that haven't been filed into the room
    *  yet (owner-only). Empty in the read-only / non-owner case. */
   unfiledDeliverables: MobileUnfiledDeliverable[];
+  /** The deal's living CIM (latest completed CIM-family deliverable), or null
+   *  when none exists yet. Share-link CREATE is gated on this. */
+  livingCimId: number | null;
   /** Re-fetch the data room from the backend. Resolves once state is updated. */
   refresh: () => Promise<void>;
   /** File an existing deliverable into the room (optionally into a folder).
@@ -118,7 +135,7 @@ function groupByFolder(
  *  stable mutation/refresh callbacks before returning it to consumers. */
 type DataRoomData = Pick<
   MobileDataRoomState,
-  "loading" | "error" | "dealName" | "folders" | "documents" | "groups" | "unfiledDeliverables"
+  "loading" | "error" | "dealName" | "folders" | "documents" | "groups" | "unfiledDeliverables" | "livingCimId"
 >;
 
 const EMPTY_DATA: DataRoomData = {
@@ -129,6 +146,7 @@ const EMPTY_DATA: DataRoomData = {
   documents: [],
   groups: [],
   unfiledDeliverables: [],
+  livingCimId: null,
 };
 
 /** Parse a fetch Response, throwing the backend `error` string when present so
@@ -169,6 +187,7 @@ export function useMobileDataRoom(dealId: number | null): MobileDataRoomState {
         documents,
         groups: groupByFolder(folders, documents),
         unfiledDeliverables: payload.unfiledDeliverables ?? [],
+        livingCimId: payload.livingCimId ?? null,
       });
     } catch (err: any) {
       if (seq !== loadSeq.current) return;

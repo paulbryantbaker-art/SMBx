@@ -120,6 +120,10 @@ interface DocRowData {
   /** Optional control rendered below the row (real data-room status advance).
    *  Sample rows never set this, so their layout is unchanged. */
   statusControl?: ReactNode;
+  /** Working Paper provenance seal — set ONLY when the document carries a
+   *  REAL substrate output hash (model_executions join). No hash → no seal;
+   *  never a fabricated or "unsigned" placeholder. */
+  seal?: ReactNode;
 }
 
 const draftRows: DocRowData[] = [
@@ -1183,7 +1187,7 @@ export function LibraryDetailScreen({
 
       {roomCategories && (
         <div style={S.roomCategoryPad}>
-          <div className="mb-section-eyebrow" style={S.roomCategoryEyebrow}>IN THIS ROOM</div>
+          <div style={S.roomCategoryHeading}>In this room</div>
           <div className="mb-hide-scroll" style={S.roomCategoryRail}>
             {roomCategories.map((category) => (
               <button
@@ -1315,10 +1319,10 @@ function RealDealDataRoom({
   // Opens the glass Share bottom-sheet from the header Share control.
   const [shareOpen, setShareOpen] = useState(false);
   const share = useMobileShareLinks(dealRawId);
-  // The link points at the deal's living CIM. No current endpoint exposes one
-  // to the client, so the create flow shows a graceful "generate a CIM first"
-  // state until a living CIM id is available (see useMobileShareLinks notes).
-  const livingCimId: number | null = null;
+  // The link points at the deal's living CIM — the data-room read now returns
+  // it (latest completed CIM-family deliverable). null keeps the honest
+  // "generate a CIM first" state in the sheet; never fabricate an id.
+  const livingCimId = room.livingCimId;
 
   // Keep the upload target valid if folders change underneath us.
   useEffect(() => {
@@ -1537,7 +1541,7 @@ function RealDealDataRoom({
 
       {room.groups.length > 1 && (
         <div style={S.roomCategoryPad}>
-          <div className="mb-section-eyebrow" style={S.roomCategoryEyebrow}>IN THIS ROOM</div>
+          <div style={S.roomCategoryHeading}>In this room</div>
           <div className="mb-hide-scroll" style={S.roomCategoryRail}>
             {room.groups.map((group, index) => (
               <button
@@ -1661,8 +1665,7 @@ function ShareSheet({
         <div style={SH.grab} />
         <div style={SH.head}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="mb-mono" style={SH.kicker}>SHARE DATA ROOM</div>
-            <div style={SH.title}>{dealTitle}</div>
+            <div style={SH.title}>Share {dealTitle}</div>
           </div>
           <button type="button" onClick={onClose} aria-label="Close" style={SH.closeBtn}>
             <X size={18} strokeWidth={2.4} color="var(--mb-ink-2)" />
@@ -1671,7 +1674,7 @@ function ShareSheet({
 
         <div style={SH.scroll}>
           {/* Active links */}
-          <div className="mb-section-eyebrow" style={SH.sectionEyebrow}>ACTIVE LINKS</div>
+          <div style={SH.sectionLabel}>Active links</div>
           {share.loading && activeLinks.length === 0 ? (
             <div style={SH.stateNote}>
               <Loader2 size={14} strokeWidth={2.4} color="var(--mb-ink-3)" style={S.spin} />
@@ -1697,7 +1700,7 @@ function ShareSheet({
           )}
 
           {/* Create */}
-          <div className="mb-section-eyebrow" style={{ ...SH.sectionEyebrow, marginTop: 22 }}>CREATE LINK</div>
+          <div style={{ ...SH.sectionLabel, marginTop: 22 }}>Create link</div>
           {canCreate ? (
             <div className="mb-as-card" style={SH.createCard}>
               <div style={SH.fieldLabel}>Access level</div>
@@ -1815,6 +1818,26 @@ function ShareLinkRow({
   onCopy: () => void;
   onRevoke: () => void;
 }) {
+  // Revoke is destructive and sits next to Copy — two-tap confirm: the first
+  // tap arms the button ("Revoke?"), the second within 3.5s revokes. The arm
+  // auto-expires so a stray tap never leaves a live destructive control.
+  const [armed, setArmed] = useState(false);
+  const disarmTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (disarmTimer.current) clearTimeout(disarmTimer.current);
+  }, []);
+  const onRevokeTap = () => {
+    if (armed) {
+      if (disarmTimer.current) clearTimeout(disarmTimer.current);
+      setArmed(false);
+      onRevoke();
+      return;
+    }
+    setArmed(true);
+    if (disarmTimer.current) clearTimeout(disarmTimer.current);
+    disarmTimer.current = setTimeout(() => setArmed(false), 3500);
+  };
+
   const status = shareLinkStatus(link);
   const meta = [
     formatRealStatus(link.access_level),
@@ -1841,8 +1864,15 @@ function ShareLinkRow({
             : <Copy size={13} strokeWidth={2.3} color="var(--mb-accent-ink)" />}
           <span>{copied ? "Copied" : "Copy"}</span>
         </button>
-        <button type="button" onClick={onRevoke} aria-label="Revoke link" style={SH.revokeButton}>
-          <Trash2 size={13} strokeWidth={2.3} color="var(--mb-danger-ink)" />
+        <button
+          type="button"
+          onClick={onRevokeTap}
+          aria-label={armed ? "Tap again to revoke this link" : "Revoke link"}
+          style={armed ? SH.revokeButtonArmed : SH.revokeButton}
+        >
+          {armed
+            ? <span>Revoke?</span>
+            : <Trash2 size={14} strokeWidth={2.3} color="var(--mb-danger-ink)" />}
         </button>
       </div>
     </div>
@@ -2043,6 +2073,60 @@ interface RealStatusAdvance {
   onAdvance: (next: string) => void;
 }
 
+/* ─── Working Paper seal (mobile) ─────────────────────────────────────────
+   Compact inline provenance chip: rotated-diamond outline + short hash + ✓.
+   Mirrors the desktop WorkSeal (client/src/components/v6/shared/WorkSeal.tsx)
+   honesty rule — renders ONLY from a REAL substrate `output_hash`. No hash →
+   no chip; this never renders an "unsigned" placeholder. Inline styles since
+   mobile doesn't load workspace.css. */
+function sealShortHash(value: string): string {
+  const clean = value.replace(/^sha256:/i, "");
+  return clean.length <= 12 ? clean : `${clean.slice(0, 6)}…${clean.slice(-4)}`;
+}
+
+function MobileSealChip({ hash, title }: { hash: string; title?: string }) {
+  return (
+    <span title={title || `Output hash ${hash} — computed by the substrate`} style={SEAL.chip}>
+      <span aria-hidden="true" style={SEAL.mark} />
+      <span className="mb-mono" style={SEAL.hash}>
+        {sealShortHash(hash)}
+        <span aria-hidden="true" style={SEAL.check}>✓</span>
+      </span>
+    </span>
+  );
+}
+
+const SEAL: Record<string, CSSProperties> = {
+  chip: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    maxWidth: "100%",
+  },
+  mark: {
+    width: 7,
+    height: 7,
+    flexShrink: 0,
+    border: "1.5px solid #2E8C5A",
+    transform: "rotate(45deg)",
+    borderRadius: 1,
+  },
+  hash: {
+    fontSize: 10.5,
+    color: "var(--mb-ink-3)",
+    letterSpacing: "0.01em",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 3,
+    whiteSpace: "nowrap",
+  },
+  check: {
+    color: "#2E8C5A",
+    fontSize: 10,
+    lineHeight: 1,
+  },
+};
+
 /* Maps a real DataRoomDocument to the mobile DocRowData shape, mirroring the
    desktop dataRoomDocToFileItem status→pill and file_type→icon logic. When an
    advance config is supplied and the document has a legal forward transition,
@@ -2086,6 +2170,15 @@ function realDocToRow(
     icon: <DocIcon kind={tone} />,
     docKind: tone,
     statusControl,
+    // Provenance: only a REAL hash from the model_executions join gets a seal.
+    seal: doc.model_output_hash
+      ? (
+          <MobileSealChip
+            hash={doc.model_output_hash}
+            title={`Output hash ${doc.model_output_hash} — computed by the substrate${doc.model_execution_type ? ` (${doc.model_execution_type})` : ""}`}
+          />
+        )
+      : undefined,
     onClick: canOpenDoc
       ? () => onOpenDoc(doc.name, meta, tone, doc.deliverable_id ?? undefined)
       : isArtifact
@@ -2223,11 +2316,11 @@ export function LibraryDocumentScreen({
     tone === "memo" ? "Memo" :
     "Locked";
   const readerLabel =
-    isData ? "SECURE FILE" :
-    tone === "signed" ? "EXECUTED RECORD" :
-    tone === "ai" ? "ANALYSIS" :
-    tone === "memo" ? "MEMO" :
-    "DRAFT REVIEW";
+    isData ? "Secure file" :
+    tone === "signed" ? "Executed record" :
+    tone === "ai" ? "Analysis" :
+    tone === "memo" ? "Memo" :
+    "Draft review";
   const readerMetaLabel =
     tone === "signed" ? "Immutable record" :
     isData ? "Data room file" :
@@ -2263,11 +2356,10 @@ export function LibraryDocumentScreen({
       <section style={S.readerPad}>
         <div style={S.readerSurface}>
           <div style={S.readerToolbar}>
-            <span className="mb-mono" style={S.readerKicker}>{readerLabel}</span>
+            <span style={S.readerToolbarLabel}>{readerLabel}</span>
             <span style={S.readerPageCount}>{isData ? "Data room" : tone === "signed" ? "Locked" : "Page 1 of 4"}</span>
           </div>
           <div style={S.readerPage}>
-            <div className="mb-mono" style={S.readerDocKicker}>BIG FAKE DEAL</div>
             <h2 style={S.readerDocTitle}>{title}</h2>
             {isData ? (
               <div style={S.dataPreviewGrid}>
@@ -2291,7 +2383,7 @@ export function LibraryDocumentScreen({
                     : "Review the economics, diligence window, and open questions before sending. The sections that need attention are already marked."}
                 </p>
                 <div style={S.readerCallout}>
-                  <span className="mb-mono" style={S.readerKicker}>{tone === "signed" ? "AUDIT NOTE" : "YULIA NOTE"}</span>
+                  <span style={S.readerCalloutLabel}>{tone === "signed" ? "Audit note" : "Yulia note"}</span>
                   <p>
                     {tone === "signed"
                       ? "Executed copies are read-only. Sharing changes access, not the underlying file."
@@ -2324,6 +2416,26 @@ interface RealDeliverable {
   slug?: string;
   version_number?: number | null;
   updated_at?: string;
+  completed_at?: string | null;
+  /** Snapshot of the canvas/model state the deliverable was generated from.
+   *  May carry the substrate `outputHash` for the Working Paper seal. */
+  generated_from_snapshot?: unknown;
+}
+
+/* Probes a loaded deliverable for a REAL substrate output hash — first the
+   generation snapshot, then the content payload. Returns null when absent
+   (most deliverables today); the seal only ever renders from a real hash. */
+function probeDeliverableOutputHash(doc: RealDeliverable | null): string | null {
+  if (!doc) return null;
+  const snapshot = doc.generated_from_snapshot as Record<string, unknown> | null | undefined;
+  if (snapshot && typeof snapshot === "object" && typeof snapshot.outputHash === "string" && snapshot.outputHash) {
+    return snapshot.outputHash;
+  }
+  const content = doc.content as Record<string, unknown> | null | undefined;
+  if (content && typeof content === "object" && typeof content.outputHash === "string" && content.outputHash) {
+    return content.outputHash;
+  }
+  return null;
 }
 
 /* REAL deliverable reader — mobile parity with desktop DocView.
@@ -2404,6 +2516,14 @@ function RealDocumentReader({
         .filter(Boolean).join(" · ")
     : fallbackMeta;
 
+  // Working Paper: a quiet completion record once the deliverable is done —
+  // version + when it completed, upgraded with the seal chip if the payload
+  // ever carries a real substrate output hash (absent on most today).
+  const outputHash = probeDeliverableOutputHash(doc);
+  const completedLine = doc && status === "complete"
+    ? [`v${doc.version_number || 1}`, doc.completed_at ? `completed ${fmtRelativeShort(doc.completed_at)}` : "completed"].join(" · ")
+    : null;
+
   // Native share sheet when available; clipboard copy (with an inline
   // confirmation) everywhere else. The doc URL is the current hash route, so
   // location.href round-trips back into this reader.
@@ -2463,7 +2583,14 @@ function RealDocumentReader({
         <div style={S.readerSurface}>
           <div style={S.readerToolbar}>
             <span style={S.readerToolbarLabel}>{formatRealStatus(docType)}</span>
-            <span style={S.readerPageCount}>{isGenerating ? "Generating" : "Live"}</span>
+            {completedLine ? (
+              <span style={S.readerCompletedWrap}>
+                {outputHash && <MobileSealChip hash={outputHash} />}
+                <span className="mb-mono" style={S.readerCompletedLine}>{completedLine}</span>
+              </span>
+            ) : (
+              <span style={S.readerPageCount}>{isGenerating ? "Generating" : "Live"}</span>
+            )}
           </div>
           <div style={S.readerPage}>
             {loading && !doc ? (
@@ -3387,6 +3514,7 @@ function DocRow({ row, last, showChevron = false }: { row: DocRowData; last: boo
           {row.stage === "data-room" && <span style={S.stageTag}>Data room</span>}
           <span style={S.rowMeta}>{row.meta}</span>
         </div>
+        {row.seal && <div style={{ marginTop: 4 }}>{row.seal}</div>}
       </div>
       <span style={S.rowTrailing}>
         {typeof row.pill === "string" ? <span style={S.actionPill}>{row.pill}</span> : row.pill}
@@ -4319,13 +4447,15 @@ const S: Record<string, CSSProperties> = {
     placeItems: "center",
     flexShrink: 0,
   },
+  // Floating chrome controls are 44×44 (Apple HIG minimum tap target) — the
+  // upload control is a primary write action, so no sub-44 hit areas here.
   floatBack: {
     position: "absolute",
-    top: "calc(env(safe-area-inset-top, 44px) + 16px)",
-    left: 16,
+    top: "calc(env(safe-area-inset-top, 44px) + 12px)",
+    left: 14,
     zIndex: 10,
-    width: 32,
-    height: 32,
+    width: 44,
+    height: 44,
     borderRadius: "50%",
     background: "rgba(255,255,255,0.82)",
     backdropFilter: "blur(10px)",
@@ -4338,11 +4468,11 @@ const S: Record<string, CSSProperties> = {
   },
   floatShare: {
     position: "absolute",
-    top: "calc(env(safe-area-inset-top, 44px) + 16px)",
-    right: 16,
+    top: "calc(env(safe-area-inset-top, 44px) + 12px)",
+    right: 14,
     zIndex: 10,
-    width: 32,
-    height: 32,
+    width: 44,
+    height: 44,
     borderRadius: "50%",
     background: "rgba(255,255,255,0.82)",
     backdropFilter: "blur(10px)",
@@ -4355,12 +4485,12 @@ const S: Record<string, CSSProperties> = {
   },
   floatShareLink: {
     position: "absolute",
-    top: "calc(env(safe-area-inset-top, 44px) + 16px)",
-    right: 56,
+    top: "calc(env(safe-area-inset-top, 44px) + 12px)",
+    right: 66,
     zIndex: 10,
-    minWidth: 32,
-    height: 32,
-    padding: "0 6px",
+    minWidth: 44,
+    height: 44,
+    padding: "0 8px",
     borderRadius: 999,
     background: "rgba(255,255,255,0.82)",
     backdropFilter: "blur(10px)",
@@ -4662,8 +4792,13 @@ const S: Record<string, CSSProperties> = {
   roomCategoryPad: {
     padding: "0 22px 12px",
   },
-  roomCategoryEyebrow: {
+  // Visible sentence-case rail label (info-bearing — names what the chips
+  // navigate; replaces the killed caps eyebrow).
+  roomCategoryHeading: {
     padding: "0 2px 7px",
+    fontSize: 12,
+    fontWeight: 600,
+    color: "var(--mb-ink-3)",
   },
   roomCategoryRail: {
     display: "flex",
@@ -4747,7 +4882,8 @@ const S: Record<string, CSSProperties> = {
     flexShrink: 0,
     border: "none",
     borderRadius: 999,
-    padding: "9px 14px",
+    minHeight: 44,
+    padding: "0 16px",
     background: "var(--mb-ink)",
     color: "#fff",
     fontSize: 13,
@@ -4780,7 +4916,8 @@ const S: Record<string, CSSProperties> = {
   fileToRoomButton: {
     border: "none",
     borderRadius: 999,
-    padding: "7px 12px",
+    minHeight: 44,
+    padding: "0 14px",
     background: "var(--mb-accent-soft)",
     color: "var(--mb-accent-ink)",
     fontSize: 12,
@@ -4812,7 +4949,8 @@ const S: Record<string, CSSProperties> = {
   statusAdvanceButton: {
     border: "none",
     borderRadius: 999,
-    padding: "6px 12px",
+    minHeight: 44,
+    padding: "0 14px",
     background: "var(--mb-accent-soft)",
     color: "var(--mb-accent-ink)",
     fontSize: 11.5,
@@ -4922,15 +5060,24 @@ const S: Record<string, CSSProperties> = {
     justifyContent: "space-between",
     borderBottom: "0.5px solid var(--mb-line-2)",
   },
-  readerKicker: {
-    fontSize: 10,
-    fontWeight: 700,
-    letterSpacing: "0.12em",
-    color: "var(--mb-accent-ink)",
-  },
   readerPageCount: {
     fontSize: 12.5,
     color: "var(--mb-ink-3)",
+  },
+  // Quiet completion record in the real reader toolbar ("v3 · completed 2 hr
+  // ago"), optionally led by the Working Paper seal chip when a real output
+  // hash exists on the payload.
+  readerCompletedWrap: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 8,
+    minWidth: 0,
+    flexShrink: 0,
+  },
+  readerCompletedLine: {
+    fontSize: 10.5,
+    color: "var(--mb-ink-3)",
+    whiteSpace: "nowrap",
   },
   // Sentence-case toolbar label for the real reader (replaces the caps-mono
   // kicker the eyebrow kill rule silently hid).
@@ -4945,7 +5092,7 @@ const S: Record<string, CSSProperties> = {
   // Inline confirmation under the wired Share control.
   shareCopiedPill: {
     position: "absolute",
-    top: "calc(env(safe-area-inset-top, 44px) + 54px)",
+    top: "calc(env(safe-area-inset-top, 44px) + 62px)",
     right: 16,
     zIndex: 10,
     padding: "6px 12px",
@@ -4964,12 +5111,6 @@ const S: Record<string, CSSProperties> = {
     background: "#fff",
     boxShadow: "0 10px 30px -24px rgba(26,34,51,0.36)",
   },
-  readerDocKicker: {
-    fontSize: 10,
-    fontWeight: 700,
-    letterSpacing: "0.12em",
-    color: "var(--mb-ink-3)",
-  },
   readerDocTitle: {
     fontFamily: "var(--mb-font-display)",
     fontWeight: 800,
@@ -4977,7 +5118,7 @@ const S: Record<string, CSSProperties> = {
     lineHeight: 1.05,
     color: "var(--mb-ink)",
     letterSpacing: "-0.9px",
-    margin: "12px 0 16px",
+    margin: "0 0 16px",
     textWrap: "balance",
   },
   readerParagraph: {
@@ -4999,6 +5140,15 @@ const S: Record<string, CSSProperties> = {
     borderRadius: 14,
     background: "var(--mb-warn-soft)",
     color: "var(--mb-ink)",
+  },
+  // Visible sentence-case callout label (info-bearing — names whose note this
+  // is; replaces the caps-mono kicker).
+  readerCalloutLabel: {
+    display: "block",
+    fontSize: 12,
+    fontWeight: 600,
+    color: "var(--mb-ink-2)",
+    marginBottom: 4,
   },
   dataPreviewGrid: {
     display: "grid",
@@ -5091,8 +5241,7 @@ const SH: Record<string, CSSProperties> = {
     padding: "10px 16px calc(env(safe-area-inset-bottom, 0px) + 16px)",
   },
   grab: { width: 38, height: 4, borderRadius: 2, background: "var(--mb-ink-5)", margin: "0 auto 10px", flexShrink: 0 },
-  head: { display: "flex", alignItems: "flex-start", gap: 10, padding: "2px 6px 12px", flexShrink: 0 },
-  kicker: { fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", color: "var(--mb-ink-3)" },
+  head: { display: "flex", alignItems: "center", gap: 10, padding: "2px 6px 12px", flexShrink: 0 },
   title: {
     fontFamily: "var(--mb-font-display)", fontWeight: 800, fontSize: 20, letterSpacing: "-0.4px",
     color: "var(--mb-ink)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
@@ -5102,7 +5251,8 @@ const SH: Record<string, CSSProperties> = {
     background: "var(--mb-card-2)", display: "grid", placeItems: "center", cursor: "pointer",
   },
   scroll: { overflowY: "auto", WebkitOverflowScrolling: "touch", paddingBottom: 4 },
-  sectionEyebrow: { padding: "0 4px 8px" },
+  // Visible sentence-case section label (replaces the killed caps eyebrow).
+  sectionLabel: { padding: "0 4px 8px", fontSize: 12, fontWeight: 600, color: "var(--mb-ink-3)" },
   stateNote: {
     display: "flex", alignItems: "center", gap: 8, padding: "12px 14px",
     fontSize: 13, color: "var(--mb-ink-3)", fontWeight: 600,
@@ -5134,15 +5284,22 @@ const SH: Record<string, CSSProperties> = {
     fontSize: 11.5, color: "var(--mb-ink-3)", marginTop: 3,
     whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
   },
-  linkActions: { display: "inline-flex", alignItems: "center", gap: 6, flexShrink: 0 },
+  linkActions: { display: "inline-flex", alignItems: "center", gap: 8, flexShrink: 0 },
+  // ≥44px hit areas: the copy/revoke pair are the row's only tap targets and
+  // revoke is destructive — comfortable height + gap, plus a two-tap confirm.
   copyButton: {
-    border: "none", borderRadius: 999, padding: "6px 11px", background: "var(--mb-accent-soft)",
+    border: "none", borderRadius: 999, minHeight: 44, padding: "0 13px", background: "var(--mb-accent-soft)",
     color: "var(--mb-accent-ink)", fontSize: 12, fontWeight: 760, letterSpacing: "-0.1px",
     cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 5, whiteSpace: "nowrap",
   },
   revokeButton: {
-    border: "none", borderRadius: 999, width: 30, height: 30, background: "var(--mb-danger-soft)",
+    border: "none", borderRadius: 999, minWidth: 44, minHeight: 44, background: "var(--mb-danger-soft)",
     display: "grid", placeItems: "center", cursor: "pointer", flexShrink: 0,
+  },
+  revokeButtonArmed: {
+    border: "none", borderRadius: 999, minHeight: 44, padding: "0 13px", background: "var(--mb-danger-ink)",
+    color: "#fff", fontSize: 12, fontWeight: 760, letterSpacing: "-0.1px",
+    cursor: "pointer", display: "inline-flex", alignItems: "center", whiteSpace: "nowrap", flexShrink: 0,
   },
   createCard: { padding: "16px 16px 16px" },
   fieldLabel: {

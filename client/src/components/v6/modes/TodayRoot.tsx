@@ -55,7 +55,8 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   // DERIVE: the FIT score never hard-swaps — it settles via useDerivedDisplay
   // and flashes the one-shot .wk-tick when the skeleton resolves into data or
   // the fit changes. Empty string while loading = nothing animates from zero.
-  const fitDisplay = useDerivedDisplay(featured ? String(featured.fit) : "");
+  // Honesty gate: synthetic (id-hash) fits may order deals but never display.
+  const fitDisplay = useDerivedDisplay(featured && featured.fitIsReal ? String(featured.fit) : "");
   const todayRows = deals.today;             // pipeline rows (same as mobile)
   const intel = brief?.marketIntelligence ?? null;
   const recentFiles = workspace.deliverables.slice(0, 4);
@@ -91,13 +92,15 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
                   <span className="wk-masthead" style={{ display: "block", color: "var(--ink)", fontSize: 30, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{featured.name}</span>
                   <span style={{ display: "block", color: "var(--ink-3)", fontSize: "0.82rem", marginTop: 3 }}>{featured.sub}</span>
                 </span>
-                <span style={{ textAlign: "right", flexShrink: 0 }}>
-                  <span style={{ display: "block", fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--accent-strong)", fontSize: 32, lineHeight: 1 }}>
-                    {fitDisplay.text}
-                    <i className={`wk-tick${fitDisplay.justSettled ? " on" : ""}`} aria-hidden="true">✓</i>
+                {featured.fitIsReal && (
+                  <span style={{ textAlign: "right", flexShrink: 0 }}>
+                    <span style={{ display: "block", fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--accent-strong)", fontSize: 32, lineHeight: 1 }}>
+                      {fitDisplay.text}
+                      <i className={`wk-tick${fitDisplay.justSettled ? " on" : ""}`} aria-hidden="true">✓</i>
+                    </span>
+                    <span style={{ display: "block", fontSize: "0.66rem", color: "var(--ink-3)", fontWeight: 600 }}>Fit</span>
                   </span>
-                  <span style={{ display: "block", fontSize: "0.66rem", color: "var(--ink-3)", fontWeight: 600 }}>FIT</span>
-                </span>
+                )}
               </button>
               <div style={{ display: "flex", gap: 9, marginTop: "auto" }}>
                 <button className="wkbtn primary" type="button" onClick={() => openDeal(featured.rawId, featured.name)}>Open deal</button>

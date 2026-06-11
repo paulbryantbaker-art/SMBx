@@ -194,8 +194,8 @@ function LiveDealTeamScreen({
         <div style={T.heroMeta}>
           <span className="mb-mono" style={T.heroCount}>
             {team.loadingTeam && !team.owner
-              ? "LOADING…"
-              : `${memberCount} ${memberCount === 1 ? "PERSON" : "PEOPLE"}`}
+              ? "Loading…"
+              : `${memberCount} ${memberCount === 1 ? "person" : "people"}`}
           </span>
           <span style={T.heroDot} aria-hidden="true">·</span>
           <span style={T.heroRole}>{team.isOwner ? "You own it" : "Shared with you"}</span>
@@ -311,7 +311,7 @@ function DemoDealTeamScreen({
         <h1 style={T.h1}>Deal team</h1>
         <div style={T.heroSub}>{dealTitle}</div>
         <div style={T.heroMeta}>
-          <span className="mb-mono" style={T.heroCount}>{memberCount} PEOPLE</span>
+          <span className="mb-mono" style={T.heroCount}>{memberCount} people</span>
           <span style={T.heroDot} aria-hidden="true">·</span>
           <span style={T.heroRole}>You own it</span>
         </div>
@@ -319,7 +319,7 @@ function DemoDealTeamScreen({
 
       {/* Honest sample banner — this is demo data, not a live deal team. */}
       <div style={T.sampleBanner} role="note">
-        <span className="mb-mono" style={T.sampleBannerKicker}>SAMPLE MODE</span>
+        <span style={T.sampleBadge}>Sample</span>
         <span style={T.sampleBannerText}>
           Sample deal team. Sign in with a real deal for live collaboration — invite and messaging are inactive here.
         </span>
@@ -528,7 +528,6 @@ function TeamSection({ team, dealTitle }: { team: ReturnType<typeof useDealTeam>
 
       {team.loadingTeam && !team.owner && (
         <div className="mb-as-card" style={T.stateCard}>
-          <div className="mb-mono" style={T.stateKicker}>DEAL TEAM</div>
           <div style={T.stateTitle}>Loading team…</div>
           <div style={T.stateCopy}>Fetching the people on this deal.</div>
         </div>
@@ -578,7 +577,7 @@ function TeamSection({ team, dealTitle }: { team: ReturnType<typeof useDealTeam>
 
       {team.pendingInvitations.length > 0 && (
         <div style={{ marginTop: 18 }}>
-          <div className="mb-section-eyebrow" style={{ paddingLeft: 4, marginBottom: 8 }}>PENDING INVITATIONS</div>
+          <div style={T.subSectionLabel}>Pending invitations</div>
           <div style={T.memberList}>
             {team.pendingInvitations.map(inv => (
               <div key={inv.id} style={{ ...T.memberRow, opacity: 0.72 }}>
@@ -942,7 +941,6 @@ function MessagesSection({ team, currentUserEmail }: { team: ReturnType<typeof u
       <div style={T.chatScroll}>
         {team.loadingMessages && team.messages.length === 0 && (
           <div className="mb-as-card" style={T.stateCard}>
-            <div className="mb-mono" style={T.stateKicker}>DEAL DISCUSSION</div>
             <div style={T.stateTitle}>Loading messages…</div>
           </div>
         )}
@@ -1007,7 +1005,6 @@ function MessagesSection({ team, currentUserEmail }: { team: ReturnType<typeof u
             <div style={T.composeField}>
               {mentionQuery != null && mentionMatches.length > 0 && (
                 <div style={T.mentionMenu} role="listbox" aria-label="Mention a teammate">
-                  <div className="mb-mono" style={T.mentionMenuHead}>MENTION</div>
                   {mentionMatches.map((c) => (
                     <button
                       key={c.userId}
@@ -1171,7 +1168,7 @@ const T: Record<string, CSSProperties> = {
   },
   heroSub: { fontSize: 14, color: "var(--mb-ink-3)", marginTop: 4, textWrap: "balance" },
   heroMeta: { marginTop: 12, display: "flex", gap: 7, alignItems: "center", flexWrap: "wrap" },
-  heroCount: { fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "var(--mb-ink-2)" },
+  heroCount: { fontSize: 12, fontWeight: 600, color: "var(--mb-ink-2)" },
   heroDot: { color: "var(--mb-ink-4)" },
   heroRole: { fontSize: 12, color: "var(--mb-ink-3)" },
 
@@ -1198,7 +1195,6 @@ const T: Record<string, CSSProperties> = {
     background: "var(--mb-accent-soft)", color: "var(--mb-accent-ink)",
     display: "grid", placeItems: "center", marginBottom: 14,
   },
-  stateKicker: { fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", color: "var(--mb-ink-3)", marginBottom: 8 },
   stateTitle: {
     fontFamily: "var(--mb-font-display)", fontWeight: 800, fontSize: 19,
     letterSpacing: "-0.4px", lineHeight: 1.15, color: "var(--mb-ink)",
@@ -1292,10 +1288,14 @@ const T: Record<string, CSSProperties> = {
   },
   roleDot: { width: 5, height: 5, borderRadius: "50%", flexShrink: 0 },
   memberActions: { gridColumn: "1 / -1", display: "flex", gap: 8, justifyContent: "flex-end" },
+  // Destructive / manage controls — ≥44px touch targets (was 34px).
   iconBtn: {
-    width: 34, height: 34, borderRadius: 10, border: "none",
+    width: 44, height: 44, borderRadius: 12, border: "none",
     background: "var(--mb-card-2)", display: "grid", placeItems: "center", cursor: "pointer",
+    WebkitTapHighlightColor: "transparent",
   },
+  // Visible sentence-case section label (replaces the hidden eyebrow class).
+  subSectionLabel: { fontSize: 12, fontWeight: 600, color: "var(--mb-ink-3)", paddingLeft: 4, marginBottom: 8 },
   editRow: {
     gridColumn: "1 / -1", display: "flex", gap: 10, marginTop: 2,
     paddingTop: 12, borderTop: "0.5px solid var(--mb-line-2)",
@@ -1366,7 +1366,6 @@ const T: Record<string, CSSProperties> = {
     borderRadius: 16, boxShadow: "0 16px 40px -16px rgba(25,24,19,0.4), inset 0 0 0 0.5px var(--mb-line-2)",
     padding: 6, zIndex: 30, display: "flex", flexDirection: "column", gap: 2,
   },
-  mentionMenuHead: { fontSize: 9.5, letterSpacing: "0.08em", fontWeight: 700, color: "var(--mb-ink-3)", padding: "4px 8px 2px" },
   mentionItem: {
     border: "none", background: "transparent", cursor: "pointer",
     display: "flex", alignItems: "center", gap: 9, padding: "8px 9px", borderRadius: 11, width: "100%",
@@ -1393,6 +1392,10 @@ const T: Record<string, CSSProperties> = {
     background: "var(--mb-card-2)", boxShadow: "inset 0 0 0 0.5px var(--mb-line-2)",
     display: "flex", flexDirection: "column", gap: 4,
   },
-  sampleBannerKicker: { fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: "var(--mb-ink-3)" },
+  sampleBadge: {
+    alignSelf: "flex-start", padding: "3px 9px", borderRadius: 999,
+    background: "var(--mb-warn-soft)", color: "var(--mb-warn-ink)",
+    fontSize: 11, fontWeight: 700,
+  },
   sampleBannerText: { fontSize: 12.5, lineHeight: 1.4, color: "var(--mb-ink-2)", textWrap: "pretty" },
 };

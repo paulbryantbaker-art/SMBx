@@ -108,7 +108,6 @@ function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut, modelPrefe
 function Placeholder({ label, note }: { label: string; note?: string }) {
   return (
     <div className="wk-content m-fade-up" style={{ maxWidth: 720 }}>
-      <div className="mono" style={{ fontSize: 9.5, color: "var(--ink-2)", letterSpacing: "0.14em", fontWeight: 600 }}>STUB</div>
       <h1 style={{
         fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 24,
         letterSpacing: "-0.025em", margin: "4px 0 8px", color: "var(--ink)",

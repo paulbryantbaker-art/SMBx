@@ -12,7 +12,10 @@ export interface PickRowProps {
   rank: number;
   name: string;
   sub: string;
-  fit: number;
+  /** Fit numeral — pass null when the deal has no REAL (composite- or
+   *  multiple-backed) fit; the numeral block is omitted entirely rather
+   *  than showing a fabricated score. */
+  fit: number | null;
   kind: Verdict;
   last?: boolean;
   onTap: () => void;
@@ -49,10 +52,12 @@ export function PickRow({ rank, name, sub, fit, kind, last, onTap }: PickRowProp
         <div style={S.pickName}>{name}</div>
         <div style={S.pickSub}>{sub}</div>
       </div>
-      <div style={S.fitWrap}>
-        <div className="mb-mono" style={{ fontSize: 18, fontWeight: 700, color: fitColor, letterSpacing: "-0.5px" }}>{fit}</div>
-        <div style={S.fitLabel}>FIT</div>
-      </div>
+      {typeof fit === "number" && (
+        <div style={S.fitWrap}>
+          <div className="mb-mono" style={{ fontSize: 18, fontWeight: 700, color: fitColor, letterSpacing: "-0.5px" }}>{fit}</div>
+          <div style={S.fitLabel}>FIT</div>
+        </div>
+      )}
     </div>
   );
 }

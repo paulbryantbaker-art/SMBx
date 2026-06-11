@@ -7,10 +7,12 @@
  * primary deal (mirrors desktop's pickActionDeal) via onRunDealAnalysis →
  * MobileAnalysisScreen. With no deals, it hands off to Yulia in chat.
  */
-import { useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { GlassTopBar, LargeTitle } from "../TopBar";
 import { MobileIcon } from "../icons";
+import { DEV_AUTH_BYPASS, authHeaders } from "../../../../hooks/useAuth";
 import type { MobilePipelineRow } from "../../../../hooks/useMobileDeals";
+import type { WorkspaceDeliverable } from "../../../../hooks/useV6WorkspaceData";
 
 interface CatalogItem {
   id: string;
@@ -45,6 +47,91 @@ const CATALOG: CatalogItem[] = [
 
 const STARTER_IDS = ["valuation", "qoe", "comps", "working_capital"];
 
+/* ─── Recently run (real deliverables) ────────────────────────────────────
+   Saved analyses were unreachable cold from this hub — the only paths were
+   re-running or digging through Files. This mirrors LibrarySearch's cached
+   workspace fetch (same endpoint, same honesty rules: real data or nothing,
+   never samples for a signed-in user) with a module-level cache so repeated
+   hub visits in a session don't re-hit the network. */
+
+let recentDeliverablesCache: { promise: Promise<WorkspaceDeliverable[]>; at: number } | null = null;
+
+function fetchAllDeliverables(): Promise<WorkspaceDeliverable[]> {
+  const now = Date.now();
+  if (recentDeliverablesCache && now - recentDeliverablesCache.at < 30_000) {
+    return recentDeliverablesCache.promise;
+  }
+  const promise = (async (): Promise<WorkspaceDeliverable[]> => {
+    const res = await fetch("/api/deliverables/all", { headers: authHeaders() });
+    if (!res.ok) throw new Error(`deliverables ${res.status}`);
+    const json = await res.json();
+    return Array.isArray(json) ? json : [];
+  })();
+  recentDeliverablesCache = { promise, at: now };
+  promise.catch(() => {
+    if (recentDeliverablesCache?.promise === promise) recentDeliverablesCache = null;
+  });
+  return promise;
+}
+
+// Mirrors desktop DealView's isAnalysisDeliverable split (artifact_kind /
+// folder_category first, then the slug+name keyword heuristic).
+const ANALYSIS_KEYWORDS = /valuation|dcf|lbo|capital[-\s]?structure|working[-\s]?capital|\bqoe\b|quality[-\s]?of[-\s]?earnings|sensitivity|earnout|\bsba\b|dscr|comps?\b|scorecard|\bmodel\b|recast|tax[-\s]?impact|financial[-\s]?spread|cap[-\s]?table|covenant|red[-\s]?flag|risk/i;
+
+function isAnalysisDeliverable(d: WorkspaceDeliverable): boolean {
+  if (d.analysis_run_id) return true;
+  if (d.artifact_kind && /model|analysis|snapshot|comparison/i.test(d.artifact_kind)) return true;
+  if (d.folder_category && /model|analys/i.test(d.folder_category)) return true;
+  return ANALYSIS_KEYWORDS.test(`${d.slug || ""} ${d.name || ""}`);
+}
+
+function deliverableWhen(d: WorkspaceDeliverable): string {
+  return d.updated_at || d.completed_at || d.created_at || "";
+}
+
+function fmtRelativeShort(iso: string): string {
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return "";
+  const min = Math.floor((Date.now() - then) / 60000);
+  if (min < 1) return "just now";
+  if (min < 60) return `${min} min ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr} hr ago`;
+  const day = Math.floor(hr / 24);
+  if (day < 30) return `${day}d ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
+function useRecentAnalyses(): { real: boolean; loaded: boolean; analyses: WorkspaceDeliverable[] } {
+  // Real signed-in user only (token present, not the dev-bypass preview) —
+  // anon/dev keep the catalog-only hub rather than fake "recent" rows.
+  const [real] = useState(() => !DEV_AUTH_BYPASS && Boolean(authHeaders().Authorization));
+  const [state, setState] = useState<{ loaded: boolean; analyses: WorkspaceDeliverable[] }>({
+    loaded: false,
+    analyses: [],
+  });
+  useEffect(() => {
+    if (!real) return;
+    let cancelled = false;
+    fetchAllDeliverables()
+      .then(all => {
+        if (cancelled) return;
+        const analyses = all
+          .filter(isAnalysisDeliverable)
+          .sort((a, b) => new Date(deliverableWhen(b)).getTime() - new Date(deliverableWhen(a)).getTime())
+          .slice(0, 5);
+        setState({ loaded: true, analyses });
+      })
+      .catch(() => {
+        if (!cancelled) setState({ loaded: true, analyses: [] });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [real]);
+  return { real, ...state };
+}
+
 export interface AnalysesRunInput {
   dealId: string;
   dealTitle: string;
@@ -65,10 +152,14 @@ interface AnalysesHubProps {
   deals: MobilePipelineRow[] | null;
   onRunDealAnalysis: (input: AnalysesRunInput) => void;
   onAskYulia: (prompt: string) => void;
+  /** Opens a saved deliverable in the real document reader — same handler the
+   *  Files surfaces use (onOpenLibraryDoc in V6Mobile). */
+  onOpenDeliverable: (title?: string, meta?: string, kind?: string, deliverableId?: number) => void;
 }
 
-export function MobileAnalysesScreen({ initials, onAvatarClick, onSearch, onNotif, notifCount, deals, onRunDealAnalysis, onAskYulia }: AnalysesHubProps) {
+export function MobileAnalysesScreen({ initials, onAvatarClick, onSearch, onNotif, notifCount, deals, onRunDealAnalysis, onAskYulia, onOpenDeliverable }: AnalysesHubProps) {
   const [query, setQuery] = useState("");
+  const recent = useRecentAnalyses();
   const primaryDeal = deals && deals.length > 0 ? deals[0] : null;
 
   const launch = (item: CatalogItem) => {
@@ -123,7 +214,7 @@ export function MobileAnalysesScreen({ initials, onAvatarClick, onSearch, onNoti
       {/* Start here */}
       {!q && (
         <div style={{ padding: "10px 16px 0" }}>
-          <div className="mb-section-eyebrow" style={{ padding: "0 6px 8px" }}>START HERE</div>
+          <div style={{ ...A.sectionLabel, padding: "0 6px 8px" }}>Start here</div>
           <div style={A.starterRow} className="mb-hide-scroll">
             {starters.map(t => (
               <button key={t.id} type="button" onClick={() => launch(t)} style={A.starterChip}>
@@ -134,11 +225,53 @@ export function MobileAnalysesScreen({ initials, onAvatarClick, onSearch, onNoti
         </div>
       )}
 
+      {/* Recently run — real deliverables, tap to reopen in the reader. */}
+      {!q && recent.real && recent.loaded && (
+        <div style={{ padding: "18px 16px 0" }}>
+          <div style={{ ...A.sectionLabel, padding: "0 6px 4px" }}>Recently run</div>
+          {recent.analyses.length === 0 ? (
+            <div className="mb-as-card" style={A.recentEmpty}>
+              No analyses yet. Run your first one below.
+            </div>
+          ) : (
+            <div className="mb-as-card" style={{ padding: "6px 0" }}>
+              {recent.analyses.map((d, i) => {
+                const name = d.name || "Analysis";
+                const when = fmtRelativeShort(deliverableWhen(d));
+                const meta = [
+                  d.deal_name,
+                  d.status && d.status !== "complete" ? d.status.replace(/[-_]/g, " ") : null,
+                  when,
+                ].filter(Boolean).join(" · ");
+                return (
+                  <button
+                    key={d.id}
+                    type="button"
+                    onClick={() => onOpenDeliverable(name, meta, "ai", d.id)}
+                    aria-label={`Open ${name}`}
+                    style={{ ...A.row, borderBottom: i === recent.analyses.length - 1 ? "none" : "0.5px solid var(--mb-line)" }}
+                  >
+                    <span style={A.rowIcon}><MobileIcon name="brief" c="var(--mb-accent-ink)" size={16} /></span>
+                    <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                      <span style={{ ...A.rowName, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{name}</span>
+                      <span style={{ ...A.rowSub, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{meta}</span>
+                    </span>
+                    <span style={{ transform: "rotate(180deg)", display: "inline-flex", color: "var(--mb-ink-4)" }} aria-hidden="true">
+                      <MobileIcon name="back" size={11} c="var(--mb-ink-4)" />
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Full catalog */}
       <div style={{ padding: "18px 16px 0" }}>
-        <div className="mb-section-eyebrow" style={{ padding: "0 6px 4px", display: "flex", justifyContent: "space-between" }}>
-          <span>ALL ANALYSES</span>
-          <span className="mb-mono" style={{ color: "var(--mb-ink-4)" }}>{filtered.length}/{CATALOG.length}</span>
+        <div style={{ ...A.sectionLabel, padding: "0 6px 4px", display: "flex", justifyContent: "space-between" }}>
+          <span>All analyses</span>
+          <span className="mb-mono" style={{ color: "var(--mb-ink-4)", fontSize: 11 }}>{filtered.length}/{CATALOG.length}</span>
         </div>
         <div className="mb-as-card" style={{ padding: "6px 0" }}>
           {filtered.map((t, i) => (
@@ -179,6 +312,9 @@ export function MobileAnalysesScreen({ initials, onAvatarClick, onSearch, onNoti
 
 const A: Record<string, CSSProperties> = {
   lede: { fontSize: 14, lineHeight: 1.45, color: "var(--mb-ink-2)" },
+  // Visible sentence-case section label (replaces the hidden eyebrow class).
+  sectionLabel: { fontSize: 12, fontWeight: 600, color: "var(--mb-ink-3)" },
+  recentEmpty: { padding: "16px 18px", fontSize: 13.5, lineHeight: 1.45, color: "var(--mb-ink-3)" },
   search: {
     display: "flex", alignItems: "center", gap: 8, padding: "11px 14px",
     background: "#fff", border: "0.5px solid var(--mb-line-2)", borderRadius: 14,

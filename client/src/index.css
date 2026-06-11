@@ -61,8 +61,14 @@ html, body { margin: 0; padding: 0; }
    On mobile the body MUST scroll naturally — that's what triggers iOS
    Safari's native chrome auto-hide + page-bleed behavior. PWA standalone
    re-locks body via the html.mobile-pwa-active rules below. See
-   memory/architecture_mobile_scroll_container.md. */
-@media (min-width: 768px) {
+   memory/architecture_mobile_scroll_container.md.
+
+   BREAKPOINT MUST MATCH useIsMobile (≤900px mounts V6Mobile). This rule
+   previously fired at min-width:768px, which scroll-locked the document
+   while the mobile shell (which relies on natural body scroll in Safari-tab
+   mode) was mounted at 768–900px — the iPad "dead band". Desktop shell
+   only exists above 900px, so the lock starts at 901px. */
+@media (min-width: 901px) {
   html, body { height: 100%; overflow: hidden; }
 }
 body {
@@ -112,8 +118,7 @@ button { font-family: inherit; cursor: pointer; }
 .top-work-meta,
 .module-work-meta,
 .mobile-root .mb-eyebrow,
-.mobile-root .mb-section-eyebrow,
-.mobile-root .mb-verdict-pill {
+.mobile-root .mb-section-eyebrow {
   display: none !important;
 }
 
@@ -969,18 +974,20 @@ input[type="range"].m-slider::-moz-range-thumb {
      Files live under client/public/textures/. Apply with:
        background-image: linear-gradient(<verdict-tint>), url(var(--mb-tex-*));
      Verdict tints are inline in the consuming component since they vary per
-     surface (hero vs artifact vs editorial). */
-  --mb-tex-pursue:   url("/textures/texture-pursue.png?v=20260503");
-  --mb-tex-watch:    url("/textures/texture-watch.png?v=20260503");
-  --mb-tex-pass:     url("/textures/texture-pass.png?v=20260503");
-  --mb-tex-baseline: url("/textures/texture-baseline.png?v=20260503");
-  --mb-tex-buyers:   url("/textures/texture-buyers.png?v=20260503");
-  --mb-tex-sunrise:  url("/textures/texture-sunrise.png?v=20260503");
+     surface (hero vs artifact vs editorial).
+     2026-06-11: art ships as ~1125px JPEG (q72, ≤250KB each) — the original
+     ~2MB PNG masters stay alongside in client/public/textures/. */
+  --mb-tex-pursue:   url("/textures/texture-pursue.jpg?v=20260611");
+  --mb-tex-watch:    url("/textures/texture-watch.jpg?v=20260611");
+  --mb-tex-pass:     url("/textures/texture-pass.jpg?v=20260611");
+  --mb-tex-baseline: url("/textures/texture-baseline.jpg?v=20260611");
+  --mb-tex-buyers:   url("/textures/texture-buyers.jpg?v=20260611");
+  --mb-tex-sunrise:  url("/textures/texture-sunrise.jpg?v=20260611");
   /* Spare textures (2026-05-03 drop) — available for new heroes / variants. */
-  --mb-tex-gold-marble:    url("/textures/texture-gold-marble.png?v=20260503");
-  --mb-tex-mint-waves:     url("/textures/texture-mint-waves.png?v=20260503");
-  --mb-tex-aqua-cloud:     url("/textures/texture-aqua-cloud.png?v=20260503");
-  --mb-tex-sage-botanical: url("/textures/texture-sage-botanical.png?v=20260503");
+  --mb-tex-gold-marble:    url("/textures/texture-gold-marble.jpg?v=20260611");
+  --mb-tex-mint-waves:     url("/textures/texture-mint-waves.jpg?v=20260611");
+  --mb-tex-aqua-cloud:     url("/textures/texture-aqua-cloud.jpg?v=20260611");
+  --mb-tex-sage-botanical: url("/textures/texture-sage-botanical.jpg?v=20260611");
 
   /* Verdict semantics */
   --mb-verdict-pursue:      #6FB89A;
@@ -1062,31 +1069,9 @@ input[type="range"].m-slider::-moz-range-thumb {
     0 24px 48px -24px rgba(20, 28, 44, 0.28);
 }
 
-/* Verdict pill */
-.mobile-root .mb-verdict-pill {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-family: var(--mb-font-mono);
-  font-size: 10.5px; font-weight: 700;
-  letter-spacing: 0.1em;
-  padding: 3px 9px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.20);
-  color: #fff;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-.mobile-root .mb-verdict-pill.on-light {
-  background: var(--mb-verdict-pursue-soft);
-  color: var(--mb-verdict-pursue-ink);
-}
-.mobile-root .mb-verdict-pill.warn {
-  background: var(--mb-warn-soft);
-  color: var(--mb-warn-ink);
-}
-.mobile-root .mb-verdict-pill.danger {
-  background: var(--mb-danger-soft);
-  color: var(--mb-danger-ink);
-}
+/* Verdict pill CSS removed 2026-06-11 — VerdictPill.tsx was rebuilt with
+   inline styles (see its header comment); the .mb-verdict-pill class has
+   zero consumers. */
 
 /* Section headers — App Store style.
    Tightened to match Apple's editorial cards: smaller eyebrow with more
@@ -1187,8 +1172,11 @@ input[type="range"].m-slider::-moz-range-thumb {
    Locks html/body and sizes body to --vvh from JS visualViewport tracking,
    gated to mobile + installed PWA. Per architecture_ios_pwa_pill.md.
    The --vvh tracker effect lives in V6Mobile root mount.
+   Width gate matches useIsMobile's 900px breakpoint (was 767px, which left
+   768–900px PWA standalone without the body lock that .mobile-root's
+   absolute scroll-container architecture depends on).
 */
-@media (max-width: 767px) and (display-mode: standalone) {
+@media (max-width: 900px) and (display-mode: standalone) {
   html.mobile-pwa-active {
     height: 100dvh;
     overflow: hidden;

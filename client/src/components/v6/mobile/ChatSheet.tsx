@@ -10,7 +10,7 @@
    composer track keyboard height via JS visualViewport while the
    conversation scroll never moves with the keyboard. */
 
-import { useEffect, useLayoutEffect, useRef, useState, type ChangeEvent, type CSSProperties, type FormEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, type ChangeEvent, type CSSProperties, type FormEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import { MobileIcon } from "./icons";
 import { CHAT_COMPOSER_STYLES } from "./ChatStarterPill";
@@ -53,10 +53,28 @@ export function ChatSheet({ open, onClose, chat }: ChatSheetProps) {
     return () => vv.removeEventListener("resize", update);
   }, [open]);
 
-  // Scroll to bottom on new messages or open. toolTrace and paywallData are
-  // identity-stable per update, so they keep the ledger / paywall card in view.
+  // Scroll pinning: keep the newest content in view ONLY while the user is
+  // already reading the tail. Someone scrolled up through earlier messages
+  // must never be yanked back down by a streaming token.
+  const nearBottomRef = useRef(true);
+  const onConversationScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    nearBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+  };
+
+  // Opening the sheet always lands at the bottom (and re-arms pinning).
   useEffect(() => {
     if (!open) return;
+    nearBottomRef.current = true;
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [open]);
+
+  // Content growth (new messages, streaming tokens, trace, paywall) pins to
+  // the bottom only when the user is within ~120px of it.
+  useEffect(() => {
+    if (!open || !nearBottomRef.current) return;
     const el = scrollRef.current;
     if (!el) return;
     el.scrollTop = el.scrollHeight;
@@ -69,6 +87,23 @@ export function ChatSheet({ open, onClose, chat }: ChatSheetProps) {
     return () => clearTimeout(t);
   }, [open]);
 
+  // Streaming perf: build the settled message rows only when the thread
+  // itself changes. chat.thread is identity-stable across SSE token updates
+  // (V6Mobile maps it per-messages, not per-render), so per-token re-renders
+  // skip both this map and — via the memoized MessageRow — every settled row.
+  // The streaming tail renders separately below.
+  const messageRows = useMemo(
+    () => chat.thread.map((m, i) => (
+      <MessageRow
+        key={i}
+        message={m}
+        onConfirmStagedAction={chat.confirmStagedAction}
+        onCancelStagedAction={chat.cancelStagedAction}
+      />
+    )),
+    [chat.thread, chat.confirmStagedAction, chat.cancelStagedAction],
+  );
+
   if (!open) return null;
   if (typeof document === "undefined") return null;
 
@@ -79,6 +114,9 @@ export function ChatSheet({ open, onClose, chat }: ChatSheetProps) {
   const sendDraft = () => {
     const msg = draft.trim();
     if (!msg) return;
+    // Sending always re-arms bottom pinning — the user expects to see their
+    // own message and the reply, even if they had scrolled up.
+    nearBottomRef.current = true;
     chat.send(msg);
     setDraft("");
     setAttachment(null);
@@ -149,6 +187,7 @@ export function ChatSheet({ open, onClose, chat }: ChatSheetProps) {
       <div
         ref={scrollRef}
         className="mb-hide-scroll"
+        onScroll={onConversationScroll}
         style={{
           ...S.conversation,
           paddingBottom: `${72 + kbHeight + 16}px`,
@@ -158,14 +197,7 @@ export function ChatSheet({ open, onClose, chat }: ChatSheetProps) {
           <ChatEmpty onPick={(t) => { chat.send(t); }} />
         ) : (
           <>
-            {chat.thread.map((m, i) => (
-              <Message
-                key={i}
-                message={m}
-                onConfirmStagedAction={chat.confirmStagedAction}
-                onCancelStagedAction={chat.cancelStagedAction}
-              />
-            ))}
+            {messageRows}
             {chat.sending && (
               <Streaming text={chat.streamingText} tool={chat.activeTool} trace={chat.toolTrace} />
             )}
@@ -240,6 +272,9 @@ export function ChatSheet({ open, onClose, chat }: ChatSheetProps) {
             disabled={!draft.trim()}
             style={{
               ...CHAT_COMPOSER_STYLES.send,
+              // ≥44px touch target (shared style is 32px — matches the 44px
+              // upload affordance on the other end of the pill).
+              width: 44, height: 44,
               opacity: draft.trim() ? 1 : 0.4,
             }}
           >
@@ -286,6 +321,12 @@ function ChatEmpty({ onPick }: { onPick: (text: string) => void }) {
 }
 
 /* ─── Message bubble ────────────────────────────────────── */
+
+/* Memoized: settled rows must not re-render on every SSE streaming token.
+   Message objects and the staged-action callbacks are referentially stable
+   across token updates (see the thread useMemo in V6Mobile), so the default
+   shallow compare bails for the whole settled history. */
+const MessageRow = memo(Message);
 
 function Message({
   message,
@@ -623,7 +664,8 @@ const S: Record<string, CSSProperties> = {
   },
   attachRemove: {
     marginLeft: "auto",
-    width: 32, height: 32, flexShrink: 0,
+    width: 36, height: 36, flexShrink: 0,
+    padding: 0,
     border: "none", background: "transparent",
     borderRadius: "50%",
     display: "flex", alignItems: "center", justifyContent: "center",

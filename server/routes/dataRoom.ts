@@ -165,10 +165,23 @@ dataRoomRouter.get('/deals/:dealId/data-room', async (req, res) => {
       }
     }
 
+    // Living CIM id — share-link creation is anchored to the deal's living
+    // CIM. Latest completed CIM-family deliverable, owner-agnostic per deal.
+    const [livingCim] = await sql`
+      SELECT d.id
+      FROM deliverables d
+      JOIN menu_items m ON m.id = d.menu_item_id
+      WHERE d.deal_id = ${dealId} AND d.status = 'complete'
+        AND (m.slug ILIKE '%cim%' OR m.slug = 'sell-cim')
+      ORDER BY d.completed_at DESC NULLS LAST, d.created_at DESC
+      LIMIT 1
+    `.catch(() => [null]);
+
     return res.json({
       folders, documents, unfiledDeliverables,
       ndaRequired, ndaSigned,
       dealName: deal.business_name || undefined,
+      livingCimId: livingCim?.id ?? null,
     });
   } catch (err: any) {
     console.error('Data room error:', err.message);

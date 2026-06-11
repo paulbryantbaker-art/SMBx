@@ -53,6 +53,10 @@ export interface MobilePipelineRow {
   /** Fit score (composite/multiple-derived) — lets Today derive its hero
    *  from real rows instead of hardcoded sample copy. */
   fit?: number;
+  /** True when `fit` is backed by a real seven_factor_composite or a real
+   *  financials.multiple — display the numeral ONLY when true. Synthetic
+   *  (id-hash) fits may still ORDER deals but must never render. */
+  fitIsReal?: boolean;
   /** Headline money figure for hero surfaces, value-only (e.g. "$5.4M"). */
   metricValue?: string;
   /** Label for metricValue (e.g. "Revenue", "SDE"). */
@@ -75,6 +79,9 @@ export interface MobilePick {
   name: string;
   sub: string;
   fit: number;
+  /** True when `fit` is composite- or multiple-backed. Synthetic fits keep
+   *  ordering the picks but the numeral renders ONLY when this is true. */
+  fitIsReal: boolean;
   kind: Verdict;
 }
 
@@ -85,7 +92,14 @@ export interface MobileFeatured {
   sub: string;
   revLabel: string;  // "$5.4M revenue"
   fit: number;
+  /** True when `fit` is composite- or multiple-backed — the hero fit numeral
+   *  renders ONLY when true (synthetic fits never display). */
+  fitIsReal: boolean;
   verdict: Verdict;
+  /** Headline money figure for hero surfaces, value-only (e.g. "$5.4M"). */
+  metricValue?: string;
+  /** Label for metricValue (e.g. "Revenue", "SDE"). */
+  metricLabel?: string;
 }
 
 /** Every deal the user owns, tagged with its pipeline stage — for the full
@@ -180,6 +194,16 @@ function compositeFit(d: RawDeal): number | null {
   return null;
 }
 
+/** Whether fitScore(d) is backed by real data (composite or multiple) rather
+ *  than the synthetic id-hash fallback. Display chains must only render the
+ *  fit numeral when this is true — synthetic fits may still order lists. */
+function fitIsRealFor(d: RawDeal): boolean {
+  return (
+    typeof d.seven_factor_composite === "number" ||
+    typeof d.financials?.multiple === "number"
+  );
+}
+
 function buildSub(d: RawDeal): string {
   const sde   = fmtMoney(d.sde, "SDE");
   const rev   = fmtMoney(d.revenue, "rev");
@@ -210,11 +234,15 @@ function shape(deals: RawDeal[]): Omit<UseMobileDealsResult, "loading" | "loaded
   // gate-derived stage so the mobile Pipeline can group them like desktop.
   const all: MobileStageRow[] = deals.map(d => {
     const v = dealVerdict(d);
+    // Stage rows carry their financials in the right-aligned money stack, so
+    // the sub prefers industry/location meta over the SDE-led buildSub line
+    // (avoids printing SDE twice on one row).
+    const meta = [d.industry, d.location].filter(Boolean).join(" · ");
     return {
       id: `deal-${d.id}`,
       rawId: d.id,
       name: nameOf(d),
-      sub: buildSub(d),
+      sub: meta || buildSub(d),
       verdict: v,
       gate: d.current_gate || "B2",
       stageId: stageForGate(d.current_gate || "B2"),
@@ -249,6 +277,7 @@ function shape(deals: RawDeal[]): Omit<UseMobileDealsResult, "loading" | "loaded
       verdict: v,
       ...(isOpen ? {} : { price: priceWord(v) }),
       fit: fitScore(d),
+      fitIsReal: fitIsRealFor(d),
       ...(revValue
         ? { metricValue: revValue, metricLabel: "Revenue" }
         : sdeValue
@@ -285,11 +314,15 @@ function shape(deals: RawDeal[]): Omit<UseMobileDealsResult, "loading" | "loaded
     name: nameOf(d),
     sub: buildSub(d),
     fit,
+    fitIsReal: fitIsRealFor(d),
     kind: dealVerdict(d),
   }));
 
-  // Featured: highest-fit active deal for Pipeline's "NEW TODAY" hero.
+  // Featured: highest-fit active deal for Pipeline's "NEW TODAY" hero and
+  // Today's daily hero (the two surfaces share this exact object).
   const top = ranked[0]?.d ?? recent[0];
+  const topRev = top ? fmtMoneyValue(top.revenue) : null;
+  const topSde = top ? fmtMoneyValue(top.sde) : null;
   const featured: MobileFeatured | null = top
     ? {
         id: `deal-${top.id}`,
@@ -298,7 +331,13 @@ function shape(deals: RawDeal[]): Omit<UseMobileDealsResult, "loading" | "loaded
         sub: buildSub(top),
         revLabel: fmtMoney(top.revenue, "revenue") ?? fmtMoney(top.sde, "SDE") ?? "Active",
         fit: ranked[0]?.fit ?? fitScore(top),
+        fitIsReal: fitIsRealFor(top),
         verdict: dealVerdict(top),
+        ...(topRev
+          ? { metricValue: topRev, metricLabel: "Revenue" }
+          : topSde
+            ? { metricValue: topSde, metricLabel: "SDE" }
+            : {}),
       }
     : null;
 

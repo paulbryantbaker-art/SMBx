@@ -35,6 +35,9 @@ interface Pick {
   name: string;
   sub: string;
   fit: number;
+  /** From MobilePick: false when the fit is a synthetic ranking score (no
+   *  composite/multiple). Sample picks omit it (clearly-labeled samples). */
+  fitIsReal?: boolean;
   kind: Verdict;
 }
 
@@ -171,7 +174,9 @@ export function BriefDigestSection({
               rank={p.rank}
               name={p.name}
               sub={p.sub}
-              fit={p.fit}
+              // Fit honesty: synthetic (id-hash/ranking-only) fits never
+              // render — null omits the numeral. Samples keep theirs.
+              fit={p.fitIsReal === false ? null : p.fit}
               kind={p.kind}
               last={i === PICKS.length - 1}
               onTap={() => onOpenDeal(p.id, p.name)}

@@ -79,6 +79,17 @@ const SAMPLE_FEATURED: FeaturedDef = {
   verdict: "pursue",
 };
 
+/** Compact money for ledger columns/aggregates — "$2.4M" / "$760K" / "$900".
+ *  Returns null for absent/zero values so callers can omit the line entirely
+ *  (never an em-dash, never a fabricated zero). */
+function fmtM(cents: number | null | undefined): string | null {
+  if (typeof cents !== "number" || cents <= 0) return null;
+  const d = cents / 100;
+  if (d >= 1_000_000) return `$${(d / 1_000_000).toFixed(1)}M`;
+  if (d >= 1_000) return `$${Math.round(d / 1_000)}K`;
+  return `$${Math.round(d)}`;
+}
+
 export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, onOpenDealsList, onAvatarClick, onSearch, onNotif, notifCount, userFeatured, userPicks, userAll, realEmpty }: PipelineProps) {
   // Sample content is ONLY for anon and the dev-bypass preview. A real
   // signed-in user never sees "Big Fake Deal" or fabricated chip counts —
@@ -86,6 +97,11 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
   const showSamples = isAnon || DEV_AUTH_BYPASS;
   const isRealFeatured = !showSamples && !!userFeatured;
   const FEATURED: FeaturedDef = userFeatured ?? SAMPLE_FEATURED;
+  // Fit honesty: a real user's featured fit renders ONLY when it's backed by
+  // a real composite/multiple (fitIsReal). Synthetic fits may pick which deal
+  // is featured, but the numeral never displays. Sample hero keeps its
+  // clearly-labeled sample fit.
+  const showFeaturedFit = !isRealFeatured || (userFeatured?.fitIsReal ?? false);
   const [activeChip, setActiveChip] = useState<DealStage>("watching");
   const { isWatched, toggle } = useWatchlist();
   const filtered: SampleDeal[] = dealsByStage(activeChip);
@@ -184,10 +200,12 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
                   ("FIT 92 · PURSUE") that the app-wide micro-label kill
                   rule display:none'd. Plain mono numeral + tonal pill. */}
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                <span style={P.fitNum}>
-                  {FEATURED.fit}
-                  <span style={P.fitWord}> fit</span>
-                </span>
+                {showFeaturedFit && (
+                  <span style={P.fitNum}>
+                    {FEATURED.fit}
+                    <span style={P.fitWord}> fit</span>
+                  </span>
+                )}
                 <VerdictPill kind={FEATURED.verdict} />
               </div>
               <div style={P.featuredHeadline}>
@@ -243,15 +261,30 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
         </div>
       ) : hasRealDeals ? (
         <>
+          <PipelineKpis deals={userAll ?? []} onOpenDeal={onOpenDeal} />
           {PIPELINE_STAGES.map(stage => {
             const stageAll = (userAll ?? []).filter(d => d.stageId === stage.id);
             if (stageAll.length === 0) return null;
             const stageRows = stageAll.slice(0, 20); // preview cap — chevron opens the full list
+            // Right-aligned ledger aggregate: deal count + summed asking
+            // price. The ask clause is omitted when no deal in the stage is
+            // priced — never a fabricated total.
+            const stageAsk = fmtM(stageAll.reduce(
+              (sum, d) => sum + (typeof d.askingPrice === "number" && d.askingPrice > 0 ? d.askingPrice : 0), 0,
+            ));
+            const aggregate =
+              `${stageAll.length} ${stageAll.length === 1 ? "deal" : "deals"}` +
+              (stageAsk ? ` · ${stageAsk} total ask` : "");
             return (
               <div key={stage.id} className="mb-as-card" style={{ margin: "20px 16px 0", padding: "20px 0 6px" }}>
                 <SectionHeader
-                  title={stage.title}
-                  subtitle={`${stageAll.length} ${stageAll.length === 1 ? "deal" : "deals"} · ${stage.sub}`}
+                  title={
+                    <span style={P.stageTitleRow}>
+                      <span style={P.stageTitleText}>{stage.title}</span>
+                      <span style={P.stageAgg}>{aggregate}</span>
+                    </span>
+                  }
+                  subtitle={stage.sub}
                   onSeeAll={onOpenDealsList}
                   seeAllAria="See all deals"
                   padding="0 22px 12px"
@@ -262,6 +295,9 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
                     name={d.name}
                     sub={d.sub}
                     verdict={d.verdict}
+                    askingPrice={d.askingPrice}
+                    sde={d.sde}
+                    fit={d.fit}
                     watched={isWatched(d.id)}
                     last={i === stageRows.length - 1}
                     onTap={() => onOpenDeal(d.id, d.name)}
@@ -331,12 +367,93 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
   );
 }
 
+/* ─── PipelineKpis ─────────────────────────────────────────
+   Compact 2×2 KPI grid above the stage-grouped list (authed users with
+   deals only). Every figure is computed from the real rows in memory —
+   cells with no data simply don't render. "Strongest source" is the
+   highest REAL-fit deal and taps through to it. */
+function PipelineKpis({
+  deals, onOpenDeal,
+}: {
+  deals: MobileStageRow[];
+  onOpenDeal: (id: string, title: string) => void;
+}) {
+  if (deals.length === 0) return null;
+
+  const totalAsk = fmtM(deals.reduce(
+    (sum, d) => sum + (typeof d.askingPrice === "number" && d.askingPrice > 0 ? d.askingPrice : 0), 0,
+  ));
+
+  // Median over REAL fits only (fit is null when no composite/multiple).
+  const fits = deals
+    .map(d => d.fit)
+    .filter((f): f is number => typeof f === "number")
+    .sort((a, b) => a - b);
+  const medianFit = fits.length === 0
+    ? null
+    : fits.length % 2 === 1
+      ? fits[(fits.length - 1) / 2]
+      : Math.round((fits[fits.length / 2 - 1] + fits[fits.length / 2]) / 2);
+
+  const strongest = deals.reduce<MobileStageRow | null>(
+    (best, d) => (typeof d.fit === "number" && (best?.fit ?? -1) < d.fit ? d : best),
+    null,
+  );
+
+  return (
+    <div className="mb-as-card" style={{ margin: "20px 16px 0", padding: "8px 6px", display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+      <div style={P.kpiCell}>
+        <div className="mb-mono" style={P.kpiValue}>{deals.length}</div>
+        <div style={P.kpiLabel}>Deals in motion</div>
+      </div>
+      {totalAsk && (
+        <div style={P.kpiCell}>
+          <div className="mb-mono" style={P.kpiValue}>{totalAsk}</div>
+          <div style={P.kpiLabel}>Total ask</div>
+        </div>
+      )}
+      {medianFit != null && (
+        <div style={P.kpiCell}>
+          <div className="mb-mono" style={P.kpiValue}>{medianFit}</div>
+          <div style={P.kpiLabel}>Median fit</div>
+        </div>
+      )}
+      {strongest && (
+        <div
+          className="mb-tap"
+          role="button"
+          tabIndex={0}
+          aria-label={`Open ${strongest.name}`}
+          onClick={() => onOpenDeal(strongest.id, strongest.name)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onOpenDeal(strongest.id, strongest.name);
+            }
+          }}
+          style={{ ...P.kpiCell, cursor: "pointer" }}
+        >
+          <div style={P.kpiName}>{strongest.name}</div>
+          <div style={P.kpiLabel}>Strongest source</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PipeRow({
-  name, sub, verdict, watched, last, onTap, onToggleWatch,
+  name, sub, verdict, askingPrice, sde, fit, watched, last, onTap, onToggleWatch,
 }: {
   name: string;
   sub: string;
   verdict: Verdict;
+  /** Financials in CENTS (real stage rows only — sample rows omit). Absent
+      values omit their line entirely; nothing renders an em-dash. */
+  askingPrice?: number | null;
+  sde?: number | null;
+  /** REAL fit only (composite/multiple-backed) — callers pass null for
+      synthetic fits so they never display. */
+  fit?: number | null;
   watched: boolean;
   last?: boolean;
   onTap: () => void;
@@ -362,6 +479,11 @@ function PipeRow({
     if (verdict === "watch") onToggleWatch();
     else onTap();
   };
+  // Working Paper ledger stack — asking price (primary), SDE (smaller),
+  // real fit numeral. Lines render only when the value exists.
+  const askTxt = fmtM(askingPrice);
+  const sdeTxt = fmtM(sde);
+  const hasMoneyStack = !!askTxt || !!sdeTxt || typeof fit === "number";
   return (
     <div
       className="mb-tap"
@@ -386,6 +508,15 @@ function PipeRow({
         <div style={P.rowName}>{name}</div>
         <div style={P.rowSub}>{sub}</div>
       </div>
+      {hasMoneyStack && (
+        <div style={P.rowMoney}>
+          {askTxt && <div className="mb-mono" style={P.rowAsk}>{askTxt}</div>}
+          {sdeTxt && <div className="mb-mono" style={P.rowSde}>SDE {sdeTxt}</div>}
+          {typeof fit === "number" && (
+            <div className="mb-mono" style={P.rowFit}>{fit} fit</div>
+          )}
+        </div>
+      )}
       <button
         type="button"
         aria-pressed={verdict === "watch" ? watched : undefined}
@@ -517,6 +648,56 @@ const P: Record<string, CSSProperties> = {
     whiteSpace: "nowrap" as const,
     overflow: "hidden",
     textOverflow: "ellipsis",
+  },
+  /* Right-aligned ledger money stack on real stage rows (matches the
+     DealsListScreen money-stack pattern): ask primary, SDE smaller, real
+     fit numeral. Visible sentence-case mono — never caps-micro. */
+  rowMoney: {
+    textAlign: "right" as const, flexShrink: 0,
+  },
+  rowAsk: {
+    fontSize: 14, fontWeight: 700, color: "var(--mb-ink)",
+    letterSpacing: "-0.2px", lineHeight: 1.25,
+  },
+  rowSde: {
+    fontSize: 11.5, color: "var(--mb-ink-3)", marginTop: 1,
+    lineHeight: 1.3,
+  },
+  rowFit: {
+    fontSize: 11.5, fontWeight: 650, color: "var(--mb-ink-3)", marginTop: 1,
+    lineHeight: 1.3,
+  },
+  /* Stage header: title left, ledger aggregate right — both inside the
+     SectionHeader title slot so the see-all chevron stays outermost. */
+  stageTitleRow: {
+    display: "flex", alignItems: "baseline",
+    justifyContent: "space-between", gap: 10, minWidth: 0,
+  },
+  stageTitleText: {
+    minWidth: 0, overflow: "hidden", textOverflow: "ellipsis",
+    whiteSpace: "nowrap" as const,
+  },
+  stageAgg: {
+    fontFamily: "var(--mb-font-mono)", fontSize: 11.5, fontWeight: 600,
+    letterSpacing: 0, color: "var(--mb-ink-3)",
+    fontVariantNumeric: "tabular-nums",
+    whiteSpace: "nowrap" as const, flexShrink: 0,
+  },
+  /* KPI strip cells — value-first tiles, visible sentence-case labels. */
+  kpiCell: {
+    padding: "12px 16px", minWidth: 0,
+  },
+  kpiValue: {
+    fontSize: 19, fontWeight: 700, color: "var(--mb-ink)",
+    letterSpacing: "-0.4px", lineHeight: 1.15,
+  },
+  kpiName: {
+    fontSize: 15, fontWeight: 650, color: "var(--mb-ink)",
+    letterSpacing: "-0.25px", lineHeight: 1.25,
+    whiteSpace: "nowrap" as const, overflow: "hidden", textOverflow: "ellipsis",
+  },
+  kpiLabel: {
+    fontSize: 12, fontWeight: 600, color: "var(--mb-ink-3)", marginTop: 2,
   },
   briefDock: {
     marginTop: 32,

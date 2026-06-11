@@ -122,7 +122,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
                   >
                     {featured.name}
                   </button>
-                  <div className="s">fit {featured.fit}</div>
+                  {featured.fitIsReal && <div className="s">fit {featured.fit}</div>}
                 </div>
               )}
             </div>
@@ -238,7 +238,9 @@ function PickRow({ pick, last, onOpen }: { pick: MobilePick; last: boolean; onOp
         <span style={{ display: "block", color: "var(--ink-3)", fontSize: "0.8rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pick.sub}</span>
       </span>
       <span className={`statpill ${verdictClass(pick.kind)}`}><span className="d" />{capitalize(pick.kind)}</span>
-      <span style={{ fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--accent-strong)", fontSize: "1rem" }}>{pick.fit}</span>
+      {pick.fitIsReal !== false && (
+        <span style={{ fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--accent-strong)", fontSize: "1rem" }}>{pick.fit}</span>
+      )}
     </button>
   );
 }

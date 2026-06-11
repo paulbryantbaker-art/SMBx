@@ -4,6 +4,7 @@
    + Confidence & notes. */
 
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { getJourneyGates } from "@shared/gateRegistry";
 import { FitGauge } from "../FitGauge";
 import { MobileIcon } from "../icons";
 import { ChatStarterPill } from "../ChatStarterPill";
@@ -11,12 +12,14 @@ import { authHeaders } from "../../../../hooks/useAuth";
 import { RANDOM_TEXTURES } from "../../../../lib/randomTextures";
 import { useWatchlist } from "../../../../hooks/useWatchlist";
 import { findDeal } from "../../../../lib/sampleDeals";
+import { LEAGUE_MULTIPLES } from "../../../../lib/calculations/core";
+import { useDerivedDisplay } from "../../shared/useDerivedDisplay";
 import type { Verdict } from "../types";
 
 const VERDICT_LABEL: Record<Verdict, string> = {
-  pursue: "PURSUE",
-  watch:  "WATCH",
-  pass:   "PASS",
+  pursue: "Pursue",
+  watch:  "Watch",
+  pass:   "Pass",
 };
 
 const VERDICT_INK: Record<Verdict, string> = {
@@ -42,9 +45,9 @@ const VERDICT_BG: Record<Verdict, string> = {
    read it as "kinda both." Per-deal verdictWhy from sampleDeals.ts always
    wins over these. */
 const VERDICT_BLURB: Record<Verdict, string> = {
-  pursue: "PURSUE — strong fit. Move on the IOI.",
-  watch:  "WATCH — not a pursue yet. Specific things have to verify before it moves to PURSUE.",
-  pass:   "PASS — math doesn't work. Don't spend cycles here.",
+  pursue: "Pursue — strong fit. Move on the IOI.",
+  watch:  "Watch — not a pursue yet. Specific things have to verify before it moves to Pursue.",
+  pass:   "Pass — math doesn't work. Don't spend cycles here.",
 };
 
 interface DetailProps {
@@ -102,6 +105,80 @@ interface MobileDealDetail {
     location?: string | null;
     journey_type?: string | null;
     league?: string | null;
+    current_gate?: string | null;
+  };
+  /** Gate progress rows from /api/deals/:id (same endpoint desktop uses) —
+      drives the methodology stage tracker. */
+  gates?: Array<{ gate: string; status: string; completed_at: string | null }>;
+}
+
+/* ─── Methodology stage tracker (port of desktop buildStageProgress) ── */
+
+interface MobileStageProgress {
+  currentIndex: number;
+  total: number;
+  currentName: string;
+  stages: Array<{ id: string; name: string; state: "done" | "current" | "upcoming" }>;
+}
+
+/** Map the deal's journey to its ordered stages and mark each
+    done / current / upcoming from gate progress + current_gate.
+    Returns null when the deal record can't honestly place itself. */
+function buildMobileStageProgress(
+  journey?: string | null,
+  currentGate?: string | null,
+  gates?: Array<{ gate: string; status: string; completed_at: string | null }>,
+): MobileStageProgress | null {
+  if (!journey || !currentGate) return null;
+  const journeyGates = getJourneyGates(journey);
+  if (journeyGates.length === 0) return null;
+  const completedSet = new Set(
+    (gates ?? []).filter(g => g.completed_at || /complete|done|passed/i.test(g.status)).map(g => g.gate),
+  );
+  const currentIndex = Math.max(0, journeyGates.findIndex(g => g.id === currentGate));
+  return {
+    currentIndex,
+    total: journeyGates.length,
+    currentName: journeyGates[currentIndex]?.name ?? "—",
+    stages: journeyGates.map((g, i) => ({
+      id: g.id,
+      name: g.name,
+      state: completedSet.has(g.id) || i < currentIndex ? "done" : i === currentIndex ? "current" : "upcoming",
+    })),
+  };
+}
+
+/* ─── League range band (port of desktop buildLeagueBand) ── */
+
+interface MobileLeagueBand {
+  league: string;
+  min: number;
+  max: number;
+  metric: "SDE" | "EBITDA";
+  pct: number; // marker position, clamped 0–100
+  inRange: boolean;
+}
+
+/** Where the implied multiple (asking / earnings, both cents) sits inside the
+    league's published range. The marker clamps to the track — an out-of-range
+    multiple pins to the 0%/100% edge and flips to the out-of-range color. */
+function buildMobileLeagueBand(
+  league?: string | null,
+  askingCents?: number | null,
+  earningsCents?: number | null,
+): MobileLeagueBand | null {
+  if (!league || !askingCents || !earningsCents || earningsCents <= 0) return null;
+  const entry = LEAGUE_MULTIPLES[league];
+  if (!entry || entry.max <= entry.min) return null;
+  const implied = askingCents / earningsCents;
+  const pct = Math.max(0, Math.min(100, ((implied - entry.min) / (entry.max - entry.min)) * 100));
+  return {
+    league,
+    min: entry.min,
+    max: entry.max,
+    metric: entry.metric,
+    pct,
+    inRange: implied >= entry.min && implied <= entry.max,
   };
 }
 
@@ -339,6 +416,19 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
   const badgeHasCall = isRealDeal ? briefVerdict !== null : true;
   const briefAge = timeAgo(dealBrief?.generatedAt);
 
+  /* Methodology "you are here" — real deals only, from the same
+     /api/deals/:id payload desktop uses (gates + deal.current_gate). */
+  const stageProgress = isRealDeal
+    ? buildMobileStageProgress(real?.journey_type, real?.current_gate, realDetail?.gates)
+    : null;
+
+  /* League range band under the Asking tile — only when asking + earnings +
+     a league in LEAGUE_MULTIPLES are all real. Never demonstrated with
+     invented numbers on the real-deal path. */
+  const leagueBand = isRealDeal
+    ? buildMobileLeagueBand(real?.league, real?.asking_price, real?.ebitda || real?.sde)
+    : null;
+
   /* Stats strip: real deals bind to the backend deal row (cents). Tiles with
      no data are hidden — never invented. Sample tiles only for sample ids. */
   const realEarnings = real?.sde ? { label: "SDE", value: real.sde } : real?.ebitda ? { label: "EBITDA", value: real.ebitda } : null;
@@ -346,14 +436,20 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
   const realMultiple = real?.asking_price && realMultipleBase > 0
     ? `${(Number(real.asking_price) / realMultipleBase).toFixed(1)}×`
     : null;
-  const realStats: Array<{ top: string; label: string; sub?: ReactNode }> = [];
+  const realStats: Array<{ top: string; label: string; sub?: ReactNode; band?: ReactNode }> = [];
   if (isRealDeal) {
     const revenueText = fmtMoney(real?.revenue);
     if (revenueText) realStats.push({ top: revenueText, label: "Revenue" });
     const earningsText = realEarnings ? fmtMoney(realEarnings.value) : null;
     if (realEarnings && earningsText) realStats.push({ top: earningsText, label: realEarnings.label });
     const askingText = fmtMoney(real?.asking_price);
-    if (askingText) realStats.push({ top: askingText, label: "Asking" });
+    if (askingText) {
+      realStats.push({
+        top: askingText,
+        label: "Asking",
+        band: leagueBand ? <LeagueBandStrip band={leagueBand} /> : undefined,
+      });
+    }
     if (realMultiple) realStats.push({ top: realMultiple, label: "Multiple", sub: realEarnings ? `of ${realEarnings.label}` : undefined });
   }
 
@@ -404,7 +500,7 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
           treatments + the "Yulia's verdict" caption underneath make the
           intent clear without extra UI clutter. */}
       <div style={D.hero}>
-        <FitGauge score={fit} verdict={verdict} size={108} strokeRatio={0.09} />
+        <DerivedFitGauge score={fit} verdict={verdict} />
         <div style={{ flex: 1, minWidth: 0, paddingTop: 4 }}>
           <h1 style={D.h1}>{dealTitle}</h1>
           <div style={D.dealMeta}>{dealSub || (isRealDeal ? "Active deal" : "Sample deal")}</div>
@@ -452,6 +548,37 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
         </div>
       </div>
 
+      {/* Methodology "you are here" — compact mobile port of the desktop
+          stage tracker, driven by gates + current_gate from /api/deals/:id.
+          Real deals only; hides when the record can't place itself. Read-only
+          in v1 — no touch interactions, horizontal scroll when cramped. */}
+      {stageProgress && (
+        <div style={D.stageWrap}>
+          <div style={D.stageLine}>
+            Stage {stageProgress.currentIndex + 1} of {stageProgress.total} — {stageProgress.currentName}
+          </div>
+          <div className="mb-hide-scroll" style={D.stageRow}>
+            {stageProgress.stages.map(s => (
+              <div key={s.id} style={D.stageCell}>
+                <span
+                  aria-hidden="true"
+                  style={{
+                    ...D.stageDot,
+                    ...(s.state === "done" ? D.stageDotDone : s.state === "current" ? D.stageDotCurrent : {}),
+                  }}
+                >{s.state === "done" ? "✓" : ""}</span>
+                <span style={{
+                  ...D.stageName,
+                  ...(s.state === "current"
+                    ? { color: "var(--mb-ink)", fontWeight: 700 }
+                    : s.state === "done" ? { color: "var(--mb-ink-2)" } : {}),
+                }}>{s.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Hero actions — open the deal's real file surfaces. Real deals only;
           hides gracefully when the shell doesn't pass the handler. */}
       {isRealDeal && onOpenDealFiles && (
@@ -489,6 +616,7 @@ export function DetailScreen({ dealId, dealTitle, onBack, onChat, onAskYulia, on
                 top={stat.top}
                 label={stat.label}
                 sub={stat.sub}
+                band={stat.band}
                 divider={index < realStats.length - 1}
               />
             ))}
@@ -848,17 +976,106 @@ function FloatingNav({ onBack, onShare }: { onBack: () => void; onShare: () => v
   );
 }
 
+/* ─── DERIVE primitives ─────────────────────────────────── */
+
+/* Working Paper emerald/terracotta — same literals as desktop DealView's
+   league band and .wk-tick. */
+const DERIVE_GREEN = "#2E8C5A";
+const RANGE_OUT = "#C0562F";
+
+/** One-shot inline settle tick. Inline-styled (the mobile shell doesn't
+    load workspace.css, so no .wk-tick): appears on settle, fades out when
+    the hook clears `justSettled` (~950ms). */
+function SettleTick({ on, size = 10 }: { on: boolean; size?: number }) {
+  return (
+    <i
+      aria-hidden="true"
+      style={{
+        fontStyle: "normal", fontWeight: 700,
+        fontSize: size, color: DERIVE_GREEN,
+        marginLeft: 3,
+        opacity: on ? 1 : 0,
+        transition: on ? "opacity 120ms ease-out" : "opacity 500ms ease",
+      }}
+    >✓</i>
+  );
+}
+
+/** DERIVE rule for stat values: on data refresh the number settles from its
+    previous value and flashes the one-shot emerald tick. The hook's
+    first-render rail means initial load shows instantly — no fake motion. */
+function StatValue({ value }: { value: string }) {
+  const { text, justSettled } = useDerivedDisplay(value);
+  return (
+    <div style={D.statTop}>
+      {text}
+      <SettleTick on={justSettled} />
+    </div>
+  );
+}
+
+/** DERIVE wrapper for the hero gauge: the fit score animates through the
+    FitGauge prop, so the ring AND the centered numeral settle from the
+    previous value when Yulia's brief lands; the one-shot tick flashes at
+    the gauge corner. First render is instant per the hook's rails. */
+function DerivedFitGauge({ score, verdict }: { score: number; verdict: Verdict }) {
+  const { text, justSettled } = useDerivedDisplay(String(Math.round(score)));
+  const animated = Number(text);
+  return (
+    <div style={{ position: "relative", flexShrink: 0 }}>
+      <FitGauge
+        score={Number.isFinite(animated) ? animated : score}
+        verdict={verdict}
+        size={108}
+        strokeRatio={0.09}
+      />
+      <span aria-hidden="true" style={{
+        position: "absolute", top: 0, right: 0,
+        fontSize: 11, fontWeight: 700, color: DERIVE_GREEN,
+        opacity: justSettled ? 1 : 0,
+        transition: justSettled ? "opacity 120ms ease-out" : "opacity 500ms ease",
+      }}>✓</span>
+    </div>
+  );
+}
+
+/* ─── League range band under the Asking tile ───────────── */
+
+function LeagueBandStrip({ band }: { band: MobileLeagueBand }) {
+  return (
+    <div style={{ marginTop: 7 }}>
+      <div style={{ position: "relative", height: 4, borderRadius: 2, background: "var(--mb-line-2)" }}>
+        <span
+          aria-hidden="true"
+          style={{
+            position: "absolute", top: "50%", left: `${band.pct}%`,
+            transform: "translate(-50%, -50%)",
+            width: 6, height: 6, borderRadius: "50%",
+            background: band.inRange ? DERIVE_GREEN : RANGE_OUT,
+          }}
+        />
+      </div>
+      <div style={{ fontSize: 11, color: "var(--mb-ink-4)", marginTop: 4, lineHeight: 1.3 }}>
+        League {band.league}: {band.min}–{band.max}× {band.metric}
+      </div>
+    </div>
+  );
+}
+
 /* ─── Stat cell ─────────────────────────────────────────── */
 
-function Stat({ top, label, sub, divider }: { top: string; label: string; sub?: ReactNode; divider?: boolean }) {
+function Stat({ top, label, sub, divider, band }: {
+  top: string; label: string; sub?: ReactNode; divider?: boolean; band?: ReactNode;
+}) {
   return (
     <div style={{
       borderRight: divider ? "0.5px solid var(--mb-line-2)" : "none",
       padding: "0 4px", minWidth: 0,
     }}>
       <div style={D.statLabel}>{label}</div>
-      <div style={D.statTop}>{top}</div>
+      <StatValue value={top} />
       {sub != null && <div style={D.statSub}>{sub}</div>}
+      {band}
     </div>
   );
 }
@@ -993,9 +1210,14 @@ const D: Record<string, CSSProperties> = {
     padding: "60px 22px 18px",
     display: "flex", gap: 14, alignItems: "flex-start",
   },
+  /* Working Paper masthead register — the deal NAME alone gets the Fraunces
+     serif (loaded globally via index.html); everything else on this screen
+     stays on the SF Pro mobile stack. */
   h1: {
-    fontFamily: "var(--mb-font-display)", fontWeight: 700,
-    fontSize: 22, letterSpacing: "-0.5px", lineHeight: 1.1,
+    fontFamily: "'Fraunces', Georgia, serif",
+    fontOpticalSizing: "auto",
+    fontWeight: 540,
+    fontSize: 28, letterSpacing: "-0.015em", lineHeight: 1.12,
     margin: 0, color: "var(--mb-ink)",
     textWrap: "balance",
   },
@@ -1046,6 +1268,46 @@ const D: Record<string, CSSProperties> = {
   verdictCaption: {
     fontSize: 11, color: "var(--mb-ink-4)", marginTop: 6,
     lineHeight: 1.35,
+  },
+
+  /* Methodology stage tracker — compact "you are here" under the hero.
+     Done = filled emerald with ✓, current = ringed, upcoming = hollow.
+     Names are plain text (NOT .mb-mono — the index.css micro-label kill
+     rule hides mono at 9–12px). */
+  stageWrap: {
+    padding: "0 22px 18px",
+  },
+  stageLine: {
+    fontSize: 13.5, fontWeight: 700, color: "var(--mb-ink)",
+    letterSpacing: "-0.1px", marginBottom: 10,
+    textWrap: "pretty",
+  },
+  stageRow: {
+    display: "flex", gap: 14, alignItems: "flex-start",
+    overflowX: "auto",
+  },
+  stageCell: {
+    display: "flex", flexDirection: "column", alignItems: "center",
+    gap: 5, flexShrink: 0, minWidth: 52,
+  },
+  stageDot: {
+    width: 16, height: 16, borderRadius: "50%",
+    border: "1.5px solid var(--mb-ink-5)",
+    background: "transparent",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    fontSize: 9, fontWeight: 700, color: "#fff",
+    boxSizing: "border-box", lineHeight: 1,
+  },
+  stageDotDone: {
+    background: "#2E8C5A", borderColor: "#2E8C5A",
+  },
+  stageDotCurrent: {
+    borderColor: "#2E8C5A",
+    boxShadow: "0 0 0 3px rgba(46,140,90,0.16)",
+  },
+  stageName: {
+    fontSize: 11, color: "var(--mb-ink-4)", lineHeight: 1.25,
+    textAlign: "center", maxWidth: 68,
   },
 
   /* Hero actions — Files / Data room. ≥44px tap targets into the deal's

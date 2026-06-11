@@ -23,7 +23,8 @@ import { DEV_AUTH_BYPASS, authHeaders } from "../../../../hooks/useAuth";
 import { MobileIcon } from "../icons";
 import { LibraryActivityList, LibraryPreviewCard } from "./LibrarySearch";
 import type { Verdict, YIconKind } from "../types";
-import type { MobilePipelineRow } from "../../../../hooks/useMobileDeals";
+import type { MobileFeatured, MobilePipelineRow } from "../../../../hooks/useMobileDeals";
+import { useDerivedDisplay } from "../../shared/useDerivedDisplay";
 import { SectionHeader } from "../SectionHeader";
 import { useWatchlist } from "../../../../hooks/useWatchlist";
 import { copyFor, LOGGED_OUT_HERO_COPY } from "../../../../lib/copy";
@@ -53,9 +54,12 @@ interface TodayProps {
   /** Authed user's deals (from useMobileDeals). For a real signed-in user
       this is the ONLY pipeline source — null means "still loading" and
       renders an honest loading row, never SAMPLE_PIPELINE. Samples render
-      solely for anon / dev-bypass preview. Also feeds the daily hero
-      (highest-fit row). */
+      solely for anon / dev-bypass preview. */
   userPipeline: MobilePipelineRow[] | null;
+  /** Authed user's featured deal — the SAME highest-fit object Pipeline's
+      "NEW TODAY" hero binds (useMobileDeals.featured), so the two heroes can
+      never disagree. Null = anon / loading / empty. */
+  featured: MobileFeatured | null;
   /** True ONLY when a genuinely signed-in user has zero deals → honest
       empty states (pipeline section + starter hero). */
   realEmpty?: boolean;
@@ -131,7 +135,7 @@ const SAMPLE_MARKET_INTEL: PortfolioMarketIntelligence = {
 
 export function TodayScreen({
   isAnon, initials, onOpenDeal, onOpenLibrary, onOpenLibraryDetail, onChat, onSearch, onAskYulia, onLearn: _onLearn, onOpenAnalyses, onOpenDealsList,
-  onAvatarClick, onNotif, notifCount, userPipeline, realEmpty,
+  onAvatarClick, onNotif, notifCount, userPipeline, featured, realEmpty,
   audience,
 }: TodayProps) {
   // Sample content is ONLY for anon and the dev-bypass preview. A real
@@ -142,11 +146,10 @@ export function TodayScreen({
   // Authed + deals fetch not resolved yet (V6Mobile passes null until
   // hasData; realEmpty only flips once loaded with zero deals).
   const authedLoading = !showSamples && userPipeline == null && !realEmpty;
-  // Hero = the highest-fit row among the user's recent active deals
-  // (same fit scoring the Pipeline "NEW TODAY" featured hero uses).
-  const heroDeal = !showSamples && userPipeline?.length
-    ? userPipeline.reduce((a, b) => ((b.fit ?? -1) > (a.fit ?? -1) ? b : a))
-    : null;
+  // Hero = the exact featured object Pipeline's "NEW TODAY" hero binds
+  // (useMobileDeals.featured) — one highest-fit deal, two surfaces, zero
+  // chance of disagreement.
+  const heroDeal = !showSamples ? featured : null;
   const { isWatched, toggle } = useWatchlist();
   const C = copyFor(audience);
   const [brief, setBrief] = useState<PortfolioBrief | null>(null);
@@ -218,8 +221,10 @@ export function TodayScreen({
             deal={{
               name: heroDeal.name,
               sub: heroDeal.sub,
-              fit: heroDeal.fit,
-              verdict: heroDeal.verdict ?? "watch",
+              // Fit honesty: render the numeral ONLY when the fit is backed
+              // by a real composite/multiple — synthetic fits never display.
+              fit: heroDeal.fitIsReal ? heroDeal.fit : undefined,
+              verdict: heroDeal.verdict,
               metricValue: heroDeal.metricValue,
               metricLabel: heroDeal.metricLabel,
             }}
@@ -547,6 +552,23 @@ const SAMPLE_HERO: HeroDeal = {
   metricNote: "+$760K normalized",
 };
 
+/* DERIVE settle tick for the hero fit numeral — mobile doesn't load
+   workspace.css, so the desktop .wk-tick recipe is inlined here: same
+   muted-green (#2E8C5A), same one-shot opacity pulse, same reduced-motion
+   honesty (no pulse, brief steady tick while justSettled holds). */
+const TICK_CSS = `
+@keyframes mb-fit-tick-pulse {
+  0% { opacity: 0; transform: scale(.8); }
+  18% { opacity: 1; transform: scale(1); }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.mb-fit-tick { display: inline-block; margin-left: 5px; font-style: normal; font-weight: 700; color: #2E8C5A; opacity: 0; pointer-events: none; }
+.mb-fit-tick.on { animation: mb-fit-tick-pulse 900ms cubic-bezier(.22,.61,.36,1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .mb-fit-tick.on { animation: none !important; opacity: 1 !important; }
+}`;
+
 function DailyHero({
   deal, onOpen, onAsk,
 }: {
@@ -554,8 +576,13 @@ function DailyHero({
   onOpen: () => void;
   onAsk: (prompt: string) => void;
 }) {
+  // DERIVE: the fit numeral never hard-swaps — it settles from its previous
+  // value (useDerivedDisplay) and flashes the one-shot green tick when it
+  // lands. Empty string when fit is absent/synthetic → hook passes through.
+  const fitDisplay = useDerivedDisplay(typeof deal.fit === "number" ? String(deal.fit) : "");
   return (
     <HeroFrame kind={deal.verdict} onTap={onOpen}>
+      <style>{TICK_CSS}</style>
       <HeroVisual value={deal.metricValue} label={deal.metricLabel} note={deal.metricNote} />
 
       <div style={H.titleBlock}>
@@ -570,8 +597,12 @@ function DailyHero({
           <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 4 }}>
             {typeof deal.fit === "number" && (
               <span style={H.fitNum}>
-                {deal.fit}
+                {fitDisplay.text}
                 <span style={H.fitWord}> fit</span>
+                <i
+                  className={`mb-fit-tick${fitDisplay.justSettled ? " on" : ""}`}
+                  aria-hidden="true"
+                >✓</i>
               </span>
             )}
             <VerdictPill kind={deal.verdict} />

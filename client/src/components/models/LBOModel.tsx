@@ -132,7 +132,6 @@ export default function LBOModel({ tabId, onTalkToYulia }: Props) {
       <div style={O.panel}>
         <div style={O.panelTop}>
           <div style={O.copy}>
-            <div className="mono" style={O.eyebrow}>LBO ITERATION LOOP</div>
             <h3 style={O.title}>Optimize the structure, then keep modeling.</h3>
             <p style={O.body}>
               Manual sliders stay live. The optimizer only changes controllable deal levers here: EV, senior leverage, and mezzanine. Yulia can broaden the pass to diligence, negotiation, tax, legal, and document outputs.
@@ -500,12 +499,6 @@ const O: Record<string, CSSProperties> = {
   },
   copy: {
     minWidth: 0,
-  },
-  eyebrow: {
-    color: 'var(--m-on-surface-mid)',
-    fontSize: 10,
-    fontWeight: 800,
-    letterSpacing: '0.14em',
   },
   title: {
     margin: '4px 0 6px',

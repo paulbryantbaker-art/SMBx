@@ -25,7 +25,7 @@ import { useNotifications, type AppNotification } from "../../../hooks/useNotifi
 import { useAudience } from "../../../hooks/useAudience";
 import { runDealAnalysis } from "../../../hooks/useV6WorkspaceData";
 import { buildMobileSurfaceContext } from "../../../lib/yuliaSurfaceContext";
-import type { MobileChatBridge, MobileTab, MobileView } from "./types";
+import type { MobileChatBridge, MobileMessage, MobileTab, MobileView } from "./types";
 
 const VALID_TABS: MobileTab[] = ["today", "pipeline", "search", "brief"];
 
@@ -54,12 +54,16 @@ function V6MobileAnon({
   onDevSignIn?: () => void;
 } = {}) {
   const chat = useAnonymousChat();
+  // Thread identity must stay stable across streaming-token re-renders —
+  // ChatSheet memoizes its message rows on it. Map only when messages change
+  // (streamingText lives outside the thread).
+  const thread = useMemo<MobileMessage[]>(() => chat.messages.map(m => ({
+    who: m.role === "user" ? "u" : "y",
+    text: m.content,
+    stagedAction: null,
+  })), [chat.messages]);
   const bridge = useMemo<MobileChatBridge>(() => ({
-    thread: chat.messages.map(m => ({
-      who: m.role === "user" ? "u" : "y",
-      text: m.content,
-      stagedAction: null,
-    })),
+    thread,
     sending: chat.sending,
     streamingText: chat.streamingText,
     activeTool: null,
@@ -69,18 +73,20 @@ function V6MobileAnon({
     send: (text, surfaceContext) => chat.sendMessage(text, undefined, surfaceContext),
     // uploadFile / confirmStagedAction / cancelStagedAction stay undefined for
     // anon — the sheet renders sign-in-gated affordances instead.
-  }), [chat.messages, chat.sending, chat.streamingText, chat.error, chat.sendMessage]);
+  }), [thread, chat.sending, chat.streamingText, chat.error, chat.sendMessage]);
   return <V6MobileShell user={user} chat={bridge} onSignOut={onSignOut} onDevSignIn={onDevSignIn} />;
 }
 
 function V6MobileAuthed({ user, onSignOut }: { user: User; onSignOut: () => void }) {
   const chat = useAuthChat(user);
+  // Stable thread identity across streaming tokens — see V6MobileAnon note.
+  const thread = useMemo<MobileMessage[]>(() => chat.messages.map(m => ({
+    who: m.role === "user" ? "u" : "y",
+    text: m.content,
+    stagedAction: m.metadata?.stagedAction ?? null,
+  })), [chat.messages]);
   const bridge = useMemo<MobileChatBridge>(() => ({
-    thread: chat.messages.map(m => ({
-      who: m.role === "user" ? "u" : "y",
-      text: m.content,
-      stagedAction: m.metadata?.stagedAction ?? null,
-    })),
+    thread,
     sending: chat.sending,
     streamingText: chat.streamingText,
     activeTool: chat.activeTool,
@@ -91,7 +97,7 @@ function V6MobileAuthed({ user, onSignOut }: { user: User; onSignOut: () => void
     uploadFile: chat.uploadFile,
     confirmStagedAction: chat.confirmStagedAction,
     cancelStagedAction: chat.cancelStagedAction,
-  }), [chat.messages, chat.sending, chat.streamingText, chat.activeTool, chat.toolTrace, chat.paywallData, chat.sendMessage, chat.uploadFile, chat.confirmStagedAction, chat.cancelStagedAction]);
+  }), [thread, chat.sending, chat.streamingText, chat.activeTool, chat.toolTrace, chat.paywallData, chat.sendMessage, chat.uploadFile, chat.confirmStagedAction, chat.cancelStagedAction]);
   return <V6MobileShell user={user} chat={bridge} onSignOut={onSignOut} />;
 }
 
@@ -563,6 +569,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           onLearn={onLearn}
           onAvatarClick={onAvatarClick}
           userPipeline={userDeals.hasData ? userDeals.today : null}
+          featured={userDeals.hasData ? userDeals.featured : null}
           audience={audience}
           onAudienceChange={setAudience}
           showAudienceSwitcher={isAnonAudience}
@@ -723,6 +730,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
           deals={userDeals.hasData ? userDeals.today : null}
           onRunDealAnalysis={onRunDealAnalysis}
           onAskYulia={onAskYulia}
+          onOpenDeliverable={onOpenLibraryDoc}
           {...notifBarProps}
         />
       )}

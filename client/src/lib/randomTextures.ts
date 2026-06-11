@@ -1,25 +1,23 @@
 /* Random texture rotation — module-level pick.
  *
- * textures 4 = hero surfaces.
- * textures 3 = secondary/action cards.
- *
  * Each surface draws once at module import, so the pick is stable for the
  * session and re-rolls on hard refresh without React re-render churn.
+ *
+ * 2026-06-11 payload diet: art ships as ~1125px-wide JPEG (q60–72, ≤250KB
+ * each) instead of the original ~2MB PNGs — mobile Today alone was pulling
+ * ~12.8MB of texture. The PNG masters stay in client/public/textures/;
+ * unreferenced textures (old desktop hero/random decks, card deck, orig-*)
+ * were moved to client/textures_backup/ so they no longer ship in builds.
+ * The dead DESKTOP_TEXTURES export (zero consumers) was removed with them.
  */
 
-const VERSION = "v=20260515-art-house-1";
-const tex = (name: string) => `/textures/texture-${name}.png?${VERSION}`;
-const heroTex = (n: number) => `/textures/texture-hero-${n}.png?${VERSION}`;
-const cardTex = (n: number) => `/textures/texture-card-${n}.png?${VERSION}`;
-const desktopHeroTex = (n: number) => `/textures/desktop/texture-hero-${n}.png?${VERSION}`;
-const desktopRandomTex = (n: number) => `/textures/desktop/random/texture-random-${String(n).padStart(2, "0")}.png?${VERSION}`;
-const desktopRandomNamedTex = (name: string) => `/textures/desktop/random/${name}.png?${VERSION}`;
-const desktopTodayRoseGold = () => `/textures/desktop/texture-today-rose-gold.png?${VERSION}`;
-const desktopTodayRoseGoldHero = () => `/textures/desktop/texture-today-rose-gold-hero-crop.png?${VERSION}`;
-const artHouseTex = (n: number) => `/textures/desktop/art-house/art-house-${String(n).padStart(2, "0")}.png?${VERSION}`;
-
-const pick = <T,>(arr: readonly T[]): T =>
-  arr[Math.floor(Math.random() * arr.length)];
+const VERSION = "v=20260611-jpg-1";
+const tex = (name: string) => `/textures/texture-${name}.jpg?${VERSION}`;
+const heroTex = (n: number) => `/textures/texture-hero-${n}.jpg?${VERSION}`;
+const desktopRandomTex = (n: number) => `/textures/desktop/random/texture-random-${String(n).padStart(2, "0")}.jpg?${VERSION}`;
+const desktopRandomNamedTex = (name: string) => `/textures/desktop/random/${name}.jpg?${VERSION}`;
+const desktopTodayRoseGold = () => `/textures/desktop/texture-today-rose-gold.jpg?${VERSION}`;
+const artHouseTex = (n: number) => `/textures/desktop/art-house/art-house-${String(n).padStart(2, "0")}.jpg?${VERSION}`;
 
 const shuffle = <T,>(arr: readonly T[]): T[] => {
   const out = [...arr];
@@ -30,17 +28,6 @@ const shuffle = <T,>(arr: readonly T[]): T[] => {
   return out;
 };
 
-const HERO_POOL = [1, 2, 3, 4, 5, 6, 7, 8] as const;
-const CARD_POOL = [1, 2, 3, 4, 5, 6, 7, 8] as const;
-const DESKTOP_MID_TEXTURE_COUNT = 14;
-const DESKTOP_MID_POOL = Array.from(
-  { length: DESKTOP_MID_TEXTURE_COUNT },
-  (_, index) => desktopRandomTex(index + 1),
-);
-const DESKTOP_HERO_POOL = Array.from(
-  { length: 13 },
-  (_, index) => desktopRandomTex(index + 15),
-);
 const ART_HOUSE_POOL = Array.from(
   { length: 7 },
   (_, index) => artHouseTex(index + 1),
@@ -48,17 +35,9 @@ const ART_HOUSE_POOL = Array.from(
 
 const desktopTextureSet = (pool: readonly string[], count: number): string[] => {
   const deck = shuffle(pool);
-  return Array.from({ length: count }, (_, index) => deck[index % deck.length] ?? desktopHeroTex(1));
+  return Array.from({ length: count }, (_, index) => deck[index % deck.length] ?? pool[0]);
 };
 
-const todayDesktopHeroTextures = desktopTextureSet(DESKTOP_HERO_POOL, 3);
-const todayDesktopMidTextures = desktopTextureSet(DESKTOP_MID_POOL, 2);
-const pipelineDesktopHeroTextures = desktopTextureSet(DESKTOP_HERO_POOL, 1);
-const pipelineDesktopMidTextures = desktopTextureSet(DESKTOP_MID_POOL, 2);
-const filesDesktopHeroTextures = desktopTextureSet(DESKTOP_HERO_POOL, 1);
-const filesDesktopMidTextures = desktopTextureSet(DESKTOP_MID_POOL, 4);
-const searchDesktopHeroTextures = desktopTextureSet(DESKTOP_HERO_POOL, 1);
-const searchDesktopMidTextures = desktopTextureSet(DESKTOP_MID_POOL, 4);
 const pageArtHouseTextures = desktopTextureSet(ART_HOUSE_POOL, 7);
 const studioArtHouseTextures = desktopTextureSet(ART_HOUSE_POOL, 4);
 
@@ -92,39 +71,6 @@ export const RANDOM_TEXTURES = {
   legacyWatch:    tex("watch"),
   legacyPass:     tex("pass"),
   legacyBaseline: tex("baseline"),
-} as const;
-
-export const DESKTOP_TEXTURES = {
-  // Desktop art shuffles per page group at module import. Each hard refresh
-  // gets a new spread, and no textured surface repeats within the same page.
-  todayHeroSample: desktopTodayRoseGoldHero(),
-  todayHeroWorkspace: todayDesktopHeroTextures[1],
-  todayMarket: todayDesktopHeroTextures[2],
-  todayPortfolio: desktopRandomNamedTex("texture-random-24-portfolio"),
-  todayCard: todayDesktopMidTextures[0],
-  todaySecondary: todayDesktopMidTextures[1],
-
-  pipelineHero: pipelineDesktopHeroTextures[0],
-  pipelineCard: pipelineDesktopMidTextures[0],
-  pipelineSecondary: pipelineDesktopMidTextures[1],
-
-  filesHero: filesDesktopHeroTextures[0],
-  filesAll: filesDesktopMidTextures[0],
-  filesDeals: filesDesktopMidTextures[1],
-  filesAction: filesDesktopMidTextures[2],
-  filesRoom: filesDesktopMidTextures[3],
-
-  searchHero: searchDesktopHeroTextures[0],
-  searchOpportunities: searchDesktopMidTextures[0],
-  searchBuyers: searchDesktopMidTextures[1],
-  searchProviders: searchDesktopMidTextures[2],
-  searchFinancing: searchDesktopMidTextures[3],
-
-  // Learn/pricing needs a steadier, sharper read than the random hero deck.
-  // These are curated from the high-resolution desktop texture set.
-  learnHero: desktopRandomTex(4),
-  pricingFeatured: desktopRandomTex(21),
-  pricingGuarantee: desktopRandomTex(10),
 } as const;
 
 export const STUDIO_TEXTURES = {
