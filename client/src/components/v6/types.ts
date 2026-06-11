@@ -90,6 +90,17 @@ export interface Message {
   stagedAction?: StagedAction | null;
 }
 
+/** One real tool call in Yulia's computation trace — sourced ONLY from
+ *  server SSE `tool_start` / `tool_done` events, never synthesized. */
+export interface ToolTraceEntry {
+  id: number;
+  tool: string;
+  label: string;
+  status: "running" | "done";
+  startedAt: number;
+  ms?: number;
+}
+
 export interface Mode {
   id: ModeId;
   label: string;

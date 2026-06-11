@@ -7,6 +7,7 @@ import { executeSurfaceAction } from "../../../lib/v6ActionContracts";
 import type { SurfaceActionId } from "../../../lib/v6SurfaceActions";
 import type { OpenTab } from "../types";
 import { DealCommentsThread } from "../shared/DealCommentsThread";
+import { WorkSeal } from "../shared/WorkSeal";
 
 interface DeliverableRow {
   id: number;
@@ -21,6 +22,8 @@ interface DeliverableRow {
   doc_class?: string | null;
   name?: string;
   slug?: string;
+  /** `d.*` from /api/deliverables/:id — the same JSONB the data room probes for outputHash */
+  generated_from_snapshot?: unknown;
 }
 
 const TOOLBAR_BUTTONS = [
@@ -128,6 +131,12 @@ export function V6DocView({
     ? `${docType.replace(/[-_]/g, " ").toUpperCase()} · ${doc.status.toUpperCase()}`
     : "LETTER OF INTENT · DRAFT v3";
   const statusKind: DocStatusKind = doc?.status === "complete" ? "live" : doc?.status === "draft" ? "draft" : "saved";
+  const isComplete = doc?.status === "complete";
+  // HONESTY: only a hash the server actually sent gets sealed. Today the
+  // deliverable row carries no output hash client-side (Phase 4 plumbing),
+  // so this probe usually returns null — and we render a plain completed
+  // line instead of a fabricated seal OR a false "unsigned draft".
+  const completedOutputHash = isComplete ? extractOutputHash(doc) : null;
   const savedAt = doc ? `SAVED · ${fmtRelative(doc.updated_at)}` : "SAVED · 12 MIN AGO";
   const showSample = !numericId;
   const showFetched = !!markdown;
@@ -275,7 +284,23 @@ export function V6DocView({
             {saveBusy ? "Saving..." : "Save"}
           </button>
           <span className="mono" style={V.savedAt}>{savedAt}</span>
-          <V6DocStatus status={statusKind} />
+          {/* THE STAMP — keyed by status so the generating→complete poll
+              transition mounts this fresh and the stamp-in plays once. */}
+          {isComplete && completedOutputHash && (
+            <WorkSeal
+              key={`seal-${doc!.status}`}
+              modelId={doc!.doc_class || doc!.type}
+              version={doc!.version_number ?? undefined}
+              outputHash={completedOutputHash}
+              timestamp={doc!.completed_at ?? undefined}
+            />
+          )}
+          {isComplete && !completedOutputHash && (
+            <span key={`completed-${doc!.status}`} className="mono" style={V.savedAt}>
+              v{doc!.version_number || 1} · completed{doc!.completed_at ? ` ${fmtRelative(doc!.completed_at).toLowerCase()}` : ""}
+            </span>
+          )}
+          <V6DocStatus key={doc ? `status-${doc.status}` : "status-sample"} status={statusKind} />
         </div>
         {toolbarNote && <div style={V.toolbarNote}>{toolbarNote}</div>}
 
@@ -538,6 +563,30 @@ function buildYuliaWatch({
     title: "Yulia needs the source document",
     body: "The deliverable record is live, but no readable content is loaded yet. Regenerate it or ask Yulia what source data is missing.",
   };
+}
+
+// Probe every place a REAL substrate output hash could live on the
+// deliverable row: content.outputHash / content.snapshot.outputHash /
+// content.artifact.outputHash, plus generated_from_snapshot.outputHash —
+// the exact field the data-room join reads (server/routes/dataRoom.ts).
+// Returns null when none exists. NEVER fabricates.
+function extractOutputHash(doc: DeliverableRow | null): string | null {
+  if (!doc) return null;
+  let content: unknown = doc.content;
+  if (typeof content === "string") {
+    try { content = JSON.parse(content); } catch { content = null; }
+  }
+  const candidates: unknown[] = [];
+  if (content && typeof content === "object") {
+    const obj = content as Record<string, any>;
+    candidates.push(obj.outputHash, obj.snapshot?.outputHash, obj.artifact?.outputHash);
+  }
+  const snap = doc.generated_from_snapshot;
+  if (snap && typeof snap === "object") {
+    candidates.push((snap as Record<string, any>).outputHash);
+  }
+  const hash = candidates.find(value => typeof value === "string" && value.trim().length > 0);
+  return typeof hash === "string" ? hash : null;
 }
 
 function extractMarkdown(content: unknown): string | null {

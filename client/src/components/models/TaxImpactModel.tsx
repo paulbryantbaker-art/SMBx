@@ -71,7 +71,7 @@ export default function TaxImpactModel({ tabId }: Props) {
             label="Difference"
             value={centsToDisplay(Math.abs(stockSale.netProceeds - assetSale.netProceeds))}
             sublabel={stockSale.netProceeds > assetSale.netProceeds ? 'Stock sale saves more' : 'Asset sale saves more'}
-            color="var(--m-primary)"
+            color="#2E8C5A"
           />
         </div>
       )}

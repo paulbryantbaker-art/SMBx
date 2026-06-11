@@ -1,5 +1,5 @@
 import { useRef, useState, type CSSProperties, type RefObject, type KeyboardEvent, type FormEvent, type ReactNode, type ChangeEvent } from "react";
-import type { Message, OpenTab, StagedAction } from "./types";
+import type { Message, OpenTab, StagedAction, ToolTraceEntry } from "./types";
 import { MODEL_PREFERENCE_LABELS, type ModelPreference } from "../../lib/modelPreference";
 import { V6Icon } from "./icons";
 
@@ -14,6 +14,7 @@ interface ChatProps {
   sending?: boolean;
   streamingText?: string;
   activeTool?: string | null;
+  toolTrace?: ToolTraceEntry[];
   error?: string | null;
   modelPreference?: ModelPreference;
   setModelPreference?: (value: ModelPreference) => void;
@@ -26,7 +27,7 @@ interface ChatProps {
 
 export function V6Chat({
   thread, draft, setDraft, send, inputRef, modeLabel, onOpenTab,
-  sending, streamingText, activeTool, error, modelPreference = "auto", setModelPreference,
+  sending, streamingText, activeTool, toolTrace, error, modelPreference = "auto", setModelPreference,
   showLearnLinks = true, showEmptySuggestions = true, onFileUpload, onConfirmStagedAction, onCancelStagedAction,
 }: ChatProps) {
   const [shareLabel, setShareLabel] = useState<"Share" | "Copied">("Share");
@@ -101,7 +102,7 @@ export function V6Chat({
               />
             ))}
             {sending && (
-              <V6Streaming text={streamingText ?? ""} tool={activeTool ?? null} />
+              <V6Streaming text={streamingText ?? ""} tool={activeTool ?? null} trace={toolTrace ?? []} />
             )}
             {error && <V6Error message={error} />}
           </>
@@ -271,7 +272,11 @@ function StagedActionCard({
   );
 }
 
-function V6Streaming({ text, tool }: { text: string; tool: string | null }) {
+function V6Streaming({ text, tool, trace }: { text: string; tool: string | null; trace: ToolTraceEntry[] }) {
+  // Computation trace: when real tool calls have streamed in, show the mono
+  // ledger instead of the pill. The pill remains the fallback for plain-text
+  // thinking with no tool activity.
+  const hasTrace = trace.length > 0;
   return (
     <div className="m-fade-up" style={{ display: "flex", gap: 10, marginBottom: 14 }}>
       <div style={{
@@ -281,7 +286,19 @@ function V6Streaming({ text, tool }: { text: string; tool: string | null }) {
         fontFamily: "var(--font-mono)", fontWeight: 600, fontSize: 10,
       }}>Y</div>
       <div style={{ flex: 1, minWidth: 0, paddingTop: 3 }}>
-        {tool && (
+        {hasTrace ? (
+          <div className="wk-trace" aria-label="Yulia's tool activity" style={{ marginBottom: text ? 8 : 0 }}>
+            {trace.map(t => (
+              <div key={t.id} className="wk-trace-line">
+                <span className="wk-trace-arrow">→</span>
+                <span className="wk-trace-name">{t.label}</span>
+                {t.status === "done"
+                  ? <><span className="wk-trace-ms">{((t.ms ?? 0) / 1000).toFixed(1)}s</span><span className="wk-trace-ok">✓</span></>
+                  : <span className="wk-trace-running">running…</span>}
+              </div>
+            ))}
+          </div>
+        ) : tool ? (
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 6,
             padding: "3px 9px",
@@ -292,14 +309,14 @@ function V6Streaming({ text, tool }: { text: string; tool: string | null }) {
             <span className="pulse-dot" style={{ color: "var(--accent)" }} aria-hidden="true" />
             <span>{tool}…</span>
           </div>
-        )}
+        ) : null}
         {text && (
           <div style={{
             fontSize: 12.5, lineHeight: 1.55, color: "var(--ink)",
             whiteSpace: "pre-wrap", textWrap: "pretty",
           }}>{text}<span style={{ opacity: 0.5 }}>▍</span></div>
         )}
-        {!tool && !text && (
+        {!hasTrace && !tool && !text && (
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 6,
             padding: "3px 9px",

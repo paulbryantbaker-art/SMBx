@@ -28,8 +28,79 @@
   --st-risk-bg: #FBE7DD;    --st-risk-fg: #C0562F;    --st-risk-dot: #C0562F;
   --banner-risk-bg: #FCF1EC;
   --wk-radius: 12px;
+  /* Working Paper motion tokens — one ease, three durations, app-wide */
+  --ease: cubic-bezier(.22, .61, .36, 1);
+  --dur-fast: 120ms;
+  --dur-base: 240ms;
+  --dur-settle: 340ms;
   background: var(--bg);
   color: var(--ink);
+}
+
+/* ============================================================
+   THE WORKING PAPER, INSIDE — Phase 2 primitives
+   WorkSeal: the substrate's REAL signature (model id · version ·
+   output hash) rendered as a compact stamp. Green here is the
+   muted verdict emerald, never brand neon — computation semantics,
+   not CTA. `unsigned` (dashed) marks scratch state honestly.
+   ============================================================ */
+.wkseal {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .02em;
+  color: var(--ink-2, #57534A);
+  border: 1px solid rgba(25, 24, 19, .14); border-radius: 6px;
+  padding: 3px 9px; background: var(--surface, #FFF);
+  white-space: nowrap;
+}
+.wkseal-mark {
+  width: 7px; height: 7px; flex: none;
+  border: 1.5px solid var(--st-good-fg, #2E8C5A); border-radius: 1.5px;
+  transform: rotate(45deg);
+}
+.wkseal-hash { font-variant-numeric: tabular-nums; }
+.wkseal-check { font-style: normal; font-weight: 700; color: var(--st-good-fg, #2E8C5A); margin-left: 4px; }
+.wkseal-time { color: var(--ink-3, #8B867A); }
+/* stamp-in: one-shot when a signature lands; never loops */
+.wkseal-stamp { animation: wkseal-in var(--dur-settle) var(--ease) both; }
+@keyframes wkseal-in {
+  from { opacity: 0; transform: scale(.94) rotate(-1.4deg); }
+  to   { opacity: 1; transform: none; }
+}
+.wkseal-unsigned { border-style: dashed; color: var(--ink-3, #8B867A); }
+.wkseal-unsigned .wkseal-mark { border-color: var(--ink-3, #8B867A); }
+
+/* DERIVE settle tick — appears once when a number finishes re-deriving,
+   then fades. The ONLY motion-green in the app (muted emerald). */
+.wk-tick {
+  display: inline-block; margin-left: 5px;
+  font-weight: 700; color: var(--st-good-fg, #2E8C5A);
+  opacity: 0; pointer-events: none;
+}
+.wk-tick.on { animation: wk-tick-pulse 900ms var(--ease) both; }
+@keyframes wk-tick-pulse {
+  0% { opacity: 0; transform: scale(.8); }
+  18% { opacity: 1; transform: scale(1); }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Computation trace — real tool telemetry as a compact mono ledger */
+.wk-trace { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.wk-trace-line {
+  display: flex; align-items: baseline; gap: 8px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--ink-2, #57534A);
+  animation: wk-trace-in var(--dur-base) var(--ease) both;
+}
+@keyframes wk-trace-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+.wk-trace-arrow { color: var(--ink-3, #8B867A); flex: none; }
+.wk-trace-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wk-trace-ms { color: var(--ink-3, #8B867A); font-variant-numeric: tabular-nums; flex: none; }
+.wk-trace-ok { color: var(--st-good-fg, #2E8C5A); font-weight: 700; flex: none; }
+.wk-trace-running { color: var(--ink-3, #8B867A); flex: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .wkseal-stamp, .wk-trace-line { animation: none; opacity: 1; transform: none; }
+  .wk-tick.on { animation: none; opacity: 1; }
 }
 
 /* ---- App grid ---- */

@@ -12,7 +12,7 @@ import { normalizeModelPreference, type ModelPreference } from "../../lib/modelP
 import { consumePendingMessage } from "../../marketing/useEnterApp";
 import { buildBigFakeInvestmentBoardTab, shouldOpenSampleInvestmentBoard } from "../../lib/sampleInvestmentBoard";
 import { useModelStore, type ModelType } from "../../lib/modelStore";
-import type { FileListView, FileScope, IconName, Message, ModeId, Tab } from "./types";
+import type { FileListView, FileScope, IconName, Message, ModeId, Tab, ToolTraceEntry } from "./types";
 
 const VALID_MODES: ModeId[] = ["today", "pipeline", "search", "studio", "files", "docs", "analysis", "intel", "library"];
 
@@ -24,6 +24,7 @@ interface ChatBridge {
   sending: boolean;
   streamingText: string;
   activeTool: string | null;
+  toolTrace?: ToolTraceEntry[];
   error: string | null;
   send: (text: string, surfaceContext?: SurfaceContext, modelPreference?: ModelPreference) => void;
   uploadFile?: (file: File) => Promise<{ name: string; size: string } | null>;
@@ -138,12 +139,13 @@ function V6AppAuthed({ user, onSignOut }: { user: User; onSignOut: () => Promise
     sending: chat.sending,
     streamingText: chat.streamingText,
     activeTool: chat.activeTool,
+    toolTrace: chat.toolTrace,
     error: null, // useAuthChat surfaces errors via toasts already
     send: chat.sendMessage,
     uploadFile: chat.uploadFile,
     confirmStagedAction: chat.confirmStagedAction,
     cancelStagedAction: chat.cancelStagedAction,
-  }), [chat.messages, chat.sending, chat.streamingText, chat.activeTool, chat.sendMessage, chat.uploadFile, chat.confirmStagedAction, chat.cancelStagedAction]);
+  }), [chat.messages, chat.sending, chat.streamingText, chat.activeTool, chat.toolTrace, chat.sendMessage, chat.uploadFile, chat.confirmStagedAction, chat.cancelStagedAction]);
 
   return <V6AppShell user={user} chat={bridge} onSignOut={async () => { await onSignOut(); }} />;
 }
@@ -725,6 +727,7 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
             sending={chat.sending}
             streamingText={chat.streamingText}
             activeTool={chat.activeTool}
+            toolTrace={chat.toolTrace}
             error={chat.error}
             modelPreference={modelPreference}
             setModelPreference={setModelPreference}

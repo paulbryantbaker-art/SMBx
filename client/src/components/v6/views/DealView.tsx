@@ -17,6 +17,7 @@ import {
 import { executeSurfaceAction, runActionAnalysis, type ActionDeal } from "../../../lib/v6ActionContracts";
 import { isSurfaceActionId, type SurfaceActionId } from "../../../lib/v6SurfaceActions";
 import { getJourneyGates } from "@shared/gateRegistry";
+import { useDerivedDisplay } from "../shared/useDerivedDisplay";
 
 /* ─── Methodology stage progress ─── */
 interface StageCell { id: string; name: string; state: "done" | "current" | "upcoming" }
@@ -702,7 +703,7 @@ export function V6DealView({
           {stats.map(s => (
             <div key={s.k} className="wkcard" style={{ padding: "14px 18px" }}>
               <div className="mono" style={D.statLabel}>{s.k.toUpperCase()}</div>
-              <div className="mono" style={D.statValue}>{s.v}</div>
+              <StatValue value={s.v} />
               <div style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 2 }}>{s.sub}</div>
             </div>
           ))}
@@ -1129,6 +1130,21 @@ function DealFileRow({ file, last, onClick, relianceWarning }: {
       <span style={{ ...D.fileStatus, background: t.soft, color: t.ink }}>{file.status}</span>
       <span style={D.fileChevron} aria-hidden="true">›</span>
     </button>
+  );
+}
+
+// DERIVE rule for the stat tiles: when the deal data refreshes, the number
+// settles from its previous value and flashes the one-shot muted-emerald
+// tick (.wk-tick — global in workspace.css, loaded by V6App). The hook's
+// first-render rule means initial load shows values instantly — no fake
+// motion, no tick on mount.
+function StatValue({ value }: { value: string }) {
+  const { text, justSettled } = useDerivedDisplay(value);
+  return (
+    <div className="mono" style={D.statValue}>
+      {text}
+      <i className={`wk-tick${justSettled ? " on" : ""}`} aria-hidden="true">✓</i>
+    </div>
   );
 }
 

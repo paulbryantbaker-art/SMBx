@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import ModelRenderer from "../../models/ModelRenderer";
+import { WorkSeal } from "../shared/WorkSeal";
 import { useModelStore } from "../../../lib/modelStore";
 import {
   listSavedModelExecutions,
@@ -106,9 +107,19 @@ export function V6ModelCanvasView({
         <div style={S.headerActions}>
           <div style={S.statusStack}>
             <div style={S.versionPill}>v{tab.versionNumber}</div>
-            <div style={S.hashPill}>
-              {latestSavedRun ? shortHash(latestSavedRun.outputHash) : readbackLabel(readbackState)}
-            </div>
+            {/* WorkSeal replaces the old hash pill: same real outputHash, plus
+                model id, saved version, and time. Unsigned when nothing has
+                been persisted yet (or readback is local-only / errored). */}
+            {latestSavedRun && readbackState !== "local-only" && readbackState !== "error" ? (
+              <WorkSeal
+                modelId={`MODEL.${tab.type}.v1`}
+                version={latestSavedRun.clientVersionNumber}
+                outputHash={latestSavedRun.outputHash}
+                timestamp={latestSavedRun.createdAt}
+              />
+            ) : (
+              <WorkSeal unsigned title={`No signature yet — saved-run readback: ${readbackLabel(readbackState)}`} />
+            )}
             <div style={{ ...S.freshnessPill, ...freshnessTone(latestFreshness?.status) }}>
               {latestFreshness?.statusLabel || (latestSavedRun ? "checking" : "live")}
             </div>
@@ -424,21 +435,6 @@ const S: Record<string, CSSProperties> = {
     fontFamily: "var(--font-mono)",
     fontWeight: 800,
     fontVariantNumeric: "tabular-nums",
-  },
-  /* hash pill: flat surface-2 bg, line border, mono */
-  hashPill: {
-    minWidth: 76,
-    minHeight: 24,
-    borderRadius: 999,
-    display: "grid",
-    placeItems: "center",
-    padding: "0 10px",
-    background: "var(--surface-2)",
-    color: "var(--ink-3)",
-    border: "1px solid var(--line)",
-    fontFamily: "var(--font-mono)",
-    fontSize: 10,
-    letterSpacing: 0,
   },
   /* freshness pill: base style; freshnessTone() merges status-specific --st-* colours */
   freshnessPill: {

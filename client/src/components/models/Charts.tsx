@@ -10,6 +10,7 @@ import {
   type ChartOptions,
 } from 'chart.js';
 import { centsToDisplay, pctDisplay, multDisplay } from '../../lib/calculations/core';
+import { useDerivedDisplay } from '../v6/shared/useDerivedDisplay';
 
 ChartJS.register(
   CategoryScale, LinearScale, BarElement, ArcElement, PointElement, LineElement,
@@ -371,10 +372,15 @@ export function SourcesUsesTable({ sources, uses }: { sources: { label: string; 
 // ─── KPI Cards ──────────────────────────────────────────────────────
 
 export function KPICard({ label, value, sublabel, color }: { label: string; value: string; sublabel?: string; color?: string }) {
+  // DERIVE: numbers settle from their previous value, then flash a one-shot tick.
+  const { text, justSettled } = useDerivedDisplay(value);
   return (
     <div className="rounded-lg p-3 sm:p-3" style={{ background: CREAM, border: `1px solid ${BORDER}` }}>
       <p className="text-[10px] sm:text-[9px] font-bold uppercase tracking-wider m-0 mb-1" style={{ color: MUTED }}>{label}</p>
-      <p className="text-lg sm:text-xl font-bold m-0 truncate" style={{ color: color || TEXT, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{value}</p>
+      <p className="text-lg sm:text-xl font-bold m-0 truncate" style={{ color: color || TEXT, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
+        <span>{text}</span>
+        <i className={`wk-tick${justSettled ? ' on' : ''}`} aria-hidden="true">✓</i>
+      </p>
       {sublabel && <p className="text-[10px] m-0 mt-0.5 truncate" style={{ color: MUTED }}>{sublabel}</p>}
     </div>
   );

@@ -3,6 +3,7 @@ import { authHeaders, type User } from './useAuth';
 import { showToast } from '../lib/toast';
 import type { SurfaceContext } from '../lib/yuliaSurfaceContext';
 import type { ModelPreference } from '../lib/modelPreference';
+import type { ToolTraceEntry } from '../components/v6/types';
 import {
   chatArtifactStreamingMessage,
   dispatchCanvasActionResult,
@@ -92,6 +93,30 @@ const TOOL_LABELS: Record<string, string> = {
   match_franchises: 'Matching franchises',
 };
 
+// Computation trace — keep only the most recent N tool calls per response.
+const TOOL_TRACE_CAP = 12;
+
+function pushTraceEntry(prev: ToolTraceEntry[], entry: ToolTraceEntry): ToolTraceEntry[] {
+  const next = [...prev, entry];
+  return next.length > TOOL_TRACE_CAP ? next.slice(next.length - TOOL_TRACE_CAP) : next;
+}
+
+// Mark the most recent matching running entry done. Falls back to the most
+// recent running entry when the tool name is absent or doesn't match.
+function completeTraceEntry(prev: ToolTraceEntry[], tool?: string): ToolTraceEntry[] {
+  let idx = -1;
+  for (let i = prev.length - 1; i >= 0; i--) {
+    if (prev[i].status !== 'running') continue;
+    if (idx === -1) idx = i;
+    if (tool && prev[i].tool === tool) { idx = i; break; }
+  }
+  if (idx === -1) return prev;
+  const entry = prev[idx];
+  const next = [...prev];
+  next[idx] = { ...entry, status: 'done', ms: performance.now() - entry.startedAt };
+  return next;
+}
+
 // Preserve chat state across Vite HMR remounts
 const _hmr = (import.meta.hot?.data ?? {}) as {
   conversations?: Conversation[];
@@ -110,6 +135,10 @@ export function useAuthChat(user: User | null) {
   const [sending, setSending] = useState(false);
   const [streamingText, setStreamingText] = useState('');
   const [activeTool, setActiveTool] = useState<string | null>(null);
+  // Computation trace — real tool calls from SSE tool_start/tool_done events,
+  // never synthesized. Cleared when a new user message is sent.
+  const [toolTrace, setToolTrace] = useState<ToolTraceEntry[]>([]);
+  const toolTraceIdRef = useRef(0);
   const [activeDealId, setActiveDealId] = useState<number | null>(_hmr.activeDealId ?? null);
   const [currentGate, setCurrentGate] = useState<string | undefined>(_hmr.currentGate);
   const [paywallData, setPaywallData] = useState<any | null>(null);
@@ -302,6 +331,24 @@ export function useAuthChat(user: User | null) {
     setSending(true);
     sendingRef.current = true;
     setStreamingText('');
+    setToolTrace([]);
+
+    // Trace recorders shared by all parse branches below (main, flush, retry).
+    // HONESTY: entries come only from real SSE tool_start/tool_done events.
+    const beginTraceEntry = (tool: unknown) => {
+      if (typeof tool !== 'string' || !tool) return;
+      const entry: ToolTraceEntry = {
+        id: ++toolTraceIdRef.current,
+        tool,
+        label: TOOL_LABELS[tool] || tool,
+        status: 'running',
+        startedAt: performance.now(),
+      };
+      setToolTrace(prev => pushTraceEntry(prev, entry));
+    };
+    const finishTraceEntry = (tool: unknown) => {
+      setToolTrace(prev => completeTraceEntry(prev, typeof tool === 'string' ? tool : undefined));
+    };
 
     let retried = false;
     try {
@@ -373,8 +420,10 @@ export function useAuthChat(user: User | null) {
                   setStreamingText(shouldRouteChatArtifact(accumulated) ? chatArtifactStreamingMessage(accumulated) : accumulated);
                 } else if (parsed.type === 'tool_start') {
                   setActiveTool(TOOL_LABELS[parsed.tool] || 'Working');
+                  beginTraceEntry(parsed.tool);
                 } else if (parsed.type === 'tool_done') {
                   setActiveTool(null);
+                  finishTraceEntry(parsed.tool);
                   canvasActionDispatched = dispatchCanvasActionResult(parsed.result) || canvasActionDispatched;
                 } else if (parsed.type === 'staged_action') {
                   setActiveTool(null);
@@ -420,6 +469,7 @@ export function useAuthChat(user: User | null) {
                 accumulated += parsed.text;
                 setStreamingText(shouldRouteChatArtifact(accumulated) ? chatArtifactStreamingMessage(accumulated) : accumulated);
               } else if (parsed.type === 'tool_done') {
+                finishTraceEntry(parsed.tool);
                 canvasActionDispatched = dispatchCanvasActionResult(parsed.result) || canvasActionDispatched;
               }
             } catch { /* ignore */ }
@@ -449,6 +499,9 @@ export function useAuthChat(user: User | null) {
           retried = true;
           setStreamingText('');
           setActiveTool('Reconnecting');
+          // Drop entries from the aborted stream — the retry re-sends the
+          // message, so the trace restarts from the retry's real events.
+          setToolTrace([]);
           // Retry after a brief pause
           try {
             const retryCtrl = new AbortController();
@@ -479,7 +532,10 @@ export function useAuthChat(user: User | null) {
                         setActiveTool(null);
                         retryAccum += parsed.text;
                         setStreamingText(shouldRouteChatArtifact(retryAccum) ? chatArtifactStreamingMessage(retryAccum) : retryAccum);
+                      } else if (parsed.type === 'tool_start') {
+                        beginTraceEntry(parsed.tool);
                       } else if (parsed.type === 'tool_done') {
+                        finishTraceEntry(parsed.tool);
                         retryCanvasActionDispatched = dispatchCanvasActionResult(parsed.result) || retryCanvasActionDispatched;
                       } else if (parsed.type === 'done') {
                         if (parsed.dealId) setActiveDealId(parsed.dealId);
@@ -630,6 +686,7 @@ export function useAuthChat(user: User | null) {
     sending,
     streamingText,
     activeTool,
+    toolTrace,
     activeDealId,
     currentGate,
     paywallData,

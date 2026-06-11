@@ -32,7 +32,7 @@ export default function DCFModel({ tabId }: Props) {
 
       {dcf && (
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-          <KPICard label="Enterprise Value" value={centsToDisplay(dcf.enterpriseValue)} color="var(--m-primary)" />
+          <KPICard label="Enterprise Value" value={centsToDisplay(dcf.enterpriseValue)} color="#2E8C5A" />
           <KPICard label="PV of FCF" value={centsToDisplay(dcf.pvFCF.reduce((sum: number, value: number) => sum + value, 0))} />
           <KPICard label="PV Terminal" value={centsToDisplay(dcf.pvTerminal)} />
           <KPICard label="Terminal Value" value={centsToDisplay(dcf.terminalValue)} />

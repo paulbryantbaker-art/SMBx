@@ -41,7 +41,7 @@ export default function EarnoutModel({ tabId }: Props) {
       {/* KPIs */}
       {earnout && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <KPICard label="Expected Value" value={centsToDisplay(earnout.expectedValue)} color="var(--m-primary)" sublabel="Probability-weighted" />
+          <KPICard label="Expected Value" value={centsToDisplay(earnout.expectedValue)} color="#2E8C5A" sublabel="Probability-weighted" />
           <KPICard label="Max Payout" value={centsToDisplay(earnout.maxPayout)} sublabel="If all milestones hit" />
           <KPICard label="PV of Expected" value={centsToDisplay(earnout.pvExpected)} sublabel={`At ${pctDisplay(a.discountRate ?? 0.10)} discount`} />
         </div>
