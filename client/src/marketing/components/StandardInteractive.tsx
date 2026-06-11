@@ -12,6 +12,7 @@ import {
   useReducedMotion,
   animate,
 } from 'framer-motion';
+import { ConformanceTerminal } from './ConformanceTerminal';
 
 /**
  * StandardInteractive — the interactive pieces of the /standard page
@@ -570,84 +571,9 @@ export function ModelAnatomy() {
 
 /* ============================================================
    4 · CONFORMANCE CONSOLE — terminal run + machine discovery
+   (terminal itself lives in ConformanceTerminal.tsx so Home's
+   dark band can mount it without pulling in this whole module)
    ============================================================ */
-type TLine =
-  | { kind: 'cmd'; text: string }
-  | { kind: 'pass'; n: string; label: string }
-  | { kind: 'total'; text: string };
-
-const TERMINAL: TLine[] = [
-  { kind: 'cmd', text: '$ npm run test:definitive-conformance' },
-  { kind: 'pass', n: '202', label: 'model-runtime' },
-  { kind: 'pass', n: '60', label: 'deal-mechanics route' },
-  { kind: 'pass', n: '104', label: 'prompt / meta' },
-  { kind: 'pass', n: '30', label: 'route-trigger' },
-  { kind: 'pass', n: '33', label: 'model-stack' },
-  { kind: 'pass', n: '43', label: 'Deal OS artifact' },
-  { kind: 'total', text: '→ 472 passed · 0 failed' },
-];
-
-function TerminalLine({ line }: { line: TLine }) {
-  if (line.kind === 'cmd') {
-    return <div className="std-term-line std-term-cmd">{line.text}</div>;
-  }
-  if (line.kind === 'total') {
-    return <div className="std-term-line std-term-total">{line.text}</div>;
-  }
-  return (
-    <div className="std-term-line std-term-pass">
-      <span className="std-term-check" aria-hidden="true">✓</span>
-      <span className="std-term-n num">{line.n}</span>
-      <span className="std-term-lbl">{line.label}</span>
-    </div>
-  );
-}
-
-function ConformanceTerminal() {
-  const reduce = !!useReducedMotion();
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { amount: 0.4 });
-  const [shown, setShown] = useState(reduce ? TERMINAL.length : 0);
-
-  // Re-schedule the whole reveal on every in-view pass (safe under StrictMode:
-  // cleanup clears pending timers, a fresh run replays the chain). Once it has
-  // played it stays at full length, so it never regresses to a half-printed run.
-  useEffect(() => {
-    if (reduce) {
-      setShown(TERMINAL.length);
-      return;
-    }
-    if (!inView) return;
-    setShown((s) => Math.max(s, 1)); // command appears first
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    for (let i = 1; i < TERMINAL.length; i++) {
-      timers.push(setTimeout(() => setShown((s) => Math.max(s, i + 1)), 260 + i * 240));
-    }
-    return () => timers.forEach(clearTimeout);
-  }, [inView, reduce]);
-
-  return (
-    <div className="mock std-term-mock" ref={ref}>
-      <div className="mock-bar">
-        <span className="mock-dot" />
-        <span className="mock-dot" />
-        <span className="mock-dot" />
-        <span className="mock-title">conformance</span>
-        <span className="mock-tag mono">
-          <span className="vdot" />
-          472 / 472
-        </span>
-      </div>
-      <div className="std-term-body mono" aria-label="Conformance suite output">
-        {TERMINAL.slice(0, shown).map((line, i) => (
-          <TerminalLine key={i} line={line} />
-        ))}
-        {!reduce && shown < TERMINAL.length && <span className="std-term-caret" aria-hidden="true" />}
-      </div>
-    </div>
-  );
-}
-
 type Discovery = { label: string; value: string; note?: string };
 
 const DISCOVERY: Discovery[] = [

@@ -1708,6 +1708,12 @@
 .mkt .reveal[data-d="3"] { animation-delay: .24s; }
 .mkt .reveal[data-d="4"] { animation-delay: .32s; }
 @keyframes mkt-reveal { to { opacity: 1; transform: translateY(0); } }
+/* Scroll-triggered reveals (revealObserver.ts): `.mkt-io` is added only once
+   the IntersectionObserver is live, and reveals are merely PAUSED until they
+   enter the viewport. No JS / no IO / any failure → no pause, the reveal
+   plays on mount exactly as before. Content can never be stuck hidden. */
+.mkt.mkt-io .reveal { animation-play-state: paused; }
+.mkt.mkt-io .reveal.is-in { animation-play-state: running; }
 @media (prefers-reduced-motion: reduce) { .mkt .reveal { animation: none; opacity: 1; transform: none; } }
 
 /* ---- responsive (ported from CD "marketing mobile" handoff) ---- */
@@ -1814,4 +1820,60 @@
   .mkt { --pad-y: calc(50px * var(--d)); }
   .mkt .display { font-size: clamp(2rem, 9vw, 2.5rem); }
   .mkt .footer .fcols { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   THE WORKING PAPER — Phase 1
+   The site computes. Green is rationed: on these surfaces it
+   appears only where computation happened (derived figures,
+   the seal's ✓, pass checks) and on the Yulia CTA.
+   ============================================================ */
+
+/* ---- derivation hero: the live worked equation on the dark hero band ---- */
+.mkt .dh { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-top: clamp(30px, 4vw, 46px); }
+.mkt .dh-eq { display: flex; align-items: flex-end; justify-content: center; flex-wrap: wrap; gap: clamp(14px, 2.6vw, 34px); row-gap: 24px; }
+.mkt .dh-term { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.mkt .dh-lbl { font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.45); font-weight: 600; }
+.mkt .dh-val { font-size: clamp(1.5rem, 2.6vw, 2.2rem); font-weight: 600; color: #fff; font-variant-numeric: tabular-nums; line-height: 1; }
+.mkt .dh-edit { border-bottom: 1px dashed rgba(255,255,255,.35); padding: 2px 6px 5px; cursor: text; border-radius: 6px 6px 0 0; transition: border-color .2s var(--ease), background .2s var(--ease); outline: none; min-width: 3.2ch; }
+.mkt .dh-edit:hover { border-color: rgba(255,255,255,.6); }
+.mkt .dh-edit:focus { border-color: var(--accent); background: rgba(255,255,255,.06); }
+.mkt .dh-op { font-family: var(--serif); font-style: italic; font-size: clamp(1.4rem, 2.2vw, 1.9rem); color: rgba(255,255,255,.5); padding-bottom: 6px; }
+.mkt .dh-knobrow { display: flex; align-items: center; gap: 10px; }
+.mkt .dh-knob { cursor: ew-resize; touch-action: none; border-bottom: 1px dashed rgba(255,255,255,.35); padding: 2px 6px 5px; border-radius: 6px 6px 0 0; transition: border-color .2s var(--ease), background .2s var(--ease); outline: none; user-select: none; }
+.mkt .dh-knob:hover, .mkt .dh-knob:focus-visible { border-color: var(--accent); background: rgba(255,255,255,.06); }
+.mkt .dh-step { all: unset; cursor: pointer; box-sizing: border-box; width: 28px; height: 28px; min-width: 28px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.25); border-radius: 50%; color: rgba(255,255,255,.7); font-size: .95rem; transition: border-color .15s var(--ease), color .15s var(--ease), transform .1s var(--ease); }
+.mkt .dh-step:hover, .mkt .dh-step:focus-visible { border-color: var(--accent); color: var(--accent); }
+.mkt .dh-step:active { transform: scale(.92); }
+/* the derived figure: serif numerals at display scale, in the computed green */
+.mkt .dh-ev { font-family: var(--serif); font-optical-sizing: auto; font-weight: 560; font-size: clamp(2.6rem, 5vw, 4rem); letter-spacing: -.02em; color: var(--accent); line-height: .95; font-variant-numeric: tabular-nums; }
+.mkt .dh-under { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 14px 28px; }
+.mkt .dh-range { font-size: .8rem; color: rgba(255,255,255,.55); letter-spacing: .02em; }
+.mkt .dh-yulia { all: unset; cursor: pointer; font-family: var(--mono); font-size: .82rem; color: rgba(255,255,255,.65); border-bottom: 1px solid transparent; padding-bottom: 2px; transition: color .2s var(--ease), border-color .2s var(--ease); }
+.mkt .dh-yulia:hover, .mkt .dh-yulia:focus-visible { color: var(--accent); border-color: var(--accent); }
+
+/* ---- provenance seal: the rotated audit stamp that signs an exhibit ---- */
+.mkt .seal { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.mkt .seal-stamp { display: inline-flex; align-items: center; gap: 10px; padding: 7px 12px; border: 1px solid var(--line-2); border-radius: 8px; transform: rotate(-2deg); background: var(--surface); box-shadow: 0 10px 24px -16px rgba(16,224,96,.4); }
+.mkt .seal-mark { width: 9px; height: 9px; flex: none; border: 2px solid var(--accent-strong); border-radius: 2px; transform: rotate(45deg); }
+.mkt .seal-meta { font-size: .6rem; letter-spacing: .1em; color: var(--ink-3); font-weight: 600; white-space: nowrap; }
+.mkt .seal-hash { font-size: .68rem; color: var(--ink-2); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.mkt .seal-check { font-style: normal; color: var(--accent-strong); font-weight: 700; }
+.mkt .seal-note { font-size: .64rem; color: var(--ink-3); letter-spacing: .04em; padding-left: 4px; }
+/* dark-surface variant (hero, dark bands) */
+.mkt .seal-dark .seal-stamp { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.22); }
+.mkt .seal-dark .seal-meta { color: rgba(255,255,255,.5); }
+.mkt .seal-dark .seal-hash { color: rgba(255,255,255,.72); }
+.mkt .seal-dark .seal-check { color: var(--accent); }
+.mkt .seal-dark .seal-mark { border-color: var(--accent); }
+.mkt .seal-dark .seal-note { color: rgba(255,255,255,.4); }
+
+/* ---- conformance terminal: replay affordance (lives on the dark body) ---- */
+.mkt .std-term-replay { all: unset; cursor: pointer; display: inline-block; margin-top: 10px; font-size: .72rem; letter-spacing: .05em; color: rgba(255,255,255,.45); transition: color .2s var(--ease); }
+.mkt .std-term-replay:hover, .mkt .std-term-replay:focus-visible { color: var(--accent); }
+
+@media (max-width: 560px) {
+  .mkt .dh-eq { gap: 12px; row-gap: 18px; }
+  .mkt .dh-out { flex-basis: 100%; }
+  .mkt .seal-meta { white-space: normal; }
 }

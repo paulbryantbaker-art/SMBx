@@ -33,6 +33,7 @@
     "test:v19-models": "npx tsx scripts/test-v19-model-runtime.ts",
     "verify:v19-schema": "npx tsx scripts/verify-v19-schema.ts",
     "launch-readiness": "npx tsx scripts/launch-readiness.ts",
+    "test:marketing-math": "npx tsx scripts/marketing-math-reconcile.ts",
     "seed:demo-user": "node scripts/seed-demo-user-data.mjs",
     "design:extract": "node scripts/extract-design-tokens.mjs"
   },

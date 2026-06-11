@@ -5,6 +5,8 @@ import { YuliaLauncher } from '../YuliaChat';
 import { CLOSER_CAPABILITIES } from '../components/ClosingCTA';
 import { enterApp } from '../useEnterApp';
 import { HeroWorkspace } from '../components/HeroWorkspace';
+import { DerivationHero } from '../components/DerivationHero';
+import { ConformanceTerminal } from '../components/ConformanceTerminal';
 import { ScrollGrow } from '../components/ScrollGrow';
 import { ProductFrame } from '../components/ProductFrame';
 import {
@@ -39,7 +41,13 @@ export default function Home() {
             and CIMs that used to take a deal team — from your real numbers, with
             every figure traceable to its source.
           </p>
+          {/* The Working Paper signature: a live worked equation — drag the
+              multiple, edit EBITDA, EV re-derives through core.ts and the
+              seal re-hashes. The site computes; it doesn't just say so. */}
           <div className="reveal" data-d="3" style={{ width: '100%' }}>
+            <DerivationHero />
+          </div>
+          <div className="reveal" data-d="4" style={{ width: '100%' }}>
             <YuliaLauncher />
           </div>
         </div>
@@ -130,19 +138,31 @@ export default function Home() {
         </div>
       </section>
 
-      {/* WHAT SMBX IS NOT — dark safe-harbor block */}
+      {/* WHAT SMBX IS NOT — dark safe-harbor block, now paired with the
+          conformance run actually playing beside the claim (Working Paper:
+          compliance prose + computation happening is the proof). */}
       <section className="dark">
-        <div className="wrap center">
-          <h2 className="reveal" style={{ maxWidth: '20ch', margin: '0 auto' }}><Brand /> is software.</h2>
-          <p className="lead reveal measure-wide" data-d="1" style={{ margin: '24px auto 0' }}>
-            It is not a broker-dealer, investment adviser, or business broker. It is not
-            a law firm, accounting firm, or appraiser. It does not negotiate, sign, file,
-            hold funds, recommend transactions, or match buyers and sellers for a fee.
-          </p>
-          <p className="reveal" data-d="2" style={{ margin: '22px auto 0', fontFamily: 'var(--mono)', letterSpacing: '.04em', color: 'var(--accent)' }}>
-            <Brand /> computes. You decide.
-          </p>
-          <div className="reveal computed-closer-tags" data-d="3" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 10, maxWidth: '56ch', margin: 'clamp(36px,4.4vw,56px) auto 0' }}>
+        <div className="wrap mkt-split">
+          <div className="reveal">
+            <h2 style={{ maxWidth: '20ch' }}><Brand /> is software.</h2>
+            <p className="lead" style={{ marginTop: 24 }}>
+              It is not a broker-dealer, investment adviser, or business broker. It is not
+              a law firm, accounting firm, or appraiser. It does not negotiate, sign, file,
+              hold funds, recommend transactions, or match buyers and sellers for a fee.
+            </p>
+            <p style={{ marginTop: 22, fontSize: '1.15rem', fontWeight: 600, color: '#fff' }}>
+              No language model touches the math path.
+            </p>
+            <p style={{ marginTop: 14, fontFamily: 'var(--mono)', letterSpacing: '.04em', color: 'var(--accent)' }}>
+              <Brand /> computes. You decide.
+            </p>
+          </div>
+          <div className="reveal" data-d="1">
+            <ConformanceTerminal replayable />
+          </div>
+        </div>
+        <div className="wrap">
+          <div className="reveal computed-closer-tags" data-d="2" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 10, maxWidth: '64ch', margin: 'clamp(40px,5vw,64px) auto 0' }}>
             {CLOSER_CAPABILITIES.map(c => (
               <Link key={c} href="/standard" className="tag tag-link">{c}</Link>
             ))}

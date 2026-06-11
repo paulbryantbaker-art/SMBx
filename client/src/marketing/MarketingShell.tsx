@@ -1,8 +1,9 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { useLocation } from 'wouter';
 import './marketing.css';
 import { MarketingNav, MarketingFooter } from './MarketingChrome';
 import { YuliaFab } from './YuliaChat';
+import { armRevealObserver } from './revealObserver';
 
 /**
  * Wraps every logged-out marketing page. Provides the `.mkt` scope (so the
@@ -13,6 +14,16 @@ import { YuliaFab } from './YuliaChat';
  */
 export function MarketingShell({ children }: { children: ReactNode }) {
   const [location] = useLocation();
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  // Arm scroll-triggered reveals (see revealObserver.ts). Reveals play only
+  // when they enter the viewport; without this observer they play on mount —
+  // a safe fallback, never hidden content.
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    return armRevealObserver(root);
+  }, []);
   // Reset scroll to the top on every route change. wouter reuses this shell
   // instance across marketing routes, and the footer (which holds the nav
   // links) sits at the page bottom — so without this, navigating from the
@@ -39,7 +50,7 @@ export function MarketingShell({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <div className="mkt">
+    <div className="mkt" ref={rootRef}>
       <MarketingNav />
       <main>{children}</main>
       <MarketingFooter />
