@@ -167,7 +167,7 @@ function ProjectionVisual() {
           </div>
           <div>
             <div className="mono" style={{ fontSize: '.7rem', color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Rule of 40</div>
-            <div className="mono num" style={{ fontSize: '1.5rem', fontWeight: 500 }}>46</div>
+            <div className="mono num" style={{ fontSize: '1.5rem', fontWeight: 500 }}>47</div>
           </div>
         </div>
       </div>
@@ -349,7 +349,13 @@ export default function Raise() {
             <p className="reveal mono" data-d="2" style={{ marginTop: 16, fontSize: '.8rem', color: 'var(--ink-3)', letterSpacing: '.01em' }}>
               For operators, independent sponsors, and founders.
             </p>
-            <div className="reveal" data-d="3">
+            <blockquote className="yq reveal" data-d="3" style={{ margin: '26px 0 0' }}>
+              &ldquo;A $12M round at $42M pre is $54M post &mdash; founders go from 78% to
+              61%. Every one of those 17 points is computed before a term sheet ever
+              arrives.&rdquo;
+              <span className="yq-who">— Yulia, on the sample raise below</span>
+            </blockquote>
+            <div className="reveal" data-d="4">
               <YuliaLauncher />
             </div>
           </div>

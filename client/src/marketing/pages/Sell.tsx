@@ -4,7 +4,8 @@ import { Brand } from '../Brand';
 import { YuliaLauncher } from '../YuliaChat';
 import { ClosingCTA } from '../components/ClosingCTA';
 import { ProductFrame } from '../components/ProductFrame';
-import { MiniValuation, CIMDeliverMock, BuyerListMock, DataRoomMock } from '../components/ProductMocks';
+import { CIMDeliverMock, BuyerListMock, DataRoomMock } from '../components/ProductMocks';
+import { AddBackLedger } from '../components/AddBackLedger';
 
 /* One stage row in the journey walkthrough */
 function Stage({ code, title, children, note }: { code: string; title: string; children: ReactNode; note?: string }) {
@@ -34,7 +35,12 @@ export default function Sell() {
             what they&rsquo;ll find — your real earnings, your working capital, your defensible
             value — and packages it the way a serious process requires.
           </p>
-          <div className="reveal" data-d="3" style={{ width: '100%' }}>
+          <blockquote className="yq reveal" data-d="3" style={{ margin: '26px auto 0', textAlign: 'center' }}>
+            &ldquo;Your reported $612k is really $1.31M. Here are the eight add-backs a
+            buyer&rsquo;s team will find.&rdquo;
+            <span className="yq-who">— Yulia, on the sample deal below</span>
+          </blockquote>
+          <div className="reveal" data-d="4" style={{ width: '100%' }}>
             <YuliaLauncher />
           </div>
         </div>
@@ -47,31 +53,12 @@ export default function Sell() {
             <span className="eyebrow" style={{ justifyContent: 'center' }}>The number that sets your price</span>
             <h2 style={{ marginTop: 16 }}>Your profit isn&rsquo;t your value.</h2>
           </div>
-          <div className="reveal" style={{ border: '1px solid var(--line)', borderRadius: 'var(--radius)', background: 'var(--surface)', boxShadow: '0 30px 60px -42px rgba(25,24,19,.4)', overflow: 'hidden' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 20, padding: '40px 36px' }}>
-              <div style={{ textAlign: 'center' }}>
-                <div className="mono" style={{ fontSize: '.72rem', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>Reported profit</div>
-                <div className="mono" style={{ fontSize: 'clamp(2rem,4vw,3rem)', fontWeight: 500, color: 'var(--ink-3)', marginTop: 8 }}>$612k</div>
-                <p className="body" style={{ fontSize: '.9rem', marginTop: 12 }}>What the tax return shows</p>
-              </div>
-              <div className="mkt-liftarrow" style={{ color: 'var(--ink-3)' }}>
-                <svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div className="mono" style={{ fontSize: '.72rem', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--accent-strong)' }}>Normalized SDE</div>
-                <div className="mono" style={{ fontSize: 'clamp(2rem,4vw,3rem)', fontWeight: 500, marginTop: 8 }}>$1.31M</div>
-                <p className="body" style={{ fontSize: '.9rem', marginTop: 12 }}>What a buyer underwrites to</p>
-              </div>
-            </div>
-            <div style={{ borderTop: '1px solid var(--line)', padding: '20px 36px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-              <span className="mono" style={{ fontSize: '.82rem', color: 'var(--ink-3)' }}>8 add-backs identified · owner comp, one-time items, personal expense</span>
-              <span className="mono" style={{ fontSize: '1.1rem', fontWeight: 500, color: 'var(--accent-strong)' }}>2.1&times; lift</span>
-            </div>
-          </div>
-
-          {/* the valuation baseline that follows from the normalized number */}
-          <div className="reveal" data-d="1" style={{ maxWidth: 460, margin: '36px auto 0' }}>
-            <MiniValuation />
+          {/* LIVE add-back ledger: toggle a line, the SDE / lift / valuation
+              range all re-derive through core.ts. Replaces the static
+              before→after card AND the old MiniValuation (whose $38–52M
+              Northwind range contradicted this page's $1.31M-SDE deal). */}
+          <div className="reveal">
+            <AddBackLedger />
           </div>
         </div>
       </section>

@@ -234,17 +234,18 @@ function CompositionVisual() {
 /* ============================================================
    PMI3 visual — EBITDA value-bridge + ranked initiatives
    ============================================================ */
+/* pct = cumulative EBITDA as % of the $10.0M target: 8.4 → 9.1 → 9.6 → 10.0 */
 const BRIDGE: Array<{ label: string; pct: number; value: string }> = [
-  { label: 'Today', pct: 70, value: '$8.4M' },
-  { label: 'Pricing', pct: 78, value: '+$0.7M' },
-  { label: 'Procure', pct: 86, value: '+$0.5M' },
-  { label: 'Mix', pct: 92, value: '+$0.4M' },
+  { label: 'Today', pct: 84, value: '$8.4M' },
+  { label: 'Pricing', pct: 91, value: '+$0.7M' },
+  { label: 'Procure', pct: 96, value: '+$0.5M' },
+  { label: 'Mix', pct: 100, value: '+$0.4M' },
   { label: 'Target', pct: 100, value: '$10.0M' },
 ];
 const INITIATIVES: Array<{ name: string; tag: string }> = [
   { name: 'Reprice underwater accounts', tag: 'High · Low effort' },
-  { name: 'Renegotiate top suppliers', tag: 'High · Med' },
-  { name: 'Shift mix to service revenue', tag: 'Med · Med' },
+  { name: 'Renegotiate top suppliers', tag: 'High · Med effort' },
+  { name: 'Shift mix to service revenue', tag: 'Med · Med effort' },
 ];
 
 function ValueBridgeVisual() {
@@ -347,7 +348,13 @@ export default function Integrate() {
             <p className="reveal mono" data-d="2" style={{ marginTop: 16, fontSize: '.8rem', color: 'var(--ink-3)', letterSpacing: '.01em' }}>
               For new owners — PE buyers, independent sponsors, and strategic acquirers.
             </p>
-            <div className="reveal" data-d="3">
+            <blockquote className="yq reveal" data-d="3" style={{ margin: '26px 0 0' }}>
+              &ldquo;There&rsquo;s $0.6M of margin leaking between $34M of revenue and $8.4M of
+              EBITDA. Three initiatives bridge it to $10.0M — and the largest, repricing, is
+              also the lowest effort.&rdquo;
+              <span className="yq-who">— Yulia, on the sample integration below</span>
+            </blockquote>
+            <div className="reveal" data-d="4">
               <YuliaLauncher />
             </div>
           </div>

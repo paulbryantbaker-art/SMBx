@@ -194,7 +194,7 @@ export function ModelBuildMock() {
           </div>
           <div className="mkt-val-foot mono">
             <span className="mkt-val-vdot" />
-            $30M senior · 3.2× leverage · assumptions editable
+            $30M senior · 3.6× leverage · assumptions editable
           </div>
         </>
       )}
@@ -272,13 +272,13 @@ export function MiniValuation() {
         {(run, reduce) => (
           <>
             <div className="mkt-mini-rangehead">
-              <span className="mkt-mini-rangeval mono num">$38M – $52M</span>
+              <span className="mkt-mini-rangeval mono num">$38M – $55M</span>
             </div>
             <div className="mkt-mini-track">
               <motion.div
                 className="mkt-mini-fill"
-                initial={reduce ? { width: '64%' } : { width: '0%' }}
-                animate={run ? { width: '64%' } : {}}
+                initial={reduce ? { width: '48%' } : { width: '0%' }}
+                animate={run ? { width: '48%' } : {}}
                 transition={{ duration: 0.9, ease: EASE }}
               >
                 <span className="mkt-mini-knob" />
@@ -398,14 +398,16 @@ export function MiniStructure() {
   return (
     <MiniFrame title="structure">
       <div className="mkt-mini-struct">
+        {/* after-tax proceeds must sit BELOW the $46.2M gross EV; stock nets
+            the seller more than asset (no entity-level step-up cost). */}
         <div className="mkt-mini-structcol active">
           <span className="mkt-mini-structname">Asset deal</span>
-          <span className="mkt-mini-structnum mono num">$44.1M</span>
+          <span className="mkt-mini-structnum mono num">$35.9M</span>
           <span className="mkt-mini-structnote mono">after-tax to seller</span>
         </div>
         <div className="mkt-mini-structcol">
           <span className="mkt-mini-structname">Stock deal</span>
-          <span className="mkt-mini-structnum mono num">$46.8M</span>
+          <span className="mkt-mini-structnum mono num">$38.7M</span>
           <span className="mkt-mini-structnote mono">after-tax to seller</span>
         </div>
       </div>
@@ -544,7 +546,7 @@ export function SensitivityMock() {
       </div>
       <div className="mkt-sens-foot mono">
         <span className="mkt-val-vdot" />
-        5.5× entry · 6.5× exit · $30M senior · 3.2× leverage
+        5.5× entry · 6.5× exit · $30M senior · 3.6× leverage
       </div>
     </div>
   );
@@ -563,7 +565,7 @@ export function DataRoomMock({
     variant === 'sell'
       ? [
           { name: 'Financial statements', meta: 'FY21–FY24 · 14 files', state: 'done' },
-          { name: 'Quality of earnings', meta: 'Normalized EBITDA $8.4M', state: 'done' },
+          { name: 'Quality of earnings', meta: 'Normalized SDE $1.31M', state: 'done' },
           { name: 'Customer contracts', meta: '38 of 41 uploaded', state: 'review' },
           { name: 'Legal & corporate', meta: 'Cap table, org docs', state: 'done' },
           { name: 'Management presentation', meta: 'Draft in review', state: 'open' },
@@ -619,10 +621,12 @@ export function DataRoomMock({
 /** SELL · buyer management — a ranked buyer list (type, fit, indicated range, status). */
 export function BuyerListMock() {
   const ROWS: Array<{ name: string; type: string; range: string; fit: number; status: string }> = [
-    { name: 'Sponsor — platform', type: 'Private equity', range: '$44M – $50M', fit: 92, status: 'IOI' },
-    { name: 'Strategic acquirer', type: 'Industry buyer', range: '$46M – $54M', fit: 88, status: 'NDA' },
-    { name: 'Family office', type: 'Long-hold', range: '$40M – $46M', fit: 81, status: 'Intro' },
-    { name: 'Search fund', type: 'Independent', range: '$38M – $43M', fit: 67, status: 'Screening' },
+    /* Sell-page deal scale ($1.31M SDE → $3.9M–$6.6M at 3.0–5.0× SDE):
+       indicated ranges must bracket that valuation, not Northwind's. */
+    { name: 'Sponsor — platform', type: 'Private equity', range: '$4.4M – $5.0M', fit: 92, status: 'IOI' },
+    { name: 'Strategic acquirer', type: 'Industry buyer', range: '$4.6M – $5.4M', fit: 88, status: 'NDA' },
+    { name: 'Family office', type: 'Long-hold', range: '$4.0M – $4.6M', fit: 81, status: 'Intro' },
+    { name: 'Search fund', type: 'Independent', range: '$3.8M – $4.3M', fit: 67, status: 'Screening' },
   ];
   return (
     <InView className="mkt-pipe" amount={0.35}>
@@ -804,7 +808,7 @@ export function AssistantSurfaceMock({ assistant = 'Claude' }: { assistant?: str
         <div className="mkt-asst-toolbody">
           <div className="mkt-asst-kv"><span>Enterprise value</span><span className="mono num">$46.2M</span></div>
           <div className="mkt-asst-kv"><span>EV / EBITDA</span><span className="mono num">5.5×</span></div>
-          <div className="mkt-asst-kv"><span>Range</span><span className="mono num">$38M – $52M</span></div>
+          <div className="mkt-asst-kv"><span>Range</span><span className="mono num">$38M – $55M</span></div>
         </div>
         <div className="mkt-asst-stamp mono">
           <span>method v2.4</span>
@@ -813,7 +817,7 @@ export function AssistantSurfaceMock({ assistant = 'Claude' }: { assistant?: str
       </div>
       <div className="mkt-asst-reply">
         At a 5.5× entry on $8.4M normalized EBITDA, the enterprise value is $46.2M,
-        inside a $38M–$52M range. Every figure traces to its source.
+        inside a $38M–$55M range. Every figure traces to its source.
       </div>
     </div>
   );

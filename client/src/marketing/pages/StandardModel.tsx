@@ -1,16 +1,8 @@
+import { useRef, useState } from 'react';
 import { Link } from 'wouter';
 import { MarketingShell } from '../MarketingShell';
 import { enterApp } from '../useEnterApp';
-
-/* KV row helper — mirrors the Home.tsx pattern; `.kv .v` is already mono */
-function KV({ k, v, pos }: { k: string; v: string; pos?: boolean }) {
-  return (
-    <div className="kv">
-      <span className="k">{k}</span>
-      <span className={pos ? 'v pos' : 'v'}>{v}</span>
-    </div>
-  );
-}
+import { ProvenanceSeal } from '../components/ProvenanceSeal';
 
 const INPUTS = [
   'Current assets included (AR, inventory, prepaids)',
@@ -25,13 +17,131 @@ const AUTHORITIES = [
   'Linked authority register entries',
 ];
 
-const EXAMPLE_LINES: Array<{ line: string; amount: string }> = [
-  { line: 'Accounts receivable', amount: '$412,000' },
-  { line: 'Inventory', amount: '$188,400' },
-  { line: 'Prepaids', amount: '$42,000' },
-  { line: 'Accounts payable', amount: '$(118,200)' },
-  { line: 'Accrued liabilities', amount: '$(38,000)' },
+/* The worked example's opening position. Liabilities carry `neg` and render in
+   accountant parentheses. NWC = 486,200 — asserted in
+   scripts/marketing-math-reconcile.ts so the live exhibit always reconciles. */
+const SCHEDULE_LINES: Array<{ line: string; amount: number; neg?: boolean }> = [
+  { line: 'Accounts receivable', amount: 412_000 },
+  { line: 'Inventory', amount: 188_400 },
+  { line: 'Prepaids', amount: 42_000 },
+  { line: 'Accounts payable', amount: 118_200, neg: true },
+  { line: 'Accrued liabilities', amount: 38_000, neg: true },
 ];
+const DELIVERED_DEFAULT = 501_900;
+
+const fmtUSD = (n: number) => `$${Math.round(Math.abs(n)).toLocaleString()}`;
+const fmtSigned = (n: number) => `${n < 0 ? '−' : '+'}$${Math.round(Math.abs(n)).toLocaleString()}`;
+
+/** An editable mono amount cell: parse on blur/Enter, clamp, reformat. */
+function AmountCell({ value, neg, onCommit, label }: {
+  value: number;
+  neg?: boolean;
+  onCommit: (n: number) => void;
+  label: string;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const commit = () => {
+    const el = ref.current;
+    if (!el) return;
+    const parsed = parseFloat((el.textContent || '').replace(/[^0-9.]/g, ''));
+    const next = Number.isFinite(parsed) ? Math.min(99_999_999, Math.max(0, Math.round(parsed))) : value;
+    onCommit(next);
+    el.textContent = neg ? `$(${next.toLocaleString()})` : `$${next.toLocaleString()}`;
+  };
+  return (
+    <span
+      ref={ref}
+      className="lg-input mono num"
+      contentEditable
+      suppressContentEditableWarning
+      inputMode="numeric"
+      role="textbox"
+      aria-label={`${label} — editable`}
+      spellCheck={false}
+      onBlur={commit}
+      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); (e.currentTarget as HTMLSpanElement).blur(); } }}
+    >
+      {neg ? `$(${value.toLocaleString()})` : `$${value.toLocaleString()}`}
+    </span>
+  );
+}
+
+/**
+ * LiveSchedule — the Working Paper move: the spec's worked example EXECUTES.
+ * Type a new receivables number and the NWC, the peg, and the purchase-price
+ * adjustment recompute on commit; the seal re-digests. The page is a working
+ * instance of its own methodology.
+ */
+function LiveSchedule() {
+  const [lines, setLines] = useState(SCHEDULE_LINES.map(l => l.amount));
+  const [delivered, setDelivered] = useState(DELIVERED_DEFAULT);
+
+  const nwc = SCHEDULE_LINES.reduce(
+    (sum, l, i) => sum + (l.neg ? -lines[i] : lines[i]),
+    0,
+  );
+  const peg = nwc; // illustrative: the trailing 12-mo average equals this position
+  const adj = delivered - peg;
+
+  return (
+    <div className="sched" style={{ maxWidth: '64ch', marginTop: 6 }}>
+      <div className="sched-hd">
+        <span className="sched-no">Schedule 4.7 — Net working capital</span>
+        <span className="sched-sub">live · edit any amount</span>
+      </div>
+      <div className="sched-body">
+        <table className="ledger" aria-label="Net working capital schedule — amounts are editable">
+          <tbody>
+            {SCHEDULE_LINES.map((l, i) => (
+              <tr key={l.line} className="lg-row">
+                <td className="lg-label">{l.line}</td>
+                <td className="lg-amt">
+                  <AmountCell
+                    value={lines[i]}
+                    neg={l.neg}
+                    label={l.line}
+                    onCommit={(n) => setLines(arr => arr.map((v, j) => (j === i ? n : v)))}
+                  />
+                </td>
+              </tr>
+            ))}
+            <tr className="lg-total">
+              <td className="lg-label rule-over">Net working capital</td>
+              <td className="lg-amt rule-over rule-double-under num">{fmtUSD(nwc)}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style={{ marginTop: 16 }}>
+          <div className="kv">
+            <span className="k">Peg (12-mo avg)</span>
+            <span className="v">{fmtUSD(peg)}</span>
+          </div>
+          <div className="kv">
+            <span className="k">Delivered NWC at close</span>
+            <span className="v">
+              <AmountCell value={delivered} label="Delivered NWC at close" onCommit={setDelivered} />
+            </span>
+          </div>
+          <div className="kv">
+            <span className="k">Purchase-price adjustment</span>
+            <span className={adj >= 0 ? 'v pos' : 'v'} style={adj < 0 ? { color: 'var(--neg)' } : undefined}>
+              {fmtSigned(adj)}
+            </span>
+          </div>
+        </div>
+
+        <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
+          <ProvenanceSeal
+            inputs={{ model: 'nwc_peg_schedule', lines, delivered }}
+            modelId="MODEL.STRUCT.NWC.PEG.v1"
+            note="computed in your browser just now"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function StandardModel() {
   return (
@@ -91,31 +201,10 @@ Adj = delivered NWC − Peg{'\n'}
               <h2>Worked example</h2>
               <p style={{ color: 'var(--ink-2)', maxWidth: '64ch' }}>
                 Trailing-12-month reference period, cash-free / debt-free basis.
+                The schedule below is live — change any amount and the peg and
+                purchase-price adjustment recompute.
               </p>
-              <div className="mock" style={{ maxWidth: '64ch', marginTop: 6 }}>
-                <div className="mock-bar">
-                  <span className="mock-title">Computed example</span>
-                  <span className="mock-tag"><span className="vdot" />v2.4</span>
-                </div>
-                <div className="mock-body">
-                  <table className="mtable">
-                    <thead>
-                      <tr><th>Line</th><th>Amount</th></tr>
-                    </thead>
-                    <tbody>
-                      {EXAMPLE_LINES.map(r => (
-                        <tr key={r.line}><td>{r.line}</td><td>{r.amount}</td></tr>
-                      ))}
-                      <tr className="total"><td>Net working capital</td><td>$486,200</td></tr>
-                    </tbody>
-                  </table>
-                  <div style={{ marginTop: 16 }}>
-                    <KV k="Peg (12-mo avg)" v="$486,200" />
-                    <KV k="Delivered NWC at close" v="$501,900" />
-                    <KV k="Purchase-price adjustment" v="+$15,700" pos />
-                  </div>
-                </div>
-              </div>
+              <LiveSchedule />
 
               {/* THE LINE note */}
               <div style={{ background: 'var(--accent-soft)', borderRadius: 12, padding: '20px 22px', maxWidth: '64ch', marginTop: 28 }}>

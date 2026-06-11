@@ -80,7 +80,7 @@ const FINAL_LINES: Line[] = [
   {
     id: 3,
     who: 'yulia',
-    text: 'At 5.5× on $8.4M normalized EBITDA, that’s $46M EV, inside a $38M–$52M range.',
+    text: 'At 5.5× on $8.4M normalized EBITDA, that’s $46M EV, inside a $38M–$55M range.',
   },
 ];
 
@@ -146,7 +146,7 @@ export function HeroWorkspace() {
               {
                 id: 3,
                 who: 'yulia',
-                text: 'At 5.5× on $8.4M normalized EBITDA, that’s $46M EV, inside a $38M–$52M range.',
+                text: 'At 5.5× on $8.4M normalized EBITDA, that’s $46M EV, inside a $38M–$55M range.',
               },
             ],
       ),
@@ -250,7 +250,7 @@ export function HeroWorkspace() {
               {/* range bar */}
               <div className="mkt-val-rangehead">
                 <span className="mkt-val-label">Enterprise value range</span>
-                <span className="mkt-val-range mono num">$38M&nbsp;–&nbsp;$52M</span>
+                <span className="mkt-val-range mono num">$38M&nbsp;–&nbsp;$55M</span>
               </div>
               <div className="mkt-val-track">
                 <motion.div

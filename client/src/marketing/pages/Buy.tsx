@@ -51,7 +51,13 @@ export default function Buy() {
               seller financials into a defensible valuation, a QoE preview, a financing
               model, and a structuring view — fast enough to keep up with a live process.
             </p>
-            <div className="reveal" data-d="3">
+            <blockquote className="yq reveal" data-d="3" style={{ margin: '26px 0 0' }}>
+              &ldquo;Adjusted EBITDA normalizes to $1,058,000, which prices the $4.24M
+              indicative value at 4.0&times;. The working capital peg is $486,200 &mdash; and
+              two diligence items are still open.&rdquo;
+              <span className="yq-who">&mdash; Yulia, on Apex HVAC</span>
+            </blockquote>
+            <div className="reveal" data-d="4">
               <YuliaLauncher />
             </div>
           </div>
@@ -109,8 +115,8 @@ export default function Buy() {
 
           <div className="stages reveal">
             <Stage code="B0 · Thesis" title="Define the box">
-              Define the box: industry, size, geography, return targets. Yulia
-              pressure-tests the thesis against what the numbers will need to show.
+              Industry, size, geography, return targets. Yulia pressure-tests the
+              thesis against what the numbers will need to show.
             </Stage>
             <Stage code="B1 · Sourcing" title="An intelligence brief on every target">
               Screen targets against the thesis. Yulia builds the intelligence brief
