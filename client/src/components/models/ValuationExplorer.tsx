@@ -56,7 +56,7 @@ export default function ValuationExplorer({ tabId }: Props) {
       {/* Valuation Range Chart */}
       {val && (
         <div className="rounded-xl p-4" style={{ background: 'var(--m-surface-container)', border: '1px solid var(--m-outline-var)' }}>
-          <h3 className="text-sm font-bold m-0 mb-3" style={{ fontFamily: 'Figtree, system-ui, sans-serif' }}>Estimated Value Range</h3>
+          <h3 className="text-sm font-bold m-0 mb-3" style={{ fontFamily: 'var(--font-body)' }}>Estimated Value Range</h3>
 
           <div className="flex justify-between items-end mb-4 px-8">
             <div className="text-center">
@@ -65,7 +65,7 @@ export default function ValuationExplorer({ tabId }: Props) {
             </div>
             <div className="text-center">
               <p className="text-[9px] font-bold uppercase tracking-wider m-0 mb-1" style={{ color: 'var(--m-primary)' }}>Most Likely</p>
-              <p className="text-2xl font-bold m-0" style={{ color: 'var(--m-primary)', fontFamily: 'Figtree, system-ui, sans-serif' }}>{centsToDisplay(val.mid)}</p>
+              <p className="text-2xl font-bold m-0" style={{ color: 'var(--m-primary)', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{centsToDisplay(val.mid)}</p>
             </div>
             <div className="text-center">
               <p className="text-[9px] font-bold uppercase tracking-wider m-0 mb-1" style={{ color: 'var(--m-on-surface-var)' }}>High</p>
@@ -191,7 +191,7 @@ export default function ValuationExplorer({ tabId }: Props) {
       {/* Blended valuation result */}
       {o.blended && (
         <div className="rounded-lg p-4" style={{ border: '1px solid var(--m-outline-var)' }}>
-          <h3 className="text-sm font-bold m-0 mb-2" style={{ fontFamily: 'Figtree, system-ui, sans-serif' }}>Blended Valuation</h3>
+          <h3 className="text-sm font-bold m-0 mb-2" style={{ fontFamily: 'var(--font-body)' }}>Blended Valuation</h3>
           <p className="text-xl font-bold m-0" style={{ color: 'var(--m-primary)' }}>{centsToDisplay(o.blended.blended)}</p>
           <div className="mt-2 space-y-1">
             {o.blended.methods.map((m: any) => (

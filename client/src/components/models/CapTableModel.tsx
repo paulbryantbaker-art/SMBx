@@ -9,8 +9,8 @@ import { centsToDisplay, pctDisplay, multDisplay } from '../../lib/calculations/
 
 interface Props { tabId: string; }
 
-const CHART_MUTED = '#555E6F';
-const COLORS = ['#6A9BCC', '#4E8FD4', '#629987', '#8F6BD4', '#86C5C0', '#4ECDC4', '#B94B43', CHART_MUTED];
+const CHART_MUTED = '#57534A';
+const COLORS = ['#2E8C5A', '#D6A35C', '#629987', '#8F6BD4', '#86C5C0', '#4ECDC4', '#C0562F', CHART_MUTED];
 
 export default function CapTableModel({ tabId }: Props) {
   const tab = useModelStore(s => s.tabs[tabId]);
@@ -46,7 +46,7 @@ export default function CapTableModel({ tabId }: Props) {
 
   return (
     <div className="p-5 space-y-6 max-w-3xl mx-auto">
-      <h2 className="text-base font-bold m-0" style={{ fontFamily: 'Figtree, system-ui, sans-serif' }}>Cap Table & Dilution</h2>
+      <h2 className="text-base font-bold m-0" style={{ fontFamily: 'var(--font-body)' }}>Cap Table & Dilution</h2>
 
       {/* Founders shares */}
       <ModelInput

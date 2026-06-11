@@ -28,7 +28,7 @@ export default function ComparisonModel({ tabId }: Props) {
 
   return (
     <div className="p-5 space-y-6 max-w-4xl mx-auto">
-      <h2 className="text-base font-bold m-0" style={{ fontFamily: 'Figtree, system-ui, sans-serif' }}>Deal Comparison</h2>
+      <h2 className="text-base font-bold m-0" style={{ fontFamily: 'var(--font-body)' }}>Deal Comparison</h2>
 
       {/* Side-by-side KPI cards */}
       <div className="overflow-x-auto">
@@ -53,7 +53,7 @@ export default function ComparisonModel({ tabId }: Props) {
                     <td key={j} style={{
                       padding: '6px 10px', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: 500,
                       color: best === j ? 'var(--m-pursue)' : 'var(--m-on-surface)',
-                      background: best === j ? 'rgba(52,168,83,0.05)' : undefined,
+                      background: best === j ? 'rgba(46,140,90,0.05)' : undefined,
                     }}>
                       {val}
                     </td>

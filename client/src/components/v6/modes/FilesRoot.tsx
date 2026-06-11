@@ -15,8 +15,8 @@ interface FilesRootProps {
 interface Shortcut {
   view: FileListView;
   label: string;
-  count: string;
-  unit: string;
+  /** Real derived count. null = no real number available, so no count renders. */
+  count: string | null;
   audience: string;
   sub: string;
   icon: "library" | "deal" | "doc" | "chart";
@@ -61,8 +61,7 @@ const SHORTCUTS: Shortcut[] = [
   {
     view: "all",
     label: "All files",
-    count: "24",
-    unit: "files",
+    count: null,
     audience: "Private and shared",
     sub: "Private deal docs, analysis, and data-room items across portfolios.",
     icon: "library",
@@ -72,8 +71,7 @@ const SHORTCUTS: Shortcut[] = [
   {
     view: "deal-libraries",
     label: "Deal libraries",
-    count: "6",
-    unit: "deals",
+    count: null,
     audience: "Portfolio > deal > stage",
     sub: "Portfolio > deal > stage. Private until you share.",
     icon: "deal",
@@ -83,8 +81,7 @@ const SHORTCUTS: Shortcut[] = [
   {
     view: "needs-action",
     label: "Needs action",
-    count: "4",
-    unit: "asks",
+    count: null,
     audience: "Drafts and reviews",
     sub: "Drafts, requests, markups, and submissions waiting on you.",
     icon: "doc",
@@ -94,8 +91,7 @@ const SHORTCUTS: Shortcut[] = [
   {
     view: "data-rooms",
     label: "Data rooms",
-    count: "9",
-    unit: "rooms",
+    count: null,
     audience: "Shared diligence",
     sub: "Shared diligence rooms with artifacts, drafted docs, and executed docs.",
     icon: "chart",
@@ -104,56 +100,38 @@ const SHORTCUTS: Shortcut[] = [
   },
 ];
 
-const RECENTS: FileRow[] = [
-  { title: "IOI draft v3", sub: "Big Fake Deal · Yulia drafting · 2 min ago", status: "Review", kind: "doc", tone: "draft" },
-  { title: "Buyer fit memo", sub: "Big Fake Deal · you · 1 hr ago", status: "Open", kind: "doc", tone: "review" },
-  { title: "2024 P&L audited", sub: "Pest Control · data room artifact", status: "View", kind: "chart", tone: "locked" },
-  { title: "Mutual NDA seller counsel", sub: "Big Fake Deal · in review · 2 markups", status: "In review", kind: "doc", tone: "review" },
-];
-
-const ROOMS: RoomRow[] = [
-  { deal: "Big Fake Deal", meta: "Buy · East Texas · industrial services", stage: "Data room active", count: "9 items", id: "deal-bigfake" },
-  { deal: "Pest Control · FL", meta: "Buy · recurring route density", stage: "Action needed", count: "6 items", id: "deal-pest" },
-  { deal: "HVAC platform · CO", meta: "Watchlist · service mix under review", stage: "Attorney review", count: "8 items", id: "deal-hvac" },
-];
-
-const ACTIONS: FileRow[] = [
-  { title: "Customer list top 25", sub: "HVAC platform · data room request", status: "Action needed", kind: "chart", tone: "draft" },
-  { title: "Security findings recap", sub: "HVAC platform · attorney review", status: "Review", kind: "doc", tone: "review" },
-  { title: "NDA countersigned", sub: "Big Fake Deal · executed and immutable", status: "Executed", kind: "doc", tone: "done" },
-];
-
 function useFilesWorkspace(user: User | null) {
   const workspace = useV6WorkspaceData(user);
   const operating = useTodayOperatingBrief(user, workspace.canFetch);
-  const useSampleData = !workspace.canFetch;
+  // No real workspace data → no counts (never invent numbers); the list
+  // sections below fall through to their EmptyRows states.
+  const useRealCounts = workspace.canFetch;
   const operatingFiles = operating.brief?.filesNeedingReview ?? [];
   const shortcuts = useMemo(
-    () => useSampleData ? SHORTCUTS : buildRealShortcuts(workspace.deals, workspace.deliverables, operatingFiles),
-    [useSampleData, workspace.deals, workspace.deliverables, operatingFiles],
+    () => useRealCounts ? buildRealShortcuts(workspace.deals, workspace.deliverables, operatingFiles) : SHORTCUTS,
+    [useRealCounts, workspace.deals, workspace.deliverables, operatingFiles],
   );
   const recents = useMemo(
-    () => useSampleData ? RECENTS : workspace.deliverables.slice(0, 5).map(deliverableToFileRow),
-    [useSampleData, workspace.deliverables],
+    () => workspace.deliverables.slice(0, 5).map(deliverableToFileRow),
+    [workspace.deliverables],
   );
   const allFiles = useMemo(
-    () => useSampleData ? [...RECENTS, ...ACTIONS] : workspace.deliverables.map(deliverableToFileRow),
-    [useSampleData, workspace.deliverables],
+    () => workspace.deliverables.map(deliverableToFileRow),
+    [workspace.deliverables],
   );
   const rooms = useMemo(
-    () => useSampleData ? ROOMS : workspace.deals.slice(0, 6).map(dealToRoomRow),
-    [useSampleData, workspace.deals],
+    () => workspace.deals.slice(0, 6).map(dealToRoomRow),
+    [workspace.deals],
   );
   const actions = useMemo(
     () => {
-      if (useSampleData) return ACTIONS;
       if (operatingFiles.length) return operatingFiles.map(operatingFileToFileRow);
       return workspace.deliverables
         .filter(d => ["queued", "generating", "failed", "draft"].includes(d.status))
         .slice(0, 8)
         .map(deliverableToFileRow);
     },
-    [operatingFiles, useSampleData, workspace.deliverables],
+    [operatingFiles, workspace.deliverables],
   );
 
   return { workspace, operating, shortcuts, recents, allFiles, rooms, actions };
@@ -207,7 +185,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
   };
 
   return (
-    <div className="wk-content m-fade-up" style={{ maxWidth: 1180, margin: "0 auto" }}>
+    <div className="wk-content m-fade-up m-page-flow" style={{ maxWidth: 1180, margin: "0 auto" }}>
       {/* Page header */}
       <div className="pg-head">
         <div>
@@ -245,9 +223,11 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
                 }}>
                   <V6Icon name={shortcut.icon} size={16} />
                 </span>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "1.6rem", fontWeight: 500, color: "var(--ink)", lineHeight: 1 }}>
-                  {shortcut.count}
-                </span>
+                {shortcut.count !== null && (
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "1.6rem", fontWeight: 500, color: "var(--ink)", lineHeight: 1 }}>
+                    {shortcut.count}
+                  </span>
+                )}
               </div>
               <div className="wkcard-title">{shortcut.label}</div>
               <div className="wkcard-sub">{shortcut.sub}</div>
@@ -281,7 +261,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
                 <div style={{ padding: 14 }}><YuliaSkeleton rows={3} label="Loading files…" /></div>
               )}
               {workspace.error && (
-                <div style={{ margin: 12, padding: "9px 11px", borderRadius: 10, background: "#FBE7DD", color: "#B0461F", fontSize: 12 }}>
+                <div style={{ margin: 12, padding: "9px 11px", borderRadius: 10, background: "var(--st-risk-bg)", color: "var(--st-risk-fg)", fontSize: 12 }}>
                   Couldn&rsquo;t load workspace files ({workspace.error}).
                 </div>
               )}
@@ -366,7 +346,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
             <div style={{ padding: 14 }}><YuliaSkeleton rows={2} label="Yulia is reading the queue…" /></div>
           )}
           {operating.error && (
-            <div style={{ margin: 12, padding: "9px 11px", borderRadius: 10, background: "#FBE7DD", color: "#B0461F", fontSize: 12 }}>
+            <div style={{ margin: 12, padding: "9px 11px", borderRadius: 10, background: "var(--st-risk-bg)", color: "var(--st-risk-fg)", fontSize: 12 }}>
               Couldn&rsquo;t load Today queue ({operating.error}).
             </div>
           )}
@@ -544,7 +524,7 @@ function ActiveFilesList({
         <div style={{ padding: "8px 0" }}><YuliaSkeleton rows={3} label="Loading files…" /></div>
       )}
       {error && (
-        <div style={{ marginBottom: 12, padding: "9px 11px", borderRadius: 10, background: "#FBE7DD", color: "#B0461F", fontSize: 12 }}>
+        <div style={{ marginBottom: 12, padding: "9px 11px", borderRadius: 10, background: "var(--st-risk-bg)", color: "var(--st-risk-fg)", fontSize: 12 }}>
           Couldn&rsquo;t load workspace files ({error}).
         </div>
       )}

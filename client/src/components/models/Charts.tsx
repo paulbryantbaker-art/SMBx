@@ -16,16 +16,20 @@ ChartJS.register(
   RadialLinearScale, Tooltip, Legend, Filler,
 );
 
-// Brand colors
-const TERRA = '#6A9BCC';
-const TERRA_LIGHT = 'rgba(106, 155, 204, 0.16)';
-const TEXT = '#1A2233';
-const MUTED = '#555E6F';
-const CREAM = '#F6F8FC';
-const BORDER = '#E1E8F2';
-const GREEN = '#629987';
+// House type + ink for all Chart.js canvases (literal strings — CSS vars don't reach canvas)
+ChartJS.defaults.font.family = "'Schibsted Grotesk', system-ui, sans-serif";
+ChartJS.defaults.color = '#191813';
+
+// Brand colors — names kept from the slate era, values map to the warm/green token world
+const TERRA = '#2E8C5A';
+const TERRA_LIGHT = 'rgba(46, 140, 90, 0.14)';
+const TEXT = '#191813';
+const MUTED = '#57534A';
+const CREAM = '#F7F5EF';
+const BORDER = 'rgba(25, 24, 19, 0.12)';
+const GREEN = '#2E8C5A';
 const YELLOW = '#D6A35C';
-const RED = '#B94B43';
+const RED = '#C0562F';
 
 // ─── Valuation Range Chart ──────────────────────────────────────────
 
@@ -96,7 +100,7 @@ export function DSCRGauge({ dscr, threshold = 1.25 }: { dscr: number; threshold?
         />
       </div>
       <div>
-        <p className="text-2xl font-bold m-0" style={{ color, fontFamily: 'Figtree, system-ui, sans-serif' }}>
+        <p className="text-2xl font-bold m-0" style={{ color, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
           {dscr.toFixed(2)}x
         </p>
         <p className="text-xs m-0" style={{ color: MUTED }}>
@@ -370,7 +374,7 @@ export function KPICard({ label, value, sublabel, color }: { label: string; valu
   return (
     <div className="rounded-lg p-3 sm:p-3" style={{ background: CREAM, border: `1px solid ${BORDER}` }}>
       <p className="text-[10px] sm:text-[9px] font-bold uppercase tracking-wider m-0 mb-1" style={{ color: MUTED }}>{label}</p>
-      <p className="text-lg sm:text-xl font-bold m-0 truncate" style={{ color: color || TEXT, fontFamily: 'Figtree, system-ui, sans-serif' }}>{value}</p>
+      <p className="text-lg sm:text-xl font-bold m-0 truncate" style={{ color: color || TEXT, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{value}</p>
       {sublabel && <p className="text-[10px] m-0 mt-0.5 truncate" style={{ color: MUTED }}>{sublabel}</p>}
     </div>
   );

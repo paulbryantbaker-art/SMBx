@@ -8,11 +8,11 @@ import { centsToDisplay } from '../../lib/calculations/core';
 
 interface Props { tabId: string; }
 
-const CHART_PRIMARY = '#6A9BCC';
-const CHART_PRIMARY_SOFT = 'rgba(106, 155, 204, 0.14)';
-const CHART_TEXT = '#1A2233';
-const CHART_MUTED = '#555E6F';
-const CHART_GREEN = '#629987';
+const CHART_PRIMARY = '#2E8C5A';
+const CHART_PRIMARY_SOFT = 'rgba(46, 140, 90, 0.14)';
+const CHART_TEXT = '#191813';
+const CHART_MUTED = '#57534A';
+const CHART_GREEN = '#D6A35C'; // secondary series — warm gold so it stays distinct from the emerald primary
 
 export default function DCFModel({ tabId }: Props) {
   const tab = useModelStore(s => s.tabs[tabId]);
@@ -26,7 +26,7 @@ export default function DCFModel({ tabId }: Props) {
 
   return (
     <div className="p-5 space-y-6 max-w-3xl mx-auto">
-      <h2 className="text-base font-bold m-0" style={{ fontFamily: 'Figtree, system-ui, sans-serif' }}>
+      <h2 className="text-base font-bold m-0" style={{ fontFamily: 'var(--font-body)' }}>
         DCF Enterprise Value
       </h2>
 
@@ -59,7 +59,7 @@ export default function DCFModel({ tabId }: Props) {
                   label: 'PV of FCF',
                   data: dcf.pvFCF.map((v: number) => v / 100),
                   borderColor: CHART_GREEN,
-                  backgroundColor: 'rgba(98, 153, 135, 0.12)',
+                  backgroundColor: 'rgba(214, 163, 92, 0.12)',
                   fill: false,
                   tension: 0.3,
                   pointRadius: 4,
@@ -138,7 +138,7 @@ export default function DCFModel({ tabId }: Props) {
             format="percent"
           />
           {dcf && (a.discountRate ?? 0.10) <= (a.terminalGrowthRate ?? 0.02) && (
-            <p className="text-xs rounded-lg p-3 m-0" style={{ background: 'rgba(185, 75, 67, 0.10)', color: '#7D2E28' }}>
+            <p className="text-xs rounded-lg p-3 m-0" style={{ background: 'rgba(192, 86, 47, 0.10)', color: '#8A3E22' }}>
               Terminal growth must stay below the discount rate. The model keeps terminal value at zero until the inputs are valid.
             </p>
           )}
@@ -149,7 +149,7 @@ export default function DCFModel({ tabId }: Props) {
         <div className="overflow-x-auto">
           <table className="text-xs w-full" style={{ borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ borderBottom: '2px solid #6A9BCC' }}>
+              <tr style={{ borderBottom: '2px solid #2E8C5A' }}>
                 {['Year', 'Projected FCF', 'PV of FCF'].map(h => (
                   <th key={h} style={{ padding: '6px 8px', textAlign: h === 'Year' ? 'left' : 'right', fontSize: 10, color: CHART_MUTED, textTransform: 'uppercase' }}>
                     {h}
@@ -159,7 +159,7 @@ export default function DCFModel({ tabId }: Props) {
             </thead>
             <tbody>
               {projections.map((value, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid #E1E8F2' }}>
+                <tr key={i} style={{ borderBottom: '1px solid rgba(25, 24, 19, 0.12)' }}>
                   <td style={{ padding: '6px 8px', fontWeight: 600 }}>Year {i + 1}</td>
                   <td style={{ padding: '6px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{centsToDisplay(value)}</td>
                   <td style={{ padding: '6px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{centsToDisplay(dcf?.pvFCF?.[i] || 0)}</td>

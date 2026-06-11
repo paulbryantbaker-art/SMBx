@@ -305,13 +305,21 @@ export function V6DocView({
 
           {isGenerating && (
             <div style={V.generatingCard}>
-              <div className="mono" style={V.generatingEyebrow}>YULIA IS GENERATING</div>
               <h2 style={V.generatingTitle}>This deliverable is being built.</h2>
               <p style={V.generatingBody}>You can leave this tab open. It will refresh automatically when the draft is ready.</p>
             </div>
           )}
 
-          {(showSample || (!showFetched && !loading && !error && numericId && !isGenerating && !doc)) && (
+          {/* A real deliverable id must NEVER show the fabricated sample body —
+              not even as a flash while the record loads. Honest state instead. */}
+          {!showSample && !showFetched && !loading && !error && !isGenerating && !doc && (
+            <div style={V.generatingCard}>
+              <h2 style={V.generatingTitle}>This deliverable isn&rsquo;t available yet.</h2>
+              <p style={V.generatingBody}>It may still be preparing. Reopen it from the deal page, or ask Yulia for its status.</p>
+            </div>
+          )}
+
+          {showSample && (
             <div ref={editorRef} contentEditable suppressContentEditableWarning>
               <p style={V.docMeta}>
                 From: Apex SMB Holdings &nbsp;·&nbsp; To: J. Marston, Owner &nbsp;·&nbsp; Re: Acquisition of {docTitle} &nbsp;·&nbsp; Date: March 27, 2026
@@ -719,15 +727,8 @@ const V: Record<string, CSSProperties> = {
     boxShadow: "0 1px 2px rgba(25,24,19,.06)",
     fontFamily: "var(--font-body)",
   },
-  generatingEyebrow: {
-    fontSize: 10,
-    letterSpacing: "0.16em",
-    color: "var(--accent-strong)",
-    fontWeight: 800,
-    fontFamily: "var(--font-mono)",
-  },
   generatingTitle: {
-    margin: "7px 0 0",
+    margin: 0,
     fontFamily: "var(--font-display)",
     fontSize: 24,
     lineHeight: 1,

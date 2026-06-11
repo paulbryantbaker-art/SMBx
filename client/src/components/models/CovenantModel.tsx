@@ -21,12 +21,12 @@ export default function CovenantModel({ tabId }: Props) {
 
   return (
     <div className="p-5 space-y-6 max-w-3xl mx-auto">
-      <h2 className="text-base font-bold m-0" style={{ fontFamily: 'Figtree, system-ui, sans-serif' }}>Covenant Compliance</h2>
+      <h2 className="text-base font-bold m-0" style={{ fontFamily: 'var(--font-body)' }}>Covenant Compliance</h2>
 
       {/* Compliance status */}
       {cov && (
         <div className={`rounded-xl p-4 text-center`} style={{ background: cov.compliant ? `${GREEN}10` : `${RED}10`, border: `2px solid ${cov.compliant ? GREEN : RED}` }}>
-          <p className="text-xl font-bold m-0" style={{ color: cov.compliant ? GREEN : RED, fontFamily: 'Figtree, system-ui, sans-serif' }}>
+          <p className="text-xl font-bold m-0" style={{ color: cov.compliant ? GREEN : RED, fontFamily: 'var(--font-body)' }}>
             {cov.compliant ? 'ALL COVENANTS MET' : 'COVENANT BREACH'}
           </p>
           {cov.warnings.length > 0 && (
@@ -61,7 +61,8 @@ export default function CovenantModel({ tabId }: Props) {
             <h4 className="text-[10px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Debt / EBITDA</h4>
             <p className="text-2xl font-bold m-0" style={{
               color: cov.debtToEbitdaHeadroom >= 0 ? GREEN : RED,
-              fontFamily: 'Figtree, system-ui, sans-serif',
+              fontFamily: 'var(--font-mono)',
+              fontVariantNumeric: 'tabular-nums',
             }}>
               {cov.debtToEbitda.toFixed(1)}x
             </p>
@@ -81,7 +82,8 @@ export default function CovenantModel({ tabId }: Props) {
             <h4 className="text-[10px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>LTV</h4>
             <p className="text-2xl font-bold m-0" style={{
               color: cov.ltvHeadroom >= 0 ? GREEN : RED,
-              fontFamily: 'Figtree, system-ui, sans-serif',
+              fontFamily: 'var(--font-mono)',
+              fontVariantNumeric: 'tabular-nums',
             }}>
               {pctDisplay(cov.ltv)}
             </p>

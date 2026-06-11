@@ -17,7 +17,7 @@ export default function TaxImpactModel({ tabId }: Props) {
 
   return (
     <div className="p-5 space-y-6 max-w-3xl mx-auto">
-      <h2 className="text-base font-bold m-0" style={{ fontFamily: 'Figtree, system-ui, sans-serif' }}>Tax Impact Analysis</h2>
+      <h2 className="text-base font-bold m-0" style={{ fontFamily: 'var(--font-body)' }}>Tax Impact Analysis</h2>
 
       {/* Inputs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -31,7 +31,7 @@ export default function TaxImpactModel({ tabId }: Props) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Stock Sale */}
           <div className="rounded-xl p-4" style={{ border: '1px solid var(--m-outline-var)' }}>
-            <h3 className="text-sm font-bold m-0 mb-3" style={{ fontFamily: 'Figtree, system-ui, sans-serif' }}>Stock Sale</h3>
+            <h3 className="text-sm font-bold m-0 mb-3" style={{ fontFamily: 'var(--font-body)' }}>Stock Sale</h3>
             <div className="space-y-2 text-xs">
               <Row label="Capital Gain" value={centsToDisplay(stockSale.capitalGain)} />
               <Row label="Federal Tax (23.8%)" value={centsToDisplay(stockSale.federalTax)} color="var(--m-pass)" />
@@ -44,7 +44,7 @@ export default function TaxImpactModel({ tabId }: Props) {
 
           {/* Asset Sale */}
           <div className="rounded-xl p-4" style={{ border: '1px solid var(--m-outline-var)' }}>
-            <h3 className="text-sm font-bold m-0 mb-3" style={{ fontFamily: 'Figtree, system-ui, sans-serif' }}>Asset Sale</h3>
+            <h3 className="text-sm font-bold m-0 mb-3" style={{ fontFamily: 'var(--font-body)' }}>Asset Sale</h3>
             {assetSale ? (
               <div className="space-y-2 text-xs">
                 {assetSale.byClass.map((c: any) => (

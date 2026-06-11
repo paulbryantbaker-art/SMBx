@@ -211,7 +211,7 @@ export function V6AnalysisRoot({
   );
 
   return (
-    <div className="wk-content m-fade-up" style={{ maxWidth: 1180, margin: "0 auto" }}>
+    <div className="wk-content m-fade-up m-page-flow" style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div className="pg-head">
         <div>
           <div className="pg-title">Analyses</div>

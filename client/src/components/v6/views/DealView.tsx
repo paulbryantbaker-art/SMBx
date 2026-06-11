@@ -638,10 +638,10 @@ export function V6DealView({
           <div className="wkcard" style={D.stageCard}>
             <div style={D.stageHead}>
               <div style={{ minWidth: 0 }}>
-                <div className="mono" style={D.intelEyebrow}>WHERE THIS DEAL IS · {stageProgress.journeyLabel} METHODOLOGY</div>
                 <h2 style={D.stageTitle}>Stage {stageProgress.currentIndex + 1} of {stageProgress.total} — {stageProgress.currentName}</h2>
               </div>
               <div style={D.stageMeta}>
+                <span style={{ display: "block" }}>{stageProgress.journeyLabel} methodology</span>
                 {stageProgress.nextName ? <span>Next: <strong style={{ color: "var(--ink)" }}>{stageProgress.nextName}</strong></span> : <span>Final stage</span>}
                 {stageProgress.deliverablesTotal > 0 && (
                   <span style={{ display: "block", marginTop: 3 }}>{stageProgress.deliverablesDone} of {stageProgress.deliverablesTotal} deliverables complete</span>
@@ -711,7 +711,6 @@ export function V6DealView({
 
       <section style={D.intelligenceGrid}>
         <div className="wkcard" style={D.marketCard}>
-          <div className="mono" style={D.intelEyebrow}>{intelligence.marketEyebrow}</div>
           <h2 style={D.intelTitle}>Market intelligence</h2>
           <p style={D.intelLead}>{intelligence.marketHeadline}</p>
           <div style={D.marketTileGrid}>
@@ -736,7 +735,7 @@ export function V6DealView({
           </div>
           {intelligence.researchNeeded.length > 0 && (
             <div style={D.researchBox}>
-              <div className="mono" style={D.researchEyebrow}>SOURCE GAPS</div>
+              <strong style={{ fontSize: 12.5 }}>Source gaps</strong>
               {intelligence.researchNeeded.slice(0, 3).map(gap => <span key={gap}>{gap}</span>)}
             </div>
           )}
@@ -744,7 +743,7 @@ export function V6DealView({
 
         <div style={D.intelSideStack}>
           <div className="wkcard" style={D.reviewCard}>
-            <div className="mono" style={D.intelEyebrow}>STRUCTURE READ</div>
+            <h3 style={{ margin: 0, fontSize: 15 }}>Structure read</h3>
             <p style={{ ...D.reviewText, margin: "8px 0 0" }}>How structure, tax, and legal shape this deal before documents move.</p>
             <div style={{ ...D.structureGrid, marginTop: 16 }}>
               <div>
@@ -759,7 +758,7 @@ export function V6DealView({
           </div>
 
           <div className="wkcard" style={D.nextCard}>
-            <div className="mono" style={D.intelEyebrow}>YULIA RECOMMENDS</div>
+            <h3 style={{ margin: 0, fontSize: 15 }}>Yulia recommends</h3>
             {intelligence.nextMoves.map((move, index) => {
               const action = resolveDealMoveAction(move, real?.journey_type, primaryDeliverable);
               const isBusy = action.kind !== "chat" && "busyKey" in action && busyAction === action.busyKey;
@@ -958,7 +957,6 @@ function DealFileExplorer({
 
       <div style={D.fileGrid}>
         <aside style={D.folderCard}>
-          <div className="mono" style={D.folderEyebrow}>HIERARCHY</div>
           <strong style={D.folderRoot}>{portfolioName} / {dealTitle}</strong>
           <div style={D.folderRows}>
             {folders.map(folder => (
@@ -1057,7 +1055,6 @@ function DataRoomReliancePanel({
     <div style={D.reliancePanel}>
       <div style={D.relianceHead}>
         <div>
-          <div className="mono" style={D.relianceEyebrow}>ROOM RELIANCE</div>
           <h3 style={D.relianceTitle}>{headline}</h3>
           <p style={D.relianceBody}>{body}</p>
         </div>
@@ -1175,7 +1172,6 @@ function buildDealIntelligence({
   const hasRead = !!dealBrief;
   return {
     hasRead,
-    marketEyebrow: (real?.industry || "Deal market").toUpperCase(),
     marketHeadline: dealBrief?.marketRead?.headline || `Yulia hasn't built a market read for ${dealName} yet.`,
     // Facts from the deal record (not judgment).
     marketTiles: [
@@ -1939,7 +1935,7 @@ const D: Record<string, CSSProperties> = {
   },
   stageCard: { padding: "22px 26px" },
   stageHead: { display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 22 },
-  stageTitle: { fontFamily: "var(--font-display)", fontWeight: 750, fontSize: 22, letterSpacing: "-0.02em", margin: "4px 0 0", color: "var(--ink)" },
+  stageTitle: { fontFamily: "var(--font-display)", fontWeight: 750, fontSize: 22, letterSpacing: "-0.02em", margin: 0, color: "var(--ink)" },
   stageMeta: { fontSize: 12.5, color: "var(--ink-3)", textAlign: "right", lineHeight: 1.5, flexShrink: 0 },
   stageTrack: { display: "flex", alignItems: "flex-start", gap: 0 },
   stageNodeWrap: { display: "flex", flexDirection: "column", alignItems: "center", gap: 8, flex: "0 0 auto", width: 96 },
@@ -1960,14 +1956,8 @@ const D: Record<string, CSSProperties> = {
   marketCard: {
     padding: "24px 26px",
   },
-  intelEyebrow: {
-    fontSize: 10,
-    letterSpacing: "0.14em",
-    fontWeight: 750,
-    color: "var(--ink-3)",
-  },
   intelTitle: {
-    margin: "6px 0 0",
+    margin: 0,
     color: "var(--ink)",
     fontFamily: "var(--font-display)",
     fontWeight: 750,
@@ -2035,12 +2025,6 @@ const D: Record<string, CSSProperties> = {
     color: "var(--st-review-fg)",
     fontSize: 12.5,
     lineHeight: 1.35,
-  },
-  researchEyebrow: {
-    fontSize: 9,
-    letterSpacing: "0.14em",
-    fontWeight: 800,
-    color: "var(--st-review-fg)",
   },
   intelSideStack: {
     display: "grid",
@@ -2228,14 +2212,8 @@ const D: Record<string, CSSProperties> = {
     alignItems: "start",
     gap: 14,
   },
-  relianceEyebrow: {
-    fontSize: 9.5,
-    letterSpacing: "0.16em",
-    color: "var(--accent-strong)",
-    fontWeight: 800,
-  },
   relianceTitle: {
-    margin: "4px 0 0",
+    margin: 0,
     fontFamily: "var(--font-display)",
     fontSize: 19,
     lineHeight: 1.05,
@@ -2319,15 +2297,8 @@ const D: Record<string, CSSProperties> = {
     background: "var(--surface-2)",
     border: "1px solid var(--line)",
   },
-  folderEyebrow: {
-    fontSize: 9.5,
-    letterSpacing: "0.16em",
-    color: "var(--accent-strong)",
-    fontWeight: 800,
-  },
   folderRoot: {
     display: "block",
-    marginTop: 6,
     color: "var(--ink)",
     fontSize: 14,
     letterSpacing: "-0.02em",

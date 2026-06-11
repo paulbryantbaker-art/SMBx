@@ -58,7 +58,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const briefAnalyzing = !!user && briefLoading && !brief;
 
   return (
-    <div className="wk-content m-fade-up" style={{ maxWidth: 1180, margin: "0 auto" }}>
+    <div className="wk-content m-fade-up m-page-flow" style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div className="pg-head">
         <div>
           <div className="pg-title">Today</div>

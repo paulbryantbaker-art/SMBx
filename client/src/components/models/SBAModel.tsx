@@ -33,7 +33,7 @@ export default function SBAModel({ tabId }: Props) {
     <div className="p-5 space-y-6 max-w-3xl mx-auto">
       {/* Go/No-Go Traffic Light */}
       <div className="rounded-xl p-5 text-center" style={{ background: `${goColor}10`, border: `2px solid ${goColor}` }}>
-        <p className="text-3xl font-bold m-0" style={{ color: goColor, fontFamily: 'Figtree, system-ui, sans-serif' }}>{goLabel}</p>
+        <p className="text-3xl font-bold m-0" style={{ color: goColor, fontFamily: 'var(--font-body)' }}>{goLabel}</p>
         <p className="text-sm m-0 mt-1" style={{ color: 'var(--m-on-surface-var)' }}>
           {sba.eligible
             ? `DSCR ${sba.dscr.toFixed(2)}x passes SBA 1.25x threshold`

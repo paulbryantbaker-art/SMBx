@@ -26,7 +26,7 @@ export default function SensitivityModel({ tabId }: Props) {
 
   return (
     <div className="p-5 space-y-6 max-w-3xl mx-auto">
-      <h2 className="text-base font-bold m-0" style={{ fontFamily: 'Figtree, system-ui, sans-serif' }}>
+      <h2 className="text-base font-bold m-0" style={{ fontFamily: 'var(--font-body)' }}>
         Sensitivity Analysis
       </h2>
 

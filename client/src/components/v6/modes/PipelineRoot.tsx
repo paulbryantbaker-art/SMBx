@@ -32,7 +32,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
   const empty = deals.loaded && all.length === 0 && !featured;
 
   return (
-    <div className="wk-content m-fade-up" style={{ maxWidth: 1180, margin: "0 auto" }}>
+    <div className="wk-content m-fade-up m-page-flow" style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div className="pg-head">
         <div>
           <div className="pg-title">Pipeline</div>
@@ -59,8 +59,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
             <div className="wkcard" style={{ marginTop: 4, display: "flex", alignItems: "center", gap: 14 }}>
               <span className="logo" style={{ width: 48, height: 48, fontSize: "1rem" }}>{initials(featured.name)}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.7rem", color: "var(--ink-3)", fontWeight: 600, letterSpacing: "0.06em" }}>STRONGEST SOURCE THIS WEEK</div>
-                <div style={{ color: "var(--ink)", fontWeight: 700, fontSize: "1.05rem", letterSpacing: "-0.02em", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{featured.name}</div>
+                <div style={{ color: "var(--ink)", fontWeight: 700, fontSize: "1.05rem", letterSpacing: "-0.02em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{featured.name}</div>
                 <div style={{ color: "var(--ink-3)", fontSize: "0.84rem" }}>{featured.sub} · {featured.revLabel}</div>
               </div>
               <div style={{ textAlign: "right", flexShrink: 0 }}>

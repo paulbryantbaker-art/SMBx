@@ -529,17 +529,23 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
   // through the module groups, so they're excluded here).
   const workTabs = tabs.filter(t => t.kind !== "mode-root");
 
-  // ⌘K focuses Yulia from anywhere.
+  // ⌘K summons Yulia from anywhere: open the chat window if it's closed,
+  // then focus the composer once it has rendered.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        inputRef.current?.focus();
+        if (chatOpen) {
+          inputRef.current?.focus();
+        } else {
+          setChatOpen(true);
+          requestAnimationFrame(() => inputRef.current?.focus());
+        }
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [chatOpen]);
 
   // CD "Ramp" workspace sidebar nav, mapped to V6 modes. Diligence opens the
   // Analyses hub (portfolio-aware recommendations + searchable catalog) instead
@@ -1263,240 +1269,9 @@ function writeHashState({
   } catch { /* noop */ }
 }
 
+// Shell-loader styles for V6ShellLoader. The rest of the old slate-era `A`
+// style object was dead (no other `A.` usages) and has been removed.
 const A: Record<string, CSSProperties> = {
-  shell: {
-    display: "flex", flexDirection: "column",
-    height: "100vh", width: "100%", overflow: "hidden",
-    background: "linear-gradient(180deg, #ECE9DF 0%, #ECE9DF 48%, #F3F1EA 100%)",
-  },
-  leftLauncherBar: {
-    flex: "0 0 auto",
-    flexShrink: 0,
-    display: "flex",
-    alignItems: "stretch",
-    justifyContent: "flex-start",
-    padding: "10px 12px 8px",
-    boxSizing: "border-box",
-    overflow: "visible",
-    position: "relative",
-    zIndex: 70,
-  },
-  launcherStrip: {
-    position: "relative",
-    width: "100%",
-    display: "grid",
-    gap: 2,
-    padding: 0,
-    boxSizing: "border-box",
-    background: "transparent",
-    border: 0,
-    boxShadow: "none",
-    overflow: "visible",
-  },
-  topLauncherWrap: {
-    display: "block",
-  },
-  topLauncher: {
-    all: "unset",
-    boxSizing: "border-box",
-    width: "100%",
-    minHeight: 32,
-    padding: "4px 7px",
-    borderRadius: 9,
-    display: "grid",
-    gridTemplateColumns: "24px minmax(0, 1fr) auto",
-    alignItems: "center",
-    gap: 8,
-    cursor: "pointer",
-    border: "1px solid transparent",
-    color: "#57534A",
-    fontSize: 14,
-    fontWeight: 720,
-  },
-  topLauncherActive: {
-    background: "rgba(255,255,255,.42)",
-    border: "1px solid rgba(166, 190, 216, 0.36)",
-    color: "#57534A",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,.54)",
-  },
-  topLauncherIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
-    display: "grid",
-    placeItems: "center",
-    color: "inherit",
-  },
-  topLauncherIconActive: {
-    background: "rgba(255, 255, 255, 0.54)",
-    color: "#57534A",
-  },
-  topLauncherLabel: {
-    lineHeight: 1,
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-  },
-  topLauncherBadge: {
-    minWidth: 16,
-    height: 16,
-    padding: "0 5px",
-    borderRadius: 999,
-    display: "grid",
-    placeItems: "center",
-    fontFamily: "var(--font-mono)",
-    fontSize: 9.5,
-    color: "#57534A",
-    background: "rgba(227, 240, 253, 0.96)",
-    boxShadow: "inset 0 0 0 1px rgba(151, 183, 214, 0.62)",
-  },
-  topLauncherBadgeActive: {
-    color: "#57534A",
-    background: "rgba(235, 244, 253, 0.78)",
-    boxShadow: "0 0 0 1px rgba(150, 174, 205, 0.42)",
-  },
-  row: {
-    flex: 1,
-    display: "flex",
-    minHeight: 0,
-    gap: 8,
-    padding: "8px",
-    boxSizing: "border-box",
-    overflow: "visible",
-  },
-  leftRail: {
-    flexShrink: 0,
-    minHeight: 0,
-    display: "flex",
-    flexDirection: "column",
-    overflow: "hidden",
-    position: "relative",
-    zIndex: 60,
-  },
-  railTabLayer: {
-    position: "relative",
-    zIndex: 72,
-    flex: "0 1 auto",
-    minHeight: 0,
-    maxHeight: "min(42vh, 440px)",
-    margin: "0 12px 8px",
-    padding: "2px 0 18px",
-    boxSizing: "border-box",
-    display: "grid",
-    gridTemplateRows: "auto minmax(0, 1fr)",
-    borderRadius: 0,
-    color: "#191813",
-    background: "transparent",
-    border: 0,
-    boxShadow: "none",
-  },
-  railTabHeader: {
-    display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) auto",
-    alignItems: "center",
-    gap: 10,
-    minHeight: 28,
-    padding: "9px 4px 6px",
-  },
-  railTabHeaderCopy: {
-    display: "grid",
-    gap: 1,
-    minWidth: 0,
-  },
-  railTabTitle: {
-    color: "#191813",
-    fontSize: 13,
-    lineHeight: 1.08,
-    fontWeight: 850,
-    letterSpacing: "-0.01em",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-  },
-  railTabMeta: {
-    color: "#8B867A",
-    fontSize: 10.5,
-    lineHeight: 1.05,
-    fontWeight: 650,
-  },
-  railTabCount: {
-    minWidth: 21,
-    height: 21,
-    padding: "0 6px",
-    borderRadius: 999,
-    display: "grid",
-    placeItems: "center",
-    color: "#8B867A",
-    background: "rgba(255,255,255,.46)",
-    boxShadow: "inset 0 0 0 1px rgba(170,196,222,.34)",
-    fontSize: 10.5,
-    fontWeight: 850,
-  },
-  railTabScroll: {
-    position: "relative",
-    minHeight: 0,
-    overflowY: "auto",
-    padding: "0 2px 14px 0",
-  },
-  railTabGroup: {
-    display: "grid",
-    gap: 5,
-    marginBottom: 12,
-  },
-  railTabGroupLabel: {
-    padding: "6px 0 2px 4px",
-    color: "rgba(77, 89, 106, 0.62)",
-    fontSize: 12,
-    lineHeight: 1,
-    fontWeight: 760,
-  },
-  railTabFade: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: -1,
-    height: 34,
-    pointerEvents: "none",
-    background: "linear-gradient(180deg, rgba(225,237,252,0), rgba(225,237,252,.78))",
-  },
-  chatPane: {
-    flex: "1 1 auto",
-    minWidth: 0,
-    display: "flex",
-    flexDirection: "column",
-    marginTop: 0,
-    minHeight: 0,
-  },
-  canvasPane: {
-    flex: 1,
-    minWidth: 0,
-    display: "flex",
-    minHeight: 0,
-    position: "relative",
-    borderRadius: 12,
-    overflow: "hidden",
-    background: "linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 58%, #FBFAF6 100%)",
-    border: "1px solid rgba(158, 180, 207, 0.78)",
-    boxShadow: [
-      "0 0 0 1px rgba(255, 255, 255, 0.66)",
-      "0 1px 2px rgba(31, 45, 66, 0.06)",
-      "inset 0 1px 0 rgba(255, 255, 255, 0.92)",
-    ].join(", "),
-  },
-  dragHandle: {
-    width: 8, flexShrink: 0,
-    cursor: "col-resize",
-    background: "transparent",
-    position: "relative",
-    borderRadius: 999,
-    margin: "10px 0",
-  },
-  dragGrip: {
-    position: "absolute", top: "50%", left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: 3, height: 42, borderRadius: 999,
-    background: "#8B867A", opacity: 0.18,
-  },
   shellLoader: {
     width: "100%",
     minHeight: 220,
@@ -1504,7 +1279,7 @@ const A: Record<string, CSSProperties> = {
     alignItems: "center",
     justifyContent: "center",
     gap: 10,
-    color: "#57534A",
+    color: "#8B867A",
     fontSize: 12,
     fontWeight: 700,
   },
@@ -1513,6 +1288,6 @@ const A: Record<string, CSSProperties> = {
     height: 9,
     borderRadius: 999,
     background: "#2BFF77",
-    boxShadow: "0 0 0 6px rgba(138,154,232,0.14)",
+    boxShadow: "0 0 0 6px rgba(43,255,119,0.14)",
   },
 };

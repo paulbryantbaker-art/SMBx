@@ -8,10 +8,10 @@ import { centsToDisplay, pctDisplay } from '../../lib/calculations/core';
 
 interface Props { tabId: string; }
 
-const CHART_PRIMARY = '#6A9BCC';
-const CHART_PRIMARY_SOFT = 'rgba(106, 155, 204, 0.16)';
-const CHART_TEXT = '#1A2233';
-const CHART_MUTED = '#555E6F';
+const CHART_PRIMARY = '#2E8C5A';
+const CHART_PRIMARY_SOFT = 'rgba(46, 140, 90, 0.14)';
+const CHART_TEXT = '#191813';
+const CHART_MUTED = '#57534A';
 
 export default function EarnoutModel({ tabId }: Props) {
   const tab = useModelStore(s => s.tabs[tabId]);
@@ -36,7 +36,7 @@ export default function EarnoutModel({ tabId }: Props) {
 
   return (
     <div className="p-5 space-y-6 max-w-3xl mx-auto">
-      <h2 className="text-base font-bold m-0" style={{ fontFamily: 'Figtree, system-ui, sans-serif' }}>Earnout Scenario Analysis</h2>
+      <h2 className="text-base font-bold m-0" style={{ fontFamily: 'var(--font-body)' }}>Earnout Scenario Analysis</h2>
 
       {/* KPIs */}
       {earnout && (

@@ -488,7 +488,7 @@ const O: Record<string, CSSProperties> = {
   panel: {
     border: '1px solid var(--m-outline-var)',
     borderRadius: 18,
-    background: 'linear-gradient(135deg, rgba(236,243,250,0.84), rgba(255,255,255,0.72))',
+    background: 'linear-gradient(135deg, rgba(247,245,239,0.84), rgba(255,255,255,0.72))',
     padding: 16,
     boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.78)',
   },
@@ -522,7 +522,7 @@ const O: Record<string, CSSProperties> = {
     lineHeight: 1.45,
   },
   resultBox: {
-    border: '1px solid rgba(46,92,138,0.14)',
+    border: '1px solid rgba(25,24,19,0.14)',
     borderRadius: 16,
     padding: 12,
     background: 'rgba(255,255,255,0.7)',
@@ -572,7 +572,7 @@ const O: Record<string, CSSProperties> = {
   objectiveButtonActive: {
     background: 'var(--m-primary-container)',
     color: 'var(--m-on-primary-container)',
-    borderColor: 'rgba(46,92,138,0.16)',
+    borderColor: 'rgba(25,24,19,0.16)',
   },
   recommendationRow: {
     display: 'flex',
@@ -592,7 +592,7 @@ const O: Record<string, CSSProperties> = {
     borderRadius: 14,
     padding: '9px 10px',
     background: 'rgba(255,255,255,0.66)',
-    border: '1px solid rgba(46,92,138,0.10)',
+    border: '1px solid rgba(25,24,19,0.10)',
     display: 'grid',
     gap: 2,
   },
@@ -617,7 +617,7 @@ const O: Record<string, CSSProperties> = {
     color: '#FFFFFF',
     border: '1px solid rgba(255,255,255,0.28)',
     background:
-      'radial-gradient(circle at 18% 0%, rgba(255,255,255,0.2), transparent 38%), linear-gradient(135deg, rgba(26,34,51,0.92), rgba(26,34,51,0.72) 58%, rgba(46,92,138,0.54))',
+      'radial-gradient(circle at 18% 0%, rgba(255,255,255,0.2), transparent 38%), linear-gradient(135deg, rgba(25,24,19,0.92), rgba(25,24,19,0.72) 58%, rgba(46,140,90,0.54))',
     boxShadow:
       '0 16px 32px -22px rgba(0,0,0,0.62), inset 0 1px 0 rgba(255,255,255,0.32), inset 0 -1px 0 rgba(255,255,255,0.08)',
   },
