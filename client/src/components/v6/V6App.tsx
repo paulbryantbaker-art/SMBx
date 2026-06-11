@@ -549,6 +549,40 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [chatOpen]);
 
+  // ⌘1–⌘9 jump to the Nth open work tab; ctrl+Tab / ctrl+shift+Tab cycle
+  // through them (wrapping). Both reuse activateTab — the exact code path an
+  // Open-row click takes — so the mode switches along with the tab. ⌘1–⌘9
+  // no-op while focus is in an editable field; ctrl+Tab is safe everywhere
+  // (plain Tab is never intercepted, so focus traversal is untouched).
+  useEffect(() => {
+    const inEditable = () => {
+      const el = document.activeElement as HTMLElement | null;
+      return !!el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.ctrlKey && !e.metaKey && !e.altKey && e.key === "Tab") {
+        if (workTabs.length === 0) return;
+        e.preventDefault();
+        const idx = workTabs.findIndex(t => t.id === activeTabId);
+        const next = idx === -1
+          // Active tab is a mode-root: enter the cycle at either end.
+          ? (e.shiftKey ? workTabs[workTabs.length - 1] : workTabs[0])
+          : workTabs[(idx + (e.shiftKey ? -1 : 1) + workTabs.length) % workTabs.length];
+        if (next) activateTab(next.id);
+        return;
+      }
+      if (e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey && /^[1-9]$/.test(e.key)) {
+        if (inEditable()) return;
+        const target = workTabs[Number(e.key) - 1];
+        if (!target) return;
+        e.preventDefault();
+        activateTab(target.id);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [tabs, activeTabId]);
+
   // CD "Ramp" workspace sidebar nav, mapped to V6 modes. Diligence opens the
   // Analyses hub (portfolio-aware recommendations + searchable catalog) instead
   // of duplicating per-analysis links in the rail.
@@ -613,7 +647,20 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
                 {workTabs.map(t => {
                   const on = t.id === activeTabId;
                   return (
-                    <div key={t.id} className={`navtab ${on ? "on" : ""}`} role="presentation">
+                    <div
+                      key={t.id}
+                      className={`navtab ${on ? "on" : ""}`}
+                      role="presentation"
+                      // Middle-click closes the row (browser-tab muscle memory).
+                      // preventDefault on BOTH events: Chrome starts autoscroll
+                      // on middle mousedown, pastes on auxclick (Linux).
+                      onMouseDown={e => { if (e.button === 1) e.preventDefault(); }}
+                      onAuxClick={e => {
+                        if (e.button !== 1) return;
+                        e.preventDefault();
+                        closeTab(t.id);
+                      }}
+                    >
                       <button
                         className="navtab-t"
                         onClick={() => activateTab(t.id)}

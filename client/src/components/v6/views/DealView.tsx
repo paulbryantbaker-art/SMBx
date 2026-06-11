@@ -18,6 +18,8 @@ import { executeSurfaceAction, runActionAnalysis, type ActionDeal } from "../../
 import { isSurfaceActionId, type SurfaceActionId } from "../../../lib/v6SurfaceActions";
 import { getJourneyGates } from "@shared/gateRegistry";
 import { useDerivedDisplay } from "../shared/useDerivedDisplay";
+import { WorkSeal } from "../shared/WorkSeal";
+import { LEAGUE_MULTIPLES } from "../../../lib/calculations/core";
 
 /* ─── Methodology stage progress ─── */
 interface StageCell { id: string; name: string; state: "done" | "current" | "upcoming" }
@@ -245,6 +247,8 @@ interface DealDetailResp {
 }
 
 interface DealBrief {
+  /** ISO timestamp the server stamps on every brief (cached or fresh). */
+  generatedAt?: string;
   verdict?: { label?: string; score?: number; text?: string };
   marketRead?: {
     headline?: string;
@@ -388,17 +392,28 @@ export function V6DealView({
   // ─── Derive display data ──────────────────────────────────────────
   const real = data?.deal;
   const stats: Stat[] = real ? buildStats(real) : numericId === null ? SAMPLE_STATS : [];
+  // League range band for the Asking-price tile. Real deals need asking +
+  // earnings + a league in LEAGUE_MULTIPLES; the sample fallback demonstrates
+  // the band with the reference numbers ($9.2M asking / $1.6M EBITDA, L3).
+  const leagueBand = real
+    ? (real.asking_price && (real.ebitda || real.sde) && real.league
+        ? buildLeagueBand(real.league, real.asking_price, (real.ebitda || real.sde)!)
+        : null)
+    : numericId === null
+      ? buildLeagueBand("L3", 920_000_000, 160_000_000)
+      : null;
+  // Working Paper: no decorative eyebrow — the eyebrow's information (journey,
+  // gate, status) folds into the subline under the masthead.
   const heroSub = real
     ? [
         real.revenue ? `${fmtCents(real.revenue)} revenue` : null,
         real.location || null,
         real.industry || null,
+        real.journey_type.toUpperCase(),
+        `gate ${real.current_gate}`,
+        real.status !== "active" ? real.status : null,
       ].filter(Boolean).join(" · ")
-    : "$5.4M revenue · East Texas · industrial services rollup target";
-
-  const heroEyebrow = real
-    ? `${real.journey_type.toUpperCase()} · ${real.league ?? "—"} · GATE ${real.current_gate}${real.status !== "active" ? ` · ${real.status.toUpperCase()}` : ""}`
-    : "DEAL · UPDATED 12 MIN AGO";
+    : "$5.4M revenue · East Texas · industrial services rollup target · BUY · gate B2";
 
   const dealName = real?.business_name || title;
   const intelligence = buildDealIntelligence({ dealName, real, dealBrief });
@@ -598,10 +613,9 @@ export function V6DealView({
     <div className="wk-content" style={{ width: "min(100%, 1440px)", maxWidth: 1440, margin: "0 auto", boxSizing: "border-box" }}>
       {/* Hero strip */}
       <section id="deal-dashboard" style={{ marginBottom: 28 }}>
-        <div className="mono" style={D.eyebrow}>{heroEyebrow}</div>
         <div style={D.headerRow}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <h1 style={D.h1}>{real?.business_name || title}</h1>
+            <h1 className="wk-masthead" style={D.h1}>{real?.business_name || title}</h1>
             <div style={D.sub}>{heroSub}</div>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
@@ -674,8 +688,13 @@ export function V6DealView({
         <section style={{ marginBottom: 28 }}>
           <div className="wkcard" style={{ display: "flex", alignItems: "center", gap: 18 }}>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: "1.05rem", fontWeight: 700, color: "var(--ink)", letterSpacing: "-0.02em" }}>{dealBrief.verdict.label || "Yulia's read"}</div>
+              <div className="wk-masthead" style={{ fontSize: 22, color: "var(--ink)" }}>{dealBrief.verdict.label || "Yulia's read"}</div>
               {dealBrief.verdict.text && <p style={{ margin: "6px 0 0", color: "var(--ink-2)", fontSize: "0.9rem", lineHeight: 1.5 }}>{dealBrief.verdict.text}</p>}
+              {/* Basis line — descriptive only, never a recommendation. */}
+              <div className="mono" style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 8 }}>
+                From Yulia’s read of this deal · descriptive, not advice
+                {dealBrief.generatedAt && fmtRelative(dealBrief.generatedAt) ? ` · ${fmtRelative(dealBrief.generatedAt)}` : ""}
+              </div>
             </div>
             {typeof dealBrief.verdict.score === "number" && (
               <div style={{ textAlign: "right", flexShrink: 0 }}>
@@ -705,6 +724,27 @@ export function V6DealView({
               <div className="mono" style={D.statLabel}>{s.k.toUpperCase()}</div>
               <StatValue value={s.v} />
               <div style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 2 }}>{s.sub}</div>
+              {s.k === "Asking price" && leagueBand && (
+                <div style={{ marginTop: 8 }}>
+                  <div style={{ position: "relative", height: 4, borderRadius: 2, background: "var(--surface-3)" }}>
+                    <span
+                      style={{
+                        position: "absolute",
+                        top: "50%",
+                        left: `${leagueBand.pct}%`,
+                        transform: "translate(-50%, -50%)",
+                        width: 6,
+                        height: 6,
+                        borderRadius: "50%",
+                        background: leagueBand.inRange ? "#2E8C5A" : "#C0562F",
+                      }}
+                    />
+                  </div>
+                  <div className="mono" style={{ fontSize: 10, color: "var(--ink-3)", marginTop: 4 }}>
+                    league {leagueBand.league}: {leagueBand.min}–{leagueBand.max}× {leagueBand.metric}
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -1123,7 +1163,16 @@ function DealFileRow({ file, last, onClick, relianceWarning }: {
       <span style={D.fileRowText}>
         <strong>{file.title}</strong>
         <span>{file.meta}</span>
-        {file.provenanceLabel && <span style={D.fileProvenance}>Model provenance: {file.provenanceLabel}</span>}
+        {/* Provenance: a real output hash gets the substrate's seal (never an
+            "unsigned draft" here — no hash means no seal, just the label). */}
+        {file.modelOutputHash ? (
+          <WorkSeal
+            modelId={file.modelType ? `MODEL.${file.modelType}.v1` : undefined}
+            outputHash={file.modelOutputHash}
+          />
+        ) : file.provenanceLabel ? (
+          <span style={D.fileProvenance}>Model provenance: {file.provenanceLabel}</span>
+        ) : null}
         {relianceWarning && <span style={D.fileWarning}>Model freshness: {relianceWarning}</span>}
         <span style={D.filePath}>Location: {file.location}</span>
       </span>
@@ -1808,6 +1857,37 @@ function buildStats(d: DealRow): Stat[] {
   ];
 }
 
+// League range band for the Asking-price tile: where the deal's implied
+// multiple (asking / earnings, both in cents) sits inside the league's
+// published multiple range. The marker clamps to the track — an out-of-range
+// multiple pins to the 0%/100% edge and flips the dot to the out-of-range
+// color rather than overflowing the bar.
+interface LeagueBandData {
+  league: string;
+  min: number;
+  max: number;
+  metric: "SDE" | "EBITDA";
+  implied: number;
+  pct: number; // marker position, clamped 0–100
+  inRange: boolean;
+}
+
+function buildLeagueBand(league: string, askingCents: number, earningsCents: number): LeagueBandData | null {
+  const entry = LEAGUE_MULTIPLES[league];
+  if (!entry || earningsCents <= 0 || entry.max <= entry.min) return null;
+  const implied = askingCents / earningsCents;
+  const pct = Math.max(0, Math.min(100, ((implied - entry.min) / (entry.max - entry.min)) * 100));
+  return {
+    league,
+    min: entry.min,
+    max: entry.max,
+    metric: entry.metric,
+    implied,
+    pct,
+    inRange: implied >= entry.min && implied <= entry.max,
+  };
+}
+
 // Methodology "you are here": map the deal's journey to its ordered stages and
 // mark each done / current / upcoming from gate_progress + current_gate.
 function buildStageProgress(
@@ -1901,17 +1981,13 @@ function shortHash(value?: string | null): string {
 }
 
 const D: Record<string, CSSProperties> = {
-  eyebrow: {
-    fontSize: 10, color: "var(--ink-3)",
-    letterSpacing: "0.14em", fontWeight: 600, marginBottom: 6,
-  },
   headerRow: {
     display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 20,
   },
+  // Masthead register — .wk-masthead supplies the Fraunces serif family.
   h1: {
-    fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 36,
-    letterSpacing: "-0.025em", margin: 0, color: "var(--ink)",
-    textWrap: "balance",
+    fontSize: 44, fontWeight: 540, letterSpacing: "-0.015em",
+    margin: 0, color: "var(--ink)", textWrap: "balance",
   },
   sub: { fontSize: 14, color: "var(--ink-2)", marginTop: 6 },
   // wkbtn classes handle the banner styles; actionBanner provides margin

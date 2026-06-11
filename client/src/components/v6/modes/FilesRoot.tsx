@@ -597,22 +597,19 @@ function ActiveFilesList({
 
       {!showRooms && groups.length > 0 && groups.map((group, groupIndex) => (
         <div key={`${activeList}-${group.deal}`} style={{ marginTop: groupIndex > 0 ? 22 : 0 }}>
+          {/* Plain provenance line — no mono-caps micro labels (LOCKED 2026-06-01) */}
           <div style={{
             display: "flex",
-            alignItems: "center",
+            alignItems: "baseline",
             justifyContent: "space-between",
             gap: 12,
             padding: "6px 0 10px",
             color: "var(--ink-3)",
-            fontSize: ".78rem",
-            fontWeight: 600,
-            letterSpacing: ".04em",
-            textTransform: "uppercase",
+            fontSize: ".84rem",
             borderBottom: "1px solid var(--line)",
-            marginBottom: 0,
           }}>
             <strong style={{ fontWeight: 600, color: "var(--ink-2)" }}>{group.deal}</strong>
-            <span style={{ fontFamily: "var(--font-mono)" }}>{group.rows.length} {group.rows.length === 1 ? "file" : "files"}</span>
+            <span>{group.rows.length} {group.rows.length === 1 ? "file" : "files"}</span>
           </div>
           <div className="wkcard" style={{ padding: 0, overflow: "hidden" }}>
             {group.rows.map((row, index) => (

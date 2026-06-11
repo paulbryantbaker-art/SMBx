@@ -14,6 +14,7 @@ import { useMobileDeals, type MobilePipelineRow } from "../../../hooks/useMobile
 import { useAudience } from "../../../hooks/useAudience";
 import { copyFor } from "../../../lib/copy";
 import { useV6WorkspaceData, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
+import { useDerivedDisplay } from "../shared/useDerivedDisplay";
 import { YuliaSkeleton } from "../shared/YuliaSkeleton";
 import { V6Icon } from "../icons";
 import type { OpenTab } from "../types";
@@ -51,6 +52,10 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const openDeal = (rawId: number, title: string) => openTab({ kind: "deal", id: String(rawId), title });
 
   const featured = deals.featured;           // strongest source this week (same as mobile)
+  // DERIVE: the FIT score never hard-swaps — it settles via useDerivedDisplay
+  // and flashes the one-shot .wk-tick when the skeleton resolves into data or
+  // the fit changes. Empty string while loading = nothing animates from zero.
+  const fitDisplay = useDerivedDisplay(featured ? String(featured.fit) : "");
   const todayRows = deals.today;             // pipeline rows (same as mobile)
   const intel = brief?.marketIntelligence ?? null;
   const recentFiles = workspace.deliverables.slice(0, 4);
@@ -70,7 +75,8 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
       <div className="wkgrid g2" style={{ gap: 16, marginTop: 4 }}>
         {/* Daily hero — the strongest source this week (deals.featured) */}
         <div className="wkcard" style={{ display: "flex", flexDirection: "column", gap: 16, minHeight: 200 }}>
-          <div style={{ fontSize: "1.15rem", fontWeight: 700, letterSpacing: "-0.03em", color: "var(--ink)", lineHeight: 1.1 }}>Strongest source this week</div>
+          {/* Working Paper inversion: the deal name is the masthead, not this label */}
+          <div style={{ fontSize: "0.95rem", fontWeight: 600, color: "var(--ink-2)", lineHeight: 1.2 }}>Strongest source this week</div>
           {dealsLoading ? (
             <YuliaSkeleton rows={2} label="Yulia is reading your deals…" />
           ) : featured ? (
@@ -82,11 +88,14 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
               >
                 <span className="logo" style={{ width: 44, height: 44 }}>{initials(featured.name)}</span>
                 <span style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{ display: "block", color: "var(--ink)", fontWeight: 700, fontSize: "1rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{featured.name}</span>
-                  <span style={{ display: "block", color: "var(--ink-3)", fontSize: "0.82rem" }}>{featured.sub}</span>
+                  <span className="wk-masthead" style={{ display: "block", color: "var(--ink)", fontSize: 30, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{featured.name}</span>
+                  <span style={{ display: "block", color: "var(--ink-3)", fontSize: "0.82rem", marginTop: 3 }}>{featured.sub}</span>
                 </span>
                 <span style={{ textAlign: "right", flexShrink: 0 }}>
-                  <span style={{ display: "block", fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--accent-strong)", fontSize: "1.3rem", lineHeight: 1 }}>{featured.fit}</span>
+                  <span style={{ display: "block", fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--accent-strong)", fontSize: 32, lineHeight: 1 }}>
+                    {fitDisplay.text}
+                    <i className={`wk-tick${fitDisplay.justSettled ? " on" : ""}`} aria-hidden="true">✓</i>
+                  </span>
                   <span style={{ display: "block", fontSize: "0.66rem", color: "var(--ink-3)", fontWeight: 600 }}>FIT</span>
                 </span>
               </button>
