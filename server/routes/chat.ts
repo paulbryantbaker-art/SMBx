@@ -329,11 +329,24 @@ chatRouter.post('/message', async (req, res) => {
       `;
       convId = conv.id;
     } else {
+      // OWNERSHIP GUARD — an existing conversationId must belong to the
+      // caller (user_id for authed, session_id for anonymous). Without this,
+      // any caller could read AND write any conversation by id; GET /messages
+      // and DELETE already guard this way.
+      const [conv] = userId
+        ? await sql`SELECT title FROM conversations WHERE id = ${convId} AND user_id = ${userId} LIMIT 1`
+        : sessionId
+          ? await sql`SELECT title FROM conversations WHERE id = ${convId} AND session_id = ${sessionId} LIMIT 1`
+          : [undefined];
+      if (!conv) {
+        safeWrite(res, `data: ${JSON.stringify({ type: 'error', error: 'Conversation not found' })}\n\n`);
+        safeWrite(res, 'data: [DONE]\n\n');
+        clearInterval(heartbeat);
+        res.end();
+        return;
+      }
       // Update title on first message if still default
-      const [conv] = await sql`
-        SELECT title FROM conversations WHERE id = ${convId} LIMIT 1
-      `;
-      if (conv && conv.title === 'New conversation') {
+      if (conv.title === 'New conversation') {
         const shortTitle = message.trim().substring(0, 60) + (message.trim().length > 60 ? '...' : '');
         await sql`UPDATE conversations SET title = ${shortTitle}, updated_at = NOW() WHERE id = ${convId}`;
       }
@@ -367,13 +380,19 @@ chatRouter.post('/message', async (req, res) => {
       pmi_phase: convRow?.pmi_phase || null,
     };
 
-    // Load conversation history (last 50 messages)
+    // Load conversation history — the LAST 50 messages. DESC+reverse, NOT
+    // ASC LIMIT: ASC keeps the OLDEST 50, which silently drops every newer
+    // message (including the one just sent) once a thread passes 50.
     const history = await sql`
       SELECT role, content FROM messages
       WHERE conversation_id = ${convId}
-      ORDER BY created_at ASC
+      ORDER BY created_at DESC, id DESC
       LIMIT 50
     `;
+    history.reverse();
+    // The Messages API requires the first message to be user-role; windowing
+    // can leave an assistant message at the head — trim it.
+    while (history.length > 0 && history[0].role !== 'user') history.shift();
 
     const apiMessages: MessageParam[] = history.map((m: any) => ({
       role: m.role as 'user' | 'assistant',
@@ -1168,13 +1187,19 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
     // Build system prompt
     const systemPrompt = await buildSystemPrompt(user as any, deal as any, convId, surfaceContext, normalizedModelPreference);
 
-    // Load conversation history (last 50 messages max)
+    // Load conversation history — the LAST 50 messages. DESC+reverse, NOT
+    // ASC LIMIT: ASC keeps the OLDEST 50, which silently drops every newer
+    // message (including the one just sent) once a thread passes 50.
     const history = await sql`
       SELECT role, content FROM messages
       WHERE conversation_id = ${convId}
-      ORDER BY created_at ASC
+      ORDER BY created_at DESC, id DESC
       LIMIT 50
     `;
+    history.reverse();
+    // The Messages API requires the first message to be user-role; windowing
+    // can leave an assistant message at the head — trim it.
+    while (history.length > 0 && history[0].role !== 'user') history.shift();
 
     const messages: MessageParam[] = history.map((m: any) => ({
       role: m.role as 'user' | 'assistant',
@@ -1360,27 +1385,40 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
       }
     }
 
-    // ─── Periodic summarization for long conversations (fire-and-forget) ───
-    // When a conversation hits 50+ messages, summarize and store on the conversation
-    // record so future system prompts stay within token limits.
+    // ─── Rolling summarization for long conversations (fire-and-forget) ───
+    // First summary at 30 messages, refreshed every ~25 new messages after
+    // that, ALWAYS folding the previous summary in — so the conversation's
+    // compact memory keeps tracking the thread instead of freezing at the
+    // first write. (The old guard wrote once when summary was NULL and never
+    // again; combined with the 30-message summarizer window, everything said
+    // after the one-shot write was unrepresentable in future prompts.)
     setImmediate(async () => {
       try {
         const [{ count }] = await sql`SELECT COUNT(*) as count FROM messages WHERE conversation_id = ${convId}`;
-        if (Number(count) >= 50) {
-          const [existing] = await sql`SELECT summary FROM conversations WHERE id = ${convId} LIMIT 1`;
-          // Only summarize if we haven't already (summary would be from gate advance or prior summarization)
-          if (!existing?.summary) {
+        const total = Number(count);
+        if (total >= 30) {
+          const [existing] = await sql`SELECT summary, summary_message_count FROM conversations WHERE id = ${convId} LIMIT 1`;
+          const lastCount = Number(existing?.summary_message_count || 0);
+          if (total - lastCount >= 25) {
             const { summarizeGateConversation } = await import('../services/gateSummaryService.js');
             const gateName = deal?.current_gate || 'ongoing';
-            const summary = await summarizeGateConversation(convId, gateName);
-            if (summary) {
-              await sql`UPDATE conversations SET summary = ${summary} WHERE id = ${convId}`;
-              console.log(`📝 Periodic summary generated for conversation ${convId} (${count} messages)`);
+            // Window sized to the unfolded delta (capped at 60) so a delta
+            // that outgrew the default 30 — agentic bursts, prior failed
+            // cycles — still gets fully folded.
+            const windowSize = Math.min(60, Math.max(30, total - lastCount + 5));
+            const summary = await summarizeGateConversation(convId, gateName, existing?.summary ?? null, windowSize);
+            // FRESHNESS GUARD: on failure the summarizer returns the PRIOR
+            // text. Advancing the watermark for that would permanently skip
+            // the unfolded messages (the next cycle only reads the recent
+            // window). Skip entirely — the next message retries.
+            if (summary && summary !== existing?.summary) {
+              await sql`UPDATE conversations SET summary = ${summary}, summary_message_count = ${total} WHERE id = ${convId}`;
+              console.log(`📝 Rolling summary refreshed for conversation ${convId} (${total} messages)`);
             }
           }
         }
       } catch (e: any) {
-        console.error('Periodic summarization error:', e.message);
+        console.error('Rolling summarization error:', e.message);
       }
     });
 

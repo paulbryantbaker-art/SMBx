@@ -32,17 +32,32 @@ export const GATE_TITLES: Record<string, string> = {
 };
 
 /**
- * Summarize the last 20 messages of a gate conversation into 3-4 sentences.
- * Returns null on failure (non-critical).
+ * Summarize a conversation into a compact running memory.
+ *
+ * PROGRESSIVE: pass the conversation's existing summary as `previousSummary`
+ * and it is folded in — durable facts from earlier in the thread survive even
+ * though only the last 30 messages are read. Without this, anything said more
+ * than 30 messages ago would be unrepresentable in any future prompt.
+ *
+ * FAILURE-SAFE: on any error (or empty thread) the PREVIOUS summary is
+ * returned, never null-over-data — callers can write the result back without
+ * risking erasure of memory they already had.
  */
-export async function summarizeGateConversation(conversationId: number, gateName: string): Promise<string | null> {
+export async function summarizeGateConversation(
+  conversationId: number,
+  gateName: string,
+  previousSummary?: string | null,
+  windowSize: number = 30,
+): Promise<string | null> {
+  const prior = previousSummary?.trim() || null;
+  const window = Math.min(60, Math.max(30, Math.floor(windowSize) || 30));
   try {
     const messages = await sql`
       SELECT role, content FROM messages
       WHERE conversation_id = ${conversationId}
-      ORDER BY created_at DESC LIMIT 20
+      ORDER BY created_at DESC, id DESC LIMIT ${window}
     `;
-    if (messages.length === 0) return null;
+    if (messages.length === 0) return prior;
 
     // Reverse to chronological order
     const chronological = messages.reverse();
@@ -53,19 +68,23 @@ export async function summarizeGateConversation(conversationId: number, gateName
     const label = GATE_LABELS[gateName] || gateName;
     const resp = await getClient().messages.create({
       model: HAIKU_MODEL,
-      max_tokens: 256,
-      system: `You summarize M&A deal conversations concisely. Output 3-4 sentences capturing: key facts learned, decisions made, and current status. No preamble.`,
+      max_tokens: 350,
+      system: prior
+        ? `You maintain the running summary of an M&A deal conversation. Merge the prior summary with the latest exchanges into 4-6 sentences capturing: key facts learned, decisions made, numbers and terms agreed, and current status. Keep durable facts from the prior summary unless the latest exchanges contradict them. No preamble.`
+        : `You summarize M&A deal conversations concisely. Output 3-4 sentences capturing: key facts learned, decisions made, and current status. No preamble.`,
       messages: [{
         role: 'user',
-        content: `Summarize this ${gateName} (${label}) gate conversation:\n\n${transcript}`,
+        content: prior
+          ? `Prior summary:\n${prior}\n\nLatest exchanges in this ${gateName} (${label}) gate conversation:\n\n${transcript}`
+          : `Summarize this ${gateName} (${label}) gate conversation:\n\n${transcript}`,
       }],
     });
 
     const text = resp.content[0]?.type === 'text' ? resp.content[0].text : null;
-    return text?.trim() || null;
+    return text?.trim() || prior;
   } catch (e: any) {
     console.error('[gateSummary] Error summarizing conversation:', e.message);
-    return null;
+    return prior;
   }
 }
 

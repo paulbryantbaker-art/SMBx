@@ -1036,8 +1036,9 @@ export async function executeTool(
 async function startNewChapter(input: Record<string, any>, userId: number, conversationId: number): Promise<string> {
   const { reason, newChapterTitle } = input;
 
-  // Get the current conversation's deal
-  const [conv] = await sql`SELECT deal_id FROM conversations WHERE id = ${conversationId} AND user_id = ${userId} LIMIT 1`;
+  // Get the current conversation's deal (+ its rolling summary, folded into
+  // the archive summary so earlier-chapter facts survive the compaction)
+  const [conv] = await sql`SELECT deal_id, summary FROM conversations WHERE id = ${conversationId} AND user_id = ${userId} LIMIT 1`;
   if (!conv?.deal_id) {
     return JSON.stringify({ error: 'No deal linked to this conversation. Cannot start a chapter without a deal.' });
   }
@@ -1048,8 +1049,9 @@ async function startNewChapter(input: Record<string, any>, userId: number, conve
   // Import and run the gate conversation service for summarization + archival
   const { summarizeGateConversation, gateCompletionTitle } = await import('./gateSummaryService.js');
 
-  // Summarize current conversation
-  const summary = await summarizeGateConversation(conversationId, deal?.current_gate || 'ongoing').catch(() => null);
+  // Summarize current conversation (failure-safe: keeps the prior summary)
+  const summary = await summarizeGateConversation(conversationId, deal?.current_gate || 'ongoing', conv.summary ?? null)
+    .catch(() => conv.summary ?? null);
 
   // Archive current conversation with summary
   const archiveTitle = newChapterTitle
@@ -1276,6 +1278,14 @@ async function advanceGate(input: Record<string, any>, userId: number): Promise<
 
   // Advance the gate
   await sql`UPDATE deals SET current_gate = ${toGate}, updated_at = NOW() WHERE id = ${dealId}`;
+
+  // Log the transition event — the auto-advance path (dealService) already
+  // does this; without it here, chat-driven advances left no history and
+  // "what changed" / pipeline velocity silently under-reported.
+  await sql`
+    INSERT INTO gate_events (deal_id, from_gate, to_gate, event_type)
+    VALUES (${dealId}, ${fromGate}, ${toGate}, 'yulia_tool')
+  `.catch((e: any) => console.error('Gate event log error:', e.message));
 
   // Update gate_progress if it exists
   await sql`

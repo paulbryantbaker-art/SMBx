@@ -628,6 +628,68 @@ Continue gathering the information the gate prompt describes, but through natura
   return layers.join('\n\n');
 }
 
+/**
+ * Compact activity trail — the read side of the event tables. gate_events,
+ * deal_activity_log, model_executions, and deliverables were all written but
+ * never consulted in chat, which made "what changed across my deals" (a chip
+ * the product itself suggests) structurally unanswerable: the brief caches
+ * are single-row overwrites with no prior state to diff. This injects the
+ * last 10 recorded events — deal-scoped when a deal is in context,
+ * portfolio-wide otherwise.
+ */
+async function buildRecentActivityLayer(userId: number, dealId: number | null): Promise<string | null> {
+  try {
+    // Per-branch ORDER BY/LIMIT: without it the planner reads EVERY matching
+    // event row before the outer top-10 sort — deal_activity_log grows
+    // per-view/per-comment without bound and this runs on every message.
+    const rows = dealId
+      ? await sql`
+          SELECT what, created_at FROM (
+            (SELECT 'Gate advanced ' || from_gate || ' → ' || to_gate AS what, created_at
+             FROM gate_events WHERE deal_id = ${dealId}
+             ORDER BY created_at DESC LIMIT 10)
+            UNION ALL
+            (SELECT INITCAP(action) || COALESCE(' (' || target_type || ')', '') AS what, created_at
+             FROM deal_activity_log WHERE deal_id = ${dealId}
+             ORDER BY created_at DESC LIMIT 10)
+            UNION ALL
+            (SELECT 'Model run: ' || model_id AS what, created_at
+             FROM model_executions WHERE deal_id = ${dealId}
+             ORDER BY created_at DESC LIMIT 10)
+            UNION ALL
+            (SELECT 'Deliverable completed: ' || type AS what, created_at
+             FROM deliverables WHERE deal_id = ${dealId} AND status = 'complete'
+             ORDER BY created_at DESC LIMIT 10)
+          ) ev ORDER BY created_at DESC LIMIT 10
+        `
+      : await sql`
+          SELECT what, created_at FROM (
+            (SELECT COALESCE(d.business_name, 'Deal ' || ge.deal_id) || ': gate ' || ge.from_gate || ' → ' || ge.to_gate AS what, ge.created_at
+             FROM gate_events ge JOIN deals d ON d.id = ge.deal_id WHERE d.user_id = ${userId}
+             ORDER BY ge.created_at DESC LIMIT 10)
+            UNION ALL
+            (SELECT COALESCE(d.business_name, 'Deal ' || dl.deal_id) || ': ' || dl.action AS what, dl.created_at
+             FROM deal_activity_log dl JOIN deals d ON d.id = dl.deal_id WHERE d.user_id = ${userId}
+             ORDER BY dl.created_at DESC LIMIT 10)
+            UNION ALL
+            (SELECT COALESCE(d.business_name, 'Deal ' || me.deal_id) || ': model run ' || me.model_id AS what, me.created_at
+             FROM model_executions me JOIN deals d ON d.id = me.deal_id WHERE d.user_id = ${userId}
+             ORDER BY me.created_at DESC LIMIT 10)
+            UNION ALL
+            (SELECT COALESCE(d.business_name, 'Deal ' || dv.deal_id) || ': deliverable ' || dv.type AS what, dv.created_at
+             FROM deliverables dv JOIN deals d ON d.id = dv.deal_id WHERE d.user_id = ${userId} AND dv.status = 'complete'
+             ORDER BY dv.created_at DESC LIMIT 10)
+          ) ev ORDER BY created_at DESC LIMIT 10
+        `;
+    if (rows.length === 0) return null;
+    const lines = rows.map((r: any) =>
+      `- ${new Date(r.created_at).toISOString().slice(0, 10)} — ${r.what}`).join('\n');
+    return `\n## RECENT ${dealId ? 'DEAL' : 'PORTFOLIO'} ACTIVITY\nMost recent recorded events${dealId ? ' on this deal' : " across the user's deals"} (newest first). Ground "what changed" answers in these facts.\n${lines}`;
+  } catch {
+    return null; // activity trail is non-critical prompt context
+  }
+}
+
 export async function buildSystemPrompt(
   user: UserContext,
   deal: DealContext | null,
@@ -657,20 +719,30 @@ export async function buildSystemPrompt(
   const userName = user.display_name || user.email.split('@')[0];
   layers.push(`\n## CURRENT USER\nName: ${userName}\nEmail: ${user.email}\nLeague: ${user.league || 'Not yet classified'}`);
 
-  // Layer 2b: Portfolio awareness — check if user has multiple deals
+  // Layer 2b: Portfolio awareness. Injected for EVERY user with at least one
+  // active deal — the old >1-deal guard meant single-deal users (most users)
+  // got no conversational deal memory at all in general chats. The list is
+  // bounded to the 12 most recently touched owned deals so heavy portfolios
+  // can't flood the prompt; the count stays honest.
   try {
+    const [{ count: ownedCountRaw }] = await sql`
+      SELECT COUNT(*) AS count FROM deals WHERE user_id = ${user.id} AND status = 'active'
+    `;
+    const ownedCount = Number(ownedCountRaw);
     const allDeals = await sql`
       SELECT id, journey_type, current_gate, business_name, league, revenue, status
       FROM deals WHERE user_id = ${user.id} AND status = 'active'
       ORDER BY updated_at DESC
+      LIMIT 12
     `;
     const participantDeals = await sql`
       SELECT d.id, d.journey_type, d.business_name, dp.role
       FROM deals d JOIN deal_participants dp ON dp.deal_id = d.id
       WHERE dp.user_id = ${user.id} AND dp.accepted_at IS NOT NULL AND d.status = 'active'
+      LIMIT 12
     `;
-    const totalDeals = allDeals.length + participantDeals.length;
-    if (totalDeals > 1) {
+    const totalDeals = ownedCount + participantDeals.length;
+    if (totalDeals > 0) {
       // Enrich owned deals with their latest chapter summary for cross-reference
       const ownedIds = allDeals.map((d: any) => d.id);
       let latestSummaries = new Map<number, string>();
@@ -689,18 +761,63 @@ export async function buildSystemPrompt(
       }
 
       const dealList = allDeals.map((d: any) => {
-        const summary = latestSummaries.get(d.id);
-        const summarySnippet = summary ? `\n    Last context: ${summary.substring(0, 150)}` : '';
+        // No snippet for the ACTIVE deal — its full summaries are injected
+        // below (Layer 2d + gate/thread layers); repeating 300 chars here
+        // would duplicate the same text in one prompt.
+        const summary = deal && d.id === deal.id ? null : latestSummaries.get(d.id);
+        const summarySnippet = summary ? `\n    Last context: ${summary.substring(0, 300)}` : '';
         return `  - [${d.id}] ${d.business_name || 'Unnamed'} (${d.journey_type.toUpperCase()} @ ${d.current_gate}, ${d.league || 'unclassified'})${summarySnippet}`;
       }).join('\n');
+      const moreLine = ownedCount > allDeals.length
+        ? `\n  …and ${ownedCount - allDeals.length} more owned deals — use list_user_deals for the full set.`
+        : '';
       const partList = participantDeals.map((d: any) => `  - [${d.id}] ${d.business_name || 'Unnamed'} (${d.journey_type.toUpperCase()}, role: ${d.role})`).join('\n');
-      layers.push(`\n## PORTFOLIO AWARENESS\nThis user has ${totalDeals} active deals. You have the list_user_deals and switch_deal_context tools — use them proactively.\n\nOwned deals:\n${dealList}${partList ? `\n\nParticipant deals:\n${partList}` : ''}\n\nWhen working on one deal, reference other deals in the portfolio when relevant (e.g., "Your HVAC multiple compares favorably to the MSP deal"). Cross-deal insights make you more valuable than a single-deal work surface.`);
+      const crossDealNote = totalDeals > 1
+        ? `\n\nWhen working on one deal, reference other deals in the portfolio when relevant (e.g., "Your HVAC multiple compares favorably to the MSP deal"). Cross-deal insights make you more valuable than a single-deal work surface.`
+        : '';
+      layers.push(`\n## PORTFOLIO AWARENESS\nThis user has ${totalDeals} active deal${totalDeals === 1 ? '' : 's'}. You have the list_user_deals and switch_deal_context tools — use them proactively.\n\nOwned deals:\n${dealList}${moreLine}${partList ? `\n\nParticipant deals:\n${partList}` : ''}${crossDealNote}`);
     }
   } catch { /* portfolio check is non-critical */ }
+
+  // Layer 2c: Firm memory — durable facts Yulia herself saved via the
+  // update_firm_memory tool. Previously write-only from chat: saved but
+  // never injected back into any future conversation.
+  try {
+    const memories = await sql`
+      SELECT memory_type, label, value FROM firm_memory
+      WHERE user_id = ${user.id} AND status = 'active'
+      ORDER BY updated_at DESC
+      LIMIT 12
+    `;
+    if (memories.length > 0) {
+      const memLines = memories.map((m: any) => {
+        const v = typeof m.value === 'string' ? m.value : JSON.stringify(m.value);
+        return `- [${m.memory_type}] ${m.label}: ${v.substring(0, 240)}`;
+      }).join('\n');
+      layers.push(`\n## FIRM MEMORY\nDurable facts and preferences previously saved for this user. Honor them, and keep them current with the update_firm_memory tool when they change.\n${memLines}`);
+    }
+  } catch { /* firm memory is non-critical prompt context */ }
+
+  // Layer 2d: Running summary of THIS conversation. Lives here — OUTSIDE the
+  // deal branch — because general (non-deal) conversations also carry rolling
+  // summaries; the old placement inside the deal branch made those summaries
+  // write-only dead data.
+  try {
+    const [currentConv] = await sql`
+      SELECT summary FROM conversations WHERE id = ${conversationId} AND summary IS NOT NULL LIMIT 1
+    `;
+    if (currentConv?.summary) {
+      layers.push(`\n## EARLIER IN THIS CONVERSATION\n${currentConv.summary}\n(This summarizes earlier messages. The recent messages follow in the conversation history.)`);
+    }
+  } catch { /* non-critical */ }
 
   // Layer 3: Journey detection or deal context
   if (!deal) {
     layers.push(JOURNEY_DETECTION_PROMPT);
+    // Portfolio-wide activity trail so "what changed" is answerable in
+    // general chats, where no single deal is in context.
+    const portfolioActivity = await buildRecentActivityLayer(user.id, null);
+    if (portfolioActivity) layers.push(portfolioActivity);
   } else {
     // Layer 3a: Deal context summary
     layers.push(`\n## CURRENT DEAL (ID: ${deal.id})\n${formatDealContext(deal)}`);
@@ -728,17 +845,32 @@ export async function buildSystemPrompt(
       }
     } catch { /* non-critical */ }
 
-    // Layer 3a++: Current conversation summary (for long conversations with 50+ messages)
-    // This captures context from earlier in the same conversation that may have scrolled
-    // out of the message history window (last 50 messages).
+    // (Current-conversation summary moved to Layer 2d — it now also covers
+    // general conversations, which previously wrote summaries nothing read.)
+
+    // Layer 3a+++: Running summaries of this deal's OTHER open threads.
+    // Returning to a deal via a NEW chat ("New deal chat") starts an empty
+    // conversation — without this layer, the rolling summary living on the
+    // deal's previous still-active thread was invisible (the completed-gate
+    // layer only reads archived chapters) and Yulia re-asked settled
+    // questions.
     try {
-      const [currentConv] = await sql`
-        SELECT summary FROM conversations WHERE id = ${conversationId} AND summary IS NOT NULL LIMIT 1
+      const otherThreads = await sql`
+        SELECT title, summary FROM conversations
+        WHERE deal_id = ${deal.id} AND id != ${conversationId}
+          AND gate_status = 'active' AND summary IS NOT NULL
+        ORDER BY updated_at DESC LIMIT 3
       `;
-      if (currentConv?.summary) {
-        layers.push(`\n## EARLIER IN THIS CONVERSATION\n${currentConv.summary}\n(This summarizes earlier messages. The recent messages follow in the conversation history.)`);
+      if (otherThreads.length > 0) {
+        const threadLines = otherThreads.map((c: any) => `- **${c.title || 'Untitled thread'}**: ${c.summary}`).join('\n');
+        layers.push(`\n## OTHER ACTIVE THREADS ON THIS DEAL\nRunning summaries of this deal's other open conversations. Treat their facts and decisions as already established — do NOT re-ask.\n${threadLines}`);
       }
     } catch { /* non-critical */ }
+
+    // Layer 3a++: Recent recorded activity on THIS deal — the factual trail
+    // for "what changed / what happened while I was away".
+    const dealActivity = await buildRecentActivityLayer(user.id, deal.id);
+    if (dealActivity) layers.push(dealActivity);
 
     // Layer 3b: League persona
     const league = deal.league || user.league;

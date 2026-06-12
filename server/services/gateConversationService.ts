@@ -41,10 +41,14 @@ export async function handleGateTransition(
     convoId = active?.id;
   }
 
-  // 2. Summarize the old conversation (non-blocking failure)
+  // 2. Summarize the old conversation (non-blocking failure). The existing
+  //    rolling summary is folded in so facts from earlier in the gate — and
+  //    a Haiku failure here — can never erase memory the thread already had.
   let summary: string | null = null;
   if (convoId) {
-    summary = await summarizeGateConversation(convoId, fromGate).catch(() => null);
+    const [existing] = await sql`SELECT summary FROM conversations WHERE id = ${convoId} LIMIT 1`;
+    summary = await summarizeGateConversation(convoId, fromGate, existing?.summary ?? null)
+      .catch(() => existing?.summary ?? null);
 
     // 3. Archive it: mark completed, set title, store summary
     const [deal] = await sql`SELECT business_name FROM deals WHERE id = ${dealId}`;
