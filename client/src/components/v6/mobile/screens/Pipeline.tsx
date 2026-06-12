@@ -24,7 +24,8 @@ interface PipelineProps {
   initials: string;
   onOpenDeal: (id: string, title: string) => void;
   onOpenWatching: () => void;
-  onOpenDealsList: () => void;
+  /** Optional stage id lands the full deals list pre-filtered to that stage. */
+  onOpenDealsList: (stage?: string) => void;
   onAvatarClick: () => void;
   onSearch: () => void;
   /** Opens the notifications sheet + unread badge count. Omitted → no bell. */
@@ -290,8 +291,8 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
                     </span>
                   }
                   subtitle={stage.sub}
-                  onSeeAll={onOpenDealsList}
-                  seeAllAria="See all deals"
+                  onSeeAll={() => onOpenDealsList(stage.id)}
+                  seeAllAria={`See all ${stage.title} deals`}
                   padding="0 22px 12px"
                 />
                 {stageRows.map((d, i) => (
@@ -313,7 +314,7 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
                   <button
                     type="button"
                     className="mb-tap"
-                    onClick={onOpenDealsList}
+                    onClick={() => onOpenDealsList(stage.id)}
                     style={P.stageSeeAll}
                   >
                     See all {stageAll.length} in {stage.title}

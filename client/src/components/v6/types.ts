@@ -63,6 +63,9 @@ export interface Tab {
   fileScope?: FileScope;
   fileListView?: FileListView;
   dealsListView?: "all";
+  /** Preselected pipeline-stage filter for the deals-list view — set when a
+   *  Pipeline "See all N in {stage}" row (or stage header) opens the list. */
+  dealsStage?: string;
   studioView?: StudioView;
   studioFormat?: StudioFormatId;
   studioDraftId?: string;

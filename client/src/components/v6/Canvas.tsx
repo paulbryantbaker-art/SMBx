@@ -105,7 +105,7 @@ function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut, modelPrefe
     return <Placeholder label={`${tab.title} — root view`} note="Unknown mode root." />;
   }
   if (tab.kind === "files-list") return <V6FilesListView view={tab.fileListView ?? "all"} openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
-  if (tab.kind === "deals-list") return <V6DealsListView view={tab.dealsListView ?? "all"} openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
+  if (tab.kind === "deals-list") return <V6DealsListView view={tab.dealsListView ?? "all"} initialStage={tab.dealsStage} openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
   if (tab.kind === "provider-profile") return <V6ProviderProfileView user={user} />;
   if (tab.kind === "deal")     return <V6DealView id={tab.id} title={tab.title} openTab={openTab} fileScope={tab.fileScope} onTalkToYulia={onTalkToYulia} modelPreference={modelPreference} user={user} />;
   if (tab.kind === "deal-team") return <V6DealTeamView dealId={String(tab.dealId ?? tab.id)} dealTitle={tab.dealTitle ?? tab.title} openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;

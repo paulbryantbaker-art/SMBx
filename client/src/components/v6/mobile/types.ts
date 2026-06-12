@@ -45,6 +45,9 @@ export interface MobileView {
   docMeta?: string;
   docKind?: string;
   filesFilter?: string;
+  /** Preselected pipeline-stage filter for the deals-list screen — set when
+   *  a Pipeline "See all in {stage}" affordance opens the list. */
+  dealsStage?: string;
   analysisTitle?: string;
   analysisTool?: string;
   analysisRunId?: number | null;

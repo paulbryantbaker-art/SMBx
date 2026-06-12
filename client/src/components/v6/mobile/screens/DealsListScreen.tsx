@@ -13,6 +13,7 @@ import { IndustryIcon } from "../IndustryIcon";
 import type { Verdict } from "../types";
 import { type User } from "../../../../hooks/useAuth";
 import { useV6WorkspaceData, type WorkspaceDeal } from "../../../../hooks/useV6WorkspaceData";
+import { PIPELINE_STAGES, stageForGate, type PipelineStageId } from "../../../../lib/pipelineStages";
 
 function fmtCents(cents: number | null | undefined): string {
   if (!cents) return "--";
@@ -61,18 +62,26 @@ const SAMPLE: WorkspaceDeal[] = Array.from({ length: 40 }, (_, i) => {
 interface Props {
   onBack: () => void;
   onOpenDeal: (id: string, title: string) => void;
+  /** Preselected pipeline-stage filter (Pipeline "See all in {stage}").
+   *  The stage chips let the user change or clear it. */
+  initialStage?: string;
   user: User | null;
 }
+
+const STAGE_IDS = new Set<string>(PIPELINE_STAGES.map(s => s.id));
 
 // Full-list pagination law (both platforms): render up to 100 rows, then a
 // full-width "Show next 100" button appends the next client-side page from
 // the already-fetched array.
 const PAGE_SIZE = 100;
 
-export function MobileDealsListScreen({ onBack, onOpenDeal, user }: Props) {
+export function MobileDealsListScreen({ onBack, onOpenDeal, initialStage, user }: Props) {
   const workspace = useV6WorkspaceData(user);
   const [query, setQuery] = useState("");
   const [journey, setJourney] = useState<"all" | "buy" | "sell" | "raise" | "pmi">("all");
+  const [stage, setStage] = useState<PipelineStageId | "all">(
+    initialStage && STAGE_IDS.has(initialStage) ? (initialStage as PipelineStageId) : "all",
+  );
   const [limit, setLimit] = useState(PAGE_SIZE);
   const isSample = !workspace.canFetch;
   const all = isSample ? SAMPLE : workspace.deals;
@@ -81,10 +90,11 @@ export function MobileDealsListScreen({ onBack, onOpenDeal, user }: Props) {
     const q = query.trim().toLowerCase();
     return all.filter(d => {
       if (journey !== "all" && (d.journey_type || "").toLowerCase() !== journey) return false;
+      if (stage !== "all" && stageForGate(d.current_gate || "B2") !== stage) return false;
       if (!q) return true;
       return [d.business_name, d.industry, d.location, d.league, d.current_gate].some(v => (v || "").toLowerCase().includes(q));
     });
-  }, [all, query, journey]);
+  }, [all, query, journey, stage]);
 
   // Paginate at 100: render the first page(s), append via "Show next 100".
   // Search + the journey chips narrow within the full set (and reset paging).
@@ -129,6 +139,18 @@ export function MobileDealsListScreen({ onBack, onOpenDeal, user }: Props) {
         {(["all", "buy", "sell", "raise", "pmi"] as const).map(j => (
           <button key={j} type="button" onClick={() => { setJourney(j); setLimit(PAGE_SIZE); }} style={chip(journey === j)}>
             {j === "all" ? "All" : JOURNEY_LABEL[j]}
+          </button>
+        ))}
+      </div>
+      {/* Stage chips — the same five Pipeline stages, so "See all in Source"
+          lands here already narrowed. */}
+      <div style={{ display: "flex", gap: 7, padding: "0 16px 10px", overflowX: "auto" }}>
+        <button type="button" onClick={() => { setStage("all"); setLimit(PAGE_SIZE); }} style={chip(stage === "all")}>
+          All stages
+        </button>
+        {PIPELINE_STAGES.map(s => (
+          <button key={s.id} type="button" onClick={() => { setStage(s.id); setLimit(PAGE_SIZE); }} style={chip(stage === s.id)}>
+            {s.title}
           </button>
         ))}
       </div>

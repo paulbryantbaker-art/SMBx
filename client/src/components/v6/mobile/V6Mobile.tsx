@@ -476,7 +476,11 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
     setView({ kind: "deal-team", tab: activeTab, dealRawId: rawId ?? undefined, dealTitle: title });
   };
   const onOpenWatching = () => setView({ kind: "watching" });
-  const onOpenDealsList = () => setView({ kind: "deals-list", tab: activeTab });
+  // Optional stage lands the list pre-filtered (Pipeline "See all in
+  // {stage}"). typeof guard: some call sites pass this directly as an event
+  // handler, and a MouseEvent must not become a stage filter.
+  const onOpenDealsList = (stage?: string) =>
+    setView({ kind: "deals-list", tab: activeTab, dealsStage: typeof stage === "string" ? stage : undefined });
   const onOpenProviderProfile = () => setView({ kind: "provider-profile", tab: activeTab });
   const onAvatarClick = () => {
     if (!user) {
@@ -693,6 +697,7 @@ function V6MobileShell({ user, chat, onSignOut, onDevSignIn }: ShellProps) {
         <MobileDealsListScreen
           onBack={() => setView({ kind: "tab", tab: view.tab ?? "pipeline" })}
           onOpenDeal={onOpenDeal}
+          initialStage={view.dealsStage}
           user={user}
         />
       )}

@@ -25,10 +25,12 @@ interface PipelineRootProps {
   modelPreference?: ModelPreference;
 }
 
-// House list law: stage groups are short lists — 10 rows max, then a
-// "See all N in {stage}" tail row into the full deals list (same cap as
-// mobile Pipeline's stage groups, so the two platforms show the same rows).
-const STAGE_ROW_CAP = 10;
+// House list law: stage groups are SHORT lists. Desktop caps at 5 rows per
+// stage (founder: the page must not run super long — five stages × 5 rows
+// is one comfortable viewport) with a "See all N in {stage}" tail row and a
+// clickable stage header, both landing on the full deals list FILTERED to
+// that stage.
+const STAGE_ROW_CAP = 5;
 const COLUMNS = 7; // Deal | Stage | SDE | Asking | Multiple | Fit | Verdict
 
 export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootProps) {
@@ -37,6 +39,10 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
   const ask = (prompt: string) => onTalkToYulia?.(prompt);
   const openDeal = (rawId: number, title: string) => openTab({ kind: "deal", id: String(rawId), title });
   const openAllDeals = () => openTab({ id: "deals-all", kind: "deals-list", title: "All deals", dealsListView: "all" });
+  // Stage-scoped full list — the "See all N in Source" promise must land on
+  // Source, not on an unfiltered dump of every deal.
+  const openStage = (stageId: string, stageTitle: string) =>
+    openTab({ id: `deals-stage-${stageId}`, kind: "deals-list", title: `${stageTitle} deals`, dealsListView: "all", dealsStage: stageId });
 
   const featured = deals.featured;
   const picks = deals.picks;
@@ -155,7 +161,12 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
                 ].filter(Boolean).join(" · ");
                 return (
                   <tbody key={stage.id}>
-                    <tr className="stage-row">
+                    <tr
+                      className="stage-row"
+                      onClick={() => openStage(stage.id, stage.title)}
+                      style={{ cursor: "pointer" }}
+                      title={`Open all ${rows.length} ${stage.title} deals`}
+                    >
                       <td colSpan={COLUMNS}>
                         <span className="wkstage-agg">{agg}</span>
                         <span className="stage-name">{stage.title}</span>
@@ -166,7 +177,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
                       <ScheduleRow key={d.id} deal={d} onOpen={() => openDeal(d.id, dealTitle(d))} />
                     ))}
                     {rows.length > shown.length && (
-                      <tr onClick={openAllDeals}>
+                      <tr onClick={() => openStage(stage.id, stage.title)}>
                         <td colSpan={COLUMNS} style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", fontWeight: 600, color: "var(--accent-strong)" }}>
                           See all {rows.length} in {stage.title} →
                         </td>

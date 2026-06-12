@@ -12,6 +12,7 @@ import { useMemo, useState } from "react";
 import type { OpenTab } from "../types";
 import { type User } from "../../../hooks/useAuth";
 import { useV6WorkspaceData, type WorkspaceDeal } from "../../../hooks/useV6WorkspaceData";
+import { PIPELINE_STAGES, stageForGate, type PipelineStageId } from "../../../lib/pipelineStages";
 
 function fmtCents(cents: number | null | undefined): string {
   if (!cents) return "--";
@@ -75,15 +76,24 @@ const PAGE_SIZE = 100;
 
 interface Props {
   view?: "all";
+  /** Preselected pipeline-stage filter — set when a Pipeline "See all in
+   *  {stage}" link or stage-header click opens this view. The stage chips
+   *  let the user change or clear it. */
+  initialStage?: string;
   openTab: OpenTab;
   onTalkToYulia?: (prompt: string) => void;
   user: User | null;
 }
 
-export function V6DealsListView({ openTab, user }: Props) {
+const STAGE_IDS = new Set<string>(PIPELINE_STAGES.map(s => s.id));
+
+export function V6DealsListView({ initialStage, openTab, user }: Props) {
   const workspace = useV6WorkspaceData(user);
   const [query, setQuery] = useState("");
   const [journey, setJourney] = useState<JourneyFilter>("all");
+  const [stage, setStage] = useState<PipelineStageId | "all">(
+    initialStage && STAGE_IDS.has(initialStage) ? (initialStage as PipelineStageId) : "all",
+  );
   const [limit, setLimit] = useState(PAGE_SIZE);
 
   const isSample = !workspace.canFetch;
@@ -93,10 +103,11 @@ export function V6DealsListView({ openTab, user }: Props) {
     const q = query.trim().toLowerCase();
     return allDeals.filter(d => {
       if (journey !== "all" && (d.journey_type || "").toLowerCase() !== journey) return false;
+      if (stage !== "all" && stageForGate(d.current_gate || "B2") !== stage) return false;
       if (!q) return true;
       return [d.business_name, d.industry, d.location, d.league, d.current_gate].some(v => (v || "").toLowerCase().includes(q));
     });
-  }, [allDeals, query, journey]);
+  }, [allDeals, query, journey, stage]);
 
   // Paginate at 100; search + journey chips narrow within the full set
   // (and reset paging).
@@ -145,6 +156,18 @@ export function V6DealsListView({ openTab, user }: Props) {
           {(["all", "buy", "sell", "raise", "pmi"] as const).map(j => (
             <button key={j} type="button" onClick={() => { setJourney(j); setLimit(PAGE_SIZE); }} style={chip(journey === j)}>
               {j === "all" ? "All" : JOURNEY_LABEL[j]}
+            </button>
+          ))}
+        </div>
+        {/* Stage chips — same five stages the Pipeline groups by, so a
+            "See all in Source" link lands here already narrowed. */}
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          <button type="button" onClick={() => { setStage("all"); setLimit(PAGE_SIZE); }} style={chip(stage === "all")}>
+            All stages
+          </button>
+          {PIPELINE_STAGES.map(s => (
+            <button key={s.id} type="button" onClick={() => { setStage(s.id); setLimit(PAGE_SIZE); }} style={chip(stage === s.id)}>
+              {s.title}
             </button>
           ))}
         </div>
