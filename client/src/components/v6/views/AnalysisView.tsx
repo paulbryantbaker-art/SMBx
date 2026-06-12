@@ -2891,13 +2891,13 @@ function ArtifactCanvas({
         </section>
       )}
 
-      {markdown && (
-        <details style={IA.rawDetails}>
-          <summary style={IA.rawSummary}>Original Yulia text</summary>
-          <div className="wkcard" style={A.markdownCard}>
-            <Markdown>{markdown}</Markdown>
-          </div>
-        </details>
+      {/* Raw markdown renders directly ONLY when there are no structured
+          sections (then it IS the content) — users never see a raw-text
+          disclosure when the section cards already carry the analysis. */}
+      {markdown && sections.length === 0 && (
+        <div className="wkcard" style={A.markdownCard}>
+          <Markdown>{markdown}</Markdown>
+        </div>
       )}
     </div>
   );

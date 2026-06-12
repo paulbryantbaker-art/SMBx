@@ -226,10 +226,30 @@ export interface PortfolioBriefResponse {
 }
 
 const MODEL = 'claude-sonnet-4-6';
+// Deal briefs are the LIGHT read (one deal, strict JSON) — they run on Haiku
+// for speed; the heavier portfolio synthesis stays on Sonnet.
+const DEAL_BRIEF_MODEL = 'claude-haiku-4-5-20251001';
 
 // Hard ceiling on the brief AI call. A normal Sonnet brief lands in ~10-18s;
 // past this we stop waiting and serve the deterministic brief instead.
 const BRIEF_AI_TIMEOUT_MS = Number(process.env.BRIEF_AI_TIMEOUT_MS) || 22000;
+
+/**
+ * STALE-WHILE-REVALIDATE: the page never waits for a model call when ANY
+ * prior brief exists. A stale brief (data changed or TTL lapsed) is served
+ * instantly with `stale: true`, and ONE background regeneration is kicked
+ * per key (deduped here) — the next visit gets the fresh read. Users only
+ * ever block on the very first brief for a deal, and that now runs on Haiku.
+ */
+const briefRefreshInFlight = new Set<string>();
+
+function refreshInBackground(key: string, task: () => Promise<unknown>): void {
+  if (briefRefreshInFlight.has(key)) return;
+  briefRefreshInFlight.add(key);
+  void task()
+    .catch(err => console.error(`[brief-refresh] ${key}:`, err?.message || err))
+    .finally(() => briefRefreshInFlight.delete(key));
+}
 
 /**
  * Races a promise against a timer that REJECTS. A bare `await` on a slow/stuck
@@ -251,22 +271,39 @@ export async function getPortfolioBriefForUser(userId: number, forceRefresh = fa
   const snapshot = await buildPortfolioSnapshot(userId);
   const fingerprint = fingerprintOf(snapshot.fingerprintBasis);
 
-  if (!forceRefresh) {
-    const [cached] = await sql`
-      SELECT brief, model_used, generated_at, expires_at, source_fingerprint
-      FROM yulia_portfolio_briefs
-      WHERE user_id = ${userId}
-      LIMIT 1
-    `;
-    if (
-      cached?.brief &&
+  const [cached] = await sql`
+    SELECT brief, model_used, generated_at, expires_at, source_fingerprint
+    FROM yulia_portfolio_briefs
+    WHERE user_id = ${userId}
+    LIMIT 1
+  `;
+
+  if (!forceRefresh && cached?.brief) {
+    const fresh =
       cached.source_fingerprint === fingerprint &&
-      new Date(cached.expires_at).getTime() > Date.now()
-    ) {
+      new Date(cached.expires_at).getTime() > Date.now();
+    if (fresh) {
       return normalizePortfolioBrief(cached.brief, snapshot, 'llm_cached', cached.model_used || MODEL);
     }
+    // Stale-while-revalidate: serve the last brief instantly, refresh behind
+    // the response. The page never blocks on Sonnet once a brief exists.
+    refreshInBackground(`portfolio:${userId}`, () =>
+      regeneratePortfolioBrief(userId, snapshot, fingerprint),
+    );
+    return {
+      ...normalizePortfolioBrief(cached.brief, snapshot, 'llm_cached', cached.model_used || MODEL),
+      stale: true,
+    } as PortfolioBriefResponse;
   }
 
+  return regeneratePortfolioBrief(userId, snapshot, fingerprint);
+}
+
+async function regeneratePortfolioBrief(
+  userId: number,
+  snapshot: Awaited<ReturnType<typeof buildPortfolioSnapshot>>,
+  fingerprint: string,
+): Promise<PortfolioBriefResponse> {
   const fallback = buildDeterministicPortfolioBrief(snapshot);
   let generated = fallback;
   let status = 'complete';
@@ -315,22 +352,38 @@ export async function getDealBriefForUser(userId: number, dealId: number, forceR
   const snapshot = await buildDealSnapshot(userId, dealId);
   const fingerprint = fingerprintOf(snapshot.fingerprintBasis);
 
-  if (!forceRefresh) {
-    const [cached] = await sql`
-      SELECT brief, model_used, generated_at, expires_at, source_fingerprint
-      FROM yulia_deal_briefs
-      WHERE user_id = ${userId} AND deal_id = ${dealId}
-      LIMIT 1
-    `;
-    if (
-      cached?.brief &&
+  const [cached] = await sql`
+    SELECT brief, model_used, generated_at, expires_at, source_fingerprint
+    FROM yulia_deal_briefs
+    WHERE user_id = ${userId} AND deal_id = ${dealId}
+    LIMIT 1
+  `;
+
+  if (!forceRefresh && cached?.brief) {
+    const fresh =
       cached.source_fingerprint === fingerprint &&
-      new Date(cached.expires_at).getTime() > Date.now()
-    ) {
+      new Date(cached.expires_at).getTime() > Date.now();
+    if (fresh) {
       return { ...cached.brief, generatedAt: cached.generated_at, intelligenceMode: 'llm_cached' };
     }
+    // Stale-while-revalidate: Yulia's last read renders instantly (marked
+    // stale) while the refresh runs behind the response — opening a deal tab
+    // never blocks on a model call once a brief exists.
+    refreshInBackground(`deal:${userId}:${dealId}`, () =>
+      regenerateDealBrief(userId, dealId, snapshot, fingerprint),
+    );
+    return { ...cached.brief, generatedAt: cached.generated_at, intelligenceMode: 'llm_cached', stale: true };
   }
 
+  return regenerateDealBrief(userId, dealId, snapshot, fingerprint);
+}
+
+async function regenerateDealBrief(
+  userId: number,
+  dealId: number,
+  snapshot: Awaited<ReturnType<typeof buildDealSnapshot>>,
+  fingerprint: string,
+) {
   const fallback = buildDeterministicDealBrief(snapshot);
   let generated = fallback;
   let status = 'complete';
@@ -357,7 +410,7 @@ export async function getDealBriefForUser(userId: number, dealId: number, forceR
     VALUES (
       ${userId}, ${dealId}, ${fingerprint}, ${JSON.stringify(snapshot.sourcePayload)}::jsonb,
       ${JSON.stringify(generated)}::jsonb, ${generated.marketRead?.headline || null},
-      ${MODEL}, ${status}, ${errorMessage}, NOW(), NOW() + INTERVAL '6 hours', NOW()
+      ${DEAL_BRIEF_MODEL}, ${status}, ${errorMessage}, NOW(), NOW() + INTERVAL '72 hours', NOW()
     )
     ON CONFLICT (user_id, deal_id) DO UPDATE SET
       source_fingerprint = EXCLUDED.source_fingerprint,
@@ -708,7 +761,7 @@ ${JSON.stringify(fallback)}
 Deal source snapshot:
 ${JSON.stringify(snapshot.sourcePayload).slice(0, 32000)}`;
 
-  const text = await callClaudeWithModel(MODEL, 'You produce strict JSON for SMBx Yulia deal intelligence briefs.', [{ role: 'user', content: prompt }], 3072);
+  const text = await callClaudeWithModel(DEAL_BRIEF_MODEL, 'You produce strict JSON for SMBx Yulia deal intelligence briefs.', [{ role: 'user', content: prompt }], 3072);
   return parseJsonObject(text);
 }
 
