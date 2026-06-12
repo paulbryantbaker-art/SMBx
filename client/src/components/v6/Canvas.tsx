@@ -2,6 +2,7 @@ import { lazy, Suspense, type CSSProperties } from "react";
 import type { Tab, OpenTab, ModeId } from "./types";
 import type { User } from "../../hooks/useAuth";
 import type { ModelPreference } from "../../lib/modelPreference";
+import type { WkTheme } from "../../lib/wkTheme";
 
 const V6TodayRoot = lazy(() => import("./modes/TodayRoot").then(module => ({ default: module.V6TodayRoot })));
 const V6PipelineRoot = lazy(() => import("./modes/PipelineRoot").then(module => ({ default: module.V6PipelineRoot })));
@@ -37,6 +38,9 @@ interface CanvasProps {
   user: User | null;
   onSignOut: () => void;
   modelPreference?: ModelPreference;
+  /* Workspace chrome theme (Settings → Appearance). */
+  wkTheme?: WkTheme;
+  onSetWkTheme?: (t: WkTheme) => void;
   /* Conversation-history seam — see HistoryView. Resume must route through
      the live chat bridge, not a fresh fetch. chatBusy mirrors chat.sending:
      switching or deleting the active thread mid-stream corrupts the panel,
@@ -47,7 +51,7 @@ interface CanvasProps {
   onConversationDeleted?: (id: number) => void;
 }
 
-export function V6Canvas({ tabs, activeTabId, openTab, onPickMode, onTalkToYulia, user, onSignOut, modelPreference, activeConversationId, chatBusy, onResumeConversation, onConversationDeleted }: CanvasProps) {
+export function V6Canvas({ tabs, activeTabId, openTab, onPickMode, onTalkToYulia, user, onSignOut, modelPreference, wkTheme, onSetWkTheme, activeConversationId, chatBusy, onResumeConversation, onConversationDeleted }: CanvasProps) {
   const activeTab = tabs.find(t => t.id === activeTabId) ?? tabs[0];
   // The open-tabs strip lives in the left nav ("Open" section) now, so the
   // canvas is pure content: just the active tab's body at full height.
@@ -65,6 +69,8 @@ export function V6Canvas({ tabs, activeTabId, openTab, onPickMode, onTalkToYulia
               user={user}
               onSignOut={onSignOut}
               modelPreference={modelPreference}
+              wkTheme={wkTheme}
+              onSetWkTheme={onSetWkTheme}
               activeConversationId={activeConversationId}
               chatBusy={chatBusy}
               onResumeConversation={onResumeConversation}
@@ -85,13 +91,15 @@ interface TabContentProps {
   user: User | null;
   onSignOut: () => void;
   modelPreference?: ModelPreference;
+  wkTheme?: WkTheme;
+  onSetWkTheme?: (t: WkTheme) => void;
   activeConversationId?: number | null;
   chatBusy?: boolean;
   onResumeConversation?: (id: number) => void;
   onConversationDeleted?: (id: number) => void;
 }
 
-function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut, modelPreference, activeConversationId, chatBusy, onResumeConversation, onConversationDeleted }: TabContentProps) {
+function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut, modelPreference, wkTheme, onSetWkTheme, activeConversationId, chatBusy, onResumeConversation, onConversationDeleted }: TabContentProps) {
   if (tab.kind === "mode-root") {
     if (tab.modeId === "today")    return <V6TodayRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
     if (tab.modeId === "pipeline") return <V6PipelineRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} modelPreference={modelPreference} />;
@@ -115,7 +123,7 @@ function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut, modelPrefe
   if (tab.kind === "feed-item") return <Placeholder label={`Feed · ${tab.title}`} note="Feed item reading view is a thin wrapper — coming after polish." />;
   if (tab.kind === "learn")    return <V6LearnView section={tab.section} anchor={tab.anchor} onTalkToYulia={onTalkToYulia} />;
   if (tab.kind === "marketing-studio") return <V6MarketingStudioView tab={tab} openTab={openTab} user={user} onTalkToYulia={onTalkToYulia} />;
-  if (tab.kind === "settings") return <V6SettingsView user={user} onSignOut={onSignOut} />;
+  if (tab.kind === "settings") return <V6SettingsView user={user} onSignOut={onSignOut} wkTheme={wkTheme} onSetWkTheme={onSetWkTheme} />;
   if (tab.kind === "history")  return <V6HistoryView user={user} activeConversationId={activeConversationId} busy={chatBusy} onResume={onResumeConversation} onDeleted={onConversationDeleted} />;
   if (tab.kind === "starter")  return <V6StarterView onTalkToYulia={onTalkToYulia} />;
   return <Placeholder label="Unknown tab" />;

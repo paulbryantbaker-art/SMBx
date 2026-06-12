@@ -94,6 +94,35 @@
 }
 
 /* ============================================================
+   WORKSPACE CHROME THEMES (Settings → Appearance).
+   Founder-selectable desktop chrome. A theme repaints the SHELL
+   ONLY — ground, nav, nested surfaces, hairlines. Brand accent,
+   verdict semantics (two-greens law), ink, and content tokens are
+   untouched, so every theme stays on-system. The default "paper"
+   theme is the base token set above — no override block.
+   ============================================================ */
+.v6-root.wk[data-wk-theme="goldengate"] {
+  --bg: #FBF5EE;
+  --nav: #F6EADC;
+  --surface-2: #F6EADC;
+  --surface-3: #EDDDC9;
+  --line: rgba(122, 56, 24, 0.12);
+  --line-2: rgba(122, 56, 24, 0.18);
+  --wk-hairline: rgba(122, 56, 24, 0.18);
+  --wk-hairline-2: rgba(122, 56, 24, 0.09);
+}
+.v6-root.wk[data-wk-theme="neoblue"] {
+  --bg: #F4F8FC;
+  --nav: #E8F0F8;
+  --surface-2: #E8F0F8;
+  --surface-3: #DCE8F3;
+  --line: rgba(28, 60, 102, 0.12);
+  --line-2: rgba(28, 60, 102, 0.18);
+  --wk-hairline: rgba(28, 60, 102, 0.18);
+  --wk-hairline-2: rgba(28, 60, 102, 0.09);
+}
+
+/* ============================================================
    .wk-tap — mobile press/hover physics (fusion Wave A).
    Ported verbatim from .mobile-root's press grammar (index.css):
    transform scale press — NEVER opacity dimming, which washes

@@ -9,6 +9,7 @@ import V6NotificationBell from "./V6NotificationBell";
 import "./workspace.css";
 import { buildDesktopSurfaceContext, type SurfaceContext } from "../../lib/yuliaSurfaceContext";
 import { normalizeModelPreference, type ModelPreference } from "../../lib/modelPreference";
+import { loadWkTheme, saveWkTheme, type WkTheme } from "../../lib/wkTheme";
 import { consumePendingMessage } from "../../marketing/useEnterApp";
 import { buildBigFakeInvestmentBoardTab, shouldOpenSampleInvestmentBoard } from "../../lib/sampleInvestmentBoard";
 import { useModelStore, type ModelType } from "../../lib/modelStore";
@@ -182,6 +183,9 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
       return "auto";
     }
   });
+  // Workspace chrome theme (Settings → Appearance) — shell repaint only.
+  const [wkTheme, setWkTheme] = useState<WkTheme>(loadWkTheme);
+  const changeWkTheme = (t: WkTheme) => { setWkTheme(t); saveWkTheme(t); };
   const [tabs, setTabs] = useState<Tab[]>(() => {
     const rootMode = initial.mode;
     const todayRoot: Tab = {
@@ -619,7 +623,7 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
   };
 
   return (
-    <div className="v6-root wk">
+    <div className="v6-root wk" data-wk-theme={wkTheme === "paper" ? undefined : wkTheme}>
       <div className="wk-app">
         {/* SIDEBAR — CD sectioned IA, wired to V6 modes. Holds search (top) +
             the toolbar (foot): New, notifications, account. */}
@@ -775,6 +779,8 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
                 user={user}
                 onSignOut={onSignOut}
                 modelPreference={modelPreference}
+                wkTheme={wkTheme}
+                onSetWkTheme={changeWkTheme}
                 activeConversationId={chat.activeConversationId}
                 chatBusy={chat.sending}
                 onResumeConversation={chat.selectConversation
