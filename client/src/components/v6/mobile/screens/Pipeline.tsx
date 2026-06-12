@@ -266,7 +266,11 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
           {PIPELINE_STAGES.map(stage => {
             const stageAll = (userAll ?? []).filter(d => d.stageId === stage.id);
             if (stageAll.length === 0) return null;
-            const stageRows = stageAll.slice(0, 20); // preview cap — chevron opens the full list
+            // House list law: stage groups are short lists — 10 rows max,
+            // then a "See all N in {stage}" tail row (same cap as desktop
+            // Pipeline's ledger). Header chevron opens the full list too.
+            const stageRows = stageAll.slice(0, 10);
+            const hasMore = stageAll.length > stageRows.length;
             // Right-aligned ledger aggregate: deal count + summed asking
             // price. The ask clause is omitted when no deal in the stage is
             // priced — never a fabricated total.
@@ -300,11 +304,21 @@ export function PipelineScreen({ isAnon, initials, onOpenDeal, onOpenWatching, o
                     sde={d.sde}
                     fit={d.fit}
                     watched={isWatched(d.id)}
-                    last={i === stageRows.length - 1}
+                    last={!hasMore && i === stageRows.length - 1}
                     onTap={() => onOpenDeal(d.id, d.name)}
                     onToggleWatch={() => toggle(d.id, d.name)}
                   />
                 ))}
+                {hasMore && (
+                  <button
+                    type="button"
+                    className="mb-tap"
+                    onClick={onOpenDealsList}
+                    style={P.stageSeeAll}
+                  >
+                    See all {stageAll.length} in {stage.title}
+                  </button>
+                )}
               </div>
             );
           })}
@@ -667,6 +681,16 @@ const P: Record<string, CSSProperties> = {
   rowFit: {
     fontSize: 11.5, fontWeight: 650, color: "var(--mb-ink-3)", marginTop: 1,
     lineHeight: 1.3,
+  },
+  /* Tail row under a capped stage group — full-width, ≥44px, routes to the
+     full deals list (same destination as the header chevron). */
+  stageSeeAll: {
+    display: "flex", alignItems: "center", justifyContent: "center",
+    width: "100%", minHeight: 44, boxSizing: "border-box" as const,
+    padding: "10px 22px",
+    background: "transparent", border: "none",
+    fontSize: 13.5, fontWeight: 650, color: "var(--mb-accent-ink)",
+    cursor: "pointer",
   },
   /* Stage header: title left, ledger aggregate right — both inside the
      SectionHeader title slot so the see-all chevron stays outermost. */

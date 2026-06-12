@@ -40,7 +40,17 @@ export function SectionHeader({ title, subtitle, onSeeAll, seeAllAria, padding =
 }
 
 const ROW: CSSProperties = { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 };
-const BTN: CSSProperties = { all: "unset", display: "block", width: "100%", cursor: "pointer", WebkitTapHighlightColor: "transparent" };
+const BTN: CSSProperties = {
+  all: "unset",
+  display: "block",
+  width: "100%",
+  cursor: "pointer",
+  WebkitTapHighlightColor: "transparent",
+  /* ≥44px tap target (HIG) without shifting the card's visual rhythm:
+     pad the hit area vertically, pull the same amount back with margin. */
+  padding: "12px 0",
+  margin: "-12px 0",
+};
 const SUB: CSSProperties = { fontSize: 13, color: "var(--mb-ink-3)", marginTop: 2, lineHeight: 1.4 };
 
 export default SectionHeader;

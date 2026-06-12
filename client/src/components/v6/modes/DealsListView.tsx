@@ -68,6 +68,11 @@ const SAMPLE_DEALS: WorkspaceDeal[] = Array.from({ length: 60 }, (_, i) => {
 
 type JourneyFilter = "all" | "buy" | "sell" | "raise" | "pmi";
 
+// Full-list pagination law (both platforms): render up to 100 rows, then a
+// full-width "Show next 100" button appends the next client-side page from
+// the already-fetched array.
+const PAGE_SIZE = 100;
+
 interface Props {
   view?: "all";
   openTab: OpenTab;
@@ -79,6 +84,7 @@ export function V6DealsListView({ openTab, user }: Props) {
   const workspace = useV6WorkspaceData(user);
   const [query, setQuery] = useState("");
   const [journey, setJourney] = useState<JourneyFilter>("all");
+  const [limit, setLimit] = useState(PAGE_SIZE);
 
   const isSample = !workspace.canFetch;
   const allDeals = isSample ? SAMPLE_DEALS : workspace.deals;
@@ -91,6 +97,10 @@ export function V6DealsListView({ openTab, user }: Props) {
       return [d.business_name, d.industry, d.location, d.league, d.current_gate].some(v => (v || "").toLowerCase().includes(q));
     });
   }, [allDeals, query, journey]);
+
+  // Paginate at 100; search + journey chips narrow within the full set
+  // (and reset paging).
+  const shown = filtered.slice(0, limit);
 
   const openDeal = (d: WorkspaceDeal) =>
     openTab({ kind: "deal", id: String(d.id), title: d.business_name || `Deal #${d.id}`, dealId: d.id, dealTitle: d.business_name });
@@ -116,7 +126,9 @@ export function V6DealsListView({ openTab, user }: Props) {
           <p className="pg-sub">
             {workspace.loading
               ? "Loading deals…"
-              : `${filtered.length}${filtered.length !== allDeals.length ? ` of ${allDeals.length}` : ""} ${allDeals.length === 1 ? "deal" : "deals"}${isSample ? " · sample data" : ""}`}
+              : filtered.length > shown.length
+                ? `Showing ${shown.length} of ${filtered.length} deals${isSample ? " · sample data" : ""}`
+                : `${filtered.length}${filtered.length !== allDeals.length ? ` of ${allDeals.length}` : ""} ${allDeals.length === 1 ? "deal" : "deals"}${isSample ? " · sample data" : ""}`}
           </p>
         </div>
       </div>
@@ -125,13 +137,13 @@ export function V6DealsListView({ openTab, user }: Props) {
       <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", margin: "2px 0 16px" }}>
         <input
           value={query}
-          onChange={e => setQuery(e.target.value)}
+          onChange={e => { setQuery(e.target.value); setLimit(PAGE_SIZE); }}
           placeholder="Search by name, industry, location, league, gate…"
           style={{ flex: "1 1 280px", minWidth: 220, padding: "10px 14px", borderRadius: 10, border: "1px solid var(--line)", background: "var(--surface)", color: "var(--ink)", fontSize: "0.9rem", outline: "none" }}
         />
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           {(["all", "buy", "sell", "raise", "pmi"] as const).map(j => (
-            <button key={j} type="button" onClick={() => setJourney(j)} style={chip(journey === j)}>
+            <button key={j} type="button" onClick={() => { setJourney(j); setLimit(PAGE_SIZE); }} style={chip(journey === j)}>
               {j === "all" ? "All" : JOURNEY_LABEL[j]}
             </button>
           ))}
@@ -157,7 +169,7 @@ export function V6DealsListView({ openTab, user }: Props) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map(d => (
+            {shown.map(d => (
               <tr key={d.id} onClick={() => openDeal(d)}>
                 <td>
                   <div className="cellname">
@@ -183,6 +195,23 @@ export function V6DealsListView({ openTab, user }: Props) {
             ))}
           </tbody>
         </table>
+      )}
+
+      {filtered.length > shown.length && (
+        <button
+          type="button"
+          onClick={() => setLimit(l => l + PAGE_SIZE)}
+          style={{
+            all: "unset", boxSizing: "border-box", display: "block",
+            width: "100%", textAlign: "center", marginTop: 12,
+            padding: "13px 0", background: "var(--surface)",
+            border: "1px solid var(--line)", borderRadius: 12,
+            cursor: "pointer", color: "var(--accent-strong)",
+            fontWeight: 600, fontSize: "0.88rem",
+          }}
+        >
+          Show next 100
+        </button>
       )}
     </div>
   );

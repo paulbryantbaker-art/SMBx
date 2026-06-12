@@ -1,10 +1,21 @@
 /**
- * Mobile screen data — fetches the authed user's deals once and shapes them
- * into the three slices the V6 mobile screens consume:
- *   - today    → Today screen "5 deals Yulia is working" pipeline rows
- *   - watching → Pipeline screen "Yulia is watching" list rows
- *   - picks    → Brief screen "Today's three picks" rows
- *   - featured → Pipeline screen "NEW TODAY" hero
+ * Cross-platform deal data — fetches the authed user's deals once and shapes
+ * them into the slices BOTH the V6 mobile screens AND the desktop Today/
+ * Pipeline roots consume:
+ *   - today    → "Deals in motion" rows (mobile Today + desktop TodayRoot)
+ *   - picks    → "Yulia's ranked read" rows
+ *   - featured → highest-fit hero (mobile Today/Pipeline + desktop KPI)
+ *   - all      → every deal tagged with pipeline stage (mobile Pipeline)
+ *
+ * ── ORDERING / SLICE RULE (one rule, both platforms) ─────────────────────
+ * "Deals in motion" = ACTIVE deals ordered by updated_at DESC.
+ * The `today` slice is the first TODAY_DEAL_CAP (10) rows of that ordering
+ * and is THE single source for mobile Today and desktop TodayRoot — both
+ * render these exact rows in this exact order, so the platforms can never
+ * disagree. House list law: short-list surfaces cap at 10 rows with the
+ * section header (and/or a tail row) opening the full deals list, and full
+ * deals lists paginate client-side at 100 rows per "Show next 100" page.
+ * ──────────────────────────────────────────────────────────────────────────
  *
  * Anonymous callers get loading=false / loaded=true with empty arrays — the
  * consuming screens fall back to their hardcoded sample arrays in that case.
@@ -63,15 +74,6 @@ export interface MobilePipelineRow {
   metricLabel?: string;
 }
 
-export interface MobileWatchRow {
-  id: string;
-  rawId: number;
-  icon: YIconKind;
-  name: string;
-  sub: string;
-  pill: string;
-}
-
 export interface MobilePick {
   rank: number;
   id: string;
@@ -128,7 +130,6 @@ export interface UseMobileDealsResult {
   isAuthed: boolean;
   hasData: boolean;
   today: MobilePipelineRow[];
-  watching: MobileWatchRow[];
   picks: MobilePick[];
   featured: MobileFeatured | null;
   all: MobileStageRow[];
@@ -136,11 +137,13 @@ export interface UseMobileDealsResult {
 
 const EMPTY: Omit<UseMobileDealsResult, "loading" | "loaded" | "isAuthed" | "hasData"> = {
   today: [],
-  watching: [],
   picks: [],
   featured: null,
   all: [],
 };
+
+/** Short-list cap for "Deals in motion" — see the ordering/slice rule above. */
+const TODAY_DEAL_CAP = 10;
 
 /* ─── derivation helpers ──────────────────────────────────── */
 
@@ -256,13 +259,14 @@ function shape(deals: RawDeal[]): Omit<UseMobileDealsResult, "loading" | "loaded
   const active = deals.filter(d => d.status === "active");
   if (active.length === 0) return { ...EMPTY, all };
 
-  // Sort by recency for the Today list (what Yulia is "currently working").
+  // THE ordering rule: active deals by updated_at DESC ("deals in motion").
   const recent = [...active].sort(
     (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
   );
 
-  // Today: top 5 most-recently-updated active deals.
-  const today: MobilePipelineRow[] = recent.slice(0, 5).map(d => {
+  // Today: top TODAY_DEAL_CAP (10) most-recently-updated active deals —
+  // the same rows on mobile Today and desktop TodayRoot.
+  const today: MobilePipelineRow[] = recent.slice(0, TODAY_DEAL_CAP).map(d => {
     const v = dealVerdict(d);
     const isOpen = v === "pursue";
     const revValue = fmtMoneyValue(d.revenue);
@@ -283,22 +287,6 @@ function shape(deals: RawDeal[]): Omit<UseMobileDealsResult, "loading" | "loaded
         : sdeValue
           ? { metricValue: sdeValue, metricLabel: "SDE" }
           : {}),
-    };
-  });
-
-  // Watching: 4 deals being tracked (mix of verdicts), skip the Today's hero
-  // dupe by offsetting one. Falls back to recency when offset goes empty.
-  const watchPool = recent.slice(1).length >= 4 ? recent.slice(1) : recent;
-  const watching: MobileWatchRow[] = watchPool.slice(0, 4).map(d => {
-    const v = dealVerdict(d);
-    const sde = fmtMoney(d.sde, "SDE");
-    return {
-      id: `deal-${d.id}`,
-      rawId: d.id,
-      icon: iconFor(v),
-      name: nameOf(d),
-      sub: buildSub(d),
-      pill: v === "pursue" && sde ? sde : priceWord(v),
     };
   });
 
@@ -341,7 +329,7 @@ function shape(deals: RawDeal[]): Omit<UseMobileDealsResult, "loading" | "loaded
       }
     : null;
 
-  return { today, watching, picks, featured, all };
+  return { today, picks, featured, all };
 }
 
 /* ─── hook ────────────────────────────────────────────────── */

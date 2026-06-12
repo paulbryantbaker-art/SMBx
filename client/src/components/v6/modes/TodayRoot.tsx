@@ -50,6 +50,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
 
   const ask = (prompt: string) => onTalkToYulia?.(prompt);
   const openDeal = (rawId: number, title: string) => openTab({ kind: "deal", id: String(rawId), title });
+  const openAllDeals = () => openTab({ id: "deals-all", kind: "deals-list", title: "All deals", dealsListView: "all" });
 
   const featured = deals.featured;           // strongest source this week (same as mobile)
   // DERIVE: the FIT score never hard-swaps — it settles via useDerivedDisplay
@@ -228,13 +229,24 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
         </button>
       </div>
 
-      {/* ── Deals in motion (deals.today — same rows as mobile) ── */}
+      {/* ── Deals in motion (deals.today — same 10 rows as mobile) ──
+          The HEADER itself is the affordance into the full deals list
+          (same destination as the See all link), mirroring mobile's
+          tappable SectionHeader-with-chevron. */}
       <div className="wksec">
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
-          <div className="wksec-title" style={{ marginBottom: 2 }}>{C.todayIntelTitle}</div>
           <button
             type="button"
-            onClick={() => openTab({ id: "deals-all", kind: "deals-list", title: "All deals", dealsListView: "all" })}
+            onClick={openAllDeals}
+            aria-label="See all deals"
+            style={{ all: "unset", cursor: "pointer", display: "inline-flex", alignItems: "baseline", gap: 7, minWidth: 0 }}
+          >
+            <span className="wksec-title" style={{ marginBottom: 2 }}>{C.todayIntelTitle}</span>
+            <span aria-hidden="true" style={{ color: "var(--accent-strong)", fontWeight: 600 }}>›</span>
+          </button>
+          <button
+            type="button"
+            onClick={openAllDeals}
             style={{ all: "unset", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.04em", color: "var(--accent-strong)", whiteSpace: "nowrap" }}
           >
             See all →

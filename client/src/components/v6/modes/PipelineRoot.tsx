@@ -25,7 +25,10 @@ interface PipelineRootProps {
   modelPreference?: ModelPreference;
 }
 
-const STAGE_ROW_CAP = 20;
+// House list law: stage groups are short lists — 10 rows max, then a
+// "See all N in {stage}" tail row into the full deals list (same cap as
+// mobile Pipeline's stage groups, so the two platforms show the same rows).
+const STAGE_ROW_CAP = 10;
 const COLUMNS = 7; // Deal | Stage | SDE | Asking | Multiple | Fit | Verdict
 
 export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootProps) {
@@ -164,7 +167,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
                     {rows.length > shown.length && (
                       <tr onClick={openAllDeals}>
                         <td colSpan={COLUMNS} style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", fontWeight: 600, color: "var(--accent-strong)" }}>
-                          See all {rows.length} →
+                          See all {rows.length} in {stage.title} →
                         </td>
                       </tr>
                     )}

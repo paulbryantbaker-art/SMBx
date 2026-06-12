@@ -64,10 +64,16 @@ interface Props {
   user: User | null;
 }
 
+// Full-list pagination law (both platforms): render up to 100 rows, then a
+// full-width "Show next 100" button appends the next client-side page from
+// the already-fetched array.
+const PAGE_SIZE = 100;
+
 export function MobileDealsListScreen({ onBack, onOpenDeal, user }: Props) {
   const workspace = useV6WorkspaceData(user);
   const [query, setQuery] = useState("");
   const [journey, setJourney] = useState<"all" | "buy" | "sell" | "raise" | "pmi">("all");
+  const [limit, setLimit] = useState(PAGE_SIZE);
   const isSample = !workspace.canFetch;
   const all = isSample ? SAMPLE : workspace.deals;
 
@@ -80,9 +86,9 @@ export function MobileDealsListScreen({ onBack, onOpenDeal, user }: Props) {
     });
   }, [all, query, journey]);
 
-  // Cap the rendered list at 100 for mobile performance; search + the journey
-  // chips narrow within the full set. (Stress-tested with hundreds of deals.)
-  const shown = filtered.slice(0, 100);
+  // Paginate at 100: render the first page(s), append via "Show next 100".
+  // Search + the journey chips narrow within the full set (and reset paging).
+  const shown = filtered.slice(0, limit);
 
   const chip = (active: boolean): CSSProperties => ({
     flexShrink: 0,
@@ -114,14 +120,14 @@ export function MobileDealsListScreen({ onBack, onOpenDeal, user }: Props) {
       <div style={{ padding: "0 16px 6px" }}>
         <input
           value={query}
-          onChange={e => setQuery(e.target.value)}
+          onChange={e => { setQuery(e.target.value); setLimit(PAGE_SIZE); }}
           placeholder="Search deals…"
           style={D.search}
         />
       </div>
       <div style={{ display: "flex", gap: 7, padding: "2px 16px 10px", overflowX: "auto" }}>
         {(["all", "buy", "sell", "raise", "pmi"] as const).map(j => (
-          <button key={j} type="button" onClick={() => setJourney(j)} style={chip(journey === j)}>
+          <button key={j} type="button" onClick={() => { setJourney(j); setLimit(PAGE_SIZE); }} style={chip(journey === j)}>
             {j === "all" ? "All" : JOURNEY_LABEL[j]}
           </button>
         ))}
@@ -132,16 +138,30 @@ export function MobileDealsListScreen({ onBack, onOpenDeal, user }: Props) {
           {all.length === 0 ? "No deals yet." : "No matching deals."}
         </div>
       ) : (
-        <div className="mb-as-card" style={{ margin: "4px 16px 0", padding: "4px 0" }}>
-          {shown.map((d, i) => (
-            <DealRow
-              key={d.id}
-              deal={d}
-              last={i === shown.length - 1}
-              onTap={() => onOpenDeal(String(d.id), d.business_name || `Deal #${d.id}`)}
-            />
-          ))}
-        </div>
+        <>
+          <div className="mb-as-card" style={{ margin: "4px 16px 0", padding: "4px 0" }}>
+            {shown.map((d, i) => (
+              <DealRow
+                key={d.id}
+                deal={d}
+                last={i === shown.length - 1}
+                onTap={() => onOpenDeal(String(d.id), d.business_name || `Deal #${d.id}`)}
+              />
+            ))}
+          </div>
+          {filtered.length > shown.length && (
+            <div style={{ padding: "12px 16px 0" }}>
+              <button
+                type="button"
+                className="mb-tap"
+                onClick={() => setLimit(l => l + PAGE_SIZE)}
+                style={D.showNext}
+              >
+                Show next 100
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
@@ -211,6 +231,16 @@ const D: Record<string, CSSProperties> = {
   },
   rowValue: { fontSize: 14, fontWeight: 700, color: "var(--mb-ink)", letterSpacing: "-0.2px" },
   rowGate: { fontSize: 11, color: "var(--mb-ink-4)", fontFamily: "var(--mb-font-mono)", marginTop: 1 },
+  /* Full-width client-side pagination button below the list card. */
+  showNext: {
+    display: "flex", alignItems: "center", justifyContent: "center",
+    width: "100%", minHeight: 48, boxSizing: "border-box",
+    padding: "12px 16px", borderRadius: 16,
+    background: "#fff", border: "0.5px solid var(--mb-line-2)",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+    fontSize: 14.5, fontWeight: 700, color: "var(--mb-accent-ink)",
+    cursor: "pointer",
+  },
 };
 
 export default MobileDealsListScreen;

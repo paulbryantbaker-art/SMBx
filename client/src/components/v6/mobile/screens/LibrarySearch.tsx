@@ -126,6 +126,22 @@ interface DocRowData {
   seal?: ReactNode;
 }
 
+/* ─── The list standard ───────────────────────────────────────────────────
+   SHORT lists (hub cards, finder "All" sections, "Needs your eye") show at
+   most 10 rows and make their section header a ≥44px tappable row (trailing
+   chevron) that opens the full set. FULL list views (finder filter results,
+   expanded data-room folders) render up to 100 rows, then a full-width
+   "Show next" button appends the next page — client-side slicing of arrays
+   that are already fetched, no backend involvement. */
+const SHORT_LIST_MAX = 10;
+const FULL_LIST_PAGE = 100;
+
+/* ─── Sample fixtures — ANON / DEV-BYPASS ONLY ────────────────────────────
+   Everything from here through `activeDataRooms` is showroom data. A real
+   signed-in user must NEVER see these rows: every consumer is gated on
+   useLibraryWorkspace().real (LibraryScreen, LibraryActivityList,
+   LibraryPreviewCard, LibraryFinderScreen, LibraryDetailScreen). */
+
 const draftRows: DocRowData[] = [
   { name: "IOI · Big Fake Deal", meta: "Yulia · v3 · 2 min ago", pill: "Open", icon: "memo" },
   { name: "QoE summary · Pest Control", meta: "You · 1 hr ago", pill: "Open", icon: "memo" },
@@ -214,6 +230,49 @@ const activeDataRooms = [
 interface LibraryWorkspaceSnapshot {
   deals: WorkspaceDeal[];
   deliverables: WorkspaceDeliverable[];
+  /** Data-room documents sitting in a review-ish status across the user's
+   *  deals — the data-room half of "Needs your eye". Only deals that report
+   *  documents are probed; a failed room read contributes nothing (real data
+   *  or nothing, never samples). */
+  reviewDocs: WorkspaceReviewDoc[];
+}
+
+/** A real data-room document paired with the workspace deal it belongs to,
+ *  so rows can navigate back into that deal's room. */
+interface WorkspaceReviewDoc {
+  doc: MobileDataRoomDocument;
+  deal: WorkspaceDeal;
+}
+
+/** Review-ish data-room statuses = anything carrying "review" (review,
+ *  in_review, attorney_review, …). These are the docs waiting on a human eye. */
+function isReviewishStatus(status: string | null | undefined): boolean {
+  return (status || "").toLowerCase().includes("review");
+}
+
+/** Pulls review-status documents out of each deal's REAL data room — the same
+ *  GET /api/deals/:id/data-room read useMobileDataRoom performs. Bounded to
+ *  the first 25 deals that report documents; per-deal failures yield []. */
+async function fetchReviewDocs(deals: WorkspaceDeal[]): Promise<WorkspaceReviewDoc[]> {
+  const roomDeals = deals.filter((deal) => Number(deal.document_count ?? 0) > 0).slice(0, 25);
+  const results = await Promise.all(
+    roomDeals.map(async (deal): Promise<WorkspaceReviewDoc[]> => {
+      try {
+        const res = await fetch(`/api/deals/${deal.id}/data-room`, { headers: authHeaders() });
+        if (!res.ok) return [];
+        const payload = await res.json();
+        const documents = Array.isArray(payload?.documents)
+          ? (payload.documents as MobileDataRoomDocument[])
+          : [];
+        return documents
+          .filter((doc) => isReviewishStatus(doc.status))
+          .map((doc) => ({ doc, deal }));
+      } catch {
+        return [];
+      }
+    }),
+  );
+  return results.flat();
 }
 
 let libraryWorkspaceCache: { promise: Promise<LibraryWorkspaceSnapshot>; at: number } | null = null;
@@ -231,9 +290,11 @@ function fetchLibraryWorkspace(): Promise<LibraryWorkspaceSnapshot> {
     if (!dealRes.ok) throw new Error(`deals ${dealRes.status}`);
     if (!deliverableRes.ok) throw new Error(`deliverables ${deliverableRes.status}`);
     const [deals, deliverables] = await Promise.all([dealRes.json(), deliverableRes.json()]);
+    const dealList: WorkspaceDeal[] = Array.isArray(deals) ? deals : [];
     return {
-      deals: Array.isArray(deals) ? deals : [],
+      deals: dealList,
       deliverables: Array.isArray(deliverables) ? deliverables : [],
+      reviewDocs: await fetchReviewDocs(dealList),
     };
   })();
   libraryWorkspaceCache = { promise, at: now };
@@ -250,12 +311,14 @@ function useLibraryWorkspace(): {
   loaded: boolean;
   deals: WorkspaceDeal[];
   deliverables: WorkspaceDeliverable[];
+  reviewDocs: WorkspaceReviewDoc[];
 } {
   const [real] = useState(() => !DEV_AUTH_BYPASS && Boolean(authHeaders().Authorization));
   const [state, setState] = useState<{ loaded: boolean } & LibraryWorkspaceSnapshot>({
     loaded: false,
     deals: [],
     deliverables: [],
+    reviewDocs: [],
   });
   useEffect(() => {
     if (!real) return;
@@ -265,7 +328,7 @@ function useLibraryWorkspace(): {
         if (!cancelled) setState({ loaded: true, ...data });
       })
       .catch(() => {
-        if (!cancelled) setState({ loaded: true, deals: [], deliverables: [] });
+        if (!cancelled) setState({ loaded: true, deals: [], deliverables: [], reviewDocs: [] });
       });
     return () => {
       cancelled = true;
@@ -374,6 +437,48 @@ function realDealLibraryRow(deal: WorkspaceDeal, onOpenDealLibrary: OpenDealLibr
   };
 }
 
+/** A review-status data-room document as a row. Deliverable-backed docs open
+ *  the REAL document reader; raw artifacts open the deal's data room (where
+ *  the file lives and its status can be advanced). Every row navigates. */
+function realReviewDocRow(
+  entry: WorkspaceReviewDoc,
+  onOpenDoc: OpenDocHandler,
+  onOpenDealLibrary: OpenDealLibraryHandler,
+): DocRowData {
+  const { doc, deal } = entry;
+  const tone = realDocTone(doc);
+  const dealTitle = dealDisplayTitle(deal);
+  const meta = [dealTitle, formatRealFileType(doc.file_type), formatRealStatus(doc.status)]
+    .filter(Boolean)
+    .join(" · ");
+  return {
+    name: doc.name,
+    meta,
+    pill: <StatusPill tone="review">{formatRealStatus(doc.status) || "In review"}</StatusPill>,
+    icon: <DocIcon kind={tone} />,
+    docKind: tone,
+    onClick: doc.deliverable_id != null
+      ? () => onOpenDoc(doc.name, meta, tone, doc.deliverable_id ?? undefined)
+      : () => onOpenDealLibrary(dealTitle, dealDisplayMeta(deal), "Deals", "data-room"),
+  };
+}
+
+/** "Needs your eye" for a REAL signed-in user: actionable deliverables
+ *  (queued / generating / failed / draft) + data-room documents in review.
+ *  All rows are real and navigable; empty means genuinely empty. */
+function realActionableRows(
+  workspace: { deliverables: WorkspaceDeliverable[]; reviewDocs: WorkspaceReviewDoc[] },
+  onOpenDoc: OpenDocHandler,
+  onOpenDealLibrary: OpenDealLibraryHandler,
+): DocRowData[] {
+  return [
+    ...sortDeliverablesByRecency(workspace.deliverables.filter(isActionableDeliverable)).map((d) =>
+      realDeliverableRow(d, onOpenDoc),
+    ),
+    ...workspace.reviewDocs.map((entry) => realReviewDocRow(entry, onOpenDoc, onOpenDealLibrary)),
+  ];
+}
+
 export function LibraryPreviewCard({
   onOpenFinder,
 }: {
@@ -389,10 +494,12 @@ export function LibraryPreviewCard({
     return {
       all: String(workspace.deliverables.length + docCount),
       deals: String(workspace.deals.length),
-      action: String(workspace.deliverables.filter(isActionableDeliverable).length),
+      action: String(
+        workspace.deliverables.filter(isActionableDeliverable).length + workspace.reviewDocs.length,
+      ),
       docs: String(workspace.deliverables.filter((d) => !isAnalysisDeliverable(d)).length),
     };
-  }, [workspace.real, workspace.loaded, workspace.deals, workspace.deliverables]);
+  }, [workspace.real, workspace.loaded, workspace.deals, workspace.deliverables, workspace.reviewDocs]);
 
   return (
     <div style={S.libraryPortal}>
@@ -444,13 +551,15 @@ export function LibraryActivityList({
   limit?: number;
 }) {
   const workspace = useLibraryWorkspace();
+  // SHORT list — never more than 10 rows regardless of the limit passed in.
+  const cap = Math.min(limit, SHORT_LIST_MAX);
   // Real signed-in user → real deliverables (or an honest empty/loading state).
   // Anon / dev-bypass → the sample showroom rows.
   const rows = workspace.real
     ? sortDeliverablesByRecency(workspace.deliverables)
-        .slice(0, limit)
+        .slice(0, cap)
         .map((d) => realDeliverableRow(d, onOpenDetail))
-    : libraryActivity.slice(0, limit).map((row) => withDocClick(row, onOpenDetail));
+    : libraryActivity.slice(0, cap).map((row) => withDocClick(row, onOpenDetail));
   const emptyCopy = workspace.real && rows.length === 0
     ? workspace.loaded
       ? "Nothing here yet. Files you and Yulia create show up here."
@@ -469,7 +578,7 @@ export function LibraryActivityList({
           type="button"
           onClick={onSeeAll}
           aria-label="See all recent files"
-          style={{ all: "unset", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, width: "100%", padding: "0 22px 6px", boxSizing: "border-box", cursor: "pointer" }}
+          style={{ all: "unset", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, width: "100%", minHeight: 44, padding: "0 22px 6px", boxSizing: "border-box", cursor: "pointer" }}
         >
           <div style={{ minWidth: 0 }}>{head}</div>
           <MobileIcon name="chevron" c="var(--mb-ink-3)" size={13} />
@@ -543,7 +652,7 @@ export function LibraryScreen({
     const generatingMeta = generating
       ? [generating.deal_name, "Generating", fmtRelativeShort(deliverableWhen(generating))].filter(Boolean).join(" · ")
       : "";
-    const rooms = workspace.deals.slice(0, 6);
+    const rooms = workspace.deals.slice(0, SHORT_LIST_MAX);
     return (
       <div className="mb-fade-up" style={{ ...S.page, ...S.filesPage }}>
         <GlassTopBar
@@ -607,7 +716,15 @@ export function LibraryScreen({
               </div>
               <MobileIcon name="chevron" c="var(--mb-accent-ink)" size={13} />
             </button>
-            <div style={S.roomsLabel}>Data rooms</div>
+            <button
+              type="button"
+              onClick={() => onOpenFinder("data-room")}
+              aria-label="See all data rooms"
+              style={S.roomsHeaderTap}
+            >
+              <span style={S.roomsLabel}>Data rooms</span>
+              <MobileIcon name="chevron" c="var(--mb-ink-3)" size={12} />
+            </button>
             <div style={S.activityRows}>
               {rooms.map((deal, index) => (
                 <DocRow
@@ -683,7 +800,15 @@ export function LibraryScreen({
             </div>
             <MobileIcon name="chevron" c="var(--mb-accent-ink)" size={13} />
           </button>
-          <div style={S.roomsLabel}>Data rooms</div>
+          <button
+            type="button"
+            onClick={() => onOpenFinder("data-room")}
+            aria-label="See all data rooms"
+            style={S.roomsHeaderTap}
+          >
+            <span style={S.roomsLabel}>Data rooms</span>
+            <MobileIcon name="chevron" c="var(--mb-ink-3)" size={12} />
+          </button>
           <div style={S.activityRows}>
             {activeDataRooms.map((room, index) => (
               <DocRow
@@ -1941,19 +2066,27 @@ function RealUnfiledSection({
   filingId: number | null;
   targetFolderName: string | null;
 }) {
+  const [shown, setShown] = useState(FULL_LIST_PAGE);
   if (!deliverables.length) return null;
   const dest = targetFolderName || "Root";
+  const visibleDeliverables = deliverables.slice(0, shown);
+  const remaining = deliverables.length - visibleDeliverables.length;
   return (
     <section style={S.docSection}>
       <div style={S.docHeader}>
         <h2 style={S.docTitle}>Unfiled</h2>
         <div style={S.docSub}>Deliverables you’ve generated that aren’t in the room yet. File into {dest}.</div>
+        {deliverables.length > FULL_LIST_PAGE && (
+          <div className="mb-mono" style={S.docHeaderProgress}>
+            {visibleDeliverables.length} of {deliverables.length}
+          </div>
+        )}
       </div>
       <div style={S.docRows}>
-        {deliverables.map((d, index) => {
+        {visibleDeliverables.map((d, index) => {
           const tone = realDeliverableTone(d.slug || "", d.status || "", d.name || "");
           const busy = filingId === d.id;
-          const last = index === deliverables.length - 1;
+          const last = index === visibleDeliverables.length - 1 && remaining === 0;
           const meta = [
             d.tier ? formatRealStatus(d.tier) : null,
             d.status ? formatRealStatus(d.status) : null,
@@ -1985,6 +2118,11 @@ function RealUnfiledSection({
             </div>
           );
         })}
+        {remaining > 0 && (
+          <button type="button" onClick={() => setShown((value) => value + FULL_LIST_PAGE)} style={S.showNextButton}>
+            Show next {Math.min(FULL_LIST_PAGE, remaining)}
+          </button>
+        )}
       </div>
     </section>
   );
@@ -2718,19 +2856,20 @@ export function LibraryFinderScreen({
   const q = query.trim().toLowerCase();
   const matchesQuery = (row: DocRowData) => !q || `${row.name} ${row.meta}`.toLowerCase().includes(q);
 
-  // ── Real workspace union: deliverables grouped by deal, deals as rooms ──
+  // ── Real workspace union: deliverables, deals, rooms, review docs ──────
   const docCount = workspace.deals.reduce((sum, deal) => sum + Number(deal.document_count ?? 0), 0);
   const roomCount = workspace.deals.filter((deal) => Number(deal.document_count ?? 0) > 0).length;
   const actionables = workspace.deliverables.filter(isActionableDeliverable);
   const analyses = workspace.deliverables.filter(isAnalysisDeliverable);
   const docsOnly = workspace.deliverables.filter((d) => !isAnalysisDeliverable(d));
+  const actionableCount = actionables.length + workspace.reviewDocs.length;
 
   const filters: { id: FilesFilter; label: string; count: number | null }[] = real
     ? [
         { id: "all", label: "All", count: workspace.loaded ? workspace.deliverables.length + docCount : null },
         { id: "deals", label: "Deals", count: workspace.loaded ? workspace.deals.length : null },
         { id: "data-room", label: "Data rooms", count: workspace.loaded ? roomCount : null },
-        { id: "actionable", label: "Actionable", count: workspace.loaded ? actionables.length : null },
+        { id: "actionable", label: "Actionable", count: workspace.loaded ? actionableCount : null },
         { id: "docs", label: "Docs", count: workspace.loaded ? docsOnly.length : null },
         { id: "analysis", label: "Analyses", count: workspace.loaded ? analyses.length : null },
       ]
@@ -2748,24 +2887,43 @@ export function LibraryFinderScreen({
   const dataRoomView = activeFilter === "data-room" || activeFilter === "secure";
   const showDealLibraries = activeFilter === "all" || activeFilter === "deals";
 
-  // Real: deliverables for the active scope, grouped by deal.
-  const realScope =
-    activeFilter === "actionable" ? actionables :
-    activeFilter === "analysis" ? analyses :
-    activeFilter === "docs" ? docsOnly :
-    activeFilter === "all" ? workspace.deliverables :
-    [];
-  const realSections = real ? groupRealDeliverablesByDeal(realScope, onOpenDetail, matchesQuery) : [];
+  // Real rows per scope — every row navigates (document reader, deal data
+  // room, or deal library). "Actionable" is a real derivation: queued /
+  // generating / failed / draft deliverables + data-room docs in review.
   const realDealRows = real
     ? workspace.deals.map((deal) => realDealLibraryRow(deal, onOpenDealLibrary)).filter(matchesQuery)
     : [];
   const realRoomRows = real
-    ? workspace.deals.map((deal) => realDealRoomRow(deal, onOpenDealLibrary)).filter(matchesQuery)
+    ? workspace.deals
+        .filter((deal) => Number(deal.document_count ?? 0) > 0)
+        .map((deal) => realDealRoomRow(deal, onOpenDealLibrary))
+        .filter(matchesQuery)
+    : [];
+  const realActionRows = real
+    ? realActionableRows(workspace, onOpenDetail, onOpenDealLibrary).filter(matchesQuery)
+    : [];
+  const realAllRows = real
+    ? sortDeliverablesByRecency(workspace.deliverables)
+        .map((d) => realDeliverableRow(d, onOpenDetail))
+        .filter(matchesQuery)
+    : [];
+  const realDocRows = real
+    ? sortDeliverablesByRecency(docsOnly)
+        .map((d) => realDeliverableRow(d, onOpenDetail))
+        .filter(matchesQuery)
+    : [];
+  const realAnalysisRows = real
+    ? sortDeliverablesByRecency(analyses)
+        .map((d) => realDeliverableRow(d, onOpenDetail))
+        .filter(matchesQuery)
     : [];
   const realVisibleCount =
-    realSections.reduce((sum, section) => sum + section.rows.length, 0) +
-    (showDealLibraries ? realDealRows.length : 0) +
-    (dataRoomView ? realRoomRows.length : 0);
+    activeFilter === "all" ? realAllRows.length + realDealRows.length + realActionRows.length :
+    activeFilter === "deals" ? realDealRows.length :
+    dataRoomView ? realRoomRows.length :
+    activeFilter === "actionable" ? realActionRows.length :
+    activeFilter === "docs" ? realDocRows.length :
+    realAnalysisRows.length;
 
   // Sample: existing showroom sections, filtered by the live search.
   const sampleSections = real ? [] : getFilesSections(onOpenDetail);
@@ -2882,8 +3040,43 @@ export function LibraryFinderScreen({
             </div>
           )}
 
-          {workspace.loaded && showDealLibraries && realDealRows.length > 0 && (
-            <FinderSection
+          {/* "All" scope: SHORT sections (≤10 rows, tappable headers that open
+              the filtered full set) above the FULL paginated list of files. */}
+          {workspace.loaded && activeFilter === "all" && (
+            <>
+              {realDealRows.length > 0 && (
+                <FinderSection
+                  title="Deal libraries"
+                  sub="Open a deal to browse its files and data room."
+                  rows={realDealRows}
+                  cap={SHORT_LIST_MAX}
+                  onHeaderTap={() => chooseFilter("deals")}
+                />
+              )}
+              {realActionRows.length > 0 && (
+                <FinderSection
+                  title="Needs your eye"
+                  sub="Generating, failed, and draft files, plus data-room docs in review."
+                  rows={realActionRows}
+                  cap={SHORT_LIST_MAX}
+                  onHeaderTap={() => chooseFilter("actionable")}
+                />
+              )}
+              {realAllRows.length > 0 && (
+                <FinderFullList
+                  key="full-all"
+                  title="All files"
+                  sub="Everything you and Yulia have created, newest first."
+                  rows={realAllRows}
+                />
+              )}
+            </>
+          )}
+
+          {/* Specific scopes: FULL list views (up to 100 rows, then paginate). */}
+          {workspace.loaded && activeFilter === "deals" && realDealRows.length > 0 && (
+            <FinderFullList
+              key="full-deals"
               title="Deal libraries"
               sub="Open a deal to browse its files and data room."
               rows={realDealRows}
@@ -2891,21 +3084,40 @@ export function LibraryFinderScreen({
           )}
 
           {workspace.loaded && dataRoomView && realRoomRows.length > 0 && (
-            <FinderSection
+            <FinderFullList
+              key="full-rooms"
               title="Active data rooms"
               sub="Open a deal's shared diligence room."
               rows={realRoomRows}
             />
           )}
 
-          {workspace.loaded && realSections.map((section) => (
-            <FinderSection
-              key={section.title}
-              title={section.title}
-              sub={section.sub}
-              rows={section.rows}
+          {workspace.loaded && activeFilter === "actionable" && realActionRows.length > 0 && (
+            <FinderFullList
+              key="full-actionable"
+              title="Needs your eye"
+              sub="Queued, generating, failed, and draft files, plus data-room docs in review."
+              rows={realActionRows}
             />
-          ))}
+          )}
+
+          {workspace.loaded && activeFilter === "docs" && realDocRows.length > 0 && (
+            <FinderFullList
+              key="full-docs"
+              title="Documents"
+              sub="Letters, memos, CIMs, and working documents, newest first."
+              rows={realDocRows}
+            />
+          )}
+
+          {workspace.loaded && activeFilter === "analysis" && realAnalysisRows.length > 0 && (
+            <FinderFullList
+              key="full-analysis"
+              title="Analyses"
+              sub="Recasts, valuations, scorecards, and model outputs, newest first."
+              rows={realAnalysisRows}
+            />
+          )}
 
           {workspace.loaded && realVisibleCount === 0 && (
             <div style={S.realStatePad}>
@@ -2914,21 +3126,33 @@ export function LibraryFinderScreen({
                   <FolderKanban size={26} strokeWidth={2} />
                 </div>
                 <div style={S.realStateTitle}>
-                  {q ? `No files match “${query.trim()}”` : "Nothing filed here yet"}
+                  {q
+                    ? `No files match “${query.trim()}”`
+                    : activeFilter === "actionable"
+                      ? "Nothing needs your eye right now."
+                      : "Nothing filed here yet"}
                 </div>
                 <div style={S.realStateCopy}>
                   {q
                     ? "Try a different name, deal, or status."
-                    : "Files you and Yulia create show up here, organized by deal."}
+                    : activeFilter === "actionable"
+                      ? "Generating, failed, and draft files — and data-room documents in review — show up here."
+                      : "Files you and Yulia create show up here, organized by deal."}
                 </div>
               </div>
             </div>
           )}
         </>
       ) : (
+        /* ANON / DEV-BYPASS ONLY — the sample showroom. A real signed-in user
+           never reaches this branch (gated on workspace.real above). */
         <>
           {showDealLibraries && (
-            <DealLibrarySection onOpenDealLibrary={onOpenDealLibrary} query={q} />
+            <DealLibrarySection
+              onOpenDealLibrary={onOpenDealLibrary}
+              query={q}
+              onHeaderTap={activeFilter === "all" ? () => chooseFilter("deals") : undefined}
+            />
           )}
 
           {dataRoomView && (
@@ -2954,6 +3178,8 @@ export function LibraryFinderScreen({
               title={section.title}
               sub={section.sub}
               rows={section.rows}
+              cap={activeFilter === "all" ? SHORT_LIST_MAX : undefined}
+              onHeaderTap={activeFilter === "all" ? () => chooseFilter(section.filters[0]) : undefined}
             />
           ))}
         </>
@@ -2962,98 +3188,55 @@ export function LibraryFinderScreen({
   );
 }
 
-/** Groups real deliverables by deal for the finder, newest first, applying
- *  the live search filter. Sections with no matching rows are dropped. */
-function groupRealDeliverablesByDeal(
-  deliverables: WorkspaceDeliverable[],
-  onOpenDetail: OpenDocHandler,
-  matchesQuery: (row: DocRowData) => boolean,
-): Array<{ title: string; sub: string; rows: DocRowData[] }> {
-  const groups = new Map<string, WorkspaceDeliverable[]>();
-  for (const d of sortDeliverablesByRecency(deliverables)) {
-    const key = d.deal_name || "Workspace";
-    const list = groups.get(key) ?? [];
-    list.push(d);
-    groups.set(key, list);
-  }
-  return [...groups.entries()]
-    .map(([dealName, items]) => ({
-      title: dealName,
-      sub: `${items.length} ${items.length === 1 ? "file" : "files"}`,
-      rows: items.map((item) => realDeliverableRow(item, onOpenDetail)).filter(matchesQuery),
-    }))
-    .filter((section) => section.rows.length > 0);
-}
-
-function DealLibrarySection({ onOpenDealLibrary, query = "" }: { onOpenDealLibrary: OpenDealLibraryHandler; query?: string }) {
+/* ANON / DEV-BYPASS ONLY — sample deal libraries for the showroom finder. */
+function DealLibrarySection({
+  onOpenDealLibrary,
+  query = "",
+  onHeaderTap,
+}: {
+  onOpenDealLibrary: OpenDealLibraryHandler;
+  query?: string;
+  onHeaderTap?: () => void;
+}) {
   const visible = dealLibraries.filter(
     (deal) => !query || `${deal.title} ${deal.meta} ${deal.portfolio}`.toLowerCase().includes(query),
   );
   if (query && visible.length === 0) return null;
   return (
-    <section style={S.finderSection}>
-      <div className="mb-as-card" style={S.finderListCard}>
-        <div style={S.finderCardHead}>
-          <div>
-            <div style={S.finderTitleRow}>
-              <h2 style={S.docTitle}>Deal libraries</h2>
-              <MobileIcon name="chevron" c="var(--mb-ink-4)" size={13} />
-            </div>
-            <div style={S.docSub}>Open a portfolio deal to browse stages and files.</div>
-          </div>
-        </div>
-        {visible.map((deal, index) => (
-          <DocRow
-            key={deal.title}
-            row={{
-              name: deal.title,
-              meta: `${deal.portfolio} portfolio · All stages · ${deal.count} files`,
-              pill: "Open",
-              icon: <DealLibraryIcon />,
-              onClick: () => onOpenDealLibrary(deal.title, deal.meta, deal.portfolio, "all"),
-            }}
-            last={index === visible.length - 1}
-            showChevron
-          />
-        ))}
-      </div>
-    </section>
+    <FinderSection
+      title="Deal libraries"
+      sub="Open a portfolio deal to browse stages and files."
+      cap={SHORT_LIST_MAX}
+      onHeaderTap={onHeaderTap}
+      rows={visible.map((deal) => ({
+        name: deal.title,
+        meta: `${deal.portfolio} portfolio · All stages · ${deal.count} files`,
+        pill: "Open",
+        icon: <DealLibraryIcon />,
+        onClick: () => onOpenDealLibrary(deal.title, deal.meta, deal.portfolio, "all"),
+      }))}
+    />
   );
 }
 
+/* ANON / DEV-BYPASS ONLY — sample data rooms for the showroom finder. */
 function DataRoomDealSection({ onOpenDealLibrary, query = "" }: { onOpenDealLibrary: OpenDealLibraryHandler; query?: string }) {
   const visible = activeDataRooms.filter(
     (room) => !query || `${room.title} ${room.meta}`.toLowerCase().includes(query),
   );
   if (query && visible.length === 0) return null;
   return (
-    <section style={S.finderSection}>
-      <div className="mb-as-card" style={S.finderListCard}>
-        <div style={S.finderCardHead}>
-          <div>
-            <div style={S.finderTitleRow}>
-              <h2 style={S.docTitle}>Active data rooms</h2>
-              <MobileIcon name="chevron" c="var(--mb-ink-4)" size={13} />
-            </div>
-            <div style={S.docSub}>Open a deal&rsquo;s shared diligence room.</div>
-          </div>
-        </div>
-        {visible.map((room, index) => (
-          <DocRow
-            key={room.title}
-            row={{
-              name: room.title,
-              meta: room.meta,
-              pill: "Open",
-              icon: <PortfolioIcon />,
-              onClick: () => onOpenDealLibrary(room.dealTitle, room.dealMeta, room.portfolio, "data-room"),
-            }}
-            last={index === visible.length - 1}
-            showChevron
-          />
-        ))}
-      </div>
-    </section>
+    <FinderSection
+      title="Active data rooms"
+      sub="Open a deal’s shared diligence room."
+      rows={visible.map((room) => ({
+        name: room.title,
+        meta: room.meta,
+        pill: "Open",
+        icon: <PortfolioIcon />,
+        onClick: () => onOpenDealLibrary(room.dealTitle, room.dealMeta, room.portfolio, "data-room"),
+      }))}
+    />
   );
 }
 
@@ -3066,6 +3249,10 @@ function FinderStat({ value, label }: { value: string; label: string }) {
   );
 }
 
+/* ANON / DEV-BYPASS ONLY — sample finder sections ("Needs your eye", drafts,
+   analysis, data room, shared). The single call site is gated on
+   `workspace.real` inside LibraryFinderScreen; a signed-in user gets the real
+   derivations (realActionableRows / realDeliverableRow / deal rows) instead. */
 function getFilesSections(onOpenDetail: OpenDocHandler): Array<{
   eyebrow: string;
   title: string;
@@ -3375,7 +3562,53 @@ function docToneFromKind(kind?: string): DocTone {
     : "memo";
 }
 
+/** SHORT-list card: caps rows (≤10) and, when `onHeaderTap` is provided,
+ *  turns the section header into a ≥44px tappable row with a trailing chevron
+ *  that opens the full set. No handler → plain header, no chevron (a chevron
+ *  without a destination is a bug). */
 function FinderSection({
+  title,
+  sub,
+  rows,
+  cap,
+  onHeaderTap,
+}: {
+  title: string;
+  sub: string;
+  rows: DocRowData[];
+  cap?: number;
+  onHeaderTap?: () => void;
+}) {
+  const visible = cap != null ? rows.slice(0, cap) : rows;
+  const headBody = (
+    <div style={{ flex: 1, minWidth: 0 }}>
+      <h2 style={S.docTitle}>{title}</h2>
+      <div style={S.docSub}>{sub}</div>
+    </div>
+  );
+  return (
+    <section style={S.finderSection}>
+      <div className="mb-as-card" style={S.finderListCard}>
+        {onHeaderTap ? (
+          <button type="button" onClick={onHeaderTap} aria-label={`See all ${title}`} style={S.finderCardHeadTap}>
+            {headBody}
+            <MobileIcon name="chevron" c="var(--mb-ink-4)" size={13} />
+          </button>
+        ) : (
+          <div style={S.finderCardHead}>{headBody}</div>
+        )}
+        {visible.map((row, index) => (
+          <DocRow key={`${index}-${row.name}`} row={row} last={index === visible.length - 1} showChevron />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** FULL-list card (finder filter results): renders up to 100 rows, then a
+ *  full-width "Show next" button appends the next client-side page. Shows
+ *  "N of M" in the header once the set exceeds a page. */
+function FinderFullList({
   title,
   sub,
   rows,
@@ -3384,21 +3617,40 @@ function FinderSection({
   sub: string;
   rows: DocRowData[];
 }) {
+  const [shown, setShown] = useState(FULL_LIST_PAGE);
+  const visible = rows.slice(0, shown);
+  const remaining = rows.length - visible.length;
   return (
     <section style={S.finderSection}>
       <div className="mb-as-card" style={S.finderListCard}>
         <div style={S.finderCardHead}>
-          <div>
-            <div style={S.finderTitleRow}>
-              <h2 style={S.docTitle}>{title}</h2>
-              <MobileIcon name="chevron" c="var(--mb-ink-4)" size={13} />
-            </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h2 style={S.docTitle}>{title}</h2>
             <div style={S.docSub}>{sub}</div>
           </div>
+          {rows.length > FULL_LIST_PAGE && (
+            <span className="mb-mono" style={S.fullListProgress}>
+              {visible.length} of {rows.length}
+            </span>
+          )}
         </div>
-        {rows.map((row, index) => (
-          <DocRow key={`${index}-${row.name}`} row={row} last={index === rows.length - 1} showChevron />
+        {visible.map((row, index) => (
+          <DocRow
+            key={`${index}-${row.name}`}
+            row={row}
+            last={index === visible.length - 1 && remaining === 0}
+            showChevron
+          />
         ))}
+        {remaining > 0 && (
+          <button
+            type="button"
+            onClick={() => setShown((value) => value + FULL_LIST_PAGE)}
+            style={S.showNextButton}
+          >
+            Show next {Math.min(FULL_LIST_PAGE, remaining)}
+          </button>
+        )}
       </div>
     </section>
   );
@@ -3428,14 +3680,22 @@ function DocSection({
   cap?: number;
 }) {
   const [open, setOpen] = useState(false);
-  const visible = open ? rows : rows.slice(0, cap);
+  // Expanded sets follow the FULL-list standard: pages of 100, appended.
+  const [shown, setShown] = useState(FULL_LIST_PAGE);
+  const visible = open ? rows.slice(0, shown) : rows.slice(0, cap);
   const hasMore = rows.length > cap;
+  const remaining = open ? rows.length - visible.length : 0;
 
   return (
     <section id={anchorId} style={S.docSection}>
       <div style={S.docHeader}>
         <h2 style={S.docTitle}>{title}</h2>
         <div style={S.docSub}>{sub}</div>
+        {open && rows.length > FULL_LIST_PAGE && (
+          <div className="mb-mono" style={S.docHeaderProgress}>
+            {visible.length} of {rows.length}
+          </div>
+        )}
       </div>
       <div style={S.docRows}>
         {visible.map((row, index) => {
@@ -3444,14 +3704,32 @@ function DocSection({
             <DocRow
               key={`${index}-${row.name}`}
               row={clickableRow}
-              last={index === visible.length - 1 && (!hasMore || open)}
+              last={index === visible.length - 1 && (!hasMore || (open && remaining === 0))}
               showChevron={Boolean(clickableRow.onClick)}
             />
           );
         })}
-        {hasMore && (
-          <button type="button" onClick={() => setOpen((value) => !value)} style={S.showMore}>
-            {open ? "Show less" : `See all ${rows.length}`}
+        {hasMore && !open && (
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(true);
+              setShown(FULL_LIST_PAGE);
+            }}
+            style={S.showMore}
+          >
+            See all {rows.length}
+            <MobileIcon name="chevron" c="var(--mb-accent-ink)" size={11} />
+          </button>
+        )}
+        {open && remaining > 0 && (
+          <button type="button" onClick={() => setShown((value) => value + FULL_LIST_PAGE)} style={S.showNextButton}>
+            Show next {Math.min(FULL_LIST_PAGE, remaining)}
+          </button>
+        )}
+        {open && remaining === 0 && (
+          <button type="button" onClick={() => setOpen(false)} style={S.showMore}>
+            Show less
             <MobileIcon name="chevron" c="var(--mb-accent-ink)" size={11} />
           </button>
         )}
@@ -3461,6 +3739,8 @@ function DocSection({
 }
 
 function DocRow({ row, last, showChevron = false }: { row: DocRowData; last: boolean; showChevron?: boolean }) {
+  // A chevron promises navigation — never render one on a row with no handler.
+  const chevron = showChevron && Boolean(row.onClick);
   const body = (
     <>
       {typeof row.icon === "string" ? <SimpleDocIcon kind={row.icon} /> : row.icon}
@@ -3474,7 +3754,7 @@ function DocRow({ row, last, showChevron = false }: { row: DocRowData; last: boo
       </div>
       <span style={S.rowTrailing}>
         {typeof row.pill === "string" ? <span style={S.actionPill}>{row.pill}</span> : row.pill}
-        {showChevron && <MobileIcon name="chevron" c="var(--mb-ink-4)" size={11} />}
+        {chevron && <MobileIcon name="chevron" c="var(--mb-ink-4)" size={11} />}
       </span>
     </>
   );
@@ -4038,6 +4318,22 @@ const S: Record<string, CSSProperties> = {
     fontWeight: 700,
     color: "var(--mb-ink-3)",
   },
+  // ≥44px tappable section header (the list standard) — opens the finder
+  // scoped to data rooms.
+  roomsHeaderTap: {
+    width: "100%",
+    boxSizing: "border-box",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+    minHeight: 44,
+    padding: "0 4px",
+    background: "transparent",
+    border: "none",
+    textAlign: "left",
+    cursor: "pointer",
+  },
   finderCtaPad: {
     marginTop: 30,
     padding: "0 16px",
@@ -4187,6 +4483,20 @@ const S: Record<string, CSSProperties> = {
     color: "var(--mb-accent-ink)",
     fontSize: 14,
     fontWeight: 600,
+    cursor: "pointer",
+  },
+  // Full-width pagination button for FULL list views ("Show next 100").
+  showNextButton: {
+    width: "100%",
+    boxSizing: "border-box",
+    minHeight: 48,
+    margin: "10px 0 12px",
+    border: "none",
+    borderRadius: 14,
+    background: "var(--mb-card-2)",
+    color: "var(--mb-accent-ink)",
+    fontSize: 14,
+    fontWeight: 700,
     cursor: "pointer",
   },
   searchPad: {
@@ -4916,11 +5226,37 @@ const S: Record<string, CSSProperties> = {
     gap: 14,
     padding: "0 4px 12px",
   },
-  finderTitleRow: {
-    display: "inline-flex",
+  // Tappable variant of finderCardHead — ≥44px hit area, trailing chevron.
+  finderCardHeadTap: {
+    width: "100%",
+    boxSizing: "border-box",
+    display: "flex",
     alignItems: "center",
-    gap: 7,
-    marginTop: 2,
+    justifyContent: "space-between",
+    gap: 14,
+    minHeight: 44,
+    padding: "0 4px 12px",
+    background: "transparent",
+    border: "none",
+    textAlign: "left",
+    cursor: "pointer",
+  },
+  // "N of M" indicator for FULL list views past one page (M > 100).
+  fullListProgress: {
+    flexShrink: 0,
+    fontSize: 11,
+    fontWeight: 700,
+    letterSpacing: "0.03em",
+    color: "var(--mb-ink-3)",
+    paddingBottom: 3,
+    whiteSpace: "nowrap",
+  },
+  docHeaderProgress: {
+    marginTop: 6,
+    fontSize: 11,
+    fontWeight: 700,
+    letterSpacing: "0.03em",
+    color: "var(--mb-ink-3)",
   },
   docReaderHero: {
     display: "flex",
