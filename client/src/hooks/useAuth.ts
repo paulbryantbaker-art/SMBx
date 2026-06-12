@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 const TOKEN_KEY = 'smbx_token';
 const DEV_USER_KEY = 'smbx_dev_mock_user';
@@ -79,6 +79,7 @@ export function authHeaders(): Record<string, string> {
 export function useAuth() {
   const [user, setUser] = useState<User | null>(() => readDevUser());
   const [loading, setLoading] = useState(!DEV_AUTH_BYPASS);
+  const meRetriesRef = useRef(0);
 
   const fetchCurrentUser = useCallback(async () => {
     if (DEV_AUTH_BYPASS) {
@@ -96,16 +97,32 @@ export function useAuth() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
+        meRetriesRef.current = 0;
         setUser(await res.json());
-      } else {
+      } else if (res.status === 401 || res.status === 403) {
+        // Definitive: the token is invalid or expired — sign out.
         clearToken();
+        setUser(null);
+      } else {
+        // TRANSIENT failure (429 rate limit, 5xx, proxy hiccup): KEEP the
+        // token. Destroying a valid session here bounced freshly signed-in
+        // users straight back to marketing ("signed in, then logged out").
+        // Retry briefly — the loader stays up (setLoading(false) is skipped)
+        // so the user never flashes to marketing mid-retry. If it keeps
+        // failing, render logged-out but leave the token so the next load
+        // restores the session.
+        if (meRetriesRef.current < 2) {
+          meRetriesRef.current += 1;
+          setTimeout(() => { void fetchCurrentUser(); }, 1500 * meRetriesRef.current);
+          return; // loading stays true until the retry resolves
+        }
         setUser(null);
       }
     } catch {
+      // Network failure — same rule: never clear the token on a transient.
       setUser(null);
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   }, []);
 
   useEffect(() => {
