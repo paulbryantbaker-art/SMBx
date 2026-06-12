@@ -96,10 +96,17 @@ const PORT = process.env.PORT || 3000;
 // ─── Rate limiters ──────────────────────────────────────────
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // 10 attempts per window
+  max: 20, // credential attempts per window per IP
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many attempts, please try again later' },
+  // Limit CREDENTIAL endpoints only (login/register/google/password flows —
+  // the brute-force surface). /me is the session check fired on EVERY app
+  // load: counting it locked real users out of Google sign-in after a few
+  // page loads ("too many attempts" with zero failed logins). /logout
+  // likewise must never be refusable. (req.path here is relative to the
+  // /api/auth mount.)
+  skip: (req) => req.path === '/me' || req.path === '/logout',
 });
 
 const chatLimiter = rateLimit({
