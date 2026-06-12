@@ -15,6 +15,7 @@ import {
   yuliaComparePrompt,
 } from "../../../lib/v6ActionContracts";
 import type { SurfaceActionId } from "../../../lib/v6SurfaceActions";
+import { VERDICT_MATERIAL } from "../shared/verdictMaterial";
 
 interface Tool { id: string; name: string; sub: string; icon: IconName; actionId?: SurfaceActionId }
 
@@ -37,6 +38,39 @@ const TOOLS: Tool[] = [
 ];
 
 const TOOLS_BY_ID: Record<string, Tool> = Object.fromEntries(TOOLS.map(t => [t.id, t]));
+
+/* Family tonal fills (judged tonal pass): the 15-card catalog gets
+   group-colored icon tiles ONLY — 15 textures would be loud; tonal chips
+   carry the families. The judged family hexes ARE the verdictMaterial tone
+   trios (valuation→#E6F3EC/#3F8A6A, diligence→#EAF0FA/#4A7AB0,
+   structure/tax/legal→#FAF1E1/#9C7128) — consume, never restate. */
+const FAMILY_TONE = {
+  valuation: VERDICT_MATERIAL.pursue.tone,
+  diligence: VERDICT_MATERIAL.baseline.tone,
+  structure: VERDICT_MATERIAL.watch.tone,
+} as const;
+
+const TOOL_FAMILY: Record<string, keyof typeof FAMILY_TONE> = {
+  "tool-recast": "valuation",
+  "tool-comps": "valuation",
+  "tool-val": "valuation",
+  "tool-dcf": "valuation",
+  "tool-sensitivity": "valuation",
+  "tool-qoe": "diligence",
+  "tool-buyer": "diligence",
+  "tool-wc": "diligence",
+  "tool-compare": "diligence",
+  "tool-tax": "structure",
+  "tool-earnout": "structure",
+  "tool-sba": "structure",
+  "tool-lbo": "structure",
+  "tool-captable": "structure",
+  "tool-covenant": "structure",
+};
+
+function toolTone(toolId: string) {
+  return FAMILY_TONE[TOOL_FAMILY[toolId] ?? "diligence"];
+}
 
 // Portfolio-aware recommendation: a deal's gate implies which analyses move it
 // forward (methodology gate → required models). Deterministic first pass; the
@@ -262,7 +296,7 @@ export function V6AnalysisRoot({
                 .map(id => TOOLS_BY_ID[id])
                 .filter(Boolean);
               return (
-                <div key={d.id} className="wkcard">
+                <div key={d.id} className="wkcard" style={{ boxShadow: "var(--wk-elev-card)" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
                     <div className="wkcard-title" style={{ fontSize: "0.98rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {d.business_name || `Deal #${d.id}`}
@@ -275,7 +309,7 @@ export function V6AnalysisRoot({
                     {recs.map(t => (
                       <button
                         key={t.id}
-                        className="fchip"
+                        className="fchip wk-tap"
                         type="button"
                         disabled={busyAction === t.id}
                         onClick={() => { void runAnalysisAction(t, d); }}
@@ -312,7 +346,8 @@ export function V6AnalysisRoot({
             {filtered.map(t => (
               <div
                 key={t.id}
-                className="wkcard tap"
+                className="wkcard wk-tap"
+                style={{ boxShadow: "var(--wk-elev-card)", cursor: "pointer" }}
                 onClick={() => { void runAnalysisAction(t); }}
                 role="button"
                 tabIndex={0}
@@ -320,10 +355,11 @@ export function V6AnalysisRoot({
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); void runAnalysisAction(t); } }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  {/* Group-colored icon tile — the tonal chip carries the family */}
                   <div style={{
                     width: 36, height: 36, borderRadius: 10, flexShrink: 0,
                     display: "grid", placeItems: "center",
-                    background: "var(--surface-2)", color: "var(--ink-2)",
+                    background: toolTone(t.id).soft, color: toolTone(t.id).ink,
                   }}>
                     <V6Icon name={t.icon} size={16} />
                   </div>

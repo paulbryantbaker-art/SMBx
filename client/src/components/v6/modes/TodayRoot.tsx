@@ -8,13 +8,22 @@
  * Same card set / order as mobile: Daily hero · Market intelligence ·
  * Today's quick wins · Recent work · Analyses · Deals in motion.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { authHeaders, type User } from "../../../hooks/useAuth";
 import { useMobileDeals, type MobilePipelineRow } from "../../../hooks/useMobileDeals";
 import { useAudience } from "../../../hooks/useAudience";
 import { copyFor } from "../../../lib/copy";
 import { useV6WorkspaceData, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
-import { useDerivedDisplay } from "../shared/useDerivedDisplay";
+import {
+  deriveVerdictKind,
+  heroBoxShadow,
+  preloadTexture,
+  HERO_GHOST_PILL_BG,
+  HERO_INNER_CELL,
+  HERO_RADIUS,
+  VERDICT_MATERIAL,
+  type VerdictKind,
+} from "../shared/verdictMaterial";
 import { YuliaSkeleton } from "../shared/YuliaSkeleton";
 import { V6Icon } from "../icons";
 import type { OpenTab } from "../types";
@@ -53,11 +62,33 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const openAllDeals = () => openTab({ id: "deals-all", kind: "deals-list", title: "All deals", dealsListView: "all" });
 
   const featured = deals.featured;           // strongest source this week (same as mobile)
-  // DERIVE: the FIT score never hard-swaps — it settles via useDerivedDisplay
-  // and flashes the one-shot .wk-tick when the skeleton resolves into data or
-  // the fit changes. Empty string while loading = nothing animates from zero.
+  // Watercolor verdict hero (fusion Wave B2). The FIT numeral renders PLAIN
+  // on texture — no useDerivedDisplay, no wk-tick: DERIVE's emerald is a
+  // light-surface verification signal and never renders on texture.
   // Honesty gate: synthetic (id-hash) fits may order deals but never display.
-  const fitDisplay = useDerivedDisplay(featured && featured.fitIsReal ? String(featured.fit) : "");
+  const heroKind: VerdictKind = featured ? deriveVerdictKind(featured.verdict) : "baseline";
+  const heroMat = VERDICT_MATERIAL[heroKind];
+  const [heroTexReady, setHeroTexReady] = useState(false);
+
+  // Decode all four verdict textures up front so a verdict change never
+  // paints white-then-pops (judges' criterion: no wrong-color flash on the
+  // daily landing page).
+  useEffect(() => {
+    (Object.keys(VERDICT_MATERIAL) as VerdictKind[]).forEach(kind => preloadTexture(VERDICT_MATERIAL[kind].texture));
+  }, []);
+
+  // Mount flat (verdict-tinted solid + overlay), then crossfade the
+  // watercolor in once its image has actually decoded.
+  useEffect(() => {
+    setHeroTexReady(false);
+    let cancelled = false;
+    const img = new Image();
+    img.onload = () => { if (!cancelled) setHeroTexReady(true); };
+    img.src = heroMat.texture;
+    if (img.complete) setHeroTexReady(true);
+    return () => { cancelled = true; };
+  }, [heroMat.texture]);
+
   const todayRows = deals.today;             // pipeline rows (same as mobile)
   const intel = brief?.marketIntelligence ?? null;
   const recentFiles = workspace.deliverables.slice(0, 4);
@@ -75,51 +106,103 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
 
       {/* ── Daily hero + Market intelligence ── */}
       <div className="wkgrid g2" style={{ gap: 16, marginTop: 4 }}>
-        {/* Daily hero — the strongest source this week (deals.featured) */}
-        <div className="wkcard" style={{ display: "flex", flexDirection: "column", gap: 16, minHeight: 200 }}>
-          {/* Working Paper inversion: the deal name is the masthead, not this label */}
-          <div style={{ fontSize: "0.95rem", fontWeight: 600, color: "var(--ink-2)", lineHeight: 1.2 }}>Strongest source this week</div>
-          {dealsLoading ? (
+        {/* Daily hero — the strongest source this week (deals.featured).
+            Featured = the watercolor verdict HeroFrame (flagship #1): material
+            from shared/verdictMaterial.ts, radius 22, glass inner cell
+            carrying the actions. Skeleton + empty states stay plain cards —
+            no texture on empties. */}
+        {dealsLoading ? (
+          <div className="wkcard" style={{ display: "flex", flexDirection: "column", gap: 16, minHeight: 200 }}>
+            <div style={{ fontSize: "0.95rem", fontWeight: 600, color: "var(--ink-2)", lineHeight: 1.2 }}>Strongest source this week</div>
             <YuliaSkeleton rows={2} label="Yulia is reading your deals…" />
-          ) : featured ? (
-            <>
-              <button
-                type="button"
-                style={{ all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 13, padding: "14px 16px", background: "var(--surface-2)", border: "1px solid var(--line)", borderRadius: 14, boxSizing: "border-box" }}
-                onClick={() => openDeal(featured.rawId, featured.name)}
-              >
-                <span className="logo" style={{ width: 44, height: 44 }}>{initials(featured.name)}</span>
-                <span style={{ flex: 1, minWidth: 0 }}>
-                  <span className="wk-masthead" style={{ display: "block", color: "var(--ink)", fontSize: 30, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{featured.name}</span>
-                  <span style={{ display: "block", color: "var(--ink-3)", fontSize: "0.82rem", marginTop: 3 }}>{featured.sub}</span>
-                </span>
-                {featured.fitIsReal && (
-                  <span style={{ textAlign: "right", flexShrink: 0 }}>
-                    <span style={{ display: "block", fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--accent-strong)", fontSize: 32, lineHeight: 1 }}>
-                      {fitDisplay.text}
-                      <i className={`wk-tick${fitDisplay.justSettled ? " on" : ""}`} aria-hidden="true">✓</i>
-                    </span>
-                    <span style={{ display: "block", fontSize: "0.66rem", color: "var(--ink-3)", fontWeight: 600 }}>Fit</span>
-                  </span>
-                )}
-              </button>
-              <div style={{ display: "flex", gap: 9, marginTop: "auto" }}>
-                <button className="wkbtn primary" type="button" onClick={() => openDeal(featured.rawId, featured.name)}>Open deal</button>
-                <button className="wkbtn" type="button" onClick={() => ask(`Give me your read on ${featured.name}: verdict, risks, and the next move.`)}>Ask Yulia</button>
-              </div>
-            </>
-          ) : (
-            <>
-              <p style={{ color: "var(--ink-2)", fontSize: "0.9rem", lineHeight: 1.5, margin: 0 }}>
-                Yulia will surface your strongest source here once you have deals in motion.
-              </p>
-              <button className="wkbtn primary" type="button" style={{ marginTop: "auto", alignSelf: "flex-start" }} onClick={() => ask("Help me start or source my first deal.")}>Start with Yulia</button>
-            </>
-          )}
-        </div>
+          </div>
+        ) : featured ? (
+          <div
+            style={{
+              position: "relative",
+              display: "flex",
+              flexDirection: "column",
+              minHeight: 240,
+              padding: "20px 22px",
+              boxSizing: "border-box",
+              borderRadius: HERO_RADIUS,
+              overflow: "hidden",
+              color: "#fff",
+              backgroundColor: heroFallbackFill(heroKind),
+              backgroundImage: heroMat.overlay,
+              boxShadow: heroBoxShadow(heroKind),
+            }}
+          >
+            {/* Watercolor layer — overlay re-applied above the texture (165deg,
+                ~0.30 top keeps the numeral zone bright, ~0.62 bottom gives the
+                glass cell contrast). Crossfades in once the image decodes. */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                inset: 0,
+                backgroundImage: `${heroMat.overlay}, url('${heroMat.texture}')`,
+                backgroundSize: "cover, cover",
+                backgroundPosition: "center, center",
+                backgroundRepeat: "no-repeat, no-repeat",
+                opacity: heroTexReady ? 1 : 0,
+                transition: "opacity 320ms ease",
+              }}
+            />
+            {/* Ambient orbs (mobile HeroVisual parity) */}
+            <div aria-hidden="true" style={{ position: "absolute", top: -60, right: -40, width: 280, height: 280, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.16), transparent 60%)" }} />
+            <div aria-hidden="true" style={{ position: "absolute", bottom: -80, left: -30, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.07), transparent 60%)" }} />
 
-        {/* Market intelligence */}
-        <div className="wkcard" style={{ display: "flex", flexDirection: "column", gap: 12, minHeight: 200 }}>
+            <div style={{ position: "relative", display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: "#fff", lineHeight: 1.2 }}>Strongest source this week</div>
+              {/* Working Paper inversion: the deal name is the masthead — Fraunces register, white on texture */}
+              <div style={{ marginTop: 10, minWidth: 0 }}>
+                <div className="wk-masthead" style={{ color: "#fff", fontSize: 34, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{featured.name}</div>
+                <div style={{ color: "rgba(255,255,255,0.92)", fontSize: "0.82rem", marginTop: 4 }}>{featured.sub}</div>
+              </div>
+              <div style={{ flex: 1, display: "flex", alignItems: "flex-end", justifyContent: "flex-end", padding: "10px 2px 12px", minHeight: 26 }}>
+                {featured.fitIsReal && (
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 600, color: "#fff" }}>Fit</div>
+                    {/* PLAIN render on texture — no DERIVE settle, no tick (judges' law) */}
+                    <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 48, letterSpacing: -2, lineHeight: 1, color: "#fff", marginTop: 2 }}>{featured.fit}</div>
+                  </div>
+                )}
+              </div>
+              {/* Glass inner cell — the action row floating inside the hero */}
+              <div
+                style={{
+                  position: "relative",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: 8,
+                  borderRadius: HERO_INNER_CELL.radius,
+                  background: HERO_INNER_CELL.background,
+                  backdropFilter: HERO_INNER_CELL.backdropFilter,
+                  WebkitBackdropFilter: HERO_INNER_CELL.backdropFilter,
+                  border: HERO_INNER_CELL.border,
+                  boxShadow: HERO_INNER_CELL.boxShadow,
+                }}
+              >
+                <button className="wk-tap" type="button" style={HERO_PILL} onClick={() => openDeal(featured.rawId, featured.name)}>Open deal</button>
+                <button className="wk-tap" type="button" style={HERO_PILL} onClick={() => ask(`Give me your read on ${featured.name}: verdict, risks, and the next move.`)}>Ask Yulia</button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="wkcard" style={{ display: "flex", flexDirection: "column", gap: 16, minHeight: 200 }}>
+            <div style={{ fontSize: "0.95rem", fontWeight: 600, color: "var(--ink-2)", lineHeight: 1.2 }}>Strongest source this week</div>
+            <p style={{ color: "var(--ink-2)", fontSize: "0.9rem", lineHeight: 1.5, margin: 0 }}>
+              Yulia will surface your strongest source here once you have deals in motion.
+            </p>
+            <button className="wkbtn primary" type="button" style={{ marginTop: "auto", alignSelf: "flex-start" }} onClick={() => ask("Help me start or source my first deal.")}>Start with Yulia</button>
+          </div>
+        )}
+
+        {/* Market intelligence — blue-soft tonal field (judged tonal pass):
+            informational family, not a verdict; chips flip white-on-tonal. */}
+        <div className="wkcard" style={{ display: "flex", flexDirection: "column", gap: 12, minHeight: 200, background: VERDICT_MATERIAL.baseline.tone.soft }}>
           <div style={{ fontSize: "1.15rem", fontWeight: 700, letterSpacing: "-0.03em", color: "var(--ink)", lineHeight: 1.1 }}>Market intelligence</div>
           {briefAnalyzing ? (
             <YuliaSkeleton rows={3} label="Yulia is reading the market…" />
@@ -127,7 +210,8 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
             <>
               <button
                 type="button"
-                style={{ all: "unset", display: "block", cursor: "pointer", padding: "12px 14px", background: "var(--surface-2)", border: "1px solid var(--line)", borderRadius: 10, width: "100%", boxSizing: "border-box" }}
+                className="wk-tap"
+                style={{ appearance: "none", font: "inherit", color: "inherit", margin: 0, textAlign: "left", display: "block", cursor: "pointer", padding: "12px 14px", background: "#fff", border: "0.5px solid rgba(25,24,19,0.10)", borderRadius: 10, width: "100%", boxSizing: "border-box" }}
                 onClick={() => ask("Show me the market intelligence behind today's read — buyer universe, financing climate, tax/legal, and source gaps.")}
               >
                 <strong style={{ display: "block", color: "var(--ink)", fontSize: "0.94rem", lineHeight: 1.3, fontWeight: 700 }}>{intel.headline}</strong>
@@ -137,7 +221,8 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
                 <button
                   key={bullet}
                   type="button"
-                  style={{ all: "unset", cursor: "pointer", display: "grid", gridTemplateColumns: "auto 1fr", gap: 10, alignItems: "start", padding: "9px 12px", background: "var(--surface)", border: "1px solid var(--line-2)", borderRadius: 9, width: "100%", boxSizing: "border-box" }}
+                  className="wk-tap"
+                  style={{ appearance: "none", font: "inherit", color: "inherit", margin: 0, textAlign: "left", cursor: "pointer", display: "grid", gridTemplateColumns: "auto 1fr", gap: 10, alignItems: "start", padding: "9px 12px", background: "#fff", border: "0.5px solid rgba(25,24,19,0.10)", borderRadius: 9, width: "100%", boxSizing: "border-box" }}
                   onClick={() => ask(`Unpack this market signal: ${bullet}`)}
                 >
                   <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", fontWeight: 600, color: "var(--ink-3)" }}>{i + 1}</span>
@@ -160,7 +245,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
 
       {/* ── Today's quick wins (copyFor(audience).todayTips) + Recent work ── */}
       <div className="wkgrid g2" style={{ gap: 16, marginTop: 16 }}>
-        <div className="wkcard" style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        <div className="wkcard" style={{ display: "flex", flexDirection: "column", gap: 4, boxShadow: "var(--wk-elev-card)" }}>
           <div style={{ fontSize: "1.15rem", fontWeight: 700, letterSpacing: "-0.03em", color: "var(--ink)", lineHeight: 1.1 }}>Today's quick wins</div>
           <p style={{ color: "var(--ink-2)", fontSize: "0.84rem", margin: "4px 0 10px" }}>Things Yulia can do for you right now.</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -168,7 +253,8 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
               <button
                 key={tip.label}
                 type="button"
-                style={{ all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 12, padding: "11px 13px", background: "var(--surface-2)", border: "1px solid var(--line)", borderRadius: 10, boxSizing: "border-box" }}
+                className="wk-tap"
+                style={{ appearance: "none", font: "inherit", color: "inherit", margin: 0, textAlign: "left", cursor: "pointer", display: "flex", alignItems: "center", gap: 12, padding: "11px 13px", background: "var(--surface-2)", border: "1px solid var(--line)", borderRadius: 10, boxSizing: "border-box" }}
                 onClick={() => ask(tip.prompt)}
               >
                 <span style={{ flex: 1, minWidth: 0, color: "var(--ink)", fontWeight: 600, fontSize: "0.9rem" }}>{tip.label}</span>
@@ -178,7 +264,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           </div>
         </div>
 
-        <div className="wkcard" style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        <div className="wkcard" style={{ display: "flex", flexDirection: "column", gap: 4, boxShadow: "var(--wk-elev-card)" }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
             <div style={{ fontSize: "1.15rem", fontWeight: 700, letterSpacing: "-0.03em", color: "var(--ink)", lineHeight: 1.1 }}>Recent work</div>
             <button type="button" onClick={() => openTab({ kind: "mode-root", modeId: "files", id: "files-root", title: "Files", pinned: true })} style={{ all: "unset", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.04em", color: "var(--accent-strong)" }}>Open Files →</button>
@@ -190,14 +276,19 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
             <div style={{ color: "var(--ink-2)", fontSize: "0.85rem", padding: "8px 0" }}>Generated docs and analyses will collect here.</div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              {recentFiles.map(f => (
+              {recentFiles.map(f => {
+                // Family tonal fill on the icon chip (judged tonal pass):
+                // analyses wear the valuation family, docs the info-blue family.
+                const tone = isAnalysis(f) ? FAMILY_TONE.valuation : FAMILY_TONE.diligence;
+                return (
                 <button
                   key={f.id}
                   type="button"
-                  style={{ all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 12, padding: "10px 4px", boxSizing: "border-box", borderBottom: "1px solid var(--line)" }}
+                  className="wk-tap"
+                  style={{ appearance: "none", font: "inherit", color: "inherit", margin: 0, border: 0, background: "transparent", textAlign: "left", cursor: "pointer", display: "flex", alignItems: "center", gap: 12, padding: "10px 4px", boxSizing: "border-box", borderBottom: "1px solid var(--line)" }}
                   onClick={() => openFile(f, openTab)}
                 >
-                  <span style={{ flex: "none", width: 30, height: 30, borderRadius: 8, background: "var(--surface-2)", display: "grid", placeItems: "center", color: "var(--ink-2)" }}>
+                  <span style={{ flex: "none", width: 30, height: 30, borderRadius: 8, background: tone.soft, display: "grid", placeItems: "center", color: tone.ink }}>
                     <V6Icon name={isAnalysis(f) ? "chart" : "doc"} size={15} />
                   </span>
                   <span style={{ flex: 1, minWidth: 0 }}>
@@ -205,7 +296,8 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
                     <span style={{ display: "block", color: "var(--ink-3)", fontSize: "0.76rem" }}>{f.deal_name || "Deal"} · {statusLabel(f.status)}</span>
                   </span>
                 </button>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -215,10 +307,12 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
       <div className="wksec">
         <button
           type="button"
+          className="wk-tap"
           onClick={() => openTab({ kind: "mode-root", modeId: "analysis", id: "analysis-root", title: "Analyses", pinned: true })}
-          style={{ all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 13, width: "100%", boxSizing: "border-box", padding: "16px 18px", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 14 }}
+          style={{ appearance: "none", font: "inherit", color: "inherit", margin: 0, textAlign: "left", cursor: "pointer", display: "flex", alignItems: "center", gap: 13, width: "100%", boxSizing: "border-box", padding: "16px 18px", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 14, boxShadow: "var(--wk-elev-card)" }}
         >
-          <span style={{ width: 38, height: 38, borderRadius: 11, flexShrink: 0, display: "grid", placeItems: "center", background: "var(--accent-soft)", color: "var(--accent-strong)" }}>
+          {/* De-neoned to the valuation family tonal fill — green is rationed to the one CTA */}
+          <span style={{ width: 38, height: 38, borderRadius: 11, flexShrink: 0, display: "grid", placeItems: "center", background: FAMILY_TONE.valuation.soft, color: FAMILY_TONE.valuation.ink }}>
             <V6Icon name="chart" size={18} />
           </span>
           <span style={{ flex: 1, minWidth: 0 }}>
@@ -274,12 +368,71 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   );
 }
 
+/* ── Wave B2 hero + tonal material (consumes shared/verdictMaterial.ts) ── */
+
+/* Ghost glass pill on texture (mobile H.innerButton parity): gradient only,
+   no border, no blur. Explicit resets instead of all:unset so the .wk-tap
+   class transitions are not overridden by the inline cascade. */
+const HERO_PILL: CSSProperties = {
+  appearance: "none",
+  border: 0,
+  margin: 0,
+  cursor: "pointer",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  flex: 1,
+  minHeight: 34,
+  padding: "0 14px",
+  borderRadius: 999,
+  background: HERO_GHOST_PILL_BG,
+  color: "#fff",
+  fontFamily: "inherit",
+  fontSize: 13,
+  fontWeight: 800,
+  letterSpacing: "0.01em",
+  whiteSpace: "nowrap",
+};
+
+/* Family tonal fills (judged tonal pass): icon chips drop uniform surface-2
+   for family-colored soft fills. The judged family hexes ARE the
+   verdictMaterial tone trios — consume them, never restate:
+   valuation→pursue trio, diligence/docs→baseline info-blue trio,
+   structure/tax/legal→watch trio. */
+const FAMILY_TONE = {
+  valuation: VERDICT_MATERIAL.pursue.tone,
+  diligence: VERDICT_MATERIAL.baseline.tone,
+  structure: VERDICT_MATERIAL.watch.tone,
+} as const;
+
+/* The overlay's dark stop as an opaque pre-decode fill — the hero never
+   flashes white (or a wrong verdict color) before its texture decodes. */
+function heroFallbackFill(kind: VerdictKind): string {
+  const stops = VERDICT_MATERIAL[kind].overlay.match(/rgba\([^)]+\)/g);
+  const last = stops?.[stops.length - 1];
+  return last ? last.replace(/[\d.]+\)$/, "1)") : "#10243E";
+}
+
+/* Mobile VerdictPill anatomy on the tonal trio (judged pill aliasing):
+   soft bg / ink text from VERDICT_MATERIAL[kind].tone. Judgment pills only —
+   status pills elsewhere keep .statpill (--st-*) semantics. */
+function TonalVerdictPill({ kind, label, dot = true }: { kind: VerdictKind; label: string; dot?: boolean }) {
+  const tone = VERDICT_MATERIAL[kind].tone;
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 10px", borderRadius: 999, fontSize: 11.5, fontWeight: 650, lineHeight: 1, background: tone.soft, color: tone.ink, flexShrink: 0, whiteSpace: "nowrap" }}>
+      {dot && <span aria-hidden="true" style={{ width: 5, height: 5, borderRadius: "50%", background: "currentColor", flexShrink: 0 }} />}
+      {label}
+    </span>
+  );
+}
+
 function PipelineRow({ row, last, onOpen }: { row: MobilePipelineRow; last: boolean; onOpen: () => void }) {
   const verdict = (row as any).verdict as string | undefined;
   return (
     <button
       type="button"
-      style={{ all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 12, width: "100%", boxSizing: "border-box", padding: "14px 18px", borderBottom: last ? "none" : "1px solid var(--line)" }}
+      className="wk-tap"
+      style={{ appearance: "none", font: "inherit", color: "inherit", margin: 0, border: 0, background: "transparent", textAlign: "left", cursor: "pointer", display: "flex", alignItems: "center", gap: 12, width: "100%", boxSizing: "border-box", padding: "14px 18px", borderBottom: last ? "none" : "1px solid var(--line)" }}
       onClick={onOpen}
     >
       <span className="logo">{initials(row.name)}</span>
@@ -288,9 +441,9 @@ function PipelineRow({ row, last, onOpen }: { row: MobilePipelineRow; last: bool
         <span style={{ display: "block", color: "var(--ink-3)", fontSize: "0.8rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row.sub}</span>
       </span>
       {verdict
-        ? <span className={`statpill ${verdictClass(verdict)}`}><span className="d" />{capitalize(verdict)}</span>
+        ? <TonalVerdictPill kind={deriveVerdictKind(verdict)} label={capitalize(verdict)} />
         : (row as any).price
-          ? <span className="statpill review"><span className="d" />{(row as any).price}</span>
+          ? <TonalVerdictPill kind="baseline" label={(row as any).price} dot={false} />
           : null}
     </button>
   );
@@ -314,13 +467,6 @@ function initials(value: string): string {
 
 function capitalize(s: string): string {
   return s ? s[0].toUpperCase() + s.slice(1) : s;
-}
-
-function verdictClass(status: string): string {
-  const s = (status || "").toLowerCase();
-  if (s.includes("pursue")) return "good";
-  if (s.includes("pass") || s.includes("hold")) return "flag";
-  return "review";
 }
 
 function prettySlug(slug: string): string {

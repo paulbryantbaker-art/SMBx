@@ -12,6 +12,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["tsx", "server/index.ts"],
       "port": 3000
+    },
+    {
+      "name": "frontend-realauth",
+      "runtimeExecutable": "env",
+      "runtimeArgs": ["VITE_DEV_AUTH_BYPASS=false", "npx", "vite", "--port", "5175", "--strictPort"],
+      "port": 5175
     }
   ]
 }

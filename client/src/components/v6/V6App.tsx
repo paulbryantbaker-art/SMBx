@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { authHeaders, DEV_AUTH_BYPASS, useAuth, type User } from "../../hooks/useAuth";
 import { useAnonymousChat } from "../../hooks/useAnonymousChat";
 import { useAuthChat } from "../../hooks/useAuthChat";
@@ -507,28 +507,6 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
     } catch { /* ignore */ }
   }, [modelPreference]);
 
-  // ─── Resizable Yulia rail ───
-  const [chatWidth, setChatWidth] = useState(400);
-  const onDragStart = (e: MouseEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const startX = e.clientX;
-    const startW = chatWidth;
-    const onMove = (ev: globalThis.MouseEvent) => {
-      const dx = ev.clientX - startX;
-      setChatWidth(Math.min(520, Math.max(360, startW + dx)));
-    };
-    const onUp = () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
-    };
-    document.body.style.cursor = "col-resize";
-    document.body.style.userSelect = "none";
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-  };
-
   const modeLabel = MODES.find(m => m.id === activeMode)?.label ?? "Workspace";
   const launcherWork = (modeId: ModeId) => tabs.filter(tab => tabBelongsToLauncherMode(tab, modeId, tabs));
   // Open work items surfaced in the nav "Open" section (mode-roots are reached
@@ -640,7 +618,7 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
         <aside className="wknav">
           <div className="wkbrand"><span className="brand-mark" />smb<b>X</b></div>
           {/* Search launcher — moved out of the (now removed) topbar. */}
-          <button className="wknav-search" onClick={() => pickMode("search")} title="Search deals, artifacts, methodology">
+          <button className="wknav-search wk-tap" onClick={() => pickMode("search")} title="Search deals, artifacts, methodology">
             <V6Icon name="search" size={16} />
             <span className="wknav-search-label">Search</span>
             <span className="kbd">⌘K</span>
@@ -655,7 +633,7 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
                   return (
                     <button
                       key={`${gi}-${ii}`}
-                      className={`navitem ${on ? "on" : ""}`}
+                      className={`navitem wk-tap ${on ? "on" : ""}`}
                       onClick={() => pickMode(item.mode)}
                       aria-current={on ? "page" : undefined}
                     >
@@ -678,7 +656,7 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
                   return (
                     <div
                       key={t.id}
-                      className={`navtab ${on ? "on" : ""}`}
+                      className={`navtab wk-tap ${on ? "on" : ""}`}
                       role="presentation"
                       // Middle-click closes the row (browser-tab muscle memory).
                       // preventDefault on BOTH events: Chrome starts autoscroll
@@ -717,11 +695,11 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
           {/* FOOT TOOLBAR — relocated from the topbar: New, notifications, account.
               Popovers open UPWARD/RIGHTWARD from here (see .wknav-foot CSS). */}
           <div className="wknav-foot">
-            <button className="wkicon" title="New" onClick={() => pickMode("today")}><V6Icon name="plus" size={18} /></button>
+            <button className="wkicon wk-tap" title="New" onClick={() => pickMode("today")}><V6Icon name="plus" size={18} /></button>
             {user && <V6NotificationBell onNavigate={navigateToActionUrl} />}
             <div className="wkacct-wrap">
               <button
-                className="wkav"
+                className="wkav wk-tap"
                 title={user?.email || "Account"}
                 aria-haspopup="menu"
                 aria-expanded={acctOpen}
@@ -797,7 +775,7 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
 
       {/* FAB CHAT — V6Chat lifted into a floating bubble */}
       {!chatOpen && (
-        <button className="wk-fab" aria-label="Ask Yulia" onClick={() => setChatOpen(true)}>
+        <button className="wk-fab wk-tap" aria-label="Ask Yulia" onClick={() => setChatOpen(true)}>
           <YuliaGlyphSvg size={24} /><span className="bdot" />
         </button>
       )}

@@ -53,7 +53,7 @@ export default function V6NotificationBell({ onNavigate }: Props) {
   return (
     <div className="wknotif-wrap" ref={wrapRef}>
       <button
-        className="wkicon wknotif-btn"
+        className="wkicon wknotif-btn wk-tap"
         title="Notifications"
         aria-haspopup="menu"
         aria-expanded={open}

@@ -122,6 +122,29 @@
   .v6-root.wk .wk-tap:active { transform: none !important; transition: none !important; }
 }
 
+/* Cascade shim (fusion Wave B): the legacy "shared desktop nudge"
+   (index.css ~888) marks its button transition/:active with !important,
+   which silently swallows the .wk-tap grammar above on every <button>.
+   Re-assert the judged physics for OPTED-IN controls only, at higher
+   specificity, so press-in stays 90ms/scale(.985) and release 160ms.
+   The FAB presses deeper (scale .96 — mobile .m-fab parity). */
+.v6-root.wk .wk-tap:not(:disabled) {
+  transition:
+    transform 160ms cubic-bezier(0.25, 1, 0.5, 1),
+    box-shadow 180ms ease,
+    background 140ms ease !important;
+}
+.v6-root.wk .wk-tap:not(:disabled):active {
+  transform: scale(0.985) !important;
+  transition-duration: 90ms !important;
+}
+.v6-root.wk .wk-fab.wk-tap:not(:disabled):active { transform: scale(0.96) !important; }
+@media (prefers-reduced-motion: reduce) {
+  .v6-root.wk .wk-tap:not(:disabled),
+  .v6-root.wk .wk-tap:not(:disabled):active,
+  .v6-root.wk .wk-fab.wk-tap:not(:disabled):active { transform: none !important; transition: none !important; }
+}
+
 /* ============================================================
    Scrollbar grammar — floating-pill thumb on the nav gutter, the
    notifications list, and the FAB chat thread ONLY. The canvas
@@ -238,12 +261,29 @@
 .wk-app .wknav-search .wknav-search-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .wk-app .wknav-search .kbd { font-family: var(--font-mono); font-size: .64rem; background: var(--surface); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; margin-left: auto; flex: none; }
 .wk-app .wknavscroll { flex: 1; overflow-y: auto; min-height: 0; padding: 4px 10px; }
-.wk-app .navitem { display: flex; align-items: center; gap: 11px; padding: 7px 10px; border-radius: 9px; font-size: .9rem; color: var(--ink-2); cursor: pointer; font-weight: 450; border: 0; background: transparent; width: 100%; text-align: left; }
+.wk-app .navitem { display: flex; align-items: center; gap: 11px; padding: 7px 10px; border-radius: 10px; font-size: .9rem; color: var(--ink-2); cursor: pointer; font-weight: 450; border: 0; background: transparent; width: 100%; text-align: left; }
 .wk-app .navitem:hover { background: rgba(25,24,19,.05); }
-.wk-app .navitem.on { background: var(--surface); color: var(--ink); font-weight: 500; box-shadow: 0 1px 2px rgba(25,24,19,.05); }
+/* ── THE active-pill recipe (judge-final) — ONE shared material for
+   .navitem.on AND .navtab.on. The .mb-as-card cool-slate stack scaled
+   to a rail-row pill (NOT --wk-elev-card: the composer stack's 12/26px
+   blur is card-scale, too heavy for a 32px row — judges' call).
+   Heavier top inset = lit from above, same light source as the cards. */
+.wk-app .navitem.on,
+.wk-app .navtab.on {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 1px 2px rgba(20, 28, 44, 0.08),
+    0 4px 10px -5px rgba(20, 28, 44, 0.18);
+}
+.wk-app .navitem.on { font-weight: 500; }
 .wk-app .navitem svg { color: var(--ink-3); flex: none; }
 .wk-app .navitem.on svg { color: var(--ink); }
-.wk-app .navitem .badge { margin-left: auto; font-family: var(--font-mono); font-size: .66rem; font-weight: 600; background: var(--accent); color: var(--on-accent); border-radius: 999px; padding: 1px 8px; }
+/* count badge de-neoned (judged): tonal soft-green + muted emerald text —
+   raw #2BFF77 on light chrome is louder than mobile ever allows; neon
+   survives only on .wkbtn.primary and the FAB dot. */
+.wk-app .navitem .badge { margin-left: auto; font-family: var(--font-mono); font-size: .66rem; font-weight: 600; background: var(--accent-soft); color: var(--st-good-fg); border-radius: 999px; padding: 1px 8px; }
 .wk-app .navsec { font-size: .66rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); padding: 14px 10px 5px; }
 .wk-app .navsub { display: flex; flex-direction: column; gap: 1px; margin: 1px 0 2px 30px; }
 .wk-app .navsub .navitem { padding: 5px 10px; font-size: .86rem; }
@@ -252,9 +292,9 @@
    Relocated from the canvas strip into the nav "Open" section. Each row is a
    title button + a close button (NOT nested), styled like .navitem. The × is
    dimmed until hover/active so the row reads clean at rest. */
-.wk-app .navtab { display: flex; align-items: center; gap: 3px; border-radius: 9px; color: var(--ink-2); }
+.wk-app .navtab { display: flex; align-items: center; gap: 3px; border-radius: 10px; color: var(--ink-2); }
 .wk-app .navtab:hover { background: rgba(25,24,19,.05); }
-.wk-app .navtab.on { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(25,24,19,.05); }
+/* .navtab.on takes the shared active-pill recipe above (with .navitem.on) */
 .wk-app .navtab-t { display: flex; align-items: center; gap: 11px; flex: 1; min-width: 0; padding: 7px 2px 7px 10px; border: 0; background: transparent; color: inherit; font-size: .9rem; font-weight: 450; font-family: var(--font-body); text-align: left; cursor: pointer; }
 .wk-app .navtab.on .navtab-t { font-weight: 500; }
 .wk-app .navtab-t span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -273,13 +313,40 @@
 .wk-app .wkicon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; color: var(--ink-2); cursor: pointer; border: 0; background: transparent; }
 /* hover: was var(--surface-2), invisible now that the rail itself is #F3F1EA */
 .wk-app .wkicon:hover { background: var(--surface-3); color: var(--ink); }
-.wk-app .wkav { width: 32px; height: 32px; border-radius: 50%; background: #2BFF77; color: #06371A; display: flex; align-items: center; justify-content: center; font-size: .72rem; font-weight: 600; cursor: pointer; border: 0; }
+/* avatar de-neoned (judged): mobile's slate identity chip — a neon identity
+   dot violates green-rationing (neon = CTA only, never "who am I"). */
+.wk-app .wkav { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(145deg, #4D5666, #1F2530); color: #fff; display: flex; align-items: center; justify-content: center; font-size: .72rem; font-weight: 700; cursor: pointer; border: 0; }
 
 /* ---- account menu (avatar dropdown — Sign out / preview) ----
    Anchored to the nav foot, so it opens UPWARD and to the RIGHT. */
 .wk-app .wkacct-wrap { position: relative; display: flex; }
 .wk-app .wkacct-backdrop { position: fixed; inset: 0; z-index: 1300; }
-.wk-app .wkacct { position: absolute; bottom: calc(100% + 8px); left: 0; z-index: 1301; min-width: 224px; background: var(--surface); border: 1px solid var(--line-2); border-radius: 12px; box-shadow: 0 18px 44px -18px rgba(25,24,19,.42); padding: 6px; }
+/* ── LIQUID-GLASS SHEET RECIPE (judged) — the two nav-foot popovers are the
+   shell's ONLY blurred surfaces (small + transient, per mobile's blur
+   rationing: edges do the glass work, blur only on ephemera). Mobile sheet
+   material at desktop scale: 16px blur, white-edge border, lit top inset.
+   Never apply this to permanent chrome or scroll containers. */
+.wk-app .wkacct,
+.wk-app .wknotif-pop {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.84));
+  -webkit-backdrop-filter: blur(16px) saturate(190%);
+  backdrop-filter: blur(16px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 0 0 0.5px rgba(25, 24, 19, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 18px 44px -18px rgba(25, 24, 19, 0.42);
+  animation: wk-pop-in 200ms cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+/* entrance rises toward its upward anchor */
+@keyframes wk-pop-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wk-app .wkacct, .wk-app .wknotif-pop { animation: none; }
+}
+.wk-app .wkacct { position: absolute; bottom: calc(100% + 8px); left: 0; z-index: 1301; min-width: 224px; border-radius: 14px; padding: 6px; }
 .wk-app .wkacct-id { padding: 9px 11px 10px; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
 .wk-app .wkacct-name { font-size: .88rem; font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .wk-app .wkacct-sub { font-size: .72rem; color: var(--ink-3); font-family: var(--font-mono); margin-top: 1px; }
@@ -292,9 +359,11 @@
    Anchored to the nav foot, so the popover opens UPWARD and to the RIGHT. */
 .wk-app .wknotif-wrap { position: relative; display: flex; }
 .wk-app .wknotif-btn { position: relative; }
-.wk-app .wknotif-badge { position: absolute; top: 2px; right: 2px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; background: #C0562F; color: #fff; font-family: var(--font-mono); font-size: .6rem; font-weight: 600; line-height: 16px; text-align: center; box-shadow: 0 0 0 2px var(--bg); pointer-events: none; }
-.wk-app .wknotif-pop { position: absolute; bottom: calc(100% + 8px); left: 0; z-index: 1301; width: 340px; max-width: calc(100vw - 32px); background: var(--surface); border: 1px solid var(--line-2); border-radius: 14px; box-shadow: 0 18px 44px -18px rgba(25,24,19,.42); overflow: hidden; }
-.wk-app .wknotif-head { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; border-bottom: 1px solid var(--line); background: var(--surface-2); }
+.wk-app .wknotif-badge { position: absolute; top: 2px; right: 2px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; background: #C0562F; color: #fff; font-family: var(--font-mono); font-size: .6rem; font-weight: 600; line-height: 16px; text-align: center; box-shadow: 0 0 0 2px var(--nav); pointer-events: none; }
+.wk-app .wknotif-pop { position: absolute; bottom: calc(100% + 8px); left: 0; z-index: 1301; width: 340px; max-width: calc(100vw - 32px); border-radius: 16px; overflow: hidden; }
+/* head band: transparent on glass (judged — a surface-2 band on a glass sheet
+   reads as a painted patch); hairline below carries the separation. */
+.wk-app .wknotif-head { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; border-bottom: 1px solid var(--wk-hairline-2); background: transparent; }
 .wk-app .wknotif-title { font-size: .82rem; font-weight: 600; color: var(--ink); }
 .wk-app .wknotif-allread { border: 0; background: transparent; color: var(--accent-strong); font-size: .74rem; font-weight: 600; cursor: pointer; font-family: var(--font-body); padding: 0; }
 .wk-app .wknotif-allread:hover { text-decoration: underline; }
@@ -305,8 +374,10 @@
 .wk-app .wknotif-row:last-child { border-bottom: 0; }
 .wk-app .wknotif-row.clickable { cursor: pointer; }
 .wk-app .wknotif-row.clickable:hover { background: var(--surface-2); }
-.wk-app .wknotif-row.unread { background: rgba(43,255,119,.05); }
-.wk-app .wknotif-row.unread.clickable:hover { background: rgba(43,255,119,.09); }
+/* unread tint de-neoned (judged): notifications are INFORMATIONAL — mobile's
+   info-blue family, not green (green = confirmation/CTA only). */
+.wk-app .wknotif-row.unread { background: rgba(127, 168, 217, 0.10); }
+.wk-app .wknotif-row.unread.clickable:hover { background: rgba(127, 168, 217, 0.16); }
 .wk-app .wknotif-dot { flex: none; width: 7px; height: 7px; margin-top: 5px; border-radius: 50%; background: #C0562F; }
 .wk-app .wknotif-row:not(.unread) .wknotif-body { padding-left: 16px; }
 .wk-app .wknotif-body { flex: 1; min-width: 0; }
@@ -319,24 +390,48 @@
 .wk-app .wkcanvas { flex: 1; min-height: 0; min-width: 0; display: flex; }
 .wk-app .wkcanvas .v6-canvas-frame { flex: 1; min-width: 0; }
 
-/* ---- FAB chat ---- */
+/* ---- FAB chat ----
+   Ink fill stays (on light warm ground a neon circle is a billboard —
+   mobile's neon FAB only works on its dark glass pill). Shadow is mobile's
+   three-part grammar adapted to ink: ambient lift + 0.5px hairline ring +
+   lit-from-above top inset. Press physics ride .wk-tap (applied in V6App)
+   with a deeper FAB-specific press (scale .96, mobile .m-fab parity).
+   .bdot stays the FAB's one green pixel. */
 .v6-root.wk .wk-fab {
   position: fixed; right: 22px; bottom: 22px; z-index: 1200;
   width: 56px; height: 56px; border-radius: 50%; border: 0; cursor: pointer;
   background: var(--ink); color: #fff; display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 12px 30px -10px rgba(25,24,19,.55); transition: transform .2s, background .2s;
+  box-shadow:
+    0 10px 28px -6px rgba(25, 24, 19, 0.42),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.20);
 }
-.v6-root.wk .wk-fab:hover { transform: translateY(-2px) scale(1.04); }
+/* FAB press depth (scale .96) lives in the .wk-tap cascade shim up top. */
 .v6-root.wk .wk-fab .bdot { position: absolute; top: 11px; right: 12px; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); border: 2px solid var(--ink); }
+/* Chat window — a transient SHEET, so it wears the cool as-card frame stack
+   (radius 20 per the radii scale: 20 = transient windows) plus the original
+   atmospheric halo as the 4th layer. Entrance is the mobile sheet
+   choreography: rise + settle from the bottom-right anchor.
+   (Glass header band: judge-gated on a 60fps profile — NOT shipped.) */
 .v6-root.wk .wk-chatwin {
   position: fixed; right: 22px; bottom: 88px; z-index: 1200; width: 420px; max-width: calc(100vw - 36px);
   height: min(620px, calc(100vh - 130px));
-  background: var(--surface); border: 1px solid var(--line-2); border-radius: 18px;
-  box-shadow: 0 30px 70px -24px rgba(25,24,19,.5); overflow: hidden; display: flex; flex-direction: column;
-  transform-origin: bottom right; opacity: 0; transform: translateY(12px) scale(.97); pointer-events: none;
-  transition: opacity .2s, transform .2s;
+  background: var(--surface); border: var(--wk-as-card-border); border-top-color: var(--wk-as-card-border-top); border-radius: 20px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 2px 5px rgba(20, 28, 44, 0.08),
+    0 10px 24px -8px rgba(20, 28, 44, 0.24),
+    0 30px 70px -24px rgba(25, 24, 19, 0.5);
+  overflow: hidden; display: flex; flex-direction: column;
+  transform-origin: bottom right; opacity: 0; transform: translateY(16px) scale(.97); pointer-events: none;
+  transition:
+    opacity var(--dur-base) cubic-bezier(0.25, 1, 0.5, 1),
+    transform var(--dur-base) cubic-bezier(0.25, 1, 0.5, 1);
 }
 .v6-root.wk .wk-chatwin.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+@media (prefers-reduced-motion: reduce) {
+  .v6-root.wk .wk-chatwin { transition: none; transform: none; }
+}
 .v6-root.wk .wk-chatwin-hd { display: flex; align-items: center; gap: 10px; padding: 13px 15px; border-bottom: 1px solid var(--line); flex: none; }
 .v6-root.wk .wk-chatwin-hd .av { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; color: var(--accent-strong); }
 .v6-root.wk .wk-chatwin-hd .nm { font-weight: 600; font-size: .95rem; color: var(--ink); }
@@ -374,12 +469,20 @@
 .wk-app button:focus-visible { outline: none; box-shadow: inset 0 0 0 1.5px var(--accent-strong); }
 
 /* page header */
-.wk-content .pg-head { display: flex; align-items: flex-start; gap: 20px; margin-bottom: 6px; }
+.wk-content .pg-head { display: flex; align-items: flex-start; gap: 20px; padding: 26px 0 18px; margin-bottom: 0; }
 .wk-content .pg-eyebrow { font-size: .86rem; color: var(--ink-3); }
-/* Demoted (Working Paper, Phase 3): nav labels are wayfinding, not the work.
-   The largest type on any screen should name the user's deal/money — see
-   .wk-masthead — never the word "Today". */
-.wk-content .pg-title { font-size: 1.4rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.1; margin-top: 6px; color: var(--ink); }
+/* LargeTitle register (fusion Wave B) — mobile's 34/800/-1px scaled one step
+   down for desktop reading distance. STATIC: no collapse choreography, no
+   sticky glass chrome (mobile-viewport patterns). The Working Paper rule
+   still holds — DealView's 44px Fraunces masthead stays the largest type;
+   Today/Pipeline/Files get presence without shouting. Display stack is
+   mobile's --mb-font-display, kept LOCAL to the title so the global
+   --font-display consumers (Learn, Section) are untouched. */
+.wk-content .pg-title {
+  font-family: "SF Pro Display", "Inter Tight", -apple-system, system-ui, sans-serif;
+  font-size: 1.75rem; font-weight: 750; letter-spacing: -.02em; line-height: 1.08;
+  margin-top: 6px; color: var(--ink); text-wrap: balance;
+}
 
 /* The masthead register — serif names the money */
 .wk-masthead {
@@ -389,7 +492,7 @@
   letter-spacing: -.015em;
   line-height: 1.06;
 }
-.wk-content .pg-sub { color: var(--ink-2); font-size: 1rem; margin-top: 12px; max-width: 64ch; line-height: 1.5; }
+.wk-content .pg-sub { color: var(--ink-2); font-size: .95rem; margin-top: 6px; max-width: 64ch; line-height: 1.5; text-wrap: pretty; }
 .wk-content .pg-actions { margin-left: auto; display: flex; gap: 9px; align-items: center; padding-top: 8px; }
 
 /* buttons */
