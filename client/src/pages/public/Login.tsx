@@ -72,9 +72,12 @@ export default function Login({ onLogin, onGoogleLogin, googleReady, onNavigateS
           <p className="text-sm text-[#5e5d59] mt-2 m-0">Sign in to your account</p>
         </div>
 
-        {googleReady ? (
-          <div ref={googleBtnRef} className="w-full flex justify-center" style={{ minHeight: 44 }} />
-        ) : (
+        {/* Container is ALWAYS mounted so the official button can take over
+            the instant GIS arms — even if that happens after first paint.
+            The fallback shows only while loading; its One Tap path can be
+            cooldown-suppressed, so it must never be the permanent state. */}
+        <div ref={googleBtnRef} className="w-full flex justify-center" style={{ minHeight: googleReady ? 44 : 0 }} />
+        {!googleReady && (
           <button
             type="button"
             onClick={onGoogleLogin}

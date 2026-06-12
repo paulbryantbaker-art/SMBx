@@ -154,14 +154,23 @@ export default function App() {
   }, [handleGoogleCredential]);
 
   // Fallback trigger (One Tap) for surfaces that still call onGoogleLogin. The
-  // primary path is now the rendered button (see `googleReady`).
+  // primary path is the rendered button (see `googleReady`). One Tap is
+  // SILENTLY suppressed by Google after repeated dismissals (g_state cooldown
+  // cookie on our origin) — without the notification callback the click
+  // appears to do nothing at all, which reads as "sign-in is broken".
   const handleGoogleLogin = useCallback(() => {
     if (!ensureGoogleInit()) {
       setGoogleError('Google Sign-In is loading. Please try again in a moment.');
       return;
     }
     setGoogleError('');
-    (window as any).google.accounts.id.prompt();
+    (window as any).google.accounts.id.prompt((n: any) => {
+      try {
+        if (n && (n.isNotDisplayed?.() || n.isSkippedMoment?.())) {
+          setGoogleError('Your browser blocked the quick Google prompt (it cools down after being dismissed a few times). Wait a moment for the Google button to appear, or clear cookies for this site and try again.');
+        }
+      } catch { /* notification shape varies across GIS versions */ }
+    });
   }, [ensureGoogleInit]);
 
   const handleLoginSuccess = useCallback(async (email: string, password: string) => {
@@ -193,11 +202,14 @@ export default function App() {
     fetch('/api/config').then(r => r.json()).then(cfg => {
       if (cancelled || !cfg.googleClientId) return;
       (window as any).__GOOGLE_CLIENT_ID = cfg.googleClientId;
+      // Keep polling for up to 60s: the old 5s cap permanently stranded slow
+      // GSI loads on the fallback button, whose One Tap prompt is silently
+      // cooldown-suppressed — net effect: sign-in clicks did nothing.
       let tries = 0;
       const tick = () => {
         if (cancelled) return;
         if (ensureGoogleInit()) setGoogleReady(true);
-        else if (tries++ < 50) setTimeout(tick, 100);
+        else if (tries++ < 300) setTimeout(tick, 200);
       };
       tick();
     }).catch(() => {});
