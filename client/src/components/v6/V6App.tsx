@@ -9,7 +9,7 @@ import V6NotificationBell from "./V6NotificationBell";
 import "./workspace.css";
 import { buildDesktopSurfaceContext, type SurfaceContext } from "../../lib/yuliaSurfaceContext";
 import { normalizeModelPreference, type ModelPreference } from "../../lib/modelPreference";
-import { loadWkTheme, saveWkTheme, type WkTheme } from "../../lib/wkTheme";
+import { loadWkTheme, saveWkTheme, WK_THEMES, type WkTheme } from "../../lib/wkTheme";
 import { VERDICT_MATERIAL } from "./shared/verdictMaterial";
 
 /* Family inks for Open-tab glyphs (consume verdictMaterial, never restate):
@@ -194,8 +194,10 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
       return "auto";
     }
   });
-  // Workspace chrome theme (Settings → Appearance) — shell repaint only.
+  // Workspace chrome theme (toolbar palette + Settings → Appearance) —
+  // shell repaint only.
   const [wkTheme, setWkTheme] = useState<WkTheme>(loadWkTheme);
+  const [themeOpen, setThemeOpen] = useState(false);
   const changeWkTheme = (t: WkTheme) => { setWkTheme(t); saveWkTheme(t); };
   const [tabs, setTabs] = useState<Tab[]>(() => {
     const rootMode = initial.mode;
@@ -732,7 +734,51 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
           <div className="wknav-foot">
             <button className="wkicon wk-tap" title="New" onClick={() => pickMode("today")}><V6Icon name="plus" size={18} /></button>
             {user && <V6NotificationBell onNavigate={navigateToActionUrl} />}
-            <div className="wkacct-wrap">
+            {/* Workspace theme — one click from the toolbar (also in
+                Settings → Appearance). Popover clones the account menu. */}
+            <div className="wkacct-wrap" style={{ marginLeft: "auto" }}>
+              <button
+                className="wkicon wk-tap"
+                title="Workspace theme"
+                aria-haspopup="menu"
+                aria-expanded={themeOpen}
+                onClick={() => setThemeOpen(o => !o)}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="9" cy="9" r="4.4" stroke="currentColor" strokeWidth="1.7" />
+                  <circle cx="15.5" cy="13.8" r="4.4" stroke="currentColor" strokeWidth="1.7" />
+                </svg>
+              </button>
+              {themeOpen && (
+                <>
+                  <div className="wkacct-backdrop" onClick={() => setThemeOpen(false)} />
+                  <div className="wkacct" role="menu" style={{ minWidth: 216 }}>
+                    <div className="wkacct-id">
+                      <div className="wkacct-name">Workspace theme</div>
+                    </div>
+                    {WK_THEMES.map(t => (
+                      <button
+                        key={t.id}
+                        className="wkacct-item"
+                        role="menuitemradio"
+                        aria-checked={wkTheme === t.id}
+                        onClick={() => { changeWkTheme(t.id); setThemeOpen(false); }}
+                        style={{ display: "flex", alignItems: "center", gap: 9 }}
+                      >
+                        <span aria-hidden style={{
+                          width: 22, height: 14, borderRadius: 4, flexShrink: 0,
+                          background: `linear-gradient(to right, ${t.swatch.nav} 0 38%, ${t.swatch.bg} 38% 100%)`,
+                          border: `1px solid ${t.swatch.line}`,
+                        }} />
+                        <span style={{ flex: 1 }}>{t.label}</span>
+                        {wkTheme === t.id && <span aria-hidden style={{ color: "var(--st-good-fg)", fontWeight: 700 }}>✓</span>}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="wkacct-wrap" style={{ marginLeft: 6 }}>
               <button
                 className="wkav wk-tap"
                 title={user?.email || "Account"}

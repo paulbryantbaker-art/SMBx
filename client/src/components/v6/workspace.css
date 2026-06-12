@@ -122,14 +122,27 @@
   --wk-hairline-2: rgba(122, 56, 24, 0.09);
 }
 .v6-root.wk[data-wk-theme="neoblue"] {
-  --bg: #F4F8FC;
-  --nav: #E8F0F8;
-  --surface-2: #E8F0F8;
-  --surface-3: #DCE8F3;
-  --line: rgba(28, 60, 102, 0.12);
-  --line-2: rgba(28, 60, 102, 0.18);
-  --wk-hairline: rgba(28, 60, 102, 0.18);
-  --wk-hairline-2: rgba(28, 60, 102, 0.09);
+  /* Strengthened toward the founder's reference browser chrome: more
+     chroma in the rail, deeper navy hairlines. */
+  --bg: #EFF5FC;
+  --nav: #DCE9F7;
+  --surface-2: #E2EDF8;
+  --surface-3: #D2E2F2;
+  --line: rgba(25, 72, 140, 0.14);
+  --line-2: rgba(25, 72, 140, 0.22);
+  --wk-hairline: rgba(25, 72, 140, 0.22);
+  --wk-hairline-2: rgba(25, 72, 140, 0.10);
+}
+.v6-root.wk[data-wk-theme="platinum"] {
+  /* macOS-style platinum — cool neutral system grays. */
+  --bg: #F5F6F8;
+  --nav: #EAEDF1;
+  --surface-2: #ECEEF2;
+  --surface-3: #DFE3E9;
+  --line: rgba(50, 60, 75, 0.12);
+  --line-2: rgba(50, 60, 75, 0.18);
+  --wk-hairline: rgba(50, 60, 75, 0.18);
+  --wk-hairline-2: rgba(50, 60, 75, 0.09);
 }
 
 /* ============================================================
