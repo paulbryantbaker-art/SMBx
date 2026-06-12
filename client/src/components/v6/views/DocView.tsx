@@ -8,6 +8,7 @@ import type { SurfaceActionId } from "../../../lib/v6SurfaceActions";
 import type { OpenTab } from "../types";
 import { DealCommentsThread } from "../shared/DealCommentsThread";
 import { WorkSeal } from "../shared/WorkSeal";
+import { V6EmptyState } from "../shared/EmptyState";
 
 interface DeliverableRow {
   id: number;
@@ -127,9 +128,12 @@ export function V6DocView({
   const markdown = extractMarkdown(doc?.content);
   const docType = doc?.type || doc?.slug || "document";
   const docTitle = doc?.name || title.replace(/ · (LOI|Memo|CIM)[\s\w]*$/, "");
+  // Sentence-case visible label (eyebrow-lock 2026-06-01): kept because it
+  // names the deliverable type + status, which appear nowhere else on the
+  // sheet — but it is no longer a mono-caps kicker.
   const eyebrowLabel = doc
-    ? `${docType.replace(/[-_]/g, " ").toUpperCase()} · ${doc.status.toUpperCase()}`
-    : "LETTER OF INTENT · DRAFT v3";
+    ? `${formatDocTypeLabel(docType)} · ${doc.status}`
+    : "Letter of intent · Draft v3";
   const statusKind: DocStatusKind = doc?.status === "complete" ? "live" : doc?.status === "draft" ? "draft" : "saved";
   const isComplete = doc?.status === "complete";
   // HONESTY: only a hash the server actually sent gets sealed. Today the
@@ -304,9 +308,11 @@ export function V6DocView({
         </div>
         {toolbarNote && <div style={V.toolbarNote}>{toolbarNote}</div>}
 
-        {/* Body */}
-        <div style={{ fontFamily: "Iowan Old Style, Charter, Georgia, serif", color: "var(--ink)" }}>
-          <div className="mono" style={V.docEyebrow}>{eyebrowLabel}</div>
+        {/* THE SHEET — the document is a physical paper sheet resting on the
+            tonal desk. Inside it everything is fenced paper: zero new styling
+            on the title, markdown, contentEditable, highlights, or seal. */}
+        <div style={V.sheet}>
+          <div style={V.docEyebrow}>{eyebrowLabel}</div>
           <h1 style={V.docH1}>{docTitle}</h1>
 
           {loading && (
@@ -329,18 +335,22 @@ export function V6DocView({
           )}
 
           {isGenerating && (
-            <div style={V.generatingCard}>
-              <h2 style={V.generatingTitle}>This deliverable is being built.</h2>
-              <p style={V.generatingBody}>You can leave this tab open. It will refresh automatically when the draft is ready.</p>
+            <div style={V.emptyWrap}>
+              <V6EmptyState
+                title="This deliverable is being built."
+                body="You can leave this tab open. It will refresh automatically when the draft is ready."
+              />
             </div>
           )}
 
           {/* A real deliverable id must NEVER show the fabricated sample body —
               not even as a flash while the record loads. Honest state instead. */}
           {!showSample && !showFetched && !loading && !error && !isGenerating && !doc && (
-            <div style={V.generatingCard}>
-              <h2 style={V.generatingTitle}>This deliverable isn&rsquo;t available yet.</h2>
-              <p style={V.generatingBody}>It may still be preparing. Reopen it from the deal page, or ask Yulia for its status.</p>
+            <div style={V.emptyWrap}>
+              <V6EmptyState
+                title="This deliverable isn’t available yet."
+                body="It may still be preparing. Reopen it from the deal page, or ask Yulia for its status."
+              />
             </div>
           )}
 
@@ -395,7 +405,7 @@ export function V6DocView({
           </div>
         </div>
 
-        <div className="wkcard" style={{ padding: "14px 16px" }}>
+        <div className="wkcard" style={V.railCard}>
           <div className="mono" style={V.commentsEyebrow}>DOCUMENT ACTIONS</div>
           <div style={V.actionStack}>
             <button
@@ -443,7 +453,7 @@ export function V6DocView({
         {numericId !== null ? (
           <DealCommentsThread deliverableId={numericId} />
         ) : (
-          <div className="wkcard" style={{ padding: "14px 16px" }}>
+          <div className="wkcard" style={V.railCard}>
             <div className="mono" style={V.commentsEyebrow}>COMMENTS · {normalizedComments.length}</div>
             {normalizedComments.map((c, i) => (
               <div
@@ -465,7 +475,7 @@ export function V6DocView({
           </div>
         )}
 
-        <div className="wkcard" style={{ padding: "14px 16px" }}>
+        <div className="wkcard" style={V.railCard}>
           <div className="mono" style={V.versionsEyebrow}>VERSION HISTORY</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {normalizedVersions.map(v => (
@@ -620,30 +630,65 @@ function extractMarkdown(content: unknown): string | null {
 }
 
 const V: Record<string, CSSProperties> = {
+  /* THE DESK (fusion Wave C2) — the view ground is a tonal field; the
+     document itself is a white paper sheet resting on it. The negative
+     margins mirror Canvas.tsx K.canvasBody padding (28px 40px 56px) so the
+     desk fills the doc tab's whole scroll area — position:static inside the
+     canvas scroll, never position:fixed (Safari toolbar rule). justifyContent
+     centering replaces the old margin:0 auto (1128 + 32 + 280 = 1440). */
   shell: {
     display: "grid",
-    gridTemplateColumns: "1fr 280px",
+    gridTemplateColumns: "minmax(0, 1128px) 280px",
+    justifyContent: "center",
     gap: 32,
     alignItems: "flex-start",
-    width: "min(100%, 1440px)",
-    maxWidth: 1440,
-    margin: "0 auto",
+    background: "var(--surface-2)",
+    margin: "-28px -40px -56px",
+    padding: "28px 40px 56px",
+    minHeight: "calc(100% + 84px)",
     boxSizing: "border-box",
   },
+  /* article: plain column now — the desk shows through; the sheet and the
+     toolbar carry their own surfaces. */
   article: {
+    minWidth: 0,
+  },
+  /* toolbar: attached above the sheet — same 820 width, rested elevation. */
+  toolbar: {
+    display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap",
+    maxWidth: 820, margin: "0 auto 12px", boxSizing: "border-box",
+    padding: "10px 14px",
     background: "var(--surface)",
     border: "1px solid var(--line)",
-    borderRadius: 14,
-    boxShadow: "0 1px 2px rgba(25,24,19,.06)",
-    padding: "56px 64px",
-    minHeight: 600,
+    borderRadius: 12,
+    boxShadow: "var(--wk-elev-card)",
   },
-  toolbar: {
-    display: "flex", alignItems: "center", gap: 4, marginBottom: 32,
-    paddingBottom: 16, borderBottom: "1px solid var(--line)",
-    marginLeft: -64, marginRight: -64,
-    paddingLeft: 64, paddingRight: 64,
-    marginTop: -56, paddingTop: 18,
+  /* THE SHEET — deliberate paper corners (6, NOT the 18-22 card radii: paper
+     is not a card), App-Store frame hairline + shadow, generous margins.
+     Everything inside is fenced paper — zero new styling. */
+  sheet: {
+    maxWidth: 820,
+    margin: "0 auto",
+    boxSizing: "border-box",
+    background: "var(--surface)",
+    borderRadius: 6,
+    border: "var(--wk-as-card-border)",
+    borderTopColor: "var(--wk-as-card-border-top)",
+    boxShadow: "var(--wk-as-card-shadow)",
+    padding: "48px 56px",
+    minHeight: 600,
+    fontFamily: "Iowan Old Style, Charter, Georgia, serif",
+    color: "var(--ink)",
+  },
+  emptyWrap: {
+    marginTop: 20,
+    fontFamily: "var(--font-body)",
+  },
+  /* rail cards keep their wkcard chrome but rest on the desk with the warm
+     composer elevation. */
+  railCard: {
+    padding: "14px 16px",
+    boxShadow: "var(--wk-elev-card)",
   },
   toolbarDivider: {
     width: 1, height: 18, background: "var(--line)", margin: "0 6px",
@@ -660,7 +705,9 @@ const V: Record<string, CSSProperties> = {
     fontSize: ".82rem",
   },
   toolbarNote: {
-    margin: "-22px 0 24px",
+    maxWidth: 820,
+    margin: "0 auto 12px",
+    boxSizing: "border-box",
     padding: "9px 11px",
     borderRadius: 10,
     background: "var(--st-good-bg)",
@@ -673,9 +720,12 @@ const V: Record<string, CSSProperties> = {
     fontSize: 10.5, color: "var(--ink-3)", letterSpacing: "0.1em",
     fontFamily: "var(--font-mono)",
   },
+  /* sentence-case visible label — carries deliverable type + status; the
+     mono-caps kicker treatment is retired (eyebrow lock 2026-06-01). */
   docEyebrow: {
-    fontSize: 10, color: "var(--ink-3)",
-    letterSpacing: "0.14em", fontWeight: 600, marginBottom: 12,
+    fontSize: 12.5, color: "var(--ink-3)",
+    fontWeight: 600, marginBottom: 12,
+    fontFamily: "var(--font-body)",
   },
   docH1: {
     fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 30,
@@ -725,6 +775,7 @@ const V: Record<string, CSSProperties> = {
     background: "var(--accent-soft)",
     color: "var(--accent-strong)",
     border: "1px solid var(--line)",
+    boxShadow: "var(--wk-elev-card)",
   },
   yuliaWatchEyebrow: {
     fontSize: 9.5, letterSpacing: "0.14em", fontWeight: 600,
@@ -767,29 +818,15 @@ const V: Record<string, CSSProperties> = {
     fontFamily: "Iowan Old Style, Charter, Georgia, serif",
     color: "var(--ink)",
   },
-  generatingCard: {
-    marginTop: 20,
-    padding: 22,
-    borderRadius: 14,
-    background: "var(--surface)",
-    border: "1px solid var(--line)",
-    boxShadow: "0 1px 2px rgba(25,24,19,.06)",
-    fontFamily: "var(--font-body)",
-  },
-  generatingTitle: {
-    margin: 0,
-    fontFamily: "var(--font-display)",
-    fontSize: 24,
-    lineHeight: 1,
-    color: "var(--ink)",
-  },
-  generatingBody: {
-    margin: "8px 0 0",
-    color: "var(--ink-2)",
-    fontSize: 13.5,
-    lineHeight: 1.5,
-  },
 };
+
+/* "letter_of_intent" → "Letter of intent", "cim" → "CIM" — sentence case
+   with deal-doc acronyms preserved. */
+function formatDocTypeLabel(value: string): string {
+  const spaced = value.replace(/[-_]/g, " ").trim();
+  const acronymed = spaced.replace(/\b(loi|cim|nda|ioi|qoe|apa|spa)\b/gi, m => m.toUpperCase());
+  return acronymed.charAt(0).toUpperCase() + acronymed.slice(1);
+}
 
 function fmtRelative(iso: string): string {
   try {

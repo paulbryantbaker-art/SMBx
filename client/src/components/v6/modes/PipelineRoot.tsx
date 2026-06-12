@@ -92,7 +92,8 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
         </div>
       ) : (
         <>
-          {/* KPI strip — the featured hero collapsed into schedule headline figures */}
+          {/* KPI band — warm tonal card (fusion Wave C3; chrome lives in the
+              .mhead CSS block in workspace.css). Explicitly NOT watercolor. */}
           {(tableDeals.length > 0 || featured) && (
             <div className="mhead">
               {tableDeals.length > 0 && (
@@ -119,9 +120,9 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
                   <div className="l">Strongest source</div>
                   <button
                     type="button"
-                    className="v"
+                    className="v mh-name"
                     onClick={() => openDeal(featured.rawId, featured.name)}
-                    style={{ background: "none", border: 0, padding: 0, cursor: "pointer", textAlign: "left", fontSize: "1.3rem" }}
+                    style={{ background: "none", border: 0, padding: 0, cursor: "pointer", textAlign: "left" }}
                   >
                     {featured.name}
                   </button>

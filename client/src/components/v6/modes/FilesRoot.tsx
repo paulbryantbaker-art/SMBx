@@ -1,9 +1,11 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { V6Icon } from "../icons";
 import type { FileListView, FileScope, OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
 import { useTodayOperatingBrief, type TodayFileReviewItem } from "../../../hooks/useTodayOperatingBrief";
 import { useV6WorkspaceData, type WorkspaceDeal, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
+import { FILE_LANE_TEXTURES } from "../../../lib/randomTextures";
+import { HERO_LIFT, preloadTexture } from "../shared/verdictMaterial";
 import { YuliaSkeleton } from "../shared/YuliaSkeleton";
 
 interface FilesRootProps {
@@ -56,6 +58,43 @@ interface RoomRow {
   count: string;
   id: string;
 }
+
+/* ── Lane material (fusion Wave C3) — the four shortcut lanes are the ONLY
+ * textures on this page. ──
+ *
+ * LANE_TEXTURES gate: both design judges defaulted to the calm de-textured
+ * variant (four paintings in one viewport strains the one-texture-per-page
+ * law), but the founder explicitly wants mobile's beauty on these lanes, so
+ * the textured variant SHIPS as the default. Flip this ONE flag to false to
+ * de-texture: the same four tiles render as tonal --wk-elev-card cards (a
+ * complete fallback branch, not a stub) for any founder/judge side-by-side.
+ */
+const LANE_TEXTURES = true;
+
+/* Neutral dark wash — lanes are navigation, not judgment, so the overlay is
+ * NEUTRAL warm ink (rgba(25,24,19)) and never verdict-tinted. Same 165deg
+ * light-top → dark-bottom shape as the hero overlays, NORMAL compositing. */
+const LANE_OVERLAY =
+  "linear-gradient(165deg, rgba(25,24,19,0.20) 0%, rgba(25,24,19,0.50) 100%)";
+
+/* heroBoxShadow()-style lift with the verdict glow swapped for a NEUTRAL
+ * warm-ink ambient glow — lanes radiate paper, not verdict color. */
+const LANE_SHADOW = `0 14px 36px -10px rgba(25,24,19,0.22), ${HERO_LIFT}`;
+
+/* Frosted icon chip on texture (mobile editorial texture-card chip). */
+const LANE_CHIP_BG =
+  "linear-gradient(180deg, rgba(255,255,255,0.066), rgba(255,255,255,0.018))";
+
+/* FIXED spare texture per lane (the 2026-05-03 set via randomTextures.ts —
+ * correct cache-bust version, never the random rotation) plus a pre-decode
+ * backgroundColor fallback: each texture's measured average color composited
+ * under LANE_OVERLAY, so there is no white pop-in while the JPEG decodes. */
+const LANE_ART: Record<FileListView, { texture: string; fallback: string }> = {
+  all: { texture: FILE_LANE_TEXTURES.allFiles, fallback: "#AB9F7E" },           // gold-marble
+  "deal-libraries": { texture: FILE_LANE_TEXTURES.dealLibraries, fallback: "#8F9790" }, // sage-botanical
+  "needs-action": { texture: FILE_LANE_TEXTURES.needsAction, fallback: "#93A098" },     // mint-waves
+  "data-rooms": { texture: FILE_LANE_TEXTURES.dataRooms, fallback: "#91A19B" },         // aqua-cloud
+};
 
 const SHORTCUTS: Shortcut[] = [
   {
@@ -140,6 +179,13 @@ function useFilesWorkspace(user: User | null) {
 export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
   const { workspace, operating, shortcuts, recents, rooms, actions } = useFilesWorkspace(user);
 
+  // Perf: decode the four lane watercolors before paint — the lanes are the
+  // only textures on this page, so this is the whole texture budget.
+  useEffect(() => {
+    if (!LANE_TEXTURES) return;
+    Object.values(LANE_ART).forEach(art => preloadTexture(art.texture));
+  }, []);
+
   const ask = (prompt: string) => {
     onTalkToYulia?.(prompt);
   };
@@ -200,7 +246,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
         </div>
       </div>
 
-      {/* Source lanes — flat shortcut cards */}
+      {/* Source lanes — ambient-texture shortcut tiles (the page's only textures) */}
       <div className="wksec">
         <div className="wksec-title">Files that need your eye</div>
         <p style={{ margin: "0 0 14px", color: "var(--ink-2)", fontSize: ".9rem" }}>
@@ -208,30 +254,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
         </p>
         <div className="wkgrid g4">
           {shortcuts.map(shortcut => (
-            <button
-              key={shortcut.label}
-              type="button"
-              className="wkcard tap"
-              onClick={() => runShortcut(shortcut)}
-            >
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
-                <span style={{
-                  width: 32, height: 32, borderRadius: 9,
-                  background: "var(--surface-2)",
-                  display: "grid", placeItems: "center",
-                  color: "var(--accent-strong)",
-                }}>
-                  <V6Icon name={shortcut.icon} size={16} />
-                </span>
-                {shortcut.count !== null && (
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "1.6rem", fontWeight: 500, color: "var(--ink)", lineHeight: 1 }}>
-                    {shortcut.count}
-                  </span>
-                )}
-              </div>
-              <div className="wkcard-title">{shortcut.label}</div>
-              <div className="wkcard-sub">{shortcut.sub}</div>
-            </button>
+            <LaneTile key={shortcut.label} shortcut={shortcut} onOpen={() => runShortcut(shortcut)} />
           ))}
         </div>
       </div>
@@ -256,7 +279,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
                 See all
               </button>
             </div>
-            <div className="wkcard" style={{ padding: 0, overflow: "hidden" }}>
+            <div className="wkcard" style={{ padding: 0, overflow: "hidden", boxShadow: "var(--wk-elev-card)" }}>
               {workspace.loading && (
                 <div style={{ padding: 14 }}><YuliaSkeleton rows={3} label="Loading files…" /></div>
               )}
@@ -285,7 +308,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
               <div className="wksec-title" style={{ marginBottom: 2 }}>Data rooms</div>
               <p style={{ margin: 0, color: "var(--ink-2)", fontSize: ".84rem" }}>Shared diligence drives by deal. Open a deal to see what is private versus in the room.</p>
             </div>
-            <div className="wkcard" style={{ padding: 0, overflow: "hidden" }}>
+            <div className="wkcard" style={{ padding: 0, overflow: "hidden", boxShadow: "var(--wk-elev-card)" }}>
               {!workspace.loading && rooms.length === 0 && (
                 <EmptyRows
                   title="No deal libraries yet"
@@ -341,7 +364,7 @@ export function V6FilesRoot({ openTab, onTalkToYulia, user }: FilesRootProps) {
           <div className="wksec-title" style={{ marginBottom: 2 }}>Needs action</div>
           <p style={{ margin: 0, color: "var(--ink-2)", fontSize: ".84rem" }}>Requests, reviews, execution items, and failed generations waiting for a decision.</p>
         </div>
-        <div className="wkcard" style={{ padding: 0, overflow: "hidden" }}>
+        <div className="wkcard" style={{ padding: 0, overflow: "hidden", boxShadow: "var(--wk-elev-card)" }}>
           {operating.loading && (
             <div style={{ padding: 14 }}><YuliaSkeleton rows={2} label="Yulia is reading the queue…" /></div>
           )}
@@ -449,6 +472,98 @@ export function V6FilesListView({
         ask={ask}
       />
     </div>
+  );
+}
+
+/* One Files lane tile. Textured by default (LANE_TEXTURES); the fallback
+ * branch is the COMPLETE tonal variant — same content, white card on
+ * --wk-elev-card resting elevation — so one flag flip de-textures the row. */
+function LaneTile({ shortcut, onOpen }: { shortcut: Shortcut; onOpen: () => void }) {
+  if (!LANE_TEXTURES) {
+    return (
+      <button
+        type="button"
+        className="wkcard wk-tap"
+        onClick={onOpen}
+        style={{
+          font: "inherit",
+          textAlign: "left",
+          cursor: "pointer",
+          minHeight: 110,
+          boxSizing: "border-box",
+          borderRadius: "var(--wk-radius-card)",
+          boxShadow: "var(--wk-elev-card)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
+          <span style={{
+            width: 32, height: 32, borderRadius: 10,
+            background: "var(--surface-2)",
+            display: "grid", placeItems: "center",
+            color: "var(--accent-strong)",
+          }}>
+            <V6Icon name={shortcut.icon} size={16} />
+          </span>
+          {shortcut.count !== null && (
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "1.6rem", fontWeight: 600, fontVariantNumeric: "tabular-nums", color: "var(--ink)", lineHeight: 1 }}>
+              {shortcut.count}
+            </span>
+          )}
+        </div>
+        <div className="wkcard-title">{shortcut.label}</div>
+        <div className="wkcard-sub">{shortcut.sub}</div>
+      </button>
+    );
+  }
+
+  const art = LANE_ART[shortcut.view];
+  return (
+    <button
+      type="button"
+      className="wk-tap"
+      onClick={onOpen}
+      style={{
+        appearance: "none",
+        border: 0,
+        margin: 0,
+        font: "inherit",
+        textAlign: "left",
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        minHeight: 110,
+        padding: "14px 16px",
+        boxSizing: "border-box",
+        borderRadius: "var(--wk-radius-card)",
+        overflow: "hidden",
+        cursor: "pointer",
+        color: "#fff",
+        backgroundColor: art.fallback,
+        backgroundImage: `${LANE_OVERLAY}, url('${art.texture}')`,
+        backgroundSize: "cover, cover",
+        backgroundPosition: "center, center",
+        backgroundRepeat: "no-repeat, no-repeat",
+        boxShadow: LANE_SHADOW,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+        <span style={{
+          width: 32, height: 32, borderRadius: 10,
+          background: LANE_CHIP_BG,
+          display: "grid", placeItems: "center",
+          color: "#fff",
+        }}>
+          <V6Icon name={shortcut.icon} size={16} />
+        </span>
+        {shortcut.count !== null && (
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "1.6rem", fontWeight: 600, fontVariantNumeric: "tabular-nums", color: "#fff", lineHeight: 1 }}>
+            {shortcut.count}
+          </span>
+        )}
+      </div>
+      <div style={{ marginTop: "auto", paddingTop: 10, fontSize: 15, fontWeight: 650, lineHeight: 1.25, color: "#fff" }}>{shortcut.label}</div>
+      <div style={{ marginTop: 3, fontSize: ".78rem", lineHeight: 1.4, color: "rgba(255,255,255,0.88)" }}>{shortcut.sub}</div>
+    </button>
   );
 }
 

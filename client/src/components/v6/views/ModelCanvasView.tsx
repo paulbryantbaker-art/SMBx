@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import ModelRenderer from "../../models/ModelRenderer";
 import { WorkSeal } from "../shared/WorkSeal";
+import { V6EmptyState } from "../shared/EmptyState";
 import { useModelStore } from "../../../lib/modelStore";
 import {
   listSavedModelExecutions,
@@ -79,15 +80,11 @@ export function V6ModelCanvasView({
   if (!tab) {
     return (
       <div className="wk-content" style={S.shell}>
-        <div className="wkcard" style={S.empty}>
-          <h1 style={S.title}>{title}</h1>
-          <p style={S.body}>
-            The canvas tab is here, but the in-memory model state is not loaded in this browser session. Ask Yulia to reopen it from the saved deal state or model run.
-          </p>
-          <button className="wkbtn dark" type="button" onClick={() => onTalkToYulia?.(prompt)}>
-            Ask Yulia to reopen
-          </button>
-        </div>
+        <V6EmptyState
+          title={title}
+          body="The canvas tab is here, but the in-memory model state is not loaded in this browser session. Ask Yulia to reopen it from the saved deal state or model run."
+          action={{ label: "Ask Yulia to reopen", onClick: () => onTalkToYulia?.(prompt) }}
+        />
       </div>
     );
   }
@@ -123,10 +120,10 @@ export function V6ModelCanvasView({
             </div>
           </div>
           <div style={S.actionStack}>
-            <button className="wkbtn dark" type="button" onClick={() => onTalkToYulia?.(optimizePrompt)}>
+            <button className="wkbtn dark wk-tap" type="button" onClick={() => onTalkToYulia?.(optimizePrompt)}>
               Ask Yulia to optimize
             </button>
-            <button className="wkbtn" type="button" onClick={() => onTalkToYulia?.(prompt)}>
+            <button className="wkbtn wk-tap" type="button" onClick={() => onTalkToYulia?.(prompt)}>
               Compare versions
             </button>
           </div>
@@ -141,7 +138,7 @@ export function V6ModelCanvasView({
 
         {/* Rail / version history */}
         <aside className="wkcard" style={S.rail}>
-          <div style={S.eyebrow}>VERSION TRAIL</div>
+          <div style={S.railLabel}>Version trail</div>
           <h2 style={S.railTitle}>Scenario history</h2>
           <div style={S.railHint}>
             Local changes stay fast. Saved runs become audit-stamped artifacts that Yulia and external agents can read back later.
@@ -190,7 +187,7 @@ export function V6ModelCanvasView({
           <div style={S.divider} />
 
           {/* Saved runs */}
-          <div style={S.eyebrow}>SAVED RUNS</div>
+          <div style={S.railLabel}>Saved runs</div>
           <h2 style={S.railTitleSmall}>Agent readback</h2>
           <div style={S.savedStack}>
             {savedRuns.slice(0, 6).map(run => {
@@ -362,10 +359,9 @@ const S: Record<string, CSSProperties> = {
     maxWidth: 1280,
     margin: "0 auto",
   },
-  empty: {
-    padding: 28,
-    maxWidth: 760,
-  },
+  /* header: the warm rested frame (fusion Wave C2). The chrome card takes
+     the composer's resting elevation; the model BODY below stays pure
+     paper — flat wkcard, hairlines, mono numerals — untouched. */
   header: {
     display: "flex",
     justifyContent: "space-between",
@@ -373,6 +369,9 @@ const S: Record<string, CSSProperties> = {
     alignItems: "flex-start",
     padding: 24,
     marginBottom: 18,
+    background: "var(--surface)",
+    borderRadius: "var(--wk-radius-card)",
+    boxShadow: "var(--wk-elev-card)",
   },
   headerCopy: {
     minWidth: 0,
@@ -396,14 +395,12 @@ const S: Record<string, CSSProperties> = {
     justifyItems: "end",
     gap: 6,
   },
-  /* eyebrow: mono, ink-3, tight caps — inline var() since no .pg-eyebrow equiv for mono */
-  eyebrow: {
-    fontFamily: "var(--font-mono)",
+  /* rail label: sentence-case visible label (eyebrow-lock 2026-06-01 —
+     mono-caps kickers are retired; these carry real section meaning) */
+  railLabel: {
     color: "var(--ink-3)",
-    fontSize: 10,
-    fontWeight: 700,
-    letterSpacing: "0.14em",
-    textTransform: "uppercase",
+    fontSize: 12,
+    fontWeight: 600,
   },
   title: {
     margin: "5px 0 8px",

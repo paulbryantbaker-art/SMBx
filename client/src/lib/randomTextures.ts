@@ -73,6 +73,16 @@ export const RANDOM_TEXTURES = {
   legacyBaseline: tex("baseline"),
 } as const;
 
+/* Files lane spares (the unwired 2026-05-03 set) — FIXED per lane, never in
+ * the random hero/card rotation, so the four Files shortcuts stay
+ * recognizable session to session. Consumed by v6/modes/FilesRoot.tsx. */
+export const FILE_LANE_TEXTURES = {
+  allFiles:      tex("gold-marble"),
+  dealLibraries: tex("sage-botanical"),
+  needsAction:   tex("mint-waves"),
+  dataRooms:     tex("aqua-cloud"),
+} as const;
+
 export const STUDIO_TEXTURES = {
   rose: desktopTodayRoseGold(),
   blue: desktopRandomNamedTex("texture-random-24-clean"),

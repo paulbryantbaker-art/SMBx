@@ -20,6 +20,16 @@ import { getJourneyGates } from "@shared/gateRegistry";
 import { useDerivedDisplay } from "../shared/useDerivedDisplay";
 import { WorkSeal } from "../shared/WorkSeal";
 import { LEAGUE_MULTIPLES } from "../../../lib/calculations/core";
+import {
+  deriveVerdictKind,
+  heroBoxShadow,
+  preloadTexture,
+  HERO_GHOST_PILL_BG,
+  HERO_INNER_CELL,
+  HERO_RADIUS,
+  VERDICT_MATERIAL,
+  type VerdictKind,
+} from "../shared/verdictMaterial";
 
 /* ─── Methodology stage progress ─── */
 interface StageCell { id: string; name: string; state: "done" | "current" | "upcoming" }
@@ -359,6 +369,31 @@ export function V6DealView({
   const [activeFileScope, setActiveFileScope] = useState<FileScope | null>(fileScope ?? null);
   const operating = useTodayOperatingBrief(user ?? null, !!user && numericId !== null);
 
+  // Watercolor verdict hero (fusion Wave C1). Material from
+  // shared/verdictMaterial.ts — baseline navy until Yulia's verdict exists;
+  // never guess a verdict color from ambiguous text.
+  const verdictKind: VerdictKind = deriveVerdictKind(dealBrief?.verdict?.label);
+  const heroMat = VERDICT_MATERIAL[verdictKind];
+  const [heroTexReady, setHeroTexReady] = useState(false);
+
+  // Decode all four verdict textures when a deal tab mounts so a verdict
+  // change never paints white-then-pops (TodayRoot's proven no-flash rule).
+  useEffect(() => {
+    (Object.keys(VERDICT_MATERIAL) as VerdictKind[]).forEach(kind => preloadTexture(VERDICT_MATERIAL[kind].texture));
+  }, []);
+
+  // Mount flat (verdict-tinted solid + overlay), then crossfade the
+  // watercolor in once its image has actually decoded.
+  useEffect(() => {
+    setHeroTexReady(false);
+    let cancelled = false;
+    const img = new Image();
+    img.onload = () => { if (!cancelled) setHeroTexReady(true); };
+    img.src = heroMat.texture;
+    if (img.complete) setHeroTexReady(true);
+    return () => { cancelled = true; };
+  }, [heroMat.texture]);
+
   useEffect(() => {
     setActiveFileScope(fileScope ?? null);
   }, [fileScope]);
@@ -611,20 +646,94 @@ export function V6DealView({
 
   return (
     <div className="wk-content" style={{ width: "min(100%, 1440px)", maxWidth: 1440, margin: "0 auto", boxSizing: "border-box" }}>
-      {/* Hero strip */}
+      {/* Hero strip — the verdict watercolor band (fusion Wave C1, flagship #2).
+          Carded geometry inside the container; the ONLY texture on this page.
+          The FIT numeral renders PLAIN on texture — no DERIVE settle, no
+          wk-tick (DERIVE's emerald is a light-surface verification signal).
+          The verdict TEXT + THE LINE basis line live in the tonal card below,
+          never in glass-on-texture (judges' merged resolution). */}
       <section id="deal-dashboard" style={{ marginBottom: 28 }}>
-        <div style={D.headerRow}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <h1 className="wk-masthead" style={D.h1}>{real?.business_name || title}</h1>
-            <div style={D.sub}>{heroSub}</div>
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button className="wkbtn" type="button" onClick={() => setDealFileScope("all")}>Open files</button>
-            <button className="wkbtn" type="button" onClick={() => setDealFileScope("data-room")}>Data room</button>
-            <button className="wkbtn" type="button" onClick={openDealTeam}>Team</button>
-            <button className="wkbtn primary" type="button" onClick={runGenerateDeliverable} disabled={busyAction === "generate"}>
-              {busyAction === "generate" ? "Generating..." : `Generate ${primaryDeliverable.label}`}
-            </button>
+        <div
+          style={{
+            position: "relative",
+            display: "flex",
+            flexDirection: "column",
+            minHeight: 200,
+            padding: "26px 28px 22px",
+            boxSizing: "border-box",
+            borderRadius: HERO_RADIUS,
+            overflow: "hidden",
+            color: "#fff",
+            backgroundColor: heroFallbackFill(verdictKind),
+            backgroundImage: heroMat.overlay,
+            boxShadow: heroBoxShadow(verdictKind),
+          }}
+        >
+          {/* Watercolor layer — overlay re-applied above the texture (165deg,
+              ~0.30 top keeps the masthead zone bright, ~0.62 bottom gives the
+              action pills contrast). Crossfades in once the image decodes. */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              inset: 0,
+              backgroundImage: `${heroMat.overlay}, url('${heroMat.texture}')`,
+              backgroundSize: "cover, cover",
+              backgroundPosition: "center, center",
+              backgroundRepeat: "no-repeat, no-repeat",
+              opacity: heroTexReady ? 1 : 0,
+              transition: "opacity 320ms ease",
+            }}
+          />
+          {/* Ambient orbs (mobile HeroVisual parity) */}
+          <div aria-hidden="true" style={{ position: "absolute", top: -60, right: -40, width: 280, height: 280, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.16), transparent 60%)" }} />
+          <div aria-hidden="true" style={{ position: "absolute", bottom: -80, left: -30, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.07), transparent 60%)" }} />
+
+          <div style={{ position: "relative", display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
+            <div style={{ minWidth: 0 }}>
+              <h1 className="wk-masthead" style={D.h1}>{real?.business_name || title}</h1>
+              <div style={D.sub}>{heroSub}</div>
+            </div>
+            <div style={{ flex: 1, display: "flex", alignItems: "flex-end", justifyContent: "flex-end", padding: "12px 2px 14px", minHeight: 24 }}>
+              {typeof dealBrief?.verdict?.score === "number" && (
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 600, color: "#fff" }}>Fit</div>
+                  {/* PLAIN render on texture — no StatValue, no wk-tick (judges' law) */}
+                  <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 52, letterSpacing: -2, lineHeight: 1, color: "#fff", marginTop: 2 }}>{dealBrief.verdict.score}</div>
+                </div>
+              )}
+            </div>
+            {/* Glass inner cell — the action row floating inside the hero.
+                Same four actions as the old header buttons, byte-identical
+                handlers, now ghost pills on texture. */}
+            <div
+              style={{
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: 8,
+                borderRadius: HERO_INNER_CELL.radius,
+                background: HERO_INNER_CELL.background,
+                backdropFilter: HERO_INNER_CELL.backdropFilter,
+                WebkitBackdropFilter: HERO_INNER_CELL.backdropFilter,
+                border: HERO_INNER_CELL.border,
+                boxShadow: HERO_INNER_CELL.boxShadow,
+              }}
+            >
+              <button className="wk-tap" type="button" style={HERO_ACTION_PILL} onClick={() => setDealFileScope("all")}>Open files</button>
+              <button className="wk-tap" type="button" style={HERO_ACTION_PILL} onClick={() => setDealFileScope("data-room")}>Data room</button>
+              <button className="wk-tap" type="button" style={HERO_ACTION_PILL} onClick={openDealTeam}>Team</button>
+              <button
+                className="wk-tap"
+                type="button"
+                style={{ ...HERO_ACTION_PILL, opacity: busyAction === "generate" ? 0.6 : 1 }}
+                onClick={runGenerateDeliverable}
+                disabled={busyAction === "generate"}
+              >
+                {busyAction === "generate" ? "Generating..." : `Generate ${primaryDeliverable.label}`}
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -674,7 +783,7 @@ export function V6DealView({
                   </div>
                 );
                 if (i === stageProgress.stages.length - 1) return [node];
-                return [node, <div key={`c-${s.id}`} style={{ ...D.stageConnector, ...(s.state === "done" ? { background: "var(--accent-strong)" } : {}) }} />];
+                return [node, <div key={`c-${s.id}`} style={{ ...D.stageConnector, ...(s.state === "done" ? { background: "#2E8C5A" } : {}) }} />];
               })}
             </div>
           </div>
@@ -683,25 +792,32 @@ export function V6DealView({
 
       {/* Yulia's verdict — her call, rendered straight from the deal brief
           (substrate). No app-computed verdict; honest "analyzing" when her
-          read isn't ready. */}
+          read isn't ready. Tonal card (judges' merged resolution): the verdict
+          TEXT and THE LINE basis line read on the verdict's soft tone for
+          maximum legibility — never on texture or glass. The FIT numeral
+          lives in the hero band above. */}
       {dealBrief?.verdict?.label || dealBrief?.verdict?.text ? (
         <section style={{ marginBottom: 28 }}>
-          <div className="wkcard" style={{ display: "flex", alignItems: "center", gap: 18 }}>
+          <div
+            className="wkcard"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 18,
+              background: heroMat.tone.soft,
+              border: `0.5px solid color-mix(in srgb, ${heroMat.tone.ink} 22%, transparent)`,
+              borderRadius: 18,
+            }}
+          >
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="wk-masthead" style={{ fontSize: 22, color: "var(--ink)" }}>{dealBrief.verdict.label || "Yulia's read"}</div>
-              {dealBrief.verdict.text && <p style={{ margin: "6px 0 0", color: "var(--ink-2)", fontSize: "0.9rem", lineHeight: 1.5 }}>{dealBrief.verdict.text}</p>}
+              <div className="wk-masthead" style={{ fontSize: 22, color: heroMat.tone.ink }}>{dealBrief.verdict.label || "Yulia's read"}</div>
+              {dealBrief.verdict.text && <p style={{ margin: "6px 0 0", color: "var(--ink)", fontSize: "0.9rem", lineHeight: 1.5 }}>{dealBrief.verdict.text}</p>}
               {/* Basis line — descriptive only, never a recommendation. */}
               <div className="mono" style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 8 }}>
                 From Yulia’s read of this deal · descriptive, not advice
                 {dealBrief.generatedAt && fmtRelative(dealBrief.generatedAt) ? ` · ${fmtRelative(dealBrief.generatedAt)}` : ""}
               </div>
             </div>
-            {typeof dealBrief.verdict.score === "number" && (
-              <div style={{ textAlign: "right", flexShrink: 0 }}>
-                <div style={{ fontSize: "2rem", fontWeight: 800, color: "var(--accent-strong)", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{dealBrief.verdict.score}</div>
-                <div className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-3)", fontWeight: 600, letterSpacing: "0.08em" }}>FIT</div>
-              </div>
-            )}
           </div>
         </section>
       ) : numericId !== null ? (
@@ -716,11 +832,13 @@ export function V6DealView({
         </section>
       ) : null}
 
-      {/* Stats row */}
+      {/* Stats row — as-card depth (cool iOS stack): tiles rest with the
+          4-layer laminated shadow, no .wk-tap (they aren't buttons). DERIVE
+          internals (StatValue + wk-tick) untouched — they're on white. */}
       <section style={{ marginBottom: 32 }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
           {stats.map(s => (
-            <div key={s.k} className="wkcard" style={{ padding: "14px 18px" }}>
+            <div key={s.k} className="wkcard" style={D.statTile}>
               <div className="mono" style={D.statLabel}>{s.k.toUpperCase()}</div>
               <StatValue value={s.v} />
               <div style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 2 }}>{s.sub}</div>
@@ -757,7 +875,7 @@ export function V6DealView({
           <div style={D.marketTileGrid}>
             {intelligence.marketTiles.map(tile => (
               <div key={tile.label} style={D.desktopMarketTile}>
-                <div className="mono" style={D.desktopMarketTileLabel}>{tile.label}</div>
+                <div style={D.desktopMarketTileLabel}>{tile.label}</div>
                 <div style={D.desktopMarketTileValue}>{tile.value}</div>
               </div>
             ))}
@@ -788,11 +906,11 @@ export function V6DealView({
             <p style={{ ...D.reviewText, margin: "8px 0 0" }}>How structure, tax, and legal shape this deal before documents move.</p>
             <div style={{ ...D.structureGrid, marginTop: 16 }}>
               <div>
-                <span className="mono" style={D.structureLabel}>TAX</span>
+                <span style={D.structureLabel}>Tax</span>
                 <p>{intelligence.tax}</p>
               </div>
               <div>
-                <span className="mono" style={D.structureLabel}>LEGAL</span>
+                <span style={D.structureLabel}>Legal</span>
                 <p>{intelligence.legal}</p>
               </div>
             </div>
@@ -1237,12 +1355,13 @@ function buildDealIntelligence({
   return {
     hasRead,
     marketHeadline: dealBrief?.marketRead?.headline || `Yulia hasn't built a market read for ${dealName} yet.`,
-    // Facts from the deal record (not judgment).
+    // Facts from the deal record (not judgment). Sentence-case labels —
+    // mono-caps killed in the judged tonal pass.
     marketTiles: [
-      { label: "INDUSTRY", value: real?.industry || "—" },
-      { label: "GEOGRAPHY", value: real?.location || "—" },
-      { label: "REVENUE", value: fmtCents(real?.revenue ?? null) },
-      { label: "EARNINGS", value: fmtCents(real?.ebitda ?? real?.sde ?? null) },
+      { label: "Industry", value: real?.industry || "—" },
+      { label: "Geography", value: real?.location || "—" },
+      { label: "Revenue", value: fmtCents(real?.revenue ?? null) },
+      { label: "Earnings", value: fmtCents(real?.ebitda ?? real?.sde ?? null) },
     ],
     marketBullets: dealBrief?.marketRead?.bullets?.filter(Boolean).slice(0, 3) ?? [],
     researchNeeded: dealBrief?.marketRead?.researchNeeded?.filter(Boolean).slice(0, 3) ?? [],
@@ -1979,48 +2098,68 @@ function shortHash(value?: string | null): string {
   return clean.length <= 12 ? clean : `${clean.slice(0, 6)}…${clean.slice(-4)}`;
 }
 
+/* ── Wave C1 hero material (consumes shared/verdictMaterial.ts) ── */
+
+/* Ghost glass pill on texture (TodayRoot HERO_PILL parity): gradient only,
+   no border, no blur. Explicit resets instead of all:unset so the .wk-tap
+   class transitions are not overridden by the inline cascade. */
+const HERO_ACTION_PILL: CSSProperties = {
+  appearance: "none",
+  border: 0,
+  margin: 0,
+  cursor: "pointer",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  flex: 1,
+  minHeight: 34,
+  padding: "0 14px",
+  borderRadius: 999,
+  background: HERO_GHOST_PILL_BG,
+  color: "#fff",
+  fontFamily: "inherit",
+  fontSize: 13,
+  fontWeight: 800,
+  letterSpacing: "0.01em",
+  whiteSpace: "nowrap",
+};
+
+/* The overlay's dark stop as an opaque pre-decode fill — the hero never
+   flashes white (or a wrong verdict color) before its texture decodes. */
+function heroFallbackFill(kind: VerdictKind): string {
+  const stops = VERDICT_MATERIAL[kind].overlay.match(/rgba\([^)]+\)/g);
+  const last = stops?.[stops.length - 1];
+  return last ? last.replace(/[\d.]+\)$/, "1)") : "#10243E";
+}
+
 const D: Record<string, CSSProperties> = {
-  headerRow: {
-    display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 20,
-  },
   // Masthead register — .wk-masthead supplies the Fraunces serif family.
+  // White on the hero's watercolor (the 0.30-alpha top zone stays bright).
   h1: {
     fontSize: 44, fontWeight: 540, letterSpacing: "-0.015em",
-    margin: 0, color: "var(--ink)", textWrap: "balance",
+    margin: 0, color: "#fff", textWrap: "balance",
   },
-  sub: { fontSize: 14, color: "var(--ink-2)", marginTop: 6 },
+  sub: { fontSize: 14, color: "rgba(255,255,255,0.92)", marginTop: 6 },
   // wkbtn classes handle the banner styles; actionBanner provides margin
   actionBanner: {
     marginBottom: 18,
   },
-  verdict: {
-    padding: "20px 24px",
-    background: "var(--st-good-bg)",
-    color: "var(--st-good-fg)",
-    border: "1px solid var(--line)",
-    display: "flex", alignItems: "center", gap: 24,
+  // Stat tile: as-card physical recipe (lit-from-above top hairline + the
+  // 4-layer cool-slate shadow stack). Flat white behind the numerals — depth
+  // at rest, never material.
+  statTile: {
+    padding: "14px 18px",
+    borderRadius: "var(--wk-radius-card)",
+    border: "var(--wk-as-card-border)",
+    borderTopColor: "var(--wk-as-card-border-top)",
+    boxShadow: "var(--wk-as-card-shadow)",
   },
-  verdictMark: {
-    width: 48, height: 48, borderRadius: 12,
-    background: "var(--accent-strong)", color: "#fff",
-    display: "grid", placeItems: "center", flexShrink: 0,
-  },
-  verdictEyebrow: { fontSize: 10, letterSpacing: "0.14em", fontWeight: 700, opacity: 0.7 },
-  verdictText: {
-    fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 18,
-    letterSpacing: "-0.02em", marginTop: 2, textWrap: "pretty",
-  },
-  fitNumber: {
-    fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 28,
-    letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums",
-  },
-  fitLabel: { fontSize: 10, letterSpacing: "0.14em", fontWeight: 600, opacity: 0.7 },
   statLabel: {
     fontSize: 10, color: "var(--ink-3)",
     letterSpacing: "0.14em", fontWeight: 600,
   },
   statValue: {
-    fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 22,
+    fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 27,
     letterSpacing: "-0.02em", color: "var(--ink)",
     marginTop: 4, fontVariantNumeric: "tabular-nums",
   },
@@ -2031,11 +2170,17 @@ const D: Record<string, CSSProperties> = {
   stageTrack: { display: "flex", alignItems: "flex-start", gap: 0 },
   stageNodeWrap: { display: "flex", flexDirection: "column", alignItems: "center", gap: 8, flex: "0 0 auto", width: 96 },
   stageNode: { width: 30, height: 30, borderRadius: "50%", border: "1.5px solid var(--line-2)", display: "grid", placeItems: "center", fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700, color: "var(--ink-3)", background: "var(--surface)", fontVariantNumeric: "tabular-nums" },
-  stageNodeDone: { background: "var(--accent-strong)", borderColor: "var(--accent-strong)", color: "#fff" },
-  stageNodeCurrent: { borderColor: "var(--accent-strong)", color: "var(--accent-strong)", borderWidth: 2, boxShadow: "0 0 0 4px var(--accent-soft)" },
+  // De-neon (judged): journey progress wears DERIVE's muted emerald, not the
+  // brand neon — green stays rationed. Node/connector grammar unchanged.
+  stageNodeDone: { background: "#2E8C5A", borderColor: "#2E8C5A", color: "#fff" },
+  stageNodeCurrent: { borderColor: "#2E8C5A", color: "#2E8C5A", borderWidth: 2, boxShadow: "0 0 0 4px rgba(46,140,90,.15)" },
   stageNodeLabel: { fontSize: 11.5, color: "var(--ink-3)", lineHeight: 1.25, textAlign: "center", maxWidth: 100 },
   stageConnector: { flex: 1, height: 2, background: "var(--line)", marginTop: 14, minWidth: 12, borderRadius: 2 },
-  workGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 12 },
+  workGrid: {
+    display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 12,
+    // Below-fold paint skip for many WorkCards.
+    contentVisibility: "auto", containIntrinsicSize: "auto 480px",
+  },
   emptyWork: { padding: "18px 20px", fontSize: 13.5, color: "var(--ink-2)", lineHeight: 1.55 },
   intelligenceGrid: {
     display: "grid",
@@ -2043,6 +2188,9 @@ const D: Record<string, CSSProperties> = {
     gap: 16,
     marginBottom: 32,
     alignItems: "stretch",
+    // Below-fold paint skip — long deal pages stop painting offscreen.
+    contentVisibility: "auto",
+    containIntrinsicSize: "auto 480px",
   },
   marketCard: {
     padding: "24px 26px",
@@ -2069,17 +2217,18 @@ const D: Record<string, CSSProperties> = {
     gap: 10,
     marginTop: 18,
   },
+  // Info-blue tonal field (baseline trio — informational, not a verdict).
+  // Tonal soft ≠ texture; numerals keep the mono verification voice on it.
   desktopMarketTile: {
     borderRadius: 12,
     padding: "12px 13px",
-    background: "var(--surface-2)",
+    background: VERDICT_MATERIAL.baseline.tone.soft,
     border: "1px solid var(--line)",
   },
   desktopMarketTileLabel: {
-    fontSize: 9,
-    letterSpacing: "0.12em",
-    color: "var(--ink-3)",
-    fontWeight: 750,
+    fontSize: 11,
+    color: VERDICT_MATERIAL.baseline.tone.ink,
+    fontWeight: 600,
   },
   desktopMarketTileValue: {
     marginTop: 7,
@@ -2121,8 +2270,11 @@ const D: Record<string, CSSProperties> = {
     display: "grid",
     gap: 16,
   },
+  // Structure read rests on the warm composer elevation stack — depth, zero
+  // material.
   reviewCard: {
     padding: "22px 24px",
+    boxShadow: "var(--wk-elev-card)",
   },
   reviewTop: {
     display: "grid",
@@ -2169,13 +2321,13 @@ const D: Record<string, CSSProperties> = {
     fontSize: 12.5,
     lineHeight: 1.36,
   },
+  // Sentence-case readable label (mono-caps killed in the judged tonal pass).
   structureLabel: {
     display: "block",
     marginBottom: 5,
     color: "var(--ink-3)",
-    fontSize: 9,
-    letterSpacing: "0.14em",
-    fontWeight: 800,
+    fontSize: 12,
+    fontWeight: 600,
   },
   nextCard: {
     padding: "20px 24px 8px",
@@ -2225,6 +2377,9 @@ const D: Record<string, CSSProperties> = {
     background: "var(--surface)",
     border: "1px solid var(--line)",
     boxShadow: "0 1px 2px rgba(25,24,19,.06)",
+    // Below-fold paint skip — the file explorer is a long surface.
+    contentVisibility: "auto",
+    containIntrinsicSize: "auto 480px",
   },
   fileTop: {
     display: "flex",

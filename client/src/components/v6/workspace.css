@@ -527,11 +527,22 @@
 .wk-content .seg.on .n { color: var(--accent-strong); }
 
 /* metric / KPI header */
-.wk-content .mhead { display: flex; gap: 48px; padding: 26px 2px 28px; flex-wrap: wrap; }
+/* Pipeline KPI band — warm tonal card above the ledger (fusion Wave C3).
+   Explicitly NOT watercolor: zero texture, zero glass, zero verdict tint.
+   The warmth is one flat --surface-2 field with a hairline border — no
+   elevation shadow — so the wktable below stays the page's work surface.
+   Numerals step up but KEEP the mono verification voice (computed schedule
+   figures, not display numerals). */
+.wk-content .mhead { display: flex; gap: 48px; padding: 20px 24px; flex-wrap: wrap; background: var(--surface-2); border: 1px solid var(--wk-hairline-2); border-radius: var(--wk-radius-card); margin-bottom: 18px; }
 .wk-content .mh { display: flex; flex-direction: column; gap: 7px; }
 .wk-content .mh .l { font-size: .84rem; color: var(--ink-3); }
-.wk-content .mh .v { font-family: var(--font-mono); font-size: 2rem; font-weight: 500; letter-spacing: -.03em; color: var(--ink); }
+.wk-content .mh .v { font-family: var(--font-mono); font-size: 2.4rem; font-weight: 600; letter-spacing: -.03em; font-variant-numeric: tabular-nums; color: var(--ink); }
 .wk-content .mh .s { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-3); }
+/* The one masthead-register moment on the page: the strongest-source NAME
+   (a name, not a computed figure) renders Fraunces as a hover-underline
+   button into the deal tab. */
+.wk-content .mh button.v.mh-name { font-family: var(--font-serif); font-optical-sizing: auto; font-weight: 540; font-size: 1.4rem; letter-spacing: -.015em; }
+.wk-content .mh button.v.mh-name:hover { text-decoration: underline; }
 
 /* filter bar */
 .wk-content .filterbar { display: flex; align-items: center; gap: 9px; margin: 6px 0 0; flex-wrap: wrap; }
