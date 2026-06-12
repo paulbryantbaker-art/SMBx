@@ -208,11 +208,28 @@ async function readAuditResource(userId: number, path: string): Promise<V19Audit
   };
 }
 
-async function readDealResource(userId: number, path: string): Promise<V19DealStateArtifact> {
-  const match = path.match(/^(\d+)\/state$/);
-  if (!match) throw new Error('Deal resource must be deal://{dealId}/state');
+async function readDealResource(userId: number, path: string): Promise<V19DealStateArtifact | Record<string, any>> {
+  const match = path.match(/^(\d+)\/(state|dossier)$/);
+  if (!match) throw new Error('Deal resource must be deal://{dealId}/state or deal://{dealId}/dossier');
   const dealId = Number(match[1]);
   if (!(await hasDealAccess(dealId, userId))) throw new Error('Deal not found');
+
+  // deal://{dealId}/dossier — full dated memory pack so an agent returning
+  // to a deal months later (any status, incl. dormant/completed) recovers
+  // everything recorded plus staleness ages. Same assembly as Yulia's
+  // get_deal_dossier chat tool.
+  if (match[2] === 'dossier') {
+    const { buildDealDossier } = await import('./dealMemoryService.js');
+    const dossier = await buildDealDossier(userId, dealId);
+    if (!dossier) throw new Error('Deal not found');
+    return {
+      kind: 'deal_dossier',
+      uri: `deal://${dealId}/dossier`,
+      id: String(dealId),
+      ...dossier,
+    };
+  }
+
   const [deal] = await sql`
     SELECT id, journey_type, current_gate, league, deal_type, updated_at
     FROM deals

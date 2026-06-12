@@ -552,14 +552,26 @@ export const TOOL_DEFINITIONS: Tool[] = [
   },
   {
     name: 'list_user_deals',
-    description: 'List all deals for the current user. Call this when: the user asks about their deals, portfolio, or pipeline; when you need to understand what deals they have; when the user wants to switch to a different deal; or when you detect they may be a broker/advisor managing multiple clients. Returns summary of all active deals with journey type, gate, financials, and business name.',
+    description: 'List all deals for the current user. Call this when: the user asks about their deals, portfolio, or pipeline; when you need to understand what deals they have; when the user wants to switch to a different deal; or when you detect they may be a broker/advisor managing multiple clients. Returns summary of all active deals with journey type, gate, financials, and business name. Pass includeInactive when the user mentions an old, dormant, completed, or "dead" deal — those are invisible in the default active-only list.',
     input_schema: {
       type: 'object' as const,
       properties: {
         journeyFilter: { type: 'string', enum: ['sell', 'buy', 'raise', 'pmi'], description: 'Optional filter by journey type' },
         includeParticipant: { type: 'boolean', description: 'Include deals where user is a participant (not owner). Useful for advisors/brokers.' },
+        includeInactive: { type: 'boolean', description: 'Include non-active deals (completed/dormant). Use when the user references a deal that is not in the active list.' },
       },
       required: [],
+    },
+  },
+  {
+    name: 'get_deal_dossier',
+    description: 'Full dated memory pack for ANY of the user\'s deals — any status, including dormant or completed deals the active-only lists cannot see. Returns the deal record, gate timeline with dates, every chapter and thread summary, latest model runs, deliverables, recent activity, and how stale each data point is. Call this when the user returns to a deal after time away, asks about an old or "dead" deal, wants to revive one, or before re-running analysis on a deal that has been idle.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealIdOrName: { type: 'string', description: 'Deal ID (number) or business-name fragment to look up across ALL the user\'s deals regardless of status.' },
+      },
+      required: ['dealIdOrName'],
     },
   },
   {
@@ -976,6 +988,8 @@ export async function executeTool(
         return await matchFranchiseTool(input);
       case 'generate_optimization_plan':
         return await generateOptimizationPlanTool(input, userId);
+      case 'get_deal_dossier':
+        return await getDealDossierTool(input, userId);
       case 'list_user_deals':
         return await listUserDeals(input, userId);
       case 'switch_deal_context':
@@ -3536,39 +3550,91 @@ async function generateOptimizationPlanTool(input: Record<string, any>, userId: 
 
 // ─── Portfolio Tools ──────────────────────────────────────
 
-async function listUserDeals(input: Record<string, any>, userId: number): Promise<string> {
-  const { journeyFilter, includeParticipant } = input;
+/** Full dated memory pack for any owned/participant deal, any status —
+ *  the "return after six months / revive a dead deal" entry point. */
+async function getDealDossierTool(input: Record<string, any>, userId: number): Promise<string> {
+  const { dealIdOrName } = input;
+  if (!dealIdOrName) return JSON.stringify({ error: 'dealIdOrName is required' });
 
-  // Get owned deals
+  const { findDealByIdOrName, buildDealDossier, formatDealDossierForPrompt } = await import('./dealMemoryService.js');
+  // One resolver, owned + participant, ID-then-name. A numeric input that
+  // isn't an accessible deal ID falls through to the name search, so a
+  // business literally named "365" still resolves.
+  const found = await findDealByIdOrName(userId, String(dealIdOrName));
+  if (!found) return JSON.stringify({ error: `No deal matching "${dealIdOrName}" found across any status. Try list_user_deals with includeInactive: true (and includeParticipant: true for advised deals).` });
+
+  const dossier = await buildDealDossier(userId, found.id);
+  if (!dossier) return JSON.stringify({ error: 'Deal not found or no access' });
+
+  return JSON.stringify({
+    dossier: formatDealDossierForPrompt(dossier),
+    dealId: dossier.deal.id,
+    status: dossier.deal.status,
+    lastTouchedAt: dossier.lastTouchedAt,
+    dormantDays: dossier.dormantDays,
+  });
+}
+
+async function listUserDeals(input: Record<string, any>, userId: number): Promise<string> {
+  const { journeyFilter, includeParticipant, includeInactive } = input;
+
+  // Get owned deals. Default is active-only; includeInactive surfaces
+  // completed/dormant deals (a returning user's "dead" deal lives there).
   let deals;
   if (journeyFilter) {
-    deals = await sql`
-      SELECT id, journey_type, current_gate, league, business_name, industry, location,
-             revenue, sde, ebitda, asking_price, status, created_at, updated_at
-      FROM deals WHERE user_id = ${userId} AND status = 'active' AND journey_type = ${journeyFilter}
-      ORDER BY updated_at DESC
-    `;
+    deals = includeInactive
+      ? await sql`
+          SELECT id, journey_type, current_gate, league, business_name, industry, location,
+                 revenue, sde, ebitda, asking_price, status, created_at, updated_at
+          FROM deals WHERE user_id = ${userId} AND journey_type = ${journeyFilter}
+          ORDER BY updated_at DESC
+        `
+      : await sql`
+          SELECT id, journey_type, current_gate, league, business_name, industry, location,
+                 revenue, sde, ebitda, asking_price, status, created_at, updated_at
+          FROM deals WHERE user_id = ${userId} AND status = 'active' AND journey_type = ${journeyFilter}
+          ORDER BY updated_at DESC
+        `;
   } else {
-    deals = await sql`
-      SELECT id, journey_type, current_gate, league, business_name, industry, location,
-             revenue, sde, ebitda, asking_price, status, created_at, updated_at
-      FROM deals WHERE user_id = ${userId} AND status = 'active'
-      ORDER BY updated_at DESC
-    `;
+    deals = includeInactive
+      ? await sql`
+          SELECT id, journey_type, current_gate, league, business_name, industry, location,
+                 revenue, sde, ebitda, asking_price, status, created_at, updated_at
+          FROM deals WHERE user_id = ${userId}
+          ORDER BY updated_at DESC
+        `
+      : await sql`
+          SELECT id, journey_type, current_gate, league, business_name, industry, location,
+                 revenue, sde, ebitda, asking_price, status, created_at, updated_at
+          FROM deals WHERE user_id = ${userId} AND status = 'active'
+          ORDER BY updated_at DESC
+        `;
   }
 
-  // Optionally include deals where user is a participant (advisor/broker)
+  // Optionally include deals where user is a participant (advisor/broker).
+  // includeInactive applies here too — an advisor's dormant deal is the
+  // same "thought dead, returning later" case as an owner's.
   let participantDeals: any[] = [];
   if (includeParticipant) {
-    participantDeals = await sql`
-      SELECT d.id, d.journey_type, d.current_gate, d.league, d.business_name, d.industry,
-             d.revenue, d.sde, d.ebitda, d.asking_price, d.status, d.updated_at,
-             dp.role as participant_role, dp.access_level
-      FROM deals d
-      JOIN deal_participants dp ON dp.deal_id = d.id
-      WHERE dp.user_id = ${userId} AND dp.accepted_at IS NOT NULL AND d.status = 'active'
-      ORDER BY d.updated_at DESC
-    `;
+    participantDeals = includeInactive
+      ? await sql`
+          SELECT d.id, d.journey_type, d.current_gate, d.league, d.business_name, d.industry,
+                 d.revenue, d.sde, d.ebitda, d.asking_price, d.status, d.updated_at,
+                 dp.role as participant_role, dp.access_level
+          FROM deals d
+          JOIN deal_participants dp ON dp.deal_id = d.id
+          WHERE dp.user_id = ${userId} AND dp.accepted_at IS NOT NULL
+          ORDER BY d.updated_at DESC
+        `
+      : await sql`
+          SELECT d.id, d.journey_type, d.current_gate, d.league, d.business_name, d.industry,
+                 d.revenue, d.sde, d.ebitda, d.asking_price, d.status, d.updated_at,
+                 dp.role as participant_role, dp.access_level
+          FROM deals d
+          JOIN deal_participants dp ON dp.deal_id = d.id
+          WHERE dp.user_id = ${userId} AND dp.accepted_at IS NOT NULL AND d.status = 'active'
+          ORDER BY d.updated_at DESC
+        `;
   }
 
   const formatDeal = (d: any, role?: string) => ({
@@ -3578,6 +3644,9 @@ async function listUserDeals(input: Record<string, any>, userId: number): Promis
     league: d.league,
     businessName: d.business_name || 'Unnamed',
     industry: d.industry,
+    // status included so an includeInactive list is unambiguous — Yulia
+    // must never treat a completed/dormant deal as live pipeline.
+    status: d.status,
     revenue: d.revenue ? `$${(d.revenue / 100).toLocaleString()}` : null,
     sde: d.sde ? `$${(d.sde / 100).toLocaleString()}` : null,
     ebitda: d.ebitda ? `$${(d.ebitda / 100).toLocaleString()}` : null,
@@ -3591,6 +3660,9 @@ async function listUserDeals(input: Record<string, any>, userId: number): Promis
 
   const totalDeals = ownedFormatted.length + participantFormatted.length;
   const isMultiDeal = totalDeals > 1;
+  // Pipeline math counts ACTIVE deals only — with includeInactive set, the
+  // list may contain completed/dormant deals that aren't pipeline.
+  const activeOwned = deals.filter((d: any) => d.status === 'active');
 
   return JSON.stringify({
     totalDeals,
@@ -3599,12 +3671,12 @@ async function listUserDeals(input: Record<string, any>, userId: number): Promis
     ownedDeals: ownedFormatted,
     participantDeals: participantFormatted,
     portfolioSummary: isMultiDeal ? {
-      totalPipelineValue: deals.reduce((sum: number, d: any) => sum + (d.asking_price || d.revenue || 0), 0) / 100,
+      totalPipelineValue: activeOwned.reduce((sum: number, d: any) => sum + (d.asking_price || d.revenue || 0), 0) / 100,
       journeyBreakdown: {
-        sell: deals.filter((d: any) => d.journey_type === 'sell').length,
-        buy: deals.filter((d: any) => d.journey_type === 'buy').length,
-        raise: deals.filter((d: any) => d.journey_type === 'raise').length,
-        pmi: deals.filter((d: any) => d.journey_type === 'pmi').length,
+        sell: activeOwned.filter((d: any) => d.journey_type === 'sell').length,
+        buy: activeOwned.filter((d: any) => d.journey_type === 'buy').length,
+        raise: activeOwned.filter((d: any) => d.journey_type === 'raise').length,
+        pmi: activeOwned.filter((d: any) => d.journey_type === 'pmi').length,
       },
     } : null,
   });

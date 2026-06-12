@@ -742,7 +742,33 @@ export async function buildSystemPrompt(
       LIMIT 12
     `;
     const totalDeals = ownedCount + participantDeals.length;
-    if (totalDeals > 0) {
+
+    // Inactive/completed deals computed BEFORE the active-count gate: the
+    // canonical returning user — every deal dormant, zero active — must
+    // still see that their deals exist. Dead deals are one question away,
+    // never invisible behind active-only filters.
+    let inactiveLine = '';
+    let inactiveCount = 0;
+    try {
+      const [{ count: inactiveCountRaw }] = await sql`
+        SELECT COUNT(*) AS count FROM deals WHERE user_id = ${user.id} AND status != 'active'
+      `;
+      inactiveCount = Number(inactiveCountRaw);
+      if (inactiveCount > 0) {
+        const inactive = await sql`
+          SELECT business_name, status, updated_at FROM deals
+          WHERE user_id = ${user.id} AND status != 'active'
+          ORDER BY updated_at DESC LIMIT 3
+        `;
+        const names = inactive.map((d: any) => {
+          const when = new Date(d.updated_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+          return `${d.business_name || 'Unnamed'} (${d.status}, last touched ${when})`;
+        }).join('; ');
+        inactiveLine = `\n\nInactive/completed deals: ${inactiveCount} — most recent: ${names}. Any can be revisited or revived: pull full dated memory with get_deal_dossier.`;
+      }
+    } catch { /* non-critical */ }
+
+    if (totalDeals > 0 || inactiveCount > 0) {
       // Enrich owned deals with their latest chapter summary for cross-reference
       const ownedIds = allDeals.map((d: any) => d.id);
       let latestSummaries = new Map<number, string>();
@@ -775,7 +801,11 @@ export async function buildSystemPrompt(
       const crossDealNote = totalDeals > 1
         ? `\n\nWhen working on one deal, reference other deals in the portfolio when relevant (e.g., "Your HVAC multiple compares favorably to the MSP deal"). Cross-deal insights make you more valuable than a single-deal work surface.`
         : '';
-      layers.push(`\n## PORTFOLIO AWARENESS\nThis user has ${totalDeals} active deal${totalDeals === 1 ? '' : 's'}. You have the list_user_deals and switch_deal_context tools — use them proactively.\n\nOwned deals:\n${dealList}${moreLine}${partList ? `\n\nParticipant deals:\n${partList}` : ''}${crossDealNote}`);
+
+      const ownedSection = totalDeals > 0
+        ? `\n\nOwned deals:\n${dealList}${moreLine}${partList ? `\n\nParticipant deals:\n${partList}` : ''}`
+        : '';
+      layers.push(`\n## PORTFOLIO AWARENESS\nThis user has ${totalDeals} active deal${totalDeals === 1 ? '' : 's'}. You have the list_user_deals, switch_deal_context, and get_deal_dossier tools — use them proactively.${ownedSection}${inactiveLine}${crossDealNote}`);
     }
   } catch { /* portfolio check is non-critical */ }
 
@@ -832,15 +862,19 @@ export async function buildSystemPrompt(
       if (definitiveContext) layers.push(definitiveContext);
     } catch { /* DEFINITIVE DealState journal is non-critical prompt context */ }
 
-    // Layer 3a+: Previous gate summaries for context carry-forward
+    // Layer 3a+: Previous gate summaries for context carry-forward. Dated —
+    // a six-month return needs "when" as much as "what".
     try {
       const completedGates = await sql`
-        SELECT title, summary FROM conversations
+        SELECT title, summary, updated_at FROM conversations
         WHERE deal_id = ${deal.id} AND gate_status = 'completed' AND summary IS NOT NULL
         ORDER BY updated_at ASC
       `;
       if (completedGates.length > 0) {
-        const summaryLines = completedGates.map((g: any) => `- **${g.title}**: ${g.summary}`).join('\n');
+        const summaryLines = completedGates.map((g: any) => {
+          const when = new Date(g.updated_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+          return `- **${g.title}** (${when}): ${g.summary}`;
+        }).join('\n');
         layers.push(`\n## PREVIOUS GATE SUMMARIES\nThe user has already completed these gates. Do NOT re-ask questions already covered.\n${summaryLines}`);
       }
     } catch { /* non-critical */ }
@@ -856,13 +890,16 @@ export async function buildSystemPrompt(
     // questions.
     try {
       const otherThreads = await sql`
-        SELECT title, summary FROM conversations
+        SELECT title, summary, updated_at FROM conversations
         WHERE deal_id = ${deal.id} AND id != ${conversationId}
           AND gate_status = 'active' AND summary IS NOT NULL
         ORDER BY updated_at DESC LIMIT 3
       `;
       if (otherThreads.length > 0) {
-        const threadLines = otherThreads.map((c: any) => `- **${c.title || 'Untitled thread'}**: ${c.summary}`).join('\n');
+        const threadLines = otherThreads.map((c: any) => {
+          const when = new Date(c.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          return `- **${c.title || 'Untitled thread'}** (last active ${when}): ${c.summary}`;
+        }).join('\n');
         layers.push(`\n## OTHER ACTIVE THREADS ON THIS DEAL\nRunning summaries of this deal's other open conversations. Treat their facts and decisions as already established — do NOT re-ask.\n${threadLines}`);
       }
     } catch { /* non-critical */ }
@@ -871,6 +908,15 @@ export async function buildSystemPrompt(
     // for "what changed / what happened while I was away".
     const dealActivity = await buildRecentActivityLayer(user.id, deal.id);
     if (dealActivity) layers.push(dealActivity);
+
+    // Layer 3a+++: Re-entry orientation when the deal has been dormant 30+
+    // days — Yulia must acknowledge the gap, restate what's known with
+    // dates, and flag stale data instead of pretending continuity.
+    try {
+      const { buildReentryLayer } = await import('./dealMemoryService.js');
+      const reentry = await buildReentryLayer(user.id, deal.id);
+      if (reentry) layers.push(reentry);
+    } catch { /* non-critical */ }
 
     // Layer 3b: League persona
     const league = deal.league || user.league;

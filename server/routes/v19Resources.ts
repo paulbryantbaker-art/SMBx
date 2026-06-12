@@ -457,6 +457,16 @@ v19ResourcesRouter.get('/v19/resources', async (req, res) => {
   if (!Number.isFinite(userId) || userId <= 0) return res.status(401).json({ error: 'Not authenticated' });
   if (!uri) return res.status(400).json({ error: 'uri is required' });
 
+  // Dossiers carry conversation-content summaries — a deliberately
+  // under-scoped agent token (discovery profile etc.) must not read them.
+  // Human-session JWTs (no tokenUse claim) are unaffected.
+  if (/^deal:\/\/\d+\/dossier$/.test(uri)) {
+    const claims = (req as any).authClaims || {};
+    if (claims.tokenUse === 'definitive_agent' && !(Array.isArray(claims.scopes) && claims.scopes.includes('deal:read'))) {
+      return res.status(403).json({ error: 'The deal:read scope is required to read deal dossiers with an agent token.' });
+    }
+  }
+
   try {
     const gate = await checkV19Entitlement(userId, 'api_call', {
       actionId: 'read_v19_resource',

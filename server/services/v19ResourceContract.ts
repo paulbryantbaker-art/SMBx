@@ -17,6 +17,11 @@ export const V19_RESOURCE_TEMPLATES = [
     description: 'Journey, league, gate, active model stack, and next-action state.',
   },
   {
+    uriTemplate: 'deal://{dealId}/dossier',
+    name: 'Deal dossier',
+    description: 'Full dated memory pack for returning to a deal after time away — any status, including dormant/completed: gate timeline, the caller\'s own conversation summaries, model runs, deliverables, activity, and staleness ages. Agent tokens require the deal:read scope.',
+  },
+  {
     uriTemplate: 'studio://book/{bookId}',
     name: 'Studio book',
     description: 'Source-grounded pitch book, IC deck, QoE book, memo, or lender book.',
