@@ -80,7 +80,6 @@ export function V6ModelCanvasView({
     return (
       <div className="wk-content" style={S.shell}>
         <div className="wkcard" style={S.empty}>
-          <div style={S.eyebrow}>MODEL CANVAS · NOT LOADED</div>
           <h1 style={S.title}>{title}</h1>
           <p style={S.body}>
             The canvas tab is here, but the in-memory model state is not loaded in this browser session. Ask Yulia to reopen it from the saved deal state or model run.
@@ -98,7 +97,6 @@ export function V6ModelCanvasView({
       {/* Header card */}
       <div className="wkcard" style={S.header}>
         <div style={S.headerCopy}>
-          <div style={S.eyebrow}>MODEL CANVAS · ITERATIVE</div>
           <h1 style={S.title}>{tab.title}</h1>
           <p style={S.body}>
             This is a working model, not a one-time answer. Adjust EV, EBITDA, debt, working capital, tax, and terms; each change is saved as a version Yulia can read back into the deal loop.

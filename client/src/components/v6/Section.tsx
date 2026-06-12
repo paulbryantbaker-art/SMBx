@@ -1,7 +1,9 @@
 import type { CSSProperties, ReactNode } from "react";
 
-export function V6Section({ eyebrow, title, sub, action, children }: {
-  eyebrow?: string;
+/* Section header — title leads, per the eyebrow lock (2026-06-01): no
+   decorative mono-caps kickers. The old `eyebrow` prop and its render path
+   were deleted in the fusion Wave A foundation. */
+export function V6Section({ title, sub, action, children }: {
   title: string;
   sub?: string;
   action?: ReactNode;
@@ -11,7 +13,6 @@ export function V6Section({ eyebrow, title, sub, action, children }: {
     <section style={{ marginBottom: 36 }}>
       <div style={S.header}>
         <div>
-          {eyebrow && <div className="mono" style={S.eyebrow}>{eyebrow}</div>}
           <h2 style={S.title}>{title}</h2>
           {sub && <div style={S.sub}>{sub}</div>}
         </div>
@@ -28,12 +29,6 @@ const S: Record<string, CSSProperties> = {
     alignItems: "flex-end",
     justifyContent: "space-between",
     marginBottom: 14,
-  },
-  eyebrow: {
-    fontSize: 9.5,
-    color: "var(--m-on-surface-mid)",
-    letterSpacing: "0.14em",
-    fontWeight: 600,
   },
   title: {
     fontFamily: "var(--font-display)",

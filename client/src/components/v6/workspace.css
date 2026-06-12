@@ -13,11 +13,25 @@
   --accent-strong: #0FB94F;
   --accent-soft: #D8F7E4;
   --on-accent: #06371A;
-  --nav: #F8F8F4;
-  /* app ground is airier than the public site (CD .app-scope) */
-  --bg: #FCFCFA;
-  --surface-2: #F3F3EE;
+
+  /* ── WARM-GROUND TOKEN BRIDGE (desktop⇄mobile fusion, Wave A) ──
+     The wk shell grounds on the SAME warm paper as .mobile-root:
+       --bg        #FBFAF6  = --mb-bg                 (was #FCFCFA)
+       --nav       #F3F1EA  = --mb-bg-2               (was #F8F8F4)
+       --surface-2 #F3F1EA  = --mb-bg-2 / --mb-card-2 (was #F3F3EE — also
+                              unifies with the chat composer's existing
+                              hardcoded #F3F1EA pill fill)
+     One warm family across both platforms; the composer was already the
+     desktop Rosetta stone for these values. */
+  --nav: #F3F1EA;
+  --bg: #FBFAF6;
+  --surface-2: #F3F1EA;
   --surface-3: #E9E8E1;
+
+  /* hairlines — mobile parity aliases (= --mb-line / --mb-line-2) */
+  --wk-hairline: rgba(25, 24, 19, 0.16);
+  --wk-hairline-2: rgba(25, 24, 19, 0.08);
+
   /* harmonized status system (CD --st-*). EXCEPTION: --st-good is held to a
      MUTED green (not brand neon #2BFF77) so verdict pills stay distinct from
      the accent, per the product rule "verdict colors muted & distinct from neon". */
@@ -27,7 +41,46 @@
   --st-missing-bg: #F3F3EE; --st-missing-fg: #8B867A; --st-missing-dot: #8B867A;
   --st-risk-bg: #FBE7DD;    --st-risk-fg: #C0562F;    --st-risk-dot: #C0562F;
   --banner-risk-bg: #FCF1EC;
+
+  /* ── ELEVATION RECIPES — two families with documented ROLES; never mix ──
+     --wk-elev-card   the WARM composer stack: resting cards on warm ground.
+                      Extracted verbatim from the chat composer (Chat.tsx),
+                      the iOS-grade recipe already proven on desktop.
+     --wk-as-card-*   the COOL iOS App-Store stack (= mobile .mb-as-card):
+                      hero / sheet / window frames. Cool slate shadow
+                      rgba(20,28,44,…) — not pure black — with a deliberately
+                      heavier TOP hairline (light source from above) and a
+                      printed/laminated inset sheen. */
+  --wk-elev-card:
+    0 0 0 1px rgba(255, 255, 255, 0.58),
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    0 12px 26px rgba(25, 24, 19, 0.075),
+    0 2px 7px rgba(25, 24, 19, 0.065);
+  --wk-as-card-border: 0.5px solid rgba(60, 60, 67, 0.10);
+  --wk-as-card-border-top: rgba(60, 60, 67, 0.14);
+  --wk-as-card-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 2px 5px rgba(20, 28, 44, 0.08),
+    0 10px 24px -8px rgba(20, 28, 44, 0.24),
+    0 24px 48px -24px rgba(20, 28, 44, 0.28);
+
+  /* ── RADII SCALE — 6 paper sheets · 9–10 rail rows · 12 legacy chrome
+     (--wk-radius) · 14–16 popovers · 18 cards · 20 transient windows ·
+     22 heroes (mobile HeroFrame parity). ── */
   --wk-radius: 12px;
+  --wk-radius-card: 18px;
+  --wk-hero-radius: 22px;
+
+  /* ── THE TWO GREENS (LOCKED) ──
+     #2BFF77 neon brand  = brand/CTA ONLY: the one loud button per page, the
+                           FAB dot, active tab. Pairs with dark green ink.
+     #2E8C5A muted emerald = computed/verdict semantics: DERIVE ticks,
+                           WorkSeal marks, trace ✓ (--st-good-fg). Light
+                           surfaces only — never on texture.
+     Never swap one for the other; a third green is a bug.
+     (Verdict tonal trios — #3F8A6A pursue-ink etc. — live in
+     shared/verdictMaterial.ts, the single verdict-material source.) */
+
   /* Working Paper motion tokens — one ease, three durations, app-wide */
   --ease: cubic-bezier(.22, .61, .36, 1);
   --dur-fast: 120ms;
@@ -38,6 +91,59 @@
   --font-serif: 'Fraunces', Georgia, 'Times New Roman', serif;
   background: var(--bg);
   color: var(--ink);
+}
+
+/* ============================================================
+   .wk-tap — mobile press/hover physics (fusion Wave A).
+   Ported verbatim from .mobile-root's press grammar (index.css):
+   transform scale press — NEVER opacity dimming, which washes
+   textures gray — plus a -1.5px cursor lift on fine pointers and a
+   faster press-in (90ms) than release (160ms).
+   STRICTLY OPT-IN: apply the class per control. Never auto-apply via
+   broad selectors, and NEVER on .wktable rows — ledger rows keep
+   their flat surface-2 hover; the Working Paper stays still.
+   ============================================================ */
+.v6-root.wk .wk-tap {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 160ms cubic-bezier(0.25, 1, 0.5, 1),
+    box-shadow 180ms ease,
+    background 140ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .v6-root.wk .wk-tap:not(:disabled):hover { transform: translate3d(0, -1.5px, 0); }
+}
+.v6-root.wk .wk-tap:not(:disabled):active { transform: scale(0.985); transition-duration: 90ms; }
+@media (prefers-reduced-motion: reduce) {
+  .v6-root.wk .wk-tap,
+  .v6-root.wk .wk-tap:hover,
+  .v6-root.wk .wk-tap:active { transform: none !important; transition: none !important; }
+}
+
+/* ============================================================
+   Scrollbar grammar — floating-pill thumb on the nav gutter, the
+   notifications list, and the FAB chat thread ONLY. The canvas
+   scroll column keeps the UA default (judges' cut: scrollbar-gutter
+   there visibly re-centers the 1180/1440 containers).
+   Transparent track; the thumb is var(--line-2) clipped inside a
+   3px transparent border so it floats like an iOS overlay scrollbar.
+   ============================================================ */
+.wk-app .wknavscroll { scrollbar-gutter: stable; }
+.wk-app .wknavscroll::-webkit-scrollbar,
+.wk-app .wknotif-list::-webkit-scrollbar,
+.v6-root.wk .wk-chatwin .thin-scroll::-webkit-scrollbar { width: 10px; height: 10px; }
+.wk-app .wknavscroll::-webkit-scrollbar-track,
+.wk-app .wknotif-list::-webkit-scrollbar-track,
+.v6-root.wk .wk-chatwin .thin-scroll::-webkit-scrollbar-track { background: transparent; }
+.wk-app .wknavscroll::-webkit-scrollbar-thumb,
+.wk-app .wknotif-list::-webkit-scrollbar-thumb,
+.v6-root.wk .wk-chatwin .thin-scroll::-webkit-scrollbar-thumb {
+  background: var(--line-2);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
 }
 
 /* ============================================================
@@ -124,7 +230,9 @@
 .wk-app .setup .sbar { height: 5px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
 .wk-app .setup .sbar i { display: block; height: 100%; width: 38%; background: var(--accent); border-radius: 3px; }
 /* nav search launcher — sits under the brand, sized to nav width (moved from topbar) */
-.wk-app .wknav-search { display: flex; align-items: center; gap: 9px; width: calc(100% - 24px); margin: 2px 12px 6px; padding: 8px 11px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line); color: var(--ink-3); font-size: .86rem; font-weight: 450; cursor: pointer; font-family: var(--font-body); text-align: left; }
+/* search field: was var(--surface-2), which now equals the warmed --nav and
+   merged the fill into the rail — var(--bg) keeps it a soft inset field. */
+.wk-app .wknav-search { display: flex; align-items: center; gap: 9px; width: calc(100% - 24px); margin: 2px 12px 6px; padding: 8px 11px; border-radius: 10px; background: var(--bg); border: 1px solid var(--line); color: var(--ink-3); font-size: .86rem; font-weight: 450; cursor: pointer; font-family: var(--font-body); text-align: left; }
 .wk-app .wknav-search:hover { background: var(--surface-3); color: var(--ink-2); }
 .wk-app .wknav-search svg { flex: none; }
 .wk-app .wknav-search .wknav-search-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -163,7 +271,8 @@
 /* ---- Main column — topbar removed; the canvas sits at the top. ---- */
 .wk-app .wkmain { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 .wk-app .wkicon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; color: var(--ink-2); cursor: pointer; border: 0; background: transparent; }
-.wk-app .wkicon:hover { background: var(--surface-2); color: var(--ink); }
+/* hover: was var(--surface-2), invisible now that the rail itself is #F3F1EA */
+.wk-app .wkicon:hover { background: var(--surface-3); color: var(--ink); }
 .wk-app .wkav { width: 32px; height: 32px; border-radius: 50%; background: #2BFF77; color: #06371A; display: flex; align-items: center; justify-content: center; font-size: .72rem; font-weight: 600; cursor: pointer; border: 0; }
 
 /* ---- account menu (avatar dropdown — Sign out / preview) ----

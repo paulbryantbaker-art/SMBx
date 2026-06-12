@@ -846,7 +846,6 @@ export function V6DealView({
       {/* What Yulia has produced — analyses/models first (DCF, LBO, valuation,
           working capital, QoE), then documents. Each links to open in a tab. */}
       <V6Section
-        eyebrow="ANALYSES & MODELS"
         title="Analyses Yulia has run"
         sub={linkedWork.analyses.length ? "Valuations, models, and diligence analysis — click any to open." : undefined}
       >
@@ -864,7 +863,7 @@ export function V6DealView({
       </V6Section>
 
       {linkedWork.documents.length > 0 && (
-        <V6Section eyebrow="DOCUMENTS" title="Documents Yulia has drafted" sub="CIMs, LOIs, and memos — click any to open.">
+        <V6Section title="Documents Yulia has drafted" sub="CIMs, LOIs, and memos — click any to open.">
           <div style={D.workGrid}>
             {linkedWork.documents.map(f => (
               <WorkCard key={`d-${f.title}-${f.id ?? ""}`} file={f} dealName={real?.business_name || title} openTab={openTab} />

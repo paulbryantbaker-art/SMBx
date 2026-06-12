@@ -242,7 +242,8 @@ function StagedActionCard({
     <div style={C.stagedCard}>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "flex-start" }}>
         <div style={{ minWidth: 0 }}>
-          <div style={C.stagedEyebrow}>STAGED ACTION</div>
+          {/* mono-caps "STAGED ACTION" kicker deleted per the eyebrow lock —
+              the Confirm/Cancel pair + risk pill already say what this is. */}
           <div style={C.stagedTitle}>{action.label}</div>
           <div style={C.stagedSummary}>{action.summary}</div>
         </div>
@@ -551,17 +552,16 @@ const C: Record<string, CSSProperties> = {
     minHeight: 0,
   },
   composer: {
+    /* Canonical warm-card recipe — now sourced from the Wave A foundation
+       tokens (workspace.css .v6-root.wk). Values are byte-identical to the
+       previous literals: border rgba(25,24,19,0.16) = --wk-hairline; the
+       4-layer shadow stack = --wk-elev-card (extracted from here). */
     margin: 8,
     background: "var(--surface)",
     borderRadius: 18,
     padding: 10,
-    border: "1px solid rgba(25, 24, 19, 0.16)",
-    boxShadow: [
-      "0 0 0 1px rgba(255,255,255,0.58)",
-      "inset 0 1px 0 rgba(255,255,255,0.96)",
-      "0 12px 26px rgba(25, 24, 19, 0.075)",
-      "0 2px 7px rgba(25, 24, 19, 0.065)",
-    ].join(", "),
+    border: "1px solid var(--wk-hairline)",
+    boxShadow: "var(--wk-elev-card)",
   },
   composerInput: {
     width: "100%", boxSizing: "border-box",
@@ -594,8 +594,10 @@ const C: Record<string, CSSProperties> = {
     alignItems: "center",
     gap: 4,
     color: "var(--ink-2)",
-    background: "#F3F1EA",
-    border: "1px solid rgba(25, 24, 19, 0.10)",
+    /* #F3F1EA → var(--surface-2) (identical post-bridge); rgba(25,24,19,0.10)
+       → var(--line) (identical, base :root token). */
+    background: "var(--surface-2)",
+    border: "1px solid var(--line)",
     fontSize: 11,
     fontWeight: 750,
     cursor: "pointer",
@@ -615,8 +617,8 @@ const C: Record<string, CSSProperties> = {
     display: "flex",
     alignItems: "center",
     gap: 6,
-    background: "#F3F1EA",
-    border: "1px solid rgba(25, 24, 19, 0.10)",
+    background: "var(--surface-2)",
+    border: "1px solid var(--line)",
   },
   attachmentIcon: {
     width: 18,
@@ -655,9 +657,9 @@ const C: Record<string, CSSProperties> = {
   modelSelect: {
     height: 26,
     maxWidth: 92,
-    border: "1px solid rgba(25, 24, 19, 0.10)",
+    border: "1px solid var(--line)",
     borderRadius: 999,
-    background: "#F3F1EA",
+    background: "var(--surface-2)",
     color: "var(--ink)",
     padding: "0 7px",
     fontSize: 11,
@@ -726,14 +728,6 @@ const C: Record<string, CSSProperties> = {
     background: "var(--surface)",
     border: "1px solid #ECE9DF",
     boxShadow: "0 12px 28px rgba(25, 24, 19, 0.10)",
-  },
-  stagedEyebrow: {
-    fontFamily: "var(--font-mono)",
-    fontSize: 9,
-    letterSpacing: "0.15em",
-    fontWeight: 700,
-    color: "var(--accent)",
-    marginBottom: 5,
   },
   stagedTitle: {
     fontSize: 13.5,
