@@ -107,6 +107,24 @@ export interface MobileChatBridge {
   uploadFile?: (file: File) => Promise<{ name: string; size: string } | null>;
   confirmStagedAction?: (id: number, summary?: string) => void | Promise<void>;
   cancelStagedAction?: (id: number) => void | Promise<void>;
+  /* Conversation history (authed only) — the sheet's clock button lists
+     saved threads and resumes one through the live useAuthChat instance.
+     All four absent for anon: the button doesn't render. */
+  conversations?: MobileConversationSummary[];
+  activeConversationId?: number | null;
+  selectConversation?: (id: number) => void;
+  /** Resolves false when the refresh failed — the sheet must not claim
+   *  "no conversations" when the truth is "couldn't check". */
+  refreshConversations?: () => void | Promise<boolean>;
+}
+
+/** Minimal slice of useAuthChat's Conversation that the history list renders. */
+export interface MobileConversationSummary {
+  id: number;
+  title: string | null;
+  summary?: string | null;
+  business_name?: string | null;
+  updated_at: string;
 }
 
 export type Verdict = "pursue" | "watch" | "pass";
@@ -115,6 +133,6 @@ export type YIconKind = Verdict | "default" | "cool";
 export type IconName =
   | "chat" | "search" | "back" | "share" | "close" | "download"
   | "chevron" | "star" | "arrowUp" | "bell" | "bellOff"
-  | "today" | "pipeline" | "brief";
+  | "today" | "pipeline" | "brief" | "history";
 
 export type GlassTint = "light" | "chrome" | "dark" | "onColor";

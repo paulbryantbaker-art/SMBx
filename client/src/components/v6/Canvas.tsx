@@ -37,9 +37,17 @@ interface CanvasProps {
   user: User | null;
   onSignOut: () => void;
   modelPreference?: ModelPreference;
+  /* Conversation-history seam — see HistoryView. Resume must route through
+     the live chat bridge, not a fresh fetch. chatBusy mirrors chat.sending:
+     switching or deleting the active thread mid-stream corrupts the panel,
+     so HistoryView disables those rows while Yulia is replying. */
+  activeConversationId?: number | null;
+  chatBusy?: boolean;
+  onResumeConversation?: (id: number) => void;
+  onConversationDeleted?: (id: number) => void;
 }
 
-export function V6Canvas({ tabs, activeTabId, openTab, onPickMode, onTalkToYulia, user, onSignOut, modelPreference }: CanvasProps) {
+export function V6Canvas({ tabs, activeTabId, openTab, onPickMode, onTalkToYulia, user, onSignOut, modelPreference, activeConversationId, chatBusy, onResumeConversation, onConversationDeleted }: CanvasProps) {
   const activeTab = tabs.find(t => t.id === activeTabId) ?? tabs[0];
   // The open-tabs strip lives in the left nav ("Open" section) now, so the
   // canvas is pure content: just the active tab's body at full height.
@@ -57,6 +65,10 @@ export function V6Canvas({ tabs, activeTabId, openTab, onPickMode, onTalkToYulia
               user={user}
               onSignOut={onSignOut}
               modelPreference={modelPreference}
+              activeConversationId={activeConversationId}
+              chatBusy={chatBusy}
+              onResumeConversation={onResumeConversation}
+              onConversationDeleted={onConversationDeleted}
             />
           </Suspense>
         )}
@@ -73,9 +85,13 @@ interface TabContentProps {
   user: User | null;
   onSignOut: () => void;
   modelPreference?: ModelPreference;
+  activeConversationId?: number | null;
+  chatBusy?: boolean;
+  onResumeConversation?: (id: number) => void;
+  onConversationDeleted?: (id: number) => void;
 }
 
-function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut, modelPreference }: TabContentProps) {
+function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut, modelPreference, activeConversationId, chatBusy, onResumeConversation, onConversationDeleted }: TabContentProps) {
   if (tab.kind === "mode-root") {
     if (tab.modeId === "today")    return <V6TodayRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
     if (tab.modeId === "pipeline") return <V6PipelineRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} modelPreference={modelPreference} />;
@@ -100,7 +116,7 @@ function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut, modelPrefe
   if (tab.kind === "learn")    return <V6LearnView section={tab.section} anchor={tab.anchor} onTalkToYulia={onTalkToYulia} />;
   if (tab.kind === "marketing-studio") return <V6MarketingStudioView tab={tab} openTab={openTab} user={user} onTalkToYulia={onTalkToYulia} />;
   if (tab.kind === "settings") return <V6SettingsView user={user} onSignOut={onSignOut} />;
-  if (tab.kind === "history")  return <V6HistoryView />;
+  if (tab.kind === "history")  return <V6HistoryView user={user} activeConversationId={activeConversationId} busy={chatBusy} onResume={onResumeConversation} onDeleted={onConversationDeleted} />;
   if (tab.kind === "starter")  return <V6StarterView onTalkToYulia={onTalkToYulia} />;
   return <Placeholder label="Unknown tab" />;
 }

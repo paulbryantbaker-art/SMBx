@@ -25,6 +25,12 @@ const ICONS: Record<IconName, (p: IconProps) => ReactElement> = {
       <path d="M11.6 11.6L15 15" stroke={c} strokeWidth="1.8" strokeLinecap="round"/>
     </svg>
   ),
+  history: ({ size = 17, c = "currentColor" }) => (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <circle cx="10" cy="10" r="7.2" stroke={c} strokeWidth="1.7"/>
+      <path d="M10 6.2V10L12.8 11.8" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
   back: ({ size = 14, c = "currentColor" }) => (
     <svg width={size} height={(size as number) * 22 / 14} viewBox="0 0 14 22" fill="none" aria-hidden="true">
       <path d="M11 2L3 11L11 20" stroke={c} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>

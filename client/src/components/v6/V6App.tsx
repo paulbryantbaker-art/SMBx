@@ -30,6 +30,11 @@ interface ChatBridge {
   uploadFile?: (file: File) => Promise<{ name: string; size: string } | null>;
   confirmStagedAction?: (id: number, summary?: string) => void | Promise<void>;
   cancelStagedAction?: (id: number) => void | Promise<void>;
+  /* Conversation history (authed only) — the History tab resumes/clears
+     threads through the SAME useAuthChat instance that powers the composer. */
+  activeConversationId?: number | null;
+  selectConversation?: (id: number) => void;
+  newConversation?: () => void;
 }
 
 function mergeStructuredAssumptions(analysisData: Record<string, any> | undefined, updates: Record<string, any>): Record<string, any> | undefined {
@@ -145,7 +150,10 @@ function V6AppAuthed({ user, onSignOut }: { user: User; onSignOut: () => Promise
     uploadFile: chat.uploadFile,
     confirmStagedAction: chat.confirmStagedAction,
     cancelStagedAction: chat.cancelStagedAction,
-  }), [chat.messages, chat.sending, chat.streamingText, chat.activeTool, chat.toolTrace, chat.sendMessage, chat.uploadFile, chat.confirmStagedAction, chat.cancelStagedAction]);
+    activeConversationId: chat.activeConversationId,
+    selectConversation: chat.selectConversation,
+    newConversation: chat.newConversation,
+  }), [chat.messages, chat.sending, chat.streamingText, chat.activeTool, chat.toolTrace, chat.sendMessage, chat.uploadFile, chat.confirmStagedAction, chat.cancelStagedAction, chat.activeConversationId, chat.selectConversation, chat.newConversation]);
 
   return <V6AppShell user={user} chat={bridge} onSignOut={async () => { await onSignOut(); }} />;
 }
@@ -767,6 +775,14 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
                 user={user}
                 onSignOut={onSignOut}
                 modelPreference={modelPreference}
+                activeConversationId={chat.activeConversationId}
+                chatBusy={chat.sending}
+                onResumeConversation={chat.selectConversation
+                  ? (id) => { chat.selectConversation?.(id); setChatOpen(true); }
+                  : undefined}
+                onConversationDeleted={(id) => {
+                  if (id === chat.activeConversationId) chat.newConversation?.();
+                }}
               />
             </Suspense>
           </div>

@@ -101,7 +101,11 @@ function V6MobileAuthed({ user, onSignOut }: { user: User; onSignOut: () => void
     uploadFile: chat.uploadFile,
     confirmStagedAction: chat.confirmStagedAction,
     cancelStagedAction: chat.cancelStagedAction,
-  }), [thread, chat.sending, chat.streamingText, chat.activeTool, chat.toolTrace, chat.paywallData, chat.sendMessage, chat.uploadFile, chat.confirmStagedAction, chat.cancelStagedAction]);
+    conversations: chat.conversations,
+    activeConversationId: chat.activeConversationId,
+    selectConversation: chat.selectConversation,
+    refreshConversations: chat.loadConversations,
+  }), [thread, chat.sending, chat.streamingText, chat.activeTool, chat.toolTrace, chat.paywallData, chat.sendMessage, chat.uploadFile, chat.confirmStagedAction, chat.cancelStagedAction, chat.conversations, chat.activeConversationId, chat.selectConversation, chat.loadConversations]);
   return <V6MobileShell user={user} chat={bridge} onSignOut={onSignOut} />;
 }
 

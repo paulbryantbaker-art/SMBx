@@ -199,9 +199,12 @@ export function useAuthChat(user: User | null) {
   // current implementation without closing over a stale function.
   const sendMessageRef = useRef<((content: string, surfaceContext?: SurfaceContext, modelPreference?: ModelPreference) => Promise<void>) | null>(null);
 
-  // Load conversation list (flat for backward compat + grouped for new sidebar)
-  const loadConversations = useCallback(async () => {
-    if (!user) return;
+  // Load conversation list (flat for backward compat + grouped for new sidebar).
+  // Returns whether BOTH fetches succeeded so history surfaces can tell a real
+  // empty list from a failed refresh (honesty: never claim "no conversations"
+  // when the truth is "couldn't check").
+  const loadConversations = useCallback(async (): Promise<boolean> => {
+    if (!user) return false;
     try {
       const [flatRes, groupedRes] = await Promise.all([
         fetch('/api/chat/conversations', { headers: authHeaders() }),
@@ -209,14 +212,48 @@ export function useAuthChat(user: User | null) {
       ]);
       if (flatRes.ok) setConversations(await flatRes.json());
       if (groupedRes.ok) setGrouped(await groupedRes.json());
+      return flatRes.ok && groupedRes.ok;
     } catch (err) {
       console.error('Failed to load conversations:', err);
+      return false;
     }
   }, [user]);
 
   useEffect(() => {
     if (user) loadConversations();
   }, [user, loadConversations]);
+
+  // Fetch one conversation's messages. Owns loadedConvIdRef:
+  //   - STALE GUARD: only the fetch whose id still matches loadedConvIdRef
+  //     when the response lands may setMessages — rapid A→B selection can't
+  //     paint A's thread under B's identity.
+  //   - FAILURE RECOVERY: on error the ref resets to null (so re-selecting
+  //     refetches instead of no-opping) and a toast offers Retry.
+  const loadMessagesRef = useRef<(id: number) => void>(() => {});
+  const loadMessages = useCallback((id: number) => {
+    loadedConvIdRef.current = id;
+    void (async () => {
+      try {
+        const res = await fetch(
+          `/api/chat/conversations/${id}/messages`,
+          { headers: authHeaders() },
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (loadedConvIdRef.current === id) setMessages(data);
+      } catch (err) {
+        console.error('Failed to load messages:', err);
+        if (loadedConvIdRef.current === id) {
+          loadedConvIdRef.current = null;
+          showToast("Couldn't load that conversation", {
+            tone: 'error',
+            action: { label: 'Retry', handler: () => loadMessagesRef.current(id) },
+          });
+        }
+      }
+    })();
+  }, []);
+  useEffect(() => { loadMessagesRef.current = loadMessages; }, [loadMessages]);
 
   // Load messages when conversation changes.
   // SKIP when:
@@ -237,19 +274,8 @@ export function useAuthChat(user: User | null) {
       return;
     }
     if (loadedConvIdRef.current === activeConversationId) return;
-    loadedConvIdRef.current = activeConversationId;
-    (async () => {
-      try {
-        const res = await fetch(
-          `/api/chat/conversations/${activeConversationId}/messages`,
-          { headers: authHeaders() },
-        );
-        if (res.ok) setMessages(await res.json());
-      } catch (err) {
-        console.error('Failed to load messages:', err);
-      }
-    })();
-  }, [activeConversationId, user]);
+    loadMessages(activeConversationId);
+  }, [activeConversationId, user, loadMessages]);
 
   // Create a new conversation
   const createConversation = useCallback(async (): Promise<number | null> => {
@@ -667,6 +693,13 @@ export function useAuthChat(user: User | null) {
   const selectConversation = useCallback((id: number) => {
     setActiveConversationId(id);
     setPaywallData(null);
+    // Re-selecting the already-active thread after its load failed: the id
+    // state doesn't change so the load effect won't re-fire — fetch directly.
+    // (loadMessages sets loadedConvIdRef first, so when the id DID change the
+    // effect sees it already claimed and doesn't double-fetch.)
+    if (!sendingRef.current && loadedConvIdRef.current !== id) {
+      loadMessagesRef.current(id);
+    }
   }, []);
 
   // Start fresh (new conversation)

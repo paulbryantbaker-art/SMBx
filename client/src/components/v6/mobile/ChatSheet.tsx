@@ -30,6 +30,15 @@ export function ChatSheet({ open, onClose, chat }: ChatSheetProps) {
   const [kbHeight, setKbHeight] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [attachment, setAttachment] = useState<{ name: string; size: string } | null>(null);
+  // History layer (authed only) — lists saved conversations over the thread;
+  // tapping one resumes it through the live useAuthChat instance.
+  const [historyOpen, setHistoryOpen] = useState(false);
+  // Honest list states: never show "No saved conversations yet." while the
+  // refresh is in flight or after it failed.
+  const [historyState, setHistoryState] = useState<"loading" | "ready" | "failed">("loading");
+  // House list law: full lists render 100/page with a "Show next 100" extender.
+  const HISTORY_PAGE = 100;
+  const [historyCap, setHistoryCap] = useState(HISTORY_PAGE);
 
   // Toggle html.yulia-chat-open while sheet is mounted
   useLayoutEffect(() => {
@@ -37,6 +46,24 @@ export function ChatSheet({ open, onClose, chat }: ChatSheetProps) {
     document.documentElement.classList.add("yulia-chat-open");
     return () => document.documentElement.classList.remove("yulia-chat-open");
   }, [open]);
+
+  // History resets with the sheet and refreshes its list when opened.
+  useEffect(() => {
+    if (!open) setHistoryOpen(false);
+  }, [open]);
+  const refreshConversations = chat.refreshConversations;
+  useEffect(() => {
+    if (!historyOpen) {
+      setHistoryCap(HISTORY_PAGE);
+      return;
+    }
+    let alive = true;
+    setHistoryState("loading");
+    Promise.resolve(refreshConversations?.())
+      .then(ok => { if (alive) setHistoryState(ok === false ? "failed" : "ready"); })
+      .catch(() => { if (alive) setHistoryState("failed"); });
+    return () => { alive = false; };
+  }, [historyOpen, refreshConversations]);
 
   // Track keyboard height via visualViewport
   useEffect(() => {
@@ -169,25 +196,42 @@ export function ChatSheet({ open, onClose, chat }: ChatSheetProps) {
             <MobileIcon name="back" size={14} c="var(--mb-ink-1)" />
           </button>
           <div style={S.headerTitleWrap}>
-            <div style={S.headerTitle}>Yulia</div>
-            {chat.activeTool ? <div className="mb-mono" style={S.headerMeta}>{chat.activeTool}</div> : null}
+            <div style={S.headerTitle}>{historyOpen ? "Conversations" : "Yulia"}</div>
+            {!historyOpen && chat.activeTool ? <div className="mb-mono" style={S.headerMeta}>{chat.activeTool}</div> : null}
           </div>
-          <button
-            type="button"
-            aria-label="Close chat"
-            onClick={onClose}
-            style={S.headerBtn}
-          >
-            <MobileIcon name="close" size={16} c="var(--mb-ink-1)" />
-          </button>
+          <div style={S.headerActions}>
+            {chat.selectConversation && (
+              <button
+                type="button"
+                aria-label="Conversation history"
+                aria-pressed={historyOpen}
+                onClick={() => setHistoryOpen(p => !p)}
+                style={{ ...S.headerBtn, ...(historyOpen ? S.headerBtnActive : undefined) }}
+              >
+                <MobileIcon name="history" size={17} c="var(--mb-ink-1)" />
+              </button>
+            )}
+            <button
+              type="button"
+              aria-label="Close chat"
+              onClick={onClose}
+              style={S.headerBtn}
+            >
+              <MobileIcon name="close" size={16} c="var(--mb-ink-1)" />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* BACK — scrolling conversation */}
+      {/* BACK — scrolling conversation. `inert` while history covers it:
+          the layer only occludes by paint order, so without inert the
+          thread's send chips and staged-action confirms stay reachable by
+          VoiceOver/Tab behind the list. */}
       <div
         ref={scrollRef}
         className="mb-hide-scroll"
         onScroll={onConversationScroll}
+        inert={historyOpen || undefined}
         style={{
           ...S.conversation,
           paddingBottom: `${72 + kbHeight + 16}px`,
@@ -209,7 +253,66 @@ export function ChatSheet({ open, onClose, chat }: ChatSheetProps) {
         )}
       </div>
 
+      {/* HISTORY — saved conversations over the thread (authed only). The
+          composer hides while this is up so a stray send can't stream into
+          whichever thread happens to be active mid-browse. */}
+      {historyOpen && (
+        <div className="mb-hide-scroll" style={S.historyLayer}>
+          {(chat.conversations?.length ?? 0) === 0 ? (
+            // Honest empties: an empty array means "none" ONLY once a refresh
+            // has actually succeeded — not while loading, not after a failure.
+            <div style={S.historyEmpty}>
+              {historyState === "loading" ? "Loading conversations…"
+                : historyState === "failed" ? "Couldn't load conversations. Check your connection and reopen this list."
+                : "No saved conversations yet."}
+            </div>
+          ) : (
+            <>
+              {chat.conversations!.slice(0, historyCap).map(c => {
+                const title = c.title?.trim() || "Untitled conversation";
+                const isActive = c.id === chat.activeConversationId;
+                // Switching threads while Yulia streams corrupts the panel
+                // (the hook can't load mid-send and the stream's done event
+                // snaps the selection back) — wait her out.
+                const blocked = chat.sending;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    disabled={blocked}
+                    onClick={() => { chat.selectConversation?.(c.id); setHistoryOpen(false); }}
+                    style={{ ...S.historyRow, opacity: blocked ? 0.5 : 1 }}
+                    aria-label={`Resume “${title}”`}
+                  >
+                    <span style={S.historyRowTitleLine}>
+                      <span style={S.historyRowTitle}>{title}</span>
+                      {isActive && <span style={S.historyOpenTag}>Open</span>}
+                    </span>
+                    <span style={S.historyRowMeta}>
+                      {[c.business_name, sheetTimeAgo(c.updated_at)].filter(Boolean).join(" · ")}
+                    </span>
+                  </button>
+                );
+              })}
+              {chat.sending && (
+                <div style={S.historyEmpty}>Yulia is replying — switch threads when she finishes.</div>
+              )}
+              {(chat.conversations?.length ?? 0) > historyCap && (
+                <button
+                  type="button"
+                  style={S.historyMore}
+                  onClick={() => setHistoryCap(p => p + HISTORY_PAGE)}
+                >
+                  Show next {Math.min(chat.conversations!.length - historyCap, HISTORY_PAGE)}
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
       {/* FRONT BOTTOM — composer */}
+      {!historyOpen && (
       <form
         onSubmit={onSubmit}
         style={{
@@ -282,9 +385,24 @@ export function ChatSheet({ open, onClose, chat }: ChatSheetProps) {
           </button>
         </div>
       </form>
+      )}
     </div>,
     document.body,
   );
+}
+
+function sheetTimeAgo(iso?: string | null): string {
+  if (!iso) return "";
+  const ms = Date.now() - new Date(iso).getTime();
+  if (!Number.isFinite(ms) || ms < 0) return "";
+  const min = Math.floor(ms / 60_000);
+  if (min < 1) return "just now";
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const day = Math.floor(hr / 24);
+  if (day < 7) return `${day}d ago`;
+  return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
 /* ─── Empty state ───────────────────────────────────────── */
@@ -539,6 +657,8 @@ const S: Record<string, CSSProperties> = {
     cursor: "pointer",
     flexShrink: 0,
   },
+  headerActions: { display: "flex", alignItems: "center", gap: 6, flexShrink: 0 },
+  headerBtnActive: { background: "rgba(0,0,0,0.10)" },
   headerTitleWrap: { textAlign: "center", flex: 1, minWidth: 0 },
   headerTitle: {
     fontFamily: "var(--mb-font-display)", fontWeight: 700,
@@ -555,6 +675,46 @@ const S: Record<string, CSSProperties> = {
     padding: "calc(env(safe-area-inset-top, 0px) + 60px) 16px 0",
     display: "flex", flexDirection: "column",
     justifyContent: "flex-end",
+  },
+  historyLayer: {
+    position: "absolute", inset: 0, zIndex: 1,
+    overflowY: "auto",
+    background: "var(--mb-bg)",
+    padding: "calc(env(safe-area-inset-top, 0px) + 64px) 16px calc(env(safe-area-inset-bottom, 0px) + 24px)",
+    display: "flex", flexDirection: "column", gap: 6,
+  },
+  historyEmpty: { fontSize: 14, color: "var(--mb-ink-3)", padding: "18px 4px" },
+  historyRow: {
+    background: "var(--mb-card-2)", border: "none",
+    borderRadius: 14,
+    padding: "12px 14px",
+    display: "flex", flexDirection: "column", gap: 3,
+    textAlign: "left",
+    fontFamily: "var(--mb-font-body)",
+    cursor: "pointer",
+    flexShrink: 0,
+  },
+  historyRowTitleLine: { display: "flex", alignItems: "center", gap: 8, minWidth: 0 },
+  historyRowTitle: {
+    fontSize: 14.5, fontWeight: 600, color: "var(--mb-ink)",
+    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+  },
+  historyOpenTag: {
+    flexShrink: 0,
+    fontSize: 11, fontWeight: 700,
+    color: "var(--mb-accent-ink)",
+  },
+  historyRowMeta: { fontSize: 12, color: "var(--mb-ink-3)" },
+  historyMore: {
+    background: "transparent",
+    border: "1px solid var(--mb-line-2)",
+    borderRadius: 14,
+    padding: "12px 14px",
+    fontSize: 14, fontWeight: 600,
+    color: "var(--mb-ink-2)",
+    fontFamily: "var(--mb-font-body)",
+    cursor: "pointer",
+    flexShrink: 0,
   },
   emptyWrap: {
     flex: 1,
