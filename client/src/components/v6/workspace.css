@@ -133,6 +133,68 @@
 }
 
 /* ============================================================
+   LIVING CHROME (Data Speaks Color, Phase 2) — per-mode ambient
+   washes. Each mode root carries its own faint atmosphere, the
+   hues ported from the mobile screens (periwinkle Today, olive
+   Pipeline, navy Intel, gold Docs/Files, sage Analysis, slate
+   Library/Search). The wash encodes ONE meaning — which room you
+   are in — and stays a FLAT tint (texture law: no new texture
+   fields). data-wk-mode is set beside data-wk-theme on the root;
+   modes without a block (settings, history) stay pure paper.
+   ============================================================ */
+.v6-root.wk {
+  --wk-wash: transparent;
+  --wk-wash-ink: transparent;
+}
+.v6-root.wk[data-wk-mode="today"]    { --wk-wash: rgba(95, 115, 200, 0.06); --wk-wash-ink: rgba(80, 98, 180, 0.85); }
+.v6-root.wk[data-wk-mode="pipeline"] { --wk-wash: rgba(80, 96, 62, 0.05);   --wk-wash-ink: rgba(80, 96, 62, 0.85); }
+.v6-root.wk[data-wk-mode="intel"]    { --wk-wash: rgba(24, 58, 76, 0.05);   --wk-wash-ink: rgba(24, 58, 76, 0.85); }
+.v6-root.wk[data-wk-mode="docs"],
+.v6-root.wk[data-wk-mode="studio"],
+.v6-root.wk[data-wk-mode="files"]    { --wk-wash: rgba(214, 163, 92, 0.07); --wk-wash-ink: rgba(150, 106, 40, 0.85); }
+.v6-root.wk[data-wk-mode="analysis"] { --wk-wash: rgba(63, 138, 106, 0.05); --wk-wash-ink: rgba(63, 138, 106, 0.85); }
+.v6-root.wk[data-wk-mode="library"],
+.v6-root.wk[data-wk-mode="search"]   { --wk-wash: rgba(70, 90, 110, 0.05);  --wk-wash-ink: rgba(70, 90, 110, 0.85); }
+
+/* The wash itself: bottom-weighted flat gradient on the scrolling canvas —
+   the working area at the top stays paper; the room hue gathers below.
+   Painted on the scroll body inside its relative parent (Safari rule safe). */
+.v6-root.wk .v6-canvas-scroll {
+  background-image: linear-gradient(to bottom, transparent 0%, transparent 45%, var(--wk-wash) 100%);
+}
+
+/* KPI band breathes the room hue (fence-safe: the band sits ABOVE the
+   wktable; numerals stay mono ink — only their ground warms). */
+.v6-root.wk .wk-content .mhead {
+  background: linear-gradient(135deg, var(--surface-2), color-mix(in oklab, var(--wk-wash-ink) 7%, var(--surface-2)));
+  border-color: color-mix(in oklab, var(--wk-wash-ink) 16%, var(--wk-hairline-2));
+}
+
+/* Active nav pill acknowledges the room. */
+.v6-root.wk .wk-app .navitem.on,
+.v6-root.wk .wk-app .navtab.on {
+  background: color-mix(in oklab, var(--wk-wash-ink) 6%, var(--surface));
+}
+
+/* Ledger row hover takes a whisper of the room hue (flat — the Working
+   Paper stays still; no transforms on table rows). */
+.v6-root.wk .wk-content .wktable tbody tr:hover {
+  background: color-mix(in oklab, var(--wk-wash-ink) 4%, var(--surface-2));
+}
+
+/* ── .wk-ascard — the App-Store card frame as an opt-in utility (DC-2
+   graft). Consumes the existing --wk-as-card-* recipe so browse cards
+   (Analyses catalog, Docs, Search categories) sit in the laminated frame
+   the mobile cards use. ── */
+.v6-root.wk .wk-ascard {
+  background: var(--surface);
+  border: var(--wk-as-card-border);
+  border-top-color: var(--wk-as-card-border-top);
+  border-radius: 18px;
+  box-shadow: var(--wk-as-card-shadow);
+}
+
+/* ============================================================
    .wk-tap — mobile press/hover physics (fusion Wave A).
    Ported verbatim from .mobile-root's press grammar (index.css):
    transform scale press — NEVER opacity dimming, which washes

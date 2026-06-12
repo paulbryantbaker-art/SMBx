@@ -4,8 +4,17 @@ import type { IconName, OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
 import { useV6WorkspaceData, type WorkspaceDeal, type WorkspaceDeliverable } from "../../../hooks/useV6WorkspaceData";
 import { YuliaSkeleton } from "../shared/YuliaSkeleton";
+import { VERDICT_MATERIAL } from "../shared/verdictMaterial";
 
 type LibKind = "deal" | "analysis" | "doc";
+
+/* Family tones (consume verdictMaterial, never restate): these are KIND
+ * families, not verdicts — info-blue/sage/gold answer "what is this row". */
+const KIND_TONE: Record<LibKind, { ink: string; soft: string }> = {
+  deal: VERDICT_MATERIAL.baseline.tone,
+  analysis: VERDICT_MATERIAL.pursue.tone,
+  doc: VERDICT_MATERIAL.watch.tone,
+};
 
 interface LibItem {
   kind: LibKind;
@@ -138,8 +147,18 @@ export function V6LibraryRoot({
                     role="button"
                     aria-label={`${it.title}, ${it.sub}`}
                   >
-                    <td style={{ color: "var(--ink-3)" }}>
-                      <V6Icon name={iconForKind(it.kind)} size={14} />
+                    <td>
+                      {/* Kind-literate chip (family tones from verdictMaterial):
+                          deal=info-blue, analysis=valuation sage, doc=structure
+                          gold — color answers "what kind of thing is this row". */}
+                      <span style={{
+                        width: 26, height: 26, borderRadius: 8,
+                        background: KIND_TONE[it.kind].soft,
+                        color: KIND_TONE[it.kind].ink,
+                        display: "inline-flex", alignItems: "center", justifyContent: "center",
+                      }}>
+                        <V6Icon name={iconForKind(it.kind)} size={14} />
+                      </span>
                     </td>
                     <td><div className="nm">{it.title}</div></td>
                     <td><span className="muted">{it.sub}</span></td>

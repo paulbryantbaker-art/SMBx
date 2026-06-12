@@ -10,6 +10,17 @@ import "./workspace.css";
 import { buildDesktopSurfaceContext, type SurfaceContext } from "../../lib/yuliaSurfaceContext";
 import { normalizeModelPreference, type ModelPreference } from "../../lib/modelPreference";
 import { loadWkTheme, saveWkTheme, type WkTheme } from "../../lib/wkTheme";
+import { VERDICT_MATERIAL } from "./shared/verdictMaterial";
+
+/* Family inks for Open-tab glyphs (consume verdictMaterial, never restate):
+ * deal=info-blue baseline, doc=structure gold, analysis/model=valuation
+ * sage. Unlisted kinds stay neutral ink. */
+const TAB_KIND_INK: Record<string, string | undefined> = {
+  deal: VERDICT_MATERIAL.baseline.tone.ink,
+  doc: VERDICT_MATERIAL.watch.tone.ink,
+  analysis: VERDICT_MATERIAL.pursue.tone.ink,
+  model: VERDICT_MATERIAL.pursue.tone.ink,
+};
 import { consumePendingMessage } from "../../marketing/useEnterApp";
 import { buildBigFakeInvestmentBoardTab, shouldOpenSampleInvestmentBoard } from "../../lib/sampleInvestmentBoard";
 import { useModelStore, type ModelType } from "../../lib/modelStore";
@@ -623,7 +634,13 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
   };
 
   return (
-    <div className="v6-root wk" data-wk-theme={wkTheme === "paper" ? undefined : wkTheme}>
+    <div
+      className="v6-root wk"
+      data-wk-theme={wkTheme === "paper" ? undefined : wkTheme}
+      // Living Chrome: the active mode tints the room (ambient wash, KPI
+      // band, nav pill) via the [data-wk-mode] token blocks in workspace.css.
+      data-wk-mode={activeMode}
+    >
       <div className="wk-app">
         {/* SIDEBAR — CD sectioned IA, wired to V6 modes. Holds search (top) +
             the toolbar (foot): New, notifications, account. */}
@@ -688,7 +705,13 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
                         aria-selected={on}
                         aria-current={on ? "page" : undefined}
                       >
-                        <V6Icon name={navTabIcon(t)} size={16} />
+                        {/* Open-tab glyphs learn their kind (family tones from
+                            verdictMaterial): deals=info-blue, docs=structure
+                            gold, analyses/models=valuation sage. Labels stay
+                            ink; only the glyph carries the family. */}
+                        <span style={{ display: "inline-flex", color: TAB_KIND_INK[t.kind] }}>
+                          <V6Icon name={navTabIcon(t)} size={16} />
+                        </span>
                         <span>{t.title}</span>
                       </button>
                       <button

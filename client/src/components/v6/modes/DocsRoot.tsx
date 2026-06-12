@@ -136,7 +136,7 @@ export function V6DocsRoot({
           {TEMPLATES.map(t => (
             <div
               key={t.id}
-              className="wkcard tap"
+              className="wkcard tap wk-ascard"
               onClick={() => { void runDocAction(t); }}
               role="button"
               tabIndex={0}
@@ -170,7 +170,7 @@ export function V6DocsRoot({
           {RECENTS.map(d => (
             <div
               key={d.id}
-              className="wkcard tap"
+              className="wkcard tap wk-ascard"
               onClick={() => openTab({ kind: "doc", title: d.title, id: d.id })}
               role="button"
               tabIndex={0}
@@ -199,7 +199,7 @@ export function V6DocsRoot({
           {FOLDERS.map(f => (
             <div
               key={f.id}
-              className="wkcard tap"
+              className="wkcard tap wk-ascard"
               role="button"
               tabIndex={0}
               aria-label={`${f.name} — ${f.count} files`}

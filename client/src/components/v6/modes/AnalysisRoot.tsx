@@ -346,8 +346,8 @@ export function V6AnalysisRoot({
             {filtered.map(t => (
               <div
                 key={t.id}
-                className="wkcard wk-tap"
-                style={{ boxShadow: "var(--wk-elev-card)", cursor: "pointer" }}
+                className="wkcard wk-tap wk-ascard"
+                style={{ cursor: "pointer" }}
                 onClick={() => { void runAnalysisAction(t); }}
                 role="button"
                 tabIndex={0}
@@ -413,7 +413,11 @@ export function V6AnalysisRoot({
                   >
                     <td>
                       <div className="cellname">
-                        <span className="logo"><V6Icon name="chart" size={14} /></span>
+                        {/* Tool-family tint (toolTone consumes verdictMaterial)
+                            — the chip answers "which analysis family". */}
+                        <span className="logo" style={{ background: toolTone(r.analysisType || "").soft, color: toolTone(r.analysisType || "").ink }}>
+                          <V6Icon name="chart" size={14} />
+                        </span>
                         <div className="nm">{r.title}</div>
                       </div>
                     </td>
