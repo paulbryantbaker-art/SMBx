@@ -63,6 +63,9 @@ export interface VerdictMaterial {
   /** Tonal trio for LIGHT surfaces (pills, tonal fields): mid = dots/fills,
    *  ink = text on soft, soft = tonal background. (= mobile verdict tokens) */
   tone: { mid: string; ink: string; soft: string };
+  /** 145deg gradient pair for small icon chips (mobile IndustryIcon recipe).
+   *  Light → mid of the kind's family; white glyph on top. */
+  iconGradient: [string, string];
 }
 
 export const VERDICT_MATERIAL: Record<VerdictKind, VerdictMaterial> = {
@@ -71,18 +74,21 @@ export const VERDICT_MATERIAL: Record<VerdictKind, VerdictMaterial> = {
     overlay: "linear-gradient(165deg, rgba(63,138,106,0.30) 0%, rgba(40,92,70,0.62) 100%)",
     glow: "0 14px 36px -10px rgba(63,138,106,0.32)",
     tone: { mid: "#6FB89A", ink: "#3F8A6A", soft: "#E6F3EC" },
+    iconGradient: ["#B5DCC5", "#3F8A6A"],
   },
   watch: {
     texture: RANDOM_TEXTURES.watch,
     overlay: "linear-gradient(165deg, rgba(202,150,82,0.30) 0%, rgba(128,86,36,0.62) 100%)",
     glow: "0 14px 36px -10px rgba(180,130,50,0.30)",
     tone: { mid: "#D6A35C", ink: "#9C7128", soft: "#FAF1E1" },
+    iconGradient: ["#F0CF98", "#B8853F"],
   },
   pass: {
     texture: RANDOM_TEXTURES.pass,
     overlay: "linear-gradient(165deg, rgba(216,139,132,0.30) 0%, rgba(140,68,60,0.62) 100%)",
     glow: "0 14px 36px -10px rgba(180,90,80,0.28)",
     tone: { mid: "#D88B84", ink: "#A85248", soft: "#FBEAE7" },
+    iconGradient: ["#F0BAB3", "#A85248"],
   },
   baseline: {
     // Navy-neutral "no verdict yet" — texture from the live rotation
@@ -93,8 +99,29 @@ export const VERDICT_MATERIAL: Record<VerdictKind, VerdictMaterial> = {
     glow: "0 16px 38px -14px rgba(24,72,105,0.40)",
     // Mobile's info-blue family — baseline is informational, not a verdict.
     tone: { mid: "#7FA8D9", ink: "#4A7AB0", soft: "#EAF0FA" },
+    iconGradient: ["#B6CDEB", "#5689C8"],
   },
 };
+
+/* JOURNEY_TONE — flat tonal trios (NO texture) for journey/stage chips,
+ * drawn from mobile's categoryTones hue deck (LibrarySearch.tsx). The four
+ * families deliberately avoid the verdict hues so a journey chip can never
+ * be misread as Yulia's call: BUY=blue, SELL=purple, RAISE=plum, PMI=slate.
+ * Grammar matches tone trios: mid = dots/fills, ink = text on soft,
+ * soft = chip background. */
+export type JourneyKind = "buy" | "sell" | "raise" | "pmi";
+
+export const JOURNEY_TONE: Record<JourneyKind, { mid: string; ink: string; soft: string }> = {
+  buy:   { mid: "#6E9CCB", ink: "#3C6CA8", soft: "#E9F0F8" },
+  sell:  { mid: "#9D82C4", ink: "#6E52A0", soft: "#F0EBF8" },
+  raise: { mid: "#C07EA0", ink: "#9C5276", soft: "#F8ECF2" },
+  pmi:   { mid: "#7C92A8", ink: "#465A6E", soft: "#EBF0F4" },
+};
+
+export function journeyTone(journey?: string | null) {
+  const j = String(journey || "").toLowerCase() as JourneyKind;
+  return JOURNEY_TONE[j] ?? null;
+}
 
 /** Hero card corner radius — mobile HeroFrame parity (= --wk-hero-radius). */
 export const HERO_RADIUS = 22;

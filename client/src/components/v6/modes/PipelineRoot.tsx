@@ -12,6 +12,9 @@
 import { useMobileDeals, type MobilePick } from "../../../hooks/useMobileDeals";
 import { useV6WorkspaceData, type WorkspaceDeal } from "../../../hooks/useV6WorkspaceData";
 import { PIPELINE_STAGES, stageForGate } from "../../../lib/pipelineStages";
+import { LEAGUE_MULTIPLES } from "../../../lib/calculations/core";
+import { VERDICT_MATERIAL } from "../shared/verdictMaterial";
+import { FitRing, IndustryGlyphChip } from "../shared/dataChips";
 import { YuliaSkeleton } from "../shared/YuliaSkeleton";
 import type { OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
@@ -217,11 +220,19 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
 
 function ScheduleRow({ deal, onOpen }: { deal: WorkspaceDeal; onOpen: () => void }) {
   const verdict = dealVerdict(deal);
+  const tone = VERDICT_MATERIAL[verdict].tone;
+  const fit = typeof deal.seven_factor_composite === "number" && Number.isFinite(deal.seven_factor_composite)
+    ? Math.round(deal.seven_factor_composite)
+    : null;
+  const range = multipleRange(deal);
   return (
     <tr onClick={onOpen}>
-      <td>
+      {/* Verdict rail — mobile's verdict-tinted row grammar reduced to the
+          minimum a dense ledger tolerates: a 3px inset hairline, scannable
+          down the table. Same inference as the statpill, so the two agree. */}
+      <td style={{ boxShadow: `inset 3px 0 0 ${tone.mid}` }}>
         <div className="cellname">
-          <span className="logo">{initials(dealTitle(deal))}</span>
+          <IndustryGlyphChip name={`${dealTitle(deal)} ${deal.industry ?? ""}`} kind={verdict} size={28} />
           <div>
             <div className="nm">{dealTitle(deal)}</div>
             <div className="sub">{[deal.industry, deal.location].filter(Boolean).join(" · ") || "—"}</div>
@@ -231,8 +242,19 @@ function ScheduleRow({ deal, onOpen }: { deal: WorkspaceDeal; onOpen: () => void
       <td>{deal.current_gate || "—"}</td>
       <td className="r amt">{fmtCents(deal.sde)}</td>
       <td className="r amt">{fmtCents(deal.asking_price)}</td>
-      <td className="r amt">{fmtMultiple(deal)}</td>
-      <td className="r amt">{typeof deal.seven_factor_composite === "number" && Number.isFinite(deal.seven_factor_composite) ? Math.round(deal.seven_factor_composite) : "—"}</td>
+      {/* League-range semantics (mobile LeagueBandStrip): emerald in range,
+          rust out — ONLY when league + asking + earnings are all real. */}
+      <td className="r amt" style={range === null ? undefined : { color: range ? "var(--st-good-fg)" : "var(--st-range-out)" }}>
+        {fmtMultiple(deal)}
+      </td>
+      <td className="r amt">
+        {fit !== null ? (
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <FitRing score={fit} kind={verdict} size={16} />
+            {fit}
+          </span>
+        ) : "—"}
+      </td>
       <td>
         <span className={`statpill ${verdictClass(verdict)}`}><span className="d" />{capitalize(verdict)}</span>
       </td>
@@ -254,7 +276,9 @@ function PickRow({ pick, last, onOpen }: { pick: MobilePick; last: boolean; onOp
       </span>
       <span className={`statpill ${verdictClass(pick.kind)}`}><span className="d" />{capitalize(pick.kind)}</span>
       {pick.fitIsReal !== false && (
-        <span style={{ fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--accent-strong)", fontSize: "1rem" }}>{pick.fit}</span>
+        // Computed value wears the computed green (two-greens law) — the
+        // brand accent is for CTAs, never numerals.
+        <span style={{ fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--st-good-fg)", fontSize: "1rem" }}>{pick.fit}</span>
       )}
     </button>
   );
@@ -269,6 +293,20 @@ function fmtCents(cents: number | null | undefined): string {
   if (dollars >= 1_000_000) return `$${(dollars / 1_000_000).toFixed(2).replace(/\.?0+$/, "")}M`;
   if (dollars >= 1_000) return `$${Math.round(dollars / 1_000)}K`;
   return `$${Math.round(dollars).toLocaleString()}`;
+}
+
+// League-range check for the Multiple cell (mobile buildMobileLeagueBand
+// semantics): null = not demonstrable (missing league/asking/earnings —
+// the cell stays ink), true = within the league's multiple band, false =
+// outside it.
+function multipleRange(d: WorkspaceDeal): boolean | null {
+  const entry = d.league ? LEAGUE_MULTIPLES[d.league] : undefined;
+  if (!entry || entry.max <= entry.min) return null;
+  const earnings = entry.metric === "SDE" ? d.sde : d.ebitda;
+  if (typeof d.asking_price !== "number" || d.asking_price <= 0) return null;
+  if (typeof earnings !== "number" || earnings <= 0) return null;
+  const implied = d.asking_price / earnings;
+  return implied >= entry.min && implied <= entry.max;
 }
 
 // Asking ÷ (EBITDA, else SDE) — both in cents, so the ratio is unitless.

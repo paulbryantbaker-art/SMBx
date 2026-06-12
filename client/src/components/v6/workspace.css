@@ -41,6 +41,16 @@
   --st-missing-bg: #F3F3EE; --st-missing-fg: #8B867A; --st-missing-dot: #8B867A;
   --st-risk-bg: #FBE7DD;    --st-risk-fg: #C0562F;    --st-risk-dot: #C0562F;
   --banner-risk-bg: #FCF1EC;
+  /* Out-of-league-range rust (mobile Detail RANGE_OUT) — pairs with
+     --st-good-fg for the league multiple in/out semantic. One red role;
+     never reuse for errors (that's --st-risk-fg's job). */
+  --st-range-out: #C0562F;
+  /* Periwinkle — mobile's discovery/navigation accent (#8A9AE8 family).
+     STRICTLY navigational (open/get/see pills, explore affordances).
+     NEVER a verdict, NEVER a computed value. */
+  --wk-peri: #8A9AE8;
+  --wk-peri-ink: #5C70C6;
+  --wk-peri-soft: #EDF0FB;
 
   /* ── ELEVATION RECIPES — two families with documented ROLES; never mix ──
      --wk-elev-card   the WARM composer stack: resting cards on warm ground.

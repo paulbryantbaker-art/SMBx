@@ -13,6 +13,8 @@ import type { OpenTab } from "../types";
 import { type User } from "../../../hooks/useAuth";
 import { useV6WorkspaceData, type WorkspaceDeal } from "../../../hooks/useV6WorkspaceData";
 import { PIPELINE_STAGES, stageForGate, type PipelineStageId } from "../../../lib/pipelineStages";
+import { journeyTone, type VerdictKind } from "../shared/verdictMaterial";
+import { IndustryGlyphChip, ToneChip } from "../shared/dataChips";
 
 function fmtCents(cents: number | null | undefined): string {
   if (!cents) return "--";
@@ -31,10 +33,15 @@ function statusPillClass(status: string): string {
   return "missing"; // closed / archived / other
 }
 
-function dealInitials(name: string): string {
-  return (
-    name.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]?.toUpperCase() ?? "").join("") || "—"
-  );
+// Mirrors useMobileDeals.dealVerdict / PipelineRoot.dealVerdict so the chip
+// tint agrees with the Pipeline ledger for the same deal.
+function listVerdict(d: WorkspaceDeal): VerdictKind {
+  const label = String(d.financials?.status_label ?? "").toLowerCase();
+  if (/loi|closing|negotiat|pursu|signed/.test(label)) return "pursue";
+  if (/pass|cold|drop|reject/.test(label)) return "pass";
+  const gate = d.current_gate ?? "";
+  if (/[BSR]4|[BSR]5/.test(gate)) return "pursue";
+  return "watch";
 }
 
 // Deterministic sample set so the layout (and long-list behavior) is visible in
@@ -192,30 +199,37 @@ export function V6DealsListView({ initialStage, openTab, user }: Props) {
             </tr>
           </thead>
           <tbody>
-            {shown.map(d => (
-              <tr key={d.id} onClick={() => openDeal(d)}>
-                <td>
-                  <div className="cellname">
-                    <span className="logo">{dealInitials(d.business_name || "?")}</span>
-                    <div>
-                      <div className="nm">{d.business_name || `Deal #${d.id}`}</div>
-                      <div className="sub">{[d.industry, d.location].filter(Boolean).join(" · ") || "—"}</div>
+            {shown.map(d => {
+              const jTone = journeyTone(d.journey_type);
+              const jLabel = JOURNEY_LABEL[(d.journey_type || "").toLowerCase()] || d.journey_type || "—";
+              return (
+                <tr key={d.id} onClick={() => openDeal(d)}>
+                  <td>
+                    <div className="cellname">
+                      <IndustryGlyphChip name={`${d.business_name ?? ""} ${d.industry ?? ""}`.trim() || "?"} kind={listVerdict(d)} size={28} />
+                      <div>
+                        <div className="nm">{d.business_name || `Deal #${d.id}`}</div>
+                        <div className="sub">{[d.industry, d.location].filter(Boolean).join(" · ") || "—"}</div>
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td>{JOURNEY_LABEL[(d.journey_type || "").toLowerCase()] || d.journey_type || "—"}</td>
-                <td>{d.league || "—"}</td>
-                <td>{d.current_gate || "—"}</td>
-                <td className="r amt">{fmtCents(d.sde)}</td>
-                <td className="r amt">{fmtCents(d.asking_price)}</td>
-                <td>
-                  <span className={`statpill ${statusPillClass(d.status)}`}>
-                    <span className="d" />
-                    {d.status || "—"}
-                  </span>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  {/* Journey + stage wear the journey's tonal family (JOURNEY_TONE
+                      hues deliberately avoid verdict hues — a journey chip can
+                      never be misread as Yulia's call). */}
+                  <td>{jTone ? <ToneChip label={jLabel} tone={jTone} /> : jLabel}</td>
+                  <td>{d.league || "—"}</td>
+                  <td>{jTone && d.current_gate ? <ToneChip label={d.current_gate} tone={jTone} /> : (d.current_gate || "—")}</td>
+                  <td className="r amt">{fmtCents(d.sde)}</td>
+                  <td className="r amt">{fmtCents(d.asking_price)}</td>
+                  <td>
+                    <span className={`statpill ${statusPillClass(d.status)}`}>
+                      <span className="d" />
+                      {d.status || "—"}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}

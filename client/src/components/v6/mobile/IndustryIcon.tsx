@@ -10,6 +10,7 @@ import {
   Bug, Zap, Wind, Shirt, Smile, TreeDeciduous, Wrench, Truck,
   Anchor, Package, Hammer, Droplet, Shield, Waves, CloudRain,
   Key, Home, Brush, Building2, Briefcase,
+  Landmark, ShoppingCart, Cpu, HeartPulse, Users, Factory,
   type LucideIcon,
 } from "lucide-react";
 import type { Verdict } from "./types";
@@ -49,9 +50,22 @@ const INDUSTRY_RULES: Array<[RegExp, LucideIcon]> = [
   [/floor/i,                   Hammer],
   [/paint/i,                   Brush],
   [/big fake|fake deal/i,      Building2],
+  // Generic industry-field matches (callers may pass "name + industry") so
+  // portfolio-scale lists aren't a wall of briefcase fallbacks.
+  [/financ|bank|insur/i,       Landmark],
+  [/construct/i,               Hammer],
+  [/e-?commerce|retail/i,      ShoppingCart],
+  [/software|saas|tech|it\/|msp/i, Cpu],
+  [/real estate/i,             Home],
+  [/automot/i,                 Wrench],
+  [/health|medical/i,          HeartPulse],
+  [/staffing|recruit/i,        Users],
+  [/manufactur|industrial/i,   Factory],
 ];
 
-function pickIcon(name: string): LucideIcon {
+/** Exported so the desktop dataChips port shares ONE industry-rule list —
+ *  a pest deal wears the bug glyph on both platforms. */
+export function pickIcon(name: string): LucideIcon {
   for (const [pattern, icon] of INDUSTRY_RULES) {
     if (pattern.test(name)) return icon;
   }

@@ -183,8 +183,10 @@ export function V6DocsRoot({
               </div>
               <div className="wkcard-title" style={{ marginTop: 14 }}>{d.title}</div>
               <div className="wkcard-sub" style={{ marginTop: 2 }}>{d.deal}</div>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--ink-3)", letterSpacing: "0.1em", marginTop: 10 }}>
-                {d.updated.toUpperCase()}
+              {/* Sentence case, plain ink (eyebrow lock — the letterspaced
+                  caps date read as a decorative micro label). */}
+              <div style={{ fontSize: "0.78rem", color: "var(--ink-3)", marginTop: 10 }}>
+                {d.updated}
               </div>
             </div>
           ))}

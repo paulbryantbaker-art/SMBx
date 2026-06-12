@@ -63,13 +63,13 @@ export function V6IntelRoot({ openTab, onTalkToYulia }: { openTab: OpenTab; onTa
             onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openTab({ kind: "feed-item", title: f.title, id: f.id }); } }}
             style={{ padding: "28px 32px", background: "var(--surface-2)", border: "1px solid var(--line)" }}
           >
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--ink-3)", letterSpacing: "0.12em", fontWeight: 600, marginBottom: 12 }}>
-              FEATURED · {f.sector.toUpperCase()} · {f.time.toUpperCase()}
-            </div>
+            {/* Title leads (eyebrow lock) — sector and recency carry real
+                information, so they live in sentence case under the sub. */}
             <h2 style={{ margin: 0, fontWeight: 700, fontSize: "clamp(1.35rem, 2.2vw, 1.75rem)", letterSpacing: "-0.025em", lineHeight: 1.15, color: "var(--ink)" }}>
               {f.title}
             </h2>
             <div style={{ fontSize: "0.9rem", color: "var(--ink-2)", marginTop: 10 }}>{f.sub}</div>
+            <div style={{ fontSize: "0.8rem", color: "var(--ink-3)", marginTop: 8 }}>{f.sector} · {f.time}</div>
           </div>
         </div>
       ))}
@@ -95,11 +95,12 @@ export function V6IntelRoot({ openTab, onTalkToYulia }: { openTab: OpenTab; onTa
                 </span>
                 <span style={{
                   fontFamily: "var(--font-mono)", fontSize: "0.78rem", fontWeight: 600,
-                  color: s.trend.startsWith("+") ? "var(--accent-strong)" : "var(--st-risk-fg)",
+                  // Computed delta wears the computed green (two-greens law).
+                  color: s.trend.startsWith("+") ? "var(--st-good-fg)" : "var(--st-risk-fg)",
                 }}>{s.trend}</span>
               </div>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.66rem", color: "var(--ink-3)", letterSpacing: "0.1em", marginTop: 4 }}>
-                NEW SIGNALS
+              <div style={{ fontSize: "0.78rem", color: "var(--ink-3)", marginTop: 4 }}>
+                new signals this week
               </div>
             </div>
           ))}
@@ -129,12 +130,12 @@ export function V6IntelRoot({ openTab, onTalkToYulia }: { openTab: OpenTab; onTa
                     <span className="logo"><V6Icon name="feed" size={14} /></span>
                     <div>
                       <div className="nm">{f.title}</div>
-                      <div className="sub"><span style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", letterSpacing: "0.08em" }}>{f.sector.toUpperCase()}</span></div>
+                      <div className="sub">{f.sector}</div>
                     </div>
                   </div>
                 </td>
                 <td><span className="muted">{f.sub}</span></td>
-                <td className="r muted">{f.time.toUpperCase()}</td>
+                <td className="r muted">{f.time}</td>
               </tr>
             ))}
           </tbody>

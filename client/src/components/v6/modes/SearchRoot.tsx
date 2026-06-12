@@ -4,8 +4,10 @@
  * Categories/prompts are the identical set mobile uses so the two match.
  */
 import { useState } from "react";
+import { Handshake, Crosshair, Landmark, Scale, Building2, Map } from "lucide-react";
 import type { OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
+import { RANDOM_TEXTURES } from "../../../lib/randomTextures";
 
 interface SearchRootProps {
   openTab: OpenTab;
@@ -13,14 +15,28 @@ interface SearchRootProps {
   user: User | null;
 }
 
+/* Watercolor ornament chips per discovery domain — mobile's categoryTones
+ * recipes (LibrarySearch) as 40px tint-over-texture tiles. Legal under the
+ * ≤64px ornament exemption (Search has no texture field); no glow at chip
+ * scale. The old mono-caps eyebrows are gone (eyebrow lock) — the chip now
+ * carries the category identity the label used to shout. */
+const CATEGORY_TONE: Record<string, string> = {
+  purple: `linear-gradient(160deg, rgba(125,98,170,0.30) 0%, rgba(75,52,128,0.62) 100%), url('${RANDOM_TEXTURES.cardBuyers}')`,
+  sage: `linear-gradient(160deg, rgba(63,138,106,0.30) 0%, rgba(40,92,70,0.62) 100%), url('${RANDOM_TEXTURES.cardPursue}')`,
+  gold: `linear-gradient(160deg, rgba(202,150,82,0.30) 0%, rgba(128,86,36,0.62) 100%), url('${RANDOM_TEXTURES.card}')`,
+  plum: `linear-gradient(160deg, rgba(168,90,124,0.30) 0%, rgba(108,46,76,0.62) 100%), url('${RANDOM_TEXTURES.cardBuyers}')`,
+  slate: `linear-gradient(160deg, rgba(70,90,110,0.30) 0%, rgba(34,48,68,0.66) 100%), url('${RANDOM_TEXTURES.cardBaseline}')`,
+  blue: `linear-gradient(160deg, rgba(60,108,168,0.30) 0%, rgba(25,68,118,0.62) 100%), url('${RANDOM_TEXTURES.cardBaseline}')`,
+};
+
 // Identical to mobile SearchScreen's category set.
 const CATEGORIES = [
-  { eyebrow: "BUYERS", title: "Potential buyers", sub: "Strategics, sponsors, family offices, buyer pools.", prompt: "Find likely buyers and buyer pools for a lower-middle-market services company. Include strategics, private equity, family offices, and search funds. Rank by fit and explain why each belongs." },
-  { eyebrow: "TARGETS", title: "Targets to buy", sub: "Build a target list from a thesis.", prompt: "Help me define an acquisition thesis, then find target companies that match it. Start with sector, geography, size, recurring revenue, owner profile, and deal-breakers." },
-  { eyebrow: "PE & CAPITAL", title: "PE and capital", sub: "Sponsors, independent sponsors, lenders.", prompt: "Find private equity firms, independent sponsors, family offices, and lenders relevant to this deal. Separate equity buyers from debt capital and compare them by likely appetite." },
-  { eyebrow: "PROFESSIONALS", title: "Deal professionals", sub: "Attorneys, QoE, tax, insurance, brokers.", prompt: "Find deal professionals for this transaction: M&A attorneys, QoE providers, tax advisors, insurance brokers, and diligence specialists. Compare experience with lower-middle-market transactions." },
-  { eyebrow: "REAL ESTATE", title: "Real estate & ops", sub: "Facilities, leases, agents, zoning help.", prompt: "Find real estate and operating specialists for this deal: commercial agents, lease reviewers, environmental diligence, facilities consultants, and zoning or permitting help." },
-  { eyebrow: "MARKET MAPS", title: "Market maps", sub: "Competitors, adjacencies, roll-up themes.", prompt: "Build a market map for this thesis. Include competitors, adjacencies, roll-up themes, likely acquirers, and signals that a company may be ready to transact." },
+  { tone: "purple", icon: Handshake, title: "Potential buyers", sub: "Strategics, sponsors, family offices, buyer pools.", prompt: "Find likely buyers and buyer pools for a lower-middle-market services company. Include strategics, private equity, family offices, and search funds. Rank by fit and explain why each belongs." },
+  { tone: "sage", icon: Crosshair, title: "Targets to buy", sub: "Build a target list from a thesis.", prompt: "Help me define an acquisition thesis, then find target companies that match it. Start with sector, geography, size, recurring revenue, owner profile, and deal-breakers." },
+  { tone: "gold", icon: Landmark, title: "PE and capital", sub: "Sponsors, independent sponsors, lenders.", prompt: "Find private equity firms, independent sponsors, family offices, and lenders relevant to this deal. Separate equity buyers from debt capital and compare them by likely appetite." },
+  { tone: "plum", icon: Scale, title: "Deal professionals", sub: "Attorneys, QoE, tax, insurance, brokers.", prompt: "Find deal professionals for this transaction: M&A attorneys, QoE providers, tax advisors, insurance brokers, and diligence specialists. Compare experience with lower-middle-market transactions." },
+  { tone: "slate", icon: Building2, title: "Real estate & ops", sub: "Facilities, leases, agents, zoning help.", prompt: "Find real estate and operating specialists for this deal: commercial agents, lease reviewers, environmental diligence, facilities consultants, and zoning or permitting help." },
+  { tone: "blue", icon: Map, title: "Market maps", sub: "Competitors, adjacencies, roll-up themes.", prompt: "Build a market map for this thesis. Include competitors, adjacencies, roll-up themes, likely acquirers, and signals that a company may be ready to transact." },
 ] as const;
 
 const QUICK_STARTS = [
@@ -73,20 +89,37 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
       <div className="wksec">
         <div className="wksec-title">Start a discovery search</div>
         <div className="wkgrid g3" style={{ gap: 12, marginTop: 12 }}>
-          {CATEGORIES.map(c => (
-            <button
-              key={c.title}
-              type="button"
-              className="wkcard tap"
-              style={{ all: "unset", cursor: "pointer", boxSizing: "border-box", display: "flex", flexDirection: "column", gap: 6, padding: "18px 20px", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 14, minHeight: 132 }}
-              onClick={() => runSearch(c.prompt, c.title)}
-            >
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.66rem", letterSpacing: "0.1em", color: "var(--ink-3)", fontWeight: 600 }}>{c.eyebrow}</span>
-              <strong style={{ color: "var(--ink)", fontSize: "1.05rem", fontWeight: 700, letterSpacing: "-0.02em" }}>{c.title}</strong>
-              <span style={{ color: "var(--ink-2)", fontSize: "0.84rem", lineHeight: 1.45, flex: 1 }}>{c.sub}</span>
-              <span className="wkbtn" style={{ alignSelf: "flex-start", marginTop: 4, padding: "5px 12px", fontSize: "0.82rem" }}>Open</span>
-            </button>
-          ))}
+          {CATEGORIES.map(c => {
+            const Icon = c.icon;
+            return (
+              <button
+                key={c.title}
+                type="button"
+                className="wkcard tap"
+                style={{ all: "unset", cursor: "pointer", boxSizing: "border-box", display: "flex", flexDirection: "column", gap: 8, padding: "18px 20px", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 14, minHeight: 138 }}
+                onClick={() => runSearch(c.prompt, c.title)}
+              >
+                <span
+                  aria-hidden
+                  style={{
+                    width: 40, height: 40, borderRadius: 11,
+                    background: CATEGORY_TONE[c.tone],
+                    backgroundSize: "cover", backgroundPosition: "center",
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                    color: "#fff", flexShrink: 0,
+                    boxShadow: "0 1px 2px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.22)",
+                  }}
+                >
+                  <Icon size={20} strokeWidth={2} />
+                </span>
+                <strong style={{ color: "var(--ink)", fontSize: "1.05rem", fontWeight: 700, letterSpacing: "-0.02em" }}>{c.title}</strong>
+                <span style={{ color: "var(--ink-2)", fontSize: "0.84rem", lineHeight: 1.45, flex: 1 }}>{c.sub}</span>
+                {/* Periwinkle = the discovery/navigation accent (mobile's
+                    explore register) — never a verdict, never a number. */}
+                <span style={{ alignSelf: "flex-start", marginTop: 4, padding: "5px 14px", fontSize: "0.82rem", fontWeight: 700, borderRadius: 999, background: "var(--wk-peri-soft)", color: "var(--wk-peri-ink)" }}>Open</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 

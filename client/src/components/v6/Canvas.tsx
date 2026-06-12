@@ -167,11 +167,12 @@ const K: Record<string, CSSProperties> = {
     width: "100%",
     boxSizing: "border-box",
   },
+  /* Tokens, not hexes — the loader follows chrome themes and dark mode. */
   loader: {
     display: "flex",
     alignItems: "center",
     gap: 12,
-    color: "#8B867A",
+    color: "var(--ink-3)",
     minHeight: 220,
     background: "transparent",
   },
@@ -179,18 +180,18 @@ const K: Record<string, CSSProperties> = {
     width: 10,
     height: 10,
     borderRadius: 999,
-    background: "#2BFF77",
+    background: "var(--accent)",
     boxShadow: "0 0 0 6px rgba(43,255,119,0.14)",
   },
   loaderTitle: {
     fontFamily: "var(--font-display)",
     fontWeight: 700,
     fontSize: 14,
-    color: "#191813",
+    color: "var(--ink)",
   },
   loaderSub: {
     fontSize: 12,
     marginTop: 2,
-    color: "#8B867A",
+    color: "var(--ink-3)",
   },
 };
