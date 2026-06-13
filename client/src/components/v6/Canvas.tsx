@@ -11,10 +11,8 @@ const V6FilesListView = lazy(() => import("./modes/FilesRoot").then(module => ({
 const V6DealsListView = lazy(() => import("./modes/DealsListView").then(module => ({ default: module.V6DealsListView })));
 const V6ProviderProfileView = lazy(() => import("./modes/ProviderProfileView").then(module => ({ default: module.V6ProviderProfileView })));
 const V6SearchRoot = lazy(() => import("./modes/SearchRoot").then(module => ({ default: module.V6SearchRoot })));
-const V6DocsRoot = lazy(() => import("./modes/DocsRoot").then(module => ({ default: module.V6DocsRoot })));
 const V6AnalysisRoot = lazy(() => import("./modes/AnalysisRoot").then(module => ({ default: module.V6AnalysisRoot })));
 const V6IntelRoot = lazy(() => import("./modes/IntelRoot").then(module => ({ default: module.V6IntelRoot })));
-const V6LibraryRoot = lazy(() => import("./modes/LibraryRoot").then(module => ({ default: module.V6LibraryRoot })));
 const V6DealView = lazy(() => import("./views/DealView").then(module => ({ default: module.V6DealView })));
 const V6DealTeamView = lazy(() => import("./views/DealTeamView").then(module => ({ default: module.V6DealTeamView })));
 const V6DocView = lazy(() => import("./views/DocView").then(module => ({ default: module.V6DocView })));
@@ -106,10 +104,8 @@ function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut, modelPrefe
     if (tab.modeId === "search")   return <V6SearchRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
     if (tab.modeId === "studio")   return <V6MarketingStudioView tab={{ id: "marketing-studio", kind: "marketing-studio", title: "Studio", studioView: "home" }} openTab={openTab} user={user} onTalkToYulia={onTalkToYulia} />;
     if (tab.modeId === "files")    return <V6FilesRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
-    if (tab.modeId === "docs")     return <V6DocsRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} modelPreference={modelPreference} />;
     if (tab.modeId === "analysis") return <V6AnalysisRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} modelPreference={modelPreference} />;
     if (tab.modeId === "intel")    return <V6IntelRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
-    if (tab.modeId === "library")  return <V6LibraryRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
     return <Placeholder label={`${tab.title} — root view`} note="Unknown mode root." />;
   }
   if (tab.kind === "files-list") return <V6FilesListView view={tab.fileListView ?? "all"} openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;

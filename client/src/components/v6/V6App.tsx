@@ -603,9 +603,11 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
       { mode: "analysis", label: "Analyses", icon: "chart" },
     ] },
     { section: "Documents", items: [
-      { mode: "studio", label: "Studio", icon: "studio" },
+      // Files is the single document home (by deal → deliverables + data room);
+      // the old Library tab listed the SAME deliverables by recency and is gone.
+      // Studio stays as the marketing-book creator (not a file store).
       { mode: "files", label: "Files", icon: "library" },
-      { mode: "library", label: "Library", icon: "doc" },
+      { mode: "studio", label: "Studio", icon: "studio" },
     ] },
   ];
   const avatarInitials = ((user?.email || "SX").replace(/[^a-zA-Z]/g, "").slice(0, 2) || "SX").toUpperCase();
