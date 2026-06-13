@@ -181,3 +181,52 @@ export const BTN_RESET: CSSProperties = {
   color: "inherit",
   background: "transparent",
 };
+
+/* ─── Market-heat temperature primitive ──────────────────────────────────
+ * Heat is a DESCRIPTIVE market temperature (PE-consolidation + live buyer-
+ * thesis demand), NOT a verdict — so it rides a warm→cool ramp and NEVER
+ * pursue-emerald (two-greens: green is for computed verdicts / the one CTA).
+ * Shared by Today's market read and Intel's sector cards so the two surfaces
+ * read identically. */
+type HeatTrio = { soft: string; ink: string; mid: string };
+const HEAT_RAMP: Record<number, HeatTrio> = {
+  5: VERDICT_MATERIAL.watch.tone,                          // Super-Hot → amber
+  4: VERDICT_MATERIAL.watch.tone,                          // Hot → amber
+  3: { soft: "#F1EEE6", ink: "#7A7256", mid: "#B8AE97" },  // Warm → oat
+  2: { soft: "#EDEFF2", ink: "#4A5260", mid: "#8B92A0" },  // Cool → charcoal
+  1: { soft: "#EDEFF2", ink: "#4A5260", mid: "#8B92A0" },  // Cold → charcoal
+};
+export function heatRamp(score: number): HeatTrio {
+  return HEAT_RAMP[Math.max(1, Math.min(5, Math.round(score)))] ?? HEAT_RAMP[2];
+}
+
+/** A 5-segment market-heat temperature bar. Filled segments = score (1-5),
+ *  warm amber when hot, cool neutral when cold. Descriptive, never a verdict. */
+export function HeatBar({ score, segWidth = 9 }: { score: number; segWidth?: number }) {
+  const t = heatRamp(score);
+  const filled = Math.max(0, Math.min(5, Math.round(score)));
+  return (
+    <span aria-hidden style={{ display: "inline-flex", gap: 3, alignItems: "center" }}>
+      {[0, 1, 2, 3, 4].map(i => (
+        <span
+          key={i}
+          style={{
+            width: segWidth, height: 6, borderRadius: 2,
+            background: i < filled ? t.mid : "var(--wk-hairline-2, rgba(20,20,30,0.10))",
+          }}
+        />
+      ))}
+    </span>
+  );
+}
+
+/** A heat chip: dot + "Label · N/5" on the warm/cool ramp soft fill. */
+export function HeatChip({ score, label }: { score: number; label: string }) {
+  const t = heatRamp(score);
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 999, background: t.soft, color: t.ink, fontSize: "0.74rem", fontWeight: 700, whiteSpace: "nowrap" }}>
+      <span aria-hidden style={{ width: 6, height: 6, borderRadius: "50%", background: t.mid }} />
+      {label} · {score}/5
+    </span>
+  );
+}

@@ -230,6 +230,32 @@ function priceWord(verdict: Verdict): string {
   return verdict === "pursue" ? "Pursue" : verdict === "pass" ? "Pass" : "Watch";
 }
 
+/* ─── normalization ───────────────────────────────────────── */
+
+/** postgres-js returns numeric/bigint columns as STRINGS. RawDeal declares them
+ *  `number`, so the money formatters (which guard `typeof === "number"`) reject
+ *  the string and fall through to "Active"/null. Coerce once at the fetch
+ *  boundary — same fix as useV6WorkspaceData — so the hero metric, mobile money
+ *  columns, and fit all read real values. */
+function toNum(v: unknown): number | null {
+  if (typeof v === "number") return Number.isFinite(v) ? v : null;
+  if (typeof v === "string" && v.trim() !== "") {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
+}
+function normalizeRawDeal(raw: any): RawDeal {
+  return {
+    ...raw,
+    revenue: toNum(raw?.revenue),
+    sde: toNum(raw?.sde),
+    ebitda: toNum(raw?.ebitda),
+    asking_price: toNum(raw?.asking_price),
+    seven_factor_composite: toNum(raw?.seven_factor_composite),
+  };
+}
+
 /* ─── shape per-screen ────────────────────────────────────── */
 
 function shape(deals: RawDeal[]): Omit<UseMobileDealsResult, "loading" | "loaded" | "isAuthed" | "hasData"> {
@@ -354,8 +380,9 @@ export function useMobileDeals(user: User | null): UseMobileDealsResult {
       .then(r => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
       .then((rows: RawDeal[]) => {
         if (cancelled) return;
-        setShaped(shape(rows));
-        setHasData(rows.length > 0);
+        const normalized = Array.isArray(rows) ? rows.map(normalizeRawDeal) : [];
+        setShaped(shape(normalized));
+        setHasData(normalized.length > 0);
       })
       .catch((e: Error) => {
         if (cancelled) return;

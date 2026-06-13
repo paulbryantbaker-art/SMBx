@@ -34,10 +34,13 @@ pipelineRouter.get('/portfolio/summary', async (req, res) => {
     let weightedEvCents = 0;
     let totalEvCents = 0;
     for (const d of deals) {
-      const value = d.asking_price ?? deriveEvCents(d);
-      const prob = typeof d.seven_factor_composite === 'number' && d.seven_factor_composite > 0
-        ? d.seven_factor_composite / 100
-        : 0.5;
+      // postgres-js returns numeric columns as STRINGS — coerce before summing,
+      // or `totalEvCents += value` concatenates instead of adding (weightedEv
+      // only worked because `value * prob` coerces).
+      const raw = d.asking_price ?? deriveEvCents(d);
+      const value = typeof raw === 'number' ? raw : (Number(raw) || 0);
+      const composite = Number(d.seven_factor_composite);
+      const prob = Number.isFinite(composite) && composite > 0 ? composite / 100 : 0.5;
       weightedEvCents += value * prob;
       totalEvCents += value;
     }
