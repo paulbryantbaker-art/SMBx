@@ -17,7 +17,7 @@ import { VERDICT_MATERIAL } from "../shared/verdictMaterial";
 import { FitRing, IndustryGlyphChip } from "../shared/dataChips";
 import { useTodayOperatingBrief, type TodayDefinitiveDealState } from "../../../hooks/useTodayOperatingBrief";
 import { usePortfolioSummary } from "../../../hooks/usePortfolioSummary";
-import { ReadinessBadge } from "../shared/operatingPrimitives";
+import { ReadinessBadge, realBlockers } from "../shared/operatingPrimitives";
 import { YuliaSkeleton } from "../shared/YuliaSkeleton";
 import type { OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
@@ -51,8 +51,10 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
   const readinessByDeal = new Map<string, TodayDefinitiveDealState>();
   for (const g of operating.brief?.gateCountdown ?? []) if (g.definitive) readinessByDeal.set(g.dealId, g.definitive);
   for (const p of operating.brief?.dealPulse ?? []) if (p.definitive && !readinessByDeal.has(p.dealId)) readinessByDeal.set(p.dealId, p.definitive);
-  const totalBlockers = (operating.brief?.gateCountdown ?? []).reduce((n, g) => n + g.blockers.length, 0);
-  const blockedDealCount = (operating.brief?.gateCountdown ?? []).filter(g => g.blockers.length > 0).length;
+  // Real open items only — the server pads every gate item with a
+  // 'No blocker surfaced' placeholder, so raw .length always overcounts.
+  const totalBlockers = (operating.brief?.gateCountdown ?? []).reduce((n, g) => n + realBlockers(g.blockers).length, 0);
+  const blockedDealCount = (operating.brief?.gateCountdown ?? []).filter(g => realBlockers(g.blockers).length > 0).length;
   const weightedEv = portfolio.summary?.weightedEvCents ?? 0;
   const ask = (prompt: string) => onTalkToYulia?.(prompt);
   const openDeal = (rawId: number, title: string) => openTab({ kind: "deal", id: String(rawId), title });
@@ -77,14 +79,20 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
     rows: tableDeals.filter(d => stageForGate(d.current_gate || "B2") === stage.id),
   })).filter(g => g.rows.length > 0);
 
-  // Header KPIs (replaces the featured hero card)
-  const activeCount = tableDeals.filter(d => (d.status || "").toLowerCase() === "active").length;
-  const askingValues = tableDeals.map(d => d.asking_price).filter((v): v is number => typeof v === "number" && v > 0);
+  // Header KPIs — all over the ACTIVE set so Total ask / Median fit /
+  // Weighted EV describe ONE population (the active pipeline), matching the
+  // "Deals in motion" count. The table below still shows every deal.
+  const activeDeals = tableDeals.filter(d => (d.status || "").toLowerCase() === "active");
+  const activeCount = activeDeals.length;
+  const askingValues = activeDeals.map(d => d.asking_price).filter((v): v is number => typeof v === "number" && v > 0);
   const totalAsk = askingValues.reduce((sum, v) => sum + v, 0);
-  const fitValues = tableDeals
+  const fitValues = activeDeals
     .map(d => d.seven_factor_composite)
     .filter((v): v is number => typeof v === "number" && Number.isFinite(v))
     .sort((a, b) => a - b);
+  // The ledger footer totals every row SHOWN (all statuses) — a different,
+  // honest figure from the active-pipeline KPI above.
+  const tableTotalAsk = tableDeals.reduce((sum, d) => sum + (typeof d.asking_price === "number" && d.asking_price > 0 ? d.asking_price : 0), 0);
   const medianFit = fitValues.length
     ? Math.round(
         fitValues.length % 2
@@ -133,14 +141,14 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
                   <div className="v">{fmtCents(totalAsk)}</div>
                 </div>
               )}
-              {/* Weighted EV — probability-adjusted, consistently derived
-                  (asking, or earnings×multiple when absent). A computed
-                  figure, not a raw sum: proves money at a glance. */}
+              {/* Weighted EV — fit-weighted on the server (each deal's EV ×
+                  seven-factor composite/100, default 0.5). A computed figure,
+                  not a raw sum: proves money at a glance. */}
               {weightedEv > 0 && (
                 <div className="mh">
                   <div className="l">Weighted EV</div>
                   <div className="v">{fmtCents(weightedEv)}</div>
-                  <div className="s">probability-adjusted</div>
+                  <div className="s">fit-weighted</div>
                 </div>
               )}
               {medianFit !== null && (
@@ -214,7 +222,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
                 <tr className="total-row">
                   <td colSpan={2}>All stages</td>
                   <td className="r" />
-                  <td className="r amt">{fmtCents(totalAsk)}</td>
+                  <td className="r amt">{fmtCents(tableTotalAsk)}</td>
                   <td colSpan={4} />
                 </tr>
               </tbody>

@@ -27,7 +27,7 @@ import {
 import { YuliaSkeleton } from "../shared/YuliaSkeleton";
 import { V6Icon } from "../icons";
 import { useTodayOperatingBrief, type TodayGateCountdownItem, type TodayOperatingBrief, type TodayTone } from "../../../hooks/useTodayOperatingBrief";
-import { NextMoveBar, BlockerChips, ReadinessBadge, OpChip, toneTrio } from "../shared/operatingPrimitives";
+import { NextMoveBar, BlockerChips, ReadinessBadge, OpChip, toneTrio, realBlockers, gateSignalTone } from "../shared/operatingPrimitives";
 import type { OpenTab } from "../types";
 
 interface BriefMarketIntel { headline: string; subhead: string; bullets: string[]; sourceCount: number; confidence: string; }
@@ -101,7 +101,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const operating = useTodayOperatingBrief(user, !!user);
   const ob = operating.brief;
   const gateItems = (ob?.gateCountdown ?? []).slice(0, 3);
-  const blockedDeals = (ob?.gateCountdown ?? []).filter(g => g.blockers.length > 0).length;
+  const blockedDeals = (ob?.gateCountdown ?? []).filter(g => realBlockers(g.blockers).length > 0).length;
   const staleModels = ob?.modelRefreshNeeds.length ?? 0;
   const filesReview = ob?.filesNeedingReview.length ?? 0;
   const readyToDisclose = (ob?.filesNeedingReview ?? []).filter(f => f.definitiveDisclosureStatus === "ready_for_user_controlled_disclosure").length;
@@ -109,7 +109,7 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const actionItems = buildActionItems(ob);
 
   const nextMoveParts: string[] = [];
-  if (blockedDeals) nextMoveParts.push(`${blockedDeals} deal${blockedDeals === 1 ? "" : "s"} with open blockers`);
+  if (blockedDeals) nextMoveParts.push(`${blockedDeals} deal${blockedDeals === 1 ? "" : "s"} with open gate items`);
   if (staleModels) nextMoveParts.push(`${staleModels} model${staleModels === 1 ? "" : "s"} need rerun`);
   if (filesReview) nextMoveParts.push(`${filesReview} file${filesReview === 1 ? "" : "s"} awaiting review`);
   if (readyToDisclose) nextMoveParts.push(`${readyToDisclose} ready to disclose`);
@@ -497,7 +497,11 @@ function TonalVerdictPill({ kind, label, dot = true }: { kind: VerdictKind; labe
    the gate, the blockers in the way, the DEFINITIVE readiness, the next
    suggested move. Tonal card (not glass — this is a work surface). */
 function GateCountdownCard({ item, onOpen, onAsk }: { item: TodayGateCountdownItem; onOpen: () => void; onAsk: () => void }) {
-  const t = toneTrio(item.tone);
+  // Color from REAL state (open items vs clear), never the server's
+  // positional round-robin tone — a blocked deal must never read green.
+  const open = realBlockers(item.blockers);
+  const signal = gateSignalTone(open.length);
+  const t = toneTrio(signal);
   return (
     <div className="wkcard" style={{ display: "flex", flexDirection: "column", gap: 10, boxShadow: "var(--wk-elev-card)", borderLeft: `3px solid ${t.mid}` }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
@@ -507,9 +511,9 @@ function GateCountdownCard({ item, onOpen, onAsk }: { item: TodayGateCountdownIt
         </div>
         <ReadinessBadge state={item.definitive} compact />
       </div>
-      {item.blockers.length > 0
-        ? <BlockerChips blockers={item.blockers} tone={item.tone} />
-        : <OpChip label="No blockers — ready to advance" tone="cactus" />}
+      {open.length > 0
+        ? <BlockerChips blockers={open} tone={signal} />
+        : <OpChip label="Ready to advance" tone="cactus" />}
       {item.nextAction && (
         <div style={{ fontSize: "0.82rem", color: "var(--ink-2)", lineHeight: 1.4 }}>
           <span style={{ color: "var(--ink-3)", fontWeight: 600 }}>Next: </span>{item.nextAction}
@@ -540,11 +544,14 @@ function buildActionItems(ob: TodayOperatingBrief | null): ActionItem[] {
     });
   }
   for (const f of ob.filesNeedingReview.slice(0, 3)) {
+    // Tone from real state: disclosure-ready is good (cactus), everything
+    // else is attention (gold) — never the server's positional tone.
+    const ready = f.definitiveDisclosureStatus === "ready_for_user_controlled_disclosure";
     out.push({
-      kind: "Review",
+      kind: ready ? "Ready" : "Review",
       label: `${f.title}${f.dealTitle ? ` · ${f.dealTitle}` : ""}`,
       reason: f.reason || f.status,
-      tone: f.tone,
+      tone: ready ? "cactus" : "gold",
       prompt: `Walk me through ${f.title}${f.dealTitle ? ` on ${f.dealTitle}` : ""} — what needs my eye?`,
     });
   }

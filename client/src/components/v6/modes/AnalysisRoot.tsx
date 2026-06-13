@@ -16,6 +16,8 @@ import {
 } from "../../../lib/v6ActionContracts";
 import type { SurfaceActionId } from "../../../lib/v6SurfaceActions";
 import { VERDICT_MATERIAL } from "../shared/verdictMaterial";
+import { useTodayOperatingBrief } from "../../../hooks/useTodayOperatingBrief";
+import { OpChip } from "../shared/operatingPrimitives";
 
 interface Tool { id: string; name: string; sub: string; icon: IconName; actionId?: SurfaceActionId }
 
@@ -134,6 +136,12 @@ export function V6AnalysisRoot({
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionNote, setActionNote] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+
+  // Model-freshness intelligence: which models are stale + why. The static
+  // tool catalog becomes state-aware — a stale model is the real signal that
+  // an analysis needs re-running.
+  const operating = useTodayOperatingBrief(user, !!user);
+  const staleModels = operating.brief?.modelRefreshNeeds ?? [];
 
   const runAnalysisAction = async (tool?: Tool, dealOverride?: WorkspaceDeal) => {
     setActionError(null);
@@ -268,6 +276,43 @@ export function V6AnalysisRoot({
       {(actionError || actionNote || workspace.error) && (
         <div className={actionError || workspace.error ? "wkerr" : "wknote"}>
           {actionError || workspace.error || actionNote}
+        </div>
+      )}
+
+      {/* MODEL FRESHNESS — the computed lead: which models are stale and why.
+          A model whose inputs changed is the real signal an analysis needs
+          re-running. Descriptive (THE LINE), honest "all current" fallback. */}
+      {operating.brief && (
+        <div style={{ marginTop: 4 }}>
+          {staleModels.length > 0 ? (
+            <div className="wkcard" style={{ display: "flex", flexDirection: "column", gap: 8, borderLeft: "3px solid var(--st-review-fg)" }}>
+              <div style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--ink)" }}>
+                {staleModels.length} model{staleModels.length === 1 ? "" : "s"} need a rerun
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {staleModels.slice(0, 3).map(m => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    className="wk-tap"
+                    onClick={() => onTalkToYulia?.(m.recomputePrompt || `Rerun ${m.modelTitle}${m.dealTitle ? ` for ${m.dealTitle}` : ""} — the inputs changed.`)}
+                    style={{ appearance: "none", border: 0, cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 10, padding: "9px 11px", background: "var(--surface-2)", borderRadius: 10 }}
+                  >
+                    <OpChip label={m.status === "needs_rerun" ? "Rerun" : "Stale"} tone="gold" />
+                    <span style={{ flex: 1, minWidth: 0 }}>
+                      <span style={{ display: "block", fontWeight: 600, fontSize: "0.88rem", color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.modelTitle}{m.dealTitle ? ` · ${m.dealTitle}` : ""}</span>
+                      <span style={{ display: "block", fontSize: "0.76rem", color: "var(--ink-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.reason || m.statusLabel}</span>
+                    </span>
+                    <span style={{ color: "var(--accent-strong)" }} aria-hidden>↗</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="wkcard" style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--ink-2)", fontSize: "0.88rem", borderLeft: "3px solid var(--st-good-fg)" }}>
+              <OpChip label="Current" tone="cactus" /> Every model is current — no reruns waiting.
+            </div>
+          )}
         </div>
       )}
 

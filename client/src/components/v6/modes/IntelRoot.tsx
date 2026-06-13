@@ -18,7 +18,8 @@ import { journeyTone, VERDICT_MATERIAL } from "../shared/verdictMaterial";
 interface SectorRollup {
   industry: string;
   count: number;
-  avgFit: number | null;
+  fitSum: number;   // accumulate sum + count → TRUE mean, divided once at render
+  fitCount: number;
   topDealId: number;
   topDealName: string;
   states: string[];
@@ -28,20 +29,21 @@ export function V6IntelRoot({ openTab, onTalkToYulia, user }: { openTab: OpenTab
   const workspace = useV6WorkspaceData(user ?? null);
   const ask = (prompt: string) => onTalkToYulia?.(prompt);
 
-  // Group the user's real deals by industry → honest sector rollups.
+  // Group the user's real ACTIVE deals by industry → honest sector rollups.
   const sectors = useMemo<SectorRollup[]>(() => {
     const map = new Map<string, SectorRollup>();
     for (const d of workspace.deals) {
+      if ((d.status || "").toLowerCase() !== "active") continue;
       const ind = (d.industry || "").trim();
       if (!ind) continue;
-      const fit = typeof d.seven_factor_composite === "number" ? d.seven_factor_composite : null;
+      const fit = typeof d.seven_factor_composite === "number" && Number.isFinite(d.seven_factor_composite) ? d.seven_factor_composite : null;
       const st = (d.location || "").split(",").pop()?.trim();
       const cur = map.get(ind);
       if (!cur) {
-        map.set(ind, { industry: ind, count: 1, avgFit: fit, topDealId: d.id, topDealName: d.business_name || `Deal #${d.id}`, states: st ? [st] : [] });
+        map.set(ind, { industry: ind, count: 1, fitSum: fit ?? 0, fitCount: fit != null ? 1 : 0, topDealId: d.id, topDealName: d.business_name || `Deal #${d.id}`, states: st ? [st] : [] });
       } else {
         cur.count += 1;
-        if (fit != null) cur.avgFit = cur.avgFit == null ? fit : (cur.avgFit + fit) / 2;
+        if (fit != null) { cur.fitSum += fit; cur.fitCount += 1; }
         if (st && !cur.states.includes(st)) cur.states.push(st);
       }
     }
@@ -49,7 +51,9 @@ export function V6IntelRoot({ openTab, onTalkToYulia, user }: { openTab: OpenTab
   }, [workspace.deals]);
 
   const loading = workspace.canFetch && workspace.loading;
-  const totalDeals = workspace.deals.length;
+  // Count only deals that actually landed in a sector, so the headline
+  // matches the grid (no industry-less or non-active deals overstated).
+  const sectorDealCount = sectors.reduce((n, s) => n + s.count, 0);
 
   const watchSector = (industry?: string) => {
     openTab({ id: "search-root", kind: "mode-root", modeId: "search", title: "Search" });
@@ -82,7 +86,7 @@ export function V6IntelRoot({ openTab, onTalkToYulia, user }: { openTab: OpenTab
         <div className="wksec">
           <div className="wksec-title" style={{ marginBottom: 4 }}>Your sectors</div>
           <p className="pg-sub" style={{ marginTop: 0, marginBottom: 14 }}>
-            {totalDeals} active deal{totalDeals === 1 ? "" : "s"} across {sectors.length} sector{sectors.length === 1 ? "" : "s"}. Open any for the source-grounded read.
+            {sectorDealCount} active deal{sectorDealCount === 1 ? "" : "s"} across {sectors.length} sector{sectors.length === 1 ? "" : "s"}. Open any for the source-grounded read.
           </p>
           <div className="wkgrid g3" style={{ gap: 12 }}>
             {sectors.map(s => {
@@ -106,7 +110,7 @@ export function V6IntelRoot({ openTab, onTalkToYulia, user }: { openTab: OpenTab
                   </div>
                   <div style={{ fontSize: "0.82rem", color: "var(--ink-2)", lineHeight: 1.4 }}>
                     {s.states.length > 0 ? s.states.slice(0, 3).join(" · ") : "—"}
-                    {s.avgFit != null && <> · avg fit <span style={{ color: "var(--st-good-fg)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>{Math.round(s.avgFit)}</span></>}
+                    {s.fitCount > 0 && <> · avg fit <span style={{ color: "var(--st-good-fg)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>{Math.round(s.fitSum / s.fitCount)}</span></>}
                   </div>
                   <div style={{ marginTop: "auto", paddingTop: 6, fontSize: "0.8rem", fontWeight: 700, color: tone.ink }}>
                     Get the market read ›

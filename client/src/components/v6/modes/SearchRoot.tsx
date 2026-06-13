@@ -53,8 +53,19 @@ export function V6SearchRoot({ openTab, onTalkToYulia, user }: SearchRootProps) 
   // is sourcing FOR before offering a generic category picker.
   const workspace = useV6WorkspaceData(user);
   const activeDeals = workspace.deals.filter(d => (d.status || "").toLowerCase() === "active");
-  const fitVals = workspace.deals.map(d => d.seven_factor_composite).filter((v): v is number => typeof v === "number");
-  const medianFit = fitVals.length ? Math.round([...fitVals].sort((a, b) => a - b)[Math.floor(fitVals.length / 2)]) : null;
+  // Median fit over the SAME active set the scorecard counts. True median:
+  // average the two middles on an even count (not the upper-middle alone).
+  const fitVals = activeDeals
+    .map(d => d.seven_factor_composite)
+    .filter((v): v is number => typeof v === "number" && Number.isFinite(v))
+    .sort((a, b) => a - b);
+  const medianFit = fitVals.length
+    ? Math.round(
+        fitVals.length % 2
+          ? fitVals[(fitVals.length - 1) / 2]
+          : (fitVals[fitVals.length / 2 - 1] + fitVals[fitVals.length / 2]) / 2,
+      )
+    : null;
   const topIndustries = useMemo(() => {
     const m = new Map<string, number>();
     for (const d of workspace.deals) { const i = (d.industry || "").trim(); if (i) m.set(i, (m.get(i) || 0) + 1); }

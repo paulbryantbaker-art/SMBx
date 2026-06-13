@@ -31,6 +31,21 @@ export function toneTrio(tone?: TodayTone | null): Trio {
   return (tone && TONE_TRIO[tone]) || TONE_TRIO.oat;
 }
 
+/** The server emits a literal placeholder ('No blocker surfaced') when a gate
+ *  item has zero real open items, so item.blockers is NEVER empty. Strip it
+ *  before counting or displaying — otherwise every gated deal reads as
+ *  blocked and the "ready to advance" state can never show. */
+export function realBlockers(blockers?: string[]): string[] {
+  return (blockers ?? []).filter(b => b && b !== "No blocker surfaced");
+}
+
+/** Signal tone for a gate/work item: gold (attention) when items are open,
+ *  cactus (clear) when none. Never the server's round-robin tone, which is
+ *  positional decoration — color must encode the real state. */
+export function gateSignalTone(openCount: number): TodayTone {
+  return openCount > 0 ? "gold" : "cactus";
+}
+
 /** A small tonal chip (label on soft, ink text). The atom of every
  *  operating surface. */
 export function OpChip({ label, tone, title }: { label: string; tone?: TodayTone; title?: string }) {
