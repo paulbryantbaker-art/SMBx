@@ -13,8 +13,14 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-ARG CACHEBUST=1
+# Force a real rebuild of the client + server on EVERY deploy. The old static
+# `ARG CACHEBUST=1` never changed, so Railway's Docker layer cache kept reusing
+# a stale `vite build` output — production shipped a pre-redesign frontend even
+# though origin/main had the new code. Railway injects RAILWAY_GIT_COMMIT_SHA at
+# build time; a changing ARG value here busts this layer's cache every commit.
+ARG RAILWAY_GIT_COMMIT_SHA=local
 RUN rm -rf dist \
+  && echo "Building client+server for commit ${RAILWAY_GIT_COMMIT_SHA}" \
   && npx vite build \
   && npx esbuild server/index.ts --bundle --platform=node --outdir=dist/server --format=esm --packages=external \
   && mkdir -p dist/server/migrations \
