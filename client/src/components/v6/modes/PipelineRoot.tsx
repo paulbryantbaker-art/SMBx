@@ -15,6 +15,9 @@ import { PIPELINE_STAGES, stageForGate } from "../../../lib/pipelineStages";
 import { LEAGUE_MULTIPLES } from "../../../lib/calculations/core";
 import { VERDICT_MATERIAL } from "../shared/verdictMaterial";
 import { FitRing, IndustryGlyphChip } from "../shared/dataChips";
+import { useTodayOperatingBrief, type TodayDefinitiveDealState } from "../../../hooks/useTodayOperatingBrief";
+import { usePortfolioSummary } from "../../../hooks/usePortfolioSummary";
+import { ReadinessBadge } from "../shared/operatingPrimitives";
 import { YuliaSkeleton } from "../shared/YuliaSkeleton";
 import type { OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
@@ -34,11 +37,23 @@ interface PipelineRootProps {
 // clickable stage header, both landing on the full deals list FILTERED to
 // that stage.
 const STAGE_ROW_CAP = 5;
-const COLUMNS = 7; // Deal | Stage | SDE | Asking | Multiple | Fit | Verdict
+const COLUMNS = 8; // Deal | Stage | SDE | Asking | Multiple | Fit | Ready | Verdict
 
 export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootProps) {
   const deals = useMobileDeals(user);
   const workspace = useV6WorkspaceData(user);
+  // Computed intelligence: per-deal DEFINITIVE readiness (from the brief)
+  // and probability-weighted EV (from the portfolio summary). Both already
+  // computed server-side — the table was a ledger of stored fields; this
+  // makes it a dashboard of "what can actually move."
+  const operating = useTodayOperatingBrief(user, !!user);
+  const portfolio = usePortfolioSummary(user, !!user);
+  const readinessByDeal = new Map<string, TodayDefinitiveDealState>();
+  for (const g of operating.brief?.gateCountdown ?? []) if (g.definitive) readinessByDeal.set(g.dealId, g.definitive);
+  for (const p of operating.brief?.dealPulse ?? []) if (p.definitive && !readinessByDeal.has(p.dealId)) readinessByDeal.set(p.dealId, p.definitive);
+  const totalBlockers = (operating.brief?.gateCountdown ?? []).reduce((n, g) => n + g.blockers.length, 0);
+  const blockedDealCount = (operating.brief?.gateCountdown ?? []).filter(g => g.blockers.length > 0).length;
+  const weightedEv = portfolio.summary?.weightedEvCents ?? 0;
   const ask = (prompt: string) => onTalkToYulia?.(prompt);
   const openDeal = (rawId: number, title: string) => openTab({ kind: "deal", id: String(rawId), title });
   const openAllDeals = () => openTab({ id: "deals-all", kind: "deals-list", title: "All deals", dealsListView: "all" });
@@ -83,7 +98,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
       <div className="pg-head">
         <div>
           <div className="pg-title">Pipeline</div>
-          <p className="pg-sub">Your deals, grouped by stage — and the strongest source this week.</p>
+          <p className="pg-sub">Your deals by stage — weighted value, fit, and what's blocking each gate.</p>
         </div>
         <div className="pg-actions">
           <button className="wkbtn" type="button" onClick={openAllDeals}>All deals</button>
@@ -118,24 +133,29 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
                   <div className="v">{fmtCents(totalAsk)}</div>
                 </div>
               )}
+              {/* Weighted EV — probability-adjusted, consistently derived
+                  (asking, or earnings×multiple when absent). A computed
+                  figure, not a raw sum: proves money at a glance. */}
+              {weightedEv > 0 && (
+                <div className="mh">
+                  <div className="l">Weighted EV</div>
+                  <div className="v">{fmtCents(weightedEv)}</div>
+                  <div className="s">probability-adjusted</div>
+                </div>
+              )}
               {medianFit !== null && (
                 <div className="mh">
                   <div className="l">Median fit</div>
                   <div className="v">{medianFit}</div>
                 </div>
               )}
-              {featured && (
+              {/* Blockers — the computed friction tile (replaces the
+                  low-signal "Strongest source" name). Emerald when clear. */}
+              {operating.brief && (
                 <div className="mh">
-                  <div className="l">Strongest source</div>
-                  <button
-                    type="button"
-                    className="v mh-name"
-                    onClick={() => openDeal(featured.rawId, featured.name)}
-                    style={{ background: "none", border: 0, padding: 0, cursor: "pointer", textAlign: "left" }}
-                  >
-                    {featured.name}
-                  </button>
-                  {featured.fitIsReal && <div className="s">fit {featured.fit}</div>}
+                  <div className="l">Blockers</div>
+                  <div className="v" style={{ color: totalBlockers > 0 ? "var(--st-range-out)" : "var(--st-good-fg)" }}>{totalBlockers}</div>
+                  <div className="s">{totalBlockers > 0 ? `across ${blockedDealCount} deal${blockedDealCount === 1 ? "" : "s"}` : "nothing waiting"}</div>
                 </div>
               )}
             </div>
@@ -152,6 +172,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
                   <th className="r">Asking</th>
                   <th className="r">Multiple</th>
                   <th className="r">Fit</th>
+                  <th>Ready</th>
                   <th>Verdict</th>
                 </tr>
               </thead>
@@ -177,7 +198,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
                       </td>
                     </tr>
                     {shown.map(d => (
-                      <ScheduleRow key={d.id} deal={d} onOpen={() => openDeal(d.id, dealTitle(d))} />
+                      <ScheduleRow key={d.id} deal={d} readiness={readinessByDeal.get(String(d.id))} onOpen={() => openDeal(d.id, dealTitle(d))} />
                     ))}
                     {rows.length > shown.length && (
                       <tr onClick={() => openStage(stage.id, stage.title)}>
@@ -194,7 +215,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
                   <td colSpan={2}>All stages</td>
                   <td className="r" />
                   <td className="r amt">{fmtCents(totalAsk)}</td>
-                  <td colSpan={3} />
+                  <td colSpan={4} />
                 </tr>
               </tbody>
             </table>
@@ -218,7 +239,7 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
   );
 }
 
-function ScheduleRow({ deal, onOpen }: { deal: WorkspaceDeal; onOpen: () => void }) {
+function ScheduleRow({ deal, readiness, onOpen }: { deal: WorkspaceDeal; readiness?: TodayDefinitiveDealState; onOpen: () => void }) {
   const verdict = dealVerdict(deal);
   const tone = VERDICT_MATERIAL[verdict].tone;
   const fit = typeof deal.seven_factor_composite === "number" && Number.isFinite(deal.seven_factor_composite)
@@ -255,6 +276,9 @@ function ScheduleRow({ deal, onOpen }: { deal: WorkspaceDeal; onOpen: () => void
           </span>
         ) : "—"}
       </td>
+      {/* Ready — DEFINITIVE readiness: what can actually advance, not just
+          what it's worth. Empty (—) when no DealState exists (honest). */}
+      <td>{readiness ? <ReadinessBadge state={readiness} compact /> : <span style={{ color: "var(--ink-3)" }}>—</span>}</td>
       <td>
         <span className={`statpill ${verdictClass(verdict)}`}><span className="d" />{capitalize(verdict)}</span>
       </td>
@@ -286,10 +310,12 @@ function PickRow({ pick, last, onOpen }: { pick: MobilePick; last: boolean; onOp
 
 /* ─── helpers ─────────────────────────────────────────────── */
 
-// Same money formatter as DealsListView (cents → $X.XM / $XK).
+// Money formatter (cents → $X.XB / $X.XM / $XK). Billions matter once the
+// KPI band sums weighted EV across a full portfolio.
 function fmtCents(cents: number | null | undefined): string {
   if (!cents) return "--";
   const dollars = cents / 100;
+  if (dollars >= 1_000_000_000) return `$${(dollars / 1_000_000_000).toFixed(2).replace(/\.?0+$/, "")}B`;
   if (dollars >= 1_000_000) return `$${(dollars / 1_000_000).toFixed(2).replace(/\.?0+$/, "")}M`;
   if (dollars >= 1_000) return `$${Math.round(dollars / 1_000)}K`;
   return `$${Math.round(dollars).toLocaleString()}`;

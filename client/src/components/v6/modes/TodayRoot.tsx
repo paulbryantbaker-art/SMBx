@@ -26,6 +26,8 @@ import {
 } from "../shared/verdictMaterial";
 import { YuliaSkeleton } from "../shared/YuliaSkeleton";
 import { V6Icon } from "../icons";
+import { useTodayOperatingBrief, type TodayGateCountdownItem, type TodayOperatingBrief, type TodayTone } from "../../../hooks/useTodayOperatingBrief";
+import { NextMoveBar, BlockerChips, ReadinessBadge, OpChip, toneTrio } from "../shared/operatingPrimitives";
 import type { OpenTab } from "../types";
 
 interface BriefMarketIntel { headline: string; subhead: string; bullets: string[]; sourceCount: number; confidence: string; }
@@ -95,6 +97,24 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
   const dealsLoading = deals.isAuthed && deals.loading && !deals.loaded;
   const briefAnalyzing = !!user && briefLoading && !brief;
 
+  // ── Computed operating intelligence (the page's real lead) ──
+  const operating = useTodayOperatingBrief(user, !!user);
+  const ob = operating.brief;
+  const gateItems = (ob?.gateCountdown ?? []).slice(0, 3);
+  const blockedDeals = (ob?.gateCountdown ?? []).filter(g => g.blockers.length > 0).length;
+  const staleModels = ob?.modelRefreshNeeds.length ?? 0;
+  const filesReview = ob?.filesNeedingReview.length ?? 0;
+  const readyToDisclose = (ob?.filesNeedingReview ?? []).filter(f => f.definitiveDisclosureStatus === "ready_for_user_controlled_disclosure").length;
+  // Top action chips from the real backlog (replaces static "quick wins").
+  const actionItems = buildActionItems(ob);
+
+  const nextMoveParts: string[] = [];
+  if (blockedDeals) nextMoveParts.push(`${blockedDeals} deal${blockedDeals === 1 ? "" : "s"} with open blockers`);
+  if (staleModels) nextMoveParts.push(`${staleModels} model${staleModels === 1 ? "" : "s"} need rerun`);
+  if (filesReview) nextMoveParts.push(`${filesReview} file${filesReview === 1 ? "" : "s"} awaiting review`);
+  if (readyToDisclose) nextMoveParts.push(`${readyToDisclose} ready to disclose`);
+  const nextMoveTone = blockedDeals ? "plum" : staleModels ? "gold" : "cactus";
+
   return (
     <div className="wk-content m-fade-up m-page-flow" style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div className="pg-head">
@@ -103,6 +123,27 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
           <p className="pg-sub">{C.todayHeroTag}</p>
         </div>
       </div>
+
+      {/* ── NEXT-MOVE BAR — the computed lead: one line of state facts
+          distilled from gate countdowns, model staleness, and the review
+          queue. Descriptive only (THE LINE); honest "all current" fallback.
+          Only renders once the operating brief is in hand for an authed
+          user — never a placeholder. */}
+      {user && (operating.brief || operating.loading) && (
+        operating.loading && !operating.brief ? (
+          <div style={{ marginTop: 4 }}><YuliaSkeleton rows={1} label="Yulia is reading today's queue…" /></div>
+        ) : (
+          <div style={{ marginTop: 4 }}>
+            <NextMoveBar
+              parts={nextMoveParts}
+              tone={nextMoveTone}
+              icon={<V6Icon name="chart" size={16} />}
+              ctaLabel="Ask Yulia"
+              onClick={() => ask(ob?.morningBrief.prompt || "Walk me through what needs my attention across the portfolio today.")}
+            />
+          </div>
+        )
+      )}
 
       {/* ── Daily hero + Market intelligence ── */}
       <div className="wkgrid g2" style={{ gap: 16, marginTop: 4 }}>
@@ -243,24 +284,50 @@ export function V6TodayRoot({ openTab, onTalkToYulia, user }: TodayRootProps) {
         </div>
       </div>
 
-      {/* ── Today's quick wins (copyFor(audience).todayTips) + Recent work ── */}
+      {/* ── GATE COUNTDOWN — the top deals by urgency with the real blockers
+          standing between them and their next gate. The page's computed
+          centerpiece: each card is state facts (gate, blockers, readiness)
+          + the next suggested move, never advice. */}
+      {gateItems.length > 0 && (
+        <div className="wksec">
+          <div className="wksec-title" style={{ marginBottom: 12 }}>What's between you and the next gate</div>
+          <div className="wkgrid g3" style={{ gap: 12 }}>
+            {gateItems.map(item => (
+              <GateCountdownCard key={item.dealId} item={item} onOpen={() => openDeal(Number(item.dealId), item.title)} onAsk={() => ask(`${item.title}: what clears the ${item.gateName} gate, and what's the next move?`)} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Today's actions (real backlog) + Recent work ── */}
       <div className="wkgrid g2" style={{ gap: 16, marginTop: 16 }}>
         <div className="wkcard" style={{ display: "flex", flexDirection: "column", gap: 4, boxShadow: "var(--wk-elev-card)" }}>
-          <div style={{ fontSize: "1.15rem", fontWeight: 700, letterSpacing: "-0.03em", color: "var(--ink)", lineHeight: 1.1 }}>Today's quick wins</div>
-          <p style={{ color: "var(--ink-2)", fontSize: "0.84rem", margin: "4px 0 10px" }}>Things Yulia can do for you right now.</p>
+          <div style={{ fontSize: "1.15rem", fontWeight: 700, letterSpacing: "-0.03em", color: "var(--ink)", lineHeight: 1.1 }}>Today's actions</div>
+          <p style={{ color: "var(--ink-2)", fontSize: "0.84rem", margin: "4px 0 10px" }}>
+            {actionItems.length > 0 ? "Pulled from your live backlog — Yulia can run each now." : "Everything Yulia computed is current."}
+          </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {C.todayTips.map(tip => (
+            {actionItems.length > 0 ? actionItems.map((a, i) => (
               <button
-                key={tip.label}
+                key={i}
                 type="button"
                 className="wk-tap"
                 style={{ appearance: "none", font: "inherit", color: "inherit", margin: 0, textAlign: "left", cursor: "pointer", display: "flex", alignItems: "center", gap: 12, padding: "11px 13px", background: "var(--surface-2)", border: "1px solid var(--line)", borderRadius: 10, boxSizing: "border-box" }}
-                onClick={() => ask(tip.prompt)}
+                onClick={() => ask(a.prompt)}
               >
-                <span style={{ flex: 1, minWidth: 0, color: "var(--ink)", fontWeight: 600, fontSize: "0.9rem" }}>{tip.label}</span>
+                <span style={{ flexShrink: 0 }}><OpChip label={a.kind} tone={a.tone} /></span>
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{ display: "block", color: "var(--ink)", fontWeight: 600, fontSize: "0.9rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.label}</span>
+                  {a.reason && <span style={{ display: "block", color: "var(--ink-3)", fontSize: "0.76rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.reason}</span>}
+                </span>
                 <span style={{ color: "var(--accent-strong)" }} aria-hidden="true">↗</span>
               </button>
-            ))}
+            )) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "10px 0", color: "var(--ink-2)", fontSize: "0.85rem" }}>
+                No models stale, no reviews waiting. Ask Yulia what to source next.
+                <button className="wkbtn" type="button" style={{ alignSelf: "flex-start", marginTop: 6 }} onClick={() => ask("What's the highest-leverage thing I could do across my portfolio right now?")}>Ask Yulia</button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -424,6 +491,64 @@ function TonalVerdictPill({ kind, label, dot = true }: { kind: VerdictKind; labe
       {label}
     </span>
   );
+}
+
+/* GATE COUNTDOWN CARD — a deal's real position relative to its next gate:
+   the gate, the blockers in the way, the DEFINITIVE readiness, the next
+   suggested move. Tonal card (not glass — this is a work surface). */
+function GateCountdownCard({ item, onOpen, onAsk }: { item: TodayGateCountdownItem; onOpen: () => void; onAsk: () => void }) {
+  const t = toneTrio(item.tone);
+  return (
+    <div className="wkcard" style={{ display: "flex", flexDirection: "column", gap: 10, boxShadow: "var(--wk-elev-card)", borderLeft: `3px solid ${t.mid}` }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
+        <div style={{ minWidth: 0 }}>
+          <div className="wk-masthead" style={{ fontSize: 18, lineHeight: 1.15, color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.title}</div>
+          <div style={{ fontSize: "0.78rem", color: "var(--ink-3)", marginTop: 2 }}>{item.gateId} · {item.gateName}</div>
+        </div>
+        <ReadinessBadge state={item.definitive} compact />
+      </div>
+      {item.blockers.length > 0
+        ? <BlockerChips blockers={item.blockers} tone={item.tone} />
+        : <OpChip label="No blockers — ready to advance" tone="cactus" />}
+      {item.nextAction && (
+        <div style={{ fontSize: "0.82rem", color: "var(--ink-2)", lineHeight: 1.4 }}>
+          <span style={{ color: "var(--ink-3)", fontWeight: 600 }}>Next: </span>{item.nextAction}
+        </div>
+      )}
+      <div style={{ display: "flex", gap: 8, marginTop: "auto", paddingTop: 4 }}>
+        <button className="wkbtn wk-tap" type="button" style={{ flex: 1 }} onClick={onOpen}>Open deal</button>
+        <button className="wkbtn wk-tap" type="button" style={{ flex: 1 }} onClick={onAsk}>Ask Yulia</button>
+      </div>
+    </div>
+  );
+}
+
+/* Distill the live backlog (stale models + review queue) into ranked,
+   runnable action items. Model reruns first (they gate analysis), then the
+   review queue. Each carries its real reason — descriptive, never advice. */
+interface ActionItem { kind: string; label: string; reason: string; tone: TodayTone; prompt: string }
+function buildActionItems(ob: TodayOperatingBrief | null): ActionItem[] {
+  if (!ob) return [];
+  const out: ActionItem[] = [];
+  for (const m of ob.modelRefreshNeeds.slice(0, 3)) {
+    out.push({
+      kind: "Rerun",
+      label: `${m.modelTitle}${m.dealTitle ? ` · ${m.dealTitle}` : ""}`,
+      reason: m.reason || m.statusLabel,
+      tone: m.status === "needs_rerun" ? "plum" : "gold",
+      prompt: m.recomputePrompt || `Rerun ${m.modelTitle}${m.dealTitle ? ` for ${m.dealTitle}` : ""} — the inputs changed.`,
+    });
+  }
+  for (const f of ob.filesNeedingReview.slice(0, 3)) {
+    out.push({
+      kind: "Review",
+      label: `${f.title}${f.dealTitle ? ` · ${f.dealTitle}` : ""}`,
+      reason: f.reason || f.status,
+      tone: f.tone,
+      prompt: `Walk me through ${f.title}${f.dealTitle ? ` on ${f.dealTitle}` : ""} — what needs my eye?`,
+    });
+  }
+  return out.slice(0, 5);
 }
 
 function PipelineRow({ row, last, onOpen }: { row: MobilePipelineRow; last: boolean; onOpen: () => void }) {
