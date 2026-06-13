@@ -788,10 +788,39 @@ function buildDeterministicPortfolioBrief(snapshot: Awaited<ReturnType<typeof bu
   const stale = snapshot.deliverables.filter(d => d.is_stale);
   const complete = snapshot.deliverables.filter(d => d.status === 'complete');
   const dataRoomCount = deals.reduce((sum, d) => sum + Number(d.document_count ?? 0), 0);
-  const sourceCount = snapshot.reports.length + snapshot.sourcingBriefs.length + snapshot.marketHeat.length;
+  // Real per-industry market heat (getMarketHeat: curated PE roll-up verticals
+  // + live active buyer-thesis counts). Each bullet pairs an industry with ITS
+  // OWN heat — never the lead's name glued to a different industry's label.
+  // Cool/Cold are kept (honest: "limited PE activity" is real intelligence);
+  // only score-0 / Unknown (compute errors) are dropped.
+  const hotHeat = [...snapshot.marketHeat]
+    .filter((h: any) => h && typeof h.score === 'number' && h.score > 0 && h.label && h.label !== 'Unknown')
+    .sort((a: any, b: any) => b.score - a.score);
+  const heatBullets = hotHeat.slice(0, 3).map((h: any) => {
+    const dir = h.multipleDirection ? `, ${h.multipleDirection} multiples` : '';
+    return `${h.industry} — ${h.label} (${h.score}/5${dir}): ${h.peActivity || (h.signals?.[0] ?? 'see signals')}.`;
+  });
+  const briefBullet = snapshot.sourcingBriefs[0]?.narrative_markdown
+    ? `Latest sourcing brief: ${clip(snapshot.sourcingBriefs[0].narrative_markdown, 130)}`
+    : null;
+  const bullets = [...heatBullets];
+  if (briefBullet) bullets.push(briefBullet);
+  if (bullets.length === 0) {
+    bullets.push(lead?.industry
+      ? `${lead.industry}: no PE-consolidation signal or active buyer thesis on platform yet — Yulia can research the buyer universe on request.`
+      : 'Add a deal industry and Yulia will compute live market heat from PE activity and buyer-thesis demand.');
+  }
+
+  const scoredCount = hotHeat.length;
+  // sourceCount = genuinely attached/computed reads (reports + sourcing briefs
+  // + scored industries). Heat reads ARE computed intelligence, not "attached
+  // sources", so the subhead/confidence describe them as such — no overclaim.
+  const sourceCount = snapshot.reports.length + snapshot.sourcingBriefs.length + scoredCount;
   const marketHeadline = lead
-    ? `${dealName(lead)} is being read against ${lead.industry || 'its market'}, financing climate, diligence state, and live work product.`
-    : 'Yulia is waiting for the first deal or thesis to build a live market read.';
+    ? scoredCount > 0
+      ? `Your portfolio reads hottest in ${hotHeat[0].industry} — ranked by live PE consolidation activity and active buyer theses.`
+      : `${dealName(lead)} — Yulia is computing live market heat for ${lead.industry || 'this market'}.`
+    : 'Add a deal or thesis and Yulia will build a live market-heat read from PE activity and buyer demand.';
 
   return {
     source: 'live',
@@ -799,18 +828,14 @@ function buildDeterministicPortfolioBrief(snapshot: Awaited<ReturnType<typeof bu
     modelUsed: MODEL,
     intelligenceMode: 'deterministic_fallback',
     marketIntelligence: {
-      eyebrow: 'MARKET INTELLIGENCE LIVE',
+      eyebrow: '',
       headline: marketHeadline,
-      subhead: sourceCount > 0
-        ? `${sourceCount} intelligence source${sourceCount === 1 ? '' : 's'} are attached to this workspace.`
-        : 'No dedicated market reports are attached yet. Yulia can generate the first market intelligence read from the deal thesis.',
-      bullets: [
-        lead?.industry ? `${lead.industry}: ${snapshot.marketHeat[0]?.label || 'market heat pending'}.` : 'Add industry and geography to unlock local density, comps, and buyer universe.',
-        snapshot.sourcingBriefs[0]?.narrative_markdown ? `Latest sourcing brief: ${clip(snapshot.sourcingBriefs[0].narrative_markdown, 130)}` : 'Sourcing briefs will feed buyer/target market context here.',
-        'Tax and legal implications are surfaced as issue spotting; CPA and counsel sign off before execution.',
-      ],
+      subhead: scoredCount > 0
+        ? `${scoredCount} industr${scoredCount === 1 ? 'y' : 'ies'} scored on live PE activity and buyer-thesis demand.`
+        : 'No market-heat signal yet — add deal industries to compute live PE activity and buyer demand.',
+      bullets,
       sourceCount,
-      confidence: sourceCount > 0 ? 'Live sources attached' : 'Needs source data',
+      confidence: scoredCount > 0 ? 'Computed from live PE activity + buyer theses' : 'Needs deal industry',
     },
     hero: buildHero(lead, snapshot, stale),
     liveDesk: buildLiveDesk(snapshot, inProgress),

@@ -5,6 +5,7 @@ import { Router } from 'express';
 import { sql } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
 import { fetchCBPData, fetchFREDData, calculateSBABankability, generateMarketOverview } from '../services/marketDataService.js';
+import { getMarketHeat } from '../services/marketHeatService.js';
 import { generateIntelligenceReport } from '../services/generators/intelligenceReport.js';
 // dealExecutionFee removed — subscription model handles access
 
@@ -31,6 +32,41 @@ intelligenceRouter.get('/intelligence/market-overview', async (req, res) => {
   } catch (err: any) {
     console.error('Market overview error:', err.message);
     return res.status(500).json({ error: 'Failed to generate market overview' });
+  }
+});
+
+// ─── Portfolio market heat ───────────────────────────────────
+// Real, sourced heat per distinct industry in the user's ACTIVE deals:
+// getMarketHeat() scores from a curated PE roll-up vertical table
+// (methodology) plus LIVE active buyer-thesis counts, returning transparent
+// signals. No fabrication — an industry with no PE consolidation and no
+// theses honestly returns Cool with "No active buyer theses" as its signal.
+intelligenceRouter.get('/intelligence/portfolio-heat', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const rows = await sql`
+      SELECT DISTINCT industry FROM deals
+      WHERE user_id = ${userId}
+        AND status = 'active'
+        AND industry IS NOT NULL AND TRIM(industry) <> ''
+    `;
+    const industries = rows.map(r => String(r.industry).trim()).slice(0, 24);
+    const heat = await Promise.all(
+      industries.map(async (industry) => {
+        try {
+          return { industry, ...(await getMarketHeat(industry)) };
+        } catch {
+          return null;
+        }
+      }),
+    );
+    const ranked = heat
+      .filter((h): h is NonNullable<typeof h> => !!h)
+      .sort((a, b) => b.score - a.score);
+    return res.json({ heat: ranked, generatedAt: new Date().toISOString() });
+  } catch (err: any) {
+    console.error('Portfolio heat error:', err.message);
+    return res.status(500).json({ error: 'Failed to compute portfolio market heat' });
   }
 });
 
