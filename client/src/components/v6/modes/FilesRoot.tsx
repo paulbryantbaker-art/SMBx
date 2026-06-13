@@ -904,11 +904,29 @@ function FileListRow({ row, last, onClick }: { row: FileRow; last: boolean; onCl
         <strong style={{ color: "var(--ink)", fontWeight: 600, fontSize: ".9rem" }}>{row.title}</strong>
         <span style={{ color: "var(--ink-3)", fontSize: ".78rem" }}>{row.sub}</span>
       </span>
-      <span className={`statpill ${pill.cls}`}>
-        <span className="d" />{row.status}
+      <span style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+        {/* DEFINITIVE disclosure signal — the data model already carries it.
+            Descriptive state fact (THE LINE): the user controls disclosure. */}
+        {row.definitiveDisclosureStatus && (
+          <span className={`statpill ${disclosurePillCls(row.definitiveDisclosureStatus)}`}>
+            <span className="d" />{disclosureStatusLabel(row.definitiveDisclosureStatus, row.definitiveSourceGaps?.length ?? 0)}
+          </span>
+        )}
+        <span className={`statpill ${pill.cls}`}>
+          <span className="d" />{row.status}
+        </span>
       </span>
     </button>
   );
+}
+
+/** Pill class for a DEFINITIVE disclosure status — ready=good, blocked=missing,
+ *  gaps-open=review, index-ready=diligence. */
+function disclosurePillCls(status: FileRow["definitiveDisclosureStatus"]): string {
+  if (status === "ready_for_user_controlled_disclosure") return "good";
+  if (status === "blocked_by_source_gaps") return "missing";
+  if (status === "source_gaps_open") return "review";
+  return "diligence";
 }
 
 function toneToPill(name: FileRow["tone"]): { cls: string } {

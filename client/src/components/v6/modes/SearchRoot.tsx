@@ -144,9 +144,41 @@ export function V6SearchRoot({ openTab, onTalkToYulia, user }: SearchRootProps) 
         </div>
       )}
 
-      {/* Categories — same 6 as mobile */}
+      {/* Portfolio-derived discovery — prompts built from the user's REAL active
+          deals (sector + geography), so the page leads with "what your book
+          needs sourced," not a generic category grid. */}
+      {activeDeals.length > 0 && (
+        <div className="wksec">
+          <div className="wksec-title">Discover for your pipeline</div>
+          <p className="pg-sub" style={{ marginTop: 0, marginBottom: 12 }}>Built from your active deals — buyer universe, comps, and the pros working each sector.</p>
+          <div className="wkgrid g2" style={{ gap: 12 }}>
+            {activeDeals.slice(0, 4).map(d => {
+              const name = d.business_name || `Deal #${d.id}`;
+              const sector = d.industry || "this sector";
+              const where = d.location ? ` · ${d.location}` : "";
+              return (
+                <button
+                  key={d.id}
+                  type="button"
+                  className="wkcard tap wk-ascard"
+                  style={{ all: "unset", cursor: "pointer", boxSizing: "border-box", display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 14 }}
+                  onClick={() => runSearch(`For ${name} (${sector}${d.location ? `, ${d.location}` : ""}), map the active buyer universe, recent comparable transactions, and the deal professionals working this sector. Ground it in sources.`, `${name} discovery`)}
+                >
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{ display: "block", fontWeight: 700, fontSize: "0.92rem", color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Buyers &amp; comps for {name}</span>
+                    <span style={{ display: "block", fontSize: "0.78rem", color: "var(--ink-3)", marginTop: 2 }}>{sector}{where}</span>
+                  </span>
+                  <span aria-hidden style={{ color: "var(--accent-strong)", fontWeight: 700 }}>›</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Evergreen categories — demoted below the portfolio-derived prompts */}
       <div className="wksec">
-        <div className="wksec-title">Start a discovery search</div>
+        <div className="wksec-title">{activeDeals.length > 0 ? "Or start from a category" : "Start a discovery search"}</div>
         <div className="wkgrid g3" style={{ gap: 12, marginTop: 12 }}>
           {CATEGORIES.map(c => {
             const Icon = c.icon;

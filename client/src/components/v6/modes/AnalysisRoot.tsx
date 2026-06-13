@@ -136,6 +136,7 @@ export function V6AnalysisRoot({
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionNote, setActionNote] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const [showCatalog, setShowCatalog] = useState(false);
 
   // Model-freshness intelligence: which models are stale + why. The static
   // tool catalog becomes state-aware — a stale model is the real signal that
@@ -301,7 +302,7 @@ export function V6AnalysisRoot({
                     <OpChip label={m.status === "needs_rerun" ? "Rerun" : "Stale"} tone="gold" />
                     <span style={{ flex: 1, minWidth: 0 }}>
                       <span style={{ display: "block", fontWeight: 600, fontSize: "0.88rem", color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.modelTitle}{m.dealTitle ? ` · ${m.dealTitle}` : ""}</span>
-                      <span style={{ display: "block", fontSize: "0.76rem", color: "var(--ink-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.reason || m.statusLabel}</span>
+                      <span style={{ display: "block", fontSize: "0.76rem", color: "var(--ink-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.changedInputs.length ? `${m.changedInputs.join(", ")} changed` : (m.reason || m.statusLabel)}</span>
                     </span>
                     <span style={{ color: "var(--accent-strong)" }} aria-hidden>↗</span>
                   </button>
@@ -375,9 +376,18 @@ export function V6AnalysisRoot({
         )}
       </div>
 
-      {/* Searchable full catalog (show all) */}
+      {/* Full methodology catalog — collapsed by default so the page opens on
+          consequence (freshness + recommendations), not a 14-card tool menu.
+          Searching auto-expands it. */}
       <div className="wksec">
-        <div className="wksec-title">All analyses</div>
+        <div className="pg-head" style={{ alignItems: "center" }}>
+          <div className="wksec-title" style={{ marginBottom: 0 }}>All analyses</div>
+          <button className="wkbtn" type="button" onClick={() => setShowCatalog(v => !v)}>
+            {showCatalog ? "Hide catalog" : `Browse all ${TOOLS.length} analyses`}
+          </button>
+        </div>
+        {(showCatalog || q) && (
+        <>
         <div className="filterbar">
           <label className="fsearch">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.7" /><path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
@@ -426,6 +436,8 @@ export function V6AnalysisRoot({
             <div className="wkcard-title">No analysis matches “{query}”</div>
             <div className="wkcard-sub">Try a different term, or ask Yulia to run something custom.</div>
           </div>
+        )}
+        </>
         )}
       </div>
 

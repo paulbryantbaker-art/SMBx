@@ -92,6 +92,23 @@ export function V6LibraryRoot({
         </div>
       </div>
 
+      {/* KPI band — the glanceable shape of the library (total + what's most
+          recent), so the page opens on substance, not a bare filter row. */}
+      {rows.length > 0 && (
+        <div className="mhead" style={{ marginBottom: 4 }}>
+          <div className="mh"><div className="l">Total items</div><div className="v">{rows.length}</div></div>
+          {counts.analysis > 0 && <div className="mh"><div className="l">Analyses</div><div className="v">{counts.analysis}</div></div>}
+          {counts.doc > 0 && <div className="mh"><div className="l">Documents</div><div className="v">{counts.doc}</div></div>}
+          {rows[0] && (
+            <div className="mh">
+              <div className="l">Last touched</div>
+              <div className="v" style={{ fontSize: "1.1rem" }}>{fmtRelative(rows[0].updated)}</div>
+              <div className="s" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 200 }}>{rows[0].title}</div>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="segmented" style={{ flexWrap: "wrap" }}>
         {TABS.map(t => (
           <button
@@ -137,7 +154,6 @@ export function V6LibraryRoot({
                   <th style={{ width: 32 }}></th>
                   <th>Title</th>
                   <th>Status</th>
-                  <th className="r">Fit</th>
                   <th className="r">Updated</th>
                 </tr>
               </thead>
@@ -164,13 +180,6 @@ export function V6LibraryRoot({
                     </td>
                     <td><div className="nm">{it.title}</div></td>
                     <td><span className="muted">{it.sub}</span></td>
-                    {/* Fit — the deal's computed seven-factor score, emerald
-                        (computed voice). Only deals carry it; honest "—" else. */}
-                    <td className="r amt">
-                      {it.kind === "deal" && typeof it.fit === "number"
-                        ? <span style={{ color: "var(--st-good-fg)", fontWeight: 700 }}>{Math.round(it.fit)}</span>
-                        : <span style={{ color: "var(--ink-3)" }}>—</span>}
-                    </td>
                     <td className="r muted">{fmtRelative(it.updated)}</td>
                   </tr>
                 ))}

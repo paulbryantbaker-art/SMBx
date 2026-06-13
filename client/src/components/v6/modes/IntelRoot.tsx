@@ -14,6 +14,7 @@ import { authHeaders, type User } from "../../../hooks/useAuth";
 import { useV6WorkspaceData } from "../../../hooks/useV6WorkspaceData";
 import { YuliaSkeleton } from "../shared/YuliaSkeleton";
 import { journeyTone, VERDICT_MATERIAL } from "../shared/verdictMaterial";
+import { HeatBar, HeatChip } from "../shared/operatingPrimitives";
 
 interface SectorRollup {
   industry: string;
@@ -36,21 +37,20 @@ interface MarketHeat {
   signals: string[];
 }
 
-/** Temperature ramp — NOT a verdict. Higher heat = more PE/buyer activity, a
- *  descriptive market-temperature fact (THE LINE: never "good/bad to act").
- *  Warm tones for hot markets, cool neutral for cold; reuses on-system trios
- *  so no bespoke palette is invented. */
-const HEAT_TONE: Record<number, { soft: string; ink: string; mid: string }> = {
-  5: VERDICT_MATERIAL.watch.tone,                                  // Super-Hot → amber/gold
-  4: VERDICT_MATERIAL.watch.tone,                                  // Hot → amber/gold
-  3: { soft: "#F1EEE6", ink: "#7A7256", mid: "#B8AE97" },          // Warm → oat neutral
-  2: { soft: "#EDEFF2", ink: "#4A5260", mid: "#8B92A0" },          // Cool → charcoal neutral
-  1: { soft: "#EDEFF2", ink: "#4A5260", mid: "#8B92A0" },          // Cold → charcoal neutral
-};
-function heatTone(score: number) {
-  return HEAT_TONE[Math.max(1, Math.min(5, Math.round(score)))] ?? HEAT_TONE[2];
+const DIRECTION_GLYPH: Record<string, string> = { expanding: "↗ expanding multiples", stable: "→ stable multiples", contracting: "↘ contracting multiples" };
+
+/** A compact cell for the heat-posture summary band. */
+function HeatStatCell({ label, value, sub, valueColor }: { label: string; value: string; sub?: string; valueColor?: string }) {
+  return (
+    <div style={{ flex: 1, minWidth: 0, background: "var(--surface)", padding: "12px 16px" }}>
+      <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--ink-3)" }}>{label}</div>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 7 }}>
+        <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.5rem", letterSpacing: "-0.02em", color: valueColor || "var(--ink)", marginTop: 2 }}>{value}</span>
+        {sub && <span style={{ fontSize: "0.74rem", color: "var(--ink-3)" }}>{sub}</span>}
+      </div>
+    </div>
+  );
 }
-const DIRECTION_GLYPH: Record<string, string> = { expanding: "↗", stable: "→", contracting: "↘" };
 
 export function V6IntelRoot({ openTab, onTalkToYulia, user }: { openTab: OpenTab; onTalkToYulia?: (prompt: string) => void; user?: User | null }) {
   const workspace = useV6WorkspaceData(user ?? null);
@@ -105,6 +105,16 @@ export function V6IntelRoot({ openTab, onTalkToYulia, user }: { openTab: OpenTab
     const vals = Object.values(heatByIndustry).filter(h => h.score > 0);
     return vals.sort((a, b) => b.score - a.score)[0] ?? null;
   }, [heatByIndustry]);
+  // Portfolio-wide heat posture — leads the page as a glanceable summary band.
+  const heatStats = useMemo(() => {
+    const vals = Object.values(heatByIndustry).filter(h => h.score > 0);
+    return {
+      total: vals.length,
+      hot: vals.filter(h => h.score >= 4).length,
+      expanding: vals.filter(h => h.multipleDirection === "expanding").length,
+      contracting: vals.filter(h => h.multipleDirection === "contracting").length,
+    };
+  }, [heatByIndustry]);
 
   const watchSector = (industry?: string) => {
     openTab({ id: "search-root", kind: "mode-root", modeId: "search", title: "Search" });
@@ -125,6 +135,16 @@ export function V6IntelRoot({ openTab, onTalkToYulia, user }: { openTab: OpenTab
         </div>
       </div>
 
+      {/* Heat posture band — the page's computed lead: how many sectors run hot
+          and which way multiples are moving. Real getMarketHeat aggregate. */}
+      {heatStats.total > 0 && (
+        <div style={{ display: "flex", gap: 1, marginBottom: 16, background: "var(--line)", borderRadius: 12, overflow: "hidden", border: "1px solid var(--line)" }}>
+          <HeatStatCell label="Sectors running hot" value={`${heatStats.hot}`} sub={`of ${heatStats.total} scored`} />
+          <HeatStatCell label="Multiples expanding" value={`${heatStats.expanding}`} valueColor={VERDICT_MATERIAL.watch.tone.ink} />
+          <HeatStatCell label="Multiples contracting" value={`${heatStats.contracting}`} valueColor={heatStats.contracting > 0 ? "var(--ink-2)" : "var(--ink-3)"} />
+        </div>
+      )}
+
       {loading ? (
         <div style={{ marginTop: 16 }}><YuliaSkeleton rows={4} label="Yulia is reading your portfolio…" /></div>
       ) : sectors.length === 0 ? (
@@ -144,7 +164,6 @@ export function V6IntelRoot({ openTab, onTalkToYulia, user }: { openTab: OpenTab
             {sectors.map(s => {
               const tone = journeyTone("buy") ?? VERDICT_MATERIAL.baseline.tone;
               const heat = heatByIndustry[s.industry.toLowerCase().trim()];
-              const ht = heat ? heatTone(heat.score) : null;
               // The strongest real signal Yulia computed for this sector — the
               // top buyer-thesis / consolidation signal, else the PE-activity read.
               const signal = heat ? (heat.signals[0] || heat.peActivity) : null;
@@ -165,16 +184,14 @@ export function V6IntelRoot({ openTab, onTalkToYulia, user }: { openTab: OpenTab
                       {s.count} deal{s.count === 1 ? "" : "s"}
                     </span>
                   </div>
-                  {/* Real market heat — the page's lead signal. Temperature ramp,
-                      not a verdict (THE LINE: descriptive market state only). */}
-                  {heat && ht && (
-                    <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap" }}>
-                      <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 999, background: ht.soft, color: ht.ink, fontSize: "0.74rem", fontWeight: 700 }}>
-                        <span aria-hidden style={{ width: 6, height: 6, borderRadius: "50%", background: ht.mid }} />
-                        {heat.label} · {heat.score}/5
-                      </span>
+                  {/* Real market heat — the page's lead signal. Temperature bar +
+                      chip, not a verdict (THE LINE: descriptive market state). */}
+                  {heat && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                      <HeatChip score={heat.score} label={heat.label} />
+                      <HeatBar score={heat.score} />
                       <span style={{ fontSize: "0.74rem", fontWeight: 600, color: "var(--ink-3)" }}>
-                        {DIRECTION_GLYPH[heat.multipleDirection] || "→"} {heat.multipleDirection} multiples
+                        {DIRECTION_GLYPH[heat.multipleDirection] || heat.multipleDirection}
                       </span>
                     </div>
                   )}

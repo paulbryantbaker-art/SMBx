@@ -17,7 +17,7 @@ import { VERDICT_MATERIAL } from "../shared/verdictMaterial";
 import { FitRing, IndustryGlyphChip } from "../shared/dataChips";
 import { useTodayOperatingBrief, type TodayDefinitiveDealState } from "../../../hooks/useTodayOperatingBrief";
 import { usePortfolioSummary } from "../../../hooks/usePortfolioSummary";
-import { ReadinessBadge, realBlockers } from "../shared/operatingPrimitives";
+import { ReadinessBadge, realBlockers, NextMoveBar } from "../shared/operatingPrimitives";
 import { YuliaSkeleton } from "../shared/YuliaSkeleton";
 import type { OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
@@ -55,6 +55,12 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
   // 'No blocker surfaced' placeholder, so raw .length always overcounts.
   const totalBlockers = (operating.brief?.gateCountdown ?? []).reduce((n, g) => n + realBlockers(g.blockers).length, 0);
   const blockedDealCount = (operating.brief?.gateCountdown ?? []).filter(g => realBlockers(g.blockers).length > 0).length;
+  // The single deal nearest a gate with the most open items — the page's lead
+  // "what can move first" pointer (descriptive; the table stays funnel-ordered).
+  const topBlocked = (operating.brief?.gateCountdown ?? [])
+    .map(g => ({ g, open: realBlockers(g.blockers) }))
+    .filter(x => x.open.length > 0)
+    .sort((a, b) => b.open.length - a.open.length)[0];
   const weightedEv = portfolio.summary?.weightedEvCents ?? 0;
   const ask = (prompt: string) => onTalkToYulia?.(prompt);
   const openDeal = (rawId: number, title: string) => openTab({ kind: "deal", id: String(rawId), title });
@@ -169,6 +175,22 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
                   <div className="s">{totalBlockers > 0 ? `across ${blockedDealCount} deal${blockedDealCount === 1 ? "" : "s"}` : "nothing waiting"}</div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Next-move pointer — the one deal that can move first, with its
+              real open-item count and the operational next step. Descriptive. */}
+          {topBlocked && (
+            <div style={{ marginBottom: 12 }}>
+              <NextMoveBar
+                parts={[
+                  `${topBlocked.g.title} · ${topBlocked.g.gateId} · ${topBlocked.open.length} open item${topBlocked.open.length === 1 ? "" : "s"}`,
+                  topBlocked.g.nextAction,
+                ].filter(Boolean)}
+                tone="gold"
+                onClick={() => openDeal(Number(topBlocked.g.dealId), topBlocked.g.title)}
+                ctaLabel="Open deal"
+              />
             </div>
           )}
 

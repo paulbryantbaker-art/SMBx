@@ -4,6 +4,8 @@ import { V6DocStatus, type DocStatusKind } from "./cards";
 import type { OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
 import { useV6WorkspaceData } from "../../../hooks/useV6WorkspaceData";
+import { useTodayOperatingBrief } from "../../../hooks/useTodayOperatingBrief";
+import { OpChip } from "../shared/operatingPrimitives";
 import type { ModelPreference } from "../../../lib/modelPreference";
 import {
   docSlugForTemplate,
@@ -57,6 +59,8 @@ export function V6DocsRoot({
   modelPreference?: ModelPreference;
 }) {
   const workspace = useV6WorkspaceData(user);
+  const operating = useTodayOperatingBrief(user, !!user);
+  const reviewQueue = operating.brief?.filesNeedingReview ?? [];
   const deal = pickActionDeal(workspace.deals);
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -132,6 +136,40 @@ export function V6DocsRoot({
       {(actionError || actionNote || workspace.error) && (
         <div className={actionError || workspace.error ? "wkerr" : "wknote"}>
           {actionError || workspace.error || actionNote}
+        </div>
+      )}
+
+      {/* Waiting on you — the review queue from the operating brief, surfaced
+          before templates so Documents opens on "what's unfinished." Honest
+          absence: the band is omitted entirely when nothing is waiting. */}
+      {reviewQueue.length > 0 && (
+        <div className="wksec">
+          <div className="wkcard" style={{ display: "flex", flexDirection: "column", gap: 8, borderLeft: "3px solid var(--st-review-fg, #9C7128)" }}>
+            <div style={{ fontSize: "0.98rem", fontWeight: 700, color: "var(--ink)" }}>
+              {reviewQueue.length} file{reviewQueue.length === 1 ? "" : "s"} waiting on you
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {reviewQueue.slice(0, 4).map(f => {
+                const ready = f.definitiveDisclosureStatus === "ready_for_user_controlled_disclosure";
+                return (
+                  <button
+                    key={f.id}
+                    type="button"
+                    className="wk-tap"
+                    onClick={() => onTalkToYulia?.(`Walk me through ${f.title}${f.dealTitle ? ` on ${f.dealTitle}` : ""} — what needs my eye?`)}
+                    style={{ appearance: "none", border: 0, cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 10, padding: "9px 11px", background: "var(--surface-2)", borderRadius: 10 }}
+                  >
+                    <OpChip label={ready ? "Ready to disclose" : "Review"} tone={ready ? "cactus" : "gold"} />
+                    <span style={{ flex: 1, minWidth: 0 }}>
+                      <span style={{ display: "block", fontWeight: 600, fontSize: "0.88rem", color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.title}{f.dealTitle ? ` · ${f.dealTitle}` : ""}</span>
+                      <span style={{ display: "block", fontSize: "0.76rem", color: "var(--ink-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.reason || f.status}</span>
+                    </span>
+                    <span style={{ color: "var(--accent-strong)" }} aria-hidden>↗</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       )}
 
