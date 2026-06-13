@@ -3,10 +3,11 @@
  *   search input · 6 discovery categories · quick starts.
  * Categories/prompts are the identical set mobile uses so the two match.
  */
-import { useState } from "react";
-import { Handshake, Crosshair, Landmark, Scale, Building2, Map } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Handshake, Crosshair, Landmark, Scale, Building2, Map as MapIcon } from "lucide-react";
 import type { OpenTab } from "../types";
 import type { User } from "../../../hooks/useAuth";
+import { useV6WorkspaceData } from "../../../hooks/useV6WorkspaceData";
 import { RANDOM_TEXTURES } from "../../../lib/randomTextures";
 
 interface SearchRootProps {
@@ -36,7 +37,7 @@ const CATEGORIES = [
   { tone: "gold", icon: Landmark, title: "PE and capital", sub: "Sponsors, independent sponsors, lenders.", prompt: "Find private equity firms, independent sponsors, family offices, and lenders relevant to this deal. Separate equity buyers from debt capital and compare them by likely appetite." },
   { tone: "plum", icon: Scale, title: "Deal professionals", sub: "Attorneys, QoE, tax, insurance, brokers.", prompt: "Find deal professionals for this transaction: M&A attorneys, QoE providers, tax advisors, insurance brokers, and diligence specialists. Compare experience with lower-middle-market transactions." },
   { tone: "slate", icon: Building2, title: "Real estate & ops", sub: "Facilities, leases, agents, zoning help.", prompt: "Find real estate and operating specialists for this deal: commercial agents, lease reviewers, environmental diligence, facilities consultants, and zoning or permitting help." },
-  { tone: "blue", icon: Map, title: "Market maps", sub: "Competitors, adjacencies, roll-up themes.", prompt: "Build a market map for this thesis. Include competitors, adjacencies, roll-up themes, likely acquirers, and signals that a company may be ready to transact." },
+  { tone: "blue", icon: MapIcon, title: "Market maps", sub: "Competitors, adjacencies, roll-up themes.", prompt: "Build a market map for this thesis. Include competitors, adjacencies, roll-up themes, likely acquirers, and signals that a company may be ready to transact." },
 ] as const;
 
 const QUICK_STARTS = [
@@ -46,8 +47,19 @@ const QUICK_STARTS = [
   "Find deal counsel and diligence help",
 ];
 
-export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
+export function V6SearchRoot({ openTab, onTalkToYulia, user }: SearchRootProps) {
   const [query, setQuery] = useState("");
+  // Workspace scorecard — the page must prove the desk knows what the user
+  // is sourcing FOR before offering a generic category picker.
+  const workspace = useV6WorkspaceData(user);
+  const activeDeals = workspace.deals.filter(d => (d.status || "").toLowerCase() === "active");
+  const fitVals = workspace.deals.map(d => d.seven_factor_composite).filter((v): v is number => typeof v === "number");
+  const medianFit = fitVals.length ? Math.round([...fitVals].sort((a, b) => a - b)[Math.floor(fitVals.length / 2)]) : null;
+  const topIndustries = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const d of workspace.deals) { const i = (d.industry || "").trim(); if (i) m.set(i, (m.get(i) || 0) + 1); }
+    return [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([i]) => i);
+  }, [workspace.deals]);
 
   const runSearch = (prompt: string, title = "Market discovery") => {
     const clean = prompt.trim();
@@ -84,6 +96,42 @@ export function V6SearchRoot({ openTab, onTalkToYulia }: SearchRootProps) {
         />
         <button className="wkbtn primary" type="submit">Search</button>
       </form>
+
+      {/* Workspace scorecard — grounds the search in the real portfolio so
+          the page isn't identical for a 0-deal and a 10-deal user. */}
+      {activeDeals.length > 0 && (
+        <div className="mhead" style={{ marginTop: 16 }}>
+          <div className="mh">
+            <div className="l">Sourcing for</div>
+            <div className="v">{activeDeals.length}</div>
+            <div className="s">active deal{activeDeals.length === 1 ? "" : "s"}</div>
+          </div>
+          {medianFit !== null && (
+            <div className="mh">
+              <div className="l">Median fit</div>
+              <div className="v">{medianFit}</div>
+            </div>
+          )}
+          {topIndustries.length > 0 && (
+            <div className="mh" style={{ flex: "2 1 240px" }}>
+              <div className="l">Your sectors</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
+                {topIndustries.map(ind => (
+                  <button
+                    key={ind}
+                    type="button"
+                    className="wk-tap"
+                    onClick={() => runSearch(`Find buyers, comps, and targets for the ${ind} sector — ground it in sources.`, `${ind} discovery`)}
+                    style={{ appearance: "none", border: 0, cursor: "pointer", padding: "4px 11px", borderRadius: 999, background: "var(--wk-peri-soft)", color: "var(--wk-peri-ink)", fontSize: "0.78rem", fontWeight: 700 }}
+                  >
+                    {ind} ›
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Categories — same 6 as mobile */}
       <div className="wksec">

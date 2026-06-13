@@ -23,6 +23,7 @@ interface LibItem {
   sub: string;
   updated: string;
   ts: number;
+  fit?: number | null;
   analysisRunId?: number | null;
   analysisType?: string | null;
   analysisStatus?: string | null;
@@ -136,6 +137,7 @@ export function V6LibraryRoot({
                   <th style={{ width: 32 }}></th>
                   <th>Title</th>
                   <th>Status</th>
+                  <th className="r">Fit</th>
                   <th className="r">Updated</th>
                 </tr>
               </thead>
@@ -162,6 +164,13 @@ export function V6LibraryRoot({
                     </td>
                     <td><div className="nm">{it.title}</div></td>
                     <td><span className="muted">{it.sub}</span></td>
+                    {/* Fit — the deal's computed seven-factor score, emerald
+                        (computed voice). Only deals carry it; honest "—" else. */}
+                    <td className="r amt">
+                      {it.kind === "deal" && typeof it.fit === "number"
+                        ? <span style={{ color: "var(--st-good-fg)", fontWeight: 700 }}>{Math.round(it.fit)}</span>
+                        : <span style={{ color: "var(--ink-3)" }}>—</span>}
+                    </td>
                     <td className="r muted">{fmtRelative(it.updated)}</td>
                   </tr>
                 ))}
@@ -186,6 +195,7 @@ function dealToLib(d: WorkspaceDeal): LibItem {
     sub: d.current_gate ? `${formatJourney(d.journey_type)} · ${d.current_gate}` : formatJourney(d.journey_type),
     updated,
     ts: timeOf(updated),
+    fit: typeof d.seven_factor_composite === "number" ? d.seven_factor_composite : null,
   };
 }
 

@@ -12,19 +12,10 @@ import {
   primaryDocForJourney,
 } from "../../../lib/v6ActionContracts";
 
-interface RecentDoc { id: string; title: string; deal: string; updated: string; status: DocStatusKind }
-
-const RECENTS: RecentDoc[] = [
-  { id: "doc-loi-bigfake", title: "Big Fake Deal · LOI v3",   deal: "Big Fake Deal · sample", updated: "3 days ago", status: "draft" },
-  { id: "doc-nda-acme",    title: "Acme NDA · executed",      deal: "Acme acquisition",        updated: "Mar 18",     status: "final" },
-  { id: "doc-memo-q1",     title: "Q1 thesis memo",           deal: "Strategic",               updated: "Feb 28",     status: "final" },
-  { id: "doc-loi-pest",    title: "Pest Control · LOI v1",    deal: "Pest Control · FL",       updated: "Mar 22",     status: "draft" },
-  { id: "doc-qoe-bigfake", title: "Big Fake Deal · QoE",      deal: "Big Fake Deal · sample",  updated: "Mar 24",     status: "live"  },
-  { id: "doc-ioi-elec",    title: "Electrical · IOI",         deal: "Electrical · TX",         updated: "Mar 20",     status: "sent"  },
-];
-
 interface Template { id: string; name: string; sub: string; tag: string }
 
+// Generic, honest template offerings (not deal data) — the document kinds
+// Yulia can draft. Kept as-is; recents and folders below are now REAL.
 const TEMPLATES: Template[] = [
   { id: "t-nda",  name: "NDA",             sub: "Mutual · light",         tag: "NDA"  },
   { id: "t-loi",  name: "LOI",             sub: "Letter of intent",       tag: "LOI"  },
@@ -34,14 +25,25 @@ const TEMPLATES: Template[] = [
   { id: "t-apa",  name: "APA",             sub: "Asset purchase",         tag: "APA"  },
 ];
 
-interface Folder { id: string; name: string; count: number }
+// Map a deliverable's real status to the V6DocStatus badge kind.
+function docStatusKind(status: string): DocStatusKind {
+  const s = (status || "").toLowerCase();
+  if (/complete|final|signed|executed|lock/.test(s)) return "final";
+  if (/sent|delivered|shared/.test(s)) return "sent";
+  if (/live|active/.test(s)) return "live";
+  if (/saved/.test(s)) return "saved";
+  return "draft";
+}
 
-const FOLDERS: Folder[] = [
-  { id: "f-bigfake", name: "Big Fake Deal · sample",  count: 8  },
-  { id: "f-pest",    name: "Pest Control · FL",       count: 4  },
-  { id: "f-elec",    name: "Electrical · TX",         count: 5  },
-  { id: "f-archive", name: "Closed deals · 2025",     count: 47 },
-];
+function relTime(iso?: string | null): string {
+  if (!iso) return "";
+  const ms = Date.now() - new Date(iso).getTime();
+  if (!Number.isFinite(ms) || ms < 0) return "";
+  const d = Math.floor(ms / 86_400_000);
+  if (d < 1) return "today";
+  if (d < 7) return `${d}d ago`;
+  return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
 
 export function V6DocsRoot({
   openTab,
@@ -59,6 +61,18 @@ export function V6DocsRoot({
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionNote, setActionNote] = useState<string | null>(null);
+
+  // REAL recently-edited docs (replaces the old sample array) — the user's
+  // own deliverables, newest first.
+  const realRecents = [...workspace.deliverables]
+    .sort((a, b) => new Date(b.completed_at || b.updated_at || b.created_at).getTime() - new Date(a.completed_at || a.updated_at || a.created_at).getTime())
+    .slice(0, 6);
+  // REAL by-deal folders (replaces the old sample folders) — active deals
+  // with their authentic deliverable + document counts.
+  const realFolders = [...workspace.deals]
+    .map(d => ({ deal: d, count: (d.deliverable_count ?? 0) + (d.document_count ?? 0) }))
+    .sort((a, b) => b.count - a.count || new Date(b.deal.updated_at).getTime() - new Date(a.deal.updated_at).getTime())
+    .slice(0, 8);
 
   const runDocAction = async (template?: Template) => {
     setActionError(null);
@@ -93,15 +107,6 @@ export function V6DocsRoot({
     }
   };
 
-  const openFolder = (folder: Folder) => {
-    const dealId = sampleFolderDealId(folder.id);
-    openTab({
-      kind: "deal",
-      id: dealId,
-      title: folder.name.replace(" · sample", ""),
-      fileScope: "all",
-    });
-  };
 
   return (
     <div className="wk-content m-fade-up" style={{ maxWidth: 1180, margin: "0 auto" }}>
@@ -163,79 +168,92 @@ export function V6DocsRoot({
         </div>
       </div>
 
+      {/* Recently edited — REAL deliverables, newest first. Honest empty
+          state when none exist (no sample docs, ever). */}
       <div className="wksec">
         <div className="wksec-title">Recently edited</div>
         <p className="pg-sub" style={{ marginTop: 0, marginBottom: 14 }}>Open any to keep working — Yulia stays in context.</p>
-        <div className="wkgrid g2">
-          {RECENTS.map(d => (
-            <div
-              key={d.id}
-              className="wkcard tap wk-ascard"
-              onClick={() => openTab({ kind: "doc", title: d.title, id: d.id })}
-              role="button"
-              tabIndex={0}
-              aria-label={`${d.title}, ${d.status}, ${d.deal}`}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openTab({ kind: "doc", title: d.title, id: d.id }); } }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
-                <V6Icon name="doc" size={16} />
-                <V6DocStatus status={d.status} />
-              </div>
-              <div className="wkcard-title" style={{ marginTop: 14 }}>{d.title}</div>
-              <div className="wkcard-sub" style={{ marginTop: 2 }}>{d.deal}</div>
-              {/* Sentence case, plain ink (eyebrow lock — the letterspaced
-                  caps date read as a decorative micro label). */}
-              <div style={{ fontSize: "0.78rem", color: "var(--ink-3)", marginTop: 10 }}>
-                {d.updated}
-              </div>
-            </div>
-          ))}
-        </div>
+        {realRecents.length === 0 ? (
+          <div className="wkcard" style={{ color: "var(--ink-2)", fontSize: "0.88rem" }}>
+            No documents yet. Start from a template above and Yulia drafts it against your deal.
+          </div>
+        ) : (
+          <div className="wkgrid g2">
+            {realRecents.map(d => {
+              const title = d.name || prettySlug(d.slug);
+              return (
+                <div
+                  key={d.id}
+                  className="wkcard tap wk-ascard"
+                  onClick={() => openTab({ kind: "doc", title, id: String(d.id) })}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${title}, ${d.status}, ${d.deal_name || "Deal"}`}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openTab({ kind: "doc", title, id: String(d.id) }); } }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
+                    <V6Icon name="doc" size={16} />
+                    <V6DocStatus status={docStatusKind(d.status)} />
+                  </div>
+                  <div className="wkcard-title" style={{ marginTop: 14 }}>{title}</div>
+                  <div className="wkcard-sub" style={{ marginTop: 2 }}>{d.deal_name || "Workspace"}</div>
+                  <div style={{ fontSize: "0.78rem", color: "var(--ink-3)", marginTop: 10 }}>
+                    {relTime(d.completed_at || d.updated_at || d.created_at)}
+                    {d.generation_model ? " · Yulia-drafted" : ""}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      <div className="wksec">
-        <div className="wksec-title">By deal</div>
-        <div className="wkgrid g2">
-          {FOLDERS.map(f => (
-            <div
-              key={f.id}
-              className="wkcard tap wk-ascard"
-              role="button"
-              tabIndex={0}
-              aria-label={`${f.name} — ${f.count} files`}
-              onClick={() => openFolder(f)}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openFolder(f); } }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{
-                  width: 32, height: 32, borderRadius: 9, flexShrink: 0,
-                  display: "grid", placeItems: "center",
-                  background: "var(--surface-2)", color: "var(--ink-2)",
-                }}>
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                    <path d="M2 4.5c0-0.83 0.67-1.5 1.5-1.5h2.5L7 4.5h3.5c0.83 0 1.5 0.67 1.5 1.5v4.5c0 0.83-0.67 1.5-1.5 1.5H3.5C2.67 12 2 11.33 2 10.5V4.5z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div className="wkcard-title" style={{ fontSize: "0.92rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {f.name}
+      {/* By deal — REAL deals with authentic file counts. */}
+      {realFolders.length > 0 && (
+        <div className="wksec">
+          <div className="wksec-title">By deal</div>
+          <div className="wkgrid g2">
+            {realFolders.map(({ deal: d, count }) => {
+              const name = d.business_name || `Deal #${d.id}`;
+              return (
+                <div
+                  key={d.id}
+                  className="wkcard tap wk-ascard"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${name} — ${count} files`}
+                  onClick={() => openTab({ kind: "deal", id: String(d.id), title: name, fileScope: "all" })}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openTab({ kind: "deal", id: String(d.id), title: name, fileScope: "all" }); } }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: 9, flexShrink: 0,
+                      display: "grid", placeItems: "center",
+                      background: "var(--surface-2)", color: "var(--ink-2)",
+                    }}>
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                        <path d="M2 4.5c0-0.83 0.67-1.5 1.5-1.5h2.5L7 4.5h3.5c0.83 0 1.5 0.67 1.5 1.5v4.5c0 0.83-0.67 1.5-1.5 1.5H3.5C2.67 12 2 11.33 2 10.5V4.5z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="wkcard-title" style={{ fontSize: "0.92rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {name}
+                      </div>
+                      <div className="wkcard-sub" style={{ marginTop: 2 }}>
+                        {d.current_gate} · <span style={{ fontFamily: "var(--font-mono)" }}>{count}</span> file{count === 1 ? "" : "s"}
+                      </div>
+                    </div>
                   </div>
-                  <div className="wkcard-sub" style={{ marginTop: 2 }}>
-                    <span style={{ fontFamily: "var(--font-mono)" }}>{f.count}</span> files
-                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
 
-function sampleFolderDealId(folderId: string) {
-  if (folderId.includes("pest")) return "deal-pest";
-  if (folderId.includes("elec")) return "deal-electrical";
-  if (folderId.includes("archive")) return "deal-dist";
-  return "deal-bigfake";
+function prettySlug(slug: string): string {
+  return (slug || "Untitled").replace(/[-_]/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 }
