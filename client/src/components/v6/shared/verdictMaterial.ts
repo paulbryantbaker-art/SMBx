@@ -137,28 +137,27 @@ export function heroBoxShadow(kind: VerdictKind): string {
   return `${VERDICT_MATERIAL[kind].glow}, ${HERO_LIFT}`;
 }
 
-/* On-texture glass inner cell — the row that floats INSIDE a hero
- * (mobile H.innerCell / CTA.cell). blur(3px) ONLY, kept low so the
- * watercolor stays crisp beneath; the 0.5px white border and inset
- * highlights do the glass work. */
+/* On-texture glass inner cell — the action row that floats INSIDE a hero.
+ * Apple Liquid Glass over media (iOS/macOS 26-27): a REAL frost that softens
+ * and tints the watercolor beneath (a faint wash reads muddy; a true material
+ * refracts), a crisp bright specular along the top edge, a hairline dark base
+ * for lift, and enough body to read as one clean panel — not a translucent
+ * smear. blur+saturate is the liquid; the inset highlights are the glass. */
 export const HERO_INNER_CELL = {
-  radius: 16,
+  radius: 18,
   background:
-    "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.14), transparent 42%), linear-gradient(180deg, rgba(255,255,255,0.038), rgba(255,255,255,0.003))",
-  backdropFilter: "blur(3px)",
-  border: "0.5px solid rgba(255,255,255,0.34)",
-  // Liquid Glass 27: darkened outer ring + brighter top specular for
-  // depth/separation. This is the ONE legitimate "clear" glass (over
-  // media: watercolor + dimming overlay + bold white type) — blur stays
-  // 3px so the texture underneath survives crisp.
+    "linear-gradient(180deg, rgba(255,255,255,0.20), rgba(255,255,255,0.085))",
+  backdropFilter: "blur(14px) saturate(150%)",
+  border: "1px solid rgba(255,255,255,0.45)",
   boxShadow:
-    "0 0 0 0.5px rgba(0,0,0,0.18), 0 10px 26px -18px rgba(0,0,0,0.44), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.05)",
+    "inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.10), 0 14px 34px -18px rgba(0,0,0,0.5)",
 } as const;
 
-/* Ghost glass button on texture (mobile H.innerButton / CTA.pill) — no blur,
- * no border; the faint white vertical gradient reads as a frosted chip. */
+/* Ghost glass button on texture (mobile H.innerButton / CTA.pill) — a frosted
+ * chip with real body so it reads as a button, not a faint smear: a brighter
+ * top, a hairline light edge, and a touch of its own blur. */
 export const HERO_GHOST_PILL_BG =
-  "linear-gradient(180deg, rgba(255,255,255,0.078), rgba(255,255,255,0.02))";
+  "linear-gradient(180deg, rgba(255,255,255,0.26), rgba(255,255,255,0.12))";
 
 /** Inject a <link rel="preload" as="image"> for a hero texture so the
  *  watercolor is decoded before the hero mounts (no wrong-color flash).
