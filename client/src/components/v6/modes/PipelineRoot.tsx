@@ -141,10 +141,13 @@ export function V6PipelineRoot({ openTab, onTalkToYulia, user }: PipelineRootPro
                   <div className="v">{fmtCents(totalAsk)}</div>
                 </div>
               )}
-              {/* Weighted EV — fit-weighted on the server (each deal's EV ×
-                  seven-factor composite/100, default 0.5). A computed figure,
-                  not a raw sum: proves money at a glance. */}
-              {weightedEv > 0 && (
+              {/* Weighted EV — server weights each deal's EV by its seven-factor
+                  composite/100. Only honest to show when a REAL fit signal
+                  exists: with every composite null the server falls back to a
+                  flat 0.5, making this a deterministic 50% haircut on Total ask
+                  — no added information. Suppress it then (same rule that hides
+                  Median fit), so the label never overstates differentiation. */}
+              {weightedEv > 0 && fitValues.length > 0 && (
                 <div className="mh">
                   <div className="l">Weighted EV</div>
                   <div className="v">{fmtCents(weightedEv)}</div>

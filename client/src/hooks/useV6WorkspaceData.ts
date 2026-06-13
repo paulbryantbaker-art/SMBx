@@ -138,6 +138,34 @@ export interface ExportModelArtifactPreviewInput {
   artifactPayload: Record<string, any>;
 }
 
+/**
+ * postgres-js returns numeric / bigint columns as STRINGS (it refuses to risk
+ * IEEE-754 precision loss). Our WorkspaceDeal type declares these fields as
+ * `number`, so tsc is happy but every runtime `typeof x === "number"` guard in
+ * the app silently rejects the string — totals collapse to 0, medians vanish,
+ * multiples read "—". Coerce once here, at the fetch boundary, so the declared
+ * types are actually true for every consumer (desktop + mobile).
+ */
+function toNum(v: unknown): number | null {
+  if (typeof v === "number") return Number.isFinite(v) ? v : null;
+  if (typeof v === "string" && v.trim() !== "") {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
+}
+
+function normalizeDeal(raw: any): WorkspaceDeal {
+  return {
+    ...raw,
+    revenue: toNum(raw?.revenue),
+    sde: toNum(raw?.sde),
+    ebitda: toNum(raw?.ebitda),
+    asking_price: toNum(raw?.asking_price),
+    seven_factor_composite: toNum(raw?.seven_factor_composite),
+  };
+}
+
 export function useV6WorkspaceData(user: User | null) {
   const [deals, setDeals] = useState<WorkspaceDeal[]>([]);
   const [deliverables, setDeliverables] = useState<WorkspaceDeliverable[]>([]);
@@ -163,7 +191,7 @@ export function useV6WorkspaceData(user: User | null) {
       if (!dealRes.ok) throw new Error(`deals ${dealRes.status}`);
       if (!deliverableRes.ok) throw new Error(`deliverables ${deliverableRes.status}`);
       const [dealRows, deliverableRows] = await Promise.all([dealRes.json(), deliverableRes.json()]);
-      setDeals(Array.isArray(dealRows) ? dealRows : []);
+      setDeals(Array.isArray(dealRows) ? dealRows.map(normalizeDeal) : []);
       setDeliverables(Array.isArray(deliverableRows) ? deliverableRows : []);
     } catch (e: any) {
       setError(e?.message || "Failed to load workspace data");
