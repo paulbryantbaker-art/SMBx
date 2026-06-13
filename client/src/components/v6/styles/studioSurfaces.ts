@@ -12,9 +12,13 @@ export const studioFormatTextures: Record<StudioFormatId, string> = {
   "lender-book": ART_HOUSE_TEXTURES.studioCollateral,
 };
 
+/* Liquid Glass 27 budget: backdrop-filter re-reads pixels every frame and
+ * forces a compositing layer per element — reserve it for surfaces that
+ * genuinely sit OVER texture. 22→14px matches the popover family's
+ * diffusion-per-area; saturate keeps the glass luminous. */
 export const studioGlassBackdrop: CSSProperties = {
-  backdropFilter: "blur(22px)",
-  WebkitBackdropFilter: "blur(22px)",
+  backdropFilter: "blur(14px) saturate(150%)",
+  WebkitBackdropFilter: "blur(14px) saturate(150%)",
 };
 
 export const studioLiquidGlass =
@@ -36,7 +40,10 @@ export const studioDarkLiquidGlassPill: CSSProperties = {
     "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.28), transparent 42%), " +
     "linear-gradient(135deg, rgba(31,38,52,0.76), rgba(18,24,36,0.68) 48%, rgba(8,12,20,0.78))",
   border: "0.5px solid rgba(255,255,255,0.64)",
+  // Liquid Glass 27 darkened edge: the dark pill separates from the texture
+  // card beneath by edge ring, not border glow alone.
   boxShadow:
+    "0 0 0 0.5px rgba(0,0,0,0.22), " +
     "0 18px 38px -24px rgba(0,0,0,0.58), " +
     "inset 0 1px 0 rgba(255,255,255,0.58), " +
     "inset 0 -1px 0 rgba(255,255,255,0.16), " +
@@ -105,7 +112,8 @@ export const studioListCardStyles: Record<string, CSSProperties> = {
     background: studioLiquidGlass,
     border: "1px solid rgba(255,255,255,.55)",
     boxShadow: "0 18px 44px rgba(42,65,96,.10), inset 0 1px 0 rgba(255,255,255,.72)",
-    ...studioGlassBackdrop,
+    // no backdrop-filter: this panel sits on flat paper — blurring a flat
+    // color is invisible, but the compositing-layer cost is real.
   },
   stack: { display: "grid", gap: 10, marginTop: 18 },
   row: {
@@ -159,7 +167,9 @@ export const studioCompeteCardStyles: Record<string, CSSProperties> = {
     backgroundRepeat: "no-repeat",
     border: "1px solid rgba(255,255,255,.55)",
     boxShadow: "0 18px 44px rgba(42,65,96,.10), inset 0 1px 0 rgba(255,255,255,.72)",
-    ...studioGlassBackdrop,
+    // no backdrop-filter: what's BEHIND this panel is the flat studio
+    // canvas (its own texture is a background image, untouched by
+    // backdrop-filter) — the blur was invisible cost.
   },
   grid: {
     display: "grid",

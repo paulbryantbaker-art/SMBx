@@ -32,6 +32,19 @@
   --wk-hairline: rgba(25, 24, 19, 0.16);
   --wk-hairline-2: rgba(25, 24, 19, 0.08);
 
+  /* ── LIQUID GLASS 27 — ONE transient-surface material (WWDC26 refinement:
+     "a darkened edge and brighter specular highlights establish more depth
+     and separation"). Frosted-regular by default — ≥80% opaque, so Safari
+     (which cannot signal prefers-reduced-transparency) never depends on
+     blur for legibility. Every glass surface consumes these tokens; never
+     re-derive blur/edge values per surface (the GlassEffectContainer
+     analog: one material, one light source from above). ── */
+  --wk-glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.90), rgba(255, 255, 255, 0.80));
+  --wk-glass-blur: blur(20px) saturate(170%);
+  --wk-glass-edge: 0 0 0 0.5px rgba(25, 24, 19, 0.16);          /* darkened edge ring */
+  --wk-glass-specular: inset 0 1px 0 rgba(255, 255, 255, 0.95); /* brighter top specular */
+  --wk-glass-frost-bg: color-mix(in oklab, var(--surface) 96%, transparent); /* the "tinted" slider endpoint */
+
   /* harmonized status system (CD --st-*). EXCEPTION: --st-good is held to a
      MUTED green (not brand neon #2BFF77) so verdict pills stay distinct from
      the accent, per the product rule "verdict colors muted & distinct from neon". */
@@ -440,17 +453,45 @@
    rationing: edges do the glass work, blur only on ephemera). Mobile sheet
    material at desktop scale: 16px blur, white-edge border, lit top inset.
    Never apply this to permanent chrome or scroll containers. */
+/* Liquid Glass 27 material (tokenized above): blur 16→20 = heavier
+   diffusion of complex content; saturate 190→170 (the luminous 140–180
+   band — 190 over-juiced warm paper); edge ring 0.10→0.16 = the darkened
+   edge; top inset 0.72→0.95 = the brighter specular; white border eased
+   0.70→0.55 so the dark ring, not a glow halo, carries separation. */
 .wk-app .wkacct,
 .wk-app .wknotif-pop {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.84));
-  -webkit-backdrop-filter: blur(16px) saturate(190%);
-  backdrop-filter: blur(16px) saturate(190%);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: var(--wk-glass-bg);
+  -webkit-backdrop-filter: var(--wk-glass-blur);
+  backdrop-filter: var(--wk-glass-blur);
+  border: 1px solid rgba(255, 255, 255, 0.55);
   box-shadow:
-    0 0 0 0.5px rgba(25, 24, 19, 0.10),
-    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    var(--wk-glass-edge),
+    var(--wk-glass-specular),
     0 18px 44px -18px rgba(25, 24, 19, 0.42);
   animation: wk-pop-in 200ms cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+/* The clear→tinted axis (iOS 27's transparency slider, accessibility end):
+   reduced transparency frosts the glass to near-opaque; increased contrast
+   goes solid with an ink border. Safari can't signal the first — which is
+   why the default material above is already ≥80% opaque. */
+@media (prefers-reduced-transparency: reduce) {
+  .wk-app .wkacct,
+  .wk-app .wknotif-pop {
+    background: var(--wk-glass-frost-bg);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border-color: var(--line-2);
+  }
+}
+@media (prefers-contrast: more) {
+  .wk-app .wkacct,
+  .wk-app .wknotif-pop {
+    background: var(--surface);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border-color: transparent;
+    box-shadow: 0 0 0 1px var(--ink), 0 18px 44px -18px rgba(25, 24, 19, 0.42);
+  }
 }
 /* entrance rises toward its upward anchor */
 @keyframes wk-pop-in {
@@ -460,14 +501,17 @@
 @media (prefers-reduced-motion: reduce) {
   .wk-app .wkacct, .wk-app .wknotif-pop { animation: none; }
 }
-.wk-app .wkacct { position: absolute; bottom: calc(100% + 8px); left: 0; z-index: 1301; min-width: 224px; border-radius: 14px; padding: 6px; }
+/* Uniform popover radius (macOS 27: one radius family, enforced globally)
+   — 16 matches .wknotif-pop; items are concentric (16 − 6 padding = 10). */
+.wk-app .wkacct { position: absolute; bottom: calc(100% + 8px); left: 0; z-index: 1301; min-width: 224px; border-radius: 16px; padding: 6px; }
 .wk-app .wkacct-id { padding: 9px 11px 10px; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
 .wk-app .wkacct-name { font-size: .88rem; font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .wk-app .wkacct-sub { font-size: .72rem; color: var(--ink-3); font-family: var(--font-mono); margin-top: 1px; }
-.wk-app .wkacct-item { display: block; width: 100%; text-align: left; padding: 9px 11px; border: 0; background: transparent; border-radius: 8px; font-size: .88rem; color: var(--ink-2); cursor: pointer; font-family: var(--font-body); }
-.wk-app .wkacct-item:hover { background: var(--surface-2); color: var(--ink); }
+.wk-app .wkacct-item { display: block; width: 100%; text-align: left; padding: 9px 11px; border: 0; background: transparent; border-radius: 10px; font-size: .88rem; color: var(--ink-2); cursor: pointer; font-family: var(--font-body); }
+/* Translucent ink hover — an opaque surface-2 patch kills the glass. */
+.wk-app .wkacct-item:hover { background: rgba(25, 24, 19, 0.06); color: var(--ink); }
 .wk-app .wkacct-item.danger { color: #C0562F; }
-.wk-app .wkacct-item.danger:hover { background: #FBE7DD; color: #C0562F; }
+.wk-app .wkacct-item.danger:hover { background: rgba(192, 86, 47, 0.10); color: #C0562F; }
 
 /* ---- notifications bell (nav foot — @mention + deal notifications) ----
    Anchored to the nav foot, so the popover opens UPWARD and to the RIGHT. */
@@ -487,7 +531,7 @@
 .wk-app .wknotif-row { display: flex; align-items: flex-start; gap: 9px; width: 100%; text-align: left; padding: 11px 14px 11px 12px; border: 0; border-bottom: 1px solid var(--line); background: transparent; font-family: var(--font-body); }
 .wk-app .wknotif-row:last-child { border-bottom: 0; }
 .wk-app .wknotif-row.clickable { cursor: pointer; }
-.wk-app .wknotif-row.clickable:hover { background: var(--surface-2); }
+.wk-app .wknotif-row.clickable:hover { background: rgba(25, 24, 19, 0.05); }
 /* unread tint de-neoned (judged): notifications are INFORMATIONAL — mobile's
    info-blue family, not green (green = confirmation/CTA only). */
 .wk-app .wknotif-row.unread { background: rgba(127, 168, 217, 0.10); }
@@ -515,10 +559,13 @@
   position: fixed; right: 22px; bottom: 22px; z-index: 1200;
   width: 56px; height: 56px; border-radius: 50%; border: 0; cursor: pointer;
   background: var(--ink); color: #fff; display: flex; align-items: center; justify-content: center;
+  /* iOS 27 static speculars: subtle highlights at top AND bottom edges,
+     never animated, never tracking hover — press physics stay in .wk-tap. */
   box-shadow:
     0 10px 28px -6px rgba(25, 24, 19, 0.42),
     inset 0 0 0 0.5px rgba(255, 255, 255, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.20);
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08);
 }
 /* FAB press depth (scale .96) lives in the .wk-tap cascade shim up top. */
 .v6-root.wk .wk-fab .bdot { position: absolute; top: 11px; right: 12px; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); border: 2px solid var(--ink); }
@@ -531,8 +578,12 @@
   position: fixed; right: 22px; bottom: 88px; z-index: 1200; width: 420px; max-width: calc(100vw - 36px);
   height: min(620px, calc(100vh - 130px));
   background: var(--surface); border: var(--wk-as-card-border); border-top-color: var(--wk-as-card-border-top); border-radius: 20px;
+  /* macOS 27 frontmost-window separation: darkened edge ring + brighter
+     lit-top specular. The body stays PAPER (chat is work) — separation by
+     edge and shadow, never blur. */
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 0 0 0.5px rgba(25, 24, 19, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
     0 2px 5px rgba(20, 28, 44, 0.08),
     0 10px 24px -8px rgba(20, 28, 44, 0.24),
     0 30px 70px -24px rgba(25, 24, 19, 0.5);

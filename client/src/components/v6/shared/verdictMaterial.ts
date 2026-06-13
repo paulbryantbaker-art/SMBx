@@ -147,8 +147,12 @@ export const HERO_INNER_CELL = {
     "radial-gradient(circle at 18% 0%, rgba(255,255,255,0.14), transparent 42%), linear-gradient(180deg, rgba(255,255,255,0.038), rgba(255,255,255,0.003))",
   backdropFilter: "blur(3px)",
   border: "0.5px solid rgba(255,255,255,0.34)",
+  // Liquid Glass 27: darkened outer ring + brighter top specular for
+  // depth/separation. This is the ONE legitimate "clear" glass (over
+  // media: watercolor + dimming overlay + bold white type) — blur stays
+  // 3px so the texture underneath survives crisp.
   boxShadow:
-    "0 10px 26px -18px rgba(0,0,0,0.44), inset 0 1px 0 rgba(255,255,255,0.34), inset 0 -1px 0 rgba(255,255,255,0.05)",
+    "0 0 0 0.5px rgba(0,0,0,0.18), 0 10px 26px -18px rgba(0,0,0,0.44), inset 0 1px 0 rgba(255,255,255,0.44), inset 0 -1px 0 rgba(255,255,255,0.05)",
 } as const;
 
 /* Ghost glass button on texture (mobile H.innerButton / CTA.pill) — no blur,
