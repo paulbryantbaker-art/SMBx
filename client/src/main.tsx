@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import { ErrorBoundary } from './components/shared/ErrorBoundary';
 import './index.css';
+import './styles/cdTokens.css'; // Claude Design fintech token layer (.cd-root scope) — MIGRATION_PLAN.md §2
 
 /* ─── Global run-to-completion click feedback ───
    :active in CSS only fires while the button is physically held. Fast

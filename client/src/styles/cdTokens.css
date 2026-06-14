@@ -1,0 +1,118 @@
+/* ========================================================================
+   cdTokens.css — Claude Design "Ultra Modern Fintech" token layer.
+   Light, editorial, Stripe/Ramp energy. Cool-neutral base, indigo accent.
+
+   PORT NOTE (MIGRATION_PLAN.md §2): this is a SCOPED NEW LAYER, not a
+   replacement. Everything lives under `.cd-root` and every token is
+   namespaced `--cd-*`, so it cannot leak into the live V3 `:root` palette
+   or break verdictMaterial.ts / operatingPrimitives.tsx (warm, hardcoded).
+   New fintech surfaces opt in by mounting under a `.cd-root` ancestor.
+   Fonts (Figtree / Newsreader / IBM Plex Mono) are loaded in index.html.
+   ======================================================================== */
+
+.cd-root {
+  /* ---- Accent (indigo/blue) ---- */
+  --cd-accent:        oklch(0.56 0.15 256);
+  --cd-accent-strong: oklch(0.48 0.16 256);
+  --cd-accent-soft:   oklch(0.95 0.03 256);
+  --cd-accent-ring:   oklch(0.56 0.15 256 / 0.18);
+
+  /* ---- Neutrals (cool, low chroma) — 3-tier depth ---- */
+  --cd-desk:      oklch(0.935 0.008 264);   /* page behind rails (darkest) */
+  --cd-canvas:    oklch(0.978 0.004 264);   /* the working surface */
+  --cd-bg:        oklch(0.978 0.004 264);   /* alias = canvas */
+  --cd-surface:   oklch(1 0 0);             /* cards float on canvas (white) */
+  --cd-surface-2: oklch(0.972 0.005 264);   /* sunken / striped inside cards */
+  --cd-surface-3: oklch(0.95 0.006 264);
+  --cd-line:      oklch(0.91 0.006 264);    /* hairline */
+  --cd-line-2:    oklch(0.87 0.007 264);    /* stronger border */
+
+  --cd-ink:   oklch(0.22 0.012 264);   /* primary text */
+  --cd-ink-2: oklch(0.44 0.012 264);   /* secondary */
+  --cd-ink-3: oklch(0.60 0.010 264);   /* tertiary / labels */
+  --cd-ink-4: oklch(0.72 0.008 264);   /* faint */
+
+  /* ---- Finance semantics ---- */
+  --cd-pos:       oklch(0.58 0.12 158);     /* gains */
+  --cd-pos-soft:  oklch(0.95 0.04 158);
+  --cd-neg:       oklch(0.57 0.17 25);      /* losses */
+  --cd-neg-soft:  oklch(0.96 0.03 25);
+  --cd-warn:      oklch(0.72 0.13 75);
+  --cd-warn-soft: oklch(0.96 0.05 75);
+
+  /* ---- Chart palette (harmonious, shared L/C, varied hue) ---- */
+  --cd-c1: oklch(0.56 0.15 256);   /* blue (primary) */
+  --cd-c2: oklch(0.62 0.13 200);   /* teal-cyan */
+  --cd-c3: oklch(0.66 0.13 158);   /* green */
+  --cd-c4: oklch(0.70 0.13 75);    /* amber */
+  --cd-c5: oklch(0.62 0.15 350);   /* magenta */
+  --cd-c6: oklch(0.60 0.14 30);    /* coral */
+
+  /* ---- Type ---- */
+  --cd-sans:  'Figtree', system-ui, -apple-system, sans-serif;
+  --cd-serif: 'Newsreader', Georgia, serif;     /* editorial headline (the "Good morning" italic) */
+  --cd-num:   'Figtree', system-ui, sans-serif; /* figures: tabular sans, not mono */
+  --cd-mono:  'IBM Plex Mono', ui-monospace, monospace;
+  --cd-heading-weight: 700;
+  --cd-heading-spacing: -0.02em;
+
+  /* ---- Radius ---- */
+  --cd-r-sm: 7px;
+  --cd-r-md: 11px;
+  --cd-r-lg: 16px;
+  --cd-r-xl: 22px;
+
+  /* ---- Density (comfortable default; compact via [data-density]) ---- */
+  --cd-pad: 22px;
+  --cd-row-h: 44px;
+  --cd-gap: 18px;
+
+  /* ---- Shadow (very soft, fintech) ---- */
+  --cd-shadow-sm: 0 1px 2px oklch(0.35 0.03 256 / 0.06), 0 4px 10px oklch(0.35 0.03 256 / 0.07);
+  --cd-shadow-md: 0 2px 5px oklch(0.35 0.03 256 / 0.06), 0 10px 24px oklch(0.35 0.03 256 / 0.10);
+  --cd-shadow-lg: 0 16px 40px oklch(0.32 0.03 256 / 0.16), 0 4px 12px oklch(0.32 0.03 256 / 0.08);
+
+  /* the surface itself */
+  font-family: var(--cd-sans);
+  color: var(--cd-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.cd-root[data-density="compact"] {
+  --cd-pad: 15px;
+  --cd-row-h: 34px;
+  --cd-gap: 12px;
+}
+
+/* ---- Namespaced utilities (CD reuses .num/.mono/.eyebrow globally — ours
+   are .cd-* to avoid colliding with the existing V6 utilities) ---- */
+.cd-root .cd-mono  { font-family: var(--cd-mono); font-feature-settings: "tnum" 1, "ss01" 1; }
+.cd-root .cd-tnum  { font-variant-numeric: tabular-nums; }
+.cd-root .cd-serif { font-family: var(--cd-serif); }
+.cd-root .cd-num   { font-family: var(--cd-num); font-variant-numeric: tabular-nums; letter-spacing: -0.005em; }
+.cd-root .cd-pos   { color: var(--cd-pos); }
+.cd-root .cd-neg   { color: var(--cd-neg); }
+.cd-root .cd-eyebrow {
+  font-family: var(--cd-sans);
+  font-size: 10.5px; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--cd-ink-3);
+}
+
+/* scrollbars */
+.cd-root .cd-scrollable::-webkit-scrollbar { width: 9px; height: 9px; }
+.cd-root .cd-scrollable::-webkit-scrollbar-thumb { background: var(--cd-line-2); border-radius: 9px; border: 2px solid var(--cd-surface); }
+.cd-root .cd-scrollable::-webkit-scrollbar-track { background: transparent; }
+
+/* ---- state primitives (distinct from the existing .wk-skel) ---- */
+@keyframes cdSkelShimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes cdSkelPulse   { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+.cd-root .cd-skel {
+  background: linear-gradient(90deg, var(--cd-surface-2) 25%, var(--cd-surface-3) 38%, var(--cd-surface-2) 60%);
+  background-size: 200% 100%;
+  animation: cdSkelShimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+.cd-root .cd-skel-pulse { animation: cdSkelPulse 1.5s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .cd-root .cd-skel, .cd-root .cd-skel-pulse { animation: none; }
+}
