@@ -17,8 +17,14 @@ import { YuliaMark, IconBtn, Ic, type PillTone, type IcName } from "./primitives
 import { AskYuliaHome, type NeedItem, type IntelItem, type DealRowItem } from "./surfaces/AskYuliaHome";
 import { OverviewPage, type OverviewDeal, type OverviewKpi, type OverviewSectorHeat, type OverviewNeedsYou, type OverviewActivity } from "./surfaces/OverviewPage";
 import { StageDeals, type StageDealItem } from "./surfaces/StageDeals";
+import { NDCanvas, type NDArtifact } from "./NDCanvas";
 import { NDYuliaChat } from "./NDYuliaChat";
 import { NDDealWorkspace } from "./NDDealWorkspace";
+
+/** "EnterpriseValue" / "ebitda_multiple" → "Enterprise value" / "Ebitda multiple" */
+function humanizeKey(k: string): string {
+  return k.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/[_-]+/g, " ").replace(/^\w/, c => c.toUpperCase()).trim();
+}
 
 const STAGE_META: Record<string, { label: string; icon: IcName }> = {
   sourcing: { label: "Sourcing", icon: "st_source" },
@@ -64,6 +70,8 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
   const [route, setRoute] = useState<Route>("home");
   const [dealId, setDealId] = useState<string | null>(null);
   const [railOpen, setRailOpen] = useState(false);
+  const [artifacts, setArtifacts] = useState<NDArtifact[]>([]);
+  const [activeArtifact, setActiveArtifact] = useState<string>("surface");
 
   const workspace = useV6WorkspaceData(user);
   const operating = useTodayOperatingBrief(user, !!user);
@@ -84,11 +92,57 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setRailOpen(o => !o); }
-      if (e.key === "Escape") setRailOpen(false);
     };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
   }, []);
+
+  /* ── canvas_action bus: when Yulia opens an artifact, render it on the canvas
+     beside the chat. show_content → markdown doc/analysis; model verbs → the real
+     assumptions she set (read-only). Honest: nothing is fabricated. ── */
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const d = (e as CustomEvent).detail as Record<string, any> | undefined;
+      if (!d || !d.canvas_action) return;
+      const upsert = (art: NDArtifact) => {
+        setArtifacts(prev => {
+          const i = prev.findIndex(a => a.key === art.key);
+          if (i >= 0) { const next = [...prev]; next[i] = art; return next; }
+          return [...prev, art];
+        });
+        setActiveArtifact(art.key);
+        setRailOpen(true);
+      };
+      const verb = d.canvas_action;
+      if (verb === "show_content") {
+        const key = String(d.tabId || d.title || `doc-${Date.now()}`);
+        const kind: NDArtifact["kind"] = /analysis|brief|memo|valuation/i.test(String(d.title || d.kind || "")) ? "analysis" : "doc";
+        upsert({ key, kind, title: String(d.title || "Yulia artifact"), markdown: String(d.content || d.markdown || d.message || "") });
+      } else if (verb === "create_model_tab" || verb === "update_model" || verb === "open_tab") {
+        const key = String(d.tabId || d.tab || `model-${Date.now()}`);
+        const assumptions = (d.initialAssumptions && typeof d.initialAssumptions === "object" ? d.initialAssumptions
+          : d.updates && typeof d.updates === "object" ? d.updates
+          : d.state && typeof d.state === "object" ? d.state : {}) as Record<string, unknown>;
+        const kv = Object.entries(assumptions).slice(0, 14).map(([k, v]) => ({ k: humanizeKey(k), v: String(v) }));
+        upsert({
+          key, kind: "model",
+          title: String(d.title || d.modelType || "Model"),
+          kv,
+          note: "Yulia maintains this model. The assumptions she set are shown above; the fully interactive model (live sliders) opens in the deal's Model tab.",
+        });
+      }
+    };
+    window.addEventListener("smbx:canvas_action", handler);
+    return () => window.removeEventListener("smbx:canvas_action", handler);
+  }, []);
+
+  const closeArtifact = (key: string) => {
+    setArtifacts(prev => {
+      const next = prev.filter(a => a.key !== key);
+      setActiveArtifact(cur => (cur === key ? (next.length ? next[next.length - 1].key : "surface") : cur));
+      return next;
+    });
+  };
 
   const active = useMemo(() => workspace.deals.filter(d => (d.status || "").toLowerCase() === "active"), [workspace.deals]);
   const dealNameById = useMemo(() => { const m = new Map<string, string>(); for (const d of active) m.set(String(d.id), d.business_name || `Deal #${d.id}`); return m; }, [active]);
@@ -197,6 +251,46 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
   const ask = (prompt: string) => { chat.send(prompt); setRailOpen(true); };
 
   const scopeLabel = route === "home" ? "your portfolio" : route === "overview" ? "your portfolio" : route;
+  const surfaceLabel = route === "home" ? "Ask Yulia" : route === "overview" ? "Overview" : route === "deal" ? "Deal" : STAGE_META[route]?.label || "Workspace";
+
+  /* the current surface, rendered either full-width or as the canvas-left in the split */
+  const surfaceNode = (
+    <>
+      {route === "home" && (
+        <AskYuliaHome
+          userName={(user?.email?.split("@")[0] || "there").replace(/\b\w/, c => c.toUpperCase())}
+          needs={needs}
+          intel={intel}
+          deals={homeDeals}
+          suggestions={["Review what needs me", "What moved on my deals?", "Find new targets", "Draft a teaser"]}
+          onAsk={ask}
+          onOpenDeal={openDeal}
+          onReview={() => setRailOpen(true)}
+          onNav={(dest) => { if (dest === "overview") setRoute("overview"); }}
+        />
+      )}
+      {route === "overview" && (
+        <OverviewPage kpis={kpis} deals={ovDeals} sectorHeat={sectorHeat} needsYou={needsYou} activity={activity} onOpenDeal={openDeal} onAsk={() => setRailOpen(true)} />
+      )}
+      {route === "deal" && dealId && (
+        <NDDealWorkspace dealId={dealId} user={user} chat={chat} onAsk={ask} />
+      )}
+      {(route === "sourcing" || route === "analysis" || route === "closing" || route === "post") && (
+        <StageDeals
+          label={STAGE_META[route].label}
+          icon={STAGE_META[route].icon}
+          lede={stageDeals.length
+            ? `${stageDeals.length} ${stageDeals.length === 1 ? "deal is" : "deals are"} in the ${STAGE_META[route].label.toLowerCase()} stage${stageDeals.some(d => d.status === "Needs you") ? " — ranked by what needs you first." : "."}`
+            : undefined}
+          deals={stageDeals}
+          onOpenDeal={openDeal}
+          onAsk={ask}
+        />
+      )}
+    </>
+  );
+
+  const hasCanvas = railOpen && artifacts.length > 0;
 
   return (
     <div className="nd-root">
@@ -216,59 +310,33 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
         }}
       />
 
-      <div className="mck-grow" style={{ position: "relative", display: "flex", flexDirection: "column", minWidth: 0 }}>
-        {route === "home" && (
-          <AskYuliaHome
-            userName={(user?.email?.split("@")[0] || "there").replace(/\b\w/, c => c.toUpperCase())}
-            needs={needs}
-            intel={intel}
-            deals={homeDeals}
-            suggestions={["Review what needs me", "What moved on my deals?", "Find new targets", "Draft a teaser"]}
-            onAsk={ask}
-            onOpenDeal={openDeal}
-            onReview={() => setRailOpen(true)}
-            onNav={(dest) => { if (dest === "overview") setRoute("overview"); }}
-          />
-        )}
-        {route === "overview" && (
-          <OverviewPage kpis={kpis} deals={ovDeals} sectorHeat={sectorHeat} needsYou={needsYou} activity={activity} onOpenDeal={openDeal} onAsk={() => setRailOpen(true)} />
-        )}
-        {route === "deal" && dealId && (
-          <NDDealWorkspace dealId={dealId} user={user} chat={chat} onAsk={ask} />
-        )}
-        {(route === "sourcing" || route === "analysis" || route === "closing" || route === "post") && (
-          <StageDeals
-            label={STAGE_META[route].label}
-            icon={STAGE_META[route].icon}
-            lede={stageDeals.length
-              ? `${stageDeals.length} ${stageDeals.length === 1 ? "deal is" : "deals are"} in the ${STAGE_META[route].label.toLowerCase()} stage${stageDeals.some(d => d.status === "Needs you") ? " — ranked by what needs you first." : "."}`
-              : undefined}
-            deals={stageDeals}
-            onOpenDeal={openDeal}
-            onAsk={ask}
-          />
-        )}
+      {/* main region: canvas (left) + Yulia chat (right rail, inline when open).
+          Plain stretch-row — NOT .mck-row, which centers children vertically. */}
+      <div className="mck-grow" style={{ display: "flex", flexDirection: "row", alignItems: "stretch", minWidth: 0, minHeight: 0 }}>
+        <div className="mck-grow" style={{ position: "relative", display: "flex", flexDirection: "column", minWidth: 0 }}>
+          {hasCanvas
+            ? <NDCanvas surfaceLabel={surfaceLabel} surface={surfaceNode} artifacts={artifacts} active={activeArtifact} onSelect={setActiveArtifact} onClose={closeArtifact} />
+            : surfaceNode}
 
-        {/* Yulia launcher (closed) */}
-        {!railOpen && (
-          <div className="mck-dock">
-            <button className="mck-dock-pill" onClick={() => setRailOpen(true)}>
-              <YuliaMark size={32} />
-              <span className="mck-dock-label">Ask Yulia</span>
-              <span className="mck-dock-kbd">⌘K</span>
-            </button>
-          </div>
-        )}
-      </div>
+          {/* Yulia launcher (rail closed) */}
+          {!railOpen && (
+            <div className="mck-dock">
+              <button className="mck-dock-pill" onClick={() => setRailOpen(true)}>
+                <YuliaMark size={32} />
+                <span className="mck-dock-label">Ask Yulia</span>
+                <span className="mck-dock-kbd">⌘K</span>
+              </button>
+            </div>
+          )}
+        </div>
 
-      {/* Yulia rail (open) — the live agent in the nd language */}
-      {railOpen && (
-        <>
-          <div className="mck-scrim" onClick={() => setRailOpen(false)} />
-          <div className="mck-ypanel">
-            <div className="mck-row" style={{ gap: 10, padding: "14px 16px", borderBottom: "1px solid var(--line)" }}>
+        {/* Yulia chat rail (inline) */}
+        {railOpen && (
+          <div className="mck-ychat">
+            <div className="mck-row" style={{ gap: 10, padding: "14px 16px", borderBottom: "1px solid var(--line)", flex: "0 0 auto" }}>
               <YuliaMark size={26} />
               <span style={{ fontWeight: 600, fontSize: 13.5 }}>Yulia</span>
+              <span className="mck-pill mck-pill-neutral" style={{ marginLeft: 2 }}>{surfaceLabel}</span>
               <span className="mck-grow" />
               <IconBtn name="x" size={16} onClick={() => setRailOpen(false)} title="Close" />
             </div>
@@ -276,8 +344,8 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
               <NDYuliaChat chat={chat} scope={scopeLabel} />
             </div>
           </div>
-        </>
-      )}
+        )}
+      </div>
     </div>
   );
 }
