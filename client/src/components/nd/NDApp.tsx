@@ -156,6 +156,7 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
     pct: Math.max(6, Math.min(100, h.score)),
   }));
   const needsYou: OverviewNeedsYou[] = gateCountdown.slice(0, 4).map(g => ({
+    id: g.dealId,
     title: g.nextAction || `Advance ${g.gateName}`,
     deal: `${dealNameById.get(g.dealId) || g.dealId} · ${g.gateName || "—"}`,
     time: "today",

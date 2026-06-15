@@ -49,6 +49,8 @@ export interface OverviewSectorHeat {
 }
 
 export interface OverviewNeedsYou {
+  /** real deal id — clicking opens that deal's workspace */
+  id?: string;
   title: string;
   /** Deal/stage context line, e.g. "Atlas · Sourcing". */
   deal: string;
@@ -182,7 +184,7 @@ export function OverviewPage({ kpis, deals, sectorHeat, needsYou, activity, onOp
               </div>
               <div className="mck-card" style={{ overflow: "hidden" }}>
                 {needsYou.map((n, i) => (
-                  <button key={n.title} onClick={() => onOpenDeal(n.title)} className="mck-row" style={{ width: "100%", textAlign: "left", gap: 11, padding: "13px 15px", borderTop: i ? "1px solid var(--line-2)" : "none", background: "none", cursor: "pointer" } as CSSProperties}>
+                  <button key={n.id ?? n.title} onClick={() => n.id && onOpenDeal(n.id)} className="mck-row" style={{ width: "100%", textAlign: "left", gap: 11, padding: "13px 15px", borderTop: i ? "1px solid var(--line-2)" : "none", background: "none", cursor: n.id ? "pointer" : "default" } as CSSProperties}>
                     <span className="mck-pdot" style={{ width: 7, height: 7, borderRadius: "50%", marginTop: 5, flex: "0 0 auto", background: n.kind === "risk" ? "var(--risk)" : "var(--warn)" }} />
                     <span className="mck-col" style={{ gap: 2, minWidth: 0 }}>
                       <span style={{ fontSize: 13, fontWeight: 600 }}>{n.title}</span>

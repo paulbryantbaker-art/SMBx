@@ -86,11 +86,6 @@ const DEALS_C: DealRef[] = [
   { name: "Project Ember", sub: "Atlas Foods", tone: "d", journey: "RAISE" },
   { name: "Project Harbor", sub: "Delta Cold Co · integrating", tone: "c", journey: "PMI" },
 ];
-const TEAM: AvatarPerson[] = [
-  { name: "Dana Okafor", tone: "b", live: true },
-  { name: "Raj Patel", tone: "c" },
-  { name: "Mei Lin", tone: "d" },
-];
 
 /* ---------------- Sidebar (journey-aware) ---------------- */
 export interface SidebarUser {
@@ -211,6 +206,9 @@ export interface TopBarProps {
   stageActive?: string;
   team?: AvatarPerson[];
   onHome?: () => void;
+  /** Share/more render only when a handler is supplied — no dead buttons (CLAUDE.md C1). */
+  onShare?: () => void;
+  onMore?: () => void;
 }
 export function TopBar({
   deal = "Project Atlas",
@@ -218,8 +216,10 @@ export function TopBar({
   side = "buy-side",
   journey = "BUY",
   stageActive = "Valuation",
-  team = TEAM,
+  team = [],
   onHome,
+  onShare,
+  onMore,
 }: TopBarProps) {
   const stages = JOURNEYS[journey] || JOURNEYS.BUY;
   const curIdx = Math.max(0, stages.indexOf(stageActive));
@@ -241,8 +241,8 @@ export function TopBar({
       </div>
       <div className="mck-grow" />
       <AvatarStack people={team} size={26} />
-      <Btn variant="ghost" size="sm" icon="link">Share</Btn>
-      <IconBtn name="more" />
+      {onShare && <Btn variant="ghost" size="sm" icon="link" onClick={onShare}>Share</Btn>}
+      {onMore && <IconBtn name="more" onClick={onMore} />}
     </div>
   );
 }
