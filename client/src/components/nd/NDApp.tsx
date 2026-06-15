@@ -186,7 +186,7 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
   const kpis: OverviewKpi[] = [
     { label: "Active mandates", value: summary ? String(summary.totalActive) : "—" },
     { label: "Aggregate EV", value: summary ? fmtCents(summary.totalEvCents) : "—" },
-    { label: "Tasks due", value: String(gateCountdown.length), sub: gateCountdown.length ? "needs your sign-off" : undefined },
+    { label: "Tasks due", value: String(gateCountdown.length), sub: gateCountdown.length ? "across your pipeline" : undefined },
     { label: "Portfolio IRR", value: "—", empty: true, sub: "No live feed yet" },
   ];
   const ovDeals: OverviewDeal[] = active.slice(0, 12).map(d => {
@@ -214,7 +214,8 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
     title: g.nextAction || `Advance ${g.gateName}`,
     deal: `${dealNameById.get(g.dealId) || g.dealId} · ${g.gateName || "—"}`,
     time: "today",
-    kind: realBlockers(g.blockers).length > 0 ? "warn" : "risk",
+    // open blockers → red "risk"; a routine next action with none → amber "warn"
+    kind: realBlockers(g.blockers).length > 0 ? "risk" : "warn",
   }));
   // honest: a unified activity feed is a net-new backend → derive what's real (completed deliverables) or empty.
   const activity: OverviewActivity[] = (workspace.deliverables || [])
@@ -341,7 +342,7 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
               <IconBtn name="x" size={16} onClick={() => setRailOpen(false)} title="Close" />
             </div>
             <div className="mck-grow" style={{ minHeight: 0 }}>
-              <NDYuliaChat chat={chat} scope={scopeLabel} />
+              <NDYuliaChat chat={chat} scope={scopeLabel} userName={(user?.email?.split("@")[0] || "You").replace(/\b\w/, c => c.toUpperCase())} />
             </div>
           </div>
         )}

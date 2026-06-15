@@ -201,7 +201,7 @@ export function DealRow({
       onClick={onClick}
       style={{ width: "100%", textAlign: "left", padding: "13px 16px", display: "flex", alignItems: "center", gap: 13, transition: "border-color .12s" }}
     >
-      <Avatar name={name.replace("Project ", "")} tone={idx === 1 ? "a" : "c"} size={28} live={idx === 1} />
+      <Avatar name={name} tone="c" size={28} />
       <span className="mck-col" style={{ gap: 2, minWidth: 0, width: 180, flex: "0 0 180px" }}>
         <span style={{ fontSize: 13, fontWeight: 600 }}>{name}</span>
         <span style={{ fontSize: 11, color: "var(--ink-3)" }}>{target}</span>

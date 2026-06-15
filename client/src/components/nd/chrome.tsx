@@ -119,9 +119,8 @@ export function Sidebar({
 }: SidebarProps) {
   return (
     <div className="mck-rail">
-      <div className="mck-row" style={{ justifyContent: "space-between", padding: "4px 8px 2px" }}>
+      <div className="mck-row" style={{ padding: "4px 8px 2px" }}>
         <button onClick={onHome} style={{ display: "inline-flex", borderRadius: 8 }}><Logo size={19} /></button>
-        <IconBtn name="sliders" />
       </div>
 
       <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 4 }}>
@@ -191,7 +190,6 @@ export function Sidebar({
           <span style={{ fontSize: 12.5, fontWeight: 500 }}>{user.name}</span>
           {user.sub && <span style={{ fontSize: 10.5, color: "var(--ink-3)" }}>{user.sub}</span>}
         </span>
-        <span style={{ marginLeft: "auto" }}><IconBtn name="more" /></span>
       </div>
     </div>
   );

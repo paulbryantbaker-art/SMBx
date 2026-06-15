@@ -179,8 +179,6 @@ export function OverviewPage({ kpis, deals, sectorHeat, needsYou, activity, onOp
               <div className="mck-row" style={{ gap: 9 }}>
                 <span className="mck-eyebrow">What needs you</span>
                 <span className="mck-pill mck-pill-yulia" style={{ height: 18, padding: "0 7px", fontSize: 10 }}><span className="mck-pdot" />{needsYou.length}</span>
-                <div className="mck-grow" />
-                <button className="mck-btn mck-btn-quiet mck-btn-sm">View all</button>
               </div>
               <div className="mck-card" style={{ overflow: "hidden" }}>
                 {needsYou.map((n, i) => (

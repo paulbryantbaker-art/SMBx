@@ -13,7 +13,7 @@ import { YuliaMsg, UserMsg, Task, Composer, StagedConfirm } from "./chrome";
 
 const LAW_LINE = "Yulia shows analysis & implications — and asks before anything irreversible.";
 
-export function NDYuliaChat({ chat, scope = "Workspace", placeholder }: { chat: ChatBridge; scope?: string; placeholder?: string }) {
+export function NDYuliaChat({ chat, scope = "Workspace", placeholder, userName }: { chat: ChatBridge; scope?: string; placeholder?: string; userName?: string }) {
   const [draft, setDraft] = useState("");
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
@@ -43,9 +43,9 @@ export function NDYuliaChat({ chat, scope = "Workspace", placeholder }: { chat: 
 
         {chat.thread.map((m, i) => (
           m.who === "u" ? (
-            <UserMsg key={i}>{m.text}</UserMsg>
+            <UserMsg key={i} name={userName || "You"} time="">{m.text}</UserMsg>
           ) : (
-            <YuliaMsg key={i}>
+            <YuliaMsg key={i} time="">
               {m.text && <div className="mck-prose" style={{ marginBottom: m.stagedAction ? 12 : 0 }}>{m.text}</div>}
               {m.stagedAction && (
                 <StagedConfirm

@@ -365,39 +365,29 @@ export interface CanvasDataProps {
   onOpenFolder?: (name: string) => void;
 }
 
-const DATA_FOLDERS_DEFAULT: DataFolder[] = [
-  { name: "Financials", count: "142 files", status: "Reviewed", tone: "ok" },
-  { name: "Customer contracts", count: "388 files", status: "Reviewed", tone: "ok" },
-  { name: "Fleet & leases", count: "210 files", status: "2 flags", tone: "risk" },
-  { name: "Legal & corporate", count: "176 files", status: "Reviewed", tone: "ok" },
-  { name: "HR & benefits", count: "94 files", status: "In review", tone: "neutral" },
-  { name: "Insurance", count: "63 files", status: "Reviewed", tone: "ok" },
-];
+/* Honest-empty defaults — the integrator passes real folders + a real banner.
+   No fabricated file counts can render. */
+const DATA_FOLDERS_DEFAULT: DataFolder[] = [];
 
 export function CanvasData({
   reviewBanner,
-  reviewActionLabel = "See 2 flags",
+  reviewActionLabel,
   onReviewAction,
   folders = DATA_FOLDERS_DEFAULT,
   onOpenFolder,
 }: CanvasDataProps) {
   return (
     <div style={{ padding: 26, display: "flex", flexDirection: "column", gap: 16 }}>
-      <div className="mck-row" style={{ gap: 12, padding: "12px 15px", background: "var(--accent-soft)", border: "1px solid var(--accent-line)", borderRadius: 11 }}>
-        <YuliaMark size={23} />
-        <span style={{ fontSize: 13, color: "var(--accent-ink)" }}>
-          {reviewBanner ?? (
-            <>I reviewed <b>1,204 files</b> and extracted 38 key terms. <b>2 fleet leases</b> have change-of-control clauses worth flagging.</>
+      {/* Yulia's review banner — only when there's real review copy. Action button only when wired. */}
+      {reviewBanner && (
+        <div className="mck-row" style={{ gap: 12, padding: "12px 15px", background: "var(--accent-soft)", border: "1px solid var(--accent-line)", borderRadius: 11 }}>
+          <YuliaMark size={23} />
+          <span style={{ fontSize: 13, color: "var(--accent-ink)" }}>{reviewBanner}</span>
+          {onReviewAction && reviewActionLabel && (
+            <button className="mck-btn mck-btn-ink mck-btn-sm" style={{ marginLeft: "auto" }} onClick={onReviewAction}>{reviewActionLabel}</button>
           )}
-        </span>
-        <button className="mck-btn mck-btn-ink mck-btn-sm" style={{ marginLeft: "auto" }} onClick={onReviewAction}>{reviewActionLabel}</button>
-      </div>
-      <div className="mck-row" style={{ gap: 9 }}>
-        <span className="mck-row" style={{ gap: 7, height: 32, padding: "0 12px", border: "1px solid var(--line)", borderRadius: 8, color: "var(--ink-3)", fontSize: 12.5, flex: 1 }}>
-          <Ic name="search" size={14} /> Search the data room
-        </span>
-        <Chip icon="filter">Status</Chip>
-      </div>
+        </div>
+      )}
       <div className="mck-card" style={{ overflow: "hidden" }}>
         {folders.map((f, i) => (
           <div key={f.name} className="mck-row" style={{ gap: 13, padding: "13px 16px", borderTop: i ? "1px solid var(--line-2)" : "none" }}>
@@ -407,7 +397,7 @@ export function CanvasData({
             <span style={{ marginLeft: "auto" }}>
               <StatusPill tone={f.tone} dot={f.tone !== "ok"}>{f.tone === "ok" && <Ic name="check" size={11} />}{f.status}</StatusPill>
             </span>
-            <IconBtn name="chevRight" size={14} onClick={onOpenFolder ? () => onOpenFolder(f.name) : undefined} />
+            {onOpenFolder && <IconBtn name="chevRight" size={14} onClick={() => onOpenFolder(f.name)} />}
           </div>
         ))}
       </div>
