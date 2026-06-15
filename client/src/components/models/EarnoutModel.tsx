@@ -8,10 +8,10 @@ import { centsToDisplay, pctDisplay } from '../../lib/calculations/core';
 
 interface Props { tabId: string; }
 
-const CHART_PRIMARY = '#2E8C5A';
+const CHART_PRIMARY = 'var(--cd-pos)';
 const CHART_PRIMARY_SOFT = 'rgba(46, 140, 90, 0.14)';
-const CHART_TEXT = '#191813';
-const CHART_MUTED = '#57534A';
+const CHART_TEXT = 'var(--cd-ink)';
+const CHART_MUTED = 'var(--cd-ink-2)';
 
 export default function EarnoutModel({ tabId }: Props) {
   const tab = useModelStore(s => s.tabs[tabId]);
@@ -41,7 +41,7 @@ export default function EarnoutModel({ tabId }: Props) {
       {/* KPIs */}
       {earnout && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <KPICard label="Expected Value" value={centsToDisplay(earnout.expectedValue)} color="#2E8C5A" sublabel="Probability-weighted" />
+          <KPICard label="Expected Value" value={centsToDisplay(earnout.expectedValue)} color="var(--cd-pos)" sublabel="Probability-weighted" />
           <KPICard label="Max Payout" value={centsToDisplay(earnout.maxPayout)} sublabel="If all milestones hit" />
           <KPICard label="PV of Expected" value={centsToDisplay(earnout.pvExpected)} sublabel={`At ${pctDisplay(a.discountRate ?? 0.10)} discount`} />
         </div>

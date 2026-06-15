@@ -60,25 +60,25 @@ export default function SBAModel({ tabId }: Props) {
           <DSCRGauge dscr={sba.dscr} />
 
           <div className="mt-4 space-y-2">
-            <div className="flex justify-between text-xs" style={{ borderBottom: '1px solid #e8e6dc', paddingBottom: 4 }}>
+            <div className="flex justify-between text-xs" style={{ borderBottom: '1px solid var(--cd-line)', paddingBottom: 4 }}>
               <span style={{ color: 'var(--m-on-surface-var)' }}>Total Project Cost</span>
               <span className="font-medium tabular-nums">{centsToDisplay(sba.totalProjectCost)}</span>
             </div>
-            <div className="flex justify-between text-xs" style={{ borderBottom: '1px solid #e8e6dc', paddingBottom: 4 }}>
+            <div className="flex justify-between text-xs" style={{ borderBottom: '1px solid var(--cd-line)', paddingBottom: 4 }}>
               <span style={{ color: 'var(--m-on-surface-var)' }}>SBA Loan</span>
               <span className="font-medium tabular-nums">{centsToDisplay(sba.loanAmount)}</span>
             </div>
             {sba.sellerNote > 0 && (
-              <div className="flex justify-between text-xs" style={{ borderBottom: '1px solid #e8e6dc', paddingBottom: 4 }}>
+              <div className="flex justify-between text-xs" style={{ borderBottom: '1px solid var(--cd-line)', paddingBottom: 4 }}>
                 <span style={{ color: 'var(--m-on-surface-var)' }}>Seller Note</span>
                 <span className="font-medium tabular-nums">{centsToDisplay(sba.sellerNote)}</span>
               </div>
             )}
-            <div className="flex justify-between text-xs" style={{ borderBottom: '1px solid #e8e6dc', paddingBottom: 4 }}>
+            <div className="flex justify-between text-xs" style={{ borderBottom: '1px solid var(--cd-line)', paddingBottom: 4 }}>
               <span style={{ color: 'var(--m-on-surface-var)' }}>Cash Equity Required</span>
               <span className="font-bold tabular-nums">{centsToDisplay(sba.equityRequired)}</span>
             </div>
-            <div className="flex justify-between text-xs" style={{ borderBottom: '1px solid #e8e6dc', paddingBottom: 4 }}>
+            <div className="flex justify-between text-xs" style={{ borderBottom: '1px solid var(--cd-line)', paddingBottom: 4 }}>
               <span style={{ color: 'var(--m-on-surface-var)' }}>Annual Debt Service</span>
               <span className="font-medium tabular-nums">{centsToDisplay(sba.annualDebtService)}</span>
             </div>
@@ -181,7 +181,7 @@ export default function SBAModel({ tabId }: Props) {
                 </thead>
                 <tbody>
                   {sba.amortization.filter((_: any, i: number) => i % 12 === 0 || i === sba.amortization.length - 1).map((row: any) => (
-                    <tr key={row.month} style={{ borderBottom: '1px solid #e8e6dc' }}>
+                    <tr key={row.month} style={{ borderBottom: '1px solid var(--cd-line)' }}>
                       <td style={{ padding: '4px 8px', textAlign: 'right' }}>{row.month}</td>
                       <td style={{ padding: '4px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{centsToDisplay(row.payment)}</td>
                       <td style={{ padding: '4px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{centsToDisplay(row.principal)}</td>

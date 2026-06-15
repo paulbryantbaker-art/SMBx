@@ -745,8 +745,8 @@ const C: Record<string, CSSProperties> = {
     flexShrink: 0,
     padding: "4px 8px",
     borderRadius: 999,
-    background: "#F3F1EA",
-    color: "#57534A",
+    background: "var(--surface-2)",
+    color: "var(--ink-2)",
     fontSize: 10.5,
     fontWeight: 700,
     textTransform: "capitalize",
@@ -761,8 +761,10 @@ const C: Record<string, CSSProperties> = {
     height: 30,
     padding: "0 13px",
     borderRadius: 999,
-    background: "#2BFF77",
-    color: "#00210F",
+    // Token-driven so it bridges to CD indigo in the new shell (was hardcoded
+    // neon #2BFF77, which clashed in the cool Yulia rail).
+    background: "var(--accent)",
+    color: "var(--on-accent)",
     border: "none",
     fontSize: 11.5,
     fontWeight: 800,

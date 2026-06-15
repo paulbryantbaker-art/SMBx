@@ -3511,7 +3511,7 @@ const DP: Record<string, CSSProperties> = {
     placeItems: "center",
     fontSize: 11,
     fontWeight: 900,
-    color: "#191813",
+    color: "var(--ink)",
     background: "rgba(222,232,249,0.9)",
   },
   callText: {

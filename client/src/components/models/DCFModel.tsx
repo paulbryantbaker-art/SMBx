@@ -8,11 +8,11 @@ import { centsToDisplay } from '../../lib/calculations/core';
 
 interface Props { tabId: string; }
 
-const CHART_PRIMARY = '#2E8C5A';
+const CHART_PRIMARY = 'var(--cd-pos)';
 const CHART_PRIMARY_SOFT = 'rgba(46, 140, 90, 0.14)';
-const CHART_TEXT = '#191813';
-const CHART_MUTED = '#57534A';
-const CHART_GREEN = '#D6A35C'; // secondary series — warm gold so it stays distinct from the emerald primary
+const CHART_TEXT = 'var(--cd-ink)';
+const CHART_MUTED = 'var(--cd-ink-2)';
+const CHART_GREEN = 'var(--cd-warn)'; // secondary series — warm gold so it stays distinct from the emerald primary
 
 export default function DCFModel({ tabId }: Props) {
   const tab = useModelStore(s => s.tabs[tabId]);
@@ -32,7 +32,7 @@ export default function DCFModel({ tabId }: Props) {
 
       {dcf && (
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-          <KPICard label="Enterprise Value" value={centsToDisplay(dcf.enterpriseValue)} color="#2E8C5A" />
+          <KPICard label="Enterprise Value" value={centsToDisplay(dcf.enterpriseValue)} color="var(--cd-pos)" />
           <KPICard label="PV of FCF" value={centsToDisplay(dcf.pvFCF.reduce((sum: number, value: number) => sum + value, 0))} />
           <KPICard label="PV Terminal" value={centsToDisplay(dcf.pvTerminal)} />
           <KPICard label="Terminal Value" value={centsToDisplay(dcf.terminalValue)} />
@@ -138,7 +138,7 @@ export default function DCFModel({ tabId }: Props) {
             format="percent"
           />
           {dcf && (a.discountRate ?? 0.10) <= (a.terminalGrowthRate ?? 0.02) && (
-            <p className="text-xs rounded-lg p-3 m-0" style={{ background: 'rgba(192, 86, 47, 0.10)', color: '#8A3E22' }}>
+            <p className="text-xs rounded-lg p-3 m-0" style={{ background: 'rgba(192, 86, 47, 0.10)', color: 'var(--cd-ink-2)' }}>
               Terminal growth must stay below the discount rate. The model keeps terminal value at zero until the inputs are valid.
             </p>
           )}
@@ -149,7 +149,7 @@ export default function DCFModel({ tabId }: Props) {
         <div className="overflow-x-auto">
           <table className="text-xs w-full" style={{ borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ borderBottom: '2px solid #2E8C5A' }}>
+              <tr style={{ borderBottom: '2px solid var(--cd-pos)' }}>
                 {['Year', 'Projected FCF', 'PV of FCF'].map(h => (
                   <th key={h} style={{ padding: '6px 8px', textAlign: h === 'Year' ? 'left' : 'right', fontSize: 10, color: CHART_MUTED, textTransform: 'uppercase' }}>
                     {h}

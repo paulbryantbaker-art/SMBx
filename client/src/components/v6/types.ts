@@ -1,4 +1,4 @@
-export type ModeId = "today" | "pipeline" | "search" | "studio" | "files" | "docs" | "analysis" | "intel" | "library";
+export type ModeId = "today" | "today-v6" | "pipeline" | "search" | "studio" | "files" | "docs" | "analysis" | "intel" | "library" | "notifications";
 
 export type TabKind =
   | "mode-root"

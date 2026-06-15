@@ -9,10 +9,10 @@ import { centsToDisplay } from '../../lib/calculations/core';
 interface Props { tabId: string; }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const CHART_PRIMARY = '#2E8C5A';
+const CHART_PRIMARY = 'var(--cd-pos)';
 const CHART_PRIMARY_SOFT = 'rgba(46, 140, 90, 0.14)';
-const CHART_TEXT = '#191813';
-const CHART_MUTED = '#57534A';
+const CHART_TEXT = 'var(--cd-ink)';
+const CHART_MUTED = 'var(--cd-ink-2)';
 
 export default function WorkingCapitalModel({ tabId }: Props) {
   const tab = useModelStore(s => s.tabs[tabId]);
@@ -36,7 +36,7 @@ export default function WorkingCapitalModel({ tabId }: Props) {
       {wc && (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <KPICard label="Working Capital Peg" value={centsToDisplay(wc.peg)} color="#2E8C5A" sublabel="12-month average" />
+            <KPICard label="Working Capital Peg" value={centsToDisplay(wc.peg)} color="var(--cd-pos)" sublabel="12-month average" />
             <KPICard label="Variance" value={centsToDisplay(wc.variance)} sublabel="Seasonal swing" />
             <KPICard label="Months Analyzed" value={String(wc.monthlyWC.filter((m: any) => m.wc !== 0).length)} />
           </div>
@@ -103,7 +103,7 @@ export default function WorkingCapitalModel({ tabId }: Props) {
             </thead>
             <tbody>
               {monthlyData.map((m: any, i: number) => (
-                <tr key={i} style={{ borderBottom: '1px solid #e8e6dc' }}>
+                <tr key={i} style={{ borderBottom: '1px solid var(--cd-line)' }}>
                   <td style={{ padding: '4px 6px', fontWeight: 600 }}>{m.month}</td>
                   <td style={{ padding: '4px 6px' }}>
                     <input type="number" value={m.currentAssets / 100} onChange={e => updateMonth(i, 'currentAssets', Number(e.target.value) * 100)}

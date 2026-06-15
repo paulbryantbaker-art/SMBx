@@ -46,7 +46,7 @@ export default function ComparisonModel({ tabId }: Props) {
           </thead>
           <tbody>
             {getComparisonRows(linkedTabs).map((row, i) => (
-              <tr key={row.label} style={{ borderBottom: '1px solid #e8e6dc', background: i % 2 ? '#faf9f5' : 'transparent' }}>
+              <tr key={row.label} style={{ borderBottom: '1px solid var(--cd-line)', background: i % 2 ? 'var(--cd-surface)' : 'transparent' }}>
                 <td style={{ padding: '6px 10px', color: 'var(--m-on-surface-var)', fontWeight: 500 }}>{row.label}</td>
                 {row.values.map((val, j) => {
                   const best = row.bestIdx;

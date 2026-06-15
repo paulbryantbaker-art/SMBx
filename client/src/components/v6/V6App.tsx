@@ -11,6 +11,12 @@ import { buildDesktopSurfaceContext, type SurfaceContext } from "../../lib/yulia
 import { normalizeModelPreference, type ModelPreference } from "../../lib/modelPreference";
 import { loadWkTheme, saveWkTheme, WK_THEMES, type WkTheme } from "../../lib/wkTheme";
 import { VERDICT_MATERIAL } from "./shared/verdictMaterial";
+import { useV6WorkspaceData } from "../../hooks/useV6WorkspaceData";
+import { CDTopBar, type CDSectionKey } from "../cd/shell/CDTopBar";
+import { CDLeftRail, type CDRailDeal, type CDRailModuleNav } from "../cd/shell/CDLeftRail";
+import { CDCanvasTabStrip, type CDStripTab } from "../cd/shell/CDCanvasTabStrip";
+import { CDYuliaRail } from "../cd/shell/CDYuliaRail";
+import { cdDealColor, cdFmtCents } from "../cd/shell/cdAtoms";
 
 /* Family inks for Open-tab glyphs (consume verdictMaterial, never restate):
  * deal=info-blue baseline, doc=structure gold, analysis/model=valuation
@@ -26,7 +32,7 @@ import { buildBigFakeInvestmentBoardTab, shouldOpenSampleInvestmentBoard } from 
 import { useModelStore, type ModelType } from "../../lib/modelStore";
 import type { FileListView, FileScope, IconName, Message, ModeId, Tab, ToolTraceEntry } from "./types";
 
-const VALID_MODES: ModeId[] = ["today", "pipeline", "search", "studio", "files", "docs", "analysis", "intel", "library"];
+const VALID_MODES: ModeId[] = ["today", "pipeline", "search", "studio", "files", "docs", "analysis", "intel", "library", "notifications"];
 
 const V6Mobile = lazy(() => import("./mobile/V6Mobile"));
 const V6Canvas = lazy(() => import("./Canvas").then(module => ({ default: module.V6Canvas })));
@@ -221,7 +227,11 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
   });
   const [activeTabId, setActiveTabId] = useState(initial.tab ?? `${initial.mode}-root`);
   // FAB chat open/closed (CD "Ramp" workspace — chat is a floating bubble).
-  const [chatOpen, setChatOpen] = useState(false);
+  // CD shell: the Yulia rail is a persistent right panel (default open on
+  // desktop, matching the mockup); collapses to a thin strip. `navOpen`
+  // toggles the left rail between 240px and the 66px icon rail.
+  const [chatOpen, setChatOpen] = useState(true);
+  const [navOpen, setNavOpen] = useState(true);
   const [acctOpen, setAcctOpen] = useState(false);
   // Stripe Customer Portal session state for the account popover's
   // "Manage subscription" item (desktop parity with mobile billing).
@@ -636,6 +646,177 @@ function V6AppShell({ user, chat, onSignOut }: ShellProps) {
       setBillingBusy(false);
     }
   };
+
+  // ─── CD desktop shell (MIG-2) ──────────────────────────────────────────
+  // The mockup chrome: top section nav, deal-list left rail, a floating
+  // canvas on the desk, a persistent Yulia rail. Wired to the SAME V6 state
+  // (tabs/modes/chat) — no parallel app. Escape hatch: localStorage
+  // smbx_shell="legacy" falls back to the original V6 sidebar shell.
+  const cdShell = (() => { try { return localStorage.getItem("smbx_shell") !== "legacy"; } catch { return true; } })();
+  const workspace = useV6WorkspaceData(user);
+  const railDeals: CDRailDeal[] = useMemo(() => workspace.deals
+    .filter(d => (d.status || "").toLowerCase() === "active")
+    .map(d => ({ id: d.id, code: d.business_name || `Deal #${d.id}`, evLabel: cdFmtCents(d.asking_price), color: cdDealColor(d.id) })),
+    [workspace.deals]);
+
+  const MODE_SECTION: Record<string, CDSectionKey> = { today: "today", notifications: "today", pipeline: "portfolio", intel: "portfolio", search: "portfolio", analysis: "analysis", files: "analysis", studio: "studio" };
+  const SECTION_PRIMARY: Record<CDSectionKey, ModeId> = { today: "today", portfolio: "pipeline", analysis: "analysis", studio: "studio" };
+  const activeSection: CDSectionKey = MODE_SECTION[activeMode] ?? "today";
+  const onSection = (s: CDSectionKey) => { if (activeSection !== s) pickMode(SECTION_PRIMARY[s]); };
+
+  const moduleNav: CDRailModuleNav = activeSection === "portfolio"
+    ? { label: "Portfolio", items: [
+        { icon: "portfolio", label: "Pipeline", active: activeMode === "pipeline", onClick: () => pickMode("pipeline") },
+        { icon: "analysis", label: "Market intel", active: activeMode === "intel", onClick: () => pickMode("intel") },
+        { icon: "search", label: "Market search", active: activeMode === "search", onClick: () => pickMode("search") },
+      ] }
+    : activeSection === "analysis"
+    ? { label: "Analysis", items: [
+        { icon: "scenario", label: "Analyses", active: activeMode === "analysis", onClick: () => pickMode("analysis") },
+        { icon: "docs", label: "Files", active: activeMode === "files", badge: launcherWork("files").length, onClick: () => pickMode("files") },
+      ] }
+    : activeSection === "studio"
+    ? { label: "Studio", items: [
+        { icon: "grid", label: "Studio", active: activeMode === "studio", onClick: () => pickMode("studio") },
+      ] }
+    : { label: "Today", items: [
+        { icon: "today", label: "Today", active: activeMode === "today", onClick: () => pickMode("today") },
+        { icon: "bell", label: "Notifications", active: activeMode === "notifications", onClick: () => pickMode("notifications") },
+      ] };
+
+  const stripTabs: CDStripTab[] = workTabs.map(t => ({ id: t.id, title: t.title, kind: t.kind, color: t.kind === "deal" ? cdDealColor(t.id) : undefined }));
+  const activeWorkTab = tabs.find(t => t.id === activeTabId);
+  const activeGroupId = activeWorkTab?.kind === "deal" ? activeWorkTab.id : null;
+  const yuliaDealLabel = activeWorkTab?.kind === "deal" ? activeWorkTab.title : undefined;
+
+  const v6Canvas = (
+    <Suspense fallback={<V6ShellLoader />}>
+      <V6Canvas
+        tabs={tabs}
+        activeTabId={activeTabId}
+        setActiveTabId={setActiveTabId}
+        openTab={openTab}
+        closeTab={closeTab}
+        reorderTabs={reorderTabs}
+        onPickMode={pickMode}
+        onTalkToYulia={(prompt) => { setChatOpen(true); send(prompt); }}
+        user={user}
+        onSignOut={onSignOut}
+        modelPreference={modelPreference}
+        wkTheme={wkTheme}
+        onSetWkTheme={changeWkTheme}
+        activeConversationId={chat.activeConversationId}
+        chatBusy={chat.sending}
+        onResumeConversation={chat.selectConversation
+          ? (id) => { chat.selectConversation?.(id); setChatOpen(true); }
+          : undefined}
+        onConversationDeleted={(id) => { if (id === chat.activeConversationId) chat.newConversation?.(); }}
+      />
+    </Suspense>
+  );
+
+  const v6ChatPanel = (
+    <V6Chat
+      thread={chat.thread}
+      draft={draft}
+      setDraft={setDraft}
+      send={send}
+      inputRef={inputRef}
+      modeLabel={modeLabel}
+      onOpenTab={openTab}
+      sending={chat.sending}
+      streamingText={chat.streamingText}
+      activeTool={chat.activeTool}
+      toolTrace={chat.toolTrace}
+      error={chat.error}
+      modelPreference={modelPreference}
+      setModelPreference={setModelPreference}
+      showLearnLinks={!user}
+      showEmptySuggestions
+      onFileUpload={chat.uploadFile}
+      onConfirmStagedAction={chat.confirmStagedAction}
+      onCancelStagedAction={chat.cancelStagedAction}
+    />
+  );
+
+  if (cdShell) {
+    return (
+      <div
+        className="v6-root wk cd-root"
+        data-wk-theme={wkTheme === "paper" ? undefined : wkTheme}
+        data-wk-mode={activeMode}
+        style={{ height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative", background: "var(--cd-desk)" }}
+      >
+        <CDTopBar
+          activeSection={activeSection}
+          onSection={onSection}
+          onToggleNav={() => setNavOpen(o => !o)}
+          onSearch={() => pickMode("search")}
+          notifBell={user ? <V6NotificationBell onNavigate={navigateToActionUrl} /> : undefined}
+          yuliaOpen={chatOpen}
+          onToggleYulia={() => setChatOpen(o => !o)}
+          avatarInitials={avatarInitials}
+          onAvatar={() => setAcctOpen(o => !o)}
+        />
+        {acctOpen && (
+          <>
+            <div className="wkacct-backdrop" onClick={() => setAcctOpen(false)} />
+            <div className="wkacct" role="menu" style={{ position: "absolute", top: 54, right: 16, zIndex: 60 }}>
+              <div className="wkacct-id">
+                <div className="wkacct-name">{user?.email || "Signed in"}</div>
+                <div className="wkacct-sub">smbX.ai workspace</div>
+              </div>
+              {user && <button className="wkacct-item" role="menuitem" onClick={() => { setAcctOpen(false); openTab({ kind: "provider-profile", title: "Provider profile" }); }}>Provider profile</button>}
+              {user && !DEV_AUTH_BYPASS && (
+                <button className="wkacct-item" role="menuitem" disabled={billingBusy} style={billingBusy ? { opacity: 0.6, cursor: "default" } : undefined} onClick={() => { void handleManageBilling(); }}>
+                  {billingBusy ? "Opening billing portal…" : "Manage subscription"}
+                </button>
+              )}
+              {billingError && <div style={{ padding: "2px 11px 8px", fontSize: ".76rem", lineHeight: 1.35, color: "#C0562F" }} role="alert">{billingError}</div>}
+              <button className="wkacct-item" role="menuitem" onClick={() => { setAcctOpen(false); window.location.assign("/?marketing"); }}>Preview marketing site</button>
+              <button className="wkacct-item danger" role="menuitem" onClick={() => {
+                setAcctOpen(false);
+                try { sessionStorage.removeItem("smbx_app_entered"); sessionStorage.removeItem("smbx_preview_marketing"); } catch { /* ignore */ }
+                void onSignOut();
+                window.location.assign("/");
+              }}>Sign out</button>
+            </div>
+          </>
+        )}
+        <div style={{ flex: 1, display: "flex", minHeight: 0 }}>
+          <CDLeftRail
+            open={navOpen}
+            deals={railDeals}
+            activeGroupId={activeGroupId}
+            onOpenDeal={(d) => openTab({ kind: "deal", id: String(d.id), title: d.code })}
+            onNewDeal={() => { setChatOpen(true); send("I want to start a new deal."); }}
+            moduleNav={moduleNav}
+            userName={user?.email?.split("@")[0] || "Workspace"}
+            userSub="smbX.ai workspace"
+            onSettings={() => openTab({ kind: "settings", title: "Settings" })}
+          />
+          <section style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", minHeight: 0 }}>
+            {stripTabs.length > 0 && (
+              <CDCanvasTabStrip tabs={stripTabs} activeId={activeTabId} onPick={activateTab} onClose={closeTab} onNew={() => pickMode("today")} />
+            )}
+            <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
+              <div style={{ flex: 1, minWidth: 0, padding: stripTabs.length > 0 ? "0 0 8px 8px" : "4px 0 8px 8px" }}>
+                <div style={{ height: "100%", position: "relative", background: "var(--cd-canvas)", borderRadius: "var(--cd-r-xl)", border: "1px solid var(--cd-line)", boxShadow: "var(--cd-shadow-lg)", overflow: "hidden" }}>
+                  {/* CD token bridge: remaps the warm V6 app tokens to the CD
+                      cool/indigo palette so every not-yet-rebuilt surface renders
+                      in the CD language. Bespoke CD pages (Today) re-scope themselves. */}
+                  <div className="cd-bridge" style={{ height: "100%" }}>{v6Canvas}</div>
+                </div>
+              </div>
+              <CDYuliaRail open={chatOpen} onToggle={setChatOpen} dealLabel={yuliaDealLabel} topGap={stripTabs.length > 0 ? 0 : 4}>
+                <div className="cd-bridge" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>{v6ChatPanel}</div>
+              </CDYuliaRail>
+            </div>
+          </section>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

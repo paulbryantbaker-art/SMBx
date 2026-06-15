@@ -9,8 +9,8 @@ import { centsToDisplay, pctDisplay, multDisplay } from '../../lib/calculations/
 
 interface Props { tabId: string; }
 
-const CHART_MUTED = '#57534A';
-const COLORS = ['#2E8C5A', '#D6A35C', '#629987', '#8F6BD4', '#86C5C0', '#4ECDC4', '#C0562F', CHART_MUTED];
+const CHART_MUTED = 'var(--cd-ink-2)';
+const COLORS = ['var(--cd-pos)', 'var(--cd-warn)', '#629987', '#8F6BD4', '#86C5C0', '#4ECDC4', 'var(--cd-neg)', CHART_MUTED];
 
 export default function CapTableModel({ tabId }: Props) {
   const tab = useModelStore(s => s.tabs[tabId]);
@@ -135,7 +135,7 @@ export default function CapTableModel({ tabId }: Props) {
             <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--m-on-surface-var)' }}>Cap Table</h3>
             <div className="space-y-1">
               {dilution.rows.map((r: any, i: number) => (
-                <div key={i} className="flex items-center justify-between text-xs py-1" style={{ borderBottom: '1px solid #e8e6dc' }}>
+                <div key={i} className="flex items-center justify-between text-xs py-1" style={{ borderBottom: '1px solid var(--cd-line)' }}>
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
                     <span>{r.stakeholder}</span>
@@ -173,7 +173,7 @@ export default function CapTableModel({ tabId }: Props) {
               </thead>
               <tbody>
                 {waterfalls[0]?.distributions.map((d: any, i: number) => (
-                  <tr key={i} style={{ borderBottom: '1px solid #e8e6dc' }}>
+                  <tr key={i} style={{ borderBottom: '1px solid var(--cd-line)' }}>
                     <td style={{ padding: '4px 8px' }}>{d.stakeholder}</td>
                     {waterfalls.map((w: any) => (
                       <td key={w.exitValue} style={{ padding: '4px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>

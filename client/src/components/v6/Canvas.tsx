@@ -23,6 +23,26 @@ const V6HistoryView = lazy(() => import("./views/HistoryView").then(module => ({
 const V6StarterView = lazy(() => import("./views/StarterView").then(module => ({ default: module.V6StarterView })));
 const V6LearnView = lazy(() => import("./Learn").then(module => ({ default: module.V6LearnView })));
 const V6MarketingStudioView = lazy(() => import("./views/MarketingStudioView").then(module => ({ default: module.V6MarketingStudioView })));
+// Claude Design fintech migration — the new Today (MIG-4 first visible slice).
+const CDToday = lazy(() => import("../cd/CDToday").then(module => ({ default: module.CDToday })));
+// CD page cutover (MIG-5/6/7/8) — every inner surface rebuilt to the CD mockup, wired to real data.
+const CDPipeline = lazy(() => import("../cd/pages/CDPipeline").then(module => ({ default: module.CDPipeline })));
+const CDSearch = lazy(() => import("../cd/pages/CDSearch").then(module => ({ default: module.CDSearch })));
+const CDIntel = lazy(() => import("../cd/pages/CDIntel").then(module => ({ default: module.CDIntel })));
+const CDAnalysis = lazy(() => import("../cd/pages/CDAnalysis").then(module => ({ default: module.CDAnalysis })));
+const CDFiles = lazy(() => import("../cd/pages/CDFiles").then(module => ({ default: module.CDFiles })));
+const CDStudio = lazy(() => import("../cd/pages/CDStudio").then(module => ({ default: module.CDStudio })));
+const CDDealDetail = lazy(() => import("../cd/pages/CDDealDetail").then(module => ({ default: module.CDDealDetail })));
+const CDNotifications = lazy(() => import("../cd/pages/CDNotifications").then(module => ({ default: module.CDNotifications })));
+// CD drill-down surfaces (deal-team, doc, lists, settings, history, starter, provider).
+const CDDealTeam = lazy(() => import("../cd/pages/CDDealTeam").then(module => ({ default: module.CDDealTeam })));
+const CDDocView = lazy(() => import("../cd/pages/CDDocView").then(module => ({ default: module.CDDocView })));
+const CDDealsList = lazy(() => import("../cd/pages/CDDealsList").then(module => ({ default: module.CDDealsList })));
+const CDFilesList = lazy(() => import("../cd/pages/CDFilesList").then(module => ({ default: module.CDFilesList })));
+const CDSettings = lazy(() => import("../cd/pages/CDSettings").then(module => ({ default: module.CDSettings })));
+const CDHistory = lazy(() => import("../cd/pages/CDHistory").then(module => ({ default: module.CDHistory })));
+const CDStarter = lazy(() => import("../cd/pages/CDStarter").then(module => ({ default: module.CDStarter })));
+const CDProviderProfile = lazy(() => import("../cd/pages/CDProviderProfile").then(module => ({ default: module.CDProviderProfile })));
 
 interface CanvasProps {
   tabs: Tab[];
@@ -99,29 +119,31 @@ interface TabContentProps {
 
 function V6TabContent({ tab, openTab, onTalkToYulia, user, onSignOut, modelPreference, wkTheme, onSetWkTheme, activeConversationId, chatBusy, onResumeConversation, onConversationDeleted }: TabContentProps) {
   if (tab.kind === "mode-root") {
-    if (tab.modeId === "today")    return <V6TodayRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
-    if (tab.modeId === "pipeline") return <V6PipelineRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} modelPreference={modelPreference} />;
-    if (tab.modeId === "search")   return <V6SearchRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
-    if (tab.modeId === "studio")   return <V6MarketingStudioView tab={{ id: "marketing-studio", kind: "marketing-studio", title: "Studio", studioView: "home" }} openTab={openTab} user={user} onTalkToYulia={onTalkToYulia} />;
-    if (tab.modeId === "files")    return <V6FilesRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
-    if (tab.modeId === "analysis") return <V6AnalysisRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} modelPreference={modelPreference} />;
-    if (tab.modeId === "intel")    return <V6IntelRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
+    if (tab.modeId === "today")    return <CDToday user={user} onAsk={onTalkToYulia} onOpenDeal={(id, title) => openTab({ kind: "deal", id: String(id), title })} />;
+    if (tab.modeId === "today-v6") return <V6TodayRoot openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
+    if (tab.modeId === "pipeline") return <CDPipeline openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
+    if (tab.modeId === "search")   return <CDSearch openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
+    if (tab.modeId === "studio")   return <CDStudio openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
+    if (tab.modeId === "files")    return <CDFiles openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
+    if (tab.modeId === "analysis") return <CDAnalysis openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
+    if (tab.modeId === "intel")    return <CDIntel openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
+    if (tab.modeId === "notifications") return <CDNotifications openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
     return <Placeholder label={`${tab.title} — root view`} note="Unknown mode root." />;
   }
-  if (tab.kind === "files-list") return <V6FilesListView view={tab.fileListView ?? "all"} openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
-  if (tab.kind === "deals-list") return <V6DealsListView view={tab.dealsListView ?? "all"} initialStage={tab.dealsStage} openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
-  if (tab.kind === "provider-profile") return <V6ProviderProfileView user={user} />;
-  if (tab.kind === "deal")     return <V6DealView id={tab.id} title={tab.title} openTab={openTab} fileScope={tab.fileScope} onTalkToYulia={onTalkToYulia} modelPreference={modelPreference} user={user} />;
-  if (tab.kind === "deal-team") return <V6DealTeamView dealId={String(tab.dealId ?? tab.id)} dealTitle={tab.dealTitle ?? tab.title} openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
-  if (tab.kind === "doc")      return <V6DocView id={tab.id} title={tab.title} openTab={openTab} modelPreference={modelPreference} onTalkToYulia={onTalkToYulia} />;
+  if (tab.kind === "files-list") return <CDFilesList view={tab.fileListView ?? "all"} openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
+  if (tab.kind === "deals-list") return <CDDealsList view={tab.dealsListView ?? "all"} initialStage={tab.dealsStage} openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
+  if (tab.kind === "provider-profile") return <CDProviderProfile user={user} />;
+  if (tab.kind === "deal")     return <CDDealDetail id={tab.id} title={tab.title} openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
+  if (tab.kind === "deal-team") return <CDDealTeam dealId={String(tab.dealId ?? tab.id)} dealTitle={tab.dealTitle ?? tab.title} openTab={openTab} onTalkToYulia={onTalkToYulia} user={user} />;
+  if (tab.kind === "doc")      return <CDDocView id={tab.id} title={tab.title} openTab={openTab} modelPreference={modelPreference} onTalkToYulia={onTalkToYulia} />;
   if (tab.kind === "analysis") return <V6AnalysisView title={tab.title} tool={tab.tool} markdown={tab.markdown} comparisonData={tab.comparisonData} analysisData={tab.analysisData} artifactData={tab.artifactData} analysisRunId={tab.analysisRunId} deliverableId={tab.deliverableId} status={tab.status} versionNumber={tab.versionNumber} resolvedMenuItemSlug={tab.resolvedMenuItemSlug} openTab={openTab} onTalkToYulia={onTalkToYulia} />;
   if (tab.kind === "model")    return <V6ModelCanvasView tabId={tab.modelTabId ?? tab.id} title={tab.title} onTalkToYulia={onTalkToYulia} />;
   if (tab.kind === "feed-item") return <Placeholder label={`Feed · ${tab.title}`} note="Feed item reading view is a thin wrapper — coming after polish." />;
   if (tab.kind === "learn")    return <V6LearnView section={tab.section} anchor={tab.anchor} onTalkToYulia={onTalkToYulia} />;
   if (tab.kind === "marketing-studio") return <V6MarketingStudioView tab={tab} openTab={openTab} user={user} onTalkToYulia={onTalkToYulia} />;
-  if (tab.kind === "settings") return <V6SettingsView user={user} onSignOut={onSignOut} wkTheme={wkTheme} onSetWkTheme={onSetWkTheme} />;
-  if (tab.kind === "history")  return <V6HistoryView user={user} activeConversationId={activeConversationId} busy={chatBusy} onResume={onResumeConversation} onDeleted={onConversationDeleted} />;
-  if (tab.kind === "starter")  return <V6StarterView onTalkToYulia={onTalkToYulia} />;
+  if (tab.kind === "settings") return <CDSettings user={user} onSignOut={onSignOut} wkTheme={wkTheme} onSetWkTheme={onSetWkTheme} />;
+  if (tab.kind === "history")  return <CDHistory user={user} activeConversationId={activeConversationId} busy={chatBusy} onResume={onResumeConversation} onDeleted={onConversationDeleted} />;
+  if (tab.kind === "starter")  return <CDStarter onTalkToYulia={onTalkToYulia} />;
   return <Placeholder label="Unknown tab" />;
 }
 

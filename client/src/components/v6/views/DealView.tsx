@@ -448,7 +448,9 @@ export function V6DealView({
         `gate ${real.current_gate}`,
         real.status !== "active" ? real.status : null,
       ].filter(Boolean).join(" · ")
-    : "$5.4M revenue · East Texas · industrial services rollup target · BUY · gate B2";
+    // Honest loading state — never fabricate revenue/location/gate for a deal
+    // that hasn't loaded (no-fiction law; was a hardcoded "$5.4M · East Texas…").
+    : "Loading deal…";
 
   const dealName = real?.business_name || title;
   const intelligence = buildDealIntelligence({ dealName, real, dealBrief });

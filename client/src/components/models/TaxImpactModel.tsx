@@ -71,7 +71,7 @@ export default function TaxImpactModel({ tabId }: Props) {
             label="Difference"
             value={centsToDisplay(Math.abs(stockSale.netProceeds - assetSale.netProceeds))}
             sublabel={stockSale.netProceeds > assetSale.netProceeds ? 'Stock sale saves more' : 'Asset sale saves more'}
-            color="#2E8C5A"
+            color="var(--cd-pos)"
           />
         </div>
       )}
@@ -94,7 +94,7 @@ export default function TaxImpactModel({ tabId }: Props) {
               </thead>
               <tbody>
                 {installment.yearlyTax.map((y: any) => (
-                  <tr key={y.year} style={{ borderBottom: '1px solid #e8e6dc' }}>
+                  <tr key={y.year} style={{ borderBottom: '1px solid var(--cd-line)' }}>
                     <td style={{ padding: '4px 8px', textAlign: 'right' }}>Year {y.year}</td>
                     <td style={{ padding: '4px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{centsToDisplay(y.payment)}</td>
                     <td style={{ padding: '4px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{centsToDisplay(y.taxableGain)}</td>

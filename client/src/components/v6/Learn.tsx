@@ -137,7 +137,7 @@ const DIFFERENCES: Difference[] = [
   {
     title: "Legal and tax boundaries in the product",
     body: "Yulia can show options, implications, diligence questions, and documents to review. She does not represent you, negotiate for you, or turn software into transaction compensation.",
-    accent: "#D6A35C",
+    accent: "var(--accent)",
   },
   {
     title: "Ready for the agent economy",

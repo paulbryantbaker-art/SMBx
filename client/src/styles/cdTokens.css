@@ -84,6 +84,101 @@
   --cd-gap: 12px;
 }
 
+/* ========================================================================
+   CD TOKEN BRIDGE — remap the warm/green V6 "Ramp" app tokens (--accent
+   #2BFF77, --bg #FBFAF6, Schibsted Grotesk, etc.) to the CD cool/indigo
+   palette. Applied to the canvas + chat wrappers (.cd-bridge) so EVERY
+   not-yet-rebuilt V6 surface renders in the CD language without a rewrite.
+   Because these vars are declared on a closer ancestor than `.v6-root.wk`,
+   they win the cascade for everything inside the canvas. Surfaces that get
+   a bespoke CD rebuild (Today) opt out by re-establishing their own scope.
+   ======================================================================== */
+.cd-root .cd-bridge {
+  /* neutrals / ground */
+  --bg: var(--cd-canvas);
+  --surface: var(--cd-surface);
+  --surface-2: var(--cd-surface-2);
+  --surface-3: var(--cd-surface-3);
+  --nav: var(--cd-surface-2);
+  --line: var(--cd-line);
+  --line-2: var(--cd-line-2);
+  --wk-hairline: var(--cd-line-2);
+  --wk-hairline-2: var(--cd-line);
+
+  /* ink */
+  --ink: var(--cd-ink);
+  --ink-2: var(--cd-ink-2);
+  --ink-3: var(--cd-ink-3);
+  --ink-4: var(--cd-ink-4);
+
+  /* accent — neon green → CD indigo */
+  --accent: var(--cd-accent);
+  --accent-strong: var(--cd-accent-strong);
+  --accent-soft: var(--cd-accent-soft);
+  --on-accent: #ffffff;
+
+  /* type — Schibsted/Inter → Figtree, display → Newsreader */
+  --font-body: var(--cd-sans);
+  --font-display: var(--cd-serif);
+  --font-mono: var(--cd-mono);
+
+  /* status system → CD finance semantics (greens/golds/rusts) */
+  --st-good-bg: var(--cd-pos-soft);   --st-good-fg: var(--cd-pos);          --st-good-dot: var(--cd-pos);
+  --st-review-bg: var(--cd-warn-soft); --st-review-fg: oklch(0.5 0.13 75);  --st-review-dot: var(--cd-warn);
+  --st-dilig-bg: var(--cd-accent-soft); --st-dilig-fg: var(--cd-accent-strong); --st-dilig-dot: var(--cd-accent);
+  --st-missing-bg: var(--cd-surface-2); --st-missing-fg: var(--cd-ink-3);   --st-missing-dot: var(--cd-ink-3);
+  --st-risk-bg: var(--cd-neg-soft);   --st-risk-fg: var(--cd-neg);          --st-risk-dot: var(--cd-neg);
+  --st-range-out: var(--cd-neg);
+  --banner-risk-bg: var(--cd-neg-soft);
+
+  /* periwinkle navigation accent → CD indigo family */
+  --wk-peri: var(--cd-accent);
+  --wk-peri-ink: var(--cd-accent-strong);
+  --wk-peri-soft: var(--cd-accent-soft);
+
+  /* glass frost endpoint follows the cool surface */
+  --wk-glass-frost-bg: color-mix(in oklab, var(--cd-surface) 96%, transparent);
+
+  /* ---- the 11 interactive models use a parallel --m-* palette (index.css,
+     warm: --m-primary #2BFF77, --m-bg #FBFAF6, …). Remap it to CD so every
+     model renders cool/indigo without touching its calc logic. ---- */
+  --m-primary: var(--cd-accent);
+  --m-on-primary: #ffffff;
+  --m-primary-container: var(--cd-accent-soft);
+  --m-on-primary-container: var(--cd-accent-strong);
+  --m-secondary: var(--cd-warn);
+  --m-secondary-container: var(--cd-warn-soft);
+  --m-on-secondary-container: oklch(0.5 0.13 75);
+  --m-fab-rose-gold: var(--cd-accent);
+  --m-fab-rose-gold-hover: var(--cd-accent-strong);
+  --m-fab-rose-gold-soft: var(--cd-accent-soft);
+  --m-tertiary: var(--cd-c2);
+  --m-tertiary-container: var(--cd-surface-2);
+  --m-on-tertiary-container: var(--cd-ink-2);
+  --m-pursue: var(--cd-pos);            --m-pursue-container: var(--cd-pos-soft);  --m-pursue-on-cont: var(--cd-pos);
+  --m-watch: var(--cd-warn);            --m-watch-container: var(--cd-warn-soft);
+  --m-pass: var(--cd-neg);              --m-pass-container: var(--cd-neg-soft);
+  --m-bg: var(--cd-canvas);
+  --m-surface: var(--cd-surface);
+  --m-surface-on-light: var(--cd-surface);
+  --m-surface-tinted: var(--cd-surface-2);
+  --m-surface-2: var(--cd-surface-2);
+  --m-surface-3: var(--cd-surface-3);
+  --m-surface-1: var(--cd-surface-2);
+  --m-surface-container: var(--cd-surface-2);
+  --m-on-surface: var(--cd-ink);
+  --m-on-surface-var: var(--cd-ink-2);
+  --m-on-surface-mid: var(--cd-ink-3);
+  --m-outline: var(--cd-line-2);
+  --m-outline-var: var(--cd-line);
+  --m-elev-1: var(--cd-shadow-sm);
+  --m-elev-2: var(--cd-shadow-md);
+  --m-elev-3: var(--cd-shadow-lg);
+
+  color: var(--cd-ink);
+  font-family: var(--cd-sans);
+}
+
 /* ---- Namespaced utilities (CD reuses .num/.mono/.eyebrow globally — ours
    are .cd-* to avoid colliding with the existing V6 utilities) ---- */
 .cd-root .cd-mono  { font-family: var(--cd-mono); font-feature-settings: "tnum" 1, "ss01" 1; }
@@ -96,6 +191,18 @@
   font-family: var(--cd-sans);
   font-size: 10.5px; font-weight: 600; letter-spacing: 0.1em;
   text-transform: uppercase; color: var(--cd-ink-3);
+}
+
+/* keyboard focus ring — CD chrome controls are inline-styled (no .btn class),
+   so scope a token-styled :focus-visible to all interactive elements under the
+   shell. Mouse clicks stay ring-free (:focus-visible only fires for keyboard). */
+.cd-root button:focus-visible,
+.cd-root [role="tab"]:focus-visible,
+.cd-root [role="button"]:focus-visible,
+.cd-root [tabindex]:focus-visible {
+  outline: 2px solid var(--cd-accent);
+  outline-offset: 2px;
+  border-radius: inherit;
 }
 
 /* scrollbars */

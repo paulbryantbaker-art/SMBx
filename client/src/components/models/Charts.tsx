@@ -20,18 +20,18 @@ ChartJS.register(
 
 // House type + ink for all Chart.js canvases (literal strings — CSS vars don't reach canvas)
 ChartJS.defaults.font.family = "'Schibsted Grotesk', system-ui, sans-serif";
-ChartJS.defaults.color = '#191813';
+ChartJS.defaults.color = 'var(--cd-ink)';
 
 // Brand colors — names kept from the slate era, values map to the warm/green token world
-const TERRA = '#2E8C5A';
+const TERRA = 'var(--cd-pos)';
 const TERRA_LIGHT = 'rgba(46, 140, 90, 0.14)';
-const TEXT = '#191813';
-const MUTED = '#57534A';
-const CREAM = '#F7F5EF';
+const TEXT = 'var(--cd-ink)';
+const MUTED = 'var(--cd-ink-2)';
+const CREAM = 'var(--cd-surface-2)';
 const BORDER = 'rgba(25, 24, 19, 0.12)';
-const GREEN = '#2E8C5A';
-const YELLOW = '#D6A35C';
-const RED = '#C0562F';
+const GREEN = 'var(--cd-pos)';
+const YELLOW = 'var(--cd-warn)';
+const RED = 'var(--cd-neg)';
 
 // ─── Valuation Range Chart ──────────────────────────────────────────
 
@@ -87,7 +87,7 @@ export function DSCRGauge({ dscr, threshold = 1.25 }: { dscr: number; threshold?
           data={{
             datasets: [{
               data: [pct * 100, (1 - pct) * 100],
-              backgroundColor: [color, '#e8e6dc'],
+              backgroundColor: [color, 'var(--cd-line)'],
               borderWidth: 0,
               circumference: 270,
               rotation: 225,
@@ -144,7 +144,7 @@ export function WaterfallChart({ items }: { items: { label: string; amount: numb
           datasets: [
             { label: 'Base', data: bases, backgroundColor: 'transparent', borderWidth: 0, barPercentage: 0.5 },
             { label: 'Add', data: positives, backgroundColor: TERRA, borderRadius: 4, barPercentage: 0.5 },
-            { label: 'Less', data: negatives, backgroundColor: '#E8E4DC', borderRadius: 4, barPercentage: 0.5 },
+            { label: 'Less', data: negatives, backgroundColor: 'var(--cd-line)', borderRadius: 4, barPercentage: 0.5 },
           ],
         }}
         options={{
@@ -273,7 +273,7 @@ export function ProFormaTable({ years }: { years: { year: number; revenue: numbe
         </thead>
         <tbody>
           {years.map((y, i) => (
-            <tr key={y.year} style={{ background: i % 2 === 0 ? 'transparent' : '#faf9f5', borderBottom: '1px solid #e8e6dc' }}>
+            <tr key={y.year} style={{ background: i % 2 === 0 ? 'transparent' : 'var(--cd-surface)', borderBottom: '1px solid var(--cd-line)' }}>
               <td style={{ padding: '6px 8px', fontWeight: 600 }}>Year {y.year}</td>
               <td style={{ padding: '6px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{centsToDisplay(y.revenue)}</td>
               <td style={{ padding: '6px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{centsToDisplay(y.ebitda)}</td>
@@ -346,7 +346,7 @@ export function SourcesUsesTable({ sources, uses }: { sources: { label: string; 
       <div>
         <h4 className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: MUTED }}>Sources</h4>
         {sources.map(s => (
-          <div key={s.label} className="flex justify-between text-xs py-1" style={{ borderBottom: '1px solid #e8e6dc' }}>
+          <div key={s.label} className="flex justify-between text-xs py-1" style={{ borderBottom: '1px solid var(--cd-line)' }}>
             <span>{s.label}</span>
             <span className="font-medium tabular-nums">{centsToDisplay(s.amount)}</span>
           </div>
@@ -359,7 +359,7 @@ export function SourcesUsesTable({ sources, uses }: { sources: { label: string; 
       <div>
         <h4 className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: MUTED }}>Uses</h4>
         {uses.map(u => (
-          <div key={u.label} className="flex justify-between text-xs py-1" style={{ borderBottom: '1px solid #e8e6dc' }}>
+          <div key={u.label} className="flex justify-between text-xs py-1" style={{ borderBottom: '1px solid var(--cd-line)' }}>
             <span>{u.label}</span>
             <span className="font-medium tabular-nums">{centsToDisplay(u.amount)}</span>
           </div>
@@ -429,7 +429,7 @@ export function ModelSlider({ label, value, onChange, min, max, step, format = '
           onChange={e => onChange(Number(e.target.value))}
           className="model-range w-full cursor-pointer"
           style={{
-            '--mr-fill': `linear-gradient(to right, ${TERRA} 0%, ${TERRA} ${pct}%, #e8e6dc ${pct}%, #e8e6dc 100%)`,
+            '--mr-fill': `linear-gradient(to right, ${TERRA} 0%, ${TERRA} ${pct}%, var(--cd-line) ${pct}%, var(--cd-line) 100%)`,
           } as CSSProperties}
         />
       </div>
