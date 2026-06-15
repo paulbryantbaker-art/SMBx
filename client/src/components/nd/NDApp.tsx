@@ -13,11 +13,19 @@ import { usePortfolioSummary } from "../../hooks/usePortfolioSummary";
 import { realBlockers } from "../v6/shared/operatingPrimitives";
 import type { ChatBridge } from "../v6/V6App";
 import { Sidebar, type DealRef } from "./chrome";
-import { Logo, YuliaMark, IconBtn, Ic, type PillTone } from "./primitives";
+import { YuliaMark, IconBtn, Ic, type PillTone, type IcName } from "./primitives";
 import { AskYuliaHome, type NeedItem, type IntelItem, type DealRowItem } from "./surfaces/AskYuliaHome";
 import { OverviewPage, type OverviewDeal, type OverviewKpi, type OverviewSectorHeat, type OverviewNeedsYou, type OverviewActivity } from "./surfaces/OverviewPage";
+import { StageDeals, type StageDealItem } from "./surfaces/StageDeals";
 import { NDYuliaChat } from "./NDYuliaChat";
 import { NDDealWorkspace } from "./NDDealWorkspace";
+
+const STAGE_META: Record<string, { label: string; icon: IcName }> = {
+  sourcing: { label: "Sourcing", icon: "st_source" },
+  analysis: { label: "Analysis", icon: "st_analyze" },
+  closing: { label: "Closing", icon: "st_close" },
+  post: { label: "Post-merger", icon: "st_post" },
+};
 
 interface MarketHeat { industry: string; score: number; label: string; peActivity?: string; multipleDirection?: string; signals?: string[] }
 type Route = "home" | "overview" | "deal" | "sourcing" | "analysis" | "closing" | "post";
@@ -159,6 +167,31 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
     .slice(0, 5)
     .map(d => ({ who: "Yulia", act: "completed", obj: (d.name || d.slug || "an analysis").replace(/[-_]/g, " "), deal: dealNameById.get(String(d.deal_id)) || "", ago: "", kind: "yulia" as const }));
 
+  /* ── LIFECYCLE STAGE (real deals filtered to the stage bucket, needs-you first) ── */
+  const stageDeals: StageDealItem[] = useMemo(() => {
+    if (!(route === "sourcing" || route === "analysis" || route === "closing" || route === "post")) return [];
+    return active
+      .filter(d => gateBucket(d.current_gate) === route)
+      .map(d => {
+        const oc = gateCountdown.find(g => g.dealId === String(d.id));
+        const open = oc ? realBlockers(oc.blockers).length : 0;
+        return {
+          id: String(d.id),
+          name: d.business_name || `Deal #${d.id}`,
+          avatar: (d.business_name || "D").slice(0, 2).toUpperCase(),
+          tone: "b",
+          meta: [d.industry, d.location].filter(Boolean).join(" · ") || "—",
+          journey: (d.journey_type || "buy").toUpperCase(),
+          stage: oc?.gateName || d.current_gate || "—",
+          ev: fmtCents(d.asking_price),
+          openItems: open > 0 ? `${open} open` : "—",
+          status: open > 0 ? "Needs you" : "On track",
+          statusTone: (open > 0 ? "warn" : "ok") as PillTone,
+        };
+      })
+      .sort((a, b) => (a.status === "Needs you" ? 0 : 1) - (b.status === "Needs you" ? 0 : 1));
+  }, [route, active, gateCountdown]);
+
   const openDeal = (id: string) => { setDealId(id); setRoute("deal"); };
   const ask = (prompt: string) => { chat.send(prompt); setRailOpen(true); };
 
@@ -203,7 +236,16 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
           <NDDealWorkspace dealId={dealId} user={user} chat={chat} onAsk={ask} />
         )}
         {(route === "sourcing" || route === "analysis" || route === "closing" || route === "post") && (
-          <PhasePlaceholder route={route} onAsk={() => setRailOpen(true)} />
+          <StageDeals
+            label={STAGE_META[route].label}
+            icon={STAGE_META[route].icon}
+            lede={stageDeals.length
+              ? `${stageDeals.length} ${stageDeals.length === 1 ? "deal is" : "deals are"} in the ${STAGE_META[route].label.toLowerCase()} stage${stageDeals.some(d => d.status === "Needs you") ? " — ranked by what needs you first." : "."}`
+              : undefined}
+            deals={stageDeals}
+            onOpenDeal={openDeal}
+            onAsk={ask}
+          />
         )}
 
         {/* Yulia launcher (closed) */}
@@ -239,16 +281,3 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
   );
 }
 
-function PhasePlaceholder({ route, onAsk }: { route: string; onAsk: () => void }) {
-  const label = { sourcing: "Sourcing", analysis: "Analysis", closing: "Closing", post: "Post-merger" }[route] || route;
-  return (
-    <div className="mck-grow mck-row" style={{ justifyContent: "center", padding: 40 }}>
-      <div className="mck-empty" style={{ maxWidth: 420 }}>
-        <span className="mck-empty-ic"><Ic name="agent" size={18} /></span>
-        <div className="mck-empty-t">{label} lands next</div>
-        <div className="mck-empty-s">This surface is on the cutover roadmap. In the meantime, ask Yulia to work on {label.toLowerCase()} for any deal.</div>
-        <button className="mck-btn mck-btn-ink mck-btn-sm" style={{ marginTop: 4 }} onClick={onAsk}><Ic name="agent" size={14} />Ask Yulia</button>
-      </div>
-    </div>
-  );
-}
