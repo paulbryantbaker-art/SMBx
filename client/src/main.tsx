@@ -4,6 +4,7 @@ import App from './App';
 import { ErrorBoundary } from './components/shared/ErrorBoundary';
 import './index.css';
 import './styles/cdTokens.css'; // Claude Design fintech token layer (.cd-root scope) — MIGRATION_PLAN.md §2
+import './components/nd/nd.css'; // Agent-first desktop ("nd") token + component layer (.nd-root scope) — AGENT_DESKTOP_CUTOVER_PLAN.md
 
 /* ─── Global run-to-completion click feedback ───
    :active in CSS only fires while the button is physically held. Fast

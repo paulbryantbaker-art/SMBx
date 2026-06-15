@@ -36,8 +36,10 @@ const VALID_MODES: ModeId[] = ["today", "pipeline", "search", "studio", "files",
 
 const V6Mobile = lazy(() => import("./mobile/V6Mobile"));
 const V6Canvas = lazy(() => import("./Canvas").then(module => ({ default: module.V6Canvas })));
+// Agent-first desktop ("nd") shell — opt-in via localStorage smbx_shell="nd". AGENT_DESKTOP_CUTOVER_PLAN.md
+const NDApp = lazy(() => import("../nd/NDApp").then(module => ({ default: module.NDApp })));
 
-interface ChatBridge {
+export interface ChatBridge {
   thread: Message[];
   sending: boolean;
   streamingText: string;
@@ -186,6 +188,13 @@ interface ShellProps {
 }
 
 function V6AppShell({ user, chat, onSignOut }: ShellProps) {
+  // Agent-first desktop shell (opt-in, gated). Returns BEFORE the V6 shell hooks
+  // so the two desktops never coexist; mobile/anon already branched earlier.
+  const ndShell = (() => { try { return localStorage.getItem("smbx_shell") === "nd"; } catch { return false; } })();
+  if (ndShell) {
+    return <Suspense fallback={<V6ShellLoader />}><NDApp user={user} chat={chat} onSignOut={onSignOut} /></Suspense>;
+  }
+
   // ─── Tab + mode state, hydrated from URL hash ───
   const initial = readHashState();
   const restoreModelTab = useModelStore(s => s.restoreTab);
