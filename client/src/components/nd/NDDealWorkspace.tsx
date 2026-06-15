@@ -63,7 +63,8 @@ export function NDDealWorkspace({ dealId, user, chat, onAsk }: { dealId: string;
   useEffect(() => {
     if (numId === null) { setDeal(null); return; }
     let cancelled = false;
-    setLoading(true); setError(null); setBrief(null); setRoom(null);
+    // clear the prior deal so a switch shows a loading state, never the wrong deal's data
+    setLoading(true); setError(null); setDeal(null); setBrief(null); setRoom(null); setTab("brief");
     // The deal record gates the page; brief + data room load independently (never block).
     fetch(`/api/deals/${numId}`, { headers: authHeaders() })
       .then(r => r.ok ? r.json() : Promise.reject(new Error(`deal ${r.status}`)))
