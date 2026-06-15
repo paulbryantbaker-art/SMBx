@@ -17,9 +17,10 @@ import { Logo, YuliaMark, IconBtn, Ic, type PillTone } from "./primitives";
 import { AskYuliaHome, type NeedItem, type IntelItem, type DealRowItem } from "./surfaces/AskYuliaHome";
 import { OverviewPage, type OverviewDeal, type OverviewKpi, type OverviewSectorHeat, type OverviewNeedsYou, type OverviewActivity } from "./surfaces/OverviewPage";
 import { NDYuliaChat } from "./NDYuliaChat";
+import { NDDealWorkspace } from "./NDDealWorkspace";
 
 interface MarketHeat { industry: string; score: number; label: string; peActivity?: string; multipleDirection?: string; signals?: string[] }
-type Route = "home" | "overview" | "sourcing" | "analysis" | "closing" | "post";
+type Route = "home" | "overview" | "deal" | "sourcing" | "analysis" | "closing" | "post";
 
 /* ---- honest formatters (real or "—") ---- */
 function fmtCents(c?: number | null): string {
@@ -53,6 +54,7 @@ const BUCKET_IDX: Record<string, number> = { sourcing: 0, analysis: 1, closing: 
 
 export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null; chat: ChatBridge; onSignOut: () => void }) {
   const [route, setRoute] = useState<Route>("home");
+  const [dealId, setDealId] = useState<string | null>(null);
   const [railOpen, setRailOpen] = useState(false);
 
   const workspace = useV6WorkspaceData(user);
@@ -92,6 +94,7 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
   }, [active]);
 
   const sidebarDeals: DealRef[] = active.slice(0, 8).map(d => ({
+    id: String(d.id),
     name: d.business_name || `Deal #${d.id}`,
     sub: [d.industry, fmtCents(d.asking_price)].filter(Boolean).join(" · ") || "—",
     journey: (d.journey_type || "buy").toUpperCase(),
@@ -156,7 +159,7 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
     .slice(0, 5)
     .map(d => ({ who: "Yulia", act: "completed", obj: (d.name || d.slug || "an analysis").replace(/[-_]/g, " "), deal: dealNameById.get(String(d.deal_id)) || "", ago: "", kind: "yulia" as const }));
 
-  const openDeal = (id: string) => { /* Phase 2: route to deal workspace */ chat.send(`Open the deal workspace for deal ${id} and give me your read.`); setRailOpen(true); setRoute("home"); };
+  const openDeal = (id: string) => { setDealId(id); setRoute("deal"); };
   const ask = (prompt: string) => { chat.send(prompt); setRailOpen(true); };
 
   const scopeLabel = route === "home" ? "your portfolio" : route === "overview" ? "your portfolio" : route;
@@ -170,6 +173,7 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
         deals={sidebarDeals}
         user={{ name: user?.email?.split("@")[0] || "Workspace", sub: "smbx.ai", live: true }}
         onHome={() => setRoute("home")}
+        onOpenDeal={openDeal}
         onNav={(key) => {
           if (key === "overview") setRoute("overview");
           else if (key === "sourcing" || key === "analysis" || key === "closing" || key === "post") setRoute(key);
@@ -194,6 +198,9 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
         )}
         {route === "overview" && (
           <OverviewPage kpis={kpis} deals={ovDeals} sectorHeat={sectorHeat} needsYou={needsYou} activity={activity} onOpenDeal={openDeal} onAsk={() => setRailOpen(true)} />
+        )}
+        {route === "deal" && dealId && (
+          <NDDealWorkspace dealId={dealId} user={user} chat={chat} onAsk={ask} />
         )}
         {(route === "sourcing" || route === "analysis" || route === "closing" || route === "post") && (
           <PhasePlaceholder route={route} onAsk={() => setRailOpen(true)} />

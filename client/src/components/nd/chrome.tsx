@@ -72,6 +72,8 @@ export const PIPELINES: Record<string, PipelineStage[]> = {
 };
 
 export interface DealRef {
+  /** real deal id — when present, clicking opens the unified deal workspace */
+  id?: string;
   name: string;
   sub: string;
   tone?: string;
@@ -107,6 +109,8 @@ export interface SidebarProps {
   user?: SidebarUser;
   onHome?: () => void;
   onNav?: (key: string) => void;
+  /** open a deal's unified workspace by id (preferred over journey-routing) */
+  onOpenDeal?: (id: string) => void;
 }
 export function Sidebar({
   active = "home",
@@ -116,6 +120,7 @@ export function Sidebar({
   user = { name: "Dana Okafor", sub: "Greenhill · Pro", tone: "b", live: true },
   onHome,
   onNav,
+  onOpenDeal,
 }: SidebarProps) {
   return (
     <div className="mck-rail">
@@ -164,13 +169,19 @@ export function Sidebar({
       <div className="mck-navsec">Deals</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {deals.map((d) => {
+          // Every deal opens the unified, journey-adaptive workspace by id.
+          // Fallback (no id / no handler): the old journey-routed nav.
           const route = d.journey === "SELL" ? "sell" : d.journey === "RAISE" ? "raise" : d.journey === "PMI" ? "post" : "deal";
+          const open = () => {
+            if (d.id && onOpenDeal) onOpenDeal(d.id);
+            else if (onNav) onNav(route);
+          };
           return (
-            <a key={d.name} className="mck-nav" onClick={() => onNav && onNav(route)} style={{ height: 40, cursor: "pointer" }}>
+            <a key={d.id || d.name} className="mck-nav" title={d.name} onClick={open} style={{ height: 40, cursor: "pointer" }}>
               <Avatar name={d.name.replace("Project ", "")} tone={d.tone} size={22} live={d.live} />
-              <span className="mck-col" style={{ gap: 0, lineHeight: 1.25 }}>
-                <span style={{ fontSize: 12.5, fontWeight: 500, color: "var(--ink)" }}>{d.name}</span>
-                <span style={{ fontSize: 10.5, color: "var(--ink-3)" }}>{d.sub} · {d.journey}</span>
+              <span className="mck-col" style={{ gap: 0, lineHeight: 1.25, minWidth: 0, flex: 1 }}>
+                <span style={{ fontSize: 12.5, fontWeight: 500, color: "var(--ink)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{d.name}</span>
+                <span style={{ fontSize: 10.5, color: "var(--ink-3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{d.sub} · {d.journey}</span>
               </span>
             </a>
           );
