@@ -190,7 +190,16 @@ interface ShellProps {
 function V6AppShell({ user, chat, onSignOut }: ShellProps) {
   // Agent-first desktop shell (opt-in, gated). Returns BEFORE the V6 shell hooks
   // so the two desktops never coexist; mobile/anon already branched earlier.
-  const ndShell = (() => { try { return localStorage.getItem("smbx_shell") === "nd"; } catch { return false; } })();
+  // Reachable by localStorage OR a URL param (?nd=1 enables + persists, ?nd=0 clears)
+  // so the gated preview can be opened from a plain link — no devtools needed.
+  const ndShell = (() => {
+    try {
+      const q = new URLSearchParams(window.location.search).get("nd");
+      if (q === "1") { localStorage.setItem("smbx_shell", "nd"); return true; }
+      if (q === "0") { localStorage.removeItem("smbx_shell"); return false; }
+      return localStorage.getItem("smbx_shell") === "nd";
+    } catch { return false; }
+  })();
   if (ndShell) {
     return <Suspense fallback={<V6ShellLoader />}><NDApp user={user} chat={chat} onSignOut={onSignOut} /></Suspense>;
   }
