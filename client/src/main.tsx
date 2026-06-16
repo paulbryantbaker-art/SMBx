@@ -3,8 +3,11 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import { ErrorBoundary } from './components/shared/ErrorBoundary';
 import './index.css';
-import './styles/cdTokens.css'; // Claude Design fintech token layer (.cd-root scope) — MIGRATION_PLAN.md §2
-import './components/nd/nd.css'; // Agent-first desktop ("nd") token + component layer (.nd-root scope) — AGENT_DESKTOP_CUTOVER_PLAN.md
+// cdTokens is the CD token layer — still imported because the interactive
+// canvas models (components/models/*) consume its --cd-* tokens on mobile.
+import './styles/cdTokens.css';
+// nd.css (.nd-root desktop shell layer) removed with the desktop UI on
+// 2026-06-16 — nothing mounts that scope anymore.
 
 /* ─── Global run-to-completion click feedback ───
    :active in CSS only fires while the button is physically held. Fast
