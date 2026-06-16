@@ -16,6 +16,7 @@ import { createDealInvite } from '../routes/collaboration.js';
 import { matchFranchises } from './franchiseMatchingService.js';
 import { matchBuyersForSeller } from './buyerSourcingService.js';
 import { generateOptimizationPlan, saveOptimizationPlan, createOptimizationMilestone } from './optimizationPlanService.js';
+import { generateIntegrationPlan, saveIntegrationPlan } from './pmiValueCaptureService.js';
 import { sendGateAdvancementEmail } from './emailService.js';
 import { handleGateTransition } from './gateConversationService.js';
 import { snapshotDealFinancials, checkDealFreshness } from './dealFreshnessService.js';
@@ -551,6 +552,17 @@ export const TOOL_DEFINITIONS: Tool[] = [
     },
   },
   {
+    name: 'generate_integration_plan',
+    description: 'Build a 100-day post-merger integration (PMI) value-capture plan for a deal: integration workstreams (with owners and first moves), illustrative value levers (cost/revenue synergy targets), and execution tracking. Call this when a PMI / post-close deal needs an integration plan, or the user asks for a 100-day plan, synergy capture, or value creation. Returns a canvas_action that refreshes the deal Integration surface. PLAN & IMPLICATIONS ONLY — do not recommend regulated decisions; synergy figures are illustrative targets, not guarantees, and there are no verified actuals until a finance system is connected.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId: { type: 'number', description: 'The deal ID (a PMI / post-close deal)' },
+      },
+      required: ['dealId'],
+    },
+  },
+  {
     name: 'list_user_deals',
     description: 'List all deals for the current user. Call this when: the user asks about their deals, portfolio, or pipeline; when you need to understand what deals they have; when the user wants to switch to a different deal; or when you detect they may be a broker/advisor managing multiple clients. Returns summary of all active deals with journey type, gate, financials, and business name. Pass includeInactive when the user mentions an old, dormant, completed, or "dead" deal — those are invisible in the default active-only list.',
     input_schema: {
@@ -988,6 +1000,8 @@ export async function executeTool(
         return await matchFranchiseTool(input);
       case 'generate_optimization_plan':
         return await generateOptimizationPlanTool(input, userId);
+      case 'generate_integration_plan':
+        return await generateIntegrationPlanTool(input, userId);
       case 'get_deal_dossier':
         return await getDealDossierTool(input, userId);
       case 'list_user_deals':
@@ -3545,6 +3559,40 @@ async function generateOptimizationPlanTool(input: Record<string, any>, userId: 
       difficulty: a.difficulty,
       timeline: `${a.timeline_days} days`,
     })),
+  });
+}
+
+async function generateIntegrationPlanTool(input: Record<string, any>, userId: number): Promise<string> {
+  const { dealId } = input;
+  const [deal] = await sql`
+    SELECT id, user_id, business_name, industry, league, revenue, ebitda, journey_type
+    FROM deals WHERE id = ${dealId} AND user_id = ${userId}
+  `;
+  if (!deal) return JSON.stringify({ error: 'Deal not found' });
+
+  const dealInput = {
+    dealId: deal.id as number,
+    userId,
+    business_name: deal.business_name as string | undefined,
+    industry: deal.industry as string | undefined,
+    league: (deal.league as string) || 'L1',
+    revenueCents: deal.revenue == null ? null : Number(deal.revenue),
+    ebitdaCents: deal.ebitda == null ? null : Number(deal.ebitda),
+  };
+  const plan = await generateIntegrationPlan(dealInput);
+  await saveIntegrationPlan(dealInput, plan);
+
+  return JSON.stringify({
+    success: true,
+    dealId: deal.id,
+    summary: plan.summary,
+    workstreamCount: plan.workstreams.length,
+    leverCount: plan.valueLevers.length,
+    targetValue: `$${Math.round(plan.targetValueCents / 100).toLocaleString()} (illustrative target)`,
+    workstreams: plan.workstreams.map(w => ({ title: w.title, owner: w.owner, firstMove: w.first_move })),
+    note: 'Synergy figures are illustrative targets; verified actuals require connecting the finance system.',
+    canvas_action: 'open_tab',
+    tab: { id: String(deal.id), kind: 'deal', title: deal.business_name || `Deal #${deal.id}` },
   });
 }
 

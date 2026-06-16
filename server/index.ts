@@ -11,6 +11,7 @@ import { chatRouter } from './routes/chat.js';
 import { anonymousRouter } from './routes/anonymous.js';
 import { stripeRouter, handleStripeWebhook } from './routes/stripe.js';
 import { deliverablesRouter } from './routes/deliverables.js';
+import { pmiPlanRouter } from './routes/pmiPlan.js';
 import { dataRoomRouter } from './routes/dataRoom.js';
 import { collaborationRouter } from './routes/collaboration.js';
 import { pipelineRouter } from './routes/pipeline.js';
@@ -663,6 +664,7 @@ app.use('/api', portfolioBriefRouter);
 app.use('/api', canvasTabsRouter);
 app.use('/api', docViewsRouter);
 app.use('/api', studioRouter);
+app.use('/api', pmiPlanRouter);
 app.use('/api', v19ResourcesRouter);
 
 app.use('/api', exportRouter);

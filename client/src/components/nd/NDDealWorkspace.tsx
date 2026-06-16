@@ -13,7 +13,7 @@ import { TopBar, EmptyChart, LoadingBlock, ErrorState } from "./chrome";
 import { Ic, Btn, type PillTone } from "./primitives";
 import { DealBrief, type KpiItem, type RiskItem } from "./surfaces/DealBrief";
 import { CanvasData, type DataFolder } from "./surfaces/DealCanvas";
-import { NDIntegration } from "./surfaces/NDIntegration";
+import { NDIntegration, type Workstream, type ValueLever } from "./surfaces/NDIntegration";
 import { CDDealTeam } from "../cd/pages/CDDealTeam";
 
 type Ws = "brief" | "data" | "team" | "model" | "integration";
@@ -61,6 +61,8 @@ export function NDDealWorkspace({ dealId, user, chat, onAsk }: { dealId: string;
   const [deliverables, setDeliverables] = useState<{ id: number; name?: string; slug?: string; status?: string; gate?: string | null }[]>([]);
   const [brief, setBrief] = useState<DealBriefResp | null>(null);
   const [room, setRoom] = useState<{ folders: RoomFolder[]; documents: RoomDoc[] } | null>(null);
+  const [plan, setPlan] = useState<{ workstreams: Workstream[]; levers: ValueLever[]; targetValueCents: number | null } | null>(null);
+  const [generatingPlan, setGeneratingPlan] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const operating = useTodayOperatingBrief(user ?? null, !!user && numId !== null);
@@ -69,7 +71,7 @@ export function NDDealWorkspace({ dealId, user, chat, onAsk }: { dealId: string;
     if (numId === null) { setDeal(null); return; }
     let cancelled = false;
     // clear the prior deal so a switch shows a loading state, never the wrong deal's data
-    setLoading(true); setError(null); setDeal(null); setGates([]); setDeliverables([]); setBrief(null); setRoom(null); setTab("brief");
+    setLoading(true); setError(null); setDeal(null); setGates([]); setDeliverables([]); setBrief(null); setRoom(null); setPlan(null); setTab("brief");
     // The deal record gates the page; brief + data room load independently (never block).
     fetch(`/api/deals/${numId}`, { headers: authHeaders() })
       .then(r => r.ok ? r.json() : Promise.reject(new Error(`deal ${r.status}`)))
@@ -88,6 +90,8 @@ export function NDDealWorkspace({ dealId, user, chat, onAsk }: { dealId: string;
       .then(r => r.ok ? r.json() : null).then(rm => { if (!cancelled && rm) setRoom({ folders: rm.folders ?? [], documents: rm.documents ?? [] }); }).catch(() => {});
     fetch(`/api/deals/${numId}/deliverables`, { headers: authHeaders() })
       .then(r => r.ok ? r.json() : null).then(dl => { if (!cancelled && Array.isArray(dl)) setDeliverables(dl); }).catch(() => {});
+    fetch(`/api/deals/${numId}/integration-plan`, { headers: authHeaders() })
+      .then(r => r.ok ? r.json() : null).then(d => { if (!cancelled && d) setPlan({ workstreams: d.workstreams ?? [], levers: d.plan?.valueLevers ?? [], targetValueCents: d.plan?.targetValueCents ?? null }); }).catch(() => {});
     return () => { cancelled = true; };
   }, [numId]);
 
@@ -118,6 +122,24 @@ export function NDDealWorkspace({ dealId, user, chat, onAsk }: { dealId: string;
     };
   });
 
+  /* ── 100-day integration plan (real; generate + self-report progress) ── */
+  const genPlan = () => {
+    if (numId === null || generatingPlan) return;
+    setGeneratingPlan(true);
+    fetch(`/api/deals/${numId}/integration-plan/generate`, { method: "POST", headers: { ...authHeaders(), "Content-Type": "application/json" }, body: "{}" })
+      .then(r => r.ok ? r.json() : Promise.reject(new Error()))
+      .then(d => setPlan({ workstreams: d.workstreams ?? [], levers: d.plan?.valueLevers ?? [], targetValueCents: d.plan?.targetValueCents ?? null }))
+      .catch(() => {})
+      .finally(() => setGeneratingPlan(false));
+  };
+  const setWsStatus = (wsId: number, status: string) => {
+    if (numId === null) return;
+    fetch(`/api/deals/${numId}/workstreams/${wsId}`, { method: "PATCH", headers: { ...authHeaders(), "Content-Type": "application/json" }, body: JSON.stringify({ status }) })
+      .then(r => r.ok ? r.json() : null)
+      .then(updated => { if (updated) setPlan(p => p ? { ...p, workstreams: p.workstreams.map(w => w.id === wsId ? { ...w, ...updated } : w) } : p); })
+      .catch(() => {});
+  };
+
   if (loading && !deal) return <div className="mck-grow" style={{ padding: 28 }}><LoadingBlock label="Yulia is opening the deal…" /></div>;
   if (error && !deal) return <div className="mck-grow mck-row" style={{ justifyContent: "center", padding: 40 }}><ErrorState title="Couldn't open the deal" sub={error} onRetry={() => setDeal(null)} /></div>;
 
@@ -138,7 +160,11 @@ export function NDDealWorkspace({ dealId, user, chat, onAsk }: { dealId: string;
 
       <div className="mck-grow" style={{ overflow: "auto", minHeight: 0 }}>
         {tab === "integration" && (
-          <NDIntegration dealName={dealName} gates={gates} deliverables={deliverables} currentGate={deal?.current_gate} onAsk={onAsk} />
+          <NDIntegration
+            dealName={dealName} gates={gates} deliverables={deliverables} currentGate={deal?.current_gate} onAsk={onAsk}
+            workstreams={plan?.workstreams ?? []} levers={plan?.levers ?? []} targetValueCents={plan?.targetValueCents ?? null}
+            generating={generatingPlan} onGenerate={genPlan} onSetWorkstreamStatus={setWsStatus}
+          />
         )}
         {tab === "brief" && (
           <DealBrief
