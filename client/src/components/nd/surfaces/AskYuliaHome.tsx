@@ -7,11 +7,10 @@
    Faithful port of Test 33 / today.jsx → presentational TSX. All data arrives
    via typed props; the integration layer wires real data later.
    ============================================================================ */
-import { useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { Ic, YuliaMark, Avatar, Btn, IconBtn, Chip } from "../primitives";
 import type { IcName } from "../primitives";
-import { YuliaMsg, Composer } from "../chrome";
+import { YuliaMsg } from "../chrome";
 
 /* ---- data shapes ---- */
 export interface NeedItem {
@@ -65,7 +64,6 @@ export interface AskYuliaHomeProps {
   onReview: (item: NeedItem | IntelItem) => void;
   /** optional: overview / clock chrome affordances */
   onNav?: (dest: string) => void;
-  composerPlaceholder?: string;
 }
 
 /* ---- pipeline stage pips ---- */
@@ -244,10 +242,8 @@ export function AskYuliaHome({
   onOpenDeal,
   onReview,
   onNav,
-  composerPlaceholder = "Ask Yulia, or tell her what to work on…",
 }: AskYuliaHomeProps) {
   const open = (id?: string) => id && onOpenDeal(id);
-  const [draft, setDraft] = useState("");
 
   return (
     <div className="mck-col mck-grow" style={{ height: "100%" }}>
@@ -337,15 +333,15 @@ export function AskYuliaHome({
         </div>
       </div>
 
-      {/* composer */}
-      <div style={{ flex: "0 0 auto", padding: "0 0 24px" }}>
+      {/* quick prompts — they route into the always-docked Yulia rail (the single
+          chat). No separate composer here: the rail is the one place you type. */}
+      <div style={{ flex: "0 0 auto", padding: "0 0 28px" }}>
         <div style={{ maxWidth: 760, margin: "0 auto", padding: "0 28px" }}>
-          <div className="mck-row" style={{ gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+          <div className="mck-row" style={{ gap: 8, flexWrap: "wrap" }}>
             {suggestions.map((s) => (
               <Chip key={s} icon="spark" onClick={() => onAsk(s)}>{s}</Chip>
             ))}
           </div>
-          <Composer value={draft} onChange={setDraft} onSend={(v) => { onAsk(v); setDraft(""); }} placeholder={composerPlaceholder} lawLine />
         </div>
       </div>
     </div>
