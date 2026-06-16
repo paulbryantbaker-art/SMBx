@@ -17,6 +17,7 @@ import { YuliaMark, IconBtn, Ic, type PillTone, type IcName } from "./primitives
 import { AskYuliaHome, type NeedItem, type IntelItem, type DealRowItem } from "./surfaces/AskYuliaHome";
 import { OverviewPage, type OverviewDeal, type OverviewKpi, type OverviewSectorHeat, type OverviewNeedsYou, type OverviewActivity } from "./surfaces/OverviewPage";
 import { StageDeals, type StageDealItem } from "./surfaces/StageDeals";
+import { NDSourcing } from "./surfaces/NDSourcing";
 import { NDCanvas, type NDArtifact } from "./NDCanvas";
 import { NDYuliaChat } from "./NDYuliaChat";
 import { NDDealWorkspace } from "./NDDealWorkspace";
@@ -72,6 +73,8 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
   const [railOpen, setRailOpen] = useState(false);
   const [artifacts, setArtifacts] = useState<NDArtifact[]>([]);
   const [activeArtifact, setActiveArtifact] = useState<string>("surface");
+  // Sourcing nav has two views: the off-market engine (theses→candidates) and the in-pipeline deal list
+  const [sourcingView, setSourcingView] = useState<"engine" | "pipeline">("engine");
 
   const workspace = useV6WorkspaceData(user);
   const operating = useTodayOperatingBrief(user, !!user);
@@ -276,7 +279,27 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
       {route === "deal" && dealId && (
         <NDDealWorkspace dealId={dealId} user={user} chat={chat} onAsk={ask} />
       )}
-      {(route === "sourcing" || route === "analysis" || route === "closing" || route === "post") && (
+      {route === "sourcing" && (
+        sourcingView === "pipeline" ? (
+          <div className="mck-col mck-grow" style={{ minWidth: 0, height: "100%" }}>
+            <div className="mck-row" style={{ gap: 12, height: 48, flex: "0 0 48px", padding: "0 20px", borderBottom: "1px solid var(--line)" }}>
+              <button className="mck-btn mck-btn-ghost mck-btn-sm" onClick={() => setSourcingView("engine")}><Ic name="back" size={13} />Off-market sourcing</button>
+              <span style={{ fontSize: 12.5, color: "var(--ink-3)" }}>Deals already in the sourcing stage</span>
+            </div>
+            <StageDeals
+              label={STAGE_META.sourcing.label}
+              icon={STAGE_META.sourcing.icon}
+              lede={stageDeals.length ? `${stageDeals.length} ${stageDeals.length === 1 ? "deal is" : "deals are"} in the sourcing stage${stageDeals.some(d => d.status === "Needs you") ? " — ranked by what needs you first." : "."}` : undefined}
+              deals={stageDeals}
+              onOpenDeal={openDeal}
+              onAsk={ask}
+            />
+          </div>
+        ) : (
+          <NDSourcing user={user} onAsk={ask} stageDealsCount={stageDeals.length} onOpenStageDeals={() => setSourcingView("pipeline")} />
+        )
+      )}
+      {(route === "analysis" || route === "closing" || route === "post") && (
         <StageDeals
           label={STAGE_META[route].label}
           icon={STAGE_META[route].icon}
@@ -305,7 +328,8 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
         onOpenDeal={openDeal}
         onNav={(key) => {
           if (key === "overview") setRoute("overview");
-          else if (key === "sourcing" || key === "analysis" || key === "closing" || key === "post") setRoute(key);
+          else if (key === "sourcing") { setSourcingView("engine"); setRoute("sourcing"); }
+          else if (key === "analysis" || key === "closing" || key === "post") setRoute(key);
           else if (key === "new") ask("I want to start a new deal — walk me through it.");
           else setRoute("home");
         }}
