@@ -13,15 +13,18 @@ import { TopBar, EmptyChart, LoadingBlock, ErrorState } from "./chrome";
 import { Ic, Btn, type PillTone } from "./primitives";
 import { DealBrief, type KpiItem, type RiskItem } from "./surfaces/DealBrief";
 import { CanvasData, type DataFolder } from "./surfaces/DealCanvas";
+import { NDIntegration } from "./surfaces/NDIntegration";
 import { CDDealTeam } from "../cd/pages/CDDealTeam";
 
-type Ws = "brief" | "data" | "team" | "model";
-const WS_TABS: { key: Ws; label: string; ic: string }[] = [
+type Ws = "brief" | "data" | "team" | "model" | "integration";
+const BASE_TABS: { key: Ws; label: string; ic: string }[] = [
   { key: "brief", label: "Deal brief", ic: "doc" },
   { key: "data", label: "Data room", ic: "grid" },
   { key: "team", label: "Team", ic: "comment" },
   { key: "model", label: "Model", ic: "bars" },
 ];
+// PMI-journey deals get an Integration tab first (post-merger is their primary work).
+const INTEGRATION_TAB: { key: Ws; label: string; ic: string } = { key: "integration", label: "Integration", ic: "st_post" };
 
 interface DealRec {
   id: number; business_name: string | null; industry: string | null; location: string | null;
@@ -54,6 +57,8 @@ export function NDDealWorkspace({ dealId, user, chat, onAsk }: { dealId: string;
   const numId = /^\d+$/.test(dealId) ? parseInt(dealId, 10) : null;
   const [tab, setTab] = useState<Ws>("brief");
   const [deal, setDeal] = useState<DealRec | null>(null);
+  const [gates, setGates] = useState<{ gate: string; status?: string; completed_at?: string | null }[]>([]);
+  const [deliverables, setDeliverables] = useState<{ id: number; name?: string; slug?: string; status?: string; gate?: string | null }[]>([]);
   const [brief, setBrief] = useState<DealBriefResp | null>(null);
   const [room, setRoom] = useState<{ folders: RoomFolder[]; documents: RoomDoc[] } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -64,21 +69,31 @@ export function NDDealWorkspace({ dealId, user, chat, onAsk }: { dealId: string;
     if (numId === null) { setDeal(null); return; }
     let cancelled = false;
     // clear the prior deal so a switch shows a loading state, never the wrong deal's data
-    setLoading(true); setError(null); setDeal(null); setBrief(null); setRoom(null); setTab("brief");
+    setLoading(true); setError(null); setDeal(null); setGates([]); setDeliverables([]); setBrief(null); setRoom(null); setTab("brief");
     // The deal record gates the page; brief + data room load independently (never block).
     fetch(`/api/deals/${numId}`, { headers: authHeaders() })
       .then(r => r.ok ? r.json() : Promise.reject(new Error(`deal ${r.status}`)))
-      .then((d: any) => { if (!cancelled) setDeal(d?.deal ?? d); })
+      .then((d: any) => {
+        if (cancelled) return;
+        const dd = d?.deal ?? d;
+        setDeal(dd);
+        setGates(Array.isArray(d?.gates) ? d.gates : []);
+        if ((dd?.journey_type || "").toLowerCase() === "pmi") setTab("integration"); // PMI deals open on Integration
+      })
       .catch((e: Error) => { if (!cancelled) setError(e.message); })
       .finally(() => { if (!cancelled) setLoading(false); });
     fetch(`/api/agency/deals/${numId}/brief`, { headers: authHeaders() })
       .then(r => r.ok ? r.json() : null).then(b => { if (!cancelled) setBrief(b); }).catch(() => {});
     fetch(`/api/deals/${numId}/data-room`, { headers: authHeaders() })
       .then(r => r.ok ? r.json() : null).then(rm => { if (!cancelled && rm) setRoom({ folders: rm.folders ?? [], documents: rm.documents ?? [] }); }).catch(() => {});
+    fetch(`/api/deals/${numId}/deliverables`, { headers: authHeaders() })
+      .then(r => r.ok ? r.json() : null).then(dl => { if (!cancelled && Array.isArray(dl)) setDeliverables(dl); }).catch(() => {});
     return () => { cancelled = true; };
   }, [numId]);
 
   const dealName = deal?.business_name || `Deal #${dealId}`;
+  const isPmi = (deal?.journey_type || "").toLowerCase() === "pmi";
+  const tabs = isPmi ? [INTEGRATION_TAB, ...BASE_TABS] : BASE_TABS;
   const gate = useMemo(() => (operating.brief?.gateCountdown ?? []).find(g => g.dealId === String(numId)), [operating.brief, numId]);
 
   /* ── Deal brief (real or honest "—") ── */
@@ -112,7 +127,7 @@ export function NDDealWorkspace({ dealId, user, chat, onAsk }: { dealId: string;
 
       {/* deal-workspace tab bar */}
       <div className="mck-row" style={{ gap: 4, padding: "8px 20px 0", borderBottom: "1px solid var(--line)" }}>
-        {WS_TABS.map(t => (
+        {tabs.map(t => (
           <button key={t.key} className={"mck-tab" + (tab === t.key ? " is-active" : "")} onClick={() => setTab(t.key)}>
             <Ic name={t.ic} size={14} />{t.label}
           </button>
@@ -122,6 +137,9 @@ export function NDDealWorkspace({ dealId, user, chat, onAsk }: { dealId: string;
       </div>
 
       <div className="mck-grow" style={{ overflow: "auto", minHeight: 0 }}>
+        {tab === "integration" && (
+          <NDIntegration dealName={dealName} gates={gates} deliverables={deliverables} currentGate={deal?.current_gate} onAsk={onAsk} />
+        )}
         {tab === "brief" && (
           <DealBrief
             name={dealName} target={deal?.industry || "—"} side={`${JOURNEY(deal?.journey_type).toLowerCase()}-side`}
