@@ -52,7 +52,7 @@ export function StageDeals({ label, icon, lede, deals, onOpenDeal, onAsk }: Stag
         <Btn variant="ghost" size="sm" icon="agent" onClick={() => onAsk(`What should I focus on across my ${label.toLowerCase()} deals?`)}>Ask Yulia</Btn>
       </div>
 
-      <div className="mck-grow mck-scrollfade" style={{ overflow: "hidden", padding: "24px 26px 40px" }}>
+      <div className="mck-grow mck-scrollfade" style={{ overflow: "auto", padding: "24px 26px 40px" }}>
         <div style={{ maxWidth: 1180, margin: "0 auto", display: "flex", flexDirection: "column", gap: 16 }}>
           {lede && <p style={{ fontSize: 14, color: "var(--ink-2)", margin: 0, lineHeight: 1.6 }}>{lede}</p>}
 

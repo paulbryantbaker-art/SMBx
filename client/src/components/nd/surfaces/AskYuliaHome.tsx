@@ -262,7 +262,7 @@ export function AskYuliaHome({
       </div>
 
       {/* conversation — Yulia's proactive briefing */}
-      <div className="mck-grow mck-scrollfade" style={{ overflow: "hidden", padding: "34px 0 26px" }}>
+      <div className="mck-grow mck-scrollfade" style={{ overflow: "auto", padding: "34px 0 26px" }}>
         <div style={{ maxWidth: 760, margin: "0 auto", padding: "0 28px", display: "flex", flexDirection: "column", gap: 22 }}>
           {greeting && <div className="mck-eyebrow">{greeting}</div>}
 

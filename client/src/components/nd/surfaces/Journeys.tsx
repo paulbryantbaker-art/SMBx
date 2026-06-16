@@ -177,7 +177,7 @@ function Tabs({ tabs, active, onSelect }: { tabs: JourneyTab[]; active: string; 
 
 function ScrollWrap({ children, max = 880 }: { children: ReactNode; max?: number }) {
   return (
-    <div className="mck-grow mck-scrollfade" style={{ overflow: "hidden", padding: "30px 0" }}>
+    <div className="mck-grow mck-scrollfade" style={{ overflow: "auto", padding: "30px 0" }}>
       <div style={{ maxWidth: max, margin: "0 auto", padding: "0 34px", display: "flex", flexDirection: "column", gap: 28 }}>{children}</div>
     </div>
   );
@@ -197,7 +197,7 @@ function SecHead({ n, title, action, onAction }: { n: string; title: string; act
 /* shared counterparty table (buyers + investors share the column shape) */
 function CounterpartyTable({ rows, columns }: { rows: CounterpartyRow[]; columns: { name: string; type: string; capacity: string; rationale: string } }) {
   return (
-    <div className="mck-grow mck-scrollfade" style={{ overflow: "hidden", padding: "6px 14px" }}>
+    <div className="mck-grow mck-scrollfade" style={{ overflow: "auto", padding: "6px 14px" }}>
       <table className="mck-tbl">
         <thead>
           <tr>

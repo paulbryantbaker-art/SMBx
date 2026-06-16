@@ -114,7 +114,7 @@ export function Closing({
         </span>
       </div>
 
-      <div className="mck-grow mck-scrollfade" style={{ overflow: "hidden", padding: "30px 0" }}>
+      <div className="mck-grow mck-scrollfade" style={{ overflow: "auto", padding: "30px 0" }}>
         <div style={{ maxWidth: 880, margin: "0 auto", padding: "0 34px", display: "flex", flexDirection: "column", gap: 30 }}>
           {/* conditions to close */}
           <section>
@@ -270,7 +270,7 @@ export function PostMerger({
         </span>
       </div>
 
-      <div className="mck-grow mck-scrollfade" style={{ overflow: "hidden", padding: "30px 0" }}>
+      <div className="mck-grow mck-scrollfade" style={{ overflow: "auto", padding: "30px 0" }}>
         <div style={{ maxWidth: 880, margin: "0 auto", padding: "0 34px", display: "flex", flexDirection: "column", gap: 30 }}>
           <section>
             <div className="mck-row" style={{ gap: 10, marginBottom: 14 }}>

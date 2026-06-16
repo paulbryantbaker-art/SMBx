@@ -102,7 +102,7 @@ export function OverviewPage({ kpis, deals, sectorHeat, needsYou, activity, onOp
         <Btn variant="ghost" size="sm" icon="agent" onClick={onAsk}>Ask Yulia</Btn>
       </div>
 
-      <div className="mck-grow mck-scrollfade" style={{ overflow: "hidden", padding: "24px 26px 40px" }}>
+      <div className="mck-grow mck-scrollfade" style={{ overflow: "auto", padding: "24px 26px 40px" }}>
         <div style={{ maxWidth: 1180, margin: "0 auto", display: "flex", flexDirection: "column", gap: 26 }}>
           {/* KPI strip — honest where no backend */}
           <div className="mck-row" style={{ gap: 14 }}>

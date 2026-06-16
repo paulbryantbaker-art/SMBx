@@ -159,7 +159,7 @@ export function Sourcing({
       </div>
 
       {/* table */}
-      <div className="mck-grow mck-scrollfade" style={{ overflow: "hidden", padding: "6px 14px" }}>
+      <div className="mck-grow mck-scrollfade" style={{ overflow: "auto", padding: "6px 14px" }}>
         <table className="mck-tbl">
           <thead>
             <tr>

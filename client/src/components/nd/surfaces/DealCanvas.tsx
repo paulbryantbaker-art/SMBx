@@ -299,7 +299,7 @@ export function CanvasDocs({
           <span style={{ color: "var(--line)" }}>|</span>
           <AvatarStack people={people} size={22} />
         </div>
-        <div className="mck-grow mck-scrollfade" style={{ overflow: "hidden", padding: "28px 36px" }}>
+        <div className="mck-grow mck-scrollfade" style={{ overflow: "auto", padding: "28px 36px" }}>
           {children ?? <DocsMemoSample />}
         </div>
       </div>
@@ -496,7 +496,7 @@ export function DealCanvas({
             {v === "chatOnly" && <Chip icon="panel" onClick={() => setView("split")}>Open canvas · {canvasCount}</Chip>}
             <IconBtn name="more" />
           </div>
-          <div className="mck-grow mck-scrollfade" style={{ overflow: "hidden", minHeight: 0 }}>{chat}</div>
+          <div className="mck-grow mck-scrollfade" style={{ overflow: "auto", minHeight: 0 }}>{chat}</div>
         </div>
       )}
 
@@ -518,7 +518,7 @@ export function DealCanvas({
               onClick={() => { setView(expanded ? "split" : "canvasOnly"); onExpand?.(); }}><Ic name={expanded ? "shrink" : "expand"} size={16} /></button>
             <button className="mck-iconbtn" title="Close canvas" onClick={() => { setView("chatOnly"); onClose?.(); }}><Ic name="x" size={15} /></button>
           </div>
-          <div className="mck-grow mck-scrollfade" style={{ overflow: "hidden", minHeight: 0 }}>
+          <div className="mck-grow mck-scrollfade" style={{ overflow: "auto", minHeight: 0 }}>
             {bodies[tab]}
           </div>
         </div>

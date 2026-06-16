@@ -173,7 +173,7 @@ export function DealBrief({
         </div>
       )}
 
-      <div className="mck-grow mck-scrollfade" style={{ overflow: "hidden", padding: "34px 0" }}>
+      <div className="mck-grow mck-scrollfade" style={{ overflow: "auto", padding: "34px 0" }}>
         <div style={{ maxWidth: 880, margin: "0 auto", padding: "0 34px", display: "flex", flexDirection: "column", gap: 34 }}>
           {/* 00 — what this deal needs from you: the next moves lead the brief, so the
                workspace opens on "do this next", not a wall of analysis. */}
@@ -418,7 +418,7 @@ export function WorkSourcing({
       </div>
 
       {/* table */}
-      <div className="mck-grow mck-scrollfade" style={{ overflow: "hidden", padding: "6px 14px" }}>
+      <div className="mck-grow mck-scrollfade" style={{ overflow: "auto", padding: "6px 14px" }}>
         <table className="mck-tbl">
           <thead>
             <tr>

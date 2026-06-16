@@ -137,7 +137,7 @@ export function NewDeal({
           <button className="mck-iconbtn" title="Close" onClick={onHome}><Ic name="x" size={16} /></button>
         </div>
 
-        <div className="mck-grow mck-scrollfade" style={{ overflow: "hidden", padding: "44px 0" }}>
+        <div className="mck-grow mck-scrollfade" style={{ overflow: "auto", padding: "44px 0" }}>
           <div style={{ maxWidth: 680, margin: "0 auto", padding: "0 32px", display: "flex", flexDirection: "column", gap: 30 }}>
             <div className="mck-row" style={{ gap: 12, alignItems: "flex-start" }}>
               <YuliaMark size={32} />
