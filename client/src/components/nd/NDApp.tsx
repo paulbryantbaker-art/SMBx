@@ -71,7 +71,14 @@ const BUCKET_IDX: Record<string, number> = { sourcing: 0, analysis: 1, closing: 
 export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null; chat: ChatBridge; onSignOut: () => void }) {
   const [route, setRoute] = useState<Route>("home");
   const [dealId, setDealId] = useState<string | null>(null);
-  const [railOpen, setRailOpen] = useState(false);
+  // The Yulia rail is ALWAYS docked (never a floating pill). railOpen = expanded
+  // vs collapsed-to-a-strip; the preference persists so it feels like a copilot.
+  const [railOpen, setRailOpen] = useState(() => {
+    try { return localStorage.getItem("smbx_nd_rail") !== "collapsed"; } catch { return true; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem("smbx_nd_rail", railOpen ? "open" : "collapsed"); } catch { /* ignore */ }
+  }, [railOpen]);
   const [artifacts, setArtifacts] = useState<NDArtifact[]>([]);
   const [activeArtifact, setActiveArtifact] = useState<string>("surface");
   // Sourcing nav has two views: the off-market engine (theses→candidates) and the in-pipeline deal list
@@ -436,33 +443,30 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
           {hasCanvas
             ? <NDCanvas surfaceLabel={surfaceLabel} surface={surfaceNode} artifacts={artifacts} active={activeArtifact} onSelect={setActiveArtifact} onClose={closeArtifact} />
             : surfaceNode}
-
-          {/* Yulia launcher (rail closed) */}
-          {!railOpen && (
-            <div className="mck-dock">
-              <button className="mck-dock-pill" onClick={() => setRailOpen(true)}>
-                <YuliaMark size={32} />
-                <span className="mck-dock-label">Ask Yulia</span>
-                <span className="mck-dock-kbd">⌘K</span>
-              </button>
-            </div>
-          )}
         </div>
 
-        {/* Yulia chat rail (inline) */}
-        {railOpen && (
+        {/* Yulia rail — ALWAYS docked on the right. Expanded = full chat; collapsed
+            = a thin labeled strip. Never a floating pill, never missing. ⌘K toggles. */}
+        {railOpen ? (
           <div className="mck-ychat">
             <div className="mck-row" style={{ gap: 10, padding: "14px 16px", borderBottom: "1px solid var(--line)", flex: "0 0 auto" }}>
               <YuliaMark size={26} />
               <span style={{ fontWeight: 600, fontSize: 13.5 }}>Yulia</span>
               <span className="mck-pill mck-pill-neutral" style={{ marginLeft: 2 }}>{surfaceLabel}</span>
               <span className="mck-grow" />
-              <IconBtn name="x" size={16} onClick={() => setRailOpen(false)} title="Close" />
+              <IconBtn name="chevRight" size={16} onClick={() => setRailOpen(false)} title="Collapse (⌘K)" />
             </div>
             <div className="mck-grow" style={{ minHeight: 0 }}>
               <NDYuliaChat chat={chat} scope={scopeLabel} userName={(user?.email?.split("@")[0] || "You").replace(/\b\w/, c => c.toUpperCase())} />
             </div>
           </div>
+        ) : (
+          <button className="mck-ychat-strip" onClick={() => setRailOpen(true)} title="Open Yulia (⌘K)">
+            <YuliaMark size={28} />
+            <span className="mck-ychat-strip-label">Ask Yulia</span>
+            <span className="mck-grow" />
+            <span className="mck-ychat-strip-kbd">⌘K</span>
+          </button>
         )}
       </div>
     </div>
