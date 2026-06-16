@@ -7,11 +7,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { authHeaders, type User } from "../../hooks/useAuth";
 import { useTodayOperatingBrief } from "../../hooks/useTodayOperatingBrief";
+import { useNextActions } from "../../hooks/useNextActions";
 import { realBlockers } from "../v6/shared/operatingPrimitives";
 import type { ChatBridge } from "../v6/V6App";
 import { TopBar, EmptyChart, LoadingBlock, ErrorState } from "./chrome";
 import { Ic, Btn, type PillTone } from "./primitives";
-import { DealBrief, type KpiItem, type RiskItem } from "./surfaces/DealBrief";
+import { DealBrief, type KpiItem, type RiskItem, type NextMoveItem } from "./surfaces/DealBrief";
 import { CanvasData, type DataFolder } from "./surfaces/DealCanvas";
 import { NDIntegration, type Workstream, type ValueLever } from "./surfaces/NDIntegration";
 import { CDDealTeam } from "../cd/pages/CDDealTeam";
@@ -35,6 +36,7 @@ interface DealBriefResp {
   verdict?: { label?: string; text?: string };
   marketRead?: { headline?: string; bullets?: string[]; researchNeeded?: string[] };
   taxLegal?: { tax?: string; legal?: string };
+  nextMoves?: { title?: string; why?: string; prompt?: string; actionId?: string }[];
 }
 interface RoomFolder { id: number; name: string; document_count?: number; status?: string }
 interface RoomDoc { id: number; folder_id: number | null; status?: string; is_stale?: boolean }
@@ -66,6 +68,7 @@ export function NDDealWorkspace({ dealId, user, chat, onAsk }: { dealId: string;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const operating = useTodayOperatingBrief(user ?? null, !!user && numId !== null);
+  const { actions: nextActions } = useNextActions(user ?? null, !!user && numId !== null);
 
   useEffect(() => {
     if (numId === null) { setDeal(null); return; }
@@ -109,6 +112,22 @@ export function NDDealWorkspace({ dealId, user, chat, onAsk }: { dealId: string;
   ];
   const risks: RiskItem[] = (brief?.marketRead?.researchNeeded ?? []).slice(0, 4).map(r => ({ name: r, evidence: "Surfaced by Yulia's read — open the deal to dig in.", severity: "Medium" }));
   const thesisText = brief?.verdict?.text || brief?.marketRead?.headline || "";
+
+  /* ── "What this deal needs from you" — the next moves that lead the brief.
+     Yulia's AI brief moves first (richest, per-deal); if she hasn't briefed it yet,
+     the deterministic gate-readiness engine (same one mobile/home use) so the deal
+     ALWAYS opens on a concrete next step, never a dead end. ── */
+  const dealMoves: NextMoveItem[] = useMemo(() => {
+    const fromBrief = (brief?.nextMoves ?? [])
+      .filter(m => m?.title)
+      .slice(0, 4)
+      .map(m => ({ title: m.title!, sub: m.why || undefined, cta: "Work on it", prompt: m.prompt || `Help me with: ${m.title} on ${dealName}.` }));
+    if (fromBrief.length) return fromBrief;
+    return nextActions
+      .filter(a => a.dealId != null && String(a.dealId) === dealId)
+      .slice(0, 4)
+      .map(a => ({ title: a.title, sub: a.description || undefined, cta: a.cta || "Do this", prompt: a.prefill || `${a.title} for ${dealName}.` }));
+  }, [brief, nextActions, dealId, dealName]);
 
   /* ── Data room (real folders/docs) ── */
   const folders: DataFolder[] = (room?.folders ?? []).map(f => {
@@ -171,6 +190,8 @@ export function NDDealWorkspace({ dealId, user, chat, onAsk }: { dealId: string;
             name={dealName} target={deal?.industry || "—"} side={`${JOURNEY(deal?.journey_type).toLowerCase()}-side`}
             journey={JOURNEY(deal?.journey_type)} stageActive={gate?.gateName || deal?.current_gate || ""}
             chromeless
+            nextMoves={dealMoves}
+            onMove={(m) => onAsk(m.prompt || m.title)}
             thesis={thesisText || undefined}
             kpis={kpis}
             risks={risks}

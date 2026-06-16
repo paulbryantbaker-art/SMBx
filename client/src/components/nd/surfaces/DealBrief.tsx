@@ -49,6 +49,9 @@ export interface RiskItem {
 
 export type DealBriefTab = "Deal brief" | "Financials" | "Diligence" | "Data room";
 
+/** A concrete next step Yulia surfaces for this deal (the deal-level guidance). */
+export interface NextMoveItem { title: string; sub?: string; cta?: string; prompt?: string }
+
 export interface DealBriefProps {
   /* deal identity (passed straight through to TopBar) */
   name?: string;
@@ -64,6 +67,10 @@ export interface DealBriefProps {
 
   /* "maintained by Yulia" freshness line */
   updatedLabel?: string;
+
+  /* 00 — what this deal needs from you (leads the brief; the next moves) */
+  nextMoves?: NextMoveItem[];
+  onMove?: (m: NextMoveItem) => void;
 
   /* 01 — investment thesis */
   thesis?: ReactNode;
@@ -145,6 +152,8 @@ export function DealBrief({
   onAdjustAssumptions,
   risks = RISKS_DEFAULT,
   onRescanDataRoom,
+  nextMoves = [],
+  onMove,
   chromeless = false,
 }: DealBriefProps) {
   return (
@@ -166,6 +175,29 @@ export function DealBrief({
 
       <div className="mck-grow mck-scrollfade" style={{ overflow: "hidden", padding: "34px 0" }}>
         <div style={{ maxWidth: 880, margin: "0 auto", padding: "0 34px", display: "flex", flexDirection: "column", gap: 34 }}>
+          {/* 00 — what this deal needs from you: the next moves lead the brief, so the
+               workspace opens on "do this next", not a wall of analysis. */}
+          {nextMoves.length > 0 && (
+            <div className="mck-card" style={{ padding: 0, overflow: "hidden", borderColor: "var(--accent-line)" }}>
+              <div className="mck-row" style={{ gap: 10, padding: "12px 16px", background: "var(--accent-soft)", borderBottom: "1px solid var(--accent-line)" }}>
+                <YuliaMark size={20} />
+                <span style={{ fontSize: 13.5, fontWeight: 600, color: "var(--accent-ink)" }}>What this deal needs from you</span>
+                <span className="mck-grow" />
+                <span className="mck-pill mck-pill-yulia" style={{ fontSize: 10 }}>{nextMoves.length}</span>
+              </div>
+              {nextMoves.map((m, i) => (
+                <button key={i} className="mck-row" onClick={() => onMove && onMove(m)}
+                  style={{ width: "100%", textAlign: "left", gap: 12, padding: "13px 16px", borderTop: i ? "1px solid var(--line-2)" : "none", background: "none", cursor: "pointer", alignItems: "flex-start" }}>
+                  <span className="mck-task-ic" style={{ marginTop: 1, flex: "0 0 auto" }}><Ic name="arrowRight" size={13} /></span>
+                  <span className="mck-col" style={{ gap: 2, flex: 1, minWidth: 0 }}>
+                    <span style={{ fontSize: 13.5, fontWeight: 600 }}>{m.title}</span>
+                    {m.sub && <span style={{ fontSize: 12, color: "var(--ink-2)", lineHeight: 1.5 }}>{m.sub}</span>}
+                  </span>
+                  <span className="mck-btn mck-btn-ghost mck-btn-sm" style={{ flex: "0 0 auto" }}>{m.cta || "Do this"}<Ic name="chevRight" size={12} /></span>
+                </button>
+              ))}
+            </div>
+          )}
           <section>
             <SectionHead n="01" title="Investment thesis" action="Re-run" onAction={onRerunThesis} />
             {thesis ? (

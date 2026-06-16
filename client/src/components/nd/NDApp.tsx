@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from "react";
 import { authHeaders, type User } from "../../hooks/useAuth";
 import { useV6WorkspaceData } from "../../hooks/useV6WorkspaceData";
 import { useTodayOperatingBrief } from "../../hooks/useTodayOperatingBrief";
+import { useNextActions } from "../../hooks/useNextActions";
 import { usePortfolioSummary } from "../../hooks/usePortfolioSummary";
 import { realBlockers } from "../v6/shared/operatingPrimitives";
 import type { ChatBridge } from "../v6/V6App";
@@ -78,6 +79,7 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
 
   const workspace = useV6WorkspaceData(user);
   const operating = useTodayOperatingBrief(user, !!user);
+  const { actions: nextActions } = useNextActions(user, !!user);
   const { summary } = usePortfolioSummary(user, !!user);
   const [heat, setHeat] = useState<MarketHeat[]>([]);
 
@@ -151,6 +153,52 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
   const dealNameById = useMemo(() => { const m = new Map<string, string>(); for (const d of active) m.set(String(d.id), d.business_name || `Deal #${d.id}`); return m; }, [active]);
   const gateCountdown = operating.brief?.gateCountdown ?? [];
 
+  /* ── "Needs you" is computed from TWO engines, not one. The operating brief's
+     gateCountdown only surfaces blockers for deals that already have DEFINITIVE
+     DealState snapshots or model runs; an ordinary app-created deal (e.g. a fresh
+     SELL deal sitting at S0) has neither, so its blockers collapse to the
+     server's 'No blocker surfaced' placeholder and the deal wrongly reads
+     "On track" / "0 things need you". GET /api/user/next-actions is the
+     deterministic gate-readiness engine (already used on mobile): it reads each
+     deal's real missing gate inputs (industry, revenue, thesis, capital…) plus
+     pending reviews — no DealState required. We treat it as authoritative per
+     deal and fall back to the brief's blockers only for deals it didn't rank. ── */
+  const dealActions = useMemo(
+    () => nextActions.filter(a => a.dealId != null && !a.id.endsWith("-advance")),
+    [nextActions],
+  );
+  // per-deal count of real open work from the engine (an "-advance" action = ready to advance → 0 open)
+  const actionCountByDeal = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const a of nextActions) {
+      if (a.dealId == null) continue;
+      const id = String(a.dealId);
+      m.set(id, (m.get(id) ?? 0) + (a.id.endsWith("-advance") ? 0 : 1));
+    }
+    return m;
+  }, [nextActions]);
+  // deals the engine spoke for at all — so we never double-count brief blockers for them
+  const engineDeals = useMemo(
+    () => new Set(nextActions.filter(a => a.dealId != null).map(a => String(a.dealId))),
+    [nextActions],
+  );
+  const gateNameByDeal = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const g of gateCountdown) m.set(g.dealId, g.gateName || g.gateId);
+    return m;
+  }, [gateCountdown]);
+  // open-work count for one deal: engine-authoritative, else the brief's real blockers
+  const openCountFor = (id: string): number => {
+    const fromEngine = actionCountByDeal.get(id);
+    if (fromEngine != null) return fromEngine;
+    const g = gateCountdown.find(x => x.dealId === id);
+    return g ? realBlockers(g.blockers).length : 0;
+  };
+  const totalOpen = useMemo(
+    () => active.reduce((sum, d) => sum + openCountFor(String(d.id)), 0),
+    [active, actionCountByDeal, gateCountdown],
+  );
+
   /* real per-stage counts for the sidebar (never the prototype's sample numbers) */
   const counts = useMemo(() => {
     const c: Record<string, number> = { sourcing: 0, analysis: 0, closing: 0, post: 0 };
@@ -166,10 +214,40 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
   }));
 
   /* ── HOME briefing (real) ── */
-  const needs: NeedItem[] = gateCountdown.slice(0, 4).map(g => {
-    const open = realBlockers(g.blockers);
-    return { icon: "check", title: g.nextAction || `Advance ${g.gateName}`, deal: dealNameById.get(g.dealId) || `Deal ${g.dealId}`, stage: g.gateName || "—", sub: open.length ? `${open.length} open item${open.length === 1 ? "" : "s"}` : undefined, time: "", action: "Open", id: g.dealId };
-  });
+  /* "Needs your attention" — the gate-readiness engine's concrete items first
+     (real missing inputs / pending reviews), then any agent-driven blockers
+     for deals the engine didn't rank (DealState gaps, model reruns). */
+  const needs: NeedItem[] = useMemo(() => {
+    const fromActions: NeedItem[] = dealActions.map(a => {
+      const id = a.dealId != null ? String(a.dealId) : undefined;
+      return {
+        icon: "check" as IcName,
+        title: a.title,
+        deal: a.dealName || (id ? dealNameById.get(id) : undefined) || `Deal ${a.dealId}`,
+        stage: (id && gateNameByDeal.get(id)) || a.currentGate || "—",
+        sub: a.description || undefined,
+        time: "",
+        action: a.cta || "Open",
+        id,
+      };
+    });
+    const fromBlockers: NeedItem[] = gateCountdown
+      .filter(g => !engineDeals.has(g.dealId) && realBlockers(g.blockers).length > 0)
+      .map(g => {
+        const open = realBlockers(g.blockers);
+        return {
+          icon: "check" as IcName,
+          title: g.nextAction || `Advance ${g.gateName}`,
+          deal: dealNameById.get(g.dealId) || `Deal ${g.dealId}`,
+          stage: g.gateName || "—",
+          sub: `${open.length} open item${open.length === 1 ? "" : "s"}`,
+          time: "",
+          action: "Open",
+          id: g.dealId,
+        };
+      });
+    return [...fromActions, ...fromBlockers].slice(0, 4);
+  }, [dealActions, gateCountdown, engineDeals, dealNameById, gateNameByDeal]);
   const intel: IntelItem[] = heat.slice().sort((a, b) => b.score - a.score).slice(0, 2).map(h => ({
     title: `${h.industry} — ${h.label}`,
     sub: h.peActivity || (h.signals && h.signals[0]) || `${h.label} sector conditions`,
@@ -189,12 +267,12 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
   const kpis: OverviewKpi[] = [
     { label: "Active mandates", value: summary ? String(summary.totalActive) : "—" },
     { label: "Aggregate EV", value: summary ? fmtCents(summary.totalEvCents) : "—" },
-    { label: "Tasks due", value: String(gateCountdown.length), sub: gateCountdown.length ? "across your pipeline" : undefined },
+    { label: "Tasks due", value: String(totalOpen), sub: totalOpen ? "across your pipeline" : undefined },
     { label: "Portfolio IRR", value: "—", empty: true, sub: "No live feed yet" },
   ];
   const ovDeals: OverviewDeal[] = active.slice(0, 12).map(d => {
     const oc = gateCountdown.find(g => g.dealId === String(d.id));
-    const open = oc ? realBlockers(oc.blockers).length : 0;
+    const open = openCountFor(String(d.id));
     return {
       id: String(d.id), name: d.business_name || `Deal #${d.id}`,
       avatar: (d.business_name || "D").slice(0, 2).toUpperCase(), tone: "b",
@@ -212,14 +290,30 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
     heatLabel: h.label,
     pct: Math.max(6, Math.min(100, h.score)),
   }));
-  const needsYou: OverviewNeedsYou[] = gateCountdown.slice(0, 4).map(g => ({
-    id: g.dealId,
-    title: g.nextAction || `Advance ${g.gateName}`,
-    deal: `${dealNameById.get(g.dealId) || g.dealId} · ${g.gateName || "—"}`,
-    time: "today",
-    // open blockers → red "risk"; a routine next action with none → amber "warn"
-    kind: realBlockers(g.blockers).length > 0 ? "risk" : "warn",
-  }));
+  // Same two-engine union as the home "needs" list, in the overview's shape.
+  const needsYou: OverviewNeedsYou[] = useMemo(() => {
+    const fromActions: OverviewNeedsYou[] = dealActions.map(a => {
+      const id = a.dealId != null ? String(a.dealId) : undefined;
+      return {
+        id,
+        title: a.title,
+        deal: `${a.dealName || (id ? dealNameById.get(id) : undefined) || a.dealId} · ${(id && gateNameByDeal.get(id)) || a.currentGate || "—"}`,
+        time: "today",
+        // a blocked review → red "risk"; a missing-input next action → amber "warn"
+        kind: a.id.startsWith("review-") ? "risk" : "warn",
+      };
+    });
+    const fromBlockers: OverviewNeedsYou[] = gateCountdown
+      .filter(g => !engineDeals.has(g.dealId) && realBlockers(g.blockers).length > 0)
+      .map(g => ({
+        id: g.dealId,
+        title: g.nextAction || `Advance ${g.gateName}`,
+        deal: `${dealNameById.get(g.dealId) || g.dealId} · ${g.gateName || "—"}`,
+        time: "today",
+        kind: "risk" as const,
+      }));
+    return [...fromActions, ...fromBlockers].slice(0, 4);
+  }, [dealActions, gateCountdown, engineDeals, dealNameById, gateNameByDeal]);
   // honest: a unified activity feed is a net-new backend → derive what's real (completed deliverables) or empty.
   const activity: OverviewActivity[] = (workspace.deliverables || [])
     .filter(d => (d.status || "").toLowerCase() === "complete")
@@ -233,7 +327,7 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
       .filter(d => gateBucket(d.current_gate) === route)
       .map(d => {
         const oc = gateCountdown.find(g => g.dealId === String(d.id));
-        const open = oc ? realBlockers(oc.blockers).length : 0;
+        const open = openCountFor(String(d.id));
         return {
           id: String(d.id),
           name: d.business_name || `Deal #${d.id}`,
@@ -249,7 +343,7 @@ export function NDApp({ user, chat, onSignOut: _onSignOut }: { user: User | null
         };
       })
       .sort((a, b) => (a.status === "Needs you" ? 0 : 1) - (b.status === "Needs you" ? 0 : 1));
-  }, [route, active, gateCountdown]);
+  }, [route, active, gateCountdown, actionCountByDeal]);
 
   const openDeal = (id: string) => { setDealId(id); setRoute("deal"); };
   const ask = (prompt: string) => { chat.send(prompt); setRailOpen(true); };
