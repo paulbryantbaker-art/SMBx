@@ -97,7 +97,6 @@ function applyCanvasModelUpdate(tab: Tab, detail: Record<string, any>): Tab {
 
 export default function V6App() {
   const auth = useAuth();
-  const isMobile = useIsMobile();
   const user = auth.user;
 
   if (auth.loading) {
@@ -108,21 +107,18 @@ export default function V6App() {
     );
   }
 
-  if (isMobile) {
-    return (
-      <Suspense fallback={<V6ShellLoader />}>
-        <V6Mobile user={user} onSignOut={async () => { await auth.logout(); }} onDevSignIn={auth.devSignIn} />
-      </Suspense>
-    );
-  }
-
-  if (DEV_AUTH_BYPASS) {
-    return <V6AppAnon user={user} onSignOut={auth.logout} onDevSignIn={auth.devSignIn} />;
-  }
-
-  return user
-    ? <V6AppAuthed user={user} onSignOut={auth.logout} />
-    : <V6AppAnon />;
+  // ─── Desktop UI removed (2026-06-16) ───────────────────────────────────────
+  // The desktop shells (nd + cd) were a parallel reimplementation that diverged
+  // from the backend the mobile app already consumes correctly. Per direction,
+  // every bit of desktop UI is out of the render path: the working mobile
+  // experience now renders on EVERY viewport while desktop is rebuilt — against
+  // the real APIs this time. (V6AppShell / NDApp / cd shell are dead code,
+  // unreferenced; safe to delete in a follow-up cleanup.)
+  return (
+    <Suspense fallback={<V6ShellLoader />}>
+      <V6Mobile user={user} onSignOut={async () => { await auth.logout(); }} onDevSignIn={auth.devSignIn} />
+    </Suspense>
+  );
 }
 
 /* ─── Anonymous variant — uses anon chat hook ────────────────── */
