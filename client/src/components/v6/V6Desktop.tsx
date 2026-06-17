@@ -93,6 +93,9 @@ function Shell({ user, chat, onSignOut, onDevSignIn }: { user: User | null; chat
   const [canvasTabs, setCanvasTabs] = useState<CanvasTab[]>([]);
   const [activeCanvasId, setActiveCanvasId] = useState<string | null>(null);
   const [compareId, setCompareId] = useState<string | null>(null);
+  // Deals in play — opened or referenced in the chat. Shown as chips at the top
+  // of the Yulia dock so you can jump to a deal page without closing the chat.
+  const [dealTabs, setDealTabs] = useState<{ id: string; title: string }[]>([]);
 
   const firstName = (user?.display_name?.trim() || user?.email || "there").split(/[\s@.]+/)[0];
   const initials = initialsFor(user);
@@ -115,6 +118,32 @@ function Shell({ user, chat, onSignOut, onDevSignIn }: { user: User | null; chat
       return next;
     });
   };
+
+  // Open a deal in the MAIN column (left of the dock) so the chat stays open,
+  // and register a deal chip in the dock for quick switching.
+  const openDealInMain = (id: string, title: string) => {
+    setDealTabs(prev => prev.some(t => t.id === id) ? prev : [...prev, { id, title }]);
+    setOpenDeal({ id, title });
+    setActiveCanvasId(null);
+  };
+  const closeDealTab = (id: string) => {
+    setDealTabs(prev => prev.filter(t => t.id !== id));
+    setOpenDeal(cur => cur?.id === id ? null : cur);
+  };
+
+  // Surface deal chips for any of the user's deals named in the conversation.
+  useEffect(() => {
+    if (!deals.hasData) return;
+    const text = chat.thread.map(m => m.text || "").join("  ").toLowerCase();
+    if (!text) return;
+    const matched = deals.all.filter(d => d.name && d.name.length > 3 && text.includes(d.name.toLowerCase()));
+    if (!matched.length) return;
+    setDealTabs(prev => {
+      const have = new Set(prev.map(t => t.id));
+      const add = matched.filter(d => !have.has(d.id)).map(d => ({ id: d.id, title: d.name }));
+      return add.length ? [...prev, ...add] : prev;
+    });
+  }, [chat.thread, deals.hasData, deals.all]);
 
   // Yulia's tool outputs (create_model_tab / open_tab analysis / show_content)
   // land on the canvas. Registered once; uses a ref so it always calls the
@@ -197,47 +226,48 @@ function Shell({ user, chat, onSignOut, onDevSignIn }: { user: User | null; chat
 
       {/* BODY */}
       <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
-        <main style={{ flex: 1, minWidth: 0, overflow: activeCanvasId ? "hidden" : "auto", position: "relative", background: AMBIENT, display: activeCanvasId ? "flex" : "block" }}>
+        <main style={{ flex: 1, minWidth: 0, position: "relative", background: AMBIENT, overflow: (activeCanvasId || openDeal) ? "hidden" : "auto", display: (activeCanvasId || openDeal) ? "flex" : "block" }}>
           {activeCanvasId ? (
             <DesktopCanvas
               tabs={canvasTabs} activeId={activeCanvasId} compareId={compareId}
               onActivate={setActiveCanvasId} onClose={closeCanvasTab} onMinimize={() => setActiveCanvasId(null)}
               onSetCompare={setCompareId} onAsk={send}
-              onOpenDeal={(id, title) => setOpenDeal({ id, title })} onRunAnalysis={runAnalysisToCanvas}
+              onOpenDeal={openDealInMain} onRunAnalysis={runAnalysisToCanvas}
             />
+          ) : openDeal ? (
+            <div style={{ flex: 1, minWidth: 0, overflow: "auto" }}>
+              <div style={{ maxWidth: 720, margin: "0 auto", position: "relative", minHeight: "100%", background: "#fff" }}>
+              <ChromeModeProvider mode="pane">
+                <DetailScreen
+                  dealId={openDeal.id}
+                  dealTitle={openDeal.title}
+                  onBack={() => setOpenDeal(null)}
+                  onChat={() => setDockOpen(true)}
+                  onAskYulia={send}
+                  onRunAnalysis={runAnalysisToCanvas}
+                  onOpenTeam={(_r: number | null, t: string) => send(`Show me the deal team for ${t}.`)}
+                  onOpenDealFiles={() => send("Open this deal's data room.")}
+                />
+              </ChromeModeProvider>
+              </div>
+            </div>
           ) : (
             <>
-              {surface === "today" && <Today firstName={firstName} deals={deals} actions={actions} user={user} onOpenDeal={(id, title) => setOpenDeal({ id, title })} onAsk={send} />}
-              {surface === "pipeline" && <Pipeline deals={deals} onOpenDeal={(id, title) => setOpenDeal({ id, title })} onAsk={send} goSourcing={() => setSurface("sourcing")} />}
-              {surface === "integration" && <Integration deals={deals} canFetch={canFetch} onOpenDeal={(id, title) => setOpenDeal({ id, title })} onAsk={send} />}
+              {surface === "today" && <Today firstName={firstName} deals={deals} actions={actions} user={user} onOpenDeal={openDealInMain} onAsk={send} />}
+              {surface === "pipeline" && <Pipeline deals={deals} onOpenDeal={openDealInMain} onAsk={send} goSourcing={() => setSurface("sourcing")} />}
+              {surface === "integration" && <Integration deals={deals} canFetch={canFetch} onOpenDeal={openDealInMain} onAsk={send} />}
               {surface !== "today" && surface !== "pipeline" && surface !== "integration" && <SurfaceComing label={NAV.find(n => n.key === surface)!.label} onAsk={send} />}
             </>
           )}
         </main>
 
-        <YuliaDock open={dockOpen} onToggle={() => setDockOpen(o => !o)} chat={chat} initials={initials} />
+        <YuliaDock
+          open={dockOpen} onToggle={() => setDockOpen(o => !o)} chat={chat} initials={initials}
+          dealTabs={dealTabs} activeDealId={openDeal?.id ?? null}
+          onPickDeal={openDealInMain} onCloseDealTab={closeDealTab}
+        />
       </div>
 
-      {/* Deal slide-over (reuses the mobile DetailScreen) */}
-      {openDeal && (
-        <>
-          <div onClick={() => setOpenDeal(null)} style={{ position: "fixed", inset: 0, zIndex: 50, background: "rgba(15,18,35,0.32)" }} />
-          <aside style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 560, maxWidth: "92vw", background: "#fff", zIndex: 51, display: "flex", flexDirection: "column", overflow: "auto", boxShadow: "-24px 0 60px -30px rgba(15,18,35,0.5)" }}>
-            <ChromeModeProvider mode="pane">
-              <DetailScreen
-                dealId={openDeal.id}
-                dealTitle={openDeal.title}
-                onBack={() => setOpenDeal(null)}
-                onChat={() => setDockOpen(true)}
-                onAskYulia={send}
-                onRunAnalysis={runAnalysisToCanvas}
-                onOpenTeam={(_r: number | null, t: string) => send(`Show me the deal team for ${t}.`)}
-                onOpenDealFiles={() => send("Open this deal's data room.")}
-              />
-            </ChromeModeProvider>
-          </aside>
-        </>
-      )}
       <ToastHost zIndex={10000} />
     </div>
   );
@@ -801,7 +831,7 @@ function Activity({ items, loaded }: { items: { text: string; when: string; dot:
 }
 
 /* ── YULIA DOCK ── */
-function YuliaDock({ open, onToggle, chat, initials }: { open: boolean; onToggle: () => void; chat: MobileChatBridge; initials: string }) {
+function YuliaDock({ open, onToggle, chat, initials, dealTabs, activeDealId, onPickDeal, onCloseDealTab }: { open: boolean; onToggle: () => void; chat: MobileChatBridge; initials: string; dealTabs: { id: string; title: string }[]; activeDealId: string | null; onPickDeal: (id: string, title: string) => void; onCloseDealTab: (id: string) => void }) {
   const [draft, setDraft] = useState("");
   const taRef = useRef<HTMLTextAreaElement>(null);
   const working = chat.sending || !!chat.activeTool;
@@ -823,12 +853,28 @@ function YuliaDock({ open, onToggle, chat, initials }: { open: boolean; onToggle
     <aside style={{ width: 328, flexShrink: 0, height: "100%", display: "flex", flexDirection: "column", background: DOCK_BG, backdropFilter: DOCK_FILTER, WebkitBackdropFilter: DOCK_FILTER, borderLeft: "1px solid rgba(255,255,255,0.5)" }}>
       <div style={{ padding: "16px 18px 14px", display: "flex", alignItems: "center", gap: 11, borderBottom: "1px solid rgba(60,60,67,0.08)" }}>
         <span style={{ width: 34, height: 34, borderRadius: 11, flexShrink: 0, display: "grid", placeItems: "center", background: "linear-gradient(150deg,#8A9AE8,#6F82DC)", boxShadow: "0 5px 14px -5px rgba(111,130,220,0.7), inset 0 1px 0 rgba(255,255,255,0.4)" }}><Diamond s={18} /></span>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: INK }}>Yulia</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}><span style={{ width: 6, height: 6, borderRadius: 999, background: working ? PERI : "#C4CBD6", animation: working ? "yp 1.3s ease-in-out infinite" : "none" }} /><span style={{ fontSize: 11.5, color: working ? PERI : MUT, fontWeight: 600 }}>{working ? "working…" : "ready"}</span></div>
+        <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 14, fontWeight: 700, color: INK }}>Yulia</span>
+          {working && <span aria-label="working" style={{ width: 6, height: 6, borderRadius: 999, background: PERI, animation: "yp 1.3s ease-in-out infinite" }} />}
         </div>
         <button type="button" onClick={onToggle} aria-label="Collapse Yulia" style={{ width: 28, height: 28, flexShrink: 0, border: "none", borderRadius: 8, background: "transparent", color: MUT, display: "grid", placeItems: "center", cursor: "pointer" }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 6 6 6-6 6" /></svg></button>
       </div>
+
+      {/* Deals in play — jump to a deal page without closing the chat */}
+      {dealTabs.length > 0 && (
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", padding: "10px 14px", borderBottom: "1px solid rgba(60,60,67,0.08)" }}>
+          {dealTabs.map(d => {
+            const on = d.id === activeDealId;
+            return (
+              <span key={d.id} onClick={() => onPickDeal(d.id, d.title)} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 6px 5px 10px", borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: "pointer", background: on ? INK : "rgba(255,255,255,0.65)", color: on ? "#fff" : MUT2, boxShadow: on ? "none" : "inset 0 0 0 0.5px rgba(60,60,67,0.12)" }}>
+                <span style={{ width: 5, height: 5, borderRadius: 999, background: on ? "#fff" : PERI }} />
+                <span style={{ maxWidth: 120, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{d.title}</span>
+                <button type="button" onClick={e => { e.stopPropagation(); onCloseDealTab(d.id); }} aria-label={`Close ${d.title}`} style={{ border: "none", background: "transparent", color: on ? "rgba(255,255,255,0.7)" : FAINT, cursor: "pointer", display: "grid", placeItems: "center", padding: 0, width: 14, height: 14 }}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg></button>
+              </span>
+            );
+          })}
+        </div>
+      )}
 
       <div style={{ flex: 1, overflow: "auto", padding: 16 }}>
         {(working || trace.length > 0) && (
