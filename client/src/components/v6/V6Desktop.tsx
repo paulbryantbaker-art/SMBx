@@ -26,7 +26,8 @@ import type { MobileChatBridge, MobileMessage, Verdict } from "./mobile/types";
 /* ── CD tokens ── */
 const INK = "#1A2233", MUT = "#7A8395", MUT2 = "#555E6F", FAINT = "#A6AEBC";
 const PERI = "#6F82DC", PERI2 = "#8A9AE8", PERI3 = "#B7C0EC", PERI_BG = "#EEF1FB", PERI_INK = "#4F60BD";
-const BG = "#FAFAFB", DOCK_BG = "#F1F1F7", LINE = "rgba(60,60,67,0.09)";
+const BG = "#E9ECF7", DOCK_BG = "rgba(243,244,250,0.62)", LINE = "rgba(60,60,67,0.09)";
+const DOCK_FILTER = "blur(24px) saturate(170%) brightness(1.03)";
 const DISP = "'Inter Tight',-apple-system,system-ui,sans-serif";
 const BODY = "'Inter',-apple-system,system-ui,sans-serif";
 const MONO = "'JetBrains Mono',ui-monospace,monospace";
@@ -86,7 +87,7 @@ function Shell({ user, chat, onSignOut, onDevSignIn }: { user: User | null; chat
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100dvh", width: "100%", overflow: "hidden", fontFamily: BODY, color: INK, background: BG }}>
       {/* MASTHEAD */}
-      <header style={{ height: 62, flexShrink: 0, padding: "0 26px", display: "flex", alignItems: "center", gap: 26, borderBottom: "1px solid " + LINE, background: "rgba(250,250,251,0.86)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", zIndex: 5, position: "relative" }}>
+      <header style={{ height: 62, flexShrink: 0, padding: "0 26px", display: "flex", alignItems: "center", gap: 26, borderBottom: "1px solid rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.55)", backdropFilter: "blur(20px) saturate(180%)", WebkitBackdropFilter: "blur(20px) saturate(180%)", boxShadow: "0 1px 0 rgba(60,60,67,0.06)", zIndex: 5, position: "relative" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
           <div style={{ width: 30, height: 30, borderRadius: 9, background: "linear-gradient(150deg,#8A9AE8,#6F82DC)", display: "grid", placeItems: "center", boxShadow: "0 4px 12px -4px rgba(111,130,220,0.6), inset 0 1px 0 rgba(255,255,255,0.4)" }}><Diamond /></div>
           <span style={{ fontFamily: DISP, fontWeight: 700, fontSize: 16, letterSpacing: "-0.3px", color: INK }}>smbx<span style={{ color: PERI }}>.ai</span></span>
@@ -119,7 +120,7 @@ function Shell({ user, chat, onSignOut, onDevSignIn }: { user: User | null; chat
 
       {/* BODY */}
       <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
-        <main style={{ flex: 1, minWidth: 0, overflow: "auto", position: "relative" }}>
+        <main style={{ flex: 1, minWidth: 0, overflow: "auto", position: "relative", background: AMBIENT }}>
           {surface === "today" && <Today firstName={firstName} deals={deals} actions={actions} user={user} onOpenDeal={(id, title) => setOpenDeal({ id, title })} onAsk={send} />}
           {surface !== "today" && <SurfaceComing label={NAV.find(n => n.key === surface)!.label} onAsk={send} />}
         </main>
@@ -383,7 +384,7 @@ function YuliaDock({ open, onToggle, chat, initials }: { open: boolean; onToggle
 
   if (!open) {
     return (
-      <aside style={{ width: 58, flexShrink: 0, height: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 14, padding: "16px 0", background: DOCK_BG, borderLeft: "1px solid rgba(60,60,67,0.1)" }}>
+      <aside style={{ width: 58, flexShrink: 0, height: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 14, padding: "16px 0", background: DOCK_BG, backdropFilter: DOCK_FILTER, WebkitBackdropFilter: DOCK_FILTER, borderLeft: "1px solid rgba(255,255,255,0.5)" }}>
         <button type="button" onClick={onToggle} aria-label="Expand Yulia" style={{ width: 38, height: 38, border: "none", borderRadius: 11, cursor: "pointer", display: "grid", placeItems: "center", background: "linear-gradient(150deg,#8A9AE8,#6F82DC)", boxShadow: "0 5px 14px -5px rgba(111,130,220,0.7), inset 0 1px 0 rgba(255,255,255,0.4)" }}><Diamond s={19} /></button>
         <span style={{ width: 7, height: 7, borderRadius: 999, background: PERI, animation: working ? "yp 1.3s ease-in-out infinite" : "none" }} />
         <span style={{ writingMode: "vertical-rl", fontSize: 11, fontWeight: 600, color: MUT, letterSpacing: "0.3px" }}>Yulia{working ? " · working" : ""}</span>
@@ -392,7 +393,7 @@ function YuliaDock({ open, onToggle, chat, initials }: { open: boolean; onToggle
   }
 
   return (
-    <aside style={{ width: 328, flexShrink: 0, height: "100%", display: "flex", flexDirection: "column", background: DOCK_BG, borderLeft: "1px solid rgba(60,60,67,0.1)" }}>
+    <aside style={{ width: 328, flexShrink: 0, height: "100%", display: "flex", flexDirection: "column", background: DOCK_BG, backdropFilter: DOCK_FILTER, WebkitBackdropFilter: DOCK_FILTER, borderLeft: "1px solid rgba(255,255,255,0.5)" }}>
       <div style={{ padding: "16px 18px 14px", display: "flex", alignItems: "center", gap: 11, borderBottom: "1px solid rgba(60,60,67,0.08)" }}>
         <span style={{ width: 34, height: 34, borderRadius: 11, flexShrink: 0, display: "grid", placeItems: "center", background: "linear-gradient(150deg,#8A9AE8,#6F82DC)", boxShadow: "0 5px 14px -5px rgba(111,130,220,0.7), inset 0 1px 0 rgba(255,255,255,0.4)" }}><Diamond s={18} /></span>
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -528,7 +529,22 @@ function initialsOf(name: string): string { const p = name.replace(/[^a-zA-Z0-9 
 function initialsFor(user: User | null): string { if (!user) return "JM"; const src = user.display_name?.trim() || user.email; const p = src.split(/[\s@.]+/).filter(Boolean); return (p.length >= 2 ? p[0][0] + p[1][0] : src.slice(0, 2)).toUpperCase(); }
 function prettyTool(t: string): string { return (t || "Working").replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()); }
 
-const card: CSSProperties = { border: "1px solid " + LINE, borderRadius: 18, background: "#fff", boxShadow: "0 1px 3px rgba(15,18,35,0.04)", overflow: "hidden" };
+/* Liquid Glass — same material the mobile app uses (glass.tsx): translucent
+   white + blur + saturate + the layered inset edge-highlights. Reads as glass
+   only because it refracts the lavender AMBIENT behind it. */
+const GLASS_EDGE = "inset 0 0 0 0.5px rgba(255,255,255,0.7), inset 0 1px 0 rgba(255,255,255,0.66), inset 0 -1px 0 rgba(255,255,255,0.16)";
+const GLASS_FILTER = "blur(22px) saturate(185%) brightness(1.05)";
+const card: CSSProperties = {
+  borderRadius: 18,
+  background: "rgba(255,255,255,0.58)",
+  backdropFilter: GLASS_FILTER, WebkitBackdropFilter: GLASS_FILTER,
+  boxShadow: `${GLASS_EDGE}, 0 1px 3px rgba(15,18,35,0.04), 0 18px 40px -20px rgba(40,48,90,0.24)`,
+  overflow: "hidden",
+};
+/* Soft lavender wash + two periwinkle glows — gives the glass something to
+   bend. Quiet per CLAUDE.md; on the main's own padding box so it sits still
+   behind the scrolling cards (no position:fixed bg div — Safari toolbar rule). */
+const AMBIENT = "radial-gradient(78% 56% at 88% 6%, rgba(138,154,232,0.16), transparent 55%), radial-gradient(72% 70% at 4% 102%, rgba(111,130,220,0.14), transparent 58%), linear-gradient(180deg, #F6F7FC 0%, #EDEFFA 58%, #E6EAF7 100%)";
 const eyebrow: CSSProperties = { fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: "1.2px", color: INK };
 const ghostBtn: CSSProperties = { padding: "8px 14px", border: "1px solid rgba(255,255,255,0.4)", borderRadius: 10, background: "rgba(255,255,255,0.1)", color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer" };
 const acctItem: CSSProperties = { display: "block", width: "100%", textAlign: "left", padding: 10, border: "none", borderTop: "1px solid rgba(60,60,67,0.07)", background: "transparent", cursor: "pointer", fontFamily: BODY, fontSize: 14, color: INK };
