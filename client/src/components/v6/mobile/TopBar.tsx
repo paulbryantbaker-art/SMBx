@@ -46,21 +46,6 @@ export function TitleCollapseProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/* ─── Chrome positioning mode ─────────────────────────────────
-   Mobile (default 'fixed'): the GlassTopBar strips anchor to the visual
-   viewport — the iOS App-Store chrome pattern. Desktop ('pane'): the SAME
-   strips anchor to the nearest position:relative ancestor (the content pane),
-   so the chrome stays inside its pane instead of floating over the whole
-   window. This also lifts the Safari rule-#5 hazard (a position:fixed strip
-   with a background) by making it position:absolute in pane mode. Screens are
-   untouched — V6Desktop provides 'pane'; V6Mobile renders without a provider
-   so the default 'fixed' applies. */
-const ChromeModeContext = createContext<"fixed" | "pane">("fixed");
-
-export function ChromeModeProvider({ mode, children }: { mode: "fixed" | "pane"; children: ReactNode }) {
-  return <ChromeModeContext.Provider value={mode}>{children}</ChromeModeContext.Provider>;
-}
-
 interface GlassTopBarProps {
   title: string;
   showBack?: boolean;
@@ -88,11 +73,6 @@ export function GlassTopBar({
   notifCount = 0,
 }: GlassTopBarProps) {
   const { collapsed, scrolled } = useContext(TitleCollapseContext);
-  // 'pane' on desktop → the three chrome strips anchor to the content pane
-  // (position:absolute) instead of the viewport (position:fixed). See
-  // ChromeModeProvider.
-  const isPane = useContext(ChromeModeContext) === "pane";
-  const chromePos: CSSProperties["position"] = isPane ? "absolute" : "fixed";
   return (
     <>
       {/* iOS 26 chrome sampler — Safari 26 live-samples the topmost
@@ -104,7 +84,7 @@ export function GlassTopBar({
           the chrome as the user scrolls — apple.com / macrumors quality.
           Older iOS treats this as an invisible 0.2-alpha strip behind
           the chrome (no visible regression). */}
-      <div style={{ ...T.chromeSentinel, position: chromePos }} aria-hidden="true" />
+      <div style={T.chromeSentinel} aria-hidden="true" />
 
       {/* Spacer reserves only safe-area + a small gap. The LargeTitle starts
           right beneath it; the floating chrome (avatar + search) overlays the
@@ -127,7 +107,6 @@ export function GlassTopBar({
       <div
         style={{
           ...T.barWrap,
-          position: chromePos,
           pointerEvents: "none", // permanently non-interactive while bar is transparent
         }}
         aria-hidden={!collapsed}
@@ -171,11 +150,8 @@ export function GlassTopBar({
 
       {/* Floating chrome — always visible, always at top-right. Sits above
           the glass bar layer so a single set of buttons handles both
-          scroll-top and collapsed states. Hidden in desktop 'pane' mode: the
-          masthead owns account/search/notifications there, so the per-screen
-          cluster would be a redundant duplicate. */}
-      {!isPane && (
-      <div style={{ ...T.floatingChrome, position: chromePos }}>
+          scroll-top and collapsed states. */}
+      <div style={T.floatingChrome}>
         {rightSlot ?? (
           <>
             {onNotif && (
@@ -215,7 +191,6 @@ export function GlassTopBar({
           </>
         )}
       </div>
-      )}
     </>
   );
 }
