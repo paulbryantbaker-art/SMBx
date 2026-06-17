@@ -124,7 +124,8 @@ function Shell({ user, chat, onSignOut, onDevSignIn }: { user: User | null; chat
         <main style={{ flex: 1, minWidth: 0, overflow: "auto", position: "relative", background: AMBIENT }}>
           {surface === "today" && <Today firstName={firstName} deals={deals} actions={actions} user={user} onOpenDeal={(id, title) => setOpenDeal({ id, title })} onAsk={send} />}
           {surface === "pipeline" && <Pipeline deals={deals} onOpenDeal={(id, title) => setOpenDeal({ id, title })} onAsk={send} goSourcing={() => setSurface("sourcing")} />}
-          {surface !== "today" && surface !== "pipeline" && <SurfaceComing label={NAV.find(n => n.key === surface)!.label} onAsk={send} />}
+          {surface === "integration" && <Integration deals={deals} canFetch={canFetch} onOpenDeal={(id, title) => setOpenDeal({ id, title })} onAsk={send} />}
+          {surface !== "today" && surface !== "pipeline" && surface !== "integration" && <SurfaceComing label={NAV.find(n => n.key === surface)!.label} onAsk={send} />}
         </main>
 
         <YuliaDock open={dockOpen} onToggle={() => setDockOpen(o => !o)} chat={chat} initials={initials} />
@@ -241,6 +242,193 @@ function Today({ firstName, deals, actions, user, onOpenDeal, onAsk }: {
         <MarketRead market={market} onAsk={onAsk} />
         <Activity items={market.activity} loaded={deals.loaded} />
       </div>
+    </div>
+  );
+}
+
+/* ── INTEGRATION surface (native PMI — honest-empty captured, no Asana) ── */
+interface PmiWorkstream { id: number; title: string; detail?: string; owner?: string; first_move?: string; status: string; pct?: number; kind?: string; label?: string }
+interface PmiLever { name?: string; category?: string; target_value_cents?: number }
+interface PmiPlan { id: number; horizonDays?: number; summary?: string; targetValueCents?: number | null; valueLevers?: PmiLever[]; createdAt?: string }
+
+function useIntegrationPlan(dealId: number | null, canFetch: boolean) {
+  const [data, setData] = useState<{ plan: PmiPlan | null; workstreams: PmiWorkstream[] } | null>(null);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (dealId == null || !canFetch) { setData(null); return; }
+    let off = false; setLoading(true);
+    fetch(`/api/deals/${dealId}/integration-plan`, { headers: authHeaders() })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (!off) setData(d ? { plan: d.plan ?? null, workstreams: Array.isArray(d.workstreams) ? d.workstreams : [] } : { plan: null, workstreams: [] }); })
+      .catch(() => { if (!off) setData({ plan: null, workstreams: [] }); })
+      .finally(() => { if (!off) setLoading(false); });
+    return () => { off = true; };
+  }, [dealId, canFetch]);
+  return { data, loading };
+}
+
+function Integration({ deals, canFetch, onOpenDeal, onAsk }: { deals: ReturnType<typeof useMobileDeals>; canFetch: boolean; onOpenDeal: (id: string, title: string) => void; onAsk: (t: string) => void }) {
+  // "In integration" = post-close (Close/PMI stage). MobileStageRow stageId maps
+  // PMI + S5/B5/R5 close gates to "close".
+  const cos = (deals.hasData ? deals.all : []).filter(r => r.stageId === "close");
+  const [sel, setSel] = useState(0);
+  const active = cos[sel] ?? cos[0] ?? null;
+  const { data: plan } = useIntegrationPlan(active ? active.rawId : null, canFetch);
+
+  if (deals.loaded && cos.length === 0) {
+    return (
+      <div style={{ maxWidth: 1080, margin: "0 auto", padding: "26px 38px" }}>
+        <h1 style={{ fontFamily: DISP, fontWeight: 800, fontSize: 27, letterSpacing: "-0.6px", margin: 0 }}>Integration</h1>
+        <div style={{ ...card, marginTop: 22, padding: "44px 30px", textAlign: "center" }}>
+          <span style={{ display: "inline-grid", placeItems: "center", width: 46, height: 46, borderRadius: 13, background: PERI_BG, marginBottom: 14 }}><Diamond s={22} c={PERI} /></span>
+          <div style={{ fontFamily: DISP, fontWeight: 700, fontSize: 18, color: INK }}>No companies in integration yet</div>
+          <p style={{ maxWidth: 440, color: MUT, fontSize: 14, lineHeight: 1.5, margin: "8px auto 0" }}>When you close a deal, its first-100-days value-creation plan lives here — every lever tracked to target, with Yulia keeping each one current.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ maxWidth: 1080, margin: "0 auto", padding: "26px 38px 60px" }}>
+      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 20, marginBottom: 18 }}>
+        <div>
+          <h1 style={{ fontFamily: DISP, fontWeight: 800, fontSize: 27, letterSpacing: "-0.6px", margin: 0 }}>Integration</h1>
+          <div style={{ fontSize: 13.5, color: MUT, marginTop: 7 }}>A trackable value-creation plan — Yulia tracks each lever to target. Captured value stays an honest dash until a finance system is connected.</div>
+        </div>
+        <span style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: "0.4px", color: FAINT }}>{cos.length} IN INTEGRATION</span>
+      </div>
+
+      {/* company tabs */}
+      {cos.length > 0 && (
+        <div style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
+          {cos.map((c, i) => {
+            const on = i === sel;
+            return (
+              <button key={c.id} type="button" onClick={() => setSel(i)} style={{ display: "flex", alignItems: "center", gap: 11, padding: "11px 15px", borderRadius: 14, cursor: "pointer", minWidth: 230, textAlign: "left", border: "none", background: on ? INK : "rgba(255,255,255,0.5)", backdropFilter: on ? "none" : GLASS_FILTER, WebkitBackdropFilter: on ? "none" : GLASS_FILTER, boxShadow: on ? "none" : "inset 0 0 0 0.5px rgba(60,60,67,0.12)" }}>
+                <span style={{ width: 34, height: 34, borderRadius: 9, flexShrink: 0, display: "grid", placeItems: "center", background: "rgba(127,140,180,0.18)", color: on ? "#fff" : INK, fontFamily: MONO, fontWeight: 700, fontSize: 12 }}>{initialsOf(c.name)}</span>
+                <span style={{ minWidth: 0 }}><span style={{ display: "block", fontSize: 14, fontWeight: 600, color: on ? "#fff" : INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}</span><span style={{ display: "block", fontSize: 12, color: on ? "rgba(255,255,255,0.7)" : MUT, marginTop: 1 }}>Post-close</span></span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {active && !plan?.plan && (
+        <div style={{ ...card, padding: "34px 30px", textAlign: "center" }}>
+          <div style={{ fontFamily: DISP, fontWeight: 700, fontSize: 18, color: INK }}>No 100-day plan for {active.name} yet</div>
+          <p style={{ maxWidth: 440, color: MUT, fontSize: 14, lineHeight: 1.5, margin: "8px auto 18px" }}>Yulia can build a value-creation plan — workstreams, owners, and illustrative value targets for the first 100 days.</p>
+          <button type="button" onClick={() => onAsk(`Build the 100-day integration plan for ${active.name}.`)} style={{ padding: "10px 18px", border: "none", borderRadius: 11, background: PERI, color: "#fff", fontWeight: 700, fontSize: 13.5, cursor: "pointer" }}>Build the plan with Yulia</button>
+        </div>
+      )}
+
+      {plan?.plan && <IntegrationPlan plan={plan.plan} workstreams={plan.workstreams} dealName={active?.name ?? "Deal"} onAsk={onAsk} />}
+    </div>
+  );
+}
+
+function IntegrationPlan({ plan, workstreams, dealName, onAsk }: { plan: PmiPlan; workstreams: PmiWorkstream[]; dealName: string; onAsk: (t: string) => void }) {
+  const horizon = plan.horizonDays ?? 100;
+  const created = plan.createdAt ? new Date(plan.createdAt).getTime() : Date.now();
+  const dayN = Math.max(0, Math.min(horizon, Math.round((Date.now() - created) / 86400000)));
+  const atRisk = workstreams.filter(w => w.kind === "warn").length;
+  const done = workstreams.filter(w => w.kind === "ok" || (w.pct ?? 0) >= 100).length;
+  const target = plan.targetValueCents ? fmtM(plan.targetValueCents) : "—";
+  const levers = plan.valueLevers ?? [];
+  const cost = levers.filter(l => l.category === "cost_synergy").reduce((s, l) => s + (l.target_value_cents || 0), 0);
+  const rev = levers.filter(l => l.category === "revenue_synergy").reduce((s, l) => s + (l.target_value_cents || 0), 0);
+  const risks = workstreams.filter(w => w.kind === "warn");
+
+  return (
+    <>
+      {/* day bar */}
+      <div style={{ ...card, borderRadius: 16, padding: "16px 18px", marginBottom: 14 }}>
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 11 }}><span style={eyebrow}>{horizon}-DAY PLAN · DAY {dayN}</span><span style={{ fontSize: 12.5, color: MUT }}>Day {dayN} of {horizon} since plan created</span></div>
+        <div style={{ height: 8, borderRadius: 999, background: "#ECECF1", overflow: "hidden" }}><div style={{ height: "100%", width: `${(dayN / horizon) * 100}%`, borderRadius: 999, background: "linear-gradient(90deg,#8A9AE8,#6F82DC)" }} /></div>
+      </div>
+
+      {/* KPI strip — captured + retention are honest dashes (native PMI law) */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12, marginBottom: 18 }}>
+        <Kpi value="—" label="Value captured (illustrative target only)" />
+        <Kpi value={target} label="Value target · illustrative" />
+        <Kpi value={`${done}/${workstreams.length}`} label="Workstreams on track" />
+        <Kpi value={String(atRisk)} label="Initiatives at risk" />
+      </div>
+
+      {/* Yulia banner */}
+      {plan.summary && (
+        <div style={{ borderRadius: 16, overflow: "hidden", marginBottom: 20, border: "1px solid rgba(111,130,220,0.22)", background: "linear-gradient(180deg,#F7F8FE,#FFFFFF)", boxShadow: "0 10px 30px -20px rgba(79,96,189,0.5)", padding: "15px 17px", display: "flex", alignItems: "center", gap: 14 }}>
+          <span style={{ width: 36, height: 36, borderRadius: 11, flexShrink: 0, display: "grid", placeItems: "center", background: "linear-gradient(150deg,#8A9AE8,#6F82DC)", boxShadow: "0 5px 14px -5px rgba(111,130,220,0.7)" }}><Diamond s={18} /></span>
+          <div style={{ flex: 1, minWidth: 0, fontSize: 13.5, lineHeight: 1.5, color: "#283047" }}>{plan.summary}</div>
+          <button type="button" onClick={() => onAsk(`Re-sequence the integration plan for ${dealName}.`)} style={{ padding: "9px 15px", border: "none", borderRadius: 10, background: "linear-gradient(150deg,#8A9AE8,#6F82DC)", color: "#fff", fontSize: 13, fontWeight: 650, cursor: "pointer", flexShrink: 0 }}>Re-sequence plan</button>
+        </div>
+      )}
+
+      <div style={{ display: "grid", gridTemplateColumns: "1.55fr 1fr", gap: 18 }}>
+        {/* initiatives (workstreams) */}
+        <div>
+          <div style={{ ...eyebrow, color: FAINT, marginBottom: 11 }}>VALUE-CREATION INITIATIVES</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {workstreams.map(w => {
+              const st = w.kind === "warn" ? { bg: "#FBE9E4", ink: "#C0562F" } : w.kind === "ok" ? { bg: "#E6F3EC", ink: "#3F8A6A" } : { bg: "#F2F2F7", ink: MUT2 };
+              return (
+                <div key={w.id} style={{ ...card, borderRadius: 16, padding: "15px 17px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 12 }}>
+                    <span style={{ flex: 1, minWidth: 0, fontSize: 14.5, fontWeight: 700, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{w.title}</span>
+                    <span style={{ padding: "3px 10px", borderRadius: 999, background: st.bg, color: st.ink, fontSize: 10.5, fontWeight: 650, whiteSpace: "nowrap" }}>{w.label || w.status}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: w.first_move ? 13 : 0 }}>
+                    <span style={{ flex: 1, height: 6, borderRadius: 999, background: "#ECECF1", overflow: "hidden" }}><span style={{ display: "block", height: "100%", width: `${w.pct ?? 0}%`, borderRadius: 999, background: "linear-gradient(90deg,#6FB89A,#3F8A6A)" }} /></span>
+                    <span style={{ fontFamily: MONO, fontSize: 12.5, fontWeight: 700, color: INK }}>{w.pct ?? 0}%</span>
+                  </div>
+                  {w.first_move && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, paddingTop: 12, borderTop: "1px solid rgba(60,60,67,0.06)" }}>
+                      <span style={{ flex: 1, minWidth: 0, fontSize: 13, color: "#283047", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}><span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.5px", color: FAINT, fontWeight: 700 }}>NEXT</span> · {w.first_move}</span>
+                      {w.owner && <span style={{ fontSize: 12, color: MUT, whiteSpace: "nowrap" }}>{w.owner}</span>}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* value to target + risks */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+          <div style={{ ...card, borderRadius: 16, padding: "16px 18px" }}>
+            <div style={{ ...eyebrow, marginBottom: 12 }}>VALUE TO TARGET</div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 7, marginBottom: 11 }}><span style={{ fontFamily: DISP, fontWeight: 800, fontSize: 30, letterSpacing: "-1px", color: INK }}>—</span><span style={{ fontSize: 13, color: MUT }}>of {target} target</span></div>
+            <div style={{ fontSize: 11.5, color: FAINT, lineHeight: 1.4, marginBottom: 16 }}>Captured value needs a finance connection — targets are illustrative.</div>
+            {cost > 0 && <LeverRow label="Cost" target={fmtM(cost)} />}
+            {rev > 0 && <LeverRow label="Revenue" target={fmtM(rev)} />}
+          </div>
+
+          <div style={{ ...card, borderRadius: 16, padding: "16px 18px" }}>
+            <div style={{ ...eyebrow, marginBottom: 12 }}>RISKS TO THE PLAN</div>
+            {risks.length === 0 ? (
+              <div style={{ fontSize: 12.5, color: MUT }}>No workstreams flagged at risk.</div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+                {risks.map(r => (
+                  <div key={r.id} style={{ display: "flex", alignItems: "flex-start", gap: 11, padding: "11px 13px", border: "1px solid rgba(60,60,67,0.09)", borderRadius: 13 }}>
+                    <span style={{ flex: 1, minWidth: 0 }}><span style={{ display: "block", fontSize: 13, fontWeight: 600, color: INK }}>{r.title}</span>{r.first_move && <span style={{ display: "block", fontSize: 11.5, color: MUT, marginTop: 2, lineHeight: 1.4 }}>{r.first_move}</span>}</span>
+                    <span style={{ padding: "3px 9px", borderRadius: 999, background: "#FBE9E4", color: "#C0562F", fontSize: 10.5, fontWeight: 650, flexShrink: 0 }}>At risk</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function LeverRow({ label, target }: { label: string; target: string }) {
+  const c = label === "Revenue" ? { bg: "#E6F3EC", ink: "#3F8A6A" } : { bg: PERI_BG, ink: PERI_INK };
+  return (
+    <div style={{ marginBottom: 13 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}><span style={{ padding: "2px 8px", borderRadius: 999, background: c.bg, color: c.ink, fontSize: 10, fontWeight: 650 }}>{label}</span><span style={{ flex: 1 }} /><span style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 700, color: INK }}>— <span style={{ color: FAINT, fontWeight: 500 }}>/ {target}</span></span></div>
+      <div style={{ height: 5, borderRadius: 999, background: "#ECECF1", overflow: "hidden" }} />
     </div>
   );
 }
