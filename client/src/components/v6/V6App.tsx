@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { useAuth } from "../../hooks/useAuth";
+import { useIsMobile } from "../../hooks/useIsMobile";
 
 /* ───────────────────────────────────────────────────────────────────────────
  * Desktop UI fully removed (2026-06-16).
@@ -17,6 +18,9 @@ import { useAuth } from "../../hooks/useAuth";
  * ─────────────────────────────────────────────────────────────────────────── */
 
 const V6Mobile = lazy(() => import("./mobile/V6Mobile"));
+// Desktop shell (rebuild in progress) — a LAYOUT over the same mobile data
+// hooks/screens, never a parallel app. Renders ≥900px; mobile renders below.
+const V6Desktop = lazy(() => import("./V6Desktop"));
 
 const FULLSCREEN_CENTER = {
   display: "grid",
@@ -27,14 +31,16 @@ const FULLSCREEN_CENTER = {
 
 export default function V6App() {
   const auth = useAuth();
+  const isMobile = useIsMobile();
 
   if (auth.loading) {
     return <div style={FULLSCREEN_CENTER}>Loading…</div>;
   }
 
+  const Shell = isMobile ? V6Mobile : V6Desktop;
   return (
     <Suspense fallback={<div style={FULLSCREEN_CENTER}>Loading workspace…</div>}>
-      <V6Mobile
+      <Shell
         user={auth.user}
         onSignOut={async () => { await auth.logout(); }}
         onDevSignIn={auth.devSignIn}
