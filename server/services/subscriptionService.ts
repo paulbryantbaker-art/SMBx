@@ -220,6 +220,20 @@ export async function canGenerateDeliverable(
   return { allowed: false, requiredPlan, currentPlan, isFreeDeliverable: false };
 }
 
+/** Client-shaped paywall payload for the chat SSE `type:'paywall'` event
+ *  (MobilePaywallData). Built from a denied canGenerateDeliverable result. */
+export function buildDeliverablePaywall(access: { requiredPlan: Plan; currentPlan: Plan }) {
+  const req = PLANS[access.requiredPlan];
+  return {
+    requiredPlan: access.requiredPlan,
+    currentPlan: access.currentPlan,
+    priceDisplay: req?.priceDisplay,
+    message: `This deliverable is included with the ${req?.name} plan.`,
+    callToAction: `Upgrade to ${req?.name}`,
+    valueProps: req?.note ? [req.note] : [],
+  };
+}
+
 /** Mark the user's one free deliverable as used */
 export async function markFreeDeliverableUsed(userId: number, deliverableType: string): Promise<void> {
   await sql`

@@ -26,7 +26,7 @@ import { getMarketHeat } from './marketHeatService.js';
 import { enrichCompanyWebsite } from './websiteEnrichmentService.js';
 import { enqueueDeliverableGeneration } from './jobQueue.js';
 import { processDeliverable } from './deliverableProcessor.js';
-import { canGenerateDeliverable, markFreeDeliverableUsed } from './subscriptionService.js';
+import { canGenerateDeliverable, markFreeDeliverableUsed, buildDeliverablePaywall } from './subscriptionService.js';
 import { hasDealAccess } from './dealAccessService.js';
 import { TOOL_NAMES_REQUIRING_CONFIRMATION } from './agencyActionRegistry.js';
 import { createAnalysisRun, createModelTabRecord, readAnalysisRunSnapshot, readModelTabState, updateAnalysisRunSnapshot, updateModelTabState } from './analysisRuntime.js';
@@ -1424,11 +1424,15 @@ async function generateDealDeliverable(input: Record<string, any>, userId: numbe
   const deliverableType = menuItem.slug.replace(/-/g, '_');
   const access = await canGenerateDeliverable(userId, deliverableType);
   if (!access.allowed) {
+    // Free user past their one free deliverable (or an ineligible type) → surface
+    // the paywall. aiService forwards `paywall` as a `type:'paywall'` SSE event,
+    // which the client renders as the PaywallCard (Critical Rule #3).
     return JSON.stringify({
       error: 'Subscription required',
       requiredPlan: access.requiredPlan,
       currentPlan: access.currentPlan,
       message: `This deliverable requires a ${access.requiredPlan} subscription.`,
+      paywall: buildDeliverablePaywall(access),
     });
   }
 
@@ -3854,9 +3858,9 @@ async function scanMarket(input: Record<string, any>, _userId: number): Promise<
   try {
     const theses = await sql`
       SELECT COUNT(*)::int as cnt FROM buyer_theses
-      WHERE status = 'active' AND (
-        industries::text ILIKE ${`%${industry}%`}
-        OR target_description ILIKE ${`%${industry}%`}
+      WHERE is_active = true AND (
+        industry ILIKE ${`%${industry}%`}
+        OR name ILIKE ${`%${industry}%`}
       )
     `;
     results.platformBuyerTheses = parseInt(theses[0]?.cnt || '0');
@@ -3935,7 +3939,7 @@ async function getSourcingPortfolio(input: Record<string, any>, userId: number):
     // Check if they have theses but no portfolio
     const theses = await sql`
       SELECT id, name, industry, geography FROM buyer_theses
-      WHERE user_id = ${userId} AND status = 'active'
+      WHERE user_id = ${userId} AND is_active = true
       ORDER BY updated_at DESC LIMIT 5
     `;
     if (theses.length > 0) {

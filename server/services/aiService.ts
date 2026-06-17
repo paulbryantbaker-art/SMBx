@@ -144,6 +144,15 @@ export async function streamAgenticResponse(
               })}\n\n`);
             }
 
+            // Plan gate hit (e.g. free user past their one free deliverable) →
+            // emit the paywall event the client listens for (useAuthChat → PaywallCard).
+            if (parsedResult?.paywall) {
+              safeWrite(res, `data: ${JSON.stringify({
+                type: 'paywall',
+                ...parsedResult.paywall,
+              })}\n\n`);
+            }
+
             // Persist any canvas_action server-side so the tab survives client disconnects
             if (parsedResult?.canvas_action && ctx.conversationId) {
               persistCanvasTabFromAction(ctx.conversationId, parsedResult).catch(err =>

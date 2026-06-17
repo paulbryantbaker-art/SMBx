@@ -3,14 +3,18 @@
  */
 import { Router } from 'express';
 import { sql } from '../db.js';
-import { requireAuth } from '../middleware/auth.js';
+import { requireAuth, requireAuthQueryToken } from '../middleware/auth.js';
 import { runThesisMatch } from '../services/thesisMatchingService.js';
 import { findUnderservedMarkets } from '../services/marketOpportunityService.js';
 import { matchBuyersForSeller, estimateDemand } from '../services/buyerSourcingService.js';
 import { initializePipeline, getPortfolioProgress, enrichCandidateOnDemand } from '../services/sourcingPipelineService.js';
 
 export const sourcingRouter = Router();
-sourcingRouter.use(requireAuth);
+// All sourcing routes require auth. The SSE progress stream is the one exception
+// to header-only auth: EventSource can't set an Authorization header, so that
+// route (and only that route) also accepts the JWT via ?token=.
+sourcingRouter.use((req, res, next) =>
+  req.path.endsWith('/progress') ? requireAuthQueryToken(req, res, next) : requireAuth(req, res, next));
 
 // ─── Thesis CRUD ─────────────────────────────────────────────
 

@@ -83,6 +83,30 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+/**
+ * Like requireAuth, but also accepts the JWT from a `?token=` query param.
+ * The browser EventSource (SSE) API cannot set an Authorization header, so
+ * streaming endpoints must fall back to the query string. Use this ONLY for SSE
+ * routes — the Authorization header is still preferred when present.
+ */
+export function requireAuthQueryToken(req: Request, res: Response, next: NextFunction) {
+  const header = req.headers.authorization;
+  const token = header && header.startsWith('Bearer ')
+    ? header.slice(7)
+    : (typeof req.query.token === 'string' ? req.query.token : null);
+  if (!token) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  try {
+    const payload = jwt.verify(token, JWT_SECRET) as AuthTokenClaims;
+    (req as any).userId = payload.userId;
+    (req as any).authClaims = payload;
+    next();
+  } catch {
+    return res.status(401).json({ error: 'Invalid or expired token' });
+  }
+}
+
 export function signToken(userId: number): string {
   return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '30d' });
 }
