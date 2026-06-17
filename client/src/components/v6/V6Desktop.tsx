@@ -21,6 +21,10 @@ import { useNextActions, type NextAction } from "../../hooks/useNextActions";
 import { PIPELINE_STAGES, type PipelineStageId } from "../../lib/pipelineStages";
 import { ChromeModeProvider } from "./mobile/TopBar";
 import { DetailScreen } from "./mobile/screens/Detail";
+import { MobileAnalysisScreen } from "./mobile/screens/Analysis";
+import { MobileModelScreen, ensureModelTabFromCanvasAction } from "./mobile/screens/Model";
+import { runDealAnalysis } from "../../hooks/useV6WorkspaceData";
+import { useModelStore } from "../../lib/modelStore";
 import { ToastHost } from "../mobile/ToastHost";
 import type { MobileChatBridge, MobileMessage, Verdict } from "./mobile/types";
 
@@ -45,6 +49,12 @@ const NAV: { key: SurfaceKey; label: string }[] = [
   { key: "sourcing", label: "Sourcing" }, { key: "studio", label: "Studio" },
   { key: "integration", label: "Integration" }, { key: "files", label: "Files" },
 ];
+
+/* A canvas tab is an analysis (incl. Yulia artifacts via markdown) or a live
+   model. Tabs persist; two can be shown side-by-side to compare. */
+type CanvasTab =
+  | { id: string; kind: "analysis"; title: string; analysisRunId?: number | null; analysisData?: Record<string, any>; status?: string; versionNumber?: number | null }
+  | { id: string; kind: "model"; title: string; modelTabId: string };
 
 const Diamond = ({ s = 16, c = "#fff" }: { s?: number; c?: string }) => (
   <svg width={s} height={s} viewBox="0 0 24 24" fill={c} aria-hidden="true"><path d="M12 1.6c.3 5.2 5.2 10.1 10.4 10.4-5.2.3-10.1 5.2-10.4 10.4-.3-5.2-5.2-10.1-10.4-10.4C6.8 11.7 11.7 6.8 12 1.6Z" /></svg>
@@ -79,11 +89,71 @@ function Shell({ user, chat, onSignOut, onDevSignIn }: { user: User | null; chat
   const [openDeal, setOpenDeal] = useState<{ id: string; title: string } | null>(null);
   const [dockOpen, setDockOpen] = useState(true);
   const [acctOpen, setAcctOpen] = useState(false);
+  // Tabbed canvas — analyses/models open here; two can be compared side-by-side.
+  const [canvasTabs, setCanvasTabs] = useState<CanvasTab[]>([]);
+  const [activeCanvasId, setActiveCanvasId] = useState<string | null>(null);
+  const [compareId, setCompareId] = useState<string | null>(null);
 
   const firstName = (user?.display_name?.trim() || user?.email || "there").split(/[\s@.]+/)[0];
   const initials = initialsFor(user);
   const send = (t: string) => { chat.send(t); setDockOpen(true); };
   const onAvatar = () => { if (!user) { DEV_AUTH_BYPASS ? onDevSignIn?.() : window.location.assign("/login"); return; } setAcctOpen(o => !o); };
+
+  const addCanvasTab = (tab: CanvasTab) => {
+    setCanvasTabs(prev => prev.some(t => t.id === tab.id) ? prev.map(t => t.id === tab.id ? { ...t, ...tab } : t) : [...prev, tab]);
+    setActiveCanvasId(tab.id);
+    setOpenDeal(null); // surface the canvas
+  };
+  const addTabRef = useRef(addCanvasTab);
+  addTabRef.current = addCanvasTab;
+
+  const closeCanvasTab = (id: string) => {
+    setCanvasTabs(prev => {
+      const next = prev.filter(t => t.id !== id);
+      setActiveCanvasId(cur => cur === id ? (next.length ? next[next.length - 1].id : null) : cur);
+      setCompareId(cur => cur === id ? null : cur);
+      return next;
+    });
+  };
+
+  // Yulia's tool outputs (create_model_tab / open_tab analysis / show_content)
+  // land on the canvas. Registered once; uses a ref so it always calls the
+  // latest addCanvasTab. The shared modelStore makes models the same live tab.
+  useEffect(() => {
+    const onAction = (e: Event) => {
+      const d = (e as CustomEvent).detail;
+      if (!d) return;
+      if (d.canvas_action === "create_model_tab" && d.tabId) {
+        const ensured = ensureModelTabFromCanvasAction(d);
+        if (ensured) addTabRef.current({ id: "model-" + ensured.tabId, kind: "model", title: ensured.title, modelTabId: ensured.tabId });
+      } else if (d.canvas_action === "open_tab" && d.tab?.kind === "analysis") {
+        const t = d.tab;
+        const rid = t.analysisRunId ?? d.analysisRunId ?? null;
+        addTabRef.current({ id: "an-" + (rid ?? Date.now()), kind: "analysis", title: t.title || d.title || "Analysis", analysisRunId: rid, analysisData: t.analysisData ?? d.analysisData, status: t.status, versionNumber: t.versionNumber });
+      } else if (d.canvas_action === "show_content") {
+        const md = d.content || d.markdown || d.message || "";
+        addTabRef.current({ id: "doc-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6), kind: "analysis", title: d.title || "Yulia artifact", analysisData: { analysisMarkdown: md } });
+      } else if (d.canvas_action === "update_model") {
+        const targetId = d.tabId && d.tabId !== "active" ? d.tabId : null;
+        const updates = d.updates && typeof d.updates === "object" ? d.updates : null;
+        if (targetId && updates) useModelStore.getState().updateAssumptions(targetId, updates);
+      }
+    };
+    window.addEventListener("smbx:canvas_action", onAction);
+    return () => window.removeEventListener("smbx:canvas_action", onAction);
+  }, []);
+
+  // Run a deal analysis and open the result as a canvas tab (deal-detail action).
+  const runAnalysisToCanvas = async (input: { dealId: string; dealTitle: string; analysisType: string; menuItemSlug?: string; label: string; prompt: string }) => {
+    const numericId = Number(input.dealId);
+    if (!Number.isFinite(numericId)) { send(input.prompt); return; }
+    try {
+      const result = await runDealAnalysis({ dealId: numericId, analysisType: input.analysisType, menuItemSlug: input.menuItemSlug, requestedFrom: "desktop_canvas" });
+      const tab = result.tab;
+      const rid = tab?.analysisRunId ?? result.analysisRunId ?? null;
+      addCanvasTab({ id: "an-" + (rid ?? Date.now()), kind: "analysis", title: tab?.title || `${input.dealTitle} · ${input.label}`, analysisRunId: rid, analysisData: tab?.analysisData ?? result.analysisData, status: tab?.status ?? result.analysisStatus ?? "analysis complete" });
+    } catch { send(input.prompt); }
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100dvh", width: "100%", overflow: "hidden", fontFamily: BODY, color: INK, background: BG }}>
@@ -96,10 +166,16 @@ function Shell({ user, chat, onSignOut, onDevSignIn }: { user: User | null; chat
         <nav style={{ display: "flex", alignItems: "center", gap: 3 }}>
           {NAV.map(n => {
             const on = surface === n.key;
-            return <button key={n.key} type="button" onClick={() => { setSurface(n.key); setOpenDeal(null); }} style={{ padding: "7px 13px", border: "none", borderRadius: 9, fontFamily: BODY, fontSize: 13.5, cursor: "pointer", background: on ? PERI_BG : "transparent", color: on ? PERI_INK : MUT2, fontWeight: on ? 600 : 500 }}>{n.label}</button>;
+            return <button key={n.key} type="button" onClick={() => { setSurface(n.key); setOpenDeal(null); setActiveCanvasId(null); }} style={{ padding: "7px 13px", border: "none", borderRadius: 9, fontFamily: BODY, fontSize: 13.5, cursor: "pointer", background: on && !activeCanvasId ? PERI_BG : "transparent", color: on && !activeCanvasId ? PERI_INK : MUT2, fontWeight: on ? 600 : 500 }}>{n.label}</button>;
           })}
         </nav>
         <div style={{ flex: 1 }} />
+        {canvasTabs.length > 0 && (
+          <button type="button" onClick={() => setActiveCanvasId(activeCanvasId ? null : canvasTabs[canvasTabs.length - 1].id)} style={{ display: "flex", alignItems: "center", gap: 7, padding: "7px 12px", border: "none", borderRadius: 10, cursor: "pointer", fontFamily: BODY, fontSize: 13, fontWeight: 600, background: activeCanvasId ? INK : PERI_BG, color: activeCanvasId ? "#fff" : PERI_INK }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18" /></svg>
+            Canvas<span style={{ fontFamily: MONO, fontSize: 11, padding: "1px 6px", borderRadius: 999, background: activeCanvasId ? "rgba(255,255,255,0.2)" : "rgba(111,130,220,0.18)" }}>{canvasTabs.length}</span>
+          </button>
+        )}
         <button type="button" onClick={() => setDockOpen(true)} style={{ display: "flex", alignItems: "center", gap: 9, width: 230, padding: "8px 12px", border: "1px solid rgba(60,60,67,0.12)", borderRadius: 10, background: "#fff", color: FAINT, fontSize: 13, cursor: "pointer", textAlign: "left" }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
           <span style={{ flex: 1 }}>Search deals, files, people</span>
@@ -121,11 +197,22 @@ function Shell({ user, chat, onSignOut, onDevSignIn }: { user: User | null; chat
 
       {/* BODY */}
       <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
-        <main style={{ flex: 1, minWidth: 0, overflow: "auto", position: "relative", background: AMBIENT }}>
-          {surface === "today" && <Today firstName={firstName} deals={deals} actions={actions} user={user} onOpenDeal={(id, title) => setOpenDeal({ id, title })} onAsk={send} />}
-          {surface === "pipeline" && <Pipeline deals={deals} onOpenDeal={(id, title) => setOpenDeal({ id, title })} onAsk={send} goSourcing={() => setSurface("sourcing")} />}
-          {surface === "integration" && <Integration deals={deals} canFetch={canFetch} onOpenDeal={(id, title) => setOpenDeal({ id, title })} onAsk={send} />}
-          {surface !== "today" && surface !== "pipeline" && surface !== "integration" && <SurfaceComing label={NAV.find(n => n.key === surface)!.label} onAsk={send} />}
+        <main style={{ flex: 1, minWidth: 0, overflow: activeCanvasId ? "hidden" : "auto", position: "relative", background: AMBIENT, display: activeCanvasId ? "flex" : "block" }}>
+          {activeCanvasId ? (
+            <DesktopCanvas
+              tabs={canvasTabs} activeId={activeCanvasId} compareId={compareId}
+              onActivate={setActiveCanvasId} onClose={closeCanvasTab} onMinimize={() => setActiveCanvasId(null)}
+              onSetCompare={setCompareId} onAsk={send}
+              onOpenDeal={(id, title) => setOpenDeal({ id, title })} onRunAnalysis={runAnalysisToCanvas}
+            />
+          ) : (
+            <>
+              {surface === "today" && <Today firstName={firstName} deals={deals} actions={actions} user={user} onOpenDeal={(id, title) => setOpenDeal({ id, title })} onAsk={send} />}
+              {surface === "pipeline" && <Pipeline deals={deals} onOpenDeal={(id, title) => setOpenDeal({ id, title })} onAsk={send} goSourcing={() => setSurface("sourcing")} />}
+              {surface === "integration" && <Integration deals={deals} canFetch={canFetch} onOpenDeal={(id, title) => setOpenDeal({ id, title })} onAsk={send} />}
+              {surface !== "today" && surface !== "pipeline" && surface !== "integration" && <SurfaceComing label={NAV.find(n => n.key === surface)!.label} onAsk={send} />}
+            </>
+          )}
         </main>
 
         <YuliaDock open={dockOpen} onToggle={() => setDockOpen(o => !o)} chat={chat} initials={initials} />
@@ -143,7 +230,7 @@ function Shell({ user, chat, onSignOut, onDevSignIn }: { user: User | null; chat
                 onBack={() => setOpenDeal(null)}
                 onChat={() => setDockOpen(true)}
                 onAskYulia={send}
-                onRunAnalysis={(i: { prompt: string }) => send(i.prompt)}
+                onRunAnalysis={runAnalysisToCanvas}
                 onOpenTeam={(_r: number | null, t: string) => send(`Show me the deal team for ${t}.`)}
                 onOpenDealFiles={() => send("Open this deal's data room.")}
               />
@@ -152,6 +239,68 @@ function Shell({ user, chat, onSignOut, onDevSignIn }: { user: User | null; chat
         </>
       )}
       <ToastHost zIndex={10000} />
+    </div>
+  );
+}
+
+/* ── Tabbed canvas (open analyses/models; compare two side-by-side) ── */
+type RunAnalysisInput = { dealId: string; dealTitle: string; analysisType: string; menuItemSlug?: string; label: string; prompt: string };
+function DesktopCanvas({ tabs, activeId, compareId, onActivate, onClose, onMinimize, onSetCompare, onAsk, onOpenDeal, onRunAnalysis }: {
+  tabs: CanvasTab[]; activeId: string; compareId: string | null;
+  onActivate: (id: string) => void; onClose: (id: string) => void; onMinimize: () => void;
+  onSetCompare: (id: string | null) => void; onAsk: (t: string) => void;
+  onOpenDeal: (id: string, title: string) => void; onRunAnalysis: (i: RunAnalysisInput) => void;
+}) {
+  const active = tabs.find(t => t.id === activeId) ?? tabs[0];
+  const compareTab = compareId ? tabs.find(t => t.id === compareId) ?? null : null;
+  if (!active) return null;
+  const render = (tab: CanvasTab) => tab.kind === "model"
+    ? <MobileModelScreen modelTabId={tab.modelTabId} title={tab.title} onBack={() => onClose(tab.id)} onTalkToYulia={onAsk} />
+    : <MobileAnalysisScreen title={tab.title} analysisRunId={tab.analysisRunId} analysisData={tab.analysisData} status={tab.status} versionNumber={tab.versionNumber} onBack={() => onClose(tab.id)} onAskYulia={onAsk} onOpenDeal={onOpenDeal} onRunDealAnalysis={onRunAnalysis} />;
+
+  return (
+    <div style={{ flex: 1, minWidth: 0, height: "100%", display: "flex", flexDirection: "column" }}>
+      {/* tab strip */}
+      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 16px", borderBottom: "1px solid rgba(60,60,67,0.08)", background: "rgba(255,255,255,0.5)", backdropFilter: GLASS_FILTER, WebkitBackdropFilter: GLASS_FILTER, flexShrink: 0, overflowX: "auto" }}>
+        {tabs.map(t => {
+          const on = t.id === activeId;
+          const cmp = t.id === compareId;
+          return (
+            <div key={t.id} onClick={() => onActivate(t.id)} style={{ display: "flex", alignItems: "center", gap: 7, padding: "6px 10px", borderRadius: 9, cursor: "pointer", flexShrink: 0, background: on ? "#fff" : "transparent", boxShadow: on ? "0 1px 3px rgba(15,18,35,0.08), inset 0 0 0 0.5px rgba(60,60,67,0.1)" : cmp ? "inset 0 0 0 1px " + PERI : "none" }}>
+              <span style={{ width: 7, height: 7, borderRadius: 2, background: t.kind === "model" ? "#6FB89A" : PERI, flexShrink: 0 }} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: on ? INK : MUT2, maxWidth: 180, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{t.title}</span>
+              <button type="button" onClick={e => { e.stopPropagation(); onClose(t.id); }} aria-label="Close tab" style={{ border: "none", background: "transparent", color: FAINT, cursor: "pointer", display: "grid", placeItems: "center", padding: 0, width: 16, height: 16 }}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg></button>
+            </div>
+          );
+        })}
+        <span style={{ flex: 1 }} />
+        {tabs.length >= 2 && (
+          <button type="button" onClick={() => onSetCompare(compareTab ? null : (tabs.find(t => t.id !== activeId)?.id ?? null))} style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 11px", border: "none", borderRadius: 9, cursor: "pointer", fontSize: 12.5, fontWeight: 600, background: compareTab ? INK : "rgba(60,60,67,0.06)", color: compareTab ? "#fff" : MUT2, flexShrink: 0 }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="7" height="16" rx="1.5" /><rect x="14" y="4" width="7" height="16" rx="1.5" /></svg>
+            {compareTab ? "Single view" : "Compare"}
+          </button>
+        )}
+        <button type="button" onClick={onMinimize} style={{ padding: "6px 11px", border: "none", borderRadius: 9, cursor: "pointer", fontSize: 12.5, fontWeight: 600, background: "rgba(60,60,67,0.06)", color: MUT2, flexShrink: 0 }}>Done</button>
+      </div>
+
+      {/* content */}
+      <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
+        <div style={{ flex: 1, minWidth: 0, position: "relative", overflow: "auto", background: "#fff" }}><ChromeModeProvider mode="pane">{render(active)}</ChromeModeProvider></div>
+        {compareTab && (
+          <>
+            <div style={{ width: 1, background: "rgba(60,60,67,0.12)", flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", background: "#fff" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderBottom: "1px solid rgba(60,60,67,0.08)", flexShrink: 0 }}>
+                <span style={{ fontFamily: MONO, fontSize: 10, color: FAINT, fontWeight: 700, letterSpacing: "0.5px" }}>COMPARE</span>
+                <select value={compareId ?? ""} onChange={e => onSetCompare(e.target.value || null)} style={{ flex: 1, border: "1px solid rgba(60,60,67,0.14)", borderRadius: 8, padding: "5px 8px", fontFamily: BODY, fontSize: 12.5, color: INK, background: "#fff", cursor: "pointer" }}>
+                  {tabs.filter(t => t.id !== activeId).map(t => <option key={t.id} value={t.id}>{t.title}</option>)}
+                </select>
+              </div>
+              <div style={{ flex: 1, minHeight: 0, position: "relative", overflow: "auto" }}><ChromeModeProvider mode="pane">{render(compareTab)}</ChromeModeProvider></div>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
