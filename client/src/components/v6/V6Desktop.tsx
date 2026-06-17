@@ -18,6 +18,7 @@ import { useAnonymousChat } from "../../hooks/useAnonymousChat";
 import { useAuthChat } from "../../hooks/useAuthChat";
 import { useMobileDeals, type MobileFeatured, type MobileStageRow } from "../../hooks/useMobileDeals";
 import { useNextActions, type NextAction } from "../../hooks/useNextActions";
+import { PIPELINE_STAGES, type PipelineStageId } from "../../lib/pipelineStages";
 import { ChromeModeProvider } from "./mobile/TopBar";
 import { DetailScreen } from "./mobile/screens/Detail";
 import { ToastHost } from "../mobile/ToastHost";
@@ -122,7 +123,8 @@ function Shell({ user, chat, onSignOut, onDevSignIn }: { user: User | null; chat
       <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
         <main style={{ flex: 1, minWidth: 0, overflow: "auto", position: "relative", background: AMBIENT }}>
           {surface === "today" && <Today firstName={firstName} deals={deals} actions={actions} user={user} onOpenDeal={(id, title) => setOpenDeal({ id, title })} onAsk={send} />}
-          {surface !== "today" && <SurfaceComing label={NAV.find(n => n.key === surface)!.label} onAsk={send} />}
+          {surface === "pipeline" && <Pipeline deals={deals} onOpenDeal={(id, title) => setOpenDeal({ id, title })} onAsk={send} goSourcing={() => setSurface("sourcing")} />}
+          {surface !== "today" && surface !== "pipeline" && <SurfaceComing label={NAV.find(n => n.key === surface)!.label} onAsk={send} />}
         </main>
 
         <YuliaDock open={dockOpen} onToggle={() => setDockOpen(o => !o)} chat={chat} initials={initials} />
@@ -240,6 +242,94 @@ function Today({ firstName, deals, actions, user, onOpenDeal, onAsk }: {
         <Activity items={market.activity} loaded={deals.loaded} />
       </div>
     </div>
+  );
+}
+
+/* ── PIPELINE surface ── */
+function Pipeline({ deals, onOpenDeal, onAsk, goSourcing }: { deals: ReturnType<typeof useMobileDeals>; onOpenDeal: (id: string, title: string) => void; onAsk: (t: string) => void; goSourcing: () => void }) {
+  const all = deals.hasData ? deals.all : [];
+  const [stage, setStage] = useState<PipelineStageId | "all">("all");
+  const rows = all.filter(r => stage === "all" || r.stageId === stage);
+  const priced = all.filter(r => r.askingPrice);
+  const totalAsk = priced.reduce((s, r) => s + (r.askingPrice || 0), 0);
+  const realFits = all.map(r => r.fit).filter((f): f is number => typeof f === "number");
+  const medianFit = realFits.length ? Math.round([...realFits].sort((a, b) => a - b)[Math.floor(realFits.length / 2)]) : null;
+  const strongest = [...all].filter(r => typeof r.fit === "number").sort((a, b) => (b.fit ?? 0) - (a.fit ?? 0))[0] ?? null;
+  const stageCounts = (id: PipelineStageId) => all.filter(r => r.stageId === id).length;
+
+  if (deals.loaded && all.length === 0) {
+    return (
+      <div style={{ maxWidth: 1060, margin: "0 auto", padding: "26px 38px" }}>
+        <h1 style={{ fontFamily: DISP, fontWeight: 800, fontSize: 27, letterSpacing: "-0.6px", margin: 0 }}>Pipeline</h1>
+        <div style={{ ...card, marginTop: 22, padding: "44px 30px", textAlign: "center" }}>
+          <div style={{ fontFamily: DISP, fontWeight: 700, fontSize: 18, color: INK }}>No deals in your pipeline yet</div>
+          <p style={{ maxWidth: 420, color: MUT, fontSize: 14, lineHeight: 1.5, margin: "8px auto 18px" }}>Add a deal or let Yulia source one, and it shows up here across the funnel.</p>
+          <button type="button" onClick={() => onAsk("Help me source my first deal.")} style={{ padding: "10px 18px", border: "none", borderRadius: 11, background: PERI, color: "#fff", fontWeight: 700, fontSize: 13.5, cursor: "pointer" }}>Source a deal with Yulia</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ maxWidth: 1060, margin: "0 auto", padding: "26px 38px 60px" }}>
+      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 20, marginBottom: 20 }}>
+        <div>
+          <h1 style={{ fontFamily: DISP, fontWeight: 800, fontSize: 27, letterSpacing: "-0.6px", margin: 0 }}>Pipeline</h1>
+          <div style={{ fontSize: 13.5, color: MUT, marginTop: 7 }}>Your deals across the funnel — Yulia keeps each one current.</div>
+        </div>
+        <span style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: "0.4px", color: FAINT }}>{all.length} IN MOTION</span>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1.4fr", gap: 12, marginBottom: 20 }}>
+        <Kpi value={String(all.length)} label="Deals in motion" />
+        <Kpi value={priced.length ? fmtM(totalAsk) : "—"} label="Total ask" />
+        <Kpi value={medianFit != null ? String(medianFit) : "—"} label="Median fit" />
+        <Kpi value={strongest?.name ?? "—"} label={strongest && typeof strongest.fit === "number" ? `Strongest fit · ${strongest.fit}` : "Strongest fit"} small onClick={strongest ? () => onOpenDeal(strongest.id, strongest.name) : undefined} />
+      </div>
+
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+        <Chip label="All deals" n={all.length} on={stage === "all"} onTap={() => setStage("all")} />
+        {PIPELINE_STAGES.map(s => <Chip key={s.id} label={s.title} n={stageCounts(s.id)} on={stage === s.id} onTap={() => setStage(s.id)} />)}
+      </div>
+
+      <section style={card}>
+        <div style={{ padding: "15px 20px 13px", borderBottom: "1px solid rgba(60,60,67,0.07)" }}><span style={eyebrow}>DEALS · {stage === "all" ? "All deals" : PIPELINE_STAGES.find(s => s.id === stage)?.title}</span></div>
+        {rows.length === 0 ? (
+          <div style={{ padding: "26px 20px", color: MUT, fontSize: 13 }}>No deals in this stage.</div>
+        ) : (
+          <>
+            <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1.7fr) 0.9fr 0.7fr 1.1fr auto", gap: 12, padding: "9px 20px", borderBottom: "1px solid rgba(60,60,67,0.06)", fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.7px", color: FAINT, fontWeight: 600 }}>
+              <span>DEAL</span><span>STAGE</span><span style={{ textAlign: "right" }}>ASK</span><span>FIT</span><span />
+            </div>
+            {rows.map(r => <LedgerRow key={r.id} r={r} onOpen={() => onOpenDeal(r.id, r.name)} />)}
+          </>
+        )}
+      </section>
+
+      {all.some(r => r.stageId === "source") && (
+        <button type="button" onClick={goSourcing} style={{ marginTop: 14, padding: "11px 16px", border: "none", borderRadius: 12, background: "rgba(255,255,255,0.5)", backdropFilter: GLASS_FILTER, WebkitBackdropFilter: GLASS_FILTER, boxShadow: GLASS_EDGE, color: PERI_INK, fontSize: 13, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+          Top-of-funnel candidates live in Sourcing — open it
+        </button>
+      )}
+    </div>
+  );
+}
+
+function Kpi({ value, label, small, onClick }: { value: string; label: string; small?: boolean; onClick?: () => void }) {
+  return (
+    <div onClick={onClick} style={{ ...card, borderRadius: 16, padding: "15px 17px", cursor: onClick ? "pointer" : "default" }}>
+      <div style={{ fontFamily: DISP, fontWeight: small ? 700 : 800, fontSize: small ? 16 : 26, letterSpacing: small ? "-0.3px" : "-0.8px", color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{value}</div>
+      <div style={{ fontSize: 12, color: MUT, marginTop: 3 }}>{label}</div>
+    </div>
+  );
+}
+
+function Chip({ label, n, on, onTap }: { label: string; n: number; on: boolean; onTap: () => void }) {
+  return (
+    <button type="button" onClick={onTap} style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "8px 14px", border: "none", borderRadius: 999, fontSize: 13, fontWeight: 600, cursor: "pointer", background: on ? INK : "rgba(255,255,255,0.5)", color: on ? "#fff" : MUT2, boxShadow: on ? "none" : "inset 0 0 0 0.5px rgba(60,60,67,0.12)", backdropFilter: on ? "none" : GLASS_FILTER, WebkitBackdropFilter: on ? "none" : GLASS_FILTER }}>
+      {label}<span style={{ fontFamily: MONO, fontSize: 11, padding: "1px 6px", borderRadius: 999, background: on ? "rgba(255,255,255,0.2)" : "rgba(60,60,67,0.08)", color: on ? "#fff" : MUT }}>{n}</span>
+    </button>
   );
 }
 
