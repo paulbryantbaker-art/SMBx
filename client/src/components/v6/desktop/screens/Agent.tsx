@@ -62,8 +62,20 @@ function useStagedActions(canFetch: boolean) {
   const [actions, setActions] = useState<StagedAction[]>([]);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Resolves with the fresh actions list (or rejects) so callers that mutate the
+  // server (approve/decline) can RECONCILE — a server-blocked action that the
+  // confirm path swallowed will reappear instead of silently staying removed.
+  const fetchOnce = useCallback(async (): Promise<StagedAction[]> => {
+    const r = await fetch("/api/agency/actions", { headers: authHeaders() });
+    if (!r.ok) throw new Error(`actions ${r.status}`);
+    const data: { actions?: StagedAction[] } = await r.json();
+    return Array.isArray(data.actions) ? data.actions : [];
+  }, []);
+
+  // Initial / "Try again" load — owns the loading + error UI state.
   const load = useCallback(() => {
     if (!canFetch) {
       setActions([]);
@@ -75,10 +87,9 @@ function useStagedActions(canFetch: boolean) {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    fetch("/api/agency/actions", { headers: authHeaders() })
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`actions ${r.status}`))))
-      .then((data: { actions?: StagedAction[] }) => {
-        if (!cancelled) setActions(Array.isArray(data.actions) ? data.actions : []);
+    fetchOnce()
+      .then((next) => {
+        if (!cancelled) setActions(next);
       })
       .catch((e: any) => {
         if (!cancelled) {
@@ -95,20 +106,38 @@ function useStagedActions(canFetch: boolean) {
     return () => {
       cancelled = true;
     };
-  }, [canFetch]);
+  }, [canFetch, fetchOnce]);
 
   useEffect(() => {
     const cleanup = load();
     return cleanup;
   }, [load]);
 
+  // Silent reconcile — does NOT flip the full-screen loading/error state, so it
+  // can run after every approve/decline and on manual refresh without flashing
+  // the loader. On failure it leaves the optimistic state untouched (the chat
+  // rail already surfaced the error) rather than wiping the queue.
+  const reconcile = useCallback(async () => {
+    if (!canFetch) return;
+    setRefreshing(true);
+    try {
+      const next = await fetchOnce();
+      setActions(next);
+      setError(null);
+    } catch {
+      /* keep current optimistic state; chat rail owns the error message */
+    } finally {
+      setRefreshing(false);
+    }
+  }, [canFetch, fetchOnce]);
+
   // Optimistic local removal once the user approves/declines, so the card leaves
-  // immediately; the next refresh reconciles with the server.
+  // immediately; reconcile() then reconciles with the server.
   const remove = useCallback((id: number) => {
     setActions((prev) => prev.filter((a) => a.id !== id));
   }, []);
 
-  return { actions, loading, loaded, error, refresh: load, remove };
+  return { actions, loading, loaded, refreshing, error, refresh: load, reconcile, remove };
 }
 
 /* ── small helpers ── */
@@ -161,20 +190,40 @@ function RobotGlyph({ size = 19, c = T.violet }: { size?: number; c?: string }) 
   );
 }
 
+/* ── inline button spinner (matches LoadingState's ring) ── */
+function Spinner({ c }: { c: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        width: 13,
+        height: 13,
+        flex: "none",
+        borderRadius: "50%",
+        border: `2px solid ${c}`,
+        borderTopColor: "transparent",
+        opacity: 0.85,
+        animation: "atlas-glow 1s linear infinite",
+      }}
+    />
+  );
+}
+
 /* ── one staged action = one "Needs your approval" card ── */
 function ApprovalCard({
   action,
   onApprove,
   onDecline,
-  busy,
+  pending,
 }: {
   action: StagedAction;
   onApprove: () => void;
   onDecline: () => void;
-  busy: boolean;
+  pending: "approve" | "decline" | null;
 }) {
   const tone = riskTone(action.risk_level);
   const label = action.action_label || titleizeTool(action.tool_name);
+  const busy = pending !== null;
   return (
     <Card pad="15px 17px" style={{ borderColor: T.approvalBd }}>
       <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
@@ -208,7 +257,11 @@ function ApprovalCard({
             {label}
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 7, marginTop: 9 }}>
-            <Pill bg={T.track} fg={T.muted}>
+            <Pill
+              bg={T.track}
+              fg={T.muted}
+              style={{ maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis", display: "inline-block" }}
+            >
               {titleizeTool(action.tool_name)}
             </Pill>
             {action.risk_level && (
@@ -217,7 +270,11 @@ function ApprovalCard({
               </Pill>
             )}
             {action.write_scope && (
-              <Pill bg={T.track} fg={T.muted}>
+              <Pill
+                bg={T.track}
+                fg={T.muted}
+                style={{ maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis", display: "inline-block" }}
+              >
                 {action.write_scope}
               </Pill>
             )}
@@ -256,7 +313,8 @@ function ApprovalCard({
             opacity: busy ? 0.6 : 1,
           }}
         >
-          <CheckIcon size={13} c={T.white} /> Approve
+          {pending === "approve" ? <Spinner c={T.white} /> : <CheckIcon size={13} c={T.white} />}
+          {pending === "approve" ? "Approving…" : "Approve"}
         </button>
         <button
           type="button"
@@ -278,7 +336,8 @@ function ApprovalCard({
             opacity: busy ? 0.6 : 1,
           }}
         >
-          <CloseIcon size={13} c={T.ink3} /> Decline
+          {pending === "decline" ? <Spinner c={T.ink3} /> : <CloseIcon size={13} c={T.ink3} />}
+          {pending === "decline" ? "Declining…" : "Decline"}
         </button>
       </div>
     </Card>
@@ -289,21 +348,32 @@ export default function AgentScreen({ user }: AtlasScreenProps) {
   const nav = useAtlasNav();
   const chat = useAtlasChat();
   const canFetch = !!user;
+  // Setting up an agent means starting a real, persisted Yulia conversation —
+  // that needs BOTH a live chat bridge AND a signed-in user. An anonymous
+  // visitor has a chat bridge (the sample one) but no account, so the "New" /
+  // "Set up with Yulia" affordances must read as not-yet-available, not live.
+  const agentSetupReady = !!chat && canFetch;
 
-  const { actions, loading, loaded, error, refresh, remove } = useStagedActions(canFetch);
+  const { actions, loading, loaded, refreshing, error, refresh, reconcile, remove } =
+    useStagedActions(canFetch);
   const next = useNextActions(user, canFetch);
 
-  const [busyId, setBusyId] = useState<number | null>(null);
+  // Which action is mid-flight, and whether it's an approve or a decline — drives
+  // the per-card spinner/label.
+  const [busy, setBusy] = useState<{ id: number; kind: "approve" | "decline" } | null>(null);
 
   const [draft, setDraft] = useState("");
 
   const sendToYulia = useCallback(
     (text: string) => {
       const t = text.trim();
-      if (!t || !chat) return;
+      // Gate on agentSetupReady (chat bridge AND signed-in) so the no-op matches
+      // the dimmed affordances — an anon visitor's click does nothing, the same
+      // way the button reads as not-yet-available.
+      if (!t || !agentSetupReady || !chat) return;
       chat.send(t);
     },
-    [chat],
+    [agentSetupReady, chat],
   );
 
   const submitDraft = useCallback(() => {
@@ -315,32 +385,42 @@ export default function AgentScreen({ user }: AtlasScreenProps) {
     setDraft("");
   }, [draft, sendToYulia]);
 
+  // IMPORTANT: confirmStagedAction / cancelStagedAction swallow every error
+  // internally (toast + chat-rail message, never re-thrown — useAuthChat.ts).
+  // They also resolve on HTTP 200 with status 'blocked' / 'failed'. So an
+  // optimistic remove() alone could make a BLOCKED irreversible action vanish
+  // from this queue as if it were approved. After the mutation we reconcile()
+  // against /api/agency/actions — anything the server did NOT actually clear
+  // reappears in the queue, keeping this surface honest and in sync with the
+  // chat-rail StagedActionCard.
   const approve = useCallback(
     async (a: StagedAction) => {
-      if (!chat?.confirmStagedAction) return;
-      setBusyId(a.id);
+      if (!chat?.confirmStagedAction || busy) return;
+      setBusy({ id: a.id, kind: "approve" });
       try {
         await chat.confirmStagedAction(a.id, a.action_label || a.tool_name);
         remove(a.id);
       } finally {
-        setBusyId(null);
+        setBusy(null);
+        await reconcile();
       }
     },
-    [chat, remove],
+    [chat, busy, remove, reconcile],
   );
 
   const decline = useCallback(
     async (a: StagedAction) => {
-      if (!chat?.cancelStagedAction) return;
-      setBusyId(a.id);
+      if (!chat?.cancelStagedAction || busy) return;
+      setBusy({ id: a.id, kind: "decline" });
       try {
         await chat.cancelStagedAction(a.id);
         remove(a.id);
       } finally {
-        setBusyId(null);
+        setBusy(null);
+        await reconcile();
       }
     },
-    [chat, remove],
+    [chat, busy, remove, reconcile],
   );
 
   /* ── MY AGENTS sub-list — honestly empty (no agent persists) ── */
@@ -370,6 +450,7 @@ export default function AgentScreen({ user }: AtlasScreenProps) {
         </span>
         <button
           type="button"
+          disabled={!agentSetupReady}
           onClick={() =>
             sendToYulia("I'd like to set up an agent. What can you automate for me?")
           }
@@ -379,13 +460,13 @@ export default function AgentScreen({ user }: AtlasScreenProps) {
             gap: 3,
             border: "none",
             background: "transparent",
-            cursor: chat ? "pointer" : "default",
+            cursor: agentSetupReady ? "pointer" : "default",
             fontFamily: T.font,
             fontSize: 12,
             fontWeight: 600,
             color: T.blue,
             padding: 0,
-            opacity: chat ? 1 : 0.5,
+            opacity: agentSetupReady ? 1 : 0.5,
           }}
         >
           <PlusIcon size={13} c={T.blue} /> New
@@ -490,11 +571,39 @@ export default function AgentScreen({ user }: AtlasScreenProps) {
           }}
         >
           <SectionLabel>Pending approvals</SectionLabel>
-          {loaded && actions.length > 0 && (
-            <span style={{ fontSize: 12, color: T.muted, fontWeight: 600 }}>
-              {actions.length} waiting
-            </span>
-          )}
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            {loaded && actions.length > 0 && (
+              <span style={{ fontSize: 12, color: T.muted, fontWeight: 600 }}>
+                {actions.length} waiting
+              </span>
+            )}
+            {/* Manual reconcile — no polling, but a staged action created while
+                the user sits here can be pulled in on demand. */}
+            {loaded && !error && (
+              <button
+                type="button"
+                disabled={refreshing}
+                onClick={() => void reconcile()}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 5,
+                  border: "none",
+                  background: "transparent",
+                  cursor: refreshing ? "default" : "pointer",
+                  fontFamily: T.font,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: T.blue,
+                  padding: 0,
+                  opacity: refreshing ? 0.5 : 1,
+                }}
+              >
+                {refreshing ? <Spinner c={T.blue} /> : null}
+                {refreshing ? "Refreshing…" : "Refresh"}
+              </button>
+            )}
+          </div>
         </div>
 
         {loading && !loaded ? (
@@ -522,7 +631,7 @@ export default function AgentScreen({ user }: AtlasScreenProps) {
               <ApprovalCard
                 key={a.id}
                 action={a}
-                busy={busyId === a.id}
+                pending={busy?.id === a.id ? busy.kind : null}
                 onApprove={() => void approve(a)}
                 onDecline={() => void decline(a)}
               />
@@ -533,17 +642,28 @@ export default function AgentScreen({ user }: AtlasScreenProps) {
 
       {/* (c) recent agent-ish activity (deterministic, real) */}
       <div>
-        <SectionLabel>What needs your attention</SectionLabel>
-        <div style={{ height: 10 }} />
+        <div style={{ marginBottom: 10 }}>
+          <SectionLabel>What needs your attention</SectionLabel>
+        </div>
         {next.loading && !next.loaded ? (
           <LoadingState label="Loading…" />
         ) : next.actions.length === 0 ? (
-          <Card pad="18px 20px">
-            <div style={{ fontSize: 13, color: T.muted, lineHeight: 1.55 }}>
-              No open items right now. As your deals progress, the next moves Yulia surfaces
-              will appear here.
+          // When the approvals queue above is ALSO empty (brand-new user), this
+          // would stack a second near-identical empty card — so de-emphasize it
+          // to a single quiet line. When there's an approvals card above, keep
+          // the fuller empty card so the section doesn't read as broken.
+          loaded && !error && actions.length === 0 ? (
+            <div style={{ fontSize: 13, color: T.faint, lineHeight: 1.55, padding: "2px 2px" }}>
+              No open items right now — next moves appear here as your deals progress.
             </div>
-          </Card>
+          ) : (
+            <Card pad="18px 20px">
+              <div style={{ fontSize: 13, color: T.muted, lineHeight: 1.55 }}>
+                No open items right now. As your deals progress, the next moves Yulia surfaces
+                will appear here.
+              </div>
+            </Card>
+          )
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {next.actions.map((act) => (
@@ -589,8 +709,9 @@ export default function AgentScreen({ user }: AtlasScreenProps) {
 
       {/* (d) "Describe what this agent should do" composer → chat.send */}
       <div>
-        <SectionLabel>Describe what this agent should do</SectionLabel>
-        <div style={{ height: 10 }} />
+        <div style={{ marginBottom: 10 }}>
+          <SectionLabel>Describe what this agent should do</SectionLabel>
+        </div>
         <div
           style={{
             border: `1px solid ${T.inputBd}`,
@@ -627,11 +748,11 @@ export default function AgentScreen({ user }: AtlasScreenProps) {
           />
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <span style={{ fontSize: 11.5, color: T.faint }}>
-              {chat ? "Yulia will help you configure it." : "Sign in to talk to Yulia."}
+              {agentSetupReady ? "Yulia will help you configure it." : "Sign in to talk to Yulia."}
             </span>
             <button
               type="button"
-              disabled={!chat || !draft.trim()}
+              disabled={!agentSetupReady || !draft.trim()}
               onClick={submitDraft}
               style={{
                 display: "inline-flex",
@@ -645,8 +766,8 @@ export default function AgentScreen({ user }: AtlasScreenProps) {
                 fontFamily: T.font,
                 fontSize: 13,
                 fontWeight: 600,
-                cursor: !chat || !draft.trim() ? "default" : "pointer",
-                opacity: !chat || !draft.trim() ? 0.5 : 1,
+                cursor: !agentSetupReady || !draft.trim() ? "default" : "pointer",
+                opacity: !agentSetupReady || !draft.trim() ? 0.5 : 1,
               }}
             >
               <Sparkle size={14} /> Set up with Yulia

@@ -21,13 +21,13 @@
 import { useState, useEffect, useCallback } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import type { AtlasScreenProps } from "../atlasNav";
-import { useAtlasNav } from "../atlasNav";
+import { useAtlasNav, useAtlasChat } from "../atlasNav";
 import type { SettingsPane } from "../atlasNav";
 import type { User } from "../../../../hooks/useAuth";
 import { authHeaders } from "../../../../hooks/useAuth";
 import { T } from "../atlasTokens";
 import { Card, Avatar, Pill, ProgressBar, LoadingState } from "../primitives";
-import { SettingsGlyph } from "../icons";
+import { SettingsGlyph, PlusIcon } from "../icons";
 
 /* ─── locked pricing (SMBX_PRICING_LOCKED.md) ─────────────────────────────── */
 const PLAN_LABEL: Record<string, string> = {
@@ -188,9 +188,15 @@ export default function SettingsScreen({ user, view }: AtlasScreenProps) {
       {/* content column — 660px centered */}
       <div style={{ flex: 1, minWidth: 0, overflow: "auto", padding: "30px 0" }}>
         <div style={{ width: 660, maxWidth: "90%", margin: "0 auto" }}>
-          <h1 style={{ fontSize: 24, fontWeight: 600, color: T.ink, margin: "0 0 18px" }}>
-            {PANE_TITLE[pane]}
-          </h1>
+          {/* H1 sits in a flex header row so panes that need an action (Members)
+              get a right-aligned affordance slot, matching the Hi-Fi map §6d. */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "0 0 18px" }}>
+            <h1 style={{ fontSize: 24, fontWeight: 600, color: T.ink, margin: 0 }}>
+              {PANE_TITLE[pane]}
+            </h1>
+            {pane === "members" && <div style={{ flex: 1 }} />}
+            {pane === "members" && <InviteMemberButton />}
+          </div>
           {pane === "profile" && <ProfilePane user={user} />}
           {pane === "billing" && <BillingPane />}
           {pane === "notifications" && <NotificationsPane />}
@@ -312,7 +318,7 @@ function ProfilePane({ user }: { user: User | null }) {
 function BillingPane() {
   const sub = useEndpoint<SubscriptionPayload>("/api/stripe/subscription", true);
   const ent = useEndpoint<EntitlementsPayload>("/api/v19/entitlements", true);
-  const nav = useAtlasNav();
+  const chat = useAtlasChat();
   const [portalBusy, setPortalBusy] = useState(false);
   const [portalError, setPortalError] = useState(false);
 
@@ -344,10 +350,18 @@ function BillingPane() {
 
   const planKey = (sub.data.plan || "free").toLowerCase();
   const planName = PLAN_LABEL[planKey] ?? titleCase(sub.data.name);
-  const priceLine = PLAN_PRICE[planKey] ?? sub.data.priceDisplay ?? "—";
+  // Known plans use our own spaced label; an unknown planKey falls back to the
+  // server priceDisplay ("$99/month"), normalized to the screen's "$99 / month".
+  const priceLine = PLAN_PRICE[planKey] ?? normalizePrice(sub.data.priceDisplay) ?? "—";
   const row = sub.data.subscription || null;
   const renewLabel = formatRenew(row);
   const isFree = planKey === "free";
+
+  const changePlan = () => {
+    // Plan changes route through chat (THE LINE: Yulia guides the upgrade; the
+    // user decides). There is no self-serve pricing surface — chat is the door.
+    chat?.send("I'd like to change my plan. What are my options?");
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -364,7 +378,7 @@ function BillingPane() {
           <div style={{ flex: 1 }} />
           <button
             type="button"
-            onClick={isFree ? () => nav.go("today") : openPortal}
+            onClick={isFree ? changePlan : openPortal}
             disabled={portalBusy}
             style={{
               marginTop: 16,
@@ -408,8 +422,8 @@ function BillingPane() {
       <Card pad={20} style={{ borderRadius: T.rCardLg }}>
         <Eyebrow>BILLING</Eyebrow>
         <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
-          <KeyVal k="Status" v={titleCase(row?.status) ?? "Active"} />
-          {renewLabel && <KeyVal k="Next" v={stripLead(renewLabel)} />}
+          <KeyVal k="Status" v={<StatusValue status={row?.status} />} />
+          {renewLabel && <KeyVal k={renewRowKey(renewLabel)} v={stripLead(renewLabel)} />}
           {row?.cancel_at_period_end ? (
             <KeyVal k="Renewal" v="Cancels at period end" />
           ) : null}
@@ -482,8 +496,28 @@ function KeyVal({ k, v }: { k: string; v: ReactNode }) {
   );
 }
 
+/** Subscription status with a color cue for non-active states. A null/empty
+ *  status row is treated as "Active" (titleCase never returns nullish, so the
+ *  fallback has to be gated on the raw value, not its title-cased result). */
+function StatusValue({ status }: { status?: string | null }) {
+  const raw = (status || "").trim().toLowerCase();
+  const text = status?.trim() ? titleCase(status) : "Active";
+  const isActive = raw === "" || raw === "active" || raw === "trialing";
+  const color = isActive ? T.ink : T.terra;
+  return <span style={{ color, fontWeight: isActive ? 500 : 600 }}>{text}</span>;
+}
+
 function stripLead(s: string): string {
   return s.replace(/^(renews|trial ends|ends)\s+/i, "").trim();
+}
+
+/** Label the date row by what the date actually is, so a trial-end date isn't
+ *  mislabeled "Next" (which reads as a renewal). */
+function renewRowKey(renewLabel: string): string {
+  const l = renewLabel.toLowerCase();
+  if (l.startsWith("trial ends")) return "Trial ends";
+  if (l.startsWith("ends")) return "Ends";
+  return "Renews";
 }
 
 function formatRenew(row: SubscriptionRow | null): string | null {
@@ -500,6 +534,15 @@ function formatRenew(row: SubscriptionRow | null): string | null {
 
 function fmtDate(d: Date): string {
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
+/** Normalize a server priceDisplay ("$99/month") to the screen's spaced
+ *  "$99 / month" so an unknown-plan fallback reads consistently. */
+function normalizePrice(s: string | null | undefined): string | null {
+  if (!s) return null;
+  const trimmed = s.trim();
+  if (!trimmed) return null;
+  return trimmed.replace(/\s*\/\s*/g, " / ");
 }
 
 /* ─── 6c. NOTIFICATIONS ────────────────────────────────────────────────────── */
@@ -622,6 +665,37 @@ function Toggle({ on, onChange }: { on: boolean; onChange: () => void }) {
 
 /* ─── 6d. MEMBERS & ROLES ──────────────────────────────────────────────────── */
 
+/** Hi-Fi map §6d header action. Org-wide invites are a GAP (only per-deal
+ *  participants exist), so this routes the invite intent to Yulia rather than
+ *  fabricating an org-roster write. Honest: chat is the only real door today. */
+function InviteMemberButton() {
+  const chat = useAtlasChat();
+  return (
+    <button
+      type="button"
+      onClick={() => chat?.send("I'd like to invite a teammate. How do I add someone to a deal?")}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        flex: "none",
+        background: T.blue,
+        color: "#fff",
+        border: "none",
+        borderRadius: T.rPill,
+        padding: "9px 16px",
+        fontSize: 13.5,
+        fontWeight: 600,
+        cursor: "pointer",
+        fontFamily: T.font,
+      }}
+    >
+      <PlusIcon size={16} c="#fff" />
+      Invite member
+    </button>
+  );
+}
+
 function MembersPane({ user }: { user: User | null }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -641,8 +715,8 @@ function MembersPane({ user }: { user: User | null }) {
         >
           <span style={{ flex: 2 }}>MEMBER</span>
           <span style={{ flex: 1 }}>ROLE</span>
-          <span style={{ flex: 1 }}>ACCESS</span>
-          <span style={{ width: 70, flex: "none", textAlign: "right" }}>STATUS</span>
+          <span style={{ flex: 1 }}>DEAL ACCESS</span>
+          <span style={{ flex: 0.7, textAlign: "right" }}>STATUS</span>
         </div>
 
         {/* the only honest org member is the signed-in user */}
@@ -663,7 +737,7 @@ function MembersPane({ user }: { user: User | null }) {
               <Pill bg={T.violetBg} fg={T.violet}>Owner</Pill>
             </div>
             <div style={{ flex: 1, color: T.ink3 }}>All deals</div>
-            <div style={{ width: 70, flex: "none", textAlign: "right", color: T.green, fontWeight: 600 }}>You</div>
+            <div style={{ flex: 0.7, textAlign: "right", color: T.green, fontWeight: 600 }}>You</div>
           </div>
         ) : (
           <div style={{ padding: "18px", fontSize: 13, color: T.muted2 }}>No signed-in account.</div>

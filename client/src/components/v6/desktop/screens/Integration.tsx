@@ -34,10 +34,9 @@ import {
   SectionLabel,
   EmptyState,
   LoadingState,
-  StatusDot,
   fmtCents,
 } from "../primitives";
-import { CheckIcon } from "../icons";
+import { CheckIcon, ChevronDownIcon } from "../icons";
 import {
   useIntegrationPlan,
   type IntegrationWorkstream,
@@ -58,14 +57,7 @@ const STATUS_LABEL: Record<string, string> = Object.fromEntries(
   STATUS_OPTIONS.map((o) => [o.id, o.label]),
 );
 
-/** Map a workstream status to the StatusDot tri-state and to a pill palette. */
-function statusToDot(status: string | null | undefined): "done" | "prog" | "open" {
-  const s = (status || "").toLowerCase();
-  if (s === "complete") return "done";
-  if (s === "in_progress" || s === "on_track" || s === "at_risk") return "prog";
-  return "open";
-}
-
+/** Map a workstream status to a pill/dot palette (fg drives the dot; the two agree). */
 function statusColors(status: string | null | undefined): { fg: string; bg: string } {
   const s = (status || "").toLowerCase();
   if (s === "complete") return { fg: T.green, bg: T.greenBg };
@@ -119,9 +111,31 @@ const MILESTONE_LABEL: Record<string, string> = {
   quarterly_review: "Quarterly review",
 };
 
+function milestoneType(m: IntegrationMilestone): string | undefined {
+  return (m as any).milestone_type as string | undefined;
+}
+
 function milestoneTitle(m: IntegrationMilestone): string {
-  const type = (m as any).milestone_type as string | undefined;
+  const type = milestoneType(m);
   return (m.title || m.name || (type ? MILESTONE_LABEL[type] : undefined) || "Milestone").toString();
+}
+
+/**
+ * The server description for `workstream_completed` is "Workstream complete: <title>",
+ * which duplicates the milestoneTitle header. Strip the redundant lead so the body
+ * carries only the workstream name (e.g. header "Workstream complete" + body
+ * "Finance & systems"). For other event types the description stands as written.
+ */
+function milestoneDesc(m: IntegrationMilestone): string | undefined {
+  const raw = (m as any).description as string | undefined;
+  if (!raw) return undefined;
+  const title = milestoneTitle(m);
+  if (raw.startsWith(`${title}: `)) {
+    const rest = raw.slice(title.length + 2).trim();
+    return rest || undefined;
+  }
+  if (raw.trim() === title) return undefined;
+  return raw;
 }
 
 function milestoneWhen(m: IntegrationMilestone): string {
@@ -220,17 +234,21 @@ export default function IntegrationScreen({ view }: AtlasScreenProps) {
       <Root>
         <Header dealName={dealName} plan={null} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <EmptyState
-            title="No integration plan yet"
-            hint="Generate a 100-day value-capture plan from this deal's diligence — Day-0 controls, workstreams, owners, and illustrative synergy levers. You can edit execution status after."
-            cta={generating ? "Generating…" : "Generate plan"}
-            onCta={generating ? undefined : generate}
-          />
-          {genError && (
-            <div style={{ textAlign: "center", marginTop: -12, color: T.terra, fontSize: 12.5 }}>
-              {genError}
-            </div>
-          )}
+          {/* Group the CTA + error so the message flows beneath the button without a
+              fragile negative margin against EmptyState's internal padding. */}
+          <div style={{ margin: "auto", display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <EmptyState
+              title="No integration plan yet"
+              hint="Generate a 100-day value-capture plan from this deal's diligence — Day-0 controls, workstreams, owners, and illustrative synergy levers. You can edit execution status after."
+              cta={generating ? "Generating…" : "Generate plan"}
+              onCta={generating ? undefined : generate}
+            />
+            {genError && (
+              <div style={{ textAlign: "center", color: T.terra, fontSize: 12.5, maxWidth: 420, lineHeight: 1.5 }}>
+                {genError}
+              </div>
+            )}
+          </div>
         </div>
       </Root>
     );
@@ -245,7 +263,13 @@ export default function IntegrationScreen({ view }: AtlasScreenProps) {
 
   return (
     <Root>
-      <Header dealName={dealName} plan={plan} />
+      <Header
+        dealName={dealName}
+        plan={plan}
+        onRegenerate={generate}
+        regenerating={generating}
+        regenError={genError}
+      />
       <MilestoneTimeline workstreams={workstreams} milestones={milestones} />
       <WorkstreamsSection workstreams={workstreams} onUpdate={updateWorkstream} />
       <ValueLeversSection levers={levers} targetCents={targetCents} />
@@ -277,12 +301,29 @@ function Root({ children }: { children: ReactNode }) {
 
 /* ─── header ─────────────────────────────────────────────────── */
 
-function Header({ dealName, plan }: { dealName?: string; plan: any | null }) {
+function Header({
+  dealName,
+  plan,
+  onRegenerate,
+  regenerating,
+  regenError,
+}: {
+  dealName?: string;
+  plan: any | null;
+  /** Present only when a plan exists — re-runs POST /generate (replaces workstreams). */
+  onRegenerate?: () => void;
+  regenerating?: boolean;
+  regenError?: string | null;
+}) {
   const horizon: number | null =
     plan?.horizonDays != null && Number.isFinite(Number(plan.horizonDays))
       ? Number(plan.horizonDays)
       : null;
   const created = fmtDate(plan?.createdAt);
+
+  // Regenerate REPLACES the workstream set (discards self-reported status/%), so it
+  // takes a two-step inline confirm rather than firing on a single click.
+  const [confirming, setConfirming] = useState(false);
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
@@ -309,8 +350,60 @@ function Header({ dealName, plan }: { dealName?: string; plan: any | null }) {
           )}
         </div>
       )}
+      {onRegenerate &&
+        (confirming ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 12, color: T.muted }}>Replace plan &amp; reset progress?</span>
+            <button
+              type="button"
+              disabled={regenerating}
+              onClick={() => {
+                setConfirming(false);
+                onRegenerate();
+              }}
+              style={headerBtnStyle(true, !!regenerating)}
+            >
+              {regenerating ? "Regenerating…" : "Replace"}
+            </button>
+            <button
+              type="button"
+              disabled={regenerating}
+              onClick={() => setConfirming(false)}
+              style={headerBtnStyle(false, !!regenerating)}
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            disabled={regenerating}
+            onClick={() => setConfirming(true)}
+            style={headerBtnStyle(false, !!regenerating)}
+          >
+            {regenerating ? "Regenerating…" : "Regenerate"}
+          </button>
+        ))}
+      {regenError && !confirming && (
+        <div style={{ width: "100%", textAlign: "right", fontSize: 12, color: T.terra }}>{regenError}</div>
+      )}
     </div>
   );
+}
+
+function headerBtnStyle(primary: boolean, busy: boolean): CSSProperties {
+  return {
+    border: `1px solid ${primary ? T.blue : T.inputBd}`,
+    borderRadius: T.rPill,
+    padding: "6px 13px",
+    fontSize: 12.5,
+    fontWeight: 600,
+    color: primary ? "#fff" : T.muted,
+    background: primary ? T.blue : T.white,
+    cursor: busy ? "default" : "pointer",
+    opacity: busy ? 0.7 : 1,
+    fontFamily: T.font,
+  };
 }
 
 /* ─── milestone timeline ─────────────────────────────────────
@@ -318,6 +411,8 @@ function Header({ dealName, plan }: { dealName?: string; plan: any | null }) {
  * logged milestone events render below it as an honest event trail — there
  * is no synthetic Day-0/30/60/100 ladder in the data.
  * ─────────────────────────────────────────────────────────── */
+
+const MILESTONE_VISIBLE_CAP = 6;
 
 function MilestoneTimeline({
   workstreams,
@@ -329,6 +424,14 @@ function MilestoneTimeline({
   const total = workstreams.length;
   const complete = workstreams.filter((w) => (w.status || "").toLowerCase() === "complete").length;
   const pct = total > 0 ? Math.round((complete / total) * 100) : 0;
+
+  // Every completed workstream appends a milestone row; cap the inline trail so a
+  // fully-executed plan doesn't push the rest of the page down. Newest events sit at
+  // the top of the revealed list (the array is created-ascending from the server).
+  const [expanded, setExpanded] = useState(false);
+  const ordered = [...milestones].reverse();
+  const overflow = Math.max(0, ordered.length - MILESTONE_VISIBLE_CAP);
+  const shown = expanded ? ordered : ordered.slice(0, MILESTONE_VISIBLE_CAP);
 
   return (
     <Card pad="16px 20px" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -351,12 +454,12 @@ function MilestoneTimeline({
 
       {/* real milestone events (the event trail) */}
       <div style={{ display: "flex", flexDirection: "column", gap: 0, marginTop: 2 }}>
-        {milestones.length === 0 ? (
+        {ordered.length === 0 ? (
           <div style={{ fontSize: 12.5, color: T.muted2 }}>
             No milestones logged yet — they appear here as workstreams complete.
           </div>
         ) : (
-          milestones.map((m, i) => {
+          shown.map((m, i) => {
             const when = milestoneWhen(m);
             const wc = (m as any).workstreams_complete;
             const wt = (m as any).workstreams_total;
@@ -364,7 +467,7 @@ function MilestoneTimeline({
               wc != null && wt != null && Number.isFinite(Number(wt)) && Number(wt) > 0
                 ? `${Number(wc)}/${Number(wt)} workstreams`
                 : null;
-            const desc = (m as any).description as string | undefined;
+            const desc = milestoneDesc(m);
             return (
               <div
                 key={m.id ?? i}
@@ -401,7 +504,15 @@ function MilestoneTimeline({
                     {when && <span style={{ fontSize: 11.5, color: T.faint }}>{when}</span>}
                   </div>
                   {desc && (
-                    <div style={{ fontSize: 12.5, color: T.muted, marginTop: 2, lineHeight: 1.45 }}>
+                    <div
+                      style={{
+                        fontSize: 12.5,
+                        color: T.muted,
+                        marginTop: 2,
+                        lineHeight: 1.45,
+                        overflowWrap: "anywhere",
+                      }}
+                    >
                       {desc}
                     </div>
                   )}
@@ -412,6 +523,26 @@ function MilestoneTimeline({
               </div>
             );
           })
+        )}
+        {overflow > 0 && (
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            style={{
+              alignSelf: "flex-start",
+              marginTop: 6,
+              background: "none",
+              border: "none",
+              padding: 0,
+              fontSize: 12,
+              fontWeight: 600,
+              color: T.blue,
+              cursor: "pointer",
+              fontFamily: T.font,
+            }}
+          >
+            {expanded ? "Show fewer" : `Show ${overflow} earlier event${overflow === 1 ? "" : "s"}`}
+          </button>
         )}
       </div>
     </Card>
@@ -453,6 +584,9 @@ function WorkstreamsSection({
   );
 }
 
+/** Progress steps the user can self-report. 100% maps the server to 'complete'. */
+const PCT_STEPS = [0, 25, 50, 75, 100];
+
 function WorkstreamCard({
   ws,
   onUpdate,
@@ -466,33 +600,59 @@ function WorkstreamCard({
   const pct = wsPct(ws);
   const colors = statusColors(status);
 
-  const change = async (next: string) => {
-    if (busy || next === status) return;
+  /** Single PATCH path for both the status select and the progress stepper. */
+  const apply = async (patch: { status?: string; pct?: number }) => {
+    if (busy) return;
     setBusy(true);
     setDenied(false);
-    const res = await onUpdate(ws.id, { status: next });
-    // null = 403 (no full access) or failure — surface honestly, no fake success.
+    const res = await onUpdate(ws.id, patch);
+    // null = 403 (no full access) OR a transient failure — surface honestly,
+    // no fake success. The controlled value snaps back from hook state.
     if (res === null) setDenied(true);
     setBusy(false);
+  };
+
+  const changeStatus = (next: string) => {
+    if (next !== status) void apply({ status: next });
+  };
+  const changePct = (next: number) => {
+    if (next !== pct) void apply({ pct: next });
   };
 
   const firstMove = (ws.first_move as string | undefined) || undefined;
   const detail = (ws.detail as string | undefined) || ws.description || undefined;
   const owner = (ws.owner as string | undefined) || undefined;
+  // evidence_link is descriptive prose ("Data room / financial model"), not a URL.
   const evidence = (ws.evidence_link as string | undefined) || undefined;
-  // Captured synergy $ is not tracked (no GL connector) — honest "—".
-  const captured: number | null = null;
 
   return (
-    <Card pad={13} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+    <Card pad={13} style={{ display: "flex", flexDirection: "column", gap: 10, minWidth: 0 }}>
       <div style={{ display: "flex", alignItems: "flex-start", gap: 9 }}>
-        <StatusDot state={statusToDot(status)} />
+        {/* Dot color tracks statusColors so it never disagrees with the pill. */}
+        <span
+          aria-hidden="true"
+          style={{
+            width: 16,
+            height: 16,
+            flex: "none",
+            marginTop: 1,
+            borderRadius: "50%",
+            background: status.toLowerCase() === "complete" ? colors.fg : colors.bg,
+            border: status.toLowerCase() === "complete" ? "none" : `2px solid ${colors.fg}`,
+            color: "#fff",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {status.toLowerCase() === "complete" && <CheckIcon size={10} c="#fff" />}
+        </span>
         <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{ fontSize: 13.5, fontWeight: 600, color: T.ink, lineHeight: 1.3 }}>
+          <div style={{ fontSize: 13.5, fontWeight: 600, color: T.ink, lineHeight: 1.3, overflowWrap: "anywhere" }}>
             {wsTitle(ws)}
           </div>
           {owner && (
-            <div style={{ fontSize: 11.5, color: T.muted2, marginTop: 2 }}>{owner}</div>
+            <div style={{ fontSize: 11.5, color: T.muted2, marginTop: 2, overflowWrap: "anywhere" }}>{owner}</div>
           )}
         </div>
         <Pill bg={colors.bg} fg={colors.fg} style={{ padding: "3px 9px", fontSize: 11 }}>
@@ -501,27 +661,56 @@ function WorkstreamCard({
       </div>
 
       {detail && (
-        <div style={{ fontSize: 12.5, color: T.muted, lineHeight: 1.45 }}>{detail}</div>
+        <div style={{ fontSize: 12.5, color: T.muted, lineHeight: 1.45, overflowWrap: "anywhere" }}>{detail}</div>
       )}
 
       {/* lever-style rows: real fields only */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-        {firstMove && (
-          <LeverRow glyph="▷" glyphColor={T.blue} label="Next move" value={firstMove} />
-        )}
-        {evidence && (
-          <LeverRow glyph="◇" glyphColor={T.muted2} label="Evidence" value={evidence} />
-        )}
-        <LeverRow glyph="○" glyphColor={T.faint} label="Captured" value={fmtCents(captured)} />
-      </div>
+      {(firstMove || evidence) && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+          {firstMove && (
+            <LeverRow glyph="▷" glyphColor={T.blue} label="Next move" value={firstMove} />
+          )}
+          {/* "Reference" — honest prose pointer, NOT framed as a clickable artifact. */}
+          {evidence && (
+            <LeverRow glyph="○" glyphColor={T.muted2} label="Reference" value={evidence} />
+          )}
+        </div>
+      )}
 
-      {/* progress */}
+      {/* progress — self-reported, editable via the stepper below */}
       <div style={{ display: "flex", flexDirection: "column", gap: 5, marginTop: 1 }}>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11.5, color: T.muted2 }}>
           <span>Progress</span>
           <span style={{ color: T.ink, fontWeight: 600 }}>{pct}%</span>
         </div>
         <ProgressBar pct={pct} color={status.toLowerCase() === "complete" ? T.green : T.blue} />
+        <div style={{ display: "flex", gap: 5, marginTop: 2 }}>
+          {PCT_STEPS.map((step) => {
+            const active = pct === step;
+            return (
+              <button
+                key={step}
+                type="button"
+                disabled={busy || active}
+                onClick={() => changePct(step)}
+                style={{
+                  flex: 1,
+                  border: `1px solid ${active ? T.blue : T.inputBd}`,
+                  borderRadius: 7,
+                  padding: "4px 0",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: active ? T.blue : T.muted,
+                  background: active ? T.blueBg : T.white,
+                  cursor: busy || active ? "default" : "pointer",
+                  fontFamily: T.font,
+                }}
+              >
+                {step}%
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* execution status control → updateWorkstream */}
@@ -529,34 +718,64 @@ function WorkstreamCard({
         <span style={{ fontSize: 10.5, color: T.muted2, fontWeight: 600, letterSpacing: ".03em", textTransform: "uppercase" }}>
           Status
         </span>
-        <select
-          value={status}
-          disabled={busy}
-          onChange={(e) => void change(e.target.value)}
-          style={{
-            appearance: "none",
-            WebkitAppearance: "none",
-            border: `1px solid ${T.inputBd}`,
-            borderRadius: 9,
-            padding: "7px 10px",
-            fontSize: 12.5,
-            fontWeight: 600,
-            color: T.ink,
-            background: busy ? T.hover : T.white,
-            cursor: busy ? "default" : "pointer",
-            fontFamily: T.font,
-          }}
-        >
-          {STATUS_OPTIONS.map((o) => (
-            <option key={o.id} value={o.id}>
-              {o.label}
-            </option>
-          ))}
-        </select>
+        <div style={{ position: "relative" }}>
+          <select
+            value={status}
+            disabled={busy}
+            onChange={(e) => changeStatus(e.target.value)}
+            style={{
+              appearance: "none",
+              WebkitAppearance: "none",
+              width: "100%",
+              border: `1px solid ${T.inputBd}`,
+              borderRadius: 9,
+              padding: "7px 30px 7px 10px",
+              fontSize: 12.5,
+              fontWeight: 600,
+              color: T.ink,
+              background: busy ? T.hover : T.white,
+              cursor: busy ? "default" : "pointer",
+              fontFamily: T.font,
+            }}
+          >
+            {STATUS_OPTIONS.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+          <span
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              right: 9,
+              top: "50%",
+              transform: "translateY(-50%)",
+              display: "inline-flex",
+              pointerEvents: "none",
+            }}
+          >
+            {busy ? (
+              <span
+                style={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: "50%",
+                  border: `2px solid ${T.progTrack}`,
+                  borderTopColor: T.blue,
+                  display: "inline-block",
+                  animation: "atlas-glow 1s linear infinite",
+                }}
+              />
+            ) : (
+              <ChevronDownIcon size={15} c={T.muted2} />
+            )}
+          </span>
+        </div>
       </label>
       {denied && (
         <div style={{ fontSize: 11.5, color: T.terra, lineHeight: 1.4 }}>
-          Couldn't update — full deal access is required to edit workstreams.
+          Couldn't update — please try again.
         </div>
       )}
     </Card>
@@ -582,13 +801,14 @@ function LeverRow({
     borderRadius: 9,
     padding: "8px 10px",
     fontSize: 12.5,
+    minWidth: 0,
   };
   return (
     <div style={rowStyle}>
       <span aria-hidden="true" style={{ color: glyphColor, fontSize: 12, lineHeight: 1.4, flex: "none" }}>
         {glyph}
       </span>
-      <div style={{ minWidth: 0, flex: 1 }}>
+      <div style={{ minWidth: 0, flex: 1, overflowWrap: "anywhere" }}>
         <span style={{ color: T.muted2, fontWeight: 600 }}>{label}: </span>
         <span style={{ color: T.ink }}>{value}</span>
       </div>

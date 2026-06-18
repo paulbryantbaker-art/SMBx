@@ -140,7 +140,7 @@ export function AtlasChatRail() {
       {/* Message list */}
       <div ref={scrollRef} onScroll={onConversationScroll} style={S.list}>
         {showEmpty ? (
-          <RailEmpty hint={composerHintFor(view)} />
+          <RailEmpty />
         ) : (
           <>
             {messageRows}
@@ -151,7 +151,9 @@ export function AtlasChatRail() {
         )}
       </div>
 
-      {/* Composer — shared ChatDock, dock variant. The rail constrains width. */}
+      {/* Composer — shared ChatDock, dock variant. The rail constrains width.
+          ChatDock's dock-outer already draws its own top border + padding, so
+          the wrapper adds none (avoids a double hairline). */}
       <div style={S.composerWrap}>
         <ChatDock
           variant="dock"
@@ -187,12 +189,14 @@ function buildAtlasSurfaceContext(view: AtlasView): SurfaceContext {
 
 /* ─── empty state ──────────────────────────────────────────── */
 
-function RailEmpty({ hint }: { hint: string }) {
+/** Compact, on-brand empty state sized for the 340px rail: one sparkle + one
+ *  short line. (The reused mobile ChatSheet empty state is full-screen and its
+ *  illustrations overflow this width — it is deliberately NOT used here.) */
+function RailEmpty() {
   return (
     <div style={S.emptyWrap}>
-      <Sparkle size={22} />
-      <div style={S.emptyTitle}>Ask Yulia about your deals.</div>
-      <div style={S.emptyHint}>{hint}.</div>
+      <Sparkle size={20} />
+      <div style={S.emptyTitle}>Ask Atlas about this screen</div>
     </div>
   );
 }
@@ -401,12 +405,12 @@ const S: Record<string, CSSProperties> = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: 8,
+    gap: 9,
     textAlign: "center",
-    padding: "24px 8px",
+    padding: "24px 16px",
+    maxWidth: 240,
   },
-  emptyTitle: { fontSize: 15, fontWeight: 600, color: T.ink },
-  emptyHint: { fontSize: 13, color: T.muted, lineHeight: 1.5 },
+  emptyTitle: { fontSize: 13.5, fontWeight: 500, color: T.muted, lineHeight: 1.45 },
   userBubble: {
     alignSelf: "flex-end",
     maxWidth: "85%",
@@ -434,12 +438,15 @@ const S: Record<string, CSSProperties> = {
     fontSize: 13,
     lineHeight: 1.45,
   },
-  composerWrap: { flex: "none", borderTop: `1px solid ${T.railDiv}` },
+  // ChatDock's dock-outer brings its own top border + 12px/16px padding, so the
+  // wrapper adds neither (a second border here would double the hairline).
+  composerWrap: { flex: "none" },
   disclaimer: {
     textAlign: "center",
     fontSize: 11,
     color: T.faint,
-    padding: "0 14px 10px",
+    lineHeight: 1.4,
+    padding: "0 14px 12px",
   },
   /* staged action */
   stagedCard: {
@@ -462,6 +469,7 @@ const S: Record<string, CSSProperties> = {
     fontWeight: 600,
     cursor: "pointer",
     fontFamily: T.font,
+    transition: "opacity .12s ease",
   },
   stagedCancel: {
     background: T.white,
@@ -473,6 +481,7 @@ const S: Record<string, CSSProperties> = {
     fontWeight: 500,
     cursor: "pointer",
     fontFamily: T.font,
+    transition: "background .12s ease",
   },
   /* streaming / trace */
   toolPill: {

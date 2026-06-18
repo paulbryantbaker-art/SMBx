@@ -61,6 +61,7 @@ export function AtlasHeader({
             <button
               key={tab.id}
               type="button"
+              aria-current={isActive ? "page" : undefined}
               onClick={() => nav.go(tab.id)}
               style={{
                 ...S.tab,
@@ -82,18 +83,43 @@ export function AtlasHeader({
       </nav>
 
       {/* Utilities */}
-      <button type="button" aria-label="Search" style={S.iconBtn} onClick={() => nav.go("deals")}>
+      <button
+        type="button"
+        aria-label="Search"
+        style={S.iconBtn}
+        onClick={() => nav.go("deals")}
+        onMouseEnter={hoverIconOn}
+        onMouseLeave={hoverIconOff}
+      >
         <SearchIcon size={21} c={T.muted} />
       </button>
-      <button type="button" aria-label="Help" style={S.iconBtn}>
+      <button
+        type="button"
+        aria-label="Help"
+        style={S.iconBtn}
+        onMouseEnter={hoverIconOn}
+        onMouseLeave={hoverIconOff}
+      >
         <HelpIcon size={21} c={T.muted} />
       </button>
-      <button type="button" aria-label="Notifications" style={{ ...S.iconBtn, position: "relative" }}>
+      <button
+        type="button"
+        aria-label="Notifications"
+        style={{ ...S.iconBtn, position: "relative" }}
+        onMouseEnter={hoverIconOn}
+        onMouseLeave={hoverIconOff}
+      >
         <BellIcon size={21} c={T.muted} />
         {hasNotifications && <span style={S.notifDot} />}
       </button>
 
-      <button type="button" style={S.upgrade} onClick={() => nav.openSettings("billing")}>
+      <button
+        type="button"
+        style={S.upgrade}
+        onClick={() => nav.openSettings("billing")}
+        onMouseEnter={(e) => (e.currentTarget.style.background = T.navActive)}
+        onMouseLeave={(e) => (e.currentTarget.style.background = T.blueBg)}
+      >
         <Sparkle size={14} />
         Upgrade
       </button>
@@ -103,11 +129,21 @@ export function AtlasHeader({
         aria-label="Account"
         onClick={() => nav.openSettings("profile")}
         style={S.avatarBtn}
+        onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
+        onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
       >
         <Avatar initials={initials} size={32} gradient />
       </button>
     </header>
   );
+}
+
+/* Shared icon-button hover (subtle blue wash, matching the tab/Upgrade chrome). */
+function hoverIconOn(e: { currentTarget: HTMLElement }) {
+  e.currentTarget.style.background = T.tabHover;
+}
+function hoverIconOff(e: { currentTarget: HTMLElement }) {
+  e.currentTarget.style.background = "transparent";
 }
 
 const S: Record<string, CSSProperties> = {
@@ -123,7 +159,16 @@ const S: Record<string, CSSProperties> = {
   },
   logo: { display: "flex", alignItems: "center", gap: 9, marginRight: 6, flex: "none" },
   wordmark: { fontSize: 19, fontWeight: 600, letterSpacing: "-.01em", color: T.ink },
-  tabs: { flex: 1, minWidth: 0, display: "flex", gap: 2, overflowX: "auto" },
+  tabs: {
+    flex: 1,
+    minWidth: 0,
+    display: "flex",
+    gap: 2,
+    overflowX: "auto",
+    // The strip can scroll on narrow widths, but the scrollbar reads as chrome
+    // noise in a 58px header — hide it (content stays reachable by wheel/drag).
+    scrollbarWidth: "none",
+  },
   tab: {
     border: "none",
     borderRadius: T.rPill,
@@ -133,6 +178,7 @@ const S: Record<string, CSSProperties> = {
     fontFamily: T.font,
     whiteSpace: "nowrap",
     flex: "none",
+    transition: "background .12s ease, color .12s ease",
   },
   iconBtn: {
     border: "none",
@@ -141,8 +187,10 @@ const S: Record<string, CSSProperties> = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    padding: 4,
+    padding: 6,
+    borderRadius: T.rPill,
     flex: "none",
+    transition: "background .12s ease",
   },
   notifDot: {
     position: "absolute",
@@ -168,8 +216,16 @@ const S: Record<string, CSSProperties> = {
     cursor: "pointer",
     fontFamily: T.font,
     flex: "none",
+    transition: "background .12s ease",
   },
-  avatarBtn: { border: "none", background: "transparent", cursor: "pointer", padding: 0, flex: "none" },
+  avatarBtn: {
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    padding: 0,
+    flex: "none",
+    transition: "opacity .12s ease",
+  },
 };
 
 export default AtlasHeader;

@@ -5,8 +5,12 @@
  *                      (label = folder.name, badge = # documents filed under it).
  *                      "All files" pseudo-folder on top; an "Unfiled" group when
  *                      the room has documents that don't match a folder.
- * Detail header       = breadcrumb (dealName › Files) + scope Segmented
- *                      (My files / Shared with team / Data room).
+ * Detail header       = breadcrumb (dealName › Files) + a non-interactive
+ *                      scope label "Data room · Due diligence". The design's
+ *                      My files / Shared with team segments aren't honestly
+ *                      backable (no per-doc owner/share field), so they're
+ *                      collapsed to the one real scope rather than shown inert.
+ *                      "+ Upload" in the sub-list header drives room.uploadFile.
  * Document toolbar    = selected document name + status Pill (In review/Approved
  *                      colored) + "· v{n}" version ONLY when the doc carries one.
  *                      The "p.n / N" page counter is rendered ONLY if the doc has
@@ -25,7 +29,7 @@
  * Honesty: every value is a real hook field or an honest "—" / empty / loading /
  * error state. No demo literals (Project Atlas, the SPA, the 42/31 counts).
  */
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import type { AtlasScreenProps } from "../atlasNav";
 import { useAtlasNav } from "../atlasNav";
 import {
@@ -40,20 +44,19 @@ import {
   Pill,
   EmptyState,
   LoadingState,
-  Segmented,
   Sparkle,
 } from "../primitives";
-import { ChevronRightIcon, DownloadIcon } from "../icons";
+import { ChevronRightIcon, DownloadIcon, PlusIcon } from "../icons";
 
-/* ─── scope toggle ────────────────────────────────────────── */
-
-type FileScope = "mine" | "team" | "room";
-
-const SCOPE_OPTIONS: { id: FileScope; label: string }[] = [
-  { id: "mine", label: "My files" },
-  { id: "team", label: "Shared with team" },
-  { id: "room", label: "Data room" },
-];
+/* ─── scope ───────────────────────────────────────────────────
+ * The design's scope toggle (My files / Shared with team / Data room ·
+ * Due diligence) selects the 3rd ("Data room · Due diligence") segment.
+ * The data layer carries NO per-document owner or share-status field, so
+ * "My files" and "Shared with team" cannot be honestly backed — an inert
+ * toggle that animates but filters nothing (and implies sharing the screen
+ * cannot deliver) would be misleading. We render the selected scope as a
+ * non-interactive label instead. */
+const ACTIVE_SCOPE_LABEL = "Data room · Due diligence";
 
 /* ─── status pill tone ────────────────────────────────────── */
 
@@ -268,10 +271,12 @@ export default function FilesScreen({ view }: AtlasScreenProps) {
 
   // The active folder filter: "all" | folder.id | "unfiled".
   const [folderKey, setFolderKey] = useState<"all" | "unfiled" | number>("all");
-  const [scope, setScope] = useState<FileScope>("room");
   const [selectedDocId, setSelectedDocId] = useState<number | null>(null);
   const [opening, setOpening] = useState(false);
   const [openError, setOpenError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Per-folder document counts (drive the sub-list badges).
   const counts = useMemo(() => {
@@ -331,6 +336,26 @@ export default function FilesScreen({ view }: AtlasScreenProps) {
     setSelectedDocId(null);
     setOpenError(null);
   }, []);
+
+  // Upload a raw file into the room — into the open folder when one is selected,
+  // otherwise root/unfiled. Additive (creates a data_room_document); not an
+  // irreversible/regulated action, so no staged-action confirm is required.
+  const handleUploadPick = useCallback(
+    async (file: File | null | undefined) => {
+      if (!file) return;
+      setUploadError(null);
+      setUploading(true);
+      try {
+        const folderId = typeof folderKey === "number" ? folderKey : null;
+        await room.uploadFile(file, folderId);
+      } catch (err: any) {
+        setUploadError(err?.message || "Couldn’t upload this file");
+      } finally {
+        setUploading(false);
+      }
+    },
+    [folderKey, room],
+  );
 
   // ── No deal context: nothing to scope a data room to ──────────────
   if (dealId == null) {
@@ -398,7 +423,56 @@ export default function FilesScreen({ view }: AtlasScreenProps) {
           <span style={{ fontSize: 11.5, fontWeight: 700, color: T.muted2, letterSpacing: ".05em" }}>
             DATA ROOM
           </span>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 3,
+              border: "none",
+              background: "transparent",
+              cursor: uploading ? "default" : "pointer",
+              fontFamily: T.font,
+              fontSize: 12,
+              fontWeight: 600,
+              color: T.blue,
+              padding: 0,
+              opacity: uploading ? 0.6 : 1,
+            }}
+          >
+            <PlusIcon size={13} c={T.blue} /> {uploading ? "Uploading…" : "Upload"}
+          </button>
+          {/* Hidden picker — drives room.uploadFile into the open folder (or root). */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            style={{ display: "none" }}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              void handleUploadPick(file);
+              // Reset so re-picking the same file fires onChange again.
+              e.target.value = "";
+            }}
+          />
         </div>
+
+        {uploadError && (
+          <div
+            style={{
+              margin: "0 4px 8px",
+              background: T.terraBg,
+              borderRadius: 8,
+              padding: "8px 10px",
+              fontSize: 12,
+              color: T.terra,
+              lineHeight: 1.4,
+            }}
+          >
+            {uploadError}
+          </div>
+        )}
 
         <FolderRow
           label="All files"
@@ -406,15 +480,19 @@ export default function FilesScreen({ view }: AtlasScreenProps) {
           active={folderKey === "all"}
           onClick={() => selectFolder("all")}
         />
-        {room.folders.map((f: MobileDataRoomFolder) => (
-          <FolderRow
-            key={f.id}
-            label={f.name}
-            count={counts.byFolder.get(f.id) ?? 0}
-            active={folderKey === f.id}
-            onClick={() => selectFolder(f.id)}
-          />
-        ))}
+        {room.folders.map((f: MobileDataRoomFolder) => {
+          const n = counts.byFolder.get(f.id) ?? 0;
+          return (
+            <FolderRow
+              key={f.id}
+              label={f.name}
+              // Hide the badge on empty folders — a "0" pill reads as noise.
+              count={n > 0 ? n : null}
+              active={folderKey === f.id}
+              onClick={() => selectFolder(f.id)}
+            />
+          );
+        })}
         {counts.unfiled > 0 && (
           <FolderRow
             label="Unfiled"
@@ -435,7 +513,23 @@ export default function FilesScreen({ view }: AtlasScreenProps) {
             <ChevronRightIcon size={15} c={T.faint} />
             <span style={{ fontSize: 13.5, color: T.muted }}>Files</span>
           </div>
-          <Segmented options={SCOPE_OPTIONS} value={scope} onChange={setScope} />
+          {/* Scope label — non-interactive. The data layer has no owner/share
+              field, so "My files" / "Shared with team" can't be honestly
+              backed; we surface only the real scope rather than an inert toggle. */}
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              background: T.track,
+              borderRadius: T.rPill,
+              padding: "6px 14px",
+              fontSize: 12.5,
+              fontWeight: 600,
+              color: T.ink,
+            }}
+          >
+            {ACTIVE_SCOPE_LABEL}
+          </span>
         </div>
 
         {/* Body: document list + viewer */}
@@ -539,6 +633,24 @@ function DocViewer({
           {tone.label}
         </Pill>
         <span style={{ flex: 1 }} />
+        {/* Open error surfaces next to the button so a user who hasn't scrolled
+            the viewer body still sees why the open failed. */}
+        {openError && (
+          <span
+            style={{
+              fontSize: 12,
+              color: T.terra,
+              flex: "none",
+              maxWidth: 220,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+            title={openError}
+          >
+            {openError}
+          </span>
+        )}
         {/* "p.n / N" page counter is OMITTED — the hook carries no page metadata.
             We never fabricate "p.12 / 88". Version is real when present. */}
         {doc.version != null && (
@@ -572,7 +684,7 @@ function DocViewer({
 
       {/* Metadata "viewer" — the document's REAL fields. No page-anchored clause
           box is rendered because no real page-anchored citation exists in this data. */}
-      <div style={{ flex: 1, overflow: "auto", background: T.surface, padding: "26px 0", display: "flex", justifyContent: "center" }}>
+      <div style={{ flex: 1, overflow: "auto", background: T.track, padding: "26px 0", display: "flex", justifyContent: "center" }}>
         <div
           style={{
             width: 540,

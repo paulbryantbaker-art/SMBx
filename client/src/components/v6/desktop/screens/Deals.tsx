@@ -30,7 +30,7 @@ import {
   LoadingState,
   fmtCents,
 } from "../primitives";
-import { SearchIcon, ChevronDownIcon, BackIcon, ChevronRightIcon } from "../icons";
+import { SearchIcon, BackIcon, ChevronRightIcon } from "../icons";
 import { T } from "../atlasTokens";
 
 const PAGE_SIZE = 25;
@@ -46,20 +46,30 @@ const FILTERS: { id: FilterId; label: string }[] = [
 
 /* ─── per-row derivations (honest) ─────────────────────────── */
 
-/** Sector from the `sub` line: the hook builds it as `[industry, location]`
- *  joined by " · ", so the first segment is the sector. "—" when absent. */
+/** Sector from the `sub` line. The hook builds `all`'s sub as
+ *  `[industry, location].join(" · ")`, so the leading segment is the sector
+ *  ONLY when a "·" separator is present (industry AND location both exist).
+ *  Without the separator the sub is just a location, or a buildSub fallback
+ *  like "$680K SDE" / "Active deal" — none of which are sectors, so we show
+ *  "—" rather than mislabel a non-sector value as one. */
 function sectorOf(row: MobileStageRow): string {
-  const first = (row.sub ?? "").split("·")[0]?.trim();
+  const sub = (row.sub ?? "").trim();
+  if (!sub.includes("·")) return "—";
+  const first = sub.split("·")[0]?.trim();
   return first || "—";
 }
 
-/** Stage label + pill palette, keyed off the gate-derived stageId (map 00). */
+/** Stage label + pill palette, keyed off the gate-derived stageId (map 00).
+ *  The real taxonomy (source/value/diligence/structure/close) is an honest
+ *  remap of the demo's gate names, but we keep the design's full tint ladder
+ *  so each stage reads distinctly: Sourcing→Screening grey, Valuation→amber
+ *  (the demo's IOI tier), Diligence→blue, Structuring→terra, Close→green. */
 function stageMeta(row: MobileStageRow): { label: string; bg: string; fg: string } {
   switch (row.stageId) {
     case "source":
       return { label: "Sourcing", bg: T.track, fg: T.muted };
     case "value":
-      return { label: "Valuation", bg: T.blueBg, fg: T.blue };
+      return { label: "Valuation", bg: T.amberBg2, fg: T.amber };
     case "diligence":
       return { label: "Diligence", bg: T.blueBg, fg: T.blue };
     case "structure":
@@ -71,9 +81,11 @@ function stageMeta(row: MobileStageRow): { label: string; bg: string; fg: string
   }
 }
 
-/** Headline EV: asking price, else EBITDA, else SDE (all integer cents). */
+/** Enterprise value = the asking price ONLY (integer cents). We do NOT fall
+ *  back to EBITDA/SDE here: an earnings figure under an "EV" header would
+ *  mislabel it as enterprise value. No asking price → "—" via fmtCents. */
 function evCents(row: MobileStageRow): number | null {
-  return row.askingPrice ?? row.ebitda ?? row.sde ?? null;
+  return row.askingPrice ?? null;
 }
 
 /** Fit pill palette by score (map 00): ≥80 green, 65–79 blue, <65 gray. */
@@ -288,8 +300,10 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
         end={Math.min(start + PAGE_SIZE, filtered.length)}
         canPrev={safePage > 0}
         canNext={safePage < pageCount - 1}
-        onPrev={() => setPage((p) => Math.max(0, p - 1))}
-        onNext={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
+        // Step off safePage (the clamped, rendered page), not the raw page, so
+        // a stale out-of-range `page` can't desync the first prev/next click.
+        onPrev={() => setPage(Math.max(0, safePage - 1))}
+        onNext={() => setPage(Math.min(pageCount - 1, safePage + 1))}
       />
     </div>
   );
@@ -383,11 +397,10 @@ function Toolbar({
 
       <div style={{ flex: 1 }} />
 
-      {/* sort (display-only; client sort is the natural updated_at order) */}
-      <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 13, color: T.muted }}>
-        Sort: Last activity
-        <ChevronDownIcon size={13} c={T.muted} />
-      </span>
+      {/* No "Sort: Last activity ▾" control: MobileStageRow carries no
+          updated_at, so the rows can't honestly be sorted by last activity and
+          there's no sort menu behind it. An inert chevron asserting a sort that
+          doesn't exist is misleading, so we omit it rather than fake it. */}
 
       {/* + Add deal → Yulia */}
       <button
@@ -447,12 +460,23 @@ function DealRow({
         gap: 12,
         fontSize: 13.5,
         cursor: "pointer",
+        outline: "none",
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.background = T.hover;
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.background = "transparent";
+      }}
+      // Keyboard focus ring — these rows are role=button/tabIndex=0, so give
+      // keyboard users a visible focus state (inline, matching the hover wash).
+      onFocus={(e) => {
+        e.currentTarget.style.background = T.hover;
+        e.currentTarget.style.boxShadow = `inset 0 0 0 2px ${T.stageActiveBd}`;
+      }}
+      onBlur={(e) => {
+        e.currentTarget.style.background = "transparent";
+        e.currentTarget.style.boxShadow = "none";
       }}
     >
       {/* DEAL */}
@@ -498,7 +522,11 @@ function DealRow({
       {/* FIT — only when real */}
       <div style={{ flex: COLS.fit, minWidth: 0 }}>
         {fitReal ? (
-          <Pill bg={fitMeta(row.fit as number).bg} fg={fitMeta(row.fit as number).fg}>
+          <Pill
+            bg={fitMeta(row.fit as number).bg}
+            fg={fitMeta(row.fit as number).fg}
+            style={{ padding: "3px 9px" }}
+          >
             {row.fit}
           </Pill>
         ) : (
@@ -510,7 +538,11 @@ function DealRow({
       <div style={{ flex: COLS.owner, minWidth: 0, display: "flex", alignItems: "center", gap: 8 }}>
         {owner ? (
           <>
-            <Avatar initials={owner.initials} size={22} bg={tint.bg} />
+            {/* Owner is the signed-in user on every row, so the avatar uses a
+                single stable blue tint — the Avatar primitive renders initials
+                in T.blue, so a rotating non-blue tile would print blue text on
+                amber/green/terra (off-palette, low contrast). */}
+            <Avatar initials={owner.initials} size={22} bg={T.blueBg} />
             <span
               style={{
                 color: T.muted,

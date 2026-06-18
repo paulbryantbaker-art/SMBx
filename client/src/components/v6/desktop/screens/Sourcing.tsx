@@ -41,13 +41,20 @@ interface Thesis {
   id: number;
   name: string;
   industry: string | null;
-  naics_code: string | null;
+  /** Real column is `naics_codes` (VARCHAR(10)[] array), NOT a singular string. */
+  naics_codes: string[] | null;
   geography: string | null;
-  /** Raw DOLLARS (not cents) on the thesis row — coerce, then ×100 for fmtCents. */
-  min_revenue: number | null;
-  max_revenue: number | null;
-  min_price: number | null;
-  max_price: number | null;
+  /**
+   * Raw DOLLARS (not cents) on the buyer_theses row — coerce, then ×100 for
+   * fmtCents. Real column names are revenue_/ebitda_/price_ min|max (see
+   * migration 012_sourcing_engine.sql); the GET returns `t.*` straight through.
+   */
+  revenue_min: number | null;
+  revenue_max: number | null;
+  ebitda_min: number | null;
+  ebitda_max: number | null;
+  price_min: number | null;
+  price_max: number | null;
   status: string;
   new_matches?: number;
   pursuing_count?: number;
@@ -72,7 +79,8 @@ interface Candidate {
   name: string | null;
   city: string | null;
   state: string | null;
-  total_score: number;
+  /** INTEGER DEFAULT 0 in the table, but treat as possibly-null defensively. */
+  total_score: number | null;
   tier: string | null;
   pipeline_status: string;
 }
@@ -128,18 +136,28 @@ function buyBoxParts(t: Thesis): string[] {
   const parts: string[] = [];
   if (t.industry) parts.push(t.industry);
   if (t.geography) parts.push(t.geography);
-  const rev = dollarRange(t.min_revenue, t.max_revenue);
-  if (rev) parts.push(`Revenue ${rev}`);
-  const price = dollarRange(t.min_price, t.max_price);
+  // Prefer EBITDA (design's buy-box sample leads with it); fall back to revenue.
+  const ebitda = dollarRange(t.ebitda_min, t.ebitda_max);
+  if (ebitda) {
+    parts.push(`EBITDA ${ebitda}`);
+  } else {
+    const rev = dollarRange(t.revenue_min, t.revenue_max);
+    if (rev) parts.push(`Revenue ${rev}`);
+  }
+  const price = dollarRange(t.price_min, t.price_max);
   if (price) parts.push(`Check ${price}`);
   return parts;
 }
 
 /* ─── FIT pill palette (by score, per design §SCREEN 3) ───────────────────── */
 
-function fitPillColors(score: number): { bg: string; fg: string } {
-  if (score >= 80) return { bg: T.greenBg, fg: T.green };
-  if (score >= 65) return { bg: T.blueBg, fg: T.blue };
+function fitPillColors(score: number | null | undefined): { bg: string; fg: string } {
+  // Non-finite scores (null / pre-scoring) fall to the neutral bucket so the
+  // "—" pill is never inconsistently colored by the >=80/>=65 branches.
+  if (!Number.isFinite(Number(score))) return { bg: T.track, fg: T.muted };
+  const n = Number(score);
+  if (n >= 80) return { bg: T.greenBg, fg: T.green };
+  if (n >= 65) return { bg: T.blueBg, fg: T.blue };
   return { bg: T.track, fg: T.muted };
 }
 
@@ -532,7 +550,7 @@ export default function SourcingScreen({ user }: AtlasScreenProps) {
             BUY-BOX
           </span>
           <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
-            {buyBoxParts(selectedThesis).join("  ·  ") || selectedThesis.name}
+            {buyBoxParts(selectedThesis).join(" · ") || selectedThesis.name}
           </span>
           <span style={{ flex: 1 }} />
           <button
@@ -672,6 +690,10 @@ function CandidateRegion({
   onBuild: () => void;
   onAskYulia: () => void;
 }) {
+  // Row hover is state-driven (see Rows below) to avoid a stuck-shaded row when
+  // the candidate list re-renders mid-hover during a live SSE refresh.
+  const [hoverId, setHoverId] = useState<number | null>(null);
+
   // Still resolving whether a portfolio exists for this thesis.
   if (portfolioLoading) {
     return (
@@ -809,7 +831,11 @@ function CandidateRegion({
       <div style={{ flex: 1, overflow: "auto", minHeight: 0 }}>
         {candidates.map((c) => {
           const fit = fitPillColors(c.total_score);
+          const fitIsReal = Number.isFinite(Number(c.total_score));
           const loc = [c.city, c.state].filter(Boolean).join(", ");
+          // Hover via React state (not direct style mutation) so a row caught
+          // mid-hover during an SSE candidate refresh can't get stuck shaded.
+          const hovered = hoverId === c.id;
           return (
             <div
               key={c.id}
@@ -819,13 +845,11 @@ function CandidateRegion({
                 padding: "13px 18px",
                 borderBottom: `1px solid ${T.rowDiv}`,
                 fontSize: 13.5,
+                background: hovered ? T.hover : "transparent",
+                transition: "background .12s ease",
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = T.hover;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "transparent";
-              }}
+              onMouseEnter={() => setHoverId(c.id)}
+              onMouseLeave={() => setHoverId((id) => (id === c.id ? null : id))}
             >
               <div style={{ flex: 2, minWidth: 0 }}>
                 <div
@@ -840,12 +864,23 @@ function CandidateRegion({
                   {c.name || "Unnamed business"}
                 </div>
                 {loc && (
-                  <div style={{ fontSize: 12, color: T.muted2, marginTop: 2 }}>{loc}</div>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: T.muted2,
+                      marginTop: 2,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {loc}
+                  </div>
                 )}
               </div>
               <div style={{ flex: 1 }}>
                 <Pill bg={fit.bg} fg={fit.fg} style={{ fontSize: 12, padding: "3px 10px" }}>
-                  {Number.isFinite(c.total_score) ? c.total_score : "—"}
+                  {fitIsReal ? Number(c.total_score) : "—"}
                 </Pill>
               </div>
               <div style={{ flex: 1, fontWeight: 600, color: tierColor(c.tier) }}>

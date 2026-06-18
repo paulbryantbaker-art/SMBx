@@ -19,8 +19,8 @@ import type { CSSProperties, ReactNode } from "react";
 import type { AtlasScreenProps } from "../atlasNav";
 import { useAtlasNav, useAtlasChat } from "../atlasNav";
 import { T } from "../atlasTokens";
-import { Sparkle, LoadingState } from "../primitives";
-import { PlusIcon, ChevronDownIcon, ChevronRightIcon, SendArrowIcon } from "../icons";
+import { Sparkle } from "../primitives";
+import { PlusIcon, ChevronRightIcon, SendArrowIcon } from "../icons";
 import { useMobileDeals } from "../../../../hooks/useMobileDeals";
 import { useNextActions, type NextAction } from "../../../../hooks/useNextActions";
 import {
@@ -44,24 +44,45 @@ function timeGreeting(): string {
   return "Good evening";
 }
 
-/* ─── attention-item icon tile (tinted by action type) ────── */
+/* ─── attention-item icon tile (tinted by action semantics) ──
+ *
+ * Keyed off the server's known Material-Symbol `icon` ids (nextActions.ts) so
+ * every action type lands on a distinct tile — not a regex over free text that
+ * collapses nearly everything to the default blue/`›` (the design wants the
+ * three semantic families: review ⚑ blue, nudge/stale ✎ terra, draft 📝 green).
+ *
+ *   rate_review        → ⚑ blue  (someone is blocked on your review — urgent)
+ *   schedule           → ✎ terra (stale deal, needs a nudge)
+ *   arrow_circle_right → 📝 green (ready to advance — the "done, move on" case)
+ *   sell/shopping_cart/savings/merge/auto_awesome → journey-tinted gate work
+ */
 
-type Tile = { bg: string; fg: string };
+type AttentionKind = { bg: string; fg: string; glyph: string };
 
-function tileForAction(a: NextAction): Tile {
-  const k = `${a.icon} ${a.title} ${a.cta}`.toLowerCase();
-  if (/review|approve|pending|wait/.test(k)) return { bg: T.blueBg3, fg: T.blue };
-  if (/stale|idle|nudge|overdue|stall/.test(k)) return { bg: T.terraBg, fg: T.terra };
-  if (/draft|cim|summary|memo|deck/.test(k)) return { bg: T.greenBg, fg: T.green };
-  return { bg: T.blueBg3, fg: T.blue };
-}
-
-function glyphForAction(a: NextAction): string {
-  const k = `${a.icon} ${a.title} ${a.cta}`.toLowerCase();
-  if (/review|approve|pending/.test(k)) return "⚑";
-  if (/stale|idle|nudge|overdue|stall/.test(k)) return "✎";
-  if (/draft|cim|summary|memo/.test(k)) return "📝";
-  return "›";
+function attentionKind(a: NextAction): AttentionKind {
+  switch (a.icon) {
+    case "rate_review":
+      return { bg: T.blueBg3, fg: T.blue, glyph: "⚑" };
+    case "schedule":
+      return { bg: T.terraBg, fg: T.terra, glyph: "✎" };
+    case "arrow_circle_right":
+      return { bg: T.greenBg, fg: T.green, glyph: "📝" };
+    default:
+      break;
+  }
+  // Gate-work actions (icon = journeyIcon) — tint by journey so buy/sell/raise
+  // read distinctly instead of an identical blue tile.
+  switch (a.journeyType) {
+    case "sell":
+      return { bg: T.amberBg, fg: T.amber, glyph: "▲" };
+    case "raise":
+      return { bg: T.violetBg, fg: T.violet, glyph: "◆" };
+    case "pmi":
+      return { bg: T.greenBg, fg: T.green, glyph: "⤢" };
+    case "buy":
+    default:
+      return { bg: T.blueBg3, fg: T.blue, glyph: "▸" };
+  }
 }
 
 /* ─── agent-activity item (mapped from the operating brief) ── */
@@ -71,10 +92,14 @@ type AgentItem = { glyph: string; color: string; text: string; who: string };
 function buildAgentItems(
   pulse: TodayDealPulseItem[] | undefined,
   studio: TodayStudioRefreshItem[] | undefined,
-  morning: { title: string; lede: string } | undefined,
+  morning: { title: string; lede: string; focusDealId?: string } | undefined,
 ): AgentItem[] {
   const items: AgentItem[] = [];
-  if (morning && (morning.title || morning.lede)) {
+  // Only surface the morning brief as "agent activity" when it's tied to a real
+  // focus deal. Its `!focus` branch returns an onboarding line ("No live deal is
+  // attached yet…") for every authed user — presenting that as work Yulia did is
+  // an honesty drift, and it contradicts the left column's first-deal CTA.
+  if (morning && morning.focusDealId && (morning.title || morning.lede)) {
     items.push({
       glyph: "✦",
       color: T.violet,
@@ -110,7 +135,11 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
 
   const deals = useMobileDeals(user);
   const next = useNextActions(user, canFetch);
-  const { brief, loading: briefLoading } = useTodayOperatingBrief(user, canFetch);
+  const {
+    brief,
+    loading: briefLoading,
+    error: briefError,
+  } = useTodayOperatingBrief(user, canFetch);
 
   const [composerValue, setComposerValue] = useState("");
 
@@ -143,9 +172,18 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
     brief?.morningBrief,
   );
 
-  // Authed user with no deals → keep composer + chips, swap the attention
-  // column for a first-deal CTA (never fabricate attention items).
-  const noDeals = canFetch && deals.loaded && !deals.hasData;
+  // Authed user with genuinely no deals → keep composer + chips, swap the
+  // attention column for a first-deal CTA (never fabricate attention items).
+  // Gate on next-actions ALSO returning nothing: useMobileDeals can't tell a
+  // failed /api/deals fetch from a truly empty account (both → hasData=false,
+  // loaded=true), so on a deals error next.actions still carries the real feed
+  // and we render it rather than a misleading "No deals yet" card.
+  const noDeals =
+    canFetch &&
+    deals.loaded &&
+    !deals.hasData &&
+    next.loaded &&
+    next.actions.length === 0;
 
   return (
     <div
@@ -191,14 +229,17 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
           alignItems: "center",
         }}
       >
-        {/* greeting */}
+        {/* greeting — real display_name is unbounded, so wrap+clamp instead of
+            nowrap (a long single first name at 50px would clip the 920px column). */}
         <h1
           style={{
             fontSize: 50,
             fontWeight: 600,
             letterSpacing: "-.025em",
             margin: "0 0 32px",
-            whiteSpace: "nowrap",
+            maxWidth: "100%",
+            textAlign: "center",
+            overflowWrap: "anywhere",
             color: T.ink,
           }}
         >
@@ -271,7 +312,11 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
                 Yulia &amp; your agents
               </span>
             </div>
-            <AgentColumn loading={briefLoading} items={agentItems} />
+            <AgentColumn
+              loading={briefLoading}
+              error={briefError}
+              items={agentItems}
+            />
           </div>
         </div>
       </div>
@@ -331,12 +376,13 @@ function HeroComposer({
           padding: "18px 0",
         }}
       />
-      {/* static model label (per design) */}
+      {/* Model label. There is no model/persona switcher to wire to, so this is
+          a plain label — the design's `▾` chevron is dropped rather than left
+          implying an actionable dropdown that does nothing. */}
       <span
         style={{
           display: "inline-flex",
           alignItems: "center",
-          gap: 5,
           color: T.label,
           fontSize: 14,
           fontWeight: 500,
@@ -346,7 +392,6 @@ function HeroComposer({
         }}
       >
         Yulia Pro
-        <ChevronDownIcon size={16} c={T.label} />
       </span>
       <button
         type="button"
@@ -454,7 +499,7 @@ function AttentionColumn({
   onStartDeal: () => void;
 }) {
   if (loading) {
-    return <LoadingState label="Checking what needs you…" />;
+    return <ColumnLoading rows={3} />;
   }
 
   if (noDeals) {
@@ -472,7 +517,7 @@ function AttentionColumn({
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
       {actions.map((a) => {
-        const tile = tileForAction(a);
+        const kind = attentionKind(a);
         return (
           <button
             key={a.id}
@@ -506,15 +551,15 @@ function AttentionColumn({
                 height: 30,
                 flex: "none",
                 borderRadius: 9,
-                background: tile.bg,
-                color: tile.fg,
+                background: kind.bg,
+                color: kind.fg,
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
                 fontSize: 15,
               }}
             >
-              {glyphForAction(a)}
+              {kind.glyph}
             </span>
             <span style={{ flex: 1, minWidth: 0 }}>
               <span
@@ -592,9 +637,25 @@ function FirstDealCard({ onStartDeal }: { onStartDeal: () => void }) {
 
 /* ─── agent column ────────────────────────────────────────── */
 
-function AgentColumn({ loading, items }: { loading: boolean; items: AgentItem[] }) {
+function AgentColumn({
+  loading,
+  error,
+  items,
+}: {
+  loading: boolean;
+  error: string | null;
+  items: AgentItem[];
+}) {
   if (loading) {
-    return <LoadingState label="Catching up on agent activity…" />;
+    return <ColumnLoading rows={3} />;
+  }
+  // The operating-brief route returns 500 on failure; the hook then nulls the
+  // brief, so an error would otherwise read as the empty "nothing happened"
+  // note. Surface it honestly as an error, not as "no activity".
+  if (error) {
+    return (
+      <NoteCard text="Couldn't load agent activity right now. Refresh to try again." />
+    );
   }
   if (items.length === 0) {
     return (
@@ -604,22 +665,39 @@ function AgentColumn({ loading, items }: { loading: boolean; items: AgentItem[] 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
       {items.map((it, i) => (
+        // Non-interactive activity cards: flatter, soft-surface chrome (no card
+        // shadow, default cursor) so they read as a read-only log and aren't
+        // confused with the clickable white attention cards opposite them.
         <div
           key={i}
           style={{
             display: "flex",
             alignItems: "flex-start",
             gap: 11,
-            background: T.white,
-            border: `1px solid ${T.border}`,
+            background: T.surface,
+            border: `1px solid ${T.hair}`,
             borderRadius: 13,
             padding: "13px 15px",
-            boxShadow: T.shSoft,
+            cursor: "default",
           }}
         >
           <AgentGlyph glyph={it.glyph} color={it.color} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13.5, color: T.ink, lineHeight: 1.45 }}>{it.text}</div>
+            <div
+              style={{
+                fontSize: 13.5,
+                color: T.ink,
+                lineHeight: 1.45,
+                // clamp to 2 lines so a long thesis / studio reason can't blow
+                // out card height
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
+            >
+              {it.text}
+            </div>
             <div
               style={{
                 fontSize: 12,
@@ -662,6 +740,39 @@ function AgentGlyph({ glyph, color }: { glyph: string; color: string }) {
     >
       {glyph}
     </span>
+  );
+}
+
+/* ─── compact column skeleton ─────────────────────────────── */
+
+/**
+ * Card-stack-sized skeleton for the two lower columns. The shared LoadingState
+ * centers a spinner with 48px vertical padding, which makes the two columns
+ * very tall and unequal while their independent fetches resolve at different
+ * times. This matches the resting card stack height so the columns stay
+ * balanced during load.
+ */
+function ColumnLoading({ rows }: { rows: number }) {
+  return (
+    <div
+      aria-busy="true"
+      style={{ display: "flex", flexDirection: "column", gap: 9 }}
+    >
+      {Array.from({ length: rows }).map((_, i) => (
+        <div
+          key={i}
+          style={{
+            height: 58,
+            background: T.white,
+            border: `1px solid ${T.border}`,
+            borderRadius: 13,
+            boxShadow: T.shSoft,
+            opacity: 0.7,
+            animation: "atlas-glow 1.4s ease-in-out infinite",
+          }}
+        />
+      ))}
+    </div>
   );
 }
 

@@ -20,6 +20,8 @@ import type { CSSProperties } from "react";
 import type { AtlasScreenProps } from "../atlasNav";
 import { useAtlasNav, useAtlasChat } from "../atlasNav";
 import { authHeaders } from "../../../../hooks/useAuth";
+import type { User } from "../../../../hooks/useAuth";
+import type { SurfaceContext } from "../../../../lib/yuliaSurfaceContext";
 import { T } from "../atlasTokens";
 import {
   Sparkle,
@@ -38,7 +40,6 @@ import {
 } from "../primitives";
 import type { StepState } from "../primitives";
 import {
-  MonitorIcon,
   SendArrowIcon,
   ChevronRightIcon,
 } from "../icons";
@@ -75,6 +76,9 @@ interface DealBrief {
   marketRead?: { headline?: string; bullets?: string[]; sourceSignals?: string[]; researchNeeded?: string[] };
   taxLegal?: { tax?: string; legal?: string; signoffFlags?: string[] };
   nextMoves?: { title?: string; why?: string; prompt?: string; actionId?: string }[];
+  /** True when a cached brief is served while a background refresh runs
+   *  (yuliaBriefingService SWR). Surfaced as an honest "Updating…" badge. */
+  stale?: boolean;
 }
 
 interface Participant {
@@ -179,9 +183,41 @@ function initialsOf(name: string | null | undefined, email: string | null | unde
 
 const TEAM_AVATAR_BG = [T.greenAv, T.amberAv, T.violetBg, T.blueBg];
 
+/** Stable color from a person's identity key (user_id / email / name) so the
+ *  same teammate keeps one color everywhere — never drifts per array index or
+ *  per message. */
+function avatarColorFor(key: string | number | null | undefined): string {
+  const s = key == null ? "" : String(key);
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return TEAM_AVATAR_BG[Math.abs(h) % TEAM_AVATAR_BG.length];
+}
+
+/** Honest person label: display_name → email → role-titled fallback (Owner /
+ *  teammate #id) so distinct user_ids never all collapse to the literal "Member". */
+function personLabel(
+  name: string | null | undefined,
+  email: string | null | undefined,
+  role: string | null | undefined,
+  userId: number | null | undefined,
+): string {
+  const n = (name || "").trim();
+  if (n) return n;
+  const e = (email || "").trim();
+  if (e) return e;
+  const r = (role || "").trim();
+  if (r === "owner") return "Owner";
+  if (userId != null) return `${r ? titleCase(r) : "Teammate"} #${userId}`;
+  return r ? titleCase(r) : "Teammate";
+}
+
 function relTime(iso: string): string {
   const t = new Date(iso).getTime();
-  if (!Number.isFinite(t)) return "";
+  if (!Number.isFinite(t)) {
+    // Real rows always carry created_at; if it's unparseable, don't leave a
+    // blank gap — fall back to the raw string rather than "".
+    return iso ? String(iso) : "";
+  }
   const diff = Date.now() - t;
   const m = Math.round(diff / 60000);
   if (m < 1) return "just now";
@@ -277,8 +313,12 @@ function useDealTeam(dealId: number | undefined) {
       });
 
     loadMessages();
-    // Deal chat is polling-only (no realtime transport).
-    pollRef.current = setInterval(loadMessages, 12000);
+    // Deal chat is polling-only (no realtime transport). Pause polling while
+    // the tab is hidden so a left-open deal isn't a steady background fetch.
+    pollRef.current = setInterval(() => {
+      if (typeof document !== "undefined" && document.hidden) return;
+      loadMessages();
+    }, 12000);
 
     return () => {
       alive = false;
@@ -358,6 +398,44 @@ function SignalChip({ children }: { children: string }) {
     >
       {children}
     </span>
+  );
+}
+
+/** Deal-team action chip (design §D-right line 75). "Message" is the active
+ *  composer mode; the structured doc/approval actions route to Yulia, where the
+ *  real review-request / document-share / staged-action flows live (THE LINE:
+ *  irreversible steps confirm in chat, never one-click here). */
+function TeamActionChip({
+  label,
+  active = false,
+  onClick,
+}: {
+  label: string;
+  active?: boolean;
+  onClick?: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={!active && !onClick}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        fontSize: 11.5,
+        fontWeight: 600,
+        borderRadius: T.rPill,
+        padding: "6px 11px",
+        background: active ? T.blueBg : T.white,
+        color: active ? T.blue : !onClick ? T.faint : T.muted,
+        border: `1px solid ${active ? T.blue : T.border}`,
+        cursor: active ? "default" : onClick ? "pointer" : "not-allowed",
+        fontFamily: T.font,
+        whiteSpace: "nowrap",
+      }}
+    >
+      {label}
+    </button>
   );
 }
 
@@ -450,7 +528,7 @@ function WorkflowCard({
    COCKPIT SCREEN
    ═══════════════════════════════════════════════════════════════ */
 
-export default function CockpitScreen({ view }: AtlasScreenProps) {
+export default function CockpitScreen({ view, user }: AtlasScreenProps) {
   const nav = useAtlasNav();
   const chat = useAtlasChat();
   const dealId = view.dealId;
@@ -461,7 +539,7 @@ export default function CockpitScreen({ view }: AtlasScreenProps) {
   // No deal selected → honest empty.
   if (dealId == null) {
     return (
-      <div style={rootStyle}>
+      <div style={rootStyleScroll}>
         <EmptyState
           title="No deal open"
           hint="Open a deal from Pipeline or Deals to see its cockpit — verdict, gates, financials, workflows, and the deal team."
@@ -475,7 +553,7 @@ export default function CockpitScreen({ view }: AtlasScreenProps) {
   const loading = detailState === "loading" || detailState === "idle";
   if (loading && !detail) {
     return (
-      <div style={rootStyle}>
+      <div style={rootStyleScroll}>
         <LoadingState label="Loading deal cockpit…" />
       </div>
     );
@@ -483,7 +561,7 @@ export default function CockpitScreen({ view }: AtlasScreenProps) {
 
   if (detailState === "error" || !detail) {
     return (
-      <div style={rootStyle}>
+      <div style={rootStyleScroll}>
         <EmptyState
           title="Couldn’t load this deal"
           hint="The deal cockpit failed to load. It may not exist or you may not have access."
@@ -503,11 +581,19 @@ export default function CockpitScreen({ view }: AtlasScreenProps) {
   const adjEbitda = toNum(deal.ebitda) ?? toNum(deal.sde);
   const asking = toNum(deal.asking_price);
   const multipleRaw = toNum(deal.financials?.multiple);
+  // Derive asking/EBITDA only above a small EBITDA floor and only when the
+  // result lands in a sane band — a tiny but >0 EBITDA otherwise yields an
+  // absurd "4210.5×". A provided financials.multiple is trusted as-is.
+  const EBITDA_FLOOR_CENTS = 100_000; // $1,000 — below this a ratio is noise
+  const derived =
+    asking != null && adjEbitda != null && adjEbitda >= EBITDA_FLOOR_CENTS
+      ? asking / adjEbitda
+      : null;
   const impliedMultiple =
     multipleRaw != null
       ? multipleRaw
-      : asking != null && adjEbitda != null && adjEbitda > 0
-        ? asking / adjEbitda
+      : derived != null && derived > 0 && derived <= 50
+        ? derived
         : null;
 
   const gateSteps = buildGateSteps(deal, detail.gates);
@@ -517,11 +603,16 @@ export default function CockpitScreen({ view }: AtlasScreenProps) {
   const vColors = verdictColors(verdict?.label);
   const fitScore = typeof verdict?.score === "number" && verdict.score > 0 ? verdict.score : null;
 
-  // Deliverable + gate progress for workflow cards (honest counts).
+  // Deliverable + gate progress for workflow cards (honest counts). Guard
+  // against an inconsistent backend (completed > total) so the bar and the
+  // "{done} / {total}" meta never read e.g. "8 / 5" or exceed 100%.
   const dStats = detail.deliverableStats;
-  const dTotal = toNum(dStats.total) ?? 0;
-  const dDone = toNum(dStats.completed) ?? 0;
-  const dProg = toNum(dStats.in_progress) ?? 0;
+  const dTotalRaw = Math.max(0, toNum(dStats.total) ?? 0);
+  const dDoneRaw = Math.max(0, toNum(dStats.completed) ?? 0);
+  const dProgRaw = Math.max(0, toNum(dStats.in_progress) ?? 0);
+  const dTotal = dTotalRaw;
+  const dDone = Math.min(dDoneRaw, dTotal);
+  const dProg = Math.min(dProgRaw, Math.max(0, dTotal - dDone));
   const deliverablePct = dTotal > 0 ? Math.round((dDone / dTotal) * 100) : 0;
 
   const gateDone = gateSteps.filter((s) => s.state === "done").length;
@@ -548,11 +639,39 @@ export default function CockpitScreen({ view }: AtlasScreenProps) {
         }}
       >
         <MarkBadge letter={name} size={38} radius={11} />
-        <div style={{ fontSize: 22, fontWeight: 600, color: T.ink, minWidth: 0 }}>{name}</div>
+        <div
+          style={{
+            fontSize: 22,
+            fontWeight: 600,
+            color: T.ink,
+            minWidth: 0,
+            maxWidth: "min(440px, 60%)",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+          title={name}
+        >
+          {name}
+        </div>
         {journeyLabel(deal) && (
           <Pill bg={T.track} fg={T.label}>
             {journeyLabel(deal)}
           </Pill>
+        )}
+        {/* Verdict / Fit. A skeleton holds the row height while the brief loads
+            so the pills don't pop in and shift the header. */}
+        {briefState === "loading" && (
+          <span
+            aria-hidden="true"
+            style={{
+              display: "inline-block",
+              width: 124,
+              height: 22,
+              borderRadius: T.rPill,
+              background: T.track,
+            }}
+          />
         )}
         {briefState === "ready" && verdict?.label && (
           <Pill bg={vColors.bg} fg={vColors.fg}>
@@ -582,15 +701,41 @@ export default function CockpitScreen({ view }: AtlasScreenProps) {
         />
       </div>
 
-      {/* ── D. Two-column body ────────────────────────── */}
-      <div style={{ display: "flex", gap: 18, marginTop: 18, alignItems: "flex-start", flexWrap: "wrap" }}>
-        {/* LEFT column */}
-        <div style={{ flex: 1, minWidth: 320, display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* ── D. Two-column body — body clips; LEFT scrolls; team panel pins flush ── */}
+      <div style={{ display: "flex", gap: 18, marginTop: 18, flex: 1, minHeight: 0, overflow: "hidden", flexWrap: "wrap" }}>
+        {/* LEFT column — independently scrolls so the team panel can sit flush */}
+        <div
+          style={{
+            flex: 1,
+            minWidth: 320,
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+            overflow: "auto",
+            minHeight: 0,
+            paddingBottom: 22,
+          }}
+        >
           {/* Yulia's read */}
           <Card pad={18} style={{ borderRadius: T.rCardLg }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
               <Sparkle size={16} />
               <span style={{ fontSize: 14.5, fontWeight: 600, color: T.ink }}>Yulia’s read</span>
+              {briefState === "ready" && brief?.stale && (
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: T.amber,
+                    background: T.amberBg,
+                    borderRadius: T.rPill,
+                    padding: "2px 9px",
+                  }}
+                  title="Showing the last read while Yulia refreshes it."
+                >
+                  Updating…
+                </span>
+              )}
             </div>
 
             {briefState === "loading" && <LoadingState label="Reading the deal…" />}
@@ -715,12 +860,37 @@ export default function CockpitScreen({ view }: AtlasScreenProps) {
         {/* RIGHT column — Deal team */}
         <DealTeamPanel
           team={team}
-          onAskYulia={(prompt) => chat?.send(prompt)}
+          onAskYulia={(prompt) =>
+            chat?.send(prompt, dealSurfaceContext(dealId, dealName, deal))
+          }
+          onManage={() => nav.openSettings("members")}
           dealName={dealName}
+          currentEmail={user?.email ?? null}
+          chatReady={chat != null}
         />
       </div>
     </div>
   );
+}
+
+/** Deal-scoped context so Yulia knows which screen/deal a cockpit nudge came
+ *  from — mirrors the chat rail's compact view-derived context. */
+function dealSurfaceContext(
+  dealId: number | undefined,
+  dealName: string,
+  deal: DealRow,
+): SurfaceContext {
+  const ctx: SurfaceContext = {
+    device: "desktop",
+    activeMode: "cockpit",
+    activeView: "cockpit",
+    activeTitle: dealName,
+  };
+  if (dealId != null) ctx.dealId = dealId;
+  if (dealName) ctx.dealTitle = dealName;
+  const stage = journeyLabel(deal);
+  if (stage) ctx.dealStage = stage;
+  return ctx;
 }
 
 /* ─── Deal team panel (participants + messages + composer) ──── */
@@ -728,30 +898,45 @@ export default function CockpitScreen({ view }: AtlasScreenProps) {
 function DealTeamPanel({
   team,
   onAskYulia,
+  onManage,
   dealName,
+  currentEmail,
+  chatReady,
 }: {
   team: ReturnType<typeof useDealTeam>;
   onAskYulia: (prompt: string) => void;
+  onManage: () => void;
   dealName: string;
+  currentEmail: string | null;
+  chatReady: boolean;
 }) {
   const [draft, setDraft] = useState("");
   const [sendingMsg, setSendingMsg] = useState(false);
   const listRef = useRef<HTMLDivElement | null>(null);
 
-  // Owner + participants → avatar stack and a name lookup for messages.
-  const roster: { name: string; email: string | null; role: string }[] = [];
+  // Owner + participants → avatar stack and a name lookup for messages. Each
+  // person carries a stable identity key (user_id, then email) so colors don't
+  // drift, and an honest label that never collapses distinct users to "Member".
+  const roster: {
+    name: string;
+    email: string | null;
+    role: string;
+    key: string;
+  }[] = [];
   if (team.owner) {
     roster.push({
-      name: team.owner.display_name || team.owner.email || "Owner",
+      name: personLabel(team.owner.display_name, team.owner.email, "owner", team.owner.id),
       email: team.owner.email ?? null,
       role: "owner",
+      key: `u${team.owner.id}`,
     });
   }
   for (const p of team.participants) {
     roster.push({
-      name: p.display_name || p.email || "Member",
+      name: personLabel(p.display_name, p.email, p.role, p.user_id),
       email: p.email ?? null,
       role: p.role,
+      key: `u${p.user_id}`,
     });
   }
 
@@ -774,17 +959,20 @@ function DealTeamPanel({
         width: 374,
         flex: "none",
         maxWidth: "100%",
+        alignSelf: "stretch",
         background: T.white,
         border: `1px solid ${T.border}`,
-        borderRadius: T.rCardLg,
+        // Flush to the bottom of the body (design §D-right): top corners round,
+        // bottom corners square so the panel sits on the pane edge.
+        borderRadius: "16px 16px 0 0",
         boxShadow: T.shCard,
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
-        maxHeight: 620,
+        minHeight: 0,
       }}
     >
-      {/* header */}
+      {/* header — "Deal team" + avatar stack + Manage (design §D-right) */}
       <div
         style={{
           display: "flex",
@@ -797,11 +985,11 @@ function DealTeamPanel({
         <span style={{ fontSize: 14.5, fontWeight: 600, color: T.ink }}>Deal team</span>
         {team.teamState === "ready" && roster.length > 0 && (
           <div style={{ display: "flex", alignItems: "center", marginLeft: 4 }}>
-            {roster.slice(0, 5).map((m, i) => (
+            {roster.slice(0, 5).map((m) => (
               <span
-                key={i}
+                key={m.key}
                 style={{
-                  marginLeft: i === 0 ? 0 : -7,
+                  marginLeft: m === roster[0] ? 0 : -7,
                   borderRadius: "50%",
                   border: `2px solid ${T.white}`,
                   display: "inline-flex",
@@ -812,29 +1000,30 @@ function DealTeamPanel({
                   initials={initialsOf(m.name, m.email)}
                   size={25}
                   gradient={m.role === "owner"}
-                  bg={TEAM_AVATAR_BG[i % TEAM_AVATAR_BG.length]}
+                  bg={avatarColorFor(m.key)}
                 />
               </span>
             ))}
           </div>
         )}
         <span style={{ flex: 1 }} />
-        <span
+        <button
+          type="button"
+          onClick={onManage}
           style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 5,
-            fontSize: 11.5,
-            color: T.muted,
-            background: T.track,
-            borderRadius: T.rPill,
-            padding: "4px 10px",
-            maxWidth: 150,
+            border: "none",
+            background: "none",
+            padding: 0,
+            fontSize: 12,
+            fontWeight: 600,
+            color: T.blue,
+            cursor: "pointer",
+            fontFamily: T.font,
+            whiteSpace: "nowrap",
           }}
         >
-          <MonitorIcon size={12} c={T.blue} />
-          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{dealName}</span>
-        </span>
+          Manage
+        </button>
       </div>
 
       {/* message stream */}
@@ -864,28 +1053,58 @@ function DealTeamPanel({
           />
         )}
 
-        {team.messages.map((m, i) => {
-          const who = m.display_name || m.email || "Member";
-          const idx = roster.findIndex((r) => r.email && r.email === m.email);
-          const bg = TEAM_AVATAR_BG[(idx >= 0 ? idx : i) % TEAM_AVATAR_BG.length];
+        {team.messages.map((m) => {
+          const who = personLabel(m.display_name, m.email, m.participant_role, null);
+          // Identity-stable color: match by email to the roster (so a teammate
+          // keeps the SAME color as their header avatar); else hash on the
+          // message's own identity so it's stable down the thread, never index.
+          const rosterMatch = m.email
+            ? roster.find((r) => r.email && r.email === m.email)
+            : undefined;
+          const colorKey = rosterMatch?.key ?? m.email ?? m.display_name ?? `m${m.id}`;
+          const bg = avatarColorFor(colorKey);
+          // Distinguish the signed-in user's own messages (right-aligned, blue).
+          const isMine = !!currentEmail && !!m.email && m.email === currentEmail;
           return (
-            <div key={m.id} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-              <Avatar initials={initialsOf(who, m.email)} size={30} bg={bg} />
+            <div
+              key={m.id}
+              style={{
+                display: "flex",
+                gap: 10,
+                alignItems: "flex-start",
+                flexDirection: isMine ? "row-reverse" : "row",
+              }}
+            >
+              <Avatar
+                initials={initialsOf(who, m.email)}
+                size={30}
+                bg={isMine ? undefined : bg}
+                gradient={isMine}
+              />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "baseline", gap: 7 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: T.ink }}>{who}</span>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "baseline",
+                    gap: 7,
+                    justifyContent: isMine ? "flex-end" : "flex-start",
+                  }}
+                >
+                  <span style={{ fontSize: 13, fontWeight: 600, color: T.ink }}>
+                    {isMine ? "You" : who}
+                  </span>
                   <span style={{ fontSize: 11, color: T.faint }}>{relTime(m.created_at)}</span>
                 </div>
                 <div
                   style={{
                     marginTop: 4,
-                    background: T.white,
-                    border: `1px solid ${T.hair}`,
-                    borderRadius: "4px 12px 12px 12px",
+                    background: isMine ? T.blueBg : T.white,
+                    border: `1px solid ${isMine ? T.stageActiveBd : T.hair}`,
+                    borderRadius: isMine ? "12px 4px 12px 12px" : "4px 12px 12px 12px",
                     padding: "9px 12px",
                     fontSize: 13,
                     lineHeight: 1.5,
-                    color: T.ink3,
+                    color: isMine ? T.ink2 : T.ink3,
                     whiteSpace: "pre-wrap",
                     wordBreak: "break-word",
                   }}
@@ -898,8 +1117,36 @@ function DealTeamPanel({
         })}
       </div>
 
-      {/* composer */}
+      {/* team actions + composer (design §D-right line 75) */}
       <div style={{ padding: "11px 14px", borderTop: `1px solid ${T.railDiv}` }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 7, marginBottom: 9 }}>
+          <TeamActionChip label="Message" active />
+          <TeamActionChip
+            label="Request doc"
+            onClick={
+              chatReady
+                ? () => onAskYulia(`Request a document from the ${dealName} deal team.`)
+                : undefined
+            }
+          />
+          <TeamActionChip
+            label="Submit doc"
+            onClick={
+              chatReady
+                ? () => onAskYulia(`Share a document with the ${dealName} deal team.`)
+                : undefined
+            }
+          />
+          <TeamActionChip
+            label="Request approval"
+            onClick={
+              chatReady
+                ? () =>
+                    onAskYulia(`Request the team's approval on a next step for ${dealName}.`)
+                : undefined
+            }
+          />
+        </div>
         <div
           style={{
             display: "flex",
@@ -954,23 +1201,25 @@ function DealTeamPanel({
             <SendArrowIcon size={15} c="#fff" />
           </button>
         </div>
-        <button
-          type="button"
-          onClick={() => onAskYulia(`Give me your read on ${dealName}.`)}
-          style={{
-            marginTop: 8,
-            width: "100%",
-            textAlign: "center",
-            border: "none",
-            background: "none",
-            fontSize: 11.5,
-            color: T.muted2,
-            cursor: "pointer",
-            fontFamily: T.font,
-          }}
-        >
-          Ask Yulia about this deal →
-        </button>
+        {chatReady && (
+          <button
+            type="button"
+            onClick={() => onAskYulia(`Give me your read on ${dealName}.`)}
+            style={{
+              marginTop: 8,
+              width: "100%",
+              textAlign: "center",
+              border: "none",
+              background: "none",
+              fontSize: 11.5,
+              color: T.muted2,
+              cursor: "pointer",
+              fontFamily: T.font,
+            }}
+          >
+            Ask Yulia about this deal →
+          </button>
+        )}
       </div>
     </div>
   );
@@ -983,6 +1232,15 @@ const rootStyle: CSSProperties = {
   minWidth: 0,
   display: "flex",
   flexDirection: "column",
+  overflow: "hidden",
+  minHeight: 0,
+  padding: "22px 24px 0",
+};
+
+/** Fallback root for the empty / loading / error states, which DO want the
+ *  page to scroll and breathe (no flush-to-bottom team panel to pin). */
+const rootStyleScroll: CSSProperties = {
+  ...rootStyle,
   overflow: "auto",
   padding: "22px 24px",
 };

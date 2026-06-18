@@ -28,6 +28,7 @@ import {
   LoadingState,
   fmtCents,
 } from "../primitives";
+import { ChevronDownIcon } from "../icons";
 import { T } from "../atlasTokens";
 import { useMobileDeals, type MobileStageRow } from "../../../../hooks/useMobileDeals";
 import { usePortfolioSummary } from "../../../../hooks/usePortfolioSummary";
@@ -60,11 +61,6 @@ function markTint(rawId: number) {
 
 /* ─── client-side filter chips over `.all` ───────────────── */
 
-type FilterId = string;
-const OWNER_FILTERS: { id: FilterId; label: string }[] = [
-  { id: "all", label: "All deals" },
-];
-
 function FilterChip({
   label,
   active,
@@ -96,17 +92,97 @@ function FilterChip({
   );
 }
 
+/* ─── sort control (design's "Sort: Fit score ▾") ─────────── */
+
+function SortControl({
+  value,
+  onChange,
+}: {
+  value: SortId;
+  onChange: (id: SortId) => void;
+}) {
+  const current = SORT_OPTIONS.find((o) => o.id === value) ?? SORT_OPTIONS[0];
+  return (
+    <label
+      style={{
+        position: "relative",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 5,
+        fontSize: 13,
+        color: T.muted,
+        cursor: "pointer",
+        flex: "none",
+      }}
+    >
+      <span>Sort: {current.label}</span>
+      <ChevronDownIcon size={13} c={T.muted} />
+      {/* Real, accessible select layered transparently over the label text. */}
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value as SortId)}
+        aria-label="Sort deals"
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          opacity: 0,
+          cursor: "pointer",
+          fontFamily: T.font,
+        }}
+      >
+        {SORT_OPTIONS.map((o) => (
+          <option key={o.id} value={o.id}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 /* ─── deal card ──────────────────────────────────────────── */
 
+/** Treat a non-positive cents value as absent — a literal "0" cents (toNum
+ *  returns 0, not null) must NOT render "$0 Ask"; fall through to the next real
+ *  figure. Mirrors useMobileDeals.fmtMoney's `cents <= 0` guard. */
+function pos(cents: number | null): number | null {
+  return typeof cents === "number" && cents > 0 ? cents : null;
+}
 function moneyFor(row: MobileStageRow): number | null {
-  return row.askingPrice ?? row.ebitda ?? row.sde ?? null;
+  return pos(row.askingPrice) ?? pos(row.ebitda) ?? pos(row.sde) ?? null;
 }
 function moneyLabel(row: MobileStageRow): string {
-  if (row.askingPrice != null) return "Ask";
-  if (row.ebitda != null) return "EBITDA";
-  if (row.sde != null) return "SDE";
+  if (pos(row.askingPrice) != null) return "Ask";
+  if (pos(row.ebitda) != null) return "EBITDA";
+  if (pos(row.sde) != null) return "SDE";
   return "";
 }
+
+/** The sector token, or null. Only "industry · location" subs carry one — a
+ *  location-only sub (no "·") must NOT be read as a sector. */
+function sectorOf(row: MobileStageRow): string | null {
+  const sub = row.sub || "";
+  if (!sub.includes("·")) return null;
+  return sub.split("·")[0]?.trim() || null;
+}
+
+/* ─── sort (the design's "Sort: Fit score ▾") ───────────────── */
+
+type SortId = "fit" | "value" | "name";
+const SORT_OPTIONS: { id: SortId; label: string }[] = [
+  { id: "fit", label: "Fit score" },
+  { id: "value", label: "Deal value" },
+  { id: "name", label: "Name" },
+];
+const SORTERS: Record<SortId, (a: MobileStageRow, b: MobileStageRow) => number> = {
+  // Real composites first (desc); rows without a fit fall to the bottom.
+  fit: (a, b) => (b.fit ?? -1) - (a.fit ?? -1),
+  // Largest money first; rows without a figure fall to the bottom.
+  value: (a, b) => (moneyFor(b) ?? -1) - (moneyFor(a) ?? -1),
+  name: (a, b) => a.name.localeCompare(b.name),
+};
 
 function DealCard({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) {
   const tint = markTint(row.rawId);
@@ -215,7 +291,9 @@ function KanbanColumn({
     <div
       style={{
         flex: 1,
-        minWidth: 0,
+        // A floor keeps the deal-card bottom row (money + fit + verdict pill)
+        // from crushing when five columns share a narrow 1024px viewport.
+        minWidth: 176,
         display: "flex",
         flexDirection: "column",
         minHeight: 0,
@@ -274,10 +352,10 @@ function KanbanColumn({
             {visible.map((row) => (
               <DealCard key={row.id} row={row} onOpen={() => onOpen(row)} />
             ))}
-            {hidden > 0 && (
+            {(hidden > 0 || expanded) && rows.length > COLUMN_CAP && (
               <button
                 type="button"
-                onClick={() => setExpanded(true)}
+                onClick={() => setExpanded((e) => !e)}
                 style={{
                   background: "none",
                   border: "none",
@@ -289,7 +367,7 @@ function KanbanColumn({
                   fontFamily: T.font,
                 }}
               >
-                +{hidden} more
+                {expanded ? "Show less" : `+${hidden} more`}
               </button>
             )}
           </>
@@ -415,27 +493,31 @@ export default function PipelineScreen({ user }: AtlasScreenProps) {
   const { summary } = usePortfolioSummary(user, deals.isAuthed);
 
   const [layout, setLayout] = useState<"board" | "table">("board");
-  const [owner, setOwner] = useState<FilterId>("all");
   const [sector, setSector] = useState<string>("__all__");
+  const [sort, setSort] = useState<SortId>("fit");
 
-  // Sector chips are derived from the real deal data, never hardcoded.
+  // Sector chips are derived from the real deal data, never hardcoded. Only the
+  // "industry · location" rows carry a sector — a location-only sub (no "·")
+  // would otherwise leak a place name into the sector filter, so we require the
+  // separator before treating the head token as an industry.
   const sectors = useMemo(() => {
     const set = new Set<string>();
     for (const row of deals.all) {
-      // sub is "industry · location" — take the leading industry token.
-      const head = (row.sub || "").split("·")[0]?.trim();
+      const head = sectorOf(row);
       if (head) set.add(head);
     }
     return Array.from(set).slice(0, 6);
   }, [deals.all]);
 
   const filtered = useMemo(() => {
-    if (sector === "__all__") return deals.all;
-    return deals.all.filter((row) => {
-      const head = (row.sub || "").split("·")[0]?.trim();
-      return head === sector;
-    });
-  }, [deals.all, sector]);
+    const base =
+      sector === "__all__"
+        ? deals.all
+        : deals.all.filter((row) => sectorOf(row) === sector);
+    // Stable, explicit ordering (the design implies a Sort affordance; the raw
+    // hook order is arbitrary insertion order).
+    return [...base].sort(SORTERS[sort]);
+  }, [deals.all, sector, sort]);
 
   const byStage = useMemo(() => {
     const groups: Record<PipelineStageId, MobileStageRow[]> = {
@@ -453,6 +535,9 @@ export default function PipelineScreen({ user }: AtlasScreenProps) {
 
   /* ── KPIs (real fields or honest "—") ──────────────────── */
   const inFlow = summary ? String(summary.totalActive) : "—";
+  // Gate IN FLOW's delta on summary too — without it the value shows "—" so a
+  // "active deals" caption would read "— · active deals".
+  const inFlowDelta = summary ? "active deals" : undefined;
   const flowValue = summary ? fmtCents(summary.weightedEvCents) : "—";
   const flowDelta =
     summary && Number.isFinite(summary.totalEvCents)
@@ -505,12 +590,12 @@ export default function PipelineScreen({ user }: AtlasScreenProps) {
     <div style={root}>
       {/* KPI row */}
       <div style={{ display: "flex", gap: 14 }}>
-        <KpiCard label="IN FLOW" value={inFlow} delta="active deals" />
+        <KpiCard label="IN FLOW" value={inFlow} delta={inFlowDelta} />
         <KpiCard
           label="FLOW VALUE"
           value={flowValue}
           delta={flowDelta}
-          deltaColor={T.green}
+          deltaColor={T.muted2}
         />
         {/* Honest "—": LOI-out and stalled counts are not derivable from the
             available fields, so we show the gap rather than fabricate. */}
@@ -528,35 +613,32 @@ export default function PipelineScreen({ user }: AtlasScreenProps) {
           value={layout}
           onChange={setLayout}
         />
-        <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
-          {OWNER_FILTERS.map((f) => (
-            <FilterChip
-              key={f.id}
-              label={f.label}
-              active={owner === f.id}
-              onClick={() => setOwner(f.id)}
-            />
-          ))}
-          {sectors.length > 0 && (
+        {/* Sector chips — derived from real "industry · location" subs only.
+            Owner filtering is intentionally absent: RawDeal carries no owner
+            field, so a "My deals / All owners" chip would be a no-op. */}
+        {sectors.length > 0 && (
+          <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
             <FilterChip
               label="All sectors"
               active={sector === "__all__"}
               onClick={() => setSector("__all__")}
             />
-          )}
-          {sectors.map((s) => (
-            <FilterChip
-              key={s}
-              label={s}
-              active={sector === s}
-              onClick={() => setSector(s)}
-            />
-          ))}
-        </div>
+            {sectors.map((s) => (
+              <FilterChip
+                key={s}
+                label={s}
+                active={sector === s}
+                onClick={() => setSector(s)}
+              />
+            ))}
+          </div>
+        )}
         <div style={{ flex: 1 }} />
         <div style={{ fontSize: 13, color: T.muted }}>
           {filtered.length} of {deals.all.length} deals
         </div>
+        {/* Sort: design map §2 — right-aligned "Sort: … ▾". */}
+        <SortControl value={sort} onChange={setSort} />
       </div>
 
       {/* Board / Table */}
