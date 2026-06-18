@@ -1,0 +1,93 @@
+/* Atlas desktop scope — everything here is gated under `.atlas-root` so it
+ * cannot leak into the mobile shell (which renders below the 1024px
+ * breakpoint and never mounts AtlasApp). Imported once from AtlasApp.tsx.
+ *
+ * Safari toolbar rule: the Atlas window is normal-flow / position:absolute
+ * inside a relative parent — NEVER a position:fixed full-viewport bg div. */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
+
+.atlas-root {
+  /* Palette mirrored from atlasTokens.ts (T). Components use the T object for
+   * inline styles; these vars exist for any class-based descendant styling. */
+  --at-font: 'DM Sans', -apple-system, system-ui, sans-serif;
+  --at-ink: #1f1f1f;
+  --at-ink2: #202124;
+  --at-ink3: #3c4043;
+  --at-label: #444746;
+  --at-muted: #5e6b7b;
+  --at-muted2: #80868b;
+  --at-faint: #9aa3ad;
+  --at-blue: #0b57d0;
+  --at-blue-bg: #e8f0fe;
+  --at-blue-bg2: #eef4ff;
+  --at-blue-bg3: #f3f7ff;
+  --at-nav-active: #d3e3fd;
+  --at-stage-active-bd: #bcd4fb;
+  --at-approval-bd: #cfe0ff;
+  --at-tab-active: rgba(11, 87, 208, 0.10);
+  --at-tab-hover: rgba(11, 87, 208, 0.05);
+  --at-green: #1f8a5b;
+  --at-green-bg: #e6f4ec;
+  --at-green-av: #cdeada;
+  --at-amber: #9a6b00;
+  --at-amber-bg: #fdf0d5;
+  --at-amber-bg2: #fff3e0;
+  --at-amber-av: #f3e0b0;
+  --at-cite-bg: #fff6d6;
+  --at-cite-bd: #f0dca0;
+  --at-terra: #c2410c;
+  --at-terra-bg: #fdeee6;
+  --at-violet: #5b53d6;
+  --at-violet-bg: #ecebfb;
+  --at-white: #fff;
+  --at-surface: #fafbfd;
+  --at-page: #e9edf2;
+  --at-hover: #f7f9fc;
+  --at-track: #f0f4f9;
+  --at-rail-div: #f0f2f5;
+  --at-border: #e3e8ef;
+  --at-hair: #eef1f5;
+  --at-row-div: #f3f5f8;
+  --at-row-div2: #f6f8fb;
+  --at-input-bd: #dbe3ec;
+  --at-prog-track: #e8edf3;
+  --at-spark: linear-gradient(135deg, #4285F4, #9B72CB 50%, #D96570);
+  --at-avatar-grad: linear-gradient(135deg, #4285F4, #9B72CB);
+
+  font-family: var(--at-font);
+  color: var(--at-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.atlas-root *,
+.atlas-root *::before,
+.atlas-root *::after {
+  box-sizing: border-box;
+}
+
+/* Webkit scrollbar — 9px, soft thumb, transparent track (design spec). */
+.atlas-root ::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+.atlas-root ::-webkit-scrollbar-thumb {
+  background: #d3dae3;
+  border-radius: 8px;
+}
+.atlas-root ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Today background blob breathes via this keyframe (6s ease-in-out infinite). */
+@keyframes atlas-glow {
+  0%, 100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.04);
+  }
+}
