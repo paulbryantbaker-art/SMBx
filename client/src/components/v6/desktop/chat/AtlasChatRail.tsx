@@ -161,6 +161,7 @@ export function AtlasChatRail() {
           onFileUpload={chat?.uploadFile}
           disabled={sending}
           placeholder={composerHintFor(view)}
+          hideStarter
         />
         <div style={S.disclaimer}>Yulia sees this screen · check important info</div>
       </div>
