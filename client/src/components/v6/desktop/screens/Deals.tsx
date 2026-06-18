@@ -1,10 +1,15 @@
 /**
- * Atlas DEALS — the portfolio table (design map 00 §"SCREEN 4 — DEALS").
+ * Atlas DEALS — the merged portfolio screen (design map 00 §"SCREEN 4 — DEALS"
+ * folded together with the former Pipeline kanban).
  *
- * isApp screen, NO 198px sub-list. Renders a real table over
- * useMobileDeals(user).all (MobileStageRow[]). Search + filter chips filter
- * client-side; rows open the deal cockpit; "+ Add deal" routes to Yulia (the
- * front door). Pager paginates the array.
+ * ONE tab, table-first. A Board/Table Segmented toggle picks the view; both
+ * read the SAME filtered slice of `useMobileDeals(user).all` (the shared search
+ * box + All/Buy/Sell/Watchlist chips apply to both):
+ *   - TABLE (default, the workhorse — scales to hundreds of deals): the real
+ *     portfolio table — search, filter chips, columns, pager.
+ *   - BOARD: the active funnel — KPI tiles (usePortfolioSummary) + a kanban
+ *     grouped by the five shared PIPELINE_STAGES (Source→Value→Diligence→
+ *     Structure→Close).
  *
  * Honesty notes:
  *  - SECTOR: MobileStageRow has no `industry`. The `sub` line is built from
@@ -16,16 +21,28 @@
  *  - ACTIVITY: MobileStageRow carries no updated_at → "—".
  *  - FIT: rendered ONLY when `fit` is a real composite (the hook already nulls
  *    synthetic fits in `all`). Otherwise "—".
+ *  - KPIs: IN FLOW / FLOW VALUE are real summary fields; IOI/LOI and STALLED are
+ *    not derivable from the available fields → honest "—".
+ *  - MONEY: a literal 0-cents "Ask" must not print "$0 Ask"; the board card
+ *    falls through ask → EBITDA → SDE via a `> 0` guard.
  */
 import { useMemo, useState } from "react";
 import type { AtlasScreenProps } from "../atlasNav";
 import { useAtlasNav, useAtlasChat } from "../atlasNav";
 import { useMobileDeals, type MobileStageRow } from "../../../../hooks/useMobileDeals";
+import { usePortfolioSummary } from "../../../../hooks/usePortfolioSummary";
+import {
+  PIPELINE_STAGES,
+  type PipelineStageId,
+} from "../../../../lib/pipelineStages";
+import type { Verdict } from "../../mobile/types";
 import type { User } from "../../../../hooks/useAuth";
 import {
   MarkBadge,
   Avatar,
   Pill,
+  KpiCard,
+  Segmented,
   EmptyState,
   LoadingState,
   fmtCents,
@@ -36,6 +53,7 @@ import { T } from "../atlasTokens";
 const PAGE_SIZE = 25;
 
 type FilterId = "all" | "buy" | "sell" | "watch";
+type LayoutId = "table" | "board";
 
 const FILTERS: { id: FilterId; label: string }[] = [
   { id: "all", label: "All" },
@@ -128,6 +146,31 @@ function ownerOf(user: User | null): { initials: string; name: string } | null {
   return { initials: initials.toUpperCase(), name };
 }
 
+/* ─── board money helpers (ported from Pipeline) ───────────── */
+
+/** Treat a non-positive cents value as absent — a literal "0" cents (toNum
+ *  returns 0, not null) must NOT render "$0 Ask"; fall through to the next real
+ *  figure. Mirrors useMobileDeals.fmtMoney's `cents <= 0` guard. */
+function pos(cents: number | null): number | null {
+  return typeof cents === "number" && cents > 0 ? cents : null;
+}
+function moneyFor(row: MobileStageRow): number | null {
+  return pos(row.askingPrice) ?? pos(row.ebitda) ?? pos(row.sde) ?? null;
+}
+function moneyLabel(row: MobileStageRow): string {
+  if (pos(row.askingPrice) != null) return "Ask";
+  if (pos(row.ebitda) != null) return "EBITDA";
+  if (pos(row.sde) != null) return "SDE";
+  return "";
+}
+
+/** Verdict pill palette (per design map). */
+function verdictPill(v: Verdict): { label: string; bg: string; fg: string } {
+  if (v === "pursue") return { label: "Pursue", bg: T.greenBg, fg: T.green };
+  if (v === "pass") return { label: "Pass", bg: T.amberBg, fg: T.amber };
+  return { label: "Watch", bg: T.blueBg, fg: T.blue };
+}
+
 /* ─── column layout (flex weights from map 00) ─────────────── */
 
 const COLS = {
@@ -147,15 +190,18 @@ const ROW_PAD = "11px 22px";
 export default function DealsScreen({ user }: AtlasScreenProps) {
   const nav = useAtlasNav();
   const chat = useAtlasChat();
-  const { all, loading, loaded } = useMobileDeals(user);
+  const { all, loading, loaded, isAuthed } = useMobileDeals(user);
+  const { summary } = usePortfolioSummary(user, isAuthed);
 
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterId>("all");
+  const [layout, setLayout] = useState<LayoutId>("table");
   const [page, setPage] = useState(0);
 
   const owner = ownerOf(user);
 
-  // Client-side filter: search over name + sector, chips over side/watchlist.
+  // Client-side filter: search over name + sub, chips over side/watchlist.
+  // Drives BOTH the table and the board (same `all` set, one filter pass).
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return all.filter((row) => {
@@ -169,6 +215,19 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
       return true;
     });
   }, [all, query, filter]);
+
+  // Board grouping — the same filtered slice, bucketed into the five stages.
+  const byStage = useMemo(() => {
+    const groups: Record<PipelineStageId, MobileStageRow[]> = {
+      source: [],
+      value: [],
+      diligence: [],
+      structure: [],
+      close: [],
+    };
+    for (const row of filtered) groups[row.stageId].push(row);
+    return groups;
+  }, [filtered]);
 
   // Clamp page when the filtered set shrinks.
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
@@ -184,6 +243,17 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
     setFilter(id);
     setPage(0);
   };
+
+  const openDeal = (row: MobileStageRow) => nav.openDeal(row.rawId, row.name);
+
+  /* ── KPIs (real fields or honest "—") ──────────────────── */
+  const inFlow = summary ? String(summary.totalActive) : "—";
+  const inFlowDelta = summary ? "active deals" : undefined;
+  const flowValue = summary ? fmtCents(summary.weightedEvCents) : "—";
+  const flowDelta =
+    summary && Number.isFinite(summary.totalEvCents)
+      ? `of ${fmtCents(summary.totalEvCents)} total EV`
+      : undefined;
 
   const root: React.CSSProperties = {
     flex: 1,
@@ -204,6 +274,8 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
           onSearch={onSearch}
           filter={filter}
           onFilter={onFilter}
+          layout={layout}
+          onLayout={setLayout}
           count={0}
           onAdd={() => chat?.send("I want to add a new deal.")}
         />
@@ -222,6 +294,8 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
           onSearch={onSearch}
           filter={filter}
           onFilter={onFilter}
+          layout={layout}
+          onLayout={setLayout}
           count={0}
           onAdd={() => chat?.send("I want to add a new deal.")}
         />
@@ -244,67 +318,87 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
         onSearch={onSearch}
         filter={filter}
         onFilter={onFilter}
+        layout={layout}
+        onLayout={setLayout}
         count={all.length}
         onAdd={() => chat?.send("I want to add a new deal.")}
       />
 
-      {/* table */}
-      <div style={{ flex: 1, overflow: "auto", minHeight: 0 }}>
-        {/* sticky header */}
-        <div
-          style={{
-            position: "sticky",
-            top: 0,
-            zIndex: 1,
-            background: T.white,
-            padding: "10px 22px",
-            borderTop: `1px solid ${T.hair}`,
-            borderBottom: `1px solid ${T.hair}`,
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            fontSize: 11,
-            fontWeight: 600,
-            color: T.muted2,
-            letterSpacing: ".04em",
+      {layout === "board" ? (
+        <BoardView
+          byStage={byStage}
+          matchCount={filtered.length}
+          inFlow={inFlow}
+          inFlowDelta={inFlowDelta}
+          flowValue={flowValue}
+          flowDelta={flowDelta}
+          onOpen={openDeal}
+          onClear={() => {
+            setQuery("");
+            setFilter("all");
           }}
-        >
-          <span style={{ flex: COLS.deal, minWidth: 0 }}>DEAL</span>
-          <span style={{ flex: COLS.sector, minWidth: 0 }}>SECTOR</span>
-          <span style={{ flex: COLS.stage, minWidth: 0 }}>STAGE</span>
-          <span style={{ flex: COLS.ev, minWidth: 0 }}>EV</span>
-          <span style={{ flex: COLS.fit, minWidth: 0 }}>FIT</span>
-          <span style={{ flex: COLS.owner, minWidth: 0 }}>OWNER</span>
-          <span style={{ flex: COLS.activity, minWidth: 0 }}>ACTIVITY</span>
-        </div>
+        />
+      ) : (
+        <>
+          {/* table */}
+          <div style={{ flex: 1, overflow: "auto", minHeight: 0 }}>
+            {/* sticky header */}
+            <div
+              style={{
+                position: "sticky",
+                top: 0,
+                zIndex: 1,
+                background: T.white,
+                padding: "10px 22px",
+                borderTop: `1px solid ${T.hair}`,
+                borderBottom: `1px solid ${T.hair}`,
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                fontSize: 11,
+                fontWeight: 600,
+                color: T.muted2,
+                letterSpacing: ".04em",
+              }}
+            >
+              <span style={{ flex: COLS.deal, minWidth: 0 }}>DEAL</span>
+              <span style={{ flex: COLS.sector, minWidth: 0 }}>SECTOR</span>
+              <span style={{ flex: COLS.stage, minWidth: 0 }}>STAGE</span>
+              <span style={{ flex: COLS.ev, minWidth: 0 }}>EV</span>
+              <span style={{ flex: COLS.fit, minWidth: 0 }}>FIT</span>
+              <span style={{ flex: COLS.owner, minWidth: 0 }}>OWNER</span>
+              <span style={{ flex: COLS.activity, minWidth: 0 }}>ACTIVITY</span>
+            </div>
 
-        {/* rows */}
-        {pageRows.length === 0 ? (
-          <div style={{ padding: "40px 22px" }}>
-            <EmptyState
-              title="No deals match"
-              hint="Try a different search or filter."
-            />
+            {/* rows */}
+            {pageRows.length === 0 ? (
+              <div style={{ padding: "40px 22px" }}>
+                <EmptyState
+                  title="No deals match"
+                  hint="Try a different search or filter."
+                />
+              </div>
+            ) : (
+              pageRows.map((row) => (
+                <DealRow key={row.id} row={row} owner={owner} onOpen={() => openDeal(row)} />
+              ))
+            )}
           </div>
-        ) : (
-          pageRows.map((row) => (
-            <DealRow key={row.id} row={row} owner={owner} onOpen={() => nav.openDeal(row.rawId, row.name)} />
-          ))
-        )}
-      </div>
 
-      {/* pager */}
-      <Pager
-        total={filtered.length}
-        start={start}
-        end={Math.min(start + PAGE_SIZE, filtered.length)}
-        canPrev={safePage > 0}
-        canNext={safePage < pageCount - 1}
-        // Step off safePage (the clamped, rendered page), not the raw page, so
-        // a stale out-of-range `page` can't desync the first prev/next click.
-        onPrev={() => setPage(Math.max(0, safePage - 1))}
-        onNext={() => setPage(Math.min(pageCount - 1, safePage + 1))}
-      />
+          {/* pager */}
+          <Pager
+            total={filtered.length}
+            start={start}
+            end={Math.min(start + PAGE_SIZE, filtered.length)}
+            canPrev={safePage > 0}
+            canNext={safePage < pageCount - 1}
+            // Step off safePage (the clamped, rendered page), not the raw page, so
+            // a stale out-of-range `page` can't desync the first prev/next click.
+            onPrev={() => setPage(Math.max(0, safePage - 1))}
+            onNext={() => setPage(Math.min(pageCount - 1, safePage + 1))}
+          />
+        </>
+      )}
     </div>
   );
 }
@@ -316,6 +410,8 @@ function Toolbar({
   onSearch,
   filter,
   onFilter,
+  layout,
+  onLayout,
   count,
   onAdd,
 }: {
@@ -323,6 +419,8 @@ function Toolbar({
   onSearch: (v: string) => void;
   filter: FilterId;
   onFilter: (id: FilterId) => void;
+  layout: LayoutId;
+  onLayout: (id: LayoutId) => void;
   count: number;
   onAdd: () => void;
 }) {
@@ -337,6 +435,17 @@ function Toolbar({
         flex: "none",
       }}
     >
+      {/* Board / Table toggle — Table is the default workhorse; Board shows the
+          active funnel. Both views read the same filtered set. */}
+      <Segmented
+        options={[
+          { id: "table", label: "Table" },
+          { id: "board", label: "Board" },
+        ]}
+        value={layout}
+        onChange={onLayout}
+      />
+
       {/* search field */}
       <label
         style={{
@@ -424,7 +533,274 @@ function Toolbar({
   );
 }
 
-/* ─── row ──────────────────────────────────────────────────── */
+/* ─── board view (KPI tiles + kanban, ported from Pipeline) ── */
+
+function BoardView({
+  byStage,
+  matchCount,
+  inFlow,
+  inFlowDelta,
+  flowValue,
+  flowDelta,
+  onOpen,
+  onClear,
+}: {
+  byStage: Record<PipelineStageId, MobileStageRow[]>;
+  matchCount: number;
+  inFlow: string;
+  inFlowDelta?: string;
+  flowValue: string;
+  flowDelta?: string;
+  onOpen: (row: MobileStageRow) => void;
+  onClear: () => void;
+}) {
+  return (
+    <div
+      style={{
+        flex: 1,
+        minHeight: 0,
+        display: "flex",
+        flexDirection: "column",
+        gap: 16,
+        overflow: "auto",
+        padding: "4px 22px 22px",
+      }}
+    >
+      {/* KPI row */}
+      <div style={{ display: "flex", gap: 14 }}>
+        <KpiCard label="IN FLOW" value={inFlow} delta={inFlowDelta} />
+        <KpiCard
+          label="FLOW VALUE"
+          value={flowValue}
+          delta={flowDelta}
+          deltaColor={T.muted2}
+        />
+        {/* Honest "—": LOI-out and stalled counts are not derivable from the
+            available fields, so we show the gap rather than fabricate. */}
+        <KpiCard label="IOI / LOI OUT" value="—" delta="not yet tracked" deltaColor={T.muted2} />
+        <KpiCard label="STALLED >30d" value="—" delta="not yet tracked" deltaColor={T.muted2} />
+      </div>
+
+      {/* Kanban — the active funnel across the five shared stages */}
+      {matchCount === 0 ? (
+        <EmptyState
+          title="No deals match"
+          hint="Clear the search and filters to see your full pipeline."
+          cta="Clear filters"
+          onCta={onClear}
+        />
+      ) : (
+        <div style={{ flex: 1, display: "flex", gap: 13, minHeight: 0 }}>
+          {PIPELINE_STAGES.map((stage) => (
+            <KanbanColumn
+              key={stage.id}
+              title={stage.title}
+              rows={byStage[stage.id]}
+              onOpen={onOpen}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── kanban column ──────────────────────────────────────── */
+
+const COLUMN_CAP = 12; // overflow rows fold under a "+N more" footer
+
+function KanbanColumn({
+  title,
+  rows,
+  onOpen,
+}: {
+  title: string;
+  rows: MobileStageRow[];
+  onOpen: (row: MobileStageRow) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const visible = expanded ? rows : rows.slice(0, COLUMN_CAP);
+  const hidden = rows.length - visible.length;
+  return (
+    <div
+      style={{
+        flex: 1,
+        // A floor keeps the deal-card bottom row (money + fit + verdict pill)
+        // from crushing when five columns share a narrow 1024px viewport.
+        minWidth: 176,
+        display: "flex",
+        flexDirection: "column",
+        minHeight: 0,
+        background: T.hover,
+        borderRadius: 13,
+        padding: 9,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 6,
+          padding: "3px 5px 9px",
+        }}
+      >
+        <div style={{ fontSize: 13, fontWeight: 600, color: T.label }}>{title}</div>
+        <span
+          style={{
+            fontSize: 11.5,
+            color: T.muted2,
+            background: T.white,
+            border: `1px solid ${T.hair}`,
+            borderRadius: T.rPill,
+            padding: "2px 9px",
+            flex: "none",
+          }}
+        >
+          {rows.length}
+        </span>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 9,
+          overflow: "auto",
+          flex: 1,
+          minHeight: 0,
+        }}
+      >
+        {rows.length === 0 ? (
+          <div
+            style={{
+              fontSize: 12,
+              color: T.faint,
+              textAlign: "center",
+              padding: "16px 8px",
+            }}
+          >
+            No deals
+          </div>
+        ) : (
+          <>
+            {visible.map((row) => (
+              <DealCard key={row.id} row={row} onOpen={() => onOpen(row)} />
+            ))}
+            {(hidden > 0 || expanded) && rows.length > COLUMN_CAP && (
+              <button
+                type="button"
+                onClick={() => setExpanded((e) => !e)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: 12,
+                  color: T.blue,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  padding: 8,
+                  fontFamily: T.font,
+                }}
+              >
+                {expanded ? "Show less" : `+${hidden} more`}
+              </button>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─── deal card (board) ──────────────────────────────────── */
+
+function DealCard({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) {
+  const tint = markTint(row.rawId);
+  const vp = verdictPill(row.verdict);
+  const money = fmtCents(moneyFor(row));
+  const label = moneyLabel(row);
+  return (
+    <div
+      onClick={onOpen}
+      style={{
+        background: T.white,
+        border: `1px solid ${T.border}`,
+        borderRadius: 12,
+        padding: 12,
+        cursor: "pointer",
+        boxShadow: "0 1px 2px rgba(60,64,67,.05)",
+        transition: "box-shadow .15s ease",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = "0 4px 14px rgba(60,64,67,.13)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = "0 1px 2px rgba(60,64,67,.05)";
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 9, minWidth: 0 }}>
+        <MarkBadge letter={row.name} bg={tint.bg} fg={tint.fg} size={23} radius={7} />
+        <div
+          style={{
+            fontSize: 13.5,
+            fontWeight: 600,
+            color: T.ink,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            minWidth: 0,
+          }}
+          title={row.name}
+        >
+          {row.name}
+        </div>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 8,
+          marginTop: 10,
+        }}
+      >
+        <div
+          style={{
+            fontSize: 12,
+            color: T.muted,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            minWidth: 0,
+          }}
+          title={row.sub}
+        >
+          {money !== "—" ? (
+            <>
+              {money}
+              {label && <span style={{ color: T.faint }}> {label}</span>}
+            </>
+          ) : (
+            row.sub || "—"
+          )}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, flex: "none" }}>
+          {/* Fit numeral renders ONLY when backed by a real composite. */}
+          {row.fit != null && (
+            <span style={{ fontSize: 11.5, fontWeight: 700, color: T.ink3 }}>
+              {row.fit}
+              <span style={{ color: T.faint, fontWeight: 600 }}> fit</span>
+            </span>
+          )}
+          <Pill bg={vp.bg} fg={vp.fg} style={{ fontSize: 10.5, padding: "2px 8px" }}>
+            {vp.label}
+          </Pill>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── row (table) ──────────────────────────────────────────── */
 
 function DealRow({
   row,

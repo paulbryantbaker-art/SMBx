@@ -197,7 +197,7 @@ export default function IntegrationScreen({ view }: AtlasScreenProps) {
       <Root>
         <EmptyState
           title="Open a deal to see its integration plan"
-          hint="The 100-day post-close plan lives on a deal. Pick one from your pipeline to track Day-0 controls, workstreams, and synergy levers."
+          hint="The 100-day post-close plan lives on a deal. Pick one from your deals to track Day-0 controls, workstreams, and synergy levers."
           cta="Go to deals"
           onCta={() => nav.go("deals")}
         />

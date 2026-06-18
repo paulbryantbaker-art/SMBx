@@ -1,9 +1,11 @@
 /**
  * AtlasHeader — the 58px global header + module tab strip + utilities.
  *
- * Tab strip: Today · Pipeline · Sourcing · Deals · Studio · Integration ·
- * Files · Agent. Active-tab logic (from design map 00 §b): cockpit → Deals,
- * canvas → Deals (keeps the prior app tab feel), settings → none.
+ * Tab strip: Today · Deals · Sourcing · Studio · Integration · Files · Agent.
+ * (The old "Pipeline" tab is merged into Deals — its kanban funnel is the Deals
+ * Board toggle.) Active-tab logic (from design map 00 §b): cockpit → Deals,
+ * canvas → Deals (keeps the prior app tab feel), pipeline alias → Deals,
+ * settings → none.
  */
 import type { CSSProperties } from "react";
 import { useAtlasNav, type AtlasScreen } from "./atlasNav";
@@ -18,9 +20,8 @@ interface TabDef {
 
 const TABS: TabDef[] = [
   { id: "today", label: "Today" },
-  { id: "pipeline", label: "Pipeline" },
-  { id: "sourcing", label: "Sourcing" },
   { id: "deals", label: "Deals" },
+  { id: "sourcing", label: "Sourcing" },
   { id: "studio", label: "Studio" },
   { id: "integration", label: "Integration" },
   { id: "files", label: "Files" },
@@ -28,9 +29,10 @@ const TABS: TabDef[] = [
 ];
 
 /** Map the current screen to the highlighted tab. Cockpit + canvas highlight
- *  Deals; settings highlights nothing. */
+ *  Deals; the retired "pipeline" alias also highlights Deals (the funnel now
+ *  lives in the Deals Board toggle); settings highlights nothing. */
 function activeTabFor(screen: AtlasScreen): AtlasScreen | null {
-  if (screen === "cockpit" || screen === "canvas") return "deals";
+  if (screen === "cockpit" || screen === "canvas" || screen === "pipeline") return "deals";
   if (screen === "settings") return null;
   return screen;
 }

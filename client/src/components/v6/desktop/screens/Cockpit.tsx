@@ -542,9 +542,9 @@ export default function CockpitScreen({ view, user }: AtlasScreenProps) {
       <div style={rootStyleScroll}>
         <EmptyState
           title="No deal open"
-          hint="Open a deal from Pipeline or Deals to see its cockpit — verdict, gates, financials, workflows, and the deal team."
-          cta="Go to Pipeline"
-          onCta={() => nav.go("pipeline")}
+          hint="Open a deal from Deals to see its cockpit — verdict, gates, financials, workflows, and the deal team."
+          cta="Go to Deals"
+          onCta={() => nav.go("deals")}
         />
       </div>
     );
@@ -565,8 +565,8 @@ export default function CockpitScreen({ view, user }: AtlasScreenProps) {
         <EmptyState
           title="Couldn’t load this deal"
           hint="The deal cockpit failed to load. It may not exist or you may not have access."
-          cta="Back to Pipeline"
-          onCta={() => nav.go("pipeline")}
+          cta="Back to Deals"
+          onCta={() => nav.go("deals")}
         />
       </div>
     );
@@ -850,7 +850,7 @@ export default function CockpitScreen({ view, user }: AtlasScreenProps) {
             <div style={{ display: "flex", flexWrap: "wrap", gap: 9, marginTop: 9 }}>
               <ThisDealChip label="Files" onClick={() => nav.go("files", { dealId, dealName })} />
               <ThisDealChip label="Studio" onClick={() => nav.go("studio", { dealId, dealName })} />
-              <ThisDealChip label="Pipeline" onClick={() => nav.go("pipeline", { dealId, dealName })} />
+              <ThisDealChip label="Deals" onClick={() => nav.go("deals", { dealId, dealName })} />
               <ThisDealChip label="Integration" onClick={() => nav.go("integration", { dealId, dealName })} />
               <ThisDealChip label="Sourcing" onClick={() => nav.go("sourcing", { dealId, dealName })} />
             </div>

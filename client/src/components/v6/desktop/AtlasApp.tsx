@@ -35,7 +35,6 @@ import { AtlasHeader } from "./AtlasHeader";
 import { AtlasChatRail } from "./chat/AtlasChatRail";
 
 import TodayScreen from "./screens/Today";
-import PipelineScreen from "./screens/Pipeline";
 import SourcingScreen from "./screens/Sourcing";
 import DealsScreen from "./screens/Deals";
 import CockpitScreen from "./screens/Cockpit";
@@ -299,10 +298,12 @@ function AtlasShell({ user, chat }: ShellProps) {
 /** The active app screen (isApp views 1–8 + cockpit + canvas). */
 function AppScreen({ user, view }: { user: User | null; view: AtlasView }) {
   switch (view.screen) {
-    case "pipeline":
-      return <PipelineScreen user={user} view={view} />;
     case "sourcing":
       return <SourcingScreen user={user} view={view} />;
+    // "pipeline" is a retired tab — kept in the AtlasScreen union as an alias so
+    // lingering deep links / nav.go('pipeline') still resolve to the merged
+    // table-first Deals screen (which carries the Board funnel toggle).
+    case "pipeline":
     case "deals":
       return <DealsScreen user={user} view={view} />;
     case "studio":
