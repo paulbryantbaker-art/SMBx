@@ -74,19 +74,24 @@ interface ChatDockProps {
       reliably populate the input. In-app (logged in) the + still shows and
       opens the file picker. */
   isMobile?: boolean;
+  /** Suppress the "Start with Yulia" journey/tools starter popup (and the +
+      button when there is no file upload). Used by the Atlas desktop rail,
+      where the popup's global CSS isn't scoped and its icons balloon. Default
+      false → mobile/marketing behavior is unchanged. */
+  hideStarter?: boolean;
 }
 
 /* ═══ COMPONENT ═══ */
 
 const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
-  { onSend, onFileUpload, disabled, placeholder = "Tell Yulia about your deal...", rotatingPlaceholders, variant = 'dock', rows, typewriterHints, typewriterPrefix = '', onInputFocus, onInputBlur, isMobile = false },
+  { onSend, onFileUpload, disabled, placeholder = "Tell Yulia about your deal...", rotatingPlaceholders, variant = 'dock', rows, typewriterHints, typewriterPrefix = '', onInputFocus, onInputBlur, isMobile = false, hideStarter = false },
   ref,
 ) {
   const isHero = variant === 'hero';
   // Hide the + button on mobile when logged out — the starter popup doesn't
   // reliably populate the input on mobile; in-app users keep it for file
   // upload.
-  const showPlusButton = !(isMobile && !onFileUpload);
+  const showPlusButton = !(isMobile && !onFileUpload) && !(hideStarter && !onFileUpload);
   const [value, setValue] = useState('');
   const [toolsOpen, setToolsOpen] = useState(false);
   // Separate state for the mobile Vaul sheet — keeps the desktop dropdown's
@@ -587,7 +592,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
       <div className="max-w-[860px] mx-auto pb-3 pt-2 lg:pb-4">
         <div className="home-dock-card relative">
           {/* Tool popup */}
-          <div ref={toolsRef} className={`home-tools-popup ${toolsOpen ? 'open' : ''}`}>
+          <div ref={toolsRef} className={`home-tools-popup ${toolsOpen ? 'open' : ''}`} style={hideStarter ? { display: 'none' } : undefined}>
             <div className="px-4 pt-3 pb-2">
               <span className="text-[12px] font-semibold tracking-wide uppercase" style={{ color: 'rgba(0,0,0,0.35)' }}>Start with Yulia</span>
             </div>

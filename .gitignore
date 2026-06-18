@@ -14,3 +14,6 @@ client/textures_backup/
 # Generated test-run artifacts (not source)
 testing/agent-pov/results/
 testing/definitive/results/
+
+# stray local sqlite (app uses Railway Postgres)
+database.db
