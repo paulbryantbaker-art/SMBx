@@ -445,7 +445,7 @@ function renderBlock(b: MdBlock, i: number) {
                       style={{
                         textAlign: "left",
                         padding: "7px 11px",
-                        borderBottom: `2px solid ${T.border}`,
+                        borderBottom: `1px solid ${T.border}`,
                         color: T.ink,
                         fontWeight: 600,
                         whiteSpace: "nowrap",
@@ -991,7 +991,6 @@ export default function StudioScreen({ user }: AtlasScreenProps) {
       style={{
         width: 198,
         flex: "none",
-        borderRight: `1px solid ${T.hair}`,
         padding: "16px 12px",
         display: "flex",
         flexDirection: "column",
@@ -1007,9 +1006,6 @@ export default function StudioScreen({ user }: AtlasScreenProps) {
           padding: "0 11px 8px",
         }}
       >
-        <span style={{ fontSize: 11.5, fontWeight: 700, color: T.muted2, letterSpacing: ".05em" }}>
-          COLLATERAL
-        </span>
         <button
           type="button"
           onClick={() => askYulia("Draft a new deliverable for one of my deals.")}
@@ -1107,7 +1103,6 @@ export default function StudioScreen({ user }: AtlasScreenProps) {
           style={{
             height: 46,
             flex: "none",
-            borderBottom: `1px solid ${T.hair}`,
             padding: "0 18px",
             display: "flex",
             alignItems: "center",
@@ -1195,7 +1190,6 @@ export default function StudioScreen({ user }: AtlasScreenProps) {
               background: T.terraBg,
               color: T.terra,
               fontSize: 12.5,
-              borderBottom: `1px solid ${T.hair}`,
             }}
           >
             {exportError}
@@ -1204,7 +1198,7 @@ export default function StudioScreen({ user }: AtlasScreenProps) {
 
         {/* stage — slide canvas (slides mode + content) OR document/PDF body */}
         {format === "slides" && !detailLoading && !detailError && slides.length ? (
-          <div style={{ flex: 1, minHeight: 0, background: T.track, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          <div style={{ flex: 1, minHeight: 0, background: T.surface, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             {/* centered 16:9 slide canvas */}
             <div
               style={{
@@ -1224,7 +1218,6 @@ export default function StudioScreen({ user }: AtlasScreenProps) {
               style={{
                 flex: "none",
                 height: 104,
-                borderTop: `1px solid ${T.border}`,
                 background: T.white,
                 padding: "0 18px",
                 display: "flex",
@@ -1245,7 +1238,7 @@ export default function StudioScreen({ user }: AtlasScreenProps) {
             </div>
           </div>
         ) : (
-        <div style={{ flex: 1, minHeight: 0, background: T.track, overflow: "auto" }}>
+        <div style={{ flex: 1, minHeight: 0, background: T.surface, overflow: "auto" }}>
           <div style={{ maxWidth: 920, margin: "0 auto", padding: "24px 24px 40px" }}>
             {/* the real metadata "cover" — honest fields only */}
             <div
@@ -1258,12 +1251,6 @@ export default function StudioScreen({ user }: AtlasScreenProps) {
                 marginBottom: 18,
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                <Sparkle size={14} />
-                <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: ".04em", color: T.muted2 }}>
-                  {(selected.artifact_kind || selected.tier || "Deliverable").toUpperCase()}
-                </span>
-              </div>
               <div
                 style={{
                   fontSize: 26,

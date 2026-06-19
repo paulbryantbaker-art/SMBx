@@ -404,7 +404,6 @@ export default function FilesScreen({ view }: AtlasScreenProps) {
         style={{
           width: 198,
           flex: "none",
-          borderRight: `1px solid ${T.hair}`,
           background: T.white,
           display: "flex",
           flexDirection: "column",
@@ -420,9 +419,6 @@ export default function FilesScreen({ view }: AtlasScreenProps) {
             padding: "0 7px 10px",
           }}
         >
-          <span style={{ fontSize: 11.5, fontWeight: 700, color: T.muted2, letterSpacing: ".05em" }}>
-            DATA ROOM
-          </span>
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -550,7 +546,6 @@ export default function FilesScreen({ view }: AtlasScreenProps) {
               style={{
                 width: 360,
                 flex: "none",
-                borderRight: `1px solid ${T.hair}`,
                 overflow: "auto",
               }}
             >
@@ -610,7 +605,6 @@ function DocViewer({
         style={{
           minHeight: 46,
           flex: "none",
-          borderBottom: `1px solid ${T.hair}`,
           padding: "0 18px",
           display: "flex",
           alignItems: "center",
@@ -684,7 +678,7 @@ function DocViewer({
 
       {/* Metadata "viewer" — the document's REAL fields. No page-anchored clause
           box is rendered because no real page-anchored citation exists in this data. */}
-      <div style={{ flex: 1, overflow: "auto", background: T.track, padding: "26px 0", display: "flex", justifyContent: "center" }}>
+      <div style={{ flex: 1, overflow: "auto", background: T.surface, padding: "26px 0", display: "flex", justifyContent: "center" }}>
         <div
           style={{
             width: 540,
@@ -735,14 +729,13 @@ function DocViewer({
                   alignItems: "center",
                   gap: 7,
                   fontSize: 11.5,
-                  fontWeight: 700,
-                  color: T.blue,
-                  letterSpacing: ".03em",
+                  fontWeight: 600,
+                  color: T.muted,
                   marginBottom: 7,
                 }}
               >
                 <Sparkle size={13} />
-                WORKING PAPER PROVENANCE
+                Working paper provenance
               </div>
               {doc.model_execution_title && (
                 <div style={{ fontSize: 13.5, color: T.ink, marginBottom: 4 }}>

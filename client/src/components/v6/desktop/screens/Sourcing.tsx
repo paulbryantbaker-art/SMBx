@@ -528,7 +528,6 @@ export default function SourcingScreen({ user }: AtlasScreenProps) {
       {selectedThesis && (
         <div
           style={{
-            background: T.hover,
             borderRadius: 12,
             padding: "11px 15px",
             display: "flex",
@@ -538,17 +537,6 @@ export default function SourcingScreen({ user }: AtlasScreenProps) {
             color: T.label,
           }}
         >
-          <span
-            style={{
-              fontSize: 11.5,
-              fontWeight: 600,
-              color: T.muted2,
-              letterSpacing: ".04em",
-              flex: "none",
-            }}
-          >
-            BUY-BOX
-          </span>
           <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
             {buyBoxParts(selectedThesis).join(" · ") || selectedThesis.name}
           </span>
@@ -843,7 +831,7 @@ function CandidateRegion({
                 display: "flex",
                 alignItems: "center",
                 padding: "13px 18px",
-                borderBottom: `1px solid ${T.rowDiv}`,
+                borderBottom: `1px solid ${T.rowDiv2}`,
                 fontSize: 13.5,
                 background: hovered ? T.hover : "transparent",
                 transition: "background .12s ease",

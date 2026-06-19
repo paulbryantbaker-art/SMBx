@@ -715,9 +715,6 @@ function WorkstreamCard({
 
       {/* execution status control → updateWorkstream */}
       <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        <span style={{ fontSize: 10.5, color: T.muted2, fontWeight: 600, letterSpacing: ".03em", textTransform: "uppercase" }}>
-          Status
-        </span>
         <div style={{ position: "relative" }}>
           <select
             value={status}
@@ -797,9 +794,7 @@ function LeverRow({
     display: "flex",
     alignItems: "flex-start",
     gap: 8,
-    border: `1px solid ${T.hair}`,
-    borderRadius: 9,
-    padding: "8px 10px",
+    padding: "4px 0",
     fontSize: 12.5,
     minWidth: 0,
   };
@@ -844,8 +839,6 @@ function ValueLeversSection({
             justifyContent: "space-between",
             gap: 12,
             padding: "13px 16px",
-            borderBottom: hasLevers ? `1px solid ${T.rowDiv}` : "none",
-            background: T.surface,
           }}
         >
           <span style={{ fontSize: 12.5, color: T.muted, fontWeight: 600 }}>

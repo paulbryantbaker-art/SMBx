@@ -127,13 +127,12 @@ export default function SettingsScreen({ user, view }: AtlasScreenProps) {
   const pane: SettingsPane = view.settingsPane ?? "profile";
 
   return (
-    <div style={{ flex: 1, minWidth: 0, display: "flex", background: T.surface, overflow: "hidden" }}>
+    <div style={{ flex: 1, minWidth: 0, display: "flex", overflow: "hidden" }}>
       {/* left nav rail — 236px */}
       <nav
         style={{
           width: 236,
           flex: "none",
-          borderRight: `1px solid ${T.hair}`,
           background: T.white,
           padding: "18px 13px",
           display: "flex",
@@ -142,17 +141,6 @@ export default function SettingsScreen({ user, view }: AtlasScreenProps) {
           overflow: "auto",
         }}
       >
-        <div
-          style={{
-            fontSize: 11.5,
-            fontWeight: 700,
-            color: T.muted2,
-            letterSpacing: ".05em",
-            padding: "0 13px 8px",
-          }}
-        >
-          SETTINGS
-        </div>
         {NAV.map((item) => {
           const active = item.pane === pane;
           return (
@@ -211,14 +199,6 @@ export default function SettingsScreen({ user, view }: AtlasScreenProps) {
 
 /* ─── shared bits ──────────────────────────────────────────────────────────── */
 
-function Eyebrow({ children }: { children: ReactNode }) {
-  return (
-    <div style={{ fontSize: 11.5, fontWeight: 600, color: T.muted2, letterSpacing: ".03em" }}>
-      {children}
-    </div>
-  );
-}
-
 function HonestNote({ children, style }: { children: ReactNode; style?: CSSProperties }) {
   return (
     <div style={{ fontSize: 12, color: T.muted2, lineHeight: 1.55, ...style }}>{children}</div>
@@ -267,7 +247,6 @@ function ProfilePane({ user }: { user: User | null }) {
           display: "flex",
           alignItems: "center",
           gap: 14,
-          borderBottom: `1px solid ${T.railDiv}`,
           paddingBottom: 20,
         }}
       >
@@ -292,7 +271,6 @@ function ProfilePane({ user }: { user: User | null }) {
               display: "flex",
               alignItems: "center",
               padding: "11px 0",
-              borderBottom: `1px solid ${T.rowDiv2}`,
             }}
           >
             <div style={{ width: 160, fontSize: 13, color: T.muted2, fontWeight: 500, flex: "none" }}>
@@ -369,7 +347,6 @@ function BillingPane() {
       <div style={{ display: "flex", gap: 14, alignItems: "stretch", flexWrap: "wrap" }}>
         {/* plan card */}
         <Card pad={20} style={{ flex: 1, minWidth: 240, borderRadius: T.rCardLg, display: "flex", flexDirection: "column" }}>
-          <Eyebrow>PLAN</Eyebrow>
           <div style={{ fontSize: 24, fontWeight: 600, color: T.ink, marginTop: 4 }}>{planName}</div>
           <div style={{ fontSize: 13, color: T.muted, marginTop: 4 }}>
             {priceLine}
@@ -411,7 +388,7 @@ function BillingPane() {
 
         {/* usage card */}
         <Card pad={20} style={{ flex: 1.4, minWidth: 280, borderRadius: T.rCardLg }}>
-          <Eyebrow>USAGE THIS CYCLE</Eyebrow>
+          <div style={{ fontSize: 14, fontWeight: 600, color: T.ink }}>Usage this cycle</div>
           <div style={{ marginTop: 12 }}>
             <UsageBody ent={ent} />
           </div>
@@ -420,7 +397,7 @@ function BillingPane() {
 
       {/* status / receipts card — honest: no invoice ledger is exposed here */}
       <Card pad={20} style={{ borderRadius: T.rCardLg }}>
-        <Eyebrow>BILLING</Eyebrow>
+        <div style={{ fontSize: 14, fontWeight: 600, color: T.ink }}>Billing</div>
         <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
           <KeyVal k="Status" v={<StatusValue status={row?.status} />} />
           {renewLabel && <KeyVal k={renewRowKey(renewLabel)} v={stripLead(renewLabel)} />}
@@ -594,10 +571,10 @@ function NotificationsPane() {
 
       {NOTIF_GROUPS.map((g) => (
         <Card key={g.title} pad="8px 18px" style={{ borderRadius: T.rCardLg }}>
-          <div style={{ padding: "12px 0 6px" }}>
-            <Eyebrow>{g.title.toUpperCase()}</Eyebrow>
+          <div style={{ padding: "12px 0 6px", fontSize: 13, fontWeight: 600, color: T.muted }}>
+            {g.title}
           </div>
-          {g.items.map((it, idx) => (
+          {g.items.map((it) => (
             <div
               key={it.id}
               style={{
@@ -605,7 +582,6 @@ function NotificationsPane() {
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "12px 0",
-                borderTop: idx === 0 ? "none" : `1px solid ${T.rowDiv2}`,
               }}
             >
               <span style={{ fontSize: 14, color: T.ink }}>{it.label}</span>
@@ -706,17 +682,15 @@ function MembersPane({ user }: { user: User | null }) {
             display: "flex",
             alignItems: "center",
             padding: "12px 18px",
-            borderBottom: `1px solid ${T.hair}`,
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: 600,
             color: T.muted2,
-            letterSpacing: ".04em",
           }}
         >
-          <span style={{ flex: 2 }}>MEMBER</span>
-          <span style={{ flex: 1 }}>ROLE</span>
-          <span style={{ flex: 1 }}>DEAL ACCESS</span>
-          <span style={{ flex: 0.7, textAlign: "right" }}>STATUS</span>
+          <span style={{ flex: 2 }}>Member</span>
+          <span style={{ flex: 1 }}>Role</span>
+          <span style={{ flex: 1 }}>Deal access</span>
+          <span style={{ flex: 0.7, textAlign: "right" }}>Status</span>
         </div>
 
         {/* the only honest org member is the signed-in user */}

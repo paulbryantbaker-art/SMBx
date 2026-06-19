@@ -70,8 +70,8 @@ export default function CanvasScreen({ view }: AtlasScreenProps) {
 
   if (modelTab) {
     return (
-      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", overflow: "auto", background: T.white }}>
-        <div style={{ padding: "18px 24px", borderBottom: `1px solid ${T.hair}`, flex: "none" }}>
+      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", overflow: "auto" }}>
+        <div style={{ padding: "18px 24px", flex: "none" }}>
           <div style={{ fontSize: 18, fontWeight: 600, color: T.ink, letterSpacing: "-.01em" }}>
             {modelTab.title || "Interactive model"}
           </div>
@@ -85,8 +85,8 @@ export default function CanvasScreen({ view }: AtlasScreenProps) {
 
   if (artifact) {
     return (
-      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", overflow: "auto", background: T.white }}>
-        <div style={{ padding: "18px 24px", borderBottom: `1px solid ${T.hair}`, flex: "none" }}>
+      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", overflow: "auto" }}>
+        <div style={{ padding: "18px 24px", flex: "none" }}>
           <div style={{ fontSize: 18, fontWeight: 600, color: T.ink, letterSpacing: "-.01em" }}>{artifact.title}</div>
         </div>
         <div style={{ flex: 1, minWidth: 0, overflow: "auto", padding: "24px 32px 56px" }}>
@@ -121,7 +121,7 @@ export default function CanvasScreen({ view }: AtlasScreenProps) {
   // No live model, no stashed artifact — honest empty. The canvas opens when
   // Yulia fires a tool result; nudge the user back to a working surface.
   return (
-    <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", background: T.white }}>
+    <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
       <EmptyState
         title="Nothing open on the canvas"
         hint="Ask Yulia to run an analysis or open a model and it will appear here."
