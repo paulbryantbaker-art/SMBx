@@ -210,21 +210,19 @@ export default function TodayMobileScreen({ user }: AtlasScreenProps) {
           marginBottom: 24,
         }}
       >
-        {/* soft glow — decorative; absolute-in-relative, NOT a fixed full-viewport
-            bg div (Safari toolbar rule). Bottom-anchored (blooms UP from near the
-            floating nav, an iOS dock-light read) rather than centered behind the
-            composer. bottom:-90 bleeds it just below the hero band toward the
-            screen bottom; left:50% + translateX(-50%) keeps it horizontally
-            centered (no vertical transform — there's no animation here to fight). */}
+        {/* soft glow behind the composer — decorative; absolute-in-relative, NOT
+            a fixed full-viewport bg div (Safari toolbar rule). Centered on the
+            hero (greeting + composer) via translate(-50%,-50%); no animation here
+            so the transform-centering holds. */}
         <div
           aria-hidden="true"
           style={{
             position: "absolute",
-            bottom: -90,
+            top: "54%",
             left: "50%",
-            transform: "translateX(-50%)",
-            width: 460,
-            height: 340,
+            transform: "translate(-50%, -50%)",
+            width: 440,
+            height: 320,
             background:
               "radial-gradient(ellipse at center, rgba(66,133,244,.26), rgba(155,114,203,.15) 46%, transparent 72%)",
             filter: "blur(16px)",
