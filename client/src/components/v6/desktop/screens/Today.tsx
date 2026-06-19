@@ -202,9 +202,9 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
         aria-hidden="true"
         style={{
           position: "absolute",
-          top: 140,
+          top: "34dvh",
           left: "50%",
-          transform: "translateX(-50%)",
+          transform: "translate(-50%, -50%)",
           width: 900,
           height: 420,
           background:
@@ -223,12 +223,25 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
           width: 920,
           maxWidth: "92%",
           margin: "0 auto",
-          padding: "92px 0 56px",
+          padding: "0 0 64px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
         }}
       >
+        {/* HERO — greeting + composer vertically centered in the first screenful
+            so the Yulia composer is the focal point (the Gemini-home pattern);
+            the attention / agents band sits just below the fold. */}
+        <div
+          style={{
+            minHeight: "calc(100dvh - 132px)",
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
         {/* greeting — real display_name is unbounded, so wrap+clamp instead of
             nowrap (a long single first name at 50px would clip the 920px column). */}
         <h1
@@ -269,14 +282,15 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
           <QuickChip emoji="📂" label="Summarize a data room" onClick={() => nav.go("files")} />
           <QuickChip emoji="🤖" label="Set up an agent" onClick={() => nav.go("agent")} />
         </div>
+        </div>
 
-        {/* two-column lower band */}
+        {/* two-column lower band — below the centered hero (scroll to reach) */}
         <div
           style={{
             width: "100%",
             display: "flex",
             gap: 18,
-            marginTop: 62,
+            marginTop: 16,
             paddingTop: 30,
             borderTop: `1px solid ${T.hair}`,
           }}
