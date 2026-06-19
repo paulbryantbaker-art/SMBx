@@ -131,9 +131,14 @@ export function AtlasChatRail() {
         <Sparkle size={18} />
         <span style={S.headerTitle}>Yulia</span>
         <span style={{ flex: 1 }} />
+        {/* Context pill = which screen Yulia is reading. On a deal cockpit the
+            deal-detail header already names the deal (avatar + title), so the
+            pill stays the GENERIC screen label ("Deal") to avoid showing the
+            same name twice. The deal name lives in the tooltip + surface context
+            (Yulia still knows it), just not duplicated on-screen. */}
         <span style={S.ctxPill} title={ctxLabelFor(view)}>
           <MonitorIcon size={13} c={T.blue} />
-          <span style={S.ctxLabel}>{ctxLabelFor(view)}</span>
+          <span style={S.ctxLabel}>{CTX_LABEL[view.screen] ?? "Yulia"}</span>
         </span>
       </header>
 

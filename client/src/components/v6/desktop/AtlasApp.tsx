@@ -164,19 +164,54 @@ function AtlasShell({ user, chat }: ShellProps) {
   const viewRef = useRef(view);
   viewRef.current = view;
 
+  // ── In-app browser history ──────────────────────────────────────────────
+  // Desktop nav is internal `view` state. Without history integration a
+  // browser Back / trackpad swipe-back leaves the in-app view entirely and —
+  // compounded by the bfcache reload guard — the app re-mounts at its initial
+  // `today` view, so backing out of a deal dumped the user on Today instead of
+  // the page they came from. We mirror a router: each forward navigation pushes
+  // a history entry carrying the target view; popstate restores it; the initial
+  // entry is seeded on mount. pushState/popstate are same-document, so the
+  // bfcache guard never fires for in-app Back (only on real cross-document
+  // restores), and the two coexist cleanly.
+  const commitView = useCallback((next: AtlasView, mode: "push" | "replace" = "push") => {
+    setView(next);
+    const state = { atlasView: next };
+    if (mode === "replace") window.history.replaceState(state, "");
+    else window.history.pushState(state, "");
+  }, []);
+  // Stable handle for the once-subscribed canvas_action listener.
+  const commitViewRef = useRef(commitView);
+  commitViewRef.current = commitView;
+
+  // Seed the initial entry so backing to it restores `today` (not a reload).
+  useEffect(() => {
+    window.history.replaceState({ atlasView: viewRef.current }, "");
+  }, []);
+
+  // Restore the view a Back / Forward lands on.
+  useEffect(() => {
+    const onPop = (e: PopStateEvent) => {
+      const v = (e.state as { atlasView?: AtlasView } | null)?.atlasView ?? { screen: "today" };
+      setView(v);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
   const nav = useMemo<AtlasNav>(
     () => ({
       view,
       go: (screen: AtlasScreen, opts?: Partial<AtlasView>) =>
-        setView({ screen, ...opts }),
+        commitView({ screen, ...opts }),
       openDeal: (dealId: number, dealName?: string) =>
-        setView({ screen: "cockpit", dealId, dealName }),
+        commitView({ screen: "cockpit", dealId, dealName }),
       openSettings: (pane?: SettingsPane) =>
-        setView({ screen: "settings", settingsPane: pane ?? "profile" }),
+        commitView({ screen: "settings", settingsPane: pane ?? "profile" }),
       openCanvas: (canvasTabId: string, dealId?: number) =>
-        setView({ screen: "canvas", canvasTabId, dealId }),
+        commitView({ screen: "canvas", canvasTabId, dealId }),
     }),
-    [view],
+    [view, commitView],
   );
 
   // Subscribe to Yulia's tool results (the ONE chat→canvas bridge). Same event
@@ -191,7 +226,7 @@ function AtlasShell({ user, chat }: ShellProps) {
       if (detail.canvas_action === "create_model_tab" && detail.tabId) {
         const ensured = ensureModelTabFromCanvasAction(detail);
         if (ensured) {
-          setView({
+          commitViewRef.current({
             screen: "canvas",
             canvasTabId: ensured.tabId,
             dealId: typeof detail.dealId === "number" ? detail.dealId : current.dealId,
@@ -209,7 +244,7 @@ function AtlasShell({ user, chat }: ShellProps) {
           analysisRunId: detail.analysisRunId ?? null,
           dealId: typeof detail.dealId === "number" ? detail.dealId : null,
         });
-        setView({ screen: "canvas", canvasTabId: id, dealId: current.dealId, dealName: current.dealName });
+        commitViewRef.current({ screen: "canvas", canvasTabId: id, dealId: current.dealId, dealName: current.dealName });
         return;
       }
 
@@ -225,7 +260,7 @@ function AtlasShell({ user, chat }: ShellProps) {
           analysisRunId: tab.analysisRunId ?? detail.analysisRunId ?? null,
           dealId: typeof detail.dealId === "number" ? detail.dealId : null,
         });
-        setView({ screen: "canvas", canvasTabId: id, dealId: current.dealId, dealName: current.dealName });
+        commitViewRef.current({ screen: "canvas", canvasTabId: id, dealId: current.dealId, dealName: current.dealName });
         return;
       }
 

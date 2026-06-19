@@ -421,10 +421,10 @@ const S: Record<string, CSSProperties> = {
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
-    width: 360,
-    height: 280,
+    width: 390,
+    height: 300,
     background:
-      "radial-gradient(ellipse at center, rgba(66,133,244,.22), rgba(155,114,203,.13) 46%, transparent 72%)",
+      "radial-gradient(ellipse at center, rgba(66,133,244,.30), rgba(155,114,203,.18) 46%, transparent 72%)",
     filter: "blur(16px)",
     pointerEvents: "none",
     zIndex: 0,

@@ -221,10 +221,10 @@ export default function TodayMobileScreen({ user }: AtlasScreenProps) {
             top: "54%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 440,
-            height: 320,
+            width: 470,
+            height: 344,
             background:
-              "radial-gradient(ellipse at center, rgba(66,133,244,.26), rgba(155,114,203,.15) 46%, transparent 72%)",
+              "radial-gradient(ellipse at center, rgba(66,133,244,.35), rgba(155,114,203,.21) 46%, transparent 72%)",
             filter: "blur(16px)",
             pointerEvents: "none",
             zIndex: 0,
