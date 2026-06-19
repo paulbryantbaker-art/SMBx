@@ -178,23 +178,30 @@ export default function AskYuliaScreen({ view }: AtlasScreenProps) {
 function EmptyThread({ onPick, disabled }: { onPick: (text: string) => void; disabled: boolean }) {
   return (
     <div style={S.emptyWrap}>
-      <Sparkle size={26} />
-      <div style={S.emptyTitle}>Ask Yulia anything</div>
-      <div style={S.emptySub}>
-        Yulia reads the screen you came from and your deal context.
-      </div>
-      <div style={S.starterRow}>
-        {STARTERS.map((s) => (
-          <button
-            key={s}
-            type="button"
-            disabled={disabled}
-            style={{ ...S.starterChip, opacity: disabled ? 0.5 : 1 }}
-            onClick={() => onPick(s)}
-          >
-            {s}
-          </button>
-        ))}
+      {/* soft glow centered behind the hero — mirrors the Today composer glow.
+          Sibling (not z-index:-1) so it layers correctly over the white screen
+          bg: glow zIndex 0, content zIndex 1. Absolute-in-relative, no animation
+          (Safari toolbar rule). */}
+      <div aria-hidden="true" style={S.emptyGlow} />
+      <div style={S.emptyInner}>
+        <Sparkle size={26} />
+        <div style={S.emptyTitle}>Ask Yulia anything</div>
+        <div style={S.emptySub}>
+          Yulia reads the screen you came from and your deal context.
+        </div>
+        <div style={S.starterRow}>
+          {STARTERS.map((s) => (
+            <button
+              key={s}
+              type="button"
+              disabled={disabled}
+              style={{ ...S.starterChip, opacity: disabled ? 0.5 : 1 }}
+              onClick={() => onPick(s)}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -399,14 +406,36 @@ const S: Record<string, CSSProperties> = {
   },
   /* empty thread */
   emptyWrap: {
+    position: "relative",
     margin: "auto",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: 8,
     textAlign: "center",
     padding: "24px 8px",
     maxWidth: 300,
+  },
+  /* soft glow behind the empty hero (matches Today's composer glow) */
+  emptyGlow: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 360,
+    height: 280,
+    background:
+      "radial-gradient(ellipse at center, rgba(66,133,244,.22), rgba(155,114,203,.13) 46%, transparent 72%)",
+    filter: "blur(16px)",
+    pointerEvents: "none",
+    zIndex: 0,
+  },
+  emptyInner: {
+    position: "relative",
+    zIndex: 1,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 8,
   },
   emptyTitle: { fontSize: 17, fontWeight: 600, color: T.ink, marginTop: 2 },
   emptySub: { fontSize: 13, lineHeight: 1.5, color: T.muted, marginBottom: 6 },
