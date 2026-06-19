@@ -49,6 +49,20 @@ if (typeof window !== 'undefined') {
   });
 }
 
+/* ─── Stale back-forward-cache guard ───
+   The legacy "mobile-everywhere" app (V6Mobile) pushed #tab history entries, so a
+   back/forward swipe could restore a stale bfcache snapshot of the OLD mobile UI
+   on top of the new Atlas shell. The Atlas shells (desktop + mobile) use internal
+   state, not browser history — so if the browser restores a page from the
+   back-forward cache (pageshow.persisted), reload to render the CURRENT build
+   instead of a stale snapshot. reload() loads fresh (not from bfcache), so this
+   does not loop (the next pageshow has persisted === false). */
+if (typeof window !== 'undefined') {
+  window.addEventListener('pageshow', (e) => {
+    if ((e as PageTransitionEvent).persisted) window.location.reload();
+  });
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
