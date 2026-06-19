@@ -38,7 +38,7 @@ import TodayScreen from "./screens/Today";
 import SourcingScreen from "./screens/Sourcing";
 import DealsScreen from "./screens/Deals";
 import CockpitScreen from "./screens/Cockpit";
-import StudioScreen from "./screens/Studio";
+import StudioScreen from "./screens/StudioCreate";
 import IntegrationScreen from "./screens/Integration";
 import FilesScreen from "./screens/Files";
 import AgentScreen from "./screens/Agent";

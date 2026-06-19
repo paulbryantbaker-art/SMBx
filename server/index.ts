@@ -544,6 +544,26 @@ app.use('/api/chat', chatLimiter, chatRouter);
 app.use('/api/stripe', requireAuth, stripeRouter); // routes read req.userId; this mount is before the blanket requireAuth, so gate it here (webhook is mounted separately above, stays public)
 app.use('/api', shareLinksRouter); // has both public (/shared/:token) and protected routes
 
+// Studio collateral catalog — generic, non-sensitive (the list of buildable
+// deliverable types). Mounted public (before the blanket requireAuth) so the
+// Studio creation launcher can show "what you can build" without forcing auth;
+// the CREATE action (POST /deals/:id/deliverables) stays gated.
+app.get('/api/deliverables/catalog', async (_req, res) => {
+  try {
+    const sql = (await import('./db.js')).sql;
+    const items = await sql`
+      SELECT slug, name, description, journey, gate, category, tier, deliverable_type
+      FROM menu_items
+      WHERE active = true
+      ORDER BY category, name
+    `;
+    res.json({ items });
+  } catch (err: any) {
+    console.error('[catalog] failed:', err.message);
+    res.status(500).json({ error: 'Failed to load catalog' });
+  }
+});
+
 // ─── Public document share viewer (no auth — token-based) ────────
 app.get('/api/shared/doc/:token', async (req, res) => {
   try {
