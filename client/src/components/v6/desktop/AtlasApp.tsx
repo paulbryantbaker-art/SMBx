@@ -384,7 +384,7 @@ const S: Record<string, CSSProperties> = {
     minHeight: 0,
     position: "relative",
     overflow: "auto",
-    background: T.surface,
+    background: `linear-gradient(180deg, ${T.white} 0px, ${T.surface} 220px)`,
   },
   // App: rail + detail region.
   appBody: {
@@ -393,13 +393,15 @@ const S: Record<string, CSSProperties> = {
     display: "flex",
     overflow: "hidden",
   },
-  // Faint canvas tint (not white): lets the white Yulia rail + the white content
-  // cards float on a calm ground, so neither needs a hard divider line to read.
+  // Canvas: a SMOOTH gradient, white at the very top (so it meets the borderless
+  // nav with no seam) fading to a faint tint below — subtly highlights the
+  // content ground so the white Yulia rail + white cards float, with no hard
+  // edge anywhere.
   detailRegion: {
     flex: 1,
     minWidth: 0,
     display: "flex",
-    background: T.surface,
+    background: `linear-gradient(180deg, ${T.white} 0px, ${T.surface} 220px)`,
   },
   // Settings: no rail.
   settingsWrap: {
@@ -407,6 +409,6 @@ const S: Record<string, CSSProperties> = {
     minHeight: 0,
     display: "flex",
     overflow: "hidden",
-    background: T.surface,
+    background: `linear-gradient(180deg, ${T.white} 0px, ${T.surface} 220px)`,
   },
 };

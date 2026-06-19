@@ -156,7 +156,8 @@ const S: Record<string, CSSProperties> = {
     alignItems: "center",
     gap: 9,
     padding: "0 16px",
-    borderBottom: `1px solid ${T.hair}`,
+    // No bottom hairline — the canvas below fades from white at the top
+    // (detailRegion gradient), so the nav meets the content seamlessly.
     background: T.white,
   },
   logo: { display: "flex", alignItems: "center", gap: 9, marginRight: 6, flex: "none" },
