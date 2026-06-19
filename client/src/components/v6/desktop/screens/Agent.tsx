@@ -242,17 +242,6 @@ function ApprovalCard({
           <RobotGlyph size={17} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              color: T.muted2,
-              letterSpacing: ".04em",
-              marginBottom: 4,
-            }}
-          >
-            NEEDS YOUR APPROVAL
-          </div>
           <div style={{ fontSize: 14.5, fontWeight: 600, color: T.ink, lineHeight: 1.4 }}>
             {label}
           </div>
@@ -445,9 +434,6 @@ export default function AgentScreen({ user }: AtlasScreenProps) {
           padding: "0 11px 8px",
         }}
       >
-        <span style={{ fontSize: 11.5, fontWeight: 700, color: T.muted2, letterSpacing: ".05em" }}>
-          MY AGENTS
-        </span>
         <button
           type="button"
           disabled={!agentSetupReady}

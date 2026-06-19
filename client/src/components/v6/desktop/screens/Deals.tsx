@@ -2,14 +2,14 @@
  * Atlas DEALS — the merged portfolio screen (design map 00 §"SCREEN 4 — DEALS"
  * folded together with the former Pipeline kanban).
  *
- * ONE tab, table-first. A Board/Table Segmented toggle picks the view; both
+ * ONE tab, board-first. A Board/Table Segmented toggle picks the view; both
  * read the SAME filtered slice of `useMobileDeals(user).all` (the shared search
  * box + All/Buy/Sell/Watchlist chips apply to both):
- *   - TABLE (default, the workhorse — scales to hundreds of deals): the real
- *     portfolio table — search, filter chips, columns, pager.
- *   - BOARD: the active funnel — KPI tiles (usePortfolioSummary) + a kanban
- *     grouped by the five shared PIPELINE_STAGES (Source→Value→Diligence→
+ *   - BOARD (default): the active funnel — KPI tiles (usePortfolioSummary) + a
+ *     kanban grouped by the five shared PIPELINE_STAGES (Source→Value→Diligence→
  *     Structure→Close).
+ *   - TABLE (the dense workhorse — scales to hundreds of deals): the real
+ *     portfolio table — search, filter chips, columns, pager.
  *
  * Honesty notes:
  *  - SECTOR: MobileStageRow has no `industry`. The `sub` line is built from
@@ -195,7 +195,7 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
 
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterId>("all");
-  const [layout, setLayout] = useState<LayoutId>("table");
+  const [layout, setLayout] = useState<LayoutId>("board");
   const [page, setPage] = useState(0);
 
   const owner = ownerOf(user);
@@ -350,8 +350,7 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
                 zIndex: 1,
                 background: T.white,
                 padding: "10px 22px",
-                borderTop: `1px solid ${T.hair}`,
-                borderBottom: `1px solid ${T.hair}`,
+                borderBottom: `1px solid ${T.rowDiv}`,
                 display: "flex",
                 alignItems: "center",
                 gap: 12,
@@ -435,8 +434,8 @@ function Toolbar({
         flex: "none",
       }}
     >
-      {/* Board / Table toggle — Table is the default workhorse; Board shows the
-          active funnel. Both views read the same filtered set. */}
+      {/* Board / Table toggle — Board is the default (the active funnel);
+          Table is the dense workhorse. Both views read the same filtered set. */}
       <Segmented
         options={[
           { id: "table", label: "Table" },
@@ -727,14 +726,14 @@ function DealCard({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) 
         borderRadius: 12,
         padding: 12,
         cursor: "pointer",
-        boxShadow: "0 1px 2px rgba(60,64,67,.05)",
+        boxShadow: T.shSoft,
         transition: "box-shadow .15s ease",
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = "0 4px 14px rgba(60,64,67,.13)";
+        e.currentTarget.style.boxShadow = T.shHover;
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = "0 1px 2px rgba(60,64,67,.05)";
+        e.currentTarget.style.boxShadow = T.shSoft;
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 9, minWidth: 0 }}>
@@ -965,7 +964,6 @@ function Pager({
     <div
       style={{
         padding: "11px 22px",
-        borderTop: `1px solid ${T.hair}`,
         display: "flex",
         alignItems: "center",
         gap: 12,

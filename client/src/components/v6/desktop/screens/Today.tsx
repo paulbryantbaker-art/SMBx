@@ -192,7 +192,6 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
         minWidth: 0,
         position: "relative",
         overflow: "auto",
-        background: T.surface,
         fontFamily: T.font,
         color: T.ink,
       }}
@@ -299,7 +298,6 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
             gap: 18,
             marginTop: 16,
             paddingTop: 30,
-            borderTop: `1px solid ${T.hair}`,
           }}
         >
           {/* LEFT — Needs your attention */}

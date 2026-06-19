@@ -278,7 +278,7 @@ export function Segmented<TId extends string>({
               cursor: "pointer",
               background: active ? T.white : "transparent",
               color: active ? T.ink : T.muted,
-              boxShadow: active ? "0 1px 2px rgba(60,64,67,.18)" : undefined,
+              boxShadow: active ? T.shCard : undefined,
               fontFamily: T.font,
             }}
           >
@@ -367,9 +367,11 @@ export function ProgressBar({ pct, color = T.blue }: { pct: number; color?: stri
 
 /* ─── SectionLabel ────────────────────────────────────────── */
 
+/** Quiet section label. Sentence-case (NOT an uppercase mono eyebrow kicker — the
+ *  LOCKED no-gratuitous-eyebrows rule): a calm grouping label, not chrome. */
 export function SectionLabel({ children }: { children: ReactNode }) {
   return (
-    <div style={{ fontSize: 11, color: T.muted2, fontWeight: 600, letterSpacing: ".03em", textTransform: "uppercase" }}>
+    <div style={{ fontSize: 12, color: T.muted, fontWeight: 600 }}>
       {children}
     </div>
   );
