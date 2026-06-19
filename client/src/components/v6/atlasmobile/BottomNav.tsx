@@ -1,6 +1,8 @@
 /**
  * BottomNav — the floating liquid-glass tab bar (m4 §1d), the signature
- * Atlas-mobile element. Five tabs: Today / Pipeline / Deals / Files / More.
+ * Atlas-mobile element. Five tabs: Today / Deals / Sourcing / Files / More —
+ * the same destination set the desktop header carries (the former Pipeline tab
+ * is merged into Deals as its Board toggle).
  *
  * It is a SMALL inset rounded bar (position:absolute, left/right:16, bottom
  * calc(safe-area+16)) — NOT a full-viewport fixed bg div, so the Safari toolbar
@@ -15,19 +17,19 @@ import { T } from "../desktop/atlasTokens";
 import { M } from "./mobileTokens";
 import {
   HomeIcon,
-  PipelineBarsIcon,
   DealsListIcon,
+  SourcingIcon,
   FolderIcon,
   MoreDotsIcon,
 } from "../desktop/icons";
 import type { AtlasScreen } from "../desktop/atlasNav";
 
-export type BottomTab = "today" | "pipeline" | "deals" | "files" | "more";
+export type BottomTab = "today" | "deals" | "sourcing" | "files" | "more";
 
 const ITEMS: { id: BottomTab; label: string; icon: (c: string) => ReactNode }[] = [
   { id: "today", label: "Today", icon: (c) => <HomeIcon size={22} c={c} /> },
-  { id: "pipeline", label: "Pipeline", icon: (c) => <PipelineBarsIcon size={22} c={c} /> },
   { id: "deals", label: "Deals", icon: (c) => <DealsListIcon size={22} c={c} /> },
+  { id: "sourcing", label: "Sourcing", icon: (c) => <SourcingIcon size={22} c={c} /> },
   { id: "files", label: "Files", icon: (c) => <FolderIcon size={22} c={c} /> },
   { id: "more", label: "More", icon: (c) => <MoreDotsIcon size={22} c={c} /> },
 ];
@@ -64,15 +66,19 @@ export function BottomNav({
 }
 
 /** The four bottom tabs that map onto an AtlasScreen (More is a shell overlay,
- *  not an AtlasScreen). Exported so the shell can derive the active tab. */
+ *  not an AtlasScreen). Exported so the shell can derive the active tab. The
+ *  retired "pipeline" alias and the deal-detail surfaces (cockpit) highlight
+ *  Deals — the funnel now lives in the Deals Board toggle. */
 export function bottomTabForScreen(screen: AtlasScreen): BottomTab | null {
   switch (screen) {
     case "today":
       return "today";
-    case "pipeline":
-      return "pipeline";
     case "deals":
+    case "pipeline":
+    case "cockpit":
       return "deals";
+    case "sourcing":
+      return "sourcing";
     case "files":
       return "files";
     default:

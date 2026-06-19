@@ -166,6 +166,18 @@ export function FolderIcon({ size = 22, c = "currentColor", style, strokeWidth =
   );
 }
 
+/** Sourcing — a target / discovery scope (concentric rings around a center
+ *  dot). Same stroked-currentColor signature as the bottom-nav glyphs above;
+ *  used by the Atlas-mobile bottom nav for the Sourcing tab. */
+export function SourcingIcon({ size = 22, c = "currentColor", style, strokeWidth = 2 }: IconProps) {
+  return (
+    <svg {...svgProps(size, style)} stroke={c} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="8" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
 export function MoreDotsIcon({ size = 22, c = "currentColor", style }: IconProps) {
   return (
     <svg {...svgProps(size, style)} fill={c} stroke="none">

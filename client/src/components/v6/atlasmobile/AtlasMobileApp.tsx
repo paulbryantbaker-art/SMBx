@@ -60,7 +60,6 @@ import { MobileShellContext } from "./mobileShell";
 
 import TodayMobileScreen from "./screens/Today";
 import AskYuliaScreen from "./screens/AskYulia";
-import PipelineMobileScreen from "./screens/Pipeline";
 import DealsMobileScreen from "./screens/Deals";
 import CockpitMobileScreen from "./screens/Cockpit";
 import FilesMobileScreen from "./screens/Files";
@@ -189,16 +188,20 @@ interface ShellProps {
  *  mobile-only 'more' overlay screen (which is NOT in the desktop union). */
 type MobileSurface = AtlasScreen | "more" | "askyulia";
 
-/* Screens that show the floating bottom tab bar. */
-const NAV_SCREENS = new Set<MobileSurface>(["today", "pipeline", "deals", "files", "more"]);
-/* Screens that show the Yulia FAB (no inline composer). */
-const FAB_SCREENS = new Set<MobileSurface>(["pipeline", "cockpit", "sourcing"]);
-/* The FAB sits above the tab bar only when the bar is present (Pipeline). */
+/* Screens that show the floating bottom tab bar — Today / Deals / Sourcing /
+ * Files / More (the bottom-bar destination set; the retired 'pipeline' alias is
+ * folded into Deals and never renders as its own surface). */
+const NAV_SCREENS = new Set<MobileSurface>(["today", "deals", "sourcing", "files", "more"]);
+/* Screens that show the Yulia FAB (no inline composer). Deals absorbs the
+ * former Pipeline FAB so Yulia is reachable from the merged screen. */
+const FAB_SCREENS = new Set<MobileSurface>(["deals", "cockpit", "sourcing"]);
+/* The FAB sits above the tab bar only when the bar is present (Deals/Sourcing). */
 
-/* Header title for the variant-B back bar, per screen. */
+/* Header title for the variant-B back bar, per screen. The retired 'pipeline'
+ * alias renders Deals everywhere, so it carries the Deals title. */
 const SCREEN_TITLE: Record<AtlasScreen, string> = {
   today: "Atlas",
-  pipeline: "Pipeline",
+  pipeline: "Deals",
   sourcing: "Sourcing",
   deals: "Deals",
   studio: "Studio",
@@ -347,16 +350,16 @@ function AtlasMobileShell({ user, chat }: ShellProps) {
   const isToday = surface === "today";
   const showNav = NAV_SCREENS.has(surface);
   const showFab = FAB_SCREENS.has(surface);
-  const fabAboveNav = showFab && showNav; // only Pipeline has both
+  const fabAboveNav = showFab && showNav; // Deals/Sourcing have both bar + FAB
   const activeTab: BottomTab = moreOpen ? "more" : bottomTabForScreen(view.screen) ?? "today";
 
   // Back target: detail/section screens step back to a sensible surface. Deal
   // detail (cockpit/canvas) → Deals; the More-reached module screens
-  // (sourcing/studio/integration/agent/settings) → the More menu; everything
-  // else → Today.
+  // (studio/integration/agent/settings) → the More menu; everything else
+  // (including the Sourcing bottom-bar tab) → Today.
   const onBack = useCallback(() => {
     const s = view.screen;
-    if (s === "sourcing" || s === "studio" || s === "integration" || s === "agent" || s === "settings") {
+    if (s === "studio" || s === "integration" || s === "agent" || s === "settings") {
       setView({ screen: "today" }); // reset the underlying view, then show More
       setMoreOpen(true);
       return;
@@ -449,8 +452,9 @@ function ActiveScreen({
   switch (surface) {
     case "today":
       return <TodayMobileScreen user={user} view={view} />;
+    // 'pipeline' is a retired alias of Deals — the Pipeline funnel is now the
+    // Deals Board toggle, so it renders the same screen.
     case "pipeline":
-      return <PipelineMobileScreen user={user} view={view} />;
     case "deals":
       return <DealsMobileScreen user={user} view={view} />;
     case "files":

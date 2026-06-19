@@ -197,82 +197,114 @@ export default function TodayMobileScreen({ user }: AtlasScreenProps) {
 
   return (
     <div style={{ padding: "0 18px", fontFamily: T.font, color: T.ink }}>
-      {/* greeting — real display_name is unbounded, so wrap+clamp instead of
-          nowrap (a long single first name at 27px would clip the 358px column). */}
-      <h1
-        style={{
-          fontSize: 27,
-          fontWeight: 600,
-          letterSpacing: "-.02em",
-          lineHeight: 1.15,
-          margin: "2px 0 4px",
-          overflowWrap: "anywhere",
-          color: T.ink,
-        }}
-      >
-        {greeting}
-      </h1>
-
-      {/* subtitle — honest next-actions count (or caught-up / nothing pre-load) */}
-      {subtitle && (
-        <div style={{ fontSize: 14, color: T.muted2, marginBottom: 18 }}>
-          {subtitle}
-        </div>
-      )}
-
-      {/* "Ask Yulia anything…" composer pill — tap to open the full chat
-          (frame 01 spec: rounded pill + plain plus + blue send circle). */}
-      <button
-        type="button"
-        onClick={() => shell?.openChat()}
-        style={{
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          background: T.white,
-          border: `1px solid ${T.border}`,
-          borderRadius: 24,
-          boxShadow: "0 6px 20px rgba(31,41,55,.10)",
-          padding: "7px 7px 7px 16px",
-          marginBottom: 14,
-          cursor: "pointer",
-          fontFamily: T.font,
-          textAlign: "left",
-        }}
-      >
-        <PlusIcon size={20} c={T.muted} />
-        <span style={{ flex: 1, color: T.muted, fontSize: 14.5 }}>Ask Yulia anything…</span>
-        <span
+      {/* HERO — the Yulia composer is the focal point of Today (mirrors the
+          desktop Gemini home: a centered greeting over the hero composer, with a
+          soft glow behind it; the rest of the day is supporting content below). */}
+      <div style={{ position: "relative", paddingTop: 6, marginBottom: 24 }}>
+        {/* soft glow behind the composer — decorative; absolute-in-relative, NOT
+            a fixed full-viewport bg div (Safari toolbar rule). */}
+        <div
+          aria-hidden="true"
           style={{
-            width: 38,
-            height: 38,
-            flex: "none",
-            borderRadius: "50%",
-            background: T.blue,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            position: "absolute",
+            top: 46,
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: 340,
+            height: 230,
+            background:
+              "radial-gradient(ellipse at center, rgba(66,133,244,.20), rgba(155,114,203,.12) 46%, transparent 72%)",
+            filter: "blur(10px)",
+            pointerEvents: "none",
+            zIndex: 0,
           }}
-        >
-          <SendArrowIcon size={18} c="#fff" />
-        </span>
-      </button>
+        />
+        <div style={{ position: "relative", zIndex: 1 }}>
+          {/* greeting — centered hero; display_name is unbounded so wrap+clamp */}
+          <h1
+            style={{
+              fontSize: 28,
+              fontWeight: 600,
+              letterSpacing: "-.02em",
+              lineHeight: 1.12,
+              textAlign: "center",
+              margin: "6px 0 4px",
+              overflowWrap: "anywhere",
+              color: T.ink,
+            }}
+          >
+            {greeting}
+          </h1>
 
-      {/* quick-action chips — edge-bleed horizontal scroll row */}
-      <div
-        className="scr"
-        style={{
-          display: "flex",
-          gap: 9,
-          margin: "0 -18px 22px",
-          padding: "0 18px",
-          overflowX: "auto",
-        }}
-      >
-        <QuickChip emoji="📊" label="Pitch deck" onClick={() => nav.go("studio")} />
-        <QuickChip emoji="🔍" label="Screen targets" onClick={() => nav.go("sourcing")} />
-        <QuickChip emoji="📂" label="Summarize" onClick={() => nav.go("files")} />
+          {/* subtitle — honest next-actions count (or caught-up / pre-load) */}
+          {subtitle && (
+            <div
+              style={{
+                fontSize: 14,
+                color: T.muted2,
+                textAlign: "center",
+                marginBottom: 22,
+              }}
+            >
+              {subtitle}
+            </div>
+          )}
+
+          {/* the hero composer — enlarged; tap to open the full Ask Yulia chat */}
+          <button
+            type="button"
+            onClick={() => shell?.openChat()}
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              gap: 11,
+              background: T.white,
+              border: `1px solid ${T.border}`,
+              borderRadius: 28,
+              boxShadow: "0 12px 34px rgba(31,41,55,.14)",
+              padding: "9px 9px 9px 18px",
+              cursor: "pointer",
+              fontFamily: T.font,
+              textAlign: "left",
+            }}
+          >
+            <PlusIcon size={22} c={T.muted} />
+            <span style={{ flex: 1, color: T.muted, fontSize: 16 }}>
+              Ask Yulia anything…
+            </span>
+            <span
+              style={{
+                width: 42,
+                height: 42,
+                flex: "none",
+                borderRadius: "50%",
+                background: T.blue,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <SendArrowIcon size={19} c="#fff" />
+            </span>
+          </button>
+
+          {/* quick-action chips — edge-bleed scroll row under the composer */}
+          <div
+            className="scr"
+            style={{
+              display: "flex",
+              gap: 9,
+              margin: "14px -18px 0",
+              padding: "0 18px",
+              overflowX: "auto",
+            }}
+          >
+            <QuickChip emoji="📊" label="Pitch deck" onClick={() => nav.go("studio")} />
+            <QuickChip emoji="🔍" label="Screen targets" onClick={() => nav.go("sourcing")} />
+            <QuickChip emoji="📂" label="Summarize" onClick={() => nav.go("files")} />
+          </div>
+        </div>
       </div>
 
       {/* Needs your attention */}

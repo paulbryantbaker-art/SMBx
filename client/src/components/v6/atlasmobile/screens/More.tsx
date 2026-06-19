@@ -7,7 +7,8 @@
  * data layer — no new fetch path):
  *   - Profile card  → real `user` (display_name/email/role/plan), gradient avatar
  *                     → ChevronRight opens Settings (profile pane).
- *   - MODULES card  → Sourcing/Studio/Integration/Agent rows → nav.go(screen).
+ *   - MODULES card  → Studio/Integration/Agent rows → nav.go(screen). (Sourcing
+ *                     is a bottom-bar tab now, so it's dropped from here.)
  *   - ACCOUNT card  → Settings → openSettings(); Members & roles →
  *                     openSettings('members'); Notifications → openSettings(
  *                     'notifications') with the REAL unread badge from
@@ -87,13 +88,7 @@ export default function MoreScreen({ user }: AtlasScreenProps) {
       {/* ── MODULES ─────────────────────────────────────────────── */}
       <SectionLabel>Modules</SectionLabel>
       <div style={S.group}>
-        <Row
-          glyph={<SourcingGlyph />}
-          label="Sourcing"
-          first
-          onClick={() => nav.go("sourcing")}
-        />
-        <Row glyph={<StudioGlyph />} label="Studio" onClick={() => nav.go("studio")} />
+        <Row glyph={<StudioGlyph />} label="Studio" first onClick={() => nav.go("studio")} />
         <Row
           glyph={<IntegrationGlyph />}
           label="Integration"
@@ -189,17 +184,6 @@ function glyphSvg(children: ReactNode, stroke: string, fill = false) {
     >
       {children}
     </svg>
-  );
-}
-
-/** Sourcing — target / discovery scope. */
-function SourcingGlyph() {
-  return glyphSvg(
-    <>
-      <circle cx="12" cy="12" r="8" />
-      <circle cx="12" cy="12" r="3" />
-    </>,
-    T.blue,
   );
 }
 
