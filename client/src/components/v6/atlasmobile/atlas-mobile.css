@@ -1,0 +1,68 @@
+/* Atlas-mobile scope — everything here is gated under `.atlas-mobile` so it
+ * cannot leak into the desktop Atlas shell or the V6Mobile app. Imported once
+ * from AtlasMobileApp.tsx.
+ *
+ * Safari toolbar rule (CLAUDE.md #5): the app root is `position:relative` and
+ * the glass bars are small inset elements — NEVER a position:fixed full-viewport
+ * bg div. Nothing in this file creates one. */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
+
+.atlas-mobile {
+  font-family: 'DM Sans', -apple-system, system-ui, sans-serif;
+  color: #1f1f1f;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* Safe-area helpers — screens/headers read these so they don't hardcode 0. */
+  --m-safe-top: env(safe-area-inset-top, 0px);
+  --m-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --m-safe-left: env(safe-area-inset-left, 0px);
+  --m-safe-right: env(safe-area-inset-right, 0px);
+}
+
+.atlas-mobile *,
+.atlas-mobile *::before,
+.atlas-mobile *::after {
+  box-sizing: border-box;
+}
+
+/* Hidden scrollbars + momentum scrolling on every scroll region (the `.scr`
+ * class on the main scroll area and on the edge-bleed chip/KPI rows). */
+.atlas-mobile .scr {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.atlas-mobile .scr::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* The same spinner keyframe the primitives' LoadingState uses (atlas.css is
+ * desktop-scoped and not loaded here, so re-declare it under this scope). */
+@keyframes atlas-mobile-glow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.atlas-mobile [style*="atlas-glow"] {
+  animation-name: atlas-mobile-glow !important;
+}
+
+/* Bottom-sheet slide-up. */
+@keyframes atlas-mobile-sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes atlas-mobile-scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

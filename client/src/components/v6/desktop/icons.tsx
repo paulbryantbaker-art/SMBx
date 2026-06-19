@@ -126,6 +126,56 @@ export function CheckIcon({ size = 14, c = "currentColor", style, strokeWidth = 
   );
 }
 
+/* ─── Mobile bottom-nav glyphs (shared with the Atlas-mobile shell) ───────
+ * The five floating-tab-bar icons. Same signature/style as the icons above:
+ * stroked currentColor, `size` + `c` props, viewBox 0 0 24 24, sw 2. Paths are
+ * verbatim from the Atlas-mobile shell spec (m4 §1d). Additive — nothing above
+ * is changed. */
+
+export function HomeIcon({ size = 22, c = "currentColor", style, strokeWidth = 2 }: IconProps) {
+  return (
+    <svg {...svgProps(size, style)} stroke={c} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 11l9-8 9 8M5 9.5V21h14V9.5" />
+    </svg>
+  );
+}
+
+export function PipelineBarsIcon({ size = 22, c = "currentColor", style, strokeWidth = 2 }: IconProps) {
+  return (
+    <svg {...svgProps(size, style)} stroke={c} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="5" height="16" rx="1.5" />
+      <rect x="10" y="4" width="5" height="11" rx="1.5" />
+      <rect x="17" y="4" width="4" height="14" rx="1.5" />
+    </svg>
+  );
+}
+
+export function DealsListIcon({ size = 22, c = "currentColor", style, strokeWidth = 2 }: IconProps) {
+  return (
+    <svg {...svgProps(size, style)} stroke={c} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 6h16M4 12h16M4 18h10" />
+    </svg>
+  );
+}
+
+export function FolderIcon({ size = 22, c = "currentColor", style, strokeWidth = 2 }: IconProps) {
+  return (
+    <svg {...svgProps(size, style)} stroke={c} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    </svg>
+  );
+}
+
+export function MoreDotsIcon({ size = 22, c = "currentColor", style }: IconProps) {
+  return (
+    <svg {...svgProps(size, style)} fill={c} stroke="none">
+      <circle cx="5" cy="12" r="1.6" />
+      <circle cx="12" cy="12" r="1.6" />
+      <circle cx="19" cy="12" r="1.6" />
+    </svg>
+  );
+}
+
 /** Settings-pane glyphs — single-path stroke icons (paths from /tmp/atlas_maps/01). */
 export const SETTINGS_ICON_PATHS: Record<string, string> = {
   profile: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM5 21a7 7 0 0 1 14 0",
