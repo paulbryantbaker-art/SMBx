@@ -197,14 +197,21 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
         color: T.ink,
       }}
     >
-      {/* decorative glow blob — pointer-events none, behind content */}
+      {/* decorative glow blob — pointer-events none, behind content. Centered on
+          the composer via NEGATIVE MARGINS (half width / half height), NOT a
+          transform: the atlas-glow keyframe animates `transform: scale()`, which
+          would override an inline `translate(-50%,-50%)` and shove the blob
+          down-and-right. Margins are untouched by the animation, so centering
+          holds. left:50% + marginLeft:-450 = horizontal page-center;
+          top:46dvh + marginTop:-210 = vertical center landing on the composer. */}
       <div
         aria-hidden="true"
         style={{
           position: "absolute",
-          top: "34dvh",
+          top: "46dvh",
           left: "50%",
-          transform: "translate(-50%, -50%)",
+          marginLeft: -450,
+          marginTop: -210,
           width: 900,
           height: 420,
           background:
