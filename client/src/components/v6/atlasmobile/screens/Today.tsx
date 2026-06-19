@@ -200,21 +200,21 @@ export default function TodayMobileScreen({ user }: AtlasScreenProps) {
       {/* HERO — the Yulia composer is the focal point of Today (mirrors the
           desktop Gemini home: a centered greeting over the hero composer, with a
           soft glow behind it; the rest of the day is supporting content below). */}
-      <div style={{ position: "relative", paddingTop: 6, marginBottom: 24 }}>
+      <div style={{ position: "relative", paddingTop: 40, marginBottom: 28 }}>
         {/* soft glow behind the composer — decorative; absolute-in-relative, NOT
             a fixed full-viewport bg div (Safari toolbar rule). */}
         <div
           aria-hidden="true"
           style={{
             position: "absolute",
-            top: 46,
+            top: 64,
             left: "50%",
             transform: "translateX(-50%)",
-            width: 340,
-            height: 230,
+            width: 420,
+            height: 300,
             background:
-              "radial-gradient(ellipse at center, rgba(66,133,244,.20), rgba(155,114,203,.12) 46%, transparent 72%)",
-            filter: "blur(10px)",
+              "radial-gradient(ellipse at center, rgba(66,133,244,.26), rgba(155,114,203,.15) 46%, transparent 72%)",
+            filter: "blur(16px)",
             pointerEvents: "none",
             zIndex: 0,
           }}
@@ -223,12 +223,12 @@ export default function TodayMobileScreen({ user }: AtlasScreenProps) {
           {/* greeting — centered hero; display_name is unbounded so wrap+clamp */}
           <h1
             style={{
-              fontSize: 28,
+              fontSize: 33,
               fontWeight: 600,
-              letterSpacing: "-.02em",
-              lineHeight: 1.12,
+              letterSpacing: "-.025em",
+              lineHeight: 1.08,
               textAlign: "center",
-              margin: "6px 0 4px",
+              margin: "4px 0 7px",
               overflowWrap: "anywhere",
               color: T.ink,
             }}
@@ -240,10 +240,10 @@ export default function TodayMobileScreen({ user }: AtlasScreenProps) {
           {subtitle && (
             <div
               style={{
-                fontSize: 14,
+                fontSize: 14.5,
                 color: T.muted2,
                 textAlign: "center",
-                marginBottom: 22,
+                marginBottom: 28,
               }}
             >
               {subtitle}
@@ -258,25 +258,25 @@ export default function TodayMobileScreen({ user }: AtlasScreenProps) {
               width: "100%",
               display: "flex",
               alignItems: "center",
-              gap: 11,
+              gap: 12,
               background: T.white,
               border: `1px solid ${T.border}`,
-              borderRadius: 28,
-              boxShadow: "0 12px 34px rgba(31,41,55,.14)",
-              padding: "9px 9px 9px 18px",
+              borderRadius: 33,
+              boxShadow: "0 16px 42px rgba(31,41,55,.17)",
+              padding: "13px 13px 13px 22px",
               cursor: "pointer",
               fontFamily: T.font,
               textAlign: "left",
             }}
           >
-            <PlusIcon size={22} c={T.muted} />
-            <span style={{ flex: 1, color: T.muted, fontSize: 16 }}>
+            <PlusIcon size={24} c={T.muted} />
+            <span style={{ flex: 1, color: T.muted, fontSize: 17 }}>
               Ask Yulia anything…
             </span>
             <span
               style={{
-                width: 42,
-                height: 42,
+                width: 46,
+                height: 46,
                 flex: "none",
                 borderRadius: "50%",
                 background: T.blue,
@@ -285,7 +285,7 @@ export default function TodayMobileScreen({ user }: AtlasScreenProps) {
                 justifyContent: "center",
               }}
             >
-              <SendArrowIcon size={19} c="#fff" />
+              <SendArrowIcon size={20} c="#fff" />
             </span>
           </button>
 
