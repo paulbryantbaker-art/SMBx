@@ -202,7 +202,7 @@ function RailEmpty() {
   return (
     <div style={S.emptyWrap}>
       <Sparkle size={20} />
-      <div style={S.emptyTitle}>Ask Atlas about this screen</div>
+      <div style={S.emptyTitle}>Ask Yulia about this screen</div>
     </div>
   );
 }
