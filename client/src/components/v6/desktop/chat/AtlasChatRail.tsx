@@ -372,7 +372,8 @@ const S: Record<string, CSSProperties> = {
     minHeight: 0,
     display: "flex",
     flexDirection: "column",
-    borderRight: `1px solid ${T.hair}`,
+    // No right border — the white rail reads against the faintly-tinted canvas
+    // (AtlasApp detailRegion = T.surface). Separation by tone, not a line.
     background: T.white,
   },
   header: {
@@ -382,7 +383,7 @@ const S: Record<string, CSSProperties> = {
     alignItems: "center",
     gap: 9,
     padding: "0 16px",
-    borderBottom: `1px solid ${T.railDiv}`,
+    // No underline — the header floats in the clean rail column.
   },
   headerTitle: { fontSize: 15, fontWeight: 600, color: T.ink },
   ctxPill: {
