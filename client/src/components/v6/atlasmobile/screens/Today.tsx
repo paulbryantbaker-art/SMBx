@@ -31,8 +31,7 @@ import type { AtlasScreenProps } from "../../desktop/atlasNav";
 import { useAtlasNav, useAtlasChat } from "../../desktop/atlasNav";
 import { T } from "../../desktop/atlasTokens";
 import { Sparkle } from "../../desktop/primitives";
-import { ChevronRightIcon } from "../../desktop/icons";
-import ChatDock from "../../../shared/ChatDock";
+import { ChevronRightIcon, PlusIcon, SendArrowIcon } from "../../desktop/icons";
 import { useMobileShell } from "../mobileShell";
 import { useMobileDeals } from "../../../../hooks/useMobileDeals";
 import { useNextActions, type NextAction } from "../../../../hooks/useNextActions";
@@ -221,21 +220,44 @@ export default function TodayMobileScreen({ user }: AtlasScreenProps) {
         </div>
       )}
 
-      {/* inline composer — shared ChatDock dock variant → Yulia */}
-      <div style={{ marginBottom: 14 }}>
-        <ChatDock
-          variant="dock"
-          isMobile
-          hideStarter
-          placeholder="Ask Yulia anything…"
-          disabled={!chat || chat.sending}
-          onSend={(t) => {
-            chat?.send(t);
-            shell?.openChat();
+      {/* "Ask Yulia anything…" composer pill — tap to open the full chat
+          (frame 01 spec: rounded pill + plain plus + blue send circle). */}
+      <button
+        type="button"
+        onClick={() => shell?.openChat()}
+        style={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          background: T.white,
+          border: `1px solid ${T.border}`,
+          borderRadius: 24,
+          boxShadow: "0 6px 20px rgba(31,41,55,.10)",
+          padding: "7px 7px 7px 16px",
+          marginBottom: 14,
+          cursor: "pointer",
+          fontFamily: T.font,
+          textAlign: "left",
+        }}
+      >
+        <PlusIcon size={20} c={T.muted} />
+        <span style={{ flex: 1, color: T.muted, fontSize: 14.5 }}>Ask Yulia anything…</span>
+        <span
+          style={{
+            width: 38,
+            height: 38,
+            flex: "none",
+            borderRadius: "50%",
+            background: T.blue,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
-          onFileUpload={chat?.uploadFile}
-        />
-      </div>
+        >
+          <SendArrowIcon size={18} c="#fff" />
+        </span>
+      </button>
 
       {/* quick-action chips — edge-bleed horizontal scroll row */}
       <div
