@@ -962,9 +962,9 @@ function DealTeamPanel({
         alignSelf: "stretch",
         background: T.white,
         border: `1px solid ${T.border}`,
-        // Flush to the bottom of the body (design §D-right): top corners round,
-        // bottom corners square so the panel sits on the pane edge.
-        borderRadius: "16px 16px 0 0",
+        // Fully rounded — floats off the pane edge (rootStyle adds an 18px bottom
+        // gap), so all four corners read.
+        borderRadius: 16,
         boxShadow: T.shCard,
         overflow: "hidden",
         display: "flex",
@@ -1234,7 +1234,9 @@ const rootStyle: CSSProperties = {
   flexDirection: "column",
   overflow: "hidden",
   minHeight: 0,
-  padding: "22px 24px 0",
+  // 18px bottom gap so the (now fully-rounded) deal-team panel floats off the
+  // pane edge instead of sitting flush — its bottom corners read.
+  padding: "22px 24px 18px",
 };
 
 /** Fallback root for the empty / loading / error states, which DO want the
