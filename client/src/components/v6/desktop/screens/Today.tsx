@@ -212,10 +212,10 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
           left: "50%",
           marginLeft: -450,
           marginTop: -210,
-          width: 900,
-          height: 420,
+          width: 960,
+          height: 440,
           background:
-            "radial-gradient(ellipse at center, rgba(66,133,244,.24), rgba(155,114,203,.13) 45%, transparent 70%)",
+            "radial-gradient(ellipse at center, rgba(66,133,244,.34), rgba(155,114,203,.19) 45%, transparent 70%)",
           filter: "blur(10px)",
           animation: "atlas-glow 6s ease-in-out infinite",
           pointerEvents: "none",

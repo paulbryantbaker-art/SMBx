@@ -590,7 +590,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
         </div>
       ) : (
       <div className="max-w-[860px] mx-auto pb-3 pt-2 lg:pb-4">
-        <div className="home-dock-card relative">
+        <div className="home-dock-card dock-card relative">
           {/* Tool popup */}
           <div ref={toolsRef} className={`home-tools-popup ${toolsOpen ? 'open' : ''}`} style={hideStarter ? { display: 'none' } : undefined}>
             <div className="px-4 pt-3 pb-2">
@@ -699,6 +699,20 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             <style>{`
               .home-dock-card textarea::placeholder { color: rgba(0,0,0,0.55); }
               @keyframes twBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+              /* Framed dock composer (Atlas app surfaces). Gives the dock variant
+                 a single distinguished card instead of loose floating controls.
+                 Scoped to .dock-card so the marketing hero pill is untouched. */
+              .dock-card {
+                background: #fff;
+                border: 1px solid #e3e8ef;
+                border-radius: 20px;
+                box-shadow: 0 1px 2px rgba(60,64,67,.06), 0 8px 24px rgba(20,22,28,.05);
+                transition: border-color .15s ease, box-shadow .15s ease;
+              }
+              .dock-card:focus-within {
+                border-color: #b9ccef;
+                box-shadow: 0 1px 2px rgba(60,64,67,.06), 0 8px 24px rgba(11,87,208,.10);
+              }
             `}</style>
           </div>
 
@@ -709,7 +723,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               onClick={() => setToolsOpen(prev => !prev)}
               className="flex items-center justify-center dock-plus-btn cursor-pointer active:scale-95"
               aria-label={toolsOpen ? 'Close tools' : 'Open tools'}
-              style={{ width: 44, height: 44, borderRadius: 12, border: '1.5px solid rgba(0,0,0,0.06)', transition: 'all .2s', color: 'rgba(0,0,0,0.4)' }}
+              style={{ width: 40, height: 40, borderRadius: 12, border: '1px solid #dbe3ec', transition: 'all .2s', color: '#5f6b7a' }}
               type="button"
             >
               {uploading ? (
@@ -725,9 +739,9 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               className="flex items-center justify-center border-none cursor-pointer active:scale-95"
               aria-label="Send message"
               style={{
-                width: 44, height: 44, borderRadius: '50%',
-                background: hasContent && !disabled ? '#D4714E' : '#D8D8DA',
-                color: hasContent && !disabled ? '#fff' : 'rgba(0,0,0,0.3)',
+                width: 40, height: 40, borderRadius: '50%',
+                background: hasContent && !disabled ? '#0b57d0' : '#e6eaf0',
+                color: hasContent && !disabled ? '#fff' : '#9aa6b2',
                 transition: 'all .2s',
                 pointerEvents: hasContent && !disabled ? 'auto' : 'none',
               }}
