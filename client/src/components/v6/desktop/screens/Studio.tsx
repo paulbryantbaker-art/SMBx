@@ -33,6 +33,7 @@ import {
   Segmented,
 } from "../primitives";
 import { DownloadIcon, PlusIcon } from "../icons";
+import PitchBookStudio from "./PitchBookStudio";
 
 /* ─── badge tone for artifact kind / tier ─────────────────── */
 
@@ -897,7 +898,31 @@ const EXPORT_LABEL: Record<StudioFormat, string> = {
   pdf: "Export PDF",
 };
 
-export default function StudioScreen({ user }: AtlasScreenProps) {
+/** Studio shell — Pitch books (the model-backed deck builder, the hero) and
+ *  Documents (the generated-deliverables viewer). Pitch books leads; Documents
+ *  preserves the prior viewer so nothing is lost (those also live in Files). */
+export default function StudioScreen(props: AtlasScreenProps) {
+  const [studioMode, setStudioMode] = useState<"books" | "documents">("books");
+  return (
+    <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column" }}>
+      <div style={{ display: "flex", alignItems: "center", padding: "12px 18px 2px" }}>
+        <Segmented
+          options={[
+            { id: "books", label: "Pitch books" },
+            { id: "documents", label: "Documents" },
+          ]}
+          value={studioMode}
+          onChange={setStudioMode}
+        />
+      </div>
+      <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex" }}>
+        {studioMode === "books" ? <PitchBookStudio {...props} /> : <DocumentsView {...props} />}
+      </div>
+    </div>
+  );
+}
+
+function DocumentsView({ user }: AtlasScreenProps) {
   const nav = useAtlasNav();
   const chat = useAtlasChat();
   const { deliverables, loading, error, refresh } = useV6WorkspaceData(user);
