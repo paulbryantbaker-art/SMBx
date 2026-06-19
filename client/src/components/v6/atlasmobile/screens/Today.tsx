@@ -200,16 +200,25 @@ export default function TodayMobileScreen({ user }: AtlasScreenProps) {
       {/* HERO — the Yulia composer is the focal point of Today (mirrors the
           desktop Gemini home: a centered greeting over the hero composer, with a
           soft glow behind it; the rest of the day is supporting content below). */}
-      <div style={{ position: "relative", paddingTop: 40, marginBottom: 28 }}>
+      <div
+        style={{
+          position: "relative",
+          minHeight: "calc(100dvh - 250px)",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          marginBottom: 24,
+        }}
+      >
         {/* soft glow behind the composer — decorative; absolute-in-relative, NOT
             a fixed full-viewport bg div (Safari toolbar rule). */}
         <div
           aria-hidden="true"
           style={{
             position: "absolute",
-            top: 64,
+            top: "50%",
             left: "50%",
-            transform: "translateX(-50%)",
+            transform: "translate(-50%, -50%)",
             width: 420,
             height: 300,
             background:
