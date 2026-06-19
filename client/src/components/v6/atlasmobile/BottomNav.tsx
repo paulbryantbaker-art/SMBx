@@ -54,10 +54,20 @@ export function BottomNav({
             aria-label={it.label}
             aria-current={isActive ? "page" : undefined}
             onClick={() => onTab(it.id)}
-            style={{ ...S.item, color }}
+            style={S.item}
           >
-            {it.icon(color)}
-            <span style={{ ...S.label, fontWeight: isActive ? 600 : 400 }}>{it.label}</span>
+            {/* inner capsule — the selected tab gets a tinted lozenge behind the
+                icon+label (iOS liquid-glass tab-bar treatment). */}
+            <span
+              style={{
+                ...S.cap,
+                color,
+                background: isActive ? M.glassNav.activeBg : "transparent",
+              }}
+            >
+              {it.icon(color)}
+              <span style={{ ...S.label, fontWeight: isActive ? 600 : 400 }}>{it.label}</span>
+            </span>
           </button>
         );
       })}
@@ -109,15 +119,24 @@ const S: Record<string, CSSProperties> = {
     minWidth: 0,
     height: "100%",
     display: "flex",
-    flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    gap: 3,
+    padding: 0,
     border: "none",
     background: "transparent",
     cursor: "pointer",
     fontFamily: T.font,
     WebkitTapHighlightColor: "transparent",
+  },
+  cap: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 3,
+    padding: "6px 14px",
+    borderRadius: 16,
+    transition: "background .2s ease",
   },
   label: { fontSize: 10, lineHeight: 1 },
 };
