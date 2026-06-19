@@ -15,35 +15,44 @@
  *  full-viewport fixed bg div (Safari toolbar rule). The `fallbackBg` is the
  *  higher-opacity solid for browsers without backdrop-filter support. */
 const glassNav = {
-  background: "rgba(255,255,255,.5)",
+  background: "rgba(255,255,255,.55)",
   /** Solid fallback where backdrop-filter is unsupported (keeps the bar legible). */
-  fallbackBg: "rgba(255,255,255,.9)",
-  backdropFilter: "blur(28px) saturate(1.9)",
-  border: "1px solid rgba(255,255,255,.75)",
-  boxShadow: "0 10px 32px rgba(20,22,28,.18), inset 0 1px 1px rgba(255,255,255,.6)",
+  fallbackBg: "rgba(255,255,255,.92)",
+  // Deeper frost + a hairline edge + a bright top inner highlight and a faint
+  // bottom inner shade — the iOS "liquid glass" read (a lit pane of glass, not a
+  // flat translucent fill).
+  backdropFilter: "blur(34px) saturate(1.8)",
+  border: "1px solid rgba(255,255,255,.7)",
+  boxShadow:
+    "0 8px 30px rgba(20,22,28,.16), 0 1px 2px rgba(20,22,28,.08), inset 0 1px 1.5px rgba(255,255,255,.85), inset 0 -1px 1px rgba(20,22,28,.05)",
+  /** Selected-tab capsule highlight behind the active icon+label (the iOS
+   *  liquid-glass tab-bar treatment), tinted to the Atlas accent. */
+  activeBg: "rgba(11,87,208,.10)",
   radius: 31,
   height: 62,
 } as const;
 
-/** Glass Yulia FAB material (m4 §1e). */
+/** Glass Yulia FAB material (m4 §1e) — same lit-glass treatment as the nav. */
 const glassFab = {
-  background: "rgba(255,255,255,.42)",
-  fallbackBg: "rgba(255,255,255,.92)",
-  backdropFilter: "blur(22px) saturate(1.9)",
-  border: "1px solid rgba(255,255,255,.78)",
-  boxShadow: "0 10px 28px rgba(20,22,28,.22), inset 0 1px 1px rgba(255,255,255,.7)",
+  background: "rgba(255,255,255,.5)",
+  fallbackBg: "rgba(255,255,255,.94)",
+  backdropFilter: "blur(26px) saturate(1.8)",
+  border: "1px solid rgba(255,255,255,.72)",
+  boxShadow:
+    "0 10px 28px rgba(20,22,28,.20), 0 1px 2px rgba(20,22,28,.10), inset 0 1px 1.5px rgba(255,255,255,.85)",
   size: 56,
 } as const;
 
 /** Glass bottom-sheet material (frame 08 — m4 §2). Scrim + grab-handle + the
  *  translucent sheet fill. Mobile-only. */
 const glassSheet = {
-  background: "rgba(255,255,255,.86)",
-  fallbackBg: "rgba(255,255,255,.96)",
-  backdropFilter: "blur(30px) saturate(1.8)",
+  background: "rgba(255,255,255,.82)",
+  fallbackBg: "rgba(255,255,255,.97)",
+  backdropFilter: "blur(36px) saturate(1.8)",
   radius: "30px 30px 0 0",
-  boxShadow: "0 -10px 34px rgba(0,0,0,.18)",
-  scrim: "rgba(15,17,22,.38)",
+  boxShadow:
+    "0 -10px 34px rgba(0,0,0,.18), inset 0 1px 1.5px rgba(255,255,255,.9)",
+  scrim: "rgba(15,17,22,.4)",
   handle: { width: 40, height: 5, radius: 3, color: "#cdd5df" },
 } as const;
 
