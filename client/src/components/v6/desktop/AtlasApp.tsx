@@ -393,11 +393,13 @@ const S: Record<string, CSSProperties> = {
     display: "flex",
     overflow: "hidden",
   },
+  // Faint canvas tint (not white): lets the white Yulia rail + the white content
+  // cards float on a calm ground, so neither needs a hard divider line to read.
   detailRegion: {
     flex: 1,
     minWidth: 0,
     display: "flex",
-    background: T.white,
+    background: T.surface,
   },
   // Settings: no rail.
   settingsWrap: {

@@ -373,7 +373,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
   }, [toolsOpen]);
 
   return (
-    <div className={isHero ? '' : 'shrink-0 border-t dock-outer'} style={isHero ? undefined : { padding: '12px 16px', paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
+    <div className={isHero ? '' : 'shrink-0 dock-outer'} style={isHero ? undefined : { padding: '12px 16px', paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
       {/* Hidden file input — broad allowlist matched to server/routes/chat.ts.
           Google Docs and Office 365 docs are usually shared as URLs; users can
           paste those directly into the chat input and Yulia fetches the
