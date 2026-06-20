@@ -343,19 +343,12 @@ function AtlasMobileShell({ user, chat }: ShellProps) {
     return () => window.removeEventListener("smbx:canvas_action", onAction);
   }, []);
 
-  // In body-scroll mode the DOCUMENT rubber-bands; its overscroll at top/bottom
-  // reveals the html background, which globally is a warm off-white (--bg). Paint
-  // the document the frame's base tone while the mobile shell is mounted so the
-  // bounce bleeds the app's own color (not a mismatched warm strip), then restore.
-  useEffect(() => {
-    const html = document.documentElement;
-    const prev = html.style.backgroundColor;
-    html.style.backgroundColor = "#ffffff"; // matches the frame gradient's top
-    return () => {
-      html.style.backgroundColor = prev;
-    };
-  }, []);
-
+  // NOTE: do NOT mutate document.documentElement / body background from React.
+  // index.html sets the mobile html+body bg to #FFFFFF SYNCHRONOUSLY before first
+  // paint, and iOS Safari samples the toolbar tint once at that first paint — any
+  // post-paint JS bg write gives a stale/mismatched tint and defeats the
+  // translucent chrome + page-bleed (the document must stay pristine after mount,
+  // like V6Mobile in Safari-tab mode). The pre-paint script is the sole owner.
   const initials = computeInitials(user);
 
   // The active surface = the 'more' overlay if open, else the view's screen.
@@ -538,16 +531,20 @@ const S: Record<string, CSSProperties> = {
   },
   // Body-scroll shell — content screens grow the DOCUMENT so iOS Safari
   // collapses its chrome and the page full-bleeds top & bottom (the immersive
-  // scroll the prototype was missing). Still position:relative (Safari rule);
-  // min-height (not height) + no overflow lets the body be the scroller.
+  // scroll). Still position:relative (Safari rule); min-height (not height) + no
+  // overflow lets the BODY be the scroller. 100LVH (not dvh) fills the full
+  // webview behind the chrome so the bg never leaks a strip into the URL-bar zone
+  // and there's no dvh shrink-on-chrome seam (V6Mobile's proven recipe). The
+  // floating-nav clearance lives HERE, on the actual scroller, not the inner .scr.
   rootScroll: {
     position: "relative",
-    minHeight: "100dvh",
+    minHeight: "100lvh",
     width: "100%",
     display: "flex",
     flexDirection: "column",
     background: M.frameBg,
     color: T.ink,
+    paddingBottom: NAV_CLEARANCE,
   },
   // Sticky header keeps the bar pinned while the body scrolls under it. Carries
   // the frame background so the (transparent variant-A) header isn't see-through.
@@ -568,15 +565,14 @@ const S: Record<string, CSSProperties> = {
     flexDirection: "column",
     paddingBottom: NAV_CLEARANCE,
   },
-  // Body-scroll mode — the screen flows in the document; the body scrolls.
-  // overflow-x:hidden still guards against a wide child (e.g. a decorative glow)
-  // panning the page horizontally.
+  // Body-scroll mode — the screen flows in the document; the body scrolls. The
+  // nav clearance is on rootScroll (the scroller), not here. overflow-x:hidden
+  // still guards against a wide child (e.g. a decorative glow) panning the page.
   scrollFlow: {
     flexGrow: 1,
     display: "flex",
     flexDirection: "column",
     overflowX: "hidden",
-    paddingBottom: NAV_CLEARANCE,
   },
   // Transparent, viewport-fixed layer for the floating chrome (nav / FAB /
   // sheet). NO background → Safari never reads it for toolbar tinting.
