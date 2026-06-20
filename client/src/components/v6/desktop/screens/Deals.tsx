@@ -30,6 +30,7 @@ import { useMemo, useState } from "react";
 import type { AtlasScreenProps } from "../atlasNav";
 import { useAtlasNav, useAtlasChat } from "../atlasNav";
 import { useMobileDeals, type MobileStageRow } from "../../../../hooks/useMobileDeals";
+import { useAdvisorMandates } from "../../../../hooks/useAdvisorMandates";
 import { usePortfolioSummary } from "../../../../hooks/usePortfolioSummary";
 import {
   PIPELINE_STAGES,
@@ -192,6 +193,7 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
   const chat = useAtlasChat();
   const { all, loading, loaded, isAuthed } = useMobileDeals(user);
   const { summary } = usePortfolioSummary(user, isAuthed);
+  const mandates = useAdvisorMandates(user);
 
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterId>("all");
@@ -332,6 +334,8 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
           inFlowDelta={inFlowDelta}
           flowValue={flowValue}
           flowDelta={flowDelta}
+          liveOffers={mandates.totals?.liveOffers ?? null}
+          mandateCount={mandates.mandates.length}
           onOpen={openDeal}
           onClear={() => {
             setQuery("");
@@ -541,6 +545,8 @@ function BoardView({
   inFlowDelta,
   flowValue,
   flowDelta,
+  liveOffers,
+  mandateCount,
   onOpen,
   onClear,
 }: {
@@ -550,6 +556,8 @@ function BoardView({
   inFlowDelta?: string;
   flowValue: string;
   flowDelta?: string;
+  liveOffers: number | null;
+  mandateCount: number;
   onOpen: (row: MobileStageRow) => void;
   onClear: () => void;
 }) {
@@ -574,9 +582,19 @@ function BoardView({
           delta={flowDelta}
           deltaColor={T.muted2}
         />
-        {/* Honest "—": LOI-out and stalled counts are not derivable from the
-            available fields, so we show the gap rather than fabricate. */}
-        <KpiCard label="IOI / LOI OUT" value="—" delta="not yet tracked" deltaColor={T.muted2} />
+        {/* LIVE OFFERS — inbound IOI/LOI offers in play across the advisor's
+            sell-side mandates (deal_offers received/under_review/countered).
+            Honest "—" until there are any. STALLED has no backing metric → "—". */}
+        {liveOffers != null && liveOffers > 0 ? (
+          <KpiCard
+            label="LIVE OFFERS"
+            value={String(liveOffers)}
+            delta={`across ${mandateCount} mandate${mandateCount === 1 ? "" : "s"}`}
+            deltaColor={T.muted2}
+          />
+        ) : (
+          <KpiCard label="LIVE OFFERS" value="—" delta="not yet tracked" deltaColor={T.muted2} />
+        )}
         <KpiCard label="STALLED >30d" value="—" delta="not yet tracked" deltaColor={T.muted2} />
       </div>
 
