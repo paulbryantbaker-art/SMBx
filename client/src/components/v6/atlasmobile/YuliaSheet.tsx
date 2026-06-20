@@ -298,6 +298,7 @@ function PaywallCard({ data }: { data: MobilePaywallData }) {
 const S: Record<string, CSSProperties> = {
   scrim: {
     position: "absolute",
+    pointerEvents: "auto", // re-enable taps inside the shell's pointer-events:none fixed layer
     inset: 0,
     background: M.glassSheet.scrim,
     zIndex: 8,
@@ -305,6 +306,7 @@ const S: Record<string, CSSProperties> = {
   },
   sheet: {
     position: "absolute",
+    pointerEvents: "auto", // re-enable taps inside the shell's pointer-events:none fixed layer
     left: 0,
     right: 0,
     bottom: 0,
