@@ -175,6 +175,29 @@ export function Pill({
   );
 }
 
+/* ─── ExpiryPill — neutral date countdown ────────────────── */
+
+/** Whole days until an ISO date (ceil); null if absent/invalid. Client clock. */
+export function daysUntil(iso: string | null | undefined): number | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return null;
+  return Math.ceil((d.getTime() - Date.now()) / 86_400_000);
+}
+
+/** A neutral, factual date countdown — never a directive. Past → quiet "Expired";
+ *  within 7 days → amber "Expires in Nd"; otherwise nothing. THE LINE: a calendar
+ *  fact, not a prioritization. Shared by OffersPanel + MandatesBand so the
+ *  threshold/phrasing never drift. */
+export function ExpiryPill({ iso, verb = "Expires" }: { iso: string | null | undefined; verb?: string }) {
+  const days = daysUntil(iso);
+  if (days == null) return null;
+  if (days < 0) return <Pill bg={T.track} fg={T.muted2}>Expired</Pill>;
+  if (days === 0) return <Pill bg={T.amberBg} fg={T.amber}>{verb} today</Pill>;
+  if (days <= 7) return <Pill bg={T.amberBg} fg={T.amber}>{verb} in {days}d</Pill>;
+  return null;
+}
+
 /* ─── Card ────────────────────────────────────────────────── */
 
 export function Card({

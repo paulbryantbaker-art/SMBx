@@ -28,6 +28,8 @@ import {
   type TodayDealPulseItem,
   type TodayStudioRefreshItem,
 } from "../../../../hooks/useTodayOperatingBrief";
+import { useAdvisorMandates } from "../../../../hooks/useAdvisorMandates";
+import MandatesBand from "./MandatesBand";
 
 /* ─── greeting ────────────────────────────────────────────── */
 
@@ -135,6 +137,7 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
 
   const deals = useMobileDeals(user);
   const next = useNextActions(user, canFetch);
+  const mandates = useAdvisorMandates(user);
   const {
     brief,
     loading: briefLoading,
@@ -289,6 +292,20 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
           <QuickChip emoji="🤖" label="Set up an agent" onClick={() => nav.go("agent")} />
         </div>
         </div>
+
+        {/* Multi-mandate roll-up — full-width band, advisors with 2+ sell-side
+            mandates only; otherwise Today is unchanged (band never mounts). */}
+        {mandates.mandates.length >= 2 && (
+          <div style={{ width: "100%", paddingTop: 30 }}>
+            <MandatesBand
+              mandates={mandates.mandates}
+              totals={mandates.totals}
+              loading={mandates.loading}
+              error={mandates.error}
+              onOpenDeal={(id, name) => nav.openDeal(id, name)}
+            />
+          </div>
+        )}
 
         {/* two-column lower band — below the centered hero (scroll to reach) */}
         <div

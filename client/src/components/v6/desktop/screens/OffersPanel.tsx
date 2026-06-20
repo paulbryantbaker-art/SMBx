@@ -28,7 +28,7 @@ import {
 } from "../../../../hooks/useDealOffers";
 import { useDealBuyers } from "../../../../hooks/useDealBuyers";
 import { T } from "../atlasTokens";
-import { Pill, Segmented, fmtCents } from "../primitives";
+import { Pill, Segmented, fmtCents, ExpiryPill } from "../primitives";
 import { PlusIcon, CloseIcon, SendArrowIcon } from "../icons";
 
 const TYPE_TONE: Record<OfferType, { bg: string; fg: string }> = {
@@ -211,7 +211,7 @@ function OfferRow({
         <div style={S.rowTop}>
           <span style={S.name}>{name}</span>
           <Pill bg={tType.bg} fg={tType.fg}>{offer.offer_type.toUpperCase()}</Pill>
-          {expiryNote(offer.expires_at)}
+          <ExpiryPill iso={offer.expires_at} />
         </div>
         <div style={S.rowSub}>
           <span style={S.headline}>{fmtCents(denom)}</span>
@@ -598,15 +598,6 @@ function expiryText(iso: string | null): string {
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 }
 
-function expiryNote(iso: string | null) {
-  if (!iso) return null;
-  const d = new Date(iso);
-  if (isNaN(d.getTime())) return null;
-  const days = Math.ceil((d.getTime() - Date.now()) / 86_400_000);
-  if (days < 0) return <Pill bg={T.track} fg={T.muted2}>Expired</Pill>;
-  if (days <= 7) return <Pill bg={T.amberBg} fg={T.amber}>Expires in {days}d</Pill>;
-  return null;
-}
 
 const S: Record<string, React.CSSProperties> = {
   card: { background: T.white, border: `1px solid ${T.border}`, borderRadius: T.rCardLg, boxShadow: T.shCard, padding: "16px 18px" },
