@@ -39,6 +39,7 @@ export function YuliaFab({
 const S: Record<string, CSSProperties> = {
   fab: {
     position: "absolute",
+    pointerEvents: "auto", // re-enable taps inside the shell's pointer-events:none fixed layer
     right: 18,
     width: M.glassFab.size,
     height: M.glassFab.size,

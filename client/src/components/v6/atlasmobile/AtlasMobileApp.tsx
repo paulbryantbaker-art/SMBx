@@ -343,11 +343,29 @@ function AtlasMobileShell({ user, chat }: ShellProps) {
     return () => window.removeEventListener("smbx:canvas_action", onAction);
   }, []);
 
+  // In body-scroll mode the DOCUMENT rubber-bands; its overscroll at top/bottom
+  // reveals the html background, which globally is a warm off-white (--bg). Paint
+  // the document the frame's base tone while the mobile shell is mounted so the
+  // bounce bleeds the app's own color (not a mismatched warm strip), then restore.
+  useEffect(() => {
+    const html = document.documentElement;
+    const prev = html.style.backgroundColor;
+    html.style.backgroundColor = "#ffffff"; // matches the frame gradient's top
+    return () => {
+      html.style.backgroundColor = prev;
+    };
+  }, []);
+
   const initials = computeInitials(user);
 
   // The active surface = the 'more' overlay if open, else the view's screen.
   const surface: MobileSurface = chatOpen ? "askyulia" : moreOpen ? "more" : view.screen;
   const isToday = surface === "today";
+  // Content screens scroll the DOCUMENT so iOS Safari collapses its chrome and
+  // the page full-bleeds top & bottom (the immersive scroll). The full-screen
+  // chat (askyulia) keeps a bounded, fixed-height layout because it pins its
+  // composer and scrolls its message list internally.
+  const bodyScroll = surface !== "askyulia";
   const showNav = NAV_SCREENS.has(surface);
   const showFab = FAB_SCREENS.has(surface);
   const fabAboveNav = showFab && showNav; // Deals/Sourcing have both bar + FAB
@@ -417,20 +435,27 @@ function AtlasMobileShell({ user, chat }: ShellProps) {
     <AtlasNavContext.Provider value={nav}>
       <AtlasChatContext.Provider value={chat}>
         <MobileShellContext.Provider value={mobileShell}>
-        <div className="atlas-mobile" style={S.root}>
-          {header}
-          <div className="scr" style={S.scroll}>
+        <div className="atlas-mobile" style={bodyScroll ? S.rootScroll : S.rootFixed}>
+          {bodyScroll ? <div style={S.headerSticky}>{header}</div> : header}
+          <div className="scr" style={bodyScroll ? S.scrollFlow : S.scrollFixed}>
             <ActiveScreen surface={surface} user={user} view={view} />
           </div>
 
-          {showNav && <BottomNav active={activeTab} onTab={onTab} />}
-          {showFab && <YuliaFab onOpen={() => setSheetOpen(true)} aboveNav={fabAboveNav} />}
-
-          <YuliaSheet
-            open={sheetOpen}
-            onClose={() => setSheetOpen(false)}
-            surfaceContext={surfaceContext}
-          />
+          {/* Floating chrome lives in a viewport-fixed, TRANSPARENT layer (no
+              background, so Safari never reads it for toolbar tinting — the
+              CLAUDE.md #5 rule). Its children keep position:absolute and so
+              anchor to the viewport in BOTH the body-scroll and fixed modes;
+              pointer-events:none lets taps fall through to the page everywhere
+              except on the bars/sheet (which re-enable pointer events). */}
+          <div style={S.fixedLayer}>
+            {showNav && <BottomNav active={activeTab} onTab={onTab} />}
+            {showFab && <YuliaFab onOpen={() => setSheetOpen(true)} aboveNav={fabAboveNav} />}
+            <YuliaSheet
+              open={sheetOpen}
+              onClose={() => setSheetOpen(false)}
+              surfaceContext={surfaceContext}
+            />
+          </div>
         </div>
         </MobileShellContext.Provider>
       </AtlasChatContext.Provider>
@@ -492,11 +517,16 @@ function computeInitials(user: User | null): string {
   return src.slice(0, 2).toUpperCase();
 }
 
+// Shared bottom clearance for the floating glass tab bar: 62px bar + 16px inset
+// + safe-area + breathing room.
+const NAV_CLEARANCE = "calc(62px + env(safe-area-inset-bottom, 0px) + 28px)";
+
 const S: Record<string, CSSProperties> = {
-  // Production: fill the real viewport. NOT a position:fixed full-viewport bg
-  // div (Safari toolbar rule) — position:relative so the glass bars/FAB/sheet
-  // can anchor against it.
-  root: {
+  // Fixed-height shell — used ONLY for the full-screen chat (askyulia), which
+  // pins its composer and scrolls its message list internally and so needs a
+  // bounded height. NOT a position:fixed full-viewport bg div (Safari toolbar
+  // rule) — position:relative.
+  rootFixed: {
     position: "relative",
     height: "100dvh",
     width: "100%",
@@ -506,24 +536,54 @@ const S: Record<string, CSSProperties> = {
     background: M.frameBg,
     color: T.ink,
   },
-  // The single scroll area. Bottom padding clears the floating glass tab bar:
-  // 62px bar + 16px inset + safe-area + breathing room.
-  scroll: {
+  // Body-scroll shell — content screens grow the DOCUMENT so iOS Safari
+  // collapses its chrome and the page full-bleeds top & bottom (the immersive
+  // scroll the prototype was missing). Still position:relative (Safari rule);
+  // min-height (not height) + no overflow lets the body be the scroller.
+  rootScroll: {
+    position: "relative",
+    minHeight: "100dvh",
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    background: M.frameBg,
+    color: T.ink,
+  },
+  // Sticky header keeps the bar pinned while the body scrolls under it. Carries
+  // the frame background so the (transparent variant-A) header isn't see-through.
+  headerSticky: {
+    position: "sticky",
+    top: 0,
+    zIndex: 20,
+    background: M.frameBg,
+  },
+  // Inner scroll — fixed mode only (the chat fills + scrolls this).
+  scrollFixed: {
     flex: 1,
     minHeight: 0,
     overflowY: "auto",
-    // Lock horizontal pan: overflow-y:auto alone makes overflow-x compute to
-    // auto too, so any element wider than the column (e.g. a decorative glow)
-    // lets the whole page slide side-to-side. Clip x; edge-bleed chip rows keep
-    // their own inner overflow-x:auto and are unaffected (they sit at the edge,
-    // not beyond it).
     overflowX: "hidden",
-    // Keep the rubber-band overscroll LOCAL so it reveals the app's frame
-    // gradient (full bleed) instead of chaining to the body, whose background is
-    // a different (warm) color and shows as a mismatched strip at top/bottom.
     overscrollBehavior: "contain",
     display: "flex",
     flexDirection: "column",
-    paddingBottom: "calc(62px + env(safe-area-inset-bottom, 0px) + 28px)",
+    paddingBottom: NAV_CLEARANCE,
+  },
+  // Body-scroll mode — the screen flows in the document; the body scrolls.
+  // overflow-x:hidden still guards against a wide child (e.g. a decorative glow)
+  // panning the page horizontally.
+  scrollFlow: {
+    flexGrow: 1,
+    display: "flex",
+    flexDirection: "column",
+    overflowX: "hidden",
+    paddingBottom: NAV_CLEARANCE,
+  },
+  // Transparent, viewport-fixed layer for the floating chrome (nav / FAB /
+  // sheet). NO background → Safari never reads it for toolbar tinting.
+  fixedLayer: {
+    position: "fixed",
+    inset: 0,
+    pointerEvents: "none",
+    zIndex: 30,
   },
 };
