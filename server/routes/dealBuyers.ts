@@ -46,6 +46,7 @@ dealBuyersRouter.post('/deals/:dealId/buyers', async (req, res) => {
   try {
     const access = await hasDealAccess(dealId, userId);
     if (!access) return res.status(404).json({ error: 'Deal not found' });
+    if (access.access_level === 'read') return res.status(403).json({ error: 'Read-only access cannot modify buyers' });
     const name = String(req.body?.name || '').trim();
     if (!name) return res.status(400).json({ error: 'Buyer name is required' });
     const buyerType = TYPES.includes(req.body?.buyer_type) ? req.body.buyer_type : 'strategic';
@@ -72,6 +73,7 @@ dealBuyersRouter.patch('/deals/:dealId/buyers/:buyerId', async (req, res) => {
   try {
     const access = await hasDealAccess(dealId, userId);
     if (!access) return res.status(404).json({ error: 'Deal not found' });
+    if (access.access_level === 'read') return res.status(403).json({ error: 'Read-only access cannot modify buyers' });
     const [cur] = await sql`SELECT * FROM deal_buyers WHERE id = ${buyerId} AND deal_id = ${dealId}`;
     if (!cur) return res.status(404).json({ error: 'Buyer not found' });
 
@@ -118,6 +120,7 @@ dealBuyersRouter.delete('/deals/:dealId/buyers/:buyerId', async (req, res) => {
   try {
     const access = await hasDealAccess(dealId, userId);
     if (!access) return res.status(404).json({ error: 'Deal not found' });
+    if (access.access_level === 'read') return res.status(403).json({ error: 'Read-only access cannot modify buyers' });
     await sql`DELETE FROM deal_buyers WHERE id = ${buyerId} AND deal_id = ${dealId}`;
     return res.json({ ok: true });
   } catch (err: any) {
