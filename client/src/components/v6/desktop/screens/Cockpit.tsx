@@ -39,6 +39,7 @@ import {
   fmtCents,
 } from "../primitives";
 import type { StepState } from "../primitives";
+import BuyerFunnel from "./BuyerFunnel";
 import {
   SendArrowIcon,
   ChevronRightIcon,
@@ -842,6 +843,18 @@ export default function CockpitScreen({ view, user }: AtlasScreenProps) {
             <div style={{ fontSize: 12.5, color: T.muted2 }}>
               No deliverables yet — ask Yulia to draft the first one for this deal.
             </div>
+          )}
+
+          {/* Buyer funnel — advisor sell-side only. The acquirer universe this
+              mandate is being marketed to, NDA→IOI→LOI status. THE LINE: tracks
+              status + drafts outreach (routes to Yulia); never contacts a buyer. */}
+          {journeyLabel(deal) === "SELL-side" && (
+            <BuyerFunnel
+              user={user}
+              dealId={dealId}
+              dealName={dealName}
+              onAskYulia={(prompt) => chat?.send(prompt, dealSurfaceContext(dealId, dealName, deal))}
+            />
           )}
 
           {/* THIS DEAL chips */}
