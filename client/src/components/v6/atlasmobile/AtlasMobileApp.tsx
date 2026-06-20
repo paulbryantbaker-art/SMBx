@@ -531,17 +531,20 @@ const S: Record<string, CSSProperties> = {
   },
   // Body-scroll shell — content screens grow the DOCUMENT so iOS Safari
   // collapses its chrome and the page full-bleeds top & bottom (the immersive
-  // scroll). Still position:relative (Safari rule); min-height (not height) + no
-  // overflow lets the BODY be the scroller. 100LVH (not dvh) fills the full
-  // webview behind the chrome so the bg never leaks a strip into the URL-bar zone
-  // and there's no dvh shrink-on-chrome seam (V6Mobile's proven recipe). The
-  // floating-nav clearance lives HERE, on the actual scroller, not the inner .scr.
+  // scroll). This MATCHES V6Mobile's proven-on-device `rootSafari` recipe
+  // VERBATIM: a plain BLOCK box (NO display:flex), position:relative (Safari
+  // rule), min-height (not height) + no overflow, so the screen content flows in
+  // normal document flow and the BODY is the scroller. The earlier flex-column +
+  // inner flex-grow `.scr` shape sized fine in headless Blink but did NOT let the
+  // body scroll on a real iPhone (WebKit sizes flex-grow / min-height:auto items
+  // differently) — so the chrome never collapsed. Block flow is the fix.
+  // 100LVH (not dvh) fills the full webview behind the chrome so the bg never
+  // leaks a strip into the URL-bar zone and there's no dvh shrink-on-chrome seam.
+  // The floating-nav clearance lives HERE, on the actual scroller (the body).
   rootScroll: {
     position: "relative",
     minHeight: "100lvh",
     width: "100%",
-    display: "flex",
-    flexDirection: "column",
     background: M.frameBg,
     color: T.ink,
     paddingBottom: NAV_CLEARANCE,
@@ -565,23 +568,21 @@ const S: Record<string, CSSProperties> = {
     flexDirection: "column",
     paddingBottom: NAV_CLEARANCE,
   },
-  // Body-scroll mode — the screen flows in the document; the BODY scrolls, which
-  // is what makes iOS Safari collapse its top/bottom chrome (a nested scroller
-  // never does). The nav clearance is on rootScroll (the scroller), not here.
+  // Body-scroll mode — a TRANSPARENT block wrapper so the screen flows directly
+  // in the document and the BODY scrolls (mirrors V6Mobile, which renders screens
+  // straight inside .mobile-root with no inner wrapper). It is NOT a flex item
+  // and NOT a scroll container — its only job is to clip a wide decorative child
+  // (e.g. the Today hero glow) from panning the page horizontally.
   //
-  // overflow-x MUST be `clip`, not `hidden`, to still guard against a wide child
-  // (e.g. a decorative glow) panning the page: per the CSS overflow spec, when
+  // overflow-x MUST be `clip`, never `hidden`: per the CSS overflow spec, when
   // one axis is `hidden` and the other is `visible`, the visible axis computes to
-  // `auto` — so `overflow-x:hidden` would silently turn this into a vertical
-  // scroll container, trapping the scroll here and leaving Safari's chrome up.
-  // `clip` clips horizontally WITHOUT establishing a scroll container, so the
-  // overflow propagates to the document body. (Safari 16+; older iOS just falls
-  // back to no horizontal clip, while body scroll — the important part — still
-  // works.) See memory/mobile-scroll-architecture + Tailwind Plus issue #579.
+  // `auto` — so `overflow-x:hidden` would silently make this a vertical scroll
+  // container, trapping the scroll here and leaving Safari's chrome up. `clip`
+  // clips horizontally WITHOUT establishing a scroll container, so vertical
+  // overflow propagates to the document body. (Safari 16+; older iOS just loses
+  // the horizontal clip, while body scroll — the important part — still works.)
+  // See memory/mobile-scroll-architecture + Tailwind Plus issue #579.
   scrollFlow: {
-    flexGrow: 1,
-    display: "flex",
-    flexDirection: "column",
     overflowX: "clip",
   },
   // Transparent, viewport-fixed layer for the floating chrome (nav / FAB /
