@@ -565,14 +565,24 @@ const S: Record<string, CSSProperties> = {
     flexDirection: "column",
     paddingBottom: NAV_CLEARANCE,
   },
-  // Body-scroll mode — the screen flows in the document; the body scrolls. The
-  // nav clearance is on rootScroll (the scroller), not here. overflow-x:hidden
-  // still guards against a wide child (e.g. a decorative glow) panning the page.
+  // Body-scroll mode — the screen flows in the document; the BODY scrolls, which
+  // is what makes iOS Safari collapse its top/bottom chrome (a nested scroller
+  // never does). The nav clearance is on rootScroll (the scroller), not here.
+  //
+  // overflow-x MUST be `clip`, not `hidden`, to still guard against a wide child
+  // (e.g. a decorative glow) panning the page: per the CSS overflow spec, when
+  // one axis is `hidden` and the other is `visible`, the visible axis computes to
+  // `auto` — so `overflow-x:hidden` would silently turn this into a vertical
+  // scroll container, trapping the scroll here and leaving Safari's chrome up.
+  // `clip` clips horizontally WITHOUT establishing a scroll container, so the
+  // overflow propagates to the document body. (Safari 16+; older iOS just falls
+  // back to no horizontal clip, while body scroll — the important part — still
+  // works.) See memory/mobile-scroll-architecture + Tailwind Plus issue #579.
   scrollFlow: {
     flexGrow: 1,
     display: "flex",
     flexDirection: "column",
-    overflowX: "hidden",
+    overflowX: "clip",
   },
   // Transparent, viewport-fixed layer for the floating chrome (nav / FAB /
   // sheet). NO background → Safari never reads it for toolbar tinting.
