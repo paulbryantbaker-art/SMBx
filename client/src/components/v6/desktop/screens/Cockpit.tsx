@@ -40,6 +40,7 @@ import {
 } from "../primitives";
 import type { StepState } from "../primitives";
 import BuyerFunnel from "./BuyerFunnel";
+import OffersPanel from "./OffersPanel";
 import {
   SendArrowIcon,
   ChevronRightIcon,
@@ -849,12 +850,20 @@ export default function CockpitScreen({ view, user }: AtlasScreenProps) {
               mandate is being marketed to, NDA→IOI→LOI status. THE LINE: tracks
               status + drafts outreach (routes to Yulia); never contacts a buyer. */}
           {journeyLabel(deal) === "SELL-side" && (
-            <BuyerFunnel
-              user={user}
-              dealId={dealId}
-              dealName={dealName}
-              onAskYulia={(prompt) => chat?.send(prompt, dealSurfaceContext(dealId, dealName, deal))}
-            />
+            <>
+              <BuyerFunnel
+                user={user}
+                dealId={dealId}
+                dealName={dealName}
+                onAskYulia={(prompt) => chat?.send(prompt, dealSurfaceContext(dealId, dealName, deal))}
+              />
+              <OffersPanel
+                user={user}
+                dealId={dealId}
+                dealName={dealName}
+                onAskYulia={(prompt) => chat?.send(prompt, dealSurfaceContext(dealId, dealName, deal))}
+              />
+            </>
           )}
 
           {/* THIS DEAL chips */}
