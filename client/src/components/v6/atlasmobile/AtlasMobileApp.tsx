@@ -512,6 +512,16 @@ const S: Record<string, CSSProperties> = {
     flex: 1,
     minHeight: 0,
     overflowY: "auto",
+    // Lock horizontal pan: overflow-y:auto alone makes overflow-x compute to
+    // auto too, so any element wider than the column (e.g. a decorative glow)
+    // lets the whole page slide side-to-side. Clip x; edge-bleed chip rows keep
+    // their own inner overflow-x:auto and are unaffected (they sit at the edge,
+    // not beyond it).
+    overflowX: "hidden",
+    // Keep the rubber-band overscroll LOCAL so it reveals the app's frame
+    // gradient (full bleed) instead of chaining to the body, whose background is
+    // a different (warm) color and shows as a mismatched strip at top/bottom.
+    overscrollBehavior: "contain",
     display: "flex",
     flexDirection: "column",
     paddingBottom: "calc(62px + env(safe-area-inset-bottom, 0px) + 28px)",

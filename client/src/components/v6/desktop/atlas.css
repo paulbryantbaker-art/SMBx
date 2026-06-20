@@ -67,16 +67,20 @@
   box-sizing: border-box;
 }
 
-/* Webkit scrollbar — 9px, soft thumb, transparent track (design spec). */
-.atlas-root ::-webkit-scrollbar {
+/* Scrollbars: intentionally NOT styled at the root. Defining ::-webkit-scrollbar
+   with a width/thumb forces macOS into a classic, always-visible scrollbar and
+   defeats the native auto-hiding overlay scrollbar. Leaving it unset lets macOS
+   use its overlay (auto-hide) scrollbars app-wide. A container that genuinely
+   needs a persistent thin bar can opt in with the `.atlas-thinscroll` class. */
+.atlas-root .atlas-thinscroll::-webkit-scrollbar {
   width: 9px;
   height: 9px;
 }
-.atlas-root ::-webkit-scrollbar-thumb {
+.atlas-root .atlas-thinscroll::-webkit-scrollbar-thumb {
   background: #d3dae3;
   border-radius: 8px;
 }
-.atlas-root ::-webkit-scrollbar-track {
+.atlas-root .atlas-thinscroll::-webkit-scrollbar-track {
   background: transparent;
 }
 
