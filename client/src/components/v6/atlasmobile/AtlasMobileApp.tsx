@@ -364,15 +364,17 @@ function AtlasMobileShell({ user, chat }: ShellProps) {
   const fabAboveNav = showFab && showNav; // Deals/Sourcing have both bar + FAB
   const activeTab: BottomTab = moreOpen ? "more" : bottomTabForScreen(view.screen) ?? "today";
 
-  // TEMP scroll diagnostics — opt-in via smbx.ai/?sd=1 (persists for the session).
-  // Reports ground truth from the device so we stop guessing from headless Chrome.
+  // TEMP scroll diagnostics — DEFAULT-ON (no ?sd=1 needed, because App.tsx's
+  // navigate('/', {replace:true}) auth redirects strip query params before this
+  // mounts). smbx.ai/?sd=0 turns it off. Reports ground truth from the device so
+  // we stop guessing from headless Chrome. Removed once the cause is found.
   const debugScroll = (() => {
     try {
       const sp = new URLSearchParams(window.location.search);
-      if (sp.get("sd") === "1") { sessionStorage.setItem("sd", "1"); return true; }
-      if (sp.get("sd") === "0") { sessionStorage.removeItem("sd"); return false; }
-      return sessionStorage.getItem("sd") === "1";
-    } catch { return false; }
+      if (sp.get("sd") === "0") { sessionStorage.setItem("sd", "0"); return false; }
+      if (sp.get("sd") === "1") { sessionStorage.removeItem("sd"); return true; }
+      return sessionStorage.getItem("sd") !== "0";
+    } catch { return true; }
   })();
 
   // Back target: detail/section screens step back to a sensible surface. Deal
