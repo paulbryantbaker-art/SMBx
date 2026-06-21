@@ -98,8 +98,7 @@ export function bottomTabForScreen(screen: AtlasScreen): BottomTab | null {
 
 const S: Record<string, CSSProperties> = {
   bar: {
-    position: "absolute",
-    pointerEvents: "auto", // re-enable taps inside the shell's pointer-events:none fixed layer
+    position: "fixed", // own viewport-fixed bottom bar — NOT inside a full-viewport fixed layer (which would block iOS chrome collapse)
     left: 16,
     right: 16,
     bottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)",

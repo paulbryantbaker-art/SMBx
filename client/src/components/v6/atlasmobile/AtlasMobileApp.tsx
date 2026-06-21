@@ -434,21 +434,22 @@ function AtlasMobileShell({ user, chat }: ShellProps) {
             <ActiveScreen surface={surface} user={user} view={view} />
           </div>
 
-          {/* Floating chrome lives in a viewport-fixed, TRANSPARENT layer (no
-              background, so Safari never reads it for toolbar tinting — the
-              CLAUDE.md #5 rule). Its children keep position:absolute and so
-              anchor to the viewport in BOTH the body-scroll and fixed modes;
-              pointer-events:none lets taps fall through to the page everywhere
-              except on the bars/sheet (which re-enable pointer events). */}
-          <div style={S.fixedLayer}>
-            {showNav && <BottomNav active={activeTab} onTab={onTab} />}
-            {showFab && <YuliaFab onOpen={() => setSheetOpen(true)} aboveNav={fabAboveNav} />}
-            <YuliaSheet
-              open={sheetOpen}
-              onClose={() => setSheetOpen(false)}
-              surfaceContext={surfaceContext}
-            />
-          </div>
+          {/* Floating chrome — each piece is its OWN small position:fixed element
+              (nav = bottom bar, FAB = bottom-right, sheet = modal), NOT wrapped in
+              a viewport-filling fixed layer. CRITICAL: a full-viewport
+              `position:fixed; inset:0` element makes iOS Safari treat the page as a
+              fixed app and STOP minimizing its top/bottom chrome on scroll — the
+              exact reason the chrome wouldn't collapse here. Small bottom-anchored
+              fixed bars (like macrumors.com / the legacy V6Mobile TabBar) don't
+              trigger that, so the chrome collapses normally. The YuliaSheet returns
+              null when closed, so on content screens nothing fills the viewport. */}
+          {showNav && <BottomNav active={activeTab} onTab={onTab} />}
+          {showFab && <YuliaFab onOpen={() => setSheetOpen(true)} aboveNav={fabAboveNav} />}
+          <YuliaSheet
+            open={sheetOpen}
+            onClose={() => setSheetOpen(false)}
+            surfaceContext={surfaceContext}
+          />
         </div>
         </MobileShellContext.Provider>
       </AtlasChatContext.Provider>
@@ -584,13 +585,5 @@ const S: Record<string, CSSProperties> = {
   // See memory/mobile-scroll-architecture + Tailwind Plus issue #579.
   scrollFlow: {
     overflowX: "clip",
-  },
-  // Transparent, viewport-fixed layer for the floating chrome (nav / FAB /
-  // sheet). NO background → Safari never reads it for toolbar tinting.
-  fixedLayer: {
-    position: "fixed",
-    inset: 0,
-    pointerEvents: "none",
-    zIndex: 30,
   },
 };
