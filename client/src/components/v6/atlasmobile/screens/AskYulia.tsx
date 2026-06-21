@@ -16,7 +16,7 @@
  * the composer pins to the bottom. A negative bottom margin neutralizes the
  * shell's nav clearance (there is no nav here) so the composer sits flush.
  */
-import { memo, useEffect, useMemo, useRef, type CSSProperties } from "react";
+import { memo, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import ChatDock from "../../../shared/ChatDock";
 import type { SurfaceContext } from "../../../../lib/yuliaSurfaceContext";
 import type {
@@ -25,7 +25,7 @@ import type {
   StagedAction,
   ToolTraceEntry,
 } from "../../mobile/types";
-import { useAtlasChat, type AtlasScreenProps, type AtlasView, type AtlasScreen } from "../../desktop/atlasNav";
+import { useAtlasChat, useAtlasNav, type AtlasScreenProps, type AtlasView, type AtlasScreen } from "../../desktop/atlasNav";
 import { Sparkle } from "../../desktop/primitives";
 import { MonitorIcon } from "../../desktop/icons";
 import { T } from "../../desktop/atlasTokens";
@@ -76,10 +76,79 @@ const STARTERS = [
   "Help me screen new targets",
 ];
 
+/* ─── deal references (always-clickable subjects) ───────────────
+ * Yulia's replies are plain text but carry "Name (Deal #N)" / "Deal #N" tokens.
+ * We (a) linkify those tokens inline so any deal she names is one tap away, and
+ * (b) collect them into the subject bar so the deals under discussion are always
+ * reachable without closing the chat to hunt for them. */
+
+export interface DealRef { id: number; name: string; }
+
+/** Pull every deal mentioned in a block of Yulia text, best-effort named.
+ *  Name = the trailing title-case phrase right before "(Deal #N)"; bare
+ *  "Deal #N" (or an un-named paren) falls back to the id. */
+function collectDealRefs(text: string): DealRef[] {
+  const map = new Map<number, string>();
+  const re = /\(Deal #(\d+)\)|\bDeal #(\d+)\b/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text))) {
+    const id = Number(m[1] || m[2]);
+    if (!id) continue;
+    let name = `Deal #${id}`;
+    if (m[1]) {
+      const pre = text.slice(Math.max(0, m.index - 44), m.index).replace(/[*_#]/g, "").trimEnd();
+      const nm = pre.match(/[A-Z][A-Za-z0-9.&'’-]*(?:[ /][A-Z0-9][A-Za-z0-9.&'’-]*){0,3}$/);
+      if (nm) name = nm[0].trim();
+    }
+    if (!map.has(id) || (map.get(id)!.startsWith("Deal #") && !name.startsWith("Deal #"))) {
+      map.set(id, name);
+    }
+  }
+  return [...map].map(([id, name]) => ({ id, name }));
+}
+
+/** Unique deal refs across the whole thread (Yulia turns), first-seen order. */
+function threadDealRefs(thread: MobileMessage[]): DealRef[] {
+  const map = new Map<number, string>();
+  for (const msg of thread) {
+    if (msg.who !== "y") continue;
+    for (const r of collectDealRefs(msg.text || "")) {
+      if (!map.has(r.id) || (map.get(r.id)!.startsWith("Deal #") && !r.name.startsWith("Deal #"))) {
+        map.set(r.id, r.name);
+      }
+    }
+  }
+  return [...map].map(([id, name]) => ({ id, name }));
+}
+
+/** Render Yulia text with each "Deal #N" / "(Deal #N)" token as a tap-to-open
+ *  pill. Reliable on the explicit id token; the surrounding name stays as text
+ *  (and is also a chip in the subject bar). */
+function renderYuliaText(text: string, onOpen: (id: number) => void): ReactNode[] {
+  const out: ReactNode[] = [];
+  const re = /\(Deal #(\d+)\)|\bDeal #(\d+)\b/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let k = 0;
+  while ((m = re.exec(text))) {
+    if (m.index > last) out.push(text.slice(last, m.index));
+    const id = Number(m[1] || m[2]);
+    out.push(
+      <button key={`d${k++}`} type="button" onClick={() => onOpen(id)} style={S.dealLink}>
+        Deal #{id} ↗
+      </button>,
+    );
+    last = re.lastIndex;
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out;
+}
+
 /* ─── the screen ───────────────────────────────────────────── */
 
 export default function AskYuliaScreen({ view }: AtlasScreenProps) {
   const chat = useAtlasChat();
+  const nav = useAtlasNav();
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const nearBottomRef = useRef(true);
@@ -110,17 +179,23 @@ export default function AskYuliaScreen({ view }: AtlasScreenProps) {
     if (el) el.scrollTop = el.scrollHeight;
   }, [thread.length, streamingText, activeTool, toolTrace, paywallData]);
 
+  // Deals referenced anywhere in the thread → subject shortcuts + inline links.
+  const dealRefs = useMemo(() => threadDealRefs(thread), [thread]);
+  const openDeal = (id: number) => nav.openDeal(id);
+
   const messageRows = useMemo(
     () =>
       thread.map((m, i) => (
         <MessageRow
           key={i}
           message={m}
+          onOpenDeal={openDeal}
           onConfirmStagedAction={chat?.confirmStagedAction}
           onCancelStagedAction={chat?.cancelStagedAction}
         />
       )),
-    [thread, chat?.confirmStagedAction, chat?.cancelStagedAction],
+    // openDeal is stable enough (nav identity); exclude to avoid re-mapping every render
+    [thread, chat?.confirmStagedAction, chat?.cancelStagedAction], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const handleSend = (text: string) => {
@@ -132,14 +207,11 @@ export default function AskYuliaScreen({ view }: AtlasScreenProps) {
 
   return (
     <div style={S.screen}>
-      {/* In-body screen-aware context chip. The shell's variant-B bar already
-          shows "Yulia" above; this chip signals what screen Yulia is reading. */}
-      <div style={S.ctxBar}>
-        <span style={S.ctxPill} title={ctxLabelFor(view)}>
-          <MonitorIcon size={13} c={T.blue} />
-          <span style={S.ctxLabel}>Yulia sees {ctxLabelFor(view)}</span>
-        </span>
-      </div>
+      {/* Subject bar: the screen Yulia's reading + a tap-to-open chip for every
+          deal referenced in the conversation, so the deals under discussion are
+          always one tap away (no closing the chat to hunt for them). */}
+      <DealSubjectBar screenLabel={ctxLabelFor(view)} deals={dealRefs} onOpenDeal={openDeal} />
+
 
       {/* Thread */}
       <div ref={scrollRef} onScroll={onScroll} className="scr" style={S.list}>
@@ -211,24 +283,44 @@ function EmptyThread({ onPick, disabled }: { onPick: (text: string) => void; dis
 
 const MessageRow = memo(Message);
 
+/* Yulia replies longer than this collapse to a clamped height with Show more,
+ * so the thread isn't a wall of text. */
+const COLLAPSE_OVER = 520;
+
 function Message({
   message,
+  onOpenDeal,
   onConfirmStagedAction,
   onCancelStagedAction,
 }: {
   message: MobileMessage;
+  onOpenDeal: (id: number) => void;
   onConfirmStagedAction?: (id: number, summary?: string) => void | Promise<void>;
   onCancelStagedAction?: (id: number) => void | Promise<void>;
 }) {
   const isUser = message.who === "u";
+  const text = message.text || "";
+  const collapsible = !isUser && text.length > COLLAPSE_OVER;
+  const [expanded, setExpanded] = useState(false);
+  const clamped = collapsible && !expanded;
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
       {isUser ? (
-        <div style={S.userBubble}>{message.text}</div>
+        <div style={S.userBubble}>{text}</div>
       ) : (
         <div style={S.yuliaRow}>
           <Sparkle size={18} />
-          <div style={S.yuliaText}>{message.text}</div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={clamped ? S.yuliaTextClamped : S.yuliaText}>
+              {renderYuliaText(text, onOpenDeal)}
+              {clamped && <span style={S.fade} aria-hidden="true" />}
+            </div>
+            {collapsible && (
+              <button type="button" style={S.moreBtn} onClick={() => setExpanded((e) => !e)}>
+                {expanded ? "Show less" : "Show more"}
+              </button>
+            )}
+          </div>
         </div>
       )}
       {message.stagedAction && (
@@ -238,6 +330,39 @@ function Message({
           onCancel={onCancelStagedAction}
         />
       )}
+    </div>
+  );
+}
+
+/* ─── deal-subject bar (always-on shortcuts to the deals under discussion) ── */
+
+function DealSubjectBar({
+  screenLabel,
+  deals,
+  onOpenDeal,
+}: {
+  screenLabel: string;
+  deals: DealRef[];
+  onOpenDeal: (id: number) => void;
+}) {
+  return (
+    <div style={S.subjectBar} className="scr">
+      <span style={S.subjectScreenChip} title={`Yulia sees ${screenLabel}`}>
+        <MonitorIcon size={12} c={T.blue} />
+        <span style={S.ctxLabel}>{screenLabel}</span>
+      </span>
+      {deals.map((d) => (
+        <button
+          key={d.id}
+          type="button"
+          style={S.subjectDealChip}
+          onClick={() => onOpenDeal(d.id)}
+          title={`Open ${d.name}`}
+        >
+          <span style={S.subjectDot} aria-hidden="true" />
+          <span style={S.ctxLabel}>{d.name}</span>
+        </button>
+      ))}
     </div>
   );
 }
@@ -377,24 +502,93 @@ const S: Record<string, CSSProperties> = {
     background: "#fff",
     marginBottom: "calc(-1 * (62px + env(safe-area-inset-bottom, 0px) + 28px))",
   },
-  ctxBar: {
+  // Subject bar — horizontal scroll: the screen Yulia sees + a chip per deal
+  // referenced in the thread (tap to open). Hidden scrollbar via `.scr`.
+  subjectBar: {
     flex: "none",
     display: "flex",
-    justifyContent: "flex-end",
-    padding: "8px 18px 2px",
+    alignItems: "center",
+    gap: 8,
+    overflowX: "auto",
+    padding: "8px 18px 4px",
   },
-  ctxPill: {
+  subjectScreenChip: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 5,
+    background: T.track,
+    borderRadius: T.rPill,
+    padding: "5px 10px",
+    fontSize: 11.5,
+    color: T.muted,
+    flex: "none",
+    maxWidth: 150,
+  },
+  subjectDealChip: {
     display: "inline-flex",
     alignItems: "center",
     gap: 6,
-    background: T.track,
+    background: T.blueBg3,
+    border: `1px solid ${T.approvalBd}`,
     borderRadius: T.rPill,
     padding: "5px 11px",
-    fontSize: 11.5,
-    color: T.muted,
-    maxWidth: "100%",
+    fontSize: 12,
+    fontWeight: 600,
+    color: T.blue,
+    flex: "none",
+    maxWidth: 190,
+    cursor: "pointer",
+    fontFamily: T.font,
+    WebkitTapHighlightColor: "transparent",
   },
+  subjectDot: { width: 6, height: 6, borderRadius: "50%", background: T.blue, flex: "none" },
   ctxLabel: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+  // Inline tap-to-open deal token inside Yulia's prose.
+  dealLink: {
+    display: "inline",
+    padding: 0,
+    border: "none",
+    background: "transparent",
+    color: T.blue,
+    fontWeight: 700,
+    font: "inherit",
+    cursor: "pointer",
+    textDecoration: "underline",
+    textUnderlineOffset: 2,
+    WebkitTapHighlightColor: "transparent",
+  },
+  // Collapsed long reply: clamp + bottom fade + Show more.
+  yuliaTextClamped: {
+    position: "relative",
+    fontSize: 14,
+    lineHeight: 1.6,
+    color: T.ink,
+    whiteSpace: "pre-wrap",
+    minWidth: 0,
+    maxHeight: 300,
+    overflow: "hidden",
+  },
+  fade: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 54,
+    background: "linear-gradient(to bottom, rgba(255,255,255,0), #fff)",
+    pointerEvents: "none",
+  },
+  moreBtn: {
+    marginTop: 6,
+    border: "none",
+    background: "none",
+    padding: 0,
+    color: T.blue,
+    fontSize: 12.5,
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: T.font,
+    WebkitTapHighlightColor: "transparent",
+  },
   list: {
     flex: 1,
     minHeight: 0,
