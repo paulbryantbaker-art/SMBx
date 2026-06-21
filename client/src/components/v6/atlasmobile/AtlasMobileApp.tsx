@@ -429,7 +429,7 @@ function AtlasMobileShell({ user, chat }: ShellProps) {
       <AtlasChatContext.Provider value={chat}>
         <MobileShellContext.Provider value={mobileShell}>
         <div className="atlas-mobile" style={bodyScroll ? S.rootScroll : S.rootFixed}>
-          {bodyScroll ? <div style={S.headerSticky}>{header}</div> : header}
+          {header}
           <div className="scr" style={bodyScroll ? S.scrollFlow : S.scrollFixed}>
             <ActiveScreen surface={surface} user={user} view={view} />
           </div>
@@ -549,14 +549,6 @@ const S: Record<string, CSSProperties> = {
     background: M.frameBg,
     color: T.ink,
     paddingBottom: NAV_CLEARANCE,
-  },
-  // Sticky header keeps the bar pinned while the body scrolls under it. Carries
-  // the frame background so the (transparent variant-A) header isn't see-through.
-  headerSticky: {
-    position: "sticky",
-    top: 0,
-    zIndex: 20,
-    background: M.frameBg,
   },
   // Inner scroll — fixed mode only (the chat fills + scrolls this).
   scrollFixed: {
