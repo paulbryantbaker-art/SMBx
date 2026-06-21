@@ -16,7 +16,8 @@
  * the composer pins to the bottom. A negative bottom margin neutralizes the
  * shell's nav clearance (there is no nav here) so the composer sits flush.
  */
-import { memo, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import Markdown from "react-markdown";
 import ChatDock from "../../../shared/ChatDock";
 import type { SurfaceContext } from "../../../../lib/yuliaSurfaceContext";
 import type {
@@ -121,27 +122,23 @@ function threadDealRefs(thread: MobileMessage[]): DealRef[] {
   return [...map].map(([id, name]) => ({ id, name }));
 }
 
-/** Render Yulia text with each "Deal #N" / "(Deal #N)" token as a tap-to-open
- *  pill. Reliable on the explicit id token; the surrounding name stays as text
- *  (and is also a chip in the subject bar). */
-function renderYuliaText(text: string, onOpen: (id: number) => void): ReactNode[] {
-  const out: ReactNode[] = [];
-  const re = /\(Deal #(\d+)\)|\bDeal #(\d+)\b/g;
-  let last = 0;
-  let m: RegExpExecArray | null;
-  let k = 0;
-  while ((m = re.exec(text))) {
-    if (m.index > last) out.push(text.slice(last, m.index));
-    const id = Number(m[1] || m[2]);
-    out.push(
-      <button key={`d${k++}`} type="button" onClick={() => onOpen(id)} style={S.dealLink}>
-        Deal #{id} ↗
-      </button>,
-    );
-    last = re.lastIndex;
-  }
-  if (last < text.length) out.push(text.slice(last));
-  return out;
+/** Make Yulia's deal references tappable THROUGH markdown: rewrite each explicit
+ *  "Deal #N" token into a `deal:N` markdown link, which the custom <a> renderer
+ *  turns into a tap-to-open control. (The deal NAME stays as prose and is also a
+ *  chip in the subject bar.) Skips ids already inside a markdown link. */
+function linkifyDealMarkdown(text: string): string {
+  return text.replace(/\[[^\]]*\]\([^)]*\)|Deal #(\d+)/g, (full, id) =>
+    id ? `[Deal #${id}](deal:${id})` : full,
+  );
+}
+
+/** Allow our `deal:` scheme past react-markdown's URL sanitizer; block dangerous
+ *  schemes; pass everything else (http/mailto/relative) through unchanged. */
+function dealUrlTransform(url: string): string {
+  const u = url.trim();
+  if (u.startsWith("deal:")) return u;
+  if (/^(javascript|data|vbscript):/i.test(u)) return "";
+  return url;
 }
 
 /* ─── the screen ───────────────────────────────────────────── */
@@ -181,7 +178,7 @@ export default function AskYuliaScreen({ view }: AtlasScreenProps) {
 
   // Deals referenced anywhere in the thread → subject shortcuts + inline links.
   const dealRefs = useMemo(() => threadDealRefs(thread), [thread]);
-  const openDeal = (id: number) => nav.openDeal(id);
+  const openDeal = useCallback((id: number) => nav.openDeal(id), [nav]);
 
   const messageRows = useMemo(
     () =>
@@ -303,6 +300,27 @@ function Message({
   const collapsible = !isUser && text.length > COLLAPSE_OVER;
   const [expanded, setExpanded] = useState(false);
   const clamped = collapsible && !expanded;
+  const mdComponents = useMemo(
+    () => ({
+      // deal:N links → tap-to-open control; everything else → safe external link
+      a: (props: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+        const href: string | undefined = props.href;
+        if (typeof href === "string" && href.startsWith("deal:")) {
+          return (
+            <button type="button" style={S.dealLink} onClick={() => onOpenDeal(Number(href.slice(5)))}>
+              {props.children} ↗
+            </button>
+          );
+        }
+        return (
+          <a href={href} target="_blank" rel="noopener noreferrer" style={S.mdLink}>
+            {props.children}
+          </a>
+        );
+      },
+    }),
+    [onOpenDeal],
+  );
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
       {isUser ? (
@@ -311,8 +329,10 @@ function Message({
         <div style={S.yuliaRow}>
           <Sparkle size={18} />
           <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={clamped ? S.yuliaTextClamped : S.yuliaText}>
-              {renderYuliaText(text, onOpenDeal)}
+            <div className="atlas-md" style={clamped ? S.yuliaMdClamped : S.yuliaMd}>
+              <Markdown components={mdComponents} urlTransform={dealUrlTransform}>
+                {linkifyDealMarkdown(text)}
+              </Markdown>
               {clamped && <span style={S.fade} aria-hidden="true" />}
             </div>
             {collapsible && (
@@ -557,17 +577,12 @@ const S: Record<string, CSSProperties> = {
     textUnderlineOffset: 2,
     WebkitTapHighlightColor: "transparent",
   },
-  // Collapsed long reply: clamp + bottom fade + Show more.
-  yuliaTextClamped: {
-    position: "relative",
-    fontSize: 14,
-    lineHeight: 1.6,
-    color: T.ink,
-    whiteSpace: "pre-wrap",
-    minWidth: 0,
-    maxHeight: 300,
-    overflow: "hidden",
-  },
+  // Markdown prose container for Yulia replies; `.atlas-md` (atlas-mobile.css)
+  // owns element spacing/sizing. Clamped variant adds the collapse + fade.
+  yuliaMd: { minWidth: 0 },
+  yuliaMdClamped: { position: "relative", minWidth: 0, maxHeight: 320, overflow: "hidden" },
+  mdLink: { color: T.blue, textDecoration: "underline", textUnderlineOffset: 2 },
+  // Collapsed long reply: bottom fade + Show more.
   fade: {
     position: "absolute",
     left: 0,
