@@ -203,10 +203,9 @@ export default function TodayMobileScreen({ user }: AtlasScreenProps) {
       <div
         style={{
           position: "relative",
-          minHeight: "calc(100dvh - 250px)",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
+          paddingTop: 8,
           marginBottom: 24,
         }}
       >

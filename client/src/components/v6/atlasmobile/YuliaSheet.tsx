@@ -297,16 +297,14 @@ function PaywallCard({ data }: { data: MobilePaywallData }) {
 
 const S: Record<string, CSSProperties> = {
   scrim: {
-    position: "absolute",
-    pointerEvents: "auto", // re-enable taps inside the shell's pointer-events:none fixed layer
+    position: "fixed", // modal scrim, viewport-fixed — only mounts while the sheet is OPEN (returns null when closed)
     inset: 0,
     background: M.glassSheet.scrim,
     zIndex: 8,
     animation: "atlas-mobile-scrim-in .16s ease-out",
   },
   sheet: {
-    position: "absolute",
-    pointerEvents: "auto", // re-enable taps inside the shell's pointer-events:none fixed layer
+    position: "fixed", // modal sheet, viewport-fixed bottom — only mounts while open
     left: 0,
     right: 0,
     bottom: 0,
