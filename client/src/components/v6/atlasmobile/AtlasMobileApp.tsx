@@ -364,19 +364,6 @@ function AtlasMobileShell({ user, chat }: ShellProps) {
   const fabAboveNav = showFab && showNav; // Deals/Sourcing have both bar + FAB
   const activeTab: BottomTab = moreOpen ? "more" : bottomTabForScreen(view.screen) ?? "today";
 
-  // TEMP scroll diagnostics — DEFAULT-ON (no ?sd=1 needed, because App.tsx's
-  // navigate('/', {replace:true}) auth redirects strip query params before this
-  // mounts). smbx.ai/?sd=0 turns it off. Reports ground truth from the device so
-  // we stop guessing from headless Chrome. Removed once the cause is found.
-  const debugScroll = (() => {
-    try {
-      const sp = new URLSearchParams(window.location.search);
-      if (sp.get("sd") === "0") { sessionStorage.setItem("sd", "0"); return false; }
-      if (sp.get("sd") === "1") { sessionStorage.removeItem("sd"); return true; }
-      return sessionStorage.getItem("sd") !== "0";
-    } catch { return true; }
-  })();
-
   // Back target: detail/section screens step back to a sensible surface. Deal
   // detail (cockpit/canvas) → Deals; the More-reached module screens
   // (studio/integration/agent/settings) → the More menu; everything else
@@ -442,7 +429,6 @@ function AtlasMobileShell({ user, chat }: ShellProps) {
       <AtlasChatContext.Provider value={chat}>
         <MobileShellContext.Provider value={mobileShell}>
         <div className="atlas-mobile" style={bodyScroll ? S.rootScroll : S.rootFixed}>
-          {debugScroll && <ScrollDebug />}
           {bodyScroll ? <div style={S.headerSticky}>{header}</div> : header}
           <div className="scr" style={bodyScroll ? S.scrollFlow : S.scrollFixed}>
             <ActiveScreen surface={surface} user={user} view={view} />
@@ -514,64 +500,6 @@ function ActiveScreen({
     default:
       return <TodayMobileScreen user={user} view={view} />;
   }
-}
-
-/** TEMP on-device scroll diagnostics (opt-in via ?sd=1). A small fixed pill that
- *  reports, live as you scroll, whether the BODY is the scroller (the thing iOS
- *  needs to collapse its chrome) or whether the scroll is trapped in `.scr`, plus
- *  the document/viewport heights and how many full-viewport position:fixed layers
- *  exist. One screenshot while scrolling tells us the root cause. Remove after. */
-function ScrollDebug() {
-  const [s, setS] = useState({ winY: 0, winMax: 0, scrTop: -1, scrMax: -1, docSH: 0, ih: 0, vvH: 0, ovY: "?", atlasH: -1, fullFixed: 0 });
-  useEffect(() => {
-    const scrEl = () => document.querySelector(".atlas-mobile > .scr") as HTMLElement | null;
-    const update = () => {
-      const de = (document.scrollingElement || document.documentElement) as HTMLElement;
-      const sc = scrEl();
-      const at = document.querySelector(".atlas-mobile") as HTMLElement | null;
-      let fullFixed = 0;
-      document.querySelectorAll("body *").forEach((el) => {
-        const cs = getComputedStyle(el);
-        if (cs.position !== "fixed") return;
-        const r = (el as HTMLElement).getBoundingClientRect();
-        if (r.width >= window.innerWidth - 2 && r.height >= window.innerHeight - 2) fullFixed++;
-      });
-      setS({
-        winY: Math.round(window.scrollY),
-        winMax: Math.round(de.scrollHeight - de.clientHeight),
-        scrTop: sc ? Math.round(sc.scrollTop) : -1,
-        scrMax: sc ? Math.round(sc.scrollHeight - sc.clientHeight) : -1,
-        docSH: Math.round(de.scrollHeight),
-        ih: Math.round(window.innerHeight),
-        vvH: Math.round(window.visualViewport?.height ?? 0),
-        ovY: sc ? getComputedStyle(sc).overflowY : "?",
-        atlasH: at ? Math.round(at.offsetHeight) : -1,
-        fullFixed,
-      });
-    };
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    const sc = scrEl();
-    sc?.addEventListener("scroll", update, { passive: true });
-    window.visualViewport?.addEventListener("resize", update);
-    const iv = window.setInterval(update, 400);
-    return () => {
-      window.removeEventListener("scroll", update);
-      sc?.removeEventListener("scroll", update);
-      window.visualViewport?.removeEventListener("resize", update);
-      window.clearInterval(iv);
-    };
-  }, []);
-  const row: CSSProperties = { whiteSpace: "nowrap" };
-  return (
-    <div style={{ position: "fixed", top: "calc(env(safe-area-inset-top, 0px) + 2px)", left: 4, zIndex: 99999, background: "rgba(0,0,0,0.85)", color: "#39ff14", font: "10px/1.4 ui-monospace,Menlo,monospace", padding: "5px 7px", borderRadius: 7, pointerEvents: "none", maxWidth: "78vw" }}>
-      <div style={row}>win {s.winY}/{s.winMax} {s.winMax > 0 ? "✓BODY-SCROLLS" : "✗NO body scroll"}</div>
-      <div style={row}>.scr {s.scrTop}/{s.scrMax} {s.scrMax > 0 ? "⚠NESTED scroller" : "ok"}</div>
-      <div style={row}>doc sh{s.docSH} ih{s.ih} {s.docSH > s.ih + 2 ? "✓taller" : "✗fits viewport"}</div>
-      <div style={row}>vv{s.vvH} Δ{s.ih - s.vvH} · ovY:{s.ovY}</div>
-      <div style={row}>atlasH{s.atlasH} · fullFixed:{s.fullFixed}</div>
-    </div>
-  );
 }
 
 function computeInitials(user: User | null): string {
