@@ -435,14 +435,14 @@ function AttentionList({
             onClick={() => onAction(a)}
             style={{
               display: "flex",
-              alignItems: "center",
-              gap: 11,
+              alignItems: "flex-start",
+              gap: 12,
               width: "100%",
               textAlign: "left",
               background: T.white,
               border: `1px solid ${T.border}`,
-              borderRadius: 14,
-              padding: 13,
+              borderRadius: 15,
+              padding: "15px 15px",
               cursor: "pointer",
               fontFamily: T.font,
             }}
@@ -450,16 +450,17 @@ function AttentionList({
             <span
               aria-hidden="true"
               style={{
-                width: 30,
-                height: 30,
+                width: 34,
+                height: 34,
                 flex: "none",
-                borderRadius: 9,
+                marginTop: 1,
+                borderRadius: 10,
                 background: kind.bg,
                 color: kind.fg,
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: 14,
+                fontSize: 16,
               }}
             >
               {kind.glyph}
@@ -467,31 +468,36 @@ function AttentionList({
             <span style={{ flex: 1, minWidth: 0 }}>
               <span
                 style={{
-                  display: "block",
-                  fontSize: 15,
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  fontSize: 16,
                   fontWeight: 700,
+                  lineHeight: 1.3,
                   color: T.ink,
                   overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
+                  marginBottom: 3,
                 }}
               >
                 {a.title}
               </span>
               <span
                 style={{
-                  display: "block",
-                  fontSize: 13,
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  fontSize: 14,
+                  lineHeight: 1.45,
                   color: T.muted,
                   overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
                 }}
               >
                 {a.description || a.cta}
               </span>
             </span>
-            <ChevronRightIcon size={16} c={T.muted2} />
+            <span style={{ flex: "none", marginTop: 2 }}>
+              <ChevronRightIcon size={18} c={T.muted2} />
+            </span>
           </button>
         );
       })}
