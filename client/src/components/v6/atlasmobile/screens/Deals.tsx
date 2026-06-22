@@ -320,7 +320,7 @@ function Toolbar({
           marginBottom: 11,
         }}
       >
-        <SearchIcon size={17} c={T.muted2} />
+        <SearchIcon size={19} c={T.muted} />
         <input
           value={query}
           onChange={(e) => onSearch(e.target.value)}
@@ -358,8 +358,8 @@ function Toolbar({
               onClick={() => onFilter(f.id)}
               style={{
                 flex: "none",
-                fontSize: 12.5,
-                fontWeight: 600,
+                fontSize: 14,
+                fontWeight: 700,
                 padding: "7px 14px",
                 borderRadius: T.rPill,
                 cursor: "pointer",
@@ -467,19 +467,19 @@ function BoardView({
         }}
       >
         <StatChip>
-          <KpiCard label="IN FLOW" value={inFlow} delta="active deals" deltaColor={T.muted2} />
+          <KpiCard label="IN FLOW" value={inFlow} delta="active deals" deltaColor={T.muted} />
         </StatChip>
         <StatChip>
-          <KpiCard label="FLOW VALUE" value={flowValue} delta="weighted EV" deltaColor={T.muted2} />
+          <KpiCard label="FLOW VALUE" value={flowValue} delta="weighted EV" deltaColor={T.muted} />
         </StatChip>
         {/* Honest "—": LOI-out and stalled counts are not derivable from the
             available deal fields, so we show the gap rather than fabricate —
             the exact gap the desktop Board declares. */}
         <StatChip>
-          <KpiCard label="IOI / LOI" value="—" delta="not yet tracked" deltaColor={T.muted2} />
+          <KpiCard label="IOI / LOI" value="—" delta="not yet tracked" deltaColor={T.muted} />
         </StatChip>
         <StatChip>
-          <KpiCard label="STALLED" value="—" delta="not yet tracked" deltaColor={T.muted2} />
+          <KpiCard label="STALLED" value="—" delta="not yet tracked" deltaColor={T.muted} />
         </StatChip>
       </div>
 
@@ -539,7 +539,7 @@ function BoardView({
                     <span style={{ fontSize: 15.5, fontWeight: 700, color: T.ink, letterSpacing: "-0.01em" }}>
                       {stage.title}
                     </span>
-                    <span style={{ fontSize: 12, color: T.faint }}>{rows.length}</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: T.muted }}>{rows.length}</span>
                   </div>
                 )}
                 {rows.map((row) => (
@@ -584,8 +584,8 @@ function StageTab({
         display: "inline-flex",
         alignItems: "center",
         gap: 6,
-        fontSize: 13,
-        fontWeight: 600,
+        fontSize: 14,
+        fontWeight: 700,
         padding: active ? "7px 14px" : "7px 12px",
         borderRadius: T.rPill,
         border: "none",
@@ -599,9 +599,9 @@ function StageTab({
       {label}
       <span
         style={{
-          fontSize: 11.5,
+          fontSize: 14,
           fontWeight: 600,
-          color: active ? T.blue : T.faint,
+          color: active ? T.blue : T.muted,
         }}
       >
         {count}
@@ -698,8 +698,8 @@ function DealRow({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) {
         {fitReal && (
           <span
             style={{
-              fontSize: 11.5,
-              fontWeight: 600,
+              fontSize: 14,
+              fontWeight: 700,
               color: fitMeta(row.fit as number).fg,
             }}
           >

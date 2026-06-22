@@ -170,7 +170,7 @@ function FolderChip({
         >
           {label}
         </span>
-        <span style={{ display: "block", fontSize: 11.5, fontWeight: 600, color: active ? T.blue : T.faint, marginTop: 1 }}>
+        <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: active ? T.blue : T.muted, marginTop: 1 }}>
           {count == null ? "—" : count === 1 ? "1 file" : `${count} files`}
         </span>
       </span>
@@ -394,10 +394,11 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
           <MarkBadge letter={(dealLabel || "?").slice(0, 1)} size={24} radius={7} />
           <span style={{ fontSize: 18, fontWeight: 600, color: T.ink }}>Files</span>
-          <ChevronRightIcon size={14} c={T.faint} />
+          <ChevronRightIcon size={16} c={T.faint} />
           <span
             style={{
-              fontSize: 13,
+              fontSize: 14,
+              fontWeight: 600,
               color: T.muted,
               minWidth: 0,
               overflow: "hidden",
@@ -416,8 +417,8 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
               alignItems: "center",
               background: T.blueBg,
               borderRadius: T.rPill,
-              padding: "6px 13px",
-              fontSize: 12.5,
+              padding: "7px 13px",
+              fontSize: 14,
               fontWeight: 600,
               color: T.blue,
             }}
@@ -438,14 +439,14 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
               background: T.white,
               cursor: uploading ? "default" : "pointer",
               fontFamily: T.font,
-              fontSize: 12.5,
-              fontWeight: 600,
+              fontSize: 14,
+              fontWeight: 700,
               color: T.blue,
-              padding: "6px 13px",
+              padding: "7px 13px",
               opacity: uploading ? 0.6 : 1,
             }}
           >
-            <PlusIcon size={14} c={T.blue} /> {uploading ? "Uploading…" : "Upload"}
+            <PlusIcon size={16} c={T.blue} /> {uploading ? "Uploading…" : "Upload"}
           </button>
           {/* Hidden picker — drives room.uploadFile into the open folder (or root). */}
           <input
@@ -468,7 +469,7 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
               background: T.terraBg,
               borderRadius: 10,
               padding: "9px 12px",
-              fontSize: 12.5,
+              fontSize: 13.5,
               color: T.terra,
               lineHeight: 1.4,
             }}
@@ -525,7 +526,7 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
           {/* Active-folder title + count */}
           <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 10 }}>
             <span style={{ fontSize: 15.5, fontWeight: 700, color: T.ink, letterSpacing: "-0.01em" }}>{activeFolderName}</span>
-            <span style={{ fontSize: 12.5, color: T.muted2, fontWeight: 600 }}>
+            <span style={{ fontSize: 14, color: T.muted, fontWeight: 600 }}>
               {visibleDocs.length === 1 ? "1 file" : `${visibleDocs.length} files`}
             </span>
           </div>
@@ -538,7 +539,7 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
                 background: T.terraBg,
                 borderRadius: 10,
                 padding: "9px 12px",
-                fontSize: 12.5,
+                fontSize: 13.5,
                 color: T.terra,
                 lineHeight: 1.4,
               }}

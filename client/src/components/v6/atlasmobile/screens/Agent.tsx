@@ -357,7 +357,7 @@ function ApprovalCard({
             )}
           </div>
           {action.created_at && (
-            <div style={{ fontSize: 13, color: T.faint, marginTop: 8 }}>
+            <div style={{ fontSize: 14, color: T.muted, marginTop: 8 }}>
               Staged {relTime(action.created_at)}
             </div>
           )}
@@ -381,13 +381,13 @@ function ApprovalCard({
             borderRadius: T.rPill,
             padding: "9px 16px",
             fontFamily: T.font,
-            fontSize: 13,
-            fontWeight: 600,
+            fontSize: 14,
+            fontWeight: 700,
             cursor: busy ? "default" : "pointer",
             opacity: busy ? 0.6 : 1,
           }}
         >
-          {pending === "approve" ? <Spinner c={T.white} /> : <CheckIcon size={13} c={T.white} />}
+          {pending === "approve" ? <Spinner c={T.white} /> : <CheckIcon size={14} c={T.white} />}
           {pending === "approve" ? "Approving…" : "Approve"}
         </button>
         <button
@@ -406,13 +406,13 @@ function ApprovalCard({
             borderRadius: T.rPill,
             padding: "9px 16px",
             fontFamily: T.font,
-            fontSize: 13,
-            fontWeight: 600,
+            fontSize: 14,
+            fontWeight: 700,
             cursor: busy ? "default" : "pointer",
             opacity: busy ? 0.6 : 1,
           }}
         >
-          {pending === "decline" ? <Spinner c={T.ink3} /> : <CloseIcon size={13} c={T.ink3} />}
+          {pending === "decline" ? <Spinner c={T.ink3} /> : <CloseIcon size={14} c={T.ink3} />}
           {pending === "decline" ? "Declining…" : "Decline"}
         </button>
       </div>
@@ -550,7 +550,7 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
         <SectionHeading style={{ marginBottom: 0 }}>Pending approvals</SectionHeading>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           {loaded && actions.length > 0 && (
-            <span style={{ fontSize: 12, color: T.muted, fontWeight: 600 }}>
+            <span style={{ fontSize: 14, color: T.muted, fontWeight: 600 }}>
               {actions.length} waiting
             </span>
           )}
@@ -569,14 +569,14 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
                 background: "transparent",
                 cursor: refreshing ? "default" : "pointer",
                 fontFamily: T.font,
-                fontSize: 12,
-                fontWeight: 600,
+                fontSize: 14,
+                fontWeight: 700,
                 color: T.blue,
                 padding: 0,
                 opacity: refreshing ? 0.5 : 1,
               }}
             >
-              {refreshing ? <Spinner c={T.blue} size={12} /> : null}
+              {refreshing ? <Spinner c={T.blue} size={13} /> : null}
               {refreshing ? "Refreshing…" : "Refresh"}
             </button>
           )}
@@ -609,8 +609,8 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
               border: "none",
               borderRadius: T.rPill,
               padding: "9px 16px",
-              fontSize: 13,
-              fontWeight: 600,
+              fontSize: 14,
+              fontWeight: 700,
               cursor: "pointer",
               fontFamily: T.font,
             }}
@@ -643,7 +643,7 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
         <ListLoading rows={1} />
       ) : next.actions.length === 0 ? (
         approvalsEmpty ? (
-          <div style={{ fontSize: 13, color: T.faint, lineHeight: 1.55, padding: "2px 2px" }}>
+          <div style={{ fontSize: 13.5, color: T.muted, lineHeight: 1.55, padding: "2px 2px" }}>
             No open items right now — next moves appear here as your deals progress.
           </div>
         ) : (
@@ -726,7 +726,7 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
         onSend={submitDraft}
         onFileUpload={chat?.uploadFile}
       />
-      <div style={{ fontSize: 13, color: T.faint, marginTop: 8, lineHeight: 1.5 }}>
+      <div style={{ fontSize: 14, color: T.muted, marginTop: 8, lineHeight: 1.5 }}>
         {agentSetupReady
           ? "Yulia will help you configure it, then stage anything irreversible here for your approval."
           : "Sign in to set up an agent with Yulia."}

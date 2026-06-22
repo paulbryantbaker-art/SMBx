@@ -698,10 +698,10 @@ function CollateralRow({
         <span
           style={{
             flex: "none",
-            fontSize: 11,
+            fontSize: 13.5,
             fontWeight: 600,
             borderRadius: T.rPill,
-            padding: "2px 9px",
+            padding: "3px 10px",
             background: badge.bg,
             color: badge.fg,
           }}
@@ -713,10 +713,10 @@ function CollateralRow({
       <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
         <span
           style={{
-            fontSize: 11,
+            fontSize: 13.5,
             fontWeight: 600,
             borderRadius: T.rPill,
-            padding: "2px 8px",
+            padding: "3px 9px",
             background: st.bg,
             color: st.fg,
           }}
@@ -737,7 +737,7 @@ function CollateralRow({
             {d.deal_name}
           </span>
         )}
-        <span style={{ fontSize: 12, color: T.muted2 }}>{fmtDate(d.created_at)}</span>
+        <span style={{ fontSize: 14, color: T.muted }}>{fmtDate(d.created_at)}</span>
       </div>
     </button>
   );
@@ -873,14 +873,14 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
               borderRadius: T.rPill,
               cursor: "pointer",
               fontFamily: T.font,
-              fontSize: 13,
-              fontWeight: 600,
+              fontSize: 14,
+              fontWeight: 700,
               color: T.blue,
               padding: "5px 8px",
               margin: "-5px -8px",
             }}
           >
-            <PlusIcon size={15} c={T.blue} /> New
+            <PlusIcon size={17} c={T.blue} /> New
           </button>
         </div>
 
@@ -913,14 +913,14 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
           background: "transparent",
           cursor: "pointer",
           fontFamily: T.font,
-          fontSize: 13.5,
-          fontWeight: 600,
+          fontSize: 14,
+          fontWeight: 700,
           color: T.muted,
           padding: "4px 8px",
           margin: "0 -8px 6px",
         }}
       >
-        <BackIcon size={15} c={T.muted} /> Collateral
+        <BackIcon size={17} c={T.muted} /> Collateral
       </button>
 
       {/* metadata cover — honest fields only */}
@@ -935,8 +935,8 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 9 }}>
-          <Sparkle size={13} />
-          <span style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: ".04em", color: T.muted2 }}>
+          <Sparkle size={15} />
+          <span style={{ fontSize: 13.5, fontWeight: 600, letterSpacing: ".04em", color: T.muted }}>
             {(selected.artifact_kind || selected.tier || "Deliverable").toUpperCase()}
           </span>
         </div>
@@ -964,9 +964,9 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
               {journeyGate}
             </Pill>
           )}
-          <span style={{ fontSize: 12, color: T.muted2 }}>Created {fmtDate(selected.created_at)}</span>
+          <span style={{ fontSize: 14, color: T.muted }}>Created {fmtDate(selected.created_at)}</span>
           {selected.completed_at && (
-            <span style={{ fontSize: 12, color: T.muted2 }}>
+            <span style={{ fontSize: 14, color: T.muted }}>
               · Completed {fmtDate(selected.completed_at)}
             </span>
           )}
@@ -1005,15 +1005,15 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
             border: `1px solid ${T.border}`,
             background: T.white,
             borderRadius: T.rPill,
-            padding: "7px 13px",
-            fontSize: 12.5,
-            fontWeight: 600,
+            padding: "8px 14px",
+            fontSize: 14,
+            fontWeight: 700,
             fontFamily: T.font,
             color: canExport ? T.ink3 : T.faint,
             cursor: canExport ? "pointer" : "default",
           }}
         >
-          <DownloadIcon size={14} c={canExport ? T.muted : T.faint} />
+          <DownloadIcon size={16} c={canExport ? T.muted : T.faint} />
           {exporting ? "Exporting…" : EXPORT_LABEL[format]}
         </button>
       </div>
@@ -1024,7 +1024,7 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
             padding: "9px 12px",
             background: T.terraBg,
             color: T.terra,
-            fontSize: 12.5,
+            fontSize: 13.5,
             borderRadius: 10,
             marginBottom: 12,
           }}
@@ -1052,7 +1052,7 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
           <div style={{ fontSize: 15, fontWeight: 600, color: T.ink, marginBottom: 8 }}>
             Nothing drafted yet
           </div>
-          <div style={{ fontSize: 13, color: T.muted, lineHeight: 1.6, marginBottom: 14 }}>
+          <div style={{ fontSize: 14, color: T.muted, lineHeight: 1.6, marginBottom: 14 }}>
             This deliverable doesn't have rendered content yet. Ask Yulia to draft it.
           </div>
           <button
@@ -1067,9 +1067,9 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
             style={{
               border: "none",
               borderRadius: T.rPill,
-              padding: "9px 18px",
-              fontSize: 13,
-              fontWeight: 600,
+              padding: "10px 20px",
+              fontSize: 14,
+              fontWeight: 700,
               fontFamily: T.font,
               background: T.blue,
               color: "#fff",

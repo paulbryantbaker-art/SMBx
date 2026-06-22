@@ -238,7 +238,7 @@ export default function IntegrationMobileScreen({ view }: AtlasScreenProps) {
           onCta={generating ? undefined : generate}
         />
         {genError && (
-          <div style={{ textAlign: "center", color: T.terra, fontSize: 12.5, lineHeight: 1.5 }}>
+          <div style={{ textAlign: "center", color: T.terra, fontSize: 13.5, lineHeight: 1.5 }}>
             {genError}
           </div>
         )}
@@ -320,17 +320,17 @@ function Header({
         100-Day Integration Plan
       </h1>
       <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-        <Pill bg={T.track} fg={T.label} style={{ padding: "4px 11px", fontSize: 12 }}>
+        <Pill bg={T.track} fg={T.label} style={{ padding: "5px 12px", fontSize: 13.5 }}>
           {dealName ? `${dealName} · post-close` : "post-close"}
         </Pill>
         {/* Honest: real horizon + created date. NO fabricated "Day n / 100". */}
         {horizon != null && (
-          <span style={{ fontSize: 12.5, color: T.muted }}>
+          <span style={{ fontSize: 14, color: T.muted }}>
             Horizon <b style={{ color: T.ink }}>{horizon}</b> days
           </span>
         )}
         {created && (
-          <span style={{ fontSize: 12.5, color: T.muted }}>
+          <span style={{ fontSize: 14, color: T.muted }}>
             <span style={{ color: T.faint }}>·</span> Created {created}
           </span>
         )}
@@ -339,7 +339,7 @@ function Header({
       {onRegenerate &&
         (confirming ? (
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 12, color: T.muted }}>Replace plan &amp; reset progress?</span>
+            <span style={{ fontSize: 13.5, color: T.muted }}>Replace plan &amp; reset progress?</span>
             <button
               type="button"
               disabled={regenerating}
@@ -371,7 +371,7 @@ function Header({
           </button>
         ))}
       {regenError && !confirming && (
-        <div style={{ fontSize: 12, color: T.terra }}>{regenError}</div>
+        <div style={{ fontSize: 13.5, color: T.terra }}>{regenError}</div>
       )}
     </div>
   );
@@ -381,9 +381,9 @@ function headerBtnStyle(primary: boolean, busy: boolean): CSSProperties {
   return {
     border: `1px solid ${primary ? T.blue : T.inputBd}`,
     borderRadius: T.rPill,
-    padding: "7px 14px",
-    fontSize: 12.5,
-    fontWeight: 600,
+    padding: "8px 15px",
+    fontSize: 14,
+    fontWeight: 700,
     color: primary ? "#fff" : T.muted,
     background: primary ? T.blue : T.white,
     cursor: busy ? "default" : "pointer",
@@ -425,7 +425,7 @@ function MilestoneTimeline({
       <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
           <SectionLabel>Execution progress</SectionLabel>
-          <div style={{ fontSize: 12, color: T.muted }}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: T.muted }}>
             {total > 0 ? (
               <>
                 <b style={{ color: T.ink }}>{complete}</b> / {total} complete
@@ -487,7 +487,7 @@ function MilestoneTimeline({
                     <span style={{ fontSize: 15.5, fontWeight: 700, color: T.ink }}>
                       {milestoneTitle(m)}
                     </span>
-                    {when && <span style={{ fontSize: 11.5, color: T.faint }}>{when}</span>}
+                    {when && <span style={{ fontSize: 14, color: T.muted }}>{when}</span>}
                   </div>
                   {desc && (
                     <div
@@ -503,7 +503,7 @@ function MilestoneTimeline({
                     </div>
                   )}
                   {counts && (
-                    <div style={{ fontSize: 11.5, color: T.muted2, marginTop: 2 }}>{counts}</div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: T.muted, marginTop: 2 }}>{counts}</div>
                   )}
                 </div>
               </div>
@@ -520,8 +520,8 @@ function MilestoneTimeline({
               background: "none",
               border: "none",
               padding: 0,
-              fontSize: 12,
-              fontWeight: 600,
+              fontSize: 14,
+              fontWeight: 700,
               color: T.blue,
               cursor: "pointer",
               fontFamily: T.font,
@@ -549,7 +549,7 @@ function WorkstreamsSection({
       <SectionLabel>Workstreams</SectionLabel>
       {workstreams.length === 0 ? (
         <Card pad={15}>
-          <div style={{ fontSize: 13, color: T.muted }}>This plan has no workstreams yet.</div>
+          <div style={{ fontSize: 14, color: T.muted }}>This plan has no workstreams yet.</div>
         </Card>
       ) : (
         workstreams.map((w) => <WorkstreamCard key={w.id} ws={w} onUpdate={onUpdate} />)
@@ -640,7 +640,7 @@ function WorkstreamCard({
             </div>
           )}
         </div>
-        <Pill bg={colors.bg} fg={colors.fg} style={{ padding: "3px 9px", fontSize: 11 }}>
+        <Pill bg={colors.bg} fg={colors.fg} style={{ padding: "4px 10px", fontSize: 13.5 }}>
           {STATUS_LABEL[status] || status}
         </Pill>
       </div>
@@ -662,7 +662,7 @@ function WorkstreamCard({
 
       {/* progress — self-reported, editable via the stepper below */}
       <div style={{ display: "flex", flexDirection: "column", gap: 5, marginTop: 1 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11.5, color: T.muted2 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: T.muted }}>
           <span>Progress</span>
           <span style={{ color: T.ink, fontWeight: 600 }}>{pct}%</span>
         </div>
@@ -680,8 +680,8 @@ function WorkstreamCard({
                   flex: 1,
                   border: `1px solid ${active ? T.blue : T.inputBd}`,
                   borderRadius: 7,
-                  padding: "6px 0",
-                  fontSize: 11,
+                  padding: "7px 0",
+                  fontSize: 13,
                   fontWeight: 600,
                   color: active ? T.blue : T.muted,
                   background: active ? T.blueBg : T.white,
@@ -700,8 +700,8 @@ function WorkstreamCard({
       <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
         <span
           style={{
-            fontSize: 10.5,
-            color: T.muted2,
+            fontSize: 13,
+            color: T.muted,
             fontWeight: 600,
             letterSpacing: ".03em",
             textTransform: "uppercase",
@@ -720,8 +720,8 @@ function WorkstreamCard({
               width: "100%",
               border: `1px solid ${T.inputBd}`,
               borderRadius: 9,
-              padding: "9px 32px 9px 11px",
-              fontSize: 13,
+              padding: "10px 32px 10px 11px",
+              fontSize: 14,
               fontWeight: 600,
               color: T.ink,
               background: busy ? T.hover : T.white,
@@ -765,7 +765,7 @@ function WorkstreamCard({
         </div>
       </label>
       {denied && (
-        <div style={{ fontSize: 11.5, color: T.terra, lineHeight: 1.4 }}>
+        <div style={{ fontSize: 13.5, color: T.terra, lineHeight: 1.4 }}>
           Couldn't update — please try again.
         </div>
       )}
@@ -797,7 +797,7 @@ function LeverRow({
         minWidth: 0,
       }}
     >
-      <span aria-hidden="true" style={{ color: glyphColor, fontSize: 12, lineHeight: 1.4, flex: "none" }}>
+      <span aria-hidden="true" style={{ color: glyphColor, fontSize: 14, lineHeight: 1.4, flex: "none" }}>
         {glyph}
       </span>
       <div style={{ minWidth: 0, flex: 1, overflowWrap: "anywhere" }}>
@@ -822,7 +822,7 @@ function ValueLeversSection({
     <section style={{ display: "flex", flexDirection: "column", gap: 9 }}>
       <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
         <SectionLabel>Value levers</SectionLabel>
-        <div style={{ fontSize: 12, color: T.muted2 }}>
+        <div style={{ fontSize: 14, color: T.muted }}>
           Illustrative targets · captured value not tracked
         </div>
       </div>
@@ -840,12 +840,12 @@ function ValueLeversSection({
             background: T.surface,
           }}
         >
-          <span style={{ fontSize: 12.5, color: T.muted, fontWeight: 600 }}>Total illustrative target</span>
+          <span style={{ fontSize: 14, color: T.muted, fontWeight: 600 }}>Total illustrative target</span>
           <span style={{ fontSize: 15, fontWeight: 600, color: T.ink }}>{fmtCents(targetCents)}</span>
         </div>
 
         {!hasLevers ? (
-          <div style={{ padding: "16px", fontSize: 12.5, color: T.muted }}>
+          <div style={{ padding: "16px", fontSize: 14, color: T.muted }}>
             No value levers on this plan.
           </div>
         ) : (
@@ -871,18 +871,18 @@ function ValueLeversSection({
                   </div>
                   <div style={{ display: "flex", gap: 8, marginTop: 3, flexWrap: "wrap" }}>
                     {cat && (
-                      <Pill bg={T.track} fg={T.muted} style={{ padding: "2px 8px", fontSize: 10.5 }}>
+                      <Pill bg={T.track} fg={T.muted} style={{ padding: "3px 10px", fontSize: 13.5 }}>
                         {cat}
                       </Pill>
                     )}
-                    {conf && <span style={{ fontSize: 11, color: T.muted2 }}>{conf}</span>}
+                    {conf && <span style={{ fontSize: 14, color: T.muted }}>{conf}</span>}
                   </div>
                 </div>
                 <div style={{ textAlign: "right", flex: "none" }}>
                   <div style={{ fontSize: 14, fontWeight: 600, color: target != null ? T.ink : T.muted2 }}>
                     {fmtCents(target)}
                   </div>
-                  <div style={{ fontSize: 10.5, color: T.faint }}>target</div>
+                  <div style={{ fontSize: 13, color: T.muted2 }}>target</div>
                 </div>
               </div>
             );

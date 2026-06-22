@@ -161,8 +161,8 @@ export default function SettingsMobileScreen({ user, view }: AtlasScreenProps) {
                 flex: "none",
                 whiteSpace: "nowrap",
                 fontFamily: T.font,
-                fontSize: 13,
-                fontWeight: active ? 600 : 500,
+                fontSize: 14,
+                fontWeight: active ? 700 : 600,
                 padding: "8px 14px",
                 borderRadius: T.rPill,
                 border: `1px solid ${active ? "transparent" : T.border}`,
@@ -368,8 +368,8 @@ function BillingPane() {
             border: "none",
             borderRadius: T.rPill,
             padding: "10px 18px",
-            fontSize: 13.5,
-            fontWeight: 600,
+            fontSize: 14,
+            fontWeight: 700,
             cursor: portalBusy ? "default" : "pointer",
             opacity: portalBusy ? 0.65 : 1,
             fontFamily: T.font,
@@ -451,8 +451,8 @@ function UsageRow({ label, counter }: { label: string; counter: UsageCounter }) 
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
-        <span style={{ fontSize: 13, color: T.ink3 }}>{label}</span>
-        <span style={{ fontSize: 13, fontWeight: 600, color: T.ink }}>{valueText}</span>
+        <span style={{ fontSize: 14, color: T.ink3 }}>{label}</span>
+        <span style={{ fontSize: 14, fontWeight: 600, color: T.ink }}>{valueText}</span>
       </div>
       <ProgressBar pct={pct} />
     </div>
@@ -466,8 +466,8 @@ function fmtCount(n: number): string {
 
 function KeyVal({ k, v }: { k: string; v: ReactNode }) {
   return (
-    <div style={{ display: "flex", alignItems: "baseline", gap: 12, fontSize: 13 }}>
-      <span style={{ color: T.muted2, width: 86, flex: "none" }}>{k}</span>
+    <div style={{ display: "flex", alignItems: "baseline", gap: 12, fontSize: 14 }}>
+      <span style={{ color: T.muted, width: 86, flex: "none", fontSize: 13 }}>{k}</span>
       <span style={{ color: T.ink, fontWeight: 500 }}>{v}</span>
     </div>
   );
@@ -661,8 +661,8 @@ function InviteMemberButton() {
         border: "none",
         borderRadius: T.rPill,
         padding: "11px 16px",
-        fontSize: 13.5,
-        fontWeight: 600,
+        fontSize: 14,
+        fontWeight: 700,
         cursor: "pointer",
         fontFamily: T.font,
       }}
@@ -692,7 +692,7 @@ function MembersPane({ user }: { user: User | null }) {
             <Pill bg={T.violetBg} fg={T.violet}>Owner</Pill>
           </div>
         ) : (
-          <div style={{ padding: 18, fontSize: 13, color: T.muted2 }}>No signed-in account.</div>
+          <div style={{ padding: 18, fontSize: 14, color: T.muted }}>No signed-in account.</div>
         )}
       </Card>
 

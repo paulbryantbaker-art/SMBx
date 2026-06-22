@@ -249,9 +249,9 @@ function SignalChip({ children }: { children: string }) {
         background: T.blueBg,
         color: T.blue,
         borderRadius: T.rPill,
-        padding: "4px 11px",
-        fontSize: 11.5,
-        fontWeight: 500,
+        padding: "5px 12px",
+        fontSize: 13.5,
+        fontWeight: 600,
       }}
     >
       {children}
@@ -508,7 +508,7 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
           </Pill>
         )}
         {briefState === "ready" && fitScore != null && (
-          <span style={{ fontSize: 13.5, color: T.muted }}>
+          <span style={{ fontSize: 14, color: T.muted, fontWeight: 600 }}>
             Fit <b style={{ color: T.ink }}>{fitScore}</b>/100
           </span>
         )}
@@ -538,12 +538,12 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
           {briefState === "ready" && brief?.stale && (
             <span
               style={{
-                fontSize: 11,
+                fontSize: 13.5,
                 fontWeight: 600,
                 color: T.amber,
                 background: T.amberBg,
                 borderRadius: T.rPill,
-                padding: "2px 9px",
+                padding: "3px 10px",
               }}
               title="Showing the last read while Yulia refreshes it."
             >
@@ -555,20 +555,20 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
         {briefState === "loading" && <LoadingState label="Reading the deal…" />}
 
         {briefState === "error" && (
-          <div style={{ fontSize: 13.5, color: T.muted, lineHeight: 1.6 }}>
+          <div style={{ fontSize: 14, color: T.muted, lineHeight: 1.6 }}>
             Yulia’s read isn’t available right now.
           </div>
         )}
 
         {briefState === "ready" && (
           <>
-            <div style={{ fontSize: 13.5, lineHeight: 1.7, color: T.ink2 }}>
+            <div style={{ fontSize: 14, lineHeight: 1.7, color: T.ink2 }}>
               {brief?.marketRead?.headline || "—"}
             </div>
             {(brief?.marketRead?.bullets?.length ?? 0) > 0 && (
               <ul style={{ margin: "12px 0 0", paddingLeft: 18, display: "flex", flexDirection: "column", gap: 6 }}>
                 {brief!.marketRead!.bullets!.map((b, i) => (
-                  <li key={i} style={{ fontSize: 13, lineHeight: 1.55, color: T.ink3 }}>
+                  <li key={i} style={{ fontSize: 14, lineHeight: 1.55, color: T.ink3 }}>
                     {b}
                   </li>
                 ))}
@@ -588,12 +588,12 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
                       alignItems: "flex-start",
                       borderTop: `1px solid ${T.rowDiv}`,
                       padding: "7px 0",
-                      fontSize: 13,
+                      fontSize: 14,
                       color: T.ink3,
                       lineHeight: 1.5,
                     }}
                   >
-                    <span style={{ color: T.terra, flex: "none", fontSize: 13 }} aria-hidden="true">
+                    <span style={{ color: T.terra, flex: "none", fontSize: 14 }} aria-hidden="true">
                       ⚑
                     </span>
                     <span>{r}</span>
@@ -625,9 +625,9 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
                   border: `1px solid ${T.border}`,
                   background: T.white,
                   borderRadius: T.rPill,
-                  padding: "9px 14px",
-                  fontSize: 12.5,
-                  fontWeight: 600,
+                  padding: "10px 14px",
+                  fontSize: 14,
+                  fontWeight: 700,
                   color: T.blue,
                   cursor: "pointer",
                   fontFamily: T.font,
@@ -674,7 +674,7 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
       />
 
       {dTotal === 0 && (
-        <div style={{ fontSize: 13.5, color: T.muted2, marginTop: -4 }}>
+        <div style={{ fontSize: 14, color: T.muted, marginTop: -4 }}>
           No deliverables yet — ask Yulia to draft the first one for this deal.
         </div>
       )}

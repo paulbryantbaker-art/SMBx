@@ -510,8 +510,8 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
                   flex: "none",
                   border: "none",
                   borderRadius: T.rPill,
-                  padding: "7px 13px",
-                  fontSize: 12.5,
+                  padding: "7px 14px",
+                  fontSize: 14,
                   fontWeight: 600,
                   cursor: "pointer",
                   fontFamily: T.font,
@@ -563,8 +563,8 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
                 border: "none",
                 background: "transparent",
                 color: T.blue,
-                fontWeight: 600,
-                fontSize: 12.5,
+                fontWeight: 700,
+                fontSize: 14,
                 cursor: "pointer",
                 fontFamily: T.font,
                 padding: 0,
@@ -573,7 +573,7 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
               Edit
             </button>
           </div>
-          <div style={{ fontSize: 13.5, lineHeight: 1.5, color: T.ink3 }}>
+          <div style={{ fontSize: 14, lineHeight: 1.5, color: T.ink3 }}>
             {buyBoxParts(selectedThesis).join(" · ") || "Buy-box details not set yet."}
           </div>
         </div>
@@ -605,12 +605,12 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
             gap: 7,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 13, color: T.ink }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 14, color: T.ink }}>
             <span
               aria-hidden="true"
               style={{
-                width: 13,
-                height: 13,
+                width: 14,
+                height: 14,
                 borderRadius: "50%",
                 border: `2px solid ${T.progTrack}`,
                 borderTopColor: T.blue,
@@ -621,7 +621,7 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
             {livePortfolio.stage_progress?.message || "Scoring candidates against your buy-box…"}
           </div>
           {livePortfolio.total_candidates > 0 && (
-            <div style={{ fontSize: 13, color: T.muted }}>
+            <div style={{ fontSize: 14, color: T.muted, fontWeight: 600 }}>
               {livePortfolio.total_candidates} candidates found
               {livePortfolio.a_tier_count > 0 && ` · ${livePortfolio.a_tier_count} Tier 1`}
               {livePortfolio.b_tier_count > 0 && ` · ${livePortfolio.b_tier_count} Tier 2`}
@@ -637,7 +637,7 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
             background: T.terraBg,
             borderRadius: 14,
             padding: "11px 14px",
-            fontSize: 12.5,
+            fontSize: 13.5,
             color: T.terra,
             display: "flex",
             alignItems: "center",
@@ -653,8 +653,8 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
               border: "none",
               background: "transparent",
               color: T.terra,
-              fontWeight: 600,
-              fontSize: 12.5,
+              fontWeight: 700,
+              fontSize: 14,
               textDecoration: "underline",
               cursor: "pointer",
               fontFamily: T.font,
@@ -740,7 +740,7 @@ function CandidateRegion({
         <div style={{ fontSize: 16, fontWeight: 600, color: T.ink }}>
           No candidates sourced yet
         </div>
-        <div style={{ fontSize: 13.5, color: T.muted, lineHeight: 1.5, maxWidth: 320 }}>
+        <div style={{ fontSize: 14, color: T.muted, lineHeight: 1.5, maxWidth: 320 }}>
           Run discovery to search Google Places and score off-market targets against
           this buy-box, or ask Yulia to source for you.
         </div>
@@ -754,9 +754,9 @@ function CandidateRegion({
               color: "#fff",
               border: "none",
               borderRadius: T.rPill,
-              padding: "9px 18px",
-              fontSize: 13,
-              fontWeight: 600,
+              padding: "10px 18px",
+              fontSize: 14,
+              fontWeight: 700,
               cursor: building ? "default" : "pointer",
               opacity: building ? 0.6 : 1,
               fontFamily: T.font,
@@ -772,9 +772,9 @@ function CandidateRegion({
               color: T.ink,
               border: `1px solid ${T.inputBd}`,
               borderRadius: T.rPill,
-              padding: "9px 16px",
-              fontSize: 13,
-              fontWeight: 500,
+              padding: "10px 16px",
+              fontSize: 14,
+              fontWeight: 700,
               cursor: "pointer",
               fontFamily: T.font,
             }}
@@ -810,7 +810,7 @@ function CandidateRegion({
         <div style={{ fontSize: 15, fontWeight: 600, color: T.ink }}>
           {isActive ? "Scoring in progress" : "No candidates yet"}
         </div>
-        <div style={{ fontSize: 13, color: T.muted, lineHeight: 1.5, maxWidth: 320 }}>
+        <div style={{ fontSize: 14, color: T.muted, lineHeight: 1.5, maxWidth: 320 }}>
           {isActive
             ? "Yulia is searching and scoring targets — they'll appear here as they're found."
             : "Try broadening the buy-box geography or industry, or ask Yulia to widen the search."}
@@ -832,7 +832,7 @@ function CandidateRegion({
         }}
       >
         {candidates.length} {candidates.length === 1 ? "candidate" : "candidates"}
-        <span style={{ color: T.faint, fontWeight: 500 }}> · Google Places</span>
+        <span style={{ color: T.muted, fontWeight: 600 }}> · Google Places</span>
       </div>
       {candidates.map((c) => (
         <CandidateCard key={c.id} c={c} onRoute={() => onRoute(c)} />
@@ -878,7 +878,7 @@ function CandidateCard({ c, onRoute }: { c: Candidate; onRoute: () => void }) {
         >
           {c.name || "Unnamed business"}
         </span>
-        <Pill bg={fit.bg} fg={fit.fg} style={{ flex: "none", fontSize: 11.5, padding: "3px 9px" }}>
+        <Pill bg={fit.bg} fg={fit.fg} style={{ flex: "none", fontSize: 13, padding: "3px 10px" }}>
           {fitIsReal ? `Fit ${Number(c.total_score)}` : "Fit —"}
         </Pill>
       </div>
@@ -903,7 +903,7 @@ function CandidateCard({ c, onRoute }: { c: Candidate; onRoute: () => void }) {
 
       {/* Row 2: tier (left) + route (right) */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-        <span style={{ fontSize: 12, fontWeight: 600, color: tierColor(c.tier) }}>
+        <span style={{ fontSize: 14, fontWeight: 700, color: tierColor(c.tier) }}>
           {tierLabel(c.tier)}
         </span>
         {route.action ? (
@@ -918,18 +918,18 @@ function CandidateCard({ c, onRoute }: { c: Candidate; onRoute: () => void }) {
               border: "none",
               background: "transparent",
               color: T.blue,
-              fontWeight: 600,
-              fontSize: 12,
+              fontWeight: 700,
+              fontSize: 14,
               cursor: "pointer",
               fontFamily: T.font,
               padding: 0,
             }}
           >
             {route.label}
-            <ChevronRightIcon size={13} c={T.blue} />
+            <ChevronRightIcon size={15} c={T.blue} />
           </button>
         ) : (
-          <span style={{ fontSize: 12, color: T.muted }}>{route.label}</span>
+          <span style={{ fontSize: 14, fontWeight: 600, color: T.muted }}>{route.label}</span>
         )}
       </div>
     </div>
