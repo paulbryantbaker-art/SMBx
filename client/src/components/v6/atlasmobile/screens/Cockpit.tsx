@@ -324,8 +324,8 @@ function WorkflowCard({
               border: "none",
               background: "none",
               padding: 0,
-              fontSize: 12,
-              fontWeight: 600,
+              fontSize: 14,
+              fontWeight: 700,
               color: T.blue,
               cursor: "pointer",
               fontFamily: T.font,
@@ -348,7 +348,7 @@ function WorkflowCard({
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
-                padding: "7px 0",
+                padding: "9px 0",
                 borderTop: `1px solid ${T.rowDiv2}`,
               }}
             >
@@ -357,8 +357,8 @@ function WorkflowCard({
                 style={{
                   flex: 1,
                   minWidth: 0,
-                  fontSize: 13,
-                  color: T.ink3,
+                  fontSize: 14.5,
+                  color: T.ink,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
@@ -366,7 +366,7 @@ function WorkflowCard({
               >
                 {it.label}
               </span>
-              {it.meta && <span style={{ fontSize: 11.5, color: T.faint, flex: "none" }}>{it.meta}</span>}
+              {it.meta && <span style={{ fontSize: 14, fontWeight: 600, color: T.muted, flex: "none" }}>{it.meta}</span>}
             </div>
           ))}
         </div>

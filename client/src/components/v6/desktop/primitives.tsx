@@ -160,8 +160,8 @@ export function Pill({
         alignItems: "center",
         gap: 6,
         borderRadius: T.rPill,
-        padding: "3px 10px",
-        fontSize: 11.5,
+        padding: "4px 11px",
+        fontSize: 12.5,
         fontWeight: 600,
         background: bg,
         color: fg,
@@ -259,10 +259,10 @@ export function KpiCard({
         padding: "15px 17px",
       }}
     >
-      <div style={{ fontSize: 11.5, color: T.muted2, fontWeight: 600, letterSpacing: ".03em", marginBottom: 7 }}>
+      <div style={{ fontSize: 13, color: T.muted, fontWeight: 700, letterSpacing: ".02em", marginBottom: 7 }}>
         {label}
       </div>
-      <div style={{ fontSize: 27, fontWeight: 600, letterSpacing: "-.02em", lineHeight: 1, color: T.ink }}>
+      <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-.02em", lineHeight: 1, color: T.ink }}>
         {value}
       </div>
       {delta != null && (
@@ -330,8 +330,8 @@ export function StepperPills({ steps }: { steps: { label: string; state: StepSta
                 alignItems: "center",
                 gap: 7,
                 borderRadius: T.rPill,
-                padding: "7px 13px",
-                fontSize: 12.5,
+                padding: "8px 14px",
+                fontSize: 13.5,
                 fontWeight: 600,
                 background: style.bg,
                 color: style.fg,
@@ -340,15 +340,15 @@ export function StepperPills({ steps }: { steps: { label: string; state: StepSta
             >
               <span
                 style={{
-                  width: 18,
-                  height: 18,
+                  width: 20,
+                  height: 20,
                   borderRadius: "50%",
                   background: style.dotBg,
                   color: style.dotFg,
                   display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: 10,
+                  fontSize: 12,
                   fontWeight: 700,
                   flex: "none",
                 }}
@@ -394,7 +394,7 @@ export function ProgressBar({ pct, color = T.blue }: { pct: number; color?: stri
  *  LOCKED no-gratuitous-eyebrows rule): a calm grouping label, not chrome. */
 export function SectionLabel({ children }: { children: ReactNode }) {
   return (
-    <div style={{ fontSize: 12, color: T.muted, fontWeight: 600 }}>
+    <div style={{ fontSize: 14, color: T.ink, fontWeight: 700, letterSpacing: "-0.01em" }}>
       {children}
     </div>
   );
