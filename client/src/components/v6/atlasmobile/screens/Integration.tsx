@@ -441,7 +441,7 @@ function MilestoneTimeline({
       {/* real milestone events (the event trail) */}
       <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
         {ordered.length === 0 ? (
-          <div style={{ fontSize: 12.5, color: T.muted2, lineHeight: 1.45 }}>
+          <div style={{ fontSize: 14, color: T.muted2, lineHeight: 1.45 }}>
             No milestones logged yet — they appear here as workstreams complete.
           </div>
         ) : (
@@ -484,7 +484,7 @@ function MilestoneTimeline({
                 </span>
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: T.ink }}>
+                    <span style={{ fontSize: 15.5, fontWeight: 700, color: T.ink }}>
                       {milestoneTitle(m)}
                     </span>
                     {when && <span style={{ fontSize: 11.5, color: T.faint }}>{when}</span>}
@@ -492,7 +492,7 @@ function MilestoneTimeline({
                   {desc && (
                     <div
                       style={{
-                        fontSize: 12.5,
+                        fontSize: 14,
                         color: T.muted,
                         marginTop: 2,
                         lineHeight: 1.45,
@@ -625,8 +625,8 @@ function WorkstreamCard({
         <div style={{ minWidth: 0, flex: 1 }}>
           <div
             style={{
-              fontSize: 13.5,
-              fontWeight: 600,
+              fontSize: 15.5,
+              fontWeight: 700,
               color: T.ink,
               lineHeight: 1.3,
               overflowWrap: "anywhere",
@@ -635,7 +635,7 @@ function WorkstreamCard({
             {wsTitle(ws)}
           </div>
           {owner && (
-            <div style={{ fontSize: 11.5, color: T.muted2, marginTop: 2, overflowWrap: "anywhere" }}>
+            <div style={{ fontSize: 14, color: T.muted, marginTop: 2, overflowWrap: "anywhere" }}>
               {owner}
             </div>
           )}
@@ -646,7 +646,7 @@ function WorkstreamCard({
       </div>
 
       {detail && (
-        <div style={{ fontSize: 12.5, color: T.muted, lineHeight: 1.45, overflowWrap: "anywhere" }}>
+        <div style={{ fontSize: 14, color: T.muted, lineHeight: 1.45, overflowWrap: "anywhere" }}>
           {detail}
         </div>
       )}
@@ -793,7 +793,7 @@ function LeverRow({
         border: `1px solid ${T.hair}`,
         borderRadius: 9,
         padding: "8px 10px",
-        fontSize: 12.5,
+        fontSize: 14,
         minWidth: 0,
       }}
     >
@@ -866,7 +866,7 @@ function ValueLeversSection({
                 }}
               >
                 <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: T.ink, overflowWrap: "anywhere" }}>
+                  <div style={{ fontSize: 15.5, fontWeight: 700, color: T.ink, overflowWrap: "anywhere" }}>
                     {l.name || "Value lever"}
                   </div>
                   <div style={{ display: "flex", gap: 8, marginTop: 3, flexWrap: "wrap" }}>

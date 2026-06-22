@@ -216,7 +216,7 @@ function Spinner({ c, size = 13 }: { c: string; size?: number }) {
 /* ── section heading (mobile body convention — Today.tsx) ── */
 function SectionHeading({ children, style }: { children: ReactNode; style?: CSSProperties }) {
   return (
-    <div style={{ fontSize: 13, fontWeight: 600, color: T.label, marginBottom: 10, ...style }}>
+    <div style={{ fontSize: 15.5, fontWeight: 700, color: T.ink, letterSpacing: "-0.01em", marginBottom: 10, ...style }}>
       {children}
     </div>
   );
@@ -234,11 +234,11 @@ function NoteCard({ title, text }: { title?: string; text: string }) {
       }}
     >
       {title && (
-        <div style={{ fontSize: 13.5, fontWeight: 600, color: T.ink3, marginBottom: 5 }}>
+        <div style={{ fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 5 }}>
           {title}
         </div>
       )}
-      <div style={{ fontSize: 13, color: T.muted, lineHeight: 1.55 }}>{text}</div>
+      <div style={{ fontSize: 14, color: T.muted, lineHeight: 1.55 }}>{text}</div>
     </div>
   );
 }
@@ -309,7 +309,7 @@ function ApprovalCard({
           </div>
           <div
             style={{
-              fontSize: 14,
+              fontSize: 15.5,
               fontWeight: 600,
               color: T.ink,
               lineHeight: 1.4,
@@ -357,7 +357,7 @@ function ApprovalCard({
             )}
           </div>
           {action.created_at && (
-            <div style={{ fontSize: 11.5, color: T.faint, marginTop: 8 }}>
+            <div style={{ fontSize: 13, color: T.faint, marginTop: 8 }}>
               Staged {relTime(action.created_at)}
             </div>
           )}
@@ -524,10 +524,10 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
             <Sparkle size={16} />
           </span>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: T.ink, marginBottom: 5 }}>
+            <div style={{ fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 5 }}>
               Set up agents by describing them to Yulia
             </div>
-            <div style={{ fontSize: 12.5, color: T.muted, lineHeight: 1.6 }}>
+            <div style={{ fontSize: 14, color: T.muted, lineHeight: 1.6 }}>
               Tell Yulia what you want watched, scored, or drafted on a recurring basis —
               scanning for new listings against your buy-box, or refreshing a valuation when
               financials change. Yulia does the work and stages anything irreversible here for
@@ -594,10 +594,10 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
             padding: "16px 15px",
           }}
         >
-          <div style={{ fontSize: 13.5, fontWeight: 600, color: T.ink3, marginBottom: 4 }}>
+          <div style={{ fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 4 }}>
             Couldn't load approvals
           </div>
-          <div style={{ fontSize: 12.5, color: T.muted, lineHeight: 1.55, marginBottom: 12 }}>
+          <div style={{ fontSize: 14, color: T.muted, lineHeight: 1.55, marginBottom: 12 }}>
             {error}
           </div>
           <button
@@ -673,25 +673,27 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
               <span style={{ flex: 1, minWidth: 0 }}>
                 <span
                   style={{
-                    display: "block",
-                    fontSize: 13.5,
+                    fontSize: 15.5,
                     fontWeight: 600,
                     color: T.ink,
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
                     overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
+                    lineHeight: 1.3,
                   }}
                 >
                   {act.title}
                 </span>
                 <span
                   style={{
-                    display: "block",
-                    fontSize: 12,
-                    color: T.muted2,
+                    fontSize: 14,
+                    color: T.muted,
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
                     overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
+                    lineHeight: 1.45,
                     marginTop: 2,
                   }}
                 >
@@ -705,7 +707,7 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
                   </span>
                 )}
               </span>
-              <ChevronRightIcon size={16} c={T.faint} />
+              <ChevronRightIcon size={18} c={T.muted2} />
             </button>
           ))}
         </div>
@@ -724,7 +726,7 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
         onSend={submitDraft}
         onFileUpload={chat?.uploadFile}
       />
-      <div style={{ fontSize: 11.5, color: T.faint, marginTop: 8, lineHeight: 1.5 }}>
+      <div style={{ fontSize: 13, color: T.faint, marginTop: 8, lineHeight: 1.5 }}>
         {agentSetupReady
           ? "Yulia will help you configure it, then stage anything irreversible here for your approval."
           : "Sign in to set up an agent with Yulia."}

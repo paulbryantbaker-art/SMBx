@@ -276,8 +276,8 @@ function ThisDealRow({ label, onClick }: { label: string; onClick: () => void })
         borderRadius: T.rChip,
         boxShadow: T.shCard,
         padding: "13px 14px",
-        fontSize: 14,
-        fontWeight: 500,
+        fontSize: 15.5,
+        fontWeight: 700,
         color: T.ink,
         cursor: "pointer",
         fontFamily: T.font,
@@ -285,7 +285,7 @@ function ThisDealRow({ label, onClick }: { label: string; onClick: () => void })
       }}
     >
       <span style={{ flex: 1, minWidth: 0 }}>{label}</span>
-      <ChevronRightIcon size={16} c={T.faint} />
+      <ChevronRightIcon size={18} c={T.muted2} />
     </button>
   );
 }
@@ -313,8 +313,8 @@ function WorkflowCard({
     <Card pad={15} style={{ borderRadius: T.rCardLg }}>
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
-          <div style={{ fontSize: 14.5, fontWeight: 600, color: T.ink }}>{title}</div>
-          <div style={{ fontSize: 11.5, color: T.muted2, fontWeight: 600 }}>{meta}</div>
+          <div style={{ fontSize: 15.5, fontWeight: 700, color: T.ink }}>{title}</div>
+          <div style={{ fontSize: 14, color: T.muted, fontWeight: 600 }}>{meta}</div>
         </div>
         {cta && onCta && (
           <button
@@ -508,7 +508,7 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
           </Pill>
         )}
         {briefState === "ready" && fitScore != null && (
-          <span style={{ fontSize: 12.5, color: T.muted }}>
+          <span style={{ fontSize: 13.5, color: T.muted }}>
             Fit <b style={{ color: T.ink }}>{fitScore}</b>/100
           </span>
         )}
@@ -534,7 +534,7 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
       <Card pad={15} style={{ borderRadius: T.rCardLg }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
           <Sparkle size={15} />
-          <span style={{ fontSize: 14.5, fontWeight: 600, color: T.ink }}>Yulia’s read</span>
+          <span style={{ fontSize: 15.5, fontWeight: 700, color: T.ink, letterSpacing: "-0.01em" }}>Yulia’s read</span>
           {briefState === "ready" && brief?.stale && (
             <span
               style={{
@@ -578,7 +578,7 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
             {/* Key risks — real signoff flags + research gaps, never fabricated clauses */}
             {riskRows.length > 0 && (
               <div style={{ marginTop: 15 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: T.ink, marginBottom: 4 }}>Key risks</div>
+                <div style={{ fontSize: 15.5, fontWeight: 700, color: T.ink, letterSpacing: "-0.01em", marginBottom: 4 }}>Key risks</div>
                 {riskRows.map((r, i) => (
                   <div
                     key={i}
@@ -674,7 +674,7 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
       />
 
       {dTotal === 0 && (
-        <div style={{ fontSize: 12.5, color: T.muted2, marginTop: -4 }}>
+        <div style={{ fontSize: 13.5, color: T.muted2, marginTop: -4 }}>
           No deliverables yet — ask Yulia to draft the first one for this deal.
         </div>
       )}
@@ -699,8 +699,8 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
         }}
       >
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: T.ink }}>Deal team</div>
-          <div style={{ fontSize: 12, color: T.muted2, marginTop: 2 }}>
+          <div style={{ fontSize: 15.5, fontWeight: 700, color: T.ink }}>Deal team</div>
+          <div style={{ fontSize: 14, color: T.muted, marginTop: 2 }}>
             {team.state === "ready"
               ? team.count != null
                 ? `${team.count} ${team.count === 1 ? "member" : "members"}`
@@ -710,7 +710,7 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
                 : "Loading members…"}
           </div>
         </div>
-        <ChevronRightIcon size={16} c={T.faint} />
+        <ChevronRightIcon size={18} c={T.muted2} />
       </button>
 
       {/* ── G. THIS DEAL chips → nav.go(..., { dealId }) ── */}

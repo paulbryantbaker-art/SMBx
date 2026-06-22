@@ -82,7 +82,7 @@ export default function MoreScreen({ user }: AtlasScreenProps) {
           <div style={S.profileName}>{name}</div>
           {subtitle && <div style={S.profileSub}>{subtitle}</div>}
         </div>
-        <ChevronRightIcon size={16} c={T.faint} />
+        <ChevronRightIcon size={18} c={T.muted2} />
       </button>
 
       {/* ── MODULES ─────────────────────────────────────────────── */}
@@ -161,7 +161,7 @@ function Row({
       {badge != null && (
         <span style={S.badge}>{badge > 99 ? "99+" : badge}</span>
       )}
-      <ChevronRightIcon size={15} c={T.faint} />
+      <ChevronRightIcon size={18} c={T.muted2} />
     </button>
   );
 }
@@ -271,20 +271,24 @@ const S: Record<string, CSSProperties> = {
     fontFamily: T.font,
   },
   profileName: {
-    fontSize: 15,
+    fontSize: 15.5,
     fontWeight: 600,
     color: T.ink,
+    display: "-webkit-box",
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: "vertical",
     overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
+    lineHeight: 1.3,
   },
   profileSub: {
-    fontSize: 12.5,
-    color: T.muted2,
+    fontSize: 14,
+    color: T.muted,
     marginTop: 2,
+    display: "-webkit-box",
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: "vertical",
     overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
+    lineHeight: 1.45,
   },
   group: {
     background: T.white,
@@ -315,7 +319,7 @@ const S: Record<string, CSSProperties> = {
     alignItems: "center",
     justifyContent: "center",
   },
-  rowLabel: { flex: 1, minWidth: 0, fontSize: 14, color: T.ink, fontWeight: 500 },
+  rowLabel: { flex: 1, minWidth: 0, fontSize: 15.5, color: T.ink, fontWeight: 600 },
   badge: {
     flex: "none",
     minWidth: 18,

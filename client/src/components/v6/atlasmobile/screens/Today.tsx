@@ -579,18 +579,18 @@ function AgentList({
           style={{
             display: "flex",
             alignItems: "flex-start",
-            gap: 9,
+            gap: 12,
             background: T.white,
             border: `1px solid ${T.border}`,
-            borderRadius: 14,
-            padding: 13,
+            borderRadius: 15,
+            padding: 15,
           }}
         >
           <AgentGlyph glyph={it.glyph} color={it.color} />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div
               style={{
-                fontSize: 13,
+                fontSize: 14.5,
                 color: T.ink,
                 lineHeight: 1.45,
                 display: "-webkit-box",
@@ -603,9 +603,9 @@ function AgentList({
             </div>
             <div
               style={{
-                fontSize: 11.5,
-                color: T.muted2,
-                marginTop: 2,
+                fontSize: 13,
+                color: T.muted,
+                marginTop: 3,
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",

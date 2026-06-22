@@ -548,7 +548,7 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
               marginBottom: 6,
             }}
           >
-            <span style={{ fontSize: 15, fontWeight: 600, color: T.ink }}>
+            <span style={{ fontSize: 15.5, fontWeight: 700, color: T.ink }}>
               {selectedThesis.name}
             </span>
             <button
@@ -621,7 +621,7 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
             {livePortfolio.stage_progress?.message || "Scoring candidates against your buy-box…"}
           </div>
           {livePortfolio.total_candidates > 0 && (
-            <div style={{ fontSize: 12, color: T.muted }}>
+            <div style={{ fontSize: 13, color: T.muted }}>
               {livePortfolio.total_candidates} candidates found
               {livePortfolio.a_tier_count > 0 && ` · ${livePortfolio.a_tier_count} Tier 1`}
               {livePortfolio.b_tier_count > 0 && ` · ${livePortfolio.b_tier_count} Tier 2`}
@@ -824,9 +824,10 @@ function CandidateRegion({
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       <div
         style={{
-          fontSize: 13,
-          fontWeight: 600,
-          color: T.label,
+          fontSize: 15.5,
+          fontWeight: 700,
+          color: T.ink,
+          letterSpacing: "-0.01em",
           padding: "0 2px",
         }}
       >
@@ -864,12 +865,14 @@ function CandidateCard({ c, onRoute }: { c: Candidate; onRoute: () => void }) {
           style={{
             flex: 1,
             minWidth: 0,
-            fontSize: 14,
-            fontWeight: 600,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            fontSize: 15.5,
+            fontWeight: 700,
             color: T.ink,
             overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
+            lineHeight: 1.3,
           }}
           title={c.name || undefined}
         >
@@ -884,12 +887,14 @@ function CandidateCard({ c, onRoute }: { c: Candidate; onRoute: () => void }) {
       {loc && (
         <div
           style={{
-            fontSize: 12,
-            color: T.muted2,
+            fontSize: 14,
+            color: T.muted,
             marginBottom: 9,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
             overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
+            lineHeight: 1.45,
           }}
         >
           {loc}

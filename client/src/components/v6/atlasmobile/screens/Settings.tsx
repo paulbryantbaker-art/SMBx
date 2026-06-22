@@ -203,7 +203,7 @@ function Eyebrow({ children }: { children: ReactNode }) {
 
 function HonestNote({ children, style }: { children: ReactNode; style?: CSSProperties }) {
   return (
-    <div style={{ fontSize: 12, color: T.muted2, lineHeight: 1.55, ...style }}>{children}</div>
+    <div style={{ fontSize: 14, color: T.muted, lineHeight: 1.55, ...style }}>{children}</div>
   );
 }
 
@@ -255,10 +255,10 @@ function ProfilePane({ user }: { user: User | null }) {
       >
         <Avatar initials={userInitials(user)} size={56} gradient />
         <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{ fontSize: 16, fontWeight: 600, color: T.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <div style={{ fontSize: 16, fontWeight: 600, color: T.ink, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.3 }}>
             {user.display_name || user.email}
           </div>
-          <div style={{ fontSize: 13, color: T.muted2, marginTop: 2 }}>
+          <div style={{ fontSize: 14, color: T.muted, marginTop: 2 }}>
             {titleCase(user.role)}
             {user.league ? ` · ${titleCase(user.league)} league` : ""}
           </div>
@@ -352,7 +352,7 @@ function BillingPane() {
       <Card pad={20} style={{ borderRadius: T.rCardLg, display: "flex", flexDirection: "column" }}>
         <Eyebrow>PLAN</Eyebrow>
         <div style={{ fontSize: 24, fontWeight: 600, color: T.ink, marginTop: 4 }}>{planName}</div>
-        <div style={{ fontSize: 13, color: T.muted, marginTop: 4 }}>
+        <div style={{ fontSize: 14, color: T.muted, marginTop: 4 }}>
           {priceLine}
           {renewLabel ? ` · ${renewLabel}` : ""}
         </div>
@@ -565,7 +565,7 @@ function NotificationsPane() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-      <HonestNote style={{ fontSize: 13.5 }}>
+      <HonestNote style={{ fontSize: 14 }}>
         Choose what Atlas and your agents notify you about.
       </HonestNote>
 
@@ -585,7 +585,7 @@ function NotificationsPane() {
                 borderTop: idx === 0 ? "none" : `1px solid ${T.rowDiv2}`,
               }}
             >
-              <span style={{ fontSize: 14, color: T.ink }}>{it.label}</span>
+              <span style={{ fontSize: 15.5, fontWeight: 600, color: T.ink }}>{it.label}</span>
               <Toggle
                 on={!!state[it.id]}
                 onChange={() => setState((s) => ({ ...s, [it.id]: !s[it.id] }))}
@@ -682,10 +682,10 @@ function MembersPane({ user }: { user: User | null }) {
           <div style={{ display: "flex", alignItems: "center", padding: "16px 18px", gap: 12 }}>
             <Avatar initials={userInitials(user)} size={40} gradient />
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: T.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              <div style={{ fontSize: 15.5, fontWeight: 600, color: T.ink, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.3 }}>
                 {user.display_name || user.email}
               </div>
-              <div style={{ fontSize: 12.5, color: T.muted2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              <div style={{ fontSize: 14, color: T.muted, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.45 }}>
                 {user.email}
               </div>
             </div>
@@ -712,7 +712,7 @@ function MembersPane({ user }: { user: User | null }) {
 function StubPane({ text }: { text: string }) {
   return (
     <Card style={{ borderRadius: T.rCardLg, padding: 26, textAlign: "center" }}>
-      <div style={{ fontSize: 14, color: T.muted2, lineHeight: 1.6 }}>{text}</div>
+      <div style={{ fontSize: 14, color: T.muted, lineHeight: 1.6 }}>{text}</div>
     </Card>
   );
 }

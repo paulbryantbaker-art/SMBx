@@ -683,12 +683,14 @@ function CollateralRow({
           style={{
             flex: 1,
             minWidth: 0,
-            fontSize: 14,
-            fontWeight: 600,
+            fontSize: 15.5,
+            fontWeight: 700,
             color: T.ink,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
             overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
+            lineHeight: 1.3,
           }}
         >
           {d.name || "Untitled"}
@@ -706,7 +708,7 @@ function CollateralRow({
         >
           {badge.label}
         </span>
-        <ChevronRightIcon size={16} c={T.faint} />
+        <ChevronRightIcon size={18} c={T.muted2} />
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
         <span
@@ -724,7 +726,7 @@ function CollateralRow({
         {d.deal_name && (
           <span
             style={{
-              fontSize: 12.5,
+              fontSize: 14,
               color: T.muted,
               overflow: "hidden",
               textOverflow: "ellipsis",

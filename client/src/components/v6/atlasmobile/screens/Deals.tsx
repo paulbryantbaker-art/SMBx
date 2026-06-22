@@ -536,7 +536,7 @@ function BoardView({
                       padding: "2px 2px 0",
                     }}
                   >
-                    <span style={{ fontSize: 13, fontWeight: 600, color: T.label }}>
+                    <span style={{ fontSize: 15.5, fontWeight: 700, color: T.ink, letterSpacing: "-0.01em" }}>
                       {stage.title}
                     </span>
                     <span style={{ fontSize: 12, color: T.faint }}>{rows.length}</span>
@@ -653,12 +653,14 @@ function DealRow({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
-            fontSize: 14,
-            fontWeight: 600,
+            fontSize: 15.5,
+            fontWeight: 700,
             color: T.ink,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
             overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
+            lineHeight: 1.3,
           }}
           title={row.name}
         >
@@ -666,12 +668,14 @@ function DealRow({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) {
         </div>
         <div
           style={{
-            fontSize: 12,
-            color: T.muted2,
+            fontSize: 14,
+            color: T.muted,
             marginTop: 2,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
             overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
+            lineHeight: 1.45,
           }}
         >
           {meta || "—"}
@@ -751,12 +755,14 @@ function DealCard({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) 
           style={{
             flex: 1,
             minWidth: 0,
-            fontSize: 15,
-            fontWeight: 600,
+            fontSize: 15.5,
+            fontWeight: 700,
             color: T.ink,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
             overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
+            lineHeight: 1.3,
           }}
           title={row.name}
         >
@@ -774,16 +780,18 @@ function DealCard({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) 
           alignItems: "center",
           justifyContent: "space-between",
           gap: 10,
-          fontSize: 12.5,
+          fontSize: 14,
           color: T.muted,
         }}
       >
         <span
           style={{
             minWidth: 0,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
             overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
+            lineHeight: 1.45,
           }}
           title={metaLeft}
         >

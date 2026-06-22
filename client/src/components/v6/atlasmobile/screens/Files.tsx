@@ -234,18 +234,19 @@ function DocRow({
       <span style={{ flex: 1, minWidth: 0 }}>
         <span
           style={{
-            display: "block",
-            fontSize: 13.5,
-            fontWeight: 600,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            fontSize: 15.5,
+            fontWeight: 700,
             color: T.ink,
             overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
+            lineHeight: 1.3,
           }}
         >
           {doc.name || "Untitled"}
         </span>
-        <span style={{ display: "block", fontSize: 11.5, color: T.muted2, marginTop: 3 }}>
+        <span style={{ display: "block", fontSize: 14, color: T.muted, marginTop: 3 }}>
           {fileTypeLabel(doc.file_type)}
           {doc.version != null ? ` · v${doc.version}` : ""} · Updated {fmtDate(doc.updated_at)}
         </span>
@@ -523,7 +524,7 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
 
           {/* Active-folder title + count */}
           <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 10 }}>
-            <span style={{ fontSize: 15, fontWeight: 600, color: T.ink }}>{activeFolderName}</span>
+            <span style={{ fontSize: 15.5, fontWeight: 700, color: T.ink, letterSpacing: "-0.01em" }}>{activeFolderName}</span>
             <span style={{ fontSize: 12.5, color: T.muted2, fontWeight: 600 }}>
               {visibleDocs.length === 1 ? "1 file" : `${visibleDocs.length} files`}
             </span>
