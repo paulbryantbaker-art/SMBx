@@ -336,8 +336,8 @@ export default function TodayMobileScreen({ user }: AtlasScreenProps) {
           margin: "22px 0 10px",
         }}
       >
-        <Sparkle size={14} />
-        <span style={{ fontSize: 13, fontWeight: 600, color: T.label }}>
+        <Sparkle size={16} />
+        <span style={{ fontSize: 15.5, fontWeight: 700, color: T.ink, letterSpacing: "-0.01em" }}>
           Yulia &amp; your agents
         </span>
       </div>
@@ -368,10 +368,10 @@ function QuickChip({
         gap: 7,
         background: T.white,
         border: `1px solid ${T.border}`,
-        borderRadius: 12,
-        padding: "10px 13px",
-        fontSize: 13,
-        fontWeight: 500,
+        borderRadius: 14,
+        padding: "13px 17px",
+        fontSize: 14.5,
+        fontWeight: 600,
         color: T.ink,
         boxShadow: T.shCard,
         cursor: "pointer",
@@ -379,7 +379,7 @@ function QuickChip({
         fontFamily: T.font,
       }}
     >
-      <span aria-hidden="true" style={{ fontSize: 14, lineHeight: 1 }}>
+      <span aria-hidden="true" style={{ fontSize: 16, lineHeight: 1 }}>
         {emoji}
       </span>
       {label}
@@ -391,7 +391,7 @@ function QuickChip({
 
 function SectionHeading({ children }: { children: ReactNode }) {
   return (
-    <div style={{ fontSize: 13, fontWeight: 600, color: T.label, marginBottom: 10 }}>
+    <div style={{ fontSize: 15.5, fontWeight: 700, color: T.ink, marginBottom: 11, letterSpacing: "-0.01em" }}>
       {children}
     </div>
   );

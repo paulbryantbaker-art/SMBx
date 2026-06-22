@@ -15,13 +15,14 @@
  *  full-viewport fixed bg div (Safari toolbar rule). The `fallbackBg` is the
  *  higher-opacity solid for browsers without backdrop-filter support. */
 const glassNav = {
-  background: "rgba(255,255,255,.55)",
+  // More translucent so content REFRACTS through (true iOS liquid glass, not a
+  // flat white pill). Legibility is preserved by the dark nav labels on top.
+  background: "rgba(255,255,255,.46)",
   /** Solid fallback where backdrop-filter is unsupported (keeps the bar legible). */
   fallbackBg: "rgba(255,255,255,.92)",
-  // Deeper frost + a hairline edge + a bright top inner highlight and a faint
-  // bottom inner shade — the iOS "liquid glass" read (a lit pane of glass, not a
-  // flat translucent fill).
-  backdropFilter: "blur(34px) saturate(1.8)",
+  // Lighter frost + higher saturation = content visibly slides behind the glass;
+  // the hairline edge + bright top inner highlight give the lit-pane read.
+  backdropFilter: "blur(28px) saturate(2)",
   border: "1px solid rgba(255,255,255,.7)",
   boxShadow:
     "0 8px 30px rgba(20,22,28,.16), 0 1px 2px rgba(20,22,28,.08), inset 0 1px 1.5px rgba(255,255,255,.85), inset 0 -1px 1px rgba(20,22,28,.05)",
@@ -34,9 +35,9 @@ const glassNav = {
 
 /** Glass Yulia FAB material (m4 §1e) — same lit-glass treatment as the nav. */
 const glassFab = {
-  background: "rgba(255,255,255,.5)",
+  background: "rgba(255,255,255,.46)",
   fallbackBg: "rgba(255,255,255,.94)",
-  backdropFilter: "blur(26px) saturate(1.8)",
+  backdropFilter: "blur(24px) saturate(2)",
   border: "1px solid rgba(255,255,255,.72)",
   boxShadow:
     "0 10px 28px rgba(20,22,28,.20), 0 1px 2px rgba(20,22,28,.10), inset 0 1px 1.5px rgba(255,255,255,.85)",
