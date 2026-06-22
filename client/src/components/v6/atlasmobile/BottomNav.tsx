@@ -46,7 +46,8 @@ export function BottomNav({
     <nav style={S.bar} aria-label="Primary">
       {ITEMS.map((it) => {
         const isActive = it.id === active;
-        const color = isActive ? T.blue : T.faint;
+        // inactive was T.faint (#9aa3ad) — fails contrast; use a readable mid-grey
+        const color = isActive ? T.blue : "#525b69";
         return (
           <button
             key={it.id}
@@ -66,7 +67,7 @@ export function BottomNav({
               }}
             >
               {it.icon(color)}
-              <span style={{ ...S.label, fontWeight: isActive ? 600 : 400 }}>{it.label}</span>
+              <span style={{ ...S.label, fontWeight: isActive ? 700 : 500 }}>{it.label}</span>
             </span>
           </button>
         );
@@ -138,5 +139,5 @@ const S: Record<string, CSSProperties> = {
     borderRadius: 16,
     transition: "background .2s ease",
   },
-  label: { fontSize: 10, lineHeight: 1 },
+  label: { fontSize: 11, lineHeight: 1, letterSpacing: "-0.01em" },
 };

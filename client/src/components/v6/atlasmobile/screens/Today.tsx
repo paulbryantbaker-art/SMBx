@@ -468,8 +468,8 @@ function AttentionList({
               <span
                 style={{
                   display: "block",
-                  fontSize: 13.5,
-                  fontWeight: 600,
+                  fontSize: 15,
+                  fontWeight: 700,
                   color: T.ink,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
@@ -481,8 +481,8 @@ function AttentionList({
               <span
                 style={{
                   display: "block",
-                  fontSize: 12,
-                  color: T.muted2,
+                  fontSize: 13,
+                  color: T.muted,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
@@ -491,7 +491,7 @@ function AttentionList({
                 {a.description || a.cta}
               </span>
             </span>
-            <ChevronRightIcon size={16} c={T.faint} />
+            <ChevronRightIcon size={16} c={T.muted2} />
           </button>
         );
       })}

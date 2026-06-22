@@ -27,7 +27,7 @@ const glassNav = {
     "0 8px 30px rgba(20,22,28,.16), 0 1px 2px rgba(20,22,28,.08), inset 0 1px 1.5px rgba(255,255,255,.85), inset 0 -1px 1px rgba(20,22,28,.05)",
   /** Selected-tab capsule highlight behind the active icon+label (the iOS
    *  liquid-glass tab-bar treatment), tinted to the Atlas accent. */
-  activeBg: "rgba(11,87,208,.10)",
+  activeBg: "rgba(11,87,208,.13)",
   radius: 31,
   height: 62,
 } as const;
