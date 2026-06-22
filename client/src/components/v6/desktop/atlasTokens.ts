@@ -8,7 +8,9 @@ export const T = {
   font: "'DM Sans', -apple-system, system-ui, sans-serif",
   // ink / text
   ink: '#1f1f1f', ink2: '#202124', ink3: '#3c4043', label: '#444746',
-  muted: '#5e6b7b', muted2: '#80868b', faint: '#9aa3ad',
+  // muted2/faint darkened to pass WCAG AA (were #80868b ~3.5:1 / #9aa3ad ~2.6:1 —
+  // illegible secondary text; readability is paramount, esp. on mobile).
+  muted: '#5e6b7b', muted2: '#5d6672', faint: '#616a78',
   // blue (primary/active)
   blue: '#0b57d0', blueBg: '#e8f0fe', blueBg2: '#eef4ff', blueBg3: '#f3f7ff',
   navActive: '#d3e3fd', stageActiveBd: '#bcd4fb', approvalBd: '#cfe0ff',
