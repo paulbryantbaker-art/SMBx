@@ -16,11 +16,11 @@
  */
 import { memo, useEffect, useMemo, useRef, type CSSProperties } from "react";
 import ChatDock from "../../shared/ChatDock";
-import { CloseIcon } from "../desktop/icons";
+import { CloseIcon, MonitorIcon } from "../desktop/icons";
 import { Sparkle } from "../desktop/primitives";
 import { T } from "../desktop/atlasTokens";
 import { M } from "./mobileTokens";
-import { useAtlasChat } from "../desktop/atlasNav";
+import { useAtlasChat, useAtlasNav } from "../desktop/atlasNav";
 import type {
   MobileMessage,
   MobilePaywallData,
@@ -40,8 +40,17 @@ export function YuliaSheet({
   surfaceContext?: SurfaceContext;
 }) {
   const chat = useAtlasChat();
+  const nav = useAtlasNav();
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const nearBottomRef = useRef(true);
+
+  // Re-open a canvas artifact Yulia produced, then dismiss the sheet so the
+  // canvas surface (behind it) is revealed.
+  const openCanvas = (id: string) => {
+    const dealId = typeof surfaceContext?.dealId === "number" ? surfaceContext.dealId : undefined;
+    nav.openCanvas(id, dealId);
+    onClose();
+  };
 
   const thread = chat?.thread ?? [];
   const streamingText = chat?.streamingText ?? "";
@@ -77,11 +86,13 @@ export function YuliaSheet({
         <MessageRow
           key={i}
           message={m}
+          onOpenCanvas={openCanvas}
           onConfirmStagedAction={chat?.confirmStagedAction}
           onCancelStagedAction={chat?.cancelStagedAction}
         />
       )),
-    [thread, chat?.confirmStagedAction, chat?.cancelStagedAction],
+    // openCanvas closes over stable nav/onClose; exclude to avoid re-mapping
+    [thread, chat?.confirmStagedAction, chat?.cancelStagedAction], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   if (!open) return null;
@@ -145,10 +156,12 @@ const MessageRow = memo(Message);
 
 function Message({
   message,
+  onOpenCanvas,
   onConfirmStagedAction,
   onCancelStagedAction,
 }: {
   message: MobileMessage;
+  onOpenCanvas: (id: string) => void;
   onConfirmStagedAction?: (id: number, summary?: string) => void | Promise<void>;
   onCancelStagedAction?: (id: number) => void | Promise<void>;
 }) {
@@ -160,7 +173,20 @@ function Message({
       ) : (
         <div style={S.yuliaRow}>
           <Sparkle size={17} />
-          <div style={S.yuliaText}>{message.text}</div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={S.yuliaText}>{message.text}</div>
+            {message.canvasArtifact?.id && (
+              <button
+                type="button"
+                style={S.canvasBtn}
+                onClick={() => onOpenCanvas(message.canvasArtifact!.id)}
+              >
+                <MonitorIcon size={15} c={T.blue} />
+                <span>Open on canvas</span>
+                <span aria-hidden="true">→</span>
+              </button>
+            )}
+          </div>
         </div>
       )}
       {message.stagedAction && (
@@ -382,6 +408,24 @@ const S: Record<string, CSSProperties> = {
   },
   yuliaRow: { display: "flex", gap: 9, alignItems: "flex-start" },
   yuliaText: { fontSize: 14, lineHeight: 1.6, color: T.ink, whiteSpace: "pre-wrap", minWidth: 0 },
+  // Persistent way to the canvas Yulia opened — the reliable destination for
+  // her "I opened it on the canvas" turns.
+  canvasBtn: {
+    marginTop: 10,
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 7,
+    background: T.blueBg3,
+    border: `1px solid ${T.approvalBd}`,
+    borderRadius: T.rPill,
+    padding: "9px 15px",
+    color: T.blue,
+    fontSize: 14,
+    fontWeight: 700,
+    cursor: "pointer",
+    fontFamily: T.font,
+    WebkitTapHighlightColor: "transparent",
+  },
   errorBubble: {
     padding: "10px 14px",
     background: T.terraBg,

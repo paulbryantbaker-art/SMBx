@@ -348,7 +348,7 @@ function Message({
                 {expanded ? "Show less" : "Show more"}
               </button>
             )}
-            {message.canvasArtifact && (
+            {message.canvasArtifact?.id && (
               <button
                 type="button"
                 style={S.canvasBtn}

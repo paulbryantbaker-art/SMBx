@@ -236,7 +236,7 @@ function Message({
           <Sparkle size={17} />
           <div style={{ minWidth: 0, flex: 1 }}>
             <div style={S.yuliaText}>{message.text}</div>
-            {message.canvasArtifact && (
+            {message.canvasArtifact?.id && (
               <button
                 type="button"
                 style={S.canvasBtn}
