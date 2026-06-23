@@ -17,6 +17,7 @@ import {
   isValidElement,
   useEffect,
   type CSSProperties,
+  type KeyboardEvent,
   type ReactElement,
   type ReactNode,
 } from "react";
@@ -196,13 +197,27 @@ export function ListRow({
   onClick,
   __first = false,
 }: ListRowProps) {
-  const Tag: any = onClick ? "button" : "div"; // eslint-disable-line @typescript-eslint/no-explicit-any
   const titleColor = destructive ? IOS_RED : tint ?? T.ink;
   // Divider insets to align with the title (past the leading), iOS-style.
   const dividerInset = 16 + (leading ? 44 : 0);
+  // A tappable row is a div with role=button (NOT a <button>) so it can hold
+  // interactive trailing controls — a "⋯", a switch — without invalid nesting.
+  const tapProps = onClick
+    ? {
+        role: "button",
+        tabIndex: 0,
+        onClick,
+        onKeyDown: (e: KeyboardEvent) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onClick();
+          }
+        },
+      }
+    : {};
   return (
-    <Tag
-      {...(onClick ? { type: "button", onClick } : {})}
+    <div
+      {...tapProps}
       style={{ ...S.row, ...(onClick ? S.rowTappable : null) }}
     >
       {!__first && <span aria-hidden="true" style={{ ...S.rowDivider, left: dividerInset }} />}
@@ -214,7 +229,7 @@ export function ListRow({
       {detail != null && <span style={S.rowDetail}>{detail}</span>}
       {trailing}
       {accessory === "chevron" && <ChevronRightIcon size={18} c={T.muted2} />}
-    </Tag>
+    </div>
   );
 }
 

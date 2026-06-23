@@ -21,12 +21,15 @@ import { getCanvasArtifact } from "../../desktop/screens/Canvas";
 import ModelRenderer from "../../../models/ModelRenderer";
 import CockpitMobileScreen from "./Cockpit";
 import { useAtlasChat, useAtlasNav, type AtlasScreenProps } from "../../desktop/atlasNav";
+import { useMobileShell } from "../mobileShell";
+import { Toolbar } from "../iosKit";
 import { T } from "../../desktop/atlasTokens";
 import type { CSSProperties } from "react";
 
 export default function CanvasMobileScreen({ user, view }: AtlasScreenProps) {
   const nav = useAtlasNav();
   const chat = useAtlasChat();
+  const shell = useMobileShell();
   const canvasTabId = view.canvasTabId;
 
   // Live model tab (the store is the source of truth; subscribe so Yulia's
@@ -38,39 +41,60 @@ export default function CanvasMobileScreen({ user, view }: AtlasScreenProps) {
 
   const talkToYulia = (prompt: string) => chat?.send(prompt);
 
+  // Contextual bottom toolbar (iOS UIToolbar): step back to the deal, or hand
+  // the open artifact to Yulia to revise. Pinned; content clears it via padding.
+  const canvasToolbar = (
+    <div style={S.toolbarBar}>
+      <Toolbar
+        leading={{
+          label: "Back to deal",
+          onClick: () =>
+            view.dealId != null ? nav.openDeal(view.dealId, view.dealName) : nav.go("deals"),
+        }}
+        trailing={{ label: "Ask Yulia", primary: true, onClick: () => shell?.openChat() }}
+      />
+    </div>
+  );
+
   // Interactive model → the shared renderer.
   if (canvasTabId && modelTab) {
     return (
-      <div style={S.wrap}>
-        <h1 style={S.title}>{modelTab.title || "Interactive model"}</h1>
-        <ModelRenderer tabId={canvasTabId} onTalkToYulia={talkToYulia} />
-      </div>
+      <>
+        <div style={S.wrap}>
+          <h1 style={S.title}>{modelTab.title || "Interactive model"}</h1>
+          <ModelRenderer tabId={canvasTabId} onTalkToYulia={talkToYulia} />
+        </div>
+        {canvasToolbar}
+      </>
     );
   }
 
   // Long-form analysis / content → readable markdown.
   if (artifact) {
     return (
-      <div style={S.wrap}>
-        <h1 style={S.title}>{artifact.title}</h1>
-        {artifact.markdown ? (
-          <div className="atlas-md" style={S.body}>
-            <Markdown>{artifact.markdown}</Markdown>
-          </div>
-        ) : (
-          <div style={S.emptyCard}>
-            <div style={S.emptyTitle}>Nothing to show yet</div>
-            <div style={S.emptyHint}>Ask Yulia to open or rerun this on the canvas.</div>
-            <button
-              type="button"
-              style={S.emptyBtn}
-              onClick={() => talkToYulia(`Reopen ${artifact.title} on the canvas with the latest data.`)}
-            >
-              Ask Yulia
-            </button>
-          </div>
-        )}
-      </div>
+      <>
+        <div style={S.wrap}>
+          <h1 style={S.title}>{artifact.title}</h1>
+          {artifact.markdown ? (
+            <div className="atlas-md" style={S.body}>
+              <Markdown>{artifact.markdown}</Markdown>
+            </div>
+          ) : (
+            <div style={S.emptyCard}>
+              <div style={S.emptyTitle}>Nothing to show yet</div>
+              <div style={S.emptyHint}>Ask Yulia to open or rerun this on the canvas.</div>
+              <button
+                type="button"
+                style={S.emptyBtn}
+                onClick={() => talkToYulia(`Reopen ${artifact.title} on the canvas with the latest data.`)}
+              >
+                Ask Yulia
+              </button>
+            </div>
+          )}
+        </div>
+        {canvasToolbar}
+      </>
     );
   }
 
@@ -80,7 +104,11 @@ export default function CanvasMobileScreen({ user, view }: AtlasScreenProps) {
 }
 
 const S: Record<string, CSSProperties> = {
-  wrap: { padding: "16px 18px 40px" },
+  // Bottom padding clears the pinned toolbar so the last content isn't hidden.
+  wrap: { padding: "16px 18px 96px" },
+  // Pinned contextual toolbar — a small bottom-anchored fixed bar (Safari rule:
+  // NOT a full-viewport fixed bg div; the Toolbar itself carries the material).
+  toolbarBar: { position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 6 },
   title: {
     margin: "0 0 12px",
     fontSize: 21,

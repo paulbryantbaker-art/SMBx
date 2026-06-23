@@ -38,6 +38,7 @@ import {
 } from "../../desktop/primitives";
 import type { StepState } from "../../desktop/primitives";
 import { ChevronRightIcon } from "../../desktop/icons";
+import { ListSection, ListRow } from "../iosKit";
 
 /* ─── API shapes (honest to the real responses) ─────────────── */
 
@@ -257,37 +258,6 @@ function SignalChip({ children }: { children: string }) {
     >
       {children}
     </span>
-  );
-}
-
-/** THIS-DEAL chip — a full-width row that routes a section into this deal's
- *  context via nav.go(screen, { dealId, dealName }). */
-function ThisDealRow({ label, onClick }: { label: string; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        width: "100%",
-        background: T.white,
-        border: `1px solid ${T.border}`,
-        borderRadius: T.rChip,
-        boxShadow: T.shCard,
-        padding: "13px 14px",
-        fontSize: 15.5,
-        fontWeight: 700,
-        color: T.ink,
-        cursor: "pointer",
-        fontFamily: T.font,
-        textAlign: "left",
-      }}
-    >
-      <span style={{ flex: 1, minWidth: 0 }}>{label}</span>
-      <ChevronRightIcon size={18} c={T.muted2} />
-    </button>
   );
 }
 
@@ -721,17 +691,14 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
         <ChevronRightIcon size={18} c={T.muted2} />
       </button>
 
-      {/* ── G. THIS DEAL chips → nav.go(..., { dealId }) ── */}
-      <div style={{ marginTop: 2 }}>
-        <SectionLabel>This deal</SectionLabel>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 9 }}>
-          <ThisDealRow label="Files" onClick={() => nav.go("files", { dealId, dealName })} />
-          <ThisDealRow label="Studio" onClick={() => nav.go("studio", { dealId, dealName })} />
-          <ThisDealRow label="Deals" onClick={() => nav.go("deals", { dealId, dealName })} />
-          <ThisDealRow label="Integration" onClick={() => nav.go("integration", { dealId, dealName })} />
-          <ThisDealRow label="Sourcing" onClick={() => nav.go("sourcing", { dealId, dealName })} />
-        </div>
-      </div>
+      {/* ── G. THIS DEAL → nav.go(..., { dealId }) ── */}
+      <ListSection header="This deal" style={{ marginTop: 2 }}>
+        <ListRow title="Files" accessory="chevron" onClick={() => nav.go("files", { dealId, dealName })} />
+        <ListRow title="Studio" accessory="chevron" onClick={() => nav.go("studio", { dealId, dealName })} />
+        <ListRow title="Deals" accessory="chevron" onClick={() => nav.go("deals", { dealId, dealName })} />
+        <ListRow title="Integration" accessory="chevron" onClick={() => nav.go("integration", { dealId, dealName })} />
+        <ListRow title="Sourcing" accessory="chevron" onClick={() => nav.go("sourcing", { dealId, dealName })} />
+      </ListSection>
     </div>
   );
 }

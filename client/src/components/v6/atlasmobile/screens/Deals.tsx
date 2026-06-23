@@ -45,8 +45,11 @@ import {
   LoadingState,
   fmtCents,
 } from "../../desktop/primitives";
-import { SearchIcon } from "../../desktop/icons";
+import { SearchIcon, MoreDotsIcon } from "../../desktop/icons";
 import { T } from "../../desktop/atlasTokens";
+import { ListSection, ListRow, ActionSheet } from "../iosKit";
+import { useMobileShell } from "../mobileShell";
+import type { SurfaceContext } from "../../../../lib/yuliaSurfaceContext";
 
 type FilterId = "all" | "buy" | "sell" | "watch";
 type LayoutId = "list" | "board";
@@ -388,6 +391,12 @@ function ListView({
   filtered: MobileStageRow[];
   onOpen: (row: MobileStageRow) => void;
 }) {
+  const nav = useAtlasNav();
+  const chat = useAtlasChat();
+  const shell = useMobileShell();
+  // The deal whose "⋯" action sheet is open.
+  const [sheetFor, setSheetFor] = useState<MobileStageRow | null>(null);
+
   if (filtered.length === 0) {
     return (
       <div style={{ padding: "24px 18px" }}>
@@ -398,18 +407,50 @@ function ListView({
       </div>
     );
   }
+
+  const askYulia = (row: MobileStageRow) => {
+    const ctx: SurfaceContext = {
+      device: "mobile",
+      activeMode: "deals",
+      activeView: "deals",
+      activeTitle: row.name,
+      dealId: row.rawId,
+      dealTitle: row.name,
+    };
+    chat?.send(`Give me your read on ${row.name}.`, ctx);
+    shell?.openChat();
+  };
+
   return (
-    <div
-      style={{
-        padding: "12px 18px 4px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 9,
-      }}
-    >
-      {filtered.map((row) => (
-        <DealRow key={row.id} row={row} onOpen={() => onOpen(row)} />
-      ))}
+    <div style={{ padding: "12px 18px 4px" }}>
+      <ListSection>
+        {filtered.map((row) => (
+          <DealRow
+            key={row.id}
+            row={row}
+            onOpen={() => onOpen(row)}
+            onMore={() => setSheetFor(row)}
+          />
+        ))}
+      </ListSection>
+
+      <ActionSheet
+        open={!!sheetFor}
+        onClose={() => setSheetFor(null)}
+        title={sheetFor?.name}
+        actions={
+          sheetFor
+            ? [
+                { label: "Open deal", onClick: () => onOpen(sheetFor) },
+                { label: "Ask Yulia about this deal", onClick: () => askYulia(sheetFor) },
+                {
+                  label: "Open data room",
+                  onClick: () => nav.go("files", { dealId: sheetFor.rawId, dealName: sheetFor.name }),
+                },
+              ]
+            : []
+        }
+      />
     </div>
   );
 }
@@ -612,102 +653,55 @@ function StageTab({
 
 /* ─── deal row (list) ──────────────────────────────────────── */
 
-function DealRow({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) {
+function DealRow({
+  row,
+  onOpen,
+  onMore,
+}: {
+  row: MobileStageRow;
+  onOpen: () => void;
+  onMore: () => void;
+}) {
   const sector = sectorOf(row);
   const stage = stageMeta(row);
   const ev = fmtCents(evCents(row));
   const tint = markTint(row.rawId);
   const fitReal = typeof row.fit === "number";
 
-  // "sector · EV" — drop an absent half so we never print a bare "·".
-  const meta = [sector !== "—" ? sector : null, ev !== "—" ? ev : null]
+  // "sector · EV [· Fit NN]" — drop absent halves so we never print a bare "·".
+  const meta = [
+    sector !== "—" ? sector : null,
+    ev !== "—" ? ev : null,
+    fitReal ? `Fit ${row.fit}` : null,
+  ]
     .filter(Boolean)
     .join(" · ");
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <ListRow
+      leading={<MarkBadge letter={row.name} bg={tint.bg} fg={tint.fg} size={30} radius={8} />}
+      title={row.name}
+      subtitle={meta || "—"}
       onClick={onOpen}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onOpen();
-        }
-      }}
-      style={{
-        background: T.white,
-        border: `1px solid ${T.border}`,
-        borderRadius: 14,
-        padding: 13,
-        display: "flex",
-        alignItems: "center",
-        gap: 11,
-        cursor: "pointer",
-        outline: "none",
-      }}
-    >
-      <MarkBadge letter={row.name} bg={tint.bg} fg={tint.fg} size={34} radius={9} />
-
-      {/* name + meta */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div
-          style={{
-            fontSize: 15.5,
-            fontWeight: 700,
-            color: T.ink,
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-            lineHeight: 1.3,
-          }}
-          title={row.name}
-        >
-          {row.name}
-        </div>
-        <div
-          style={{
-            fontSize: 14,
-            color: T.muted,
-            marginTop: 2,
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-            lineHeight: 1.45,
-          }}
-        >
-          {meta || "—"}
-        </div>
-      </div>
-
-      {/* stage pill + fit (fit only when real) */}
-      <div
-        style={{
-          flex: "none",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-end",
-          gap: 5,
-        }}
-      >
-        <Pill bg={stage.bg} fg={stage.fg} style={{ fontSize: 11, padding: "3px 8px" }}>
-          {stage.label}
-        </Pill>
-        {fitReal && (
-          <span
-            style={{
-              fontSize: 14,
-              fontWeight: 700,
-              color: fitMeta(row.fit as number).fg,
+      trailing={
+        <span style={{ flex: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>
+          <Pill bg={stage.bg} fg={stage.fg} style={{ fontSize: 11, padding: "3px 8px" }}>
+            {stage.label}
+          </Pill>
+          <button
+            type="button"
+            aria-label={`Actions for ${row.name}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onMore();
             }}
+            style={S.moreBtn}
           >
-            Fit {row.fit}
-          </span>
-        )}
-      </div>
-    </div>
+            <MoreDotsIcon size={20} c={T.muted2} />
+          </button>
+        </span>
+      }
+    />
   );
 }
 
@@ -810,4 +804,19 @@ function DealCard({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) 
 
 const S: Record<string, React.CSSProperties> = {
   root: { color: T.ink, fontFamily: T.font, display: "flex", flexDirection: "column" },
+  // Per-row "⋯" — a comfortable tap target that stops the row's open-on-tap.
+  moreBtn: {
+    flex: "none",
+    width: 34,
+    height: 34,
+    marginRight: -6,
+    border: "none",
+    background: "transparent",
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    WebkitTapHighlightColor: "transparent",
+  },
 };
