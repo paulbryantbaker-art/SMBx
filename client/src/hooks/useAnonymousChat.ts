@@ -6,6 +6,7 @@ import {
   dispatchCanvasActionResult,
   routeChatArtifactToCanvas,
   shouldRouteChatArtifact,
+  type CanvasArtifactRef,
 } from '../lib/chatArtifactRouting';
 
 export interface AnonMessage {
@@ -87,7 +88,7 @@ export function useAnonymousChat() {
     setMessages(prev => prev.map(message => message.id === candidate.id ? {
       ...message,
       content: routed.chatMessage,
-      metadata: { ...(message.metadata ?? {}), canvasArtifact: { title: routed.title, source: 'anonymous_chat_history' } },
+      metadata: { ...(message.metadata ?? {}), canvasArtifact: { id: routed.id, title: routed.title, source: 'anonymous_chat_history' } },
     } : message));
   }, [messages]);
 
@@ -189,7 +190,9 @@ export function useAnonymousChat() {
       const decoder = new TextDecoder();
       let accumulated = '';
       let sseBuffer = '';
-      let canvasActionDispatched = false;
+      // Canvas tab a server tool opened this turn → carried onto the message as
+      // an "Open on canvas" control. Last one wins.
+      let canvasArtifact: CanvasArtifactRef | null = null;
 
       if (reader) {
         // Stale-connection timeout: abort if no data arrives for 45s
@@ -228,7 +231,7 @@ export function useAnonymousChat() {
                   accumulated += parsed.text;
                   setStreamingText(shouldRouteChatArtifact(accumulated) ? chatArtifactStreamingMessage(accumulated) : accumulated);
                 } else if (parsed.type === 'tool_done') {
-                  canvasActionDispatched = dispatchCanvasActionResult(parsed.result) || canvasActionDispatched;
+                  canvasArtifact = dispatchCanvasActionResult(parsed.result) ?? canvasArtifact;
                 } else if (parsed.type === 'message_stop') {
                   if (parsed.conversationId) {
                     setActiveConversationId(parsed.conversationId);
@@ -255,7 +258,7 @@ export function useAnonymousChat() {
                 accumulated += parsed.text;
                 setStreamingText(shouldRouteChatArtifact(accumulated) ? chatArtifactStreamingMessage(accumulated) : accumulated);
               } else if (parsed.type === 'tool_done') {
-                canvasActionDispatched = dispatchCanvasActionResult(parsed.result) || canvasActionDispatched;
+                canvasArtifact = dispatchCanvasActionResult(parsed.result) ?? canvasArtifact;
               }
             } catch { /* ignore */ }
           }
@@ -264,15 +267,15 @@ export function useAnonymousChat() {
 
       setStreamingText('');
       if (accumulated) {
-        const routed = canvasActionDispatched
-          ? { opened: false, title: '', chatMessage: accumulated }
+        const routed = canvasArtifact
+          ? { opened: true, id: canvasArtifact.id, title: canvasArtifact.title, chatMessage: accumulated }
           : routeChatArtifactToCanvas(accumulated, 'anonymous_chat');
         setMessages(prev => [...prev, {
           id: Date.now() + 1,
           role: 'assistant' as const,
           content: routed.chatMessage,
           created_at: new Date().toISOString(),
-          metadata: routed.opened ? { canvasArtifact: { title: routed.title, source: 'anonymous_chat' } } : undefined,
+          metadata: routed.opened ? { canvasArtifact: { id: routed.id, title: routed.title, source: 'anonymous_chat' } } : undefined,
         }]);
       }
 

@@ -104,17 +104,21 @@ export function AtlasChatRail() {
     if (el) el.scrollTop = el.scrollHeight;
   }, [thread.length, streamingText, activeTool, toolTrace, paywallData]);
 
+  const openCanvas = (id: string) => nav.openCanvas(id, view.dealId ?? undefined);
+
   const messageRows = useMemo(
     () =>
       thread.map((m, i) => (
         <MessageRow
           key={i}
           message={m}
+          onOpenCanvas={openCanvas}
           onConfirmStagedAction={chat?.confirmStagedAction}
           onCancelStagedAction={chat?.cancelStagedAction}
         />
       )),
-    [thread, chat?.confirmStagedAction, chat?.cancelStagedAction],
+    // openCanvas closes over nav identity + the active deal id (stable per view)
+    [thread, view.dealId, chat?.confirmStagedAction, chat?.cancelStagedAction], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const handleSend = (text: string) => {
@@ -213,10 +217,12 @@ const MessageRow = memo(Message);
 
 function Message({
   message,
+  onOpenCanvas,
   onConfirmStagedAction,
   onCancelStagedAction,
 }: {
   message: MobileMessage;
+  onOpenCanvas: (id: string) => void;
   onConfirmStagedAction?: (id: number, summary?: string) => void | Promise<void>;
   onCancelStagedAction?: (id: number) => void | Promise<void>;
 }) {
@@ -228,7 +234,20 @@ function Message({
       ) : (
         <div style={S.yuliaRow}>
           <Sparkle size={17} />
-          <div style={S.yuliaText}>{message.text}</div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={S.yuliaText}>{message.text}</div>
+            {message.canvasArtifact && (
+              <button
+                type="button"
+                style={S.canvasBtn}
+                onClick={() => onOpenCanvas(message.canvasArtifact!.id)}
+              >
+                <MonitorIcon size={14} c={T.blue} />
+                <span>Open on canvas</span>
+                <span aria-hidden="true">→</span>
+              </button>
+            )}
+          </div>
         </div>
       )}
       {message.stagedAction && (
@@ -436,6 +455,23 @@ const S: Record<string, CSSProperties> = {
     color: T.ink,
     whiteSpace: "pre-wrap",
     minWidth: 0,
+  },
+  // Persistent way back to a canvas Yulia opened — rendered on the turn that
+  // produced it so "I opened it on the canvas" always has a real destination.
+  canvasBtn: {
+    marginTop: 9,
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    background: T.blueBg3,
+    border: `1px solid ${T.approvalBd}`,
+    borderRadius: T.rPill,
+    padding: "7px 13px",
+    color: T.blue,
+    fontSize: 12.5,
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: T.font,
   },
   errorBubble: {
     padding: "10px 14px",

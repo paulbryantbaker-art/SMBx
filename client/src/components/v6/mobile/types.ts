@@ -75,6 +75,9 @@ export interface MobileMessage {
   /** Governed-write approval card attached to this message (authed chat only).
    *  THE LINE: descriptive — the user confirms or cancels; nothing auto-runs. */
   stagedAction?: StagedAction | null;
+  /** Set when this Yulia turn opened a canvas artifact. The chat renders an
+   *  "Open on canvas" control that re-navigates to it via nav.openCanvas(id). */
+  canvasArtifact?: { id: string; title: string } | null;
 }
 
 /** Plan-gate payload parsed by useAuthChat from the chat SSE `type:'paywall'`

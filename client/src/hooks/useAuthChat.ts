@@ -9,6 +9,7 @@ import {
   dispatchCanvasActionResult,
   routeChatArtifactToCanvas,
   shouldRouteChatArtifact,
+  type CanvasArtifactRef,
 } from '../lib/chatArtifactRouting';
 
 export interface AuthMessage {
@@ -184,7 +185,7 @@ export function useAuthChat(user: User | null) {
     setMessages(prev => prev.map(message => message.id === candidate.id ? {
       ...message,
       content: routed.chatMessage,
-      metadata: { ...(message.metadata ?? {}), canvasArtifact: { title: routed.title, source: 'auth_chat_history' } },
+      metadata: { ...(message.metadata ?? {}), canvasArtifact: { id: routed.id, title: routed.title, source: 'auth_chat_history' } },
     } : message));
   }, [messages]);
 
@@ -404,7 +405,9 @@ export function useAuthChat(user: User | null) {
       const decoder = new TextDecoder();
       let accumulated = '';
       let sseBuffer = '';
-      let canvasActionDispatched = false;
+      // The canvas tab a server tool opened this turn (id+title), so the final
+      // message can carry an "Open on canvas" control back to it. Last one wins.
+      let canvasArtifact: CanvasArtifactRef | null = null;
 
       if (reader) {
         // Stale-connection timeout: abort if no data arrives for 120s
@@ -450,7 +453,7 @@ export function useAuthChat(user: User | null) {
                 } else if (parsed.type === 'tool_done') {
                   setActiveTool(null);
                   finishTraceEntry(parsed.tool);
-                  canvasActionDispatched = dispatchCanvasActionResult(parsed.result) || canvasActionDispatched;
+                  canvasArtifact = dispatchCanvasActionResult(parsed.result) ?? canvasArtifact;
                 } else if (parsed.type === 'staged_action') {
                   setActiveTool(null);
                   const action = parsed.action as StagedAction | undefined;
@@ -496,7 +499,7 @@ export function useAuthChat(user: User | null) {
                 setStreamingText(shouldRouteChatArtifact(accumulated) ? chatArtifactStreamingMessage(accumulated) : accumulated);
               } else if (parsed.type === 'tool_done') {
                 finishTraceEntry(parsed.tool);
-                canvasActionDispatched = dispatchCanvasActionResult(parsed.result) || canvasActionDispatched;
+                canvasArtifact = dispatchCanvasActionResult(parsed.result) ?? canvasArtifact;
               }
             } catch { /* ignore */ }
           }
@@ -505,15 +508,18 @@ export function useAuthChat(user: User | null) {
 
       setStreamingText('');
       if (accumulated) {
-        const routed = canvasActionDispatched
-          ? { opened: false, title: '', chatMessage: accumulated }
+        // A server tool already opened the canvas → keep Yulia's own narration as
+        // the message and attach the canvas ref so it gets an "Open on canvas"
+        // control. Otherwise fall back to client-side routing of long analyses.
+        const routed = canvasArtifact
+          ? { opened: true, id: canvasArtifact.id, title: canvasArtifact.title, chatMessage: accumulated }
           : routeChatArtifactToCanvas(accumulated, 'auth_chat_fallback');
         setMessages(prev => [...prev, {
           id: Date.now() + 1,
           role: 'assistant' as const,
           content: routed.chatMessage,
           created_at: new Date().toISOString(),
-          metadata: routed.opened ? { canvasArtifact: { title: routed.title, source: 'auth_chat_fallback' } } : undefined,
+          metadata: routed.opened ? { canvasArtifact: { id: routed.id, title: routed.title, source: 'auth_chat_fallback' } } : undefined,
         }]);
       }
 
@@ -543,7 +549,7 @@ export function useAuthChat(user: User | null) {
               if (retryReader) {
                 const retryDecoder = new TextDecoder();
                 let retryAccum = '';
-                let retryCanvasActionDispatched = false;
+                let retryCanvasArtifact: CanvasArtifactRef | null = null;
                 while (true) {
                   const { done, value } = await retryReader.read();
                   if (done) break;
@@ -562,7 +568,7 @@ export function useAuthChat(user: User | null) {
                         beginTraceEntry(parsed.tool);
                       } else if (parsed.type === 'tool_done') {
                         finishTraceEntry(parsed.tool);
-                        retryCanvasActionDispatched = dispatchCanvasActionResult(parsed.result) || retryCanvasActionDispatched;
+                        retryCanvasArtifact = dispatchCanvasActionResult(parsed.result) ?? retryCanvasArtifact;
                       } else if (parsed.type === 'done') {
                         if (parsed.dealId) setActiveDealId(parsed.dealId);
                       } else if (parsed.type === 'error') {
@@ -573,15 +579,15 @@ export function useAuthChat(user: User | null) {
                 }
                 setStreamingText('');
                 if (retryAccum) {
-                  const routed = retryCanvasActionDispatched
-                    ? { opened: false, title: '', chatMessage: retryAccum }
+                  const routed = retryCanvasArtifact
+                    ? { opened: true, id: retryCanvasArtifact.id, title: retryCanvasArtifact.title, chatMessage: retryAccum }
                     : routeChatArtifactToCanvas(retryAccum, 'auth_chat_retry_fallback');
                   setMessages(prev => [...prev, {
                     id: Date.now() + 1,
                     role: 'assistant' as const,
                     content: routed.chatMessage,
                     created_at: new Date().toISOString(),
-                    metadata: routed.opened ? { canvasArtifact: { title: routed.title, source: 'auth_chat_retry_fallback' } } : undefined,
+                    metadata: routed.opened ? { canvasArtifact: { id: routed.id, title: routed.title, source: 'auth_chat_retry_fallback' } } : undefined,
                   }]);
                 }
                 loadConversations();

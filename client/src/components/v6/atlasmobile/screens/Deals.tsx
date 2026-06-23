@@ -160,7 +160,7 @@ export default function DealsMobileScreen({ user }: AtlasScreenProps) {
   const { all, loading, loaded, isAuthed } = useMobileDeals(user);
   const { summary } = usePortfolioSummary(user, isAuthed);
 
-  const [layout, setLayout] = useState<LayoutId>("list");
+  const [layout, setLayout] = useState<LayoutId>("board");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterId>("all");
   const [stageFilter, setStageFilter] = useState<StageFilterId>("all");

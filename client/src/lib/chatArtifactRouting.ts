@@ -1,7 +1,16 @@
 export interface ChatArtifactRoutingResult {
   opened: boolean;
+  /** Stable canvas tab id the chat message can later reuse to re-open the
+   *  artifact (nav.openCanvas). Empty string when nothing was opened. */
+  id: string;
   title: string;
   chatMessage: string;
+}
+
+/** What the chat message stores so it can offer an "Open on canvas" control. */
+export interface CanvasArtifactRef {
+  id: string;
+  title: string;
 }
 
 const ARTIFACT_PHRASES = [
@@ -71,14 +80,18 @@ export function chatArtifactStreamingMessage(content: string): string {
 export function routeChatArtifactToCanvas(content: string, source: string): ChatArtifactRoutingResult {
   const trimmed = content.trim();
   if (!shouldRouteChatArtifact(trimmed)) {
-    return { opened: false, title: "", chatMessage: content };
+    return { opened: false, id: "", title: "", chatMessage: content };
   }
 
   const title = inferArtifactTitle(trimmed);
+  // Stable id shared with the shell listener (it registers/navigates under this
+  // exact id) AND returned to the caller so the chat message can re-open it.
+  const id = `artifact-content-${Date.now()}`;
   if (typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent("smbx:canvas_action", {
       detail: {
         canvas_action: "show_content",
+        artifactId: id,
         title,
         content: trimmed,
         markdown: trimmed,
@@ -91,22 +104,72 @@ export function routeChatArtifactToCanvas(content: string, source: string): Chat
 
   return {
     opened: true,
+    id,
     title,
     chatMessage: `I opened "${title}" on the canvas so we can work it visually. Tell me what assumption, section, or chart you want changed.`,
   };
 }
 
-export function dispatchCanvasActionResult(result: unknown): boolean {
-  if (!result || typeof window === "undefined") return false;
+/** Forward a server tool's canvas_action to the shell listener and, when the
+ *  action lands on a navigable canvas panel, hand back the {id,title} so the
+ *  chat message can offer an "Open on canvas" control afterwards. Returns null
+ *  for actions with no navigation target (e.g. update_model) — the event still
+ *  fires either way. */
+export function dispatchCanvasActionResult(result: unknown): CanvasArtifactRef | null {
+  if (!result || typeof window === "undefined") return null;
   try {
     const parsed = typeof result === "string" ? JSON.parse(result) : result;
-    if (!parsed || typeof parsed !== "object") return false;
-    const detail = parsed as { canvas_action?: unknown };
-    if (typeof detail.canvas_action !== "string") return false;
+    if (!parsed || typeof parsed !== "object") return null;
+    const detail = parsed as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+    if (typeof detail.canvas_action !== "string") return null;
+    const target = canvasNavTargetFor(detail);
+    // Share the computed id with the shell listener so the registered artifact
+    // and the chat message's "Open on canvas" control point at the SAME tab.
+    if (target && !detail.artifactId) detail.artifactId = target.id;
     window.dispatchEvent(new CustomEvent("smbx:canvas_action", { detail: parsed }));
-    return true;
+    return target;
   } catch {
-    return false;
+    return null;
+  }
+}
+
+/** The canvas tab a server canvas_action will land on, if navigable. Mirrors the
+ *  id logic in AtlasApp / AtlasMobileApp so the chat message can later re-open
+ *  the exact same tab via nav.openCanvas(id). */
+function canvasNavTargetFor(detail: Record<string, any>): CanvasArtifactRef | null { // eslint-disable-line @typescript-eslint/no-explicit-any
+  switch (detail.canvas_action) {
+    case "show_content": {
+      const id =
+        typeof detail.artifactId === "string" && detail.artifactId
+          ? detail.artifactId
+          : `artifact-content-${Date.now()}`;
+      return {
+        id,
+        title: typeof detail.title === "string" && detail.title ? detail.title : "Yulia artifact",
+      };
+    }
+    case "open_tab": {
+      const tab = detail.tab;
+      if (!tab || tab.kind !== "analysis") return null;
+      const id =
+        typeof detail.artifactId === "string" && detail.artifactId
+          ? detail.artifactId
+          : `artifact-${tab.analysisRunId ?? detail.analysisRunId ?? Date.now()}`;
+      return { id, title: tab.title || detail.title || "Analysis" };
+    }
+    case "create_model_tab": {
+      // Interactive model: the store keys by detail.tabId, which is also the
+      // canvas navigation id (the shell navigates to ensured.tabId === tabId).
+      if (typeof detail.tabId === "string" && detail.tabId) {
+        return {
+          id: detail.tabId,
+          title: typeof detail.title === "string" && detail.title ? detail.title : "Interactive model",
+        };
+      }
+      return null;
+    }
+    default:
+      return null; // update_model, read_tab_state, etc. — nothing to navigate to.
   }
 }
 

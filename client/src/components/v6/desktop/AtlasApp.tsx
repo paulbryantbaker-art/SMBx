@@ -81,6 +81,7 @@ function AtlasAnon({
         who: m.role === "user" ? "u" : "y",
         text: m.content,
         stagedAction: null,
+        canvasArtifact: m.metadata?.canvasArtifact ?? null,
       })),
     [chat.messages],
   );
@@ -108,6 +109,7 @@ function AtlasAuthed({ user, onSignOut }: { user: User; onSignOut: () => void })
         who: m.role === "user" ? "u" : "y",
         text: m.content,
         stagedAction: m.metadata?.stagedAction ?? null,
+        canvasArtifact: m.metadata?.canvasArtifact ?? null,
       })),
     [chat.messages],
   );
@@ -251,7 +253,9 @@ function AtlasShell({ user, chat }: ShellProps) {
       // Analysis tab opened from chat → stash + Canvas.
       if (detail.canvas_action === "open_tab" && detail.tab?.kind === "analysis") {
         const tab = detail.tab;
-        const id = `artifact-${tab.analysisRunId ?? detail.analysisRunId ?? Date.now()}`;
+        const id = typeof detail.artifactId === "string" && detail.artifactId
+          ? detail.artifactId
+          : `artifact-${tab.analysisRunId ?? detail.analysisRunId ?? Date.now()}`;
         registerCanvasArtifact({
           id,
           kind: "analysis",
@@ -267,7 +271,9 @@ function AtlasShell({ user, chat }: ShellProps) {
       // Long-form Yulia artifact (show_content) → stash + Canvas.
       if (detail.canvas_action === "show_content") {
         const markdown = detail.content || detail.markdown || detail.message || "";
-        const id = `artifact-content-${Date.now()}`;
+        const id = typeof detail.artifactId === "string" && detail.artifactId
+          ? detail.artifactId
+          : `artifact-content-${Date.now()}`;
         registerCanvasArtifact({
           id,
           kind: "content",

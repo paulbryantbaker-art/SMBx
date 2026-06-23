@@ -179,6 +179,11 @@ export default function AskYuliaScreen({ view }: AtlasScreenProps) {
   // Deals referenced anywhere in the thread → subject shortcuts + inline links.
   const dealRefs = useMemo(() => threadDealRefs(thread), [thread]);
   const openDeal = useCallback((id: number) => nav.openDeal(id), [nav]);
+  // Re-open a canvas artifact Yulia produced (keeps the current deal context).
+  const openCanvas = useCallback(
+    (id: string) => nav.openCanvas(id, view.dealId ?? undefined),
+    [nav, view.dealId],
+  );
 
   const messageRows = useMemo(
     () =>
@@ -187,11 +192,12 @@ export default function AskYuliaScreen({ view }: AtlasScreenProps) {
           key={i}
           message={m}
           onOpenDeal={openDeal}
+          onOpenCanvas={openCanvas}
           onConfirmStagedAction={chat?.confirmStagedAction}
           onCancelStagedAction={chat?.cancelStagedAction}
         />
       )),
-    // openDeal is stable enough (nav identity); exclude to avoid re-mapping every render
+    // openDeal/openCanvas are stable enough (nav identity); exclude to avoid re-mapping every render
     [thread, chat?.confirmStagedAction, chat?.cancelStagedAction], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
@@ -287,11 +293,13 @@ const COLLAPSE_OVER = 520;
 function Message({
   message,
   onOpenDeal,
+  onOpenCanvas,
   onConfirmStagedAction,
   onCancelStagedAction,
 }: {
   message: MobileMessage;
   onOpenDeal: (id: number) => void;
+  onOpenCanvas: (id: string) => void;
   onConfirmStagedAction?: (id: number, summary?: string) => void | Promise<void>;
   onCancelStagedAction?: (id: number) => void | Promise<void>;
 }) {
@@ -338,6 +346,17 @@ function Message({
             {collapsible && (
               <button type="button" style={S.moreBtn} onClick={() => setExpanded((e) => !e)}>
                 {expanded ? "Show less" : "Show more"}
+              </button>
+            )}
+            {message.canvasArtifact && (
+              <button
+                type="button"
+                style={S.canvasBtn}
+                onClick={() => onOpenCanvas(message.canvasArtifact!.id)}
+              >
+                <MonitorIcon size={15} c={T.blue} />
+                <span style={S.canvasBtnLabel}>Open on canvas</span>
+                <span aria-hidden="true">→</span>
               </button>
             )}
           </div>
@@ -605,6 +624,25 @@ const S: Record<string, CSSProperties> = {
     fontFamily: T.font,
     WebkitTapHighlightColor: "transparent",
   },
+  // Persistent "Open on canvas" control on any Yulia turn that opened an
+  // artifact — the reliable way back to the canvas she referenced.
+  canvasBtn: {
+    marginTop: 11,
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 7,
+    background: T.blueBg3,
+    border: `1px solid ${T.approvalBd}`,
+    borderRadius: T.rPill,
+    padding: "9px 15px",
+    color: T.blue,
+    fontSize: 14,
+    fontWeight: 700,
+    cursor: "pointer",
+    fontFamily: T.font,
+    WebkitTapHighlightColor: "transparent",
+  },
+  canvasBtnLabel: { letterSpacing: "-0.01em" },
   list: {
     flex: 1,
     minHeight: 0,
