@@ -216,7 +216,7 @@ const SCREEN_TITLE: Record<AtlasScreen, string> = {
   settings: "Settings",
 };
 
-function AtlasMobileShell({ user, chat }: ShellProps) {
+function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
   const [view, setView] = useState<AtlasView>({ screen: "today" });
   // 'more' is an overlay screen that is NOT in the desktop AtlasView union — it
   // lives in a separate flag so nav/openDeal/etc. keep the canonical AtlasView.
@@ -226,8 +226,8 @@ function AtlasMobileShell({ user, chat }: ShellProps) {
   // composer; rendered inside the shell's scroll area as the 'askyulia' surface.
   const [chatOpen, setChatOpen] = useState(false);
   const mobileShell = useMemo(
-    () => ({ openChat: () => setChatOpen(true), closeChat: () => setChatOpen(false) }),
-    [],
+    () => ({ openChat: () => setChatOpen(true), closeChat: () => setChatOpen(false), signOut: onSignOut }),
+    [onSignOut],
   );
 
   // Latest view for the canvas_action listener (subscribes once).

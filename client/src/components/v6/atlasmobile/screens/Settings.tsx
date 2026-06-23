@@ -47,6 +47,7 @@ import { authHeaders } from "../../../../hooks/useAuth";
 import { T } from "../../desktop/atlasTokens";
 import { Card, Avatar, Pill, ProgressBar, LoadingState } from "../../desktop/primitives";
 import { PlusIcon } from "../../desktop/icons";
+import { ListSection, ListRow, Switch } from "../iosKit";
 
 /* ─── locked pricing (SMBX_PRICING_LOCKED.md) ─────────────────────────────── */
 const PLAN_LABEL: Record<string, string> = {
@@ -570,29 +571,20 @@ function NotificationsPane() {
       </HonestNote>
 
       {NOTIF_GROUPS.map((g) => (
-        <Card key={g.title} pad="8px 18px" style={{ borderRadius: T.rCardLg }}>
-          <div style={{ padding: "12px 0 6px" }}>
-            <Eyebrow>{g.title.toUpperCase()}</Eyebrow>
-          </div>
-          {g.items.map((it, idx) => (
-            <div
+        <ListSection key={g.title} header={g.title}>
+          {g.items.map((it) => (
+            <ListRow
               key={it.id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "12px 0",
-                borderTop: idx === 0 ? "none" : `1px solid ${T.rowDiv2}`,
-              }}
-            >
-              <span style={{ fontSize: 15.5, fontWeight: 600, color: T.ink }}>{it.label}</span>
-              <Toggle
-                on={!!state[it.id]}
-                onChange={() => setState((s) => ({ ...s, [it.id]: !s[it.id] }))}
-              />
-            </div>
+              title={it.label}
+              trailing={
+                <Switch
+                  on={!!state[it.id]}
+                  onChange={() => setState((s) => ({ ...s, [it.id]: !s[it.id] }))}
+                />
+              }
+            />
           ))}
-        </Card>
+        </ListSection>
       ))}
 
       <HonestNote>
@@ -600,43 +592,6 @@ function NotificationsPane() {
         Real delivery (the bell, email, weekly digest) is driven by your deal activity today.
       </HonestNote>
     </div>
-  );
-}
-
-function Toggle({ on, onChange }: { on: boolean; onChange: () => void }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={on}
-      onClick={onChange}
-      style={{
-        width: 40,
-        height: 23,
-        flex: "none",
-        borderRadius: T.rPill,
-        border: "none",
-        cursor: "pointer",
-        padding: 0,
-        position: "relative",
-        background: on ? T.blue : T.inputBd,
-        transition: "background .15s ease",
-      }}
-    >
-      <span
-        style={{
-          position: "absolute",
-          top: 2,
-          left: on ? 19 : 2,
-          width: 19,
-          height: 19,
-          borderRadius: "50%",
-          background: "#fff",
-          boxShadow: "0 1px 2px rgba(60,64,67,.3)",
-          transition: "left .15s ease",
-        }}
-      />
-    </button>
   );
 }
 

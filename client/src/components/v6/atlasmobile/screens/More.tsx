@@ -18,14 +18,16 @@
  * Agent "3 on" pill are placeholders — NOT ported. The profile subtitle is the
  * real role + plan; the Agent row carries no fabricated live-count pill.
  */
-import type { CSSProperties, ReactNode } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import type { AtlasScreenProps } from "../../desktop/atlasNav";
 import { useAtlasNav } from "../../desktop/atlasNav";
 import type { User } from "../../../../hooks/useAuth";
 import { useNotifications } from "../../../../hooks/useNotifications";
-import { Avatar, SectionLabel } from "../../desktop/primitives";
+import { Avatar } from "../../desktop/primitives";
 import { ChevronRightIcon } from "../../desktop/icons";
 import { T } from "../../desktop/atlasTokens";
+import { ListSection, ListRow, ActionSheet } from "../iosKit";
+import { useMobileShell } from "../mobileShell";
 
 /* ─── locked plan labels (mirror desktop Settings PLAN_LABEL) ─────────────── */
 const PLAN_LABEL: Record<string, string> = {
@@ -62,9 +64,11 @@ function profileSubtitle(u: User | null): string {
 
 export default function MoreScreen({ user }: AtlasScreenProps) {
   const nav = useAtlasNav();
+  const shell = useMobileShell();
   // Real unread count for the Notifications row badge (polled; honest 0 when
   // there's nothing). Disabled for anonymous so we never hit /api unauthenticated.
   const { unreadCount } = useNotifications(!!user);
+  const [signOutOpen, setSignOutOpen] = useState(false);
 
   const name = user?.display_name?.trim() || user?.email || "Your account";
   const subtitle = profileSubtitle(user);
@@ -85,85 +89,43 @@ export default function MoreScreen({ user }: AtlasScreenProps) {
         <ChevronRightIcon size={18} c={T.muted2} />
       </button>
 
-      {/* ── MODULES ─────────────────────────────────────────────── */}
-      <SectionLabel>Modules</SectionLabel>
-      <div style={S.group}>
-        <Row glyph={<StudioGlyph />} label="Studio" first onClick={() => nav.go("studio")} />
-        <Row
-          glyph={<IntegrationGlyph />}
-          label="Integration"
-          onClick={() => nav.go("integration")}
-        />
-        <Row glyph={<AgentGlyph />} label="Agent" last onClick={() => nav.go("agent")} />
-      </div>
+      <ListSection header="Modules">
+        <ListRow leading={<StudioGlyph />} title="Studio" accessory="chevron" onClick={() => nav.go("studio")} />
+        <ListRow leading={<IntegrationGlyph />} title="Integration" accessory="chevron" onClick={() => nav.go("integration")} />
+        <ListRow leading={<AgentGlyph />} title="Agent" accessory="chevron" onClick={() => nav.go("agent")} />
+      </ListSection>
 
-      {/* ── ACCOUNT ─────────────────────────────────────────────── */}
-      <SectionLabel>Account</SectionLabel>
-      <div style={S.group}>
-        <Row
-          glyph={<SettingsGlyphIcon />}
-          label="Settings"
-          first
-          onClick={() => nav.openSettings()}
-        />
-        <Row
-          glyph={<MembersGlyph />}
-          label="Members & roles"
-          onClick={() => nav.openSettings("members")}
-        />
-        <Row
-          glyph={<BellGlyph />}
-          label="Notifications"
-          last
-          badge={user && unreadCount > 0 ? unreadCount : undefined}
+      <ListSection header="Account">
+        <ListRow leading={<SettingsGlyphIcon />} title="Settings" accessory="chevron" onClick={() => nav.openSettings()} />
+        <ListRow leading={<MembersGlyph />} title="Members & roles" accessory="chevron" onClick={() => nav.openSettings("members")} />
+        <ListRow
+          leading={<BellGlyph />}
+          title="Notifications"
+          accessory="chevron"
+          trailing={user && unreadCount > 0 ? <CountBadge n={unreadCount} /> : undefined}
           onClick={() => nav.openSettings("notifications")}
         />
-      </div>
+      </ListSection>
+
+      <ListSection>
+        <ListRow title="Sign out" destructive onClick={() => setSignOutOpen(true)} />
+      </ListSection>
+
+      <ActionSheet
+        open={signOutOpen}
+        onClose={() => setSignOutOpen(false)}
+        title="Sign out?"
+        message="You'll need to sign back in to reach your deals."
+        actions={[{ label: "Sign out", destructive: true, onClick: () => shell?.signOut() }]}
+      />
     </div>
   );
 }
 
-/* ─── grouped-list row ───────────────────────────────────────────────────── */
+/* ─── notification count badge (red, iOS-style) ─────────────────────────── */
 
-function Row({
-  glyph,
-  label,
-  onClick,
-  first = false,
-  last = false,
-  badge,
-}: {
-  glyph: ReactNode;
-  label: string;
-  onClick: () => void;
-  first?: boolean;
-  last?: boolean;
-  badge?: number;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        ...S.row,
-        borderTop: first ? "none" : `1px solid ${T.rowDiv}`,
-        borderTopLeftRadius: first ? T.rCardLg : 0,
-        borderTopRightRadius: first ? T.rCardLg : 0,
-        borderBottomLeftRadius: last ? T.rCardLg : 0,
-        borderBottomRightRadius: last ? T.rCardLg : 0,
-      }}
-      onMouseDown={(e) => (e.currentTarget.style.background = T.hover)}
-      onMouseUp={(e) => (e.currentTarget.style.background = T.white)}
-      onMouseLeave={(e) => (e.currentTarget.style.background = T.white)}
-    >
-      <span style={S.glyphWrap}>{glyph}</span>
-      <span style={S.rowLabel}>{label}</span>
-      {badge != null && (
-        <span style={S.badge}>{badge > 99 ? "99+" : badge}</span>
-      )}
-      <ChevronRightIcon size={18} c={T.muted2} />
-    </button>
-  );
+function CountBadge({ n }: { n: number }) {
+  return <span style={S.badge}>{n > 99 ? "99+" : n}</span>;
 }
 
 /* ─── module / account glyphs — stroked Atlas line icons (stroke-2 round),
@@ -290,43 +252,13 @@ const S: Record<string, CSSProperties> = {
     overflow: "hidden",
     lineHeight: 1.45,
   },
-  group: {
-    background: T.white,
-    border: `1px solid ${T.border}`,
-    borderRadius: T.rCardLg,
-    boxShadow: T.shCard,
-    overflow: "hidden",
-    marginTop: 7,
-    marginBottom: 11,
-  },
-  row: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    width: "100%",
-    background: T.white,
-    border: "none",
-    padding: 14,
-    cursor: "pointer",
-    fontFamily: T.font,
-    textAlign: "left",
-    transition: "background .12s ease",
-  },
-  glyphWrap: {
-    width: 20,
-    flex: "none",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  rowLabel: { flex: 1, minWidth: 0, fontSize: 15.5, color: T.ink, fontWeight: 600 },
   badge: {
     flex: "none",
     minWidth: 20,
     height: 20,
     padding: "0 7px",
     borderRadius: 999,
-    background: T.blue,
+    background: "#FF3B30", // iOS notification red
     color: "#fff",
     fontSize: 13,
     fontWeight: 700,

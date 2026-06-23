@@ -11,6 +11,8 @@ export interface MobileShell {
   openChat: () => void;
   /** Close it (back to the underlying screen). */
   closeChat: () => void;
+  /** Sign the user out (surfaced as a destructive action in the Menu). */
+  signOut: () => void;
 }
 
 export const MobileShellContext = createContext<MobileShell | null>(null);
