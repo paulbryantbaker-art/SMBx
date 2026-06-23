@@ -420,7 +420,7 @@ function AtlasMobileShell({ user, chat }: ShellProps) {
   const header: ReactNode = isToday ? (
     <MobileHomeHeader initials={initials} onAvatar={() => nav.openSettings()} />
   ) : surface === "askyulia" ? (
-    <MobileBackHeader title="Yulia" showSparkle onBack={() => setChatOpen(false)} />
+    <MobileBackHeader title="Yulia" showSparkle solid onBack={() => setChatOpen(false)} />
   ) : surface === "more" ? (
     <MobileBackHeader title="More" onBack={() => onTab("today")} />
   ) : (

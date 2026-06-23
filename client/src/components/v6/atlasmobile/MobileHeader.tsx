@@ -53,6 +53,7 @@ export function MobileBackHeader({
   badge,
   right,
   showSparkle = false,
+  solid = false,
 }: {
   title: string;
   onBack: () => void;
@@ -62,9 +63,13 @@ export function MobileBackHeader({
   right?: ReactNode;
   /** Chat surfaces (Ask Yulia) show the ✦ + "Yulia" lockup before the title. */
   showSparkle?: boolean;
+  /** Solid white bar (+ divider) for white-field surfaces like the chat, so the
+   *  header matches the field instead of revealing the shell's top glow. Content
+   *  screens leave this false → transparent header over the glow. */
+  solid?: boolean;
 }) {
   return (
-    <header style={S.backBar}>
+    <header style={solid ? { ...S.backBar, ...S.backBarSolid } : S.backBar}>
       <button type="button" aria-label="Back" onClick={onBack} style={S.backBtn}>
         <BackIcon size={22} c={T.ink} />
       </button>
@@ -112,8 +117,16 @@ const S: Record<string, CSSProperties> = {
     padding: "0 14px",
     paddingTop: "calc(env(safe-area-inset-top, 0px) + 4px)",
     paddingBottom: 4,
-    borderBottom: `1px solid ${T.railDiv}`,
+    // Transparent + borderless so the shell's top glow shows behind the back bar
+    // on every screen (matches the Today home header). The bar scrolls away with
+    // the page (body-scroll), so it needs no opaque fill or divider.
+    background: "transparent",
+  },
+  // White-field surfaces (chat) opt in: solid bar + divider so it reads as one
+  // surface with the white chat below instead of a violet strip over white.
+  backBarSolid: {
     background: T.white,
+    borderBottom: `1px solid ${T.railDiv}`,
   },
   backBtn: {
     width: 40,

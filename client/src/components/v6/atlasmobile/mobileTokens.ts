@@ -58,12 +58,20 @@ const glassSheet = {
 } as const;
 
 export const M = {
-  /** The mobile app-shell background wash (desktop uses flat `T.page`). Applied
-   *  to the app root, never to a fixed child (Safari toolbar rule). */
-  frameBg: "linear-gradient(165deg,#ffffff 0%,#f7faff 46%,#eef2fe 78%,#e9e8f6 100%)",
-  /** Studio (frame 10) uses a slightly different wash; kept here so that screen
-   *  can opt into it without re-deriving. */
-  frameBgStudio: "linear-gradient(165deg,#ffffff,#f3f6fc 60%,#e7ebf7 100%)",
+  /** The mobile app-shell background wash, applied to EVERY screen's root (never
+   *  a fixed child — Safari toolbar rule). Two layers: a top-anchored blue→violet
+   *  glow (the "purple gradient" that used to live only on Today, now on all
+   *  pages) over a light lavender base. The glow is px-anchored near the top so it
+   *  sits behind the header/hero on every screen and scrolls away with the page;
+   *  the base stays light so cards/text keep strong contrast (white cards pop
+   *  harder against the violet than against the old near-white wash). */
+  frameBg:
+    "radial-gradient(900px 520px at 50% -40px, rgba(139,110,214,.30) 0%, rgba(96,128,232,.16) 46%, rgba(255,255,255,0) 72%)," +
+    "linear-gradient(180deg,#f6f4fc 0%,#f2f3fb 48%,#ecedf7 100%)",
+  /** Studio shares the same wash now (kept as an alias so callers don't break). */
+  frameBgStudio:
+    "radial-gradient(900px 520px at 50% -40px, rgba(139,110,214,.30) 0%, rgba(96,128,232,.16) 46%, rgba(255,255,255,0) 72%)," +
+    "linear-gradient(180deg,#f6f4fc 0%,#f2f3fb 48%,#ecedf7 100%)",
   /** Ask-Yulia / chat surfaces use a solid field (frame 02). */
   chatField: "#fff",
   glassNav,

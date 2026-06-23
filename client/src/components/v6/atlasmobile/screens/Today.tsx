@@ -209,26 +209,8 @@ export default function TodayMobileScreen({ user }: AtlasScreenProps) {
           marginBottom: 24,
         }}
       >
-        {/* soft glow behind the composer — decorative; absolute-in-relative, NOT
-            a fixed full-viewport bg div (Safari toolbar rule). Centered on the
-            hero (greeting + composer) via translate(-50%,-50%); no animation here
-            so the transform-centering holds. */}
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            top: "54%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 470,
-            height: 344,
-            background:
-              "radial-gradient(ellipse at center, rgba(66,133,244,.35), rgba(155,114,203,.21) 46%, transparent 72%)",
-            filter: "blur(16px)",
-            pointerEvents: "none",
-            zIndex: 0,
-          }}
-        />
+        {/* The hero glow now lives in the shell background (M.frameBg) so every
+            screen gets it, not just Today — no per-screen glow div here. */}
         <div style={{ position: "relative", zIndex: 1 }}>
           {/* greeting — centered hero; display_name is unbounded so wrap+clamp */}
           <h1

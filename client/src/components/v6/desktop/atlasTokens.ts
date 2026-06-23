@@ -32,16 +32,18 @@ export const T = {
   // surfaces / borders
   white: '#fff', surface: '#fafbfd', page: '#e9edf2', hover: '#f7f9fc',
   track: '#f0f4f9', railDiv: '#f0f2f5',
-  border: '#e3e8ef', hair: '#eef1f5', rowDiv: '#f3f5f8', rowDiv2: '#f6f8fb',
+  border: '#d8dfe9', hair: '#eef1f5', rowDiv: '#f3f5f8', rowDiv2: '#f6f8fb',
   inputBd: '#dbe3ec', progTrack: '#e8edf3',
   // gradients
   spark: 'linear-gradient(135deg,#4285F4,#9B72CB 50%,#D96570)',
   avatarGrad: 'linear-gradient(135deg,#4285F4,#9B72CB)',
   // radii
   rCard: 14, rCardLg: 16, rPill: 999, rComposer: 24, rBubble: 18, rChip: 13,
-  // shadow
-  shCard: '0 1px 2px rgba(60,64,67,.06)', shSoft: '0 1px 2px rgba(60,64,67,.05)',
-  shHover: '0 4px 12px rgba(60,64,67,.10)', shWin: '0 8px 30px rgba(31,41,55,.16)',
+  // shadow — slightly deeper + faintly violet-tinted so white cards lift cleanly
+  // off the new purple frame wash (more separation = more perceived contrast).
+  shCard: '0 2px 6px rgba(34,36,72,.09), 0 1px 2px rgba(34,36,72,.05)',
+  shSoft: '0 1px 3px rgba(34,36,72,.07)',
+  shHover: '0 6px 16px rgba(34,36,72,.13)', shWin: '0 8px 30px rgba(31,41,55,.16)',
 } as const;
 
 export type AtlasTokens = typeof T;
