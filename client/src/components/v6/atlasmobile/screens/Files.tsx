@@ -44,6 +44,7 @@ import {
   FolderIcon,
   PlusIcon,
 } from "../../desktop/icons";
+import { ListSection, ListRow } from "../iosKit";
 
 /* ─── scope ───────────────────────────────────────────────────
  * The design's scope segments (My files / Shared / Data room · DD) select the
@@ -191,72 +192,40 @@ function DocRow({
 }) {
   const tone = statusTone(doc.status);
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      disabled={opening}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        width: "100%",
-        textAlign: "left",
-        cursor: opening ? "default" : "pointer",
-        padding: 13,
-        borderRadius: 13,
-        background: T.white,
-        border: `1px solid ${T.border}`,
-        boxShadow: T.shCard,
-        fontFamily: T.font,
-        opacity: opening ? 0.6 : 1,
-      }}
-    >
-      {/* File-type thumb — the doc's REAL type, no faked "PDF" literal. */}
-      <span
-        style={{
-          width: 36,
-          height: 42,
-          flex: "none",
-          borderRadius: 6,
-          background: T.blueBg3,
-          border: `1px solid ${T.hair}`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 8.5,
-          fontWeight: 700,
-          color: T.muted,
-          letterSpacing: ".02em",
-        }}
-      >
-        {fileTypeLabel(doc.file_type).slice(0, 4)}
-      </span>
-      <span style={{ flex: 1, minWidth: 0 }}>
-        <span
-          style={{
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            fontSize: 15.5,
-            fontWeight: 700,
-            color: T.ink,
-            overflow: "hidden",
-            lineHeight: 1.3,
-          }}
-        >
-          {doc.name || "Untitled"}
-        </span>
-        <span style={{ display: "block", fontSize: 14, color: T.muted, marginTop: 3 }}>
-          {fileTypeLabel(doc.file_type)}
-          {doc.version != null ? ` · v${doc.version}` : ""} · Updated {fmtDate(doc.updated_at)}
-        </span>
-      </span>
-      <Pill bg={tone.bg} fg={tone.fg} style={{ flex: "none" }}>
-        {tone.label}
-      </Pill>
-    </button>
+    <ListRow
+      leading={
+        <span style={S.thumb}>{fileTypeLabel(doc.file_type).slice(0, 4)}</span>
+      }
+      title={doc.name || "Untitled"}
+      subtitle={`${fileTypeLabel(doc.file_type)}${doc.version != null ? ` · v${doc.version}` : ""} · Updated ${fmtDate(doc.updated_at)}`}
+      trailing={
+        <Pill bg={tone.bg} fg={tone.fg} style={{ flex: "none", opacity: opening ? 0.5 : 1 }}>
+          {tone.label}
+        </Pill>
+      }
+      onClick={opening ? undefined : onOpen}
+    />
   );
 }
+
+const S: { thumb: React.CSSProperties } = {
+  // File-type thumb — the doc's REAL type, no faked "PDF" literal.
+  thumb: {
+    width: 30,
+    height: 36,
+    flex: "none",
+    borderRadius: 6,
+    background: T.blueBg3,
+    border: `1px solid ${T.hair}`,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: 8,
+    fontWeight: 700,
+    color: T.muted,
+    letterSpacing: ".02em",
+  },
+};
 
 /* ─── the screen ──────────────────────────────────────────── */
 
@@ -555,7 +524,7 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
               hint="No documents are filed here yet. Pick another folder, or ask Yulia to file a deliverable into it."
             />
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 9, marginBottom: 4 }}>
+            <ListSection style={{ marginBottom: 4 }}>
               {visibleDocs.map((doc) => (
                 <DocRow
                   key={doc.id}
@@ -564,7 +533,7 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
                   onOpen={() => void handleOpen(doc)}
                 />
               ))}
-            </div>
+            </ListSection>
           )}
         </>
       )}
