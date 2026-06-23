@@ -62,6 +62,10 @@ export function useAnonymousChat() {
   const abortRef = useRef<AbortController | null>(null);
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const artifactHistoryBatchRef = useRef('');
+  // Synchronous in-flight flag — a rapid double-tap on a programmatic trigger
+  // reads stale `sending` state, so guard on a ref instead (prevents the
+  // duplicate user message the user saw).
+  const sendingRef = useRef(false);
 
   // Sync critical state to HMR data so it survives hot reloads
   useEffect(() => {
@@ -143,6 +147,9 @@ export function useAnonymousChat() {
     surfaceContext?: SurfaceContext,
     modelPreference?: ModelPreference,
   ) => {
+    // Drop a send while one is already streaming (rapid double-tap on a
+    // programmatic trigger would otherwise post the same prompt twice).
+    if (sendingRef.current) return;
     setError(null);
 
     const userMsg: AnonMessage = {
@@ -153,6 +160,7 @@ export function useAnonymousChat() {
     };
     setMessages(prev => [...prev, userMsg]);
     setSending(true);
+    sendingRef.current = true;
     setStreamingText('');
 
     try {
@@ -269,7 +277,7 @@ export function useAnonymousChat() {
       if (accumulated) {
         const routed = canvasArtifact
           ? { opened: true, id: canvasArtifact.id, title: canvasArtifact.title, chatMessage: accumulated }
-          : routeChatArtifactToCanvas(accumulated, 'anonymous_chat');
+          : routeChatArtifactToCanvas(accumulated, 'anonymous_chat', surfaceContext?.dealTitle);
         setMessages(prev => [...prev, {
           id: Date.now() + 1,
           role: 'assistant' as const,
@@ -320,6 +328,7 @@ export function useAnonymousChat() {
       }
     } finally {
       setSending(false);
+      sendingRef.current = false;
       setStreamingText('');
       abortRef.current = null;
     }
@@ -360,6 +369,7 @@ export function useAnonymousChat() {
     setConversations([]);
     setActiveConversationId(null);
     setSending(false);
+    sendingRef.current = false;
     setStreamingText('');
     setError(null);
     setPendingDeliverable(null);

@@ -347,6 +347,11 @@ export function useAuthChat(user: User | null) {
   // Send message with SSE streaming
   const sendMessage = useCallback(async (content: string, surfaceContext?: SurfaceContext, modelPreference?: ModelPreference) => {
     if (!user) return;
+    // Drop a send while one is already streaming. Programmatic triggers (the
+    // cockpit "Ask Yulia about this deal" button, Today quick-chips) bypass the
+    // composer's disabled state, so a rapid double-tap would otherwise post the
+    // same prompt twice — exactly the duplicate the user hit.
+    if (sendingRef.current) return;
 
     const tempMsg: AuthMessage = {
       id: Date.now(),
@@ -513,7 +518,7 @@ export function useAuthChat(user: User | null) {
         // control. Otherwise fall back to client-side routing of long analyses.
         const routed = canvasArtifact
           ? { opened: true, id: canvasArtifact.id, title: canvasArtifact.title, chatMessage: accumulated }
-          : routeChatArtifactToCanvas(accumulated, 'auth_chat_fallback');
+          : routeChatArtifactToCanvas(accumulated, 'auth_chat_fallback', surfaceContext?.dealTitle);
         setMessages(prev => [...prev, {
           id: Date.now() + 1,
           role: 'assistant' as const,
@@ -581,7 +586,7 @@ export function useAuthChat(user: User | null) {
                 if (retryAccum) {
                   const routed = retryCanvasArtifact
                     ? { opened: true, id: retryCanvasArtifact.id, title: retryCanvasArtifact.title, chatMessage: retryAccum }
-                    : routeChatArtifactToCanvas(retryAccum, 'auth_chat_retry_fallback');
+                    : routeChatArtifactToCanvas(retryAccum, 'auth_chat_retry_fallback', surfaceContext?.dealTitle);
                   setMessages(prev => [...prev, {
                     id: Date.now() + 1,
                     role: 'assistant' as const,

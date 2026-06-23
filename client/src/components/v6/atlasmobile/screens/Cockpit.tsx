@@ -19,6 +19,7 @@ import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import type { AtlasScreenProps } from "../../desktop/atlasNav";
 import { useAtlasNav, useAtlasChat } from "../../desktop/atlasNav";
+import { useMobileShell } from "../mobileShell";
 import { authHeaders } from "../../../../hooks/useAuth";
 import type { SurfaceContext } from "../../../../lib/yuliaSurfaceContext";
 import { T } from "../../desktop/atlasTokens";
@@ -401,6 +402,7 @@ function dealSurfaceContext(
 export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenProps) {
   const nav = useAtlasNav();
   const chat = useAtlasChat();
+  const shell = useMobileShell();
   const dealId = view.dealId;
 
   const { detail, brief, detailState, briefState } = useDealCockpit(dealId);
@@ -485,7 +487,13 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
   const riskRows = [...signoffFlags, ...researchNeeded];
   const sourceSignals = brief?.marketRead?.sourceSignals ?? [];
 
-  const askYulia = (prompt: string) => chat?.send(prompt, dealSurfaceContext(dealId, dealName, deal));
+  // Open the chat surface so the send is VISIBLE (the user watches Yulia work +
+  // gets the "Open on canvas" control). Without this the cockpit sent silently,
+  // which is what led people to tap twice. The hook also drops the duplicate.
+  const askYulia = (prompt: string) => {
+    chat?.send(prompt, dealSurfaceContext(dealId, dealName, deal));
+    shell?.openChat();
+  };
 
   return (
     <div style={col}>

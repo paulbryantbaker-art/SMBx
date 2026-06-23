@@ -77,13 +77,13 @@ export function chatArtifactStreamingMessage(content: string): string {
   return `Opening "${title}" on the canvas so this stays visual and editable.`;
 }
 
-export function routeChatArtifactToCanvas(content: string, source: string): ChatArtifactRoutingResult {
+export function routeChatArtifactToCanvas(content: string, source: string, dealTitle?: string): ChatArtifactRoutingResult {
   const trimmed = content.trim();
   if (!shouldRouteChatArtifact(trimmed)) {
     return { opened: false, id: "", title: "", chatMessage: content };
   }
 
-  const title = inferArtifactTitle(trimmed);
+  const title = inferArtifactTitle(trimmed, dealTitle);
   // Stable id shared with the shell listener (it registers/navigates under this
   // exact id) AND returned to the caller so the chat message can re-open it.
   const id = `artifact-content-${Date.now()}`;
@@ -173,25 +173,66 @@ function canvasNavTargetFor(detail: Record<string, any>): CanvasArtifactRef | nu
   }
 }
 
-function inferArtifactTitle(content: string): string {
-  const heading = content.match(/^#{1,3}\s+(.+?)\s*$/m)?.[1];
-  const boldLine = content.match(/^\s*\*\*(.+?)\*\*\s*$/m)?.[1];
-  const phraseLine = content
-    .split(/\r?\n/)
-    .find(line => /analysis|valuation|risk|buyer|market/i.test(line) && line.trim().length > 8);
+// Headings that read as a narrative section opener, NOT a document title \u2014 these
+// must never become the artifact title (this is where "The Setup" came from).
+const GENERIC_HEADING = /^(the\s+setup|setup|the\s+read|overview|exec(?:utive)?\s+summary|summary|introduction|intro|background|context|the\s+ask|tl;?dr|key\s+(?:takeaways?|points?)|highlights?|takeaways?|next\s+steps?|recommendations?|notes?|details?)$/i;
 
-  const candidate = heading || boldLine || phraseLine || "Yulia analysis artifact";
-  const trailingTitlePunctuation = new RegExp("\\s*[\\-:|]\\s*$", "g");
-  const cleaned = candidate
+const TITLE_TERM = /\b(read|valuation|recast|comps?|buyer|fit|market|score|thesis|memo|loi|cim|diligence|structure|model|qoe|ebitda|sde|deal)\b/i;
+
+function cleanTitleCandidate(s: string): string {
+  return s
     .replace(/[*_`#]/g, "")
     .replace(/\bfull\s+analysis\s+canvas\b/ig, "")
     .replace(/\banalysis\s+canvas\b/ig, "")
     .replace(/\s+/g, " ")
     .replace(/[\u2013\u2014\u00b7]\s*$/g, "")
-    .replace(trailingTitlePunctuation, "")
+    .replace(new RegExp("\\s*[\\-:|]\\s*$", "g"), "")
     .trim();
+}
 
-  return truncateTitle(cleaned || "Yulia analysis artifact");
+/** Best title for a chat-routed artifact. Prefers a real document title from the
+ *  content (an H1, or a heading that reads like a deliverable), skips generic
+ *  section openers, and \u2014 when the content offers nothing strong \u2014 anchors on the
+ *  deal name so the canvas tab is never labelled with a stray section like
+ *  "The Setup". */
+function inferArtifactTitle(content: string, dealTitle?: string): string {
+  const isGeneric = (t: string) => !t || GENERIC_HEADING.test(t);
+
+  const headings = [...content.matchAll(/^(#{1,3})\s+(.+?)\s*$/gm)]
+    .map(m => ({ level: m[1].length, raw: m[2], text: cleanTitleCandidate(m[2]) }))
+    .filter(h => h.text);
+
+  // 1) A top-level (#) heading is almost always the document title.
+  const h1 = headings.find(h => h.level === 1 && !isGeneric(h.text));
+  // 2) A heading that reads like a deliverable title (separator or domain term).
+  const titleish = headings.find(
+    h => !isGeneric(h.text) && (/[\u2014\u2013:|]/.test(h.raw) || TITLE_TERM.test(h.text)),
+  );
+  // 3) First non-generic heading of any level.
+  const firstGood = headings.find(h => !isGeneric(h.text));
+
+  const boldLine = cleanTitleCandidate(content.match(/^\s*\*\*(.+?)\*\*\s*$/m)?.[1] ?? "");
+
+  // A real structural title from the content: a heading or a standalone bold line.
+  const structural =
+    h1?.text ||
+    titleish?.text ||
+    firstGood?.text ||
+    (boldLine && !isGeneric(boldLine) ? boldLine : "");
+  if (structural) return truncateTitle(structural);
+
+  // No usable title in the content \u2192 anchor on the deal name when we have one
+  // (this is what keeps a stray section like "The Setup" off the canvas tab).
+  const deal = dealTitle?.trim();
+  if (deal) return truncateTitle(deal);
+
+  // No deal context either: last-ditch, scan for an analysis-flavored line.
+  const phraseLine = content
+    .split(/\r?\n/)
+    .map(cleanTitleCandidate)
+    .find(line => /analysis|valuation|risk|buyer|market/i.test(line) && line.length > 8 && line.length <= 80 && !isGeneric(line));
+
+  return truncateTitle(phraseLine || "Yulia analysis artifact");
 }
 
 function truncateTitle(title: string): string {
