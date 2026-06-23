@@ -15,33 +15,35 @@
  *  full-viewport fixed bg div (Safari toolbar rule). The `fallbackBg` is the
  *  higher-opacity solid for browsers without backdrop-filter support. */
 const glassNav = {
-  // More translucent so content REFRACTS through (true iOS liquid glass, not a
-  // flat white pill). Legibility is preserved by the dark nav labels on top.
-  background: "rgba(255,255,255,.46)",
+  // Frosted, but predominantly a bright material so the bar reads as a clear,
+  // floating panel against the busy purple wash (it was too translucent at .46 —
+  // it disappeared into the gradient). Apple's tab bars are heavily frosted, not
+  // see-through; the blur + saturate still let content hint through the edges.
+  background: "rgba(255,255,255,.82)",
   /** Solid fallback where backdrop-filter is unsupported (keeps the bar legible). */
-  fallbackBg: "rgba(255,255,255,.92)",
-  // Lighter frost + higher saturation = content visibly slides behind the glass;
-  // the hairline edge + bright top inner highlight give the lit-pane read.
-  backdropFilter: "blur(28px) saturate(2)",
-  border: "1px solid rgba(255,255,255,.7)",
+  fallbackBg: "rgba(255,255,255,.95)",
+  backdropFilter: "blur(26px) saturate(1.9)",
+  // A real edge: a soft dark hairline (visible on light bg, unlike a white one)
+  // plus the bright inner top highlight for the lit-glass read.
+  border: "1px solid rgba(40,42,80,.10)",
   boxShadow:
-    "0 8px 30px rgba(20,22,28,.16), 0 1px 2px rgba(20,22,28,.08), inset 0 1px 1.5px rgba(255,255,255,.85), inset 0 -1px 1px rgba(20,22,28,.05)",
+    "0 12px 34px rgba(30,32,70,.22), 0 2px 8px rgba(30,32,70,.12), inset 0 1px 1.5px rgba(255,255,255,.95), inset 0 -1px 1px rgba(20,22,28,.05)",
   /** Selected-tab capsule highlight behind the active icon+label (the iOS
    *  liquid-glass tab-bar treatment), tinted to the Atlas accent. */
-  activeBg: "rgba(11,87,208,.13)",
-  radius: 31,
-  height: 62,
+  activeBg: "rgba(11,87,208,.15)",
+  radius: 30,
+  height: 68,
 } as const;
 
 /** Glass Yulia FAB material (m4 §1e) — same lit-glass treatment as the nav. */
 const glassFab = {
-  background: "rgba(255,255,255,.46)",
-  fallbackBg: "rgba(255,255,255,.94)",
-  backdropFilter: "blur(24px) saturate(2)",
-  border: "1px solid rgba(255,255,255,.72)",
+  background: "rgba(255,255,255,.82)",
+  fallbackBg: "rgba(255,255,255,.96)",
+  backdropFilter: "blur(24px) saturate(1.9)",
+  border: "1px solid rgba(40,42,80,.10)",
   boxShadow:
-    "0 10px 28px rgba(20,22,28,.20), 0 1px 2px rgba(20,22,28,.10), inset 0 1px 1.5px rgba(255,255,255,.85)",
-  size: 56,
+    "0 12px 30px rgba(30,32,70,.24), 0 2px 6px rgba(30,32,70,.12), inset 0 1px 1.5px rgba(255,255,255,.95)",
+  size: 58,
 } as const;
 
 /** Glass bottom-sheet material (frame 08 — m4 §2). Scrim + grab-handle + the

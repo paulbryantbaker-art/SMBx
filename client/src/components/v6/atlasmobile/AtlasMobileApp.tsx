@@ -194,10 +194,10 @@ type MobileSurface = AtlasScreen | "more" | "askyulia";
 /* Screens that show the floating bottom tab bar — Today / Deals / Sourcing /
  * Files / More (the bottom-bar destination set; the retired 'pipeline' alias is
  * folded into Deals and never renders as its own surface). */
-const NAV_SCREENS = new Set<MobileSurface>(["today", "deals", "sourcing", "files", "more"]);
-/* Screens that show the Yulia FAB (no inline composer). Deals absorbs the
- * former Pipeline FAB so Yulia is reachable from the merged screen. */
-const FAB_SCREENS = new Set<MobileSurface>(["deals", "cockpit", "sourcing"]);
+const NAV_SCREENS = new Set<MobileSurface>(["today", "deals", "sourcing"]);
+/* Screens that show the Yulia FAB. The bar now carries a Yulia tab, so the FAB
+ * is only needed on the cockpit (a deal-detail screen that has no bottom bar). */
+const FAB_SCREENS = new Set<MobileSurface>(["cockpit"]);
 /* The FAB sits above the tab bar only when the bar is present (Deals/Sourcing). */
 
 /* Header title for the variant-B back bar, per screen. The retired 'pipeline'
@@ -368,8 +368,8 @@ function AtlasMobileShell({ user, chat }: ShellProps) {
   const bodyScroll = surface !== "askyulia";
   const showNav = NAV_SCREENS.has(surface);
   const showFab = FAB_SCREENS.has(surface);
-  const fabAboveNav = showFab && showNav; // Deals/Sourcing have both bar + FAB
-  const activeTab: BottomTab = moreOpen ? "more" : bottomTabForScreen(view.screen) ?? "today";
+  const fabAboveNav = showFab && showNav; // (cockpit has the FAB but no bar)
+  const activeTab: BottomTab = bottomTabForScreen(view.screen) ?? "today";
 
   // Back target: detail/section screens step back to a sensible surface. Deal
   // detail (cockpit/canvas) → Deals; the More-reached module screens
@@ -405,12 +405,13 @@ function AtlasMobileShell({ user, chat }: ShellProps) {
 
   const onTab = (tab: BottomTab) => {
     setSheetOpen(false);
-    setChatOpen(false);
-    if (tab === "more") {
-      setMoreOpen(true);
+    setMoreOpen(false);
+    // Yulia is an action, not a destination — it opens the full-screen chat.
+    if (tab === "yulia") {
+      setChatOpen(true);
       return;
     }
-    setMoreOpen(false);
+    setChatOpen(false);
     nav.go(tab as AtlasScreen);
   };
 
@@ -418,11 +419,13 @@ function AtlasMobileShell({ user, chat }: ShellProps) {
   // (including the More overlay, which gets a plain titled bar without a back —
   // tapping a bottom tab leaves it).
   const header: ReactNode = isToday ? (
-    <MobileHomeHeader initials={initials} onAvatar={() => nav.openSettings()} />
+    // The avatar opens the account/More menu (modules + settings) — the old More
+    // tab's content now lives here under the user icon.
+    <MobileHomeHeader initials={initials} onAvatar={() => setMoreOpen(true)} />
   ) : surface === "askyulia" ? (
     <MobileBackHeader title="Yulia" showSparkle solid onBack={() => setChatOpen(false)} />
   ) : surface === "more" ? (
-    <MobileBackHeader title="More" onBack={() => onTab("today")} />
+    <MobileBackHeader title="Menu" onBack={() => setMoreOpen(false)} />
   ) : (
     <MobileBackHeader
       title={view.dealName ?? SCREEN_TITLE[view.screen] ?? "Atlas"}

@@ -1,37 +1,35 @@
 /**
  * BottomNav — the floating liquid-glass tab bar (m4 §1d), the signature
- * Atlas-mobile element. Five tabs: Today / Deals / Sourcing / Files / More —
- * the same destination set the desktop header carries (the former Pipeline tab
- * is merged into Deals as its Board toggle).
+ * Atlas-mobile element. Four tabs: Today / Deals / Yulia / Sourcing. Yulia (the
+ * ✦ chat) is the product's core action and lives in the bar; Files moved into
+ * each deal's cockpit (per-deal data room) and the old "More" menu now opens
+ * from the home user icon.
  *
- * It is a SMALL inset rounded bar (position:absolute, left/right:16, bottom
- * calc(safe-area+16)) — NOT a full-viewport fixed bg div, so the Safari toolbar
- * rule is satisfied (it sits inside the app root which is position:relative).
+ * It is a SMALL inset rounded bar (position:fixed bottom, left/right:14) — NOT a
+ * full-viewport fixed bg div, so the Safari toolbar rule is satisfied.
  *
- * Active item = T.blue, inactive = T.faint; the icons inherit via
- * stroke/fill currentColor. Drives nav.go(...) for the four real screens; More
- * is a shell-level overlay flag handled by AtlasMobileApp.
+ * Active item = T.blue, inactive = a readable mid-grey; the icons inherit via
+ * stroke/fill currentColor (Yulia uses the gradient Sparkle, always lit). Today/
+ * Deals/Sourcing drive nav.go(...); Yulia opens the chat (handled by the shell).
  */
 import type { CSSProperties, ReactNode } from "react";
 import { T } from "../desktop/atlasTokens";
 import { M } from "./mobileTokens";
-import {
-  HomeIcon,
-  DealsListIcon,
-  SourcingIcon,
-  FolderIcon,
-  MoreDotsIcon,
-} from "../desktop/icons";
+import { HomeIcon, DealsListIcon, SourcingIcon } from "../desktop/icons";
+import { Sparkle } from "../desktop/primitives";
 import type { AtlasScreen } from "../desktop/atlasNav";
 
-export type BottomTab = "today" | "deals" | "sourcing" | "files" | "more";
+export type BottomTab = "today" | "deals" | "yulia" | "sourcing";
+
+const ICON = 26;
 
 const ITEMS: { id: BottomTab; label: string; icon: (c: string) => ReactNode }[] = [
-  { id: "today", label: "Today", icon: (c) => <HomeIcon size={22} c={c} /> },
-  { id: "deals", label: "Deals", icon: (c) => <DealsListIcon size={22} c={c} /> },
-  { id: "sourcing", label: "Sourcing", icon: (c) => <SourcingIcon size={22} c={c} /> },
-  { id: "files", label: "Files", icon: (c) => <FolderIcon size={22} c={c} /> },
-  { id: "more", label: "More", icon: (c) => <MoreDotsIcon size={22} c={c} /> },
+  { id: "today", label: "Today", icon: (c) => <HomeIcon size={ICON} c={c} /> },
+  { id: "deals", label: "Deals", icon: (c) => <DealsListIcon size={ICON} c={c} /> },
+  // Yulia = the chat action. The Sparkle is a fixed gradient (ignores `c`), so it
+  // always reads as lit/colorful — the bar's most prominent affordance.
+  { id: "yulia", label: "Yulia", icon: () => <Sparkle size={ICON} /> },
+  { id: "sourcing", label: "Sourcing", icon: (c) => <SourcingIcon size={ICON} c={c} /> },
 ];
 
 export function BottomNav({
@@ -87,11 +85,10 @@ export function bottomTabForScreen(screen: AtlasScreen): BottomTab | null {
     case "deals":
     case "pipeline":
     case "cockpit":
+    case "files": // files is a per-deal surface now → highlight Deals
       return "deals";
     case "sourcing":
       return "sourcing";
-    case "files":
-      return "files";
     default:
       return null;
   }
@@ -100,9 +97,9 @@ export function bottomTabForScreen(screen: AtlasScreen): BottomTab | null {
 const S: Record<string, CSSProperties> = {
   bar: {
     position: "fixed", // own viewport-fixed bottom bar — NOT inside a full-viewport fixed layer (which would block iOS chrome collapse)
-    left: 16,
-    right: 16,
-    bottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)",
+    left: 14,
+    right: 14,
+    bottom: "calc(env(safe-area-inset-bottom, 0px) + 14px)",
     height: M.glassNav.height,
     borderRadius: M.glassNav.radius,
     background: M.glassNav.background,
@@ -112,9 +109,11 @@ const S: Record<string, CSSProperties> = {
     boxShadow: M.glassNav.boxShadow,
     display: "flex",
     alignItems: "center",
-    padding: "0 6px",
+    padding: "0 4px",
     zIndex: 5,
   },
+  // Each tab fills its quarter of the bar AND its full height — a ~88×68 hit
+  // area (was cramped with 5 tabs). The visible capsule is centered inside.
   item: {
     flex: 1,
     minWidth: 0,
@@ -134,10 +133,10 @@ const S: Record<string, CSSProperties> = {
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    gap: 3,
-    padding: "6px 14px",
-    borderRadius: 16,
+    gap: 4,
+    padding: "7px 16px",
+    borderRadius: 18,
     transition: "background .2s ease",
   },
-  label: { fontSize: 11, lineHeight: 1, letterSpacing: "-0.01em" },
+  label: { fontSize: 11.5, lineHeight: 1, letterSpacing: "-0.01em" },
 };
