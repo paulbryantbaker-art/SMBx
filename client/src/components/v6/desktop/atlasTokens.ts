@@ -10,11 +10,15 @@ export const T = {
   // it renders crisper than any webfont — the app reads as cleanly as a native
   // app (YouTube/Kroger reference). Replaced 'DM Sans', which read soft on mobile.
   font: '-apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-  // ink / text
-  ink: '#1f1f1f', ink2: '#202124', ink3: '#3c4043', label: '#444746',
-  // muted2/faint darkened to pass WCAG AA (were #80868b ~3.5:1 / #9aa3ad ~2.6:1 —
-  // illegible secondary text; readability is paramount, esp. on mobile).
-  muted: '#5e6b7b', muted2: '#5d6672', faint: '#616a78',
+  // ink / text — the whole scale lifted darker for stronger contrast/readability
+  // (2026-06-23). Titles near-black for YouTube-style punch; body a touch darker;
+  // the secondary grays raised from ~5.6:1 to ~7:1 (AAA) so they stay legible on
+  // the tinted frame wash, not just on white. Hierarchy steps preserved.
+  ink: '#141519', ink2: '#181a1e', ink3: '#2d3136', label: '#393c41',
+  // Secondary text — all comfortably AAA on white (≈6.7–7:1) and still ≥AA on the
+  // lavender wash. (Earlier these were illegible: muted2 #80868b ~3.5:1 / faint
+  // #9aa3ad ~2.6:1.) Readability is paramount, especially on mobile.
+  muted: '#4d5765', muted2: '#4b5460', faint: '#4e5764',
   // blue (primary/active)
   blue: '#0b57d0', blueBg: '#e8f0fe', blueBg2: '#eef4ff', blueBg3: '#f3f7ff',
   navActive: '#d3e3fd', stageActiveBd: '#bcd4fb', approvalBd: '#cfe0ff',

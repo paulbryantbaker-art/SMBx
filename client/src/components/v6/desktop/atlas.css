@@ -10,13 +10,15 @@
    * inline styles; these vars exist for any class-based descendant styling. */
   /* Native system font (matches T.font) — see atlasTokens.ts. */
   --at-font: -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --at-ink: #1f1f1f;
-  --at-ink2: #202124;
-  --at-ink3: #3c4043;
-  --at-label: #444746;
-  --at-muted: #5e6b7b;
-  --at-muted2: #80868b;
-  --at-faint: #9aa3ad;
+  /* Text scale — kept in sync with atlasTokens.ts T (lifted darker 2026-06-23 for
+   * stronger contrast; only --at-ink is consumed today, but mirror the rest). */
+  --at-ink: #141519;
+  --at-ink2: #181a1e;
+  --at-ink3: #2d3136;
+  --at-label: #393c41;
+  --at-muted: #4d5765;
+  --at-muted2: #4b5460;
+  --at-faint: #4e5764;
   --at-blue: #0b57d0;
   --at-blue-bg: #e8f0fe;
   --at-blue-bg2: #eef4ff;
