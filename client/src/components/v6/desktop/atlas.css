@@ -5,12 +5,11 @@
  * Safari toolbar rule: the Atlas window is normal-flow / position:absolute
  * inside a relative parent — NEVER a position:fixed full-viewport bg div. */
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
-
 .atlas-root {
   /* Palette mirrored from atlasTokens.ts (T). Components use the T object for
    * inline styles; these vars exist for any class-based descendant styling. */
-  --at-font: 'DM Sans', -apple-system, system-ui, sans-serif;
+  /* Native system font (matches T.font) — see atlasTokens.ts. */
+  --at-font: -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --at-ink: #1f1f1f;
   --at-ink2: #202124;
   --at-ink3: #3c4043;

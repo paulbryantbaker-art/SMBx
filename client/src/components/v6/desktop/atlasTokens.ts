@@ -5,7 +5,11 @@
  * vars under `.atlas-root`; this object is what every screen imports.
  */
 export const T = {
-  font: "'DM Sans', -apple-system, system-ui, sans-serif",
+  // The native system font (San Francisco on iOS/macOS, Segoe UI on Windows,
+  // Roboto on Android). The OS hints it to the device and optically sizes it, so
+  // it renders crisper than any webfont — the app reads as cleanly as a native
+  // app (YouTube/Kroger reference). Replaced 'DM Sans', which read soft on mobile.
+  font: '-apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   // ink / text
   ink: '#1f1f1f', ink2: '#202124', ink3: '#3c4043', label: '#444746',
   // muted2/faint darkened to pass WCAG AA (were #80868b ~3.5:1 / #9aa3ad ~2.6:1 —

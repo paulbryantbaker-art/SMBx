@@ -6,10 +6,12 @@
  * the glass bars are small inset elements — NEVER a position:fixed full-viewport
  * bg div. Nothing in this file creates one. */
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
-
 .atlas-mobile {
-  font-family: 'DM Sans', -apple-system, system-ui, sans-serif;
+  /* Native system font (San Francisco on iOS) — hinted + optically sized by the
+   * OS, so it reads as crisply as a native app (the YouTube reference). No
+   * webfont @import: drops the load AND the font-swap flash. Replaced 'DM Sans',
+   * which read soft at body sizes on mobile. */
+  font-family: -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #1f1f1f;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
