@@ -19,18 +19,15 @@ const glassNav = {
   // floating panel against the busy purple wash (it was too translucent at .46 —
   // it disappeared into the gradient). Apple's tab bars are heavily frosted, not
   // see-through; the blur + saturate still let content hint through the edges.
-  background: "rgba(255,255,255,.82)",
-  /** Solid fallback where backdrop-filter is unsupported (keeps the bar legible). */
-  fallbackBg: "rgba(255,255,255,.95)",
-  backdropFilter: "blur(26px) saturate(1.9)",
-  // A real edge: a soft dark hairline (visible on light bg, unlike a white one)
-  // plus the bright inner top highlight for the lit-glass read.
-  border: "1px solid rgba(40,42,80,.10)",
-  boxShadow:
-    "0 12px 34px rgba(30,32,70,.22), 0 2px 8px rgba(30,32,70,.12), inset 0 1px 1.5px rgba(255,255,255,.95), inset 0 -1px 1px rgba(20,22,28,.05)",
-  /** Selected-tab capsule highlight behind the active icon+label (the iOS
-   *  liquid-glass tab-bar treatment), tinted to the Atlas accent. */
-  activeBg: "rgba(11,87,208,.15)",
+  // Redesign: a clean SOLID white floating pill (no glass) — the only place a
+  // soft shadow is allowed (floating chrome needs lift off the grey page).
+  background: "#ffffff",
+  fallbackBg: "#ffffff",
+  backdropFilter: "none",
+  border: "1px solid rgba(40,42,80,.06)",
+  boxShadow: "0 8px 26px rgba(30,32,70,.14), 0 1px 3px rgba(30,32,70,.08)",
+  /** Selected-tab capsule — the violet accent, soft tint. */
+  activeBg: "#ece9fb",
   radius: 30,
   height: 68,
 } as const;
@@ -67,13 +64,11 @@ export const M = {
    *  sits behind the header/hero on every screen and scrolls away with the page;
    *  the base stays light so cards/text keep strong contrast (white cards pop
    *  harder against the violet than against the old near-white wash). */
-  frameBg:
-    "radial-gradient(900px 520px at 50% -40px, rgba(139,110,214,.30) 0%, rgba(96,128,232,.16) 46%, rgba(255,255,255,0) 72%)," +
-    "linear-gradient(180deg,#f6f4fc 0%,#f2f3fb 48%,#ecedf7 100%)",
-  /** Studio shares the same wash now (kept as an alias so callers don't break). */
-  frameBgStudio:
-    "radial-gradient(900px 520px at 50% -40px, rgba(139,110,214,.30) 0%, rgba(96,128,232,.16) 46%, rgba(255,255,255,0) 72%)," +
-    "linear-gradient(180deg,#f6f4fc 0%,#f2f3fb 48%,#ecedf7 100%)",
+  // Redesign: a flat soft warm grey page (RT.page). Separation is by TONE — the
+  // grey page makes white elements read as raised, no gradient needed.
+  frameBg: "#f3f2ef",
+  /** Studio shares the same page (kept as an alias so callers don't break). */
+  frameBgStudio: "#f3f2ef",
   /** Ask-Yulia / chat surfaces use a solid field (frame 02). */
   chatField: "#fff",
   glassNav,

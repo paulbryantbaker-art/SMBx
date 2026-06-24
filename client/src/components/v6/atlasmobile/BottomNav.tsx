@@ -44,8 +44,8 @@ export function BottomNav({
     <nav style={S.bar} aria-label="Primary">
       {ITEMS.map((it) => {
         const isActive = it.id === active;
-        // inactive was T.faint (#9aa3ad) — fails contrast; use a readable mid-grey
-        const color = isActive ? T.blue : "#525b69";
+        // Redesign: the one violet accent for active; readable mid-grey inactive.
+        const color = isActive ? "#5b53d6" : "#6c6b66";
         return (
           <button
             key={it.id}
