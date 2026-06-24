@@ -598,15 +598,16 @@ export default function CockpitScreen({ view, user }: AtlasScreenProps) {
         ? derived
         : null;
 
-  // Enterprise value (EV) — the analytical valuation, led with instead of the
-  // seller's asking price (asking is a negotiation input shown as a detail).
-  // Implied EV = adj. EBITDA × the implied multiple; falls back to asking →
-  // EBITDA → revenue when there's nothing to value on. (When the multiple is
-  // only derived from asking, EV ≈ asking — honest until a real valuation lands.)
+  // Enterprise value (EV) — a REAL valuation, NOT the seller's asking price.
+  // EV = adj. EBITDA × an EXPLICITLY-PROVIDED multiple (financials.multiple, set
+  // by valuation work). We do NOT use the multiple back-solved from asking (that
+  // just reproduces the ask) and do NOT fall back to asking — so when there's no
+  // real valuation, EV is blank ("—"). It becomes a number once a valuation sets
+  // a real multiple.
   const enterpriseValue =
-    adjEbitda != null && impliedMultiple != null && impliedMultiple > 0
-      ? Math.round(adjEbitda * impliedMultiple)
-      : (asking ?? adjEbitda ?? revenue);
+    adjEbitda != null && multipleRaw != null && multipleRaw > 0
+      ? Math.round(adjEbitda * multipleRaw)
+      : null;
 
   const gateSteps = buildGateSteps(deal, detail.gates);
 
