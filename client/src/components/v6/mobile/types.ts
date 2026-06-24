@@ -122,6 +122,10 @@ export interface MobileChatBridge {
   /** Resolves false when the refresh failed — the sheet must not claim
    *  "no conversations" when the truth is "couldn't check". */
   refreshConversations?: () => void | Promise<boolean>;
+  /** Authed only — when the user opens a deal, resume that deal's SAVED
+   *  conversation (so Yulia "remembers") and rehydrate its persisted canvas tabs
+   *  (so her analyses come back). No-op for anon. */
+  bindDeal?: (dealId: number) => void;
 }
 
 /** Minimal slice of useAuthChat's Conversation that the history list renders. */

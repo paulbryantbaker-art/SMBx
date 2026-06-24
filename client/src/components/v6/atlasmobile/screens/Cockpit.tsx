@@ -258,6 +258,14 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
   // model store + the artifact registry (session). (Cross-reload rehydration from
   // the server's canvas_tabs is the next step — the work is already saved there.)
   const modelTabs = useModelStore((s) => s.tabs);
+  // The artifact registry is non-reactive; rehydration/registration fire a
+  // window event so we recompute when Yulia's canvas work lands or is restored.
+  const [canvasVersion, setCanvasVersion] = useState(0);
+  useEffect(() => {
+    const onChange = () => setCanvasVersion((v) => v + 1);
+    window.addEventListener("atlas:canvas-changed", onChange);
+    return () => window.removeEventListener("atlas:canvas-changed", onChange);
+  }, []);
   const canvasItems = useMemo(() => {
     if (dealId == null) return [] as { id: string; label: string; kind: string }[];
     const models = Object.values(modelTabs)
@@ -269,7 +277,8 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
       kind: "Analysis",
     }));
     return [...models, ...analyses];
-  }, [modelTabs, dealId]);
+    // canvasVersion forces a recompute when the (non-reactive) registry changes.
+  }, [modelTabs, dealId, canvasVersion]);
 
   // No deal selected → honest empty.
   if (dealId == null) {

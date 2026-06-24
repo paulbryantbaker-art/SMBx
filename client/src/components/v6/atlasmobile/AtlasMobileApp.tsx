@@ -40,6 +40,7 @@ import type { SurfaceContext } from "../../../lib/yuliaSurfaceContext";
 import type { MobileChatBridge, MobileMessage } from "../mobile/types";
 import { ensureModelTabFromCanvasAction } from "../mobile/screens/Model";
 import { registerCanvasArtifact } from "../desktop/screens/Canvas";
+import { rehydrateCanvasTabs } from "../../../lib/canvasRehydrate";
 
 import "./atlas-mobile.css";
 import { T } from "../desktop/atlasTokens";
@@ -156,6 +157,18 @@ function AtlasMobileAuthed({ user, onSignOut }: { user: User; onSignOut: () => v
       activeConversationId: chat.activeConversationId,
       selectConversation: chat.selectConversation,
       refreshConversations: chat.loadConversations,
+      // Resume the deal's SAVED conversation (Yulia "remembers") + rehydrate its
+      // persisted canvas tabs (her analyses come back). for-deal always CREATES a
+      // new thread, so we RESUME the most-recent existing one instead.
+      bindDeal: (dealId: number) => {
+        const forDeal = (chat.conversations ?? [])
+          .filter((c) => c.deal_id === dealId)
+          .sort((a, b) => (b.updated_at || "").localeCompare(a.updated_at || ""));
+        const convId = forDeal[0]?.id;
+        if (convId == null) return; // no saved thread yet — it's created on first send
+        if (convId !== chat.activeConversationId) chat.selectConversation(convId);
+        void rehydrateCanvasTabs(convId, dealId);
+      },
     }),
     [
       thread,
@@ -229,6 +242,22 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
   // Latest view for the canvas_action listener (subscribes once).
   const viewRef = useRef(view);
   viewRef.current = view;
+
+  // When the user lands on a deal surface (cockpit/canvas), resume that deal's
+  // saved Yulia conversation + rehydrate its persisted canvas tabs — so Yulia
+  // doesn't appear to "forget" and her analyses come back. Guarded so it fires
+  // once per deal change (not on every chat update). chatRef avoids re-binding
+  // when the bridge identity changes mid-stream.
+  const chatRef = useRef(chat);
+  chatRef.current = chat;
+  const lastBoundDealRef = useRef<number | null>(null);
+  useEffect(() => {
+    const d = view.dealId;
+    if (d != null && (view.screen === "cockpit" || view.screen === "canvas") && lastBoundDealRef.current !== d) {
+      lastBoundDealRef.current = d;
+      chatRef.current.bindDeal?.(d);
+    }
+  }, [view.dealId, view.screen]);
 
   const nav = useMemo<AtlasNav>(
     () => ({

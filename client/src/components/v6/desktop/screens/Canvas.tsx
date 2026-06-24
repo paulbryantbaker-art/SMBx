@@ -41,6 +41,10 @@ const ARTIFACTS = new Map<string, CanvasArtifact>();
 
 export function registerCanvasArtifact(artifact: CanvasArtifact): void {
   ARTIFACTS.set(artifact.id, artifact);
+  // Notify surfaces that read this non-reactive registry (e.g. the cockpit's
+  // "On the canvas" section) so they recompute. Event name mirrors
+  // CANVAS_CHANGED_EVENT in lib/canvasRehydrate (kept inline to avoid a cycle).
+  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("atlas:canvas-changed"));
 }
 
 export function getCanvasArtifact(id: string | undefined): CanvasArtifact | null {
