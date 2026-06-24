@@ -22,7 +22,7 @@ import { useAtlasNav } from "../../desktop/atlasNav";
 import { authHeaders } from "../../../../hooks/useAuth";
 import { T } from "../../desktop/atlasTokens";
 import { RT } from "../redesign/rt";
-import { Hero, SectionHeader, DetailSection, Divider, ActionRow } from "../redesign/kit";
+import { Hero, SectionHeader, DetailSection, Divider, ActionRow, ButtonRow } from "../redesign/kit";
 import { ChevronRightIcon } from "../../desktop/icons";
 import {
   Sparkle,
@@ -477,6 +477,14 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
         sub={heroSub}
       />
 
+      {/* ── A2. Primary deal actions (Money-page pattern: grouped pill buttons) ── */}
+      <ButtonRow
+        buttons={[
+          { label: "Data room", onClick: () => nav.go("files", { dealId, dealName }) },
+          { label: "Studio", onClick: () => nav.go("studio", { dealId, dealName }) },
+        ]}
+      />
+
       {/* ── B. Journey gate pills (edge-bleed horizontal scroll) ── */}
       <div className="scr" style={edgeBleed}>
         <StepperPills steps={gateSteps} />
@@ -633,16 +641,6 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
           }
           action={<ChevronRightIcon size={18} c={RT.faint} />}
           onClick={() => nav.openSettings("members")}
-        />
-        <ActionRow
-          title="Data room"
-          action={<ChevronRightIcon size={18} c={RT.faint} />}
-          onClick={() => nav.go("files", { dealId, dealName })}
-        />
-        <ActionRow
-          title="Studio"
-          action={<ChevronRightIcon size={18} c={RT.faint} />}
-          onClick={() => nav.go("studio", { dealId, dealName })}
         />
         <ActionRow
           title="Integration"

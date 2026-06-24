@@ -37,9 +37,7 @@ import {
 } from "../../../../lib/pipelineStages";
 import type { Verdict } from "../../mobile/types";
 import {
-  MarkBadge,
   Pill,
-  KpiCard,
   Segmented,
   EmptyState,
   LoadingState,
@@ -102,18 +100,6 @@ function fitMeta(fit: number): { bg: string; fg: string } {
   if (fit >= 80) return { bg: T.greenBg, fg: T.green };
   if (fit >= 65) return { bg: T.blueBg, fg: T.blue };
   return { bg: T.track, fg: T.muted2 };
-}
-
-/** Mark-tile palette — stable per row so the list reads as a set, not noise. */
-const MARK_TINTS: { bg: string; fg: string }[] = [
-  { bg: T.blueBg, fg: T.blue },
-  { bg: T.greenBg, fg: T.green },
-  { bg: T.violetBg, fg: T.violet },
-  { bg: T.amberBg, fg: T.amber },
-  { bg: T.terraBg, fg: T.terra },
-];
-function markTint(rawId: number) {
-  return MARK_TINTS[Math.abs(rawId) % MARK_TINTS.length];
 }
 
 /** Buy/sell side from the gate letter prefix (B → buy, S → sell, R → raise). */
@@ -447,21 +433,13 @@ function BoardView({
           gap: 10,
         }}
       >
-        <StatChip>
-          <KpiCard label="IN FLOW" value={inFlow} delta="active deals" deltaColor={T.muted} />
-        </StatChip>
-        <StatChip>
-          <KpiCard label="FLOW VALUE" value={flowValue} delta="weighted EV" deltaColor={T.muted} />
-        </StatChip>
+        <StatTile value={inFlow} caption="active deals" />
+        <StatTile value={flowValue} caption="weighted EV" />
         {/* Honest "—": LOI-out and stalled counts are not derivable from the
             available deal fields, so we show the gap rather than fabricate —
             the exact gap the desktop Board declares. */}
-        <StatChip>
-          <KpiCard label="IOI / LOI" value="—" delta="not yet tracked" deltaColor={T.muted} />
-        </StatChip>
-        <StatChip>
-          <KpiCard label="STALLED" value="—" delta="not yet tracked" deltaColor={T.muted} />
-        </StatChip>
+        <StatTile value="—" caption="IOI / LOI" />
+        <StatTile value="—" caption="stalled" />
       </div>
 
       {/* ── Stage filter tabs (edge-bleed horizontal scroll) ── */}
@@ -535,12 +513,18 @@ function BoardView({
   );
 }
 
-/* ─── stat chip wrapper — fixes the KpiCard width for horizontal scroll ── */
+/* ─── flat stat tile (board) ───────────────────────────────── */
 
-function StatChip({ children }: { children: React.ReactNode }) {
-  // KpiCard is flex:1 by design; in a horizontal scroller we give it a fixed
-  // min width so the chips don't collapse.
-  return <div style={{ flex: "none", width: 138, display: "flex" }}>{children}</div>;
+/** Flat stat tile (white-on-warm, no border/shadow) for the Board stat row. */
+function StatTile({ value, caption }: { value: string; caption: string }) {
+  return (
+    <div style={{ flex: "none", minWidth: 132, background: RT.card, borderRadius: 14, padding: "13px 15px" }}>
+      <div style={{ fontSize: 19, fontWeight: 600, color: RT.ink, letterSpacing: "-0.01em", lineHeight: 1.1 }}>
+        {value}
+      </div>
+      <div style={{ fontSize: 12.5, color: RT.muted, marginTop: 4 }}>{caption}</div>
+    </div>
+  );
 }
 
 /* ─── stage filter tab (board) ─────────────────────────────── */
@@ -626,7 +610,6 @@ function DealRow({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) {
 /* ─── deal card (board · single column, ported from Pipeline) ── */
 
 function DealCard({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) {
-  const tint = markTint(row.rawId);
   const vp = verdictPill(row.verdict);
   const money = fmtCents(moneyFor(row));
   const label = moneyLabel(row);
@@ -638,6 +621,7 @@ function DealCard({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) 
   if (sector !== "—") metaParts.push(sector);
   const metaLeft = metaParts.length ? metaParts.join(" · ") : row.sub || "—";
 
+  // Flat white card — separation by TONE on the warm page (NO border, NO shadow).
   return (
     <div
       role="button"
@@ -650,26 +634,24 @@ function DealCard({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) 
         }
       }}
       style={{
-        background: T.white,
-        border: `1px solid ${T.border}`,
-        borderRadius: 15,
-        padding: 15,
+        background: RT.card,
+        borderRadius: RT.rCard,
+        padding: 16,
         cursor: "pointer",
-        boxShadow: T.shSoft,
         outline: "none",
-        transition: "box-shadow .15s ease",
+        WebkitTapHighlightColor: "transparent",
       }}
     >
       {/* header row: monogram + name + verdict pill */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 11 }}>
-        <MarkBadge letter={row.name} bg={tint.bg} fg={tint.fg} size={30} radius={8} />
+      <div style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: 11 }}>
+        <RMarkBadge label={row.name} seed={row.rawId} size={32} />
         <div
           style={{
             flex: 1,
             minWidth: 0,
-            fontSize: 15.5,
-            fontWeight: 700,
-            color: T.ink,
+            fontSize: 16,
+            fontWeight: 600,
+            color: RT.ink,
             display: "-webkit-box",
             WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
@@ -680,7 +662,7 @@ function DealCard({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) 
         >
           {row.name}
         </div>
-        <Pill bg={vp.bg} fg={vp.fg} style={{ fontSize: 11, padding: "3px 9px", flex: "none" }}>
+        <Pill bg={vp.bg} fg={vp.fg} style={{ fontSize: 11.5, padding: "4px 10px", flex: "none" }}>
           {vp.label}
         </Pill>
       </div>
@@ -692,8 +674,8 @@ function DealCard({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) 
           alignItems: "center",
           justifyContent: "space-between",
           gap: 10,
-          fontSize: 14,
-          color: T.muted,
+          fontSize: 14.5,
+          color: RT.muted,
         }}
       >
         <span
@@ -711,7 +693,7 @@ function DealCard({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) 
         </span>
         {/* Fit numeral renders ONLY when backed by a real composite. */}
         {row.fit != null && (
-          <span style={{ flex: "none", color: T.ink3, fontWeight: 600 }}>
+          <span style={{ flex: "none", color: RT.ink2, fontWeight: 600 }}>
             Fit {row.fit}
           </span>
         )}
