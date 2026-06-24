@@ -64,11 +64,12 @@ export const M = {
    *  sits behind the header/hero on every screen and scrolls away with the page;
    *  the base stays light so cards/text keep strong contrast (white cards pop
    *  harder against the violet than against the old near-white wash). */
-  // Redesign: a flat WARM OFF-WHITE page (RT.page / marketing --bg). Separation
-  // is by TONE — white elements read as raised on the warm off-white, no gradient.
-  frameBg: "#FBFAF6",
+  // Redesign: a flat NEUTRAL LIGHT-GREY page (RT.page). Separation is by TONE —
+  // white elements read as raised on the light grey, no gradient. (Neutral, not
+  // warm/brown — closer to Cash App.)
+  frameBg: "#F4F4F6",
   /** Studio shares the same page (kept as an alias so callers don't break). */
-  frameBgStudio: "#FBFAF6",
+  frameBgStudio: "#F4F4F6",
   /** Ask-Yulia / chat surfaces use a solid field (frame 02). */
   chatField: "#fff",
   glassNav,

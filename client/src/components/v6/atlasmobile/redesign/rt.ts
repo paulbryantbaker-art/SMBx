@@ -16,14 +16,14 @@ import { T } from "../../desktop/atlasTokens";
 
 export const RT = {
   // surfaces (warm — matches marketing --bg / --surface)
-  page: "#FBFAF6", // warm off-white — the page
+  page: "#F4F4F6", // neutral light grey — the page (less brown; closer to Cash App)
   card: "#ffffff", // white — every raised element (no border, no shadow)
-  // ink scale (warm — marketing --ink / --ink-2 / --ink-3; muted kept AA-dark)
-  ink: "#191813",
-  ink2: "#57534A",
-  muted: "#605B4F",
-  faint: "#8B867A",
-  line: "#E6E2D8", // warm pill fill / hairline when one is truly needed
+  // ink scale (NEUTRAL greys — the warm/brown tint removed; muted kept AA-dark)
+  ink: "#1A1A1E",
+  ink2: "#44454B",
+  muted: "#6A6B73",
+  faint: "#9A9AA2",
+  line: "#E7E7EA", // neutral pill fill / hairline when one is truly needed
   // the one accent — BRAND GREEN
   accent: "#2BFF77", // bright brand green — FILLS only (pair with onAccent text)
   accentStrong: "#10E060", // deeper green — solid buttons / hover

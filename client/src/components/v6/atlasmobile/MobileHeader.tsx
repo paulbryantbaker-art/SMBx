@@ -1,69 +1,51 @@
 /**
  * MobileHeader — the two Atlas-mobile header variants (m4 §1b).
  *
- *   Variant A ("home"): ✦ Atlas wordmark + avatar. Used on Today. It sits at the
- *     top of the page; in this shell the Today screen renders inside the scroll
- *     area, but the brand row is a flex:none band so it stays put while the rest
- *     scrolls. Top-padded with the safe-area inset.
+ *   Variant A ("top bar"): page title + search + avatar — NO app wordmark. The
+ *     Cash App pattern: the bar names the PAGE you're on (Today / Deals), not the
+ *     app. Used on the bottom-nav destinations. flex:none band so it stays put
+ *     while the rest scrolls; safe-area top-padded.
  *   Variant B ("detail/section" back bar): BackIcon + optional MarkBadge + title
- *     + optional right slot. flex:none, border-bottom T.railDiv. Used on every
- *     detail/section screen (Ask Yulia, Cockpit, Files, Sourcing, Studio,
- *     Integration, Agent, Settings).
+ *     + optional right slot. Pure detail screens (no badge/right) CENTER the title
+ *     like Cash App; deal screens (badge + right action) stay left-aligned.
  *
- * Reuses the desktop Atlas foundation: T tokens, BackIcon, Sparkle, Avatar,
- * MarkBadge. No new design language.
+ * Reuses the desktop Atlas foundation (BackIcon, SearchIcon, Avatar, MarkBadge);
+ * text colors come from the redesign RT scale so the bar matches the neutral page.
  */
 import type { CSSProperties, ReactNode } from "react";
 import { T } from "../desktop/atlasTokens";
-import { BackIcon } from "../desktop/icons";
+import { RT } from "./redesign/rt";
+import { BackIcon, SearchIcon } from "../desktop/icons";
 import { Sparkle, Avatar, MarkBadge } from "../desktop/primitives";
 
-/* ─── Variant A — home header ──────────────────────────────── */
+/* ─── Variant A — top bar: page title + search + avatar ─────── */
 
-export function MobileHomeHeader({
-  initials,
-  onAvatar,
-}: {
-  initials: string;
-  onAvatar?: () => void;
-}) {
-  return (
-    <div style={S.homeRow}>
-      <div style={S.brandLeft}>
-        <Sparkle size={21} />
-        <span style={S.brandWord}>Atlas</span>
-      </div>
-      <button
-        type="button"
-        aria-label="Account"
-        onClick={onAvatar}
-        style={S.avatarBtn}
-      >
-        <Avatar initials={initials} size={34} gradient />
-      </button>
-    </div>
-  );
-}
-
-/* ─── Variant A2 — content-tab header (title + avatar, NO back) ─ */
-
-/** A bottom-nav tab (Deals) is a top-level destination, so it gets a titled
- *  header with the avatar — NOT a back bar (a tab has nothing to go back to). */
+/** A bottom-nav destination (Today, Deals) gets a titled top bar — the title
+ *  names the PAGE, not the app (no "Atlas" wordmark). Search + avatar sit right. */
 export function MobileTabHeader({
   title,
   initials,
   onAvatar,
+  onSearch,
 }: {
   title: string;
   initials: string;
   onAvatar?: () => void;
+  onSearch?: () => void;
 }) {
   return (
     <div style={S.homeRow}>
       <span style={S.tabTitle}>{title}</span>
-      <button type="button" aria-label="Account" onClick={onAvatar} style={S.avatarBtn}>
-        <Avatar initials={initials} size={34} gradient />
-      </button>
+      <div style={S.topRight}>
+        {onSearch && (
+          <button type="button" aria-label="Search" onClick={onSearch} style={S.iconBtn}>
+            <SearchIcon size={20} c={RT.ink} />
+          </button>
+        )}
+        <button type="button" aria-label="Account" onClick={onAvatar} style={S.avatarBtn}>
+          <Avatar initials={initials} size={34} gradient />
+        </button>
+      </div>
     </div>
   );
 }
@@ -91,24 +73,33 @@ export function MobileBackHeader({
    *  screens leave this false → transparent header over the glow. */
   solid?: boolean;
 }) {
+  // Pure detail screens (no deal badge, no chat sparkle, no right action) center
+  // the title like Cash App; a trailing 40px cell balances the back button.
+  const centered = !badge && !showSparkle && !right;
   return (
     <header style={solid ? { ...S.backBar, ...S.backBarSolid } : S.backBar}>
       <button type="button" aria-label="Back" onClick={onBack} style={S.backBtn}>
-        <BackIcon size={22} c={T.ink} />
+        <BackIcon size={22} c={RT.ink} />
       </button>
       {badge && (
         <MarkBadge letter={badge.letter} bg={badge.bg} fg={badge.fg} size={28} radius={8} />
       )}
       {showSparkle && <Sparkle size={18} />}
-      <span style={S.backTitle}>{title}</span>
-      <span style={{ flex: 1, minWidth: 8 }} />
-      {right}
+      <span style={centered ? S.backTitleCentered : S.backTitle}>{title}</span>
+      {centered ? (
+        <span style={{ width: 40, flex: "none" }} aria-hidden="true" />
+      ) : (
+        <>
+          <span style={{ flex: 1, minWidth: 8 }} />
+          {right}
+        </>
+      )}
     </header>
   );
 }
 
 const S: Record<string, CSSProperties> = {
-  /* Variant A */
+  /* Variant A — top bar */
   homeRow: {
     flex: "none",
     display: "flex",
@@ -117,9 +108,21 @@ const S: Record<string, CSSProperties> = {
     padding: "10px 18px 0",
     paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)",
   },
-  brandLeft: { display: "flex", alignItems: "center", gap: 8 },
-  brandWord: { fontSize: 18, fontWeight: 600, color: T.ink, letterSpacing: "-.01em" },
-  tabTitle: { fontSize: 22, fontWeight: 700, color: T.ink, letterSpacing: "-.02em" },
+  tabTitle: { fontSize: 24, fontWeight: 700, color: RT.ink, letterSpacing: "-.02em" },
+  topRight: { display: "flex", alignItems: "center", gap: 10 },
+  iconBtn: {
+    width: 38,
+    height: 38,
+    flex: "none",
+    border: `1px solid ${RT.line}`,
+    background: "#fff",
+    borderRadius: "50%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    WebkitTapHighlightColor: "transparent",
+  },
   avatarBtn: {
     border: "none",
     background: "transparent",
@@ -169,7 +172,18 @@ const S: Record<string, CSSProperties> = {
   backTitle: {
     fontSize: 17,
     fontWeight: 600,
-    color: T.ink,
+    color: RT.ink,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+  },
+  backTitleCentered: {
+    flex: 1,
+    minWidth: 0,
+    textAlign: "center",
+    fontSize: 17,
+    fontWeight: 600,
+    color: RT.ink,
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",

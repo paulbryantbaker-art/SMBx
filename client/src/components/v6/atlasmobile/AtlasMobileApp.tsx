@@ -53,7 +53,7 @@ import {
   type AtlasView,
   type SettingsPane,
 } from "../desktop/atlasNav";
-import { MobileHomeHeader, MobileTabHeader, MobileBackHeader } from "./MobileHeader";
+import { MobileTabHeader, MobileBackHeader } from "./MobileHeader";
 import { BottomNav, bottomTabForScreen, type BottomTab } from "./BottomNav";
 import { YuliaFab } from "./YuliaFab";
 import { YuliaSheet } from "./YuliaSheet";
@@ -437,13 +437,23 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
   // (including the More overlay, which gets a plain titled bar without a back —
   // tapping a bottom tab leaves it).
   const header: ReactNode = isToday ? (
-    // The avatar opens the account/More menu (modules + settings) — the old More
-    // tab's content now lives here under the user icon.
-    <MobileHomeHeader initials={initials} onAvatar={() => setMoreOpen(true)} />
+    // Top bar names the PAGE (no "Atlas" wordmark). Avatar → account/More menu;
+    // search → the Yulia sheet (ask/find anything — Atlas's search surface).
+    <MobileTabHeader
+      title="Today"
+      initials={initials}
+      onAvatar={() => setMoreOpen(true)}
+      onSearch={() => setSheetOpen(true)}
+    />
   ) : surface === "deals" ? (
-    // Deals is a bottom-nav TAB — a titled header with the avatar, NOT a back bar
-    // (a tab has nothing to go back to).
-    <MobileTabHeader title="Deals" initials={initials} onAvatar={() => setMoreOpen(true)} />
+    // Deals is a bottom-nav TAB — a titled top bar with search + avatar, NOT a
+    // back bar (a tab has nothing to go back to).
+    <MobileTabHeader
+      title="Deals"
+      initials={initials}
+      onAvatar={() => setMoreOpen(true)}
+      onSearch={() => setSheetOpen(true)}
+    />
   ) : surface === "more" ? (
     <MobileBackHeader title="Menu" onBack={() => setMoreOpen(false)} />
   ) : (
