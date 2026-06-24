@@ -391,8 +391,8 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
   const showNav = NAV_SCREENS.has(surface);
   // Yulia lives IN the dock on tabbed screens (Today/Deals), so the FAB only
   // appears where there's no dock (detail/hub) — one Yulia affordance per screen.
-  // (The menu hub has its own row.)
-  const showFab = !showNav && surface !== "more";
+  // The menu hub has its own row; the canvas carries Ask Yulia in its action bar.
+  const showFab = !showNav && surface !== "more" && surface !== "canvas";
   const activeTab: BottomTab = bottomTabForScreen(view.screen) ?? "today";
 
   // Back target: detail/section screens step back to a sensible surface. Deal
