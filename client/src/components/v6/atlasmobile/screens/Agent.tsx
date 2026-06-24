@@ -39,6 +39,7 @@ import { useAtlasNav, useAtlasChat } from "../../desktop/atlasNav";
 import { authHeaders } from "../../../../hooks/useAuth";
 import { useNextActions, type NextAction } from "../../../../hooks/useNextActions";
 import { T } from "../../desktop/atlasTokens";
+import { RT } from "../redesign/rt";
 import { Sparkle, Pill, Card } from "../../desktop/primitives";
 import { CheckIcon, CloseIcon, ChevronRightIcon } from "../../desktop/icons";
 import ChatDock from "../../../shared/ChatDock";
@@ -216,7 +217,7 @@ function Spinner({ c, size = 13 }: { c: string; size?: number }) {
 /* ── section heading (mobile body convention — Today.tsx) ── */
 function SectionHeading({ children, style }: { children: ReactNode; style?: CSSProperties }) {
   return (
-    <div style={{ fontSize: 15.5, fontWeight: 700, color: T.ink, letterSpacing: "-0.01em", marginBottom: 10, ...style }}>
+    <div style={{ fontSize: 19, fontWeight: 600, color: RT.ink, letterSpacing: "-0.01em", marginBottom: 10, ...style }}>
       {children}
     </div>
   );
@@ -227,18 +228,17 @@ function NoteCard({ title, text }: { title?: string; text: string }) {
   return (
     <div
       style={{
-        background: T.white,
-        border: `1px solid ${T.border}`,
+        background: RT.card,
         borderRadius: 14,
         padding: "16px 15px",
       }}
     >
       {title && (
-        <div style={{ fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 5 }}>
+        <div style={{ fontSize: 15.5, fontWeight: 600, color: RT.ink, marginBottom: 5 }}>
           {title}
         </div>
       )}
-      <div style={{ fontSize: 14, color: T.muted, lineHeight: 1.55 }}>{text}</div>
+      <div style={{ fontSize: 14, color: RT.muted, lineHeight: 1.55 }}>{text}</div>
     </div>
   );
 }
@@ -252,8 +252,7 @@ function ListLoading({ rows = 2 }: { rows?: number }) {
           key={i}
           style={{
             height: 92,
-            background: T.white,
-            border: `1px solid ${T.border}`,
+            background: RT.card,
             borderRadius: 14,
             opacity: 0.7,
           }}
@@ -279,7 +278,7 @@ function ApprovalCard({
   const label = action.action_label || titleizeTool(action.tool_name);
   const busy = pending !== null;
   return (
-    <Card pad="14px 15px" style={{ borderColor: T.approvalBd }}>
+    <Card pad="14px 15px" style={{ background: RT.card, border: "none", boxShadow: "none" }}>
       <div style={{ display: "flex", alignItems: "flex-start", gap: 11 }}>
         <div
           style={{
@@ -298,20 +297,19 @@ function ApprovalCard({
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
-              fontSize: 11,
-              fontWeight: 700,
-              color: T.muted2,
-              letterSpacing: ".04em",
+              fontSize: 13,
+              fontWeight: 600,
+              color: RT.muted,
               marginBottom: 4,
             }}
           >
-            NEEDS YOUR APPROVAL
+            Needs your approval
           </div>
           <div
             style={{
               fontSize: 15.5,
               fontWeight: 600,
-              color: T.ink,
+              color: RT.ink,
               lineHeight: 1.4,
               overflowWrap: "anywhere",
             }}
@@ -357,7 +355,7 @@ function ApprovalCard({
             )}
           </div>
           {action.created_at && (
-            <div style={{ fontSize: 14, color: T.muted, marginTop: 8 }}>
+            <div style={{ fontSize: 14, color: RT.muted, marginTop: 8 }}>
               Staged {relTime(action.created_at)}
             </div>
           )}
@@ -376,7 +374,7 @@ function ApprovalCard({
             justifyContent: "center",
             gap: 6,
             border: "none",
-            background: T.blue,
+            background: RT.accent,
             color: T.white,
             borderRadius: T.rPill,
             padding: "9px 16px",
@@ -400,9 +398,9 @@ function ApprovalCard({
             alignItems: "center",
             justifyContent: "center",
             gap: 6,
-            border: `1px solid ${T.border}`,
-            background: T.white,
-            color: T.ink3,
+            border: "none",
+            background: RT.line,
+            color: RT.ink2,
             borderRadius: T.rPill,
             padding: "9px 16px",
             fontFamily: T.font,
@@ -412,7 +410,7 @@ function ApprovalCard({
             opacity: busy ? 0.6 : 1,
           }}
         >
-          {pending === "decline" ? <Spinner c={T.ink3} /> : <CloseIcon size={14} c={T.ink3} />}
+          {pending === "decline" ? <Spinner c={RT.ink2} /> : <CloseIcon size={14} c={RT.ink2} />}
           {pending === "decline" ? "Declining…" : "Decline"}
         </button>
       </div>
@@ -513,21 +511,21 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
   const approvalsEmpty = loaded && !error && actions.length === 0;
 
   return (
-    <div style={{ padding: "0 18px", fontFamily: T.font, color: T.ink }}>
+    <div style={{ padding: "0 18px", fontFamily: T.font, color: RT.ink }}>
       {/* (a) honest explainer — what an "agent" actually is here */}
       <Card
         pad="15px 16px"
-        style={{ background: T.blueBg3, borderColor: T.approvalBd, marginTop: 4, marginBottom: 20 }}
+        style={{ background: RT.accentSoft, border: "none", boxShadow: "none", marginTop: 4, marginBottom: 20 }}
       >
         <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
           <span style={{ paddingTop: 1, flex: "none" }}>
             <Sparkle size={16} />
           </span>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 5 }}>
+            <div style={{ fontSize: 15.5, fontWeight: 600, color: RT.ink, marginBottom: 5 }}>
               Set up agents by describing them to Yulia
             </div>
-            <div style={{ fontSize: 14, color: T.muted, lineHeight: 1.6 }}>
+            <div style={{ fontSize: 14, color: RT.muted, lineHeight: 1.6 }}>
               Tell Yulia what you want watched, scored, or drafted on a recurring basis —
               scanning for new listings against your buy-box, or refreshing a valuation when
               financials change. Yulia does the work and stages anything irreversible here for
@@ -550,7 +548,7 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
         <SectionHeading style={{ marginBottom: 0 }}>Pending approvals</SectionHeading>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           {loaded && actions.length > 0 && (
-            <span style={{ fontSize: 14, color: T.muted, fontWeight: 600 }}>
+            <span style={{ fontSize: 14, color: RT.muted, fontWeight: 600 }}>
               {actions.length} waiting
             </span>
           )}
@@ -571,12 +569,12 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
                 fontFamily: T.font,
                 fontSize: 14,
                 fontWeight: 700,
-                color: T.blue,
+                color: RT.accent,
                 padding: 0,
                 opacity: refreshing ? 0.5 : 1,
               }}
             >
-              {refreshing ? <Spinner c={T.blue} size={13} /> : null}
+              {refreshing ? <Spinner c={RT.accent} size={13} /> : null}
               {refreshing ? "Refreshing…" : "Refresh"}
             </button>
           )}
@@ -588,23 +586,22 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
       ) : error ? (
         <div
           style={{
-            background: T.white,
-            border: `1px solid ${T.border}`,
+            background: RT.card,
             borderRadius: 14,
             padding: "16px 15px",
           }}
         >
-          <div style={{ fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 4 }}>
+          <div style={{ fontSize: 15.5, fontWeight: 600, color: RT.ink, marginBottom: 4 }}>
             Couldn't load approvals
           </div>
-          <div style={{ fontSize: 14, color: T.muted, lineHeight: 1.55, marginBottom: 12 }}>
+          <div style={{ fontSize: 14, color: RT.muted, lineHeight: 1.55, marginBottom: 12 }}>
             {error}
           </div>
           <button
             type="button"
             onClick={() => void refresh()}
             style={{
-              background: T.blue,
+              background: RT.accent,
               color: "#fff",
               border: "none",
               borderRadius: T.rPill,
@@ -643,7 +640,7 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
         <ListLoading rows={1} />
       ) : next.actions.length === 0 ? (
         approvalsEmpty ? (
-          <div style={{ fontSize: 13.5, color: T.muted, lineHeight: 1.55, padding: "2px 2px" }}>
+          <div style={{ fontSize: 13.5, color: RT.muted, lineHeight: 1.55, padding: "2px 2px" }}>
             No open items right now — next moves appear here as your deals progress.
           </div>
         ) : (
@@ -662,8 +659,8 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
                 gap: 11,
                 width: "100%",
                 textAlign: "left",
-                background: T.white,
-                border: `1px solid ${T.border}`,
+                background: RT.card,
+                border: "none",
                 borderRadius: 14,
                 padding: 13,
                 cursor: "pointer",
@@ -675,7 +672,7 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
                   style={{
                     fontSize: 15.5,
                     fontWeight: 600,
-                    color: T.ink,
+                    color: RT.ink,
                     display: "-webkit-box",
                     WebkitLineClamp: 2,
                     WebkitBoxOrient: "vertical",
@@ -688,7 +685,7 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
                 <span
                   style={{
                     fontSize: 14,
-                    color: T.muted,
+                    color: RT.muted,
                     display: "-webkit-box",
                     WebkitLineClamp: 2,
                     WebkitBoxOrient: "vertical",
@@ -707,7 +704,7 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
                   </span>
                 )}
               </span>
-              <ChevronRightIcon size={18} c={T.muted2} />
+              <ChevronRightIcon size={18} c={RT.faint} />
             </button>
           ))}
         </div>
@@ -726,7 +723,7 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
         onSend={submitDraft}
         onFileUpload={chat?.uploadFile}
       />
-      <div style={{ fontSize: 14, color: T.muted, marginTop: 8, lineHeight: 1.5 }}>
+      <div style={{ fontSize: 14, color: RT.muted, marginTop: 8, lineHeight: 1.5 }}>
         {agentSetupReady
           ? "Yulia will help you configure it, then stage anything irreversible here for your approval."
           : "Sign in to set up an agent with Yulia."}

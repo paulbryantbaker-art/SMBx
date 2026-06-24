@@ -26,6 +26,7 @@ import { useNotifications } from "../../../../hooks/useNotifications";
 import { Avatar } from "../../desktop/primitives";
 import { ChevronRightIcon } from "../../desktop/icons";
 import { T } from "../../desktop/atlasTokens";
+import { RT } from "../redesign/rt";
 import { ListSection, ListRow, ActionSheet } from "../iosKit";
 import { useMobileShell } from "../mobileShell";
 
@@ -86,7 +87,7 @@ export default function MoreScreen({ user }: AtlasScreenProps) {
           <div style={S.profileName}>{name}</div>
           {subtitle && <div style={S.profileSub}>{subtitle}</div>}
         </div>
-        <ChevronRightIcon size={18} c={T.muted2} />
+        <ChevronRightIcon size={18} c={RT.muted} />
       </button>
 
       <ListSection header="Modules">
@@ -223,10 +224,8 @@ const S: Record<string, CSSProperties> = {
     alignItems: "center",
     gap: 12,
     width: "100%",
-    background: T.white,
-    border: `1px solid ${T.border}`,
+    background: RT.card,
     borderRadius: T.rCardLg,
-    boxShadow: T.shCard,
     padding: 14,
     marginBottom: 9,
     cursor: "pointer",
@@ -235,7 +234,7 @@ const S: Record<string, CSSProperties> = {
   profileName: {
     fontSize: 15.5,
     fontWeight: 600,
-    color: T.ink,
+    color: RT.ink,
     display: "-webkit-box",
     WebkitLineClamp: 2,
     WebkitBoxOrient: "vertical",
@@ -244,7 +243,7 @@ const S: Record<string, CSSProperties> = {
   },
   profileSub: {
     fontSize: 14,
-    color: T.muted,
+    color: RT.muted,
     marginTop: 2,
     display: "-webkit-box",
     WebkitLineClamp: 2,

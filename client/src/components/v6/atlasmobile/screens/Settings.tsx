@@ -48,6 +48,7 @@ import { T } from "../../desktop/atlasTokens";
 import { Card, Avatar, Pill, ProgressBar, LoadingState } from "../../desktop/primitives";
 import { PlusIcon } from "../../desktop/icons";
 import { ListSection, ListRow, Switch } from "../iosKit";
+import { RT } from "../redesign/rt";
 
 /* ─── locked pricing (SMBX_PRICING_LOCKED.md) ─────────────────────────────── */
 const PLAN_LABEL: Record<string, string> = {
@@ -165,10 +166,10 @@ export default function SettingsMobileScreen({ user, view }: AtlasScreenProps) {
                 fontSize: 14,
                 fontWeight: active ? 700 : 600,
                 padding: "8px 14px",
-                borderRadius: T.rPill,
-                border: `1px solid ${active ? "transparent" : T.border}`,
-                background: active ? T.navActive : T.white,
-                color: active ? T.blue : T.label,
+                borderRadius: RT.rPill,
+                border: "none",
+                background: active ? RT.accentSoft : RT.card,
+                color: active ? RT.accent : RT.ink2,
                 cursor: "pointer",
               }}
             >
@@ -196,7 +197,7 @@ export default function SettingsMobileScreen({ user, view }: AtlasScreenProps) {
 
 function Eyebrow({ children }: { children: ReactNode }) {
   return (
-    <div style={{ fontSize: 11.5, fontWeight: 600, color: T.muted2, letterSpacing: ".03em" }}>
+    <div style={{ fontSize: 19, fontWeight: 600, color: RT.ink, letterSpacing: "-0.01em" }}>
       {children}
     </div>
   );
@@ -204,13 +205,13 @@ function Eyebrow({ children }: { children: ReactNode }) {
 
 function HonestNote({ children, style }: { children: ReactNode; style?: CSSProperties }) {
   return (
-    <div style={{ fontSize: 14, color: T.muted, lineHeight: 1.55, ...style }}>{children}</div>
+    <div style={{ fontSize: 14, color: RT.muted, lineHeight: 1.55, ...style }}>{children}</div>
   );
 }
 
 function ErrorNote({ label }: { label: string }) {
   return (
-    <Card style={{ padding: 18, borderRadius: T.rCardLg }}>
+    <Card style={{ padding: 18, borderRadius: RT.rCard, background: RT.card, border: "none", boxShadow: "none" }}>
       <HonestNote>{label}</HonestNote>
     </Card>
   );
@@ -243,23 +244,23 @@ function ProfilePane({ user }: { user: User | null }) {
   ];
 
   return (
-    <Card pad={20} style={{ borderRadius: T.rCardLg }}>
+    <Card pad={20} style={{ borderRadius: RT.rCard, background: RT.card, border: "none", boxShadow: "none" }}>
       {/* identity row */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           gap: 14,
-          borderBottom: `1px solid ${T.railDiv}`,
+          borderBottom: `1px solid ${RT.line}`,
           paddingBottom: 18,
         }}
       >
         <Avatar initials={userInitials(user)} size={56} gradient />
         <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{ fontSize: 16, fontWeight: 600, color: T.ink, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.3 }}>
+          <div style={{ fontSize: 16, fontWeight: 600, color: RT.ink, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.3 }}>
             {user.display_name || user.email}
           </div>
-          <div style={{ fontSize: 14, color: T.muted, marginTop: 2 }}>
+          <div style={{ fontSize: 14, color: RT.muted, marginTop: 2 }}>
             {titleCase(user.role)}
             {user.league ? ` · ${titleCase(user.league)} league` : ""}
           </div>
@@ -276,13 +277,13 @@ function ProfilePane({ user }: { user: User | null }) {
               alignItems: "baseline",
               gap: 12,
               padding: "11px 0",
-              borderBottom: `1px solid ${T.rowDiv2}`,
+              borderBottom: `1px solid ${RT.line}`,
             }}
           >
-            <div style={{ width: 96, fontSize: 12.5, color: T.muted2, fontWeight: 500, flex: "none" }}>
+            <div style={{ width: 96, fontSize: 12.5, color: RT.muted, fontWeight: 500, flex: "none" }}>
               {f.key}
             </div>
-            <div style={{ fontSize: 14, color: T.ink, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", flex: 1 }}>
+            <div style={{ fontSize: 14, color: RT.ink, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", flex: 1 }}>
               {f.value}
             </div>
           </div>
@@ -350,10 +351,10 @@ function BillingPane() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       {/* plan card */}
-      <Card pad={20} style={{ borderRadius: T.rCardLg, display: "flex", flexDirection: "column" }}>
-        <Eyebrow>PLAN</Eyebrow>
-        <div style={{ fontSize: 24, fontWeight: 600, color: T.ink, marginTop: 4 }}>{planName}</div>
-        <div style={{ fontSize: 14, color: T.muted, marginTop: 4 }}>
+      <Card pad={20} style={{ borderRadius: RT.rCard, background: RT.card, border: "none", boxShadow: "none", display: "flex", flexDirection: "column" }}>
+        <Eyebrow>Plan</Eyebrow>
+        <div style={{ fontSize: 24, fontWeight: 600, color: RT.ink, marginTop: 4 }}>{planName}</div>
+        <div style={{ fontSize: 14, color: RT.muted, marginTop: 4 }}>
           {priceLine}
           {renewLabel ? ` · ${renewLabel}` : ""}
         </div>
@@ -364,10 +365,10 @@ function BillingPane() {
           style={{
             marginTop: 16,
             alignSelf: "flex-start",
-            background: T.blueBg,
-            color: T.blue,
+            background: RT.accentSoft,
+            color: RT.accent,
             border: "none",
-            borderRadius: T.rPill,
+            borderRadius: RT.rPill,
             padding: "10px 18px",
             fontSize: 14,
             fontWeight: 700,
@@ -391,16 +392,16 @@ function BillingPane() {
       </Card>
 
       {/* usage card */}
-      <Card pad={20} style={{ borderRadius: T.rCardLg }}>
-        <Eyebrow>USAGE THIS CYCLE</Eyebrow>
+      <Card pad={20} style={{ borderRadius: RT.rCard, background: RT.card, border: "none", boxShadow: "none" }}>
+        <Eyebrow>Usage this cycle</Eyebrow>
         <div style={{ marginTop: 12 }}>
           <UsageBody ent={ent} />
         </div>
       </Card>
 
       {/* status / receipts card — honest: no invoice ledger is exposed here */}
-      <Card pad={20} style={{ borderRadius: T.rCardLg }}>
-        <Eyebrow>BILLING</Eyebrow>
+      <Card pad={20} style={{ borderRadius: RT.rCard, background: RT.card, border: "none", boxShadow: "none" }}>
+        <Eyebrow>Billing</Eyebrow>
         <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
           <KeyVal k="Status" v={<StatusValue status={row?.status} />} />
           {renewLabel && <KeyVal k={renewRowKey(renewLabel)} v={stripLead(renewLabel)} />}
@@ -452,10 +453,10 @@ function UsageRow({ label, counter }: { label: string; counter: UsageCounter }) 
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
-        <span style={{ fontSize: 14, color: T.ink3 }}>{label}</span>
-        <span style={{ fontSize: 14, fontWeight: 600, color: T.ink }}>{valueText}</span>
+        <span style={{ fontSize: 14, color: RT.ink2 }}>{label}</span>
+        <span style={{ fontSize: 14, fontWeight: 600, color: RT.ink }}>{valueText}</span>
       </div>
-      <ProgressBar pct={pct} />
+      <ProgressBar pct={pct} color={RT.accent} />
     </div>
   );
 }
@@ -468,8 +469,8 @@ function fmtCount(n: number): string {
 function KeyVal({ k, v }: { k: string; v: ReactNode }) {
   return (
     <div style={{ display: "flex", alignItems: "baseline", gap: 12, fontSize: 14 }}>
-      <span style={{ color: T.muted, width: 86, flex: "none", fontSize: 13 }}>{k}</span>
-      <span style={{ color: T.ink, fontWeight: 500 }}>{v}</span>
+      <span style={{ color: RT.muted, width: 86, flex: "none", fontSize: 13 }}>{k}</span>
+      <span style={{ color: RT.ink, fontWeight: 500 }}>{v}</span>
     </div>
   );
 }
@@ -481,7 +482,7 @@ function StatusValue({ status }: { status?: string | null }) {
   const raw = (status || "").trim().toLowerCase();
   const text = status?.trim() ? titleCase(status) : "Active";
   const isActive = raw === "" || raw === "active" || raw === "trialing";
-  const color = isActive ? T.ink : T.terra;
+  const color = isActive ? RT.ink : T.terra;
   return <span style={{ color, fontWeight: isActive ? 500 : 600 }}>{text}</span>;
 }
 
@@ -611,10 +612,10 @@ function InviteMemberButton() {
         alignItems: "center",
         justifyContent: "center",
         gap: 6,
-        background: T.blue,
+        background: RT.accent,
         color: "#fff",
         border: "none",
-        borderRadius: T.rPill,
+        borderRadius: RT.rPill,
         padding: "11px 16px",
         fontSize: 14,
         fontWeight: 700,
@@ -632,22 +633,22 @@ function MembersPane({ user }: { user: User | null }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       {/* the only honest org member is the signed-in user */}
-      <Card style={{ borderRadius: T.rCardLg, padding: 0, overflow: "hidden" }}>
+      <Card style={{ borderRadius: RT.rCard, background: RT.card, border: "none", boxShadow: "none", padding: 0, overflow: "hidden" }}>
         {user ? (
           <div style={{ display: "flex", alignItems: "center", padding: "16px 18px", gap: 12 }}>
             <Avatar initials={userInitials(user)} size={40} gradient />
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: 15.5, fontWeight: 600, color: T.ink, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.3 }}>
+              <div style={{ fontSize: 15.5, fontWeight: 600, color: RT.ink, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.3 }}>
                 {user.display_name || user.email}
               </div>
-              <div style={{ fontSize: 14, color: T.muted, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.45 }}>
+              <div style={{ fontSize: 14, color: RT.muted, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.45 }}>
                 {user.email}
               </div>
             </div>
             <Pill bg={T.violetBg} fg={T.violet}>Owner</Pill>
           </div>
         ) : (
-          <div style={{ padding: 18, fontSize: 14, color: T.muted }}>No signed-in account.</div>
+          <div style={{ padding: 18, fontSize: 14, color: RT.muted }}>No signed-in account.</div>
         )}
       </Card>
 
@@ -666,8 +667,8 @@ function MembersPane({ user }: { user: User | null }) {
 
 function StubPane({ text }: { text: string }) {
   return (
-    <Card style={{ borderRadius: T.rCardLg, padding: 26, textAlign: "center" }}>
-      <div style={{ fontSize: 14, color: T.muted, lineHeight: 1.6 }}>{text}</div>
+    <Card style={{ borderRadius: RT.rCard, background: RT.card, border: "none", boxShadow: "none", padding: 26, textAlign: "center" }}>
+      <div style={{ fontSize: 14, color: RT.muted, lineHeight: 1.6 }}>{text}</div>
     </Card>
   );
 }

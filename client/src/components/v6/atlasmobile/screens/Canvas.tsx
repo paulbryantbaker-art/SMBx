@@ -24,6 +24,7 @@ import { useAtlasChat, useAtlasNav, type AtlasScreenProps } from "../../desktop/
 import { useMobileShell } from "../mobileShell";
 import { Toolbar } from "../iosKit";
 import { T } from "../../desktop/atlasTokens";
+import { RT } from "../redesign/rt";
 import type { CSSProperties } from "react";
 
 export default function CanvasMobileScreen({ user, view }: AtlasScreenProps) {
@@ -113,25 +114,23 @@ const S: Record<string, CSSProperties> = {
     margin: "0 0 12px",
     fontSize: 21,
     fontWeight: 800,
-    color: T.ink,
+    color: RT.ink,
     letterSpacing: "-0.02em",
     lineHeight: 1.2,
   },
-  body: { color: T.ink },
+  body: { color: RT.ink },
   emptyCard: {
-    background: T.white,
-    border: `1px solid ${T.border}`,
+    background: RT.card,
     borderRadius: 16,
     padding: 18,
-    boxShadow: T.shCard,
   },
-  emptyTitle: { fontSize: 16, fontWeight: 700, color: T.ink },
-  emptyHint: { marginTop: 6, fontSize: 14, lineHeight: 1.5, color: T.muted },
+  emptyTitle: { fontSize: 16, fontWeight: 700, color: RT.ink },
+  emptyHint: { marginTop: 6, fontSize: 14, lineHeight: 1.5, color: RT.muted },
   emptyBtn: {
     marginTop: 14,
     border: "none",
     borderRadius: T.rPill,
-    background: T.blue,
+    background: RT.accent,
     color: "#fff",
     fontSize: 14,
     fontWeight: 700,

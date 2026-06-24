@@ -29,11 +29,10 @@ import type { AtlasScreenProps } from "../../desktop/atlasNav";
 import { useAtlasNav } from "../../desktop/atlasNav";
 import { authHeaders } from "../../../../hooks/useAuth";
 import { T } from "../../desktop/atlasTokens";
+import { RT } from "../redesign/rt";
 import {
-  Card,
   Pill,
   ProgressBar,
-  SectionLabel,
   EmptyState,
   LoadingState,
   fmtCents,
@@ -149,6 +148,24 @@ function fmtDate(iso: string | null | undefined): string {
   const t = new Date(iso).getTime();
   if (!Number.isFinite(t)) return "";
   return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
+/* ─── surface (RT law: white element on the grey page; NO border, NO shadow) ─ */
+
+function Card({
+  children,
+  pad = 16,
+  style,
+}: {
+  children: ReactNode;
+  pad?: number | string;
+  style?: CSSProperties;
+}) {
+  return (
+    <div style={{ background: RT.card, borderRadius: RT.rCard, padding: pad, ...style }}>
+      {children}
+    </div>
+  );
 }
 
 /* ════════════════════════════════════════════════════════════ */
@@ -279,8 +296,8 @@ function Root({ children }: { children: ReactNode }) {
         flexDirection: "column",
         gap: 14,
         padding: "14px 18px 16px",
-        fontFamily: T.font,
-        color: T.ink,
+        fontFamily: RT.font,
+        color: RT.ink,
       }}
     >
       {children}
@@ -316,22 +333,22 @@ function Header({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-      <h1 style={{ fontSize: 19, fontWeight: 600, margin: 0, letterSpacing: "-.01em" }}>
+      <h1 style={{ fontSize: 19, fontWeight: 600, margin: 0, letterSpacing: "-.01em", color: RT.ink }}>
         100-Day Integration Plan
       </h1>
       <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-        <Pill bg={T.track} fg={T.label} style={{ padding: "5px 12px", fontSize: 13.5 }}>
+        <Pill bg={RT.line} fg={RT.ink2} style={{ padding: "5px 12px", fontSize: 13.5 }}>
           {dealName ? `${dealName} · post-close` : "post-close"}
         </Pill>
         {/* Honest: real horizon + created date. NO fabricated "Day n / 100". */}
         {horizon != null && (
-          <span style={{ fontSize: 14, color: T.muted }}>
-            Horizon <b style={{ color: T.ink }}>{horizon}</b> days
+          <span style={{ fontSize: 14, color: RT.muted }}>
+            Horizon <b style={{ color: RT.ink }}>{horizon}</b> days
           </span>
         )}
         {created && (
-          <span style={{ fontSize: 14, color: T.muted }}>
-            <span style={{ color: T.faint }}>·</span> Created {created}
+          <span style={{ fontSize: 14, color: RT.muted }}>
+            <span style={{ color: RT.faint }}>·</span> Created {created}
           </span>
         )}
       </div>
@@ -339,7 +356,7 @@ function Header({
       {onRegenerate &&
         (confirming ? (
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 13.5, color: T.muted }}>Replace plan &amp; reset progress?</span>
+            <span style={{ fontSize: 13.5, color: RT.muted }}>Replace plan &amp; reset progress?</span>
             <button
               type="button"
               disabled={regenerating}
@@ -379,16 +396,16 @@ function Header({
 
 function headerBtnStyle(primary: boolean, busy: boolean): CSSProperties {
   return {
-    border: `1px solid ${primary ? T.blue : T.inputBd}`,
+    border: `1px solid ${primary ? RT.accent : T.inputBd}`,
     borderRadius: T.rPill,
     padding: "8px 15px",
     fontSize: 14,
     fontWeight: 700,
-    color: primary ? "#fff" : T.muted,
-    background: primary ? T.blue : T.white,
+    color: primary ? "#fff" : RT.muted,
+    background: primary ? RT.accent : RT.card,
     cursor: busy ? "default" : "pointer",
     opacity: busy ? 0.7 : 1,
-    fontFamily: T.font,
+    fontFamily: RT.font,
   };
 }
 
@@ -424,24 +441,26 @@ function MilestoneTimeline({
       {/* progress spine */}
       <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
-          <SectionLabel>Execution progress</SectionLabel>
-          <div style={{ fontSize: 14, fontWeight: 600, color: T.muted }}>
+          <div style={{ fontSize: 19, fontWeight: 600, color: RT.ink, letterSpacing: "-0.01em" }}>
+            Execution progress
+          </div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: RT.muted }}>
             {total > 0 ? (
               <>
-                <b style={{ color: T.ink }}>{complete}</b> / {total} complete
+                <b style={{ color: RT.ink }}>{complete}</b> / {total} complete
               </>
             ) : (
               "No workstreams"
             )}
           </div>
         </div>
-        <ProgressBar pct={pct} color={pct >= 100 ? T.green : T.blue} />
+        <ProgressBar pct={pct} color={pct >= 100 ? T.green : RT.accent} />
       </div>
 
       {/* real milestone events (the event trail) */}
       <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
         {ordered.length === 0 ? (
-          <div style={{ fontSize: 14, color: T.muted2, lineHeight: 1.45 }}>
+          <div style={{ fontSize: 14, color: RT.muted, lineHeight: 1.45 }}>
             No milestones logged yet — they appear here as workstreams complete.
           </div>
         ) : (
@@ -462,7 +481,7 @@ function MilestoneTimeline({
                   alignItems: "flex-start",
                   gap: 10,
                   padding: "9px 0",
-                  borderTop: i === 0 ? "none" : `1px solid ${T.rowDiv}`,
+                  borderTop: i === 0 ? "none" : `1px solid ${RT.line}`,
                 }}
               >
                 <span
@@ -484,16 +503,16 @@ function MilestoneTimeline({
                 </span>
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
-                    <span style={{ fontSize: 15.5, fontWeight: 700, color: T.ink }}>
+                    <span style={{ fontSize: 15.5, fontWeight: 700, color: RT.ink }}>
                       {milestoneTitle(m)}
                     </span>
-                    {when && <span style={{ fontSize: 14, color: T.muted }}>{when}</span>}
+                    {when && <span style={{ fontSize: 14, color: RT.muted }}>{when}</span>}
                   </div>
                   {desc && (
                     <div
                       style={{
                         fontSize: 14,
-                        color: T.muted,
+                        color: RT.muted,
                         marginTop: 2,
                         lineHeight: 1.45,
                         overflowWrap: "anywhere",
@@ -503,7 +522,7 @@ function MilestoneTimeline({
                     </div>
                   )}
                   {counts && (
-                    <div style={{ fontSize: 14, fontWeight: 600, color: T.muted, marginTop: 2 }}>{counts}</div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: RT.muted, marginTop: 2 }}>{counts}</div>
                   )}
                 </div>
               </div>
@@ -522,9 +541,9 @@ function MilestoneTimeline({
               padding: 0,
               fontSize: 14,
               fontWeight: 700,
-              color: T.blue,
+              color: RT.accent,
               cursor: "pointer",
-              fontFamily: T.font,
+              fontFamily: RT.font,
             }}
           >
             {expanded ? "Show fewer" : `Show ${overflow} earlier event${overflow === 1 ? "" : "s"}`}
@@ -546,10 +565,12 @@ function WorkstreamsSection({
 }) {
   return (
     <section style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-      <SectionLabel>Workstreams</SectionLabel>
+      <div style={{ fontSize: 19, fontWeight: 600, color: RT.ink, letterSpacing: "-0.01em" }}>
+        Workstreams
+      </div>
       {workstreams.length === 0 ? (
         <Card pad={15}>
-          <div style={{ fontSize: 14, color: T.muted }}>This plan has no workstreams yet.</div>
+          <div style={{ fontSize: 14, color: RT.muted }}>This plan has no workstreams yet.</div>
         </Card>
       ) : (
         workstreams.map((w) => <WorkstreamCard key={w.id} ws={w} onUpdate={onUpdate} />)
@@ -627,7 +648,7 @@ function WorkstreamCard({
             style={{
               fontSize: 15.5,
               fontWeight: 700,
-              color: T.ink,
+              color: RT.ink,
               lineHeight: 1.3,
               overflowWrap: "anywhere",
             }}
@@ -635,7 +656,7 @@ function WorkstreamCard({
             {wsTitle(ws)}
           </div>
           {owner && (
-            <div style={{ fontSize: 14, color: T.muted, marginTop: 2, overflowWrap: "anywhere" }}>
+            <div style={{ fontSize: 14, color: RT.muted, marginTop: 2, overflowWrap: "anywhere" }}>
               {owner}
             </div>
           )}
@@ -646,7 +667,7 @@ function WorkstreamCard({
       </div>
 
       {detail && (
-        <div style={{ fontSize: 14, color: T.muted, lineHeight: 1.45, overflowWrap: "anywhere" }}>
+        <div style={{ fontSize: 14, color: RT.muted, lineHeight: 1.45, overflowWrap: "anywhere" }}>
           {detail}
         </div>
       )}
@@ -654,19 +675,19 @@ function WorkstreamCard({
       {/* lever-style rows: real fields only */}
       {(firstMove || evidence) && (
         <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-          {firstMove && <LeverRow glyph="▷" glyphColor={T.blue} label="Next move" value={firstMove} />}
+          {firstMove && <LeverRow glyph="▷" glyphColor={RT.accent} label="Next move" value={firstMove} />}
           {/* "Reference" — honest prose pointer, NOT framed as a clickable artifact. */}
-          {evidence && <LeverRow glyph="○" glyphColor={T.muted2} label="Reference" value={evidence} />}
+          {evidence && <LeverRow glyph="○" glyphColor={RT.muted} label="Reference" value={evidence} />}
         </div>
       )}
 
       {/* progress — self-reported, editable via the stepper below */}
       <div style={{ display: "flex", flexDirection: "column", gap: 5, marginTop: 1 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: T.muted }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: RT.muted }}>
           <span>Progress</span>
-          <span style={{ color: T.ink, fontWeight: 600 }}>{pct}%</span>
+          <span style={{ color: RT.ink, fontWeight: 600 }}>{pct}%</span>
         </div>
-        <ProgressBar pct={pct} color={isComplete ? T.green : T.blue} />
+        <ProgressBar pct={pct} color={isComplete ? T.green : RT.accent} />
         <div style={{ display: "flex", gap: 5, marginTop: 2 }}>
           {PCT_STEPS.map((step) => {
             const active = pct === step;
@@ -678,15 +699,15 @@ function WorkstreamCard({
                 onClick={() => changePct(step)}
                 style={{
                   flex: 1,
-                  border: `1px solid ${active ? T.blue : T.inputBd}`,
+                  border: `1px solid ${active ? RT.accent : T.inputBd}`,
                   borderRadius: 7,
                   padding: "7px 0",
                   fontSize: 13,
                   fontWeight: 600,
-                  color: active ? T.blue : T.muted,
-                  background: active ? T.blueBg : T.white,
+                  color: active ? RT.accent : RT.muted,
+                  background: active ? RT.accentSoft : RT.card,
                   cursor: busy || active ? "default" : "pointer",
-                  fontFamily: T.font,
+                  fontFamily: RT.font,
                 }}
               >
                 {step}%
@@ -701,10 +722,8 @@ function WorkstreamCard({
         <span
           style={{
             fontSize: 13,
-            color: T.muted,
+            color: RT.muted,
             fontWeight: 600,
-            letterSpacing: ".03em",
-            textTransform: "uppercase",
           }}
         >
           Status
@@ -723,10 +742,10 @@ function WorkstreamCard({
               padding: "10px 32px 10px 11px",
               fontSize: 14,
               fontWeight: 600,
-              color: T.ink,
-              background: busy ? T.hover : T.white,
+              color: RT.ink,
+              background: busy ? T.hover : RT.card,
               cursor: busy ? "default" : "pointer",
-              fontFamily: T.font,
+              fontFamily: RT.font,
             }}
           >
             {STATUS_OPTIONS.map((o) => (
@@ -753,13 +772,13 @@ function WorkstreamCard({
                   height: 12,
                   borderRadius: "50%",
                   border: `2px solid ${T.progTrack}`,
-                  borderTopColor: T.blue,
+                  borderTopColor: RT.accent,
                   display: "inline-block",
                   animation: "atlas-glow 1s linear infinite",
                 }}
               />
             ) : (
-              <ChevronDownIcon size={15} c={T.muted2} />
+              <ChevronDownIcon size={15} c={RT.muted} />
             )}
           </span>
         </div>
@@ -790,7 +809,7 @@ function LeverRow({
         display: "flex",
         alignItems: "flex-start",
         gap: 8,
-        border: `1px solid ${T.hair}`,
+        background: RT.line,
         borderRadius: 9,
         padding: "8px 10px",
         fontSize: 14,
@@ -801,8 +820,8 @@ function LeverRow({
         {glyph}
       </span>
       <div style={{ minWidth: 0, flex: 1, overflowWrap: "anywhere" }}>
-        <span style={{ color: T.muted2, fontWeight: 600 }}>{label}: </span>
-        <span style={{ color: T.ink }}>{value}</span>
+        <span style={{ color: RT.muted, fontWeight: 600 }}>{label}: </span>
+        <span style={{ color: RT.ink }}>{value}</span>
       </div>
     </div>
   );
@@ -821,8 +840,10 @@ function ValueLeversSection({
   return (
     <section style={{ display: "flex", flexDirection: "column", gap: 9 }}>
       <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        <SectionLabel>Value levers</SectionLabel>
-        <div style={{ fontSize: 14, color: T.muted }}>
+        <div style={{ fontSize: 19, fontWeight: 600, color: RT.ink, letterSpacing: "-0.01em" }}>
+          Value levers
+        </div>
+        <div style={{ fontSize: 14, color: RT.muted }}>
           Illustrative targets · captured value not tracked
         </div>
       </div>
@@ -836,16 +857,16 @@ function ValueLeversSection({
             justifyContent: "space-between",
             gap: 12,
             padding: "13px 16px",
-            borderBottom: hasLevers ? `1px solid ${T.rowDiv}` : "none",
-            background: T.surface,
+            borderBottom: hasLevers ? `1px solid ${RT.line}` : "none",
+            background: RT.line,
           }}
         >
-          <span style={{ fontSize: 14, color: T.muted, fontWeight: 600 }}>Total illustrative target</span>
-          <span style={{ fontSize: 15, fontWeight: 600, color: T.ink }}>{fmtCents(targetCents)}</span>
+          <span style={{ fontSize: 14, color: RT.muted, fontWeight: 600 }}>Total illustrative target</span>
+          <span style={{ fontSize: 15, fontWeight: 600, color: RT.ink }}>{fmtCents(targetCents)}</span>
         </div>
 
         {!hasLevers ? (
-          <div style={{ padding: "16px", fontSize: 14, color: T.muted }}>
+          <div style={{ padding: "16px", fontSize: 14, color: RT.muted }}>
             No value levers on this plan.
           </div>
         ) : (
@@ -862,27 +883,27 @@ function ValueLeversSection({
                   justifyContent: "space-between",
                   gap: 12,
                   padding: "12px 16px",
-                  borderTop: i === 0 ? "none" : `1px solid ${T.rowDiv}`,
+                  borderTop: i === 0 ? "none" : `1px solid ${RT.line}`,
                 }}
               >
                 <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: 15.5, fontWeight: 700, color: T.ink, overflowWrap: "anywhere" }}>
+                  <div style={{ fontSize: 15.5, fontWeight: 700, color: RT.ink, overflowWrap: "anywhere" }}>
                     {l.name || "Value lever"}
                   </div>
                   <div style={{ display: "flex", gap: 8, marginTop: 3, flexWrap: "wrap" }}>
                     {cat && (
-                      <Pill bg={T.track} fg={T.muted} style={{ padding: "3px 10px", fontSize: 13.5 }}>
+                      <Pill bg={RT.line} fg={RT.muted} style={{ padding: "3px 10px", fontSize: 13.5 }}>
                         {cat}
                       </Pill>
                     )}
-                    {conf && <span style={{ fontSize: 14, color: T.muted }}>{conf}</span>}
+                    {conf && <span style={{ fontSize: 14, color: RT.muted }}>{conf}</span>}
                   </div>
                 </div>
                 <div style={{ textAlign: "right", flex: "none" }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: target != null ? T.ink : T.muted2 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: target != null ? RT.ink : RT.muted }}>
                     {fmtCents(target)}
                   </div>
-                  <div style={{ fontSize: 13, color: T.muted2 }}>target</div>
+                  <div style={{ fontSize: 13, color: RT.muted }}>target</div>
                 </div>
               </div>
             );

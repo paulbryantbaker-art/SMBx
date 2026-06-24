@@ -28,6 +28,7 @@ import {
 } from "../../../../hooks/useV6WorkspaceData";
 import { authHeaders } from "../../../../hooks/useAuth";
 import { T } from "../../desktop/atlasTokens";
+import { RT } from "../redesign/rt";
 import {
   Pill,
   Sparkle,
@@ -46,7 +47,7 @@ import {
 
 function badgeFor(d: WorkspaceDeliverable): { label: string; bg: string; fg: string } {
   const raw = (d.artifact_kind || d.tier || "").trim();
-  if (!raw) return { label: "Doc", bg: T.track, fg: T.muted2 };
+  if (!raw) return { label: "Doc", bg: RT.line, fg: RT.muted };
   const k = raw.toLowerCase();
   if (/deck|slide|pitch|presentation|pres/.test(k)) {
     return { label: titleCase(raw), bg: T.blueBg, fg: T.blue };
@@ -54,7 +55,7 @@ function badgeFor(d: WorkspaceDeliverable): { label: string; bg: string; fg: str
   if (/pdf/.test(k)) {
     return { label: titleCase(raw), bg: T.violetBg, fg: T.violet };
   }
-  return { label: titleCase(raw), bg: T.track, fg: T.muted2 };
+  return { label: titleCase(raw), bg: RT.line, fg: RT.muted };
 }
 
 function titleCase(s: string): string {
@@ -75,7 +76,7 @@ function statusTone(status: string): { bg: string; fg: string } {
   if (/complete|ready|done|final/.test(s)) return { bg: T.greenBg, fg: T.green };
   if (/review|progress|pending|generating|running|draft/.test(s)) return { bg: T.amberBg, fg: T.amber };
   if (/error|fail/.test(s)) return { bg: T.terraBg, fg: T.terra };
-  return { bg: T.track, fg: T.muted2 };
+  return { bg: RT.line, fg: RT.muted };
 }
 
 /* ─── single-deliverable content fetch (existing endpoint, no hook) ──
@@ -336,7 +337,7 @@ function inline(text: string, keyPrefix: string) {
   return parts.map((p, i) => {
     if (/^\*\*[^*]+\*\*$/.test(p)) {
       return (
-        <strong key={`${keyPrefix}-${i}`} style={{ fontWeight: 600, color: T.ink }}>
+        <strong key={`${keyPrefix}-${i}`} style={{ fontWeight: 600, color: RT.ink }}>
           {p.slice(2, -2)}
         </strong>
       );
@@ -348,7 +349,7 @@ function inline(text: string, keyPrefix: string) {
           style={{
             fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
             fontSize: 12,
-            background: T.track,
+            background: RT.line,
             borderRadius: 5,
             padding: "1px 5px",
           }}
@@ -366,24 +367,24 @@ function renderBlock(b: MdBlock, i: number) {
   switch (b.kind) {
     case "h1":
       return (
-        <div key={key} style={{ fontSize: 19, fontWeight: 600, color: T.ink, letterSpacing: "-.01em", margin: "18px 0 9px" }}>
+        <div key={key} style={{ fontSize: 19, fontWeight: 600, color: RT.ink, letterSpacing: "-.01em", margin: "18px 0 9px" }}>
           {inline(b.text || "", key)}
         </div>
       );
     case "h2":
       return (
-        <div key={key} style={{ fontSize: 15.5, fontWeight: 600, color: T.ink, margin: "16px 0 7px" }}>
+        <div key={key} style={{ fontSize: 15.5, fontWeight: 600, color: RT.ink, margin: "16px 0 7px" }}>
           {inline(b.text || "", key)}
         </div>
       );
     case "h3":
       return (
-        <div key={key} style={{ fontSize: 13.5, fontWeight: 600, color: T.ink3, margin: "13px 0 5px" }}>
+        <div key={key} style={{ fontSize: 13.5, fontWeight: 600, color: RT.ink2, margin: "13px 0 5px" }}>
           {inline(b.text || "", key)}
         </div>
       );
     case "hr":
-      return <div key={key} style={{ height: 1, background: T.hair, margin: "14px 0" }} />;
+      return <div key={key} style={{ height: 1, background: RT.line, margin: "14px 0" }} />;
     case "code":
       return (
         <pre
@@ -391,14 +392,13 @@ function renderBlock(b: MdBlock, i: number) {
           style={{
             margin: "9px 0 13px",
             padding: "11px 13px",
-            background: T.track,
-            border: `1px solid ${T.hair}`,
+            background: RT.line,
             borderRadius: 8,
             overflowX: "auto",
             fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
             fontSize: 11.5,
             lineHeight: 1.55,
-            color: T.ink3,
+            color: RT.ink2,
             whiteSpace: "pre",
           }}
         >
@@ -422,8 +422,8 @@ function renderBlock(b: MdBlock, i: number) {
                       style={{
                         textAlign: "left",
                         padding: "6px 10px",
-                        borderBottom: `2px solid ${T.border}`,
-                        color: T.ink,
+                        borderBottom: `2px solid ${RT.line}`,
+                        color: RT.ink,
                         fontWeight: 600,
                         whiteSpace: "nowrap",
                       }}
@@ -442,8 +442,8 @@ function renderBlock(b: MdBlock, i: number) {
                       key={`${key}-r-${ri}-${c}`}
                       style={{
                         padding: "6px 10px",
-                        borderBottom: `1px solid ${T.hair}`,
-                        color: T.ink3,
+                        borderBottom: `1px solid ${RT.line}`,
+                        color: RT.ink2,
                         verticalAlign: "top",
                       }}
                     >
@@ -489,7 +489,7 @@ function renderBlock(b: MdBlock, i: number) {
 function MarkdownBody({ md }: { md: string }) {
   const blocks = useMemo(() => splitBlocks(md), [md]);
   return (
-    <div style={{ fontSize: 13, lineHeight: 1.7, color: T.ink2 }}>
+    <div style={{ fontSize: 13, lineHeight: 1.7, color: RT.ink2 }}>
       {blocks.map((b, i) => renderBlock(b, i))}
     </div>
   );
@@ -527,9 +527,8 @@ function SlideCanvas({ slide, index }: { slide: Slide; index: number }) {
       style={{
         width: "100%",
         aspectRatio: "16 / 9",
-        background: T.white,
+        background: RT.card,
         borderRadius: 10,
-        boxShadow: "0 4px 16px rgba(60,64,67,.16)",
         padding: "18px 20px",
         display: "flex",
         flexDirection: "column",
@@ -538,7 +537,7 @@ function SlideCanvas({ slide, index }: { slide: Slide; index: number }) {
     >
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
         <Sparkle size={11} />
-        <span style={{ fontSize: 9.5, fontWeight: 600, letterSpacing: ".05em", color: T.muted2 }}>
+        <span style={{ fontSize: 9.5, fontWeight: 600, letterSpacing: ".05em", color: RT.muted }}>
           {String(index + 1).padStart(2, "0")}
         </span>
       </div>
@@ -547,7 +546,7 @@ function SlideCanvas({ slide, index }: { slide: Slide; index: number }) {
           fontSize: 18,
           fontWeight: 600,
           letterSpacing: "-.01em",
-          color: T.ink,
+          color: RT.ink,
           display: "-webkit-box",
           WebkitLineClamp: 2,
           WebkitBoxOrient: "vertical",
@@ -556,12 +555,12 @@ function SlideCanvas({ slide, index }: { slide: Slide; index: number }) {
       >
         {slide.title}
       </div>
-      <div style={{ height: 3, width: 48, background: T.blue, borderRadius: 3, margin: "8px 0 10px" }} />
-      <div className="scr" style={{ flex: 1, minHeight: 0, overflow: "auto", fontSize: 11.5, lineHeight: 1.6, color: T.ink2 }}>
+      <div style={{ height: 3, width: 48, background: RT.accent, borderRadius: 3, margin: "8px 0 10px" }} />
+      <div className="scr" style={{ flex: 1, minHeight: 0, overflow: "auto", fontSize: 11.5, lineHeight: 1.6, color: RT.ink2 }}>
         {slide.blocks.length ? (
           slide.blocks.map((b, i) => renderBlock(b, i))
         ) : (
-          <div style={{ fontSize: 11.5, color: T.faint }}>No content on this slide.</div>
+          <div style={{ fontSize: 11.5, color: RT.faint }}>No content on this slide.</div>
         )}
       </div>
     </div>
@@ -595,9 +594,8 @@ function SlideThumb({
           width: 104,
           aspectRatio: "16 / 9",
           borderRadius: 7,
-          border: `${active ? 2 : 1}px solid ${active ? T.blue : T.border}`,
-          background: T.white,
-          boxShadow: active ? "0 1px 3px rgba(60,64,67,.12)" : undefined,
+          border: `${active ? 2 : 1}px solid ${active ? RT.accent : RT.line}`,
+          background: RT.card,
           padding: "8px 9px",
           boxSizing: "border-box",
           overflow: "hidden",
@@ -613,7 +611,7 @@ function SlideThumb({
             fontSize: 9,
             fontWeight: 600,
             lineHeight: 1.25,
-            color: active ? T.blue : T.ink3,
+            color: active ? RT.accent : RT.ink2,
           }}
         >
           {slide.title}
@@ -626,7 +624,7 @@ function SlideThumb({
           textAlign: "center",
           fontSize: 11,
           fontWeight: active ? 600 : 500,
-          color: active ? T.blue : T.muted,
+          color: active ? RT.accent : RT.muted,
         }}
       >
         {index + 1}
@@ -669,10 +667,9 @@ function CollateralRow({
         display: "block",
         width: "100%",
         textAlign: "left",
-        border: `1px solid ${T.border}`,
-        background: T.white,
+        border: "none",
+        background: RT.card,
         borderRadius: 14,
-        boxShadow: T.shCard,
         padding: 13,
         fontFamily: T.font,
         cursor: "pointer",
@@ -685,7 +682,7 @@ function CollateralRow({
             minWidth: 0,
             fontSize: 15.5,
             fontWeight: 700,
-            color: T.ink,
+            color: RT.ink,
             display: "-webkit-box",
             WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
@@ -708,7 +705,7 @@ function CollateralRow({
         >
           {badge.label}
         </span>
-        <ChevronRightIcon size={18} c={T.muted2} />
+        <ChevronRightIcon size={18} c={RT.muted} />
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
         <span
@@ -727,7 +724,7 @@ function CollateralRow({
           <span
             style={{
               fontSize: 14,
-              color: T.muted,
+              color: RT.muted,
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
@@ -737,7 +734,7 @@ function CollateralRow({
             {d.deal_name}
           </span>
         )}
-        <span style={{ fontSize: 14, color: T.muted }}>{fmtDate(d.created_at)}</span>
+        <span style={{ fontSize: 14, color: RT.muted }}>{fmtDate(d.created_at)}</span>
       </div>
     </button>
   );
@@ -858,7 +855,7 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
             marginBottom: 12,
           }}
         >
-          <div style={{ fontSize: 20, fontWeight: 600, letterSpacing: "-.01em", color: T.ink }}>
+          <div style={{ fontSize: 20, fontWeight: 600, letterSpacing: "-.01em", color: RT.ink }}>
             Studio
           </div>
           <button
@@ -875,12 +872,12 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
               fontFamily: T.font,
               fontSize: 14,
               fontWeight: 700,
-              color: T.blue,
+              color: RT.accent,
               padding: "5px 8px",
               margin: "-5px -8px",
             }}
           >
-            <PlusIcon size={17} c={T.blue} /> New
+            <PlusIcon size={17} c={RT.accent} /> New
           </button>
         </div>
 
@@ -915,29 +912,27 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
           fontFamily: T.font,
           fontSize: 14,
           fontWeight: 700,
-          color: T.muted,
+          color: RT.muted,
           padding: "4px 8px",
           margin: "0 -8px 6px",
         }}
       >
-        <BackIcon size={17} c={T.muted} /> Collateral
+        <BackIcon size={17} c={RT.muted} /> Collateral
       </button>
 
       {/* metadata cover — honest fields only */}
       <div
         style={{
-          background: T.white,
-          border: `1px solid ${T.border}`,
+          background: RT.card,
           borderRadius: T.rCardLg,
-          boxShadow: T.shCard,
           padding: 16,
           marginBottom: 14,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 9 }}>
           <Sparkle size={15} />
-          <span style={{ fontSize: 13.5, fontWeight: 600, letterSpacing: ".04em", color: T.muted }}>
-            {(selected.artifact_kind || selected.tier || "Deliverable").toUpperCase()}
+          <span style={{ fontSize: 19, fontWeight: 600, letterSpacing: "-0.01em", color: RT.ink }}>
+            {titleCase(selected.artifact_kind || selected.tier || "Deliverable")}
           </span>
         </div>
         <div
@@ -945,7 +940,7 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
             fontSize: 21,
             fontWeight: 600,
             letterSpacing: "-.01em",
-            color: T.ink,
+            color: RT.ink,
             marginBottom: 6,
             wordBreak: "break-word",
           }}
@@ -953,20 +948,20 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
           {selected.name || "Untitled"}
         </div>
         {selected.deal_name && (
-          <div style={{ fontSize: 14, color: T.muted, marginBottom: 12 }}>{selected.deal_name}</div>
+          <div style={{ fontSize: 14, color: RT.muted, marginBottom: 12 }}>{selected.deal_name}</div>
         )}
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
           <Pill bg={stTone.bg} fg={stTone.fg}>
             {titleCase(selected.status || "—")}
           </Pill>
           {journeyGate && (
-            <Pill bg={T.track} fg={T.label}>
+            <Pill bg={RT.line} fg={RT.muted}>
               {journeyGate}
             </Pill>
           )}
-          <span style={{ fontSize: 14, color: T.muted }}>Created {fmtDate(selected.created_at)}</span>
+          <span style={{ fontSize: 14, color: RT.muted }}>Created {fmtDate(selected.created_at)}</span>
           {selected.completed_at && (
-            <span style={{ fontSize: 14, color: T.muted }}>
+            <span style={{ fontSize: 14, color: RT.muted }}>
               · Completed {fmtDate(selected.completed_at)}
             </span>
           )}
@@ -1002,18 +997,18 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
             display: "inline-flex",
             alignItems: "center",
             gap: 6,
-            border: `1px solid ${T.border}`,
-            background: T.white,
+            border: `1px solid ${RT.line}`,
+            background: RT.card,
             borderRadius: T.rPill,
             padding: "8px 14px",
             fontSize: 14,
             fontWeight: 700,
             fontFamily: T.font,
-            color: canExport ? T.ink3 : T.faint,
+            color: canExport ? RT.ink2 : RT.faint,
             cursor: canExport ? "pointer" : "default",
           }}
         >
-          <DownloadIcon size={16} c={canExport ? T.muted : T.faint} />
+          <DownloadIcon size={16} c={canExport ? RT.muted : RT.faint} />
           {exporting ? "Exporting…" : EXPORT_LABEL[format]}
         </button>
       </div>
@@ -1041,18 +1036,16 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
       ) : !hasBody ? (
         <div
           style={{
-            background: T.white,
-            border: `1px solid ${T.border}`,
+            background: RT.card,
             borderRadius: T.rCardLg,
-            boxShadow: T.shCard,
             padding: "26px 20px",
             textAlign: "center",
           }}
         >
-          <div style={{ fontSize: 15, fontWeight: 600, color: T.ink, marginBottom: 8 }}>
+          <div style={{ fontSize: 15, fontWeight: 600, color: RT.ink, marginBottom: 8 }}>
             Nothing drafted yet
           </div>
-          <div style={{ fontSize: 14, color: T.muted, lineHeight: 1.6, marginBottom: 14 }}>
+          <div style={{ fontSize: 14, color: RT.muted, lineHeight: 1.6, marginBottom: 14 }}>
             This deliverable doesn't have rendered content yet. Ask Yulia to draft it.
           </div>
           <button
@@ -1071,7 +1064,7 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
               fontSize: 14,
               fontWeight: 700,
               fontFamily: T.font,
-              background: T.blue,
+              background: RT.accent,
               color: "#fff",
               cursor: "pointer",
             }}
@@ -1110,10 +1103,8 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
       ) : (
         <div
           style={{
-            background: T.white,
-            border: `1px solid ${T.border}`,
+            background: RT.card,
             borderRadius: T.rCardLg,
-            boxShadow: T.shCard,
             padding: "18px 18px 22px",
           }}
         >

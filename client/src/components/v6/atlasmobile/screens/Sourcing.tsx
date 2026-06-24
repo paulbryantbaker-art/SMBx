@@ -29,6 +29,7 @@ import { useAtlasChat } from "../../desktop/atlasNav";
 import { authHeaders } from "../../../../hooks/useAuth";
 import { usePipelineProgress } from "../../../../hooks/usePipelineProgress";
 import { T } from "../../desktop/atlasTokens";
+import { RT } from "../redesign/rt";
 import {
   StepperPills,
   Pill,
@@ -138,11 +139,11 @@ function buyBoxParts(t: Thesis): string[] {
 /* ─── FIT chip palette + TIER + ROUTE (per design §FRAME 09) ──────────────── */
 
 function fitChipColors(score: number | null | undefined): { bg: string; fg: string } {
-  if (!Number.isFinite(Number(score))) return { bg: T.track, fg: T.muted };
+  if (!Number.isFinite(Number(score))) return { bg: T.track, fg: RT.muted };
   const n = Number(score);
   if (n >= 80) return { bg: T.greenBg, fg: T.green };
-  if (n >= 65) return { bg: T.blueBg, fg: T.blue };
-  return { bg: T.track, fg: T.muted };
+  if (n >= 65) return { bg: RT.accentSoft, fg: RT.accent };
+  return { bg: T.track, fg: RT.muted };
 }
 
 function tierColor(tier: string | null): string {
@@ -150,9 +151,9 @@ function tierColor(tier: string | null): string {
     case "A":
       return T.green;
     case "B":
-      return T.blue;
+      return RT.accent;
     default:
-      return T.muted2;
+      return RT.muted;
   }
 }
 
@@ -515,9 +516,8 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
                   fontWeight: 600,
                   cursor: "pointer",
                   fontFamily: T.font,
-                  background: active ? T.blueBg : T.white,
-                  color: active ? T.blue : T.muted,
-                  boxShadow: active ? "none" : T.shSoft,
+                  background: active ? RT.accentSoft : RT.card,
+                  color: active ? RT.accent : RT.muted,
                   whiteSpace: "nowrap",
                 }}
               >
@@ -532,11 +532,9 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
       {selectedThesis && (
         <div
           style={{
-            background: T.white,
-            border: `1px solid ${T.border}`,
+            background: RT.card,
             borderRadius: 15,
             padding: 14,
-            boxShadow: T.shSoft,
           }}
         >
           <div
@@ -548,7 +546,7 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
               marginBottom: 6,
             }}
           >
-            <span style={{ fontSize: 15.5, fontWeight: 700, color: T.ink }}>
+            <span style={{ fontSize: 15.5, fontWeight: 700, color: RT.ink }}>
               {selectedThesis.name}
             </span>
             <button
@@ -562,7 +560,7 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
                 flex: "none",
                 border: "none",
                 background: "transparent",
-                color: T.blue,
+                color: RT.accent,
                 fontWeight: 700,
                 fontSize: 14,
                 cursor: "pointer",
@@ -573,7 +571,7 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
               Edit
             </button>
           </div>
-          <div style={{ fontSize: 14, lineHeight: 1.5, color: T.ink3 }}>
+          <div style={{ fontSize: 14, lineHeight: 1.5, color: RT.ink2 }}>
             {buyBoxParts(selectedThesis).join(" · ") || "Buy-box details not set yet."}
           </div>
         </div>
@@ -596,8 +594,7 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
       {livePortfolio && isActive && (
         <div
           style={{
-            background: T.blueBg3,
-            border: `1px solid ${T.approvalBd}`,
+            background: RT.accentSoft,
             borderRadius: 14,
             padding: "12px 14px",
             display: "flex",
@@ -605,7 +602,7 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
             gap: 7,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 14, color: T.ink }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 14, color: RT.ink }}>
             <span
               aria-hidden="true"
               style={{
@@ -613,7 +610,7 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
                 height: 14,
                 borderRadius: "50%",
                 border: `2px solid ${T.progTrack}`,
-                borderTopColor: T.blue,
+                borderTopColor: RT.accent,
                 animation: "atlas-glow 1s linear infinite",
                 flex: "none",
               }}
@@ -621,7 +618,7 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
             {livePortfolio.stage_progress?.message || "Scoring candidates against your buy-box…"}
           </div>
           {livePortfolio.total_candidates > 0 && (
-            <div style={{ fontSize: 14, color: T.muted, fontWeight: 600 }}>
+            <div style={{ fontSize: 14, color: RT.muted, fontWeight: 600 }}>
               {livePortfolio.total_candidates} candidates found
               {livePortfolio.a_tier_count > 0 && ` · ${livePortfolio.a_tier_count} Tier 1`}
               {livePortfolio.b_tier_count > 0 && ` · ${livePortfolio.b_tier_count} Tier 2`}
@@ -737,10 +734,10 @@ function CandidateRegion({
           padding: "40px 18px",
         }}
       >
-        <div style={{ fontSize: 16, fontWeight: 600, color: T.ink }}>
+        <div style={{ fontSize: 16, fontWeight: 600, color: RT.ink }}>
           No candidates sourced yet
         </div>
-        <div style={{ fontSize: 14, color: T.muted, lineHeight: 1.5, maxWidth: 320 }}>
+        <div style={{ fontSize: 14, color: RT.muted, lineHeight: 1.5, maxWidth: 320 }}>
           Run discovery to search Google Places and score off-market targets against
           this buy-box, or ask Yulia to source for you.
         </div>
@@ -750,7 +747,7 @@ function CandidateRegion({
             onClick={onBuild}
             disabled={building}
             style={{
-              background: T.blue,
+              background: RT.accent,
               color: "#fff",
               border: "none",
               borderRadius: T.rPill,
@@ -768,9 +765,9 @@ function CandidateRegion({
             type="button"
             onClick={onAskYulia}
             style={{
-              background: T.white,
-              color: T.ink,
-              border: `1px solid ${T.inputBd}`,
+              background: RT.card,
+              color: RT.ink,
+              border: "none",
               borderRadius: T.rPill,
               padding: "10px 16px",
               fontSize: 14,
@@ -807,10 +804,10 @@ function CandidateRegion({
           padding: "40px 18px",
         }}
       >
-        <div style={{ fontSize: 15, fontWeight: 600, color: T.ink }}>
+        <div style={{ fontSize: 15, fontWeight: 600, color: RT.ink }}>
           {isActive ? "Scoring in progress" : "No candidates yet"}
         </div>
-        <div style={{ fontSize: 14, color: T.muted, lineHeight: 1.5, maxWidth: 320 }}>
+        <div style={{ fontSize: 14, color: RT.muted, lineHeight: 1.5, maxWidth: 320 }}>
           {isActive
             ? "Yulia is searching and scoring targets — they'll appear here as they're found."
             : "Try broadening the buy-box geography or industry, or ask Yulia to widen the search."}
@@ -824,15 +821,15 @@ function CandidateRegion({
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       <div
         style={{
-          fontSize: 15.5,
-          fontWeight: 700,
-          color: T.ink,
+          fontSize: 19,
+          fontWeight: 600,
+          color: RT.ink,
           letterSpacing: "-0.01em",
           padding: "0 2px",
         }}
       >
         {candidates.length} {candidates.length === 1 ? "candidate" : "candidates"}
-        <span style={{ color: T.muted, fontWeight: 600 }}> · Google Places</span>
+        <span style={{ color: RT.muted, fontWeight: 600 }}> · Google Places</span>
       </div>
       {candidates.map((c) => (
         <CandidateCard key={c.id} c={c} onRoute={() => onRoute(c)} />
@@ -852,11 +849,9 @@ function CandidateCard({ c, onRoute }: { c: Candidate; onRoute: () => void }) {
   return (
     <div
       style={{
-        background: T.white,
-        border: `1px solid ${T.border}`,
+        background: RT.card,
         borderRadius: 14,
         padding: 13,
-        boxShadow: T.shSoft,
       }}
     >
       {/* Row 1: name + fit chip */}
@@ -870,7 +865,7 @@ function CandidateCard({ c, onRoute }: { c: Candidate; onRoute: () => void }) {
             WebkitBoxOrient: "vertical",
             fontSize: 15.5,
             fontWeight: 700,
-            color: T.ink,
+            color: RT.ink,
             overflow: "hidden",
             lineHeight: 1.3,
           }}
@@ -888,7 +883,7 @@ function CandidateCard({ c, onRoute }: { c: Candidate; onRoute: () => void }) {
         <div
           style={{
             fontSize: 14,
-            color: T.muted,
+            color: RT.muted,
             marginBottom: 9,
             display: "-webkit-box",
             WebkitLineClamp: 2,
@@ -917,7 +912,7 @@ function CandidateCard({ c, onRoute }: { c: Candidate; onRoute: () => void }) {
               gap: 2,
               border: "none",
               background: "transparent",
-              color: T.blue,
+              color: RT.accent,
               fontWeight: 700,
               fontSize: 14,
               cursor: "pointer",
@@ -926,10 +921,10 @@ function CandidateCard({ c, onRoute }: { c: Candidate; onRoute: () => void }) {
             }}
           >
             {route.label}
-            <ChevronRightIcon size={15} c={T.blue} />
+            <ChevronRightIcon size={15} c={RT.accent} />
           </button>
         ) : (
-          <span style={{ fontSize: 14, fontWeight: 600, color: T.muted }}>{route.label}</span>
+          <span style={{ fontSize: 14, fontWeight: 600, color: RT.muted }}>{route.label}</span>
         )}
       </div>
     </div>
@@ -947,8 +942,8 @@ function Body({ children }: { children: React.ReactNode }) {
         display: "flex",
         flexDirection: "column",
         gap: 14,
-        fontFamily: T.font,
-        color: T.ink,
+        fontFamily: RT.font,
+        color: RT.ink,
       }}
     >
       {children}

@@ -33,6 +33,7 @@ import {
 } from "../../../../hooks/useMobileDataRoom";
 import { authHeaders } from "../../../../hooks/useAuth";
 import { T } from "../../desktop/atlasTokens";
+import { RT } from "../redesign/rt";
 import {
   MarkBadge,
   Pill,
@@ -61,7 +62,7 @@ type FolderKey = "all" | "unfiled" | number;
 function statusTone(status: string | null | undefined): { label: string; bg: string; fg: string } {
   const raw = (status || "").trim();
   const s = raw.toLowerCase();
-  if (!raw) return { label: "—", bg: T.track, fg: T.muted2 };
+  if (!raw) return { label: "—", bg: RT.line, fg: RT.muted };
   if (/approv|final|complete|signed|executed|ready/.test(s)) {
     return { label: titleCase(raw), bg: T.greenBg, fg: T.green };
   }
@@ -71,7 +72,7 @@ function statusTone(status: string | null | undefined): { label: string; bg: str
   if (/reject|fail|error|stale|expired/.test(s)) {
     return { label: titleCase(raw), bg: T.terraBg, fg: T.terra };
   }
-  return { label: titleCase(raw), bg: T.track, fg: T.muted2 };
+  return { label: titleCase(raw), bg: RT.line, fg: RT.muted };
 }
 
 function titleCase(s: string): string {
@@ -137,9 +138,7 @@ function FolderChip({
         fontFamily: T.font,
         textAlign: "left",
         minWidth: 122,
-        background: T.white,
-        border: `1px solid ${active ? T.stageActiveBd : T.border}`,
-        boxShadow: T.shCard,
+        background: RT.card,
       }}
     >
       <span
@@ -151,10 +150,10 @@ function FolderChip({
           display: "inline-flex",
           alignItems: "center",
           justifyContent: "center",
-          background: active ? T.blueBg : T.track,
+          background: active ? RT.accentSoft : RT.line,
         }}
       >
-        <FolderIcon size={19} c={active ? T.blue : T.muted2} />
+        <FolderIcon size={19} c={active ? RT.accent : RT.muted} />
       </span>
       <span style={{ minWidth: 0 }}>
         <span
@@ -162,7 +161,7 @@ function FolderChip({
             display: "block",
             fontSize: 13.5,
             fontWeight: 600,
-            color: active ? T.blue : T.ink,
+            color: active ? RT.accent : RT.ink,
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
@@ -171,7 +170,7 @@ function FolderChip({
         >
           {label}
         </span>
-        <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: active ? T.blue : T.muted, marginTop: 1 }}>
+        <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: active ? RT.accent : RT.muted, marginTop: 1 }}>
           {count == null ? "—" : count === 1 ? "1 file" : `${count} files`}
         </span>
       </span>
@@ -215,14 +214,13 @@ const S: { thumb: React.CSSProperties } = {
     height: 36,
     flex: "none",
     borderRadius: 6,
-    background: T.blueBg3,
-    border: `1px solid ${T.hair}`,
+    background: RT.line,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     fontSize: 8,
     fontWeight: 700,
-    color: T.muted,
+    color: RT.muted,
     letterSpacing: ".02em",
   },
 };
@@ -362,13 +360,13 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
       <div style={{ paddingTop: 6, paddingBottom: 14 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
           <MarkBadge letter={(dealLabel || "?").slice(0, 1)} size={24} radius={7} />
-          <span style={{ fontSize: 18, fontWeight: 600, color: T.ink }}>Files</span>
-          <ChevronRightIcon size={16} c={T.faint} />
+          <span style={{ fontSize: 18, fontWeight: 600, color: RT.ink }}>Files</span>
+          <ChevronRightIcon size={16} c={RT.faint} />
           <span
             style={{
               fontSize: 14,
               fontWeight: 600,
-              color: T.muted,
+              color: RT.muted,
               minWidth: 0,
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -384,12 +382,12 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
             style={{
               display: "inline-flex",
               alignItems: "center",
-              background: T.blueBg,
+              background: RT.accentSoft,
               borderRadius: T.rPill,
               padding: "7px 13px",
               fontSize: 14,
               fontWeight: 600,
-              color: T.blue,
+              color: RT.accent,
             }}
           >
             {ACTIVE_SCOPE_LABEL}
@@ -403,19 +401,18 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
               display: "inline-flex",
               alignItems: "center",
               gap: 5,
-              border: `1px solid ${T.border}`,
               borderRadius: T.rPill,
-              background: T.white,
+              background: RT.card,
               cursor: uploading ? "default" : "pointer",
               fontFamily: T.font,
               fontSize: 14,
               fontWeight: 700,
-              color: T.blue,
+              color: RT.accent,
               padding: "7px 13px",
               opacity: uploading ? 0.6 : 1,
             }}
           >
-            <PlusIcon size={16} c={T.blue} /> {uploading ? "Uploading…" : "Upload"}
+            <PlusIcon size={16} c={RT.accent} /> {uploading ? "Uploading…" : "Upload"}
           </button>
           {/* Hidden picker — drives room.uploadFile into the open folder (or root). */}
           <input
@@ -494,8 +491,8 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
 
           {/* Active-folder title + count */}
           <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 10 }}>
-            <span style={{ fontSize: 15.5, fontWeight: 700, color: T.ink, letterSpacing: "-0.01em" }}>{activeFolderName}</span>
-            <span style={{ fontSize: 14, color: T.muted, fontWeight: 600 }}>
+            <span style={{ fontSize: 19, fontWeight: 600, color: RT.ink, letterSpacing: "-0.01em" }}>{activeFolderName}</span>
+            <span style={{ fontSize: 14, color: RT.muted, fontWeight: 600 }}>
               {visibleDocs.length === 1 ? "1 file" : `${visibleDocs.length} files`}
             </span>
           </div>
