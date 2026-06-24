@@ -407,11 +407,14 @@ export function EmptyState({
   hint,
   cta,
   onCta,
+  accent = T.blue,
 }: {
   title: string;
   hint?: string;
   cta?: string;
   onCta?: () => void;
+  /** CTA fill — desktop keeps slate-blue; mobile passes the violet RT.accent. */
+  accent?: string;
 }) {
   return (
     <div
@@ -435,7 +438,7 @@ export function EmptyState({
           onClick={onCta}
           style={{
             marginTop: 4,
-            background: T.blue,
+            background: accent,
             color: "#fff",
             border: "none",
             borderRadius: T.rPill,

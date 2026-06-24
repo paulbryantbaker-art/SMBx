@@ -45,6 +45,29 @@ export function MobileHomeHeader({
   );
 }
 
+/* ─── Variant A2 — content-tab header (title + avatar, NO back) ─ */
+
+/** A bottom-nav tab (Deals) is a top-level destination, so it gets a titled
+ *  header with the avatar — NOT a back bar (a tab has nothing to go back to). */
+export function MobileTabHeader({
+  title,
+  initials,
+  onAvatar,
+}: {
+  title: string;
+  initials: string;
+  onAvatar?: () => void;
+}) {
+  return (
+    <div style={S.homeRow}>
+      <span style={S.tabTitle}>{title}</span>
+      <button type="button" aria-label="Account" onClick={onAvatar} style={S.avatarBtn}>
+        <Avatar initials={initials} size={34} gradient />
+      </button>
+    </div>
+  );
+}
+
 /* ─── Variant B — detail / section back bar ────────────────── */
 
 export function MobileBackHeader({
@@ -96,6 +119,7 @@ const S: Record<string, CSSProperties> = {
   },
   brandLeft: { display: "flex", alignItems: "center", gap: 8 },
   brandWord: { fontSize: 18, fontWeight: 600, color: T.ink, letterSpacing: "-.01em" },
+  tabTitle: { fontSize: 22, fontWeight: 700, color: T.ink, letterSpacing: "-.02em" },
   avatarBtn: {
     border: "none",
     background: "transparent",

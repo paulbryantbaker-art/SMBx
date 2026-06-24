@@ -1,16 +1,15 @@
 /**
- * BottomNav — the floating liquid-glass tab bar (m4 §1d), the signature
- * Atlas-mobile element. Four tabs: Today / Deals / Yulia / Sourcing. Yulia (the
- * ✦ chat) is the product's core action and lives in the bar; Files moved into
- * each deal's cockpit (per-deal data room) and the old "More" menu now opens
- * from the home user icon.
+ * BottomNav — the floating bottom tab bar, the signature Atlas-mobile element.
+ * Redesign: just TWO content tabs (Today / Deals). Yulia is the universal violet
+ * FAB → slide-up sheet (which also carries jump-to nav); Sourcing/Studio/Agent/
+ * Integration/Settings live in the avatar menu hub; per-deal surfaces live in the
+ * deal.
  *
- * It is a SMALL inset rounded bar (position:fixed bottom, left/right:14) — NOT a
- * full-viewport fixed bg div, so the Safari toolbar rule is satisfied.
+ * It is a SMALL inset rounded white pill (position:fixed bottom, left/right:14) —
+ * NOT a full-viewport fixed bg div, so the Safari toolbar rule is satisfied.
  *
- * Active item = T.blue, inactive = a readable mid-grey; the icons inherit via
- * stroke/fill currentColor (Yulia uses the gradient Sparkle, always lit). Today/
- * Deals/Sourcing drive nav.go(...); Yulia opens the chat (handled by the shell).
+ * Active item = the one violet accent (#5b53d6) with a soft-tinted lozenge,
+ * inactive = a readable mid-grey; icons inherit via stroke/fill currentColor.
  */
 import type { CSSProperties, ReactNode } from "react";
 import { T } from "../desktop/atlasTokens";

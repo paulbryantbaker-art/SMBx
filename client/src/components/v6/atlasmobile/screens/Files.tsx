@@ -318,7 +318,7 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
   if (dealId == null) {
     return (
       <div style={padX}>
-        <EmptyState
+        <EmptyState accent={RT.accent}
           title="Open a deal to see its data room"
           hint="The data room organizes a single deal’s documents into review folders. Open a deal from Deals or Pipeline to file, review, and download its files."
           cta="Go to Deals"
@@ -341,7 +341,7 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
   if (room.error) {
     return (
       <div style={padX}>
-        <EmptyState
+        <EmptyState accent={RT.accent}
           title="Couldn’t load the data room"
           hint={room.error}
           cta="Retry"
@@ -447,7 +447,7 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
 
       {/* Empty data room — no documents at all */}
       {room.documents.length === 0 ? (
-        <EmptyState
+        <EmptyState accent={RT.accent}
           title="No documents in the data room yet"
           hint="Generate a deliverable or upload files and Yulia will file them into review folders. Ask Yulia to draft what you need."
         />
@@ -516,7 +516,7 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
 
           {/* Document list — or an honest per-folder empty */}
           {visibleDocs.length === 0 ? (
-            <EmptyState
+            <EmptyState accent={RT.accent}
               title="This folder is empty"
               hint="No documents are filed here yet. Pick another folder, or ask Yulia to file a deliverable into it."
             />

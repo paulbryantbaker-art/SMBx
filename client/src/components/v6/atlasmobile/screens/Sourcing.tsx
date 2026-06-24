@@ -441,7 +441,7 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
   if (!canFetch) {
     return (
       <Body>
-        <EmptyState
+        <EmptyState accent={RT.accent}
           title="Sign in to use sourcing"
           hint="Buy-boxes and off-market candidates live behind your account."
         />
@@ -460,7 +460,7 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
   if (s.thesesError) {
     return (
       <Body>
-        <EmptyState
+        <EmptyState accent={RT.accent}
           title="Couldn't load sourcing"
           hint="There was a problem reaching the sourcing service. Ask Yulia to help, or try again shortly."
           cta="Ask Yulia"
@@ -473,7 +473,7 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
   if (s.theses.length === 0) {
     return (
       <Body>
-        <EmptyState
+        <EmptyState accent={RT.accent}
           title="No buy-box defined yet"
           hint="Tell Yulia what you're looking for — industry, geography, size — and she'll search Google Places and score off-market targets against it."
           cta="Define a buy-box with Yulia"

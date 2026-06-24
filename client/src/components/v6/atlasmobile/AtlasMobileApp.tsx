@@ -52,14 +52,13 @@ import {
   type AtlasView,
   type SettingsPane,
 } from "../desktop/atlasNav";
-import { MobileHomeHeader, MobileBackHeader } from "./MobileHeader";
+import { MobileHomeHeader, MobileTabHeader, MobileBackHeader } from "./MobileHeader";
 import { BottomNav, bottomTabForScreen, type BottomTab } from "./BottomNav";
 import { YuliaFab } from "./YuliaFab";
 import { YuliaSheet } from "./YuliaSheet";
 import { MobileShellContext } from "./mobileShell";
 
 import TodayMobileScreen from "./screens/Today";
-import AskYuliaScreen from "./screens/AskYulia";
 import DealsMobileScreen from "./screens/Deals";
 import CockpitMobileScreen from "./screens/Cockpit";
 import CanvasMobileScreen from "./screens/Canvas";
@@ -189,7 +188,7 @@ interface ShellProps {
 
 /** The local active-surface union: every desktop AtlasScreen, plus the
  *  mobile-only 'more' overlay screen (which is NOT in the desktop union). */
-type MobileSurface = AtlasScreen | "more" | "askyulia";
+type MobileSurface = AtlasScreen | "more";
 
 /* Redesign: the floating bar shows on the two content tabs only. Everything else
  * is a detail/hub screen (back header, no bar) reached from a deal, the Yulia
@@ -200,7 +199,7 @@ const NAV_SCREENS = new Set<MobileSurface>(["today", "deals"]);
 /* Header title for the variant-B back bar, per screen. The retired 'pipeline'
  * alias renders Deals everywhere, so it carries the Deals title. */
 const SCREEN_TITLE: Record<AtlasScreen, string> = {
-  today: "Atlas",
+  today: "Today",
   pipeline: "Deals",
   sourcing: "Sourcing",
   deals: "Deals",
@@ -358,8 +357,8 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
   // The active surface = the 'more' overlay if open, else the view's screen.
   const surface: MobileSurface = moreOpen ? "more" : view.screen;
   const isToday = surface === "today";
-  // Every screen body-scrolls now (the chat is an overlay sheet, not a surface).
-  const bodyScroll = true;
+  // Every screen body-scrolls now (the chat is an overlay sheet, not a surface),
+  // so iOS Safari keeps collapsing its chrome on scroll.
   const showNav = NAV_SCREENS.has(surface);
   // The Yulia FAB is universal — on every screen except the menu hub (which has
   // its own affordances). The sheet covers it when open, so no extra gating.
@@ -412,6 +411,10 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
     // The avatar opens the account/More menu (modules + settings) — the old More
     // tab's content now lives here under the user icon.
     <MobileHomeHeader initials={initials} onAvatar={() => setMoreOpen(true)} />
+  ) : surface === "deals" ? (
+    // Deals is a bottom-nav TAB — a titled header with the avatar, NOT a back bar
+    // (a tab has nothing to go back to).
+    <MobileTabHeader title="Deals" initials={initials} onAvatar={() => setMoreOpen(true)} />
   ) : surface === "more" ? (
     <MobileBackHeader title="Menu" onBack={() => setMoreOpen(false)} />
   ) : (
@@ -426,9 +429,9 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
     <AtlasNavContext.Provider value={nav}>
       <AtlasChatContext.Provider value={chat}>
         <MobileShellContext.Provider value={mobileShell}>
-        <div className="atlas-mobile" style={bodyScroll ? S.rootScroll : S.rootFixed}>
+        <div className="atlas-mobile" style={S.rootScroll}>
           {header}
-          <div className="scr" style={bodyScroll ? S.scrollFlow : S.scrollFixed}>
+          <div className="scr" style={S.scrollFlow}>
             <ActiveScreen surface={surface} user={user} view={view} />
           </div>
 
@@ -490,8 +493,6 @@ function ActiveScreen({
       return <SettingsMobileScreen user={user} view={view} />;
     case "cockpit":
       return <CockpitMobileScreen user={user} view={view} />;
-    case "askyulia":
-      return <AskYuliaScreen user={user} view={view} />;
     // Real canvas surface: renders Yulia's chat-opened model/analysis artifacts,
     // falling back to the deal cockpit only when nothing is on the canvas.
     case "canvas":
@@ -514,20 +515,6 @@ function computeInitials(user: User | null): string {
 const NAV_CLEARANCE = "calc(62px + env(safe-area-inset-bottom, 0px) + 28px)";
 
 const S: Record<string, CSSProperties> = {
-  // Fixed-height shell — used ONLY for the full-screen chat (askyulia), which
-  // pins its composer and scrolls its message list internally and so needs a
-  // bounded height. NOT a position:fixed full-viewport bg div (Safari toolbar
-  // rule) — position:relative.
-  rootFixed: {
-    position: "relative",
-    height: "100dvh",
-    width: "100%",
-    display: "flex",
-    flexDirection: "column",
-    overflow: "hidden",
-    background: M.frameBg,
-    color: T.ink,
-  },
   // Body-scroll shell — content screens grow the DOCUMENT so iOS Safari
   // collapses its chrome and the page full-bleeds top & bottom (the immersive
   // scroll). This MATCHES V6Mobile's proven-on-device `rootSafari` recipe
@@ -546,17 +533,6 @@ const S: Record<string, CSSProperties> = {
     width: "100%",
     background: M.frameBg,
     color: T.ink,
-    paddingBottom: NAV_CLEARANCE,
-  },
-  // Inner scroll — fixed mode only (the chat fills + scrolls this).
-  scrollFixed: {
-    flex: 1,
-    minHeight: 0,
-    overflowY: "auto",
-    overflowX: "hidden",
-    overscrollBehavior: "contain",
-    display: "flex",
-    flexDirection: "column",
     paddingBottom: NAV_CLEARANCE,
   },
   // Body-scroll mode — a TRANSPARENT block wrapper so the screen flows directly

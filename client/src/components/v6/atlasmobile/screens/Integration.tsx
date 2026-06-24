@@ -210,7 +210,7 @@ export default function IntegrationMobileScreen({ view }: AtlasScreenProps) {
   if (dealId == null) {
     return (
       <Root>
-        <EmptyState
+        <EmptyState accent={RT.accent}
           title="Open a deal to see its integration plan"
           hint="The 100-day post-close plan lives on a deal. Pick one from your deals to track Day-0 controls, workstreams, and synergy levers."
           cta="Go to deals"
@@ -233,7 +233,7 @@ export default function IntegrationMobileScreen({ view }: AtlasScreenProps) {
   if (error) {
     return (
       <Root>
-        <EmptyState
+        <EmptyState accent={RT.accent}
           title="Couldn't load the integration plan"
           hint={error}
           cta="Retry"
@@ -248,7 +248,7 @@ export default function IntegrationMobileScreen({ view }: AtlasScreenProps) {
     return (
       <Root>
         <Header dealName={dealName} plan={null} />
-        <EmptyState
+        <EmptyState accent={RT.accent}
           title="No integration plan yet"
           hint="Generate a 100-day value-capture plan from this deal's diligence — Day-0 controls, workstreams, owners, and illustrative synergy levers. You can edit execution status after."
           cta={generating ? "Generating…" : "Generate plan"}

@@ -826,7 +826,7 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
     }
     if (error) {
       return (
-        <EmptyState
+        <EmptyState accent={RT.accent}
           title="Couldn't load Studio"
           hint={error}
           cta="Try again"
@@ -836,7 +836,7 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
     }
     if (deliverables.length === 0) {
       return (
-        <EmptyState
+        <EmptyState accent={RT.accent}
           title="No collateral yet"
           hint="Decks, memos, teasers, and one-pagers you draft with Yulia show up here. Ask Yulia to draft one for a deal to get started."
           cta="Ask Yulia to draft"
@@ -1032,7 +1032,7 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
       {detailLoading ? (
         <LoadingState label="Loading content…" />
       ) : detailError ? (
-        <EmptyState title="Couldn't load this deliverable" hint={detailError} />
+        <EmptyState accent={RT.accent} title="Couldn't load this deliverable" hint={detailError} />
       ) : !hasBody ? (
         <div
           style={{

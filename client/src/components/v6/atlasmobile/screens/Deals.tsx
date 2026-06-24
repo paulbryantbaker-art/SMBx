@@ -231,7 +231,7 @@ export default function DealsMobileScreen({ user }: AtlasScreenProps) {
       <div style={S.root}>
         {toolbar}
         <div style={{ padding: "24px 18px", display: "flex", minHeight: 260 }}>
-          <EmptyState
+          <EmptyState accent={RT.accent}
             title="No deals yet"
             hint="Talk to Yulia to add a target, evaluate a business, or import a deal. She is the front door to everything in Atlas."
             cta="Add your first deal"
@@ -380,7 +380,7 @@ function ListView({
   if (filtered.length === 0) {
     return (
       <div style={{ padding: "24px 18px" }}>
-        <EmptyState title="No deals match" hint="Try a different search or filter." />
+        <EmptyState accent={RT.accent} title="No deals match" hint="Try a different search or filter." />
       </div>
     );
   }
@@ -496,7 +496,7 @@ function BoardView({
       <div style={{ padding: PAGE_H, display: "flex", flexDirection: "column", gap: 14 }}>
         {visibleCount === 0 ? (
           <div style={{ display: "flex", minHeight: 200 }}>
-            <EmptyState
+            <EmptyState accent={RT.accent}
               title="No deals in this stage"
               hint="Switch stages above or clear the search to see the rest of your pipeline."
             />
