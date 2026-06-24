@@ -375,7 +375,7 @@ function ApprovalCard({
             gap: 6,
             border: "none",
             background: RT.accent,
-            color: T.white,
+            color: RT.onAccent,
             borderRadius: T.rPill,
             padding: "9px 16px",
             fontFamily: T.font,
@@ -569,12 +569,12 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
                 fontFamily: T.font,
                 fontSize: 14,
                 fontWeight: 700,
-                color: RT.accent,
+                color: RT.accentInk,
                 padding: 0,
                 opacity: refreshing ? 0.5 : 1,
               }}
             >
-              {refreshing ? <Spinner c={RT.accent} size={13} /> : null}
+              {refreshing ? <Spinner c={RT.accentInk} size={13} /> : null}
               {refreshing ? "Refreshing…" : "Refresh"}
             </button>
           )}
@@ -602,7 +602,7 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
             onClick={() => void refresh()}
             style={{
               background: RT.accent,
-              color: "#fff",
+              color: RT.onAccent,
               border: "none",
               borderRadius: T.rPill,
               padding: "9px 16px",

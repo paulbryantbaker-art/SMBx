@@ -248,7 +248,7 @@ const S: Record<string, CSSProperties> = {
   card: { background: RT.card, borderRadius: RT.rCard, padding: "16px 16px", marginTop: 4 },
   cta: {
     background: RT.accent,
-    color: "#fff",
+    color: RT.onAccent,
     border: "none",
     borderRadius: RT.rPill,
     padding: "11px 18px",

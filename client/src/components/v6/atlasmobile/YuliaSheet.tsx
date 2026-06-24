@@ -469,7 +469,7 @@ const S: Record<string, CSSProperties> = {
     alignSelf: "flex-end",
     maxWidth: "85%",
     background: RT.accent,
-    color: "#fff",
+    color: RT.onAccent,
     borderRadius: "18px 18px 5px 18px",
     padding: "11px 15px",
     fontSize: 15,

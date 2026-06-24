@@ -131,7 +131,7 @@ const S: Record<string, CSSProperties> = {
     border: "none",
     borderRadius: T.rPill,
     background: RT.accent,
-    color: "#fff",
+    color: RT.onAccent,
     fontSize: 14,
     fontWeight: 700,
     padding: "10px 18px",

@@ -28,9 +28,14 @@ const TABS: { id: BottomTab; label: string; icon: (c: string) => ReactNode }[] =
   { id: "deals", label: "Deals", icon: (c) => <DealsListIcon size={ICON} c={c} /> },
 ];
 
-const ACCENT = "#5b53d6";
-const ACCENT_SOFT = "#ece9fb";
-const INACTIVE = "#6c6b66";
+// Brand-green dock: the active tab gets a pale-green pill with a deep-green icon
+// (green is illegible as a light icon); Yulia is the bright-green fill with a
+// dark on-accent sparkle. Inactive tabs are warm grey.
+const ACCENT_FILL = "#2BFF77"; // Yulia button (bright brand green)
+const ACCENT_SOFT = "#CFFFE1"; // active tab pill (pale green)
+const ACCENT_INK = "#0A5C2E"; // active tab icon (deep green, legible on pale)
+const ON_ACCENT = "#00210F"; // sparkle on the green Yulia button
+const INACTIVE = "#605B4F"; // inactive tab icon (warm grey)
 
 export function BottomNav({
   active,
@@ -55,13 +60,13 @@ export function BottomNav({
             onClick={() => onTab(it.id)}
             style={{ ...S.btn, background: isActive ? ACCENT_SOFT : "transparent" }}
           >
-            {it.icon(isActive ? ACCENT : INACTIVE)}
+            {it.icon(isActive ? ACCENT_INK : INACTIVE)}
           </button>
         );
       })}
-      {/* Yulia — the chat action, integrated into the dock as the violet accent. */}
+      {/* Yulia — the chat action, integrated into the dock as the green accent. */}
       <button type="button" aria-label="Ask Yulia" onClick={onYulia} style={{ ...S.btn, ...S.yulia }}>
-        <svg width={ICON} height={ICON} viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
+        <svg width={ICON} height={ICON} viewBox="0 0 24 24" fill={ON_ACCENT} aria-hidden="true">
           <path d="M12 2c.4 4.6 2.4 6.6 7 7-4.6.4-6.6 2.4-7 7-.4-4.6-2.4-6.6-7-7 4.6-.4 6.6-2.4 7-7z" />
         </svg>
       </button>
@@ -122,7 +127,7 @@ const S: Record<string, CSSProperties> = {
     WebkitTapHighlightColor: "transparent",
   },
   yulia: {
-    background: ACCENT,
-    boxShadow: "0 4px 12px rgba(91,83,214,.35)",
+    background: ACCENT_FILL,
+    boxShadow: "0 4px 12px rgba(16,224,96,.38)",
   },
 };

@@ -826,7 +826,7 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
     }
     if (error) {
       return (
-        <EmptyState accent={RT.accent}
+        <EmptyState accent={RT.accent} onAccent={RT.onAccent}
           title="Couldn't load Studio"
           hint={error}
           cta="Try again"
@@ -836,7 +836,7 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
     }
     if (deliverables.length === 0) {
       return (
-        <EmptyState accent={RT.accent}
+        <EmptyState accent={RT.accent} onAccent={RT.onAccent}
           title="No collateral yet"
           hint="Decks, memos, teasers, and one-pagers you draft with Yulia show up here. Ask Yulia to draft one for a deal to get started."
           cta="Ask Yulia to draft"
@@ -872,12 +872,12 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
               fontFamily: T.font,
               fontSize: 14,
               fontWeight: 700,
-              color: RT.accent,
+              color: RT.accentInk,
               padding: "5px 8px",
               margin: "-5px -8px",
             }}
           >
-            <PlusIcon size={17} c={RT.accent} /> New
+            <PlusIcon size={17} c={RT.accentInk} /> New
           </button>
         </div>
 
@@ -1032,7 +1032,7 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
       {detailLoading ? (
         <LoadingState label="Loading content…" />
       ) : detailError ? (
-        <EmptyState accent={RT.accent} title="Couldn't load this deliverable" hint={detailError} />
+        <EmptyState accent={RT.accent} onAccent={RT.onAccent} title="Couldn't load this deliverable" hint={detailError} />
       ) : !hasBody ? (
         <div
           style={{
@@ -1065,7 +1065,7 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
               fontWeight: 700,
               fontFamily: T.font,
               background: RT.accent,
-              color: "#fff",
+              color: RT.onAccent,
               cursor: "pointer",
             }}
           >

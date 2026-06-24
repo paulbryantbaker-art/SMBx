@@ -293,7 +293,7 @@ function WorkflowCard({
               padding: 0,
               fontSize: 14,
               fontWeight: 600,
-              color: RT.accent,
+              color: RT.accentInk,
               cursor: "pointer",
               fontFamily: RT.font,
               whiteSpace: "nowrap",
@@ -357,7 +357,7 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
   if (dealId == null) {
     return (
       <div style={padBody}>
-        <EmptyState accent={RT.accent}
+        <EmptyState accent={RT.accent} onAccent={RT.onAccent}
           title="No deal open"
           hint="Open a deal from Deals to see its cockpit — verdict, gates, financials, workflows, and the deal team."
           cta="Go to Deals"
@@ -379,7 +379,7 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
   if (detailState === "error" || !detail) {
     return (
       <div style={padBody}>
-        <EmptyState accent={RT.accent}
+        <EmptyState accent={RT.accent} onAccent={RT.onAccent}
           title="Couldn’t load this deal"
           hint="The deal cockpit failed to load. It may not exist or you may not have access."
           cta="Back to Deals"

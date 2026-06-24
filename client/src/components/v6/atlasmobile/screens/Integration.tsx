@@ -210,7 +210,7 @@ export default function IntegrationMobileScreen({ view }: AtlasScreenProps) {
   if (dealId == null) {
     return (
       <Root>
-        <EmptyState accent={RT.accent}
+        <EmptyState accent={RT.accent} onAccent={RT.onAccent}
           title="Open a deal to see its integration plan"
           hint="The 100-day post-close plan lives on a deal. Pick one from your deals to track Day-0 controls, workstreams, and synergy levers."
           cta="Go to deals"
@@ -233,7 +233,7 @@ export default function IntegrationMobileScreen({ view }: AtlasScreenProps) {
   if (error) {
     return (
       <Root>
-        <EmptyState accent={RT.accent}
+        <EmptyState accent={RT.accent} onAccent={RT.onAccent}
           title="Couldn't load the integration plan"
           hint={error}
           cta="Retry"
@@ -248,7 +248,7 @@ export default function IntegrationMobileScreen({ view }: AtlasScreenProps) {
     return (
       <Root>
         <Header dealName={dealName} plan={null} />
-        <EmptyState accent={RT.accent}
+        <EmptyState accent={RT.accent} onAccent={RT.onAccent}
           title="No integration plan yet"
           hint="Generate a 100-day value-capture plan from this deal's diligence — Day-0 controls, workstreams, owners, and illustrative synergy levers. You can edit execution status after."
           cta={generating ? "Generating…" : "Generate plan"}
@@ -401,7 +401,7 @@ function headerBtnStyle(primary: boolean, busy: boolean): CSSProperties {
     padding: "8px 15px",
     fontSize: 14,
     fontWeight: 700,
-    color: primary ? "#fff" : RT.muted,
+    color: primary ? RT.onAccent : RT.muted,
     background: primary ? RT.accent : RT.card,
     cursor: busy ? "default" : "pointer",
     opacity: busy ? 0.7 : 1,
@@ -541,7 +541,7 @@ function MilestoneTimeline({
               padding: 0,
               fontSize: 14,
               fontWeight: 700,
-              color: RT.accent,
+              color: RT.accentInk,
               cursor: "pointer",
               fontFamily: RT.font,
             }}

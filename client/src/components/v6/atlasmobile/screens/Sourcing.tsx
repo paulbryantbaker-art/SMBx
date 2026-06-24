@@ -441,7 +441,7 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
   if (!canFetch) {
     return (
       <Body>
-        <EmptyState accent={RT.accent}
+        <EmptyState accent={RT.accent} onAccent={RT.onAccent}
           title="Sign in to use sourcing"
           hint="Buy-boxes and off-market candidates live behind your account."
         />
@@ -460,7 +460,7 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
   if (s.thesesError) {
     return (
       <Body>
-        <EmptyState accent={RT.accent}
+        <EmptyState accent={RT.accent} onAccent={RT.onAccent}
           title="Couldn't load sourcing"
           hint="There was a problem reaching the sourcing service. Ask Yulia to help, or try again shortly."
           cta="Ask Yulia"
@@ -473,7 +473,7 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
   if (s.theses.length === 0) {
     return (
       <Body>
-        <EmptyState accent={RT.accent}
+        <EmptyState accent={RT.accent} onAccent={RT.onAccent}
           title="No buy-box defined yet"
           hint="Tell Yulia what you're looking for — industry, geography, size — and she'll search Google Places and score off-market targets against it."
           cta="Define a buy-box with Yulia"
@@ -560,7 +560,7 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
                 flex: "none",
                 border: "none",
                 background: "transparent",
-                color: RT.accent,
+                color: RT.accentInk,
                 fontWeight: 700,
                 fontSize: 14,
                 cursor: "pointer",
@@ -748,7 +748,7 @@ function CandidateRegion({
             disabled={building}
             style={{
               background: RT.accent,
-              color: "#fff",
+              color: RT.onAccent,
               border: "none",
               borderRadius: T.rPill,
               padding: "10px 18px",
@@ -912,7 +912,7 @@ function CandidateCard({ c, onRoute }: { c: Candidate; onRoute: () => void }) {
               gap: 2,
               border: "none",
               background: "transparent",
-              color: RT.accent,
+              color: RT.accentInk,
               fontWeight: 700,
               fontSize: 14,
               cursor: "pointer",
@@ -921,7 +921,7 @@ function CandidateCard({ c, onRoute }: { c: Candidate; onRoute: () => void }) {
             }}
           >
             {route.label}
-            <ChevronRightIcon size={15} c={RT.accent} />
+            <ChevronRightIcon size={15} c={RT.accentInk} />
           </button>
         ) : (
           <span style={{ fontSize: 14, fontWeight: 600, color: RT.muted }}>{route.label}</span>
