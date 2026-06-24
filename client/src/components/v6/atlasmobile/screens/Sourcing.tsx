@@ -39,6 +39,7 @@ import {
   type StepState,
 } from "../../desktop/primitives";
 import { ChevronRightIcon } from "../../desktop/icons";
+import { DetailSection, Divider } from "../redesign/kit";
 
 /* ─── Types (mirror the real endpoint rows; see desktop Sourcing) ─────────── */
 
@@ -818,23 +819,18 @@ function CandidateRegion({
 
   // The real candidate card list.
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <div
-        style={{
-          fontSize: 19,
-          fontWeight: 600,
-          color: RT.ink,
-          letterSpacing: "-0.01em",
-          padding: "0 2px",
-        }}
+    <>
+      <Divider />
+      <DetailSection
+        title={`${candidates.length} ${candidates.length === 1 ? "candidate" : "candidates"}`}
+        desc="Off-market targets found on Google Places and scored against your buy-box."
+        style={{ display: "flex", flexDirection: "column", gap: 10 }}
       >
-        {candidates.length} {candidates.length === 1 ? "candidate" : "candidates"}
-        <span style={{ color: RT.muted, fontWeight: 600 }}> · Google Places</span>
-      </div>
-      {candidates.map((c) => (
-        <CandidateCard key={c.id} c={c} onRoute={() => onRoute(c)} />
-      ))}
-    </div>
+        {candidates.map((c) => (
+          <CandidateCard key={c.id} c={c} onRoute={() => onRoute(c)} />
+        ))}
+      </DetailSection>
+    </>
   );
 }
 

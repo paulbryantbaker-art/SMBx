@@ -46,6 +46,7 @@ import {
   PlusIcon,
 } from "../../desktop/icons";
 import { ListSection, ListRow } from "../iosKit";
+import { DetailSection, Divider } from "../redesign/kit";
 
 /* ─── scope ───────────────────────────────────────────────────
  * The design's scope segments (My files / Shared / Data room · DD) select the
@@ -489,49 +490,51 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
             )}
           </div>
 
-          {/* Active-folder title + count */}
-          <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 10 }}>
-            <span style={{ fontSize: 19, fontWeight: 600, color: RT.ink, letterSpacing: "-0.01em" }}>{activeFolderName}</span>
-            <span style={{ fontSize: 14, color: RT.muted, fontWeight: 600 }}>
-              {visibleDocs.length === 1 ? "1 file" : `${visibleDocs.length} files`}
-            </span>
-          </div>
+          <Divider />
 
-          {/* Open error — surfaced above the list so a tap failure is visible. */}
-          {openError && (
-            <div
-              style={{
-                marginBottom: 10,
-                background: T.terraBg,
-                borderRadius: 10,
-                padding: "9px 12px",
-                fontSize: 13.5,
-                color: T.terra,
-                lineHeight: 1.4,
-              }}
-            >
-              {openError}
-            </div>
-          )}
+          {/* Active-folder documents — big bold detail header (Cash App pattern) */}
+          <DetailSection
+            title={activeFolderName}
+            desc="Documents filed in this folder. Tap a row to open one."
+          >
+            {/* Open error — surfaced above the list so a tap failure is visible. */}
+            {openError && (
+              <div
+                style={{
+                  marginTop: 10,
+                  background: T.terraBg,
+                  borderRadius: 10,
+                  padding: "9px 12px",
+                  fontSize: 13.5,
+                  color: T.terra,
+                  lineHeight: 1.4,
+                }}
+              >
+                {openError}
+              </div>
+            )}
 
-          {/* Document list — or an honest per-folder empty */}
-          {visibleDocs.length === 0 ? (
-            <EmptyState accent={RT.accent} onAccent={RT.onAccent}
-              title="This folder is empty"
-              hint="No documents are filed here yet. Pick another folder, or ask Yulia to file a deliverable into it."
-            />
-          ) : (
-            <ListSection style={{ marginBottom: 4 }}>
-              {visibleDocs.map((doc) => (
-                <DocRow
-                  key={doc.id}
-                  doc={doc}
-                  opening={openingId === doc.id}
-                  onOpen={() => void handleOpen(doc)}
+            {/* Document list — or an honest per-folder empty */}
+            {visibleDocs.length === 0 ? (
+              <div style={{ marginTop: 14 }}>
+                <EmptyState accent={RT.accent} onAccent={RT.onAccent}
+                  title="This folder is empty"
+                  hint="No documents are filed here yet. Pick another folder, or ask Yulia to file a deliverable into it."
                 />
-              ))}
-            </ListSection>
-          )}
+              </div>
+            ) : (
+              <ListSection style={{ marginTop: 14, marginBottom: 4 }}>
+                {visibleDocs.map((doc) => (
+                  <DocRow
+                    key={doc.id}
+                    doc={doc}
+                    opening={openingId === doc.id}
+                    onOpen={() => void handleOpen(doc)}
+                  />
+                ))}
+              </ListSection>
+            )}
+          </DetailSection>
         </>
       )}
     </div>

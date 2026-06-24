@@ -33,7 +33,6 @@
  * error state.
  */
 import { useCallback, useEffect, useState } from "react";
-import type { CSSProperties, ReactNode } from "react";
 import type { AtlasScreenProps } from "../../desktop/atlasNav";
 import { useAtlasNav, useAtlasChat } from "../../desktop/atlasNav";
 import { authHeaders } from "../../../../hooks/useAuth";
@@ -42,6 +41,7 @@ import { T } from "../../desktop/atlasTokens";
 import { RT } from "../redesign/rt";
 import { Sparkle, Pill, Card } from "../../desktop/primitives";
 import { CheckIcon, CloseIcon, ChevronRightIcon } from "../../desktop/icons";
+import { DetailSection, Divider } from "../redesign/kit";
 import ChatDock from "../../../shared/ChatDock";
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -211,15 +211,6 @@ function Spinner({ c, size = 13 }: { c: string; size?: number }) {
         animation: "atlas-glow 1s linear infinite",
       }}
     />
-  );
-}
-
-/* ── section heading (mobile body convention — Today.tsx) ── */
-function SectionHeading({ children, style }: { children: ReactNode; style?: CSSProperties }) {
-  return (
-    <div style={{ fontSize: 19, fontWeight: 600, color: RT.ink, letterSpacing: "-0.01em", marginBottom: 10, ...style }}>
-      {children}
-    </div>
   );
 }
 
@@ -537,51 +528,57 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
       </Card>
 
       {/* (b) the REAL pending-approval queue (THE LINE) */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 10,
-        }}
+      <DetailSection
+        title="Pending approvals"
+        desc="Irreversible steps Yulia has staged and is waiting for you to approve or decline."
+        style={{ marginTop: 0 }}
       >
-        <SectionHeading style={{ marginBottom: 0 }}>Pending approvals</SectionHeading>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          {loaded && actions.length > 0 && (
-            <span style={{ fontSize: 14, color: RT.muted, fontWeight: 600 }}>
-              {actions.length} waiting
-            </span>
-          )}
-          {/* Manual reconcile — no polling, but a staged action created while the
-              user sits here can be pulled in on demand. */}
-          {loaded && !error && (
-            <button
-              type="button"
-              disabled={refreshing}
-              onClick={() => void reconcile()}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 5,
-                border: "none",
-                background: "transparent",
-                cursor: refreshing ? "default" : "pointer",
-                fontFamily: T.font,
-                fontSize: 14,
-                fontWeight: 700,
-                color: RT.accentInk,
-                padding: 0,
-                opacity: refreshing ? 0.5 : 1,
-              }}
-            >
-              {refreshing ? <Spinner c={RT.accentInk} size={13} /> : null}
-              {refreshing ? "Refreshing…" : "Refresh"}
-            </button>
-          )}
-        </div>
-      </div>
+        {/* Count + manual reconcile — no polling, but a staged action created while
+            the user sits here can be pulled in on demand. */}
+        {loaded && (actions.length > 0 || !error) && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
+              gap: 12,
+              marginTop: 8,
+              marginBottom: 10,
+            }}
+          >
+            {actions.length > 0 && (
+              <span style={{ fontSize: 14, color: RT.muted, fontWeight: 600 }}>
+                {actions.length} waiting
+              </span>
+            )}
+            {!error && (
+              <button
+                type="button"
+                disabled={refreshing}
+                onClick={() => void reconcile()}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 5,
+                  border: "none",
+                  background: "transparent",
+                  cursor: refreshing ? "default" : "pointer",
+                  fontFamily: T.font,
+                  fontSize: 14,
+                  fontWeight: 700,
+                  color: RT.accentInk,
+                  padding: 0,
+                  opacity: refreshing ? 0.5 : 1,
+                }}
+              >
+                {refreshing ? <Spinner c={RT.accentInk} size={13} /> : null}
+                {refreshing ? "Refreshing…" : "Refresh"}
+              </button>
+            )}
+          </div>
+        )}
 
-      {loading && !loaded ? (
+        {loading && !loaded ? (
         <ListLoading rows={2} />
       ) : error ? (
         <div
@@ -620,22 +617,28 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
           title="Nothing waiting on you"
           text="When Yulia needs your sign-off on an irreversible step, it shows up here. There's nothing awaiting approval right now."
         />
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
-          {actions.map((a) => (
-            <ApprovalCard
-              key={a.id}
-              action={a}
-              pending={busy?.id === a.id ? busy.kind : null}
-              onApprove={() => void approve(a)}
-              onDecline={() => void decline(a)}
-            />
-          ))}
-        </div>
-      )}
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
+            {actions.map((a) => (
+              <ApprovalCard
+                key={a.id}
+                action={a}
+                pending={busy?.id === a.id ? busy.kind : null}
+                onApprove={() => void approve(a)}
+                onDecline={() => void decline(a)}
+              />
+            ))}
+          </div>
+        )}
+      </DetailSection>
+
+      <Divider />
 
       {/* (c) recent agent-ish next-moves (deterministic, real) */}
-      <SectionHeading style={{ margin: "22px 0 10px" }}>What needs your attention</SectionHeading>
+      <DetailSection
+        title="What needs your attention"
+        desc="Next moves Yulia surfaces as your deals progress — tap one to act on it."
+      >
       {next.loading && !next.loaded ? (
         <ListLoading rows={1} />
       ) : next.actions.length === 0 ? (
@@ -709,11 +712,15 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
           ))}
         </div>
       )}
+      </DetailSection>
+
+      <Divider />
 
       {/* (d) "Describe what an agent should do" → chat.send (shared ChatDock) */}
-      <SectionHeading style={{ margin: "22px 0 10px" }}>
-        Describe what an agent should do
-      </SectionHeading>
+      <DetailSection
+        title="Describe what an agent should do"
+        desc="Tell Yulia in plain words what to watch, score, or draft on a recurring basis."
+      >
       <ChatDock
         variant="dock"
         isMobile
@@ -728,6 +735,7 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
           ? "Yulia will help you configure it, then stage anything irreversible here for your approval."
           : "Sign in to set up an agent with Yulia."}
       </div>
+      </DetailSection>
     </div>
   );
 }

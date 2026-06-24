@@ -47,8 +47,9 @@ import { authHeaders } from "../../../../hooks/useAuth";
 import { T } from "../../desktop/atlasTokens";
 import { Card, Avatar, Pill, ProgressBar, LoadingState } from "../../desktop/primitives";
 import { PlusIcon } from "../../desktop/icons";
-import { ListSection, ListRow, Switch } from "../iosKit";
+import { Switch } from "../iosKit";
 import { RT } from "../redesign/rt";
+import { DetailSection, ActionRow, Divider } from "../redesign/kit";
 
 /* ─── locked pricing (SMBX_PRICING_LOCKED.md) ─────────────────────────────── */
 const PLAN_LABEL: Record<string, string> = {
@@ -526,9 +527,10 @@ function normalizePrice(s: string | null | undefined): string | null {
 
 /* ─── NOTIFICATIONS ─────────────────────────────────────────────────────────── */
 
-const NOTIF_GROUPS: { title: string; items: { id: string; label: string; on: boolean }[] }[] = [
+const NOTIF_GROUPS: { title: string; desc: string; items: { id: string; label: string; on: boolean }[] }[] = [
   {
     title: "Deals & pipeline",
+    desc: "Stage moves, IOI / LOI due dates, and deals that have gone quiet.",
     items: [
       { id: "stage", label: "Stage changes", on: true },
       { id: "duedates", label: "IOI / LOI due dates", on: true },
@@ -537,6 +539,7 @@ const NOTIF_GROUPS: { title: string; items: { id: string; label: string; on: boo
   },
   {
     title: "Yulia & agents",
+    desc: "Agent runs, approvals waiting on you, and new buy-box matches.",
     items: [
       { id: "runs", label: "Agent run completed", on: true },
       { id: "approval", label: "Needs your approval", on: true },
@@ -545,6 +548,7 @@ const NOTIF_GROUPS: { title: string; items: { id: string; label: string; on: boo
   },
   {
     title: "Collaboration",
+    desc: "Mentions, comments, and document shares from your team.",
     items: [
       { id: "mentions", label: "Mentions & comments", on: true },
       { id: "shares", label: "Document shares", on: false },
@@ -552,6 +556,7 @@ const NOTIF_GROUPS: { title: string; items: { id: string; label: string; on: boo
   },
   {
     title: "Digests",
+    desc: "Periodic roll-ups of your pipeline.",
     items: [{ id: "digest", label: "Weekly pipeline digest", on: true }],
   },
 ];
@@ -566,29 +571,32 @@ function NotificationsPane() {
   });
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+    <div style={{ display: "flex", flexDirection: "column" }}>
       <HonestNote style={{ fontSize: 14 }}>
         Choose what Atlas and your agents notify you about.
       </HonestNote>
 
-      {NOTIF_GROUPS.map((g) => (
-        <ListSection key={g.title} header={g.title}>
-          {g.items.map((it) => (
-            <ListRow
-              key={it.id}
-              title={it.label}
-              trailing={
-                <Switch
-                  on={!!state[it.id]}
-                  onChange={() => setState((s) => ({ ...s, [it.id]: !s[it.id] }))}
-                />
-              }
-            />
-          ))}
-        </ListSection>
+      {NOTIF_GROUPS.map((g, gi) => (
+        <div key={g.title}>
+          {gi > 0 && <Divider />}
+          <DetailSection title={g.title} desc={g.desc}>
+            {g.items.map((it) => (
+              <ActionRow
+                key={it.id}
+                title={it.label}
+                action={
+                  <Switch
+                    on={!!state[it.id]}
+                    onChange={() => setState((s) => ({ ...s, [it.id]: !s[it.id] }))}
+                  />
+                }
+              />
+            ))}
+          </DetailSection>
+        </div>
       ))}
 
-      <HonestNote>
+      <HonestNote style={{ marginTop: 22 }}>
         Notification preferences aren't saved yet — these toggles control this session only.
         Real delivery (the bell, email, weekly digest) is driven by your deal activity today.
       </HonestNote>

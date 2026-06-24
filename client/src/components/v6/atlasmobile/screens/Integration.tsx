@@ -38,6 +38,7 @@ import {
   fmtCents,
 } from "../../desktop/primitives";
 import { CheckIcon, ChevronDownIcon } from "../../desktop/icons";
+import { DetailSection, Divider } from "../redesign/kit";
 import {
   useIntegrationPlan,
   type IntegrationWorkstream,
@@ -280,7 +281,9 @@ export default function IntegrationMobileScreen({ view }: AtlasScreenProps) {
         regenError={genError}
       />
       <MilestoneTimeline workstreams={workstreams} milestones={milestones} />
+      <Divider />
       <WorkstreamsSection workstreams={workstreams} onUpdate={updateWorkstream} />
+      <Divider />
       <ValueLeversSection levers={levers} targetCents={targetCents} />
     </Root>
   );
@@ -564,18 +567,17 @@ function WorkstreamsSection({
   onUpdate: (wsId: number, patch: { status?: string; pct?: number }) => Promise<IntegrationWorkstream | null>;
 }) {
   return (
-    <section style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-      <div style={{ fontSize: 19, fontWeight: 600, color: RT.ink, letterSpacing: "-0.01em" }}>
-        Workstreams
+    <DetailSection title="Workstreams" desc="Self-reported execution status and progress for each plan workstream.">
+      <div style={{ display: "flex", flexDirection: "column", gap: 9, marginTop: 14 }}>
+        {workstreams.length === 0 ? (
+          <Card pad={15}>
+            <div style={{ fontSize: 14, color: RT.muted }}>This plan has no workstreams yet.</div>
+          </Card>
+        ) : (
+          workstreams.map((w) => <WorkstreamCard key={w.id} ws={w} onUpdate={onUpdate} />)
+        )}
       </div>
-      {workstreams.length === 0 ? (
-        <Card pad={15}>
-          <div style={{ fontSize: 14, color: RT.muted }}>This plan has no workstreams yet.</div>
-        </Card>
-      ) : (
-        workstreams.map((w) => <WorkstreamCard key={w.id} ws={w} onUpdate={onUpdate} />)
-      )}
-    </section>
+    </DetailSection>
   );
 }
 
@@ -838,17 +840,8 @@ function ValueLeversSection({
 }) {
   const hasLevers = levers.length > 0;
   return (
-    <section style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        <div style={{ fontSize: 19, fontWeight: 600, color: RT.ink, letterSpacing: "-0.01em" }}>
-          Value levers
-        </div>
-        <div style={{ fontSize: 14, color: RT.muted }}>
-          Illustrative targets · captured value not tracked
-        </div>
-      </div>
-
-      <Card pad={0} style={{ overflow: "hidden" }}>
+    <DetailSection title="Value levers" desc="Illustrative targets · captured value not tracked.">
+      <Card pad={0} style={{ overflow: "hidden", marginTop: 14 }}>
         {/* total target row */}
         <div
           style={{
@@ -910,6 +903,6 @@ function ValueLeversSection({
           })
         )}
       </Card>
-    </section>
+    </DetailSection>
   );
 }

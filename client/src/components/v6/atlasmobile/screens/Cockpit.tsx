@@ -22,7 +22,8 @@ import { useAtlasNav } from "../../desktop/atlasNav";
 import { authHeaders } from "../../../../hooks/useAuth";
 import { T } from "../../desktop/atlasTokens";
 import { RT } from "../redesign/rt";
-import { Hero, SectionHeader } from "../redesign/kit";
+import { Hero, SectionHeader, DetailSection, Divider, ActionRow } from "../redesign/kit";
+import { ChevronRightIcon } from "../../desktop/icons";
 import {
   Sparkle,
   Pill,
@@ -34,7 +35,6 @@ import {
   fmtCents,
 } from "../../desktop/primitives";
 import type { StepState } from "../../desktop/primitives";
-import { ListSection, ListRow } from "../iosKit";
 
 /* ─── API shapes (honest to the real responses) ─────────────── */
 
@@ -490,8 +490,11 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
       </div>
 
       {/* ── D. Yulia's read (Yulia herself is the FAB — no in-card button) ── */}
-      <SectionHeader style={{ display: "flex", alignItems: "center", gap: 8, margin: "10px 0 0" }}>
-        <Sparkle size={16} />
+      <Divider />
+      <SectionHeader
+        style={{ display: "flex", alignItems: "center", gap: 8, margin: "26px 0 0", fontSize: 24, fontWeight: 700, letterSpacing: "-0.02em" }}
+      >
+        <Sparkle size={18} />
         Yulia&rsquo;s read
         {briefState === "ready" && brief?.stale && (
           <span
@@ -574,7 +577,8 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
       </div>
 
       {/* ── E. Workflows (honest: deliverable + gate progress) ── */}
-      <SectionHeader>Progress</SectionHeader>
+      <Divider />
+      <DetailSection title="Progress" desc="Deliverables drafted and journey stages completed for this deal." />
       <WorkflowCard
         title="Deliverables"
         meta={`${dDone} / ${dTotal} complete`}
@@ -613,11 +617,12 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
         </div>
       )}
 
-      {/* ── F. This deal — team + deal surfaces ── */}
-      <ListSection header="This deal" style={{ marginTop: 8 }}>
-        <ListRow
+      {/* ── F. This deal — team + deal surfaces (flat detail rows) ── */}
+      <Divider />
+      <DetailSection title="This deal">
+        <ActionRow
           title="Deal team"
-          subtitle={
+          sub={
             team.state === "ready"
               ? team.count != null
                 ? `${team.count} ${team.count === 1 ? "member" : "members"}`
@@ -626,13 +631,25 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
                 ? "Members unavailable"
                 : "Loading members…"
           }
-          accessory="chevron"
+          action={<ChevronRightIcon size={18} c={RT.faint} />}
           onClick={() => nav.openSettings("members")}
         />
-        <ListRow title="Data room" accessory="chevron" onClick={() => nav.go("files", { dealId, dealName })} />
-        <ListRow title="Studio" accessory="chevron" onClick={() => nav.go("studio", { dealId, dealName })} />
-        <ListRow title="Integration" accessory="chevron" onClick={() => nav.go("integration", { dealId, dealName })} />
-      </ListSection>
+        <ActionRow
+          title="Data room"
+          action={<ChevronRightIcon size={18} c={RT.faint} />}
+          onClick={() => nav.go("files", { dealId, dealName })}
+        />
+        <ActionRow
+          title="Studio"
+          action={<ChevronRightIcon size={18} c={RT.faint} />}
+          onClick={() => nav.go("studio", { dealId, dealName })}
+        />
+        <ActionRow
+          title="Integration"
+          action={<ChevronRightIcon size={18} c={RT.faint} />}
+          onClick={() => nav.go("integration", { dealId, dealName })}
+        />
+      </DetailSection>
     </div>
   );
 }

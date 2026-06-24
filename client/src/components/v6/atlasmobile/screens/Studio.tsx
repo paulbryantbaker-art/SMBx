@@ -42,6 +42,7 @@ import {
   DownloadIcon,
   PlusIcon,
 } from "../../desktop/icons";
+import { DetailSection } from "../redesign/kit";
 
 /* ─── badge tone for artifact kind / tier ─────────────────── */
 
@@ -850,18 +851,21 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
         <div
           style={{
             display: "flex",
-            alignItems: "center",
+            alignItems: "flex-start",
             justifyContent: "space-between",
-            marginBottom: 12,
+            gap: 12,
           }}
         >
-          <div style={{ fontSize: 20, fontWeight: 600, letterSpacing: "-.01em", color: RT.ink }}>
-            Studio
-          </div>
+          <DetailSection
+            title="Studio"
+            desc="Decks, memos, teasers, and one-pagers you draft with Yulia."
+            style={{ margin: "0 0 14px", flex: 1, minWidth: 0 }}
+          />
           <button
             type="button"
             onClick={() => askYulia("Draft a new deliverable for one of my deals.")}
             style={{
+              flex: "none",
               display: "inline-flex",
               alignItems: "center",
               gap: 4,
@@ -874,7 +878,7 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
               fontWeight: 700,
               color: RT.accentInk,
               padding: "5px 8px",
-              margin: "-5px -8px",
+              margin: "4px -8px 0 0",
             }}
           >
             <PlusIcon size={17} c={RT.accentInk} /> New
