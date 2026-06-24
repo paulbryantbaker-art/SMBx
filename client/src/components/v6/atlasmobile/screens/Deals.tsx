@@ -762,7 +762,7 @@ function DealCard({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) 
         >
           {row.name}
         </div>
-        <Pill bg={vp.bg} fg={vp.fg} style={{ fontSize: 10.5, padding: "3px 9px", flex: "none" }}>
+        <Pill bg={vp.bg} fg={vp.fg} style={{ fontSize: 11, padding: "3px 9px", flex: "none" }}>
           {vp.label}
         </Pill>
       </div>

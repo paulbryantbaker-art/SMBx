@@ -624,7 +624,7 @@ function SlideThumb({
           display: "block",
           marginTop: 5,
           textAlign: "center",
-          fontSize: 10.5,
+          fontSize: 11,
           fontWeight: active ? 600 : 500,
           color: active ? T.blue : T.muted,
         }}

@@ -797,7 +797,7 @@ const S: Record<string, CSSProperties> = {
   traceMs: { color: T.faint, fontVariantNumeric: "tabular-nums", flex: "none", marginLeft: "auto" },
   traceOk: { color: T.green, fontWeight: 700, flex: "none" },
   traceDim: { color: T.faint, flex: "none" },
-  traceCollapsed: { color: T.faint, fontSize: 10.5 },
+  traceCollapsed: { color: T.faint, fontSize: 11 },
   /* paywall */
   paywallCard: {
     background: T.white,

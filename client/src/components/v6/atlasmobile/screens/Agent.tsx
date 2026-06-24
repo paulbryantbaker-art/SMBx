@@ -298,7 +298,7 @@ function ApprovalCard({
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
-              fontSize: 10.5,
+              fontSize: 11,
               fontWeight: 700,
               color: T.muted2,
               letterSpacing: ".04em",
