@@ -18,8 +18,10 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import type { AtlasScreenProps } from "../../desktop/atlasNav";
-import { useAtlasNav } from "../../desktop/atlasNav";
+import { useAtlasNav, useAtlasChat } from "../../desktop/atlasNav";
+import { useMobileShell } from "../mobileShell";
 import { authHeaders } from "../../../../hooks/useAuth";
+import type { SurfaceContext } from "../../../../lib/yuliaSurfaceContext";
 import { T } from "../../desktop/atlasTokens";
 import { RT } from "../redesign/rt";
 import { Hero, SectionHeader, DetailSection, Divider, ActionRow, ButtonRow } from "../redesign/kit";
@@ -27,9 +29,7 @@ import { ChevronRightIcon } from "../../desktop/icons";
 import {
   Sparkle,
   Pill,
-  StepperPills,
   ProgressBar,
-  StatusDot,
   EmptyState,
   LoadingState,
   fmtCents,
@@ -238,116 +238,14 @@ function useDealTeamCount(dealId: number | undefined) {
 
 /* ─── small inline UI atoms ─────────────────────────────────── */
 
-function SignalChip({ children }: { children: string }) {
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        background: RT.accentSoft,
-        color: RT.accentInk,
-        borderRadius: RT.rPill,
-        padding: "5px 12px",
-        fontSize: 13.5,
-        fontWeight: 500,
-      }}
-    >
-      {children}
-    </span>
-  );
-}
-
-/* ─── workflow card (honest progress from gates / deliverableStats) ─ */
-
-function WorkflowCard({
-  title,
-  meta,
-  pct,
-  barColor,
-  cta,
-  onCta,
-  items,
-}: {
-  title: string;
-  meta: string;
-  pct: number;
-  barColor: string;
-  cta?: string;
-  onCta?: () => void;
-  items: { label: string; state: "done" | "prog" | "open"; meta?: string }[];
-}) {
-  return (
-    <div style={panel}>
-      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
-          <div style={{ fontSize: 17, fontWeight: 600, color: RT.ink, letterSpacing: "-0.01em" }}>{title}</div>
-          <div style={{ fontSize: 14, color: RT.muted }}>{meta}</div>
-        </div>
-        {cta && onCta && (
-          <button
-            type="button"
-            onClick={onCta}
-            style={{
-              border: "none",
-              background: "none",
-              padding: 0,
-              fontSize: 14,
-              fontWeight: 600,
-              color: RT.accentInk,
-              cursor: "pointer",
-              fontFamily: RT.font,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {cta} →
-          </button>
-        )}
-      </div>
-      <div style={{ marginTop: 11 }}>
-        <ProgressBar pct={pct} color={barColor} />
-      </div>
-      {items.length > 0 && (
-        <div style={{ marginTop: 6 }}>
-          {items.map((it, i) => (
-            <div
-              key={`${it.label}-${i}`}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "9px 0",
-                borderTop: `1px solid ${RT.line}`,
-              }}
-            >
-              <StatusDot state={it.state} />
-              <span
-                style={{
-                  flex: 1,
-                  minWidth: 0,
-                  fontSize: 14.5,
-                  color: RT.ink,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {it.label}
-              </span>
-              {it.meta && <span style={{ fontSize: 14, fontWeight: 600, color: RT.muted, flex: "none" }}>{it.meta}</span>}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 /* ═══════════════════════════════════════════════════════════════
    COCKPIT MOBILE SCREEN
    ═══════════════════════════════════════════════════════════════ */
 
 export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenProps) {
   const nav = useAtlasNav();
+  const chat = useAtlasChat();
+  const shell = useMobileShell();
   const dealId = view.dealId;
 
   const { detail, brief, detailState, briefState } = useDealCockpit(dealId);
@@ -412,15 +310,10 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
   const fitScore = typeof verdict?.score === "number" && verdict.score > 0 ? verdict.score : null;
   const jLabel = journeyLabel(deal);
 
-  // Deliverable + gate progress for workflow cards (honest counts, guarded).
+  // Deliverable counts for the Manage row (honest, guarded).
   const dStats = detail.deliverableStats;
-  const dTotalRaw = Math.max(0, toNum(dStats.total) ?? 0);
-  const dDoneRaw = Math.max(0, toNum(dStats.completed) ?? 0);
-  const dProgRaw = Math.max(0, toNum(dStats.in_progress) ?? 0);
-  const dTotal = dTotalRaw;
-  const dDone = Math.min(dDoneRaw, dTotal);
-  const dProg = Math.min(dProgRaw, Math.max(0, dTotal - dDone));
-  const deliverablePct = dTotal > 0 ? Math.round((dDone / dTotal) * 100) : 0;
+  const dTotal = Math.max(0, toNum(dStats.total) ?? 0);
+  const dDone = Math.min(Math.max(0, toNum(dStats.completed) ?? 0), dTotal);
 
   const gateDone = gateSteps.filter((s) => s.state === "done").length;
   const gateTotal = gateSteps.length;
@@ -430,7 +323,6 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
   const signoffFlags = brief?.taxLegal?.signoffFlags ?? [];
   const researchNeeded = brief?.marketRead?.researchNeeded ?? [];
   const riskRows = [...signoffFlags, ...researchNeeded];
-  const sourceSignals = brief?.marketRead?.sourceSignals ?? [];
 
   // The deal's one headline figure (honest fallback chain → "—"), led with as the
   // hero. NO sparkline: a deal has no honest time-series, and fabricating a trend
@@ -444,29 +336,35 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
           ? { label: "Revenue", value: revenue }
           : { label: "Headline figure", value: null as number | null };
 
-  const heroSub = (
-    <>
-      {jLabel ?? "Deal"}
-      {briefState === "ready" && fitScore != null && (
-        <>
-          {" · "}Fit <b style={{ color: RT.ink2, fontWeight: 600 }}>{fitScore}</b>/100
-        </>
-      )}
-      {briefState === "loading" && " · reading…"}
-    </>
-  );
+  const currentStage = gateSteps.find((s) => s.state === "current")?.label ?? null;
+  const stageIndex = Math.min(gateDone + 1, gateTotal); // 1-based "stage N of M"
+  const nextMove = brief?.nextMoves?.[0];
+  const riskCount = riskRows.length;
+
+  // Deal-scoped context so the Yulia sheet opens already knowing this deal.
+  const ctx: SurfaceContext = {
+    device: "mobile",
+    activeMode: "cockpit",
+    activeView: "cockpit",
+    activeTitle: dealName,
+    dealId: dealId ?? undefined,
+    dealTitle: dealName,
+    dealStage: jLabel ?? undefined,
+  };
+  const askYulia = (prompt: string) => {
+    chat?.send(prompt, ctx);
+    shell?.openChat();
+  };
 
   return (
     <div style={col}>
-      {/* ── A. Hero: the deal's headline figure + verdict ── */}
+      {/* ── Hero: headline figure + verdict, stage folded into the sub ── */}
       <Hero
         label={heroFig.label}
         value={fmtCents(heroFig.value)}
         trailing={
           briefState === "ready" && verdict?.label ? (
-            <Pill bg={vColors.bg} fg={vColors.fg}>
-              {titleCase(verdict.label)}
-            </Pill>
+            <Pill bg={vColors.bg} fg={vColors.fg}>{titleCase(verdict.label)}</Pill>
           ) : briefState === "loading" ? (
             <span
               aria-hidden="true"
@@ -474,10 +372,48 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
             />
           ) : null
         }
-        sub={heroSub}
+        sub={
+          <>
+            {jLabel ?? "Deal"}
+            {currentStage && <> · {currentStage}</>}
+            {briefState === "ready" && fitScore != null && (
+              <>
+                {" · "}Fit <b style={{ color: RT.ink2, fontWeight: 600 }}>{fitScore}</b>
+              </>
+            )}
+            {briefState === "loading" && " · reading…"}
+          </>
+        }
       />
 
-      {/* ── A2. Primary deal actions (Money-page pattern: grouped pill buttons) ── */}
+      {/* ── One clean stage indicator (replaces the busy stepper) ── */}
+      {gateTotal > 0 && (
+        <div>
+          <ProgressBar pct={gatePct} color={RT.accentInk} />
+          <div style={{ fontSize: 13, color: RT.muted, marginTop: 7 }}>
+            Stage {stageIndex} of {gateTotal}
+            {currentStage ? ` · ${currentStage}` : ""}
+          </div>
+        </div>
+      )}
+
+      {/* ── Next: the one thing to do — the manage-the-deal driver ── */}
+      {briefState === "ready" && nextMove?.title && (
+        <button
+          type="button"
+          onClick={() => askYulia(nextMove.prompt || `What's the next step on ${dealName}?`)}
+          style={nextCard}
+        >
+          <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+            <span style={nextEyebrow}>Next</span>
+            <span style={nextTitle}>{nextMove.title}</span>
+            {nextMove.why && <span style={nextWhy}>{nextMove.why}</span>}
+          </span>
+          <ChevronRightIcon size={20} c={RT.accentInk} />
+        </button>
+      )}
+
+      {/* ── Quick surfaces ── */}
       <ButtonRow
         buttons={[
           { label: "Data room", onClick: () => nav.go("files", { dealId, dealName }) },
@@ -485,19 +421,14 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
         ]}
       />
 
-      {/* ── B. Journey gate pills (edge-bleed horizontal scroll) ── */}
-      <div className="scr" style={edgeBleed}>
-        <StepperPills steps={gateSteps} />
-      </div>
-
-      {/* ── C. Stats (flat, white-on-grey — asking is the hero) ── */}
+      {/* ── Key numbers ── */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 9 }}>
         <Stat label="Revenue" value={fmtCents(revenue)} />
         <Stat label="Adj. EBITDA" value={fmtCents(adjEbitda)} />
         <Stat label="Multiple" value={impliedMultiple != null ? `${impliedMultiple.toFixed(1)}×` : "—"} />
       </div>
 
-      {/* ── D. Yulia's read (Yulia herself is the FAB — no in-card button) ── */}
+      {/* ── Yulia's read — concise headline + a risk LINK (full read via Yulia) ── */}
       <Divider />
       <SectionHeader
         style={{ display: "flex", alignItems: "center", gap: 8, margin: "26px 0 0", fontSize: 24, fontWeight: 700, letterSpacing: "-0.02em" }}
@@ -506,14 +437,7 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
         Yulia&rsquo;s read
         {briefState === "ready" && brief?.stale && (
           <span
-            style={{
-              fontSize: 12.5,
-              fontWeight: 500,
-              color: T.amber,
-              background: T.amberBg,
-              borderRadius: RT.rPill,
-              padding: "3px 10px",
-            }}
+            style={{ fontSize: 12.5, fontWeight: 500, color: T.amber, background: T.amberBg, borderRadius: RT.rPill, padding: "3px 10px" }}
             title="Showing the last read while Yulia refreshes it."
           >
             Updating…
@@ -532,102 +456,34 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
 
         {briefState === "ready" && (
           <>
-            <div style={{ fontSize: 15, lineHeight: 1.7, color: RT.ink2 }}>
-              {brief?.marketRead?.headline || "—"}
-            </div>
-            {(brief?.marketRead?.bullets?.length ?? 0) > 0 && (
-              <ul style={{ margin: "12px 0 0", paddingLeft: 18, display: "flex", flexDirection: "column", gap: 6 }}>
-                {brief!.marketRead!.bullets!.map((b, i) => (
-                  <li key={i} style={{ fontSize: 14.5, lineHeight: 1.55, color: RT.ink2 }}>
-                    {b}
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {/* Key risks — real signoff flags + research gaps, never fabricated clauses */}
-            {riskRows.length > 0 && (
-              <div style={{ marginTop: 15 }}>
-                <div style={{ fontSize: 16, fontWeight: 600, color: RT.ink, letterSpacing: "-0.01em", marginBottom: 4 }}>Key risks</div>
-                {riskRows.map((r, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      display: "flex",
-                      gap: 9,
-                      alignItems: "flex-start",
-                      borderTop: `1px solid ${RT.line}`,
-                      padding: "7px 0",
-                      fontSize: 14.5,
-                      color: RT.ink2,
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    <span style={{ color: RT.down, flex: "none", fontSize: 14 }} aria-hidden="true">
-                      ⚑
-                    </span>
-                    <span>{r}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Source signals (the honest stand-in for a discrete "citations" list) */}
-            {sourceSignals.length > 0 && (
-              <div style={{ marginTop: 15, display: "flex", flexWrap: "wrap", gap: 7 }}>
-                {sourceSignals.map((s, i) => (
-                  <SignalChip key={i}>{s}</SignalChip>
-                ))}
-              </div>
+            <div style={{ fontSize: 15.5, lineHeight: 1.65, color: RT.ink2 }}>{brief?.marketRead?.headline || "—"}</div>
+            {/* Risks collapse to a link — tap to have Yulia walk them through (no dump) */}
+            {riskCount > 0 && (
+              <button
+                type="button"
+                onClick={() => askYulia(`Walk me through the open risks on ${dealName}.`)}
+                style={riskLink}
+              >
+                <span style={{ color: RT.down }} aria-hidden="true">
+                  ⚑
+                </span>
+                {riskCount} {riskCount === 1 ? "thing" : "things"} to check
+                <ChevronRightIcon size={15} c={RT.muted} />
+              </button>
             )}
           </>
         )}
       </div>
 
-      {/* ── E. Workflows (honest: deliverable + gate progress) ── */}
+      {/* ── Manage this deal — the drill-ins ── */}
       <Divider />
-      <DetailSection title="Progress" desc="Deliverables drafted and journey stages completed for this deal." />
-      <WorkflowCard
-        title="Deliverables"
-        meta={`${dDone} / ${dTotal} complete`}
-        pct={deliverablePct}
-        barColor={RT.accent}
-        cta="Data room"
-        onCta={() => nav.go("files", { dealId, dealName })}
-        items={
-          dTotal > 0
-            ? [
-                { label: "Completed", state: "done", meta: String(dDone) },
-                ...(dProg > 0 ? [{ label: "In progress", state: "prog" as const, meta: String(dProg) }] : []),
-                ...(dTotal - dDone - dProg > 0
-                  ? [{ label: "Not started", state: "open" as const, meta: String(dTotal - dDone - dProg) }]
-                  : []),
-              ]
-            : []
-        }
-      />
-      <WorkflowCard
-        title="Journey progress"
-        meta={`${gateDone} / ${gateTotal} stages`}
-        pct={gatePct}
-        barColor={RT.up}
-        cta="Studio"
-        onCta={() => nav.go("studio", { dealId, dealName })}
-        items={gateSteps.map((s) => ({
-          label: s.label,
-          state: s.state === "done" ? "done" : s.state === "current" ? "prog" : "open",
-        }))}
-      />
-
-      {dTotal === 0 && (
-        <div style={{ fontSize: 14, color: RT.muted, marginTop: -4 }}>
-          No deliverables yet — ask Yulia to draft the first one for this deal.
-        </div>
-      )}
-
-      {/* ── F. This deal — team + deal surfaces (flat detail rows) ── */}
-      <Divider />
-      <DetailSection title="This deal">
+      <DetailSection title="Manage">
+        <ActionRow
+          title="Deliverables"
+          sub={dTotal > 0 ? `${dDone} / ${dTotal} complete` : "None yet — draft one in Studio"}
+          action={<ChevronRightIcon size={18} c={RT.faint} />}
+          onClick={() => nav.go("studio", { dealId, dealName })}
+        />
         <ActionRow
           title="Deal team"
           sub={
@@ -681,13 +537,6 @@ const padBody: CSSProperties = {
   padding: "10px 18px",
 };
 
-/** Edge-bleed horizontal scroller (full-width gate-pill row). */
-const edgeBleed: CSSProperties = {
-  margin: "0 -18px",
-  padding: "2px 18px 4px",
-  overflowX: "auto",
-};
-
 /** Flat white panel — separation by tone (no border, no shadow). */
 const panel: CSSProperties = {
   background: RT.card,
@@ -713,3 +562,37 @@ const statValue: CSSProperties = {
   whiteSpace: "nowrap",
 };
 const statLabel: CSSProperties = { fontSize: 12.5, color: RT.muted, marginTop: 3 };
+
+/** "Next" card — the manage-the-deal driver (pale-green highlight, tappable). */
+const nextCard: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 12,
+  width: "100%",
+  background: RT.accentSoft,
+  border: "none",
+  borderRadius: RT.rCard,
+  padding: "14px 16px",
+  cursor: "pointer",
+  fontFamily: RT.font,
+  WebkitTapHighlightColor: "transparent",
+};
+const nextEyebrow: CSSProperties = { display: "block", fontSize: 12.5, fontWeight: 600, color: RT.accentInk, marginBottom: 3 };
+const nextTitle: CSSProperties = { display: "block", fontSize: 17, fontWeight: 600, color: RT.ink, lineHeight: 1.3 };
+const nextWhy: CSSProperties = { display: "block", fontSize: 14, color: RT.ink2, lineHeight: 1.4, marginTop: 3 };
+
+/** Risk count → a tappable link (no risk dump in the read). */
+const riskLink: CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 7,
+  marginTop: 14,
+  background: "transparent",
+  border: "none",
+  padding: 0,
+  cursor: "pointer",
+  fontFamily: RT.font,
+  fontSize: 14.5,
+  fontWeight: 600,
+  color: RT.ink,
+};
