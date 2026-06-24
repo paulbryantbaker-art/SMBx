@@ -45,11 +45,10 @@ import {
   LoadingState,
   fmtCents,
 } from "../../desktop/primitives";
-import { SearchIcon, MoreDotsIcon } from "../../desktop/icons";
+import { SearchIcon } from "../../desktop/icons";
 import { T } from "../../desktop/atlasTokens";
-import { ListSection, ListRow, ActionSheet } from "../iosKit";
-import { useMobileShell } from "../mobileShell";
-import type { SurfaceContext } from "../../../../lib/yuliaSurfaceContext";
+import { RT } from "../redesign/rt";
+import { ActionRow, MarkBadge as RMarkBadge } from "../redesign/kit";
 
 type FilterId = "all" | "buy" | "sell" | "watch";
 type LayoutId = "list" | "board";
@@ -163,7 +162,7 @@ export default function DealsMobileScreen({ user }: AtlasScreenProps) {
   const { all, loading, loaded, isAuthed } = useMobileDeals(user);
   const { summary } = usePortfolioSummary(user, isAuthed);
 
-  const [layout, setLayout] = useState<LayoutId>("board");
+  const [layout, setLayout] = useState<LayoutId>("list");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterId>("all");
   const [stageFilter, setStageFilter] = useState<StageFilterId>("all");
@@ -284,21 +283,9 @@ function Toolbar({
 }) {
   return (
     <div style={{ padding: "6px 18px 0" }}>
-      {/* title + Board/List toggle */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 10,
-          marginBottom: 12,
-        }}
-      >
-        <div style={{ fontSize: 22, fontWeight: 600, letterSpacing: "-.02em" }}>
-          Deals
-        </div>
-        {/* List is the default; Board shows the active funnel. Both read the
-            same filtered set. */}
+      {/* Board/List toggle — the shell header already shows the "Deals" title, so
+          we don't repeat it here. (Full tab-header model lands in the nav rework.) */}
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
         <Segmented
           options={[
             { id: "list", label: "List" },
@@ -312,18 +299,17 @@ function Toolbar({
       {/* search field */}
       <label
         style={{
-          height: 40,
-          background: T.white,
-          border: `1px solid ${T.border}`,
-          borderRadius: T.rPill,
+          height: 44,
+          background: RT.card,
+          borderRadius: RT.rPill,
           display: "flex",
           alignItems: "center",
-          padding: "0 14px",
+          padding: "0 15px",
           gap: 9,
           marginBottom: 11,
         }}
       >
-        <SearchIcon size={19} c={T.muted} />
+        <SearchIcon size={19} c={RT.faint} />
         <input
           value={query}
           onChange={(e) => onSearch(e.target.value)}
@@ -334,9 +320,9 @@ function Toolbar({
             border: "none",
             background: "transparent",
             outline: "none",
-            fontSize: 14,
-            color: T.ink,
-            fontFamily: T.font,
+            fontSize: 15,
+            color: RT.ink,
+            fontFamily: RT.font,
           }}
         />
       </label>
@@ -362,14 +348,14 @@ function Toolbar({
               style={{
                 flex: "none",
                 fontSize: 14,
-                fontWeight: 700,
-                padding: "7px 14px",
-                borderRadius: T.rPill,
+                fontWeight: 600,
+                padding: "8px 15px",
+                borderRadius: RT.rPill,
                 cursor: "pointer",
-                fontFamily: T.font,
-                border: `1px solid ${active ? T.blue : T.border}`,
-                background: active ? T.blue : T.white,
-                color: active ? "#fff" : T.muted,
+                fontFamily: RT.font,
+                border: "none",
+                background: active ? RT.accent : RT.card,
+                color: active ? "#fff" : RT.muted,
                 whiteSpace: "nowrap",
               }}
             >
@@ -391,66 +377,20 @@ function ListView({
   filtered: MobileStageRow[];
   onOpen: (row: MobileStageRow) => void;
 }) {
-  const nav = useAtlasNav();
-  const chat = useAtlasChat();
-  const shell = useMobileShell();
-  // The deal whose "⋯" action sheet is open.
-  const [sheetFor, setSheetFor] = useState<MobileStageRow | null>(null);
-
   if (filtered.length === 0) {
     return (
       <div style={{ padding: "24px 18px" }}>
-        <EmptyState
-          title="No deals match"
-          hint="Try a different search or filter."
-        />
+        <EmptyState title="No deals match" hint="Try a different search or filter." />
       </div>
     );
   }
-
-  const askYulia = (row: MobileStageRow) => {
-    const ctx: SurfaceContext = {
-      device: "mobile",
-      activeMode: "deals",
-      activeView: "deals",
-      activeTitle: row.name,
-      dealId: row.rawId,
-      dealTitle: row.name,
-    };
-    chat?.send(`Give me your read on ${row.name}.`, ctx);
-    shell?.openChat();
-  };
-
+  // Whitespace-separated rows on the grey page (no card, no dividers) — tap to
+  // open. Per-deal actions live in the cockpit + the Yulia sheet, not a "⋯" here.
   return (
-    <div style={{ padding: "12px 18px 4px" }}>
-      <ListSection>
-        {filtered.map((row) => (
-          <DealRow
-            key={row.id}
-            row={row}
-            onOpen={() => onOpen(row)}
-            onMore={() => setSheetFor(row)}
-          />
-        ))}
-      </ListSection>
-
-      <ActionSheet
-        open={!!sheetFor}
-        onClose={() => setSheetFor(null)}
-        title={sheetFor?.name}
-        actions={
-          sheetFor
-            ? [
-                { label: "Open deal", onClick: () => onOpen(sheetFor) },
-                { label: "Ask Yulia about this deal", onClick: () => askYulia(sheetFor) },
-                {
-                  label: "Open data room",
-                  onClick: () => nav.go("files", { dealId: sheetFor.rawId, dealName: sheetFor.name }),
-                },
-              ]
-            : []
-        }
-      />
+    <div style={{ padding: "8px 18px 4px" }}>
+      {filtered.map((row) => (
+        <DealRow key={row.id} row={row} onOpen={() => onOpen(row)} />
+      ))}
     </div>
   );
 }
@@ -653,19 +593,10 @@ function StageTab({
 
 /* ─── deal row (list) ──────────────────────────────────────── */
 
-function DealRow({
-  row,
-  onOpen,
-  onMore,
-}: {
-  row: MobileStageRow;
-  onOpen: () => void;
-  onMore: () => void;
-}) {
+function DealRow({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) {
   const sector = sectorOf(row);
   const stage = stageMeta(row);
   const ev = fmtCents(evCents(row));
-  const tint = markTint(row.rawId);
   const fitReal = typeof row.fit === "number";
 
   // "sector · EV [· Fit NN]" — drop absent halves so we never print a bare "·".
@@ -678,29 +609,16 @@ function DealRow({
     .join(" · ");
 
   return (
-    <ListRow
-      leading={<MarkBadge letter={row.name} bg={tint.bg} fg={tint.fg} size={30} radius={8} />}
+    <ActionRow
+      leading={<RMarkBadge label={row.name} seed={row.rawId} size={40} />}
       title={row.name}
-      subtitle={meta || "—"}
-      onClick={onOpen}
-      trailing={
-        <span style={{ flex: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>
-          <Pill bg={stage.bg} fg={stage.fg} style={{ fontSize: 11, padding: "3px 8px" }}>
-            {stage.label}
-          </Pill>
-          <button
-            type="button"
-            aria-label={`Actions for ${row.name}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onMore();
-            }}
-            style={S.moreBtn}
-          >
-            <MoreDotsIcon size={20} c={T.muted2} />
-          </button>
-        </span>
+      sub={meta || "—"}
+      action={
+        <Pill bg={stage.bg} fg={stage.fg} style={{ fontSize: 12, padding: "5px 11px" }}>
+          {stage.label}
+        </Pill>
       }
+      onClick={onOpen}
     />
   );
 }
@@ -803,20 +721,5 @@ function DealCard({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) 
 }
 
 const S: Record<string, React.CSSProperties> = {
-  root: { color: T.ink, fontFamily: T.font, display: "flex", flexDirection: "column" },
-  // Per-row "⋯" — a comfortable tap target that stops the row's open-on-tap.
-  moreBtn: {
-    flex: "none",
-    width: 34,
-    height: 34,
-    marginRight: -6,
-    border: "none",
-    background: "transparent",
-    borderRadius: "50%",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
-    WebkitTapHighlightColor: "transparent",
-  },
+  root: { color: RT.ink, fontFamily: RT.font, display: "flex", flexDirection: "column" },
 };
