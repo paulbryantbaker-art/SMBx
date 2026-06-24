@@ -363,6 +363,7 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
   const signoffFlags = brief?.taxLegal?.signoffFlags ?? [];
   const researchNeeded = brief?.marketRead?.researchNeeded ?? [];
   const riskRows = [...signoffFlags, ...researchNeeded];
+  const bullets = brief?.marketRead?.bullets ?? [];
 
   // The hero leads with Enterprise Value (the valuation), NOT the asking price.
   // NO sparkline: a deal has no honest time-series, and fabricating a trend would
@@ -372,7 +373,6 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
   const currentStage = gateSteps.find((s) => s.state === "current")?.label ?? null;
   const stageIndex = Math.min(gateDone + 1, gateTotal); // 1-based "stage N of M"
   const nextMove = brief?.nextMoves?.[0];
-  const riskCount = riskRows.length;
 
   // Deal-scoped context so the Yulia sheet opens already knowing this deal.
   const ctx: SurfaceContext = {
@@ -490,21 +490,40 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
 
         {briefState === "ready" && (
           <>
-            <div style={{ fontSize: 15.5, lineHeight: 1.65, color: RT.ink2 }}>{brief?.marketRead?.headline || "—"}</div>
-            {/* Risks collapse to a link — tap to have Yulia walk them through (no dump) */}
-            {riskCount > 0 && (
-              <button
-                type="button"
-                onClick={() => askYulia(`Walk me through the open risks on ${dealName}.`)}
-                style={riskLink}
-              >
-                <span style={{ color: RT.down }} aria-hidden="true">
-                  ⚑
-                </span>
-                {riskCount} {riskCount === 1 ? "thing" : "things"} to check
-                <ChevronRightIcon size={15} c={RT.muted} />
-              </button>
+            {/* Structured synopsis (NOT a verbose dump): the read, key points, and
+                what still needs confirming — all from the persisted brief. */}
+            <div style={readSummary}>{brief?.marketRead?.headline || "—"}</div>
+
+            {bullets.length > 0 && (
+              <div style={{ marginTop: 16 }}>
+                {bullets.map((b, i) => (
+                  <div key={i} style={readPoint}>
+                    <span style={readDot} aria-hidden="true" />
+                    <span style={readPointText}>{b}</span>
+                  </div>
+                ))}
+              </div>
             )}
+
+            {riskRows.length > 0 && (
+              <div style={{ marginTop: 16 }}>
+                <div style={readSubLabel}>Needs confirming</div>
+                {riskRows.map((r, i) => (
+                  <div key={i} style={readPoint}>
+                    <span style={{ color: RT.down, flex: "none", fontSize: 13, marginTop: 1 }} aria-hidden="true">
+                      ⚑
+                    </span>
+                    <span style={readPointText}>{r}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Interact — the full read lives here + the chat already knows it. */}
+            <button type="button" onClick={() => askYulia(`Let's talk through your read on ${dealName}.`)} style={readDiscuss}>
+              Discuss with Yulia
+              <ChevronRightIcon size={15} c={RT.accentInk} />
+            </button>
           </>
         )}
       </div>
@@ -634,12 +653,17 @@ const nextEyebrow: CSSProperties = { display: "block", fontSize: 12.5, fontWeigh
 const nextTitle: CSSProperties = { display: "block", fontSize: 17, fontWeight: 600, color: RT.ink, lineHeight: 1.3 };
 const nextWhy: CSSProperties = { display: "block", fontSize: 14, color: RT.ink2, lineHeight: 1.4, marginTop: 3 };
 
-/** Risk count → a tappable link (no risk dump in the read). */
-const riskLink: CSSProperties = {
+/** Yulia's read — structured synopsis styles (Cash App DL). */
+const readSummary: CSSProperties = { fontSize: 15.5, lineHeight: 1.65, color: RT.ink2, fontWeight: 500 };
+const readSubLabel: CSSProperties = { fontSize: 13, fontWeight: 600, color: RT.ink, marginBottom: 6 };
+const readPoint: CSSProperties = { display: "flex", gap: 10, alignItems: "flex-start", padding: "5px 0" };
+const readPointText: CSSProperties = { fontSize: 14.5, lineHeight: 1.5, color: RT.ink2 };
+const readDot: CSSProperties = { width: 6, height: 6, borderRadius: "50%", background: RT.accentInk, marginTop: 7, flex: "none" };
+const readDiscuss: CSSProperties = {
   display: "inline-flex",
   alignItems: "center",
-  gap: 7,
-  marginTop: 14,
+  gap: 5,
+  marginTop: 16,
   background: "transparent",
   border: "none",
   padding: 0,
@@ -647,5 +671,5 @@ const riskLink: CSSProperties = {
   fontFamily: RT.font,
   fontSize: 14.5,
   fontWeight: 600,
-  color: RT.ink,
+  color: RT.accentInk,
 };
