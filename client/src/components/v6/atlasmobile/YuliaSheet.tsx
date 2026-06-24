@@ -14,7 +14,7 @@
  * fixed bg div): it uses position:absolute inside the relative app root, with a
  * translucent glass fill — Safari does not read it as the page background.
  */
-import { memo, useEffect, useMemo, useRef, type CSSProperties } from "react";
+import { memo, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import ChatDock from "../../shared/ChatDock";
 import { CloseIcon, MonitorIcon } from "../desktop/icons";
 import { Sparkle } from "../desktop/primitives";
@@ -28,6 +28,12 @@ import type {
   ToolTraceEntry,
 } from "../mobile/types";
 import type { SurfaceContext } from "../../../lib/yuliaSurfaceContext";
+
+/* Sheet snap heights (vh). Drag the handle/top up to expand, down to dismiss. */
+const DEFAULT_VH = 86; // resting height
+const EXPANDED_VH = 95; // dragged up
+const CLOSE_VH = 50; // below this on release → dismiss
+const SNAP_MIDPOINT = 90; // ≥ this on release → snap to expanded
 
 export function YuliaSheet({
   open,
@@ -43,6 +49,44 @@ export function YuliaSheet({
   const nav = useAtlasNav();
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const nearBottomRef = useRef(true);
+
+  // ── Draggable sheet: snap between a default height and 95%; a hard drag-down
+  // dismisses. Height is in vh; while dragging we drop the transition for 1:1
+  // tracking, then animate to the nearest snap on release. ──────────────────
+  const [heightVh, setHeightVh] = useState(DEFAULT_VH);
+  const [dragging, setDragging] = useState(false);
+  const dragRef = useRef<{ startY: number; startH: number } | null>(null);
+
+  // Each open starts at the default height.
+  useEffect(() => {
+    if (open) setHeightVh(DEFAULT_VH);
+  }, [open]);
+
+  const onDragStart = (e: ReactPointerEvent) => {
+    // Don't start a drag from an interactive control (close button, a chip).
+    if ((e.target as HTMLElement).closest("button")) return;
+    dragRef.current = { startY: e.clientY, startH: heightVh };
+    setDragging(true);
+    (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+  };
+  const onDragMove = (e: ReactPointerEvent) => {
+    const d = dragRef.current;
+    if (!d) return;
+    const dyVh = ((d.startY - e.clientY) / window.innerHeight) * 100; // up = +
+    setHeightVh(Math.max(30, Math.min(95, d.startH + dyVh)));
+  };
+  const onDragEnd = () => {
+    if (!dragRef.current) return;
+    dragRef.current = null;
+    setDragging(false);
+    setHeightVh((h) => {
+      if (h <= CLOSE_VH) {
+        onClose();
+        return DEFAULT_VH;
+      }
+      return h >= SNAP_MIDPOINT ? EXPANDED_VH : DEFAULT_VH;
+    });
+  };
 
   // Re-open a canvas artifact Yulia produced, then dismiss the sheet so the
   // canvas surface (behind it) is revealed.
@@ -107,9 +151,25 @@ export function YuliaSheet({
   return (
     <>
       <div onClick={onClose} style={S.scrim} aria-hidden="true" />
-      <div role="dialog" aria-label="Ask Yulia" style={S.sheet}>
-        <div style={S.handle} aria-hidden="true" />
-        <header style={S.header}>
+      <div
+        role="dialog"
+        aria-label="Ask Yulia"
+        style={{
+          ...S.sheet,
+          height: `${heightVh}vh`,
+          transition: dragging ? "none" : "height .26s cubic-bezier(.32,.72,0,1)",
+        }}
+      >
+        {/* Drag zone — handle + header. Swipe up → 95%, down → dismiss. */}
+        <div
+          style={S.dragZone}
+          onPointerDown={onDragStart}
+          onPointerMove={onDragMove}
+          onPointerUp={onDragEnd}
+          onPointerCancel={onDragEnd}
+        >
+          <div style={S.handle} aria-hidden="true" />
+          <header style={S.header}>
           <Sparkle size={18} />
           <span style={S.headerTitle}>Yulia</span>
           {surfaceContext?.activeTitle && (
@@ -122,7 +182,8 @@ export function YuliaSheet({
           <button type="button" aria-label="Close" onClick={onClose} style={S.closeBtn}>
             <CloseIcon size={16} c={RT.muted} />
           </button>
-        </header>
+          </header>
+        </div>
 
         {/* Jump-to nav — the sheet doubles as a launcher (drag-up nav). */}
         <JumpNav
@@ -379,7 +440,7 @@ const S: Record<string, CSSProperties> = {
     right: 0,
     bottom: 0,
     zIndex: 9,
-    maxHeight: "88%",
+    maxHeight: "95vh", // height itself is set inline (draggable)
     display: "flex",
     flexDirection: "column",
     background: RT.card,
@@ -387,6 +448,13 @@ const S: Record<string, CSSProperties> = {
     boxShadow: "0 -12px 40px rgba(20,18,34,.22)",
     paddingBottom: "env(safe-area-inset-bottom, 0px)",
     animation: "atlas-mobile-sheet-up .24s cubic-bezier(.32,.72,0,1)",
+  },
+  // The drag affordance — handle + header. touch-action:none so the gesture
+  // resizes the sheet instead of scrolling the page behind it.
+  dragZone: {
+    flex: "none",
+    touchAction: "none",
+    cursor: "grab",
   },
   handle: {
     width: 38,
