@@ -15,21 +15,18 @@
 import type { CSSProperties, ReactNode } from "react";
 import { T } from "../desktop/atlasTokens";
 import { M } from "./mobileTokens";
-import { HomeIcon, DealsListIcon, SourcingIcon } from "../desktop/icons";
-import { Sparkle } from "../desktop/primitives";
+import { HomeIcon, DealsListIcon } from "../desktop/icons";
 import type { AtlasScreen } from "../desktop/atlasNav";
 
-export type BottomTab = "today" | "deals" | "yulia" | "sourcing";
+// Redesign: just two content tabs. Yulia is the universal FAB → slide-up sheet
+// (it also carries jump-to nav); Sourcing/Studio/etc. live in the avatar hub.
+export type BottomTab = "today" | "deals";
 
 const ICON = 26;
 
 const ITEMS: { id: BottomTab; label: string; icon: (c: string) => ReactNode }[] = [
   { id: "today", label: "Today", icon: (c) => <HomeIcon size={ICON} c={c} /> },
   { id: "deals", label: "Deals", icon: (c) => <DealsListIcon size={ICON} c={c} /> },
-  // Yulia = the chat action. The Sparkle is a fixed gradient (ignores `c`), so it
-  // always reads as lit/colorful — the bar's most prominent affordance.
-  { id: "yulia", label: "Yulia", icon: () => <Sparkle size={ICON} /> },
-  { id: "sourcing", label: "Sourcing", icon: (c) => <SourcingIcon size={ICON} c={c} /> },
 ];
 
 export function BottomNav({
@@ -85,12 +82,11 @@ export function bottomTabForScreen(screen: AtlasScreen): BottomTab | null {
     case "deals":
     case "pipeline":
     case "cockpit":
-    case "files": // files is a per-deal surface now → highlight Deals
+    case "files": // per-deal surfaces highlight Deals
+    case "canvas":
       return "deals";
-    case "sourcing":
-      return "sourcing";
     default:
-      return null;
+      return null; // sourcing/studio/agent/integration/settings live in the hub
   }
 }
 

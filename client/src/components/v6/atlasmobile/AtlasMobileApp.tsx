@@ -191,13 +191,10 @@ interface ShellProps {
  *  mobile-only 'more' overlay screen (which is NOT in the desktop union). */
 type MobileSurface = AtlasScreen | "more" | "askyulia";
 
-/* Screens that show the floating bottom tab bar — Today / Deals / Sourcing /
- * Files / More (the bottom-bar destination set; the retired 'pipeline' alias is
- * folded into Deals and never renders as its own surface). */
-const NAV_SCREENS = new Set<MobileSurface>(["today", "deals", "sourcing"]);
-/* Screens that show the Yulia FAB. The bar now carries a Yulia tab, so the FAB
- * is only needed on the cockpit (a deal-detail screen that has no bottom bar). */
-const FAB_SCREENS = new Set<MobileSurface>(["cockpit"]);
+/* Redesign: the floating bar shows on the two content tabs only. Everything else
+ * is a detail/hub screen (back header, no bar) reached from a deal, the Yulia
+ * sheet's jump-nav, or the avatar menu. */
+const NAV_SCREENS = new Set<MobileSurface>(["today", "deals"]);
 /* The FAB sits above the tab bar only when the bar is present (Deals/Sourcing). */
 
 /* Header title for the variant-B back bar, per screen. The retired 'pipeline'
@@ -221,12 +218,12 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
   // 'more' is an overlay screen that is NOT in the desktop AtlasView union — it
   // lives in a separate flag so nav/openDeal/etc. keep the canonical AtlasView.
   const [moreOpen, setMoreOpen] = useState(false);
+  // The Yulia slide-up sheet (chat + jump-to nav) — the universal Yulia surface;
+  // it overlays whatever screen you're on. `openChat` opens it (the full-screen
+  // chat is retired).
   const [sheetOpen, setSheetOpen] = useState(false);
-  // Full-screen Ask Yulia chat surface (frame 02) — opened from the Today
-  // composer; rendered inside the shell's scroll area as the 'askyulia' surface.
-  const [chatOpen, setChatOpen] = useState(false);
   const mobileShell = useMemo(
-    () => ({ openChat: () => setChatOpen(true), closeChat: () => setChatOpen(false), signOut: onSignOut }),
+    () => ({ openChat: () => setSheetOpen(true), closeChat: () => setSheetOpen(false), signOut: onSignOut }),
     [onSignOut],
   );
 
@@ -239,22 +236,22 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
       view,
       go: (screen: AtlasScreen, opts?: Partial<AtlasView>) => {
         setMoreOpen(false);
-        setChatOpen(false);
+        setSheetOpen(false);
         setView({ screen, ...opts });
       },
       openDeal: (dealId: number, dealName?: string) => {
         setMoreOpen(false);
-        setChatOpen(false);
+        setSheetOpen(false);
         setView({ screen: "cockpit", dealId, dealName });
       },
       openSettings: (pane?: SettingsPane) => {
         setMoreOpen(false);
-        setChatOpen(false);
+        setSheetOpen(false);
         setView({ screen: "settings", settingsPane: pane ?? "profile" });
       },
       openCanvas: (canvasTabId: string, dealId?: number) => {
         setMoreOpen(false);
-        setChatOpen(false);
+        setSheetOpen(false);
         setView({ screen: "canvas", canvasTabId, dealId });
       },
     }),
@@ -359,16 +356,15 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
   const initials = computeInitials(user);
 
   // The active surface = the 'more' overlay if open, else the view's screen.
-  const surface: MobileSurface = chatOpen ? "askyulia" : moreOpen ? "more" : view.screen;
+  const surface: MobileSurface = moreOpen ? "more" : view.screen;
   const isToday = surface === "today";
-  // Content screens scroll the DOCUMENT so iOS Safari collapses its chrome and
-  // the page full-bleeds top & bottom (the immersive scroll). The full-screen
-  // chat (askyulia) keeps a bounded, fixed-height layout because it pins its
-  // composer and scrolls its message list internally.
-  const bodyScroll = surface !== "askyulia";
+  // Every screen body-scrolls now (the chat is an overlay sheet, not a surface).
+  const bodyScroll = true;
   const showNav = NAV_SCREENS.has(surface);
-  const showFab = FAB_SCREENS.has(surface);
-  const fabAboveNav = showFab && showNav; // (cockpit has the FAB but no bar)
+  // The Yulia FAB is universal — on every screen except the menu hub (which has
+  // its own affordances). The sheet covers it when open, so no extra gating.
+  const showFab = surface !== "more";
+  const fabAboveNav = showFab && showNav; // Today/Deals have the bar → lift the FAB
   const activeTab: BottomTab = bottomTabForScreen(view.screen) ?? "today";
 
   // Back target: detail/section screens step back to a sensible surface. Deal
@@ -406,12 +402,6 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
   const onTab = (tab: BottomTab) => {
     setSheetOpen(false);
     setMoreOpen(false);
-    // Yulia is an action, not a destination — it opens the full-screen chat.
-    if (tab === "yulia") {
-      setChatOpen(true);
-      return;
-    }
-    setChatOpen(false);
     nav.go(tab as AtlasScreen);
   };
 
@@ -422,8 +412,6 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
     // The avatar opens the account/More menu (modules + settings) — the old More
     // tab's content now lives here under the user icon.
     <MobileHomeHeader initials={initials} onAvatar={() => setMoreOpen(true)} />
-  ) : surface === "askyulia" ? (
-    <MobileBackHeader title="Yulia" showSparkle solid onBack={() => setChatOpen(false)} />
   ) : surface === "more" ? (
     <MobileBackHeader title="Menu" onBack={() => setMoreOpen(false)} />
   ) : (

@@ -9,8 +9,6 @@
  * (Cockpit / Sourcing, which have no nav).
  */
 import type { CSSProperties } from "react";
-import { M } from "./mobileTokens";
-import { Sparkle } from "../desktop/primitives";
 
 export function YuliaFab({
   onOpen,
@@ -27,27 +25,30 @@ export function YuliaFab({
       style={{
         ...S.fab,
         bottom: aboveNav
-          ? "calc(env(safe-area-inset-bottom, 0px) + 94px)" // clears the 62px bar + 16px gap + breathing room
-          : "calc(env(safe-area-inset-bottom, 0px) + 18px)",
+          ? "calc(env(safe-area-inset-bottom, 0px) + 96px)" // clears the floating nav
+          : "calc(env(safe-area-inset-bottom, 0px) + 20px)",
       }}
     >
-      <Sparkle size={26} />
+      {/* white sparkle — Yulia's mark on the violet primary FAB */}
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
+        <path d="M12 2c.4 4.6 2.4 6.6 7 7-4.6.4-6.6 2.4-7 7-.4-4.6-2.4-6.6-7-7 4.6-.4 6.6-2.4 7-7z" />
+      </svg>
     </button>
   );
 }
 
 const S: Record<string, CSSProperties> = {
+  // Redesign: the violet PRIMARY action (colored background, white symbol — the
+  // Done-button pattern). A small bottom-anchored fixed button (Safari rule).
   fab: {
-    position: "fixed", // own viewport-fixed FAB — NOT inside a full-viewport fixed layer (which would block iOS chrome collapse)
+    position: "fixed",
     right: 18,
-    width: M.glassFab.size,
-    height: M.glassFab.size,
+    width: 58,
+    height: 58,
     borderRadius: "50%",
-    background: M.glassFab.background,
-    backdropFilter: M.glassFab.backdropFilter,
-    WebkitBackdropFilter: M.glassFab.backdropFilter,
-    border: M.glassFab.border,
-    boxShadow: M.glassFab.boxShadow,
+    background: "#5b53d6",
+    border: "none",
+    boxShadow: "0 10px 26px rgba(91,83,214,.40), 0 2px 6px rgba(30,32,70,.16)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
