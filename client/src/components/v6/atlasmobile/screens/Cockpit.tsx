@@ -18,26 +18,22 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import type { AtlasScreenProps } from "../../desktop/atlasNav";
-import { useAtlasNav, useAtlasChat } from "../../desktop/atlasNav";
-import { useMobileShell } from "../mobileShell";
+import { useAtlasNav } from "../../desktop/atlasNav";
 import { authHeaders } from "../../../../hooks/useAuth";
-import type { SurfaceContext } from "../../../../lib/yuliaSurfaceContext";
 import { T } from "../../desktop/atlasTokens";
+import { RT } from "../redesign/rt";
+import { Hero, SectionHeader } from "../redesign/kit";
 import {
   Sparkle,
   Pill,
-  Card,
-  KpiCard,
   StepperPills,
   ProgressBar,
-  SectionLabel,
   StatusDot,
   EmptyState,
   LoadingState,
   fmtCents,
 } from "../../desktop/primitives";
 import type { StepState } from "../../desktop/primitives";
-import { ChevronRightIcon } from "../../desktop/icons";
 import { ListSection, ListRow } from "../iosKit";
 
 /* ─── API shapes (honest to the real responses) ─────────────── */
@@ -248,12 +244,12 @@ function SignalChip({ children }: { children: string }) {
       style={{
         display: "inline-flex",
         alignItems: "center",
-        background: T.blueBg,
-        color: T.blue,
-        borderRadius: T.rPill,
+        background: RT.accentSoft,
+        color: RT.accentInk,
+        borderRadius: RT.rPill,
         padding: "5px 12px",
         fontSize: 13.5,
-        fontWeight: 600,
+        fontWeight: 500,
       }}
     >
       {children}
@@ -281,11 +277,11 @@ function WorkflowCard({
   items: { label: string; state: "done" | "prog" | "open"; meta?: string }[];
 }) {
   return (
-    <Card pad={15} style={{ borderRadius: T.rCardLg }}>
+    <div style={panel}>
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
-          <div style={{ fontSize: 15.5, fontWeight: 700, color: T.ink }}>{title}</div>
-          <div style={{ fontSize: 14, color: T.muted, fontWeight: 600 }}>{meta}</div>
+          <div style={{ fontSize: 17, fontWeight: 600, color: RT.ink, letterSpacing: "-0.01em" }}>{title}</div>
+          <div style={{ fontSize: 14, color: RT.muted }}>{meta}</div>
         </div>
         {cta && onCta && (
           <button
@@ -296,10 +292,10 @@ function WorkflowCard({
               background: "none",
               padding: 0,
               fontSize: 14,
-              fontWeight: 700,
-              color: T.blue,
+              fontWeight: 600,
+              color: RT.accent,
               cursor: "pointer",
-              fontFamily: T.font,
+              fontFamily: RT.font,
               whiteSpace: "nowrap",
             }}
           >
@@ -320,7 +316,7 @@ function WorkflowCard({
                 alignItems: "center",
                 gap: 10,
                 padding: "9px 0",
-                borderTop: `1px solid ${T.rowDiv2}`,
+                borderTop: `1px solid ${RT.line}`,
               }}
             >
               <StatusDot state={it.state} />
@@ -329,7 +325,7 @@ function WorkflowCard({
                   flex: 1,
                   minWidth: 0,
                   fontSize: 14.5,
-                  color: T.ink,
+                  color: RT.ink,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
@@ -337,32 +333,13 @@ function WorkflowCard({
               >
                 {it.label}
               </span>
-              {it.meta && <span style={{ fontSize: 14, fontWeight: 600, color: T.muted, flex: "none" }}>{it.meta}</span>}
+              {it.meta && <span style={{ fontSize: 14, fontWeight: 600, color: RT.muted, flex: "none" }}>{it.meta}</span>}
             </div>
           ))}
         </div>
       )}
-    </Card>
+    </div>
   );
-}
-
-/** Deal-scoped surface context (mirror of the desktop sibling). */
-function dealSurfaceContext(
-  dealId: number | undefined,
-  dealName: string,
-  deal: DealRow,
-): SurfaceContext {
-  const ctx: SurfaceContext = {
-    device: "mobile",
-    activeMode: "cockpit",
-    activeView: "cockpit",
-    activeTitle: dealName,
-  };
-  if (dealId != null) ctx.dealId = dealId;
-  if (dealName) ctx.dealTitle = dealName;
-  const stage = journeyLabel(deal);
-  if (stage) ctx.dealStage = stage;
-  return ctx;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -371,8 +348,6 @@ function dealSurfaceContext(
 
 export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenProps) {
   const nav = useAtlasNav();
-  const chat = useAtlasChat();
-  const shell = useMobileShell();
   const dealId = view.dealId;
 
   const { detail, brief, detailState, briefState } = useDealCockpit(dealId);
@@ -457,96 +432,102 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
   const riskRows = [...signoffFlags, ...researchNeeded];
   const sourceSignals = brief?.marketRead?.sourceSignals ?? [];
 
-  // Open the chat surface so the send is VISIBLE (the user watches Yulia work +
-  // gets the "Open on canvas" control). Without this the cockpit sent silently,
-  // which is what led people to tap twice. The hook also drops the duplicate.
-  const askYulia = (prompt: string) => {
-    chat?.send(prompt, dealSurfaceContext(dealId, dealName, deal));
-    shell?.openChat();
-  };
+  // The deal's one headline figure (honest fallback chain → "—"), led with as the
+  // hero. NO sparkline: a deal has no honest time-series, and fabricating a trend
+  // would break the zero-hallucination rule.
+  const heroFig =
+    asking != null
+      ? { label: "Asking price", value: asking }
+      : adjEbitda != null
+        ? { label: "Adj. EBITDA", value: adjEbitda }
+        : revenue != null
+          ? { label: "Revenue", value: revenue }
+          : { label: "Headline figure", value: null as number | null };
+
+  const heroSub = (
+    <>
+      {jLabel ?? "Deal"}
+      {briefState === "ready" && fitScore != null && (
+        <>
+          {" · "}Fit <b style={{ color: RT.ink2, fontWeight: 600 }}>{fitScore}</b>/100
+        </>
+      )}
+      {briefState === "loading" && " · reading…"}
+    </>
+  );
 
   return (
     <div style={col}>
-      {/* ── A. Verdict / fit / journey (shell renders the back bar w/ deal name) ── */}
-      <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8, paddingTop: 2 }}>
-        {jLabel && (
-          <Pill bg={T.track} fg={T.label}>
-            {jLabel}
-          </Pill>
-        )}
-        {briefState === "loading" && (
-          <span
-            aria-hidden="true"
-            style={{ display: "inline-block", width: 118, height: 22, borderRadius: T.rPill, background: T.track }}
-          />
-        )}
-        {briefState === "ready" && verdict?.label && (
-          <Pill bg={vColors.bg} fg={vColors.fg}>
-            Verdict · {titleCase(verdict.label)}
-          </Pill>
-        )}
-        {briefState === "ready" && fitScore != null && (
-          <span style={{ fontSize: 14, color: T.muted, fontWeight: 600 }}>
-            Fit <b style={{ color: T.ink }}>{fitScore}</b>/100
-          </span>
-        )}
-      </div>
+      {/* ── A. Hero: the deal's headline figure + verdict ── */}
+      <Hero
+        label={heroFig.label}
+        value={fmtCents(heroFig.value)}
+        trailing={
+          briefState === "ready" && verdict?.label ? (
+            <Pill bg={vColors.bg} fg={vColors.fg}>
+              {titleCase(verdict.label)}
+            </Pill>
+          ) : briefState === "loading" ? (
+            <span
+              aria-hidden="true"
+              style={{ display: "inline-block", width: 92, height: 24, borderRadius: RT.rPill, background: RT.line }}
+            />
+          ) : null
+        }
+        sub={heroSub}
+      />
 
       {/* ── B. Journey gate pills (edge-bleed horizontal scroll) ── */}
       <div className="scr" style={edgeBleed}>
         <StepperPills steps={gateSteps} />
       </div>
 
-      {/* ── C. KPI cards (2-up grid, stacked) ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 9 }}>
-        <KpiCard label="REVENUE" value={fmtCents(revenue)} />
-        <KpiCard label="ADJ. EBITDA" value={fmtCents(adjEbitda)} />
-        <KpiCard label="ASKING" value={fmtCents(asking)} />
-        <KpiCard
-          label="IMPLIED MULTIPLE"
-          value={impliedMultiple != null ? `${impliedMultiple.toFixed(1)}×` : "—"}
-        />
+      {/* ── C. Stats (flat, white-on-grey — asking is the hero) ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 9 }}>
+        <Stat label="Revenue" value={fmtCents(revenue)} />
+        <Stat label="Adj. EBITDA" value={fmtCents(adjEbitda)} />
+        <Stat label="Multiple" value={impliedMultiple != null ? `${impliedMultiple.toFixed(1)}×` : "—"} />
       </div>
 
-      {/* ── D. Yulia's read ── */}
-      <Card pad={15} style={{ borderRadius: T.rCardLg }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-          <Sparkle size={15} />
-          <span style={{ fontSize: 15.5, fontWeight: 700, color: T.ink, letterSpacing: "-0.01em" }}>Yulia’s read</span>
-          {briefState === "ready" && brief?.stale && (
-            <span
-              style={{
-                fontSize: 13.5,
-                fontWeight: 600,
-                color: T.amber,
-                background: T.amberBg,
-                borderRadius: T.rPill,
-                padding: "3px 10px",
-              }}
-              title="Showing the last read while Yulia refreshes it."
-            >
-              Updating…
-            </span>
-          )}
-        </div>
+      {/* ── D. Yulia's read (Yulia herself is the FAB — no in-card button) ── */}
+      <SectionHeader style={{ display: "flex", alignItems: "center", gap: 8, margin: "10px 0 0" }}>
+        <Sparkle size={16} />
+        Yulia&rsquo;s read
+        {briefState === "ready" && brief?.stale && (
+          <span
+            style={{
+              fontSize: 12.5,
+              fontWeight: 500,
+              color: T.amber,
+              background: T.amberBg,
+              borderRadius: RT.rPill,
+              padding: "3px 10px",
+            }}
+            title="Showing the last read while Yulia refreshes it."
+          >
+            Updating…
+          </span>
+        )}
+      </SectionHeader>
 
+      <div style={panel}>
         {briefState === "loading" && <LoadingState label="Reading the deal…" />}
 
         {briefState === "error" && (
-          <div style={{ fontSize: 14, color: T.muted, lineHeight: 1.6 }}>
-            Yulia’s read isn’t available right now.
+          <div style={{ fontSize: 14.5, color: RT.muted, lineHeight: 1.6 }}>
+            Yulia&rsquo;s read isn&rsquo;t available right now.
           </div>
         )}
 
         {briefState === "ready" && (
           <>
-            <div style={{ fontSize: 14, lineHeight: 1.7, color: T.ink2 }}>
+            <div style={{ fontSize: 15, lineHeight: 1.7, color: RT.ink2 }}>
               {brief?.marketRead?.headline || "—"}
             </div>
             {(brief?.marketRead?.bullets?.length ?? 0) > 0 && (
               <ul style={{ margin: "12px 0 0", paddingLeft: 18, display: "flex", flexDirection: "column", gap: 6 }}>
                 {brief!.marketRead!.bullets!.map((b, i) => (
-                  <li key={i} style={{ fontSize: 14, lineHeight: 1.55, color: T.ink3 }}>
+                  <li key={i} style={{ fontSize: 14.5, lineHeight: 1.55, color: RT.ink2 }}>
                     {b}
                   </li>
                 ))}
@@ -556,7 +537,7 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
             {/* Key risks — real signoff flags + research gaps, never fabricated clauses */}
             {riskRows.length > 0 && (
               <div style={{ marginTop: 15 }}>
-                <div style={{ fontSize: 15.5, fontWeight: 700, color: T.ink, letterSpacing: "-0.01em", marginBottom: 4 }}>Key risks</div>
+                <div style={{ fontSize: 16, fontWeight: 600, color: RT.ink, letterSpacing: "-0.01em", marginBottom: 4 }}>Key risks</div>
                 {riskRows.map((r, i) => (
                   <div
                     key={i}
@@ -564,14 +545,14 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
                       display: "flex",
                       gap: 9,
                       alignItems: "flex-start",
-                      borderTop: `1px solid ${T.rowDiv}`,
+                      borderTop: `1px solid ${RT.line}`,
                       padding: "7px 0",
-                      fontSize: 14,
-                      color: T.ink3,
+                      fontSize: 14.5,
+                      color: RT.ink2,
                       lineHeight: 1.5,
                     }}
                   >
-                    <span style={{ color: T.terra, flex: "none", fontSize: 14 }} aria-hidden="true">
+                    <span style={{ color: RT.down, flex: "none", fontSize: 14 }} aria-hidden="true">
                       ⚑
                     </span>
                     <span>{r}</span>
@@ -582,49 +563,24 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
 
             {/* Source signals (the honest stand-in for a discrete "citations" list) */}
             {sourceSignals.length > 0 && (
-              <div style={{ marginTop: 15 }}>
-                <SectionLabel>Source signals</SectionLabel>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 7, marginTop: 8 }}>
-                  {sourceSignals.map((s, i) => (
-                    <SignalChip key={i}>{s}</SignalChip>
-                  ))}
-                </div>
+              <div style={{ marginTop: 15, display: "flex", flexWrap: "wrap", gap: 7 }}>
+                {sourceSignals.map((s, i) => (
+                  <SignalChip key={i}>{s}</SignalChip>
+                ))}
               </div>
-            )}
-
-            {chat != null && (
-              <button
-                type="button"
-                onClick={() => askYulia(`Give me your read on ${dealName}.`)}
-                style={{
-                  marginTop: 15,
-                  width: "100%",
-                  textAlign: "center",
-                  border: `1px solid ${T.border}`,
-                  background: T.white,
-                  borderRadius: T.rPill,
-                  padding: "10px 14px",
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: T.blue,
-                  cursor: "pointer",
-                  fontFamily: T.font,
-                }}
-              >
-                Ask Yulia about this deal →
-              </button>
             )}
           </>
         )}
-      </Card>
+      </div>
 
       {/* ── E. Workflows (honest: deliverable + gate progress) ── */}
+      <SectionHeader>Progress</SectionHeader>
       <WorkflowCard
         title="Deliverables"
         meta={`${dDone} / ${dTotal} complete`}
         pct={deliverablePct}
-        barColor={T.blue}
-        cta="Files"
+        barColor={RT.accent}
+        cta="Data room"
         onCta={() => nav.go("files", { dealId, dealName })}
         items={
           dTotal > 0
@@ -642,7 +598,7 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
         title="Journey progress"
         meta={`${gateDone} / ${gateTotal} stages`}
         pct={gatePct}
-        barColor={T.green}
+        barColor={RT.up}
         cta="Studio"
         onCta={() => nav.go("studio", { dealId, dealName })}
         items={gateSteps.map((s) => ({
@@ -652,53 +608,41 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
       />
 
       {dTotal === 0 && (
-        <div style={{ fontSize: 14, color: T.muted, marginTop: -4 }}>
+        <div style={{ fontSize: 14, color: RT.muted, marginTop: -4 }}>
           No deliverables yet — ask Yulia to draft the first one for this deal.
         </div>
       )}
 
-      {/* ── F. Deal team row (honest count → Members) ── */}
-      <button
-        type="button"
-        onClick={() => nav.openSettings("members")}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 11,
-          width: "100%",
-          background: T.white,
-          border: `1px solid ${T.border}`,
-          borderRadius: T.rCardLg,
-          boxShadow: T.shCard,
-          padding: 14,
-          cursor: "pointer",
-          fontFamily: T.font,
-          textAlign: "left",
-        }}
-      >
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 15.5, fontWeight: 700, color: T.ink }}>Deal team</div>
-          <div style={{ fontSize: 14, color: T.muted, marginTop: 2 }}>
-            {team.state === "ready"
+      {/* ── F. This deal — team + deal surfaces ── */}
+      <ListSection header="This deal" style={{ marginTop: 8 }}>
+        <ListRow
+          title="Deal team"
+          subtitle={
+            team.state === "ready"
               ? team.count != null
                 ? `${team.count} ${team.count === 1 ? "member" : "members"}`
                 : "—"
               : team.state === "error"
                 ? "Members unavailable"
-                : "Loading members…"}
-          </div>
-        </div>
-        <ChevronRightIcon size={18} c={T.muted2} />
-      </button>
-
-      {/* ── G. THIS DEAL → nav.go(..., { dealId }) ── */}
-      <ListSection header="This deal" style={{ marginTop: 2 }}>
-        <ListRow title="Files" accessory="chevron" onClick={() => nav.go("files", { dealId, dealName })} />
+                : "Loading members…"
+          }
+          accessory="chevron"
+          onClick={() => nav.openSettings("members")}
+        />
+        <ListRow title="Data room" accessory="chevron" onClick={() => nav.go("files", { dealId, dealName })} />
         <ListRow title="Studio" accessory="chevron" onClick={() => nav.go("studio", { dealId, dealName })} />
-        <ListRow title="Deals" accessory="chevron" onClick={() => nav.go("deals", { dealId, dealName })} />
         <ListRow title="Integration" accessory="chevron" onClick={() => nav.go("integration", { dealId, dealName })} />
-        <ListRow title="Sourcing" accessory="chevron" onClick={() => nav.go("sourcing", { dealId, dealName })} />
       </ListSection>
+    </div>
+  );
+}
+
+/** Flat stat tile (white-on-grey, no card chrome). */
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={statTile}>
+      <div style={statValue}>{value}</div>
+      <div style={statLabel}>{label}</div>
     </div>
   );
 }
@@ -728,3 +672,29 @@ const edgeBleed: CSSProperties = {
   padding: "2px 18px 4px",
   overflowX: "auto",
 };
+
+/** Flat white panel — separation by tone (no border, no shadow). */
+const panel: CSSProperties = {
+  background: RT.card,
+  borderRadius: RT.rCard,
+  padding: 16,
+};
+
+/** Flat stat tile (white-on-grey). */
+const statTile: CSSProperties = {
+  background: RT.card,
+  borderRadius: 14,
+  padding: "12px 12px 11px",
+  minWidth: 0,
+};
+const statValue: CSSProperties = {
+  fontSize: 18,
+  fontWeight: 600,
+  color: RT.ink,
+  letterSpacing: "-0.01em",
+  lineHeight: 1.15,
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+};
+const statLabel: CSSProperties = { fontSize: 12.5, color: RT.muted, marginTop: 3 };
