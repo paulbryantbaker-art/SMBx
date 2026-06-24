@@ -1422,6 +1422,33 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
       }
     });
 
+    // Durable per-deal FACT extraction — fire-and-forget, same cadence as the
+    // rolling summary. Cross-conversation memory so Yulia returns to a deal
+    // already knowing what's established (deal_facts; injected by promptBuilder).
+    if (deal?.id) {
+      setImmediate(async () => {
+        try {
+          const [{ count }] = await sql`SELECT COUNT(*) as count FROM messages WHERE conversation_id = ${convId}`;
+          const total = Number(count);
+          if (total >= 20) {
+            const [w] = await sql`SELECT facts_message_count FROM conversations WHERE id = ${convId} LIMIT 1`;
+            const lastCount = Number(w?.facts_message_count || 0);
+            if (total - lastCount >= 20) {
+              const { extractDealFacts } = await import('../services/dealFactsExtractor.js');
+              const windowSize = Math.min(60, Math.max(20, total - lastCount + 5));
+              const n = await extractDealFacts(convId, deal.id, userId, windowSize);
+              // Advance the watermark even when 0 facts found (window processed),
+              // so we don't re-extract the same messages next turn.
+              await sql`UPDATE conversations SET facts_message_count = ${total} WHERE id = ${convId}`;
+              if (n > 0) console.log(`🧠 Extracted ${n} deal fact(s) for deal ${deal.id} (conv ${convId})`);
+            }
+          }
+        } catch (e: any) {
+          console.error('Deal facts extraction error:', e.message);
+        }
+      });
+    }
+
     if (!clientDisconnected && !res.writableEnded) {
       res.write('data: [DONE]\n\n');
       res.end();

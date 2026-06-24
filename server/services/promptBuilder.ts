@@ -53,6 +53,16 @@ interface DealContext {
   asking_price: number | null;
   financials: Record<string, any> | null;
   status: string;
+  // Deal-stand / structure signals (already SELECT *-fetched in chat.ts).
+  deal_type?: string | null;
+  entity_type?: string | null;
+  exit_type?: string | null;
+  earnout_present?: boolean | null;
+  rwi_eligible?: boolean | null;
+  seller_financing_willingness?: string | null;
+  seller_standby_willingness?: string | null;
+  parent_deal_id?: number | null;
+  financial_snapshot_at?: string | null;
 }
 
 const V19_RUNTIME_RULES = `
@@ -74,6 +84,20 @@ function formatDealContext(deal: DealContext): string {
   if (deal.sde) fields.push(`SDE: $${(deal.sde / 100).toLocaleString()}`);
   if (deal.ebitda) fields.push(`EBITDA: $${(deal.ebitda / 100).toLocaleString()}`);
   if (deal.asking_price) fields.push(`Asking Price: $${(deal.asking_price / 100).toLocaleString()}`);
+
+  // Deal-stand / structure signals (so Yulia knows where the deal stands).
+  if (deal.status && deal.status !== 'active') fields.push(`Status: ${deal.status}`);
+  if (deal.deal_type) fields.push(`Deal Type: ${deal.deal_type}`);
+  if (deal.entity_type) fields.push(`Entity Type: ${deal.entity_type}`);
+  if (deal.exit_type) fields.push(`Exit Strategy: ${deal.exit_type}`);
+  if (deal.earnout_present) fields.push(`Earnout: present`);
+  if (deal.rwi_eligible) fields.push(`RWI eligible: yes`);
+  if (deal.seller_financing_willingness) fields.push(`Seller financing: ${deal.seller_financing_willingness}`);
+  if (deal.seller_standby_willingness) fields.push(`SBA standby: ${deal.seller_standby_willingness}`);
+  if (deal.parent_deal_id) fields.push(`Spawned from Deal #${deal.parent_deal_id}`);
+  if (deal.financial_snapshot_at) {
+    fields.push(`Financials last snapshotted: ${new Date(deal.financial_snapshot_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`);
+  }
 
   // Include extended fields from financials jsonb
   if (deal.financials && typeof deal.financials === 'object') {
@@ -152,6 +176,55 @@ async function buildDealAssetsLayer(dealId: number): Promise<string | null> {
     return `\n## WHAT'S ALREADY IN THIS DEAL\nYou already have what's listed below. Pick up where the deal stands — don't re-read from scratch.\n\n${parts.join('\n\n')}`;
   } catch {
     return null; // non-critical prompt context
+  }
+}
+
+/* ── Deal team (owner + accepted collaborators) so Yulia knows who's involved
+ *    instead of asking. ── */
+async function buildDealTeamLayer(dealId: number): Promise<string | null> {
+  try {
+    const [owner] = await sql`
+      SELECT u.display_name, u.email FROM deals d JOIN users u ON u.id = d.user_id WHERE d.id = ${dealId} LIMIT 1
+    `;
+    const participants = await sql`
+      SELECT dp.role, dp.access_level, u.display_name, u.email
+      FROM deal_participants dp JOIN users u ON u.id = dp.user_id
+      WHERE dp.deal_id = ${dealId} AND dp.accepted_at IS NOT NULL
+      ORDER BY dp.created_at ASC LIMIT 20
+    `;
+    if (participants.length === 0) return null; // owner-only = no real team to note
+    const lines: string[] = [];
+    if (owner) lines.push(`- ${owner.display_name || owner.email} — owner`);
+    for (const p of participants as any[]) {
+      const lvl = p.access_level && p.access_level !== 'full' ? ` (${p.access_level} access)` : '';
+      lines.push(`- ${p.display_name || p.email} — ${p.role}${lvl}`);
+    }
+    return `\n## DEAL TEAM\nWho's working this deal (don't ask "who's involved?" — you know):\n${lines.join('\n')}`;
+  } catch {
+    return null; // non-critical
+  }
+}
+
+/* ── Established per-deal FACTS — durable memory captured from earlier work on
+ *    this deal, across ALL its conversations. This is what lets Yulia "remember"
+ *    a deal she comes back to instead of re-deriving it. Written by
+ *    dealFactsExtractor (fire-and-forget post-conversation). ── */
+async function buildDealFactsLayer(dealId: number): Promise<string | null> {
+  try {
+    const facts = await sql`
+      SELECT category, fact FROM deal_facts WHERE deal_id = ${dealId}
+      ORDER BY updated_at DESC LIMIT 30
+    `;
+    if (facts.length === 0) return null;
+    const byCat: Record<string, string[]> = {};
+    for (const f of facts as any[]) (byCat[f.category || 'general'] ??= []).push(f.fact);
+    const lines = Object.keys(byCat)
+      .sort()
+      .map((c) => `**${titleizeType(c)}**\n${byCat[c].map((x) => `- ${x}`).join('\n')}`)
+      .join('\n');
+    return `\n## ESTABLISHED FACTS FOR THIS DEAL\nDurable facts captured from earlier work on this deal (across all its conversations). Treat these as KNOWN — do NOT re-ask or re-derive them; build on them:\n${lines}`;
+  } catch {
+    return null; // non-critical (table may not exist yet on older DBs)
   }
 }
 
@@ -901,10 +974,16 @@ export async function buildSystemPrompt(
   // write-only dead data.
   try {
     const [currentConv] = await sql`
-      SELECT summary FROM conversations WHERE id = ${conversationId} AND summary IS NOT NULL LIMIT 1
+      SELECT summary, message_count FROM conversations WHERE id = ${conversationId} AND summary IS NOT NULL LIMIT 1
     `;
     if (currentConv?.summary) {
-      layers.push(`\n## EARLIER IN THIS CONVERSATION\n${currentConv.summary}\n(This summarizes earlier messages. The recent messages follow in the conversation history.)`);
+      // Tell Yulia she's on a windowed view, so she knows older detail lives in
+      // the summary (and to pull it / not assume she has everything verbatim).
+      const total = Number(currentConv.message_count || 0);
+      const note = total > 50
+        ? `\n(You are seeing the LAST 50 of ~${total} messages in this thread; everything before is summarized above. If you need older specifics, say so or use the deal's established facts — don't assume you have it all verbatim.)`
+        : `\n(This summarizes earlier messages. The recent messages follow in the conversation history.)`;
+      layers.push(`\n## EARLIER IN THIS CONVERSATION\n${currentConv.summary}${note}`);
     }
   } catch { /* non-critical */ }
 
@@ -934,6 +1013,15 @@ export async function buildSystemPrompt(
     // that already exist.
     const assetsLayer = await buildDealAssetsLayer(deal.id);
     if (assetsLayer) layers.push(assetsLayer);
+
+    // Layer 3a+: Established durable facts for this deal (cross-conversation
+    // memory) + the deal team, so Yulia returns knowing the deal, not blank.
+    const [factsLayer, teamLayer] = await Promise.all([
+      buildDealFactsLayer(deal.id),
+      buildDealTeamLayer(deal.id),
+    ]);
+    if (factsLayer) layers.push(factsLayer);
+    if (teamLayer) layers.push(teamLayer);
 
     // Layer 3a+: Previous gate summaries for context carry-forward. Dated —
     // a six-month return needs "when" as much as "what".
