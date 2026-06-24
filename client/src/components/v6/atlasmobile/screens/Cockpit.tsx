@@ -331,6 +331,16 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
   const impliedMultiple =
     multipleRaw != null ? multipleRaw : derived != null && derived > 0 && derived <= 50 ? derived : null;
 
+  // Enterprise value (EV) — the analytical valuation, led with as the hero
+  // instead of the seller's asking price (asking is a negotiation input shown as
+  // a detail). Implied EV = adj. EBITDA × the implied multiple; falls back to
+  // asking → EBITDA → revenue. (When the multiple is only derived from asking,
+  // EV ≈ asking — honest until a real valuation lands.)
+  const enterpriseValue =
+    adjEbitda != null && impliedMultiple != null && impliedMultiple > 0
+      ? Math.round(adjEbitda * impliedMultiple)
+      : (asking ?? adjEbitda ?? revenue);
+
   const gateSteps = buildGateSteps(deal, detail.gates);
 
   // Verdict + fit (fit = verdict.score; only render if real).
@@ -353,17 +363,10 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
   const researchNeeded = brief?.marketRead?.researchNeeded ?? [];
   const riskRows = [...signoffFlags, ...researchNeeded];
 
-  // The deal's one headline figure (honest fallback chain → "—"), led with as the
-  // hero. NO sparkline: a deal has no honest time-series, and fabricating a trend
-  // would break the zero-hallucination rule.
-  const heroFig =
-    asking != null
-      ? { label: "Asking price", value: asking }
-      : adjEbitda != null
-        ? { label: "Adj. EBITDA", value: adjEbitda }
-        : revenue != null
-          ? { label: "Revenue", value: revenue }
-          : { label: "Headline figure", value: null as number | null };
+  // The hero leads with Enterprise Value (the valuation), NOT the asking price.
+  // NO sparkline: a deal has no honest time-series, and fabricating a trend would
+  // break the zero-hallucination rule.
+  const heroFig = { label: "Enterprise value", value: enterpriseValue as number | null };
 
   const currentStage = gateSteps.find((s) => s.state === "current")?.label ?? null;
   const stageIndex = Math.min(gateDone + 1, gateTotal); // 1-based "stage N of M"
@@ -450,11 +453,12 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
         ]}
       />
 
-      {/* ── Key numbers ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 9 }}>
+      {/* ── Key numbers (asking is the seller's number — a negotiation detail) ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 9 }}>
         <Stat label="Revenue" value={fmtCents(revenue)} />
         <Stat label="Adj. EBITDA" value={fmtCents(adjEbitda)} />
         <Stat label="Multiple" value={impliedMultiple != null ? `${impliedMultiple.toFixed(1)}×` : "—"} />
+        <Stat label="Asking" value={fmtCents(asking)} />
       </div>
 
       {/* ── Yulia's read — concise headline + a risk LINK (full read via Yulia) ── */}

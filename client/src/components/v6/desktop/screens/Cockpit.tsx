@@ -598,6 +598,16 @@ export default function CockpitScreen({ view, user }: AtlasScreenProps) {
         ? derived
         : null;
 
+  // Enterprise value (EV) — the analytical valuation, led with instead of the
+  // seller's asking price (asking is a negotiation input shown as a detail).
+  // Implied EV = adj. EBITDA × the implied multiple; falls back to asking →
+  // EBITDA → revenue when there's nothing to value on. (When the multiple is
+  // only derived from asking, EV ≈ asking — honest until a real valuation lands.)
+  const enterpriseValue =
+    adjEbitda != null && impliedMultiple != null && impliedMultiple > 0
+      ? Math.round(adjEbitda * impliedMultiple)
+      : (asking ?? adjEbitda ?? revenue);
+
   const gateSteps = buildGateSteps(deal, detail.gates);
 
   // Verdict + fit (fit = verdict.score; only render if real).
@@ -694,13 +704,15 @@ export default function CockpitScreen({ view, user }: AtlasScreenProps) {
 
       {/* ── C. KPI cards ──────────────────────────────── */}
       <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+        <KpiCard label="ENTERPRISE VALUE" value={fmtCents(enterpriseValue)} />
         <KpiCard label="REVENUE" value={fmtCents(revenue)} />
         <KpiCard label="ADJ. EBITDA" value={fmtCents(adjEbitda)} />
-        <KpiCard label="ASKING" value={fmtCents(asking)} />
         <KpiCard
           label="IMPLIED MULTIPLE"
           value={impliedMultiple != null ? `${impliedMultiple.toFixed(1)}×` : "—"}
         />
+        {/* Asking is the seller's number — a negotiation detail, not the headline. */}
+        {asking != null && <KpiCard label="ASKING" value={fmtCents(asking)} />}
       </div>
 
       {/* ── D. Two-column body — body clips; LEFT scrolls; team panel pins flush ── */}
