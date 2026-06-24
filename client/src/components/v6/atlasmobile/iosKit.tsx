@@ -23,6 +23,7 @@ import {
 } from "react";
 import { T } from "../desktop/atlasTokens";
 import { M } from "./mobileTokens";
+import { RT } from "./redesign/rt";
 import { ChevronRightIcon } from "../desktop/icons";
 
 /* iOS system colors used as recognizable signals (kept local — not app tokens). */
@@ -364,7 +365,7 @@ export function Toolbar({
         <button
           type="button"
           onClick={leading.onClick}
-          style={{ ...S.toolbarBtn, color: leading.destructive ? IOS_RED : T.blue, textAlign: "left" }}
+          style={{ ...S.toolbarBtn, color: leading.destructive ? IOS_RED : RT.ink2, textAlign: "left" }}
         >
           {leading.label}
         </button>
@@ -376,7 +377,7 @@ export function Toolbar({
         <button
           type="button"
           onClick={trailing.onClick}
-          style={{ ...S.toolbarBtn, color: T.blue, fontWeight: trailing.primary ? 700 : 500, textAlign: "right" }}
+          style={{ ...S.toolbarBtn, color: RT.accentInk, fontWeight: trailing.primary ? 700 : 500, textAlign: "right" }}
         >
           {trailing.label}
         </button>
