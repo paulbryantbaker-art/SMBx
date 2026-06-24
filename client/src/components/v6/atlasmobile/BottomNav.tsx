@@ -1,47 +1,51 @@
 /**
- * BottomNav — the floating bottom tab bar, the signature Atlas-mobile element.
- * Redesign: just TWO content tabs (Today / Deals). Yulia is the universal violet
- * FAB → slide-up sheet (which also carries jump-to nav); Sourcing/Studio/Agent/
- * Integration/Settings live in the avatar menu hub; per-deal surfaces live in the
- * deal.
+ * BottomNav — the floating dock, the signature Atlas-mobile element.
  *
- * It is a SMALL inset rounded white pill (position:fixed bottom, left/right:14) —
- * NOT a full-viewport fixed bg div, so the Safari toolbar rule is satisfied.
+ * Cash App language: a SMALL, centered, form-fitting pill that hugs its buttons
+ * (NOT a full-width bar). Three round pill buttons inside the pill dock — the two
+ * content tabs (Today / Deals) + Yulia (the chat action, the violet accent). The
+ * active tab gets a soft-violet pill behind it (a true pill, NOT a rounded
+ * square); Yulia is a solid-violet pill so it reads as the one accent action.
  *
- * Active item = the one violet accent (#5b53d6) with a soft-tinted lozenge,
- * inactive = a readable mid-grey; icons inherit via stroke/fill currentColor.
+ * Because Yulia lives in the dock here, the separate FAB only appears on screens
+ * that have NO dock (detail/hub) — one Yulia affordance per screen, never two.
+ *
+ * It is a SMALL inset element (position:fixed bottom, centered) — NOT a
+ * full-viewport fixed bg div, so the Safari toolbar / chrome-collapse rule holds.
  */
 import type { CSSProperties, ReactNode } from "react";
-import { T } from "../desktop/atlasTokens";
-import { M } from "./mobileTokens";
 import { HomeIcon, DealsListIcon } from "../desktop/icons";
 import type { AtlasScreen } from "../desktop/atlasNav";
 
-// Redesign: just two content tabs. Yulia is the universal FAB → slide-up sheet
-// (it also carries jump-to nav); Sourcing/Studio/etc. live in the avatar hub.
+// Two content tabs. Yulia is the chat action (opens the slide-up sheet), not a
+// destination, so it's rendered separately — not part of the tab union.
 export type BottomTab = "today" | "deals";
 
-const ICON = 26;
+const ICON = 25;
 
-const ITEMS: { id: BottomTab; label: string; icon: (c: string) => ReactNode }[] = [
+const TABS: { id: BottomTab; label: string; icon: (c: string) => ReactNode }[] = [
   { id: "today", label: "Today", icon: (c) => <HomeIcon size={ICON} c={c} /> },
   { id: "deals", label: "Deals", icon: (c) => <DealsListIcon size={ICON} c={c} /> },
 ];
 
+const ACCENT = "#5b53d6";
+const ACCENT_SOFT = "#ece9fb";
+const INACTIVE = "#6c6b66";
+
 export function BottomNav({
   active,
   onTab,
+  onYulia,
 }: {
   active: BottomTab;
-  /** The four real screens go through nav.go; 'more' toggles the More overlay. */
   onTab: (tab: BottomTab) => void;
+  /** Opens the Yulia slide-up sheet — the chat action lives in the dock now. */
+  onYulia: () => void;
 }) {
   return (
     <nav style={S.bar} aria-label="Primary">
-      {ITEMS.map((it) => {
+      {TABS.map((it) => {
         const isActive = it.id === active;
-        // Redesign: the one violet accent for active; readable mid-grey inactive.
-        const color = isActive ? "#5b53d6" : "#6c6b66";
         return (
           <button
             key={it.id}
@@ -49,31 +53,24 @@ export function BottomNav({
             aria-label={it.label}
             aria-current={isActive ? "page" : undefined}
             onClick={() => onTab(it.id)}
-            style={S.item}
+            style={{ ...S.btn, background: isActive ? ACCENT_SOFT : "transparent" }}
           >
-            {/* inner capsule — the selected tab gets a tinted lozenge behind the
-                icon+label (iOS liquid-glass tab-bar treatment). */}
-            <span
-              style={{
-                ...S.cap,
-                color,
-                background: isActive ? M.glassNav.activeBg : "transparent",
-              }}
-            >
-              {it.icon(color)}
-              <span style={{ ...S.label, fontWeight: isActive ? 700 : 500 }}>{it.label}</span>
-            </span>
+            {it.icon(isActive ? ACCENT : INACTIVE)}
           </button>
         );
       })}
+      {/* Yulia — the chat action, integrated into the dock as the violet accent. */}
+      <button type="button" aria-label="Ask Yulia" onClick={onYulia} style={{ ...S.btn, ...S.yulia }}>
+        <svg width={ICON} height={ICON} viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
+          <path d="M12 2c.4 4.6 2.4 6.6 7 7-4.6.4-6.6 2.4-7 7-.4-4.6-2.4-6.6-7-7 4.6-.4 6.6-2.4 7-7z" />
+        </svg>
+      </button>
     </nav>
   );
 }
 
-/** The four bottom tabs that map onto an AtlasScreen (More is a shell overlay,
- *  not an AtlasScreen). Exported so the shell can derive the active tab. The
- *  retired "pipeline" alias and the deal-detail surfaces (cockpit) highlight
- *  Deals — the funnel now lives in the Deals Board toggle. */
+/** Today / Deals + the deal-detail surfaces highlight a tab; everything else
+ *  (sourcing/studio/agent/integration/settings) lives in the avatar hub. */
 export function bottomTabForScreen(screen: AtlasScreen): BottomTab | null {
   switch (screen) {
     case "today":
@@ -85,53 +82,45 @@ export function bottomTabForScreen(screen: AtlasScreen): BottomTab | null {
     case "canvas":
       return "deals";
     default:
-      return null; // sourcing/studio/agent/integration/settings live in the hub
+      return null;
   }
 }
 
 const S: Record<string, CSSProperties> = {
+  // Centered, content-hugging pill (form-fitting) — a small bottom-anchored fixed
+  // element (Safari rule), NOT a full-width bar.
   bar: {
-    position: "fixed", // own viewport-fixed bottom bar — NOT inside a full-viewport fixed layer (which would block iOS chrome collapse)
-    left: 14,
-    right: 14,
-    bottom: "calc(env(safe-area-inset-bottom, 0px) + 14px)",
-    height: M.glassNav.height,
-    borderRadius: M.glassNav.radius,
-    background: M.glassNav.background,
-    backdropFilter: M.glassNav.backdropFilter,
-    WebkitBackdropFilter: M.glassNav.backdropFilter,
-    border: M.glassNav.border,
-    boxShadow: M.glassNav.boxShadow,
-    display: "flex",
+    position: "fixed",
+    left: "50%",
+    transform: "translateX(-50%)",
+    bottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)",
+    display: "inline-flex",
     alignItems: "center",
-    padding: "0 4px",
+    gap: 6,
+    padding: 6,
+    borderRadius: 999,
+    background: "#ffffff",
+    boxShadow: "0 10px 30px rgba(30,32,70,.18), 0 1px 3px rgba(30,32,70,.10)",
     zIndex: 5,
   },
-  // Each tab fills its quarter of the bar AND its full height — a ~88×68 hit
-  // area (was cramped with 5 tabs). The visible capsule is centered inside.
-  item: {
-    flex: 1,
-    minWidth: 0,
-    height: "100%",
+  // Each button is a true round pill (fully-rounded), NOT a rounded square.
+  btn: {
+    width: 48,
+    height: 48,
+    flex: "none",
+    borderRadius: 999,
+    border: "none",
+    padding: 0,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    padding: 0,
-    border: "none",
-    background: "transparent",
     cursor: "pointer",
-    fontFamily: T.font,
+    background: "transparent",
+    transition: "background .18s ease",
     WebkitTapHighlightColor: "transparent",
   },
-  cap: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 4,
-    padding: "7px 16px",
-    borderRadius: 18,
-    transition: "background .2s ease",
+  yulia: {
+    background: ACCENT,
+    boxShadow: "0 4px 12px rgba(91,83,214,.35)",
   },
-  label: { fontSize: 11.5, lineHeight: 1, letterSpacing: "-0.01em" },
 };

@@ -360,10 +360,10 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
   // Every screen body-scrolls now (the chat is an overlay sheet, not a surface),
   // so iOS Safari keeps collapsing its chrome on scroll.
   const showNav = NAV_SCREENS.has(surface);
-  // The Yulia FAB is universal — on every screen except the menu hub (which has
-  // its own affordances). The sheet covers it when open, so no extra gating.
-  const showFab = surface !== "more";
-  const fabAboveNav = showFab && showNav; // Today/Deals have the bar → lift the FAB
+  // Yulia lives IN the dock on tabbed screens (Today/Deals), so the FAB only
+  // appears where there's no dock (detail/hub) — one Yulia affordance per screen.
+  // (The menu hub has its own row.)
+  const showFab = !showNav && surface !== "more";
   const activeTab: BottomTab = bottomTabForScreen(view.screen) ?? "today";
 
   // Back target: detail/section screens step back to a sensible surface. Deal
@@ -444,8 +444,8 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
               fixed bars (like macrumors.com / the legacy V6Mobile TabBar) don't
               trigger that, so the chrome collapses normally. The YuliaSheet returns
               null when closed, so on content screens nothing fills the viewport. */}
-          {showNav && <BottomNav active={activeTab} onTab={onTab} />}
-          {showFab && <YuliaFab onOpen={() => setSheetOpen(true)} aboveNav={fabAboveNav} />}
+          {showNav && <BottomNav active={activeTab} onTab={onTab} onYulia={() => setSheetOpen(true)} />}
+          {showFab && <YuliaFab onOpen={() => setSheetOpen(true)} />}
           <YuliaSheet
             open={sheetOpen}
             onClose={() => setSheetOpen(false)}
