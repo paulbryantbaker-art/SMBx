@@ -15,11 +15,13 @@
  * The shell renders the back bar (deal name), the scroll area, bottom nav
  * clearance, and the Yulia FAB. This screen returns ONLY body content.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import type { AtlasScreenProps } from "../../desktop/atlasNav";
 import { useAtlasNav, useAtlasChat } from "../../desktop/atlasNav";
 import { useMobileShell } from "../mobileShell";
+import { useModelStore } from "../../../../lib/modelStore";
+import { listCanvasArtifacts } from "../../desktop/screens/Canvas";
 import { authHeaders } from "../../../../hooks/useAuth";
 import type { SurfaceContext } from "../../../../lib/yuliaSurfaceContext";
 import { T } from "../../desktop/atlasTokens";
@@ -251,6 +253,24 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
   const { detail, brief, detailState, briefState } = useDealCockpit(dealId);
   const team = useDealTeamCount(dealId);
 
+  // What Yulia has opened on the canvas FOR THIS DEAL — so the user can return to
+  // her analyses/models instead of asking her to redo them. Sourced from the live
+  // model store + the artifact registry (session). (Cross-reload rehydration from
+  // the server's canvas_tabs is the next step — the work is already saved there.)
+  const modelTabs = useModelStore((s) => s.tabs);
+  const canvasItems = useMemo(() => {
+    if (dealId == null) return [] as { id: string; label: string; kind: string }[];
+    const models = Object.values(modelTabs)
+      .filter((t) => t.dealId === dealId)
+      .map((t) => ({ id: t.id, label: t.title || "Interactive model", kind: "Model" }));
+    const analyses = listCanvasArtifacts(dealId).map((a) => ({
+      id: a.id,
+      label: a.title || "Analysis",
+      kind: "Analysis",
+    }));
+    return [...models, ...analyses];
+  }, [modelTabs, dealId]);
+
   // No deal selected → honest empty.
   if (dealId == null) {
     return (
@@ -474,6 +494,25 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
           </>
         )}
       </div>
+
+      {/* ── On the canvas — Yulia's analyses for this deal (return, don't redo) ── */}
+      {canvasItems.length > 0 && (
+        <>
+          <Divider />
+          <DetailSection title="On the canvas" desc="Models and analyses Yulia opened for this deal — tap to reopen.">
+            {canvasItems.map((it) => (
+              <ActionRow
+                key={it.id}
+                leading={<Sparkle size={18} />}
+                title={it.label}
+                sub={it.kind}
+                action={<ChevronRightIcon size={18} c={RT.faint} />}
+                onClick={() => nav.openCanvas(it.id, dealId ?? undefined)}
+              />
+            ))}
+          </DetailSection>
+        </>
+      )}
 
       {/* ── Manage this deal — the drill-ins ── */}
       <Divider />

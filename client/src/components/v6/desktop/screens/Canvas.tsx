@@ -48,6 +48,14 @@ export function getCanvasArtifact(id: string | undefined): CanvasArtifact | null
   return ARTIFACTS.get(id) ?? null;
 }
 
+/** Long-form artifacts registered this session for a deal — lets a surface (e.g.
+ *  the cockpit) list "what Yulia opened on the canvas" so the user can return to
+ *  it instead of asking her to redo the work. */
+export function listCanvasArtifacts(dealId?: number | null): CanvasArtifact[] {
+  const all = [...ARTIFACTS.values()];
+  return dealId == null ? all : all.filter((a) => a.dealId === dealId);
+}
+
 export default function CanvasScreen({ view }: AtlasScreenProps) {
   const nav = useAtlasNav();
   const chat = useAtlasChat();
