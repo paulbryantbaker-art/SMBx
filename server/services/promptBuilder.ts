@@ -88,6 +88,73 @@ function formatDealContext(deal: DealContext): string {
   return fields.join('\n');
 }
 
+/* ── "What's already in this deal" — the deliverables Yulia has created + the
+ *    files in the data room, so she knows where the deal stands without
+ *    re-reading from scratch or re-asking for work/docs that already exist. ── */
+
+const DELIVERABLE_STATUS_LABEL: Record<string, string> = {
+  complete: 'Complete',
+  generating: 'In progress',
+  pending: 'Not started',
+  failed: 'Failed',
+};
+
+function titleizeType(t: string | null | undefined): string {
+  if (!t) return 'Deliverable';
+  return t.replace(/[_-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+async function buildDealAssetsLayer(dealId: number): Promise<string | null> {
+  try {
+    const [deliverables, docs] = await Promise.all([
+      sql`
+        SELECT d.status, d.type, m.name AS menu_name
+        FROM deliverables d
+        LEFT JOIN menu_items m ON m.id = d.menu_item_id
+        WHERE d.deal_id = ${dealId}
+        ORDER BY d.created_at DESC
+        LIMIT 30
+      `,
+      sql`
+        SELECT name, file_type, deliverable_id
+        FROM data_room_documents
+        WHERE deal_id = ${dealId}
+        ORDER BY created_at DESC
+        LIMIT 40
+      `,
+    ]);
+
+    const parts: string[] = [];
+
+    if (deliverables.length > 0) {
+      const byStatus: Record<string, string[]> = {};
+      for (const d of deliverables as any[]) {
+        const name = d.menu_name || titleizeType(d.type);
+        (byStatus[d.status] ??= []).push(name);
+      }
+      const order = ['complete', 'generating', 'pending', 'failed'];
+      const lines = order
+        .filter((s) => byStatus[s]?.length)
+        .map((s) => `- ${DELIVERABLE_STATUS_LABEL[s] ?? s}: ${byStatus[s].join(', ')}`);
+      if (lines.length) parts.push(`**Work products already created** (reference or update these — do NOT re-create them or claim they don't exist):\n${lines.join('\n')}`);
+    }
+
+    // Uploaded files (deliverable_id IS NULL = user-provided, not generated).
+    const uploads = (docs as any[]).filter((x) => x.deliverable_id == null);
+    if (uploads.length > 0) {
+      const MAX = 25;
+      const shown = uploads.slice(0, MAX).map((x) => `${x.name}${x.file_type ? ` (${x.file_type})` : ''}`);
+      const extra = uploads.length > MAX ? ` (+${uploads.length - MAX} more)` : '';
+      parts.push(`**Files in the data room** (already uploaded — do NOT ask the user to provide these again; cite them when grounding claims):\n${shown.join(', ')}${extra}`);
+    }
+
+    if (parts.length === 0) return null;
+    return `\n## WHAT'S ALREADY IN THIS DEAL\nYou already have what's listed below. Pick up where the deal stands — don't re-read from scratch.\n\n${parts.join('\n\n')}`;
+  } catch {
+    return null; // non-critical prompt context
+  }
+}
+
 function formatV19ReadinessForPrompt(readiness: V19DealReadiness): string {
   const modelLines = readiness.models.length
     ? readiness.models.map(model => `- ${model.modelId}: ${model.status}${model.missingInputs.length ? ` (${model.missingInputs.join(', ')})` : ''}`).join('\n')
@@ -861,6 +928,12 @@ export async function buildSystemPrompt(
       const definitiveContext = formatDefinitiveDealStateForPrompt(latestState, packets);
       if (definitiveContext) layers.push(definitiveContext);
     } catch { /* DEFINITIVE DealState journal is non-critical prompt context */ }
+
+    // Layer 3a+: What's already produced + uploaded for this deal — so Yulia
+    // knows where the deal stands and doesn't re-read or re-ask for work/files
+    // that already exist.
+    const assetsLayer = await buildDealAssetsLayer(deal.id);
+    if (assetsLayer) layers.push(assetsLayer);
 
     // Layer 3a+: Previous gate summaries for context carry-forward. Dated —
     // a six-month return needs "when" as much as "what".
