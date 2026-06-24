@@ -96,17 +96,19 @@ const S: Record<string, CSSProperties> = {
     bottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)",
     display: "inline-flex",
     alignItems: "center",
-    gap: 6,
+    gap: 5,
     padding: 6,
     borderRadius: 999,
     background: "#ffffff",
     boxShadow: "0 10px 30px rgba(30,32,70,.18), 0 1px 3px rgba(30,32,70,.10)",
     zIndex: 5,
   },
-  // Each button is a true round pill (fully-rounded), NOT a rounded square.
+  // Each button is a horizontal PILL (stadium — wider than tall, fully rounded),
+  // like Cash App's dock lozenges. NOT a circle, NOT a rounded square. The active
+  // tab + Yulia carry the fill; inactive tabs are bare icons (per the reference).
   btn: {
-    width: 48,
-    height: 48,
+    width: 66,
+    height: 46,
     flex: "none",
     borderRadius: 999,
     border: "none",
