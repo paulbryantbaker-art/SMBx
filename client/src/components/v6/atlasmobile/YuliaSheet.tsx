@@ -19,8 +19,8 @@ import ChatDock from "../../shared/ChatDock";
 import { CloseIcon, MonitorIcon } from "../desktop/icons";
 import { Sparkle } from "../desktop/primitives";
 import { T } from "../desktop/atlasTokens";
-import { M } from "./mobileTokens";
-import { useAtlasChat, useAtlasNav } from "../desktop/atlasNav";
+import { useAtlasChat, useAtlasNav, type AtlasScreen } from "../desktop/atlasNav";
+import { RT } from "./redesign/rt";
 import type {
   MobileMessage,
   MobilePaywallData,
@@ -112,11 +112,26 @@ export function YuliaSheet({
         <header style={S.header}>
           <Sparkle size={18} />
           <span style={S.headerTitle}>Yulia</span>
+          {surfaceContext?.activeTitle && (
+            <span style={S.ctxChip} title={`Yulia sees ${surfaceContext.activeTitle}`}>
+              <MonitorIcon size={12} c={RT.accentInk} />
+              <span style={S.ctxLabel}>sees {surfaceContext.activeTitle}</span>
+            </span>
+          )}
           <span style={{ flex: 1 }} />
           <button type="button" aria-label="Close" onClick={onClose} style={S.closeBtn}>
-            <CloseIcon size={16} c={T.muted} />
+            <CloseIcon size={16} c={RT.muted} />
           </button>
         </header>
+
+        {/* Jump-to nav — the sheet doubles as a launcher (drag-up nav). */}
+        <JumpNav
+          dealId={typeof surfaceContext?.dealId === "number" ? surfaceContext.dealId : undefined}
+          onJump={(screen, opts) => {
+            nav.go(screen, opts);
+            onClose();
+          }}
+        />
 
         <div ref={scrollRef} onScroll={onScroll} className="scr" style={S.list}>
           {showEmpty ? (
@@ -147,6 +162,33 @@ export function YuliaSheet({
         </div>
       </div>
     </>
+  );
+}
+
+/* ─── jump-to nav (the sheet doubles as a launcher) ─────────── */
+
+function JumpNav({
+  dealId,
+  onJump,
+}: {
+  dealId?: number;
+  onJump: (screen: AtlasScreen, opts?: { dealId?: number }) => void;
+}) {
+  const items: { label: string; screen: AtlasScreen; opts?: { dealId?: number } }[] = [
+    { label: "Deals", screen: "deals" },
+    { label: "Sourcing", screen: "sourcing" },
+    { label: "Studio", screen: "studio" },
+    { label: "Agent", screen: "agent" },
+  ];
+  if (dealId != null) items.unshift({ label: "Data room", screen: "files", opts: { dealId } });
+  return (
+    <div className="scr" style={S.jumpRow}>
+      {items.map((it) => (
+        <button key={it.label} type="button" onClick={() => onJump(it.screen, it.opts)} style={S.jumpChip}>
+          {it.label}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -323,35 +365,35 @@ function PaywallCard({ data }: { data: MobilePaywallData }) {
 
 const S: Record<string, CSSProperties> = {
   scrim: {
-    position: "fixed", // modal scrim, viewport-fixed — only mounts while the sheet is OPEN (returns null when closed)
+    position: "fixed",
     inset: 0,
-    background: M.glassSheet.scrim,
+    background: "rgba(22,18,34,.40)",
     zIndex: 8,
     animation: "atlas-mobile-scrim-in .16s ease-out",
   },
+  // Redesign: a clean WHITE sheet (no glass), taller, so it reads as a surface
+  // sliding up over the dimmed screen behind.
   sheet: {
-    position: "fixed", // modal sheet, viewport-fixed bottom — only mounts while open
+    position: "fixed",
     left: 0,
     right: 0,
     bottom: 0,
     zIndex: 9,
-    maxHeight: "76%",
+    maxHeight: "88%",
     display: "flex",
     flexDirection: "column",
-    background: M.glassSheet.background,
-    backdropFilter: M.glassSheet.backdropFilter,
-    WebkitBackdropFilter: M.glassSheet.backdropFilter,
-    borderRadius: M.glassSheet.radius,
-    boxShadow: M.glassSheet.boxShadow,
+    background: RT.card,
+    borderRadius: "24px 24px 0 0",
+    boxShadow: "0 -12px 40px rgba(20,18,34,.22)",
     paddingBottom: "env(safe-area-inset-bottom, 0px)",
-    animation: "atlas-mobile-sheet-up .22s cubic-bezier(.32,.72,0,1)",
+    animation: "atlas-mobile-sheet-up .24s cubic-bezier(.32,.72,0,1)",
   },
   handle: {
-    width: M.glassSheet.handle.width,
-    height: M.glassSheet.handle.height,
-    borderRadius: M.glassSheet.handle.radius,
-    background: M.glassSheet.handle.color,
-    margin: "10px auto 6px",
+    width: 38,
+    height: 5,
+    borderRadius: 3,
+    background: "#d8d6cf",
+    margin: "10px auto 8px",
     flex: "none",
   },
   header: {
@@ -359,9 +401,37 @@ const S: Record<string, CSSProperties> = {
     display: "flex",
     alignItems: "center",
     gap: 9,
-    padding: "2px 16px 10px",
+    padding: "2px 16px 8px",
   },
-  headerTitle: { fontSize: 15, fontWeight: 600, color: T.ink },
+  headerTitle: { fontSize: 17, fontWeight: 600, color: RT.ink },
+  ctxChip: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 5,
+    background: RT.accentSoft,
+    color: RT.accentInk,
+    borderRadius: RT.rPill,
+    padding: "5px 11px",
+    fontSize: 12,
+    fontWeight: 500,
+    maxWidth: 170,
+  },
+  ctxLabel: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+  jumpRow: { flex: "none", display: "flex", gap: 8, overflowX: "auto", padding: "0 16px 12px" },
+  jumpChip: {
+    flex: "none",
+    border: `1px solid ${RT.line}`,
+    background: RT.card,
+    borderRadius: RT.rPill,
+    padding: "9px 15px",
+    fontSize: 14,
+    fontWeight: 500,
+    color: RT.ink,
+    cursor: "pointer",
+    fontFamily: RT.font,
+    whiteSpace: "nowrap",
+    WebkitTapHighlightColor: "transparent",
+  },
   closeBtn: {
     width: 34,
     height: 34,
@@ -398,16 +468,16 @@ const S: Record<string, CSSProperties> = {
   userBubble: {
     alignSelf: "flex-end",
     maxWidth: "85%",
-    background: T.blue,
+    background: RT.accent,
     color: "#fff",
     borderRadius: "18px 18px 5px 18px",
-    padding: "10px 14px",
-    fontSize: 14,
+    padding: "11px 15px",
+    fontSize: 15,
     lineHeight: 1.5,
     whiteSpace: "pre-wrap",
   },
   yuliaRow: { display: "flex", gap: 9, alignItems: "flex-start" },
-  yuliaText: { fontSize: 14, lineHeight: 1.6, color: T.ink, whiteSpace: "pre-wrap", minWidth: 0 },
+  yuliaText: { fontSize: 15, lineHeight: 1.6, color: RT.ink, whiteSpace: "pre-wrap", minWidth: 0 },
   // Persistent way to the canvas Yulia opened — the reliable destination for
   // her "I opened it on the canvas" turns.
   canvasBtn: {
