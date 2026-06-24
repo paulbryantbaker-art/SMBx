@@ -138,12 +138,80 @@ export function Sparkline({
   );
 }
 
+/* ─── Cash App detail-page pattern ───────────────────────────────
+   Big bold section header + an explanatory line, flat rows on the page
+   (no card containers), hairline section dividers, grouped grey pill buttons. */
+
+export function DetailSection({
+  title,
+  desc,
+  children,
+  style,
+}: {
+  title: string;
+  /** Short explanatory line under the header (Cash App style). Keep it honest. */
+  desc?: ReactNode;
+  children?: ReactNode;
+  style?: CSSProperties;
+}) {
+  return (
+    <section style={{ ...S.detailSection, ...style }}>
+      <h2 style={S.detailTitle}>{title}</h2>
+      {desc != null && <p style={S.detailDesc}>{desc}</p>}
+      {children}
+    </section>
+  );
+}
+
+/** A full-width hairline — separates detail sections. */
+export function Divider({ style }: { style?: CSSProperties }) {
+  return <hr style={{ ...S.divider, ...style }} />;
+}
+
+/** Grouped grey pill buttons (e.g. "Add phone" · "Add email"). Secondary
+ *  actions stay GREY — the green accent is rationed for the primary action. */
+export function ButtonRow({
+  buttons,
+}: {
+  buttons: { label: string; onClick?: () => void }[];
+}) {
+  return (
+    <div style={S.buttonRow}>
+      {buttons.map((b, i) => (
+        <button key={`${b.label}-${i}`} type="button" onClick={b.onClick} style={S.pillButton}>
+          {b.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 const S: Record<string, CSSProperties> = {
   heroLabel: { fontSize: 13, color: RT.muted, display: "flex", alignItems: "center", gap: 4 },
   heroValueRow: { display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12, marginTop: 2 },
   heroValue: { fontSize: 48, fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1, color: RT.ink },
   heroSub: { fontSize: 13.5, color: RT.muted, marginTop: 8 },
   section: { fontSize: 19, fontWeight: 600, color: RT.ink, letterSpacing: "-0.01em", margin: "22px 0 2px" },
+  // Cash App detail pattern
+  detailSection: { margin: "26px 0 0" },
+  detailTitle: { fontSize: 26, fontWeight: 700, color: RT.ink, letterSpacing: "-0.02em", lineHeight: 1.15, margin: 0 },
+  detailDesc: { fontSize: 15.5, color: RT.muted, lineHeight: 1.5, margin: "8px 0 0", maxWidth: "92%" },
+  divider: { height: 1, background: "rgba(25,24,19,.10)", border: 0, margin: "26px 0 0" },
+  buttonRow: { display: "flex", gap: 12, marginTop: 18 },
+  pillButton: {
+    flex: 1,
+    minWidth: 0,
+    background: RT.line,
+    color: RT.ink,
+    border: "none",
+    borderRadius: RT.rPill,
+    padding: "14px 16px",
+    fontSize: 15,
+    fontWeight: 600,
+    fontFamily: RT.font,
+    cursor: "pointer",
+    WebkitTapHighlightColor: "transparent",
+  },
   row: { display: "flex", alignItems: "center", gap: 12, padding: "12px 0", fontFamily: RT.font, color: RT.ink },
   rowTap: { cursor: "pointer", WebkitTapHighlightColor: "transparent" },
   rowLead: { flex: "none", display: "flex", alignItems: "center" },

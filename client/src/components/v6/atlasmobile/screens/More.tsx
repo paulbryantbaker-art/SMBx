@@ -27,7 +27,8 @@ import { Avatar } from "../../desktop/primitives";
 import { ChevronRightIcon } from "../../desktop/icons";
 import { T } from "../../desktop/atlasTokens";
 import { RT } from "../redesign/rt";
-import { ListSection, ListRow, ActionSheet } from "../iosKit";
+import { DetailSection, Divider, ActionRow } from "../redesign/kit";
+import { ActionSheet } from "../iosKit";
 import { useMobileShell } from "../mobileShell";
 
 /* ─── locked plan labels (mirror desktop Settings PLAN_LABEL) ─────────────── */
@@ -90,27 +91,39 @@ export default function MoreScreen({ user }: AtlasScreenProps) {
         <ChevronRightIcon size={18} c={RT.muted} />
       </button>
 
-      <ListSection header="Modules">
-        <ListRow leading={<StudioGlyph />} title="Studio" accessory="chevron" onClick={() => nav.go("studio")} />
-        <ListRow leading={<IntegrationGlyph />} title="Integration" accessory="chevron" onClick={() => nav.go("integration")} />
-        <ListRow leading={<AgentGlyph />} title="Agent" accessory="chevron" onClick={() => nav.go("agent")} />
-      </ListSection>
+      <DetailSection title="Modules" desc="Build collateral, connect your tools, and run agents.">
+        <ActionRow leading={<StudioGlyph />} title="Studio" action={<Chevron />} onClick={() => nav.go("studio")} />
+        <ActionRow leading={<IntegrationGlyph />} title="Integration" action={<Chevron />} onClick={() => nav.go("integration")} />
+        <ActionRow leading={<AgentGlyph />} title="Agent" action={<Chevron />} onClick={() => nav.go("agent")} />
+      </DetailSection>
 
-      <ListSection header="Account">
-        <ListRow leading={<SettingsGlyphIcon />} title="Settings" accessory="chevron" onClick={() => nav.openSettings()} />
-        <ListRow leading={<MembersGlyph />} title="Members & roles" accessory="chevron" onClick={() => nav.openSettings("members")} />
-        <ListRow
+      <Divider />
+
+      <DetailSection title="Account" desc="Your profile, team, and notifications.">
+        <ActionRow leading={<SettingsGlyphIcon />} title="Settings" action={<Chevron />} onClick={() => nav.openSettings()} />
+        <ActionRow leading={<MembersGlyph />} title="Members & roles" action={<Chevron />} onClick={() => nav.openSettings("members")} />
+        <ActionRow
           leading={<BellGlyph />}
           title="Notifications"
-          accessory="chevron"
-          trailing={user && unreadCount > 0 ? <CountBadge n={unreadCount} /> : undefined}
+          action={
+            user && unreadCount > 0 ? (
+              <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <CountBadge n={unreadCount} />
+                <Chevron />
+              </span>
+            ) : (
+              <Chevron />
+            )
+          }
           onClick={() => nav.openSettings("notifications")}
         />
-      </ListSection>
+      </DetailSection>
 
-      <ListSection>
-        <ListRow title="Sign out" destructive onClick={() => setSignOutOpen(true)} />
-      </ListSection>
+      <Divider />
+
+      <button type="button" onClick={() => setSignOutOpen(true)} style={S.signOut}>
+        Sign out
+      </button>
 
       <ActionSheet
         open={signOutOpen}
@@ -127,6 +140,11 @@ export default function MoreScreen({ user }: AtlasScreenProps) {
 
 function CountBadge({ n }: { n: number }) {
   return <span style={S.badge}>{n > 99 ? "99+" : n}</span>;
+}
+
+/** The right-side chevron on a detail row (faint, Cash App style). */
+function Chevron() {
+  return <ChevronRightIcon size={18} c={RT.faint} />;
 }
 
 /* ─── module / account glyphs — stroked Atlas line icons (stroke-2 round),
@@ -264,5 +282,19 @@ const S: Record<string, CSSProperties> = {
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
+  },
+  signOut: {
+    marginTop: 24,
+    width: "100%",
+    background: "transparent",
+    border: "none",
+    padding: "12px 0",
+    textAlign: "left",
+    fontSize: 17,
+    fontWeight: 600,
+    color: "#C0562F", // warm red (marketing --neg) — destructive
+    cursor: "pointer",
+    fontFamily: RT.font,
+    WebkitTapHighlightColor: "transparent",
   },
 };
