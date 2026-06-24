@@ -4,6 +4,15 @@ Source of truth for the Cash App–inspired mobile cutover (2026-06). Build to t
 Scope: the Atlas-mobile shell (`client/src/components/v6/atlasmobile/`). Desktop
 (`v6/desktop/`) is unaffected.
 
+> **Status (2026-06-24): cutover complete — M1·M2·M3 done & pushed to `main`.**
+> Spine (2-tab nav, universal violet FAB → slide-up Yulia sheet with jump-nav,
+> Today/Deals/Cockpit), all 8 hub/detail screens surface-migrated, dead full-screen
+> chat retired, Deals tab header + violet CTAs. Verified anon in preview; tsc clean.
+> **Needs a real-device pass** for populated states (anon has no deals).
+> **Follow-ups (not blockers):** dark-mode RT variants (app is light-only today),
+> expressive set-pieces (onboarding / deal-won / Studio collectible feel / tactile
+> illustrated icons), and whether to flatten the iOS-kit grouped-list elevation.
+
 ## The law
 
 1. **Surface — separation by tone, not borders or shadows.** Soft warm grey page
