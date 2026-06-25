@@ -832,15 +832,21 @@ async function runMigrations() {
 runMigrations().then(async () => {
   // Post-migration: ensure critical schema and admin account exist
   const bootSql = createSql();
-  // Belt-and-suspenders: ensure the deal favorite/disposition columns exist even
-  // if migration 095 didn't apply on this DB — /api/deals selects them, and a
-  // missing column would 500 + blank the Deals board. Isolated so a failure here
-  // can't skip the admin-account ensure below.
+  // Belt-and-suspenders: ensure the deal columns that /api/deals selects actually
+  // exist, even on DBs that predate them — a missing column 500s the whole query
+  // and blanks the Deals board. Isolated so a failure here can't skip the
+  // admin-account ensure below.
+  //   - `name` (rename target): added to 000_base_schema.sql LATE (commit 36890ab5),
+  //     so any deals table created before that has NO `name` column and there is no
+  //     ALTER migration for it. THIS was the production HTTP 500 — /api/deals started
+  //     selecting d.name and died with "column does not exist".
+  //   - is_favorite / disposition: migration 095, same risk if it didn't apply.
   try {
+    await bootSql`ALTER TABLE deals ADD COLUMN IF NOT EXISTS name VARCHAR(255)`;
     await bootSql`ALTER TABLE deals ADD COLUMN IF NOT EXISTS is_favorite BOOLEAN NOT NULL DEFAULT FALSE`;
     await bootSql`ALTER TABLE deals ADD COLUMN IF NOT EXISTS disposition VARCHAR(20) NOT NULL DEFAULT 'active'`;
   } catch (e: any) {
-    console.error('[boot] ensure deals favorite/disposition columns:', e?.message);
+    console.error('[boot] ensure deals name/favorite/disposition columns:', e?.message);
   }
   try {
     await bootSql`ALTER TABLE users ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMPTZ`;

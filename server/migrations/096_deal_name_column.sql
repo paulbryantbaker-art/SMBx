@@ -1,0 +1,11 @@
+-- 096: Guarantee deals.name exists.
+--
+-- `name` was added to 000_base_schema.sql's CREATE TABLE in a LATE edit
+-- (commit 36890ab5). CREATE TABLE IF NOT EXISTS never alters a pre-existing
+-- table, and no migration ever ADDed the column — so any `deals` table created
+-- before that edit has NO `name` column. GET /api/deals began selecting d.name
+-- (rename support), which then 500'd with "column does not exist" on those DBs
+-- and blanked the entire Deals board.
+--
+-- Idempotent; also enforced at boot in server/index.ts as a safety net.
+ALTER TABLE deals ADD COLUMN IF NOT EXISTS name VARCHAR(255);

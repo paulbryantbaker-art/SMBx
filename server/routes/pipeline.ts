@@ -114,22 +114,25 @@ pipelineRouter.get('/deals', async (req, res) => {
     `;
     return res.json(deals);
   } catch (err: any) {
-    // RESILIENCE: the preferred query adds is_favorite/disposition + favorites-first
-    // ordering (migration 095). If it fails for ANY reason (columns missing, etc.),
-    // fall back to the known-good pre-095 query so the Deals board NEVER blanks.
-    // 500 only if the fallback ALSO fails.
-    console.warn('[deals] preferred query failed — pre-095 fallback:', err?.message);
+    // RESILIENCE: the preferred query references OPTIONAL columns (name, is_favorite,
+    // disposition — added by late base-schema edits / migration 095) and three
+    // correlated subqueries. If it fails for ANY reason, fall back to a BULLETPROOF
+    // query that touches ONLY original base-schema `deals` columns + literal defaults
+    // for everything optional. It cannot fail on a missing column or subquery table,
+    // so the Deals board NEVER blanks. (Was the prod HTTP 500: d.name didn't exist and
+    // the old fallback still selected it.) `name` is omitted here → the client's
+    // nameOf() falls back to business_name. deliverable/document counts the mobile
+    // board doesn't render, so 0/NULL is safe.
+    console.warn('[deals] preferred query failed — bulletproof fallback:', err?.message);
     try {
       const deals = await sql`
         SELECT d.id, d.journey_type, d.current_gate, d.status, d.league,
-               d.business_name, d.name,
+               d.business_name, NULL as name, FALSE as is_favorite, 'active' as disposition,
                d.industry, d.revenue, d.sde, d.ebitda,
                d.asking_price, d.location, d.financials,
                d.seven_factor_composite,
                d.created_at, d.updated_at,
-               (SELECT COUNT(*) FROM deliverables del WHERE del.deal_id = d.id AND del.status = 'complete') as deliverable_count,
-               (SELECT COUNT(*) FROM data_room_documents doc WHERE doc.deal_id = d.id) as document_count,
-               (SELECT c.id FROM conversations c WHERE c.deal_id = d.id ORDER BY c.updated_at DESC LIMIT 1) as conversation_id
+               0 as deliverable_count, 0 as document_count, NULL as conversation_id
         FROM deals d
         WHERE d.user_id = ${userId}
         ORDER BY d.updated_at DESC
