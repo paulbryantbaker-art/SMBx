@@ -66,6 +66,8 @@ interface DealRow {
   ebitda?: string | number | null;
   asking_price?: string | number | null;
   financials?: { multiple?: number | string | null } | null;
+  is_favorite?: boolean | null;
+  disposition?: string | null;
 }
 interface DealDetail {
   deal: DealRow;
@@ -546,6 +548,21 @@ export default function CockpitScreen({ view, user }: AtlasScreenProps) {
   const { detail, brief, detailState, briefState } = useDealCockpit(dealId);
   const team = useDealTeam(dealId);
 
+  // Deal actions (favorite / rename / defer) — optimistic overrides over the
+  // server values, reset whenever the deal changes. The "⋯" menu is fixed-position
+  // (the hero banner clips overflow, so a dropdown inside it would be cut off).
+  const [favOverride, setFavOverride] = useState<boolean | null>(null);
+  const [dispOverride, setDispOverride] = useState<string | null>(null);
+  const [nameOverride, setNameOverride] = useState<string | null>(null);
+  const [menuPos, setMenuPos] = useState<{ top: number; right: number } | null>(null);
+  const menuBtnRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    setFavOverride(null);
+    setDispOverride(null);
+    setNameOverride(null);
+    setMenuPos(null);
+  }, [dealId]);
+
   // No deal selected → honest empty.
   if (dealId == null) {
     return (
@@ -585,6 +602,41 @@ export default function CockpitScreen({ view, user }: AtlasScreenProps) {
   const deal = detail.deal;
   const name = dealDisplayName(deal);
   const dealName = view.dealName || name;
+
+  // Live action state + handlers.
+  const isFavorite = favOverride ?? deal.is_favorite === true;
+  const disposition = dispOverride ?? deal.disposition ?? "active";
+  const displayName = nameOverride ?? name;
+  const patchDeal = (body: Record<string, unknown>) => {
+    if (dealId == null) return;
+    fetch(`/api/deals/${dealId}`, {
+      method: "PATCH",
+      headers: { ...authHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }).catch(() => {});
+  };
+  const toggleFavorite = () => {
+    const next = !isFavorite;
+    setFavOverride(next);
+    patchDeal({ is_favorite: next });
+  };
+  const toggleDefer = () => {
+    const next = disposition === "deferred" ? "active" : "deferred";
+    setDispOverride(next);
+    patchDeal({ disposition: next });
+  };
+  const renameDeal = () => {
+    const n = window.prompt("Rename this deal", displayName);
+    if (n == null) return;
+    const trimmed = n.trim();
+    if (!trimmed) return;
+    setNameOverride(trimmed);
+    patchDeal({ name: trimmed });
+  };
+  const openMenu = () => {
+    const r = menuBtnRef.current?.getBoundingClientRect();
+    setMenuPos(r ? { top: r.bottom + 6, right: Math.max(8, window.innerWidth - r.right) } : null);
+  };
 
   // Money — integer cents arrive as strings on the deal row.
   const revenue = toNum(deal.revenue);
@@ -654,8 +706,9 @@ export default function CockpitScreen({ view, user }: AtlasScreenProps) {
       <div style={{ ...heroBanner, background: headerBg }}>
         <div style={heroIdRow}>
           <MarkBadge letter={name} size={34} radius={10} />
-          <div style={heroName} title={name}>
-            {name}
+          <div style={heroName} title={displayName}>
+            {isFavorite && <span style={{ marginRight: 6 }} aria-hidden="true">★</span>}
+            {displayName}
           </div>
           {journeyLabel(deal) && <span style={heroJourneyPill}>{journeyLabel(deal)}</span>}
           {briefState === "loading" && <span aria-hidden="true" style={heroSkeleton} />}
@@ -667,6 +720,8 @@ export default function CockpitScreen({ view, user }: AtlasScreenProps) {
               Fit <b style={{ color: "#fff" }}>{fitScore}</b>/100
             </span>
           )}
+          {disposition === "deferred" && <span style={heroDeferredPill}>Deferred</span>}
+          <button ref={menuBtnRef} type="button" aria-label="Deal actions" onClick={openMenu} style={heroMenuBtn}>⋯</button>
         </div>
         <div style={heroEvLabel}>Enterprise value</div>
         <div style={heroEvValue}>
@@ -677,6 +732,24 @@ export default function CockpitScreen({ view, user }: AtlasScreenProps) {
           )}
         </div>
       </div>
+
+      {/* Deal-actions dropdown (fixed → escapes the banner's overflow clip). */}
+      {menuPos && (
+        <>
+          <div onClick={() => setMenuPos(null)} style={{ position: "fixed", inset: 0, zIndex: 50 }} aria-hidden="true" />
+          <div style={{ ...menuPanel, top: menuPos.top, right: menuPos.right }} role="menu">
+            <button type="button" role="menuitem" style={menuItem} onClick={() => { toggleFavorite(); setMenuPos(null); }}>
+              {isFavorite ? "Remove from favorites" : "★ Favorite"}
+            </button>
+            <button type="button" role="menuitem" style={menuItem} onClick={() => { setMenuPos(null); renameDeal(); }}>
+              Rename deal
+            </button>
+            <button type="button" role="menuitem" style={{ ...menuItem, color: T.terra }} onClick={() => { toggleDefer(); setMenuPos(null); }}>
+              {disposition === "deferred" ? "Reactivate (resume reading)" : "Defer (pause Yulia)"}
+            </button>
+          </div>
+        </>
+      )}
 
       {/* ── B. Journey gate pills ─────────────────────── */}
       <div style={{ paddingBottom: 14, overflowX: "auto" }}>
@@ -1275,6 +1348,48 @@ const heroFit: CSSProperties = { fontSize: 12.5, color: "rgba(255,255,255,0.85)"
 const heroSkeleton: CSSProperties = { display: "inline-block", width: 124, height: 22, borderRadius: 999, background: "rgba(255,255,255,0.25)" };
 const heroEvLabel: CSSProperties = { fontSize: 12.5, color: "rgba(255,255,255,0.8)", letterSpacing: "0.02em" };
 const heroEvValue: CSSProperties = { fontSize: 40, fontWeight: 700, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.05, marginTop: 3 };
+const heroDeferredPill: CSSProperties = { fontSize: 12.5, fontWeight: 700, color: "#fff", background: "rgba(255,255,255,0.18)", borderRadius: 999, padding: "4px 12px" };
+const heroMenuBtn: CSSProperties = {
+  marginLeft: "auto",
+  width: 34,
+  height: 34,
+  flex: "none",
+  border: "none",
+  background: "rgba(255,255,255,0.16)",
+  color: "#fff",
+  borderRadius: "50%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: "pointer",
+  fontSize: 20,
+  lineHeight: 1,
+  fontWeight: 700,
+};
+/** Fixed deal-actions dropdown panel (top/right set inline from the button rect). */
+const menuPanel: CSSProperties = {
+  position: "fixed",
+  zIndex: 51,
+  background: T.white,
+  borderRadius: 12,
+  border: `1px solid ${T.border}`,
+  boxShadow: "0 14px 34px rgba(20,24,40,.18), 0 2px 8px rgba(20,24,40,.10)",
+  padding: 6,
+  minWidth: 210,
+};
+const menuItem: CSSProperties = {
+  display: "block",
+  width: "100%",
+  textAlign: "left",
+  background: "transparent",
+  border: "none",
+  borderRadius: 8,
+  padding: "9px 12px",
+  fontSize: 14,
+  fontWeight: 500,
+  color: T.ink,
+  cursor: "pointer",
+};
 
 const rootStyle: CSSProperties = {
   flex: 1,
