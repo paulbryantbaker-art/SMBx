@@ -25,12 +25,10 @@ import { listCanvasArtifacts } from "../../desktop/screens/Canvas";
 import { authHeaders } from "../../../../hooks/useAuth";
 import type { SurfaceContext } from "../../../../lib/yuliaSurfaceContext";
 import { RT } from "../redesign/rt";
-import { Hero, SectionHeader, DetailSection, ActionRow, ButtonRow } from "../redesign/kit";
+import { SectionHeader, DetailSection, ActionRow, ButtonRow } from "../redesign/kit";
 import { ChevronRightIcon } from "../../desktop/icons";
 import {
   Sparkle,
-  Pill,
-  ProgressBar,
   EmptyState,
   LoadingState,
   fmtCents,
@@ -391,51 +389,50 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
 
   return (
     <div style={col}>
-      {/* ── Hero: headline figure + verdict, stage folded into the sub ── */}
-      <Hero
-        label={heroFig.label}
-        value={
-          heroFig.value == null ? (
-            // No real valuation yet → a quiet placeholder, never a bold black bar.
-            <span style={{ color: RT.faint, fontWeight: 600, fontSize: 34 }}>—</span>
-          ) : (
-            fmtCents(heroFig.value)
-          )
-        }
-        trailing={
-          briefState === "ready" && verdict?.label ? (
-            <Pill bg={vColors.bg} fg={vColors.fg}>{titleCase(verdict.label)}</Pill>
+      {/* ── Artful header banner: the deal headline (EV + verdict + stage) over a
+            brand texture — the Cash App "colored hero" moment. White text on a
+            green-scrimmed teal wash. ── */}
+      <div style={heroBanner}>
+        <div style={heroLabelLight}>{heroFig.label}</div>
+        <div style={heroValRow}>
+          <span style={heroValueLight}>
+            {heroFig.value == null ? (
+              <span style={{ opacity: 0.6, fontWeight: 600, fontSize: 36 }}>—</span>
+            ) : (
+              fmtCents(heroFig.value)
+            )}
+          </span>
+          {briefState === "ready" && verdict?.label ? (
+            <span style={{ ...heroVerdict, color: vColors.fg }}>{titleCase(verdict.label)}</span>
           ) : briefState === "loading" ? (
             <span
               aria-hidden="true"
-              style={{ display: "inline-block", width: 92, height: 24, borderRadius: RT.rPill, background: RT.line }}
+              style={{ display: "inline-block", width: 88, height: 26, borderRadius: RT.rPill, background: "rgba(255,255,255,.25)", marginBottom: 4 }}
             />
-          ) : null
-        }
-        sub={
-          <>
-            {jLabel ?? "Deal"}
-            {currentStage && <> · {currentStage}</>}
-            {briefState === "ready" && fitScore != null && (
-              <>
-                {" · "}Fit <b style={{ color: RT.ink2, fontWeight: 600 }}>{fitScore}</b>
-              </>
-            )}
-            {briefState === "loading" && " · reading…"}
-          </>
-        }
-      />
-
-      {/* ── One clean stage indicator (replaces the busy stepper) ── */}
-      {gateTotal > 0 && (
-        <div>
-          <ProgressBar pct={gatePct} color={RT.accentInk} />
-          <div style={{ fontSize: 13, color: RT.muted, marginTop: 7 }}>
-            Stage {stageIndex} of {gateTotal}
-            {currentStage ? ` · ${currentStage}` : ""}
-          </div>
+          ) : null}
         </div>
-      )}
+        <div style={heroSubLight}>
+          {jLabel ?? "Deal"}
+          {currentStage && <> · {currentStage}</>}
+          {briefState === "ready" && fitScore != null && (
+            <>
+              {" · "}Fit <b style={{ color: "#fff", fontWeight: 700 }}>{fitScore}</b>
+            </>
+          )}
+          {briefState === "loading" && " · reading…"}
+        </div>
+        {gateTotal > 0 && (
+          <div style={{ marginTop: 18 }}>
+            <div style={heroStageTrack}>
+              <div style={{ ...heroStageFill, width: `${gatePct}%` }} />
+            </div>
+            <div style={heroStageLabel}>
+              Stage {stageIndex} of {gateTotal}
+              {currentStage ? ` · ${currentStage}` : ""}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* ── Next: the one thing to do — the manage-the-deal driver ── */}
       {briefState === "ready" && nextMove?.title && (
@@ -624,6 +621,38 @@ const padBody: CSSProperties = {
   flexDirection: "column",
   padding: "10px 18px",
 };
+
+/* ─── Artful header banner (texture-backed hero) ───────────────── */
+
+/** Full-bleed textured header: a teal brand wash (texture-hero-1) under a deep-green
+ *  scrim so the white EV reads, with a rounded bottom that flows into the grey page. */
+const heroBanner: CSSProperties = {
+  margin: "-10px -18px 4px", // cancel the col's top + side padding → edge-to-edge
+  padding: "16px 20px 22px",
+  borderRadius: "0 0 28px 28px",
+  position: "relative",
+  color: "#fff",
+  background:
+    "linear-gradient(164deg, rgba(11,58,42,0.34) 0%, rgba(6,32,23,0.84) 100%), url(/textures/texture-hero-1.jpg) center / cover no-repeat",
+  overflow: "hidden",
+};
+const heroLabelLight: CSSProperties = { fontSize: 14, fontWeight: 500, color: "rgba(255,255,255,0.82)" };
+const heroValRow: CSSProperties = { display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12, marginTop: 4 };
+const heroValueLight: CSSProperties = { fontSize: 53, fontWeight: 800, letterSpacing: "-0.035em", lineHeight: 1, color: "#fff" };
+const heroVerdict: CSSProperties = {
+  flex: "none",
+  background: "rgba(255,255,255,0.96)",
+  borderRadius: RT.rPill,
+  padding: "5px 14px",
+  fontSize: 13.5,
+  fontWeight: 700,
+  whiteSpace: "nowrap",
+  marginBottom: 4,
+};
+const heroSubLight: CSSProperties = { fontSize: 14.5, color: "rgba(255,255,255,0.8)", marginTop: 10 };
+const heroStageTrack: CSSProperties = { height: 5, borderRadius: 999, background: "rgba(255,255,255,0.26)", overflow: "hidden" };
+const heroStageFill: CSSProperties = { height: "100%", background: "#fff", borderRadius: 999 };
+const heroStageLabel: CSSProperties = { fontSize: 13, color: "rgba(255,255,255,0.8)", marginTop: 9 };
 
 /** White content card — separation by tone (no border, no shadow). Padding matches
  *  the financials / Manage cards (18px horizontal) so every card aligns. */
