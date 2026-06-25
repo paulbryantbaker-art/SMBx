@@ -25,7 +25,7 @@ import { listCanvasArtifacts } from "../../desktop/screens/Canvas";
 import { authHeaders } from "../../../../hooks/useAuth";
 import type { SurfaceContext } from "../../../../lib/yuliaSurfaceContext";
 import { RT } from "../redesign/rt";
-import { Hero, SectionHeader, DetailSection, Divider, ActionRow, ButtonRow } from "../redesign/kit";
+import { Hero, SectionHeader, DetailSection, ActionRow, ButtonRow } from "../redesign/kit";
 import { ChevronRightIcon } from "../../desktop/icons";
 import {
   Sparkle,
@@ -460,18 +460,17 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
         ]}
       />
 
-      {/* ── Key numbers (asking is the seller's number — a negotiation detail) ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 9 }}>
-        <Stat label="Revenue" value={fmtCents(revenue)} />
-        <Stat label="Adj. EBITDA" value={fmtCents(adjEbitda)} />
-        <Stat label="Multiple" value={impliedMultiple != null ? `${impliedMultiple.toFixed(1)}×` : "—"} />
-        <Stat label="Asking" value={fmtCents(asking)} />
+      {/* ── Key numbers → one clean card of rows (asking is the seller's number) ── */}
+      <div style={finCard}>
+        <FinRow label="Revenue" value={fmtCents(revenue)} />
+        <FinRow label="Adj. EBITDA" value={fmtCents(adjEbitda)} />
+        <FinRow label="Multiple" value={impliedMultiple != null ? `${impliedMultiple.toFixed(1)}×` : "—"} />
+        <FinRow label="Asking" value={fmtCents(asking)} last />
       </div>
 
       {/* ── Yulia's read — concise headline + a risk LINK (full read via Yulia) ── */}
-      <Divider />
       <SectionHeader
-        style={{ display: "flex", alignItems: "center", gap: 9, margin: "30px 0 0", fontSize: 28, fontWeight: 700, letterSpacing: "-0.02em" }}
+        style={{ display: "flex", alignItems: "center", gap: 9, margin: "38px 0 0", fontSize: 28, fontWeight: 700, letterSpacing: "-0.02em" }}
       >
         <Sparkle size={20} />
         Yulia&rsquo;s read
@@ -537,8 +536,7 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
       {/* ── On the canvas — Yulia's analyses for this deal (return, don't redo) ── */}
       {canvasItems.length > 0 && (
         <>
-          <Divider />
-          <DetailSection title="On the canvas" desc="Models and analyses Yulia opened for this deal — tap to reopen.">
+          <DetailSection card title="On the canvas" desc="Models and analyses Yulia opened for this deal — tap to reopen.">
             {canvasItems.map((it) => (
               <ActionRow
                 key={it.id}
@@ -554,8 +552,7 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
       )}
 
       {/* ── Manage this deal — the drill-ins ── */}
-      <Divider />
-      <DetailSection title="Manage">
+      <DetailSection card title="Manage">
         <ActionRow
           title="Deliverables"
           sub={dTotal > 0 ? `${dDone} / ${dTotal} complete` : "None yet — draft one in Studio"}
@@ -586,12 +583,12 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
   );
 }
 
-/** Flat stat tile (white-on-grey, no card chrome). */
-function Stat({ label, value }: { label: string; value: string }) {
+/** One financial metric as a card row: label left (muted), value right (big, dark). */
+function FinRow({ label, value, last }: { label: string; value: string; last?: boolean }) {
   return (
-    <div style={statTile}>
-      <div style={statValue}>{value}</div>
-      <div style={statLabel}>{label}</div>
+    <div style={{ ...finRow, borderBottom: last ? "none" : "1px solid rgba(0,0,0,.05)" }}>
+      <span style={finRowLabel}>{label}</span>
+      <span style={finRowValue}>{value}</span>
     </div>
   );
 }
@@ -615,31 +612,25 @@ const padBody: CSSProperties = {
   padding: "10px 18px",
 };
 
-/** Flat white panel — separation by tone (no border, no shadow). */
+/** White content card — separation by tone (no border, no shadow). Padding matches
+ *  the financials / Manage cards (18px horizontal) so every card aligns. */
 const panel: CSSProperties = {
   background: RT.card,
   borderRadius: RT.rCard,
-  padding: 16,
+  padding: "18px 18px",
 };
 
-/** Flat stat tile (white-on-grey). */
-const statTile: CSSProperties = {
-  background: RT.card,
-  borderRadius: 14,
-  padding: "12px 12px 11px",
-  minWidth: 0,
+/** Financials card + rows (the Cash App balance-widget pattern: grouped rows). */
+const finCard: CSSProperties = { background: RT.card, borderRadius: RT.rCard, padding: "2px 18px" };
+const finRow: CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "baseline",
+  gap: 12,
+  padding: "15px 0",
 };
-const statValue: CSSProperties = {
-  fontSize: 18,
-  fontWeight: 600,
-  color: RT.ink,
-  letterSpacing: "-0.01em",
-  lineHeight: 1.15,
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-};
-const statLabel: CSSProperties = { fontSize: 12.5, color: RT.muted, marginTop: 3 };
+const finRowLabel: CSSProperties = { fontSize: 15.5, color: RT.muted };
+const finRowValue: CSSProperties = { fontSize: 19, fontWeight: 600, color: RT.ink, letterSpacing: "-0.01em" };
 
 /** "Next" card — the manage-the-deal driver (pale-green highlight, tappable). */
 const nextCard: CSSProperties = {

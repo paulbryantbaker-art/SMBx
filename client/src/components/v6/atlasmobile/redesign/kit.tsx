@@ -147,18 +147,21 @@ export function DetailSection({
   desc,
   children,
   style,
+  card = false,
 }: {
   title: string;
   /** Short explanatory line under the header (Cash App style). Keep it honest. */
   desc?: ReactNode;
   children?: ReactNode;
   style?: CSSProperties;
+  /** Group the rows inside a white card on the grey page (Cash App highlighting). */
+  card?: boolean;
 }) {
   return (
     <section style={{ ...S.detailSection, ...style }}>
       <h2 style={S.detailTitle}>{title}</h2>
       {desc != null && <p style={S.detailDesc}>{desc}</p>}
-      {children}
+      {card ? <div style={S.detailCard}>{children}</div> : children}
     </section>
   );
 }
@@ -194,6 +197,8 @@ const S: Record<string, CSSProperties> = {
   section: { fontSize: 21, fontWeight: 700, color: RT.ink, letterSpacing: "-0.015em", margin: "28px 0 2px" },
   // Cash App detail pattern — spacious + large type
   detailSection: { margin: "38px 0 4px" },
+  // White card that groups a section's rows (Cash App highlighting on the grey page).
+  detailCard: { background: RT.card, borderRadius: RT.rCard, padding: "2px 18px", marginTop: 14 },
   detailTitle: { fontSize: 29, fontWeight: 700, color: RT.ink, letterSpacing: "-0.02em", lineHeight: 1.12, margin: 0 },
   detailDesc: { fontSize: 16, color: RT.muted, lineHeight: 1.55, margin: "10px 0 2px", maxWidth: "94%" },
   divider: { height: 1, background: "rgba(0,0,0,.07)", border: 0, margin: "34px 0 0" },
