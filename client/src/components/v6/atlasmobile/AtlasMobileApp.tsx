@@ -461,6 +461,10 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
     />
   ) : surface === "more" ? (
     <MobileBackHeader title="Menu" onBack={() => setMoreOpen(false)} />
+  ) : surface === "cockpit" ? (
+    // Cockpit owns a FULL-BLEED textured header — its back button + deal name live
+    // inside the banner (over the texture), so the shell renders no separate bar.
+    null
   ) : (
     <MobileBackHeader
       title={view.dealName ?? SCREEN_TITLE[view.screen] ?? "Atlas"}

@@ -26,7 +26,7 @@ import { authHeaders } from "../../../../hooks/useAuth";
 import type { SurfaceContext } from "../../../../lib/yuliaSurfaceContext";
 import { RT } from "../redesign/rt";
 import { SectionHeader, DetailSection, ActionRow, ButtonRow } from "../redesign/kit";
-import { ChevronRightIcon } from "../../desktop/icons";
+import { ChevronRightIcon, BackIcon } from "../../desktop/icons";
 import {
   Sparkle,
   EmptyState,
@@ -316,6 +316,11 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
   const deal = detail.deal;
   const name = dealDisplayName(deal);
   const dealName = view.dealName || name;
+  // The cockpit IS the top-level deal surface (the shell renders no header for it),
+  // so it owns a full-bleed textured header with its own back button + deal name.
+  // When embedded as the Canvas fallback (view.screen === "canvas"), the Canvas
+  // header handles nav, so the banner skips the back row + the full-bleed top.
+  const ownHeader = view.screen === "cockpit";
 
   // Money — integer cents arrive as strings on the deal row.
   const revenue = toNum(deal.revenue);
@@ -391,8 +396,18 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
     <div style={col}>
       {/* ── Artful header banner: the deal headline (EV + verdict + stage) over a
             brand texture — the Cash App "colored hero" moment. White text on a
-            green-scrimmed teal wash. ── */}
-      <div style={heroBanner}>
+            green-scrimmed teal wash; full-bleed to the very top with its own back
+            button + deal name when this is the standalone cockpit surface. ── */}
+      <div style={ownHeader ? heroBannerFull : heroBanner}>
+        {ownHeader && (
+          <div style={heroNav}>
+            <button type="button" aria-label="Back" onClick={() => nav.go("deals")} style={heroBackBtn}>
+              <BackIcon size={22} c="#fff" />
+            </button>
+            <span style={heroNavTitle}>{dealName}</span>
+            <span style={{ width: 40, flex: "none" }} aria-hidden="true" />
+          </div>
+        )}
         <div style={heroLabelLight}>{heroFig.label}</div>
         <div style={heroValRow}>
           <span style={heroValueLight}>
@@ -624,17 +639,51 @@ const padBody: CSSProperties = {
 
 /* ─── Artful header banner (texture-backed hero) ───────────────── */
 
-/** Full-bleed textured header: a teal brand wash (texture-hero-1) under a deep-green
- *  scrim so the white EV reads, with a rounded bottom that flows into the grey page. */
-const heroBanner: CSSProperties = {
-  margin: "-10px -18px 4px", // cancel the col's top + side padding → edge-to-edge
+/** Textured header: a teal brand wash (texture-hero-1) under a deep-green scrim so
+ *  the white EV reads. Square corners, edge-to-edge. `heroBanner` is the embedded
+ *  (Canvas-fallback) variant that sits below the shell header. */
+const heroBannerBase: CSSProperties = {
+  margin: "-10px -18px 0", // cancel the col's top + side padding → edge-to-edge
   padding: "16px 20px 22px",
-  borderRadius: "0 0 28px 28px",
   position: "relative",
   color: "#fff",
   background:
     "linear-gradient(164deg, rgba(11,58,42,0.34) 0%, rgba(6,32,23,0.84) 100%), url(/textures/texture-hero-1.jpg) center / cover no-repeat",
   overflow: "hidden",
+};
+const heroBanner: CSSProperties = heroBannerBase;
+/** Standalone cockpit: full-bleed to the very top (no shell header above), so the
+ *  texture goes behind the status bar. The safe-area inset clears the notch. */
+const heroBannerFull: CSSProperties = {
+  ...heroBannerBase,
+  paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)",
+};
+/** In-banner nav row (white back button + centered deal name) over the texture. */
+const heroNav: CSSProperties = { display: "flex", alignItems: "center", marginBottom: 16 };
+const heroBackBtn: CSSProperties = {
+  width: 40,
+  height: 40,
+  marginLeft: -8,
+  flex: "none",
+  border: "none",
+  background: "transparent",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: "pointer",
+  borderRadius: "50%",
+  WebkitTapHighlightColor: "transparent",
+};
+const heroNavTitle: CSSProperties = {
+  flex: 1,
+  minWidth: 0,
+  textAlign: "center",
+  fontSize: 17,
+  fontWeight: 600,
+  color: "#fff",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
 };
 const heroLabelLight: CSSProperties = { fontSize: 14, fontWeight: 500, color: "rgba(255,255,255,0.82)" };
 const heroValRow: CSSProperties = { display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12, marginTop: 4 };
