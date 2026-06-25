@@ -20,6 +20,7 @@ import type { CSSProperties } from "react";
 import type { AtlasScreenProps } from "../../desktop/atlasNav";
 import { useAtlasNav, useAtlasChat } from "../../desktop/atlasNav";
 import { useMobileShell } from "../mobileShell";
+import { ActionSheet } from "../iosKit";
 import { useModelStore } from "../../../../lib/modelStore";
 import { listCanvasArtifacts } from "../../desktop/screens/Canvas";
 import { authHeaders } from "../../../../hooks/useAuth";
@@ -56,6 +57,8 @@ interface DealRow {
   ebitda?: string | number | null;
   asking_price?: string | number | null;
   financials?: { multiple?: number | string | null } | null;
+  is_favorite?: boolean | null;
+  disposition?: string | null;
 }
 interface DealDetail {
   deal: DealRow;
@@ -260,6 +263,18 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
   const { detail, brief, detailState, briefState } = useDealCockpit(dealId);
   const team = useDealTeamCount(dealId);
 
+  // Deal actions (favorite / rename / defer) — optimistic overrides over the
+  // server values, reset whenever the deal changes.
+  const [favOverride, setFavOverride] = useState<boolean | null>(null);
+  const [dispOverride, setDispOverride] = useState<string | null>(null);
+  const [nameOverride, setNameOverride] = useState<string | null>(null);
+  const [actionsOpen, setActionsOpen] = useState(false);
+  useEffect(() => {
+    setFavOverride(null);
+    setDispOverride(null);
+    setNameOverride(null);
+  }, [dealId]);
+
   // What Yulia has opened on the canvas FOR THIS DEAL — so the user can return to
   // her analyses/models instead of asking her to redo them. Sourced from the live
   // model store + the artifact registry (session). (Cross-reload rehydration from
@@ -326,6 +341,37 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
   const deal = detail.deal;
   const name = dealDisplayName(deal);
   const dealName = view.dealName || name;
+
+  // Live action state (optimistic overrides over the server values).
+  const isFavorite = favOverride ?? deal.is_favorite === true;
+  const disposition = dispOverride ?? deal.disposition ?? "active";
+  const displayName = nameOverride ?? dealName;
+  const patchDeal = (body: Record<string, unknown>) => {
+    if (dealId == null) return;
+    fetch(`/api/deals/${dealId}`, {
+      method: "PATCH",
+      headers: { ...authHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }).catch(() => {});
+  };
+  const toggleFavorite = () => {
+    const next = !isFavorite;
+    setFavOverride(next);
+    patchDeal({ is_favorite: next });
+  };
+  const toggleDefer = () => {
+    const next = disposition === "deferred" ? "active" : "deferred";
+    setDispOverride(next);
+    patchDeal({ disposition: next });
+  };
+  const renameDeal = () => {
+    const n = window.prompt("Rename this deal", displayName);
+    if (n == null) return;
+    const trimmed = n.trim();
+    if (!trimmed) return;
+    setNameOverride(trimmed);
+    patchDeal({ name: trimmed });
+  };
   // The cockpit IS the top-level deal surface (the shell renders no header for it),
   // so it owns a full-bleed textured header with its own back button + deal name.
   // When embedded as the Canvas fallback (view.screen === "canvas"), the Canvas
@@ -417,8 +463,13 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
             <button type="button" aria-label="Back" onClick={() => nav.go("deals")} style={heroBackBtn}>
               <BackIcon size={22} c="#fff" />
             </button>
-            <span style={heroNavTitle}>{dealName}</span>
-            <span style={{ width: 40, flex: "none" }} aria-hidden="true" />
+            <span style={heroNavTitle}>
+              {isFavorite && <span style={{ marginRight: 6 }} aria-hidden="true">★</span>}
+              {displayName}
+            </span>
+            <button type="button" aria-label="Deal actions" onClick={() => setActionsOpen(true)} style={heroMenuBtn}>
+              ⋯
+            </button>
           </div>
         )}
         <div style={heroLabelLight}>{heroFig.label}</div>
@@ -447,6 +498,7 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
               {" · "}Fit <b style={{ color: "#fff", fontWeight: 700 }}>{fitScore}</b>
             </>
           )}
+          {disposition === "deferred" && <> · <b style={{ color: "#fff", fontWeight: 700 }}>Deferred</b></>}
           {briefState === "loading" && " · reading…"}
         </div>
         {gateTotal > 0 && (
@@ -617,6 +669,22 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
           onClick={() => nav.go("integration", { dealId, dealName })}
         />
       </DetailSection>
+
+      {/* Deal actions — favorite (faster access on Deals), rename, defer (pauses
+          Yulia's background reading until reactivated). */}
+      <ActionSheet
+        open={actionsOpen}
+        onClose={() => setActionsOpen(false)}
+        title={displayName}
+        message={disposition === "deferred" ? "Deferred — Yulia isn't doing background reading on this deal." : undefined}
+        actions={[
+          { label: isFavorite ? "Remove from favorites" : "★ Favorite", onClick: () => { toggleFavorite(); setActionsOpen(false); } },
+          { label: "Rename deal", onClick: () => { setActionsOpen(false); renameDeal(); } },
+          disposition === "deferred"
+            ? { label: "Reactivate (resume reading)", onClick: () => { toggleDefer(); setActionsOpen(false); } }
+            : { label: "Defer (pause Yulia)", onClick: () => { toggleDefer(); setActionsOpen(false); }, destructive: true },
+        ]}
+      />
     </div>
   );
 }
@@ -690,6 +758,24 @@ const heroBackBtn: CSSProperties = {
   justifyContent: "center",
   cursor: "pointer",
   borderRadius: "50%",
+  WebkitTapHighlightColor: "transparent",
+};
+const heroMenuBtn: CSSProperties = {
+  width: 40,
+  height: 40,
+  marginRight: -8,
+  flex: "none",
+  border: "none",
+  background: "transparent",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: "pointer",
+  borderRadius: "50%",
+  color: "#fff",
+  fontSize: 26,
+  lineHeight: 1,
+  fontWeight: 700,
   WebkitTapHighlightColor: "transparent",
 };
 const heroNavTitle: CSSProperties = {

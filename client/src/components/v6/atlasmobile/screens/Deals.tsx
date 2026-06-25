@@ -574,6 +574,7 @@ function DealCard({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) 
           }}
           title={row.name}
         >
+          {row.isFavorite && <span style={{ color: RT.accentInk, marginRight: 5 }} aria-hidden="true">★</span>}
           {row.name}
         </div>
         <Pill bg={vp.bg} fg={vp.fg} style={{ fontSize: 11.5, padding: "4px 10px", flex: "none" }}>
