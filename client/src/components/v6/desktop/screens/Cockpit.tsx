@@ -555,12 +555,15 @@ export default function CockpitScreen({ view, user }: AtlasScreenProps) {
   const [dispOverride, setDispOverride] = useState<string | null>(null);
   const [nameOverride, setNameOverride] = useState<string | null>(null);
   const [menuPos, setMenuPos] = useState<{ top: number; right: number } | null>(null);
+  const [renameOpen, setRenameOpen] = useState(false);
+  const [renameValue, setRenameValue] = useState("");
   const menuBtnRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     setFavOverride(null);
     setDispOverride(null);
     setNameOverride(null);
     setMenuPos(null);
+    setRenameOpen(false);
   }, [dealId]);
 
   // No deal selected → honest empty.
@@ -625,13 +628,16 @@ export default function CockpitScreen({ view, user }: AtlasScreenProps) {
     setDispOverride(next);
     patchDeal({ disposition: next });
   };
-  const renameDeal = () => {
-    const n = window.prompt("Rename this deal", displayName);
-    if (n == null) return;
-    const trimmed = n.trim();
+  const openRename = () => {
+    setRenameValue(displayName);
+    setRenameOpen(true);
+  };
+  const saveRename = () => {
+    const trimmed = renameValue.trim();
     if (!trimmed) return;
     setNameOverride(trimmed);
-    patchDeal({ name: trimmed });
+    patchDeal({ name: trimmed }); // confirmed by Save → persisted in the DB
+    setRenameOpen(false);
   };
   const openMenu = () => {
     const r = menuBtnRef.current?.getBoundingClientRect();
@@ -741,7 +747,7 @@ export default function CockpitScreen({ view, user }: AtlasScreenProps) {
             <button type="button" role="menuitem" style={menuItem} onClick={() => { toggleFavorite(); setMenuPos(null); }}>
               {isFavorite ? "Remove from favorites" : "★ Favorite"}
             </button>
-            <button type="button" role="menuitem" style={menuItem} onClick={() => { setMenuPos(null); renameDeal(); }}>
+            <button type="button" role="menuitem" style={menuItem} onClick={() => { setMenuPos(null); openRename(); }}>
               Rename deal
             </button>
             <button type="button" role="menuitem" style={{ ...menuItem, color: T.terra }} onClick={() => { toggleDefer(); setMenuPos(null); }}>
@@ -749,6 +755,30 @@ export default function CockpitScreen({ view, user }: AtlasScreenProps) {
             </button>
           </div>
         </>
+      )}
+
+      {/* Rename popover — the name only changes in the DB once the user clicks Save. */}
+      {renameOpen && (
+        <div style={renameScrim} onClick={() => setRenameOpen(false)}>
+          <div style={renameCard} onClick={(e) => e.stopPropagation()}>
+            <div style={renameTitle}>Rename deal</div>
+            <input
+              autoFocus
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") saveRename();
+                if (e.key === "Escape") setRenameOpen(false);
+              }}
+              placeholder="Deal name"
+              style={renameInput}
+            />
+            <div style={renameBtnRow}>
+              <button type="button" style={renameCancelBtn} onClick={() => setRenameOpen(false)}>Cancel</button>
+              <button type="button" style={{ ...renameSaveBtn, opacity: renameValue.trim() ? 1 : 0.5 }} disabled={!renameValue.trim()} onClick={saveRename}>Save</button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* ── B. Journey gate pills ─────────────────────── */}
@@ -1388,6 +1418,60 @@ const menuItem: CSSProperties = {
   fontSize: 14,
   fontWeight: 500,
   color: T.ink,
+  cursor: "pointer",
+};
+
+/* ─── rename popover ──────────────────────────────────────────── */
+const renameScrim: CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  zIndex: 60,
+  background: "rgba(15,17,22,.42)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: 24,
+};
+const renameCard: CSSProperties = {
+  width: "100%",
+  maxWidth: 380,
+  background: T.white,
+  borderRadius: 16,
+  padding: 22,
+  border: `1px solid ${T.border}`,
+  boxShadow: "0 24px 60px rgba(20,24,40,.28)",
+};
+const renameTitle: CSSProperties = { fontSize: 16, fontWeight: 700, color: T.ink, marginBottom: 14 };
+const renameInput: CSSProperties = {
+  width: "100%",
+  boxSizing: "border-box",
+  fontSize: 15,
+  color: T.ink,
+  background: T.track,
+  border: `1px solid ${T.border}`,
+  borderRadius: 10,
+  padding: "11px 14px",
+  outline: "none",
+};
+const renameBtnRow: CSSProperties = { display: "flex", gap: 10, marginTop: 16, justifyContent: "flex-end" };
+const renameCancelBtn: CSSProperties = {
+  padding: "9px 18px",
+  borderRadius: 999,
+  background: T.track,
+  color: T.ink,
+  border: "none",
+  fontSize: 14,
+  fontWeight: 600,
+  cursor: "pointer",
+};
+const renameSaveBtn: CSSProperties = {
+  padding: "9px 20px",
+  borderRadius: 999,
+  background: T.blue,
+  color: "#fff",
+  border: "none",
+  fontSize: 14,
+  fontWeight: 700,
   cursor: "pointer",
 };
 

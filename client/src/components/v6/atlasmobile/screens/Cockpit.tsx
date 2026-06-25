@@ -269,10 +269,13 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
   const [dispOverride, setDispOverride] = useState<string | null>(null);
   const [nameOverride, setNameOverride] = useState<string | null>(null);
   const [actionsOpen, setActionsOpen] = useState(false);
+  const [renameOpen, setRenameOpen] = useState(false);
+  const [renameValue, setRenameValue] = useState("");
   useEffect(() => {
     setFavOverride(null);
     setDispOverride(null);
     setNameOverride(null);
+    setRenameOpen(false);
   }, [dealId]);
 
   // What Yulia has opened on the canvas FOR THIS DEAL — so the user can return to
@@ -364,13 +367,16 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
     setDispOverride(next);
     patchDeal({ disposition: next });
   };
-  const renameDeal = () => {
-    const n = window.prompt("Rename this deal", displayName);
-    if (n == null) return;
-    const trimmed = n.trim();
+  const openRename = () => {
+    setRenameValue(displayName);
+    setRenameOpen(true);
+  };
+  const saveRename = () => {
+    const trimmed = renameValue.trim();
     if (!trimmed) return;
     setNameOverride(trimmed);
-    patchDeal({ name: trimmed });
+    patchDeal({ name: trimmed }); // confirmed by Save → persisted in the DB
+    setRenameOpen(false);
   };
   // The cockpit IS the top-level deal surface (the shell renders no header for it),
   // so it owns a full-bleed textured header with its own back button + deal name.
@@ -679,12 +685,36 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
         message={disposition === "deferred" ? "Deferred — Yulia isn't doing background reading on this deal." : undefined}
         actions={[
           { label: isFavorite ? "Remove from favorites" : "★ Favorite", onClick: () => { toggleFavorite(); setActionsOpen(false); } },
-          { label: "Rename deal", onClick: () => { setActionsOpen(false); renameDeal(); } },
+          { label: "Rename deal", onClick: () => { setActionsOpen(false); openRename(); } },
           disposition === "deferred"
             ? { label: "Reactivate (resume reading)", onClick: () => { toggleDefer(); setActionsOpen(false); } }
             : { label: "Defer (pause Yulia)", onClick: () => { toggleDefer(); setActionsOpen(false); }, destructive: true },
         ]}
       />
+
+      {/* Rename popover — the name only changes in the DB once the user taps Save. */}
+      {renameOpen && (
+        <div style={renameScrim} onClick={() => setRenameOpen(false)}>
+          <div style={renameCard} onClick={(e) => e.stopPropagation()}>
+            <div style={renameTitle}>Rename deal</div>
+            <input
+              autoFocus
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") saveRename();
+                if (e.key === "Escape") setRenameOpen(false);
+              }}
+              placeholder="Deal name"
+              style={renameInput}
+            />
+            <div style={renameBtnRow}>
+              <button type="button" style={renameCancelBtn} onClick={() => setRenameOpen(false)}>Cancel</button>
+              <button type="button" style={{ ...renameSaveBtn, opacity: renameValue.trim() ? 1 : 0.5 }} disabled={!renameValue.trim()} onClick={saveRename}>Save</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -806,6 +836,64 @@ const heroSubLight: CSSProperties = { fontSize: 14.5, color: "rgba(255,255,255,0
 const heroStageTrack: CSSProperties = { height: 5, borderRadius: 999, background: "rgba(255,255,255,0.26)", overflow: "hidden" };
 const heroStageFill: CSSProperties = { height: "100%", background: "#fff", borderRadius: 999 };
 const heroStageLabel: CSSProperties = { fontSize: 13, color: "rgba(255,255,255,0.8)", marginTop: 9 };
+
+/* ─── rename popover ──────────────────────────────────────────── */
+const renameScrim: CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  zIndex: 60,
+  background: "rgba(15,17,22,.42)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: 24,
+};
+const renameCard: CSSProperties = {
+  width: "100%",
+  maxWidth: 340,
+  background: RT.card,
+  borderRadius: 18,
+  padding: 20,
+  boxShadow: "0 20px 50px rgba(0,0,0,.28)",
+};
+const renameTitle: CSSProperties = { fontSize: 17, fontWeight: 700, color: RT.ink, marginBottom: 14 };
+const renameInput: CSSProperties = {
+  width: "100%",
+  boxSizing: "border-box",
+  fontSize: 16,
+  color: RT.ink,
+  fontFamily: RT.font,
+  background: RT.page,
+  border: `1px solid ${RT.line}`,
+  borderRadius: 12,
+  padding: "12px 14px",
+  outline: "none",
+};
+const renameBtnRow: CSSProperties = { display: "flex", gap: 10, marginTop: 16 };
+const renameCancelBtn: CSSProperties = {
+  flex: 1,
+  padding: "12px 16px",
+  borderRadius: RT.rPill,
+  background: RT.line,
+  color: RT.ink,
+  border: "none",
+  fontSize: 15,
+  fontWeight: 600,
+  fontFamily: RT.font,
+  cursor: "pointer",
+};
+const renameSaveBtn: CSSProperties = {
+  flex: 1,
+  padding: "12px 16px",
+  borderRadius: RT.rPill,
+  background: RT.accentStrong,
+  color: RT.onAccent,
+  border: "none",
+  fontSize: 15,
+  fontWeight: 700,
+  fontFamily: RT.font,
+  cursor: "pointer",
+};
 
 /** White content card — separation by tone (no border, no shadow). Padding matches
  *  the financials / Manage cards (18px horizontal) so every card aligns. */
