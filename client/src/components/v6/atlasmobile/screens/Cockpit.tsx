@@ -351,6 +351,9 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
   const vColors = verdictColors(verdict?.label);
   const fitScore = typeof verdict?.score === "number" && verdict.score > 0 ? verdict.score : null;
   const jLabel = journeyLabel(deal);
+  // Header texture by journey: BUY-side reads BLUE (texture-hero-2), everything else
+  // the teal-green SELL wash (texture-hero-1) — paired with a matching dark scrim.
+  const headerBg = jLabel === "BUY-side" ? HEADER_BG_BUY : HEADER_BG_SELL;
 
   // Deliverable counts for the Manage row (honest, guarded).
   const dStats = detail.deliverableStats;
@@ -398,7 +401,7 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
             brand texture — the Cash App "colored hero" moment. White text on a
             green-scrimmed teal wash; full-bleed to the very top with its own back
             button + deal name when this is the standalone cockpit surface. ── */}
-      <div style={ownHeader ? heroBannerFull : heroBanner}>
+      <div style={{ ...(ownHeader ? heroBannerFull : heroBanner), background: headerBg }}>
         {ownHeader && (
           <div style={heroNav}>
             <button type="button" aria-label="Back" onClick={() => nav.go("deals")} style={heroBackBtn}>
@@ -642,13 +645,18 @@ const padBody: CSSProperties = {
 /** Textured header: a teal brand wash (texture-hero-1) under a deep-green scrim so
  *  the white EV reads. Square corners, edge-to-edge. `heroBanner` is the embedded
  *  (Canvas-fallback) variant that sits below the shell header. */
+/** Header washes by journey (texture + matching dark scrim for white text). */
+const HEADER_BG_SELL =
+  "linear-gradient(164deg, rgba(11,58,42,0.34) 0%, rgba(6,32,23,0.84) 100%), url(/textures/texture-hero-1.jpg) center / cover no-repeat";
+const HEADER_BG_BUY =
+  "linear-gradient(164deg, rgba(13,40,74,0.32) 0%, rgba(7,20,44,0.85) 100%), url(/textures/texture-hero-2.jpg) center / cover no-repeat";
+
 const heroBannerBase: CSSProperties = {
   margin: "-10px -18px 0", // cancel the col's top + side padding → edge-to-edge
   padding: "16px 20px 22px",
   position: "relative",
   color: "#fff",
-  background:
-    "linear-gradient(164deg, rgba(11,58,42,0.34) 0%, rgba(6,32,23,0.84) 100%), url(/textures/texture-hero-1.jpg) center / cover no-repeat",
+  background: HEADER_BG_SELL, // default; overridden per-journey inline
   overflow: "hidden",
 };
 const heroBanner: CSSProperties = heroBannerBase;

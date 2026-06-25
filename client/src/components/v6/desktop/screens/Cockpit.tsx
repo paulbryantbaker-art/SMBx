@@ -27,7 +27,6 @@ import {
   Sparkle,
   MarkBadge,
   Avatar,
-  Pill,
   Card,
   KpiCard,
   StepperPills,
@@ -598,18 +597,17 @@ export default function CockpitScreen({ view, user }: AtlasScreenProps) {
         ? derived
         : null;
 
-  // Enterprise value (EV) — a REAL valuation, NOT the seller's asking price.
-  // EV = adj. EBITDA × an EXPLICITLY-PROVIDED multiple (financials.multiple, set
-  // by valuation work). We do NOT use the multiple back-solved from asking (that
-  // just reproduces the ask) and do NOT fall back to asking — so when there's no
-  // real valuation, EV is blank ("—"). It becomes a number once a valuation sets
-  // a real multiple.
+  // Enterprise value (EV) = adj. EBITDA × multiple. Prefer an explicit valuation
+  // multiple; else the asking-implied multiple so EV shows the implied valuation
+  // rather than a blank "—" (matches the mobile cockpit).
   const enterpriseValue =
-    adjEbitda != null && multipleRaw != null && multipleRaw > 0
-      ? Math.round(adjEbitda * multipleRaw)
+    adjEbitda != null && impliedMultiple != null && impliedMultiple > 0
+      ? Math.round(adjEbitda * impliedMultiple)
       : null;
 
   const gateSteps = buildGateSteps(deal, detail.gates);
+  // Journey-aware header wash: BUY-side reads BLUE, everything else teal-green.
+  const headerBg = journeyLabel(deal) === "BUY-side" ? HEADER_BG_BUY : HEADER_BG_SELL;
 
   // Verdict + fit (fit = verdict.score; only render if real).
   const verdict = brief?.verdict;
@@ -641,61 +639,34 @@ export default function CockpitScreen({ view, user }: AtlasScreenProps) {
 
   return (
     <div style={rootStyle}>
-      {/* ── A. Deal header ────────────────────────────── */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 11,
-          flexWrap: "wrap",
-          padding: "2px 0 14px",
-        }}
-      >
-        <MarkBadge letter={name} size={38} radius={11} />
-        <div
-          style={{
-            fontSize: 22,
-            fontWeight: 600,
-            color: T.ink,
-            minWidth: 0,
-            maxWidth: "min(440px, 60%)",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-          title={name}
-        >
-          {name}
+      {/* ── A. Deal header — a tasteful, CONTAINED textured banner (journey-aware
+            teal/blue wash). Not full-bleed: it's a rounded card inside the padded
+            pane. The identity + verdict + EV sit on it in white. ── */}
+      <div style={{ ...heroBanner, background: headerBg }}>
+        <div style={heroIdRow}>
+          <MarkBadge letter={name} size={34} radius={10} />
+          <div style={heroName} title={name}>
+            {name}
+          </div>
+          {journeyLabel(deal) && <span style={heroJourneyPill}>{journeyLabel(deal)}</span>}
+          {briefState === "loading" && <span aria-hidden="true" style={heroSkeleton} />}
+          {briefState === "ready" && verdict?.label && (
+            <span style={{ ...heroVerdictPill, color: vColors.fg }}>Verdict · {titleCase(verdict.label)}</span>
+          )}
+          {briefState === "ready" && fitScore != null && (
+            <span style={heroFit}>
+              Fit <b style={{ color: "#fff" }}>{fitScore}</b>/100
+            </span>
+          )}
         </div>
-        {journeyLabel(deal) && (
-          <Pill bg={T.track} fg={T.label}>
-            {journeyLabel(deal)}
-          </Pill>
-        )}
-        {/* Verdict / Fit. A skeleton holds the row height while the brief loads
-            so the pills don't pop in and shift the header. */}
-        {briefState === "loading" && (
-          <span
-            aria-hidden="true"
-            style={{
-              display: "inline-block",
-              width: 124,
-              height: 22,
-              borderRadius: T.rPill,
-              background: T.track,
-            }}
-          />
-        )}
-        {briefState === "ready" && verdict?.label && (
-          <Pill bg={vColors.bg} fg={vColors.fg}>
-            Verdict · {titleCase(verdict.label)}
-          </Pill>
-        )}
-        {briefState === "ready" && fitScore != null && (
-          <span style={{ fontSize: 12.5, color: T.muted }}>
-            Fit <b style={{ color: T.ink }}>{fitScore}</b>/100
-          </span>
-        )}
+        <div style={heroEvLabel}>Enterprise value</div>
+        <div style={heroEvValue}>
+          {enterpriseValue == null ? (
+            <span style={{ opacity: 0.6, fontWeight: 600, fontSize: 26 }}>—</span>
+          ) : (
+            fmtCents(enterpriseValue)
+          )}
+        </div>
       </div>
 
       {/* ── B. Journey gate pills ─────────────────────── */}
@@ -703,9 +674,8 @@ export default function CockpitScreen({ view, user }: AtlasScreenProps) {
         <StepperPills steps={gateSteps} />
       </div>
 
-      {/* ── C. KPI cards ──────────────────────────────── */}
+      {/* ── C. KPI cards (EV now leads the textured hero above) ─────── */}
       <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-        <KpiCard label="ENTERPRISE VALUE" value={fmtCents(enterpriseValue)} />
         <KpiCard label="REVENUE" value={fmtCents(revenue)} />
         <KpiCard label="ADJ. EBITDA" value={fmtCents(adjEbitda)} />
         <KpiCard
@@ -1261,6 +1231,41 @@ function DealTeamPanel({
 }
 
 /* ─── styles / utils ────────────────────────────────────────── */
+
+/** Header washes by journey (texture + matching dark scrim so white text reads). */
+const HEADER_BG_SELL =
+  "linear-gradient(155deg, rgba(11,58,42,0.30) 0%, rgba(6,32,23,0.80) 100%), url(/textures/texture-hero-1.jpg) center / cover no-repeat";
+const HEADER_BG_BUY =
+  "linear-gradient(155deg, rgba(13,40,74,0.30) 0%, rgba(7,20,44,0.82) 100%), url(/textures/texture-hero-2.jpg) center / cover no-repeat";
+
+/** Contained textured hero banner (desktop) — a rounded card INSIDE the padded
+ *  pane (not full-bleed), white identity + verdict + EV over the journey wash. */
+const heroBanner: CSSProperties = {
+  borderRadius: 16,
+  padding: "20px 24px 22px",
+  marginBottom: 14,
+  color: "#fff",
+  position: "relative",
+  overflow: "hidden",
+  background: HEADER_BG_SELL,
+};
+const heroIdRow: CSSProperties = { display: "flex", alignItems: "center", gap: 11, flexWrap: "wrap", marginBottom: 18 };
+const heroName: CSSProperties = {
+  fontSize: 20,
+  fontWeight: 600,
+  color: "#fff",
+  minWidth: 0,
+  maxWidth: "min(440px, 55%)",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+};
+const heroJourneyPill: CSSProperties = { fontSize: 12.5, fontWeight: 600, color: "#fff", background: "rgba(255,255,255,0.18)", borderRadius: 999, padding: "4px 12px" };
+const heroVerdictPill: CSSProperties = { fontSize: 12.5, fontWeight: 700, background: "rgba(255,255,255,0.96)", borderRadius: 999, padding: "4px 12px" };
+const heroFit: CSSProperties = { fontSize: 12.5, color: "rgba(255,255,255,0.85)" };
+const heroSkeleton: CSSProperties = { display: "inline-block", width: 124, height: 22, borderRadius: 999, background: "rgba(255,255,255,0.25)" };
+const heroEvLabel: CSSProperties = { fontSize: 12.5, color: "rgba(255,255,255,0.8)", letterSpacing: "0.02em" };
+const heroEvValue: CSSProperties = { fontSize: 40, fontWeight: 700, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.05, marginTop: 3 };
 
 const rootStyle: CSSProperties = {
   flex: 1,
