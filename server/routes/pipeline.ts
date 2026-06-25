@@ -101,7 +101,8 @@ pipelineRouter.get('/deals', async (req, res) => {
 
     const deals = await sql`
       SELECT d.id, d.journey_type, d.current_gate, d.status, d.league,
-             d.business_name, d.industry, d.revenue, d.sde, d.ebitda,
+             d.business_name, d.name, d.is_favorite, d.disposition,
+             d.industry, d.revenue, d.sde, d.ebitda,
              d.asking_price, d.location, d.financials,
              d.seven_factor_composite,
              d.created_at, d.updated_at,
@@ -110,13 +111,50 @@ pipelineRouter.get('/deals', async (req, res) => {
              (SELECT c.id FROM conversations c WHERE c.deal_id = d.id ORDER BY c.updated_at DESC LIMIT 1) as conversation_id
       FROM deals d
       WHERE d.user_id = ${userId}
-      ORDER BY d.updated_at DESC
+      ORDER BY d.is_favorite DESC, d.updated_at DESC
     `;
 
     return res.json(deals);
   } catch (err: any) {
     console.error('List deals error:', err.message);
     return res.status(500).json({ error: 'Failed to list deals' });
+  }
+});
+
+// ─── Update deal metadata (rename / favorite / disposition) ──
+// Rename → deals.name; star → is_favorite; defer → disposition='deferred'
+// (Yulia then does no background reading). updated_at is NOT bumped: these are
+// metadata, not analysis-source changes, so they don't trigger a brief regen.
+pipelineRouter.patch('/deals/:dealId', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const dealId = parseInt(req.params.dealId, 10);
+    if (!Number.isFinite(dealId)) return res.status(400).json({ error: 'Bad deal id' });
+
+    const [owned] = await sql`SELECT id FROM deals WHERE id = ${dealId} AND user_id = ${userId}`;
+    if (!owned) return res.status(404).json({ error: 'Deal not found' });
+
+    const body = (req.body ?? {}) as { name?: unknown; is_favorite?: unknown; disposition?: unknown };
+    const updates: Record<string, unknown> = {};
+    if (typeof body.name === 'string') updates.name = body.name.trim().slice(0, 200) || null;
+    if (typeof body.is_favorite === 'boolean') updates.is_favorite = body.is_favorite;
+    if (typeof body.disposition === 'string') {
+      if (!['active', 'deferred'].includes(body.disposition)) {
+        return res.status(400).json({ error: 'Invalid disposition (active | deferred)' });
+      }
+      updates.disposition = body.disposition;
+    }
+    if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'No updatable fields' });
+
+    const [updated] = await sql`
+      UPDATE deals SET ${sql(updates)}
+      WHERE id = ${dealId} AND user_id = ${userId}
+      RETURNING id, business_name, name, is_favorite, disposition, status
+    `;
+    return res.json(updated);
+  } catch (err: any) {
+    console.error('Update deal error:', err.message);
+    return res.status(500).json({ error: 'Failed to update deal' });
   }
 });
 

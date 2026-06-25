@@ -63,6 +63,8 @@ interface DealContext {
   seller_standby_willingness?: string | null;
   parent_deal_id?: number | null;
   financial_snapshot_at?: string | null;
+  is_favorite?: boolean | null;
+  disposition?: string | null;
 }
 
 const V19_RUNTIME_RULES = `
@@ -86,6 +88,10 @@ function formatDealContext(deal: DealContext): string {
   if (deal.asking_price) fields.push(`Asking Price: $${(deal.asking_price / 100).toLocaleString()}`);
 
   // Deal-stand / structure signals (so Yulia knows where the deal stands).
+  if (deal.is_favorite) fields.push('★ Favorited by the user');
+  if (deal.disposition === 'deferred') {
+    fields.push('Disposition: DEFERRED — the user has paused this deal. Do NOT run proactive/background market reading, intelligence updates, or unprompted analysis; respond only to what they explicitly ask, and keep it light-touch until they reactivate it.');
+  }
   if (deal.status && deal.status !== 'active') fields.push(`Status: ${deal.status}`);
   if (deal.deal_type) fields.push(`Deal Type: ${deal.deal_type}`);
   if (deal.entity_type) fields.push(`Entity Type: ${deal.entity_type}`);

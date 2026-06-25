@@ -31,6 +31,9 @@ import { stageForGate, type PipelineStageId } from "../lib/pipelineStages";
 export interface RawDeal {
   id: number;
   business_name: string | null;
+  name: string | null;
+  is_favorite: boolean | null;
+  disposition: string | null;
   industry: string | null;
   location: string | null;
   league: string | null;
@@ -122,6 +125,9 @@ export interface MobileStageRow {
   /** seven_factor_composite clamped to 0–99, or null when the deal has no
    *  real composite — do NOT substitute a fabricated score here. */
   fit: number | null;
+  /** User-starred (sorts first on the board) + workflow disposition. */
+  isFavorite: boolean;
+  disposition: string;
 }
 
 export interface UseMobileDealsResult {
@@ -219,7 +225,8 @@ function buildSub(d: RawDeal): string {
 }
 
 function nameOf(d: RawDeal): string {
-  return d.business_name?.trim() || `Deal #SMBX-${String(d.id).padStart(4, "0")}`;
+  // A user rename (deals.name) wins over the imported business_name.
+  return d.name?.trim() || d.business_name?.trim() || `Deal #SMBX-${String(d.id).padStart(4, "0")}`;
 }
 
 function iconFor(verdict: Verdict): YIconKind {
@@ -279,6 +286,8 @@ function shape(deals: RawDeal[]): Omit<UseMobileDealsResult, "loading" | "loaded
       askingPrice: d.asking_price ?? null,
       ebitda: d.ebitda ?? null,
       fit: compositeFit(d),
+      isFavorite: d.is_favorite === true,
+      disposition: d.disposition || "active",
     };
   });
 
