@@ -349,6 +349,24 @@ async function regeneratePortfolioBrief(
 }
 
 export async function getDealBriefForUser(userId: number, dealId: number, forceRefresh = false) {
+  try {
+    return await getDealBriefForUserInner(userId, dealId, forceRefresh);
+  } catch (err: any) {
+    // FINAL SAFETY NET: the deal brief must NEVER 500. A 500 makes the cockpit show
+    // "Yulia's read isn't available", and because the client only caches a SUCCESSFUL
+    // brief, every re-open re-fetches → Yulia re-reads (slow regenerate) every time.
+    // Return a structurally-complete deterministic brief (200) instead of throwing.
+    console.error('[deal-brief] safety-net fallback:', err?.message);
+    const fallback = buildDeterministicDealBrief({
+      deal: null, deliverables: [], reviews: [], reports: [],
+      sourcingBriefs: [], marketHeat: [], sourcePayload: {} as any,
+      fingerprintBasis: {} as any,
+    } as any);
+    return { ...fallback, generatedAt: new Date().toISOString(), intelligenceMode: 'deterministic_fallback' as const };
+  }
+}
+
+async function getDealBriefForUserInner(userId: number, dealId: number, forceRefresh = false) {
   const snapshot = await buildDealSnapshot(userId, dealId);
   const fingerprint = fingerprintOf(snapshot.fingerprintBasis);
 
@@ -411,28 +429,34 @@ async function regenerateDealBrief(
     errorMessage = 'ANTHROPIC_API_KEY is not set';
   }
 
-  await sql`
-    INSERT INTO yulia_deal_briefs (
-      user_id, deal_id, source_fingerprint, source_payload, brief, narrative_markdown,
-      model_used, status, error_message, generated_at, expires_at, updated_at
-    )
-    VALUES (
-      ${userId}, ${dealId}, ${fingerprint}, ${JSON.stringify(snapshot.sourcePayload)}::jsonb,
-      ${JSON.stringify(generated)}::jsonb, ${generated.marketRead?.headline || null},
-      ${DEAL_BRIEF_MODEL}, ${status}, ${errorMessage}, NOW(), NOW() + INTERVAL '72 hours', NOW()
-    )
-    ON CONFLICT (user_id, deal_id) DO UPDATE SET
-      source_fingerprint = EXCLUDED.source_fingerprint,
-      source_payload = EXCLUDED.source_payload,
-      brief = EXCLUDED.brief,
-      narrative_markdown = EXCLUDED.narrative_markdown,
-      model_used = EXCLUDED.model_used,
-      status = EXCLUDED.status,
-      error_message = EXCLUDED.error_message,
-      generated_at = EXCLUDED.generated_at,
-      expires_at = EXCLUDED.expires_at,
-      updated_at = NOW()
-  `;
+  // Persist is best-effort: if writing the cache row fails, STILL return the generated
+  // brief (a 200) rather than throwing — the client cache then holds it for the session.
+  try {
+    await sql`
+      INSERT INTO yulia_deal_briefs (
+        user_id, deal_id, source_fingerprint, source_payload, brief, narrative_markdown,
+        model_used, status, error_message, generated_at, expires_at, updated_at
+      )
+      VALUES (
+        ${userId}, ${dealId}, ${fingerprint}, ${JSON.stringify(snapshot.sourcePayload)}::jsonb,
+        ${JSON.stringify(generated)}::jsonb, ${generated.marketRead?.headline || null},
+        ${DEAL_BRIEF_MODEL}, ${status}, ${errorMessage}, NOW(), NOW() + INTERVAL '72 hours', NOW()
+      )
+      ON CONFLICT (user_id, deal_id) DO UPDATE SET
+        source_fingerprint = EXCLUDED.source_fingerprint,
+        source_payload = EXCLUDED.source_payload,
+        brief = EXCLUDED.brief,
+        narrative_markdown = EXCLUDED.narrative_markdown,
+        model_used = EXCLUDED.model_used,
+        status = EXCLUDED.status,
+        error_message = EXCLUDED.error_message,
+        generated_at = EXCLUDED.generated_at,
+        expires_at = EXCLUDED.expires_at,
+        updated_at = NOW()
+    `;
+  } catch (err: any) {
+    console.warn('[deal-brief] persist failed (returning brief anyway):', err?.message);
+  }
 
   return { ...generated, generatedAt: new Date().toISOString(), intelligenceMode: status === 'complete' ? 'llm_cached' : 'deterministic_fallback' };
 }
@@ -615,41 +639,54 @@ async function loadActiveDeals(userId: number): Promise<DealRow[]> {
 
 async function loadDeliverables(userId: number, dealIds: number[]): Promise<DeliverableRow[]> {
   if (dealIds.length === 0) return [];
-  return sql<DeliverableRow[]>`
-    SELECT d.id, d.deal_id, d.status, d.created_at, d.completed_at,
-           d.is_stale, d.stale_reason,
-           m.slug, m.name, m.deliverable_type,
-           dl.business_name as deal_name
-    FROM deliverables d
-    JOIN menu_items m ON m.id = d.menu_item_id
-    LEFT JOIN deals dl ON dl.id = d.deal_id
-    WHERE d.user_id = ${userId}
-      AND d.deal_id = ANY(${dealIds})
-    ORDER BY COALESCE(d.completed_at, d.created_at) DESC
-    LIMIT 60
-  `;
+  // RESILIENCE: a missing aux column/table (the deals.name class) must degrade to an
+  // empty list, NOT 500 the whole deal brief. The loader name in the warning pinpoints
+  // the real culprit in prod logs.
+  try {
+    return await sql<DeliverableRow[]>`
+      SELECT d.id, d.deal_id, d.status, d.created_at, d.completed_at,
+             d.is_stale, d.stale_reason,
+             m.slug, m.name, m.deliverable_type,
+             dl.business_name as deal_name
+      FROM deliverables d
+      JOIN menu_items m ON m.id = d.menu_item_id
+      LEFT JOIN deals dl ON dl.id = d.deal_id
+      WHERE d.user_id = ${userId}
+        AND d.deal_id = ANY(${dealIds})
+      ORDER BY COALESCE(d.completed_at, d.created_at) DESC
+      LIMIT 60
+    `;
+  } catch (err: any) {
+    console.warn('[deal-brief] loadDeliverables unavailable:', err?.message);
+    return [];
+  }
 }
 
 async function loadReviews(userId: number, dealIds: number[]): Promise<ReviewRow[]> {
   if (dealIds.length === 0) return [];
-  return sql<ReviewRow[]>`
-    SELECT rr.id, rr.deal_id, rr.status, rr.reviewer_role, rr.focus_areas,
-           rr.created_at,
-           req.display_name as requester_name,
-           COALESCE(m.name, doc.name) as doc_name,
-           dl.business_name as deal_name
-    FROM review_requests rr
-    JOIN users req ON req.id = rr.requested_by
-    LEFT JOIN deliverables del ON del.id = rr.deliverable_id
-    LEFT JOIN menu_items m ON m.id = del.menu_item_id
-    LEFT JOIN data_room_documents doc ON doc.id = rr.document_id
-    LEFT JOIN deals dl ON dl.id = rr.deal_id
-    WHERE (rr.requested_by = ${userId} OR rr.reviewer_id = ${userId})
-      AND rr.deal_id = ANY(${dealIds})
-      AND rr.status IN ('pending', 'reviewing')
-    ORDER BY rr.created_at ASC
-    LIMIT 30
-  `;
+  try {
+    return await sql<ReviewRow[]>`
+      SELECT rr.id, rr.deal_id, rr.status, rr.reviewer_role, rr.focus_areas,
+             rr.created_at,
+             req.display_name as requester_name,
+             COALESCE(m.name, doc.name) as doc_name,
+             dl.business_name as deal_name
+      FROM review_requests rr
+      JOIN users req ON req.id = rr.requested_by
+      LEFT JOIN deliverables del ON del.id = rr.deliverable_id
+      LEFT JOIN menu_items m ON m.id = del.menu_item_id
+      LEFT JOIN data_room_documents doc ON doc.id = rr.document_id
+      LEFT JOIN deals dl ON dl.id = rr.deal_id
+      WHERE (rr.requested_by = ${userId} OR rr.reviewer_id = ${userId})
+        AND rr.deal_id = ANY(${dealIds})
+        AND rr.status IN ('pending', 'reviewing')
+      ORDER BY rr.created_at ASC
+      LIMIT 30
+    `;
+  } catch (err: any) {
+    console.warn('[deal-brief] loadReviews unavailable:', err?.message);
+    return [];
+  }
 }
 
 async function loadStagedActions(userId: number): Promise<StagedActionRow[]> {
@@ -668,14 +705,19 @@ async function loadStagedActions(userId: number): Promise<StagedActionRow[]> {
 
 async function loadIntelligenceReports(userId: number, dealIds: number[]): Promise<IntelligenceReportRow[]> {
   if (dealIds.length === 0) return [];
-  return sql<IntelligenceReportRow[]>`
-    SELECT id, deal_id, report_type, naics_code, geography, status, content, completed_at, created_at
-    FROM intelligence_reports
-    WHERE user_id = ${userId}
-      AND (deal_id = ANY(${dealIds}) OR deal_id IS NULL)
-    ORDER BY COALESCE(completed_at, created_at) DESC
-    LIMIT 30
-  `;
+  try {
+    return await sql<IntelligenceReportRow[]>`
+      SELECT id, deal_id, report_type, naics_code, geography, status, content, completed_at, created_at
+      FROM intelligence_reports
+      WHERE user_id = ${userId}
+        AND (deal_id = ANY(${dealIds}) OR deal_id IS NULL)
+      ORDER BY COALESCE(completed_at, created_at) DESC
+      LIMIT 30
+    `;
+  } catch (err: any) {
+    console.warn('[deal-brief] loadIntelligenceReports unavailable:', err?.message);
+    return [];
+  }
 }
 
 async function loadSourcingBriefs(userId: number): Promise<SourcingBriefRow[]> {
