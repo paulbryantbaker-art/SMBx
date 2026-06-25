@@ -20,6 +20,7 @@ import type { CSSProperties } from "react";
 import type { AtlasScreenProps } from "../atlasNav";
 import { useAtlasNav, useAtlasChat } from "../atlasNav";
 import { authHeaders } from "../../../../hooks/useAuth";
+import { getCachedDealBrief, setCachedDealBrief } from "../../../../lib/dealBriefCache";
 import type { User } from "../../../../hooks/useAuth";
 import type { SurfaceContext } from "../../../../lib/yuliaSurfaceContext";
 import { T } from "../atlasTokens";
@@ -255,16 +256,24 @@ function useDealCockpit(dealId: number | undefined) {
         if (alive) setDetailState("error");
       });
 
-    fetch(`/api/agency/deals/${dealId}/brief`, { headers: authHeaders() })
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`brief ${r.status}`))))
-      .then((b: DealBrief) => {
-        if (!alive) return;
-        setBrief(b);
-        setBriefState("ready");
-      })
-      .catch(() => {
-        if (alive) setBriefState("error");
-      });
+    // Serve the in-session cached brief instantly (no re-fetch / "reading…" flash).
+    const cached = getCachedDealBrief<DealBrief>(dealId);
+    if (cached) {
+      setBrief(cached);
+      setBriefState("ready");
+    } else {
+      fetch(`/api/agency/deals/${dealId}/brief`, { headers: authHeaders() })
+        .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`brief ${r.status}`))))
+        .then((b: DealBrief) => {
+          if (!alive) return;
+          setBrief(b);
+          setCachedDealBrief(dealId, b);
+          setBriefState("ready");
+        })
+        .catch(() => {
+          if (alive) setBriefState("error");
+        });
+    }
 
     return () => {
       alive = false;

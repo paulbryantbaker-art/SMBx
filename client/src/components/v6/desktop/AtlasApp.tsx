@@ -19,6 +19,7 @@ import { useAnonymousChat } from "../../../hooks/useAnonymousChat";
 import { useAuthChat } from "../../../hooks/useAuthChat";
 import { DEV_AUTH_BYPASS, type User } from "../../../hooks/useAuth";
 import { useModelStore } from "../../../lib/modelStore";
+import { clearDealBrief } from "../../../lib/dealBriefCache";
 import type { MobileChatBridge, MobileMessage } from "../mobile/types";
 
 import "./atlas.css";
@@ -223,6 +224,12 @@ function AtlasShell({ user, chat }: ShellProps) {
       const detail = (event as CustomEvent).detail;
       if (!detail) return;
       const current = viewRef.current;
+
+      // A live canvas change → this deal's read is stale; drop its session-cached
+      // brief so the next cockpit open reflects it. Replays + echoes skip.
+      if (!detail.replay && detail.canvas_action && detail.canvas_action !== "read_tab_state" && typeof current.dealId === "number") {
+        clearDealBrief(current.dealId);
+      }
 
       // Interactive model → live modelStore tab → Canvas.
       if (detail.canvas_action === "create_model_tab" && detail.tabId) {

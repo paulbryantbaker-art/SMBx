@@ -41,6 +41,7 @@ import type { MobileChatBridge, MobileMessage } from "../mobile/types";
 import { ensureModelTabFromCanvasAction } from "../mobile/screens/Model";
 import { registerCanvasArtifact } from "../desktop/screens/Canvas";
 import { rehydrateCanvasTabs } from "../../../lib/canvasRehydrate";
+import { clearDealBrief } from "../../../lib/dealBriefCache";
 
 import "./atlas-mobile.css";
 import { T } from "../desktop/atlasTokens";
@@ -293,6 +294,13 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
       const detail = (event as CustomEvent).detail;
       if (!detail) return;
       const current = viewRef.current;
+
+      // A LIVE canvas change (new analysis/model) means this deal's read is now
+      // stale → drop its in-session cached brief so the next cockpit open reflects
+      // it (the "log changes made in session" ask). Replays + read-only echoes skip.
+      if (!detail.replay && detail.canvas_action && detail.canvas_action !== "read_tab_state" && typeof current.dealId === "number") {
+        clearDealBrief(current.dealId);
+      }
 
       // Interactive model → live modelStore tab → Canvas.
       if (detail.canvas_action === "create_model_tab" && detail.tabId) {
