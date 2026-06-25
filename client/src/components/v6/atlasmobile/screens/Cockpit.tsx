@@ -330,15 +330,15 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
   const impliedMultiple =
     multipleRaw != null ? multipleRaw : derived != null && derived > 0 && derived <= 50 ? derived : null;
 
-  // Enterprise value (EV) — a REAL valuation, NOT the seller's asking price.
-  // EV = adj. EBITDA × an EXPLICITLY-PROVIDED multiple (financials.multiple, set
-  // by valuation work). We do NOT use the multiple back-solved from asking (that
-  // just reproduces the ask), and we do NOT fall back to asking — so when there's
-  // no real valuation, EV is blank ("—"). It becomes a number once a valuation
-  // sets a real multiple.
+  // Enterprise value (EV) = adj. EBITDA × multiple. Prefer an EXPLICIT valuation
+  // multiple (financials.multiple); when none exists, use the asking-IMPLIED
+  // multiple so EV shows the implied valuation at the current ask rather than a
+  // blank "—". (Honest: it's a derivation of real EBITDA + ask, not a fabricated
+  // figure — and it lines up with the Multiple shown in the financials card.)
+  const evMultiple = multipleRaw != null && multipleRaw > 0 ? multipleRaw : impliedMultiple;
   const enterpriseValue =
-    adjEbitda != null && multipleRaw != null && multipleRaw > 0
-      ? Math.round(adjEbitda * multipleRaw)
+    adjEbitda != null && evMultiple != null && evMultiple > 0
+      ? Math.round(adjEbitda * evMultiple)
       : null;
 
   const gateSteps = buildGateSteps(deal, detail.gates);
@@ -363,6 +363,7 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
   const researchNeeded = brief?.marketRead?.researchNeeded ?? [];
   const riskRows = [...signoffFlags, ...researchNeeded];
   const bullets = brief?.marketRead?.bullets ?? [];
+  const sourceSignals = brief?.marketRead?.sourceSignals ?? [];
 
   // The hero leads with Enterprise Value (the valuation), NOT the asking price.
   // NO sparkline: a deal has no honest time-series, and fabricating a trend would
@@ -510,6 +511,18 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
               </div>
             )}
 
+            {sourceSignals.length > 0 && (
+              <div style={{ marginTop: 16 }}>
+                <div style={readSubLabel}>Market signals</div>
+                {sourceSignals.map((s, i) => (
+                  <div key={i} style={readPoint}>
+                    <span style={{ ...readDot, background: RT.up }} aria-hidden="true" />
+                    <span style={readPointText}>{s}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {riskRows.length > 0 && (
               <div style={{ marginTop: 16 }}>
                 <div style={readSubLabel}>Needs confirming</div>
@@ -629,7 +642,7 @@ const finRow: CSSProperties = {
   gap: 12,
   padding: "15px 0",
 };
-const finRowLabel: CSSProperties = { fontSize: 15.5, color: RT.muted };
+const finRowLabel: CSSProperties = { fontSize: 15.5, color: RT.ink2, fontWeight: 500 };
 const finRowValue: CSSProperties = { fontSize: 19, fontWeight: 600, color: RT.ink, letterSpacing: "-0.01em" };
 
 /** "Next" card — the manage-the-deal driver (pale-green highlight, tappable). */

@@ -359,7 +359,10 @@ export async function getDealBriefForUser(userId: number, dealId: number, forceR
     LIMIT 1
   `;
 
-  if (!forceRefresh && cached?.brief) {
+  // An empty cached brief (blank read — the old no-merge bug, or a failed gen) must
+  // NOT be served; fall through to a synchronous regenerate so it self-heals into a
+  // populated read instead of showing "—" until the 72h TTL lapses.
+  if (!forceRefresh && cached?.brief && briefHasContent(cached.brief)) {
     const fresh =
       cached.source_fingerprint === fingerprint &&
       new Date(cached.expires_at).getTime() > Date.now();
@@ -391,7 +394,13 @@ async function regenerateDealBrief(
 
   if (process.env.ANTHROPIC_API_KEY && snapshot.deal) {
     try {
-      generated = await withTimeout(generateDealBrief(snapshot, fallback), BRIEF_AI_TIMEOUT_MS, 'deal-brief');
+      const raw = await withTimeout(generateDealBrief(snapshot, fallback), BRIEF_AI_TIMEOUT_MS, 'deal-brief');
+      // MERGE the model output OVER the deterministic fallback (the portfolio brief
+      // already does this; the deal brief used to store raw LLM output verbatim, so a
+      // partial/empty model JSON — a missing marketRead or blank headline — produced an
+      // empty read ("—") with no next moves. Now any field the model leaves empty falls
+      // back to the always-populated deterministic read.
+      generated = mergeDealBrief(fallback, raw);
     } catch (err: any) {
       status = 'failed';
       errorMessage = err.message || 'Deal brief generation failed';
@@ -851,6 +860,45 @@ function buildDeterministicPortfolioBrief(snapshot: Awaited<ReturnType<typeof bu
       intelligenceSources: sourceCount,
     },
     deals: deals.slice(0, 5).map((deal, index) => dealToBriefDeal(deal, index)),
+  };
+}
+
+/** True when a brief actually has a read (a non-empty marketRead headline). */
+function briefHasContent(brief: any): boolean {
+  const h = brief?.marketRead?.headline;
+  return typeof h === 'string' && h.trim().length > 0;
+}
+
+/** Merge a model brief OVER the deterministic fallback: each model field wins only
+ *  when it is genuinely present (non-empty string / non-empty array), otherwise the
+ *  always-populated fallback value is kept. Guarantees a populated read + next moves. */
+function mergeDealBrief(fallback: any, raw: any): any {
+  if (!raw || typeof raw !== 'object') return fallback;
+  const str = (v: any, f: any) => (typeof v === 'string' && v.trim().length > 0 ? v : f);
+  const arr = (v: any, f: any) => (Array.isArray(v) && v.length > 0 ? v : f);
+  const num = (v: any, f: any) => (typeof v === 'number' && Number.isFinite(v) ? v : f);
+  const fb = fallback || {};
+  return {
+    ...fb,
+    ...raw,
+    verdict: {
+      label: str(raw?.verdict?.label, fb.verdict?.label),
+      score: num(raw?.verdict?.score, fb.verdict?.score),
+      text: str(raw?.verdict?.text, fb.verdict?.text),
+    },
+    marketRead: {
+      headline: str(raw?.marketRead?.headline, fb.marketRead?.headline),
+      bullets: arr(raw?.marketRead?.bullets, fb.marketRead?.bullets),
+      sourceSignals: arr(raw?.marketRead?.sourceSignals, fb.marketRead?.sourceSignals),
+      researchNeeded: arr(raw?.marketRead?.researchNeeded, fb.marketRead?.researchNeeded),
+    },
+    taxLegal: {
+      tax: str(raw?.taxLegal?.tax, fb.taxLegal?.tax),
+      legal: str(raw?.taxLegal?.legal, fb.taxLegal?.legal),
+      signoffFlags: arr(raw?.taxLegal?.signoffFlags, fb.taxLegal?.signoffFlags),
+    },
+    nextMoves: arr(raw?.nextMoves, fb.nextMoves),
+    filesFocus: arr(raw?.filesFocus, fb.filesFocus),
   };
 }
 
