@@ -38,7 +38,6 @@ import {
 import type { Verdict } from "../../mobile/types";
 import {
   Pill,
-  Segmented,
   EmptyState,
   LoadingState,
   fmtCents,
@@ -48,7 +47,6 @@ import { RT } from "../redesign/rt";
 import { ActionRow, MarkBadge as RMarkBadge } from "../redesign/kit";
 
 type FilterId = "all" | "buy" | "sell" | "watch";
-type LayoutId = "list" | "board";
 
 const FILTERS: { id: FilterId; label: string }[] = [
   { id: "all", label: "All" },
@@ -147,7 +145,6 @@ export default function DealsMobileScreen({ user }: AtlasScreenProps) {
   const { all, loading, loaded, isAuthed } = useMobileDeals(user);
   const { summary } = usePortfolioSummary(user, isAuthed);
 
-  const [layout, setLayout] = useState<LayoutId>("list");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterId>("all");
   const [stageFilter, setStageFilter] = useState<StageFilterId>("all");
@@ -189,8 +186,6 @@ export default function DealsMobileScreen({ user }: AtlasScreenProps) {
 
   const toolbar = (
     <Toolbar
-      layout={layout}
-      onLayout={setLayout}
       query={query}
       onSearch={setQuery}
       filter={filter}
@@ -230,19 +225,15 @@ export default function DealsMobileScreen({ user }: AtlasScreenProps) {
   return (
     <div style={S.root}>
       {toolbar}
-      {layout === "board" ? (
-        <BoardView
-          byStage={byStage}
-          matchCount={filtered.length}
-          stageFilter={stageFilter}
-          onStageFilter={setStageFilter}
-          inFlow={inFlow}
-          flowValue={flowValue}
-          onOpen={openDeal}
-        />
-      ) : (
-        <ListView filtered={filtered} onOpen={openDeal} />
-      )}
+      <BoardView
+        byStage={byStage}
+        matchCount={filtered.length}
+        stageFilter={stageFilter}
+        onStageFilter={setStageFilter}
+        inFlow={inFlow}
+        flowValue={flowValue}
+        onOpen={openDeal}
+      />
     </div>
   );
 }
@@ -250,16 +241,12 @@ export default function DealsMobileScreen({ user }: AtlasScreenProps) {
 /* ─── toolbar (Board/List toggle + search + filter chips) ──── */
 
 function Toolbar({
-  layout,
-  onLayout,
   query,
   onSearch,
   filter,
   onFilter,
   count,
 }: {
-  layout: LayoutId;
-  onLayout: (id: LayoutId) => void;
   query: string;
   onSearch: (v: string) => void;
   filter: FilterId;
@@ -267,20 +254,7 @@ function Toolbar({
   count: number;
 }) {
   return (
-    <div style={{ padding: "6px 18px 0" }}>
-      {/* Board/List toggle — the shell header already shows the "Deals" title, so
-          we don't repeat it here. (Full tab-header model lands in the nav rework.) */}
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
-        <Segmented
-          options={[
-            { id: "list", label: "List" },
-            { id: "board", label: "Board" },
-          ]}
-          value={layout}
-          onChange={onLayout}
-        />
-      </div>
-
+    <div style={{ padding: "12px 18px 0" }}>
       {/* search field */}
       <label
         style={{
@@ -349,33 +323,6 @@ function Toolbar({
           );
         })}
       </div>
-    </div>
-  );
-}
-
-/* ─── list view (the vertical portfolio list) ──────────────── */
-
-function ListView({
-  filtered,
-  onOpen,
-}: {
-  filtered: MobileStageRow[];
-  onOpen: (row: MobileStageRow) => void;
-}) {
-  if (filtered.length === 0) {
-    return (
-      <div style={{ padding: "24px 18px" }}>
-        <EmptyState accent={RT.accent} onAccent={RT.onAccent} title="No deals match" hint="Try a different search or filter." />
-      </div>
-    );
-  }
-  // Whitespace-separated rows on the grey page (no card, no dividers) — tap to
-  // open. Per-deal actions live in the cockpit + the Yulia sheet, not a "⋯" here.
-  return (
-    <div style={{ padding: "8px 18px 4px" }}>
-      {filtered.map((row) => (
-        <DealRow key={row.id} row={row} onOpen={() => onOpen(row)} />
-      ))}
     </div>
   );
 }
@@ -571,38 +518,6 @@ function StageTab({
         {count}
       </span>
     </button>
-  );
-}
-
-/* ─── deal row (list) ──────────────────────────────────────── */
-
-function DealRow({ row, onOpen }: { row: MobileStageRow; onOpen: () => void }) {
-  const sector = sectorOf(row);
-  const stage = stageMeta(row);
-  const ev = fmtCents(evCents(row));
-  const fitReal = typeof row.fit === "number";
-
-  // "sector · EV [· Fit NN]" — drop absent halves so we never print a bare "·".
-  const meta = [
-    sector !== "—" ? sector : null,
-    ev !== "—" ? ev : null,
-    fitReal ? `Fit ${row.fit}` : null,
-  ]
-    .filter(Boolean)
-    .join(" · ");
-
-  return (
-    <ActionRow
-      leading={<RMarkBadge label={row.name} seed={row.rawId} size={40} />}
-      title={row.name}
-      sub={meta || "—"}
-      action={
-        <Pill bg={stage.bg} fg={stage.fg} style={{ fontSize: 12, padding: "5px 11px" }}>
-          {stage.label}
-        </Pill>
-      }
-      onClick={onOpen}
-    />
   );
 }
 

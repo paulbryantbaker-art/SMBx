@@ -43,7 +43,6 @@ import {
   Avatar,
   Pill,
   KpiCard,
-  Segmented,
   EmptyState,
   LoadingState,
   fmtCents,
@@ -54,7 +53,6 @@ import { T } from "../atlasTokens";
 const PAGE_SIZE = 25;
 
 type FilterId = "all" | "buy" | "sell" | "watch";
-type LayoutId = "table" | "board";
 
 const FILTERS: { id: FilterId; label: string }[] = [
   { id: "all", label: "All" },
@@ -197,7 +195,6 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
 
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterId>("all");
-  const [layout, setLayout] = useState<LayoutId>("board");
   const [page, setPage] = useState(0);
 
   const owner = ownerOf(user);
@@ -276,8 +273,6 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
           onSearch={onSearch}
           filter={filter}
           onFilter={onFilter}
-          layout={layout}
-          onLayout={setLayout}
           count={0}
           onAdd={() => chat?.send("I want to add a new deal.")}
         />
@@ -296,8 +291,6 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
           onSearch={onSearch}
           filter={filter}
           onFilter={onFilter}
-          layout={layout}
-          onLayout={setLayout}
           count={0}
           onAdd={() => chat?.send("I want to add a new deal.")}
         />
@@ -320,88 +313,25 @@ export default function DealsScreen({ user }: AtlasScreenProps) {
         onSearch={onSearch}
         filter={filter}
         onFilter={onFilter}
-        layout={layout}
-        onLayout={setLayout}
         count={all.length}
         onAdd={() => chat?.send("I want to add a new deal.")}
       />
 
-      {layout === "board" ? (
-        <BoardView
-          byStage={byStage}
-          matchCount={filtered.length}
-          inFlow={inFlow}
-          inFlowDelta={inFlowDelta}
-          flowValue={flowValue}
-          flowDelta={flowDelta}
-          liveOffers={mandates.totals?.liveOffers ?? null}
-          mandateCount={mandates.mandates.length}
-          onOpen={openDeal}
-          onClear={() => {
-            setQuery("");
-            setFilter("all");
-          }}
-        />
-      ) : (
-        <>
-          {/* table */}
-          <div style={{ flex: 1, overflow: "auto", minHeight: 0 }}>
-            {/* sticky header */}
-            <div
-              style={{
-                position: "sticky",
-                top: 0,
-                zIndex: 1,
-                background: T.white,
-                padding: "10px 22px",
-                borderBottom: `1px solid ${T.rowDiv}`,
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                fontSize: 11,
-                fontWeight: 600,
-                color: T.muted2,
-                letterSpacing: ".04em",
-              }}
-            >
-              <span style={{ flex: COLS.deal, minWidth: 0 }}>DEAL</span>
-              <span style={{ flex: COLS.sector, minWidth: 0 }}>SECTOR</span>
-              <span style={{ flex: COLS.stage, minWidth: 0 }}>STAGE</span>
-              <span style={{ flex: COLS.ev, minWidth: 0 }}>EV</span>
-              <span style={{ flex: COLS.fit, minWidth: 0 }}>FIT</span>
-              <span style={{ flex: COLS.owner, minWidth: 0 }}>OWNER</span>
-              <span style={{ flex: COLS.activity, minWidth: 0 }}>ACTIVITY</span>
-            </div>
-
-            {/* rows */}
-            {pageRows.length === 0 ? (
-              <div style={{ padding: "40px 22px" }}>
-                <EmptyState
-                  title="No deals match"
-                  hint="Try a different search or filter."
-                />
-              </div>
-            ) : (
-              pageRows.map((row) => (
-                <DealRow key={row.id} row={row} owner={owner} onOpen={() => openDeal(row)} />
-              ))
-            )}
-          </div>
-
-          {/* pager */}
-          <Pager
-            total={filtered.length}
-            start={start}
-            end={Math.min(start + PAGE_SIZE, filtered.length)}
-            canPrev={safePage > 0}
-            canNext={safePage < pageCount - 1}
-            // Step off safePage (the clamped, rendered page), not the raw page, so
-            // a stale out-of-range `page` can't desync the first prev/next click.
-            onPrev={() => setPage(Math.max(0, safePage - 1))}
-            onNext={() => setPage(Math.min(pageCount - 1, safePage + 1))}
-          />
-        </>
-      )}
+      <BoardView
+        byStage={byStage}
+        matchCount={filtered.length}
+        inFlow={inFlow}
+        inFlowDelta={inFlowDelta}
+        flowValue={flowValue}
+        flowDelta={flowDelta}
+        liveOffers={mandates.totals?.liveOffers ?? null}
+        mandateCount={mandates.mandates.length}
+        onOpen={openDeal}
+        onClear={() => {
+          setQuery("");
+          setFilter("all");
+        }}
+      />
     </div>
   );
 }
@@ -413,8 +343,6 @@ function Toolbar({
   onSearch,
   filter,
   onFilter,
-  layout,
-  onLayout,
   count,
   onAdd,
 }: {
@@ -422,8 +350,6 @@ function Toolbar({
   onSearch: (v: string) => void;
   filter: FilterId;
   onFilter: (id: FilterId) => void;
-  layout: LayoutId;
-  onLayout: (id: LayoutId) => void;
   count: number;
   onAdd: () => void;
 }) {
@@ -438,17 +364,6 @@ function Toolbar({
         flex: "none",
       }}
     >
-      {/* Board / Table toggle — Board is the default (the active funnel);
-          Table is the dense workhorse. Both views read the same filtered set. */}
-      <Segmented
-        options={[
-          { id: "table", label: "Table" },
-          { id: "board", label: "Board" },
-        ]}
-        value={layout}
-        onChange={onLayout}
-      />
-
       {/* search field */}
       <label
         style={{
