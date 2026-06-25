@@ -62,6 +62,36 @@ export function YuliaSheet({
     if (open) setHeightVh(DEFAULT_VH);
   }, [open]);
 
+  // Lock the page behind the sheet so touches don't scroll the background THROUGH
+  // the open sheet. This app body-scrolls (the document scrolls, not an inner div),
+  // and on iOS `overflow:hidden` alone doesn't hold — freeze the body in place
+  // (top:-scrollY keeps it visually put) and restore the scroll on close.
+  useEffect(() => {
+    if (!open) return;
+    const scrollY = window.scrollY;
+    const body = document.body;
+    const prev = {
+      position: body.style.position,
+      top: body.style.top,
+      left: body.style.left,
+      right: body.style.right,
+      width: body.style.width,
+    };
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.width = "100%";
+    return () => {
+      body.style.position = prev.position;
+      body.style.top = prev.top;
+      body.style.left = prev.left;
+      body.style.right = prev.right;
+      body.style.width = prev.width;
+      window.scrollTo(0, scrollY);
+    };
+  }, [open]);
+
   const onDragStart = (e: ReactPointerEvent) => {
     // Don't start a drag from an interactive control (close button, a chip).
     if ((e.target as HTMLElement).closest("button")) return;
@@ -517,6 +547,8 @@ const S: Record<string, CSSProperties> = {
     flex: 1,
     minHeight: 0,
     overflowY: "auto",
+    overscrollBehavior: "contain", // the chat scroll can't chain out to the page
+    WebkitOverflowScrolling: "touch",
     padding: "4px 16px 8px",
     display: "flex",
     flexDirection: "column",
