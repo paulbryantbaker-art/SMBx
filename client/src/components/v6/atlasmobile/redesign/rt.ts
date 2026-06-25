@@ -18,11 +18,12 @@ export const RT = {
   // surfaces (warm — matches marketing --bg / --surface)
   page: "#F4F4F6", // neutral light grey — the page (less brown; closer to Cash App)
   card: "#ffffff", // white — every raised element (no border, no shadow)
-  // ink scale (NEUTRAL greys — the warm/brown tint removed; muted kept AA-dark)
-  ink: "#1A1A1E",
-  ink2: "#44454B",
-  muted: "#6A6B73",
-  faint: "#9A9AA2",
+  // ink scale (NEUTRAL greys — de-tinted + DARKENED so secondary text stays
+  // crisp on the light page; Cash App never floats light type on light grey)
+  ink: "#18181B",
+  ink2: "#3A3A40", // body / descriptions — dark, not grey
+  muted: "#5A5A62", // secondary (subs, labels) — readable medium-dark, AA+ on the page
+  faint: "#86868E", // tertiary (timestamps) only — never body
   line: "#E7E7EA", // neutral pill fill / hairline when one is truly needed
   // the one accent — BRAND GREEN
   accent: "#2BFF77", // bright brand green — FILLS only (pair with onAccent text)

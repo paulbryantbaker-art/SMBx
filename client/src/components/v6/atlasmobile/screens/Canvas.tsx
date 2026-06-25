@@ -15,6 +15,7 @@
  */
 import { useMemo } from "react";
 import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { useModelStore } from "../../../../lib/modelStore";
 import { getCanvasArtifact } from "../../desktop/screens/Canvas";
 import ModelRenderer from "../../../models/ModelRenderer";
@@ -77,7 +78,7 @@ export default function CanvasMobileScreen({ user, view }: AtlasScreenProps) {
           <h1 style={S.title}>{artifact.title}</h1>
           {artifact.markdown ? (
             <div className="atlas-md" style={S.body}>
-              <Markdown>{artifact.markdown}</Markdown>
+              <Markdown remarkPlugins={[remarkGfm]}>{artifact.markdown}</Markdown>
             </div>
           ) : (
             <div style={S.emptyCard}>
@@ -106,12 +107,12 @@ const S: Record<string, CSSProperties> = {
   // Bottom padding clears the pinned action bar so the last content isn't hidden.
   wrap: { padding: "14px 18px 104px" },
   title: {
-    margin: "2px 0 16px",
-    fontSize: 24,
+    margin: "4px 0 20px",
+    fontSize: 31,
     fontWeight: 700,
     color: RT.ink,
-    letterSpacing: "-0.02em",
-    lineHeight: 1.2,
+    letterSpacing: "-0.025em",
+    lineHeight: 1.1,
   },
   body: { color: RT.ink },
   // Pinned action bar — a clean white bar with a warm hairline (NOT a glass

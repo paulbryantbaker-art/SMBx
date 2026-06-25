@@ -187,15 +187,15 @@ export function ButtonRow({
 }
 
 const S: Record<string, CSSProperties> = {
-  heroLabel: { fontSize: 13, color: RT.muted, display: "flex", alignItems: "center", gap: 4 },
-  heroValueRow: { display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12, marginTop: 2 },
-  heroValue: { fontSize: 48, fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1, color: RT.ink },
-  heroSub: { fontSize: 13.5, color: RT.muted, marginTop: 8 },
-  section: { fontSize: 19, fontWeight: 600, color: RT.ink, letterSpacing: "-0.01em", margin: "26px 0 2px" },
+  heroLabel: { fontSize: 14, color: RT.muted, display: "flex", alignItems: "center", gap: 4 },
+  heroValueRow: { display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12, marginTop: 3 },
+  heroValue: { fontSize: 53, fontWeight: 800, letterSpacing: "-0.035em", lineHeight: 1, color: RT.ink },
+  heroSub: { fontSize: 14.5, color: RT.muted, marginTop: 9 },
+  section: { fontSize: 21, fontWeight: 700, color: RT.ink, letterSpacing: "-0.015em", margin: "28px 0 2px" },
   // Cash App detail pattern — spacious + large type
-  detailSection: { margin: "36px 0 4px" },
-  detailTitle: { fontSize: 27, fontWeight: 700, color: RT.ink, letterSpacing: "-0.02em", lineHeight: 1.15, margin: 0 },
-  detailDesc: { fontSize: 15.5, color: RT.muted, lineHeight: 1.55, margin: "10px 0 2px", maxWidth: "94%" },
+  detailSection: { margin: "38px 0 4px" },
+  detailTitle: { fontSize: 29, fontWeight: 700, color: RT.ink, letterSpacing: "-0.02em", lineHeight: 1.12, margin: 0 },
+  detailDesc: { fontSize: 16, color: RT.muted, lineHeight: 1.55, margin: "10px 0 2px", maxWidth: "94%" },
   divider: { height: 1, background: "rgba(0,0,0,.07)", border: 0, margin: "34px 0 0" },
   buttonRow: { display: "flex", gap: 12, marginTop: 18 },
   pillButton: {
@@ -216,8 +216,8 @@ const S: Record<string, CSSProperties> = {
   rowTap: { cursor: "pointer", WebkitTapHighlightColor: "transparent" },
   rowLead: { flex: "none", display: "flex", alignItems: "center" },
   rowText: { flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 },
-  rowTitle: { fontSize: 17, fontWeight: 600, lineHeight: 1.3, color: RT.ink, overflow: "hidden", textOverflow: "ellipsis" },
-  rowSub: { fontSize: 14.5, color: RT.muted, lineHeight: 1.45, overflow: "hidden", textOverflow: "ellipsis" },
+  rowTitle: { fontSize: 18.5, fontWeight: 600, lineHeight: 1.3, color: RT.ink, overflow: "hidden", textOverflow: "ellipsis" },
+  rowSub: { fontSize: 15.5, color: RT.muted, lineHeight: 1.45, overflow: "hidden", textOverflow: "ellipsis" },
   pill: {
     flex: "none",
     background: RT.line,

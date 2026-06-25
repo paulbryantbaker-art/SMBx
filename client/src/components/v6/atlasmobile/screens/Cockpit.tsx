@@ -394,7 +394,14 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
       {/* ── Hero: headline figure + verdict, stage folded into the sub ── */}
       <Hero
         label={heroFig.label}
-        value={fmtCents(heroFig.value)}
+        value={
+          heroFig.value == null ? (
+            // No real valuation yet → a quiet placeholder, never a bold black bar.
+            <span style={{ color: RT.faint, fontWeight: 600, fontSize: 34 }}>—</span>
+          ) : (
+            fmtCents(heroFig.value)
+          )
+        }
         trailing={
           briefState === "ready" && verdict?.label ? (
             <Pill bg={vColors.bg} fg={vColors.fg}>{titleCase(verdict.label)}</Pill>
@@ -465,9 +472,9 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
       {/* ── Yulia's read — concise headline + a risk LINK (full read via Yulia) ── */}
       <Divider />
       <SectionHeader
-        style={{ display: "flex", alignItems: "center", gap: 8, margin: "26px 0 0", fontSize: 24, fontWeight: 700, letterSpacing: "-0.02em" }}
+        style={{ display: "flex", alignItems: "center", gap: 9, margin: "30px 0 0", fontSize: 28, fontWeight: 700, letterSpacing: "-0.02em" }}
       >
-        <Sparkle size={18} />
+        <Sparkle size={20} />
         Yulia&rsquo;s read
         {briefState === "ready" && brief?.stale && (
           <span
@@ -654,10 +661,10 @@ const nextTitle: CSSProperties = { display: "block", fontSize: 17, fontWeight: 6
 const nextWhy: CSSProperties = { display: "block", fontSize: 14, color: RT.ink2, lineHeight: 1.4, marginTop: 3 };
 
 /** Yulia's read — structured synopsis styles (Cash App DL). */
-const readSummary: CSSProperties = { fontSize: 15.5, lineHeight: 1.65, color: RT.ink2, fontWeight: 500 };
-const readSubLabel: CSSProperties = { fontSize: 13, fontWeight: 600, color: RT.ink, marginBottom: 6 };
-const readPoint: CSSProperties = { display: "flex", gap: 10, alignItems: "flex-start", padding: "5px 0" };
-const readPointText: CSSProperties = { fontSize: 14.5, lineHeight: 1.5, color: RT.ink2 };
+const readSummary: CSSProperties = { fontSize: 16.5, lineHeight: 1.6, color: RT.ink, fontWeight: 500 };
+const readSubLabel: CSSProperties = { fontSize: 13.5, fontWeight: 700, color: RT.ink, marginBottom: 7 };
+const readPoint: CSSProperties = { display: "flex", gap: 11, alignItems: "flex-start", padding: "6px 0" };
+const readPointText: CSSProperties = { fontSize: 15.5, lineHeight: 1.5, color: RT.ink2 };
 const readDot: CSSProperties = { width: 6, height: 6, borderRadius: "50%", background: RT.accentInk, marginTop: 7, flex: "none" };
 const readDiscuss: CSSProperties = {
   display: "inline-flex",
