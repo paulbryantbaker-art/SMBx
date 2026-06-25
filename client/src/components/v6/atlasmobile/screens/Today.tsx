@@ -6,7 +6,9 @@
  *   Pipeline HERO — real usePortfolioSummary.weightedEvCents + totalActive
  *     (honest: no fabricated delta). No deals → greeting + first-deal CTA.
  *   "Needs you"   — real useNextActions as action-rows (tap → openDeal / chat).
- *   "Yulia & your agents" — real useTodayOperatingBrief; honest-empty.
+ *   "Favorites"   — real starred deals (deals.all where isFavorite); tap → cockpit.
+ *   "Notifications" — real useNotifications feed (deal-team comments, invites,
+ *                     deliverables, gate moves); tap → markRead + open the deal.
  *
  * The big "Ask Yulia" composer + quick chips are GONE — Yulia is the FAB / the
  * slide-up sheet now. Honesty (contract law #4): every value is a real hook
@@ -21,11 +23,7 @@ import { ChevronRightIcon } from "../../desktop/icons";
 import { useMobileDeals } from "../../../../hooks/useMobileDeals";
 import { useNextActions, type NextAction } from "../../../../hooks/useNextActions";
 import { usePortfolioSummary } from "../../../../hooks/usePortfolioSummary";
-import {
-  useTodayOperatingBrief,
-  type TodayDealPulseItem,
-  type TodayStudioRefreshItem,
-} from "../../../../hooks/useTodayOperatingBrief";
+import { useNotifications, notifTimeAgo, type AppNotification } from "../../../../hooks/useNotifications";
 import { RT } from "../redesign/rt";
 import { Hero, SectionHeader, ActionRow, MarkBadge } from "../redesign/kit";
 
@@ -44,33 +42,6 @@ function timeGreeting(): string {
   return "Good evening";
 }
 
-/* ─── agent-activity items (mapped from the operating brief) ── */
-
-type AgentItem = { text: string; who: string };
-
-function buildAgentItems(
-  pulse: TodayDealPulseItem[] | undefined,
-  studio: TodayStudioRefreshItem[] | undefined,
-  morning: { title: string; lede: string; focusDealId?: string } | undefined,
-): AgentItem[] {
-  const items: AgentItem[] = [];
-  // Only surface the morning brief when it's tied to a real focus deal — its
-  // `!focus` branch is an onboarding line for every authed user (honesty drift).
-  if (morning && morning.focusDealId && (morning.title || morning.lede)) {
-    items.push({ text: morning.lede || morning.title, who: "Yulia · morning brief" });
-  }
-  for (const s of studio ?? []) {
-    items.push({ text: `${s.reason || s.action} — ${s.title}`, who: `${s.format || "Studio"} · refresh` });
-  }
-  for (const p of pulse ?? []) {
-    items.push({
-      text: p.nextAction || p.thesis || `${p.title} — ${p.status}`,
-      who: `${p.title} · ${p.urgency || p.status}`,
-    });
-  }
-  return items.slice(0, 4);
-}
-
 /* ─── screen ──────────────────────────────────────────────── */
 
 export default function TodayMobileScreen({ user }: AtlasScreenProps) {
@@ -81,7 +52,7 @@ export default function TodayMobileScreen({ user }: AtlasScreenProps) {
   const deals = useMobileDeals(user);
   const next = useNextActions(user, canFetch);
   const { summary } = usePortfolioSummary(user, canFetch);
-  const { brief, loading: briefLoading, error: briefError } = useTodayOperatingBrief(user, canFetch);
+  const notifs = useNotifications(canFetch);
 
   const first = firstNameOf(user?.display_name);
   const greeting = user ? `${timeGreeting()}, ${first ?? "there"}.` : `${timeGreeting()}.`;
@@ -94,7 +65,21 @@ export default function TodayMobileScreen({ user }: AtlasScreenProps) {
     [nav, chat],
   );
 
-  const agentItems = buildAgentItems(brief?.dealPulse, brief?.studioRefreshNeeds, brief?.morningBrief);
+  // Starred deals → quick-access pinned row. Real `isFavorite` from /api/deals.
+  const favorites = deals.all.filter((d) => d.isFavorite);
+
+  // Tapping a notification marks it read and, when it's tied to a deal, opens
+  // that deal's cockpit (carrying the real deal name from the loaded list).
+  const onNotif = useCallback(
+    (n: AppNotification) => {
+      notifs.markRead(n.id);
+      if (n.deal_id != null) {
+        const deal = deals.all.find((d) => d.rawId === n.deal_id);
+        nav.openDeal(n.deal_id, deal?.name);
+      }
+    },
+    [notifs, deals.all, nav],
+  );
 
   const noDeals =
     canFetch && deals.loaded && !deals.hasData && next.loaded && next.actions.length === 0;
@@ -148,9 +133,37 @@ export default function TodayMobileScreen({ user }: AtlasScreenProps) {
         onStartDeal={startFirstDeal}
       />
 
-      {/* Yulia & your agents */}
-      <SectionHeader>Yulia &amp; your agents</SectionHeader>
-      <AgentList loading={briefLoading} error={briefError} items={agentItems} />
+      {/* Favorites — starred deals, quick access (only when the user has pinned any) */}
+      {deals.loaded && favorites.length > 0 && (
+        <>
+          <SectionHeader>Favorites</SectionHeader>
+          <div>
+            {favorites.map((d) => (
+              <ActionRow
+                key={d.id}
+                leading={<MarkBadge label={d.name} seed={d.rawId} size={40} />}
+                title={
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                    <span aria-hidden="true" style={{ color: RT.accentInk }}>★</span>
+                    {d.name}
+                  </span>
+                }
+                sub={d.sub}
+                action="Open"
+                onClick={() => nav.openDeal(d.rawId, d.name)}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Notifications — the real deal-team / deal-activity feed (same rows as the bell) */}
+      <SectionHeader>Notifications</SectionHeader>
+      <NotificationList
+        loaded={notifs.loaded}
+        notifications={notifs.notifications}
+        onOpen={onNotif}
+      />
     </div>
   );
 }
@@ -205,24 +218,47 @@ function FirstDealCard({ onStartDeal }: { onStartDeal: () => void }) {
   );
 }
 
-/* ─── agent list (read-only log) ──────────────────────────── */
+/* ─── notifications feed (real /api/notifications rows) ───── */
 
-function AgentList({ loading, error, items }: { loading: boolean; error: string | null; items: AgentItem[] }) {
-  if (loading) return <Skeleton rows={2} />;
-  if (error) return <Note text="Couldn't load agent activity right now. Refresh to try again." />;
-  if (items.length === 0)
-    return <Note text="No agent activity yet. Yulia will post updates here as she works your deals." />;
+function NotificationList({
+  loaded,
+  notifications,
+  onOpen,
+}: {
+  loaded: boolean;
+  notifications: AppNotification[];
+  onOpen: (n: AppNotification) => void;
+}) {
+  if (!loaded) return <Skeleton rows={2} />;
+  if (notifications.length === 0)
+    return (
+      <Note text="You're all caught up — no new notifications. Updates from your deal team show here." />
+    );
+
   return (
     <div>
-      {items.map((it, i) => (
-        <div key={i} style={{ display: "flex", gap: 11, padding: "11px 0", alignItems: "flex-start" }}>
-          <span style={{ width: 8, height: 8, borderRadius: "50%", background: RT.accent, marginTop: 7, flex: "none" }} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={S.agentText}>{it.text}</div>
-            <div style={S.agentWho}>{it.who}</div>
-          </div>
-        </div>
-      ))}
+      {notifications.slice(0, 6).map((n) => {
+        const unread = !n.read_at;
+        return (
+          <ActionRow
+            key={n.id}
+            leading={
+              <span style={S.notifLead}>
+                <span style={{ ...S.notifDot, background: unread ? RT.accentStrong : RT.line }} />
+              </span>
+            }
+            title={<span style={{ fontWeight: unread ? 700 : 600 }}>{n.title}</span>}
+            sub={
+              <span>
+                {n.body ? `${n.body} · ` : ""}
+                <span style={{ color: RT.faint }}>{notifTimeAgo(n.created_at)}</span>
+              </span>
+            }
+            action={n.deal_id != null ? "Open" : undefined}
+            onClick={() => onOpen(n)}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -257,14 +293,6 @@ const S: Record<string, CSSProperties> = {
     cursor: "pointer",
     fontFamily: RT.font,
   },
-  agentText: {
-    fontSize: 15,
-    color: RT.ink,
-    lineHeight: 1.4,
-    display: "-webkit-box",
-    WebkitLineClamp: 2,
-    WebkitBoxOrient: "vertical",
-    overflow: "hidden",
-  },
-  agentWho: { fontSize: 13, color: RT.muted, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+  notifLead: { width: 40, display: "flex", alignItems: "center", justifyContent: "center" },
+  notifDot: { width: 10, height: 10, borderRadius: "50%", flex: "none" },
 };
