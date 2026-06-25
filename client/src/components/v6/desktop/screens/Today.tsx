@@ -5,29 +5,25 @@
  * #fafbfd with a decorative glow blob, a 50px greeting, a hero composer that
  * sends to Yulia, four quick-action chips, and a two-column lower band:
  *   - "Needs your attention"  ← useNextActions (real gate/stale/review actions)
- *   - "Yulia & your agents"   ← useTodayOperatingBrief (agent/Yulia activity)
+ *   - "Notifications"         ← useNotifications (real deal-team / deal-activity feed)
+ *   plus a "Favorites" band   ← deals.all where isFavorite (real starred deals)
  *
- * Honesty: every value is a real hook field or an honest empty note. The
- * prototype's "New listing scanner 7:00 AM" / "$1,200" rows are NOT ported —
- * the agent column renders only what the operating brief actually returns, and
- * shows an honest empty note when the brief is null/empty. An authed user with
- * no deals keeps the composer + chips but gets a first-deal CTA instead of
- * fabricated attention items.
+ * Honesty: every value is a real hook field or an honest empty note. The old
+ * "Yulia & your agents" column rendered non-clickable operating-brief items; it
+ * is replaced (per the user) with the real, clickable Notifications feed and a
+ * Favorites quick-access band. An authed user with no deals keeps the composer +
+ * chips but gets a first-deal CTA instead of fabricated attention items.
  */
 import { useCallback, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import type { AtlasScreenProps } from "../atlasNav";
 import { useAtlasNav, useAtlasChat } from "../atlasNav";
 import { T } from "../atlasTokens";
-import { Sparkle } from "../primitives";
+import { MarkBadge } from "../primitives";
 import { PlusIcon, ChevronRightIcon, SendArrowIcon } from "../icons";
 import { useMobileDeals } from "../../../../hooks/useMobileDeals";
 import { useNextActions, type NextAction } from "../../../../hooks/useNextActions";
-import {
-  useTodayOperatingBrief,
-  type TodayDealPulseItem,
-  type TodayStudioRefreshItem,
-} from "../../../../hooks/useTodayOperatingBrief";
+import { useNotifications, notifTimeAgo, type AppNotification } from "../../../../hooks/useNotifications";
 import { useAdvisorMandates } from "../../../../hooks/useAdvisorMandates";
 import MandatesBand from "./MandatesBand";
 
@@ -87,47 +83,6 @@ function attentionKind(a: NextAction): AttentionKind {
   }
 }
 
-/* ─── agent-activity item (mapped from the operating brief) ── */
-
-type AgentItem = { glyph: string; color: string; text: string; who: string };
-
-function buildAgentItems(
-  pulse: TodayDealPulseItem[] | undefined,
-  studio: TodayStudioRefreshItem[] | undefined,
-  morning: { title: string; lede: string; focusDealId?: string } | undefined,
-): AgentItem[] {
-  const items: AgentItem[] = [];
-  // Only surface the morning brief as "agent activity" when it's tied to a real
-  // focus deal. Its `!focus` branch returns an onboarding line ("No live deal is
-  // attached yet…") for every authed user — presenting that as work Yulia did is
-  // an honesty drift, and it contradicts the left column's first-deal CTA.
-  if (morning && morning.focusDealId && (morning.title || morning.lede)) {
-    items.push({
-      glyph: "✦",
-      color: T.violet,
-      text: morning.lede || morning.title,
-      who: "Yulia · morning brief",
-    });
-  }
-  for (const s of studio ?? []) {
-    items.push({
-      glyph: "✓",
-      color: T.green,
-      text: `${s.reason || s.action} — ${s.title}`,
-      who: `${s.format || "Studio"} · refresh`,
-    });
-  }
-  for (const p of pulse ?? []) {
-    items.push({
-      glyph: "▷",
-      color: T.blue,
-      text: p.nextAction || p.thesis || `${p.title} — ${p.status}`,
-      who: `${p.title} · ${p.urgency || p.status}`,
-    });
-  }
-  return items.slice(0, 4);
-}
-
 /* ─── screen ──────────────────────────────────────────────── */
 
 export default function TodayScreen({ user }: AtlasScreenProps) {
@@ -138,11 +93,7 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
   const deals = useMobileDeals(user);
   const next = useNextActions(user, canFetch);
   const mandates = useAdvisorMandates(user);
-  const {
-    brief,
-    loading: briefLoading,
-    error: briefError,
-  } = useTodayOperatingBrief(user, canFetch);
+  const notifs = useNotifications(canFetch);
 
   const [composerValue, setComposerValue] = useState("");
 
@@ -169,10 +120,20 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
     [nav, chat],
   );
 
-  const agentItems = buildAgentItems(
-    brief?.dealPulse,
-    brief?.studioRefreshNeeds,
-    brief?.morningBrief,
+  // Starred deals → quick-access band. Real `isFavorite` from /api/deals.
+  const favorites = deals.all.filter((d) => d.isFavorite);
+
+  // Tapping a notification marks it read and, when it's tied to a deal, opens
+  // that deal's cockpit (carrying the real deal name from the loaded list).
+  const onNotif = useCallback(
+    (n: AppNotification) => {
+      notifs.markRead(n.id);
+      if (n.deal_id != null) {
+        const deal = deals.all.find((d) => d.rawId === n.deal_id);
+        nav.openDeal(n.deal_id, deal?.name);
+      }
+    },
+    [notifs, deals.all, nav],
   );
 
   // Authed user with genuinely no deals → keep composer + chips, swap the
@@ -307,6 +268,24 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
           </div>
         )}
 
+        {/* Favorites — starred deals, quick access (full-width band, only when
+            the user has pinned any). A horizontal row of compact deal cards. */}
+        {deals.loaded && favorites.length > 0 && (
+          <div style={{ width: "100%", paddingTop: 30 }}>
+            <ColumnHeading>Favorites</ColumnHeading>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              {favorites.map((d) => (
+                <FavoriteCard
+                  key={d.id}
+                  name={d.name}
+                  sub={d.sub}
+                  onOpen={() => nav.openDeal(d.rawId, d.name)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* two-column lower band — below the centered hero (scroll to reach) */}
         <div
           style={{
@@ -333,25 +312,13 @@ export default function TodayScreen({ user }: AtlasScreenProps) {
             />
           </div>
 
-          {/* RIGHT — Yulia & your agents */}
+          {/* RIGHT — Notifications (real deal-team / deal-activity feed) */}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 7,
-                marginBottom: 11,
-              }}
-            >
-              <Sparkle size={15} />
-              <span style={{ fontSize: 14, fontWeight: 600, color: T.label }}>
-                Yulia &amp; your agents
-              </span>
-            </div>
-            <AgentColumn
-              loading={briefLoading}
-              error={briefError}
-              items={agentItems}
+            <ColumnHeading>Notifications</ColumnHeading>
+            <NotificationColumn
+              loaded={notifs.loaded}
+              notifications={notifs.notifications}
+              onOpen={onNotif}
             />
           </div>
         </div>
@@ -671,111 +638,184 @@ function FirstDealCard({ onStartDeal }: { onStartDeal: () => void }) {
   );
 }
 
-/* ─── agent column ────────────────────────────────────────── */
+/* ─── favorite deal card (compact, clickable) ─────────────── */
 
-function AgentColumn({
-  loading,
-  error,
-  items,
+function FavoriteCard({
+  name,
+  sub,
+  onOpen,
 }: {
-  loading: boolean;
-  error: string | null;
-  items: AgentItem[];
+  name: string;
+  sub: string;
+  onOpen: () => void;
 }) {
-  if (loading) {
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        textAlign: "left",
+        background: T.white,
+        border: `1px solid ${T.border}`,
+        borderRadius: 13,
+        padding: "11px 14px",
+        cursor: "pointer",
+        boxShadow: T.shSoft,
+        fontFamily: T.font,
+        flex: "1 1 220px",
+        minWidth: 200,
+        maxWidth: 300,
+        transition: "box-shadow .15s ease",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = T.shHover;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = T.shSoft;
+      }}
+    >
+      <MarkBadge letter={name} size={30} radius={8} />
+      <span style={{ flex: 1, minWidth: 0 }}>
+        <span
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 5,
+            fontSize: 13.5,
+            fontWeight: 600,
+            color: T.ink,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          <span aria-hidden="true" style={{ color: T.amber, flex: "none" }}>★</span>
+          <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{name}</span>
+        </span>
+        <span
+          style={{
+            display: "block",
+            fontSize: 12,
+            color: T.muted2,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {sub}
+        </span>
+      </span>
+    </button>
+  );
+}
+
+/* ─── notifications column (real /api/notifications, clickable) ── */
+
+function NotificationColumn({
+  loaded,
+  notifications,
+  onOpen,
+}: {
+  loaded: boolean;
+  notifications: AppNotification[];
+  onOpen: (n: AppNotification) => void;
+}) {
+  if (!loaded) {
     return <ColumnLoading rows={3} />;
   }
-  // The operating-brief route returns 500 on failure; the hook then nulls the
-  // brief, so an error would otherwise read as the empty "nothing happened"
-  // note. Surface it honestly as an error, not as "no activity".
-  if (error) {
+  if (notifications.length === 0) {
     return (
-      <NoteCard text="Couldn't load agent activity right now. Refresh to try again." />
-    );
-  }
-  if (items.length === 0) {
-    return (
-      <NoteCard text="No agent activity yet. Yulia will post updates here as she works your deals." />
+      <NoteCard text="You're all caught up — no new notifications. Updates from your deal team show here." />
     );
   }
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-      {items.map((it, i) => (
-        // Non-interactive activity cards: flatter, soft-surface chrome (no card
-        // shadow, default cursor) so they read as a read-only log and aren't
-        // confused with the clickable white attention cards opposite them.
-        <div
-          key={i}
-          style={{
-            display: "flex",
-            alignItems: "flex-start",
-            gap: 11,
-            background: T.surface,
-            border: `1px solid ${T.hair}`,
-            borderRadius: 13,
-            padding: "13px 15px",
-            cursor: "default",
-          }}
-        >
-          <AgentGlyph glyph={it.glyph} color={it.color} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div
+      {notifications.slice(0, 6).map((n) => {
+        const unread = !n.read_at;
+        return (
+          <button
+            key={n.id}
+            type="button"
+            onClick={() => onOpen(n)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 11,
+              textAlign: "left",
+              background: T.white,
+              border: `1px solid ${T.border}`,
+              borderRadius: 13,
+              padding: "13px 15px",
+              cursor: "pointer",
+              boxShadow: T.shSoft,
+              fontFamily: T.font,
+              transition: "box-shadow .15s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = T.shHover;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = T.shSoft;
+            }}
+          >
+            <span
+              aria-hidden="true"
               style={{
-                fontSize: 13.5,
-                color: T.ink,
-                lineHeight: 1.45,
-                // clamp to 2 lines so a long thesis / studio reason can't blow
-                // out card height
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
+                width: 30,
+                height: 30,
+                flex: "none",
+                borderRadius: 9,
+                background: unread ? T.greenBg : T.hair,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              {it.text}
-            </div>
-            <div
-              style={{
-                fontSize: 12,
-                color: T.muted2,
-                marginTop: 3,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {it.who}
-            </div>
-          </div>
-        </div>
-      ))}
+              <span
+                style={{
+                  width: 9,
+                  height: 9,
+                  borderRadius: "50%",
+                  background: unread ? T.green : T.faint,
+                }}
+              />
+            </span>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span
+                style={{
+                  display: "block",
+                  fontSize: 13.5,
+                  fontWeight: unread ? 700 : 600,
+                  color: T.ink,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {n.title}
+              </span>
+              <span
+                style={{
+                  display: "block",
+                  fontSize: 12,
+                  color: T.muted2,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {n.body ? `${n.body} · ` : ""}
+                <span style={{ color: T.faint }}>{notifTimeAgo(n.created_at)}</span>
+              </span>
+            </span>
+            {n.deal_id != null && <ChevronRightIcon size={16} c={T.faint} />}
+          </button>
+        );
+      })}
     </div>
-  );
-}
-
-function AgentGlyph({ glyph, color }: { glyph: string; color: string }) {
-  // The Gemini sparkle uses the gradient clip; other glyphs use a flat color.
-  if (glyph === "✦") {
-    return (
-      <span style={{ marginTop: 1, flex: "none" }}>
-        <Sparkle size={15} />
-      </span>
-    );
-  }
-  return (
-    <span
-      aria-hidden="true"
-      style={{
-        flex: "none",
-        marginTop: 1,
-        fontSize: 14,
-        lineHeight: 1.45,
-        color,
-        fontWeight: 700,
-      }}
-    >
-      {glyph}
-    </span>
   );
 }
 
