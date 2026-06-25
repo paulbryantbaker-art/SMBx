@@ -131,19 +131,11 @@ export function AtlasChatRail() {
   return (
     <aside style={S.rail}>
       {/* Header */}
+      {/* The old "Deal"/"Canvas" context pill is gone — the header tab strip now
+          shows what's open (and which is active), so the pill was redundant. */}
       <header style={S.header}>
         <Sparkle size={18} />
         <span style={S.headerTitle}>Yulia</span>
-        <span style={{ flex: 1 }} />
-        {/* Context pill = which screen Yulia is reading. On a deal cockpit the
-            deal-detail header already names the deal (avatar + title), so the
-            pill stays the GENERIC screen label ("Deal") to avoid showing the
-            same name twice. The deal name lives in the tooltip + surface context
-            (Yulia still knows it), just not duplicated on-screen. */}
-        <span style={S.ctxPill} title={ctxLabelFor(view)}>
-          <MonitorIcon size={13} c={T.blue} />
-          <span style={S.ctxLabel}>{CTX_LABEL[view.screen] ?? "Yulia"}</span>
-        </span>
       </header>
 
       {/* Message list */}
@@ -405,18 +397,6 @@ const S: Record<string, CSSProperties> = {
     // No underline — the header floats in the clean rail column.
   },
   headerTitle: { fontSize: 15, fontWeight: 600, color: T.ink },
-  ctxPill: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 6,
-    background: T.track,
-    borderRadius: T.rPill,
-    padding: "4px 10px",
-    fontSize: 11.5,
-    color: T.muted,
-    maxWidth: 172,
-  },
-  ctxLabel: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
   list: {
     flex: 1,
     minHeight: 0,

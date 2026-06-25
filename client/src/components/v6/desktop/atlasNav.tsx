@@ -41,6 +41,18 @@ export interface AtlasView {
   canvasTabId?: string;
 }
 
+/** An open "document" tab — a deal cockpit or a canvas/analysis — shown in the
+ *  header tab strip so several can be open at once and switched between. Module
+ *  screens (Today/Deals/…) are navigation, not tabs, so they never open one. */
+export interface OpenTab {
+  /** `deal-<dealId>` | `canvas-<canvasTabId>` — stable identity for dedupe. */
+  id: string;
+  kind: "deal" | "canvas";
+  title: string;
+  /** The view to restore when this tab is selected. */
+  view: AtlasView;
+}
+
 export interface AtlasNav {
   view: AtlasView;
   go(screen: AtlasScreen, opts?: Partial<AtlasView>): void;
@@ -50,6 +62,14 @@ export interface AtlasNav {
   openSettings(pane?: SettingsPane): void;
   /** Open a chat-spawned canvas artifact (analysis/model tab). */
   openCanvas(canvasTabId: string, dealId?: number): void;
+  /** Open deal/canvas tabs, most-recent last. Empty until one is opened. */
+  openTabs: OpenTab[];
+  /** The id of the tab matching the current view, or null on a module screen. */
+  activeTabId: string | null;
+  /** Switch to an already-open tab. */
+  selectTab(tab: OpenTab): void;
+  /** Close a tab; if it was active, falls back to a neighbor or the Deals list. */
+  closeTab(id: string): void;
 }
 
 export const AtlasNavContext = createContext<AtlasNav | null>(null);

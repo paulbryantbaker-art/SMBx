@@ -84,6 +84,57 @@ export function AtlasHeader({
         })}
       </nav>
 
+      {/* Divider between the module nav and the open-document tabs (only when any
+          are open) — visually separates "where you navigate" from "what you have
+          open", in the SAME row so no vertical height is added. */}
+      {nav.openTabs.length > 0 && <span style={S.tabDivider} aria-hidden="true" />}
+
+      {/* Open-document tab strip (deals + canvases). Takes the flexible middle
+          space and scrolls horizontally; doubles as the spacer that keeps the
+          utilities right-aligned when nothing is open. */}
+      <div style={S.tabStrip} role="tablist" aria-label="Open tabs">
+        {nav.openTabs.map((t) => {
+          const isActive = t.id === nav.activeTabId;
+          return (
+            <span
+              key={t.id}
+              style={{ ...S.openTab, background: isActive ? T.tabActive : "transparent" }}
+              onMouseEnter={(e) => {
+                if (!isActive) e.currentTarget.style.background = T.tabHover;
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) e.currentTarget.style.background = "transparent";
+              }}
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                title={t.title}
+                onClick={() => nav.selectTab(t)}
+                style={{
+                  ...S.openTabLabel,
+                  color: isActive ? T.blue : T.muted,
+                  fontWeight: isActive ? 600 : 500,
+                }}
+              >
+                {t.title}
+              </button>
+              <button
+                type="button"
+                aria-label={`Close ${t.title}`}
+                onClick={() => nav.closeTab(t.id)}
+                style={S.tabClose}
+                onMouseEnter={(e) => (e.currentTarget.style.color = T.ink)}
+                onMouseLeave={(e) => (e.currentTarget.style.color = T.faint)}
+              >
+                ×
+              </button>
+            </span>
+          );
+        })}
+      </div>
+
       {/* Utilities */}
       <button
         type="button"
@@ -163,7 +214,10 @@ const S: Record<string, CSSProperties> = {
   logo: { display: "flex", alignItems: "center", gap: 9, marginRight: 6, flex: "none" },
   wordmark: { fontSize: 19, fontWeight: 600, letterSpacing: "-.01em", color: T.ink },
   tabs: {
-    flex: 1,
+    // Content-width now (was flex:1) so the open-tab strip can take the flexible
+    // middle space. The module nav stays fully visible; on a narrow window it
+    // can shrink + scroll before the tab strip does.
+    flex: "0 1 auto",
     minWidth: 0,
     display: "flex",
     gap: 2,
@@ -171,6 +225,58 @@ const S: Record<string, CSSProperties> = {
     // The strip can scroll on narrow widths, but the scrollbar reads as chrome
     // noise in a 58px header — hide it (content stays reachable by wheel/drag).
     scrollbarWidth: "none",
+  },
+  // Hairline between the module nav and the open-document tabs.
+  tabDivider: {
+    flex: "none",
+    width: 1,
+    height: 22,
+    background: T.border,
+    margin: "0 4px",
+  },
+  // Open-document tab strip — flexible middle space; scrolls; also the spacer
+  // that keeps the right-hand utilities pinned when nothing is open.
+  tabStrip: {
+    flex: 1,
+    minWidth: 0,
+    display: "flex",
+    alignItems: "center",
+    gap: 3,
+    overflowX: "auto",
+    scrollbarWidth: "none",
+  },
+  openTab: {
+    flex: "none",
+    display: "inline-flex",
+    alignItems: "center",
+    maxWidth: 180,
+    borderRadius: T.rPill,
+    transition: "background .12s ease",
+  },
+  openTabLabel: {
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    fontFamily: T.font,
+    fontSize: 13.5,
+    padding: "6px 2px 6px 11px",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    maxWidth: 148,
+    transition: "color .12s ease",
+  },
+  tabClose: {
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    color: T.faint,
+    fontSize: 16,
+    lineHeight: 1,
+    padding: "4px 9px 4px 3px",
+    display: "inline-flex",
+    alignItems: "center",
+    transition: "color .12s ease",
   },
   tab: {
     border: "none",

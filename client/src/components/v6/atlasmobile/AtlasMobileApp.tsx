@@ -283,6 +283,12 @@ function AtlasMobileShell({ user, chat, onSignOut }: ShellProps) {
         setSheetOpen(false);
         setView({ screen: "canvas", canvasTabId, dealId });
       },
+      // Document tabs are a desktop affordance — mobile navigates one surface at
+      // a time, so these are inert here (the shared AtlasNav type requires them).
+      openTabs: [],
+      activeTabId: null,
+      selectTab: () => {},
+      closeTab: () => {},
     }),
     [view],
   );

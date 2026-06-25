@@ -30,6 +30,7 @@ import {
   type AtlasNav,
   type AtlasScreen,
   type AtlasView,
+  type OpenTab,
   type SettingsPane,
 } from "./atlasNav";
 import { AtlasHeader } from "./AtlasHeader";
@@ -44,8 +45,41 @@ import IntegrationScreen from "./screens/Integration";
 import FilesScreen from "./screens/Files";
 import AgentScreen from "./screens/Agent";
 import SettingsScreen from "./screens/Settings";
-import CanvasScreen, { registerCanvasArtifact, type CanvasArtifact } from "./screens/Canvas";
+import CanvasScreen, { registerCanvasArtifact, getCanvasArtifact, type CanvasArtifact } from "./screens/Canvas";
 import { ensureModelTabFromCanvasAction } from "../mobile/screens/Model";
+
+/* ─── open-tab helpers (deal cockpit + canvas/analysis become tabs) ─────────
+ * Module screens (Today/Deals/…) are navigation, not documents, so they never
+ * produce a tab. Only cockpit + canvas do. */
+
+function tabIdForView(v: AtlasView): string | null {
+  if (v.screen === "cockpit" && v.dealId != null) return `deal-${v.dealId}`;
+  if (v.screen === "canvas" && v.canvasTabId) return `canvas-${v.canvasTabId}`;
+  return null;
+}
+
+/** Best-effort canvas label: the live model-tab title, else the stashed
+ *  artifact title, else null (caller falls back to the deal name / "Analysis"). */
+function canvasTitle(canvasTabId: string): string | null {
+  const modelTab = useModelStore.getState().tabs[canvasTabId];
+  if (modelTab?.title) return modelTab.title;
+  return getCanvasArtifact(canvasTabId)?.title ?? null;
+}
+
+function tabForView(v: AtlasView): OpenTab | null {
+  if (v.screen === "cockpit" && v.dealId != null) {
+    return { id: `deal-${v.dealId}`, kind: "deal", title: v.dealName || `Deal ${v.dealId}`, view: v };
+  }
+  if (v.screen === "canvas" && v.canvasTabId) {
+    return {
+      id: `canvas-${v.canvasTabId}`,
+      kind: "canvas",
+      title: canvasTitle(v.canvasTabId) || v.dealName || "Analysis",
+      view: v,
+    };
+  }
+  return null;
+}
 
 interface AtlasAppProps {
   user: User | null;
@@ -167,6 +201,13 @@ function AtlasShell({ user, chat }: ShellProps) {
   const viewRef = useRef(view);
   viewRef.current = view;
 
+  // Open "document" tabs (deals + canvases). Session-scoped — a full reload
+  // starts clean at `today`; reopening a deal re-adds its tab. openTabsRef keeps
+  // closeTab's fallback math off the render cycle.
+  const [openTabs, setOpenTabs] = useState<OpenTab[]>([]);
+  const openTabsRef = useRef(openTabs);
+  openTabsRef.current = openTabs;
+
   // ── In-app browser history ──────────────────────────────────────────────
   // Desktop nav is internal `view` state. Without history integration a
   // browser Back / trackpad swipe-back leaves the in-app view entirely and —
@@ -177,12 +218,35 @@ function AtlasShell({ user, chat }: ShellProps) {
   // entry is seeded on mount. pushState/popstate are same-document, so the
   // bfcache guard never fires for in-app Back (only on real cross-document
   // restores), and the two coexist cleanly.
-  const commitView = useCallback((next: AtlasView, mode: "push" | "replace" = "push") => {
-    setView(next);
-    const state = { atlasView: next };
-    if (mode === "replace") window.history.replaceState(state, "");
-    else window.history.pushState(state, "");
+  // Ensure a cockpit/canvas view has an open tab — add it, or refresh its
+  // title/view when a better one arrives (dealName lands, or a canvas title
+  // resolves after its artifact registers). Module screens produce no tab.
+  // Shared by commitView (forward nav) AND popstate (Back/Forward), so backing
+  // into a deal always shows its tab.
+  const trackTab = useCallback((next: AtlasView) => {
+    const tab = tabForView(next);
+    if (!tab) return;
+    setOpenTabs((prev) => {
+      const i = prev.findIndex((t) => t.id === tab.id);
+      if (i === -1) return [...prev, tab];
+      const merged = { ...prev[i], view: tab.view, title: tab.title || prev[i].title };
+      if (merged.title === prev[i].title && merged.view === prev[i].view) return prev;
+      const copy = prev.slice();
+      copy[i] = merged;
+      return copy;
+    });
   }, []);
+
+  const commitView = useCallback(
+    (next: AtlasView, mode: "push" | "replace" = "push") => {
+      setView(next);
+      trackTab(next);
+      const state = { atlasView: next };
+      if (mode === "replace") window.history.replaceState(state, "");
+      else window.history.pushState(state, "");
+    },
+    [trackTab],
+  );
   // Stable handle for the once-subscribed canvas_action listener.
   const commitViewRef = useRef(commitView);
   commitViewRef.current = commitView;
@@ -197,10 +261,31 @@ function AtlasShell({ user, chat }: ShellProps) {
     const onPop = (e: PopStateEvent) => {
       const v = (e.state as { atlasView?: AtlasView } | null)?.atlasView ?? { screen: "today" };
       setView(v);
+      trackTab(v);
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
-  }, []);
+  }, [trackTab]);
+
+  // Switch to an already-open tab.
+  const selectTab = useCallback((tab: OpenTab) => commitView(tab.view), [commitView]);
+
+  // Close a tab. If it was the active one, fall back to the neighbor that slides
+  // into its slot (or the previous one), else the Deals list — never a blank.
+  const closeTab = useCallback(
+    (id: string) => {
+      const prev = openTabsRef.current;
+      const idx = prev.findIndex((t) => t.id === id);
+      if (idx === -1) return;
+      const nextTabs = prev.filter((t) => t.id !== id);
+      setOpenTabs(nextTabs);
+      if (tabIdForView(viewRef.current) === id) {
+        const fallback = nextTabs[idx] ?? nextTabs[idx - 1] ?? null;
+        commitView(fallback ? fallback.view : { screen: "deals" });
+      }
+    },
+    [commitView],
+  );
 
   const nav = useMemo<AtlasNav>(
     () => ({
@@ -213,8 +298,12 @@ function AtlasShell({ user, chat }: ShellProps) {
         commitView({ screen: "settings", settingsPane: pane ?? "profile" }),
       openCanvas: (canvasTabId: string, dealId?: number) =>
         commitView({ screen: "canvas", canvasTabId, dealId }),
+      openTabs,
+      activeTabId: tabIdForView(view),
+      selectTab,
+      closeTab,
     }),
-    [view, commitView],
+    [view, commitView, openTabs, selectTab, closeTab],
   );
 
   // Subscribe to Yulia's tool results (the ONE chat→canvas bridge). Same event
