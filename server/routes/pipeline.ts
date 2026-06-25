@@ -96,9 +96,8 @@ function deriveEvCents(d: any): number {
 // ─── List all deals for user ─────────────────────────────────
 
 pipelineRouter.get('/deals', async (req, res) => {
+  const userId = (req as any).userId;
   try {
-    const userId = (req as any).userId;
-
     const deals = await sql`
       SELECT d.id, d.journey_type, d.current_gate, d.status, d.league,
              d.business_name, d.name, d.is_favorite, d.disposition,
@@ -113,9 +112,35 @@ pipelineRouter.get('/deals', async (req, res) => {
       WHERE d.user_id = ${userId}
       ORDER BY d.is_favorite DESC, d.updated_at DESC
     `;
-
     return res.json(deals);
   } catch (err: any) {
+    // RESILIENCE: if the is_favorite/disposition columns aren't present yet
+    // (migration 095 still pending on this DB), DON'T 500 — that blanks the whole
+    // Deals board. Fall back to the pre-095 shape so deals always load.
+    const missingCols = /column .*(is_favorite|disposition).* does not exist|is_favorite|disposition/i.test(err?.message || '');
+    if (missingCols) {
+      console.warn('[deals] is_favorite/disposition missing — pre-095 fallback query (migration pending)');
+      try {
+        const deals = await sql`
+          SELECT d.id, d.journey_type, d.current_gate, d.status, d.league,
+                 d.business_name, d.name,
+                 d.industry, d.revenue, d.sde, d.ebitda,
+                 d.asking_price, d.location, d.financials,
+                 d.seven_factor_composite,
+                 d.created_at, d.updated_at,
+                 (SELECT COUNT(*) FROM deliverables del WHERE del.deal_id = d.id AND del.status = 'complete') as deliverable_count,
+                 (SELECT COUNT(*) FROM data_room_documents doc WHERE doc.deal_id = d.id) as document_count,
+                 (SELECT c.id FROM conversations c WHERE c.deal_id = d.id ORDER BY c.updated_at DESC LIMIT 1) as conversation_id
+          FROM deals d
+          WHERE d.user_id = ${userId}
+          ORDER BY d.updated_at DESC
+        `;
+        return res.json(deals);
+      } catch (e2: any) {
+        console.error('List deals fallback error:', e2.message);
+        return res.status(500).json({ error: 'Failed to list deals' });
+      }
+    }
     console.error('List deals error:', err.message);
     return res.status(500).json({ error: 'Failed to list deals' });
   }

@@ -832,6 +832,16 @@ async function runMigrations() {
 runMigrations().then(async () => {
   // Post-migration: ensure critical schema and admin account exist
   const bootSql = createSql();
+  // Belt-and-suspenders: ensure the deal favorite/disposition columns exist even
+  // if migration 095 didn't apply on this DB — /api/deals selects them, and a
+  // missing column would 500 + blank the Deals board. Isolated so a failure here
+  // can't skip the admin-account ensure below.
+  try {
+    await bootSql`ALTER TABLE deals ADD COLUMN IF NOT EXISTS is_favorite BOOLEAN NOT NULL DEFAULT FALSE`;
+    await bootSql`ALTER TABLE deals ADD COLUMN IF NOT EXISTS disposition VARCHAR(20) NOT NULL DEFAULT 'active'`;
+  } catch (e: any) {
+    console.error('[boot] ensure deals favorite/disposition columns:', e?.message);
+  }
   try {
     await bootSql`ALTER TABLE users ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMPTZ`;
     await bootSql`
