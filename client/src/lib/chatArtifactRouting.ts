@@ -87,6 +87,12 @@ export function routeChatArtifactToCanvas(content: string, source: string, dealT
   // Stable id shared with the shell listener (it registers/navigates under this
   // exact id) AND returned to the caller so the chat message can re-open it.
   const id = `artifact-content-${Date.now()}`;
+  // REPLAY = we're re-scanning a conversation's SAVED history (resuming a deal),
+  // not producing a fresh artifact live. On replay the shell must register the
+  // artifact (so it lists under the cockpit's "On the canvas" + the message gets
+  // an "Open on canvas" control) but must NOT navigate — otherwise just opening a
+  // deal yanks you straight to the canvas instead of the deal page.
+  const isReplay = /history/i.test(source);
   if (typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent("smbx:canvas_action", {
       detail: {
@@ -96,6 +102,7 @@ export function routeChatArtifactToCanvas(content: string, source: string, dealT
         content: trimmed,
         markdown: trimmed,
         source,
+        replay: isReplay,
         artifactKind: "chat_markdown_analysis",
         generatedAt: new Date().toISOString(),
       },
@@ -106,7 +113,9 @@ export function routeChatArtifactToCanvas(content: string, source: string, dealT
     opened: true,
     id,
     title,
-    chatMessage: `I opened "${title}" on the canvas so we can work it visually. Tell me what assumption, section, or chart you want changed.`,
+    chatMessage: isReplay
+      ? `"${title}" is saved to this deal's canvas — open it anytime to work it visually.`
+      : `I opened "${title}" on the canvas so we can work it visually. Tell me what assumption, section, or chart you want changed.`,
   };
 }
 

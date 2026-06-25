@@ -280,7 +280,12 @@ function AtlasShell({ user, chat }: ShellProps) {
           title: detail.title || "Yulia artifact",
           markdown,
           analysisRunId: detail.analysisRunId ?? null,
+          // Tag with the deal so it lists under the cockpit's "On the canvas".
+          dealId: typeof detail.dealId === "number" ? detail.dealId : current.dealId ?? null,
         });
+        // Replay (resuming a deal's saved chat): registered above so it's reopenable
+        // from the deal page — but DON'T navigate away from the deal the user opened.
+        if (detail.replay) return;
         setView({ screen: "canvas", canvasTabId: id, dealId: current.dealId, dealName: current.dealName });
         return;
       }
