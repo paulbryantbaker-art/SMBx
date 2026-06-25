@@ -17,6 +17,7 @@ import { runDailyAggregatorScan } from './services/aggregatorMonitorService.js';
 import { batchEnrichTargets } from './services/websiteEnrichmentService.js';
 import { runStage2, runStage3, runStage4, runWeeklyPortfolioRefresh, runMonthlyPortfolioExpansion } from './services/sourcingPipelineService.js';
 import { sql } from './db.js';
+import { refreshNightlyDealReads } from './services/nightlyDealReadService.js';
 import { getDatabaseUrl, shouldUseDatabaseSsl } from './dbConfig.js';
 
 let DATABASE_URL = '';
@@ -141,6 +142,17 @@ async function start() {
       console.log(`[worker] Freshness scan: ${deals.length} deals checked, ${staleTotal} deliverables marked stale`);
     });
     console.log('Scheduled: weekly_freshness_scan (Monday 7 AM UTC)');
+
+    // Nightly deal-read + market-intelligence refresh — daily 2 AM UTC.
+    // Regenerates + persists every ACTIVE, NON-DEFERRED deal's brief so it's
+    // current on next login. Deferred deals are skipped (no background reading).
+    await (boss as any).schedule('nightly_deal_read', '0 2 * * *', {}, {});
+    await (boss as any).work('nightly_deal_read', async () => {
+      console.log('[worker] Running nightly deal-read refresh...');
+      const r = await refreshNightlyDealReads();
+      console.log(`[worker] Nightly deal-read: ${r.refreshed}/${r.deals} refreshed, ${r.failures} failures, ${r.skippedDeferred} deferred skipped`);
+    });
+    console.log('Scheduled: nightly_deal_read (daily 2 AM UTC, skips deferred)');
 
     // Weekly FRED rate monitoring — Wednesday 3 AM UTC
     await (boss as any).schedule('fred_rate_monitor', '0 3 * * 3', {}, {});
