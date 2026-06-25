@@ -114,35 +114,31 @@ pipelineRouter.get('/deals', async (req, res) => {
     `;
     return res.json(deals);
   } catch (err: any) {
-    // RESILIENCE: if the is_favorite/disposition columns aren't present yet
-    // (migration 095 still pending on this DB), DON'T 500 — that blanks the whole
-    // Deals board. Fall back to the pre-095 shape so deals always load.
-    const missingCols = /column .*(is_favorite|disposition).* does not exist|is_favorite|disposition/i.test(err?.message || '');
-    if (missingCols) {
-      console.warn('[deals] is_favorite/disposition missing — pre-095 fallback query (migration pending)');
-      try {
-        const deals = await sql`
-          SELECT d.id, d.journey_type, d.current_gate, d.status, d.league,
-                 d.business_name, d.name,
-                 d.industry, d.revenue, d.sde, d.ebitda,
-                 d.asking_price, d.location, d.financials,
-                 d.seven_factor_composite,
-                 d.created_at, d.updated_at,
-                 (SELECT COUNT(*) FROM deliverables del WHERE del.deal_id = d.id AND del.status = 'complete') as deliverable_count,
-                 (SELECT COUNT(*) FROM data_room_documents doc WHERE doc.deal_id = d.id) as document_count,
-                 (SELECT c.id FROM conversations c WHERE c.deal_id = d.id ORDER BY c.updated_at DESC LIMIT 1) as conversation_id
-          FROM deals d
-          WHERE d.user_id = ${userId}
-          ORDER BY d.updated_at DESC
-        `;
-        return res.json(deals);
-      } catch (e2: any) {
-        console.error('List deals fallback error:', e2.message);
-        return res.status(500).json({ error: 'Failed to list deals' });
-      }
+    // RESILIENCE: the preferred query adds is_favorite/disposition + favorites-first
+    // ordering (migration 095). If it fails for ANY reason (columns missing, etc.),
+    // fall back to the known-good pre-095 query so the Deals board NEVER blanks.
+    // 500 only if the fallback ALSO fails.
+    console.warn('[deals] preferred query failed — pre-095 fallback:', err?.message);
+    try {
+      const deals = await sql`
+        SELECT d.id, d.journey_type, d.current_gate, d.status, d.league,
+               d.business_name, d.name,
+               d.industry, d.revenue, d.sde, d.ebitda,
+               d.asking_price, d.location, d.financials,
+               d.seven_factor_composite,
+               d.created_at, d.updated_at,
+               (SELECT COUNT(*) FROM deliverables del WHERE del.deal_id = d.id AND del.status = 'complete') as deliverable_count,
+               (SELECT COUNT(*) FROM data_room_documents doc WHERE doc.deal_id = d.id) as document_count,
+               (SELECT c.id FROM conversations c WHERE c.deal_id = d.id ORDER BY c.updated_at DESC LIMIT 1) as conversation_id
+        FROM deals d
+        WHERE d.user_id = ${userId}
+        ORDER BY d.updated_at DESC
+      `;
+      return res.json(deals);
+    } catch (e2: any) {
+      console.error('List deals error (both queries failed):', e2.message);
+      return res.status(500).json({ error: 'Failed to list deals' });
     }
-    console.error('List deals error:', err.message);
-    return res.status(500).json({ error: 'Failed to list deals' });
   }
 });
 

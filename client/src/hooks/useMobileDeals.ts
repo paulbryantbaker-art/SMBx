@@ -135,13 +135,16 @@ export interface UseMobileDealsResult {
   loaded: boolean;
   isAuthed: boolean;
   hasData: boolean;
+  /** Non-null when the /api/deals fetch failed — lets the UI say WHY instead of
+   *  a misleading "No deals yet" empty state. */
+  error: string | null;
   today: MobilePipelineRow[];
   picks: MobilePick[];
   featured: MobileFeatured | null;
   all: MobileStageRow[];
 }
 
-const EMPTY: Omit<UseMobileDealsResult, "loading" | "loaded" | "isAuthed" | "hasData"> = {
+const EMPTY: Omit<UseMobileDealsResult, "loading" | "loaded" | "isAuthed" | "hasData" | "error"> = {
   today: [],
   picks: [],
   featured: null,
@@ -265,7 +268,7 @@ function normalizeRawDeal(raw: any): RawDeal {
 
 /* ─── shape per-screen ────────────────────────────────────── */
 
-function shape(deals: RawDeal[]): Omit<UseMobileDealsResult, "loading" | "loaded" | "isAuthed" | "hasData"> {
+function shape(deals: RawDeal[]): Omit<UseMobileDealsResult, "loading" | "loaded" | "isAuthed" | "hasData" | "error"> {
   // Full pipeline: every deal the user owns (all statuses), tagged with its
   // gate-derived stage so the mobile Pipeline can group them like desktop.
   const all: MobileStageRow[] = deals.map(d => {
@@ -374,30 +377,41 @@ export function useMobileDeals(user: User | null): UseMobileDealsResult {
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [hasData, setHasData] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user || DEV_AUTH_BYPASS) {
       setShaped(EMPTY);
       setLoaded(true);
       setHasData(false);
+      setError(null);
       return;
     }
     let cancelled = false;
     setLoading(true);
     setLoaded(false);
+    setError(null);
     fetch("/api/deals", { headers: authHeaders() })
-      .then(r => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
+      .then(async r => {
+        if (r.ok) return r.json();
+        // Surface the server's message so an on-device user can tell us WHY.
+        let detail = "";
+        try { detail = (await r.json())?.error || ""; } catch { /* no body */ }
+        return Promise.reject(new Error(`HTTP ${r.status}${detail ? ` — ${detail}` : ""}`));
+      })
       .then((rows: RawDeal[]) => {
         if (cancelled) return;
         const normalized = Array.isArray(rows) ? rows.map(normalizeRawDeal) : [];
         setShaped(shape(normalized));
         setHasData(normalized.length > 0);
+        setError(null);
       })
       .catch((e: Error) => {
         if (cancelled) return;
         console.error("[useMobileDeals] fetch failed:", e.message);
         setShaped(EMPTY);
         setHasData(false);
+        setError(e.message || "Could not load deals");
       })
       .finally(() => {
         if (cancelled) return;
@@ -409,5 +423,5 @@ export function useMobileDeals(user: User | null): UseMobileDealsResult {
     };
   }, [user?.id]);
 
-  return { ...shaped, loading, loaded, isAuthed: !!user, hasData };
+  return { ...shaped, loading, loaded, isAuthed: !!user, hasData, error };
 }

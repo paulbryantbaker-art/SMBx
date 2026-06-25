@@ -142,7 +142,7 @@ const PAGE_H = "0 18px"; // shell owns vertical/bottom; we own horizontal 18px
 export default function DealsMobileScreen({ user }: AtlasScreenProps) {
   const nav = useAtlasNav();
   const chat = useAtlasChat();
-  const { all, loading, loaded, isAuthed } = useMobileDeals(user);
+  const { all, loading, loaded, isAuthed, error } = useMobileDeals(user);
   const { summary } = usePortfolioSummary(user, isAuthed);
 
   const [query, setQuery] = useState("");
@@ -201,6 +201,25 @@ export default function DealsMobileScreen({ user }: AtlasScreenProps) {
         {toolbar}
         <div style={{ padding: "32px 18px", display: "flex", minHeight: 200 }}>
           <LoadingState label="Loading your deals…" />
+        </div>
+      </div>
+    );
+  }
+
+  // Honest error state — distinguishes "the fetch FAILED" from "you have zero
+  // deals". Without this, a 500 on /api/deals reads as a misleading "No deals yet".
+  // The message includes the HTTP status so an on-device user can report it.
+  if (loaded && error) {
+    return (
+      <div style={S.root}>
+        {toolbar}
+        <div style={{ padding: "24px 18px", display: "flex", minHeight: 260 }}>
+          <EmptyState accent={RT.accent} onAccent={RT.onAccent}
+            title="Couldn't load your deals"
+            hint={`Something went wrong loading your pipeline (${error}). Your deals are safe — this is a load error, not a data loss. Pull down or tap to retry.`}
+            cta="Try again"
+            onCta={() => window.location.reload()}
+          />
         </div>
       </div>
     );
