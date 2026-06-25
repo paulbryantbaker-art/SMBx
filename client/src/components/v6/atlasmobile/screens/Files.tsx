@@ -32,7 +32,6 @@ import {
   type MobileDataRoomFolder,
 } from "../../../../hooks/useMobileDataRoom";
 import { authHeaders } from "../../../../hooks/useAuth";
-import { T } from "../../desktop/atlasTokens";
 import { RT } from "../redesign/rt";
 import {
   MarkBadge,
@@ -65,13 +64,13 @@ function statusTone(status: string | null | undefined): { label: string; bg: str
   const s = raw.toLowerCase();
   if (!raw) return { label: "—", bg: RT.line, fg: RT.muted };
   if (/approv|final|complete|signed|executed|ready/.test(s)) {
-    return { label: titleCase(raw), bg: T.greenBg, fg: T.green };
+    return { label: titleCase(raw), bg: RT.accentSoft, fg: RT.accentInk };
   }
   if (/review|pending|progress|draft|generating/.test(s)) {
-    return { label: titleCase(raw), bg: T.amberBg, fg: T.amber };
+    return { label: titleCase(raw), bg: RT.line, fg: RT.muted };
   }
   if (/reject|fail|error|stale|expired/.test(s)) {
-    return { label: titleCase(raw), bg: T.terraBg, fg: T.terra };
+    return { label: titleCase(raw), bg: RT.line, fg: RT.down };
   }
   return { label: titleCase(raw), bg: RT.line, fg: RT.muted };
 }
@@ -136,7 +135,7 @@ function FolderChip({
         cursor: "pointer",
         padding: "12px 13px",
         borderRadius: 14,
-        fontFamily: T.font,
+        fontFamily: RT.font,
         textAlign: "left",
         minWidth: 122,
         background: RT.card,
@@ -154,15 +153,15 @@ function FolderChip({
           background: active ? RT.accentSoft : RT.line,
         }}
       >
-        <FolderIcon size={19} c={active ? RT.accent : RT.muted} />
+        <FolderIcon size={19} c={active ? RT.accentInk : RT.muted} />
       </span>
       <span style={{ minWidth: 0 }}>
         <span
           style={{
             display: "block",
-            fontSize: 13.5,
+            fontSize: 15,
             fontWeight: 600,
-            color: active ? RT.accent : RT.ink,
+            color: active ? RT.accentInk : RT.ink,
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
@@ -171,7 +170,7 @@ function FolderChip({
         >
           {label}
         </span>
-        <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: active ? RT.accent : RT.muted, marginTop: 1 }}>
+        <span style={{ display: "block", fontSize: 14, fontWeight: 600, color: active ? RT.accentInk : RT.muted, marginTop: 1 }}>
           {count == null ? "—" : count === 1 ? "1 file" : `${count} files`}
         </span>
       </span>
@@ -359,8 +358,8 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
     <div style={padX}>
       {/* Breadcrumb + scope + Upload */}
       <div style={{ paddingTop: 6, paddingBottom: 14 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-          <MarkBadge letter={(dealLabel || "?").slice(0, 1)} size={24} radius={7} />
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 18 }}>
+          <MarkBadge letter={(dealLabel || "?").slice(0, 1)} size={24} radius={7} bg={RT.line} fg={RT.muted} />
           <span style={{ fontSize: 18, fontWeight: 600, color: RT.ink }}>Files</span>
           <ChevronRightIcon size={16} c={RT.faint} />
           <span
@@ -384,7 +383,7 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
               display: "inline-flex",
               alignItems: "center",
               background: RT.accentSoft,
-              borderRadius: T.rPill,
+              borderRadius: RT.rPill,
               padding: "7px 13px",
               fontSize: 14,
               fontWeight: 600,
@@ -402,10 +401,10 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
               display: "inline-flex",
               alignItems: "center",
               gap: 5,
-              borderRadius: T.rPill,
+              borderRadius: RT.rPill,
               background: RT.card,
               cursor: uploading ? "default" : "pointer",
-              fontFamily: T.font,
+              fontFamily: RT.font,
               fontSize: 14,
               fontWeight: 700,
               color: RT.accentInk,
@@ -433,11 +432,11 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
           <div
             style={{
               marginTop: 10,
-              background: T.terraBg,
+              background: RT.line,
               borderRadius: 10,
               padding: "9px 12px",
               fontSize: 13.5,
-              color: T.terra,
+              color: RT.down,
               lineHeight: 1.4,
             }}
           >
@@ -502,11 +501,11 @@ export default function FilesMobileScreen({ view }: AtlasScreenProps) {
               <div
                 style={{
                   marginTop: 10,
-                  background: T.terraBg,
+                  background: RT.line,
                   borderRadius: 10,
                   padding: "9px 12px",
                   fontSize: 13.5,
-                  color: T.terra,
+                  color: RT.down,
                   lineHeight: 1.4,
                 }}
               >

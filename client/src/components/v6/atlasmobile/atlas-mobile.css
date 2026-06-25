@@ -6,6 +6,15 @@
  * the glass bars are small inset elements — NEVER a position:fixed full-viewport
  * bg div. Nothing in this file creates one. */
 
+/* Brand-mark recolor (mobile only): the shared Sparkle + gradient Avatar primitives
+ * default to the desktop violet/blue. Scope a GREEN override under .atlas-mobile so
+ * Yulia's ✦ mark and the user avatar match the green/neutral palette without
+ * touching desktop (which keeps its slate-blue). Inline background-clip stays. */
+/* background-IMAGE (not the shorthand) so the inline `background-clip:text` that
+ * shapes the ✦ glyph survives — the shorthand would reset clip and fill the box. */
+.atlas-mobile .atlas-spark { background-image: linear-gradient(135deg, #2BFF77 0%, #0E9E54 100%) !important; }
+.atlas-mobile .atlas-avatar-grad { background-image: linear-gradient(140deg, #34D27E 0%, #0B8F4E 100%) !important; }
+
 .atlas-mobile {
   /* Native system font (San Francisco on iOS) — hinted + optically sized by the
    * OS, so it reads as crisply as a native app (the YouTube reference). No

@@ -175,7 +175,7 @@ function StudioGlyph() {
       <rect x="4" y="3" width="16" height="18" rx="2" />
       <path d="M8 8h8M8 12h8M8 16h5" />
     </>,
-    T.blue,
+    RT.muted,
   );
 }
 
@@ -186,7 +186,7 @@ function IntegrationGlyph() {
       <circle cx="12" cy="12" r="8" />
       <path d="M12 8v4l3 2" />
     </>,
-    T.blue,
+    RT.muted,
   );
 }
 
@@ -194,7 +194,7 @@ function IntegrationGlyph() {
 function AgentGlyph() {
   return glyphSvg(
     <path d="M12 3l8 9-8 9-8-9z" />,
-    T.violet,
+    RT.accentInk,
   );
 }
 
@@ -205,7 +205,7 @@ function SettingsGlyphIcon() {
       <circle cx="12" cy="12" r="3" />
       <path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" />
     </>,
-    T.muted,
+    RT.muted,
   );
 }
 
@@ -213,7 +213,7 @@ function SettingsGlyphIcon() {
 function MembersGlyph() {
   return glyphSvg(
     <path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM2 21a7 7 0 0 1 14 0M17 11a3 3 0 0 0 0-6" />,
-    T.muted,
+    RT.muted,
   );
 }
 
@@ -224,7 +224,7 @@ function BellGlyph() {
       <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
       <path d="M13.7 21a2 2 0 0 1-3.4 0" />
     </>,
-    T.muted,
+    RT.muted,
   );
 }
 
@@ -235,7 +235,7 @@ const S: Record<string, CSSProperties> = {
     padding: "4px 18px",
     display: "flex",
     flexDirection: "column",
-    gap: 9,
+    gap: 24,
   },
   profileCard: {
     display: "flex",
@@ -245,12 +245,12 @@ const S: Record<string, CSSProperties> = {
     background: RT.card,
     borderRadius: T.rCardLg,
     padding: 14,
-    marginBottom: 9,
+    marginBottom: 14,
     cursor: "pointer",
-    fontFamily: T.font,
+    fontFamily: RT.font,
   },
   profileName: {
-    fontSize: 15.5,
+    fontSize: 18.5,
     fontWeight: 600,
     color: RT.ink,
     display: "-webkit-box",
@@ -260,7 +260,7 @@ const S: Record<string, CSSProperties> = {
     lineHeight: 1.3,
   },
   profileSub: {
-    fontSize: 14,
+    fontSize: 15.5,
     color: RT.muted,
     marginTop: 2,
     display: "-webkit-box",

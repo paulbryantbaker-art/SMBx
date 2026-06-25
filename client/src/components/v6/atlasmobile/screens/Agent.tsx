@@ -37,7 +37,6 @@ import type { AtlasScreenProps } from "../../desktop/atlasNav";
 import { useAtlasNav, useAtlasChat } from "../../desktop/atlasNav";
 import { authHeaders } from "../../../../hooks/useAuth";
 import { useNextActions, type NextAction } from "../../../../hooks/useNextActions";
-import { T } from "../../desktop/atlasTokens";
 import { RT } from "../redesign/rt";
 import { Sparkle, Pill, Card } from "../../desktop/primitives";
 import { CheckIcon, CloseIcon, ChevronRightIcon } from "../../desktop/icons";
@@ -149,14 +148,14 @@ function useStagedActions(canFetch: boolean) {
 function riskTone(risk: string | null): { bg: string; fg: string } {
   switch ((risk || "").toLowerCase()) {
     case "high":
-      return { bg: T.terraBg, fg: T.terra };
+      return { bg: RT.line, fg: RT.down };
     case "medium":
     case "moderate":
-      return { bg: T.amberBg, fg: T.amber };
+      return { bg: RT.line, fg: RT.muted };
     case "low":
-      return { bg: T.greenBg, fg: T.green };
+      return { bg: RT.accentSoft, fg: RT.up };
     default:
-      return { bg: T.track, fg: T.muted };
+      return { bg: RT.line, fg: RT.muted };
   }
 }
 
@@ -181,8 +180,8 @@ function relTime(iso: string): string {
   return new Date(t).toLocaleDateString();
 }
 
-/* ── robot glyph (violet) — the agent mark, matches the design icon tile ── */
-function RobotGlyph({ size = 18, c = T.violet }: { size?: number; c?: string }) {
+/* ── robot glyph (accent ink) — the agent mark, matches the design icon tile ── */
+function RobotGlyph({ size = 18, c = RT.accentInk }: { size?: number; c?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <rect x="4" y="8" width="16" height="11" rx="3" stroke={c} strokeWidth="2" />
@@ -229,7 +228,7 @@ function NoteCard({ title, text }: { title?: string; text: string }) {
           {title}
         </div>
       )}
-      <div style={{ fontSize: 14, color: RT.muted, lineHeight: 1.55 }}>{text}</div>
+      <div style={{ fontSize: 16, color: RT.ink2, lineHeight: 1.55 }}>{text}</div>
     </div>
   );
 }
@@ -277,7 +276,7 @@ function ApprovalCard({
             height: 32,
             flex: "none",
             borderRadius: 9,
-            background: T.violetBg,
+            background: RT.accentSoft,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -309,8 +308,8 @@ function ApprovalCard({
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 9 }}>
             <Pill
-              bg={T.track}
-              fg={T.muted}
+              bg={RT.line}
+              fg={RT.muted}
               style={{
                 maxWidth: "100%",
                 overflow: "hidden",
@@ -327,8 +326,8 @@ function ApprovalCard({
             )}
             {action.write_scope && (
               <Pill
-                bg={T.track}
-                fg={T.muted}
+                bg={RT.line}
+                fg={RT.muted}
                 style={{
                   maxWidth: "100%",
                   overflow: "hidden",
@@ -340,13 +339,13 @@ function ApprovalCard({
               </Pill>
             )}
             {action.permission_level && (
-              <Pill bg={T.track} fg={T.muted}>
+              <Pill bg={RT.line} fg={RT.muted}>
                 {action.permission_level}
               </Pill>
             )}
           </div>
           {action.created_at && (
-            <div style={{ fontSize: 14, color: RT.muted, marginTop: 8 }}>
+            <div style={{ fontSize: 16, color: RT.ink2, marginTop: 8 }}>
               Staged {relTime(action.created_at)}
             </div>
           )}
@@ -365,18 +364,18 @@ function ApprovalCard({
             justifyContent: "center",
             gap: 6,
             border: "none",
-            background: RT.accent,
+            background: RT.accentStrong,
             color: RT.onAccent,
-            borderRadius: T.rPill,
+            borderRadius: RT.rPill,
             padding: "9px 16px",
-            fontFamily: T.font,
+            fontFamily: RT.font,
             fontSize: 14,
             fontWeight: 700,
             cursor: busy ? "default" : "pointer",
             opacity: busy ? 0.6 : 1,
           }}
         >
-          {pending === "approve" ? <Spinner c={T.white} /> : <CheckIcon size={14} c={T.white} />}
+          {pending === "approve" ? <Spinner c={RT.onAccent} /> : <CheckIcon size={14} c={RT.onAccent} />}
           {pending === "approve" ? "Approving…" : "Approve"}
         </button>
         <button
@@ -392,9 +391,9 @@ function ApprovalCard({
             border: "none",
             background: RT.line,
             color: RT.ink2,
-            borderRadius: T.rPill,
+            borderRadius: RT.rPill,
             padding: "9px 16px",
-            fontFamily: T.font,
+            fontFamily: RT.font,
             fontSize: 14,
             fontWeight: 700,
             cursor: busy ? "default" : "pointer",
@@ -502,7 +501,7 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
   const approvalsEmpty = loaded && !error && actions.length === 0;
 
   return (
-    <div style={{ padding: "0 18px", fontFamily: T.font, color: RT.ink }}>
+    <div style={{ padding: "0 18px", fontFamily: RT.font, color: RT.ink }}>
       {/* (a) honest explainer — what an "agent" actually is here */}
       <Card
         pad="15px 16px"
@@ -513,10 +512,10 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
             <Sparkle size={16} />
           </span>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 15.5, fontWeight: 600, color: RT.ink, marginBottom: 5 }}>
+            <div style={{ fontSize: 24, fontWeight: 700, color: RT.ink, marginBottom: 5 }}>
               Set up agents by describing them to Yulia
             </div>
-            <div style={{ fontSize: 14, color: RT.muted, lineHeight: 1.6 }}>
+            <div style={{ fontSize: 16, color: RT.ink2, lineHeight: 1.6 }}>
               Tell Yulia what you want watched, scored, or drafted on a recurring basis —
               scanning for new listings against your buy-box, or refreshing a valuation when
               financials change. Yulia does the work and stages anything irreversible here for
@@ -563,7 +562,7 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
                   border: "none",
                   background: "transparent",
                   cursor: refreshing ? "default" : "pointer",
-                  fontFamily: T.font,
+                  fontFamily: RT.font,
                   fontSize: 14,
                   fontWeight: 700,
                   color: RT.accentInk,
@@ -591,22 +590,22 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
           <div style={{ fontSize: 15.5, fontWeight: 600, color: RT.ink, marginBottom: 4 }}>
             Couldn't load approvals
           </div>
-          <div style={{ fontSize: 14, color: RT.muted, lineHeight: 1.55, marginBottom: 12 }}>
+          <div style={{ fontSize: 16, color: RT.ink2, lineHeight: 1.55, marginBottom: 12 }}>
             {error}
           </div>
           <button
             type="button"
             onClick={() => void refresh()}
             style={{
-              background: RT.accent,
+              background: RT.accentStrong,
               color: RT.onAccent,
               border: "none",
-              borderRadius: T.rPill,
+              borderRadius: RT.rPill,
               padding: "9px 16px",
               fontSize: 14,
               fontWeight: 700,
               cursor: "pointer",
-              fontFamily: T.font,
+              fontFamily: RT.font,
             }}
           >
             Try again
@@ -667,7 +666,7 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
                 borderRadius: 14,
                 padding: 13,
                 cursor: "pointer",
-                fontFamily: T.font,
+                fontFamily: RT.font,
               }}
             >
               <span style={{ flex: 1, minWidth: 0 }}>
@@ -701,7 +700,7 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
                 </span>
                 {act.dealName && (
                   <span style={{ display: "inline-block", marginTop: 7 }}>
-                    <Pill bg={T.track} fg={T.muted}>
+                    <Pill bg={RT.line} fg={RT.muted}>
                       {act.dealName}
                     </Pill>
                   </span>
@@ -730,7 +729,7 @@ export default function AgentMobileScreen({ user }: AtlasScreenProps) {
         onSend={submitDraft}
         onFileUpload={chat?.uploadFile}
       />
-      <div style={{ fontSize: 14, color: RT.muted, marginTop: 8, lineHeight: 1.5 }}>
+      <div style={{ fontSize: 16, color: RT.ink2, marginTop: 8, lineHeight: 1.5 }}>
         {agentSetupReady
           ? "Yulia will help you configure it, then stage anything irreversible here for your approval."
           : "Sign in to set up an agent with Yulia."}

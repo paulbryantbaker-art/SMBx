@@ -129,7 +129,7 @@ export function ValueBadge({ children }: { children: ReactNode }) {
 export function RowButton({
   children,
   onClick,
-  tint = T.blue,
+  tint = RT.accentInk,
 }: {
   children: ReactNode;
   onClick?: () => void;
@@ -178,7 +178,7 @@ export interface ListRowProps {
   trailing?: ReactNode;
   /** Disclosure chevron on the right. */
   accessory?: "chevron" | "none";
-  /** Title color override — e.g. T.blue for an action row, IOS_RED via `destructive`. */
+  /** Title color override — e.g. RT.accentInk for an action row, IOS_RED via `destructive`. */
   tint?: string;
   destructive?: boolean;
   onClick?: () => void;
@@ -331,7 +331,7 @@ export function ActionSheet({
               }}
               style={{
                 ...S.sheetAction,
-                color: a.destructive ? IOS_RED : T.blue,
+                color: a.destructive ? IOS_RED : RT.accentInk,
                 opacity: a.disabled ? 0.4 : 1,
                 borderTop: i === 0 && title == null && message == null ? "none" : `1px solid ${S_SHEET_DIV}`,
               }}
@@ -464,7 +464,7 @@ const S: Record<string, CSSProperties> = {
   sectionHeaderAction: {
     border: "none",
     background: "transparent",
-    color: T.blue,
+    color: RT.accentInk,
     fontSize: 15,
     fontWeight: 600,
     cursor: "pointer",
@@ -556,7 +556,7 @@ const S: Record<string, CSSProperties> = {
     background: "rgba(255,255,255,.96)",
     backdropFilter: "blur(28px) saturate(1.8)",
     WebkitBackdropFilter: "blur(28px) saturate(1.8)",
-    color: T.blue,
+    color: RT.accentInk,
     fontSize: 19,
     fontWeight: 700,
     cursor: "pointer",

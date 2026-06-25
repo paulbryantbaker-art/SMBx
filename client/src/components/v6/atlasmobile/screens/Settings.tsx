@@ -44,7 +44,6 @@ import type { AtlasScreenProps, SettingsPane } from "../../desktop/atlasNav";
 import { useAtlasNav, useAtlasChat } from "../../desktop/atlasNav";
 import type { User } from "../../../../hooks/useAuth";
 import { authHeaders } from "../../../../hooks/useAuth";
-import { T } from "../../desktop/atlasTokens";
 import { Card, Avatar, Pill, ProgressBar, LoadingState } from "../../desktop/primitives";
 import { PlusIcon } from "../../desktop/icons";
 import { Switch } from "../iosKit";
@@ -163,14 +162,14 @@ export default function SettingsMobileScreen({ user, view }: AtlasScreenProps) {
               style={{
                 flex: "none",
                 whiteSpace: "nowrap",
-                fontFamily: T.font,
+                fontFamily: RT.font,
                 fontSize: 14,
                 fontWeight: active ? 700 : 600,
                 padding: "8px 14px",
                 borderRadius: RT.rPill,
                 border: "none",
                 background: active ? RT.accentSoft : RT.card,
-                color: active ? RT.accent : RT.ink2,
+                color: active ? RT.accentInk : RT.ink2,
                 cursor: "pointer",
               }}
             >
@@ -375,13 +374,13 @@ function BillingPane() {
             fontWeight: 700,
             cursor: portalBusy ? "default" : "pointer",
             opacity: portalBusy ? 0.65 : 1,
-            fontFamily: T.font,
+            fontFamily: RT.font,
           }}
         >
           {isFree ? "Change plan" : portalBusy ? "Opening…" : "Manage subscription"}
         </button>
         {portalError && (
-          <HonestNote style={{ marginTop: 10, color: T.terra }}>
+          <HonestNote style={{ marginTop: 10, color: RT.muted }}>
             Couldn't open the billing portal. Please try again.
           </HonestNote>
         )}
@@ -483,7 +482,7 @@ function StatusValue({ status }: { status?: string | null }) {
   const raw = (status || "").trim().toLowerCase();
   const text = status?.trim() ? titleCase(status) : "Active";
   const isActive = raw === "" || raw === "active" || raw === "trialing";
-  const color = isActive ? RT.ink : T.terra;
+  const color = isActive ? RT.ink : RT.muted;
   return <span style={{ color, fontWeight: isActive ? 500 : 600 }}>{text}</span>;
 }
 
@@ -628,7 +627,7 @@ function InviteMemberButton() {
         fontSize: 14,
         fontWeight: 700,
         cursor: "pointer",
-        fontFamily: T.font,
+        fontFamily: RT.font,
       }}
     >
       <PlusIcon size={16} c="#fff" />
@@ -653,7 +652,7 @@ function MembersPane({ user }: { user: User | null }) {
                 {user.email}
               </div>
             </div>
-            <Pill bg={T.violetBg} fg={T.violet}>Owner</Pill>
+            <Pill bg={RT.line} fg={RT.ink}>Owner</Pill>
           </div>
         ) : (
           <div style={{ padding: 18, fontSize: 14, color: RT.muted }}>No signed-in account.</div>

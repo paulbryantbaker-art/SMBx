@@ -51,6 +51,7 @@ export function Sparkle({ size = 17 }: { size?: number }) {
   return (
     <span
       aria-hidden="true"
+      className="atlas-spark"
       style={{
         background: T.spark,
         WebkitBackgroundClip: "text",
@@ -119,6 +120,7 @@ export function Avatar({
   return (
     <span
       aria-hidden="true"
+      className={gradient ? "atlas-avatar-grad" : undefined}
       style={{
         width: size,
         height: size,

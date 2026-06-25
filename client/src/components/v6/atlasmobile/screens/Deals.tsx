@@ -44,7 +44,6 @@ import {
   fmtCents,
 } from "../../desktop/primitives";
 import { SearchIcon } from "../../desktop/icons";
-import { T } from "../../desktop/atlasTokens";
 import { RT } from "../redesign/rt";
 import { ActionRow, MarkBadge as RMarkBadge } from "../redesign/kit";
 
@@ -75,17 +74,17 @@ function sectorOf(row: MobileStageRow): string {
 function stageMeta(row: MobileStageRow): { label: string; bg: string; fg: string } {
   switch (row.stageId) {
     case "source":
-      return { label: "Sourcing", bg: T.track, fg: T.muted };
+      return { label: "Sourcing", bg: RT.line, fg: RT.muted };
     case "value":
-      return { label: "Valuation", bg: T.amberBg2, fg: T.amber };
+      return { label: "Valuation", bg: RT.line, fg: RT.muted };
     case "diligence":
-      return { label: "Diligence", bg: T.blueBg, fg: T.blue };
+      return { label: "Diligence", bg: RT.line, fg: RT.muted };
     case "structure":
-      return { label: "Structuring", bg: T.terraBg, fg: T.terra };
+      return { label: "Structuring", bg: RT.line, fg: RT.muted };
     case "close":
-      return { label: "Close / PMI", bg: T.greenBg, fg: T.green };
+      return { label: "Close / PMI", bg: RT.accentSoft, fg: RT.accentInk };
     default:
-      return { label: "—", bg: T.track, fg: T.muted };
+      return { label: "—", bg: RT.line, fg: RT.muted };
   }
 }
 
@@ -97,9 +96,9 @@ function evCents(row: MobileStageRow): number | null {
 
 /** Fit pill palette by score: ≥80 green, 65–79 blue, <65 gray. */
 function fitMeta(fit: number): { bg: string; fg: string } {
-  if (fit >= 80) return { bg: T.greenBg, fg: T.green };
-  if (fit >= 65) return { bg: T.blueBg, fg: T.blue };
-  return { bg: T.track, fg: T.muted2 };
+  if (fit >= 80) return { bg: RT.accentSoft, fg: RT.accentInk };
+  if (fit >= 65) return { bg: RT.line, fg: RT.muted };
+  return { bg: RT.line, fg: RT.muted };
 }
 
 /** Buy/sell side from the gate letter prefix (B → buy, S → sell, R → raise). */
@@ -129,9 +128,9 @@ function moneyLabel(row: MobileStageRow): string {
 
 /** Verdict pill palette (per design map: Pursue green, Pass amber, Watch blue). */
 function verdictPill(v: Verdict): { label: string; bg: string; fg: string } {
-  if (v === "pursue") return { label: "Pursue", bg: T.greenBg, fg: T.green };
-  if (v === "pass") return { label: "Pass", bg: T.amberBg, fg: T.amber };
-  return { label: "Watch", bg: T.blueBg, fg: T.blue };
+  if (v === "pursue") return { label: "Pursue", bg: RT.accentSoft, fg: RT.accentInk };
+  if (v === "pass") return { label: "Pass", bg: RT.line, fg: RT.down };
+  return { label: "Watch", bg: RT.line, fg: RT.muted };
 }
 
 /* ─── stage-filter ladder (board) ──────────────────────────── */
@@ -306,7 +305,7 @@ function Toolbar({
             border: "none",
             background: "transparent",
             outline: "none",
-            fontSize: 15,
+            fontSize: 16,
             color: RT.ink,
             fontFamily: RT.font,
           }}
@@ -415,8 +414,8 @@ function BoardView({
   return (
     <div
       style={{
-        fontFamily: T.font,
-        color: T.ink,
+        fontFamily: RT.font,
+        color: RT.ink,
         display: "flex",
         flexDirection: "column",
         marginTop: 12,
@@ -495,10 +494,10 @@ function BoardView({
                       padding: "2px 2px 0",
                     }}
                   >
-                    <span style={{ fontSize: 15.5, fontWeight: 700, color: T.ink, letterSpacing: "-0.01em" }}>
+                    <span style={{ fontSize: 21, fontWeight: 700, color: RT.ink, letterSpacing: "-0.01em" }}>
                       {stage.title}
                     </span>
-                    <span style={{ fontSize: 14, fontWeight: 600, color: T.muted }}>{rows.length}</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: RT.muted }}>{rows.length}</span>
                   </div>
                 )}
                 {rows.map((row) => (
@@ -552,10 +551,10 @@ function StageTab({
         fontSize: 14,
         fontWeight: 700,
         padding: active ? "7px 14px" : "7px 12px",
-        borderRadius: T.rPill,
+        borderRadius: RT.rPill,
         border: "none",
         cursor: "pointer",
-        fontFamily: T.font,
+        fontFamily: RT.font,
         background: active ? RT.accentSoft : "transparent",
         color: active ? RT.accentInk : RT.muted,
         whiteSpace: "nowrap",

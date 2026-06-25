@@ -24,7 +24,6 @@ import { useModelStore } from "../../../../lib/modelStore";
 import { listCanvasArtifacts } from "../../desktop/screens/Canvas";
 import { authHeaders } from "../../../../hooks/useAuth";
 import type { SurfaceContext } from "../../../../lib/yuliaSurfaceContext";
-import { T } from "../../desktop/atlasTokens";
 import { RT } from "../redesign/rt";
 import { Hero, SectionHeader, DetailSection, Divider, ActionRow, ButtonRow } from "../redesign/kit";
 import { ChevronRightIcon } from "../../desktop/icons";
@@ -147,13 +146,13 @@ function buildGateSteps(deal: DealRow, gates: DealGate[]): { label: string; stat
   });
 }
 
-/** Verdict color family by label (green PURSUE/STRONG FIT, blue WATCH, terra risk). */
+/** Verdict color family (rationed: green PURSUE/STRONG, grey-neutral WATCH, terra risk). */
 function verdictColors(label: string | undefined): { fg: string; bg: string } {
   const l = (label || "").toUpperCase();
-  if (l.includes("PURSUE") || l.includes("STRONG")) return { fg: T.green, bg: T.greenBg };
-  if (l.includes("WATCH") || l.includes("NEEDS")) return { fg: T.blue, bg: T.blueBg };
-  if (l.includes("PASS") || l.includes("HIGH RISK")) return { fg: T.terra, bg: T.terraBg };
-  return { fg: T.muted, bg: T.track };
+  if (l.includes("PURSUE") || l.includes("STRONG")) return { fg: RT.accentInk, bg: RT.accentSoft };
+  if (l.includes("WATCH") || l.includes("NEEDS")) return { fg: RT.muted, bg: RT.line };
+  if (l.includes("PASS") || l.includes("HIGH RISK")) return { fg: RT.down, bg: RT.line };
+  return { fg: RT.muted, bg: RT.line };
 }
 
 function titleCase(s: string): string {
@@ -478,7 +477,7 @@ export default function CockpitMobileScreen({ view, user: _user }: AtlasScreenPr
         Yulia&rsquo;s read
         {briefState === "ready" && brief?.stale && (
           <span
-            style={{ fontSize: 12.5, fontWeight: 500, color: T.amber, background: T.amberBg, borderRadius: RT.rPill, padding: "3px 10px" }}
+            style={{ fontSize: 12.5, fontWeight: 500, color: RT.muted, background: RT.line, borderRadius: RT.rPill, padding: "3px 10px" }}
             title="Showing the last read while Yulia refreshes it."
           >
             Updating…

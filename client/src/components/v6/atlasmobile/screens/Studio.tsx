@@ -51,10 +51,10 @@ function badgeFor(d: WorkspaceDeliverable): { label: string; bg: string; fg: str
   if (!raw) return { label: "Doc", bg: RT.line, fg: RT.muted };
   const k = raw.toLowerCase();
   if (/deck|slide|pitch|presentation|pres/.test(k)) {
-    return { label: titleCase(raw), bg: T.blueBg, fg: T.blue };
+    return { label: titleCase(raw), bg: RT.line, fg: RT.muted };
   }
   if (/pdf/.test(k)) {
-    return { label: titleCase(raw), bg: T.violetBg, fg: T.violet };
+    return { label: titleCase(raw), bg: RT.line, fg: RT.muted };
   }
   return { label: titleCase(raw), bg: RT.line, fg: RT.muted };
 }
@@ -74,9 +74,9 @@ function fmtDate(iso: string | null | undefined): string {
 
 function statusTone(status: string): { bg: string; fg: string } {
   const s = (status || "").toLowerCase();
-  if (/complete|ready|done|final/.test(s)) return { bg: T.greenBg, fg: T.green };
-  if (/review|progress|pending|generating|running|draft/.test(s)) return { bg: T.amberBg, fg: T.amber };
-  if (/error|fail/.test(s)) return { bg: T.terraBg, fg: T.terra };
+  if (/complete|ready|done|final/.test(s)) return { bg: RT.accentSoft, fg: RT.accentInk };
+  if (/review|progress|pending|generating|running|draft/.test(s)) return { bg: RT.line, fg: RT.muted };
+  if (/error|fail/.test(s)) return { bg: RT.line, fg: RT.down };
   return { bg: RT.line, fg: RT.muted };
 }
 
@@ -671,8 +671,8 @@ function CollateralRow({
         border: "none",
         background: RT.card,
         borderRadius: 14,
-        padding: 13,
-        fontFamily: T.font,
+        padding: 16,
+        fontFamily: RT.font,
         cursor: "pointer",
       }}
     >
@@ -698,7 +698,7 @@ function CollateralRow({
             flex: "none",
             fontSize: 13.5,
             fontWeight: 600,
-            borderRadius: T.rPill,
+            borderRadius: RT.rPill,
             padding: "3px 10px",
             background: badge.bg,
             color: badge.fg,
@@ -713,7 +713,7 @@ function CollateralRow({
           style={{
             fontSize: 13.5,
             fontWeight: 600,
-            borderRadius: T.rPill,
+            borderRadius: RT.rPill,
             padding: "3px 9px",
             background: st.bg,
             color: st.fg,
@@ -871,9 +871,9 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
               gap: 4,
               border: "none",
               background: "transparent",
-              borderRadius: T.rPill,
+              borderRadius: RT.rPill,
               cursor: "pointer",
-              fontFamily: T.font,
+              fontFamily: RT.font,
               fontSize: 14,
               fontWeight: 700,
               color: RT.accentInk,
@@ -913,7 +913,7 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
           border: "none",
           background: "transparent",
           cursor: "pointer",
-          fontFamily: T.font,
+          fontFamily: RT.font,
           fontSize: 14,
           fontWeight: 700,
           color: RT.muted,
@@ -929,13 +929,13 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
         style={{
           background: RT.card,
           borderRadius: T.rCardLg,
-          padding: 16,
+          padding: 20,
           marginBottom: 14,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 9 }}>
           <Sparkle size={15} />
-          <span style={{ fontSize: 19, fontWeight: 600, letterSpacing: "-0.01em", color: RT.ink }}>
+          <span style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.01em", color: RT.ink }}>
             {titleCase(selected.artifact_kind || selected.tier || "Deliverable")}
           </span>
         </div>
@@ -1003,11 +1003,11 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
             gap: 6,
             border: `1px solid ${RT.line}`,
             background: RT.card,
-            borderRadius: T.rPill,
+            borderRadius: RT.rPill,
             padding: "8px 14px",
             fontSize: 14,
             fontWeight: 700,
-            fontFamily: T.font,
+            fontFamily: RT.font,
             color: canExport ? RT.ink2 : RT.faint,
             cursor: canExport ? "pointer" : "default",
           }}
@@ -1021,8 +1021,8 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
         <div
           style={{
             padding: "9px 12px",
-            background: T.terraBg,
-            color: T.terra,
+            background: RT.line,
+            color: RT.down,
             fontSize: 13.5,
             borderRadius: 10,
             marginBottom: 12,
@@ -1063,11 +1063,11 @@ export default function StudioMobileScreen({ user }: AtlasScreenProps) {
             }
             style={{
               border: "none",
-              borderRadius: T.rPill,
+              borderRadius: RT.rPill,
               padding: "10px 20px",
               fontSize: 14,
               fontWeight: 700,
-              fontFamily: T.font,
+              fontFamily: RT.font,
               background: RT.accent,
               color: RT.onAccent,
               cursor: "pointer",

@@ -28,7 +28,6 @@ import type { AtlasScreenProps } from "../../desktop/atlasNav";
 import { useAtlasChat } from "../../desktop/atlasNav";
 import { authHeaders } from "../../../../hooks/useAuth";
 import { usePipelineProgress } from "../../../../hooks/usePipelineProgress";
-import { T } from "../../desktop/atlasTokens";
 import { RT } from "../redesign/rt";
 import {
   StepperPills,
@@ -140,19 +139,19 @@ function buyBoxParts(t: Thesis): string[] {
 /* ─── FIT chip palette + TIER + ROUTE (per design §FRAME 09) ──────────────── */
 
 function fitChipColors(score: number | null | undefined): { bg: string; fg: string } {
-  if (!Number.isFinite(Number(score))) return { bg: T.track, fg: RT.muted };
+  if (!Number.isFinite(Number(score))) return { bg: RT.line, fg: RT.muted };
   const n = Number(score);
-  if (n >= 80) return { bg: T.greenBg, fg: T.green };
-  if (n >= 65) return { bg: RT.accentSoft, fg: RT.accent };
-  return { bg: T.track, fg: RT.muted };
+  if (n >= 80) return { bg: RT.accentSoft, fg: RT.accentInk };
+  if (n >= 65) return { bg: RT.accentSoft, fg: RT.accentInk };
+  return { bg: RT.line, fg: RT.muted };
 }
 
 function tierColor(tier: string | null): string {
   switch ((tier || "").toUpperCase()) {
     case "A":
-      return T.green;
+      return RT.accentInk;
     case "B":
-      return RT.accent;
+      return RT.accentInk;
     default:
       return RT.muted;
   }
@@ -511,14 +510,14 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
                 style={{
                   flex: "none",
                   border: "none",
-                  borderRadius: T.rPill,
+                  borderRadius: RT.rPill,
                   padding: "7px 14px",
                   fontSize: 14,
                   fontWeight: 600,
                   cursor: "pointer",
-                  fontFamily: T.font,
+                  fontFamily: RT.font,
                   background: active ? RT.accentSoft : RT.card,
-                  color: active ? RT.accent : RT.muted,
+                  color: active ? RT.accentInk : RT.muted,
                   whiteSpace: "nowrap",
                 }}
               >
@@ -565,7 +564,7 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
                 fontWeight: 700,
                 fontSize: 14,
                 cursor: "pointer",
-                fontFamily: T.font,
+                fontFamily: RT.font,
                 padding: 0,
               }}
             >
@@ -610,7 +609,7 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
                 width: 14,
                 height: 14,
                 borderRadius: "50%",
-                border: `2px solid ${T.progTrack}`,
+                border: `2px solid ${RT.line}`,
                 borderTopColor: RT.accent,
                 animation: "atlas-glow 1s linear infinite",
                 flex: "none",
@@ -632,11 +631,11 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
       {s.buildError && (
         <div
           style={{
-            background: T.terraBg,
+            background: RT.line,
             borderRadius: 14,
             padding: "11px 14px",
             fontSize: 13.5,
-            color: T.terra,
+            color: RT.down,
             display: "flex",
             alignItems: "center",
             gap: 10,
@@ -650,12 +649,12 @@ export default function SourcingMobileScreen({ user }: AtlasScreenProps) {
               flex: "none",
               border: "none",
               background: "transparent",
-              color: T.terra,
+              color: RT.down,
               fontWeight: 700,
               fontSize: 14,
               textDecoration: "underline",
               cursor: "pointer",
-              fontFamily: T.font,
+              fontFamily: RT.font,
             }}
           >
             Retry
@@ -751,13 +750,13 @@ function CandidateRegion({
               background: RT.accent,
               color: RT.onAccent,
               border: "none",
-              borderRadius: T.rPill,
+              borderRadius: RT.rPill,
               padding: "10px 18px",
               fontSize: 14,
               fontWeight: 700,
               cursor: building ? "default" : "pointer",
               opacity: building ? 0.6 : 1,
-              fontFamily: T.font,
+              fontFamily: RT.font,
             }}
           >
             {building ? "Starting…" : "Run discovery"}
@@ -769,12 +768,12 @@ function CandidateRegion({
               background: RT.card,
               color: RT.ink,
               border: "none",
-              borderRadius: T.rPill,
+              borderRadius: RT.rPill,
               padding: "10px 16px",
               fontSize: 14,
               fontWeight: 700,
               cursor: "pointer",
-              fontFamily: T.font,
+              fontFamily: RT.font,
             }}
           >
             Ask Yulia
@@ -912,7 +911,7 @@ function CandidateCard({ c, onRoute }: { c: Candidate; onRoute: () => void }) {
               fontWeight: 700,
               fontSize: 14,
               cursor: "pointer",
-              fontFamily: T.font,
+              fontFamily: RT.font,
               padding: 0,
             }}
           >

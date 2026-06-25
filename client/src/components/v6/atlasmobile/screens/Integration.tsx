@@ -28,7 +28,6 @@ import type { CSSProperties, ReactNode } from "react";
 import type { AtlasScreenProps } from "../../desktop/atlasNav";
 import { useAtlasNav } from "../../desktop/atlasNav";
 import { authHeaders } from "../../../../hooks/useAuth";
-import { T } from "../../desktop/atlasTokens";
 import { RT } from "../redesign/rt";
 import {
   Pill,
@@ -62,11 +61,11 @@ const STATUS_LABEL: Record<string, string> = Object.fromEntries(
 /** Map a workstream status to a pill/dot palette (fg drives the dot; the two agree). */
 function statusColors(status: string | null | undefined): { fg: string; bg: string } {
   const s = (status || "").toLowerCase();
-  if (s === "complete") return { fg: T.green, bg: T.greenBg };
-  if (s === "at_risk") return { fg: T.amber, bg: T.amberBg };
-  if (s === "on_track") return { fg: T.green, bg: T.greenBg };
-  if (s === "in_progress") return { fg: T.blue, bg: T.blueBg };
-  return { fg: T.muted, bg: T.track };
+  if (s === "complete") return { fg: RT.accentInk, bg: RT.accentSoft };
+  if (s === "at_risk") return { fg: RT.down, bg: RT.line };
+  if (s === "on_track") return { fg: RT.accentInk, bg: RT.accentSoft };
+  if (s === "in_progress") return { fg: RT.muted, bg: RT.line };
+  return { fg: RT.muted, bg: RT.line };
 }
 
 /** A workstream row from the read layer exposes `title`; tolerate `name`. */
@@ -256,7 +255,7 @@ export default function IntegrationMobileScreen({ view }: AtlasScreenProps) {
           onCta={generating ? undefined : generate}
         />
         {genError && (
-          <div style={{ textAlign: "center", color: T.terra, fontSize: 13.5, lineHeight: 1.5 }}>
+          <div style={{ textAlign: "center", color: RT.down, fontSize: 13.5, lineHeight: 1.5 }}>
             {genError}
           </div>
         )}
@@ -391,7 +390,7 @@ function Header({
           </button>
         ))}
       {regenError && !confirming && (
-        <div style={{ fontSize: 13.5, color: T.terra }}>{regenError}</div>
+        <div style={{ fontSize: 13.5, color: RT.down }}>{regenError}</div>
       )}
     </div>
   );
@@ -399,8 +398,8 @@ function Header({
 
 function headerBtnStyle(primary: boolean, busy: boolean): CSSProperties {
   return {
-    border: `1px solid ${primary ? RT.accent : T.inputBd}`,
-    borderRadius: T.rPill,
+    border: `1px solid ${primary ? RT.accent : RT.line}`,
+    borderRadius: RT.rPill,
     padding: "8px 15px",
     fontSize: 14,
     fontWeight: 700,
@@ -457,7 +456,7 @@ function MilestoneTimeline({
             )}
           </div>
         </div>
-        <ProgressBar pct={pct} color={pct >= 100 ? T.green : RT.accent} />
+        <ProgressBar pct={pct} color={pct >= 100 ? RT.up : RT.accent} />
       </div>
 
       {/* real milestone events (the event trail) */}
@@ -495,7 +494,7 @@ function MilestoneTimeline({
                     flex: "none",
                     marginTop: 1,
                     borderRadius: "50%",
-                    background: T.green,
+                    background: RT.up,
                     color: "#fff",
                     display: "inline-flex",
                     alignItems: "center",
@@ -506,7 +505,7 @@ function MilestoneTimeline({
                 </span>
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
-                    <span style={{ fontSize: 15.5, fontWeight: 700, color: RT.ink }}>
+                    <span style={{ fontSize: 18.5, fontWeight: 700, color: RT.ink }}>
                       {milestoneTitle(m)}
                     </span>
                     {when && <span style={{ fontSize: 14, color: RT.muted }}>{when}</span>}
@@ -648,7 +647,7 @@ function WorkstreamCard({
         <div style={{ minWidth: 0, flex: 1 }}>
           <div
             style={{
-              fontSize: 15.5,
+              fontSize: 18.5,
               fontWeight: 700,
               color: RT.ink,
               lineHeight: 1.3,
@@ -689,7 +688,7 @@ function WorkstreamCard({
           <span>Progress</span>
           <span style={{ color: RT.ink, fontWeight: 600 }}>{pct}%</span>
         </div>
-        <ProgressBar pct={pct} color={isComplete ? T.green : RT.accent} />
+        <ProgressBar pct={pct} color={isComplete ? RT.up : RT.accent} />
         <div style={{ display: "flex", gap: 5, marginTop: 2 }}>
           {PCT_STEPS.map((step) => {
             const active = pct === step;
@@ -701,7 +700,7 @@ function WorkstreamCard({
                 onClick={() => changePct(step)}
                 style={{
                   flex: 1,
-                  border: `1px solid ${active ? RT.accent : T.inputBd}`,
+                  border: `1px solid ${active ? RT.accent : RT.line}`,
                   borderRadius: 7,
                   padding: "7px 0",
                   fontSize: 13,
@@ -739,13 +738,13 @@ function WorkstreamCard({
               appearance: "none",
               WebkitAppearance: "none",
               width: "100%",
-              border: `1px solid ${T.inputBd}`,
+              border: `1px solid ${RT.line}`,
               borderRadius: 9,
               padding: "10px 32px 10px 11px",
               fontSize: 14,
               fontWeight: 600,
               color: RT.ink,
-              background: busy ? T.hover : RT.card,
+              background: busy ? RT.line : RT.card,
               cursor: busy ? "default" : "pointer",
               fontFamily: RT.font,
             }}
@@ -773,7 +772,7 @@ function WorkstreamCard({
                   width: 12,
                   height: 12,
                   borderRadius: "50%",
-                  border: `2px solid ${T.progTrack}`,
+                  border: `2px solid ${RT.line}`,
                   borderTopColor: RT.accent,
                   display: "inline-block",
                   animation: "atlas-glow 1s linear infinite",
@@ -786,7 +785,7 @@ function WorkstreamCard({
         </div>
       </label>
       {denied && (
-        <div style={{ fontSize: 13.5, color: T.terra, lineHeight: 1.4 }}>
+        <div style={{ fontSize: 13.5, color: RT.down, lineHeight: 1.4 }}>
           Couldn't update — please try again.
         </div>
       )}
@@ -880,7 +879,7 @@ function ValueLeversSection({
                 }}
               >
                 <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: 15.5, fontWeight: 700, color: RT.ink, overflowWrap: "anywhere" }}>
+                  <div style={{ fontSize: 18.5, fontWeight: 700, color: RT.ink, overflowWrap: "anywhere" }}>
                     {l.name || "Value lever"}
                   </div>
                   <div style={{ display: "flex", gap: 8, marginTop: 3, flexWrap: "wrap" }}>
