@@ -1,8 +1,10 @@
 /**
- * YuliaSheet — the glass quick-chat bottom-sheet (frame 08). Opened from the
- * YuliaFab. Scrim + grab-handle + a compact Yulia thread + the shared ChatDock
- * composer. Dismissible (tap the scrim, the close button, or swipe-down-on-grab
- * is left to the OS — we keep it tap-dismiss).
+ * YuliaSheet — the Yulia quick-chat bottom-sheet. Opened from the YuliaFab.
+ * Grab-handle + a compact Yulia thread + the shared ChatDock composer. Opens at a
+ * MEDIUM detent (not full-screen) and is draggable: swipe the handle/header up to
+ * expand, down to collapse, further down to dismiss (and when empty, drag anywhere).
+ * Also dismissible via the scrim or the close button. While open, the page behind
+ * is scroll-locked so the chat is its own scroll context.
  *
  * ZERO new chat logic: it consumes the same `MobileChatBridge` (via
  * `useAtlasChat()`) the desktop rail + V6Mobile use, and ports the four
@@ -19,7 +21,7 @@ import ChatDock from "../../shared/ChatDock";
 import { CloseIcon, MonitorIcon } from "../desktop/icons";
 import { Sparkle } from "../desktop/primitives";
 import { T } from "../desktop/atlasTokens";
-import { useAtlasChat, useAtlasNav, type AtlasScreen } from "../desktop/atlasNav";
+import { useAtlasChat, useAtlasNav } from "../desktop/atlasNav";
 import { RT } from "./redesign/rt";
 import type {
   MobileMessage,
@@ -29,11 +31,13 @@ import type {
 } from "../mobile/types";
 import type { SurfaceContext } from "../../../lib/yuliaSurfaceContext";
 
-/* Sheet snap heights (vh). Drag the handle/top up to expand, down to dismiss. */
-const DEFAULT_VH = 86; // resting height
-const EXPANDED_VH = 95; // dragged up
-const CLOSE_VH = 50; // below this on release → dismiss
-const SNAP_MIDPOINT = 90; // ≥ this on release → snap to expanded
+/* Sheet snap heights (vh). Opens at a comfortable MEDIUM detent (the dimmed
+ * screen stays visible above, Cash-App style); drag the handle/top up to expand,
+ * down to collapse, further down to dismiss. */
+const DEFAULT_VH = 66; // resting (medium) — NOT full-screen
+const EXPANDED_VH = 94; // dragged up
+const CLOSE_VH = 44; // below this on release → dismiss
+const SNAP_EXPAND = 82; // ≥ this on release → snap to expanded, else medium
 
 export function YuliaSheet({
   open,
@@ -62,32 +66,49 @@ export function YuliaSheet({
     if (open) setHeightVh(DEFAULT_VH);
   }, [open]);
 
-  // Lock the page behind the sheet so touches don't scroll the background THROUGH
-  // the open sheet. This app body-scrolls (the document scrolls, not an inner div),
-  // and on iOS `overflow:hidden` alone doesn't hold — freeze the body in place
-  // (top:-scrollY keeps it visually put) and restore the scroll on close.
+  // Lock the page behind the sheet so the chat is its own scroll context and the
+  // background can't move with it. This app BODY-scrolls (the document scrolls,
+  // not an inner div). Belt-and-suspenders so it holds on iOS: (1) freeze the body
+  // in place via position:fixed + top:-scrollY (the technique that survives iOS),
+  // AND (2) overflow:hidden + overscroll:none on BOTH <html> and <body> so any
+  // residual scroll/chaining is killed. Restore everything (and the scroll) on close.
   useEffect(() => {
     if (!open) return;
     const scrollY = window.scrollY;
     const body = document.body;
-    const prev = {
+    const docEl = document.documentElement;
+    const prevBody = {
       position: body.style.position,
       top: body.style.top,
       left: body.style.left,
       right: body.style.right,
       width: body.style.width,
+      overflow: body.style.overflow,
+      overscrollBehavior: body.style.overscrollBehavior,
+    };
+    const prevHtml = {
+      overflow: docEl.style.overflow,
+      overscrollBehavior: docEl.style.overscrollBehavior,
     };
     body.style.position = "fixed";
     body.style.top = `-${scrollY}px`;
     body.style.left = "0";
     body.style.right = "0";
     body.style.width = "100%";
+    body.style.overflow = "hidden";
+    body.style.overscrollBehavior = "none";
+    docEl.style.overflow = "hidden";
+    docEl.style.overscrollBehavior = "none";
     return () => {
-      body.style.position = prev.position;
-      body.style.top = prev.top;
-      body.style.left = prev.left;
-      body.style.right = prev.right;
-      body.style.width = prev.width;
+      body.style.position = prevBody.position;
+      body.style.top = prevBody.top;
+      body.style.left = prevBody.left;
+      body.style.right = prevBody.right;
+      body.style.width = prevBody.width;
+      body.style.overflow = prevBody.overflow;
+      body.style.overscrollBehavior = prevBody.overscrollBehavior;
+      docEl.style.overflow = prevHtml.overflow;
+      docEl.style.overscrollBehavior = prevHtml.overscrollBehavior;
       window.scrollTo(0, scrollY);
     };
   }, [open]);
@@ -114,7 +135,7 @@ export function YuliaSheet({
         onClose();
         return DEFAULT_VH;
       }
-      return h >= SNAP_MIDPOINT ? EXPANDED_VH : DEFAULT_VH;
+      return h >= SNAP_EXPAND ? EXPANDED_VH : DEFAULT_VH;
     });
   };
 
@@ -215,20 +236,34 @@ export function YuliaSheet({
           </header>
         </div>
 
-        {/* Jump-to nav — the sheet doubles as a launcher (drag-up nav). */}
-        <JumpNav
-          dealId={typeof surfaceContext?.dealId === "number" ? surfaceContext.dealId : undefined}
-          onJump={(screen, opts) => {
-            nav.go(screen, opts);
-            onClose();
-          }}
-        />
-
-        <div ref={scrollRef} onScroll={onScroll} className="scr" style={S.list}>
+        {/* When empty there's nothing to scroll, so the whole area drags the sheet
+            (Cash-App "swipe anywhere"). With a conversation, the list scrolls on its
+            own and the handle/header stays the drag affordance. */}
+        <div
+          ref={scrollRef}
+          onScroll={onScroll}
+          className="scr"
+          style={{ ...S.list, ...(showEmpty ? { touchAction: "none" as const } : null) }}
+          {...(showEmpty
+            ? {
+                onPointerDown: onDragStart,
+                onPointerMove: onDragMove,
+                onPointerUp: onDragEnd,
+                onPointerCancel: onDragEnd,
+              }
+            : {})}
+        >
           {showEmpty ? (
             <div style={S.emptyWrap}>
-              <Sparkle size={22} />
-              <div style={S.emptyTitle}>Ask a quick question</div>
+              <Sparkle size={26} />
+              <div style={S.emptyTitle}>
+                {surfaceContext?.activeTitle
+                  ? `Ask Yulia about ${surfaceContext.activeTitle}`
+                  : "Ask Yulia anything"}
+              </div>
+              <div style={S.emptySub}>
+                She can pull up a deal, run the numbers, or read a file — just ask.
+              </div>
             </div>
           ) : (
             <>
@@ -246,40 +281,13 @@ export function YuliaSheet({
             onSend={handleSend}
             onFileUpload={chat?.uploadFile}
             disabled={sending}
-            placeholder="Ask a quick question…"
+            placeholder="Message Yulia"
             isMobile
             hideStarter
           />
         </div>
       </div>
     </>
-  );
-}
-
-/* ─── jump-to nav (the sheet doubles as a launcher) ─────────── */
-
-function JumpNav({
-  dealId,
-  onJump,
-}: {
-  dealId?: number;
-  onJump: (screen: AtlasScreen, opts?: { dealId?: number }) => void;
-}) {
-  const items: { label: string; screen: AtlasScreen; opts?: { dealId?: number } }[] = [
-    { label: "Deals", screen: "deals" },
-    { label: "Sourcing", screen: "sourcing" },
-    { label: "Studio", screen: "studio" },
-    { label: "Agent", screen: "agent" },
-  ];
-  if (dealId != null) items.unshift({ label: "Data room", screen: "files", opts: { dealId } });
-  return (
-    <div className="scr" style={S.jumpRow}>
-      {items.map((it) => (
-        <button key={it.label} type="button" onClick={() => onJump(it.screen, it.opts)} style={S.jumpChip}>
-          {it.label}
-        </button>
-      ))}
-    </div>
   );
 }
 
@@ -460,6 +468,7 @@ const S: Record<string, CSSProperties> = {
     inset: 0,
     background: "rgba(22,18,34,.40)",
     zIndex: 8,
+    touchAction: "none", // a touch on the dimmed area can't scroll the page behind
     animation: "atlas-mobile-scrim-in .16s ease-out",
   },
   // Redesign: a clean WHITE sheet (no glass), taller, so it reads as a surface
@@ -487,11 +496,11 @@ const S: Record<string, CSSProperties> = {
     cursor: "grab",
   },
   handle: {
-    width: 38,
+    width: 40,
     height: 5,
     borderRadius: 3,
-    background: "#d8d6cf",
-    margin: "10px auto 8px",
+    background: "#c8c6c0",
+    margin: "9px auto 7px",
     flex: "none",
   },
   header: {
@@ -515,21 +524,6 @@ const S: Record<string, CSSProperties> = {
     maxWidth: 170,
   },
   ctxLabel: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
-  jumpRow: { flex: "none", display: "flex", gap: 8, overflowX: "auto", padding: "0 16px 12px" },
-  jumpChip: {
-    flex: "none",
-    border: `1px solid ${RT.line}`,
-    background: RT.card,
-    borderRadius: RT.rPill,
-    padding: "9px 15px",
-    fontSize: 14,
-    fontWeight: 500,
-    color: RT.ink,
-    cursor: "pointer",
-    fontFamily: RT.font,
-    whiteSpace: "nowrap",
-    WebkitTapHighlightColor: "transparent",
-  },
   closeBtn: {
     width: 34,
     height: 34,
@@ -564,7 +558,8 @@ const S: Record<string, CSSProperties> = {
     padding: "24px 16px",
     maxWidth: 240,
   },
-  emptyTitle: { fontSize: 16, fontWeight: 500, color: RT.ink2, lineHeight: 1.45 },
+  emptyTitle: { fontSize: 18, fontWeight: 600, color: RT.ink, lineHeight: 1.35 },
+  emptySub: { fontSize: 14.5, fontWeight: 400, color: RT.muted, lineHeight: 1.5 },
   userBubble: {
     alignSelf: "flex-end",
     maxWidth: "85%",
