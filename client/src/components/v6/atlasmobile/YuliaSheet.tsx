@@ -35,9 +35,10 @@ import type { SurfaceContext } from "../../../lib/yuliaSurfaceContext";
  * screen stays visible above, Cash-App style); drag the handle/top up to expand,
  * down to collapse, further down to dismiss. */
 const DEFAULT_VH = 66; // resting (medium) — NOT full-screen
-const EXPANDED_VH = 94; // dragged up
+const EXPANDED_VH = 100; // dragged up → full-screen (the X closes it from here)
 const CLOSE_VH = 44; // below this on release → dismiss
-const SNAP_EXPAND = 82; // ≥ this on release → snap to expanded, else medium
+const SNAP_EXPAND = 82; // ≥ this on release → snap to full, else medium
+const FULL_VH = 99; // at/above this, treat as maximized (square top, clear status bar)
 
 export function YuliaSheet({
   open,
@@ -124,7 +125,7 @@ export function YuliaSheet({
     const d = dragRef.current;
     if (!d) return;
     const dyVh = ((d.startY - e.clientY) / window.innerHeight) * 100; // up = +
-    setHeightVh(Math.max(30, Math.min(95, d.startH + dyVh)));
+    setHeightVh(Math.max(30, Math.min(100, d.startH + dyVh)));
   };
   const onDragEnd = () => {
     if (!dragRef.current) return;
@@ -198,6 +199,10 @@ export function YuliaSheet({
   };
 
   const showEmpty = thread.length === 0 && !sending && !paywallData;
+  // At full height the sheet IS the screen: square the top corners and pad past the
+  // status bar so the handle/header (and the X) sit below the notch. The X is the
+  // close affordance when maximized.
+  const atFull = heightVh >= FULL_VH;
 
   return (
     <>
@@ -207,11 +212,13 @@ export function YuliaSheet({
         aria-label="Ask Yulia"
         style={{
           ...S.sheet,
-          height: `${heightVh}vh`,
+          height: `${heightVh}dvh`,
+          borderRadius: atFull ? 0 : "24px 24px 0 0",
+          paddingTop: atFull ? "env(safe-area-inset-top, 0px)" : undefined,
           transition: dragging ? "none" : "height .26s cubic-bezier(.32,.72,0,1)",
         }}
       >
-        {/* Drag zone — handle + header. Swipe up → 95%, down → dismiss. */}
+        {/* Drag zone — handle + header. Swipe up → full (X closes), down → dismiss. */}
         <div
           style={S.dragZone}
           onPointerDown={onDragStart}
@@ -479,7 +486,7 @@ const S: Record<string, CSSProperties> = {
     right: 0,
     bottom: 0,
     zIndex: 9,
-    maxHeight: "95vh", // height itself is set inline (draggable)
+    maxHeight: "100dvh", // height itself is set inline (draggable, up to full-screen)
     display: "flex",
     flexDirection: "column",
     background: RT.card,
