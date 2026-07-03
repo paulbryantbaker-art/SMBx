@@ -20,13 +20,12 @@ export const T = {
   // #9aa3ad ~2.6:1.) Readability is paramount, especially on mobile.
   muted: '#4d5765', muted2: '#4b5460', faint: '#4e5764',
   // blue (primary/active)
-  blue: '#0b57d0', blueBg: '#e8f0fe', blueBg2: '#eef4ff', blueBg3: '#f3f7ff',
+  blue: '#0b57d0', blueBg: '#e8f0fe', blueBg3: '#f3f7ff',
   navActive: '#d3e3fd', stageActiveBd: '#bcd4fb', approvalBd: '#cfe0ff',
   tabActive: 'rgba(11,87,208,.10)', tabHover: 'rgba(11,87,208,.05)',
   // green / amber / terra / violet
   green: '#1f8a5b', greenBg: '#e6f4ec', greenAv: '#cdeada',
   amber: '#9a6b00', amberBg: '#fdf0d5', amberBg2: '#fff3e0', amberAv: '#f3e0b0',
-  citeBg: '#fff6d6', citeBd: '#f0dca0',
   terra: '#c2410c', terraBg: '#fdeee6',
   violet: '#5b53d6', violetBg: '#ecebfb',
   // surfaces / borders
@@ -38,12 +37,12 @@ export const T = {
   spark: 'linear-gradient(135deg,#4285F4,#9B72CB 50%,#D96570)',
   avatarGrad: 'linear-gradient(135deg,#4285F4,#9B72CB)',
   // radii
-  rCard: 14, rCardLg: 16, rPill: 999, rComposer: 24, rBubble: 18, rChip: 13,
+  rCard: 14, rCardLg: 16, rPill: 999, rComposer: 24,
   // shadow — slightly deeper + faintly violet-tinted so white cards lift cleanly
   // off the new purple frame wash (more separation = more perceived contrast).
   shCard: '0 2px 6px rgba(34,36,72,.09), 0 1px 2px rgba(34,36,72,.05)',
   shSoft: '0 1px 3px rgba(34,36,72,.07)',
-  shHover: '0 6px 16px rgba(34,36,72,.13)', shWin: '0 8px 30px rgba(31,41,55,.16)',
+  shHover: '0 6px 16px rgba(34,36,72,.13)',
 } as const;
 
 export type AtlasTokens = typeof T;

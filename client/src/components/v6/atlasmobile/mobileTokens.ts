@@ -32,17 +32,6 @@ const glassNav = {
   height: 68,
 } as const;
 
-/** Glass Yulia FAB material (m4 §1e) — same lit-glass treatment as the nav. */
-const glassFab = {
-  background: "rgba(255,255,255,.82)",
-  fallbackBg: "rgba(255,255,255,.96)",
-  backdropFilter: "blur(24px) saturate(1.9)",
-  border: "1px solid rgba(40,42,80,.10)",
-  boxShadow:
-    "0 12px 30px rgba(30,32,70,.24), 0 2px 6px rgba(30,32,70,.12), inset 0 1px 1.5px rgba(255,255,255,.95)",
-  size: 58,
-} as const;
-
 /** Glass bottom-sheet material (frame 08 — m4 §2). Scrim + grab-handle + the
  *  translucent sheet fill. Mobile-only. */
 const glassSheet = {
@@ -68,15 +57,8 @@ export const M = {
   // white elements read as raised on the light grey, no gradient. (Neutral, not
   // warm/brown — closer to Cash App.)
   frameBg: "#F4F4F6",
-  /** Studio shares the same page (kept as an alias so callers don't break). */
-  frameBgStudio: "#F4F4F6",
-  /** Ask-Yulia / chat surfaces use a solid field (frame 02). */
-  chatField: "#fff",
   glassNav,
-  glassFab,
   glassSheet,
-  /** Mobile neutral — sheet handle / toggle-off greys (≈ T.inputBd). */
-  neutralLine: "#cdd5df",
 } as const;
 
 export type MobileTokens = typeof M;

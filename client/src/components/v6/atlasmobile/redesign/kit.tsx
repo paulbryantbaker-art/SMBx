@@ -111,33 +111,6 @@ export function ActionRow({
   );
 }
 
-export function Sparkline({
-  points,
-  color = RT.accent,
-  width = 92,
-  height = 38,
-}: {
-  /** y-values 0..1 (0 = bottom). Evenly spaced across the width. */
-  points: number[];
-  color?: string;
-  width?: number;
-  height?: number;
-}) {
-  if (!points.length) return null;
-  const pad = 3;
-  const w = width - pad * 2;
-  const h = height - pad * 2;
-  const step = points.length > 1 ? w / (points.length - 1) : 0;
-  const d = points
-    .map((p, i) => `${(pad + i * step).toFixed(1)},${(pad + (1 - Math.max(0, Math.min(1, p))) * h).toFixed(1)}`)
-    .join(" ");
-  return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden="true">
-      <polyline points={d} fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
 /* ─── Cash App detail-page pattern ───────────────────────────────
    Big bold section header + an explanatory line, flat rows on the page
    (no card containers), hairline section dividers, grouped grey pill buttons. */

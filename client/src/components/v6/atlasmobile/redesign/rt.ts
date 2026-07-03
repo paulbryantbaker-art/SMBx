@@ -39,10 +39,8 @@ export const RT = {
   // radii
   rCard: 18,
   rPill: 999,
-  rSheet: 24,
   // type
   font: T.font, // the system font
-  mono: 'ui-monospace, "SF Mono", Menlo, monospace',
 } as const;
 
 /** Stable mark colour for a deal/row, so a list reads as a set not noise. */

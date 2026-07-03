@@ -118,53 +118,6 @@ export function Stepper({
   );
 }
 
-/* ─────────────── Trailing accessories (compose into ListRow) ─────────── */
-
-/** Grey rounded value pill, e.g. "June 2024" / "9:41 AM". */
-export function ValueBadge({ children }: { children: ReactNode }) {
-  return <span style={S.valueBadge}>{children}</span>;
-}
-
-/** Inline tinted text button inside a row (the reference "Button"). */
-export function RowButton({
-  children,
-  onClick,
-  tint = RT.accentInk,
-}: {
-  children: ReactNode;
-  onClick?: () => void;
-  tint?: string;
-}) {
-  return (
-    <button type="button" onClick={onClick} style={{ ...S.rowButton, color: tint }}>
-      {children}
-    </button>
-  );
-}
-
-/** Pop-up menu indicator (the reference "Pop-up ⌄"). */
-export function PopUpValue({ children }: { children: ReactNode }) {
-  return (
-    <span style={S.popUp}>
-      <span>{children}</span>
-      <svg width="11" height="14" viewBox="0 0 11 14" fill="none" aria-hidden="true">
-        <path d="M3 5.5L5.5 3l2.5 2.5M3 8.5l2.5 2.5 2.5-2.5" stroke={T.muted2} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </span>
-  );
-}
-
-/** Drag-to-reorder handle (the reference ≡). */
-export function ReorderHandle() {
-  return (
-    <span aria-hidden="true" style={S.reorder}>
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <path d="M3 6h12M3 9h12M3 12h12" stroke={T.muted2} strokeWidth="1.6" strokeLinecap="round" />
-      </svg>
-    </span>
-  );
-}
-
 /* ─────────────────────────── ListRow ───────────────────────────────── */
 
 export interface ListRowProps {
@@ -418,38 +371,6 @@ const S: Record<string, CSSProperties> = {
     WebkitTapHighlightColor: "transparent",
   },
   stepperDiv: { width: 1, height: 18, background: T.inputBd, flex: "none" },
-
-  /* trailing accessories */
-  valueBadge: {
-    flex: "none",
-    background: T.track,
-    color: T.muted,
-    fontSize: 15,
-    fontWeight: 500,
-    padding: "3px 10px",
-    borderRadius: 7,
-    fontVariantNumeric: "tabular-nums",
-  },
-  rowButton: {
-    flex: "none",
-    border: "none",
-    background: "transparent",
-    fontSize: 17,
-    fontWeight: 500,
-    cursor: "pointer",
-    padding: 0,
-    fontFamily: T.font,
-    WebkitTapHighlightColor: "transparent",
-  },
-  popUp: {
-    flex: "none",
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 4,
-    color: T.muted,
-    fontSize: 17,
-  },
-  reorder: { flex: "none", display: "inline-flex", alignItems: "center" },
 
   /* list section */
   section: { display: "flex", flexDirection: "column" },

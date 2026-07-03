@@ -29,17 +29,6 @@ function fmtDollars(dollars: number): string {
   return `${sign}$${Math.round(abs).toLocaleString()}`;
 }
 
-/** Compact count/EV formatting ("8.4B" style, no $). null/NaN → "—". */
-export function fmtCompact(n: number | null | undefined): string {
-  if (n == null || !Number.isFinite(n)) return "—";
-  const sign = n < 0 ? "-" : "";
-  const abs = Math.abs(n);
-  if (abs >= 1_000_000_000) return `${sign}${trim(abs / 1_000_000_000)}B`;
-  if (abs >= 1_000_000) return `${sign}${trim(abs / 1_000_000)}M`;
-  if (abs >= 1_000) return `${sign}${trim(abs / 1_000)}K`;
-  return `${sign}${Math.round(abs).toLocaleString()}`;
-}
-
 function trim(n: number): string {
   // One decimal, drop a trailing ".0".
   return n.toFixed(1).replace(/\.0$/, "");
