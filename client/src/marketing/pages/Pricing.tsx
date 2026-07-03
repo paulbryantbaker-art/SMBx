@@ -53,12 +53,6 @@ const TIERS: Array<{ name: string; price: string; per?: string; desc: string; fe
   },
 ];
 
-const ONEOFF: Array<{ kind: string; name: string; price: string }> = [
-  { kind: 'PREVIEW', name: 'Quality-of-earnings preview', price: '$99' },
-  { kind: 'DOCUMENT', name: 'CIM', price: '$499' },
-  { kind: 'DOSSIER', name: 'Valuation dossier', price: '$999' },
-];
-
 const NEVER = [
   'No success fee.',
   'No percentage of deal value.',
@@ -73,11 +67,7 @@ const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: 'Do I need a subscription to try it?',
-    a: 'No. Talk to Yulia and generate your first deliverable free.',
-  },
-  {
-    q: 'Can I buy one artifact without subscribing?',
-    a: 'Yes — see per-artifact pricing above. Each is a one-time software fee.',
+    a: 'No. Talk to Yulia and generate your first deliverable free. Beyond that, unlimited deliverables are included in a monthly subscription.',
   },
   {
     q: 'Is smbX.ai a broker or advisor?',
@@ -159,29 +149,6 @@ export default function Pricing() {
         </div>
       </section>
 
-      {/* PER-ARTIFACT */}
-      <section style={{ background: 'var(--surface-2)' }}>
-        <div className="wrap">
-          <div className="reveal" style={{ maxWidth: '56ch', marginBottom: 44 }}>
-            <span className="eyebrow">One-off, no subscription</span>
-            <h2 style={{ marginTop: 18 }}>Need one artifact? Buy just that one.</h2>
-          </div>
-          <div className="oneoff reveal">
-            {ONEOFF.map(o => (
-              <div className="card" key={o.name}>
-                <div className="mono" style={{ fontSize: '.74rem', color: 'var(--ink-3)', letterSpacing: '.06em' }}>{o.kind}</div>
-                <h3 style={{ marginTop: 6 }}>{o.name}</h3>
-                <div className="op">{o.price}</div>
-                <p style={{ marginTop: 'auto', paddingTop: 14 }}>Generate it, own it, export it.</p>
-              </div>
-            ))}
-          </div>
-          <p style={{ marginTop: 24, fontFamily: 'var(--mono)', fontSize: '.85rem', color: 'var(--ink-3)' }}>
-            Each is a one-time software fee, charged on generation.
-          </p>
-        </div>
-      </section>
-
       {/* FAQ */}
       <section style={{ paddingTop: 'var(--pad-y)' }}>
         <div className="wrap">
@@ -213,9 +180,8 @@ export default function Pricing() {
             <span className="eyebrow">The line</span>
             <h2 style={{ marginTop: 18, maxWidth: '14ch' }}>What we never charge.</h2>
             <p className="lead" style={{ marginTop: 22, maxWidth: '44ch' }}>
-              <Brand /> is software. Every fee is flat — a subscription or a per-artifact price,
-              charged on generation. Nothing we charge moves with the size or outcome of
-              your deal.
+              <Brand /> is software. Every fee is flat — a monthly subscription. Nothing we
+              charge moves with the size or outcome of your deal.
             </p>
           </div>
           <div className="reveal" data-d="1" style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
