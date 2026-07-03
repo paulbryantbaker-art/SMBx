@@ -13,21 +13,16 @@ import { useIsDesktop } from "../../hooks/useIsDesktop";
  * there is no parallel data path. See DESKTOP_REBUILD_BRIEF and the Atlas build
  * contract for the one-data-layer law.
  *
- * V6Mobile is kept lazily importable as a fallback (the legacy mobile app) —
- * NOT deleted. Swap `MobileShell` back to it if AtlasMobileApp needs to be
- * disabled.
+ * (The legacy V6Mobile shell was removed 2026-06-25 — Atlas has been the live
+ * mobile shell for weeks; its shared leaves `mobile/types`, `mobile/screens/Model`,
+ * and `mobile/icons` are kept.)
  * ─────────────────────────────────────────────────────────────────────────── */
 
-// Legacy mobile app — kept as a fallback, no longer the default mobile render.
-const V6Mobile = lazy(() => import("./mobile/V6Mobile"));
 const AtlasMobileApp = lazy(() => import("./atlasmobile/AtlasMobileApp"));
 const AtlasApp = lazy(() => import("./desktop/AtlasApp"));
 
-// The mobile (<1024px) render path. Points at the Atlas-mobile shell; flip this
-// to `V6Mobile` to fall back to the legacy mobile app.
+// The mobile (<1024px) render path.
 const MobileShell = AtlasMobileApp;
-// Reference V6Mobile so the fallback import isn't tree-shaken / flagged unused.
-void V6Mobile;
 
 const FULLSCREEN_CENTER = {
   display: "grid",
