@@ -1,0 +1,52 @@
+/* WorkSeal + derive-tick + computation-trace — the substrate's signature
+   primitives. Extracted from the retired v6 workspace.css (which was never
+   imported, leaving these live components unstyled). Self-contained: every
+   var() carries a fallback so this file works under any token regime —
+   important across design-language swaps. Green here is the muted verdict
+   emerald, never brand accent — computation semantics, not CTA. */
+
+.wkseal {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--font-mono, "JetBrains Mono", ui-monospace, monospace);
+  font-size: 10.5px; letter-spacing: .02em;
+  color: var(--ink-2, #57534A);
+  border: 1px solid rgba(25, 24, 19, .14); border-radius: 6px;
+  padding: 3px 9px; background: var(--surface, #FFF);
+  white-space: nowrap;
+}
+.wkseal-mark {
+  width: 7px; height: 7px; flex: none;
+  border: 1.5px solid var(--st-good-fg, #2E8C5A); border-radius: 1.5px;
+  transform: rotate(45deg);
+}
+.wkseal-hash { font-variant-numeric: tabular-nums; }
+.wkseal-check { font-style: normal; font-weight: 700; color: var(--st-good-fg, #2E8C5A); margin-left: 4px; }
+.wkseal-time { color: var(--ink-3, #8B867A); }
+/* stamp-in: one-shot when a signature lands; never loops */
+.wkseal-stamp { animation: wkseal-in var(--dur-settle, 340ms) var(--ease, cubic-bezier(.22, .61, .36, 1)) both; }
+@keyframes wkseal-in {
+  from { opacity: 0; transform: scale(.94) rotate(-1.4deg); }
+  to   { opacity: 1; transform: none; }
+}
+.wkseal-unsigned { border-style: dashed; color: var(--ink-3, #8B867A); }
+.wkseal-unsigned .wkseal-mark { border-color: var(--ink-3, #8B867A); }
+
+/* DERIVE settle tick — appears once when a number finishes re-deriving,
+   then fades. Used by models/Charts.tsx. */
+.wk-tick {
+  display: inline-block; margin-left: 5px;
+  font-weight: 700; color: var(--st-good-fg, #2E8C5A);
+  opacity: 0; pointer-events: none;
+}
+.wk-tick.on { animation: wk-tick-pulse 900ms var(--ease, cubic-bezier(.22, .61, .36, 1)) both; }
+@keyframes wk-tick-pulse {
+  0% { opacity: 0; transform: scale(.8); }
+  18% { opacity: 1; transform: scale(1); }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wkseal-stamp { animation: none; opacity: 1; transform: none; }
+  .wk-tick.on { animation: none; opacity: 1; }
+}

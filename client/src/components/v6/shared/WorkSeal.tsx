@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import "./workseal.css";
 
 /**
  * WorkSeal — the substrate's signature, rendered. A compact mono stamp:
@@ -12,7 +13,8 @@ import { useEffect, useRef, useState } from "react";
  *
  * The stamp-in animation fires once per new hash (keyed re-mount), never
  * loops, and collapses under prefers-reduced-motion (CSS handles it).
- * Styles live in workspace.css under `.wkseal*`.
+ * Styles live in ./workseal.css (self-contained; also carries the
+ * `.wk-tick` derive-settle tick used by models/Charts.tsx).
  */
 
 function shortHash(value: string): string {
